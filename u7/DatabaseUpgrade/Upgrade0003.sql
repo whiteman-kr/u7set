@@ -1,0 +1,1 @@
+ALTER TABLE "User" ADD COLUMN "Disabled" boolean NOT NULL DEFAULT FALSE;

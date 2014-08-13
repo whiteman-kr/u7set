@@ -1,0 +1,43 @@
+#include "Stable.h"
+#include "LoginDialog.h"
+#include "ui_LoginDialog.h"
+#include "Settings.h"
+
+LoginDialog::LoginDialog(QWidget *parent) :
+	QDialog(parent),
+	ui(new Ui::LoginDialog)
+{
+	ui->setupUi(this);
+
+	QString defaultUsername = theSettings.loginDialog_defaultUsername;
+	ui->usernameEdit->setText(defaultUsername);
+
+	if (defaultUsername.isEmpty() == false)
+	{
+		ui->passwordEdit->setFocus();
+	}
+}
+
+LoginDialog::~LoginDialog()
+{
+	delete ui;
+}
+
+const QString& LoginDialog::username() const
+{
+	return m_username;
+}
+
+const QString& LoginDialog::password() const
+{
+	return m_password;
+}
+
+void LoginDialog::on_buttonBox_accepted()
+{
+	m_username = ui->usernameEdit->text().trimmed();
+	m_password = ui->passwordEdit->text();
+
+	theSettings.loginDialog_defaultUsername = m_username;
+	return;
+}

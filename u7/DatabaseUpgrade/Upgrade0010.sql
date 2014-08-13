@@ -1,0 +1,3 @@
+ALTER TABLE CheckOut ADD UNIQUE(FileID);
+
+ALTER TABLE CheckOut ADD UNIQUE(SignalID);

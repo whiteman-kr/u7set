@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DiagTabPage</class>
+ <widget class="QWidget" name="DiagTabPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>494</width>
+    <height>159</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>DiagTabPage</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="m_pModuleIdLabel">
+       <property name="text">
+        <string>Module ID</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="m_pModuleId">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="inputMask">
+        <string>hhhh</string>
+       </property>
+       <property name="text">
+        <string>0000</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="m_pFactoryNoLabel">
+       <property name="text">
+        <string>Factory No</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="m_pFactoryNo">
+       <property name="inputMask">
+        <string/>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="m_pManufactureDateLabel">
+       <property name="text">
+        <string>Manufacture Date</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="m_pFirwareCrc1Label">
+       <property name="text">
+        <string>Firmware CRC1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="m_pFirwareCrc1">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="m_pFirwareCrc2Label">
+       <property name="text">
+        <string>Firmware CRC2</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="m_pFirwareCrc2">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QDateEdit" name="m_pManufactureDate"/>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>m_pModuleId</tabstop>
+  <tabstop>m_pFactoryNo</tabstop>
+  <tabstop>m_pManufactureDate</tabstop>
+  <tabstop>m_pFirwareCrc1</tabstop>
+  <tabstop>m_pFirwareCrc2</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

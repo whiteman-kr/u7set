@@ -1,0 +1,32 @@
+#include "Stable.h"
+#include "VideoFrameLogic.h"
+
+namespace VFrame30
+{
+	CVideoFrameLogic::CVideoFrameLogic(void)
+	{
+		setUnit(Inch);
+
+		setDocWidth(mm2in(420));
+		setDocHeight(mm2in(297));
+
+		Layers.push_back(std::make_shared<CVideoLayer>("Frame", false));
+		Layers.push_back(std::make_shared<CVideoLayer>("Drawing", true));
+		Layers.push_back(std::make_shared<CVideoLayer>("Notes", false));
+
+		return;
+	}
+
+	CVideoFrameLogic::~CVideoFrameLogic(void)
+	{
+	}
+
+	void CVideoFrameLogic::Draw(CDrawParam* pDrawParam, const QRectF& clipRect) const
+	{
+		BuildFblConnectionMap();
+
+		CVideoFrame::Draw(pDrawParam, clipRect);
+		return;
+    }
+
+}

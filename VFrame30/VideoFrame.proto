@@ -1,0 +1,349 @@
+package VFrame30.Proto;
+
+
+// GUID
+//
+message Guid
+{
+	required bytes guid = 1;
+}
+
+
+// Unicode строка
+//
+message wstring
+{
+	required bytes text = 1;
+}
+
+// FontParam
+//
+message FontParam
+{
+	required wstring name = 1;
+	required double size = 2;
+	required bool bold = 3;
+	required bool italic = 4;
+}
+
+
+// VideoItemPoint
+//
+message VideoItemPoint
+{
+	required double x = 1;
+	required double y = 2;
+}
+
+
+// SchemeUnit
+//
+enum SchemeUnit
+{
+	Display = 0;			// измерение в точках устройства (пиксели для дисплея)
+	Millimeter = 1;			// измерение в мм
+	Inch = 2;				// измерение в дюймах
+}
+
+// FblSignalType - тип сигнала в FblElement
+//
+enum FblSignalType
+{
+	Analog = 0;
+	Discrete = 1;
+}
+
+// FblParamType	- Тип параметра для FblElement
+//
+enum FblParamType
+{
+	AnalogIntegral = 0;			// Аналоговый целочисленный (long long - 64bit signed ind)
+	AnalogFloatingPoint = 1;	// Аналоговый с плавающей запятой (double, 64bit)
+	DiscreteValue = 2;			// Дискретный (c++ bool)
+}
+
+// ConnectionDirrection
+//
+enum ConnectionDirrection
+{
+	Input = 0;
+	Output = 1;
+}
+
+
+// Envelope - универсальная структура, хранит любой корневой тип
+//
+message Envelope
+{
+	// Класс, для сериализации
+	//
+	required uint32 classnamehash = 1;			// Hash from classname, the way of getting the hash is always same
+
+	// возможные типы для хранения
+	//
+	optional VideoFrame videoframe = 100;			// VFrame30::CVideoFrame
+	optional VideoLayer videolayer = 101;			// VFrame30::CVideoLayer
+	optional VideoItem videoitem = 102;				// VFrame30::CVideoItem
+	optional FblElement fblelement = 103;			// Fbl::FblElement
+	optional Configuration configuration = 104;		// VFrame30::Configuration
+}
+
+// VFrame30::Configuration
+message Configuration
+{
+	required Guid guid = 1;
+	required wstring strID = 2;
+	required wstring caption = 3;
+	required wstring variables = 4;
+	required wstring globals = 5; 
+	
+	repeated Guid videoFramesIDs = 100;
+	repeated Envelope videoFrames = 101;
+}
+
+// Fbl::FblElement
+//
+message FblElement
+{
+	required Guid guid = 1;
+	required wstring strID = 2;
+	required wstring caption = 3;
+	required uint32 opcode = 4;
+
+	repeated FblElementSignal inputSignals = 100;
+	repeated FblElementSignal outputSignals = 101;
+	repeated FblElementParam params = 102;
+}
+
+// Fbl::FblElementSignal
+//
+message FblElementSignal
+{
+	required wstring caption = 1;
+	required FblSignalType type = 2;
+}
+
+// Fbl::FblElementParam
+//
+message FblElementParam
+{
+	required wstring caption = 1;
+	required FblParamType type = 2;
+	required FblParamValue value = 3;
+	required FblParamValue defaultvalue = 4;
+	required FblParamValue lowlimit = 5;
+	required FblParamValue highlimit = 6;
+}
+
+// Fbl::FblParamValue
+//
+message FblParamValue
+{
+	required int64 integralvalue = 1;
+	required double floatingpoint = 2;
+	required bool discrete = 3;
+}
+
+// VFrame30::CVideoFrame
+//
+message VideoFrame
+{
+	required Guid guid = 1;
+	required wstring strID = 2;
+	required wstring caption = 3;
+	required double width = 4;
+	required double height = 5;
+	required SchemeUnit unit = 6;
+
+	repeated Envelope layers = 100;		// Список слоев
+}
+
+
+// VFrame30::CVideoLayer
+//
+message VideoLayer
+{
+	required Guid guid = 1;
+	required wstring name = 2;
+	required bool compile = 3;
+	required bool show = 4;
+	required bool print = 5;
+
+	repeated Envelope items = 100;		// Список CVideoItem'ов
+}
+
+
+// VFrame30::VideoItem
+//
+message VideoItem
+{
+	required Guid guid = 1;
+	required bool isStatic = 2;
+	required bool isLocked = 3;
+	required SchemeUnit itemUnit = 4;
+	optional bool acceptClick = 5 [default = false];
+	optional wstring clickScript = 6;
+
+	// Наследуемые от CVideoItem
+	//
+	optional PosRectImpl PosRectImpl = 1000;
+	optional PosLineImpl PosLineImpl = 1001;
+	optional PosConnectionImpl PosConnectionImpl = 1002;
+
+	// --
+	//
+	optional FblItem FblItem = 1006;							// 
+	optional FblItemRect FblItemRect = 1007;					// +PosRectImpl, FblItem
+	optional FblItemLine FblItemLine = 1008;					// +PosConnectionImpl, FblItem
+	
+	// Наслдедуемые от PosRectImpl, PosLineImpl, PosConnectionImpl
+	//
+	optional VideoItemRect Rect = 1016;							// +PosRectImpl
+	optional VideoItemLine Line = 1017;							// +PosLineImpl
+	optional VideoItemConnectionLine ConnectionLine = 1018;		// +PosConnectionImpl
+	
+	optional VideoItemSignal Signal = 1024;						// +FblItemRect
+	optional VideoItemInputSignal InputSignal = 1025;			// +Signal
+	optional VideoItemOutputSignal OutputSignal = 1026;			// +Signal
+	optional VideoItemLink Link = 1027;							// +FblItemLine
+	optional VideoItemFblElement VideoItemFblElement = 1028;	// +FblItemRect
+}
+
+
+// PosRectImpl
+//
+message PosRectImpl
+{
+	required double leftDocPt = 1;
+	required double topDocPt = 2;
+	required double widthDocPt = 3;
+	required double heightDocPt = 4;
+}
+
+
+// PosLineImpl
+//
+message PosLineImpl
+{
+	required double startXDocPt = 1;
+	required double startYDocPt = 2;
+	required double endXDocPt = 3;
+	required double endYDocPt = 4;
+}
+
+
+// PosConnectionImpl
+//
+message PosConnectionImpl
+{
+	repeated VideoItemPoint points = 1;
+}
+
+// VideoItemRect
+//
+message VideoItemRect
+{
+	required double weight = 1;
+	required uint32 lineColor = 2;
+	required uint32 fillColor = 3;
+	required wstring text = 4;
+	required uint32 textColor = 5;
+	required FontParam font = 6;
+	required bool fill = 7;
+}
+
+
+// VideoItemLine
+//
+message VideoItemLine
+{
+	required double weight = 1;
+	required uint32 lineColor = 2;
+}
+
+// VideoItemConnectionLine
+//
+message VideoItemConnectionLine
+{
+	required double weight = 1;
+	required uint32 lineColor = 2;
+}
+
+
+// FblConnectionPoint
+//
+message FblConnectionPoint
+{
+	required VideoItemPoint point = 1;
+	required ConnectionDirrection dirrection = 2;
+	required Guid guid = 3;
+	
+	optional Guid signalGuid = 100;
+	optional wstring signalStrID = 101;
+	optional wstring signalCaption = 102;
+}
+
+// FblItem
+//
+message FblItem
+{
+	repeated FblConnectionPoint points = 1;
+}
+
+
+// FblItemRect
+//
+message FblItemRect
+{
+	required double weight = 1;
+	required uint32 lineColor = 2;
+	required uint32 fillColor = 3;
+	required uint32 textColor = 4;
+	required FontParam font = 5;
+}
+
+
+// FblItemLine
+//
+message FblItemLine
+{
+	required double weight = 1;
+	required uint32 lineColor = 2;
+}
+
+
+// VideoItemSignal
+//
+message VideoItemSignal
+{
+}
+
+
+// VideoItemInputSignal
+//
+message VideoItemInputSignal
+{
+}
+
+
+// VideoItemOutputSignal
+//
+message VideoItemOutputSignal
+{
+}
+
+
+// VideoItemLink
+//
+message VideoItemLink
+{
+}
+
+
+// VideoItemFblElement
+//
+message VideoItemFblElement
+{
+	required Envelope fblelement = 1;
+}
+
