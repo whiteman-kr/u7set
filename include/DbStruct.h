@@ -6,10 +6,14 @@
 // DbProgress
 //
 //
-class DbProgress
+class DbProgress : public QObject
 {
 public:
 	DbProgress();
+	virtual ~DbProgress();
+
+	bool init(QWidget* parentWidget, const QString& description, int maxValue);
+	bool run();
 
 	bool completed() const;
 	void setCompleted(bool value);
@@ -20,9 +24,6 @@ public:
 	QString currentOperation() const;
 	void setCurrentOperation(const QString& value);
 
-	int maxValue() const;
-	void setMaxValue(int maxValue);
-
 	int value() const;
 	void setValue(int value);
 
@@ -30,6 +31,9 @@ public:
 	void setErrorMessage(const QString& value);
 
 	bool hasError() const;
+
+	QString completeMessage() const;
+	void setCompleteMessage(const QString& value);
 
 private:
 	mutable QMutex m_mutex;
@@ -39,10 +43,12 @@ private:
 
 	QString m_currentOperation;
 
-	int m_maxValue;
 	int m_value;
 
 	QString m_errorMessage;			// In case of error, this variable will contain error description
+	QString m_completeMessage;		// If this field is not empty, show message box with the text
+
+	QProgressDialog* m_progressDialog;
 };
 
 //
@@ -110,6 +116,7 @@ class DbProject
 {
 public:
 	DbProject();
+	virtual ~DbProject();
 
 public:
 	QString databaseName() const;
@@ -118,12 +125,16 @@ public:
 	QString projectName() const;
 	void setProjectName(const QString& projectName);
 
+	QString description() const;
+	void setDescription(const QString& description);
+
 	int version() const;
 	void setVersion(int value);
 
-private:
+protected:
 	QString m_databaseName;
 	QString m_projectName;
+	QString m_description;
 	int m_version;
 };
 
@@ -345,6 +356,8 @@ Q_DECLARE_METATYPE(DbUser)
 Q_DECLARE_METATYPE(DbFileInfo)
 Q_DECLARE_METATYPE(DbFile)
 Q_DECLARE_METATYPE(DbChangesetInfo)
+Q_DECLARE_METATYPE(DbProject)
+Q_DECLARE_METATYPE(std::vector<DbProject>)
 Q_DECLARE_METATYPE(std::vector<DbFileInfo>)
 Q_DECLARE_METATYPE(std::vector<std::shared_ptr<DbFile>>)
 Q_DECLARE_METATYPE(std::vector<int>)

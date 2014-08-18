@@ -27,16 +27,17 @@ DbStore::DbStore() :
 	m_host("127.0.0.1"),
 	m_port(5432),
 	m_serverUsername("u7"),
-	m_serverPassword("")
+	m_serverPassword(""),
+	m_operationMutex(QMutex::NonRecursive)
 {
 	qDebug() << Q_FUNC_INFO;
 
 	m_pThread = new QThread();
 
+	this->moveToThread(m_pThread);
+
 	connect(m_pThread, &QThread::started, [](){qDebug() << "Database communication thread has been started";});
 	connect(m_pThread, &QThread::finished, [](){qDebug() << "Database communication thread has been finished";});
-
-	this->moveToThread(m_pThread);
 
 	// --
 	//
@@ -54,7 +55,7 @@ DbStore::DbStore() :
 	connect(this, &DbStore::signal_isProjectOpen, this, &DbStore::slot_isProjectOpen, Qt::BlockingQueuedConnection);
 	connect(this, &DbStore::signal_openProject, this, &DbStore::slot_openProject, Qt::BlockingQueuedConnection);
 	connect(this, &DbStore::signal_closeProject, this, &DbStore::slot_closeProject, Qt::BlockingQueuedConnection);
-	connect(this, &DbStore::signal_getProjectList, this, &DbStore::slot_getProjectList, Qt::BlockingQueuedConnection);
+	connect(this, &DbStore::signal_getProjectList, this, &DbStore::slot_getProjectList);
 	connect(this, &DbStore::signal_createProject, this, &DbStore::slot_createProject, Qt::BlockingQueuedConnection);
 
 	connect(this, &DbStore::signal_createUser, this, &DbStore::slot_createUser, Qt::BlockingQueuedConnection);
@@ -123,7 +124,7 @@ int DbStore::databaseVersion() const
 
 void DbStore::upgradeProject(const QString& projectName, QWidget* parentWidget)
 {
-	assert(parentWidget);
+/*	assert(parentWidget);
 
 	DbProgress progress;
 
@@ -152,7 +153,7 @@ void DbStore::upgradeProject(const QString& projectName, QWidget* parentWidget)
 		QMessageBox mb;
 		mb.setText(progress.errorMessage());
 		mb.exec();
-	}
+	}*/
 
 	return;
 }
@@ -172,10 +173,24 @@ bool DbStore::isProjectOpened()
 
 // Get u7 project list from the database, BLOCKING CONNECTION
 //
-bool DbStore::getProjectList(std::vector<DbProject>& projects)
+bool DbStore::getProjectList(std::vector<DbProject>* projects, QWidget* parentWidget)
 {
-	emit signal_getProjectList(projects);
-	return true;
+	assert(parentWidget != nullptr);
+
+	// --
+	//
+	bool ok = initProgress(parentWidget, tr("Getting projects list"), 1);
+	if (ok == true)
+	{
+		emit signal_getProjectList(projects);
+
+		bool result = runProgress();
+
+		qDebug() << "DbStore::getProjectList run stop";
+		return result;
+	}
+
+	return false;
 }
 
 void DbStore::openProject(const QString& projectName, const QString &username, const QString &password)
@@ -268,7 +283,7 @@ void DbStore::getFileInfo(int fileId, DbFileInfo* out)
 
 void DbStore::getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo>* out, QWidget* parentWidget)
 {
-	if (file.fileId() == -1 || out == nullptr || parentWidget == nullptr)
+/*	if (file.fileId() == -1 || out == nullptr || parentWidget == nullptr)
 	{
 		assert(file.fileId() != -1);
 		assert(out != nullptr);
@@ -305,7 +320,7 @@ void DbStore::getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo
 		QMessageBox mb;
 		mb.setText(progress.errorMessage());
 		mb.exec();
-	}
+	}*/
 
 	return;
 }
@@ -314,7 +329,7 @@ void DbStore::getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo
 //
 void DbStore::getCurrentUserAndCheckedInFileList(std::vector<DbFileInfo>& files, const QString& filter)
 {
-	std::vector<DbFileInfo> allFiles;
+/*	std::vector<DbFileInfo> allFiles;
 	std::vector<DbFileInfo> checkedInFiles;
 
 	emit signal_getFileList(allFiles, false, filter);			// Get all files
@@ -353,12 +368,12 @@ void DbStore::getCurrentUserAndCheckedInFileList(std::vector<DbFileInfo>& files,
 		//
 	}
 
-	return;
+	return;*/
 }
 
 void DbStore::addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget* parentWidget)
 {
-	assert(files != nullptr);
+/*	assert(files != nullptr);
 	assert(files->size() != 0);
 	assert(parentWidget != nullptr);
 
@@ -392,12 +407,12 @@ void DbStore::addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget* par
 		mb.exec();
 	}
 
-	return;
+	return;*/
 }
 
 bool DbStore::undoFilesPendingChanges(const std::vector<DbFileInfo>& files, QWidget* parentWidget)
 {
-	assert(files.size() != 0);
+/*	assert(files.size() != 0);
 	assert(parentWidget != nullptr);
 
 	DbProgress progress;
@@ -435,13 +450,13 @@ bool DbStore::undoFilesPendingChanges(const std::vector<DbFileInfo>& files, QWid
 	{
 		return false;
 	}
-
+*/
 	return true;
 }
 
 bool DbStore::checkInFiles(const std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget)
 {
-	assert(files.size() != 0);
+/*	assert(files.size() != 0);
 	assert(parentWidget != nullptr);
 
 	DbProgress progress;
@@ -479,13 +494,13 @@ bool DbStore::checkInFiles(const std::vector<DbFileInfo>& files, const QString& 
 	{
 		return false;
 	}
-
+*/
 	return true;
 }
 
 bool DbStore::checkOutFiles(const std::vector<DbFileInfo>& files, QWidget* parentWidget)
 {
-	assert(files.size() != 0);
+/*	assert(files.size() != 0);
 	assert(parentWidget != nullptr);
 
 	DbProgress progress;
@@ -523,13 +538,13 @@ bool DbStore::checkOutFiles(const std::vector<DbFileInfo>& files, QWidget* paren
 	{
 		return false;
 	}
-
+*/
 	return true;
 }
 
 bool DbStore::getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
 {
-	assert(files.size() != 0);
+/*	assert(files.size() != 0);
 	assert(out != nullptr);
 	assert(parentWidget != nullptr);
 
@@ -567,12 +582,14 @@ bool DbStore::getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std:
 		mb.exec();
 	}
 
-	return !progress.hasError();
+	return !progress.hasError();*/
+
+	return false;
 }
 
 std::shared_ptr<DbFile> DbStore::getWorkcopy(const DbFileInfo& file, QWidget* parentWidget)
 {
-	std::vector<DbFileInfo> files;
+/*	std::vector<DbFileInfo> files;
 	files.push_back(file);
 
 	std::vector<std::shared_ptr<DbFile>> out;
@@ -587,11 +604,15 @@ std::shared_ptr<DbFile> DbStore::getWorkcopy(const DbFileInfo& file, QWidget* pa
 	{
 		return std::shared_ptr<DbFile>();
 	}
+	*/
+
+
+	return std::shared_ptr<DbFile>();
 }
 
 bool DbStore::setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWidget* parentWidget)
 {
-	assert(files.empty() == false);
+/*	assert(files.empty() == false);
 	assert(parentWidget != nullptr);
 
 	qDebug() << Q_FUNC_INFO;
@@ -635,7 +656,9 @@ bool DbStore::setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWi
 		return false;
 	}
 
-	return true;
+	return true;*/
+
+	return false;
 }
 
 bool DbStore::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget)
@@ -648,7 +671,7 @@ bool DbStore::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWi
 
 void DbStore::getLatestCopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
 {
-	assert(files.size() != 0);
+/*	assert(files.size() != 0);
 	assert(out != nullptr);
 	assert(parentWidget != nullptr);
 
@@ -683,13 +706,13 @@ void DbStore::getLatestCopy(const std::vector<DbFileInfo>& files, std::vector<st
 		mb.setText(progress.errorMessage());
 		mb.exec();
 	}
-
+*/
 	return;
 }
 
 bool DbStore::getSpecificCopy(int changesetId, const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
 {
-	if (changesetId < 0 ||
+/*	if (changesetId < 0 ||
 		files.empty() == true ||
 		out == nullptr ||
 		parentWidget == nullptr)
@@ -734,12 +757,14 @@ bool DbStore::getSpecificCopy(int changesetId, const std::vector<DbFileInfo>& fi
 		mb.exec();
 	}
 
-	return !progress.hasError();
+	return !progress.hasError();*/
+
+	return false;
 }
 
 bool DbStore::addSystem(DeviceSystem* system, QWidget* parentWidget)
 {
-	if (system == nullptr ||
+/*	if (system == nullptr ||
 		parentWidget == nullptr)
 	{
 		assert(system != nullptr);
@@ -780,12 +805,14 @@ bool DbStore::addSystem(DeviceSystem* system, QWidget* parentWidget)
 		mb.exec();
 	}
 
-	return !progress.hasError();
+	return !progress.hasError();*/
+
+	return false;
 }
 
 bool DbStore::getEquipmentWorkcopy(DeviceRoot* out, QWidget* parentWidget)
 {
-	if (out == nullptr ||
+/*	if (out == nullptr ||
 		parentWidget == nullptr)
 	{
 		assert(out != nullptr);
@@ -826,19 +853,17 @@ bool DbStore::getEquipmentWorkcopy(DeviceRoot* out, QWidget* parentWidget)
 		mb.exec();
 	}
 
-	return !progress.hasError();
+	return !progress.hasError();*/
+
+	return false;
 }
 
 QSqlDatabase DbStore::openPostgresDatabase()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "postgres");
-
-	QSqlError lastError = db.lastError();
-	if (lastError.isValid() == true)
+	if (db.lastError().isValid() == true)
 	{
-		qDebug() << "OpenDatabase error: " << lastError;
-		emit error(lastError.text());
-		return QSqlDatabase();
+		return db;
 	}
 
 	db.setHostName(host());
@@ -880,18 +905,11 @@ QSqlDatabase DbStore::openPostgresDatabase()
 			hasUnicode == false ||
 			hasPreparedQueries == false)
 		{
-			emit error(tr("Database driver doesn't have required features."));
-			qDebug() << "Database driver doesn't have required features.";
+			emitError(tr("Database driver doesn't have required features."));
 
 			db.close();
-			return QSqlDatabase();
+			return QSqlDatabase();	// !!!!!!!!!!!!!!!!!!!!!!11 we return the empty database, cant get error from it!
 		}
-	}
-	else
-	{
-		emit error(db.lastError().text());
-		qDebug() << "OpenDatabase error: " << db.lastError().text();
-		return QSqlDatabase();
 	}
 
 	return db;
@@ -905,18 +923,16 @@ bool DbStore::closePostgresDatabase()
 		return false;
 	}
 
-	QSqlDatabase db = QSqlDatabase::database("postgres");
-	if (db.isOpen() == true)
 	{
-		db.close();
-		QSqlDatabase::removeDatabase("postgres");
-		return true;
+		QSqlDatabase db = QSqlDatabase::database("postgres");
+		if (db.isOpen() == true)
+		{
+			db.close();
+		}
 	}
-	else
-	{
-		QSqlDatabase::removeDatabase("postgres");
-		return false;
-	}
+
+	QSqlDatabase::removeDatabase("postgres");
+	return true;
 }
 
 
@@ -930,6 +946,39 @@ QSqlDatabase DbStore::projectDatabase()
 {
 	assert(QSqlDatabase::contains(projectConnectionName()));
 	return QSqlDatabase::database(projectConnectionName(), false);
+}
+
+// Must be called from the GUI thread
+//
+bool DbStore::initProgress(QWidget* parentWidget, const QString& description, int maxValue)
+{
+	if (m_operationMutex.tryLock() == false)		// MUST BE UNLOCKED LATER (in DbStore::runProgress!!!)
+	{
+		qDebug() << "DbStore: Another operation is in progress!";
+		return false;
+	}
+
+	return m_progress.init(parentWidget, description, maxValue);
+}
+
+bool DbStore::runProgress()
+{
+	// Must be called from the GUI thread
+	//
+	bool result = m_progress.run();
+	m_operationMutex.unlock();						// WAS LOCKED IN DbStore::initProgress
+	return result;
+}
+
+void DbStore::emitError(const QSqlError& err)
+{
+	emitError(err.text());
+}
+
+void DbStore::emitError(const QString& err)
+{
+	qDebug() << err;
+	m_progress.setErrorMessage(err);
 }
 
 void DbStore::slot_debug()
@@ -999,117 +1048,122 @@ bool DbStore::slot_isProjectOpen()
 	return QSqlDatabase::contains(projectConnectionName());
 }
 
-void DbStore::slot_getProjectList(std::vector<DbProject>& projects)
+void DbStore::slot_getProjectList(std::vector<DbProject>* projects)
 {
+	assert(projects != nullptr);
+
+	// Automatic scope variable to perform progress->setCompleted(true)
+	//
+	DbProgress& progress = m_progress;
+	std::shared_ptr<int*> progressCompleted(nullptr, [&progress](void*)
+		{
+			progress.setCompleted(true);
+		});
+
+
 	// Open database "postgres", and get project list
 	//
-	QSqlDatabase db = openPostgresDatabase();
-	if (db.isOpen() == false)
 	{
-		return;
-	}
-
-	// --
-	//
-
-	projects.clear();
-
-	// Get databases list
-	//
-	QSqlQuery query(db);
-
-	bool result = query.exec("SELECT datname FROM pg_database;");
-	if (result == false)
-	{
-		qDebug() << query.lastError();
-
-		closePostgresDatabase();
-		return;
-	}
-
-	while (query.next())
-	{
-		QString databaseName = query.value(0).toString();
-		QString projectName = databaseName;
-
-		// filter database list
-		//
-		if (projectName.left(3) != "u7_" &&
-			projectName.left(3) != "U7_")
+		QSqlDatabase db = openPostgresDatabase();
+		if (db.isOpen() == false)
 		{
-			continue;
+			emitError(db.lastError());
+			return;
 		}
 
-		projectName.replace("u7_", "", Qt::CaseInsensitive);
+		QSqlQuery query(db);
 
-		// --
-		//
-		DbProject p;
-		p.setDatabaseName(databaseName);
-		p.setProjectName(projectName);
+		bool result = query.exec("SELECT datname FROM pg_database;");
+		if (result == false)
+		{
+			emitError(query.lastError());
+			return;
+		}
 
-		projects.push_back(p);
+		while (query.next())
+		{
+			QString databaseName = query.value(0).toString();
+			QString projectName = databaseName;
+
+			// filter database list
+			//
+			if (projectName.left(3) != "u7_" &&
+				projectName.left(3) != "U7_")
+			{
+				continue;
+			}
+
+			projectName.replace("u7_", "", Qt::CaseInsensitive);
+
+			// --
+			//
+			DbProject p;
+			p.setDatabaseName(databaseName);
+			p.setProjectName(projectName);
+
+			projects->push_back(p);
+		}
 	}
 
-	query.clear();
 	closePostgresDatabase();
 
 	// Open each project and get it's version
 	//
 
-	for (auto pi = projects.begin(); pi != projects.end(); ++pi)
+	for (auto pi = projects->begin(); pi != projects->end(); ++pi)
 	{
 		QString projectDatabaseConnectionName = QString("%1 connection").arg(pi->projectName());
 
-		QSqlDatabase projectDb = QSqlDatabase::addDatabase("QPSQL", projectDatabaseConnectionName);
-		projectDb.setHostName(host());
-		projectDb.setPort(port());
-		projectDb.setDatabaseName(pi->databaseName());
-		projectDb.setUserName(serverUsername());
-		projectDb.setPassword(serverPassword());
-
-		result = projectDb.open();
-
-		if (result == false)
 		{
-			qDebug() << projectDb.lastError();
-			emit error(projectDb.lastError().text());
+			QSqlDatabase projectDb = QSqlDatabase::addDatabase("QPSQL", projectDatabaseConnectionName);
+			projectDb.setHostName(host());
+			projectDb.setPort(port());
+			projectDb.setDatabaseName(pi->databaseName());
+			projectDb.setUserName(serverUsername());
+			projectDb.setPassword(serverPassword());
 
-			QSqlDatabase::removeDatabase(projectDatabaseConnectionName);
-			continue;
-		}
+			bool result = projectDb.open();
 
-		// Get project version
-		//
+			if (result == false)
+			{
+				emitError(projectDb.lastError());
+				QSqlDatabase::removeDatabase(projectDatabaseConnectionName);
+				break;
+			}
 
-		// Request is:
-		//	SELECT max("VersionNo") FROM "Version";
-		//
+			// Get project version
+			//
 
-		QString createVersionTableSql = QString("SELECT max(\"VersionNo\") FROM \"Version\";");
+			// Request is:
+			//	SELECT max("VersionNo") FROM "Version";
+			//
 
-		QSqlQuery versionQuery(projectDb);
-		result = versionQuery.exec(createVersionTableSql);
+			QString createVersionTableSql = QString("SELECT max(\"VersionNo\") FROM \"Version\";");
 
-		if (result == false)
-		{
-			qDebug() << versionQuery.lastError();
-			emit error(versionQuery.lastError().text());
+			QSqlQuery versionQuery(projectDb);
+			result = versionQuery.exec(createVersionTableSql);
+
+			if (result == false)
+			{
+				//			qDebug() << versionQuery.lastError();
+				//			emit error(versionQuery.lastError().text());
+
+				//			versionQuery.clear();
+				//			projectDb.close();
+				QSqlDatabase::removeDatabase(projectDatabaseConnectionName);
+				continue;
+			}
+
+			if (versionQuery.next())
+			{
+				int projectVersion = versionQuery.value(0).toInt();
+				pi->setVersion(projectVersion);
+			}
 
 			versionQuery.clear();
 			projectDb.close();
-			QSqlDatabase::removeDatabase(projectDatabaseConnectionName);
-			continue;
 		}
 
-		if (versionQuery.next())
-		{
-			int projectVersion = versionQuery.value(0).toInt();
-			pi->setVersion(projectVersion);
-		}
-
-		versionQuery.clear();
-		projectDb.close();
 		QSqlDatabase::removeDatabase(projectDatabaseConnectionName);
 	}
 
@@ -1120,7 +1174,7 @@ void DbStore::slot_getProjectList(std::vector<DbProject>& projects)
 
 void DbStore::slot_openProject(QString projectName, QString username, QString password)
 {
-	projectName = projectName.trimmed();
+/*	projectName = projectName.trimmed();
 	QString projectDatabaseName = "u7_" + projectName.toLower();
 	username = username.trimmed();
 
@@ -1219,13 +1273,13 @@ void DbStore::slot_openProject(QString projectName, QString username, QString pa
 
 	// Send notifications
 	//
-	emit projectOpened();
+	emit projectOpened();*/
 	return;
 }
 
 void DbStore::slot_closeProject()
 {
-	setCurrentUser(DbUser());
+/*	setCurrentUser(DbUser());
 	setCurrentProject(DbProject());
 
 	if (QSqlDatabase::contains(projectConnectionName()) == false)
@@ -1244,7 +1298,7 @@ void DbStore::slot_closeProject()
 	db.close();
 	QSqlDatabase::removeDatabase(projectConnectionName());
 
-	emit projectClosed();
+	emit projectClosed();*/
 }
 
 // Create databse for new project.
@@ -1257,7 +1311,7 @@ void DbStore::slot_createProject(const QString projectName, const QString admini
 {
 	// Open database "postgres", and get project list
 	//
-	QSqlDatabase db = openPostgresDatabase();
+/*	QSqlDatabase db = openPostgresDatabase();
 	if (db.isOpen() == false)
 	{
 		return;
@@ -1360,19 +1414,19 @@ void DbStore::slot_createProject(const QString projectName, const QString admini
 	// Create User table
 	//
 
-	/*
-	CREATE TABLE "User"
-	(
-		"UserID" serial PRIMARY KEY NOT NULL,
-		"Date" timestamp with time zone NOT NULL DEFAULT now(),
-		"Username" text NOT NULL,
-		"FirstName" text NOT NULL,
-		"LastName" text NOT NULL,
-		"Password" text NOT NULL,
-		"Administrator" boolean NOT NULL DEFAULT FALSE,
-		"ReadOnly" boolean NOT NULL DEFAULT TRUE
-	);
-	*/
+
+//	CREATE TABLE "User"
+//	(
+//		"UserID" serial PRIMARY KEY NOT NULL,
+//		"Date" timestamp with time zone NOT NULL DEFAULT now(),
+//		"Username" text NOT NULL,
+//		"FirstName" text NOT NULL,
+//		"LastName" text NOT NULL,
+//		"Password" text NOT NULL,
+//		"Administrator" boolean NOT NULL DEFAULT FALSE,
+//		"ReadOnly" boolean NOT NULL DEFAULT TRUE
+//	);
+
 
 	QString createUserTableSql = QString(
 		"CREATE TABLE \"User\""
@@ -1439,7 +1493,7 @@ void DbStore::slot_createProject(const QString projectName, const QString admini
 	newDbQuery.clear();
 	newDatabase.close();
 	QSqlDatabase::removeDatabase(newDatabaseConnectionName);
-	closePostgresDatabase();
+	closePostgresDatabase();*/
 	return;
 }
 
@@ -1447,7 +1501,7 @@ void DbStore::slot_createProject(const QString projectName, const QString admini
 //
 void DbStore::slot_upgradeProject(const QString databaseName, DbProgress* progress)
 {
-	assert(progress != nullptr);
+/*	assert(progress != nullptr);
 
 	// Automatic scope variable to perform progress->setCompleted(true)
 	//
@@ -1730,12 +1784,12 @@ void DbStore::slot_upgradeProject(const QString databaseName, DbProgress* progre
 	db.close();
 	QSqlDatabase::removeDatabase(dbConnectionName);
 
-	return;
+	return;*/
 }
 
 void DbStore::slot_createUser(DbUser user)
 {
-	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+/*	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
 		assert(db.isOpen());
@@ -1827,13 +1881,13 @@ void DbStore::slot_createUser(DbUser user)
 		qDebug() << Q_FUNC_INFO << db.lastError();
 		emit error(tr("Can't create user %1, error: %2").arg(user.username()).arg(db.lastError().text()));
 	}
-
+*/
 	return;
 }
 
 void DbStore::slot_updateUser(DbUser user)
 {
-	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+/*	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
 		assert(db.isOpen());
@@ -1965,12 +2019,12 @@ void DbStore::slot_updateUser(DbUser user)
 		emit error(tr("Can't update user %1 data, error: %2").arg(user.username()).arg(db.lastError().text()));
 	}
 
-	return;
+	return;*/
 }
 
 void DbStore::slot_getUserList(std::vector<DbUser> &users)
 {
-	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+/*	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
 		assert(db.isOpen());
@@ -2004,12 +2058,12 @@ void DbStore::slot_getUserList(std::vector<DbUser> &users)
 		}
 	}
 
-	return;
+	return;*/
 }
 
 bool DbStore::db_getUserData(QSqlDatabase& db, int userId, DbUser* pUser)
 {
-	if (pUser == nullptr)
+/*	if (pUser == nullptr)
 	{
 		assert(pUser != nullptr);
 		return false;
@@ -2053,6 +2107,7 @@ bool DbStore::db_getUserData(QSqlDatabase& db, int userId, DbUser* pUser)
 	pUser->setReadonly(query.value("ReadOnly").toBool());
 	pUser->setDisabled(query.value("Disabled").toBool());
 
+	*/
 	return true;
 }
 
@@ -2060,7 +2115,7 @@ bool DbStore::db_getUserData(QSqlDatabase& db, int userId, DbUser* pUser)
 //
 void DbStore::slot_getFileList(std::vector<DbFileInfo> &files, bool justCheckedInState, QString filter)
 {
-	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+/*	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
 		assert(db.isOpen());
@@ -2160,17 +2215,17 @@ void DbStore::slot_getFileList(std::vector<DbFileInfo> &files, bool justCheckedI
 
 		// The file lateset checkIn
 		//
-		/*
-			SELECT * FROM Changeset
-			WHERE
-				ChangesetID =
-					(SELECT ChangesetID FROM FileInstance
-						WHERE
-							FileID=6 AND
-							ChangesetID IS NOT NULL AND
-							Sequence = (SELECT max(Sequence) FROM FileInstance WHERE FileID=6 AND ChangesetID IS NOT NULL)
-					);
-		*/
+
+//			SELECT * FROM Changeset
+//			WHERE
+//				ChangesetID =
+//					(SELECT ChangesetID FROM FileInstance
+//						WHERE
+//							FileID=6 AND
+//							ChangesetID IS NOT NULL AND
+//							Sequence = (SELECT max(Sequence) FROM FileInstance WHERE FileID=6 AND ChangesetID IS NOT NULL)
+//					);
+
 
 		QString lastCheckInRequest = QString(
 			"SELECT * FROM Changeset "
@@ -2275,12 +2330,12 @@ void DbStore::slot_getFileList(std::vector<DbFileInfo> &files, bool justCheckedI
 		files.push_back(fileInfo);
 	}
 
-	return;
+	return;*/
 }
 
 void DbStore::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>* out, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -2381,12 +2436,12 @@ void DbStore::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>*
 	//
 	progress->setErrorMessage(errorMessage);
 
-	return;
+	return;*/
 }
 
 void DbStore::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -2541,12 +2596,12 @@ void DbStore::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, DbProgr
 
 	progress->setErrorMessage(errorMessage);
 
-	return;
+	return;*/
 }
 
 void DbStore::slot_undoFilesPendingChanges(const std::vector<DbFileInfo>& files, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -2633,12 +2688,12 @@ void DbStore::slot_undoFilesPendingChanges(const std::vector<DbFileInfo>& files,
 
 	progress->setErrorMessage(errorMessage);
 
-	return;
+	return;*/
 }
 
 void DbStore::slot_checkInFiles(const std::vector<DbFileInfo>& files, QString comment, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -2775,12 +2830,12 @@ void DbStore::slot_checkInFiles(const std::vector<DbFileInfo>& files, QString co
 	db.commit();
 
 	progress->setErrorMessage(errorMessage);
-	return;
+	return;*/
 }
 
 void DbStore::slot_checkOutFiles(const std::vector<DbFileInfo>& files, DbProgress* progress)
 {
-	assert(progress != nullptr);
+/*	assert(progress != nullptr);
 
 	// Automatic scope variable to perform progress->setCompleted(true)
 	//
@@ -2924,14 +2979,14 @@ void DbStore::slot_checkOutFiles(const std::vector<DbFileInfo>& files, DbProgres
 		progress->setErrorMessage(errorMessage);
 	}
 
-	return;
+	return;*/
 }
 
 
 
 void DbStore::slot_getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -3054,12 +3109,12 @@ void DbStore::slot_getWorkcopy(const std::vector<DbFileInfo>& files, std::vector
 	}
 
 	progress->setErrorMessage(errorMessage);
-	return;
+	return;*/
 }
 
 void DbStore::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, DbProgress* progress)
 {
-	assert(progress != nullptr);
+/*	assert(progress != nullptr);
 
 	// Automatic scope variable to perform progress->setCompleted(true)
 	//
@@ -3140,12 +3195,12 @@ void DbStore::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files
 		progress->setErrorMessage(errorMessage);
 	}
 
-	return;
+	return;*/
 }
 
 void DbStore::slot_getLatestCopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -3280,12 +3335,12 @@ void DbStore::slot_getLatestCopy(const std::vector<DbFileInfo>& files, std::vect
 	}
 
 	progress->setErrorMessage(errorMessage);
-	return;
+	return;*/
 }
 
 void DbStore::slot_getSpecificCopy(int changesetId, const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -3420,12 +3475,12 @@ void DbStore::slot_getSpecificCopy(int changesetId, const std::vector<DbFileInfo
 	}
 
 	progress->setErrorMessage(errorMessage);
-	return;
+	return;*/
 }
 
 void DbStore::slot_addSystem(DeviceSystem* system, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -3479,7 +3534,7 @@ void DbStore::slot_addSystem(DeviceSystem* system, DbProgress* progress)
         return;
     }
 
-    /*
+
 
 	// Start transaction
 	//
@@ -3566,15 +3621,15 @@ void DbStore::slot_addSystem(DeviceSystem* system, DbProgress* progress)
 		return;
 	}
 
-    db.commit();*/
+	db.commit();
 
 	progress->setErrorMessage(errorMessage);
-	return;
+	return;*/
 }
 
 void DbStore::slot_getEquipmentWorkcopy(DeviceRoot* out, DbProgress* progress)
 {
-	if (progress == nullptr)
+/*	if (progress == nullptr)
 	{
 		assert(progress != nullptr);
 		return;
@@ -3631,7 +3686,7 @@ void DbStore::slot_getEquipmentWorkcopy(DeviceRoot* out, DbProgress* progress)
 //		systemId = q.value("MaxSystemID").toInt() + 1;
 //	}
 
-	progress->setErrorMessage(errorMessage);
+	progress->setErrorMessage(errorMessage);*/
 	return;
 }
 

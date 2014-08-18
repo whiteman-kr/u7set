@@ -59,8 +59,8 @@ private slots:
 	void projectOpened();
 	void projectClosed();
 
-	void databaseError(QString message);
-	void databaseOperationCompleted(QString message);
+	//void databaseError(QString message);
+	//void databaseOperationCompleted(QString message);
 
 	// Properties
 	//

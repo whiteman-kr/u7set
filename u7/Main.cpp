@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<DbFileInfo>();
 	qRegisterMetaType<DbFile>();
 	qRegisterMetaType<DbChangesetInfo>();
+	qRegisterMetaType<DbProject>();
+	qRegisterMetaType<std::vector<DbProject>>();
 	qRegisterMetaType<std::vector<DbFileInfo>>();
 	qRegisterMetaType<std::vector<std::shared_ptr<DbFile>>>();
 	qRegisterMetaType<std::vector<int>>();

@@ -9,9 +9,72 @@
 DbProgress::DbProgress() :
 	m_completed(false),
 	m_cancel(false),
-	m_maxValue(0),
-	m_value(0)
+	m_value(0),
+	m_progressDialog(nullptr)
 {
+	m_progressDialog = new QProgressDialog("", tr("Cancel"), 0, 0, nullptr);
+
+	m_progressDialog->setWindowModality(Qt::WindowModal);
+	m_progressDialog->setMinimumDuration(100);
+}
+
+bool DbProgress::init(QWidget* parentWidget, const QString& description, int maxValue)
+{
+	QMutexLocker l(&m_mutex);
+
+	m_completed = false;
+	m_cancel = false;
+	m_value = 0;
+
+	m_errorMessage.clear();
+	m_completeMessage.clear();
+
+	m_progressDialog->setLabelText(description);
+	m_progressDialog->setMaximum(maxValue);
+	m_progressDialog->setValue(m_value);
+
+	return true;
+}
+
+bool DbProgress::run()
+{
+	while (completed() == false)
+	{
+		QThread::yieldCurrentThread();
+		QCoreApplication::processEvents();
+
+		m_progressDialog->setValue(value());
+		if (m_progressDialog->wasCanceled() == true)
+		{
+			setCancel(true);
+		}
+	}
+
+	m_progressDialog->reset();
+
+	if (hasError() == true)
+	{
+		QMessageBox mb;
+		mb.setText(errorMessage());
+		mb.exec();
+
+		return false;
+	}
+
+	if (completeMessage().isEmpty() == false)
+	{
+		QMessageBox mb;
+		mb.setText(completeMessage());
+		mb.exec();
+	}
+
+	return true;
+}
+
+
+DbProgress::~DbProgress()
+{
+	delete m_progressDialog;
 }
 
 bool DbProgress::completed() const
@@ -50,18 +113,6 @@ void DbProgress::setCurrentOperation(const QString& value)
 	m_currentOperation = value;
 }
 
-int DbProgress::maxValue() const
-{
-	QMutexLocker l(&m_mutex);
-	return m_maxValue;
-}
-
-void DbProgress::setMaxValue(int maxValue)
-{
-	QMutexLocker l(&m_mutex);
-	m_maxValue = maxValue;
-}
-
 int DbProgress::value() const
 {
 	QMutexLocker l(&m_mutex);
@@ -90,6 +141,18 @@ bool DbProgress::hasError() const
 {
 	QMutexLocker l(&m_mutex);
 	return !m_errorMessage.isEmpty();
+}
+
+QString DbProgress::completeMessage() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_completeMessage;
+}
+
+void DbProgress::setCompleteMessage(const QString& value)
+{
+	QMutexLocker l(&m_mutex);
+	m_completeMessage = value;
 }
 
 //
@@ -185,6 +248,10 @@ DbProject::DbProject() :
 {
 }
 
+DbProject::~DbProject()
+{
+}
+
 QString DbProject::databaseName() const
 {
 	return m_databaseName;
@@ -203,6 +270,16 @@ QString DbProject::projectName() const
 void DbProject::setProjectName(const QString& projectName)
 {
 	m_projectName = projectName;
+}
+
+QString DbProject::description() const
+{
+	return m_description;
+}
+
+void DbProject::setDescription(const QString& description)
+{
+	m_description = description;
 }
 
 int DbProject::version() const

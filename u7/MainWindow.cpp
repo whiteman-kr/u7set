@@ -6,7 +6,7 @@
 #include "DialogSettings.h"
 #include "../include/DbStore.h"
 #include "UserManagementDialog.h"
-#include "DatabaseTabPage.h"
+#include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
 #include "ConfigurationsTabPage.h"
 #include "VideoFrameTabPage.h"
@@ -40,33 +40,32 @@ MainWindow::MainWindow(DbStore* dbstore, QWidget* parent) :
 	createToolBars();
 	createStatusBar();
 
-	restoreWindowState();
-
 	// --
 	//
 	connect(dbStore(), &DbStore::projectOpened, this, &MainWindow::projectOpened);
 	connect(dbStore(), &DbStore::projectClosed, this, &MainWindow::projectClosed);
 
-	connect(dbStore(), &DbStore::error, this, &MainWindow::databaseError);
-	connect(dbStore(), &DbStore::completed, this, &MainWindow::databaseOperationCompleted);
+	//connect(dbStore(), &DbStore::error, this, &MainWindow::databaseError);
+	//connect(dbStore(), &DbStore::completed, this, &MainWindow::databaseOperationCompleted);
 
 	//connect(centralWidget(), SIGNAL(historyChanged(bool, bool)), this, SLOT(historyChanged(bool, bool)));
 
 	// Add main tab pages
 	//
-	getCentralWidget()->addTabPage(new DatabaseTabPage(dbStore(), nullptr), tr("Database"));
-	getCentralWidget()->addTabPage(new EquipmentTabPage(dbStore(), nullptr), tr("Equipment"));
+	getCentralWidget()->addTabPage(new ProjectsTabPage(dbStore(), nullptr), tr("Projects"));
+	getCentralWidget()->addTabPage(new EquipmentTabPage(dbStore(), nullptr), tr("Hardware Configuration"));
 	getCentralWidget()->addTabPage(new FilesTabPage(dbStore(), nullptr), tr("Files"));
-	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbStore(), nullptr), tr("Configurations"));
+	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbStore(), nullptr), tr("Modules Configurations"));
 
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameLogic>("lvf", dbStore(), nullptr), tr("Logic"));
+	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameLogic>("lvf", dbStore(), nullptr), tr("Application Logic"));
 	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameWiring>("wvf", dbStore(), nullptr), tr("Wiring"));
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameTech>("tvf", dbStore(), nullptr), tr("Tech Frames"));
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameDiag>("dvf", dbStore(), nullptr), tr("Diag Frames"));
+	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameTech>("tvf", dbStore(), nullptr), tr("Tech Schemes"));
+	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameDiag>("dvf", dbStore(), nullptr), tr("Diag Schemes"));
 
 	// --
 	//
 	setMinimumSize(500, 300);
+	restoreWindowState();
 
 	centralWidget()->show();
 
@@ -317,25 +316,25 @@ void MainWindow::projectClosed()
 	return;
 }
 
-void MainWindow::databaseError(QString message)
-{
-	QMessageBox::critical(this, qApp->applicationName(), message);
-	return;
-}
+//void MainWindow::databaseError(QString message)
+//{
+//	QMessageBox::critical(this, qApp->applicationName(), message);
+//	return;
+//}
 
-void MainWindow::databaseOperationCompleted(QString message)
-{
-	if (message.isEmpty() == false)
-	{
-		QMessageBox mb(this);
+//void MainWindow::databaseOperationCompleted(QString message)
+//{
+//	if (message.isEmpty() == false)
+//	{
+//		QMessageBox mb(this);
 
-		mb.setText(message);
+//		mb.setText(message);
 
-		mb.exec();
-	}
+//		mb.exec();
+//	}
 
-	return;
-}
+//	return;
+//}
 
 DbStore* MainWindow::dbStore()
 {

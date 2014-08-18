@@ -31,6 +31,11 @@ private:
 	const QString& projectConnectionName() const;
 	QSqlDatabase projectDatabase();
 
+	bool initProgress(QWidget* parentWidget, const QString& description, int maxValue);
+	bool runProgress();
+	void emitError(const QSqlError& err);
+	void emitError(const QString& err);
+
 	//
 	// Public signlas
 	//
@@ -38,8 +43,8 @@ signals:
 	void projectOpened();
 	void projectClosed();
 
-	void error(QString message);
-	void completed(QString message);
+	//void error(QString message);
+	//void completed(QString message);
 
 	//
 	// Asynchronous calls
@@ -55,7 +60,7 @@ public:
 	// Project Management -- Blocking
 	//
 	bool isProjectOpened();
-	bool getProjectList(std::vector<DbProject>& projects);
+	bool getProjectList(std::vector<DbProject>* projects, QWidget* parentWidget);	// Non Blocking
 	void openProject(const QString& projectName, const QString& serverUsername, const QString& serverPassword);
 	void closeProject();
 	bool createProject(const QString& projectName, const QString& administratorPassword);
@@ -109,7 +114,7 @@ signals:
 	void signal_closeConnection();
 
 	bool signal_isProjectOpen();
-	void signal_getProjectList(std::vector<DbProject>& projects);
+	void signal_getProjectList(std::vector<DbProject>* projects);
 	void signal_openProject(QString projectName, QString username, QString password);
 	void signal_closeProject();
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -142,7 +147,7 @@ private slots:
 	void slot_debug();
 
 	bool slot_isProjectOpen();
-	void slot_getProjectList(std::vector<DbProject>& projects);
+	void slot_getProjectList(std::vector<DbProject>* projects);
 	void slot_openProject(QString projectName, QString username, QString password);
 	void slot_closeProject();
 	void slot_createProject(const QString projectName, const QString administratorPassword);
@@ -197,6 +202,7 @@ private:
 	QThread* m_pThread;
 
 	mutable QMutex m_mutex;
+	mutable QMutex m_operationMutex;	// Non Recursive mutex for single opartion at a time
 
 	QString m_host;
 	int m_port;
@@ -207,6 +213,8 @@ private:
 
 	DbUser m_currentUser;
 	DbProject m_currentProject;
+
+	DbProgress m_progress;
 };
 
 class HasDbStore

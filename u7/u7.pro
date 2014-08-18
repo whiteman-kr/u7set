@@ -42,7 +42,6 @@ SOURCES +=\
     ConfigurationsTabPage.cpp \
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
-    DatabaseTabPage.cpp \
     DialogSettings.cpp \
     DialogValueEdit.cpp \
     FilesTabPage.cpp \
@@ -67,7 +66,8 @@ SOURCES +=\
     EditEngineSetPoints.cpp \
     EditEngineDeleteItem.cpp \
     EditEngineMoveItem.cpp \
-    CheckInDialog.cpp
+    CheckInDialog.cpp \
+    ProjectsTabPage.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -75,7 +75,6 @@ HEADERS  += \
     ConfigurationsTabPage.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
-    DatabaseTabPage.h \
     DialogSettings.h \
     DialogValueEdit.h \
     FilesTabPage.h \
@@ -100,7 +99,8 @@ HEADERS  += \
     EditEngineSetPoints.h \
     EditEngineDeleteItem.h \
     EditEngineMoveItem.h \
-    CheckInDialog.h
+    CheckInDialog.h \
+    ProjectsTabPage.h
 
 FORMS    += \
     ChangesetDialog.ui \

@@ -6,10 +6,13 @@
 class QListWidget;
 class DbStore;
 
-class DatabaseTabPage : public MainTabPage
+class ProjectsTabPage : public MainTabPage
 {
 public:
-	DatabaseTabPage(DbStore* dbstore, QWidget* parent);
+	ProjectsTabPage(DbStore* dbstore, QWidget* parent);
+
+protected:
+	virtual void resizeEvent(QResizeEvent* event) override;
 
 public slots:
 	void projectOpened();

@@ -1,10 +1,10 @@
 #include "Stable.h"
-#include "DatabaseTabPage.h"
+#include "ProjectsTabPage.h"
 #include "../include/DbStore.h"
 #include "CreateProjectDialog.h"
 #include "LoginDialog.h"
 
-DatabaseTabPage::DatabaseTabPage(DbStore* dbstore, QWidget* parent) :
+ProjectsTabPage::ProjectsTabPage(DbStore* dbstore, QWidget* parent) :
 	MainTabPage(dbstore, parent),
 	m_pProjectTable(nullptr),
 	m_pNewProject(nullptr),
@@ -30,15 +30,17 @@ DatabaseTabPage::DatabaseTabPage(DbStore* dbstore, QWidget* parent) :
 
 	QStringList headers;
 	headers.push_back(tr("Project Name"));
+	headers.push_back(tr("Description"));
 	headers.push_back(tr("Version"));
 
-	m_pProjectTable->setColumnCount(2);
+	m_pProjectTable->setColumnCount(3);
 	m_pProjectTable->setHorizontalHeaderLabels(headers);
-	m_pProjectTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+	m_pProjectTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
 	m_pProjectTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
+	m_pProjectTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
 
-	connect(m_pProjectTable, &QTableWidget::itemSelectionChanged, this, &DatabaseTabPage::projectTableSelectionChanged);
-	connect(m_pProjectTable, &QTableWidget::doubleClicked, this, &DatabaseTabPage::openProject);
+	connect(m_pProjectTable, &QTableWidget::itemSelectionChanged, this, &ProjectsTabPage::projectTableSelectionChanged);
+	connect(m_pProjectTable, &QTableWidget::doubleClicked, this, &ProjectsTabPage::openProject);
 
 	// Buttons
 	//
@@ -52,10 +54,10 @@ DatabaseTabPage::DatabaseTabPage(DbStore* dbstore, QWidget* parent) :
 	m_pCloseProject->setEnabled(false);
 	m_pDeleteProject->setEnabled(false);
 
-	connect(m_pNewProject, &QPushButton::clicked, this, &DatabaseTabPage::createProject);
-	connect(m_pOpenProject, &QPushButton::clicked, this, &DatabaseTabPage::openProject);
-	connect(m_pCloseProject, &QPushButton::clicked, this, &DatabaseTabPage::closeProject);
-	connect(m_pRefreshProjectList, &QPushButton::clicked, this, &DatabaseTabPage::refreshProjectList);
+	connect(m_pNewProject, &QPushButton::clicked, this, &ProjectsTabPage::createProject);
+	connect(m_pOpenProject, &QPushButton::clicked, this, &ProjectsTabPage::openProject);
+	connect(m_pCloseProject, &QPushButton::clicked, this, &ProjectsTabPage::closeProject);
+	connect(m_pRefreshProjectList, &QPushButton::clicked, this, &ProjectsTabPage::refreshProjectList);
 
 	//
 	// Layouts
@@ -87,8 +89,8 @@ DatabaseTabPage::DatabaseTabPage(DbStore* dbstore, QWidget* parent) :
 
 	// --
 	//
-	connect(dbStore(), &DbStore::projectOpened, this, &DatabaseTabPage::projectOpened);
-	connect(dbStore(), &DbStore::projectClosed, this, &DatabaseTabPage::projectClosed);
+	connect(dbStore(), &DbStore::projectOpened, this, &ProjectsTabPage::projectOpened);
+	connect(dbStore(), &DbStore::projectClosed, this, &ProjectsTabPage::projectClosed);
 
 	// --
 	//
@@ -97,7 +99,21 @@ DatabaseTabPage::DatabaseTabPage(DbStore* dbstore, QWidget* parent) :
 	return;
 }
 
-void DatabaseTabPage::projectOpened()
+void ProjectsTabPage::resizeEvent(QResizeEvent* event)
+{
+	QWidget::resizeEvent(event);
+
+	assert(m_pProjectTable);
+
+	// Set ProjectTable colums width
+	//
+	m_pProjectTable->setColumnWidth(0, static_cast<int>(m_pProjectTable->size().width() * 0.30));
+	m_pProjectTable->setColumnWidth(1, static_cast<int>(m_pProjectTable->size().width() * 0.60));
+
+	return;
+}
+
+void ProjectsTabPage::projectOpened()
 {
 	refreshProjectList();
 
@@ -108,7 +124,7 @@ void DatabaseTabPage::projectOpened()
 	m_pRefreshProjectList->setEnabled(true);
 }
 
-void DatabaseTabPage::projectClosed()
+void ProjectsTabPage::projectClosed()
 {
 	refreshProjectList();
 
@@ -119,7 +135,7 @@ void DatabaseTabPage::projectClosed()
 	m_pRefreshProjectList->setEnabled(true);
 }
 
-void DatabaseTabPage::createProject()
+void ProjectsTabPage::createProject()
 {
 	CreateProjectDialog dialog(this);
 
@@ -131,7 +147,7 @@ void DatabaseTabPage::createProject()
 		// Check "Project already exist"...
 		//
 		std::vector<DbProject> projects;
-		dbStore()->getProjectList(projects);
+		dbStore()->getProjectList(&projects, this);
 
 		auto findPredicate = [&projectName](const DbProject& p) -> bool
 			{
@@ -161,7 +177,7 @@ void DatabaseTabPage::createProject()
 	return;
 }
 
-void DatabaseTabPage::openProject()
+void ProjectsTabPage::openProject()
 {
 	QList<QTableWidgetItem*> selectedItems = m_pProjectTable->selectedItems();
 
@@ -229,7 +245,7 @@ void DatabaseTabPage::openProject()
 	return;
 }
 
-void DatabaseTabPage::closeProject()
+void ProjectsTabPage::closeProject()
 {
 	if (dbStore()->isProjectOpened() == false)
 	{
@@ -241,7 +257,7 @@ void DatabaseTabPage::closeProject()
 	return;
 }
 
-void DatabaseTabPage::refreshProjectList()
+void ProjectsTabPage::refreshProjectList()
 {
 	assert(m_pProjectTable != nullptr);
 
@@ -261,8 +277,12 @@ void DatabaseTabPage::refreshProjectList()
 
 	// Get project list from database (synchronous call)
 	//
+	qDebug() << "getProjectList start";
+
 	std::vector<DbProject> projects;
-	bool result = dbStore()->getProjectList(projects);
+	bool result = dbStore()->getProjectList(&projects, this);
+
+	qDebug() << "getProjectList finish";
 
 	if (result == false)
 	{
@@ -278,8 +298,9 @@ void DatabaseTabPage::refreshProjectList()
 		const DbProject& p = projects[i];
 
 		m_pProjectTable->setItem(i, 0, new QTableWidgetItem(p.projectName()));
-		m_pProjectTable->setItem(i, 1, new QTableWidgetItem(QString::number(p.version())));
-		m_pProjectTable->item(i, 1)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+		m_pProjectTable->setItem(i, 1, new QTableWidgetItem(p.description()));
+		m_pProjectTable->setItem(i, 2, new QTableWidgetItem(QString::number(p.version())));
+		m_pProjectTable->item(i, 2)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	}
 
 	selectProject(selectedProject);
@@ -287,7 +308,7 @@ void DatabaseTabPage::refreshProjectList()
 	return;
 }
 
-void DatabaseTabPage::selectProject(const QString& projectName)
+void ProjectsTabPage::selectProject(const QString& projectName)
 {
 	assert(m_pProjectTable != nullptr);
 
@@ -311,7 +332,7 @@ void DatabaseTabPage::selectProject(const QString& projectName)
 	return;
 }
 
-void DatabaseTabPage::projectTableSelectionChanged()
+void ProjectsTabPage::projectTableSelectionChanged()
 {
 	if (m_pProjectTable == nullptr)
 	{

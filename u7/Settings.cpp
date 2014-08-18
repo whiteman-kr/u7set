@@ -1,9 +1,7 @@
 #include "Settings.h"
+#include "QStandardPaths"
 
 Settings theSettings;
-
-const QString userIniFileName = "./u7user.ini";
-const QString systemIniFileName = "./u7.ini";
 
 Settings::Settings() :
 	m_serverIpAddress("127.0.0.1"),
@@ -31,7 +29,7 @@ void Settings::load()
 
 void Settings::writeUserScope() const
 {
-	QSettings s(userIniFileName, QSettings::IniFormat);
+	QSettings s;
 
 	s.setValue("MainWindow/pos", m_mainWindowPos);
 	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
@@ -47,7 +45,7 @@ void Settings::writeUserScope() const
 }
 void Settings::loadUserScope()
 {
-	QSettings s(userIniFileName, QSettings::IniFormat);
+	QSettings s;
 
 	m_mainWindowPos = s.value("MainWindow/pos", QPoint(200, 200)).toPoint();
 	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
@@ -64,7 +62,7 @@ void Settings::loadUserScope()
 
 void Settings::writeSystemScope() const
 {
-	QSettings s(systemIniFileName, QSettings::IniFormat);
+	QSettings s;
 
 	s.setValue("m_serverIpAddress", m_serverIpAddress);
 	s.setValue("m_serverPort", m_serverPort);
@@ -75,7 +73,7 @@ void Settings::writeSystemScope() const
 }
 void Settings::loadSystemScope()
 {
-	QSettings s(systemIniFileName, QSettings::IniFormat);
+	QSettings s;
 
 	m_serverIpAddress = s.value("m_serverIpAddress", "127.0.0.1").toString();
 	m_serverPort = s.value("m_serverPort", 5432).toInt();
