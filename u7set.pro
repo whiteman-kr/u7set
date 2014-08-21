@@ -5,7 +5,9 @@ CONFIG += ordered
 win32:SUBDIRS += Protobuf
 SUBDIRS += qtservice \
     BaseService \
-    ServiceControlManager
+    ServiceControlManager \
+    UdpClient \
+    UdpServer
 SUBDIRS += VFrame30
 SUBDIRS += u7
 
