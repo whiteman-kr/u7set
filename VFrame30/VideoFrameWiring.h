@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAMEWIRING_H
-#define VIDEOFRAMEWIRING_H
+#pragma once
 
 #include "VideoFrame.h"
 
@@ -16,4 +15,4 @@ namespace VFrame30
 	};
 }
 
-#endif // VIDEOFRAMEWIRING_H
+

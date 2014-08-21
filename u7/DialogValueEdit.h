@@ -1,5 +1,4 @@
-#ifndef DIALOGVALUEEDIT_H
-#define DIALOGVALUEEDIT_H
+#pragma once
 
 #include "../include/ConfigData.h"
 
@@ -27,4 +26,3 @@ private:
     ConfigValue* m_pValue;
 };
 
-#endif // DIALOGVALUEEDIT_H

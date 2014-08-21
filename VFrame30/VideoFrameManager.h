@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAMEMANAGER_H
-#define VIDEOFRAMEMANAGER_H
+#pragma once
 
 namespace VFrame30
 {
@@ -37,4 +36,4 @@ namespace VFrame30
 
 }
 
-#endif // VIDEOFRAMEMANAGER_H
+

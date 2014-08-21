@@ -1,4 +1,5 @@
 #pragma once
+
 #include "PosConnectionImpl.h"
 
 namespace VFrame30

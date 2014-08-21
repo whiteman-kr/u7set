@@ -43,8 +43,8 @@ void VideoFrameFileView::addFile()
 // EditVideoFrameTabPage
 //
 //
-VideoFrameTabPage::VideoFrameTabPage(DbStore* dbstore, QWidget* parent) :
-	MainTabPage(dbstore, parent)
+VideoFrameTabPage::VideoFrameTabPage(DbController* dbcontroller, QWidget* parent) :
+	MainTabPage(dbcontroller, parent)
 {
 	m_tabWidget = new QTabWidget();
 	m_tabWidget->setMovable(true);
@@ -56,8 +56,8 @@ VideoFrameTabPage::VideoFrameTabPage(DbStore* dbstore, QWidget* parent) :
 
 	// --
 	//
-	connect(dbStore(), &DbStore::projectOpened, this, &VideoFrameTabPage::projectOpened);
-	connect(dbStore(), &DbStore::projectClosed, this, &VideoFrameTabPage::projectClosed);
+	//connect(dbController(), &DbStore::projectOpened, this, &VideoFrameTabPage::projectOpened);
+	//connect(dbController(), &DbStore::projectClosed, this, &VideoFrameTabPage::projectClosed);
 
 	// Evidently, project is not opened yet
 	//

@@ -1,5 +1,4 @@
-#ifndef EDITENGINEDELETEITEM_H
-#define EDITENGINEDELETEITEM_H
+#pragma once
 
 #include "EditEngine.h"
 
@@ -33,4 +32,3 @@ namespace EditEngine
 
 }
 
-#endif // EDITENGINEDELETEITEM_H

@@ -2,6 +2,45 @@
 
 //
 //
+// ProgressDialog
+//
+//
+ProgressDialog::ProgressDialog(QWidget* parent, const QString& description, DbProgress* progress) :
+	QDialog(parent),
+	m_description(description),
+	m_progress(progress)
+{
+	assert(m_progress);
+
+	setWindowTitle(description);
+
+	connect(this, &QDialog::rejected, this, &ProgressDialog::cancel);
+
+	startTimer(10);
+}
+
+void ProgressDialog::cancel()
+{
+	m_progress->setCancel(true);
+}
+
+void ProgressDialog::timerEvent(QTimerEvent*)
+{
+	assert(m_progress);
+
+	if (m_progress->completed() == true)
+	{
+		accept();
+	}
+
+	setWindowTitle(m_description + QString(" - %1%%").arg(m_progress->value()));
+
+	return;
+}
+
+
+//
+//
 //	DbProgress
 //
 //
@@ -10,15 +49,11 @@ DbProgress::DbProgress() :
 	m_completed(false),
 	m_cancel(false),
 	m_value(0),
-	m_progressDialog(nullptr)
+	m_progressEnabled(false)
 {
-	m_progressDialog = new QProgressDialog("", tr("Cancel"), 0, 0, nullptr);
-
-	m_progressDialog->setWindowModality(Qt::WindowModal);
-	m_progressDialog->setMinimumDuration(100);
 }
 
-bool DbProgress::init(QWidget* parentWidget, const QString& description, int maxValue)
+bool DbProgress::init()
 {
 	QMutexLocker l(&m_mutex);
 
@@ -29,28 +64,23 @@ bool DbProgress::init(QWidget* parentWidget, const QString& description, int max
 	m_errorMessage.clear();
 	m_completeMessage.clear();
 
-	m_progressDialog->setLabelText(description);
-	m_progressDialog->setMaximum(maxValue);
-	m_progressDialog->setValue(m_value);
-
 	return true;
 }
 
-bool DbProgress::run()
+bool DbProgress::run(QWidget* parentWidget, const QString& description)
 {
-	while (completed() == false)
+	if (m_progressEnabled == true)
 	{
-		QThread::yieldCurrentThread();
-		QCoreApplication::processEvents();
-
-		m_progressDialog->setValue(value());
-		if (m_progressDialog->wasCanceled() == true)
+		ProgressDialog progressDialog(parentWidget, description, this);
+		progressDialog.exec();
+	}
+	else
+	{
+		while (completed() == false)
 		{
-			setCancel(true);
+			QThread::yieldCurrentThread();
 		}
 	}
-
-	m_progressDialog->reset();
 
 	if (hasError() == true)
 	{
@@ -74,7 +104,6 @@ bool DbProgress::run()
 
 DbProgress::~DbProgress()
 {
-	delete m_progressDialog;
 }
 
 bool DbProgress::completed() const
@@ -134,7 +163,13 @@ QString DbProgress::errorMessage() const
 void DbProgress::setErrorMessage(const QString& value)
 {
 	QMutexLocker l(&m_mutex);
-	m_errorMessage = value;
+
+	if (m_errorMessage.isEmpty() == false)
+	{
+		m_errorMessage += "\n";
+	}
+
+	m_errorMessage += value;
 }
 
 bool DbProgress::hasError() const
@@ -153,6 +188,24 @@ void DbProgress::setCompleteMessage(const QString& value)
 {
 	QMutexLocker l(&m_mutex);
 	m_completeMessage = value;
+}
+
+void DbProgress::enableProgress()
+{
+	QMutexLocker l(&m_mutex);
+	m_progressEnabled = true;
+}
+
+void DbProgress::disableProgress()
+{
+	QMutexLocker l(&m_mutex);
+	m_progressEnabled = false;
+}
+
+bool DbProgress::isProgressEnabled()
+{
+	QMutexLocker l(&m_mutex);
+	return m_progressEnabled;
 }
 
 //

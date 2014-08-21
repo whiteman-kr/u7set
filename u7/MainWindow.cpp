@@ -5,6 +5,7 @@
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "../include/DbStore.h"
+#include "../include/DbController.h"
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
@@ -14,7 +15,7 @@
 
 #include "../VFrame30/VFrame30.h"
 
-MainWindow::MainWindow(DbStore* dbstore, QWidget* parent) :
+MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	QMainWindow(parent),
 	m_pExitAction(nullptr),
 	m_pUsersAction(nullptr),
@@ -25,9 +26,9 @@ MainWindow::MainWindow(DbStore* dbstore, QWidget* parent) :
 	m_pStatusBarInfo(nullptr),
 	m_pStatusBarConnectionStatistics(nullptr),
 	m_pStatusBarConnectionState(nullptr),
-	m_pDbStore(dbstore)
+	m_dbController(dbcontroller)
 {
-	assert(m_pDbStore);
+	assert(m_dbController);
 
 	// --
 	//
@@ -42,26 +43,26 @@ MainWindow::MainWindow(DbStore* dbstore, QWidget* parent) :
 
 	// --
 	//
-	connect(dbStore(), &DbStore::projectOpened, this, &MainWindow::projectOpened);
-	connect(dbStore(), &DbStore::projectClosed, this, &MainWindow::projectClosed);
+	connect(dbController(), &DbController::projectOpened, this, &MainWindow::projectOpened);
+	connect(dbController(), &DbController::projectClosed, this, &MainWindow::projectClosed);
 
-	//connect(dbStore(), &DbStore::error, this, &MainWindow::databaseError);
-	//connect(dbStore(), &DbStore::completed, this, &MainWindow::databaseOperationCompleted);
+	////connect(dbStore(), &DbStore::error, this, &MainWindow::databaseError);
+	////connect(dbStore(), &DbStore::completed, this, &MainWindow::databaseOperationCompleted);
 
 	//connect(centralWidget(), SIGNAL(historyChanged(bool, bool)), this, SLOT(historyChanged(bool, bool)));
 
 	// Add main tab pages
 	//
-	getCentralWidget()->addTabPage(new ProjectsTabPage(dbStore(), nullptr), tr("Projects"));
-	getCentralWidget()->addTabPage(new EquipmentTabPage(dbStore(), nullptr), tr("Hardware Configuration"));
-	getCentralWidget()->addTabPage(new FilesTabPage(dbStore(), nullptr), tr("Files"));
-	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbStore(), nullptr), tr("Modules Configurations"));
+	getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
+/*	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Hardware Configuration"));
+	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
+	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameLogic>("lvf", dbStore(), nullptr), tr("Application Logic"));
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameWiring>("wvf", dbStore(), nullptr), tr("Wiring"));
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameTech>("tvf", dbStore(), nullptr), tr("Tech Schemes"));
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameDiag>("dvf", dbStore(), nullptr), tr("Diag Schemes"));
-
+	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameLogic>("lvf", dbController(), nullptr), tr("Application Logic"));
+	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameWiring>("wvf", dbController(), nullptr), tr("Wiring"));
+	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameTech>("tvf", dbController(), nullptr), tr("Tech Schemes"));
+	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameDiag>("dvf", dbController(), nullptr), tr("Diag Schemes"));
+*/
 	// --
 	//
 	setMinimumSize(500, 300);
@@ -223,13 +224,13 @@ void MainWindow::exit()
 
 void MainWindow::userManagement()
 {
-	UserManagementDialog d(this, dbStore());
+/*	UserManagementDialog d(this, dbController());
 
 	if (d.exec() == QDialog::Accepted)
 	{
 	}
 
-	return;
+	return;*/
 }
 
 void MainWindow::showLog()
@@ -247,10 +248,10 @@ void MainWindow::showSettings()
 		theSettings = d.settings();
 		theSettings.writeSystemScope();
 
-		dbStore()->setHost(theSettings.serverIpAddress());
-		dbStore()->setPort(theSettings.serverPort());
-		dbStore()->setServerUsername(theSettings.serverUsername());
-		dbStore()->setServerPassword(theSettings.serverPassword());
+		dbController()->setHost(theSettings.serverIpAddress());
+		dbController()->setPort(theSettings.serverPort());
+		dbController()->setServerUsername(theSettings.serverUsername());
+		dbController()->setServerPassword(theSettings.serverPassword());
 
 		return;
 	}
@@ -269,12 +270,12 @@ void MainWindow::showAbout()
 
 void MainWindow::debug()
 {
-	dbStore()->debug();
+	//dbController()->debug();
 }
 
-void MainWindow::projectOpened()
+void MainWindow::projectOpened(DbProject project)
 {
-	setWindowTitle(qApp->applicationName() + QString(" - ") + dbStore()->currentProject().projectName() + QString(" - ") + dbStore()->currentUser().username());
+	setWindowTitle(qApp->applicationName() + QString(" - ") + project.projectName() + QString(" - ") + dbController()->currentUser().username());
 
 	// Action, disable/enable
 	//
@@ -336,8 +337,8 @@ void MainWindow::projectClosed()
 //	return;
 //}
 
-DbStore* MainWindow::dbStore()
+DbController* MainWindow::dbController()
 {
-	assert(m_pDbStore != nullptr);
-	return m_pDbStore;
+	assert(m_dbController != nullptr);
+	return m_dbController;
 }

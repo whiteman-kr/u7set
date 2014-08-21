@@ -1,5 +1,4 @@
-#ifndef FONTPARAM_H
-#define FONTPARAM_H
+#pragma once
 
 #define DECLARE_FONT_PROPERTIES(propname) \
 	const QString& Get##propname##Name() const; \
@@ -80,4 +79,4 @@ namespace VFrame30
 	};
 }
 
-#endif
+

@@ -1,5 +1,4 @@
-#ifndef POSCONNECTIONIMPL_H
-#define POSCONNECTIONIMPL_H
+#pragma once
 
 #include "VideoItem.h"
 #include "../include/VFrameUtils.h"
@@ -125,4 +124,4 @@ namespace VFrame30
 
 }
 
-#endif
+

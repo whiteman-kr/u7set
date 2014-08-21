@@ -1,5 +1,4 @@
-#ifndef DEVICEOBJECT_H
-#define DEVICEOBJECT_H
+#pragma once
 
 //
 //
@@ -113,5 +112,3 @@ public:
     virtual ~DeviceBlock();
 };
 
-
-#endif // DEVICEOBJECT_H

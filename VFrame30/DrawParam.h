@@ -1,5 +1,4 @@
-#ifndef DRAWPARAM_H
-#define DRAWPARAM_H
+#pragma once
 
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX		// To resolve min/max conflic "windows.h macros vs std::min/max"
@@ -54,4 +53,3 @@ namespace VFrame30
 	};
 }
 
-#endif

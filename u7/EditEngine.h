@@ -1,5 +1,4 @@
-#ifndef EDITENGINE_H
-#define EDITENGINE_H
+#pragma once
 
 #include "../VFrame30/VideoItem.h"
 
@@ -215,4 +214,3 @@ namespace EditEngine
 	};
 }
 
-#endif // EDITENGINE_H

@@ -1,5 +1,4 @@
-#ifndef VFRAME30_PB_H
-#define VFRAME30_PB_H
+#pragma once
 
 #include <QtCore/QUuid>
 #include <fstream>
@@ -343,4 +342,4 @@ namespace VFrame30
 	}
 }
 
-#endif
+

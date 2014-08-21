@@ -1,5 +1,4 @@
-#ifndef CONFIGUARTIONSTABPAGE_H
-#define CONFIGUARTIONSTABPAGE_H
+#pragma once
 
 #include "MainTabPage.h"
 #include "../include/DbStruct.h"
@@ -33,7 +32,7 @@ class ConfigurationsTabPage : public MainTabPage
 {
 	Q_OBJECT
 public:
-	ConfigurationsTabPage(DbStore* dbstore, QWidget* parent);
+	ConfigurationsTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~ConfigurationsTabPage();
 
 protected:
@@ -66,7 +65,7 @@ private:
 	ModuleConfigurationTabPage();
 
 public:
-    ModuleConfigurationTabPage(DbStore* pDbStore);
+	ModuleConfigurationTabPage(DbController* pDbController);
     virtual ~ModuleConfigurationTabPage();
 
 	// Methods
@@ -88,7 +87,7 @@ private slots:
     // Properties
 	//
 protected:
-    DbStore* dbStore();
+	DbController* dbController();
 
 public:
     const ConfigData& configData() const;
@@ -110,7 +109,7 @@ protected:
 	ConfigData m_configData;
 	bool m_readOnly;
 
-    DbStore* m_pDbStore;
+	DbController* m_dbController;
 };
 
-#endif // CONFIGUARTIONSTABPAGE_H
+

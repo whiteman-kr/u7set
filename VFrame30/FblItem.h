@@ -1,5 +1,4 @@
-#ifndef FBLITEM_H
-#define FBLITEM_H
+#pragma once
 
 #include "VideoItem.h"
 #include "Fbl.h"
@@ -206,4 +205,4 @@ namespace VFrame30
 	};
 }
 
-#endif
+

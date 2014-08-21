@@ -1,5 +1,4 @@
-#ifndef TYPESANDENUMS_H
-#define TYPESANDENUMS_H
+#pragma once
 
 namespace VFrame30
 {
@@ -29,4 +28,3 @@ namespace VFrame30
 	};
 }
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#pragma once
 
 #include "VFrame30.pb.h"
 #include "DebugInstCounter.h"
@@ -85,4 +84,3 @@ namespace VFrame30
 	};
 }
 
-#endif // CONFIGURATION_H

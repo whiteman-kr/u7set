@@ -1,8 +1,21 @@
 #include "Stable.h"
 #include "MainWindow.h"
 #include "../include/DbStore.h"
+#include "../include/DbController.h"
 #include "Settings.h"
 #include "../VFrame30/VFrame30Library.h"
+
+#if defined(Q_OS_WIN) && defined(_MSC_VER)
+	#include <vld.h>		// Enable Visula Leak Detector
+	// vld.h includes windows.h wich redefine min/max stl functions
+	#ifdef min
+		#undef min
+	#endif
+	#ifdef max
+		#undef max
+	#endif
+#endif
+
 
 int main(int argc, char *argv[])
 {
@@ -33,21 +46,23 @@ int main(int argc, char *argv[])
 
 	// Start database communication thread
 	//
-	DbStore* dbStore = DbStore::create();
+	DbController dbController;
 
-	dbStore->setHost(theSettings.serverIpAddress());
-	dbStore->setPort(theSettings.serverPort());
-	dbStore->setServerUsername(theSettings.serverUsername());
-	dbStore->setServerPassword(theSettings.serverPassword());
+	dbController.disableProgress();
+
+	dbController.setHost(theSettings.serverIpAddress());
+	dbController.setPort(theSettings.serverPort());
+	dbController.setServerUsername(theSettings.serverUsername());
+	dbController.setServerPassword(theSettings.serverPassword());
 
 	// --
 	//
-	MainWindow w(dbStore, nullptr);
+	MainWindow w(&dbController, nullptr);
     w.show();
 
-	int result = a.exec();
+	dbController.enableProgress();
 
-	dbStore->destroy();
+	int result = a.exec();
 
 	VFrame30::VFrame30Library::Shutdown();
 

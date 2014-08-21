@@ -1,5 +1,4 @@
-#ifndef DIALOGSETTINGS_H
-#define DIALOGSETTINGS_H
+#pragma once
 
 #include <QDialog>
 #include "Settings.h"
@@ -29,4 +28,4 @@ private:
 	Settings m_settings;
 };
 
-#endif // DIALOGSETTINGS_H
+

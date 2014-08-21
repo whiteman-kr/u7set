@@ -1,11 +1,10 @@
-#ifndef EQUIPMENTTABPAGE_H
-#define EQUIPMENTTABPAGE_H
+#pragma once
 
 #include "MainTabPage.h"
 #include "..\include\DeviceObject.h"
 
-class DbStore;
-
+class DbController;
+/*
 class EquipmentModel : public QAbstractItemModel
 {
 public:
@@ -48,7 +47,7 @@ class EquipmentTabPage : public MainTabPage
 	Q_OBJECT
 
 public:
-	EquipmentTabPage(DbStore* dbstore, QWidget* parent);
+	EquipmentTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~EquipmentTabPage();
 
 protected:
@@ -85,5 +84,5 @@ private:
 	QSplitter* m_splitter;
 };
 
+*/
 
-#endif // EQUIPMENTTABPAGE_H

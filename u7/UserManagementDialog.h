@@ -1,5 +1,4 @@
-#ifndef USERMANAGEMENTDIALOG_H
-#define USERMANAGEMENTDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include "../include/DbStruct.h"
@@ -60,4 +59,3 @@ private:
 	bool m_userHasChages;
 };
 
-#endif // USERMANAGEMENTDIALOG_H

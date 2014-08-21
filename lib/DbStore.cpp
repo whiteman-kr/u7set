@@ -33,6 +33,7 @@ DbStore::DbStore() :
 	qDebug() << Q_FUNC_INFO;
 
 	m_pThread = new QThread();
+	m_pThread->setObjectName("DB Communication Thread");
 
 	this->moveToThread(m_pThread);
 
@@ -90,19 +91,7 @@ DbStore::~DbStore()
 {
 	qDebug() << Q_FUNC_INFO;
 
-	// Stop thread
-	//
-	if (m_pThread != nullptr)
-	{
-		m_pThread->exit();
-		m_pThread->wait(10000);
-		m_pThread = nullptr;
-	}
-	else
-	{
-		assert(m_pThread != nullptr);
-	}
-
+	delete m_pThread;
 	return;
 }
 
@@ -114,7 +103,10 @@ DbStore* DbStore::create()
 
 void DbStore::destroy()
 {
-	deleteLater();
+	m_pThread->quit();
+	m_pThread->wait();
+
+	delete this;
 }
 
 int DbStore::databaseVersion() const
@@ -179,14 +171,12 @@ bool DbStore::getProjectList(std::vector<DbProject>* projects, QWidget* parentWi
 
 	// --
 	//
-	bool ok = initProgress(parentWidget, tr("Getting projects list"), 1);
+	bool ok = initProgress();
 	if (ok == true)
 	{
 		emit signal_getProjectList(projects);
 
-		bool result = runProgress();
-
-		qDebug() << "DbStore::getProjectList run stop";
+		bool result = runProgress(parentWidget, tr("Getting projects list"));
 		return result;
 	}
 
@@ -663,10 +653,12 @@ bool DbStore::setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWi
 
 bool DbStore::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget)
 {
+	/*
 	std::vector<std::shared_ptr<DbFile>> files;
 	files.push_back(file);
 
-	return setWorkcopy(files, parentWidget);
+	return setWorkcopy(files, parentWidget);*/
+	return false;
 }
 
 void DbStore::getLatestCopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
@@ -950,7 +942,7 @@ QSqlDatabase DbStore::projectDatabase()
 
 // Must be called from the GUI thread
 //
-bool DbStore::initProgress(QWidget* parentWidget, const QString& description, int maxValue)
+bool DbStore::initProgress()
 {
 	if (m_operationMutex.tryLock() == false)		// MUST BE UNLOCKED LATER (in DbStore::runProgress!!!)
 	{
@@ -958,14 +950,14 @@ bool DbStore::initProgress(QWidget* parentWidget, const QString& description, in
 		return false;
 	}
 
-	return m_progress.init(parentWidget, description, maxValue);
+	return m_progress.init();
 }
 
-bool DbStore::runProgress()
+bool DbStore::runProgress(QWidget* parentWidget, const QString& description)
 {
 	// Must be called from the GUI thread
 	//
-	bool result = m_progress.run();
+	bool result = m_progress.run(parentWidget, description);
 	m_operationMutex.unlock();						// WAS LOCKED IN DbStore::initProgress
 	return result;
 }

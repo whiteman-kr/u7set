@@ -1,8 +1,8 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
+#include "../include/DbStruct.h"
 
 class CentralWidget;
-class DbStore;
+class DbController;
 
 namespace Ui {
 class MainWindow;
@@ -13,7 +13,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-	MainWindow(DbStore* dbstore, QWidget* parent);
+	MainWindow(DbController* dbcontroller, QWidget* parent);
     ~MainWindow();
 
 	// Events
@@ -56,7 +56,7 @@ protected slots:
 	void debug();
 
 private slots:
-	void projectOpened();
+	void projectOpened(DbProject project);
 	void projectClosed();
 
 	//void databaseError(QString message);
@@ -65,7 +65,7 @@ private slots:
 	// Properties
 	//
 protected:
-	DbStore* dbStore();
+	DbController* dbController();
     
 	// Data
 	//
@@ -84,7 +84,6 @@ private:
 	QLabel* m_pStatusBarConnectionStatistics;
 	QLabel* m_pStatusBarConnectionState;
 
-	DbStore* m_pDbStore;
+	DbController* m_dbController;
 };
 
-#endif // MAINWINDOW_H

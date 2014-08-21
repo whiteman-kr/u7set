@@ -1,10 +1,13 @@
-#ifndef DBPROVIDER_H
-#define DBPROVIDER_H
+#pragma once
 
 #include <QObject>
 #include "DbStruct.h"
 #include "DeviceObject.h"
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////
+/////////////////////////
 class DbStore : public QObject
 {
 	Q_OBJECT
@@ -31,8 +34,8 @@ private:
 	const QString& projectConnectionName() const;
 	QSqlDatabase projectDatabase();
 
-	bool initProgress(QWidget* parentWidget, const QString& description, int maxValue);
-	bool runProgress();
+	bool initProgress();
+	bool runProgress(QWidget* parentWidget, const QString& description);
 	void emitError(const QSqlError& err);
 	void emitError(const QString& err);
 
@@ -236,4 +239,3 @@ private:
 	DbStore* m_pDbStore;
 };
 
-#endif // DBPROVIDER_H

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "PosLineImpl.h"
 
 namespace VFrame30

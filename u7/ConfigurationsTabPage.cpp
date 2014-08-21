@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "ConfigurationsTabPage.h"
-#include "../include/DbStore.h"
+#include "../include/DbController.h"
 #include "Settings.h"
 #include "../include/ConfigData.h"
 #include "ChangesetDialog.h"
@@ -39,7 +39,7 @@ void ConfigurationFileView::viewFile(std::vector<DbFileInfo> files)
 
 void ConfigurationFileView::addFile()
 {
-	// Choose Configuration file name
+/*	// Choose Configuration file name
 	//
     bool ok = false;
 
@@ -95,7 +95,7 @@ void ConfigurationFileView::addFile()
 	}
 
 	filesViewSelectionChanged(QItemSelection(), QItemSelection());
-	return;
+	return;*/
 }
 
 //
@@ -103,10 +103,10 @@ void ConfigurationFileView::addFile()
 //	ConfigurationsTabPage
 //
 //
-ConfigurationsTabPage::ConfigurationsTabPage(DbStore* dbstore, QWidget* parent) :
-	MainTabPage(dbstore, parent)
+ConfigurationsTabPage::ConfigurationsTabPage(DbController* dbcontroller, QWidget* parent) :
+	MainTabPage(dbcontroller, parent)
 {
-	assert(dbstore != nullptr);
+/*	assert(dbcontroller != nullptr);
 
 	// Create Actions
 	//
@@ -115,7 +115,7 @@ ConfigurationsTabPage::ConfigurationsTabPage(DbStore* dbstore, QWidget* parent) 
 	//
 	// Controls
 	//
-	m_filesView = new ConfigurationFileView(dbstore);
+	m_filesView = new ConfigurationFileView(dbcontroller);
 	m_tabWidget = new QTabWidget();
 
 	m_splitter = new QSplitter();
@@ -140,15 +140,15 @@ ConfigurationsTabPage::ConfigurationsTabPage(DbStore* dbstore, QWidget* parent) 
 
 	// --
 	//
-	connect(dbStore(), &DbStore::projectOpened, this, &ConfigurationsTabPage::projectOpened);
-	connect(dbStore(), &DbStore::projectClosed, this, &ConfigurationsTabPage::projectClosed);
+	connect(dbController(), &DbStore::projectOpened, this, &ConfigurationsTabPage::projectOpened);
+	connect(dbController(), &DbStore::projectClosed, this, &ConfigurationsTabPage::projectClosed);
 
 	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
 	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
 
 	// Evidently, project is not opened yet
 	//
-	this->setEnabled(false);
+	this->setEnabled(false);*/
 }
 
 ConfigurationsTabPage::~ConfigurationsTabPage()
@@ -182,7 +182,7 @@ void ConfigurationsTabPage::projectClosed()
 
 void ConfigurationsTabPage::openFiles(std::vector<DbFileInfo> files)
 {
-	if (files.empty() == true || files.size() != 1)
+/*	if (files.empty() == true || files.size() != 1)
 	{
 		assert(files.empty() == false);
 		return;
@@ -198,7 +198,7 @@ void ConfigurationsTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	if (file.state() == VcsState::CheckedOut && file.user() != dbStore()->currentUser())
+	if (file.state() == VcsState::CheckedOut && file.user() != dbController()->currentUser())
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.user().username()));
@@ -206,7 +206,7 @@ void ConfigurationsTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	assert(file.state() == VcsState::CheckedOut && file.user() == dbStore()->currentUser());
+	assert(file.state() == VcsState::CheckedOut && file.user() == dbController()->currentUser());
 
 	// Check if file already open, and activate file tab if it is
 	//
@@ -232,7 +232,7 @@ void ConfigurationsTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	bool result = dbStore()->getWorkcopy(files, &out, this);
+	bool result = dbController()->getWorkcopy(files, &out, this);
 	if (result == false || out.size() != files.size())
 	{
 		return;
@@ -240,7 +240,7 @@ void ConfigurationsTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	// Load configuration
 	//
-	ModuleConfigurationTabPage* mtb = new ModuleConfigurationTabPage(dbStore());
+	ModuleConfigurationTabPage* mtb = new ModuleConfigurationTabPage(dbController());
 
 	mtb->setReadOnly(false);
 
@@ -251,12 +251,12 @@ void ConfigurationsTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	m_tabWidget->setTabText(tabIndex, mtb->windowTitle());
 
-	return;
+	return;*/
 }
 
 void ConfigurationsTabPage::viewFiles(std::vector<DbFileInfo> files)
 {
-	if (files.empty() == true || files.size() != 1)
+/*	if (files.empty() == true || files.size() != 1)
 	{
 		assert(files.empty() == false);
 		return;
@@ -268,7 +268,7 @@ void ConfigurationsTabPage::viewFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<DbChangesetInfo> fileHistory;
 
-	dbStore()->getFileHistory(file, &fileHistory, this);
+	dbController()->getFileHistory(file, &fileHistory, this);
 
 	// Show chageset dialog
 	//
@@ -283,7 +283,7 @@ void ConfigurationsTabPage::viewFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	bool result = dbStore()->getSpecificCopy(changesetId, files, &out, this);
+	bool result = dbController()->getSpecificCopy(changesetId, files, &out, this);
 
 	if (result == false || out.size() != files.size())
 	{
@@ -292,7 +292,7 @@ void ConfigurationsTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Load configuration
 	//
-    ModuleConfigurationTabPage* mtb = new ModuleConfigurationTabPage(dbStore());
+    ModuleConfigurationTabPage* mtb = new ModuleConfigurationTabPage(dbController());
 
 	mtb->setReadOnly(true);
 
@@ -303,7 +303,7 @@ void ConfigurationsTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	m_tabWidget->setTabText(tabIndex, mtb->windowTitle());
 
-	return;
+	return;*/
 }
 
 //
@@ -317,12 +317,12 @@ ModuleConfigurationTabPage::ModuleConfigurationTabPage()
     assert(false);
 }
 
-ModuleConfigurationTabPage::ModuleConfigurationTabPage(DbStore* pDbStore) :
+ModuleConfigurationTabPage::ModuleConfigurationTabPage(DbController* pDbController) :
 	QWidget(nullptr),
     m_readOnly(false),
-    m_pDbStore(pDbStore)
+	m_dbController(pDbController)
 {
-    assert(pDbStore != nullptr);
+	assert(pDbController != nullptr);
 
     // tree
     //
@@ -427,14 +427,14 @@ void ModuleConfigurationTabPage::on_tree_doubleClicked(QModelIndex index)
 
 void ModuleConfigurationTabPage::saveFile()
 {
-    std::shared_ptr<DbFile> sp = std::make_shared<DbFile>();
+/*    std::shared_ptr<DbFile> sp = std::make_shared<DbFile>();
     save(sp.get());
 
     std::vector<std::shared_ptr<DbFile>> files;
     files.push_back(sp);
 
-    dbStore()->setWorkcopy(files, this);
-    return;
+	dbController()->setWorkcopy(files, this);
+	return;*/
 }
 
 void ModuleConfigurationTabPage::compileFile()
@@ -486,10 +486,10 @@ void ModuleConfigurationTabPage::compileFile()
 
 }*/
 
-DbStore* ModuleConfigurationTabPage::dbStore()
+DbController* ModuleConfigurationTabPage::dbController()
 {
-    assert(m_pDbStore != nullptr);
-    return m_pDbStore;
+	assert(m_dbController != nullptr);
+	return m_dbController;
 }
 
 const ConfigData& ModuleConfigurationTabPage::configData() const

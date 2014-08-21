@@ -1,5 +1,4 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 
 class Settings
 {
@@ -67,4 +66,4 @@ private:
 
 extern Settings theSettings;
 
-#endif // SETTINGS_H
+

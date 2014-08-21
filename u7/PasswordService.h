@@ -1,5 +1,4 @@
-#ifndef PASSWORDSERVICE_H
-#define PASSWORDSERVICE_H
+#pragma once
 
 class QString;
 class QWidget;
@@ -13,4 +12,3 @@ public:
 	static bool checkPassword(const QString& password, const QString& passwordConfirmation, bool showMessageBox, QWidget* parent);
 };
 
-#endif // PASSWORDSERVICE_H

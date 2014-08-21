@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "EquipmentTabPage.h"
-#include "../include/DbStore.h"
+#include "../include/DbController.h"
 #include "Settings.h"
 
 //
@@ -8,6 +8,8 @@
 // EquipmentModel
 //
 //
+
+/*
 EquipmentModel::EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent) :
 	QAbstractItemModel(parent),
 	m_root(root)
@@ -24,7 +26,7 @@ EquipmentModel::EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent
 
 //	c2->addChild(c3);
 
-    /*for (int i = 0; i < 32; i++)
+	for (int i = 0; i < 32; i++)
 	{
         auto d1 = std::make_shared<DeviceCase>();
 		d1->setCaption(QString("c1 item %1").arg(i));
@@ -52,7 +54,7 @@ EquipmentModel::EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent
 		d3->setCaption(QString("c3 item %1").arg(i));
 		c3->addChild(d3);
 	}
-*/
+
 //	m_root.addChild(c1);
 //	m_root.addChild(c2);
 }
@@ -131,7 +133,7 @@ QModelIndex EquipmentModel::parent(const QModelIndex& childIndex) const
 	}
 }
 
-int EquipmentModel::rowCount(const QModelIndex& parentIndex /*= QModelIndex()*/) const
+int EquipmentModel::rowCount(const QModelIndex& parentIndex) const
 {
 	if (parentIndex.isValid() == false)
 	{
@@ -149,12 +151,12 @@ int EquipmentModel::rowCount(const QModelIndex& parentIndex /*= QModelIndex()*/)
 	return parent->childrenCount();
 }
 
-int EquipmentModel::columnCount(const QModelIndex& /*parentIndex = QModelIndex()*/) const
+int EquipmentModel::columnCount(const QModelIndex& parentIndex) const
 {
 	return ColumnCount;		// Always the same
 }
 
-QVariant EquipmentModel::data(const QModelIndex& index, int role /*= Qt::DisplayRole*/) const
+QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 {
 	if (index.isValid() == false)
 	{
@@ -225,7 +227,7 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 	return QVariant();
 }
 
-bool EquipmentModel::hasChildren(const QModelIndex& parentIndex /*= QModelIndex()*/) const
+bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
 {
     const DeviceObject* parent = nullptr;
 
@@ -247,8 +249,8 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex /*= QModelIndex(
 // EquipmentTabPage
 //
 //
-EquipmentTabPage::EquipmentTabPage(DbStore* dbstore, QWidget* parent) :
-	MainTabPage(dbstore, parent),
+EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) :
+	MainTabPage(dbcontroller, parent),
 	m_addSystemAction(nullptr),
 	m_addCaseAction(nullptr),
 	m_addSubblockAction(nullptr),
@@ -258,7 +260,7 @@ EquipmentTabPage::EquipmentTabPage(DbStore* dbstore, QWidget* parent) :
 	m_propertyView(nullptr),
 	m_splitter(nullptr)
 {
-	assert(dbstore != nullptr);
+	assert(dbcontroller != nullptr);
 
 	// Create Actions
 	//
@@ -267,14 +269,14 @@ EquipmentTabPage::EquipmentTabPage(DbStore* dbstore, QWidget* parent) :
 	//
 	// Controls
 	//
-	m_root = std::make_shared<DeviceRoot>();
+	////m_root = std::make_shared<DeviceRoot>();
 
 	// Equipment View
 	//
 	m_equipmentView = new QTreeView();
 
-	m_equipmentModel = new EquipmentModel(m_root);
-	m_equipmentView->setModel(m_equipmentModel);
+	//m_equipmentModel = new EquipmentModel(m_root);
+	//m_equipmentView->setModel(m_equipmentModel);
 
 	// Set context menu to Equipment View
 	//
@@ -313,8 +315,8 @@ EquipmentTabPage::EquipmentTabPage(DbStore* dbstore, QWidget* parent) :
 
 	// --
 	//
-	connect(dbStore(), &DbStore::projectOpened, this, &EquipmentTabPage::projectOpened);
-	connect(dbStore(), &DbStore::projectClosed, this, &EquipmentTabPage::projectClosed);
+	connect(dbController(), &DbStore::projectOpened, this, &EquipmentTabPage::projectOpened);
+	connect(dbController(), &DbStore::projectClosed, this, &EquipmentTabPage::projectClosed);
 
 //	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
 //	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
@@ -379,7 +381,7 @@ void EquipmentTabPage::addSystem()
 	system->setStrId("STRID");
 	system->setCaption(tr("New System"));
 
-	bool result = dbStore()->addSystem(system.get(), this);
+	bool result = dbController()->addSystem(system.get(), this);
 
 	if (result == true)
 	{
@@ -405,3 +407,4 @@ void EquipmentTabPage::addBlock()
 {
 }
 
+*/

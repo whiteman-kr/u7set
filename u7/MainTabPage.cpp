@@ -1,15 +1,15 @@
 #include "MainTabPage.h"
-#include "../include/DbStore.h"
+#include "../include/DbController.h"
 
-MainTabPage::MainTabPage(DbStore* dbstore, QWidget* parent) :
+MainTabPage::MainTabPage(DbController* dbcontroller, QWidget* parent) :
 	QWidget(parent),
-	m_pDbStore(dbstore)
+	m_dbController(dbcontroller)
 {
-	assert(m_pDbStore != nullptr);
+	assert(m_dbController != nullptr);
 }
 
-DbStore* MainTabPage::dbStore()
+DbController* MainTabPage::dbController()
 {
-	assert(m_pDbStore != nullptr);
-	return m_pDbStore;
+	assert(m_dbController != nullptr);
+	return m_dbController;
 }

@@ -1,7 +1,6 @@
-#ifndef MAINTABPAGE_H
-#define MAINTABPAGE_H
+#pragma once
 
-class DbStore;
+class DbController;
 
 class MainTabPage : public QWidget
 {
@@ -10,7 +9,7 @@ class MainTabPage : public QWidget
 private:
 	MainTabPage();
 public:
-	MainTabPage(DbStore* dbstore, QWidget* parent);
+	MainTabPage(DbController* dbcontroller, QWidget* parent);
 	
 signals:
 	
@@ -19,12 +18,11 @@ public slots:
 	// Properties
 	//
 protected:
-	DbStore* dbStore();
+	DbController* dbController();
 
 	// Data
 	//
 private:
-	DbStore* m_pDbStore;
+	DbController* m_dbController;
 };
 
-#endif // MAINTABPAGE_H

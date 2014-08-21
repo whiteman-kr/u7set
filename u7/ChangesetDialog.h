@@ -1,5 +1,4 @@
-#ifndef CHANGESETDIALOG_H
-#define CHANGESETDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include "../include/DbStruct.h"
@@ -33,4 +32,3 @@ private:
 	int m_changeset;
 };
 
-#endif // CHANGESETDIALOG_H

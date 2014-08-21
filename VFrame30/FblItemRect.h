@@ -1,5 +1,4 @@
-#ifndef FBLITEMRECT_H
-#define FBLITEMRECT_H
+#pragma once
 
 #include "PosRectImpl.h"
 #include "FblItem.h"
@@ -73,4 +72,4 @@ namespace VFrame30
 	};
 }
 
-#endif
+

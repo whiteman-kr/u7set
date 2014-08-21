@@ -1,5 +1,4 @@
-#ifndef VFRAMEUTILS_H
-#define VFRAMEUTILS_H
+#pragma once
 
 #include "TypesAndEnums.h"
 
@@ -67,4 +66,4 @@ namespace VFrame30
 }
 
 
-#endif	// VFRAMEUTILS_H
+

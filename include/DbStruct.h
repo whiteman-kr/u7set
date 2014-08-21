@@ -1,5 +1,27 @@
-#ifndef DBSTRUCT_H
-#define DBSTRUCT_H
+#pragma once
+
+class DbProgress;
+
+//
+//
+// ProgressDialog
+//
+//
+class ProgressDialog : public QDialog
+{
+public:
+	ProgressDialog(QWidget* parent, const QString& description, DbProgress* progress);
+
+protected:
+	virtual void ProgressDialog::timerEvent(QTimerEvent*) override;
+
+protected slots:
+	void cancel();
+
+private:
+	QString m_description;
+	DbProgress* m_progress;
+};
 
 //
 //
@@ -12,8 +34,8 @@ public:
 	DbProgress();
 	virtual ~DbProgress();
 
-	bool init(QWidget* parentWidget, const QString& description, int maxValue);
-	bool run();
+	bool init();
+	bool run(QWidget* parentWidget, const QString& description);
 
 	bool completed() const;
 	void setCompleted(bool value);
@@ -35,6 +57,10 @@ public:
 	QString completeMessage() const;
 	void setCompleteMessage(const QString& value);
 
+	void enableProgress();
+	void disableProgress();
+	bool isProgressEnabled();
+
 private:
 	mutable QMutex m_mutex;
 
@@ -48,7 +74,7 @@ private:
 	QString m_errorMessage;			// In case of error, this variable will contain error description
 	QString m_completeMessage;		// If this field is not empty, show message box with the text
 
-	QProgressDialog* m_progressDialog;
+	bool m_progressEnabled;			// QProgressDialog is enabled
 };
 
 //
@@ -363,5 +389,3 @@ Q_DECLARE_METATYPE(std::vector<std::shared_ptr<DbFile>>)
 Q_DECLARE_METATYPE(std::vector<int>)
 Q_DECLARE_METATYPE(std::vector<DbChangesetInfo>)
 
-
-#endif // DBSTRUCT_H

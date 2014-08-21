@@ -1,5 +1,4 @@
-#ifndef CREATEUSERDIALOGDIALOG_H
-#define CREATEUSERDIALOGDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include "../include/DbStruct.h"
@@ -28,4 +27,3 @@ private:
 	DbUser m_user;
 };
 
-#endif // CREATEUSERDIALOGDIALOG_H

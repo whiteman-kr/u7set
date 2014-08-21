@@ -1,5 +1,4 @@
-#ifndef FACTORY_H
-#define FACTORY_H
+#pragma once
 
 #include <QtGlobal>
 #include <map>
@@ -61,4 +60,4 @@ private:
 	std::map<quint32, std::shared_ptr<BaseType>> factories;
 };
 
-#endif
+

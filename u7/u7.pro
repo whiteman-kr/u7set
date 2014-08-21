@@ -9,6 +9,10 @@ QT       += core gui widgets sql network
 TARGET = u7
 TEMPLATE = app
 
+win32:LIBS += -lGdi32
+
+INCLUDEPATH += $$PWD
+
 # DESTDIR
 #
 win32 {
@@ -67,7 +71,9 @@ SOURCES +=\
     EditEngineDeleteItem.cpp \
     EditEngineMoveItem.cpp \
     CheckInDialog.cpp \
-    ProjectsTabPage.cpp
+    ProjectsTabPage.cpp \
+    ../lib/DbController.cpp \
+    ../lib/DbWorker.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -100,7 +106,9 @@ HEADERS  += \
     EditEngineDeleteItem.h \
     EditEngineMoveItem.h \
     CheckInDialog.h \
-    ProjectsTabPage.h
+    ProjectsTabPage.h \
+    ../include/DbController.h \
+    ../include/DbWorker.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -153,8 +161,8 @@ DEPENDPATH += ../VFrame30
 #
 #include(../QtPropertyBrowser/src/qtpropertybrowser.pri)
 
-##protobuf
-##
+#protobuf
+#
 win32 {
 	LIBS += -L$$DESTDIR -lprotobuf
 
@@ -184,3 +192,17 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0001.sql
 
 
+# Visual Leak Detector
+#
+win32 {
+	contains(QMAKE_TARGET.arch, x86_64) {
+		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
+		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
+	} else {
+		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
+		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
+	}
+
+	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
+	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
+}

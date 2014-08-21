@@ -1,5 +1,4 @@
-#ifndef DEBUGINSTCOUNTER_H
-#define DEBUGINSTCOUNTER_H
+#pragma once
 
 #include <QtCore/QMutex>
 #include <QtCore/QDebug>
@@ -74,4 +73,3 @@ namespace VFrame30
 
 }
 
-#endif // DEBUGINSTCOUNTER_H

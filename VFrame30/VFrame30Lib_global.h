@@ -1,5 +1,4 @@
-#ifndef VFRAME30LIB_GLOBAL_H
-#define VFRAME30LIB_GLOBAL_H
+#pragma once
 
 #include <QtCore/qglobal.h>
 
@@ -9,4 +8,4 @@
     #define VFRAME30LIBSHARED_EXPORT Q_DECL_IMPORT
 #endif
 
-#endif // VFRAME30LIB_GLOBAL_H
+

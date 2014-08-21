@@ -1,5 +1,4 @@
-#ifndef LOGINDIALOG_H
-#define LOGINDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -28,4 +27,3 @@ private:
 	QString m_password;
 };
 
-#endif // LOGINDIALOG_H
