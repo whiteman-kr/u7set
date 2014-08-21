@@ -1,5 +1,4 @@
-#ifndef EDITVIDEOFRAMEWIDGET_H
-#define EDITVIDEOFRAMEWIDGET_H
+#pragma once
 
 #include "../VFrame30/VideoFrameView.h"
 #include "../VFrame30/VideoItem.h"
@@ -448,4 +447,4 @@ private:
 	// End of ConextMenu
 };
 
-#endif // EDITVIDEOFRAMEWIDGET_H
+

@@ -1,5 +1,4 @@
-#ifndef FBLITEMLINE_H
-#define FBLITEMLINE_H
+#pragma once
 
 #include "PosConnectionImpl.h"
 #include "FblItem.h"
@@ -44,5 +43,3 @@ namespace VFrame30
 		QRgb m_lineColor;
 	};
 }
-
-#endif

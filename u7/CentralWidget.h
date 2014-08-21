@@ -1,5 +1,4 @@
-#ifndef CENTRALWIDGET_H
-#define CENTRALWIDGET_H
+#pragma once
 
 class MainTabPage;
 
@@ -19,5 +18,3 @@ signals:
 public slots:
 	
 };
-
-#endif // CENTRALWIDGET_H

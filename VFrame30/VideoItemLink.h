@@ -1,4 +1,5 @@
 #pragma once
+
 #include "PosConnectionImpl.h"
 #include "FblItemLine.h"
 

@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAME_H
-#define VIDEOFRAME_H
+#pragma once
 
 #include "VideoLayer.h"
 #include "../include/TypesAndEnums.h"
@@ -119,4 +118,4 @@ namespace VFrame30
 #endif
 }
 
-#endif
+

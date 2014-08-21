@@ -1,15 +1,14 @@
-#ifndef FILESTABPAGE_H
-#define FILESTABPAGE_H
+#pragma once
 
 #include "MainTabPage.h"
-#include "../include/DbStruct.h"
+#include "../include/DbController.h"
 #include "FileView.h"
-
+/*
 class FilesTabPage : public MainTabPage
 {
 
 public:
-	FilesTabPage(DbStore* dbstore, QWidget* parent);
+	FilesTabPage(DbController* dbcontroller, QWidget* parent);
 
 protected:
 	void CreateActions();
@@ -25,5 +24,5 @@ private slots:
 private:
 	FileView* m_filesView;
 };
+*/
 
-#endif // FILESTABPAGE_H

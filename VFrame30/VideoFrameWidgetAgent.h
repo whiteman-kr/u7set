@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAMEWIDGETAGENT_H
-#define VIDEOFRAMEWIDGETAGENT_H
+#pragma once
 
 #include <QObject>
 #include <../QtScript/QScriptable>
@@ -46,4 +45,4 @@ namespace VFrame30
 
 }
 
-#endif // VIDEOFRAMEWIDGETAGENT_H
+

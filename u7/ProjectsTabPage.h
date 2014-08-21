@@ -1,18 +1,18 @@
-#ifndef DATABASETABPAGE_H
-#define DATABASETABPAGE_H
+#pragma once
 
 #include "MainTabPage.h"
 
 class QListWidget;
-class DbStore;
+class DbController;
 
 class ProjectsTabPage : public MainTabPage
 {
 public:
-	ProjectsTabPage(DbStore* dbstore, QWidget* parent);
+	ProjectsTabPage(DbController* dbcontroller, QWidget* parent);
 
 protected:
 	virtual void resizeEvent(QResizeEvent* event) override;
+	virtual void showEvent(QShowEvent* event) override;
 
 public slots:
 	void projectOpened();
@@ -43,4 +43,3 @@ private:
 	QPushButton* m_pRefreshProjectList;
 };
 
-#endif // DATABASETABPAGE_H

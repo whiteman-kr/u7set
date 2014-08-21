@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAMELOGIC_H
-#define VIDEOFRAMELOGIC_H
+#pragma once
 
 #include "VideoFrame.h"
 
@@ -22,4 +21,4 @@ namespace VFrame30
 
 }
 
-#endif // VIDEOFRAMELOGIC_H
+

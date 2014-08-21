@@ -1,16 +1,16 @@
 #include "FilesTabPage.h"
 #include "../include/DbStore.h"
-
+/*
 
 //
 //
 //	FilesTabPage
 //
 //
-FilesTabPage::FilesTabPage(DbStore* dbstore, QWidget* parent) :
-	MainTabPage(dbstore, parent)
+FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
+	MainTabPage(dbcontroller, parent)
 {
-	assert(dbstore != nullptr);
+	assert(dbcontroller != nullptr);
 
 	// Create Actions
 	//
@@ -19,7 +19,7 @@ FilesTabPage::FilesTabPage(DbStore* dbstore, QWidget* parent) :
 	//
 	// Controls
 	//
-	m_filesView = new FileView(dbstore);
+	m_filesView = new FileView(dbcontroller);
 
 	//
 	// Layouts
@@ -46,8 +46,8 @@ FilesTabPage::FilesTabPage(DbStore* dbstore, QWidget* parent) :
 
 	// --
 	//
-	connect(dbStore(), &DbStore::projectOpened, this, &FilesTabPage::projectOpened);
-	connect(dbStore(), &DbStore::projectClosed, this, &FilesTabPage::projectClosed);
+	connect(dbController(), &DbStore::projectOpened, this, &FilesTabPage::projectOpened);
+	connect(dbController(), &DbStore::projectClosed, this, &FilesTabPage::projectClosed);
 
 	// Evidently, project is not opened yet
 	//
@@ -76,3 +76,4 @@ void FilesTabPage::projectClosed()
 	return;
 }
 
+*/

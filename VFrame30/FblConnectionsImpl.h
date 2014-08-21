@@ -1,5 +1,4 @@
-#ifndef FBLCONNECTIONSIMPL_H
-#define FBLCONNECTIONSIMPL_H
+#pragma once
 
 #include "VideoItem.h"
 
@@ -171,5 +170,3 @@ namespace VFrame30
 	};	
 	*/
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef POSLINEIMPL_H
-#define POSLINEIMPL_H
+#pragma once
 
 #include "VideoItem.h"
 #include "../include/VFrameUtils.h"
@@ -124,5 +123,4 @@ namespace VFrame30
 	};
 }
 
-#endif
 

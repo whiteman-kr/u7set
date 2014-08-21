@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAMEAGENT_H
-#define VIDEOFRAMEAGENT_H
+#pragma once
 
 #include <QObject>
 
@@ -36,6 +35,3 @@ Q_DECLARE_METATYPE(VFrame30::VideoFrameAgent*)
 
 
 
-
-
-#endif // VIDEOFRAMEAGENT_H

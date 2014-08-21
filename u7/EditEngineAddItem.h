@@ -1,5 +1,4 @@
-#ifndef EDITENGINEADDITEM_H
-#define EDITENGINEADDITEM_H
+#pragma once
 
 #include "EditEngine.h"
 
@@ -26,4 +25,3 @@ namespace EditEngine
 
 }
 
-#endif // EDITENGINEADDITEM_H

@@ -1,11 +1,11 @@
 #include "Stable.h"
 #include "ProjectsTabPage.h"
-#include "../include/DbStore.h"
+#include "../include/DbController.h"
 #include "CreateProjectDialog.h"
 #include "LoginDialog.h"
 
-ProjectsTabPage::ProjectsTabPage(DbStore* dbstore, QWidget* parent) :
-	MainTabPage(dbstore, parent),
+ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
+	MainTabPage(dbcontroller, parent),
 	m_pProjectTable(nullptr),
 	m_pNewProject(nullptr),
 	m_pOpenProject(nullptr),
@@ -89,11 +89,9 @@ ProjectsTabPage::ProjectsTabPage(DbStore* dbstore, QWidget* parent) :
 
 	// --
 	//
-	connect(dbStore(), &DbStore::projectOpened, this, &ProjectsTabPage::projectOpened);
-	connect(dbStore(), &DbStore::projectClosed, this, &ProjectsTabPage::projectClosed);
+	connect(dbController(), &DbController::projectOpened, this, &ProjectsTabPage::projectOpened);
+	connect(dbController(), &DbController::projectClosed, this, &ProjectsTabPage::projectClosed);
 
-	// --
-	//
 	refreshProjectList();
 
 	return;
@@ -111,6 +109,11 @@ void ProjectsTabPage::resizeEvent(QResizeEvent* event)
 	m_pProjectTable->setColumnWidth(1, static_cast<int>(m_pProjectTable->size().width() * 0.60));
 
 	return;
+}
+
+void ProjectsTabPage::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
 }
 
 void ProjectsTabPage::projectOpened()
@@ -147,7 +150,7 @@ void ProjectsTabPage::createProject()
 		// Check "Project already exist"...
 		//
 		std::vector<DbProject> projects;
-		dbStore()->getProjectList(&projects, this);
+		dbController()->getProjectList(&projects, this);
 
 		auto findPredicate = [&projectName](const DbProject& p) -> bool
 			{
@@ -160,7 +163,7 @@ void ProjectsTabPage::createProject()
 		{
 			// Add project
 			//
-			dbStore()->createProject(projectName, administratorPassword);
+			dbController()->createProject(projectName, administratorPassword, this);
 
 			refreshProjectList();
 			selectProject(projectName);
@@ -192,21 +195,21 @@ void ProjectsTabPage::openProject()
 		return;
 	}
 
-	if (dbStore()->isProjectOpened() == true &&  dbStore()->currentProject().projectName() == projectName)
+	if (dbController()->isProjectOpened() == true &&  dbController()->currentProject().projectName() == projectName)
 	{
 		QMessageBox::information(this, tr("Open project"), tr("Project %1 is already open.").arg(projectName));
 		return;
 	}
 
-	if (dbStore()->isProjectOpened() == true)
+	if (dbController()->isProjectOpened() == true)
 	{
 		QMessageBox::information(this, tr("Open project"), tr("Another project is opened, please close it first."));
 		return;
 	}
 
 
-	int projectVersion = m_pProjectTable->item(selectedItems[0]->row(), 1)->text().toInt();
-	if (projectVersion > dbStore()->databaseVersion())
+	int projectVersion = m_pProjectTable->item(selectedItems[0]->row(), 2)->text().toInt();
+	if (projectVersion > DbController::databaseVersion())
 	{
 		QMessageBox mb(this);
 
@@ -216,7 +219,7 @@ void ProjectsTabPage::openProject()
 		return;
 	}
 
-	if (projectVersion < dbStore()->databaseVersion())
+	if (projectVersion < DbController::databaseVersion())
 	{
 		QMessageBox mb(this);
 
@@ -228,7 +231,7 @@ void ProjectsTabPage::openProject()
 		int result = mb.exec();
 		if (result == QMessageBox::Ok)
 		{
-			dbStore()->upgradeProject(projectName, this);
+			dbController()->upgradeProject(projectName, this);
 			refreshProjectList();
 		}
 
@@ -239,7 +242,7 @@ void ProjectsTabPage::openProject()
 
 	if (ld.exec() == QDialog::Accepted)
 	{
-		dbStore()->openProject(projectName, ld.username(), ld.password());
+		dbController()->openProject(projectName, ld.username(), ld.password(), this);
 	}
 
 	return;
@@ -247,13 +250,13 @@ void ProjectsTabPage::openProject()
 
 void ProjectsTabPage::closeProject()
 {
-	if (dbStore()->isProjectOpened() == false)
+	if (dbController()->isProjectOpened() == false)
 	{
-		assert(dbStore()->isProjectOpened() == true);
+		assert(dbController()->isProjectOpened() == true);
 		return;
 	}
 
-	dbStore()->closeProject();
+	dbController()->closeProject(this);
 	return;
 }
 
@@ -277,12 +280,8 @@ void ProjectsTabPage::refreshProjectList()
 
 	// Get project list from database (synchronous call)
 	//
-	qDebug() << "getProjectList start";
-
 	std::vector<DbProject> projects;
-	bool result = dbStore()->getProjectList(&projects, this);
-
-	qDebug() << "getProjectList finish";
+	bool result = dbController()->getProjectList(&projects, this);
 
 	if (result == false)
 	{
@@ -340,7 +339,7 @@ void ProjectsTabPage::projectTableSelectionChanged()
 		return;
 	}
 
-	if (dbStore()->isProjectOpened())
+	if (dbController()->isProjectOpened())
 	{
 		// Can just close the project, it was set in projectOpened slot
 		//

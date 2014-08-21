@@ -1,5 +1,4 @@
-#ifndef EDITVIDEOFRAMETABPAGE_H
-#define EDITVIDEOFRAMETABPAGE_H
+#pragma once
 
 #include "MainTabPage.h"
 #include "FileView.h"
@@ -45,13 +44,13 @@ class VideoFrameTabPage : public MainTabPage
 	Q_OBJECT
 
 private:
-	VideoFrameTabPage(DbStore* dbstore, QWidget* parent);
+	VideoFrameTabPage(DbController* dbcontroller, QWidget* parent);
 
 public:
 	virtual ~VideoFrameTabPage();
 
 	template<typename VideoFrameType>
-	static VideoFrameTabPage* create(const QString& fileExt, DbStore* dbstore, QWidget* parent);
+	static VideoFrameTabPage* create(const QString& fileExt, DbController* dbcontroller, QWidget* parent);
 
 protected:
 
@@ -74,12 +73,12 @@ protected:
 // Create MainTab!!!
 //
 template<typename VideoFrameType>
-VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbStore* dbstore, QWidget* parent)
+VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbController* dbcontroller, QWidget* parent)
 {
 	static_assert(std::is_base_of<VFrame30::CVideoFrame, VideoFrameType>::value, "Base class must be VFrame30::CVideoFrame");
-	assert(dbstore != nullptr);
+	assert(dbcontroller != nullptr);
 
-	VideoFrameTabPage* p = new VideoFrameTabPage(dbstore, parent);
+	VideoFrameTabPage* p = new VideoFrameTabPage(dbcontroller, parent);
 
 	// Create VideoFrame function, will be stored in two places, VideoFrameTabPage and VideoFrameControlTabPage
 	//
@@ -184,4 +183,3 @@ private:
 };
 
 
-#endif // EDITVIDEOFRAMETABPAGE_H

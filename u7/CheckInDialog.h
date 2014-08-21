@@ -1,5 +1,4 @@
-#ifndef CHECKINDIALOG_H
-#define CHECKINDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include "../include/DbStore.h"
@@ -29,4 +28,3 @@ private:
 	std::vector<DbFileInfo> m_files;
 };
 
-#endif // CHECKINDIALOG_H

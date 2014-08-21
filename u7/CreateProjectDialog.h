@@ -1,5 +1,4 @@
-#ifndef CREATEPROJECTDIALOG_H
-#define CREATEPROJECTDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -27,4 +26,3 @@ private:
 	Ui::CreateProjectDialog *ui;
 };
 
-#endif // CREATEPROJECTDIALOG_H

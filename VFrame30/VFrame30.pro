@@ -6,8 +6,11 @@
 TARGET = VFrame30
 
 TEMPLATE = lib
-
 QT += script widgets
+
+win32:LIBS += -lGdi32
+
+INCLUDEPATH += $$PWD
 
 # DESTDIR
 #
@@ -154,11 +157,9 @@ unix {
 	error("Couldn't find the protobuf.pri file!")
 }
 
-#Winows specific libraries
+# Visual Leak Detector
 #
 win32 {
-    LIBS += -lGdi32
-
 	contains(QMAKE_TARGET.arch, x86_64) {
 		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
 		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
@@ -167,13 +168,6 @@ win32 {
 		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
 	}
 
-}
-
-#Extra include path
-#
-win32 {
-	INCLUDEPATH += $$PWD
-    INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
+	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
-

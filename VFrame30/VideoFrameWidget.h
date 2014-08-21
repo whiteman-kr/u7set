@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAMEWIDGET_H
-#define VIDEOFRAMEWIDGET_H
+#pragma once
 
 #include "VideoFrameWidgetAgent.h"
 #include "FrameHistoryItem.h"
@@ -145,4 +144,4 @@ namespace VFrame30
 
 }
 
-#endif // VIDEOFRAMEWIDGET_H
+

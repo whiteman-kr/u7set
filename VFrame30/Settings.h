@@ -1,5 +1,4 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 
 #include "../include/TypesAndEnums.h"
 
@@ -27,4 +26,4 @@ namespace VFrame30
 	};
 }
 
-#endif
+

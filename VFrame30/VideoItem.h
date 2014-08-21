@@ -1,5 +1,4 @@
-#ifndef VIDEOITEM_H
-#define VIDEOITEM_H
+#pragma once
 
 #include "VFrame30.pb.h"
 #include "FontParam.h"
@@ -244,4 +243,4 @@ namespace VFrame30
 #endif
 }
 
-#endif // VIDEOITEM_H
+

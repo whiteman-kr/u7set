@@ -1,5 +1,4 @@
-#ifndef FBL_H
-#define FBL_H
+#pragma once
 
 #include "VFrame30.pb.h"
 #include "DebugInstCounter.h"
@@ -223,4 +222,4 @@ private:
 	};
 }
 
-#endif
+

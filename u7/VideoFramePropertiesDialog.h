@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAMEPROPERTIESDIALOG_H
-#define VIDEOFRAMEPROPERTIESDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include "../VFrame30/VFrame30.h"
@@ -25,4 +24,3 @@ private:
 	std::shared_ptr<VFrame30::CVideoFrame> m_videoFrame;
 };
 
-#endif // VIDEOFRAMEPROPERTIESDIALOG_H

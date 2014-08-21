@@ -1,5 +1,4 @@
-#ifndef VFRAME30LIB_H
-#define VFRAME30LIB_H
+#pragma once
 
 #include "VFrame30Lib_global.h"
 
@@ -17,4 +16,4 @@ namespace VFrame30
 	};
 }
 
-#endif // VFRAME30LIB_H
+

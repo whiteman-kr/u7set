@@ -1,5 +1,4 @@
-#ifndef POSRECTIMPL_H
-#define POSRECTIMPL_H
+#pragma once
 
 #include "VideoItem.h"
 #include "../include/VFrameUtils.h"
@@ -133,4 +132,4 @@ namespace VFrame30
 	};
 }
 
-#endif
+

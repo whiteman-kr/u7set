@@ -1,5 +1,4 @@
-#ifndef EDITENGINESETPOINTS_H
-#define EDITENGINESETPOINTS_H
+#pragma once
 
 #include "EditEngine.h"
 
@@ -31,4 +30,3 @@ namespace EditEngine
 
 }
 
-#endif // EDITENGINESETPOINTS_H

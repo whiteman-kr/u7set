@@ -1,5 +1,4 @@
-#ifndef HORZVERTLINKS_H
-#define HORZVERTLINKS_H
+#pragma once
 
 #include "VideoItem.h"
 
@@ -53,4 +52,4 @@ namespace VFrame30
 	};
 }
 
-#endif
+

@@ -1,5 +1,4 @@
-#ifndef STFAFX_H
-#define STFAFX_H
+#pragma once
 
 // VFrame30 Library
 //
@@ -69,4 +68,3 @@
 	#pragma warning(disable : 4482)
 #endif
 
-#endif	// STFAFX_H

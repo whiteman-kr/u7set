@@ -1,5 +1,4 @@
-#ifndef FILEVIEW_H
-#define FILEVIEW_H
+#pragma once
 
 #include <QTableView>
 #include "../include/DbStruct.h"
@@ -145,4 +144,3 @@ protected:
 	// End of ConextMenu
 };
 
-#endif // FILEVIEW_H

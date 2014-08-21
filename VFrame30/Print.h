@@ -1,5 +1,4 @@
-#ifndef PRINT_H
-#define PRINT_H
+#pragma once
 
 #include "VideoFrame.h"
 
@@ -21,5 +20,3 @@ namespace VFrame30
 
 
 }
-
-#endif

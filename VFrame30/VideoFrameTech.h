@@ -1,5 +1,4 @@
-#ifndef VIDEOFRAMETECH_H
-#define VIDEOFRAMETECH_H
+#pragma once
 
 #include "VideoFrame.h"
 
@@ -17,4 +16,4 @@ namespace VFrame30
 	};
 }
 
-#endif // VIDEOFRAMETECH_H
+

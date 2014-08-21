@@ -1,5 +1,4 @@
-#ifndef VFRAME30_H
-#define VFRAME30_H
+#pragma once
 
 // Project stable includes
 //
@@ -14,4 +13,4 @@
 #include "VideoFrameDiag.h"
 #include "VideoFrameWiring.h"
 
-#endif // VFRAME30_H
+

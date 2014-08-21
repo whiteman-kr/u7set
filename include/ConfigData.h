@@ -1,5 +1,4 @@
-#ifndef CCONFIGDATA_H
-#define CCONFIGDATA_H
+#pragma once
 
 #include "DbStruct.h"
 
@@ -355,4 +354,3 @@ private:
 
 Q_DECLARE_METATYPE(ConfigDataReader)
 
-#endif // CCONFIGDATA_H

@@ -1,5 +1,4 @@
-#ifndef FRAMEHISTORYITEM_H
-#define FRAMEHISTORYITEM_H
+#pragma once
 
 namespace VFrame30
 {
@@ -38,4 +37,4 @@ namespace VFrame30
 	};
 }
 
-#endif // FRAMEHISTORYITEM_H
+#pragma once
