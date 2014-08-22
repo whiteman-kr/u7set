@@ -19,10 +19,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     BaseService.cpp \
-    UdpSocket.cpp
+    ../lib/UdpSocket.cpp
 
 HEADERS += \
     BaseService.h \
-    UdpSocket.h
+    ../include/SocketIO.h \
+    ../include/UdpSocket.h
 
 include(../qtservice/src/qtservice.pri)

@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QDebug>
 #include "../qtservice/src/qtservice.h"
-#include "UdpSocket.h"
+#include "../include/UdpSocket.h"
 
 
 class MainWorker : public QObject
