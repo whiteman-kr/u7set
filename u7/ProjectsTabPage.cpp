@@ -57,6 +57,7 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_pNewProject, &QPushButton::clicked, this, &ProjectsTabPage::createProject);
 	connect(m_pOpenProject, &QPushButton::clicked, this, &ProjectsTabPage::openProject);
 	connect(m_pCloseProject, &QPushButton::clicked, this, &ProjectsTabPage::closeProject);
+	connect(m_pDeleteProject, &QPushButton::clicked, this, &ProjectsTabPage::deleteProject);
 	connect(m_pRefreshProjectList, &QPushButton::clicked, this, &ProjectsTabPage::refreshProjectList);
 
 	//
@@ -183,7 +184,6 @@ void ProjectsTabPage::createProject()
 void ProjectsTabPage::openProject()
 {
 	QList<QTableWidgetItem*> selectedItems = m_pProjectTable->selectedItems();
-
 	if (selectedItems.size() == 0 || selectedItems[0]->column() != 0)
 	{
 		return;
@@ -229,11 +229,29 @@ void ProjectsTabPage::openProject()
 		mb.setDefaultButton(QMessageBox::Ok);
 
 		int result = mb.exec();
-		if (result == QMessageBox::Ok)
+		if (result == QMessageBox::Cancel)
 		{
-			dbController()->upgradeProject(projectName, this);
-			refreshProjectList();
+			return;
 		}
+
+		// Ask for Administartor's password
+		//
+		bool ok = false;
+
+		QString password = QInputDialog::getText(this,
+			tr("Delete project"),
+			tr("Please, enter Administrator's password for project %1:").arg(projectName),
+			QLineEdit::Password,
+			QString(), &ok);
+
+		if (ok == false)
+		{
+			return;
+		}
+
+
+		dbController()->upgradeProject(projectName, password, this);
+		refreshProjectList();
 
 		return;
 	}
@@ -257,6 +275,62 @@ void ProjectsTabPage::closeProject()
 	}
 
 	dbController()->closeProject(this);
+	return;
+}
+
+void ProjectsTabPage::deleteProject()
+{
+	QList<QTableWidgetItem*> selectedItems = m_pProjectTable->selectedItems();
+	if (selectedItems.size() == 0 || selectedItems[0]->column() != 0)
+	{
+		return;
+	}
+
+	QString projectName = selectedItems[0]->text();
+	if (projectName.isEmpty())
+	{
+		return;
+	}
+
+	if (dbController()->isProjectOpened() == true)
+	{
+		QMessageBox msgBox;
+		msgBox.setText(tr("You can not delete project while any is open. Please, close the project first."));
+		msgBox.exec();
+		return;
+	}
+
+	QMessageBox msgBox;
+	msgBox.setText(tr("Deleting project %1.").arg(projectName));
+	msgBox.setInformativeText(tr("Do you want to delete project %1 and lost all data?").arg(projectName));
+	msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+	msgBox.setDefaultButton(QMessageBox::Cancel);
+	msgBox.setIcon(QMessageBox::Critical);
+	int ret = msgBox.exec();
+
+	if (ret == QMessageBox::Cancel)
+	{
+		return;
+	}
+
+	// Ask for Administrator's password
+	//
+	bool ok = false;
+
+	QString password = QInputDialog::getText(this,
+		tr("Delete project"),
+		tr("Please, enter Administrator's password for project %1:").arg(projectName),
+		QLineEdit::Password,
+		QString(), &ok);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	dbController()->deleteProject(projectName, password, this);
+
+	refreshProjectList();
 	return;
 }
 

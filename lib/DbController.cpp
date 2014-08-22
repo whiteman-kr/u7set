@@ -22,6 +22,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_createProject, m_worker, &DbWorker::slot_createProject);
 	connect(this, &DbController::signal_openProject, m_worker, &DbWorker::slot_openProject);
 	connect(this, &DbController::signal_closeProject, m_worker, &DbWorker::slot_closeProject);
+	connect(this, &DbController::signal_deleteProject, m_worker, &DbWorker::slot_deleteProject);
 	connect(this, &DbController::signal_upgradeProject, m_worker, &DbWorker::slot_upgradeProject);
 
 	m_thread.start();
@@ -146,16 +147,17 @@ bool DbController::closeProject(QWidget* parentWidget)
 	return result;
 }
 
-bool DbController::upgradeProject(const QString& projectName, QWidget* parentWidget)
+bool DbController::deleteProject(const QString& projectName, const QString& password, QWidget* parentWidget)
 {
 	// Check parameters
 	//
-	return false;
-	/*if (projectName.isEmpty())
+	if (projectName.isEmpty() || password.isEmpty())
 	{
 		assert(projectName.isEmpty() == false);
+		assert(password.isEmpty() == false);
 		return false;
 	}
+
 
 	// Init progress and check availability
 	//
@@ -167,16 +169,38 @@ bool DbController::upgradeProject(const QString& projectName, QWidget* parentWid
 
 	// Emit signal end wait for complete
 	//
-	emit signal_closeProject();
+	emit signal_deleteProject(projectName, password);
 
-	bool result = waitForComplete(parentWidget, tr("Closing project"));
+	bool result = waitForComplete(parentWidget, tr("Deleting project"));
+	return result;
+}
 
-	if (result == true)
+bool DbController::upgradeProject(const QString& projectName, const QString& password, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (projectName.isEmpty() || password.isEmpty())
 	{
-		emit projectClosed();
+		assert(projectName.isEmpty() == false);
+		assert(password.isEmpty() == false);
+		return false;
 	}
 
-	return result;*/
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_upgradeProject(projectName, password);
+
+	bool result = waitForComplete(parentWidget, tr("Upgrading project"));
+	return result;
 }
 
 // Must be called from the GUI thread

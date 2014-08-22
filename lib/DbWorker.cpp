@@ -189,7 +189,7 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 
 		QSqlQuery query(db);
 
-		bool result = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7_%' OR datname LIKE 'U7_%';");
+		bool result = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7\\_%' OR datname LIKE 'U7\\_%';");
 
 		if (result == false)
 		{
@@ -301,9 +301,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 
 	std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
 		{
-			qDebug() << postgresConnectionName() << "S";
 			QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
-			qDebug() << postgresConnectionName() << "F";
 		});
 
 	{
@@ -626,9 +624,380 @@ void DbWorker::slot_closeProject()
 	return;
 }
 
-void DbWorker::slot_upgradeProject(const QString databaseName)
+void DbWorker::slot_deleteProject(QString projectName, QString password)
 {
-	assert(false);
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	projectName = projectName.trimmed();
+	QString username = "Administrator";
+
+	if (projectName.isEmpty() || username.isEmpty() || password.isEmpty())
+	{
+		assert(projectName.isEmpty() == false);
+		assert(password.isEmpty() == false);
+		return;
+	}
+
+	// Check password for Administrator
+	//
+	projectName = projectName.trimmed();
+	QString databaseName = "u7_" + projectName.toLower();
+	username = username.trimmed();
+
+	// Open database, removeDatabase will be called in slot_closeProject()
+	//
+	{
+		std::shared_ptr<int*> removeNewDatabase(nullptr, [this](void*)
+		{
+			QSqlDatabase::removeDatabase(projectConnectionName());		// remove database
+		});
+
+		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", projectConnectionName());
+
+		db.setHostName(host());
+		db.setPort(port());
+		db.setDatabaseName(databaseName);
+		db.setUserName(serverUsername());
+		db.setPassword(serverPassword());
+
+		bool result = db.open();
+		if (result == false)
+		{
+			emitError(db.lastError());
+			return;
+		}
+
+		result = db_checkUserPassword(db, username, password);
+		if (result == false)
+		{
+			emitError("Wrong password.");
+			db.close();
+			return;
+		}
+	}
+
+	// Rename project from the template u7_[projectname] to u7deleted_[projectname]
+	//
+	std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
+		{
+			QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
+		});
+
+	{
+		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
+		if (db.lastError().isValid() == true)
+		{
+			emitError(db.lastError());
+			return;
+		}
+
+		db.setHostName(host());
+		db.setPort(port());
+		db.setDatabaseName("postgres");
+		db.setUserName(serverUsername());
+		db.setPassword(serverPassword());
+
+		bool ok = db.open();
+		if (ok == false)
+		{
+			emitError(db.lastError());
+			return;
+		}
+
+		QSqlQuery query(db);
+		QString createDatabaseSql = QString("ALTER DATABASE %1 RENAME TO u7deleted_%2;").arg(databaseName).arg(projectName.toLower());
+
+		bool result = query.exec(createDatabaseSql);
+
+		if (result == false)
+		{
+			emitError(query.lastError());
+			db.close();
+			return;
+		}
+
+		db.close();
+	}
+
+	// --
+	//
+	setCurrentProject(DbProject());
+	setCurrentUser(DbUser());
+
+	return;
+}
+
+void DbWorker::slot_upgradeProject(QString projectName, QString password)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			qDebug() << "SetCompleted()";
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	projectName = projectName.trimmed();
+	QString username = "Administrator";
+
+	if (projectName.isEmpty() || username.isEmpty() || password.isEmpty())
+	{
+		assert(projectName.isEmpty() == false);
+		assert(password.isEmpty() == false);
+		return;
+	}
+
+	// Check password for Administrator
+	//
+	projectName = projectName.trimmed();
+	QString databaseName = "u7_" + projectName.toLower();
+	username = username.trimmed();
+
+	// Open database, removeDatabase will be called in slot_closeProject()
+	//
+
+	int projectVersion = 0;
+
+	{
+		std::shared_ptr<int*> removeNewDatabase(nullptr, [this](void*)
+		{
+			QSqlDatabase::removeDatabase(projectConnectionName());		// remove database
+		});
+
+		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", projectConnectionName());
+
+		db.setHostName(host());
+		db.setPort(port());
+		db.setDatabaseName(databaseName);
+		db.setUserName(serverUsername());
+		db.setPassword(serverPassword());
+
+		bool result = db.open();
+		if (result == false)
+		{
+			emitError(db.lastError());
+			return;
+		}
+
+		projectVersion = db_getProjectVersion(db);
+		if (projectVersion == -1)
+		{
+			emitError("Cannot get project database version.");
+			db.close();
+			return;
+		}
+
+		result = db_checkUserPassword(db, username, password);
+		if (result == false)
+		{
+			emitError("Wrong password.");
+			db.close();
+			return;
+		}
+	}
+
+	// Copy project from the template u7_[projectname] to u7upgrade[oldversion]_[projectname]
+	//
+	{
+		std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
+			{
+				QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
+			});
+
+		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
+		if (db.lastError().isValid() == true)
+		{
+			emitError(db.lastError());
+			return;
+		}
+
+		db.setHostName(host());
+		db.setPort(port());
+		db.setDatabaseName("postgres");
+		db.setUserName(serverUsername());
+		db.setPassword(serverPassword());
+
+		bool ok = db.open();
+		if (ok == false)
+		{
+			emitError(db.lastError());
+			return;
+		}
+
+		QSqlQuery query(db);
+		QString copyDatabaseSql =
+			QString("CREATE DATABASE u7upgrade%1_%2 WITH TEMPLATE %3 OWNER %4;")
+				.arg(projectVersion)
+				.arg(projectName.toLower())
+				.arg(databaseName)
+				.arg(serverUsername());
+
+		bool result = query.exec(copyDatabaseSql);
+
+		if (result == false)
+		{
+			emitError(query.lastError());
+			db.close();
+			return;
+		}
+
+		db.close();
+	}
+
+	// Upgrade
+	//
+	{
+		std::shared_ptr<int*> removeNewDatabase(nullptr, [this](void*)
+		{
+			QSqlDatabase::removeDatabase(projectConnectionName());		// remove database
+		});
+
+		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", projectConnectionName());
+
+		db.setHostName(host());
+		db.setPort(port());
+		db.setDatabaseName(databaseName);
+		db.setUserName(serverUsername());
+		db.setPassword(serverPassword());
+
+		bool result = db.open();
+		if (result == false)
+		{
+			emitError(db.lastError());
+			return;
+		}
+
+		// Start transaction
+		//
+		result = db.transaction();
+		if (result == false)
+		{
+			emitError(db.lastError());
+			db.close();
+			return;
+		}
+
+		{
+			std::shared_ptr<int*> closeDb(nullptr, [&db, &result](void*)
+			{
+				if (result == true)
+				{
+					qDebug() << "Upgrade: Commit changes.";
+					db.commit();
+				}
+				else
+				{
+					qDebug() << "Upgrade: Rollback changes.";
+					db.rollback();
+				}
+
+				db.close();
+			});
+
+			// Get project version, check it
+			//
+
+			// Lock Version table
+			// LOCK TABLE "Version" IN ACCESS EXCLUSIVE MODE NOWAIT;
+			//
+			QSqlQuery versionQuery(db);
+			result = versionQuery.exec("LOCK TABLE \"Version\" IN ACCESS EXCLUSIVE MODE NOWAIT;");
+
+			if (result == false)
+			{
+				emitError(versionQuery.lastError());
+				return;
+			}
+			versionQuery.clear();
+
+			projectVersion = db_getProjectVersion(db);
+			if (projectVersion == -1)
+			{
+				emitError(versionQuery.lastError());
+				return;
+			}
+
+			// Some checks
+			//
+			if (projectVersion == databaseVersion())
+			{
+				emitError(tr("Database %1 is up to date.").arg(databaseName));
+				return;
+			}
+
+			if (projectVersion > databaseVersion())
+			{
+				emitError(tr("Database %1 is newer than the software version.").arg(databaseName));
+				return;
+			}
+
+			// Upgrade database
+			//
+			for (int i = projectVersion; i < databaseVersion(); i++)
+			{
+				m_progress->setValue(static_cast<int>(100.0 / (databaseVersion() - projectVersion) * (i - projectVersion)));
+
+				const UpgradeItem& ui = upgradeItems[i];
+
+				// Perform upgade action
+				//
+				QFile upgradeFile(ui.upgradeFileName);
+
+				result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
+
+				if (result == false)
+				{
+					emitError(tr("Can't open file %1. \n%2").arg(ui.upgradeFileName).arg(upgradeFile.errorString()));
+					break;
+				}
+
+				QString upgradeScript = upgradeFile.readAll();
+
+				// Run upgrade script
+				//
+				{
+					QSqlQuery upgradeQuery(db);
+
+					result = upgradeQuery.exec(upgradeScript);
+
+					if (result == false)
+					{
+						emitError(upgradeQuery.lastError());
+						break;
+					}
+				}
+
+				// Add record to Version table
+				//
+				{
+					QString addVersionRecord = QString(
+						"INSERT INTO \"Version\" (\"VersionNo\", \"Reasone\")"
+						"VALUES (%1, '%2');").arg(i + 1).arg(ui.text);
+
+					QSqlQuery versionQuery(db);
+
+					result = versionQuery.exec(addVersionRecord);
+
+					if (result == false)
+					{
+						emitError(versionQuery.lastError());
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return;
 }
 
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
@@ -672,6 +1041,90 @@ bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 	user->setDisabled(query.value("Disabled").toBool());
 
 	return true;
+}
+
+bool DbWorker::db_checkUserPassword(QSqlDatabase db, QString username, QString password)
+{
+	if (db.isOpen() == false)
+	{
+		return false;
+	}
+
+	int projectVersion = db_getProjectVersion(db);
+
+	if (projectVersion == -1)
+	{
+		return false;
+	}
+
+	if (projectVersion < 4)		// Since version 4 database has stored procedure GetUserID
+	{
+		// Check by query
+		//
+		QSqlQuery query(db);
+
+		bool result = query.exec(
+			QString("SELECT \"UserID\" FROM \"User\" WHERE \"Username\"='%1' AND \"Password\"='%2'").arg(username).arg(password));
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (query.next() == false)
+		{
+			return false;
+		}
+	}
+	else
+	{
+		// Check by store function
+		//
+		QSqlQuery query(db);
+		bool result = query.exec(QString("SELECT \"GetUserID\"('%1', '%2');").arg(username).arg(password));
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (query.next() == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+int DbWorker::db_getProjectVersion(QSqlDatabase db)
+{
+	if (db.isOpen() == false)
+	{
+		return -1;
+	}
+
+	QString createVersionTableSql = QString("SELECT max(\"VersionNo\") FROM \"Version\";");
+
+	QSqlQuery versionQuery(db);
+	bool result = versionQuery.exec(createVersionTableSql);
+
+	if (result == false)
+	{
+		emitError(versionQuery.lastError());
+		versionQuery.clear();
+		return -1;
+	}
+
+	if (versionQuery.next())
+	{
+		int projectVersion = versionQuery.value(0).toInt();
+		return projectVersion;
+	}
+	else
+	{
+		return -1;
+	}
 }
 
 const QString& DbWorker::host() const

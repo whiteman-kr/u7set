@@ -26,14 +26,16 @@ public:
 	bool createProject(const QString& projectName, const QString& administratorPassword, QWidget* parentWidget);
 	bool openProject(const QString& projectName, const QString& username, const QString& password, QWidget* parentWidget);
 	bool closeProject(QWidget* parentWidget);
-	bool upgradeProject(const QString& projectName, QWidget* parentWidget);
+	bool deleteProject(const QString& projectName, const QString& password, QWidget* parentWidget);
+	bool upgradeProject(const QString& projectName, const QString& password, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
 	void signal_openProject(QString projectName, QString username, QString password);
 	void signal_closeProject();
-	void signal_upgradeProject(QString databaseName);
+	void signal_deleteProject(QString projectName, QString password);
+	void signal_upgradeProject(QString projectName, QString password);
 
 	//
 	// Service functions

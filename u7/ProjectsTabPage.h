@@ -22,6 +22,7 @@ private slots:
 	void createProject();
 	void openProject();
 	void closeProject();
+	void deleteProject();
 	void refreshProjectList();
 	void selectProject(const QString &projectName);
 

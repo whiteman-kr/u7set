@@ -44,9 +44,12 @@ public slots:
 	void slot_createProject(QString projectName, QString administratorPassword);
 	void slot_openProject(QString projectName, QString username, QString password);
 	void slot_closeProject();
-	void slot_upgradeProject(const QString databaseName);
+	void slot_deleteProject(QString projectName, QString password);
+	void slot_upgradeProject(QString projectName, QString password);
 
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
+	bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
+	int db_getProjectVersion(QSqlDatabase db);
 
 	// Properties
 	//
