@@ -224,13 +224,13 @@ void MainWindow::exit()
 
 void MainWindow::userManagement()
 {
-/*	UserManagementDialog d(this, dbController());
+	UserManagementDialog d(this, dbController());
 
 	if (d.exec() == QDialog::Accepted)
 	{
 	}
 
-	return;*/
+	return;
 }
 
 void MainWindow::showLog()

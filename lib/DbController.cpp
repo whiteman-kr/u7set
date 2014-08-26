@@ -25,6 +25,10 @@ DbController::DbController() :
 	connect(this, &DbController::signal_deleteProject, m_worker, &DbWorker::slot_deleteProject);
 	connect(this, &DbController::signal_upgradeProject, m_worker, &DbWorker::slot_upgradeProject);
 
+	connect(this, &DbController::signal_createUser, m_worker, &DbWorker::slot_createUser);
+	connect(this, &DbController::signal_updateUser, m_worker, &DbWorker::slot_updateUser);
+	connect(this, &DbController::signal_getUserList, m_worker, &DbWorker::slot_getUserList);
+
 	m_thread.start();
 }
 
@@ -202,6 +206,85 @@ bool DbController::upgradeProject(const QString& projectName, const QString& pas
 	bool result = waitForComplete(parentWidget, tr("Upgrading project"));
 	return result;
 }
+
+bool DbController::createUser(const DbUser& user, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (user.username().isEmpty() == true)
+	{
+		assert(user.username().isEmpty() == false);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_createUser(user);
+
+	bool result = waitForComplete(parentWidget, tr("Creating user"));
+	return result;
+}
+
+bool DbController::updateUser(const DbUser& user, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (user.username().isEmpty() == true)
+	{
+		assert(user.username().isEmpty() == false);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_updateUser(user);
+
+	bool result = waitForComplete(parentWidget, tr("Updating user profile"));
+	return result;
+}
+
+bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getUserList(out);
+
+	bool result = waitForComplete(parentWidget, tr("Getting user list"));
+	return result;
+}
+
 
 // Must be called from the GUI thread
 //

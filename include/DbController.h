@@ -22,12 +22,21 @@ signals:
 	// Operations on Project Database
 	//
 public:
+
+	// Project Management
+	//
 	bool getProjectList(std::vector<DbProject>* out, QWidget* parentWidget);
 	bool createProject(const QString& projectName, const QString& administratorPassword, QWidget* parentWidget);
 	bool openProject(const QString& projectName, const QString& username, const QString& password, QWidget* parentWidget);
 	bool closeProject(QWidget* parentWidget);
 	bool deleteProject(const QString& projectName, const QString& password, QWidget* parentWidget);
 	bool upgradeProject(const QString& projectName, const QString& password, QWidget* parentWidget);
+
+	// User management
+	//
+	bool createUser(const DbUser& user, QWidget* parentWidget);
+	bool updateUser(const DbUser& user, QWidget* parentWidget);
+	bool getUserList(std::vector<DbUser>* out, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
@@ -36,6 +45,10 @@ signals:
 	void signal_closeProject();
 	void signal_deleteProject(QString projectName, QString password);
 	void signal_upgradeProject(QString projectName, QString password);
+
+	void signal_createUser(DbUser user);
+	void signal_updateUser(DbUser user);
+	void signal_getUserList(std::vector<DbUser>* out);
 
 	//
 	// Service functions

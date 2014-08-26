@@ -7,14 +7,14 @@ namespace Ui {
 	class UserManagementDialog;
 }
 
-class DbStore;
+class DbController;
 
 class UserManagementDialog : public QDialog
 {
 	Q_OBJECT
 	
 public:
-	explicit UserManagementDialog(QWidget* parent, DbStore* dbStore);
+	explicit UserManagementDialog(QWidget* parent, DbController* dbController);
 	~UserManagementDialog();
 
 private:
@@ -47,11 +47,11 @@ private slots:
 	void on_buttonBox_clicked(QAbstractButton *button);
 
 private:
-	DbStore* dbStore();
+	DbController* dbController();
 
 private:
 	Ui::UserManagementDialog* ui;
-	DbStore* m_dbStore;
+	DbController* m_dbController;
 
 	DbUser m_currentUser;
 	std::vector<DbUser> m_users;

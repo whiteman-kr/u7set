@@ -1000,6 +1000,339 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 	return;
 }
 
+void DbWorker::slot_createUser(DbUser user)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (user.username().isEmpty() == true)
+	{
+		assert(user.username().isEmpty() == false);
+		return;
+	}
+
+	// Operation
+	//
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get user list. Database connection is not openned."));
+		return;
+	}
+
+	if (currentUser().isAdminstrator() == false)
+	{
+		emitError(tr("Current user does not have administrator privileges."));
+		return;
+	}
+
+	// Start transaction
+	//
+	bool result = db.transaction();
+
+	if (result == false)
+	{
+		emitError(db.lastError());
+		return;
+	}
+
+	{
+		std::shared_ptr<int*> finishTransaction(nullptr, [this, &db, &result](void*)
+		{
+			if (result == true)
+			{
+				qDebug() << "CreateUser: Commit changes.";
+				result = db.commit();
+				if (result == false)
+				{
+					emitError(db.lastError());
+				}
+			}
+			else
+			{
+				qDebug() << "CreateUser: Rollback changes.";
+				db.rollback();
+			}
+			});
+
+
+		// Check if such user already exists
+		// SELECT "UserID" FROM "User" WHERE "Username"='Administrator';
+		//
+		QSqlQuery query(db);
+		result = query.exec(QString("SELECT \"UserID\" FROM \"User\" WHERE \"Username\"='%1';").arg(user.username()));
+
+		if (result == false)
+		{
+			emitError(tr("Can't create user %1, error: %2").arg(user.username()).arg(db.lastError().text()));
+			return;
+		}
+
+		if (query.size() > 0)
+		{
+			result = query.next();
+			assert(result);
+
+			int userID = query.value("UserID").toInt();
+
+			if (userID != 0)
+			{
+				emitError(tr("User %1 already exists").arg(user.username()));
+				return;
+			}
+		}
+
+		// Create User
+		// INSERT INTO "User"("Username", "FirstName", "LastName", "Password", "Administrator", "ReadOnly", "Disabled")
+		//		VALUES (:username, :firstName, :lastName, :password, :administrator, :readonly, :disabled);
+		//
+
+		query.prepare("INSERT INTO \"User\"(\"Username\", \"FirstName\", \"LastName\", \"Password\", \"Administrator\", \"ReadOnly\", \"Disabled\") "
+					  "VALUES (:username, :firstName, :lastName, :password, :administrator, :readonly, :disabled);");
+
+		query.bindValue(":username", user.username());
+		query.bindValue(":firstName", user.firstName());
+		query.bindValue(":lastName", user.lastName());
+		query.bindValue(":password", user.newPassword());
+		query.bindValue(":administrator", user.isAdminstrator());
+		query.bindValue(":readonly", user.isReadonly());
+		query.bindValue(":disabled", user.isDisabled());
+
+		result = query.exec();
+
+		if (result == false)
+		{
+			emitError(tr("Create user error: %1").arg(query.lastError().text()));
+			return;
+		}
+	}	// commit will happen here, by auto variable finishTransaction
+
+
+	return;
+}
+
+void DbWorker::slot_updateUser(DbUser user)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (user.username().isEmpty() == true)
+	{
+		assert(user.username().isEmpty() == false);
+		return;
+	}
+
+	// Operation
+	//
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get user list. Database connection is not openned."));
+		return;
+	}
+
+	if (currentUser().username() != user.username() && currentUser().isAdminstrator() == false)
+	{
+		assert(false);
+		emitError(tr("Only administrators can change other users' details."));
+		return;
+	}
+
+
+	// Start transaction
+	//
+	bool result = db.transaction();
+
+	if (result == false)
+	{
+		emitError(db.lastError());
+		return;
+	}
+
+	// Operation
+	//
+	{
+		std::shared_ptr<int*> finishTransaction(nullptr, [this, &db, &result](void*)
+		{
+			if (result == true)
+			{
+				qDebug() << "UpdateUser: Commit changes.";
+				result = db.commit();
+				if (result == false)
+				{
+					emitError(db.lastError());
+				}
+			}
+			else
+			{
+				qDebug() << "UpdateUser: Rollback changes.";
+				db.rollback();
+			}
+			});
+
+		// Check if such user already exists
+		// SELECT "UserID", "Password" FROM "User" WHERE "Username"=user.username();
+		//
+		QSqlQuery query(db);
+		result = query.exec(QString("SELECT \"UserID\", \"Password\" FROM \"User\" WHERE \"Username\"='%1';").arg(user.username()));
+
+		if (result == false || query.size() != 1)
+		{
+			emitError(tr("Can't update user data, error: %1").arg(db.lastError().text()));
+			result = false;
+			return;
+		}
+
+		result = query.next();
+		assert(result);
+
+		int userID = query.value("UserID").toInt();
+		QString password = query.value("Password").toString();
+
+		if (userID == 0)
+		{
+			emitError(tr("User %1 is not exists").arg(user.username()));
+			result = false;
+			return;
+		}
+
+		bool updatePassword = false;
+
+		if (user.newPassword().isEmpty() == false)
+		{
+			if (user.password() != password)
+			{
+				emitError(tr("Wrong old password."));
+				result = false;
+				return;
+			}
+			else
+			{
+				updatePassword = true;
+			}
+		}
+
+		// Update User request
+		// UPDATE "User"
+		//		SET "UserID"=?, "Date"=?, "Username"=?, "FirstName"=?, "LastName"=?,
+		//		"Password"=?, "Administrator"=?, "ReadOnly"=?, "Disabled"=?
+		//		WHERE <condition>;
+
+		QString updateQurery;
+
+		if (updatePassword == true)
+		{
+			updateQurery = QString(
+				"UPDATE \"User\" "
+					"SET \"FirstName\"='%1', \"LastName\"='%2', \"Password\"='%3', "
+					"\"Administrator\"=%4, \"ReadOnly\"=%5, \"Disabled\"=%6 "
+					"WHERE \"UserID\" = %7;")
+				.arg(user.firstName())
+				.arg(user.lastName())
+				.arg(user.newPassword())
+				.arg(user.isAdminstrator() ? "TRUE" : "FALSE")
+				.arg(user.isReadonly() ? "TRUE" : "FALSE")
+				.arg(user.isDisabled() ? "TRUE" : "FALSE")
+				.arg(userID);
+
+		}
+		else
+		{
+			updateQurery = QString(
+				"UPDATE \"User\" "
+					"SET \"FirstName\"='%1', \"LastName\"='%2', "
+					"\"Administrator\"=%3, \"ReadOnly\"=%4, \"Disabled\"=%5 "
+					"WHERE \"UserID\" = %6;")
+				.arg(user.firstName())
+				.arg(user.lastName())
+				.arg(user.isAdminstrator() ? "TRUE" : "FALSE")
+				.arg(user.isReadonly() ? "TRUE" : "FALSE")
+				.arg(user.isDisabled() ? "TRUE" : "FALSE")
+				.arg(userID);
+		}
+
+		result = query.exec(updateQurery);
+
+		if (result == false)
+		{
+			emitError(tr("Update user data error: %1").arg(query.lastError().text()));
+			return;
+		}
+	}
+}
+
+void DbWorker::slot_getUserList(std::vector<DbUser>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get user list. Database connection is not openned."));
+		return;
+	}
+
+	// SELECT "UserID" FROM "User" ORDER BY "Username";
+	//
+	QSqlQuery q(db);
+
+	bool result = q.exec("SELECT \"UserID\" FROM \"User\" ORDER BY \"Username\";");
+	if (result == false)
+	{
+		qDebug() << Q_FUNC_INFO << q.lastError();
+		assert(result);
+		return;
+	}
+
+	out->clear();
+
+	while (q.next())
+	{
+		DbUser user;
+
+		int userId = q.value(0).toInt();
+
+		bool ok = db_getUserData(db, userId, &user);
+
+		if (ok == true)
+		{
+			out->push_back(user);
+		}
+	}
+
+	return;
+}
+
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 {
 	if (user == nullptr)

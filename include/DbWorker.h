@@ -26,8 +26,6 @@ protected:
 	// Public signals
 	//
 signals:
-	//void projectOpened(DbProject project);
-	//void projectClosed();
 
 	//
 	// Public methods
@@ -40,6 +38,8 @@ public:
 	// Operations
 	//
 public slots:
+	// Project Management
+	//
 	void slot_getProjectList(std::vector<DbProject>* out);
 	void slot_createProject(QString projectName, QString administratorPassword);
 	void slot_openProject(QString projectName, QString username, QString password);
@@ -47,6 +47,14 @@ public slots:
 	void slot_deleteProject(QString projectName, QString password);
 	void slot_upgradeProject(QString projectName, QString password);
 
+	// User management
+	//
+	void slot_createUser(DbUser user);
+	void slot_updateUser(DbUser user);
+	void slot_getUserList(std::vector<DbUser>* out);
+
+	// Service
+	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
 	bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
 	int db_getProjectVersion(QSqlDatabase db);

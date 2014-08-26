@@ -2,22 +2,22 @@
 #include "UserManagementDialog.h"
 #include "ui_UserManagementDialog.h"
 #include "CreateUserDialogDialog.h"
-#include "../include/DbStore.h"
+#include "../include/DbController.h"
 #include "PasswordService.h"
 
-UserManagementDialog::UserManagementDialog(QWidget* parent, DbStore* dbStore) :
+UserManagementDialog::UserManagementDialog(QWidget* parent, DbController* dbController) :
 	QDialog(parent),
 	ui(new Ui::UserManagementDialog),
-	m_dbStore(dbStore),
+	m_dbController(dbController),
 	m_userHasChages(false)
 {
 	ui->setupUi(this);
-	assert(m_dbStore);
+	assert(m_dbController);
 
 	// --
 	//
-	m_currentUser = m_dbStore->currentUser();
-	m_dbStore->getUserList(m_users);
+	m_currentUser = m_dbController->currentUser();
+	m_dbController->getUserList(&m_users, this);
 
 	// Fill user list
 	//
@@ -113,10 +113,10 @@ void UserManagementDialog::disableApply()
 	ui->buttonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 }
 
-DbStore* UserManagementDialog::dbStore()
+DbController* UserManagementDialog::dbController()
 {
-	assert(m_dbStore);
-	return m_dbStore;
+	assert(m_dbController);
+	return m_dbController;
 }
 
 void UserManagementDialog::on_createUserButton_clicked()
@@ -137,11 +137,13 @@ void UserManagementDialog::on_createUserButton_clicked()
 	//
 	DbUser user = dialog.user();
 
-	dbStore()->createUser(user);
+	dbController()->createUser(user, this);
 
 	// Refresh user list
 	//
-	dbStore()->getUserList(m_users);
+	m_users.clear();
+
+	dbController()->getUserList(&m_users, this);
 	fillUserList(user.username());
 
 	disableApply();
@@ -318,8 +320,8 @@ void UserManagementDialog::applyChanges(const QString& username)
 
 	// Save to Database;
 	//
-	dbStore()->updateUser(user);
-	dbStore()->getUserList(m_users);
+	dbController()->updateUser(user, this);
+	dbController()->getUserList(&m_users, this);
 
 	disableApply();
 }
@@ -339,7 +341,7 @@ void UserManagementDialog::on_buttonBox_clicked(QAbstractButton* button)
 
 		QString username = si[0]->text().trimmed();
 
-		if (dbStore()->currentUser().isAdminstrator() || dbStore()->currentUser().username() == username)
+		if (dbController()->currentUser().isAdminstrator() || dbController()->currentUser().username() == username)
 		{
 			applyChanges(username);
 			fillUserList(username);
