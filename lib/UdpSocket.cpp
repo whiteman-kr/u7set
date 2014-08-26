@@ -1,10 +1,8 @@
 #include "../include/UdpSocket.h"
 
 
-// -------------------------------------------------------------------
-// UDP Client classes implementations
-//
 
+// -----------------------------------------------------------------------------
 // UdpServerSocketWorker class implementation
 //
 
@@ -31,8 +29,8 @@ UdpClientSocket::UdpClientSocket(const QHostAddress &serverAddress, quint16 port
 
     m_clientID = qHash(QUuid::createUuid());            // generate unique clientID
 
-    connect(&m_ackTimer, &QTimer::timeout, this, &UdpClientSocket::onAckTimerTimeout);
-    connect(&m_socket, &QUdpSocket::readyRead, this, &UdpClientSocket::onSocketReadyRead);
+    connect(&m_ackTimer, SIGNAL(timeout()), this, SLOT(onAckTimerTimeout()));
+    connect(&m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
 }
 
 
@@ -49,7 +47,7 @@ void UdpClientSocket::onSocketThreadStartedSlot()
 
 void UdpClientSocket::onSocketThreadStarted()
 {
-    qDebug() << "Called UdpClientSocketWorker::onSocketThreadStarted()";
+    qDebug() << "Called UdpClientSocket::onSocketThreadStarted()";
 }
 
 
@@ -63,7 +61,7 @@ void UdpClientSocket::onSocketThreadFinishedSlot()
 
 void UdpClientSocket::onSocketThreadFinished()
 {
-    qDebug() << "Called UdpClientSocketWorker::onSocketThreadFinished()";
+    qDebug() << "Called UdpClientSocket::onSocketThreadFinished()";
 }
 
 
@@ -73,7 +71,9 @@ void UdpClientSocket::onSocketReadyRead()
 
     assert(m_state == UdpClientSocketState::waitingForAck);
 
-    m_recevedDataSize = m_socket.readDatagram(reinterpret_cast<char*>(m_receivedData), MAX_DATAGRAM_SIZE, &m_senderHostAddr, &m_senderPort);
+    m_ackTimer.stop();
+
+    m_recevedDataSize = m_socket.readDatagram(m_receivedData, MAX_DATAGRAM_SIZE, &m_senderHostAddr, &m_senderPort);
 
     if (m_sentHeader->ID == m_receivedHeader->ID &&
         m_sentHeader->ClientID == m_receivedHeader->ClientID &&
@@ -96,13 +96,13 @@ void UdpClientSocket::onSocketReadyRead()
 
 void UdpClientSocket::onRequestAck(const REQUEST_HEADER& /* ackHeader */, char* /* ackData */, quint32 /* ackDataSize */)
 {
-    qDebug() << "Called UdpClientSocketWorker::onRequestAck()";
+    qDebug() << "Called UdpClientSocket::onRequestAck()";
 }
 
 
 void UdpClientSocket::onUnknownRequestAck(const REQUEST_HEADER& /* ackHeader */, char* /* ackData */, quint32 /* ackDataSize */)
 {
-    qDebug() << "Called UdpClientSocketWorker::onUnknownRequestAck()";
+    qDebug() << "Called UdpClientSocket::onUnknownRequestAck()";
 }
 
 
@@ -163,7 +163,17 @@ void UdpClientSocket::sendRequest(quint32 requestID, char *requestData, quint32 
 
     m_sentDataSize = sizeof(REQUEST_HEADER) + requestDataSize;
 
-    m_socket.writeDatagram(QByteArray(m_sentData, m_sentDataSize), m_serverAddress, m_port);
+    qint64 sent = m_socket.writeDatagram(m_sentData, m_sentDataSize, m_serverAddress, m_port);
+
+    if (sent == -1)
+    {
+        qDebug() << "UdpClientSocket::sendRequest writeDatagram error!";
+
+    }
+    else
+    {
+        qDebug() << "UdpClientSocket::sendRequest OK";
+    }
 
     m_requestNo++;
 
@@ -219,16 +229,139 @@ void UdpClientSocket::onAckTimerTimeout()
 
 void UdpClientSocket::onAckTimeout()
 {
-    qDebug() << "Called UdpClientSocketWorker::onAckTimeout()";
+    qDebug() << "Called UdpClientSocket::onAckTimeout()";
 }
 
 
 void UdpClientSocket::onRequestTimeout(const REQUEST_HEADER& /* requestHeader */)
 {
-    qDebug() << "Called UdpClientSocketWorker::onRequestTimeout()";
+    qDebug() << "Called UdpClientSocket::onRequestTimeout()";
 }
 
 
+// -----------------------------------------------------------------------------
+// UdpServerSocket class implementation
+//
+
+UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize) :
+    m_senderAddress(senderAddress),
+    m_senderPort(senderPort),
+    m_requestDataSize(0)
+{
+    if (receivedData != nullptr && (receivedDataSize >= sizeof(REQUEST_HEADER) && receivedDataSize <= MAX_DATAGRAM_SIZE))
+    {
+        m_requestDataSize = receivedDataSize;
+        memcpy(m_requestData, receivedData, m_requestDataSize);
+    }
+    else
+    {
+        assert(false);
+    }
+}
+
+
+UdpRequestProcessor::UdpRequestProcessor()
+{
+}
+
+
+void UdpRequestProcessor::PutRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize)
+{
+
+}
+
+
+UdpServerSocket::UdpServerSocket(const QHostAddress &bindToAddress, quint16 port) :
+    m_bindToAddress(bindToAddress),
+    m_port(port),
+    m_secondsTimer(this),
+    m_socket(this),
+    m_recevedDataSize(0),
+    m_senderPort(0),
+    requestHeader(reinterpret_cast<REQUEST_HEADER*>(m_receivedData))
+{
+}
+
+
+UdpServerSocket::~UdpServerSocket()
+{
+}
+
+
+void UdpServerSocket::onSocketThreadStartedSlot()
+{
+    m_secondsTimer.start(1000);
+
+    connect(&m_secondsTimer, &QTimer::timeout, this, &UdpServerSocket::onSecondsTimer);
+    connect(&m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyReadSlot()));
+
+    m_socket.bind(m_bindToAddress, m_port);
+
+    onSocketThreadStarted();
+}
+
+
+void UdpServerSocket::onSocketThreadStarted()
+{
+    qDebug() << "Called UdpServerSocket::onSocketThreadStarted";
+}
+
+
+void UdpServerSocket::onSocketThreadFinishedSlot()
+{
+    onSocketThreadFinished();
+
+    this->deleteLater();
+}
+
+
+void UdpServerSocket::onSocketThreadFinished()
+{
+    qDebug() << "Called UdpServerSocket::onSocketThreadFinished";
+}
+
+
+void UdpServerSocket::onSecondsTimer()
+{
+}
+
+
+void UdpServerSocket::onSocketReadyReadSlot()
+{
+    QMutexLocker m(&m_mutex);
+
+    m_recevedDataSize = m_socket.readDatagram(m_receivedData, MAX_DATAGRAM_SIZE, &m_senderHostAddr, &m_senderPort);
+
+    datagramReceived();
+
+    UdpRequestProcessor* requestProcessor = nullptr;
+
+    quint32 clientID = requestHeader->ClientID;
+
+    if (requestProcessorMap.contains(clientID))
+    {
+        requestProcessor = requestProcessorMap.value(clientID);
+    }
+    else
+    {
+        requestProcessor = new UdpRequestProcessor;
+
+        requestProcessorMap.insert(clientID, requestProcessor);
+    }
+
+    requestProcessor->PutRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize);
+
+    //m_socket.writeDatagram(m_receivedDatagram, m_recevedDatagramSize, m_senderHostAddr, m_senderPort);
+}
+
+
+void UdpServerSocket::datagramReceived()
+{
+     qDebug() << "Called UdpServerSocket::datagramReceived";
+}
+
+
+// -----------------------------------------------------------------------------
 // UdpSocketThread class implementation
 //
 
@@ -237,15 +370,27 @@ UdpSocketThread::UdpSocketThread()
 }
 
 
-void UdpSocketThread::runClientSocket(UdpClientSocket* clientSocket)
+void UdpSocketThread::run(UdpClientSocket* clientSocket)
 {
     clientSocket->moveToThread(&m_socketThread);
 
-    connect(&m_socketThread, &QThread::started, clientSocket, &UdpClientSocket::onSocketThreadStartedSlot);
-    connect(&m_socketThread, &QThread::finished, clientSocket, &UdpClientSocket::onSocketThreadFinishedSlot);
+    connect(&m_socketThread, SIGNAL(started()), clientSocket, SLOT(onSocketThreadStartedSlot()));
+    connect(&m_socketThread, SIGNAL(finished()), clientSocket, SLOT(onSocketThreadFinishedSlot()));
 
     m_socketThread.start();
 }
+
+
+void UdpSocketThread::run(UdpServerSocket* serverSocket)
+{
+    serverSocket->moveToThread(&m_socketThread);
+
+    connect(&m_socketThread, SIGNAL(started()), serverSocket, SLOT(onSocketThreadStartedSlot()));
+    connect(&m_socketThread, SIGNAL(finished()), serverSocket, SLOT(onSocketThreadFinishedSlot()));
+
+    m_socketThread.start();
+}
+
 
 
 UdpSocketThread::~UdpSocketThread()
@@ -254,105 +399,3 @@ UdpSocketThread::~UdpSocketThread()
     m_socketThread.wait();
 }
 
-
-
-// -------------------------------------------------------------------
-// UDP Server classes implementations
-//
-
-
-// UdpServerSocketWorker class implementation
-//
-
-
-UdpServerSocketWorker::UdpServerSocketWorker(const QHostAddress &bindToAddress, quint16 port) :
-    m_bindToAddress(bindToAddress),
-    m_port(port),
-    m_secondsTimer(this),
-    m_socket(this),
-    m_recevedDatagramSize(0),
-    m_senderPort(0)
-{
-}
-
-
-UdpServerSocketWorker::~UdpServerSocketWorker()
-{
-}
-
-
-void UdpServerSocketWorker::onSocketThreadStarted()
-{
-    m_secondsTimer.start(1000);
-
-    connect(&m_secondsTimer, &QTimer::timeout, this, &UdpServerSocketWorker::onSecondsTimer);
-
-    connect(&m_socket, &QUdpSocket::readyRead, this, &UdpServerSocketWorker::onSocketReadyRead);
-
-    qDebug() << "Socket Thread started";
-}
-
-
-void UdpServerSocketWorker::onSecondsTimer()
-{
-    if (!m_socket.isValid())
-    {
-        qDebug() << "Socket is not valid";
-    }
-
-    if (m_socket.state() == QAbstractSocket::BoundState)
-    {
-        qDebug() << "Socket is bounded";
-    }
-    else
-    {
-        if (m_socket.bind(m_bindToAddress, m_port) == true)
-        {
-            qDebug() << "Bind OK";
-        }
-        else
-        {
-            qDebug() << "Bind failed";
-        }
-    }
-
-}
-
-
-void UdpServerSocketWorker::onSocketReadyRead()
-{
-    m_recevedDatagramSize = m_socket.readDatagram(m_receivedDatagram, MAX_DATAGRAM_SIZE, &m_senderHostAddr, &m_senderPort);
-
-    datagramReceived();
-}
-
-
-// m_recevedDatagramSize
-// m_receivedDatagram
-//
-void UdpServerSocketWorker::datagramReceived()
-{
-}
-
-
-// UdpServerSocket class implementation
-//
-
-UdpServerSocket::UdpServerSocket(const QHostAddress& address, qint16 port)
-{
-    UdpServerSocketWorker* serverWorker = new UdpServerSocketWorker(address, port);
-
-    serverWorker->moveToThread(&m_socketThread);
-
-    connect(&m_socketThread, &QThread::started, serverWorker, &UdpServerSocketWorker::onSocketThreadStarted);
-    connect(&m_socketThread, &QThread::finished, serverWorker, &QObject::deleteLater);
-
-    m_socketThread.start();
-}
-
-
-UdpServerSocket::~UdpServerSocket()
-{
-    m_socketThread.quit();
-    m_socketThread.wait();
-}

@@ -4,16 +4,15 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    m_clientSocket(nullptr)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    m_clientSocket = new ClientSocket(QHostAddress("192.168.14.85"), 4000);
+    ClientSocket* m_clientSocket = new ClientSocket(QHostAddress("192.168.14.85"), 4000);
 
     connect(this, &MainWindow::clientSendRequest, m_clientSocket, &UdpClientSocket::sendRequest);
 
-    m_clientSocketThread.runClientSocket(m_clientSocket);
+    m_clientSocketThread.run(m_clientSocket);
 }
 
 MainWindow::~MainWindow()

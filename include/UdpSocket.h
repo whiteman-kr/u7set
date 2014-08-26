@@ -93,57 +93,38 @@ private slots:
 };
 
 
-class UdpSocketThread : public QObject
-{
-    Q_OBJECT
-
-public:
-    UdpSocketThread();
-    void runClientSocket(UdpClientSocket* clientSocket);
-
-    virtual ~UdpSocketThread();
-
-private:
-    QThread m_socketThread;
-};
-
-
 // -------------------------------------------------------------------
 // UDP Server classes
 //
 
 
-class UdpServerSocketWorker : public QObject
+// базовый класс для обработчиков UDP-запросов
+//
+
+class UdpRequest
+{
+public:
+    UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize);
+
+    QHostAddress m_senderAddress;
+    qint16 m_senderPort;
+    char m_requestData[MAX_DATAGRAM_SIZE];
+    quint32 m_requestDataSize;
+};
+
+
+class UdpRequestProcessor : public QObject
 {
     Q_OBJECT
 
 public:
-    UdpServerSocketWorker(const QHostAddress& bindToAddress, quint16 port);
-    virtual ~UdpServerSocketWorker();
+    UdpRequestProcessor();
 
-    virtual void datagramReceived();
-
-signals:
+    void PutRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize);
 
 public slots:
-    void onSocketThreadStarted();
 
 
-private slots:
-    void onSecondsTimer();
-    void onSocketReadyRead();
-
-private:
-    QHostAddress m_bindToAddress;
-    qint16 m_port;
-
-    QUdpSocket m_socket;
-    QTimer m_secondsTimer;
-
-    qint64 m_recevedDatagramSize;
-    char m_receivedDatagram[MAX_DATAGRAM_SIZE];
-    QHostAddress m_senderHostAddr;
-    quint16 m_senderPort;
 };
 
 
@@ -151,9 +132,61 @@ class UdpServerSocket : public QObject
 {
     Q_OBJECT
 
+private:
+    QMutex m_mutex;
+
+    QHostAddress m_bindToAddress;
+    qint16 m_port;
+
+    QUdpSocket m_socket;
+    QTimer m_secondsTimer;
+
+    qint64 m_recevedDataSize;
+    char m_receivedData[MAX_DATAGRAM_SIZE];
+    REQUEST_HEADER* requestHeader;
+    QHostAddress m_senderHostAddr;
+    quint16 m_senderPort;
+
+    QHash<quint32, UdpRequestProcessor*> requestProcessorMap;
+
 public:
-    UdpServerSocket(const QHostAddress& address, qint16 port);
+    UdpServerSocket(const QHostAddress& bindToAddress, quint16 port);
     virtual ~UdpServerSocket();
+
+    virtual void datagramReceived();
+
+    virtual void onSocketThreadStarted();
+    virtual void onSocketThreadFinished();
+
+   // virtual UdpRequestProcessor* createUdpRequestProcessor();
+
+signals:
+
+public slots:
+    void onSocketThreadStartedSlot();
+    void onSocketThreadFinishedSlot();
+
+private slots:
+    void onSecondsTimer();
+    void onSocketReadyReadSlot();
+};
+
+
+
+// -------------------------------------------------------------------
+// UDP sockets' thread
+//
+
+class UdpSocketThread : public QObject
+{
+    Q_OBJECT
+
+public:
+    UdpSocketThread();
+    void run(UdpClientSocket* clientSocket);
+    void run(UdpServerSocket* serverSocket);
+
+    virtual ~UdpSocketThread();
 
 private:
     QThread m_socketThread;

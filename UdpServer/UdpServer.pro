@@ -15,12 +15,14 @@ TEMPLATE = app
 
 
 SOURCES +=\
-        mainwindow.cpp \
     servermain.cpp \
-    ../lib/UdpSocket.cpp
+    ../lib/UdpSocket.cpp \
+    ServerSocket.cpp \
+    mainwindow2.cpp
 
 HEADERS  += mainwindow.h \
     ../include/SocketIO.h \
-    ../include/UdpSocket.h
+    ../include/UdpSocket.h \
+    ServerSocket.h
 
 FORMS    += mainwindow.ui

@@ -26,7 +26,6 @@ signals:
 private:
     Ui::MainWindow *ui;
 
-    ClientSocket* m_clientSocket;
     UdpSocketThread m_clientSocketThread;
 };
 
