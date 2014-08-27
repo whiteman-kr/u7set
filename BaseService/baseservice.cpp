@@ -19,7 +19,7 @@ MainWorker::~MainWorker()
 
 void MainWorker::onMainWorkerThreadStarted()
 {
-    m_mainUdpServerSocket = new UdpServerSocket(QHostAddress("192.168.122.122"), 3000);
+   // m_mainUdpServerSocket = new ServerSocket(QHostAddress("192.168.122.122"), 3000);
 }
 
 

@@ -8,6 +8,8 @@
 #include <QUdpSocket>
 #include <QTimerEvent>
 #include <QMutexLocker>
+#include <QQueue>
+#include <QDateTime>
 
 #include "../include/SocketIO.h"
 
@@ -98,33 +100,76 @@ private slots:
 //
 
 
-// базовый класс для обработчиков UDP-запросов
-//
-
 class UdpRequest
 {
 public:
-    UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize);
-
     QHostAddress m_senderAddress;
     qint16 m_senderPort;
     char m_requestData[MAX_DATAGRAM_SIZE];
     quint32 m_requestDataSize;
+
+    UdpRequest();
+    UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize);
+
+    bool isEmpty() const;
 };
 
 
+
+class UdpClientRequestHandler;
+
+
+// UdpRequestProcessor is a base class for request's handlers
+//
 class UdpRequestProcessor : public QObject
 {
     Q_OBJECT
 
+private:
+    UdpClientRequestHandler* m_clientRequestHandler;
+
 public:
     UdpRequestProcessor();
 
-    void PutRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize);
+    virtual void onThreadStarted() { qDebug() << "UdpRequestProcessor thread started"; }
+    virtual void onThreadFinished() { qDebug() << "UdpRequestProcessor thread finished"; }
+
+    virtual void processRequest(const UdpRequest& request) = 0;
+
+    void setClientRequestHandler(UdpClientRequestHandler* clientRequestHandler);
 
 public slots:
+    void onThreadStartedSlot();
+    void onThreadFinishedSlot();
+
+    void onRequestQueueIsNotEmpty();
+};
 
 
+class UdpClientRequestHandler : public QObject
+{
+    Q_OBJECT
+
+private:
+    QMutex m_queueMutex;
+    QThread m_handlerThread;
+
+    QQueue<UdpRequest> requestQueue;
+
+    qint64 m_lastRequestTime;
+
+public:
+    UdpClientRequestHandler(UdpRequestProcessor* udpRequestProcessor);
+    virtual ~UdpClientRequestHandler();
+
+    void putRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize);
+    UdpRequest getRequest();
+    bool hasRequest();
+
+    qint64 lastRequestTime() const;
+
+signals:
+    void requestQueueIsNotEmpty();
 };
 
 
@@ -133,13 +178,13 @@ class UdpServerSocket : public QObject
     Q_OBJECT
 
 private:
-    QMutex m_mutex;
+    QMutex m_clientMapMutex;
 
     QHostAddress m_bindToAddress;
     qint16 m_port;
 
     QUdpSocket m_socket;
-    QTimer m_secondsTimer;
+    QTimer m_timer;
 
     qint64 m_recevedDataSize;
     char m_receivedData[MAX_DATAGRAM_SIZE];
@@ -147,7 +192,7 @@ private:
     QHostAddress m_senderHostAddr;
     quint16 m_senderPort;
 
-    QHash<quint32, UdpRequestProcessor*> requestProcessorMap;
+    QHash<quint32, UdpClientRequestHandler*> clientRequestHandlerMap;
 
 public:
     UdpServerSocket(const QHostAddress& bindToAddress, quint16 port);
@@ -158,7 +203,7 @@ public:
     virtual void onSocketThreadStarted();
     virtual void onSocketThreadFinished();
 
-   // virtual UdpRequestProcessor* createUdpRequestProcessor();
+    virtual UdpRequestProcessor* createUdpRequestProcessor() = 0;           //
 
 signals:
 
@@ -167,7 +212,7 @@ public slots:
     void onSocketThreadFinishedSlot();
 
 private slots:
-    void onSecondsTimer();
+    void onTimer();
     void onSocketReadyReadSlot();
 };
 

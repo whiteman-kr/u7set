@@ -55,7 +55,7 @@ void UdpClientSocket::onSocketThreadFinishedSlot()
 {
     onSocketThreadFinished();
 
-    this->deleteLater();
+    deleteLater();
 }
 
 
@@ -240,7 +240,7 @@ void UdpClientSocket::onRequestTimeout(const REQUEST_HEADER& /* requestHeader */
 
 
 // -----------------------------------------------------------------------------
-// UdpServerSocket class implementation
+// UDP Server classes' implementation
 //
 
 UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize) :
@@ -260,21 +260,151 @@ UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, cha
 }
 
 
-UdpRequestProcessor::UdpRequestProcessor()
+UdpRequest::UdpRequest() :
+    m_senderPort(0),
+    m_requestDataSize(0)
 {
 }
 
 
-void UdpRequestProcessor::PutRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize)
+bool UdpRequest::isEmpty() const
 {
-
+    return m_requestDataSize < sizeof(REQUEST_HEADER);
 }
 
+
+
+UdpRequestProcessor::UdpRequestProcessor() :
+    m_clientRequestHandler(nullptr)
+{
+}
+
+
+void UdpRequestProcessor::setClientRequestHandler(UdpClientRequestHandler* clientRequestHandler)
+{
+    m_clientRequestHandler = clientRequestHandler;
+}
+
+
+void UdpRequestProcessor::onThreadStartedSlot()
+{
+    onThreadStarted();
+}
+
+
+void UdpRequestProcessor::onThreadFinishedSlot()
+{
+    onThreadFinished();
+    deleteLater();
+}
+
+
+void UdpRequestProcessor::onRequestQueueIsNotEmpty()
+{
+    assert(m_clientRequestHandler != nullptr);
+
+    int count = 0;
+
+    do
+    {
+        UdpRequest request = m_clientRequestHandler->getRequest();
+
+        if (request.isEmpty())
+        {
+            break;
+        }
+
+        processRequest(request);
+
+        count++;
+
+    } while (m_clientRequestHandler->hasRequest() && count < 5);
+}
+
+
+UdpClientRequestHandler::UdpClientRequestHandler(UdpRequestProcessor* udpRequestProcessor) :
+    m_lastRequestTime(0)
+{
+    udpRequestProcessor->setClientRequestHandler(this);
+    udpRequestProcessor->moveToThread(&m_handlerThread);
+
+    connect(&m_handlerThread, SIGNAL(started()), udpRequestProcessor, SLOT(onThreadStartedSlot()));
+    connect(&m_handlerThread, SIGNAL(finished()), udpRequestProcessor, SLOT(onThreadFinishedSlot()));
+
+    connect(this, SIGNAL(requestQueueIsNotEmpty()), udpRequestProcessor, SLOT(onRequestQueueIsNotEmpty()));
+
+    m_handlerThread.start();
+}
+
+
+UdpClientRequestHandler::~UdpClientRequestHandler()
+{
+    m_handlerThread.quit();
+    m_handlerThread.wait();
+}
+
+
+qint64 UdpClientRequestHandler::lastRequestTime() const
+{
+    return m_lastRequestTime;
+}
+
+
+void UdpClientRequestHandler::putRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize)
+{
+    m_queueMutex.lock();
+
+    m_lastRequestTime = QDateTime::currentMSecsSinceEpoch();
+
+    requestQueue.enqueue(UdpRequest(senderAddress, senderPort, receivedData, recevedDataSize));
+
+    m_queueMutex.unlock();
+
+    emit requestQueueIsNotEmpty();
+}
+
+
+UdpRequest UdpClientRequestHandler::getRequest()
+{
+    m_queueMutex.lock();
+
+    if (requestQueue.isEmpty())
+    {
+        m_queueMutex.unlock();
+
+        return UdpRequest();
+    }
+
+    UdpRequest request = requestQueue.dequeue();
+
+    m_queueMutex.unlock();
+
+    return request;
+}
+
+
+bool UdpClientRequestHandler::hasRequest()
+{
+    bool result = false;
+
+    m_queueMutex.lock();
+
+    result = !requestQueue.isEmpty();
+
+    m_queueMutex.unlock();
+
+    return result;
+}
+
+
+// -----------------------------------------------------------------------------
+// UdpServerSocket class implementation
+//
 
 UdpServerSocket::UdpServerSocket(const QHostAddress &bindToAddress, quint16 port) :
     m_bindToAddress(bindToAddress),
     m_port(port),
-    m_secondsTimer(this),
+    m_timer(this),
     m_socket(this),
     m_recevedDataSize(0),
     m_senderPort(0),
@@ -290,9 +420,9 @@ UdpServerSocket::~UdpServerSocket()
 
 void UdpServerSocket::onSocketThreadStartedSlot()
 {
-    m_secondsTimer.start(1000);
+    m_timer.start(5000);
 
-    connect(&m_secondsTimer, &QTimer::timeout, this, &UdpServerSocket::onSecondsTimer);
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
     connect(&m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyReadSlot()));
 
     m_socket.bind(m_bindToAddress, m_port);
@@ -311,7 +441,7 @@ void UdpServerSocket::onSocketThreadFinishedSlot()
 {
     onSocketThreadFinished();
 
-    this->deleteLater();
+    deleteLater();
 }
 
 
@@ -321,37 +451,37 @@ void UdpServerSocket::onSocketThreadFinished()
 }
 
 
-void UdpServerSocket::onSecondsTimer()
+void UdpServerSocket::onTimer()
 {
 }
 
 
 void UdpServerSocket::onSocketReadyReadSlot()
 {
-    QMutexLocker m(&m_mutex);
-
     m_recevedDataSize = m_socket.readDatagram(m_receivedData, MAX_DATAGRAM_SIZE, &m_senderHostAddr, &m_senderPort);
 
     datagramReceived();
 
-    UdpRequestProcessor* requestProcessor = nullptr;
+    UdpClientRequestHandler* clientRequestHandler = nullptr;
 
     quint32 clientID = requestHeader->ClientID;
 
-    if (requestProcessorMap.contains(clientID))
+    if (clientRequestHandlerMap.contains(clientID))
     {
-        requestProcessor = requestProcessorMap.value(clientID);
+        clientRequestHandler = clientRequestHandlerMap.value(clientID);
+
+        qDebug() << "clientRequestHandler found";
     }
     else
     {
-        requestProcessor = new UdpRequestProcessor;
+        clientRequestHandler = new UdpClientRequestHandler(createUdpRequestProcessor());
 
-        requestProcessorMap.insert(clientID, requestProcessor);
+        clientRequestHandlerMap.insert(clientID, clientRequestHandler);
+
+        qDebug() << "clientRequestHandler created";
     }
 
-    requestProcessor->PutRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize);
-
-    //m_socket.writeDatagram(m_receivedDatagram, m_recevedDatagramSize, m_senderHostAddr, m_senderPort);
+    clientRequestHandler->putRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize);
 }
 
 
