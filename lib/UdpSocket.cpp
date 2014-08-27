@@ -420,7 +420,7 @@ UdpServerSocket::~UdpServerSocket()
 
 void UdpServerSocket::onSocketThreadStartedSlot()
 {
-    m_timer.start(5000);
+    m_timer.start(1000);
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
     connect(&m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyReadSlot()));
@@ -453,6 +453,40 @@ void UdpServerSocket::onSocketThreadFinished()
 
 void UdpServerSocket::onTimer()
 {
+    qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+
+    m_clientMapMutex.lock();
+
+    QHashIterator<quint32, UdpClientRequestHandler*> i(clientRequestHandlerMap);
+
+    while (i.hasNext())
+    {
+        i.next();
+
+        UdpClientRequestHandler* clientHandler = i.value();
+
+        if (clientHandler == nullptr)
+        {
+            assert(false);
+        }
+        else
+        {
+            qint64 dtime = currentTime - clientHandler->lastRequestTime();
+
+            if (dtime > 5000)
+            {
+                // time from last request more then 10 sec
+                //
+                quint32 clientID = i.key();
+
+                clientRequestHandlerMap.remove(clientID);
+
+                delete clientHandler;
+            }
+        }
+    }
+
+    m_clientMapMutex.unlock();
 }
 
 
@@ -465,6 +499,8 @@ void UdpServerSocket::onSocketReadyReadSlot()
     UdpClientRequestHandler* clientRequestHandler = nullptr;
 
     quint32 clientID = requestHeader->ClientID;
+
+    m_clientMapMutex.lock();
 
     if (clientRequestHandlerMap.contains(clientID))
     {
@@ -482,6 +518,8 @@ void UdpServerSocket::onSocketReadyReadSlot()
     }
 
     clientRequestHandler->putRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize);
+
+    m_clientMapMutex.unlock();
 }
 
 
