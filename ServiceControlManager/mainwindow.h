@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSystemTrayIcon>
+
+class ServiceTableModel;
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +20,21 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QSystemTrayIcon *trayIcon;
+
+    void openConnectionInfo(QString text);
+    void checkAddress(QString connectionAddress);
+
+    QVector<QWidget*> widgets;
+    ServiceTableModel* serviceModel;
+
+public slots:
+    void openEditor();
+    void trayIconActivated(QSystemTrayIcon::ActivationReason);
+    void switchLanguage(QAction* selectedAction);
+    void connectionClicked(QAction* selectedAction);
+    void scanNetwork();
+    void serviceFound();
 };
 
 #endif // MAINWINDOW_H
