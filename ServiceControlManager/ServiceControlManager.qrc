@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/SearchComputer.png</file>
+        <file>translations/ServiceControlManager_uk.qm</file>
+        <file>translations/ServiceControlManager_ru.qm</file>
+        <file>translations/qt_ru.qm</file>
+        <file>translations/qt_uk.qm</file>
+        <file>translations/qtbase_ru.qm</file>
+        <file>translations/qtbase_uk.qm</file>
+    </qresource>
+</RCC>
