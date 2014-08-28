@@ -3,8 +3,17 @@
 
 #include <QAbstractTableModel>
 #include <QHostAddress>
+#include "../include/SocketIO.h"
 
 const int SERVICE_TYPE_COUNT = 4;
+
+const int SERVICE_STATE_UNDEFINED = 0,
+    SERVICE_STATE_UNAVAILABLE = 1,
+    SERVICE_STATE_STOPPED = 2,
+    SERVICE_STATE_RUNNING = 3,
+    SERVICE_STATE_COUNT = 4;
+
+class UdpClientSocket;
 
 struct serviceTypeInfo
 {
@@ -14,10 +23,11 @@ struct serviceTypeInfo
 
 struct serviceInfo
 {
-    bool active;
+    int state;
+    UdpClientSocket* clientSocket;
     QWidget* statusWidget;
 
-    serviceInfo() : active(false), statusWidget(nullptr) {}
+    serviceInfo() : state(SERVICE_STATE_UNDEFINED), statusWidget(nullptr) {}
 };
 
 struct hostInfo
@@ -37,12 +47,15 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const ;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-    void setActive(quint32 ip, quint16 port, bool active);
+    void setServiceState(quint32 ip, quint16 port, int state);
+    void checkAddress(QString connectionAddress);
 
 signals:
 
 public slots:
+    void serviceFound(REQUEST_HEADER header, QByteArray data);
 
 private:
     QVector<hostInfo> hostsInfo;

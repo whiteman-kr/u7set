@@ -9,9 +9,9 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QHostAddress>
-#include <QTcpSocket>
 #include "scanoptionswidget.h"
 #include "servicetablemodel.h"
+#include "../include/UdpSocket.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -19,8 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     serviceModel(new ServiceTableModel(this)),
     trayIcon(new QSystemTrayIcon(this))
 {
-    /*serviceModel = new ServiceTableModel(this);
-    trayIcon = new QSystemTrayIcon(this);*/
     trayIcon->setIcon(windowIcon());
     trayIcon->show();
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
@@ -39,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Context menu connections list
     QTableView* serviceTable = new QTableView(this);
     serviceTable->setModel(serviceModel);
+    connect(serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), serviceTable, SLOT(resizeColumnsToContents()));
     setCentralWidget(serviceTable);
     /*QActionGroup *serviceActionGroup = new QActionGroup(this);
     connect(serviceActionGroup, SIGNAL(triggered(QAction *)), this, SLOT(connectionClicked(QAction *)));
@@ -99,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     trayIcon->setContextMenu(contextMenu);
 
-    resize(sizeHint());
+    //resize(serviceTable->maximumViewportSize());
     //ui->setupUi(this);
 }
 
@@ -131,14 +130,6 @@ void MainWindow::openConnectionInfo(QString text)
     w->raise();
     w->activateWindow();
     widgets.append(w);
-}
-
-void MainWindow::checkAddress(QString connectionAddress)
-{
-    QTcpSocket* socket = new QTcpSocket;
-    connect(socket, SIGNAL(connected()), this, SLOT(serviceFound()));
-    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), socket, SLOT(deleteLater()));
-    socket->connectToHost(connectionAddress, 4510);
 }
 
 void MainWindow::openEditor()
@@ -186,7 +177,7 @@ void MainWindow::scanNetwork()
     QStringList address = sow.getSelectedAddress().split("/");
     if (address.count() == 1)
     {
-        checkAddress(address[0]);
+        serviceModel->checkAddress(address[0]);
     }
     else
     {
@@ -202,18 +193,7 @@ void MainWindow::scanNetwork()
         for (quint32 i = 0; i < counter; i++)
         {
             QHostAddress peerAddress(mask + i);
-            checkAddress(peerAddress.toString());
+            serviceModel->checkAddress(peerAddress.toString());
         }
     }
-}
-
-void MainWindow::serviceFound()
-{
-    QTcpSocket* socket = dynamic_cast<QTcpSocket*>(sender());
-    if (socket == nullptr)
-    {
-        return;
-    }
-    serviceModel->setActive(socket->peerAddress().toIPv4Address(), socket->peerPort(), true);
-    socket->deleteLater();
 }

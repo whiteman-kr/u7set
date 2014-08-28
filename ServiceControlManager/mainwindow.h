@@ -23,7 +23,6 @@ private:
     QSystemTrayIcon *trayIcon;
 
     void openConnectionInfo(QString text);
-    void checkAddress(QString connectionAddress);
 
     QVector<QWidget*> widgets;
     ServiceTableModel* serviceModel;
@@ -34,7 +33,6 @@ public slots:
     void switchLanguage(QAction* selectedAction);
     void connectionClicked(QAction* selectedAction);
     void scanNetwork();
-    void serviceFound();
 };
 
 #endif // MAINWINDOW_H

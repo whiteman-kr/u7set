@@ -1,4 +1,5 @@
 #include "../include/UdpSocket.h"
+#include <QByteArray>
 
 
 
@@ -87,6 +88,8 @@ void UdpClientSocket::onSocketReadyRead()
     {
         onUnknownRequestAck(*m_receivedHeader, m_receivedData + sizeof(REQUEST_HEADER), m_receivedHeader->DataLen);
     }
+
+    emit ackReceived(*m_receivedHeader, QByteArray(m_receivedData + sizeof(REQUEST_HEADER), m_receivedHeader->DataLen));
 
     m_state = UdpClientSocketState::readyToSend;
 
@@ -210,6 +213,7 @@ void UdpClientSocket::onAckTimerTimeout()
         m_mutex.unlock();
 
         onAckTimeout();
+        emit ackTimeout();
     }
     else
     {
