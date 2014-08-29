@@ -213,6 +213,7 @@ signals:
 public slots:
     void onSocketThreadStartedSlot();
     void onSocketThreadFinishedSlot();
+    void sendAck(UdpRequest request);
 
 private slots:
     void onTimer();

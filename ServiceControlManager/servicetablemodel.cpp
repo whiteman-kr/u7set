@@ -15,10 +15,6 @@ serviceTypeInfo serviceTypesInfo[SERVICE_TYPE_COUNT] =
 ServiceTableModel::ServiceTableModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
-    /*setServiceState(0x7f000001, 4510, SERVICE_STATE_RUNNING);
-    setServiceState(0x7f000001, 4530, SERVICE_STATE_RUNNING);
-    setServiceState(0xc0a80001, 4520, SERVICE_STATE_RUNNING);
-    setServiceState(0xc0a80002, 4540, SERVICE_STATE_RUNNING);*/
 }
 
 int ServiceTableModel::rowCount(const QModelIndex&) const

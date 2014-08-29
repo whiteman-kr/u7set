@@ -448,6 +448,21 @@ void UdpServerSocket::onSocketThreadFinishedSlot()
     deleteLater();
 }
 
+void UdpServerSocket::sendAck(UdpRequest request)
+{
+    qint64 sent = m_socket.writeDatagram(request.m_requestData, request.m_requestDataSize, request.m_senderAddress, request.m_senderPort);
+
+    if (sent == -1)
+    {
+        qDebug() << "UdpServerSocket::sendRequest writeDatagram error!";
+
+    }
+    else
+    {
+        qDebug() << "UdpServerSocket::sendRequest OK";
+    }
+}
+
 
 void UdpServerSocket::onSocketThreadFinished()
 {
