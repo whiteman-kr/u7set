@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QTableView* serviceTable = new QTableView(this);
     serviceTable->setModel(serviceModel);
     connect(serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), serviceTable, SLOT(resizeColumnsToContents()));
+    connect(serviceModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), serviceTable, SLOT(resizeColumnsToContents()));
     setCentralWidget(serviceTable);
     /*QActionGroup *serviceActionGroup = new QActionGroup(this);
     connect(serviceActionGroup, SIGNAL(triggered(QAction *)), this, SLOT(connectionClicked(QAction *)));

@@ -101,9 +101,9 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
     hostInfo hi;
     hi.ip = ip;
     hi.servicesInfo[portIndex].state = state;
+    beginInsertRows(QModelIndex(), hostsInfo.count(), hostsInfo.count());
     hostsInfo.append(hi);
-    QModelIndex changedIndex = index(hostsInfo.count() - 1, portIndex);
-    emit dataChanged(changedIndex, changedIndex, QVector<int>() << Qt::DisplayRole);
+    endInsertRows();
 }
 
 void ServiceTableModel::checkAddress(QString connectionAddress)
@@ -124,7 +124,7 @@ void ServiceTableModel::checkAddress(QString connectionAddress)
     for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
     {
         UdpClientSocket* socket = new UdpClientSocket(QHostAddress(connectionAddress), serviceTypesInfo[i].port);
-        connect(socket, SIGNAL(ackTimeout()), socket, SLOT(deleteLater()));
+        connect(socket, SIGNAL(ackTimeout()), this, SLOT(serviceNotFound()));
         connect(socket, SIGNAL(ackReceived(REQUEST_HEADER,QByteArray)), this, SLOT(serviceFound(REQUEST_HEADER,QByteArray)));
         socket->sendRequest(RQID_GET_SERVICE_STATE, nullptr, 0);
     }
@@ -139,5 +139,16 @@ void ServiceTableModel::serviceFound(REQUEST_HEADER header, QByteArray data)
     }
     quint64 time = *(quint64*)data.constData();
     setServiceState(socket->serverAddress().toIPv4Address(), socket->port(), time == 0 ? SERVICE_STATE_STOPPED : SERVICE_STATE_RUNNING);
+    socket->deleteLater();
+}
+
+void ServiceTableModel::serviceNotFound()
+{
+    UdpClientSocket* socket = dynamic_cast<UdpClientSocket*>(sender());
+    if (socket == nullptr)
+    {
+        return;
+    }
+    setServiceState(socket->serverAddress().toIPv4Address(), socket->port(), SERVICE_STATE_UNAVAILABLE);
     socket->deleteLater();
 }

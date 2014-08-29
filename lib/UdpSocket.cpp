@@ -213,7 +213,6 @@ void UdpClientSocket::onAckTimerTimeout()
         m_mutex.unlock();
 
         onAckTimeout();
-        emit ackTimeout();
     }
     else
     {
@@ -227,6 +226,7 @@ void UdpClientSocket::onAckTimerTimeout()
        m_mutex.unlock();
 
        onRequestTimeout(requestHeader);
+       emit ackTimeout();
     }
 }
 

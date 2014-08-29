@@ -10,14 +10,15 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
 
     qDebug() << "Request processing...";
 
-    REQUEST_HEADER* header = (REQUEST_HEADER*)request.m_requestData;
+    UdpRequest newRequest = request;
+    REQUEST_HEADER* header = (REQUEST_HEADER*)newRequest.m_requestData;
 
     switch (header->ID) {
     case RQID_GET_SERVICE_STATE:
         {
-            UdpRequest newRequest = request;
             quint64& time = *(quint64*)(newRequest.m_requestData + sizeof(REQUEST_HEADER));
-            newRequest.m_requestDataSize = sizeof(REQUEST_HEADER) + sizeof(quint64);
+            header->DataLen = sizeof(quint64);
+            newRequest.m_requestDataSize = sizeof(REQUEST_HEADER) + header->DataLen;
             if (isRunning)
             {
                 time = (QDateTime::currentDateTime().secsTo(lastStartTime));

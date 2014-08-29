@@ -56,6 +56,7 @@ signals:
 
 public slots:
     void serviceFound(REQUEST_HEADER header, QByteArray data);
+    void serviceNotFound();
 
 private:
     QVector<hostInfo> hostsInfo;
