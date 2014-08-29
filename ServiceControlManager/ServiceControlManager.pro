@@ -15,11 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     scanoptionswidget.cpp \
-    servicetablemodel.cpp
+    servicetablemodel.cpp \
+    ../lib/UdpSocket.cpp
 
 HEADERS  += mainwindow.h \
     scanoptionswidget.h \
-    servicetablemodel.h
+    servicetablemodel.h \
+    ../include/UdpSocket.h
 
 FORMS    += mainwindow.ui
 

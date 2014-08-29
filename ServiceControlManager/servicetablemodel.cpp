@@ -1,5 +1,8 @@
 #include "servicetablemodel.h"
 #include <QBrush>
+#include <QDebug>
+#include "../include/UdpSocket.h"
+#include "../include/SocketIO.h"
 
 serviceTypeInfo serviceTypesInfo[SERVICE_TYPE_COUNT] =
 {
@@ -12,25 +15,16 @@ serviceTypeInfo serviceTypesInfo[SERVICE_TYPE_COUNT] =
 ServiceTableModel::ServiceTableModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
-    setActive(0x7f000001, 4510, true);
-    setActive(0x7f000001, 4530, true);
-    setActive(0xc0a80001, 4520, true);
-    setActive(0xc0a80002, 4540, true);
-    setHeaderData(0, Qt::Horizontal, tr("IP Address"));
-    for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
-    {
-        setHeaderData(i + 1, Qt::Horizontal, QString(serviceTypesInfo[i].name));
-    }
 }
 
-int ServiceTableModel::rowCount(const QModelIndex &parent) const
+int ServiceTableModel::rowCount(const QModelIndex&) const
 {
     return hostsInfo.count();
 }
 
-int ServiceTableModel::columnCount(const QModelIndex &parent) const
+int ServiceTableModel::columnCount(const QModelIndex&) const
 {
-    return SERVICE_TYPE_COUNT + 1;
+    return SERVICE_TYPE_COUNT;
 }
 
 QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
@@ -40,32 +34,45 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
     switch(role)
     {
     case Qt::DisplayRole:
-        if (col == 0)
+        switch(hostsInfo[row].servicesInfo[col].state)
         {
-            return QHostAddress(hostsInfo[index.row()].ip).toString();
+        case SERVICE_STATE_RUNNING: return tr("Running");
+        case SERVICE_STATE_STOPPED: return tr("Stopped");
+        case SERVICE_STATE_UNAVAILABLE: return tr("Unavailable");
+        default: return QVariant();
         }
-        return hostsInfo[row].servicesInfo[col - 1].active ? tr("Yes") : tr("No");
         break;
     case Qt::BackgroundRole:
-        if (col > 0)  //change background only for cell(1,2)
+        switch(hostsInfo[row].servicesInfo[col].state)
         {
-            if (hostsInfo[row].servicesInfo[col - 1].active)
-            {
-                return QBrush(Qt::green);
-            }
-            else
-            {
-                return QBrush(Qt::red);
-            }
+        case SERVICE_STATE_RUNNING: return QBrush(Qt::green);
+        case SERVICE_STATE_STOPPED: return QBrush(Qt::yellow);
+        case SERVICE_STATE_UNAVAILABLE: return QBrush(Qt::lightGray);
+        default: return QBrush(Qt::red);
         }
-        return QVariant();
         break;
     default:
         return QVariant();
     }
 }
 
-void ServiceTableModel::setActive(quint32 ip, quint16 port, bool active)
+QVariant ServiceTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole)
+    {
+        if (orientation == Qt::Horizontal)
+        {
+            return tr(serviceTypesInfo[section].name);
+        }
+        if (orientation == Qt::Vertical)
+        {
+            return QHostAddress(hostsInfo[section].ip).toString();
+        }
+    }
+    return QVariant();
+}
+
+void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
 {
     int portIndex = -1;
     for (int j = 0; j < SERVICE_TYPE_COUNT; j++)
@@ -82,15 +89,55 @@ void ServiceTableModel::setActive(quint32 ip, quint16 port, bool active)
     }
     for (int i = 0; i < hostsInfo.count(); i++)
     {
-        if (hostsInfo[i].ip != ip)
+        if (hostsInfo[i].ip == ip)
         {
-            continue;
+            hostInfo& hi = hostsInfo[i];
+            hi.servicesInfo[portIndex].state = state;
+            QModelIndex changedIndex = index(i, portIndex);
+            emit dataChanged(changedIndex, changedIndex, QVector<int>() << Qt::DisplayRole);
+            return;
         }
-        hostInfo& hi = hostsInfo[i];
-        hi.servicesInfo[portIndex].active = active;
     }
     hostInfo hi;
     hi.ip = ip;
-    hi.servicesInfo[portIndex].active = active;
+    hi.servicesInfo[portIndex].state = state;
     hostsInfo.append(hi);
+    QModelIndex changedIndex = index(hostsInfo.count() - 1, portIndex);
+    emit dataChanged(changedIndex, changedIndex, QVector<int>() << Qt::DisplayRole);
+}
+
+void ServiceTableModel::checkAddress(QString connectionAddress)
+{
+    QHostAddress ha(connectionAddress);
+    quint32 ip = ha.toIPv4Address();
+    if (ha.protocol() != QAbstractSocket::IPv4Protocol)
+    {
+        return;
+    }
+    for (int i = 0; i < hostsInfo.count(); i++)
+    {
+        if (hostsInfo[i].ip == ip)
+        {
+            return;
+        }
+    }
+    for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+    {
+        UdpClientSocket* socket = new UdpClientSocket(QHostAddress(connectionAddress), serviceTypesInfo[i].port);
+        connect(socket, SIGNAL(ackTimeout()), socket, SLOT(deleteLater()));
+        connect(socket, SIGNAL(ackReceived(REQUEST_HEADER,QByteArray)), this, SLOT(serviceFound(REQUEST_HEADER,QByteArray)));
+        socket->sendRequest(RQID_GET_SERVICE_STATE, nullptr, 0);
+    }
+}
+
+void ServiceTableModel::serviceFound(REQUEST_HEADER header, QByteArray data)
+{
+    UdpClientSocket* socket = dynamic_cast<UdpClientSocket*>(sender());
+    if (socket == nullptr || header.ID != RQID_GET_SERVICE_STATE || data.count() < 8)
+    {
+        return;
+    }
+    quint64 time = *(quint64*)data.constData();
+    setServiceState(socket->serverAddress().toIPv4Address(), socket->port(), time == 0 ? SERVICE_STATE_STOPPED : SERVICE_STATE_RUNNING);
+    socket->deleteLater();
 }

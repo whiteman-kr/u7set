@@ -10,6 +10,7 @@
 #include <QMutexLocker>
 #include <QQueue>
 #include <QDateTime>
+//#include <QByteArray>
 
 #include "../include/SocketIO.h"
 
@@ -83,6 +84,8 @@ public:
     virtual void onUnknownRequestAck(const REQUEST_HEADER& ackHeader, char* ackData, quint32 ackDataSize);
 
 signals:
+    void ackTimeout();
+    void ackReceived(REQUEST_HEADER header, QByteArray data);
 
 public slots:
     void onSocketThreadStartedSlot();
@@ -210,6 +213,7 @@ signals:
 public slots:
     void onSocketThreadStartedSlot();
     void onSocketThreadFinishedSlot();
+    void sendAck(UdpRequest request);
 
 private slots:
     void onTimer();

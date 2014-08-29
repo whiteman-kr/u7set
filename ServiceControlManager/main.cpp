@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     //a.setActivationWindow(&w);
     w.connect(&a, SIGNAL(messageReceived(const QString&)), SLOT(openEditor()));
-    w.show();
+    w.showMaximized();
 
     return a.exec();
 }

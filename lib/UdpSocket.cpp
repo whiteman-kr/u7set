@@ -1,4 +1,5 @@
 #include "../include/UdpSocket.h"
+#include <QByteArray>
 
 
 
@@ -87,6 +88,8 @@ void UdpClientSocket::onSocketReadyRead()
     {
         onUnknownRequestAck(*m_receivedHeader, m_receivedData + sizeof(REQUEST_HEADER), m_receivedHeader->DataLen);
     }
+
+    emit ackReceived(*m_receivedHeader, QByteArray(m_receivedData + sizeof(REQUEST_HEADER), m_receivedHeader->DataLen));
 
     m_state = UdpClientSocketState::readyToSend;
 
@@ -210,6 +213,7 @@ void UdpClientSocket::onAckTimerTimeout()
         m_mutex.unlock();
 
         onAckTimeout();
+        emit ackTimeout();
     }
     else
     {
@@ -240,7 +244,12 @@ void UdpClientSocket::onRequestTimeout(const REQUEST_HEADER& /* requestHeader */
 
 
 // -----------------------------------------------------------------------------
-// UDP Server classes' implementation
+// UDP Server classes implementation
+//
+
+
+// -----------------------------------------------------------------------------
+// UdpRequest class implementation
 //
 
 UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize) :
@@ -272,6 +281,10 @@ bool UdpRequest::isEmpty() const
     return m_requestDataSize < sizeof(REQUEST_HEADER);
 }
 
+
+// -----------------------------------------------------------------------------
+// UdpRequestProcessor class implementation
+//
 
 
 UdpRequestProcessor::UdpRequestProcessor() :
@@ -335,6 +348,11 @@ UdpClientRequestHandler::UdpClientRequestHandler(UdpRequestProcessor* udpRequest
 
     m_handlerThread.start();
 }
+
+
+// -----------------------------------------------------------------------------
+// UdpClientRequestHandler class implementation
+//
 
 
 UdpClientRequestHandler::~UdpClientRequestHandler()
@@ -420,7 +438,7 @@ UdpServerSocket::~UdpServerSocket()
 
 void UdpServerSocket::onSocketThreadStartedSlot()
 {
-    m_timer.start(5000);
+    m_timer.start(1000);
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
     connect(&m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyReadSlot()));
@@ -444,6 +462,21 @@ void UdpServerSocket::onSocketThreadFinishedSlot()
     deleteLater();
 }
 
+void UdpServerSocket::sendAck(UdpRequest request)
+{
+    qint64 sent = m_socket.writeDatagram(request.m_requestData, request.m_requestDataSize, request.m_senderAddress, request.m_senderPort);
+
+    if (sent == -1)
+    {
+        qDebug() << "UdpServerSocket::sendRequest writeDatagram error!";
+
+    }
+    else
+    {
+        qDebug() << "UdpServerSocket::sendRequest OK";
+    }
+}
+
 
 void UdpServerSocket::onSocketThreadFinished()
 {
@@ -453,6 +486,40 @@ void UdpServerSocket::onSocketThreadFinished()
 
 void UdpServerSocket::onTimer()
 {
+    qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+
+    m_clientMapMutex.lock();
+
+    QHashIterator<quint32, UdpClientRequestHandler*> i(clientRequestHandlerMap);
+
+    while (i.hasNext())
+    {
+        i.next();
+
+        UdpClientRequestHandler* clientHandler = i.value();
+
+        if (clientHandler == nullptr)
+        {
+            assert(false);
+        }
+        else
+        {
+            qint64 dtime = currentTime - clientHandler->lastRequestTime();
+
+            if (dtime > 5 * 1000)
+            {
+                // time from last request more then 5 sec
+                //
+                quint32 clientID = i.key();
+
+                clientRequestHandlerMap.remove(clientID);
+
+                delete clientHandler;
+            }
+        }
+    }
+
+    m_clientMapMutex.unlock();
 }
 
 
@@ -465,6 +532,8 @@ void UdpServerSocket::onSocketReadyReadSlot()
     UdpClientRequestHandler* clientRequestHandler = nullptr;
 
     quint32 clientID = requestHeader->ClientID;
+
+    m_clientMapMutex.lock();
 
     if (clientRequestHandlerMap.contains(clientID))
     {
@@ -482,6 +551,8 @@ void UdpServerSocket::onSocketReadyReadSlot()
     }
 
     clientRequestHandler->putRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize);
+
+    m_clientMapMutex.unlock();
 }
 
 

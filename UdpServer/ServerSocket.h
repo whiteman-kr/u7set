@@ -5,10 +5,19 @@
 
 class TestRequestProcessor : public UdpRequestProcessor
 {
+    Q_OBJECT
+
 public:
-    TestRequestProcessor() {}
+    TestRequestProcessor(QDateTime& lastStartTime, bool& isRunning) : lastStartTime(lastStartTime), isRunning(isRunning) {}
 
     void processRequest(const UdpRequest& request) override;
+
+signals:
+    void ackIsReady(UdpRequest request);
+
+private:
+    QDateTime& lastStartTime;
+    bool& isRunning;
 };
 
 
@@ -21,6 +30,10 @@ public:
     virtual ~ServerSocket();
 
     virtual UdpRequestProcessor* createUdpRequestProcessor();
+
+private:
+    QDateTime lastStartTime;
+    bool isRunning;
 };
 
 
