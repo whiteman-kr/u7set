@@ -240,7 +240,12 @@ void UdpClientSocket::onRequestTimeout(const REQUEST_HEADER& /* requestHeader */
 
 
 // -----------------------------------------------------------------------------
-// UDP Server classes' implementation
+// UDP Server classes implementation
+//
+
+
+// -----------------------------------------------------------------------------
+// UdpRequest class implementation
 //
 
 UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize) :
@@ -272,6 +277,10 @@ bool UdpRequest::isEmpty() const
     return m_requestDataSize < sizeof(REQUEST_HEADER);
 }
 
+
+// -----------------------------------------------------------------------------
+// UdpRequestProcessor class implementation
+//
 
 
 UdpRequestProcessor::UdpRequestProcessor() :
@@ -335,6 +344,11 @@ UdpClientRequestHandler::UdpClientRequestHandler(UdpRequestProcessor* udpRequest
 
     m_handlerThread.start();
 }
+
+
+// -----------------------------------------------------------------------------
+// UdpClientRequestHandler class implementation
+//
 
 
 UdpClientRequestHandler::~UdpClientRequestHandler()
@@ -473,9 +487,9 @@ void UdpServerSocket::onTimer()
         {
             qint64 dtime = currentTime - clientHandler->lastRequestTime();
 
-            if (dtime > 5000)
+            if (dtime > 5 * 1000)
             {
-                // time from last request more then 10 sec
+                // time from last request more then 5 sec
                 //
                 quint32 clientID = i.key();
 
