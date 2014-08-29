@@ -1,28 +1,5 @@
 #pragma once
 
-class DbProgress;
-
-//
-//
-// ProgressDialog
-//
-//
-class ProgressDialog : public QDialog
-{
-public:
-	ProgressDialog(QWidget* parent, const QString& description, DbProgress* progress);
-
-protected:
-	virtual void ProgressDialog::timerEvent(QTimerEvent*) override;
-
-protected slots:
-	void cancel();
-
-private:
-	QString m_description;
-	DbProgress* m_progress;
-};
-
 //
 //
 // DbProgress
