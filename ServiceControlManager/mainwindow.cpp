@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include <QTableWidget>
 #include <QHBoxLayout>
 #include <QMenu>
@@ -9,43 +8,62 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QHostAddress>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QApplication>
 #include "scanoptionswidget.h"
 #include "servicetablemodel.h"
 #include "../include/UdpSocket.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
     serviceModel(new ServiceTableModel(this)),
+    serviceTable(new QTableView(this)),
     trayIcon(new QSystemTrayIcon(this))
 {
+    connect(this, SIGNAL(commandPushed(int,int,int)), serviceModel, SLOT(sendCommand(int,int,int)));
+
+    serviceTable->setModel(serviceModel);
+    connect(serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), serviceTable, SLOT(resizeColumnsToContents()));
+    connect(serviceModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), serviceTable, SLOT(resizeColumnsToContents()));
+    serviceTable->resizeColumnsToContents();
+    setCentralWidget(serviceTable);
+
     trayIcon->setIcon(windowIcon());
     trayIcon->show();
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
 
     QMenu *contextMenu = new QMenu(this);
+    QToolBar *toolBar = addToolBar(tr("Main actions"));
 
     contextMenu->addAction(tr("Open editor"), this, SLOT(openEditor()));
     contextMenu->addSeparator();
 
     // Manage Connections
     QMenu* menu = menuBar()->addMenu(tr("Connections"));
-    contextMenu->addAction(menu->addAction(tr("Scan network..."), this, SLOT(scanNetwork())));
+    QAction* scanNetworkAction = menu->addAction(tr("Scan network..."), this, SLOT(scanNetwork()));
+    menu->addSeparator();
+    toolBar->addAction(scanNetworkAction);
+    contextMenu->addAction(scanNetworkAction);
     contextMenu->addSeparator();
+
+    toolBar->addSeparator();
+    toolBar->addAction(menu->addAction(tr("Start service"), this, SLOT(startService())));
+    toolBar->addAction(menu->addAction(tr("Stop service"), this, SLOT(stopService())));
+    toolBar->addAction(menu->addAction(tr("Restart service"), this, SLOT(restartService())));
+    toolBar->addSeparator();
     //
 
     // Context menu connections list
-    QTableView* serviceTable = new QTableView(this);
-    serviceTable->setModel(serviceModel);
-    connect(serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), serviceTable, SLOT(resizeColumnsToContents()));
-    setCentralWidget(serviceTable);
     /*QActionGroup *serviceActionGroup = new QActionGroup(this);
     connect(serviceActionGroup, SIGNAL(triggered(QAction *)), this, SLOT(connectionClicked(QAction *)));
 
     contextMenu->addSeparator();*/
     //
 
+    menu->addSeparator();
     QAction* exitAction = menu->addAction(tr("Exit"), qApp, SLOT(quit()));
+    toolBar->addAction(exitAction);
 
     //Languages
     QActionGroup *languageActionGroup = new QActionGroup(this);
@@ -99,7 +117,6 @@ MainWindow::MainWindow(QWidget *parent) :
     trayIcon->setContextMenu(contextMenu);
 
     //resize(serviceTable->maximumViewportSize());
-    //ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()
@@ -108,7 +125,6 @@ MainWindow::~MainWindow()
     {
         widgets[i]->deleteLater();
     }
-    delete ui;
 }
 
 void MainWindow::openConnectionInfo(QString text)
@@ -132,9 +148,23 @@ void MainWindow::openConnectionInfo(QString text)
     widgets.append(w);
 }
 
+void MainWindow::setServicesForCommand(int command)
+{
+    QModelIndexList selection = serviceTable->selectionModel()->selectedIndexes();
+    if (selection.count() == 0)
+    {
+        QMessageBox::warning(this, tr("Warning"), tr("No service is selected!"));
+    }
+    for (int i = 0; i < selection.count(); i++)
+    {
+        emit commandPushed(selection[i].row(), selection[i].column(), command);
+    }
+}
+
 void MainWindow::openEditor()
 {
     showNormal();
+    showMaximized();
     raise();
     activateWindow();
 }
@@ -196,4 +226,19 @@ void MainWindow::scanNetwork()
             serviceModel->checkAddress(peerAddress.toString());
         }
     }
+}
+
+void MainWindow::startService()
+{
+    setServicesForCommand(RQID_SERVICE_START);
+}
+
+void MainWindow::stopService()
+{
+    setServicesForCommand(RQID_SERVICE_STOP);
+}
+
+void MainWindow::restartService()
+{
+    setServicesForCommand(RQID_SERVICE_RESTART);
 }

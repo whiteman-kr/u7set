@@ -1,43 +1,5 @@
 #include "../include/DbStruct.h"
-
-//
-//
-// ProgressDialog
-//
-//
-ProgressDialog::ProgressDialog(QWidget* parent, const QString& description, DbProgress* progress) :
-	QDialog(parent),
-	m_description(description),
-	m_progress(progress)
-{
-	assert(m_progress);
-
-	setWindowTitle(description);
-
-	connect(this, &QDialog::rejected, this, &ProgressDialog::cancel);
-
-	startTimer(10);
-}
-
-void ProgressDialog::cancel()
-{
-	m_progress->setCancel(true);
-}
-
-void ProgressDialog::timerEvent(QTimerEvent*)
-{
-	assert(m_progress);
-
-	if (m_progress->completed() == true)
-	{
-		accept();
-	}
-
-	setWindowTitle(m_description + QString(" - %1%%").arg(m_progress->value()));
-
-	return;
-}
-
+#include "../include/DbProgressDialog.h"
 
 //
 //
@@ -69,18 +31,7 @@ bool DbProgress::init()
 
 bool DbProgress::run(QWidget* parentWidget, const QString& description)
 {
-	if (m_progressEnabled == true)
-	{
-		ProgressDialog progressDialog(parentWidget, description, this);
-		progressDialog.exec();
-	}
-	else
-	{
-		while (completed() == false)
-		{
-			QThread::yieldCurrentThread();
-		}
-	}
+    ProgressDialog::ShowProgressDialog(parentWidget, description, this);
 
 	if (hasError() == true)
 	{

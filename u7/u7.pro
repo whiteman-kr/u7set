@@ -73,7 +73,8 @@ SOURCES +=\
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
     ../lib/DbController.cpp \
-    ../lib/DbWorker.cpp
+    ../lib/DbWorker.cpp \
+    ../lib/DbProgressDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -108,7 +109,8 @@ HEADERS  += \
     CheckInDialog.h \
     ProjectsTabPage.h \
     ../include/DbController.h \
-    ../include/DbWorker.h
+    ../include/DbWorker.h \
+    ../include/DbProgressDialog.h
 
 FORMS    += \
     ChangesetDialog.ui \

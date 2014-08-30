@@ -21,9 +21,10 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     scanoptionswidget.h \
     servicetablemodel.h \
-    ../include/UdpSocket.h
+    ../include/UdpSocket.h \
+    ../include/SocketIO.h
 
-FORMS    += mainwindow.ui
+FORMS    +=
 
 TRANSLATIONS = ./translations/ServiceControlManager_ru.ts \
                 ./translations/ServiceControlManager_uk.ts
