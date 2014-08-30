@@ -27,7 +27,7 @@ struct serviceInfo
     UdpClientSocket* clientSocket;
     QWidget* statusWidget;
 
-    serviceInfo() : state(SERVICE_STATE_UNDEFINED), statusWidget(nullptr) {}
+    serviceInfo() : state(SERVICE_STATE_UNDEFINED), clientSocket(nullptr), statusWidget(nullptr) {}
 };
 
 struct hostInfo
@@ -43,23 +43,31 @@ class ServiceTableModel : public QAbstractTableModel
     Q_OBJECT
 public:
     explicit ServiceTableModel(QObject *parent = 0);
+    ~ServiceTableModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const ;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-    void setServiceState(quint32 ip, quint16 port, int state);
     void checkAddress(QString connectionAddress);
 
 signals:
 
 public slots:
-    void serviceFound(REQUEST_HEADER header, QByteArray data);
+    void serviceAckReceived(REQUEST_HEADER header, QByteArray data);
     void serviceNotFound();
+    void checkServiceStates();
+
+    void sendStart();
+    void sendStop();
+    void sendRestart();
 
 private:
     QVector<hostInfo> hostsInfo;
+
+    void setServiceState(quint32 ip, quint16 port, int state);
+    void checkForDeletingSocket(UdpClientSocket* socket);
 };
 
 #endif // SERVICETABLEMODEL_H

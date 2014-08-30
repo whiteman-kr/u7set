@@ -24,14 +24,22 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
 
     QMenu *contextMenu = new QMenu(this);
+    QToolBar *toolBar = addToolBar(tr("Main actions"));
 
     contextMenu->addAction(tr("Open editor"), this, SLOT(openEditor()));
     contextMenu->addSeparator();
 
     // Manage Connections
     QMenu* menu = menuBar()->addMenu(tr("Connections"));
-    contextMenu->addAction(menu->addAction(tr("Scan network..."), this, SLOT(scanNetwork())));
+    QAction* scanNetworkAction = menu->addAction(tr("Scan network..."), this, SLOT(scanNetwork()));
+    menu->addSeparator();
+    toolBar->addAction(scanNetworkAction);
+    contextMenu->addAction(scanNetworkAction);
     contextMenu->addSeparator();
+
+    menu->addAction(tr("Start service"), this, SLOT(startService()));
+    menu->addAction(tr("Stop service"), this, SLOT(stopService()));
+    menu->addAction(tr("Restart service"), this, SLOT(restartService()));
     //
 
     // Context menu connections list
@@ -39,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     serviceTable->setModel(serviceModel);
     connect(serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), serviceTable, SLOT(resizeColumnsToContents()));
     connect(serviceModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), serviceTable, SLOT(resizeColumnsToContents()));
+    serviceTable->resizeColumnsToContents();
     setCentralWidget(serviceTable);
     /*QActionGroup *serviceActionGroup = new QActionGroup(this);
     connect(serviceActionGroup, SIGNAL(triggered(QAction *)), this, SLOT(connectionClicked(QAction *)));
@@ -47,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //
 
     QAction* exitAction = menu->addAction(tr("Exit"), qApp, SLOT(quit()));
+    toolBar->addAction(exitAction);
 
     //Languages
     QActionGroup *languageActionGroup = new QActionGroup(this);
@@ -136,6 +146,7 @@ void MainWindow::openConnectionInfo(QString text)
 void MainWindow::openEditor()
 {
     showNormal();
+    showMaximized();
     raise();
     activateWindow();
 }
@@ -197,4 +208,19 @@ void MainWindow::scanNetwork()
             serviceModel->checkAddress(peerAddress.toString());
         }
     }
+}
+
+void MainWindow::startService()
+{
+
+}
+
+void MainWindow::stopService()
+{
+
+}
+
+void MainWindow::restartService()
+{
+
 }

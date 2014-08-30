@@ -33,6 +33,14 @@ public slots:
     void switchLanguage(QAction* selectedAction);
     void connectionClicked(QAction* selectedAction);
     void scanNetwork();
+    void startService();
+    void stopService();
+    void restartService();
+
+signals:
+    void startPushed(int row, int col);
+    void stopPushed(int row, int col);
+    void restartPushed(int row, int col);
 };
 
 #endif // MAINWINDOW_H

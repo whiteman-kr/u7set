@@ -30,6 +30,28 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
             emit ackIsReady(newRequest);
             return;
         }
+    case RQID_SERVICE_START:
+        {
+            isRunning = true;
+            lastStartTime = QDateTime::currentDateTime();
+            emit ackIsReady(newRequest);
+            return;
+        }
+        break;
+    case RQID_SERVICE_STOP:
+        {
+            isRunning = false;
+            emit ackIsReady(newRequest);
+            return;
+        }
+        break;
+    case RQID_SERVICE_RESTART:
+        {
+            isRunning = true;
+            lastStartTime = QDateTime::currentDateTime();
+            emit ackIsReady(newRequest);
+            return;
+        }
         break;
     default:
         break;
