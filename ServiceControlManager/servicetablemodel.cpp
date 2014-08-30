@@ -5,6 +5,7 @@
 #include "../include/SocketIO.h"
 #include <QSettings>
 #include <QWidget>
+#include <QApplication>
 
 serviceTypeInfo serviceTypesInfo[SERVICE_TYPE_COUNT] =
 {
@@ -15,7 +16,8 @@ serviceTypeInfo serviceTypesInfo[SERVICE_TYPE_COUNT] =
 };
 
 ServiceTableModel::ServiceTableModel(QObject *parent) :
-    QAbstractTableModel(parent)
+    QAbstractTableModel(parent),
+    freezeUpdate(false)
 {
     QSettings settings;
     int size = settings.beginReadArray("server list");
@@ -73,7 +75,14 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole:
         switch(hostsInfo[row].servicesInfo[col].state)
         {
-        case SERVICE_STATE_RUNNING: return tr("Running");
+        case SERVICE_STATE_RUNNING:
+        {
+            quint64 time = hostsInfo[row].servicesInfo[col].time;
+            int s = time % 60; time /= 60;
+            int m = time % 60; time /= 60;
+            int h = time % 24; time /= 24;
+            return tr("Running") + QString(" (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, QChar('0')).arg(s, 2, QChar('0'));
+        }
         case SERVICE_STATE_STOPPED: return tr("Stopped");
         case SERVICE_STATE_UNAVAILABLE: return tr("Unavailable");
         default: return QVariant();
@@ -82,8 +91,8 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
     case Qt::BackgroundRole:
         switch(hostsInfo[row].servicesInfo[col].state)
         {
-        case SERVICE_STATE_RUNNING: return QBrush(Qt::green);
-        case SERVICE_STATE_STOPPED: return QBrush(Qt::yellow);
+        case SERVICE_STATE_RUNNING: return QBrush(QColor(0x7f,0xff,0x7f));
+        case SERVICE_STATE_STOPPED: return QBrush(QColor(0xff,0xff,0x7f));
         case SERVICE_STATE_UNAVAILABLE: return QBrush(Qt::lightGray);
         default: return QBrush(Qt::red);
         }
@@ -109,7 +118,7 @@ QVariant ServiceTableModel::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
+serviceInfo* ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
 {
     int portIndex = -1;
     for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
@@ -122,7 +131,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
     }
     if (portIndex == -1)
     {
-        return;
+        return nullptr;
     }
     for (int i = 0; i < hostsInfo.count(); i++)
     {
@@ -132,7 +141,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
             hi.servicesInfo[portIndex].state = state;
             QModelIndex changedIndex = index(i, portIndex);
             emit dataChanged(changedIndex, changedIndex, QVector<int>() << Qt::DisplayRole);
-            return;
+            return &hi.servicesInfo[portIndex];
         }
     }
     hostInfo hi;
@@ -141,6 +150,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
     beginInsertRows(QModelIndex(), hostsInfo.count(), hostsInfo.count());
     hostsInfo.append(hi);
     endInsertRows();
+    return &hostsInfo[hostsInfo.count() - 1].servicesInfo[portIndex];
 }
 
 void ServiceTableModel::checkForDeletingSocket(UdpClientSocket *socket)
@@ -218,7 +228,11 @@ void ServiceTableModel::serviceAckReceived(REQUEST_HEADER header, QByteArray dat
         }
         quint64 time = *(quint64*)data.constData();
         quint64 ip = socket->serverAddress().toIPv4Address();
-        setServiceState(ip, socket->port(), time == 0 ? SERVICE_STATE_STOPPED : SERVICE_STATE_RUNNING);
+        serviceInfo* si = setServiceState(ip, socket->port(), time == 0 ? SERVICE_STATE_STOPPED : SERVICE_STATE_RUNNING);
+        if (si != nullptr)
+        {
+            si->time = time;
+        }
 
         checkForDeletingSocket(socket);
     }
@@ -252,6 +266,10 @@ void ServiceTableModel::serviceNotFound()
 
 void ServiceTableModel::checkServiceStates()
 {
+    if (freezeUpdate)
+    {
+        return;
+    }
     for (int i = 0; i < hostsInfo.count(); i++)
     {
         for (int j = 0; j < SERVICE_TYPE_COUNT; j++)
@@ -264,22 +282,33 @@ void ServiceTableModel::checkServiceStates()
                 connect(clientSocket, SIGNAL(ackReceived(REQUEST_HEADER,QByteArray)), this, SLOT(serviceAckReceived(REQUEST_HEADER,QByteArray)));
                 hostsInfo[i].servicesInfo[j].clientSocket = clientSocket;
             }
+            while (clientSocket->isWaitingForAck())
+            {
+                qApp->processEvents();
+            }
             clientSocket->sendRequest(RQID_GET_SERVICE_STATE, nullptr, 0);
         }
     }
 }
 
-void ServiceTableModel::sendStart()
+void ServiceTableModel::sendCommand(int row, int col, int command)
 {
-
-}
-
-void ServiceTableModel::sendStop()
-{
-
-}
-
-void ServiceTableModel::sendRestart()
-{
-
+    UdpClientSocket* clientSocket = hostsInfo[row].servicesInfo[col].clientSocket;
+    int state = hostsInfo[row].servicesInfo[col].state;
+    if (clientSocket == nullptr)
+    {
+        return;
+    }
+    if (!(state == SERVICE_STATE_RUNNING && (command == RQID_SERVICE_STOP || command == RQID_SERVICE_RESTART)) &&
+            !(state == SERVICE_STATE_STOPPED && command == RQID_SERVICE_START))
+    {
+        return;
+    }
+    freezeUpdate = true;
+    while (clientSocket->isWaitingForAck())
+    {
+        qApp->processEvents();
+    }
+    clientSocket->sendRequest(command, nullptr, 0);
+    freezeUpdate = false;
 }

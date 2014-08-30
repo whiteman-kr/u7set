@@ -72,6 +72,8 @@ public:
     const quint16 port() const;
     void setPort(quint16 port);
 
+    bool isWaitingForAck() { return m_state == waitingForAck; }
+
     void setProtocolVersion(quint32 version) { m_protocolVersion = version; }
     void setTimeout(int msTimeout) { m_msTimeout = msTimeout; }
     void setRetryCount(int retryCount) { m_retryCount = retryCount; }

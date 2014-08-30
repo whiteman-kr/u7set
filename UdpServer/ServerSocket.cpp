@@ -21,7 +21,7 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
             newRequest.m_requestDataSize = sizeof(REQUEST_HEADER) + header->DataLen;
             if (isRunning)
             {
-                time = (QDateTime::currentDateTime().secsTo(lastStartTime));
+                time = lastStartTime.secsTo(QDateTime::currentDateTime());
             }
             else
             {
@@ -32,6 +32,10 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
         }
     case RQID_SERVICE_START:
         {
+            if (isRunning)
+            {
+                return;
+            }
             isRunning = true;
             lastStartTime = QDateTime::currentDateTime();
             emit ackIsReady(newRequest);
@@ -40,6 +44,10 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
         break;
     case RQID_SERVICE_STOP:
         {
+            if (!isRunning)
+            {
+                return;
+            }
             isRunning = false;
             emit ackIsReady(newRequest);
             return;
@@ -47,7 +55,10 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
         break;
     case RQID_SERVICE_RESTART:
         {
-            isRunning = true;
+            if (!isRunning)
+            {
+                return;
+            }
             lastStartTime = QDateTime::currentDateTime();
             emit ackIsReady(newRequest);
             return;

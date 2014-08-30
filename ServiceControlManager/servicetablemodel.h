@@ -24,6 +24,7 @@ struct serviceTypeInfo
 struct serviceInfo
 {
     int state;
+    quint64 time;
     UdpClientSocket* clientSocket;
     QWidget* statusWidget;
 
@@ -59,14 +60,13 @@ public slots:
     void serviceNotFound();
     void checkServiceStates();
 
-    void sendStart();
-    void sendStop();
-    void sendRestart();
+    void sendCommand(int row, int col, int command);
 
 private:
     QVector<hostInfo> hostsInfo;
+    bool freezeUpdate;
 
-    void setServiceState(quint32 ip, quint16 port, int state);
+    serviceInfo* setServiceState(quint32 ip, quint16 port, int state);
     void checkForDeletingSocket(UdpClientSocket* socket);
 };
 

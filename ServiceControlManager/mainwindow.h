@@ -5,10 +5,7 @@
 #include <QSystemTrayIcon>
 
 class ServiceTableModel;
-
-namespace Ui {
-class MainWindow;
-}
+class QTableView;
 
 class MainWindow : public QMainWindow
 {
@@ -19,13 +16,13 @@ public:
     ~MainWindow();
 
 private:
-    Ui::MainWindow *ui;
     QSystemTrayIcon *trayIcon;
-
-    void openConnectionInfo(QString text);
-
     QVector<QWidget*> widgets;
     ServiceTableModel* serviceModel;
+    QTableView* serviceTable;
+
+    void openConnectionInfo(QString text);
+    void setServicesForCommand(int command);
 
 public slots:
     void openEditor();
@@ -38,9 +35,7 @@ public slots:
     void restartService();
 
 signals:
-    void startPushed(int row, int col);
-    void stopPushed(int row, int col);
-    void restartPushed(int row, int col);
+    void commandPushed(int row, int col, int command);
 };
 
 #endif // MAINWINDOW_H
