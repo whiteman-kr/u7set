@@ -565,7 +565,8 @@ void DbFileInfo::setCreated(const QDateTime& value)
 
 void DbFileInfo::setCreated(const QString& value)
 {
-	QDateTime dt = QDateTime::fromString(value, "yyyy-MM-ddTHH:mm:ss");
+	QDateTime dt = QDateTime::fromString(value, "yyyy-MM-ddThh:mm:ss");
+	//QDateTime dt = QDateTime::fromString(value, Qt::RFC2822Date);
 	setCreated(dt);
 }
 

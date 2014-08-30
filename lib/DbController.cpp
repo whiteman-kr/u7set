@@ -29,6 +29,9 @@ DbController::DbController() :
 	connect(this, &DbController::signal_updateUser, m_worker, &DbWorker::slot_updateUser);
 	connect(this, &DbController::signal_getUserList, m_worker, &DbWorker::slot_getUserList);
 
+	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
+	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
+
 	m_thread.start();
 }
 
@@ -256,6 +259,63 @@ bool DbController::updateUser(const DbUser& user, QWidget* parentWidget)
 	emit signal_updateUser(user);
 
 	bool result = waitForComplete(parentWidget, tr("Updating user profile"));
+	return result;
+}
+
+bool DbController::getFileList(std::vector<DbFileInfo>* files, QWidget* parentWidget)
+{
+	return getFileList(files, QString(), parentWidget);
+}
+
+bool DbController::getFileList(std::vector<DbFileInfo>* files, const QString& filter, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (files == nullptr)
+	{
+		assert(files != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFileList(files, filter);
+
+	bool result = waitForComplete(parentWidget, tr("Geting file list"));
+	return result;
+}
+
+bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (files == nullptr)
+	{
+		assert(files != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_addFiles(files);
+
+	bool result = waitForComplete(parentWidget, tr("Adding files"));
 	return result;
 }
 

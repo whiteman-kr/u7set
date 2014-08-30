@@ -53,6 +53,11 @@ public slots:
 	void slot_updateUser(DbUser user);
 	void slot_getUserList(std::vector<DbUser>* out);
 
+	// File management
+	//
+	void slot_getFileList(std::vector<DbFileInfo>* files, QString filter);
+	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files);
+
 	// Service
 	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);

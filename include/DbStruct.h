@@ -69,7 +69,7 @@ private:
 
 	QString m_currentOperation;
 
-	int m_value;
+	int m_value;					// 0 - 100%
 
 	QString m_errorMessage;			// In case of error, this variable will contain error description
 	QString m_completeMessage;		// If this field is not empty, show message box with the text

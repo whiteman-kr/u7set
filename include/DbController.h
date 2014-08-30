@@ -38,6 +38,13 @@ public:
 	bool updateUser(const DbUser& user, QWidget* parentWidget);
 	bool getUserList(std::vector<DbUser>* out, QWidget* parentWidget);
 
+	// File management
+	//
+	bool getFileList(std::vector<DbFileInfo>* files, QWidget* parentWidget);
+	bool getFileList(std::vector<DbFileInfo>* files, const QString& filter, QWidget* parentWidget);
+	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget* parentWidget);
+
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -49,6 +56,9 @@ signals:
 	void signal_createUser(DbUser user);
 	void signal_updateUser(DbUser user);
 	void signal_getUserList(std::vector<DbUser>* out);
+
+	void signal_getFileList(std::vector<DbFileInfo>* files, QString filter);
+	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files);
 
 	//
 	// Service functions

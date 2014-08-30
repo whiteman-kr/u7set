@@ -189,7 +189,9 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0011.sql \
     DatabaseUpgrade/Upgrade0012.sql \
     DatabaseUpgrade/Upgrade0002.sql \
-    DatabaseUpgrade/Upgrade0001.sql
+    DatabaseUpgrade/Upgrade0001.sql \
+    DatabaseUpgrade/Upgrade0013.sql \
+    DatabaseUpgrade/Upgrade0014.sql
 
 
 # Visual Leak Detector

@@ -270,7 +270,26 @@ void MainWindow::showAbout()
 
 void MainWindow::debug()
 {
-	//dbController()->debug();
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	std::shared_ptr<DbFile> f1 = std::make_shared<DbFile>();
+	f1->setFileName("filefsf.fcf");
+
+	QByteArray data;
+	data.push_back(1);
+	data.push_back(2);
+	data.push_back(3);
+	data.push_back(4);
+	data.push_back(5);
+	f1->swapData(data);
+
+	files.push_back(f1);
+
+	dbController()->addFiles(&files, this);
+
+	//std::vector<DbFileInfo> files;
+	//dbController()->getFileList(&files, this);
+
 }
 
 void MainWindow::projectOpened(DbProject project)

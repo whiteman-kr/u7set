@@ -12,5 +12,7 @@
         <file>DatabaseUpgrade/Upgrade0010.sql</file>
         <file>DatabaseUpgrade/Upgrade0011.sql</file>
         <file>DatabaseUpgrade/Upgrade0012.sql</file>
+		<file>DatabaseUpgrade/Upgrade0013.sql</file>
+		<file>DatabaseUpgrade/Upgrade0014.sql</file>
     </qresource>
 </RCC>

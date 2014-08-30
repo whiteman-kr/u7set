@@ -15,6 +15,8 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add UNIQUE(FileID), UNIQUE(SignalID) to the CheckOut table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0010.sql"},
 	{"Add SysttemInst, CaseInst, SubblockInst and BlockInst tables", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0011.sql"},
 	{"Add SystemID, CaseID, SubblockID, BlockID columns to CheckOut table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0012.sql"},
+	{"Add GetFileList stored procedure", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0013.sql"},
+	{"Add AddFile stored procedure", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0014.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -1328,6 +1330,150 @@ void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 		{
 			out->push_back(user);
 		}
+	}
+
+	return;
+}
+
+void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, QString filter)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr)
+	{
+		assert(files != nullptr);
+		return;
+	}
+
+	files->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file list. Database connection is not openned."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM GetFileList('%%%1');").arg(filter);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get file list. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbFileInfo fileInfo;
+
+		fileInfo.setFileName(q.value("Name").toString());
+		fileInfo.setFileId(q.value("FileID").toInt());
+		fileInfo.setSize(q.value("Size").toInt());
+		fileInfo.setChangeset(q.value("ChangesetID").toInt());
+		fileInfo.setCreated(q.value("Created").toString());
+		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
+		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+
+		DbUser user;
+		user.setUserId(q.value("UserID").toInt());
+		fileInfo.setUser(user);
+
+		files->push_back(fileInfo);
+	}
+
+	return;
+}
+
+void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr || files->empty() == true)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file list. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		std::shared_ptr<DbFile> file = files->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM AddFile(%1,'%2', %3, ")
+				.arg(currentUser().userId())
+				.arg(file->fileName())
+				.arg(file->size());
+
+		QString data;
+		file->convertToDatabaseString(&data);
+		request.append(data);
+		data.clear();
+
+		request += ");";
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(tr("Can't add file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't get FileID"));
+			return;
+		}
+
+		int fileId = q.value(0).toInt();
+
+		file->setFileId(fileId);
+		file->setUser(currentUser());
+		file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
 	}
 
 	return;
