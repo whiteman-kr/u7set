@@ -40,10 +40,15 @@ public:
 
 	// File management
 	//
-	bool getFileList(std::vector<DbFileInfo>* files, QWidget* parentWidget);
-	bool getFileList(std::vector<DbFileInfo>* files, const QString& filter, QWidget* parentWidget);
-	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget* parentWidget);
+	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QWidget* parentWidget);
+	bool getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, QWidget* parentWidget);
+	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 
+	/*bool getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
+	std::shared_ptr<DbFile> getWorkcopy(const DbFileInfo& file, QWidget* parentWidget);
+
+	bool setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWidget* parentWidget);
+	bool setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget);*/
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
@@ -57,8 +62,8 @@ signals:
 	void signal_updateUser(DbUser user);
 	void signal_getUserList(std::vector<DbUser>* out);
 
-	void signal_getFileList(std::vector<DbFileInfo>* files, QString filter);
-	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files);
+	void signal_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter);
+	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
 
 	//
 	// Service functions

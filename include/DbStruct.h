@@ -95,7 +95,7 @@ public:
 	{
 		Added = 1,
 		Modified = 2,
-		Deleted = 4
+		Deleted = 3
 	};
 
 	VcsItemAction();
@@ -241,6 +241,9 @@ public:
 	void resetFileId();
 	bool hasFileId() const;
 
+	int parentId() const;
+	void setParentId(int value);
+
 	virtual int size() const;
 	void setSize(int size);
 
@@ -266,6 +269,7 @@ public:
 protected:
 	QString m_fileName;
 	int m_fileId;
+	int m_parentId;
 	int m_size;
 
 	int m_changeset;

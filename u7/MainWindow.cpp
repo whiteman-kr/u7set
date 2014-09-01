@@ -285,7 +285,8 @@ void MainWindow::debug()
 
 	files.push_back(f1);
 
-	dbController()->addFiles(&files, this);
+	dbController()->addFiles(&files, 0, this);
+	//dbController()->addFiles(&files, 0, this);
 
 	//std::vector<DbFileInfo> files;
 	//dbController()->getFileList(&files, this);

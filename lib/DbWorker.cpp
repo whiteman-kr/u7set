@@ -17,6 +17,8 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add SystemID, CaseID, SubblockID, BlockID columns to CheckOut table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0012.sql"},
 	{"Add GetFileList stored procedure", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0013.sql"},
 	{"Add AddFile stored procedure", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0014.sql"},
+	{"Add fields ParentID, Deleted to File table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0015.sql"},
+	{"Replace AddFile function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0016.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -1335,7 +1337,7 @@ void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 	return;
 }
 
-void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, QString filter)
+void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter)
 {
 	// Init automitic varaiables
 	//
@@ -1363,7 +1365,9 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, QString filter)
 		return;
 	}
 
-	QString request = QString("SELECT * FROM GetFileList('%%%1');").arg(filter);
+	QString request = QString("SELECT * FROM GetFileList(%1, '%%%2');")
+			.arg(parentId)
+			.arg(filter);
 
 	QSqlQuery q(db);
 
@@ -1381,6 +1385,7 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, QString filter)
 
 		fileInfo.setFileName(q.value("Name").toString());
 		fileInfo.setFileId(q.value("FileID").toInt());
+		fileInfo.setParentId(q.value("ParentID").toInt());
 		fileInfo.setSize(q.value("Size").toInt());
 		fileInfo.setChangeset(q.value("ChangesetID").toInt());
 		fileInfo.setCreated(q.value("Created").toString());
@@ -1397,7 +1402,7 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, QString filter)
 	return;
 }
 
-void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files)
+void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId)
 {
 	// Init automitic varaiables
 	//
@@ -1441,9 +1446,10 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files)
 
 		// request
 		//
-		QString request = QString("SELECT * FROM AddFile(%1,'%2', %3, ")
+		QString request = QString("SELECT * FROM AddFile(%1,'%2', %3, %4, ")
 				.arg(currentUser().userId())
 				.arg(file->fileName())
+				.arg(parentId)
 				.arg(file->size());
 
 		QString data;

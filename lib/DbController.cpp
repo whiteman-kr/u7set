@@ -262,12 +262,12 @@ bool DbController::updateUser(const DbUser& user, QWidget* parentWidget)
 	return result;
 }
 
-bool DbController::getFileList(std::vector<DbFileInfo>* files, QWidget* parentWidget)
+bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QWidget* parentWidget)
 {
-	return getFileList(files, QString(), parentWidget);
+	return getFileList(files, parentId, QString(), parentWidget);
 }
 
-bool DbController::getFileList(std::vector<DbFileInfo>* files, const QString& filter, QWidget* parentWidget)
+bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -287,13 +287,13 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, const QString& fi
 
 	// Emit signal end wait for complete
 	//
-	emit signal_getFileList(files, filter);
+	emit signal_getFileList(files, parentId, filter);
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list"));
 	return result;
 }
 
-bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget* parentWidget)
+bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -313,7 +313,7 @@ bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget
 
 	// Emit signal end wait for complete
 	//
-	emit signal_addFiles(files);
+	emit signal_addFiles(files, parentId);
 
 	bool result = waitForComplete(parentWidget, tr("Adding files"));
 	return result;

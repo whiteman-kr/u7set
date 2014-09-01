@@ -437,6 +437,7 @@ void DbUser::setDisabled(bool value)
 //
 DbFileInfo::DbFileInfo() :
 	m_fileId(-1),
+	m_parentId(0),
 	m_size(0),
 	m_changeset(-1),
 	m_state(VcsState::CheckedIn)
@@ -492,6 +493,16 @@ void DbFileInfo::resetFileId()
 bool DbFileInfo::hasFileId() const
 {
 	return m_fileId == -1;
+}
+
+int DbFileInfo::parentId() const
+{
+	return m_parentId;
+}
+
+void DbFileInfo::setParentId(int value)
+{
+	m_parentId = value;
 }
 
 int DbFileInfo::changeset() const

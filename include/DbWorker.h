@@ -55,8 +55,8 @@ public slots:
 
 	// File management
 	//
-	void slot_getFileList(std::vector<DbFileInfo>* files, QString filter);
-	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files);
+	void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter);
+	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
 
 	// Service
 	//
