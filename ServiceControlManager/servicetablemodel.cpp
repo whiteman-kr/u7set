@@ -236,9 +236,9 @@ void ServiceTableModel::serviceAckReceived(REQUEST_HEADER header, QByteArray dat
 
         checkForDeletingSocket(socket);
     }
-    case RQID_SERVICE_START:
-    case RQID_SERVICE_STOP:
-    case RQID_SERVICE_RESTART:
+    case RQID_SERVICE_MF_START:
+    case RQID_SERVICE_MF_STOP:
+    case RQID_SERVICE_MF_RESTART:
         break;
     default:
         qDebug() << "Unknown packet ID";
@@ -299,8 +299,8 @@ void ServiceTableModel::sendCommand(int row, int col, int command)
     {
         return;
     }
-    if (!(state == SERVICE_STATE_RUNNING && (command == RQID_SERVICE_STOP || command == RQID_SERVICE_RESTART)) &&
-            !(state == SERVICE_STATE_STOPPED && command == RQID_SERVICE_START))
+    if (!(state == SERVICE_STATE_RUNNING && (command == RQID_SERVICE_MF_STOP || command == RQID_SERVICE_MF_RESTART)) &&
+            !(state == SERVICE_STATE_STOPPED && command == RQID_SERVICE_MF_START))
     {
         return;
     }

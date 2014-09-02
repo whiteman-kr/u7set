@@ -208,9 +208,10 @@ public:
     virtual void onSocketThreadStarted();
     virtual void onSocketThreadFinished();
 
-    virtual UdpRequestProcessor* createUdpRequestProcessor() = 0;           //
+    virtual UdpRequestProcessor* createUdpRequestProcessor() { return nullptr; }
 
 signals:
+    void request(UdpServerSocket* serverSocket, UdpRequest request);
 
 public slots:
     void onSocketThreadStartedSlot();

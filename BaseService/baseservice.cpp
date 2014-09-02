@@ -6,21 +6,30 @@
 
 
 MainWorker::MainWorker() :
-    m_mainUdpServerSocket(nullptr)
+    m_baseUdpServerSocket(nullptr),
+    m_serviceMainFunctionState(ServiceMainFunctionState::Stopped)
 {
 }
 
 
 MainWorker::~MainWorker()
 {
-    delete m_mainUdpServerSocket;
 }
 
 
 void MainWorker::onMainWorkerThreadStarted()
 {
-   // m_mainUdpServerSocket = new ServerSocket(QHostAddress("192.168.122.122"), 3000);
+    m_baseUdpServerSocket = new UdpServerSocket(QHostAddress("192.168.122.122"), 3000);
 }
+
+
+void MainWorker::onMainWorkerThreadFinished()
+{
+    delete m_baseUdpServerSocket;
+
+    deleteLater();
+}
+
 
 
 // MainWorkerController class implementation
@@ -33,11 +42,8 @@ MainWorkerController::MainWorkerController()
 
     worker->moveToThread(&m_mainWorkerThread);
 
-    connect(&m_mainWorkerThread, &QThread::finished, worker, &QObject::deleteLater);
     connect(&m_mainWorkerThread, &QThread::started, worker, &MainWorker::onMainWorkerThreadStarted);
-
-    //connect(this, &Controller::operate, worker, &Worker::doWork);
-    //connect(worker, &Worker::resultReady, this, &Controller::handleResults);
+    connect(&m_mainWorkerThread, &QThread::finished, worker, &MainWorker::onMainWorkerThreadFinished);
 
     m_mainWorkerThread.start();
 }
@@ -76,6 +82,10 @@ void BaseService::stop()
 }
 
 
+void BaseService::getBindToAddress(QHostAddress& bindToAddress, quint16& port)
+{
+    //bindToAddress.setAddress(("127.0.0.1"), );
+}
 
 
 

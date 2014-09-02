@@ -230,15 +230,15 @@ void MainWindow::scanNetwork()
 
 void MainWindow::startService()
 {
-    setServicesForCommand(RQID_SERVICE_START);
+    setServicesForCommand(RQID_SERVICE_MF_START);
 }
 
 void MainWindow::stopService()
 {
-    setServicesForCommand(RQID_SERVICE_STOP);
+    setServicesForCommand(RQID_SERVICE_MF_STOP);
 }
 
 void MainWindow::restartService()
 {
-    setServicesForCommand(RQID_SERVICE_RESTART);
+    setServicesForCommand(RQID_SERVICE_MF_RESTART);
 }

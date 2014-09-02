@@ -529,7 +529,9 @@ void UdpServerSocket::onSocketReadyReadSlot()
 
     datagramReceived();
 
-    UdpClientRequestHandler* clientRequestHandler = nullptr;
+    emit request(this, UdpRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize));
+
+/*    UdpClientRequestHandler* clientRequestHandler = nullptr;
 
     quint32 clientID = requestHeader->ClientID;
 
@@ -552,7 +554,7 @@ void UdpServerSocket::onSocketReadyReadSlot()
 
     clientRequestHandler->putRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize);
 
-    m_clientMapMutex.unlock();
+    m_clientMapMutex.unlock();*/
 }
 
 

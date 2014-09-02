@@ -12,14 +12,25 @@ class MainWorker : public QObject
     Q_OBJECT
 
 public:
+    enum ServiceMainFunctionState
+    {
+        Stopped,
+        Starts,
+        Work,
+        Stops
+    };
+
     MainWorker();
     virtual ~MainWorker();
 
 public slots:
     void onMainWorkerThreadStarted();
+    void onMainWorkerThreadFinished();
 
 private:
-    UdpServerSocket* m_mainUdpServerSocket;
+    UdpServerSocket* m_baseUdpServerSocket;
+
+    ServiceMainFunctionState m_serviceMainFunctionState;
 };
 
 
@@ -43,6 +54,8 @@ class BaseService : public QtService<QCoreApplication>
 public:
     BaseService(int argc, char ** argv, const QString & name);
     virtual ~BaseService();
+
+    virtual void getBindToAddress(QHostAddress& bindToAddress, quint16 &port);
 
 protected:
     void start() override;
