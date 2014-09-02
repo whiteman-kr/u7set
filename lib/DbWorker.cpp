@@ -19,6 +19,7 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add AddFile stored procedure", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0014.sql"},
 	{"Add fields ParentID, Deleted to File table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0015.sql"},
 	{"Replace AddFile function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0016.sql"},
+	{"Add GetWorkcopy function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0017.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -1480,6 +1481,189 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		file->setFileId(fileId);
 		file->setUser(currentUser());
 		file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
+	}
+
+	return;
+}
+
+void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true ||
+		out == nullptr)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+
+		const DbFileInfo& fi = files->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM GetWorkcopy(%1);")
+				.arg(fi.fileId());
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+		if (result == false)
+		{
+			emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't find workcopy for file: %1. Is file CheckedOut?").arg(fi.fileName()));
+			return;
+		}
+
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		file->setFileId(q.value("FileID").toInt());
+
+		file->setFileName(q.value("Name").toString());
+		file->setParentId(q.value("ParentID").toInt());
+		file->setChangeset(0);
+		file->setCreated(q.value("Created").toString());
+		file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
+		file->setState(VcsState::CheckedOut);
+
+		DbUser user;
+		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
+
+		if (ok == false)
+		{
+			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
+			continue;
+		}
+
+		file->setUser(user);
+
+		QByteArray data = q.value("Data").toByteArray();
+		file->swapData(data);
+
+		out->push_back(file);
+
+		assert(fi.fileId() == file->fileId());
+	}
+
+	return;
+}
+
+void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		auto file = files->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM SetWorkcopy(%1, ")
+				.arg(file->fileId());
+
+		QString data;
+		file->convertToDatabaseString(&data);
+		request.append(data);
+		data.clear();
+
+		request += ");";
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(tr("Can't save file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't get FileID"));
+			return;
+		}
+
+		int fileId = q.value(0).toInt();
+
+		if (fileId != file->fileId())
+		{
+			assert(fileId == file->fileId());
+			emitError(tr("Write file error. filename: %1").arg(file->fileName()));
+			continue;
+		}
 	}
 
 	return;

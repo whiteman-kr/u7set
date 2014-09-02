@@ -281,11 +281,26 @@ void MainWindow::debug()
 	data.push_back(3);
 	data.push_back(4);
 	data.push_back(5);
+	data.push_back(6);
 	f1->swapData(data);
 
 	files.push_back(f1);
 
-	dbController()->addFiles(&files, 0, this);
+
+	/*DbFileInfo fi;
+	fi.setFileId(1);*/
+
+	//std::shared_ptr<DbFile> file;
+
+	//dbController()->getWorkcopy(fi, &file, this);
+
+	//qDebug() << "Get Workcopy, size:" << file->size() << " Name?:" << file->fileName();
+
+	f1->setFileId(1);
+	dbController()->setWorkcopy(files, this);
+
+
+	//dbController()->addFiles(&files, 0, this);
 	//dbController()->addFiles(&files, 0, this);
 
 	//std::vector<DbFileInfo> files;
