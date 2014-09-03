@@ -50,6 +50,10 @@ public:
 	bool setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWidget* parentWidget);
 	bool setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget);
 
+	bool checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget);
+	bool checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget);
+	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -67,6 +71,10 @@ signals:
 
 	void signal_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void signal_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
+
+	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
+	void signal_checkOut(std::vector<DbFileInfo>* files);
+	void signal_undoChanges(std::vector<DbFileInfo>* files);
 
 	//
 	// Service functions

@@ -272,20 +272,43 @@ void MainWindow::debug()
 {
 	std::vector<std::shared_ptr<DbFile>> files;
 
+	// Add file
 	std::shared_ptr<DbFile> f1 = std::make_shared<DbFile>();
-	f1->setFileName("filefsf.fcf");
+	f1->setFileName("file_1.fcf");
 
-	QByteArray data;
-	data.push_back(1);
-	data.push_back(2);
-	data.push_back(3);
-	data.push_back(4);
-	data.push_back(5);
-	data.push_back(6);
-	f1->swapData(data);
+	std::shared_ptr<DbFile> f2 = std::make_shared<DbFile>();
+	f2->setFileName("file_2.fcf");
+
+	QByteArray data1;
+	data1.push_back(1);
+	data1.push_back(2);
+	data1.push_back(3);
+	f1->swapData(data1);
+
+	QByteArray data2;
+	data2.push_back(3);
+	data2.push_back(4);
+	f2->swapData(data2);
 
 	files.push_back(f1);
+	files.push_back(f2);
 
+	dbController()->addFiles(&files, 0, this);
+
+	// Ckeck in file_1
+	std::vector<DbFileInfo>	fiv;
+	fiv.push_back(static_cast<DbFileInfo>(*f1));
+
+	dbController()->checkIn(fiv, "check_in file 1", this);
+
+	// check out file_1
+	dbController()->checkOut(fiv, this);
+
+	// undo all files
+	fiv.clear();
+	fiv.push_back(static_cast<DbFileInfo>(*f1));
+	fiv.push_back(static_cast<DbFileInfo>(*f2));
+	dbController()->undoChanges(fiv, this);
 
 	/*DbFileInfo fi;
 	fi.setFileId(1);*/
@@ -296,8 +319,8 @@ void MainWindow::debug()
 
 	//qDebug() << "Get Workcopy, size:" << file->size() << " Name?:" << file->fileName();
 
-	f1->setFileId(1);
-	dbController()->setWorkcopy(files, this);
+	//f1->setFileId(1);
+	//dbController()->setWorkcopy(files, this);
 
 
 	//dbController()->addFiles(&files, 0, this);

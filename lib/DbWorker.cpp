@@ -20,6 +20,7 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add fields ParentID, Deleted to File table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0015.sql"},
 	{"Replace AddFile function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0016.sql"},
 	{"Add GetWorkcopy function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0017.sql"},
+	{"Add CheckIn function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0018.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -194,7 +195,7 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 
 		QSqlQuery query(db);
 
-		bool result = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7\\_%' OR datname LIKE 'U7\\_%';");
+		bool result = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7\\_%' OR datname LIKE 'U7\\_%' ORDER BY datname;");
 
 		if (result == false)
 		{
@@ -1664,6 +1665,220 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 			emitError(tr("Write file error. filename: %1").arg(file->fileName()));
 			continue;
 		}
+	}
+
+	return;
+}
+
+void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	QString request = "SELECT * FROM checkin(ARRAY[";
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		auto file = files->at(i);
+
+		if (i == 0)
+		{
+			request += QString("%1").arg(file.fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(file.fileId());
+		}
+	}
+
+	request += QString("], %1, '%2');")
+			.arg(currentUser().userId())
+			.arg(comment);
+
+	// request
+	//
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't check in. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	// Set file state to CheckedIn
+	//
+	for (auto& fi : *files)
+	{
+		fi.setState(VcsState::CheckedIn);
+	}
+
+	return;
+}
+
+void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not openned."));
+		return;
+	}
+
+	QString request = "SELECT * FROM checkout(ARRAY[";
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		auto file = files->at(i);
+
+		if (i == 0)
+		{
+			request += QString("%1").arg(file.fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(file.fileId());
+		}
+	}
+
+	request += QString("], %1);")
+			.arg(currentUser().userId());
+
+	// request
+	//
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't undo changes. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	// Set file state to CheckedOut
+	//
+	for (auto& fi : *files)
+	{
+		fi.setState(VcsState::CheckedOut);
+	}
+
+	return;
+}
+
+void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	QString request = "SELECT * FROM undoChanges(ARRAY[";
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		auto file = files->at(i);
+
+		if (i == 0)
+		{
+			request += QString("%1").arg(file.fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(file.fileId());
+		}
+	}
+
+	request += QString("], %1);")
+			.arg(currentUser().userId());
+
+	// request
+	//
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't check out. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	// Set file state to CheckedIn
+	//
+	for (auto& fi : *files)
+	{
+		fi.setState(VcsState::CheckedIn);
 	}
 
 	return;

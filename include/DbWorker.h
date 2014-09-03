@@ -61,6 +61,11 @@ public slots:
 	void slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
 
+	void slot_checkIn(std::vector<DbFileInfo>* files, QString comment);
+	void slot_checkOut(std::vector<DbFileInfo>* files);
+	void slot_undoChanges(std::vector<DbFileInfo>* files);
+
+
 	// Service
 	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
