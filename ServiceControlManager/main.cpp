@@ -26,10 +26,24 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    bool closeToTray = false;
+    QString trayParam = "--tray";
+    for (int i = 0; i < argc; i++)
+    {
+        if (argv[i] == trayParam)
+        {
+            closeToTray = true;
+            break;
+        }
+    }
+
     QCoreApplication::setOrganizationName("Radiy");
     QCoreApplication::setOrganizationDomain("inter.project@radiy.com");
     QCoreApplication::setApplicationName("ServiceControlManager");
-    a.setQuitOnLastWindowClosed(false);
+    if (closeToTray)
+    {
+        a.setQuitOnLastWindowClosed(false);
+    }
     a.setWindowIcon(QIcon(":/images/SearchComputer.png"));
 
     QSettings settings;
@@ -50,7 +64,6 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w;
-    //a.setActivationWindow(&w);
     w.connect(&a, SIGNAL(messageReceived(const QString&)), SLOT(openEditor()));
     w.showMaximized();
 

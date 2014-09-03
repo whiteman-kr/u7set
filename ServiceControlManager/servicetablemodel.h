@@ -10,7 +10,7 @@ const quint32   SS_MF_UNDEFINED = 10,
 
 class UdpClientSocket;
 
-struct serviceInfo
+struct ServiceInfo
 {
     quint32 serviceType;
     quint32 majorVersion;
@@ -25,15 +25,15 @@ struct serviceInfo
     UdpClientSocket* clientSocket;
     QWidget* statusWidget;
 
-    serviceInfo();
+    ServiceInfo();
 };
 
-struct hostInfo
+struct HostInfo
 {
     quint32 ip;
-    serviceInfo servicesInfo[RQSTP_COUNT];
+    ServiceInfo servicesInfo[RQSTP_COUNT];
 
-    hostInfo() : ip(0) {}
+    HostInfo() : ip(0) {}
 };
 
 class ServiceTableModel : public QAbstractTableModel
@@ -63,8 +63,8 @@ public slots:
     void removeHost(int row);
 
 private:
-    QVector<hostInfo> hostsInfo;
-    bool freezeUpdate;
+    QVector<HostInfo> m_hostsInfo;
+    bool m_freezeUpdate;
 
     void setServiceState(quint32 ip, quint16 port, int state);
     QPair<int,int> getServiceState(quint32 ip, quint16 port);
