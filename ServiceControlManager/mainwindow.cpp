@@ -25,7 +25,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     serviceTable->setModel(serviceModel);
     connect(serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), serviceTable, SLOT(resizeColumnsToContents()));
+    connect(serviceModel, SIGNAL(serviceStateChanged(int)), serviceTable, SLOT(resizeRowToContents(int)));
     connect(serviceModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), serviceTable, SLOT(resizeColumnsToContents()));
+    //serviceTable->setTextElideMode(Qt::ElideNone);
     serviceTable->resizeColumnsToContents();
     setCentralWidget(serviceTable);
 
@@ -36,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu *contextMenu = new QMenu(this);
     QToolBar *toolBar = addToolBar(tr("Main actions"));
 
-    contextMenu->addAction(tr("Open editor"), this, SLOT(openEditor()));
+    contextMenu->addAction(tr("Open service status window"), this, SLOT(openEditor()));
     contextMenu->addSeparator();
 
     // Manage Connections

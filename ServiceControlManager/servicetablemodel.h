@@ -7,28 +7,40 @@
 
 const int SERVICE_TYPE_COUNT = 4;
 
-const int SERVICE_STATE_UNDEFINED = 0,
+/*const int SERVICE_STATE_UNDEFINED = 0,
     SERVICE_STATE_UNAVAILABLE = 1,
     SERVICE_STATE_STOPPED = 2,
     SERVICE_STATE_RUNNING = 3,
-    SERVICE_STATE_COUNT = 4;
+    SERVICE_STATE_COUNT = 4;*/
+
+const quint32   SS_MF_UNDEFINED = 10,
+                SS_MF_UNAVAILABLE = 11;
 
 class UdpClientSocket;
 
 struct serviceTypeInfo
 {
+    quint32 serviceType;
     quint16 port;
     char* name;
 };
 
 struct serviceInfo
 {
-    int state;
-    quint64 time;
+    quint32 serviceType;
+    quint32 majorVersion;
+    quint32 minorVersion;
+    quint32 buildNo;
+    quint32 CRC;
+
+    quint32 serviceTime;
+    quint32 state;
+    quint32 serviceFunctionTime;
+
     UdpClientSocket* clientSocket;
     QWidget* statusWidget;
 
-    serviceInfo() : state(SERVICE_STATE_UNDEFINED), clientSocket(nullptr), statusWidget(nullptr) {}
+    serviceInfo();
 };
 
 struct hostInfo
@@ -54,6 +66,7 @@ public:
     void checkAddress(QString connectionAddress);
 
 signals:
+    void serviceStateChanged(int row);
 
 public slots:
     void serviceAckReceived(REQUEST_HEADER header, QByteArray data);
@@ -66,7 +79,8 @@ private:
     QVector<hostInfo> hostsInfo;
     bool freezeUpdate;
 
-    serviceInfo* setServiceState(quint32 ip, quint16 port, int state);
+    void setServiceState(quint32 ip, quint16 port, int state);
+    QPair<int,int> getServiceState(quint32 ip, quint16 port);
     void checkForDeletingSocket(UdpClientSocket* socket);
 };
 

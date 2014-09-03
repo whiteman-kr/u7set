@@ -8,7 +8,7 @@ class TestRequestProcessor : public UdpRequestProcessor
     Q_OBJECT
 
 public:
-    TestRequestProcessor(QDateTime& lastStartTime, bool& isRunning) : lastStartTime(lastStartTime), isRunning(isRunning) {}
+    TestRequestProcessor(QDateTime& lastStartTime, QDateTime& runTime, bool& isRunning);
 
     void processRequest(const UdpRequest& request) override;
 
@@ -17,6 +17,7 @@ signals:
 
 private:
     QDateTime& lastStartTime;
+    QDateTime& runTime;
     bool& isRunning;
 };
 
@@ -33,6 +34,7 @@ public:
 
 private:
     QDateTime lastStartTime;
+    QDateTime runTime;
     bool isRunning;
 };
 

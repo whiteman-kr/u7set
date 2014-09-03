@@ -4,6 +4,7 @@ CONFIG += ordered
 
 win32:SUBDIRS += Protobuf
 SUBDIRS += qtservice \
+    qtsingleapplication \
     BaseService \
     ServiceControlManager \
     UdpClient \
