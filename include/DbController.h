@@ -112,6 +112,13 @@ public:
 	DbProject currentProject() const;
 	void setCurrentProject(const DbProject& project);
 
+	int rootFileId() const;
+	int afblFileId() const;
+	int alFileId() const;
+	int hcFileId() const;
+	int wvsFileId() const;
+	int dvsFileId() const;
+
 	//
 	// Data
 	//

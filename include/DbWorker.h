@@ -34,6 +34,13 @@ public:
 	static int databaseVersion();
 	bool isProjectOpened() const;
 
+	int rootFileId() const;
+	int afblFileId() const;
+	int alFileId() const;
+	int hcFileId() const;
+	int wvsFileId() const;
+	int dvsFileId() const;
+
 	//
 	// Operations
 	//
@@ -104,6 +111,12 @@ private:
 
 	DbUser m_currentUser;
 	DbProject m_currentProject;
+
+	int m_afblFileId;	// Application Functional Block Library
+	int m_alFileId;		// Application Logic
+	int m_hcFileId;		// Hardware Configuration
+	int m_wvsFileId;	// Workflow Visualization Schemes
+	int m_dvsFileId;	// Diagnostics Visualization Schemes
 
 	static const UpgradeItem upgradeItems[];
 

@@ -21,6 +21,7 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Replace AddFile function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0016.sql"},
 	{"Add GetWorkcopy function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0017.sql"},
 	{"Add CheckIn function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0018.sql"},
+	{"Add system folders (AFBL, AL, HC, WVS, DVS)", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0019.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -36,6 +37,11 @@ DbWorker::DbWorker(DbProgress* progress) :
 	m_serverUsername("u7"),
 	m_serverPassword(""),
 	m_progress(progress),
+	m_afblFileId(-1),
+	m_alFileId(-1),
+	m_hcFileId(-1),
+	m_wvsFileId(-1),
+	m_dvsFileId(-1),
 	m_instanceNo(counter)
 {
 	DbWorker::counter ++;		// static variable
@@ -135,6 +141,42 @@ bool DbWorker::isProjectOpened() const
 {
 	return !currentProject().databaseName().isEmpty();
 }
+
+int DbWorker::rootFileId() const
+{
+	return 0;
+}
+
+int DbWorker::afblFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_afblFileId;
+}
+
+int DbWorker::alFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_alFileId;
+}
+
+int DbWorker::hcFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_hcFileId;
+}
+
+int DbWorker::wvsFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_wvsFileId;
+}
+
+int DbWorker::dvsFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_dvsFileId;
+}
+
 
 void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 {
@@ -587,6 +629,84 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	project.setProjectName(projectName);
 
 	setCurrentProject(project);
+
+	// Set System Folders File ID
+	//
+	std::vector<DbFileInfo> systemFiles;
+
+	slot_getFileList(&systemFiles, rootFileId(), "%");
+
+	m_mutex.lock();
+	m_afblFileId = -1;
+	m_alFileId = -1;
+	m_hcFileId = -1;
+	m_wvsFileId = -1;
+	m_dvsFileId = -1;
+	m_mutex.unlock();
+
+	for (const DbFileInfo& fi : systemFiles)
+	{
+		if (fi.fileName() == "AFBL")
+		{
+			QMutexLocker locker(&m_mutex);
+			m_afblFileId = fi.fileId();
+			continue;
+		}
+
+		if (fi.fileName() == "AL")
+		{
+			QMutexLocker locker(&m_mutex);
+			m_alFileId = fi.fileId();
+			continue;
+		}
+
+		if (fi.fileName() == "HC")
+		{
+			QMutexLocker locker(&m_mutex);
+			m_hcFileId = fi.fileId();
+			continue;
+		}
+
+		if (fi.fileName() == "WVS")
+		{
+			QMutexLocker locker(&m_mutex);
+			m_wvsFileId = fi.fileId();
+			continue;
+		}
+
+		if (fi.fileName() == "DVS")
+		{
+			QMutexLocker locker(&m_mutex);
+			m_dvsFileId = fi.fileId();
+			continue;
+		}
+	}
+
+
+	m_mutex.lock();
+	result = m_afblFileId != -1;
+	result &= m_alFileId != -1;
+	result &= m_hcFileId != -1;
+	result &= m_wvsFileId != -1;
+	result &= m_dvsFileId != -1;
+	m_mutex.unlock();
+
+	if (result == false)
+	{
+		emitError(tr("Can't get system floder.") + db.lastError().text());
+		query.clear();
+		db.close();
+
+		// Lock is nit necessare, we will crash anyway!
+		assert(m_afblFileId != -1);
+		assert(m_alFileId != -1);
+		assert(m_hcFileId != -1);
+		assert(m_wvsFileId != -1);
+		assert(m_dvsFileId != -1);
+
+		return;
+	}
+
 
 	return;
 }
