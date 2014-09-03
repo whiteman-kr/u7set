@@ -16,7 +16,6 @@
 
 int main(int argc, char *argv[])
 {
-        char* p = new char[100];
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

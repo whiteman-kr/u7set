@@ -16,7 +16,7 @@
 
 int main(int argc, char *argv[])
 {
-    BaseService service(argc, argv, "RPCT Base Service");
+    BaseService service(argc, argv, "RPCT Base Service", PORT_BASE_SERVICE);
 
     return service.exec();
 }

@@ -5,13 +5,15 @@
 #pragma pack(push, 1)
 
 
-const quint32   RQSTP_CONFIG = 1,
+const quint32   RQSTP_BASE = 0,
+                RQSTP_CONFIG = 1,
                 RQSTP_FSC_AQUISION = 2,
                 RQSTP_FSC_TUNING = 3,
                 RQSTP_ARCHIVING = 4;
 
 
-const quint16   PORT_CONFIG_SERRVICE = 4510,
+const quint16   PORT_BASE_SERVICE = 4500,
+                PORT_CONFIG_SERVICE = 4510,
                 PORT_FCS_AQUISION_SERVICE = 4520,
                 PORT_FCS_TUNING_SERVICE = 4530,
                 PORT_ARCHIVING_SERVICE = 4540;

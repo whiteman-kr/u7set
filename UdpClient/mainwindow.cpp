@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ClientSocket* m_clientSocket = new ClientSocket(QHostAddress("192.168.14.85"), 4000);
+    UdpClientSocket* m_clientSocket = new UdpClientSocket(QHostAddress("127.0.0.1"), PORT_BASE_SERVICE);
 
     connect(this, &MainWindow::clientSendRequest, m_clientSocket, &UdpClientSocket::sendRequest);
 
@@ -23,5 +23,5 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    emit clientSendRequest(1, 0, 0);
+    emit clientSendRequest(RQID_GET_SERVICE_INFO, 0, 0);
 }

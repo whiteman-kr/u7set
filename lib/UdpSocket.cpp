@@ -30,8 +30,8 @@ UdpClientSocket::UdpClientSocket(const QHostAddress &serverAddress, quint16 port
 
     m_clientID = qHash(QUuid::createUuid());            // generate unique clientID
 
-    connect(&m_ackTimer, SIGNAL(timeout()), this, SLOT(onAckTimerTimeout()));
-    connect(&m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
+    connect(&m_ackTimer, &QTimer::timeout, this, &UdpClientSocket::onAckTimerTimeout);
+    connect(&m_socket, &QUdpSocket::readyRead, this, &UdpClientSocket::onSocketReadyRead);
 }
 
 
@@ -253,9 +253,10 @@ void UdpClientSocket::onRequestTimeout(const REQUEST_HEADER& /* requestHeader */
 //
 
 UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize) :
-    m_senderAddress(senderAddress),
-    m_senderPort(senderPort),
-    m_requestDataSize(0)
+    m_address(senderAddress),
+    m_port(senderPort),
+    m_requestDataSize(0),
+    m_dataPtr(nullptr)
 {
     if (receivedData != nullptr && (receivedDataSize >= sizeof(REQUEST_HEADER) && receivedDataSize <= MAX_DATAGRAM_SIZE))
     {
@@ -270,8 +271,9 @@ UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, cha
 
 
 UdpRequest::UdpRequest() :
-    m_senderPort(0),
-    m_requestDataSize(0)
+    m_port(0),
+    m_requestDataSize(0),
+    m_dataPtr(nullptr)
 {
 }
 
@@ -279,6 +281,41 @@ UdpRequest::UdpRequest() :
 bool UdpRequest::isEmpty() const
 {
     return m_requestDataSize < sizeof(REQUEST_HEADER);
+}
+
+void UdpRequest::initAck(const UdpRequest& request)
+{
+    assert(!request.isEmpty());
+
+    m_address = request.m_address;
+    m_port = request.m_port;
+
+    memcpy(m_requestData, request.m_requestData, sizeof(REQUEST_HEADER));
+
+    m_requestDataSize = sizeof(REQUEST_HEADER);
+
+    header()->ErrorCode = 0;
+    header()->DataLen = 0;
+
+    m_dataPtr = m_requestData + sizeof(REQUEST_HEADER);
+}
+
+
+bool UdpRequest::writeDword(quint32 dw)
+{
+    if (m_dataPtr + sizeof(quint32) > m_requestData + MAX_DATAGRAM_SIZE)
+    {
+        assert(false);
+        return false;
+    }
+
+    *reinterpret_cast<quint32*>(m_dataPtr) = dw;
+
+    m_dataPtr += sizeof(quint32);
+
+    header()->DataLen += sizeof(quint32);
+
+    return true;
 }
 
 
@@ -464,7 +501,7 @@ void UdpServerSocket::onSocketThreadFinishedSlot()
 
 void UdpServerSocket::sendAck(UdpRequest request)
 {
-    qint64 sent = m_socket.writeDatagram(request.m_requestData, request.m_requestDataSize, request.m_senderAddress, request.m_senderPort);
+    qint64 sent = m_socket.writeDatagram(request.data(), request.dataSize(), request.address(), request.port());
 
     if (sent == -1)
     {
@@ -529,7 +566,7 @@ void UdpServerSocket::onSocketReadyReadSlot()
 
     datagramReceived();
 
-    emit request(this, UdpRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize));
+    emit request(UdpRequest(m_senderHostAddr, m_senderPort, m_receivedData, m_recevedDataSize));
 
 /*    UdpClientRequestHandler* clientRequestHandler = nullptr;
 

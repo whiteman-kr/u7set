@@ -107,16 +107,30 @@ private slots:
 
 class UdpRequest
 {
-public:
-    QHostAddress m_senderAddress;
-    qint16 m_senderPort;
+private:
+    QHostAddress m_address;
+    qint16 m_port;
     char m_requestData[MAX_DATAGRAM_SIZE];
     quint32 m_requestDataSize;
 
+    char* m_dataPtr;
+
+public:
     UdpRequest();
     UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize);
 
+    REQUEST_HEADER* header() { return reinterpret_cast<REQUEST_HEADER*>(m_requestData); }
+    quint32 id() { return header()->ID; }
+    char* data() { return m_requestData; }
+    quint32 dataSize() { return m_requestDataSize; }
+    QHostAddress address() { return m_address; }
+    quint16 port() { return m_port; }
+
     bool isEmpty() const;
+
+    void initAck(const UdpRequest& request);
+
+    bool writeDword(quint32 dw);
 };
 
 
@@ -211,7 +225,7 @@ public:
     virtual UdpRequestProcessor* createUdpRequestProcessor() { return nullptr; }
 
 signals:
-    void request(UdpServerSocket* serverSocket, UdpRequest request);
+    void request(UdpRequest request);
 
 public slots:
     void onSocketThreadStartedSlot();

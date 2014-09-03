@@ -17,12 +17,10 @@ TEMPLATE = app
 SOURCES += \
         mainwindow.cpp \
         clientmain.cpp \
-        ../lib/UdpSocket.cpp \
-    ClientSocket.cpp
+        ../lib/UdpSocket.cpp
 
 
 HEADERS  += mainwindow.h \
-        ClientSocket.h \
         ../include/SocketIO.h \
         ../include/UdpSocket.h
 
