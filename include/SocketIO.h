@@ -9,7 +9,8 @@ const quint32   RQSTP_BASE = 0,
                 RQSTP_CONFIG = 1,
                 RQSTP_FSC_AQUISION = 2,
                 RQSTP_FSC_TUNING = 3,
-                RQSTP_ARCHIVING = 4;
+                RQSTP_ARCHIVING = 4,
+                RQSTP_COUNT = 5;
 
 
 const quint16   PORT_BASE_SERVICE = 4500,
@@ -34,6 +35,17 @@ const quint32   SS_MF_STOPPED = 0,
                 SS_MF_STARTS = 1,
                 SS_MF_WORK = 2,
                 SS_MF_STOPS = 3;
+
+
+struct serviceTypeInfo
+{
+    quint32 serviceType;
+    quint16 port;
+    char* name;
+};
+
+
+extern serviceTypeInfo serviceTypesInfo[RQSTP_COUNT];
 
 
 struct REQUEST_HEADER

@@ -32,6 +32,13 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 
+	connect(this, &DbController::signal_getWorkcopy, m_worker, &DbWorker::slot_getWorkcopy);
+	connect(this, &DbController::signal_setWorkcopy, m_worker, &DbWorker::slot_setWorkcopy);
+
+	connect(this, &DbController::signal_checkIn, m_worker, &DbWorker::slot_checkIn);
+	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
+	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
+
 	m_thread.start();
 }
 
@@ -319,6 +326,170 @@ bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int par
 	return result;
 }
 
+bool DbController::getWorkcopy(const std::vector<DbFileInfo>& files,
+							   std::vector<std::shared_ptr<DbFile>>* out,
+							   QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr || files.empty() == true)
+	{
+		assert(out != nullptr);
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getWorkcopy(&files, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting file workcopy"));
+	return out;
+}
+
+bool DbController::getWorkcopy(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	std::vector<DbFileInfo> fiv;
+	fiv.push_back(file);
+
+	std::vector<std::shared_ptr<DbFile>> outvector;
+	bool result = getWorkcopy(fiv, &outvector, parentWidget);
+
+	if (result == false || outvector.size() != 1)
+	{
+		return false;
+	}
+
+	*out = outvector.front();
+	return true;
+}
+
+bool DbController::setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (files.empty() == true)
+	{
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_setWorkcopy(&files);
+
+	ok = waitForComplete(parentWidget, tr("Setting file workcopy"));
+	return true;
+}
+
+bool DbController::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget)
+{
+	std::vector<std::shared_ptr<DbFile>> files;
+	files.push_back(file);
+
+	return setWorkcopy(files, parentWidget);
+}
+
+bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (files.empty() == true)
+	{
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_checkIn(&files, comment);
+
+	ok = waitForComplete(parentWidget, tr("Checking in files"));
+	return true;
+}
+
+bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (files.empty() == true)
+	{
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_checkOut(&files);
+
+	ok = waitForComplete(parentWidget, tr("Checking out files"));
+	return true;
+}
+
+bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (files.empty() == true)
+	{
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_undoChanges(&files);
+
+	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
+	return true;
+}
+
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {
 	// Check parameters
@@ -443,7 +614,7 @@ DbUser DbController::currentUser() const
 	return m_worker->currentUser();
 }
 
-void DbController::setCurrentUser(const DbUser& user)
+void DbController::setCurrentUser(const DbUser& /*user*/)
 {
 	// Do we really need this function?
 	assert(false);
@@ -455,7 +626,7 @@ DbProject DbController::currentProject() const
 	return m_worker->currentProject();
 }
 
-void DbController::setCurrentProject(const DbProject& project)
+void DbController::setCurrentProject(const DbProject& /*project*/)
 {
 	// Do we really need this function?
 	assert(false);

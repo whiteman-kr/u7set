@@ -16,7 +16,8 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     scanoptionswidget.cpp \
     servicetablemodel.cpp \
-    ../lib/UdpSocket.cpp
+    ../lib/UdpSocket.cpp \
+    ../lib/SocketIO.cpp
 
 HEADERS  += mainwindow.h \
     scanoptionswidget.h \
