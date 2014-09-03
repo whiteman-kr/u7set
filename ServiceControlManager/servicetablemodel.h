@@ -55,7 +55,7 @@ signals:
     void serviceStateChanged(int row);
 
 public slots:
-    void serviceAckReceived(REQUEST_HEADER header, QByteArray data);
+    void serviceAckReceived(RequestHeader header, QByteArray data);
     void serviceNotFound();
     void checkServiceStates();
 

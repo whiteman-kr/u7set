@@ -277,7 +277,7 @@ void ServiceTableModel::checkAddress(QString connectionAddress)
     {
         UdpClientSocket* socket = new UdpClientSocket(QHostAddress(connectionAddress), serviceTypesInfo[i].port);
         connect(socket, SIGNAL(ackTimeout()), this, SLOT(serviceNotFound()));
-        connect(socket, SIGNAL(ackReceived(REQUEST_HEADER,QByteArray)), this, SLOT(serviceAckReceived(REQUEST_HEADER,QByteArray)));
+        connect(socket, SIGNAL(ackReceived(RequestHeader,QByteArray)), this, SLOT(serviceAckReceived(RequestHeader,QByteArray)));
         socket->sendRequest(RQID_GET_SERVICE_INFO, nullptr, 0);
     }
 }
@@ -305,7 +305,7 @@ void ServiceTableModel::addAddress(QString connectionAddress)
     emit serviceStateChanged(hostsInfo.count() - 1);
 }
 
-void ServiceTableModel::serviceAckReceived(REQUEST_HEADER header, QByteArray data)
+void ServiceTableModel::serviceAckReceived(RequestHeader header, QByteArray data)
 {
     UdpClientSocket* socket = dynamic_cast<UdpClientSocket*>(sender());
     if (socket == nullptr)
@@ -393,7 +393,7 @@ void ServiceTableModel::checkServiceStates()
             {
                 clientSocket = new UdpClientSocket(QHostAddress(hostsInfo[i].ip), serviceTypesInfo[j].port);
                 connect(clientSocket, SIGNAL(ackTimeout()), this, SLOT(serviceNotFound()));
-                connect(clientSocket, SIGNAL(ackReceived(REQUEST_HEADER,QByteArray)), this, SLOT(serviceAckReceived(REQUEST_HEADER,QByteArray)));
+                connect(clientSocket, SIGNAL(ackReceived(RequestHeader,QByteArray)), this, SLOT(serviceAckReceived(RequestHeader,QByteArray)));
                 hostsInfo[i].servicesInfo[j].clientSocket = clientSocket;
             }
             while (clientSocket->isWaitingForAck())

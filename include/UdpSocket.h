@@ -50,11 +50,11 @@ private:
 
     char m_receivedData[MAX_DATAGRAM_SIZE];
     quint32 m_recevedDataSize;
-    REQUEST_HEADER* m_receivedHeader;
+    RequestHeader* m_receivedHeader;
 
     char m_sentData[MAX_DATAGRAM_SIZE];
     quint32 m_sentDataSize;
-    REQUEST_HEADER* m_sentHeader;
+    RequestHeader* m_sentHeader;
 
     QHostAddress m_senderHostAddr;
     quint16 m_senderPort;
@@ -81,13 +81,13 @@ public:
     virtual void onSocketThreadStarted();
     virtual void onSocketThreadFinished();
     virtual void onAckTimeout();
-    virtual void onRequestTimeout(const REQUEST_HEADER& requestHeader);
-    virtual void onRequestAck(const REQUEST_HEADER& ackHeader, char* ackData, quint32 ackDataSize);
-    virtual void onUnknownRequestAck(const REQUEST_HEADER& ackHeader, char* ackData, quint32 ackDataSize);
+    virtual void onRequestTimeout(const RequestHeader& requestHeader);
+    virtual void onRequestAck(const RequestHeader& ackHeader, char* ackData, quint32 ackDataSize);
+    virtual void onUnknownRequestAck(const RequestHeader& ackHeader, char* ackData, quint32 ackDataSize);
 
 signals:
     void ackTimeout();
-    void ackReceived(REQUEST_HEADER header, QByteArray data);
+    void ackReceived(RequestHeader header, QByteArray data);
 
 public slots:
     void onSocketThreadStartedSlot();
@@ -119,8 +119,8 @@ public:
     UdpRequest();
     UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize);
 
-    REQUEST_HEADER * header() { return reinterpret_cast<REQUEST_HEADER*>(m_requestData); }
-    quint32 id() const { return reinterpret_cast<const REQUEST_HEADER*>(m_requestData)->id; }
+    RequestHeader * header() { return reinterpret_cast<RequestHeader*>(m_requestData); }
+    quint32 id() const { return reinterpret_cast<const RequestHeader*>(m_requestData)->id; }
     char* data() { return m_requestData; }
     quint32 dataSize() { return m_requestDataSize; }
     QHostAddress address() { return m_address; }
@@ -209,7 +209,7 @@ private:
 
     qint64 m_recevedDataSize;
     char m_receivedData[MAX_DATAGRAM_SIZE];
-    REQUEST_HEADER* requestHeader;
+    RequestHeader* requestHeader;
     QHostAddress m_senderHostAddr;
     quint16 m_senderPort;
 

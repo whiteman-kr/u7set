@@ -50,7 +50,7 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 
     ack.initAck(request);
 
-    ACK_GET_SERVICE_INFO agsi;
+    AckGetServiceInfo agsi;
 
     agsi.buildNo = 111;
 

@@ -2,15 +2,12 @@
 
 #include <QtGlobal>
 
-#pragma pack(push, 1)
-
 
 const quint32   RQSTP_BASE = 0,
                 RQSTP_CONFIG = 1,
                 RQSTP_FSC_AQUISION = 2,
                 RQSTP_FSC_TUNING = 3,
-                RQSTP_ARCHIVING = 4,
-                RQSTP_COUNT = 5;
+                RQSTP_ARCHIVING = 4;
 
 
 const quint16   PORT_BASE_SERVICE = 4500,
@@ -37,7 +34,7 @@ const quint32   SS_MF_STOPPED = 0,
                 SS_MF_STOPS = 3;
 
 
-struct serviceTypeInfo
+struct ServiceTypeInfo
 {
     quint32 serviceType;
     quint16 port;
@@ -45,10 +42,22 @@ struct serviceTypeInfo
 };
 
 
-extern serviceTypeInfo serviceTypesInfo[RQSTP_COUNT];
+const ServiceTypeInfo serviceTypesInfo[] =
+{
+    {RQSTP_BASE, PORT_BASE_SERVICE, "Base Service"},
+    {RQSTP_CONFIG, PORT_CONFIG_SERVICE, "Configuration Service"},
+    {RQSTP_FSC_AQUISION, PORT_FCS_AQUISION_SERVICE, "FSC Data Acquisition Service"},
+    {RQSTP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, "FSC Tuning Service"},
+    {RQSTP_ARCHIVING, PORT_ARCHIVING_SERVICE, "Data Archiving Service"},
+};
+
+const int RQSTP_COUNT = sizeof(serviceTypesInfo) / sizeof(ServiceTypeInfo);
 
 
-struct REQUEST_HEADER
+#pragma pack(push, 1)
+
+
+struct RequestHeader
 {
     quint32 id;
     quint32 clientID;
@@ -59,9 +68,9 @@ struct REQUEST_HEADER
 };
 
 
-struct ACK_GET_SERVICE_INFO
+struct AckGetServiceInfo
 {
-    REQUEST_HEADER Header;
+    RequestHeader header;
 
     quint32 serviceType;                // RQSTP_* constants
     quint32 majorVersion;
