@@ -10,7 +10,7 @@
 
 serviceTypeInfo serviceTypesInfo[SERVICE_TYPE_COUNT] =
 {
-    {RQSTP_CONFIG, PORT_CONFIG_SERRVICE, "Configuration Service"},
+    {RQSTP_CONFIG, PORT_CONFIG_SERVICE, "Configuration Service"},
     {RQSTP_FSC_AQUISION, PORT_FCS_AQUISION_SERVICE, "FSC Data Acquisition Service"},
     {RQSTP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, "FSC Tuning Service"},
     {RQSTP_ARCHIVING, PORT_ARCHIVING_SERVICE, "Data Archiving Service"},
@@ -295,7 +295,7 @@ void ServiceTableModel::serviceAckReceived(REQUEST_HEADER header, QByteArray dat
     {
         return;
     }
-    switch (header.ID)
+    switch (header.id)
     {
     case RQID_GET_SERVICE_INFO:
     {

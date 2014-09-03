@@ -13,17 +13,19 @@ TestRequestProcessor::TestRequestProcessor(QDateTime &lastStartTime, QDateTime &
 
 void TestRequestProcessor::processRequest(const UdpRequest& request)
 {
-    if (request.isEmpty() || request.m_requestDataSize < sizeof(REQUEST_HEADER))
+    if (request.isEmpty())
     {
         return;
     }
 
     qDebug() << "Request processing...";
 
-    UdpRequest newRequest = request;
-    REQUEST_HEADER* header = (REQUEST_HEADER*)newRequest.m_requestData;
+    UdpRequest newRequest;
 
-    switch (header->ID) {
+    newRequest.initAck(request);
+
+    switch (request.id())
+    {
     case RQID_GET_SERVICE_INFO:
         {
             QByteArray array;/* = QByteArray::fromRawData(newRequest.m_requestData + sizeof(REQUEST_HEADER), MAX_DATAGRAM_SIZE - sizeof(REQUEST_HEADER));*/
@@ -39,9 +41,9 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
             out << quint32(runTime.secsTo(currentTime));
             out << quint32(isRunning ? SS_MF_WORK : SS_MF_STOPPED);
             out << quint32(isRunning ? lastStartTime.secsTo(currentTime) : 0);
-            header->DataLen = array.size();
-            memcpy(newRequest.m_requestData + sizeof(REQUEST_HEADER), array.constData(), array.size());
-            newRequest.m_requestDataSize = sizeof(REQUEST_HEADER) + header->DataLen;
+
+            newRequest.setData(array.constData(), array.size());
+
             emit ackIsReady(newRequest);
             return;
         }

@@ -119,8 +119,8 @@ public:
     UdpRequest();
     UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize);
 
-    REQUEST_HEADER* header() { return reinterpret_cast<REQUEST_HEADER*>(m_requestData); }
-    quint32 id() { return header()->ID; }
+    REQUEST_HEADER * header() { return reinterpret_cast<REQUEST_HEADER*>(m_requestData); }
+    quint32 id() const { return reinterpret_cast<const REQUEST_HEADER*>(m_requestData)->id; }
     char* data() { return m_requestData; }
     quint32 dataSize() { return m_requestDataSize; }
     QHostAddress address() { return m_address; }
@@ -131,6 +131,8 @@ public:
     void initAck(const UdpRequest& request);
 
     bool writeDword(quint32 dw);
+
+    bool setData(const char* requestData, quint32 requestDataSize);
 };
 
 

@@ -38,12 +38,12 @@ const quint32   SS_MF_STOPPED = 0,
 
 struct REQUEST_HEADER
 {
-    quint32 ID;
-    quint32 ClientID;
-    quint32 Version;
-    quint32 No;
-    quint32 ErrorCode;
-    quint32 DataLen;
+    quint32 id;
+    quint32 clientID;
+    quint32 version;
+    quint32 no;
+    quint32 errorCode;
+    quint32 dataSize;
 };
 
 
@@ -51,14 +51,14 @@ struct ACK_GET_SERVICE_INFO
 {
     REQUEST_HEADER Header;
 
-    quint32 ServiceType;                // RQSTP_* constants
-    quint32 MajorVersion;
-    quint32 MinorVersion;
-    quint32 BuildNo;
-    quint32 CRC;
-    quint32 ServiceUptime;
-    quint32 State;                      // SS_MF_* constants
-    quint32 ServiceFunctionUptime;
+    quint32 serviceType;                // RQSTP_* constants
+    quint32 majorVersion;
+    quint32 minorVersion;
+    quint32 buildNo;
+    quint32 crc;
+    quint32 serviceUptime;
+    quint32 state;                      // SS_MF_* constants
+    quint32 serviceFunctionUptime;
 
 };
 
