@@ -33,6 +33,7 @@ public slots:
     void startService();
     void stopService();
     void restartService();
+    void removeHost();
 
 signals:
     void commandPushed(int row, int col, int command);

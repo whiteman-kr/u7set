@@ -8,6 +8,13 @@
 #include <QApplication>
 #include <QBuffer>
 
+struct serviceTypeInfo
+{
+    quint32 serviceType;
+    quint16 port;
+    char* name;
+};
+
 serviceTypeInfo serviceTypesInfo[SERVICE_TYPE_COUNT] =
 {
     {RQSTP_CONFIG, PORT_CONFIG_SERVICE, "Configuration Service"},
@@ -203,6 +210,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
     beginInsertRows(QModelIndex(), hostsInfo.count(), hostsInfo.count());
     hostsInfo.append(hi);
     endInsertRows();
+    emit serviceStateChanged(hostsInfo.count() - 1);
 }
 
 QPair<int,int> ServiceTableModel::getServiceState(quint32 ip, quint16 port)
@@ -286,6 +294,29 @@ void ServiceTableModel::checkAddress(QString connectionAddress)
         connect(socket, SIGNAL(ackReceived(REQUEST_HEADER,QByteArray)), this, SLOT(serviceAckReceived(REQUEST_HEADER,QByteArray)));
         socket->sendRequest(RQID_GET_SERVICE_INFO, nullptr, 0);
     }
+}
+
+void ServiceTableModel::addAddress(QString connectionAddress)
+{
+    QHostAddress ha(connectionAddress);
+    quint32 ip = ha.toIPv4Address();
+    if (ha.protocol() != QAbstractSocket::IPv4Protocol)
+    {
+        return;
+    }
+    for (int i = 0; i < hostsInfo.count(); i++)
+    {
+        if (hostsInfo[i].ip == ip)
+        {
+            return;
+        }
+    }
+    hostInfo hi;
+    hi.ip = ip;
+    beginInsertRows(QModelIndex(), hostsInfo.count(), hostsInfo.count());
+    hostsInfo.append(hi);
+    endInsertRows();
+    emit serviceStateChanged(hostsInfo.count() - 1);
 }
 
 void ServiceTableModel::serviceAckReceived(REQUEST_HEADER header, QByteArray data)
@@ -408,4 +439,22 @@ void ServiceTableModel::sendCommand(int row, int col, int command)
     }
     clientSocket->sendRequest(command, nullptr, 0);
     freezeUpdate = false;
+}
+
+void ServiceTableModel::removeHost(int row)
+{
+    beginRemoveRows(QModelIndex(), row, row);
+    for (int j = 0; j < SERVICE_TYPE_COUNT; j++)
+    {
+        if (hostsInfo[row].servicesInfo[j].clientSocket != nullptr)
+        {
+            delete hostsInfo[row].servicesInfo[j].clientSocket;
+        }
+        if (hostsInfo[row].servicesInfo[j].statusWidget != nullptr)
+        {
+            delete hostsInfo[row].servicesInfo[j].statusWidget;
+        }
+    }
+    hostsInfo.removeAt(row);
+    endRemoveRows();
 }

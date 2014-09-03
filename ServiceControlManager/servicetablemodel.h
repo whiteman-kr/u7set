@@ -7,23 +7,10 @@
 
 const int SERVICE_TYPE_COUNT = 4;
 
-/*const int SERVICE_STATE_UNDEFINED = 0,
-    SERVICE_STATE_UNAVAILABLE = 1,
-    SERVICE_STATE_STOPPED = 2,
-    SERVICE_STATE_RUNNING = 3,
-    SERVICE_STATE_COUNT = 4;*/
-
 const quint32   SS_MF_UNDEFINED = 10,
                 SS_MF_UNAVAILABLE = 11;
 
 class UdpClientSocket;
-
-struct serviceTypeInfo
-{
-    quint32 serviceType;
-    quint16 port;
-    char* name;
-};
 
 struct serviceInfo
 {
@@ -64,6 +51,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
     void checkAddress(QString connectionAddress);
+    void addAddress(QString connectionAddress);
 
 signals:
     void serviceStateChanged(int row);
@@ -74,6 +62,7 @@ public slots:
     void checkServiceStates();
 
     void sendCommand(int row, int col, int command);
+    void removeHost(int row);
 
 private:
     QVector<hostInfo> hostsInfo;

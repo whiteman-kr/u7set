@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), serviceTable, SLOT(resizeColumnsToContents()));
     connect(serviceModel, SIGNAL(serviceStateChanged(int)), serviceTable, SLOT(resizeRowToContents(int)));
     connect(serviceModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), serviceTable, SLOT(resizeColumnsToContents()));
-    //serviceTable->setTextElideMode(Qt::ElideNone);
     serviceTable->resizeColumnsToContents();
     setCentralWidget(serviceTable);
 
@@ -54,14 +53,10 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar->addAction(menu->addAction(tr("Stop service"), this, SLOT(stopService())));
     toolBar->addAction(menu->addAction(tr("Restart service"), this, SLOT(restartService())));
     toolBar->addSeparator();
-    //
 
-    // Context menu connections list
-    /*QActionGroup *serviceActionGroup = new QActionGroup(this);
-    connect(serviceActionGroup, SIGNAL(triggered(QAction *)), this, SLOT(connectionClicked(QAction *)));
-
-    contextMenu->addSeparator();*/
-    //
+    menu->addSeparator();
+    toolBar->addAction(menu->addAction(tr("Remove host"), this, SLOT(removeHost())));
+    toolBar->addSeparator();
 
     menu->addSeparator();
     QAction* exitAction = menu->addAction(tr("Exit"), qApp, SLOT(quit()));
@@ -209,7 +204,7 @@ void MainWindow::scanNetwork()
     QStringList address = sow.getSelectedAddress().split("/");
     if (address.count() == 1)
     {
-        serviceModel->checkAddress(address[0]);
+        serviceModel->addAddress(address[0]);
     }
     else
     {
@@ -243,4 +238,17 @@ void MainWindow::stopService()
 void MainWindow::restartService()
 {
     setServicesForCommand(RQID_SERVICE_MF_RESTART);
+}
+
+void MainWindow::removeHost()
+{
+    QModelIndexList selection = serviceTable->selectionModel()->selectedIndexes();
+    if (selection.count() == 0)
+    {
+        QMessageBox::warning(this, tr("Warning"), tr("No service is selected!"));
+    }
+    for (int i = 0; i < selection.count(); i++)
+    {
+        serviceModel->removeHost(selection[i].row());
+    }
 }
