@@ -12,14 +12,14 @@ ScanOptionsWidget::ScanOptionsWidget(QWidget *parent) :
     setWindowTitle(tr("Scan settings"));
     QRegExp re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[1-9]|[1-2][0-9]|3[0-2]?)?)\\b");
     QRegExpValidator* rev = new QRegExpValidator(re);
-    addressEdit = new QLineEdit(this);
-    addressEdit->setValidator(rev);
+    m_addressEdit = new QLineEdit(this);
+    m_addressEdit->setValidator(rev);
 
     QFormLayout* fl = new QFormLayout;
-    fl->addRow(tr("Enter IP or subnet"), addressEdit);
+    fl->addRow(tr("Enter IP or subnet"), m_addressEdit);
 
     QComboBox* addressCombo = new QComboBox;
-    connect(addressCombo, SIGNAL(currentTextChanged(QString)), addressEdit, SLOT(setText(QString)));
+    connect(addressCombo, SIGNAL(currentTextChanged(QString)), m_addressEdit, SLOT(setText(QString)));
 
     QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
     for (int i = 0; i < interfaceList.count(); i++)
@@ -53,5 +53,5 @@ ScanOptionsWidget::ScanOptionsWidget(QWidget *parent) :
 
 QString ScanOptionsWidget::getSelectedAddress()
 {
-    return addressEdit->text();
+    return m_addressEdit->text();
 }
