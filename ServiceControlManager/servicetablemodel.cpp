@@ -8,20 +8,6 @@
 #include <QApplication>
 #include <QBuffer>
 
-struct serviceTypeInfo
-{
-    quint32 serviceType;
-    quint16 port;
-    char* name;
-};
-
-serviceTypeInfo serviceTypesInfo[SERVICE_TYPE_COUNT] =
-{
-    {RQSTP_CONFIG, PORT_CONFIG_SERVICE, "Configuration Service"},
-    {RQSTP_FSC_AQUISION, PORT_FCS_AQUISION_SERVICE, "FSC Data Acquisition Service"},
-    {RQSTP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, "FSC Tuning Service"},
-    {RQSTP_ARCHIVING, PORT_ARCHIVING_SERVICE, "Data Archiving Service"},
-};
 
 serviceInfo::serviceInfo() :
     serviceType(-1),
@@ -63,7 +49,7 @@ ServiceTableModel::~ServiceTableModel()
     {
         settings.setArrayIndex(i);
         settings.setValue("IP", hostsInfo[i].ip);
-        for (int j = 0; j < SERVICE_TYPE_COUNT; j++)
+        for (int j = 0; j < RQSTP_COUNT; j++)
         {
             if (hostsInfo[i].servicesInfo[j].clientSocket != nullptr)
             {
@@ -85,7 +71,7 @@ int ServiceTableModel::rowCount(const QModelIndex&) const
 
 int ServiceTableModel::columnCount(const QModelIndex&) const
 {
-    return SERVICE_TYPE_COUNT;
+    return RQSTP_COUNT;
 }
 
 QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
@@ -100,7 +86,7 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
             const serviceInfo& si = hostsInfo[row].servicesInfo[col];
             bool serviceFound = false;
 
-            for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+            for (int i = 0; i < RQSTP_COUNT; i++)
             {
                 if (serviceTypesInfo[i].serviceType == si.serviceType)
                 {
@@ -177,7 +163,7 @@ QVariant ServiceTableModel::headerData(int section, Qt::Orientation orientation,
 void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
 {
     int portIndex = -1;
-    for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+    for (int i = 0; i < RQSTP_COUNT; i++)
     {
         if (serviceTypesInfo[i].port == port)
         {
@@ -216,7 +202,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
 QPair<int,int> ServiceTableModel::getServiceState(quint32 ip, quint16 port)
 {
     int portIndex = -1;
-    for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+    for (int i = 0; i < RQSTP_COUNT; i++)
     {
         if (serviceTypesInfo[i].port == port)
         {
@@ -242,7 +228,7 @@ void ServiceTableModel::checkForDeletingSocket(UdpClientSocket *socket)
 {
     // Socket should be remembered or deleted, if we are scanning.
     int portIndex = -1;
-    for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+    for (int i = 0; i < RQSTP_COUNT; i++)
     {
         if (serviceTypesInfo[i].port == socket->port())
         {
@@ -287,7 +273,7 @@ void ServiceTableModel::checkAddress(QString connectionAddress)
             return;
         }
     }
-    for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+    for (int i = 0; i < RQSTP_COUNT; i++)
     {
         UdpClientSocket* socket = new UdpClientSocket(QHostAddress(connectionAddress), serviceTypesInfo[i].port);
         connect(socket, SIGNAL(ackTimeout()), this, SLOT(serviceNotFound()));
@@ -336,7 +322,7 @@ void ServiceTableModel::serviceAckReceived(REQUEST_HEADER header, QByteArray dat
         }
         quint32 ip = socket->serverAddress().toIPv4Address();
         QPair<int, int> place = getServiceState(ip, socket->port());
-        if (place.first == -1 || place.first >= hostsInfo.count() || place.second == -1 || place.second >= SERVICE_TYPE_COUNT)
+        if (place.first == -1 || place.first >= hostsInfo.count() || place.second == -1 || place.second >= RQSTP_COUNT)
         {
             return;
         }
@@ -400,7 +386,7 @@ void ServiceTableModel::checkServiceStates()
     }
     for (int i = 0; i < hostsInfo.count(); i++)
     {
-        for (int j = 0; j < SERVICE_TYPE_COUNT; j++)
+        for (int j = 0; j < RQSTP_COUNT; j++)
         {
             UdpClientSocket* clientSocket = hostsInfo[i].servicesInfo[j].clientSocket;
             if (clientSocket == nullptr)
@@ -444,7 +430,7 @@ void ServiceTableModel::sendCommand(int row, int col, int command)
 void ServiceTableModel::removeHost(int row)
 {
     beginRemoveRows(QModelIndex(), row, row);
-    for (int j = 0; j < SERVICE_TYPE_COUNT; j++)
+    for (int j = 0; j < RQSTP_COUNT; j++)
     {
         if (hostsInfo[row].servicesInfo[j].clientSocket != nullptr)
         {

@@ -5,8 +5,6 @@
 #include <QHostAddress>
 #include "../include/SocketIO.h"
 
-const int SERVICE_TYPE_COUNT = 4;
-
 const quint32   SS_MF_UNDEFINED = 10,
                 SS_MF_UNAVAILABLE = 11;
 
@@ -33,7 +31,7 @@ struct serviceInfo
 struct hostInfo
 {
     quint32 ip;
-    serviceInfo servicesInfo[SERVICE_TYPE_COUNT];
+    serviceInfo servicesInfo[RQSTP_COUNT];
 
     hostInfo() : ip(0) {}
 };
