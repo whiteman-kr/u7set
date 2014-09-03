@@ -18,7 +18,7 @@ signals:
 public slots:
 
 private:
-    QLineEdit* addressEdit;
+    QLineEdit* m_addressEdit;
 };
 
 #endif // SCANOPTIONSWIDGET_H

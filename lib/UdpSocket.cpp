@@ -23,8 +23,8 @@ UdpClientSocket::UdpClientSocket(const QHostAddress &serverAddress, quint16 port
     m_sentDataSize(0),
     m_senderPort(0),
     m_requestNo(0),
-    m_receivedHeader(reinterpret_cast<REQUEST_HEADER*>(m_receivedData)),
-    m_sentHeader(reinterpret_cast<REQUEST_HEADER*>(m_sentData))
+    m_receivedHeader(reinterpret_cast<RequestHeader*>(m_receivedData)),
+    m_sentHeader(reinterpret_cast<RequestHeader*>(m_sentData))
 {
     m_ackTimer.setSingleShot(true);
 
@@ -80,16 +80,16 @@ void UdpClientSocket::onSocketReadyRead()
         m_sentHeader->clientID == m_receivedHeader->clientID &&
         m_sentHeader->no == m_receivedHeader->no)
     {
-        assert(m_receivedHeader->dataSize + sizeof(REQUEST_HEADER) <= MAX_DATAGRAM_SIZE);
+        assert(m_receivedHeader->dataSize + sizeof(RequestHeader) <= MAX_DATAGRAM_SIZE);
 
-        onRequestAck(*m_receivedHeader, m_receivedData + sizeof(REQUEST_HEADER), m_receivedHeader->dataSize);
+        onRequestAck(*m_receivedHeader, m_receivedData + sizeof(RequestHeader), m_receivedHeader->dataSize);
     }
     else
     {
-        onUnknownRequestAck(*m_receivedHeader, m_receivedData + sizeof(REQUEST_HEADER), m_receivedHeader->dataSize);
+        onUnknownRequestAck(*m_receivedHeader, m_receivedData + sizeof(RequestHeader), m_receivedHeader->dataSize);
     }
 
-    emit ackReceived(*m_receivedHeader, QByteArray(m_receivedData + sizeof(REQUEST_HEADER), m_receivedHeader->dataSize));
+    emit ackReceived(*m_receivedHeader, QByteArray(m_receivedData + sizeof(RequestHeader), m_receivedHeader->dataSize));
 
     m_state = UdpClientSocketState::readyToSend;
 
@@ -97,13 +97,13 @@ void UdpClientSocket::onSocketReadyRead()
 }
 
 
-void UdpClientSocket::onRequestAck(const REQUEST_HEADER& /* ackHeader */, char* /* ackData */, quint32 /* ackDataSize */)
+void UdpClientSocket::onRequestAck(const RequestHeader& /* ackHeader */, char* /* ackData */, quint32 /* ackDataSize */)
 {
     qDebug() << "Called UdpClientSocket::onRequestAck()";
 }
 
 
-void UdpClientSocket::onUnknownRequestAck(const REQUEST_HEADER& /* ackHeader */, char* /* ackData */, quint32 /* ackDataSize */)
+void UdpClientSocket::onUnknownRequestAck(const RequestHeader& /* ackHeader */, char* /* ackData */, quint32 /* ackDataSize */)
 {
     qDebug() << "Called UdpClientSocket::onUnknownRequestAck()";
 }
@@ -155,7 +155,7 @@ void UdpClientSocket::sendRequest(quint32 requestID, char *requestData, quint32 
 
     if (requestData != nullptr && requestDataSize > 0)
     {
-        memcpy(m_sentData + sizeof(REQUEST_HEADER), requestData, requestDataSize);
+        memcpy(m_sentData + sizeof(RequestHeader), requestData, requestDataSize);
     }
     else
     {
@@ -164,7 +164,7 @@ void UdpClientSocket::sendRequest(quint32 requestID, char *requestData, quint32 
 
     m_sentHeader->dataSize = requestDataSize;
 
-    m_sentDataSize = sizeof(REQUEST_HEADER) + requestDataSize;
+    m_sentDataSize = sizeof(RequestHeader) + requestDataSize;
 
     qint64 sent = m_socket.writeDatagram(m_sentData, m_sentDataSize, m_serverAddress, m_port);
 
@@ -219,9 +219,9 @@ void UdpClientSocket::onAckTimerTimeout()
        m_retryCtr = 0;
        m_state = UdpClientSocketState::readyToSend;
 
-       REQUEST_HEADER requestHeader;
+       RequestHeader requestHeader;
 
-       memcpy(&requestHeader, m_sentData, sizeof(REQUEST_HEADER));
+       memcpy(&requestHeader, m_sentData, sizeof(RequestHeader));
 
        m_mutex.unlock();
 
@@ -237,7 +237,7 @@ void UdpClientSocket::onAckTimeout()
 }
 
 
-void UdpClientSocket::onRequestTimeout(const REQUEST_HEADER& /* requestHeader */)
+void UdpClientSocket::onRequestTimeout(const RequestHeader& /* requestHeader */)
 {
     qDebug() << "Called UdpClientSocket::onRequestTimeout()";
 }
@@ -258,7 +258,7 @@ UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, cha
     m_requestDataSize(0),
     m_dataPtr(nullptr)
 {
-    if (receivedData != nullptr && (receivedDataSize >= sizeof(REQUEST_HEADER) && receivedDataSize <= MAX_DATAGRAM_SIZE))
+    if (receivedData != nullptr && (receivedDataSize >= sizeof(RequestHeader) && receivedDataSize <= MAX_DATAGRAM_SIZE))
     {
         m_requestDataSize = receivedDataSize;
         memcpy(m_requestData, receivedData, m_requestDataSize);
@@ -280,7 +280,7 @@ UdpRequest::UdpRequest() :
 
 bool UdpRequest::isEmpty() const
 {
-    return m_requestDataSize < sizeof(REQUEST_HEADER);
+    return m_requestDataSize < sizeof(RequestHeader);
 }
 
 void UdpRequest::initAck(const UdpRequest& request)
@@ -290,14 +290,14 @@ void UdpRequest::initAck(const UdpRequest& request)
     m_address = request.m_address;
     m_port = request.m_port;
 
-    memcpy(m_requestData, request.m_requestData, sizeof(REQUEST_HEADER));
+    memcpy(m_requestData, request.m_requestData, sizeof(RequestHeader));
 
-    m_requestDataSize = sizeof(REQUEST_HEADER);
+    m_requestDataSize = sizeof(RequestHeader);
 
     header()->errorCode = 0;
     header()->dataSize = 0;
 
-    m_dataPtr = m_requestData + sizeof(REQUEST_HEADER);
+    m_dataPtr = m_requestData + sizeof(RequestHeader);
 }
 
 
@@ -321,13 +321,13 @@ bool UdpRequest::writeDword(quint32 dw)
 
 bool UdpRequest::setData(const char* requestData, quint32 requestDataSize)
 {
-    if (requestDataSize > MAX_DATAGRAM_SIZE - sizeof(REQUEST_HEADER))
+    if (requestDataSize > MAX_DATAGRAM_SIZE - sizeof(RequestHeader))
     {
         assert(false);
         return false;
     }
 
-    memcpy(m_requestData + sizeof(REQUEST_HEADER), requestData, requestDataSize);
+    memcpy(m_requestData + sizeof(RequestHeader), requestData, requestDataSize);
 
     header()->dataSize = requestDataSize;
 
@@ -479,7 +479,7 @@ UdpServerSocket::UdpServerSocket(const QHostAddress &bindToAddress, quint16 port
     m_socket(this),
     m_recevedDataSize(0),
     m_senderPort(0),
-    requestHeader(reinterpret_cast<REQUEST_HEADER*>(m_receivedData))
+    requestHeader(reinterpret_cast<RequestHeader*>(m_receivedData))
 {
 }
 

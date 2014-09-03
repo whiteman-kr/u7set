@@ -17,23 +17,22 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    serviceModel(new ServiceTableModel(this)),
-    serviceTable(new QTableView(this)),
-    trayIcon(new QSystemTrayIcon(this))
+    m_serviceModel(new ServiceTableModel(this)),
+    m_serviceTable(new QTableView(this)),
+    m_trayIcon(new QSystemTrayIcon(this))
 {
-    connect(this, SIGNAL(commandPushed(int,int,int)), serviceModel, SLOT(sendCommand(int,int,int)));
+    connect(this, SIGNAL(commandPushed(int,int,int)), m_serviceModel, SLOT(sendCommand(int,int,int)));
 
-    serviceTable->setModel(serviceModel);
-    connect(serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), serviceTable, SLOT(resizeColumnsToContents()));
-    connect(serviceModel, SIGNAL(serviceStateChanged(int)), serviceTable, SLOT(resizeRowToContents(int)));
-    connect(serviceModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), serviceTable, SLOT(resizeColumnsToContents()));
-    //serviceTable->setTextElideMode(Qt::ElideNone);
-    serviceTable->resizeColumnsToContents();
-    setCentralWidget(serviceTable);
+    m_serviceTable->setModel(m_serviceModel);
+    connect(m_serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_serviceTable, SLOT(resizeColumnsToContents()));
+    connect(m_serviceModel, SIGNAL(serviceStateChanged(int)), m_serviceTable, SLOT(resizeRowToContents(int)));
+    connect(m_serviceModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), m_serviceTable, SLOT(resizeColumnsToContents()));
+    m_serviceTable->resizeColumnsToContents();
+    setCentralWidget(m_serviceTable);
 
-    trayIcon->setIcon(windowIcon());
-    trayIcon->show();
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
+    m_trayIcon->setIcon(windowIcon());
+    m_trayIcon->show();
+    connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
 
     QMenu *contextMenu = new QMenu(this);
     QToolBar *toolBar = addToolBar(tr("Main actions"));
@@ -54,14 +53,10 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar->addAction(menu->addAction(tr("Stop service"), this, SLOT(stopService())));
     toolBar->addAction(menu->addAction(tr("Restart service"), this, SLOT(restartService())));
     toolBar->addSeparator();
-    //
 
-    // Context menu connections list
-    /*QActionGroup *serviceActionGroup = new QActionGroup(this);
-    connect(serviceActionGroup, SIGNAL(triggered(QAction *)), this, SLOT(connectionClicked(QAction *)));
-
-    contextMenu->addSeparator();*/
-    //
+    menu->addSeparator();
+    toolBar->addAction(menu->addAction(tr("Remove host"), this, SLOT(removeHost())));
+    toolBar->addSeparator();
 
     menu->addSeparator();
     QAction* exitAction = menu->addAction(tr("Exit"), qApp, SLOT(quit()));
@@ -116,28 +111,28 @@ MainWindow::MainWindow(QWidget *parent) :
 
     contextMenu->addAction(exitAction);
 
-    trayIcon->setContextMenu(contextMenu);
+    m_trayIcon->setContextMenu(contextMenu);
 
     //resize(serviceTable->maximumViewportSize());
 }
 
 MainWindow::~MainWindow()
 {
-    for (int i = 0; i < widgets.count(); i++)
+    for (int i = 0; i < m_widgets.count(); i++)
     {
-        widgets[i]->deleteLater();
+        m_widgets[i]->deleteLater();
     }
 }
 
 void MainWindow::openConnectionInfo(QString text)
 {
-    for (int i = 0; i < widgets.count(); i++)
+    for (int i = 0; i < m_widgets.count(); i++)
     {
-        if (widgets[i]->windowTitle() == text)
+        if (m_widgets[i]->windowTitle() == text)
         {
-            widgets[i]->showNormal();
-            widgets[i]->raise();
-            widgets[i]->activateWindow();
+            m_widgets[i]->showNormal();
+            m_widgets[i]->raise();
+            m_widgets[i]->activateWindow();
             return;
         }
     }
@@ -147,12 +142,12 @@ void MainWindow::openConnectionInfo(QString text)
     w->showNormal();
     w->raise();
     w->activateWindow();
-    widgets.append(w);
+    m_widgets.append(w);
 }
 
 void MainWindow::setServicesForCommand(int command)
 {
-    QModelIndexList selection = serviceTable->selectionModel()->selectedIndexes();
+    QModelIndexList selection = m_serviceTable->selectionModel()->selectedIndexes();
     if (selection.count() == 0)
     {
         QMessageBox::warning(this, tr("Warning"), tr("No service is selected!"));
@@ -176,7 +171,7 @@ void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
     switch (reason)
     {
     case QSystemTrayIcon::Context:
-        trayIcon->contextMenu()->show();
+        m_trayIcon->contextMenu()->show();
         break;
     case QSystemTrayIcon::Trigger:
         openEditor();
@@ -209,7 +204,7 @@ void MainWindow::scanNetwork()
     QStringList address = sow.getSelectedAddress().split("/");
     if (address.count() == 1)
     {
-        serviceModel->checkAddress(address[0]);
+        m_serviceModel->addAddress(address[0]);
     }
     else
     {
@@ -225,7 +220,7 @@ void MainWindow::scanNetwork()
         for (quint32 i = 0; i < counter; i++)
         {
             QHostAddress peerAddress(mask + i);
-            serviceModel->checkAddress(peerAddress.toString());
+            m_serviceModel->checkAddress(peerAddress.toString());
         }
     }
 }
@@ -243,4 +238,17 @@ void MainWindow::stopService()
 void MainWindow::restartService()
 {
     setServicesForCommand(RQID_SERVICE_MF_RESTART);
+}
+
+void MainWindow::removeHost()
+{
+    QModelIndexList selection = m_serviceTable->selectionModel()->selectedIndexes();
+    if (selection.count() == 0)
+    {
+        QMessageBox::warning(this, tr("Warning"), tr("No service is selected!"));
+    }
+    for (int i = 0; i < selection.count(); i++)
+    {
+        m_serviceModel->removeHost(selection[i].row());
+    }
 }

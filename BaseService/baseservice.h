@@ -7,12 +7,50 @@
 #include "../include/UdpSocket.h"
 
 
-class MainWorker : public QObject
+class BaseServiceController;
+
+// BaseServiceWorker class
+//
+
+class BaseServiceWorker : public QObject
 {
     Q_OBJECT
 
 private:
-    enum ServiceMainFunctionState
+    quint16 m_servicePort;
+    UdpSocketThread* m_baseSocketThread;
+
+    BaseServiceController* m_baseServiceController;
+
+public:
+
+    BaseServiceWorker(BaseServiceController* baseServiceController, quint16 port);
+    virtual ~BaseServiceWorker();
+
+    virtual void baseServiceWorkerThreadStarted() {}
+    virtual void baseServiceWorkerThreadFinished() {}
+
+signals:
+    void ackBaseRequest(UdpRequest request);
+
+public slots:
+    void onBaseServiceWorkerThreadStarted();
+    void onBaseServiceWorkerThreadFinished();
+
+    void onBaseRequest(UdpRequest request);
+};
+
+
+// BaseServiceController class
+//
+
+
+class BaseServiceController : public QObject
+{
+    Q_OBJECT
+
+public:
+    enum MainFunctionState
     {
         Stopped,
         Starts,
@@ -20,47 +58,34 @@ private:
         Stops
     };
 
-    quint16 m_servicePort;
-    UdpSocketThread* m_baseSocketThread;
-
-    ServiceMainFunctionState m_serviceMainFunctionState;
-
-public:
-
-    MainWorker(quint16 port);
-    virtual ~MainWorker();
-
-    virtual void mainWorkerThreadStarted() {}
-    virtual void mainWorkerThreadFinished() {}
-
-signals:
-    void ackBaseRequest(UdpRequest request);
-
-public slots:
-    void onMainWorkerThreadStarted();
-    void onMainWorkerThreadFinished();
-
-    void onBaseRequest(UdpRequest request);
-};
-
-
-class MainWorkerController : public QObject
-{
-    Q_OBJECT
-
-public:
-    MainWorkerController(quint16 port);
-    virtual ~MainWorkerController();
-
-
 private:
-    QThread m_mainWorkerThread;
+    QThread m_baseWorkerThread;
+    QThread m_mainFunctionThread;
+
+    qint64 m_serviceStartTime;
+    qint64 m_mainFunctionStartTime;
+
+    MainFunctionState m_mainFunctionState;
+
+    quint32 m_majorVersion;
+    quint32 m_minorVersion;
+    quint32 m_buildNo;
+
+public:
+    BaseServiceController(quint16 por);
+    virtual ~BaseServiceController();
 };
 
 
+// BaseService class
+//
 
 class BaseService : public QtService<QCoreApplication>
 {
+private:
+    BaseServiceController* m_baseServiceController;
+    quint16 m_port;
+
 public:
     BaseService(int argc, char ** argv, const QString & name, quint16 port);
     virtual ~BaseService();
@@ -68,12 +93,4 @@ public:
 protected:
     void start() override;
     void stop() override;
-
-signals:
-
-public slots:
-
-private:
-    MainWorkerController* m_mainWorkerController;
-    quint16 m_servicePort;
 };

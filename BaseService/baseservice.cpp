@@ -5,37 +5,38 @@
 //
 
 
-MainWorker::MainWorker(quint16 port) :
+BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceController, quint16 port) :
     m_baseSocketThread(nullptr),
-    m_serviceMainFunctionState(ServiceMainFunctionState::Stopped),
+    m_baseServiceController(baseServiceController),
     m_servicePort(port)
 {
+    assert(m_baseServiceController != nullptr);
 }
 
 
-MainWorker::~MainWorker()
+BaseServiceWorker::~BaseServiceWorker()
 {
 }
 
 
-void MainWorker::onMainWorkerThreadStarted()
+void BaseServiceWorker::onBaseServiceWorkerThreadStarted()
 {
     m_baseSocketThread = new UdpSocketThread;
 
     UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, m_servicePort);
 
-    connect(serverSocket, &UdpServerSocket::request, this, &MainWorker::onBaseRequest);
-    connect(this, &MainWorker::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
+    connect(serverSocket, &UdpServerSocket::request, this, &BaseServiceWorker::onBaseRequest);
+    connect(this, &BaseServiceWorker::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
 
     m_baseSocketThread->run(serverSocket);
 
-    mainWorkerThreadStarted();
+    baseServiceWorkerThreadStarted();
 }
 
 
-void MainWorker::onMainWorkerThreadFinished()
+void BaseServiceWorker::onBaseServiceWorkerThreadFinished()
 {
-    mainWorkerThreadFinished();
+    baseServiceWorkerThreadFinished();
 
     delete m_baseSocketThread;
 
@@ -43,11 +44,17 @@ void MainWorker::onMainWorkerThreadFinished()
 }
 
 
-void MainWorker::onBaseRequest(UdpRequest request)
+void BaseServiceWorker::onBaseRequest(UdpRequest request)
 {
     UdpRequest ack;
 
     ack.initAck(request);
+
+    AckGetServiceInfo agsi;
+
+    agsi.buildNo = 111;
+
+    ack.setData(reinterpret_cast<const char*>(&agsi), sizeof(agsi));
 
     switch(request.id())
     {
@@ -58,28 +65,31 @@ void MainWorker::onBaseRequest(UdpRequest request)
 }
 
 
-// MainWorkerController class implementation
-//
-
-
-MainWorkerController::MainWorkerController(quint16 port)
+BaseServiceController::BaseServiceController(quint16 port) :
+    m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
+    m_mainFunctionStartTime(0),
+    m_mainFunctionState(MainFunctionState::Stopped),
+    m_majorVersion(1),
+    m_minorVersion(0),
+    m_buildNo(123)
 {
-    MainWorker *worker = new MainWorker(port);
+    BaseServiceWorker *worker = new BaseServiceWorker(this, port);
 
-    worker->moveToThread(&m_mainWorkerThread);
+    worker->moveToThread(&m_baseWorkerThread);
 
-    connect(&m_mainWorkerThread, &QThread::started, worker, &MainWorker::onMainWorkerThreadStarted);
-    connect(&m_mainWorkerThread, &QThread::finished, worker, &MainWorker::onMainWorkerThreadFinished);
+    connect(&m_baseWorkerThread, &QThread::started, worker, &BaseServiceWorker::onBaseServiceWorkerThreadStarted);
+    connect(&m_baseWorkerThread, &QThread::finished, worker, &BaseServiceWorker::onBaseServiceWorkerThreadFinished);
 
-    m_mainWorkerThread.start();
+    m_baseWorkerThread.start();
 }
 
 
-MainWorkerController::~MainWorkerController()
+BaseServiceController::~BaseServiceController()
 {
-    m_mainWorkerThread.quit();
-    m_mainWorkerThread.wait();
+    m_baseWorkerThread.quit();
+    m_baseWorkerThread.wait();
 }
+
 
 // BaseService class implementation
 //
@@ -87,7 +97,8 @@ MainWorkerController::~MainWorkerController()
 
 BaseService::BaseService(int argc, char ** argv, const QString & name, quint16 port):
     QtService(argc, argv, name),
-    m_servicePort(port)
+    m_baseServiceController(nullptr),
+    m_port(port)
 {
 }
 
@@ -99,13 +110,13 @@ BaseService::~BaseService()
 
 void BaseService::start()
 {
-    m_mainWorkerController = new MainWorkerController(m_servicePort);
+    m_baseServiceController = new BaseServiceController(m_port);
 }
 
 
 void BaseService::stop()
 {
-    delete m_mainWorkerController;
+    delete m_baseServiceController;
 }
 
 

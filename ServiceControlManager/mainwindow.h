@@ -16,10 +16,10 @@ public:
     ~MainWindow();
 
 private:
-    QSystemTrayIcon *trayIcon;
-    QVector<QWidget*> widgets;
-    ServiceTableModel* serviceModel;
-    QTableView* serviceTable;
+    QSystemTrayIcon *m_trayIcon;
+    QVector<QWidget*> m_widgets;
+    ServiceTableModel* m_serviceModel;
+    QTableView* m_serviceTable;
 
     void openConnectionInfo(QString text);
     void setServicesForCommand(int command);
@@ -33,6 +33,7 @@ public slots:
     void startService();
     void stopService();
     void restartService();
+    void removeHost();
 
 signals:
     void commandPushed(int row, int col, int command);
