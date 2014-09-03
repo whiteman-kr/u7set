@@ -631,3 +631,33 @@ void DbController::setCurrentProject(const DbProject& /*project*/)
 	// Do we really need this function?
 	assert(false);
 }
+
+int DbController::rootFileId() const
+{
+	return m_worker->rootFileId();
+}
+
+int DbController::afblFileId() const
+{
+	return m_worker->afblFileId();
+}
+
+int DbController::alFileId() const
+{
+	return m_worker->alFileId();
+}
+
+int DbController::hcFileId() const
+{
+	return m_worker->hcFileId();
+}
+
+int DbController::wvsFileId() const
+{
+	return m_worker->wvsFileId();
+}
+
+int DbController::dvsFileId() const
+{
+	return m_worker->dvsFileId();
+}
