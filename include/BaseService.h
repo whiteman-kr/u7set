@@ -9,6 +9,19 @@
 
 class BaseServiceController;
 
+struct ServiceInfo
+{
+    quint32 serviceType;                // RQSTP_* constants
+    quint32 majorVersion;
+    quint32 minorVersion;
+    quint32 buildNo;
+    quint32 crc;
+    quint32 serviceUptime;
+    quint32 mainFunctionSate;           // SS_MF_* constants
+    quint32 mainFunctionUptime;
+};
+
+
 // BaseServiceWorker class
 //
 
@@ -17,14 +30,15 @@ class BaseServiceWorker : public QObject
     Q_OBJECT
 
 private:
-    quint16 m_servicePort;
+    int m_serviceType;
+
     UdpSocketThread* m_baseSocketThread;
 
     BaseServiceController* m_baseServiceController;
 
 public:
 
-    BaseServiceWorker(BaseServiceController* baseServiceController, quint16 port);
+    BaseServiceWorker(BaseServiceController* baseServiceController, int serviceType);
     virtual ~BaseServiceWorker();
 
     virtual void baseServiceWorkerThreadStarted() {}
@@ -59,8 +73,12 @@ public:
     };
 
 private:
+    QMutex m_mutex;
+
     QThread m_baseWorkerThread;
     QThread m_mainFunctionThread;
+
+    int m_serviceType;
 
     qint64 m_serviceStartTime;
     qint64 m_mainFunctionStartTime;
@@ -70,27 +88,13 @@ private:
     quint32 m_majorVersion;
     quint32 m_minorVersion;
     quint32 m_buildNo;
+	quint32 m_crc;
 
 public:
-    BaseServiceController(quint16 por);
+    BaseServiceController(int serviceType);
     virtual ~BaseServiceController();
+
+    void getServiceInfo(ServiceInfo& serviceInfo);
 };
 
 
-// BaseService class
-//
-
-class BaseService : public QtService<QCoreApplication>
-{
-private:
-    BaseServiceController* m_baseServiceController;
-    quint16 m_port;
-
-public:
-    BaseService(int argc, char ** argv, const QString & name, quint16 port);
-    virtual ~BaseService();
-
-protected:
-    void start() override;
-    void stop() override;
-};

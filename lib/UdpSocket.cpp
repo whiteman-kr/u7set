@@ -48,7 +48,6 @@ void UdpClientSocket::onSocketThreadStartedSlot()
 
 void UdpClientSocket::onSocketThreadStarted()
 {
-    qDebug() << "Called UdpClientSocket::onSocketThreadStarted()";
 }
 
 
@@ -62,7 +61,6 @@ void UdpClientSocket::onSocketThreadFinishedSlot()
 
 void UdpClientSocket::onSocketThreadFinished()
 {
-    qDebug() << "Called UdpClientSocket::onSocketThreadFinished()";
 }
 
 
@@ -99,13 +97,11 @@ void UdpClientSocket::onSocketReadyRead()
 
 void UdpClientSocket::onRequestAck(const RequestHeader& /* ackHeader */, char* /* ackData */, quint32 /* ackDataSize */)
 {
-    qDebug() << "Called UdpClientSocket::onRequestAck()";
 }
 
 
 void UdpClientSocket::onUnknownRequestAck(const RequestHeader& /* ackHeader */, char* /* ackData */, quint32 /* ackDataSize */)
 {
-    qDebug() << "Called UdpClientSocket::onUnknownRequestAck()";
 }
 
 
@@ -170,12 +166,10 @@ void UdpClientSocket::sendRequest(quint32 requestID, char *requestData, quint32 
 
     if (sent == -1)
     {
-        qDebug() << "UdpClientSocket::sendRequest writeDatagram error!";
 
     }
     else
     {
-        qDebug() << "UdpClientSocket::sendRequest OK";
     }
 
     m_requestNo++;
@@ -233,13 +227,11 @@ void UdpClientSocket::onAckTimerTimeout()
 
 void UdpClientSocket::onAckTimeout()
 {
-    qDebug() << "Called UdpClientSocket::onAckTimeout()";
 }
 
 
 void UdpClientSocket::onRequestTimeout(const RequestHeader& /* requestHeader */)
 {
-    qDebug() << "Called UdpClientSocket::onRequestTimeout()";
 }
 
 
@@ -496,7 +488,7 @@ void UdpServerSocket::onSocketThreadStartedSlot()
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
     connect(&m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyReadSlot()));
 
-    m_socket.bind(m_bindToAddress, m_port);
+	bind();
 
     onSocketThreadStarted();
 }
@@ -514,6 +506,21 @@ void UdpServerSocket::onSocketThreadFinishedSlot()
 
     deleteLater();
 }
+
+
+void UdpServerSocket::bind()
+{
+	if (m_socket.state() != QAbstractSocket::BoundState)
+	{
+		bool res = m_socket.bind(m_bindToAddress, m_port);
+
+		if (res)
+		{
+			qDebug() << "Socket bound on port " << m_port;
+		}
+	}
+}
+
 
 void UdpServerSocket::sendAck(UdpRequest request)
 {
@@ -539,7 +546,9 @@ void UdpServerSocket::onSocketThreadFinished()
 
 void UdpServerSocket::onTimer()
 {
-    qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+	bind();
+
+	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
 
     m_clientMapMutex.lock();
 

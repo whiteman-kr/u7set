@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "ServerSocket.h"
+#include "../include/BaseService.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,7 +19,7 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    UdpSocketThread m_socketThread;
+	BaseServiceController* m_baseServiceController;
 };
 
 #endif // MAINWINDOW_H

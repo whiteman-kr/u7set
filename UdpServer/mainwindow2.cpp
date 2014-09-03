@@ -5,14 +5,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-
-    ServerSocket* m_serverSocket = new ServerSocket(QHostAddress("192.168.14.85"), 4000);
-
-    m_socketThread.run(m_serverSocket);
+	m_baseServiceController = new BaseServiceController(RQSTP_BASE);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+	delete m_baseServiceController;
+
+	delete ui;
 }

@@ -18,12 +18,14 @@ SOURCES +=\
     servermain.cpp \
     ../lib/UdpSocket.cpp \
     ServerSocket.cpp \
-    mainwindow2.cpp
+    mainwindow2.cpp \
+    ../lib/BaseService.cpp
 
 HEADERS  += mainwindow.h \
     ../include/SocketIO.h \
     ../include/UdpSocket.h \
-    ServerSocket.h
+    ServerSocket.h \
+    ../include/BaseService.h
 
 FORMS    += mainwindow.ui
 

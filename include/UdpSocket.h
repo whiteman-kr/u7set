@@ -215,6 +215,8 @@ private:
 
     QHash<quint32, UdpClientRequestHandler*> clientRequestHandlerMap;
 
+	void bind();
+
 public:
     UdpServerSocket(const QHostAddress& bindToAddress, quint16 port);
     virtual ~UdpServerSocket();

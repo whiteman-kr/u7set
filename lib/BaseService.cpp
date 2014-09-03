@@ -1,14 +1,14 @@
-#include "BaseService.h"
+#include "../include/BaseService.h"
 
 
-// MainWorker class implementation
+// BaseServiceWorker class implementation
 //
 
 
-BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceController, quint16 port) :
+BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceController, int serviceType) :
     m_baseSocketThread(nullptr),
     m_baseServiceController(baseServiceController),
-    m_servicePort(port)
+    m_serviceType(serviceType)
 {
     assert(m_baseServiceController != nullptr);
 }
@@ -21,14 +21,14 @@ BaseServiceWorker::~BaseServiceWorker()
 
 void BaseServiceWorker::onBaseServiceWorkerThreadStarted()
 {
-    m_baseSocketThread = new UdpSocketThread;
+	m_baseSocketThread = new UdpSocketThread;
 
-    UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, m_servicePort);
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress("127.0.0.1"), serviceTypesInfo[m_serviceType].port);
 
     connect(serverSocket, &UdpServerSocket::request, this, &BaseServiceWorker::onBaseRequest);
     connect(this, &BaseServiceWorker::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
 
-    m_baseSocketThread->run(serverSocket);
+	m_baseSocketThread->run(serverSocket);
 
     baseServiceWorkerThreadStarted();
 }
@@ -36,9 +36,9 @@ void BaseServiceWorker::onBaseServiceWorkerThreadStarted()
 
 void BaseServiceWorker::onBaseServiceWorkerThreadFinished()
 {
-    baseServiceWorkerThreadFinished();
+	baseServiceWorkerThreadFinished();
 
-    delete m_baseSocketThread;
+	delete m_baseSocketThread;
 
     deleteLater();
 }
@@ -65,15 +65,22 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 }
 
 
-BaseServiceController::BaseServiceController(quint16 port) :
+// BaseServiceController class implementation
+//
+
+
+BaseServiceController::BaseServiceController(int serviceType) :
     m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
     m_mainFunctionStartTime(0),
     m_mainFunctionState(MainFunctionState::Stopped),
     m_majorVersion(1),
     m_minorVersion(0),
-    m_buildNo(123)
+    m_buildNo(123),
+    m_serviceType(serviceType)
 {
-    BaseServiceWorker *worker = new BaseServiceWorker(this, port);
+    assert(m_serviceType >= 0 && m_serviceType < RQSTP_COUNT);
+
+    BaseServiceWorker *worker = new BaseServiceWorker(this, m_serviceType);
 
     worker->moveToThread(&m_baseWorkerThread);
 
@@ -91,34 +98,25 @@ BaseServiceController::~BaseServiceController()
 }
 
 
-// BaseService class implementation
-//
-
-
-BaseService::BaseService(int argc, char ** argv, const QString & name, quint16 port):
-    QtService(argc, argv, name),
-    m_baseServiceController(nullptr),
-    m_port(port)
+void BaseServiceController::getServiceInfo(ServiceInfo& serviceInfo)
 {
+    m_mutex.lock();
+
+	serviceInfo.serviceType = m_serviceType;
+	serviceInfo.majorVersion = m_majorVersion;
+	serviceInfo.minorVersion = m_minorVersion;
+	serviceInfo.buildNo = m_buildNo;
+	serviceInfo.crc = m_crc;
+	serviceInfo.serviceUptime = (QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000;
+
+	if (m_mainFunctionState != MainFunctionState::Stopped)
+	{
+		serviceInfo.mainFunctionUptime = (QDateTime::currentMSecsSinceEpoch() - m_mainFunctionStartTime) / 1000;
+	}
+	else
+	{
+		serviceInfo.mainFunctionUptime = 0;
+	}
+
+	m_mutex.unlock();
 }
-
-
-BaseService::~BaseService()
-{
-}
-
-
-void BaseService::start()
-{
-    m_baseServiceController = new BaseServiceController(m_port);
-}
-
-
-void BaseService::stop()
-{
-    delete m_baseServiceController;
-}
-
-
-
-
