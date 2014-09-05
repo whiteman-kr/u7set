@@ -25,13 +25,13 @@ struct ServiceInfo
     UdpClientSocket* clientSocket;
     QWidget* statusWidget;
 
-    ServiceInfo();
+	ServiceInfo();
 };
 
 struct HostInfo
 {
     quint32 ip;
-    ServiceInfo servicesInfo[RQSTP_COUNT];
+	ServiceInfo servicesInfo[RQSTP_COUNT];
 
     HostInfo() : ip(0) {}
 };

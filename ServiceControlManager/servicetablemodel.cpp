@@ -83,7 +83,7 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole:
         {
             QString str;
-            const ServiceInfo& si = m_hostsInfo[row].servicesInfo[col];
+			const ServiceInfo& si = m_hostsInfo[row].servicesInfo[col];
             bool serviceFound = false;
 
             for (int i = 0; i < RQSTP_COUNT; i++)
@@ -326,7 +326,7 @@ void ServiceTableModel::serviceAckReceived(RequestHeader header, QByteArray data
         {
             return;
         }
-        ServiceInfo& si = m_hostsInfo[place.first].servicesInfo[place.second];
+		ServiceInfo& si = m_hostsInfo[place.first].servicesInfo[place.second];
         QBuffer buffer(&data);
         buffer.open(QBuffer::ReadOnly);
         QDataStream in(&buffer);

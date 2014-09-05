@@ -132,7 +132,7 @@ public:
 
     bool writeDword(quint32 dw);
 
-    bool setData(const char* requestData, quint32 requestDataSize);
+	bool setData(const char* data, quint32 dataSize);
 };
 
 

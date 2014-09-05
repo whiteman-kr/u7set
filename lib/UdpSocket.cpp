@@ -311,17 +311,19 @@ bool UdpRequest::writeDword(quint32 dw)
 }
 
 
-bool UdpRequest::setData(const char* requestData, quint32 requestDataSize)
+bool UdpRequest::setData(const char* data, quint32 dataSize)
 {
-    if (requestDataSize > MAX_DATAGRAM_SIZE - sizeof(RequestHeader))
+	assert(data != nullptr);
+
+	if (dataSize > MAX_DATAGRAM_SIZE - sizeof(RequestHeader))
     {
         assert(false);
         return false;
     }
 
-    memcpy(m_requestData + sizeof(RequestHeader), requestData, requestDataSize);
+	memcpy(m_requestData + sizeof(RequestHeader), data, dataSize);
 
-    header()->dataSize = requestDataSize;
+	header()->dataSize = dataSize;
 
     return true;
 }
@@ -528,12 +530,12 @@ void UdpServerSocket::sendAck(UdpRequest request)
 
     if (sent == -1)
     {
-        qDebug() << "UdpServerSocket::sendRequest writeDatagram error!";
+		//qDebug() << "UdpServerSocket::sendRequest writeDatagram error!";
 
     }
     else
     {
-        qDebug() << "UdpServerSocket::sendRequest OK";
+		//qDebug() << "UdpServerSocket::sendRequest OK";
     }
 }
 
@@ -622,7 +624,7 @@ void UdpServerSocket::onSocketReadyReadSlot()
 
 void UdpServerSocket::datagramReceived()
 {
-     qDebug() << "Called UdpServerSocket::datagramReceived";
+	 //qDebug() << "Called UdpServerSocket::datagramReceived";
 }
 
 

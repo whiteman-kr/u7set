@@ -9,18 +9,6 @@
 
 class BaseServiceController;
 
-struct ServiceInfo
-{
-    quint32 serviceType;                // RQSTP_* constants
-    quint32 majorVersion;
-    quint32 minorVersion;
-    quint32 buildNo;
-    quint32 crc;
-    quint32 serviceUptime;
-    quint32 mainFunctionSate;           // SS_MF_* constants
-    quint32 mainFunctionUptime;
-};
-
 
 // BaseServiceWorker class
 //
@@ -66,10 +54,10 @@ class BaseServiceController : public QObject
 public:
     enum MainFunctionState
     {
-        Stopped,
-        Starts,
-        Work,
-        Stops
+		Stopped = SS_MF_STOPPED,
+		Starts = SS_MF_STARTS,
+		Work = SS_MF_WORK,
+		Stops = SS_MF_STOPS
     };
 
 private:
@@ -94,7 +82,7 @@ public:
     BaseServiceController(int serviceType);
     virtual ~BaseServiceController();
 
-    void getServiceInfo(ServiceInfo& serviceInfo);
+	void getServiceInfo(ServiceInformation& serviceInfo);
 };
 
 
