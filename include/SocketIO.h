@@ -68,19 +68,24 @@ struct RequestHeader
 };
 
 
+struct ServiceInformation
+{
+	quint32 type;						// RQSTP_* constants
+	quint32 majorVersion;
+	quint32 minorVersion;
+	quint32 buildNo;
+	quint32 crc;
+	quint32 uptime;
+	quint32 mainFunctionSate;           // SS_MF_* constants
+	quint32 mainFunctionUptime;
+};
+
+
 struct AckGetServiceInfo
 {
     RequestHeader header;
 
-    quint32 serviceType;                // RQSTP_* constants
-    quint32 majorVersion;
-    quint32 minorVersion;
-    quint32 buildNo;
-    quint32 crc;
-    quint32 serviceUptime;
-    quint32 state;                      // SS_MF_* constants
-    quint32 serviceFunctionUptime;
-
+	ServiceInformation serviceInfo;
 };
 
 

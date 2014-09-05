@@ -50,11 +50,11 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 
     ack.initAck(request);
 
-    AckGetServiceInfo agsi;
+	ServiceInformation si;
 
-    agsi.buildNo = 111;
+	m_baseServiceController->getServiceInfo(si);
 
-    ack.setData(reinterpret_cast<const char*>(&agsi), sizeof(agsi));
+	ack.setData(reinterpret_cast<const char*>(&si), sizeof(si));
 
     switch(request.id())
     {
@@ -98,16 +98,18 @@ BaseServiceController::~BaseServiceController()
 }
 
 
-void BaseServiceController::getServiceInfo(ServiceInfo& serviceInfo)
+void BaseServiceController::getServiceInfo(ServiceInformation &serviceInfo)
 {
     m_mutex.lock();
 
-	serviceInfo.serviceType = m_serviceType;
+	serviceInfo.type = m_serviceType;
 	serviceInfo.majorVersion = m_majorVersion;
 	serviceInfo.minorVersion = m_minorVersion;
 	serviceInfo.buildNo = m_buildNo;
 	serviceInfo.crc = m_crc;
-	serviceInfo.serviceUptime = (QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000;
+	serviceInfo.uptime = (QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000;
+
+	serviceInfo.mainFunctionSate = m_mainFunctionState;
 
 	if (m_mainFunctionState != MainFunctionState::Stopped)
 	{
