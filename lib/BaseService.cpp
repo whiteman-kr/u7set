@@ -23,7 +23,7 @@ void BaseServiceWorker::onBaseServiceWorkerThreadStarted()
 {
 	m_baseSocketThread = new UdpSocketThread;
 
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress("127.0.0.1"), serviceTypesInfo[m_serviceType].port);
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, serviceTypesInfo[m_serviceType].port);
 
     connect(serverSocket, &UdpServerSocket::request, this, &BaseServiceWorker::onBaseRequest);
     connect(this, &BaseServiceWorker::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
