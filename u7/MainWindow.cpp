@@ -55,8 +55,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	// Add main tab pages
 	//
 	getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
-/*	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Hardware Configuration"));
-	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
+	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Hardware Configuration"));
+/*	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
 	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 
 	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameLogic>("lvf", dbController(), nullptr), tr("Application Logic"));
@@ -139,7 +139,7 @@ void MainWindow::createActions()
 
     m_pAfblEditorAction = new QAction(tr("AFBL Editor..."), this);
     m_pAfblEditorAction->setStatusTip(tr("Run AFBL Editor"));
-    //m_pConfiguratorAction->setEnabled(true);
+	m_pAfblEditorAction->setEnabled(false);
     connect(m_pAfblEditorAction, &QAction::triggered, this, &MainWindow::runAfblEditor);
 
     m_pAboutAction = new QAction(tr("About..."), this);
@@ -358,6 +358,7 @@ void MainWindow::projectOpened(DbProject project)
 	assert(m_pUsersAction != nullptr);
 
 	m_pUsersAction->setEnabled(true);
+	m_pAfblEditorAction->setEnabled(true);
 
 	// Tab Pages, enable all tab pages
 	//
@@ -380,6 +381,7 @@ void MainWindow::projectClosed()
 	assert(m_pUsersAction != nullptr);
 
 	m_pUsersAction->setEnabled(false);
+	m_pAfblEditorAction->setEnabled(false);
 
 	// Tab Pages, disable all tab pages except the first.
 	//

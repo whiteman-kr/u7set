@@ -9,8 +9,8 @@
 //
 //
 
-/*
-EquipmentModel::EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent) :
+
+/*EquipmentModel::EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent) :
 	QAbstractItemModel(parent),
 	m_root(root)
 {
@@ -242,7 +242,7 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
 
 	assert(parent != nullptr);
 	return parent->childrenCount() > 0;
-}
+}*/
 
 //
 //
@@ -255,7 +255,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_addCaseAction(nullptr),
 	m_addSubblockAction(nullptr),
 	m_addBlockAction(nullptr),
-	m_equipmentModel(nullptr),
+	//m_equipmentModel(nullptr),
 	m_equipmentView(nullptr),
 	m_propertyView(nullptr),
 	m_splitter(nullptr)
@@ -315,8 +315,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// --
 	//
-	connect(dbController(), &DbStore::projectOpened, this, &EquipmentTabPage::projectOpened);
-	connect(dbController(), &DbStore::projectClosed, this, &EquipmentTabPage::projectClosed);
+	connect(dbController(), &DbController::projectOpened, this, &EquipmentTabPage::projectOpened);
+	connect(dbController(), &DbController::projectClosed, this, &EquipmentTabPage::projectClosed);
 
 //	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
 //	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
@@ -381,13 +381,13 @@ void EquipmentTabPage::addSystem()
 	system->setStrId("STRID");
 	system->setCaption(tr("New System"));
 
-	bool result = dbController()->addSystem(system.get(), this);
+	//bool result = dbController()->addSystem(system.get(), this);
 
-	if (result == true)
+	//if (result == true)
 	{
 		// Add system to the model m_equipmentModel
 		//
-		m_root->addChild(system);
+		//m_root->addChild(system);
 
 		// !!!!!!!!!!!!!!!!!!! emmit here message about model changing............
 	}
@@ -397,14 +397,17 @@ void EquipmentTabPage::addSystem()
 
 void EquipmentTabPage::addCase()
 {
+	assert(false);
 }
 
 void EquipmentTabPage::addSubblock()
 {
+	assert(false);
 }
 
 void EquipmentTabPage::addBlock()
 {
+	assert(false);
 }
 
-*/
+
