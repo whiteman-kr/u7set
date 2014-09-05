@@ -8,7 +8,6 @@ class Afb
 public:
     Afb();
 
-
 public:
     void storeToXml(QXmlStreamWriter& xmlWriter) const;
     void readFromXml(QXmlStreamReader& xmlReader);
@@ -22,7 +21,6 @@ private:
     int m_opCode;
     int m_inCount;
     int m_outCount;
-
 };
 
 #endif // AFBLIBRARY_H

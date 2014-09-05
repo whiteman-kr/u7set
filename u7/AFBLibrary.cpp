@@ -122,7 +122,6 @@ bool AfbLibrary::restore(const QString& fileName, Afb &afb)
 */
 void Afb::storeToXml(QXmlStreamWriter& xmlWriter) const
 {
-
     xmlWriter.setAutoFormatting(true);
     xmlWriter.writeStartDocument();
 
@@ -138,5 +137,4 @@ void Afb::storeToXml(QXmlStreamWriter& xmlWriter) const
     xmlWriter.writeEndElement();
 
     xmlWriter.writeEndDocument();
-
 }

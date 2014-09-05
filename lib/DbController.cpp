@@ -412,6 +412,12 @@ bool DbController::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* par
 	return setWorkcopy(files, parentWidget);
 }
 
+bool DbController::checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget)
+{
+	std::vector<DbFileInfo> fv {file};
+	return checkIn(fv, comment, parentWidget);
+}
+
 bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget)
 {
 	// Check parameters
@@ -438,6 +444,12 @@ bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& commen
 	return true;
 }
 
+bool DbController::checkOut(DbFileInfo& file, QWidget* parentWidget)
+{
+	std::vector<DbFileInfo> fv {file};
+	return checkOut(fv, parentWidget);
+}
+
 bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget)
 {
 	// Check parameters
@@ -462,6 +474,13 @@ bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidge
 
 	ok = waitForComplete(parentWidget, tr("Checking out files"));
 	return true;
+}
+
+
+bool DbController::undoChanges(DbFileInfo& file, QWidget* parentWidget)
+{
+	std::vector<DbFileInfo> fv {file};
+	return undoChanges(fv, parentWidget);
 }
 
 bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget)

@@ -50,8 +50,11 @@ public:
 	bool setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWidget* parentWidget);
 	bool setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget);
 
+	bool checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget);
 	bool checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget);
+	bool checkOut(DbFileInfo& file, QWidget* parentWidget);
 	bool checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget);
+	bool undoChanges(DbFileInfo& file, QWidget* parentWidget);
 	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 
 signals:

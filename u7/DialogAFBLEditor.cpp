@@ -79,7 +79,7 @@ void DialogAfblEditor::on_m_add_clicked()
 
     if (m_pDbController->addFiles(&f, m_pDbController->afblFileId(), this) == true)
     {
-        refreshFiles();
+		refreshFiles();
     }
     else
     {
@@ -104,11 +104,11 @@ void DialogAfblEditor::on_m_edit_clicked()
             return;
         }
 
-        std::vector <DbFileInfo> f;
+		std::vector<DbFileInfo> f;
         f.push_back(*pFi);
 
-        if (m_pDbController->checkOut(f, this) == false)
-        {
+		if (m_pDbController->checkOut(f, this) == false)
+		{
             QMessageBox::critical(this, "Error", "Check Out error!");
             return;
         }

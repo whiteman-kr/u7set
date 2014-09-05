@@ -1,9 +1,10 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include "..\include\DeviceObject.h"
+#include "../include/DeviceObject.h"
 
 class DbController;
+
 /*
 class EquipmentModel : public QAbstractItemModel
 {
@@ -40,7 +41,7 @@ private:
 		ColumnCount
 	};
 };
-
+*/
 
 class EquipmentTabPage : public MainTabPage
 {
@@ -77,12 +78,11 @@ private:
 	QAction* m_addBlockAction;
 
 	std::shared_ptr<DeviceRoot> m_root;
-	EquipmentModel* m_equipmentModel;
+	//EquipmentModel* m_equipmentModel;
 
 	QTreeView* m_equipmentView;
 	QTextEdit* m_propertyView;
 	QSplitter* m_splitter;
 };
 
-*/
 
