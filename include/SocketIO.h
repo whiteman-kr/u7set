@@ -76,7 +76,7 @@ struct ServiceInformation
 	quint32 buildNo;
 	quint32 crc;
 	quint32 uptime;
-	quint32 mainFunctionSate;           // SS_MF_* constants
+	quint32 mainFunctionState;           // SS_MF_* constants
 	quint32 mainFunctionUptime;
 };
 

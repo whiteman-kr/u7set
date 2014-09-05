@@ -176,7 +176,7 @@ void BaseServiceController::getServiceInfo(ServiceInformation &serviceInfo)
 	serviceInfo.crc = m_crc;
 	serviceInfo.uptime = (QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000;
 
-	serviceInfo.mainFunctionSate = m_mainFunctionState;
+	serviceInfo.mainFunctionState = m_mainFunctionState;
 
 	if (m_mainFunctionState != MainFunctionState::Stopped)
 	{
