@@ -64,7 +64,7 @@ void BaseService::stop()
 
 int main(int argc, char *argv[])
 {
-	BaseService service(argc, argv, "RPCT Base Service", RQSTP_BASE);
+	BaseService service(argc, argv, "RPCT Base Service", STP_BASE);
 
     return service.exec();
 }

@@ -29,8 +29,8 @@ public:
     BaseServiceWorker(BaseServiceController* baseServiceController, int serviceType);
     virtual ~BaseServiceWorker();
 
-    virtual void baseServiceWorkerThreadStarted() {}
-    virtual void baseServiceWorkerThreadFinished() {}
+	virtual void threadStarted() {}
+	virtual void threadFinished() {}
 
 signals:
     void ackBaseRequest(UdpRequest request);
@@ -40,8 +40,8 @@ signals:
 	void restartMainFunction();
 
 public slots:
-    void onBaseServiceWorkerThreadStarted();
-    void onBaseServiceWorkerThreadFinished();
+	void onThreadStarted();
+	void onThreadFinished();
 
     void onBaseRequest(UdpRequest request);
 };
@@ -62,8 +62,8 @@ public:
 	MainFunctionWorker(BaseServiceController* baseServiceController);
 	virtual ~MainFunctionWorker();
 
-	virtual void onThreadStarted() { qDebug() << "Called MainFunctionWorker::onThreadStarted"; }
-	virtual void onThreadFinished() { qDebug() << "Called MainFunctionWorker::onThreadFinished"; }
+	virtual void threadStarted() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::threadStarted"; }
+	virtual void threadFinished() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::threadFinished"; }
 
 signals:
 	void mainFunctionWork();
@@ -86,10 +86,10 @@ class BaseServiceController : public QObject
 public:
     enum MainFunctionState
     {
-		Stopped = SS_MF_STOPPED,
-		Starts = SS_MF_STARTS,
-		Work = SS_MF_WORK,
-		Stops = SS_MF_STOPS
+		stopped = SS_MF_STOPPED,
+		starts = SS_MF_STARTS,
+		work = SS_MF_WORK,
+		stops = SS_MF_STOPS
     };
 
 private:

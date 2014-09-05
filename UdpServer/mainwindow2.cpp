@@ -5,7 +5,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-	m_baseServiceController = new BaseServiceController(RQSTP_BASE);
+	m_baseServiceController = new BaseServiceController(STP_BASE);
 }
 
 MainWindow::~MainWindow()

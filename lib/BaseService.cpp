@@ -18,7 +18,7 @@ BaseServiceWorker::~BaseServiceWorker()
 }
 
 
-void BaseServiceWorker::onBaseServiceWorkerThreadStarted()
+void BaseServiceWorker::onThreadStarted()
 {
 	m_baseSocketThread = new UdpSocketThread;
 
@@ -33,13 +33,13 @@ void BaseServiceWorker::onBaseServiceWorkerThreadStarted()
 
 	m_baseSocketThread->run(serverSocket);
 
-    baseServiceWorkerThreadStarted();
+	threadStarted();
 }
 
 
-void BaseServiceWorker::onBaseServiceWorkerThreadFinished()
+void BaseServiceWorker::onThreadFinished()
 {
-	baseServiceWorkerThreadFinished();
+	threadFinished();
 
 	delete m_baseSocketThread;
 
@@ -81,8 +81,6 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 		emit ackBaseRequest(ack);
 		return;
     }
-
-
 }
 
 
@@ -98,13 +96,12 @@ MainFunctionWorker::MainFunctionWorker(BaseServiceController *baseServiceControl
 
 MainFunctionWorker::~MainFunctionWorker()
 {
-	deleteLater();
 }
 
 
 void MainFunctionWorker::onThreadStartedSlot()
 {
-	onThreadStarted();
+	threadStarted();
 
 	emit mainFunctionWork();
 }
@@ -112,9 +109,11 @@ void MainFunctionWorker::onThreadStartedSlot()
 
 void MainFunctionWorker::onThreadFinishedSlot()
 {
-	onThreadFinished();
+	threadFinished();
 
 	emit mainFunctionStopped();
+
+	deleteLater();
 }
 
 
@@ -125,10 +124,11 @@ void MainFunctionWorker::onThreadFinishedSlot()
 BaseServiceController::BaseServiceController(int serviceType) :
     m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
     m_mainFunctionStartTime(0),
-    m_mainFunctionState(MainFunctionState::Stopped),
+	m_mainFunctionState(MainFunctionState::stopped),
     m_majorVersion(1),
     m_minorVersion(0),
     m_buildNo(123),
+	m_crc(0xF0F1F2F3),
 	m_serviceType(serviceType),
 	m_mainFunctionNeedRestart(false),
 	m_mainFunctionStopped(false)
@@ -147,8 +147,8 @@ BaseServiceController::BaseServiceController(int serviceType) :
 
     worker->moveToThread(&m_baseWorkerThread);
 
-    connect(&m_baseWorkerThread, &QThread::started, worker, &BaseServiceWorker::onBaseServiceWorkerThreadStarted);
-    connect(&m_baseWorkerThread, &QThread::finished, worker, &BaseServiceWorker::onBaseServiceWorkerThreadFinished);
+	connect(&m_baseWorkerThread, &QThread::started, worker, &BaseServiceWorker::onThreadStarted);
+	connect(&m_baseWorkerThread, &QThread::finished, worker, &BaseServiceWorker::onThreadFinished);
 
     m_baseWorkerThread.start();
 
@@ -160,7 +160,11 @@ BaseServiceController::BaseServiceController(int serviceType) :
 
 BaseServiceController::~BaseServiceController()
 {
-    m_baseWorkerThread.quit();
+	stopMainFunction();
+
+	m_mainFunctionThread.wait();		// !!!!
+
+	m_baseWorkerThread.quit();
     m_baseWorkerThread.wait();
 }
 
@@ -178,7 +182,7 @@ void BaseServiceController::getServiceInfo(ServiceInformation &serviceInfo)
 
 	serviceInfo.mainFunctionState = m_mainFunctionState;
 
-	if (m_mainFunctionState != MainFunctionState::Stopped)
+	if (m_mainFunctionState != MainFunctionState::stopped)
 	{
 		serviceInfo.mainFunctionUptime = (QDateTime::currentMSecsSinceEpoch() - m_mainFunctionStartTime) / 1000;
 	}
@@ -193,12 +197,14 @@ void BaseServiceController::getServiceInfo(ServiceInformation &serviceInfo)
 
 void BaseServiceController::stopMainFunction()
 {
-	if (m_mainFunctionState != MainFunctionState::Work)
+	qDebug() << "Called BaseServiceController::stopMainFunction";
+
+	if (m_mainFunctionState != MainFunctionState::work)
 	{
 		return;
 	}
 
-	m_mainFunctionState = MainFunctionState::Stops;
+	m_mainFunctionState = MainFunctionState::stops;
 
 	m_mainFunctionThread.quit();
 
@@ -209,7 +215,9 @@ void BaseServiceController::stopMainFunction()
 
 void BaseServiceController::startMainFunction()
 {
-	if (m_mainFunctionState != MainFunctionState::Stopped)
+	qDebug() << "Called BaseServiceController::startMainFunction";
+
+	if (m_mainFunctionState != MainFunctionState::stopped)
 	{
 		return;
 	}
@@ -217,15 +225,15 @@ void BaseServiceController::startMainFunction()
 	m_mainFunctionStopped = false;
 	m_mainFunctionNeedRestart = false;
 
-	m_mainFunctionState = MainFunctionState::Starts;
+	m_mainFunctionState = MainFunctionState::starts;
 
 	MainFunctionWorker* mainFunctionWorker = new MainFunctionWorker(this);
 
 	connect(mainFunctionWorker, &MainFunctionWorker::mainFunctionWork, this, &BaseServiceController::onMainFunctionWork);
 	connect(mainFunctionWorker, &MainFunctionWorker::mainFunctionStopped, this, &BaseServiceController::onMainFunctionStopped);
 
-	connect(&m_mainFunctionThread, &QThread::started, mainFunctionWorker, &MainFunctionWorker::onThreadStarted);
-	connect(&m_mainFunctionThread, &QThread::finished, mainFunctionWorker, &MainFunctionWorker::onThreadFinished);
+	connect(&m_mainFunctionThread, &QThread::started, mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
+	connect(&m_mainFunctionThread, &QThread::finished, mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
 
 	mainFunctionWorker->moveToThread(&m_mainFunctionThread);
 
@@ -238,9 +246,19 @@ void BaseServiceController::startMainFunction()
 
 void BaseServiceController::restartMainFunction()
 {
-	stopMainFunction();
+	qDebug() << "Called BaseServiceController::restartMainFunction";
 
-	m_mainFunctionNeedRestart = true;
+	switch(m_mainFunctionState)
+	{
+	case MainFunctionState::work:
+		stopMainFunction();
+		m_mainFunctionNeedRestart = true;
+		break;
+
+	case MainFunctionState::stopped:
+		startMainFunction();
+		break;
+	}
 }
 
 
@@ -252,13 +270,13 @@ void BaseServiceController::onTimer500ms()
 
 void BaseServiceController::checkMainFunctionState()
 {
-	if (m_mainFunctionState == MainFunctionState::Stops)
+	if (m_mainFunctionState == MainFunctionState::stops)
 	{
 		if (m_mainFunctionStopped && m_mainFunctionThread.isFinished())
 		{
 			m_mainFunctionStopped = false;
 
-			m_mainFunctionState = MainFunctionState::Stopped;
+			m_mainFunctionState = MainFunctionState::stopped;
 
 			if (m_mainFunctionNeedRestart)
 			{
@@ -272,12 +290,16 @@ void BaseServiceController::checkMainFunctionState()
 
 void BaseServiceController::onMainFunctionWork()
 {
-	m_mainFunctionState = MainFunctionState::Work;
+	qDebug() << "Called BaseServiceController::onMainFunctionWork";
+
+	m_mainFunctionState = MainFunctionState::work;
 }
 
 
 void BaseServiceController::onMainFunctionStopped()
 {
+	qDebug() << "Called BaseServiceController::onMainFunctionStopped";
+
 	m_mainFunctionStopped = true;
 }
 
