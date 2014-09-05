@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="ApplicationFunctionalBlocks">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="AFB">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Caption" type="xs:string" />
+              <xs:element name="OpCode" type="xs:unsignedByte" />
+              <xs:element name="InCount" type="xs:unsignedByte" />
+              <xs:element name="OutCount" type="xs:unsignedByte" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

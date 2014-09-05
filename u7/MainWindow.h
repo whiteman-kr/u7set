@@ -52,7 +52,8 @@ protected slots:
 	void showSettings();
 
 	void runConfigurator();
-	void showAbout();
+    void runAfblEditor();
+    void showAbout();
 	void debug();
 
 private slots:
@@ -77,7 +78,8 @@ private:
 	QAction* m_pSettingsAction;
 
 	QAction* m_pConfiguratorAction;
-	QAction* m_pAboutAction;
+    QAction* m_pAfblEditorAction;
+    QAction* m_pAboutAction;
 	QAction* m_pDebugAction;
 
 	QLabel* m_pStatusBarInfo;

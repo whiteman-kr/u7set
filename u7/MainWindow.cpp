@@ -12,6 +12,7 @@
 #include "ConfigurationsTabPage.h"
 #include "VideoFrameTabPage.h"
 #include "EquipmentTabPage.h"
+#include "DialogAfblEditor.h"
 
 #include "../VFrame30/VFrame30.h"
 
@@ -136,7 +137,12 @@ void MainWindow::createActions()
 	//m_pConfiguratorAction->setEnabled(true);
 	connect(m_pConfiguratorAction, &QAction::triggered, this, &MainWindow::runConfigurator);
 
-	m_pAboutAction = new QAction(tr("About..."), this);
+    m_pAfblEditorAction = new QAction(tr("AFBL Editor..."), this);
+    m_pAfblEditorAction->setStatusTip(tr("Run AFBL Editor"));
+    //m_pConfiguratorAction->setEnabled(true);
+    connect(m_pAfblEditorAction, &QAction::triggered, this, &MainWindow::runAfblEditor);
+
+    m_pAboutAction = new QAction(tr("About..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_pAboutAction, &QAction::triggered, this, &MainWindow::showAbout);
@@ -169,7 +175,8 @@ void MainWindow::createMenus()
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
 	pToolsMenu->addAction(m_pConfiguratorAction);
-	pToolsMenu->addSeparator();
+    pToolsMenu->addAction(m_pAfblEditorAction);
+    pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -261,6 +268,17 @@ void MainWindow::showSettings()
 
 void MainWindow::runConfigurator()
 {
+}
+
+void MainWindow::runAfblEditor()
+{
+    if (dbController()->isProjectOpened() == false)
+    {
+        return;
+    }
+
+    DialogAfblEditor d(dbController(), this);
+    d.exec();
 }
 
 void MainWindow::showAbout()
