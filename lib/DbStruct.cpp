@@ -31,7 +31,18 @@ bool DbProgress::init()
 
 bool DbProgress::run(QWidget* parentWidget, const QString& description)
 {
-    ProgressDialog::ShowProgressDialog(parentWidget, description, this);
+    if (m_progressEnabled == true)
+    {
+        ProgressDialog::ShowProgressDialog(parentWidget, description, this);
+    }
+    else
+    {
+        while (completed() == false)
+        {
+            QThread::yieldCurrentThread();
+        }
+    }
+
 
 	if (hasError() == true)
 	{

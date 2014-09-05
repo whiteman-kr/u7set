@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network
+QT       += core gui widgets sql network xmlpatterns
 
 TARGET = u7
 TEMPLATE = app
@@ -74,7 +74,11 @@ SOURCES +=\
     ProjectsTabPage.cpp \
     ../lib/DbController.cpp \
     ../lib/DbWorker.cpp \
-    ../lib/DbProgressDialog.cpp
+    ../lib/DbProgressDialog.cpp \
+    AfbLibrary.cpp \
+    DialogAfblEditor.cpp \
+    DialogAfbProperties.cpp \
+    xmlsyntaxhighlighter.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -110,7 +114,11 @@ HEADERS  += \
     ProjectsTabPage.h \
     ../include/DbController.h \
     ../include/DbWorker.h \
-    ../include/DbProgressDialog.h
+    ../include/DbProgressDialog.h \
+    AfbLibrary.h \
+    DialogAfblEditor.h \
+    DialogAfbProperties.h \
+    xmlsyntaxhighlighter.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -121,7 +129,9 @@ FORMS    += \
     LoginDialog.ui \
     UserManagementDialog.ui \
     VideoFramePropertiesDialog.ui \
-    CheckInDialog.ui
+    CheckInDialog.ui \
+    DialogAfblEditor.ui \
+    DialogAfbProperties.ui
 
 PRECOMPILED_HEADER = stable.h
 
@@ -199,7 +209,6 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0017.sql \
     DatabaseUpgrade/Upgrade0018.sql \
     DatabaseUpgrade/Upgrade0019.sql
-
 
 # Visual Leak Detector
 #
