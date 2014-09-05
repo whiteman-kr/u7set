@@ -401,7 +401,7 @@ void ServiceTableModel::sendCommand(int row, int col, int command)
         return;
     }
     if (!(state == SS_MF_WORK && (command == RQID_SERVICE_MF_STOP || command == RQID_SERVICE_MF_RESTART)) &&
-            !(state == SS_MF_STOPPED && command == RQID_SERVICE_MF_START))
+            !(state == SS_MF_STOPPED && command == RQID_SERVICE_MF_START || command == RQID_SERVICE_MF_RESTART))
     {
         return;
     }
