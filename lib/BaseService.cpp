@@ -135,6 +135,8 @@ BaseServiceController::BaseServiceController(int serviceType) :
 {
     assert(m_serviceType >= 0 && m_serviceType < RQSTP_COUNT);
 
+	qRegisterMetaType<UdpRequest>("UdpRequest");
+
 	// start timer
 	//
 	connect(&m_timer500ms, &QTimer::timeout, this, &BaseServiceController::onTimer500ms);
@@ -237,6 +239,8 @@ void BaseServiceController::startMainFunction()
 
 	mainFunctionWorker->moveToThread(&m_mainFunctionThread);
 
+	m_mainFunctionStartTime = QDateTime::currentMSecsSinceEpoch();
+
 	m_mainFunctionThread.start();
 
 	// m_mainFunctionState = MainFunctionState::Work setted in slot onMainFunctionWork
@@ -277,6 +281,8 @@ void BaseServiceController::checkMainFunctionState()
 			m_mainFunctionStopped = false;
 
 			m_mainFunctionState = MainFunctionState::stopped;
+
+			m_mainFunctionStartTime = 0;
 
 			if (m_mainFunctionNeedRestart)
 			{
