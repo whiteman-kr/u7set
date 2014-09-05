@@ -35,11 +35,43 @@ public:
 signals:
     void ackBaseRequest(UdpRequest request);
 
+	void startMainFunction();
+	void stopMainFunction();
+	void restartMainFunction();
+
 public slots:
     void onBaseServiceWorkerThreadStarted();
     void onBaseServiceWorkerThreadFinished();
 
     void onBaseRequest(UdpRequest request);
+};
+
+
+// MainFunctionWorker class
+//
+
+class MainFunctionWorker : public QObject
+{
+	Q_OBJECT
+
+private:
+	BaseServiceController* m_baseServiceController = nullptr;
+
+public:
+
+	MainFunctionWorker(BaseServiceController* baseServiceController);
+	virtual ~MainFunctionWorker();
+
+	virtual void onThreadStarted() { qDebug() << "Called MainFunctionWorker::onThreadStarted"; }
+	virtual void onThreadFinished() { qDebug() << "Called MainFunctionWorker::onThreadFinished"; }
+
+signals:
+	void mainFunctionWork();
+	void mainFunctionStopped();
+
+public slots:
+	void onThreadStartedSlot();
+	void onThreadFinishedSlot();
 };
 
 
@@ -66,7 +98,11 @@ private:
     QThread m_baseWorkerThread;
     QThread m_mainFunctionThread;
 
-    int m_serviceType;
+	bool m_mainFunctionNeedRestart;
+
+	bool m_mainFunctionStopped;
+
+	int m_serviceType;
 
     qint64 m_serviceStartTime;
     qint64 m_mainFunctionStartTime;
@@ -77,6 +113,21 @@ private:
     quint32 m_minorVersion;
     quint32 m_buildNo;
 	quint32 m_crc;
+
+	QTimer m_timer500ms;
+
+	void checkMainFunctionState();
+
+public slots:
+	void stopMainFunction();
+	void startMainFunction();
+	void restartMainFunction();
+
+private slots:
+	void onTimer500ms();
+
+	void onMainFunctionWork();
+	void onMainFunctionStopped();
 
 public:
     BaseServiceController(int serviceType);
