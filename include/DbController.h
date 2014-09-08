@@ -43,7 +43,9 @@ public:
 	//
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, QWidget* parentWidget);
+
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
+	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
 
 	bool getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getWorkcopy(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);

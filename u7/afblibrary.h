@@ -13,14 +13,14 @@ public:
     void readFromXml(QXmlStreamReader& xmlReader);
 
 public:
-    QString caption();
+	const QString& caption();
     void setCaption(const QString& caption);
 
 private:
     QString m_caption;
-    int m_opCode;
-    int m_inCount;
-    int m_outCount;
+	int m_opCode = 0;
+	int m_inCount = 0;
+	int m_outCount = 0;
 };
 
 #endif // AFBLIBRARY_H

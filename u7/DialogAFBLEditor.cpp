@@ -15,8 +15,8 @@ DialogAfblEditor::DialogAfblEditor(DbController* pDbController, QWidget *parent)
 
     ui->m_afbTree->setColumnCount(3);
     QStringList l(tr("File Name"));
-    l<<tr("State");
-    l<<tr("Last Check-in Time");
+	l << tr("State");
+	l << tr("Last Check-in Time");
     ui->m_afbTree->setHeaderLabels(l);
     ui->m_afbTree->setColumnWidth(0, 150);
     ui->m_afbTree->setColumnWidth(1, 100);
@@ -31,8 +31,8 @@ DialogAfblEditor::~DialogAfblEditor()
 
 void DialogAfblEditor::refreshFiles()
 {
-    //save selected indexes
-
+	// save selected indexes
+	//
     std::vector<int> oldSelectedIndexes;
     QModelIndexList selectedIndexList = ui->m_afbTree->selectionModel()->selectedIndexes();
     for (auto i = selectedIndexList.begin(); i != selectedIndexList.end(); i++)
@@ -46,10 +46,10 @@ void DialogAfblEditor::refreshFiles()
     int oldItemsCount = ui->m_afbTree->topLevelItemCount();
 
     // refresh list
-
+	//
     ui->m_afbTree->clear();
 
-    QList<QTreeWidgetItem *> items;
+	QList<QTreeWidgetItem*> items;
 
     std::vector<DbFileInfo> afbfiles;
     if (m_pDbController->getFileList(&afbfiles, m_pDbController->afblFileId(), "afb", this) == false)
@@ -58,8 +58,6 @@ void DialogAfblEditor::refreshFiles()
         return;
     }
 
-    files.clear();
-
     std::vector<DbFileInfo> xsdfiles;
     if (m_pDbController->getFileList(&xsdfiles, m_pDbController->afblFileId(), "xsd", this) == false)
     {
@@ -67,7 +65,9 @@ void DialogAfblEditor::refreshFiles()
         return;
     }
 
-    files.insert(files.begin(), xsdfiles.begin(), xsdfiles.end());
+	files.clear();
+
+	files.insert(files.begin(), xsdfiles.begin(), xsdfiles.end());
     files.insert(files.begin(), afbfiles.begin(), afbfiles.end());
 
     for (int i = 0; i < files.size(); i++)
@@ -78,21 +78,21 @@ void DialogAfblEditor::refreshFiles()
         l.append(fi.state().text());
         l.append(fi.lastCheckIn().toString());
 
-        QTreeWidgetItem* pItem = new QTreeWidgetItem((QTreeWidget*)0, l);
+		QTreeWidgetItem* pItem = new QTreeWidgetItem(ui->m_afbTree, l);
         items.append(pItem);
 
     }
 
     ui->m_afbTree->insertTopLevelItems(0, items);
 
-    //restore selection
-
+	// restore selection
+	//
     if (items.size() == oldItemsCount)
     {
         for (auto j = oldSelectedIndexes.begin(); j != oldSelectedIndexes.end(); j++)
         {
-            ui->m_afbTree->selectionModel()->select( ui->m_afbTree->model()->index( *j, 0 ),
-                                                     QItemSelectionModel::Select | QItemSelectionModel::Rows );
+			ui->m_afbTree->selectionModel()->select( ui->m_afbTree->model()->index( *j, 0 ),
+				QItemSelectionModel::Select | QItemSelectionModel::Rows );
         }
     }
 }
@@ -100,7 +100,7 @@ void DialogAfblEditor::refreshFiles()
 void DialogAfblEditor::on_m_add_clicked()
 {
     bool ok = false;
-    QString caption = QInputDialog::getText(this, tr("Add AFB"), tr("Enter the name:"), QLineEdit::Normal, tr(""), &ok);
+	QString caption = QInputDialog::getText(this, tr("Add AFB"), tr("Enter name:"), QLineEdit::Normal, tr(""), &ok);
     if (ok == false)
     {
         return;
@@ -118,7 +118,7 @@ void DialogAfblEditor::on_m_add_clicked()
     pf->setFileName(caption + ".afb");
     pf->swapData(byteArray);
 
-    addFile(pf);
+	addFile(pf);
 }
 
 void DialogAfblEditor::on_m_addXsd_clicked()
@@ -130,7 +130,7 @@ void DialogAfblEditor::on_m_addXsd_clicked()
         return;
     }
 
-    QByteArray byteArray = QString("Enter schema here...").toUtf8();
+	QByteArray byteArray = QString("Enter schema here...").toUtf8();
 
 
     std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
@@ -197,6 +197,7 @@ void DialogAfblEditor::on_m_edit_clicked()
         return;
     }
 
+	return;
 }
 
 void DialogAfblEditor::on_m_checkOut_clicked()
@@ -252,7 +253,6 @@ void DialogAfblEditor::on_m_checkIn_clicked()
     }
 
     refreshFiles();
-
 }
 
 void DialogAfblEditor::on_m_Undo_clicked()
@@ -283,12 +283,9 @@ void DialogAfblEditor::on_m_Undo_clicked()
     refreshFiles();
 }
 
-void DialogAfblEditor::addFile(const std::shared_ptr<DbFile> pf)
+void DialogAfblEditor::addFile(const std::shared_ptr<DbFile>& pf)
 {
-    std::vector<std::shared_ptr<DbFile>> f;
-    f.push_back(pf);
-
-    if (m_pDbController->addFiles(&f, m_pDbController->afblFileId(), this) == false)
+	if (m_pDbController->addFile(pf, m_pDbController->afblFileId(), this) == false)
     {
         QMessageBox::critical(this, "Error", "Error adding file!");
         return;
@@ -296,15 +293,19 @@ void DialogAfblEditor::addFile(const std::shared_ptr<DbFile> pf)
 
     refreshFiles();
 
-    //select the new file
-
+	// Select the new file
+	//
     QList<QTreeWidgetItem*> added = ui->m_afbTree->findItems(pf->fileName(), Qt::MatchFixedString);
-    Q_ASSERT (added.size() == 1);
+
+	Q_ASSERT(added.size() == 1);
+
     for (auto i = added.begin(); i != added.end(); i++)
     {
         QTreeWidgetItem* pItem = *i;
         pItem->setSelected(true);
     }
+
+	return;
 }
 
 std::vector<DbFileInfo*> DialogAfblEditor::getSelectedFiles()
@@ -326,7 +327,7 @@ std::vector<DbFileInfo*> DialogAfblEditor::getSelectedFiles()
 
 
 
-void DialogAfblEditor::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem *item, int column)
+void DialogAfblEditor::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem* item, int column)
 {
     Q_UNUSED(item);
     Q_UNUSED(column);

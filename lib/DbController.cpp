@@ -328,6 +328,14 @@ bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int par
 	return result;
 }
 
+bool DbController::addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget)
+{
+	std::vector<std::shared_ptr<DbFile>> v;
+	v.push_back(file);
+
+	return addFiles(&v, parentId, parentWidget);
+}
+
 bool DbController::getWorkcopy(const std::vector<DbFileInfo>& files,
 							   std::vector<std::shared_ptr<DbFile>>* out,
 							   QWidget* parentWidget)

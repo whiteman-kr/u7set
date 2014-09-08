@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>548</width>
+    <width>565</width>
     <height>490</height>
    </rect>
   </property>
@@ -103,7 +103,7 @@
        <item>
         <widget class="QPushButton" name="m_addXsd">
          <property name="text">
-          <string>Add Scheme</string>
+          <string>Add XSD Scheme</string>
          </property>
         </widget>
        </item>

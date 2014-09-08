@@ -3,14 +3,11 @@
 #include <QString>
 #include <QMessageBox>
 
-Afb::Afb() :
-    m_opCode(0),
-    m_inCount(0),
-    m_outCount(0)
+Afb::Afb()
 {
 }
 
-QString Afb::caption()
+const QString& Afb::caption()
 {
     return m_caption;
 }

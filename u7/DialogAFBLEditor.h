@@ -38,8 +38,8 @@ private:
 
 private:
     void refreshFiles();
-    void addFile(const std::shared_ptr<DbFile> pf);
-    std::vector<DbFileInfo *> getSelectedFiles();
+	void addFile(const std::shared_ptr<DbFile>& pf);
+	std::vector<DbFileInfo*> getSelectedFiles();
 };
 
 #endif // DIALOGAFBLEDITOR_H
