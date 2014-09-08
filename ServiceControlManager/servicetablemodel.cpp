@@ -9,19 +9,14 @@
 #include <QBuffer>
 
 
-ServiceInfo::ServiceInfo() :
-    serviceType(-1),
-    majorVersion(0),
-    minorVersion(0),
-    buildNo(0),
-    CRC(0),
-    serviceTime(0),
-    state(SS_MF_UNDEFINED),
-    serviceFunctionTime(0),
+ServiceData::ServiceData() :
     clientSocket(nullptr),
     statusWidget(nullptr)
 {
+    information.type = -1;
+    information.mainFunctionState = SS_MF_UNDEFINED;
 }
+
 
 ServiceTableModel::ServiceTableModel(QObject *parent) :
     QAbstractTableModel(parent),
@@ -51,13 +46,13 @@ ServiceTableModel::~ServiceTableModel()
         settings.setValue("IP", m_hostsInfo[i].ip);
         for (int j = 0; j < RQSTP_COUNT; j++)
         {
-            if (m_hostsInfo[i].servicesInfo[j].clientSocket != nullptr)
+            if (m_hostsInfo[i].servicesData[j].clientSocket != nullptr)
             {
-                delete m_hostsInfo[i].servicesInfo[j].clientSocket;
+                delete m_hostsInfo[i].servicesData[j].clientSocket;
             }
-            if (m_hostsInfo[i].servicesInfo[j].statusWidget != nullptr)
+            if (m_hostsInfo[i].servicesData[j].statusWidget != nullptr)
             {
-                delete m_hostsInfo[i].servicesInfo[j].statusWidget;
+                delete m_hostsInfo[i].servicesData[j].statusWidget;
             }
         }
     }
@@ -78,17 +73,17 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 {
     int row = index.row();
     int col = index.column();
+    const ServiceInformation& si = m_hostsInfo[row].servicesData[col].information;
     switch(role)
     {
     case Qt::DisplayRole:
         {
             QString str;
-			const ServiceInfo& si = m_hostsInfo[row].servicesInfo[col];
             bool serviceFound = false;
 
             for (int i = 0; i < RQSTP_COUNT; i++)
             {
-                if (serviceTypesInfo[i].serviceType == si.serviceType)
+                if (serviceTypesInfo[i].serviceType == si.type)
                 {
                     str = serviceTypesInfo[i].name;
                     serviceFound = true;
@@ -97,21 +92,21 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
             }
             if (serviceFound)
             {
-                str += QString(" v%1.%2.%3(0x%4)\n").arg(si.majorVersion).arg(si.minorVersion).arg(si.buildNo).arg(si.CRC, 0, 16, QChar('0'));
+                str += QString(" v%1.%2.%3(0x%4)\n").arg(si.majorVersion).arg(si.minorVersion).arg(si.buildNo).arg(si.crc, 0, 16, QChar('0'));
             }
-            if (si.state != SS_MF_UNDEFINED && si.state != SS_MF_UNAVAILABLE)
+            if (si.mainFunctionState != SS_MF_UNDEFINED && si.mainFunctionState != SS_MF_UNAVAILABLE)
             {
-                quint32 time = si.serviceTime;
+                quint32 time = si.uptime;
                 int s = time % 60; time /= 60;
                 int m = time % 60; time /= 60;
                 int h = time % 24; time /= 24;
                 str += tr("Uptime") + QString(" (%1d %2:%3:%4)\n").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
             }
-            switch(si.state)
+            switch(si.mainFunctionState)
             {
                 case SS_MF_WORK:
                 {
-                    quint32 time = si.serviceFunctionTime;
+                    quint32 time = si.mainFunctionUptime;
                     int s = time % 60; time /= 60;
                     int m = time % 60; time /= 60;
                     int h = time % 24; time /= 24;
@@ -128,7 +123,7 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
         }
         break;
     case Qt::BackgroundRole:
-        switch(m_hostsInfo[row].servicesInfo[col].state)
+        switch(si.mainFunctionState)
         {
         case SS_MF_WORK: return QBrush(QColor(0x7f,0xff,0x7f));
         case SS_MF_STARTS:
@@ -179,10 +174,10 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
     {
         if (m_hostsInfo[i].ip == ip)
         {
-            HostInfo& hi = m_hostsInfo[i];
-            if (hi.servicesInfo[portIndex].state != state)
+            ServiceInformation& si = m_hostsInfo[i].servicesData[portIndex].information;
+            if (si.mainFunctionState != state)
             {
-                hi.servicesInfo[portIndex].state = state;
+                si.mainFunctionState = state;
                 emit serviceStateChanged(i);
             }
             QModelIndex changedIndex = index(i, portIndex);
@@ -192,7 +187,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, int state)
     }
     HostInfo hi;
     hi.ip = ip;
-    hi.servicesInfo[portIndex].state = state;
+    hi.servicesData[portIndex].information.mainFunctionState = state;
     beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
     m_hostsInfo.append(hi);
     endInsertRows();
@@ -246,7 +241,7 @@ void ServiceTableModel::checkForDeletingSocket(UdpClientSocket *socket)
         {
             continue;
         }
-        UdpClientSocket** clientSocket = &m_hostsInfo[i].servicesInfo[portIndex].clientSocket;
+        UdpClientSocket** clientSocket = &m_hostsInfo[i].servicesData[portIndex].clientSocket;
         if (*clientSocket == nullptr)
         {
             *clientSocket = socket;
@@ -326,25 +321,17 @@ void ServiceTableModel::serviceAckReceived(RequestHeader header, QByteArray data
         {
             return;
         }
-		ServiceInfo& si = m_hostsInfo[place.first].servicesInfo[place.second];
-        QBuffer buffer(&data);
-        buffer.open(QBuffer::ReadOnly);
-        QDataStream in(&buffer);
-        in >> si.serviceType;
-        in >> si.majorVersion;
-        in >> si.minorVersion;
-        in >> si.buildNo;
-        in >> si.CRC;
-
-        in >> si.serviceTime;
-        quint32 state;
-        in >> state;
-        if (state != si.state)
+        ServiceInformation& info = m_hostsInfo[place.first].servicesData[place.second].information;
+        ServiceInformation& newInfo = *(ServiceInformation*)data.constData();
+        if (info.mainFunctionState != newInfo.mainFunctionState)
         {
-            si.state = state;
+            info = newInfo;
             emit serviceStateChanged(place.first);
         }
-        in >> si.serviceFunctionTime;
+        else
+        {
+            info = newInfo;
+        }
         QModelIndex changedIndex = index(place.first, place.second);
         emit dataChanged(changedIndex, changedIndex);
 
@@ -388,13 +375,13 @@ void ServiceTableModel::checkServiceStates()
     {
         for (int j = 0; j < RQSTP_COUNT; j++)
         {
-            UdpClientSocket* clientSocket = m_hostsInfo[i].servicesInfo[j].clientSocket;
+            UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
             if (clientSocket == nullptr)
             {
                 clientSocket = new UdpClientSocket(QHostAddress(m_hostsInfo[i].ip), serviceTypesInfo[j].port);
                 connect(clientSocket, SIGNAL(ackTimeout()), this, SLOT(serviceNotFound()));
                 connect(clientSocket, SIGNAL(ackReceived(RequestHeader,QByteArray)), this, SLOT(serviceAckReceived(RequestHeader,QByteArray)));
-                m_hostsInfo[i].servicesInfo[j].clientSocket = clientSocket;
+                m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
             }
             while (clientSocket->isWaitingForAck())
             {
@@ -407,14 +394,14 @@ void ServiceTableModel::checkServiceStates()
 
 void ServiceTableModel::sendCommand(int row, int col, int command)
 {
-    UdpClientSocket* clientSocket = m_hostsInfo[row].servicesInfo[col].clientSocket;
-    int state = m_hostsInfo[row].servicesInfo[col].state;
+    UdpClientSocket* clientSocket = m_hostsInfo[row].servicesData[col].clientSocket;
+    int state = m_hostsInfo[row].servicesData[col].information.mainFunctionState;
     if (clientSocket == nullptr)
     {
         return;
     }
     if (!(state == SS_MF_WORK && (command == RQID_SERVICE_MF_STOP || command == RQID_SERVICE_MF_RESTART)) &&
-            !(state == SS_MF_STOPPED && command == RQID_SERVICE_MF_START))
+            !(state == SS_MF_STOPPED && command == RQID_SERVICE_MF_START || command == RQID_SERVICE_MF_RESTART))
     {
         return;
     }
@@ -432,13 +419,13 @@ void ServiceTableModel::removeHost(int row)
     beginRemoveRows(QModelIndex(), row, row);
     for (int j = 0; j < RQSTP_COUNT; j++)
     {
-        if (m_hostsInfo[row].servicesInfo[j].clientSocket != nullptr)
+        if (m_hostsInfo[row].servicesData[j].clientSocket != nullptr)
         {
-            delete m_hostsInfo[row].servicesInfo[j].clientSocket;
+            delete m_hostsInfo[row].servicesData[j].clientSocket;
         }
-        if (m_hostsInfo[row].servicesInfo[j].statusWidget != nullptr)
+        if (m_hostsInfo[row].servicesData[j].statusWidget != nullptr)
         {
-            delete m_hostsInfo[row].servicesInfo[j].statusWidget;
+            delete m_hostsInfo[row].servicesData[j].statusWidget;
         }
     }
     m_hostsInfo.removeAt(row);

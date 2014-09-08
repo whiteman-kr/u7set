@@ -10,28 +10,20 @@ const quint32   SS_MF_UNDEFINED = 10,
 
 class UdpClientSocket;
 
-struct ServiceInfo
+struct ServiceData
 {
-    quint32 serviceType;
-    quint32 majorVersion;
-    quint32 minorVersion;
-    quint32 buildNo;
-    quint32 CRC;
-
-    quint32 serviceTime;
-    quint32 state;
-    quint32 serviceFunctionTime;
+    ServiceInformation information;
 
     UdpClientSocket* clientSocket;
     QWidget* statusWidget;
 
-	ServiceInfo();
+    ServiceData();
 };
 
 struct HostInfo
 {
     quint32 ip;
-	ServiceInfo servicesInfo[RQSTP_COUNT];
+    ServiceData servicesData[RQSTP_COUNT];
 
     HostInfo() : ip(0) {}
 };
