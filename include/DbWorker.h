@@ -72,6 +72,9 @@ public slots:
 	void slot_checkOut(std::vector<DbFileInfo>* files);
 	void slot_undoChanges(std::vector<DbFileInfo>* files);
 
+	// Hardware Configuration
+	//
+	void slot_addSystem(DbFile* file);
 
 	// Service
 	//

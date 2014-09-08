@@ -55,6 +55,10 @@ public:
 	//
 	QByteArray m_equipmentTabPageSplitterState;
 
+	// Signals Tab Page
+	//
+	//QByteArray m_equipmentTabPageSplitterState;
+
 private:
 	// --
 	//

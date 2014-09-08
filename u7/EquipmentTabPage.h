@@ -5,7 +5,6 @@
 
 class DbController;
 
-/*
 class EquipmentModel : public QAbstractItemModel
 {
 public:
@@ -41,7 +40,36 @@ private:
 		ColumnCount
 	};
 };
-*/
+
+
+class EquipmentView : public QTreeView
+{
+	Q_OBJECT
+
+private:
+	EquipmentView();
+
+public:
+	EquipmentView(DbController* dbcontroller);
+	virtual ~EquipmentView();
+
+public slots:
+	void addSystem();
+	void addCase();
+	void addSubblock();
+	void addBlock();
+
+	// Properties
+	//
+protected:
+	DbController* dbController();
+
+	// Data
+	//
+private:
+	DbController* m_dbController;
+};
+
 
 class EquipmentTabPage : public MainTabPage
 {
@@ -63,26 +91,20 @@ public slots:
 	void projectOpened();
 	void projectClosed();
 
-protected slots:
-	void addSystem();
-	void addCase();
-	void addSubblock();
-	void addBlock();
-
 	// Data
 	//
 private:
-	QAction* m_addSystemAction;
-	QAction* m_addCaseAction;
-	QAction* m_addSubblockAction;
-	QAction* m_addBlockAction;
+	QAction* m_addSystemAction = nullptr;
+	QAction* m_addCaseAction = nullptr;
+	QAction* m_addSubblockAction = nullptr;
+	QAction* m_addBlockAction = nullptr;
 
 	std::shared_ptr<DeviceRoot> m_root;
-	//EquipmentModel* m_equipmentModel;
+	EquipmentModel* m_equipmentModel = nullptr;
+	EquipmentView* m_equipmentView = nullptr;
 
-	QTreeView* m_equipmentView;
-	QTextEdit* m_propertyView;
-	QSplitter* m_splitter;
+	QTextEdit* m_propertyView = nullptr;
+	QSplitter* m_splitter = nullptr;
 };
 
 

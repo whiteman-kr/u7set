@@ -12,6 +12,7 @@
 #include "ConfigurationsTabPage.h"
 #include "VideoFrameTabPage.h"
 #include "EquipmentTabPage.h"
+#include "SignalsTabPage.h"
 #include "DialogAfblEditor.h"
 
 #include "../VFrame30/VFrame30.h"
@@ -56,6 +57,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	//
 	getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
 	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Hardware Configuration"));
+	getCentralWidget()->addTabPage(new SignalsTabPage(dbController(), nullptr), tr("Application Signals"));
 /*	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
 	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 

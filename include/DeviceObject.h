@@ -1,4 +1,18 @@
 #pragma once
+#include "DbStruct.h"
+
+// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
+//
+enum class DeviceType
+{
+	Root,
+	System,
+	Rack,
+	Chassis,
+	Module,
+	Controller,
+	DiagSignal
+};
 
 //
 //
@@ -15,6 +29,7 @@ protected:
     //
 public:
 	DeviceObject* parent();
+	virtual DeviceType deviceType() = 0;
 
     // Children care
     //
@@ -37,14 +52,19 @@ public:
 	const QString& caption() const;
 	void setCaption(const QString& value);
 
+	const DbFileInfo& fileInfo() const;
+	void setFileInfo(const DbFileInfo& value);
+
     // Data
     //
 protected:
-    DeviceObject* m_parent;
+	DeviceObject* m_parent = nullptr;
     std::vector<std::shared_ptr<DeviceObject>> m_children;
 
 	QString m_strId;
-    QString m_caption;
+	QString m_caption;
+
+	DbFileInfo m_fileInfo;
 };
 
 
@@ -58,6 +78,12 @@ class DeviceRoot : public DeviceObject
 public:
     DeviceRoot();
 	virtual ~DeviceRoot();
+
+public:
+	virtual DeviceType deviceType() override;
+
+private:
+	static const DeviceType m_deviceType = DeviceType::Root;
 };
 
 
@@ -71,44 +97,105 @@ class DeviceSystem : public DeviceObject
 public:
     DeviceSystem();
     virtual ~DeviceSystem();
+
+public:
+	virtual DeviceType deviceType() override;
+
+private:
+	static const DeviceType m_deviceType = DeviceType::System;
 };
 
 
 //
 //
-// DeviceCase
+// DeviceRack
 //
 //
-class DeviceCase : public DeviceObject
+class DeviceRack : public DeviceObject
 {
 public:
-    DeviceCase();
-    virtual ~DeviceCase();
+	DeviceRack();
+	virtual ~DeviceRack();
+
+public:
+	virtual DeviceType deviceType() override;
+
+private:
+	static const DeviceType m_deviceType = DeviceType::Rack;
 };
 
 
 //
 //
-// DeviceSubblock
+// DeviceChassis
 //
 //
-class DeviceSubblock : public DeviceObject
+class DeviceChassis : public DeviceObject
 {
 public:
-    DeviceSubblock();
-    virtual ~DeviceSubblock();
+	DeviceChassis();
+	virtual ~DeviceChassis();
+
+public:
+	virtual DeviceType deviceType() override;
+
+private:
+	static const DeviceType m_deviceType = DeviceType::Chassis;
 };
 
 
 //
 //
-// DeviceBlock
+// DeviceModule
 //
 //
-class DeviceBlock : public DeviceObject
+class DeviceModule : public DeviceObject
 {
 public:
-    DeviceBlock();
-    virtual ~DeviceBlock();
+	DeviceModule();
+	virtual ~DeviceModule();
+
+public:
+	virtual DeviceType deviceType() override;
+
+private:
+	static const DeviceType m_deviceType = DeviceType::Module;
 };
 
+
+//
+//
+// DeviceController
+//
+//
+class DeviceController : public DeviceObject
+{
+public:
+	DeviceController();
+	virtual ~DeviceController();
+
+public:
+	virtual DeviceType deviceType() override;
+
+private:
+	static const DeviceType m_deviceType = DeviceType::Controller;
+};
+
+
+//
+//
+// DeviceDiagSignal
+//
+//
+class DeviceDiagSignal : public DeviceObject
+{
+public:
+	DeviceDiagSignal();
+	virtual ~DeviceDiagSignal();
+
+public:
+	virtual DeviceType deviceType() override;
+
+private:
+	static const DeviceType m_deviceType = DeviceType::DiagSignal;
+};

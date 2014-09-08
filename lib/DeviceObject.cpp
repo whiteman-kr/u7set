@@ -5,8 +5,7 @@
 // DeviceObject
 //
 //
-DeviceObject::DeviceObject() :
-	m_parent(nullptr)
+DeviceObject::DeviceObject()
 {
 }
 
@@ -47,11 +46,18 @@ int DeviceObject::childIndex(DeviceObject* child) const
 
 std::shared_ptr<DeviceObject> DeviceObject::childSharedPtr(int index)
 {
-	return m_children.at(index);
+	std::shared_ptr<DeviceObject> sp = m_children.at(index);
+	return sp;
 }
 
 void DeviceObject::addChild(std::shared_ptr<DeviceObject> child)
 {
+	if (deviceType() >= child->deviceType())
+	{
+		assert(deviceType() < child->deviceType());
+		return;
+	}
+
 	child->m_parent = this;
 	m_children.push_back(child);
 }
@@ -81,6 +87,17 @@ void DeviceObject::setCaption(const QString& value)
 	m_caption = value;
 }
 
+const DbFileInfo& DeviceObject::fileInfo() const
+{
+	return m_fileInfo;
+}
+
+void DeviceObject::setFileInfo(const DbFileInfo& value)
+{
+	m_fileInfo = value;
+}
+
+
 
 //
 //
@@ -94,6 +111,11 @@ DeviceRoot::DeviceRoot() :
 
 DeviceRoot::~DeviceRoot()
 {
+}
+
+DeviceType DeviceRoot::deviceType()
+{
+	return m_deviceType;
 }
 
 
@@ -111,46 +133,104 @@ DeviceSystem::~DeviceSystem()
 {
 }
 
+DeviceType DeviceSystem::deviceType()
+{
+	return m_deviceType;
+}
+
 
 //
 //
-// DeviceCase
+// DeviceRack
 //
 //
-DeviceCase::DeviceCase() :
+DeviceRack::DeviceRack() :
 	DeviceObject()
 {
 }
 
-DeviceCase::~DeviceCase()
+DeviceRack::~DeviceRack()
 {
+}
+
+DeviceType DeviceRack::deviceType()
+{
+	return m_deviceType;
 }
 
 //
 //
-// DeviceSubblock
+// DeviceChassis
 //
 //
-DeviceSubblock::DeviceSubblock() :
+DeviceChassis::DeviceChassis() :
 	DeviceObject()
 {
 }
 
-DeviceSubblock::~DeviceSubblock()
+DeviceChassis::~DeviceChassis()
 {
 }
 
+DeviceType DeviceChassis::deviceType()
+{
+	return m_deviceType;
+}
 
 //
 //
-// DeviceBlock
+// DeviceModule
 //
 //
-DeviceBlock::DeviceBlock() :
+DeviceModule::DeviceModule() :
     DeviceObject()
 {
 }
 
-DeviceBlock::~DeviceBlock()
+DeviceModule::~DeviceModule()
 {
+}
+
+DeviceType DeviceModule::deviceType()
+{
+	return m_deviceType;
+}
+
+
+//
+//
+// DeviceController
+//
+//
+DeviceController::DeviceController() :
+	DeviceObject()
+{
+}
+
+DeviceController::~DeviceController()
+{
+}
+
+DeviceType DeviceController::deviceType()
+{
+	return m_deviceType;
+}
+
+//
+//
+// DeviceDiagSignal
+//
+//
+DeviceDiagSignal::DeviceDiagSignal() :
+	DeviceObject()
+{
+}
+
+DeviceDiagSignal::~DeviceDiagSignal()
+{
+}
+
+DeviceType DeviceDiagSignal::deviceType()
+{
+	return m_deviceType;
 }

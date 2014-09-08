@@ -2004,6 +2004,30 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	return;
 }
 
+void DbWorker::slot_addSystem(DbFile* file)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	assert(false);
+}
+
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 {
 	if (user == nullptr)
