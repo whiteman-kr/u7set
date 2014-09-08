@@ -3,18 +3,18 @@
 #include <QtGlobal>
 
 
-const quint32   RQSTP_BASE = 0,
-                RQSTP_CONFIG = 1,
-                RQSTP_FSC_AQUISION = 2,
-                RQSTP_FSC_TUNING = 3,
-                RQSTP_ARCHIVING = 4;
+const quint32   STP_BASE = 0,
+				STP_CONFIG = 1,
+				STP_FSC_AQUISION = 2,
+				STP_FSC_TUNING = 3,
+				STP_ARCHIVING = 4;
 
 
 const quint16   PORT_BASE_SERVICE = 13300,
-				PORT_CONFIG_SERVICE = 13301,
-				PORT_FCS_AQUISION_SERVICE = 13302,
-				PORT_FCS_TUNING_SERVICE = 13303,
-				PORT_ARCHIVING_SERVICE = 13304;
+				PORT_CONFIG_SERVICE = 13310,
+				PORT_FCS_AQUISION_SERVICE = 13320,
+				PORT_FCS_TUNING_SERVICE = 13330,
+				PORT_ARCHIVING_SERVICE = 13340;
 
 
 const quint32   RQID_GET_SERVICE_INFO = 1000,
@@ -44,11 +44,11 @@ struct ServiceTypeInfo
 
 const ServiceTypeInfo serviceTypesInfo[] =
 {
-    {RQSTP_BASE, PORT_BASE_SERVICE, "Base Service"},
-    {RQSTP_CONFIG, PORT_CONFIG_SERVICE, "Configuration Service"},
-    {RQSTP_FSC_AQUISION, PORT_FCS_AQUISION_SERVICE, "FSC Data Acquisition Service"},
-    {RQSTP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, "FSC Tuning Service"},
-    {RQSTP_ARCHIVING, PORT_ARCHIVING_SERVICE, "Data Archiving Service"},
+	{STP_BASE, PORT_BASE_SERVICE, "Base Service"},
+	{STP_CONFIG, PORT_CONFIG_SERVICE, "Configuration Service"},
+	{STP_FSC_AQUISION, PORT_FCS_AQUISION_SERVICE, "FSC Data Acquisition Service"},
+	{STP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, "FSC Tuning Service"},
+	{STP_ARCHIVING, PORT_ARCHIVING_SERVICE, "Data Archiving Service"},
 };
 
 const int RQSTP_COUNT = sizeof(serviceTypesInfo) / sizeof(ServiceTypeInfo);
@@ -76,7 +76,7 @@ struct ServiceInformation
 	quint32 buildNo;
 	quint32 crc;
 	quint32 uptime;
-	quint32 mainFunctionSate;           // SS_MF_* constants
+	quint32 mainFunctionState;           // SS_MF_* constants
 	quint32 mainFunctionUptime;
 };
 

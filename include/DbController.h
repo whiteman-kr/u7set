@@ -2,6 +2,7 @@
 
 #include "DbStruct.h"
 #include "DbWorker.h"
+#include "DeviceObject.h"
 
 class DbController : public QObject
 {
@@ -57,6 +58,10 @@ public:
 	bool undoChanges(DbFileInfo& file, QWidget* parentWidget);
 	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 
+	// Hardware Configuration
+	//
+	bool addSystem(const DeviceSystem* system, QWidget* parentWidget);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -78,6 +83,8 @@ signals:
 	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
+
+	void signal_addSystem(DbFile* file);
 
 	//
 	// Service functions

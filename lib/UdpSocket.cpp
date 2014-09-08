@@ -307,6 +307,8 @@ bool UdpRequest::writeDword(quint32 dw)
 
     header()->dataSize += sizeof(quint32);
 
+	m_requestDataSize += sizeof(quint32);
+
     return true;
 }
 
@@ -324,6 +326,8 @@ bool UdpRequest::setData(const char* data, quint32 dataSize)
 	memcpy(m_requestData + sizeof(RequestHeader), data, dataSize);
 
 	header()->dataSize = dataSize;
+
+	m_requestDataSize += dataSize;
 
     return true;
 }

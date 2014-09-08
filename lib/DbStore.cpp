@@ -114,7 +114,7 @@ int DbStore::databaseVersion() const
 	return sizeof(upgradeItems) / sizeof(upgradeItems[0]);
 }
 
-void DbStore::upgradeProject(const QString& projectName, QWidget* parentWidget)
+void DbStore::upgradeProject(const QString& /*projectName*/, QWidget* /*parentWidget*/)
 {
 /*	assert(parentWidget);
 
@@ -271,7 +271,7 @@ void DbStore::getFileInfo(int fileId, DbFileInfo* out)
 	return;
 }
 
-void DbStore::getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo>* out, QWidget* parentWidget)
+void DbStore::getFileHistory(const DbFileInfo& /*file*/, std::vector<DbChangesetInfo>* /*out*/, QWidget* /*parentWidget*/)
 {
 /*	if (file.fileId() == -1 || out == nullptr || parentWidget == nullptr)
 	{
@@ -317,7 +317,7 @@ void DbStore::getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo
 
 // Select all checked-in files or checked out by current user
 //
-void DbStore::getCurrentUserAndCheckedInFileList(std::vector<DbFileInfo>& files, const QString& filter)
+void DbStore::getCurrentUserAndCheckedInFileList(std::vector<DbFileInfo>& /*files*/, const QString& /*filter*/)
 {
 /*	std::vector<DbFileInfo> allFiles;
 	std::vector<DbFileInfo> checkedInFiles;
@@ -361,7 +361,7 @@ void DbStore::getCurrentUserAndCheckedInFileList(std::vector<DbFileInfo>& files,
 	return;*/
 }
 
-void DbStore::addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget* parentWidget)
+void DbStore::addFiles(std::vector<std::shared_ptr<DbFile>>* /*files*/, QWidget* /*parentWidget*/)
 {
 /*	assert(files != nullptr);
 	assert(files->size() != 0);
@@ -400,7 +400,7 @@ void DbStore::addFiles(std::vector<std::shared_ptr<DbFile>>* files, QWidget* par
 	return;*/
 }
 
-bool DbStore::undoFilesPendingChanges(const std::vector<DbFileInfo>& files, QWidget* parentWidget)
+bool DbStore::undoFilesPendingChanges(const std::vector<DbFileInfo>& /*files*/, QWidget* /*parentWidget*/)
 {
 /*	assert(files.size() != 0);
 	assert(parentWidget != nullptr);
@@ -444,7 +444,7 @@ bool DbStore::undoFilesPendingChanges(const std::vector<DbFileInfo>& files, QWid
 	return true;
 }
 
-bool DbStore::checkInFiles(const std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget)
+bool DbStore::checkInFiles(const std::vector<DbFileInfo>& /*files*/, const QString& /*comment*/, QWidget* /*parentWidget*/)
 {
 /*	assert(files.size() != 0);
 	assert(parentWidget != nullptr);
@@ -488,7 +488,7 @@ bool DbStore::checkInFiles(const std::vector<DbFileInfo>& files, const QString& 
 	return true;
 }
 
-bool DbStore::checkOutFiles(const std::vector<DbFileInfo>& files, QWidget* parentWidget)
+bool DbStore::checkOutFiles(const std::vector<DbFileInfo>& /*files*/, QWidget* /*parentWidget*/)
 {
 /*	assert(files.size() != 0);
 	assert(parentWidget != nullptr);
@@ -532,7 +532,7 @@ bool DbStore::checkOutFiles(const std::vector<DbFileInfo>& files, QWidget* paren
 	return true;
 }
 
-bool DbStore::getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+bool DbStore::getWorkcopy(const std::vector<DbFileInfo>& /*files*/, std::vector<std::shared_ptr<DbFile>>* /*out*/, QWidget* /*parentWidget*/)
 {
 /*	assert(files.size() != 0);
 	assert(out != nullptr);
@@ -577,7 +577,7 @@ bool DbStore::getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std:
 	return false;
 }
 
-std::shared_ptr<DbFile> DbStore::getWorkcopy(const DbFileInfo& file, QWidget* parentWidget)
+std::shared_ptr<DbFile> DbStore::getWorkcopy(const DbFileInfo& /*file*/, QWidget* /*parentWidget*/)
 {
 /*	std::vector<DbFileInfo> files;
 	files.push_back(file);
@@ -600,7 +600,7 @@ std::shared_ptr<DbFile> DbStore::getWorkcopy(const DbFileInfo& file, QWidget* pa
 	return std::shared_ptr<DbFile>();
 }
 
-bool DbStore::setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWidget* parentWidget)
+bool DbStore::setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& /*files*/, QWidget* /*parentWidget*/)
 {
 /*	assert(files.empty() == false);
 	assert(parentWidget != nullptr);
@@ -651,7 +651,7 @@ bool DbStore::setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWi
 	return false;
 }
 
-bool DbStore::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget)
+bool DbStore::setWorkcopy(const std::shared_ptr<DbFile>& /*file*/, QWidget* /*parentWidget*/)
 {
 	/*
 	std::vector<std::shared_ptr<DbFile>> files;
@@ -661,7 +661,7 @@ bool DbStore::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWi
 	return false;
 }
 
-void DbStore::getLatestCopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+void DbStore::getLatestCopy(const std::vector<DbFileInfo>& /*files*/, std::vector<std::shared_ptr<DbFile>>* /*out*/, QWidget* /*parentWidget*/)
 {
 /*	assert(files.size() != 0);
 	assert(out != nullptr);
@@ -702,7 +702,7 @@ void DbStore::getLatestCopy(const std::vector<DbFileInfo>& files, std::vector<st
 	return;
 }
 
-bool DbStore::getSpecificCopy(int changesetId, const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+bool DbStore::getSpecificCopy(int /*changesetId*/, const std::vector<DbFileInfo>& /*files*/, std::vector<std::shared_ptr<DbFile>>* /*out*/, QWidget* /*parentWidget*/)
 {
 /*	if (changesetId < 0 ||
 		files.empty() == true ||
@@ -754,7 +754,7 @@ bool DbStore::getSpecificCopy(int changesetId, const std::vector<DbFileInfo>& fi
 	return false;
 }
 
-bool DbStore::addSystem(DeviceSystem* system, QWidget* parentWidget)
+bool DbStore::addSystem(DeviceSystem* /*system*/, QWidget* /*parentWidget*/)
 {
 /*	if (system == nullptr ||
 		parentWidget == nullptr)
@@ -802,7 +802,7 @@ bool DbStore::addSystem(DeviceSystem* system, QWidget* parentWidget)
 	return false;
 }
 
-bool DbStore::getEquipmentWorkcopy(DeviceRoot* out, QWidget* parentWidget)
+bool DbStore::getEquipmentWorkcopy(DeviceRoot* /*out*/, QWidget* /*parentWidget*/)
 {
 /*	if (out == nullptr ||
 		parentWidget == nullptr)
@@ -1491,7 +1491,7 @@ void DbStore::slot_createProject(const QString projectName, const QString admini
 
 // Upgrade the project database to the appropriate version
 //
-void DbStore::slot_upgradeProject(const QString databaseName, DbProgress* progress)
+void DbStore::slot_upgradeProject(const QString /*databaseName*/, DbProgress* /*progress*/)
 {
 /*	assert(progress != nullptr);
 
@@ -2014,7 +2014,7 @@ void DbStore::slot_updateUser(DbUser user)
 	return;*/
 }
 
-void DbStore::slot_getUserList(std::vector<DbUser> &users)
+void DbStore::slot_getUserList(std::vector<DbUser> &/*users*/)
 {
 /*	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
@@ -2053,7 +2053,7 @@ void DbStore::slot_getUserList(std::vector<DbUser> &users)
 	return;*/
 }
 
-bool DbStore::db_getUserData(QSqlDatabase& db, int userId, DbUser* pUser)
+bool DbStore::db_getUserData(QSqlDatabase& /*db*/, int /*userId*/, DbUser* /*pUser*/)
 {
 /*	if (pUser == nullptr)
 	{
@@ -2105,7 +2105,7 @@ bool DbStore::db_getUserData(QSqlDatabase& db, int userId, DbUser* pUser)
 
 //
 //
-void DbStore::slot_getFileList(std::vector<DbFileInfo> &files, bool justCheckedInState, QString filter)
+void DbStore::slot_getFileList(std::vector<DbFileInfo> &/*files*/, bool /*justCheckedInState*/, QString /*filter*/)
 {
 /*	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
@@ -2325,7 +2325,7 @@ void DbStore::slot_getFileList(std::vector<DbFileInfo> &files, bool justCheckedI
 	return;*/
 }
 
-void DbStore::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>* out, DbProgress* progress)
+void DbStore::slot_getFileHistory(DbFileInfo /*file*/, std::vector<DbChangesetInfo>* /*out*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{
@@ -2431,7 +2431,7 @@ void DbStore::slot_getFileHistory(DbFileInfo file, std::vector<DbChangesetInfo>*
 	return;*/
 }
 
-void DbStore::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, DbProgress* progress)
+void DbStore::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* /*files*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{
@@ -2591,7 +2591,7 @@ void DbStore::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, DbProgr
 	return;*/
 }
 
-void DbStore::slot_undoFilesPendingChanges(const std::vector<DbFileInfo>& files, DbProgress* progress)
+void DbStore::slot_undoFilesPendingChanges(const std::vector<DbFileInfo>& /*files*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{
@@ -2683,7 +2683,7 @@ void DbStore::slot_undoFilesPendingChanges(const std::vector<DbFileInfo>& files,
 	return;*/
 }
 
-void DbStore::slot_checkInFiles(const std::vector<DbFileInfo>& files, QString comment, DbProgress* progress)
+void DbStore::slot_checkInFiles(const std::vector<DbFileInfo>& /*files*/, QString /*comment*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{
@@ -2825,7 +2825,7 @@ void DbStore::slot_checkInFiles(const std::vector<DbFileInfo>& files, QString co
 	return;*/
 }
 
-void DbStore::slot_checkOutFiles(const std::vector<DbFileInfo>& files, DbProgress* progress)
+void DbStore::slot_checkOutFiles(const std::vector<DbFileInfo>& /*files*/, DbProgress* /*progress*/)
 {
 /*	assert(progress != nullptr);
 
@@ -2976,7 +2976,7 @@ void DbStore::slot_checkOutFiles(const std::vector<DbFileInfo>& files, DbProgres
 
 
 
-void DbStore::slot_getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, DbProgress* progress)
+void DbStore::slot_getWorkcopy(const std::vector<DbFileInfo>& /*files*/, std::vector<std::shared_ptr<DbFile>>* /*out*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{
@@ -3104,7 +3104,7 @@ void DbStore::slot_getWorkcopy(const std::vector<DbFileInfo>& files, std::vector
 	return;*/
 }
 
-void DbStore::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, DbProgress* progress)
+void DbStore::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& /*files*/, DbProgress* /*progress*/)
 {
 /*	assert(progress != nullptr);
 
@@ -3190,7 +3190,7 @@ void DbStore::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files
 	return;*/
 }
 
-void DbStore::slot_getLatestCopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, DbProgress* progress)
+void DbStore::slot_getLatestCopy(const std::vector<DbFileInfo>& /*files*/, std::vector<std::shared_ptr<DbFile>>* /*out*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{
@@ -3330,7 +3330,7 @@ void DbStore::slot_getLatestCopy(const std::vector<DbFileInfo>& files, std::vect
 	return;*/
 }
 
-void DbStore::slot_getSpecificCopy(int changesetId, const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, DbProgress* progress)
+void DbStore::slot_getSpecificCopy(int /*changesetId*/, const std::vector<DbFileInfo>& /*files*/, std::vector<std::shared_ptr<DbFile>>* /*out*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{
@@ -3470,7 +3470,7 @@ void DbStore::slot_getSpecificCopy(int changesetId, const std::vector<DbFileInfo
 	return;*/
 }
 
-void DbStore::slot_addSystem(DeviceSystem* system, DbProgress* progress)
+void DbStore::slot_addSystem(DeviceSystem* /*system*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{
@@ -3619,7 +3619,7 @@ void DbStore::slot_addSystem(DeviceSystem* system, DbProgress* progress)
 	return;*/
 }
 
-void DbStore::slot_getEquipmentWorkcopy(DeviceRoot* out, DbProgress* progress)
+void DbStore::slot_getEquipmentWorkcopy(DeviceRoot* /*out*/, DbProgress* /*progress*/)
 {
 /*	if (progress == nullptr)
 	{

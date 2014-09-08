@@ -109,7 +109,7 @@ class UdpRequest
 {
 private:
     QHostAddress m_address;
-    qint16 m_port;
+	quint16 m_port;
     char m_requestData[MAX_DATAGRAM_SIZE];
     quint32 m_requestDataSize;
 
@@ -134,7 +134,6 @@ public:
 
 	bool setData(const char* data, quint32 dataSize);
 };
-
 
 
 class UdpClientRequestHandler;

@@ -10,7 +10,7 @@
 //
 
 
-/*EquipmentModel::EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent) :
+EquipmentModel::EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent) :
 	QAbstractItemModel(parent),
 	m_root(root)
 {
@@ -26,7 +26,7 @@
 
 //	c2->addChild(c3);
 
-	for (int i = 0; i < 32; i++)
+	/*for (int i = 0; i < 32; i++)
 	{
         auto d1 = std::make_shared<DeviceCase>();
 		d1->setCaption(QString("c1 item %1").arg(i));
@@ -53,7 +53,7 @@
         auto d3 = std::make_shared<DeviceObject>();
 		d3->setCaption(QString("c3 item %1").arg(i));
 		c3->addChild(d3);
-	}
+	}*/
 
 //	m_root.addChild(c1);
 //	m_root.addChild(c2);
@@ -151,7 +151,7 @@ int EquipmentModel::rowCount(const QModelIndex& parentIndex) const
 	return parent->childrenCount();
 }
 
-int EquipmentModel::columnCount(const QModelIndex& parentIndex) const
+int EquipmentModel::columnCount(const QModelIndex& /*parentIndex*/) const
 {
 	return ColumnCount;		// Always the same
 }
@@ -242,7 +242,76 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
 
 	assert(parent != nullptr);
 	return parent->childrenCount() > 0;
-}*/
+}
+
+//
+//
+// EquipmentView
+//
+//
+EquipmentView::EquipmentView(DbController* dbcontroller) :
+	m_dbController(dbcontroller)
+{
+}
+
+EquipmentView::~EquipmentView()
+{
+}
+
+DbController* EquipmentView::dbController()
+{
+	return m_dbController;
+}
+
+void EquipmentView::addSystem()
+{
+	/*QModelIndexList indexes = selectedIndexes();
+
+	if (indexes.isEmpty() == false)
+	{
+		// Nothing is selected, add new system to the root
+		//
+		return;
+	}
+	else
+	{
+		//
+	}*/
+
+	std::shared_ptr<DeviceSystem> system = std::make_shared<DeviceSystem>();
+
+	system->setStrId("STRID");
+	system->setCaption(tr("New System"));
+
+	bool result = dbController()->addSystem(system.get(), this);
+
+	//if (result == true)
+	{
+		// Add system to the model m_equipmentModel
+		//
+		//m_root->addChild(system);
+
+		// !!!!!!!!!!!!!!!!!!! emmit here message about model changing............
+	}
+
+	return;
+}
+
+void EquipmentView::addCase()
+{
+	assert(false);
+}
+
+void EquipmentView::addSubblock()
+{
+	assert(false);
+}
+
+void EquipmentView::addBlock()
+{
+	assert(false);
+}
+
 
 //
 //
@@ -250,33 +319,25 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
 //
 //
 EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) :
-	MainTabPage(dbcontroller, parent),
-	m_addSystemAction(nullptr),
-	m_addCaseAction(nullptr),
-	m_addSubblockAction(nullptr),
-	m_addBlockAction(nullptr),
-	//m_equipmentModel(nullptr),
-	m_equipmentView(nullptr),
-	m_propertyView(nullptr),
-	m_splitter(nullptr)
+	MainTabPage(dbcontroller, parent)
 {
 	assert(dbcontroller != nullptr);
-
-	// Create Actions
-	//
-	CreateActions();
 
 	//
 	// Controls
 	//
-	////m_root = std::make_shared<DeviceRoot>();
+	m_root = std::make_shared<DeviceRoot>();
 
 	// Equipment View
 	//
-	m_equipmentView = new QTreeView();
+	m_equipmentView = new EquipmentView(dbcontroller);
 
-	//m_equipmentModel = new EquipmentModel(m_root);
-	//m_equipmentView->setModel(m_equipmentModel);
+	m_equipmentModel = new EquipmentModel(m_root, this);
+	m_equipmentView->setModel(m_equipmentModel);
+
+	// Create Actions
+	//
+	CreateActions();
 
 	// Set context menu to Equipment View
 	//
@@ -321,6 +382,33 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 //	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
 //	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
 
+	/*auto s1 = std::make_shared<DeviceSystem>();
+	s1->setCaption("SDS I");
+	s1->setStrId("1SDS1");
+
+	auto s2 = std::make_shared<DeviceSystem>();
+	s2->setCaption("SDS II");
+	s2->setStrId("1SDS2");
+
+	auto r1 = std::make_shared<DeviceRack>();
+	r1->setCaption("1SHFS1");
+	r1->setStrId("HS017");
+
+	auto r2 = std::make_shared<DeviceRack>();
+	r2->setCaption("2SHFS1");
+	r2->setStrId("HS018");
+
+	auto r3 = std::make_shared<DeviceRack>();
+	r3->setCaption("3SHFS1");
+	r3->setStrId("HS019");
+
+	s1->addChild(r1);
+	s1->addChild(r2);
+	s1->addChild(r3);
+
+	m_root->addChild(s1);
+	m_root->addChild(s2);*/
+
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
@@ -337,22 +425,22 @@ void EquipmentTabPage::CreateActions()
 	m_addSystemAction = new QAction(tr("Add System"), this);
 	m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
 	//m_addSystemAction->setEnabled(false);
-	connect(m_addSystemAction, &QAction::triggered, this, &EquipmentTabPage::addSystem);
+	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
 
 	m_addCaseAction = new QAction(tr("Add Case"), this);
 	m_addCaseAction->setStatusTip(tr("Add case to the configuration..."));
 	//m_addCaseAction->setEnabled(false);
-	connect(m_addCaseAction, &QAction::triggered, this, &EquipmentTabPage::addCase);
+	connect(m_addCaseAction, &QAction::triggered, m_equipmentView, &EquipmentView::addCase);
 
 	m_addSubblockAction = new QAction(tr("Add Subblock"), this);
 	m_addSubblockAction->setStatusTip(tr("Add subblock to the configuration..."));
 	//m_addSubblockAction->setEnabled(false);
-	connect(m_addSubblockAction, &QAction::triggered, this, &EquipmentTabPage::addSubblock);
+	connect(m_addSubblockAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSubblock);
 
 	m_addBlockAction = new QAction(tr("Add Block"), this);
 	m_addBlockAction->setStatusTip(tr("Add block to the configuration..."));
 	//m_addBlockAction->setEnabled(false);
-	connect(m_addBlockAction, &QAction::triggered, this, &EquipmentTabPage::addBlock);
+	connect(m_addBlockAction, &QAction::triggered, m_equipmentView, &EquipmentView::addBlock);
 
 	return;
 }
@@ -373,41 +461,3 @@ void EquipmentTabPage::projectClosed()
 	this->setEnabled(false);
 	return;
 }
-
-void EquipmentTabPage::addSystem()
-{
-	std::shared_ptr<DeviceSystem> system = std::make_shared<DeviceSystem>();
-
-	system->setStrId("STRID");
-	system->setCaption(tr("New System"));
-
-	//bool result = dbController()->addSystem(system.get(), this);
-
-	//if (result == true)
-	{
-		// Add system to the model m_equipmentModel
-		//
-		//m_root->addChild(system);
-
-		// !!!!!!!!!!!!!!!!!!! emmit here message about model changing............
-	}
-
-	return;
-}
-
-void EquipmentTabPage::addCase()
-{
-	assert(false);
-}
-
-void EquipmentTabPage::addSubblock()
-{
-	assert(false);
-}
-
-void EquipmentTabPage::addBlock()
-{
-	assert(false);
-}
-
-

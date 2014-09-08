@@ -39,6 +39,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
 	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
 
+	connect(this, &DbController::signal_addSystem, m_worker, &DbWorker::slot_addSystem);
+
 	m_thread.start();
 }
 
@@ -504,6 +506,44 @@ bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWi
 	// Emit signal end wait for complete
 	//
 	emit signal_undoChanges(&files);
+
+	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
+	return true;
+}
+
+bool DbController::addSystem(const DeviceSystem* system, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (system == nullptr)
+	{
+		assert(system != nullptr);
+		return false;
+	}
+
+	// Save system to binary file
+	//
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	QByteArray data("Hi, there!");
+	DbFile file;
+	file.swapData(data);
+
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_addSystem(&file);
 
 	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
 	return true;
