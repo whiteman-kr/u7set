@@ -18,6 +18,8 @@ DialogAfblEditor::DialogAfblEditor(DbController* pDbController, QWidget *parent)
     l<<tr("State");
     l<<tr("Last Check-in Time");
     ui->m_afbTree->setHeaderLabels(l);
+    ui->m_afbTree->setColumnWidth(0, 150);
+    ui->m_afbTree->setColumnWidth(1, 100);
 
     refreshFiles();
 }
@@ -29,15 +31,44 @@ DialogAfblEditor::~DialogAfblEditor()
 
 void DialogAfblEditor::refreshFiles()
 {
+    //save selected indexes
+
+    std::vector<int> oldSelectedIndexes;
+    QModelIndexList selectedIndexList = ui->m_afbTree->selectionModel()->selectedIndexes();
+    for (auto i = selectedIndexList.begin(); i != selectedIndexList.end(); i++)
+    {
+        QModelIndex mi = *i;
+        if (mi.column() != 0)
+            continue;
+
+        oldSelectedIndexes.push_back(mi.row());
+    }
+    int oldItemsCount = ui->m_afbTree->topLevelItemCount();
+
+    // refresh list
+
     ui->m_afbTree->clear();
 
     QList<QTreeWidgetItem *> items;
 
-    if (m_pDbController->getFileList(&files, m_pDbController->afblFileId(), "afb", this) == false)
+    std::vector<DbFileInfo> afbfiles;
+    if (m_pDbController->getFileList(&afbfiles, m_pDbController->afblFileId(), "afb", this) == false)
     {
-        QMessageBox::critical(this, "Error", "Could not get files list!");
+        QMessageBox::critical(this, "Error", "Could not get afb files list!");
         return;
     }
+
+    files.clear();
+
+    std::vector<DbFileInfo> xsdfiles;
+    if (m_pDbController->getFileList(&xsdfiles, m_pDbController->afblFileId(), "xsd", this) == false)
+    {
+        QMessageBox::critical(this, "Error", "Could not get xsd files list!");
+        return;
+    }
+
+    files.insert(files.begin(), xsdfiles.begin(), xsdfiles.end());
+    files.insert(files.begin(), afbfiles.begin(), afbfiles.end());
 
     for (int i = 0; i < files.size(); i++)
     {
@@ -47,10 +78,23 @@ void DialogAfblEditor::refreshFiles()
         l.append(fi.state().text());
         l.append(fi.lastCheckIn().toString());
 
-        items.append(new QTreeWidgetItem((QTreeWidget*)0, l));
+        QTreeWidgetItem* pItem = new QTreeWidgetItem((QTreeWidget*)0, l);
+        items.append(pItem);
+
     }
 
     ui->m_afbTree->insertTopLevelItems(0, items);
+
+    //restore selection
+
+    if (items.size() == oldItemsCount)
+    {
+        for (auto j = oldSelectedIndexes.begin(); j != oldSelectedIndexes.end(); j++)
+        {
+            ui->m_afbTree->selectionModel()->select( ui->m_afbTree->model()->index( *j, 0 ),
+                                                     QItemSelectionModel::Select | QItemSelectionModel::Rows );
+        }
+    }
 }
 
 void DialogAfblEditor::on_m_add_clicked()
@@ -74,28 +118,39 @@ void DialogAfblEditor::on_m_add_clicked()
     pf->setFileName(caption + ".afb");
     pf->swapData(byteArray);
 
-    std::vector<std::shared_ptr<DbFile>> f;
-    f.push_back(pf);
-
-    if (m_pDbController->addFiles(&f, m_pDbController->afblFileId(), this) == true)
-    {
-		refreshFiles();
-    }
-    else
-    {
-        QMessageBox::critical(this, "Error", "Error adding file!");
-    }
+    addFile(pf);
 }
 
-
-void DialogAfblEditor::on_m_edit_clicked()
+void DialogAfblEditor::on_m_addXsd_clicked()
 {
-
-    DbFileInfo* pFi = getCurrentFileInfo();
-    if (pFi == nullptr)
+    bool ok = false;
+    QString caption = QInputDialog::getText(this, tr("Add XSD"), tr("Enter the scheme name:"), QLineEdit::Normal, tr(""), &ok);
+    if (ok == false)
     {
         return;
     }
+
+    QByteArray byteArray = QString("Enter schema here...").toUtf8();
+
+
+    std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
+    pf->setFileName(caption + ".xsd");
+    pf->swapData(byteArray);
+
+    addFile(pf);
+}
+
+void DialogAfblEditor::on_m_edit_clicked()
+{
+    std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
+
+    if (selectedFiles.size() != 1)
+    {
+        return;
+    }
+
+    DbFileInfo* pFi = *selectedFiles.begin();
+    Q_ASSERT(pFi);
 
     if (pFi->state() != VcsState::CheckedOut)
     {
@@ -127,7 +182,7 @@ void DialogAfblEditor::on_m_edit_clicked()
     QByteArray data;
     f->swapData(data);
 
-    DialogAfbProperties d(pFi->fileName(), &data);
+    DialogAfbProperties d(pFi->fileName(), &data, m_pDbController);
     if (d.exec() != QDialog::Accepted)
     {
         return;
@@ -146,25 +201,24 @@ void DialogAfblEditor::on_m_edit_clicked()
 
 void DialogAfblEditor::on_m_checkOut_clicked()
 {
-    DbFileInfo* pFi = getCurrentFileInfo();
-    if (pFi == nullptr)
-    {
+    std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
+    if (selectedFiles.empty())
         return;
-    }
 
-    if (pFi->state() != VcsState::CheckedIn)
+    for (auto it = selectedFiles.begin(); it != selectedFiles.end(); it++)
     {
-        QMessageBox::critical(this, "Error", "File is already checked out!");
-        return;
-    }
+        DbFileInfo* pFi = *it;
+        if (pFi->state() != VcsState::CheckedIn)
+        {
+            QMessageBox::critical(this, "Error", "File " + pFi->fileName() + " is already checked out!");
+            continue;
+        }
 
-    std::vector <DbFileInfo> f;
-    f.push_back(*pFi);
-
-    if (m_pDbController->checkOut(f, this) == false)
-    {
-        QMessageBox::critical(this, "Error", "Check Out error!");
-        return;
+        if (m_pDbController->checkOut(*pFi, this) == false)
+        {
+            QMessageBox::critical(this, "Error", pFi->fileName() + " Check Out error!");
+            continue;
+        }
     }
 
     refreshFiles();
@@ -172,32 +226,29 @@ void DialogAfblEditor::on_m_checkOut_clicked()
 
 void DialogAfblEditor::on_m_checkIn_clicked()
 {
-    DbFileInfo* pFi = getCurrentFileInfo();
-    if (pFi == nullptr)
-    {
+    std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
+    if (selectedFiles.empty())
         return;
-    }
-
-    if (pFi->state() != VcsState::CheckedOut)
-    {
-        QMessageBox::critical(this, "Error", "File is already checked in!");
-        return;
-    }
 
     bool ok = false;
-    QString comment = QInputDialog::getText(this, tr("Check In"), tr("Enter comment:"), QLineEdit::Normal, tr(""), &ok);
+    QString comment = QInputDialog::getText(this, tr("Check In"), tr("Enter the comment:"), QLineEdit::Normal, tr(""), &ok);
     if (ok == false)
-    {
         return;
-    }
 
-    std::vector <DbFileInfo> f;
-    f.push_back(*pFi);
-
-    if (m_pDbController->checkIn(f, comment, this) == false)
+    for (auto it = selectedFiles.begin(); it != selectedFiles.end(); it++)
     {
-        QMessageBox::critical(this, "Error", "Check In error!");
-        return;
+        DbFileInfo* pFi = *it;
+        if (pFi->state() != VcsState::CheckedOut)
+        {
+            QMessageBox::critical(this, "Error", "File " + pFi->fileName() + " is already checked in!");
+            continue;
+        }
+
+        if (m_pDbController->checkIn(*pFi, comment, this) == false)
+        {
+            QMessageBox::critical(this, "Error", pFi->fileName() + " Check In error!");
+            continue;
+        }
     }
 
     refreshFiles();
@@ -206,41 +257,115 @@ void DialogAfblEditor::on_m_checkIn_clicked()
 
 void DialogAfblEditor::on_m_Undo_clicked()
 {
-    DbFileInfo* pFi = getCurrentFileInfo();
-    if (pFi == nullptr)
-    {
+    std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
+    if (selectedFiles.empty())
         return;
-    }
 
-    if (pFi->state() != VcsState::CheckedOut)
-    {
-        QMessageBox::critical(this, "Error", "File is not checked out!");
+    if (QMessageBox::question(this, "Undo", "Are you sure you want to undo the changes?") != QMessageBox::Yes)
         return;
-    }
 
-    std::vector <DbFileInfo> f;
-    f.push_back(*pFi);
-
-    if (m_pDbController->undoChanges(f, this) == false)
+    for (auto it = selectedFiles.begin(); it != selectedFiles.end(); it++)
     {
-        QMessageBox::critical(this, "Error", "Undo error!");
-        return;
+        DbFileInfo* pFi = *it;
+        if (pFi->state() != VcsState::CheckedOut)
+        {
+            QMessageBox::critical(this, "Error", "File " + pFi->fileName() + " is not checked out!");
+            continue;
+        }
+
+        if (m_pDbController->undoChanges(*pFi, this) == false)
+        {
+            QMessageBox::critical(this, "Error", pFi->fileName() + " Undo error!");
+            continue;
+        }
     }
 
     refreshFiles();
 }
 
-DbFileInfo* DialogAfblEditor::getCurrentFileInfo()
+void DialogAfblEditor::addFile(const std::shared_ptr<DbFile> pf)
 {
-    if (ui->m_afbTree->currentIndex().isValid() == false)
-        return nullptr;
+    std::vector<std::shared_ptr<DbFile>> f;
+    f.push_back(pf);
 
-    int row = ui->m_afbTree->currentIndex().row();
+    if (m_pDbController->addFiles(&f, m_pDbController->afblFileId(), this) == false)
+    {
+        QMessageBox::critical(this, "Error", "Error adding file!");
+        return;
+    }
 
-    if (row < 0 || row >= files.size())
-        return nullptr;
+    refreshFiles();
 
-    return &files[row];
+    //select the new file
+
+    QList<QTreeWidgetItem*> added = ui->m_afbTree->findItems(pf->fileName(), Qt::MatchFixedString);
+    Q_ASSERT (added.size() == 1);
+    for (auto i = added.begin(); i != added.end(); i++)
+    {
+        QTreeWidgetItem* pItem = *i;
+        pItem->setSelected(true);
+    }
 }
 
+std::vector<DbFileInfo*> DialogAfblEditor::getSelectedFiles()
+{
+    std::vector<DbFileInfo*> selectedFiles;
+
+    QModelIndexList selectedIndexList = ui->m_afbTree->selectionModel()->selectedIndexes();
+    for (auto i = selectedIndexList.begin(); i != selectedIndexList.end(); i++)
+    {
+        QModelIndex mi = *i;
+        if (mi.column() != 0)
+            continue;
+
+        selectedFiles.push_back(&files[mi.row()]);
+    }
+
+    return selectedFiles;
+}
+
+
+
+void DialogAfblEditor::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+    Q_UNUSED(item);
+    Q_UNUSED(column);
+    on_m_edit_clicked();
+}
+
+void DialogAfblEditor::on_m_afbTree_itemSelectionChanged()
+{
+    std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
+
+    bool enableEdit = false;
+    if (selectedFiles.size() == 1 && selectedFiles[0]->state() == VcsState::CheckedOut)
+    {
+        enableEdit = true;
+    }
+
+    bool enableCheckOut = false;
+    int count = 0;
+    for (auto i = selectedFiles.begin(); i != selectedFiles.end(); i++)
+    {
+        if ((*i)->state() == VcsState::CheckedIn)
+            count++;
+    }
+    enableCheckOut = count != 0 && count == selectedFiles.size();
+
+    bool enableCheckIn = false;
+    count = 0;
+    for (auto i = selectedFiles.begin(); i != selectedFiles.end(); i++)
+    {
+        if ((*i)->state() == VcsState::CheckedOut)
+            count++;
+    }
+    enableCheckIn = count != 0 && count == selectedFiles.size();
+
+
+    ui->m_edit->setEnabled(enableEdit);
+    ui->m_checkOut->setEnabled(enableCheckOut);
+    ui->m_checkIn->setEnabled(enableCheckIn);
+    ui->m_Undo->setEnabled(enableCheckIn);
+    //ui->m_remove
+}
 

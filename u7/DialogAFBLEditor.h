@@ -24,6 +24,12 @@ private slots:
     void on_m_checkIn_clicked();
     void on_m_Undo_clicked();
 
+    void on_m_afbTree_itemDoubleClicked(QTreeWidgetItem *item, int column);
+
+    void on_m_afbTree_itemSelectionChanged();
+
+    void on_m_addXsd_clicked();
+
 private:
     Ui::DialogAfblEditor *ui;
 
@@ -32,7 +38,8 @@ private:
 
 private:
     void refreshFiles();
-    DbFileInfo* getCurrentFileInfo();
+    void addFile(const std::shared_ptr<DbFile> pf);
+    std::vector<DbFileInfo *> getSelectedFiles();
 };
 
 #endif // DIALOGAFBLEDITOR_H

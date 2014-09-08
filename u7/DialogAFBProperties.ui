@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogAFBProperties</class>
- <widget class="QDialog" name="DialogAFBProperties">
+ <class>DialogAfbProperties</class>
+ <widget class="QDialog" name="DialogAfbProperties">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
-    <height>318</height>
+    <width>1024</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,13 @@
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="m_validate">
+         <property name="text">
+          <string>Validate...</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">
@@ -61,12 +68,12 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>DialogAFBProperties</receiver>
+   <receiver>DialogAfbProperties</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>805</x>
+     <y>388</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -77,12 +84,12 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DialogAFBProperties</receiver>
+   <receiver>DialogAfbProperties</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>873</x>
+     <y>388</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
