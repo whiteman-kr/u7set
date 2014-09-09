@@ -127,7 +127,7 @@ CREATE TABLE signalinstance
 (
   signalinstanceid serial NOT NULL,
   signalid integer NOT NULL,  
-  changesetid integer NOT NULL,
+  changesetid integer,
   created timestamp with time zone NOT NULL DEFAULT now(),
   action integer NOT NULL DEFAULT 1,
   strid character varying(64) NOT NULL,
