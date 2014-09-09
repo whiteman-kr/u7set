@@ -22,7 +22,7 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add GetWorkcopy function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0017.sql"},
 	{"Add CheckIn function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0018.sql"},
 	{"Add system folders (AFBL, AL, HC, WVS, DVS)", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0019.sql"},
-	{"Add tables for manage application signals", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0020.sql"},
+	{"Add tables for storing application signals", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0020.sql"},
 	};
 
 int DbWorker::counter = 0;
