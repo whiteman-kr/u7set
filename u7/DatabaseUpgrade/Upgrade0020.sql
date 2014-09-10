@@ -157,6 +157,9 @@ CREATE TABLE signalinstance
   normalstate integer NOT NULL DEFAULT 0,
   decimalplaces integer NOT NULL DEFAULT 2,
   aperture double precision NOT NULL DEFAULT 0,
+  inouttype integer NOT NULL DEFAULT 2,
+  deviceid integer,
+  inoutno integer,
 
   CONSTRAINT signalinstance_pkey PRIMARY KEY (signalinstanceid),
   CONSTRAINT changeset_fkey FOREIGN KEY (changesetid)
