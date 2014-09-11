@@ -557,6 +557,19 @@ bool DbController::addSystem(const DeviceSystem* system, QWidget* parentWidget)
 	return true;
 }
 
+
+bool DbController::getSignalIDs(QSet<int>* signalIDs, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	return true;
+}
+
+
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {
 	// Check parameters

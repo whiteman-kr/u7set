@@ -3,6 +3,7 @@
 #include "DbStruct.h"
 #include "DbWorker.h"
 #include "DeviceObject.h"
+#include <QSet>
 
 class DbController : public QObject
 {
@@ -63,6 +64,10 @@ public:
 	// Hardware Configuration
 	//
 	bool addSystem(const DeviceSystem* system, QWidget* parentWidget);
+
+	// Signals management
+	//
+	bool getSignalIDs(QSet<int>* signalIDs, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
