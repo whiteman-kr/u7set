@@ -82,7 +82,9 @@ HEADERS += VFrame30Lib_global.h \
     FrameHistoryItem.h \
 	Configuration.h \
 	DebugInstCounter.h \
-    VFrame30.h
+    VFrame30.h \
+    ../include/ProtoObject.h \
+    ../include/StreamedData.h
 
 SOURCES += VideoLayer.cpp \
     VideoItem.cpp \
@@ -119,7 +121,9 @@ SOURCES += VideoLayer.cpp \
     VideoFrameWidgetAgent.cpp \
     VideoFrameAgent.cpp \
     FrameHistoryItem.cpp \
-	Configuration.cpp
+	Configuration.cpp \
+    ../lib/ProtoObject.cpp \
+    ../lib/StreamedData.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 #CONFIG(debug, debug|release): DEFINES += DEBUG

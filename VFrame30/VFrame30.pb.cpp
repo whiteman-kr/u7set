@@ -23,43 +23,43 @@ namespace VFrame30
 {
 	namespace Proto
 	{
-		CStreamedData::CStreamedData()
-		{
-		}
+//		CStreamedData::CStreamedData()
+//		{
+//		}
 
-		CStreamedData::CStreamedData(const char* pSrc, size_t size)
-		{
-			m_data.assign(pSrc, size);
-		}
+//		CStreamedData::CStreamedData(const char* pSrc, size_t size)
+//		{
+//			m_data.assign(pSrc, size);
+//		}
 
-		CStreamedData::CStreamedData(const QByteArray& src)
-		{
-			m_data.assign(src.data(), src.size());
-		}
+//		CStreamedData::CStreamedData(const QByteArray& src)
+//		{
+//			m_data.assign(src.data(), src.size());
+//		}
 
-		CStreamedData::CStreamedData(size_t capacity)
-		{
-			m_data.reserve(capacity);
-		}
+//		CStreamedData::CStreamedData(size_t capacity)
+//		{
+//			m_data.reserve(capacity);
+//		}
 
-		CStreamedData::~CStreamedData()
-		{
-		}
+//		CStreamedData::~CStreamedData()
+//		{
+//		}
 
-		const char* CStreamedData::data() const
-		{
-			return m_data.data();
-		}
+//		const char* CStreamedData::data() const
+//		{
+//			return m_data.data();
+//		}
 
-		size_t CStreamedData::length() const
-		{
-			return m_data.size() * sizeof(m_data[0]);
-		}
+//		size_t CStreamedData::length() const
+//		{
+//			return m_data.size() * sizeof(m_data[0]);
+//		}
 
-		void CStreamedData::clear()
-		{
-			m_data.clear();
-		}
+//		void CStreamedData::clear()
+//		{
+//			m_data.clear();
+//		}
 
 		// Функции для сериализации данных
 		//

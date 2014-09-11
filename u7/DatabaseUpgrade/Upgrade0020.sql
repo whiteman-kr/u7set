@@ -130,8 +130,8 @@ CREATE TABLE signalinstance
   changesetid integer,
   created timestamp with time zone NOT NULL DEFAULT now(),
   action integer NOT NULL DEFAULT 1,
-  strid character varying(64) NOT NULL,
-  extstrid character varying(64) NOT NULL,
+  strid text NOT NULL,
+  extstrid text NOT NULL,
   name text,
   dataformatid integer NOT NULL DEFAULT 1,
   datasize integer NOT NULL DEFAULT 1,
@@ -157,6 +157,9 @@ CREATE TABLE signalinstance
   normalstate integer NOT NULL DEFAULT 0,
   decimalplaces integer NOT NULL DEFAULT 2,
   aperture double precision NOT NULL DEFAULT 0,
+  inouttype integer NOT NULL DEFAULT 2,
+  deviceid integer,
+  inoutno integer,
 
   CONSTRAINT signalinstance_pkey PRIMARY KEY (signalinstanceid),
   CONSTRAINT changeset_fkey FOREIGN KEY (changesetid)
