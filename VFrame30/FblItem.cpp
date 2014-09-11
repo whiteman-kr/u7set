@@ -27,15 +27,15 @@ namespace VFrame30
 		m_signalGuid = QUuid();
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(const Proto::FblConnectionPoint& cpm)
+	CFblConnectionPoint::CFblConnectionPoint(const ::Proto::FblConnectionPoint& cpm)
 	{
 		LoadData(cpm);
 	}
 
-	bool CFblConnectionPoint::SaveData(Proto::FblConnectionPoint* cpm) const
+	bool CFblConnectionPoint::SaveData(::Proto::FblConnectionPoint* cpm) const
 	{
 		m_point.SaveData(cpm->mutable_point());
-		cpm->set_dirrection(static_cast<Proto::ConnectionDirrection>(dirrection()));
+		cpm->set_dirrection(static_cast<::Proto::ConnectionDirrection>(dirrection()));
 		VFrame30::Proto::Write(cpm->mutable_guid(), m_guid);
 
 		if (m_signalGuid.isNull() == false)  // != GUI_NULL
@@ -56,7 +56,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblConnectionPoint::LoadData(const Proto::FblConnectionPoint& cpm)
+	bool CFblConnectionPoint::LoadData(const ::Proto::FblConnectionPoint& cpm)
 	{
 		m_point.LoadData(cpm.point());
 		m_dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
@@ -107,15 +107,15 @@ namespace VFrame30
 		
 	// Serialization
 	//
-	bool CFblItem::SaveData(VFrame30::Proto::Envelope* message) const
+	bool CFblItem::SaveData(::Proto::Envelope* message) const
 	{
-		Proto::FblItem* fblItemMessage = message->mutable_videoitem()->mutable_fblitem();
+		::Proto::FblItem* fblItemMessage = message->mutable_videoitem()->mutable_fblitem();
 
 		for (auto pt = m_inputPoints.cbegin(); pt != m_inputPoints.cend(); ++pt)
 		{
 			assert(pt->dirrection() == ConnectionDirrection::Input);
 
-			Proto::FblConnectionPoint* pConnectionPointMessage = fblItemMessage->add_points();
+			::Proto::FblConnectionPoint* pConnectionPointMessage = fblItemMessage->add_points();
 			pt->SaveData(pConnectionPointMessage);
 		}
 
@@ -123,7 +123,7 @@ namespace VFrame30
 		{
 			assert(pt->dirrection() == ConnectionDirrection::Output);
 
-			Proto::FblConnectionPoint* pConnectionPointMessage = fblItemMessage->add_points();
+			::Proto::FblConnectionPoint* pConnectionPointMessage = fblItemMessage->add_points();
 			pt->SaveData(pConnectionPointMessage);
 		}
 
@@ -132,7 +132,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItem::LoadData(const VFrame30::Proto::Envelope& message)
+	bool CFblItem::LoadData(const ::Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -150,13 +150,13 @@ namespace VFrame30
 		
 		// --
 		//
-		const Proto::FblItem& fblItemMessage = message.videoitem().fblitem();
+		const ::Proto::FblItem& fblItemMessage = message.videoitem().fblitem();
 
 		m_inputPoints.clear();
 		m_outputPoints.clear();
 		for (int i = 0; i < fblItemMessage.points().size(); i++)
 		{
-			const Proto::FblConnectionPoint& cpm = fblItemMessage.points(i);
+			const ::Proto::FblConnectionPoint& cpm = fblItemMessage.points(i);
 			CFblConnectionPoint cp(cpm);
 
 			if (cp.dirrection() == ConnectionDirrection::Input)

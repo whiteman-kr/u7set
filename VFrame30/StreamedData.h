@@ -3,19 +3,20 @@
 
 namespace Proto
 {
-	class VFRAME30LIBSHARED_EXPORT CStreamedData
+
+	class VFRAME30LIBSHARED_EXPORT StreamedData
 	{
 	public:
-		CStreamedData();
-		CStreamedData(const char* data, size_t size);			// создать объект и проинницализировать data данными из src
-		explicit CStreamedData(const QByteArray& src);			// создать объект и проинницализировать data данными из src
-		explicit CStreamedData(size_t capacity);
+		StreamedData();
+		StreamedData(const char* data, size_t size);			// создать объект и проинницализировать data данными из src
+		explicit StreamedData(const QByteArray& src);			// создать объект и проинницализировать data данными из src
+		explicit StreamedData(size_t capacity);
 
-		virtual ~CStreamedData();
+		virtual ~StreamedData();
 
 	private:
-		CStreamedData(const CStreamedData&);				// Запрещена к использованию
-		CStreamedData& operator= (const CStreamedData&);	// Запрещена к использованию
+		StreamedData(const StreamedData&);				// Запрещена к использованию
+		StreamedData& operator= (const StreamedData&);	// Запрещена к использованию
 
 	public:
 		const char* data() const;		// Получить указатель на даннные, указатель не сохранять, данные не изменять.

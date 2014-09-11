@@ -660,14 +660,14 @@ inline uint8* WireFormatLite::WriteStringToArray(int field_number,
   //   WriteString() to avoid code duplication.  If the implementations become
   //   different, you will need to update that usage.
   target = WriteTagToArray(field_number, WIRETYPE_LENGTH_DELIMITED, target);
-  target = io::CodedOutputStream::WriteVarint32ToArray(value.size(), target);
+  target = io::CodedOutputStream::WriteVarint32ToArray(static_cast<int>(value.size()), target);
   return io::CodedOutputStream::WriteStringToArray(value, target);
 }
 inline uint8* WireFormatLite::WriteBytesToArray(int field_number,
                                                 const string& value,
                                                 uint8* target) {
   target = WriteTagToArray(field_number, WIRETYPE_LENGTH_DELIMITED, target);
-  target = io::CodedOutputStream::WriteVarint32ToArray(value.size(), target);
+  target = io::CodedOutputStream::WriteVarint32ToArray(static_cast<int>(value.size()), target);
   return io::CodedOutputStream::WriteStringToArray(value, target);
 }
 
@@ -735,12 +735,12 @@ inline int WireFormatLite::EnumSize(int value) {
 }
 
 inline int WireFormatLite::StringSize(const string& value) {
-  return io::CodedOutputStream::VarintSize32(value.size()) +
-         value.size();
+  return static_cast<int>(io::CodedOutputStream::VarintSize32(static_cast<int>(value.size())) +
+		 value.size());
 }
 inline int WireFormatLite::BytesSize(const string& value) {
-  return io::CodedOutputStream::VarintSize32(value.size()) +
-         value.size();
+  return static_cast<int>(io::CodedOutputStream::VarintSize32(static_cast<int>(value.size())) +
+		 value.size());
 }
 
 

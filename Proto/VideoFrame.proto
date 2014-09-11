@@ -1,20 +1,7 @@
-package VFrame30.Proto;
+import "common.proto";
 
+package Proto;
 
-// GUID
-//
-message Guid
-{
-	required bytes guid = 1;
-}
-
-
-// Unicode строка
-//
-message wstring
-{
-	required bytes text = 1;
-}
 
 // FontParam
 //

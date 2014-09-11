@@ -15,7 +15,7 @@ namespace VFrame30
 	// Serialization
 	//
 
-	bool Configuration::SaveData(VFrame30::Proto::Envelope* message) const
+	bool Configuration::SaveData(::Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
@@ -24,7 +24,7 @@ namespace VFrame30
 
 		// --
 		//
-		VFrame30::Proto::Configuration* pMutableConfiguration = message->mutable_configuration();
+		::Proto::Configuration* pMutableConfiguration = message->mutable_configuration();
 
 		VFrame30::Proto::Write(pMutableConfiguration->mutable_guid(), m_guid);
 		VFrame30::Proto::Write(pMutableConfiguration->mutable_strid(), m_strID);
@@ -34,7 +34,7 @@ namespace VFrame30
 		 
 		for (auto vf = m_videoFramesIDs.begin(); vf != m_videoFramesIDs.end(); ++vf)
 		{
-			VFrame30::Proto::Guid* pGuid = pMutableConfiguration->add_videoframesids();
+			::Proto::Guid* pGuid = pMutableConfiguration->add_videoframesids();
 			VFrame30::Proto::Write(pGuid, *vf);
 		}
 
@@ -42,14 +42,14 @@ namespace VFrame30
 
 		for (auto vf = m_videoFrames.begin(); vf != m_videoFrames.end(); ++vf)
 		{
-			VFrame30::Proto::Envelope* pVideoFrame = pMutableConfiguration->add_videoframes();
+			::Proto::Envelope* pVideoFrame = pMutableConfiguration->add_videoframes();
 			saveFrameResult &= vf->get()->Save(pVideoFrame);
 		}
 				
 		return saveFrameResult;
 	}
 
-	bool Configuration::LoadData(const Proto::Envelope& message)
+	bool Configuration::LoadData(const ::Proto::Envelope& message)
 	{
 		if (message.has_configuration() == false)
 		{
@@ -57,7 +57,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const VFrame30::Proto::Configuration& configuration = message.configuration();
+		const ::Proto::Configuration& configuration = message.configuration();
 
 		m_guid = VFrame30::Proto::Read(configuration.guid());
 		m_strID = VFrame30::Proto::Read(configuration.strid());
@@ -91,7 +91,7 @@ namespace VFrame30
 		return true;
 	}
 
-	Configuration* Configuration::CreateObject(const Proto::Envelope& message)
+	Configuration* Configuration::CreateObject(const ::Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//

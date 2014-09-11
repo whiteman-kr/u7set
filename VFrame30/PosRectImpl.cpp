@@ -21,7 +21,7 @@ namespace VFrame30
 		m_heightDocPt = 0;
 	}
 
-	bool CPosRectImpl::SaveData(VFrame30::Proto::Envelope* message) const
+	bool CPosRectImpl::SaveData(::Proto::Envelope* message) const
 	{
 		bool result = CVideoItem::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -33,7 +33,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::PosRectImpl* posRectImplMessage = message->mutable_videoitem()->mutable_posrectimpl();
+		::Proto::PosRectImpl* posRectImplMessage = message->mutable_videoitem()->mutable_posrectimpl();
 
 		posRectImplMessage->set_leftdocpt(m_leftDocPt);
 		posRectImplMessage->set_topdocpt(m_topDocPt);
@@ -43,7 +43,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CPosRectImpl::LoadData(const VFrame30::Proto::Envelope& message)
+	bool CPosRectImpl::LoadData(const ::Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -66,7 +66,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const Proto::PosRectImpl& posRectImplMessage = message.videoitem().posrectimpl();
+		const ::Proto::PosRectImpl& posRectImplMessage = message.videoitem().posrectimpl();
 
 		m_leftDocPt = posRectImplMessage.leftdocpt();
 		m_topDocPt = posRectImplMessage.topdocpt();

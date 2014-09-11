@@ -66,14 +66,14 @@ namespace VFrame30
 		{
 			point.SaveData(*cpm.mutable_point());
 			cpm.set_dirrection(static_cast<Proto::ConnectionDirrection>(GetDirrection()));
-			VFrame30::Proto::Write(cpm.mutable_guid(), guid);
+			::Proto::Write(cpm.mutable_guid(), guid);
 			return true;
 		}
 		bool LoadData(const Proto::ConnectionPoint& cpm)
 		{
 			point.LoadData(cpm.point());
 			dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
-			guid = VFrame30::Proto::Read(cpm.guid());
+			guid = ::Proto::Read(cpm.guid());
 			return true;
 		}
 
@@ -146,8 +146,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(VFrame30::Proto::Envelope& message) const;
-		virtual bool LoadData(const VFrame30::Proto::Envelope& message);
+		virtual bool SaveData(::Proto::Envelope& message) const;
+		virtual bool LoadData(const ::Proto::Envelope& message);
 
 	public:
 		virtual const list<CConnectionPoint>& GetInputs() const;

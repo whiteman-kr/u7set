@@ -21,7 +21,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CFblItemLine::SaveData(VFrame30::Proto::Envelope* message) const
+	bool CFblItemLine::SaveData(::Proto::Envelope* message) const
 	{
 		bool result = CPosConnectionImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -39,7 +39,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::FblItemLine* itemMessage = message->mutable_videoitem()->mutable_fblitemline();
+		::Proto::FblItemLine* itemMessage = message->mutable_videoitem()->mutable_fblitemline();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor);
@@ -47,7 +47,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItemLine::LoadData(const VFrame30::Proto::Envelope& message)
+	bool CFblItemLine::LoadData(const ::Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -77,7 +77,7 @@ namespace VFrame30
 			return false;
 		}
 		
-		const Proto::FblItemLine& itemMessage = message.videoitem().fblitemline();
+		const ::Proto::FblItemLine& itemMessage = message.videoitem().fblitemline();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();

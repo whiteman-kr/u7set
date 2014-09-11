@@ -8,7 +8,7 @@ namespace Fbl
 	//							FblParamValue		
 	//
 	//
-	bool FblParamValue::SaveData(VFrame30::Proto::FblParamValue* message) const
+	bool FblParamValue::SaveData(::Proto::FblParamValue* message) const
 	{
 		message->set_integralvalue(IntegralValue);
 		message->set_floatingpoint(FloatingPoint);
@@ -16,7 +16,7 @@ namespace Fbl
 		return true;
 	}
 
-	bool FblParamValue::LoadData(const VFrame30::Proto::FblParamValue& message)
+	bool FblParamValue::LoadData(const ::Proto::FblParamValue& message)
 	{
 		IntegralValue = message.integralvalue();
 		FloatingPoint = message.floatingpoint();
@@ -29,10 +29,10 @@ namespace Fbl
 	//							FblElementParam		
 	//
 	//
-	bool FblElementParam::SaveData(VFrame30::Proto::FblElementParam* message) const
+	bool FblElementParam::SaveData(::Proto::FblElementParam* message) const
 	{
 		VFrame30::Proto::Write(message->mutable_caption(), m_caption);
-		message->set_type(static_cast<VFrame30::Proto::FblParamType>(m_type));
+		message->set_type(static_cast<::Proto::FblParamType>(m_type));
 
 		m_value.SaveData(message->mutable_value());
 		m_defaultValue.SaveData(message->mutable_defaultvalue());
@@ -43,7 +43,7 @@ namespace Fbl
 		return true;
 	}
 
-	bool FblElementParam::LoadData(const VFrame30::Proto::FblElementParam& message)
+	bool FblElementParam::LoadData(const ::Proto::FblElementParam& message)
 	{
 		m_caption = VFrame30::Proto::Read(message.caption());
 		m_type = static_cast<FblParamType>(message.type());
@@ -73,14 +73,14 @@ namespace Fbl
 
 	// Serialization
 	//
-	bool FblElementSignal::SaveData(VFrame30::Proto::FblElementSignal* message) const
+	bool FblElementSignal::SaveData(::Proto::FblElementSignal* message) const
 	{
 		VFrame30::Proto::Write(message->mutable_caption(), m_caption);
-		message->set_type(static_cast<VFrame30::Proto::FblSignalType>(m_type));
+		message->set_type(static_cast<::Proto::FblSignalType>(m_type));
 		return true;
 	}
 	
-	bool FblElementSignal::LoadData(const VFrame30::Proto::FblElementSignal& message)
+	bool FblElementSignal::LoadData(const ::Proto::FblElementSignal& message)
 	{
 		m_caption = VFrame30::Proto::Read(message.caption());
 		m_type = static_cast<FblSignalType>(message.type());
@@ -211,12 +211,12 @@ namespace Fbl
 
 	// Serialization
 	//
-	bool FblElement::SaveData(VFrame30::Proto::Envelope* message) const
+	bool FblElement::SaveData(::Proto::Envelope* message) const
 	{
 		quint32 classnamehash = VFrame30::CVFrameUtils::GetClassHashCode("FblElement");
 		message->set_classnamehash(classnamehash);	// ќб€зательное поле, хш имени класса, по нему восстанавливаетс€ класс.
 
-		VFrame30::Proto::FblElement* pMutableFblElement = message->mutable_fblelement();
+		::Proto::FblElement* pMutableFblElement = message->mutable_fblelement();
 
 		VFrame30::Proto::Write(pMutableFblElement->mutable_guid(), m_guid);
 		VFrame30::Proto::Write(pMutableFblElement->mutable_strid(), m_strID);
@@ -225,26 +225,26 @@ namespace Fbl
 
 		for (auto signal = m_inputSignals.begin(); signal != m_inputSignals.end(); ++signal)
 		{
-			VFrame30::Proto::FblElementSignal* s = pMutableFblElement->mutable_inputsignals()->Add();
+			::Proto::FblElementSignal* s = pMutableFblElement->mutable_inputsignals()->Add();
 			signal->SaveData(s);
 		}
 
 		for (auto signal = m_outputSignals.begin(); signal != m_outputSignals.end(); ++signal)
 		{
-			VFrame30::Proto::FblElementSignal* s = pMutableFblElement->mutable_outputsignals()->Add();
+			::Proto::FblElementSignal* s = pMutableFblElement->mutable_outputsignals()->Add();
 			signal->SaveData(s);
 		}
 
 		for (auto param = m_params.begin(); param != m_params.end(); ++param)
 		{
-			VFrame30::Proto::FblElementParam* p = pMutableFblElement->mutable_params()->Add();
+			::Proto::FblElementParam* p = pMutableFblElement->mutable_params()->Add();
 			param->SaveData(p);
 		}
 		
 		return true;
 	}
 
-	bool FblElement::LoadData(const VFrame30::Proto::Envelope& message)
+	bool FblElement::LoadData(const ::Proto::Envelope& message)
 	{
 		if (message.has_fblelement() == false)
 		{
@@ -252,7 +252,7 @@ namespace Fbl
 			return false;
 		}
 
-		const VFrame30::Proto::FblElement& fblelement = message.fblelement();
+		const ::Proto::FblElement& fblelement = message.fblelement();
 
 		m_guid = VFrame30::Proto::Read(fblelement.guid());
 		m_strID = VFrame30::Proto::Read(fblelement.strid());
@@ -295,7 +295,7 @@ namespace Fbl
 		return true;
 	}
 
-	FblElement* FblElement::CreateObject(const VFrame30::Proto::Envelope& message)
+	FblElement* FblElement::CreateObject(const ::Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//

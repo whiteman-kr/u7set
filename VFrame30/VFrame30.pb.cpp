@@ -63,12 +63,12 @@ namespace VFrame30
 
 		// Функции для сериализации данных
 		//
-		const QUuid& Read(const VFrame30::Proto::Guid& message)
+		const QUuid& Read(const ::Proto::Guid& message)
 		{
 			return *(reinterpret_cast<const QUuid*>(message.guid().c_str()));
 		}
 
-		void Write(VFrame30::Proto::Guid* pMessage, const QUuid& guid)
+		void Write(::Proto::Guid* pMessage, const QUuid& guid)
 		{
 			if (pMessage == nullptr)
 			{
@@ -80,14 +80,14 @@ namespace VFrame30
 
 		// Read/write wstring message
 		//
-		QString Read(const VFrame30::Proto::wstring& message)
+		QString Read(const ::Proto::wstring& message)
 		{
 			QString qstr = QString::fromUtf16(reinterpret_cast<const ushort*>(message.text().data()),
 											  static_cast<int>(message.text().size() / 2) - 1);
 			return qstr;
 		}
 
-		void Write(VFrame30::Proto::wstring* pMessage, const QString& str)
+		void Write(::Proto::wstring* pMessage, const QString& str)
 		{
 			assert(sizeof(wchar_t) == 2);
 			//static_assert(sizeof(wchar_t) == 2, "wchar_t must be 16-bit.");

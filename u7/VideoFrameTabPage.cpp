@@ -172,7 +172,7 @@ void VideoFrameControlTabPage::addFile()
 		return;
 	}
 
-	::Proto::CStreamedData sd;
+	::Proto::StreamedData sd;
 	vf->Save(sd);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();

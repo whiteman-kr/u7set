@@ -26,11 +26,11 @@ namespace VFrame30
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должне прочитаться
-		static CVideoLayer* CreateObject(const Proto::Envelope& message);
+		static CVideoLayer* CreateObject(const ::Proto::Envelope& message);
 
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(::Proto::Envelope* message) const override;
+		virtual bool LoadData(const ::Proto::Envelope& message) override;
 
 		// Methods
 		//
