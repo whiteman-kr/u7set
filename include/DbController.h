@@ -67,7 +67,7 @@ public:
 
 	// Signals management
 	//
-	bool getSignalIDs(QSet<int>* signalIDs, QWidget* parentWidget);
+	bool getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
@@ -92,6 +92,8 @@ signals:
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
 
 	void signal_addSystem(DbFile* file);
+
+	void signal_getSignalsIDs(QSet<int>* signalIDs);
 
 	//
 	// Service functions

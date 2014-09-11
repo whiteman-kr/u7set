@@ -2069,6 +2069,61 @@ void DbWorker::slot_addSystem(DbFile* file)
 	return;
 }
 
+
+void DbWorker::slot_getSignalsIDs(QSet<int>* signalsIDs)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (signalsIDs == nullptr)
+	{
+		assert(signalsIDs != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get signals' IDs. Database connection is not openned."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_signals_ids(%1, %2)")
+		.arg(currentUser().userId()).arg("false");
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		int signalID = q.value(0).toInt();
+
+		qDebug() << signalID;
+
+		signalsIDs->insert(signalID);
+	}
+
+	return;
+}
+
+
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 {
 	if (user == nullptr)

@@ -266,6 +266,10 @@ void SignalsTabPage::closeEvent(QCloseEvent* e)
 void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
+
+	QSet<int> signalsIDs;
+
+	dbController()->getSignalsIDs(&signalsIDs, this);
 	return;
 }
 
