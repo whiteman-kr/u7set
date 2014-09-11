@@ -2015,17 +2015,56 @@ void DbWorker::slot_addSystem(DbFile* file)
 
 	// Check parameters
 	//
+	if (file == nullptr)
+	{
+		assert(file != nullptr);
+		return;
+	}
 
 	// Operation
 	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get file. Database connection is not openned."));
+		emitError(tr("Cannot get file list. Database connection is not openned."));
 		return;
 	}
 
-	assert(false);
+	// request
+	//
+	QString request = QString("SELECT * FROM AddSystem(%1, ")
+		.arg(currentUser().userId());
+
+	QString data;
+	file->convertToDatabaseString(&data);
+	request.append(data);
+	data.clear();
+
+	request += ");";
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't add system. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == false)
+	{
+		emitError(tr("Can't get FileID"));
+		return;
+	}
+
+	int fileId = q.value(0).toInt();
+
+	file->setFileId(fileId);
+	file->setUser(currentUser());
+	file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
+
+	return;
 }
 
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)

@@ -13,6 +13,16 @@ DeviceObject::~DeviceObject()
 {
 }
 
+void DeviceObject::load(const QByteArray& data)
+{
+
+}
+
+void DeviceObject::save(QByteArray* out_data) const
+{
+
+}
+
 DeviceObject* DeviceObject::parent()
 {
 	return m_parent;

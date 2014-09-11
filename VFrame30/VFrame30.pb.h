@@ -3,6 +3,7 @@
 #include <QtCore/QUuid>
 #include <fstream>
 #include "DebugInstCounter.h"
+#include "../include/StreamedData.h"
 
 #ifdef Q_OS_WIN
 #pragma warning (push)
@@ -40,42 +41,42 @@ namespace VFrame30
 {
 	namespace Proto
 	{
-		template <typename VFrameType> class CVFrameObjectSerialization;	// forwaed declaration for CStreamedData 
+//		template <typename VFrameType> class CVFrameObjectSerialization;	// forwaed declaration for CStreamedData
 
-		// Класс для сериализации
-		//
-		class VFRAME30LIBSHARED_EXPORT CStreamedData :
-			public DebugInstCounter<CStreamedData>
-		{
-			// Эти классы непосредтвенно стучат к data.
-			//
-			friend class CVFrameObjectSerialization<VFrame30::CVideoFrame>;
-			friend class CVFrameObjectSerialization<VFrame30::CVideoLayer>;
-			friend class CVFrameObjectSerialization<VFrame30::CVideoItem>;
-			friend class CVFrameObjectSerialization<VFrame30::Configuration>;
-			friend class CVFrameObjectSerialization<Fbl::FblElement>;
+//		// Класс для сериализации
+//		//
+//		class VFRAME30LIBSHARED_EXPORT CStreamedData :
+//			public DebugInstCounter<CStreamedData>
+//		{
+//			// Эти классы непосредтвенно стучат к data.
+//			//
+//			friend class CVFrameObjectSerialization<VFrame30::CVideoFrame>;
+//			friend class CVFrameObjectSerialization<VFrame30::CVideoLayer>;
+//			friend class CVFrameObjectSerialization<VFrame30::CVideoItem>;
+//			friend class CVFrameObjectSerialization<VFrame30::Configuration>;
+//			friend class CVFrameObjectSerialization<Fbl::FblElement>;
 
-		public:
-			CStreamedData();
-			CStreamedData(const char* pSrc, size_t size);			// создать объект и проинницализировать data данными из src
-			explicit CStreamedData(const QByteArray& src);			// создать объект и проинницализировать data данными из src
-			explicit CStreamedData(size_t capacity);
+//		public:
+//			CStreamedData();
+//			CStreamedData(const char* pSrc, size_t size);			// создать объект и проинницализировать data данными из src
+//			explicit CStreamedData(const QByteArray& src);			// создать объект и проинницализировать data данными из src
+//			explicit CStreamedData(size_t capacity);
 
-			virtual ~CStreamedData();
+//			virtual ~CStreamedData();
 
-		private:
-			CStreamedData(const CStreamedData&);				// Запрещена к использованию
-			CStreamedData& operator= (const CStreamedData&);	// Запрещена к использованию
+//		private:
+//			CStreamedData(const CStreamedData&);				// Запрещена к использованию
+//			CStreamedData& operator= (const CStreamedData&);	// Запрещена к использованию
 
-		public:
-			const char* data() const;		// Получить указатель на даннные, указатель не сохранять, данные не изменять.
-			size_t length() const;			// Получить размер данных (GetData()) в байтах
+//		public:
+//			const char* data() const;		// Получить указатель на даннные, указатель не сохранять, данные не изменять.
+//			size_t length() const;			// Получить размер данных (GetData()) в байтах
 
-			void clear();					// clear data
+//			void clear();					// clear data
 
-		protected:
-			std::string m_data;
-		};
+//		protected:
+//			std::string m_data;
+//		};
 
 
 		// Шаблон и реализация необходимых фукнций сериализации
@@ -99,7 +100,7 @@ namespace VFrame30
 
 				return Save(output);
 			}
-			bool Save(const wchar_t* fileName) const 
+			bool Save(const wchar_t* fileName) const
 			{
 				std::wstring wfnstr(fileName);
 				std::string fnstr(wfnstr.begin(), wfnstr.end());
@@ -113,7 +114,7 @@ namespace VFrame30
 
 				return Save(output);
 			}
-			bool Save(std::fstream& stream) const 
+			bool Save(std::fstream& stream) const
 			{
 				if (stream.is_open() == false || stream.bad() == true)
 				{
@@ -129,7 +130,7 @@ namespace VFrame30
 					return false;
 				}
 
-				try 
+				try
 				{
 					return message.SerializeToOstream(&stream);
 				}
@@ -139,12 +140,16 @@ namespace VFrame30
 					return false;
 				}
 			}
-			bool Save(CStreamedData& data) const
+			bool Save(::Proto::CStreamedData& data) const
 			{
 				Envelope message;
 				this->SaveData(&message);
 
-				data.m_data = message.SerializeAsString();
+				auto mutable_data = data.mutable_data();
+				auto str = message.SerializeAsString();
+
+				mutable_data = QByteArray(str.data(), static_cast<int>(str.size()));
+
 				return true;
 			}
 			bool Save(QByteArray& data) const
@@ -215,11 +220,11 @@ namespace VFrame30
 
 				return Load(message);
 			}
-			bool Load(const VFrame30::Proto::CStreamedData& data)
+			bool Load(const ::Proto::CStreamedData& data)
 			{
 				VFrame30::Proto::Envelope message;
 
-				bool result = message.ParseFromString(data.m_data);
+				bool result = message.ParseFromString(data.data());
 				if (result == false)
 				{
 					return false;
@@ -285,11 +290,11 @@ namespace VFrame30
 
 				return pNewItem;
 			}
-			static VFrameType* Create(const VFrame30::Proto::CStreamedData& data)
+			static VFrameType* Create(const ::Proto::CStreamedData& data)
 			{
 				VFrame30::Proto::Envelope message;
 
-				bool result = message.ParseFromString(data.m_data);
+				bool result = message.ParseFromString(data.data());
 				if (result == false)
 				{
 					return nullptr;
@@ -320,7 +325,7 @@ namespace VFrame30
 				// function "static VFrameType* CreateObject(const Proto::Envelope& message)"
 				// must be defined in VFrameType
 				//
-				return VFrameType::CreateObject(message);		
+				return VFrameType::CreateObject(message);
 			}
 
 	protected:

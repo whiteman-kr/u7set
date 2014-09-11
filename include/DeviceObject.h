@@ -25,6 +25,10 @@ protected:
 	DeviceObject();
 	virtual ~DeviceObject();
 
+public:
+	virtual void load(const QByteArray& data);
+	virtual void save(QByteArray* out_data) const;
+
     // Properties
     //
 public:

@@ -172,13 +172,12 @@ void VideoFrameControlTabPage::addFile()
 		return;
 	}
 
-	VFrame30::Proto::CStreamedData sd;
+	::Proto::CStreamedData sd;
 	vf->Save(sd);
-	QByteArray vfData(sd.data(), static_cast<int>(sd.length()));
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
 	vfFile->setFileName(fileName);
-	vfFile->swapData(vfData);
+	vfFile->swapData(sd.mutable_data());
 
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
 	addFilesList.push_back(vfFile);
