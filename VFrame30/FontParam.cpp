@@ -12,7 +12,7 @@ namespace VFrame30
 		italic = false;
 	}
 
-	bool FontParam::SaveData(VFrame30::Proto::FontParam* message) const
+	bool FontParam::SaveData(::Proto::FontParam* message) const
 	{
 		Proto::Write(message->mutable_name(), this->name);
 		message->set_size(this->size);
@@ -21,7 +21,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool FontParam::LoadData(const VFrame30::Proto::FontParam& message)
+	bool FontParam::LoadData(const ::Proto::FontParam& message)
 	{
 		this->name = Proto::Read(message.name());
 		this->size = message.size();

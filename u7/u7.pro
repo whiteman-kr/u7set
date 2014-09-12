@@ -58,7 +58,6 @@ SOURCES +=\
     Settings.cpp \
     UserManagementDialog.cpp \
     ../lib/ConfigData.cpp \
-    ../lib/DbStore.cpp \
     ../lib/DbStruct.cpp \
     EquipmentTabPage.cpp \
     ../lib/DeviceObject.cpp \
@@ -101,7 +100,6 @@ HEADERS  += \
     UserManagementDialog.h \
     ../include/ConfigData.h \
     ../include/DbStruct.h \
-    ../include/DbStore.h \
     EquipmentTabPage.h \
     ../include/DeviceObject.h \
     VideoFramePropertiesDialog.h \

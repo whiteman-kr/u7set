@@ -21,7 +21,7 @@ namespace VFrame30
 			this->Y = 0;
 		}
 
-		explicit VideoItemPoint(const Proto::VideoItemPoint& vip)
+		explicit VideoItemPoint(const ::Proto::VideoItemPoint& vip)
 		{
 			LoadData(vip);
 		}
@@ -64,13 +64,13 @@ namespace VFrame30
 			return QPointF(X, Y);
 		}
 
-		bool SaveData(Proto::VideoItemPoint* vip) const
+		bool SaveData(::Proto::VideoItemPoint* vip) const
 		{
 			vip->set_x(X);
 			vip->set_y(Y);
 			return true;
 		}
-		bool LoadData(const Proto::VideoItemPoint& vip)
+		bool LoadData(const ::Proto::VideoItemPoint& vip)
 		{
 			this->X = vip.x();
 			this->Y = vip.y();
@@ -127,13 +127,13 @@ namespace VFrame30
 		friend Proto::CVFrameObjectSerialization<CVideoItem>;	// Для вызоыв CreateObject из CVFrameObjectSerialization
 
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(::Proto::Envelope* message) const override;
+		virtual bool LoadData(const ::Proto::Envelope& message) override;
 
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должне прочитаться
-		static CVideoItem* CreateObject(const Proto::Envelope& message);
+		static CVideoItem* CreateObject(const ::Proto::Envelope& message);
 
 		// Action Functions
 		//

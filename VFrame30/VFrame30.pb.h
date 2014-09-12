@@ -3,7 +3,7 @@
 #include <QtCore/QUuid>
 #include <fstream>
 #include "DebugInstCounter.h"
-#include "../include/StreamedData.h"
+#include "StreamedData.h"
 
 #ifdef Q_OS_WIN
 #pragma warning (push)
@@ -15,7 +15,7 @@
 #pragma warning(disable : 4127)
 #pragma warning(disable : 4996)
 #endif // Q_OS_WIN
-#include "../VFrame30/VideoFrame.pb.h"
+#include "../Proto/serialization.pb.h"
 #ifdef Q_OS_WIN
 #pragma warning (pop)
 #endif // Q_OS_WIN
@@ -122,7 +122,7 @@ namespace VFrame30
 					return false;
 				}
 
-				VFrame30::Proto::Envelope message;
+				::Proto::Envelope message;
 
 				bool result = Save(&message);
 				if (result == false)
@@ -140,9 +140,9 @@ namespace VFrame30
 					return false;
 				}
 			}
-			bool Save(::Proto::CStreamedData& data) const
+			bool Save(::Proto::StreamedData& data) const
 			{
-				Envelope message;
+				::Proto::Envelope message;
 				this->SaveData(&message);
 
 				auto mutable_data = data.mutable_data();
@@ -154,14 +154,14 @@ namespace VFrame30
 			}
 			bool Save(QByteArray& data) const
 			{
-				Envelope message;
+				::Proto::Envelope message;
 				this->SaveData(&message);
 
 				std::string str = message.SerializeAsString();
 				data = QByteArray(str.data(), static_cast<int>(str.size()));
 				return true;
 			}
-			bool Save(VFrame30::Proto::Envelope* message) const
+			bool Save(::Proto::Envelope* message) const
 			{
 				try
 				{
@@ -210,7 +210,7 @@ namespace VFrame30
 					return false;
 				}
 
-				VFrame30::Proto::Envelope message;
+				::Proto::Envelope message;
 
 				bool result = message.ParseFromIstream(&stream);
 				if (result == false)
@@ -220,9 +220,9 @@ namespace VFrame30
 
 				return Load(message);
 			}
-			bool Load(const ::Proto::CStreamedData& data)
+			bool Load(const ::Proto::StreamedData& data)
 			{
-				VFrame30::Proto::Envelope message;
+				::Proto::Envelope message;
 
 				bool result = message.ParseFromString(data.data());
 				if (result == false)
@@ -234,7 +234,7 @@ namespace VFrame30
 			}
 			bool Load(const QByteArray& data)
 			{
-				VFrame30::Proto::Envelope message;
+				::Proto::Envelope message;
 
 				bool result = message.ParseFromArray(data.data(), data.size());
 				if (result == false)
@@ -244,7 +244,7 @@ namespace VFrame30
 
 				return Load(message);
 			}
-			bool Load(const VFrame30::Proto::Envelope& message)
+			bool Load(const ::Proto::Envelope& message)
 			{
 				try
 				{
@@ -277,7 +277,7 @@ namespace VFrame30
 					return nullptr;
 				}
 
-				VFrame30::Proto::Envelope message;
+				::Proto::Envelope message;
 
 				bool result = message.ParseFromIstream(&stream);
 				if (result == false)
@@ -290,9 +290,9 @@ namespace VFrame30
 
 				return pNewItem;
 			}
-			static VFrameType* Create(const ::Proto::CStreamedData& data)
+			static VFrameType* Create(const ::Proto::StreamedData& data)
 			{
-				VFrame30::Proto::Envelope message;
+				::Proto::Envelope message;
 
 				bool result = message.ParseFromString(data.data());
 				if (result == false)
@@ -307,7 +307,7 @@ namespace VFrame30
 			}
 			static VFrameType* Create(const QByteArray& data)
 			{
-				VFrame30::Proto::Envelope message;
+				::Proto::Envelope message;
 
 				bool result = message.ParseFromArray(data.data(), data.size());
 				if (result == false)
@@ -320,7 +320,7 @@ namespace VFrame30
 
 				return pNewItem;
 			}
-			static VFrameType* Create(const VFrame30::Proto::Envelope& message)
+			static VFrameType* Create(const ::Proto::Envelope& message)
 			{
 				// function "static VFrameType* CreateObject(const Proto::Envelope& message)"
 				// must be defined in VFrameType
@@ -329,21 +329,21 @@ namespace VFrame30
 			}
 
 	protected:
-			virtual bool SaveData(Proto::Envelope* message) const = 0;
-			virtual bool LoadData(const Proto::Envelope& message) = 0;
+			virtual bool SaveData(::Proto::Envelope* message) const = 0;
+			virtual bool LoadData(const ::Proto::Envelope& message) = 0;
 
 		};
 
 
 		// Функции для сериализации данных
 		//
-		const QUuid& Read(const VFrame30::Proto::Guid& message);
-		void Write(VFrame30::Proto::Guid* pMessage, const QUuid& guid);
+		const QUuid& Read(const ::Proto::Uuid& message);
+		void Write(::Proto::Uuid* pMessage, const QUuid& guid);
 
 		// Read/write wstring message
 		//
-		QString Read(const VFrame30::Proto::wstring& message);
-		void Write(VFrame30::Proto::wstring* pMessage, const QString& str);
+		QString Read(const ::Proto::wstring& message);
+		void Write(::Proto::wstring* pMessage, const QString& str);
 	}
 }
 

@@ -1,6 +1,5 @@
 #include "Stable.h"
 #include "MainWindow.h"
-#include "../include/DbStore.h"
 #include "../include/DbController.h"
 #include "Settings.h"
 #include "../VFrame30/VFrame30Library.h"

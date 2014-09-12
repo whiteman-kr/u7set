@@ -47,7 +47,7 @@ namespace Proto
 				return false;
 			}
 
-			VFrame30::Proto::Envelope message;
+			::Proto::Envelope message;
 
 			bool result = Save(&message);
 			if (result == false)
@@ -82,7 +82,7 @@ namespace Proto
 			data = QByteArray(str.data(), static_cast<int>(str.size()));
 			return true;
 		}
-		bool Save(VFrame30::Proto::Envelope* message) const
+		bool Save(::Proto::Envelope* message) const
 		{
 			try
 			{
@@ -131,7 +131,7 @@ namespace Proto
 				return false;
 			}
 
-			VFrame30::Proto::Envelope message;
+			::Proto::Envelope message;
 
 			bool result = message.ParseFromIstream(&stream);
 			if (result == false)
@@ -211,7 +211,7 @@ namespace Proto
 
 			return pNewItem;
 		}
-		static VFrameType* Create(const VFrame30::Proto::CStreamedData& data)
+		static VFrameType* Create(const ::Proto::CStreamedData& data)
 		{
 			Proto::Envelope message;
 

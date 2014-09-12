@@ -29,7 +29,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoLayer::SaveData(Proto::Envelope* message) const
+	bool CVideoLayer::SaveData(::Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
@@ -38,7 +38,7 @@ namespace VFrame30
 
 		auto pMutableVideoLayer = message->mutable_videolayer();
 
-		Proto::Write(pMutableVideoLayer->mutable_guid(), m_guid);
+		Proto::Write(pMutableVideoLayer->mutable_uuid(), m_guid);
 		Proto::Write(pMutableVideoLayer->mutable_name(), m_name);
 
 		pMutableVideoLayer->set_compile(m_compile);
@@ -49,7 +49,7 @@ namespace VFrame30
 		//
 		for (auto item = Items.begin(); item != Items.end(); ++item)
 		{
-			Proto::Envelope* pItemMessage = pMutableVideoLayer->add_items();
+			::Proto::Envelope* pItemMessage = pMutableVideoLayer->add_items();
 
 			if (item->get()->Save(pItemMessage) == false)
 			{
@@ -60,7 +60,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoLayer::LoadData(const Proto::Envelope& message)
+	bool CVideoLayer::LoadData(const ::Proto::Envelope& message)
 	{
 		if (message.has_videolayer() == false)
 		{
@@ -68,9 +68,9 @@ namespace VFrame30
 			return false;
 		}
 
-		const Proto::VideoLayer& videoLayer = message.videolayer();
+		const ::Proto::VideoLayer& videoLayer = message.videolayer();
 
-		m_guid = Proto::Read(videoLayer.guid());
+		m_guid = Proto::Read(videoLayer.uuid());
 		m_name = Proto::Read(videoLayer.name());
 
 		m_compile = videoLayer.compile();
@@ -103,7 +103,7 @@ namespace VFrame30
 		return true;
 	}
 
-	CVideoLayer* CVideoLayer::CreateObject(const Proto::Envelope& message)
+	CVideoLayer* CVideoLayer::CreateObject(const ::Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//

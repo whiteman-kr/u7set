@@ -104,7 +104,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemFblElement::SaveData(Proto::Envelope* message) const
+	bool CVideoItemFblElement::SaveData(::Proto::Envelope* message) const
 	{
 		bool result = CFblItemRect::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -116,7 +116,7 @@ namespace VFrame30
 	
 		// --
 		//
-		Proto::VideoItemFblElement* vifble = message->mutable_videoitem()->mutable_videoitemfblelement();
+		::Proto::VideoItemFblElement* vifble = message->mutable_videoitem()->mutable_videoitemfblelement();
 
 		m_fblElement.Save(vifble->mutable_fblelement());
 		//vifble->set_weight(weight);
@@ -124,7 +124,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemFblElement::LoadData(const Proto::Envelope& message)
+	bool CVideoItemFblElement::LoadData(const ::Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -148,7 +148,7 @@ namespace VFrame30
 			return false;
 		}
 		
-		const Proto::VideoItemFblElement& vifble = message.videoitem().videoitemfblelement();
+		const ::Proto::VideoItemFblElement& vifble = message.videoitem().videoitemfblelement();
 		
 		m_fblElement.Load(vifble.fblelement());
 		//fill = vifble.fill();

@@ -5,7 +5,7 @@
 #include "FileView.h"
 #include "../include/ConfigData.h"
 
-class ConfigurationFileView : public FileView
+/*class ConfigurationFileView : public FileView
 {
 	Q_OBJECT
 public:
@@ -113,3 +113,4 @@ protected:
 };
 
 
+*/

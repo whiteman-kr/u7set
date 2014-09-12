@@ -11,7 +11,7 @@
 //	ConfigurationFileView
 //
 //
-ConfigurationFileView::ConfigurationFileView(DbStore* dbstore) :
+/*ConfigurationFileView::ConfigurationFileView(DbStore* dbstore) :
 	FileView(dbstore)
 {
 	filesModel().setFilter("cdf");
@@ -39,63 +39,63 @@ void ConfigurationFileView::viewFile(std::vector<DbFileInfo> files)
 
 void ConfigurationFileView::addFile()
 {
-/*	// Choose Configuration file name
-	//
-    bool ok = false;
+//	// Choose Configuration file name
+//	//
+//    bool ok = false;
 
-	QString confName = QInputDialog::getText(this, tr("Choose configuration name"), tr("Configuration name:"), QLineEdit::Normal, "conf_blockname", &ok);
-	if (ok == false)
-	{
-		return;
-	}
+//	QString confName = QInputDialog::getText(this, tr("Choose configuration name"), tr("Configuration name:"), QLineEdit::Normal, "conf_blockname", &ok);
+//	if (ok == false)
+//	{
+//		return;
+//	}
 
-	if (confName.isEmpty() == true)
-	{
-		QMessageBox msg(this);
-		msg.setText(tr("Configuration name must not be empty."));
-		msg.exec();
-		return;
-	}
+//	if (confName.isEmpty() == true)
+//	{
+//		QMessageBox msg(this);
+//		msg.setText(tr("Configuration name must not be empty."));
+//		msg.exec();
+//		return;
+//	}
 
-    if (confName.endsWith(".cdf") == false)
-	{
-		confName += ".cdf";
-	}
+//    if (confName.endsWith(".cdf") == false)
+//	{
+//		confName += ".cdf";
+//	}
 
-	// Create new CDF file and add it to the vcs
-	//
-	ConfigData configData;
+//	// Create new CDF file and add it to the vcs
+//	//
+//	ConfigData configData;
 
-    std::shared_ptr<DbFile> newConfFile = std::make_shared<DbFile>();
-    configData.save(newConfFile.get());
-	newConfFile->setFileName(confName);
+//    std::shared_ptr<DbFile> newConfFile = std::make_shared<DbFile>();
+//    configData.save(newConfFile.get());
+//	newConfFile->setFileName(confName);
 
-	std::vector<std::shared_ptr<DbFile>> addFilesList;
-	addFilesList.push_back(newConfFile);
+//	std::vector<std::shared_ptr<DbFile>> addFilesList;
+//	addFilesList.push_back(newConfFile);
 
-	dbStore()->addFiles(&addFilesList, this);
+//	dbStore()->addFiles(&addFilesList, this);
 
-	// Add file to the FileModel and select them
-	//
-	std::shared_ptr<DbFileInfo> file = std::make_shared<DbFileInfo>(*newConfFile.get());
+//	// Add file to the FileModel and select them
+//	//
+//	std::shared_ptr<DbFileInfo> file = std::make_shared<DbFileInfo>(*newConfFile.get());
 
-	if (file->fileId() != -1)
-	{
-		selectionModel()->clear();
+//	if (file->fileId() != -1)
+//	{
+//		selectionModel()->clear();
 
-		filesModel().addFile(file);
+//		filesModel().addFile(file);
 
-		int fileRow = filesModel().getFileRow(file->fileId());
+//		int fileRow = filesModel().getFileRow(file->fileId());
 
-		if (fileRow != -1)
-		{
-			QModelIndex md = filesModel().index(fileRow, 0);		// m_filesModel.columnCount()
-			selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-		}
-	}
+//		if (fileRow != -1)
+//		{
+//			QModelIndex md = filesModel().index(fileRow, 0);		// m_filesModel.columnCount()
+//			selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+//		}
+//	}
 
-	filesViewSelectionChanged(QItemSelection(), QItemSelection());
-	return;*/
+//	filesViewSelectionChanged(QItemSelection(), QItemSelection());
+//	return;
 }
 
 //
@@ -106,49 +106,49 @@ void ConfigurationFileView::addFile()
 ConfigurationsTabPage::ConfigurationsTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent)
 {
-/*	assert(dbcontroller != nullptr);
+//	assert(dbcontroller != nullptr);
 
-	// Create Actions
-	//
-	CreateActions();
+//	// Create Actions
+//	//
+//	CreateActions();
 
-	//
-	// Controls
-	//
-	m_filesView = new ConfigurationFileView(dbcontroller);
-	m_tabWidget = new QTabWidget();
+//	//
+//	// Controls
+//	//
+//	m_filesView = new ConfigurationFileView(dbcontroller);
+//	m_tabWidget = new QTabWidget();
 
-	m_splitter = new QSplitter();
+//	m_splitter = new QSplitter();
 
-	m_splitter->addWidget(m_filesView);
-	m_splitter->addWidget(m_tabWidget);
+//	m_splitter->addWidget(m_filesView);
+//	m_splitter->addWidget(m_tabWidget);
 
-	m_splitter->setStretchFactor(0, 0);
-	m_splitter->setStretchFactor(1, 2);
+//	m_splitter->setStretchFactor(0, 0);
+//	m_splitter->setStretchFactor(1, 2);
 
-	m_splitter->restoreState(theSettings.m_configurationTabPageSplitterState);
+//	m_splitter->restoreState(theSettings.m_configurationTabPageSplitterState);
 
-	//
-	// Layouts
-	//
+//	//
+//	// Layouts
+//	//
 
-	QHBoxLayout* pMainLayout = new QHBoxLayout();
+//	QHBoxLayout* pMainLayout = new QHBoxLayout();
 
-	pMainLayout->addWidget(m_splitter);
+//	pMainLayout->addWidget(m_splitter);
 
-	setLayout(pMainLayout);
+//	setLayout(pMainLayout);
 
-	// --
-	//
-	connect(dbController(), &DbStore::projectOpened, this, &ConfigurationsTabPage::projectOpened);
-	connect(dbController(), &DbStore::projectClosed, this, &ConfigurationsTabPage::projectClosed);
+//	// --
+//	//
+//	connect(dbController(), &DbStore::projectOpened, this, &ConfigurationsTabPage::projectOpened);
+//	connect(dbController(), &DbStore::projectClosed, this, &ConfigurationsTabPage::projectClosed);
 
-	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
-	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
+//	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
+//	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
 
-	// Evidently, project is not opened yet
-	//
-	this->setEnabled(false);*/
+//	// Evidently, project is not opened yet
+//	//
+//	this->setEnabled(false);
 }
 
 ConfigurationsTabPage::~ConfigurationsTabPage()
@@ -182,128 +182,128 @@ void ConfigurationsTabPage::projectClosed()
 
 void ConfigurationsTabPage::openFiles(std::vector<DbFileInfo> files)
 {
-/*	if (files.empty() == true || files.size() != 1)
-	{
-		assert(files.empty() == false);
-		return;
-	}
+//	if (files.empty() == true || files.size() != 1)
+//	{
+//		assert(files.empty() == false);
+//		return;
+//	}
 
-	const DbFileInfo file = files[0];
+//	const DbFileInfo file = files[0];
 
-	if (file.state() != VcsState::CheckedOut)
-	{
-		QMessageBox mb(this);
-		mb.setText(tr("Check out file for edit first."));
-		mb.exec();
-		return;
-	}
+//	if (file.state() != VcsState::CheckedOut)
+//	{
+//		QMessageBox mb(this);
+//		mb.setText(tr("Check out file for edit first."));
+//		mb.exec();
+//		return;
+//	}
 
-	if (file.state() == VcsState::CheckedOut && file.user() != dbController()->currentUser())
-	{
-		QMessageBox mb(this);
-		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.user().username()));
-		mb.exec();
-		return;
-	}
+//	if (file.state() == VcsState::CheckedOut && file.user() != dbController()->currentUser())
+//	{
+//		QMessageBox mb(this);
+//		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.user().username()));
+//		mb.exec();
+//		return;
+//	}
 
-	assert(file.state() == VcsState::CheckedOut && file.user() == dbController()->currentUser());
+//	assert(file.state() == VcsState::CheckedOut && file.user() == dbController()->currentUser());
 
-	// Check if file already open, and activate file tab if it is
-	//
-	for (int i = 0; i < m_tabWidget->count(); i++)
-	{
-		ModuleConfigurationTabPage* mtb = dynamic_cast<ModuleConfigurationTabPage*>(m_tabWidget->widget(i));
+//	// Check if file already open, and activate file tab if it is
+//	//
+//	for (int i = 0; i < m_tabWidget->count(); i++)
+//	{
+//		ModuleConfigurationTabPage* mtb = dynamic_cast<ModuleConfigurationTabPage*>(m_tabWidget->widget(i));
 
-		if (mtb == nullptr)
-		{
-			assert(mtb);
-			continue;
-		}
+//		if (mtb == nullptr)
+//		{
+//			assert(mtb);
+//			continue;
+//		}
 
-		if (mtb->configData().fileInfo().fileName() == file.fileName() && mtb->readOnly() == false)
-		{
-			m_tabWidget->setCurrentIndex(i);
-			return;	 // !!!
-		}
-	}
+//		if (mtb->configData().fileInfo().fileName() == file.fileName() && mtb->readOnly() == false)
+//		{
+//			m_tabWidget->setCurrentIndex(i);
+//			return;	 // !!!
+//		}
+//	}
 
 
-	// Get file
-	//
-	std::vector<std::shared_ptr<DbFile>> out;
+//	// Get file
+//	//
+//	std::vector<std::shared_ptr<DbFile>> out;
 
-	bool result = dbController()->getWorkcopy(files, &out, this);
-	if (result == false || out.size() != files.size())
-	{
-		return;
-	}
+//	bool result = dbController()->getWorkcopy(files, &out, this);
+//	if (result == false || out.size() != files.size())
+//	{
+//		return;
+//	}
 
-	// Load configuration
-	//
-	ModuleConfigurationTabPage* mtb = new ModuleConfigurationTabPage(dbController());
+//	// Load configuration
+//	//
+//	ModuleConfigurationTabPage* mtb = new ModuleConfigurationTabPage(dbController());
 
-	mtb->setReadOnly(false);
+//	mtb->setReadOnly(false);
 
-	int tabIndex = m_tabWidget->addTab(mtb, mtb->windowTitle());
-	m_tabWidget->setCurrentWidget(mtb);
+//	int tabIndex = m_tabWidget->addTab(mtb, mtb->windowTitle());
+//	m_tabWidget->setCurrentWidget(mtb);
 
-	mtb->load(*out[0].get());
+//	mtb->load(*out[0].get());
 
-	m_tabWidget->setTabText(tabIndex, mtb->windowTitle());
+//	m_tabWidget->setTabText(tabIndex, mtb->windowTitle());
 
-	return;*/
+	return;
 }
 
 void ConfigurationsTabPage::viewFiles(std::vector<DbFileInfo> files)
 {
-/*	if (files.empty() == true || files.size() != 1)
-	{
-		assert(files.empty() == false);
-		return;
-	}
+//	if (files.empty() == true || files.size() != 1)
+//	{
+//		assert(files.empty() == false);
+//		return;
+//	}
 
-	const DbFileInfo file = files[0];
+//	const DbFileInfo file = files[0];
 
-	// Get file history
-	//
-	std::vector<DbChangesetInfo> fileHistory;
+//	// Get file history
+//	//
+//	std::vector<DbChangesetInfo> fileHistory;
 
-	dbController()->getFileHistory(file, &fileHistory, this);
+//	dbController()->getFileHistory(file, &fileHistory, this);
 
-	// Show chageset dialog
-	//
-	int changesetId = ChangesetDialog::getChangeset(fileHistory, this);
+//	// Show chageset dialog
+//	//
+//	int changesetId = ChangesetDialog::getChangeset(fileHistory, this);
 
-	if (changesetId == -1)
-	{
-		return;
-	}
+//	if (changesetId == -1)
+//	{
+//		return;
+//	}
 
-	// Get file with choosen changeset
-	//
-	std::vector<std::shared_ptr<DbFile>> out;
+//	// Get file with choosen changeset
+//	//
+//	std::vector<std::shared_ptr<DbFile>> out;
 
-	bool result = dbController()->getSpecificCopy(changesetId, files, &out, this);
+//	bool result = dbController()->getSpecificCopy(changesetId, files, &out, this);
 
-	if (result == false || out.size() != files.size())
-	{
-		return;
-	}
+//	if (result == false || out.size() != files.size())
+//	{
+//		return;
+//	}
 
-	// Load configuration
-	//
-    ModuleConfigurationTabPage* mtb = new ModuleConfigurationTabPage(dbController());
+//	// Load configuration
+//	//
+//    ModuleConfigurationTabPage* mtb = new ModuleConfigurationTabPage(dbController());
 
-	mtb->setReadOnly(true);
+//	mtb->setReadOnly(true);
 
-	int tabIndex = m_tabWidget->addTab(mtb, mtb->windowTitle());
-	m_tabWidget->setCurrentWidget(mtb);
+//	int tabIndex = m_tabWidget->addTab(mtb, mtb->windowTitle());
+//	m_tabWidget->setCurrentWidget(mtb);
 
-	mtb->load(*out[0].get());
+//	mtb->load(*out[0].get());
 
-	m_tabWidget->setTabText(tabIndex, mtb->windowTitle());
+//	m_tabWidget->setTabText(tabIndex, mtb->windowTitle());
 
-	return;*/
+//	return;
 }
 
 //
@@ -427,14 +427,14 @@ void ModuleConfigurationTabPage::on_tree_doubleClicked(QModelIndex index)
 
 void ModuleConfigurationTabPage::saveFile()
 {
-/*    std::shared_ptr<DbFile> sp = std::make_shared<DbFile>();
-    save(sp.get());
+//    std::shared_ptr<DbFile> sp = std::make_shared<DbFile>();
+//    save(sp.get());
 
-    std::vector<std::shared_ptr<DbFile>> files;
-    files.push_back(sp);
+//    std::vector<std::shared_ptr<DbFile>> files;
+//    files.push_back(sp);
 
-	dbController()->setWorkcopy(files, this);
-	return;*/
+//	dbController()->setWorkcopy(files, this);
+//	return;
 }
 
 void ModuleConfigurationTabPage::compileFile()
@@ -467,24 +467,24 @@ void ModuleConfigurationTabPage::compileFile()
 
 }
 
-/*void ModuleConfigurationTabPage::loadData()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Load data"), "", tr("Data Files(*.cdd)"));
-    if (fileName.isEmpty())
-        return;
+//void ModuleConfigurationTabPage::loadData()
+//{
+//    QString fileName = QFileDialog::getOpenFileName(this, tr("Load data"), "", tr("Data Files(*.cdd)"));
+//    if (fileName.isEmpty())
+//        return;
 
 
-    if (m_configData.loadData(fileName) == true)
-    {
-        //fillTree();
-        QMessageBox::critical(this, tr("Done"), tr("Done:") + fileName);
-    }
-    else
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Error loading file:") + fileName);
-    }
+//    if (m_configData.loadData(fileName) == true)
+//    {
+//        //fillTree();
+//        QMessageBox::critical(this, tr("Done"), tr("Done:") + fileName);
+//    }
+//    else
+//    {
+//        QMessageBox::critical(this, tr("Error"), tr("Error loading file:") + fileName);
+//    }
 
-}*/
+//}
 
 DbController* ModuleConfigurationTabPage::dbController()
 {
@@ -553,3 +553,4 @@ void ModuleConfigurationTabPage::appendStructItems(ConfigDataModelNode *parentNo
         }
     }
 }
+*/

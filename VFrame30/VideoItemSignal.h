@@ -20,8 +20,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(::Proto::Envelope* message) const override;
+		virtual bool LoadData(const ::Proto::Envelope& message) override;
 
 		// Draw Functions
 		//
@@ -53,8 +53,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(::Proto::Envelope* message) const override;
+		virtual bool LoadData(const ::Proto::Envelope& message) override;
 
 		// Properties and Data
 	public:
@@ -82,8 +82,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(::Proto::Envelope* message) const override;
+		virtual bool LoadData(const ::Proto::Envelope& message) override;
 
 		// Properties and Data
 	public:

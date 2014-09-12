@@ -1,5 +1,6 @@
 #pragma once
 
+
 #define DECLARE_FONT_PROPERTIES(propname) \
 	const QString& Get##propname##Name() const; \
 		void Set##propname##Name(QString& value); \
@@ -48,12 +49,9 @@
 	void classname::Set##propname##Italic(bool value) { varname.italic = value; } 
 
 
-namespace VFrame30
+namespace Proto
 {
-	namespace Proto
-	{
-		class FontParam;
-	}
+	class FontParam;
 }
 
 namespace VFrame30
@@ -66,8 +64,8 @@ namespace VFrame30
 		// Serialization
 		//
 	public:
-		bool SaveData(VFrame30::Proto::FontParam* message) const;
-		bool LoadData(const VFrame30::Proto::FontParam& message);
+		bool SaveData(::Proto::FontParam* message) const;
+		bool LoadData(const ::Proto::FontParam& message);
 	
 		// --
 		//

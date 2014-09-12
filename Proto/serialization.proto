@@ -1,11 +1,10 @@
-package VFrame30.Proto;
-
+package Proto;
 
 // GUID
 //
-message Guid
+message Uuid
 {
-	required bytes guid = 1;
+	required bytes uuid = 1;
 }
 
 
@@ -15,6 +14,8 @@ message wstring
 {
 	required bytes text = 1;
 }
+
+
 
 // FontParam
 //
@@ -77,27 +78,28 @@ message Envelope
 {
 	// Класс, для сериализации
 	//
-	required uint32 classnamehash = 1;			// Hash from classname, the way of getting the hash is always same
+	required uint32 classnamehash = 1;				// Hash from classname, the way of getting the hash is always same
 
 	// возможные типы для хранения
 	//
+	optional VideoItem videoitem = 6;				// VFrame30::CVideoItem
+	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
 	optional VideoFrame videoframe = 100;			// VFrame30::CVideoFrame
 	optional VideoLayer videolayer = 101;			// VFrame30::CVideoLayer
-	optional VideoItem videoitem = 102;				// VFrame30::CVideoItem
-	optional FblElement fblelement = 103;			// Fbl::FblElement
-	optional Configuration configuration = 104;		// VFrame30::Configuration
+	optional FblElement fblelement = 102;			// Fbl::FblElement
+	optional Configuration configuration = 103;		// VFrame30::Configuration
 }
 
 // VFrame30::Configuration
 message Configuration
 {
-	required Guid guid = 1;
+	required Uuid uuid = 1;
 	required wstring strID = 2;
 	required wstring caption = 3;
 	required wstring variables = 4;
 	required wstring globals = 5; 
 	
-	repeated Guid videoFramesIDs = 100;
+	repeated Uuid videoFramesIDs = 100;
 	repeated Envelope videoFrames = 101;
 }
 
@@ -105,14 +107,14 @@ message Configuration
 //
 message FblElement
 {
-	required Guid guid = 1;
+	required Uuid uuid = 1;
 	required wstring strID = 2;
 	required wstring caption = 3;
 	required uint32 opcode = 4;
 
-	repeated FblElementSignal inputSignals = 100;
-	repeated FblElementSignal outputSignals = 101;
-	repeated FblElementParam params = 102;
+	repeated FblElementSignal inputSignals = 11;
+	repeated FblElementSignal outputSignals = 12;
+	repeated FblElementParam params = 13;
 }
 
 // Fbl::FblElementSignal
@@ -148,7 +150,7 @@ message FblParamValue
 //
 message VideoFrame
 {
-	required Guid guid = 1;
+	required Uuid uuid = 1;
 	required wstring strID = 2;
 	required wstring caption = 3;
 	required double width = 4;
@@ -163,13 +165,13 @@ message VideoFrame
 //
 message VideoLayer
 {
-	required Guid guid = 1;
+	required Uuid uuid = 1;
 	required wstring name = 2;
 	required bool compile = 3;
 	required bool show = 4;
 	required bool print = 5;
 
-	repeated Envelope items = 100;		// Список CVideoItem'ов
+	repeated Envelope items = 15;		// Список CVideoItem'ов
 }
 
 
@@ -177,7 +179,7 @@ message VideoLayer
 //
 message VideoItem
 {
-	required Guid guid = 1;
+	required Uuid uuid = 1;
 	required bool isStatic = 2;
 	required bool isLocked = 3;
 	required SchemeUnit itemUnit = 4;
@@ -186,27 +188,27 @@ message VideoItem
 
 	// Наследуемые от CVideoItem
 	//
-	optional PosRectImpl PosRectImpl = 1000;
-	optional PosLineImpl PosLineImpl = 1001;
-	optional PosConnectionImpl PosConnectionImpl = 1002;
+	optional PosRectImpl PosRectImpl = 10;
+	optional PosLineImpl PosLineImpl = 11;
+	optional PosConnectionImpl PosConnectionImpl = 12;
 
 	// --
 	//
-	optional FblItem FblItem = 1006;							// 
-	optional FblItemRect FblItemRect = 1007;					// +PosRectImpl, FblItem
-	optional FblItemLine FblItemLine = 1008;					// +PosConnectionImpl, FblItem
+	optional FblItem FblItem = 106;							// 
+	optional FblItemRect FblItemRect = 107;						// +PosRectImpl, FblItem
+	optional FblItemLine FblItemLine = 108;						// +PosConnectionImpl, FblItem
 	
 	// Наслдедуемые от PosRectImpl, PosLineImpl, PosConnectionImpl
 	//
-	optional VideoItemRect Rect = 1016;							// +PosRectImpl
-	optional VideoItemLine Line = 1017;							// +PosLineImpl
-	optional VideoItemConnectionLine ConnectionLine = 1018;		// +PosConnectionImpl
+	optional VideoItemRect Rect = 116;						// +PosRectImpl
+	optional VideoItemLine Line = 117;						// +PosLineImpl
+	optional VideoItemConnectionLine ConnectionLine = 118;				// +PosConnectionImpl
 	
-	optional VideoItemSignal Signal = 1024;						// +FblItemRect
-	optional VideoItemInputSignal InputSignal = 1025;			// +Signal
-	optional VideoItemOutputSignal OutputSignal = 1026;			// +Signal
-	optional VideoItemLink Link = 1027;							// +FblItemLine
-	optional VideoItemFblElement VideoItemFblElement = 1028;	// +FblItemRect
+	optional VideoItemSignal Signal = 124;						// +FblItemRect
+	optional VideoItemInputSignal InputSignal = 125;			// +Signal
+	optional VideoItemOutputSignal OutputSignal = 126;			// +Signal
+	optional VideoItemLink Link = 127;							// +FblItemLine
+	optional VideoItemFblElement VideoItemFblElement = 128;	// +FblItemRect
 }
 
 
@@ -276,11 +278,11 @@ message FblConnectionPoint
 {
 	required VideoItemPoint point = 1;
 	required ConnectionDirrection dirrection = 2;
-	required Guid guid = 3;
+	required Uuid uuid = 3;
 	
-	optional Guid signalGuid = 100;
-	optional wstring signalStrID = 101;
-	optional wstring signalCaption = 102;
+	optional Uuid signalUuid = 10;
+	optional wstring signalStrID = 11;
+	optional wstring signalCaption = 12;
 }
 
 // FblItem
@@ -347,3 +349,27 @@ message VideoItemFblElement
 	required Envelope fblelement = 1;
 }
 
+
+//------------------------------------------------------------------------------------------
+//
+//
+//								Hardware::DeviceObject
+//
+//
+//------------------------------------------------------------------------------------------
+
+message DeviceObject
+{
+	optional Uuid uuid = 1;
+	optional wstring strId = 2;
+	optional wstring caption = 3;
+
+	//required bool isStatic = 2;
+	//required bool isLocked = 3;
+	//required SchemeUnit itemUnit = 4;
+	//optional bool acceptClick = 5 [default = false];
+	//optional wstring clickScript = 6;
+
+	// Derived from Hardware::DeviceObject
+	//
+}

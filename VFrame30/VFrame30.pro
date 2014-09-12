@@ -39,7 +39,9 @@ CONFIG(release, debug|release) {
 
 
 OTHER_FILES += \
-	VideoFrame.proto
+    ../Proto/proto_compile.bat \
+    ../Proto/VideoFrame.proto \
+    ../Proto/serialization.proto
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
@@ -84,7 +86,7 @@ HEADERS += VFrame30Lib_global.h \
 	DebugInstCounter.h \
     VFrame30.h \
     ../include/ProtoObject.h \
-    ../include/StreamedData.h
+    StreamedData.h
 
 SOURCES += VideoLayer.cpp \
     VideoItem.cpp \
@@ -123,7 +125,7 @@ SOURCES += VideoLayer.cpp \
     FrameHistoryItem.cpp \
 	Configuration.cpp \
     ../lib/ProtoObject.cpp \
-    ../lib/StreamedData.cpp
+    StreamedData.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 #CONFIG(debug, debug|release): DEFINES += DEBUG
@@ -157,9 +159,9 @@ unix {
 
 # Protobuf
 #
-!include(protobuf.pri) {
-	error("Couldn't find the protobuf.pri file!")
-}
+#!include(protobuf.pri) {
+#	error("Couldn't find the protobuf.pri file!")
+#}
 
 # Visual Leak Detector
 #

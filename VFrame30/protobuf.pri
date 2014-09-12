@@ -17,6 +17,7 @@ PROTOS = VideoFrame.proto
 
 PROTOPATH += .
 PROTOPATH += $$PWD/
+PROTOPATH += $$PWD/../Proto/
 PROTOPATHS =
 for(p, PROTOPATH):PROTOPATHS += --proto_path=$${p}
 
