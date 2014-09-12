@@ -17,7 +17,7 @@ SignalSet::~SignalSet()
 }
 
 
-void SignalSet::addSignal(const Signal& signal)
+void SignalSet::insert(const Signal& signal)
 {
 	int signalID = signal.ID();
 

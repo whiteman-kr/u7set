@@ -71,8 +71,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 	{
 		switch (col)
 		{
-			case 0: return signal.strId();
-			case 1: return signal.extStrId();
+			case 0: return signal.strID();
+			case 1: return signal.extStrID();
 			case 2: return signal.name();
 		}
 	}
@@ -119,8 +119,8 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		switch (index.column())
 		{
-			case 0: signal.setStrId(value.toString()); break;
-			case 1: signal.setExtStrId(value.toString()); break;
+			case 0: signal.setStrID(value.toString()); break;
+			case 1: signal.setExtStrID(value.toString()); break;
 			case 2: signal.setName(value.toString()); break;
 		}
 
@@ -269,7 +269,10 @@ void SignalsTabPage::projectOpened()
 
 	QSet<int> signalsIDs;
 
-	dbController()->getSignalsIDs(&signalsIDs, this);
+	m_signalSet.removeAll();
+
+	dbController()->getSignals(&m_signalSet, this);
+
 	return;
 }
 
