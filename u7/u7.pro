@@ -79,7 +79,7 @@ SOURCES +=\
     DialogAfbProperties.cpp \
     xmlsyntaxhighlighter.cpp \
     SignalsTabPage.cpp \
-    Signal.cpp
+    ../lib/Signal.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -120,7 +120,7 @@ HEADERS  += \
     DialogAfbProperties.h \
     xmlsyntaxhighlighter.h \
     SignalsTabPage.h \
-    Signal.h
+    ../include/Signal.h
 
 FORMS    += \
     ChangesetDialog.ui \
