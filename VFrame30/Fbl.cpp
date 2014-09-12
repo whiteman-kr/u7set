@@ -213,7 +213,7 @@ namespace Fbl
 	//
 	bool FblElement::SaveData(Proto::Envelope* message) const
 	{
-		quint32 classnamehash = VFrame30::CVFrameUtils::GetClassHashCode("FblElement");
+		quint32 classnamehash = CUtils::GetClassHashCode("FblElement");
 		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
 
 		Proto::FblElement* pMutableFblElement = message->mutable_fblelement();

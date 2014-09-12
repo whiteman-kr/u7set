@@ -4,7 +4,7 @@
 #include "VideoItemLink.h"
 #include "HorzVertLinks.h"
 #include "VideoFrameWidgetAgent.h"
-#include "../VFrame30/VFrame30.pb.h"
+#include "../include/ProtoSerialization.h"
 
 namespace VFrame30
 {
@@ -32,7 +32,7 @@ namespace VFrame30
 	bool CVideoFrame::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
-		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// Обязательное поле, хэш имени класса, по нему восстанавливается класс.
 		

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VFrame30.pb.h"
+#include "../include/ProtoSerialization.h"
 #include "DebugInstCounter.h"
 
 namespace Fbl
@@ -130,7 +130,7 @@ private:
 	//
 	//
 	class VFRAME30LIBSHARED_EXPORT FblElement :
-		public Proto::CVFrameObjectSerialization<FblElement>,
+		public Proto::ObjectSerialization<FblElement>,
 		public VFrame30::DebugInstCounter<FblElement>
 	{
 	public:
@@ -141,7 +141,7 @@ private:
 
 		// Serialization
 		//
-		friend Proto::CVFrameObjectSerialization<FblElement>;
+		friend Proto::ObjectSerialization<FblElement>;
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;

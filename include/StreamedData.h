@@ -4,7 +4,7 @@
 namespace Proto
 {
 
-	class VFRAME30LIBSHARED_EXPORT StreamedData
+	class StreamedData
 	{
 	public:
 		StreamedData();

@@ -1,4 +1,4 @@
-#include "StreamedData.h"
+#include "../include/StreamedData.h"
 
 namespace Proto
 {

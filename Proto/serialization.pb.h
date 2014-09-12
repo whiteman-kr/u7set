@@ -3433,7 +3433,7 @@ class DeviceObject : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .Proto.Uuid uuid = 1;
+  // required .Proto.Uuid uuid = 1;
   inline bool has_uuid() const;
   inline void clear_uuid();
   static const int kUuidFieldNumber = 1;
@@ -3442,7 +3442,7 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::Uuid* release_uuid();
   inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
-  // optional .Proto.wstring strId = 2;
+  // required .Proto.wstring strId = 2;
   inline bool has_strid() const;
   inline void clear_strid();
   static const int kStrIdFieldNumber = 2;
@@ -3451,7 +3451,7 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_strid();
   inline void set_allocated_strid(::Proto::wstring* strid);
 
-  // optional .Proto.wstring caption = 3;
+  // required .Proto.wstring caption = 3;
   inline bool has_caption() const;
   inline void clear_caption();
   static const int kCaptionFieldNumber = 3;
@@ -6924,7 +6924,7 @@ inline void VideoItemFblElement::set_allocated_fblelement(::Proto::Envelope* fbl
 
 // DeviceObject
 
-// optional .Proto.Uuid uuid = 1;
+// required .Proto.Uuid uuid = 1;
 inline bool DeviceObject::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -6962,7 +6962,7 @@ inline void DeviceObject::set_allocated_uuid(::Proto::Uuid* uuid) {
   }
 }
 
-// optional .Proto.wstring strId = 2;
+// required .Proto.wstring strId = 2;
 inline bool DeviceObject::has_strid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -7000,7 +7000,7 @@ inline void DeviceObject::set_allocated_strid(::Proto::wstring* strid) {
   }
 }
 
-// optional .Proto.wstring caption = 3;
+// required .Proto.wstring caption = 3;
 inline bool DeviceObject::has_caption() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }

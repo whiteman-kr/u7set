@@ -6,7 +6,7 @@ namespace VFrame30
 {
 	class VFRAME30LIBSHARED_EXPORT CVideoLayer : 
 		public QObject,
-		public Proto::CVFrameObjectSerialization<CVideoLayer>,
+		public Proto::ObjectSerialization<CVideoLayer>,
 		public DebugInstCounter<CVideoLayer>
 	{
 		Q_OBJECT
@@ -21,7 +21,7 @@ namespace VFrame30
 
 		// Serialization
 		//
-		friend Proto::CVFrameObjectSerialization<CVideoLayer>;
+		friend Proto::ObjectSerialization<CVideoLayer>;
 
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VFrame30.pb.h"
+#include "../include/ProtoSerialization.h"
 #include "DebugInstCounter.h"
 
 namespace VFrame30
@@ -9,7 +9,7 @@ namespace VFrame30
 
 	class VFRAME30LIBSHARED_EXPORT Configuration : 
 		public QObject,
-		public Proto::CVFrameObjectSerialization<Configuration>,
+		public Proto::ObjectSerialization<Configuration>,
 		public DebugInstCounter<Configuration>
 	{
 		Q_OBJECT
@@ -20,7 +20,7 @@ namespace VFrame30
 
 		// Serialization
 		//
-		friend Proto::CVFrameObjectSerialization<Configuration>;
+		friend Proto::ObjectSerialization<Configuration>;
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;

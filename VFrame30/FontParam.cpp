@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "FontParam.h"
-#include "VFrame30.pb.h"
+#include "../include/ProtoSerialization.h"
 
 namespace VFrame30
 {

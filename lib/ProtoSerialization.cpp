@@ -1,5 +1,7 @@
 #include "Stable.h"
-#include "../Proto/serialization.pb.h"
+#include "QUuid"
+
+#include "../include/ProtoSerialization.h"
 
 #ifdef Q_OS_WIN
 #pragma warning(push)

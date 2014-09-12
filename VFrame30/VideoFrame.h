@@ -2,7 +2,6 @@
 
 #include "VideoLayer.h"
 #include "../include/TypesAndEnums.h"
-#include "../include/VFrameUtils.h"
 
 namespace VFrame30
 {
@@ -11,7 +10,7 @@ namespace VFrame30
 	
 	class VFRAME30LIBSHARED_EXPORT CVideoFrame : 
 		public QObject,
-		public Proto::CVFrameObjectSerialization<CVideoFrame>,
+		public Proto::ObjectSerialization<CVideoFrame>,
 		public DebugInstCounter<CVideoFrame>
 	{
 		Q_OBJECT
@@ -26,7 +25,7 @@ namespace VFrame30
 
 		// Serialization
 		//
-		friend Proto::CVFrameObjectSerialization<CVideoFrame>;
+		friend Proto::ObjectSerialization<CVideoFrame>;
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;

@@ -1,6 +1,5 @@
 #include "Stable.h"
 #include "VideoItem.h"
-#include "../include/VFrameUtils.h"
 #include "VideoItemRect.h"
 
 namespace VFrame30
@@ -28,7 +27,7 @@ namespace VFrame30
 	bool CVideoItem::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
-		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
 

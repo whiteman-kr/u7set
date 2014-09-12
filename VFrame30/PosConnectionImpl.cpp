@@ -268,7 +268,7 @@ namespace VFrame30
 				continue;
 			}
 
-			if (CVFrameUtils::IsLineIntersectRect(prevPoint.X, prevPoint.Y, curPoint->X, curPoint->Y, intersectRectangleIn) == true)
+			if (CUtils::IsLineIntersectRect(prevPoint.X, prevPoint.Y, curPoint->X, curPoint->Y, intersectRectangleIn) == true)
 			{
 				return true;
 			}
@@ -391,12 +391,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			val = CVFrameUtils::RoundDisplayPoint(val);
+			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CVFrameUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			val = CVFrameUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
 		}
 
 		return val;
@@ -424,12 +424,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			val = CVFrameUtils::RoundDisplayPoint(val);
+			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CVFrameUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			val = CVFrameUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
+			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
 		}
 
 		return val;
@@ -461,12 +461,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			val = CVFrameUtils::RoundDisplayPoint(val);
+			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CVFrameUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			val = CVFrameUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
 		}
 
 		return val;
@@ -498,12 +498,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			val = CVFrameUtils::RoundDisplayPoint(val);
+			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CVFrameUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			val = CVFrameUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
+			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
 		}
 
 		return val;

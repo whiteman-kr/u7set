@@ -360,15 +360,9 @@ message VideoItemFblElement
 
 message DeviceObject
 {
-	optional Uuid uuid = 1;
-	optional wstring strId = 2;
-	optional wstring caption = 3;
-
-	//required bool isStatic = 2;
-	//required bool isLocked = 3;
-	//required SchemeUnit itemUnit = 4;
-	//optional bool acceptClick = 5 [default = false];
-	//optional wstring clickScript = 6;
+	required Uuid uuid = 1;
+	required wstring strId = 2;
+	required wstring caption = 3;
 
 	// Derived from Hardware::DeviceObject
 	//

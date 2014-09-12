@@ -1,9 +1,12 @@
 #pragma once
 #include "DbStruct.h"
 #include "QUuid"
+#include "../include/ProtoSerialization.h"
 
 namespace Hardware
 {
+	void Init();
+	void Shutdwon();
 
 	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
 	//
@@ -23,15 +26,31 @@ namespace Hardware
 	// DeviceObject
 	//
 	//
-	class DeviceObject
+	class DeviceObject :
+		public QObject,
+		public Proto::ObjectSerialization<DeviceObject>
 	{
+		Q_OBJECT
+
 	protected:
 		DeviceObject();
 		virtual ~DeviceObject();
 
+		// Serialization
+		//
+		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
+
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	private:
+		// Use this function only while serialization, as when object is created is not fully initialized
+		// and must be read before use
+		//
+		static DeviceObject* CreateObject(const Proto::Envelope& message);
+
 	public:
-		virtual void load(const QByteArray& data);
-		virtual void save(QByteArray* out_data) const;
 
 		// Properties
 		//
@@ -208,5 +227,7 @@ namespace Hardware
 	private:
 		static const DeviceType m_deviceType = DeviceType::DiagSignal;
 	};
+
+	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
 }

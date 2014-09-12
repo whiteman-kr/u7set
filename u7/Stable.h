@@ -89,13 +89,24 @@
 
 // Other stable includes
 //
-
 #include "../VFrame30/VFrame30Lib_global.h"
+#include "../include/Factory.h"
+#include "../include/TypesAndEnums.h"
+#include "../include/CUtils.h"
 
 // Disable some warnings
 //
 #ifdef Q_OS_WIN
-	#pragma warning(disable : 4482)		// nonstandard extension used: enum 'enum' used in qualified name
+
+#pragma warning(disable : 4482)		// nonstandard extension used: enum 'enum' used in qualified name
+
+	// Disable 4996 warning
+	#ifndef _SCL_SECURE_NO_WARNINGS
+		#define _SCL_SECURE_NO_WARNINGS
+	#endif
+
 #endif
+
+
 
 

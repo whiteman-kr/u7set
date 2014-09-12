@@ -18,7 +18,7 @@ namespace VFrame30
 	bool Configuration::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
-		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);
 

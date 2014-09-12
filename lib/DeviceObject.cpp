@@ -1,8 +1,25 @@
-#include "..\include\DeviceObject.h"
+#include "../include/DeviceObject.h"
+#include "../include/ProtoSerialization.h"
 
 
 namespace Hardware
 {
+	Factory<Hardware::DeviceObject> DeviceObjectFactory;
+
+	void Init()
+	{
+		Hardware::DeviceObjectFactory.Register<DeviceRoot>();
+		Hardware::DeviceObjectFactory.Register<DeviceSystem>();
+		Hardware::DeviceObjectFactory.Register<DeviceRack>();
+		Hardware::DeviceObjectFactory.Register<DeviceChassis>();
+		Hardware::DeviceObjectFactory.Register<DeviceModule>();
+		Hardware::DeviceObjectFactory.Register<DeviceController>();
+		Hardware::DeviceObjectFactory.Register<DeviceDiagSignal>();
+	}
+
+	void Shutdwon()
+	{
+	}
 
 	//
 	//
@@ -17,14 +34,61 @@ namespace Hardware
 	{
 	}
 
-	void DeviceObject::load(const QByteArray& data)
+	bool DeviceObject::SaveData(Proto::Envelope* message) const
 	{
+		const std::string& className = this->metaObject()->className();
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
+		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
+
+		Proto::DeviceObject* pMutableDeviceObject = message->mutable_deviceobject();
+
+		Proto::Write(pMutableDeviceObject->mutable_uuid(), m_uuid);
+		Proto::Write(pMutableDeviceObject->mutable_strid(), m_strId);
+		Proto::Write(pMutableDeviceObject->mutable_caption(), m_caption);
+
+		return true;
 	}
 
-	void DeviceObject::save(QByteArray* out_data) const
+	bool DeviceObject::LoadData(const Proto::Envelope& message)
 	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
 
+		const Proto::DeviceObject& deviceobject = message.deviceobject();
+
+		m_uuid = Proto::Read(deviceobject.uuid());
+		m_strId = Proto::Read(deviceobject.strid());
+		m_caption = Proto::Read(deviceobject.caption());
+
+		return true;
+	}
+
+	DeviceObject* DeviceObject::CreateObject(const Proto::Envelope& message)
+	{
+		// This func can create only one instance
+		//
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return nullptr;
+		}
+
+		quint32 classNameHash = message.classnamehash();
+		DeviceObject* pDeviceObject = DeviceObjectFactory.Create(classNameHash);
+
+		if (pDeviceObject == nullptr)
+		{
+			assert(pDeviceObject);
+			return nullptr;
+		}
+
+		pDeviceObject->LoadData(message);
+
+		return pDeviceObject;
 	}
 
 	DeviceObject* DeviceObject::parent()

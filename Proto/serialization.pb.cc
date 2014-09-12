@@ -877,8 +877,8 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\025VideoItemOutputSignal\"\017\n\rVideoItemLink\""
     ":\n\023VideoItemFblElement\022#\n\nfblelement\030\001 \002"
     "(\0132\017.Proto.Envelope\"i\n\014DeviceObject\022\031\n\004u"
-    "uid\030\001 \001(\0132\013.Proto.Uuid\022\035\n\005strId\030\002 \001(\0132\016."
-    "Proto.wstring\022\037\n\007caption\030\003 \001(\0132\016.Proto.w"
+    "uid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016."
+    "Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.w"
     "string*3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n\nMil"
     "limeter\020\001\022\010\n\004Inch\020\002*)\n\rFblSignalType\022\n\n\006"
     "Analog\020\000\022\014\n\010Discrete\020\001*N\n\014FblParamType\022\022"
@@ -10512,7 +10512,7 @@ bool DeviceObject::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional .Proto.Uuid uuid = 1;
+      // required .Proto.Uuid uuid = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -10525,7 +10525,7 @@ bool DeviceObject::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .Proto.wstring strId = 2;
+      // required .Proto.wstring strId = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -10539,7 +10539,7 @@ bool DeviceObject::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .Proto.wstring caption = 3;
+      // required .Proto.wstring caption = 3;
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -10571,19 +10571,19 @@ bool DeviceObject::MergePartialFromCodedStream(
 
 void DeviceObject::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional .Proto.Uuid uuid = 1;
+  // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       1, this->uuid(), output);
   }
 
-  // optional .Proto.wstring strId = 2;
+  // required .Proto.wstring strId = 2;
   if (has_strid()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       2, this->strid(), output);
   }
 
-  // optional .Proto.wstring caption = 3;
+  // required .Proto.wstring caption = 3;
   if (has_caption()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       3, this->caption(), output);
@@ -10597,21 +10597,21 @@ void DeviceObject::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* DeviceObject::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional .Proto.Uuid uuid = 1;
+  // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         1, this->uuid(), target);
   }
 
-  // optional .Proto.wstring strId = 2;
+  // required .Proto.wstring strId = 2;
   if (has_strid()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         2, this->strid(), target);
   }
 
-  // optional .Proto.wstring caption = 3;
+  // required .Proto.wstring caption = 3;
   if (has_caption()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -10629,21 +10629,21 @@ int DeviceObject::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional .Proto.Uuid uuid = 1;
+    // required .Proto.Uuid uuid = 1;
     if (has_uuid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->uuid());
     }
 
-    // optional .Proto.wstring strId = 2;
+    // required .Proto.wstring strId = 2;
     if (has_strid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->strid());
     }
 
-    // optional .Proto.wstring caption = 3;
+    // required .Proto.wstring caption = 3;
     if (has_caption()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -10703,6 +10703,7 @@ void DeviceObject::CopyFrom(const DeviceObject& from) {
 }
 
 bool DeviceObject::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
 
   if (has_uuid()) {
     if (!this->uuid().IsInitialized()) return false;

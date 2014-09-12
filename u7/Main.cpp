@@ -1,8 +1,11 @@
 #include "Stable.h"
 #include "MainWindow.h"
-#include "../include/DbController.h"
 #include "Settings.h"
 #include "../VFrame30/VFrame30Library.h"
+#include "../include/DbController.h"
+#include "../include/DeviceObject.h"
+
+
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
 	#include <vld.h>		// Enable Visula Leak Detector
@@ -27,6 +30,7 @@ int main(int argc, char *argv[])
 	a.setOrganizationDomain("radiy.com");
 
 	VFrame30::VFrame30Library::Init();
+	Hardware::Init();
 
 	// Read settings
 	//
@@ -64,6 +68,9 @@ int main(int argc, char *argv[])
 	int result = a.exec();
 
 	VFrame30::VFrame30Library::Shutdown();
+	Hardware::Shutdwon();
+
+	google::protobuf::ShutdownProtobufLibrary();
 
 	// Exit
 	//
