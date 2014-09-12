@@ -2,7 +2,7 @@
 
 #include "MainTabPage.h"
 #include <QAbstractTableModel>
-#include "Signal.h"
+#include "../include/Signal.h"
 
 class DbController;
 class QTableView;

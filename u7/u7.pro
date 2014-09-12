@@ -77,10 +77,11 @@ SOURCES +=\
     DialogAfbProperties.cpp \
     xmlsyntaxhighlighter.cpp \
     SignalsTabPage.cpp \
-    Signal.cpp \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/CUtils.cpp
+    ../lib/Signal.cpp
+
 
 HEADERS  += \
     CentralWidget.h \
@@ -121,11 +122,11 @@ HEADERS  += \
     DialogAfbProperties.h \
     xmlsyntaxhighlighter.h \
     SignalsTabPage.h \
-    Signal.h \
     ../include/StreamedData.h \
     ../include/ProtoSerialization.h \
     ../include/Factory.h \
     ../include/CUtils.h
+    ../include/Signal.h
 
 FORMS    += \
     ChangesetDialog.ui \
