@@ -79,7 +79,7 @@ SOURCES +=\
     SignalsTabPage.cpp \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/CUtils.cpp
+	../lib/CUtils.cpp \
     ../lib/Signal.cpp
 
 
