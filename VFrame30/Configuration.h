@@ -23,13 +23,13 @@ namespace VFrame30
 		friend Proto::CVFrameObjectSerialization<Configuration>;
 
 	protected:
-		virtual bool SaveData(::Proto::Envelope* message) const override;
-		virtual bool LoadData(const ::Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	private:
 		// Use this func ONLY for serialization
 		//
-		static Configuration* CreateObject(const ::Proto::Envelope& message);
+		static Configuration* CreateObject(const Proto::Envelope& message);
 
 		// Properties and Datas
 		//

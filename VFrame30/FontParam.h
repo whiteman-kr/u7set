@@ -64,8 +64,8 @@ namespace VFrame30
 		// Serialization
 		//
 	public:
-		bool SaveData(::Proto::FontParam* message) const;
-		bool LoadData(const ::Proto::FontParam& message);
+		bool SaveData(Proto::FontParam* message) const;
+		bool LoadData(const Proto::FontParam& message);
 	
 		// --
 		//

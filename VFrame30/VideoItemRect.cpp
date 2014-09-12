@@ -44,7 +44,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemRect::SaveData(::Proto::Envelope* message) const
+	bool CVideoItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CPosRectImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -56,7 +56,7 @@ namespace VFrame30
 		
 		// --
 		//
-		::Proto::VideoItemRect* rectMessage = message->mutable_videoitem()->mutable_rect();
+		Proto::VideoItemRect* rectMessage = message->mutable_videoitem()->mutable_rect();
 
 		rectMessage->set_weight(m_weight);
 		rectMessage->set_linecolor(m_lineColor);
@@ -70,7 +70,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemRect::LoadData(const ::Proto::Envelope& message)
+	bool CVideoItemRect::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -94,7 +94,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const ::Proto::VideoItemRect& rectMessage = message.videoitem().rect();
+		const Proto::VideoItemRect& rectMessage = message.videoitem().rect();
 
 		m_weight = rectMessage.weight();
 		m_lineColor = rectMessage.linecolor();

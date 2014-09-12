@@ -21,330 +21,274 @@
 #endif // Q_OS_WIN
 
 
-// Forward declarations
-//
-namespace Fbl
+namespace Proto
 {
-	class FblElement;
-}
-
-namespace VFrame30
-{ 
-	class CVideoFrame;
-	class CVideoLayer;
-	class CVideoItem;
-	class Configuration;
-}
-
-
-namespace VFrame30
-{
-	namespace Proto
+	// Шаблон и реализация необходимых фукнций сериализации
+	// у VFrameType должны быть реализованы функции CreateObject, SaveData, LoadData
+	//
+	template <typename VFrameType>
+	class CVFrameObjectSerialization
 	{
-//		template <typename VFrameType> class CVFrameObjectSerialization;	// forwaed declaration for CStreamedData
-
-//		// Класс для сериализации
-//		//
-//		class VFRAME30LIBSHARED_EXPORT CStreamedData :
-//			public DebugInstCounter<CStreamedData>
-//		{
-//			// Эти классы непосредтвенно стучат к data.
-//			//
-//			friend class CVFrameObjectSerialization<VFrame30::CVideoFrame>;
-//			friend class CVFrameObjectSerialization<VFrame30::CVideoLayer>;
-//			friend class CVFrameObjectSerialization<VFrame30::CVideoItem>;
-//			friend class CVFrameObjectSerialization<VFrame30::Configuration>;
-//			friend class CVFrameObjectSerialization<Fbl::FblElement>;
-
-//		public:
-//			CStreamedData();
-//			CStreamedData(const char* pSrc, size_t size);			// создать объект и проинницализировать data данными из src
-//			explicit CStreamedData(const QByteArray& src);			// создать объект и проинницализировать data данными из src
-//			explicit CStreamedData(size_t capacity);
-
-//			virtual ~CStreamedData();
-
-//		private:
-//			CStreamedData(const CStreamedData&);				// Запрещена к использованию
-//			CStreamedData& operator= (const CStreamedData&);	// Запрещена к использованию
-
-//		public:
-//			const char* data() const;		// Получить указатель на даннные, указатель не сохранять, данные не изменять.
-//			size_t length() const;			// Получить размер данных (GetData()) в байтах
-
-//			void clear();					// clear data
-
-//		protected:
-//			std::string m_data;
-//		};
-
-
-		// Шаблон и реализация необходимых фукнций сериализации
-		// у VFrameType должны быть реализованы функции CreateObject, SaveData, LoadData
-		//
-		template <typename VFrameType>
-		class CVFrameObjectSerialization
+	public:
+		bool Save(const QString& fileName) const
 		{
-		public:
-			bool Save(const QString& fileName) const
+			std::wstring wfnstr(fileName.toStdWString());
+			std::string fnstr(wfnstr.begin(), wfnstr.end());
+
+			std::fstream output(fnstr, std::ios::out | std::ios::binary);
+			if (output.is_open() == false || output.bad() == true)
 			{
-				std::wstring wfnstr(fileName.toStdWString());
-				std::string fnstr(wfnstr.begin(), wfnstr.end());
-
-				std::fstream output(fnstr, std::ios::out | std::ios::binary);
-				if (output.is_open() == false || output.bad() == true)
-				{
-					assert(false);
-					return false;
-				}
-
-				return Save(output);
-			}
-			bool Save(const wchar_t* fileName) const
-			{
-				std::wstring wfnstr(fileName);
-				std::string fnstr(wfnstr.begin(), wfnstr.end());
-
-				std::fstream output(fnstr, std::ios::out | std::ios::binary);
-				if (output.is_open() == false || output.bad() == true)
-				{
-					assert(false);
-					return false;
-				}
-
-				return Save(output);
-			}
-			bool Save(std::fstream& stream) const
-			{
-				if (stream.is_open() == false || stream.bad() == true)
-				{
-					assert(false);
-					return false;
-				}
-
-				::Proto::Envelope message;
-
-				bool result = Save(&message);
-				if (result == false)
-				{
-					return false;
-				}
-
-				try
-				{
-					return message.SerializeToOstream(&stream);
-				}
-				catch(...)
-				{
-					assert(false);
-					return false;
-				}
-			}
-			bool Save(::Proto::StreamedData& data) const
-			{
-				::Proto::Envelope message;
-				this->SaveData(&message);
-
-				auto mutable_data = data.mutable_data();
-				auto str = message.SerializeAsString();
-
-				mutable_data = QByteArray(str.data(), static_cast<int>(str.size()));
-
-				return true;
-			}
-			bool Save(QByteArray& data) const
-			{
-				::Proto::Envelope message;
-				this->SaveData(&message);
-
-				std::string str = message.SerializeAsString();
-				data = QByteArray(str.data(), static_cast<int>(str.size()));
-				return true;
-			}
-			bool Save(::Proto::Envelope* message) const
-			{
-				try
-				{
-					return this->SaveData(message);
-				}
-				catch (...)
-				{
-					assert(false);
-					return false;
-				}
+				assert(false);
+				return false;
 			}
 
-			bool Load(const QString& fileName)
+			return Save(output);
+		}
+		bool Save(const wchar_t* fileName) const
+		{
+			std::wstring wfnstr(fileName);
+			std::string fnstr(wfnstr.begin(), wfnstr.end());
+
+			std::fstream output(fnstr, std::ios::out | std::ios::binary);
+			if (output.is_open() == false || output.bad() == true)
 			{
-				std::wstring wfnstr(fileName.toStdWString());
-				std::string fnstr(wfnstr.begin(), wfnstr.end());
-
-				std::fstream input(fnstr, std::ios::in | std::ios::binary);
-				if (input.is_open() == false || input.bad() == true)
-				{
-					assert(false);
-					return false;
-				}
-
-				return Load(input);
-			}
-			bool Load(const wchar_t* fileName)
-			{
-				std::wstring wfnstr(fileName);
-				std::string fnstr(wfnstr.begin(), wfnstr.end());
-
-				std::fstream input(fnstr, std::ios::in | std::ios::binary);
-				if (input.is_open() == false || input.bad() == true)
-				{
-					assert(false);
-					return false;
-				}
-
-				return Load(input);
-			}
-			bool Load(std::fstream& stream)
-			{
-				if (stream.is_open() == false || stream.bad() == true)
-				{
-					assert(false);
-					return false;
-				}
-
-				::Proto::Envelope message;
-
-				bool result = message.ParseFromIstream(&stream);
-				if (result == false)
-				{
-					return false;
-				}
-
-				return Load(message);
-			}
-			bool Load(const ::Proto::StreamedData& data)
-			{
-				::Proto::Envelope message;
-
-				bool result = message.ParseFromString(data.data());
-				if (result == false)
-				{
-					return false;
-				}
-
-				return Load(message);
-			}
-			bool Load(const QByteArray& data)
-			{
-				::Proto::Envelope message;
-
-				bool result = message.ParseFromArray(data.data(), data.size());
-				if (result == false)
-				{
-					return false;
-				}
-
-				return Load(message);
-			}
-			bool Load(const ::Proto::Envelope& message)
-			{
-				try
-				{
-					return this->LoadData(message);
-				}
-				catch (...)
-				{
-					assert(false);
-					return false;
-				}
+				assert(false);
+				return false;
 			}
 
-			static VFrameType* Create(const wchar_t* fileName)
+			return Save(output);
+		}
+		bool Save(std::fstream& stream) const
+		{
+			if (stream.is_open() == false || stream.bad() == true)
 			{
-				std::wstring wfnstr(fileName);
-				std::string fnstr(wfnstr.begin(), wfnstr.end());
-
-				std::fstream input(fnstr, std::ios::in | std::ios::binary);
-				if (input.bad() == true)
-				{
-					return nullptr;
-				}
-
-				return Create(input);
+				assert(false);
+				return false;
 			}
-			static VFrameType* Create(std::fstream& stream)
+
+			Proto::Envelope message;
+
+			bool result = Save(&message);
+			if (result == false)
 			{
-				if (stream.bad() == true)
-				{
-					return nullptr;
-				}
-
-				::Proto::Envelope message;
-
-				bool result = message.ParseFromIstream(&stream);
-				if (result == false)
-				{
-					return nullptr;
-				}
-
-				VFrameType* pNewItem = VFrameType::CreateObject(message);
-				assert(pNewItem != nullptr);
-
-				return pNewItem;
+				return false;
 			}
-			static VFrameType* Create(const ::Proto::StreamedData& data)
+
+			try
 			{
-				::Proto::Envelope message;
-
-				bool result = message.ParseFromString(data.data());
-				if (result == false)
-				{
-					return nullptr;
-				}
-
-				VFrameType* pNewItem = VFrameType::CreateObject(message);
-				assert(pNewItem != nullptr);
-
-				return pNewItem;
+				return message.SerializeToOstream(&stream);
 			}
-			static VFrameType* Create(const QByteArray& data)
+			catch(...)
 			{
-				::Proto::Envelope message;
-
-				bool result = message.ParseFromArray(data.data(), data.size());
-				if (result == false)
-				{
-					return nullptr;
-				}
-
-				VFrameType* pNewItem = VFrameType::CreateObject(message);
-				assert(pNewItem != nullptr);
-
-				return pNewItem;
+				assert(false);
+				return false;
 			}
-			static VFrameType* Create(const ::Proto::Envelope& message)
+		}
+		bool Save(Proto::StreamedData& data) const
+		{
+			Proto::Envelope message;
+			this->SaveData(&message);
+
+			auto mutable_data = data.mutable_data();
+			auto str = message.SerializeAsString();
+
+			mutable_data = QByteArray(str.data(), static_cast<int>(str.size()));
+
+			return true;
+		}
+		bool Save(QByteArray& data) const
+		{
+			Proto::Envelope message;
+			this->SaveData(&message);
+
+			std::string str = message.SerializeAsString();
+			data = QByteArray(str.data(), static_cast<int>(str.size()));
+			return true;
+		}
+		bool Save(Proto::Envelope* message) const
+		{
+			try
 			{
-				// function "static VFrameType* CreateObject(const Proto::Envelope& message)"
-				// must be defined in VFrameType
-				//
-				return VFrameType::CreateObject(message);
+				return this->SaveData(message);
 			}
+			catch (...)
+			{
+				assert(false);
+				return false;
+			}
+		}
+
+		bool Load(const QString& fileName)
+		{
+			std::wstring wfnstr(fileName.toStdWString());
+			std::string fnstr(wfnstr.begin(), wfnstr.end());
+
+			std::fstream input(fnstr, std::ios::in | std::ios::binary);
+			if (input.is_open() == false || input.bad() == true)
+			{
+				assert(false);
+				return false;
+			}
+
+			return Load(input);
+		}
+		bool Load(const wchar_t* fileName)
+		{
+			std::wstring wfnstr(fileName);
+			std::string fnstr(wfnstr.begin(), wfnstr.end());
+
+			std::fstream input(fnstr, std::ios::in | std::ios::binary);
+			if (input.is_open() == false || input.bad() == true)
+			{
+				assert(false);
+				return false;
+			}
+
+			return Load(input);
+		}
+		bool Load(std::fstream& stream)
+		{
+			if (stream.is_open() == false || stream.bad() == true)
+			{
+				assert(false);
+				return false;
+			}
+
+			Proto::Envelope message;
+
+			bool result = message.ParseFromIstream(&stream);
+			if (result == false)
+			{
+				return false;
+			}
+
+			return Load(message);
+		}
+		bool Load(const Proto::StreamedData& data)
+		{
+			Proto::Envelope message;
+
+			bool result = message.ParseFromString(data.data());
+			if (result == false)
+			{
+				return false;
+			}
+
+			return Load(message);
+		}
+		bool Load(const QByteArray& data)
+		{
+			Proto::Envelope message;
+
+			bool result = message.ParseFromArray(data.data(), data.size());
+			if (result == false)
+			{
+				return false;
+			}
+
+			return Load(message);
+		}
+		bool Load(const Proto::Envelope& message)
+		{
+			try
+			{
+				return this->LoadData(message);
+			}
+			catch (...)
+			{
+				assert(false);
+				return false;
+			}
+		}
+
+		static VFrameType* Create(const wchar_t* fileName)
+		{
+			std::wstring wfnstr(fileName);
+			std::string fnstr(wfnstr.begin(), wfnstr.end());
+
+			std::fstream input(fnstr, std::ios::in | std::ios::binary);
+			if (input.bad() == true)
+			{
+				return nullptr;
+			}
+
+			return Create(input);
+		}
+		static VFrameType* Create(std::fstream& stream)
+		{
+			if (stream.bad() == true)
+			{
+				return nullptr;
+			}
+
+			Proto::Envelope message;
+
+			bool result = message.ParseFromIstream(&stream);
+			if (result == false)
+			{
+				return nullptr;
+			}
+
+			VFrameType* pNewItem = VFrameType::CreateObject(message);
+			assert(pNewItem != nullptr);
+
+			return pNewItem;
+		}
+		static VFrameType* Create(const Proto::StreamedData& data)
+		{
+			Proto::Envelope message;
+
+			bool result = message.ParseFromString(data.data());
+			if (result == false)
+			{
+				return nullptr;
+			}
+
+			VFrameType* pNewItem = VFrameType::CreateObject(message);
+			assert(pNewItem != nullptr);
+
+			return pNewItem;
+		}
+		static VFrameType* Create(const QByteArray& data)
+		{
+			Proto::Envelope message;
+
+			bool result = message.ParseFromArray(data.data(), data.size());
+			if (result == false)
+			{
+				return nullptr;
+			}
+
+			VFrameType* pNewItem = VFrameType::CreateObject(message);
+			assert(pNewItem != nullptr);
+
+			return pNewItem;
+		}
+		static VFrameType* Create(const Proto::Envelope& message)
+		{
+			// function "static VFrameType* CreateObject(const Proto::Envelope& message)"
+			// must be defined in VFrameType
+			//
+			return VFrameType::CreateObject(message);
+		}
 
 	protected:
-			virtual bool SaveData(::Proto::Envelope* message) const = 0;
-			virtual bool LoadData(const ::Proto::Envelope& message) = 0;
+		virtual bool SaveData(Proto::Envelope* message) const = 0;
+		virtual bool LoadData(const Proto::Envelope& message) = 0;
 
-		};
+	};
 
 
-		// Функции для сериализации данных
-		//
-		const QUuid& Read(const ::Proto::Uuid& message);
-		void Write(::Proto::Uuid* pMessage, const QUuid& guid);
+	// Функции для сериализации данных
+	//
+	const QUuid& Read(const Proto::Uuid& message);
+	void Write(Proto::Uuid* pMessage, const QUuid& guid);
 
-		// Read/write wstring message
-		//
-		QString Read(const ::Proto::wstring& message);
-		void Write(::Proto::wstring* pMessage, const QString& str);
-	}
+	// Read/write wstring message
+	//
+	QString Read(const Proto::wstring& message);
+	void Write(Proto::wstring* pMessage, const QString& str);
 }
+
 
 

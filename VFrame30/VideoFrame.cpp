@@ -29,7 +29,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoFrame::SaveData(::Proto::Envelope* message) const
+	bool CVideoFrame::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
@@ -38,12 +38,12 @@ namespace VFrame30
 		
 		auto pMutableVideoFrame = message->mutable_videoframe();
 
-		VFrame30::Proto::Write(pMutableVideoFrame->mutable_uuid(), m_guid);
-		VFrame30::Proto::Write(pMutableVideoFrame->mutable_strid(), m_strID);
-		VFrame30::Proto::Write(pMutableVideoFrame->mutable_caption(), m_caption);
+		Proto::Write(pMutableVideoFrame->mutable_uuid(), m_guid);
+		Proto::Write(pMutableVideoFrame->mutable_strid(), m_strID);
+		Proto::Write(pMutableVideoFrame->mutable_caption(), m_caption);
 		pMutableVideoFrame->set_width(m_width);
 		pMutableVideoFrame->set_height(m_height);
-		pMutableVideoFrame->set_unit(static_cast<::Proto::SchemeUnit>(m_unit));
+		pMutableVideoFrame->set_unit(static_cast<Proto::SchemeUnit>(m_unit));
 
 		// —охранить Layers
 		//
@@ -51,14 +51,14 @@ namespace VFrame30
 
 		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
 		{
-			::Proto::Envelope* pLayerMessage = pMutableVideoFrame->add_layers();
+			Proto::Envelope* pLayerMessage = pMutableVideoFrame->add_layers();
 			saveLayersResult &= layer->get()->Save(pLayerMessage);
 		}
 
 		return saveLayersResult;
 	}
 
-	bool CVideoFrame::LoadData(const ::Proto::Envelope& message)
+	bool CVideoFrame::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoframe() == false)
 		{
@@ -66,11 +66,11 @@ namespace VFrame30
 			return false;
 		}
 
-		const ::Proto::VideoFrame& videoframe = message.videoframe();
+		const Proto::VideoFrame& videoframe = message.videoframe();
 
-		m_guid = VFrame30::Proto::Read(videoframe.uuid());
-		m_strID = VFrame30::Proto::Read(videoframe.strid());
-		m_caption = VFrame30::Proto::Read(videoframe.caption());
+		m_guid = Proto::Read(videoframe.uuid());
+		m_strID = Proto::Read(videoframe.strid());
+		m_caption = Proto::Read(videoframe.caption());
 		m_width = videoframe.width();
 		m_height = videoframe.height();
 		m_unit = static_cast<SchemeUnit>(videoframe.unit());
@@ -102,7 +102,7 @@ namespace VFrame30
 		return true;
 	}
 
-	CVideoFrame* CVideoFrame::CreateObject(const ::Proto::Envelope& message)
+	CVideoFrame* CVideoFrame::CreateObject(const Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//

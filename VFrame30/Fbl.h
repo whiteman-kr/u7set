@@ -33,8 +33,8 @@ namespace Fbl
 		// Serialization
 		//
 	public:
-		bool SaveData(::Proto::FblParamValue* message) const;
-		bool LoadData(const ::Proto::FblParamValue& message);
+		bool SaveData(Proto::FblParamValue* message) const;
+		bool LoadData(const Proto::FblParamValue& message);
 	};
 
 		
@@ -52,8 +52,8 @@ namespace Fbl
 		// Serialization
 		//
 	public:
-		bool SaveData(::Proto::FblElementSignal* message) const;
-		bool LoadData(const ::Proto::FblElementSignal& message);
+		bool SaveData(Proto::FblElementSignal* message) const;
+		bool LoadData(const Proto::FblElementSignal& message);
 
 		// Properties
 		//
@@ -86,8 +86,8 @@ private:
 		// Serialization
 		//
 	public:
-		bool SaveData(::Proto::FblElementParam* message) const;
-		bool LoadData(const ::Proto::FblElementParam& message);
+		bool SaveData(Proto::FblElementParam* message) const;
+		bool LoadData(const Proto::FblElementParam& message);
 
 		// Properties
 		//
@@ -130,7 +130,7 @@ private:
 	//
 	//
 	class VFRAME30LIBSHARED_EXPORT FblElement :
-		public VFrame30::Proto::CVFrameObjectSerialization<FblElement>,
+		public Proto::CVFrameObjectSerialization<FblElement>,
 		public VFrame30::DebugInstCounter<FblElement>
 	{
 	public:
@@ -141,16 +141,16 @@ private:
 
 		// Serialization
 		//
-		friend VFrame30::Proto::CVFrameObjectSerialization<FblElement>;
+		friend Proto::CVFrameObjectSerialization<FblElement>;
 
 	protected:
-		virtual bool SaveData(::Proto::Envelope* message) const override;
-		virtual bool LoadData(const ::Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должне прочитаться
-		static FblElement* CreateObject(const ::Proto::Envelope& message);
+		static FblElement* CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//

@@ -22,7 +22,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CPosLineImpl::SaveData(::Proto::Envelope* message) const
+	bool CPosLineImpl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CVideoItem::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -34,7 +34,7 @@ namespace VFrame30
 
 		// --
 		//
-		::Proto::PosLineImpl* posLineImplMessage = message->mutable_videoitem()->mutable_poslineimpl();
+		Proto::PosLineImpl* posLineImplMessage = message->mutable_videoitem()->mutable_poslineimpl();
 
 		posLineImplMessage->set_startxdocpt(m_startXDocPt);
 		posLineImplMessage->set_startydocpt(m_startYDocPt);
@@ -44,7 +44,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CPosLineImpl::LoadData(const ::Proto::Envelope& message)
+	bool CPosLineImpl::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -68,7 +68,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const ::Proto::PosLineImpl& posLineImplMessage = message.videoitem().poslineimpl();
+		const Proto::PosLineImpl& posLineImplMessage = message.videoitem().poslineimpl();
 
 		m_startXDocPt = posLineImplMessage.startxdocpt();
 		m_startYDocPt = posLineImplMessage.startydocpt();

@@ -18,7 +18,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CPosConnectionImpl::SaveData(::Proto::Envelope* message) const
+	bool CPosConnectionImpl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CVideoItem::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -30,13 +30,13 @@ namespace VFrame30
 
 		// --
 		//
-		::Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_videoitem()->mutable_posconnectionimpl();
+		Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_videoitem()->mutable_posconnectionimpl();
 
 		// Сохранить точки
 		//
 		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
 		{
-			::Proto::VideoItemPoint* pPointMessage = posConnectionImplMessage->add_points();
+			Proto::VideoItemPoint* pPointMessage = posConnectionImplMessage->add_points();
 
 			pPointMessage->set_x(pt->X);
 			pPointMessage->set_y(pt->Y);
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CPosConnectionImpl::LoadData(const ::Proto::Envelope& message)
+	bool CPosConnectionImpl::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -69,7 +69,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const ::Proto::PosConnectionImpl& posConnectionImplMessage = message.videoitem().posconnectionimpl();
+		const Proto::PosConnectionImpl& posConnectionImplMessage = message.videoitem().posconnectionimpl();
 
 		points.clear();
 		for (int i = 0; i < posConnectionImplMessage.points().size(); i++)
