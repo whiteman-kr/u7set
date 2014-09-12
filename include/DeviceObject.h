@@ -1,205 +1,212 @@
 #pragma once
 #include "DbStruct.h"
+#include "QUuid"
 
-// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
-//
-enum class DeviceType
+namespace Hardware
 {
-	Root,
-	System,
-	Rack,
-	Chassis,
-	Module,
-	Controller,
-	DiagSignal
-};
 
-//
-//
-// DeviceObject
-//
-//
-class DeviceObject
-{
-protected:
-	DeviceObject();
-	virtual ~DeviceObject();
+	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
+	//
+	enum class DeviceType
+	{
+		Root,
+		System,
+		Rack,
+		Chassis,
+		Module,
+		Controller,
+		DiagSignal
+	};
 
-public:
-	virtual void load(const QByteArray& data);
-	virtual void save(QByteArray* out_data) const;
+	//
+	//
+	// DeviceObject
+	//
+	//
+	class DeviceObject
+	{
+	protected:
+		DeviceObject();
+		virtual ~DeviceObject();
 
-    // Properties
-    //
-public:
-	DeviceObject* parent();
-	virtual DeviceType deviceType() = 0;
+	public:
+		virtual void load(const QByteArray& data);
+		virtual void save(QByteArray* out_data) const;
 
-    // Children care
-    //
-	int childrenCount() const;
+		// Properties
+		//
+	public:
+		DeviceObject* parent();
+		virtual DeviceType deviceType() = 0;
 
-	DeviceObject* child(int index) const;
+		// Children care
+		//
+		int childrenCount() const;
 
-	int childIndex(DeviceObject* child) const;
+		DeviceObject* child(int index) const;
 
-	std::shared_ptr<DeviceObject> childSharedPtr(int index);
+		int childIndex(DeviceObject* child) const;
 
-	void addChild(std::shared_ptr<DeviceObject> child);
-	void deleteAllChildren();
+		std::shared_ptr<DeviceObject> childSharedPtr(int index);
 
-    // Props
-    //
-	const QString& strId() const;
-	void setStrId(const QString& value);
+		void addChild(std::shared_ptr<DeviceObject> child);
+		void deleteAllChildren();
 
-	const QString& caption() const;
-	void setCaption(const QString& value);
+		// Props
+		//
+		const QString& strId() const;
+		void setStrId(const QString& value);
 
-	const DbFileInfo& fileInfo() const;
-	void setFileInfo(const DbFileInfo& value);
+		const QString& caption() const;
+		void setCaption(const QString& value);
 
-    // Data
-    //
-protected:
-	DeviceObject* m_parent = nullptr;
-    std::vector<std::shared_ptr<DeviceObject>> m_children;
+		const DbFileInfo& fileInfo() const;
+		void setFileInfo(const DbFileInfo& value);
 
-	QString m_strId;
-	QString m_caption;
+		// Data
+		//
+	protected:
+		DeviceObject* m_parent = nullptr;
+		std::vector<std::shared_ptr<DeviceObject>> m_children;
 
-	DbFileInfo m_fileInfo;
-};
+		QUuid m_uuid;
+		QString m_strId;
+		QString m_caption;
 
-
-//
-//
-// DeviceRoot
-//
-//
-class DeviceRoot : public DeviceObject
-{
-public:
-    DeviceRoot();
-	virtual ~DeviceRoot();
-
-public:
-	virtual DeviceType deviceType() override;
-
-private:
-	static const DeviceType m_deviceType = DeviceType::Root;
-};
+		DbFileInfo m_fileInfo;
+	};
 
 
-//
-//
-// DeviceSystem
-//
-//
-class DeviceSystem : public DeviceObject
-{
-public:
-    DeviceSystem();
-    virtual ~DeviceSystem();
+	//
+	//
+	// DeviceRoot
+	//
+	//
+	class DeviceRoot : public DeviceObject
+	{
+	public:
+		DeviceRoot();
+		virtual ~DeviceRoot();
 
-public:
-	virtual DeviceType deviceType() override;
+	public:
+		virtual DeviceType deviceType() override;
 
-private:
-	static const DeviceType m_deviceType = DeviceType::System;
-};
-
-
-//
-//
-// DeviceRack
-//
-//
-class DeviceRack : public DeviceObject
-{
-public:
-	DeviceRack();
-	virtual ~DeviceRack();
-
-public:
-	virtual DeviceType deviceType() override;
-
-private:
-	static const DeviceType m_deviceType = DeviceType::Rack;
-};
+	private:
+		static const DeviceType m_deviceType = DeviceType::Root;
+	};
 
 
-//
-//
-// DeviceChassis
-//
-//
-class DeviceChassis : public DeviceObject
-{
-public:
-	DeviceChassis();
-	virtual ~DeviceChassis();
+	//
+	//
+	// DeviceSystem
+	//
+	//
+	class DeviceSystem : public DeviceObject
+	{
+	public:
+		DeviceSystem();
+		virtual ~DeviceSystem();
 
-public:
-	virtual DeviceType deviceType() override;
+	public:
+		virtual DeviceType deviceType() override;
 
-private:
-	static const DeviceType m_deviceType = DeviceType::Chassis;
-};
-
-
-//
-//
-// DeviceModule
-//
-//
-class DeviceModule : public DeviceObject
-{
-public:
-	DeviceModule();
-	virtual ~DeviceModule();
-
-public:
-	virtual DeviceType deviceType() override;
-
-private:
-	static const DeviceType m_deviceType = DeviceType::Module;
-};
+	private:
+		static const DeviceType m_deviceType = DeviceType::System;
+	};
 
 
-//
-//
-// DeviceController
-//
-//
-class DeviceController : public DeviceObject
-{
-public:
-	DeviceController();
-	virtual ~DeviceController();
+	//
+	//
+	// DeviceRack
+	//
+	//
+	class DeviceRack : public DeviceObject
+	{
+	public:
+		DeviceRack();
+		virtual ~DeviceRack();
 
-public:
-	virtual DeviceType deviceType() override;
+	public:
+		virtual DeviceType deviceType() override;
 
-private:
-	static const DeviceType m_deviceType = DeviceType::Controller;
-};
+	private:
+		static const DeviceType m_deviceType = DeviceType::Rack;
+	};
 
 
-//
-//
-// DeviceDiagSignal
-//
-//
-class DeviceDiagSignal : public DeviceObject
-{
-public:
-	DeviceDiagSignal();
-	virtual ~DeviceDiagSignal();
+	//
+	//
+	// DeviceChassis
+	//
+	//
+	class DeviceChassis : public DeviceObject
+	{
+	public:
+		DeviceChassis();
+		virtual ~DeviceChassis();
 
-public:
-	virtual DeviceType deviceType() override;
+	public:
+		virtual DeviceType deviceType() override;
 
-private:
-	static const DeviceType m_deviceType = DeviceType::DiagSignal;
-};
+	private:
+		static const DeviceType m_deviceType = DeviceType::Chassis;
+	};
+
+
+	//
+	//
+	// DeviceModule
+	//
+	//
+	class DeviceModule : public DeviceObject
+	{
+	public:
+		DeviceModule();
+		virtual ~DeviceModule();
+
+	public:
+		virtual DeviceType deviceType() override;
+
+	private:
+		static const DeviceType m_deviceType = DeviceType::Module;
+	};
+
+
+	//
+	//
+	// DeviceController
+	//
+	//
+	class DeviceController : public DeviceObject
+	{
+	public:
+		DeviceController();
+		virtual ~DeviceController();
+
+	public:
+		virtual DeviceType deviceType() override;
+
+	private:
+		static const DeviceType m_deviceType = DeviceType::Controller;
+	};
+
+
+	//
+	//
+	// DeviceDiagSignal
+	//
+	//
+	class DeviceDiagSignal : public DeviceObject
+	{
+	public:
+		DeviceDiagSignal();
+		virtual ~DeviceDiagSignal();
+
+	public:
+		virtual DeviceType deviceType() override;
+
+	private:
+		static const DeviceType m_deviceType = DeviceType::DiagSignal;
+	};
+
+}

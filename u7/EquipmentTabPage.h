@@ -8,7 +8,7 @@ class DbController;
 class EquipmentModel : public QAbstractItemModel
 {
 public:
-	EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent = 0);
+	EquipmentModel(std::shared_ptr<Hardware::DeviceRoot> root, QObject* parent = 0);
 	virtual ~EquipmentModel();
 
 	virtual QModelIndex index(int row, int column, const QModelIndex& parentIndex) const override;
@@ -26,7 +26,7 @@ public:
 	// Data
 	//
 private:
-	std::shared_ptr<DeviceRoot> m_root;
+	std::shared_ptr<Hardware::DeviceRoot> m_root;
 
 	enum Columns
 	{
@@ -99,7 +99,7 @@ private:
 	QAction* m_addSubblockAction = nullptr;
 	QAction* m_addBlockAction = nullptr;
 
-	std::shared_ptr<DeviceRoot> m_root;
+	std::shared_ptr<Hardware::DeviceRoot> m_root;
 	EquipmentModel* m_equipmentModel = nullptr;
 	EquipmentView* m_equipmentView = nullptr;
 

@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "FileView.h"
-#include "../include/DbStore.h"
 #include "CheckInDialog.h"
+#include "../include/DbController.h"
 
 
 FilesModel::FilesModel(QObject* parent) :
@@ -206,10 +206,10 @@ FileView::FileView(const FileView&) :
 	assert(false);
 }
 
-FileView::FileView(DbStore* pDbStore) :
-	m_pDbStore(pDbStore)
+FileView::FileView(DbController* pDbStore) :
+	m_dbController(pDbStore)
 {
-	assert(m_pDbStore != nullptr);
+	assert(m_dbController != nullptr);
 
 	// --
 	//
@@ -254,8 +254,8 @@ FileView::FileView(DbStore* pDbStore) :
 
 	// --
 	//
-	connect(dbStore(), &DbStore::projectOpened, this, &FileView::projectOpened);
-	connect(dbStore(), &DbStore::projectClosed, this, &FileView::projectClosed);
+	connect(dbController(), &DbController::projectOpened, this, &FileView::projectOpened);
+	connect(dbController(), &DbController::projectClosed, this, &FileView::projectClosed);
 
 	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileView::filesViewSelectionChanged);
 
@@ -429,13 +429,13 @@ void FileView::viewFile(std::vector<DbFileInfo> /*files*/)
 
 void FileView::checkOut(std::vector<DbFileInfo> files)
 {
-	dbStore()->checkOutFiles(files, this);
+	dbController()->checkOut(files, this);
 	refreshFiles();
 }
 
 void FileView::checkIn(std::vector<DbFileInfo> files)
 {
-	CheckInDialog::checkIn(files, dbStore(), this);
+	CheckInDialog::checkIn(files, dbController(), this);
 
 	refreshFiles();
 
@@ -444,13 +444,17 @@ void FileView::checkIn(std::vector<DbFileInfo> files)
 
 void FileView::undoChanges(std::vector<DbFileInfo> files)
 {
-	dbStore()->undoFilesPendingChanges(files, this);
+	dbController()->undoChanges(files, this);
 	refreshFiles();
 }
 
 void FileView::addFile()
 {
-	QFileDialog fd(this);
+	assert(false);
+	// Add Parent ID!!!!!!!!!!!!!!!!!!!!
+
+
+	/*QFileDialog fd(this);
 	fd.setFileMode(QFileDialog::ExistingFiles);
 
 	if (fd.exec() == QDialog::Rejected)
@@ -487,7 +491,7 @@ void FileView::addFile()
 
 	// Add files to the DB
 	//
-	dbStore()->addFiles(&files, this);
+	dbController()->addFiles(&files, this);
 
 	// Add files to the FileModel and select them
 	//
@@ -509,7 +513,7 @@ void FileView::addFile()
 		}
 	}
 
-	filesViewSelectionChanged(QItemSelection(), QItemSelection());
+	filesViewSelectionChanged(QItemSelection(), QItemSelection());*/
 }
 
 void FileView::getWorkcopy(std::vector<DbFileInfo> files)
@@ -525,7 +529,7 @@ void FileView::getWorkcopy(std::vector<DbFileInfo> files)
 	// Get files from the database
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
-	dbStore()->getWorkcopy(files, &out, this);
+	dbController()->getWorkcopy(files, &out, this);
 
 	// Save files to disk
 	//
@@ -554,7 +558,7 @@ void FileView::setWorkcopy(std::vector<DbFileInfo> files)
 
 	auto fileInfo = files[0];
 
-	if (fileInfo.state() != VcsState::CheckedOut || fileInfo.user() != dbStore()->currentUser())
+	if (fileInfo.state() != VcsState::CheckedOut || fileInfo.user() != dbController()->currentUser())
 	{
 		return;
 	}
@@ -586,7 +590,7 @@ void FileView::setWorkcopy(std::vector<DbFileInfo> files)
 	std::vector<std::shared_ptr<DbFile>> workcopyFiles;
 	workcopyFiles.push_back(file);
 
-	dbStore()->setWorkcopy(workcopyFiles, this);
+	dbController()->setWorkcopy(workcopyFiles, this);
 
 	refreshFiles();
 
@@ -595,14 +599,16 @@ void FileView::setWorkcopy(std::vector<DbFileInfo> files)
 
 void FileView::refreshFiles()
 {
+	assert(false);
+
 	// Get file list from the DB
 	//
-	std::vector<DbFileInfo> files;
-	dbStore()->getFileList(files, false, filesModel().filter());
+	/*std::vector<DbFileInfo> files;
+	dbController()->getFileList(&files, false, filesModel().filter());
 
 	// Set files to the view
 	//
-	setFiles(files);
+	setFiles(files);*/
 
 	return;
 }
@@ -724,7 +730,7 @@ void FileView::slot_CheckIn()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.user() == dbStore()->currentUser())
+		if (file.user() == dbController()->currentUser())
 		{
 			files.push_back(file);
 		}
@@ -752,7 +758,7 @@ void FileView::slot_UndoChanges()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.user() == dbStore()->currentUser())
+		if (file.user() == dbController()->currentUser())
 		{
 			files.push_back(file);
 		}
@@ -789,7 +795,7 @@ void FileView::slot_GetWorkcopy()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.state() == VcsState::CheckedOut && file.user() == dbStore()->currentUser())
+		if (file.state() == VcsState::CheckedOut && file.user() == dbController()->currentUser())
 		{
 			files.push_back(file);
 		}
@@ -817,7 +823,7 @@ void FileView::slot_SetWorkcopy()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.state() == VcsState::CheckedOut && file.user() == dbStore()->currentUser())
+		if (file.state() == VcsState::CheckedOut && file.user() == dbController()->currentUser())
 		{
 			files.push_back(file);
 		}
@@ -852,7 +858,7 @@ void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, con
 	bool canGetWorkcopy = false;
 	int canSetWorkcopy = 0;
 
-	int currentUserId = dbStore()->currentUser().userId();;
+	int currentUserId = dbController()->currentUser().userId();;
 
 	for (auto i = s.begin(); i != s.end(); ++i)
 	{
@@ -918,7 +924,7 @@ FilesModel& FileView::filesModel()
 	return m_filesModel;
 }
 
-DbStore* FileView::dbStore()
+DbController* FileView::dbController()
 {
-	return m_pDbStore;
+	return m_dbController;
 }

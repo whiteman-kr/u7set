@@ -38,7 +38,7 @@ namespace VFrame30
 
 		auto pMutableVideoLayer = message->mutable_videolayer();
 
-		Proto::Write(pMutableVideoLayer->mutable_guid(), m_guid);
+		Proto::Write(pMutableVideoLayer->mutable_uuid(), m_guid);
 		Proto::Write(pMutableVideoLayer->mutable_name(), m_name);
 
 		pMutableVideoLayer->set_compile(m_compile);
@@ -70,7 +70,7 @@ namespace VFrame30
 
 		const ::Proto::VideoLayer& videoLayer = message.videolayer();
 
-		m_guid = Proto::Read(videoLayer.guid());
+		m_guid = Proto::Read(videoLayer.uuid());
 		m_name = Proto::Read(videoLayer.name());
 
 		m_compile = videoLayer.compile();

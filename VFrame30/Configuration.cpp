@@ -26,7 +26,7 @@ namespace VFrame30
 		//
 		::Proto::Configuration* pMutableConfiguration = message->mutable_configuration();
 
-		VFrame30::Proto::Write(pMutableConfiguration->mutable_guid(), m_guid);
+		VFrame30::Proto::Write(pMutableConfiguration->mutable_uuid(), m_guid);
 		VFrame30::Proto::Write(pMutableConfiguration->mutable_strid(), m_strID);
 		VFrame30::Proto::Write(pMutableConfiguration->mutable_caption(), m_caption);
 		VFrame30::Proto::Write(pMutableConfiguration->mutable_variables(), m_variables);
@@ -34,7 +34,7 @@ namespace VFrame30
 		 
 		for (auto vf = m_videoFramesIDs.begin(); vf != m_videoFramesIDs.end(); ++vf)
 		{
-			::Proto::Guid* pGuid = pMutableConfiguration->add_videoframesids();
+			::Proto::Uuid* pGuid = pMutableConfiguration->add_videoframesids();
 			VFrame30::Proto::Write(pGuid, *vf);
 		}
 
@@ -59,7 +59,7 @@ namespace VFrame30
 
 		const ::Proto::Configuration& configuration = message.configuration();
 
-		m_guid = VFrame30::Proto::Read(configuration.guid());
+		m_guid = VFrame30::Proto::Read(configuration.uuid());
 		m_strID = VFrame30::Proto::Read(configuration.strid());
 		m_caption = VFrame30::Proto::Read(configuration.caption());
 		m_variables = VFrame30::Proto::Read(configuration.variables());

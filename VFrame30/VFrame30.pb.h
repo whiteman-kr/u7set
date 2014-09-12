@@ -337,8 +337,8 @@ namespace VFrame30
 
 		// Функции для сериализации данных
 		//
-		const QUuid& Read(const ::Proto::Guid& message);
-		void Write(::Proto::Guid* pMessage, const QUuid& guid);
+		const QUuid& Read(const ::Proto::Uuid& message);
+		void Write(::Proto::Uuid* pMessage, const QUuid& guid);
 
 		// Read/write wstring message
 		//

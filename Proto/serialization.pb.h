@@ -34,7 +34,7 @@ void  protobuf_AddDesc_serialization_2eproto();
 void protobuf_AssignDesc_serialization_2eproto();
 void protobuf_ShutdownFile_serialization_2eproto();
 
-class Guid;
+class Uuid;
 class wstring;
 class FontParam;
 class VideoItemPoint;
@@ -62,6 +62,7 @@ class VideoItemInputSignal;
 class VideoItemOutputSignal;
 class VideoItemLink;
 class VideoItemFblElement;
+class DeviceObject;
 
 enum SchemeUnit {
   Display = 0,
@@ -143,14 +144,14 @@ inline bool ConnectionDirrection_Parse(
 }
 // ===================================================================
 
-class Guid : public ::google::protobuf::Message {
+class Uuid : public ::google::protobuf::Message {
  public:
-  Guid();
-  virtual ~Guid();
+  Uuid();
+  virtual ~Uuid();
 
-  Guid(const Guid& from);
+  Uuid(const Uuid& from);
 
-  inline Guid& operator=(const Guid& from) {
+  inline Uuid& operator=(const Uuid& from) {
     CopyFrom(from);
     return *this;
   }
@@ -164,17 +165,17 @@ class Guid : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const Guid& default_instance();
+  static const Uuid& default_instance();
 
-  void Swap(Guid* other);
+  void Swap(Uuid* other);
 
   // implements Message ----------------------------------------------
 
-  Guid* New() const;
+  Uuid* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const Guid& from);
-  void MergeFrom(const Guid& from);
+  void CopyFrom(const Uuid& from);
+  void MergeFrom(const Uuid& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -197,26 +198,26 @@ class Guid : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required bytes guid = 1;
-  inline bool has_guid() const;
-  inline void clear_guid();
-  static const int kGuidFieldNumber = 1;
-  inline const ::std::string& guid() const;
-  inline void set_guid(const ::std::string& value);
-  inline void set_guid(const char* value);
-  inline void set_guid(const void* value, size_t size);
-  inline ::std::string* mutable_guid();
-  inline ::std::string* release_guid();
-  inline void set_allocated_guid(::std::string* guid);
+  // required bytes uuid = 1;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 1;
+  inline const ::std::string& uuid() const;
+  inline void set_uuid(const ::std::string& value);
+  inline void set_uuid(const char* value);
+  inline void set_uuid(const void* value, size_t size);
+  inline ::std::string* mutable_uuid();
+  inline ::std::string* release_uuid();
+  inline void set_allocated_uuid(::std::string* uuid);
 
-  // @@protoc_insertion_point(class_scope:Proto.Guid)
+  // @@protoc_insertion_point(class_scope:Proto.Uuid)
  private:
-  inline void set_has_guid();
-  inline void clear_has_guid();
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* guid_;
+  ::std::string* uuid_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -226,7 +227,7 @@ class Guid : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static Guid* default_instance_;
+  static Uuid* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -584,6 +585,24 @@ class Envelope : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 classnamehash() const;
   inline void set_classnamehash(::google::protobuf::uint32 value);
 
+  // optional .Proto.VideoItem videoitem = 6;
+  inline bool has_videoitem() const;
+  inline void clear_videoitem();
+  static const int kVideoitemFieldNumber = 6;
+  inline const ::Proto::VideoItem& videoitem() const;
+  inline ::Proto::VideoItem* mutable_videoitem();
+  inline ::Proto::VideoItem* release_videoitem();
+  inline void set_allocated_videoitem(::Proto::VideoItem* videoitem);
+
+  // optional .Proto.DeviceObject deviceobject = 7;
+  inline bool has_deviceobject() const;
+  inline void clear_deviceobject();
+  static const int kDeviceobjectFieldNumber = 7;
+  inline const ::Proto::DeviceObject& deviceobject() const;
+  inline ::Proto::DeviceObject* mutable_deviceobject();
+  inline ::Proto::DeviceObject* release_deviceobject();
+  inline void set_allocated_deviceobject(::Proto::DeviceObject* deviceobject);
+
   // optional .Proto.VideoFrame videoframe = 100;
   inline bool has_videoframe() const;
   inline void clear_videoframe();
@@ -602,28 +621,19 @@ class Envelope : public ::google::protobuf::Message {
   inline ::Proto::VideoLayer* release_videolayer();
   inline void set_allocated_videolayer(::Proto::VideoLayer* videolayer);
 
-  // optional .Proto.VideoItem videoitem = 102;
-  inline bool has_videoitem() const;
-  inline void clear_videoitem();
-  static const int kVideoitemFieldNumber = 102;
-  inline const ::Proto::VideoItem& videoitem() const;
-  inline ::Proto::VideoItem* mutable_videoitem();
-  inline ::Proto::VideoItem* release_videoitem();
-  inline void set_allocated_videoitem(::Proto::VideoItem* videoitem);
-
-  // optional .Proto.FblElement fblelement = 103;
+  // optional .Proto.FblElement fblelement = 102;
   inline bool has_fblelement() const;
   inline void clear_fblelement();
-  static const int kFblelementFieldNumber = 103;
+  static const int kFblelementFieldNumber = 102;
   inline const ::Proto::FblElement& fblelement() const;
   inline ::Proto::FblElement* mutable_fblelement();
   inline ::Proto::FblElement* release_fblelement();
   inline void set_allocated_fblelement(::Proto::FblElement* fblelement);
 
-  // optional .Proto.Configuration configuration = 104;
+  // optional .Proto.Configuration configuration = 103;
   inline bool has_configuration() const;
   inline void clear_configuration();
-  static const int kConfigurationFieldNumber = 104;
+  static const int kConfigurationFieldNumber = 103;
   inline const ::Proto::Configuration& configuration() const;
   inline ::Proto::Configuration* mutable_configuration();
   inline ::Proto::Configuration* release_configuration();
@@ -633,12 +643,14 @@ class Envelope : public ::google::protobuf::Message {
  private:
   inline void set_has_classnamehash();
   inline void clear_has_classnamehash();
+  inline void set_has_videoitem();
+  inline void clear_has_videoitem();
+  inline void set_has_deviceobject();
+  inline void clear_has_deviceobject();
   inline void set_has_videoframe();
   inline void clear_has_videoframe();
   inline void set_has_videolayer();
   inline void clear_has_videolayer();
-  inline void set_has_videoitem();
-  inline void clear_has_videoitem();
   inline void set_has_fblelement();
   inline void clear_has_fblelement();
   inline void set_has_configuration();
@@ -646,15 +658,16 @@ class Envelope : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::Proto::VideoItem* videoitem_;
+  ::Proto::DeviceObject* deviceobject_;
   ::Proto::VideoFrame* videoframe_;
   ::Proto::VideoLayer* videolayer_;
-  ::Proto::VideoItem* videoitem_;
   ::Proto::FblElement* fblelement_;
   ::Proto::Configuration* configuration_;
   ::google::protobuf::uint32 classnamehash_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -719,14 +732,14 @@ class Configuration : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.Guid guid = 1;
-  inline bool has_guid() const;
-  inline void clear_guid();
-  static const int kGuidFieldNumber = 1;
-  inline const ::Proto::Guid& guid() const;
-  inline ::Proto::Guid* mutable_guid();
-  inline ::Proto::Guid* release_guid();
-  inline void set_allocated_guid(::Proto::Guid* guid);
+  // required .Proto.Uuid uuid = 1;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 1;
+  inline const ::Proto::Uuid& uuid() const;
+  inline ::Proto::Uuid* mutable_uuid();
+  inline ::Proto::Uuid* release_uuid();
+  inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
   // required .Proto.wstring strID = 2;
   inline bool has_strid() const;
@@ -764,16 +777,16 @@ class Configuration : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_globals();
   inline void set_allocated_globals(::Proto::wstring* globals);
 
-  // repeated .Proto.Guid videoFramesIDs = 100;
+  // repeated .Proto.Uuid videoFramesIDs = 100;
   inline int videoframesids_size() const;
   inline void clear_videoframesids();
   static const int kVideoFramesIDsFieldNumber = 100;
-  inline const ::Proto::Guid& videoframesids(int index) const;
-  inline ::Proto::Guid* mutable_videoframesids(int index);
-  inline ::Proto::Guid* add_videoframesids();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Guid >&
+  inline const ::Proto::Uuid& videoframesids(int index) const;
+  inline ::Proto::Uuid* mutable_videoframesids(int index);
+  inline ::Proto::Uuid* add_videoframesids();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >&
       videoframesids() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::Guid >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
       mutable_videoframesids();
 
   // repeated .Proto.Envelope videoFrames = 101;
@@ -790,8 +803,8 @@ class Configuration : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Proto.Configuration)
  private:
-  inline void set_has_guid();
-  inline void clear_has_guid();
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
   inline void set_has_strid();
   inline void clear_has_strid();
   inline void set_has_caption();
@@ -803,12 +816,12 @@ class Configuration : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::Guid* guid_;
+  ::Proto::Uuid* uuid_;
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
   ::Proto::wstring* variables_;
   ::Proto::wstring* globals_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::Guid > videoframesids_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > videoframesids_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > videoframes_;
 
   mutable int _cached_size_;
@@ -877,14 +890,14 @@ class FblElement : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.Guid guid = 1;
-  inline bool has_guid() const;
-  inline void clear_guid();
-  static const int kGuidFieldNumber = 1;
-  inline const ::Proto::Guid& guid() const;
-  inline ::Proto::Guid* mutable_guid();
-  inline ::Proto::Guid* release_guid();
-  inline void set_allocated_guid(::Proto::Guid* guid);
+  // required .Proto.Uuid uuid = 1;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 1;
+  inline const ::Proto::Uuid& uuid() const;
+  inline ::Proto::Uuid* mutable_uuid();
+  inline ::Proto::Uuid* release_uuid();
+  inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
   // required .Proto.wstring strID = 2;
   inline bool has_strid() const;
@@ -911,10 +924,10 @@ class FblElement : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 opcode() const;
   inline void set_opcode(::google::protobuf::uint32 value);
 
-  // repeated .Proto.FblElementSignal inputSignals = 100;
+  // repeated .Proto.FblElementSignal inputSignals = 11;
   inline int inputsignals_size() const;
   inline void clear_inputsignals();
-  static const int kInputSignalsFieldNumber = 100;
+  static const int kInputSignalsFieldNumber = 11;
   inline const ::Proto::FblElementSignal& inputsignals(int index) const;
   inline ::Proto::FblElementSignal* mutable_inputsignals(int index);
   inline ::Proto::FblElementSignal* add_inputsignals();
@@ -923,10 +936,10 @@ class FblElement : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
       mutable_inputsignals();
 
-  // repeated .Proto.FblElementSignal outputSignals = 101;
+  // repeated .Proto.FblElementSignal outputSignals = 12;
   inline int outputsignals_size() const;
   inline void clear_outputsignals();
-  static const int kOutputSignalsFieldNumber = 101;
+  static const int kOutputSignalsFieldNumber = 12;
   inline const ::Proto::FblElementSignal& outputsignals(int index) const;
   inline ::Proto::FblElementSignal* mutable_outputsignals(int index);
   inline ::Proto::FblElementSignal* add_outputsignals();
@@ -935,10 +948,10 @@ class FblElement : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
       mutable_outputsignals();
 
-  // repeated .Proto.FblElementParam params = 102;
+  // repeated .Proto.FblElementParam params = 13;
   inline int params_size() const;
   inline void clear_params();
-  static const int kParamsFieldNumber = 102;
+  static const int kParamsFieldNumber = 13;
   inline const ::Proto::FblElementParam& params(int index) const;
   inline ::Proto::FblElementParam* mutable_params(int index);
   inline ::Proto::FblElementParam* add_params();
@@ -949,8 +962,8 @@ class FblElement : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Proto.FblElement)
  private:
-  inline void set_has_guid();
-  inline void clear_has_guid();
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
   inline void set_has_strid();
   inline void clear_has_strid();
   inline void set_has_caption();
@@ -960,7 +973,7 @@ class FblElement : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::Guid* guid_;
+  ::Proto::Uuid* uuid_;
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > inputsignals_;
@@ -1372,14 +1385,14 @@ class VideoFrame : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.Guid guid = 1;
-  inline bool has_guid() const;
-  inline void clear_guid();
-  static const int kGuidFieldNumber = 1;
-  inline const ::Proto::Guid& guid() const;
-  inline ::Proto::Guid* mutable_guid();
-  inline ::Proto::Guid* release_guid();
-  inline void set_allocated_guid(::Proto::Guid* guid);
+  // required .Proto.Uuid uuid = 1;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 1;
+  inline const ::Proto::Uuid& uuid() const;
+  inline ::Proto::Uuid* mutable_uuid();
+  inline ::Proto::Uuid* release_uuid();
+  inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
   // required .Proto.wstring strID = 2;
   inline bool has_strid() const;
@@ -1434,8 +1447,8 @@ class VideoFrame : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Proto.VideoFrame)
  private:
-  inline void set_has_guid();
-  inline void clear_has_guid();
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
   inline void set_has_strid();
   inline void clear_has_strid();
   inline void set_has_caption();
@@ -1449,7 +1462,7 @@ class VideoFrame : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::Guid* guid_;
+  ::Proto::Uuid* uuid_;
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
   double width_;
@@ -1523,14 +1536,14 @@ class VideoLayer : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.Guid guid = 1;
-  inline bool has_guid() const;
-  inline void clear_guid();
-  static const int kGuidFieldNumber = 1;
-  inline const ::Proto::Guid& guid() const;
-  inline ::Proto::Guid* mutable_guid();
-  inline ::Proto::Guid* release_guid();
-  inline void set_allocated_guid(::Proto::Guid* guid);
+  // required .Proto.Uuid uuid = 1;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 1;
+  inline const ::Proto::Uuid& uuid() const;
+  inline ::Proto::Uuid* mutable_uuid();
+  inline ::Proto::Uuid* release_uuid();
+  inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
   // required .Proto.wstring name = 2;
   inline bool has_name() const;
@@ -1562,10 +1575,10 @@ class VideoLayer : public ::google::protobuf::Message {
   inline bool print() const;
   inline void set_print(bool value);
 
-  // repeated .Proto.Envelope items = 100;
+  // repeated .Proto.Envelope items = 15;
   inline int items_size() const;
   inline void clear_items();
-  static const int kItemsFieldNumber = 100;
+  static const int kItemsFieldNumber = 15;
   inline const ::Proto::Envelope& items(int index) const;
   inline ::Proto::Envelope* mutable_items(int index);
   inline ::Proto::Envelope* add_items();
@@ -1576,8 +1589,8 @@ class VideoLayer : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Proto.VideoLayer)
  private:
-  inline void set_has_guid();
-  inline void clear_has_guid();
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
   inline void set_has_name();
   inline void clear_has_name();
   inline void set_has_compile();
@@ -1589,7 +1602,7 @@ class VideoLayer : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::Guid* guid_;
+  ::Proto::Uuid* uuid_;
   ::Proto::wstring* name_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > items_;
   bool compile_;
@@ -1662,14 +1675,14 @@ class VideoItem : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.Guid guid = 1;
-  inline bool has_guid() const;
-  inline void clear_guid();
-  static const int kGuidFieldNumber = 1;
-  inline const ::Proto::Guid& guid() const;
-  inline ::Proto::Guid* mutable_guid();
-  inline ::Proto::Guid* release_guid();
-  inline void set_allocated_guid(::Proto::Guid* guid);
+  // required .Proto.Uuid uuid = 1;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 1;
+  inline const ::Proto::Uuid& uuid() const;
+  inline ::Proto::Uuid* mutable_uuid();
+  inline ::Proto::Uuid* release_uuid();
+  inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
   // required bool isStatic = 2;
   inline bool has_isstatic() const;
@@ -1708,127 +1721,127 @@ class VideoItem : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_clickscript();
   inline void set_allocated_clickscript(::Proto::wstring* clickscript);
 
-  // optional .Proto.PosRectImpl PosRectImpl = 1000;
+  // optional .Proto.PosRectImpl PosRectImpl = 10;
   inline bool has_posrectimpl() const;
   inline void clear_posrectimpl();
-  static const int kPosRectImplFieldNumber = 1000;
+  static const int kPosRectImplFieldNumber = 10;
   inline const ::Proto::PosRectImpl& posrectimpl() const;
   inline ::Proto::PosRectImpl* mutable_posrectimpl();
   inline ::Proto::PosRectImpl* release_posrectimpl();
   inline void set_allocated_posrectimpl(::Proto::PosRectImpl* posrectimpl);
 
-  // optional .Proto.PosLineImpl PosLineImpl = 1001;
+  // optional .Proto.PosLineImpl PosLineImpl = 11;
   inline bool has_poslineimpl() const;
   inline void clear_poslineimpl();
-  static const int kPosLineImplFieldNumber = 1001;
+  static const int kPosLineImplFieldNumber = 11;
   inline const ::Proto::PosLineImpl& poslineimpl() const;
   inline ::Proto::PosLineImpl* mutable_poslineimpl();
   inline ::Proto::PosLineImpl* release_poslineimpl();
   inline void set_allocated_poslineimpl(::Proto::PosLineImpl* poslineimpl);
 
-  // optional .Proto.PosConnectionImpl PosConnectionImpl = 1002;
+  // optional .Proto.PosConnectionImpl PosConnectionImpl = 12;
   inline bool has_posconnectionimpl() const;
   inline void clear_posconnectionimpl();
-  static const int kPosConnectionImplFieldNumber = 1002;
+  static const int kPosConnectionImplFieldNumber = 12;
   inline const ::Proto::PosConnectionImpl& posconnectionimpl() const;
   inline ::Proto::PosConnectionImpl* mutable_posconnectionimpl();
   inline ::Proto::PosConnectionImpl* release_posconnectionimpl();
   inline void set_allocated_posconnectionimpl(::Proto::PosConnectionImpl* posconnectionimpl);
 
-  // optional .Proto.FblItem FblItem = 1006;
+  // optional .Proto.FblItem FblItem = 106;
   inline bool has_fblitem() const;
   inline void clear_fblitem();
-  static const int kFblItemFieldNumber = 1006;
+  static const int kFblItemFieldNumber = 106;
   inline const ::Proto::FblItem& fblitem() const;
   inline ::Proto::FblItem* mutable_fblitem();
   inline ::Proto::FblItem* release_fblitem();
   inline void set_allocated_fblitem(::Proto::FblItem* fblitem);
 
-  // optional .Proto.FblItemRect FblItemRect = 1007;
+  // optional .Proto.FblItemRect FblItemRect = 107;
   inline bool has_fblitemrect() const;
   inline void clear_fblitemrect();
-  static const int kFblItemRectFieldNumber = 1007;
+  static const int kFblItemRectFieldNumber = 107;
   inline const ::Proto::FblItemRect& fblitemrect() const;
   inline ::Proto::FblItemRect* mutable_fblitemrect();
   inline ::Proto::FblItemRect* release_fblitemrect();
   inline void set_allocated_fblitemrect(::Proto::FblItemRect* fblitemrect);
 
-  // optional .Proto.FblItemLine FblItemLine = 1008;
+  // optional .Proto.FblItemLine FblItemLine = 108;
   inline bool has_fblitemline() const;
   inline void clear_fblitemline();
-  static const int kFblItemLineFieldNumber = 1008;
+  static const int kFblItemLineFieldNumber = 108;
   inline const ::Proto::FblItemLine& fblitemline() const;
   inline ::Proto::FblItemLine* mutable_fblitemline();
   inline ::Proto::FblItemLine* release_fblitemline();
   inline void set_allocated_fblitemline(::Proto::FblItemLine* fblitemline);
 
-  // optional .Proto.VideoItemRect Rect = 1016;
+  // optional .Proto.VideoItemRect Rect = 116;
   inline bool has_rect() const;
   inline void clear_rect();
-  static const int kRectFieldNumber = 1016;
+  static const int kRectFieldNumber = 116;
   inline const ::Proto::VideoItemRect& rect() const;
   inline ::Proto::VideoItemRect* mutable_rect();
   inline ::Proto::VideoItemRect* release_rect();
   inline void set_allocated_rect(::Proto::VideoItemRect* rect);
 
-  // optional .Proto.VideoItemLine Line = 1017;
+  // optional .Proto.VideoItemLine Line = 117;
   inline bool has_line() const;
   inline void clear_line();
-  static const int kLineFieldNumber = 1017;
+  static const int kLineFieldNumber = 117;
   inline const ::Proto::VideoItemLine& line() const;
   inline ::Proto::VideoItemLine* mutable_line();
   inline ::Proto::VideoItemLine* release_line();
   inline void set_allocated_line(::Proto::VideoItemLine* line);
 
-  // optional .Proto.VideoItemConnectionLine ConnectionLine = 1018;
+  // optional .Proto.VideoItemConnectionLine ConnectionLine = 118;
   inline bool has_connectionline() const;
   inline void clear_connectionline();
-  static const int kConnectionLineFieldNumber = 1018;
+  static const int kConnectionLineFieldNumber = 118;
   inline const ::Proto::VideoItemConnectionLine& connectionline() const;
   inline ::Proto::VideoItemConnectionLine* mutable_connectionline();
   inline ::Proto::VideoItemConnectionLine* release_connectionline();
   inline void set_allocated_connectionline(::Proto::VideoItemConnectionLine* connectionline);
 
-  // optional .Proto.VideoItemSignal Signal = 1024;
+  // optional .Proto.VideoItemSignal Signal = 124;
   inline bool has_signal() const;
   inline void clear_signal();
-  static const int kSignalFieldNumber = 1024;
+  static const int kSignalFieldNumber = 124;
   inline const ::Proto::VideoItemSignal& signal() const;
   inline ::Proto::VideoItemSignal* mutable_signal();
   inline ::Proto::VideoItemSignal* release_signal();
   inline void set_allocated_signal(::Proto::VideoItemSignal* signal);
 
-  // optional .Proto.VideoItemInputSignal InputSignal = 1025;
+  // optional .Proto.VideoItemInputSignal InputSignal = 125;
   inline bool has_inputsignal() const;
   inline void clear_inputsignal();
-  static const int kInputSignalFieldNumber = 1025;
+  static const int kInputSignalFieldNumber = 125;
   inline const ::Proto::VideoItemInputSignal& inputsignal() const;
   inline ::Proto::VideoItemInputSignal* mutable_inputsignal();
   inline ::Proto::VideoItemInputSignal* release_inputsignal();
   inline void set_allocated_inputsignal(::Proto::VideoItemInputSignal* inputsignal);
 
-  // optional .Proto.VideoItemOutputSignal OutputSignal = 1026;
+  // optional .Proto.VideoItemOutputSignal OutputSignal = 126;
   inline bool has_outputsignal() const;
   inline void clear_outputsignal();
-  static const int kOutputSignalFieldNumber = 1026;
+  static const int kOutputSignalFieldNumber = 126;
   inline const ::Proto::VideoItemOutputSignal& outputsignal() const;
   inline ::Proto::VideoItemOutputSignal* mutable_outputsignal();
   inline ::Proto::VideoItemOutputSignal* release_outputsignal();
   inline void set_allocated_outputsignal(::Proto::VideoItemOutputSignal* outputsignal);
 
-  // optional .Proto.VideoItemLink Link = 1027;
+  // optional .Proto.VideoItemLink Link = 127;
   inline bool has_link() const;
   inline void clear_link();
-  static const int kLinkFieldNumber = 1027;
+  static const int kLinkFieldNumber = 127;
   inline const ::Proto::VideoItemLink& link() const;
   inline ::Proto::VideoItemLink* mutable_link();
   inline ::Proto::VideoItemLink* release_link();
   inline void set_allocated_link(::Proto::VideoItemLink* link);
 
-  // optional .Proto.VideoItemFblElement VideoItemFblElement = 1028;
+  // optional .Proto.VideoItemFblElement VideoItemFblElement = 128;
   inline bool has_videoitemfblelement() const;
   inline void clear_videoitemfblelement();
-  static const int kVideoItemFblElementFieldNumber = 1028;
+  static const int kVideoItemFblElementFieldNumber = 128;
   inline const ::Proto::VideoItemFblElement& videoitemfblelement() const;
   inline ::Proto::VideoItemFblElement* mutable_videoitemfblelement();
   inline ::Proto::VideoItemFblElement* release_videoitemfblelement();
@@ -1836,8 +1849,8 @@ class VideoItem : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Proto.VideoItem)
  private:
-  inline void set_has_guid();
-  inline void clear_has_guid();
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
   inline void set_has_isstatic();
   inline void clear_has_isstatic();
   inline void set_has_islocked();
@@ -1879,7 +1892,7 @@ class VideoItem : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::Guid* guid_;
+  ::Proto::Uuid* uuid_;
   bool isstatic_;
   bool islocked_;
   bool acceptclick_;
@@ -2621,37 +2634,37 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline ::Proto::ConnectionDirrection dirrection() const;
   inline void set_dirrection(::Proto::ConnectionDirrection value);
 
-  // required .Proto.Guid guid = 3;
-  inline bool has_guid() const;
-  inline void clear_guid();
-  static const int kGuidFieldNumber = 3;
-  inline const ::Proto::Guid& guid() const;
-  inline ::Proto::Guid* mutable_guid();
-  inline ::Proto::Guid* release_guid();
-  inline void set_allocated_guid(::Proto::Guid* guid);
+  // required .Proto.Uuid uuid = 3;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 3;
+  inline const ::Proto::Uuid& uuid() const;
+  inline ::Proto::Uuid* mutable_uuid();
+  inline ::Proto::Uuid* release_uuid();
+  inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
-  // optional .Proto.Guid signalGuid = 100;
-  inline bool has_signalguid() const;
-  inline void clear_signalguid();
-  static const int kSignalGuidFieldNumber = 100;
-  inline const ::Proto::Guid& signalguid() const;
-  inline ::Proto::Guid* mutable_signalguid();
-  inline ::Proto::Guid* release_signalguid();
-  inline void set_allocated_signalguid(::Proto::Guid* signalguid);
+  // optional .Proto.Uuid signalUuid = 10;
+  inline bool has_signaluuid() const;
+  inline void clear_signaluuid();
+  static const int kSignalUuidFieldNumber = 10;
+  inline const ::Proto::Uuid& signaluuid() const;
+  inline ::Proto::Uuid* mutable_signaluuid();
+  inline ::Proto::Uuid* release_signaluuid();
+  inline void set_allocated_signaluuid(::Proto::Uuid* signaluuid);
 
-  // optional .Proto.wstring signalStrID = 101;
+  // optional .Proto.wstring signalStrID = 11;
   inline bool has_signalstrid() const;
   inline void clear_signalstrid();
-  static const int kSignalStrIDFieldNumber = 101;
+  static const int kSignalStrIDFieldNumber = 11;
   inline const ::Proto::wstring& signalstrid() const;
   inline ::Proto::wstring* mutable_signalstrid();
   inline ::Proto::wstring* release_signalstrid();
   inline void set_allocated_signalstrid(::Proto::wstring* signalstrid);
 
-  // optional .Proto.wstring signalCaption = 102;
+  // optional .Proto.wstring signalCaption = 12;
   inline bool has_signalcaption() const;
   inline void clear_signalcaption();
-  static const int kSignalCaptionFieldNumber = 102;
+  static const int kSignalCaptionFieldNumber = 12;
   inline const ::Proto::wstring& signalcaption() const;
   inline ::Proto::wstring* mutable_signalcaption();
   inline ::Proto::wstring* release_signalcaption();
@@ -2663,10 +2676,10 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline void clear_has_point();
   inline void set_has_dirrection();
   inline void clear_has_dirrection();
-  inline void set_has_guid();
-  inline void clear_has_guid();
-  inline void set_has_signalguid();
-  inline void clear_has_signalguid();
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
+  inline void set_has_signaluuid();
+  inline void clear_has_signaluuid();
   inline void set_has_signalstrid();
   inline void clear_has_signalstrid();
   inline void set_has_signalcaption();
@@ -2675,8 +2688,8 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::VideoItemPoint* point_;
-  ::Proto::Guid* guid_;
-  ::Proto::Guid* signalguid_;
+  ::Proto::Uuid* uuid_;
+  ::Proto::Uuid* signaluuid_;
   ::Proto::wstring* signalstrid_;
   ::Proto::wstring* signalcaption_;
   int dirrection_;
@@ -3364,80 +3377,188 @@ class VideoItemFblElement : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static VideoItemFblElement* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class DeviceObject : public ::google::protobuf::Message {
+ public:
+  DeviceObject();
+  virtual ~DeviceObject();
+
+  DeviceObject(const DeviceObject& from);
+
+  inline DeviceObject& operator=(const DeviceObject& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DeviceObject& default_instance();
+
+  void Swap(DeviceObject* other);
+
+  // implements Message ----------------------------------------------
+
+  DeviceObject* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DeviceObject& from);
+  void MergeFrom(const DeviceObject& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .Proto.Uuid uuid = 1;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 1;
+  inline const ::Proto::Uuid& uuid() const;
+  inline ::Proto::Uuid* mutable_uuid();
+  inline ::Proto::Uuid* release_uuid();
+  inline void set_allocated_uuid(::Proto::Uuid* uuid);
+
+  // optional .Proto.wstring strId = 2;
+  inline bool has_strid() const;
+  inline void clear_strid();
+  static const int kStrIdFieldNumber = 2;
+  inline const ::Proto::wstring& strid() const;
+  inline ::Proto::wstring* mutable_strid();
+  inline ::Proto::wstring* release_strid();
+  inline void set_allocated_strid(::Proto::wstring* strid);
+
+  // optional .Proto.wstring caption = 3;
+  inline bool has_caption() const;
+  inline void clear_caption();
+  static const int kCaptionFieldNumber = 3;
+  inline const ::Proto::wstring& caption() const;
+  inline ::Proto::wstring* mutable_caption();
+  inline ::Proto::wstring* release_caption();
+  inline void set_allocated_caption(::Proto::wstring* caption);
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceObject)
+ private:
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
+  inline void set_has_strid();
+  inline void clear_has_strid();
+  inline void set_has_caption();
+  inline void clear_has_caption();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::Proto::Uuid* uuid_;
+  ::Proto::wstring* strid_;
+  ::Proto::wstring* caption_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static DeviceObject* default_instance_;
+};
 // ===================================================================
 
 
 // ===================================================================
 
-// Guid
+// Uuid
 
-// required bytes guid = 1;
-inline bool Guid::has_guid() const {
+// required bytes uuid = 1;
+inline bool Uuid::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Guid::set_has_guid() {
+inline void Uuid::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Guid::clear_has_guid() {
+inline void Uuid::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void Guid::clear_guid() {
-  if (guid_ != &::google::protobuf::internal::kEmptyString) {
-    guid_->clear();
+inline void Uuid::clear_uuid() {
+  if (uuid_ != &::google::protobuf::internal::kEmptyString) {
+    uuid_->clear();
   }
-  clear_has_guid();
+  clear_has_uuid();
 }
-inline const ::std::string& Guid::guid() const {
-  return *guid_;
+inline const ::std::string& Uuid::uuid() const {
+  return *uuid_;
 }
-inline void Guid::set_guid(const ::std::string& value) {
-  set_has_guid();
-  if (guid_ == &::google::protobuf::internal::kEmptyString) {
-    guid_ = new ::std::string;
+inline void Uuid::set_uuid(const ::std::string& value) {
+  set_has_uuid();
+  if (uuid_ == &::google::protobuf::internal::kEmptyString) {
+    uuid_ = new ::std::string;
   }
-  guid_->assign(value);
+  uuid_->assign(value);
 }
-inline void Guid::set_guid(const char* value) {
-  set_has_guid();
-  if (guid_ == &::google::protobuf::internal::kEmptyString) {
-    guid_ = new ::std::string;
+inline void Uuid::set_uuid(const char* value) {
+  set_has_uuid();
+  if (uuid_ == &::google::protobuf::internal::kEmptyString) {
+    uuid_ = new ::std::string;
   }
-  guid_->assign(value);
+  uuid_->assign(value);
 }
-inline void Guid::set_guid(const void* value, size_t size) {
-  set_has_guid();
-  if (guid_ == &::google::protobuf::internal::kEmptyString) {
-    guid_ = new ::std::string;
+inline void Uuid::set_uuid(const void* value, size_t size) {
+  set_has_uuid();
+  if (uuid_ == &::google::protobuf::internal::kEmptyString) {
+    uuid_ = new ::std::string;
   }
-  guid_->assign(reinterpret_cast<const char*>(value), size);
+  uuid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* Guid::mutable_guid() {
-  set_has_guid();
-  if (guid_ == &::google::protobuf::internal::kEmptyString) {
-    guid_ = new ::std::string;
+inline ::std::string* Uuid::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == &::google::protobuf::internal::kEmptyString) {
+    uuid_ = new ::std::string;
   }
-  return guid_;
+  return uuid_;
 }
-inline ::std::string* Guid::release_guid() {
-  clear_has_guid();
-  if (guid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* Uuid::release_uuid() {
+  clear_has_uuid();
+  if (uuid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = guid_;
-    guid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = uuid_;
+    uuid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void Guid::set_allocated_guid(::std::string* guid) {
-  if (guid_ != &::google::protobuf::internal::kEmptyString) {
-    delete guid_;
+inline void Uuid::set_allocated_uuid(::std::string* uuid) {
+  if (uuid_ != &::google::protobuf::internal::kEmptyString) {
+    delete uuid_;
   }
-  if (guid) {
-    set_has_guid();
-    guid_ = guid;
+  if (uuid) {
+    set_has_uuid();
+    uuid_ = uuid;
   } else {
-    clear_has_guid();
-    guid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_uuid();
+    uuid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
@@ -3697,15 +3818,91 @@ inline void Envelope::set_classnamehash(::google::protobuf::uint32 value) {
   classnamehash_ = value;
 }
 
-// optional .Proto.VideoFrame videoframe = 100;
-inline bool Envelope::has_videoframe() const {
+// optional .Proto.VideoItem videoitem = 6;
+inline bool Envelope::has_videoitem() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Envelope::set_has_videoframe() {
+inline void Envelope::set_has_videoitem() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Envelope::clear_has_videoframe() {
+inline void Envelope::clear_has_videoitem() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void Envelope::clear_videoitem() {
+  if (videoitem_ != NULL) videoitem_->::Proto::VideoItem::Clear();
+  clear_has_videoitem();
+}
+inline const ::Proto::VideoItem& Envelope::videoitem() const {
+  return videoitem_ != NULL ? *videoitem_ : *default_instance_->videoitem_;
+}
+inline ::Proto::VideoItem* Envelope::mutable_videoitem() {
+  set_has_videoitem();
+  if (videoitem_ == NULL) videoitem_ = new ::Proto::VideoItem;
+  return videoitem_;
+}
+inline ::Proto::VideoItem* Envelope::release_videoitem() {
+  clear_has_videoitem();
+  ::Proto::VideoItem* temp = videoitem_;
+  videoitem_ = NULL;
+  return temp;
+}
+inline void Envelope::set_allocated_videoitem(::Proto::VideoItem* videoitem) {
+  delete videoitem_;
+  videoitem_ = videoitem;
+  if (videoitem) {
+    set_has_videoitem();
+  } else {
+    clear_has_videoitem();
+  }
+}
+
+// optional .Proto.DeviceObject deviceobject = 7;
+inline bool Envelope::has_deviceobject() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Envelope::set_has_deviceobject() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Envelope::clear_has_deviceobject() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Envelope::clear_deviceobject() {
+  if (deviceobject_ != NULL) deviceobject_->::Proto::DeviceObject::Clear();
+  clear_has_deviceobject();
+}
+inline const ::Proto::DeviceObject& Envelope::deviceobject() const {
+  return deviceobject_ != NULL ? *deviceobject_ : *default_instance_->deviceobject_;
+}
+inline ::Proto::DeviceObject* Envelope::mutable_deviceobject() {
+  set_has_deviceobject();
+  if (deviceobject_ == NULL) deviceobject_ = new ::Proto::DeviceObject;
+  return deviceobject_;
+}
+inline ::Proto::DeviceObject* Envelope::release_deviceobject() {
+  clear_has_deviceobject();
+  ::Proto::DeviceObject* temp = deviceobject_;
+  deviceobject_ = NULL;
+  return temp;
+}
+inline void Envelope::set_allocated_deviceobject(::Proto::DeviceObject* deviceobject) {
+  delete deviceobject_;
+  deviceobject_ = deviceobject;
+  if (deviceobject) {
+    set_has_deviceobject();
+  } else {
+    clear_has_deviceobject();
+  }
+}
+
+// optional .Proto.VideoFrame videoframe = 100;
+inline bool Envelope::has_videoframe() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Envelope::set_has_videoframe() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Envelope::clear_has_videoframe() {
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void Envelope::clear_videoframe() {
   if (videoframe_ != NULL) videoframe_->::Proto::VideoFrame::Clear();
@@ -3737,13 +3934,13 @@ inline void Envelope::set_allocated_videoframe(::Proto::VideoFrame* videoframe) 
 
 // optional .Proto.VideoLayer videolayer = 101;
 inline bool Envelope::has_videolayer() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void Envelope::set_has_videolayer() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void Envelope::clear_has_videolayer() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void Envelope::clear_videolayer() {
   if (videolayer_ != NULL) videolayer_->::Proto::VideoLayer::Clear();
@@ -3773,53 +3970,15 @@ inline void Envelope::set_allocated_videolayer(::Proto::VideoLayer* videolayer) 
   }
 }
 
-// optional .Proto.VideoItem videoitem = 102;
-inline bool Envelope::has_videoitem() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void Envelope::set_has_videoitem() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void Envelope::clear_has_videoitem() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void Envelope::clear_videoitem() {
-  if (videoitem_ != NULL) videoitem_->::Proto::VideoItem::Clear();
-  clear_has_videoitem();
-}
-inline const ::Proto::VideoItem& Envelope::videoitem() const {
-  return videoitem_ != NULL ? *videoitem_ : *default_instance_->videoitem_;
-}
-inline ::Proto::VideoItem* Envelope::mutable_videoitem() {
-  set_has_videoitem();
-  if (videoitem_ == NULL) videoitem_ = new ::Proto::VideoItem;
-  return videoitem_;
-}
-inline ::Proto::VideoItem* Envelope::release_videoitem() {
-  clear_has_videoitem();
-  ::Proto::VideoItem* temp = videoitem_;
-  videoitem_ = NULL;
-  return temp;
-}
-inline void Envelope::set_allocated_videoitem(::Proto::VideoItem* videoitem) {
-  delete videoitem_;
-  videoitem_ = videoitem;
-  if (videoitem) {
-    set_has_videoitem();
-  } else {
-    clear_has_videoitem();
-  }
-}
-
-// optional .Proto.FblElement fblelement = 103;
+// optional .Proto.FblElement fblelement = 102;
 inline bool Envelope::has_fblelement() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void Envelope::set_has_fblelement() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void Envelope::clear_has_fblelement() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void Envelope::clear_fblelement() {
   if (fblelement_ != NULL) fblelement_->::Proto::FblElement::Clear();
@@ -3849,15 +4008,15 @@ inline void Envelope::set_allocated_fblelement(::Proto::FblElement* fblelement) 
   }
 }
 
-// optional .Proto.Configuration configuration = 104;
+// optional .Proto.Configuration configuration = 103;
 inline bool Envelope::has_configuration() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void Envelope::set_has_configuration() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void Envelope::clear_has_configuration() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void Envelope::clear_configuration() {
   if (configuration_ != NULL) configuration_->::Proto::Configuration::Clear();
@@ -3891,41 +4050,41 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
 
 // Configuration
 
-// required .Proto.Guid guid = 1;
-inline bool Configuration::has_guid() const {
+// required .Proto.Uuid uuid = 1;
+inline bool Configuration::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Configuration::set_has_guid() {
+inline void Configuration::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Configuration::clear_has_guid() {
+inline void Configuration::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void Configuration::clear_guid() {
-  if (guid_ != NULL) guid_->::Proto::Guid::Clear();
-  clear_has_guid();
+inline void Configuration::clear_uuid() {
+  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+  clear_has_uuid();
 }
-inline const ::Proto::Guid& Configuration::guid() const {
-  return guid_ != NULL ? *guid_ : *default_instance_->guid_;
+inline const ::Proto::Uuid& Configuration::uuid() const {
+  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Guid* Configuration::mutable_guid() {
-  set_has_guid();
-  if (guid_ == NULL) guid_ = new ::Proto::Guid;
-  return guid_;
+inline ::Proto::Uuid* Configuration::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
+  return uuid_;
 }
-inline ::Proto::Guid* Configuration::release_guid() {
-  clear_has_guid();
-  ::Proto::Guid* temp = guid_;
-  guid_ = NULL;
+inline ::Proto::Uuid* Configuration::release_uuid() {
+  clear_has_uuid();
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = NULL;
   return temp;
 }
-inline void Configuration::set_allocated_guid(::Proto::Guid* guid) {
-  delete guid_;
-  guid_ = guid;
-  if (guid) {
-    set_has_guid();
+inline void Configuration::set_allocated_uuid(::Proto::Uuid* uuid) {
+  delete uuid_;
+  uuid_ = uuid;
+  if (uuid) {
+    set_has_uuid();
   } else {
-    clear_has_guid();
+    clear_has_uuid();
   }
 }
 
@@ -4081,27 +4240,27 @@ inline void Configuration::set_allocated_globals(::Proto::wstring* globals) {
   }
 }
 
-// repeated .Proto.Guid videoFramesIDs = 100;
+// repeated .Proto.Uuid videoFramesIDs = 100;
 inline int Configuration::videoframesids_size() const {
   return videoframesids_.size();
 }
 inline void Configuration::clear_videoframesids() {
   videoframesids_.Clear();
 }
-inline const ::Proto::Guid& Configuration::videoframesids(int index) const {
+inline const ::Proto::Uuid& Configuration::videoframesids(int index) const {
   return videoframesids_.Get(index);
 }
-inline ::Proto::Guid* Configuration::mutable_videoframesids(int index) {
+inline ::Proto::Uuid* Configuration::mutable_videoframesids(int index) {
   return videoframesids_.Mutable(index);
 }
-inline ::Proto::Guid* Configuration::add_videoframesids() {
+inline ::Proto::Uuid* Configuration::add_videoframesids() {
   return videoframesids_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::Guid >&
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >&
 Configuration::videoframesids() const {
   return videoframesids_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::Guid >*
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
 Configuration::mutable_videoframesids() {
   return &videoframesids_;
 }
@@ -4135,41 +4294,41 @@ Configuration::mutable_videoframes() {
 
 // FblElement
 
-// required .Proto.Guid guid = 1;
-inline bool FblElement::has_guid() const {
+// required .Proto.Uuid uuid = 1;
+inline bool FblElement::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void FblElement::set_has_guid() {
+inline void FblElement::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void FblElement::clear_has_guid() {
+inline void FblElement::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void FblElement::clear_guid() {
-  if (guid_ != NULL) guid_->::Proto::Guid::Clear();
-  clear_has_guid();
+inline void FblElement::clear_uuid() {
+  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+  clear_has_uuid();
 }
-inline const ::Proto::Guid& FblElement::guid() const {
-  return guid_ != NULL ? *guid_ : *default_instance_->guid_;
+inline const ::Proto::Uuid& FblElement::uuid() const {
+  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Guid* FblElement::mutable_guid() {
-  set_has_guid();
-  if (guid_ == NULL) guid_ = new ::Proto::Guid;
-  return guid_;
+inline ::Proto::Uuid* FblElement::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
+  return uuid_;
 }
-inline ::Proto::Guid* FblElement::release_guid() {
-  clear_has_guid();
-  ::Proto::Guid* temp = guid_;
-  guid_ = NULL;
+inline ::Proto::Uuid* FblElement::release_uuid() {
+  clear_has_uuid();
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = NULL;
   return temp;
 }
-inline void FblElement::set_allocated_guid(::Proto::Guid* guid) {
-  delete guid_;
-  guid_ = guid;
-  if (guid) {
-    set_has_guid();
+inline void FblElement::set_allocated_uuid(::Proto::Uuid* uuid) {
+  delete uuid_;
+  uuid_ = uuid;
+  if (uuid) {
+    set_has_uuid();
   } else {
-    clear_has_guid();
+    clear_has_uuid();
   }
 }
 
@@ -4271,7 +4430,7 @@ inline void FblElement::set_opcode(::google::protobuf::uint32 value) {
   opcode_ = value;
 }
 
-// repeated .Proto.FblElementSignal inputSignals = 100;
+// repeated .Proto.FblElementSignal inputSignals = 11;
 inline int FblElement::inputsignals_size() const {
   return inputsignals_.size();
 }
@@ -4296,7 +4455,7 @@ FblElement::mutable_inputsignals() {
   return &inputsignals_;
 }
 
-// repeated .Proto.FblElementSignal outputSignals = 101;
+// repeated .Proto.FblElementSignal outputSignals = 12;
 inline int FblElement::outputsignals_size() const {
   return outputsignals_.size();
 }
@@ -4321,7 +4480,7 @@ FblElement::mutable_outputsignals() {
   return &outputsignals_;
 }
 
-// repeated .Proto.FblElementParam params = 102;
+// repeated .Proto.FblElementParam params = 13;
 inline int FblElement::params_size() const {
   return params_.size();
 }
@@ -4702,41 +4861,41 @@ inline void FblParamValue::set_discrete(bool value) {
 
 // VideoFrame
 
-// required .Proto.Guid guid = 1;
-inline bool VideoFrame::has_guid() const {
+// required .Proto.Uuid uuid = 1;
+inline bool VideoFrame::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoFrame::set_has_guid() {
+inline void VideoFrame::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoFrame::clear_has_guid() {
+inline void VideoFrame::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoFrame::clear_guid() {
-  if (guid_ != NULL) guid_->::Proto::Guid::Clear();
-  clear_has_guid();
+inline void VideoFrame::clear_uuid() {
+  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+  clear_has_uuid();
 }
-inline const ::Proto::Guid& VideoFrame::guid() const {
-  return guid_ != NULL ? *guid_ : *default_instance_->guid_;
+inline const ::Proto::Uuid& VideoFrame::uuid() const {
+  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Guid* VideoFrame::mutable_guid() {
-  set_has_guid();
-  if (guid_ == NULL) guid_ = new ::Proto::Guid;
-  return guid_;
+inline ::Proto::Uuid* VideoFrame::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
+  return uuid_;
 }
-inline ::Proto::Guid* VideoFrame::release_guid() {
-  clear_has_guid();
-  ::Proto::Guid* temp = guid_;
-  guid_ = NULL;
+inline ::Proto::Uuid* VideoFrame::release_uuid() {
+  clear_has_uuid();
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = NULL;
   return temp;
 }
-inline void VideoFrame::set_allocated_guid(::Proto::Guid* guid) {
-  delete guid_;
-  guid_ = guid;
-  if (guid) {
-    set_has_guid();
+inline void VideoFrame::set_allocated_uuid(::Proto::Uuid* uuid) {
+  delete uuid_;
+  uuid_ = uuid;
+  if (uuid) {
+    set_has_uuid();
   } else {
-    clear_has_guid();
+    clear_has_uuid();
   }
 }
 
@@ -4912,41 +5071,41 @@ VideoFrame::mutable_layers() {
 
 // VideoLayer
 
-// required .Proto.Guid guid = 1;
-inline bool VideoLayer::has_guid() const {
+// required .Proto.Uuid uuid = 1;
+inline bool VideoLayer::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoLayer::set_has_guid() {
+inline void VideoLayer::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoLayer::clear_has_guid() {
+inline void VideoLayer::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoLayer::clear_guid() {
-  if (guid_ != NULL) guid_->::Proto::Guid::Clear();
-  clear_has_guid();
+inline void VideoLayer::clear_uuid() {
+  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+  clear_has_uuid();
 }
-inline const ::Proto::Guid& VideoLayer::guid() const {
-  return guid_ != NULL ? *guid_ : *default_instance_->guid_;
+inline const ::Proto::Uuid& VideoLayer::uuid() const {
+  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Guid* VideoLayer::mutable_guid() {
-  set_has_guid();
-  if (guid_ == NULL) guid_ = new ::Proto::Guid;
-  return guid_;
+inline ::Proto::Uuid* VideoLayer::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
+  return uuid_;
 }
-inline ::Proto::Guid* VideoLayer::release_guid() {
-  clear_has_guid();
-  ::Proto::Guid* temp = guid_;
-  guid_ = NULL;
+inline ::Proto::Uuid* VideoLayer::release_uuid() {
+  clear_has_uuid();
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = NULL;
   return temp;
 }
-inline void VideoLayer::set_allocated_guid(::Proto::Guid* guid) {
-  delete guid_;
-  guid_ = guid;
-  if (guid) {
-    set_has_guid();
+inline void VideoLayer::set_allocated_uuid(::Proto::Uuid* uuid) {
+  delete uuid_;
+  uuid_ = uuid;
+  if (uuid) {
+    set_has_uuid();
   } else {
-    clear_has_guid();
+    clear_has_uuid();
   }
 }
 
@@ -5054,7 +5213,7 @@ inline void VideoLayer::set_print(bool value) {
   print_ = value;
 }
 
-// repeated .Proto.Envelope items = 100;
+// repeated .Proto.Envelope items = 15;
 inline int VideoLayer::items_size() const {
   return items_.size();
 }
@@ -5083,41 +5242,41 @@ VideoLayer::mutable_items() {
 
 // VideoItem
 
-// required .Proto.Guid guid = 1;
-inline bool VideoItem::has_guid() const {
+// required .Proto.Uuid uuid = 1;
+inline bool VideoItem::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItem::set_has_guid() {
+inline void VideoItem::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItem::clear_has_guid() {
+inline void VideoItem::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItem::clear_guid() {
-  if (guid_ != NULL) guid_->::Proto::Guid::Clear();
-  clear_has_guid();
+inline void VideoItem::clear_uuid() {
+  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+  clear_has_uuid();
 }
-inline const ::Proto::Guid& VideoItem::guid() const {
-  return guid_ != NULL ? *guid_ : *default_instance_->guid_;
+inline const ::Proto::Uuid& VideoItem::uuid() const {
+  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Guid* VideoItem::mutable_guid() {
-  set_has_guid();
-  if (guid_ == NULL) guid_ = new ::Proto::Guid;
-  return guid_;
+inline ::Proto::Uuid* VideoItem::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
+  return uuid_;
 }
-inline ::Proto::Guid* VideoItem::release_guid() {
-  clear_has_guid();
-  ::Proto::Guid* temp = guid_;
-  guid_ = NULL;
+inline ::Proto::Uuid* VideoItem::release_uuid() {
+  clear_has_uuid();
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_guid(::Proto::Guid* guid) {
-  delete guid_;
-  guid_ = guid;
-  if (guid) {
-    set_has_guid();
+inline void VideoItem::set_allocated_uuid(::Proto::Uuid* uuid) {
+  delete uuid_;
+  uuid_ = uuid;
+  if (uuid) {
+    set_has_uuid();
   } else {
-    clear_has_guid();
+    clear_has_uuid();
   }
 }
 
@@ -5248,7 +5407,7 @@ inline void VideoItem::set_allocated_clickscript(::Proto::wstring* clickscript) 
   }
 }
 
-// optional .Proto.PosRectImpl PosRectImpl = 1000;
+// optional .Proto.PosRectImpl PosRectImpl = 10;
 inline bool VideoItem::has_posrectimpl() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
@@ -5286,7 +5445,7 @@ inline void VideoItem::set_allocated_posrectimpl(::Proto::PosRectImpl* posrectim
   }
 }
 
-// optional .Proto.PosLineImpl PosLineImpl = 1001;
+// optional .Proto.PosLineImpl PosLineImpl = 11;
 inline bool VideoItem::has_poslineimpl() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
@@ -5324,7 +5483,7 @@ inline void VideoItem::set_allocated_poslineimpl(::Proto::PosLineImpl* poslineim
   }
 }
 
-// optional .Proto.PosConnectionImpl PosConnectionImpl = 1002;
+// optional .Proto.PosConnectionImpl PosConnectionImpl = 12;
 inline bool VideoItem::has_posconnectionimpl() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
@@ -5362,7 +5521,7 @@ inline void VideoItem::set_allocated_posconnectionimpl(::Proto::PosConnectionImp
   }
 }
 
-// optional .Proto.FblItem FblItem = 1006;
+// optional .Proto.FblItem FblItem = 106;
 inline bool VideoItem::has_fblitem() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
@@ -5400,7 +5559,7 @@ inline void VideoItem::set_allocated_fblitem(::Proto::FblItem* fblitem) {
   }
 }
 
-// optional .Proto.FblItemRect FblItemRect = 1007;
+// optional .Proto.FblItemRect FblItemRect = 107;
 inline bool VideoItem::has_fblitemrect() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
@@ -5438,7 +5597,7 @@ inline void VideoItem::set_allocated_fblitemrect(::Proto::FblItemRect* fblitemre
   }
 }
 
-// optional .Proto.FblItemLine FblItemLine = 1008;
+// optional .Proto.FblItemLine FblItemLine = 108;
 inline bool VideoItem::has_fblitemline() const {
   return (_has_bits_[0] & 0x00000800u) != 0;
 }
@@ -5476,7 +5635,7 @@ inline void VideoItem::set_allocated_fblitemline(::Proto::FblItemLine* fblitemli
   }
 }
 
-// optional .Proto.VideoItemRect Rect = 1016;
+// optional .Proto.VideoItemRect Rect = 116;
 inline bool VideoItem::has_rect() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
@@ -5514,7 +5673,7 @@ inline void VideoItem::set_allocated_rect(::Proto::VideoItemRect* rect) {
   }
 }
 
-// optional .Proto.VideoItemLine Line = 1017;
+// optional .Proto.VideoItemLine Line = 117;
 inline bool VideoItem::has_line() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
@@ -5552,7 +5711,7 @@ inline void VideoItem::set_allocated_line(::Proto::VideoItemLine* line) {
   }
 }
 
-// optional .Proto.VideoItemConnectionLine ConnectionLine = 1018;
+// optional .Proto.VideoItemConnectionLine ConnectionLine = 118;
 inline bool VideoItem::has_connectionline() const {
   return (_has_bits_[0] & 0x00004000u) != 0;
 }
@@ -5590,7 +5749,7 @@ inline void VideoItem::set_allocated_connectionline(::Proto::VideoItemConnection
   }
 }
 
-// optional .Proto.VideoItemSignal Signal = 1024;
+// optional .Proto.VideoItemSignal Signal = 124;
 inline bool VideoItem::has_signal() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
@@ -5628,7 +5787,7 @@ inline void VideoItem::set_allocated_signal(::Proto::VideoItemSignal* signal) {
   }
 }
 
-// optional .Proto.VideoItemInputSignal InputSignal = 1025;
+// optional .Proto.VideoItemInputSignal InputSignal = 125;
 inline bool VideoItem::has_inputsignal() const {
   return (_has_bits_[0] & 0x00010000u) != 0;
 }
@@ -5666,7 +5825,7 @@ inline void VideoItem::set_allocated_inputsignal(::Proto::VideoItemInputSignal* 
   }
 }
 
-// optional .Proto.VideoItemOutputSignal OutputSignal = 1026;
+// optional .Proto.VideoItemOutputSignal OutputSignal = 126;
 inline bool VideoItem::has_outputsignal() const {
   return (_has_bits_[0] & 0x00020000u) != 0;
 }
@@ -5704,7 +5863,7 @@ inline void VideoItem::set_allocated_outputsignal(::Proto::VideoItemOutputSignal
   }
 }
 
-// optional .Proto.VideoItemLink Link = 1027;
+// optional .Proto.VideoItemLink Link = 127;
 inline bool VideoItem::has_link() const {
   return (_has_bits_[0] & 0x00040000u) != 0;
 }
@@ -5742,7 +5901,7 @@ inline void VideoItem::set_allocated_link(::Proto::VideoItemLink* link) {
   }
 }
 
-// optional .Proto.VideoItemFblElement VideoItemFblElement = 1028;
+// optional .Proto.VideoItemFblElement VideoItemFblElement = 128;
 inline bool VideoItem::has_videoitemfblelement() const {
   return (_has_bits_[0] & 0x00080000u) != 0;
 }
@@ -6344,83 +6503,83 @@ inline void FblConnectionPoint::set_dirrection(::Proto::ConnectionDirrection val
   dirrection_ = value;
 }
 
-// required .Proto.Guid guid = 3;
-inline bool FblConnectionPoint::has_guid() const {
+// required .Proto.Uuid uuid = 3;
+inline bool FblConnectionPoint::has_uuid() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void FblConnectionPoint::set_has_guid() {
+inline void FblConnectionPoint::set_has_uuid() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void FblConnectionPoint::clear_has_guid() {
+inline void FblConnectionPoint::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void FblConnectionPoint::clear_guid() {
-  if (guid_ != NULL) guid_->::Proto::Guid::Clear();
-  clear_has_guid();
+inline void FblConnectionPoint::clear_uuid() {
+  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+  clear_has_uuid();
 }
-inline const ::Proto::Guid& FblConnectionPoint::guid() const {
-  return guid_ != NULL ? *guid_ : *default_instance_->guid_;
+inline const ::Proto::Uuid& FblConnectionPoint::uuid() const {
+  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Guid* FblConnectionPoint::mutable_guid() {
-  set_has_guid();
-  if (guid_ == NULL) guid_ = new ::Proto::Guid;
-  return guid_;
+inline ::Proto::Uuid* FblConnectionPoint::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
+  return uuid_;
 }
-inline ::Proto::Guid* FblConnectionPoint::release_guid() {
-  clear_has_guid();
-  ::Proto::Guid* temp = guid_;
-  guid_ = NULL;
+inline ::Proto::Uuid* FblConnectionPoint::release_uuid() {
+  clear_has_uuid();
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = NULL;
   return temp;
 }
-inline void FblConnectionPoint::set_allocated_guid(::Proto::Guid* guid) {
-  delete guid_;
-  guid_ = guid;
-  if (guid) {
-    set_has_guid();
+inline void FblConnectionPoint::set_allocated_uuid(::Proto::Uuid* uuid) {
+  delete uuid_;
+  uuid_ = uuid;
+  if (uuid) {
+    set_has_uuid();
   } else {
-    clear_has_guid();
+    clear_has_uuid();
   }
 }
 
-// optional .Proto.Guid signalGuid = 100;
-inline bool FblConnectionPoint::has_signalguid() const {
+// optional .Proto.Uuid signalUuid = 10;
+inline bool FblConnectionPoint::has_signaluuid() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void FblConnectionPoint::set_has_signalguid() {
+inline void FblConnectionPoint::set_has_signaluuid() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void FblConnectionPoint::clear_has_signalguid() {
+inline void FblConnectionPoint::clear_has_signaluuid() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void FblConnectionPoint::clear_signalguid() {
-  if (signalguid_ != NULL) signalguid_->::Proto::Guid::Clear();
-  clear_has_signalguid();
+inline void FblConnectionPoint::clear_signaluuid() {
+  if (signaluuid_ != NULL) signaluuid_->::Proto::Uuid::Clear();
+  clear_has_signaluuid();
 }
-inline const ::Proto::Guid& FblConnectionPoint::signalguid() const {
-  return signalguid_ != NULL ? *signalguid_ : *default_instance_->signalguid_;
+inline const ::Proto::Uuid& FblConnectionPoint::signaluuid() const {
+  return signaluuid_ != NULL ? *signaluuid_ : *default_instance_->signaluuid_;
 }
-inline ::Proto::Guid* FblConnectionPoint::mutable_signalguid() {
-  set_has_signalguid();
-  if (signalguid_ == NULL) signalguid_ = new ::Proto::Guid;
-  return signalguid_;
+inline ::Proto::Uuid* FblConnectionPoint::mutable_signaluuid() {
+  set_has_signaluuid();
+  if (signaluuid_ == NULL) signaluuid_ = new ::Proto::Uuid;
+  return signaluuid_;
 }
-inline ::Proto::Guid* FblConnectionPoint::release_signalguid() {
-  clear_has_signalguid();
-  ::Proto::Guid* temp = signalguid_;
-  signalguid_ = NULL;
+inline ::Proto::Uuid* FblConnectionPoint::release_signaluuid() {
+  clear_has_signaluuid();
+  ::Proto::Uuid* temp = signaluuid_;
+  signaluuid_ = NULL;
   return temp;
 }
-inline void FblConnectionPoint::set_allocated_signalguid(::Proto::Guid* signalguid) {
-  delete signalguid_;
-  signalguid_ = signalguid;
-  if (signalguid) {
-    set_has_signalguid();
+inline void FblConnectionPoint::set_allocated_signaluuid(::Proto::Uuid* signaluuid) {
+  delete signaluuid_;
+  signaluuid_ = signaluuid;
+  if (signaluuid) {
+    set_has_signaluuid();
   } else {
-    clear_has_signalguid();
+    clear_has_signaluuid();
   }
 }
 
-// optional .Proto.wstring signalStrID = 101;
+// optional .Proto.wstring signalStrID = 11;
 inline bool FblConnectionPoint::has_signalstrid() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -6458,7 +6617,7 @@ inline void FblConnectionPoint::set_allocated_signalstrid(::Proto::wstring* sign
   }
 }
 
-// optional .Proto.wstring signalCaption = 102;
+// optional .Proto.wstring signalCaption = 12;
 inline bool FblConnectionPoint::has_signalcaption() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -6758,6 +6917,124 @@ inline void VideoItemFblElement::set_allocated_fblelement(::Proto::Envelope* fbl
     set_has_fblelement();
   } else {
     clear_has_fblelement();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// DeviceObject
+
+// optional .Proto.Uuid uuid = 1;
+inline bool DeviceObject::has_uuid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void DeviceObject::set_has_uuid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void DeviceObject::clear_has_uuid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void DeviceObject::clear_uuid() {
+  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+  clear_has_uuid();
+}
+inline const ::Proto::Uuid& DeviceObject::uuid() const {
+  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
+}
+inline ::Proto::Uuid* DeviceObject::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
+  return uuid_;
+}
+inline ::Proto::Uuid* DeviceObject::release_uuid() {
+  clear_has_uuid();
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_uuid(::Proto::Uuid* uuid) {
+  delete uuid_;
+  uuid_ = uuid;
+  if (uuid) {
+    set_has_uuid();
+  } else {
+    clear_has_uuid();
+  }
+}
+
+// optional .Proto.wstring strId = 2;
+inline bool DeviceObject::has_strid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void DeviceObject::set_has_strid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void DeviceObject::clear_has_strid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void DeviceObject::clear_strid() {
+  if (strid_ != NULL) strid_->::Proto::wstring::Clear();
+  clear_has_strid();
+}
+inline const ::Proto::wstring& DeviceObject::strid() const {
+  return strid_ != NULL ? *strid_ : *default_instance_->strid_;
+}
+inline ::Proto::wstring* DeviceObject::mutable_strid() {
+  set_has_strid();
+  if (strid_ == NULL) strid_ = new ::Proto::wstring;
+  return strid_;
+}
+inline ::Proto::wstring* DeviceObject::release_strid() {
+  clear_has_strid();
+  ::Proto::wstring* temp = strid_;
+  strid_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_strid(::Proto::wstring* strid) {
+  delete strid_;
+  strid_ = strid;
+  if (strid) {
+    set_has_strid();
+  } else {
+    clear_has_strid();
+  }
+}
+
+// optional .Proto.wstring caption = 3;
+inline bool DeviceObject::has_caption() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void DeviceObject::set_has_caption() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void DeviceObject::clear_has_caption() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void DeviceObject::clear_caption() {
+  if (caption_ != NULL) caption_->::Proto::wstring::Clear();
+  clear_has_caption();
+}
+inline const ::Proto::wstring& DeviceObject::caption() const {
+  return caption_ != NULL ? *caption_ : *default_instance_->caption_;
+}
+inline ::Proto::wstring* DeviceObject::mutable_caption() {
+  set_has_caption();
+  if (caption_ == NULL) caption_ = new ::Proto::wstring;
+  return caption_;
+}
+inline ::Proto::wstring* DeviceObject::release_caption() {
+  clear_has_caption();
+  ::Proto::wstring* temp = caption_;
+  caption_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_caption(::Proto::wstring* caption) {
+  delete caption_;
+  caption_ = caption;
+  if (caption) {
+    set_has_caption();
+  } else {
+    clear_has_caption();
   }
 }
 

@@ -519,7 +519,7 @@ bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWi
 	return true;
 }
 
-bool DbController::addSystem(const DeviceSystem* system, QWidget* parentWidget)
+bool DbController::addSystem(const Hardware::DeviceSystem* system, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -590,7 +590,7 @@ bool DbController::initOperation()
 {
 	if (m_operationMutex.tryLock() == false)		// MUST BE UNLOCKED LATER (in waitForComplete!!!)
 	{
-		qDebug() << "DbStore: Another operation is in progress!";
+		qDebug() << "DbController: Another operation is in progress!";
 		return false;
 	}
 
@@ -727,4 +727,22 @@ int DbController::wvsFileId() const
 int DbController::dvsFileId() const
 {
 	return m_worker->dvsFileId();
+
 }
+
+HasDbController::HasDbController()
+{
+	assert(false);
+}
+
+HasDbController::HasDbController(DbController* dbcontroller) :
+	m_dbController(dbcontroller)
+{
+	assert(dbcontroller);
+}
+
+DbController* HasDbController::dbcontroller()
+{
+	return m_dbController;
+}
+

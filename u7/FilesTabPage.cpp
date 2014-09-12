@@ -1,5 +1,5 @@
 #include "FilesTabPage.h"
-#include "../include/DbStore.h"
+#include "../include/DbController.h"
 /*
 
 //

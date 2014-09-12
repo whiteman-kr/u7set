@@ -2,7 +2,7 @@
 
 #include "MainTabPage.h"
 #include "FileView.h"
-#include "../include/DbStore.h"
+#include "../include/DbController.h"
 #include "EditVideoFrameWidget.h"
 
 //
@@ -14,7 +14,7 @@ class VideoFrameFileView : public FileView
 {
 	Q_OBJECT
 public:
-	VideoFrameFileView(DbStore* dbstore);
+	VideoFrameFileView(DbController* dbcontroller);
 	virtual ~VideoFrameFileView();
 
 	// Methods
@@ -104,11 +104,11 @@ VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbControlle
 // VideoFrameControlTabPage
 //
 //
-class VideoFrameControlTabPage : public QWidget, public HasDbStore
+class VideoFrameControlTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
 public:
-	VideoFrameControlTabPage(const QString& fileExt, DbStore* dbstore, std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc);
+	VideoFrameControlTabPage(const QString& fileExt, DbController* dbcontroller, std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc);
 	virtual ~VideoFrameControlTabPage();
 
 public:
@@ -138,13 +138,13 @@ private:
 // EditVideoFrameTabPage
 //
 //
-class EditVideoFrameTabPage : public QWidget, public HasDbStore
+class EditVideoFrameTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
 private:
 	EditVideoFrameTabPage();		// Deleted
 public:
-	EditVideoFrameTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbStore* dbstore);
+	EditVideoFrameTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
 	virtual ~EditVideoFrameTabPage();
 
 protected:

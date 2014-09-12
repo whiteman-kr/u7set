@@ -218,7 +218,7 @@ namespace Fbl
 
 		::Proto::FblElement* pMutableFblElement = message->mutable_fblelement();
 
-		VFrame30::Proto::Write(pMutableFblElement->mutable_guid(), m_guid);
+		VFrame30::Proto::Write(pMutableFblElement->mutable_uuid(), m_guid);
 		VFrame30::Proto::Write(pMutableFblElement->mutable_strid(), m_strID);
 		VFrame30::Proto::Write(pMutableFblElement->mutable_caption(), m_caption);
 		pMutableFblElement->set_opcode(m_opcode);
@@ -254,7 +254,7 @@ namespace Fbl
 
 		const ::Proto::FblElement& fblelement = message.fblelement();
 
-		m_guid = VFrame30::Proto::Read(fblelement.guid());
+		m_guid = VFrame30::Proto::Read(fblelement.uuid());
 		m_strID = VFrame30::Proto::Read(fblelement.strid());
 		m_caption = VFrame30::Proto::Read(fblelement.caption());
 		m_opcode = fblelement.opcode();

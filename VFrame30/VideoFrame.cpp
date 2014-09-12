@@ -38,7 +38,7 @@ namespace VFrame30
 		
 		auto pMutableVideoFrame = message->mutable_videoframe();
 
-		VFrame30::Proto::Write(pMutableVideoFrame->mutable_guid(), m_guid);
+		VFrame30::Proto::Write(pMutableVideoFrame->mutable_uuid(), m_guid);
 		VFrame30::Proto::Write(pMutableVideoFrame->mutable_strid(), m_strID);
 		VFrame30::Proto::Write(pMutableVideoFrame->mutable_caption(), m_caption);
 		pMutableVideoFrame->set_width(m_width);
@@ -68,7 +68,7 @@ namespace VFrame30
 
 		const ::Proto::VideoFrame& videoframe = message.videoframe();
 
-		m_guid = VFrame30::Proto::Read(videoframe.guid());
+		m_guid = VFrame30::Proto::Read(videoframe.uuid());
 		m_strID = VFrame30::Proto::Read(videoframe.strid());
 		m_caption = VFrame30::Proto::Read(videoframe.caption());
 		m_width = videoframe.width();

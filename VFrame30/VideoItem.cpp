@@ -34,7 +34,7 @@ namespace VFrame30
 
 		::Proto::VideoItem* pMutableVideoItem = message->mutable_videoitem();
 
-		VFrame30::Proto::Write(pMutableVideoItem->mutable_guid(), m_guid);
+		VFrame30::Proto::Write(pMutableVideoItem->mutable_uuid(), m_guid);
 		pMutableVideoItem->set_isstatic(m_static);
 		pMutableVideoItem->set_islocked(m_locked);
 		pMutableVideoItem->set_itemunit(static_cast<::Proto::SchemeUnit>(m_itemUnit));
@@ -59,7 +59,7 @@ namespace VFrame30
 
 		const ::Proto::VideoItem& videoitem = message.videoitem();
 
-		m_guid = VFrame30::Proto::Read(videoitem.guid());
+		m_guid = VFrame30::Proto::Read(videoitem.uuid());
 		m_static = videoitem.isstatic();
 		m_locked = videoitem.islocked();
 		m_itemUnit = static_cast<SchemeUnit>(videoitem.itemunit());

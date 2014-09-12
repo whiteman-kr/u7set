@@ -10,7 +10,7 @@
 //
 
 
-EquipmentModel::EquipmentModel(std::shared_ptr<DeviceRoot> root, QObject* parent) :
+EquipmentModel::EquipmentModel(std::shared_ptr<Hardware::DeviceRoot> root, QObject* parent) :
 	QAbstractItemModel(parent),
 	m_root(root)
 {
@@ -74,10 +74,10 @@ QModelIndex EquipmentModel::index(int row, int column, const QModelIndex& parent
 	//
 	if (parentIndex.isValid() == false)
 	{
-		return createIndex(row, column, const_cast<DeviceObject*>(m_root->child(row)));
+		return createIndex(row, column, const_cast<Hardware::DeviceObject*>(m_root->child(row)));
 	}
 
-    DeviceObject* parent = static_cast<DeviceObject*>(parentIndex.internalPointer());
+	Hardware::DeviceObject* parent = static_cast<Hardware::DeviceObject*>(parentIndex.internalPointer());
 
 	if (parent == nullptr)
 	{
@@ -95,7 +95,7 @@ QModelIndex EquipmentModel::parent(const QModelIndex& childIndex) const
 		return QModelIndex();
 	}
 
-    DeviceObject* child = static_cast<DeviceObject*>(childIndex.internalPointer());
+	Hardware::DeviceObject* child = static_cast<Hardware::DeviceObject*>(childIndex.internalPointer());
 	if (child == nullptr)
 	{
 		assert(child != nullptr);
@@ -140,7 +140,7 @@ int EquipmentModel::rowCount(const QModelIndex& parentIndex) const
 		return m_root->childrenCount();
 	}
 
-    const DeviceObject* parent = static_cast<const DeviceObject*>(parentIndex.internalPointer());
+	const Hardware::DeviceObject* parent = static_cast<const Hardware::DeviceObject*>(parentIndex.internalPointer());
 
 	if (parent == nullptr)
 	{
@@ -163,7 +163,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-    DeviceObject* device = static_cast<DeviceObject*>(index.internalPointer());
+	Hardware::DeviceObject* device = static_cast<Hardware::DeviceObject*>(index.internalPointer());
 	assert(device != nullptr);
 
 	switch (role)
@@ -229,7 +229,7 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 
 bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
 {
-    const DeviceObject* parent = nullptr;
+	const Hardware::DeviceObject* parent = nullptr;
 
 	if (parentIndex.isValid() == false)
 	{
@@ -237,7 +237,7 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
 	}
 	else
 	{
-        parent = static_cast<const DeviceObject*>(parentIndex.internalPointer());
+		parent = static_cast<const Hardware::DeviceObject*>(parentIndex.internalPointer());
 	}
 
 	assert(parent != nullptr);
@@ -278,7 +278,7 @@ void EquipmentView::addSystem()
 		//
 	}*/
 
-	std::shared_ptr<DeviceSystem> system = std::make_shared<DeviceSystem>();
+	std::shared_ptr<Hardware::DeviceSystem> system = std::make_shared<Hardware::DeviceSystem>();
 
 	system->setStrId("STRID");
 	system->setCaption(tr("New System"));
@@ -326,7 +326,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	// Controls
 	//
-	m_root = std::make_shared<DeviceRoot>();
+	m_root = std::make_shared<Hardware::DeviceRoot>();
 
 	// Equipment View
 	//

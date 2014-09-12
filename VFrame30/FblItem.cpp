@@ -36,11 +36,11 @@ namespace VFrame30
 	{
 		m_point.SaveData(cpm->mutable_point());
 		cpm->set_dirrection(static_cast<::Proto::ConnectionDirrection>(dirrection()));
-		VFrame30::Proto::Write(cpm->mutable_guid(), m_guid);
+		VFrame30::Proto::Write(cpm->mutable_uuid(), m_guid);
 
 		if (m_signalGuid.isNull() == false)  // != GUI_NULL
 		{
-			VFrame30::Proto::Write(cpm->mutable_signalguid(), m_signalGuid);
+			VFrame30::Proto::Write(cpm->mutable_signaluuid(), m_signalGuid);
 		}
 
 		if (m_signalStrID.isEmpty() == false)
@@ -60,11 +60,11 @@ namespace VFrame30
 	{
 		m_point.LoadData(cpm.point());
 		m_dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
-		m_guid = VFrame30::Proto::Read(cpm.guid());
+		m_guid = VFrame30::Proto::Read(cpm.uuid());
 
-		if (cpm.has_signalguid() == true)
+		if (cpm.has_signaluuid() == true)
 		{
-			m_signalGuid = VFrame30::Proto::Read(cpm.signalguid());
+			m_signalGuid = VFrame30::Proto::Read(cpm.signaluuid());
 		}
 		else
 		{

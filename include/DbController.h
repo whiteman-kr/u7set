@@ -62,7 +62,7 @@ public:
 
 	// Hardware Configuration
 	//
-	bool addSystem(const DeviceSystem* system, QWidget* parentWidget);
+	bool addSystem(const Hardware::DeviceSystem* system, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
@@ -143,3 +143,24 @@ private:
 
 	DbProgress m_progress;
 };
+
+
+class HasDbController
+{
+
+private:
+	HasDbController();
+public:
+	explicit HasDbController(DbController* dbcontroller);
+
+	// Properties
+	//
+protected:
+	DbController* dbcontroller();
+
+	// Data
+	//
+private:
+	DbController* m_dbController;
+};
+

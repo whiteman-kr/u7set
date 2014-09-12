@@ -4,7 +4,6 @@
 #include "CentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "../include/DbStore.h"
 #include "../include/DbController.h"
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
