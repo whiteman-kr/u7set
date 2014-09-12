@@ -15,7 +15,7 @@
 #pragma warning(disable : 4127)
 #pragma warning(disable : 4996)
 #endif // Q_OS_WIN
-#include "../VFrame30/VideoFrame.pb.h"
+#include "../Proto/serialization.pb.h"
 #ifdef Q_OS_WIN
 #pragma warning (pop)
 #endif // Q_OS_WIN

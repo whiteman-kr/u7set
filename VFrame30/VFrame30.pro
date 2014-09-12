@@ -39,9 +39,9 @@ CONFIG(release, debug|release) {
 
 
 OTHER_FILES += \
-    ../Proto/common.proto \
     ../Proto/proto_compile.bat \
-    ../Proto/VideoFrame.proto
+    ../Proto/VideoFrame.proto \
+    ../Proto/serialization.proto
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
@@ -86,8 +86,7 @@ HEADERS += VFrame30Lib_global.h \
 	DebugInstCounter.h \
     VFrame30.h \
     ../include/ProtoObject.h \
-    StreamedData.h \
-    common.pb.h
+    StreamedData.h
 
 SOURCES += VideoLayer.cpp \
     VideoItem.cpp \
@@ -126,8 +125,7 @@ SOURCES += VideoLayer.cpp \
     FrameHistoryItem.cpp \
 	Configuration.cpp \
     ../lib/ProtoObject.cpp \
-    StreamedData.cpp \
-    common.pb.cc
+    StreamedData.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 #CONFIG(debug, debug|release): DEFINES += DEBUG

@@ -1,1 +1,2 @@
-call ..\Protobuf\protoc.exe --cpp_out=..\VFrame30\ VideoFrame.proto common.proto
+call ..\Protobuf\protoc.exe --cpp_out=. serialization.proto
+
