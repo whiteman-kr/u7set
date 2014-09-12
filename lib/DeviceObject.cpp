@@ -211,6 +211,61 @@ namespace Hardware
 	{
 	}
 
+	bool DeviceSystem::SaveData(Proto::Envelope* message) const
+	{
+		bool result = DeviceObject::SaveData(message);
+		if (result == false || message->has_deviceobject() == false)
+		{
+			assert(result);
+			assert(message->has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		Proto::DeviceSystem* systemMessage =
+				message->mutable_deviceobject()->mutable_system();
+
+		Q_UNUSED(systemMessage);
+		//systemMessage->set_startxdocpt(m_startXDocPt);
+		//systemMessage->set_startydocpt(m_startYDocPt);
+
+		return true;
+	}
+
+	bool DeviceSystem::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		bool result = DeviceObject::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.deviceobject().has_system() == false)
+		{
+			assert(message.deviceobject().has_system());
+			return false;
+		}
+
+		const Proto::DeviceSystem& systemMessage = message.deviceobject().system();
+
+		Q_UNUSED(systemMessage);
+		//m_startXDocPt = systemMessage.startxdocpt();
+		//m_startYDocPt = systemMessage.startydocpt();
+
+		return true;
+	}
+
 	DeviceType DeviceSystem::deviceType()
 	{
 		return m_deviceType;
@@ -229,6 +284,61 @@ namespace Hardware
 
 	DeviceRack::~DeviceRack()
 	{
+	}
+
+	bool DeviceRack::SaveData(Proto::Envelope* message) const
+	{
+		bool result = DeviceObject::SaveData(message);
+		if (result == false || message->has_deviceobject() == false)
+		{
+			assert(result);
+			assert(message->has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		Proto::DeviceRack* rackMessage =
+				message->mutable_deviceobject()->mutable_rack();
+
+		Q_UNUSED(rackMessage);
+		//rackMessage->set_startxdocpt(m_startXDocPt);
+		//rackMessage->set_startydocpt(m_startYDocPt);
+
+		return true;
+	}
+
+	bool DeviceRack::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		bool result = DeviceObject::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.deviceobject().has_rack() == false)
+		{
+			assert(message.deviceobject().has_rack());
+			return false;
+		}
+
+		const Proto::DeviceRack& rackMessage = message.deviceobject().rack();
+
+		Q_UNUSED(rackMessage);
+		//x = rackMessage.startxdocpt();
+		//y = rackMessage.startydocpt();
+
+		return true;
 	}
 
 	DeviceType DeviceRack::deviceType()
@@ -250,6 +360,61 @@ namespace Hardware
 	{
 	}
 
+	bool DeviceChassis::SaveData(Proto::Envelope* message) const
+	{
+		bool result = DeviceObject::SaveData(message);
+		if (result == false || message->has_deviceobject() == false)
+		{
+			assert(result);
+			assert(message->has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		Proto::DeviceChassis* chassisMessage =
+				message->mutable_deviceobject()->mutable_chassis();
+
+		Q_UNUSED(chassisMessage);
+		//chassisMessage ->set_startxdocpt(m_startXDocPt);
+		//chassisMessage ->set_startydocpt(m_startYDocPt);
+
+		return true;
+	}
+
+	bool DeviceChassis::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		bool result = DeviceObject::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.deviceobject().has_chassis() == false)
+		{
+			assert(message.deviceobject().has_chassis());
+			return false;
+		}
+
+		const Proto::DeviceChassis& chassisMessage = message.deviceobject().chassis();
+
+		Q_UNUSED(chassisMessage);
+		//x = chassisMessage.startxdocpt();
+		//y = chassisMessage.startydocpt();
+
+		return true;
+	}
+
 	DeviceType DeviceChassis::deviceType()
 	{
 		return m_deviceType;
@@ -267,6 +432,61 @@ namespace Hardware
 
 	DeviceModule::~DeviceModule()
 	{
+	}
+
+	bool DeviceModule::SaveData(Proto::Envelope* message) const
+	{
+		bool result = DeviceObject::SaveData(message);
+		if (result == false || message->has_deviceobject() == false)
+		{
+			assert(result);
+			assert(message->has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		Proto::DeviceModule* moduleMessage =
+				message->mutable_deviceobject()->mutable_module();
+
+		Q_UNUSED(moduleMessage);
+		//moduleMessage->set_startxdocpt(m_startXDocPt);
+		//moduleMessage->set_startydocpt(m_startYDocPt);
+
+		return true;
+	}
+
+	bool DeviceModule::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		bool result = DeviceModule::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.deviceobject().has_module() == false)
+		{
+			assert(message.deviceobject().has_module());
+			return false;
+		}
+
+		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
+
+		Q_UNUSED(moduleMessage);
+		//x = moduleMessage.startxdocpt();
+		//y = moduleMessage.startydocpt();
+
+		return true;
 	}
 
 	DeviceType DeviceModule::deviceType()
@@ -289,6 +509,61 @@ namespace Hardware
 	{
 	}
 
+	bool DeviceController::SaveData(Proto::Envelope* message) const
+	{
+		bool result = DeviceObject::SaveData(message);
+		if (result == false || message->has_deviceobject() == false)
+		{
+			assert(result);
+			assert(message->has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		Proto::DeviceController* controllerMessage =
+				message->mutable_deviceobject()->mutable_controller();
+
+		Q_UNUSED(controllerMessage);
+		//controllerMessage->set_startxdocpt(m_startXDocPt);
+		//controllerMessage->set_startydocpt(m_startYDocPt);
+
+		return true;
+	}
+
+	bool DeviceController::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		bool result = DeviceController::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.deviceobject().has_controller() == false)
+		{
+			assert(message.deviceobject().has_controller());
+			return false;
+		}
+
+		const Proto::DeviceController& controllerMessage = message.deviceobject().controller();
+
+		Q_UNUSED(controllerMessage);
+		//x = controllerMessage.startxdocpt();
+		//y = controllerMessage.startydocpt();
+
+		return true;
+	}
+
 	DeviceType DeviceController::deviceType()
 	{
 		return m_deviceType;
@@ -306,6 +581,61 @@ namespace Hardware
 
 	DeviceDiagSignal::~DeviceDiagSignal()
 	{
+	}
+
+	bool DeviceDiagSignal::SaveData(Proto::Envelope* message) const
+	{
+		bool result = DeviceObject::SaveData(message);
+		if (result == false || message->has_deviceobject() == false)
+		{
+			assert(result);
+			assert(message->has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		Proto::DeviceDiagSignal* signalMessage =
+				message->mutable_deviceobject()->mutable_diagsignal();
+
+		Q_UNUSED(signalMessage);
+		//signalMessage->set_startxdocpt(m_startXDocPt);
+		//signalMessage->set_startydocpt(m_startYDocPt);
+
+		return true;
+	}
+
+	bool DeviceDiagSignal::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		bool result = DeviceDiagSignal::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.deviceobject().has_diagsignal() == false)
+		{
+			assert(message.deviceobject().has_diagsignal());
+			return false;
+		}
+
+		const Proto::DeviceDiagSignal& signalMessage = message.deviceobject().diagsignal();
+
+		Q_UNUSED(signalMessage);
+		//x = signalMessage.startxdocpt();
+		//y = signalMessage.startydocpt();
+
+		return true;
 	}
 
 	DeviceType DeviceDiagSignal::deviceType()

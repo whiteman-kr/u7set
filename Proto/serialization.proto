@@ -366,4 +366,41 @@ message DeviceObject
 
 	// Derived from Hardware::DeviceObject
 	//
+	optional DeviceRoot Root = 100;					// Not used
+	optional DeviceSystem System = 101;
+	optional DeviceRack Rack = 102;
+	optional DeviceChassis Chassis = 103;
+	optional DeviceModule Module = 104;
+	optional DeviceController Controller = 11;		// 11 !!!
+	optional DeviceDiagSignal DiagSignal = 10;		// 10 !!!
 }
+
+message DeviceRoot
+{
+}
+
+message DeviceSystem
+{
+}
+
+message DeviceRack
+{
+}
+
+message DeviceChassis
+{
+}
+
+message DeviceModule
+{
+}
+
+message DeviceController
+{
+}
+
+message DeviceDiagSignal
+{
+}
+
+

@@ -126,6 +126,12 @@ namespace Hardware
 		DeviceSystem();
 		virtual ~DeviceSystem();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
 		virtual DeviceType deviceType() override;
 
@@ -144,6 +150,12 @@ namespace Hardware
 	public:
 		DeviceRack();
 		virtual ~DeviceRack();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
 		virtual DeviceType deviceType() override;
@@ -164,6 +176,12 @@ namespace Hardware
 		DeviceChassis();
 		virtual ~DeviceChassis();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
 		virtual DeviceType deviceType() override;
 
@@ -182,6 +200,12 @@ namespace Hardware
 	public:
 		DeviceModule();
 		virtual ~DeviceModule();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
 		virtual DeviceType deviceType() override;
@@ -202,6 +226,12 @@ namespace Hardware
 		DeviceController();
 		virtual ~DeviceController();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
 		virtual DeviceType deviceType() override;
 
@@ -220,6 +250,12 @@ namespace Hardware
 	public:
 		DeviceDiagSignal();
 		virtual ~DeviceDiagSignal();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
 		virtual DeviceType deviceType() override;

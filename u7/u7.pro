@@ -171,7 +171,7 @@ OTHER_FILES += \
 	DatabaseUpgrade/Upgrade0021.sql
 
 CONFIG += precompile_header
-PRECOMPILED_HEADER = stable.h
+PRECOMPILED_HEADER = Stable.h
 
 #c++11 support for GCC
 #

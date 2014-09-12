@@ -63,6 +63,13 @@ class VideoItemOutputSignal;
 class VideoItemLink;
 class VideoItemFblElement;
 class DeviceObject;
+class DeviceRoot;
+class DeviceSystem;
+class DeviceRack;
+class DeviceChassis;
+class DeviceModule;
+class DeviceController;
+class DeviceDiagSignal;
 
 enum SchemeUnit {
   Display = 0,
@@ -3460,6 +3467,69 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_caption();
   inline void set_allocated_caption(::Proto::wstring* caption);
 
+  // optional .Proto.DeviceRoot Root = 100;
+  inline bool has_root() const;
+  inline void clear_root();
+  static const int kRootFieldNumber = 100;
+  inline const ::Proto::DeviceRoot& root() const;
+  inline ::Proto::DeviceRoot* mutable_root();
+  inline ::Proto::DeviceRoot* release_root();
+  inline void set_allocated_root(::Proto::DeviceRoot* root);
+
+  // optional .Proto.DeviceSystem System = 101;
+  inline bool has_system() const;
+  inline void clear_system();
+  static const int kSystemFieldNumber = 101;
+  inline const ::Proto::DeviceSystem& system() const;
+  inline ::Proto::DeviceSystem* mutable_system();
+  inline ::Proto::DeviceSystem* release_system();
+  inline void set_allocated_system(::Proto::DeviceSystem* system);
+
+  // optional .Proto.DeviceRack Rack = 102;
+  inline bool has_rack() const;
+  inline void clear_rack();
+  static const int kRackFieldNumber = 102;
+  inline const ::Proto::DeviceRack& rack() const;
+  inline ::Proto::DeviceRack* mutable_rack();
+  inline ::Proto::DeviceRack* release_rack();
+  inline void set_allocated_rack(::Proto::DeviceRack* rack);
+
+  // optional .Proto.DeviceChassis Chassis = 103;
+  inline bool has_chassis() const;
+  inline void clear_chassis();
+  static const int kChassisFieldNumber = 103;
+  inline const ::Proto::DeviceChassis& chassis() const;
+  inline ::Proto::DeviceChassis* mutable_chassis();
+  inline ::Proto::DeviceChassis* release_chassis();
+  inline void set_allocated_chassis(::Proto::DeviceChassis* chassis);
+
+  // optional .Proto.DeviceModule Module = 104;
+  inline bool has_module() const;
+  inline void clear_module();
+  static const int kModuleFieldNumber = 104;
+  inline const ::Proto::DeviceModule& module() const;
+  inline ::Proto::DeviceModule* mutable_module();
+  inline ::Proto::DeviceModule* release_module();
+  inline void set_allocated_module(::Proto::DeviceModule* module);
+
+  // optional .Proto.DeviceController Controller = 11;
+  inline bool has_controller() const;
+  inline void clear_controller();
+  static const int kControllerFieldNumber = 11;
+  inline const ::Proto::DeviceController& controller() const;
+  inline ::Proto::DeviceController* mutable_controller();
+  inline ::Proto::DeviceController* release_controller();
+  inline void set_allocated_controller(::Proto::DeviceController* controller);
+
+  // optional .Proto.DeviceDiagSignal DiagSignal = 10;
+  inline bool has_diagsignal() const;
+  inline void clear_diagsignal();
+  static const int kDiagSignalFieldNumber = 10;
+  inline const ::Proto::DeviceDiagSignal& diagsignal() const;
+  inline ::Proto::DeviceDiagSignal* mutable_diagsignal();
+  inline ::Proto::DeviceDiagSignal* release_diagsignal();
+  inline void set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceObject)
  private:
   inline void set_has_uuid();
@@ -3468,15 +3538,36 @@ class DeviceObject : public ::google::protobuf::Message {
   inline void clear_has_strid();
   inline void set_has_caption();
   inline void clear_has_caption();
+  inline void set_has_root();
+  inline void clear_has_root();
+  inline void set_has_system();
+  inline void clear_has_system();
+  inline void set_has_rack();
+  inline void clear_has_rack();
+  inline void set_has_chassis();
+  inline void clear_has_chassis();
+  inline void set_has_module();
+  inline void clear_has_module();
+  inline void set_has_controller();
+  inline void clear_has_controller();
+  inline void set_has_diagsignal();
+  inline void clear_has_diagsignal();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::Uuid* uuid_;
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
+  ::Proto::DeviceRoot* root_;
+  ::Proto::DeviceSystem* system_;
+  ::Proto::DeviceRack* rack_;
+  ::Proto::DeviceChassis* chassis_;
+  ::Proto::DeviceModule* module_;
+  ::Proto::DeviceController* controller_;
+  ::Proto::DeviceDiagSignal* diagsignal_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -3484,6 +3575,510 @@ class DeviceObject : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static DeviceObject* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DeviceRoot : public ::google::protobuf::Message {
+ public:
+  DeviceRoot();
+  virtual ~DeviceRoot();
+
+  DeviceRoot(const DeviceRoot& from);
+
+  inline DeviceRoot& operator=(const DeviceRoot& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DeviceRoot& default_instance();
+
+  void Swap(DeviceRoot* other);
+
+  // implements Message ----------------------------------------------
+
+  DeviceRoot* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DeviceRoot& from);
+  void MergeFrom(const DeviceRoot& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceRoot)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static DeviceRoot* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DeviceSystem : public ::google::protobuf::Message {
+ public:
+  DeviceSystem();
+  virtual ~DeviceSystem();
+
+  DeviceSystem(const DeviceSystem& from);
+
+  inline DeviceSystem& operator=(const DeviceSystem& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DeviceSystem& default_instance();
+
+  void Swap(DeviceSystem* other);
+
+  // implements Message ----------------------------------------------
+
+  DeviceSystem* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DeviceSystem& from);
+  void MergeFrom(const DeviceSystem& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceSystem)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static DeviceSystem* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DeviceRack : public ::google::protobuf::Message {
+ public:
+  DeviceRack();
+  virtual ~DeviceRack();
+
+  DeviceRack(const DeviceRack& from);
+
+  inline DeviceRack& operator=(const DeviceRack& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DeviceRack& default_instance();
+
+  void Swap(DeviceRack* other);
+
+  // implements Message ----------------------------------------------
+
+  DeviceRack* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DeviceRack& from);
+  void MergeFrom(const DeviceRack& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceRack)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static DeviceRack* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DeviceChassis : public ::google::protobuf::Message {
+ public:
+  DeviceChassis();
+  virtual ~DeviceChassis();
+
+  DeviceChassis(const DeviceChassis& from);
+
+  inline DeviceChassis& operator=(const DeviceChassis& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DeviceChassis& default_instance();
+
+  void Swap(DeviceChassis* other);
+
+  // implements Message ----------------------------------------------
+
+  DeviceChassis* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DeviceChassis& from);
+  void MergeFrom(const DeviceChassis& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceChassis)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static DeviceChassis* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DeviceModule : public ::google::protobuf::Message {
+ public:
+  DeviceModule();
+  virtual ~DeviceModule();
+
+  DeviceModule(const DeviceModule& from);
+
+  inline DeviceModule& operator=(const DeviceModule& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DeviceModule& default_instance();
+
+  void Swap(DeviceModule* other);
+
+  // implements Message ----------------------------------------------
+
+  DeviceModule* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DeviceModule& from);
+  void MergeFrom(const DeviceModule& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static DeviceModule* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DeviceController : public ::google::protobuf::Message {
+ public:
+  DeviceController();
+  virtual ~DeviceController();
+
+  DeviceController(const DeviceController& from);
+
+  inline DeviceController& operator=(const DeviceController& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DeviceController& default_instance();
+
+  void Swap(DeviceController* other);
+
+  // implements Message ----------------------------------------------
+
+  DeviceController* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DeviceController& from);
+  void MergeFrom(const DeviceController& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceController)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static DeviceController* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class DeviceDiagSignal : public ::google::protobuf::Message {
+ public:
+  DeviceDiagSignal();
+  virtual ~DeviceDiagSignal();
+
+  DeviceDiagSignal(const DeviceDiagSignal& from);
+
+  inline DeviceDiagSignal& operator=(const DeviceDiagSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const DeviceDiagSignal& default_instance();
+
+  void Swap(DeviceDiagSignal* other);
+
+  // implements Message ----------------------------------------------
+
+  DeviceDiagSignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const DeviceDiagSignal& from);
+  void MergeFrom(const DeviceDiagSignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceDiagSignal)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static DeviceDiagSignal* default_instance_;
 };
 // ===================================================================
 
@@ -7037,6 +7632,300 @@ inline void DeviceObject::set_allocated_caption(::Proto::wstring* caption) {
     clear_has_caption();
   }
 }
+
+// optional .Proto.DeviceRoot Root = 100;
+inline bool DeviceObject::has_root() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DeviceObject::set_has_root() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DeviceObject::clear_has_root() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DeviceObject::clear_root() {
+  if (root_ != NULL) root_->::Proto::DeviceRoot::Clear();
+  clear_has_root();
+}
+inline const ::Proto::DeviceRoot& DeviceObject::root() const {
+  return root_ != NULL ? *root_ : *default_instance_->root_;
+}
+inline ::Proto::DeviceRoot* DeviceObject::mutable_root() {
+  set_has_root();
+  if (root_ == NULL) root_ = new ::Proto::DeviceRoot;
+  return root_;
+}
+inline ::Proto::DeviceRoot* DeviceObject::release_root() {
+  clear_has_root();
+  ::Proto::DeviceRoot* temp = root_;
+  root_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_root(::Proto::DeviceRoot* root) {
+  delete root_;
+  root_ = root;
+  if (root) {
+    set_has_root();
+  } else {
+    clear_has_root();
+  }
+}
+
+// optional .Proto.DeviceSystem System = 101;
+inline bool DeviceObject::has_system() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DeviceObject::set_has_system() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DeviceObject::clear_has_system() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DeviceObject::clear_system() {
+  if (system_ != NULL) system_->::Proto::DeviceSystem::Clear();
+  clear_has_system();
+}
+inline const ::Proto::DeviceSystem& DeviceObject::system() const {
+  return system_ != NULL ? *system_ : *default_instance_->system_;
+}
+inline ::Proto::DeviceSystem* DeviceObject::mutable_system() {
+  set_has_system();
+  if (system_ == NULL) system_ = new ::Proto::DeviceSystem;
+  return system_;
+}
+inline ::Proto::DeviceSystem* DeviceObject::release_system() {
+  clear_has_system();
+  ::Proto::DeviceSystem* temp = system_;
+  system_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_system(::Proto::DeviceSystem* system) {
+  delete system_;
+  system_ = system;
+  if (system) {
+    set_has_system();
+  } else {
+    clear_has_system();
+  }
+}
+
+// optional .Proto.DeviceRack Rack = 102;
+inline bool DeviceObject::has_rack() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DeviceObject::set_has_rack() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DeviceObject::clear_has_rack() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DeviceObject::clear_rack() {
+  if (rack_ != NULL) rack_->::Proto::DeviceRack::Clear();
+  clear_has_rack();
+}
+inline const ::Proto::DeviceRack& DeviceObject::rack() const {
+  return rack_ != NULL ? *rack_ : *default_instance_->rack_;
+}
+inline ::Proto::DeviceRack* DeviceObject::mutable_rack() {
+  set_has_rack();
+  if (rack_ == NULL) rack_ = new ::Proto::DeviceRack;
+  return rack_;
+}
+inline ::Proto::DeviceRack* DeviceObject::release_rack() {
+  clear_has_rack();
+  ::Proto::DeviceRack* temp = rack_;
+  rack_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_rack(::Proto::DeviceRack* rack) {
+  delete rack_;
+  rack_ = rack;
+  if (rack) {
+    set_has_rack();
+  } else {
+    clear_has_rack();
+  }
+}
+
+// optional .Proto.DeviceChassis Chassis = 103;
+inline bool DeviceObject::has_chassis() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void DeviceObject::set_has_chassis() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void DeviceObject::clear_has_chassis() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void DeviceObject::clear_chassis() {
+  if (chassis_ != NULL) chassis_->::Proto::DeviceChassis::Clear();
+  clear_has_chassis();
+}
+inline const ::Proto::DeviceChassis& DeviceObject::chassis() const {
+  return chassis_ != NULL ? *chassis_ : *default_instance_->chassis_;
+}
+inline ::Proto::DeviceChassis* DeviceObject::mutable_chassis() {
+  set_has_chassis();
+  if (chassis_ == NULL) chassis_ = new ::Proto::DeviceChassis;
+  return chassis_;
+}
+inline ::Proto::DeviceChassis* DeviceObject::release_chassis() {
+  clear_has_chassis();
+  ::Proto::DeviceChassis* temp = chassis_;
+  chassis_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_chassis(::Proto::DeviceChassis* chassis) {
+  delete chassis_;
+  chassis_ = chassis;
+  if (chassis) {
+    set_has_chassis();
+  } else {
+    clear_has_chassis();
+  }
+}
+
+// optional .Proto.DeviceModule Module = 104;
+inline bool DeviceObject::has_module() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void DeviceObject::set_has_module() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void DeviceObject::clear_has_module() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void DeviceObject::clear_module() {
+  if (module_ != NULL) module_->::Proto::DeviceModule::Clear();
+  clear_has_module();
+}
+inline const ::Proto::DeviceModule& DeviceObject::module() const {
+  return module_ != NULL ? *module_ : *default_instance_->module_;
+}
+inline ::Proto::DeviceModule* DeviceObject::mutable_module() {
+  set_has_module();
+  if (module_ == NULL) module_ = new ::Proto::DeviceModule;
+  return module_;
+}
+inline ::Proto::DeviceModule* DeviceObject::release_module() {
+  clear_has_module();
+  ::Proto::DeviceModule* temp = module_;
+  module_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_module(::Proto::DeviceModule* module) {
+  delete module_;
+  module_ = module;
+  if (module) {
+    set_has_module();
+  } else {
+    clear_has_module();
+  }
+}
+
+// optional .Proto.DeviceController Controller = 11;
+inline bool DeviceObject::has_controller() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void DeviceObject::set_has_controller() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void DeviceObject::clear_has_controller() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void DeviceObject::clear_controller() {
+  if (controller_ != NULL) controller_->::Proto::DeviceController::Clear();
+  clear_has_controller();
+}
+inline const ::Proto::DeviceController& DeviceObject::controller() const {
+  return controller_ != NULL ? *controller_ : *default_instance_->controller_;
+}
+inline ::Proto::DeviceController* DeviceObject::mutable_controller() {
+  set_has_controller();
+  if (controller_ == NULL) controller_ = new ::Proto::DeviceController;
+  return controller_;
+}
+inline ::Proto::DeviceController* DeviceObject::release_controller() {
+  clear_has_controller();
+  ::Proto::DeviceController* temp = controller_;
+  controller_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_controller(::Proto::DeviceController* controller) {
+  delete controller_;
+  controller_ = controller;
+  if (controller) {
+    set_has_controller();
+  } else {
+    clear_has_controller();
+  }
+}
+
+// optional .Proto.DeviceDiagSignal DiagSignal = 10;
+inline bool DeviceObject::has_diagsignal() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void DeviceObject::set_has_diagsignal() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void DeviceObject::clear_has_diagsignal() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void DeviceObject::clear_diagsignal() {
+  if (diagsignal_ != NULL) diagsignal_->::Proto::DeviceDiagSignal::Clear();
+  clear_has_diagsignal();
+}
+inline const ::Proto::DeviceDiagSignal& DeviceObject::diagsignal() const {
+  return diagsignal_ != NULL ? *diagsignal_ : *default_instance_->diagsignal_;
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::mutable_diagsignal() {
+  set_has_diagsignal();
+  if (diagsignal_ == NULL) diagsignal_ = new ::Proto::DeviceDiagSignal;
+  return diagsignal_;
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::release_diagsignal() {
+  clear_has_diagsignal();
+  ::Proto::DeviceDiagSignal* temp = diagsignal_;
+  diagsignal_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal) {
+  delete diagsignal_;
+  diagsignal_ = diagsignal;
+  if (diagsignal) {
+    set_has_diagsignal();
+  } else {
+    clear_has_diagsignal();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// DeviceRoot
+
+// -------------------------------------------------------------------
+
+// DeviceSystem
+
+// -------------------------------------------------------------------
+
+// DeviceRack
+
+// -------------------------------------------------------------------
+
+// DeviceChassis
+
+// -------------------------------------------------------------------
+
+// DeviceModule
+
+// -------------------------------------------------------------------
+
+// DeviceController
+
+// -------------------------------------------------------------------
+
+// DeviceDiagSignal
 
 
 // @@protoc_insertion_point(namespace_scope)
