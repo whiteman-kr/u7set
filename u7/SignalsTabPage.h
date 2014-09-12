@@ -71,6 +71,7 @@ private:
 	//QSplitter* m_splitter = nullptr;
 	SignalsModel* m_signalsModel = nullptr;
 	QTableView* m_signalsView = nullptr;
+	SignalSet m_signalSet;
 };
 
 

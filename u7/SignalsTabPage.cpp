@@ -92,7 +92,7 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 		{
 			if (section < m_signals.count())
 			{
-				return m_signals[section].signalId();
+				return m_signals[section].ID();
 			}
 			return tr("New record");
 		}
@@ -165,7 +165,7 @@ void SignalsModel::signalDataReceived(Signal signal)
 {
 	for (int i = 0; i < m_signals.count(); i++)
 	{
-		if (m_signals[i].signalId() == signal.signalId())
+		if (m_signals[i].ID() == signal.ID())
 		{
 			m_signals[i] = signal;
 			return;

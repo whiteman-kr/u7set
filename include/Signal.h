@@ -21,7 +21,7 @@ class Signal
 public:
 	Signal();
 
-	int signalId() const {return m_signalId;}
+	int ID() const {return m_ID;}
 
 	QString strId() const {return m_strId;}
 	void setStrId(QString& newStrId) {m_strId = newStrId;}
@@ -42,7 +42,7 @@ public:
 	// Data
 	//
 private:
-	int m_signalId;
+	int m_ID;
 	QString m_strId;
 	QString m_extStrId;
 	QString m_name;
@@ -53,9 +53,26 @@ private:
 	int m_outputUnit;
 
 	//Should be used only by friends
-	void setSignalId(int signalId) {m_signalId = signalId;}
+	void setID(int signalID) {m_ID = signalID;}
 	void setChannel(int newChannel) {m_channel = newChannel;}
 	void setType(SignalType type) {m_type = type;}
 };
+
+
+class SignalSet
+{
+private:
+	QHash<int, Signal*> m_signalSet;
+
+public:
+	SignalSet();
+	virtual ~SignalSet();
+
+	void addSignal(const Signal& signal);
+	Signal* getSignal(int signalID);
+
+	void removeAll();
+};
+
 
 #endif // SIGNAL_H
