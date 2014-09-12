@@ -52,6 +52,11 @@ Signal* SignalSet::getSignal(int signalID)
 	return nullptr;
 }
 
+bool SignalSet::haveSignal(int signalID)
+{
+	return m_signalSet.contains(signalID);
+}
+
 
 void SignalSet::removeAll()
 {

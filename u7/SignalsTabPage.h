@@ -37,7 +37,9 @@ public slots:
 private:
 	// Data
 	//
-	QVector<Signal> m_signals;
+	//QVector<Signal> m_signals;
+	QSet<int> m_signalIDs;
+	SignalSet m_signalSet;
 };
 
 
@@ -71,7 +73,6 @@ private:
 	//QSplitter* m_splitter = nullptr;
 	SignalsModel* m_signalsModel = nullptr;
 	QTableView* m_signalsView = nullptr;
-	SignalSet m_signalSet;
 };
 
 

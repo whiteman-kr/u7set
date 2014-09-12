@@ -2,6 +2,7 @@
 #define SIGNAL_H
 
 #include <QString>
+#include <QHash>
 
 enum SignalType
 {
@@ -70,6 +71,7 @@ public:
 
 	void addSignal(const Signal& signal);
 	Signal* getSignal(int signalID);
+	bool haveSignal(int signalID);
 
 	void removeAll();
 };
