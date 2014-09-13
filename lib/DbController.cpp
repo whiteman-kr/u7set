@@ -42,6 +42,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_addSystem, m_worker, &DbWorker::slot_addSystem);
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
+	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
 
 	m_thread.start();
 }
@@ -580,6 +581,31 @@ bool DbController::getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget)
 	emit signal_getSignalsIDs(signalIDs);
 
 	ok = waitForComplete(parentWidget, tr("Getting signals' IDs"));
+
+	return ok;
+}
+
+
+bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
+{
+	if (signalSet == nullptr)
+	{
+		assert(signalSet != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getSignals(signalSet);
+
+	ok = waitForComplete(parentWidget, tr("Reading signals"));
 
 	return ok;
 }

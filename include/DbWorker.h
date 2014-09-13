@@ -1,6 +1,10 @@
 #pragma once
 
 #include "DbStruct.h"
+#include "../include/Signal.h"
+
+
+#define AUTO_COMPLETE std::shared_ptr<int*> progressCompleted(nullptr, [this](void*) { this->m_progress->setCompleted(true); } );
 
 
 class DbWorker : public QObject
@@ -79,6 +83,7 @@ public slots:
 	// Signal management
 	//
 	void slot_getSignalsIDs(QSet<int>* signalsIDs);
+	void slot_getSignals(SignalSet* signalSet);
 
 	// Service
 	//
