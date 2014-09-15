@@ -4,7 +4,7 @@
 #include "VideoItemLink.h"
 #include "HorzVertLinks.h"
 #include "VideoFrameWidgetAgent.h"
-#include "../VFrame30/VFrame30.pb.h"
+#include "../include/ProtoSerialization.h"
 
 namespace VFrame30
 {
@@ -29,16 +29,16 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoFrame::SaveData(VFrame30::Proto::Envelope* message) const
+	bool CVideoFrame::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
-		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// ќб€зательное поле, хэш имени класса, по нему восстанавливаетс€ класс.
 		
 		auto pMutableVideoFrame = message->mutable_videoframe();
 
-		Proto::Write(pMutableVideoFrame->mutable_guid(), m_guid);
+		Proto::Write(pMutableVideoFrame->mutable_uuid(), m_guid);
 		Proto::Write(pMutableVideoFrame->mutable_strid(), m_strID);
 		Proto::Write(pMutableVideoFrame->mutable_caption(), m_caption);
 		pMutableVideoFrame->set_width(m_width);
@@ -58,7 +58,7 @@ namespace VFrame30
 		return saveLayersResult;
 	}
 
-	bool CVideoFrame::LoadData(const VFrame30::Proto::Envelope& message)
+	bool CVideoFrame::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoframe() == false)
 		{
@@ -68,7 +68,7 @@ namespace VFrame30
 
 		const Proto::VideoFrame& videoframe = message.videoframe();
 
-		m_guid = Proto::Read(videoframe.guid());
+		m_guid = Proto::Read(videoframe.uuid());
 		m_strID = Proto::Read(videoframe.strid());
 		m_caption = Proto::Read(videoframe.caption());
 		m_width = videoframe.width();
@@ -102,7 +102,7 @@ namespace VFrame30
 		return true;
 	}
 
-	CVideoFrame* CVideoFrame::CreateObject(const VFrame30::Proto::Envelope& message)
+	CVideoFrame* CVideoFrame::CreateObject(const Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//

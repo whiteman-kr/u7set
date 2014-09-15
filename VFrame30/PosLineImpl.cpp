@@ -22,7 +22,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CPosLineImpl::SaveData(VFrame30::Proto::Envelope* message) const
+	bool CPosLineImpl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CVideoItem::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -44,7 +44,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CPosLineImpl::LoadData(const VFrame30::Proto::Envelope& message)
+	bool CPosLineImpl::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -230,28 +230,28 @@ namespace VFrame30
 			return true;
 		}
 
-		if (CVFrameUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
+		if (CUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
 			detRect.x(), detRect.y(),
 			detRect.x() + detRect.width(), detRect.y()) == true)
 		{
 			return true;
 		}
 
-		if (CVFrameUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
+		if (CUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
 			detRect.x() + detRect.width(), detRect.y(),
 			detRect.x() + detRect.width(), detRect.y() + detRect.height()) == true)
 		{
 			return true;
 		}
 
-		if (CVFrameUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
+		if (CUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
 			detRect.x() + detRect.width(), detRect.y() + detRect.height(),
 			detRect.x(), detRect.y() + detRect.height()) == true)
 		{
 			return true;
 		}
 
-		if (CVFrameUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
+		if (CUtils::IsLineIntersected(ax1, ay1, ax2, ay2,
 			detRect.x(), detRect.y() + detRect.height(),
 			detRect.x(), detRect.y()) == true)
 		{
@@ -318,12 +318,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			pt = CVFrameUtils::RoundDisplayPoint(pt);
+			pt = CUtils::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CVFrameUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			pt = CVFrameUtils::RoundPoint(pt, CSettings::regionalUnit());
+			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}
 
 		return pt;
@@ -334,14 +334,14 @@ namespace VFrame30
 
 		if (itemUnit() != SchemeUnit::Display)
 		{
-			left = CVFrameUtils::ConvertPoint(left, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			left = CUtils::ConvertPoint(left, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
 		}
 
 		double delta = value - left;
 
 		if (itemUnit() != SchemeUnit::Display)
 		{
-			delta = CVFrameUtils::ConvertPoint(delta, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			delta = CUtils::ConvertPoint(delta, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
 		}
 
 		m_startXDocPt = m_startXDocPt + delta;
@@ -354,12 +354,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			pt = CVFrameUtils::RoundDisplayPoint(pt);
+			pt = CUtils::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CVFrameUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			pt = CVFrameUtils::RoundPoint(pt, CSettings::regionalUnit());
+			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}
 				
 		return pt;
@@ -370,14 +370,14 @@ namespace VFrame30
 
 		if (itemUnit() != SchemeUnit::Display)
 		{
-			top = CVFrameUtils::ConvertPoint(top, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
+			top = CUtils::ConvertPoint(top, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
 		}
 
 		double delta = value - top;
 
 		if (itemUnit() != SchemeUnit::Display)
 		{
-			delta = CVFrameUtils::ConvertPoint(delta, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
+			delta = CUtils::ConvertPoint(delta, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
 		}
 
 		m_startYDocPt = m_startYDocPt + delta;
@@ -390,12 +390,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			pt = CVFrameUtils::RoundDisplayPoint(pt);
+			pt = CUtils::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CVFrameUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			pt = CVFrameUtils::RoundPoint(pt, CSettings::regionalUnit());
+			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}
 
 		return pt;
@@ -413,7 +413,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CVFrameUtils::ConvertPoint(pt, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
 		}
 
 		if (m_endXDocPt >= m_startXDocPt)
@@ -432,12 +432,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			pt = CVFrameUtils::RoundDisplayPoint(pt);
+			pt = CUtils::RoundDisplayPoint(pt);
 		}
 		else
 		{
-			pt = CVFrameUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			pt = CVFrameUtils::RoundPoint(pt, CSettings::regionalUnit());
+			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}
 
 		return pt;	
@@ -455,7 +455,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CVFrameUtils::ConvertPoint(pt, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
 		}
 
 		if (m_endYDocPt >= m_startYDocPt)

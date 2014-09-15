@@ -1,10 +1,17 @@
 #pragma once
 
-#include "VFrame30.pb.h"
+#include "../include/ProtoSerialization.h"
 #include "FontParam.h"
 #include "DrawParam.h"
 #include "DebugInstCounter.h"
 #include "../include/TypesAndEnums.h"
+
+namespace VFrame30
+{
+	class CVideoFrame;
+	class CVideoLayer;
+}
+
 
 namespace VFrame30
 {
@@ -111,7 +118,7 @@ namespace VFrame30
 		public QObject, 
 		public IVideoItemPropertiesPos, 
 		public IPointList,
-		public Proto::CVFrameObjectSerialization<CVideoItem>,
+		public Proto::ObjectSerialization<CVideoItem>,
 		public DebugInstCounter<CVideoItem>
 	{
 		Q_OBJECT
@@ -124,7 +131,7 @@ namespace VFrame30
 
 		// Serialization
 		//
-		friend Proto::CVFrameObjectSerialization<CVideoItem>;	// ִכÿ גûחמûג CreateObject טח CVFrameObjectSerialization
+		friend Proto::ObjectSerialization<CVideoItem>;	// ִכÿ גûחמûג CreateObject טח Proto::ObjectSerialization
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;

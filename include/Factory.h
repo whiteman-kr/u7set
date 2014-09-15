@@ -3,7 +3,7 @@
 #include <QtGlobal>
 #include <map>
 #include <memory>
-#include "../include/VFrameUtils.h"
+#include "../include/CUtils.h"
 
 template<typename BaseClass>
 class Factory
@@ -12,14 +12,14 @@ public:
 	template<typename DerivedClass>
 	void Register(const std::string& className)
 	{
-		quint32 classHash = VFrame30::CVFrameUtils::GetClassHashCode(className);
+		quint32 classHash = CUtils::GetClassHashCode(className);
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
 	}
 
 	template<typename DerivedClass>
 	void Register()
 	{
-		quint32 classHash = VFrame30::CVFrameUtils::GetClassHashCode(DerivedClass::staticMetaObject.className());
+		quint32 classHash = CUtils::GetClassHashCode(DerivedClass::staticMetaObject.className());
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
 	}
 

@@ -161,8 +161,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(VFrame30::Proto::Envelope* message) const;
-		virtual bool LoadData(const VFrame30::Proto::Envelope& message);
+		virtual bool SaveData(Proto::Envelope* message) const;
+		virtual bool LoadData(const Proto::Envelope& message);
 
 		// Drawing stuff
 		//

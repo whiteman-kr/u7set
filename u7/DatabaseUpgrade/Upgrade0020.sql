@@ -80,10 +80,10 @@ WITH (
 
 -- Initialize table DataFormat
 
-INSERT INTO DataFormat (Name) VALUES 
-('Binary LE unsigned'), 
-('Binary LE signed'), 
-('Binary BE unsigned'), 
+INSERT INTO DataFormat (Name) VALUES
+('Binary LE unsigned'),
+('Binary LE signed'),
+('Binary BE unsigned'),
 ('Binary BE signed');
 
 -- Create table SignalGroup
@@ -114,8 +114,8 @@ CREATE TABLE signal
   deleted boolean NOT NULL DEFAULT false,
   CONSTRAINT signal_pkey PRIMARY KEY (signalid),
   CONSTRAINT signalgroup_fkey FOREIGN KEY (signalgroupid)
-      REFERENCES signalgroup (signalgroupid) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
+	  REFERENCES signalgroup (signalgroupid) MATCH SIMPLE
+	  ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
   OIDS=FALSE
@@ -126,55 +126,60 @@ WITH (
 CREATE TABLE signalinstance
 (
   signalinstanceid serial NOT NULL,
-  signalid integer NOT NULL,  
-  changesetid integer NOT NULL,
+  signalid integer NOT NULL,
+  changesetid integer,
   created timestamp with time zone NOT NULL DEFAULT now(),
   action integer NOT NULL DEFAULT 1,
-  strid character varying(64) NOT NULL,
-  extstrid character varying(64) NOT NULL,
-  name text NOT NULL DEFAULT ''::text,
+  strid text NOT NULL,
+  extstrid text NOT NULL,
+  name text,
   dataformatid integer NOT NULL DEFAULT 1,
-  datasize integer NOT NULL DEFAULT 1,  
+  datasize integer NOT NULL DEFAULT 1,
   lowadc integer NOT NULL DEFAULT 0,
   highadc integer NOT NULL DEFAULT 65535,
   lowlimit double precision NOT NULL DEFAULT 0,
   highlimit double precision NOT NULL DEFAULT 0,
   unitid integer NOT NULL DEFAULT 1,
-  adjustment double precision NOT NULL DEFAULT 0,  
+  adjustment double precision NOT NULL DEFAULT 0,
   droplimit double precision NOT NULL DEFAULT 0,
   excesslimit double precision NOT NULL DEFAULT 0,
   unbalancelimit double precision NOT NULL DEFAULT 0,
   inputlowlimit double precision NOT NULL DEFAULT 0,
   inputhighlimit double precision NOT NULL DEFAULT 0,
   inputunitid integer NOT NULL DEFAULT 1,
+  inputsensorid integer,
   outputlowlimit double precision NOT NULL DEFAULT 0,
   outputhighlimit double precision NOT NULL DEFAULT 0,
   outputunitid integer NOT NULL DEFAULT 1,
+  outputsensorid integer,
   acquire boolean NOT NULL DEFAULT true,
   calculated boolean NOT NULL DEFAULT false,
   normalstate integer NOT NULL DEFAULT 0,
-  decimalplaces integer NOT NULL DEFAULT 2,  
-  aperture double precision NOT NULL DEFAULT 0,  
-  
+  decimalplaces integer NOT NULL DEFAULT 2,
+  aperture double precision NOT NULL DEFAULT 0,
+  inouttype integer NOT NULL DEFAULT 2,
+  deviceid integer,
+  inoutno integer,
+
   CONSTRAINT signalinstance_pkey PRIMARY KEY (signalinstanceid),
   CONSTRAINT changeset_fkey FOREIGN KEY (changesetid)
-      REFERENCES changeset (changesetid) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
+	  REFERENCES changeset (changesetid) MATCH SIMPLE
+	  ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT dataformat_fkey FOREIGN KEY (dataformatid)
-      REFERENCES dataformat (dataformatid) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
+	  REFERENCES dataformat (dataformatid) MATCH SIMPLE
+	  ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT inputunit_fkey FOREIGN KEY (inputunitid)
-      REFERENCES unit (unitid) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
+	  REFERENCES unit (unitid) MATCH SIMPLE
+	  ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT outputunit_fkey FOREIGN KEY (outputunitid)
-      REFERENCES unit (unitid) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
+	  REFERENCES unit (unitid) MATCH SIMPLE
+	  ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT signal_fkey FOREIGN KEY (signalid)
-      REFERENCES signal (signalid) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
+	  REFERENCES signal (signalid) MATCH SIMPLE
+	  ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT unit_fkey FOREIGN KEY (unitid)
-      REFERENCES unit (unitid) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
+	  REFERENCES unit (unitid) MATCH SIMPLE
+	  ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
   OIDS=FALSE

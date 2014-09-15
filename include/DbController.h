@@ -3,6 +3,7 @@
 #include "DbStruct.h"
 #include "DbWorker.h"
 #include "DeviceObject.h"
+#include <QSet>
 
 class DbController : public QObject
 {
@@ -62,7 +63,11 @@ public:
 
 	// Hardware Configuration
 	//
-	bool addSystem(const DeviceSystem* system, QWidget* parentWidget);
+	bool addSystem(const Hardware::DeviceSystem* system, QWidget* parentWidget);
+
+	// Signals management
+	//
+	bool getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
@@ -87,6 +92,8 @@ signals:
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
 
 	void signal_addSystem(DbFile* file);
+
+	void signal_getSignalsIDs(QSet<int>* signalIDs);
 
 	//
 	// Service functions
@@ -143,3 +150,24 @@ private:
 
 	DbProgress m_progress;
 };
+
+
+class HasDbController
+{
+
+private:
+	HasDbController();
+public:
+	explicit HasDbController(DbController* dbcontroller);
+
+	// Properties
+	//
+protected:
+	DbController* dbcontroller();
+
+	// Data
+	//
+private:
+	DbController* m_dbController;
+};
+

@@ -1,201 +1,269 @@
 #pragma once
 #include "DbStruct.h"
+#include "QUuid"
+#include "../include/ProtoSerialization.h"
 
-// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
-//
-enum class DeviceType
+namespace Hardware
 {
-	Root,
-	System,
-	Rack,
-	Chassis,
-	Module,
-	Controller,
-	DiagSignal
-};
+	void Init();
+	void Shutdwon();
 
-//
-//
-// DeviceObject
-//
-//
-class DeviceObject
-{
-protected:
-	DeviceObject();
-	virtual ~DeviceObject();
+	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
+	//
+	enum class DeviceType
+	{
+		Root,
+		System,
+		Rack,
+		Chassis,
+		Module,
+		Controller,
+		DiagSignal
+	};
 
-    // Properties
-    //
-public:
-	DeviceObject* parent();
-	virtual DeviceType deviceType() = 0;
+	//
+	//
+	// DeviceObject
+	//
+	//
+	class DeviceObject :
+		public QObject,
+		public Proto::ObjectSerialization<DeviceObject>
+	{
+		Q_OBJECT
 
-    // Children care
-    //
-	int childrenCount() const;
+	protected:
+		DeviceObject();
+		virtual ~DeviceObject();
 
-	DeviceObject* child(int index) const;
+		// Serialization
+		//
+		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
 
-	int childIndex(DeviceObject* child) const;
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
-	std::shared_ptr<DeviceObject> childSharedPtr(int index);
+	private:
+		// Use this function only while serialization, as when object is created is not fully initialized
+		// and must be read before use
+		//
+		static DeviceObject* CreateObject(const Proto::Envelope& message);
 
-	void addChild(std::shared_ptr<DeviceObject> child);
-	void deleteAllChildren();
+	public:
 
-    // Props
-    //
-	const QString& strId() const;
-	void setStrId(const QString& value);
+		// Properties
+		//
+	public:
+		DeviceObject* parent();
+		virtual DeviceType deviceType() = 0;
 
-	const QString& caption() const;
-	void setCaption(const QString& value);
+		// Children care
+		//
+		int childrenCount() const;
 
-	const DbFileInfo& fileInfo() const;
-	void setFileInfo(const DbFileInfo& value);
+		DeviceObject* child(int index) const;
 
-    // Data
-    //
-protected:
-	DeviceObject* m_parent = nullptr;
-    std::vector<std::shared_ptr<DeviceObject>> m_children;
+		int childIndex(DeviceObject* child) const;
 
-	QString m_strId;
-	QString m_caption;
+		std::shared_ptr<DeviceObject> childSharedPtr(int index);
 
-	DbFileInfo m_fileInfo;
-};
+		void addChild(std::shared_ptr<DeviceObject> child);
+		void deleteAllChildren();
 
+		// Props
+		//
+		const QString& strId() const;
+		void setStrId(const QString& value);
 
-//
-//
-// DeviceRoot
-//
-//
-class DeviceRoot : public DeviceObject
-{
-public:
-    DeviceRoot();
-	virtual ~DeviceRoot();
+		const QString& caption() const;
+		void setCaption(const QString& value);
 
-public:
-	virtual DeviceType deviceType() override;
+		const DbFileInfo& fileInfo() const;
+		void setFileInfo(const DbFileInfo& value);
 
-private:
-	static const DeviceType m_deviceType = DeviceType::Root;
-};
+		// Data
+		//
+	protected:
+		DeviceObject* m_parent = nullptr;
+		std::vector<std::shared_ptr<DeviceObject>> m_children;
 
+		QUuid m_uuid;
+		QString m_strId;
+		QString m_caption;
 
-//
-//
-// DeviceSystem
-//
-//
-class DeviceSystem : public DeviceObject
-{
-public:
-    DeviceSystem();
-    virtual ~DeviceSystem();
-
-public:
-	virtual DeviceType deviceType() override;
-
-private:
-	static const DeviceType m_deviceType = DeviceType::System;
-};
+		DbFileInfo m_fileInfo;
+	};
 
 
-//
-//
-// DeviceRack
-//
-//
-class DeviceRack : public DeviceObject
-{
-public:
-	DeviceRack();
-	virtual ~DeviceRack();
+	//
+	//
+	// DeviceRoot
+	//
+	//
+	class DeviceRoot : public DeviceObject
+	{
+	public:
+		DeviceRoot();
+		virtual ~DeviceRoot();
 
-public:
-	virtual DeviceType deviceType() override;
+	public:
+		virtual DeviceType deviceType() override;
 
-private:
-	static const DeviceType m_deviceType = DeviceType::Rack;
-};
-
-
-//
-//
-// DeviceChassis
-//
-//
-class DeviceChassis : public DeviceObject
-{
-public:
-	DeviceChassis();
-	virtual ~DeviceChassis();
-
-public:
-	virtual DeviceType deviceType() override;
-
-private:
-	static const DeviceType m_deviceType = DeviceType::Chassis;
-};
+	private:
+		static const DeviceType m_deviceType = DeviceType::Root;
+	};
 
 
-//
-//
-// DeviceModule
-//
-//
-class DeviceModule : public DeviceObject
-{
-public:
-	DeviceModule();
-	virtual ~DeviceModule();
+	//
+	//
+	// DeviceSystem
+	//
+	//
+	class DeviceSystem : public DeviceObject
+	{
+	public:
+		DeviceSystem();
+		virtual ~DeviceSystem();
 
-public:
-	virtual DeviceType deviceType() override;
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
-private:
-	static const DeviceType m_deviceType = DeviceType::Module;
-};
+	public:
+		virtual DeviceType deviceType() override;
 
-
-//
-//
-// DeviceController
-//
-//
-class DeviceController : public DeviceObject
-{
-public:
-	DeviceController();
-	virtual ~DeviceController();
-
-public:
-	virtual DeviceType deviceType() override;
-
-private:
-	static const DeviceType m_deviceType = DeviceType::Controller;
-};
+	private:
+		static const DeviceType m_deviceType = DeviceType::System;
+	};
 
 
-//
-//
-// DeviceDiagSignal
-//
-//
-class DeviceDiagSignal : public DeviceObject
-{
-public:
-	DeviceDiagSignal();
-	virtual ~DeviceDiagSignal();
+	//
+	//
+	// DeviceRack
+	//
+	//
+	class DeviceRack : public DeviceObject
+	{
+	public:
+		DeviceRack();
+		virtual ~DeviceRack();
 
-public:
-	virtual DeviceType deviceType() override;
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
-private:
-	static const DeviceType m_deviceType = DeviceType::DiagSignal;
-};
+	public:
+		virtual DeviceType deviceType() override;
+
+	private:
+		static const DeviceType m_deviceType = DeviceType::Rack;
+	};
+
+
+	//
+	//
+	// DeviceChassis
+	//
+	//
+	class DeviceChassis : public DeviceObject
+	{
+	public:
+		DeviceChassis();
+		virtual ~DeviceChassis();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	public:
+		virtual DeviceType deviceType() override;
+
+	private:
+		static const DeviceType m_deviceType = DeviceType::Chassis;
+	};
+
+
+	//
+	//
+	// DeviceModule
+	//
+	//
+	class DeviceModule : public DeviceObject
+	{
+	public:
+		DeviceModule();
+		virtual ~DeviceModule();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	public:
+		virtual DeviceType deviceType() override;
+
+	private:
+		static const DeviceType m_deviceType = DeviceType::Module;
+	};
+
+
+	//
+	//
+	// DeviceController
+	//
+	//
+	class DeviceController : public DeviceObject
+	{
+	public:
+		DeviceController();
+		virtual ~DeviceController();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	public:
+		virtual DeviceType deviceType() override;
+
+	private:
+		static const DeviceType m_deviceType = DeviceType::Controller;
+	};
+
+
+	//
+	//
+	// DeviceDiagSignal
+	//
+	//
+	class DeviceDiagSignal : public DeviceObject
+	{
+	public:
+		DeviceDiagSignal();
+		virtual ~DeviceDiagSignal();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	public:
+		virtual DeviceType deviceType() override;
+
+	private:
+		static const DeviceType m_deviceType = DeviceType::DiagSignal;
+	};
+
+	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
+
+}

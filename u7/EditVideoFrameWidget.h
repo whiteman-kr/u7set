@@ -4,7 +4,7 @@
 #include "../VFrame30/VideoItem.h"
 #include "../VFrame30/FblItem.h"
 #include "EditEngine.h"
-#include "../include/DbStore.h"
+#include "../include/DbController.h"
 
 #define GridSizeDisplay				5
 #define GridSizeMm					mm2in(0.5)

@@ -3,7 +3,7 @@
 #include <QTableView>
 #include "../include/DbStruct.h"
 
-class DbStore;
+class DbController;
 
 class FilesModel : public QAbstractTableModel
 {
@@ -62,7 +62,7 @@ private:
 	FileView(const FileView&);
 
 public:
-	FileView(DbStore* dbstore);
+	FileView(DbController* dbstore);
 	virtual ~FileView();
 
 protected:
@@ -113,12 +113,12 @@ public:
 	// Protected properties
 	//
 protected:
-	DbStore* dbStore();
+	DbController* dbController();
 
 	// Data
 	//
 private:
-	DbStore* m_pDbStore;
+	DbController* m_dbController;
 	FilesModel m_filesModel;
 
 	//	Contexet Menu

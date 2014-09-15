@@ -39,13 +39,13 @@ CONFIG(release, debug|release) {
 
 
 OTHER_FILES += \
-	VideoFrame.proto
+    ../Proto/proto_compile.bat \
+    ../Proto/serialization.proto
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
     VideoLayer.h \
     VideoItem.h \
-    VFrame30.pb.h \
     VideoItemSignal.h \
     VideoItemRect.h \
     VideoItemLink.h \
@@ -70,10 +70,8 @@ HEADERS += VFrame30Lib_global.h \
     VideoFrame.h \
     Print.h \
     VFrame30Library.h \
-    Factory.h \
     HorzVertLinks.h \
 	../include/TypesAndEnums.h \
-	../include/VFrameUtils.h \
     VideoFrameManager.h \
     VideoFrameView.h \
     VideoFrameWidget.h \
@@ -82,11 +80,13 @@ HEADERS += VFrame30Lib_global.h \
     FrameHistoryItem.h \
 	Configuration.h \
 	DebugInstCounter.h \
-    VFrame30.h
+    VFrame30.h \
+    ../include/StreamedData.h \
+    ../include/ProtoSerialization.h \
+    ../include/CUtils.h
 
 SOURCES += VideoLayer.cpp \
     VideoItem.cpp \
-    VFrame30.pb.cpp \
     VideoItemSignal.cpp \
     VideoItemRect.cpp \
     VideoItemLink.cpp \
@@ -112,14 +112,16 @@ SOURCES += VideoLayer.cpp \
     Stable.cpp \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
-	../lib/VFrameUtils.cpp \
     VideoFrameManager.cpp \
     VideoFrameView.cpp \
     VideoFrameWidget.cpp \
     VideoFrameWidgetAgent.cpp \
     VideoFrameAgent.cpp \
     FrameHistoryItem.cpp \
-	Configuration.cpp
+	Configuration.cpp \
+    ../lib/StreamedData.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/CUtils.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 #CONFIG(debug, debug|release): DEFINES += DEBUG
@@ -140,8 +142,8 @@ unix {
 	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
-##protobuf
-##
+#protobuf
+#
 win32 {
 	LIBS += -L$$DESTDIR -lprotobuf
 
@@ -153,9 +155,9 @@ unix {
 
 # Protobuf
 #
-!include(protobuf.pri) {
-	error("Couldn't find the protobuf.pri file!")
-}
+#!include(protobuf.pri) {
+#	error("Couldn't find the protobuf.pri file!")
+#}
 
 # Visual Leak Detector
 #
@@ -171,3 +173,4 @@ win32 {
 	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+

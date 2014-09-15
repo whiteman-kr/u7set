@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VideoItem.h"
-#include "../include/VFrameUtils.h"
+#include "../include/CUtils.h"
 #include "Settings.h"
 
 namespace VFrame30

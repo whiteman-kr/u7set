@@ -18,7 +18,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CPosConnectionImpl::SaveData(VFrame30::Proto::Envelope* message) const
+	bool CPosConnectionImpl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CVideoItem::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CPosConnectionImpl::LoadData(const VFrame30::Proto::Envelope& message)
+	bool CPosConnectionImpl::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -268,7 +268,7 @@ namespace VFrame30
 				continue;
 			}
 
-			if (CVFrameUtils::IsLineIntersectRect(prevPoint.X, prevPoint.Y, curPoint->X, curPoint->Y, intersectRectangleIn) == true)
+			if (CUtils::IsLineIntersectRect(prevPoint.X, prevPoint.Y, curPoint->X, curPoint->Y, intersectRectangleIn) == true)
 			{
 				return true;
 			}
@@ -391,12 +391,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			val = CVFrameUtils::RoundDisplayPoint(val);
+			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CVFrameUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			val = CVFrameUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
 		}
 
 		return val;
@@ -424,12 +424,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			val = CVFrameUtils::RoundDisplayPoint(val);
+			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CVFrameUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			val = CVFrameUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
+			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
 		}
 
 		return val;
@@ -461,12 +461,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			val = CVFrameUtils::RoundDisplayPoint(val);
+			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CVFrameUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			val = CVFrameUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
 		}
 
 		return val;
@@ -498,12 +498,12 @@ namespace VFrame30
 
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			val = CVFrameUtils::RoundDisplayPoint(val);
+			val = CUtils::RoundDisplayPoint(val);
 		}
 		else
 		{
-			val = CVFrameUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			val = CVFrameUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
+			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
 		}
 
 		return val;

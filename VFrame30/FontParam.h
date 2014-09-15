@@ -1,5 +1,6 @@
 #pragma once
 
+
 #define DECLARE_FONT_PROPERTIES(propname) \
 	const QString& Get##propname##Name() const; \
 		void Set##propname##Name(QString& value); \
@@ -21,12 +22,12 @@
 	{ \
 		if (itemUnit() == SchemeUnit::Display) \
 		{ \
-			return CVFrameUtils::RoundDisplayPoint(varname.size); \
+			return CUtils::RoundDisplayPoint(varname.size); \
 		} \
 		else \
 		{ \
-			double pt = CVFrameUtils::ConvertPoint(varname.size, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz); \
-			return CVFrameUtils::RoundPoint(pt, CSettings::regionalUnit()); \
+			double pt = CUtils::ConvertPoint(varname.size, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz); \
+			return CUtils::RoundPoint(pt, CSettings::regionalUnit()); \
 		} \
 	} \
 	void classname::Set##propname##Size(double value) \
@@ -34,11 +35,11 @@
 		value = std::max(value, 0.0); \
 		if (itemUnit() == SchemeUnit::Display) \
 		{ \
-			this->varname.size = CVFrameUtils::RoundDisplayPoint(value); \
+			this->varname.size = CUtils::RoundDisplayPoint(value); \
 		} \
 		else \
 		{ \
-			double pt = CVFrameUtils::ConvertPoint(value, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz); \
+			double pt = CUtils::ConvertPoint(value, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz); \
 			this->varname.size = pt; \
 		} \
 	} \
@@ -48,12 +49,9 @@
 	void classname::Set##propname##Italic(bool value) { varname.italic = value; } 
 
 
-namespace VFrame30
+namespace Proto
 {
-	namespace Proto
-	{
-		class FontParam;
-	}
+	class FontParam;
 }
 
 namespace VFrame30
@@ -66,8 +64,8 @@ namespace VFrame30
 		// Serialization
 		//
 	public:
-		bool SaveData(VFrame30::Proto::FontParam* message) const;
-		bool LoadData(const VFrame30::Proto::FontParam& message);
+		bool SaveData(Proto::FontParam* message) const;
+		bool LoadData(const Proto::FontParam& message);
 	
 		// --
 		//

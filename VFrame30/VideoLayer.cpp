@@ -32,13 +32,13 @@ namespace VFrame30
 	bool CVideoLayer::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
-		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
 
 		auto pMutableVideoLayer = message->mutable_videolayer();
 
-		Proto::Write(pMutableVideoLayer->mutable_guid(), m_guid);
+		Proto::Write(pMutableVideoLayer->mutable_uuid(), m_guid);
 		Proto::Write(pMutableVideoLayer->mutable_name(), m_name);
 
 		pMutableVideoLayer->set_compile(m_compile);
@@ -70,7 +70,7 @@ namespace VFrame30
 
 		const Proto::VideoLayer& videoLayer = message.videolayer();
 
-		m_guid = Proto::Read(videoLayer.guid());
+		m_guid = Proto::Read(videoLayer.uuid());
 		m_name = Proto::Read(videoLayer.name());
 
 		m_compile = videoLayer.compile();
@@ -132,8 +132,8 @@ namespace VFrame30
 	//
 	void CVideoLayer::ConnectionMapPosInc(VideoItemPoint pinPos)
 	{
-		pinPos.X = CVFrameUtils::Round(pinPos.X, 5);
-		pinPos.Y = CVFrameUtils::Round(pinPos.Y, 5);
+		pinPos.X = CUtils::Round(pinPos.X, 5);
+		pinPos.Y = CUtils::Round(pinPos.Y, 5);
 
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -149,8 +149,8 @@ namespace VFrame30
 
 	int CVideoLayer::GetPinPosConnectinCount(VideoItemPoint pinPos) const
 	{
-		pinPos.X = CVFrameUtils::Round(pinPos.X, 5);
-		pinPos.Y = CVFrameUtils::Round(pinPos.Y, 5);
+		pinPos.X = CUtils::Round(pinPos.X, 5);
+		pinPos.Y = CUtils::Round(pinPos.Y, 5);
 
 		auto mapitem = connectionMap.find(pinPos);
 

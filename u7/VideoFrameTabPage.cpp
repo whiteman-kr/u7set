@@ -9,8 +9,8 @@
 //	VideoFrameFileView
 //
 //
-VideoFrameFileView::VideoFrameFileView(DbStore* dbstore) :
-	FileView(dbstore)
+VideoFrameFileView::VideoFrameFileView(DbController* dbcontroller) :
+	FileView(dbcontroller)
 {
 	filesModel().setFilter("vfr");
 	return;
@@ -56,8 +56,8 @@ VideoFrameTabPage::VideoFrameTabPage(DbController* dbcontroller, QWidget* parent
 
 	// --
 	//
-	//connect(dbController(), &DbStore::projectOpened, this, &VideoFrameTabPage::projectOpened);
-	//connect(dbController(), &DbStore::projectClosed, this, &VideoFrameTabPage::projectClosed);
+	connect(dbController(), &DbController::projectOpened, this, &VideoFrameTabPage::projectOpened);
+	connect(dbController(), &DbController::projectClosed, this, &VideoFrameTabPage::projectClosed);
 
 	// Evidently, project is not opened yet
 	//
@@ -85,19 +85,17 @@ void VideoFrameTabPage::projectClosed()
 //
 //
 
-VideoFrameControlTabPage::VideoFrameControlTabPage(const QString& fileExt, DbStore* dbstore, std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc) :
-	HasDbStore(dbstore),
+VideoFrameControlTabPage::VideoFrameControlTabPage(const QString& fileExt, DbController* dbcontroller, std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc) :
+	HasDbController(dbcontroller),
 	m_createVideoFrameFunc(createVideoFrameFunc)
 {
-	assert(dbstore != nullptr);
-
 	// Create actions
 	//
 	CreateActions();
 
 	// Create controls
 	//
-	m_filesView = new VideoFrameFileView(dbstore);
+	m_filesView = new VideoFrameFileView(dbcontroller);
 	m_filesView->filesModel().setFilter(fileExt);
 
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
@@ -172,18 +170,17 @@ void VideoFrameControlTabPage::addFile()
 		return;
 	}
 
-	VFrame30::Proto::CStreamedData sd;
+	Proto::StreamedData sd;
 	vf->Save(sd);
-	QByteArray vfData(sd.data(), static_cast<int>(sd.length()));
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
 	vfFile->setFileName(fileName);
-	vfFile->swapData(vfData);
+	vfFile->swapData(sd.mutable_data());
 
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
 	addFilesList.push_back(vfFile);
 
-	dbstore()->addFiles(&addFilesList, this);
+	dbcontroller()->addFiles(&addFilesList, dbcontroller()->wvsFileId(), this);
 
 	// Add file to the FileModel and select them
 	//
@@ -226,7 +223,7 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	if (file.state() == VcsState::CheckedOut && file.user() != dbstore()->currentUser())
+	if (file.state() == VcsState::CheckedOut && file.user() != dbcontroller()->currentUser())
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.user().username()));
@@ -234,7 +231,7 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	assert(file.state() == VcsState::CheckedOut && file.user() == dbstore()->currentUser());
+	assert(file.state() == VcsState::CheckedOut && file.user() == dbcontroller()->currentUser());
 
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
@@ -271,7 +268,7 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	bool result = dbstore()->getWorkcopy(files, &out, this);
+	bool result = dbcontroller()->getWorkcopy(files, &out, this);
 	if (result == false || out.size() != files.size())
 	{
 		return;
@@ -285,7 +282,7 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	DbFileInfo fi(*(out.front().get()));
 
-	EditVideoFrameTabPage* editTabPage = new EditVideoFrameTabPage(vf, fi, dbstore());
+	EditVideoFrameTabPage* editTabPage = new EditVideoFrameTabPage(vf, fi, dbcontroller());
 
 	connect(editTabPage, &EditVideoFrameTabPage::vcsFileStateChanged, this, &VideoFrameControlTabPage::refreshFiles);
 
@@ -299,6 +296,8 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 void VideoFrameControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 {
+	assert(false);
+	/*
 	if (files.empty() == true || files.size() != 1)
 	{
 		assert(files.empty() == false);
@@ -318,7 +317,7 @@ void VideoFrameControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<DbChangesetInfo> fileHistory;
 
-	dbstore()->getFileHistory(file, &fileHistory, this);
+	dbcontroller()->getFileHistory(file, &fileHistory, this);
 
 	// Show chageset dialog
 	//
@@ -378,7 +377,7 @@ void VideoFrameControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	tabWidget->addTab(editTabPage, tabPageTitle);
 	tabWidget->setCurrentWidget(editTabPage);
 
-	return;
+	return;*/
 }
 
 void VideoFrameControlTabPage::refreshFiles()
@@ -394,11 +393,10 @@ void VideoFrameControlTabPage::refreshFiles()
 // EditVideoFrameTabPage
 //
 //
-EditVideoFrameTabPage::EditVideoFrameTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbStore* dbstore) :
-	HasDbStore(dbstore),
+EditVideoFrameTabPage::EditVideoFrameTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller) :
+	HasDbController(dbcontroller),
 	m_videoFrameWidget(nullptr)
 {
-	assert(dbstore);
 	assert(videoFrame.get() != nullptr);
 
 	setWindowTitle(videoFrame->strID());
@@ -444,7 +442,7 @@ void EditVideoFrameTabPage::setPageTitle()
 
 	QString newTitle;
 
-	if (readOnly() == true || fileInfo().user() != dbstore()->currentUser())
+	if (readOnly() == true || fileInfo().user() != dbcontroller()->currentUser())
 	{
 		if (fileInfo().changeset() != -1)
 		{
@@ -517,11 +515,13 @@ void EditVideoFrameTabPage::closeTab()
 
 void EditVideoFrameTabPage::checkInFile()
 {
+	assert(false);
+	/*
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().user() != dbstore()->currentUser())
+		fileInfo().user() != dbcontroller()->currentUser())
 	{
-		assert(fileInfo().user() == dbstore()->currentUser());
+		assert(fileInfo().user() == dbcontroller()->currentUser());
 		return;
 	}
 
@@ -540,7 +540,7 @@ void EditVideoFrameTabPage::checkInFile()
 	std::vector<DbFileInfo> files;
 	files.push_back(fileInfo());
 
-	bool checkInResult = CheckInDialog::checkIn(files, dbstore(), this);
+	bool checkInResult = CheckInDialog::checkIn(files, dbcontroller(), this);
 	if (checkInResult == false)
 	{
 		return;
@@ -549,19 +549,21 @@ void EditVideoFrameTabPage::checkInFile()
 	emit vcsFileStateChanged();
 
 	DbFileInfo fi;
-	dbstore()->getFileInfo(fileInfo().fileId(), &fi);
+	dbcontroller()->getFileInfo(fileInfo().fileId(), &fi);
 
 	setFileInfo(fi);
 
 	setReadOnly(true);
 
 	setPageTitle();
-
+*/
 	return;
 }
 
 void EditVideoFrameTabPage::checkOutFile()
 {
+	assert(false);
+	/*
 	if (readOnly() == false ||
 		fileInfo().state() != VcsState::CheckedIn)
 	{
@@ -571,7 +573,7 @@ void EditVideoFrameTabPage::checkOutFile()
 	std::vector<DbFileInfo> files;
 	files.push_back(fileInfo());
 
-	bool result = dbstore()->checkOutFiles(files, this);
+	bool result = dbcontroller()->checkOutFiles(files, this);
 	if (result == false)
 	{
 		return;
@@ -581,7 +583,7 @@ void EditVideoFrameTabPage::checkOutFile()
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	result = dbstore()->getWorkcopy(files, &out, this);
+	result = dbcontroller()->getWorkcopy(files, &out, this);
 	if (result == false || out.size() != files.size())
 	{
 		return;
@@ -601,6 +603,7 @@ void EditVideoFrameTabPage::checkOutFile()
 
 	emit vcsFileStateChanged();
 	return;
+	*/
 }
 
 void EditVideoFrameTabPage::undoChangesFile()
@@ -610,11 +613,14 @@ void EditVideoFrameTabPage::undoChangesFile()
 	// 3 Set frame to readonly mode
 	//
 
+	assert(false);
+
+	/*
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().user() != dbstore()->currentUser())
+		fileInfo().user() != dbcontroller()->currentUser())
 	{
-		assert(fileInfo().user() == dbstore()->currentUser());
+		assert(fileInfo().user() == dbcontroller()->currentUser());
 		return;
 	}
 
@@ -629,12 +635,12 @@ void EditVideoFrameTabPage::undoChangesFile()
 		std::vector<DbFileInfo> files;
 		files.push_back(fileInfo());
 
-		bool result = dbstore()->undoFilesPendingChanges(files, this);
+		bool result = dbcontroller()->undoChanges(files, this);
 
 		if (result == true)
 		{
 			DbFileInfo fi;
-			dbstore()->getFileInfo(fileInfo().fileId(), &fi);
+			dbcontroller()->getFileInfo(fileInfo().fileId(), &fi);
 
 			setFileInfo(fi);
 
@@ -649,7 +655,7 @@ void EditVideoFrameTabPage::undoChangesFile()
 	}
 
 	emit vcsFileStateChanged();
-	return;
+	return;*/
 }
 
 bool EditVideoFrameTabPage::saveWorkcopy()
@@ -657,9 +663,9 @@ bool EditVideoFrameTabPage::saveWorkcopy()
 	if (readOnly() == true ||
 		modified() == false ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().user() != dbstore()->currentUser())
+		fileInfo().user() != dbcontroller()->currentUser())
 	{
-		assert(fileInfo().user() == dbstore()->currentUser());
+		assert(fileInfo().user() == dbcontroller()->currentUser());
 		return false;
 	}
 
@@ -676,7 +682,7 @@ bool EditVideoFrameTabPage::saveWorkcopy()
 	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo());
 	file->swapData(data);
 
-	bool result = dbstore()->setWorkcopy(file, this);
+	bool result = dbcontroller()->setWorkcopy(file, this);
 	if (result == true)
 	{
 		resetModified();
@@ -722,9 +728,9 @@ void EditVideoFrameTabPage::setCurrentWorkcopy()
 {
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().user() != dbstore()->currentUser())
+		fileInfo().user() != dbcontroller()->currentUser())
 	{
-		assert(fileInfo().user() == dbstore()->currentUser());
+		assert(fileInfo().user() == dbcontroller()->currentUser());
 		return;
 	}
 

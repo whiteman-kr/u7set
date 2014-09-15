@@ -15,34 +15,34 @@ namespace VFrame30
 	// Serialization
 	//
 
-	bool Configuration::SaveData(VFrame30::Proto::Envelope* message) const
+	bool Configuration::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
-		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);
 
 		// --
 		//
-		VFrame30::Proto::Configuration* pMutableConfiguration = message->mutable_configuration();
+		Proto::Configuration* pMutableConfiguration = message->mutable_configuration();
 
-		VFrame30::Proto::Write(pMutableConfiguration->mutable_guid(), m_guid);
-		VFrame30::Proto::Write(pMutableConfiguration->mutable_strid(), m_strID);
-		VFrame30::Proto::Write(pMutableConfiguration->mutable_caption(), m_caption);
-		VFrame30::Proto::Write(pMutableConfiguration->mutable_variables(), m_variables);
-		VFrame30::Proto::Write(pMutableConfiguration->mutable_globals(), m_globals);
+		Proto::Write(pMutableConfiguration->mutable_uuid(), m_guid);
+		Proto::Write(pMutableConfiguration->mutable_strid(), m_strID);
+		Proto::Write(pMutableConfiguration->mutable_caption(), m_caption);
+		Proto::Write(pMutableConfiguration->mutable_variables(), m_variables);
+		Proto::Write(pMutableConfiguration->mutable_globals(), m_globals);
 		 
 		for (auto vf = m_videoFramesIDs.begin(); vf != m_videoFramesIDs.end(); ++vf)
 		{
-			VFrame30::Proto::Guid* pGuid = pMutableConfiguration->add_videoframesids();
-			VFrame30::Proto::Write(pGuid, *vf);
+			Proto::Uuid* pGuid = pMutableConfiguration->add_videoframesids();
+			Proto::Write(pGuid, *vf);
 		}
 
 		bool saveFrameResult = true;
 
 		for (auto vf = m_videoFrames.begin(); vf != m_videoFrames.end(); ++vf)
 		{
-			VFrame30::Proto::Envelope* pVideoFrame = pMutableConfiguration->add_videoframes();
+			Proto::Envelope* pVideoFrame = pMutableConfiguration->add_videoframes();
 			saveFrameResult &= vf->get()->Save(pVideoFrame);
 		}
 				
@@ -57,18 +57,18 @@ namespace VFrame30
 			return false;
 		}
 
-		const VFrame30::Proto::Configuration& configuration = message.configuration();
+		const Proto::Configuration& configuration = message.configuration();
 
-		m_guid = VFrame30::Proto::Read(configuration.guid());
-		m_strID = VFrame30::Proto::Read(configuration.strid());
-		m_caption = VFrame30::Proto::Read(configuration.caption());
-		m_variables = VFrame30::Proto::Read(configuration.variables());
-		m_globals = VFrame30::Proto::Read(configuration.globals());
+		m_guid = Proto::Read(configuration.uuid());
+		m_strID = Proto::Read(configuration.strid());
+		m_caption = Proto::Read(configuration.caption());
+		m_variables = Proto::Read(configuration.variables());
+		m_globals = Proto::Read(configuration.globals());
 
 		m_videoFramesIDs.clear();
 		for (int i = 0; i < configuration.videoframesids().size(); i++)
 		{
-			const QUuid& videoFrameGuid = VFrame30::Proto::Read(configuration.videoframesids(i));
+			const QUuid& videoFrameGuid = Proto::Read(configuration.videoframesids(i));
 			m_videoFramesIDs.push_back(videoFrameGuid);
 
 			assert(videoFrameGuid.isNull() == false);

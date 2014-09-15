@@ -76,6 +76,10 @@ public slots:
 	//
 	void slot_addSystem(DbFile* file);
 
+	// Signal management
+	//
+	void slot_getSignalsIDs(QSet<int>* signalsIDs);
+
 	// Service
 	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);

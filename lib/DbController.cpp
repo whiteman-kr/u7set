@@ -41,6 +41,8 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_addSystem, m_worker, &DbWorker::slot_addSystem);
 
+	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
+
 	m_thread.start();
 }
 
@@ -519,7 +521,7 @@ bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWi
 	return true;
 }
 
-bool DbController::addSystem(const DeviceSystem* system, QWidget* parentWidget)
+bool DbController::addSystem(const Hardware::DeviceSystem* system, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -557,6 +559,32 @@ bool DbController::addSystem(const DeviceSystem* system, QWidget* parentWidget)
 	return true;
 }
 
+
+bool DbController::getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getSignalsIDs(signalIDs);
+
+	ok = waitForComplete(parentWidget, tr("Getting signals' IDs"));
+
+	return ok;
+}
+
+
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {
 	// Check parameters
@@ -590,7 +618,7 @@ bool DbController::initOperation()
 {
 	if (m_operationMutex.tryLock() == false)		// MUST BE UNLOCKED LATER (in waitForComplete!!!)
 	{
-		qDebug() << "DbStore: Another operation is in progress!";
+		qDebug() << "DbController: Another operation is in progress!";
 		return false;
 	}
 
@@ -727,4 +755,22 @@ int DbController::wvsFileId() const
 int DbController::dvsFileId() const
 {
 	return m_worker->dvsFileId();
+
 }
+
+HasDbController::HasDbController()
+{
+	assert(false);
+}
+
+HasDbController::HasDbController(DbController* dbcontroller) :
+	m_dbController(dbcontroller)
+{
+	assert(dbcontroller);
+}
+
+DbController* HasDbController::dbcontroller()
+{
+	return m_dbController;
+}
+

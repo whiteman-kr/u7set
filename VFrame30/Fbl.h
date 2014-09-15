@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VFrame30.pb.h"
+#include "../include/ProtoSerialization.h"
 #include "DebugInstCounter.h"
 
 namespace Fbl
@@ -33,8 +33,8 @@ namespace Fbl
 		// Serialization
 		//
 	public:
-		bool SaveData(VFrame30::Proto::FblParamValue* message) const;
-		bool LoadData(const VFrame30::Proto::FblParamValue& message);
+		bool SaveData(Proto::FblParamValue* message) const;
+		bool LoadData(const Proto::FblParamValue& message);
 	};
 
 		
@@ -52,8 +52,8 @@ namespace Fbl
 		// Serialization
 		//
 	public:
-		bool SaveData(VFrame30::Proto::FblElementSignal* message) const;
-		bool LoadData(const VFrame30::Proto::FblElementSignal& message);
+		bool SaveData(Proto::FblElementSignal* message) const;
+		bool LoadData(const Proto::FblElementSignal& message);
 
 		// Properties
 		//
@@ -86,8 +86,8 @@ private:
 		// Serialization
 		//
 	public:
-		bool SaveData(VFrame30::Proto::FblElementParam* message) const;
-		bool LoadData(const VFrame30::Proto::FblElementParam& message);
+		bool SaveData(Proto::FblElementParam* message) const;
+		bool LoadData(const Proto::FblElementParam& message);
 
 		// Properties
 		//
@@ -130,7 +130,7 @@ private:
 	//
 	//
 	class VFRAME30LIBSHARED_EXPORT FblElement :
-		public VFrame30::Proto::CVFrameObjectSerialization<FblElement>,
+		public Proto::ObjectSerialization<FblElement>,
 		public VFrame30::DebugInstCounter<FblElement>
 	{
 	public:
@@ -141,16 +141,16 @@ private:
 
 		// Serialization
 		//
-		friend VFrame30::Proto::CVFrameObjectSerialization<FblElement>;
+		friend Proto::ObjectSerialization<FblElement>;
 
 	protected:
-		virtual bool SaveData(VFrame30::Proto::Envelope* message) const override;
-		virtual bool LoadData(const VFrame30::Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должне прочитаться
-		static FblElement* CreateObject(const VFrame30::Proto::Envelope& message);
+		static FblElement* CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//

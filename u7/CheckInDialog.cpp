@@ -1,9 +1,9 @@
 #include "CheckInDialog.h"
 #include "ui_CheckInDialog.h"
 
-CheckInDialog::CheckInDialog(const std::vector<DbFileInfo>& files, DbStore* dbstore, QWidget* parent) :
+CheckInDialog::CheckInDialog(const std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent) :
 	QDialog(parent),
-	HasDbStore(dbstore),
+	HasDbController(dbcontroller),
 	ui(new Ui::CheckInDialog),
 	m_files(files)
 {
@@ -31,9 +31,9 @@ CheckInDialog::~CheckInDialog()
 	delete ui;
 }
 
-bool CheckInDialog::checkIn(const std::vector<DbFileInfo>& files, DbStore* dbstore, QWidget* parent)
+bool CheckInDialog::checkIn(const std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent)
 {
-	CheckInDialog d(files, dbstore, parent);
+	CheckInDialog d(files, dbcontroller, parent);
 	d.exec();
 
 	return d.result() == Accepted;
@@ -55,7 +55,7 @@ void CheckInDialog::on_checkInButton_clicked()
 		return;
 	}
 
-	bool result = dbstore()->checkInFiles(m_files, comment, this);
+	bool result = dbcontroller()->checkIn(m_files, comment, this);
 	if (result == true)
 	{
 		accept();

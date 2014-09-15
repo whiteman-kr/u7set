@@ -36,21 +36,21 @@ namespace VFrame30
 	{
 		m_point.SaveData(cpm->mutable_point());
 		cpm->set_dirrection(static_cast<Proto::ConnectionDirrection>(dirrection()));
-		VFrame30::Proto::Write(cpm->mutable_guid(), m_guid);
+		Proto::Write(cpm->mutable_uuid(), m_guid);
 
 		if (m_signalGuid.isNull() == false)  // != GUI_NULL
 		{
-			VFrame30::Proto::Write(cpm->mutable_signalguid(), m_signalGuid);
+			Proto::Write(cpm->mutable_signaluuid(), m_signalGuid);
 		}
 
 		if (m_signalStrID.isEmpty() == false)
 		{
-			VFrame30::Proto::Write(cpm->mutable_signalstrid(), m_signalStrID);
+			Proto::Write(cpm->mutable_signalstrid(), m_signalStrID);
 		}
 
 		if (m_signalCaption.isEmpty() == false)
 		{
-			VFrame30::Proto::Write(cpm->mutable_signalcaption(), m_signalCaption);
+			Proto::Write(cpm->mutable_signalcaption(), m_signalCaption);
 		}
 
 		return true;
@@ -60,11 +60,11 @@ namespace VFrame30
 	{
 		m_point.LoadData(cpm.point());
 		m_dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
-		m_guid = VFrame30::Proto::Read(cpm.guid());
+		m_guid = Proto::Read(cpm.uuid());
 
-		if (cpm.has_signalguid() == true)
+		if (cpm.has_signaluuid() == true)
 		{
-			m_signalGuid = VFrame30::Proto::Read(cpm.signalguid());
+			m_signalGuid = Proto::Read(cpm.signaluuid());
 		}
 		else
 		{
@@ -73,7 +73,7 @@ namespace VFrame30
 
 		if (cpm.has_signalstrid() == true)
 		{
-			m_signalStrID = VFrame30::Proto::Read(cpm.signalstrid());
+			m_signalStrID = Proto::Read(cpm.signalstrid());
 		}
 		else
 		{
@@ -82,7 +82,7 @@ namespace VFrame30
 
 		if (cpm.has_signalcaption() == true)
 		{
-			m_signalCaption = VFrame30::Proto::Read(cpm.signalcaption());
+			m_signalCaption = Proto::Read(cpm.signalcaption());
 		}
 		else
 		{
@@ -107,7 +107,7 @@ namespace VFrame30
 		
 	// Serialization
 	//
-	bool CFblItem::SaveData(VFrame30::Proto::Envelope* message) const
+	bool CFblItem::SaveData(Proto::Envelope* message) const
 	{
 		Proto::FblItem* fblItemMessage = message->mutable_videoitem()->mutable_fblitem();
 
@@ -132,7 +132,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItem::LoadData(const VFrame30::Proto::Envelope& message)
+	bool CFblItem::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{

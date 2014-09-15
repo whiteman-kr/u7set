@@ -1,7 +1,6 @@
 #pragma once
 
 #include "VideoItem.h"
-#include "../include/VFrameUtils.h"
 #include "Settings.h"
 
 class QPen;
@@ -46,8 +45,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(VFrame30::Proto::Envelope* message) const override;
-		virtual bool LoadData(const VFrame30::Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Action Functions
 		//
