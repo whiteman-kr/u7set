@@ -84,6 +84,7 @@ public slots:
 	//
 	void slot_getSignalsIDs(QSet<int>* signalsIDs);
 	void slot_getSignals(SignalSet* signalSet);
+	void slot_addSignal(SignalType signalType, int channelCount, Signal signal, QVector<int>* newSignalsIDs);
 
 	// Service
 	//

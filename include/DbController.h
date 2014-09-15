@@ -69,6 +69,7 @@ public:
 	//
 	bool getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget);
 	bool getSignals(SignalSet* signalSet, QWidget* parentWidget);
+	bool addSignal(SignalType signalType, int channelCount, Signal signal, QVector<int>* newSignalsIDs, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
@@ -96,6 +97,7 @@ signals:
 
 	void signal_getSignalsIDs(QSet<int>* signalIDs);
 	void signal_getSignals(SignalSet* signalSet);
+	void signal_addSignal(SignalType signalType, int channelCount, Signal signal, QVector<int>* newSignalsIDs);
 
 	//
 	// Service functions

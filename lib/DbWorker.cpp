@@ -2093,7 +2093,7 @@ void DbWorker::slot_getSignalsIDs(QSet<int>* signalsIDs)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get signals' IDs. Database connection is not openned."));
+		emitError(tr("Cannot get signals' IDs. Database connection is not opened."));
 		return;
 	}
 
@@ -2146,11 +2146,15 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get signals' IDs. Database connection is not openned."));
+		emitError(tr("Cannot get signals' IDs. Database connection is not opened."));
 		return;
 	}
 
 	QSetIterator<int> i(signalsIDs);
+
+	int signalCount = signalsIDs.count();
+
+	int count = 0;
 
 	while(i.hasNext())
 	{
@@ -2219,10 +2223,63 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 			signalSet->insert(s);
 		}
+
+		count++;
+
+		int percent = (count * 100) / signalCount;
+
+		if (m_progress != nullptr)
+		{
+			m_progress->setValue(percent);
+		}
 	}
+
+	m_progress->setValue(100);
 
 	return;
 
+}
+
+
+void DbWorker::slot_addSignal(SignalType signalType, int channelCount, Signal signal, QVector<int> *newSignalsIDs)
+{
+	// Check parameters
+	//
+	if (newSignalsIDs == nullptr)
+	{
+		assert(newSignalsIDs != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot add signals. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM add_signal(%1, %2, %3)")
+		.arg(currentUser().userId()).arg(static_cast<int>(signalType)).arg(channelCount);
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't add new signal! Error: ") +  q.lastError().text());
+		return;
+	}
+/*
+	while(q.next() != false)
+	{
+		int signalID = i.next();
+
+	}*/
 }
 
 
