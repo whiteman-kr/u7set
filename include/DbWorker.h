@@ -74,7 +74,7 @@ public slots:
 
 	// Hardware Configuration
 	//
-	void slot_addSystem(DbFile* file);
+	void slot_addDeviceObject(DbFile* file, int parentId, QString fileExtension);
 
 	// Signal management
 	//

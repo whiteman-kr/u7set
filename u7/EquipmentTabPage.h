@@ -7,8 +7,9 @@ class DbController;
 
 class EquipmentModel : public QAbstractItemModel
 {
+	Q_OBJECT
 public:
-	EquipmentModel(std::shared_ptr<Hardware::DeviceRoot> root, QObject* parent = 0);
+	EquipmentModel(DbController* dbcontroller, QWidget* parentWidget, QObject* parent);
 	virtual ~EquipmentModel();
 
 	virtual QModelIndex index(int row, int column, const QModelIndex& parentIndex) const override;
@@ -23,10 +24,33 @@ public:
 
 	virtual bool hasChildren(const QModelIndex& parentIndex = QModelIndex()) const override;
 
+	virtual bool canFetchMore(const QModelIndex& parent) const override;
+	virtual void fetchMore(const QModelIndex& parent) override;
+
+	// Get data
+public:
+	bool insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex);
+
+protected:
+	Hardware::DeviceObject* deviceObject(QModelIndex& index);
+	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
+
+public slots:
+	void projectOpened();
+	void projectClosed();
+
+	// Properties
+public:
+	DbController* dbController();
+	DbController* dbController() const;
+
 	// Data
 	//
 private:
-	std::shared_ptr<Hardware::DeviceRoot> m_root;
+	DbController* m_dbController;
+	QWidget* m_parentWidget;
+
+	std::shared_ptr<Hardware::DeviceObject> m_root;
 
 	enum Columns
 	{
@@ -62,6 +86,7 @@ public slots:
 	// Properties
 	//
 protected:
+	EquipmentModel* equipmentModel();
 	DbController* dbController();
 
 	// Data
@@ -99,7 +124,6 @@ private:
 	QAction* m_addSubblockAction = nullptr;
 	QAction* m_addBlockAction = nullptr;
 
-	std::shared_ptr<Hardware::DeviceRoot> m_root;
 	EquipmentModel* m_equipmentModel = nullptr;
 	EquipmentView* m_equipmentView = nullptr;
 

@@ -21,6 +21,8 @@
 		<file>DatabaseUpgrade/Upgrade0019.sql</file>
 		<file>DatabaseUpgrade/Upgrade0020.sql</file>
 		<file>DatabaseUpgrade/Upgrade0021.sql</file>
+		<file>DatabaseUpgrade/Upgrade0022.sql</file>
+		<file>DatabaseUpgrade/Upgrade0023.sql</file>
     </qresource>
     <qresource prefix="/">
         <file>afb_schema.xsd</file>

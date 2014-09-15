@@ -24,6 +24,8 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add system folders (AFBL, AL, HC, WVS, DVS)", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0019.sql"},
 	{"Add tables for storing application signals", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0020.sql"},
 	{"Add AddSystem function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0021.sql"},
+	{"Add add_device function, drop AddSystem", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0022.sql"},
+	{"Add is_admin function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0023.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -2006,7 +2008,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	return;
 }
 
-void DbWorker::slot_addSystem(DbFile* file)
+void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExtension)
 {
 	// Init automitic varaiables
 	//
@@ -2033,19 +2035,20 @@ void DbWorker::slot_addSystem(DbFile* file)
 	}
 
 	// request
+	// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
 	//
-	QString request = QString("SELECT * FROM AddSystem(%1, ")
-		.arg(currentUser().userId());
-
 	QString data;
 	file->convertToDatabaseString(&data);
-	request.append(data);
+
+	QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
+		.arg(currentUser().userId())
+		.arg(data)
+		.arg(parentId)
+		.arg(fileExtension);
+
 	data.clear();
 
-	request += ");";
-
 	QSqlQuery q(db);
-
 	bool result = q.exec(request);
 
 	if (result == false)

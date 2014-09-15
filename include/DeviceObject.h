@@ -21,6 +21,17 @@ namespace Hardware
 		DiagSignal
 	};
 
+	const static wchar_t* DeviceObjectExtensions[] =
+		{
+			L".hrt",		// Root
+			L".hsm",		// System
+			L".hrk",		// Rack
+			L".hcs",		// Chassis
+			L".hmd",		// Module
+			L".hcr",		// Controller
+			L".hds"		// DiagSignal
+		};
+
 	//
 	//
 	// DeviceObject
@@ -34,6 +45,8 @@ namespace Hardware
 
 	protected:
 		DeviceObject();
+
+	public:
 		virtual ~DeviceObject();
 
 		// Serialization
@@ -56,7 +69,9 @@ namespace Hardware
 		//
 	public:
 		DeviceObject* parent();
-		virtual DeviceType deviceType() = 0;
+		virtual DeviceType deviceType() const;
+
+		QString fileExtension() const;
 
 		// Children care
 		//
@@ -108,7 +123,7 @@ namespace Hardware
 		virtual ~DeviceRoot();
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Root;
@@ -133,7 +148,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::System;
@@ -158,7 +173,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Rack;
@@ -183,7 +198,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Chassis;
@@ -208,7 +223,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Module;
@@ -233,7 +248,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Controller;
@@ -258,7 +273,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::DiagSignal;

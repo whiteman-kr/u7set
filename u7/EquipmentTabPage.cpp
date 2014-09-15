@@ -10,53 +10,17 @@
 //
 
 
-EquipmentModel::EquipmentModel(std::shared_ptr<Hardware::DeviceRoot> root, QObject* parent) :
+EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget, QObject* parent) :
 	QAbstractItemModel(parent),
-	m_root(root)
+	m_dbController(dbcontroller),
+	m_parentWidget(parentWidget),
+	m_root(std::make_shared<Hardware::DeviceRoot>())
 {
-	assert(root.get() != nullptr);
+	assert(dbcontroller);
+	assert(m_root.get() != nullptr);
 
-//    std::shared_ptr<DeviceObject> c1 = std::make_shared<DeviceSystem>();
-//    std::shared_ptr<DeviceObject> c2 = std::make_shared<DeviceSystem>();
-//    std::shared_ptr<DeviceObject> c3 = std::make_shared<DeviceSystem>();
-
-//	c1->setCaption("c1");
-//	c2->setCaption("c2");
-//	c3->setCaption("c3");
-
-//	c2->addChild(c3);
-
-	/*for (int i = 0; i < 32; i++)
-	{
-        auto d1 = std::make_shared<DeviceCase>();
-		d1->setCaption(QString("c1 item %1").arg(i));
-		c1->addChild(d1);
-
-		for (int j = 0; j < 1024; j++)
-		{
-            auto d11 = std::make_shared<DeviceObject>();
-			d11->setCaption(QString("cdwd1 item %1").arg(j));
-			d1->addChild(d11);
-
-            for (int k = 0; k < 32; k++)
-			{
-				auto d111 = std::make_shared<DeviceBase>();
-				d111->setCaption(QString("ll1 item %1").arg(k));
-				d11->addChild(d111);
-            }
-		}
-
-        auto d2 = std::make_shared<DeviceObject>();
-		d2->setCaption(QString("c2 item %1").arg(i));
-		c2->addChild(d2);
-
-        auto d3 = std::make_shared<DeviceObject>();
-		d3->setCaption(QString("c3 item %1").arg(i));
-		c3->addChild(d3);
-	}*/
-
-//	m_root.addChild(c1);
-//	m_root.addChild(c2);
+	connect(dbcontroller, &DbController::projectOpened, this, &EquipmentModel::projectOpened);
+	connect(dbcontroller, &DbController::projectClosed, this, &EquipmentModel::projectClosed);
 }
 
 EquipmentModel::~EquipmentModel()
@@ -229,19 +193,166 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 
 bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
 {
-	const Hardware::DeviceObject* parent = nullptr;
+	const Hardware::DeviceObject* parent = deviceObject(parentIndex);
 
-	if (parentIndex.isValid() == false)
+	return parent->childrenCount() > 0;
+}
+
+bool EquipmentModel::canFetchMore(const QModelIndex& parent) const
+{
+	if (dbController()->isProjectOpened() == false)
 	{
-		parent = m_root.get();
+		return false;
+	}
+
+	if (parent == QModelIndex())
+	{
+		return true;
+	}
+
+	return true;
+}
+
+void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	if (parentIndex == QModelIndex())
+	{
+		// Get top level files
+		//
+		std::vector<DbFileInfo> files;
+
+		bool ok = dbController()->getFileList(&files, dbController()->hcFileId(), m_parentWidget);
+
+		if (ok == true)
+		{
+			for (auto& fi : files)
+			{
+				std::shared_ptr<DbFile> file;
+
+				if (fi.state() == VcsState::CheckedOut &&
+					fi.user() == dbController()->currentUser())
+				{
+					dbController()->getWorkcopy(fi, &file, m_parentWidget);
+				}
+				else
+				{
+					// Get lateset copy
+					//
+					assert(false);
+				}
+
+				if (file == false)
+				{
+					continue;
+				}
+
+				Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
+				assert(object);
+
+				if (object == nullptr)
+				{
+					continue;
+				}
+
+				std::shared_ptr<Hardware::DeviceObject> sp(object);
+				m_root->addChild(sp);
+			}
+		}
 	}
 	else
 	{
-		parent = static_cast<const Hardware::DeviceObject*>(parentIndex.internalPointer());
+		// Get file id of parent and get its children
+		//
+		assert(false);
 	}
 
-	assert(parent != nullptr);
-	return parent->childrenCount() > 0;
+	// TODO:: sort files in parent DeviceObject !!!!!!!!!!!
+	//
+
+	return;
+}
+
+bool EquipmentModel::insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex)
+{
+	// TODO: This function should take into consideration sort property!!!
+	//
+
+	Hardware::DeviceObject* parent = deviceObject(parentIndex);
+
+	beginInsertRows(parentIndex, parent->childrenCount(), parent->childrenCount());
+	parent->addChild(object);
+	endInsertRows();
+
+	return true;
+}
+
+Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
+{
+	Hardware::DeviceObject* object = nullptr;
+
+	if (index.isValid() == false)
+	{
+		object = m_root.get();
+	}
+	else
+	{
+		object = static_cast<Hardware::DeviceObject*>(index.internalPointer());
+	}
+
+	assert(object != nullptr);
+	return object;
+}
+
+const Hardware::DeviceObject* EquipmentModel::deviceObject(const QModelIndex& index) const
+{
+	const Hardware::DeviceObject* object = nullptr;
+
+	if (index.isValid() == false)
+	{
+		object = m_root.get();
+	}
+	else
+	{
+		object = static_cast<const Hardware::DeviceObject*>(index.internalPointer());
+	}
+
+	assert(object != nullptr);
+	return object;
+}
+
+void EquipmentModel::projectOpened()
+{
+	// read all childer for HC file
+	//
+	beginResetModel();
+	m_root = std::make_shared<Hardware::DeviceRoot>();
+	endResetModel();
+	return;
+}
+
+void EquipmentModel::projectClosed()
+{
+	// Release all children
+	//
+	beginResetModel();
+	m_root = std::make_shared<Hardware::DeviceRoot>();
+	endResetModel();
+	return;
+}
+
+DbController* EquipmentModel::dbController()
+{
+	return m_dbController;
+}
+
+DbController* EquipmentModel::dbController() const
+{
+	return m_dbController;
 }
 
 //
@@ -265,33 +376,19 @@ DbController* EquipmentView::dbController()
 
 void EquipmentView::addSystem()
 {
-	/*QModelIndexList indexes = selectedIndexes();
+	// Add new system to the root
+	//
 
-	if (indexes.isEmpty() == false)
-	{
-		// Nothing is selected, add new system to the root
-		//
-		return;
-	}
-	else
-	{
-		//
-	}*/
+	std::shared_ptr<Hardware::DeviceObject> system = std::make_shared<Hardware::DeviceSystem>();
 
-	std::shared_ptr<Hardware::DeviceSystem> system = std::make_shared<Hardware::DeviceSystem>();
-
-	system->setStrId("STRID");
+	system->setStrId("SYSTEMSTRID");
 	system->setCaption(tr("New System"));
 
-	bool result = dbController()->addSystem(system.get(), this);
+	bool result = dbController()->addDeviceObject(system.get(), dbController()->hcFileId(), this);
 
-	//if (result == true)
+	if (result == true)
 	{
-		// Add system to the model m_equipmentModel
-		//
-		//m_root->addChild(system);
-
-		// !!!!!!!!!!!!!!!!!!! emmit here message about model changing............
+		equipmentModel()->insertDeviceObject(system, QModelIndex());
 	}
 
 	return;
@@ -312,6 +409,13 @@ void EquipmentView::addBlock()
 	assert(false);
 }
 
+EquipmentModel* EquipmentView::equipmentModel()
+{
+	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
+	assert(result);
+	return result;
+}
+
 
 //
 //
@@ -326,13 +430,11 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	// Controls
 	//
-	m_root = std::make_shared<Hardware::DeviceRoot>();
 
 	// Equipment View
 	//
 	m_equipmentView = new EquipmentView(dbcontroller);
-
-	m_equipmentModel = new EquipmentModel(m_root, this);
+	m_equipmentModel = new EquipmentModel(dbcontroller, this, this);
 	m_equipmentView->setModel(m_equipmentModel);
 
 	// Create Actions
@@ -379,35 +481,9 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	connect(dbController(), &DbController::projectOpened, this, &EquipmentTabPage::projectOpened);
 	connect(dbController(), &DbController::projectClosed, this, &EquipmentTabPage::projectClosed);
 
+
 //	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
 //	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
-
-	/*auto s1 = std::make_shared<DeviceSystem>();
-	s1->setCaption("SDS I");
-	s1->setStrId("1SDS1");
-
-	auto s2 = std::make_shared<DeviceSystem>();
-	s2->setCaption("SDS II");
-	s2->setStrId("1SDS2");
-
-	auto r1 = std::make_shared<DeviceRack>();
-	r1->setCaption("1SHFS1");
-	r1->setStrId("HS017");
-
-	auto r2 = std::make_shared<DeviceRack>();
-	r2->setCaption("2SHFS1");
-	r2->setStrId("HS018");
-
-	auto r3 = std::make_shared<DeviceRack>();
-	r3->setCaption("3SHFS1");
-	r3->setStrId("HS019");
-
-	s1->addChild(r1);
-	s1->addChild(r2);
-	s1->addChild(r3);
-
-	m_root->addChild(s1);
-	m_root->addChild(s2);*/
 
 	// Evidently, project is not opened yet
 	//

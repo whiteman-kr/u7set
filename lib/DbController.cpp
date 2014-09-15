@@ -39,7 +39,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
 	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
 
-	connect(this, &DbController::signal_addSystem, m_worker, &DbWorker::slot_addSystem);
+	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
 
@@ -521,27 +521,31 @@ bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWi
 	return true;
 }
 
-bool DbController::addSystem(const Hardware::DeviceSystem* system, QWidget* parentWidget)
+bool DbController::addDeviceObject(const Hardware::DeviceObject* device, int parentId, QWidget* parentWidget)
 {
 	// Check parameters
 	//
-	if (system == nullptr)
+	if (device == nullptr)
 	{
-		assert(system != nullptr);
+		assert(device != nullptr);
 		return false;
 	}
 
 	// Save system to binary file
 	//
+	QByteArray data;
+	bool result = device->Save(data);
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	QByteArray data("Hi, there!");
+	if (result == false)
+	{
+		assert(result);
+		return false;
+	}
+
 	DbFile file;
 	file.swapData(data);
 
+	QString fileExtension(device->fileExtension());
 
 	// Init progress and check availability
 	//
@@ -553,7 +557,7 @@ bool DbController::addSystem(const Hardware::DeviceSystem* system, QWidget* pare
 
 	// Emit signal end wait for complete
 	//
-	emit signal_addSystem(&file);
+	emit signal_addDeviceObject(&file, parentId, fileExtension);
 
 	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
 	return true;

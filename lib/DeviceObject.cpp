@@ -4,6 +4,8 @@
 
 namespace Hardware
 {
+	//const static wchar_t* DeviceObjectExtensions = {L".hroot"}, {L".hsystem"};
+
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
 	void Init()
@@ -94,6 +96,21 @@ namespace Hardware
 	DeviceObject* DeviceObject::parent()
 	{
 		return m_parent;
+	}
+
+	DeviceType DeviceObject::deviceType() const
+	{
+		assert(false);
+		return DeviceType::Root;
+	}
+
+	QString DeviceObject::fileExtension() const
+	{
+		int index = static_cast<int>(deviceType());
+		assert(index >= 0 && index < sizeof(DeviceObjectExtensions) / sizeof(DeviceObjectExtensions[0]));
+
+		QString result = QString::fromWCharArray(DeviceObjectExtensions[index]);
+		return result;
 	}
 
 	int DeviceObject::childrenCount() const
@@ -189,9 +206,10 @@ namespace Hardware
 
 	DeviceRoot::~DeviceRoot()
 	{
+		qDebug() << Q_FUNC_INFO;
 	}
 
-	DeviceType DeviceRoot::deviceType()
+	DeviceType DeviceRoot::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -209,6 +227,7 @@ namespace Hardware
 
 	DeviceSystem::~DeviceSystem()
 	{
+		qDebug() << Q_FUNC_INFO;
 	}
 
 	bool DeviceSystem::SaveData(Proto::Envelope* message) const
@@ -266,7 +285,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceSystem::deviceType()
+	DeviceType DeviceSystem::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -341,7 +360,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceRack::deviceType()
+	DeviceType DeviceRack::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -415,7 +434,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceChassis::deviceType()
+	DeviceType DeviceChassis::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -489,7 +508,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceModule::deviceType()
+	DeviceType DeviceModule::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -564,7 +583,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceController::deviceType()
+	DeviceType DeviceController::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -638,7 +657,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceDiagSignal::deviceType()
+	DeviceType DeviceDiagSignal::deviceType() const
 	{
 		return m_deviceType;
 	}
