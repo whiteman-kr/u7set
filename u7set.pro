@@ -8,7 +8,8 @@ SUBDIRS += qtservice \
     BaseService \
     ServiceControlManager \
     UdpClient \
-    UdpServer
+    UdpServer \
+    Metrology
 SUBDIRS += VFrame30
 SUBDIRS += u7
 
