@@ -38,8 +38,6 @@ CONFIG(release, debug|release) {
 	UI_DIR = release/ui
 }
 
-CONFIG += precompile_header
-
 SOURCES +=\
     CentralWidget.cpp \
     ChangesetDialog.cpp \
@@ -79,7 +77,11 @@ SOURCES +=\
     DialogAfbProperties.cpp \
     xmlsyntaxhighlighter.cpp \
     SignalsTabPage.cpp \
+    ../lib/StreamedData.cpp \
+    ../lib/ProtoSerialization.cpp \
+	../lib/CUtils.cpp \
     ../lib/Signal.cpp
+
 
 HEADERS  += \
     CentralWidget.h \
@@ -120,6 +122,10 @@ HEADERS  += \
     DialogAfbProperties.h \
     xmlsyntaxhighlighter.h \
     SignalsTabPage.h \
+    ../include/StreamedData.h \
+    ../include/ProtoSerialization.h \
+    ../include/Factory.h \
+    ../include/CUtils.h
     ../include/Signal.h
 
 FORMS    += \
@@ -135,12 +141,48 @@ FORMS    += \
     DialogAfblEditor.ui \
     DialogAfbProperties.ui
 
-PRECOMPILED_HEADER = stable.h
+RESOURCES += \
+	Resources.qrc
 
-# g++ compilator settings
-unix:{
-    QMAKE_CXXFLAGS += -std=c++11
-}
+OTHER_FILES += \
+	../Proto/proto_compile.bat \
+	../Proto/serialization.proto \
+	DatabaseUpgrade/Upgrade0007.sql \
+	DatabaseUpgrade/Upgrade0001.sql \
+	DatabaseUpgrade/Upgrade0002.sql \
+	DatabaseUpgrade/Upgrade0003.sql \
+	DatabaseUpgrade/Upgrade0004.sql \
+	DatabaseUpgrade/Upgrade0005.sql \
+	DatabaseUpgrade/Upgrade0006.sql \
+	DatabaseUpgrade/Upgrade0008.sql \
+	DatabaseUpgrade/Upgrade0009.sql \
+	DatabaseUpgrade/Upgrade0010.sql \
+	DatabaseUpgrade/Upgrade0011.sql \
+	DatabaseUpgrade/Upgrade0012.sql \
+	DatabaseUpgrade/Upgrade0002.sql \
+	DatabaseUpgrade/Upgrade0001.sql \
+	DatabaseUpgrade/Upgrade0013.sql \
+	DatabaseUpgrade/Upgrade0014.sql \
+	DatabaseUpgrade/Upgrade0015.sql \
+	DatabaseUpgrade/Upgrade0016.sql \
+	DatabaseUpgrade/Upgrade0017.sql \
+	DatabaseUpgrade/Upgrade0018.sql \
+	DatabaseUpgrade/Upgrade0019.sql \
+	DatabaseUpgrade/Upgrade0020.sql \
+	DatabaseUpgrade/Upgrade0021.sql \
+    DatabaseUpgrade/Upgrade0022.sql \
+    DatabaseUpgrade/Upgrade0023.sql
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
+#c++11 support for GCC
+#
+unix:QMAKE_CXXFLAGS += -std=c++11
+
+# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+#
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
 #Optimization flags
 #
@@ -149,6 +191,17 @@ win32 {
 unix {
 	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
 	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
+}
+
+#protobuf
+#
+win32 {
+	LIBS += -L$$DESTDIR -lprotobuf
+
+	INCLUDEPATH += ./../Protobuf
+}
+unix {
+	LIBS += -lprotobuf
 }
 
 # Add curent dir to a list of library directory paths
@@ -175,43 +228,6 @@ DEPENDPATH += ../VFrame30
 #
 #include(../QtPropertyBrowser/src/qtpropertybrowser.pri)
 
-#protobuf
-#
-win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-
-	INCLUDEPATH += ./../Protobuf
-}
-unix {
-	LIBS += -lprotobuf
-}
-
-RESOURCES += \
-    Resources.qrc
-
-OTHER_FILES += \
-    DatabaseUpgrade/Upgrade0007.sql \
-    DatabaseUpgrade/Upgrade0001.sql \
-    DatabaseUpgrade/Upgrade0002.sql \
-    DatabaseUpgrade/Upgrade0003.sql \
-    DatabaseUpgrade/Upgrade0004.sql \
-    DatabaseUpgrade/Upgrade0005.sql \
-    DatabaseUpgrade/Upgrade0006.sql \
-    DatabaseUpgrade/Upgrade0008.sql \
-    DatabaseUpgrade/Upgrade0009.sql \
-    DatabaseUpgrade/Upgrade0010.sql \
-    DatabaseUpgrade/Upgrade0011.sql \
-    DatabaseUpgrade/Upgrade0012.sql \
-    DatabaseUpgrade/Upgrade0002.sql \
-    DatabaseUpgrade/Upgrade0001.sql \
-    DatabaseUpgrade/Upgrade0013.sql \
-    DatabaseUpgrade/Upgrade0014.sql \
-    DatabaseUpgrade/Upgrade0015.sql \
-    DatabaseUpgrade/Upgrade0016.sql \
-    DatabaseUpgrade/Upgrade0017.sql \
-    DatabaseUpgrade/Upgrade0018.sql \
-    DatabaseUpgrade/Upgrade0019.sql \
-    DatabaseUpgrade/Upgrade0020.sql
 
 # Visual Leak Detector
 #
@@ -227,3 +243,4 @@ win32 {
 	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+

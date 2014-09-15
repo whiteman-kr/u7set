@@ -22,15 +22,15 @@ namespace VFrame30
 
 	public:
 		CFblConnectionPoint(double x, double y, ConnectionDirrection dirrection, const QUuid& guid);
-		CFblConnectionPoint(const ::Proto::FblConnectionPoint& cpm);
+		CFblConnectionPoint(const Proto::FblConnectionPoint& cpm);
 
 		// Other
 		//
 
 		// Serialization
 		//
-		bool SaveData(::Proto::FblConnectionPoint* cpm) const;
-		bool LoadData(const ::Proto::FblConnectionPoint& cpm);
+		bool SaveData(Proto::FblConnectionPoint* cpm) const;
+		bool LoadData(const Proto::FblConnectionPoint& cpm);
 
 		// Properties
 		//
@@ -161,8 +161,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(::Proto::Envelope* message) const;
-		virtual bool LoadData(const ::Proto::Envelope& message);
+		virtual bool SaveData(Proto::Envelope* message) const;
+		virtual bool LoadData(const Proto::Envelope& message);
 
 		// Drawing stuff
 		//

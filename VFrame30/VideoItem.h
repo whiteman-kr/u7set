@@ -1,10 +1,17 @@
 #pragma once
 
-#include "VFrame30.pb.h"
+#include "../include/ProtoSerialization.h"
 #include "FontParam.h"
 #include "DrawParam.h"
 #include "DebugInstCounter.h"
 #include "../include/TypesAndEnums.h"
+
+namespace VFrame30
+{
+	class CVideoFrame;
+	class CVideoLayer;
+}
+
 
 namespace VFrame30
 {
@@ -21,7 +28,7 @@ namespace VFrame30
 			this->Y = 0;
 		}
 
-		explicit VideoItemPoint(const ::Proto::VideoItemPoint& vip)
+		explicit VideoItemPoint(const Proto::VideoItemPoint& vip)
 		{
 			LoadData(vip);
 		}
@@ -64,13 +71,13 @@ namespace VFrame30
 			return QPointF(X, Y);
 		}
 
-		bool SaveData(::Proto::VideoItemPoint* vip) const
+		bool SaveData(Proto::VideoItemPoint* vip) const
 		{
 			vip->set_x(X);
 			vip->set_y(Y);
 			return true;
 		}
-		bool LoadData(const ::Proto::VideoItemPoint& vip)
+		bool LoadData(const Proto::VideoItemPoint& vip)
 		{
 			this->X = vip.x();
 			this->Y = vip.y();
@@ -111,7 +118,7 @@ namespace VFrame30
 		public QObject, 
 		public IVideoItemPropertiesPos, 
 		public IPointList,
-		public Proto::CVFrameObjectSerialization<CVideoItem>,
+		public Proto::ObjectSerialization<CVideoItem>,
 		public DebugInstCounter<CVideoItem>
 	{
 		Q_OBJECT
@@ -124,16 +131,16 @@ namespace VFrame30
 
 		// Serialization
 		//
-		friend Proto::CVFrameObjectSerialization<CVideoItem>;	// Для вызоыв CreateObject из CVFrameObjectSerialization
+		friend Proto::ObjectSerialization<CVideoItem>;	// Для вызоыв CreateObject из Proto::ObjectSerialization
 
 	protected:
-		virtual bool SaveData(::Proto::Envelope* message) const override;
-		virtual bool LoadData(const ::Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должне прочитаться
-		static CVideoItem* CreateObject(const ::Proto::Envelope& message);
+		static CVideoItem* CreateObject(const Proto::Envelope& message);
 
 		// Action Functions
 		//

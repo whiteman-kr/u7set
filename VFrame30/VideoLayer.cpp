@@ -29,10 +29,10 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoLayer::SaveData(::Proto::Envelope* message) const
+	bool CVideoLayer::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
-		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// ќб€зательное поле, хш имени класса, по нему восстанавливаетс€ класс.
 
@@ -49,7 +49,7 @@ namespace VFrame30
 		//
 		for (auto item = Items.begin(); item != Items.end(); ++item)
 		{
-			::Proto::Envelope* pItemMessage = pMutableVideoLayer->add_items();
+			Proto::Envelope* pItemMessage = pMutableVideoLayer->add_items();
 
 			if (item->get()->Save(pItemMessage) == false)
 			{
@@ -60,7 +60,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoLayer::LoadData(const ::Proto::Envelope& message)
+	bool CVideoLayer::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videolayer() == false)
 		{
@@ -68,7 +68,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const ::Proto::VideoLayer& videoLayer = message.videolayer();
+		const Proto::VideoLayer& videoLayer = message.videolayer();
 
 		m_guid = Proto::Read(videoLayer.uuid());
 		m_name = Proto::Read(videoLayer.name());
@@ -103,7 +103,7 @@ namespace VFrame30
 		return true;
 	}
 
-	CVideoLayer* CVideoLayer::CreateObject(const ::Proto::Envelope& message)
+	CVideoLayer* CVideoLayer::CreateObject(const Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//
@@ -132,8 +132,8 @@ namespace VFrame30
 	//
 	void CVideoLayer::ConnectionMapPosInc(VideoItemPoint pinPos)
 	{
-		pinPos.X = CVFrameUtils::Round(pinPos.X, 5);
-		pinPos.Y = CVFrameUtils::Round(pinPos.Y, 5);
+		pinPos.X = CUtils::Round(pinPos.X, 5);
+		pinPos.Y = CUtils::Round(pinPos.Y, 5);
 
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -149,8 +149,8 @@ namespace VFrame30
 
 	int CVideoLayer::GetPinPosConnectinCount(VideoItemPoint pinPos) const
 	{
-		pinPos.X = CVFrameUtils::Round(pinPos.X, 5);
-		pinPos.Y = CVFrameUtils::Round(pinPos.Y, 5);
+		pinPos.X = CUtils::Round(pinPos.X, 5);
+		pinPos.Y = CUtils::Round(pinPos.Y, 5);
 
 		auto mapitem = connectionMap.find(pinPos);
 

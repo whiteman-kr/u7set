@@ -53,6 +53,7 @@
 #include <QRect>
 #include <QMutex>
 #include <QtScript/QtScript>
+
 #ifdef _MSC_VER
 	#pragma warning(pop)
 #endif
@@ -60,9 +61,9 @@
 // Project stable includes
 //
 #include "VFrame30Lib_global.h"
-#include "Factory.h"
+#include "../include/Factory.h"
 #include "../include/TypesAndEnums.h"
-#include "../include/VFrameUtils.h"
+#include "../include/CUtils.h"
 
 #ifdef _MSC_VER
 	#pragma warning(disable : 4482)

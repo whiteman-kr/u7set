@@ -40,8 +40,8 @@ namespace VFrame30
 		public:
 			bool operator () (double v1, double v2)
 			{
-				v1 = CVFrameUtils::Round(v1, 5);
-				v2 = CVFrameUtils::Round(v2, 5);
+				v1 = CUtils::Round(v1, 5);
+				v2 = CUtils::Round(v2, 5);
 				return v1 < v2;
 			}
 		};

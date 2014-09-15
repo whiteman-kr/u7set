@@ -1,9 +1,12 @@
 #pragma once
 #include "DbStruct.h"
 #include "QUuid"
+#include "../include/ProtoSerialization.h"
 
 namespace Hardware
 {
+	void Init();
+	void Shutdwon();
 
 	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
 	//
@@ -18,26 +21,57 @@ namespace Hardware
 		DiagSignal
 	};
 
+	const static wchar_t* DeviceObjectExtensions[] =
+		{
+			L".hrt",		// Root
+			L".hsm",		// System
+			L".hrk",		// Rack
+			L".hcs",		// Chassis
+			L".hmd",		// Module
+			L".hcr",		// Controller
+			L".hds"		// DiagSignal
+		};
+
 	//
 	//
 	// DeviceObject
 	//
 	//
-	class DeviceObject
+	class DeviceObject :
+		public QObject,
+		public Proto::ObjectSerialization<DeviceObject>
 	{
+		Q_OBJECT
+
 	protected:
 		DeviceObject();
-		virtual ~DeviceObject();
 
 	public:
-		virtual void load(const QByteArray& data);
-		virtual void save(QByteArray* out_data) const;
+		virtual ~DeviceObject();
+
+		// Serialization
+		//
+		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
+
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	private:
+		// Use this function only while serialization, as when object is created is not fully initialized
+		// and must be read before use
+		//
+		static DeviceObject* CreateObject(const Proto::Envelope& message);
+
+	public:
 
 		// Properties
 		//
 	public:
 		DeviceObject* parent();
-		virtual DeviceType deviceType() = 0;
+		virtual DeviceType deviceType() const;
+
+		QString fileExtension() const;
 
 		// Children care
 		//
@@ -89,7 +123,7 @@ namespace Hardware
 		virtual ~DeviceRoot();
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Root;
@@ -107,8 +141,14 @@ namespace Hardware
 		DeviceSystem();
 		virtual ~DeviceSystem();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::System;
@@ -126,8 +166,14 @@ namespace Hardware
 		DeviceRack();
 		virtual ~DeviceRack();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Rack;
@@ -145,8 +191,14 @@ namespace Hardware
 		DeviceChassis();
 		virtual ~DeviceChassis();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Chassis;
@@ -164,8 +216,14 @@ namespace Hardware
 		DeviceModule();
 		virtual ~DeviceModule();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Module;
@@ -183,8 +241,14 @@ namespace Hardware
 		DeviceController();
 		virtual ~DeviceController();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Controller;
@@ -202,11 +266,19 @@ namespace Hardware
 		DeviceDiagSignal();
 		virtual ~DeviceDiagSignal();
 
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::DiagSignal;
 	};
+
+	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
 }

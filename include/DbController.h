@@ -63,7 +63,7 @@ public:
 
 	// Hardware Configuration
 	//
-	bool addSystem(const Hardware::DeviceSystem* system, QWidget* parentWidget);
+	bool addDeviceObject(const Hardware::DeviceObject* device, int parentId, QWidget* parentWidget);
 
 	// Signals management
 	//
@@ -93,7 +93,7 @@ signals:
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
 
-	void signal_addSystem(DbFile* file);
+	void signal_addDeviceObject(DbFile* file, int parentId, QString fileExtension);
 
 	void signal_getSignalsIDs(QSet<int>* signalIDs);
 	void signal_getSignals(SignalSet* signalSet);

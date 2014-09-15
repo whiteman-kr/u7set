@@ -1,14 +1,35 @@
 #pragma once
+
+#include <QtCore/QUuid>
+#include <fstream>
+
+#ifdef Q_OS_WIN
+#pragma warning (push)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4125)
+#pragma warning(disable : 6011)
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4512)
+#pragma warning(disable : 4127)
+#pragma warning(disable : 4996)
+#endif // Q_OS_WIN
+
+#include "../Proto/serialization.pb.h"
+#ifdef Q_OS_WIN
+#pragma warning (pop)
+#endif // Q_OS_WIN
+
+
 #include "StreamedData.h"
 
-/*
+
 namespace Proto
 {
 	// Шаблон и реализация необходимых фукнций сериализации
 	// у VFrameType должны быть реализованы функции CreateObject, SaveData, LoadData
 	//
 	template <typename VFrameType>
-	class CVFrameObjectSerialization
+	class ObjectSerialization
 	{
 	public:
 		bool Save(const QString& fileName) const
@@ -47,7 +68,7 @@ namespace Proto
 				return false;
 			}
 
-			::Proto::Envelope message;
+			Proto::Envelope message;
 
 			bool result = Save(&message);
 			if (result == false)
@@ -65,24 +86,28 @@ namespace Proto
 				return false;
 			}
 		}
-		bool Save(CStreamedData& data) const
+		bool Save(Proto::StreamedData& data) const
 		{
 			Proto::Envelope message;
 			this->SaveData(&message);
 
-			data.m_data = message.SerializeAsString();
+			auto mutable_data = data.mutable_data();
+			auto str = message.SerializeAsString();
+
+			mutable_data = QByteArray(str.data(), static_cast<int>(str.size()));
+
 			return true;
 		}
 		bool Save(QByteArray& data) const
 		{
-			Envelope message;
+			Proto::Envelope message;
 			this->SaveData(&message);
 
 			std::string str = message.SerializeAsString();
 			data = QByteArray(str.data(), static_cast<int>(str.size()));
 			return true;
 		}
-		bool Save(::Proto::Envelope* message) const
+		bool Save(Proto::Envelope* message) const
 		{
 			try
 			{
@@ -131,7 +156,7 @@ namespace Proto
 				return false;
 			}
 
-			::Proto::Envelope message;
+			Proto::Envelope message;
 
 			bool result = message.ParseFromIstream(&stream);
 			if (result == false)
@@ -141,11 +166,11 @@ namespace Proto
 
 			return Load(message);
 		}
-		bool Load(const Proto::CStreamedData& data)
+		bool Load(const Proto::StreamedData& data)
 		{
 			Proto::Envelope message;
 
-			bool result = message.ParseFromString(data.m_data);
+			bool result = message.ParseFromString(data.data());
 			if (result == false)
 			{
 				return false;
@@ -211,11 +236,11 @@ namespace Proto
 
 			return pNewItem;
 		}
-		static VFrameType* Create(const ::Proto::CStreamedData& data)
+		static VFrameType* Create(const Proto::StreamedData& data)
 		{
 			Proto::Envelope message;
 
-			bool result = message.ParseFromString(data.m_data);
+			bool result = message.ParseFromString(data.data());
 			if (result == false)
 			{
 				return nullptr;
@@ -256,16 +281,16 @@ namespace Proto
 	};
 
 
-//	// Функции для сериализации данных
-//	//
-//	const QUuid& Read(const Proto::Guid& message);
-//	void Write(Proto::Guid* pMessage, const QUuid& guid);
+	// Функции для сериализации данных
+	//
+	const QUuid& Read(const Proto::Uuid& message);
+	void Write(Proto::Uuid* pMessage, const QUuid& guid);
 
-//	// Read/write wstring message
-//	//
-//	QString Read(const Proto::wstring& message);
-//	void Write(Proto::wstring* pMessage, const QString& str);
-
-
+	// Read/write wstring message
+	//
+	QString Read(const Proto::wstring& message);
+	void Write(Proto::wstring* pMessage, const QString& str);
 }
-*/
+
+
+

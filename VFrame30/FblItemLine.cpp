@@ -21,7 +21,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CFblItemLine::SaveData(::Proto::Envelope* message) const
+	bool CFblItemLine::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CPosConnectionImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -39,7 +39,7 @@ namespace VFrame30
 
 		// --
 		//
-		::Proto::FblItemLine* itemMessage = message->mutable_videoitem()->mutable_fblitemline();
+		Proto::FblItemLine* itemMessage = message->mutable_videoitem()->mutable_fblitemline();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor);
@@ -47,7 +47,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItemLine::LoadData(const ::Proto::Envelope& message)
+	bool CFblItemLine::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -77,7 +77,7 @@ namespace VFrame30
 			return false;
 		}
 		
-		const ::Proto::FblItemLine& itemMessage = message.videoitem().fblitemline();
+		const Proto::FblItemLine& itemMessage = message.videoitem().fblitemline();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();
@@ -98,12 +98,12 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			return CVFrameUtils::RoundDisplayPoint(m_weight);
+			return CUtils::RoundDisplayPoint(m_weight);
 		}
 		else
 		{
-			double pt = CVFrameUtils::ConvertPoint(m_weight, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			return CVFrameUtils::RoundPoint(pt, CSettings::regionalUnit());
+			double pt = CUtils::ConvertPoint(m_weight, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}
 	}
 
@@ -111,11 +111,11 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			m_weight = CVFrameUtils::RoundDisplayPoint(weight);
+			m_weight = CUtils::RoundDisplayPoint(weight);
 		}
 		else
 		{
-			double pt = CVFrameUtils::ConvertPoint(weight, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(weight, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
 			m_weight = pt;
 		}
 	}

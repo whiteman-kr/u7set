@@ -27,44 +27,44 @@ namespace VFrame30
 		m_signalGuid = QUuid();
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(const ::Proto::FblConnectionPoint& cpm)
+	CFblConnectionPoint::CFblConnectionPoint(const Proto::FblConnectionPoint& cpm)
 	{
 		LoadData(cpm);
 	}
 
-	bool CFblConnectionPoint::SaveData(::Proto::FblConnectionPoint* cpm) const
+	bool CFblConnectionPoint::SaveData(Proto::FblConnectionPoint* cpm) const
 	{
 		m_point.SaveData(cpm->mutable_point());
-		cpm->set_dirrection(static_cast<::Proto::ConnectionDirrection>(dirrection()));
-		VFrame30::Proto::Write(cpm->mutable_uuid(), m_guid);
+		cpm->set_dirrection(static_cast<Proto::ConnectionDirrection>(dirrection()));
+		Proto::Write(cpm->mutable_uuid(), m_guid);
 
 		if (m_signalGuid.isNull() == false)  // != GUI_NULL
 		{
-			VFrame30::Proto::Write(cpm->mutable_signaluuid(), m_signalGuid);
+			Proto::Write(cpm->mutable_signaluuid(), m_signalGuid);
 		}
 
 		if (m_signalStrID.isEmpty() == false)
 		{
-			VFrame30::Proto::Write(cpm->mutable_signalstrid(), m_signalStrID);
+			Proto::Write(cpm->mutable_signalstrid(), m_signalStrID);
 		}
 
 		if (m_signalCaption.isEmpty() == false)
 		{
-			VFrame30::Proto::Write(cpm->mutable_signalcaption(), m_signalCaption);
+			Proto::Write(cpm->mutable_signalcaption(), m_signalCaption);
 		}
 
 		return true;
 	}
 
-	bool CFblConnectionPoint::LoadData(const ::Proto::FblConnectionPoint& cpm)
+	bool CFblConnectionPoint::LoadData(const Proto::FblConnectionPoint& cpm)
 	{
 		m_point.LoadData(cpm.point());
 		m_dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
-		m_guid = VFrame30::Proto::Read(cpm.uuid());
+		m_guid = Proto::Read(cpm.uuid());
 
 		if (cpm.has_signaluuid() == true)
 		{
-			m_signalGuid = VFrame30::Proto::Read(cpm.signaluuid());
+			m_signalGuid = Proto::Read(cpm.signaluuid());
 		}
 		else
 		{
@@ -73,7 +73,7 @@ namespace VFrame30
 
 		if (cpm.has_signalstrid() == true)
 		{
-			m_signalStrID = VFrame30::Proto::Read(cpm.signalstrid());
+			m_signalStrID = Proto::Read(cpm.signalstrid());
 		}
 		else
 		{
@@ -82,7 +82,7 @@ namespace VFrame30
 
 		if (cpm.has_signalcaption() == true)
 		{
-			m_signalCaption = VFrame30::Proto::Read(cpm.signalcaption());
+			m_signalCaption = Proto::Read(cpm.signalcaption());
 		}
 		else
 		{
@@ -107,15 +107,15 @@ namespace VFrame30
 		
 	// Serialization
 	//
-	bool CFblItem::SaveData(::Proto::Envelope* message) const
+	bool CFblItem::SaveData(Proto::Envelope* message) const
 	{
-		::Proto::FblItem* fblItemMessage = message->mutable_videoitem()->mutable_fblitem();
+		Proto::FblItem* fblItemMessage = message->mutable_videoitem()->mutable_fblitem();
 
 		for (auto pt = m_inputPoints.cbegin(); pt != m_inputPoints.cend(); ++pt)
 		{
 			assert(pt->dirrection() == ConnectionDirrection::Input);
 
-			::Proto::FblConnectionPoint* pConnectionPointMessage = fblItemMessage->add_points();
+			Proto::FblConnectionPoint* pConnectionPointMessage = fblItemMessage->add_points();
 			pt->SaveData(pConnectionPointMessage);
 		}
 
@@ -123,7 +123,7 @@ namespace VFrame30
 		{
 			assert(pt->dirrection() == ConnectionDirrection::Output);
 
-			::Proto::FblConnectionPoint* pConnectionPointMessage = fblItemMessage->add_points();
+			Proto::FblConnectionPoint* pConnectionPointMessage = fblItemMessage->add_points();
 			pt->SaveData(pConnectionPointMessage);
 		}
 
@@ -132,7 +132,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItem::LoadData(const ::Proto::Envelope& message)
+	bool CFblItem::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -150,13 +150,13 @@ namespace VFrame30
 		
 		// --
 		//
-		const ::Proto::FblItem& fblItemMessage = message.videoitem().fblitem();
+		const Proto::FblItem& fblItemMessage = message.videoitem().fblitem();
 
 		m_inputPoints.clear();
 		m_outputPoints.clear();
 		for (int i = 0; i < fblItemMessage.points().size(); i++)
 		{
-			const ::Proto::FblConnectionPoint& cpm = fblItemMessage.points(i);
+			const Proto::FblConnectionPoint& cpm = fblItemMessage.points(i);
 			CFblConnectionPoint cp(cpm);
 
 			if (cp.dirrection() == ConnectionDirrection::Input)

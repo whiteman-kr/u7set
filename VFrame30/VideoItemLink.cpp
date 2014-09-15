@@ -25,7 +25,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemLink::SaveData(::Proto::Envelope* message) const
+	bool CVideoItemLink::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CFblItemLine::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemLink::LoadData(const ::Proto::Envelope& message)
+	bool CVideoItemLink::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{

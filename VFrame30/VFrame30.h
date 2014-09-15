@@ -3,9 +3,9 @@
 // Project stable includes
 //
 #include "VFrame30Lib_global.h"
-#include "Factory.h"
+#include "../include/Factory.h"
 #include "../include/TypesAndEnums.h"
-#include "../include/VFrameUtils.h"
+#include "../include/CUtils.h"
 
 #include "VideoFrame.h"
 #include "VideoFrameLogic.h"

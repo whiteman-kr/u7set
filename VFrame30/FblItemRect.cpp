@@ -152,7 +152,7 @@ namespace VFrame30
 		// вертикальное расстояние между пинами
 		//
 		double height = fblItemRect.height();
-		height = CVFrameUtils::Round(height, 6);
+		height = CUtils::Round(height, 6);
 
 		double pinVertGap = height / pinCount;
 
@@ -165,7 +165,7 @@ namespace VFrame30
 	
 	// Serialization
 	//
-	bool CFblItemRect::SaveData(::Proto::Envelope* message) const
+	bool CFblItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CPosRectImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -185,7 +185,7 @@ namespace VFrame30
 
 		// --
 		//
-		::Proto::FblItemRect* itemMessage = message->mutable_videoitem()->mutable_fblitemrect();
+		Proto::FblItemRect* itemMessage = message->mutable_videoitem()->mutable_fblitemrect();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor);
@@ -197,7 +197,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItemRect::LoadData(const ::Proto::Envelope& message)
+	bool CFblItemRect::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -225,7 +225,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const ::Proto::FblItemRect& itemMessage = message.videoitem().fblitemrect();
+		const Proto::FblItemRect& itemMessage = message.videoitem().fblitemrect();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();
@@ -403,12 +403,12 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			return CVFrameUtils::RoundDisplayPoint(m_weight);
+			return CUtils::RoundDisplayPoint(m_weight);
 		}
 		else
 		{
-			double pt = CVFrameUtils::ConvertPoint(m_weight, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			return CVFrameUtils::RoundPoint(pt, CSettings::regionalUnit());
+			double pt = CUtils::ConvertPoint(m_weight, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
+			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}
 	}
 
@@ -416,11 +416,11 @@ namespace VFrame30
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
-			m_weight = CVFrameUtils::RoundDisplayPoint(weight);
+			m_weight = CUtils::RoundDisplayPoint(weight);
 		}
 		else
 		{
-			double pt = CVFrameUtils::ConvertPoint(weight, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(weight, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
 			m_weight = pt;
 		}
 	}

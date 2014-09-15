@@ -1,6 +1,5 @@
 #include "Stable.h"
 #include "VideoItem.h"
-#include "../include/VFrameUtils.h"
 #include "VideoItemRect.h"
 
 namespace VFrame30
@@ -25,31 +24,31 @@ namespace VFrame30
 	// Serialization
 	//
 
-	bool CVideoItem::SaveData(::Proto::Envelope* message) const
+	bool CVideoItem::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
-		quint32 classnamehash = CVFrameUtils::GetClassHashCode(className);
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// ќб€зательное поле, хш имени класса, по нему восстанавливаетс€ класс.
 
-		::Proto::VideoItem* pMutableVideoItem = message->mutable_videoitem();
+		Proto::VideoItem* pMutableVideoItem = message->mutable_videoitem();
 
-		VFrame30::Proto::Write(pMutableVideoItem->mutable_uuid(), m_guid);
+		Proto::Write(pMutableVideoItem->mutable_uuid(), m_guid);
 		pMutableVideoItem->set_isstatic(m_static);
 		pMutableVideoItem->set_islocked(m_locked);
-		pMutableVideoItem->set_itemunit(static_cast<::Proto::SchemeUnit>(m_itemUnit));
+		pMutableVideoItem->set_itemunit(static_cast<Proto::SchemeUnit>(m_itemUnit));
 
 		pMutableVideoItem->set_acceptclick(m_acceptClick);
 
 		if (m_clickScript.isEmpty() == false)
 		{
-			VFrame30::Proto::Write(pMutableVideoItem->mutable_clickscript(), m_clickScript);
+			Proto::Write(pMutableVideoItem->mutable_clickscript(), m_clickScript);
 		}
 
 		return true;
 	}
 
-	bool CVideoItem::LoadData(const ::Proto::Envelope& message)
+	bool CVideoItem::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -57,9 +56,9 @@ namespace VFrame30
 			return false;
 		}
 
-		const ::Proto::VideoItem& videoitem = message.videoitem();
+		const Proto::VideoItem& videoitem = message.videoitem();
 
-		m_guid = VFrame30::Proto::Read(videoitem.uuid());
+		m_guid = Proto::Read(videoitem.uuid());
 		m_static = videoitem.isstatic();
 		m_locked = videoitem.islocked();
 		m_itemUnit = static_cast<SchemeUnit>(videoitem.itemunit());
@@ -78,7 +77,7 @@ namespace VFrame30
 		return true;
 	}
 
-	CVideoItem* CVideoItem::CreateObject(const ::Proto::Envelope& message)
+	CVideoItem* CVideoItem::CreateObject(const Proto::Envelope& message)
 	{
 		// Ёта функци€ может создавать только один экземпл€р
 		//

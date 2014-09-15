@@ -22,7 +22,7 @@ namespace VFrame30
 	{
 	}
 
-	bool CVideoItemSignal::SaveData(::Proto::Envelope* message) const
+	bool CVideoItemSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CFblItemRect::SaveData(message);
 
@@ -42,7 +42,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemSignal::LoadData(const ::Proto::Envelope& message)
+	bool CVideoItemSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -98,7 +98,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemInputSignal::SaveData(::Proto::Envelope* message) const
+	bool CVideoItemInputSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CVideoItemSignal::SaveData(message);
 		
@@ -118,7 +118,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemInputSignal::LoadData(const ::Proto::Envelope& message)
+	bool CVideoItemInputSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -173,7 +173,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemOutputSignal::SaveData(::Proto::Envelope* message) const
+	bool CVideoItemOutputSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CVideoItemSignal::SaveData(message);
 		
@@ -193,7 +193,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemOutputSignal::LoadData(const ::Proto::Envelope& message)
+	bool CVideoItemOutputSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
