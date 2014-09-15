@@ -36,7 +36,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-    setWindowTitle(tr("Метрология"));
+    setWindowTitle(tr("Metrology"));
 
     createActions();
     createMenu();
@@ -52,93 +52,93 @@ bool MainWindow::createInterface()
 
 void  MainWindow::createActions()
 {
-    // Измерения
+    // Measure
     //
-    m_pStartMeasureAction = new QAction(tr("&Старт"), this);
+    m_pStartMeasureAction = new QAction(tr("&Start"), this);
     m_pStartMeasureAction->setShortcut(Qt::Key_F5);
     m_pStartMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     connect(m_pStartMeasureAction, &QAction::triggered, this, &MainWindow::startMeasure);
 
-    m_pStopMeasureAction = new QAction(tr("&Стоп"), this);
+    m_pStopMeasureAction = new QAction(tr("&Stop"), this);
     m_pStopMeasureAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
     m_pStopMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     connect(m_pStopMeasureAction, &QAction::triggered, this, &MainWindow::stopMeasure);
 
-    m_pExportMeasureAction = new QAction(tr("&Экспорт ..."), this);
+    m_pExportMeasureAction = new QAction(tr("&Export ..."), this);
     connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::exportMeasure);
 
 
-    // Правка
+    // Edit
     //
-    m_pCutMeasureAction = new QAction(tr("&Вырезать"), this);
+    m_pCutMeasureAction = new QAction(tr("Cu&t"), this);
     m_pCutMeasureAction->setShortcut(Qt::CTRL + Qt::Key_X);
     m_pCutMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     connect(m_pCutMeasureAction, &QAction::triggered, this, &MainWindow::cutMeasure);
 
-    m_pCopyMeasureAction = new QAction(tr("&Копировать"), this);
+    m_pCopyMeasureAction = new QAction(tr("&Copy"), this);
     m_pCopyMeasureAction->setShortcut(Qt::CTRL + Qt::Key_C);
     m_pCopyMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     connect(m_pCopyMeasureAction, &QAction::triggered, this, &MainWindow::copyMeasure);
 
-    m_pRemoveMeasureAction = new QAction(tr("&Удалить"), this);
+    m_pRemoveMeasureAction = new QAction(tr("&Delete"), this);
     m_pRemoveMeasureAction->setShortcut(Qt::CTRL + Qt::Key_Delete);
     m_pRemoveMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     connect(m_pRemoveMeasureAction, &QAction::triggered, this, &MainWindow::removeMeasure);
 
-    m_pSelectAllMeasureAction = new QAction(tr("&Выделить все"), this);
+    m_pSelectAllMeasureAction = new QAction(tr("&Select All"), this);
     m_pSelectAllMeasureAction->setShortcut(Qt::CTRL + Qt::Key_A);
     connect(m_pSelectAllMeasureAction, &QAction::triggered, this, &MainWindow::selectAllMeasure);
 
-    // Вид
+    // View
     //
-    m_pShowReportsAction = new QAction(tr("&Отчеты ..."), this);
+    m_pShowReportsAction = new QAction(tr("&Reports ..."), this);
     m_pShowReportsAction->setShortcut(Qt::CTRL + Qt::Key_R);
     connect(m_pShowReportsAction, &QAction::triggered, this, &MainWindow::showReports);
 
-    m_pShowCalculateAction = new QAction(tr("&Метрологический калькулятор"), this);
+    m_pShowCalculateAction = new QAction(tr("Metrological &calculator"), this);
     m_pShowCalculateAction->setShortcut(Qt::ALT + Qt::Key_C);
     connect(m_pShowCalculateAction, &QAction::triggered, this, &MainWindow::showCalculate);
 
-    // Настройки
+    // Tools
     //
-    m_pConnectToServerAction = new QAction(tr("&Сетевое соединение ... "), this);
+    m_pConnectToServerAction = new QAction(tr("Connect to &server ... "), this);
     connect(m_pConnectToServerAction, &QAction::triggered, this, &MainWindow::connectToServer);
 
-    m_pCalibrationAction = new QAction(tr("&Калибраторы ..."), this);
+    m_pCalibrationAction = new QAction(tr("&Calibrations ..."), this);
     connect(m_pCalibrationAction, &QAction::triggered, this, &MainWindow::calibration);
 
-    m_pShowOutputSignalListAction = new QAction(tr("&Сигналы входные/выходные ..."), this);
+    m_pShowOutputSignalListAction = new QAction(tr("&Signals input/output ..."), this);
     connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
 
-//    m_pShowComlexComparatorListAction = new QAction(tr("&Сигналы сложных уставок ..."), this);
+//    m_pShowComlexComparatorListAction = new QAction(tr("&Signals of complex comparator..."), this);
 //    connect(m_pShowComlexComparatorListAction, &QAction::triggered, this, &MainWindow::showComlexComparatorList);
 
-    m_pShowOutputRangeListAction = new QAction(tr("&Сигналы с выходным диапазоном ..."), this);
+    m_pShowOutputRangeListAction = new QAction(tr("&Signals with output ranges ..."), this);
     connect(m_pShowOutputRangeListAction, &QAction::triggered, this, &MainWindow::showOutputRangeList);
 
-    m_pOptionsAction = new QAction(tr("&Параметры ..."), this);
+    m_pOptionsAction = new QAction(tr("&Options ..."), this);
     m_pOptionsAction->setShortcut(Qt::CTRL + Qt::Key_O);
     connect(m_pOptionsAction, &QAction::triggered, this, &MainWindow::options);
 
 
     // ?
     //
-    m_pShowSignalListAction = new QAction(tr("&Сигналы ..."), this);
+    m_pShowSignalListAction = new QAction(tr("&Signals ..."), this);
     connect(m_pShowSignalListAction, &QAction::triggered, this, &MainWindow::showSignalList);
 
-    m_pShowComparatorsListAction = new QAction(tr("&Уставки ..."), this);
+    m_pShowComparatorsListAction = new QAction(tr("&Comparators ..."), this);
     connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
-    m_pShowCorrecrtionsListAction = new QAction(tr("&Поправки ..."), this);
+    m_pShowCorrecrtionsListAction = new QAction(tr("Co&rrections ..."), this);
     connect(m_pShowCorrecrtionsListAction, &QAction::triggered, this, &MainWindow::showCorrecrtionsList);
 
-    m_pShowStatisticAction = new QAction(tr("&Статистика ..."), this);
+    m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
     connect(m_pShowStatisticAction, &QAction::triggered, this, &MainWindow::showStatistic);
 
-    m_pAboutConnectionAction = new QAction(tr("О подключении ..."), this);
+    m_pAboutConnectionAction = new QAction(tr("About connect to server ..."), this);
     connect(m_pAboutConnectionAction, &QAction::triggered, this, &MainWindow::aboutConnection);
 
-    m_pAboutAppAction = new QAction(tr("О программе ..."), this);
+    m_pAboutAppAction = new QAction(tr("About Metrology ..."), this);
     connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
 }
 
@@ -146,7 +146,7 @@ void  MainWindow::createActions()
 
 void MainWindow::createMenu()
 {
-    m_pMeasureMenu = new QMenu(tr("&Измерения"));
+    m_pMeasureMenu = new QMenu(tr("&Measure"));
 
     m_pMeasureMenu->addAction(m_pStartMeasureAction);
     m_pMeasureMenu->addAction(m_pStopMeasureAction);
@@ -154,7 +154,7 @@ void MainWindow::createMenu()
     m_pMeasureMenu->addAction(m_pExportMeasureAction);
 
 
-    m_pEditMenu = new QMenu(tr("&Правка"));
+    m_pEditMenu = new QMenu(tr("&Edit"));
 
     m_pEditMenu->addAction(m_pCutMeasureAction);
     m_pEditMenu->addAction(m_pCopyMeasureAction);
@@ -163,16 +163,16 @@ void MainWindow::createMenu()
     m_pEditMenu->addAction(m_pSelectAllMeasureAction);
     m_pEditMenu->addSeparator();
 
-    m_pViewMenu = new QMenu(tr("&Вид"));
+    m_pViewMenu = new QMenu(tr("&View"));
 
-    m_pViewPanelMenu = new QMenu("&Панели", m_pViewMenu);
+    m_pViewPanelMenu = new QMenu("&Panels", m_pViewMenu);
     m_pViewMenu->addMenu(m_pViewPanelMenu);
     m_pViewMenu->addAction(m_pShowReportsAction);
     m_pViewMenu->addSeparator();
     m_pViewMenu->addAction(m_pShowCalculateAction);
 
 
-    m_pSettingMenu = new QMenu(tr("&Настройки"));
+    m_pSettingMenu = new QMenu(tr("&Tools"));
 
     m_pSettingMenu->addAction(m_pConnectToServerAction);
     m_pSettingMenu->addAction(m_pCalibrationAction);
@@ -206,11 +206,11 @@ void MainWindow::createMenu()
 
 bool MainWindow::createToolBars()
 {
-    // Панель управления процессом измерений
+    // Control panel measure process
     //
     m_pMeasureControlToolBar = new QToolBar(this);
     m_pMeasureControlToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-    m_pMeasureControlToolBar->setWindowTitle(tr("Панель управления процессом измерений"));
+    m_pMeasureControlToolBar->setWindowTitle(tr("Control panel measure process"));
     addToolBarBreak(Qt::TopToolBarArea);
     addToolBar(m_pMeasureControlToolBar);
 
@@ -224,54 +224,54 @@ bool MainWindow::createToolBars()
     m_pMeasureControlToolBar->setIconSize(QSize(16,16));
 
 
-    // Панель управления демпфера
+    // Control panel measure timeout
     //
     m_pMeasureDempher = new QToolBar(this);
     m_pMeasureDempher->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-    m_pMeasureDempher->setWindowTitle(tr("Панель управления демпфера"));
+    m_pMeasureDempher->setWindowTitle(tr("Control panel measure timeout"));
     addToolBarBreak(Qt::RightToolBarArea);
     addToolBar(m_pMeasureDempher);
 
     QLabel* dempherLabel = new QLabel(m_pMeasureDempher);
     m_pMeasureDempher->addWidget(dempherLabel);
-    dempherLabel->setText(tr(" Демпфер "));
+    dempherLabel->setText(tr(" Measure timeout "));
     dempherLabel->setEnabled(false);
 
     QComboBox* dempherCombo = new QComboBox(m_pMeasureDempher);
     m_pMeasureDempher->addWidget(dempherCombo);
     dempherCombo->setEditable(true);
-    dempherCombo->addItem("Нет");
+    dempherCombo->addItem("Empty");
     //connect(dempherCombo, SIGNAL(activated(int)), this, SLOT(setDempher(int)));
 
 
-    // Панель управления выходных сигналов
+    // Control panel output signals
     //
     m_pOutputSignalToolBar = new QToolBar(this);
     m_pOutputSignalToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-    m_pOutputSignalToolBar->setWindowTitle(tr("Панель управления выходных сигналов"));
+    m_pOutputSignalToolBar->setWindowTitle(tr("Control panel output signals"));
     addToolBarBreak(Qt::RightToolBarArea);
     addToolBar(m_pOutputSignalToolBar);
 
     QLabel* osLabel = new QLabel(m_pOutputSignalToolBar);
     m_pOutputSignalToolBar->addWidget(osLabel);
-    osLabel->setText(tr(" Выходные сигналы "));
+    osLabel->setText(tr(" Output signals "));
     osLabel->setEnabled(false);
 
     QComboBox* osCombo = new QComboBox(m_pOutputSignalToolBar);
     m_pOutputSignalToolBar->addWidget(osCombo);
-    osCombo->addItem("Не используються");
+    osCombo->addItem("Don't use");
 
-    // Панель управления выбором аналогового сигнала
+    // Control panel selecting analog signal
     //
     m_pAnalogSignalToolBar = new QToolBar(this);
     m_pAnalogSignalToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-    m_pAnalogSignalToolBar->setWindowTitle(tr("Панель управления выбором аналогового сигнала"));
+    m_pAnalogSignalToolBar->setWindowTitle(tr("Control panel selecting analog signal"));
     addToolBarBreak(Qt::TopToolBarArea);
     addToolBar(m_pAnalogSignalToolBar);
 
     QLabel* asCaseLabel = new QLabel(m_pAnalogSignalToolBar);
     m_pAnalogSignalToolBar->addWidget(asCaseLabel);
-    asCaseLabel->setText(tr(" Шкаф "));
+    asCaseLabel->setText(tr(" Case "));
     asCaseLabel->setEnabled(false);
 
     QComboBox* asCaseCombo = new QComboBox(m_pAnalogSignalToolBar);
@@ -282,7 +282,7 @@ bool MainWindow::createToolBars()
 
     QLabel* asSignalLabel = new QLabel(m_pAnalogSignalToolBar);
     m_pAnalogSignalToolBar->addWidget(asSignalLabel);
-    asSignalLabel->setText(tr(" Сигнал "));
+    asSignalLabel->setText(tr(" Signal "));
     asSignalLabel->setEnabled(false);
 
     QComboBox* asSignalCombo = new QComboBox(m_pAnalogSignalToolBar);
@@ -295,7 +295,7 @@ bool MainWindow::createToolBars()
 
     QLabel* asChannelLabel = new QLabel(m_pAnalogSignalToolBar);
     m_pAnalogSignalToolBar->addWidget(asChannelLabel);
-    asChannelLabel->setText(tr(" Номер шкафа "));
+    asChannelLabel->setText(tr(" Case No "));
     asChannelLabel->setEnabled(false);
 
     QComboBox* asChannelCombo = new QComboBox(m_pAnalogSignalToolBar);
@@ -306,7 +306,7 @@ bool MainWindow::createToolBars()
 
     QLabel* asSubblockLabel = new QLabel(m_pAnalogSignalToolBar);
     m_pAnalogSignalToolBar->addWidget(asSubblockLabel);
-    asSubblockLabel->setText(tr(" Субблок "));
+    asSubblockLabel->setText(tr(" Subblock "));
     asSubblockLabel->setEnabled(false);
 
     QComboBox* asSubblockCombo = new QComboBox(m_pAnalogSignalToolBar);
@@ -317,7 +317,7 @@ bool MainWindow::createToolBars()
 
     QLabel* asBlockLabel = new QLabel(m_pAnalogSignalToolBar);
     m_pAnalogSignalToolBar->addWidget(asBlockLabel);
-    asBlockLabel->setText(tr(" Блок "));
+    asBlockLabel->setText(tr(" Block "));
     asBlockLabel->setEnabled(false);
 
     QComboBox* asBlockCombo = new QComboBox(m_pAnalogSignalToolBar);
@@ -328,7 +328,7 @@ bool MainWindow::createToolBars()
 
     QLabel* asEntryLabel = new QLabel(m_pAnalogSignalToolBar);
     m_pAnalogSignalToolBar->addWidget(asEntryLabel);
-    asEntryLabel->setText(tr(" Вход "));
+    asEntryLabel->setText(tr(" Entry "));
     asEntryLabel->setEnabled(false);
 
     QComboBox* asEntryCombo = new QComboBox(m_pAnalogSignalToolBar);
@@ -338,11 +338,11 @@ bool MainWindow::createToolBars()
     asEntryCombo->setFixedWidth(60);
 
 
-//    // Панель управления выбором сигналов сложных уставок
+//    // Control panel selecting signal of complex comparator
 //    //
 //    pComplexComporatorSignalToolBar = new QToolBar(this);
 //    pSelectComplexComporatorSignalToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-//    pSelectComplexComporatorSignalToolBar->setWindowTitle(tr("Панель управления выбором сигналов сложных уставок"));
+//    pSelectComplexComporatorSignalToolBar->setWindowTitle(tr("Control panel selecting signal of complex comparator"));
 //    addToolBarBreak(Qt::TopToolBarArea);
 //    addToolBar(pSelectComplexComporatorSignalToolBar);
 
@@ -359,7 +359,7 @@ void MainWindow::createTabPages()
     for(int t = 0; t < MEASURE_TYPE_COUNT; t++)
     {
         QTableView* pView = new QTableView;
-        m_pMainTab->addTab(pView, MeasureTypeStr[t]);
+        m_pMainTab->addTab(pView, tr(MeasureTypeStr[t]));
 
         pView->setFrameStyle(QFrame::NoFrame);
 
@@ -373,9 +373,9 @@ void MainWindow::createTabPages()
 
 void MainWindow::createPanels()
 {
-    // Панель поиска измерений
+    // Search panel measurements
     //
-    m_pFindMeasurePanel = new QDockWidget(tr("Панель поиска измерений"), this);
+    m_pFindMeasurePanel = new QDockWidget(tr("Search panel measurements"), this);
     m_pFindMeasurePanel->setAllowedAreas(Qt::RightDockWidgetArea);
 
     m_pFindMeasureView = new QTableView;
@@ -385,19 +385,19 @@ void MainWindow::createPanels()
     m_pFindMeasurePanel->hide();
 
     QAction* findAction = m_pFindMeasurePanel->toggleViewAction();
-    findAction->setText(tr("Найти ..."));
+    findAction->setText(tr("Find ..."));
     findAction->setShortcut(Qt::CTRL + Qt::Key_F);
     findAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     m_pEditMenu->addAction(findAction);
     m_pMeasureControlToolBar->addAction(findAction);
 
-    // сепаратор
+    // Separator
     //
     m_pViewPanelMenu->addSeparator();
 
-    // Панель информации о сигнале
+    // Panel signal information
     //
-    m_pSignalInfoPanel = new QDockWidget(tr("Панель информации о сигнале"), this);
+    m_pSignalInfoPanel = new QDockWidget(tr("Panel signal information"), this);
     m_pSignalInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
 
     m_pSignalInfoView = new QTableView;
@@ -408,9 +408,9 @@ void MainWindow::createPanels()
     m_pViewPanelMenu->addAction(m_pSignalInfoPanel->toggleViewAction());
 
 
-    // Панель срабатывания уставок
+    // Panel comparator information
     //
-    m_pComparatorInfoPanel = new QDockWidget(tr("Панель срабатывания уставок"), this);
+    m_pComparatorInfoPanel = new QDockWidget(tr("Panel comparator information"), this);
     m_pComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
 
     m_pComparatorInfoView = new QTableView;
@@ -421,9 +421,9 @@ void MainWindow::createPanels()
     m_pViewPanelMenu->addAction(m_pComparatorInfoPanel->toggleViewAction());
 
 
-//    // Панель срабатывания сложных уставок
+//    // Panel complex comparator information
 //    //
-//    m_pComplexComparatorInfoPanel = new QDockWidget(tr("Панель срабатывания сложных уставок"), this);
+//    m_pComplexComparatorInfoPanel = new QDockWidget(tr("Panel complex comparator information"), this);
 //    m_pComplexComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
 
 //    m_pComplexComparatorInfoView = new QTableView;
@@ -465,11 +465,11 @@ void MainWindow::createStatusBar()
     statusBar()->setLayoutDirection(Qt::RightToLeft);
 
     m_statusEmpty->setText(tr(""));
-    m_statusMeasureThreadInfo->setText(tr("Измерение 1 из 10 "));
+    m_statusMeasureThreadInfo->setText(tr("Measurement 1 of 10 "));
     m_statusMeasureDemphrer->setValue(50);
-    m_statusMeasureThreadState->setText(tr("Процесс измерений остановлен "));
-    m_statusMeasureCount->setText(tr("Измерений 0/0 "));
-    m_statusConnectToServer->setText(tr("Соединение с сервером: нет "));
+    m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));
+    m_statusMeasureCount->setText(tr("Measurement 0/0 "));
+    m_statusConnectToServer->setText(tr("Connect to server: offline "));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

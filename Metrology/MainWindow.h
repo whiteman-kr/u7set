@@ -29,7 +29,7 @@ public:
     ~MainWindow();
 
 
-    // Элементы интерфейса - меню
+    // Elements of interface - Menu
     //
     QMenu*          m_pMeasureMenu;
     QMenu*          m_pEditMenu;
@@ -38,7 +38,7 @@ public:
     QMenu*          m_pSettingMenu;
     QMenu*          m_pInfoMenu;
 
-    // Элементы интерфейса - тулбар
+    // Elements of interface - ToolBar
     //
     QToolBar*       m_pMeasureControlToolBar;
     QToolBar*       m_pMeasureDempher;
@@ -46,12 +46,12 @@ public:
     QToolBar*       m_pAnalogSignalToolBar;
     QToolBar*       m_pComplexComporatorSignalToolBar;
 
-    // Элементы интерфейса - страницы таба
+    // Elements of interface - Pages of Tab
     //
     QTabWidget*     m_pMainTab;
     QTableView*     m_pMeasureItemView[MEASURE_TYPE_COUNT];
 
-    // Элементы интерфейса - панели
+    // Elements of interface - Panels
     //
     QDockWidget*    m_pFindMeasurePanel;
     QTableView*     m_pFindMeasureView;
@@ -63,7 +63,7 @@ public:
     QTableView*     m_pComplexComparatorInfoView;
 
 
-    // Элементы интерфейса - строка состояния
+    // Elements of interface - StatusBar
     //
     QLabel*         m_statusEmpty;
     QLabel*         m_statusMeasureThreadInfo;
@@ -73,8 +73,7 @@ public:
     QLabel*         m_statusConnectToServer;
 
 
-
-    // Создание интерфейса
+    // Create interface
     //
     bool createInterface();
 
@@ -90,29 +89,29 @@ private:
 
     Ui::MainWindow *ui;
 
-    // Actions меню
+    // Actions of main menu
     //
 private:
 
-    // Измерения
+    // menu - Measure
     //
     QAction* m_pStartMeasureAction;
     QAction* m_pStopMeasureAction;
     QAction* m_pExportMeasureAction;
 
-    // Правка
+    // menu - Edit
     //
     QAction* m_pCutMeasureAction;
     QAction* m_pCopyMeasureAction;
     QAction* m_pRemoveMeasureAction;
     QAction* m_pSelectAllMeasureAction;
 
-    // Вид
+    // menu - View
     //
     QAction* m_pShowReportsAction;
     QAction* m_pShowCalculateAction;
 
-    // Настройки
+    // menu - Tools
     //
     QAction* m_pConnectToServerAction;
     QAction* m_pCalibrationAction;
@@ -121,7 +120,7 @@ private:
     QAction* m_pShowOutputRangeListAction;
     QAction* m_pOptionsAction;
 
-    // ?
+    // menu - ?
     //
     QAction* m_pShowSignalListAction;
     QAction* m_pShowComparatorsListAction;
@@ -131,30 +130,29 @@ private:
     QAction* m_pAboutAppAction;
 
 
-
-    // Slots меню
+    // Slots of main menu
     //
 public slots:
 
-    // Измерения
+    // menu - Measure
     //
     void startMeasure() {};
     void stopMeasure() {};
     void exportMeasure() {};
 
-    // Правка
+    // menu - Edit
     //
     void cutMeasure() {};
     void copyMeasure() {};
     void removeMeasure() {};
     void selectAllMeasure() {};
 
-    // Вид
+    // menu - View
     //
     void showReports() {};
     void showCalculate() {};
 
-    // Настройки
+    // menu - Tools
     //
     void connectToServer() {};
     void calibration() {};
@@ -163,7 +161,7 @@ public slots:
     void showOutputRangeList() {};
     void options() {};
 
-    // ?
+    // menu - ?
     //
     void showSignalList() {};
     void showComparatorsList() {};

@@ -24,3 +24,6 @@ FORMS    += mainwindow.ui
 
 RESOURCES += \
     Metrology.qrc
+
+TRANSLATIONS = ./translations/Metrology_ru.ts \
+                ./translations/Metrology_uk.ts
