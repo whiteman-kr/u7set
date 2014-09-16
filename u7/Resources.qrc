@@ -16,14 +16,15 @@
         <file>DatabaseUpgrade/Upgrade0014.sql</file>
         <file>DatabaseUpgrade/Upgrade0015.sql</file>
         <file>DatabaseUpgrade/Upgrade0016.sql</file>
-		<file>DatabaseUpgrade/Upgrade0017.sql</file>
-		<file>DatabaseUpgrade/Upgrade0018.sql</file>
-		<file>DatabaseUpgrade/Upgrade0019.sql</file>
-		<file>DatabaseUpgrade/Upgrade0020.sql</file>
-		<file>DatabaseUpgrade/Upgrade0021.sql</file>
-		<file>DatabaseUpgrade/Upgrade0022.sql</file>
-		<file>DatabaseUpgrade/Upgrade0023.sql</file>
-		<file>DatabaseUpgrade/Upgrade0024.sql</file>
+        <file>DatabaseUpgrade/Upgrade0017.sql</file>
+        <file>DatabaseUpgrade/Upgrade0018.sql</file>
+        <file>DatabaseUpgrade/Upgrade0019.sql</file>
+        <file>DatabaseUpgrade/Upgrade0020.sql</file>
+        <file>DatabaseUpgrade/Upgrade0021.sql</file>
+        <file>DatabaseUpgrade/Upgrade0022.sql</file>
+        <file>DatabaseUpgrade/Upgrade0023.sql</file>
+        <file>DatabaseUpgrade/Upgrade0024.sql</file>
+        <file>DatabaseUpgrade/Upgrade0025.sql</file>
     </qresource>
     <qresource prefix="/">
         <file>afb_schema.xsd</file>
