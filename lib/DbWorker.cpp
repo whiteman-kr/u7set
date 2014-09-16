@@ -1763,7 +1763,8 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 
 		// request
 		//
-		QString request = QString("SELECT * FROM SetWorkcopy(%1, ")
+		QString request = QString("SELECT * FROM set_workcopy(%1, %2, ")
+				.arg(currentUser().userId())
 				.arg(file->fileId());
 
 		QString data;

@@ -169,3 +169,33 @@ $BODY$
 $BODY$
 LANGUAGE sql;
 
+
+
+DROP FUNCTION setworkcopy(integer, bytea);
+
+CREATE OR REPLACE FUNCTION set_workcopy(user_id integer, file_id integer, file_data bytea)
+RETURNS INT AS
+$BODY$
+DECLARE
+	user_allowed int;
+	inst_file_id int;
+BEGIN
+	SELECT count(*) INTO user_allowed
+		FROM CheckOut WHERE FileID = file_id AND UserID = user_id;
+
+	IF (user_allowed = 0 AND is_admin(user_id) = FALSE) THEN
+		RAISE 'User is not allowed to set workcopy for file_id %', file_id;
+	END IF;
+
+	UPDATE FileInstance SET Size = length(file_data), Data = file_data
+		WHERE FileInstanceID = (SELECT CheckedOutInstanceID FROM File WHERE FileID = file_id)
+		RETURNING FileID INTO inst_file_id;
+
+	IF (inst_file_id <> file_id) THEN
+		RAISE 'DATABASE CRITICAL ERROR, FileID in File and FileInstance tables is different! %', file_id;
+	END IF;
+
+	RETURN file_id;
+END
+$BODY$
+LANGUAGE plpgsql;
