@@ -26,6 +26,7 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add AddSystem function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0021.sql"},
 	{"Add add_device function, drop AddSystem", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0022.sql"},
 	{"Add is_admin function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0023.sql"},
+	{"Add columns in Signal, SignalInstance tables, and some stored procedures", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0024.sql"},
 	};
 
 int DbWorker::counter = 0;
