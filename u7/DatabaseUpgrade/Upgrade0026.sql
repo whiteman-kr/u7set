@@ -101,3 +101,71 @@ ORDER BY Name;
 
 $BODY$
   LANGUAGE sql;
+
+
+DROP FUNCTION addfile(integer, text, integer, integer, bytea);
+
+CREATE OR REPLACE FUNCTION add_file(user_id integer, file_name text, parent_id integer, file_data bytea)
+RETURNS integer AS
+$BODY$
+DECLARE
+	exists int;
+	newfileid int;
+	newfileinstanceid uuid;
+BEGIN
+	SELECT count(*) INTO exists FROM File WHERE Name = file_name AND ParentID = parent_id AND Deleted = false;
+	IF (exists > 0) THEN
+		RAISE 'Duplicate file name: %', filename USING ERRCODE = 'unique_violation';
+	END IF;
+
+	INSERT INTO File (Name, ParentID, Deleted)
+		VALUES (file_name, parent_id, false) RETURNING FileID INTO newfileid;
+
+	INSERT INTO CheckOut (UserID, FileID)
+		VALUES (user_id, newfileid);
+
+	INSERT INTO FileInstance (FileID, Size, Data, Action)
+		VALUES (newfileid, length(file_data), file_data, 1) RETURNING FileInstanceID INTO newfileinstanceid;
+
+	UPDATE File SET CheckedOutInstanceID = newfileinstanceid WHERE FileID = newfileid;
+
+	RETURN newfileid;
+END
+$BODY$
+LANGUAGE plpgsql;
+
+
+DROP FUNCTION getworkcopy(integer);
+
+CREATE OR REPLACE FUNCTION get_workcopy(user_id integer, file_id integer)
+RETURNS
+	TABLE(
+		fileid integer,
+		name text,
+		parentid integer,
+		created timestamp with time zone,
+		size integer,
+		data bytea,
+		checkouttime timestamp with time zone,
+		userid integer)
+	 AS
+$BODY$
+	SELECT
+		F.FileID AS FileID,
+		F.Name AS Name,
+		F.ParentID AS ParentID,
+		F.Created AS Created,
+		length(FI.Data) AS Size,
+		FI.Data as Data,
+		CO.Time As ChechoutTime,
+		CO.UserID AS UserID
+	FROM
+		File F, FileInstance FI, Checkout CO
+	WHERE
+		F.FileID = file_id AND
+		FI.FileInstanceID = F.CheckedOutInstanceID AND
+		CO.FileID = file_id AND
+		(user_id = CO.UserID OR (SELECT is_admin(user_id)) = TRUE);
+$BODY$
+LANGUAGE sql;
+

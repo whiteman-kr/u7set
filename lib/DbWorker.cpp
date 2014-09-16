@@ -28,7 +28,7 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add is_admin function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0023.sql"},
 	{"Add CheckedInInstanceID, CheckedOutInstanceID to table File", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0024.sql"},
 	{"DUMMYY WAIT FOR WHITEMAN COMMIT", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
-	{"Add get_file_list function, delete GetFileList", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0026.sql"},
+	{"Changes in  get_file_list, add_file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0026.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -1580,11 +1580,10 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 		// request
 		//
-		QString request = QString("SELECT * FROM AddFile(%1,'%2', %3, %4, ")
+		QString request = QString("SELECT * FROM add_file(%1,'%2', %3, ")
 				.arg(currentUser().userId())
 				.arg(file->fileName())
-				.arg(parentId)
-				.arg(file->size());
+				.arg(parentId);
 
 		QString data;
 		file->convertToDatabaseString(&data);
@@ -1667,7 +1666,8 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 
 		// request
 		//
-		QString request = QString("SELECT * FROM GetWorkcopy(%1);")
+		QString request = QString("SELECT * FROM get_workcopy(%1, %2);")
+				.arg(currentUser().userId())
 				.arg(fi.fileId());
 
 		QSqlQuery q(db);
