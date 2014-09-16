@@ -27,6 +27,8 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add add_device function, drop AddSystem", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0022.sql"},
 	{"Add is_admin function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0023.sql"},
 	{"Add CheckedInInstanceID, CheckedOutInstanceID to table File", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0024.sql"},
+	{"DUMMYY WAIT FOR WHITEMAN COMMIT", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
+	{"Add get_file_list function, delete GetFileList", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0026.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -1083,6 +1085,8 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 				//
 				QFile upgradeFile(ui.upgradeFileName);
 
+				qDebug() << "Begin upgrade: item " << i << " completed, file: " << ui.upgradeFileName;
+
 				result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
 				if (result == false)
@@ -1124,6 +1128,8 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 						break;
 					}
 				}
+
+				qDebug() << "End upgrade item";
 			}
 		}
 	}
@@ -1492,7 +1498,8 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 		return;
 	}
 
-	QString request = QString("SELECT * FROM GetFileList(%1, '%%%2');")
+	QString request = QString("SELECT * FROM get_file_list(%1, %2, '%%%3');")
+			.arg(currentUser().userId())
 			.arg(parentId)
 			.arg(filter);
 
