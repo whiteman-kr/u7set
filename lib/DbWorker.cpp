@@ -2167,7 +2167,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 		// request
 		//
-		QString request = QString("SELECT * FROM get_signal_workcopy(%1, %2)")
+		QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
 			.arg(currentUser().userId()).arg(signalID);
 		QSqlQuery q(db);
 
