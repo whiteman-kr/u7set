@@ -109,8 +109,6 @@ private:
 	void setInstanceAction(InstanceAction action) { m_instanceAction = action; }
 
 public:
-	Signal();
-
 	int ID() const { return m_ID; }
 	int signalGroupID() const { return m_signalGroupID; }
 	int signalInstanceID() const { return m_signalInstanceID; }
@@ -229,6 +227,8 @@ public:
 
 	void insert(const Signal& signal);
 	Signal* getSignal(int signalID);
+	const Signal* getConstSignal(int signalID) const;
+	bool haveSignal(int signalID);
 
 	void removeAll();
 };

@@ -1,10 +1,5 @@
 #include "../include/Signal.h"
 
-Signal::Signal()
-{
-
-}
-
 
 SignalSet::SignalSet()
 {
@@ -50,6 +45,23 @@ Signal* SignalSet::getSignal(int signalID)
 	assert(false);			// signal not found
 
 	return nullptr;
+}
+
+const Signal* SignalSet::getConstSignal(int signalID) const
+{
+	if (m_signalSet.contains(signalID))
+	{
+		return const_cast<Signal*>(m_signalSet.value(signalID));
+	}
+
+	assert(false);			// signal not found
+
+	return nullptr;
+}
+
+bool SignalSet::haveSignal(int signalID)
+{
+	return m_signalSet.contains(signalID);
 }
 
 

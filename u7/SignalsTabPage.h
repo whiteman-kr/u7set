@@ -12,7 +12,7 @@ class SignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	SignalsModel(QObject* parent = 0);
+	SignalsModel(QWidget* parent = 0);
 	virtual ~SignalsModel();
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
@@ -33,11 +33,19 @@ signals:
 public slots:
 	void signalsIdReceived(QVector<int> signalsId);
 	void signalDataReceived(Signal signal);
+	void loadSignals();
+
+protected:
+	DbController* dbController();
 
 private:
 	// Data
 	//
-	QVector<Signal> m_signals;
+	//QVector<Signal> m_signals;
+	QVector<int> m_signalIDs;
+	SignalSet m_signalSet;
+	QWidget* parentWindow;
+	DbController* m_dbController;
 };
 
 
@@ -71,7 +79,6 @@ private:
 	//QSplitter* m_splitter = nullptr;
 	SignalsModel* m_signalsModel = nullptr;
 	QTableView* m_signalsView = nullptr;
-	SignalSet m_signalSet;
 };
 
 

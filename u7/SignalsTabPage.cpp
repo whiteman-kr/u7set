@@ -4,41 +4,80 @@
 #include "Settings.h"
 
 
+const int SC_STR_ID = 0,
+SC_EXT_STR_ID = 1,
+SC_NAME = 2,
+SC_CHANNEL = 3,
+SC_DATA_FORMAT = 4,
+SC_DATA_SIZE = 5,
+SC_LOW_ADC = 6,
+SC_HIGH_ADC = 7,
+SC_LOW_LIMIT = 8,
+SC_HIGH_LIMIT = 9,
+SC_UNIT = 10,
+SC_ADJUSTMENT = 11,
+SC_DROP_LIMIT = 12,
+SC_EXCESS_LIMIT = 13,
+SC_UNBALANCE_LIMIT = 14,
+SC_INPUT_LOW_LIMIT = 15,
+SC_INPUT_HIGH_LIMIT = 16,
+SC_INPUT_UNIT = 17,
+SC_INPUT_SENSOR = 18,
+SC_OUTPUT_LOW_LIMIT = 19,
+SC_OUTPUT_HIGH_LIMIT = 20,
+SC_OUTPUT_UNIT = 21,
+SC_OUTPUT_SENSOR = 22,
+SC_ACQUIRE = 23,
+SC_CALCULATED = 24,
+SC_NORMAL_STATE = 25,
+SC_DECIMAL_PLACES = 26,
+SC_APERTURE = 27,
+SC_IN_OUT_TYPE = 28,
+SC_IN_OUT_NO = 29,
+SC_DEVICE = 30;
+
+
 const char* Columns[] =
 {
-	"StrID",
-	"ExtStrID",
+	"ID",
+	"External ID",
 	"Name",
 	"Channel",
-	"DataFormat",
-	"InputUnit",
-	"OutputUnit",
-	"LowADC",
-	"HighADC",
-	"Adjustment",
-	"LowLimit",
-	"HighLimit",
+	"Data format",
+	"Data size"
+	"Low ADC",
+	"High ADC",
+	"Low limit",
+	"High limit",
 	"Unit",
-	"Aperture",
-	"DropLimit",
-	"ExcessLimit",
-	"UnbalanceLimit",
-	"InputLowLimit",
-	"InputHighLimit",
-	"OutputLowLimit",
-	"OutputHighLimit",
-	"Precision",
+	"Adjustment",
+	"Drop limit",
+	"Excess limit",
+	"Unbalance limit",
+	"InputLow limit",
+	"InputHigh limit",
+	"Input unit",
+	"Input sensor"
+	"Output low Limit",
+	"Output high Limit",
+	"Output unit",
+	"Output sensor",
 	"Acquire",
 	"Calculated",
-	"NormalState",
-	"DataSize"
+	"Normal state",
+	"Decimal places"
+	"Aperture",
+	"Input-output type"
+	"Input-output nomber"
+	"Device"
 };
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
 
 
-SignalsModel::SignalsModel(QObject *parent) :
-	QAbstractTableModel(parent)
+SignalsModel::SignalsModel(QWidget *parent) :
+	QAbstractTableModel(parent),
+	parentWindow(parent)
 {
 	emit signalsIdRequest();
 }
@@ -50,7 +89,7 @@ SignalsModel::~SignalsModel()
 
 int SignalsModel::rowCount(const QModelIndex &) const
 {
-	return m_signals.count() + 1;
+	return m_signalIDs.count() + 1;
 }
 
 int SignalsModel::columnCount(const QModelIndex &) const
@@ -62,18 +101,50 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 {
 	int row = index.row();
 	int col = index.column();
-	if (row == m_signals.count())
+	if (row == m_signalIDs.count())
 	{
 		return QVariant();
 	}
-	const Signal& signal = m_signals[row];
+	const Signal* signal = m_signalSet.getConstSignal(m_signalIDs[row]);
+	if (signal == nullptr)
+	{
+		//emit signalDataRequest(m_signalIDs[row]);
+		return QVariant();
+	}
 	if (role == Qt::DisplayRole)
 	{
 		switch (col)
 		{
-			case 0: return signal.strID();
-			case 1: return signal.extStrID();
-			case 2: return signal.name();
+			case SC_STR_ID: return signal->strID();
+			case SC_EXT_STR_ID: return signal->extStrID();
+			case SC_NAME: return signal->name();
+			case SC_CHANNEL: return signal->channel();
+			case SC_DATA_FORMAT: return signal->dataFormat();
+			case SC_DATA_SIZE: return signal->dataSize();
+			case SC_LOW_ADC: return signal->lowADC();
+			case SC_HIGH_ADC: return signal->highADC();
+			case SC_LOW_LIMIT: return signal->lowLimit();
+			case SC_HIGH_LIMIT: return signal->highLimit();
+			case SC_UNIT: return signal->unitID();
+			case SC_ADJUSTMENT: return signal->adjustment();
+			case SC_EXCESS_LIMIT: return signal->excessLimit();
+			case SC_UNBALANCE_LIMIT: return signal->unbalanceLimit();
+			case SC_INPUT_LOW_LIMIT: return signal->inputLowLimit();
+			case SC_INPUT_HIGH_LIMIT: return signal->inputHighLimit();
+			case SC_INPUT_UNIT: return signal->inputUnitID();
+			case SC_INPUT_SENSOR: return signal->inputSensorID();
+			case SC_OUTPUT_LOW_LIMIT: return signal->outputLowLimit();
+			case SC_OUTPUT_HIGH_LIMIT: return signal->outputHighLimit();
+			case SC_OUTPUT_UNIT: return signal->outputUnitID();
+			case SC_OUTPUT_SENSOR: return signal->outputSensorID();
+			case SC_ACQUIRE: return signal->acquire();
+			case SC_CALCULATED: return signal->calculated();
+			case SC_NORMAL_STATE: return signal->normalState();
+			case SC_DECIMAL_PLACES: return signal->decimalPlaces();
+			case SC_APERTURE: return signal->aperture();
+			case SC_IN_OUT_TYPE: return signal->inOutType();
+			case SC_IN_OUT_NO: return signal->inOutNo();
+			case SC_DEVICE: return signal->deviceID();
 		}
 	}
 
@@ -90,9 +161,9 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 		}
 		if (orientation == Qt::Vertical)
 		{
-			if (section < m_signals.count())
+			if (section < m_signalIDs.count())
 			{
-				return m_signals[section].ID();
+				return m_signalIDs[section];
 			}
 			return tr("New record");
 		}
@@ -106,22 +177,48 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 	{
 		bool added = false;
 		int row = index.row();
-		if (row == m_signals.count())
+		if (row == m_signalIDs.count())
 		{
-			beginInsertRows(QModelIndex(), row, row);
+			/*beginInsertRows(QModelIndex(), row, row);
 			Signal signal;
 			m_signals.append(signal);
 			endInsertRows();
-			added = true;
+			added = true;*/
 		}
 
-		Signal& signal = m_signals[index.row()];
+		Signal signal/* = m_signals[index.row()]*/;
 
 		switch (index.column())
 		{
-			case 0: signal.setStrID(value.toString()); break;
-			case 1: signal.setExtStrID(value.toString()); break;
-			case 2: signal.setName(value.toString()); break;
+			case SC_STR_ID: signal.setStrID(value.toString()); break;
+			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
+			case SC_NAME: signal.setName(value.toString()); break;
+			case SC_DATA_FORMAT: signal.setDataFormat(value.toInt()); break;
+			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
+			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
+			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
+			case SC_LOW_LIMIT: signal.setLowLimit(value.toDouble()); break;
+			case SC_HIGH_LIMIT: signal.setHighLimit(value.toDouble()); break;
+			case SC_UNIT: signal.setUnitID(value.toInt()); break;
+			case SC_ADJUSTMENT: signal.setAdjustment(value.toDouble()); break;
+			case SC_EXCESS_LIMIT: signal.setExcessLimit(value.toDouble()); break;
+			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
+			case SC_INPUT_LOW_LIMIT: signal.setInputLowLimit(value.toDouble()); break;
+			case SC_INPUT_HIGH_LIMIT: signal.setInputHighLimit(value.toDouble()); break;
+			case SC_INPUT_UNIT: signal.setInputUnitID(value.toInt()); break;
+			case SC_INPUT_SENSOR: signal.setInputSensorID(value.toInt()); break;
+			case SC_OUTPUT_LOW_LIMIT: signal.setOutputLowLimit(value.toDouble()); break;
+			case SC_OUTPUT_HIGH_LIMIT: signal.setOutputHighLimit(value.toDouble()); break;
+			case SC_OUTPUT_UNIT: signal.setOutputUnitID(value.toInt()); break;
+			case SC_OUTPUT_SENSOR: signal.setOutputSensorID(value.toInt()); break;
+			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
+			case SC_CALCULATED: signal.setCalculated(value.toBool()); break;
+			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
+			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
+			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
+			//case SC_IN_OUT_TYPE: signal.setInOutType(value.toInt()); break;
+			case SC_IN_OUT_NO: signal.setInOutNo(value.toInt()); break;
+			case SC_DEVICE: signal.setDeviceID(value.toInt()); break;
 		}
 
 		if (added)
@@ -163,15 +260,38 @@ void SignalsModel::signalsIdReceived(QVector<int> signalsId)
 
 void SignalsModel::signalDataReceived(Signal signal)
 {
-	for (int i = 0; i < m_signals.count(); i++)
+	for (int i = 0; i < m_signalIDs.count(); i++)
 	{
-		if (m_signals[i].ID() == signal.ID())
+		if (m_signalIDs[i] == signal.ID())
 		{
-			m_signals[i] = signal;
+			Signal* pSignal = m_signalSet.getSignal(m_signalIDs[i]);
+			if (pSignal != nullptr)
+			{
+				*pSignal = signal;
+			}
+			else
+			{
+				m_signalSet.insert(signal);
+			}
 			return;
 		}
 	}
-	m_signals.append(signal);
+	m_signalSet.insert(signal);
+}
+
+void SignalsModel::loadSignals()
+{
+	//QSet<int> signalsIDs;
+
+	m_signalIDs.clear();
+	m_signalSet.removeAll();
+
+	dbController()->getSignals(&m_signalSet, parentWindow);
+}
+
+DbController *SignalsModel::dbController()
+{
+	return m_dbController;
 }
 
 //
@@ -267,11 +387,7 @@ void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
-	QSet<int> signalsIDs;
-
-	m_signalSet.removeAll();
-
-	dbController()->getSignals(&m_signalSet, this);
+	m_signalsModel->loadSignals();
 
 	return;
 }
