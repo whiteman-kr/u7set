@@ -65,6 +65,8 @@ public slots:
 	void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter);
 	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
 
+	void slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
+
 	void slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
 

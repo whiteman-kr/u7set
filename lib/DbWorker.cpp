@@ -1618,6 +1618,107 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 	return;
 }
 
+void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true ||
+		out == nullptr)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		const DbFileInfo& fi = files->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM get_latest_file_version(%1, %2);")
+				.arg(currentUser().userId())
+				.arg(fi.fileId());
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+		if (result == false)
+		{
+			emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't find file: %1").arg(fi.fileName()));
+			return;
+		}
+
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		file->setFileId(q.value("FileID").toInt());
+
+		file->setFileName(q.value("Name").toString());
+		file->setParentId(q.value("ParentID").toInt());
+		file->setParentId(q.value("ChangesetID").toInt());
+		file->setCreated(q.value("Created").toString());
+		file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
+
+		bool checkedOut = q.value("CheckedOut").toBool();
+		file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
+
+		DbUser user;
+		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
+
+		if (ok == false)
+		{
+			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
+			continue;
+		}
+
+		file->setUser(user);
+
+		QByteArray data = q.value("Data").toByteArray();
+		file->swapData(data);
+
+		out->push_back(file);
+
+		assert(fi.fileId() == file->fileId());
+	}
+
+	return;
+}
+
 void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
 {
 	// Init automitic varaiables
@@ -1831,7 +1932,8 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		return;
 	}
 
-	QString request = "SELECT * FROM checkin(ARRAY[";
+	QString request = QString("SELECT * FROM check_in(%1, ARRAY[")
+		.arg(currentUser().userId());
 
 	// Iterate through files
 	//
@@ -1849,8 +1951,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		}
 	}
 
-	request += QString("], %1, '%2');")
-			.arg(currentUser().userId())
+	request += QString("], '%1');")
 			.arg(comment);
 
 	// request
@@ -1903,7 +2004,8 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	QString request = "SELECT * FROM checkout(ARRAY[";
+	QString request = QString("SELECT * FROM check_out(%1, ARRAY[")
+		.arg(currentUser().userId());
 
 	// Iterate through files
 	//
@@ -1921,8 +2023,8 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		}
 	}
 
-	request += QString("], %1);")
-			.arg(currentUser().userId());
+	request += QString("]);");
+
 
 	// request
 	//
@@ -1974,7 +2076,8 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	QString request = "SELECT * FROM undoChanges(ARRAY[";
+	QString request = QString("SELECT * FROM undo_changes(%1, ARRAY[")
+		.arg(currentUser().userId());
 
 	// Iterate through files
 	//
@@ -1992,8 +2095,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		}
 	}
 
-	request += QString("], %1);")
-			.arg(currentUser().userId());
+	request += "]);";
 
 	// request
 	//

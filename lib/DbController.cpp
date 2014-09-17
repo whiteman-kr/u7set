@@ -32,6 +32,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 
+	connect(this, &DbController::signal_getLatestVersion, m_worker, &DbWorker::slot_getLatestVersion);
+
 	connect(this, &DbController::signal_getWorkcopy, m_worker, &DbWorker::slot_getWorkcopy);
 	connect(this, &DbController::signal_setWorkcopy, m_worker, &DbWorker::slot_setWorkcopy);
 
@@ -336,6 +338,58 @@ bool DbController::addFile(const std::shared_ptr<DbFile>& file, int parentId, QW
 	v.push_back(file);
 
 	return addFiles(&v, parentId, parentWidget);
+}
+
+bool DbController::getLatestVersion(const std::vector<DbFileInfo>& files,
+					  std::vector<std::shared_ptr<DbFile>>* out,
+					  QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr || files.empty() == true)
+	{
+		assert(out != nullptr);
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getLatestVersion(&files, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting file"));
+	return out;
+}
+
+bool DbController::getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	std::vector<DbFileInfo> fiv;
+	fiv.push_back(file);
+
+	std::vector<std::shared_ptr<DbFile>> outvector;
+	bool result = getLatestVersion(fiv, &outvector, parentWidget);
+
+	if (result == false || outvector.size() != 1)
+	{
+		return false;
+	}
+
+	*out = outvector.front();
+	return true;
 }
 
 bool DbController::getWorkcopy(const std::vector<DbFileInfo>& files,
