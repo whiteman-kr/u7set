@@ -566,7 +566,7 @@ bool DbController::addDeviceObject(const Hardware::DeviceObject* device, int par
 }
 
 
-bool DbController::getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget)
+bool DbController::getSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
 {
 	if (signalIDs == nullptr)
 	{
@@ -616,11 +616,11 @@ bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
 }
 
 
-bool DbController::addSignal(SignalType signalType, int channelCount, Signal signal, QVector<int> *newSignalsIDs, QWidget* parentWidget)
+bool DbController::addSignal(SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)
 {
-	if (newSignalsIDs == nullptr)
+	if (newSignal == nullptr)
 	{
-		assert(newSignalsIDs != nullptr);
+		assert(newSignal != nullptr);
 		return false;
 	}
 
@@ -633,7 +633,7 @@ bool DbController::addSignal(SignalType signalType, int channelCount, Signal sig
 		return false;
 	}
 
-	emit signal_addSignal(signalType, channelCount, signal, newSignalsIDs);
+	emit signal_addSignal(signalType, newSignal);
 
 	ok = waitForComplete(parentWidget, tr("Adding signals"));
 

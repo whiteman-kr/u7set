@@ -3,7 +3,7 @@
 #include "DbStruct.h"
 #include "DbWorker.h"
 #include "DeviceObject.h"
-#include <QSet>
+#include <QVector>
 
 class DbController : public QObject
 {
@@ -67,9 +67,9 @@ public:
 
 	// Signals management
 	//
-	bool getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget);
+	bool getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
 	bool getSignals(SignalSet* signalSet, QWidget* parentWidget);
-	bool addSignal(SignalType signalType, int channelCount, Signal signal, QVector<int>* newSignalsIDs, QWidget* parentWidget);
+	bool addSignal(SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
@@ -95,9 +95,9 @@ signals:
 
 	void signal_addDeviceObject(DbFile* file, int parentId, QString fileExtension);
 
-	void signal_getSignalsIDs(QSet<int>* signalIDs);
+	void signal_getSignalsIDs(QVector<int>* signalIDs);
 	void signal_getSignals(SignalSet* signalSet);
-	void signal_addSignal(SignalType signalType, int channelCount, Signal signal, QVector<int>* newSignalsIDs);
+	void signal_addSignal(SignalType signalType, QVector<Signal>* newSignal);
 
 	//
 	// Service functions

@@ -14,6 +14,8 @@ class DbWorker : public QObject
 private:
 	DbWorker();
 
+	void getSignalData(QSqlQuery& q, Signal &s);
+
 public:
 	DbWorker(DbProgress* progress);
 
@@ -82,9 +84,9 @@ public slots:
 
 	// Signal management
 	//
-	void slot_getSignalsIDs(QSet<int>* signalsIDs);
+	void slot_getSignalsIDs(QVector<int>* signalsIDs);
 	void slot_getSignals(SignalSet* signalSet);
-	void slot_addSignal(SignalType signalType, int channelCount, Signal signal, QVector<int>* newSignalsIDs);
+	void slot_addSignal(SignalType signalType, QVector<Signal>* newSignal);
 
 	// Service
 	//

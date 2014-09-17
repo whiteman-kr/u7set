@@ -146,7 +146,9 @@ BEGIN
 			Signal AS S
 		WHERE
 			((S.CheckedInInstanceID IS NOT NULL) OR (S.CheckedOutInstanceID IS NOT NULL AND S.UserID = user_id)) AND
-			(S.Deleted != TRUE OR with_deleted);
+			(S.Deleted != TRUE OR with_deleted)
+		ORDER BY
+			S.SignalID ASC;
 END
 $BODY$
 LANGUAGE plpgsql;
