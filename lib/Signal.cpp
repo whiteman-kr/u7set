@@ -59,7 +59,14 @@ const Signal* SignalSet::getConstSignal(int signalID) const
 	return nullptr;
 }
 
+
 bool SignalSet::haveSignal(int signalID)
+{
+	return m_signalSet.contains(signalID);
+}
+
+
+bool SignalSet::contains(int signalID)
 {
 	return m_signalSet.contains(signalID);
 }

@@ -261,17 +261,15 @@ void SignalsModel::loadSignals()
 		endRemoveRows();
 	}
 
-	QSet<int> signalIDs;
+	dbController()->getSignalsIDs(&m_signalIDs, m_parentWindow);
 
-	dbController()->getSignalsIDs(&signalIDs, m_parentWindow);
-
-	beginInsertRows(QModelIndex(), 0, signalIDs.count() - 1);
-	m_signalIDs = signalIDs.toList().toVector();
+	beginInsertRows(QModelIndex(), 0, m_signalIDs.count() - 1);
 
 	if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
 	{
 		QMessageBox::warning(m_parentWindow, tr("Warning"), tr("Could not load signals"));
 	}
+
 	endInsertRows();
 
 	emit cellsSizeChanged();
@@ -379,12 +377,12 @@ void SignalsTabPage::projectOpened()
 
 	m_signalsModel->loadSignals();
 
-	QVector<Signal> v;
+/*	QVector<Signal> v;
 	Signal s;
 
 	v.append(s);
 
-	dbController()->addSignal(SignalType::analog, &v, this);
+	dbController()->addSignal(SignalType::analog, &v, this);*/
 
 	return;
 }

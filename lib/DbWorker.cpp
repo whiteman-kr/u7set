@@ -2136,18 +2136,34 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 		return;
 	}
 
-	QVector<int> signalsIDs;
-
-	slot_getSignalsIDs(&signalsIDs);
-
 	// Operation
 	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get signals' IDs. Database connection is not opened."));
+		emitError(tr("Cannot get signals. Database connection is not opened."));
 		return;
+	}
+
+	QString request = QString("SELECT * FROM get_signals_ids(%1, %2)")
+		.arg(currentUser().userId()).arg("false");
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	QVector<int> signalsIDs;
+
+	while(q.next() != false)
+	{
+		signalsIDs.append(q.value(0).toInt());
 	}
 
 	int signalCount = signalsIDs.count();
@@ -2177,49 +2193,6 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 			getSignalData(q, s);
 
 			signalSet->insert(s);
-
-/*			s.setID(q.value("signalid").toInt());
-			s.setSignalGroupID(q.value("signalgroupid").toInt());
-			s.setSignalInstanceID(q.value("signalinstanceid").toInt());
-			s.setChangesetID(q.value("changesetid").toInt());
-			s.setCheckedOut(q.value("checkedout").toBool());
-			s.setUserID(q.value("userid").toInt());
-			s.setChannel(q.value("channel").toInt());
-			s.setType(static_cast<SignalType>(q.value("type").toInt()));
-			s.setCreated(q.value("created").toString());
-			s.setDeleted(q.value("deleted").toBool());
-			s.setInstanceCreated(q.value("instancecreated").toString());
-			s.setInstanceAction(static_cast<InstanceAction>(q.value("action").toInt()));
-			s.setStrID(q.value("strid").toString());
-			s.setExtStrID(q.value("extstrid").toString());
-			s.setName(q.value("name").toString());
-			s.setDataFormat(q.value("dataformatid").toInt());
-			s.setDataSize(q.value("datasize").toInt());
-			s.setLowADC(q.value("lowadc").toInt());
-			s.setHighADC(q.value("highadc").toInt());
-			s.setLowLimit(q.value("lowlimit").toDouble());
-			s.setHighLimit(q.value("highlimit").toDouble());
-			s.setUnitID(q.value("unitid").toInt());
-			s.setAdjustment(q.value("adjustment").toDouble());
-			s.setDropLimit(q.value("droplimit").toDouble());
-			s.setExcessLimit(q.value("excesslimit").toDouble());
-			s.setUnbalanceLimit(q.value("unbalancelimit").toDouble());
-			s.setInputLowLimit(q.value("inputlowlimit").toDouble());
-			s.setInputHighLimit(q.value("inputhighlimit").toDouble());
-			s.setInputUnitID(q.value("inputunitid").toInt());
-			s.setInputSensorID(q.value("inputsensorid").toInt());
-			s.setOutputLowLimit(q.value("outputlowlimit").toDouble());
-			s.setOutputHighLimit(q.value("outputhighlimit").toDouble());
-			s.setOutputUnitID(q.value("outputunitid").toInt());
-			s.setOutputSensorID(q.value("outputsensorid").toInt());
-			s.setAcquire(q.value("acquire").toBool());
-			s.setCalculated(q.value("calculated").toBool());
-			s.setNormalState(q.value("normalstate").toInt());
-			s.setDecimalPlaces(q.value("decimalplaces").toInt());
-			s.setAperture(q.value("aperture").toDouble());
-			s.setInOutType(static_cast<SignalInOutType>(q.value("inouttype").toInt()));
-			s.setDeviceID(q.value("deviceid").toInt());
-			s.setInOutNo(q.value("inoutno").toInt());*/
 		}
 
 		int percent = (i * 100) / signalCount;

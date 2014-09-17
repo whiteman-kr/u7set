@@ -230,6 +230,8 @@ public:
 	const Signal* getConstSignal(int signalID) const;
 	bool haveSignal(int signalID);
 
+	bool contains(int signalID);
+
 	void removeAll();
 };
 
