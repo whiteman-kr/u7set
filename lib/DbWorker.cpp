@@ -2258,6 +2258,8 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 
 void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 {
+	AUTO_COMPLETE
+
 	if (newSignal == nullptr)
 	{
 		assert(newSignal != nullptr);
