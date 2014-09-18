@@ -608,8 +608,6 @@ bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
 		return false;
 	}
 
-	qDebug() << "get signal started";
-
 	emit signal_getSignals(signalSet);
 
 	ok = waitForComplete(parentWidget, tr("Reading signals"));

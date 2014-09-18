@@ -11,6 +11,7 @@ enum SignalType
 	discrete = 1
 };
 
+Q_DECLARE_METATYPE(SignalType);
 
 enum SignalInOutType
 {

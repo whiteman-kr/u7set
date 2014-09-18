@@ -377,12 +377,12 @@ void SignalsTabPage::projectOpened()
 
 	m_signalsModel->loadSignals();
 
-/*	QVector<Signal> v;
+	QVector<Signal> v;
 	Signal s;
 
 	v.append(s);
 
-	dbController()->addSignal(SignalType::analog, &v, this);*/
+	dbController()->addSignal(SignalType::analog, &v, this);
 
 	return;
 }
