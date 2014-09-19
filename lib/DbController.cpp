@@ -41,6 +41,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
 	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
 
+	connect(this, &DbController::signal_fileHasChildren, m_worker, &DbWorker::slot_fileHasChildren);
+
 	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
@@ -575,7 +577,33 @@ bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWi
 	return true;
 }
 
-bool DbController::addDeviceObject(const Hardware::DeviceObject* device, int parentId, QWidget* parentWidget)
+bool DbController::fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (hasChildren == nullptr)
+	{
+		assert(hasChildren != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_fileHasChildren(hasChildren, &file);
+
+	ok = waitForComplete(parentWidget, tr("Checking file children"));
+	return true;
+}
+
+bool DbController::addDeviceObject(Hardware::DeviceObject* device, int parentId, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -614,6 +642,9 @@ bool DbController::addDeviceObject(const Hardware::DeviceObject* device, int par
 	emit signal_addDeviceObject(&file, parentId, fileExtension);
 
 	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
+
+	device->setFileInfo(file);
+
 	return true;
 }
 

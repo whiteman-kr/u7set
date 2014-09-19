@@ -12,6 +12,7 @@ public:
 	EquipmentModel(DbController* dbcontroller, QWidget* parentWidget, QObject* parent);
 	virtual ~EquipmentModel();
 
+	QModelIndex index(int row, const QModelIndex& parentIndex) const;
 	virtual QModelIndex index(int row, int column, const QModelIndex& parentIndex) const override;
 
 	virtual QModelIndex parent(const QModelIndex& childIndex) const override;
@@ -27,11 +28,11 @@ public:
 	virtual bool canFetchMore(const QModelIndex& parent) const override;
 	virtual void fetchMore(const QModelIndex& parent) override;
 
-	// Get data
+	// --
+	//
 public:
 	bool insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex);
 
-protected:
 	Hardware::DeviceObject* deviceObject(QModelIndex& index);
 	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
 
@@ -79,9 +80,11 @@ public:
 
 public slots:
 	void addSystem();
-	void addCase();
-	void addSubblock();
-	void addBlock();
+	void addRack();
+	void addChassis();
+	void addModule();
+
+	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object);
 
 	// Properties
 	//
@@ -115,14 +118,15 @@ protected:
 public slots:
 	void projectOpened();
 	void projectClosed();
+	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 	// Data
 	//
 private:
 	QAction* m_addSystemAction = nullptr;
-	QAction* m_addCaseAction = nullptr;
-	QAction* m_addSubblockAction = nullptr;
-	QAction* m_addBlockAction = nullptr;
+	QAction* m_addRackAction = nullptr;
+	QAction* m_addChassisAction = nullptr;
+	QAction* m_addModuleAction = nullptr;
 
 	EquipmentModel* m_equipmentModel = nullptr;
 	EquipmentView* m_equipmentView = nullptr;

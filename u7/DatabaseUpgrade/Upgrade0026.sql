@@ -408,3 +408,67 @@ BEGIN
 END
 $BODY$
 LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
+  RETURNS integer AS
+$BODY$
+DECLARE
+	hc_fileid int;
+	fileid_lenght int;
+	new_filename text;
+	new_fileid int;
+BEGIN
+	-- TO DO: Check user right here
+
+	-- generate filename
+	SELECT * INTO new_filename FROM uuid_generate_v1();
+	SELECT octet_length(new_filename) INTO fileid_lenght;
+
+	new_filename := 'device-' || new_filename || file_extension;	-- smthng like: device-5be363ac-3c02-11e4-9de8-3f84f459cb27.hsystem
+
+	-- add new file
+	SELECT * INTO new_fileid FROM add_file(user_id, new_filename, parent_id, file_data);
+
+	RETURN new_fileid;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION file_has_children(user_id integer, file_id integer)
+RETURNS integer AS
+$BODY$
+
+SELECT SUM(CNT)::integer AS ChildCount FROM
+	((	-- All checked in now
+	SELECT
+		COUNT(*) AS CNT
+	FROM
+		File F,
+		FileInstance FI
+	WHERE
+		F.ParentID = file_id AND
+		F.CheckedInInstanceID = FI.FileInstanceID AND
+		F.CheckedOutInstanceID IS NULL AND
+		F.FileID = FI.FileID
+	)
+	UNION
+	(	-- All CheckedOut by any user if user_id is administrator
+	SELECT
+		COUNT(*) AS CNT
+	FROM
+		File F,
+		FileInstance FI,
+		CheckOut CO
+	WHERE
+		F.ParentID = file_id AND
+		F.CheckedOutInstanceID = FI.FileInstanceID AND
+		F.FileID = FI.FileID AND
+		F.FileID = CO.FileID AND
+		(CO.UserID = user_id OR (SELECT is_admin(user_id)) = TRUE)
+	)) AS SubQuery;
+
+$BODY$
+  LANGUAGE sql;
+

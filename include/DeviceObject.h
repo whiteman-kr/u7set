@@ -94,6 +94,7 @@ namespace Hardware
 		const QString& caption() const;
 		void setCaption(const QString& value);
 
+		DbFileInfo& fileInfo();
 		const DbFileInfo& fileInfo() const;
 		void setFileInfo(const DbFileInfo& value);
 
@@ -118,6 +119,7 @@ namespace Hardware
 	//
 	class DeviceRoot : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceRoot();
 		virtual ~DeviceRoot();
@@ -137,6 +139,7 @@ namespace Hardware
 	//
 	class DeviceSystem : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceSystem();
 		virtual ~DeviceSystem();
@@ -162,6 +165,7 @@ namespace Hardware
 	//
 	class DeviceRack : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceRack();
 		virtual ~DeviceRack();
@@ -187,6 +191,7 @@ namespace Hardware
 	//
 	class DeviceChassis : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceChassis();
 		virtual ~DeviceChassis();
@@ -212,6 +217,7 @@ namespace Hardware
 	//
 	class DeviceModule : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceModule();
 		virtual ~DeviceModule();
@@ -237,6 +243,7 @@ namespace Hardware
 	//
 	class DeviceController : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceController();
 		virtual ~DeviceController();
@@ -262,6 +269,7 @@ namespace Hardware
 	//
 	class DeviceDiagSignal : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceDiagSignal();
 		virtual ~DeviceDiagSignal();
@@ -279,6 +287,6 @@ namespace Hardware
 		static const DeviceType m_deviceType = DeviceType::DiagSignal;
 	};
 
-	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
+	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 }

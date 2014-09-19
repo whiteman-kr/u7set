@@ -64,9 +64,11 @@ public:
 	bool undoChanges(DbFileInfo& file, QWidget* parentWidget);
 	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 
+	bool fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget);
+
 	// Hardware Configuration
 	//
-	bool addDeviceObject(const Hardware::DeviceObject* device, int parentId, QWidget* parentWidget);
+	bool addDeviceObject(Hardware::DeviceObject* device, int parentId, QWidget* parentWidget);
 
 	// Signals management
 	//
@@ -95,6 +97,8 @@ signals:
 	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
+
+	void signal_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
 	void signal_addDeviceObject(DbFile* file, int parentId, QString fileExtension);
 

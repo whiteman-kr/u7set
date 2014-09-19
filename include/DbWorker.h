@@ -74,6 +74,8 @@ public slots:
 	void slot_checkOut(std::vector<DbFileInfo>* files);
 	void slot_undoChanges(std::vector<DbFileInfo>* files);
 
+	void slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
+
 	// Hardware Configuration
 	//
 	void slot_addDeviceObject(DbFile* file, int parentId, QString fileExtension);

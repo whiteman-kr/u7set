@@ -10,13 +10,13 @@ namespace Hardware
 
 	void Init()
 	{
-		Hardware::DeviceObjectFactory.Register<DeviceRoot>();
-		Hardware::DeviceObjectFactory.Register<DeviceSystem>();
-		Hardware::DeviceObjectFactory.Register<DeviceRack>();
-		Hardware::DeviceObjectFactory.Register<DeviceChassis>();
-		Hardware::DeviceObjectFactory.Register<DeviceModule>();
-		Hardware::DeviceObjectFactory.Register<DeviceController>();
-		Hardware::DeviceObjectFactory.Register<DeviceDiagSignal>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceChassis>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceDiagSignal>();
 	}
 
 	void Shutdwon()
@@ -182,6 +182,11 @@ namespace Hardware
 		m_caption = value;
 	}
 
+	DbFileInfo& DeviceObject::fileInfo()
+	{
+		return m_fileInfo;
+	}
+
 	const DbFileInfo& DeviceObject::fileInfo() const
 	{
 		return m_fileInfo;
@@ -260,8 +265,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -335,8 +338,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -409,8 +410,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -483,9 +482,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceModule::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -558,9 +555,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceController::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -632,9 +627,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceDiagSignal::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;

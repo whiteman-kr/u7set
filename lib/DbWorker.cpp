@@ -2119,6 +2119,61 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	return;
 }
 
+void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (hasChildren == nullptr || fileInfo == nullptr)
+	{
+		assert(hasChildren != nullptr);
+		assert(fileInfo != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM file_has_children(%1, %2)")
+		.arg(currentUser().userId())
+		.arg(fileInfo->fileId());
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == false)
+	{
+		emitError(tr("Can't get result."));
+		return;
+	}
+
+	int childCount = q.value(0).toInt();
+
+	*hasChildren = childCount > 0;
+
+	return;
+}
+
 void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExtension)
 {
 	// Init automitic varaiables
@@ -2177,6 +2232,7 @@ void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExte
 	int fileId = q.value(0).toInt();
 
 	file->setFileId(fileId);
+	file->setParentId(parentId);
 	file->setUser(currentUser());
 	file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
 
