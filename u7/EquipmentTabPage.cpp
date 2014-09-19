@@ -148,7 +148,18 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectStateColumn:
-				v.setValue<QString>(device->fileInfo().state() == VcsState::CheckedOut ? "Checked Out" : "");
+				{
+					if (device->fileInfo().state() == VcsState::CheckedOut)
+					{
+						/*QString state = QString("%1  %2")
+								.arg(device->fileInfo().state().text())
+								.arg(device->fileInfo().action().text());*/
+
+						QString state = device->fileInfo().action().text();
+
+						v.setValue<QString>(state);
+					}
+				}
 				break;
 
 			case ObjectUserColumn:
@@ -166,6 +177,30 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 	case Qt::TextAlignmentRole:
 		{
 			return Qt::AlignLeft + Qt::AlignVCenter;
+		}
+		break;
+
+	case Qt::BackgroundRole:
+		{
+			if (device->fileInfo().state() == VcsState::CheckedOut)
+			{
+				QBrush b(QColor(0xFF, 0xFF, 0xFF));
+
+				switch (static_cast<VcsItemAction::VcsItemActionType>(device->fileInfo().action().toInt()))
+				{
+				case VcsItemAction::Added:
+					b.setColor(QColor(0xF9, 0xFF, 0xF9));
+					break;
+				case VcsItemAction::Modified:
+					b.setColor(QColor(0xF4, 0xFA, 0xFF));
+					break;
+				case VcsItemAction::Deleted:
+					b.setColor(QColor(0xFF, 0xF4, 0xF4));
+					break;
+				}
+
+				return b;
+			}
 		}
 		break;
 	}
@@ -325,6 +360,35 @@ bool EquipmentModel::insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> 
 	endInsertRows();
 
 	return true;
+}
+
+void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
+{
+	std::vector<Hardware::DeviceObject*> devices;
+
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		devices.push_back(d);
+	}
+
+	bool result = dbController()->deleteDeviceObjects(devices, m_parentWidget);
+	if (result == false)
+	{
+		return;
+	}
+
+	// Update model
+	//
+
+	for (QModelIndex& index : rowList)
+	{
+		emit dataChanged(index, index);
+	}
+
+	return;
 }
 
 Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
@@ -524,6 +588,21 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 	return;
 }
 
+void EquipmentView::deleteSelectedDevices()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+	if (selected.empty())
+	{
+		return;
+	}
+
+	// --
+	//
+	equipmentModel()->deleteDeviceObject(selected);
+
+	return;
+}
+
 EquipmentModel* EquipmentView::equipmentModel()
 {
 	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
@@ -564,6 +643,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_addRackAction);
 	m_equipmentView->addAction(m_addChassisAction);
 	m_equipmentView->addAction(m_addModuleAction);
+	m_equipmentView->addAction(m_SeparatorAction1);
+	m_equipmentView->addAction(m_deleteObjectAction);
 
 	// Property View
 	//
@@ -635,6 +716,14 @@ void EquipmentTabPage::CreateActions()
 	m_addModuleAction->setEnabled(false);
 	connect(m_addModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addModule);
 
+	m_SeparatorAction1 = new QAction(this);
+	m_SeparatorAction1->setSeparator(true);
+
+	m_deleteObjectAction = new QAction(tr("Delete Device"), this);
+	m_deleteObjectAction->setStatusTip(tr("Delete Device from the configuration..."));
+	m_deleteObjectAction->setEnabled(false);
+	connect(m_deleteObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::deleteSelectedDevices);
+
 	return;
 }
 
@@ -670,10 +759,34 @@ void EquipmentTabPage::selectionChanged(const QItemSelection& /*selected*/, cons
 		return;
 	}
 
-	// Enbale possible
-	//
 	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
 
+	// Delete Items action
+	//
+	m_deleteObjectAction->setEnabled(false);
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+		assert(device);
+
+		if (device->fileInfo().state() == VcsState::CheckedIn &&
+			device->fileInfo().action() != VcsItemAction::Deleted)
+		{
+			m_deleteObjectAction->setEnabled(true);
+			break;
+		}
+
+		if (device->fileInfo().state() == VcsState::CheckedOut &&
+			(device->fileInfo().user() == dbController()->currentUser() || dbController()->currentUser().isAdminstrator())
+			&& device->fileInfo().action() != VcsItemAction::Deleted)
+		{
+			m_deleteObjectAction->setEnabled(true);
+			break;
+		}
+	}
+
+	// Enbale possible creation items;
+	//
 	if (selectedIndexList.size() > 1)
 	{
 		// Don't know after which item possible to insert new Device

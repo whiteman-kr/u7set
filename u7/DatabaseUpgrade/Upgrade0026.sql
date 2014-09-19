@@ -472,3 +472,45 @@ SELECT SUM(CNT)::integer AS ChildCount FROM
 $BODY$
   LANGUAGE sql;
 
+
+CREATE OR REPLACE FUNCTION is_file_checkedout(file_id integer)
+RETURNS boolean AS
+$BODY$
+	SELECT (COUNT(*) > 0) AS checkedout FROM CheckOut WHERE FileID = file_id;
+$BODY$
+LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION delete_file(user_id integer, file_id integer)
+RETURNS boolean AS
+$BODY$
+DECLARE
+	checked_out boolean;
+	checkout_user_id int;
+BEGIN
+	-- CheckOut file if it has not been yet
+	IF is_file_checkedout(file_id) = FALSE
+	THEN
+		checked_out := check_out(user_id, ARRAY[file_id]);
+		IF (checked_out = FALSE)
+		THEN
+			RETURN FALSE;
+		END IF;
+	END IF;
+
+	-- get check out user id, file cout be checked out by other user, we must check it
+	checkout_user_id := (SELECT UserID FROM CheckOut WHERE FileID = file_id);
+
+	if (checkout_user_id = user_id OR is_admin(user_id) = TRUE)
+	THEN
+		-- mark fileinstance action as deleted
+		UPDATE FileInstance SET Action = 3 WHERE FileInstanceID = (SELECT CheckedOutInstanceID FROM File WHERE FileID = file_id);
+
+		RETURN TRUE;
+	ELSE
+		-- oops, file was checked opu by other user, and user_id is not admin :(((
+		RETURN FALSE;
+	END IF;
+END
+$BODY$
+LANGUAGE plpgsql;

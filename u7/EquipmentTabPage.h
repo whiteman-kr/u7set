@@ -32,6 +32,7 @@ public:
 	//
 public:
 	bool insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex);
+	void deleteDeviceObject(QModelIndexList& rowList);
 
 	Hardware::DeviceObject* deviceObject(QModelIndex& index);
 	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
@@ -86,6 +87,8 @@ public slots:
 
 	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object);
 
+	void deleteSelectedDevices();
+
 	// Properties
 	//
 protected:
@@ -127,6 +130,13 @@ private:
 	QAction* m_addRackAction = nullptr;
 	QAction* m_addChassisAction = nullptr;
 	QAction* m_addModuleAction = nullptr;
+
+	QAction* m_SeparatorAction1 = nullptr;
+	QAction* m_deleteObjectAction = nullptr;
+
+	QAction* m_SeparatorAction2 = nullptr;
+	QAction* m_checkInAction = nullptr;
+	QAction* m_checkOutAction = nullptr;
 
 	EquipmentModel* m_equipmentModel = nullptr;
 	EquipmentView* m_equipmentView = nullptr;

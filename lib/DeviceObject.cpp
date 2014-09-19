@@ -211,7 +211,6 @@ namespace Hardware
 
 	DeviceRoot::~DeviceRoot()
 	{
-		qDebug() << Q_FUNC_INFO;
 	}
 
 	DeviceType DeviceRoot::deviceType() const

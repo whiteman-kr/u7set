@@ -29,6 +29,7 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add CheckedInInstanceID, CheckedOutInstanceID to table File", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0024.sql"},
 	{"DUMMYY WAIT FOR WHITEMAN COMMIT", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
 	{"Changes in  get_file_list, add_file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0026.sql"},
+	{"Add action column to result from get_file_list", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0027.sql"},
 	};
 
 int DbWorker::counter = 0;
@@ -1525,6 +1526,7 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 		fileInfo.setCreated(q.value("Created").toString());
 		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
 
 		DbUser user;
 		user.setUserId(q.value("UserID").toInt());
@@ -1613,6 +1615,84 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		file->setFileId(fileId);
 		file->setUser(currentUser());
 		file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
+		file->setAction(VcsItemAction::Added);
+	}
+
+	return;
+}
+
+void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr || files->empty() == true)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot delete files. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		DbFileInfo& file = files->operator[](i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM delete_file(%1, %2);")
+				.arg(currentUser().userId())
+				.arg(file.fileId());
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(tr("Can't delete file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't get result"));
+			return;
+		}
+
+		bool deleted = q.value(0).toBool();
+
+		if (deleted == true)
+		{
+			file.setUser(currentUser());
+			file.setState(VcsState::CheckedOut);
+			file.setAction(VcsItemAction::Deleted);
+		}
 	}
 
 	return;
@@ -1696,6 +1776,9 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 
 		bool checkedOut = q.value("CheckedOut").toBool();
 		file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
+
+		int action = q.value("Action").toInt();
+		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
 		DbUser user;
 		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
@@ -1796,6 +1879,9 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 		file->setCreated(q.value("Created").toString());
 		file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
 		file->setState(VcsState::CheckedOut);
+
+		int action = q.value("Action").toInt();
+		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
 		DbUser user;
 		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
