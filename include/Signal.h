@@ -38,6 +38,33 @@ enum InstanceAction
 };
 
 
+const char* const SensorTypeStr[] =
+{
+    "Not used",
+
+    "TSP-50P-1.391",
+    "TSP-100P-1.391",
+    "TSP-50P-1.385",
+    "TSP-100P-1.385",
+    "TSM-50M-1.428",
+	"TSM-100M-1.428",
+    "TSM-50M-1.426",
+    "TSM-100M-1.426",
+    "TSP-21",
+    "TSM-23",
+    "Rheochord",
+
+    "ТХА(K)",
+    "TXK(L) 84",
+    "TXK(L) 94",
+    "TNN(N)",
+
+    "BPS",
+};
+
+const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(const char*);
+
+
 const int NO_UNIT_ID = 1;
 
 

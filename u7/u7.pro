@@ -125,7 +125,8 @@ HEADERS  += \
     ../include/StreamedData.h \
     ../include/ProtoSerialization.h \
     ../include/Factory.h \
-    ../include/CUtils.h
+    ../include/CUtils.h \
+    ../include/Signal.h
     ../include/Signal.h
 
 FORMS    += \
@@ -143,6 +144,8 @@ FORMS    += \
 
 RESOURCES += \
 	Resources.qrc
+
+include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 OTHER_FILES += \
 	../Proto/proto_compile.bat \

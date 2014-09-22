@@ -44,7 +44,7 @@ const char* Columns[] =
 	"Name",
 	"Channel",
 	"Data format",
-	"Data size"
+	"Data size",
 	"Low ADC",
 	"High ADC",
 	"Low limit",
@@ -57,7 +57,7 @@ const char* Columns[] =
 	"InputLow limit",
 	"InputHigh limit",
 	"Input unit",
-	"Input sensor"
+	"Input sensor",
 	"Output low Limit",
 	"Output high Limit",
 	"Output unit",
@@ -65,11 +65,11 @@ const char* Columns[] =
 	"Acquire",
 	"Calculated",
 	"Normal state",
-	"Decimal places"
+	"Decimal places",
 	"Aperture",
-	"Input-output type"
-	"Input-output nomber"
-	"Device"
+	"Input-output type",
+	"Input-output nomber",
+	"Device",
 };
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
@@ -121,8 +121,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_CHANNEL: return signal->channel();
 			case SC_DATA_FORMAT: return signal->dataFormat();
 			case SC_DATA_SIZE: return signal->dataSize();
-			case SC_LOW_ADC: return signal->lowADC();
-			case SC_HIGH_ADC: return signal->highADC();
+			case SC_LOW_ADC: return QString("0x%1").arg(signal->lowADC(), 4, 16, QChar('0'));
+			case SC_HIGH_ADC: return QString("0x%1").arg(signal->highADC(), 4, 16, QChar('0'));
 			case SC_LOW_LIMIT: return signal->lowLimit();
 			case SC_HIGH_LIMIT: return signal->highLimit();
 			case SC_UNIT: return signal->unitID();
@@ -132,13 +132,13 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_INPUT_LOW_LIMIT: return signal->inputLowLimit();
 			case SC_INPUT_HIGH_LIMIT: return signal->inputHighLimit();
 			case SC_INPUT_UNIT: return signal->inputUnitID();
-			case SC_INPUT_SENSOR: return signal->inputSensorID();
+			case SC_INPUT_SENSOR: return SensorTypeStr[signal->inputSensorID()];
 			case SC_OUTPUT_LOW_LIMIT: return signal->outputLowLimit();
 			case SC_OUTPUT_HIGH_LIMIT: return signal->outputHighLimit();
 			case SC_OUTPUT_UNIT: return signal->outputUnitID();
 			case SC_OUTPUT_SENSOR: return signal->outputSensorID();
-			case SC_ACQUIRE: return signal->acquire();
-			case SC_CALCULATED: return signal->calculated();
+			case SC_ACQUIRE: return signal->acquire() ? "Yes" : "No";
+			case SC_CALCULATED: return signal->calculated() ? "Yes" : "No";
 			case SC_NORMAL_STATE: return signal->normalState();
 			case SC_DECIMAL_PLACES: return signal->decimalPlaces();
 			case SC_APERTURE: return signal->aperture();
