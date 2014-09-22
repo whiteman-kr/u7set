@@ -21,7 +21,7 @@ enum SignalInOutType
 };
 
 
-enum DataFormat
+enum DataFormatType
 {
 	binary_LE_unsigned = 1,
 	binary_LE_signed = 2,
@@ -39,6 +39,22 @@ enum InstanceAction
 
 
 const int NO_UNIT_ID = 1;
+
+
+struct Unit
+{
+	int ID;
+	QString nameEn;
+	QString nameRu;
+};
+
+
+struct DataFormat
+{
+	int ID;
+	QString name;
+};
+
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
@@ -63,7 +79,7 @@ private:
 	QString m_strID;
 	QString m_extStrID;
 	QString m_name;
-	int m_dataFormat = static_cast<int>(DataFormat::binary_LE_unsigned);
+	int m_dataFormat = static_cast<int>(DataFormatType::binary_LE_unsigned);
 	int m_dataSize;
 	int m_lowADC = 0;
 	int m_highADC = 0;

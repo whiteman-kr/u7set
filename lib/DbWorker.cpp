@@ -2326,6 +2326,104 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 }
 
 
+void DbWorker::slot_getUnits(QVector<Unit>* units)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (units == nullptr)
+	{
+		assert(units != nullptr);
+		return;
+	}
+
+	units->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get units. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_units()");
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get units! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		Unit unit;
+
+		unit.ID = q.value("unitid").toInt();
+		unit.nameEn = q.value("unit_en").toString();
+		unit.nameRu = q.value("unit_ru").toString();
+
+		units->append(unit);
+	}
+}
+
+void DbWorker::slot_getDataFormats(QVector<DataFormat>* dataFormats)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (dataFormats == nullptr)
+	{
+		assert(dataFormats != nullptr);
+		return;
+	}
+
+	dataFormats->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get data formats. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_data_formats()");
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get data formats! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		DataFormat dataFormat;
+
+		dataFormat.ID = q.value("dataformatid").toInt();
+		dataFormat.name = q.value("name").toString();
+
+		dataFormats->append(dataFormat);
+	}
+}
+
+
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 {
 	if (user == nullptr)

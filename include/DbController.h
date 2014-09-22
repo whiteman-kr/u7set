@@ -71,6 +71,9 @@ public:
 	bool getSignals(SignalSet* signalSet, QWidget* parentWidget);
 	bool addSignal(SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 
+	bool getUnits(QVector<Unit>* units, QWidget* parentWidget);
+	bool getDataFormats(QVector<DataFormat>* dataFormats, QWidget* parentWidget);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -98,6 +101,9 @@ signals:
 	void signal_getSignalsIDs(QVector<int>* signalIDs);
 	void signal_getSignals(SignalSet* signalSet);
 	void signal_addSignal(SignalType signalType, QVector<Signal>* newSignal);
+
+	void signal_getUnits(QVector<Unit>* units);
+	void signal_getDataFormats(QVector<DataFormat>* dataFormats);
 
 	//
 	// Service functions
