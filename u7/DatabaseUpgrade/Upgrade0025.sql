@@ -1,4 +1,4 @@
--- Add rows CheckedInInstanceID, CheckedOutInstanceID, UserID in table Signal
+-- Add columns CheckedInInstanceID, CheckedOutInstanceID, UserID in table Signal
 
 ALTER TABLE signal ADD COLUMN checkedininstanceid integer;
 
@@ -20,6 +20,18 @@ ALTER TABLE signal
   ADD CONSTRAINT userid_fkey FOREIGN KEY (userid)
 	  REFERENCES "User" ("UserID") MATCH SIMPLE
 	  ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
+-- Add row DeviceStrID in table SignalInstance
+
+ALTER TABLE signalinstance ADD COLUMN devicestrid text;
+
+
+-- Drop columns DeviceID, InOutNo from table SignalInstance
+
+ALTER TABLE signalinstance DROP COLUMN deviceid;
+ALTER TABLE signalinstance DROP COLUMN inoutno;
+
 
 -- Add type SignalData
 
@@ -65,8 +77,7 @@ CREATE TYPE signaldata AS (
 	decimalplaces integer,
 	aperture double precision,
 	inouttype integer,
-	deviceid integer,
-	inoutno integer
+	devicestrid text
 );
 
 -- Add stored procedures
@@ -116,7 +127,7 @@ BEGIN
 			dataSize = 1;		-- discrete signal
 		END IF;
 
-		INSERT INTO SignalInstance (SignalID, StrID, ExtStrID, Name, DataSize) VALUES (newSignalID, strID,  extStrID, extStrID, dataSize) RETURNING SignalInstanceID INTO newSignalInstanceID;
+		INSERT INTO SignalInstance (SignalID, StrID, ExtStrID, Name, DataSize, Action) VALUES (newSignalID, strID,  extStrID, extStrID, dataSize, 1) RETURNING SignalInstanceID INTO newSignalInstanceID;
 
 		UPDATE Signal SET CheckedOutInstanceID = newSignalInstanceID WHERE Signal.SignalID = newSignalID;
 	END LOOP;
@@ -162,6 +173,7 @@ DECLARE
 	wasCheckedOut int;
 	signal_id int;
 	userIsAdmin boolean;
+	signalDeleted boolean;
 BEGIN
 	SELECT is_admin(user_id) INTO userIsAdmin;
 
@@ -178,17 +190,21 @@ BEGIN
 	--
 	INSERT INTO Changeset (UserID, Comment, File) VALUES (user_id, checkin_comment, FALSE) RETURNING ChangesetID INTO newChangesetID;
 
-	UPDATE SignalInstance SET ChangesetID = newChangesetID WHERE SignalID = ANY(signal_ids) AND ChangesetID IS NULL;
+	FOREACH signal_id IN ARRAY signal_ids
+	LOOP
+		UPDATE SignalInstance SET ChangesetID = newChangesetID WHERE SignalID = signal_id AND ChangesetID IS NULL RETURNING Action = 3 INTO signalDeleted;
 
-	UPDATE Signal
-	SET
-		CheckedInInstanceID = CheckedOutInstanceID,
-		CheckedOutInstanceID = NULL,
-		UserID = NULL
-	WHERE
-		SignalID = ANY(signal_ids);
+		UPDATE Signal
+		SET
+			CheckedInInstanceID = CheckedOutInstanceID,
+			CheckedOutInstanceID = NULL,
+			UserID = NULL,
+			Deleted = signalDeleted
+		WHERE
+			SignalID = signal_id;
 
-	DELETE FROM CheckOut WHERE SignalID = ANY(signal_ids);
+		DELETE FROM CheckOut WHERE SignalID = signal_id;
+	END LOOP;
 
 	RETURN newChangesetID;
 END;
@@ -249,8 +265,7 @@ BEGIN
 				DecimalPlaces,
 				Aperture,
 				InOutType,
-				DeviceID,
-				InOutNo )
+				DeviceStrID )
 			SELECT
 				SI.SignalID,
 				2,
@@ -282,8 +297,7 @@ BEGIN
 				DecimalPlaces,
 				Aperture,
 				InOutType,
-				DeviceID,
-				InOutNo
+				DeviceStrID
 			FROM
 				Signal AS S,
 				SignalInstance AS SI
@@ -379,8 +393,7 @@ BEGIN
 		SI.DecimalPlaces,
 		SI.Aperture,
 		SI.InOutType,
-		SI.DeviceID,
-		SI.InOutNo
+		SI.DeviceStrID
 	INTO
 		signal_data
 	FROM Signal AS S, SignalInstance AS SI
@@ -444,8 +457,7 @@ BEGIN
 			DecimalPlaces = sd.DecimalPlaces,
 			Aperture = sd.Aperture,
 			InOutType = sd.InOutType,
-			DeviceID = sd.DeviceID,
-			InOutNo = sd.InOutNo
+			DeviceStrID = sd.DeviceStrID
 		WHERE
 			SignalInstanceID = chOutInstanceID;
 
@@ -459,3 +471,19 @@ BEGIN
 END
 $BODY$
 LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION get_units()
+	RETURNS TABLE (unitid integer, unit_en text, unit_ru text) AS
+$BODY$
+	SELECT U.UnitID AS unitid, U.Unit_En AS unit_en, U.Unit_Ru AS unit_ru FROM Unit AS U ORDER BY U.UnitID;
+$BODY$
+LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION get_data_formats()
+	RETURNS TABLE (dataformatid integer, name text) AS
+$BODY$
+	SELECT DF.DataFormatID AS dataformatid, DF.Name AS name FROM DataFormat AS DF ORDER BY DF.DataFormatID;
+$BODY$
+LANGUAGE sql;
