@@ -80,7 +80,8 @@ SOURCES +=\
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
 	../lib/CUtils.cpp \
-    ../lib/Signal.cpp
+    ../lib/Signal.cpp \
+    SignalPropertiesDialog.cpp
 
 
 HEADERS  += \
@@ -126,7 +127,8 @@ HEADERS  += \
     ../include/ProtoSerialization.h \
     ../include/Factory.h \
     ../include/CUtils.h \
-    ../include/Signal.h
+    ../include/Signal.h \
+    SignalPropertiesDialog.h
     ../include/Signal.h
 
 FORMS    += \

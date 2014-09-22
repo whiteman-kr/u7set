@@ -2,6 +2,10 @@
 #include "SignalsTabPage.h"
 #include "../include/DbController.h"
 #include "Settings.h"
+#include "SignalPropertiesDialog.h"
+#include <QFormLayout>
+#include <QComboBox>
+#include <QDialogButtonBox>
 
 
 const int SC_STR_ID = 0,
@@ -111,7 +115,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 		//emit signalDataRequest(m_signalIDs[row]);
 		return QVariant();
 	}
-	if (role == Qt::DisplayRole)
+	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		switch (col)
 		{
@@ -174,16 +178,9 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 {
 	if (role == Qt::EditRole)
 	{
-		bool added = false;
 		int row = index.row();
-		if (row == m_signalIDs.count())
-		{
-			/*beginInsertRows(QModelIndex(), row, row);
-			Signal signal;
-			m_signals.append(signal);
-			endInsertRows();
-			added = true;*/
-		}
+
+		assert(row < m_signalIDs.count());
 
 		Signal signal/* = m_signals[index.row()]*/;
 
@@ -275,6 +272,54 @@ void SignalsModel::loadSignals()
 	emit cellsSizeChanged();
 }
 
+void SignalsModel::addSignal()
+{
+	QDialog signalTypeDialog;
+	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
+
+	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
+	signalTypeCombo->addItems(QStringList() << "Analog" << "Discrete");
+	signalTypeCombo->setCurrentIndex(0);
+
+	fl->addRow(tr("Signal type"), signalTypeCombo);
+
+	QLineEdit* signalChannelCount = new QLineEdit(&signalTypeDialog);
+	signalChannelCount->setText("1");
+	QRegExp rx("[1-9]\\d{0,1}");
+	QValidator *validator = new QRegExpValidator(rx, &signalTypeDialog);
+	signalChannelCount->setValidator(validator);
+
+	fl->addRow(tr("Signal channel count"), signalChannelCount);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	connect(buttonBox, SIGNAL(accepted()), &signalTypeDialog, SLOT(accept()));
+	connect(buttonBox, SIGNAL(rejected()), &signalTypeDialog, SLOT(reject()));
+
+	fl->addRow(buttonBox);
+
+	signalTypeDialog.setLayout(fl);
+
+	if (signalTypeDialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	int channelCount = signalChannelCount->text().toInt();
+
+	Signal signal;
+	SignalPropertiesDialog dlg(signal, m_parentWindow);
+	if (dlg.exec() == QDialog::Accepted)
+	{
+		QVector<Signal> signalVector;
+		for (int i = 0; i < channelCount; i++)
+		{
+			signalVector << signal;
+		}
+		//dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow);
+	}
+}
+
 DbController *SignalsModel::dbController()
 {
 	return m_dbController;
@@ -290,10 +335,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
-	// Create Actions
-	//
-	CreateActions();
-
 	// Set context menu to Equipment View
 	//
 	/*m_equipmentView->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -305,16 +346,22 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Property View
 	//
-	//m_propertyView = new QTextEdit();
 	m_signalsModel = new SignalsModel(dbcontroller, this);
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsModel);
+	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
+	//m_signalsView->verticalHeader()->doubleClicked();
+	//connect(m_signalsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
 	connect(m_signalsModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_signalsView, SLOT(resizeColumnsToContents()));
 	connect(m_signalsModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_signalsView, SLOT(resizeRowsToContents()));
 	connect(m_signalsModel, SIGNAL(cellsSizeChanged()), m_signalsView, SLOT(resizeColumnsToContents()));
 	connect(m_signalsModel, SIGNAL(cellsSizeChanged()), m_signalsView, SLOT(resizeRowsToContents()));
 	m_signalsView->resizeColumnsToContents();
 	m_signalsView->resizeRowsToContents();
+
+	// Create Actions
+	//
+	CreateActions();
 
 	// Splitter
 	//
@@ -363,6 +410,12 @@ void SignalsTabPage::CreateActions()
 	//m_addSystemAction->setEnabled(false);
 	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
 	*/
+	QAction* action = new QAction(tr("Create signal"), this);
+	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
+	m_signalsView->addAction(action);
+	/*m_signalsView->addAction(menu->addAction(new QAction("Edit signal", this)));
+	m_signalsView->addAction(menu->addAction(new QAction("Delete signal", this)));
+	m_signalsView->addAction(menu->addAction(new QAction("Restore signal", this)));*/
 	return;
 }
 
@@ -391,4 +444,9 @@ void SignalsTabPage::projectClosed()
 {
 	this->setEnabled(false);
 	return;
+}
+
+void SignalsTabPage::contextMenuRequested(QPoint)
+{
+	//menu->popup(table->viewport()->mapToGlobal(pos));
 }

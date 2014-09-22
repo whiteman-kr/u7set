@@ -6,6 +6,7 @@
 
 class DbController;
 class QTableView;
+class QMenu;
 
 
 class SignalsModel : public QAbstractTableModel
@@ -28,6 +29,9 @@ public:
 
 signals:
 	void cellsSizeChanged();
+
+public slots:
+	void addSignal();
 
 protected:
 	DbController* dbController();
@@ -61,6 +65,7 @@ protected:
 public slots:
 	void projectOpened();
 	void projectClosed();
+	void contextMenuRequested(QPoint);
 
 	// Data
 	//
@@ -72,6 +77,7 @@ private:
 	//QSplitter* m_splitter = nullptr;
 	SignalsModel* m_signalsModel = nullptr;
 	QTableView* m_signalsView = nullptr;
+	QMenu* m_signalsMenu = nullptr;
 };
 
 
