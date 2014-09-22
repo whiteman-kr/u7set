@@ -9,58 +9,26 @@
 //
 //
 
-
-EquipmentModel::EquipmentModel(std::shared_ptr<Hardware::DeviceRoot> root, QObject* parent) :
+EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget, QObject* parent) :
 	QAbstractItemModel(parent),
-	m_root(root)
+	m_dbController(dbcontroller),
+	m_parentWidget(parentWidget),
+	m_root(std::make_shared<Hardware::DeviceRoot>())
 {
-	assert(root.get() != nullptr);
+	assert(dbcontroller);
+	assert(m_root.get() != nullptr);
 
-//    std::shared_ptr<DeviceObject> c1 = std::make_shared<DeviceSystem>();
-//    std::shared_ptr<DeviceObject> c2 = std::make_shared<DeviceSystem>();
-//    std::shared_ptr<DeviceObject> c3 = std::make_shared<DeviceSystem>();
-
-//	c1->setCaption("c1");
-//	c2->setCaption("c2");
-//	c3->setCaption("c3");
-
-//	c2->addChild(c3);
-
-	/*for (int i = 0; i < 32; i++)
-	{
-        auto d1 = std::make_shared<DeviceCase>();
-		d1->setCaption(QString("c1 item %1").arg(i));
-		c1->addChild(d1);
-
-		for (int j = 0; j < 1024; j++)
-		{
-            auto d11 = std::make_shared<DeviceObject>();
-			d11->setCaption(QString("cdwd1 item %1").arg(j));
-			d1->addChild(d11);
-
-            for (int k = 0; k < 32; k++)
-			{
-				auto d111 = std::make_shared<DeviceBase>();
-				d111->setCaption(QString("ll1 item %1").arg(k));
-				d11->addChild(d111);
-            }
-		}
-
-        auto d2 = std::make_shared<DeviceObject>();
-		d2->setCaption(QString("c2 item %1").arg(i));
-		c2->addChild(d2);
-
-        auto d3 = std::make_shared<DeviceObject>();
-		d3->setCaption(QString("c3 item %1").arg(i));
-		c3->addChild(d3);
-	}*/
-
-//	m_root.addChild(c1);
-//	m_root.addChild(c2);
+	connect(dbcontroller, &DbController::projectOpened, this, &EquipmentModel::projectOpened);
+	connect(dbcontroller, &DbController::projectClosed, this, &EquipmentModel::projectClosed);
 }
 
 EquipmentModel::~EquipmentModel()
 {
+}
+
+QModelIndex EquipmentModel::index(int row, const QModelIndex& parentIndex) const
+{
+	return index(row, 0, parentIndex);
 }
 
 QModelIndex EquipmentModel::index(int row, int column, const QModelIndex& parentIndex) const
@@ -85,7 +53,8 @@ QModelIndex EquipmentModel::index(int row, int column, const QModelIndex& parent
 		return QModelIndex();
 	}
 
-	return createIndex(row, column, parent->child(row));
+	QModelIndex resultIndex = createIndex(row, column, parent->child(row));
+	return resultIndex;
 }
 
 QModelIndex EquipmentModel::parent(const QModelIndex& childIndex) const
@@ -135,12 +104,7 @@ QModelIndex EquipmentModel::parent(const QModelIndex& childIndex) const
 
 int EquipmentModel::rowCount(const QModelIndex& parentIndex) const
 {
-	if (parentIndex.isValid() == false)
-	{
-		return m_root->childrenCount();
-	}
-
-	const Hardware::DeviceObject* parent = static_cast<const Hardware::DeviceObject*>(parentIndex.internalPointer());
+	const Hardware::DeviceObject* parent = deviceObject(parentIndex);
 
 	if (parent == nullptr)
 	{
@@ -151,8 +115,9 @@ int EquipmentModel::rowCount(const QModelIndex& parentIndex) const
 	return parent->childrenCount();
 }
 
-int EquipmentModel::columnCount(const QModelIndex& /*parentIndex*/) const
+int EquipmentModel::columnCount(const QModelIndex& parentIndex) const
 {
+	Q_UNUSED(parentIndex);
 	return ColumnCount;		// Always the same
 }
 
@@ -179,12 +144,26 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectStrIdColumn:
+				v.setValue<QString>(device->strId());
 				break;
 
 			case ObjectStateColumn:
+				{
+					if (device->fileInfo().state() == VcsState::CheckedOut)
+					{
+						/*QString state = QString("%1  %2")
+								.arg(device->fileInfo().state().text())
+								.arg(device->fileInfo().action().text());*/
+
+						QString state = device->fileInfo().action().text();
+
+						v.setValue<QString>(state);
+					}
+				}
 				break;
 
 			case ObjectUserColumn:
+				v.setValue<qint32>(device->fileInfo().user().userId());
 				break;
 
 			default:
@@ -192,6 +171,36 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 			}
 
 			return v;
+		}
+		break;
+
+	case Qt::TextAlignmentRole:
+		{
+			return Qt::AlignLeft + Qt::AlignVCenter;
+		}
+		break;
+
+	case Qt::BackgroundRole:
+		{
+			if (device->fileInfo().state() == VcsState::CheckedOut)
+			{
+				QBrush b(QColor(0xFF, 0xFF, 0xFF));
+
+				switch (static_cast<VcsItemAction::VcsItemActionType>(device->fileInfo().action().toInt()))
+				{
+				case VcsItemAction::Added:
+					b.setColor(QColor(0xF9, 0xFF, 0xF9));
+					break;
+				case VcsItemAction::Modified:
+					b.setColor(QColor(0xF4, 0xFA, 0xFF));
+					break;
+				case VcsItemAction::Deleted:
+					b.setColor(QColor(0xFF, 0xF4, 0xF4));
+					break;
+				}
+
+				return b;
+			}
 		}
 		break;
 	}
@@ -227,21 +236,227 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 	return QVariant();
 }
 
-bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
+bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 {
-	const Hardware::DeviceObject* parent = nullptr;
-
-	if (parentIndex.isValid() == false)
+	if (dbController()->isProjectOpened() == false)
 	{
-		parent = m_root.get();
+		return false;
+	}
+
+	const Hardware::DeviceObject* object = deviceObject(parentIndex);
+
+	if (object->childrenCount() > 0)
+	{
+		return true;	// seems that we already got file list for this object
+	}
+
+	if (object->deviceType() == Hardware::DeviceType::DiagSignal)
+	{
+		return false;	// DeviceType::DiagSignal cannot have children
+	}
+
+	bool hasChildren = false;
+	DbFileInfo fi = object->fileInfo();
+
+	bool result = dbController()->fileHasChildren(&hasChildren, fi, m_parentWidget);
+	if (result == false)
+	{
+		return false;
+	}
+
+	return hasChildren;
+}
+
+bool EquipmentModel::canFetchMore(const QModelIndex& parent) const
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return false;
+	}
+
+	const Hardware::DeviceObject* object = deviceObject(parent);
+
+	if (object->childrenCount() > 0)
+	{
+		return false;	// seems that we already got file list for this object
+	}
+
+	if (object->deviceType() == Hardware::DeviceType::DiagSignal)
+	{
+		return false;	// DeviceType::DiagSignal cannot have children
+	}
+
+	bool hasChildren = false;
+	DbFileInfo fi = object->fileInfo();
+
+	bool result = dbController()->fileHasChildren(&hasChildren, fi, m_parentWidget);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	return hasChildren;
+}
+
+void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	Hardware::DeviceObject* parentObject = deviceObject(const_cast<QModelIndex&>(parentIndex));
+
+	std::vector<DbFileInfo> files;
+
+	bool ok = dbController()->getFileList(&files, parentObject->fileInfo().fileId(), m_parentWidget);
+	if (ok == false)
+		return;
+
+	beginInsertRows(parentIndex, 0, static_cast<int>(files.size()) - 1);
+
+	parentObject->deleteAllChildren();
+
+	for (auto& fi : files)
+	{
+		std::shared_ptr<DbFile> file;
+
+		dbController()->getLatestVersion(fi, &file, m_parentWidget);
+		if (file == false)
+		{
+			continue;
+		}
+
+		Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
+		assert(object);
+
+		if (object == nullptr)
+		{
+			continue;
+		}
+
+		object->setFileInfo(fi);
+
+		std::shared_ptr<Hardware::DeviceObject> sp(object);
+		parentObject->addChild(sp);
+	}
+
+	// TODO:: sort files in parent DeviceObject !!!!!!!!!!!
+	//
+
+	return;
+}
+
+bool EquipmentModel::insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex)
+{
+	// TODO: This function should take into consideration sort property!!!
+	//
+
+	Hardware::DeviceObject* parent = deviceObject(parentIndex);
+
+	beginInsertRows(parentIndex, parent->childrenCount(), parent->childrenCount());
+	parent->addChild(object);
+	endInsertRows();
+
+	return true;
+}
+
+void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
+{
+	std::vector<Hardware::DeviceObject*> devices;
+
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		devices.push_back(d);
+	}
+
+	bool result = dbController()->deleteDeviceObjects(devices, m_parentWidget);
+	if (result == false)
+	{
+		return;
+	}
+
+	// Update model
+	//
+
+	for (QModelIndex& index : rowList)
+	{
+		emit dataChanged(index, index);
+	}
+
+	return;
+}
+
+Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
+{
+	Hardware::DeviceObject* object = nullptr;
+
+	if (index.isValid() == false)
+	{
+		object = m_root.get();
 	}
 	else
 	{
-		parent = static_cast<const Hardware::DeviceObject*>(parentIndex.internalPointer());
+		object = static_cast<Hardware::DeviceObject*>(index.internalPointer());
 	}
 
-	assert(parent != nullptr);
-	return parent->childrenCount() > 0;
+	assert(object != nullptr);
+	return object;
+}
+
+const Hardware::DeviceObject* EquipmentModel::deviceObject(const QModelIndex& index) const
+{
+	const Hardware::DeviceObject* object = nullptr;
+
+	if (index.isValid() == false)
+	{
+		object = m_root.get();
+	}
+	else
+	{
+		object = static_cast<const Hardware::DeviceObject*>(index.internalPointer());
+	}
+
+	assert(object != nullptr);
+	return object;
+}
+
+void EquipmentModel::projectOpened()
+{
+	// read all childer for HC file
+	//
+	beginResetModel();
+
+	m_root = std::make_shared<Hardware::DeviceRoot>();
+	m_root->fileInfo().setFileId(dbController()->hcFileId());
+
+	endResetModel();
+
+	return;
+}
+
+void EquipmentModel::projectClosed()
+{
+	// Release all children
+	//
+	beginResetModel();
+	m_root = std::make_shared<Hardware::DeviceRoot>();
+	endResetModel();
+	return;
+}
+
+DbController* EquipmentModel::dbController()
+{
+	return m_dbController;
+}
+
+DbController* EquipmentModel::dbController() const
+{
+	return m_dbController;
 }
 
 //
@@ -252,6 +467,10 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex ) const
 EquipmentView::EquipmentView(DbController* dbcontroller) :
 	m_dbController(dbcontroller)
 {
+	setSelectionBehavior(QAbstractItemView::SelectRows);
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
+	setUniformRowHeights(true);
+	setIndentation(10);
 }
 
 EquipmentView::~EquipmentView()
@@ -265,51 +484,130 @@ DbController* EquipmentView::dbController()
 
 void EquipmentView::addSystem()
 {
-	/*QModelIndexList indexes = selectedIndexes();
+	// Add new system to the root
+	//
+	std::shared_ptr<Hardware::DeviceObject> system = std::make_shared<Hardware::DeviceSystem>();
 
-	if (indexes.isEmpty() == false)
+	system->setStrId("SYSTEMID");
+	system->setCaption(tr("System"));
+
+	addDeviceObject(system);
+	return;
+}
+
+void EquipmentView::addRack()
+{
+	std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>();
+
+	rack->setStrId("$(PARENT)_RACKID");
+	rack->setCaption(tr("Rack"));
+
+	addDeviceObject(rack);
+	return;
+}
+
+void EquipmentView::addChassis()
+{
+	std::shared_ptr<Hardware::DeviceObject> ñhassis = std::make_shared<Hardware::DeviceChassis>();
+
+	ñhassis->setStrId("$(PARENT)_CHASSISID");
+	ñhassis->setCaption(tr("Chassis"));
+
+	addDeviceObject(ñhassis);
+	return;
+}
+
+void EquipmentView::addModule()
+{
+	std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>();
+
+	module->setStrId("$(PARENT)_MD00");
+	module->setCaption(tr("Module"));
+
+	addDeviceObject(module);
+	return;
+}
+
+void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object)
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+	QModelIndex parentIndex;	// Currently it is root;
+
+	if (selected.size() > 1)
 	{
-		// Nothing is selected, add new system to the root
+		// Don't know after which item insrt new object
 		//
 		return;
 	}
-	else
+
+	if (selected.empty() == false)
 	{
-		//
-	}*/
-
-	std::shared_ptr<Hardware::DeviceSystem> system = std::make_shared<Hardware::DeviceSystem>();
-
-	system->setStrId("STRID");
-	system->setCaption(tr("New System"));
-
-	bool result = dbController()->addSystem(system.get(), this);
-
-	//if (result == true)
-	{
-		// Add system to the model m_equipmentModel
-		//
-		//m_root->addChild(system);
-
-		// !!!!!!!!!!!!!!!!!!! emmit here message about model changing............
+		parentIndex = selected[0];
 	}
+
+	// --
+	//
+	Hardware::DeviceObject* parentObject = equipmentModel()->deviceObject(parentIndex);
+	assert(parentObject);
+
+	if (parentObject->deviceType() > object->deviceType())
+	{
+		assert(parentObject->deviceType() <= object->deviceType());
+		return;
+	}
+
+	if (parentObject->deviceType() == object->deviceType())
+	{
+		// add the same item to the end of the the parent
+		//
+		parentIndex = parentIndex.parent();
+		parentObject = equipmentModel()->deviceObject(parentIndex);
+
+		assert(parentObject->deviceType() < object->deviceType());
+	}
+
+	// Add device to DB
+	//
+	bool result = dbController()->addDeviceObject(object.get(), parentObject->fileInfo().fileId(), this);
+
+	if (result == false)
+	{
+		return;
+	}
+
+	// Add new device to the model and select it
+	//
+	equipmentModel()->insertDeviceObject(object, parentIndex);
+
+	QModelIndex objectModelIndex = equipmentModel()->index(parentObject->childIndex(object.get()), parentIndex);
+
+	selectionModel()->clearSelection();
+	selectionModel()->select(objectModelIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+	setCurrentIndex(objectModelIndex);
 
 	return;
 }
 
-void EquipmentView::addCase()
+void EquipmentView::deleteSelectedDevices()
 {
-	assert(false);
+	QModelIndexList selected = selectionModel()->selectedRows();
+	if (selected.empty())
+	{
+		return;
+	}
+
+	// --
+	//
+	equipmentModel()->deleteDeviceObject(selected);
+
+	return;
 }
 
-void EquipmentView::addSubblock()
+EquipmentModel* EquipmentView::equipmentModel()
 {
-	assert(false);
-}
-
-void EquipmentView::addBlock()
-{
-	assert(false);
+	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
+	assert(result);
+	return result;
 }
 
 
@@ -326,13 +624,11 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	// Controls
 	//
-	m_root = std::make_shared<Hardware::DeviceRoot>();
 
 	// Equipment View
 	//
 	m_equipmentView = new EquipmentView(dbcontroller);
-
-	m_equipmentModel = new EquipmentModel(m_root, this);
+	m_equipmentModel = new EquipmentModel(dbcontroller, this, this);
 	m_equipmentView->setModel(m_equipmentModel);
 
 	// Create Actions
@@ -344,9 +640,11 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_equipmentView->addAction(m_addSystemAction);
-	m_equipmentView->addAction(m_addCaseAction);
-	m_equipmentView->addAction(m_addSubblockAction);
-	m_equipmentView->addAction(m_addBlockAction);
+	m_equipmentView->addAction(m_addRackAction);
+	m_equipmentView->addAction(m_addChassisAction);
+	m_equipmentView->addAction(m_addModuleAction);
+	m_equipmentView->addAction(m_SeparatorAction1);
+	m_equipmentView->addAction(m_deleteObjectAction);
 
 	// Property View
 	//
@@ -379,35 +677,11 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	connect(dbController(), &DbController::projectOpened, this, &EquipmentTabPage::projectOpened);
 	connect(dbController(), &DbController::projectClosed, this, &EquipmentTabPage::projectClosed);
 
+	connect(m_equipmentView->selectionModel(), & QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
+
+
 //	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
 //	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
-
-	/*auto s1 = std::make_shared<DeviceSystem>();
-	s1->setCaption("SDS I");
-	s1->setStrId("1SDS1");
-
-	auto s2 = std::make_shared<DeviceSystem>();
-	s2->setCaption("SDS II");
-	s2->setStrId("1SDS2");
-
-	auto r1 = std::make_shared<DeviceRack>();
-	r1->setCaption("1SHFS1");
-	r1->setStrId("HS017");
-
-	auto r2 = std::make_shared<DeviceRack>();
-	r2->setCaption("2SHFS1");
-	r2->setStrId("HS018");
-
-	auto r3 = std::make_shared<DeviceRack>();
-	r3->setCaption("3SHFS1");
-	r3->setStrId("HS019");
-
-	s1->addChild(r1);
-	s1->addChild(r2);
-	s1->addChild(r3);
-
-	m_root->addChild(s1);
-	m_root->addChild(s2);*/
 
 	// Evidently, project is not opened yet
 	//
@@ -424,23 +698,31 @@ void EquipmentTabPage::CreateActions()
 {
 	m_addSystemAction = new QAction(tr("Add System"), this);
 	m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
-	//m_addSystemAction->setEnabled(false);
+	m_addSystemAction->setEnabled(false);
 	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
 
-	m_addCaseAction = new QAction(tr("Add Case"), this);
-	m_addCaseAction->setStatusTip(tr("Add case to the configuration..."));
-	//m_addCaseAction->setEnabled(false);
-	connect(m_addCaseAction, &QAction::triggered, m_equipmentView, &EquipmentView::addCase);
+	m_addRackAction = new QAction(tr("Add Rack"), this);
+	m_addRackAction->setStatusTip(tr("Add rack to the configuration..."));
+	m_addRackAction->setEnabled(false);
+	connect(m_addRackAction, &QAction::triggered, m_equipmentView, &EquipmentView::addRack);
 
-	m_addSubblockAction = new QAction(tr("Add Subblock"), this);
-	m_addSubblockAction->setStatusTip(tr("Add subblock to the configuration..."));
-	//m_addSubblockAction->setEnabled(false);
-	connect(m_addSubblockAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSubblock);
+	m_addChassisAction = new QAction(tr("Add Chassis"), this);
+	m_addChassisAction->setStatusTip(tr("Add chassis to the configuration..."));
+	m_addChassisAction->setEnabled(false);
+	connect(m_addChassisAction, &QAction::triggered, m_equipmentView, &EquipmentView::addChassis);
 
-	m_addBlockAction = new QAction(tr("Add Block"), this);
-	m_addBlockAction->setStatusTip(tr("Add block to the configuration..."));
-	//m_addBlockAction->setEnabled(false);
-	connect(m_addBlockAction, &QAction::triggered, m_equipmentView, &EquipmentView::addBlock);
+	m_addModuleAction = new QAction(tr("Add Module"), this);
+	m_addModuleAction->setStatusTip(tr("Add module to the configuration..."));
+	m_addModuleAction->setEnabled(false);
+	connect(m_addModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addModule);
+
+	m_SeparatorAction1 = new QAction(this);
+	m_SeparatorAction1->setSeparator(true);
+
+	m_deleteObjectAction = new QAction(tr("Delete Device"), this);
+	m_deleteObjectAction->setStatusTip(tr("Delete Device from the configuration..."));
+	m_deleteObjectAction->setEnabled(false);
+	connect(m_deleteObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::deleteSelectedDevices);
 
 	return;
 }
@@ -453,11 +735,99 @@ void EquipmentTabPage::closeEvent(QCloseEvent* e)
 void EquipmentTabPage::projectOpened()
 {
 	this->setEnabled(true);
+	selectionChanged(QItemSelection(), QItemSelection());
 	return;
 }
 
 void EquipmentTabPage::projectClosed()
 {
 	this->setEnabled(false);
+	return;
+}
+
+void EquipmentTabPage::selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+{
+	// Disable all
+	//
+	m_addSystemAction->setEnabled(false);
+	m_addRackAction->setEnabled(false);
+	m_addChassisAction->setEnabled(false);
+	m_addModuleAction->setEnabled(false);
+
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
+
+	// Delete Items action
+	//
+	m_deleteObjectAction->setEnabled(false);
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+		assert(device);
+
+		if (device->fileInfo().state() == VcsState::CheckedIn &&
+			device->fileInfo().action() != VcsItemAction::Deleted)
+		{
+			m_deleteObjectAction->setEnabled(true);
+			break;
+		}
+
+		if (device->fileInfo().state() == VcsState::CheckedOut &&
+			(device->fileInfo().user() == dbController()->currentUser() || dbController()->currentUser().isAdminstrator())
+			&& device->fileInfo().action() != VcsItemAction::Deleted)
+		{
+			m_deleteObjectAction->setEnabled(true);
+			break;
+		}
+	}
+
+	// Enbale possible creation items;
+	//
+	if (selectedIndexList.size() > 1)
+	{
+		// Don't know after which item possible to insert new Device
+		//
+		return;
+	}
+
+	if (selectedIndexList.empty() == true)
+	{
+		m_addSystemAction->setEnabled(true);
+		return;
+	}
+
+	QModelIndex singleSelectedIndex = selectedIndexList[0];
+
+	Hardware::DeviceObject* selectedObject = m_equipmentModel->deviceObject(singleSelectedIndex);
+	assert(selectedObject);
+
+	switch (selectedObject->deviceType())
+	{
+	case Hardware::DeviceType::System:
+		m_addSystemAction->setEnabled(true);
+		m_addRackAction->setEnabled(true);
+		m_addChassisAction->setEnabled(true);
+		m_addModuleAction->setEnabled(true);
+		break;
+	case Hardware::DeviceType::Rack:
+		m_addRackAction->setEnabled(true);
+		m_addChassisAction->setEnabled(true);
+		m_addModuleAction->setEnabled(true);
+		break;
+	case Hardware::DeviceType::Chassis:
+		m_addChassisAction->setEnabled(true);
+		m_addModuleAction->setEnabled(true);
+		break;
+	case Hardware::DeviceType::Module:
+		m_addModuleAction->setEnabled(true);
+		break;
+	default:
+		assert(false);
+	}
+
 	return;
 }

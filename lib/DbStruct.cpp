@@ -243,6 +243,11 @@ QString VcsItemAction::text() const
 	return QString();
 }
 
+int VcsItemAction::toInt() const
+{
+	return static_cast<int>(m_action);
+}
+
 bool operator== (const VcsItemAction& s1, const VcsItemAction& s2)
 {
 	return s1.m_action == s2.m_action;
@@ -559,14 +564,24 @@ void DbFileInfo::setLastCheckIn(const QString& value)
 	setLastCheckIn(dt);
 }
 
-VcsState DbFileInfo::state() const
+const VcsState& DbFileInfo::state() const
 {
 	return m_state;
 }
 
-void DbFileInfo::setState(VcsState state)
+void DbFileInfo::setState(const VcsState& state)
 {
 	m_state = state;
+}
+
+const VcsItemAction& DbFileInfo::action() const
+{
+	return m_action;
+}
+
+void DbFileInfo::setAction(const VcsItemAction& action)
+{
+	m_action = action;
 }
 
 const DbUser& DbFileInfo::user() const

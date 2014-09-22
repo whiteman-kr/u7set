@@ -21,6 +21,17 @@ namespace Hardware
 		DiagSignal
 	};
 
+	const static wchar_t* DeviceObjectExtensions[] =
+		{
+			L".hrt",		// Root
+			L".hsm",		// System
+			L".hrk",		// Rack
+			L".hcs",		// Chassis
+			L".hmd",		// Module
+			L".hcr",		// Controller
+			L".hds"		// DiagSignal
+		};
+
 	//
 	//
 	// DeviceObject
@@ -34,6 +45,8 @@ namespace Hardware
 
 	protected:
 		DeviceObject();
+
+	public:
 		virtual ~DeviceObject();
 
 		// Serialization
@@ -56,7 +69,9 @@ namespace Hardware
 		//
 	public:
 		DeviceObject* parent();
-		virtual DeviceType deviceType() = 0;
+		virtual DeviceType deviceType() const;
+
+		QString fileExtension() const;
 
 		// Children care
 		//
@@ -79,6 +94,7 @@ namespace Hardware
 		const QString& caption() const;
 		void setCaption(const QString& value);
 
+		DbFileInfo& fileInfo();
 		const DbFileInfo& fileInfo() const;
 		void setFileInfo(const DbFileInfo& value);
 
@@ -103,12 +119,13 @@ namespace Hardware
 	//
 	class DeviceRoot : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceRoot();
 		virtual ~DeviceRoot();
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Root;
@@ -122,6 +139,7 @@ namespace Hardware
 	//
 	class DeviceSystem : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceSystem();
 		virtual ~DeviceSystem();
@@ -133,7 +151,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::System;
@@ -147,6 +165,7 @@ namespace Hardware
 	//
 	class DeviceRack : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceRack();
 		virtual ~DeviceRack();
@@ -158,7 +177,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Rack;
@@ -172,6 +191,7 @@ namespace Hardware
 	//
 	class DeviceChassis : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceChassis();
 		virtual ~DeviceChassis();
@@ -183,7 +203,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Chassis;
@@ -197,6 +217,7 @@ namespace Hardware
 	//
 	class DeviceModule : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceModule();
 		virtual ~DeviceModule();
@@ -208,7 +229,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Module;
@@ -222,6 +243,7 @@ namespace Hardware
 	//
 	class DeviceController : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceController();
 		virtual ~DeviceController();
@@ -233,7 +255,7 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::Controller;
@@ -247,6 +269,7 @@ namespace Hardware
 	//
 	class DeviceDiagSignal : public DeviceObject
 	{
+		Q_OBJECT
 	public:
 		DeviceDiagSignal();
 		virtual ~DeviceDiagSignal();
@@ -258,12 +281,12 @@ namespace Hardware
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	public:
-		virtual DeviceType deviceType() override;
+		virtual DeviceType deviceType() const override;
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::DiagSignal;
 	};
 
-	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
+	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 }

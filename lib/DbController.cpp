@@ -31,6 +31,9 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
+	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
+
+	connect(this, &DbController::signal_getLatestVersion, m_worker, &DbWorker::slot_getLatestVersion);
 
 	connect(this, &DbController::signal_getWorkcopy, m_worker, &DbWorker::slot_getWorkcopy);
 	connect(this, &DbController::signal_setWorkcopy, m_worker, &DbWorker::slot_setWorkcopy);
@@ -39,7 +42,9 @@ DbController::DbController() :
 	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
 	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
 
-	connect(this, &DbController::signal_addSystem, m_worker, &DbWorker::slot_addSystem);
+	connect(this, &DbController::signal_fileHasChildren, m_worker, &DbWorker::slot_fileHasChildren);
+
+	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
 
@@ -338,6 +343,119 @@ bool DbController::addFile(const std::shared_ptr<DbFile>& file, int parentId, QW
 	return addFiles(&v, parentId, parentWidget);
 }
 
+bool DbController::deleteFiles(std::vector<std::shared_ptr<DbFileInfo>>* files, QWidget* parentWidget)
+{
+	if (files == nullptr)
+	{
+		assert(files);
+		return false;
+	}
+
+	std::vector<DbFileInfo> v;
+
+	for (auto& f : *files)
+	{
+		v.push_back(*(f.get()));
+	}
+
+	bool result = deleteFiles(&v, parentWidget);
+
+	if (result == true)
+	{
+		// set file state to the input array
+		//
+		assert(v.size() == files->size());
+
+		for (size_t i = 0; i < files->size(); i++)
+		{
+			assert(files->operator [](i)->fileId() == v[i].fileId());
+
+			auto& f = files->operator [](i);
+			*(f.get()) = v[i];
+		}
+	}
+
+	return result;
+}
+
+bool DbController::deleteFiles(std::vector<DbFileInfo>* files, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (files == nullptr)
+	{
+		assert(files != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_deleteFiles(files);
+
+	bool result = waitForComplete(parentWidget, tr("Deleting files"));
+	return result;
+}
+
+bool DbController::getLatestVersion(const std::vector<DbFileInfo>& files,
+					  std::vector<std::shared_ptr<DbFile>>* out,
+					  QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr || files.empty() == true)
+	{
+		assert(out != nullptr);
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getLatestVersion(&files, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting file"));
+	return out;
+}
+
+bool DbController::getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	std::vector<DbFileInfo> fiv;
+	fiv.push_back(file);
+
+	std::vector<std::shared_ptr<DbFile>> outvector;
+	bool result = getLatestVersion(fiv, &outvector, parentWidget);
+
+	if (result == false || outvector.size() != 1)
+	{
+		return false;
+	}
+
+	*out = outvector.front();
+	return true;
+}
+
 bool DbController::getWorkcopy(const std::vector<DbFileInfo>& files,
 							   std::vector<std::shared_ptr<DbFile>>* out,
 							   QWidget* parentWidget)
@@ -521,27 +639,15 @@ bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWi
 	return true;
 }
 
-bool DbController::addSystem(const Hardware::DeviceSystem* system, QWidget* parentWidget)
+bool DbController::fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget)
 {
 	// Check parameters
 	//
-	if (system == nullptr)
+	if (hasChildren == nullptr)
 	{
-		assert(system != nullptr);
+		assert(hasChildren != nullptr);
 		return false;
 	}
-
-	// Save system to binary file
-	//
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	QByteArray data("Hi, there!");
-	DbFile file;
-	file.swapData(data);
-
 
 	// Init progress and check availability
 	//
@@ -553,9 +659,87 @@ bool DbController::addSystem(const Hardware::DeviceSystem* system, QWidget* pare
 
 	// Emit signal end wait for complete
 	//
-	emit signal_addSystem(&file);
+	emit signal_fileHasChildren(hasChildren, &file);
+
+	ok = waitForComplete(parentWidget, tr("Checking file children"));
+	return true;
+}
+
+bool DbController::addDeviceObject(Hardware::DeviceObject* device, int parentId, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (device == nullptr)
+	{
+		assert(device != nullptr);
+		return false;
+	}
+
+	// Save system to binary file
+	//
+	QByteArray data;
+	bool result = device->Save(data);
+
+	if (result == false)
+	{
+		assert(result);
+		return false;
+	}
+
+	DbFile file;
+	file.swapData(data);
+
+	QString fileExtension(device->fileExtension());
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_addDeviceObject(&file, parentId, fileExtension);
 
 	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
+
+	device->setFileInfo(file);
+
+	return true;
+}
+
+bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& devices, QWidget* parentWidget)
+{
+	if (devices.empty() == true)
+	{
+		assert(devices.empty() == false);
+		return false;
+	}
+
+	std::vector<DbFileInfo> files;
+
+	for (auto& d : devices)
+	{
+		files.push_back(d->fileInfo());
+	}
+
+	bool ok = deleteFiles(&files, parentWidget);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	assert(devices.size() == files.size());
+
+	for (size_t i = 0; i < devices.size(); i++)
+	{
+		assert(devices[i]->fileInfo().fileId() == files[i].fileId());
+
+		devices[i]->setFileInfo(files[i]);
+	}
+
 	return true;
 }
 

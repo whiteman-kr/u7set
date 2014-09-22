@@ -4,17 +4,19 @@
 
 namespace Hardware
 {
+	//const static wchar_t* DeviceObjectExtensions = {L".hroot"}, {L".hsystem"};
+
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
 	void Init()
 	{
-		Hardware::DeviceObjectFactory.Register<DeviceRoot>();
-		Hardware::DeviceObjectFactory.Register<DeviceSystem>();
-		Hardware::DeviceObjectFactory.Register<DeviceRack>();
-		Hardware::DeviceObjectFactory.Register<DeviceChassis>();
-		Hardware::DeviceObjectFactory.Register<DeviceModule>();
-		Hardware::DeviceObjectFactory.Register<DeviceController>();
-		Hardware::DeviceObjectFactory.Register<DeviceDiagSignal>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceChassis>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceDiagSignal>();
 	}
 
 	void Shutdwon()
@@ -96,6 +98,21 @@ namespace Hardware
 		return m_parent;
 	}
 
+	DeviceType DeviceObject::deviceType() const
+	{
+		assert(false);
+		return DeviceType::Root;
+	}
+
+	QString DeviceObject::fileExtension() const
+	{
+		int index = static_cast<int>(deviceType());
+		assert(index >= 0 && index < sizeof(DeviceObjectExtensions) / sizeof(DeviceObjectExtensions[0]));
+
+		QString result = QString::fromWCharArray(DeviceObjectExtensions[index]);
+		return result;
+	}
+
 	int DeviceObject::childrenCount() const
 	{
 		return static_cast<int>(m_children.size());
@@ -165,6 +182,11 @@ namespace Hardware
 		m_caption = value;
 	}
 
+	DbFileInfo& DeviceObject::fileInfo()
+	{
+		return m_fileInfo;
+	}
+
 	const DbFileInfo& DeviceObject::fileInfo() const
 	{
 		return m_fileInfo;
@@ -191,7 +213,7 @@ namespace Hardware
 	{
 	}
 
-	DeviceType DeviceRoot::deviceType()
+	DeviceType DeviceRoot::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -209,6 +231,7 @@ namespace Hardware
 
 	DeviceSystem::~DeviceSystem()
 	{
+		qDebug() << Q_FUNC_INFO;
 	}
 
 	bool DeviceSystem::SaveData(Proto::Envelope* message) const
@@ -241,8 +264,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -266,7 +287,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceSystem::deviceType()
+	DeviceType DeviceSystem::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -316,8 +337,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -341,7 +360,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceRack::deviceType()
+	DeviceType DeviceRack::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -390,8 +409,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -415,7 +432,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceChassis::deviceType()
+	DeviceType DeviceChassis::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -464,9 +481,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceModule::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -489,7 +504,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceModule::deviceType()
+	DeviceType DeviceModule::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -539,9 +554,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceController::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -564,7 +577,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceController::deviceType()
+	DeviceType DeviceController::deviceType() const
 	{
 		return m_deviceType;
 	}
@@ -613,9 +626,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceDiagSignal::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -638,7 +649,7 @@ namespace Hardware
 		return true;
 	}
 
-	DeviceType DeviceDiagSignal::deviceType()
+	DeviceType DeviceDiagSignal::deviceType() const
 	{
 		return m_deviceType;
 	}

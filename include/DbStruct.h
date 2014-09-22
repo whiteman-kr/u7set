@@ -93,7 +93,7 @@ class VcsItemAction
 public:
 	enum VcsItemActionType
 	{
-		Added = 1,
+		Added = 1,			// Don't change values, it is stored in DB
 		Modified = 2,
 		Deleted = 3
 	};
@@ -102,6 +102,7 @@ public:
 	VcsItemAction(VcsItemActionType s);
 
 	QString text() const;
+	int toInt() const;
 
 private:
 	VcsItemActionType m_action;
@@ -258,8 +259,11 @@ public:
 	void setLastCheckIn(const QDateTime& value);
 	void setLastCheckIn(const QString& value);
 
-	VcsState state() const;
-	void setState(VcsState state);
+	const VcsState& state() const;
+	void setState(const VcsState& state);
+
+	const VcsItemAction& action() const;
+	void setAction(const VcsItemAction& action);
 
 	const DbUser& user() const;
 	void setUser(const DbUser& user);
@@ -277,6 +281,7 @@ protected:
 	QDateTime m_lastCheckIn;
 
 	VcsState m_state;
+	VcsItemAction m_action;
 	DbUser m_user;
 };
 

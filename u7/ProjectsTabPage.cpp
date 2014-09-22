@@ -164,7 +164,11 @@ void ProjectsTabPage::createProject()
 		{
 			// Add project
 			//
-			dbController()->createProject(projectName, administratorPassword, this);
+			bool result = dbController()->createProject(projectName, administratorPassword, this);
+			if (result == true)
+			{
+				dbController()->upgradeProject(projectName, administratorPassword, this);
+			}
 
 			refreshProjectList();
 			selectProject(projectName);
