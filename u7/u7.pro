@@ -175,7 +175,10 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0024.sql \
 	DatabaseUpgrade/Upgrade0025.sql \
     DatabaseUpgrade/Upgrade0026.sql \
-    DatabaseUpgrade/Upgrade0027.sql
+    DatabaseUpgrade/Upgrade0027.sql \
+    DatabaseUpgrade/Upgrade0028.sql \
+    DatabaseUpgrade/Upgrade0029.sql \
+    DatabaseUpgrade/Upgrade0030.sql
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
