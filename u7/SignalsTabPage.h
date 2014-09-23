@@ -41,6 +41,9 @@ private:
 	//
 	QVector<int> m_signalIDs;
 	SignalSet m_signalSet;
+	QVector<DataFormat> m_dataFormatInfo;
+	QVector<Unit> m_unitInfo;
+
 	QWidget* m_parentWindow;
 	DbController* m_dbController;
 };
