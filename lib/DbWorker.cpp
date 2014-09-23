@@ -31,6 +31,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Add columns in Signal table and some stored procedures", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
 	{"Changes in  get_file_list, add_file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0026.sql"},
 	{"Add action column to result from get_file_list", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0027.sql"},
+	{"Type ObjectState was added", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0028.sql"},
+	{"File API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0029.sql"},
+	{"Signal API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0030.sql"},
 };
 
 
