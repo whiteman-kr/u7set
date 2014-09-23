@@ -487,3 +487,4 @@ $BODY$
 	SELECT DF.DataFormatID AS dataformatid, DF.Name AS name FROM DataFormat AS DF ORDER BY DF.DataFormatID;
 $BODY$
 LANGUAGE sql;
+

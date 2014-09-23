@@ -177,8 +177,10 @@ OTHER_FILES += \
 	DatabaseUpgrade/Upgrade0021.sql \
     DatabaseUpgrade/Upgrade0022.sql \
     DatabaseUpgrade/Upgrade0023.sql \
-	DatabaseUpgrade/Upgrade0024.sql \
-    DatabaseUpgrade/Upgrade0025.sql
+    DatabaseUpgrade/Upgrade0024.sql \
+	DatabaseUpgrade/Upgrade0025.sql \
+    DatabaseUpgrade/Upgrade0026.sql \
+    DatabaseUpgrade/Upgrade0027.sql
 
 
 CONFIG += precompile_header

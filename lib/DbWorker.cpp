@@ -2,7 +2,8 @@
 
 // Upgrade database
 //
-const UpgradeItem DbWorker::upgradeItems[] = {
+const UpgradeItem DbWorker::upgradeItems[] =
+{
 	{"Create project", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0001.sql"},
 	{"Add Changeset table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0002.sql"},
 	{"Add Disabled column to User table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0003.sql"},
@@ -28,7 +29,10 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add is_admin function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0023.sql"},
 	{"Add CheckedInInstanceID, CheckedOutInstanceID to table File", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0024.sql"},
 	{"Add columns in Signal table and some stored procedures", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
+	{"Changes in  get_file_list, add_file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0026.sql"},
+	{"Add action column to result from get_file_list", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0027.sql"},
 };
+
 
 int DbWorker::counter = 0;
 
@@ -1084,6 +1088,8 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 				//
 				QFile upgradeFile(ui.upgradeFileName);
 
+				qDebug() << "Begin upgrade: item " << i << " completed, file: " << ui.upgradeFileName;
+
 				result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
 				if (result == false)
@@ -1125,6 +1131,8 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 						break;
 					}
 				}
+
+				qDebug() << "End upgrade item";
 			}
 		}
 	}
@@ -1493,7 +1501,8 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 		return;
 	}
 
-	QString request = QString("SELECT * FROM GetFileList(%1, '%%%2');")
+	QString request = QString("SELECT * FROM get_file_list(%1, %2, '%%%3');")
+			.arg(currentUser().userId())
 			.arg(parentId)
 			.arg(filter);
 
@@ -1513,18 +1522,23 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 
 		fileInfo.setFileName(q.value("Name").toString());
 		fileInfo.setFileId(q.value("FileID").toInt());
+		bool deleted = q.value("Deleted").toBool();
 		fileInfo.setParentId(q.value("ParentID").toInt());
 		fileInfo.setSize(q.value("Size").toInt());
 		fileInfo.setChangeset(q.value("ChangesetID").toInt());
 		fileInfo.setCreated(q.value("Created").toString());
 		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
 
 		DbUser user;
 		user.setUserId(q.value("UserID").toInt());
 		fileInfo.setUser(user);
 
-		files->push_back(fileInfo);
+		if (deleted == false)
+		{
+			files->push_back(fileInfo);
+		}
 	}
 
 	return;
@@ -1574,11 +1588,10 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 		// request
 		//
-		QString request = QString("SELECT * FROM AddFile(%1,'%2', %3, %4, ")
+		QString request = QString("SELECT * FROM add_file(%1,'%2', %3, ")
 				.arg(currentUser().userId())
 				.arg(file->fileName())
-				.arg(parentId)
-				.arg(file->size());
+				.arg(parentId);
 
 		QString data;
 		file->convertToDatabaseString(&data);
@@ -1608,6 +1621,198 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		file->setFileId(fileId);
 		file->setUser(currentUser());
 		file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
+		file->setAction(VcsItemAction::Added);
+	}
+
+	return;
+}
+
+void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr || files->empty() == true)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot delete files. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		DbFileInfo& file = files->operator[](i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM delete_file(%1, %2);")
+				.arg(currentUser().userId())
+				.arg(file.fileId());
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(tr("Can't delete file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't get result"));
+			return;
+		}
+
+		int deleteResult = q.value(0).toInt();		// 0 - error while deleteing, 1 - marked as deleted, 2 - delted from all tables
+
+		switch (deleteResult)
+		{
+		case 0:
+			break;
+		case 1:
+			file.setUser(currentUser());
+			file.setState(VcsState::CheckedOut);
+			file.setAction(VcsItemAction::Deleted);
+			break;
+		case 2:
+			file.setFileId(-1);						// File does not exists any more, in any table
+			file.setUser(currentUser());
+			file.setState(VcsState::CheckedOut);
+			file.setAction(VcsItemAction::Deleted);
+			break;
+		}
+	}
+
+	return;
+}
+
+void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true ||
+		out == nullptr)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+		const DbFileInfo& fi = files->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM get_latest_file_version(%1, %2);")
+				.arg(currentUser().userId())
+				.arg(fi.fileId());
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+		if (result == false)
+		{
+			emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't find file: %1").arg(fi.fileName()));
+			return;
+		}
+
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		file->setFileId(q.value("FileID").toInt());
+
+		file->setFileName(q.value("Name").toString());
+		file->setParentId(q.value("ParentID").toInt());
+		file->setParentId(q.value("ChangesetID").toInt());
+		file->setCreated(q.value("Created").toString());
+		file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
+
+		bool checkedOut = q.value("CheckedOut").toBool();
+		file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
+
+		int action = q.value("Action").toInt();
+		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
+
+		DbUser user;
+		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
+
+		if (ok == false)
+		{
+			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
+			continue;
+		}
+
+		file->setUser(user);
+
+		QByteArray data = q.value("Data").toByteArray();
+		file->swapData(data);
+
+		out->push_back(file);
+
+		assert(fi.fileId() == file->fileId());
 	}
 
 	return;
@@ -1661,7 +1866,8 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 
 		// request
 		//
-		QString request = QString("SELECT * FROM GetWorkcopy(%1);")
+		QString request = QString("SELECT * FROM get_workcopy(%1, %2);")
+				.arg(currentUser().userId())
 				.arg(fi.fileId());
 
 		QSqlQuery q(db);
@@ -1689,6 +1895,9 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 		file->setCreated(q.value("Created").toString());
 		file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
 		file->setState(VcsState::CheckedOut);
+
+		int action = q.value("Action").toInt();
+		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
 		DbUser user;
 		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
@@ -1757,7 +1966,8 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 
 		// request
 		//
-		QString request = QString("SELECT * FROM SetWorkcopy(%1, ")
+		QString request = QString("SELECT * FROM set_workcopy(%1, %2, ")
+				.arg(currentUser().userId())
 				.arg(file->fileId());
 
 		QString data;
@@ -1824,7 +2034,8 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		return;
 	}
 
-	QString request = "SELECT * FROM checkin(ARRAY[";
+	QString request = QString("SELECT * FROM check_in(%1, ARRAY[")
+		.arg(currentUser().userId());
 
 	// Iterate through files
 	//
@@ -1842,8 +2053,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		}
 	}
 
-	request += QString("], %1, '%2');")
-			.arg(currentUser().userId())
+	request += QString("], '%1');")
 			.arg(comment);
 
 	// request
@@ -1858,11 +2068,24 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		return;
 	}
 
-	// Set file state to CheckedIn
+	// Result is table of (FileID, Action);
 	//
-	for (auto& fi : *files)
+
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedIn);
+		int fileId = q.value(0).toInt();
+		VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(1).toInt());
+
+		// Set file state to CheckedIn
+		//
+		for (auto& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				fi.setState(VcsState::CheckedIn);
+				fi.setAction(action);
+			}
+		}
 	}
 
 	return;
@@ -1896,7 +2119,8 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	QString request = "SELECT * FROM checkout(ARRAY[";
+	QString request = QString("SELECT * FROM check_out(%1, ARRAY[")
+		.arg(currentUser().userId());
 
 	// Iterate through files
 	//
@@ -1914,8 +2138,8 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		}
 	}
 
-	request += QString("], %1);")
-			.arg(currentUser().userId());
+	request += QString("]);");
+
 
 	// request
 	//
@@ -1929,11 +2153,23 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	// Set file state to CheckedOut
+	// Result is table of (FileID);
 	//
-	for (auto& fi : *files)
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedOut);
+		int fileId = q.value(0).toInt();
+
+		// Set file state to CheckedOut
+		//
+		for (DbFileInfo& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				fi.setState(VcsState::CheckedOut);
+				fi.setAction(VcsItemAction::Modified);
+				fi.setUser(currentUser());
+			}
+		}
 	}
 
 	return;
@@ -1967,7 +2203,8 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	QString request = "SELECT * FROM undoChanges(ARRAY[";
+	QString request = QString("SELECT * FROM undo_changes(%1, ARRAY[")
+		.arg(currentUser().userId());
 
 	// Iterate through files
 	//
@@ -1985,8 +2222,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		}
 	}
 
-	request += QString("], %1);")
-			.arg(currentUser().userId());
+	request += "]);";
 
 	// request
 	//
@@ -2006,6 +2242,61 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	{
 		fi.setState(VcsState::CheckedIn);
 	}
+
+	return;
+}
+
+void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (hasChildren == nullptr || fileInfo == nullptr)
+	{
+		assert(hasChildren != nullptr);
+		assert(fileInfo != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM file_has_children(%1, %2)")
+		.arg(currentUser().userId())
+		.arg(fileInfo->fileId());
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == false)
+	{
+		emitError(tr("Can't get result."));
+		return;
+	}
+
+	int childCount = q.value(0).toInt();
+
+	*hasChildren = childCount > 0;
 
 	return;
 }
@@ -2068,6 +2359,7 @@ void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExte
 	int fileId = q.value(0).toInt();
 
 	file->setFileId(fileId);
+	file->setParentId(parentId);
 	file->setUser(currentUser());
 	file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
 

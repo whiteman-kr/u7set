@@ -10,13 +10,13 @@ namespace Hardware
 
 	void Init()
 	{
-		Hardware::DeviceObjectFactory.Register<DeviceRoot>();
-		Hardware::DeviceObjectFactory.Register<DeviceSystem>();
-		Hardware::DeviceObjectFactory.Register<DeviceRack>();
-		Hardware::DeviceObjectFactory.Register<DeviceChassis>();
-		Hardware::DeviceObjectFactory.Register<DeviceModule>();
-		Hardware::DeviceObjectFactory.Register<DeviceController>();
-		Hardware::DeviceObjectFactory.Register<DeviceDiagSignal>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceChassis>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceDiagSignal>();
 	}
 
 	void Shutdwon()
@@ -157,6 +157,23 @@ namespace Hardware
 		m_children.push_back(child);
 	}
 
+	void DeviceObject::deleteChild(DeviceObject* child)
+	{
+		auto found = std::find_if(m_children.begin(), m_children.end(), [child](decltype(m_children)::const_reference c)
+			{
+				return c.get() == child;
+			});
+
+		if (found == m_children.end())
+		{
+			assert(found != m_children.end());
+			return;
+		}
+
+		m_children.erase(found);
+		return;
+	}
+
 	void DeviceObject::deleteAllChildren()
 	{
 		m_children.clear();
@@ -180,6 +197,11 @@ namespace Hardware
 	void DeviceObject::setCaption(const QString& value)
 	{
 		m_caption = value;
+	}
+
+	DbFileInfo& DeviceObject::fileInfo()
+	{
+		return m_fileInfo;
 	}
 
 	const DbFileInfo& DeviceObject::fileInfo() const
@@ -206,7 +228,6 @@ namespace Hardware
 
 	DeviceRoot::~DeviceRoot()
 	{
-		qDebug() << Q_FUNC_INFO;
 	}
 
 	DeviceType DeviceRoot::deviceType() const
@@ -260,8 +281,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -335,8 +354,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -409,8 +426,6 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
 		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
@@ -483,9 +498,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceModule::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -558,9 +571,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceController::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -632,9 +643,7 @@ namespace Hardware
 			return false;
 		}
 
-		// --
-		//
-		bool result = DeviceDiagSignal::LoadData(message);
+		bool result = DeviceObject::LoadData(message);
 		if (result == false)
 		{
 			return false;

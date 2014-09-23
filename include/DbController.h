@@ -48,6 +48,12 @@ public:
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
 
+	bool deleteFiles(std::vector<std::shared_ptr<DbFileInfo> >* files, QWidget* parentWidget);
+	bool deleteFiles(std::vector<DbFileInfo>* files, QWidget* parentWidget);
+
+	bool getLatestVersion(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
+	bool getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
+
 	bool getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getWorkcopy(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
 
@@ -61,9 +67,12 @@ public:
 	bool undoChanges(DbFileInfo& file, QWidget* parentWidget);
 	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 
+	bool fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget);
+
 	// Hardware Configuration
 	//
-	bool addDeviceObject(const Hardware::DeviceObject* device, int parentId, QWidget* parentWidget);
+	bool addDeviceObject(Hardware::DeviceObject* device, int parentId, QWidget* parentWidget);
+	bool deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& devices, QWidget* parentWidget);
 
 	// Signals management
 	//
@@ -88,6 +97,9 @@ signals:
 
 	void signal_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter);
 	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
+	void signal_deleteFiles(std::vector<DbFileInfo>* files);
+
+	void signal_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 
 	void signal_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void signal_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
@@ -95,6 +107,8 @@ signals:
 	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
+
+	void signal_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
 	void signal_addDeviceObject(DbFile* file, int parentId, QString fileExtension);
 

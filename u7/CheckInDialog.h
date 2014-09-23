@@ -16,7 +16,7 @@ private:
 	~CheckInDialog();
 
 public:
-	static bool checkIn(const std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent);
+	static bool checkIn(std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent);
 	
 private slots:
 	void on_checkInButton_clicked();

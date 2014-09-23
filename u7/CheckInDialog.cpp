@@ -31,12 +31,17 @@ CheckInDialog::~CheckInDialog()
 	delete ui;
 }
 
-bool CheckInDialog::checkIn(const std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent)
+bool CheckInDialog::checkIn(std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent)
 {
 	CheckInDialog d(files, dbcontroller, parent);
 	d.exec();
 
-	return d.result() == Accepted;
+	if (d.result() == Accepted)
+	{
+		files.swap(d.m_files);
+	}
+
+	return d.result();
 }
 
 void CheckInDialog::on_checkInButton_clicked()
