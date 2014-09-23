@@ -2,6 +2,7 @@
 #define SIGNALPROPERTIESDIALOG_H
 
 #include <QDialog>
+#include <QMap>
 
 class Signal;
 struct DataFormat;
@@ -25,6 +26,8 @@ public slots:
 
 private:
 	Signal& m_signal;
+	QVector<DataFormat>& m_dataFormatInfo;
+	QVector<Unit>& m_unitInfo;
 
 	QtStringPropertyManager* m_stringManager;
 	QtEnumPropertyManager* m_enumManager;

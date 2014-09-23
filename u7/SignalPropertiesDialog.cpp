@@ -12,7 +12,9 @@
 
 SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataFormat>& dataFormatInfo, QVector<Unit>& unitInfo, QWidget *parent) :
 	QDialog(parent),
-	m_signal(signal)
+	m_signal(signal),
+	m_dataFormatInfo(dataFormatInfo),
+	m_unitInfo(unitInfo)
 {
 	QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(this);
 	m_stringManager = new QtStringPropertyManager(this);
@@ -35,13 +37,17 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 
 	m_dataFormatProperty = m_enumManager->addProperty(tr("Data format"));
 	QStringList dataFormatNames;
+	int selected = -1;
 	for (int i = 0; i < dataFormatInfo.count(); i++)
 	{
 		dataFormatNames << dataFormatInfo[i].name;
+		if (dataFormatInfo[i].ID == signal.dataFormat())
+		{
+			selected = i;
+		}
 	}
-	//dataFormatNames << "LE unsigned" << "LE signed" << "BE unsigned" << "BE signed";
 	m_enumManager->setEnumNames(m_dataFormatProperty, dataFormatNames);
-	m_enumManager->setValue(m_dataFormatProperty, signal.dataFormat());
+	m_enumManager->setValue(m_dataFormatProperty, selected);
 	signalProperty->addSubProperty(m_dataFormatProperty);
 
 	m_dataSizeProperty = m_intManager->addProperty("Data size");
@@ -69,13 +75,17 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 
 	m_unitProperty = m_enumManager->addProperty(tr("Unit"));
 	QStringList unitNames;
+	selected = -1;
 	for (int i = 0; i < unitInfo.count(); i++)
 	{
 		unitNames << unitInfo[i].nameEn;
+		if (unitInfo[i].ID == signal.unitID())
+		{
+			selected = i;
+		}
 	}
-	//unitNames << "unit 1" << "unit 2" << "unit 3" << "unit 4";
 	m_enumManager->setEnumNames(m_unitProperty, unitNames);
-	m_enumManager->setValue(m_unitProperty, signal.unitID());
+	m_enumManager->setValue(m_unitProperty, selected);
 	signalProperty->addSubProperty(m_unitProperty);
 
 	QtLineEditFactory* lineEditFactory = new QtLineEditFactory(this);
@@ -111,4 +121,23 @@ void SignalPropertiesDialog::saveSignal()
 	m_signal.setStrID(m_stringManager->value(m_strIDProperty));
 	m_signal.setExtStrID(m_stringManager->value(m_extStrIDProperty));
 	m_signal.setName(m_stringManager->value(m_nameProperty));
+	int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
+	if (dataFormatIndex > 0 && dataFormatIndex < m_dataFormatInfo.count())
+	{
+		m_signal.setDataFormat(m_dataFormatInfo[dataFormatIndex].ID);
+	}
+	m_signal.setDataSize(m_intManager->value(m_dataSizeProperty));
+	m_signal.setLowADC(m_intManager->value(m_lowAdcProperty));
+	m_signal.setHighADC(m_intManager->value(m_highAdcProperty));
+	m_signal.setLowLimit(m_doubleManager->value(m_lowLimitProperty));
+	m_signal.setHighLimit(m_doubleManager->value(m_highLimitProperty));
+	int unitIndex = m_enumManager->value(m_unitProperty);
+	if (unitIndex > 0 && unitIndex < m_unitInfo.count())
+	{
+		m_signal.setUnitID(m_unitInfo[unitIndex].ID);
+	}
+	else
+	{
+		m_signal.setUnitID(NO_UNIT_ID);
+	}
 }
