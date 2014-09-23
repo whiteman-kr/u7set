@@ -2,6 +2,7 @@
 #include "EquipmentTabPage.h"
 #include "../include/DbController.h"
 #include "Settings.h"
+#include "CheckInDialog.h"
 
 //
 //
@@ -382,13 +383,243 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 
 	// Update model
 	//
-
 	for (QModelIndex& index : rowList)
 	{
-		emit dataChanged(index, index);
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		if (d->fileInfo().fileId() == -1)
+		{
+			QModelIndex pi = index.parent();
+			Hardware::DeviceObject* po = deviceObject(pi);
+			assert(po);
+
+			int childIndex = po->childIndex(d);
+			assert(childIndex != -1);
+
+			beginRemoveRows(pi, childIndex, childIndex);
+			po->deleteChild(d);
+			endRemoveRows();
+		}
+		else
+		{
+			emit dataChanged(index, index);
+		}
 	}
 
 	return;
+}
+
+void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
+{
+	std::vector<DbFileInfo> files;
+	QModelIndexList checkedOutList;
+	DbUser currentUser = dbController()->currentUser();
+
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		if (d->fileInfo().state() == VcsState::CheckedOut &&
+			(d->fileInfo().user() == currentUser || currentUser.isAdminstrator() == true))
+		{
+			files.push_back(d->fileInfo());
+			checkedOutList.push_back(index);
+		}
+	}
+
+	CheckInDialog::checkIn(files, dbController(), m_parentWidget);
+
+	// Update FileInfo in devices and Update model
+	//
+	size_t updatedFiles = 0;
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		for (const auto& fi : files)
+		{
+			if (fi.fileId() == d->fileInfo().fileId())
+			{
+				d->setFileInfo(fi);
+				updatedFiles ++;
+
+				if (d->fileInfo().action() == VcsItemAction::Deleted && d->fileInfo().state() == VcsState::CheckedIn)
+				{
+					QModelIndex pi = index.parent();
+					Hardware::DeviceObject* po = deviceObject(pi);
+					assert(po);
+
+					int childIndex = po->childIndex(d);
+					assert(childIndex != -1);
+
+					beginRemoveRows(pi, childIndex, childIndex);
+					po->deleteChild(d);
+					endRemoveRows();
+				}
+				else
+				{
+					emit dataChanged(index, index);
+				}
+
+				break;
+			}
+		}
+	}
+	assert(updatedFiles == files.size());
+
+	return;
+}
+
+void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
+{
+	std::vector<DbFileInfo> files;
+	QModelIndexList checkedInList;
+	DbUser currentUser = dbController()->currentUser();
+
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		if (d->fileInfo().state() == VcsState::CheckedIn)
+		{
+			files.push_back(d->fileInfo());
+			checkedInList.push_back(index);
+		}
+	}
+
+	dbController()->checkOut(files, m_parentWidget);
+
+	// Update FileInfo in devices and Update model
+	//
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		for (const auto& fi : files)
+		{
+			if (fi.fileId() == d->fileInfo().fileId())
+			{
+				d->setFileInfo(fi);						// Update file info record in the DeviceOubject
+
+				if (d->fileInfo().state() == VcsState::CheckedOut)
+				{
+					emit dataChanged(index, index);		// Notify view about data update
+				}
+
+				break;
+			}
+		}
+	}
+
+	return;
+}
+
+void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
+{
+	std::vector<DbFileInfo> files;
+	QModelIndexList checkedOutList;
+	DbUser currentUser = dbController()->currentUser();
+
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		if (d->fileInfo().state() == VcsState::CheckedOut &&
+			(d->fileInfo().user() == currentUser || currentUser.isAdminstrator() == true))
+		{
+			files.push_back(d->fileInfo());
+			checkedOutList.push_back(index);
+		}
+	}
+
+	auto mb = QMessageBox::question(
+		m_parentWidget,
+		tr("Undo Changes"),
+		tr("Do you want undo pending changes? All selected objectes changes will be lost!"));
+
+	if (mb == QMessageBox::No)
+	{
+		return;
+	}
+
+	dbController()->undoChanges(files, m_parentWidget);
+
+	// Update FileInfo in devices and Update model
+	//
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		if (d->fileInfo().fileId() == -1)
+		{
+			QModelIndex pi = index.parent();
+			Hardware::DeviceObject* po = deviceObject(pi);
+			assert(po);
+
+			int childIndex = po->childIndex(d);
+			assert(childIndex != -1);
+
+			beginRemoveRows(pi, childIndex, childIndex);
+			po->deleteChild(d);
+			endRemoveRows();
+		}
+		else
+		{
+			emit dataChanged(index, index);
+		}
+	}
+
+	/*!!!!!!!!!!!!!!
+
+	size_t updatedFiles = 0;
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		for (const auto& fi : files)
+		{
+			if (fi.fileId() == d->fileInfo().fileId())
+			{
+				d->setFileInfo(fi);
+				updatedFiles ++;
+
+				if (d->fileInfo().action() == VcsItemAction::Deleted && d->fileInfo().state() == VcsState::CheckedIn)
+				{
+					QModelIndex pi = index.parent();
+					Hardware::DeviceObject* po = deviceObject(pi);
+					assert(po);
+
+					int childIndex = po->childIndex(d);
+					assert(childIndex != -1);
+
+					beginRemoveRows(pi, childIndex, childIndex);
+					po->deleteChild(d);
+					endRemoveRows();
+				}
+				else
+				{
+					emit dataChanged(index, index);
+				}
+
+				break;
+			}
+		}
+	}
+	assert(updatedFiles == files.size());
+*/
+	return;
+}
+
+void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
+{
 }
 
 Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
@@ -603,6 +834,58 @@ void EquipmentView::deleteSelectedDevices()
 	return;
 }
 
+void EquipmentView::checkInSelectedDevices()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.empty())
+	{
+		return;
+	}
+
+	equipmentModel()->checkInDeviceObject(selected);
+	return;
+}
+
+void EquipmentView::checkOutSelectedDevices()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.empty())
+	{
+		return;
+	}
+
+	equipmentModel()->checkOutDeviceObject(selected);
+	return;
+}
+
+void EquipmentView::undoChangesSelectedDevices()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.empty())
+	{
+		return;
+	}
+
+	equipmentModel()->undoChangesDeviceObject(selected);
+	return;
+}
+
+void EquipmentView::refreshSelectedDevices()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.empty())
+	{
+		return;
+	}
+
+	equipmentModel()->refreshDeviceObject(selected);
+	return;
+}
+
 EquipmentModel* EquipmentView::equipmentModel()
 {
 	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
@@ -643,8 +926,15 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_addRackAction);
 	m_equipmentView->addAction(m_addChassisAction);
 	m_equipmentView->addAction(m_addModuleAction);
+
 	m_equipmentView->addAction(m_SeparatorAction1);
 	m_equipmentView->addAction(m_deleteObjectAction);
+
+	m_equipmentView->addAction(m_SeparatorAction2);
+	m_equipmentView->addAction(m_checkOutAction);
+	m_equipmentView->addAction(m_checkInAction);
+	m_equipmentView->addAction(m_undoChangesAction);
+	m_equipmentView->addAction(m_refreshAction);
 
 	// Property View
 	//
@@ -679,9 +969,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	connect(m_equipmentView->selectionModel(), & QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 
+	connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 
-//	connect(m_filesView, &ConfigurationFileView::openFileSignal, this, &ConfigurationsTabPage::openFiles);
-//	connect(m_filesView, &ConfigurationFileView::viewFileSignal, this, &ConfigurationsTabPage::viewFiles);
 
 	// Evidently, project is not opened yet
 	//
@@ -724,6 +1013,29 @@ void EquipmentTabPage::CreateActions()
 	m_deleteObjectAction->setEnabled(false);
 	connect(m_deleteObjectAction, &QAction::triggered, m_equipmentView, &EquipmentView::deleteSelectedDevices);
 
+	m_SeparatorAction2 = new QAction(this);
+	m_SeparatorAction2->setSeparator(true);
+
+	m_checkOutAction = new QAction(tr("CheckOut"), this);
+	m_checkOutAction->setStatusTip(tr("Check out device for edit"));
+	m_checkOutAction->setEnabled(false);
+	connect(m_checkOutAction, &QAction::triggered, m_equipmentView, &EquipmentView::checkOutSelectedDevices);
+
+	m_checkInAction = new QAction(tr("CheckIn..."), this);
+	m_checkInAction->setStatusTip(tr("Check in changes"));
+	m_checkInAction->setEnabled(false);
+	connect(m_checkInAction, &QAction::triggered, m_equipmentView, &EquipmentView::checkInSelectedDevices);
+
+	m_undoChangesAction = new QAction(tr("Undo Changes..."), this);
+	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
+	m_undoChangesAction->setEnabled(false);
+	connect(m_undoChangesAction, &QAction::triggered, m_equipmentView, &EquipmentView::undoChangesSelectedDevices);
+
+	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction->setStatusTip(tr("Refresh object list"));
+	m_refreshAction->setEnabled(false);
+	connect(m_refreshAction, &QAction::triggered, m_equipmentView, &EquipmentView::refreshSelectedDevices);
+
 	return;
 }
 
@@ -747,6 +1059,16 @@ void EquipmentTabPage::projectClosed()
 
 void EquipmentTabPage::selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
+	return setActionState();
+}
+
+void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& /*roles = QVector<int>()*/)
+{
+	return setActionState();
+}
+
+void EquipmentTabPage::setActionState()
+{
 	// Disable all
 	//
 	m_addSystemAction->setEnabled(false);
@@ -769,8 +1091,8 @@ void EquipmentTabPage::selectionChanged(const QItemSelection& /*selected*/, cons
 		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
 		assert(device);
 
-		if (device->fileInfo().state() == VcsState::CheckedIn &&
-			device->fileInfo().action() != VcsItemAction::Deleted)
+		if (device->fileInfo().state() == VcsState::CheckedIn /*&&
+			device->fileInfo().action() != VcsItemAction::Deleted*/)
 		{
 			m_deleteObjectAction->setEnabled(true);
 			break;
@@ -784,6 +1106,39 @@ void EquipmentTabPage::selectionChanged(const QItemSelection& /*selected*/, cons
 			break;
 		}
 	}
+
+	// CheckIn, CheckOut
+	//
+	bool canAnyBeCheckedIn = false;
+	bool canAnyBeCheckedOut = false;
+
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+		assert(device);
+
+		if (device->fileInfo().state() == VcsState::CheckedOut &&
+			(device->fileInfo().user() == dbController()->currentUser() || dbController()->currentUser().isAdminstrator()))
+		{
+			canAnyBeCheckedIn = true;
+		}
+
+		if (device->fileInfo().state() == VcsState::CheckedIn)
+		{
+			canAnyBeCheckedOut = true;
+		}
+
+		// Don't need to go further
+		//
+		if (canAnyBeCheckedIn == true &&
+			canAnyBeCheckedIn == true )
+		{
+			break;
+		}
+	}
+
+	m_checkInAction->setEnabled(canAnyBeCheckedIn);
+	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 
 	// Enbale possible creation items;
 	//

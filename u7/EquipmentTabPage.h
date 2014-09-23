@@ -34,6 +34,11 @@ public:
 	bool insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex);
 	void deleteDeviceObject(QModelIndexList& rowList);
 
+	void checkInDeviceObject(QModelIndexList& rowList);
+	void checkOutDeviceObject(QModelIndexList& rowList);
+	void undoChangesDeviceObject(QModelIndexList& rowList);
+	void refreshDeviceObject(QModelIndexList& rowList);
+
 	Hardware::DeviceObject* deviceObject(QModelIndex& index);
 	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
 
@@ -88,6 +93,10 @@ public slots:
 	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object);
 
 	void deleteSelectedDevices();
+	void checkInSelectedDevices();
+	void checkOutSelectedDevices();
+	void undoChangesSelectedDevices();
+	void refreshSelectedDevices();
 
 	// Properties
 	//
@@ -122,6 +131,9 @@ public slots:
 	void projectOpened();
 	void projectClosed();
 	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void modelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
+
+	void setActionState();
 
 	// Data
 	//
@@ -135,8 +147,10 @@ private:
 	QAction* m_deleteObjectAction = nullptr;
 
 	QAction* m_SeparatorAction2 = nullptr;
-	QAction* m_checkInAction = nullptr;
 	QAction* m_checkOutAction = nullptr;
+	QAction* m_checkInAction = nullptr;
+	QAction* m_undoChangesAction = nullptr;
+	QAction* m_refreshAction = nullptr;
 
 	EquipmentModel* m_equipmentModel = nullptr;
 	EquipmentView* m_equipmentView = nullptr;

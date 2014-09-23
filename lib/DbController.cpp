@@ -368,7 +368,14 @@ bool DbController::deleteFiles(std::vector<std::shared_ptr<DbFileInfo>>* files, 
 
 		for (size_t i = 0; i < files->size(); i++)
 		{
-			assert(files->operator [](i)->fileId() == v[i].fileId());
+			// FileID can be different, as for permanently deleted files it is marked as -1
+			// so, we rely only on the file order
+			//
+			if (files->operator [](i)->fileId() != -1 &&
+				v[i].fileId() != -1)
+			{
+				assert(files->operator [](i)->fileId() == v[i].fileId());
+			}
 
 			auto& f = files->operator [](i);
 			*(f.get()) = v[i];
@@ -735,7 +742,14 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 
 	for (size_t i = 0; i < devices.size(); i++)
 	{
-		assert(devices[i]->fileInfo().fileId() == files[i].fileId());
+		// FileID can be different, as for permanently deleted files it is marked as -1
+		// so, we rely only on the file order
+		//
+		if (devices[i]->fileInfo().fileId() != -1 &&
+			files[i].fileId() != -1)
+		{
+			assert(devices[i]->fileInfo().fileId() == files[i].fileId());
+		}
 
 		devices[i]->setFileInfo(files[i]);
 	}

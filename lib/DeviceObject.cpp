@@ -157,6 +157,23 @@ namespace Hardware
 		m_children.push_back(child);
 	}
 
+	void DeviceObject::deleteChild(DeviceObject* child)
+	{
+		auto found = std::find_if(m_children.begin(), m_children.end(), [child](decltype(m_children)::const_reference c)
+			{
+				return c.get() == child;
+			});
+
+		if (found == m_children.end())
+		{
+			assert(found != m_children.end());
+			return;
+		}
+
+		m_children.erase(found);
+		return;
+	}
+
 	void DeviceObject::deleteAllChildren()
 	{
 		m_children.clear();

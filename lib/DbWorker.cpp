@@ -1520,6 +1520,7 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 
 		fileInfo.setFileName(q.value("Name").toString());
 		fileInfo.setFileId(q.value("FileID").toInt());
+		bool deleted = q.value("Deleted").toBool();
 		fileInfo.setParentId(q.value("ParentID").toInt());
 		fileInfo.setSize(q.value("Size").toInt());
 		fileInfo.setChangeset(q.value("ChangesetID").toInt());
@@ -1532,7 +1533,10 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 		user.setUserId(q.value("UserID").toInt());
 		fileInfo.setUser(user);
 
-		files->push_back(fileInfo);
+		if (deleted == false)
+		{
+			files->push_back(fileInfo);
+		}
 	}
 
 	return;
@@ -1685,13 +1689,23 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 			return;
 		}
 
-		bool deleted = q.value(0).toBool();
+		int deleteResult = q.value(0).toInt();		// 0 - error while deleteing, 1 - marked as deleted, 2 - delted from all tables
 
-		if (deleted == true)
+		switch (deleteResult)
 		{
+		case 0:
+			break;
+		case 1:
 			file.setUser(currentUser());
 			file.setState(VcsState::CheckedOut);
 			file.setAction(VcsItemAction::Deleted);
+			break;
+		case 2:
+			file.setFileId(-1);						// File does not exists any more, in any table
+			file.setUser(currentUser());
+			file.setState(VcsState::CheckedOut);
+			file.setAction(VcsItemAction::Deleted);
+			break;
 		}
 	}
 
@@ -2052,11 +2066,24 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		return;
 	}
 
-	// Set file state to CheckedIn
+	// Result is table of (FileID, Action);
 	//
-	for (auto& fi : *files)
+
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedIn);
+		int fileId = q.value(0).toInt();
+		VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(1).toInt());
+
+		// Set file state to CheckedIn
+		//
+		for (auto& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				fi.setState(VcsState::CheckedIn);
+				fi.setAction(action);
+			}
+		}
 	}
 
 	return;
@@ -2124,11 +2151,23 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	// Set file state to CheckedOut
+	// Result is table of (FileID);
 	//
-	for (auto& fi : *files)
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedOut);
+		int fileId = q.value(0).toInt();
+
+		// Set file state to CheckedOut
+		//
+		for (DbFileInfo& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				fi.setState(VcsState::CheckedOut);
+				fi.setAction(VcsItemAction::Modified);
+				fi.setUser(currentUser());
+			}
+		}
 	}
 
 	return;
