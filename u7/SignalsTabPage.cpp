@@ -2,45 +2,88 @@
 #include "SignalsTabPage.h"
 #include "../include/DbController.h"
 #include "Settings.h"
+#include "SignalPropertiesDialog.h"
+#include <QFormLayout>
+#include <QComboBox>
+#include <QDialogButtonBox>
+
+
+const int SC_STR_ID = 0,
+SC_EXT_STR_ID = 1,
+SC_NAME = 2,
+SC_CHANNEL = 3,
+SC_DATA_FORMAT = 4,
+SC_DATA_SIZE = 5,
+SC_LOW_ADC = 6,
+SC_HIGH_ADC = 7,
+SC_LOW_LIMIT = 8,
+SC_HIGH_LIMIT = 9,
+SC_UNIT = 10,
+SC_ADJUSTMENT = 11,
+SC_DROP_LIMIT = 12,
+SC_EXCESS_LIMIT = 13,
+SC_UNBALANCE_LIMIT = 14,
+SC_INPUT_LOW_LIMIT = 15,
+SC_INPUT_HIGH_LIMIT = 16,
+SC_INPUT_UNIT = 17,
+SC_INPUT_SENSOR = 18,
+SC_OUTPUT_LOW_LIMIT = 19,
+SC_OUTPUT_HIGH_LIMIT = 20,
+SC_OUTPUT_UNIT = 21,
+SC_OUTPUT_SENSOR = 22,
+SC_ACQUIRE = 23,
+SC_CALCULATED = 24,
+SC_NORMAL_STATE = 25,
+SC_DECIMAL_PLACES = 26,
+SC_APERTURE = 27,
+SC_IN_OUT_TYPE = 28,
+SC_IN_OUT_NO = 29,
+SC_DEVICE = 30;
 
 
 const char* Columns[] =
 {
-	"StrID",
-	"ExtStrID",
+	"ID",
+	"External ID",
 	"Name",
 	"Channel",
-	"DataFormat",
-	"InputUnit",
-	"OutputUnit",
-	"LowADC",
-	"HighADC",
-	"Adjustment",
-	"LowLimit",
-	"HighLimit",
+	"Data format",
+	"Data size",
+	"Low ADC",
+	"High ADC",
+	"Low limit",
+	"High limit",
 	"Unit",
-	"Aperture",
-	"DropLimit",
-	"ExcessLimit",
-	"UnbalanceLimit",
-	"InputLowLimit",
-	"InputHighLimit",
-	"OutputLowLimit",
-	"OutputHighLimit",
-	"Precision",
+	"Adjustment",
+	"Drop limit",
+	"Excess limit",
+	"Unbalance limit",
+	"InputLow limit",
+	"InputHigh limit",
+	"Input unit",
+	"Input sensor",
+	"Output low Limit",
+	"Output high Limit",
+	"Output unit",
+	"Output sensor",
 	"Acquire",
 	"Calculated",
-	"NormalState",
-	"DataSize"
+	"Normal state",
+	"Decimal places",
+	"Aperture",
+	"Input-output type",
+	"Input-output nomber",
+	"Device",
 };
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
 
 
-SignalsModel::SignalsModel(QObject *parent) :
-	QAbstractTableModel(parent)
+SignalsModel::SignalsModel(DbController* dbController, QWidget *parent) :
+	QAbstractTableModel(parent),
+	m_parentWindow(parent),
+	m_dbController(dbController)
 {
-	emit signalsIdRequest();
 }
 
 SignalsModel::~SignalsModel()
@@ -50,7 +93,7 @@ SignalsModel::~SignalsModel()
 
 int SignalsModel::rowCount(const QModelIndex &) const
 {
-	return m_signals.count() + 1;
+	return m_signalIDs.count();
 }
 
 int SignalsModel::columnCount(const QModelIndex &) const
@@ -62,18 +105,82 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 {
 	int row = index.row();
 	int col = index.column();
-	if (row == m_signals.count())
+	if (row == m_signalIDs.count())
 	{
 		return QVariant();
 	}
-	const Signal& signal = m_signals[row];
-	if (role == Qt::DisplayRole)
+	const Signal* signal = m_signalSet.getConstSignal(m_signalIDs[row]);
+	if (signal == nullptr)
+	{
+		//emit signalDataRequest(m_signalIDs[row]);
+		return QVariant();
+	}
+	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		switch (col)
 		{
-			case 0: return signal.strId();
-			case 1: return signal.extStrId();
-			case 2: return signal.name();
+			case SC_STR_ID: return signal->strID();
+			case SC_EXT_STR_ID: return signal->extStrID();
+			case SC_NAME: return signal->name();
+			case SC_CHANNEL: return signal->channel();
+			case SC_DATA_FORMAT:
+				for (int i = 0; i < m_dataFormatInfo.count(); i++)
+				{
+					if (m_dataFormatInfo[i].ID == signal->dataFormat())
+					{
+						return m_dataFormatInfo[i].name;
+					}
+				}
+				return tr("Unknown data format");
+			case SC_DATA_SIZE: return signal->dataSize();
+			case SC_LOW_ADC: return QString("0x%1").arg(signal->lowADC(), 4, 16, QChar('0'));
+			case SC_HIGH_ADC: return QString("0x%1").arg(signal->highADC(), 4, 16, QChar('0'));
+			case SC_LOW_LIMIT: return signal->lowLimit();
+			case SC_HIGH_LIMIT: return signal->highLimit();
+			case SC_UNIT:
+				for (int i = 0; i < m_unitInfo.count(); i++)
+				{
+					if (m_unitInfo[i].ID == signal->unitID())
+					{
+						return m_unitInfo[i].nameEn;
+					}
+				}
+				return tr("Unknown unit");
+			case SC_ADJUSTMENT: return signal->adjustment();
+			case SC_EXCESS_LIMIT: return signal->excessLimit();
+			case SC_UNBALANCE_LIMIT: return signal->unbalanceLimit();
+			case SC_INPUT_LOW_LIMIT: return signal->inputLowLimit();
+			case SC_INPUT_HIGH_LIMIT: return signal->inputHighLimit();
+			case SC_INPUT_UNIT:
+				for (int i = 0; i < m_unitInfo.count(); i++)
+				{
+					if (m_unitInfo[i].ID == signal->inputUnitID())
+					{
+						return m_unitInfo[i].nameEn;
+					}
+				}
+				return tr("Unknown unit");
+			case SC_INPUT_SENSOR: return SensorTypeStr[signal->inputSensorID()];
+			case SC_OUTPUT_LOW_LIMIT: return signal->outputLowLimit();
+			case SC_OUTPUT_HIGH_LIMIT: return signal->outputHighLimit();
+			case SC_OUTPUT_UNIT:
+				for (int i = 0; i < m_unitInfo.count(); i++)
+				{
+					if (m_unitInfo[i].ID == signal->outputUnitID())
+					{
+						return m_unitInfo[i].nameEn;
+					}
+				}
+				return tr("Unknown unit");
+			case SC_OUTPUT_SENSOR: return signal->outputSensorID();
+			case SC_ACQUIRE: return signal->acquire() ? "Yes" : "No";
+			case SC_CALCULATED: return signal->calculated() ? "Yes" : "No";
+			case SC_NORMAL_STATE: return signal->normalState();
+			case SC_DECIMAL_PLACES: return signal->decimalPlaces();
+			case SC_APERTURE: return signal->aperture();
+			case SC_IN_OUT_TYPE: return signal->inOutType();
+			case SC_IN_OUT_NO: return signal->inOutNo();
+			case SC_DEVICE: return signal->deviceID();
 		}
 	}
 
@@ -90,11 +197,10 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 		}
 		if (orientation == Qt::Vertical)
 		{
-			if (section < m_signals.count())
+			if (section < m_signalIDs.count())
 			{
-				return m_signals[section].signalId();
+				return m_signalIDs[section];
 			}
-			return tr("New record");
 		}
 	}
 	return QVariant();
@@ -104,34 +210,53 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 {
 	if (role == Qt::EditRole)
 	{
-		bool added = false;
 		int row = index.row();
-		if (row == m_signals.count())
-		{
-			beginInsertRows(QModelIndex(), row, row);
-			Signal signal;
-			m_signals.append(signal);
-			endInsertRows();
-			added = true;
-		}
 
-		Signal& signal = m_signals[index.row()];
+		assert(row < m_signalIDs.count());
+
+		Signal signal/* = m_signals[index.row()]*/;
 
 		switch (index.column())
 		{
-			case 0: signal.setStrId(value.toString()); break;
-			case 1: signal.setExtStrId(value.toString()); break;
-			case 2: signal.setName(value.toString()); break;
+			case SC_STR_ID: signal.setStrID(value.toString()); break;
+			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
+			case SC_NAME: signal.setName(value.toString()); break;
+			case SC_DATA_FORMAT: signal.setDataFormat(value.toInt()); break;
+			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
+			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
+			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
+			case SC_LOW_LIMIT: signal.setLowLimit(value.toDouble()); break;
+			case SC_HIGH_LIMIT: signal.setHighLimit(value.toDouble()); break;
+			case SC_UNIT: signal.setUnitID(value.toInt()); break;
+			case SC_ADJUSTMENT: signal.setAdjustment(value.toDouble()); break;
+			case SC_EXCESS_LIMIT: signal.setExcessLimit(value.toDouble()); break;
+			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
+			case SC_INPUT_LOW_LIMIT: signal.setInputLowLimit(value.toDouble()); break;
+			case SC_INPUT_HIGH_LIMIT: signal.setInputHighLimit(value.toDouble()); break;
+			case SC_INPUT_UNIT: signal.setInputUnitID(value.toInt()); break;
+			case SC_INPUT_SENSOR: signal.setInputSensorID(value.toInt()); break;
+			case SC_OUTPUT_LOW_LIMIT: signal.setOutputLowLimit(value.toDouble()); break;
+			case SC_OUTPUT_HIGH_LIMIT: signal.setOutputHighLimit(value.toDouble()); break;
+			case SC_OUTPUT_UNIT: signal.setOutputUnitID(value.toInt()); break;
+			case SC_OUTPUT_SENSOR: signal.setOutputSensorID(value.toInt()); break;
+			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
+			case SC_CALCULATED: signal.setCalculated(value.toBool()); break;
+			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
+			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
+			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
+			//case SC_IN_OUT_TYPE: signal.setInOutType(value.toInt()); break;
+			case SC_IN_OUT_NO: signal.setInOutNo(value.toInt()); break;
+			case SC_DEVICE: signal.setDeviceID(value.toInt()); break;
 		}
 
-		if (added)
+		/*if (added)
 		{
 			emit signalAdded(signal);
 		}
 		else
 		{
 			emit signalChanged(signal);
-		}
+		}*/
 	}
 
 	qDebug() << "setData with role: " << role;
@@ -143,7 +268,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 {
-	if (index.column() == 3)
+	if (index.column() == SC_CHANNEL)
 	{
 		return QAbstractTableModel::flags(index);
 	}
@@ -153,25 +278,97 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	}
 }
 
-void SignalsModel::signalsIdReceived(QVector<int> signalsId)
+void SignalsModel::loadSignals()
 {
-	for (int i = 0; i < signalsId.count(); i++)
+	//QSet<int> signalsIDs;
+
+	if (m_signalIDs.count() > 0)
 	{
-		emit signalDataRequest(signalsId[i]);
+		beginRemoveRows(QModelIndex(), 0, m_signalIDs.count() - 1);
+		m_signalIDs.clear();
+		m_signalSet.removeAll();
+		endRemoveRows();
+	}
+
+	dbController()->getSignalsIDs(&m_signalIDs, m_parentWindow);
+	dbController()->getDataFormats(&m_dataFormatInfo, m_parentWindow);
+	dbController()->getUnits(&m_unitInfo, m_parentWindow);
+
+	if (m_signalIDs.count() > 0)
+	{
+		beginInsertRows(QModelIndex(), 0, m_signalIDs.count() - 1);
+
+		if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
+		{
+			QMessageBox::warning(m_parentWindow, tr("Warning"), tr("Could not load signals"));
+		}
+
+		endInsertRows();
+	}
+
+	emit cellsSizeChanged();
+}
+
+void SignalsModel::addSignal()
+{
+	QDialog signalTypeDialog;
+	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
+
+	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
+	signalTypeCombo->addItems(QStringList() << "Analog" << "Discrete");
+	signalTypeCombo->setCurrentIndex(0);
+
+	fl->addRow(tr("Signal type"), signalTypeCombo);
+
+	QLineEdit* signalChannelCount = new QLineEdit(&signalTypeDialog);
+	signalChannelCount->setText("1");
+	QRegExp rx("[1-9]\\d{0,1}");
+	QValidator *validator = new QRegExpValidator(rx, &signalTypeDialog);
+	signalChannelCount->setValidator(validator);
+
+	fl->addRow(tr("Signal channel count"), signalChannelCount);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	connect(buttonBox, SIGNAL(accepted()), &signalTypeDialog, SLOT(accept()));
+	connect(buttonBox, SIGNAL(rejected()), &signalTypeDialog, SLOT(reject()));
+
+	fl->addRow(buttonBox);
+
+	signalTypeDialog.setLayout(fl);
+
+	if (signalTypeDialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	int channelCount = signalChannelCount->text().toInt();
+
+	Signal signal;
+	SignalPropertiesDialog dlg(signal, m_dataFormatInfo, m_unitInfo, m_parentWindow);
+	if (dlg.exec() == QDialog::Accepted)
+	{
+		QVector<Signal> signalVector;
+		for (int i = 0; i < channelCount; i++)
+		{
+			signalVector << signal;
+		}
+		if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
+		{
+			beginInsertRows(QModelIndex(), m_signalIDs.count(), m_signalIDs.count() + signalVector.count() - 1);
+			for (int i = 0; i < signalVector.count(); i++)
+			{
+				m_signalIDs.append(signalVector[i].ID());
+				m_signalSet.insert(signalVector[i]);
+			}
+			endInsertRows();
+		}
 	}
 }
 
-void SignalsModel::signalDataReceived(Signal signal)
+DbController *SignalsModel::dbController()
 {
-	for (int i = 0; i < m_signals.count(); i++)
-	{
-		if (m_signals[i].signalId() == signal.signalId())
-		{
-			m_signals[i] = signal;
-			return;
-		}
-	}
-	m_signals.append(signal);
+	return m_dbController;
 }
 
 //
@@ -184,10 +381,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
-	// Create Actions
-	//
-	CreateActions();
-
 	// Set context menu to Equipment View
 	//
 	/*m_equipmentView->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -199,14 +392,22 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Property View
 	//
-	//m_propertyView = new QTextEdit();
-	m_signalsModel = new SignalsModel(this);
+	m_signalsModel = new SignalsModel(dbcontroller, this);
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsModel);
+	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
+	//m_signalsView->verticalHeader()->doubleClicked();
+	//connect(m_signalsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
 	connect(m_signalsModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_signalsView, SLOT(resizeColumnsToContents()));
 	connect(m_signalsModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_signalsView, SLOT(resizeRowsToContents()));
+	connect(m_signalsModel, SIGNAL(cellsSizeChanged()), m_signalsView, SLOT(resizeColumnsToContents()));
+	connect(m_signalsModel, SIGNAL(cellsSizeChanged()), m_signalsView, SLOT(resizeRowsToContents()));
 	m_signalsView->resizeColumnsToContents();
 	m_signalsView->resizeRowsToContents();
+
+	// Create Actions
+	//
+	CreateActions();
 
 	// Splitter
 	//
@@ -255,6 +456,12 @@ void SignalsTabPage::CreateActions()
 	//m_addSystemAction->setEnabled(false);
 	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
 	*/
+	QAction* action = new QAction(tr("Create signal"), this);
+	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
+	m_signalsView->addAction(action);
+	/*m_signalsView->addAction(menu->addAction(new QAction("Edit signal", this)));
+	m_signalsView->addAction(menu->addAction(new QAction("Delete signal", this)));
+	m_signalsView->addAction(menu->addAction(new QAction("Restore signal", this)));*/
 	return;
 }
 
@@ -267,9 +474,8 @@ void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
-	QSet<int> signalsIDs;
+	m_signalsModel->loadSignals();
 
-	dbController()->getSignalsIDs(&signalsIDs, this);
 	return;
 }
 
@@ -277,4 +483,9 @@ void SignalsTabPage::projectClosed()
 {
 	this->setEnabled(false);
 	return;
+}
+
+void SignalsTabPage::contextMenuRequested(QPoint)
+{
+	//menu->popup(table->viewport()->mapToGlobal(pos));
 }

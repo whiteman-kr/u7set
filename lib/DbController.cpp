@@ -47,6 +47,10 @@ DbController::DbController() :
 	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
+	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
+	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
+	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
+	connect(this, &DbController::signal_getDataFormats, m_worker, &DbWorker::slot_getDataFormats);
 
 	m_thread.start();
 }
@@ -758,7 +762,7 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 }
 
 
-bool DbController::getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget)
+bool DbController::getSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
 {
 	if (signalIDs == nullptr)
 	{
@@ -781,6 +785,108 @@ bool DbController::getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget)
 
 	return ok;
 }
+
+
+bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
+{
+	if (signalSet == nullptr)
+	{
+		assert(signalSet != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getSignals(signalSet);
+
+	ok = waitForComplete(parentWidget, tr("Reading signals"));
+
+	return ok;
+}
+
+
+bool DbController::addSignal(SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)
+{
+	if (newSignal == nullptr)
+	{
+		assert(newSignal != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_addSignal(signalType, newSignal);
+
+	ok = waitForComplete(parentWidget, tr("Adding signals"));
+
+	return ok;
+}
+
+
+bool DbController::getUnits(QVector<Unit>* units, QWidget* parentWidget)
+{
+	if (units == nullptr)
+	{
+		assert(units != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getUnits(units);
+
+	ok = waitForComplete(parentWidget, tr("Reading units"));
+
+	return ok;
+
+}
+
+
+bool DbController::getDataFormats(QVector<DataFormat>* dataFormats, QWidget* parentWidget)
+{
+	if (dataFormats == nullptr)
+	{
+		assert(dataFormats != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getDataFormats(dataFormats);
+
+	ok = waitForComplete(parentWidget, tr("Reading data formats"));
+
+	return ok;
+}
+
 
 
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)

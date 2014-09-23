@@ -2,7 +2,8 @@
 
 // Upgrade database
 //
-const UpgradeItem DbWorker::upgradeItems[] = {
+const UpgradeItem DbWorker::upgradeItems[] =
+{
 	{"Create project", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0001.sql"},
 	{"Add Changeset table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0002.sql"},
 	{"Add Disabled column to User table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0003.sql"},
@@ -27,10 +28,11 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add add_device function, drop AddSystem", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0022.sql"},
 	{"Add is_admin function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0023.sql"},
 	{"Add CheckedInInstanceID, CheckedOutInstanceID to table File", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0024.sql"},
-	{"DUMMYY WAIT FOR WHITEMAN COMMIT", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
+	{"Add columns in Signal table and some stored procedures", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
 	{"Changes in  get_file_list, add_file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0026.sql"},
 	{"Add action column to result from get_file_list", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0027.sql"},
-	};
+};
+
 
 int DbWorker::counter = 0;
 
@@ -2365,14 +2367,9 @@ void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExte
 }
 
 
-void DbWorker::slot_getSignalsIDs(QSet<int>* signalsIDs)
+void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 {
-	// Init automitic varaiables
-	//
-	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
-		{
-			this->m_progress->setCompleted(true);			// set complete flag on return
-		});
+	AUTO_COMPLETE
 
 	// Check parameters
 	//
@@ -2388,7 +2385,7 @@ void DbWorker::slot_getSignalsIDs(QSet<int>* signalsIDs)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get signals' IDs. Database connection is not openned."));
+		emitError(tr("Cannot get signals' IDs. Database connection is not opened."));
 		return;
 	}
 
@@ -2410,12 +2407,312 @@ void DbWorker::slot_getSignalsIDs(QSet<int>* signalsIDs)
 	{
 		int signalID = q.value(0).toInt();
 
-		qDebug() << signalID;
+		//qDebug() << signalID;
 
-		signalsIDs->insert(signalID);
+		signalsIDs->append(signalID);
 	}
 
 	return;
+}
+
+
+void DbWorker::slot_getSignals(SignalSet* signalSet)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (signalSet == nullptr)
+	{
+		assert(signalSet != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get signals. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_signals_ids(%1, %2)")
+		.arg(currentUser().userId()).arg("false");
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	QVector<int> signalsIDs;
+
+	while(q.next() != false)
+	{
+		signalsIDs.append(q.value(0).toInt());
+	}
+
+	int signalCount = signalsIDs.count();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		int signalID = signalsIDs[i];
+
+		// request
+		//
+		QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
+			.arg(currentUser().userId()).arg(signalID);
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
+			return;
+		}
+
+		while(q.next() != false)
+		{
+			Signal s;
+
+			getSignalData(q, s);
+
+			signalSet->insert(s);
+		}
+
+		int percent = (i * 100) / signalCount;
+
+		if (m_progress != nullptr)
+		{
+			m_progress->setValue(percent);
+		}
+	}
+
+	m_progress->setValue(100);
+
+	return;
+
+}
+
+void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
+{
+	s.setID(q.value("signalid").toInt());
+	s.setSignalGroupID(q.value("signalgroupid").toInt());
+	s.setSignalInstanceID(q.value("signalinstanceid").toInt());
+	s.setChangesetID(q.value("changesetid").toInt());
+	s.setCheckedOut(q.value("checkedout").toBool());
+	s.setUserID(q.value("userid").toInt());
+	s.setChannel(q.value("channel").toInt());
+	s.setType(static_cast<SignalType>(q.value("type").toInt()));
+	s.setCreated(q.value("created").toString());
+	s.setDeleted(q.value("deleted").toBool());
+	s.setInstanceCreated(q.value("instancecreated").toString());
+	s.setInstanceAction(static_cast<InstanceAction>(q.value("action").toInt()));
+	s.setStrID(q.value("strid").toString());
+	s.setExtStrID(q.value("extstrid").toString());
+	s.setName(q.value("name").toString());
+	s.setDataFormat(q.value("dataformatid").toInt());
+	s.setDataSize(q.value("datasize").toInt());
+	s.setLowADC(q.value("lowadc").toInt());
+	s.setHighADC(q.value("highadc").toInt());
+	s.setLowLimit(q.value("lowlimit").toDouble());
+	s.setHighLimit(q.value("highlimit").toDouble());
+	s.setUnitID(q.value("unitid").toInt());
+	s.setAdjustment(q.value("adjustment").toDouble());
+	s.setDropLimit(q.value("droplimit").toDouble());
+	s.setExcessLimit(q.value("excesslimit").toDouble());
+	s.setUnbalanceLimit(q.value("unbalancelimit").toDouble());
+	s.setInputLowLimit(q.value("inputlowlimit").toDouble());
+	s.setInputHighLimit(q.value("inputhighlimit").toDouble());
+	s.setInputUnitID(q.value("inputunitid").toInt());
+	s.setInputSensorID(q.value("inputsensorid").toInt());
+	s.setOutputLowLimit(q.value("outputlowlimit").toDouble());
+	s.setOutputHighLimit(q.value("outputhighlimit").toDouble());
+	s.setOutputUnitID(q.value("outputunitid").toInt());
+	s.setOutputSensorID(q.value("outputsensorid").toInt());
+	s.setAcquire(q.value("acquire").toBool());
+	s.setCalculated(q.value("calculated").toBool());
+	s.setNormalState(q.value("normalstate").toInt());
+	s.setDecimalPlaces(q.value("decimalplaces").toInt());
+	s.setAperture(q.value("aperture").toDouble());
+	s.setInOutType(static_cast<SignalInOutType>(q.value("inouttype").toInt()));
+	s.setDeviceID(q.value("deviceid").toInt());
+	s.setInOutNo(q.value("inoutno").toInt());
+}
+
+
+void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
+{
+	AUTO_COMPLETE
+
+	if (newSignal == nullptr)
+	{
+		assert(newSignal != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot add signals. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM add_signal(%1, %2, %3)")
+		.arg(currentUser().userId()).arg(static_cast<int>(signalType)).arg(newSignal->count());
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't add new signal(s)! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	int i = 0;
+
+	int readed = 0;
+
+	while(q.next() != false)
+	{
+		int signalID =  q.value(0).toInt();
+
+		QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
+			.arg(currentUser().userId()).arg(signalID);
+
+		QSqlQuery q2(db);
+
+		result = q2.exec(request2);
+
+		if (result == false)
+		{
+			emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+			return;
+		}
+
+		assert(i<newSignal->count());
+
+		while(q2.next() != false)
+		{
+			getSignalData(q2, (*newSignal)[i]);
+			readed++;
+		}
+
+		i++;
+	}
+
+	assert(i == readed);
+}
+
+
+void DbWorker::slot_getUnits(QVector<Unit>* units)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (units == nullptr)
+	{
+		assert(units != nullptr);
+		return;
+	}
+
+	units->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get units. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_units()");
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get units! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		Unit unit;
+
+		unit.ID = q.value("unitid").toInt();
+		unit.nameEn = q.value("unit_en").toString();
+		unit.nameRu = q.value("unit_ru").toString();
+
+		units->append(unit);
+	}
+}
+
+void DbWorker::slot_getDataFormats(QVector<DataFormat>* dataFormats)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (dataFormats == nullptr)
+	{
+		assert(dataFormats != nullptr);
+		return;
+	}
+
+	dataFormats->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get data formats. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_data_formats()");
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get data formats! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		DataFormat dataFormat;
+
+		dataFormat.ID = q.value("dataformatid").toInt();
+		dataFormat.name = q.value("name").toString();
+
+		dataFormats->append(dataFormat);
+	}
 }
 
 

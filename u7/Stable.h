@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STABLE_H
+#define STABLE_H
 
 // C includes, must be before c++ includes
 //
@@ -106,6 +107,8 @@
 	#endif
 
 #endif
+
+#endif // STABLE_H
 
 
 

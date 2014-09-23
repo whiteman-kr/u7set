@@ -80,7 +80,8 @@ SOURCES +=\
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
 	../lib/CUtils.cpp \
-    ../lib/Signal.cpp
+    ../lib/Signal.cpp \
+    SignalPropertiesDialog.cpp
 
 
 HEADERS  += \
@@ -125,7 +126,9 @@ HEADERS  += \
     ../include/StreamedData.h \
     ../include/ProtoSerialization.h \
     ../include/Factory.h \
-    ../include/CUtils.h
+    ../include/CUtils.h \
+    ../include/Signal.h \
+    SignalPropertiesDialog.h
     ../include/Signal.h
 
 FORMS    += \
@@ -143,6 +146,8 @@ FORMS    += \
 
 RESOURCES += \
 	Resources.qrc
+
+include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 OTHER_FILES += \
 	../Proto/proto_compile.bat \
@@ -179,6 +184,7 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0028.sql \
     DatabaseUpgrade/Upgrade0029.sql \
     DatabaseUpgrade/Upgrade0030.sql
+
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
