@@ -179,8 +179,14 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_DECIMAL_PLACES: return signal->decimalPlaces();
 			case SC_APERTURE: return signal->aperture();
 			case SC_IN_OUT_TYPE: return signal->inOutType();
-			case SC_IN_OUT_NO: return signal->inOutNo();
-			case SC_DEVICE: return signal->deviceID();
+
+			// !!!!!!!!!!!!!! ЭТИХ ПОЛЕЙ УЖЕ НЕТ !!!!!!!!!!!!!!!!
+			case SC_IN_OUT_NO: return 0; // signal->inOutNo();
+			case SC_DEVICE: return 0; // signal->deviceID();
+			// !!!!!!!!!!!!!! ЭТИХ ПОЛЕЙ УЖЕ НЕТ !!!!!!!!!!!!!!!!
+
+			default:
+				;//assert(false);  РАССКОММЕНТИРОВАТЬ!!!!
 		}
 	}
 
@@ -245,8 +251,11 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
 			//case SC_IN_OUT_TYPE: signal.setInOutType(value.toInt()); break;
-			case SC_IN_OUT_NO: signal.setInOutNo(value.toInt()); break;
-			case SC_DEVICE: signal.setDeviceID(value.toInt()); break;
+
+			default:
+				assert(false);
+			//case SC_IN_OUT_NO: signal.setInOutNo(value.toInt()); break;
+			//case SC_DEVICE: signal.setDeviceID(value.toInt()); break;
 		}
 
 		/*if (added)

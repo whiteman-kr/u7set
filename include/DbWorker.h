@@ -15,6 +15,7 @@ private:
 	DbWorker();
 
 	void getSignalData(QSqlQuery& q, Signal &s);
+	QString getSignalDataStr(const Signal& s);
 
 public:
 	DbWorker(DbProgress* progress);

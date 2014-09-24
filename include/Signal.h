@@ -131,8 +131,7 @@ private:
 	int m_decimalPlaces = 2;
 	double m_aperture = 0;
 	SignalInOutType m_inOutType = SignalInOutType::internal;
-	int m_deviceID = 0;
-	int m_inOutNo = 0;
+	QString m_deviceStrID;
 
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -250,11 +249,8 @@ public:
 	SignalInOutType inOutType() const { return m_inOutType; }
 	void setInOutType(SignalInOutType inOutType) { m_inOutType = inOutType; }
 
-	int deviceID() const { return m_deviceID; }
-	void setDeviceID(int deviceID) { m_deviceID = deviceID; }
-
-	int inOutNo() const { return m_inOutNo; }
-	void setInOutNo(int inOutNo) { m_inOutNo = inOutNo; }
+	QString deviceStrID() const { return m_deviceStrID; }
+	void setDeviceStrID(const QString& deviceStrID) { m_deviceStrID = deviceStrID; }
 
 	friend class DbWorker;
 };
