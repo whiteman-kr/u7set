@@ -147,6 +147,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				}
 				return tr("Unknown unit");
 			case SC_ADJUSTMENT: return signal->adjustment();
+			case SC_DROP_LIMIT: return signal->dropLimit();
 			case SC_EXCESS_LIMIT: return signal->excessLimit();
 			case SC_UNBALANCE_LIMIT: return signal->unbalanceLimit();
 			case SC_INPUT_LOW_LIMIT: return signal->inputLowLimit();
@@ -181,6 +182,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_IN_OUT_TYPE: return signal->inOutType();
 			case SC_IN_OUT_NO: return signal->inOutNo();
 			case SC_DEVICE: return signal->deviceID();
+			default: assert(false);
 		}
 	}
 
@@ -229,6 +231,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_HIGH_LIMIT: signal.setHighLimit(value.toDouble()); break;
 			case SC_UNIT: signal.setUnitID(value.toInt()); break;
 			case SC_ADJUSTMENT: signal.setAdjustment(value.toDouble()); break;
+			case SC_DROP_LIMIT: signal.setDropLimit(value.toDouble()); break;
 			case SC_EXCESS_LIMIT: signal.setExcessLimit(value.toDouble()); break;
 			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
 			case SC_INPUT_LOW_LIMIT: signal.setInputLowLimit(value.toDouble()); break;
@@ -244,22 +247,12 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
-			//case SC_IN_OUT_TYPE: signal.setInOutType(value.toInt()); break;
+			case SC_IN_OUT_TYPE: signal.setInOutType(SignalInOutType(value.toInt())); break;
 			case SC_IN_OUT_NO: signal.setInOutNo(value.toInt()); break;
 			case SC_DEVICE: signal.setDeviceID(value.toInt()); break;
+			default: assert(false);
 		}
-
-		/*if (added)
-		{
-			emit signalAdded(signal);
-		}
-		else
-		{
-			emit signalChanged(signal);
-		}*/
 	}
-
-	qDebug() << "setData with role: " << role;
 
 	emit dataChanged(index, index, QVector<int>() << role);
 

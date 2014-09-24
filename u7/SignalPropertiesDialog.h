@@ -12,6 +12,7 @@ class QtStringPropertyManager;
 class QtEnumPropertyManager;
 class QtIntPropertyManager;
 class QtDoublePropertyManager;
+class QtBoolPropertyManager;
 
 class SignalPropertiesDialog : public QDialog
 {
@@ -33,6 +34,7 @@ private:
 	QtEnumPropertyManager* m_enumManager;
 	QtIntPropertyManager* m_intManager;
 	QtDoublePropertyManager* m_doubleManager;
+	QtBoolPropertyManager* m_boolManager;
 
 	QtProperty* m_strIDProperty;
 	QtProperty* m_extStrIDProperty;
@@ -45,6 +47,7 @@ private:
 	QtProperty* m_highLimitProperty;
 	QtProperty* m_unitProperty;
 	QtProperty* m_adjustmentProperty;
+	QtProperty* m_dropLimitProperty;
 	QtProperty* m_excessLimitProperty;
 	QtProperty* m_unbalanceLimitProperty;
 
@@ -57,6 +60,9 @@ private:
 	QtProperty* m_outputHighLimitProperty;
 	QtProperty* m_outputUnitProperty;
 	QtProperty* m_outputSensorProperty;
+
+	QtProperty* m_acquireProperty;
+	QtProperty* m_calculatedProperty;
 };
 
 #endif // SIGNALPROPERTIESDIALOG_H

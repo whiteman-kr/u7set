@@ -3,6 +3,7 @@
 #include <QtIntPropertyManager>
 #include <QtEnumPropertyManager>
 #include <QtDoublePropertyManager>
+#include <QtBoolPropertyManager>
 #include <QtProperty>
 #include <QtTreePropertyBrowser>
 #include <QtLineEditFactory>
@@ -21,6 +22,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_enumManager = new QtEnumPropertyManager(this);
 	m_intManager = new QtIntPropertyManager(this);
 	m_doubleManager = new QtDoublePropertyManager(this);
+	m_boolManager = new QtBoolPropertyManager(this);
+
 	QtProperty *signalProperty = groupManager->addProperty(tr("Signal"));
 
     m_strIDProperty = m_stringManager->addProperty(tr("ID"));
@@ -91,6 +94,10 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_adjustmentProperty = m_doubleManager->addProperty(tr("Adjustment"));
 	m_doubleManager->setValue(m_adjustmentProperty, signal.adjustment());
 	signalProperty->addSubProperty(m_adjustmentProperty);
+
+	m_dropLimitProperty = m_doubleManager->addProperty(tr("Drop limit"));
+	m_doubleManager->setValue(m_dropLimitProperty, signal.dropLimit());
+	signalProperty->addSubProperty(m_dropLimitProperty);
 
 	m_excessLimitProperty = m_doubleManager->addProperty(tr("Excess limit"));
 	m_doubleManager->setValue(m_excessLimitProperty, signal.excessLimit());
@@ -169,16 +176,30 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 
 	signalProperty->addSubProperty(outputProperty);
 
+	m_acquireProperty = m_boolManager->addProperty(tr("Acquire"));
+	m_boolManager->setValue(m_acquireProperty, signal.acquire());
+	signalProperty->addSubProperty(m_acquireProperty);
+
+	m_calculatedProperty = m_boolManager->addProperty(tr("Calculated"));
+	m_boolManager->setValue(m_calculatedProperty, signal.calculated());
+	signalProperty->addSubProperty(m_calculatedProperty);
+
+	m_acquireProperty = m_boolManager->addProperty(tr("Acquire"));
+	m_boolManager->setValue(m_acquireProperty, signal.acquire());
+	signalProperty->addSubProperty(m_acquireProperty);
+
 	QtLineEditFactory* lineEditFactory = new QtLineEditFactory(this);
 	QtEnumEditorFactory* enumEditFactory = new QtEnumEditorFactory(this);
 	QtSpinBoxFactory* spinBoxFactory = new QtSpinBoxFactory(this);
 	QtDoubleSpinBoxFactory* doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(this);
+	QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
 
 	QtAbstractPropertyBrowser *browser = new QtTreePropertyBrowser(this);
 	browser->setFactoryForManager(m_stringManager, lineEditFactory);
 	browser->setFactoryForManager(m_enumManager, enumEditFactory);
 	browser->setFactoryForManager(m_intManager, spinBoxFactory);
 	browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
+	browser->setFactoryForManager(m_boolManager, checkBoxFactory);
 
 	browser->addProperty(signalProperty);
 
@@ -261,6 +282,9 @@ void SignalPropertiesDialog::saveSignal()
 	sensorIndex = m_enumManager->value(m_outputSensorProperty);
 	if (sensorIndex > 0 && sensorIndex < SENSOR_TYPE_COUNT)
 	{
-		m_signal.setInputSensorID(sensorIndex);
+		m_signal.setOutputSensorID(sensorIndex);
 	}
+
+	m_signal.setAcquire(m_boolManager->value(m_acquireProperty));
+	m_signal.setCalculated(m_boolManager->value(m_calculatedProperty));
 }
