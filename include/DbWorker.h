@@ -15,6 +15,7 @@ private:
 	DbWorker();
 
 	void getSignalData(QSqlQuery& q, Signal &s);
+	QString getSignalDataStr(const Signal& s);
 
 public:
 	DbWorker(DbProgress* progress);
@@ -101,6 +102,8 @@ public slots:
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
 	bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
 	int db_getProjectVersion(QSqlDatabase db);
+
+	bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) const;
 
 	// Properties
 	//

@@ -556,7 +556,12 @@ bool DbController::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* par
 bool DbController::checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget)
 {
 	std::vector<DbFileInfo> fv {file};
-	return checkIn(fv, comment, parentWidget);
+
+	bool ok = checkIn(fv, comment, parentWidget);
+
+	file = fv.front();
+
+	return ok;
 }
 
 bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget)
@@ -588,7 +593,12 @@ bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& commen
 bool DbController::checkOut(DbFileInfo& file, QWidget* parentWidget)
 {
 	std::vector<DbFileInfo> fv {file};
-	return checkOut(fv, parentWidget);
+
+	bool ok = checkOut(fv, parentWidget);
+
+	file = fv.front();
+
+	return ok;
 }
 
 bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget)
@@ -621,7 +631,12 @@ bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidge
 bool DbController::undoChanges(DbFileInfo& file, QWidget* parentWidget)
 {
 	std::vector<DbFileInfo> fv {file};
-	return undoChanges(fv, parentWidget);
+
+	bool ok = undoChanges(fv, parentWidget);
+
+	file = fv.front();
+
+	return ok;
 }
 
 bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget)
@@ -718,7 +733,7 @@ bool DbController::addDeviceObject(Hardware::DeviceObject* device, int parentId,
 
 	device->setFileInfo(file);
 
-	return true;
+	return ok;
 }
 
 bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& devices, QWidget* parentWidget)
@@ -746,14 +761,7 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 
 	for (size_t i = 0; i < devices.size(); i++)
 	{
-		// FileID can be different, as for permanently deleted files it is marked as -1
-		// so, we rely only on the file order
-		//
-		if (devices[i]->fileInfo().fileId() != -1 &&
-			files[i].fileId() != -1)
-		{
-			assert(devices[i]->fileInfo().fileId() == files[i].fileId());
-		}
+		assert(devices[i]->fileInfo().fileId() == files[i].fileId());
 
 		devices[i]->setFileInfo(files[i]);
 	}

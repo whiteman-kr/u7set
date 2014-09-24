@@ -52,7 +52,7 @@ QVariant FilesModel::data(const QModelIndex& index, int role /*= Qt::DisplayRole
 				return QVariant(fileInfo->state().text());
 
 			case FileUserColumn:
-				return QVariant(fileInfo->user().username());
+				return QVariant(fileInfo->userId());
 
 			case FileLastCheckInColumn:
 				return QVariant(fileInfo->lastCheckIn().toString());
@@ -558,7 +558,7 @@ void FileView::setWorkcopy(std::vector<DbFileInfo> files)
 
 	auto fileInfo = files[0];
 
-	if (fileInfo.state() != VcsState::CheckedOut || fileInfo.user() != dbController()->currentUser())
+	if (fileInfo.state() != VcsState::CheckedOut || fileInfo.userId() != dbController()->currentUser().userId())
 	{
 		return;
 	}
@@ -730,7 +730,7 @@ void FileView::slot_CheckIn()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.user() == dbController()->currentUser())
+		if (file.userId() == dbController()->currentUser().userId())
 		{
 			files.push_back(file);
 		}
@@ -758,7 +758,7 @@ void FileView::slot_UndoChanges()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.user() == dbController()->currentUser())
+		if (file.userId() == dbController()->currentUser().userId())
 		{
 			files.push_back(file);
 		}
@@ -795,7 +795,7 @@ void FileView::slot_GetWorkcopy()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.state() == VcsState::CheckedOut && file.user() == dbController()->currentUser())
+		if (file.state() == VcsState::CheckedOut && file.userId() == dbController()->currentUser().userId())
 		{
 			files.push_back(file);
 		}
@@ -823,7 +823,7 @@ void FileView::slot_SetWorkcopy()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.state() == VcsState::CheckedOut && file.user() == dbController()->currentUser())
+		if (file.state() == VcsState::CheckedOut && file.userId() == dbController()->currentUser().userId())
 		{
 			files.push_back(file);
 		}
@@ -870,21 +870,21 @@ void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, con
 
 		// hasOpenPossibility -- almost any file can be opened
 		//
-		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->user().userId() == currentUserId)
+		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
 		{
 			hasOpenPossibility = true;
 		}
 
 		// hasCheckInPossibility
 		//
-		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->user().userId() == currentUserId)
+		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
 		{
 			hasCheckInPossibility = true;
 		}
 
 		// hasUndoPossibility
 		//
-		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->user().userId() == currentUserId)
+		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
 		{
 			hasUndoPossibility = true;
 		}
@@ -898,7 +898,7 @@ void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, con
 
 		// canGetWorkcopy, canSetWorkcopy
 		//
-		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->user().userId() == currentUserId)
+		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
 		{
 			canGetWorkcopy = true;
 			canSetWorkcopy ++;

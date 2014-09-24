@@ -37,8 +37,7 @@ SC_NORMAL_STATE = 25,
 SC_DECIMAL_PLACES = 26,
 SC_APERTURE = 27,
 SC_IN_OUT_TYPE = 28,
-SC_IN_OUT_NO = 29,
-SC_DEVICE = 30;
+SC_DEVICE_STR_ID = 29;
 
 
 const char* Columns[] =
@@ -72,8 +71,7 @@ const char* Columns[] =
 	"Decimal places",
 	"Aperture",
 	"Input-output type",
-	"Input-output nomber",
-	"Device",
+	"Device ID",
 };
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
@@ -180,9 +178,9 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_DECIMAL_PLACES: return signal->decimalPlaces();
 			case SC_APERTURE: return signal->aperture();
 			case SC_IN_OUT_TYPE: return signal->inOutType();
-			case SC_IN_OUT_NO: return signal->inOutNo();
-			case SC_DEVICE: return signal->deviceID();
-			default: assert(false);
+			case SC_DEVICE_STR_ID: return signal->deviceStrID();
+			default:
+				assert(false);
 		}
 	}
 
@@ -248,9 +246,9 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
 			case SC_IN_OUT_TYPE: signal.setInOutType(SignalInOutType(value.toInt())); break;
-			case SC_IN_OUT_NO: signal.setInOutNo(value.toInt()); break;
-			case SC_DEVICE: signal.setDeviceID(value.toInt()); break;
-			default: assert(false);
+			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
+			default:
+				assert(false);
 		}
 	}
 

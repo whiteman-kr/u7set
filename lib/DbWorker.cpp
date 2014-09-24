@@ -1533,10 +1533,7 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
 		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
-
-		DbUser user;
-		user.setUserId(q.value("UserID").toInt());
-		fileInfo.setUser(user);
+		fileInfo.setUserId(q.value("UserID").toInt());
 
 		if (deleted == false)
 		{
@@ -1615,16 +1612,14 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't get FileID"));
+			emitError(tr("Can't get request result."));
 			return;
 		}
 
-		int fileId = q.value(0).toInt();
+		file->setFileId(q.value(0).toInt());		// File just created, init it's fileId and parentid
+		file->setParentId(parentId);
 
-		file->setFileId(fileId);
-		file->setUser(currentUser());
-		file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
-		file->setAction(VcsItemAction::Added);
+		db_updateFileState(q, file.get());
 	}
 
 	return;
@@ -1694,24 +1689,7 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 			return;
 		}
 
-		int deleteResult = q.value(0).toInt();		// 0 - error while deleteing, 1 - marked as deleted, 2 - delted from all tables
-
-		switch (deleteResult)
-		{
-		case 0:
-			break;
-		case 1:
-			file.setUser(currentUser());
-			file.setState(VcsState::CheckedOut);
-			file.setAction(VcsItemAction::Deleted);
-			break;
-		case 2:
-			file.setFileId(-1);						// File does not exists any more, in any table
-			file.setUser(currentUser());
-			file.setState(VcsState::CheckedOut);
-			file.setAction(VcsItemAction::Deleted);
-			break;
-		}
+		db_updateFileState(q, &file);
 	}
 
 	return;
@@ -1799,16 +1777,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 		int action = q.value("Action").toInt();
 		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
-		DbUser user;
-		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
-
-		if (ok == false)
-		{
-			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
-			continue;
-		}
-
-		file->setUser(user);
+		file->setUserId(q.value("UserID").toInt());
 
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
@@ -1902,16 +1871,7 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 		int action = q.value("Action").toInt();
 		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
-		DbUser user;
-		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
-
-		if (ok == false)
-		{
-			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
-			continue;
-		}
-
-		file->setUser(user);
+		file->setUserId(q.value("UserID").toInt());
 
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
@@ -2071,24 +2031,25 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		return;
 	}
 
-	// Result is table of (FileID, Action);
+	// Result is table of (ObjectState);
 	//
-
 	while (q.next())
 	{
 		int fileId = q.value(0).toInt();
-		VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(1).toInt());
 
 		// Set file state to CheckedIn
 		//
+		bool updated = false;
 		for (auto& fi : *files)
 		{
 			if (fi.fileId() == fileId)
 			{
-				fi.setState(VcsState::CheckedIn);
-				fi.setAction(action);
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
 			}
 		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2156,23 +2117,25 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	// Result is table of (FileID);
+	// Result is table of (ObjectState);
 	//
 	while (q.next())
 	{
 		int fileId = q.value(0).toInt();
 
-		// Set file state to CheckedOut
+		// Set file state to CheckedIn
 		//
-		for (DbFileInfo& fi : *files)
+		bool updated = false;
+		for (auto& fi : *files)
 		{
 			if (fi.fileId() == fileId)
 			{
-				fi.setState(VcsState::CheckedOut);
-				fi.setAction(VcsItemAction::Modified);
-				fi.setUser(currentUser());
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
 			}
 		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2239,11 +2202,21 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	// Set file state to CheckedIn
-	//
-	for (auto& fi : *files)
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedIn);
+		int fileId = q.value(0).toInt();
+
+		bool updated = false;
+		for (auto& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
+			}
+		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2359,12 +2332,10 @@ void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExte
 		return;
 	}
 
-	int fileId = q.value(0).toInt();
-
-	file->setFileId(fileId);
+	file->setFileId(q.value(0).toInt());
 	file->setParentId(parentId);
-	file->setUser(currentUser());
-	file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
+
+	db_updateFileState(q, file);
 
 	return;
 }
@@ -2546,8 +2517,59 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setDecimalPlaces(q.value("decimalplaces").toInt());
 	s.setAperture(q.value("aperture").toDouble());
 	s.setInOutType(static_cast<SignalInOutType>(q.value("inouttype").toInt()));
-	s.setDeviceID(q.value("deviceid").toInt());
-	s.setInOutNo(q.value("inoutno").toInt());
+	s.setDeviceStrID(q.value("deviceid").toString());
+}
+
+
+QString DbWorker::getSignalDataStr(const Signal& s)
+{
+	return QString(
+			"'(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,"
+			"%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,"
+			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
+			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
+			"%41)'")
+	.arg(s.ID())
+	.arg(s.signalGroupID())
+	.arg(s.signalInstanceID())
+	.arg(s.changesetID())
+	.arg(s.checkedOut())
+	.arg(s.userID())
+	.arg(s.channel())
+	.arg(s.type())
+	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
+	.arg(s.deleted())
+	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
+	.arg(s.instanceAction())
+	.arg(s.strID())
+	.arg(s.extStrID())
+	.arg(s.name())
+	.arg(s.dataFormat())
+	.arg(s.dataSize())
+	.arg(s.lowADC())
+	.arg(s.highADC())
+	.arg(s.lowLimit())
+	.arg(s.highLimit())
+	.arg(s.unitID())// ? "NULL" : QString("%1").arg(s.unitID()))
+	.arg(s.adjustment())
+	.arg(s.dropLimit())
+	.arg(s.excessLimit())
+	.arg(s.unbalanceLimit())
+	.arg(s.inputLowLimit())
+	.arg(s.inputHighLimit())
+	.arg(s.inputUnitID())// ? "NULL" : QString("%1").arg(s.inputUnitID()))
+	.arg(s.inputSensorID())// ? "NULL" : QString("%1").arg(s.inputSensorID()))
+	.arg(s.outputLowLimit())
+	.arg(s.outputHighLimit())
+	.arg(s.outputUnitID())// ? "NULL" : QString("%1").arg(s.outputUnitID()))
+	.arg(s.outputSensorID())//? "NULL" : QString("%1").arg(s.outputSensorID()))
+	.arg(s.acquire() ? "TRUE" : "FALSE")
+	.arg(s.calculated() ? "TRUE" : "FALSE")
+	.arg(s.normalState())
+	.arg(s.decimalPlaces())
+	.arg(s.aperture())
+	.arg(s.inOutType())
+	.arg(s.deviceStrID().isEmpty() ? "NULL" : s.deviceStrID());
 }
 
 
@@ -2593,8 +2615,16 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 	{
 		int signalID =  q.value(0).toInt();
 
-		QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
-			.arg(currentUser().userId()).arg(signalID);
+		Signal& signal = (*newSignal)[i];
+
+		signal.setID(signalID);
+		signal.setCreated(QDateTime::currentDateTime());
+		signal.setInstanceCreated(QDateTime::currentDateTime());
+
+		QString sds = getSignalDataStr(signal);
+
+		QString request2 = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
+			.arg(currentUser().userId()).arg(sds);
 
 		QSqlQuery q2(db);
 
@@ -2602,15 +2632,28 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 
 		if (result == false)
 		{
-			emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+			emitError(tr("Can't set signal workcopy! Error: ") +  q2.lastError().text());
 			return;
 		}
 
 		assert(i<newSignal->count());
 
-		while(q2.next() != false)
+		request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
+			.arg(currentUser().userId()).arg(signalID);
+
+		QSqlQuery q3(db);
+
+		result = q3.exec(request2);
+
+		if (result == false)
 		{
-			getSignalData(q2, (*newSignal)[i]);
+			emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+			return;
+		}
+
+		while(q3.next() != false)
+		{
+			getSignalData(q3, (*newSignal)[i]);
 			readed++;
 		}
 
@@ -2844,6 +2887,31 @@ int DbWorker::db_getProjectVersion(QSqlDatabase db)
 	{
 		return -1;
 	}
+}
+
+bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) const
+{
+	assert(fileInfo);
+
+	int fileId = q.value(0).toInt();
+	bool deleted  = q.value(1).toBool();
+	VcsState::VcsStateType state = q.value(2).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn;
+	VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(3).toInt());
+	int userId = q.value(4).toInt();
+	//int errcode = q.value(5).toInt();
+
+	if (fileInfo->fileId() != fileId)
+	{
+		assert(fileInfo->fileId() == fileId);
+		return false;
+	}
+
+	fileInfo->setDeleted(deleted);
+	fileInfo->setState(state);
+	fileInfo->setAction(action);
+	fileInfo->setUserId(userId);
+
+	return true;
 }
 
 const QString& DbWorker::host() const
