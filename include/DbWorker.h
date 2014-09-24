@@ -103,6 +103,8 @@ public slots:
 	bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
 	int db_getProjectVersion(QSqlDatabase db);
 
+	bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) const;
+
 	// Properties
 	//
 public:

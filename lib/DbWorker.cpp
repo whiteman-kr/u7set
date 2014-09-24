@@ -1533,10 +1533,7 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
 		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
-
-		DbUser user;
-		user.setUserId(q.value("UserID").toInt());
-		fileInfo.setUser(user);
+		fileInfo.setUserId(q.value("UserID").toInt());
 
 		if (deleted == false)
 		{
@@ -1615,16 +1612,14 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't get FileID"));
+			emitError(tr("Can't get request result."));
 			return;
 		}
 
-		int fileId = q.value(0).toInt();
+		file->setFileId(q.value(0).toInt());		// File just created, init it's fileId and parentid
+		file->setParentId(parentId);
 
-		file->setFileId(fileId);
-		file->setUser(currentUser());
-		file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
-		file->setAction(VcsItemAction::Added);
+		db_updateFileState(q, file.get());
 	}
 
 	return;
@@ -1694,24 +1689,7 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 			return;
 		}
 
-		int deleteResult = q.value(0).toInt();		// 0 - error while deleteing, 1 - marked as deleted, 2 - delted from all tables
-
-		switch (deleteResult)
-		{
-		case 0:
-			break;
-		case 1:
-			file.setUser(currentUser());
-			file.setState(VcsState::CheckedOut);
-			file.setAction(VcsItemAction::Deleted);
-			break;
-		case 2:
-			file.setFileId(-1);						// File does not exists any more, in any table
-			file.setUser(currentUser());
-			file.setState(VcsState::CheckedOut);
-			file.setAction(VcsItemAction::Deleted);
-			break;
-		}
+		db_updateFileState(q, &file);
 	}
 
 	return;
@@ -1799,16 +1777,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 		int action = q.value("Action").toInt();
 		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
-		DbUser user;
-		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
-
-		if (ok == false)
-		{
-			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
-			continue;
-		}
-
-		file->setUser(user);
+		file->setUserId(q.value("UserID").toInt());
 
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
@@ -1902,16 +1871,7 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 		int action = q.value("Action").toInt();
 		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
-		DbUser user;
-		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
-
-		if (ok == false)
-		{
-			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
-			continue;
-		}
-
-		file->setUser(user);
+		file->setUserId(q.value("UserID").toInt());
 
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
@@ -2071,24 +2031,25 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		return;
 	}
 
-	// Result is table of (FileID, Action);
+	// Result is table of (ObjectState);
 	//
-
 	while (q.next())
 	{
 		int fileId = q.value(0).toInt();
-		VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(1).toInt());
 
 		// Set file state to CheckedIn
 		//
+		bool updated = false;
 		for (auto& fi : *files)
 		{
 			if (fi.fileId() == fileId)
 			{
-				fi.setState(VcsState::CheckedIn);
-				fi.setAction(action);
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
 			}
 		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2156,23 +2117,25 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	// Result is table of (FileID);
+	// Result is table of (ObjectState);
 	//
 	while (q.next())
 	{
 		int fileId = q.value(0).toInt();
 
-		// Set file state to CheckedOut
+		// Set file state to CheckedIn
 		//
-		for (DbFileInfo& fi : *files)
+		bool updated = false;
+		for (auto& fi : *files)
 		{
 			if (fi.fileId() == fileId)
 			{
-				fi.setState(VcsState::CheckedOut);
-				fi.setAction(VcsItemAction::Modified);
-				fi.setUser(currentUser());
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
 			}
 		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2239,11 +2202,21 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	// Set file state to CheckedIn
-	//
-	for (auto& fi : *files)
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedIn);
+		int fileId = q.value(0).toInt();
+
+		bool updated = false;
+		for (auto& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
+			}
+		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2359,12 +2332,10 @@ void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExte
 		return;
 	}
 
-	int fileId = q.value(0).toInt();
-
-	file->setFileId(fileId);
+	file->setFileId(q.value(0).toInt());
 	file->setParentId(parentId);
-	file->setUser(currentUser());
-	file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
+
+	db_updateFileState(q, file);
 
 	return;
 }
@@ -2916,6 +2887,31 @@ int DbWorker::db_getProjectVersion(QSqlDatabase db)
 	{
 		return -1;
 	}
+}
+
+bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) const
+{
+	assert(fileInfo);
+
+	int fileId = q.value(0).toInt();
+	bool deleted  = q.value(1).toBool();
+	VcsState::VcsStateType state = q.value(2).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn;
+	VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(3).toInt());
+	int userId = q.value(4).toInt();
+	//int errcode = q.value(5).toInt();
+
+	if (fileInfo->fileId() != fileId)
+	{
+		assert(fileInfo->fileId() == fileId);
+		return false;
+	}
+
+	fileInfo->setDeleted(deleted);
+	fileInfo->setState(state);
+	fileInfo->setAction(action);
+	fileInfo->setUserId(userId);
+
+	return true;
 }
 
 const QString& DbWorker::host() const

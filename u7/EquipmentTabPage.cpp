@@ -164,7 +164,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectUserColumn:
-				v.setValue<qint32>(device->fileInfo().user().userId());
+				v.setValue<qint32>(device->fileInfo().userId());
 				break;
 
 			default:
@@ -388,7 +388,7 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
 
-		if (d->fileInfo().fileId() == -1)
+		if (d->fileInfo().deleted() == true)
 		{
 			QModelIndex pi = index.parent();
 			Hardware::DeviceObject* po = deviceObject(pi);
@@ -422,7 +422,7 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 		assert(d);
 
 		if (d->fileInfo().state() == VcsState::CheckedOut &&
-			(d->fileInfo().user() == currentUser || currentUser.isAdminstrator() == true))
+			(d->fileInfo().userId() == currentUser.userId() || currentUser.isAdminstrator() == true))
 		{
 			files.push_back(d->fileInfo());
 			checkedOutList.push_back(index);
@@ -433,7 +433,6 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 
 	// Update FileInfo in devices and Update model
 	//
-	size_t updatedFiles = 0;
 	for (QModelIndex& index : rowList)
 	{
 		Hardware::DeviceObject* d = deviceObject(index);
@@ -444,9 +443,9 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 			if (fi.fileId() == d->fileInfo().fileId())
 			{
 				d->setFileInfo(fi);
-				updatedFiles ++;
 
-				if (d->fileInfo().action() == VcsItemAction::Deleted && d->fileInfo().state() == VcsState::CheckedIn)
+				if (d->fileInfo().deleted() == true ||
+					(d->fileInfo().action() == VcsItemAction::Deleted && d->fileInfo().state() == VcsState::CheckedIn))
 				{
 					QModelIndex pi = index.parent();
 					Hardware::DeviceObject* po = deviceObject(pi);
@@ -468,7 +467,6 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 			}
 		}
 	}
-	assert(updatedFiles == files.size());
 
 	return;
 }
@@ -531,7 +529,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
 		assert(d);
 
 		if (d->fileInfo().state() == VcsState::CheckedOut &&
-			(d->fileInfo().user() == currentUser || currentUser.isAdminstrator() == true))
+			(d->fileInfo().userId() == currentUser.userId() || currentUser.isAdminstrator() == true))
 		{
 			files.push_back(d->fileInfo());
 			checkedOutList.push_back(index);
@@ -557,41 +555,14 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
 
-		if (d->fileInfo().fileId() == -1)
-		{
-			QModelIndex pi = index.parent();
-			Hardware::DeviceObject* po = deviceObject(pi);
-			assert(po);
-
-			int childIndex = po->childIndex(d);
-			assert(childIndex != -1);
-
-			beginRemoveRows(pi, childIndex, childIndex);
-			po->deleteChild(d);
-			endRemoveRows();
-		}
-		else
-		{
-			emit dataChanged(index, index);
-		}
-	}
-
-	/*!!!!!!!!!!!!!!
-
-	size_t updatedFiles = 0;
-	for (QModelIndex& index : rowList)
-	{
-		Hardware::DeviceObject* d = deviceObject(index);
-		assert(d);
-
-		for (const auto& fi : files)
+		bool updated = false;
+		for (DbFileInfo& fi : files)
 		{
 			if (fi.fileId() == d->fileInfo().fileId())
 			{
 				d->setFileInfo(fi);
-				updatedFiles ++;
 
-				if (d->fileInfo().action() == VcsItemAction::Deleted && d->fileInfo().state() == VcsState::CheckedIn)
+				if (fi.deleted() == true)
 				{
 					QModelIndex pi = index.parent();
 					Hardware::DeviceObject* po = deviceObject(pi);
@@ -609,17 +580,31 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
 					emit dataChanged(index, index);
 				}
 
+				updated = true;
 				break;
 			}
 		}
+		assert(updated == true);
 	}
-	assert(updatedFiles == files.size());
-*/
+
 	return;
 }
 
-void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
+void EquipmentModel::refreshDeviceObject(QModelIndexList& /*rowList*/)
 {
+	// Now implemented just root refresh
+	// TODO refresh for selected rows
+	//
+
+	// read all childer for HC file
+	//
+	beginResetModel();
+
+	m_root = std::make_shared<Hardware::DeviceRoot>();
+	m_root->fileInfo().setFileId(dbController()->hcFileId());
+
+	endResetModel();
+
 }
 
 Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
@@ -1076,12 +1061,22 @@ void EquipmentTabPage::setActionState()
 	m_addChassisAction->setEnabled(false);
 	m_addModuleAction->setEnabled(false);
 
+	m_deleteObjectAction->setEnabled(false);
+	m_checkOutAction->setEnabled(false);
+	m_checkInAction->setEnabled(false);
+	m_undoChangesAction->setEnabled(false);
+	m_refreshAction->setEnabled(false);
+
 	if (dbController()->isProjectOpened() == false)
 	{
 		return;
 	}
 
 	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
+
+	// Refresh
+	//
+	m_refreshAction->setEnabled(true);
 
 	// Delete Items action
 	//
@@ -1099,7 +1094,7 @@ void EquipmentTabPage::setActionState()
 		}
 
 		if (device->fileInfo().state() == VcsState::CheckedOut &&
-			(device->fileInfo().user() == dbController()->currentUser() || dbController()->currentUser().isAdminstrator())
+			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
 			&& device->fileInfo().action() != VcsItemAction::Deleted)
 		{
 			m_deleteObjectAction->setEnabled(true);
@@ -1118,7 +1113,7 @@ void EquipmentTabPage::setActionState()
 		assert(device);
 
 		if (device->fileInfo().state() == VcsState::CheckedOut &&
-			(device->fileInfo().user() == dbController()->currentUser() || dbController()->currentUser().isAdminstrator()))
+			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
@@ -1139,6 +1134,7 @@ void EquipmentTabPage::setActionState()
 
 	m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
+	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 
 	// Enbale possible creation items;
 	//

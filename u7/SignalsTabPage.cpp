@@ -172,7 +172,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					}
 				}
 				return tr("Unknown unit");
-			case SC_OUTPUT_SENSOR: return signal->outputSensorID();
+			case SC_OUTPUT_SENSOR: return SensorTypeStr[signal->outputSensorID()];
 			case SC_ACQUIRE: return signal->acquire() ? "Yes" : "No";
 			case SC_CALCULATED: return signal->calculated() ? "Yes" : "No";
 			case SC_NORMAL_STATE: return signal->normalState();
@@ -373,6 +373,7 @@ void SignalsModel::addSignal()
 			endInsertRows();
 		}
 	}
+	emit cellsSizeChanged();
 }
 
 DbController *SignalsModel::dbController()
