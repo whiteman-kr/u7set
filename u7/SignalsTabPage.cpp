@@ -101,6 +101,18 @@ int SignalsModel::columnCount(const QModelIndex &) const
 	return COLUMNS_COUNT;
 }
 
+
+QString SignalsModel::getUnitStr(int unitID) const
+{
+	if (m_unitInfo.contains(unitID))
+	{
+		return m_unitInfo.value(unitID);
+	}
+
+	return tr("Unknown unit");
+}
+
+
 QVariant SignalsModel::data(const QModelIndex &index, int role) const
 {
 	int row = index.row();
@@ -124,54 +136,71 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_NAME: return signal->name();
 			case SC_CHANNEL: return signal->channel();
 			case SC_DATA_FORMAT:
-				for (int i = 0; i < m_dataFormatInfo.count(); i++)
+				if (m_dataFormatInfo.contains(signal->dataFormat()))
+				{
+					return m_dataFormatInfo.value(signal->dataFormat());
+				}
+				else
+				{
+					return tr("Unknown data format");
+				}
+
+/*				for (int i = 0; i < m_dataFormatInfo.count(); i++)
 				{
 					if (m_dataFormatInfo[i].ID == signal->dataFormat())
 					{
 						return m_dataFormatInfo[i].name;
 					}
 				}
-				return tr("Unknown data format");
+				return tr("Unknown data format");*/
+
 			case SC_DATA_SIZE: return signal->dataSize();
 			case SC_LOW_ADC: return QString("0x%1").arg(signal->lowADC(), 4, 16, QChar('0'));
 			case SC_HIGH_ADC: return QString("0x%1").arg(signal->highADC(), 4, 16, QChar('0'));
 			case SC_LOW_LIMIT: return signal->lowLimit();
 			case SC_HIGH_LIMIT: return signal->highLimit();
 			case SC_UNIT:
-				for (int i = 0; i < m_unitInfo.count(); i++)
+				return getUnitStr(signal->unitID());
+
+				/*for (int i = 0; i < m_unitInfo.count(); i++)
 				{
 					if (m_unitInfo[i].ID == signal->unitID())
 					{
 						return m_unitInfo[i].nameEn;
 					}
 				}
-				return tr("Unknown unit");
+				return tr("Unknown unit");*/
+
 			case SC_ADJUSTMENT: return signal->adjustment();
 			case SC_EXCESS_LIMIT: return signal->excessLimit();
 			case SC_UNBALANCE_LIMIT: return signal->unbalanceLimit();
 			case SC_INPUT_LOW_LIMIT: return signal->inputLowLimit();
 			case SC_INPUT_HIGH_LIMIT: return signal->inputHighLimit();
 			case SC_INPUT_UNIT:
-				for (int i = 0; i < m_unitInfo.count(); i++)
+				return getUnitStr(signal->inputUnitID());
+
+/*				for (int i = 0; i < m_unitInfo.count(); i++)
 				{
 					if (m_unitInfo[i].ID == signal->inputUnitID())
 					{
 						return m_unitInfo[i].nameEn;
 					}
 				}
-				return tr("Unknown unit");
+				return tr("Unknown unit");*/
 			case SC_INPUT_SENSOR: return SensorTypeStr[signal->inputSensorID()];
 			case SC_OUTPUT_LOW_LIMIT: return signal->outputLowLimit();
 			case SC_OUTPUT_HIGH_LIMIT: return signal->outputHighLimit();
 			case SC_OUTPUT_UNIT:
-				for (int i = 0; i < m_unitInfo.count(); i++)
+				return getUnitStr(signal->outputUnitID());
+
+				/*for (int i = 0; i < m_unitInfo.count(); i++)
 				{
 					if (m_unitInfo[i].ID == signal->outputUnitID())
 					{
 						return m_unitInfo[i].nameEn;
 					}
 				}
-				return tr("Unknown unit");
+				return tr("Unknown unit");*/
 			case SC_OUTPUT_SENSOR: return SensorTypeStr[signal->outputSensorID()];
 			case SC_ACQUIRE: return signal->acquire() ? "Yes" : "No";
 			case SC_CALCULATED: return signal->calculated() ? "Yes" : "No";
@@ -299,7 +328,7 @@ void SignalsModel::loadSignals()
 		endRemoveRows();
 	}
 
-	dbController()->getSignalsIDs(&m_signalIDs, m_parentWindow);
+	//dbController()->getSignalsIDs(&m_signalIDs, m_parentWindow);
 	dbController()->getDataFormats(&m_dataFormatInfo, m_parentWindow);
 	dbController()->getUnits(&m_unitInfo, m_parentWindow);
 
@@ -354,7 +383,9 @@ void SignalsModel::addSignal()
 	int channelCount = signalChannelCount->text().toInt();
 
 	Signal signal;
+
 	SignalPropertiesDialog dlg(signal, m_dataFormatInfo, m_unitInfo, m_parentWindow);
+
 	if (dlg.exec() == QDialog::Accepted)
 	{
 		QVector<Signal> signalVector;

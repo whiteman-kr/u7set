@@ -10,7 +10,7 @@
 #include <QDialogButtonBox>
 #include "../include/Signal.h"
 
-SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataFormat>& dataFormatInfo, QVector<Unit>& unitInfo, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, HashIntQString& dataFormatInfo, HashIntQString& unitInfo, QWidget *parent) :
 	QDialog(parent),
 	m_signal(signal),
 	m_dataFormatInfo(dataFormatInfo),
@@ -35,7 +35,9 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_stringManager->setValue(m_nameProperty, signal.name());
     signalProperty->addSubProperty(m_nameProperty);
 
-	QStringList dataFormatNames;
+
+	assert(false);			// refactor
+	/*QStringList dataFormatNames;
 	int selected = -1;
 	for (int i = 0; i < dataFormatInfo.count(); i++)
 	{
@@ -48,7 +50,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_dataFormatProperty = m_enumManager->addProperty(tr("Data format"));
 	m_enumManager->setEnumNames(m_dataFormatProperty, dataFormatNames);
 	m_enumManager->setValue(m_dataFormatProperty, selected);
-	signalProperty->addSubProperty(m_dataFormatProperty);
+	signalProperty->addSubProperty(m_dataFormatProperty);*/
 
 	m_dataSizeProperty = m_intManager->addProperty(tr("Data size"));
 	m_intManager->setRange(m_dataSizeProperty, 1, 100);
@@ -73,7 +75,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_doubleManager->setValue(m_highLimitProperty, signal.highLimit());
 	signalProperty->addSubProperty(m_highLimitProperty);
 
-	QStringList unitNames;
+	assert(false);	// refactor
+/*	QStringList unitNames;
 	selected = -1;
 	for (int i = 0; i < unitInfo.count(); i++)
 	{
@@ -86,7 +89,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_unitProperty = m_enumManager->addProperty(tr("Unit"));
 	m_enumManager->setEnumNames(m_unitProperty, unitNames);
 	m_enumManager->setValue(m_unitProperty, selected);
-	signalProperty->addSubProperty(m_unitProperty);
+	signalProperty->addSubProperty(m_unitProperty);*/
 
 	m_adjustmentProperty = m_doubleManager->addProperty(tr("Adjustment"));
 	m_doubleManager->setValue(m_adjustmentProperty, signal.adjustment());
@@ -112,7 +115,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_doubleManager->setValue(m_inputHighLimitProperty, signal.inputHighLimit());
 	inputProperty->addSubProperty(m_inputHighLimitProperty);
 
-	selected = -1;
+	assert(false);	// refactor
+/*	selected = -1;
 	for (int i = 0; i < unitInfo.count(); i++)
 	{
 		if (unitInfo[i].ID == signal.inputUnitID())
@@ -123,7 +127,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_inputUnitProperty = m_enumManager->addProperty(tr("Unit"));
 	m_enumManager->setEnumNames(m_inputUnitProperty, unitNames);
 	m_enumManager->setValue(m_inputUnitProperty, selected);
-	inputProperty->addSubProperty(m_inputUnitProperty);
+	inputProperty->addSubProperty(m_inputUnitProperty);*/
 
 	QStringList sensorNames;
 	for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
@@ -149,7 +153,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_doubleManager->setValue(m_outputHighLimitProperty, signal.outputHighLimit());
 	outputProperty->addSubProperty(m_outputHighLimitProperty);
 
-	selected = -1;
+	assert(false);	// refactor
+/*	selected = -1;
 	for (int i = 0; i < unitInfo.count(); i++)
 	{
 		if (unitInfo[i].ID == signal.outputUnitID())
@@ -160,7 +165,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_outputUnitProperty = m_enumManager->addProperty(tr("Unit"));
 	m_enumManager->setEnumNames(m_outputUnitProperty, unitNames);
 	m_enumManager->setValue(m_outputUnitProperty, selected);
-	outputProperty->addSubProperty(m_outputUnitProperty);
+	outputProperty->addSubProperty(m_outputUnitProperty);*/
 
 	m_outputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
 	m_enumManager->setEnumNames(m_outputSensorProperty, sensorNames);
@@ -206,7 +211,8 @@ void SignalPropertiesDialog::saveSignal()
 	int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
 	if (dataFormatIndex > 0 && dataFormatIndex < m_dataFormatInfo.count())
 	{
-		m_signal.setDataFormat(m_dataFormatInfo[dataFormatIndex].ID);
+		assert(false);	// refactor
+		//m_signal.setDataFormat(m_dataFormatInfo[dataFormatIndex].ID);
 	}
 	m_signal.setDataSize(m_intManager->value(m_dataSizeProperty));
 	m_signal.setLowADC(m_intManager->value(m_lowAdcProperty));
@@ -216,7 +222,8 @@ void SignalPropertiesDialog::saveSignal()
 	int unitIndex = m_enumManager->value(m_unitProperty);
 	if (unitIndex > 0 && unitIndex < m_unitInfo.count())
 	{
-		m_signal.setUnitID(m_unitInfo[unitIndex].ID);
+		assert(false);	// refactor
+		//m_signal.setUnitID(m_unitInfo[unitIndex].ID);
 	}
 	else
 	{
@@ -233,7 +240,8 @@ void SignalPropertiesDialog::saveSignal()
 	unitIndex = m_enumManager->value(m_inputUnitProperty);
 	if (unitIndex > 0 && unitIndex < m_unitInfo.count())
 	{
-		m_signal.setInputUnitID(m_unitInfo[unitIndex].ID);
+		assert(false);	// refactor
+		//m_signal.setInputUnitID(m_unitInfo[unitIndex].ID);
 	}
 	else
 	{
@@ -252,7 +260,8 @@ void SignalPropertiesDialog::saveSignal()
 	unitIndex = m_enumManager->value(m_outputUnitProperty);
 	if (unitIndex > 0 && unitIndex < m_unitInfo.count())
 	{
-		m_signal.setOutputUnitID(m_unitInfo[unitIndex].ID);
+		assert(false);	// refactor
+		//m_signal.setOutputUnitID(m_unitInfo[unitIndex].ID);
 	}
 	else
 	{

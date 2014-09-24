@@ -3,10 +3,8 @@
 
 #include <QDialog>
 #include <QMap>
+#include "../include/Signal.h"
 
-class Signal;
-struct DataFormat;
-struct Unit;
 class QtProperty;
 class QtStringPropertyManager;
 class QtEnumPropertyManager;
@@ -17,7 +15,7 @@ class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(Signal& signal, QVector<DataFormat>& dataFormatInfo, QVector<Unit>& unitInfo, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(Signal& signal, HashIntQString& dataFormatInfo, HashIntQString& unitInfo, QWidget *parent = 0);
 
 signals:
 
@@ -26,8 +24,8 @@ public slots:
 
 private:
 	Signal& m_signal;
-	QVector<DataFormat>& m_dataFormatInfo;
-	QVector<Unit>& m_unitInfo;
+	HashIntQString& m_dataFormatInfo;
+	HashIntQString& m_unitInfo;
 
 	QtStringPropertyManager* m_stringManager;
 	QtEnumPropertyManager* m_enumManager;

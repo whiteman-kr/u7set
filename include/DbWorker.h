@@ -94,8 +94,8 @@ public slots:
 	void slot_getSignals(SignalSet* signalSet);
 	void slot_addSignal(SignalType signalType, QVector<Signal>* newSignal);
 
-	void slot_getUnits(QVector<Unit>* units);
-	void slot_getDataFormats(QVector<DataFormat>* dataFormats);
+	void slot_getUnits(HashIntQString* units);
+	void slot_getDataFormats(HashIntQString* dataFormats);
 
 	// Service
 	//

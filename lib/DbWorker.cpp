@@ -2664,7 +2664,7 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 }
 
 
-void DbWorker::slot_getUnits(QVector<Unit>* units)
+void DbWorker::slot_getUnits(HashIntQString *units)
 {
 	AUTO_COMPLETE
 
@@ -2703,17 +2703,22 @@ void DbWorker::slot_getUnits(QVector<Unit>* units)
 
 	while(q.next() != false)
 	{
-		Unit unit;
+		int unitID = q.value("unitid").toInt();
+		QString unitNameEn = q.value("unit_en").toString();
+
+		units->insert(unitID, unitNameEn);
+
+/*		Unit unit;
 
 		unit.ID = q.value("unitid").toInt();
 		unit.nameEn = q.value("unit_en").toString();
 		unit.nameRu = q.value("unit_ru").toString();
 
-		units->append(unit);
+		units->append(unit); */
 	}
 }
 
-void DbWorker::slot_getDataFormats(QVector<DataFormat>* dataFormats)
+void DbWorker::slot_getDataFormats(HashIntQString *dataFormats)
 {
 	AUTO_COMPLETE
 
@@ -2752,12 +2757,17 @@ void DbWorker::slot_getDataFormats(QVector<DataFormat>* dataFormats)
 
 	while(q.next() != false)
 	{
-		DataFormat dataFormat;
+		int dataFormatID = q.value("dataformatid").toInt();
+		QString dataFormatName = q.value("name").toString();
+
+		dataFormats->insert(dataFormatID, dataFormatName);
+
+/*		DataFormat dataFormat;
 
 		dataFormat.ID = q.value("dataformatid").toInt();
 		dataFormat.name = q.value("name").toString();
 
-		dataFormats->append(dataFormat);
+		dataFormats->append(dataFormat); */
 	}
 }
 
