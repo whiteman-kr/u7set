@@ -181,7 +181,7 @@ VcsState::VcsState() :
 {
 }
 
-VcsState::VcsState(VersionControlSystemState s) :
+VcsState::VcsState(VcsStateType s) :
 	m_state(s)
 {
 }
@@ -317,17 +317,14 @@ void DbProject::setVersion(int value)
 //	DbUser
 //
 //
-DbUser::DbUser() :
-	m_userId(0),
-	m_username(""),
-	m_firstName(""),
-	m_lastName(""),
-	m_password(""),
-	m_newPassword(""),
-	m_administrator(false),
-	m_readonly(true),
-	m_disabled(true)
+DbUser::DbUser()
 {
+}
+
+DbUser::DbUser(int userId) :
+	m_userId(userId)
+{
+
 }
 
 bool DbUser::operator== (const DbUser& u) const
@@ -452,11 +449,8 @@ void DbUser::setDisabled(bool value)
 //
 //
 DbFileInfo::DbFileInfo() :
-	m_fileId(-1),
-	m_parentId(0),
-	m_size(0),
-	m_changeset(-1),
-	m_state(VcsState::CheckedIn)
+	m_state(VcsState::CheckedIn),
+	m_action(VcsItemAction::Added)
 {
 }
 
@@ -519,6 +513,16 @@ int DbFileInfo::parentId() const
 void DbFileInfo::setParentId(int value)
 {
 	m_parentId = value;
+}
+
+bool DbFileInfo::deleted() const
+{
+	return m_deleted;
+}
+
+void DbFileInfo::setDeleted(bool value)
+{
+	m_deleted = value;
 }
 
 int DbFileInfo::changeset() const
@@ -584,7 +588,7 @@ void DbFileInfo::setAction(const VcsItemAction& action)
 	m_action = action;
 }
 
-const DbUser& DbFileInfo::user() const
+/*const DbUser& DbFileInfo::user() const
 {
 	return m_user;
 }
@@ -592,7 +596,17 @@ const DbUser& DbFileInfo::user() const
 void DbFileInfo::setUser(const DbUser& user)
 {
 	m_user = user;
-	m_user.setPassword(QString());	// Clear password, juust in case
+	m_user.setPassword(QString());	// Clear password, just in case
+}*/
+
+int DbFileInfo::userId() const
+{
+	return m_userId;
+}
+
+void DbFileInfo::setUserId(int value)
+{
+	m_userId = value;
 }
 
 //

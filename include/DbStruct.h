@@ -62,19 +62,19 @@ private:
 class VcsState
 {
 public:
-	enum VersionControlSystemState
+	enum VcsStateType
 	{
 		CheckedIn,					// File has no any action, it's normal state
 		CheckedOut
 	};
 
 	VcsState();
-	VcsState(VersionControlSystemState s);
+	VcsState(VcsStateType s);
 
 	QString text() const;
 
 private:
-	VersionControlSystemState m_state;
+	VcsStateType m_state;
 
 	friend bool operator== (const VcsState& s1, const VcsState& s2);
 	friend bool operator!= (const VcsState& s1, const VcsState& s2);
@@ -157,6 +157,7 @@ class DbUser
 {
 public:
 	DbUser();
+	explicit DbUser(int userId);
 
 public:
 	bool operator== (const DbUser& u) const;
@@ -195,7 +196,7 @@ public:
 	void setDisabled(bool value);
 
 private:
-	int m_userId;
+	int m_userId = 0;
 	QDateTime m_date;
 
 	QString m_username;
@@ -205,9 +206,9 @@ private:
 	QString m_password;
 	QString m_newPassword;				// Required for setting new password
 
-	bool m_administrator;
-	bool m_readonly;
-	bool m_disabled;
+	bool m_administrator = false;
+	bool m_readonly = false;
+	bool m_disabled = false;
 };
 
 
@@ -248,6 +249,9 @@ public:
 	virtual int size() const;
 	void setSize(int size);
 
+	bool deleted() const;
+	void setDeleted(bool value);
+
 	int changeset() const;
 	void setChangeset(int value);
 
@@ -265,24 +269,28 @@ public:
 	const VcsItemAction& action() const;
 	void setAction(const VcsItemAction& action);
 
-	const DbUser& user() const;
-	void setUser(const DbUser& user);
+	//const DbUser& user() const;
+	//void setUser(const DbUser& user);
+	int userId() const;
+	void setUserId(int value);
 
 	// Data
 	//
 protected:
 	QString m_fileName;
-	int m_fileId;
-	int m_parentId;
-	int m_size;
+	int m_fileId = -1;
+	int m_parentId = 0;
+	int m_size = 0;
+	bool m_deleted = false;		// File was deleted from database, from all tables, such FileInfo does not exist anymore
 
-	int m_changeset;
+	int m_changeset = -1;
 	QDateTime m_created;
 	QDateTime m_lastCheckIn;
 
 	VcsState m_state;
 	VcsItemAction m_action;
-	DbUser m_user;
+	int m_userId = -1;
+	//DbUser m_user;
 };
 
 //

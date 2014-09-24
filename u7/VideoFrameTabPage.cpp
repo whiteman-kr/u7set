@@ -223,15 +223,15 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	if (file.state() == VcsState::CheckedOut && file.user() != dbcontroller()->currentUser())
+	if (file.state() == VcsState::CheckedOut && file.userId() != dbcontroller()->currentUser().userId())
 	{
 		QMessageBox mb(this);
-		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.user().username()));
+		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.userId()));
 		mb.exec();
 		return;
 	}
 
-	assert(file.state() == VcsState::CheckedOut && file.user() == dbcontroller()->currentUser());
+	assert(file.state() == VcsState::CheckedOut && file.userId() == dbcontroller()->currentUser().userId());
 
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
@@ -442,7 +442,7 @@ void EditVideoFrameTabPage::setPageTitle()
 
 	QString newTitle;
 
-	if (readOnly() == true || fileInfo().user() != dbcontroller()->currentUser())
+	if (readOnly() == true || fileInfo().userId() != dbcontroller()->currentUser().userId())
 	{
 		if (fileInfo().changeset() != -1)
 		{
@@ -663,9 +663,9 @@ bool EditVideoFrameTabPage::saveWorkcopy()
 	if (readOnly() == true ||
 		modified() == false ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().user() != dbcontroller()->currentUser())
+		fileInfo().userId() != dbcontroller()->currentUser().userId())
 	{
-		assert(fileInfo().user() == dbcontroller()->currentUser());
+		assert(fileInfo().userId() == dbcontroller()->currentUser().userId());
 		return false;
 	}
 
@@ -728,9 +728,9 @@ void EditVideoFrameTabPage::setCurrentWorkcopy()
 {
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().user() != dbcontroller()->currentUser())
+		fileInfo().userId() != dbcontroller()->currentUser().userId())
 	{
-		assert(fileInfo().user() == dbcontroller()->currentUser());
+		assert(fileInfo().userId() == dbcontroller()->currentUser().userId());
 		return;
 	}
 
