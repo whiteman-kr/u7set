@@ -15,7 +15,7 @@ class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(Signal& signal, HashIntQString& dataFormatInfo, HashIntQString& unitInfo, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(Signal& signal, DataFormatList& dataFormatInfo, UnitList& unitInfo, QWidget *parent = 0);
 
 signals:
 
@@ -24,8 +24,8 @@ public slots:
 
 private:
 	Signal& m_signal;
-	HashIntQString& m_dataFormatInfo;
-	HashIntQString& m_unitInfo;
+	DataFormatList& m_dataFormatInfo;
+	UnitList& m_unitInfo;
 
 	QtStringPropertyManager* m_stringManager;
 	QtEnumPropertyManager* m_enumManager;

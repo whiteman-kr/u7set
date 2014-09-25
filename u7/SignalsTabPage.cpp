@@ -121,24 +121,33 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 	{
 		return QVariant();
 	}
-	const Signal* signal = m_signalSet.getConstSignal(m_signalIDs[row]);
-	if (signal == nullptr)
+
+	if (m_signalSet.contains(m_signalIDs[row]) == false)
 	{
 		//emit signalDataRequest(m_signalIDs[row]);
 		return QVariant();
 	}
+
+	const Signal& signal = m_signalSet.value(m_signalIDs[row]);
+
+/*	if (signal == nullptr)
+	{
+		//emit signalDataRequest(m_signalIDs[row]);
+		return QVariant();
+	}*/
+
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		switch (col)
 		{
-			case SC_STR_ID: return signal->strID();
-			case SC_EXT_STR_ID: return signal->extStrID();
-			case SC_NAME: return signal->name();
-			case SC_CHANNEL: return signal->channel();
+			case SC_STR_ID: return signal.strID();
+			case SC_EXT_STR_ID: return signal.extStrID();
+			case SC_NAME: return signal.name();
+			case SC_CHANNEL: return signal.channel();
 			case SC_DATA_FORMAT:
-				if (m_dataFormatInfo.contains(signal->dataFormat()))
+				if (m_dataFormatInfo.contains(signal.dataFormat()))
 				{
-					return m_dataFormatInfo.value(signal->dataFormat());
+					return m_dataFormatInfo.value(signal.dataFormat());
 				}
 				else
 				{
@@ -147,71 +156,71 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 /*				for (int i = 0; i < m_dataFormatInfo.count(); i++)
 				{
-					if (m_dataFormatInfo[i].ID == signal->dataFormat())
+					if (m_dataFormatInfo[i].ID == signal.dataFormat())
 					{
 						return m_dataFormatInfo[i].name;
 					}
 				}
 				return tr("Unknown data format");*/
 
-			case SC_DATA_SIZE: return signal->dataSize();
-			case SC_LOW_ADC: return QString("0x%1").arg(signal->lowADC(), 4, 16, QChar('0'));
-			case SC_HIGH_ADC: return QString("0x%1").arg(signal->highADC(), 4, 16, QChar('0'));
-			case SC_LOW_LIMIT: return signal->lowLimit();
-			case SC_HIGH_LIMIT: return signal->highLimit();
+			case SC_DATA_SIZE: return signal.dataSize();
+			case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
+			case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
+			case SC_LOW_LIMIT: return signal.lowLimit();
+			case SC_HIGH_LIMIT: return signal.highLimit();
 			case SC_UNIT:
-				return getUnitStr(signal->unitID());
+				return getUnitStr(signal.unitID());
 
 				/*for (int i = 0; i < m_unitInfo.count(); i++)
 				{
-					if (m_unitInfo[i].ID == signal->unitID())
+					if (m_unitInfo[i].ID == signal.unitID())
 					{
 						return m_unitInfo[i].nameEn;
 					}
 				}
 				return tr("Unknown unit");*/
 
-			case SC_ADJUSTMENT: return signal->adjustment();
-			case SC_EXCESS_LIMIT: return signal->excessLimit();
-			case SC_UNBALANCE_LIMIT: return signal->unbalanceLimit();
-			case SC_INPUT_LOW_LIMIT: return signal->inputLowLimit();
-			case SC_INPUT_HIGH_LIMIT: return signal->inputHighLimit();
+			case SC_ADJUSTMENT: return signal.adjustment();
+			case SC_EXCESS_LIMIT: return signal.excessLimit();
+			case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
+			case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
+			case SC_INPUT_HIGH_LIMIT: return signal.inputHighLimit();
 			case SC_INPUT_UNIT:
-				return getUnitStr(signal->inputUnitID());
+				return getUnitStr(signal.inputUnitID());
 
 /*				for (int i = 0; i < m_unitInfo.count(); i++)
 				{
-					if (m_unitInfo[i].ID == signal->inputUnitID())
+					if (m_unitInfo[i].ID == signal.inputUnitID())
 					{
 						return m_unitInfo[i].nameEn;
 					}
 				}
 				return tr("Unknown unit");*/
-			case SC_INPUT_SENSOR: return SensorTypeStr[signal->inputSensorID()];
-			case SC_OUTPUT_LOW_LIMIT: return signal->outputLowLimit();
-			case SC_OUTPUT_HIGH_LIMIT: return signal->outputHighLimit();
+			case SC_INPUT_SENSOR: return SensorTypeStr[signal.inputSensorID()];
+			case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
+			case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
 			case SC_OUTPUT_UNIT:
-				return getUnitStr(signal->outputUnitID());
+				return getUnitStr(signal.outputUnitID());
 
 				/*for (int i = 0; i < m_unitInfo.count(); i++)
 				{
-					if (m_unitInfo[i].ID == signal->outputUnitID())
+					if (m_unitInfo[i].ID == signal.outputUnitID())
 					{
 						return m_unitInfo[i].nameEn;
 					}
 				}
 				return tr("Unknown unit");*/
-			case SC_OUTPUT_SENSOR: return SensorTypeStr[signal->outputSensorID()];
-			case SC_ACQUIRE: return signal->acquire() ? "Yes" : "No";
-			case SC_CALCULATED: return signal->calculated() ? "Yes" : "No";
-			case SC_NORMAL_STATE: return signal->normalState();
-			case SC_DECIMAL_PLACES: return signal->decimalPlaces();
-			case SC_APERTURE: return signal->aperture();
-			case SC_IN_OUT_TYPE: return signal->inOutType();
+			case SC_OUTPUT_SENSOR: return SensorTypeStr[signal.outputSensorID()];
+			case SC_ACQUIRE: return signal.acquire() ? "Yes" : "No";
+			case SC_CALCULATED: return signal.calculated() ? "Yes" : "No";
+			case SC_NORMAL_STATE: return signal.normalState();
+			case SC_DECIMAL_PLACES: return signal.decimalPlaces();
+			case SC_APERTURE: return signal.aperture();
+			case SC_IN_OUT_TYPE: return signal.inOutType();
 
 			// !!!!!!!!!!!!!! ЭТИХ ПОЛЕЙ УЖЕ НЕТ !!!!!!!!!!!!!!!!
-			case SC_IN_OUT_NO: return 0; // signal->inOutNo();
-			case SC_DEVICE: return 0; // signal->deviceID();
+			case SC_IN_OUT_NO: return 0; // signal.inOutNo();
+			case SC_DEVICE: return 0; // signal.deviceID();
 			// !!!!!!!!!!!!!! ЭТИХ ПОЛЕЙ УЖЕ НЕТ !!!!!!!!!!!!!!!!
 
 			default:
@@ -324,7 +333,7 @@ void SignalsModel::loadSignals()
 	{
 		beginRemoveRows(QModelIndex(), 0, m_signalIDs.count() - 1);
 		m_signalIDs.clear();
-		m_signalSet.removeAll();
+		m_signalSet.clear();
 		endRemoveRows();
 	}
 
@@ -398,8 +407,9 @@ void SignalsModel::addSignal()
 			beginInsertRows(QModelIndex(), m_signalIDs.count(), m_signalIDs.count() + signalVector.count() - 1);
 			for (int i = 0; i < signalVector.count(); i++)
 			{
-				m_signalIDs.append(signalVector[i].ID());
-				m_signalSet.insert(signalVector[i]);
+				int signalID = signalVector[i].ID();
+				m_signalIDs.append(signalID);
+				m_signalSet.append(signalID, signalVector[i]);
 			}
 			endInsertRows();
 		}

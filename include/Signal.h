@@ -3,6 +3,7 @@
 
 #include <QString>
 #include "../include/DbStruct.h"
+#include "../include/OrderedHash.h"
 
 
 enum SignalType
@@ -83,18 +84,9 @@ struct DataFormat
 };
 
 
-typedef QHash<int, QString> HashIntQString;
+typedef OrderedHash<int, QString> UnitList;
 
-template <typename KEY, typename VALUE>
-class OrderedHash
-{
-private:
-	QVector<KEY> m_vector;
-	QHash<KEY, VALUE> m_hash;
-
-public:
-	OrderedHash();
-};
+typedef OrderedHash<int, QString> DataFormatList;
 
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
@@ -102,8 +94,6 @@ const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 class Signal
 {
 private:
-	OrderedHash<int, QString> qq;
-
 	// Signal fields from database
 	//
 	int m_ID = 0;
@@ -272,24 +262,26 @@ public:
 };
 
 
-class SignalSet
+class SignalSet : public OrderedHash<int, Signal>
 {
 private:
-	QHash<int, Signal*> m_signalSet;
+	//QHash<int, Signal*> m_signalSet;
 
 public:
 	SignalSet();
 	virtual ~SignalSet();
 
-	void insert(const Signal& signal);
+/*	void insert(const Signal& signal);
 	Signal* getSignal(int signalID);
 	const Signal* getConstSignal(int signalID) const;
 	bool haveSignal(int signalID);
 
 	bool contains(int signalID);
 
-	void removeAll();
+	void removeAll();*/
 };
+
+
 
 
 #endif // SIGNAL_H

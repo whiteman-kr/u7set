@@ -8,10 +8,10 @@ SignalSet::SignalSet()
 
 SignalSet::~SignalSet()
 {
-	removeAll();
+	clear();
 }
 
-
+/*
 void SignalSet::insert(const Signal& signal)
 {
 	int signalID = signal.ID();
@@ -83,4 +83,4 @@ void SignalSet::removeAll()
 	}
 
 	m_signalSet.clear();
-}
+}*/

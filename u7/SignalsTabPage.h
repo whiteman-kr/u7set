@@ -41,8 +41,8 @@ private:
 	//
 	QVector<int> m_signalIDs;
 	SignalSet m_signalSet;
-	HashIntQString m_dataFormatInfo;
-	HashIntQString m_unitInfo;
+	DataFormatList m_dataFormatInfo;
+	UnitList m_unitInfo;
 
 	QWidget* m_parentWindow;
 	DbController* m_dbController;

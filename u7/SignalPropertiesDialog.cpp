@@ -10,7 +10,7 @@
 #include <QDialogButtonBox>
 #include "../include/Signal.h"
 
-SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, HashIntQString& dataFormatInfo, HashIntQString& unitInfo, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, DataFormatList &dataFormatInfo, UnitList &unitInfo, QWidget *parent) :
 	QDialog(parent),
 	m_signal(signal),
 	m_dataFormatInfo(dataFormatInfo),

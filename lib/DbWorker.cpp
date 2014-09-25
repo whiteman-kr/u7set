@@ -2458,7 +2458,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 			getSignalData(q, s);
 
-			signalSet->insert(s);
+			signalSet->append(s.ID(), s);
 		}
 
 		int percent = (i * 100) / signalCount;
@@ -2664,7 +2664,7 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 }
 
 
-void DbWorker::slot_getUnits(HashIntQString *units)
+void DbWorker::slot_getUnits(UnitList *units)
 {
 	AUTO_COMPLETE
 
@@ -2706,7 +2706,7 @@ void DbWorker::slot_getUnits(HashIntQString *units)
 		int unitID = q.value("unitid").toInt();
 		QString unitNameEn = q.value("unit_en").toString();
 
-		units->insert(unitID, unitNameEn);
+		units->append(unitID, unitNameEn);
 
 /*		Unit unit;
 
@@ -2718,7 +2718,7 @@ void DbWorker::slot_getUnits(HashIntQString *units)
 	}
 }
 
-void DbWorker::slot_getDataFormats(HashIntQString *dataFormats)
+void DbWorker::slot_getDataFormats(DataFormatList *dataFormats)
 {
 	AUTO_COMPLETE
 
@@ -2760,7 +2760,7 @@ void DbWorker::slot_getDataFormats(HashIntQString *dataFormats)
 		int dataFormatID = q.value("dataformatid").toInt();
 		QString dataFormatName = q.value("name").toString();
 
-		dataFormats->insert(dataFormatID, dataFormatName);
+		dataFormats->append(dataFormatID, dataFormatName);
 
 /*		DataFormat dataFormat;
 

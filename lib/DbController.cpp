@@ -845,7 +845,7 @@ bool DbController::addSignal(SignalType signalType, QVector<Signal>* newSignal, 
 }
 
 
-bool DbController::getUnits(HashIntQString* units, QWidget* parentWidget)
+bool DbController::getUnits(UnitList *units, QWidget* parentWidget)
 {
 	if (units == nullptr)
 	{
@@ -871,7 +871,7 @@ bool DbController::getUnits(HashIntQString* units, QWidget* parentWidget)
 }
 
 
-bool DbController::getDataFormats(HashIntQString *dataFormats, QWidget* parentWidget)
+bool DbController::getDataFormats(DataFormatList *dataFormats, QWidget* parentWidget)
 {
 	if (dataFormats == nullptr)
 	{
