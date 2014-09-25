@@ -37,8 +37,7 @@ SC_NORMAL_STATE = 25,
 SC_DECIMAL_PLACES = 26,
 SC_APERTURE = 27,
 SC_IN_OUT_TYPE = 28,
-SC_IN_OUT_NO = 29,
-SC_DEVICE = 30;
+SC_DEVICE_STR_ID = 29;
 
 
 const char* Columns[] =
@@ -72,8 +71,7 @@ const char* Columns[] =
 	"Decimal places",
 	"Aperture",
 	"Input-output type",
-	"Input-output nomber",
-	"Device",
+	"Device ID",
 };
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
@@ -181,6 +179,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				return tr("Unknown unit");*/
 
 			case SC_ADJUSTMENT: return signal.adjustment();
+			case SC_DROP_LIMIT: return signal.dropLimit();
 			case SC_EXCESS_LIMIT: return signal.excessLimit();
 			case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
 			case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
@@ -217,14 +216,10 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 			case SC_APERTURE: return signal.aperture();
 			case SC_IN_OUT_TYPE: return signal.inOutType();
-
-			// !!!!!!!!!!!!!! ЭТИХ ПОЛЕЙ УЖЕ НЕТ !!!!!!!!!!!!!!!!
-			case SC_IN_OUT_NO: return 0; // signal.inOutNo();
-			case SC_DEVICE: return 0; // signal.deviceID();
-			// !!!!!!!!!!!!!! ЭТИХ ПОЛЕЙ УЖЕ НЕТ !!!!!!!!!!!!!!!!
+			case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 			default:
-				;//assert(false);  РАССКОММЕНТИРОВАТЬ!!!!
+				assert(false);
 		}
 	}
 
@@ -273,6 +268,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_HIGH_LIMIT: signal.setHighLimit(value.toDouble()); break;
 			case SC_UNIT: signal.setUnitID(value.toInt()); break;
 			case SC_ADJUSTMENT: signal.setAdjustment(value.toDouble()); break;
+			case SC_DROP_LIMIT: signal.setDropLimit(value.toDouble()); break;
 			case SC_EXCESS_LIMIT: signal.setExcessLimit(value.toDouble()); break;
 			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
 			case SC_INPUT_LOW_LIMIT: signal.setInputLowLimit(value.toDouble()); break;
@@ -288,25 +284,12 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
-			//case SC_IN_OUT_TYPE: signal.setInOutType(value.toInt()); break;
-
+			case SC_IN_OUT_TYPE: signal.setInOutType(SignalInOutType(value.toInt())); break;
+			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
 			default:
 				assert(false);
-			//case SC_IN_OUT_NO: signal.setInOutNo(value.toInt()); break;
-			//case SC_DEVICE: signal.setDeviceID(value.toInt()); break;
 		}
-
-		/*if (added)
-		{
-			emit signalAdded(signal);
-		}
-		else
-		{
-			emit signalChanged(signal);
-		}*/
 	}
-
-	qDebug() << "setData with role: " << role;
 
 	emit dataChanged(index, index, QVector<int>() << role);
 
@@ -362,7 +345,7 @@ void SignalsModel::addSignal()
 	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
 
 	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
-	signalTypeCombo->addItems(QStringList() << "Analog" << "Discrete");
+	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
 	signalTypeCombo->setCurrentIndex(0);
 
 	fl->addRow(tr("Signal type"), signalTypeCombo);
@@ -393,7 +376,7 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
-	SignalPropertiesDialog dlg(signal, m_dataFormatInfo, m_unitInfo, m_parentWindow);
+	SignalPropertiesDialog dlg(signal, SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -401,6 +384,10 @@ void SignalsModel::addSignal()
 		for (int i = 0; i < channelCount; i++)
 		{
 			signalVector << signal;
+			if (channelCount > 1)
+			{
+				signalVector[i].setStrID((signal.strID() + "_%1").arg(QChar('A' + i)));
+			}
 		}
 		if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
 		{
@@ -412,9 +399,9 @@ void SignalsModel::addSignal()
 				m_signalSet.append(signalID, signalVector[i]);
 			}
 			endInsertRows();
+			emit cellsSizeChanged();
 		}
 	}
-	emit cellsSizeChanged();
 }
 
 DbController *SignalsModel::dbController()

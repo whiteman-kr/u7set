@@ -10,17 +10,19 @@ class QtStringPropertyManager;
 class QtEnumPropertyManager;
 class QtIntPropertyManager;
 class QtDoublePropertyManager;
+class QtBoolPropertyManager;
+enum SignalType;
 
 class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(Signal& signal, DataFormatList& dataFormatInfo, UnitList& unitInfo, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(Signal& signal, SignalType signalType, DataFormatList& dataFormatInfo, UnitList& unitInfo, QWidget *parent = 0);
 
 signals:
 
 public slots:
-	void saveSignal();
+	void checkAndSaveSignal();
 
 private:
 	Signal& m_signal;
@@ -31,6 +33,7 @@ private:
 	QtEnumPropertyManager* m_enumManager;
 	QtIntPropertyManager* m_intManager;
 	QtDoublePropertyManager* m_doubleManager;
+	QtBoolPropertyManager* m_boolManager;
 
 	QtProperty* m_strIDProperty;
 	QtProperty* m_extStrIDProperty;
@@ -43,6 +46,7 @@ private:
 	QtProperty* m_highLimitProperty;
 	QtProperty* m_unitProperty;
 	QtProperty* m_adjustmentProperty;
+	QtProperty* m_dropLimitProperty;
 	QtProperty* m_excessLimitProperty;
 	QtProperty* m_unbalanceLimitProperty;
 
@@ -55,6 +59,13 @@ private:
 	QtProperty* m_outputHighLimitProperty;
 	QtProperty* m_outputUnitProperty;
 	QtProperty* m_outputSensorProperty;
+
+	QtProperty* m_acquireProperty;
+	QtProperty* m_calculatedProperty;
+	QtProperty* m_normalStateProperty;
+	QtProperty* m_decimalPlacesProperty;
+	QtProperty* m_apertureProperty;
+	QtProperty* m_deviceIDProperty;
 };
 
 #endif // SIGNALPROPERTIESDIALOG_H
