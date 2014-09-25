@@ -13,17 +13,18 @@ class QtEnumPropertyManager;
 class QtIntPropertyManager;
 class QtDoublePropertyManager;
 class QtBoolPropertyManager;
+enum SignalType;
 
 class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(Signal& signal, QVector<DataFormat>& dataFormatInfo, QVector<Unit>& unitInfo, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(Signal& signal, SignalType signalType, QVector<DataFormat>& dataFormatInfo, QVector<Unit>& unitInfo, QWidget *parent = 0);
 
 signals:
 
 public slots:
-	void saveSignal();
+	void checkAndSaveSignal();
 
 private:
 	Signal& m_signal;
@@ -63,6 +64,10 @@ private:
 
 	QtProperty* m_acquireProperty;
 	QtProperty* m_calculatedProperty;
+	QtProperty* m_normalStateProperty;
+	QtProperty* m_decimalPlacesProperty;
+	QtProperty* m_apertureProperty;
+	QtProperty* m_deviceIDProperty;
 };
 
 #endif // SIGNALPROPERTIESDIALOG_H

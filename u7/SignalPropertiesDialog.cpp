@@ -9,9 +9,10 @@
 #include <QtLineEditFactory>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
+#include <QMessageBox>
 #include "../include/Signal.h"
 
-SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataFormat>& dataFormatInfo, QVector<Unit>& unitInfo, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signalType, QVector<DataFormat>& dataFormatInfo, QVector<Unit>& unitInfo, QWidget *parent) :
 	QDialog(parent),
 	m_signal(signal),
 	m_dataFormatInfo(dataFormatInfo),
@@ -27,15 +28,26 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	QtProperty *signalProperty = groupManager->addProperty(tr("Signal"));
 
     m_strIDProperty = m_stringManager->addProperty(tr("ID"));
-	m_stringManager->setValue(m_strIDProperty, signal.strID());
+	QString strID = signal.strID();
+	if (strID[0] != '#')
+	{
+		strID = '#' + strID;
+	}
+	m_stringManager->setValue(m_strIDProperty, strID);
+	QRegExp rx4ID("^#[A-Z][A-Z\\d_]*$");
+	m_stringManager->setRegExp(m_strIDProperty, rx4ID);
     signalProperty->addSubProperty(m_strIDProperty);
 
 	m_extStrIDProperty = m_stringManager->addProperty(tr("External ID"));
 	m_stringManager->setValue(m_extStrIDProperty, signal.extStrID());
+	QRegExp rx4ExtID("^[A-Z][A-Z\\d_]*$");
+	m_stringManager->setRegExp(m_extStrIDProperty, rx4ExtID);
     signalProperty->addSubProperty(m_extStrIDProperty);
 
 	m_nameProperty = m_stringManager->addProperty(tr("Name"));
 	m_stringManager->setValue(m_nameProperty, signal.name());
+	QRegExp rx4Name("^.+$");
+	m_stringManager->setRegExp(m_nameProperty, rx4Name);
     signalProperty->addSubProperty(m_nameProperty);
 
 	QStringList dataFormatNames;
@@ -55,7 +67,15 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 
 	m_dataSizeProperty = m_intManager->addProperty(tr("Data size"));
 	m_intManager->setRange(m_dataSizeProperty, 1, 100);
-	m_intManager->setValue(m_dataSizeProperty, signal.dataSize());
+	if (signalType == SignalType::analog)
+	{
+		m_intManager->setValue(m_dataSizeProperty, signal.dataSize());
+	}
+	else
+	{
+		m_intManager->setValue(m_dataSizeProperty, 1);
+		m_intManager->setReadOnly(m_dataSizeProperty, true);
+	}
 	signalProperty->addSubProperty(m_dataSizeProperty);
 
 	m_lowAdcProperty = m_intManager->addProperty(tr("Low ADC"));
@@ -184,9 +204,21 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	m_boolManager->setValue(m_calculatedProperty, signal.calculated());
 	signalProperty->addSubProperty(m_calculatedProperty);
 
-	m_acquireProperty = m_boolManager->addProperty(tr("Acquire"));
-	m_boolManager->setValue(m_acquireProperty, signal.acquire());
-	signalProperty->addSubProperty(m_acquireProperty);
+	m_normalStateProperty = m_intManager->addProperty(tr("Normal state"));
+	m_intManager->setValue(m_normalStateProperty, signal.normalState());
+	signalProperty->addSubProperty(m_normalStateProperty);
+
+	m_decimalPlacesProperty = m_intManager->addProperty(tr("Decimal places"));
+	m_intManager->setValue(m_decimalPlacesProperty, signal.decimalPlaces());
+	signalProperty->addSubProperty(m_decimalPlacesProperty);
+
+	m_apertureProperty = m_doubleManager->addProperty(tr("Aperture"));
+	m_doubleManager->setValue(m_apertureProperty, signal.aperture());
+	signalProperty->addSubProperty(m_apertureProperty);
+
+	m_deviceIDProperty = m_stringManager->addProperty(tr("Device ID"));
+	m_stringManager->setValue(m_deviceIDProperty, signal.deviceStrID());
+    signalProperty->addSubProperty(m_deviceIDProperty);
 
 	QtLineEditFactory* lineEditFactory = new QtLineEditFactory(this);
 	QtEnumEditorFactory* enumEditFactory = new QtEnumEditorFactory(this);
@@ -208,8 +240,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSignal()));
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(checkAndSaveSignal()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
 	vl->addWidget(buttonBox);
@@ -219,11 +250,35 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, QVector<DataForma
 	setFixedWidth(320);
 }
 
-void SignalPropertiesDialog::saveSignal()
+void SignalPropertiesDialog::checkAndSaveSignal()
 {
-	m_signal.setStrID(m_stringManager->value(m_strIDProperty));
-	m_signal.setExtStrID(m_stringManager->value(m_extStrIDProperty));
-	m_signal.setName(m_stringManager->value(m_nameProperty));
+	QString strID = m_stringManager->value(m_strIDProperty);
+	QRegExp rx4ID("^#[A-Z][A-Z\\d_]*$");
+	if (!rx4ID.exactMatch(strID))
+	{
+		QMessageBox::information(this, tr("Information"), tr("You have to set ID in correct format, "
+															 "it should begin from '#' and latin letter "
+															 "and be followed by any number of latin letters, '_' and digits"));
+		return;
+	}
+	QString extStrID = m_stringManager->value(m_extStrIDProperty);
+	QRegExp rx4ExtID("^[A-Z][A-Z\\d_]*$");
+	if (!rx4ExtID.exactMatch(extStrID))
+	{
+		QMessageBox::information(this, tr("Information"), tr("You have to set External ID in correct format, "
+															 "it should begin from latin letter "
+															 "and be followed by any number of latin letters, '_' and digits"));
+		return;
+	}
+	QString name = m_stringManager->value(m_nameProperty);
+	if (name.isEmpty())
+	{
+		QMessageBox::information(this, tr("Information"), tr("You should fill signal Name, it could not be empty"));
+		return;
+	}
+	m_signal.setStrID(strID);
+	m_signal.setExtStrID(extStrID);
+	m_signal.setName(name);
 	int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
 	if (dataFormatIndex > 0 && dataFormatIndex < m_dataFormatInfo.count())
 	{
@@ -287,4 +342,10 @@ void SignalPropertiesDialog::saveSignal()
 
 	m_signal.setAcquire(m_boolManager->value(m_acquireProperty));
 	m_signal.setCalculated(m_boolManager->value(m_calculatedProperty));
+	m_signal.setNormalState(m_intManager->value(m_normalStateProperty));
+	m_signal.setDecimalPlaces(m_intManager->value(m_decimalPlacesProperty));
+	m_signal.setAperture(m_doubleManager->value(m_apertureProperty));
+	m_signal.setDeviceStrID(m_stringManager->value(m_deviceIDProperty));
+
+	accept();
 }

@@ -306,7 +306,7 @@ void SignalsModel::addSignal()
 	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
 
 	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
-	signalTypeCombo->addItems(QStringList() << "Analog" << "Discrete");
+	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
 	signalTypeCombo->setCurrentIndex(0);
 
 	fl->addRow(tr("Signal type"), signalTypeCombo);
@@ -336,13 +336,17 @@ void SignalsModel::addSignal()
 	int channelCount = signalChannelCount->text().toInt();
 
 	Signal signal;
-	SignalPropertiesDialog dlg(signal, m_dataFormatInfo, m_unitInfo, m_parentWindow);
+	SignalPropertiesDialog dlg(signal, SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, m_parentWindow);
 	if (dlg.exec() == QDialog::Accepted)
 	{
 		QVector<Signal> signalVector;
 		for (int i = 0; i < channelCount; i++)
 		{
 			signalVector << signal;
+			if (channelCount > 1)
+			{
+				signalVector[i].setStrID((signal.strID() + "_%1").arg(QChar('A' + i)));
+			}
 		}
 		if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
 		{
@@ -353,9 +357,9 @@ void SignalsModel::addSignal()
 				m_signalSet.insert(signalVector[i]);
 			}
 			endInsertRows();
+			emit cellsSizeChanged();
 		}
 	}
-	emit cellsSizeChanged();
 }
 
 DbController *SignalsModel::dbController()
