@@ -1,6 +1,8 @@
 #include "DialogAfblEditor.h"
 #include "ui_DialogAfblEditor.h"
 #include "DialogAfbProperties.h"
+#include "CheckInDialog.h"
+#include "Settings.h"
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDateTime>
@@ -16,12 +18,20 @@ DialogAfblEditor::DialogAfblEditor(DbController* pDbController, QWidget *parent)
     ui->m_afbTree->setColumnCount(3);
     QStringList l(tr("File Name"));
 	l << tr("State");
-	l << tr("Last Check-in Time");
+    l << tr("Action");
+    l << tr("Last Action Time");
     ui->m_afbTree->setHeaderLabels(l);
     ui->m_afbTree->setColumnWidth(0, 150);
     ui->m_afbTree->setColumnWidth(1, 100);
+    ui->m_afbTree->setColumnWidth(2, 100);
 
     refreshFiles();
+
+    if (theSettings.m_abflEditorWindowPos.x() != -1 && theSettings.m_abflEditorWindowPos.y() != -1)
+    {
+        move(theSettings.m_abflEditorWindowPos);
+        restoreGeometry(theSettings.m_abflEditorWindowGeometry);
+    }
 }
 
 DialogAfblEditor::~DialogAfblEditor()
@@ -76,6 +86,7 @@ void DialogAfblEditor::refreshFiles()
 
         QStringList l(fi.fileName());
         l.append(fi.state().text());
+        l.append(fi.action().text());
         l.append(fi.lastCheckIn().toString());
 
 		QTreeWidgetItem* pItem = new QTreeWidgetItem(ui->m_afbTree, l);
@@ -140,6 +151,35 @@ void DialogAfblEditor::on_m_addXsd_clicked()
     addFile(pf);
 }
 
+void DialogAfblEditor::on_m_view_clicked()
+{
+    std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
+
+    if (selectedFiles.size() != 1)
+    {
+        return;
+    }
+
+    DbFileInfo* pFi = *selectedFiles.begin();
+    Q_ASSERT(pFi);
+
+    std::shared_ptr<DbFile> f;
+
+    if (m_pDbController->getLatestVersion(*pFi, &f, this) == false)
+    {
+        QMessageBox::critical(this, "Error", "Get latest version error!");
+        return;
+    }
+
+    QByteArray data;
+    f->swapData(data);
+
+    DialogAfbProperties d(pFi->fileName(), &data, m_pDbController, true);
+    d.exec();
+
+    return;
+}
+
 void DialogAfblEditor::on_m_edit_clicked()
 {
     std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
@@ -154,39 +194,27 @@ void DialogAfblEditor::on_m_edit_clicked()
 
     if (pFi->state() != VcsState::CheckedOut)
     {
-        if (QMessageBox::question(this, "Edit", "File is not checked out! Do you wish to check out and edit this file?") != QMessageBox::Yes)
-        {
-            return;
-        }
-
-		std::vector<DbFileInfo> f;
-        f.push_back(*pFi);
-
-		if (m_pDbController->checkOut(f, this) == false)
-		{
-            QMessageBox::critical(this, "Error", "Check Out error!");
-            return;
-        }
-
-        refreshFiles();
+        QMessageBox::critical(this, "Error", "File is not checked out!");
+        return;
     }
 
     std::shared_ptr<DbFile> f;
 
-    if (m_pDbController->getWorkcopy(*pFi, &f, this) == false)
+    if (m_pDbController->getLatestVersion(*pFi, &f, this) == false)
     {
-        QMessageBox::critical(this, "Error", "Get work copy error!");
+        QMessageBox::critical(this, "Error", "Get latest version error!");
         return;
     }
 
     QByteArray data;
     f->swapData(data);
 
-    DialogAfbProperties d(pFi->fileName(), &data, m_pDbController);
+    DialogAfbProperties d(pFi->fileName(), &data, m_pDbController, false);
     if (d.exec() != QDialog::Accepted)
     {
         return;
     }
+
 
     f->swapData(data);
 
@@ -231,28 +259,18 @@ void DialogAfblEditor::on_m_checkIn_clicked()
     if (selectedFiles.empty())
         return;
 
-    bool ok = false;
-    QString comment = QInputDialog::getText(this, tr("Check In"), tr("Enter the comment:"), QLineEdit::Normal, tr(""), &ok);
-    if (ok == false)
-        return;
-
+    std::vector<DbFileInfo> files;
     for (auto it = selectedFiles.begin(); it != selectedFiles.end(); it++)
     {
         DbFileInfo* pFi = *it;
-        if (pFi->state() != VcsState::CheckedOut)
-        {
-            QMessageBox::critical(this, "Error", "File " + pFi->fileName() + " is already checked in!");
-            continue;
-        }
-
-        if (m_pDbController->checkIn(*pFi, comment, this) == false)
-        {
-            QMessageBox::critical(this, "Error", pFi->fileName() + " Check In error!");
-            continue;
-        }
+        files.push_back(*pFi);
     }
 
-    refreshFiles();
+    bool result = CheckInDialog::checkIn(files, m_pDbController, this);
+    if (result == true)
+    {
+        refreshFiles();
+    }
 }
 
 void DialogAfblEditor::on_m_Undo_clicked()
@@ -331,7 +349,7 @@ void DialogAfblEditor::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem* item, int
 {
     Q_UNUSED(item);
     Q_UNUSED(column);
-    on_m_edit_clicked();
+    on_m_view_clicked();
 }
 
 void DialogAfblEditor::on_m_afbTree_itemSelectionChanged()
@@ -343,6 +361,8 @@ void DialogAfblEditor::on_m_afbTree_itemSelectionChanged()
     {
         enableEdit = true;
     }
+
+    bool enableView = selectedFiles.size() == 1;
 
     bool enableCheckOut = false;
     int count = 0;
@@ -364,9 +384,45 @@ void DialogAfblEditor::on_m_afbTree_itemSelectionChanged()
 
 
     ui->m_edit->setEnabled(enableEdit);
+    ui->m_view->setEnabled(enableView);
     ui->m_checkOut->setEnabled(enableCheckOut);
     ui->m_checkIn->setEnabled(enableCheckIn);
     ui->m_Undo->setEnabled(enableCheckIn);
-    //ui->m_remove
+    ui->m_remove->setEnabled(selectedFiles.size() > 0);
 }
 
+
+
+void DialogAfblEditor::on_DialogAfblEditor_finished(int result)
+{
+    Q_UNUSED(result);
+
+    theSettings.m_abflEditorWindowPos = pos();
+    theSettings.m_abflEditorWindowGeometry = saveGeometry();
+
+}
+
+void DialogAfblEditor::on_m_remove_clicked()
+{
+    std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
+    if (selectedFiles.empty())
+        return;
+
+    if (QMessageBox::question(this, "Delete", "Are you sure you want to delete selected file(s)?") != QMessageBox::Yes)
+        return;
+
+    std::vector<DbFileInfo> files;
+    for (auto it = selectedFiles.begin(); it != selectedFiles.end(); it++)
+    {
+        DbFileInfo* pFi = *it;
+        files.push_back(*pFi);
+    }
+
+    bool result = m_pDbController->deleteFiles(&files, this);
+    if (result == false)
+    {
+        QMessageBox::critical(this, "Error", "File(s) deleting error!");
+    }
+
+    refreshFiles();
+}

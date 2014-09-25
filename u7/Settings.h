@@ -59,6 +59,15 @@ public:
 	//
 	//QByteArray m_equipmentTabPageSplitterState;
 
+    // AFBL Editor options
+    //
+    QPoint m_abflEditorWindowPos;
+    QByteArray m_abflEditorWindowGeometry;
+
+    // AFBL Editor options
+    //
+    QPoint m_abflPropertiesWindowPos;
+    QByteArray m_abflPropertiesWindowGeometry;
 private:
 	// --
 	//
