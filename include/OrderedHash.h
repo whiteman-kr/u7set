@@ -19,6 +19,7 @@ public:
 
 	void append(const KEY& key, const VALUE& value);
 	const VALUE value(const KEY& key) const;
+	const KEY key(const int index) const;
 	const VALUE& operator[](const int index) const;
 };
 
@@ -76,6 +77,13 @@ template <typename KEY, typename VALUE>
 const VALUE OrderedHash<KEY, VALUE>::value(const KEY& key) const
 {
 	return m_hash.value(key);
+}
+
+
+template <typename KEY, typename VALUE>
+const KEY OrderedHash<KEY, VALUE>::key(const int index) const
+{
+	return m_vector[index];
 }
 
 

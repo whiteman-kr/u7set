@@ -91,7 +91,7 @@ SignalsModel::~SignalsModel()
 
 int SignalsModel::rowCount(const QModelIndex &) const
 {
-	return m_signalIDs.count();
+	return m_signalSet.count();
 }
 
 int SignalsModel::columnCount(const QModelIndex &) const
@@ -115,24 +115,12 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 {
 	int row = index.row();
 	int col = index.column();
-	if (row == m_signalIDs.count())
+	if (row == m_signalSet.count())
 	{
 		return QVariant();
 	}
 
-	if (m_signalSet.contains(m_signalIDs[row]) == false)
-	{
-		//emit signalDataRequest(m_signalIDs[row]);
-		return QVariant();
-	}
-
-	const Signal& signal = m_signalSet.value(m_signalIDs[row]);
-
-/*	if (signal == nullptr)
-	{
-		//emit signalDataRequest(m_signalIDs[row]);
-		return QVariant();
-	}*/
+	const Signal& signal = m_signalSet[row];
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
@@ -236,9 +224,9 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 		}
 		if (orientation == Qt::Vertical)
 		{
-			if (section < m_signalIDs.count())
+			if (section < m_signalSet.count())
 			{
-				return m_signalIDs[section];
+				return m_signalSet.key(section);
 			}
 		}
 	}
@@ -251,7 +239,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 	{
 		int row = index.row();
 
-		assert(row < m_signalIDs.count());
+		assert(row < m_signalSet.count());
 
 		Signal signal/* = m_signals[index.row()]*/;
 
@@ -310,12 +298,9 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 void SignalsModel::loadSignals()
 {
-	//QSet<int> signalsIDs;
-
-	if (m_signalIDs.count() > 0)
+	if (m_signalSet.count() > 0)
 	{
-		beginRemoveRows(QModelIndex(), 0, m_signalIDs.count() - 1);
-		m_signalIDs.clear();
+		beginRemoveRows(QModelIndex(), 0, m_signalSet.count() - 1);
 		m_signalSet.clear();
 		endRemoveRows();
 	}
@@ -324,17 +309,12 @@ void SignalsModel::loadSignals()
 	dbController()->getDataFormats(&m_dataFormatInfo, m_parentWindow);
 	dbController()->getUnits(&m_unitInfo, m_parentWindow);
 
-	if (m_signalIDs.count() > 0)
+	if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
 	{
-		beginInsertRows(QModelIndex(), 0, m_signalIDs.count() - 1);
-
-		if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
-		{
-			QMessageBox::warning(m_parentWindow, tr("Warning"), tr("Could not load signals"));
-		}
-
-		endInsertRows();
+		QMessageBox::warning(m_parentWindow, tr("Warning"), tr("Could not load signals"));
 	}
+	beginInsertRows(QModelIndex(), 0, m_signalSet.count() - 1);
+	endInsertRows();
 
 	emit cellsSizeChanged();
 }
@@ -391,12 +371,10 @@ void SignalsModel::addSignal()
 		}
 		if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
 		{
-			beginInsertRows(QModelIndex(), m_signalIDs.count(), m_signalIDs.count() + signalVector.count() - 1);
+			beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + signalVector.count() - 1);
 			for (int i = 0; i < signalVector.count(); i++)
 			{
-				int signalID = signalVector[i].ID();
-				m_signalIDs.append(signalID);
-				m_signalSet.append(signalID, signalVector[i]);
+				m_signalSet.append(signalVector[i].ID(), signalVector[i]);
 			}
 			endInsertRows();
 			emit cellsSizeChanged();

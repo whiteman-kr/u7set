@@ -39,7 +39,6 @@ protected:
 private:
 	// Data
 	//
-	QVector<int> m_signalIDs;
 	SignalSet m_signalSet;
 	DataFormatList m_dataFormatInfo;
 	UnitList m_unitInfo;
