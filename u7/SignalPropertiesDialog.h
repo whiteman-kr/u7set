@@ -65,6 +65,7 @@ private:
 	QtProperty* m_normalStateProperty;
 	QtProperty* m_decimalPlacesProperty;
 	QtProperty* m_apertureProperty;
+	QtProperty* m_inOutTypeProperty;
 	QtProperty* m_deviceIDProperty;
 };
 

@@ -39,6 +39,16 @@ enum InstanceAction
 };
 
 
+const char* const InOutTypeStr[] =
+{
+	"Input",
+	"Output",
+	"Internal"
+};
+
+const int IN_OUT_TYPE_COUNT = sizeof(InOutTypeStr) / sizeof(InOutTypeStr[0]);
+
+
 const char* const SensorTypeStr[] =
 {
     "Not used",
@@ -63,7 +73,7 @@ const char* const SensorTypeStr[] =
     "BPS",
 };
 
-const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(const char*);
+const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 
 const int NO_UNIT_ID = 1;

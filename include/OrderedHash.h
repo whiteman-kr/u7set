@@ -23,10 +23,12 @@ public:
 	const VALUE value(const KEY& key) const;
 
 	const KEY key(const int index) const;
+	int keyIndex(const KEY& key) const;
 
 	VALUE& operator[](int index);
 	const VALUE& operator[](int index) const;
 
+	QList<VALUE> toList() const;
 };
 
 
@@ -110,6 +112,17 @@ const KEY OrderedHash<KEY, VALUE>::key(const int index) const
 
 
 template <typename KEY, typename VALUE>
+int OrderedHash<KEY, VALUE>::keyIndex(const KEY &key) const
+{
+	if (m_hash.contains(key))
+	{
+		return m_hash[key];
+	}
+	return -1;
+}
+
+
+template <typename KEY, typename VALUE>
 VALUE& OrderedHash<KEY, VALUE>::operator[](int index)
 {
 	return m_valueVector[index];
@@ -120,4 +133,11 @@ template <typename KEY, typename VALUE>
 const VALUE& OrderedHash<KEY, VALUE>::operator[](int index) const
 {
 	return m_valueVector[index];
+}
+
+
+template <typename KEY, typename VALUE>
+QList<VALUE> OrderedHash<KEY, VALUE>::toList() const
+{
+	return m_valueVector.toList();
 }
