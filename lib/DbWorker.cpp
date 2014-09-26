@@ -2472,7 +2472,6 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 	m_progress->setValue(100);
 
 	return;
-
 }
 
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
@@ -2517,7 +2516,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setDecimalPlaces(q.value("decimalplaces").toInt());
 	s.setAperture(q.value("aperture").toDouble());
 	s.setInOutType(static_cast<SignalInOutType>(q.value("inouttype").toInt()));
-	s.setDeviceStrID(q.value("deviceid").toString());
+	s.setDeviceStrID(q.value("devicestrid").toString());
 }
 
 

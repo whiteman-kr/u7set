@@ -313,6 +313,7 @@ void SignalsModel::loadSignals()
 	{
 		QMessageBox::warning(m_parentWindow, tr("Warning"), tr("Could not load signals"));
 	}
+
 	beginInsertRows(QModelIndex(), 0, m_signalSet.count() - 1);
 	endInsertRows();
 

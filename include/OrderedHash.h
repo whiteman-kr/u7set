@@ -5,8 +5,9 @@ template <typename KEY, typename VALUE>
 class OrderedHash
 {
 private:
-	QVector<KEY> m_vector;
-	QHash<KEY, VALUE> m_hash;
+	QVector<VALUE> m_valueVector;
+	QVector<KEY> m_keyVector;
+	QHash<KEY, int> m_hash;
 
 public:
 	OrderedHash();
@@ -18,9 +19,14 @@ public:
 	bool contains(const KEY& key) const;
 
 	void append(const KEY& key, const VALUE& value);
+
 	const VALUE value(const KEY& key) const;
+
 	const KEY key(const int index) const;
-	const VALUE& operator[](const int index) const;
+
+	VALUE& operator[](int index);
+	const VALUE& operator[](int index) const;
+
 };
 
 
@@ -33,7 +39,8 @@ OrderedHash<KEY, VALUE>::OrderedHash()
 template <typename KEY, typename VALUE>
 void OrderedHash<KEY, VALUE>::clear()
 {
-	m_vector.clear();
+	m_valueVector.clear();
+	m_keyVector.clear();
 	m_hash.clear();
 }
 
@@ -41,14 +48,14 @@ void OrderedHash<KEY, VALUE>::clear()
 template <typename KEY, typename VALUE>
 bool OrderedHash<KEY, VALUE>::isEmpty() const
 {
-	return m_vector.isEmpty();
+	return m_valueVector.isEmpty();
 }
 
 
 template <typename KEY, typename VALUE>
 int OrderedHash<KEY, VALUE>::count() const
 {
-	return m_vector.count();
+	return m_valueVector.count();
 }
 
 
@@ -64,11 +71,18 @@ void OrderedHash<KEY, VALUE>::append(const KEY& key, const VALUE& value)
 {
 	if (m_hash.contains(key))
 	{
+		int valueIndex = m_hash[key];
+
+		m_valueVector[valueIndex] = value;
+		m_keyVector[valueIndex] = key;
 	}
 	else
 	{
-		m_hash.insert(key, value);
-		m_vector.append(key);
+		int newValueIndex = m_valueVector.count();
+
+		m_valueVector.append(value);
+		m_keyVector.append(key);
+		m_hash.insert(key, newValueIndex);
 	}
 }
 
@@ -76,19 +90,34 @@ void OrderedHash<KEY, VALUE>::append(const KEY& key, const VALUE& value)
 template <typename KEY, typename VALUE>
 const VALUE OrderedHash<KEY, VALUE>::value(const KEY& key) const
 {
-	return m_hash.value(key);
+	if (m_hash.contains(key))
+	{
+		int valueIndex = m_hash[key];
+		return m_valueVector[valueIndex];
+	}
+
+	assert(false);
+
+	return VALUE();
 }
 
 
 template <typename KEY, typename VALUE>
 const KEY OrderedHash<KEY, VALUE>::key(const int index) const
 {
-	return m_vector[index];
+	return m_keyVector[index];
 }
 
 
 template <typename KEY, typename VALUE>
-const VALUE& OrderedHash<KEY, VALUE>::operator[](const int index) const
+VALUE& OrderedHash<KEY, VALUE>::operator[](int index)
 {
-	return m_hash.value(m_vector[index]);
+	return m_valueVector[index];
+}
+
+
+template <typename KEY, typename VALUE>
+const VALUE& OrderedHash<KEY, VALUE>::operator[](int index) const
+{
+	return m_valueVector[index];
 }
