@@ -10,6 +10,8 @@
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QMessageBox>
+#include <QSettings>
+#include <QtVariantProperty>
 #include "../include/Signal.h"
 
 
@@ -19,6 +21,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	m_dataFormatInfo(dataFormatInfo),
 	m_unitInfo(unitInfo)
 {
+	QSettings settings;
 	QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(this);
 	m_stringManager = new QtStringPropertyManager(this);
 	m_enumManager = new QtEnumPropertyManager(this);
@@ -35,13 +38,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 		strID = '#' + strID;
 	}
 	m_stringManager->setValue(m_strIDProperty, strID);
-	QRegExp rx4ID("^#[A-Z][A-Z\\d_]*$");
+	QRegExp rx4ID("^#[A-Za-z][A-Za-z\\d_]*$");
 	m_stringManager->setRegExp(m_strIDProperty, rx4ID);
     signalProperty->addSubProperty(m_strIDProperty);
 
 	m_extStrIDProperty = m_stringManager->addProperty(tr("External ID"));
 	m_stringManager->setValue(m_extStrIDProperty, signal.extStrID());
-	QRegExp rx4ExtID("^[A-Z][A-Z\\d_]*$");
+	QRegExp rx4ExtID("^[A-Za-z][A-Za-z\\d_]*$");
 	m_stringManager->setRegExp(m_extStrIDProperty, rx4ExtID);
     signalProperty->addSubProperty(m_extStrIDProperty);
 
@@ -111,20 +114,20 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 
 	// Input sensor
 	//
-	QtProperty *inputProperty = groupManager->addProperty(tr("Input sensor"));
+	m_inputTreeProperty = groupManager->addProperty(tr("Input sensor"));
 
 	m_inputLowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
 	m_doubleManager->setValue(m_inputLowLimitProperty, signal.inputLowLimit());
-	inputProperty->addSubProperty(m_inputLowLimitProperty);
+	m_inputTreeProperty->addSubProperty(m_inputLowLimitProperty);
 
 	m_inputHighLimitProperty = m_doubleManager->addProperty(tr("High limit"));
 	m_doubleManager->setValue(m_inputHighLimitProperty, signal.inputHighLimit());
-	inputProperty->addSubProperty(m_inputHighLimitProperty);
+	m_inputTreeProperty->addSubProperty(m_inputHighLimitProperty);
 
 	m_inputUnitProperty = m_enumManager->addProperty(tr("Unit"));
 	m_enumManager->setEnumNames(m_inputUnitProperty, unitStringList);
 	m_enumManager->setValue(m_inputUnitProperty, unitInfo.keyIndex(signal.inputUnitID()));
-	inputProperty->addSubProperty(m_inputUnitProperty);
+	m_inputTreeProperty->addSubProperty(m_inputUnitProperty);
 
 	QStringList sensorNames;
 	for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
@@ -134,33 +137,33 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	m_inputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
 	m_enumManager->setEnumNames(m_inputSensorProperty, sensorNames);
 	m_enumManager->setValue(m_inputSensorProperty, signal.inputSensorID());
-	inputProperty->addSubProperty(m_inputSensorProperty);
+	m_inputTreeProperty->addSubProperty(m_inputSensorProperty);
 
-	signalProperty->addSubProperty(inputProperty);
+	signalProperty->addSubProperty(m_inputTreeProperty);
 
 	// Output sensor
 	//
-	QtProperty *outputProperty = groupManager->addProperty(tr("Output sensor"));
+	m_outputTreeProperty = groupManager->addProperty(tr("Output sensor"));
 
 	m_outputLowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
 	m_doubleManager->setValue(m_outputLowLimitProperty, signal.outputLowLimit());
-	outputProperty->addSubProperty(m_outputLowLimitProperty);
+	m_outputTreeProperty->addSubProperty(m_outputLowLimitProperty);
 
 	m_outputHighLimitProperty = m_doubleManager->addProperty(tr("High limit"));
 	m_doubleManager->setValue(m_outputHighLimitProperty, signal.outputHighLimit());
-	outputProperty->addSubProperty(m_outputHighLimitProperty);
+	m_outputTreeProperty->addSubProperty(m_outputHighLimitProperty);
 
 	m_outputUnitProperty = m_enumManager->addProperty(tr("Unit"));
 	m_enumManager->setEnumNames(m_outputUnitProperty, unitStringList);
 	m_enumManager->setValue(m_outputUnitProperty, unitInfo.keyIndex(signal.outputUnitID()));
-	outputProperty->addSubProperty(m_outputUnitProperty);
+	m_outputTreeProperty->addSubProperty(m_outputUnitProperty);
 
 	m_outputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
 	m_enumManager->setEnumNames(m_outputSensorProperty, sensorNames);
 	m_enumManager->setValue(m_outputSensorProperty, signal.outputSensorID());
-	outputProperty->addSubProperty(m_outputSensorProperty);
+	m_outputTreeProperty->addSubProperty(m_outputSensorProperty);
 
-	signalProperty->addSubProperty(outputProperty);
+	signalProperty->addSubProperty(m_outputTreeProperty);
 
 	m_acquireProperty = m_boolManager->addProperty(tr("Acquire"));
 	m_boolManager->setValue(m_acquireProperty, signal.acquire());
@@ -202,34 +205,37 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	QtDoubleSpinBoxFactory* doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(this);
 	QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
 
-	QtAbstractPropertyBrowser *browser = new QtTreePropertyBrowser(this);
-	browser->setFactoryForManager(m_stringManager, lineEditFactory);
-	browser->setFactoryForManager(m_enumManager, enumEditFactory);
-	browser->setFactoryForManager(m_intManager, spinBoxFactory);
-	browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
-	browser->setFactoryForManager(m_boolManager, checkBoxFactory);
+	m_browser = new QtTreePropertyBrowser(this);
+	m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
+	m_browser->setFactoryForManager(m_enumManager, enumEditFactory);
+	m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
+	m_browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
+	m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
 
-	browser->addProperty(signalProperty);
+	m_browser->addProperty(signalProperty);
 
 	QVBoxLayout* vl = new QVBoxLayout;
-	vl->addWidget(browser);
+	vl->addWidget(m_browser);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(checkAndSaveSignal()));
 	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+	connect(this, SIGNAL(finished(int)), this, SLOT(saveDialogSettings()));
 
 	vl->addWidget(buttonBox);
 	setLayout(vl);
 
-	setFixedHeight(640);
-	setFixedWidth(320);
+	resize(settings.value("Signal properties dialog: size", QSize(320, 640)).toSize());
+	m_browser->setExpanded(m_browser->items(m_inputTreeProperty)[0], settings.value("Signal properties dialog: input property: expanded", false).toBool());
+	m_browser->setExpanded(m_browser->items(m_outputTreeProperty)[0], settings.value("Signal properties dialog: output property: expanded", false).toBool());
 }
+
 
 void SignalPropertiesDialog::checkAndSaveSignal()
 {
 	QString strID = m_stringManager->value(m_strIDProperty);
-	QRegExp rx4ID("^#[A-Z][A-Z\\d_]*$");
+	QRegExp rx4ID("^#[A-Za-z][A-Za-z\\d_]*$");
 	if (!rx4ID.exactMatch(strID))
 	{
 		QMessageBox::information(this, tr("Information"), tr("You have to set ID in correct format, "
@@ -238,7 +244,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		return;
 	}
 	QString extStrID = m_stringManager->value(m_extStrIDProperty);
-	QRegExp rx4ExtID("^[A-Z][A-Z\\d_]*$");
+	QRegExp rx4ExtID("^[A-Za-z][A-Za-z\\d_]*$");
 	if (!rx4ExtID.exactMatch(extStrID))
 	{
 		QMessageBox::information(this, tr("Information"), tr("You have to set External ID in correct format, "
@@ -329,4 +335,13 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	m_signal.setDeviceStrID(m_stringManager->value(m_deviceIDProperty));
 
 	accept();
+}
+
+
+void SignalPropertiesDialog::saveDialogSettings()
+{
+	QSettings settings;
+	settings.setValue("Signal properties dialog: size", size());
+	settings.setValue("Signal properties dialog: input property: expanded", m_browser->isExpanded(m_browser->items(m_inputTreeProperty)[0]));
+	settings.setValue("Signal properties dialog: output property: expanded", m_browser->isExpanded(m_browser->items(m_outputTreeProperty)[0]));
 }
