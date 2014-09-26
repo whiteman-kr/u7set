@@ -1,5 +1,15 @@
 #pragma once
 
+
+// signal management error codes
+// returns in ObjectState.errCode field
+//
+
+const int	ERR_SIGNAL_OK = 0,
+			ERR_SIGNAL_IS_NOT_CHECKED_OUT = 1,
+			ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER = 2;
+
+
 //
 //
 // DbProgress
@@ -110,6 +120,18 @@ private:
 	friend bool operator== (const VcsItemAction& s1, const VcsItemAction& s2);
 	friend bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2);
 };
+
+
+struct ObjectState
+{
+	int id;
+	bool deleted;
+	bool checkedOut;
+	int action;
+	int userId;
+	int errCode;
+};
+
 
 //
 //

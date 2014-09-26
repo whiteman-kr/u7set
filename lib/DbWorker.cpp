@@ -2524,10 +2524,10 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 {
 	return QString(
 			"'(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,"
-			"%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,"
+			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"%41)'")
+			"\"%41\")'")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
@@ -2568,7 +2568,18 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.decimalPlaces())
 	.arg(s.aperture())
 	.arg(s.inOutType())
-	.arg(s.deviceStrID().isEmpty() ? "NULL" : s.deviceStrID());
+	.arg(s.deviceStrID());
+}
+
+
+void DbWorker::getObjectState(QSqlQuery& q, ObjectState &os)
+{
+	os.id = q.value("id").toInt();
+	os.deleted = q.value("deleted").toBool();
+	os.checkedOut = q.value("checkedout").toBool();
+	os.action = q.value("action").toInt();
+	os.userId = q.value("userid").toInt();
+	os.errCode = q.value("errCode").toInt();
 }
 
 
@@ -2612,7 +2623,11 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 
 	while(q.next() != false)
 	{
-		int signalID =  q.value(0).toInt();
+		ObjectState os;
+
+		getObjectState(q, os);
+
+		int signalID =  os.id;
 
 		Signal& signal = (*newSignal)[i];
 
