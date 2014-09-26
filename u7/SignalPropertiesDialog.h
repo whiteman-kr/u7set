@@ -11,6 +11,7 @@ class QtEnumPropertyManager;
 class QtIntPropertyManager;
 class QtDoublePropertyManager;
 class QtBoolPropertyManager;
+class QtTreePropertyBrowser;
 enum SignalType;
 
 class SignalPropertiesDialog : public QDialog
@@ -23,6 +24,7 @@ signals:
 
 public slots:
 	void checkAndSaveSignal();
+	void saveDialogSettings();
 
 private:
 	Signal& m_signal;
@@ -34,6 +36,7 @@ private:
 	QtIntPropertyManager* m_intManager;
 	QtDoublePropertyManager* m_doubleManager;
 	QtBoolPropertyManager* m_boolManager;
+	QtTreePropertyBrowser* m_browser;
 
 	QtProperty* m_strIDProperty;
 	QtProperty* m_extStrIDProperty;
@@ -50,11 +53,13 @@ private:
 	QtProperty* m_excessLimitProperty;
 	QtProperty* m_unbalanceLimitProperty;
 
+	QtProperty* m_inputTreeProperty;
 	QtProperty* m_inputLowLimitProperty;
 	QtProperty* m_inputHighLimitProperty;
 	QtProperty* m_inputUnitProperty;
 	QtProperty* m_inputSensorProperty;
 
+	QtProperty* m_outputTreeProperty;
 	QtProperty* m_outputLowLimitProperty;
 	QtProperty* m_outputHighLimitProperty;
 	QtProperty* m_outputUnitProperty;
