@@ -2,6 +2,10 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
+#include <QSettings>
+
+// -------------------------------------------------------------------------------------------------------------------
+
 Calibrator::Calibrator(QObject *parent) :
     QObject(parent),
     m_port(this)
@@ -1017,8 +1021,8 @@ void Calibrator::loadSettings()
 
     QSettings s;
 
-    m_portName = s.value( tr("Calibrator%1/port").arg(m_index), tr("COM%1").arg( m_index + 1)).toString();
-    m_type = s.value(tr("Calibrator%1/type").arg(m_index), CALIBRATOR_TYPE_TRXII).toInt();
+    m_portName = s.value( tr("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), tr("COM%1").arg( m_index + 1)).toString();
+    m_type = s.value(tr("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), CALIBRATOR_TYPE_TRXII).toInt();
 
 }
 
@@ -1033,8 +1037,8 @@ void Calibrator::saveSettings()
 
     QSettings s;
 
-    s.setValue(tr("Calibrator%1/port").arg(m_index), m_portName);
-    s.setValue(tr("Calibrator%1/type").arg(m_index), m_type);
+    s.setValue(tr("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), m_portName);
+    s.setValue(tr("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), m_type);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

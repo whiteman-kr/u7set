@@ -4,7 +4,10 @@
 #include <QObject>
 #include <QtGlobal>
 #include <QtSerialPort/QSerialPort>
-#include <QSettings>
+
+// ==============================================================================================
+
+#define			CALIBRATOR_OPTIONS_KEY		"Options/Calibrators/"
 
 // ==============================================================================================
 

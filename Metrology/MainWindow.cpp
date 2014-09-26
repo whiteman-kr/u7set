@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "MainWindow.h"
 #include "ui_mainwindow.h"
 
 #include <QDebug>
@@ -11,6 +11,8 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QComboBox>
+
+#include "OptionsDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -481,3 +483,10 @@ void MainWindow::calibrators()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::options()
+{
+   OptionsDialog dialog(m_options, this);
+   dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------

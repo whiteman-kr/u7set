@@ -11,6 +11,7 @@
 
 #include "Measure.h"
 #include "CalibratorBase.h"
+#include "Options.h"
 
 // ==============================================================================================
 
@@ -73,10 +74,12 @@ public:
     QLabel*         m_statusMeasureCount = nullptr;
     QLabel*         m_statusConnectToServer = nullptr;
 
+public:
 
-    // Calibrators
-    //
-    CalibratorBase  m_calibratorBase;
+    Options         m_options;              // Options
+    CalibratorBase  m_calibratorBase;       // Calibrators
+
+public:
 
     // Create interface
     //
@@ -88,7 +91,6 @@ public:
     void createTabPages();
     void createPanels();
     void createStatusBar();
-
 
 private:
 
@@ -164,7 +166,7 @@ public slots:
     void showOutputSignalList() {};
     //void showComlexComparatorList() {};
     void showOutputRangeList() {};
-    void options() {};
+    void options();
 
     // menu - ?
     //

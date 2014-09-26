@@ -11,13 +11,18 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport
 TARGET = Metrology
 TEMPLATE = app
 
+include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
-SOURCES += main.cpp \
+SOURCES += \
     MainWindow.cpp \
     Measure.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
-    CalibratorManagerDialog.cpp
+    CalibratorManagerDialog.cpp \
+    OptionsDialog.cpp \
+    Options.cpp \
+    OptionsPointsDialog.cpp \
+    Main.cpp
 
 
 HEADERS  += \
@@ -25,17 +30,21 @@ HEADERS  += \
     Measure.h \
     Calibrator.h \
     CalibratorBase.h \
-    CalibratorManagerDialog.h
+    CalibratorManagerDialog.h \
+    OptionsDialog.h \
+    Options.h \
+    OptionsPointsDialog.h
 
 
-FORMS    += mainwindow.ui \
-    CalibratorManagerDialog.ui
+FORMS    += \
+    CalibratorManagerDialog.ui \
+    mainwindow.ui
 
 RESOURCES += \
     Metrology.qrc
 
-TRANSLATIONS = ./translations/Metrology_ru.ts \
-                ./translations/Metrology_uk.ts
+TRANSLATIONS = translations/Metrology_ru.ts \
+                translations/Metrology_uk.ts
 
 
 # Visual Leak Detector

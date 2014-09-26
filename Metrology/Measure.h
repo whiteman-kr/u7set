@@ -5,9 +5,9 @@
 
 const char* const MeasureTypeStr[] =
 {
-    QT_TRANSLATE_NOOP("Measure.h", "Measurement linearity"),
-    QT_TRANSLATE_NOOP("Measure.h", "Measurement comparators"),
-//    QT_TRANSLATE_NOOP("Measure.h", "Measurement complex comparators"),
+    QT_TRANSLATE_NOOP("Measure.h", "Measurements of linearity"),
+    QT_TRANSLATE_NOOP("Measure.h", "Measurements of comparators"),
+//    QT_TRANSLATE_NOOP("Measure.h", "Measurements of complex comparators"),
 };
 
 
@@ -24,6 +24,22 @@ const int   MEASURE_TYPE_UNKNOWN            = -1,
 #define		TEST_MEASURE_TYPE1(type, retVal)	if (ERR_MEASURE_TYPE(type)) { return retVal; }
 
 // ==============================================================================================
+
+const char* const	MeasureErrorTypeStr[] =
+{
+            QT_TRANSLATE_NOOP("Measure.h", "Absolute"),
+            QT_TRANSLATE_NOOP("Measure.h", "Reduce"),
+};
+
+const int	MEASURE_ERROR_TYPE_COUNT		= sizeof(MeasureErrorTypeStr)/sizeof(char*);
+
+const int   MEASURE_ERROR_TYPE_UNKNOWN		= -1,
+            MEASURE_ERROR_TYPE_ABSOLUTE		= 0,
+            MEASURE_ERROR_TYPE_REDUCE		= 1;
+
+// ==============================================================================================
+
+
 
 #pragma pack(push, 1)
 

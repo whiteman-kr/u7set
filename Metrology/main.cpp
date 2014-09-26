@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "MainWindow.h"
 #include <QApplication>
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -24,7 +24,6 @@ int main(int argc, char *argv[])
     a.setApplicationName("Metrology");
     a.setOrganizationName("Radiy");
     a.setOrganizationDomain("radiy.com");
-
 
     MainWindow w;
     w.show();
