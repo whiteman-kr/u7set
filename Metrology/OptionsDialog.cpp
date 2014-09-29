@@ -1,5 +1,6 @@
 #include "OptionsDialog.h"
 
+#include <assert.h>
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -120,6 +121,7 @@ QWidget* OptionsDialog::createPage(int page)
         case OPTION_PAGE_BACKUP:                pPropertyPage = createPropertyList(page);     break;
         case OPTION_PAGE_LINEARETY_POINT:
         case OPTION_PAGE_MEASURE_VIEW_COLUMN:   pPropertyPage = createPropertyDialog(page);   break;
+        default:                                assert(nullptr);                              break;
     }
 
     return pPropertyPage;
@@ -139,7 +141,7 @@ QWidget* OptionsDialog::createPropertyList(int page)
     {
         case OPTION_PAGE_LINEARETY_MEASURE:
             {
-                 QtProperty *errorGroup = variantManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
+                QtProperty *errorGroup = variantManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
                 item = variantManager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR]);
                 item->setValue( m_options.getLinearity().m_errorValue );
@@ -252,7 +254,6 @@ QWidget* OptionsDialog::createPropertyList(int page)
                 variantEditor->addProperty(outputrangeGroup);
             }
             break;
-
         case OPTION_PAGE_SETTING_MEASURE:
             break;
         case OPTION_PAGE_MEASURE_VIEW_TEXT:
@@ -264,6 +265,9 @@ QWidget* OptionsDialog::createPropertyList(int page)
         case OPTION_PAGE_DATABASE:
             break;
         case OPTION_PAGE_BACKUP:
+            break;
+        default:
+            assert(nullptr);
             break;
     }
 
@@ -293,6 +297,10 @@ QWidget* OptionsDialog::createPropertyDialog(int page)
 
         case OPTION_PAGE_MEASURE_VIEW_COLUMN:
 
+            break;
+
+        default:
+            assert(nullptr);
             break;
     }
 
@@ -425,6 +433,7 @@ void OptionsDialog::onPropertyChanged(QtProperty *property, const QVariant &valu
                                                     updateLinearityPage(false);                                         break;
                     case LO_PARAM_OUTPUT_RANGE:     m_options.getLinearity().m_showOutputRangeColumn = value.toBool();  break;
                     case LO_PARAM_CORRECT_OUTPUT:	m_options.getLinearity().m_considerCorrectOutput = value.toBool();  break;
+                    default:                        assert(0);                                                          break;
                 }
             }
             break;
@@ -455,6 +464,10 @@ void OptionsDialog::onPropertyChanged(QtProperty *property, const QVariant &valu
 
         case OPTION_PAGE_BACKUP:
 
+            break;
+
+        default:
+            assert(nullptr);
             break;
     }
 

@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QMutex>
+#include <assert.h>
 #include "Measure.h"
-
 
 // ==============================================================================================
 

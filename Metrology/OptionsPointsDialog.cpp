@@ -167,6 +167,10 @@ void OptionsPointsDialog::updateRangeType()
             m_highRangeEdit->setText( QString::number(m_linearity.m_highLimitRange, 10, 2) );
 
             break;
+
+        default:
+            assert(0);
+            break;
     }
 }
 

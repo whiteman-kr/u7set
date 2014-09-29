@@ -1,7 +1,6 @@
 #include "Calibrator.h"
 
-// -------------------------------------------------------------------------------------------------------------------
-
+#include <assert.h>
 #include <QSettings>
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -227,6 +226,7 @@ bool Calibrator::send(QString cmd)
     {
         case CALIBRATOR_TYPE_TRXII:     cmd.append("\n\r"); break;
         case CALIBRATOR_TYPE_CALYS75:	cmd.append("\r\r"); break;
+        default:                        assert(false);      break;
     }
 
     QByteArray cmdData = cmd.toLocal8Bit();;
@@ -359,6 +359,7 @@ bool Calibrator::setUnit(int mode, int unit)
                         case CALIBRATOR_UNIT_KHZ:		cmdUnit = TRXII_MEASURE_UNIT_KHZ;		break;
                         case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = TRXII_MEASURE_UNIT_OHM;		break;
                         case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = TRXII_MEASURE_UNIT_OHM;		break;
+                        default:                        assert(false);                          break;
                     }
 
                     break;
@@ -373,8 +374,13 @@ bool Calibrator::setUnit(int mode, int unit)
                         case CALIBRATOR_UNIT_KHZ:		cmdUnit = TRXII_SOURCE_UNIT_KHZ;		break;
                         case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = TRXII_SOURCE_UNIT_LOW_OHM;	break;
                         case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = TRXII_SOURCE_UNIT_HIGH_OHM;	break;
+                        default:                        assert(false);                          break;
                     }
 
+                    break;
+
+                default:
+                    assert(false);
                     break;
             }
 
@@ -396,6 +402,7 @@ bool Calibrator::setUnit(int mode, int unit)
                         case CALIBRATOR_UNIT_KHZ:		cmdUnit = CALYS75_MEASURE_UNIT_KHZ;	cmdRange = CALYS75_MEASURE_RANG_KHZ;		break;
                         case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = CALYS75_MEASURE_UNIT_OHM;	cmdRange = CALYS75_MEASURE_LOW_RANG_OHM;	break;
                         case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = CALYS75_MEASURE_UNIT_OHM;	cmdRange = CALYS75_MEASURE_HIGH_RANG_OHM;	break;
+                        default:                        assert(false);                                                                  break;
                     }
 
                     break;
@@ -410,8 +417,13 @@ bool Calibrator::setUnit(int mode, int unit)
                         case CALIBRATOR_UNIT_KHZ:		cmdUnit = CALYS75_SOURCE_UNIT_KHZ;	cmdRange = CALYS75_SOURCE_RANG_KHZ;			break;
                         case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = CALYS75_SOURCE_UNIT_OM;	cmdRange = CALYS75_SOURCE_LOW_RANG_OHM;		break;
                         case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = CALYS75_SOURCE_UNIT_OM;	cmdRange = CALYS75_SOURCE_HIGH_RANG_OHM;	break;
+                        default:                        assert(false);                                                                  break;
                     }
 
+                    break;
+
+                default:
+                    assert(false);
                     break;
             }
 
@@ -419,12 +431,17 @@ bool Calibrator::setUnit(int mode, int unit)
             send(cmdRange);
 
             break;
+
+        default:
+            assert(false);
+            break;
     }
 
     switch(m_mode)
     {
         case CALIBRATOR_MODE_MEASURE:	m_measureUnit = unit;	break;
         case CALIBRATOR_MODE_SOURCE:	m_sourceUnit = unit;	break;
+        default:                        assert(false);          break;
     }
 
     emit unitIsChanged();
@@ -487,6 +504,10 @@ bool Calibrator::setValue(double value)
             cmdSetValue = QString("%1%2").arg(CALYS75_SET_VALUE, QString::number(value, 10, 5));
             cmdGetValue	= CALYS75_GET_VALUE;
 
+            break;
+
+        default:
+            assert(false);
             break;
     }
 
@@ -573,6 +594,10 @@ bool Calibrator::stepDown()
             cmdGetValue	= CALYS75_GET_VALUE;
 
             break;
+
+        default:
+            assert(false);
+            break;
     }
 
     if (cmdKeyDown.isEmpty() == true || cmdGetValue.isEmpty() == true)
@@ -658,6 +683,10 @@ bool Calibrator::stepUp()
             cmdGetValue	= CALYS75_GET_VALUE;
 
             break;
+
+        default:
+            assert(false);
+            break;
     }
 
     if (cmdKeyUp.isEmpty() == true || cmdGetValue.isEmpty() == true)
@@ -697,8 +726,9 @@ bool Calibrator::step(int stepType)
 
     switch(stepType)
     {
-        case CALIBRATOR_STEP_DOWN: stepResult = stepDown();  break;
-        case CALIBRATOR_STEP_UP:   stepResult = stepUp();    break;
+        case CALIBRATOR_STEP_DOWN:  stepResult = stepDown();  break;
+        case CALIBRATOR_STEP_UP:    stepResult = stepUp();    break;
+        default:                    assert(false);            break;
     }
 
     return stepResult;
@@ -731,6 +761,7 @@ double Calibrator::getValue()
     {
         case CALIBRATOR_TYPE_TRXII:     cmd = TRXII_GET_VALUE;		break;
         case CALIBRATOR_TYPE_CALYS75:   cmd = CALYS75_GET_VALUE;    break;
+        default:                        assert(0);                  break;
     }
 
     if (cmd.isEmpty() == true)
@@ -808,6 +839,10 @@ bool Calibrator::reset(int resetType)
                 cmd = TRXII_RESET_SOFT;
             }
 
+            break;
+
+        default:
+            assert(false);
             break;
     }
 
@@ -948,6 +983,10 @@ void Calibrator::parseResponse()
         m_sourceValue = value.toDouble();
 
         break;
+
+    default:
+        assert(0);
+        break;
     }
 
     convert(m_measureValue,	CALIBRATOR_MODE_MEASURE,	CALIBRATOR_CONVERT_HZ_TO_KHZ);
@@ -982,6 +1021,11 @@ void Calibrator::convert(double& val, int mode, int order)
             }
 
             break;
+
+        default:
+            assert(0);
+            break;
+;
     }
 
     if (enableCorrect == false)
@@ -993,6 +1037,8 @@ void Calibrator::convert(double& val, int mode, int order)
     {
         case CALIBRATOR_CONVERT_HZ_TO_KHZ:	val /=  1000;	break;
         case CALIBRATOR_CONVERT_KHZ_TO_HZ:	val *=  1000;	break;
+        default:                            assert(0);      break;
+;
     }
 }
 
