@@ -10,7 +10,7 @@
 CalibratorManagerDialog::CalibratorManagerDialog(Calibrator* pCalibrator, QWidget *parent) :
     QDialog(parent),
     m_pCalibrator( pCalibrator ),
-    ui(new Ui::QCalibratorManagerDialog)
+    ui(new Ui::CalibratorManagerDialog)
 {
     ui->setupUi(this);
 

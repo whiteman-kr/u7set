@@ -8,7 +8,7 @@
 
 namespace Ui
 {
-    class QCalibratorManagerDialog;
+    class CalibratorManagerDialog;
 }
 
 // ==============================================================================================
@@ -30,7 +30,7 @@ private:
 
 private:
 
-    Ui::QCalibratorManagerDialog *ui;
+    Ui::CalibratorManagerDialog *ui;
 
 signals:
 
