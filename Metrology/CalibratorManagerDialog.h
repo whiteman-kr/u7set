@@ -2,15 +2,14 @@
 #define CALIBRATORMANAGERDIALOG_H
 
 #include <QDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QPushButton>
+#include <QCheckBox>
 #include <QTextEdit>
+
 #include "Calibrator.h"
-
-// ==============================================================================================
-
-namespace Ui
-{
-    class CalibratorManagerDialog;
-}
 
 // ==============================================================================================
 
@@ -24,45 +23,54 @@ public:
 
 private:
 
-    Calibrator* m_pCalibrator = nullptr;
+    Calibrator*     m_pCalibrator = nullptr;
 
-    QTextEdit*  m_pErrorList = nullptr;
+    // Elements of interface - Menu
+    //
+    QLabel*         m_pMeasureLabel = nullptr;
+    QLineEdit*      m_pMeasureEdit = nullptr;
+    QLabel*         m_pSourceLabel = nullptr;
+    QLineEdit*      m_pSourceEdit = nullptr;
+    QLineEdit*      m_pValueEdit = nullptr;
+    QPushButton*    m_pSetValueButton = nullptr;
+    QPushButton*    m_pStepDownButton = nullptr;
+    QPushButton*    m_pStepUpButton = nullptr;
+    QComboBox*      m_pModeList = nullptr;
+    QComboBox*      m_pUnitList = nullptr;
+    QPushButton*    m_pErrorsButton = nullptr;
+    QTextEdit*      m_pErrorList = nullptr;
+    QCheckBox*      m_pRemoteControlCheck = nullptr;
 
-    void        enableItemCtrl(bool enable);
-
-private:
-
-    Ui::CalibratorManagerDialog *ui;
+    void            createInterfaceItems();
+    void            initInterfaceItems();
+    void            enableInterfaceItems(bool enable);
 
 signals:
 
-    void		calibratorSetUnit(int mode, int unit);
-    void        calibratorSetValue(double value);
-    void        calibratorGetValue();
-    void        calibratorReset(int resetType);
-    void        calibratorRemoveControl(bool enable);
+    void            calibratorSetUnit(int mode, int unit);
+    void            calibratorSetValue(double value);
+    void            calibratorGetValue();
+    void            calibratorRemoveControl(bool enable);
 
 private slots:
 
-    void        onCalibratorError(QString err);
+    void            onCalibratorError(QString err);
 
+    void            onConnect();
+    void            onDisconnect();
 
-    void        onConnect();
-    void        onDisconnect();
+    void            onUnitChanged();
+    void            onValueChanging();
+    void            onValueChanged();
 
-    void        unitIsChanged();
-    void        changingValue();
-    void        updateValue();
+    void            onSetValue();
 
-    void        modeList(int mode);
-    void        unitList(int unit);
+    void            onModeList(int mode);
+    void            onUnitList(int unit);
 
-    void        setValue();
-    void        reset();
+    void            onErrorList();
 
-    void        removeControl();
-
-    void        showErrorList();
+    void            onRemoveControl();
 };
 
 // ==============================================================================================

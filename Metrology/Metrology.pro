@@ -37,7 +37,6 @@ HEADERS  += \
 
 
 FORMS    += \
-    CalibratorManagerDialog.ui \
     mainwindow.ui
 
 RESOURCES += \
