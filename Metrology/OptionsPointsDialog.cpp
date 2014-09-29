@@ -183,12 +183,12 @@ void OptionsPointsDialog::updateList()
 
     for(int index = 0; index < rowCount; index++ )
     {
-        verticalHeaderLabels.append(tr("%1").arg(index + 1));
+        verticalHeaderLabels.append(QString("%1").arg(index + 1));
         m_pointList->setRowHeight(index, 18);
 
         LinearityPoint* point = m_linearity.m_pointBase.at(index);
 
-        item = new QTableWidgetItem( QString::number(point->getPrecent(), 10, 2) + tr(" %"));
+        item = new QTableWidgetItem( QString::number(point->getPrecent(), 10, 2) + " %");
         m_pointList->setItem(index, PointsColumn_Percent, item);
         item->setTextAlignment(Qt::AlignHCenter);
 

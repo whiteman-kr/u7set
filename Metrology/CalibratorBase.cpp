@@ -134,16 +134,15 @@ void CalibratorBase::setHeaderList()
 
     for(int index = 0; index < MAX_CALIBRATOR_COUNT; index++ )
     {
-        verticalHeaderLabels.append(tr("Calibrator %1").arg(index + 1));
+        verticalHeaderLabels.append(QString("Calibrator %1").arg(index + 1));
         m_pCalibratorView->setRowHeight(index, 18);
     }
     m_pCalibratorView->setVerticalHeaderLabels(verticalHeaderLabels);
 
     m_pCalibratorView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::editSettings, Qt::QueuedConnection);
-
-    for(int column = 0; column < horizontalHeaderLabels.count(); column++ )
+    int count = horizontalHeaderLabels.count();
+    for(int column = 0; column < count; column++ )
     {
         for(int row = 0; row < MAX_CALIBRATOR_COUNT; row++ )
         {
@@ -152,6 +151,8 @@ void CalibratorBase::setHeaderList()
             m_pCalibratorView->setItem(row, column, item);
         }
     }
+
+    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::editSettings, Qt::QueuedConnection);
 
 
     // init progress
@@ -166,7 +167,8 @@ void CalibratorBase::setHeaderList()
 
 void CalibratorBase::updateList()
 {
-    for(int index = 0; index < m_calibratorList.count(); index++ )
+    int count = m_calibratorList.count();
+    for(int index = 0; index < count; index++ )
     {
         Calibrator* pCalibrator = m_calibratorList.at(index);
 
@@ -195,7 +197,8 @@ Calibrator* CalibratorBase::getMainCalibrator()
 {
     Calibrator* pMainCalibrator = nullptr;
 
-    for(int index = 0; index < m_calibratorList.count(); index++ )
+    int count = m_calibratorList.count();
+    for(int index = 0; index < count; index++ )
     {
         Calibrator* pCalibrator = m_calibratorList.at(index);
 

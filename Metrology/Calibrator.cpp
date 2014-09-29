@@ -1021,8 +1021,8 @@ void Calibrator::loadSettings()
 
     QSettings s;
 
-    m_portName = s.value( tr("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), tr("COM%1").arg( m_index + 1)).toString();
-    m_type = s.value(tr("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), CALIBRATOR_TYPE_TRXII).toInt();
+    m_portName = s.value( QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), QString("COM%1").arg( m_index + 1)).toString();
+    m_type = s.value(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), CALIBRATOR_TYPE_TRXII).toInt();
 
 }
 
@@ -1037,8 +1037,8 @@ void Calibrator::saveSettings()
 
     QSettings s;
 
-    s.setValue(tr("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), m_portName);
-    s.setValue(tr("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), m_type);
+    s.setValue(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), m_portName);
+    s.setValue(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), m_type);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

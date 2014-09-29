@@ -147,7 +147,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Устанвить (Set)</string>
+    <string>Set value</string>
    </property>
    <property name="default">
     <bool>true</bool>
@@ -163,7 +163,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Шаг вниз</string>
+    <string>Step down</string>
    </property>
   </widget>
   <widget class="QPushButton" name="stepUpButton">
@@ -176,7 +176,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Шаг вверх</string>
+    <string>Step up</string>
    </property>
   </widget>
   <widget class="QPushButton" name="resetButton">
@@ -189,7 +189,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Сброс (Reset)</string>
+    <string>Reset</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="remoteCheck">
@@ -202,7 +202,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Удаленное управление</string>
+    <string>Remote control</string>
    </property>
    <property name="checked">
     <bool>false</bool>

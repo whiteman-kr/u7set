@@ -466,7 +466,7 @@ void MainWindow::createStatusBar()
 
     statusBar()->setLayoutDirection(Qt::RightToLeft);
 
-    m_statusEmpty->setText(tr(""));
+    m_statusEmpty->setText("");
     m_statusMeasureThreadInfo->setText(tr("Measurement 1 of 10 "));
     m_statusMeasureDemphrer->setValue(50);
     m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));

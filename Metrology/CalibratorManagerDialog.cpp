@@ -159,7 +159,7 @@ void CalibratorManagerDialog::onConnect()
         return;
     }
 
-    setWindowTitle(tr("c:%1 ").arg(m_pCalibrator->getIndex() + 1) + m_pCalibrator->getName() + tr(" %1").arg(m_pCalibrator->getSerialNo()) );
+    setWindowTitle(QString("c:%1 ").arg(m_pCalibrator->getIndex() + 1) + m_pCalibrator->getName() + QString(" %1").arg(m_pCalibrator->getSerialNo()) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ void CalibratorManagerDialog::onDisconnect()
         return;
     }
 
-    setWindowTitle(tr("c:%1 - Disconnected").arg(m_pCalibrator->getIndex() + 1));
+    setWindowTitle(QString("c:%1 - Disconnected").arg(m_pCalibrator->getIndex() + 1));
 
     enableItemCtrl(false);
 }
