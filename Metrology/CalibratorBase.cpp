@@ -11,13 +11,6 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-const int   CalibratorColumnPort    = 0,
-            CalibratorColumnType    = 1,
-            CalibratorColumnConnect = 2,
-            CalibratorColumnSN      = 3;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 CalibratorBase::CalibratorBase(QObject *parent) :
     QObject(parent)
 {
@@ -33,43 +26,7 @@ void CalibratorBase::init()
     createCalibratorObjects();          // create objects of calibrators
     createInitializationWnd();          // create dialog initialization
 
-    // init calibrator list
-    //
-    QStringList horizontalHeaderLabels;
-    horizontalHeaderLabels << tr("Serial port") << tr("Type") << tr("Connected") << tr("Serial number"); // << tr("Kind");
-    m_pCalibratorView->setColumnCount(horizontalHeaderLabels.count());
-    m_pCalibratorView->setHorizontalHeaderLabels(horizontalHeaderLabels);
-
-    QStringList verticalHeaderLabels;
-    m_pCalibratorView->setRowCount(MAX_CALIBRATOR_COUNT);
-
-    for(int index = 0; index < MAX_CALIBRATOR_COUNT; index++ )
-    {
-        verticalHeaderLabels.append(tr("Calibrator %1").arg(index + 1));
-        m_pCalibratorView->setRowHeight(index, 18);
-    }
-    m_pCalibratorView->setVerticalHeaderLabels(verticalHeaderLabels);
-
-    m_pCalibratorView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::editSettings, Qt::QueuedConnection);
-
-    for(int column = 0; column < horizontalHeaderLabels.count(); column++ )
-    {
-        for(int row = 0; row < MAX_CALIBRATOR_COUNT; row++ )
-        {
-            QTableWidgetItem* item = new QTableWidgetItem("");
-            item->setTextAlignment(Qt::AlignHCenter);
-            m_pCalibratorView->setItem(row, column, item);
-        }
-    }
-
-    // init progress
-    //
-    m_pCalibratorProgress->setRange(0, CALIBRATOR_TIMEOUT);
-    m_pCalibratorProgress->setValue(0);
-    m_pCalibratorProgress->setFixedHeight(10);
-    m_pCalibratorProgress->setTextVisible(false);
+    setHeaderList();                    // init calibrator list
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -154,6 +111,59 @@ void CalibratorBase::onFinishedInitializationWnd()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void CalibratorBase::setHeaderList()
+{
+    // init colomns
+    //
+    QStringList horizontalHeaderLabels;
+
+    for(int c = 0; c < CalibratorsColumnCount; c++)
+    {
+        horizontalHeaderLabels.append(CalibratorsColumn[c]);
+    }
+
+    m_pCalibratorView->setColumnCount(CalibratorsColumnCount);
+    m_pCalibratorView->setHorizontalHeaderLabels(horizontalHeaderLabels);
+    m_pCalibratorView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+
+    // init rows
+    //
+    QStringList verticalHeaderLabels;
+    m_pCalibratorView->setRowCount(MAX_CALIBRATOR_COUNT);
+
+    for(int index = 0; index < MAX_CALIBRATOR_COUNT; index++ )
+    {
+        verticalHeaderLabels.append(tr("Calibrator %1").arg(index + 1));
+        m_pCalibratorView->setRowHeight(index, 18);
+    }
+    m_pCalibratorView->setVerticalHeaderLabels(verticalHeaderLabels);
+
+    m_pCalibratorView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::editSettings, Qt::QueuedConnection);
+
+    for(int column = 0; column < horizontalHeaderLabels.count(); column++ )
+    {
+        for(int row = 0; row < MAX_CALIBRATOR_COUNT; row++ )
+        {
+            QTableWidgetItem* item = new QTableWidgetItem("");
+            item->setTextAlignment(Qt::AlignHCenter);
+            m_pCalibratorView->setItem(row, column, item);
+        }
+    }
+
+
+    // init progress
+    //
+    m_pCalibratorProgress->setRange(0, CALIBRATOR_TIMEOUT);
+    m_pCalibratorProgress->setValue(0);
+    m_pCalibratorProgress->setFixedHeight(10);
+    m_pCalibratorProgress->setTextVisible(false);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void CalibratorBase::updateList()
 {
     for(int index = 0; index < m_calibratorList.count(); index++ )
@@ -162,9 +172,10 @@ void CalibratorBase::updateList()
 
         m_pCalibratorView->item(index, CalibratorColumnPort)->setText(pCalibrator->getPortName());
         m_pCalibratorView->item(index, CalibratorColumnType)->setText(pCalibrator->getTypeStr());
-        m_pCalibratorView->item(index, CalibratorColumnConnect)->setBackgroundColor(pCalibrator->isConnected() ? Qt::green : Qt::white);
         m_pCalibratorView->item(index, CalibratorColumnConnect)->setText(pCalibrator->isConnected() ? tr("Yes") : tr("No"));
         m_pCalibratorView->item(index, CalibratorColumnSN)->setText(pCalibrator->getSerialNo());
+
+        m_pCalibratorView->item(index, CalibratorColumnConnect)->setBackgroundColor(pCalibrator->isConnected() ? Qt::green : Qt::white);
     }
 }
 

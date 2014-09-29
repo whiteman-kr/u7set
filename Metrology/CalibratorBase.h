@@ -20,6 +20,24 @@ const int MAX_CALIBRATOR_COUNT = 6;
 
 // ==============================================================================================
 
+const char* const CalibratorsColumn[] =
+{
+    QT_TRANSLATE_NOOP("Calibrator.h", "Serial port"),
+    QT_TRANSLATE_NOOP("Calibrator.h", "Type"),
+    QT_TRANSLATE_NOOP("Calibrator.h", "Connected"),
+    QT_TRANSLATE_NOOP("Calibrator.h", "Serial number"),
+    // QT_TRANSLATE_NOOP("Calibrator.h", "Kind"),
+};
+
+const int   CalibratorsColumnCount       = sizeof(CalibratorsColumn)/sizeof(char*);
+
+const int   CalibratorColumnPort    = 0,
+            CalibratorColumnType    = 1,
+            CalibratorColumnConnect = 2,
+            CalibratorColumnSN      = 3;
+
+// ==============================================================================================
+
 class CalibratorBase : public QObject
 {
     Q_OBJECT
@@ -59,6 +77,7 @@ private:
     void                createCalibratorObjects();
     void                createInitializationWnd();
 
+    void                setHeaderList();
     void                updateList();
 
 signals:
