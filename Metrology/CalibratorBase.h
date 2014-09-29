@@ -89,13 +89,15 @@ public slots:
 
     void                onInitialization();                 // Slot of calibrator menu - Initialization
     void                onManage();                         // Slot of calibrator menu - Manage
+    void                onContextMenu(QPoint);              // Slot of context menu - Manage
 
     void                onFinishedInitializationWnd();      // Slot blocks close the windows, until the initialization process finished
 
     void                editSettings(int row,int column);   // Slot for edit serial port and type of calibrator
 
-
     void                onConnected();                      // Slots events from calibrator
+
+
 };
 
 // ==============================================================================================

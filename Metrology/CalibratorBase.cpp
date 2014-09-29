@@ -154,6 +154,11 @@ void CalibratorBase::setHeaderList()
 
     connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::editSettings, Qt::QueuedConnection);
 
+    // init context menu
+    //
+    m_pCalibratorView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_pCalibratorView, &QTableWidget::customContextMenuRequested, this, &CalibratorBase::onContextMenu);
+
 
     // init progress
     //
@@ -265,7 +270,23 @@ void CalibratorBase::onManage()
         msg.exec();
     }
 
-    m_calibratorManagerList.at(index)->show();
+    CalibratorManagerDialog* dialog = m_calibratorManagerList.at(index);
+    if (dialog == nullptr)
+    {
+        return;
+    }
+
+    dialog->show();
+    dialog->activateWindow();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorBase::onContextMenu(QPoint)
+{
+    QMenu *menu = new QMenu(m_pCalibratorView);
+    menu->addAction(m_pManageAction);
+    menu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
