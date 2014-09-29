@@ -189,6 +189,7 @@ void CalibratorBase::showInitializationWnd()
     updateList();
 
     m_pInitializationWnd->show();
+    m_pInitializationWnd->activateWindow();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

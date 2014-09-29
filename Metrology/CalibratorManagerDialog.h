@@ -2,6 +2,7 @@
 #define CALIBRATORMANAGERDIALOG_H
 
 #include <QDialog>
+#include <QTextEdit>
 #include "Calibrator.h"
 
 // ==============================================================================================
@@ -21,12 +22,13 @@ public:
     explicit CalibratorManagerDialog(Calibrator* pCalibrator, QWidget *parent = 0);
     ~CalibratorManagerDialog();
 
-    Calibrator* m_pCalibrator;
+private:
+
+    Calibrator* m_pCalibrator = nullptr;
+
+    QTextEdit*  m_pErrorList = nullptr;
 
     void        enableItemCtrl(bool enable);
-
-private:
-    void        setErrorToolTip(QString error);
 
 private:
 
@@ -59,6 +61,8 @@ private slots:
     void        reset();
 
     void        removeControl();
+
+    void        showErrorList();
 };
 
 // ==============================================================================================

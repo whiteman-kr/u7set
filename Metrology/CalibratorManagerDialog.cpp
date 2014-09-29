@@ -47,7 +47,9 @@ CalibratorManagerDialog::CalibratorManagerDialog(Calibrator* pCalibrator, QWidge
         ui->remoteCheck->setVisible(false);
     }
 
-    ui->errorList->setMinimumContentsLength(150);
+    m_pErrorList = new QTextEdit;
+    m_pErrorList->setMinimumSize(700, 50);
+    m_pErrorList->setReadOnly(true);
 
     connect(m_pCalibrator, &Calibrator::connected, this, &CalibratorManagerDialog::onConnect, Qt::QueuedConnection);
     connect(m_pCalibrator, &Calibrator::disconnected, this, &CalibratorManagerDialog::onDisconnect, Qt::QueuedConnection);
@@ -73,6 +75,8 @@ CalibratorManagerDialog::CalibratorManagerDialog(Calibrator* pCalibrator, QWidge
 
     connect(ui->remoteCheck, &QCheckBox::clicked, this, &CalibratorManagerDialog::removeControl, Qt::QueuedConnection);
     connect(this, &CalibratorManagerDialog::calibratorRemoveControl, m_pCalibrator, &Calibrator::setRemoteControl, Qt::QueuedConnection);
+
+    connect(ui->errorButton, &QPushButton::clicked, this, &CalibratorManagerDialog::showErrorList, Qt::QueuedConnection);
 
     if (m_pCalibrator->isConnected() == true)
     {
@@ -115,7 +119,6 @@ void CalibratorManagerDialog::enableItemCtrl(bool enable)
     ui->stepUpButton->setEnabled(enable);
     ui->resetButton->setEnabled(enable);
     ui->remoteCheck->setEnabled(enable);
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -126,15 +129,9 @@ void  CalibratorManagerDialog::onCalibratorError(QString err)
     time.currentTime();
 
     QString error = QTime::currentTime().toString("hh:mm:ss.zzz - ") + err;
-    ui->errorList->addItem(error);
-    ui->errorList->setCurrentIndex( ui->errorList->count() - 1 );
-    ui->errorList->setToolTip(error);
 
-    QSizePolicy  SizePolicy;
-    SizePolicy.setHorizontalPolicy(QSizePolicy::Expanding);
-
-    ui->errorList->setSizePolicy(SizePolicy);
-
+    m_pErrorList->append(error);
+    ui->errorButton->setText( QString("List errors (%1)").arg(m_pErrorList->document()->lineCount() ) );
 
     if(isVisible() == false)
     {
@@ -159,7 +156,10 @@ void CalibratorManagerDialog::onConnect()
         return;
     }
 
-    setWindowTitle(QString("c:%1 ").arg(m_pCalibrator->getIndex() + 1) + m_pCalibrator->getName() + QString(" %1").arg(m_pCalibrator->getSerialNo()) );
+    QString title = QString("c:%1 ").arg(m_pCalibrator->getIndex() + 1) + m_pCalibrator->getName() + QString(" %1").arg(m_pCalibrator->getSerialNo()) ;
+
+    setWindowTitle( title );
+    m_pErrorList->setWindowTitle(title + tr(" : List errors"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -171,7 +171,10 @@ void CalibratorManagerDialog::onDisconnect()
         return;
     }
 
-    setWindowTitle(QString("c:%1 - Disconnected").arg(m_pCalibrator->getIndex() + 1));
+    QString title = QString("c:%1 - Disconnected").arg(m_pCalibrator->getIndex() + 1);
+
+    setWindowTitle(title);
+    m_pErrorList->setWindowTitle(title + tr(" : List errors"));
 
     enableItemCtrl(false);
 }
@@ -300,6 +303,19 @@ void CalibratorManagerDialog::reset()
 void CalibratorManagerDialog::removeControl()
 {
     emit calibratorRemoveControl( ui->remoteCheck->isChecked() );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManagerDialog::showErrorList()
+{
+    if (m_pErrorList == nullptr)
+    {
+        return;
+    }
+
+    m_pErrorList->show();
+    m_pErrorList->activateWindow();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

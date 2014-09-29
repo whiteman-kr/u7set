@@ -258,23 +258,17 @@
     <string/>
    </property>
   </widget>
-  <widget class="QComboBox" name="errorList">
+  <widget class="QPushButton" name="errorButton">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>360</y>
-     <width>171</width>
+     <x>14</x>
+     <y>362</y>
+     <width>161</width>
      <height>21</height>
     </rect>
    </property>
-   <property name="autoFillBackground">
-    <bool>true</bool>
-   </property>
-   <property name="sizeAdjustPolicy">
-    <enum>QComboBox::AdjustToMinimumContentsLength</enum>
-   </property>
-   <property name="minimumContentsLength">
-    <number>1000</number>
+   <property name="text">
+    <string>List errors</string>
    </property>
   </widget>
   <zorder>groupBox_2</zorder>
@@ -291,7 +285,7 @@
   <zorder>resetButton</zorder>
   <zorder>remoteCheck</zorder>
   <zorder>valueEdit</zorder>
-  <zorder>errorList</zorder>
+  <zorder>errorButton</zorder>
  </widget>
  <tabstops>
   <tabstop>measureEdit</tabstop>
