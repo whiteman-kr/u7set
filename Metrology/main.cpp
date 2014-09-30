@@ -1,5 +1,6 @@
-#include "MainWindow.h"
 #include <QApplication>
+#include "MainWindow.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -24,6 +25,8 @@ int main(int argc, char *argv[])
     a.setApplicationName("Metrology");
     a.setOrganizationName("Radiy");
     a.setOrganizationDomain("radiy.com");
+
+    theOptions.load();
 
     MainWindow w;
     w.show();

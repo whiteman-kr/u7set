@@ -7,23 +7,19 @@
 #include <QListWidget>
 #include <QPushButton>
 
-#include "MainWindow.h"
 #include "OptionsPointsDialog.h"
+
+// -------------------------------------------------------------------------------------------------------------------
+
+static int activePage = OPTION_PAGE_LINEARETY_MEASURE;
 
 // -------------------------------------------------------------------------------------------------------------------
 
 OptionsDialog::OptionsDialog(QWidget *parent) :
     QDialog(parent)
 {
-    createInterface();
-}
+    m_options = theOptions;
 
-// -------------------------------------------------------------------------------------------------------------------
-
-OptionsDialog::OptionsDialog(const Options& options, QWidget *parent) :
-    QDialog(parent),
-    m_options(options)
-{
     createInterface();
 }
 
@@ -53,7 +49,7 @@ void OptionsDialog::createInterface()
 
     // set active page
     //
-    setActivePage(OPTION_PAGE_LINEARETY_MEASURE);
+    setActivePage(activePage);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -62,10 +58,10 @@ QHBoxLayout* OptionsDialog::createPages()
 {
     QHBoxLayout *pagesLayout = new QHBoxLayout ;
 
-    QTreeWidget* pTree = new QTreeWidget;
+    QTreeWidget* pPageTree = new QTreeWidget;
 
-    pTree->setHeaderHidden(true);
-    pTree->setFixedWidth(200);
+    pPageTree->setHeaderHidden(true);
+    pPageTree->setFixedWidth(200);
 
     QList<QTreeWidgetItem*> groupList;
 
@@ -73,7 +69,7 @@ QHBoxLayout* OptionsDialog::createPages()
     {
         QTreeWidgetItem* groupItem = new QTreeWidgetItem;
         groupItem->setText(0, OptionGroup[g]);
-        pTree->addTopLevelItem(groupItem);
+        pPageTree->addTopLevelItem(groupItem);
 
         groupList.append(groupItem);
     }
@@ -97,9 +93,9 @@ QHBoxLayout* OptionsDialog::createPages()
         m_pageList.append(createPage(p));
     }
 
-    connect(pTree, &QTreeWidget::currentItemChanged , this, &OptionsDialog::onPageChanged );
+    connect(pPageTree, &QTreeWidget::currentItemChanged , this, &OptionsDialog::onPageChanged );
 
-    pagesLayout->addWidget(pTree);
+    pagesLayout->addWidget(pPageTree);
 
     return pagesLayout;
 }
@@ -357,9 +353,9 @@ bool OptionsDialog::setActivePage(int page)
 
     // hide current page
     //
-    if (m_activePage >= 0 && m_activePage < m_pageList.count() )
+    if (activePage >= 0 && activePage < m_pageList.count() )
     {
-        QWidget* oldPage = m_pageList.at(m_activePage);
+        QWidget* oldPage = m_pageList.at(activePage);
         if (oldPage != nullptr)
         {
             m_pagesLayout->removeWidget(oldPage);
@@ -379,7 +375,7 @@ bool OptionsDialog::setActivePage(int page)
     m_pagesLayout->addWidget(newPage);
     newPage->show();
 
-    m_activePage = page;
+    activePage = page;
 
     return true;
 }
@@ -561,14 +557,8 @@ void OptionsDialog::onOk()
 
 void OptionsDialog::onApply()
 {
-    MainWindow* wnd = (MainWindow*) parentWidget();
-    if (wnd == nullptr)
-    {
-        return;
-    }
-
-    wnd->m_options = m_options;
-    wnd->m_options.save();
+    theOptions = m_options;
+    theOptions.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

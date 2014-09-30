@@ -108,20 +108,12 @@ class OptionsDialog : public QDialog
 public:
 
     explicit OptionsDialog(QWidget *parent = 0);
-    explicit OptionsDialog(const Options& options, QWidget *parent = 0);
             ~OptionsDialog();
-
-    void                    setLinearity(const Options& options)    { m_options = options; }
-    Options&                getLinearity()                          { return m_options; }
-
 private:
 
     Options                 m_options;
 
-
-    int                     m_activePage = OPTION_PAGE_UNKNOWN;
     bool                    setActivePage(int page);
-
 
     void                    createInterface();
 

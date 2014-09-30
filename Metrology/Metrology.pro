@@ -22,7 +22,8 @@ SOURCES += \
     OptionsDialog.cpp \
     Options.cpp \
     OptionsPointsDialog.cpp \
-    Main.cpp
+    Main.cpp \
+    MeasureThread.cpp
 
 
 HEADERS  += \
@@ -33,7 +34,8 @@ HEADERS  += \
     CalibratorManagerDialog.h \
     OptionsDialog.h \
     Options.h \
-    OptionsPointsDialog.h
+    OptionsPointsDialog.h \
+    MeasureThread.h
 
 
 FORMS    += \

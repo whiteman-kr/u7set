@@ -11,27 +11,38 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
+CalibratorBase theCalibratorBase;
+
+// -------------------------------------------------------------------------------------------------------------------
+
 CalibratorBase::CalibratorBase(QObject *parent) :
     QObject(parent)
 {
-    init();
+}
 
-    connect(&m_timer, &QTimer::timeout, this, &CalibratorBase::timeoutInitialization, Qt::QueuedConnection);
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorBase::~CalibratorBase()
+{
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void CalibratorBase::init()
 {
-    createCalibratorObjects();          // create objects of calibrators
-    createInitializationWnd();          // create dialog initialization
+    createCalibrators();            // create objects of calibrators
+    createMainWnd();                // create dialog initialization
 
-    setHeaderList();                    // init calibrator list
+    setHeaderList();                // init calibrator list
+
+    connect(&m_timer, &QTimer::timeout, this, &CalibratorBase::timeoutInitialization, Qt::QueuedConnection);
+
+    emit openAllCalibrator();       // open all calibratirs
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::createCalibratorObjects()
+void CalibratorBase::createCalibrators()
 {
     for(int index = 0; index < MAX_CALIBRATOR_COUNT; index++ )
     {
@@ -62,7 +73,7 @@ void CalibratorBase::createCalibratorObjects()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::createInitializationWnd()
+void CalibratorBase::createMainWnd()
 {
     m_pInitializationWnd = new QDialog;
     m_pInitializationWnd->setFixedSize(520, 220);
@@ -188,7 +199,7 @@ void CalibratorBase::updateList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::showInitializationWnd()
+void CalibratorBase::showWnd()
 {
     m_pCalibratorProgress->setValue(0);
     updateList();

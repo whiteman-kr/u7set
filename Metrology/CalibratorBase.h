@@ -45,8 +45,10 @@ class CalibratorBase : public QObject
 public:
 
     explicit CalibratorBase(QObject *parent = 0);
+            ~CalibratorBase();
 
-    void                showInitializationWnd();
+    void                init();
+    void                showWnd();
     Calibrator*         getMainCalibrator();
 
 private:
@@ -71,9 +73,9 @@ private:
     QTimer              m_timer;
     int                 m_timeout = 0;
 
-    void                init();
-    void                createCalibratorObjects();
-    void                createInitializationWnd();
+
+    void                createCalibrators();
+    void                createMainWnd();
 
     void                setHeaderList();
     void                updateList();
@@ -99,6 +101,10 @@ public slots:
 
 
 };
+
+// ==============================================================================================
+
+extern CalibratorBase theCalibratorBase;
 
 // ==============================================================================================
 

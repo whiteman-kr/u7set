@@ -9,9 +9,7 @@
 #include <QLabel>
 #include <QProgressBar>
 
-#include "Measure.h"
-#include "CalibratorBase.h"
-#include "Options.h"
+#include "MeasureThread.h"
 
 // ==============================================================================================
 
@@ -76,8 +74,7 @@ public:
 
 public:
 
-    Options         m_options;              // Options
-    CalibratorBase  m_calibratorBase;       // Calibrators
+    MeasureThread   m_measureThread;        // Measure thread
 
 public:
 
@@ -143,8 +140,8 @@ public slots:
 
     // menu - Measure
     //
-    void startMeasure() {};
-    void stopMeasure() {};
+    void startMeasure();
+    void stopMeasure();
     void exportMeasure() {};
 
     // menu - Edit

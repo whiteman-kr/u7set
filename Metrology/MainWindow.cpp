@@ -12,6 +12,7 @@
 #include <QProgressBar>
 #include <QComboBox>
 
+#include "CalibratorBase.h"
 #include "OptionsDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -24,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     createInterface();
 
-    emit m_calibratorBase.openAllCalibrator();
+    theCalibratorBase.init();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -361,7 +362,7 @@ void MainWindow::createTabPages()
     for(int t = 0; t < MEASURE_TYPE_COUNT; t++)
     {
         QTableView* pView = new QTableView;
-        m_pMainTab->addTab(pView, tr(MeasureTypeStr[t]));
+        m_pMainTab->addTab(pView, tr(MeasureType[t]));
 
         pView->setFrameStyle(QFrame::NoFrame);
 
@@ -476,16 +477,32 @@ void MainWindow::createStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::startMeasure()
+{
+    m_measureThread.setMeasureType(MEASURE_TYPE_LINEARITY);
+
+    m_measureThread.start();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopMeasure()
+{
+    m_measureThread.stop();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::calibrators()
 {
-    m_calibratorBase.showInitializationWnd();
+    theCalibratorBase.showWnd();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::options()
 {
-   OptionsDialog dialog(m_options, this);
+   OptionsDialog dialog;
    dialog.exec();
 }
 

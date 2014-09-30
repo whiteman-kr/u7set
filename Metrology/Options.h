@@ -8,6 +8,32 @@
 
 // ==============================================================================================
 
+#define						TOOLBAR_OPTIONS_KEY		"Options/ToolBar/"
+
+// ----------------------------------------------------------------------------------------------
+
+class ToolBarOption : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit    ToolBarOption(QObject *parent = 0);
+    explicit    ToolBarOption(const ToolBarOption& from, QObject *parent = 0);
+               ~ToolBarOption();
+
+    int				m_measureKind = MEASURE_KIND_ONE;                   // вид измерений: поканально или во всех кналанал сразу
+    int             m_measureTimeout = 0;                               // временая задержака между моментом когда калибратор задал значение и сохранение измерения
+    int				m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNKNOWN;    // тип выходного сигнала
+
+    void            load();
+    void            save();
+
+    ToolBarOption&  operator=(const ToolBarOption& from);
+};
+
+
+// ==============================================================================================
+
 const char* const LinearityPointSensor[] =
 {
                 QT_TRANSLATE_NOOP("Options.h", "0 - 5 mA"),
@@ -188,6 +214,7 @@ public:
             ~Options();
 
 private:
+    QMutex              m_mutex;
 
     LinearityOption     m_linearity;
 
@@ -202,6 +229,10 @@ public:
     inline Options&     operator=(const Options& from);
 };
 
+
+// ==============================================================================================
+
+extern Options theOptions;
 
 // ==============================================================================================
 
