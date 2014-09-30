@@ -48,7 +48,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QDialogButtonBox" name="buttonBox">
+        <widget class="QDialogButtonBox" name="m_okCancel">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -66,7 +66,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>m_okCancel</sender>
    <signal>accepted()</signal>
    <receiver>DialogAfbProperties</receiver>
    <slot>accept()</slot>
@@ -82,7 +82,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>m_okCancel</sender>
    <signal>rejected()</signal>
    <receiver>DialogAfbProperties</receiver>
    <slot>reject()</slot>

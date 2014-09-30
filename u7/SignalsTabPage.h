@@ -6,13 +6,14 @@
 
 class DbController;
 class QTableView;
+class QMenu;
 
 
 class SignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	SignalsModel(QObject* parent = 0);
+	SignalsModel(DbController* dbController, QWidget* parent = 0);
 	virtual ~SignalsModel();
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
@@ -24,20 +25,28 @@ public:
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags(const QModelIndex & index) const;
 
+	void loadSignals();
+
 signals:
-	void signalsIdRequest();
-	void signalDataRequest(int id);
-	void signalChanged(Signal signal);
-	void signalAdded(Signal signal);
+	void cellsSizeChanged();
 
 public slots:
-	void signalsIdReceived(QVector<int> signalsId);
-	void signalDataReceived(Signal signal);
+	void addSignal();
+
+protected:
+	DbController* dbController();
 
 private:
 	// Data
 	//
-	QVector<Signal> m_signals;
+	SignalSet m_signalSet;
+	DataFormatList m_dataFormatInfo;
+	UnitList m_unitInfo;
+
+	QWidget* m_parentWindow;
+	DbController* m_dbController;
+
+	QString getUnitStr(int unitID) const;
 };
 
 
@@ -60,6 +69,7 @@ protected:
 public slots:
 	void projectOpened();
 	void projectClosed();
+	void contextMenuRequested(QPoint);
 
 	// Data
 	//
@@ -71,6 +81,7 @@ private:
 	//QSplitter* m_splitter = nullptr;
 	SignalsModel* m_signalsModel = nullptr;
 	QTableView* m_signalsView = nullptr;
+	QMenu* m_signalsMenu = nullptr;
 };
 
 

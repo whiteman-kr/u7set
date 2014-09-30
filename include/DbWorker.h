@@ -1,6 +1,10 @@
 #pragma once
 
 #include "DbStruct.h"
+#include "../include/Signal.h"
+
+
+#define AUTO_COMPLETE std::shared_ptr<int*> progressCompleted(nullptr, [this](void*) { this->m_progress->setCompleted(true); } );
 
 
 class DbWorker : public QObject
@@ -9,6 +13,9 @@ class DbWorker : public QObject
 
 private:
 	DbWorker();
+
+	void getSignalData(QSqlQuery& q, Signal &s);
+	QString getSignalDataStr(const Signal& s);
 
 public:
 	DbWorker(DbProgress* progress);
@@ -83,13 +90,20 @@ public slots:
 
 	// Signal management
 	//
-	void slot_getSignalsIDs(QSet<int>* signalsIDs);
+	void slot_getSignalsIDs(QVector<int>* signalsIDs);
+	void slot_getSignals(SignalSet* signalSet);
+	void slot_addSignal(SignalType signalType, QVector<Signal>* newSignal);
+
+	void slot_getUnits(UnitList* units);
+	void slot_getDataFormats(DataFormatList* dataFormats);
 
 	// Service
 	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
 	bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
 	int db_getProjectVersion(QSqlDatabase db);
+
+	bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) const;
 
 	// Properties
 	//

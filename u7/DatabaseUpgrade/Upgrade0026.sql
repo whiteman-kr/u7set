@@ -449,6 +449,7 @@ SELECT SUM(CNT)::integer AS ChildCount FROM
 		FileInstance FI
 	WHERE
 		F.ParentID = file_id AND
+		F.Deleted = FALSE AND
 		F.CheckedInInstanceID = FI.FileInstanceID AND
 		F.CheckedOutInstanceID IS NULL AND
 		F.FileID = FI.FileID

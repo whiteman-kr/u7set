@@ -2,7 +2,8 @@
 
 // Upgrade database
 //
-const UpgradeItem DbWorker::upgradeItems[] = {
+const UpgradeItem DbWorker::upgradeItems[] =
+{
 	{"Create project", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0001.sql"},
 	{"Add Changeset table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0002.sql"},
 	{"Add Disabled column to User table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0003.sql"},
@@ -27,10 +28,14 @@ const UpgradeItem DbWorker::upgradeItems[] = {
 	{"Add add_device function, drop AddSystem", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0022.sql"},
 	{"Add is_admin function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0023.sql"},
 	{"Add CheckedInInstanceID, CheckedOutInstanceID to table File", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0024.sql"},
-	{"DUMMYY WAIT FOR WHITEMAN COMMIT", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
+	{"Add columns in Signal table and some stored procedures", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0025.sql"},
 	{"Changes in  get_file_list, add_file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0026.sql"},
 	{"Add action column to result from get_file_list", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0027.sql"},
-	};
+	{"Type ObjectState was added", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0028.sql"},
+	{"File API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0029.sql"},
+	{"Signal API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0030.sql"},
+};
+
 
 int DbWorker::counter = 0;
 
@@ -1520,6 +1525,7 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 
 		fileInfo.setFileName(q.value("Name").toString());
 		fileInfo.setFileId(q.value("FileID").toInt());
+		bool deleted = q.value("Deleted").toBool();
 		fileInfo.setParentId(q.value("ParentID").toInt());
 		fileInfo.setSize(q.value("Size").toInt());
 		fileInfo.setChangeset(q.value("ChangesetID").toInt());
@@ -1527,12 +1533,12 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
 		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
+		fileInfo.setUserId(q.value("UserID").toInt());
 
-		DbUser user;
-		user.setUserId(q.value("UserID").toInt());
-		fileInfo.setUser(user);
-
-		files->push_back(fileInfo);
+		if (deleted == false)
+		{
+			files->push_back(fileInfo);
+		}
 	}
 
 	return;
@@ -1606,16 +1612,14 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 		if (q.next() == false)
 		{
-			emitError(tr("Can't get FileID"));
+			emitError(tr("Can't get request result."));
 			return;
 		}
 
-		int fileId = q.value(0).toInt();
+		file->setFileId(q.value(0).toInt());		// File just created, init it's fileId and parentid
+		file->setParentId(parentId);
 
-		file->setFileId(fileId);
-		file->setUser(currentUser());
-		file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
-		file->setAction(VcsItemAction::Added);
+		db_updateFileState(q, file.get());
 	}
 
 	return;
@@ -1685,14 +1689,7 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 			return;
 		}
 
-		bool deleted = q.value(0).toBool();
-
-		if (deleted == true)
-		{
-			file.setUser(currentUser());
-			file.setState(VcsState::CheckedOut);
-			file.setAction(VcsItemAction::Deleted);
-		}
+		db_updateFileState(q, &file);
 	}
 
 	return;
@@ -1780,16 +1777,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 		int action = q.value("Action").toInt();
 		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
-		DbUser user;
-		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
-
-		if (ok == false)
-		{
-			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
-			continue;
-		}
-
-		file->setUser(user);
+		file->setUserId(q.value("UserID").toInt());
 
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
@@ -1883,16 +1871,7 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 		int action = q.value("Action").toInt();
 		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
-		DbUser user;
-		bool ok = db_getUserData(db, q.value("UserID").toInt(), &user);
-
-		if (ok == false)
-		{
-			emitError(tr("Can not get user info. userID=%1").arg(q.value("UserID").toInt()));
-			continue;
-		}
-
-		file->setUser(user);
+		file->setUserId(q.value("UserID").toInt());
 
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
@@ -2052,11 +2031,25 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		return;
 	}
 
-	// Set file state to CheckedIn
+	// Result is table of (ObjectState);
 	//
-	for (auto& fi : *files)
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedIn);
+		int fileId = q.value(0).toInt();
+
+		// Set file state to CheckedIn
+		//
+		bool updated = false;
+		for (auto& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
+			}
+		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2124,11 +2117,25 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	// Set file state to CheckedOut
+	// Result is table of (ObjectState);
 	//
-	for (auto& fi : *files)
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedOut);
+		int fileId = q.value(0).toInt();
+
+		// Set file state to CheckedIn
+		//
+		bool updated = false;
+		for (auto& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
+			}
+		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2195,11 +2202,21 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		return;
 	}
 
-	// Set file state to CheckedIn
-	//
-	for (auto& fi : *files)
+	while (q.next())
 	{
-		fi.setState(VcsState::CheckedIn);
+		int fileId = q.value(0).toInt();
+
+		bool updated = false;
+		for (auto& fi : *files)
+		{
+			if (fi.fileId() == fileId)
+			{
+				db_updateFileState(q, &fi);
+				updated = true;
+				break;
+			}
+		}
+		assert(updated == true);
 	}
 
 	return;
@@ -2315,25 +2332,18 @@ void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExte
 		return;
 	}
 
-	int fileId = q.value(0).toInt();
-
-	file->setFileId(fileId);
+	file->setFileId(q.value(0).toInt());
 	file->setParentId(parentId);
-	file->setUser(currentUser());
-	file->setState(VcsState::CheckedOut);		// Set file state to CheckedOut
+
+	db_updateFileState(q, file);
 
 	return;
 }
 
 
-void DbWorker::slot_getSignalsIDs(QSet<int>* signalsIDs)
+void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 {
-	// Init automitic varaiables
-	//
-	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
-		{
-			this->m_progress->setCompleted(true);			// set complete flag on return
-		});
+	AUTO_COMPLETE
 
 	// Check parameters
 	//
@@ -2349,7 +2359,7 @@ void DbWorker::slot_getSignalsIDs(QSet<int>* signalsIDs)
 
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get signals' IDs. Database connection is not openned."));
+		emitError(tr("Cannot get signals' IDs. Database connection is not opened."));
 		return;
 	}
 
@@ -2371,12 +2381,393 @@ void DbWorker::slot_getSignalsIDs(QSet<int>* signalsIDs)
 	{
 		int signalID = q.value(0).toInt();
 
-		qDebug() << signalID;
+		//qDebug() << signalID;
 
-		signalsIDs->insert(signalID);
+		signalsIDs->append(signalID);
 	}
 
 	return;
+}
+
+
+void DbWorker::slot_getSignals(SignalSet* signalSet)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (signalSet == nullptr)
+	{
+		assert(signalSet != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get signals. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_signals_ids(%1, %2)")
+		.arg(currentUser().userId()).arg("false");
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	QVector<int> signalsIDs;
+
+	while(q.next() != false)
+	{
+		signalsIDs.append(q.value(0).toInt());
+	}
+
+	int signalCount = signalsIDs.count();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		int signalID = signalsIDs[i];
+
+		// request
+		//
+		QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
+			.arg(currentUser().userId()).arg(signalID);
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
+			return;
+		}
+
+		while(q.next() != false)
+		{
+			Signal s;
+
+			getSignalData(q, s);
+
+			signalSet->append(s.ID(), s);
+		}
+
+		int percent = (i * 100) / signalCount;
+
+		if (m_progress != nullptr)
+		{
+			m_progress->setValue(percent);
+		}
+	}
+
+	m_progress->setValue(100);
+
+	return;
+}
+
+void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
+{
+	s.setID(q.value("signalid").toInt());
+	s.setSignalGroupID(q.value("signalgroupid").toInt());
+	s.setSignalInstanceID(q.value("signalinstanceid").toInt());
+	s.setChangesetID(q.value("changesetid").toInt());
+	s.setCheckedOut(q.value("checkedout").toBool());
+	s.setUserID(q.value("userid").toInt());
+	s.setChannel(q.value("channel").toInt());
+	s.setType(static_cast<SignalType>(q.value("type").toInt()));
+	s.setCreated(q.value("created").toString());
+	s.setDeleted(q.value("deleted").toBool());
+	s.setInstanceCreated(q.value("instancecreated").toString());
+	s.setInstanceAction(static_cast<InstanceAction>(q.value("action").toInt()));
+	s.setStrID(q.value("strid").toString());
+	s.setExtStrID(q.value("extstrid").toString());
+	s.setName(q.value("name").toString());
+	s.setDataFormat(q.value("dataformatid").toInt());
+	s.setDataSize(q.value("datasize").toInt());
+	s.setLowADC(q.value("lowadc").toInt());
+	s.setHighADC(q.value("highadc").toInt());
+	s.setLowLimit(q.value("lowlimit").toDouble());
+	s.setHighLimit(q.value("highlimit").toDouble());
+	s.setUnitID(q.value("unitid").toInt());
+	s.setAdjustment(q.value("adjustment").toDouble());
+	s.setDropLimit(q.value("droplimit").toDouble());
+	s.setExcessLimit(q.value("excesslimit").toDouble());
+	s.setUnbalanceLimit(q.value("unbalancelimit").toDouble());
+	s.setInputLowLimit(q.value("inputlowlimit").toDouble());
+	s.setInputHighLimit(q.value("inputhighlimit").toDouble());
+	s.setInputUnitID(q.value("inputunitid").toInt());
+	s.setInputSensorID(q.value("inputsensorid").toInt());
+	s.setOutputLowLimit(q.value("outputlowlimit").toDouble());
+	s.setOutputHighLimit(q.value("outputhighlimit").toDouble());
+	s.setOutputUnitID(q.value("outputunitid").toInt());
+	s.setOutputSensorID(q.value("outputsensorid").toInt());
+	s.setAcquire(q.value("acquire").toBool());
+	s.setCalculated(q.value("calculated").toBool());
+	s.setNormalState(q.value("normalstate").toInt());
+	s.setDecimalPlaces(q.value("decimalplaces").toInt());
+	s.setAperture(q.value("aperture").toDouble());
+	s.setInOutType(static_cast<SignalInOutType>(q.value("inouttype").toInt()));
+	s.setDeviceStrID(q.value("devicestrid").toString());
+}
+
+
+QString DbWorker::getSignalDataStr(const Signal& s)
+{
+	return QString(
+			"'(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,"
+			"%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,"
+			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
+			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
+			"%41)'")
+	.arg(s.ID())
+	.arg(s.signalGroupID())
+	.arg(s.signalInstanceID())
+	.arg(s.changesetID())
+	.arg(s.checkedOut())
+	.arg(s.userID())
+	.arg(s.channel())
+	.arg(s.type())
+	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
+	.arg(s.deleted())
+	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
+	.arg(s.instanceAction())
+	.arg(s.strID())
+	.arg(s.extStrID())
+	.arg(s.name())
+	.arg(s.dataFormat())
+	.arg(s.dataSize())
+	.arg(s.lowADC())
+	.arg(s.highADC())
+	.arg(s.lowLimit())
+	.arg(s.highLimit())
+	.arg(s.unitID())// ? "NULL" : QString("%1").arg(s.unitID()))
+	.arg(s.adjustment())
+	.arg(s.dropLimit())
+	.arg(s.excessLimit())
+	.arg(s.unbalanceLimit())
+	.arg(s.inputLowLimit())
+	.arg(s.inputHighLimit())
+	.arg(s.inputUnitID())// ? "NULL" : QString("%1").arg(s.inputUnitID()))
+	.arg(s.inputSensorID())// ? "NULL" : QString("%1").arg(s.inputSensorID()))
+	.arg(s.outputLowLimit())
+	.arg(s.outputHighLimit())
+	.arg(s.outputUnitID())// ? "NULL" : QString("%1").arg(s.outputUnitID()))
+	.arg(s.outputSensorID())//? "NULL" : QString("%1").arg(s.outputSensorID()))
+	.arg(s.acquire() ? "TRUE" : "FALSE")
+	.arg(s.calculated() ? "TRUE" : "FALSE")
+	.arg(s.normalState())
+	.arg(s.decimalPlaces())
+	.arg(s.aperture())
+	.arg(s.inOutType())
+	.arg(s.deviceStrID().isEmpty() ? "NULL" : s.deviceStrID());
+}
+
+
+void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
+{
+	AUTO_COMPLETE
+
+	if (newSignal == nullptr)
+	{
+		assert(newSignal != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot add signals. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM add_signal(%1, %2, %3)")
+		.arg(currentUser().userId()).arg(static_cast<int>(signalType)).arg(newSignal->count());
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't add new signal(s)! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	int i = 0;
+
+	int readed = 0;
+
+	while(q.next() != false)
+	{
+		int signalID =  q.value(0).toInt();
+
+		Signal& signal = (*newSignal)[i];
+
+		signal.setID(signalID);
+		signal.setCreated(QDateTime::currentDateTime());
+		signal.setInstanceCreated(QDateTime::currentDateTime());
+
+		QString sds = getSignalDataStr(signal);
+
+		QString request2 = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
+			.arg(currentUser().userId()).arg(sds);
+
+		QSqlQuery q2(db);
+
+		result = q2.exec(request2);
+
+		if (result == false)
+		{
+			emitError(tr("Can't set signal workcopy! Error: ") +  q2.lastError().text());
+			return;
+		}
+
+		assert(i<newSignal->count());
+
+		request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
+			.arg(currentUser().userId()).arg(signalID);
+
+		QSqlQuery q3(db);
+
+		result = q3.exec(request2);
+
+		if (result == false)
+		{
+			emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+			return;
+		}
+
+		while(q3.next() != false)
+		{
+			getSignalData(q3, (*newSignal)[i]);
+			readed++;
+		}
+
+		i++;
+	}
+
+	assert(i == readed);
+}
+
+
+void DbWorker::slot_getUnits(UnitList *units)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (units == nullptr)
+	{
+		assert(units != nullptr);
+		return;
+	}
+
+	units->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get units. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_units()");
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get units! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		int unitID = q.value("unitid").toInt();
+		QString unitNameEn = q.value("unit_en").toString();
+
+		units->append(unitID, unitNameEn);
+
+/*		Unit unit;
+
+		unit.ID = q.value("unitid").toInt();
+		unit.nameEn = q.value("unit_en").toString();
+		unit.nameRu = q.value("unit_ru").toString();
+
+		units->append(unit); */
+	}
+}
+
+void DbWorker::slot_getDataFormats(DataFormatList *dataFormats)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (dataFormats == nullptr)
+	{
+		assert(dataFormats != nullptr);
+		return;
+	}
+
+	dataFormats->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get data formats. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_data_formats()");
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get data formats! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		int dataFormatID = q.value("dataformatid").toInt();
+		QString dataFormatName = q.value("name").toString();
+
+		dataFormats->append(dataFormatID, dataFormatName);
+
+/*		DataFormat dataFormat;
+
+		dataFormat.ID = q.value("dataformatid").toInt();
+		dataFormat.name = q.value("name").toString();
+
+		dataFormats->append(dataFormat); */
+	}
 }
 
 
@@ -2505,6 +2896,31 @@ int DbWorker::db_getProjectVersion(QSqlDatabase db)
 	{
 		return -1;
 	}
+}
+
+bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) const
+{
+	assert(fileInfo);
+
+	int fileId = q.value(0).toInt();
+	bool deleted  = q.value(1).toBool();
+	VcsState::VcsStateType state = q.value(2).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn;
+	VcsItemAction::VcsItemActionType action = static_cast<VcsItemAction::VcsItemActionType>(q.value(3).toInt());
+	int userId = q.value(4).toInt();
+	//int errcode = q.value(5).toInt();
+
+	if (fileInfo->fileId() != fileId)
+	{
+		assert(fileInfo->fileId() == fileId);
+		return false;
+	}
+
+	fileInfo->setDeleted(deleted);
+	fileInfo->setState(state);
+	fileInfo->setAction(action);
+	fileInfo->setUserId(userId);
+
+	return true;
 }
 
 const QString& DbWorker::host() const

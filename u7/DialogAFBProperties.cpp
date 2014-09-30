@@ -1,5 +1,6 @@
 #include "DialogAfbProperties.h"
 #include "ui_DialogAfbProperties.h"
+#include "Settings.h"
 #include <QtXmlPatterns>
 #include <QMenu>
 #include <QMessageBox>
@@ -53,11 +54,12 @@ private:
 // DialogAfbProperties
 //
 
-DialogAfbProperties::DialogAfbProperties(const QString &caption, QByteArray* pData, DbController *pDbController, QWidget *parent) :
+DialogAfbProperties::DialogAfbProperties(const QString &caption, QByteArray* pData, DbController *pDbController, bool readOnly, QWidget *parent) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
     ui(new Ui::DialogAfbProperties),
     m_pData(pData),
-    m_pDbController(pDbController)
+    m_pDbController(pDbController),
+    m_readOnly(readOnly)
 {
     ui->setupUi(this);
     setWindowTitle(caption);
@@ -76,6 +78,19 @@ DialogAfbProperties::DialogAfbProperties(const QString &caption, QByteArray* pDa
     {
         ui->m_validate->setVisible(false);
     }
+
+    if (readOnly == true)
+    {
+        ui->m_okCancel->setEnabled(false);
+        setWindowTitle(windowTitle() + tr(" [View Only]"));
+        ui->m_text->setReadOnly(true);
+    }
+
+    if (theSettings.m_abflPropertiesWindowPos.x() != -1 && theSettings.m_abflPropertiesWindowPos.y() != -1)
+    {
+        move(theSettings.m_abflPropertiesWindowPos);
+        restoreGeometry(theSettings.m_abflPropertiesWindowGeometry);
+    }
 }
 
 DialogAfbProperties::~DialogAfbProperties()
@@ -85,8 +100,11 @@ DialogAfbProperties::~DialogAfbProperties()
 
 void DialogAfbProperties::on_DialogAfbProperties_accepted()
 {
-    QString s = ui->m_text->toPlainText();
-    *m_pData = s.toUtf8();
+    if (m_readOnly == false)
+    {
+        QString s = ui->m_text->toPlainText();
+        *m_pData = s.toUtf8();
+    }
 }
 
 void DialogAfbProperties::on_m_validate_clicked()
@@ -133,7 +151,7 @@ bool DialogAfbProperties::validate(int schemaFileId)
 
     std::shared_ptr<DbFile> f = std::make_shared<DbFile>();
 
-    if (m_pDbController->getWorkcopy(fi, &f, this) == false)
+    if (m_pDbController->getLatestVersion(fi, &f, this) == false)
     {
         QMessageBox::critical(this, "Error", "Get work copy error!");
         return false;
@@ -183,4 +201,12 @@ bool DialogAfbProperties::validate(int schemaFileId)
     }
 
     return true;
+}
+
+void DialogAfbProperties::on_DialogAfbProperties_finished(int result)
+{
+    Q_UNUSED(result);
+
+    theSettings.m_abflPropertiesWindowPos = pos();
+    theSettings.m_abflPropertiesWindowGeometry = saveGeometry();
 }

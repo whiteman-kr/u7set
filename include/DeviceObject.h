@@ -84,6 +84,7 @@ namespace Hardware
 		std::shared_ptr<DeviceObject> childSharedPtr(int index);
 
 		void addChild(std::shared_ptr<DeviceObject> child);
+		void deleteChild(DeviceObject* child);
 		void deleteAllChildren();
 
 		// Props

@@ -47,6 +47,10 @@ DbController::DbController() :
 	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
+	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
+	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
+	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
+	connect(this, &DbController::signal_getDataFormats, m_worker, &DbWorker::slot_getDataFormats);
 
 	m_thread.start();
 }
@@ -368,7 +372,14 @@ bool DbController::deleteFiles(std::vector<std::shared_ptr<DbFileInfo>>* files, 
 
 		for (size_t i = 0; i < files->size(); i++)
 		{
-			assert(files->operator [](i)->fileId() == v[i].fileId());
+			// FileID can be different, as for permanently deleted files it is marked as -1
+			// so, we rely only on the file order
+			//
+			if (files->operator [](i)->fileId() != -1 &&
+				v[i].fileId() != -1)
+			{
+				assert(files->operator [](i)->fileId() == v[i].fileId());
+			}
 
 			auto& f = files->operator [](i);
 			*(f.get()) = v[i];
@@ -545,7 +556,12 @@ bool DbController::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* par
 bool DbController::checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget)
 {
 	std::vector<DbFileInfo> fv {file};
-	return checkIn(fv, comment, parentWidget);
+
+	bool ok = checkIn(fv, comment, parentWidget);
+
+	file = fv.front();
+
+	return ok;
 }
 
 bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget)
@@ -577,7 +593,12 @@ bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& commen
 bool DbController::checkOut(DbFileInfo& file, QWidget* parentWidget)
 {
 	std::vector<DbFileInfo> fv {file};
-	return checkOut(fv, parentWidget);
+
+	bool ok = checkOut(fv, parentWidget);
+
+	file = fv.front();
+
+	return ok;
 }
 
 bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget)
@@ -610,7 +631,12 @@ bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidge
 bool DbController::undoChanges(DbFileInfo& file, QWidget* parentWidget)
 {
 	std::vector<DbFileInfo> fv {file};
-	return undoChanges(fv, parentWidget);
+
+	bool ok = undoChanges(fv, parentWidget);
+
+	file = fv.front();
+
+	return ok;
 }
 
 bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget)
@@ -707,7 +733,7 @@ bool DbController::addDeviceObject(Hardware::DeviceObject* device, int parentId,
 
 	device->setFileInfo(file);
 
-	return true;
+	return ok;
 }
 
 bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& devices, QWidget* parentWidget)
@@ -744,7 +770,7 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 }
 
 
-bool DbController::getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget)
+bool DbController::getSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
 {
 	if (signalIDs == nullptr)
 	{
@@ -767,6 +793,108 @@ bool DbController::getSignalsIDs(QSet<int>* signalIDs, QWidget* parentWidget)
 
 	return ok;
 }
+
+
+bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
+{
+	if (signalSet == nullptr)
+	{
+		assert(signalSet != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getSignals(signalSet);
+
+	ok = waitForComplete(parentWidget, tr("Reading signals"));
+
+	return ok;
+}
+
+
+bool DbController::addSignal(SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)
+{
+	if (newSignal == nullptr)
+	{
+		assert(newSignal != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_addSignal(signalType, newSignal);
+
+	ok = waitForComplete(parentWidget, tr("Adding signals"));
+
+	return ok;
+}
+
+
+bool DbController::getUnits(UnitList *units, QWidget* parentWidget)
+{
+	if (units == nullptr)
+	{
+		assert(units != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getUnits(units);
+
+	ok = waitForComplete(parentWidget, tr("Reading units"));
+
+	return ok;
+
+}
+
+
+bool DbController::getDataFormats(DataFormatList *dataFormats, QWidget* parentWidget)
+{
+	if (dataFormats == nullptr)
+	{
+		assert(dataFormats != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getDataFormats(dataFormats);
+
+	ok = waitForComplete(parentWidget, tr("Reading data formats"));
+
+	return ok;
+}
+
 
 
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
