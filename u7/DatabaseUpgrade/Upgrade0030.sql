@@ -214,118 +214,160 @@ DECLARE
 	chOutInstanceID integer;
 	os objectstate;
 	chOutUserID integer;
+	signalDeleted boolean;
 BEGIN
 	FOREACH signal_id IN ARRAY signal_ids
 	LOOP
-		SELECT UserID INTO chOutUserID FROM CheckOut WHERE SignalID = signal_id;
+		SELECT CheckedOutInstanceID, UserID, Deleted INTO chOutInstanceID, chOutUserID, signalDeleted FROM Signal WHERE SignalID = signal_id;
 
-		IF chOutUserID IS NOT NULL THEN
-			-- signal already checked Out
+		IF signalDeleted THEN
+			-- signal deleted, can't check out
 
 			os.ID = signal_id;
-			os.deleted = FALSE;
-			os.checkedout = TRUE;
+			os.deleted = TRUE;
+			os.checkedout = FALSE;
 			os.action = 0;
-			os.userID = chOutUserID;
-			os.errCode = 2;					-- ERR_SIGNAL_ALREADY_CHECKED_OUT
+			os.userID = 0;
+			os.errCode = 3;					-- ERR_SIGNAL_DELETED
 			RETURN NEXT os;
 
 		ELSE
-			-- add record to the CheckOut table
-			INSERT INTO CheckOut (UserID, SignalID) VALUES (user_id, signal_id);
+			IF chOutInstanceID IS NOT NULL THEN
+				-- signal already checked Out
 
-			-- make new signal workcopy in SignalInstance
-			INSERT INTO
-				SignalInstance (
-					SignalID,
-					Action,
-					StrId,
-					ExtStrId,
-					Name,
-					DataFormatID,
-					DataSize,
-					LowADC,
-					HighADC,
-					LowLimit,
-					HighLimit,
-					UnitID,
-					Adjustment,
-					DropLimit,
-					ExcessLimit,
-					UnbalanceLimit,
-					InputLowLimit,
-					InputHighLimit,
-					InputUnitID,
-					InputSensorID,
-					OutputLowLimit,
-					OutputHighLimit,
-					OutputUnitID,
-					OutputSensorID,
-					Acquire,
-					Calculated,
-					NormalState,
-					DecimalPlaces,
-					Aperture,
-					InOutType,
-					DeviceStrID )
-				SELECT
-					SI.SignalID,
-					2,
-					StrId,
-					ExtStrId,
-					Name,
-					DataFormatID,
-					DataSize,
-					LowADC,
-					HighADC,
-					LowLimit,
-					HighLimit,
-					UnitID,
-					Adjustment,
-					DropLimit,
-					ExcessLimit,
-					UnbalanceLimit,
-					InputLowLimit,
-					InputHighLimit,
-					InputUnitID,
-					InputSensorID,
-					OutputLowLimit,
-					OutputHighLimit,
-					OutputUnitID,
-					OutputSensorID,
-					Acquire,
-					Calculated,
-					NormalState,
-					DecimalPlaces,
-					Aperture,
-					InOutType,
-					DeviceStrID
-				FROM
-					Signal AS S,
-					SignalInstance AS SI
+				os.ID = signal_id;
+				os.deleted = FALSE;
+				os.checkedout = TRUE;
+				os.action = 0;
+				os.userID = chOutUserID;
+				os.errCode = 2;					-- ERR_SIGNAL_ALREADY_CHECKED_OUT
+				RETURN NEXT os;
+
+			ELSE
+				-- add record to the CheckOut table
+				INSERT INTO CheckOut (UserID, SignalID) VALUES (user_id, signal_id);
+
+				-- make new signal workcopy in SignalInstance
+				INSERT INTO
+					SignalInstance (
+						SignalID,
+						Action,
+						StrId,
+						ExtStrId,
+						Name,
+						DataFormatID,
+						DataSize,
+						LowADC,
+						HighADC,
+						LowLimit,
+						HighLimit,
+						UnitID,
+						Adjustment,
+						DropLimit,
+						ExcessLimit,
+						UnbalanceLimit,
+						InputLowLimit,
+						InputHighLimit,
+						InputUnitID,
+						InputSensorID,
+						OutputLowLimit,
+						OutputHighLimit,
+						OutputUnitID,
+						OutputSensorID,
+						Acquire,
+						Calculated,
+						NormalState,
+						DecimalPlaces,
+						Aperture,
+						InOutType,
+						DeviceStrID )
+					SELECT
+						SI.SignalID,
+						2,							-- Action Edit
+						StrId,
+						ExtStrId,
+						Name,
+						DataFormatID,
+						DataSize,
+						LowADC,
+						HighADC,
+						LowLimit,
+						HighLimit,
+						UnitID,
+						Adjustment,
+						DropLimit,
+						ExcessLimit,
+						UnbalanceLimit,
+						InputLowLimit,
+						InputHighLimit,
+						InputUnitID,
+						InputSensorID,
+						OutputLowLimit,
+						OutputHighLimit,
+						OutputUnitID,
+						OutputSensorID,
+						Acquire,
+						Calculated,
+						NormalState,
+						DecimalPlaces,
+						Aperture,
+						InOutType,
+						DeviceStrID
+					FROM
+						Signal AS S,
+						SignalInstance AS SI
+					WHERE
+						S.SignalID = signal_id AND
+						SI.SignalID = signal_id AND
+						SI.SignalInstanceID = S.CheckedInInstanceID
+					RETURNING SignalInstanceID INTO chOutInstanceID;
+
+				UPDATE Signal
+				SET
+					CheckedOutInstanceID = chOutInstanceID,
+					UserId = user_id
 				WHERE
-					S.SignalID = signal_id AND
-					SI.SignalID = signal_id AND
-					SI.SignalInstanceID = S.CheckedInInstanceID
-				RETURNING SignalInstanceID INTO chOutInstanceID;
+					SignalID = signal_id;
 
-			UPDATE Signal
-			SET
-				CheckedOutInstanceID = chOutInstanceID,
-				UserId = user_id
-			WHERE
-				SignalID = signal_id;
+				os.ID = signal_id;
+				os.deleted = FALSE;
+				os.checkedout = TRUE;
+				os.action = 2;
+				os.userID = user_id;
+				os.errCode = 0;					-- ERR_SIGNAL_OK
+				RETURN NEXT os;
 
-			os.ID = signal_id;
-			os.deleted = FALSE;
-			os.checkedout = TRUE;
-			os.action = 0;
-			os.userID = user_id;
-			os.errCode = 0;					-- ERR_SIGNAL_OK
-			RETURN NEXT os;
-
+			END IF;
 		END IF;
 	END LOOP;
 END
 $BODY$
   LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION delete_signal(user_id integer, signal_id integer)
+  RETURNS objectstate AS
+$BODY$
+DECLARE
+	os objectstate;
+BEGIN
+	os = checkout_signals(user_id, ARRAY[signal_id]);
+
+	IF os.errCode = 0 OR (os.errCode = 2 AND os.UserID = user_id) THEN
+		-- signal successful checked out
+		-- or signal already checked out by this user
+
+		-- change checkedout signal instance action to Delete (3)
+		UPDATE SignalInstance
+		SET Action = 3
+		WHERE SignalInstanceID = (SELECT CheckedOutInstanceID FROM Signal WHERE SignalID = signal_id);
+
+		os.Action = 3;
+		os.errCode = 0;
+	END IF;
+
+	RETURN os;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
