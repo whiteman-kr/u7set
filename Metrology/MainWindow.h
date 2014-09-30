@@ -9,13 +9,13 @@
 #include <QLabel>
 #include <QProgressBar>
 
-#include "Measure.h"
+#include "MeasureThread.h"
 
 // ==============================================================================================
 
 namespace Ui
 {
-    class MainWindow;
+    class Metrology;
 }
 
 // ==============================================================================================
@@ -31,47 +31,52 @@ public:
 
     // Elements of interface - Menu
     //
-    QMenu*          m_pMeasureMenu;
-    QMenu*          m_pEditMenu;
-    QMenu*          m_pViewMenu;
-    QMenu*          m_pViewPanelMenu;
-    QMenu*          m_pSettingMenu;
-    QMenu*          m_pInfoMenu;
+    QMenu*          m_pMeasureMenu = nullptr;
+    QMenu*          m_pEditMenu = nullptr;
+    QMenu*          m_pViewMenu = nullptr;
+    QMenu*          m_pViewPanelMenu = nullptr;
+    QMenu*          m_pSettingMenu = nullptr;
+    QMenu*          m_pInfoMenu = nullptr;
 
     // Elements of interface - ToolBar
     //
-    QToolBar*       m_pMeasureControlToolBar;
-    QToolBar*       m_pMeasureDempher;
-    QToolBar*       m_pOutputSignalToolBar;
-    QToolBar*       m_pAnalogSignalToolBar;
-    QToolBar*       m_pComplexComporatorSignalToolBar;
+    QToolBar*       m_pMeasureControlToolBar = nullptr;
+    QToolBar*       m_pMeasureTimeout = nullptr;
+    QToolBar*       m_pOutputSignalToolBar = nullptr;
+    QToolBar*       m_pAnalogSignalToolBar = nullptr;
+    QToolBar*       m_pComplexComporatorSignalToolBar = nullptr;
 
     // Elements of interface - Pages of Tab
     //
-    QTabWidget*     m_pMainTab;
+    QTabWidget*     m_pMainTab = nullptr;
     QTableView*     m_pMeasureItemView[MEASURE_TYPE_COUNT];
 
     // Elements of interface - Panels
     //
-    QDockWidget*    m_pFindMeasurePanel;
-    QTableView*     m_pFindMeasureView;
-    QDockWidget*    m_pSignalInfoPanel;
-    QTableView*     m_pSignalInfoView;
-    QDockWidget*    m_pComparatorInfoPanel;
-    QTableView*     m_pComparatorInfoView;
-    QDockWidget*    m_pComplexComparatorInfoPanel;
-    QTableView*     m_pComplexComparatorInfoView;
+    QDockWidget*    m_pFindMeasurePanel = nullptr;
+    QTableView*     m_pFindMeasureView = nullptr;
+    QDockWidget*    m_pSignalInfoPanel = nullptr;
+    QTableView*     m_pSignalInfoView = nullptr;
+    QDockWidget*    m_pComparatorInfoPanel = nullptr;
+    QTableView*     m_pComparatorInfoView = nullptr;
+    QDockWidget*    m_pComplexComparatorInfoPanel = nullptr;
+    QTableView*     m_pComplexComparatorInfoView = nullptr;
 
 
     // Elements of interface - StatusBar
     //
-    QLabel*         m_statusEmpty;
-    QLabel*         m_statusMeasureThreadInfo;
-    QProgressBar*   m_statusMeasureDemphrer;
-    QLabel*         m_statusMeasureThreadState;
-    QLabel*         m_statusMeasureCount;
-    QLabel*         m_statusConnectToServer;
+    QLabel*         m_statusEmpty = nullptr;
+    QLabel*         m_statusMeasureThreadInfo = nullptr;
+    QProgressBar*   m_statusMeasureDemphrer = nullptr;
+    QLabel*         m_statusMeasureThreadState = nullptr;
+    QLabel*         m_statusMeasureCount = nullptr;
+    QLabel*         m_statusConnectToServer = nullptr;
 
+public:
+
+    MeasureThread   m_measureThread;        // Measure thread
+
+public:
 
     // Create interface
     //
@@ -84,10 +89,9 @@ public:
     void createPanels();
     void createStatusBar();
 
-
 private:
 
-    Ui::MainWindow *ui;
+    Ui::Metrology *ui;
 
     // Actions of main menu
     //
@@ -95,39 +99,39 @@ private:
 
     // menu - Measure
     //
-    QAction* m_pStartMeasureAction;
-    QAction* m_pStopMeasureAction;
-    QAction* m_pExportMeasureAction;
+    QAction* m_pStartMeasureAction = nullptr;
+    QAction* m_pStopMeasureAction = nullptr;
+    QAction* m_pExportMeasureAction = nullptr;
 
     // menu - Edit
     //
-    QAction* m_pCutMeasureAction;
-    QAction* m_pCopyMeasureAction;
-    QAction* m_pRemoveMeasureAction;
-    QAction* m_pSelectAllMeasureAction;
+    QAction* m_pCutMeasureAction = nullptr;
+    QAction* m_pCopyMeasureAction = nullptr;
+    QAction* m_pRemoveMeasureAction = nullptr;
+    QAction* m_pSelectAllMeasureAction = nullptr;
 
     // menu - View
     //
-    QAction* m_pShowReportsAction;
-    QAction* m_pShowCalculateAction;
+    QAction* m_pShowReportsAction = nullptr;
+    QAction* m_pShowCalculateAction = nullptr;
 
     // menu - Tools
     //
-    QAction* m_pConnectToServerAction;
-    QAction* m_pCalibrationAction;
-    QAction* m_pShowOutputSignalListAction;
-    //QAction* m_pShowComlexComparatorListAction;
-    QAction* m_pShowOutputRangeListAction;
+    QAction* m_pConnectToServerAction = nullptr;
+    QAction* m_pCalibratorsAction = nullptr;
+    QAction* m_pShowOutputSignalListAction = nullptr;
+    //QAction* m_pShowComlexComparatorListAction = nullptr;
+    QAction* m_pShowOutputRangeListAction = nullptr;
     QAction* m_pOptionsAction;
 
     // menu - ?
     //
-    QAction* m_pShowSignalListAction;
-    QAction* m_pShowComparatorsListAction;
-    QAction* m_pShowCorrecrtionsListAction;
-    QAction* m_pShowStatisticAction;
-    QAction* m_pAboutConnectionAction;
-    QAction* m_pAboutAppAction;
+    QAction* m_pShowSignalListAction = nullptr;
+    QAction* m_pShowComparatorsListAction = nullptr;
+    QAction* m_pShowCorrecrtionsListAction = nullptr;
+    QAction* m_pShowStatisticAction = nullptr;
+    QAction* m_pAboutConnectionAction = nullptr;
+    QAction* m_pAboutAppAction = nullptr;
 
 
     // Slots of main menu
@@ -136,8 +140,8 @@ public slots:
 
     // menu - Measure
     //
-    void startMeasure() {};
-    void stopMeasure() {};
+    void startMeasure();
+    void stopMeasure();
     void exportMeasure() {};
 
     // menu - Edit
@@ -155,11 +159,11 @@ public slots:
     // menu - Tools
     //
     void connectToServer() {};
-    void calibration() {};
+    void calibrators();
     void showOutputSignalList() {};
     //void showComlexComparatorList() {};
     void showOutputRangeList() {};
-    void options() {};
+    void options();
 
     // menu - ?
     //

@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "MainWindow.h"
 #include "ui_mainwindow.h"
 
 #include <QDebug>
@@ -12,17 +12,20 @@
 #include <QProgressBar>
 #include <QComboBox>
 
-#include "Measure.h"
+#include "CalibratorBase.h"
+#include "OptionsDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::Metrology)
 {
     ui->setupUi(this);
 
     createInterface();
+
+    theCalibratorBase.init();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -104,8 +107,8 @@ void  MainWindow::createActions()
     m_pConnectToServerAction = new QAction(tr("Connect to &server ... "), this);
     connect(m_pConnectToServerAction, &QAction::triggered, this, &MainWindow::connectToServer);
 
-    m_pCalibrationAction = new QAction(tr("&Calibrations ..."), this);
-    connect(m_pCalibrationAction, &QAction::triggered, this, &MainWindow::calibration);
+    m_pCalibratorsAction = new QAction(tr("&Calibrations ..."), this);
+    connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::calibrators);
 
     m_pShowOutputSignalListAction = new QAction(tr("&Signals input/output ..."), this);
     connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
@@ -175,7 +178,7 @@ void MainWindow::createMenu()
     m_pSettingMenu = new QMenu(tr("&Tools"));
 
     m_pSettingMenu->addAction(m_pConnectToServerAction);
-    m_pSettingMenu->addAction(m_pCalibrationAction);
+    m_pSettingMenu->addAction(m_pCalibratorsAction);
     m_pSettingMenu->addSeparator();
     m_pSettingMenu->addAction(m_pShowOutputSignalListAction);
 //    m_pSettingMenu->addAction(m_pShowComlexComparatorListAction);
@@ -226,22 +229,22 @@ bool MainWindow::createToolBars()
 
     // Control panel measure timeout
     //
-    m_pMeasureDempher = new QToolBar(this);
-    m_pMeasureDempher->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-    m_pMeasureDempher->setWindowTitle(tr("Control panel measure timeout"));
+    m_pMeasureTimeout = new QToolBar(this);
+    m_pMeasureTimeout->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+    m_pMeasureTimeout->setWindowTitle(tr("Control panel measure timeout"));
     addToolBarBreak(Qt::RightToolBarArea);
-    addToolBar(m_pMeasureDempher);
+    addToolBar(m_pMeasureTimeout);
 
-    QLabel* dempherLabel = new QLabel(m_pMeasureDempher);
-    m_pMeasureDempher->addWidget(dempherLabel);
-    dempherLabel->setText(tr(" Measure timeout "));
-    dempherLabel->setEnabled(false);
+    QLabel* measureTimeoutLabel = new QLabel(m_pMeasureTimeout);
+    m_pMeasureTimeout->addWidget(measureTimeoutLabel);
+    measureTimeoutLabel->setText(tr(" Measure timeout "));
+    measureTimeoutLabel->setEnabled(false);
 
-    QComboBox* dempherCombo = new QComboBox(m_pMeasureDempher);
-    m_pMeasureDempher->addWidget(dempherCombo);
-    dempherCombo->setEditable(true);
-    dempherCombo->addItem("Empty");
-    //connect(dempherCombo, SIGNAL(activated(int)), this, SLOT(setDempher(int)));
+    QComboBox* measureTimeoutCombo = new QComboBox(m_pMeasureTimeout);
+    m_pMeasureTimeout->addWidget(measureTimeoutCombo);
+    measureTimeoutCombo->setEditable(true);
+    measureTimeoutCombo->addItem("Empty");
+    //connect(measureTimeoutCombo, SIGNAL(activated(int)), this, SLOT(setMeasureTimeout(int)));
 
 
     // Control panel output signals
@@ -359,7 +362,7 @@ void MainWindow::createTabPages()
     for(int t = 0; t < MEASURE_TYPE_COUNT; t++)
     {
         QTableView* pView = new QTableView;
-        m_pMainTab->addTab(pView, tr(MeasureTypeStr[t]));
+        m_pMainTab->addTab(pView, tr(MeasureType[t]));
 
         pView->setFrameStyle(QFrame::NoFrame);
 
@@ -464,7 +467,7 @@ void MainWindow::createStatusBar()
 
     statusBar()->setLayoutDirection(Qt::RightToLeft);
 
-    m_statusEmpty->setText(tr(""));
+    m_statusEmpty->setText("");
     m_statusMeasureThreadInfo->setText(tr("Measurement 1 of 10 "));
     m_statusMeasureDemphrer->setValue(50);
     m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));
@@ -474,3 +477,33 @@ void MainWindow::createStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::startMeasure()
+{
+    m_measureThread.setMeasureType(MEASURE_TYPE_LINEARITY);
+
+    m_measureThread.start();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopMeasure()
+{
+    m_measureThread.stop();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::calibrators()
+{
+    theCalibratorBase.showWnd();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::options()
+{
+   OptionsDialog dialog;
+   dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
