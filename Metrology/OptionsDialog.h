@@ -10,9 +10,9 @@
 #include <QLabel>
 #include <QLineEdit>
 
-#include "qtpropertymanager.h"
-#include "qtvariantproperty.h"
-#include "qttreepropertybrowser.h"
+#include "../qtpropertybrowser/src/qtpropertymanager.h"
+#include "../qtpropertybrowser/src/qtvariantproperty.h"
+#include "../qtpropertybrowser/src/qttreepropertybrowser.h"
 
 #include "Options.h"
 
