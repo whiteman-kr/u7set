@@ -48,13 +48,22 @@ const char* const LinearityPointSensor[] =
 {
                 QT_TRANSLATE_NOOP("Options.h", "0 - 5 mA"),
                 QT_TRANSLATE_NOOP("Options.h", "4 - 20 mA"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 100 °C"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 150 °C"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 200 °C"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 400 °C"),
 };
 
 const int		POINT_SENSOR_COUNT           = sizeof(LinearityPointSensor)/sizeof(char*);
 
 const int		POINT_SENSOR_UNKNOWN         = -1,
                 POINT_SENSOR_I_0_5_MA        = 0,
-                POINT_SENSOR_I_4_20_MA       = 1;
+                POINT_SENSOR_I_4_20_MA       = 1,
+                POINT_SENSOR_T_0_100_C       = 2,
+                POINT_SENSOR_T_0_150_C       = 3,
+                POINT_SENSOR_T_0_200_C       = 4,
+                POINT_SENSOR_T_0_400_C       = 5;
+
 
 // ----------------------------------------------------------------------------------------------
 

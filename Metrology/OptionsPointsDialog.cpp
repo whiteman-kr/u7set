@@ -80,6 +80,7 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
 
     setLayout(mainLayout);
 
+
     SetHeaderList();
 
     connect(m_addButton, &QPushButton::clicked, this, &OptionsPointsDialog::onAddPoint);
@@ -91,6 +92,9 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
     connect(m_pointCountEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
     connect(m_lowRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
     connect(m_highRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
+
+
+
  }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -106,12 +110,14 @@ void OptionsPointsDialog::SetHeaderList()
 {
     QStringList horizontalHeaderLabels;
 
-    for(int column = 0; column < PointsColumnCount; column++)
+    horizontalHeaderLabels.append("%");
+
+    for(int s = 0; s < POINT_SENSOR_COUNT; s++)
     {
-        horizontalHeaderLabels.append(PointsColumn[column]);
+        horizontalHeaderLabels.append( LinearityPointSensor[s] );
     }
 
-    m_pointList->setColumnCount(PointsColumnCount);
+    m_pointList->setColumnCount(horizontalHeaderLabels.count());
     m_pointList->setHorizontalHeaderLabels(horizontalHeaderLabels);
 
     for(int column = 0; column < m_pointList->columnCount(); column++)
@@ -120,11 +126,34 @@ void OptionsPointsDialog::SetHeaderList()
         {
             m_pointList->horizontalHeaderItem(column)->setTextColor( Qt::darkGray );
         }
-    }
 
+        if (column - 1 > POINT_SENSOR_I_4_20_MA)
+        {
+            m_pointList->hideColumn(column);
+        }
+    }
 
     connect( m_pointList, &QTableWidget::cellChanged, this, &OptionsPointsDialog::cellChanged );
     connect( m_pointList, &QTableWidget::currentCellChanged, this, &OptionsPointsDialog::currentCellChanged );
+
+    // init context menu
+    //
+    m_pointList->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_pointList->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &OptionsPointsDialog::onHeaderContextMenu);
+
+    m_headerContextMenu = new QMenu(m_pointList);
+
+    for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+    {
+        m_pAction[sensor] = m_headerContextMenu->addAction(LinearityPointSensor[sensor]);
+        if (m_pAction[sensor] != nullptr)
+        {
+            m_pAction[sensor]->setCheckable(true);
+            m_pAction[sensor]->setChecked(sensor <= POINT_SENSOR_I_4_20_MA ? true : false);
+
+            connect(m_headerContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onAction(QAction*)), Qt::QueuedConnection);
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -205,16 +234,13 @@ void OptionsPointsDialog::updateList()
         m_pointList->setItem(index, PointsColumn_Percent, item);
         item->setTextAlignment(Qt::AlignHCenter);
 
-        item = new QTableWidgetItem( QString::number(point->getSensorValue(POINT_SENSOR_I_0_5_MA), 10, 3) + tr(" mA") );
-        m_pointList->setItem(index, PointsColumn_0_5mA, item);
-        item->setTextAlignment(Qt::AlignHCenter);
-        item->setTextColor( Qt::darkGray );
-
-
-        item = new QTableWidgetItem( QString::number(point->getSensorValue(POINT_SENSOR_I_4_20_MA), 10, 3) + tr(" mA") );
-        m_pointList->setItem(index, PointsColumn_4_20mA, item);
-        item->setTextAlignment(Qt::AlignHCenter);
-        item->setTextColor( Qt::darkGray );
+        for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+        {
+            item = new QTableWidgetItem( QString::number(point->getSensorValue(sensor), 10, 3));
+            m_pointList->setItem(index, sensor + 1, item);
+            item->setTextAlignment(Qt::AlignHCenter);
+            item->setTextColor( Qt::darkGray );
+        }
     }
 
     m_pointList->setVerticalHeaderLabels(verticalHeaderLabels);
@@ -256,6 +282,25 @@ void OptionsPointsDialog::clearList()
                 delete item;
             }
         }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsPointsDialog::hideColumn(int column, bool hide)
+{
+    if (column < 0 || column >= m_pointList->columnCount())
+    {
+        return;
+    }
+
+    if (hide == true)
+    {
+        m_pointList->hideColumn(column);
+    }
+    else
+    {
+        m_pointList->showColumn(column);
     }
 }
 
@@ -476,6 +521,38 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
     m_linearity.recalcPoints( value.toDouble() );
 
     updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsPointsDialog::onHeaderContextMenu(QPoint)
+{
+    if (m_headerContextMenu == nullptr)
+    {
+        return;
+    }
+
+    m_headerContextMenu->exec(QCursor::pos());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsPointsDialog::onAction(QAction* action)
+{
+    if (action == nullptr)
+    {
+        return;
+    }
+
+    for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+    {
+        if (m_pAction[sensor] == action)
+        {
+            hideColumn(sensor + 1,  !action->isChecked());
+
+            break;
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------

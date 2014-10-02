@@ -2,6 +2,7 @@
 #define OPTIONSPOINTSDIALOG_H
 
 #include <QDialog>
+#include <QMenu>
 #include <QKeyEvent>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -15,19 +16,7 @@
 
 // ==============================================================================================
 
-
-const char* const PointsColumn[] =
-{
-            QT_TRANSLATE_NOOP("OptionsPointsDialog.h", "%"),
-            LinearityPointSensor[POINT_SENSOR_I_0_5_MA],
-            LinearityPointSensor[POINT_SENSOR_I_4_20_MA],
-};
-
-const int   PointsColumnCount       = sizeof(PointsColumn)/sizeof(char*);
-
-const int   PointsColumn_Percent    = 0,
-            PointsColumn_0_5mA      = 1,
-            PointsColumn_4_20mA     = 2;
+const int   PointsColumn_Percent = 0;
 
 // ==============================================================================================
 
@@ -42,6 +31,9 @@ public:
     LinearityOption     m_linearity;
 
 private:
+
+    QAction*            m_pAction[POINT_SENSOR_COUNT];
+    QMenu*              m_headerContextMenu = nullptr;
 
     // elements of interface
     //
@@ -62,16 +54,16 @@ private:
     QPushButton*        m_upButton = nullptr;
     QPushButton*        m_downButton = nullptr;
 
-
     QTableWidget*       m_pointList = nullptr;
 
-    bool                m_updatingList;
+    bool                m_updatingList = false;
 
     void                SetHeaderList();
     void                updateRangeType();
     void                updateList();
     void                clearList();
 
+    void                hideColumn(int column, bool hide);
 
 protected:
 
@@ -94,6 +86,9 @@ private slots:
 
     void                cellChanged(int,int);
     void                currentCellChanged(int,int,int,int);
+
+    void                onHeaderContextMenu(QPoint);
+    void                onAction(QAction* action);
 };
 
 // ==============================================================================================
