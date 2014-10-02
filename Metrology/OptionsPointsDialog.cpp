@@ -92,9 +92,6 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
     connect(m_pointCountEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
     connect(m_lowRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
     connect(m_highRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
-
-
-
  }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -110,11 +107,9 @@ void OptionsPointsDialog::SetHeaderList()
 {
     QStringList horizontalHeaderLabels;
 
-    horizontalHeaderLabels.append("%");
-
-    for(int s = 0; s < POINT_SENSOR_COUNT; s++)
+    for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
     {
-        horizontalHeaderLabels.append( LinearityPointSensor[s] );
+        horizontalHeaderLabels.append( LinearityPointSensor[sensor] );
     }
 
     m_pointList->setColumnCount(horizontalHeaderLabels.count());
@@ -122,12 +117,12 @@ void OptionsPointsDialog::SetHeaderList()
 
     for(int column = 0; column < m_pointList->columnCount(); column++)
     {
-        if (column != PointsColumn_Percent)
+        if (column != POINT_SENSOR_PERCENT)
         {
             m_pointList->horizontalHeaderItem(column)->setTextColor( Qt::darkGray );
         }
 
-        if (column - 1 > POINT_SENSOR_I_4_20_MA)
+        if (column > POINT_SENSOR_I_4_20_MA)
         {
             m_pointList->hideColumn(column);
         }
@@ -135,6 +130,7 @@ void OptionsPointsDialog::SetHeaderList()
 
     connect( m_pointList, &QTableWidget::cellChanged, this, &OptionsPointsDialog::cellChanged );
     connect( m_pointList, &QTableWidget::currentCellChanged, this, &OptionsPointsDialog::currentCellChanged );
+    connect( m_pointList, &QTableWidget::cellDoubleClicked, this, &OptionsPointsDialog::onEditPoint );
 
     // init context menu
     //
@@ -145,11 +141,16 @@ void OptionsPointsDialog::SetHeaderList()
 
     for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
     {
+        if (sensor == POINT_SENSOR_PERCENT)
+        {
+            continue;
+        }
+
         m_pAction[sensor] = m_headerContextMenu->addAction(LinearityPointSensor[sensor]);
         if (m_pAction[sensor] != nullptr)
         {
             m_pAction[sensor]->setCheckable(true);
-            m_pAction[sensor]->setChecked(sensor <= POINT_SENSOR_I_4_20_MA ? true : false);
+            m_pAction[sensor]->setChecked(sensor > POINT_SENSOR_I_4_20_MA ? false : true);
 
             connect(m_headerContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onAction(QAction*)), Qt::QueuedConnection);
         }
@@ -230,16 +231,16 @@ void OptionsPointsDialog::updateList()
 
         LinearityPoint* point = m_linearity.m_pointBase.at(index);
 
-        item = new QTableWidgetItem( QString::number(point->getPrecent(), 10, 2));
-        m_pointList->setItem(index, PointsColumn_Percent, item);
-        item->setTextAlignment(Qt::AlignHCenter);
-
         for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
         {
             item = new QTableWidgetItem( QString::number(point->getSensorValue(sensor), 10, 3));
-            m_pointList->setItem(index, sensor + 1, item);
+            m_pointList->setItem(index, sensor, item);
             item->setTextAlignment(Qt::AlignHCenter);
-            item->setTextColor( Qt::darkGray );
+
+            if (sensor != POINT_SENSOR_PERCENT)
+            {
+                item->setTextColor( Qt::darkGray  );
+            }
         }
     }
 
@@ -324,7 +325,7 @@ void OptionsPointsDialog::onAddPoint()
 
     updateList();
 
-    QTableWidgetItem *item = m_pointList->item(index + 1, PointsColumn_Percent);
+    QTableWidgetItem *item = m_pointList->item(index + 1, POINT_SENSOR_PERCENT);
     if (item == nullptr)
     {
         return;
@@ -342,7 +343,7 @@ void OptionsPointsDialog::cellChanged(int row, int column)
         return;
     }
 
-    if (column != PointsColumn_Percent)
+    if (column != POINT_SENSOR_PERCENT)
     {
         return;
     }
@@ -378,7 +379,7 @@ void OptionsPointsDialog::cellChanged(int row, int column)
 
 void OptionsPointsDialog::currentCellChanged(int, int column, int, int)
 {
-    if (column == PointsColumn_Percent)
+    if (column == POINT_SENSOR_PERCENT)
     {
         m_pointList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::AnyKeyPressed);
     }
@@ -398,7 +399,7 @@ void OptionsPointsDialog::onEditPoint()
         return;
     }
 
-    QTableWidgetItem* item = m_pointList->item( row, PointsColumn_Percent);
+    QTableWidgetItem* item = m_pointList->item( row, POINT_SENSOR_PERCENT);
     if(item == nullptr)
     {
         return;
@@ -548,7 +549,7 @@ void OptionsPointsDialog::onAction(QAction* action)
     {
         if (m_pAction[sensor] == action)
         {
-            hideColumn(sensor + 1,  !action->isChecked());
+            hideColumn(sensor,  !action->isChecked());
 
             break;
         }

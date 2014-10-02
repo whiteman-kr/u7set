@@ -132,6 +132,7 @@ void LinearityPoint::setPercent(double value)
     {
         switch(s)
         {
+            case POINT_SENSOR_PERCENT:      m_sensorValue[s] = value;                   break;
             case POINT_SENSOR_I_0_5_MA:     m_sensorValue[s] = value * 5 / 100;         break;
             case POINT_SENSOR_I_4_20_MA:    m_sensorValue[s] = value * 16 / 100 + 4;    break;
             case POINT_SENSOR_T_0_100_C:    m_sensorValue[s] = value * 100 / 100;       break;
