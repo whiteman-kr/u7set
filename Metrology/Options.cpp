@@ -133,6 +133,7 @@ void LinearityPoint::setPercent(double value)
         switch(s)
         {
             case POINT_SENSOR_PERCENT:      m_sensorValue[s] = value;                   break;
+            case POINT_SENSOR_U_0_5_V:      m_sensorValue[s] = value * 5 / 100;         break;
             case POINT_SENSOR_I_0_5_MA:     m_sensorValue[s] = value * 5 / 100;         break;
             case POINT_SENSOR_I_4_20_MA:    m_sensorValue[s] = value * 16 / 100 + 4;    break;
             case POINT_SENSOR_T_0_100_C:    m_sensorValue[s] = value * 100 / 100;       break;
@@ -399,8 +400,8 @@ void LinearityPointBase::load()
 
         if (m_pointList.isEmpty() == true)
         {
-            const int count = 6;
-            double value[count] = {2, 20, 40, 60, 80, 98};
+            const int count = 7;
+            double value[count] = {2, 20, 40, 50, 60, 80, 98};
 
             for(int index = 0; index < count; index++)
             {

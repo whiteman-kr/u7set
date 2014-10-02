@@ -128,9 +128,9 @@ void OptionsPointsDialog::SetHeaderList()
         }
     }
 
+    connect( m_pointList, &QTableWidget::cellDoubleClicked, this, &OptionsPointsDialog::onEditPoint );
     connect( m_pointList, &QTableWidget::cellChanged, this, &OptionsPointsDialog::cellChanged );
     connect( m_pointList, &QTableWidget::currentCellChanged, this, &OptionsPointsDialog::currentCellChanged );
-    connect( m_pointList, &QTableWidget::cellDoubleClicked, this, &OptionsPointsDialog::onEditPoint );
 
     // init context menu
     //
