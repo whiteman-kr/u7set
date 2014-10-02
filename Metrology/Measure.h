@@ -80,10 +80,10 @@ const int   OUTPUT_SIGNAL_KIND_UNKNOWN			= -1,
 
 const char* const OutputSignalType[] =
 {
-            QT_TRANSLATE_NOOP("Measure.h", "Коррекция"),
-            QT_TRANSLATE_NOOP("Measure.h", "Сигнал МПС"),
-            QT_TRANSLATE_NOOP("Measure.h", "P → Tнас"),
-            QT_TRANSLATE_NOOP("Measure.h", "Tнас → P"),
+            QT_TRANSLATE_NOOP("Measure.h", "Correction"),
+            QT_TRANSLATE_NOOP("Measure.h", "Signal MPS"),
+            QT_TRANSLATE_NOOP("Measure.h", "P → T"),
+            QT_TRANSLATE_NOOP("Measure.h", "T → P"),
 };
 
 const int   OUTPUT_SIGNAL_TYPE_COUNT = sizeof(OutputSignalType)/sizeof(char*);
@@ -105,8 +105,8 @@ const int   OUTPUT_SIGNAL_TYPE_UNKNOWN			= -1,
 
 const char* const CorrectSignalType[] =
 {
-            QT_TRANSLATE_NOOP("Measure.h", "Добавление (+)"),
-            QT_TRANSLATE_NOOP("Measure.h", "Вычитание (-)"),
+            QT_TRANSLATE_NOOP("Measure.h", "Addition (+)"),
+            QT_TRANSLATE_NOOP("Measure.h", "Subtraction (-)"),
 };
 
 const int   CORRECT_SIGNAL_TYPE_COUNT = sizeof(CorrectSignalType)/sizeof(char*);

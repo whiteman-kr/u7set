@@ -1,59 +1,53 @@
 #include "OptionsPointsDialog.h"
 
 #include <QMessageBox>
-#include <QToolTip>
+#include <QHeaderView>
+
 // -------------------------------------------------------------------------------------------------------------------
 
 OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent) :
     QDialog(parent),
     m_linearity (linearity)
 {
-   setStyleSheet(".OptionsPointsDialog { border: 1px solid grey } ");
+    setStyleSheet(".OptionsPointsDialog { border: 1px solid grey } ");
 
-    QHBoxLayout* rangeLayout = new QHBoxLayout;
+    QHBoxLayout* valueLayout = new QHBoxLayout;
 
-    m_rangeTypeLabel = new QLabel;
     m_rangeTypeList = new QComboBox;
 
-    m_rangeTypeLabel->setText(tr("Division type"));
     for(int t = 0; t < LO_RANGE_TYPE_COUNT; t++)
     {
         m_rangeTypeList->addItem(LinearityRangeTypeStr[t]);
     }
 
-    rangeLayout->addWidget(m_rangeTypeList);
-    rangeLayout->addStretch();
-
-
-    QHBoxLayout* valueLayout = new QHBoxLayout;
-
-    m_valueLabel = new QLabel;
-    m_valueEdit = new QLineEdit;
+    m_pointCountLabel = new QLabel;
+    m_pointCountEdit = new QLineEdit;
     m_lowRangeLabel = new QLabel;
     m_lowRangeEdit = new QLineEdit;
     m_highRangeLabel = new QLabel;
     m_highRangeEdit = new QLineEdit;
 
-    m_valueLabel->setText(tr("Input value,%"));
-    m_lowRangeLabel->setText(tr("low limit,%"));
-    m_highRangeLabel->setText(tr("high limit,%"));
+    m_pointCountLabel->setText(tr("Count of points:"));
+    m_lowRangeLabel->setText(tr("Low,%"));
+    m_highRangeLabel->setText(tr("High,%"));
 
     QRegExp rx( "^[-]{0,1}[0-9]*[.]{1}[0-9]*$" );
     QValidator *validator = new QRegExpValidator(rx, this);
 
-    m_valueEdit->setFixedWidth(50);
-    m_valueEdit->setAlignment(Qt::AlignHCenter);
-    m_valueEdit->setValidator(validator);
-    m_lowRangeEdit->setFixedWidth(50);
+    m_pointCountEdit->setFixedWidth(40);
+    m_pointCountEdit->setAlignment(Qt::AlignHCenter);
+    m_pointCountEdit->setValidator(validator);
+    m_lowRangeEdit->setFixedWidth(40);
     m_lowRangeEdit->setAlignment(Qt::AlignHCenter);
     m_lowRangeEdit->setValidator(validator);
-    m_highRangeEdit->setFixedWidth(50);
+    m_highRangeEdit->setFixedWidth(40);
     m_highRangeEdit->setAlignment(Qt::AlignHCenter);
     m_highRangeEdit->setValidator(validator);
 
-    valueLayout->addWidget(m_valueLabel);
-    valueLayout->addWidget(m_valueEdit);
+    valueLayout->addWidget(m_rangeTypeList);
     valueLayout->addStretch();
+    valueLayout->addWidget(m_pointCountLabel);
+    valueLayout->addWidget(m_pointCountEdit);
     valueLayout->addWidget(m_lowRangeLabel);
     valueLayout->addWidget(m_lowRangeEdit);
     valueLayout->addWidget(m_highRangeLabel);
@@ -83,9 +77,9 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
 
     mainLayout->addLayout(valueLayout);
     mainLayout->addLayout(listLayout);
-    mainLayout->addLayout(rangeLayout);
 
     setLayout(mainLayout);
+
 
     SetHeaderList();
 
@@ -95,7 +89,7 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
     connect(m_upButton, &QPushButton::clicked, this, &OptionsPointsDialog::onUpPoint);
     connect(m_downButton, &QPushButton::clicked, this, &OptionsPointsDialog::onDownPoint);
     connect(m_rangeTypeList, SIGNAL(currentIndexChanged(int)), this, SLOT(onRangeType(int)));
-    connect(m_valueEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
+    connect(m_pointCountEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
     connect(m_lowRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
     connect(m_highRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
  }
@@ -104,6 +98,7 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
 
 OptionsPointsDialog::~OptionsPointsDialog()
 {
+    clearList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -112,14 +107,54 @@ void OptionsPointsDialog::SetHeaderList()
 {
     QStringList horizontalHeaderLabels;
 
-    for(int c = 0; c < PointsColumnCount; c++)
+    for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
     {
-        horizontalHeaderLabels.append(PointsColumn[c]);
+        horizontalHeaderLabels.append( LinearityPointSensor[sensor] );
     }
 
-    m_pointList->setColumnCount(PointsColumnCount);
+    m_pointList->setColumnCount(horizontalHeaderLabels.count());
     m_pointList->setHorizontalHeaderLabels(horizontalHeaderLabels);
-    m_pointList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    for(int column = 0; column < m_pointList->columnCount(); column++)
+    {
+        if (column != POINT_SENSOR_PERCENT)
+        {
+            m_pointList->horizontalHeaderItem(column)->setTextColor( Qt::darkGray );
+        }
+
+        if (column > POINT_SENSOR_I_4_20_MA)
+        {
+            m_pointList->hideColumn(column);
+        }
+    }
+
+    connect( m_pointList, &QTableWidget::cellDoubleClicked, this, &OptionsPointsDialog::onEditPoint );
+    connect( m_pointList, &QTableWidget::cellChanged, this, &OptionsPointsDialog::cellChanged );
+    connect( m_pointList, &QTableWidget::currentCellChanged, this, &OptionsPointsDialog::currentCellChanged );
+
+    // init context menu
+    //
+    m_pointList->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_pointList->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &OptionsPointsDialog::onHeaderContextMenu);
+
+    m_headerContextMenu = new QMenu(m_pointList);
+
+    for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+    {
+        if (sensor == POINT_SENSOR_PERCENT)
+        {
+            continue;
+        }
+
+        m_pAction[sensor] = m_headerContextMenu->addAction(LinearityPointSensor[sensor]);
+        if (m_pAction[sensor] != nullptr)
+        {
+            m_pAction[sensor]->setCheckable(true);
+            m_pAction[sensor]->setChecked(sensor > POINT_SENSOR_I_4_20_MA ? false : true);
+
+            connect(m_headerContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onAction(QAction*)), Qt::QueuedConnection);
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -130,8 +165,8 @@ void OptionsPointsDialog::updateRangeType()
     {
         case LO_RANGE_TYPE_MANUAL:
 
-            m_valueLabel->setText(tr("Input value,%"));
-
+            m_pointCountLabel->hide();
+            m_pointCountEdit->hide();
             m_lowRangeLabel->hide();
             m_lowRangeEdit->hide();
             m_highRangeLabel->hide();
@@ -143,14 +178,12 @@ void OptionsPointsDialog::updateRangeType()
             m_upButton->show();
             m_downButton->show();
 
-            m_valueEdit->setText( "0" );
-
             break;
 
         case LO_RANGE_TYPE_AUTOMATIC:
 
-            m_valueLabel->setText(tr("Count of points:"));
-
+            m_pointCountLabel->show();
+            m_pointCountEdit->show();
             m_lowRangeLabel->show();
             m_lowRangeEdit->show();
             m_highRangeLabel->show();
@@ -162,7 +195,7 @@ void OptionsPointsDialog::updateRangeType()
             m_upButton->hide();
             m_downButton->hide();
 
-            m_valueEdit->setText( QString::number( m_linearity.m_pointBase.count() ) );
+            m_pointCountEdit->setText( QString::number( m_linearity.m_pointBase.count() ) );
             m_lowRangeEdit->setText( QString::number(m_linearity.m_lowLimitRange, 10, 2) );
             m_highRangeEdit->setText( QString::number(m_linearity.m_highLimitRange, 10, 2) );
 
@@ -178,13 +211,19 @@ void OptionsPointsDialog::updateRangeType()
 
 void OptionsPointsDialog::updateList()
 {
+    clearList();
+
     int rowCount = m_linearity.m_pointBase.count();
 
     m_pointList->setRowCount(rowCount);
 
+    m_updatingList = true;
     QTableWidgetItem* item = nullptr;
     QStringList verticalHeaderLabels;
+    int selectedRow = m_pointList->currentRow();
 
+    // update list
+    //
     for(int index = 0; index < rowCount; index++ )
     {
         verticalHeaderLabels.append(QString("%1").arg(index + 1));
@@ -192,67 +231,126 @@ void OptionsPointsDialog::updateList()
 
         LinearityPoint* point = m_linearity.m_pointBase.at(index);
 
-        item = new QTableWidgetItem( QString::number(point->getPrecent(), 10, 2) + " %");
-        m_pointList->setItem(index, PointsColumn_Percent, item);
-        item->setTextAlignment(Qt::AlignHCenter);
+        for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+        {
+            item = new QTableWidgetItem( QString::number(point->getSensorValue(sensor), 10, 3));
+            m_pointList->setItem(index, sensor, item);
+            item->setTextAlignment(Qt::AlignHCenter);
 
-        item = new QTableWidgetItem( QString::number(point->getSensorValue(POINT_SENSOR_I_0_5_MA), 10, 3) + tr(" mA") );
-        m_pointList->setItem(index, PointsColumn_0_5mA, item);
-        item->setTextAlignment(Qt::AlignHCenter);
-
-        item = new QTableWidgetItem( QString::number(point->getSensorValue(POINT_SENSOR_I_4_20_MA), 10, 3) + tr(" mA") );
-        m_pointList->setItem(index, PointsColumn_4_20mA, item);
-        item->setTextAlignment(Qt::AlignHCenter);
+            if (sensor != POINT_SENSOR_PERCENT)
+            {
+                item->setTextColor( Qt::darkGray  );
+            }
+        }
     }
 
     m_pointList->setVerticalHeaderLabels(verticalHeaderLabels);
+    m_updatingList = false;
+
+    // select row
+    //
+    if (selectedRow == -1)
+    {
+        selectedRow = 0;
+    }
+    else
+    {
+        if (selectedRow >= m_pointList->rowCount())
+        {
+            selectedRow = m_pointList->rowCount() - 1;
+        }
+    }
+
+    m_pointList->selectRow(selectedRow);
 
     emit updateLinearityPage(true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onAddPoint()
+void OptionsPointsDialog::clearList()
 {
-    QString value = m_valueEdit->text();
-    if (value.isEmpty() == true)
+    int columnCount = m_pointList->columnCount();
+    int rowCount = m_pointList->rowCount();
+
+    for(int column = 0; column < columnCount; column++ )
     {
-        QMessageBox msg;
-        msg.setText(tr("Please, input value"));
-        msg.exec();
+        for(int row = 0; row < rowCount; row++ )
+        {
+            QTableWidgetItem *item = m_pointList->item(row, column);
+            if (item != nullptr)
+            {
+                delete item;
+            }
+        }
+    }
+}
 
-        m_valueEdit->setFocus();
+// -------------------------------------------------------------------------------------------------------------------
 
+void OptionsPointsDialog::hideColumn(int column, bool hide)
+{
+    if (column < 0 || column >= m_pointList->columnCount())
+    {
         return;
     }
 
-    LinearityPoint* point = new LinearityPoint(value.toDouble());
+    if (hide == true)
+    {
+        m_pointList->hideColumn(column);
+    }
+    else
+    {
+        m_pointList->showColumn(column);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsPointsDialog::onAddPoint()
+{
+    int index = m_pointList->currentRow();
+    if (index == -1)
+    {
+        index = m_linearity.m_pointBase.count() - 1;
+    }
+
+    LinearityPoint* point = new LinearityPoint(0);
     if (point == nullptr)
     {
         return;
     }
 
-    m_linearity.m_pointBase.append( point );
+    m_linearity.m_pointBase.insert(index + 1, point );
 
     updateList();
-}
 
-// -------------------------------------------------------------------------------------------------------------------
-void OptionsPointsDialog::onEditPoint()
-{
-    QString value = m_valueEdit->text();
-    if (value.isEmpty() == true)
+    QTableWidgetItem *item = m_pointList->item(index + 1, POINT_SENSOR_PERCENT);
+    if (item == nullptr)
     {
-        QMessageBox msg;
-        msg.setText(tr("Please, input value"));
-        msg.exec();
-
-        m_valueEdit->setFocus();
-
         return;
     }
 
-    int index = m_pointList->currentRow();
+    m_pointList->editItem(item);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsPointsDialog::cellChanged(int row, int column)
+{
+    if (m_updatingList == true)
+    {
+        return;
+    }
+
+    if (column != POINT_SENSOR_PERCENT)
+    {
+        return;
+    }
+
+    QString value = m_pointList->item(row, column)->text();
+
+    int index = row;
     if (index < 0 || index >= m_linearity.m_pointBase.count())
     {
         QMessageBox msg;
@@ -270,10 +368,44 @@ void OptionsPointsDialog::onEditPoint()
 
     point->setPercent( value.toDouble() );
 
+    updateList();
+
     m_pointList->setFocus();
     m_pointList->selectRow(index);
+}
 
-    updateList();
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsPointsDialog::currentCellChanged(int, int column, int, int)
+{
+    if (column == POINT_SENSOR_PERCENT)
+    {
+        m_pointList->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::AnyKeyPressed);
+    }
+    else
+    {
+        m_pointList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsPointsDialog::onEditPoint()
+{
+    int row = m_pointList->currentRow();
+    if (row == -1)
+    {
+        return;
+    }
+
+    QTableWidgetItem* item = m_pointList->item( row, POINT_SENSOR_PERCENT);
+    if(item == nullptr)
+    {
+        return;
+    }
+
+    m_pointList->editItem(item);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -350,6 +482,8 @@ void OptionsPointsDialog::onRangeType(int type)
     m_linearity.m_rangeType = type;
 
     updateRangeType();
+
+    updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -361,10 +495,10 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
         return;
     }
 
-    QString value = m_valueEdit->text();
+    QString value = m_pointCountEdit->text();
     if (value.isEmpty() == true)
     {
-        m_valueEdit->setFocus();
+        m_pointCountEdit->setFocus();
         return;
     }
 
@@ -374,7 +508,6 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
         m_lowRangeEdit->setFocus();
         return;
     }
-
 
     QString high = m_highRangeEdit->text();
     if (high.isEmpty() == true)
@@ -393,6 +526,38 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void OptionsPointsDialog::onHeaderContextMenu(QPoint)
+{
+    if (m_headerContextMenu == nullptr)
+    {
+        return;
+    }
+
+    m_headerContextMenu->exec(QCursor::pos());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsPointsDialog::onAction(QAction* action)
+{
+    if (action == nullptr)
+    {
+        return;
+    }
+
+    for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
+    {
+        if (m_pAction[sensor] == action)
+        {
+            hideColumn(sensor,  !action->isChecked());
+
+            break;
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void OptionsPointsDialog::keyPressEvent(QKeyEvent *e)
 {
     if (m_linearity.m_rangeType != LO_RANGE_TYPE_MANUAL)
@@ -402,10 +567,12 @@ void OptionsPointsDialog::keyPressEvent(QKeyEvent *e)
         return;
     }
 
-//    if(e->key() == Qt::Key_Return)
-//    {
-//        onAddPoint();
-//    }
+    if(e->key() == Qt::Key_Return)
+    {
+        onEditPoint();
+
+        return;
+    }
 
     if(e->key() == Qt::Key_Delete)
     {

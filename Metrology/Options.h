@@ -6,6 +6,16 @@
 #include <assert.h>
 #include "Measure.h"
 
+
+// ==============================================================================================
+
+#define                     WINDOW_GEOMETRY_OPTIONS_KEY		"Options/Window/"
+
+// ----------------------------------------------------------------------------------------------
+
+void restoreWindowPosition(QWidget* pWidget);
+void saveWindowPosition(QWidget* pWidget);
+
 // ==============================================================================================
 
 #define						TOOLBAR_OPTIONS_KEY		"Options/ToolBar/"
@@ -36,15 +46,28 @@ public:
 
 const char* const LinearityPointSensor[] =
 {
+                QT_TRANSLATE_NOOP("Options.h", "%"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 5 V"),
                 QT_TRANSLATE_NOOP("Options.h", "0 - 5 mA"),
                 QT_TRANSLATE_NOOP("Options.h", "4 - 20 mA"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 100 °C"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 150 °C"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 200 °C"),
+                QT_TRANSLATE_NOOP("Options.h", "0 - 400 °C"),
 };
 
 const int		POINT_SENSOR_COUNT           = sizeof(LinearityPointSensor)/sizeof(char*);
 
-const int		POINT_SENSOR_UNKNOWN         = -1,
-                POINT_SENSOR_I_0_5_MA        = 0,
-                POINT_SENSOR_I_4_20_MA       = 1;
+const int		POINT_SENSOR_UNKNOWN        = -1,
+                POINT_SENSOR_PERCENT        = 0,
+                POINT_SENSOR_U_0_5_V        = 1,
+                POINT_SENSOR_I_0_5_MA       = 2,
+                POINT_SENSOR_I_4_20_MA      = 3,
+                POINT_SENSOR_T_0_100_C      = 4,
+                POINT_SENSOR_T_0_150_C      = 5,
+                POINT_SENSOR_T_0_200_C      = 6,
+                POINT_SENSOR_T_0_400_C      = 7;
+
 
 // ----------------------------------------------------------------------------------------------
 
@@ -95,6 +118,7 @@ public:
     bool                    isEmpty() { return count() == 0; }
 
     int                     append(LinearityPoint* point);
+    int                     insert(int index, LinearityPoint* point);
 
     bool                    removeAt(int index);
     bool                    removeAt(LinearityPoint* point);

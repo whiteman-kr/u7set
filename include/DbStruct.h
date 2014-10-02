@@ -291,8 +291,6 @@ public:
 	const VcsItemAction& action() const;
 	void setAction(const VcsItemAction& action);
 
-	//const DbUser& user() const;
-	//void setUser(const DbUser& user);
 	int userId() const;
 	void setUserId(int value);
 
@@ -312,7 +310,6 @@ protected:
 	VcsState m_state;
 	VcsItemAction m_action;
 	int m_userId = -1;
-	//DbUser m_user;
 };
 
 //
@@ -331,7 +328,8 @@ public:
 	bool readFromDisk(const QString& fileName);
 	bool writeToDisk(const QString& directory) const;
 
-	void convertToDatabaseString(QString* str);				// returns E'\\x00010203......'
+	void convertToDatabaseString(QString* str);										// returns E'\\x00010203......'
+	static void convertToDatabaseString(const QByteArray& data, QString* result);	// returns E'\\x00010203......'
 
 	DbFile& operator= (const DbFileInfo& fileInfo);
 

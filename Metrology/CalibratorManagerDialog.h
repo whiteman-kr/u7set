@@ -27,6 +27,7 @@ private:
 
     // Elements of interface - Menu
     //
+    QFont*          m_pFont;
     QLabel*         m_pMeasureLabel = nullptr;
     QLineEdit*      m_pMeasureEdit = nullptr;
     QLabel*         m_pSourceLabel = nullptr;
@@ -38,8 +39,10 @@ private:
     QComboBox*      m_pModeList = nullptr;
     QComboBox*      m_pUnitList = nullptr;
     QPushButton*    m_pErrorsButton = nullptr;
-    QTextEdit*      m_pErrorList = nullptr;
     QCheckBox*      m_pRemoteControlCheck = nullptr;
+
+    QDialog*        m_pErrorDialog = nullptr;
+    QTextEdit*      m_pErrorList = nullptr;
 
     void            createInterfaceItems();
     void            initInterfaceItems();

@@ -38,11 +38,10 @@ HEADERS  += \
     MeasureThread.h
 
 
-FORMS    += \
-    mainwindow.ui
+FORMS    +=
 
 RESOURCES += \
-    Metrology.qrc
+    Resources.qrc
 
 TRANSLATIONS = translations/Metrology_ru.ts \
                 translations/Metrology_uk.ts

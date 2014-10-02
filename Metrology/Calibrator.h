@@ -222,6 +222,8 @@ private:
     QString		m_lastResponse;                                                         // string containing the last response data from the calibrator
     QString		m_lastError;                                                            // in the case of an error of the calibrator, this string contains the description
 
+    bool        m_enableWaitResponse = false;                                           // enbale wait response from calibrator after open port
+
     void        empty();                                                                // erases all information on the calibrator: SerialNo, Name and etc.
 
     void        setConnected(bool connect);                                             // function changes status calibrator: connected or disconnected
@@ -254,6 +256,7 @@ public:
     double		getMeasureValue()               { return m_measureValue; }
     double		getSourceValue()                { return m_sourceValue; }
     QString     getLastError()                  { return m_lastError; }
+    void        enableWaitResponse(bool enable) { m_enableWaitResponse = enable; }
 
     void        loadSettings();
     void        saveSettings();
@@ -270,8 +273,6 @@ signals:
     void        valueIsReceived();
 
     void        error_control(QString);
-
-    void        finished();
 
 public slots:
 

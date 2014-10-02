@@ -10,9 +10,9 @@
 #include <QLabel>
 #include <QLineEdit>
 
-#include "qtpropertymanager.h"
-#include "qtvariantproperty.h"
-#include "qttreepropertybrowser.h"
+#include "../qtpropertybrowser/src/qtpropertymanager.h"
+#include "../qtpropertybrowser/src/qtvariantproperty.h"
+#include "../qtpropertybrowser/src/qttreepropertybrowser.h"
 
 #include "Options.h"
 
@@ -101,6 +101,48 @@ const int OptionGroupPage[OPTION_PAGE_COUNT] =
 
 // ==============================================================================================
 
+const int		PROPERTY_PAGE_TYPE_UNKNOWN  = -1,
+                PROPERTY_PAGE_TYPE_LIST     = 0,
+                PROPERTY_PAGE_TYPE_DIALOG   = 1;
+
+const int		PROPERTY_PAGE_TYPE_COUNT    = 2;
+
+
+// ----------------------------------------------------------------------------------------------
+
+class PropertyPage : public QObject
+{
+    Q_OBJECT
+public:
+
+    explicit PropertyPage(QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor);
+    explicit PropertyPage(QDialog* dialog);
+    ~PropertyPage();
+
+    QWidget* getWidget()        { return m_pWidget; }
+
+    int                         m_page = OPTION_PAGE_UNKNOWN;
+    QTreeWidgetItem*            m_pTreeWidgetItem = nullptr;
+
+private:
+
+    int                         m_type = PROPERTY_PAGE_TYPE_UNKNOWN;
+
+
+    QWidget*                    m_pWidget = nullptr;
+
+    QtVariantPropertyManager*   m_pManager = nullptr;
+    QtVariantEditorFactory*     m_pFactory = nullptr;
+    QtTreePropertyBrowser*      m_pEditor = nullptr;
+
+    QDialog*                    m_pDialog = nullptr;
+
+
+
+};
+
+// ==============================================================================================
+
 class OptionsDialog : public QDialog
 {
     Q_OBJECT
@@ -109,6 +151,7 @@ public:
 
     explicit OptionsDialog(QWidget *parent = 0);
             ~OptionsDialog();
+
 private:
 
     Options                 m_options;
@@ -121,19 +164,25 @@ private:
     QHBoxLayout*            m_buttonsLayout = nullptr;
 
     QHBoxLayout*            createPages();
+    void                    removePages();
+
     QHBoxLayout*            createButtons();
 
+    QList<PropertyPage*>    m_pageList;
 
-    QList<QWidget*>         m_pageList;
-
-    QWidget*                createPage(int page);
-    QWidget*                createPropertyList(int page);
-    QWidget*                createPropertyDialog(int page);
+    PropertyPage*           createPage(int page);
+    PropertyPage*           createPropertyList(int page);
+    PropertyPage*           createPropertyDialog(int page);
 
 
     QMap<QtProperty*,int>   m_propertyList;
 
     void                    appendProperty(QtProperty* property, int page, int param);
+    void                    clearProperty();
+
+protected:
+
+    bool                    event(QEvent * e);
 
 private slots:
 

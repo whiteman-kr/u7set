@@ -3,9 +3,12 @@
 #include "DbStruct.h"
 #include "../include/Signal.h"
 
-
 #define AUTO_COMPLETE std::shared_ptr<int*> progressCompleted(nullptr, [this](void*) { this->m_progress->setCompleted(true); } );
 
+namespace Hardware
+{
+	class DeviceObject;
+};
 
 class DbWorker : public QObject
 {
@@ -47,6 +50,7 @@ public:
 	int afblFileId() const;
 	int alFileId() const;
 	int hcFileId() const;
+	int hpFileId() const;
 	int wvsFileId() const;
 	int dvsFileId() const;
 
@@ -76,6 +80,7 @@ public slots:
 	void slot_deleteFiles(std::vector<DbFileInfo>* files);
 
 	void slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
+	void slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
 
 	void slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
@@ -88,7 +93,7 @@ public slots:
 
 	// Hardware Configuration
 	//
-	void slot_addDeviceObject(DbFile* file, int parentId, QString fileExtension);
+	void slot_addDeviceObject(Hardware::DeviceObject* device, int parentId);
 
 	// Signal management
 	//
@@ -105,7 +110,8 @@ public slots:
 	bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
 	int db_getProjectVersion(QSqlDatabase db);
 
-	bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) const;
+	bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId) const;
+	bool db_updateFile(const QSqlQuery& q, DbFile* file) const;
 
 	// Properties
 	//
@@ -140,11 +146,12 @@ private:
 	DbUser m_currentUser;
 	DbProject m_currentProject;
 
-	int m_afblFileId;	// Application Functional Block Library
-	int m_alFileId;		// Application Logic
-	int m_hcFileId;		// Hardware Configuration
-	int m_wvsFileId;	// Workflow Visualization Schemes
-	int m_dvsFileId;	// Diagnostics Visualization Schemes
+	int m_afblFileId = -1;	// Application Functional Block Library
+	int m_alFileId = -1;	// Application Logic
+	int m_hcFileId = -1;	// Hardware Configuration
+	int m_hpFileId = -1;	// Hardware Presets
+	int m_wvsFileId = -1;	// Workflow Visualization Schemes
+	int m_dvsFileId = -1;	// Diagnostics Visualization Schemes
 
 	static const UpgradeItem upgradeItems[];
 

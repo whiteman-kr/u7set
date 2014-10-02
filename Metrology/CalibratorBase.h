@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QThread>
+#include <QEvent>
 #include <QDialog>
 #include <QMenuBar>
 #include <QAction>
@@ -47,7 +48,9 @@ public:
     explicit CalibratorBase(QObject *parent = 0);
             ~CalibratorBase();
 
-    void                init();
+    void                init(QWidget* parent = 0);
+    void                clear();
+
     void                showWnd();
     Calibrator*         getMainCalibrator();
 
@@ -60,12 +63,14 @@ private:
 
     // Elements of interface
     //
-    QDialog*            m_pInitializationWnd = nullptr;
+    QWidget*            m_parentWidget = nullptr;
+    QDialog*            m_pMainWnd = nullptr;
 
     QMenu*              m_pCalibratorMenu = nullptr;
     QMenuBar*           m_pMenuBar  = nullptr;
     QAction*            m_pInitAction = nullptr;
     QAction*            m_pManageAction = nullptr;
+    QAction*            m_pEditAction = nullptr;
 
     QTableWidget*       m_pCalibratorView = nullptr;
     QProgressBar*       m_pCalibratorProgress = nullptr;
@@ -75,6 +80,8 @@ private:
 
 
     void                createCalibrators();
+    void                removeCalibrators();
+
     void                createMainWnd();
 
     void                setHeaderList();
@@ -91,11 +98,12 @@ public slots:
 
     void                onInitialization();                 // Slot of calibrator menu - Initialization
     void                onManage();                         // Slot of calibrator menu - Manage
+    void                onEdit();                           // Slot of calibrator menu - Edit setting
     void                onContextMenu(QPoint);              // Slot of context menu - Manage
 
     void                onFinishedInitializationWnd();      // Slot blocks close the windows, until the initialization process finished
 
-    void                editSettings(int row,int column);   // Slot for edit serial port and type of calibrator
+    void                editSettings(int row,int);          // Slot for edit serial port and type of calibrator
 
     void                onConnected();                      // Slots events from calibrator
 

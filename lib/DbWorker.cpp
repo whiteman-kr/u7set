@@ -1,4 +1,6 @@
 #include "../include/DbWorker.h"
+#include "../include/DeviceObject.h"
+#include <functional>
 
 // Upgrade database
 //
@@ -50,11 +52,6 @@ DbWorker::DbWorker(DbProgress* progress) :
 	m_serverUsername("u7"),
 	m_serverPassword(""),
 	m_progress(progress),
-	m_afblFileId(-1),
-	m_alFileId(-1),
-	m_hcFileId(-1),
-	m_wvsFileId(-1),
-	m_dvsFileId(-1),
 	m_instanceNo(counter)
 {
 	DbWorker::counter ++;		// static variable
@@ -176,6 +173,12 @@ int DbWorker::hcFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_hcFileId;
+}
+
+int DbWorker::hpFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_hpFileId;
 }
 
 int DbWorker::wvsFileId() const
@@ -653,6 +656,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_afblFileId = -1;
 	m_alFileId = -1;
 	m_hcFileId = -1;
+	m_hpFileId = -1;
 	m_wvsFileId = -1;
 	m_dvsFileId = -1;
 	m_mutex.unlock();
@@ -680,6 +684,13 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
+		if (fi.fileName() == "HP")
+		{
+			QMutexLocker locker(&m_mutex);
+			m_hpFileId = fi.fileId();
+			continue;
+		}
+
 		if (fi.fileName() == "WVS")
 		{
 			QMutexLocker locker(&m_mutex);
@@ -700,6 +711,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result = m_afblFileId != -1;
 	result &= m_alFileId != -1;
 	result &= m_hcFileId != -1;
+	result &= m_hpFileId != -1;
 	result &= m_wvsFileId != -1;
 	result &= m_dvsFileId != -1;
 	m_mutex.unlock();
@@ -714,6 +726,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		assert(m_afblFileId != -1);
 		assert(m_alFileId != -1);
 		assert(m_hcFileId != -1);
+		assert(m_hpFileId != -1);
 		assert(m_wvsFileId != -1);
 		assert(m_dvsFileId != -1);
 
@@ -1619,7 +1632,7 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		file->setFileId(q.value(0).toInt());		// File just created, init it's fileId and parentid
 		file->setParentId(parentId);
 
-		db_updateFileState(q, file.get());
+		db_updateFileState(q, file.get(), true);
 	}
 
 	return;
@@ -1689,7 +1702,7 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 			return;
 		}
 
-		db_updateFileState(q, &file);
+		db_updateFileState(q, &file, true);
 	}
 
 	return;
@@ -1763,28 +1776,66 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-		file->setFileId(q.value("FileID").toInt());
-
-		file->setFileName(q.value("Name").toString());
-		file->setParentId(q.value("ParentID").toInt());
-		file->setParentId(q.value("ChangesetID").toInt());
-		file->setCreated(q.value("Created").toString());
-		file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
-
-		bool checkedOut = q.value("CheckedOut").toBool();
-		file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
-
-		int action = q.value("Action").toInt();
-		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
-
-		file->setUserId(q.value("UserID").toInt());
-
-		QByteArray data = q.value("Data").toByteArray();
-		file->swapData(data);
-
-		out->push_back(file);
+		db_updateFile(q, file.get());
 
 		assert(fi.fileId() == file->fileId());
+
+		out->push_back(file);
+	}
+
+	return;
+}
+
+void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (parentFileInfo.fileId() == -1 ||
+		out == nullptr)
+	{
+		assert(parentFileInfo.fileId() != -1);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// request, result is a list of DbFile
+	//
+	QString request = QString("SELECT * FROM get_latest_file_tree_version(%1, %2);")
+			.arg(currentUser().userId())
+			.arg(parentFileInfo.fileId());
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		db_updateFile(q, file.get());
+
+		out->push_back(file);
 	}
 
 	return;
@@ -2044,7 +2095,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 		{
 			if (fi.fileId() == fileId)
 			{
-				db_updateFileState(q, &fi);
+				db_updateFileState(q, &fi, true);
 				updated = true;
 				break;
 			}
@@ -2130,7 +2181,7 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 		{
 			if (fi.fileId() == fileId)
 			{
-				db_updateFileState(q, &fi);
+				db_updateFileState(q, &fi, true);
 				updated = true;
 				break;
 			}
@@ -2211,7 +2262,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		{
 			if (fi.fileId() == fileId)
 			{
-				db_updateFileState(q, &fi);
+				db_updateFileState(q, &fi, true);
 				updated = true;
 				break;
 			}
@@ -2277,7 +2328,7 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	return;
 }
 
-void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExtension)
+void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId)
 {
 	// Init automitic varaiables
 	//
@@ -2288,9 +2339,9 @@ void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExte
 
 	// Check parameters
 	//
-	if (file == nullptr)
+	if (device == nullptr)
 	{
-		assert(file != nullptr);
+		assert(device != nullptr);
 		return;
 	}
 
@@ -2303,39 +2354,163 @@ void DbWorker::slot_addDeviceObject(DbFile* file, int parentId, QString fileExte
 		return;
 	}
 
+	// Recursive function
+	//
+	int nesting = 0;
+
+	std::function<bool(Hardware::DeviceObject*, int)> addDevice =
+		[&addDevice, &db, device, this, &nesting]
+		(Hardware::DeviceObject* current, int parentId)
+		{
+			if (nesting >= static_cast<int>(Hardware::DeviceType::DeviceTypeCount) ||
+				current == nullptr ||
+				parentId == -1)
+			{
+				assert(nesting < static_cast<int>(Hardware::DeviceType::DeviceTypeCount));
+				assert(current != nullptr);
+				assert(parentId == -1);
+				return false;
+			}
+
+			nesting ++;
+
+			// request
+			// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
+			//
+			QByteArray data;
+			bool result = current->Save(data);
+			if (result == false)
+			{
+				assert(result);
+				emitError(tr("Argument errors."));
+				return false;
+			}
+
+			QString strData;
+			DbFile::convertToDatabaseString(data, &strData);
+
+			QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
+				.arg(currentUser().userId())
+				.arg(strData)
+				.arg(parentId)
+				.arg(current->fileExtension());
+
+			qDebug() << request;
+
+			strData.clear();
+
+			QSqlQuery q(db);
+			result = q.exec(request);
+
+			if (result == false)
+			{
+				emitError(tr("Can't add device. Error: ") +  q.lastError().text());
+				return false;
+			}
+
+			if (q.next() == false)
+			{
+				emitError(tr("Can't get result."));
+				return false;
+			}
+
+			DbFileInfo fi;
+			fi.setParentId(parentId);
+
+			db_updateFileState(q, &fi, false);
+			current->setFileInfo(fi);
+
+			// Call it for all children
+			//
+			for (int i = 0; i < current->childrenCount(); i++)
+			{
+				result = addDevice(current->child(i), current->fileInfo().fileId());
+				if (result == false)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		};
+
+	// Start
+	//
+	bool ok = addDevice(device, parentId);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	/*while (current != nullptr)
+	{
+		// Write to the DB
+		//
+
+		// Update id
+		//
+
+		// Switch current
+		//
+		if (current->childrenCount() > 0)
+		{
+			// switch to the first child
+			//
+			current = current->child(0);
+		}
+		else
+		{
+			// switch to the next child in the parent
+			//
+			int nextIndex = current->parent->childIndex(current) + 1;
+			if (nextIndex < current->parent->childerenCount())
+			{
+				// next child exists, switch to it
+				//
+				current = current->parent->child[nextIndex];
+			}
+			else
+			{
+				// there are no any children anumore, switch to next parents child
+				//
+			}
+		}
+	}*/
+
 	// request
 	// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
 	//
-	QString data;
-	file->convertToDatabaseString(&data);
+//	QString data;
+//	device->convertToDatabaseString(&data);
 
-	QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
-		.arg(currentUser().userId())
-		.arg(data)
-		.arg(parentId)
-		.arg(fileExtension);
+//	QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
+//		.arg(currentUser().userId())
+//		.arg(data)
+//		.arg(parentId)
+//		.arg(fileExtension);
 
-	data.clear();
+//	data.clear();
 
-	QSqlQuery q(db);
-	bool result = q.exec(request);
+//	QSqlQuery q(db);
+//	bool result = q.exec(request);
 
-	if (result == false)
-	{
-		emitError(tr("Can't add system. Error: ") +  q.lastError().text());
-		return;
-	}
+//	if (result == false)
+//	{
+//		emitError(tr("Can't add system. Error: ") +  q.lastError().text());
+//		return;
+//	}
 
-	if (q.next() == false)
-	{
-		emitError(tr("Can't get FileID"));
-		return;
-	}
+//	if (q.next() == false)
+//	{
+//		emitError(tr("Can't get FileID"));
+//		return;
+//	}
 
-	file->setFileId(q.value(0).toInt());
-	file->setParentId(parentId);
+//	device->setFileId(q.value(0).toInt());
+//	device->setParentId(parentId);
 
-	db_updateFileState(q, file);
+//	db_updateFileState(q, device);
 
 	return;
 }
@@ -2913,7 +3088,7 @@ int DbWorker::db_getProjectVersion(QSqlDatabase db)
 	}
 }
 
-bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) const
+bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId) const
 {
 	assert(fileInfo);
 
@@ -2924,16 +3099,41 @@ bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo) cons
 	int userId = q.value(4).toInt();
 	//int errcode = q.value(5).toInt();
 
-	if (fileInfo->fileId() != fileId)
+	if (checkFileId == true && fileInfo->fileId() != fileId)
 	{
 		assert(fileInfo->fileId() == fileId);
 		return false;
 	}
 
+	fileInfo->setFileId(fileId);
 	fileInfo->setDeleted(deleted);
 	fileInfo->setState(state);
 	fileInfo->setAction(action);
 	fileInfo->setUserId(userId);
+
+	return true;
+}
+
+bool DbWorker::db_updateFile(const QSqlQuery& q, DbFile* file) const
+{
+	file->setFileId(q.value("FileID").toInt());
+	file->setDeleted(q.value("Deleted").toBool());
+	file->setFileName(q.value("Name").toString());
+	file->setParentId(q.value("ParentID").toInt());
+	file->setChangeset(q.value("ChangesetID").toInt());
+	file->setCreated(q.value("Created").toString());
+	file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
+
+	bool checkedOut = q.value("CheckedOut").toBool();
+	file->setState(checkedOut ? VcsState::CheckedOut : VcsState::CheckedIn);
+
+	int action = q.value("Action").toInt();
+	file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
+
+	file->setUserId(q.value("UserID").toInt());
+
+	QByteArray data = q.value("Data").toByteArray();
+	file->swapData(data);
 
 	return true;
 }

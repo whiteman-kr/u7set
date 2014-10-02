@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QList>
 #include <QToolBar>
 #include <QTabWidget>
 #include <QTableView>
@@ -13,13 +14,6 @@
 
 // ==============================================================================================
 
-namespace Ui
-{
-    class Metrology;
-}
-
-// ==============================================================================================
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -28,53 +22,56 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-
     // Elements of interface - Menu
     //
-    QMenu*          m_pMeasureMenu = nullptr;
-    QMenu*          m_pEditMenu = nullptr;
-    QMenu*          m_pViewMenu = nullptr;
-    QMenu*          m_pViewPanelMenu = nullptr;
-    QMenu*          m_pSettingMenu = nullptr;
-    QMenu*          m_pInfoMenu = nullptr;
+    QMenu*              m_pMeasureMenu = nullptr;
+    QMenu*              m_pEditMenu = nullptr;
+    QMenu*              m_pViewMenu = nullptr;
+    QMenu*              m_pViewPanelMenu = nullptr;
+    QMenu*              m_pSettingMenu = nullptr;
+    QMenu*              m_pInfoMenu = nullptr;
 
     // Elements of interface - ToolBar
     //
-    QToolBar*       m_pMeasureControlToolBar = nullptr;
-    QToolBar*       m_pMeasureTimeout = nullptr;
-    QToolBar*       m_pOutputSignalToolBar = nullptr;
-    QToolBar*       m_pAnalogSignalToolBar = nullptr;
-    QToolBar*       m_pComplexComporatorSignalToolBar = nullptr;
+    QToolBar*           m_pMeasureControlToolBar = nullptr;
+    QToolBar*           m_pMeasureTimeout = nullptr;
+    QToolBar*           m_pOutputSignalToolBar = nullptr;
+    QToolBar*           m_pAnalogSignalToolBar = nullptr;
+    QToolBar*           m_pComplexComporatorSignalToolBar = nullptr;
 
     // Elements of interface - Pages of Tab
     //
-    QTabWidget*     m_pMainTab = nullptr;
-    QTableView*     m_pMeasureItemView[MEASURE_TYPE_COUNT];
+    QTabWidget*         m_pMainTab = nullptr;
+    QList<QTableView*>  m_measureView;
 
     // Elements of interface - Panels
     //
-    QDockWidget*    m_pFindMeasurePanel = nullptr;
-    QTableView*     m_pFindMeasureView = nullptr;
-    QDockWidget*    m_pSignalInfoPanel = nullptr;
-    QTableView*     m_pSignalInfoView = nullptr;
-    QDockWidget*    m_pComparatorInfoPanel = nullptr;
-    QTableView*     m_pComparatorInfoView = nullptr;
-    QDockWidget*    m_pComplexComparatorInfoPanel = nullptr;
-    QTableView*     m_pComplexComparatorInfoView = nullptr;
+    QDockWidget*        m_pFindMeasurePanel = nullptr;
+    QTableView*         m_pFindMeasureView = nullptr;
+    QDockWidget*        m_pSignalInfoPanel = nullptr;
+    QTableView*         m_pSignalInfoView = nullptr;
+    QDockWidget*        m_pComparatorInfoPanel = nullptr;
+    QTableView*         m_pComparatorInfoView = nullptr;
+    QDockWidget*        m_pComplexComparatorInfoPanel = nullptr;
+    QTableView*         m_pComplexComparatorInfoView = nullptr;
 
 
     // Elements of interface - StatusBar
     //
-    QLabel*         m_statusEmpty = nullptr;
-    QLabel*         m_statusMeasureThreadInfo = nullptr;
-    QProgressBar*   m_statusMeasureDemphrer = nullptr;
-    QLabel*         m_statusMeasureThreadState = nullptr;
-    QLabel*         m_statusMeasureCount = nullptr;
-    QLabel*         m_statusConnectToServer = nullptr;
+    QLabel*             m_statusEmpty = nullptr;
+    QLabel*             m_statusMeasureThreadInfo = nullptr;
+    QProgressBar*       m_statusMeasureDemphrer = nullptr;
+    QLabel*             m_statusMeasureThreadState = nullptr;
+    QLabel*             m_statusMeasureCount = nullptr;
+    QLabel*             m_statusConnectToServer = nullptr;
 
 public:
 
     MeasureThread   m_measureThread;        // Measure thread
+
+protected:
+
+    void            closeEvent(QCloseEvent* e);
 
 public:
 
@@ -88,10 +85,6 @@ public:
     void createTabPages();
     void createPanels();
     void createStatusBar();
-
-private:
-
-    Ui::Metrology *ui;
 
     // Actions of main menu
     //

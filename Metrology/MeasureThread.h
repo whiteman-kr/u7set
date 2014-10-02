@@ -37,7 +37,6 @@ private:
 protected:
 
     void        run();
-    bool        eventFilter(QObject *object, QEvent *event);
 
 public:
 
