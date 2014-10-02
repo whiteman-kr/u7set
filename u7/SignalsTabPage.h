@@ -39,13 +39,14 @@ protected:
 private:
 	// Data
 	//
-	QVector<int> m_signalIDs;
 	SignalSet m_signalSet;
-	QVector<DataFormat> m_dataFormatInfo;
-	QVector<Unit> m_unitInfo;
+	DataFormatList m_dataFormatInfo;
+	UnitList m_unitInfo;
 
 	QWidget* m_parentWindow;
 	DbController* m_dbController;
+
+	QString getUnitStr(int unitID) const;
 };
 
 

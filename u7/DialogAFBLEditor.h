@@ -30,6 +30,13 @@ private slots:
 
     void on_m_addXsd_clicked();
 
+    void on_m_view_clicked();
+
+
+    void on_DialogAfblEditor_finished(int result);
+
+    void on_m_remove_clicked();
+
 private:
     Ui::DialogAfblEditor *ui;
 

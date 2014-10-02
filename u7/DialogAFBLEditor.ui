@@ -38,6 +38,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="m_view">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>View</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="m_edit">
          <property name="enabled">
           <bool>false</bool>
@@ -53,7 +63,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Remove</string>
+          <string>Delete</string>
          </property>
         </widget>
        </item>
@@ -113,6 +123,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_afbTree</tabstop>
+  <tabstop>m_add</tabstop>
+  <tabstop>m_view</tabstop>
+  <tabstop>m_edit</tabstop>
+  <tabstop>m_remove</tabstop>
+  <tabstop>m_checkOut</tabstop>
+  <tabstop>m_checkIn</tabstop>
+  <tabstop>m_Undo</tabstop>
+  <tabstop>m_addXsd</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

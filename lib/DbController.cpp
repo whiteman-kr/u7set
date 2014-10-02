@@ -936,7 +936,7 @@ bool DbController::addSignal(SignalType signalType, QVector<Signal>* newSignal, 
 }
 
 
-bool DbController::getUnits(QVector<Unit>* units, QWidget* parentWidget)
+bool DbController::getUnits(UnitList *units, QWidget* parentWidget)
 {
 	if (units == nullptr)
 	{
@@ -962,7 +962,7 @@ bool DbController::getUnits(QVector<Unit>* units, QWidget* parentWidget)
 }
 
 
-bool DbController::getDataFormats(QVector<DataFormat>* dataFormats, QWidget* parentWidget)
+bool DbController::getDataFormats(DataFormatList *dataFormats, QWidget* parentWidget)
 {
 	if (dataFormats == nullptr)
 	{

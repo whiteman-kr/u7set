@@ -2633,7 +2633,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 			getSignalData(q, s);
 
-			signalSet->insert(s);
+			signalSet->append(s.ID(), s);
 		}
 
 		int percent = (i * 100) / signalCount;
@@ -2647,7 +2647,6 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 	m_progress->setValue(100);
 
 	return;
-
 }
 
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
@@ -2692,8 +2691,59 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setDecimalPlaces(q.value("decimalplaces").toInt());
 	s.setAperture(q.value("aperture").toDouble());
 	s.setInOutType(static_cast<SignalInOutType>(q.value("inouttype").toInt()));
-	s.setDeviceID(q.value("deviceid").toInt());
-	s.setInOutNo(q.value("inoutno").toInt());
+	s.setDeviceStrID(q.value("devicestrid").toString());
+}
+
+
+QString DbWorker::getSignalDataStr(const Signal& s)
+{
+	return QString(
+			"'(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,"
+			"%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,"
+			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
+			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
+			"%41)'")
+	.arg(s.ID())
+	.arg(s.signalGroupID())
+	.arg(s.signalInstanceID())
+	.arg(s.changesetID())
+	.arg(s.checkedOut())
+	.arg(s.userID())
+	.arg(s.channel())
+	.arg(s.type())
+	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
+	.arg(s.deleted())
+	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
+	.arg(s.instanceAction())
+	.arg(s.strID())
+	.arg(s.extStrID())
+	.arg(s.name())
+	.arg(s.dataFormat())
+	.arg(s.dataSize())
+	.arg(s.lowADC())
+	.arg(s.highADC())
+	.arg(s.lowLimit())
+	.arg(s.highLimit())
+	.arg(s.unitID())// ? "NULL" : QString("%1").arg(s.unitID()))
+	.arg(s.adjustment())
+	.arg(s.dropLimit())
+	.arg(s.excessLimit())
+	.arg(s.unbalanceLimit())
+	.arg(s.inputLowLimit())
+	.arg(s.inputHighLimit())
+	.arg(s.inputUnitID())// ? "NULL" : QString("%1").arg(s.inputUnitID()))
+	.arg(s.inputSensorID())// ? "NULL" : QString("%1").arg(s.inputSensorID()))
+	.arg(s.outputLowLimit())
+	.arg(s.outputHighLimit())
+	.arg(s.outputUnitID())// ? "NULL" : QString("%1").arg(s.outputUnitID()))
+	.arg(s.outputSensorID())//? "NULL" : QString("%1").arg(s.outputSensorID()))
+	.arg(s.acquire() ? "TRUE" : "FALSE")
+	.arg(s.calculated() ? "TRUE" : "FALSE")
+	.arg(s.normalState())
+	.arg(s.decimalPlaces())
+	.arg(s.aperture())
+	.arg(s.inOutType())
+	.arg(s.deviceStrID().isEmpty() ? "NULL" : s.deviceStrID());
 }
 
 
@@ -2739,8 +2789,16 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 	{
 		int signalID =  q.value(0).toInt();
 
-		QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
-			.arg(currentUser().userId()).arg(signalID);
+		Signal& signal = (*newSignal)[i];
+
+		signal.setID(signalID);
+		signal.setCreated(QDateTime::currentDateTime());
+		signal.setInstanceCreated(QDateTime::currentDateTime());
+
+		QString sds = getSignalDataStr(signal);
+
+		QString request2 = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
+			.arg(currentUser().userId()).arg(sds);
 
 		QSqlQuery q2(db);
 
@@ -2748,15 +2806,28 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 
 		if (result == false)
 		{
-			emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+			emitError(tr("Can't set signal workcopy! Error: ") +  q2.lastError().text());
 			return;
 		}
 
 		assert(i<newSignal->count());
 
-		while(q2.next() != false)
+		request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
+			.arg(currentUser().userId()).arg(signalID);
+
+		QSqlQuery q3(db);
+
+		result = q3.exec(request2);
+
+		if (result == false)
 		{
-			getSignalData(q2, (*newSignal)[i]);
+			emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+			return;
+		}
+
+		while(q3.next() != false)
+		{
+			getSignalData(q3, (*newSignal)[i]);
 			readed++;
 		}
 
@@ -2767,7 +2838,7 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 }
 
 
-void DbWorker::slot_getUnits(QVector<Unit>* units)
+void DbWorker::slot_getUnits(UnitList *units)
 {
 	AUTO_COMPLETE
 
@@ -2806,17 +2877,22 @@ void DbWorker::slot_getUnits(QVector<Unit>* units)
 
 	while(q.next() != false)
 	{
-		Unit unit;
+		int unitID = q.value("unitid").toInt();
+		QString unitNameEn = q.value("unit_en").toString();
+
+		units->append(unitID, unitNameEn);
+
+/*		Unit unit;
 
 		unit.ID = q.value("unitid").toInt();
 		unit.nameEn = q.value("unit_en").toString();
 		unit.nameRu = q.value("unit_ru").toString();
 
-		units->append(unit);
+		units->append(unit); */
 	}
 }
 
-void DbWorker::slot_getDataFormats(QVector<DataFormat>* dataFormats)
+void DbWorker::slot_getDataFormats(DataFormatList *dataFormats)
 {
 	AUTO_COMPLETE
 
@@ -2855,12 +2931,17 @@ void DbWorker::slot_getDataFormats(QVector<DataFormat>* dataFormats)
 
 	while(q.next() != false)
 	{
-		DataFormat dataFormat;
+		int dataFormatID = q.value("dataformatid").toInt();
+		QString dataFormatName = q.value("name").toString();
+
+		dataFormats->append(dataFormatID, dataFormatName);
+
+/*		DataFormat dataFormat;
 
 		dataFormat.ID = q.value("dataformatid").toInt();
 		dataFormat.name = q.value("name").toString();
 
-		dataFormats->append(dataFormat);
+		dataFormats->append(dataFormat); */
 	}
 }
 

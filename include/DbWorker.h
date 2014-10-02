@@ -18,6 +18,7 @@ private:
 	DbWorker();
 
 	void getSignalData(QSqlQuery& q, Signal &s);
+	QString getSignalDataStr(const Signal& s);
 
 public:
 	DbWorker(DbProgress* progress);
@@ -98,8 +99,8 @@ public slots:
 	void slot_getSignals(SignalSet* signalSet);
 	void slot_addSignal(SignalType signalType, QVector<Signal>* newSignal);
 
-	void slot_getUnits(QVector<Unit>* units);
-	void slot_getDataFormats(QVector<DataFormat>* dataFormats);
+	void slot_getUnits(UnitList* units);
+	void slot_getDataFormats(DataFormatList* dataFormats);
 
 	// Service
 	//

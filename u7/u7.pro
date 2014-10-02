@@ -128,7 +128,8 @@ HEADERS  += \
     ../include/Factory.h \
     ../include/CUtils.h \
     ../include/Signal.h \
-    SignalPropertiesDialog.h
+    SignalPropertiesDialog.h \
+    ../include/OrderedHash.h
     ../include/Signal.h
 
 FORMS    += \

@@ -3,6 +3,7 @@
 
 #include <QString>
 #include "../include/DbStruct.h"
+#include "../include/OrderedHash.h"
 
 
 enum SignalType
@@ -38,6 +39,16 @@ enum InstanceAction
 };
 
 
+const char* const InOutTypeStr[] =
+{
+	"Input",
+	"Output",
+	"Internal"
+};
+
+const int IN_OUT_TYPE_COUNT = sizeof(InOutTypeStr) / sizeof(InOutTypeStr[0]);
+
+
 const char* const SensorTypeStr[] =
 {
     "Not used",
@@ -62,7 +73,7 @@ const char* const SensorTypeStr[] =
     "BPS",
 };
 
-const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(const char*);
+const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 
 const int NO_UNIT_ID = 1;
@@ -81,6 +92,11 @@ struct DataFormat
 	int ID;
 	QString name;
 };
+
+
+typedef OrderedHash<int, QString> UnitList;
+
+typedef OrderedHash<int, QString> DataFormatList;
 
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
@@ -131,8 +147,7 @@ private:
 	int m_decimalPlaces = 2;
 	double m_aperture = 0;
 	SignalInOutType m_inOutType = SignalInOutType::internal;
-	int m_deviceID = 0;
-	int m_inOutNo = 0;
+	QString m_deviceStrID;
 
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -250,34 +265,33 @@ public:
 	SignalInOutType inOutType() const { return m_inOutType; }
 	void setInOutType(SignalInOutType inOutType) { m_inOutType = inOutType; }
 
-	int deviceID() const { return m_deviceID; }
-	void setDeviceID(int deviceID) { m_deviceID = deviceID; }
-
-	int inOutNo() const { return m_inOutNo; }
-	void setInOutNo(int inOutNo) { m_inOutNo = inOutNo; }
+	QString deviceStrID() const { return m_deviceStrID; }
+	void setDeviceStrID(const QString& deviceStrID) { m_deviceStrID = deviceStrID; }
 
 	friend class DbWorker;
 };
 
 
-class SignalSet
+class SignalSet : public OrderedHash<int, Signal>
 {
 private:
-	QHash<int, Signal*> m_signalSet;
+	//QHash<int, Signal*> m_signalSet;
 
 public:
 	SignalSet();
 	virtual ~SignalSet();
 
-	void insert(const Signal& signal);
+/*	void insert(const Signal& signal);
 	Signal* getSignal(int signalID);
 	const Signal* getConstSignal(int signalID) const;
 	bool haveSignal(int signalID);
 
 	bool contains(int signalID);
 
-	void removeAll();
+	void removeAll();*/
 };
+
+
 
 
 #endif // SIGNAL_H
