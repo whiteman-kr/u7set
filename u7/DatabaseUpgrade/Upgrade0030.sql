@@ -371,3 +371,17 @@ END
 $BODY$
   LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION undo_signal_changes(user_id integer, signal_id integer)
+  RETURNS objectstate AS
+$BODY$
+DECLARE
+	os objectstate;
+BEGIN
+
+	RETURN os;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
+
