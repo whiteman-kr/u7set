@@ -3,7 +3,15 @@
 #include "../include/DbController.h"
 #include "Settings.h"
 #include "CheckInDialog.h"
+
 #include <QtTreePropertyBrowser>
+#include <QtGroupPropertyManager>
+#include <QtStringPropertyManager>
+#include <QtEnumPropertyManager>
+#include <QtIntPropertyManager>
+#include <QtDoublePropertyManager>
+#include <QtBoolPropertyManager>
+#include <QtSpinBoxFactory>
 
 //
 //
@@ -1207,15 +1215,33 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// Property View
 	//
-	//m_propertyView = new QTextEdit();
-	m_propertyBrowser = new QtTreePropertyBrowser(this);
+	m_propertyEditor = new QtTreePropertyBrowser(this);
+
+	m_propertyGroupManager = new QtGroupPropertyManager(m_propertyEditor);
+	m_propertyStringManager = new QtStringPropertyManager(m_propertyEditor);
+	m_propertyEnumManager = new QtEnumPropertyManager(m_propertyEditor);
+	m_propertyIntManager = new QtIntPropertyManager(m_propertyEditor);
+	m_propertyDoubleManager = new QtDoublePropertyManager(m_propertyEditor);
+	m_propertyBoolManager = new QtBoolPropertyManager(m_propertyEditor);
+
+	QtSpinBoxFactory* spinBoxFactory = new QtSpinBoxFactory(this);
+	QtEnumEditorFactory* enumEditFactory = new QtEnumEditorFactory(this);
+	QtDoubleSpinBoxFactory* doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(this);
+	QtLineEditFactory* lineEditFactory = new QtLineEditFactory(this);
+	QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
+
+	m_propertyEditor->setFactoryForManager(m_propertyStringManager, lineEditFactory);
+	m_propertyEditor->setFactoryForManager(m_propertyEnumManager, enumEditFactory);
+	m_propertyEditor->setFactoryForManager(m_propertyIntManager, spinBoxFactory);
+	m_propertyEditor->setFactoryForManager(m_propertyDoubleManager, doubleSpinBoxFactory);
+	m_propertyEditor->setFactoryForManager(m_propertyBoolManager, checkBoxFactory);
 
 	// Splitter
 	//
 	m_splitter = new QSplitter();
 
 	m_splitter->addWidget(m_equipmentView);
-	m_splitter->addWidget(m_propertyBrowser);
+	m_splitter->addWidget(m_propertyEditor);
 
 	m_splitter->setStretchFactor(0, 2);
 	m_splitter->setStretchFactor(1, 1);
@@ -1225,7 +1251,6 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	// Layouts
 	//
-
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
 
 	pMainLayout->addWidget(m_splitter);
@@ -1378,7 +1403,9 @@ void EquipmentTabPage::projectClosed()
 
 void EquipmentTabPage::selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
-	return setActionState();
+	setActionState();
+	setProperties();
+	return;
 }
 
 void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& /*roles = QVector<int>()*/)
@@ -1597,6 +1624,71 @@ void EquipmentTabPage::modeSwitched()
 	}
 
 	setActionState();
+
+	return;
+}
+
+void EquipmentTabPage::setProperties()
+{
+	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
+
+	if (selectedIndexList.empty() == true)
+	{
+		m_propertyEditor->clear();
+		return;
+	}
+
+	m_propertyEditor->clear();
+
+	for (QModelIndex& mi : selectedIndexList)
+	{
+		Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+		assert(device);
+
+		const QMetaObject* metaObject = device->metaObject();
+
+		for (int i = 0; i < metaObject->propertyCount(); ++i)
+		{
+			QMetaProperty metaProperty = metaObject->property(i);
+
+			const char* name = metaProperty.name();
+			const char* typeName = metaProperty.typeName();
+
+			QVariant value = device->property(name);
+
+			qDebug() << "Name: " << name  << " Value:" << value << typeName;
+
+			//metaProperty.write(device, QVariant("HIIII"));
+		}
+	}
+
+	// "Common"
+	//
+	static QtProperty* commonProperty = nullptr;
+	static QtProperty* strIdProperty = nullptr;
+	static QtProperty* captionProperty = nullptr;
+
+	delete commonProperty;
+	delete strIdProperty;
+	delete captionProperty;
+
+	commonProperty = m_propertyGroupManager->addProperty(tr("Common"));
+
+	strIdProperty = m_propertyStringManager->addProperty("StrID");
+	m_propertyStringManager->setRegExp(strIdProperty, QRegExp("[A-Za-z$][A-Za-z\\d_$()]*$"));
+	m_propertyStringManager->setValue(strIdProperty, "USB_");
+	commonProperty->addSubProperty(strIdProperty);
+
+	captionProperty = m_propertyStringManager->addProperty("Caption");
+	m_propertyStringManager->setValue(captionProperty, "Caption....");
+	commonProperty->addSubProperty(captionProperty);
+
+	// Other
+	//
+
+	// Almost done
+	//
+	m_propertyEditor->addProperty(commonProperty);
 
 	return;
 }

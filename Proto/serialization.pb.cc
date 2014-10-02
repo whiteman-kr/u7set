@@ -713,6 +713,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(DeviceRack));
   DeviceChassis_descriptor_ = file->message_type(32);
   static const int DeviceChassis_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceChassis, place_),
   };
   DeviceChassis_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1046,14 +1047,14 @@ void protobuf_AddDesc_serialization_2eproto() {
     "roller\030i \001(\0132\027.Proto.DeviceController\022+\n"
     "\nDiagSignal\030j \001(\0132\027.Proto.DeviceDiagSign"
     "al\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDevi"
-    "ceRack\"\017\n\rDeviceChassis\"\016\n\014DeviceModule\""
-    "\022\n\020DeviceController\"\022\n\020DeviceDiagSignal*"
-    "3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter"
-    "\020\001\022\010\n\004Inch\020\002*)\n\rFblSignalType\022\n\n\006Analog\020"
-    "\000\022\014\n\010Discrete\020\001*N\n\014FblParamType\022\022\n\016Analo"
-    "gIntegral\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\r"
-    "DiscreteValue\020\002*-\n\024ConnectionDirrection\022"
-    "\t\n\005Input\020\000\022\n\n\006Output\020\001", 4502);
+    "ceRack\"!\n\rDeviceChassis\022\020\n\005place\030\001 \001(\005:\001"
+    "0\"\016\n\014DeviceModule\"\022\n\020DeviceController\"\022\n"
+    "\020DeviceDiagSignal*3\n\nSchemeUnit\022\013\n\007Displ"
+    "ay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*)\n\rFblSig"
+    "nalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014Fbl"
+    "ParamType\022\022\n\016AnalogIntegral\020\000\022\027\n\023AnalogF"
+    "loatingPoint\020\001\022\021\n\rDiscreteValue\020\002*-\n\024Con"
+    "nectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001", 4520);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -11836,6 +11837,7 @@ void DeviceRack::Swap(DeviceRack* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int DeviceChassis::kPlaceFieldNumber;
 #endif  // !_MSC_VER
 
 DeviceChassis::DeviceChassis()
@@ -11854,6 +11856,7 @@ DeviceChassis::DeviceChassis(const DeviceChassis& from)
 
 void DeviceChassis::SharedCtor() {
   _cached_size_ = 0;
+  place_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -11888,6 +11891,9 @@ DeviceChassis* DeviceChassis::New() const {
 }
 
 void DeviceChassis::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    place_ = 0;
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -11897,12 +11903,33 @@ bool DeviceChassis::MergePartialFromCodedStream(
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 place = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &place_)));
+          set_has_place();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
     }
-    DO_(::google::protobuf::internal::WireFormat::SkipField(
-          input, tag, mutable_unknown_fields()));
   }
   return true;
 #undef DO_
@@ -11910,6 +11937,11 @@ bool DeviceChassis::MergePartialFromCodedStream(
 
 void DeviceChassis::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 place = 1 [default = 0];
+  if (has_place()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->place(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -11918,6 +11950,11 @@ void DeviceChassis::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* DeviceChassis::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // optional int32 place = 1 [default = 0];
+  if (has_place()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->place(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -11928,6 +11965,15 @@ void DeviceChassis::SerializeWithCachedSizes(
 int DeviceChassis::ByteSize() const {
   int total_size = 0;
 
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 place = 1 [default = 0];
+    if (has_place()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->place());
+    }
+
+  }
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -11953,6 +11999,11 @@ void DeviceChassis::MergeFrom(const ::google::protobuf::Message& from) {
 
 void DeviceChassis::MergeFrom(const DeviceChassis& from) {
   GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_place()) {
+      set_place(from.place());
+    }
+  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -11975,6 +12026,8 @@ bool DeviceChassis::IsInitialized() const {
 
 void DeviceChassis::Swap(DeviceChassis* other) {
   if (other != this) {
+    std::swap(place_, other->place_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
