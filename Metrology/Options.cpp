@@ -1,10 +1,46 @@
-#include "Options.h"
+ #include "Options.h"
 
 #include <QSettings>
+#include <QWidget>
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Options theOptions;
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+void restoreWindowPosition(QWidget* pWidget)
+{
+    if (pWidget == nullptr)
+    {
+        return;
+    }
+
+    QSettings s;
+
+    QString className = pWidget->metaObject()->className();
+    QByteArray geometry = s.value(QString("%1%2/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY).arg(className)).toByteArray();
+
+    pWidget->restoreGeometry( geometry );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void saveWindowPosition(QWidget* pWidget)
+{
+    if (pWidget == nullptr)
+    {
+        return;
+    }
+
+    QSettings s;
+
+    QString className = pWidget->metaObject()->className();
+
+    s.setValue(QString("%1%2/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY).arg(className), pWidget->saveGeometry());
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -36,22 +72,9 @@ void ToolBarOption::load()
 {
     QSettings s;
 
-//    m_pointBase.load();
-
-//    m_errorValue = s.value( QString("%1errorValue").arg(LINEARITY_OPTIONS_KEY), 0.5).toDouble();
-//    m_errorCtrl = s.value( QString("%1errorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
-//    m_errorType  = s.value( QString("%1errorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-//    m_errorCalcBySCO  = s.value( QString("%1errorCalcBySCO ").arg(LINEARITY_OPTIONS_KEY), false).toBool();
-
-//    m_measureTimeInPoint = s.value( QString("%1measureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
-//    m_measureCountInPoint = s.value( QString("%1measureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
-
-//    m_rangeType = s.value( QString("%1rangeType").arg(LINEARITY_OPTIONS_KEY), LO_RANGE_TYPE_MANUAL).toInt();
-//    m_lowLimitRange = s.value( QString("%1lowLimitRange").arg(LINEARITY_OPTIONS_KEY), 0).toDouble();
-//    m_highLimitRange = s.value( QString("%1highLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
-
-//    m_showOutputRangeColumn = s.value( QString("%1showOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), false).toBool();
-//    m_considerCorrectOutput = s.value( QString("%1considerCorrectOutput").arg(LINEARITY_OPTIONS_KEY), false).toBool();
+    m_measureKind = s.value( QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE).toInt();
+    m_measureTimeout = s.value( QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
+    m_outputSignalType = s.value( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_UNKNOWN).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -60,44 +83,18 @@ void ToolBarOption::save()
 {
     QSettings s;
 
-//    m_pointBase.save();
-
-//    s.setValue( QString("%1errorValue").arg(LINEARITY_OPTIONS_KEY), m_errorValue);
-//    s.setValue( QString("%1errorCtrl").arg(LINEARITY_OPTIONS_KEY), m_errorCtrl);
-//    s.setValue( QString("%1errorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
-//    s.setValue( QString("%1errorCalcBySCO").arg(LINEARITY_OPTIONS_KEY), m_errorCalcBySCO);
-
-//    s.setValue( QString("%1measureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
-//    s.setValue( QString("%1measureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
-
-//    s.setValue( QString("%1rangeType").arg(LINEARITY_OPTIONS_KEY), m_rangeType);
-//    s.setValue( QString("%1lowLimitRange").arg(LINEARITY_OPTIONS_KEY), m_lowLimitRange);
-//    s.setValue( QString("%1highLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
-
-//    s.setValue( QString("%1showOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
-//    s.setValue( QString("%1considerCorrectOutput").arg(LINEARITY_OPTIONS_KEY), m_considerCorrectOutput);
+    s.setValue( QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
+    s.setValue( QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
+    s.setValue( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), m_outputSignalType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 {
-//    m_pointBase = from.m_pointBase;
-
-//    m_errorValue = from.m_errorValue;
-//    m_errorCtrl = from.m_errorCtrl;
-//    m_errorType = from.m_errorType;
-//    m_errorCalcBySCO = from.m_errorCalcBySCO;
-
-//    m_measureTimeInPoint = from.m_measureTimeInPoint;
-//    m_measureCountInPoint = from.m_measureCountInPoint;
-
-//    m_rangeType = from.m_rangeType;
-//    m_lowLimitRange = from.m_lowLimitRange;
-//    m_highLimitRange = from.m_highLimitRange;
-
-//    m_showOutputRangeColumn = from.m_showOutputRangeColumn;
-//    m_considerCorrectOutput = from.m_considerCorrectOutput;
+    m_measureKind = from.m_measureKind;
+    m_measureTimeout = from.m_measureTimeout;
+    m_outputSignalType = from.m_outputSignalType;
 
     return *this;
 }
@@ -216,6 +213,29 @@ int LinearityPointBase::append(LinearityPoint* point)
 
         m_pointList.append(point);
         index = m_pointList.count() - 1;
+
+    m_mutex.unlock();
+
+    return index;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int LinearityPointBase::insert(int index, LinearityPoint* point)
+{
+    if (index < 0 || index > count())
+    {
+        return -1;
+    }
+
+    if (point == nullptr)
+    {
+        return -1;
+    }
+
+    m_mutex.lock();
+
+        m_pointList.insert(index, point);
 
     m_mutex.unlock();
 
@@ -510,20 +530,20 @@ void LinearityOption::load()
 
     m_pointBase.load();
 
-    m_errorValue = s.value( QString("%1errorValue").arg(LINEARITY_OPTIONS_KEY), 0.5).toDouble();
-    m_errorCtrl = s.value( QString("%1errorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
-    m_errorType  = s.value( QString("%1errorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-    m_errorCalcBySCO  = s.value( QString("%1errorCalcBySCO ").arg(LINEARITY_OPTIONS_KEY), false).toBool();
+    m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.5).toDouble();
+    m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
+    m_errorType  = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
+    m_errorCalcBySCO  = s.value( QString("%1ErrorCalcBySCO ").arg(LINEARITY_OPTIONS_KEY), false).toBool();
 
-    m_measureTimeInPoint = s.value( QString("%1measureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
-    m_measureCountInPoint = s.value( QString("%1measureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
+    m_measureTimeInPoint = s.value( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
+    m_measureCountInPoint = s.value( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
 
-    m_rangeType = s.value( QString("%1rangeType").arg(LINEARITY_OPTIONS_KEY), LO_RANGE_TYPE_MANUAL).toInt();
-    m_lowLimitRange = s.value( QString("%1lowLimitRange").arg(LINEARITY_OPTIONS_KEY), 0).toDouble();
-    m_highLimitRange = s.value( QString("%1highLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
+    m_rangeType = s.value( QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), LO_RANGE_TYPE_MANUAL).toInt();
+    m_lowLimitRange = s.value( QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), 0).toDouble();
+    m_highLimitRange = s.value( QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
 
-    m_showOutputRangeColumn = s.value( QString("%1showOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), false).toBool();
-    m_considerCorrectOutput = s.value( QString("%1considerCorrectOutput").arg(LINEARITY_OPTIONS_KEY), false).toBool();
+    m_showOutputRangeColumn = s.value( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), false).toBool();
+    m_considerCorrectOutput = s.value( QString("%1ConsiderCorrectOutput").arg(LINEARITY_OPTIONS_KEY), false).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -534,20 +554,20 @@ void LinearityOption::save()
 
     m_pointBase.save();
 
-    s.setValue( QString("%1errorValue").arg(LINEARITY_OPTIONS_KEY), m_errorValue);
-    s.setValue( QString("%1errorCtrl").arg(LINEARITY_OPTIONS_KEY), m_errorCtrl);
-    s.setValue( QString("%1errorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
-    s.setValue( QString("%1errorCalcBySCO").arg(LINEARITY_OPTIONS_KEY), m_errorCalcBySCO);
+    s.setValue( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), m_errorValue);
+    s.setValue( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), m_errorCtrl);
+    s.setValue( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
+    s.setValue( QString("%1ErrorCalcBySCO").arg(LINEARITY_OPTIONS_KEY), m_errorCalcBySCO);
 
-    s.setValue( QString("%1measureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
-    s.setValue( QString("%1measureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
+    s.setValue( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
+    s.setValue( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
 
-    s.setValue( QString("%1rangeType").arg(LINEARITY_OPTIONS_KEY), m_rangeType);
-    s.setValue( QString("%1lowLimitRange").arg(LINEARITY_OPTIONS_KEY), m_lowLimitRange);
-    s.setValue( QString("%1highLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
+    s.setValue( QString("%1RangeType").arg(LINEARITY_OPTIONS_KEY), m_rangeType);
+    s.setValue( QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), m_lowLimitRange);
+    s.setValue( QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
-    s.setValue( QString("%1showOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
-    s.setValue( QString("%1considerCorrectOutput").arg(LINEARITY_OPTIONS_KEY), m_considerCorrectOutput);
+    s.setValue( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
+    s.setValue( QString("%1ConsiderCorrectOutput").arg(LINEARITY_OPTIONS_KEY), m_considerCorrectOutput);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

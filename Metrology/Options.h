@@ -6,6 +6,16 @@
 #include <assert.h>
 #include "Measure.h"
 
+
+// ==============================================================================================
+
+#define                     WINDOW_GEOMETRY_OPTIONS_KEY		"Options/Window/"
+
+// ----------------------------------------------------------------------------------------------
+
+void restoreWindowPosition(QWidget* pWidget);
+void saveWindowPosition(QWidget* pWidget);
+
 // ==============================================================================================
 
 #define						TOOLBAR_OPTIONS_KEY		"Options/ToolBar/"
@@ -95,6 +105,7 @@ public:
     bool                    isEmpty() { return count() == 0; }
 
     int                     append(LinearityPoint* point);
+    int                     insert(int index, LinearityPoint* point);
 
     bool                    removeAt(int index);
     bool                    removeAt(LinearityPoint* point);

@@ -93,6 +93,15 @@ void CalibratorManagerDialog::createInterfaceItems()
     mainLayout->addWidget(m_pErrorsButton);
     mainLayout->addWidget(m_pRemoteControlCheck);
 
+    m_pErrorDialog = new QDialog(this);
+
+    QVBoxLayout *errorLayout = new QVBoxLayout;
+
+    m_pErrorList = new QTextEdit( );
+    errorLayout->addWidget(m_pErrorList);
+
+    m_pErrorDialog->setLayout(errorLayout);
+
     setLayout(mainLayout);
 }
 
@@ -102,11 +111,8 @@ void CalibratorManagerDialog::initInterfaceItems()
 {
     // init elements of interface
     //
-    QDesktopWidget desktop;
-    int width = desktop.geometry().width();
-    setGeometry(width - 210, 0, 190, 350);
-
-    setWindowFlags(Qt::Drawer | Qt::MSWindowsFixedSizeDialogHint | Qt::WindowStaysOnTopHint);
+    setWindowFlags(Qt::Drawer);
+    setFixedSize(190,350);
 
     QFont* font = new QFont("Arial", 16, 2);
 
@@ -132,6 +138,8 @@ void CalibratorManagerDialog::initInterfaceItems()
     m_pSetValueButton->setDefault(true);
     m_pSetValueButton->setFont(*font);
 
+    delete font;
+
     for (int m = 0; m < CALIBRATOR_MODE_COUNT; m++)
     {
         m_pModeList->addItem( CalibratorMode[m] );
@@ -151,16 +159,16 @@ void CalibratorManagerDialog::initInterfaceItems()
         default:                        m_pUnitList->setCurrentIndex(CALIBRATOR_UNIT_UNKNOWN);         break;
     }
 
-    m_pErrorList = new QTextEdit;
-    m_pErrorList->setMinimumSize(700, 50);
-    m_pErrorList->setReadOnly(true);
-
     m_pRemoteControlCheck->setLayoutDirection(Qt::RightToLeft);
     m_pRemoteControlCheck->setChecked(true);
     if (m_pCalibrator->getType() == CALIBRATOR_TYPE_TRXII)
     {
         m_pRemoteControlCheck->setVisible(false);
     }
+
+    m_pErrorDialog->setWindowFlags(Qt::Drawer);
+    m_pErrorDialog->setMinimumSize(700, 50);
+    m_pErrorList->setReadOnly(true);
 
     connect(m_pCalibrator, &Calibrator::connected, this, &CalibratorManagerDialog::onConnect, Qt::QueuedConnection);
     connect(m_pCalibrator, &Calibrator::disconnected, this, &CalibratorManagerDialog::onDisconnect, Qt::QueuedConnection);
@@ -260,7 +268,7 @@ void CalibratorManagerDialog::onConnect()
     QString title = QString("c:%1 ").arg(m_pCalibrator->getIndex() + 1) + m_pCalibrator->getName() + QString(" %1").arg(m_pCalibrator->getSerialNo()) ;
 
     setWindowTitle( title );
-    m_pErrorList->setWindowTitle(title + tr(" : List errors"));
+    m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -272,10 +280,10 @@ void CalibratorManagerDialog::onDisconnect()
         return;
     }
 
-    QString title = QString("c:%1 - Disconnected").arg(m_pCalibrator->getIndex() + 1);
+    QString title = QString("c:%1 (%2) - Disconnected").arg(m_pCalibrator->getIndex() + 1).arg(m_pCalibrator->getPortName()) ;
 
     setWindowTitle(title);
-    m_pErrorList->setWindowTitle(title + tr(" : List errors"));
+    m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
 
     enableInterfaceItems(false);
 }
@@ -392,13 +400,7 @@ void CalibratorManagerDialog::onUnitList(int unit)
 
 void CalibratorManagerDialog::onErrorList()
 {
-    if (m_pErrorList == nullptr)
-    {
-        return;
-    }
-
-    m_pErrorList->show();
-    m_pErrorList->activateWindow();
+    m_pErrorDialog->show();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

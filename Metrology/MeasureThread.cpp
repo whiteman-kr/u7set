@@ -70,7 +70,3 @@ void MeasureThread::run()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::eventFilter(QObject *object, QEvent *event)
-{
-    return QThread::eventFilter(object, event);
-}

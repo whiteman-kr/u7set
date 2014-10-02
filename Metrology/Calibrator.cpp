@@ -16,7 +16,6 @@ Calibrator::Calibrator(QObject *parent) :
 
 Calibrator::~Calibrator()
 {
-    emit finished();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -135,7 +134,7 @@ bool Calibrator::getIDN()
 
     if (m_name.isEmpty() == true)
     {
-        m_lastError = tr("Calibrator error! Serial port: %1, Function: %2, Error description: Don't defined сalibration name").arg(m_portName).arg(__FUNCTION__);
+        m_lastError = tr("Calibrator error! Serial port: %1, Function: %2, Error description: Don't defined calibration name").arg(m_portName).arg(__FUNCTION__);
         qDebug(m_lastError.toLocal8Bit());
         emit error_control(m_lastError);
         return false;
@@ -188,6 +187,8 @@ bool Calibrator::openPort()
         emit error_control(m_lastError);
         return false;
     }
+
+    enableWaitResponse(true);
 
     return true;
 }
@@ -268,6 +269,12 @@ bool Calibrator::recv()
     m_timeout = 0;
     while(m_timeout < CALIBRATOR_TIMEOUT)
     {
+        if (m_enableWaitResponse == false)
+        {
+            m_timeout = CALIBRATOR_TIMEOUT;
+            break;
+        }
+
         while (m_port.waitForReadyRead(CALIBRATOR_TIMEOUT_STEP))
         {
             requestData += m_port.readAll();
@@ -1046,6 +1053,8 @@ void Calibrator::convert(double& val, int mode, int order)
 
 void Calibrator::close()
 {
+    enableWaitResponse(false);
+
     if (m_port.isOpen() == true)
     {
         setRemoteControl(false);

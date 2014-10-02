@@ -39,7 +39,7 @@ public:
     explicit OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent = 0);
     ~OptionsPointsDialog();
 
-    LinearityOption m_linearity;
+    LinearityOption     m_linearity;
 
 private:
 
@@ -48,8 +48,8 @@ private:
     QLabel*             m_rangeTypeLabel = nullptr;
     QComboBox*          m_rangeTypeList = nullptr;
 
-    QLabel*             m_valueLabel = nullptr;
-    QLineEdit*          m_valueEdit = nullptr;
+    QLabel*             m_pointCountLabel = nullptr;
+    QLineEdit*          m_pointCountEdit = nullptr;
     QLabel*             m_lowRangeLabel = nullptr;
     QLineEdit*          m_lowRangeEdit = nullptr;
     QLabel*             m_highRangeLabel = nullptr;
@@ -65,10 +65,12 @@ private:
 
     QTableWidget*       m_pointList = nullptr;
 
+    bool                m_updatingList;
 
     void                SetHeaderList();
     void                updateRangeType();
     void                updateList();
+    void                clearList();
 
 
 protected:
@@ -89,6 +91,9 @@ private slots:
     void                onDownPoint();
     void                onRangeType(int type);
     void                onAutomaticCalculatePoints();
+
+    void                cellChanged(int,int);
+    void                currentCellChanged(int,int,int,int);
 };
 
 // ==============================================================================================
