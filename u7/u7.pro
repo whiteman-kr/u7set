@@ -147,8 +147,6 @@ FORMS    += \
 RESOURCES += \
 	Resources.qrc
 
-include(../qtpropertybrowser/src/qtpropertybrowser.pri)
-
 OTHER_FILES += \
 	../Proto/proto_compile.bat \
 	../Proto/serialization.proto \
@@ -239,7 +237,7 @@ DEPENDPATH += ../VFrame30
 
 # QtPropertyBrowser
 #
-#include(../QtPropertyBrowser/src/qtpropertybrowser.pri)
+include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 
 # Visual Leak Detector

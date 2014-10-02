@@ -5,7 +5,7 @@ DROP FUNCTION getfilelist(integer, text);
 -- 2. Если файл взят на редактирование (CheckedOut) и был хоть один раз зарегистрирован он тоже включается (состояние CheckedOut).
 -- 3 Если файл еще не был зарегистрирован, он включается в список только если пользователь является владельцем файла или пользователь администратор (состояние CheckedOut).
 -- В  функции два зхапроса, объедененных через UNION,  в первом запросе выполняется LEFT JOIN с таблицей Changeset,
--- воторой запрос объеденяется с таблицей CheckeOut, bp 'nb[ hfpys[ nf,kbw ,thtnmcz UserID (Кто делал CheckIn и кто делал CheckOut)
+-- воторой запрос объеденяется с таблицей CheckeOut, из этих разных таблиц береться UserID (Кто делал CheckIn и кто делал CheckOut)
 --
 CREATE OR REPLACE FUNCTION get_file_list(user_id integer, parent_id integer, file_mask text)
 RETURNS

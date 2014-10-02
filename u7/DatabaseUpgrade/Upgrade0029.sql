@@ -10,6 +10,7 @@ DECLARE
 	checked_out boolean;
 	action int;
 	user_id int;
+	return_value ObjectState;
 BEGIN
 	checked_out := (SELECT count(*) > 0 FROM CheckOut WHERE FileID = file_id);
 
@@ -34,8 +35,8 @@ BEGIN
 					CS.ChangesetID = FI.ChangesetID);
 	END IF;
 
-
-	RETURN ROW(file_id, (SELECT count(*) = 0 FROM File WHERE FileID = file_id), checked_out, action, user_id, 0);
+	return_value := ROW(file_id, (SELECT count(*) = 0 FROM File WHERE FileID = file_id), checked_out, action, user_id, 0);
+	RETURN return_value;
 END
 $BODY$
 LANGUAGE plpgsql;
@@ -56,6 +57,7 @@ DECLARE
 	exists int;
 	newfileid int;
 	newfileinstanceid uuid;
+	return_value ObjectState;
 BEGIN
 	SELECT count(*) INTO exists FROM File WHERE Name = file_name AND ParentID = parent_id AND Deleted = false;
 	IF (exists > 0) THEN
@@ -73,7 +75,8 @@ BEGIN
 
 	UPDATE File SET CheckedOutInstanceID = newfileinstanceid WHERE FileID = newfileid;
 
-	RETURN ROW(newfileid, FALSE, TRUE, 1, user_id, 0);
+	return_value := ROW(newfileid, FALSE, TRUE, 1, user_id, 0);
+	RETURN return_value;
 END
 $BODY$
 LANGUAGE plpgsql;
@@ -355,3 +358,134 @@ BEGIN
 END
 $BODY$
 LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------------------------
+--
+--							dbfile struct
+--
+-------------------------------------------------------------------------------
+CREATE TYPE dbfile AS (
+	fileid integer,
+	deleted boolean,			-- File or signal was deleted from the table, so such ID is not exists anymore
+	name text,
+	parentid integer,
+	changesetid integer,
+	created timestamp with time zone,
+	size integer,
+	data bytea,
+	checkedout boolean,
+	checkouttime timestamp with time zone,
+	userid integer,
+	action integer
+);
+
+
+-------------------------------------------------------------------------------
+--
+--							get_latest_file_version
+--
+-------------------------------------------------------------------------------
+DROP FUNCTION get_latest_file_version(integer, integer);
+
+CREATE OR REPLACE FUNCTION get_latest_file_version(IN user_id integer, IN file_id integer)
+  RETURNS SETOF dbfile AS
+$BODY$
+DECLARE
+	is_checked_out boolean;
+BEGIN
+	SELECT true INTO is_checked_out FROM CheckOut WHERE CheckOut.FileID = file_id;
+
+	IF (is_checked_out = TRUE AND ((SELECT CO.UserID FROM CheckOut CO WHERE CO.FileID = file_id) = user_id OR is_admin(user_id) = TRUE)) THEN
+		RETURN QUERY
+			SELECT
+				F.FileID AS FileID,
+				F.Deleted AS Deleted,
+				F.Name AS Name,
+				F.ParentID AS ParentID,
+				0,
+				F.Created AS Created,
+				length(FI.Data) AS Size,
+				FI.Data as Data,
+				TRUE,	-- Checked_out
+				CO.Time As ChechOutOrInTime,	-- CheckOutTime
+				CO.UserID AS UserID,
+				FI.Action AS Action
+			FROM
+				File F, FileInstance FI, Checkout CO
+			WHERE
+				F.FileID = file_id AND
+				FI.FileInstanceID = F.CheckedOutInstanceID AND
+				CO.FileID = file_id AND
+				(user_id = CO.UserID OR (SELECT is_admin(user_id)) = TRUE);
+	ELSE
+		RETURN QUERY
+			SELECT
+				F.FileID AS FileID,
+				F.Deleted AS Deleted,
+				F.Name AS Name,
+				F.ParentID AS ParentID,
+				CS.ChangesetID,
+				F.Created AS Created,
+				length(FI.Data) AS Size,
+				FI.Data as Data,
+				FALSE,	-- Checked_in
+				CS.Time As ChechOutOrInTime,	-- CheckIn time
+				CS.UserID AS UserID,
+				FI.Action AS Action
+			FROM
+				File F, FileInstance FI, Changeset CS
+			WHERE
+				F.FileID = file_id AND
+				FI.FileInstanceID = F.CheckedInInstanceID AND
+				CS.ChangesetID = FI.ChangesetID;
+	END IF;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
+
+-------------------------------------------------------------------------------
+--
+--							get_latest_file_tree_version
+--
+-------------------------------------------------------------------------------
+
+--DROP FUNCTION get_latest_file_tree_version(integer, integer);
+
+CREATE OR REPLACE FUNCTION get_latest_file_tree_version(IN user_id integer, IN file_id integer)
+	RETURNS SETOF DbFile AS
+$BODY$
+DECLARE
+	is_checked_out boolean;
+	file_ids integer[];
+	fid integer;
+	file_result DbFile;
+BEGIN
+	-- Get all files list
+	file_ids := array(
+					SELECT SQ.FileID FROM (
+						(WITH RECURSIVE files(FileID, ParentID) AS (
+								SELECT FileID, ParentID FROM get_file_list(user_id, file_id, '%')
+							UNION ALL
+								SELECT FL.FileID, FL.ParentID FROM Files, get_file_list(user_id, files.FileID, '%') FL
+							)
+							SELECT * FROM files)
+						UNION
+							SELECT FileID, ParentID FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = file_id), '%') WHERE FileID = file_id
+					) SQ
+					ORDER BY SQ.FileID
+				);
+
+	-- Read files latest version
+	FOREACH fid IN ARRAY file_ids
+	LOOP
+		file_result := get_latest_file_version(user_id, fid);
+		RETURN NEXT file_result;
+	END LOOP;
+
+	RETURN;
+END
+$BODY$
+LANGUAGE plpgsql;
+

@@ -34,6 +34,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
 
 	connect(this, &DbController::signal_getLatestVersion, m_worker, &DbWorker::slot_getLatestVersion);
+	connect(this, &DbController::signal_getLatestTreeVersion, m_worker, &DbWorker::slot_getLatestTreeVersion);
 
 	connect(this, &DbController::signal_getWorkcopy, m_worker, &DbWorker::slot_getWorkcopy);
 	connect(this, &DbController::signal_setWorkcopy, m_worker, &DbWorker::slot_setWorkcopy);
@@ -467,6 +468,33 @@ bool DbController::getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFi
 	return true;
 }
 
+bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr || file.fileId() == -1)
+	{
+		assert(out != nullptr);
+		assert(file.fileId() != -1);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getLatestTreeVersion(file, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting files"));
+	return out;
+}
+
 bool DbController::getWorkcopy(const std::vector<DbFileInfo>& files,
 							   std::vector<std::shared_ptr<DbFile>>* out,
 							   QWidget* parentWidget)
@@ -701,22 +729,6 @@ bool DbController::addDeviceObject(Hardware::DeviceObject* device, int parentId,
 		return false;
 	}
 
-	// Save system to binary file
-	//
-	QByteArray data;
-	bool result = device->Save(data);
-
-	if (result == false)
-	{
-		assert(result);
-		return false;
-	}
-
-	DbFile file;
-	file.swapData(data);
-
-	QString fileExtension(device->fileExtension());
-
 	// Init progress and check availability
 	//
 	bool ok = initOperation();
@@ -727,11 +739,10 @@ bool DbController::addDeviceObject(Hardware::DeviceObject* device, int parentId,
 
 	// Emit signal end wait for complete
 	//
-	emit signal_addDeviceObject(&file, parentId, fileExtension);
+	emit signal_addDeviceObject(device, parentId);
 
-	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
+	ok = waitForComplete(parentWidget, tr("Adding device object"));
 
-	device->setFileInfo(file);
 
 	return ok;
 }
@@ -769,6 +780,86 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 	return true;
 }
 
+bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::shared_ptr<Hardware::DeviceObject>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (file.fileId() == -1 || out == nullptr)
+	{
+		assert(file.fileId() >= 0);
+		assert(out != nullptr);
+		return false;
+	}
+
+	// 1. Get files
+	//
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	std::list<std::shared_ptr<DbFile>> files;
+
+	emit signal_getLatestTreeVersion(file, &files);
+
+	ok = waitForComplete(parentWidget, tr("Getting device"));
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// 2.1 read all items
+	//
+	std::map<int, std::shared_ptr<Hardware::DeviceObject>> objectsMap;	// key is fileId
+
+	for (const std::shared_ptr<DbFile>& f : files)
+	{
+		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
+		objectsMap[object->fileInfo().fileId()] = object;
+	}
+
+	// 2.2 Set child to items
+	//
+	bool rootWasFound = false;
+	for (const auto& pair : objectsMap)
+	{
+		// Get parentId
+		//
+		int fileId = pair.second->fileInfo().fileId();
+		int parentId = pair.second->fileInfo().parentId();
+
+		auto parentIterator = objectsMap.find(parentId);
+		if (parentIterator == objectsMap.end())
+		{
+			// Apparently it is the root item, so, we have to check it and set flag that we already found it
+			//
+			assert(rootWasFound == false);
+			assert(file.fileId() == fileId);
+
+			*out = objectsMap[fileId];	// !!! HOW TO USE parentIterator->second; ?????
+			rootWasFound = true;
+
+			continue;
+		}
+
+		(*parentIterator).second->addChild(pair.second);
+	}
+
+	if (rootWasFound == false)
+	{
+		assert(rootWasFound == true);
+		return false;
+	}
+
+	return ok;
+}
 
 bool DbController::getSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
 {
@@ -1057,6 +1148,11 @@ int DbController::alFileId() const
 int DbController::hcFileId() const
 {
 	return m_worker->hcFileId();
+}
+
+int DbController::hpFileId() const
+{
+	return m_worker->hpFileId();
 }
 
 int DbController::wvsFileId() const

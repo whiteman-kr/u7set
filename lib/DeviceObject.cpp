@@ -28,12 +28,27 @@ namespace Hardware
 	// DeviceObject
 	//
 	//
-	DeviceObject::DeviceObject()
+	DeviceObject::DeviceObject(bool preset /*= false*/) :
+		m_preset(preset)
 	{
 	}
 
 	DeviceObject::~DeviceObject()
 	{
+	}
+
+	DeviceObject* DeviceObject::fromDbFile(const DbFile& file)
+	{
+		DeviceObject* object = DeviceObject::Create(file.data());
+
+		if (object == nullptr)
+		{
+			assert(object != nullptr);
+			return nullptr;
+		}
+
+		object->setFileInfo(file);
+		return object;
 	}
 
 	bool DeviceObject::SaveData(Proto::Envelope* message) const
@@ -48,6 +63,14 @@ namespace Hardware
 		Proto::Write(pMutableDeviceObject->mutable_uuid(), m_uuid);
 		Proto::Write(pMutableDeviceObject->mutable_strid(), m_strId);
 		Proto::Write(pMutableDeviceObject->mutable_caption(), m_caption);
+
+		if (m_preset == true)
+		{
+			pMutableDeviceObject->set_preset(m_preset);
+
+			pMutableDeviceObject->set_presetroot(m_presetRoot);
+			Proto::Write(pMutableDeviceObject->mutable_presetname(), m_presetName);
+		}
 
 		return true;
 	}
@@ -65,6 +88,23 @@ namespace Hardware
 		m_uuid = Proto::Read(deviceobject.uuid());
 		m_strId = Proto::Read(deviceobject.strid());
 		m_caption = Proto::Read(deviceobject.caption());
+
+		if (deviceobject.has_preset() == true && deviceobject.preset() == true)
+		{
+			m_preset = deviceobject.preset();
+
+			assert(deviceobject.has_presetroot() == true);
+			if (deviceobject.has_presetroot() == true)
+			{
+				m_presetRoot = deviceobject.presetroot();
+			}
+
+			assert(deviceobject.has_presetname());
+			if (deviceobject.has_presetname() == true)
+			{
+				m_presetName = Proto::Read(deviceobject.presetname());
+			}
+		}
 
 		return true;
 	}
@@ -110,6 +150,12 @@ namespace Hardware
 		assert(index >= 0 && index < sizeof(DeviceObjectExtensions) / sizeof(DeviceObjectExtensions[0]));
 
 		QString result = QString::fromWCharArray(DeviceObjectExtensions[index]);
+		return result;
+	}
+
+	QString DeviceObject::fileExtension(DeviceType device)
+	{
+		QString result = QString::fromWCharArray(DeviceObjectExtensions[static_cast<int>(device)]);
 		return result;
 	}
 
@@ -214,15 +260,40 @@ namespace Hardware
 		m_fileInfo = value;
 	}
 
+	bool DeviceObject::preset() const
+	{
+		return m_preset;
+	}
 
+	bool DeviceObject::presetRoot() const
+	{
+		assert(m_preset == true);
+		return m_presetRoot;
+	}
+
+	void DeviceObject::setPresetRoot(bool value)
+	{
+		m_presetRoot = value;
+	}
+
+	const QString& DeviceObject::presetName() const
+	{
+		assert(m_preset == true);
+		return m_presetName;
+	}
+
+	void DeviceObject::setPresetName(const QString& value)
+	{
+		m_presetName = value;
+	}
 
 	//
 	//
 	// DeviceRoot
 	//
 	//
-	DeviceRoot::DeviceRoot() :
-		DeviceObject()
+	DeviceRoot::DeviceRoot(bool preset /*= false*/) :
+		DeviceObject(preset)
 	{
 	}
 
@@ -241,8 +312,8 @@ namespace Hardware
 	// DeviceSystem
 	//
 	//
-	DeviceSystem::DeviceSystem() :
-		DeviceObject()
+	DeviceSystem::DeviceSystem(bool preset /*= false*/) :
+		DeviceObject(preset)
 	{
 	}
 
@@ -315,8 +386,8 @@ namespace Hardware
 	// DeviceRack
 	//
 	//
-	DeviceRack::DeviceRack() :
-		DeviceObject()
+	DeviceRack::DeviceRack(bool preset /*= false*/) :
+		DeviceObject(preset)
 	{
 	}
 
@@ -387,8 +458,8 @@ namespace Hardware
 	// DeviceChassis
 	//
 	//
-	DeviceChassis::DeviceChassis() :
-		DeviceObject()
+	DeviceChassis::DeviceChassis(bool preset /*= false*/) :
+		DeviceObject(preset)
 	{
 	}
 
@@ -459,8 +530,8 @@ namespace Hardware
 	// DeviceModule
 	//
 	//
-	DeviceModule::DeviceModule() :
-		DeviceObject()
+	DeviceModule::DeviceModule(bool preset /*= false*/) :
+		DeviceObject(preset)
 	{
 	}
 
@@ -532,8 +603,8 @@ namespace Hardware
 	// DeviceController
 	//
 	//
-	DeviceController::DeviceController() :
-		DeviceObject()
+	DeviceController::DeviceController(bool preset /*= false*/) :
+		DeviceObject(preset)
 	{
 	}
 
@@ -604,8 +675,8 @@ namespace Hardware
 	// DeviceDiagSignal
 	//
 	//
-	DeviceDiagSignal::DeviceDiagSignal() :
-		DeviceObject()
+	DeviceDiagSignal::DeviceDiagSignal(bool preset /*= false*/) :
+		DeviceObject(preset)
 	{
 	}
 

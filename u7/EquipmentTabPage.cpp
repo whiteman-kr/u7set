@@ -3,6 +3,7 @@
 #include "../include/DbController.h"
 #include "Settings.h"
 #include "CheckInDialog.h"
+#include <QtTreePropertyBrowser>
 
 //
 //
@@ -14,10 +15,12 @@ EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget
 	QAbstractItemModel(parent),
 	m_dbController(dbcontroller),
 	m_parentWidget(parentWidget),
-	m_root(std::make_shared<Hardware::DeviceRoot>())
+	m_configuration(std::make_shared<Hardware::DeviceRoot>()),
+	m_preset(std::make_shared<Hardware::DeviceRoot>())
 {
+	m_root = m_configuration;	// Edit configuration default mode
+
 	assert(dbcontroller);
-	assert(m_root.get() != nullptr);
 
 	connect(dbcontroller, &DbController::projectOpened, this, &EquipmentModel::projectOpened);
 	connect(dbcontroller, &DbController::projectClosed, this, &EquipmentModel::projectClosed);
@@ -152,19 +155,17 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				{
 					if (device->fileInfo().state() == VcsState::CheckedOut)
 					{
-						/*QString state = QString("%1  %2")
-								.arg(device->fileInfo().state().text())
-								.arg(device->fileInfo().action().text());*/
-
 						QString state = device->fileInfo().action().text();
-
 						v.setValue<QString>(state);
 					}
 				}
 				break;
 
 			case ObjectUserColumn:
-				v.setValue<qint32>(device->fileInfo().userId());
+				if (device->fileInfo().state() == VcsState::CheckedOut)
+				{
+					v.setValue<qint32>(device->fileInfo().userId());
+				}
 				break;
 
 			default:
@@ -599,12 +600,10 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& /*rowList*/)
 	// read all childer for HC file
 	//
 	beginResetModel();
-
-	m_root = std::make_shared<Hardware::DeviceRoot>();
-	m_root->fileInfo().setFileId(dbController()->hcFileId());
-
+	m_root->deleteAllChildren();
 	endResetModel();
 
+	return;
 }
 
 Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
@@ -643,12 +642,10 @@ const Hardware::DeviceObject* EquipmentModel::deviceObject(const QModelIndex& in
 
 void EquipmentModel::projectOpened()
 {
-	// read all childer for HC file
-	//
 	beginResetModel();
 
-	m_root = std::make_shared<Hardware::DeviceRoot>();
-	m_root->fileInfo().setFileId(dbController()->hcFileId());
+	m_configuration->fileInfo().setFileId(dbController()->hcFileId());
+	m_preset->fileInfo().setFileId(dbController()->hpFileId());
 
 	endResetModel();
 
@@ -660,9 +657,29 @@ void EquipmentModel::projectClosed()
 	// Release all children
 	//
 	beginResetModel();
-	m_root = std::make_shared<Hardware::DeviceRoot>();
+
+	m_configuration->deleteAllChildren();
+	m_preset->deleteAllChildren();
+
 	endResetModel();
+
 	return;
+}
+
+void EquipmentModel::switchMode()
+{
+	beginResetModel();
+
+	if (isPresetMode() == true)
+	{
+		m_root = m_configuration;
+	}
+	else
+	{
+		m_root = m_preset;
+	}
+
+	endResetModel();
 }
 
 DbController* EquipmentModel::dbController()
@@ -673,6 +690,16 @@ DbController* EquipmentModel::dbController()
 DbController* EquipmentModel::dbController() const
 {
 	return m_dbController;
+}
+
+bool EquipmentModel::isPresetMode() const
+{
+	return m_root == m_preset;
+}
+
+bool EquipmentModel::isConfigurationMode() const
+{
+	return m_root == m_configuration;
 }
 
 //
@@ -693,6 +720,16 @@ EquipmentView::~EquipmentView()
 {
 }
 
+bool EquipmentView::isPresetMode() const
+{
+	return equipmentModel()->isPresetMode();
+}
+
+bool EquipmentView::isConfigurationMode() const
+{
+	return equipmentModel()->isConfigurationMode();
+}
+
 DbController* EquipmentView::dbController()
 {
 	return m_dbController;
@@ -702,7 +739,16 @@ void EquipmentView::addSystem()
 {
 	// Add new system to the root
 	//
-	std::shared_ptr<Hardware::DeviceObject> system = std::make_shared<Hardware::DeviceSystem>();
+	std::shared_ptr<Hardware::DeviceObject> system;
+
+	if (isConfigurationMode() == true)
+	{
+		system = std::make_shared<Hardware::DeviceSystem>(false);
+	}
+	else
+	{
+		system = std::make_shared<Hardware::DeviceSystem>(true);
+	}
 
 	system->setStrId("SYSTEMID");
 	system->setCaption(tr("System"));
@@ -713,7 +759,16 @@ void EquipmentView::addSystem()
 
 void EquipmentView::addRack()
 {
-	std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>();
+	std::shared_ptr<Hardware::DeviceObject> rack;
+
+	if (isConfigurationMode() == true)
+	{
+		rack = std::make_shared<Hardware::DeviceRack>(false);
+	}
+	else
+	{
+		rack = std::make_shared<Hardware::DeviceRack>(true);
+	}
 
 	rack->setStrId("$(PARENT)_RACKID");
 	rack->setCaption(tr("Rack"));
@@ -724,7 +779,16 @@ void EquipmentView::addRack()
 
 void EquipmentView::addChassis()
 {
-	std::shared_ptr<Hardware::DeviceObject> ñhassis = std::make_shared<Hardware::DeviceChassis>();
+	std::shared_ptr<Hardware::DeviceObject> ñhassis;
+
+	if (isConfigurationMode() == true)
+	{
+		ñhassis = std::make_shared<Hardware::DeviceChassis>(false);
+	}
+	else
+	{
+		ñhassis = std::make_shared<Hardware::DeviceChassis>(true);
+	}
 
 	ñhassis->setStrId("$(PARENT)_CHASSISID");
 	ñhassis->setCaption(tr("Chassis"));
@@ -735,7 +799,16 @@ void EquipmentView::addChassis()
 
 void EquipmentView::addModule()
 {
-	std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>();
+	std::shared_ptr<Hardware::DeviceObject> module;
+
+	if (isConfigurationMode() == true)
+	{
+		module = std::make_shared<Hardware::DeviceModule>(false);
+	}
+	else
+	{
+		module = std::make_shared<Hardware::DeviceModule>(true);
+	}
 
 	module->setStrId("$(PARENT)_MD00");
 	module->setCaption(tr("Module"));
@@ -744,46 +817,236 @@ void EquipmentView::addModule()
 	return;
 }
 
+void EquipmentView::addPresetRack()
+{
+	if (isPresetMode() == true)
+	{
+		std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>(true);
+
+		rack->setStrId("$(PARENT)_RACKID");
+		rack->setCaption(tr("Rack"));
+
+		rack->setPresetRoot(true);
+		rack->setPresetName("PRESET_NAME");
+
+		addDeviceObject(rack);
+	}
+	else
+	{
+		choosePreset(Hardware::DeviceType::Rack);
+	}
+	return;
+}
+
+void EquipmentView::addPresetChassis()
+{
+	if (isPresetMode() == true)
+	{
+		std::shared_ptr<Hardware::DeviceObject> ñhassis = std::make_shared<Hardware::DeviceChassis>(true);
+
+		ñhassis->setStrId("$(PARENT)_CHASSISID");
+		ñhassis->setCaption(tr("Chassis"));
+
+		ñhassis->setPresetRoot(true);
+		ñhassis->setPresetName("PRESET_NAME");
+
+		addDeviceObject(ñhassis);
+	}
+	else
+	{
+		choosePreset(Hardware::DeviceType::Chassis);
+	}
+}
+
+void EquipmentView::addPresetModule()
+{
+	if (isPresetMode() == true)
+	{
+		std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>(true);
+
+		module->setStrId("$(PARENT)_MD00");
+		module->setCaption(tr("Module"));
+
+		module->setPresetRoot(true);
+		module->setPresetName("PRESET_NAME");
+
+		addDeviceObject(module);
+	}
+	else
+	{
+		choosePreset(Hardware::DeviceType::Module);
+	}
+}
+
+void EquipmentView::choosePreset(Hardware::DeviceType type)
+{
+	if (isConfigurationMode() == false)
+	{
+		assert(isConfigurationMode() == true);
+		return;
+	}
+
+	// Get file list
+	//
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = dbController()->getFileList(
+				&fileList,
+				dbController()->hpFileId(),
+				Hardware::DeviceObject::fileExtension(type),
+				this);
+
+	if (ok == false || fileList.empty() == true)
+	{
+		return;
+	}
+
+	// Read files from DB
+	//
+	std::vector<std::shared_ptr<DbFile>> files;
+	files.reserve(fileList.size());
+
+	ok = dbController()->getLatestVersion(fileList, &files, this);
+
+	if (ok == false || files.empty() == true)
+	{
+		return;
+	}
+
+	// Read DeviceObjects from raw data
+	//
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> presets;
+	presets.reserve(files.size());
+
+	for (std::shared_ptr<DbFile>& f : files)
+	{
+		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
+		assert(object != nullptr);
+
+		presets.push_back(object);
+	}
+
+	// Choose preset
+	//
+	QMenu* menu=new QMenu(this);
+
+	for (std::shared_ptr<Hardware::DeviceObject>& p : presets)
+	{
+		QAction* a = new QAction(p->caption(), this);
+
+		connect(a, &QAction::triggered,
+			[this, p]()
+			{
+				addPresetToConfiguration(p->fileInfo());
+			});
+
+		menu->addAction(a);
+	}
+
+	menu->exec(this->cursor().pos());
+
+	return;
+}
+
+void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
+{
+	assert(fileInfo.fileId() != -1);
+	assert(fileInfo.parentId() != -1);
+	assert(fileInfo.parentId() == dbController()->hpFileId());
+
+	// Read all preset tree and add it to the hardware configuration
+	//
+	std::shared_ptr<Hardware::DeviceObject> device;
+
+	bool ok = dbController()->getDeviceTreeLatestVersion(fileInfo, &device, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	if (device->fileInfo().fileId() != fileInfo.fileId() ||
+		device->presetRoot() == false)
+	{
+		assert(device->fileInfo().fileId() == fileInfo.fileId());
+		assert(device->presetRoot() == true);
+		return;
+	}
+
+	// Reset fileInfo in all objects
+	//
+
+	// Add new device
+	//
+
+	addDeviceObject(device);
+	return;
+}
+
 void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object)
 {
-	QModelIndexList selected = selectionModel()->selectedRows();
+	if (object == nullptr)
+	{
+		assert(object != nullptr);
+		return;
+	}
+
+	if (isPresetMode() == true && object->preset() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	Hardware::DeviceObject* parentObject = nullptr;
 	QModelIndex parentIndex;	// Currently it is root;
 
-	if (selected.size() > 1)
+	if (isPresetMode() == true &&
+		object->preset() == true &&
+		object->presetRoot() == true)
 	{
-		// Don't know after which item insrt new object
-		//
-		return;
-	}
-
-	if (selected.empty() == false)
-	{
-		parentIndex = selected[0];
-	}
-
-	// --
-	//
-	Hardware::DeviceObject* parentObject = equipmentModel()->deviceObject(parentIndex);
-	assert(parentObject);
-
-	if (parentObject->deviceType() > object->deviceType())
-	{
-		assert(parentObject->deviceType() <= object->deviceType());
-		return;
-	}
-
-	if (parentObject->deviceType() == object->deviceType())
-	{
-		// add the same item to the end of the the parent
-		//
-		parentIndex = parentIndex.parent();
 		parentObject = equipmentModel()->deviceObject(parentIndex);
+	}
+	else
+	{
+		QModelIndexList selected = selectionModel()->selectedRows();
 
-		assert(parentObject->deviceType() < object->deviceType());
+		if (selected.size() > 1)
+		{
+			// Don't know after which item insrt new object
+			//
+			return;
+		}
+
+		if (selected.empty() == false)
+		{
+			parentIndex = selected[0];
+		}
+
+		// --
+		//
+		parentObject = equipmentModel()->deviceObject(parentIndex);
+		assert(parentObject);
+
+		if (parentObject->deviceType() > object->deviceType())
+		{
+			assert(parentObject->deviceType() <= object->deviceType());
+			return;
+		}
+
+		if (parentObject->deviceType() == object->deviceType())
+		{
+			// add the same item to the end of the the parent
+			//
+			parentIndex = parentIndex.parent();
+			parentObject = equipmentModel()->deviceObject(parentIndex);
+
+			assert(parentObject->deviceType() < object->deviceType());
+		}
 	}
 
 	// Add device to DB
 	//
+	assert(parentObject != nullptr);
+
 	bool result = dbController()->addDeviceObject(object.get(), parentObject->fileInfo().fileId(), this);
 
 	if (result == false)
@@ -878,6 +1141,13 @@ EquipmentModel* EquipmentView::equipmentModel()
 	return result;
 }
 
+EquipmentModel* EquipmentView::equipmentModel() const
+{
+	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
+	assert(result);
+	return result;
+}
+
 
 //
 //
@@ -893,6 +1163,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	// Controls
 	//
 
+
 	// Equipment View
 	//
 	m_equipmentView = new EquipmentView(dbcontroller);
@@ -907,30 +1178,44 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	m_equipmentView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
-	m_equipmentView->addAction(m_addSystemAction);
-	m_equipmentView->addAction(m_addRackAction);
-	m_equipmentView->addAction(m_addChassisAction);
-	m_equipmentView->addAction(m_addModuleAction);
+	// -----------------
+	m_equipmentView->addAction(m_addObjectAction);
 
+		m_addObjectMenu->addAction(m_addSystemAction);
+		m_addObjectMenu->addAction(m_addRackAction);
+		m_addObjectMenu->addAction(m_addChassisAction);
+		m_addObjectMenu->addAction(m_addModuleAction);
+
+	m_equipmentView->addAction(m_addPresetAction);
+
+		m_addPresetMenu->addAction(m_addPresetRackAction);
+		m_addPresetMenu->addAction(m_addPresetChassisAction);
+		m_addPresetMenu->addAction(m_addPresetModuleAction);
+
+	// -----------------
 	m_equipmentView->addAction(m_SeparatorAction1);
 	m_equipmentView->addAction(m_deleteObjectAction);
-
+	// -----------------
 	m_equipmentView->addAction(m_SeparatorAction2);
 	m_equipmentView->addAction(m_checkOutAction);
 	m_equipmentView->addAction(m_checkInAction);
 	m_equipmentView->addAction(m_undoChangesAction);
 	m_equipmentView->addAction(m_refreshAction);
+	// -----------------
+	m_equipmentView->addAction(m_SeparatorAction3);
+	m_equipmentView->addAction(m_switchMode);
 
 	// Property View
 	//
-	m_propertyView = new QTextEdit();
+	//m_propertyView = new QTextEdit();
+	m_propertyBrowser = new QtTreePropertyBrowser(this);
 
 	// Splitter
 	//
 	m_splitter = new QSplitter();
 
 	m_splitter->addWidget(m_equipmentView);
-	m_splitter->addWidget(m_propertyView);
+	m_splitter->addWidget(m_propertyBrowser);
 
 	m_splitter->setStretchFactor(0, 2);
 	m_splitter->setStretchFactor(1, 1);
@@ -970,26 +1255,56 @@ EquipmentTabPage::~EquipmentTabPage()
 
 void EquipmentTabPage::CreateActions()
 {
-	m_addSystemAction = new QAction(tr("Add System"), this);
-	m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
-	m_addSystemAction->setEnabled(false);
-	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
+	//-------------------------------
+	m_addObjectMenu = new QMenu(this);
 
-	m_addRackAction = new QAction(tr("Add Rack"), this);
-	m_addRackAction->setStatusTip(tr("Add rack to the configuration..."));
-	m_addRackAction->setEnabled(false);
-	connect(m_addRackAction, &QAction::triggered, m_equipmentView, &EquipmentView::addRack);
+	m_addObjectAction = new QAction(tr("Add Object"), this);
+	m_addObjectAction->setEnabled(true);
+	m_addObjectAction->setMenu(m_addObjectMenu);
 
-	m_addChassisAction = new QAction(tr("Add Chassis"), this);
-	m_addChassisAction->setStatusTip(tr("Add chassis to the configuration..."));
-	m_addChassisAction->setEnabled(false);
-	connect(m_addChassisAction, &QAction::triggered, m_equipmentView, &EquipmentView::addChassis);
+		m_addSystemAction = new QAction(tr("System"), this);
+		m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
+		m_addSystemAction->setEnabled(false);
+		connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
 
-	m_addModuleAction = new QAction(tr("Add Module"), this);
-	m_addModuleAction->setStatusTip(tr("Add module to the configuration..."));
-	m_addModuleAction->setEnabled(false);
-	connect(m_addModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addModule);
+		m_addRackAction = new QAction(tr("Rack"), this);
+		m_addRackAction->setStatusTip(tr("Add rack to the configuration..."));
+		m_addRackAction->setEnabled(false);
+		connect(m_addRackAction, &QAction::triggered, m_equipmentView, &EquipmentView::addRack);
 
+		m_addChassisAction = new QAction(tr("Chassis"), this);
+		m_addChassisAction->setStatusTip(tr("Add chassis to the configuration..."));
+		m_addChassisAction->setEnabled(false);
+		connect(m_addChassisAction, &QAction::triggered, m_equipmentView, &EquipmentView::addChassis);
+
+		m_addModuleAction = new QAction(tr("Module"), this);
+		m_addModuleAction->setStatusTip(tr("Add module to the configuration..."));
+		m_addModuleAction->setEnabled(false);
+		connect(m_addModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addModule);
+
+	//----------------------------------
+	m_addPresetMenu = new QMenu(this);
+
+	m_addPresetAction = new QAction(tr("Add From Preset"), this);
+	m_addPresetAction->setEnabled(true);
+	m_addPresetAction->setMenu(m_addPresetMenu);
+
+		m_addPresetRackAction = new QAction(tr("Preset Rack"), this);
+		m_addPresetRackAction->setStatusTip(tr("Add rack to the preset..."));
+		m_addPresetRackAction->setEnabled(false);
+		connect(m_addPresetRackAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetRack);
+
+		m_addPresetChassisAction = new QAction(tr("Preset Chassis"), this);
+		m_addPresetChassisAction->setStatusTip(tr("Add chassis to the preset..."));
+		m_addPresetChassisAction->setEnabled(false);
+		connect(m_addPresetChassisAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetChassis);
+
+		m_addPresetModuleAction = new QAction(tr("Preset Module"), this);
+		m_addPresetModuleAction->setStatusTip(tr("Add module to the preset..."));
+		m_addPresetModuleAction->setEnabled(false);
+		connect(m_addPresetModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetModule);
+
+	//-----------------------------------
 	m_SeparatorAction1 = new QAction(this);
 	m_SeparatorAction1->setSeparator(true);
 
@@ -1021,7 +1336,26 @@ void EquipmentTabPage::CreateActions()
 	m_refreshAction->setEnabled(false);
 	connect(m_refreshAction, &QAction::triggered, m_equipmentView, &EquipmentView::refreshSelectedDevices);
 
+	m_SeparatorAction3 = new QAction(this);
+	m_SeparatorAction3->setSeparator(true);
+
+	m_switchMode = new QAction(tr("Switch to Preset"), this);
+	m_switchMode->setStatusTip(tr("Switch to preset/configuration mode"));
+	m_switchMode->setEnabled(true);
+	connect(m_switchMode, &QAction::triggered, m_equipmentModel, &EquipmentModel::switchMode);
+	connect(m_switchMode, &QAction::triggered, this, &EquipmentTabPage::modeSwitched);
+
 	return;
+}
+
+bool EquipmentTabPage::isPresetMode() const
+{
+	return m_equipmentModel->isPresetMode();
+}
+
+bool EquipmentTabPage::isConfigurationMode() const
+{
+	return m_equipmentModel->isConfigurationMode();
 }
 
 void EquipmentTabPage::closeEvent(QCloseEvent* e)
@@ -1066,6 +1400,10 @@ void EquipmentTabPage::setActionState()
 	m_checkInAction->setEnabled(false);
 	m_undoChangesAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
+
+	m_addPresetRackAction->setEnabled(false);
+	m_addPresetChassisAction->setEnabled(false);
+	m_addPresetModuleAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -1142,43 +1480,124 @@ void EquipmentTabPage::setActionState()
 	{
 		// Don't know after which item possible to insert new Device
 		//
-		return;
+	}
+	else
+	{
+		if (selectedIndexList.empty() == true)
+		{
+			m_addSystemAction->setEnabled(true);
+		}
+		else
+		{
+			QModelIndex singleSelectedIndex = selectedIndexList[0];
+
+			Hardware::DeviceObject* selectedObject = m_equipmentModel->deviceObject(singleSelectedIndex);
+			assert(selectedObject != nullptr);
+
+			if (isPresetMode() == true && selectedObject->preset() == false)
+			{
+				assert(false);
+				return;
+			}
+
+			switch (selectedObject->deviceType())
+			{
+			case Hardware::DeviceType::System:
+				m_addSystemAction->setEnabled(true);
+				m_addRackAction->setEnabled(true);
+				m_addChassisAction->setEnabled(true);
+				m_addModuleAction->setEnabled(true);
+
+				m_addPresetRackAction->setEnabled(true);
+				m_addPresetChassisAction->setEnabled(true);
+				m_addPresetModuleAction->setEnabled(true);
+				break;
+
+			case Hardware::DeviceType::Rack:
+				if (isConfigurationMode() == true)
+				{
+					m_addRackAction->setEnabled(true);
+					m_addChassisAction->setEnabled(true);
+					m_addModuleAction->setEnabled(true);
+				}
+				else
+				{
+					m_addRackAction->setEnabled(selectedObject->presetRoot() == false);
+					m_addChassisAction->setEnabled(true);
+					m_addModuleAction->setEnabled(true);
+				}
+
+				m_addPresetRackAction->setEnabled(true);
+				m_addPresetChassisAction->setEnabled(true);
+				m_addPresetModuleAction->setEnabled(true);
+				break;
+
+			case Hardware::DeviceType::Chassis:
+				if (isConfigurationMode() == true)
+				{
+					m_addChassisAction->setEnabled(true);
+					m_addModuleAction->setEnabled(true);
+				}
+				else
+				{
+					m_addChassisAction->setEnabled(selectedObject->presetRoot() == false);
+					m_addModuleAction->setEnabled(true);
+				}
+
+				m_addPresetChassisAction->setEnabled(true);
+				m_addPresetModuleAction->setEnabled(true);
+				break;
+
+			case Hardware::DeviceType::Module:
+				if (isConfigurationMode() == true)
+				{
+					m_addModuleAction->setEnabled(true);
+				}
+				else
+				{
+					m_addModuleAction->setEnabled(selectedObject->presetRoot() == false);
+				}
+
+				m_addPresetModuleAction->setEnabled(true);
+				break;
+
+			default:
+				assert(false);
+			}
+		}
 	}
 
-	if (selectedIndexList.empty() == true)
+	// Enable elements in preset mode
+	//
+	if (isPresetMode() == true)
 	{
-		m_addSystemAction->setEnabled(true);
-		return;
-	}
+		m_addSystemAction->setEnabled(false);
 
-	QModelIndex singleSelectedIndex = selectedIndexList[0];
-
-	Hardware::DeviceObject* selectedObject = m_equipmentModel->deviceObject(singleSelectedIndex);
-	assert(selectedObject);
-
-	switch (selectedObject->deviceType())
-	{
-	case Hardware::DeviceType::System:
-		m_addSystemAction->setEnabled(true);
-		m_addRackAction->setEnabled(true);
-		m_addChassisAction->setEnabled(true);
-		m_addModuleAction->setEnabled(true);
-		break;
-	case Hardware::DeviceType::Rack:
-		m_addRackAction->setEnabled(true);
-		m_addChassisAction->setEnabled(true);
-		m_addModuleAction->setEnabled(true);
-		break;
-	case Hardware::DeviceType::Chassis:
-		m_addChassisAction->setEnabled(true);
-		m_addModuleAction->setEnabled(true);
-		break;
-	case Hardware::DeviceType::Module:
-		m_addModuleAction->setEnabled(true);
-		break;
-	default:
-		assert(false);
+		m_addPresetRackAction->setEnabled(true);
+		m_addPresetChassisAction->setEnabled(true);
+		m_addPresetModuleAction->setEnabled(true);
 	}
 
 	return;
 }
+
+void EquipmentTabPage::modeSwitched()
+{
+	if (m_equipmentModel->isPresetMode() == true)
+	{
+		m_switchMode->setText(tr("Switch to Configuration"));
+
+		m_addPresetAction->setText(tr("Add New Preset"));
+	}
+	else
+	{
+		m_switchMode->setText(tr("Switch to Preset"));
+
+		m_addPresetAction->setText(tr("Add From Preset"));
+	}
+
+	setActionState();
+
+	return;
+}
+

@@ -53,6 +53,7 @@ public:
 
 	bool getLatestVersion(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
+	bool getLatestTreeVersion(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 
 	bool getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getWorkcopy(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
@@ -73,6 +74,7 @@ public:
 	//
 	bool addDeviceObject(Hardware::DeviceObject* device, int parentId, QWidget* parentWidget);
 	bool deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& devices, QWidget* parentWidget);
+	bool getDeviceTreeLatestVersion(const DbFileInfo& file, std::shared_ptr<Hardware::DeviceObject>* out, QWidget* parentWidget);
 
 	// Signals management
 	//
@@ -100,6 +102,7 @@ signals:
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);
 
 	void signal_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
+	void signal_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
 
 	void signal_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void signal_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
@@ -110,7 +113,7 @@ signals:
 
 	void signal_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
-	void signal_addDeviceObject(DbFile* file, int parentId, QString fileExtension);
+	void signal_addDeviceObject(Hardware::DeviceObject* device, int parentId);
 
 	void signal_getSignalsIDs(QVector<int>* signalIDs);
 	void signal_getSignals(SignalSet* signalSet);
@@ -155,12 +158,13 @@ public:
 	DbProject currentProject() const;
 	void setCurrentProject(const DbProject& project);
 
-	int rootFileId() const;
-	int afblFileId() const;
-	int alFileId() const;
-	int hcFileId() const;
-	int wvsFileId() const;
-	int dvsFileId() const;
+	int rootFileId() const;		// Root file
+	int afblFileId() const;		// Application Functional Block Library
+	int alFileId() const;		// Application Logic
+	int hcFileId() const;		// Hardware Configuration
+	int hpFileId() const;		// Hadware Presets
+	int wvsFileId() const;		// Workflow Video Schemes
+	int dvsFileId() const;		// Diaginostics Video Schemes
 
 	//
 	// Data

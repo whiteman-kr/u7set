@@ -3467,6 +3467,29 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_caption();
   inline void set_allocated_caption(::Proto::wstring* caption);
 
+  // optional bool preset = 32 [default = false];
+  inline bool has_preset() const;
+  inline void clear_preset();
+  static const int kPresetFieldNumber = 32;
+  inline bool preset() const;
+  inline void set_preset(bool value);
+
+  // optional bool presetRoot = 33 [default = false];
+  inline bool has_presetroot() const;
+  inline void clear_presetroot();
+  static const int kPresetRootFieldNumber = 33;
+  inline bool presetroot() const;
+  inline void set_presetroot(bool value);
+
+  // optional .Proto.wstring presetName = 34;
+  inline bool has_presetname() const;
+  inline void clear_presetname();
+  static const int kPresetNameFieldNumber = 34;
+  inline const ::Proto::wstring& presetname() const;
+  inline ::Proto::wstring* mutable_presetname();
+  inline ::Proto::wstring* release_presetname();
+  inline void set_allocated_presetname(::Proto::wstring* presetname);
+
   // optional .Proto.DeviceRoot Root = 100;
   inline bool has_root() const;
   inline void clear_root();
@@ -3512,19 +3535,19 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::DeviceModule* release_module();
   inline void set_allocated_module(::Proto::DeviceModule* module);
 
-  // optional .Proto.DeviceController Controller = 11;
+  // optional .Proto.DeviceController Controller = 105;
   inline bool has_controller() const;
   inline void clear_controller();
-  static const int kControllerFieldNumber = 11;
+  static const int kControllerFieldNumber = 105;
   inline const ::Proto::DeviceController& controller() const;
   inline ::Proto::DeviceController* mutable_controller();
   inline ::Proto::DeviceController* release_controller();
   inline void set_allocated_controller(::Proto::DeviceController* controller);
 
-  // optional .Proto.DeviceDiagSignal DiagSignal = 10;
+  // optional .Proto.DeviceDiagSignal DiagSignal = 106;
   inline bool has_diagsignal() const;
   inline void clear_diagsignal();
-  static const int kDiagSignalFieldNumber = 10;
+  static const int kDiagSignalFieldNumber = 106;
   inline const ::Proto::DeviceDiagSignal& diagsignal() const;
   inline ::Proto::DeviceDiagSignal* mutable_diagsignal();
   inline ::Proto::DeviceDiagSignal* release_diagsignal();
@@ -3538,6 +3561,12 @@ class DeviceObject : public ::google::protobuf::Message {
   inline void clear_has_strid();
   inline void set_has_caption();
   inline void clear_has_caption();
+  inline void set_has_preset();
+  inline void clear_has_preset();
+  inline void set_has_presetroot();
+  inline void clear_has_presetroot();
+  inline void set_has_presetname();
+  inline void clear_has_presetname();
   inline void set_has_root();
   inline void clear_has_root();
   inline void set_has_system();
@@ -3558,6 +3587,7 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::Uuid* uuid_;
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
+  ::Proto::wstring* presetname_;
   ::Proto::DeviceRoot* root_;
   ::Proto::DeviceSystem* system_;
   ::Proto::DeviceRack* rack_;
@@ -3565,9 +3595,11 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::DeviceModule* module_;
   ::Proto::DeviceController* controller_;
   ::Proto::DeviceDiagSignal* diagsignal_;
+  bool preset_;
+  bool presetroot_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -7633,15 +7665,97 @@ inline void DeviceObject::set_allocated_caption(::Proto::wstring* caption) {
   }
 }
 
-// optional .Proto.DeviceRoot Root = 100;
-inline bool DeviceObject::has_root() const {
+// optional bool preset = 32 [default = false];
+inline bool DeviceObject::has_preset() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void DeviceObject::set_has_root() {
+inline void DeviceObject::set_has_preset() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void DeviceObject::clear_has_root() {
+inline void DeviceObject::clear_has_preset() {
   _has_bits_[0] &= ~0x00000008u;
+}
+inline void DeviceObject::clear_preset() {
+  preset_ = false;
+  clear_has_preset();
+}
+inline bool DeviceObject::preset() const {
+  return preset_;
+}
+inline void DeviceObject::set_preset(bool value) {
+  set_has_preset();
+  preset_ = value;
+}
+
+// optional bool presetRoot = 33 [default = false];
+inline bool DeviceObject::has_presetroot() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DeviceObject::set_has_presetroot() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DeviceObject::clear_has_presetroot() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DeviceObject::clear_presetroot() {
+  presetroot_ = false;
+  clear_has_presetroot();
+}
+inline bool DeviceObject::presetroot() const {
+  return presetroot_;
+}
+inline void DeviceObject::set_presetroot(bool value) {
+  set_has_presetroot();
+  presetroot_ = value;
+}
+
+// optional .Proto.wstring presetName = 34;
+inline bool DeviceObject::has_presetname() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DeviceObject::set_has_presetname() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DeviceObject::clear_has_presetname() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DeviceObject::clear_presetname() {
+  if (presetname_ != NULL) presetname_->::Proto::wstring::Clear();
+  clear_has_presetname();
+}
+inline const ::Proto::wstring& DeviceObject::presetname() const {
+  return presetname_ != NULL ? *presetname_ : *default_instance_->presetname_;
+}
+inline ::Proto::wstring* DeviceObject::mutable_presetname() {
+  set_has_presetname();
+  if (presetname_ == NULL) presetname_ = new ::Proto::wstring;
+  return presetname_;
+}
+inline ::Proto::wstring* DeviceObject::release_presetname() {
+  clear_has_presetname();
+  ::Proto::wstring* temp = presetname_;
+  presetname_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_presetname(::Proto::wstring* presetname) {
+  delete presetname_;
+  presetname_ = presetname;
+  if (presetname) {
+    set_has_presetname();
+  } else {
+    clear_has_presetname();
+  }
+}
+
+// optional .Proto.DeviceRoot Root = 100;
+inline bool DeviceObject::has_root() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void DeviceObject::set_has_root() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void DeviceObject::clear_has_root() {
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void DeviceObject::clear_root() {
   if (root_ != NULL) root_->::Proto::DeviceRoot::Clear();
@@ -7673,13 +7787,13 @@ inline void DeviceObject::set_allocated_root(::Proto::DeviceRoot* root) {
 
 // optional .Proto.DeviceSystem System = 101;
 inline bool DeviceObject::has_system() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void DeviceObject::set_has_system() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void DeviceObject::clear_has_system() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void DeviceObject::clear_system() {
   if (system_ != NULL) system_->::Proto::DeviceSystem::Clear();
@@ -7711,13 +7825,13 @@ inline void DeviceObject::set_allocated_system(::Proto::DeviceSystem* system) {
 
 // optional .Proto.DeviceRack Rack = 102;
 inline bool DeviceObject::has_rack() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void DeviceObject::set_has_rack() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void DeviceObject::clear_has_rack() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void DeviceObject::clear_rack() {
   if (rack_ != NULL) rack_->::Proto::DeviceRack::Clear();
@@ -7749,13 +7863,13 @@ inline void DeviceObject::set_allocated_rack(::Proto::DeviceRack* rack) {
 
 // optional .Proto.DeviceChassis Chassis = 103;
 inline bool DeviceObject::has_chassis() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void DeviceObject::set_has_chassis() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void DeviceObject::clear_has_chassis() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void DeviceObject::clear_chassis() {
   if (chassis_ != NULL) chassis_->::Proto::DeviceChassis::Clear();
@@ -7787,13 +7901,13 @@ inline void DeviceObject::set_allocated_chassis(::Proto::DeviceChassis* chassis)
 
 // optional .Proto.DeviceModule Module = 104;
 inline bool DeviceObject::has_module() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void DeviceObject::set_has_module() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void DeviceObject::clear_has_module() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void DeviceObject::clear_module() {
   if (module_ != NULL) module_->::Proto::DeviceModule::Clear();
@@ -7823,15 +7937,15 @@ inline void DeviceObject::set_allocated_module(::Proto::DeviceModule* module) {
   }
 }
 
-// optional .Proto.DeviceController Controller = 11;
+// optional .Proto.DeviceController Controller = 105;
 inline bool DeviceObject::has_controller() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void DeviceObject::set_has_controller() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void DeviceObject::clear_has_controller() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void DeviceObject::clear_controller() {
   if (controller_ != NULL) controller_->::Proto::DeviceController::Clear();
@@ -7861,15 +7975,15 @@ inline void DeviceObject::set_allocated_controller(::Proto::DeviceController* co
   }
 }
 
-// optional .Proto.DeviceDiagSignal DiagSignal = 10;
+// optional .Proto.DeviceDiagSignal DiagSignal = 106;
 inline bool DeviceObject::has_diagsignal() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void DeviceObject::set_has_diagsignal() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void DeviceObject::clear_has_diagsignal() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void DeviceObject::clear_diagsignal() {
   if (diagsignal_ != NULL) diagsignal_->::Proto::DeviceDiagSignal::Clear();
