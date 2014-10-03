@@ -35,6 +35,7 @@ public:
     //
     QToolBar*           m_pMeasureControlToolBar = nullptr;
     QToolBar*           m_pMeasureTimeout = nullptr;
+    QToolBar*           m_pMeasureKind = nullptr;
     QToolBar*           m_pOutputSignalToolBar = nullptr;
     QToolBar*           m_pAnalogSignalToolBar = nullptr;
     QToolBar*           m_pComplexComporatorSignalToolBar = nullptr;
@@ -60,14 +61,14 @@ public:
     //
     QLabel*             m_statusEmpty = nullptr;
     QLabel*             m_statusMeasureThreadInfo = nullptr;
-    QProgressBar*       m_statusMeasureDemphrer = nullptr;
+    QProgressBar*       m_statusMeasureTimeout = nullptr;
     QLabel*             m_statusMeasureThreadState = nullptr;
     QLabel*             m_statusMeasureCount = nullptr;
     QLabel*             m_statusConnectToServer = nullptr;
 
 public:
 
-    MeasureThread   m_measureThread;        // Measure thread
+    MeasureThread       m_measureThread;
 
 protected:
 
@@ -86,14 +87,16 @@ public:
     void createPanels();
     void createStatusBar();
 
+private:
+
     // Actions of main menu
     //
-private:
 
     // menu - Measure
     //
     QAction* m_pStartMeasureAction = nullptr;
     QAction* m_pStopMeasureAction = nullptr;
+    QAction* m_pPrintMeasureAction = nullptr;
     QAction* m_pExportMeasureAction = nullptr;
 
     // menu - Edit
@@ -110,7 +113,6 @@ private:
 
     // menu - Tools
     //
-    QAction* m_pConnectToServerAction = nullptr;
     QAction* m_pCalibratorsAction = nullptr;
     QAction* m_pShowOutputSignalListAction = nullptr;
     //QAction* m_pShowComlexComparatorListAction = nullptr;
@@ -127,14 +129,16 @@ private:
     QAction* m_pAboutAppAction = nullptr;
 
 
+private slots:
+
     // Slots of main menu
     //
-public slots:
 
     // menu - Measure
     //
     void startMeasure();
     void stopMeasure();
+    void printMeasure() {};
     void exportMeasure() {};
 
     // menu - Edit
@@ -151,7 +155,6 @@ public slots:
 
     // menu - Tools
     //
-    void connectToServer() {};
     void calibrators();
     void showOutputSignalList() {};
     //void showComlexComparatorList() {};
@@ -167,6 +170,22 @@ public slots:
     void aboutConnection() {};
     void aboutApp() {};
 
+private slots:
+
+    // Slots of control panels
+    //
+    void setMeasureKind(int index);
+    void setMeasureTimeout(QString value);
+    void setOutputSignalType(int index);
+
+private slots:
+
+    // Slots of measure thread
+    //
+    void onMeasureThreadStarted();
+    void onMeasureThreadStoped();
+    void onMeasureThreadInfo(QString msg);
+    void onMeasureThreadInfo(int timeout);
 };
 
 // ==============================================================================================

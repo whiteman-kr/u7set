@@ -112,13 +112,15 @@ void CalibratorBase::removeCalibrators()
             continue;
         }
 
-        pCalibrator->enableWaitResponse(false);
+        pCalibrator->waitResponse(false);
 
         QThread *pThread = pCalibrator->thread();
-
-        pThread->quit();
-        pThread->wait();
-        pThread->deleteLater();
+        if (pThread != nullptr)
+        {
+            pThread->quit();
+            pThread->wait();
+            pThread->deleteLater();
+        }
     }
 }
 
@@ -303,7 +305,7 @@ void CalibratorBase::onInitialization()
             continue;
         }
 
-        pCalibrator->enableWaitResponse(false);
+        pCalibrator->waitResponse(false);
     }
 
     emit closeAllCalibrator();      // close all calibratirs serial port

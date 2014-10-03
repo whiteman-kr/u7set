@@ -7,6 +7,10 @@
 
 // ==============================================================================================
 
+const int MEASURE_THREAD_TIMEOUT_STEP = 100; // 100 milliseconds
+
+// ==============================================================================================
+
 class MeasureThread : public QThread
 {
     Q_OBJECT
@@ -26,13 +30,13 @@ private:
 
     bool        m_cmdStopMeasure = true;
 
+    void        waitMeasureTimeout();
+
     bool        prepareCalibrator();
 
-    void        measureLinearity() {};
-    void        measureComprators() {};
-    void        measureComplexComprators() {};
-
-
+    void        measureLinearity();
+    void        measureComprators();
+    void        measureComplexComprators();
 
 protected:
 
@@ -44,7 +48,8 @@ public:
 
 signals:
 
-    void        measureState(QString);
+    void        measureInfo(QString);
+    void        measureInfo(int);
 
 public slots:
 

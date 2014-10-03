@@ -52,6 +52,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
 	connect(this, &DbController::signal_getDataFormats, m_worker, &DbWorker::slot_getDataFormats);
+	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 
 	m_thread.start();
 }
@@ -987,6 +988,35 @@ bool DbController::getDataFormats(DataFormatList *dataFormats, QWidget* parentWi
 }
 
 
+bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	if (objectStates == nullptr)
+	{
+		assert(objectStates != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_checkoutSignals(signalIDs, objectStates);
+
+	ok = waitForComplete(parentWidget, tr("Checkout signals"));
+
+	return ok;
+}
 
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {

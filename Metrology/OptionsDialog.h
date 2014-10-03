@@ -20,6 +20,7 @@
 
 const char* const OptionPage[] =
 {
+            QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to server TCP/IP"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements of linearity"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "Point of linearity"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "Measure comparators"),
@@ -35,18 +36,20 @@ const char* const OptionPage[] =
 const int	OPTION_PAGE_COUNT				= sizeof(OptionPage)/sizeof(char*);
 
 const int	OPTION_PAGE_UNKNOWN				= -1,
-            OPTION_PAGE_LINEARETY_MEASURE	= 0,
-            OPTION_PAGE_LINEARETY_POINT		= 1,
-            OPTION_PAGE_SETTING_MEASURE		= 2,
-            OPTION_PAGE_MEASURE_VIEW_TEXT	= 3,
-            OPTION_PAGE_MEASURE_VIEW_COLUMN	= 4,
-            OPTION_PAGE_SIGNAL_INFO			= 5,
-            OPTION_PAGE_REPORT_HEADER		= 6,
-            OPTION_PAGE_DATABASE			= 7,
-            OPTION_PAGE_BACKUP				= 8;
+            OPTION_PAGE_TCP_IP              = 0,
+            OPTION_PAGE_LINEARETY_MEASURE	= 1,
+            OPTION_PAGE_LINEARETY_POINT		= 2,
+            OPTION_PAGE_SETTING_MEASURE		= 3,
+            OPTION_PAGE_MEASURE_VIEW_TEXT	= 4,
+            OPTION_PAGE_MEASURE_VIEW_COLUMN	= 5,
+            OPTION_PAGE_SIGNAL_INFO			= 6,
+            OPTION_PAGE_REPORT_HEADER		= 7,
+            OPTION_PAGE_DATABASE			= 8,
+            OPTION_PAGE_BACKUP				= 9;
 
 const char* const OptionPageShort[OPTION_PAGE_COUNT] =
 {
+            QT_TRANSLATE_NOOP("OptionsDialog.h", "TCP/IP"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "Points"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),
@@ -62,6 +65,7 @@ const char* const OptionPageShort[OPTION_PAGE_COUNT] =
 
 const char* const OptionGroup[] =
 {
+            QT_TRANSLATE_NOOP("OptionsDialog.h", "Connect to server"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "Linearity"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparators"),
             QT_TRANSLATE_NOOP("OptionsDialog.h", "List of measurements"),
@@ -75,19 +79,21 @@ const char* const OptionGroup[] =
 const int	OPTION_GROUP_COUNT              = sizeof(OptionGroup)/sizeof(char*);
 
 const int	OPTION_GROUP_UNKNOWN        = -1,
-            OPTION_GROUP_LINEARETY      = 0,
-            OPTION_GROUP_SETTING        = 1,
-            OPTION_GROUP_MEASURE_VIEW   = 2,
-            OPTION_GROUP_SIGNAL_INFO    = 3,
-            OPTION_GROUP_REPORT_HEADER  = 4,
-            OPTION_GROUP_DATABASE       = 5,
-            OPTION_GROUP_BACKUP         = 6;
+            OPTION_GROUP_TCP_IP         = 0,
+            OPTION_GROUP_LINEARETY      = 1,
+            OPTION_GROUP_SETTING        = 2,
+            OPTION_GROUP_MEASURE_VIEW   = 3,
+            OPTION_GROUP_SIGNAL_INFO    = 4,
+            OPTION_GROUP_REPORT_HEADER  = 5,
+            OPTION_GROUP_DATABASE       = 6,
+            OPTION_GROUP_BACKUP         = 7;
 
 
 // ----------------------------------------------------------------------------------------------
 
 const int OptionGroupPage[OPTION_PAGE_COUNT] =
 {
+            OPTION_GROUP_TCP_IP,        //("Linearity -- Measurements"),
             OPTION_GROUP_LINEARETY,		//("Linearity -- Measurements"),
             OPTION_GROUP_LINEARETY,		//("Linearity -- Points"),
             OPTION_GROUP_SETTING,		//("Comparators -- Measurements"),
