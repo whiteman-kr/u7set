@@ -505,3 +505,88 @@ $BODY$
   LANGUAGE plpgsql;
 
 
+DROP FUNCTION set_signal_workcopy(integer, signaldata);
+
+CREATE OR REPLACE FUNCTION set_signal_workcopy(user_id integer, sd signaldata)
+  RETURNS objectstate AS
+$BODY$
+DECLARE
+	userIsAdmin boolean;
+	chOutInstanceID integer;
+	chOutUserID integer;
+	os objectstate;
+BEGIN
+	SELECT is_admin(user_id) INTO userIsAdmin;
+
+	SELECT S.CheckedOutInstanceID, S.UserID
+	INTO chOutInstanceID, chOutUserID
+	FROM Signal AS S
+	WHERE S.SignalID = sd.SignalID;
+
+	IF (chOutInstanceID IS NOT NULL) AND
+		(chOutUserID IS NOT NULL) AND
+		(chOutUserID = user_id OR userIsAdmin)
+	THEN
+		-- update checked out workcopy
+		UPDATE SignalInstance SET
+			StrId = sd.StrID,
+			ExtStrId = sd.ExtStrId,
+			Name = sd.Name,
+			DataFormatID = sd.DataFormatID,
+			DataSize = sd.DataSize,
+			LowADC = sd.LowADC,
+			HighADC = sd.HighADC,
+			LowLimit = sd.LowLimit,
+			HighLimit = sd.HighLimit,
+			UnitID = sd.UnitID,
+			Adjustment = sd.Adjustment,
+			DropLimit = sd.DropLimit,
+			ExcessLimit = sd.ExcessLimit,
+			UnbalanceLimit = sd.UnbalanceLimit,
+			InputLowLimit = sd.InputLowLimit,
+			InputHighLimit = sd.InputHighLimit,
+			InputUnitID = sd.InputUnitID,
+			InputSensorID = sd.InputSensorID,
+			OutputLowLimit = sd.OutputLowLimit,
+			OutputHighLimit = sd.OutputHighLimit,
+			OutputUnitID = sd.OutputUnitID,
+			OutputSensorID = sd.OutputSensorID,
+			Acquire = sd.Acquire,
+			Calculated = sd.Calculated,
+			NormalState = sd.NormalState,
+			DecimalPlaces = sd.DecimalPlaces,
+			Aperture = sd.Aperture,
+			InOutType = sd.InOutType,
+			DeviceStrID = sd.DeviceStrID
+		WHERE
+			SignalInstanceID = chOutInstanceID;
+
+		os.ID = sd.SignalID;
+		os.deleted = FALSE;
+		os.checkedout = TRUE;
+		os.action = 0;
+		os.userID = chOutUserID;
+		os.errCode = 0;					-- ERR_SIGNAL_OK
+	ELSE
+		IF chOutInstanceID IS NULL THEN
+			os.ID = sd.SignalID;
+			os.deleted = FALSE;
+			os.checkedout = FALSE;
+			os.action = 0;
+			os.userID = 0;
+			os.errCode = 1;					-- ERR_SIGNAL_IS_NOT_CHECKED_OUT
+		ELSE
+			os.ID = sd.SignalID;
+			os.deleted = FALSE;
+			os.checkedout = FALSE;
+			os.action = 0;
+			os.userID = chOutUserID;
+			os.errCode = 2;					-- ERR_SIGNAL_ALREADY_CHECKED_OUT by another user
+		END IF;
+	END IF;
+
+	RETURN os;
+END
+$BODY$
+  LANGUAGE plpgsql;
+

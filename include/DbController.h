@@ -86,6 +86,7 @@ public:
 	bool getDataFormats(DataFormatList* dataFormats, QWidget* parentWidget);
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
+	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
 
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
@@ -124,6 +125,7 @@ signals:
 	void signal_getUnits(UnitList* units);
 	void signal_getDataFormats(DataFormatList* dataFormats);
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
+	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
 
 	//
 	// Service functions

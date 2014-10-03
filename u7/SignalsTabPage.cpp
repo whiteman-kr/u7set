@@ -496,16 +496,6 @@ void SignalsTabPage::projectOpened()
 
 	m_signalsModel->loadSignals();
 
-	QVector<int> IDs;
-
-	IDs.append(2);
-	IDs.append(3);
-	IDs.append(4);
-
-	QVector<ObjectState> objectStates;
-
-	dbController()->checkoutSignals(&IDs, &objectStates, this);
-
 	return;
 }
 
