@@ -2395,8 +2395,6 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 				.arg(parentId)
 				.arg(current->fileExtension());
 
-			qDebug() << request;
-
 			strData.clear();
 
 			QSqlQuery q(db);
@@ -2697,7 +2695,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 
 QString DbWorker::getSignalDataStr(const Signal& s)
 {
-	return QString(
+	QString str = QString(
 			"'(%1,%2,%3,%4,%5,%6,%7,%8,%9,%10,"
 			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
@@ -2744,6 +2742,10 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.aperture())
 	.arg(s.inOutType())
 	.arg(s.deviceStrID());
+
+	qDebug() << str;
+
+	return str;
 }
 
 
@@ -3011,6 +3013,81 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 		getObjectState(q, os);
 
 		objectStates->append(os);
+	}
+}
+
+
+void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
+{
+	AUTO_COMPLETE
+
+	if (signal == nullptr)
+	{
+		assert(signal != nullptr);
+		return;
+	}
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot set signal workcopy. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	signal->setCreated(QDateTime::currentDateTime());
+	signal->setInstanceCreated(QDateTime::currentDateTime());
+
+	QString sds = getSignalDataStr(*signal);
+
+	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
+		.arg(currentUser().userId()).arg(sds);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't set signal workcopy! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() != false)
+	{
+		getObjectState(q, *objectState);
+	}
+
+	QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
+		.arg(currentUser().userId()).arg(signal->ID());
+
+	QSqlQuery q2(db);
+
+	result = q2.exec(request2);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get latest signal! Error: ") +  q2.lastError().text());
+		return;
+	}
+
+	if (q2.next() != false)
+	{
+		getSignalData(q2, *signal);
+	}
+	else
+	{
+		emitError(tr("Can't getlatest signal! No data returned!"));
 	}
 }
 
