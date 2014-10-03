@@ -52,6 +52,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
 	connect(this, &DbController::signal_getDataFormats, m_worker, &DbWorker::slot_getDataFormats);
+	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 
 	m_thread.start();
 }
