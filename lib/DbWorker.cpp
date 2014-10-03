@@ -2896,14 +2896,6 @@ void DbWorker::slot_getUnits(UnitList *units)
 		QString unitNameEn = q.value("unit_en").toString();
 
 		units->append(unitID, unitNameEn);
-
-/*		Unit unit;
-
-		unit.ID = q.value("unitid").toInt();
-		unit.nameEn = q.value("unit_en").toString();
-		unit.nameRu = q.value("unit_ru").toString();
-
-		units->append(unit); */
 	}
 }
 
@@ -2950,13 +2942,75 @@ void DbWorker::slot_getDataFormats(DataFormatList *dataFormats)
 		QString dataFormatName = q.value("name").toString();
 
 		dataFormats->append(dataFormatID, dataFormatName);
+	}
+}
 
-/*		DataFormat dataFormat;
 
-		dataFormat.ID = q.value("dataformatid").toInt();
-		dataFormat.name = q.value("name").toString();
+void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates)
+{
+	AUTO_COMPLETE
 
-		dataFormats->append(dataFormat); */
+	// Check parameters
+	//
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return;
+	}
+
+	if (objectStates == nullptr)
+	{
+		assert(objectStates != nullptr);
+		return;
+	}
+
+	objectStates->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot checkout signals. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM checkout_signals(%1,ARRAY[").arg(currentUser().userId());
+
+	int count = signalIDs->count();
+
+	for(int i = 0; i < count; i++)
+	{
+		if (i < count -1)
+		{
+			request += QString("%1,").arg((*signalIDs)[i]);
+		}
+		else
+		{
+			request += QString("%1])").arg((*signalIDs)[i]);
+		}
+	}
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't checkout signals! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		ObjectState os;
+
+		getObjectState(q, os);
+
+		objectStates->append(os);
 	}
 }
 

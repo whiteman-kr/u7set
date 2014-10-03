@@ -104,6 +104,8 @@ public slots:
 	void slot_getUnits(UnitList* units);
 	void slot_getDataFormats(DataFormatList* dataFormats);
 
+	void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
+
 	// Service
 	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);

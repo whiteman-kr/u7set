@@ -107,6 +107,8 @@ DECLARE
 	chOutInstanceID integer;
 	chUserID integer;
 	chOutAction integer;
+	actionDelete boolean;
+	sGroupID integer;
 BEGIN
 	SELECT is_admin(user_id) INTO userIsAdmin;
 
@@ -116,8 +118,8 @@ BEGIN
 
 	FOREACH signal_id IN ARRAY signal_ids
 	LOOP
-		SELECT CheckedInInstanceID, CheckedOutInstanceID, UserID, Action
-		INTO chInInstanceID, chOutInstanceID, chUserID, chOutAction
+		SELECT S.CheckedInInstanceID, S.CheckedOutInstanceID, S.UserID, SI.Action, S.SignalGroupID
+		INTO chInInstanceID, chOutInstanceID, chUserID, chOutAction, sGroupID
 		FROM Signal AS S, SignalInstance AS SI
 		WHERE S.SignalID = signal_id AND SI.SignalInstanceID = S.CheckedOutInstanceID;
 
@@ -135,13 +137,24 @@ BEGIN
 			IF chUserID = user_id OR userIsAdmin THEN
 				-- signal checked out by current user, or user is admin
 
-				IF chOutAction = 3 AND chInInstanceID IS NULL THEN
+				IF chOutAction = 3 THEN
+					actionDelete = TRUE;
+				ELSE
+					actionDelete = FALSE;
+				END IF;
+
+				IF actionDelete AND chInInstanceID IS NULL THEN
 					-- action is DELETE, and signal has no checked in instance
 					-- remove checked out instance and signal
 					DELETE FROM CheckOut WHERE SignalID = signal_id;
 					UPDATE Signal SET CheckedOutInstanceID = NULL WHERE SignalID = signal_id;
 					DELETE FROM SignalInstance WHERE SignalInstanceID = chOutInstanceID;
 					DELETE FROM Signal WHERE SignalID = signal_id;
+
+					IF sGroupID <> 0 THEN
+						DELETE FROM SignalGroup
+						WHERE NOT EXISTS(SELECT * FROM Signal AS S WHERE SignalGroupID = sGroupID) AND SignalGroupID = sGroupID;
+					END IF;
 
 					os.ID = signal_id;
 					os.deleted = TRUE;
@@ -162,14 +175,14 @@ BEGIN
 						CheckedInInstanceID = CheckedOutInstanceID,
 						CheckedOutInstanceID = NULL,
 						UserID = NULL,
-						Deleted = (chOutAction = 3)
+						Deleted = actionDelete
 					WHERE
 						SignalID = signal_id;
 
 					DELETE FROM CheckOut WHERE SignalID = signal_id;
 
 					os.ID = signal_id;
-					os.deleted = FALSE;
+					os.deleted = actionDelete;
 					os.checkedout = FALSE;
 					os.action = 0;
 					os.userID = 0;
@@ -350,23 +363,77 @@ CREATE OR REPLACE FUNCTION delete_signal(user_id integer, signal_id integer)
 $BODY$
 DECLARE
 	os objectstate;
+	chInInstanceID integer;
+	chOutInstanceID integer;
+	chOutUserID integer;
+	sGroupID integer;
 BEGIN
-	os = checkout_signals(user_id, ARRAY[signal_id]);
+	SELECT S.CheckedInInstanceID, S.CheckedOutInstanceID, S.UserID, S.SignalGroupID
+	INTO chInInstanceID, chOutInstanceID, chOutUserID, sGroupID
+	FROM Signal AS S WHERE SignalID = signal_id;
 
-	IF os.errCode = 0 OR (os.errCode = 2 AND os.UserID = user_id) THEN
-		-- signal successful checked out
-		-- or signal already checked out by this user
+	IF chInInstanceID IS NULL THEN
+		-- no checked in instance
+		-- delete checked out instance and signal
+		DELETE FROM CheckOut WHERE SignalID = signal_id;
+		UPDATE Signal SET CheckedOutInstanceID = NULL WHERE SignalID = signal_id;
+		DELETE FROM SignalInstance WHERE SignalInstanceID = chOutInstanceID;
+		DELETE FROM Signal WHERE SignalID = signal_id;
 
-		-- change checkedout signal instance action to Delete (3)
-		UPDATE SignalInstance
-		SET Action = 3
-		WHERE SignalInstanceID = (SELECT CheckedOutInstanceID FROM Signal WHERE SignalID = signal_id);
+		IF sGroupID <> 0 THEN
+			DELETE FROM SignalGroup
+			WHERE NOT EXISTS(SELECT * FROM Signal AS S WHERE SignalGroupID = sGroupID) AND SignalGroupID = sGroupID;
+		END IF;
 
-		os.Action = 3;
-		os.errCode = 0;
+		os.ID = signal_id;
+		os.deleted = TRUE;
+		os.checkedout = FALSE;
+		os.action = 3;
+		os.userID = 0;
+		os.errCode = 0;					-- ERR_SIGNAL_OK
+		RETURN os;
+	ELSE
+		-- has checked in instance
+
+		IF chOutInstanceID IS NULL THEN
+			-- signal is not checked out, - check out signal
+			os = checkout_signals(user_id, ARRAY[signal_id]);
+			IF os.errCode <> 0 THEN
+				RETURN os;
+			END IF;
+
+			SELECT CheckedOutInstanceID, UserID INTO chOutInstanceID, chOutUserID FROM Signal WHERE SignalID = signal_id;
+		END IF;
+
+		-- signal is checked out
+
+		IF chOutUserID = user_id THEN
+			-- signal checked out by this user
+			-- change checked out signal instance action to Delete (3)
+
+			UPDATE SignalInstance
+			SET Action = 3
+			WHERE SignalInstanceID = (SELECT CheckedOutInstanceID FROM Signal WHERE SignalID = signal_id);
+
+			os.ID = signal_id;
+			os.deleted = TRUE;
+			os.checkedout = TRUE;
+			os.action = 3;
+			os.userID = user_id;
+			os.errCode = 0;					-- ERR_SIGNAL_OK
+		ELSE
+			-- signal is checked out by another user
+
+			os.ID = signal_id;
+			os.deleted = FALSE;
+			os.checkedout = TRUE;
+			os.action = 0;
+			os.userID = chOutUserID;
+			os.errCode = 2;					-- ERR_SIGNAL_ALREADY_CHECKED_OUT
+		END IF;
+
+		RETURN os;
 	END IF;
-
-	RETURN os;
 END
 $BODY$
   LANGUAGE plpgsql;
@@ -377,9 +444,62 @@ CREATE OR REPLACE FUNCTION undo_signal_changes(user_id integer, signal_id intege
 $BODY$
 DECLARE
 	os objectstate;
+	userIsAdmin boolean;
+	chInInstanceID integer;
+	chOutInstanceID integer;
+	chOutUserID integer;
+	sGroupID integer;
 BEGIN
+	SELECT is_admin(user_id) INTO userIsAdmin;
 
-	RETURN os;
+	SELECT S.CheckedInInstanceID, S.CheckedOutInstanceID, S.UserID, S.SignalGroupID
+	INTO chInInstanceID, chOutInstanceID, chOutUserID, sGroupID
+	FROM Signal AS S WHERE SignalID = signal_id;
+
+	IF chOutInstanceID IS NULL THEN
+		os.ID = signal_id;
+		os.deleted = FALSE;
+		os.checkedout = FALSE;
+		os.action = 0;
+		os.userID = 0;
+		os.errCode = 1;					-- ERR_SIGNAL_IS_NOT_CHECKED_OUT
+		RETURN os;
+	END IF;
+
+	IF chOutUserID = user_id OR userIsAdmin THEN
+		DELETE FROM CheckOut WHERE SignalID = signal_id;
+		UPDATE Signal SET CheckedOutInstanceID = NULL, UserID = NULL WHERE SignalID = signal_id;
+		DELETE FROM SignalInstance WHERE SignalInstanceID = chOutInstanceID;
+
+		os.deleted = FALSE;
+
+		IF chInInstanceID IS NULL THEN
+			DELETE FROM Signal WHERE SignalID = signal_id;
+
+			os.deleted = TRUE;
+
+			IF sGroupID <> 0 THEN
+				DELETE FROM SignalGroup
+				WHERE NOT EXISTS(SELECT * FROM Signal AS S WHERE SignalGroupID = sGroupID) AND SignalGroupID = sGroupID;
+			END IF;
+		END IF;
+
+		os.ID = signal_id;
+		os.checkedout = FALSE;
+		os.action = 0;
+		os.userID = 0;
+		os.errCode = 0;					-- ERR_SIGNAL_OK
+		RETURN os;
+
+	ELSE
+		os.ID = signal_id;
+		os.deleted = FALSE;
+		os.checkedout = TRUE;
+		os.action = 0;
+		os.userID = chOutUserID;
+		os.errCode = 2;					-- ERR_SIGNAL_ALREADY_CHECKED_OUT
+		RETURN os;
+	END IF;
 END
 $BODY$
   LANGUAGE plpgsql;

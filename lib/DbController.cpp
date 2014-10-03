@@ -987,6 +987,35 @@ bool DbController::getDataFormats(DataFormatList *dataFormats, QWidget* parentWi
 }
 
 
+bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	if (objectStates == nullptr)
+	{
+		assert(objectStates != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_checkoutSignals(signalIDs, objectStates);
+
+	ok = waitForComplete(parentWidget, tr("Checkout signals"));
+
+	return ok;
+}
 
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {
