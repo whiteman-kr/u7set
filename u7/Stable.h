@@ -38,6 +38,7 @@
 #include <QTextStream>
 #include <QMetaObject>
 #include <QMetaClassInfo>
+#include <QJSEngine>
 
 
 // Qt Widgets

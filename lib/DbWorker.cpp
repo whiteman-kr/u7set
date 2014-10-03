@@ -2395,8 +2395,6 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 				.arg(parentId)
 				.arg(current->fileExtension());
 
-			qDebug() << request;
-
 			strData.clear();
 
 			QSqlQuery q(db);
