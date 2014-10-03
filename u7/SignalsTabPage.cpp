@@ -77,6 +77,108 @@ const char* Columns[] =
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
 
 
+SignalsDelegate::SignalsDelegate(QObject *parent) :
+	QStyledItemDelegate(parent)
+{
+
+}
+
+QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+	int col = index.column();
+	switch (col)
+	{
+		// LineEdit
+		//
+		case SC_STR_ID:
+		{
+			QLineEdit* le = new QLineEdit(parent);
+			QRegExp rx4ID("^#[A-Za-z][A-Za-z\\d_]*$");
+			le->setValidator(new QRegExpValidator(rx4ID, le));
+			return le;
+		}
+		case SC_EXT_STR_ID:
+		{
+			QLineEdit* le = new QLineEdit(parent);
+			QRegExp rx4ExtID("^[A-Za-z][A-Za-z\\d_]*$");
+			le->setValidator(new QRegExpValidator(rx4ExtID, le));
+			return le;
+		}
+		case SC_NAME:
+		{
+			QLineEdit* le = new QLineEdit(parent);
+			QRegExp rx4Name("^.+$");
+			le->setValidator(new QRegExpValidator(rx4Name, le));
+			return le;
+		}
+
+		// SpinBox
+		//
+		// ComboBox
+		//
+		// CheckBox
+		//
+		/*
+		case SC_DATA_FORMAT:
+			if (m_dataFormatInfo.contains(signal.dataFormat()))
+			{
+				return m_dataFormatInfo.value(signal.dataFormat());
+			}
+			else
+			{
+				return tr("Unknown data format");
+			}
+		case SC_DATA_SIZE: return signal.dataSize();
+		case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
+		case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
+		case SC_LOW_LIMIT: return signal.lowLimit();
+		case SC_HIGH_LIMIT: return signal.highLimit();
+		case SC_UNIT:
+			return getUnitStr(signal.unitID());
+		case SC_ADJUSTMENT: return signal.adjustment();
+		case SC_DROP_LIMIT: return signal.dropLimit();
+		case SC_EXCESS_LIMIT: return signal.excessLimit();
+		case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
+		case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
+		case SC_INPUT_HIGH_LIMIT: return signal.inputHighLimit();
+		case SC_INPUT_UNIT:
+			return getUnitStr(signal.inputUnitID());
+		case SC_INPUT_SENSOR: return SensorTypeStr[signal.inputSensorID()];
+		case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
+		case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
+		case SC_OUTPUT_UNIT:
+			return getUnitStr(signal.outputUnitID());
+		case SC_OUTPUT_SENSOR: return SensorTypeStr[signal.outputSensorID()];
+		case SC_ACQUIRE: return signal.acquire() ? "Yes" : "No";
+		case SC_CALCULATED: return signal.calculated() ? "Yes" : "No";
+		case SC_NORMAL_STATE: return signal.normalState();
+		case SC_DECIMAL_PLACES: return signal.decimalPlaces();
+		case SC_APERTURE: return signal.aperture();
+		case SC_IN_OUT_TYPE: return signal.inOutType();
+		case SC_DEVICE_STR_ID: return signal.deviceStrID();*/
+		case SC_CHANNEL:
+		default:
+			assert(false);
+			return QStyledItemDelegate::createEditor(parent, option, index);
+	}
+}
+
+void SignalsDelegate::setEditorData(QWidget *, const QModelIndex &) const
+{
+
+}
+
+void SignalsDelegate::setModelData(QWidget *, QAbstractItemModel *, const QModelIndex &) const
+{
+
+}
+
+void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
+{
+	editor->setGeometry(option.rect);
+}
+
+
 SignalsModel::SignalsModel(DbController* dbController, QWidget *parent) :
 	QAbstractTableModel(parent),
 	m_parentWindow(parent),
@@ -140,15 +242,6 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					return tr("Unknown data format");
 				}
 
-/*				for (int i = 0; i < m_dataFormatInfo.count(); i++)
-				{
-					if (m_dataFormatInfo[i].ID == signal.dataFormat())
-					{
-						return m_dataFormatInfo[i].name;
-					}
-				}
-				return tr("Unknown data format");*/
-
 			case SC_DATA_SIZE: return signal.dataSize();
 			case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
 			case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
@@ -156,15 +249,6 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_HIGH_LIMIT: return signal.highLimit();
 			case SC_UNIT:
 				return getUnitStr(signal.unitID());
-
-				/*for (int i = 0; i < m_unitInfo.count(); i++)
-				{
-					if (m_unitInfo[i].ID == signal.unitID())
-					{
-						return m_unitInfo[i].nameEn;
-					}
-				}
-				return tr("Unknown unit");*/
 
 			case SC_ADJUSTMENT: return signal.adjustment();
 			case SC_DROP_LIMIT: return signal.dropLimit();
@@ -175,28 +259,12 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_INPUT_UNIT:
 				return getUnitStr(signal.inputUnitID());
 
-/*				for (int i = 0; i < m_unitInfo.count(); i++)
-				{
-					if (m_unitInfo[i].ID == signal.inputUnitID())
-					{
-						return m_unitInfo[i].nameEn;
-					}
-				}
-				return tr("Unknown unit");*/
 			case SC_INPUT_SENSOR: return SensorTypeStr[signal.inputSensorID()];
 			case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
 			case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
 			case SC_OUTPUT_UNIT:
 				return getUnitStr(signal.outputUnitID());
 
-				/*for (int i = 0; i < m_unitInfo.count(); i++)
-				{
-					if (m_unitInfo[i].ID == signal.outputUnitID())
-					{
-						return m_unitInfo[i].nameEn;
-					}
-				}
-				return tr("Unknown unit");*/
 			case SC_OUTPUT_SENSOR: return SensorTypeStr[signal.outputSensorID()];
 			case SC_ACQUIRE: return signal.acquire() ? "Yes" : "No";
 			case SC_CALCULATED: return signal.calculated() ? "Yes" : "No";
@@ -241,7 +309,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		assert(row < m_signalSet.count());
 
-		Signal signal/* = m_signals[index.row()]*/;
+		Signal& signal = m_signalSet[index.row()];
 
 		switch (index.column())
 		{
@@ -277,9 +345,13 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			default:
 				assert(false);
 		}
-	}
 
-	emit dataChanged(index, index, QVector<int>() << role);
+		emit dataChanged(index, index, QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+	}
+	else
+	{
+		QAbstractTableModel::setData(index, value, role);
+	}
 
 	return true;
 }
