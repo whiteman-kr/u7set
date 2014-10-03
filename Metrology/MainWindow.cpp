@@ -23,6 +23,13 @@ MainWindow::MainWindow(QWidget *parent) :
     theCalibratorBase.init(this);
 
     createInterface();
+
+    connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::onMeasureThreadStarted, Qt::QueuedConnection );
+    connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::onMeasureThreadStoped, Qt::QueuedConnection );
+    connect(&m_measureThread, SIGNAL(measureInfo(QString)), this, SLOT(onMeasureThreadInfo(QString)), Qt::QueuedConnection );
+    connect(&m_measureThread, SIGNAL(measureInfo(int)), this, SLOT(onMeasureThreadInfo(int)), Qt::QueuedConnection );
+
+    onMeasureThreadStoped();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -64,7 +71,14 @@ void  MainWindow::createActions()
     m_pStopMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     connect(m_pStopMeasureAction, &QAction::triggered, this, &MainWindow::stopMeasure);
 
+    m_pPrintMeasureAction = new QAction(tr("&Print ..."), this);
+    m_pPrintMeasureAction->setShortcut(Qt::CTRL + Qt::Key_P);
+    m_pPrintMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+    connect(m_pPrintMeasureAction, &QAction::triggered, this, &MainWindow::printMeasure);
+
     m_pExportMeasureAction = new QAction(tr("&Export ..."), this);
+    m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_E);
+    m_pExportMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::exportMeasure);
 
 
@@ -85,7 +99,7 @@ void  MainWindow::createActions()
     m_pRemoveMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
     connect(m_pRemoveMeasureAction, &QAction::triggered, this, &MainWindow::removeMeasure);
 
-    m_pSelectAllMeasureAction = new QAction(tr("&Select All"), this);
+    m_pSelectAllMeasureAction = new QAction(tr("Select &All"), this);
     m_pSelectAllMeasureAction->setShortcut(Qt::CTRL + Qt::Key_A);
     connect(m_pSelectAllMeasureAction, &QAction::triggered, this, &MainWindow::selectAllMeasure);
 
@@ -95,25 +109,22 @@ void  MainWindow::createActions()
     m_pShowReportsAction->setShortcut(Qt::CTRL + Qt::Key_R);
     connect(m_pShowReportsAction, &QAction::triggered, this, &MainWindow::showReports);
 
-    m_pShowCalculateAction = new QAction(tr("Metrological &calculator"), this);
+    m_pShowCalculateAction = new QAction(tr("Metrological &calculator ..."), this);
     m_pShowCalculateAction->setShortcut(Qt::ALT + Qt::Key_C);
     connect(m_pShowCalculateAction, &QAction::triggered, this, &MainWindow::showCalculate);
 
     // Tools
     //
-    m_pConnectToServerAction = new QAction(tr("Connect to &server ... "), this);
-    connect(m_pConnectToServerAction, &QAction::triggered, this, &MainWindow::connectToServer);
-
     m_pCalibratorsAction = new QAction(tr("&Calibrations ..."), this);
     connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::calibrators);
 
-    m_pShowOutputSignalListAction = new QAction(tr("&Signals input/output ..."), this);
+    m_pShowOutputSignalListAction = new QAction(tr("Signals input/output ..."), this);
     connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
 
 //    m_pShowComlexComparatorListAction = new QAction(tr("&Signals of complex comparator..."), this);
 //    connect(m_pShowComlexComparatorListAction, &QAction::triggered, this, &MainWindow::showComlexComparatorList);
 
-    m_pShowOutputRangeListAction = new QAction(tr("&Signals with output ranges ..."), this);
+    m_pShowOutputRangeListAction = new QAction(tr("Signals with output ranges ..."), this);
     connect(m_pShowOutputRangeListAction, &QAction::triggered, this, &MainWindow::showOutputRangeList);
 
     m_pOptionsAction = new QAction(tr("&Options ..."), this);
@@ -157,6 +168,7 @@ void MainWindow::createMenu()
     m_pMeasureMenu->addAction(m_pStartMeasureAction);
     m_pMeasureMenu->addAction(m_pStopMeasureAction);
     m_pMeasureMenu->addSeparator();
+    m_pMeasureMenu->addAction(m_pPrintMeasureAction);
     m_pMeasureMenu->addAction(m_pExportMeasureAction);
 
 
@@ -180,7 +192,6 @@ void MainWindow::createMenu()
 
     m_pSettingMenu = pMenuBar->addMenu(tr("&Tools"));
 
-    m_pSettingMenu->addAction(m_pConnectToServerAction);
     m_pSettingMenu->addAction(m_pCalibratorsAction);
     m_pSettingMenu->addSeparator();
     m_pSettingMenu->addAction(m_pShowOutputSignalListAction);
@@ -219,13 +230,14 @@ bool MainWindow::createToolBars()
         m_pMeasureControlToolBar->addAction(m_pStartMeasureAction);
         m_pMeasureControlToolBar->addAction(m_pStopMeasureAction);
         m_pMeasureControlToolBar->addSeparator();
+        m_pMeasureControlToolBar->addAction(m_pPrintMeasureAction);
+        m_pMeasureControlToolBar->addSeparator();
         m_pMeasureControlToolBar->addAction(m_pCopyMeasureAction);
         m_pMeasureControlToolBar->addAction(m_pRemoveMeasureAction);
         m_pMeasureControlToolBar->addSeparator();
 
         m_pMeasureControlToolBar->setIconSize(QSize(16,16));
     }
-
 
     // Control panel measure timeout
     //
@@ -238,15 +250,62 @@ bool MainWindow::createToolBars()
         addToolBar(m_pMeasureTimeout);
 
         QLabel* measureTimeoutLabel = new QLabel(m_pMeasureTimeout);
+        QComboBox* measureTimeoutList = new QComboBox(m_pMeasureTimeout);
+        QLabel* measureTimeoutUnitLabel = new QLabel(m_pMeasureTimeout);
+        QRegExp rx( "^[0-9]*[.]{1}[0-9]*$" );
+        QValidator *validator = new QRegExpValidator(rx, m_pMeasureTimeout);
+
         m_pMeasureTimeout->addWidget(measureTimeoutLabel);
+        m_pMeasureTimeout->addWidget(measureTimeoutList);
+        m_pMeasureTimeout->addWidget(measureTimeoutUnitLabel);
+
         measureTimeoutLabel->setText(tr(" Measure timeout "));
         measureTimeoutLabel->setEnabled(false);
 
-        QComboBox* measureTimeoutCombo = new QComboBox(m_pMeasureTimeout);
-        m_pMeasureTimeout->addWidget(measureTimeoutCombo);
-        measureTimeoutCombo->setEditable(true);
-        measureTimeoutCombo->addItem("Empty");
-        //connect(measureTimeoutCombo, SIGNAL(activated(int)), this, SLOT(setMeasureTimeout(int)));
+        measureTimeoutList->setEditable(true);
+        measureTimeoutList->setValidator(validator);
+
+        for(int t = 0; t < MeasureTimeoutCount; t++)
+        {
+            measureTimeoutList->addItem(QString::number(MeasureTimeout[t], 10, 1));
+        }
+
+        measureTimeoutList->setCurrentText(QString::number(double(theOptions.getToolBar().m_measureTimeout) / 1000, 10, 1));
+
+        measureTimeoutUnitLabel->setText(tr(" sec."));
+        measureTimeoutUnitLabel->setEnabled(false);
+
+        connect(measureTimeoutList, &QComboBox::currentTextChanged, this, &MainWindow::setMeasureTimeout, Qt::QueuedConnection);
+    }
+
+
+    // Control panel measure kind
+    //
+    m_pMeasureKind = new QToolBar(this);
+    if (m_pMeasureKind != nullptr)
+    {
+        m_pMeasureKind->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+        m_pMeasureKind->setWindowTitle(tr("Control panel measure kind"));
+        addToolBarBreak(Qt::RightToolBarArea);
+        addToolBar(m_pMeasureKind);
+
+        QLabel* measureKindLabel = new QLabel(m_pMeasureKind);
+        QComboBox* measureKindList = new QComboBox(m_pMeasureKind);
+
+        m_pMeasureKind->addWidget(measureKindLabel);
+        m_pMeasureKind->addWidget(measureKindList);
+
+        measureKindLabel->setText(tr(" Measure kind "));
+        measureKindLabel->setEnabled(false);
+
+        for(int k = 0; k < MEASURE_KIND_COUNT; k++)
+        {
+            measureKindList->addItem(MeasureKind[k]);
+        }
+
+        measureKindList->setCurrentIndex(theOptions.getToolBar().m_measureKind);
+
+        connect(measureKindList, SIGNAL(currentIndexChanged(int)), this, SLOT(setMeasureKind(int)), Qt::QueuedConnection);
     }
 
 
@@ -260,14 +319,22 @@ bool MainWindow::createToolBars()
         addToolBarBreak(Qt::RightToolBarArea);
         addToolBar(m_pOutputSignalToolBar);
 
-        QLabel* osLabel = new QLabel(m_pOutputSignalToolBar);
-        m_pOutputSignalToolBar->addWidget(osLabel);
-        osLabel->setText(tr(" Output signals "));
-        osLabel->setEnabled(false);
+        QLabel* outputSignalLabel = new QLabel(m_pOutputSignalToolBar);
+        QComboBox* outputSignalList = new QComboBox(m_pOutputSignalToolBar);
 
-        QComboBox* osCombo = new QComboBox(m_pOutputSignalToolBar);
-        m_pOutputSignalToolBar->addWidget(osCombo);
-        osCombo->addItem("Don't use");
+        m_pOutputSignalToolBar->addWidget(outputSignalLabel);
+        outputSignalLabel->setText(tr(" Output signals "));
+        outputSignalLabel->setEnabled(false);
+
+        m_pOutputSignalToolBar->addWidget(outputSignalList);
+
+        for(int s = 0; s < OUTPUT_SIGNAL_TYPE_COUNT; s++)
+        {
+            outputSignalList->addItem(OutputSignalType[s]);
+        }
+        outputSignalList->setCurrentIndex(theOptions.getToolBar().m_outputSignalType);
+
+        connect(outputSignalList, SIGNAL(currentIndexChanged(int)), this, SLOT(setOutputSignalType(int)), Qt::QueuedConnection);
     }
 
     // Control panel selecting analog signal
@@ -408,7 +475,7 @@ void MainWindow::createPanels()
         QAction* findAction = m_pFindMeasurePanel->toggleViewAction();
         if (findAction != nullptr)
         {
-            findAction->setText(tr("Find ..."));
+            findAction->setText(tr("&Find ..."));
             findAction->setShortcut(Qt::CTRL + Qt::Key_F);
             findAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
 
@@ -501,31 +568,29 @@ void MainWindow::createStatusBar()
 
     m_statusEmpty = new QLabel(pStatusBar);
     m_statusMeasureThreadInfo = new QLabel(pStatusBar);
-    m_statusMeasureDemphrer = new QProgressBar(pStatusBar);
+    m_statusMeasureTimeout = new QProgressBar(pStatusBar);
     m_statusMeasureThreadState = new QLabel(pStatusBar);
     m_statusMeasureThreadState = new QLabel(pStatusBar);
     m_statusMeasureCount = new QLabel(pStatusBar);
     m_statusConnectToServer = new QLabel(pStatusBar);
 
-    m_statusMeasureDemphrer->setRange(0, 100);
-    m_statusMeasureDemphrer->setFixedWidth(100);
-    m_statusMeasureDemphrer->setFixedHeight(10);
-    m_statusMeasureDemphrer->setLayoutDirection(Qt::LeftToRight);
+    m_statusMeasureTimeout->setTextVisible(false);
+    m_statusMeasureTimeout->setRange(0, 100);
+    m_statusMeasureTimeout->setFixedWidth(100);
+    m_statusMeasureTimeout->setFixedHeight(10);
+    m_statusMeasureTimeout->setLayoutDirection(Qt::LeftToRight);
 
     pStatusBar->addWidget(m_statusConnectToServer);
     pStatusBar->addWidget(m_statusConnectToServer);
     pStatusBar->addWidget(m_statusMeasureCount);
     pStatusBar->addWidget(m_statusMeasureThreadState);
-    pStatusBar->addWidget(m_statusMeasureDemphrer);
+    pStatusBar->addWidget(m_statusMeasureTimeout);
     pStatusBar->addWidget(m_statusMeasureThreadInfo);
     pStatusBar->addWidget(m_statusEmpty);
 
     pStatusBar->setLayoutDirection(Qt::RightToLeft);
 
     m_statusEmpty->setText("");
-    m_statusMeasureThreadInfo->setText(tr("Measurement 1 of 10 "));
-    m_statusMeasureDemphrer->setValue(50);
-    m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));
     m_statusMeasureCount->setText(tr("Measurement 0/0 "));
     m_statusConnectToServer->setText(tr("Connect to server: offline "));
 }
@@ -534,7 +599,27 @@ void MainWindow::createStatusBar()
 
 void MainWindow::startMeasure()
 {
-    m_measureThread.setMeasureType(MEASURE_TYPE_LINEARITY);
+    if (m_pMainTab == nullptr ||
+        m_statusMeasureTimeout == nullptr )
+    {
+        return;
+    }
+
+    if (m_measureThread.isRunning() == true)
+    {
+        return;
+    }
+
+    int type = m_pMainTab->currentIndex();
+    if (type < 0 || type >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
+    m_statusMeasureTimeout->setValue(0);
+
+    m_measureThread.setMeasureType(type);
 
     m_measureThread.start();
 }
@@ -543,6 +628,11 @@ void MainWindow::startMeasure()
 
 void MainWindow::stopMeasure()
 {
+    if (m_measureThread.isFinished() == true)
+    {
+        return;
+    }
+
     m_measureThread.stop();
 }
 
@@ -559,6 +649,94 @@ void MainWindow::options()
 {
    OptionsDialog dialog;
    dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::setMeasureKind(int index)
+{
+    int kind = index;
+    if (kind < 0 || kind >= MEASURE_KIND_COUNT)
+    {
+        return;
+    }
+
+    theOptions.getToolBar().m_measureKind = kind;
+    theOptions.getToolBar().save();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::setMeasureTimeout(QString value)
+{
+    theOptions.getToolBar().m_measureTimeout = value.toDouble() * 1000;
+    theOptions.getToolBar().save();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::setOutputSignalType(int index)
+{
+    int type = index;
+    if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
+    {
+        return;
+    }
+
+    theOptions.getToolBar().m_outputSignalType = type;
+    theOptions.getToolBar().save();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onMeasureThreadStarted()
+{
+    if (m_statusMeasureThreadState == nullptr)
+    {
+        return;
+    }
+
+    m_statusMeasureThreadState->setText(tr("The measurement process is started "));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onMeasureThreadStoped()
+{
+    if (m_statusMeasureThreadState == nullptr ||
+        m_statusMeasureThreadInfo == nullptr ||
+        m_statusMeasureTimeout == nullptr )
+    {
+        return;
+    }
+
+    m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));
+    m_statusMeasureThreadInfo->setText("");
+    m_statusMeasureTimeout->setValue(0);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onMeasureThreadInfo(QString msg)
+{
+    if (m_statusMeasureThreadInfo == nullptr)
+    {
+        return;
+    }
+
+    m_statusMeasureThreadInfo->setText(msg);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onMeasureThreadInfo(int timeout)
+{
+    if (m_statusMeasureTimeout == nullptr)
+    {
+        return;
+    }
+
+    m_statusMeasureTimeout->setValue(timeout);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -46,6 +46,60 @@ void saveWindowPosition(QWidget* pWidget)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+TcpIpOption::TcpIpOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+TcpIpOption::TcpIpOption(const TcpIpOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+TcpIpOption::~TcpIpOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TcpIpOption::load()
+{
+    QSettings s;
+
+    m_serverIP = s.value( QString("%1ServerIP").arg(TCPIP_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort = s.value( QString("%1ServerPort").arg(TCPIP_OPTIONS_KEY), 2000).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TcpIpOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1ServerIP").arg(TCPIP_OPTIONS_KEY), m_serverIP);
+    s.setValue( QString("%1ServerPort").arg(TCPIP_OPTIONS_KEY), m_serverPort);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+TcpIpOption& TcpIpOption::operator=(const TcpIpOption& from)
+{
+    m_serverIP = from.m_serverIP;
+    m_serverPort = from.m_serverPort;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 ToolBarOption::ToolBarOption(QObject *parent) :
     QObject(parent)
 {
@@ -72,9 +126,9 @@ void ToolBarOption::load()
 {
     QSettings s;
 
-    m_measureKind = s.value( QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE).toInt();
     m_measureTimeout = s.value( QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
-    m_outputSignalType = s.value( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_UNKNOWN).toInt();
+    m_measureKind = s.value( QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE).toInt();
+    m_outputSignalType = s.value( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_DONT_USED).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -83,8 +137,8 @@ void ToolBarOption::save()
 {
     QSettings s;
 
-    s.setValue( QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
     s.setValue( QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
+    s.setValue( QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
     s.setValue( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), m_outputSignalType);
 }
 
@@ -92,8 +146,8 @@ void ToolBarOption::save()
 
 ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 {
-    m_measureKind = from.m_measureKind;
     m_measureTimeout = from.m_measureTimeout;
+    m_measureKind = from.m_measureKind;
     m_outputSignalType = from.m_outputSignalType;
 
     return *this;
@@ -627,6 +681,8 @@ Options::~Options()
 
 void Options::load()
 {
+    m_toolBar.load();
+    m_connectTcpIp.load();
     m_linearity.load();
 }
 
@@ -634,6 +690,8 @@ void Options::load()
 
 void Options::save()
 {
+    m_toolBar.save();
+    m_connectTcpIp.save();
     m_linearity.save();
 }
 
@@ -643,6 +701,8 @@ Options& Options::operator=(const Options& from)
 {
     m_mutex.lock();
 
+        m_toolBar = from.m_toolBar;
+        m_connectTcpIp = from.m_connectTcpIp;
         m_linearity = from.m_linearity;
 
     m_mutex.unlock();

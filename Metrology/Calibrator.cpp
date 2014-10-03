@@ -188,7 +188,7 @@ bool Calibrator::openPort()
         return false;
     }
 
-    enableWaitResponse(true);
+    waitResponse(true);
 
     return true;
 }
@@ -1053,7 +1053,7 @@ void Calibrator::convert(double& val, int mode, int order)
 
 void Calibrator::close()
 {
-    enableWaitResponse(false);
+    waitResponse(false);
 
     if (m_port.isOpen() == true)
     {

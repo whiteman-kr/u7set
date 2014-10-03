@@ -18,7 +18,44 @@ void saveWindowPosition(QWidget* pWidget);
 
 // ==============================================================================================
 
-#define						TOOLBAR_OPTIONS_KEY		"Options/ToolBar/"
+#define						TCPIP_OPTIONS_KEY               "Options/TcpIp/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const			TcpIpParamName[] =
+{
+                            QT_TRANSLATE_NOOP("Options.h", "IP"),
+                            QT_TRANSLATE_NOOP("Options.h", "Port"),
+};
+
+const int					TCPIP_PARAM_COUNT				= sizeof(TcpIpParamName)/sizeof(char*);
+
+const int					TCPIP_PARAM_SERVER_IP			= 0,
+                            TCPIP_PARAM_SERVER_PORT         = 1;
+
+// ----------------------------------------------------------------------------------------------
+
+class TcpIpOption : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit    TcpIpOption(QObject *parent = 0);
+    explicit    TcpIpOption(const TcpIpOption& from, QObject *parent = 0);
+               ~TcpIpOption();
+
+    QString     m_serverIP = "127.0.0.1";
+    int         m_serverPort = 2000;
+
+    void        load();
+    void        save();
+
+    TcpIpOption&  operator=(const TcpIpOption& from);
+};
+
+// ==============================================================================================
+
+#define						TOOLBAR_OPTIONS_KEY             "Options/ToolBar/"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -31,12 +68,12 @@ public:
     explicit    ToolBarOption(const ToolBarOption& from, QObject *parent = 0);
                ~ToolBarOption();
 
-    int				m_measureKind = MEASURE_KIND_ONE;                   // вид измерений: поканально или во всех кналанал сразу
-    int             m_measureTimeout = 0;                               // временая задержака между моментом когда калибратор задал значение и сохранение измерения
-    int				m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNKNOWN;    // тип выходного сигнала
+    int         m_measureTimeout = 0;                               // in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
+    int			m_measureKind = MEASURE_KIND_ONE;                   // measure kind: each channel separately - 0 or for all channels together - 1
+    int         m_outputSignalType = OUTPUT_SIGNAL_TYPE_DONT_USED;  // selected type of output signal
 
-    void            load();
-    void            save();
+    void        load();
+    void        save();
 
     ToolBarOption&  operator=(const ToolBarOption& from);
 };
@@ -140,7 +177,7 @@ public:
 
 // ==============================================================================================
 
-#define						LINEARITY_OPTIONS_KEY		"Options/Linearity/"
+#define						LINEARITY_OPTIONS_KEY           "Options/Linearity/"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -238,14 +275,23 @@ public:
             ~Options();
 
 private:
+
     QMutex              m_mutex;
 
+    ToolBarOption       m_toolBar;
+    TcpIpOption         m_connectTcpIp;
     LinearityOption     m_linearity;
 
 public:
 
-    void                setLinearity(const LinearityOption& linearity)  { m_linearity = linearity; }
-    LinearityOption&    getLinearity()                                  { return m_linearity; }
+    void                setToolBar(const ToolBarOption& toolBar)            { m_toolBar = toolBar; }
+    ToolBarOption&      getToolBar()                                        { return m_toolBar; }
+
+    void                setTcpIp(const TcpIpOption& connectTcpIp)           { m_connectTcpIp = connectTcpIp; }
+    TcpIpOption&        getTcpIp()                                          { return m_connectTcpIp; }
+
+    void                setLinearity(const LinearityOption& linearity)      { m_linearity = linearity; }
+    LinearityOption&    getLinearity()                                      { return m_linearity; }
 
     void				load();
     void				save();
