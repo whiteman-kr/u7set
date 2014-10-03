@@ -1051,6 +1051,17 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 		}
 	}
 
+	// Debugging .... parentObject->setChildRestriction("function(device) { return device.Place >=0 && device.Place < 16; }");
+
+	QString errorMessage;
+	bool allowed = parentObject->checkChild(object.get(), &errorMessage);
+
+	if (allowed == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("It is not allowed to add child, error message: %1").arg(errorMessage));
+		return;
+	}
+
 	// Add device to DB
 	//
 	assert(parentObject != nullptr);

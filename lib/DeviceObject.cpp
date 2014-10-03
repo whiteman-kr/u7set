@@ -64,6 +64,11 @@ namespace Hardware
 		Proto::Write(pMutableDeviceObject->mutable_strid(), m_strId);
 		Proto::Write(pMutableDeviceObject->mutable_caption(), m_caption);
 
+		if (m_childRestriction.isEmpty() == false)
+		{
+			Proto::Write(pMutableDeviceObject->mutable_childrestriction(), m_childRestriction);
+		}
+
 		if (m_preset == true)
 		{
 			pMutableDeviceObject->set_preset(m_preset);
@@ -88,6 +93,15 @@ namespace Hardware
 		m_uuid = Proto::Read(deviceobject.uuid());
 		m_strId = Proto::Read(deviceobject.strid());
 		m_caption = Proto::Read(deviceobject.caption());
+
+		if (deviceobject.has_childrestriction() == true)
+		{
+			m_childRestriction = Proto::Read(deviceobject.childrestriction());
+		}
+		else
+		{
+			m_childRestriction.clear();
+		}
 
 		if (deviceobject.has_preset() == true && deviceobject.preset() == true)
 		{
@@ -225,6 +239,66 @@ namespace Hardware
 		m_children.clear();
 	}
 
+	bool DeviceObject::checkChild(DeviceObject* child, QString* errorMessage)
+	{
+		if (child == nullptr ||
+			errorMessage == nullptr)
+		{
+			assert(child);
+			assert(errorMessage);
+			return false;
+		}
+
+		// Check device level
+		//
+		if (deviceType() > child->deviceType())
+		{
+			*errorMessage = tr("Childer device level must be lower that perents.");
+			return false;
+		}
+
+		// Assume that an empty script is true. It will allow to save memory for modules, controllers...
+		//
+		if (m_childRestriction.isEmpty() == true)
+		{
+			return true;
+		}
+
+		// Create a copy of child, will be deleted by jsEngine on destroying.
+		// It is because QJSEngine::newQObject makes value with JavaEngine ownership
+		// and it cannot be changed (((
+		// In QQmlEngine (derived from QJSEngine) it can be changed by calling QQmlEngine::setObjectOwnership(???, QQmlEngine::CppOwnership);
+		// also, QScriptEngine::QtOwnership can help.
+		// Hopefully in future Qt releases it might be changed, that ownership can be chnged from QJSEngine or QJSValue.
+		//
+		QByteArray data;
+		child->Save(data);
+
+		DeviceObject* childCopy = DeviceObject::Create(data);
+		data.clear();
+
+		// Run m_childRestriction script
+		//
+		QJSEngine jsEngine;
+		QJSValue arg = jsEngine.newQObject(childCopy);
+		QJSValue function = jsEngine.evaluate(m_childRestriction);
+		QJSValue result = function.call(QJSValueList() << arg);
+
+		if (result.isError() == true)
+		{
+			*errorMessage = tr("Script error:").arg(result.toString());
+			return false;
+		}
+
+		bool boolResult = result.toBool();
+		if (boolResult == false)
+		{
+			*errorMessage = tr("DeviceObject is not allowed.");
+		}
+
+		return boolResult;
+	}
+
 	const QString& DeviceObject::strId() const
 	{
 		return m_strId;
@@ -258,6 +332,16 @@ namespace Hardware
 	void DeviceObject::setFileInfo(const DbFileInfo& value)
 	{
 		m_fileInfo = value;
+	}
+
+	const QString& DeviceObject::childRestriction() const
+	{
+		return m_childRestriction;
+	}
+
+	void DeviceObject::setChildRestriction(const QString& value)
+	{
+		m_childRestriction = value;
 	}
 
 	bool DeviceObject::preset() const
@@ -479,10 +563,10 @@ namespace Hardware
 
 		// --
 		//
-		Proto::DeviceChassis* chassisMessage =
-				message->mutable_deviceobject()->mutable_chassis();
+		Proto::DeviceChassis* chassisMessage = message->mutable_deviceobject()->mutable_chassis();
 
 		chassisMessage->set_place(m_place);
+		chassisMessage->set_type(m_type);
 
 		return true;
 	}
@@ -512,6 +596,7 @@ namespace Hardware
 		const Proto::DeviceChassis& chassisMessage = message.deviceobject().chassis();
 
 		m_place = chassisMessage.place();
+		m_type =  chassisMessage.type();
 
 		return true;
 	}
@@ -529,6 +614,16 @@ namespace Hardware
 	void DeviceChassis::setPlace(int value)
 	{
 		m_place = value;
+	}
+
+	int DeviceChassis::type() const
+	{
+		return m_type;
+	}
+
+	void DeviceChassis::setType(int value)
+	{
+		m_type = value;
 	}
 
 	//
@@ -557,12 +652,10 @@ namespace Hardware
 
 		// --
 		//
-		Proto::DeviceModule* moduleMessage =
-				message->mutable_deviceobject()->mutable_module();
+		Proto::DeviceModule* moduleMessage = message->mutable_deviceobject()->mutable_module();
 
-		Q_UNUSED(moduleMessage);
-		//moduleMessage->set_startxdocpt(m_startXDocPt);
-		//moduleMessage->set_startydocpt(m_startYDocPt);
+		moduleMessage->set_place(m_place);
+		moduleMessage->set_type(m_type);
 
 		return true;
 	}
@@ -591,9 +684,8 @@ namespace Hardware
 
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
-		Q_UNUSED(moduleMessage);
-		//x = moduleMessage.startxdocpt();
-		//y = moduleMessage.startydocpt();
+		m_place = moduleMessage.place();
+		m_type =  moduleMessage.type();
 
 		return true;
 	}
@@ -601,6 +693,26 @@ namespace Hardware
 	DeviceType DeviceModule::deviceType() const
 	{
 		return m_deviceType;
+	}
+
+	int DeviceModule::place() const
+	{
+		return m_place;
+	}
+
+	void DeviceModule::setPlace(int value)
+	{
+		m_place = value;
+	}
+
+	int DeviceModule::type() const
+	{
+		return m_type;
+	}
+
+	void DeviceModule::setType(int value)
+	{
+		m_type = value;
 	}
 
 

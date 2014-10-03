@@ -363,6 +363,7 @@ message DeviceObject
 	required Uuid uuid = 1;
 	required wstring strId = 2;
 	required wstring caption = 3;
+	optional wstring childRestriction = 4;
 
 	optional bool preset = 32 [default = false];
 	optional bool presetRoot = 33 [default = false];
@@ -394,10 +395,13 @@ message DeviceRack
 message DeviceChassis
 {
 	optional int32 place = 1 [default = 0];
+	optional int32 type = 2 [default = 0];
 }
 
 message DeviceModule
 {
+	optional int32 place = 1 [default = 0];
+	optional int32 type = 2 [default = 0];
 }
 
 message DeviceController
