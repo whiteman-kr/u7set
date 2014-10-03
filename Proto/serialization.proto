@@ -393,6 +393,7 @@ message DeviceRack
 
 message DeviceChassis
 {
+	optional int32 place = 1 [default = 0];
 }
 
 message DeviceModule

@@ -44,6 +44,8 @@ namespace Hardware
 		public Proto::ObjectSerialization<DeviceObject>
 	{
 		Q_OBJECT
+		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
+		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
 
 	protected:
 		explicit DeviceObject(bool preset = false);
@@ -215,6 +217,8 @@ namespace Hardware
 	//
 	class DeviceChassis : public DeviceObject
 	{
+		Q_PROPERTY(int Place READ place WRITE setPlace)
+
 		Q_OBJECT
 	public:
 		explicit DeviceChassis(bool preset = false);
@@ -229,8 +233,18 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
+		// Properties
+		//
+	public:
+		int place() const;
+		void setPlace(int value);
+
+		// Data
+		//
 	private:
 		static const DeviceType m_deviceType = DeviceType::Chassis;
+
+		int m_place = 0;
 	};
 
 

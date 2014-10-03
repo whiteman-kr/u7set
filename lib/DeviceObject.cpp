@@ -482,9 +482,7 @@ namespace Hardware
 		Proto::DeviceChassis* chassisMessage =
 				message->mutable_deviceobject()->mutable_chassis();
 
-		Q_UNUSED(chassisMessage);
-		//chassisMessage ->set_startxdocpt(m_startXDocPt);
-		//chassisMessage ->set_startydocpt(m_startYDocPt);
+		chassisMessage->set_place(m_place);
 
 		return true;
 	}
@@ -513,9 +511,7 @@ namespace Hardware
 
 		const Proto::DeviceChassis& chassisMessage = message.deviceobject().chassis();
 
-		Q_UNUSED(chassisMessage);
-		//x = chassisMessage.startxdocpt();
-		//y = chassisMessage.startydocpt();
+		m_place = chassisMessage.place();
 
 		return true;
 	}
@@ -523,6 +519,16 @@ namespace Hardware
 	DeviceType DeviceChassis::deviceType() const
 	{
 		return m_deviceType;
+	}
+
+	int DeviceChassis::place() const
+	{
+		return m_place;
+	}
+
+	void DeviceChassis::setPlace(int value)
+	{
+		m_place = value;
 	}
 
 	//

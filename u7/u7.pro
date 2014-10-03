@@ -81,7 +81,8 @@ SOURCES +=\
     ../lib/ProtoSerialization.cpp \
 	../lib/CUtils.cpp \
     ../lib/Signal.cpp \
-    SignalPropertiesDialog.cpp
+    SignalPropertiesDialog.cpp \
+    ../lib/PropertyEditor.cpp
 
 
 HEADERS  += \
@@ -129,7 +130,8 @@ HEADERS  += \
     ../include/CUtils.h \
     ../include/Signal.h \
     SignalPropertiesDialog.h \
-    ../include/OrderedHash.h
+    ../include/OrderedHash.h \
+    ../include/PropertyEditor.h
     ../include/Signal.h
 
 FORMS    += \

@@ -230,6 +230,7 @@ PropertyPage* OptionsDialog::createPage(int page)
 
     switch (page)
     {
+        case OPTION_PAGE_TCP_IP:
         case OPTION_PAGE_LINEARETY_MEASURE:
         case OPTION_PAGE_SETTING_MEASURE:
         case OPTION_PAGE_MEASURE_VIEW_TEXT:
@@ -257,6 +258,29 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
     switch (page)
     {
+        case OPTION_PAGE_TCP_IP:
+            {
+                QtProperty *serverGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server"));
+
+                item = manager->addProperty(QVariant::String, TcpIpParamName[TCPIP_PARAM_SERVER_IP]);
+                item->setValue( m_options.getTcpIp().m_serverIP );
+                appendProperty(item, page, TCPIP_PARAM_SERVER_IP);
+                serverGroup->addSubProperty(item);
+
+                item = manager->addProperty(QVariant::Int, TcpIpParamName[TCPIP_PARAM_SERVER_PORT]);
+                item->setValue( m_options.getTcpIp().m_serverPort );
+                item->setAttribute(QLatin1String("minimum"), 1);
+                item->setAttribute(QLatin1String("maximum"), 65535);
+                item->setAttribute(QLatin1String("singleStep"), 1);
+                appendProperty(item, page, TCPIP_PARAM_SERVER_PORT);
+                serverGroup->addSubProperty(item);
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(serverGroup);
+            }
+            break;
+
         case OPTION_PAGE_LINEARETY_MEASURE:
             {
                 QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
@@ -559,6 +583,16 @@ void OptionsDialog::onPropertyChanged(QtProperty *property, const QVariant &valu
 
     switch (page)
     {
+        case OPTION_PAGE_TCP_IP:
+            {
+                switch(param)
+                {
+                    case TCPIP_PARAM_SERVER_IP:     m_options.getTcpIp().m_serverIP = value.toString();                 break;
+                    case TCPIP_PARAM_SERVER_PORT:   m_options.getTcpIp().m_serverPort = value.toInt();                  break;
+                }
+            }
+            break;
+
         case OPTION_PAGE_LINEARETY_MEASURE:
             {
                 switch(param)

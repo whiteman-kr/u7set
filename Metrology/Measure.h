@@ -37,8 +37,8 @@ const int MeasureTimeoutCount = sizeof(MeasureTimeout)/sizeof(int);
 
 const char* const	MeasureKind[] =
 {
-            QT_TRANSLATE_NOOP("Measure.h", "In the one channel"),
-            QT_TRANSLATE_NOOP("Measure.h", "In the all channels"),
+            QT_TRANSLATE_NOOP("Measure.h", " in one channel"),
+            QT_TRANSLATE_NOOP("Measure.h", " in all channels"),
 };
 
 const int   MEASURE_KIND_COUNT = sizeof(MeasureKind)/sizeof(char*);
@@ -52,7 +52,6 @@ const int	MEASURE_KIND_UNKNOWN			= -1,
 #define     ERR_MEASURE_KIND(kind) (kind < 0 || kind >= MEASURE_KIND_COUNT)
 #define		TEST_MEASURE_KIND(kind)				if (ERR_MEASURE_KIND(kind)) { return; }
 #define     TEST_MEASURE_KIND1(kind, retVal)	if (ERR_MEASURE_KIND(kind)) { return retVal; }
-
 
 // ==============================================================================================
 
@@ -80,6 +79,7 @@ const int   OUTPUT_SIGNAL_KIND_UNKNOWN			= -1,
 
 const char* const OutputSignalType[] =
 {
+            QT_TRANSLATE_NOOP("Measure.h", "Don't used"),
             QT_TRANSLATE_NOOP("Measure.h", "Correction"),
             QT_TRANSLATE_NOOP("Measure.h", "Signal MPS"),
             QT_TRANSLATE_NOOP("Measure.h", "P → T"),
@@ -89,10 +89,11 @@ const char* const OutputSignalType[] =
 const int   OUTPUT_SIGNAL_TYPE_COUNT = sizeof(OutputSignalType)/sizeof(char*);
 
 const int   OUTPUT_SIGNAL_TYPE_UNKNOWN			= -1,
-            OUTPUT_SIGNAL_TYPE_CORRECTION		= 0,
-            OUTPUT_SIGNAL_TYPE_MPS				= 1,
-            OUTPUT_SIGNAL_TYPE_PT				= 2,
-            OUTPUT_SIGNAL_TYPE_TP				= 3;
+            OUTPUT_SIGNAL_TYPE_DONT_USED		= 0,
+            OUTPUT_SIGNAL_TYPE_CORRECTION		= 1,
+            OUTPUT_SIGNAL_TYPE_MPS				= 2,
+            OUTPUT_SIGNAL_TYPE_PT				= 3,
+            OUTPUT_SIGNAL_TYPE_TP				= 4;
 
 // ----------------------------------------------------------------------------------------------
 

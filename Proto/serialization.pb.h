@@ -3880,14 +3880,24 @@ class DeviceChassis : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
+  // optional int32 place = 1 [default = 0];
+  inline bool has_place() const;
+  inline void clear_place();
+  static const int kPlaceFieldNumber = 1;
+  inline ::google::protobuf::int32 place() const;
+  inline void set_place(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceChassis)
  private:
+  inline void set_has_place();
+  inline void clear_has_place();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::google::protobuf::int32 place_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[1];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -8028,6 +8038,28 @@ inline void DeviceObject::set_allocated_diagsignal(::Proto::DeviceDiagSignal* di
 // -------------------------------------------------------------------
 
 // DeviceChassis
+
+// optional int32 place = 1 [default = 0];
+inline bool DeviceChassis::has_place() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void DeviceChassis::set_has_place() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void DeviceChassis::clear_has_place() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void DeviceChassis::clear_place() {
+  place_ = 0;
+  clear_has_place();
+}
+inline ::google::protobuf::int32 DeviceChassis::place() const {
+  return place_;
+}
+inline void DeviceChassis::set_place(::google::protobuf::int32 value) {
+  set_has_place();
+  place_ = value;
+}
 
 // -------------------------------------------------------------------
 

@@ -7,12 +7,20 @@
 class DbController;
 
 class QtTreePropertyBrowser;
-//class QtProperty;
-//class QtStringPropertyManager;
-//class QtEnumPropertyManager;
-//class QtIntPropertyManager;
-//class QtDoublePropertyManager;
+class QtProperty;
+class QtStringPropertyManager;
+class QtEnumPropertyManager;
+class QtIntPropertyManager;
+class QtDoublePropertyManager;
+class QtGroupPropertyManager;
+class QtBoolPropertyManager;
 
+
+//
+//
+// EquipmentModel
+//
+//
 
 class EquipmentModel : public QAbstractItemModel
 {
@@ -89,6 +97,11 @@ private:
 };
 
 
+//
+//
+// EquipmentView
+//
+//
 class EquipmentView : public QTreeView
 {
 	Q_OBJECT
@@ -137,7 +150,11 @@ private:
 	DbController* m_dbController;
 };
 
-
+//
+//
+// EquipmentTabPage
+//
+//
 class EquipmentTabPage : public MainTabPage
 {
 	Q_OBJECT
@@ -148,6 +165,7 @@ public:
 
 protected:
 	void CreateActions();
+
 
 	bool isPresetMode() const;
 	bool isConfigurationMode() const;
@@ -165,6 +183,8 @@ public slots:
 
 	void setActionState();
 	void modeSwitched();
+
+	void setProperties();
 
 	// Data
 	//
@@ -199,8 +219,18 @@ private:
 	EquipmentModel* m_equipmentModel = nullptr;
 	EquipmentView* m_equipmentView = nullptr;
 
-	QtTreePropertyBrowser* m_propertyBrowser = nullptr;
 	QSplitter* m_splitter = nullptr;
+
+	// Property Browser
+	//
+	QtTreePropertyBrowser* m_propertyEditor = nullptr;
+
+	QtGroupPropertyManager* m_propertyGroupManager = nullptr;
+	QtStringPropertyManager* m_propertyStringManager = nullptr;
+	QtEnumPropertyManager* m_propertyEnumManager = nullptr;
+	QtIntPropertyManager* m_propertyIntManager = nullptr;
+	QtDoublePropertyManager* m_propertyDoubleManager = nullptr;
+	QtBoolPropertyManager* m_propertyBoolManager = nullptr;
 };
 
 

@@ -256,7 +256,7 @@ public:
     double		getMeasureValue()               { return m_measureValue; }
     double		getSourceValue()                { return m_sourceValue; }
     QString     getLastError()                  { return m_lastError; }
-    void        enableWaitResponse(bool enable) { m_enableWaitResponse = enable; }
+    void        waitResponse(bool enable)       { m_enableWaitResponse = enable; }
 
     void        loadSettings();
     void        saveSettings();
