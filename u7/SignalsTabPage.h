@@ -27,6 +27,8 @@ public:
 
 	void loadSignals();
 
+	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
+
 signals:
 	void cellsSizeChanged();
 
