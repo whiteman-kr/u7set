@@ -21,18 +21,18 @@ MainWindow::MainWindow(QWidget *parent) :
     m_serviceTable(new QTableView(this)),
     m_trayIcon(new QSystemTrayIcon(this))
 {
-    connect(this, SIGNAL(commandPushed(int,int,int)), m_serviceModel, SLOT(sendCommand(int,int,int)));
+    connect(this, &MainWindow::commandPushed, m_serviceModel, &ServiceTableModel::sendCommand);
 
     m_serviceTable->setModel(m_serviceModel);
-    connect(m_serviceModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), m_serviceTable, SLOT(resizeColumnsToContents()));
-    connect(m_serviceModel, SIGNAL(serviceStateChanged(int)), m_serviceTable, SLOT(resizeRowToContents(int)));
-    connect(m_serviceModel, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), m_serviceTable, SLOT(resizeColumnsToContents()));
+    connect(m_serviceModel, &ServiceTableModel::dataChanged, m_serviceTable, &QTableView::resizeColumnsToContents);
+    connect(m_serviceModel, &ServiceTableModel::serviceStateChanged, m_serviceTable, &QTableView::resizeRowToContents);
+    connect(m_serviceModel, &ServiceTableModel::rowsAboutToBeInserted, m_serviceTable, &QTableView::resizeColumnsToContents);
     m_serviceTable->resizeColumnsToContents();
     setCentralWidget(m_serviceTable);
 
     m_trayIcon->setIcon(windowIcon());
     m_trayIcon->show();
-    connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
+    connect(m_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::trayIconActivated);
 
     QMenu *contextMenu = new QMenu(this);
     QToolBar *toolBar = addToolBar(tr("Main actions"));
@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Languages
     QActionGroup *languageActionGroup = new QActionGroup(this);
-    connect(languageActionGroup, SIGNAL(triggered(QAction *)), this, SLOT(switchLanguage(QAction *)));
+    connect(languageActionGroup, &QActionGroup::triggered, this, &MainWindow::switchLanguage);
 
     QString qmPath = ":/translations";
     QDir dir(qmPath);

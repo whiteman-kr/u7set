@@ -14,7 +14,7 @@ class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit SignalsDelegate(QObject *parent = 0);
+    explicit SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, QObject *parent = 0);
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
@@ -27,6 +27,10 @@ signals:
 
 public slots:
 
+private:
+	DataFormatList& m_dataFormatInfo;
+	UnitList& m_unitInfo;
+	SignalSet& m_signalSet;
 };
 
 
