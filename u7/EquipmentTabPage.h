@@ -2,18 +2,10 @@
 
 #include "MainTabPage.h"
 #include "../include/DeviceObject.h"
+#include "../include/PropertyEditor.h"
 
 
 class DbController;
-
-class QtTreePropertyBrowser;
-class QtProperty;
-class QtStringPropertyManager;
-class QtEnumPropertyManager;
-class QtIntPropertyManager;
-class QtDoublePropertyManager;
-class QtGroupPropertyManager;
-class QtBoolPropertyManager;
 
 
 //
@@ -186,6 +178,8 @@ public slots:
 
 	void setProperties();
 
+	void propertiesChanged(QObjectList objects);
+
 	// Data
 	//
 private:
@@ -221,16 +215,7 @@ private:
 
 	QSplitter* m_splitter = nullptr;
 
-	// Property Browser
-	//
-	QtTreePropertyBrowser* m_propertyEditor = nullptr;
-
-	QtGroupPropertyManager* m_propertyGroupManager = nullptr;
-	QtStringPropertyManager* m_propertyStringManager = nullptr;
-	QtEnumPropertyManager* m_propertyEnumManager = nullptr;
-	QtIntPropertyManager* m_propertyIntManager = nullptr;
-	QtDoublePropertyManager* m_propertyDoubleManager = nullptr;
-	QtBoolPropertyManager* m_propertyBoolManager = nullptr;
+	PropertyEditor* m_propertyEditor = nullptr;
 };
 
 
