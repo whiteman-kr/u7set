@@ -3,7 +3,24 @@
 #include "MainTabPage.h"
 #include "../include/DeviceObject.h"
 
+
 class DbController;
+
+class QtTreePropertyBrowser;
+class QtProperty;
+class QtStringPropertyManager;
+class QtEnumPropertyManager;
+class QtIntPropertyManager;
+class QtDoublePropertyManager;
+class QtGroupPropertyManager;
+class QtBoolPropertyManager;
+
+
+//
+//
+// EquipmentModel
+//
+//
 
 class EquipmentModel : public QAbstractItemModel
 {
@@ -46,10 +63,15 @@ public slots:
 	void projectOpened();
 	void projectClosed();
 
+	void switchMode();
+
 	// Properties
 public:
 	DbController* dbController();
 	DbController* dbController() const;
+
+	bool isPresetMode() const;
+	bool isConfigurationMode() const;
 
 	// Data
 	//
@@ -58,6 +80,8 @@ private:
 	QWidget* m_parentWidget;
 
 	std::shared_ptr<Hardware::DeviceObject> m_root;
+	std::shared_ptr<Hardware::DeviceObject> m_configuration;
+	std::shared_ptr<Hardware::DeviceObject> m_preset;
 
 	enum Columns
 	{
@@ -73,6 +97,11 @@ private:
 };
 
 
+//
+//
+// EquipmentView
+//
+//
 class EquipmentView : public QTreeView
 {
 	Q_OBJECT
@@ -84,12 +113,22 @@ public:
 	EquipmentView(DbController* dbcontroller);
 	virtual ~EquipmentView();
 
+	bool isPresetMode() const;
+	bool isConfigurationMode() const;
+
 public slots:
 	void addSystem();
 	void addRack();
 	void addChassis();
 	void addModule();
 
+	void addPresetRack();
+	void addPresetChassis();
+	void addPresetModule();
+
+	void choosePreset(Hardware::DeviceType type);
+
+	void addPresetToConfiguration(const DbFileInfo& fileInfo);
 	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object);
 
 	void deleteSelectedDevices();
@@ -102,6 +141,7 @@ public slots:
 	//
 protected:
 	EquipmentModel* equipmentModel();
+	EquipmentModel* equipmentModel() const;
 	DbController* dbController();
 
 	// Data
@@ -110,7 +150,11 @@ private:
 	DbController* m_dbController;
 };
 
-
+//
+//
+// EquipmentTabPage
+//
+//
 class EquipmentTabPage : public MainTabPage
 {
 	Q_OBJECT
@@ -121,6 +165,10 @@ public:
 
 protected:
 	void CreateActions();
+
+
+	bool isPresetMode() const;
+	bool isConfigurationMode() const;
 
 	// Events
 	//
@@ -134,29 +182,55 @@ public slots:
 	void modelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
 	void setActionState();
+	void modeSwitched();
+
+	void setProperties();
 
 	// Data
 	//
 private:
-	QAction* m_addSystemAction = nullptr;
-	QAction* m_addRackAction = nullptr;
-	QAction* m_addChassisAction = nullptr;
-	QAction* m_addModuleAction = nullptr;
-
+	QMenu* m_addObjectMenu = nullptr;
+	QAction* m_addObjectAction = nullptr;
+		QAction* m_addSystemAction = nullptr;
+		QAction* m_addRackAction = nullptr;
+		QAction* m_addChassisAction = nullptr;
+		QAction* m_addModuleAction = nullptr;
+	//----------------------------------
+	QMenu* m_addPresetMenu = nullptr;
+	QAction* m_addPresetAction = nullptr;
+		QAction* m_addPresetRackAction = nullptr;
+		QAction* m_addPresetChassisAction = nullptr;
+		QAction* m_addPresetModuleAction = nullptr;
+	//----------------------------------
 	QAction* m_SeparatorAction1 = nullptr;
 	QAction* m_deleteObjectAction = nullptr;
-
+	//----------------------------------
 	QAction* m_SeparatorAction2 = nullptr;
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_refreshAction = nullptr;
+	//----------------------------------
+	QAction* m_SeparatorAction3 = nullptr;
+	QAction* m_switchMode = nullptr;
 
+	//--
+	//
 	EquipmentModel* m_equipmentModel = nullptr;
 	EquipmentView* m_equipmentView = nullptr;
 
-	QTextEdit* m_propertyView = nullptr;
 	QSplitter* m_splitter = nullptr;
+
+	// Property Browser
+	//
+	QtTreePropertyBrowser* m_propertyEditor = nullptr;
+
+	QtGroupPropertyManager* m_propertyGroupManager = nullptr;
+	QtStringPropertyManager* m_propertyStringManager = nullptr;
+	QtEnumPropertyManager* m_propertyEnumManager = nullptr;
+	QtIntPropertyManager* m_propertyIntManager = nullptr;
+	QtDoublePropertyManager* m_propertyDoubleManager = nullptr;
+	QtBoolPropertyManager* m_propertyBoolManager = nullptr;
 };
 
 

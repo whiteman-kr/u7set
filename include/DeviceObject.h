@@ -18,7 +18,9 @@ namespace Hardware
 		Chassis,
 		Module,
 		Controller,
-		DiagSignal
+		DiagSignal,
+
+		DeviceTypeCount
 	};
 
 	const static wchar_t* DeviceObjectExtensions[] =
@@ -29,7 +31,7 @@ namespace Hardware
 			L".hcs",		// Chassis
 			L".hmd",		// Module
 			L".hcr",		// Controller
-			L".hds"		// DiagSignal
+			L".hds"			// DiagSignal
 		};
 
 	//
@@ -42,9 +44,11 @@ namespace Hardware
 		public Proto::ObjectSerialization<DeviceObject>
 	{
 		Q_OBJECT
+		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
+		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
 
 	protected:
-		DeviceObject();
+		explicit DeviceObject(bool preset = false);
 
 	public:
 		virtual ~DeviceObject();
@@ -52,6 +56,8 @@ namespace Hardware
 		// Serialization
 		//
 		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
+
+		static DeviceObject* fromDbFile(const DbFile& file);
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -72,6 +78,7 @@ namespace Hardware
 		virtual DeviceType deviceType() const;
 
 		QString fileExtension() const;
+		static QString fileExtension(DeviceType device);
 
 		// Children care
 		//
@@ -99,6 +106,17 @@ namespace Hardware
 		const DbFileInfo& fileInfo() const;
 		void setFileInfo(const DbFileInfo& value);
 
+		// Preset
+		//
+		bool preset() const;
+
+		bool presetRoot() const;
+		void setPresetRoot(bool value);
+
+		const QString& presetName() const;
+		void setPresetName(const QString& value);
+
+
 		// Data
 		//
 	protected:
@@ -110,6 +128,13 @@ namespace Hardware
 		QString m_caption;
 
 		DbFileInfo m_fileInfo;
+
+		// Preset Data
+		//
+		bool m_preset = false;			// It is preset or part of it
+		bool m_presetRoot = false;		// This object is preset root
+		QString m_presetName;			// PresetName, if it is preset
+		//QUuid m_presetId;
 	};
 
 
@@ -122,7 +147,7 @@ namespace Hardware
 	{
 		Q_OBJECT
 	public:
-		DeviceRoot();
+		explicit DeviceRoot(bool preset = false);
 		virtual ~DeviceRoot();
 
 	public:
@@ -142,7 +167,7 @@ namespace Hardware
 	{
 		Q_OBJECT
 	public:
-		DeviceSystem();
+		explicit DeviceSystem(bool preset = false);
 		virtual ~DeviceSystem();
 
 		// Serialization
@@ -168,7 +193,7 @@ namespace Hardware
 	{
 		Q_OBJECT
 	public:
-		DeviceRack();
+		explicit DeviceRack(bool preset = false);
 		virtual ~DeviceRack();
 
 		// Serialization
@@ -192,9 +217,11 @@ namespace Hardware
 	//
 	class DeviceChassis : public DeviceObject
 	{
+		Q_PROPERTY(int Place READ place WRITE setPlace)
+
 		Q_OBJECT
 	public:
-		DeviceChassis();
+		explicit DeviceChassis(bool preset = false);
 		virtual ~DeviceChassis();
 
 		// Serialization
@@ -206,8 +233,18 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
+		// Properties
+		//
+	public:
+		int place() const;
+		void setPlace(int value);
+
+		// Data
+		//
 	private:
 		static const DeviceType m_deviceType = DeviceType::Chassis;
+
+		int m_place = 0;
 	};
 
 
@@ -220,7 +257,7 @@ namespace Hardware
 	{
 		Q_OBJECT
 	public:
-		DeviceModule();
+		explicit DeviceModule(bool preset = false);
 		virtual ~DeviceModule();
 
 		// Serialization
@@ -246,7 +283,7 @@ namespace Hardware
 	{
 		Q_OBJECT
 	public:
-		DeviceController();
+		explicit DeviceController(bool preset = false);
 		virtual ~DeviceController();
 
 		// Serialization
@@ -272,7 +309,7 @@ namespace Hardware
 	{
 		Q_OBJECT
 	public:
-		DeviceDiagSignal();
+		explicit DeviceDiagSignal(bool preset = false);
 		virtual ~DeviceDiagSignal();
 
 		// Serialization

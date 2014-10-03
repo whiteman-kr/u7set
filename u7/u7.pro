@@ -81,7 +81,8 @@ SOURCES +=\
     ../lib/ProtoSerialization.cpp \
 	../lib/CUtils.cpp \
     ../lib/Signal.cpp \
-    SignalPropertiesDialog.cpp
+    SignalPropertiesDialog.cpp \
+    ../lib/PropertyEditor.cpp
 
 
 HEADERS  += \
@@ -129,7 +130,8 @@ HEADERS  += \
     ../include/CUtils.h \
     ../include/Signal.h \
     SignalPropertiesDialog.h \
-    ../include/OrderedHash.h
+    ../include/OrderedHash.h \
+    ../include/PropertyEditor.h
     ../include/Signal.h
 
 FORMS    += \
@@ -147,8 +149,6 @@ FORMS    += \
 
 RESOURCES += \
 	Resources.qrc
-
-include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 OTHER_FILES += \
 	../Proto/proto_compile.bat \
@@ -240,7 +240,7 @@ DEPENDPATH += ../VFrame30
 
 # QtPropertyBrowser
 #
-#include(../QtPropertyBrowser/src/qtpropertybrowser.pri)
+include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 
 # Visual Leak Detector

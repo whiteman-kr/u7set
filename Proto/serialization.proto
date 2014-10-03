@@ -364,6 +364,10 @@ message DeviceObject
 	required wstring strId = 2;
 	required wstring caption = 3;
 
+	optional bool preset = 32 [default = false];
+	optional bool presetRoot = 33 [default = false];
+	optional wstring presetName = 34;
+
 	// Derived from Hardware::DeviceObject
 	//
 	optional DeviceRoot Root = 100;					// Not used
@@ -371,8 +375,8 @@ message DeviceObject
 	optional DeviceRack Rack = 102;
 	optional DeviceChassis Chassis = 103;
 	optional DeviceModule Module = 104;
-	optional DeviceController Controller = 11;		// 11 !!!
-	optional DeviceDiagSignal DiagSignal = 10;		// 10 !!!
+	optional DeviceController Controller = 105;
+	optional DeviceDiagSignal DiagSignal = 106;
 }
 
 message DeviceRoot
@@ -389,6 +393,7 @@ message DeviceRack
 
 message DeviceChassis
 {
+	optional int32 place = 1 [default = 0];
 }
 
 message DeviceModule

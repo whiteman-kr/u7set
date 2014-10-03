@@ -36,6 +36,8 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QTextStream>
+#include <QMetaObject>
+#include <QMetaClassInfo>
 
 
 // Qt Widgets
