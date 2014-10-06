@@ -573,13 +573,15 @@ void OptionsDialog::onPropertyChanged(QtProperty *property, const QVariant &valu
         return;
     }
 
-    int page = m_propertyList[property] & 0xFF00;
+    unsigned int paramId = m_propertyList[property];
+
+    int page = (paramId & 0xFF00) >> 8;
     if (page < 0 || page >= OPTION_PAGE_COUNT)
     {
         return;
     }
 
-    int param = m_propertyList[property] & 0x00FF;
+    int param = paramId & 0x00FF;
 
     switch (page)
     {

@@ -2,6 +2,7 @@
 #define CALIBRATORBASE_H
 
 #include <QObject>
+#include <QMutex>
 #include <QList>
 #include <QThread>
 #include <QEvent>
@@ -13,7 +14,7 @@
 #include <QProgressBar>
 
 #include "Calibrator.h"
-#include "CalibratorManagerDialog.h"
+#include "CalibratorManager.h"
 
 // ==============================================================================================
 
@@ -48,16 +49,32 @@ public:
     explicit CalibratorBase(QObject *parent = 0);
             ~CalibratorBase();
 
-    void                init(QWidget* parent = 0);
-    void                clear();
+    void                        init(QWidget* parent = 0);
+    void                        clear();
 
-    void                showWnd();
-    Calibrator*         getMainCalibrator();
+    void                        show();
+
+    int                         calibratorCount();
+
+    CalibratorManager*          getCalibratorManager(int index);
+
+    int                         getConnectedCalibratorsCount() { return m_connectedCalibratorsCount; }
 
 private:
 
-    QList<Calibrator*>              m_calibratorList;
-    QList<CalibratorManagerDialog*> m_calibratorManagerList;
+    QMutex                      m_mutex;
+
+    QTimer                      m_timer;
+    int                         m_timeout = 0;
+
+    QList<CalibratorManager*>   m_calibratorManagerList;
+
+    int                         m_connectedCalibratorsCount = 0;
+    int                         m_connectedCalibratorsIndex[MAX_CALIBRATOR_COUNT];
+
+
+    void                        updateConnectedCalibrators();
+
 
 private:
 
@@ -67,16 +84,13 @@ private:
     QDialog*            m_pMainWnd = nullptr;
 
     QMenu*              m_pCalibratorMenu = nullptr;
-    QMenuBar*           m_pMenuBar  = nullptr;
+    QMenuBar*           m_pMenuBar = nullptr;
     QAction*            m_pInitAction = nullptr;
     QAction*            m_pManageAction = nullptr;
     QAction*            m_pEditAction = nullptr;
 
     QTableWidget*       m_pCalibratorView = nullptr;
     QProgressBar*       m_pCalibratorProgress = nullptr;
-
-    QTimer              m_timer;
-    int                 m_timeout = 0;
 
 
     void                createCalibrators();
@@ -87,10 +101,15 @@ private:
     void                setHeaderList();
     void                updateList();
 
+    void                appendCalibratorManger(CalibratorManager* pManager);
+    void                removeCalibratorManger(int index);
+
 signals:
 
-    void                openAllCalibrator();
-    void                closeAllCalibrator();
+    void                calibratorOpen();
+    void                calibratorClose();
+
+    void                calibratorConnectedChanged(int);
 
 public slots:
 
@@ -101,13 +120,12 @@ public slots:
     void                onEdit();                           // Slot of calibrator menu - Edit setting
     void                onContextMenu(QPoint);              // Slot of context menu - Manage
 
-    void                onFinishedInitializationWnd();      // Slot blocks close the windows, until the initialization process finished
+    void                onClose();                          // Slot blocks close the windows, until the initialization process finishing
 
     void                editSettings(int row,int);          // Slot for edit serial port and type of calibrator
 
-    void                onConnected();                      // Slots events from calibrator
-
-
+    void                onCalibratorConnected();            // Slots events from calibrator
+    void                onCalibratorDisconnected();         // Slots events from calibrator
 };
 
 // ==============================================================================================
