@@ -20,6 +20,8 @@ private:
 	void getSignalData(QSqlQuery& q, Signal &s);
 	QString getSignalDataStr(const Signal& s);
 
+	void getObjectState(QSqlQuery& q, ObjectState &os);
+
 public:
 	DbWorker(DbProgress* progress);
 
@@ -51,6 +53,8 @@ public:
 	int hpFileId() const;
 	int wvsFileId() const;
 	int dvsFileId() const;
+
+	std::vector<DbFileInfo> systemFiles() const;
 
 	//
 	// Operations
@@ -102,6 +106,9 @@ public slots:
 	void slot_getUnits(UnitList* units);
 	void slot_getDataFormats(DataFormatList* dataFormats);
 
+	void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
+	void slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState);
+
 	// Service
 	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
@@ -150,6 +157,8 @@ private:
 	int m_hpFileId = -1;	// Hardware Presets
 	int m_wvsFileId = -1;	// Workflow Visualization Schemes
 	int m_dvsFileId = -1;	// Diagnostics Visualization Schemes
+
+	std::vector<DbFileInfo> m_systemFiles;		// All system files
 
 	static const UpgradeItem upgradeItems[];
 

@@ -1051,6 +1051,17 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 		}
 	}
 
+	// Debugging .... parentObject->setChildRestriction("function(device) { return device.Place >=0 && device.Place < 16; }");
+
+	QString errorMessage;
+	bool allowed = parentObject->checkChild(object.get(), &errorMessage);
+
+	if (allowed == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("It is not allowed to add child, error message: %1").arg(errorMessage));
+		return;
+	}
+
 	// Add device to DB
 	//
 	assert(parentObject != nullptr);
@@ -1215,26 +1226,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// Property View
 	//
-	m_propertyEditor = new QtTreePropertyBrowser(this);
-
-	m_propertyGroupManager = new QtGroupPropertyManager(m_propertyEditor);
-	m_propertyStringManager = new QtStringPropertyManager(m_propertyEditor);
-	m_propertyEnumManager = new QtEnumPropertyManager(m_propertyEditor);
-	m_propertyIntManager = new QtIntPropertyManager(m_propertyEditor);
-	m_propertyDoubleManager = new QtDoublePropertyManager(m_propertyEditor);
-	m_propertyBoolManager = new QtBoolPropertyManager(m_propertyEditor);
-
-	QtSpinBoxFactory* spinBoxFactory = new QtSpinBoxFactory(this);
-	QtEnumEditorFactory* enumEditFactory = new QtEnumEditorFactory(this);
-	QtDoubleSpinBoxFactory* doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(this);
-	QtLineEditFactory* lineEditFactory = new QtLineEditFactory(this);
-	QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
-
-	m_propertyEditor->setFactoryForManager(m_propertyStringManager, lineEditFactory);
-	m_propertyEditor->setFactoryForManager(m_propertyEnumManager, enumEditFactory);
-	m_propertyEditor->setFactoryForManager(m_propertyIntManager, spinBoxFactory);
-	m_propertyEditor->setFactoryForManager(m_propertyDoubleManager, doubleSpinBoxFactory);
-	m_propertyEditor->setFactoryForManager(m_propertyBoolManager, checkBoxFactory);
+	m_propertyEditor = new PropertyEditor(this);
 
 	// Splitter
 	//
@@ -1265,6 +1257,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	connect(m_equipmentView->selectionModel(), & QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 
 	connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
+
+	connect(m_propertyEditor, &PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
 
 	// Evidently, project is not opened yet
@@ -1630,6 +1624,10 @@ void EquipmentTabPage::modeSwitched()
 
 void EquipmentTabPage::setProperties()
 {
+	assert(m_propertyEditor != nullptr);
+
+	// Get objects from the selected rows
+	//
 	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
 
 	if (selectedIndexList.empty() == true)
@@ -1638,58 +1636,63 @@ void EquipmentTabPage::setProperties()
 		return;
 	}
 
-	m_propertyEditor->clear();
+	QList<QObject*> devices;
 
 	for (QModelIndex& mi : selectedIndexList)
 	{
 		Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
 		assert(device);
 
-		const QMetaObject* metaObject = device->metaObject();
-
-		for (int i = 0; i < metaObject->propertyCount(); ++i)
-		{
-			QMetaProperty metaProperty = metaObject->property(i);
-
-			const char* name = metaProperty.name();
-			const char* typeName = metaProperty.typeName();
-
-			QVariant value = device->property(name);
-
-			qDebug() << "Name: " << name  << " Value:" << value << typeName;
-
-			//metaProperty.write(device, QVariant("HIIII"));
-		}
+		devices << device;
 	}
 
-	// "Common"
+	// Set objects to the PropertyEditor
 	//
-	static QtProperty* commonProperty = nullptr;
-	static QtProperty* strIdProperty = nullptr;
-	static QtProperty* captionProperty = nullptr;
-
-	delete commonProperty;
-	delete strIdProperty;
-	delete captionProperty;
-
-	commonProperty = m_propertyGroupManager->addProperty(tr("Common"));
-
-	strIdProperty = m_propertyStringManager->addProperty("StrID");
-	m_propertyStringManager->setRegExp(strIdProperty, QRegExp("[A-Za-z$][A-Za-z\\d_$()]*$"));
-	m_propertyStringManager->setValue(strIdProperty, "USB_");
-	commonProperty->addSubProperty(strIdProperty);
-
-	captionProperty = m_propertyStringManager->addProperty("Caption");
-	m_propertyStringManager->setValue(captionProperty, "Caption....");
-	commonProperty->addSubProperty(captionProperty);
-
-	// Other
-	//
-
-	// Almost done
-	//
-	m_propertyEditor->addProperty(commonProperty);
+	m_propertyEditor->setObjects(devices);
 
 	return;
 }
 
+void EquipmentTabPage::propertiesChanged(QObjectList objects)
+{
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	for (auto& o : objects)
+	{
+		Hardware::DeviceObject* device = dynamic_cast<Hardware::DeviceObject*>(o);
+
+		if (device == nullptr)
+		{
+			assert(device != nullptr);
+			return;
+		}
+
+		QByteArray data;
+		bool ok = device->Save(data);
+
+		if (ok == false)
+		{
+			assert(false);
+			return;
+		}
+
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		*file = device->fileInfo();
+		file->swapData(data);
+
+		files.push_back(file);
+	}
+
+	qDebug() << "Update Properties in the Database";
+
+	bool ok = dbController()->setWorkcopy(files, this);
+
+	if (ok == true)
+	{
+		// Refresh selected items
+		//
+	}
+
+	return;
+}

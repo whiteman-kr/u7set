@@ -32,7 +32,7 @@ ServiceTableModel::ServiceTableModel(QObject *parent) :
         m_hostsInfo.append(hi);
     }
     QTimer* timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(checkServiceStates()));
+    connect(timer, &QTimer::timeout, this, &ServiceTableModel::checkServiceStates);
     timer->start(500);
 }
 
@@ -271,8 +271,8 @@ void ServiceTableModel::checkAddress(QString connectionAddress)
     for (int i = 0; i < RQSTP_COUNT; i++)
     {
         UdpClientSocket* socket = new UdpClientSocket(QHostAddress(connectionAddress), serviceTypesInfo[i].port);
-        connect(socket, SIGNAL(ackTimeout()), this, SLOT(serviceNotFound()));
-        connect(socket, SIGNAL(ackReceived(RequestHeader,QByteArray)), this, SLOT(serviceAckReceived(RequestHeader,QByteArray)));
+        connect(socket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotFound);
+        connect(socket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
         socket->sendRequest(RQID_GET_SERVICE_INFO, nullptr, 0);
     }
 }
@@ -379,8 +379,8 @@ void ServiceTableModel::checkServiceStates()
             if (clientSocket == nullptr)
             {
                 clientSocket = new UdpClientSocket(QHostAddress(m_hostsInfo[i].ip), serviceTypesInfo[j].port);
-                connect(clientSocket, SIGNAL(ackTimeout()), this, SLOT(serviceNotFound()));
-                connect(clientSocket, SIGNAL(ackReceived(RequestHeader,QByteArray)), this, SLOT(serviceAckReceived(RequestHeader,QByteArray)));
+                connect(clientSocket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotFound);
+                connect(clientSocket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
                 m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
             }
             while (clientSocket->isWaitingForAck())

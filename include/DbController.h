@@ -85,6 +85,9 @@ public:
 	bool getUnits(UnitList* units, QWidget* parentWidget);
 	bool getDataFormats(DataFormatList* dataFormats, QWidget* parentWidget);
 
+	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
+	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -121,6 +124,8 @@ signals:
 
 	void signal_getUnits(UnitList* units);
 	void signal_getDataFormats(DataFormatList* dataFormats);
+	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
+	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
 
 	//
 	// Service functions
@@ -165,6 +170,9 @@ public:
 	int hpFileId() const;		// Hadware Presets
 	int wvsFileId() const;		// Workflow Video Schemes
 	int dvsFileId() const;		// Diaginostics Video Schemes
+
+	std::vector<DbFileInfo> systemFiles() const;
+	DbFileInfo systemFileInfo(const QString& fileName) const;
 
 	//
 	// Data

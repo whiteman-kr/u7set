@@ -19,7 +19,7 @@ ScanOptionsWidget::ScanOptionsWidget(QWidget *parent) :
     fl->addRow(tr("Enter IP or subnet"), m_addressEdit);
 
     QComboBox* addressCombo = new QComboBox;
-    connect(addressCombo, SIGNAL(currentTextChanged(QString)), m_addressEdit, SLOT(setText(QString)));
+    connect(addressCombo, &QComboBox::currentTextChanged, m_addressEdit, &QLineEdit::setText);
 
     QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
     for (int i = 0; i < interfaceList.count(); i++)
@@ -44,8 +44,8 @@ ScanOptionsWidget::ScanOptionsWidget(QWidget *parent) :
     fl->addRow(tr("Or select from following"), addressCombo);
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &ScanOptionsWidget::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, this, &ScanOptionsWidget::reject);
     fl->addRow(buttonBox);
 
     setLayout(fl);
