@@ -14,7 +14,7 @@ class VideoFrameFileView : public FileView
 {
 	Q_OBJECT
 public:
-	VideoFrameFileView(DbController* dbcontroller);
+	VideoFrameFileView(DbController* dbcontroller, const QString& parentFileName);
 	virtual ~VideoFrameFileView();
 
 	// Methods
@@ -50,7 +50,7 @@ public:
 	virtual ~VideoFrameTabPage();
 
 	template<typename VideoFrameType>
-	static VideoFrameTabPage* create(const QString& fileExt, DbController* dbcontroller, QWidget* parent);
+	static VideoFrameTabPage* create(const QString& fileExt, DbController* dbcontroller, const QString& parentFileName, QWidget* parent);
 
 protected:
 
@@ -73,7 +73,7 @@ protected:
 // Create MainTab!!!
 //
 template<typename VideoFrameType>
-VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbController* dbcontroller, QWidget* parent)
+VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbController* dbcontroller,  const QString& parentFileName, QWidget* parent)
 {
 	static_assert(std::is_base_of<VFrame30::CVideoFrame, VideoFrameType>::value, "Base class must be VFrame30::CVideoFrame");
 	assert(dbcontroller != nullptr);
@@ -92,7 +92,7 @@ VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbControlle
 
 	// Add control page
 	//
-	VideoFrameControlTabPage* controlTabPage = new VideoFrameControlTabPage(fileExt, dbstore, createFunc);
+	VideoFrameControlTabPage* controlTabPage = new VideoFrameControlTabPage(fileExt, dbcontroller, parentFileName, createFunc);
 	p->m_tabWidget->addTab(controlTabPage, tr("Control"));
 
 	return p;
@@ -108,7 +108,12 @@ class VideoFrameControlTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
 public:
-	VideoFrameControlTabPage(const QString& fileExt, DbController* dbcontroller, std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc);
+	VideoFrameControlTabPage(
+		const QString& fileExt,
+		DbController* dbcontroller,
+		const QString& parentFileName,
+		std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc);
+
 	virtual ~VideoFrameControlTabPage();
 
 public:

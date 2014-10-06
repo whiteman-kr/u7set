@@ -171,6 +171,9 @@ public:
 	int wvsFileId() const;		// Workflow Video Schemes
 	int dvsFileId() const;		// Diaginostics Video Schemes
 
+	std::vector<DbFileInfo> systemFiles() const;
+	DbFileInfo systemFileInfo(const QString& fileName) const;
+
 	//
 	// Data
 	//

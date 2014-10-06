@@ -1684,6 +1684,8 @@ void EquipmentTabPage::propertiesChanged(QObjectList objects)
 		files.push_back(file);
 	}
 
+	qDebug() << "Update Properties in the Database";
+
 	bool ok = dbController()->setWorkcopy(files, this);
 
 	if (ok == true)

@@ -271,16 +271,21 @@ namespace Hardware
 		// also, QScriptEngine::QtOwnership can help.
 		// Hopefully in future Qt releases it might be changed, that ownership can be chnged from QJSEngine or QJSValue.
 		//
-		QByteArray data;
-		child->Save(data);
 
-		DeviceObject* childCopy = DeviceObject::Create(data);
-		data.clear();
+		//QByteArray data;
+		//child->Save(data);
+
+		//DeviceObject* childCopy = DeviceObject::Create(data);
+		//data.clear();
 
 		// Run m_childRestriction script
 		//
 		QJSEngine jsEngine;
-		QJSValue arg = jsEngine.newQObject(childCopy);
+
+		//QJSValue arg = jsEngine.newQObject(childCopy);
+		QJSValue arg = jsEngine.newQObject(child);
+		QQmlEngine::setObjectOwnership(child, QQmlEngine::CppOwnership);
+
 		QJSValue function = jsEngine.evaluate(m_childRestriction);
 		QJSValue result = function.call(QJSValueList() << arg);
 
