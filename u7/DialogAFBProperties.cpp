@@ -133,7 +133,7 @@ void DialogAfbProperties::on_m_validate_clicked()
         menu->addAction(action);
     }
 
-    connect(group, SIGNAL(triggered(QAction*)), this, SLOT(on_validate(QAction*)));
+    connect(group, &QActionGroup::triggered, this, &DialogAfbProperties::on_validate);
 
     menu->exec(QCursor::pos());
 }

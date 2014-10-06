@@ -392,10 +392,10 @@ UdpClientRequestHandler::UdpClientRequestHandler(UdpRequestProcessor* udpRequest
     udpRequestProcessor->setClientRequestHandler(this);
     udpRequestProcessor->moveToThread(&m_handlerThread);
 
-    connect(&m_handlerThread, SIGNAL(started()), udpRequestProcessor, SLOT(onThreadStartedSlot()));
-    connect(&m_handlerThread, SIGNAL(finished()), udpRequestProcessor, SLOT(onThreadFinishedSlot()));
+    connect(&m_handlerThread, &QThread::started, udpRequestProcessor, &UdpRequestProcessor::onThreadStartedSlot);
+    connect(&m_handlerThread, &QThread::finished, udpRequestProcessor, &UdpRequestProcessor::onThreadFinishedSlot);
 
-    connect(this, SIGNAL(requestQueueIsNotEmpty()), udpRequestProcessor, SLOT(onRequestQueueIsNotEmpty()));
+    connect(this, &UdpClientRequestHandler::requestQueueIsNotEmpty, udpRequestProcessor, &UdpRequestProcessor::onRequestQueueIsNotEmpty);
 
     m_handlerThread.start();
 }
@@ -491,8 +491,8 @@ void UdpServerSocket::onSocketThreadStartedSlot()
 {
     m_timer.start(1000);
 
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-    connect(&m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyReadSlot()));
+    connect(&m_timer, &QTimer::timeout, this, &UdpServerSocket::onTimer);
+    connect(&m_socket, &QUdpSocket::readyRead, this, &UdpServerSocket::onSocketReadyReadSlot);
 
 	bind();
 
@@ -645,8 +645,8 @@ void UdpSocketThread::run(UdpClientSocket* clientSocket)
 {
     clientSocket->moveToThread(&m_socketThread);
 
-    connect(&m_socketThread, SIGNAL(started()), clientSocket, SLOT(onSocketThreadStartedSlot()));
-    connect(&m_socketThread, SIGNAL(finished()), clientSocket, SLOT(onSocketThreadFinishedSlot()));
+    connect(&m_socketThread, &QThread::started, clientSocket, &UdpClientSocket::onSocketThreadStartedSlot);
+    connect(&m_socketThread, &QThread::finished, clientSocket, &UdpClientSocket::onSocketThreadFinishedSlot);
 
     m_socketThread.start();
 }
@@ -656,8 +656,8 @@ void UdpSocketThread::run(UdpServerSocket* serverSocket)
 {
     serverSocket->moveToThread(&m_socketThread);
 
-    connect(&m_socketThread, SIGNAL(started()), serverSocket, SLOT(onSocketThreadStartedSlot()));
-    connect(&m_socketThread, SIGNAL(finished()), serverSocket, SLOT(onSocketThreadFinishedSlot()));
+    connect(&m_socketThread, &QThread::started, serverSocket, &UdpServerSocket::onSocketThreadStartedSlot);
+    connect(&m_socketThread, &QThread::finished, serverSocket, &UdpServerSocket::onSocketThreadFinishedSlot);
 
     m_socketThread.start();
 }

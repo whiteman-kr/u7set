@@ -102,7 +102,7 @@ ServerSocket::~ServerSocket()
 
 UdpRequestProcessor* ServerSocket::createUdpRequestProcessor()
 {
-    UdpRequestProcessor* processor = new TestRequestProcessor(lastStartTime, runTime, isRunning);
-    connect(processor, SIGNAL(ackIsReady(UdpRequest)), this, SLOT(sendAck(UdpRequest)));
+    TestRequestProcessor* processor = new TestRequestProcessor(lastStartTime, runTime, isRunning);
+    connect(processor, &TestRequestProcessor::ackIsReady, this, &ServerSocket::sendAck);
     return processor;
 }

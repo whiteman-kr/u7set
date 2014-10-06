@@ -219,9 +219,9 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(checkAndSaveSignal()));
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-	connect(this, SIGNAL(finished(int)), this, SLOT(saveDialogSettings()));
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::checkAndSaveSignal);
+	connect(buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::reject);
+	connect(this, &SignalPropertiesDialog::finished, this, &SignalPropertiesDialog::saveDialogSettings);
 
 	vl->addWidget(buttonBox);
 	setLayout(vl);

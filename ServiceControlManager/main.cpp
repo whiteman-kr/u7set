@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w;
-    w.connect(&a, SIGNAL(messageReceived(const QString&)), SLOT(openEditor()));
+    w.connect(&a, &QtSingleApplication::messageReceived, &w, &MainWindow::openEditor);
     w.showMaximized();
 
     return a.exec();

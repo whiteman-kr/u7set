@@ -2,11 +2,36 @@
 
 #include "MainTabPage.h"
 #include <QAbstractTableModel>
+#include <QStyledItemDelegate>
 #include "../include/Signal.h"
 
 class DbController;
 class QTableView;
 class QMenu;
+
+
+class SignalsDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+public:
+    explicit SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, QObject *parent = 0);
+
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+    void setEditorData(QWidget *editor, const QModelIndex &index) const;
+    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+
+    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+signals:
+
+public slots:
+
+private:
+	DataFormatList& m_dataFormatInfo;
+	UnitList& m_unitInfo;
+	SignalSet& m_signalSet;
+};
 
 
 class SignalsModel : public QAbstractTableModel
