@@ -50,6 +50,8 @@ public:
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags(const QModelIndex & index) const;
 
+	SignalsDelegate* createDelegate() { return new SignalsDelegate(m_dataFormatInfo, m_unitInfo, m_signalSet, parent()); }
+
 	void loadSignals();
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
@@ -74,6 +76,7 @@ private:
 	DbController* m_dbController;
 
 	QString getUnitStr(int unitID) const;
+	QString getSensorStr(int sensorID) const;
 };
 
 
