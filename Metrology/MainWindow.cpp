@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QSettings>
+#include <QMessageBox>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
@@ -11,6 +12,7 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QComboBox>
+#include <QCloseEvent>
 
 #include "CalibratorBase.h"
 #include "OptionsDialog.h"
@@ -24,12 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     createInterface();
 
-    connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::onMeasureThreadStarted, Qt::QueuedConnection );
-    connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::onMeasureThreadStoped, Qt::QueuedConnection );
-    connect(&m_measureThread, SIGNAL(measureInfo(QString)), this, SLOT(onMeasureThreadInfo(QString)), Qt::QueuedConnection );
-    connect(&m_measureThread, SIGNAL(measureInfo(int)), this, SLOT(onMeasureThreadInfo(int)), Qt::QueuedConnection );
-
-    onMeasureThreadStoped();
+    initMeasureThread();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -53,6 +50,18 @@ bool MainWindow::createInterface()
     createStatusBar();
 
     return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::initMeasureThread()
+{
+    connect(&MeasureThread, &MeasureThread::started, this, &MainWindow::onMeasureThreadStarted, Qt::QueuedConnection );
+    connect(&MeasureThread, &MeasureThread::finished, this, &MainWindow::onMeasureThreadStoped, Qt::QueuedConnection );
+    connect(&MeasureThread, SIGNAL(measureInfo(QString)), this, SLOT(onMeasureThreadInfo(QString)), Qt::QueuedConnection );
+    connect(&MeasureThread, SIGNAL(measureInfo(int)), this, SLOT(onMeasureThreadInfo(int)), Qt::QueuedConnection );
+
+    onMeasureThreadStoped();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -599,13 +608,7 @@ void MainWindow::createStatusBar()
 
 void MainWindow::startMeasure()
 {
-    if (m_pMainTab == nullptr ||
-        m_statusMeasureTimeout == nullptr )
-    {
-        return;
-    }
-
-    if (m_measureThread.isRunning() == true)
+    if (MeasureThread.isRunning() == true)
     {
         return;
     }
@@ -616,31 +619,28 @@ void MainWindow::startMeasure()
         return;
     }
 
-    m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
-    m_statusMeasureTimeout->setValue(0);
+    MeasureThread.setMeasureType(type);
 
-    m_measureThread.setMeasureType(type);
-
-    m_measureThread.start();
+    MeasureThread.start();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::stopMeasure()
 {
-    if (m_measureThread.isFinished() == true)
+    if (MeasureThread.isFinished() == true)
     {
         return;
     }
 
-    m_measureThread.stop();
+    MeasureThread.stop();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::calibrators()
 {
-    theCalibratorBase.showWnd();
+    theCalibratorBase.show();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -691,10 +691,16 @@ void MainWindow::setOutputSignalType(int index)
 
 void MainWindow::onMeasureThreadStarted()
 {
-    if (m_statusMeasureThreadState == nullptr)
-    {
-        return;
-    }
+    m_pMeasureKind->setDisabled(true);
+    m_pOutputSignalToolBar->setDisabled(true);
+    m_pAnalogSignalToolBar->setDisabled(true);
+    //m_pComplexComporatorSignalToolBar->setDisabled(true);
+
+    m_statusMeasureThreadInfo->setText("");
+
+    m_statusMeasureTimeout->show();
+    m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
+    m_statusMeasureTimeout->setValue(0);
 
     m_statusMeasureThreadState->setText(tr("The measurement process is started "));
 }
@@ -703,27 +709,24 @@ void MainWindow::onMeasureThreadStarted()
 
 void MainWindow::onMeasureThreadStoped()
 {
-    if (m_statusMeasureThreadState == nullptr ||
-        m_statusMeasureThreadInfo == nullptr ||
-        m_statusMeasureTimeout == nullptr )
-    {
-        return;
-    }
+    m_pMeasureKind->setEnabled(true);
+    m_pOutputSignalToolBar->setEnabled(true);
+    m_pAnalogSignalToolBar->setEnabled(true);
+    //m_pComplexComporatorSignalToolBar->setEnabled(true);
+
+    m_statusMeasureThreadInfo->setText("");
+
+    m_statusMeasureTimeout->hide();
+    m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
+    m_statusMeasureTimeout->setValue(0);
 
     m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));
-    m_statusMeasureThreadInfo->setText("");
-    m_statusMeasureTimeout->setValue(0);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::onMeasureThreadInfo(QString msg)
 {
-    if (m_statusMeasureThreadInfo == nullptr)
-    {
-        return;
-    }
-
     m_statusMeasureThreadInfo->setText(msg);
 }
 
@@ -731,11 +734,6 @@ void MainWindow::onMeasureThreadInfo(QString msg)
 
 void MainWindow::onMeasureThreadInfo(int timeout)
 {
-    if (m_statusMeasureTimeout == nullptr)
-    {
-        return;
-    }
-
     m_statusMeasureTimeout->setValue(timeout);
 }
 
@@ -743,6 +741,17 @@ void MainWindow::onMeasureThreadInfo(int timeout)
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
+    if (MeasureThread.isRunning() == true)
+    {
+        QMessageBox msg;
+        msg.setText(m_statusMeasureThreadState->text());
+        msg.exec();
+
+        e->ignore();
+
+        return;
+    }
+
     theCalibratorBase.clear();
 
     saveWindowPosition(this);

@@ -62,7 +62,7 @@ private:
 	FileView(const FileView&);
 
 public:
-	FileView(DbController* dbstore);
+	FileView(DbController* dbstore, const QString& parentFileName);
 	virtual ~FileView();
 
 protected:
@@ -110,6 +110,8 @@ public slots:
 public:
 	FilesModel& filesModel();
 
+	const DbFileInfo& parentFile() const;
+
 	// Protected properties
 	//
 protected:
@@ -120,6 +122,9 @@ protected:
 private:
 	DbController* m_dbController;
 	FilesModel m_filesModel;
+
+	QString m_parentFileName;
+	DbFileInfo m_parentFile;
 
 	//	Contexet Menu
 	//

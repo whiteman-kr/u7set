@@ -1,5 +1,5 @@
-#ifndef CALIBRATORMANAGERDIALOG_H
-#define CALIBRATORMANAGERDIALOG_H
+#ifndef CALIBRATORMANAGER_H
+#define CALIBRATORMANAGER_H
 
 #include <QDialog>
 #include <QLabel>
@@ -13,17 +13,40 @@
 
 // ==============================================================================================
 
-class CalibratorManagerDialog : public QDialog
+class CalibratorManager : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CalibratorManagerDialog(Calibrator* pCalibrator, QWidget *parent = 0);
-    ~CalibratorManagerDialog();
+    explicit CalibratorManager(Calibrator* pCalibrator, QWidget *parent = 0);
+    ~CalibratorManager();
+
+    int             getIndex()                      { return m_index; }
+    void            setIndex(int index)             { m_index = index; }
+
+    Calibrator*     getCalibrator()                 { return m_pCalibrator; }
+
+    bool            calibratorIsConnected();
+
+    bool            setUnit(int mode, int unit);
+    void            setValue(double value);
+    void            stepDown();
+    void            stepUp();
+
+    void            getValue();
+
+    bool            isReady()                       { return m_ready; }
+
+    void            loadSettings();
+    void            saveSettings();
 
 private:
 
+    int             m_index = -1;                                                           // index calibrator in a common base calibrators CalibratorBase
+
     Calibrator*     m_pCalibrator = nullptr;
+
+    bool            m_ready = false;
 
     // Elements of interface - Menu
     //
@@ -44,20 +67,22 @@ private:
     QDialog*        m_pErrorDialog = nullptr;
     QTextEdit*      m_pErrorList = nullptr;
 
-    void            createInterfaceItems();
-    void            initInterfaceItems();
-    void            enableInterfaceItems(bool enable);
+    void            createInterface();
+    void            initInterface();
+    void            enableInterface(bool enable);
 
 signals:
 
     void            calibratorSetUnit(int mode, int unit);
     void            calibratorSetValue(double value);
+    void            calibratorStepDown();
+    void            calibratorStepUp();
     void            calibratorGetValue();
     void            calibratorRemoveControl(bool enable);
 
 private slots:
 
-    void            onCalibratorError(QString err);
+    void            onCalibratorError(QString text);
 
     void            onConnect();
     void            onDisconnect();
@@ -67,6 +92,8 @@ private slots:
     void            onValueChanged();
 
     void            onSetValue();
+    void            onStepDown();
+    void            onStepUp();
 
     void            onModeList(int mode);
     void            onUnitList(int unit);
@@ -78,4 +105,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // CALIBRATORMANAGERDIALOG_H
+#endif // CALIBRATORMANAGER_H

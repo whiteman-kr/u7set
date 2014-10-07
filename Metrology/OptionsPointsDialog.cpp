@@ -80,8 +80,7 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
 
     setLayout(mainLayout);
 
-
-    SetHeaderList();
+    setHeaderList();
 
     connect(m_addButton, &QPushButton::clicked, this, &OptionsPointsDialog::onAddPoint);
     connect(m_editButton, &QPushButton::clicked, this, &OptionsPointsDialog::onEditPoint);
@@ -103,7 +102,7 @@ OptionsPointsDialog::~OptionsPointsDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::SetHeaderList()
+void OptionsPointsDialog::setHeaderList()
 {
     QStringList horizontalHeaderLabels;
 
@@ -155,6 +154,9 @@ void OptionsPointsDialog::SetHeaderList()
             connect(m_headerContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onAction(QAction*)), Qt::QueuedConnection);
         }
     }
+
+    DoubleDelegate * delegate = new DoubleDelegate(this);
+     m_pointList->setItemDelegate(delegate);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -234,8 +236,8 @@ void OptionsPointsDialog::updateList()
         for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
         {
             item = new QTableWidgetItem( QString::number(point->getSensorValue(sensor), 10, 3));
-            m_pointList->setItem(index, sensor, item);
             item->setTextAlignment(Qt::AlignHCenter);
+            m_pointList->setItem(index, sensor, item);
 
             if (sensor != POINT_SENSOR_PERCENT)
             {
@@ -332,6 +334,8 @@ void OptionsPointsDialog::onAddPoint()
     }
 
     m_pointList->editItem(item);
+
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -421,6 +425,8 @@ void OptionsPointsDialog::onRemovePoint()
     m_linearity.m_pointBase.removeAt(index);
 
     updateList();
+
+    m_pointList->setFocus();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -444,6 +450,8 @@ void OptionsPointsDialog::onUpPoint()
     m_pointList->selectRow(index - 1);
 
     updateList();
+
+    m_pointList->setFocus();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -467,6 +475,8 @@ void OptionsPointsDialog::onDownPoint()
     m_pointList->selectRow(index + 1);
 
     updateList();
+
+    m_pointList->setFocus();
 }
 
 
@@ -560,13 +570,6 @@ void OptionsPointsDialog::onAction(QAction* action)
 
 void OptionsPointsDialog::keyPressEvent(QKeyEvent *e)
 {
-    if (m_linearity.m_rangeType != LO_RANGE_TYPE_MANUAL)
-    {
-        QWidget::keyPressEvent(e);
-
-        return;
-    }
-
     if(e->key() == Qt::Key_Return)
     {
         onEditPoint();

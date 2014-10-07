@@ -2,6 +2,7 @@
 
 #include <QSettings>
 #include <QWidget>
+#include "CalibratorBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -675,6 +676,22 @@ Options::Options(const Options& from, QObject *parent) :
 
 Options::~Options()
 {
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int Options::getChannelCount()
+{
+    int count = 0;
+
+    switch(m_toolBar.m_measureKind)
+    {
+        case MEASURE_KIND_ONE:      count = 1;                      break;
+        case MEASURE_KIND_MULTI:    count = MAX_CALIBRATOR_COUNT;   break;
+        default:                    assert(0);                      break;
+    }
+
+    return count;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

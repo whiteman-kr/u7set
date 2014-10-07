@@ -57,14 +57,25 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
 	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Hardware Configuration"));
 	getCentralWidget()->addTabPage(new SignalsTabPage(dbController(), nullptr), tr("Application Signals"));
-/*	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
-	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
+//	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
+//	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameLogic>("lvf", dbController(), nullptr), tr("Application Logic"));
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameWiring>("wvf", dbController(), nullptr), tr("Wiring"));
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameTech>("tvf", dbController(), nullptr), tr("Tech Schemes"));
-	getCentralWidget()->addTabPage(VideoFrameTabPage::create<VFrame30::CVideoFrameDiag>("dvf", dbController(), nullptr), tr("Diag Schemes"));
-*/
+	getCentralWidget()->addTabPage(
+		VideoFrameTabPage::create<VFrame30::CVideoFrameLogic>("als", dbController(), AlFileName, nullptr),
+		tr("Application Logic"));
+
+	getCentralWidget()->addTabPage(
+		VideoFrameTabPage::create<VFrame30::CVideoFrameTech>("wvs", dbController(), WvsFileName, nullptr),
+		tr("Workflow Schemes"));
+
+	getCentralWidget()->addTabPage(
+		VideoFrameTabPage::create<VFrame30::CVideoFrameDiag>("dvs", dbController(), DvsFileName, nullptr),
+		tr("Diag Schemes"));
+
+//	getCentralWidget()->addTabPage(
+//		VideoFrameTabPage::create<VFrame30::CVideoFrameWiring>("wvf", dbController(), dbcontroller()->alFileId(), nullptr),
+//		tr("Wiring"));
+
 	// --
 	//
 	setMinimumSize(500, 300);

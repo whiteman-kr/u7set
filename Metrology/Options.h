@@ -274,6 +274,8 @@ public:
     explicit Options(const Options& from, QObject *parent = 0);
             ~Options();
 
+    int                 getChannelCount();
+
 private:
 
     QMutex              m_mutex;

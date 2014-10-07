@@ -68,7 +68,7 @@ public:
 
 public:
 
-    MeasureThread       m_measureThread;
+    MeasureThread       MeasureThread;
 
 protected:
 
@@ -76,9 +76,8 @@ protected:
 
 public:
 
-    // Create interface
-    //
     bool createInterface();
+    void initMeasureThread();
 
     void createActions();
     void createMenu();

@@ -1227,7 +1227,32 @@ int DbController::wvsFileId() const
 int DbController::dvsFileId() const
 {
 	return m_worker->dvsFileId();
+}
 
+std::vector<DbFileInfo> DbController::systemFiles() const
+{
+	return m_worker->systemFiles();
+}
+
+DbFileInfo DbController::systemFileInfo(const QString& fileName) const
+{
+	DbFileInfo result;
+	result.setFileId(-1);
+
+	std::vector<DbFileInfo> systemFiles = m_worker->systemFiles();
+
+	auto pos = std::find_if(systemFiles.begin(), systemFiles.end(),
+		[&fileName](const DbFileInfo& fi)
+		{
+			return fi.fileName() == fileName;
+		});
+
+	if (pos != systemFiles.end())
+	{
+		result = *pos;
+	}
+
+	return result;
 }
 
 HasDbController::HasDbController()
