@@ -25,8 +25,10 @@ void MeasureThread::waitMeasureTimeout()
 
         QThread::msleep(MT_TIMEOUT_STEP);
 
-        emit measureInfo(t + MT_TIMEOUT_STEP);
+        emit measureInfo(MT_TIMEOUT_STEP + t);
     }
+
+    emit measureInfo(0);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -172,7 +174,7 @@ void MeasureThread::measureLinearity()
             continue;
         }
 
-        emit measureInfo(tr("Set point %1 / %2 ").arg(p + 1).arg(pointCount));
+        emit measureInfo(tr("set point %1 / %2 ").arg(p + 1).arg(pointCount));
 
         // set electric value
         //
@@ -215,6 +217,7 @@ void MeasureThread::measureLinearity()
 
         qDebug("Function: %s, time waiting ready: %d ms", __FUNCTION__, responseTime.elapsed());
 
+        emit measureInfo(tr("wait measurement %1 / %2 ").arg(p + 1).arg(pointCount));
         // wait measure timeout
         //
         waitMeasureTimeout();

@@ -698,9 +698,16 @@ void MainWindow::onMeasureThreadStarted()
 
     m_statusMeasureThreadInfo->setText("");
 
-    m_statusMeasureTimeout->show();
-    m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
-    m_statusMeasureTimeout->setValue(0);
+    if (theOptions.getToolBar().m_measureTimeout != 0)
+    {
+        m_statusMeasureTimeout->show();
+        m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
+        m_statusMeasureTimeout->setValue(0);
+    }
+    else
+    {
+         m_statusMeasureTimeout->hide();
+    }
 
     m_statusMeasureThreadState->setText(tr("The measurement process is started "));
 }

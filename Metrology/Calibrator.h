@@ -247,7 +247,7 @@ public:
     void		setPortName(QString portName)   { m_portName = portName; }
 
     int			getType()                       { return m_type; }
-    QString		getTypeStr()                    { if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT) return ""; else return CalibratorType[ m_type ]; }
+    QString		getTypeString()                 { if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT) return ""; else return CalibratorType[ m_type ]; }
     void		setType(int type)               { m_type = type; }
     QString		getName()                       { return m_name; }
     QString		getSerialNo()                   { return m_serialNo; }

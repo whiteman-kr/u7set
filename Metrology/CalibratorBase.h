@@ -75,7 +75,6 @@ private:
 
     void                        updateConnectedCalibrators();
 
-
 private:
 
     // Elements of interface

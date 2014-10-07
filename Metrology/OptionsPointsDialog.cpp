@@ -505,6 +505,17 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
         return;
     }
 
+    int cursorPosition = -1;
+
+    QWidget* pEdit = focusWidget();
+    if (pEdit != nullptr)
+    {
+        if(QString::compare(pEdit->metaObject()->className(),"QLineEdit") == 0 )
+        {
+            cursorPosition = ((QLineEdit*)pEdit)->cursorPosition();
+        }
+    }
+
     QString value = m_pointCountEdit->text();
     if (value.isEmpty() == true)
     {
@@ -532,6 +543,15 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
     m_linearity.recalcPoints( value.toDouble() );
 
     updateList();
+
+    if (pEdit != nullptr)
+    {
+        pEdit->setFocus();
+        if (cursorPosition != -1)
+        {
+            ((QLineEdit*)pEdit)->setCursorPosition(cursorPosition);
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
