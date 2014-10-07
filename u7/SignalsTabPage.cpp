@@ -114,12 +114,21 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 			le->setValidator(new QRegExpValidator(rx4Name, le));
 			return le;
 		}
-		case SC_DATA_SIZE:
 		case SC_LOW_ADC:
 		case SC_HIGH_ADC:
 		case SC_NORMAL_STATE:
 		case SC_DECIMAL_PLACES:
 		{
+			QLineEdit* le = new QLineEdit(parent);
+			le->setValidator(new QIntValidator(le));
+			return le;
+		}
+		case SC_DATA_SIZE:
+		{
+			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].type() == SignalType::discrete)
+			{
+				return nullptr;
+			}
 			QLineEdit* le = new QLineEdit(parent);
 			le->setValidator(new QIntValidator(le));
 			return le;
@@ -219,10 +228,10 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_DEVICE_STR_ID: if (le) le->setText(m_signalSet[row].deviceStrID()); break;
 
 		case SC_DATA_SIZE: if (le) le->setText(QString::number(m_signalSet[row].dataSize())); break;
-		case SC_LOW_ADC: if (le) le->setText(QString::number(m_signalSet[row].dataSize())); break;
-		case SC_HIGH_ADC: if (le) le->setText(QString::number(m_signalSet[row].dataSize())); break;
-		case SC_NORMAL_STATE: if (le) le->setText(QString::number(m_signalSet[row].dataSize())); break;
-		case SC_DECIMAL_PLACES: if (le) le->setText(QString::number(m_signalSet[row].dataSize())); break;
+		case SC_LOW_ADC: if (le) le->setText(QString::number(m_signalSet[row].lowADC())); break;
+		case SC_HIGH_ADC: if (le) le->setText(QString::number(m_signalSet[row].highADC())); break;
+		case SC_NORMAL_STATE: if (le) le->setText(QString::number(m_signalSet[row].normalState())); break;
+		case SC_DECIMAL_PLACES: if (le) le->setText(QString::number(m_signalSet[row].decimalPlaces())); break;
 
 		case SC_LOW_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].lowLimit())); break;
 		case SC_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].highLimit())); break;
@@ -252,14 +261,69 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 	}
 }
 
-void SignalsDelegate::setModelData(QWidget *, QAbstractItemModel *, const QModelIndex &) const
+void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const QModelIndex &index) const
 {
+	int col = index.column();
+	int row = index.row();
+	if (row >= m_signalSet.count())
+	{
+		return;
+	}
+	QLineEdit* le = dynamic_cast<QLineEdit*>(editor);
+	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
+	Signal& s = m_signalSet[row];
+	switch (col)
+	{
+		// LineEdit
+		//
+		case SC_STR_ID: if (le) s.setStrID(le->text()); break;
+		case SC_EXT_STR_ID: if (le) s.setExtStrID(le->text()); break;
+		case SC_NAME: if (le) s.setName(le->text()); break;
+		case SC_DEVICE_STR_ID: if (le) s.setDeviceStrID(le->text()); break;
 
+		case SC_DATA_SIZE: if (le) s.setDataSize(le->text().toInt()); break;
+		case SC_LOW_ADC: if (le) s.setLowADC(le->text().toInt()); break;
+		case SC_HIGH_ADC: if (le) s.setHighADC(le->text().toInt()); break;
+		case SC_NORMAL_STATE: if (le) s.setNormalState(le->text().toInt()); break;
+		case SC_DECIMAL_PLACES: if (le) s.setDecimalPlaces(le->text().toInt()); break;
+
+		case SC_LOW_LIMIT: if (le) s.setLowLimit(le->text().toDouble()); break;
+		case SC_HIGH_LIMIT: if (le) s.setHighLimit(le->text().toDouble()); break;
+		case SC_ADJUSTMENT: if (le) s.setAdjustment(le->text().toDouble()); break;
+		case SC_DROP_LIMIT: if (le) s.setDropLimit(le->text().toDouble()); break;
+		case SC_EXCESS_LIMIT: if (le) s.setExcessLimit(le->text().toDouble()); break;
+		case SC_UNBALANCE_LIMIT: if (le) s.setUnbalanceLimit(le->text().toDouble()); break;
+		case SC_INPUT_LOW_LIMIT: if (le) s.setInputLowLimit(le->text().toDouble()); break;
+		case SC_INPUT_HIGH_LIMIT: if (le) s.setInputHighLimit(le->text().toDouble()); break;
+		case SC_OUTPUT_LOW_LIMIT: if (le) s.setOutputLowLimit(le->text().toDouble()); break;
+		case SC_OUTPUT_HIGH_LIMIT: if (le) s.setOutputHighLimit(le->text().toDouble()); break;
+		case SC_APERTURE: if (le) s.setAperture(le->text().toDouble()); break;
+		// ComboBox
+		//
+		case SC_DATA_FORMAT: if (cb) s.setDataFormat(m_dataFormatInfo.key(cb->currentIndex())); break;
+		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.key(cb->currentIndex())); break;
+		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.key(cb->currentIndex())); break;
+		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
+		case SC_INPUT_SENSOR: if (cb) s.setInputSensorID(cb->currentIndex()); break;
+		case SC_OUTPUT_SENSOR: if (cb) s.setOutputSensorID(cb->currentIndex()); break;
+		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
+		case SC_CALCULATED: if (cb) s.setCalculated(cb->currentIndex() == 0 ? false : true); break;
+		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(SignalInOutType(cb->currentIndex())); break;
+		case SC_CHANNEL:
+		default:
+			assert(false);
+			return;
+	}
 }
 
 void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
 {
 	editor->setGeometry(option.rect);
+	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
+	if (cb)
+	{
+		cb->showPopup();
+	}
 }
 
 
@@ -294,6 +358,18 @@ QString SignalsModel::getUnitStr(int unitID) const
 	}
 
 	return tr("Unknown unit");
+}
+
+QString SignalsModel::getSensorStr(int sensorID) const
+{
+	if (sensorID >= 0 && sensorID < SENSOR_TYPE_COUNT)
+	{
+		return SensorTypeStr[sensorID];
+	}
+	else
+	{
+		return tr("Unknown sensor");
+	}
 }
 
 
@@ -331,31 +407,29 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
 			case SC_LOW_LIMIT: return signal.lowLimit();
 			case SC_HIGH_LIMIT: return signal.highLimit();
-			case SC_UNIT:
-				return getUnitStr(signal.unitID());
+			case SC_UNIT: return getUnitStr(signal.unitID());
 
 			case SC_ADJUSTMENT: return signal.adjustment();
 			case SC_DROP_LIMIT: return signal.dropLimit();
 			case SC_EXCESS_LIMIT: return signal.excessLimit();
 			case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
+
 			case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
 			case SC_INPUT_HIGH_LIMIT: return signal.inputHighLimit();
-			case SC_INPUT_UNIT:
-				return getUnitStr(signal.inputUnitID());
+			case SC_INPUT_UNIT: return getUnitStr(signal.inputUnitID());
+			case SC_INPUT_SENSOR: return getSensorStr(signal.inputSensorID());
 
-			case SC_INPUT_SENSOR: return SensorTypeStr[signal.inputSensorID()];
 			case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
 			case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
-			case SC_OUTPUT_UNIT:
-				return getUnitStr(signal.outputUnitID());
+			case SC_OUTPUT_UNIT: return getUnitStr(signal.outputUnitID());
+			case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());
 
-			case SC_OUTPUT_SENSOR: return SensorTypeStr[signal.outputSensorID()];
 			case SC_ACQUIRE: return signal.acquire() ? "Yes" : "No";
 			case SC_CALCULATED: return signal.calculated() ? "Yes" : "No";
 			case SC_NORMAL_STATE: return signal.normalState();
 			case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 			case SC_APERTURE: return signal.aperture();
-			case SC_IN_OUT_TYPE: return signal.inOutType();
+			case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
 			case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 			default:
@@ -571,12 +645,14 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsModel = new SignalsModel(dbcontroller, this);
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsModel);
+	m_signalsView->setItemDelegate(m_signalsModel->createDelegate());
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 	//m_signalsView->verticalHeader()->doubleClicked();
 	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeRowsToContents);
+	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeColumnsToContents);
 	m_signalsView->resizeColumnsToContents();
 	m_signalsView->resizeRowsToContents();
 
