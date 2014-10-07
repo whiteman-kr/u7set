@@ -257,7 +257,7 @@ void CalibratorBase::updateList()
         }
 
         m_pCalibratorView->item(index, CalibratorColumnPort)->setText(pCalibrator->getPortName());
-        m_pCalibratorView->item(index, CalibratorColumnType)->setText(pCalibrator->getTypeStr());
+        m_pCalibratorView->item(index, CalibratorColumnType)->setText(pCalibrator->getTypeString());
         m_pCalibratorView->item(index, CalibratorColumnConnect)->setText(pCalibrator->isConnected() ? tr("Yes") : tr("No"));
         m_pCalibratorView->item(index, CalibratorColumnSN)->setText(pCalibrator->getSerialNo());
 
