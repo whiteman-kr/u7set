@@ -88,6 +88,9 @@ public:
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
 
+	bool deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget);
+	bool undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -126,6 +129,8 @@ signals:
 	void signal_getDataFormats(DataFormatList* dataFormats);
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
+	void signal_deleteSignal(int signalID, ObjectState* objectState);
+	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
 
 	//
 	// Service functions
