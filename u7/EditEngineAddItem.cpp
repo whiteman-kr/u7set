@@ -1,10 +1,10 @@
 #include "EditEngineAddItem.h"
 #include "VideoFrameWidget.h"
-#include "EditVideoFrameWidget.h"
+#include "EditSchemeWidget.h"
 
 namespace EditEngine
 {
-	AddItemCommand::AddItemCommand(EditVideoFrameView* videoFrameView, std::list<std::shared_ptr<VFrame30::CVideoItem>> items, std::shared_ptr<VFrame30::CVideoLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	AddItemCommand::AddItemCommand(EditSchemeView* videoFrameView, std::list<std::shared_ptr<VFrame30::CVideoItem>> items, std::shared_ptr<VFrame30::CVideoLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 		: EditCommand(videoFrameView, hScrollBar, vScrollBar)
 	{
 		assert(videoFrameView != nullptr);
@@ -19,14 +19,14 @@ namespace EditEngine
 		return;
 	}
 
-	void AddItemCommand::executeCommand(EditVideoFrameView* videoFrameView)
+	void AddItemCommand::executeCommand(EditSchemeView* videoFrameView)
 	{
 		m_layer->Items.insert(m_layer->Items.end(), m_items.begin(), m_items.end());
 
 		videoFrameView->setSelectedItems(m_items);
 	}
 
-	void AddItemCommand::unExecuteCommand(EditVideoFrameView* videoFrameView)
+	void AddItemCommand::unExecuteCommand(EditSchemeView* videoFrameView)
 	{
 		for (auto si = m_items.begin(); si != m_items.end(); ++si)
 		{

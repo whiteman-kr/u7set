@@ -45,6 +45,9 @@ public:
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, QWidget* parentWidget);
 
+	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
+	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);
+
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
 
@@ -101,6 +104,8 @@ signals:
 	void signal_getUserList(std::vector<DbUser>* out);
 
 	void signal_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter);
+	void signal_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+
 	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);
 

@@ -1,12 +1,12 @@
 #include "../include/DbStruct.h"
 #include "../include/DbProgressDialog.h"
 
-const char* AfblFileName = "AFBL";		// Application Functional Block Library
-const char* AlFileName = "AL";			// Application Logic Schemes
-const char* HcFileName = "HC";			// Hardware Configuratiun
-const char* HpFileName = "HP";			// Hardware Presets
-const char* WvsFileName = "WVS";		// Workflow Video Schemes
-const char* DvsFileName = "DVS";		// Diagnostics Video Schemes
+const char* const AfblFileName = "AFBL";		// Application Functional Block Library
+const char* const  AlFileName = "AL";			// Application Logic Schemes
+const char* const  HcFileName = "HC";			// Hardware Configuratiun
+const char* const  HpFileName = "HP";			// Hardware Presets
+const char* const  WvsFileName = "WVS";		// Workflow Video Schemes
+const char* const  DvsFileName = "DVS";		// Diagnostics Video Schemes
 
 //
 //

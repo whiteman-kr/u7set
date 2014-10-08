@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "EditVideoFrameWidget.h"
+#include "EditSchemeWidget.h"
 #include "../VFrame30/VideoItemLine.h"
 #include "../VFrame30/VideoItemRect.h"
 #include "../VFrame30/VideoItemConnectionLine.h"
@@ -8,7 +8,7 @@
 #include "../VFrame30/VideoItemLink.h"
 
 
-const EditVideoFrameWidget::MouseStateCursor EditVideoFrameWidget::m_mouseStateCursor[] =
+const EditSchemeWidget::MouseStateCursor EditSchemeWidget::m_mouseStateCursor[] =
 	{
 		{MouseState::Scrolling, Qt::CursorShape::ArrowCursor},
 		{MouseState::Selection, Qt::CursorShape::CrossCursor},
@@ -28,7 +28,7 @@ const EditVideoFrameWidget::MouseStateCursor EditVideoFrameWidget::m_mouseStateC
 		{MouseState::MovingConnectionLinePoint, Qt::CursorShape::SizeAllCursor},
 	};
 
-const EditVideoFrameWidget::SizeActionToMouseCursor EditVideoFrameWidget::m_sizeActionToMouseCursor[] =
+const EditSchemeWidget::SizeActionToMouseCursor EditSchemeWidget::m_sizeActionToMouseCursor[] =
 	{
 		{VideoItemAction::ChangeSizeTopLeft, MouseState::SizingTopLeft, Qt::SizeFDiagCursor},
 		{VideoItemAction::ChangeSizeTop, MouseState::SizingTop, Qt::SizeVerCursor},
@@ -46,7 +46,7 @@ const EditVideoFrameWidget::SizeActionToMouseCursor EditVideoFrameWidget::m_size
 // EditVideoFrameView
 //
 //
-EditVideoFrameView::EditVideoFrameView(QWidget* parent) :
+EditSchemeView::EditSchemeView(QWidget* parent) :
 	VFrame30::VideoFrameView(parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
@@ -60,7 +60,7 @@ EditVideoFrameView::EditVideoFrameView(QWidget* parent) :
 {
 }
 
-EditVideoFrameView::EditVideoFrameView(std::shared_ptr<VFrame30::CVideoFrame>& videoFrame, QWidget* parent)
+EditSchemeView::EditSchemeView(std::shared_ptr<VFrame30::CVideoFrame>& videoFrame, QWidget* parent)
 	: VFrame30::VideoFrameView(videoFrame, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
@@ -74,7 +74,11 @@ EditVideoFrameView::EditVideoFrameView(std::shared_ptr<VFrame30::CVideoFrame>& v
 {
 }
 
-void EditVideoFrameView::paintEvent(QPaintEvent* pe)
+EditSchemeView::~EditSchemeView()
+{
+}
+
+void EditSchemeView::paintEvent(QPaintEvent* pe)
 {
 	// Draw videoframe
 	//
@@ -149,7 +153,7 @@ void EditVideoFrameView::paintEvent(QPaintEvent* pe)
 	return;
 }
 
-void EditVideoFrameView::drawSelectionArea(QPainter* p)
+void EditSchemeView::drawSelectionArea(QPainter* p)
 {
 	QRectF r(m_mouseSelectionStartPoint, m_mouseSelectionEndPoint);
 
@@ -164,7 +168,7 @@ void EditVideoFrameView::drawSelectionArea(QPainter* p)
 	return;
 }
 
-void EditVideoFrameView::drawMovingItems(VFrame30::CDrawParam* drawParam)
+void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 {
 	if (mouseState() != MouseState::Moving ||
 		m_selectedItems.empty() == true)
@@ -200,7 +204,7 @@ void EditVideoFrameView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	return;
 }
 
-void EditVideoFrameView::drawRectSizing(VFrame30::CDrawParam* drawParam)
+void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 {
 	if (mouseState() != MouseState::SizingTopLeft &&
 		mouseState() != MouseState::SizingTop &&
@@ -306,7 +310,7 @@ void EditVideoFrameView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	return;
 }
 
-void EditVideoFrameView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
+void EditSchemeView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 {
 	if (mouseState() != MouseState::MovingStartLinePoint &&
 		mouseState() != MouseState::MovingEndLinePoint)
@@ -370,7 +374,7 @@ void EditVideoFrameView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 	return;
 }
 
-void EditVideoFrameView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam* drawParam)
+void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam* drawParam)
 {
 	if (mouseState() != MouseState::MovingHorizontalEdge &&
 		mouseState() != MouseState::MovingVerticalEdge &&
@@ -631,7 +635,7 @@ void EditVideoFrameView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawPa
 	return;
 }
 
-void EditVideoFrameView::drawGrid(QPainter* p)
+void EditSchemeView::drawGrid(QPainter* p)
 {
 	assert(p);
 
@@ -698,7 +702,7 @@ void EditVideoFrameView::drawGrid(QPainter* p)
 	return;
 }
 
-VideoItemAction EditVideoFrameView::getPossibleAction(VFrame30::CVideoItem* videoItem, QPointF point, int* outMovingEdgePointIndex)
+VideoItemAction EditSchemeView::getPossibleAction(VFrame30::CVideoItem* videoItem, QPointF point, int* outMovingEdgePointIndex)
 {
 	if (videoItem == nullptr)
 	{
@@ -908,7 +912,7 @@ VideoItemAction EditVideoFrameView::getPossibleAction(VFrame30::CVideoItem* vide
 }
 
 
-QUuid EditVideoFrameView::activeLayerGuid() const
+QUuid EditSchemeView::activeLayerGuid() const
 {
 	if (m_activeLayer >= static_cast<int>(videoFrame()->Layers.size()))
 	{
@@ -919,7 +923,7 @@ QUuid EditVideoFrameView::activeLayerGuid() const
 	return videoFrame()->Layers[m_activeLayer]->guid();
 }
 
-std::shared_ptr<VFrame30::CVideoLayer> EditVideoFrameView::activeLayer()
+std::shared_ptr<VFrame30::CVideoLayer> EditSchemeView::activeLayer()
 {
 	if (m_activeLayer >= static_cast<int>(videoFrame()->Layers.size()))
 	{
@@ -930,7 +934,7 @@ std::shared_ptr<VFrame30::CVideoLayer> EditVideoFrameView::activeLayer()
 	return videoFrame()->Layers[m_activeLayer];
 }
 
-void EditVideoFrameView::setActiveLayer(std::shared_ptr<VFrame30::CVideoLayer> layer)
+void EditSchemeView::setActiveLayer(std::shared_ptr<VFrame30::CVideoLayer> layer)
 {
 	for (int i = 0; i < static_cast<int>(videoFrame()->Layers.size()); i++)
 	{
@@ -947,33 +951,33 @@ void EditVideoFrameView::setActiveLayer(std::shared_ptr<VFrame30::CVideoLayer> l
 	return;
 }
 
-MouseState EditVideoFrameView::mouseState() const
+MouseState EditSchemeView::mouseState() const
 {
 	return m_mouseState;
 }
 
-void EditVideoFrameView::setMouseState(MouseState state)
+void EditSchemeView::setMouseState(MouseState state)
 {
 	m_mouseState = state;
 }
 
-const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditVideoFrameView::selectedItems() const
+const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditSchemeView::selectedItems() const
 {
 	return m_selectedItems;
 }
 
-void EditVideoFrameView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items)
+void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items)
 {
 	m_selectedItems = items;
 }
 
-void EditVideoFrameView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::CVideoItem>>& items)
+void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::CVideoItem>>& items)
 {
 	m_selectedItems.clear();
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
 }
 
-void EditVideoFrameView::clearSelection()
+void EditSchemeView::clearSelection()
 {
 	m_selectedItems.clear();
 }
@@ -983,7 +987,7 @@ void EditVideoFrameView::clearSelection()
 // EditVideoFrameWidget
 //
 //
-EditVideoFrameWidget::EditVideoFrameWidget(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo) :
+EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo) :
 	m_fileInfo(fileInfo),
 	m_snapToGrid(true),
 	m_editEngine(nullptr)
@@ -992,58 +996,58 @@ EditVideoFrameWidget::EditVideoFrameWidget(std::shared_ptr<VFrame30::CVideoFrame
 
 	// Left Button Down
 	//
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditVideoFrameWidget::mouseLeftDown_None, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosLineStartPoint, std::bind(&EditVideoFrameWidget::mouseLeftDown_AddSchemePosLineStartPoint, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosRectStartPoint, std::bind(&EditVideoFrameWidget::mouseLeftDown_AddSchemePosRectStartPoint, this, std::placeholders::_1)));
-	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionStartPoint, std::bind(&EditVideoFrameWidget::mouseLeftDown_AddSchemePosConnectionStartPoint, this, std::placeholders::_1)));
+	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemeWidget::mouseLeftDown_None, this, std::placeholders::_1)));
+	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosLineStartPoint, std::bind(&EditSchemeWidget::mouseLeftDown_AddSchemePosLineStartPoint, this, std::placeholders::_1)));
+	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosRectStartPoint, std::bind(&EditSchemeWidget::mouseLeftDown_AddSchemePosRectStartPoint, this, std::placeholders::_1)));
+	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionStartPoint, std::bind(&EditSchemeWidget::mouseLeftDown_AddSchemePosConnectionStartPoint, this, std::placeholders::_1)));
 
 	// Left Button Up
 	//
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditVideoFrameWidget::mouseLeftUp_Selection, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditVideoFrameWidget::mouseLeftUp_Moving, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditVideoFrameWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditVideoFrameWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditVideoFrameWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditVideoFrameWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditVideoFrameWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditVideoFrameWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditVideoFrameWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditVideoFrameWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditVideoFrameWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditVideoFrameWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemePosLineEndPoint, std::bind(&EditVideoFrameWidget::mouseLeftUp_AddSchemePosLineEndPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemePosRectEndPoint, std::bind(&EditVideoFrameWidget::mouseLeftUp_AddSchemePosRectEndPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditVideoFrameWidget::mouseLeftUp_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditVideoFrameWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditVideoFrameWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
-	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditVideoFrameWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditSchemeWidget::mouseLeftUp_Selection, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditSchemeWidget::mouseLeftUp_Moving, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditSchemeWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditSchemeWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditSchemeWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditSchemeWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditSchemeWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditSchemeWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditSchemeWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditSchemeWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditSchemeWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditSchemeWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemePosLineEndPoint, std::bind(&EditSchemeWidget::mouseLeftUp_AddSchemePosLineEndPoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemePosRectEndPoint, std::bind(&EditSchemeWidget::mouseLeftUp_AddSchemePosRectEndPoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditSchemeWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditSchemeWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemeWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
 
 	// Moouse Mov
 	//
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Scrolling, std::bind(&EditVideoFrameWidget::mouseMove_Scrolling, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditVideoFrameWidget::mouseMove_Selection, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditVideoFrameWidget::mouseMove_Moving, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditVideoFrameWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditVideoFrameWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditVideoFrameWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditVideoFrameWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditVideoFrameWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditVideoFrameWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditVideoFrameWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditVideoFrameWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditVideoFrameWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditVideoFrameWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemePosLineEndPoint, std::bind(&EditVideoFrameWidget::mouseMove_AddSchemePosLineEndPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemePosRectEndPoint, std::bind(&EditVideoFrameWidget::mouseMove_AddSchemePosRectEndPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditVideoFrameWidget::mouseMove_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditVideoFrameWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditVideoFrameWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
-	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditVideoFrameWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Scrolling, std::bind(&EditSchemeWidget::mouseMove_Scrolling, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditSchemeWidget::mouseMove_Selection, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditSchemeWidget::mouseMove_Moving, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditSchemeWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditSchemeWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditSchemeWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditSchemeWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditSchemeWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditSchemeWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditSchemeWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditSchemeWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditSchemeWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditSchemeWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemePosLineEndPoint, std::bind(&EditSchemeWidget::mouseMove_AddSchemePosLineEndPoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemePosRectEndPoint, std::bind(&EditSchemeWidget::mouseMove_AddSchemePosRectEndPoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditSchemeWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditSchemeWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemeWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
 
 	// Mouse Right Button Down
 	//
 	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditVideoFrameWidget::mouseRightDown_None, this, std::placeholders::_1)));
-	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditVideoFrameWidget::mouseRightDown_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
+	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
 
 
 	// --
@@ -1057,31 +1061,31 @@ EditVideoFrameWidget::EditVideoFrameWidget(std::shared_ptr<VFrame30::CVideoFrame
 
 	// --
 	//
-	m_videoFrameView = new EditVideoFrameView(videoFrame, this);
+	m_videoFrameView = new EditSchemeView(videoFrame, this);
 
 	m_videoFrameView->setZoom(100);
 	setWidget(m_videoFrameView);
 
 	// --
 	//
-	connect(this, &QWidget::customContextMenuRequested, this, &EditVideoFrameWidget::contextMenu);
+	connect(this, &QWidget::customContextMenuRequested, this, &EditSchemeWidget::contextMenu);
 	setCorrespondingContextMenu();
 
 	// Edit Engine
 	//
 	m_editEngine = new EditEngine::EditEngine(videoFrameView(), horizontalScrollBar(), verticalScrollBar(), this);
 
-	connect(m_editEngine, &EditEngine::EditEngine::stateChanged, this, &EditVideoFrameWidget::editEngineStateChanged);
-	connect(m_editEngine, &EditEngine::EditEngine::modifiedChanged, this, &EditVideoFrameWidget::modifiedChanged);
+	connect(m_editEngine, &EditEngine::EditEngine::stateChanged, this, &EditSchemeWidget::editEngineStateChanged);
+	connect(m_editEngine, &EditEngine::EditEngine::modifiedChanged, this, &EditSchemeWidget::modifiedChanged);
 
 	return;
 }
 
-EditVideoFrameWidget::~EditVideoFrameWidget()
+EditSchemeWidget::~EditSchemeWidget()
 {
 }
 
-void EditVideoFrameWidget::createActions()
+void EditSchemeWidget::createActions()
 {
 	// Escape Button Pressed
 	//
@@ -1089,7 +1093,7 @@ void EditVideoFrameWidget::createActions()
 	m_escapeAction->setEnabled(true);
 	m_escapeAction->setMenuRole(QAction::NoRole);
 	m_escapeAction->setShortcut(QKeySequence(Qt::Key_Escape));
-	connect(m_escapeAction, &QAction::triggered, this, &EditVideoFrameWidget::escapeKey);
+	connect(m_escapeAction, &QAction::triggered, this, &EditSchemeWidget::escapeKey);
 	addAction(m_escapeAction);
 
 	//
@@ -1101,17 +1105,17 @@ void EditVideoFrameWidget::createActions()
 	m_fileCheckInAction = new QAction(tr("Check In"), this);
 	m_fileCheckInAction->setStatusTip(tr("Check In changes..."));
 	m_fileCheckInAction->setEnabled(false);
-	connect(m_fileCheckInAction, &QAction::triggered, this, &EditVideoFrameWidget::checkInFile);
+	connect(m_fileCheckInAction, &QAction::triggered, this, &EditSchemeWidget::checkInFile);
 
 	m_fileCheckOutAction = new QAction(tr("Check Out"), this);
 	m_fileCheckOutAction->setStatusTip(tr("Check Out for edit..."));
 	m_fileCheckOutAction->setEnabled(false);
-	connect(m_fileCheckOutAction, &QAction::triggered, this, &EditVideoFrameWidget::checkOutFile);
+	connect(m_fileCheckOutAction, &QAction::triggered, this, &EditSchemeWidget::checkOutFile);
 
 	m_fileUndoChangesAction = new QAction(tr("Undo Changes..."), this);
 	m_fileUndoChangesAction->setStatusTip(tr("Undo Pending Changes..."));
 	m_fileUndoChangesAction->setEnabled(false);
-	connect(m_fileUndoChangesAction, &QAction::triggered, this, &EditVideoFrameWidget::undoChangesFile);
+	connect(m_fileUndoChangesAction, &QAction::triggered, this, &EditSchemeWidget::undoChangesFile);
 
 	m_fileSeparatorAction0 = new QAction(this);
 	m_fileSeparatorAction0->setSeparator(true);
@@ -1120,7 +1124,7 @@ void EditVideoFrameWidget::createActions()
 	m_fileSaveAction->setStatusTip(tr("Save current changes..."));
 	m_fileSaveAction->setEnabled(false);
 	m_fileSaveAction->setShortcut(QKeySequence::Save);
-	connect(m_fileSaveAction, &QAction::triggered, this, &EditVideoFrameWidget::saveWorkcopy);
+	connect(m_fileSaveAction, &QAction::triggered, this, &EditSchemeWidget::saveWorkcopy);
 	addAction(m_fileSaveAction);
 
 	m_fileSeparatorAction1 = new QAction(this);
@@ -1129,12 +1133,12 @@ void EditVideoFrameWidget::createActions()
 	m_fileGetWorkcopyAction = new QAction(tr("Get Workcopy..."), this);
 	m_fileGetWorkcopyAction->setStatusTip(tr("Get file workcopy"));
 	m_fileGetWorkcopyAction->setEnabled(true);
-	connect(m_fileGetWorkcopyAction, &QAction::triggered, this, &EditVideoFrameWidget::getCurrentWorkcopy);
+	connect(m_fileGetWorkcopyAction, &QAction::triggered, this, &EditSchemeWidget::getCurrentWorkcopy);
 
 	m_fileSetWorkcopyAction = new QAction(tr("Set Workcopy..."), this);
 	m_fileSetWorkcopyAction->setStatusTip(tr("Set file workcopy"));
 	m_fileSetWorkcopyAction->setEnabled(false);
-	connect(m_fileSetWorkcopyAction, &QAction::triggered, this, &EditVideoFrameWidget::setCurrentWorkcopy);
+	connect(m_fileSetWorkcopyAction, &QAction::triggered, this, &EditSchemeWidget::setCurrentWorkcopy);
 
 	m_fileSeparatorAction2 = new QAction(this);
 	m_fileSeparatorAction2->setSeparator(true);
@@ -1230,7 +1234,7 @@ void EditVideoFrameWidget::createActions()
 	m_undoAction = new QAction(tr("Undo"), this);
 	m_undoAction->setEnabled(false);
 	m_undoAction->setShortcut(QKeySequence::Undo);
-	connect(m_undoAction, &QAction::triggered, this, &EditVideoFrameWidget::undo);
+	connect(m_undoAction, &QAction::triggered, this, &EditSchemeWidget::undo);
 	addAction(m_undoAction);
 
 	// Edit->Redo
@@ -1238,7 +1242,7 @@ void EditVideoFrameWidget::createActions()
 	m_redoAction = new QAction(tr("Redo"), this);
 	m_redoAction->setEnabled(false);
 	m_redoAction->setShortcut(QKeySequence::Redo);
-	connect(m_redoAction, &QAction::triggered, this, &EditVideoFrameWidget::redo);
+	connect(m_redoAction, &QAction::triggered, this, &EditSchemeWidget::redo);
 	addAction(m_redoAction);
 
 	// ------------------------------------
@@ -1251,7 +1255,7 @@ void EditVideoFrameWidget::createActions()
 	m_selectAllAction = new QAction(tr("Select All"), this);
 	m_selectAllAction->setEnabled(true);
 	m_selectAllAction->setShortcut(QKeySequence::SelectAll);
-	connect(m_selectAllAction, &QAction::triggered, this, &EditVideoFrameWidget::selectAll);
+	connect(m_selectAllAction, &QAction::triggered, this, &EditSchemeWidget::selectAll);
 	addAction(m_selectAllAction);
 
 	// ------------------------------------
@@ -1294,7 +1298,7 @@ void EditVideoFrameWidget::createActions()
 	m_deleteAction->setEnabled(true);
 	m_deleteAction->setMenuRole(QAction::NoRole);
 	m_deleteAction->setShortcut(QKeySequence(Qt::Key_Delete));
-	connect(m_deleteAction, &QAction::triggered, this, &EditVideoFrameWidget::deleteKey);
+	connect(m_deleteAction, &QAction::triggered, this, &EditSchemeWidget::deleteKey);
 	addAction(m_deleteAction);
 
 	// ------------------------------------
@@ -1322,7 +1326,7 @@ void EditVideoFrameWidget::createActions()
 	m_zoomInAction = new QAction(tr("Zoom In"), this);
 	m_zoomInAction->setEnabled(true);
 	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
-	connect(m_zoomInAction, &QAction::triggered, this, &EditVideoFrameWidget::zoomIn);
+	connect(m_zoomInAction, &QAction::triggered, this, &EditSchemeWidget::zoomIn);
 	addAction(m_zoomInAction);
 
 	// View->ZoomOut
@@ -1330,7 +1334,7 @@ void EditVideoFrameWidget::createActions()
 	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
 	m_zoomOutAction->setEnabled(true);
 	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
-	connect(m_zoomOutAction, &QAction::triggered, this, &EditVideoFrameWidget::zoomOut);
+	connect(m_zoomOutAction, &QAction::triggered, this, &EditSchemeWidget::zoomOut);
 	addAction(m_zoomOutAction);
 
 	// View->Zoom100
@@ -1338,7 +1342,7 @@ void EditVideoFrameWidget::createActions()
 	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 	m_zoom100Action->setEnabled(true);
 	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
-	connect(m_zoom100Action, &QAction::triggered, this, &EditVideoFrameWidget::zoom100);
+	connect(m_zoom100Action, &QAction::triggered, this, &EditSchemeWidget::zoom100);
 	addAction(m_zoom100Action);
 
 	// ------------------------------------
@@ -1362,7 +1366,7 @@ void EditVideoFrameWidget::createActions()
 	//
 	// Create Sub Menus
 	//
-	m_fileMenu = new QMenu();
+	m_fileMenu = new QMenu(this);
 	m_fileAction->setMenu(m_fileMenu);
 		m_fileMenu->addAction(m_fileCheckOutAction);
 		m_fileMenu->addAction(m_fileCheckInAction);
@@ -1377,7 +1381,7 @@ void EditVideoFrameWidget::createActions()
 		m_fileMenu->addAction(m_fileSeparatorAction3);
 		m_fileMenu->addAction(m_fileCloseAction);
 
-	m_addMenu = new QMenu();
+	m_addMenu = new QMenu(this);
 	m_addAction->setMenu(m_addMenu);
 		m_addMenu->addAction(m_addLineAction);
 		m_addMenu->addAction(m_addConnectionLineAction);
@@ -1388,7 +1392,7 @@ void EditVideoFrameWidget::createActions()
 		m_addMenu->addAction(m_addFblElementAction);
 		m_addMenu->addAction(m_addLinkAction);
 
-	m_editMenu = new QMenu();
+	m_editMenu = new QMenu(this);
 	m_editAction->setMenu(m_editMenu);
 		m_editMenu->addAction(m_undoAction);
 		m_editMenu->addAction(m_redoAction);
@@ -1404,7 +1408,7 @@ void EditVideoFrameWidget::createActions()
 		m_editMenu->addAction(m_propertiesAction);
 
 
-	m_viewMenu = new QMenu();
+	m_viewMenu = new QMenu(this);
 	m_viewAction->setMenu(m_viewMenu);
 		m_viewMenu->addAction(m_zoomInAction);
 		m_viewMenu->addAction(m_zoomOutAction);
@@ -1417,13 +1421,13 @@ void EditVideoFrameWidget::createActions()
 
 // Set corresponding to the current situation and user actions context menu
 //
-void EditVideoFrameWidget::setCorrespondingContextMenu()
+void EditSchemeWidget::setCorrespondingContextMenu()
 {
 	setContextMenuPolicy(Qt::CustomContextMenu);
 	return;
 }
 
-void EditVideoFrameWidget::mousePressEvent(QMouseEvent* event)
+void EditSchemeWidget::mousePressEvent(QMouseEvent* event)
 {
 	if (event->button() == Qt::MidButton)
 	{
@@ -1493,7 +1497,7 @@ void EditVideoFrameWidget::mousePressEvent(QMouseEvent* event)
 	return;
 }
 
-void EditVideoFrameWidget::mouseReleaseEvent(QMouseEvent* event)
+void EditSchemeWidget::mouseReleaseEvent(QMouseEvent* event)
 {
 	if (event->button() == Qt::LeftButton)
 	{
@@ -1528,7 +1532,7 @@ void EditVideoFrameWidget::mouseReleaseEvent(QMouseEvent* event)
 	event->ignore();
 }
 
-void EditVideoFrameWidget::mouseMoveEvent(QMouseEvent* event)
+void EditSchemeWidget::mouseMoveEvent(QMouseEvent* event)
 {
 	if (event->buttons().testFlag(Qt::MidButton) == true)
 	{
@@ -1562,7 +1566,7 @@ void EditVideoFrameWidget::mouseMoveEvent(QMouseEvent* event)
 	return;
 }
 
-void EditVideoFrameWidget::wheelEvent(QWheelEvent* event)
+void EditSchemeWidget::wheelEvent(QWheelEvent* event)
 {
 	if (widget() == nullptr)
 	{
@@ -1622,7 +1626,7 @@ void EditVideoFrameWidget::wheelEvent(QWheelEvent* event)
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftDown_None(QMouseEvent* me)
+void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 {
 	if (me->modifiers().testFlag(Qt::ShiftModifier) == false)
 	{
@@ -1857,7 +1861,7 @@ void EditVideoFrameWidget::mouseLeftDown_None(QMouseEvent* me)
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftDown_AddSchemePosLineStartPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseLeftDown_AddSchemePosLineStartPoint(QMouseEvent* event)
 {
 	if (videoFrameView()->m_newItem == nullptr)
 	{
@@ -1885,7 +1889,7 @@ void EditVideoFrameWidget::mouseLeftDown_AddSchemePosLineStartPoint(QMouseEvent*
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftDown_AddSchemePosRectStartPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseLeftDown_AddSchemePosRectStartPoint(QMouseEvent* event)
 {
 	if (videoFrameView()->m_newItem == nullptr)
 	{
@@ -1918,7 +1922,7 @@ void EditVideoFrameWidget::mouseLeftDown_AddSchemePosRectStartPoint(QMouseEvent*
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftDown_AddSchemePosConnectionStartPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseLeftDown_AddSchemePosConnectionStartPoint(QMouseEvent* event)
 {
 	if (videoFrameView()->m_newItem == nullptr)
 	{
@@ -1961,7 +1965,7 @@ void EditVideoFrameWidget::mouseLeftDown_AddSchemePosConnectionStartPoint(QMouse
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftUp_Selection(QMouseEvent* me)
+void EditSchemeWidget::mouseLeftUp_Selection(QMouseEvent* me)
 {
 	// Определить какие элеиенты попали в выделенную область,
 	// добавить их в selectedItem
@@ -2042,7 +2046,7 @@ void EditVideoFrameWidget::mouseLeftUp_Selection(QMouseEvent* me)
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftUp_Moving(QMouseEvent* event)
+void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 {
 	if (selectedItems().empty() == true)
 	{
@@ -2118,7 +2122,7 @@ void EditVideoFrameWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
+void EditSchemeWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 {
 	if (mouseState() != MouseState::SizingTopLeft &&
 		mouseState() != MouseState::SizingTop &&
@@ -2216,7 +2220,7 @@ void EditVideoFrameWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
+void EditSchemeWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 {
 	if (mouseState() != MouseState::MovingStartLinePoint &&
 		mouseState() != MouseState::MovingEndLinePoint)
@@ -2275,7 +2279,7 @@ void EditVideoFrameWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftUp_AddSchemePosLineEndPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseLeftUp_AddSchemePosLineEndPoint(QMouseEvent* event)
 {
 	assert(videoFrameView()->m_newItem != nullptr);
 
@@ -2312,7 +2316,7 @@ void EditVideoFrameWidget::mouseLeftUp_AddSchemePosLineEndPoint(QMouseEvent* eve
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftUp_AddSchemePosRectEndPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseLeftUp_AddSchemePosRectEndPoint(QMouseEvent* event)
 {
 	assert(videoFrameView()->m_newItem != nullptr);
 
@@ -2355,7 +2359,7 @@ void EditVideoFrameWidget::mouseLeftUp_AddSchemePosRectEndPoint(QMouseEvent* eve
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
+void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 {
 	assert(videoFrameView()->m_newItem != nullptr);
 
@@ -2534,7 +2538,7 @@ void EditVideoFrameWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEve
 	return;
 }
 
-void EditVideoFrameWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
+void EditSchemeWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 {
 	if (mouseState() != MouseState::MovingHorizontalEdge &&
 		mouseState() != MouseState::MovingVerticalEdge &&
@@ -2588,14 +2592,14 @@ void EditVideoFrameWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_Scrolling(QMouseEvent*)
+void EditSchemeWidget::mouseMove_Scrolling(QMouseEvent*)
 {
 	// To Do
 	assert(false);
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_Selection(QMouseEvent* me)
+void EditSchemeWidget::mouseMove_Selection(QMouseEvent* me)
 {
 	// Выполнить перерисовку выделения.
 	//
@@ -2605,7 +2609,7 @@ void EditVideoFrameWidget::mouseMove_Selection(QMouseEvent* me)
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_Moving(QMouseEvent* me)
+void EditSchemeWidget::mouseMove_Moving(QMouseEvent* me)
 {
 	if (selectedItems().empty() == true)
 	{
@@ -2620,7 +2624,7 @@ void EditVideoFrameWidget::mouseMove_Moving(QMouseEvent* me)
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_SizingRect(QMouseEvent* me)
+void EditSchemeWidget::mouseMove_SizingRect(QMouseEvent* me)
 {
 	if (selectedItems().size() != 1)
 	{
@@ -2644,7 +2648,7 @@ void EditVideoFrameWidget::mouseMove_SizingRect(QMouseEvent* me)
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_MovingLinePoint(QMouseEvent* me)
+void EditSchemeWidget::mouseMove_MovingLinePoint(QMouseEvent* me)
 {
 	if (selectedItems().size() != 1)
 	{
@@ -2667,7 +2671,7 @@ void EditVideoFrameWidget::mouseMove_MovingLinePoint(QMouseEvent* me)
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_AddSchemePosLineEndPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseMove_AddSchemePosLineEndPoint(QMouseEvent* event)
 {
 	if (videoFrameView()->m_newItem == nullptr)
 	{
@@ -2698,7 +2702,7 @@ void EditVideoFrameWidget::mouseMove_AddSchemePosLineEndPoint(QMouseEvent* event
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_AddSchemePosRectEndPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseMove_AddSchemePosRectEndPoint(QMouseEvent* event)
 {
 	if (videoFrameView()->m_newItem == nullptr)
 	{
@@ -2737,7 +2741,7 @@ void EditVideoFrameWidget::mouseMove_AddSchemePosRectEndPoint(QMouseEvent* event
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* event)
 {
 	if (videoFrameView()->m_newItem == nullptr)
 	{
@@ -2821,7 +2825,7 @@ void EditVideoFrameWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent
 	return;
 }
 
-void EditVideoFrameWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
+void EditSchemeWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
 {
 	if (mouseState() != MouseState::MovingHorizontalEdge &&
 		mouseState() != MouseState::MovingVerticalEdge &&
@@ -2873,7 +2877,7 @@ void EditVideoFrameWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
 	return;
 }
 
-void EditVideoFrameWidget::mouseRightDown_None(QMouseEvent*)
+void EditSchemeWidget::mouseRightDown_None(QMouseEvent*)
 {
 	// CURRENTLY THIS ACTION IS DISABLED IN CONSTRUCTOR, ADD IT TO THE RightClickPress array
 	//
@@ -2882,7 +2886,7 @@ void EditVideoFrameWidget::mouseRightDown_None(QMouseEvent*)
 	return;
 }
 
-void EditVideoFrameWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEvent* event)
+void EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEvent* event)
 {
 	if (videoFrameView()->m_newItem == nullptr)
 	{
@@ -2928,42 +2932,42 @@ void EditVideoFrameWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouse
 	return;
 }
 
-std::shared_ptr<VFrame30::CVideoFrame>& EditVideoFrameWidget::videoFrame()
+std::shared_ptr<VFrame30::CVideoFrame>& EditSchemeWidget::videoFrame()
 {
 	return m_videoFrameView->videoFrame();
 }
 
-std::shared_ptr<VFrame30::CVideoFrame>& EditVideoFrameWidget::videoFrame() const
+std::shared_ptr<VFrame30::CVideoFrame>& EditSchemeWidget::videoFrame() const
 {
 	return m_videoFrameView->videoFrame();
 }
 
-EditVideoFrameView* EditVideoFrameWidget::videoFrameView()
+EditSchemeView* EditSchemeWidget::videoFrameView()
 {
 	return m_videoFrameView;
 }
 
-const EditVideoFrameView* EditVideoFrameWidget::videoFrameView() const
+const EditSchemeView* EditSchemeWidget::videoFrameView() const
 {
 	return m_videoFrameView;
 }
 
-const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditVideoFrameWidget::selectedItems() const
+const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditSchemeWidget::selectedItems() const
 {
 	return m_videoFrameView->m_selectedItems;
 }
 
-std::shared_ptr<VFrame30::CVideoLayer> EditVideoFrameWidget::activeLayer()
+std::shared_ptr<VFrame30::CVideoLayer> EditSchemeWidget::activeLayer()
 {
 	return m_videoFrameView->activeLayer();
 }
 
-std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditVideoFrameWidget::selectedItems()
+std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditSchemeWidget::selectedItems()
 {
 	return m_videoFrameView->m_selectedItems;
 }
 
-QPointF EditVideoFrameWidget::widgetPointToDocument(const QPoint& widgetPoint, bool snapToGrid) const
+QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool snapToGrid) const
 {
 	double docX = 0;	// Result
 	double docY = 0;
@@ -3022,7 +3026,7 @@ QPointF EditVideoFrameWidget::widgetPointToDocument(const QPoint& widgetPoint, b
 	return QPointF(docX, docY);
 }
 
-QPointF EditVideoFrameWidget::snapToGrid(QPointF pt) const
+QPointF EditSchemeWidget::snapToGrid(QPointF pt) const
 {
 	QPointF result;
 	double gridSize = videoFrame()->unit() == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
@@ -3056,7 +3060,7 @@ QPointF EditVideoFrameWidget::snapToGrid(QPointF pt) const
 	return result;
 }
 
-bool EditVideoFrameWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
+bool EditSchemeWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
 {
 	if (pDestDocPos == nullptr)
 	{
@@ -3110,7 +3114,7 @@ bool EditVideoFrameWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* p
 	return true;
 }
 
-void EditVideoFrameWidget::addItem(std::shared_ptr<VFrame30::CVideoItem> newItem)
+void EditSchemeWidget::addItem(std::shared_ptr<VFrame30::CVideoItem> newItem)
 {
 	if (newItem == nullptr)
 	{
@@ -3161,7 +3165,7 @@ void EditVideoFrameWidget::addItem(std::shared_ptr<VFrame30::CVideoItem> newItem
 	return;
 }
 
-void EditVideoFrameWidget::setMouseCursor(QPoint mousePos)
+void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 {
 	setCursor(QCursor(Qt::CursorShape::ArrowCursor));
 
@@ -3285,7 +3289,7 @@ void EditVideoFrameWidget::setMouseCursor(QPoint mousePos)
 	return;
 }
 
-void EditVideoFrameWidget::resetAction()
+void EditSchemeWidget::resetAction()
 {
 	setMouseState(MouseState::None);
 	videoFrameView()->m_newItem.reset();
@@ -3304,12 +3308,12 @@ void EditVideoFrameWidget::resetAction()
 	return;
 }
 
-void EditVideoFrameWidget::clearSelection()
+void EditSchemeWidget::clearSelection()
 {
 	videoFrameView()->clearSelection();
 }
 
-void EditVideoFrameWidget::contextMenu(const QPoint& pos)
+void EditSchemeWidget::contextMenu(const QPoint& pos)
 {
 	if (mouseState() == MouseState::AddSchemePosConnectionNextPoint)
 	{
@@ -3360,7 +3364,7 @@ void EditVideoFrameWidget::contextMenu(const QPoint& pos)
 	return;
 }
 
-void EditVideoFrameWidget::escapeKey()
+void EditSchemeWidget::escapeKey()
 {
 	if (mouseState() != MouseState::None)
 	{
@@ -3375,7 +3379,7 @@ void EditVideoFrameWidget::escapeKey()
 	return;
 }
 
-void EditVideoFrameWidget::deleteKey()
+void EditSchemeWidget::deleteKey()
 {
 	auto selection = videoFrameView()->selectedItems();
 
@@ -3388,17 +3392,17 @@ void EditVideoFrameWidget::deleteKey()
 	return;
 }
 
-void EditVideoFrameWidget::undo()
+void EditSchemeWidget::undo()
 {
 	m_editEngine->undo(1);
 }
 
-void EditVideoFrameWidget::redo()
+void EditSchemeWidget::redo()
 {
 	m_editEngine->redo(1);
 }
 
-void EditVideoFrameWidget::editEngineStateChanged(bool canUndo, bool canRedo)
+void EditSchemeWidget::editEngineStateChanged(bool canUndo, bool canRedo)
 {
 	if (m_undoAction == nullptr ||
 		m_redoAction == nullptr)
@@ -3414,31 +3418,31 @@ void EditVideoFrameWidget::editEngineStateChanged(bool canUndo, bool canRedo)
 	return;
 }
 
-void EditVideoFrameWidget::zoomIn()
+void EditSchemeWidget::zoomIn()
 {
 	setZoom(zoom() + 10);
 	return;
 }
 
-void EditVideoFrameWidget::modifiedChanged(bool modified)
+void EditSchemeWidget::modifiedChanged(bool modified)
 {
 	m_fileSaveAction->setEnabled(modified);
 	return;
 }
 
-void EditVideoFrameWidget::zoomOut()
+void EditSchemeWidget::zoomOut()
 {
 	setZoom(zoom() - 10);
 	return;
 }
 
-void EditVideoFrameWidget::zoom100()
+void EditSchemeWidget::zoom100()
 {
 	setZoom(100);
 	return;
 }
 
-void EditVideoFrameWidget::selectAll()
+void EditSchemeWidget::selectAll()
 {
 	videoFrameView()->clearSelection();
 
@@ -3451,18 +3455,18 @@ void EditVideoFrameWidget::selectAll()
 	return;
 }
 
-MouseState EditVideoFrameWidget::mouseState() const
+MouseState EditSchemeWidget::mouseState() const
 {
 	return m_videoFrameView->mouseState();
 }
 
-void EditVideoFrameWidget::setMouseState(MouseState state)
+void EditSchemeWidget::setMouseState(MouseState state)
 {
 	m_videoFrameView->setMouseState(state);
 	return;
 }
 
-double EditVideoFrameWidget::zoom() const
+double EditSchemeWidget::zoom() const
 {
 	if (videoFrameView() == nullptr)
 	{
@@ -3473,7 +3477,7 @@ double EditVideoFrameWidget::zoom() const
 	return videoFrameView()->zoom();
 }
 
-void EditVideoFrameWidget::setZoom(double zoom, int horzScrollValue /*= -1*/, int vertScrollValue /*= -1*/)
+void EditSchemeWidget::setZoom(double zoom, int horzScrollValue /*= -1*/, int vertScrollValue /*= -1*/)
 {
 	QPoint widgetCenterPoint(size().width() / 2, size().height() / 2);
 
@@ -3514,58 +3518,58 @@ void EditVideoFrameWidget::setZoom(double zoom, int horzScrollValue /*= -1*/, in
 	return;
 }
 
-const DbFileInfo& EditVideoFrameWidget::fileInfo() const
+const DbFileInfo& EditSchemeWidget::fileInfo() const
 {
 	return m_fileInfo;
 }
 
-void EditVideoFrameWidget::setFileInfo(const DbFileInfo& fi)
+void EditSchemeWidget::setFileInfo(const DbFileInfo& fi)
 {
 	m_fileInfo = fi;
 }
 
-bool EditVideoFrameWidget::snapToGrid() const
+bool EditSchemeWidget::snapToGrid() const
 {
 	return m_snapToGrid;
 }
 
-void EditVideoFrameWidget::setSnapToGrid(bool value)
+void EditSchemeWidget::setSnapToGrid(bool value)
 {
 	m_snapToGrid = value;
 }
 
-bool EditVideoFrameWidget::readOnly() const
+bool EditSchemeWidget::readOnly() const
 {
 	assert(m_editEngine);
 	return m_editEngine->readOnly();
 }
 
-void EditVideoFrameWidget::setReadOnly(bool value)
+void EditSchemeWidget::setReadOnly(bool value)
 {
 	assert(m_editEngine);
 	m_editEngine->setReadOnly(value);
 }
 
-bool EditVideoFrameWidget::modified() const
+bool EditSchemeWidget::modified() const
 {
 	assert(m_editEngine);
 	return m_editEngine->modified();
 }
 
-void EditVideoFrameWidget::setModified()
+void EditSchemeWidget::setModified()
 {
 	assert(m_editEngine);
 	m_editEngine->setModified();
 }
 
 
-void EditVideoFrameWidget::resetModified()
+void EditSchemeWidget::resetModified()
 {
 	assert(m_editEngine);
 	m_editEngine->resetModified();
 }
 
-void EditVideoFrameWidget::resetEditEngine()
+void EditSchemeWidget::resetEditEngine()
 {
 	assert(m_editEngine);
 	m_editEngine->reset();

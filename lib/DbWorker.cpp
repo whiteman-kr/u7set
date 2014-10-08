@@ -36,6 +36,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Type ObjectState was added", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0028.sql"},
 	{"File API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0029.sql"},
 	{"Signal API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0030.sql"},
+	{"File API, adding get_file_info", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0031.sql"},
 };
 
 
@@ -1566,6 +1567,89 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 		if (deleted == false)
 		{
 			files->push_back(fileInfo);
+		}
+	}
+
+	return;
+}
+
+void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (fileIds == nullptr ||
+		fileIds->empty() == true ||
+		out == nullptr)
+	{
+		assert(fileIds != nullptr);
+		assert(out != nullptr);
+		return;
+	}
+
+	out->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file list. Database connection is not openned."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_file_info(%1, ARRAY[")
+			.arg(currentUser().userId());
+
+	for (auto it = fileIds->begin(); it != fileIds->end(); ++it)
+	{
+		if (it == fileIds->begin())
+		{
+			request += QString("%1").arg(*it);
+		}
+		else
+		{
+			request += QString(", %1").arg(*it);
+		}
+	}
+
+	request += "]);";
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get file info. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbFileInfo fileInfo;
+
+		fileInfo.setFileName(q.value("Name").toString());
+		fileInfo.setFileId(q.value("FileID").toInt());
+		bool deleted = q.value("Deleted").toBool();
+		fileInfo.setParentId(q.value("ParentID").toInt());
+		fileInfo.setSize(q.value("Size").toInt());
+		fileInfo.setChangeset(q.value("ChangesetID").toInt());
+		fileInfo.setCreated(q.value("Created").toString());
+		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
+		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
+		fileInfo.setUserId(q.value("UserID").toInt());
+
+		if (deleted == false)
+		{
+			out->push_back(fileInfo);
 		}
 	}
 

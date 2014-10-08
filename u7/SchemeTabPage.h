@@ -3,19 +3,19 @@
 #include "MainTabPage.h"
 #include "FileView.h"
 #include "../include/DbController.h"
-#include "EditVideoFrameWidget.h"
+#include "EditSchemeWidget.h"
 
 //
 //
 // VideoFrameFileView
 //
 //
-class VideoFrameFileView : public FileView
+class SchemeFileView : public FileView
 {
 	Q_OBJECT
 public:
-	VideoFrameFileView(DbController* dbcontroller, const QString& parentFileName);
-	virtual ~VideoFrameFileView();
+	SchemeFileView(DbController* dbcontroller, const QString& parentFileName);
+	virtual ~SchemeFileView();
 
 	// Methods
 	//
@@ -39,18 +39,18 @@ protected:
 // EditVideoFrameTabPage
 //
 //
-class VideoFrameTabPage : public MainTabPage
+class SchemesTabPage : public MainTabPage
 {
 	Q_OBJECT
 
 private:
-	VideoFrameTabPage(DbController* dbcontroller, QWidget* parent);
+	SchemesTabPage(DbController* dbcontroller, QWidget* parent);
 
 public:
-	virtual ~VideoFrameTabPage();
+	virtual ~SchemesTabPage();
 
 	template<typename VideoFrameType>
-	static VideoFrameTabPage* create(const QString& fileExt, DbController* dbcontroller, const QString& parentFileName, QWidget* parent);
+	static SchemesTabPage* create(const QString& fileExt, DbController* dbcontroller, const QString& parentFileName, QWidget* parent);
 
 protected:
 
@@ -73,12 +73,12 @@ protected:
 // Create MainTab!!!
 //
 template<typename VideoFrameType>
-VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbController* dbcontroller,  const QString& parentFileName, QWidget* parent)
+SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbcontroller,  const QString& parentFileName, QWidget* parent)
 {
 	static_assert(std::is_base_of<VFrame30::CVideoFrame, VideoFrameType>::value, "Base class must be VFrame30::CVideoFrame");
 	assert(dbcontroller != nullptr);
 
-	VideoFrameTabPage* p = new VideoFrameTabPage(dbcontroller, parent);
+	SchemesTabPage* p = new SchemesTabPage(dbcontroller, parent);
 
 	// Create VideoFrame function, will be stored in two places, VideoFrameTabPage and VideoFrameControlTabPage
 	//
@@ -92,7 +92,7 @@ VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbControlle
 
 	// Add control page
 	//
-	VideoFrameControlTabPage* controlTabPage = new VideoFrameControlTabPage(fileExt, dbcontroller, parentFileName, createFunc);
+	SchemeControlTabPage* controlTabPage = new SchemeControlTabPage(fileExt, dbcontroller, parentFileName, createFunc);
 	p->m_tabWidget->addTab(controlTabPage, tr("Control"));
 
 	return p;
@@ -104,17 +104,17 @@ VideoFrameTabPage* VideoFrameTabPage::create(const QString& fileExt, DbControlle
 // VideoFrameControlTabPage
 //
 //
-class VideoFrameControlTabPage : public QWidget, public HasDbController
+class SchemeControlTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
 public:
-	VideoFrameControlTabPage(
+	SchemeControlTabPage(
 		const QString& fileExt,
 		DbController* dbcontroller,
 		const QString& parentFileName,
 		std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc);
 
-	virtual ~VideoFrameControlTabPage();
+	virtual ~SchemeControlTabPage();
 
 public:
 	VFrame30::CVideoFrame* createVideoFrame() const;
@@ -125,17 +125,25 @@ protected:
 signals:
 
 protected slots:
+	//void projectOpened();
+	//void projectClosed();
+
 	void addFile();
 	void openFiles(std::vector<DbFileInfo> files);
 	void viewFiles(std::vector<DbFileInfo> files);
 
 	void refreshFiles();
 
+	// Properties
+	//
+public:
+	const DbFileInfo& parentFile() const;
+
 	// Data
 	//
 private:
 	std::function<VFrame30::CVideoFrame*()> m_createVideoFrameFunc;
-	VideoFrameFileView* m_filesView;
+	SchemeFileView* m_filesView;
 };
 
 //
@@ -143,14 +151,14 @@ private:
 // EditVideoFrameTabPage
 //
 //
-class EditVideoFrameTabPage : public QWidget, public HasDbController
+class EditSchemeTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
 private:
-	EditVideoFrameTabPage();		// Deleted
+	EditSchemeTabPage();		// Deleted
 public:
-	EditVideoFrameTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
-	virtual ~EditVideoFrameTabPage();
+	EditSchemeTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
+	virtual ~EditSchemeTabPage();
 
 protected:
 	void CreateActions();
@@ -184,7 +192,7 @@ public:
 	// Data
 	//
 private:
-	EditVideoFrameWidget* m_videoFrameWidget;
+	EditSchemeWidget* m_videoFrameWidget;
 };
 
 

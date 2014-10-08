@@ -9,7 +9,7 @@
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
 #include "ConfigurationsTabPage.h"
-#include "VideoFrameTabPage.h"
+#include "SchemeTabPage.h"
 #include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
 #include "DialogAfblEditor.h"
@@ -61,15 +61,15 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 //	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 
 	getCentralWidget()->addTabPage(
-		VideoFrameTabPage::create<VFrame30::CVideoFrameLogic>("als", dbController(), AlFileName, nullptr),
+		SchemesTabPage::create<VFrame30::CVideoFrameLogic>("als", dbController(), AlFileName, nullptr),
 		tr("Application Logic"));
 
 	getCentralWidget()->addTabPage(
-		VideoFrameTabPage::create<VFrame30::CVideoFrameTech>("wvs", dbController(), WvsFileName, nullptr),
+		SchemesTabPage::create<VFrame30::CVideoFrameTech>("wvs", dbController(), WvsFileName, nullptr),
 		tr("Workflow Schemes"));
 
 	getCentralWidget()->addTabPage(
-		VideoFrameTabPage::create<VFrame30::CVideoFrameDiag>("dvs", dbController(), DvsFileName, nullptr),
+		SchemesTabPage::create<VFrame30::CVideoFrameDiag>("dvs", dbController(), DvsFileName, nullptr),
 		tr("Diag Schemes"));
 
 //	getCentralWidget()->addTabPage(
