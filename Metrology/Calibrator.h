@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtGlobal>
 #include <QtSerialPort/QSerialPort>
+#include <QStringList>
 
 // ==============================================================================================
 
@@ -196,16 +197,13 @@ public:
     explicit    Calibrator(QObject *parent = 0);
                ~Calibrator();
 
-    QSerialPort m_port;                                                                 // object serial port for management of the calibrator
-
 private:
-
-    int			m_index = -1;                                                           // index calibrator in a common base calibrators CalibratorBase
 
     bool        m_connected = false;
 
-    QString		m_portName;													            // string containing the name of the serial port
+    QSerialPort m_port;                                                                 // object serial port for management of the calibrator
 
+    QString		m_portName;													            // string containing the name of the serial port
     int			m_type = CALIBRATOR_TYPE_UNKNOWN;										// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
     QString		m_name;													                // name of calibrator
     QString		m_serialNo;												                // serial number of calibrator
@@ -224,6 +222,8 @@ private:
 
     bool        m_enableWaitResponse = false;                                           // enbale wait response from calibrator after open port
 
+    bool        m_busy;
+
     void        empty();                                                                // erases all information on the calibrator: SerialNo, Name and etc.
 
     void        setConnected(bool connect);                                             // function changes status calibrator: connected or disconnected
@@ -240,26 +240,32 @@ private:
 public:
 
     bool        isConnected()                   { return m_connected; }
-    int			getIndex()                      { return m_index; }
-    void        setIndex(int index)             { m_index = index; }
+
+    bool        isOpenPort()                    { return m_port.isOpen(); }
+
     QString		getPortName()                   { return m_portName; }
     void		setPortName(QString portName)   { m_portName = portName; }
+
     int			getType()                       { return m_type; }
-    QString		getTypeStr()                    { if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT) return ""; else return CalibratorType[ m_type ]; }
+    QString		getTypeString()                 { if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT) return ""; else return CalibratorType[ m_type ]; }
     void		setType(int type)               { m_type = type; }
     QString		getName()                       { return m_name; }
     QString		getSerialNo()                   { return m_serialNo; }
     int			getTimeout()                    { return m_timeout; }
+
     int			getMode()                       { return m_mode; }
     int			getMeasureUnit()                { return m_measureUnit; }
     int			getSourceUnit()                 { return m_sourceUnit; }
+
     double		getMeasureValue()               { return m_measureValue; }
     double		getSourceValue()                { return m_sourceValue; }
-    QString     getLastError()                  { return m_lastError; }
-    void        waitResponse(bool enable)       { m_enableWaitResponse = enable; }
 
-    void        loadSettings();
-    void        saveSettings();
+    QString     getLastError()                  { return m_lastError; }
+
+    void        setWaitResponse(bool enable)    { m_enableWaitResponse = enable; }
+
+    void        setBusy(bool busy);
+    bool        isBusy()                        { return m_busy; }
 
 signals:
 
@@ -272,18 +278,19 @@ signals:
     void        valueIsRequested();
     void        valueIsReceived();
 
-    void        error_control(QString);
+    void        error(QString);
 
 public slots:
 
     bool        open();                                                                 // initialization of the calibrator
 
-    bool		setUnit(int mode, int unit);							                // select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or soource - 1 (CALIBRATOR_MODE_SOURCE)
+    bool		setUnit(int mode, int unit);                                            // select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or soource - 1 (CALIBRATOR_MODE_SOURCE)
                                                                                         // select unit: mA, mV and etc.
     bool		setValue(double value);                                                 // set value
     bool		stepDown();                                                             // decrease the value on the calibrator
     bool		stepUp();                                                               // increasing the value on the calibrator
     bool		step(int stepType);                                                     // imitation of the "step"
+
     double		getValue();     											            // get electrical values ​​with calibrator
 
     bool        beep();                                                                 // beep

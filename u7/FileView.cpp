@@ -206,10 +206,12 @@ FileView::FileView(const FileView&) :
 	assert(false);
 }
 
-FileView::FileView(DbController* pDbStore) :
-	m_dbController(pDbStore)
+FileView::FileView(DbController* pDbStore, const QString& parentFileName) :
+	m_dbController(pDbStore),
+	m_parentFileName(parentFileName)
 {
 	assert(m_dbController != nullptr);
+	assert(m_parentFileName.isEmpty() == false);
 
 	// --
 	//
@@ -599,16 +601,15 @@ void FileView::setWorkcopy(std::vector<DbFileInfo> files)
 
 void FileView::refreshFiles()
 {
-	assert(false);
-
 	// Get file list from the DB
 	//
-	/*std::vector<DbFileInfo> files;
-	dbController()->getFileList(&files, false, filesModel().filter());
+	std::vector<DbFileInfo> files;
+
+	dbController()->getFileList(&files, parentFile().fileId(), filesModel().filter(), this);
 
 	// Set files to the view
 	//
-	setFiles(files);*/
+	setFiles(files);
 
 	return;
 }
@@ -619,6 +620,9 @@ void FileView::projectOpened()
 
 	m_addFileAction->setEnabled(true);
 	m_refreshFileAction->setEnabled(true);
+
+	m_parentFile = dbController()->systemFileInfo(m_parentFileName);
+	assert(m_parentFile.fileId() != -1);
 
 	// Refresh file list in FileModel
 	//
@@ -633,6 +637,8 @@ void FileView::projectClosed()
 
 	m_addFileAction->setEnabled(false);
 	m_refreshFileAction->setEnabled(false);
+
+	m_parentFile = DbFileInfo();
 
 	clear();
 }
@@ -922,6 +928,11 @@ void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, con
 FilesModel& FileView::filesModel()
 {
 	return m_filesModel;
+}
+
+const DbFileInfo& FileView::parentFile() const
+{
+	return m_parentFile;
 }
 
 DbController* FileView::dbController()

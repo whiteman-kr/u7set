@@ -9,8 +9,8 @@
 //	VideoFrameFileView
 //
 //
-VideoFrameFileView::VideoFrameFileView(DbController* dbcontroller) :
-	FileView(dbcontroller)
+VideoFrameFileView::VideoFrameFileView(DbController* dbcontroller, const QString& parentFileName) :
+	FileView(dbcontroller, parentFileName)
 {
 	filesModel().setFilter("vfr");
 	return;
@@ -85,7 +85,10 @@ void VideoFrameTabPage::projectClosed()
 //
 //
 
-VideoFrameControlTabPage::VideoFrameControlTabPage(const QString& fileExt, DbController* dbcontroller, std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc) :
+VideoFrameControlTabPage::VideoFrameControlTabPage(const QString& fileExt,
+		DbController* dbcontroller, const QString& parentFileName,
+		std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc) :
+
 	HasDbController(dbcontroller),
 	m_createVideoFrameFunc(createVideoFrameFunc)
 {
@@ -95,7 +98,7 @@ VideoFrameControlTabPage::VideoFrameControlTabPage(const QString& fileExt, DbCon
 
 	// Create controls
 	//
-	m_filesView = new VideoFrameFileView(dbcontroller);
+	m_filesView = new VideoFrameFileView(dbcontroller, parentFileName);
 	m_filesView->filesModel().setFilter(fileExt);
 
 	QHBoxLayout* pMainLayout = new QHBoxLayout();

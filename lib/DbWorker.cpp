@@ -193,6 +193,13 @@ int DbWorker::dvsFileId() const
 	return m_dvsFileId;
 }
 
+std::vector<DbFileInfo> DbWorker::systemFiles() const
+{
+	QMutexLocker m(&m_mutex);
+	std::vector<DbFileInfo> copy(m_systemFiles);
+	return copy;
+}
+
 
 void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 {
@@ -659,49 +666,56 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_hpFileId = -1;
 	m_wvsFileId = -1;
 	m_dvsFileId = -1;
+	m_systemFiles.clear();
 	m_mutex.unlock();
 
 	for (const DbFileInfo& fi : systemFiles)
 	{
-		if (fi.fileName() == "AFBL")
+		if (fi.fileName() == AfblFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_afblFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
 			continue;
 		}
 
-		if (fi.fileName() == "AL")
+		if (fi.fileName() == AlFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_alFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
 			continue;
 		}
 
-		if (fi.fileName() == "HC")
+		if (fi.fileName() == HcFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_hcFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
 			continue;
 		}
 
-		if (fi.fileName() == "HP")
+		if (fi.fileName() == HpFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_hpFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
 			continue;
 		}
 
-		if (fi.fileName() == "WVS")
+		if (fi.fileName() == WvsFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_wvsFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
 			continue;
 		}
 
-		if (fi.fileName() == "DVS")
+		if (fi.fileName() == DvsFileName)
 		{
 			QMutexLocker locker(&m_mutex);
 			m_dvsFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
 			continue;
 		}
 	}
@@ -723,6 +737,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		db.close();
 
 		// Lock is nit necessare, we will crash anyway!
+		//
 		assert(m_afblFileId != -1);
 		assert(m_alFileId != -1);
 		assert(m_hcFileId != -1);

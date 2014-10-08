@@ -18,12 +18,12 @@ SOURCES += \
     Measure.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
-    CalibratorManagerDialog.cpp \
     OptionsDialog.cpp \
     Options.cpp \
     OptionsPointsDialog.cpp \
     Main.cpp \
-    MeasureThread.cpp
+    MeasureThread.cpp \
+    CalibratorManager.cpp
 
 
 HEADERS  += \
@@ -31,11 +31,11 @@ HEADERS  += \
     Measure.h \
     Calibrator.h \
     CalibratorBase.h \
-    CalibratorManagerDialog.h \
     OptionsDialog.h \
     Options.h \
     OptionsPointsDialog.h \
-    MeasureThread.h
+    MeasureThread.h \
+    CalibratorManager.h
 
 
 FORMS    +=

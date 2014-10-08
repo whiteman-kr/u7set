@@ -10,6 +10,15 @@ const int	ERR_SIGNAL_OK = 0,
 			ERR_SIGNAL_ALREADY_CHECKED_OUT = 2,
 			ERR_SIGNAL_DELETED = 3;
 
+// System files names
+//
+extern const char* AfblFileName;		// Application Functional Block Library
+extern const char* AlFileName;			// Application Logic Schemes
+extern const char* HcFileName;			// Hardware Configuratiun
+extern const char* HpFileName;			// Hardware Presets
+extern const char* WvsFileName;		// Workflow Video Schemes
+extern const char* DvsFileName;		// Diagnostics Video Schemes
+
 //
 //
 // DbProgress

@@ -39,6 +39,7 @@
 #include <QMetaObject>
 #include <QMetaClassInfo>
 #include <QJSEngine>
+#include <QQmlEngine>
 
 
 // Qt Widgets
