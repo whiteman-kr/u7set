@@ -4,10 +4,12 @@
 #include <QThread>
 #include <QMutex>
 #include "Measure.h"
+#include "CalibratorBase.h"
 
 // ==============================================================================================
 
-const int MEASURE_THREAD_TIMEOUT_STEP = 100; // 100 milliseconds
+const int MT_TIMEOUT_STEP       = 100; // 100 milliseconds
+const int MT_VALUE_IS_READY     = 0xFFFF;
 
 // ==============================================================================================
 
@@ -22,6 +24,8 @@ public:
     void        setMeasureType(int type)    { m_measureType = type; }
     int         getMeasureType()            { return m_measureType; }
 
+    bool        stop();
+
 private:
 
     QMutex      m_mutex;
@@ -32,7 +36,7 @@ private:
 
     void        waitMeasureTimeout();
 
-    bool        prepareCalibrator();
+    bool        prepareCalibrator(CalibratorManager* manager, int mode, int unit);
 
     void        measureLinearity();
     void        measureComprators();
@@ -42,14 +46,13 @@ protected:
 
     void        run();
 
-public:
-
-    bool        stop();
-
 signals:
 
+    // measure thread signals
+    //
     void        measureInfo(QString);
     void        measureInfo(int);
+    void        measureComplite();
 
 public slots:
 

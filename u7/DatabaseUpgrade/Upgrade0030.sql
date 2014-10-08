@@ -1,3 +1,9 @@
+ALTER TABLE checkout
+  ADD CONSTRAINT checkout_signalid_fkey FOREIGN KEY (signalid)
+	  REFERENCES signal (signalid) MATCH SIMPLE
+	  ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
 DROP FUNCTION get_signals_ids(integer, boolean);
 
 CREATE OR REPLACE FUNCTION get_signals_ids(user_id integer, with_deleted boolean)
@@ -228,10 +234,24 @@ DECLARE
 	os objectstate;
 	chOutUserID integer;
 	signalDeleted boolean;
+	sgID integer;
 BEGIN
 	FOREACH signal_id IN ARRAY signal_ids
 	LOOP
-		SELECT CheckedOutInstanceID, UserID, Deleted INTO chOutInstanceID, chOutUserID, signalDeleted FROM Signal WHERE SignalID = signal_id;
+		SELECT SignalID, CheckedOutInstanceID, UserID, Deleted INTO sgID, chOutInstanceID, chOutUserID, signalDeleted FROM Signal WHERE SignalID = signal_id;
+
+		IF sgID IS NULL THEN
+
+			os.ID = signal_id;
+			os.deleted = FALSE;
+			os.checkedout = FALSE;
+			os.action = 0;
+			os.userID = 0;
+			os.errCode = 4;					-- ERR_SIGNAL_NOT_FOUND
+			RETURN NEXT os;
+
+			CONTINUE;
+		END IF;
 
 		IF signalDeleted THEN
 			-- signal deleted, can't check out

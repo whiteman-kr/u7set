@@ -8,13 +8,14 @@
 class DbController;
 class QTableView;
 class QMenu;
+class SignalsModel;
 
 
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, QObject *parent = 0);
+    explicit SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, QObject *parent = 0);
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
@@ -31,6 +32,7 @@ private:
 	DataFormatList& m_dataFormatInfo;
 	UnitList& m_unitInfo;
 	SignalSet& m_signalSet;
+	SignalsModel* m_model;
 };
 
 
@@ -50,9 +52,15 @@ public:
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags(const QModelIndex & index) const;
 
+	SignalsDelegate* createDelegate() { return new SignalsDelegate(m_dataFormatInfo, m_unitInfo, m_signalSet, this, parent()); }
+
 	void loadSignals();
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
+
+	DbController* dbController();
+	QWidget* parrentWindow() { return m_parentWindow; }
+	void showError(const ObjectState& state) const;
 
 signals:
 	void cellsSizeChanged();
@@ -60,20 +68,20 @@ signals:
 public slots:
 	void addSignal();
 
-protected:
-	DbController* dbController();
-
 private:
 	// Data
 	//
 	SignalSet m_signalSet;
 	DataFormatList m_dataFormatInfo;
 	UnitList m_unitInfo;
+	QMap<int, QString> m_usernameMap;
 
 	QWidget* m_parentWindow;
 	DbController* m_dbController;
 
 	QString getUnitStr(int unitID) const;
+	QString getSensorStr(int sensorID) const;
+	QString getUserStr(int userID) const;
 };
 
 

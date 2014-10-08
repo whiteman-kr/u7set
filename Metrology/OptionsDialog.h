@@ -119,13 +119,15 @@ const int		PROPERTY_PAGE_TYPE_COUNT    = 2;
 class PropertyPage : public QObject
 {
     Q_OBJECT
+
 public:
 
     explicit PropertyPage(QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor);
     explicit PropertyPage(QDialog* dialog);
     ~PropertyPage();
 
-    QWidget* getWidget()        { return m_pWidget; }
+    QWidget*                    getWidget() { return m_pWidget; }
+    int                         getType()   { return m_type; }
 
     int                         m_page = OPTION_PAGE_UNKNOWN;
     QTreeWidgetItem*            m_pTreeWidgetItem = nullptr;
@@ -134,17 +136,17 @@ private:
 
     int                         m_type = PROPERTY_PAGE_TYPE_UNKNOWN;
 
-
     QWidget*                    m_pWidget = nullptr;
 
+    // PROPERTY_PAGE_TYPE_LIST
+    //
     QtVariantPropertyManager*   m_pManager = nullptr;
     QtVariantEditorFactory*     m_pFactory = nullptr;
     QtTreePropertyBrowser*      m_pEditor = nullptr;
 
+    // PROPERTY_PAGE_TYPE_DIALOG
+    //
     QDialog*                    m_pDialog = nullptr;
-
-
-
 };
 
 // ==============================================================================================
@@ -166,6 +168,7 @@ private:
 
     void                    createInterface();
 
+    QTreeWidget*            m_pPageTree = nullptr;
     QHBoxLayout*            m_pagesLayout = nullptr;
     QHBoxLayout*            m_buttonsLayout = nullptr;
 
@@ -181,10 +184,17 @@ private:
     PropertyPage*           createPropertyDialog(int page);
 
 
-    QMap<QtProperty*,int>   m_propertyList;
+    QMap<QtProperty*,int>        m_propertyItemList;
+    QMap<QtProperty*,QVariant>   m_propertyValueList;
 
     void                    appendProperty(QtProperty* property, int page, int param);
     void                    clearProperty();
+
+    QtProperty*             m_currentPropertyItem = nullptr;
+    QVariant                m_currentPropertyValue = 0;
+
+    void                    restoreProperty();
+    void                    applyProperty();
 
 protected:
 
@@ -193,7 +203,9 @@ protected:
 private slots:
 
     void                    onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
-    void                    onPropertyChanged(QtProperty *property, const QVariant &value);
+    void                    onPropertyValueChanged(QtProperty *property, const QVariant &value);
+
+    void                    onBrowserItem(QtBrowserItem*);
 
     void                    updateLinearityPage(bool isDialog);
 

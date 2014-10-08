@@ -134,10 +134,10 @@ QHBoxLayout* OptionsDialog::createPages()
 {
     QHBoxLayout *pagesLayout = new QHBoxLayout ;
 
-    QTreeWidget* pPageTree = new QTreeWidget;
+    m_pPageTree = new QTreeWidget;
 
-    pPageTree->setHeaderHidden(true);
-    pPageTree->setFixedWidth(200);
+    m_pPageTree->setHeaderHidden(true);
+    m_pPageTree->setFixedWidth(200);
 
     QList<QTreeWidgetItem*> groupList;
 
@@ -145,7 +145,7 @@ QHBoxLayout* OptionsDialog::createPages()
     {
         QTreeWidgetItem* groupTreeItem = new QTreeWidgetItem;
         groupTreeItem->setText(0, OptionGroup[group]);
-        pPageTree->addTopLevelItem(groupTreeItem);
+        m_pPageTree->addTopLevelItem(groupTreeItem);
 
         groupList.append(groupTreeItem);
     }
@@ -176,9 +176,9 @@ QHBoxLayout* OptionsDialog::createPages()
         m_pageList.append(pPropertyPage);
     }
 
-    connect(pPageTree, &QTreeWidget::currentItemChanged , this, &OptionsDialog::onPageChanged );
+    connect(m_pPageTree, &QTreeWidget::currentItemChanged , this, &OptionsDialog::onPageChanged );
 
-    pagesLayout->addWidget(pPageTree);
+    pagesLayout->addWidget(m_pPageTree);
 
     return pagesLayout;
 }
@@ -187,6 +187,9 @@ QHBoxLayout* OptionsDialog::createPages()
 
 void OptionsDialog::removePages()
 {
+    m_propertyItemList.clear();
+    m_propertyValueList.clear();
+
     int count = m_pageList.count();
     for(int i = 0; i < count; i++ )
     {
@@ -351,7 +354,12 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
                 item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_POINT_COUNT]);
                 item->setValue(m_options.getLinearity().m_pointBase.count());
-                //item->setAttribute(QLatin1String("readOnly"), true);
+                switch( m_options.getLinearity().m_rangeType)
+                {
+                    case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
+                    case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
+                    default:                        assert(0);                  break;
+                }
                 appendProperty(item, page, LO_PARAM_POINT_COUNT);
                 pointGroup->addSubProperty(item);
 
@@ -359,6 +367,12 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                 item->setValue( m_options.getLinearity().m_lowLimitRange );
                 item->setAttribute(QLatin1String("singleStep"), 1);
                 item->setAttribute(QLatin1String("decimals"), 1);
+                switch( m_options.getLinearity().m_rangeType)
+                {
+                    case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
+                    case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
+                    default:                        assert(0);                  break;
+                }
                 appendProperty(item, page, LO_PARAM_LOW_RANGE);
                 pointGroup->addSubProperty(item);
 
@@ -366,6 +380,12 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                 item->setValue( m_options.getLinearity().m_highLimitRange );
                 item->setAttribute(QLatin1String("singleStep"), 1);
                 item->setAttribute(QLatin1String("decimals"), 1);
+                switch( m_options.getLinearity().m_rangeType)
+                {
+                    case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
+                    case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
+                    default:                        assert(0);                  break;
+                }
                 appendProperty(item, page, LO_PARAM_HIGH_RANGE);
                 pointGroup->addSubProperty(item);
 
@@ -416,7 +436,8 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
     editor->setPropertiesWithoutValueMarked(true);
     editor->setRootIsDecorated(false);
 
-    connect(manager, &QtVariantPropertyManager::valueChanged, this, &OptionsDialog::onPropertyChanged );
+    connect(manager, &QtVariantPropertyManager::valueChanged, this, &OptionsDialog::onPropertyValueChanged );
+    connect(editor, &QtTreePropertyBrowser::currentItemChanged, this, &OptionsDialog::onBrowserItem );
 
     return (new PropertyPage(manager, factory, editor));
 }
@@ -467,7 +488,8 @@ void OptionsDialog::appendProperty(QtProperty* property, int page, int param)
         return;
     }
 
-    m_propertyList[property] = (page << 8) | param;
+    m_propertyItemList[property] = (page << 8) | param;
+    m_propertyValueList[property] = ((QtVariantProperty*) property)->value();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -509,10 +531,10 @@ bool OptionsDialog::setActivePage(int page)
     //
     if (activePage >= 0 && activePage < m_pageList.count() )
     {
-        PropertyPage* oldPage = m_pageList.at(activePage);
-        if (oldPage != nullptr )
+        PropertyPage* pCurrentPage = m_pageList.at(activePage);
+        if (pCurrentPage != nullptr )
         {
-            QWidget* pWidget = oldPage->getWidget();
+            QWidget* pWidget = pCurrentPage->getWidget();
             if (pWidget != nullptr )
             {
                 m_pagesLayout->removeWidget(pWidget);
@@ -523,10 +545,10 @@ bool OptionsDialog::setActivePage(int page)
 
     // show new page
     //
-    PropertyPage* newPage = m_pageList.at(page);
-    if (newPage != nullptr)
+    PropertyPage* pActivePage = m_pageList.at(page);
+    if (pActivePage != nullptr)
     {
-        QWidget* pWidget = newPage->getWidget();
+        QWidget* pWidget = pActivePage->getWidget();
         if (pWidget != nullptr )
         {
             setWindowTitle(tr("Options - %1").arg(OptionPage[page]));
@@ -540,20 +562,9 @@ bool OptionsDialog::setActivePage(int page)
 
     // select tree item
     //
-    QTreeWidgetItem* item = newPage->m_pTreeWidgetItem;
-    if (item != nullptr)
+    if (m_pPageTree != nullptr && pActivePage->m_pTreeWidgetItem != nullptr)
     {
-        QTreeWidgetItem* parent = item->parent();
-        if (parent != nullptr)
-        {
-            parent->setExpanded(true);
-            for(int c = 0; c < parent->childCount(); c++)
-            {
-                parent->child(c)->setSelected(false);
-            }
-        }
-
-        item->setSelected(true);
+        m_pPageTree->setCurrentItem( pActivePage->m_pTreeWidgetItem );
     }
 
     return true;
@@ -561,25 +572,87 @@ bool OptionsDialog::setActivePage(int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::onPropertyChanged(QtProperty *property, const QVariant &value)
+void OptionsDialog::onPropertyValueChanged(QtProperty *property, const QVariant &value)
 {
     if (property == nullptr)
     {
         return;
     }
 
-    if (m_propertyList.contains(property) == false)
+    if (m_propertyItemList.contains(property) == false)
     {
         return;
     }
 
-    int page = m_propertyList[property] & 0xFF00;
+    m_currentPropertyItem = property;
+    m_currentPropertyValue = value;
+
+    int type = ((QtVariantProperty*)property)->propertyType();
+
+    if( type == QVariant::Bool ||                               // check
+        type == QtVariantPropertyManager::enumTypeId() ||       // list of values
+        type == QVariant::String)                               // string
+   {
+        applyProperty();
+   }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::onBrowserItem(QtBrowserItem*)
+{
+    restoreProperty();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::restoreProperty()
+{
+    QtProperty *property = m_currentPropertyItem;
+    if (property == nullptr)
+    {
+        return;
+    }
+
+    if (m_propertyValueList.contains(property) == false)
+    {
+        return;
+    }
+
+    QVariant value = m_propertyValueList[property];
+
+    ((QtVariantProperty*) property)->setValue( value );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::applyProperty()
+{
+    QtProperty *property = m_currentPropertyItem;
+    if (property == nullptr)
+    {
+        return;
+    }
+
+    if (m_propertyItemList.contains(property) == false)
+    {
+        return;
+    }
+
+    m_propertyValueList[property] = m_currentPropertyValue;
+
+
+    int paramId = m_propertyItemList[property];
+
+    int page = (paramId & 0xFF00) >> 8;
     if (page < 0 || page >= OPTION_PAGE_COUNT)
     {
         return;
     }
 
-    int param = m_propertyList[property] & 0x00FF;
+    int param = paramId & 0x00FF;
+
+    QVariant value = m_currentPropertyValue;
 
     switch (page)
     {
@@ -654,6 +727,8 @@ void OptionsDialog::onPropertyChanged(QtProperty *property, const QVariant &valu
             assert(nullptr);
             break;
     }
+
+    m_currentPropertyItem = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -687,31 +762,53 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 
     QtVariantProperty *property = nullptr;
 
-    property = (QtVariantProperty*) m_propertyList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_RANGE_TYPE );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_RANGE_TYPE );
     if (property != nullptr)
     {
         property->setValue( m_options.getLinearity().m_rangeType );
     }
 
-    property = (QtVariantProperty*) m_propertyList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_POINT_COUNT );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_POINT_COUNT );
     if (property != nullptr)
     {
         property->setValue( m_options.getLinearity().m_pointBase.count() );
+
+        switch( m_options.getLinearity().m_rangeType)
+        {
+            case LO_RANGE_TYPE_MANUAL:      property->setEnabled(false);    break;
+            case LO_RANGE_TYPE_AUTOMATIC:   property->setEnabled(true);     break;
+            default:                        assert(0);                      break;
+        }
     }
 
-    property = (QtVariantProperty*) m_propertyList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_LOW_RANGE );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_LOW_RANGE );
     if (property != nullptr)
     {
         property->setValue( m_options.getLinearity().m_lowLimitRange );
+
+        switch( m_options.getLinearity().m_rangeType)
+        {
+            case LO_RANGE_TYPE_MANUAL:      property->setEnabled(false);    break;
+            case LO_RANGE_TYPE_AUTOMATIC:   property->setEnabled(true);     break;
+            default:                        assert(0);                      break;
+        }
     }
 
-    property = (QtVariantProperty*) m_propertyList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_HIGH_RANGE );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_HIGH_RANGE );
     if (property != nullptr)
     {
         property->setValue( m_options.getLinearity().m_highLimitRange );
+
+        switch( m_options.getLinearity().m_rangeType)
+        {
+            case LO_RANGE_TYPE_MANUAL:      property->setEnabled(false);    break;
+            case LO_RANGE_TYPE_AUTOMATIC:   property->setEnabled(true);     break;
+            default:                        assert(0);                      break;
+        }
+
     }
 
-    property = (QtVariantProperty*) m_propertyList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_VALUE_POINTS );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_VALUE_POINTS );
     if (property != nullptr)
     {
         property->setValue( m_options.getLinearity().m_pointBase.text() );
@@ -744,7 +841,35 @@ bool OptionsDialog::event(QEvent * e)
         saveWindowPosition(this);
     }
 
+    if (e->type() == QEvent::KeyRelease)
+    {
+        if (activePage >= 0 && activePage < m_pageList.count() )
+        {
+            PropertyPage* pActivePage = m_pageList.at(activePage);
+            if (pActivePage != nullptr )
+            {
+                if (pActivePage->getType() == PROPERTY_PAGE_TYPE_LIST)
+                {
+                    QKeyEvent* keyEvent =  static_cast<QKeyEvent *>( e );
+
+                    if (keyEvent->key() == Qt::Key_Return)
+                    {
+                        applyProperty();
+                    }
+
+                    if (keyEvent->key() == Qt::Key_Escape)
+                    {
+                        restoreProperty();
+                    }
+                }
+            }
+        }
+
+    }
+
+
     return QDialog::event(e);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
