@@ -3087,7 +3087,95 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	}
 	else
 	{
-		emitError(tr("Can't getlatest signal! No data returned!"));
+		emitError(tr("Can't get latest signal! No data returned!"));
+	}
+}
+
+
+void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
+{
+	AUTO_COMPLETE
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot delete signal. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM delete_signal(%1, %2)")
+		.arg(currentUser().userId()).arg(signalID);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't delete signal! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() != false)
+	{
+		getObjectState(q, *objectState);
+	}
+	else
+	{
+		emitError(tr("Can't delete signal! No data returned!"));
+	}
+}
+
+
+void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
+{
+	AUTO_COMPLETE
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot undo signal changes. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM undo_signal_changes(%1, %2)")
+		.arg(currentUser().userId()).arg(signalID);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't undo signal changes! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() != false)
+	{
+		getObjectState(q, *objectState);
+	}
+	else
+	{
+		emitError(tr("Can't undo signal changes! No data returned!"));
 	}
 }
 

@@ -54,6 +54,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getDataFormats, m_worker, &DbWorker::slot_getDataFormats);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
+	connect(this, &DbController::signal_deleteSignal, m_worker, &DbWorker::slot_deleteSignal);
+	connect(this, &DbController::signal_undoSignalChanges, m_worker, &DbWorker::slot_undoSignalChanges);
 
 	m_thread.start();
 }
@@ -1048,7 +1050,56 @@ bool DbController::setSignalWorkcopy(Signal *signal, ObjectState *objectState, Q
 	ok = waitForComplete(parentWidget, tr("Set signal workcopy"));
 
 	return ok;
+}
 
+
+bool DbController::deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget)
+{
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_deleteSignal(signalID, objectState);
+
+	ok = waitForComplete(parentWidget, tr("Delete signal"));
+
+	return ok;
+}
+
+
+bool DbController::undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget)
+{
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_undoSignalChanges(signalID, objectState);
+
+	ok = waitForComplete(parentWidget, tr("Undo signal changes"));
+
+	return ok;
 }
 
 
