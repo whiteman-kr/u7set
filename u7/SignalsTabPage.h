@@ -29,8 +29,8 @@ signals:
 public slots:
 
 private:
-	DataFormatList& m_dataFormatInfo;
-	UnitList& m_unitInfo;
+	const DataFormatList& m_dataFormatInfo;
+	const UnitList& m_unitInfo;
 	SignalSet& m_signalSet;
 	SignalsModel* m_model;
 };

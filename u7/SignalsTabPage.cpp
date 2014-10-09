@@ -93,7 +93,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 {
 	int col = index.column();
 	QVector<int> signalsIDs;
-	signalsIDs << m_signalSet.keyIndex(index.row());
+	signalsIDs << m_signalSet.key(index.row());
 	QVector<ObjectState> objectStates;
 	m_model->dbController()->checkoutSignals(&signalsIDs, &objectStates, m_model->parrentWindow());
 	if (objectStates.count() == 0)
