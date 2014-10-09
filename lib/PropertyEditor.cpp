@@ -505,25 +505,25 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 //
 
 PropertyEditor::PropertyEditor(QWidget* parent) :
-	QWidget(parent)
+	QtTreePropertyBrowser(parent)
 {
-	m_propertyEditor = new QtTreePropertyBrowser(parent);
+	//m_propertyEditor = new QtTreePropertyBrowser(parent);
 
-	m_propertyGroupManager = new QtGroupPropertyManager(m_propertyEditor);
-	m_propertyStringManager = new QtMultiVariantPropertyManager(m_propertyEditor, QVariant::String);
-	m_propertyIntManager = new QtMultiVariantPropertyManager(m_propertyEditor, QVariant::Int);
-	m_propertyDoubleManager = new QtMultiVariantPropertyManager(m_propertyEditor, QVariant::Double);
-	m_propertyBoolManager = new QtMultiVariantPropertyManager(m_propertyEditor, QVariant::Bool);
+	m_propertyGroupManager = new QtGroupPropertyManager(this);
+	m_propertyStringManager = new QtMultiVariantPropertyManager(this, QVariant::String);
+	m_propertyIntManager = new QtMultiVariantPropertyManager(this, QVariant::Int);
+	m_propertyDoubleManager = new QtMultiVariantPropertyManager(this, QVariant::Double);
+	m_propertyBoolManager = new QtMultiVariantPropertyManager(this, QVariant::Bool);
 
 	QtMultiVariantFactory* spinBoxFactory = new QtMultiVariantFactory(this);
 	QtMultiVariantFactory* doubleSpinBoxFactory = new QtMultiVariantFactory(this);
 	QtMultiVariantFactory* lineEditFactory = new QtMultiVariantFactory(this);
 	QtMultiVariantFactory *checkBoxFactory = new QtMultiVariantFactory(this);
 
-	m_propertyEditor->setFactoryForManager(m_propertyStringManager, lineEditFactory);
-	m_propertyEditor->setFactoryForManager(m_propertyIntManager, spinBoxFactory);
-	m_propertyEditor->setFactoryForManager(m_propertyDoubleManager, doubleSpinBoxFactory);
-	m_propertyEditor->setFactoryForManager(m_propertyBoolManager, checkBoxFactory);
+	setFactoryForManager(m_propertyStringManager, lineEditFactory);
+	setFactoryForManager(m_propertyIntManager, spinBoxFactory);
+	setFactoryForManager(m_propertyDoubleManager, doubleSpinBoxFactory);
+	setFactoryForManager(m_propertyBoolManager, checkBoxFactory);
 
 	connect(m_propertyIntManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
 	connect(m_propertyStringManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
@@ -532,13 +532,19 @@ PropertyEditor::PropertyEditor(QWidget* parent) :
 
 	connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
 
-	connect(m_propertyEditor, &QtTreePropertyBrowser::currentItemChanged, this, &PropertyEditor::onCurrentItemChanged);
+	connect(this, &QtTreePropertyBrowser::currentItemChanged, this, &PropertyEditor::onCurrentItemChanged);
 
 	return;
 }
 
 void PropertyEditor::onCurrentItemChanged(QtBrowserItem* current)
 {
+	if (current == nullptr)
+	{
+		return;
+	}
+
+
 	if (current->property() == nullptr)
 	{
 		Q_ASSERT(current->property());
@@ -549,7 +555,7 @@ void PropertyEditor::onCurrentItemChanged(QtBrowserItem* current)
 
 void PropertyEditor::setObjects(QList<std::shared_ptr<QObject>>& objects)
 {
-	clear();
+	clearObjects();
 
 	QMap<QString, PropertyItem> propertyItems;
 	QList<QString> propertyNames;
@@ -702,12 +708,12 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject>>& objects)
 		commonProperty->addSubProperty(subProperty);
 	}
 
-	m_propertyEditor->addProperty(commonProperty);
+	addProperty(commonProperty);
 
 	return;
 }
 
-void PropertyEditor::update()
+void PropertyEditor::updateObjects()
 {
 	QMap<QtProperty*, QVariant> vals;
 
@@ -817,10 +823,10 @@ void PropertyEditor::createValuesMap(QtAbstractPropertyManager* manager, QVarian
 	}
 }
 
-void PropertyEditor::clear()
+void PropertyEditor::clearObjects()
 {
+	clear();
 	m_propToClassMap.clear();
-	m_propertyEditor->clear();
 }
 
 void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
@@ -885,9 +891,9 @@ bool PropertyEditor::propertyByName(const QObject* object, const QString& name, 
 
 void PropertyEditor::onShowErrorMessage(QString message)
 {
-	QMessageBox::warning(this, "Error", message);
+//	QMessageBox::warning(this, "Error", message);
 }
-
+/*
 void PropertyEditor::resizeEvent(QResizeEvent * event)
 {
 	if (m_propertyEditor != nullptr)
@@ -895,3 +901,13 @@ void PropertyEditor::resizeEvent(QResizeEvent * event)
 		m_propertyEditor->resize(event->size());
 	}
 }
+
+void PropertyEditor::moveEvent(QMoveEvent * event)
+{
+	if (m_propertyEditor != nullptr)
+	{
+		m_propertyEditor->move(event->pos());
+	}
+
+}
+*/

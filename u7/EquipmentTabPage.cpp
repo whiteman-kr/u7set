@@ -1264,16 +1264,15 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	// Property View
 	//
-	m_propertyEditor = new PropertyEditor(this);
 
 	// Splitter
 	//
-	m_splitter = new QSplitter();
+	m_splitter = new QSplitter(this);
+
+	m_propertyEditor = new PropertyEditor(m_splitter);
 
 	m_splitter->addWidget(m_equipmentView);
 	m_splitter->addWidget(m_propertyEditor);
-
-	//m_splitter->addWidget(new QPushButton());
 
 
 	m_splitter->setStretchFactor(0, 2);
@@ -1287,6 +1286,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
 
 	pMainLayout->addWidget(m_splitter);
+
 
 	setLayout(pMainLayout);
 

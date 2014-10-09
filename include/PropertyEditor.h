@@ -168,7 +168,7 @@ private:
 
 // -------------------------------------------------------------------------------
 
-class PropertyEditor : public QWidget
+class PropertyEditor : public QtTreePropertyBrowser
 {
     Q_OBJECT
 
@@ -179,8 +179,8 @@ public:
 	//
 public:
 	void setObjects(QList<std::shared_ptr<QObject>>& objects);
-	void update();
-	void clear();
+	void updateObjects();
+	void clearObjects();
 
 protected slots:
 	virtual void valueChanged(QtProperty* property, QVariant value);
@@ -196,7 +196,8 @@ signals:
 	// Private functions and structs
 	//
 private:
-	void resizeEvent(QResizeEvent* event);
+	//void resizeEvent(QResizeEvent* event);
+	//void moveEvent(QMoveEvent * event);
 	void createValuesMap(QtAbstractPropertyManager* manager, QVariant::Type type, QMap<QtProperty*, QVariant>& values);
 	bool propertyByName(const QObject* object, const QString& name, QMetaProperty& metaProperty);
 
@@ -210,7 +211,7 @@ private:
 	// Data
 	//
 private:
-    QtTreePropertyBrowser* m_propertyEditor = nullptr;
+	//QtTreePropertyBrowser* m_propertyEditor = nullptr;
 	QtGroupPropertyManager* m_propertyGroupManager = nullptr;
 
 	QtMultiVariantPropertyManager* m_propertyStringManager = nullptr;
