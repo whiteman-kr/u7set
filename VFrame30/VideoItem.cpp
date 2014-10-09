@@ -332,7 +332,7 @@ namespace VFrame30
 		return m_clickScript;
 	}
 
-	void CVideoItem::setClickScript(const QString value)
+	void CVideoItem::setClickScript(const QString& value)
 	{
 		m_clickScript = value;
 	}

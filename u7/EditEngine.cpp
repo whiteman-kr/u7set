@@ -151,14 +151,20 @@ namespace EditEngine
 
 	void EditEngine::setModified()
 	{
-		m_modified = true;
-		emit modifiedChanged(m_modified);
+		if (m_modified == false)
+		{
+			m_modified = true;
+			emit modifiedChanged(m_modified);
+		}
 	}
 
 	void EditEngine::resetModified()
 	{
-		m_modified = false;
-		emit modifiedChanged(m_modified);
+		if (m_modified == true)
+		{
+			m_modified = false;
+			emit modifiedChanged(m_modified);
+		}
 	}
 
 	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::CVideoItem>> items, std::shared_ptr<VFrame30::CVideoLayer> layer)

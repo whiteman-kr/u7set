@@ -5,6 +5,7 @@
 #include "../VFrame30/FblItem.h"
 #include "EditEngine.h"
 #include "../include/DbController.h"
+#include "SchemeItemPropertiesDialog.h"
 
 #define GridSizeDisplay				5
 #define GridSizeMm					mm2in(0.5)
@@ -255,6 +256,7 @@ signals:
 	void saveWorkcopy();
 	void getCurrentWorkcopy();				// Save current videoframe to a file
 	void setCurrentWorkcopy();				// Load a videoframe from a file
+	void modifiedChanged(bool modified);	// Command to the owner to change title
 
 	// Slots
 	//
@@ -268,12 +270,14 @@ protected slots:
 	void redo();
 	void editEngineStateChanged(bool canUndo, bool canRedo);
 
-	void modifiedChanged(bool modified);
+	void modifiedChangedSlot(bool modified);
 
 	void zoomIn();
 	void zoomOut();
 	void zoom100();
 	void selectAll();
+
+	void properties();
 
 	// Properties
 	//
@@ -287,8 +291,8 @@ public:
 	const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems() const;
 	std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems();
 
-	EditSchemeView* videoFrameView();
-	const EditSchemeView* videoFrameView() const;
+	EditSchemeView* schemeView();
+	const EditSchemeView* schemeView() const;
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
@@ -325,6 +329,8 @@ private:
 
 	EditSchemeView* m_videoFrameView;
 	EditEngine::EditEngine* m_editEngine;
+
+	SchemeItemPropertiesDialog* m_propertiesDialog = nullptr;
 
 	// Temporary and state variables
 	//

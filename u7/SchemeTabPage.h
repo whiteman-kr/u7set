@@ -169,6 +169,7 @@ signals:
 
 protected slots:
 	void closeTab();
+	void modifiedChanged(bool modified);
 
 	void checkInFile();
 	void checkOutFile();

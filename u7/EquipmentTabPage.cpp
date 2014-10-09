@@ -631,6 +631,44 @@ Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
 	return object;
 }
 
+std::shared_ptr<Hardware::DeviceObject> EquipmentModel::deviceObjectSharedPtr(QModelIndex& index)
+{
+	Hardware::DeviceObject* rawPtr = nullptr;
+
+	if (index.isValid() == false)
+	{
+		rawPtr = m_root.get();
+	}
+	else
+	{
+		rawPtr = static_cast<Hardware::DeviceObject*>(index.internalPointer());
+	}
+
+	if (rawPtr == nullptr)
+	{
+		assert(rawPtr);
+		return std::shared_ptr<Hardware::DeviceObject>();
+	}
+
+	if (rawPtr->parent() == nullptr)
+	{
+		assert(rawPtr->parent() != nullptr);
+		return std::shared_ptr<Hardware::DeviceObject>();
+	}
+
+	int childIndex = rawPtr->parent()->childIndex(rawPtr);
+	if (childIndex == -1)
+	{
+		assert(childIndex != -1);
+		return std::shared_ptr<Hardware::DeviceObject>();
+	}
+
+	std::shared_ptr<Hardware::DeviceObject> object = rawPtr->parent()->childSharedPtr(childIndex);
+
+	assert(object != nullptr);
+	return object;
+}
+
 const Hardware::DeviceObject* EquipmentModel::deviceObject(const QModelIndex& index) const
 {
 	const Hardware::DeviceObject* object = nullptr;
@@ -1235,6 +1273,9 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_splitter->addWidget(m_equipmentView);
 	m_splitter->addWidget(m_propertyEditor);
 
+	//m_splitter->addWidget(new QPushButton());
+
+
 	m_splitter->setStretchFactor(0, 2);
 	m_splitter->setStretchFactor(1, 1);
 
@@ -1636,11 +1677,11 @@ void EquipmentTabPage::setProperties()
 		return;
 	}
 
-	QList<QObject*> devices;
+	QList<std::shared_ptr<QObject>> devices;
 
 	for (QModelIndex& mi : selectedIndexList)
 	{
-		Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+		auto device = m_equipmentModel->deviceObjectSharedPtr(mi);
 		assert(device);
 
 		devices << device;

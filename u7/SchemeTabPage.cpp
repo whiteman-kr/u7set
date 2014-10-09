@@ -435,6 +435,7 @@ EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::CVideoFrame> vide
 	m_videoFrameWidget = new EditSchemeWidget(videoFrame, fileInfo);
 
 	connect(m_videoFrameWidget, &EditSchemeWidget::closeTab, this, &EditSchemeTabPage::closeTab);
+	connect(m_videoFrameWidget, &EditSchemeWidget::modifiedChanged, this, &EditSchemeTabPage::modifiedChanged);
 	connect(m_videoFrameWidget, &EditSchemeWidget::saveWorkcopy, this, &EditSchemeTabPage::saveWorkcopy);
 	connect(m_videoFrameWidget, &EditSchemeWidget::checkInFile, this, &EditSchemeTabPage::checkInFile);
 	connect(m_videoFrameWidget, &EditSchemeWidget::checkOutFile, this, &EditSchemeTabPage::checkOutFile);
@@ -545,6 +546,11 @@ void EditSchemeTabPage::closeTab()
 
 	this->deleteLater();
 	return;
+}
+
+void EditSchemeTabPage::modifiedChanged(bool /*modified*/)
+{
+	setPageTitle();
 }
 
 void EditSchemeTabPage::checkInFile()

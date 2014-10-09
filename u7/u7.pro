@@ -82,7 +82,9 @@ SOURCES +=\
     SignalPropertiesDialog.cpp \
     ../lib/PropertyEditor.cpp \
     SchemeTabPage.cpp \
-    EditSchemeWidget.cpp
+    EditSchemeWidget.cpp \
+    SchemeItemPropertiesDialog.cpp \
+    EditEngineSetProperty.cpp
 
 
 HEADERS  += \
@@ -131,7 +133,9 @@ HEADERS  += \
     ../include/OrderedHash.h \
     ../include/PropertyEditor.h \
     SchemeTabPage.h \
-    EditSchemeWidget.h
+    EditSchemeWidget.h \
+    SchemeItemPropertiesDialog.h \
+    EditEngineSetProperty.h
     ../include/Signal.h
 
 FORMS    += \
@@ -145,7 +149,8 @@ FORMS    += \
     VideoFramePropertiesDialog.ui \
     CheckInDialog.ui \
     DialogAfblEditor.ui \
-    DialogAfbProperties.ui
+    DialogAfbProperties.ui \
+    SchemeItemPropertiesDialog.ui
 
 RESOURCES += \
 	Resources.qrc
