@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "VideoFrameTabPage.h"
+#include "SchemeTabPage.h"
 #include "VideoFramePropertiesDialog.h"
 #include "ChangesetDialog.h"
 #include "CheckInDialog.h"
@@ -9,30 +9,30 @@
 //	VideoFrameFileView
 //
 //
-VideoFrameFileView::VideoFrameFileView(DbController* dbcontroller, const QString& parentFileName) :
+SchemeFileView::SchemeFileView(DbController* dbcontroller, const QString& parentFileName) :
 	FileView(dbcontroller, parentFileName)
 {
 	filesModel().setFilter("vfr");
 	return;
 }
 
-VideoFrameFileView::~VideoFrameFileView()
+SchemeFileView::~SchemeFileView()
 {
 }
 
-void VideoFrameFileView::openFile(std::vector<DbFileInfo> files)
+void SchemeFileView::openFile(std::vector<DbFileInfo> files)
 {
 	emit openFileSignal(files);
 	return;
 }
 
-void VideoFrameFileView::viewFile(std::vector<DbFileInfo> files)
+void SchemeFileView::viewFile(std::vector<DbFileInfo> files)
 {
 	emit viewFileSignal(files);
 	return;
 }
 
-void VideoFrameFileView::addFile()
+void SchemeFileView::addFile()
 {
 	emit addFileSignal();
 }
@@ -43,7 +43,7 @@ void VideoFrameFileView::addFile()
 // EditVideoFrameTabPage
 //
 //
-VideoFrameTabPage::VideoFrameTabPage(DbController* dbcontroller, QWidget* parent) :
+SchemesTabPage::SchemesTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent)
 {
 	m_tabWidget = new QTabWidget();
@@ -56,24 +56,24 @@ VideoFrameTabPage::VideoFrameTabPage(DbController* dbcontroller, QWidget* parent
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &VideoFrameTabPage::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &VideoFrameTabPage::projectClosed);
+	connect(dbController(), &DbController::projectOpened, this, &SchemesTabPage::projectOpened);
+	connect(dbController(), &DbController::projectClosed, this, &SchemesTabPage::projectClosed);
 
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
 }
 
-VideoFrameTabPage::~VideoFrameTabPage()
+SchemesTabPage::~SchemesTabPage()
 {
 }
 
-void VideoFrameTabPage::projectOpened()
+void SchemesTabPage::projectOpened()
 {
 	this->setEnabled(true);
 }
 
-void VideoFrameTabPage::projectClosed()
+void SchemesTabPage::projectClosed()
 {
 	this->setEnabled(false);
 }
@@ -85,7 +85,7 @@ void VideoFrameTabPage::projectClosed()
 //
 //
 
-VideoFrameControlTabPage::VideoFrameControlTabPage(const QString& fileExt,
+SchemeControlTabPage::SchemeControlTabPage(const QString& fileExt,
 		DbController* dbcontroller, const QString& parentFileName,
 		std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc) :
 
@@ -98,7 +98,7 @@ VideoFrameControlTabPage::VideoFrameControlTabPage(const QString& fileExt,
 
 	// Create controls
 	//
-	m_filesView = new VideoFrameFileView(dbcontroller, parentFileName);
+	m_filesView = new SchemeFileView(dbcontroller, parentFileName);
 	m_filesView->filesModel().setFilter(fileExt);
 
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
@@ -108,27 +108,38 @@ VideoFrameControlTabPage::VideoFrameControlTabPage(const QString& fileExt,
 
 	// --
 	//
-	connect(m_filesView, &VideoFrameFileView::openFileSignal, this, &VideoFrameControlTabPage::openFiles);
-	connect(m_filesView, &VideoFrameFileView::viewFileSignal, this, &VideoFrameControlTabPage::viewFiles);
-	connect(m_filesView, &VideoFrameFileView::addFileSignal, this, &VideoFrameControlTabPage::addFile);
+	//connect(dbcontroller, &DbController::projectOpened, this, &VideoFrameControlTabPage::projectOpened);
+	//connect(dbcontroller, &DbController::projectClosed, this, &VideoFrameControlTabPage::projectClosed);
+
+	connect(m_filesView, &SchemeFileView::openFileSignal, this, &SchemeControlTabPage::openFiles);
+	connect(m_filesView, &SchemeFileView::viewFileSignal, this, &SchemeControlTabPage::viewFiles);
+	connect(m_filesView, &SchemeFileView::addFileSignal, this, &SchemeControlTabPage::addFile);
 
 	return;
 }
 
-VideoFrameControlTabPage::~VideoFrameControlTabPage()
+SchemeControlTabPage::~SchemeControlTabPage()
 {
 }
 
-VFrame30::CVideoFrame* VideoFrameControlTabPage::createVideoFrame() const
+VFrame30::CVideoFrame* SchemeControlTabPage::createVideoFrame() const
 {
 	return m_createVideoFrameFunc();
 }
 
-void VideoFrameControlTabPage::CreateActions()
+void SchemeControlTabPage::CreateActions()
 {
 }
 
-void VideoFrameControlTabPage::addFile()
+void projectOpened()
+{
+}
+
+void projectClosed()
+{
+}
+
+void SchemeControlTabPage::addFile()
 {
 	// Choose Configuration file name
 	//
@@ -173,17 +184,17 @@ void VideoFrameControlTabPage::addFile()
 		return;
 	}
 
-	Proto::StreamedData sd;
-	vf->Save(sd);
+	QByteArray data;
+	vf->Save(data);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
 	vfFile->setFileName(fileName);
-	vfFile->swapData(sd.mutable_data());
+	vfFile->swapData(data);
 
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
 	addFilesList.push_back(vfFile);
 
-	dbcontroller()->addFiles(&addFilesList, dbcontroller()->wvsFileId(), this);
+	dbcontroller()->addFiles(&addFilesList, parentFile().fileId(), this);
 
 	// Add file to the FileModel and select them
 	//
@@ -208,7 +219,7 @@ void VideoFrameControlTabPage::addFile()
 	return;
 }
 
-void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
+void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 {
 	if (files.empty() == true || files.size() != 1)
 	{
@@ -226,7 +237,8 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	if (file.state() == VcsState::CheckedOut && file.userId() != dbcontroller()->currentUser().userId())
+	if (file.state() == VcsState::CheckedOut &&
+		file.userId() != dbcontroller()->currentUser().userId())
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.userId()));
@@ -246,11 +258,12 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	// Check if file already open, and activate file tab if it is
 	//
 
-	// Find the opened file,
+	// Find the opened file, bu filId
 	//
+
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
-		EditVideoFrameTabPage* tb = dynamic_cast<EditVideoFrameTabPage*>(tabWidget->widget(i));
+		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
 		if (tb == nullptr)
 		{
 			// It can be control tab page
@@ -258,7 +271,7 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 			continue;
 		}
 
-		if (tb->fileInfo().fileName() == file.fileName() &&
+		if (tb->fileInfo().fileId() == file.fileId() &&
 			tb->fileInfo().changeset() == file.changeset() &&
 			tb->readOnly() == false)
 		{
@@ -281,13 +294,19 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	std::shared_ptr<VFrame30::CVideoFrame> vf(VFrame30::CVideoFrame::Create(out[0].get()->data()));
 
+	if (vf == nullptr)
+	{
+		assert(vf != nullptr);
+		return;
+	}
+
 	// Create TabPage and add it to the TabControl
 	//
 	DbFileInfo fi(*(out.front().get()));
 
-	EditVideoFrameTabPage* editTabPage = new EditVideoFrameTabPage(vf, fi, dbcontroller());
+	EditSchemeTabPage* editTabPage = new EditSchemeTabPage(vf, fi, dbcontroller());
 
-	connect(editTabPage, &EditVideoFrameTabPage::vcsFileStateChanged, this, &VideoFrameControlTabPage::refreshFiles);
+	connect(editTabPage, &EditSchemeTabPage::vcsFileStateChanged, this, &SchemeControlTabPage::refreshFiles);
 
 	editTabPage->setReadOnly(false);
 
@@ -297,11 +316,11 @@ void VideoFrameControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	return;
 }
 
-void VideoFrameControlTabPage::viewFiles(std::vector<DbFileInfo> files)
+void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 {
 	assert(false);
-	/*
-	if (files.empty() == true || files.size() != 1)
+
+	/*if (files.empty() == true || files.size() != 1)
 	{
 		assert(files.empty() == false);
 		return;
@@ -379,15 +398,20 @@ void VideoFrameControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	tabWidget->addTab(editTabPage, tabPageTitle);
 	tabWidget->setCurrentWidget(editTabPage);
-
-	return;*/
+*/
+	return;
 }
 
-void VideoFrameControlTabPage::refreshFiles()
+void SchemeControlTabPage::refreshFiles()
 {
 	assert(m_filesView);
 	m_filesView->refreshFiles();
 	return;
+}
+
+const DbFileInfo& SchemeControlTabPage::parentFile() const
+{
+	return m_filesView->parentFile();
 }
 
 
@@ -396,7 +420,7 @@ void VideoFrameControlTabPage::refreshFiles()
 // EditVideoFrameTabPage
 //
 //
-EditVideoFrameTabPage::EditVideoFrameTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller) :
+EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller) :
 	HasDbController(dbcontroller),
 	m_videoFrameWidget(nullptr)
 {
@@ -408,15 +432,16 @@ EditVideoFrameTabPage::EditVideoFrameTabPage(std::shared_ptr<VFrame30::CVideoFra
 
 	// Create controls
 	//
-	m_videoFrameWidget = new EditVideoFrameWidget(videoFrame, fileInfo);
+	m_videoFrameWidget = new EditSchemeWidget(videoFrame, fileInfo);
 
-	connect(m_videoFrameWidget, &EditVideoFrameWidget::closeTab, this, &EditVideoFrameTabPage::closeTab);
-	connect(m_videoFrameWidget, &EditVideoFrameWidget::saveWorkcopy, this, &EditVideoFrameTabPage::saveWorkcopy);
-	connect(m_videoFrameWidget, &EditVideoFrameWidget::checkInFile, this, &EditVideoFrameTabPage::checkInFile);
-	connect(m_videoFrameWidget, &EditVideoFrameWidget::checkOutFile, this, &EditVideoFrameTabPage::checkOutFile);
-	connect(m_videoFrameWidget, &EditVideoFrameWidget::undoChangesFile, this, &EditVideoFrameTabPage::undoChangesFile);
-	connect(m_videoFrameWidget, &EditVideoFrameWidget::getCurrentWorkcopy, this, &EditVideoFrameTabPage::getCurrentWorkcopy);
-	connect(m_videoFrameWidget, &EditVideoFrameWidget::setCurrentWorkcopy, this, &EditVideoFrameTabPage::setCurrentWorkcopy);
+	connect(m_videoFrameWidget, &EditSchemeWidget::closeTab, this, &EditSchemeTabPage::closeTab);
+	connect(m_videoFrameWidget, &EditSchemeWidget::modifiedChanged, this, &EditSchemeTabPage::modifiedChanged);
+	connect(m_videoFrameWidget, &EditSchemeWidget::saveWorkcopy, this, &EditSchemeTabPage::saveWorkcopy);
+	connect(m_videoFrameWidget, &EditSchemeWidget::checkInFile, this, &EditSchemeTabPage::checkInFile);
+	connect(m_videoFrameWidget, &EditSchemeWidget::checkOutFile, this, &EditSchemeTabPage::checkOutFile);
+	connect(m_videoFrameWidget, &EditSchemeWidget::undoChangesFile, this, &EditSchemeTabPage::undoChangesFile);
+	connect(m_videoFrameWidget, &EditSchemeWidget::getCurrentWorkcopy, this, &EditSchemeTabPage::getCurrentWorkcopy);
+	connect(m_videoFrameWidget, &EditSchemeWidget::setCurrentWorkcopy, this, &EditSchemeTabPage::setCurrentWorkcopy);
 
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
 	pMainLayout->addWidget(m_videoFrameWidget);
@@ -426,15 +451,15 @@ EditVideoFrameTabPage::EditVideoFrameTabPage(std::shared_ptr<VFrame30::CVideoFra
 	return;
 }
 
-EditVideoFrameTabPage::~EditVideoFrameTabPage()
+EditSchemeTabPage::~EditSchemeTabPage()
 {
 }
 
-void EditVideoFrameTabPage::CreateActions()
+void EditSchemeTabPage::CreateActions()
 {
 }
 
-void EditVideoFrameTabPage::setPageTitle()
+void EditSchemeTabPage::setPageTitle()
 {
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
@@ -458,7 +483,14 @@ void EditVideoFrameTabPage::setPageTitle()
 	}
 	else
 	{
-		newTitle = m_videoFrameWidget->videoFrame()->strID();
+		if (modified() == true)
+		{
+			newTitle = m_videoFrameWidget->videoFrame()->strID() + "*";
+		}
+		else
+		{
+			newTitle = m_videoFrameWidget->videoFrame()->strID();
+		}
 	}
 
 	for (int i = 0; i < tabWidget->count(); i++)
@@ -471,7 +503,7 @@ void EditVideoFrameTabPage::setPageTitle()
 	}
 }
 
-void EditVideoFrameTabPage::closeTab()
+void EditSchemeTabPage::closeTab()
 {
 	if (m_videoFrameWidget->modified() == true)
 	{
@@ -516,15 +548,17 @@ void EditVideoFrameTabPage::closeTab()
 	return;
 }
 
-void EditVideoFrameTabPage::checkInFile()
+void EditSchemeTabPage::modifiedChanged(bool /*modified*/)
 {
-	assert(false);
-	/*
+	setPageTitle();
+}
+
+void EditSchemeTabPage::checkInFile()
+{
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().user() != dbcontroller()->currentUser())
+		(fileInfo().userId() != dbcontroller()->currentUser().userId() && dbcontroller()->currentUser().isAdminstrator() == false))
 	{
-		assert(fileInfo().user() == dbcontroller()->currentUser());
 		return;
 	}
 
@@ -552,21 +586,19 @@ void EditVideoFrameTabPage::checkInFile()
 	emit vcsFileStateChanged();
 
 	DbFileInfo fi;
-	dbcontroller()->getFileInfo(fileInfo().fileId(), &fi);
+	dbcontroller()->getFileInfo(fileInfo().fileId(), &fi, this);
 
 	setFileInfo(fi);
 
 	setReadOnly(true);
 
 	setPageTitle();
-*/
+
 	return;
 }
 
-void EditVideoFrameTabPage::checkOutFile()
+void EditSchemeTabPage::checkOutFile()
 {
-	assert(false);
-	/*
 	if (readOnly() == false ||
 		fileInfo().state() != VcsState::CheckedIn)
 	{
@@ -576,7 +608,7 @@ void EditVideoFrameTabPage::checkOutFile()
 	std::vector<DbFileInfo> files;
 	files.push_back(fileInfo());
 
-	bool result = dbcontroller()->checkOutFiles(files, this);
+	bool result = dbcontroller()->checkOut(files, this);
 	if (result == false)
 	{
 		return;
@@ -606,10 +638,9 @@ void EditVideoFrameTabPage::checkOutFile()
 
 	emit vcsFileStateChanged();
 	return;
-	*/
 }
 
-void EditVideoFrameTabPage::undoChangesFile()
+void EditSchemeTabPage::undoChangesFile()
 {
 	// 1 Ask user to confirm operation
 	// 2 Undo changes to database
@@ -661,7 +692,7 @@ void EditVideoFrameTabPage::undoChangesFile()
 	return;*/
 }
 
-bool EditVideoFrameTabPage::saveWorkcopy()
+bool EditSchemeTabPage::saveWorkcopy()
 {
 	if (readOnly() == true ||
 		modified() == false ||
@@ -695,7 +726,7 @@ bool EditVideoFrameTabPage::saveWorkcopy()
 	return false;
 }
 
-void EditVideoFrameTabPage::getCurrentWorkcopy()
+void EditSchemeTabPage::getCurrentWorkcopy()
 {
 	// Select destination folder
 	//
@@ -727,11 +758,11 @@ void EditVideoFrameTabPage::getCurrentWorkcopy()
 	return;
 }
 
-void EditVideoFrameTabPage::setCurrentWorkcopy()
+void EditSchemeTabPage::setCurrentWorkcopy()
 {
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().userId() != dbcontroller()->currentUser().userId())
+		(fileInfo().userId() != dbcontroller()->currentUser().userId() && dbcontroller()->currentUser().isAdminstrator() == false))
 	{
 		assert(fileInfo().userId() == dbcontroller()->currentUser().userId());
 		return;
@@ -770,37 +801,37 @@ void EditVideoFrameTabPage::setCurrentWorkcopy()
 	return;
 }
 
-const DbFileInfo& EditVideoFrameTabPage::fileInfo() const
+const DbFileInfo& EditSchemeTabPage::fileInfo() const
 {
 	assert(m_videoFrameWidget);
 	return m_videoFrameWidget->fileInfo();
 }
 
-void EditVideoFrameTabPage::setFileInfo(const DbFileInfo& fi)
+void EditSchemeTabPage::setFileInfo(const DbFileInfo& fi)
 {
 	assert(m_videoFrameWidget);
 	m_videoFrameWidget->setFileInfo(fi);
 }
 
-bool EditVideoFrameTabPage::readOnly() const
+bool EditSchemeTabPage::readOnly() const
 {
 	assert(m_videoFrameWidget);
 	return m_videoFrameWidget->readOnly();
 }
 
-void EditVideoFrameTabPage::setReadOnly(bool value)
+void EditSchemeTabPage::setReadOnly(bool value)
 {
 	assert(m_videoFrameWidget);
 	m_videoFrameWidget->setReadOnly(value);
 }
 
-bool EditVideoFrameTabPage::modified() const
+bool EditSchemeTabPage::modified() const
 {
 	assert(m_videoFrameWidget);
 	return m_videoFrameWidget->modified();
 }
 
-void EditVideoFrameTabPage::resetModified()
+void EditSchemeTabPage::resetModified()
 {
 	assert(m_videoFrameWidget);
 	return m_videoFrameWidget->resetModified();

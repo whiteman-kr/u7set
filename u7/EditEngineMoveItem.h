@@ -10,7 +10,7 @@ namespace EditEngine
 		MoveItemCommand();		// deleted;
 	public:
 		MoveItemCommand(
-				EditVideoFrameView* videoFrameView,
+				EditSchemeView* videoFrameView,
 				double xdiff,
 				double ydiff,
 				const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items,
@@ -18,8 +18,8 @@ namespace EditEngine
 				QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditVideoFrameView* videoFrameView) override;
-		virtual void unExecuteCommand(EditVideoFrameView* videoFrameView) override;
+		virtual void executeCommand(EditSchemeView* videoFrameView) override;
+		virtual void unExecuteCommand(EditSchemeView* videoFrameView) override;
 
 		// Data
 		//

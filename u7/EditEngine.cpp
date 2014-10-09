@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "EditEngine.h"
-#include "EditVideoFrameWidget.h"
+#include "EditSchemeWidget.h"
 #include "EditEngineAddItem.h"
 #include "EditEngineSetPoints.h"
 #include "EditEngineDeleteItem.h"
@@ -9,7 +9,7 @@
 namespace EditEngine
 {
 
-	EditEngine::EditEngine(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent) :
+	EditEngine::EditEngine(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent) :
 		QObject(parent),
 		m_videoFrameView(videoFrameView),
 		m_hScrollBar(hScrollBar),
@@ -23,6 +23,10 @@ namespace EditEngine
 		assert(vScrollBar != nullptr);
 
 		return;
+	}
+
+	EditEngine::~EditEngine()
+	{
 	}
 
 	void EditEngine::reset()
@@ -147,14 +151,20 @@ namespace EditEngine
 
 	void EditEngine::setModified()
 	{
-		m_modified = true;
-		emit modifiedChanged(m_modified);
+		if (m_modified == false)
+		{
+			m_modified = true;
+			emit modifiedChanged(m_modified);
+		}
 	}
 
 	void EditEngine::resetModified()
 	{
-		m_modified = false;
-		emit modifiedChanged(m_modified);
+		if (m_modified == true)
+		{
+			m_modified = false;
+			emit modifiedChanged(m_modified);
+		}
 	}
 
 	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::CVideoItem>> items, std::shared_ptr<VFrame30::CVideoLayer> layer)
@@ -234,7 +244,7 @@ namespace EditEngine
 	//
 	//
 
-	EditCommand::EditCommand(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar) :
+	EditCommand::EditCommand(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar) :
 		m_zoom(100.0)
 	{
 		assert(videoFrameView != nullptr);
@@ -247,7 +257,7 @@ namespace EditEngine
 		saveViewPos(videoFrameView, hScrollBar, vScrollBar);
 	}
 
-	void EditCommand::execute(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	void EditCommand::execute(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 	{
 		assert(videoFrameView != nullptr);
 		assert(hScrollBar != nullptr);
@@ -260,7 +270,7 @@ namespace EditEngine
 		executeCommand(videoFrameView);
 	}
 
-	void EditCommand::unExecute(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	void EditCommand::unExecute(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 	{
 		assert(videoFrameView != nullptr);
 		assert(hScrollBar != nullptr);
@@ -273,7 +283,7 @@ namespace EditEngine
 		unExecuteCommand(videoFrameView);
 	}
 
-	void EditCommand::saveViewPos(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	void EditCommand::saveViewPos(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 	{
 		assert(videoFrameView != nullptr);
 		assert(hScrollBar != nullptr);
@@ -290,7 +300,7 @@ namespace EditEngine
 		return;
 	}
 
-	void EditCommand::restoreViewPos(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	void EditCommand::restoreViewPos(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 	{
 		assert(videoFrameView != nullptr);
 		assert(hScrollBar != nullptr);

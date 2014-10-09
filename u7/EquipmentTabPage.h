@@ -51,6 +51,8 @@ public:
 	Hardware::DeviceObject* deviceObject(QModelIndex& index);
 	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
 
+	std::shared_ptr<Hardware::DeviceObject> deviceObjectSharedPtr(QModelIndex& index);
+
 public slots:
 	void projectOpened();
 	void projectClosed();

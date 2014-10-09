@@ -30,6 +30,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getUserList, m_worker, &DbWorker::slot_getUserList);
 
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
+	connect(this, &DbController::signal_getFileInfo, m_worker, &DbWorker::slot_getFileInfo);
+
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
 
@@ -315,6 +317,62 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, con
 	emit signal_getFileList(files, parentId, filter);
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list"));
+	return result;
+}
+
+bool DbController::getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	std::vector<int> fileIds;
+	fileIds.push_back(fileId);
+
+	std::vector<DbFileInfo> proxyOut;
+
+	bool result = getFileInfo(&fileIds, &proxyOut, parentWidget);
+
+	if (result == false || proxyOut.size() != 1)
+	{
+		return false;
+	}
+
+	assert(fileId == proxyOut[0].fileId());
+
+	*out = proxyOut[0];
+
+	return result;
+}
+
+bool DbController::getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (fileIds == nullptr ||
+		fileIds->empty() == true ||
+		out == nullptr)
+	{
+		assert(fileIds != nullptr);
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFileInfo(fileIds, out);
+
+	bool result = waitForComplete(parentWidget, tr("Geting files info"));
 	return result;
 }
 

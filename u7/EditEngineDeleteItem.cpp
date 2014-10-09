@@ -1,11 +1,11 @@
 #include "EditEngineDeleteItem.h"
 #include "VideoFrameWidget.h"
-#include "EditVideoFrameWidget.h"
+#include "EditSchemeWidget.h"
 
 namespace EditEngine
 {
 	DeleteItemCommand::DeleteItemCommand(
-		EditVideoFrameView* videoFrameView,
+		EditSchemeView* videoFrameView,
 		std::vector<std::shared_ptr<VFrame30::CVideoItem>> items,
 		std::shared_ptr<VFrame30::CVideoLayer> layer,
 		QScrollBar* hScrollBar,
@@ -26,7 +26,7 @@ namespace EditEngine
 		return;
 	}
 
-	void DeleteItemCommand::executeCommand(EditVideoFrameView* videoFrameView)
+	void DeleteItemCommand::executeCommand(EditSchemeView* videoFrameView)
 	{
 		std::for_each(m_items.begin(), m_items.end(),
 			[this](std::shared_ptr<VFrame30::CVideoItem> item)
@@ -39,7 +39,7 @@ namespace EditEngine
 		return;
 	}
 
-	void DeleteItemCommand::unExecuteCommand(EditVideoFrameView* videoFrameView)
+	void DeleteItemCommand::unExecuteCommand(EditSchemeView* videoFrameView)
 	{
 		m_layer->Items.assign(m_prevOrder.begin(), m_prevOrder.end());
 

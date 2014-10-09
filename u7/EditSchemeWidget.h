@@ -5,6 +5,7 @@
 #include "../VFrame30/FblItem.h"
 #include "EditEngine.h"
 #include "../include/DbController.h"
+#include "SchemeItemPropertiesDialog.h"
 
 #define GridSizeDisplay				5
 #define GridSizeMm					mm2in(0.5)
@@ -61,20 +62,22 @@ enum VideoItemAction
 	MoveConnectionLinePoint				// Move ConnectionLine point (ISchemePosConnectionLine)
 };
 
-class EditVideoFrameWidget;
+class EditSchemeWidget;
 
 //
 //
 // EditVideoFrameView
 //
 //
-class EditVideoFrameView : public VFrame30::VideoFrameView
+class EditSchemeView : public VFrame30::VideoFrameView
 {
 	Q_OBJECT
 
 public:
-	explicit EditVideoFrameView(QWidget* parent = 0);
-	explicit EditVideoFrameView(std::shared_ptr<VFrame30::CVideoFrame>& videoFrame, QWidget* parent = nullptr);
+	explicit EditSchemeView(QWidget* parent = 0);
+	explicit EditSchemeView(std::shared_ptr<VFrame30::CVideoFrame>& videoFrame, QWidget* parent = nullptr);
+
+	virtual ~EditSchemeView();
 
 	// Painting
 	//
@@ -158,7 +161,7 @@ protected:
 
 	// Temporary data, can be changed in EditVideoFrameWidget
 	//
-	friend EditVideoFrameWidget;
+	friend EditSchemeWidget;
 };
 
 
@@ -167,16 +170,16 @@ protected:
 // EditVideoFrameWidget
 //
 //
-class EditVideoFrameWidget : public QScrollArea
+class EditSchemeWidget : public QScrollArea
 {
 	Q_OBJECT
 
 private:
-	EditVideoFrameWidget();			// deleted;
+	EditSchemeWidget();			// deleted;
 
 public:
-	explicit EditVideoFrameWidget(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo);
-	virtual ~EditVideoFrameWidget();
+	explicit EditSchemeWidget(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo);
+	virtual ~EditSchemeWidget();
 	
 protected:
 	void createActions();
@@ -253,6 +256,7 @@ signals:
 	void saveWorkcopy();
 	void getCurrentWorkcopy();				// Save current videoframe to a file
 	void setCurrentWorkcopy();				// Load a videoframe from a file
+	void modifiedChanged(bool modified);	// Command to the owner to change title
 
 	// Slots
 	//
@@ -266,12 +270,14 @@ protected slots:
 	void redo();
 	void editEngineStateChanged(bool canUndo, bool canRedo);
 
-	void modifiedChanged(bool modified);
+	void modifiedChangedSlot(bool modified);
 
 	void zoomIn();
 	void zoomOut();
 	void zoom100();
 	void selectAll();
+
+	void properties();
 
 	// Properties
 	//
@@ -285,8 +291,8 @@ public:
 	const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems() const;
 	std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems();
 
-	EditVideoFrameView* videoFrameView();
-	const EditVideoFrameView* videoFrameView() const;
+	EditSchemeView* schemeView();
+	const EditSchemeView* schemeView() const;
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
@@ -321,8 +327,10 @@ private:
 	int horzScrollBarValue;		// Horizintal scroll bar value in mousePressEvent -- midButton
 	int vertScrollBarValue;		// Vertical scroll bar value in mousePressEvent -- midButton
 
-	EditVideoFrameView* m_videoFrameView;
+	EditSchemeView* m_videoFrameView;
 	EditEngine::EditEngine* m_editEngine;
+
+	SchemeItemPropertiesDialog* m_propertiesDialog = nullptr;
 
 	// Temporary and state variables
 	//

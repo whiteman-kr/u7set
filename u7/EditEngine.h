@@ -2,7 +2,7 @@
 
 #include "../VFrame30/VideoItem.h"
 
-class EditVideoFrameView;
+class EditSchemeView;
 
 namespace VFrame30
 {
@@ -27,7 +27,8 @@ namespace EditEngine
 		EditEngine();		// deleted;
 
 	public:
-		EditEngine(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent);
+		EditEngine(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent);
+		virtual ~EditEngine();
 
 	public:
 		void reset();
@@ -167,7 +168,7 @@ namespace EditEngine
 	private:
 		static const int MaxCommandCount = 2048;
 
-		EditVideoFrameView* m_videoFrameView;
+		EditSchemeView* m_videoFrameView;
 		QScrollBar* m_hScrollBar;
 		QScrollBar* m_vScrollBar;
 
@@ -189,18 +190,18 @@ namespace EditEngine
 	private:
 		EditCommand();		// deleted;
 	public:
-		EditCommand(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		EditCommand(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	public:
-		void execute(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void unExecute(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void execute(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void unExecute(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditVideoFrameView* videoFrameView) = 0;
-		virtual void unExecuteCommand(EditVideoFrameView* videoFrameView) = 0;
+		virtual void executeCommand(EditSchemeView* videoFrameView) = 0;
+		virtual void unExecuteCommand(EditSchemeView* videoFrameView) = 0;
 
-		void saveViewPos(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void restoreViewPos(EditVideoFrameView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void saveViewPos(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void restoreViewPos(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 		// Data
 		//

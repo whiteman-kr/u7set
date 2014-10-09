@@ -30,6 +30,7 @@
 		<file>DatabaseUpgrade/Upgrade0028.sql</file>
 		<file>DatabaseUpgrade/Upgrade0029.sql</file>
 		<file>DatabaseUpgrade/Upgrade0030.sql</file>
+		<file>DatabaseUpgrade/Upgrade0031.sql</file>
     </qresource>
     <qresource prefix="/">
         <file>afb_schema.xsd</file>

@@ -123,6 +123,9 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(bool AcceptClick READ acceptClick  WRITE setAcceptClick)
+		Q_PROPERTY(QString ClickScript READ clickScript  WRITE setClickScript)
+
 	protected:
 		CVideoItem();
 
@@ -227,7 +230,7 @@ namespace VFrame30
 		void setAcceptClick(bool value);
 
 		const QString& clickScript() const;
-		void setClickScript(const QString value);
+		void setClickScript(const QString& value);
 
 		// Get VideoItem bounding rectangle in itemUnit()
 		//
@@ -242,7 +245,7 @@ namespace VFrame30
 		SchemeUnit m_itemUnit;		// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 
 		bool m_acceptClick;			// The VideoItem accept mouse Left button click and runs script
-		QString m_clickScript;	// Qt script on mouse left button click
+		QString m_clickScript;		// Qt script on mouse left button click
 	};
 
 #ifdef VFRAME30LIB_LIBRARY

@@ -1,12 +1,12 @@
 #include "EditEngineSetPoints.h"
 #include "VideoFrameWidget.h"
-#include "EditVideoFrameWidget.h"
+#include "EditSchemeWidget.h"
 
 namespace EditEngine
 {
 
 	SetPointsCommand::SetPointsCommand(
-			EditVideoFrameView* videoFrameView,
+			EditSchemeView* videoFrameView,
 			const std::vector<std::vector<VFrame30::VideoItemPoint>>& points,
 			const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items,
 			QScrollBar* hScrollBar,
@@ -28,7 +28,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::executeCommand(EditVideoFrameView* videoFrameView)
+	void SetPointsCommand::executeCommand(EditSchemeView* videoFrameView)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{
@@ -46,7 +46,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::unExecuteCommand(EditVideoFrameView* videoFrameView)
+	void SetPointsCommand::unExecuteCommand(EditSchemeView* videoFrameView)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{

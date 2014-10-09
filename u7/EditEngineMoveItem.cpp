@@ -1,12 +1,12 @@
 #include "EditEngineMoveItem.h"
 #include "VideoFrameWidget.h"
-#include "EditVideoFrameWidget.h"
+#include "EditSchemeWidget.h"
 
 namespace EditEngine
 {
 
 	MoveItemCommand::MoveItemCommand(
-			EditVideoFrameView* videoFrameView,
+			EditSchemeView* videoFrameView,
 			double xdiff,
 			double ydiff,
 			const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items,
@@ -24,7 +24,7 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::executeCommand(EditVideoFrameView* videoFrameView)
+	void MoveItemCommand::executeCommand(EditSchemeView* videoFrameView)
 	{
 		videoFrameView->setSelectedItems(m_items);
 
@@ -38,7 +38,7 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::unExecuteCommand(EditVideoFrameView* videoFrameView)
+	void MoveItemCommand::unExecuteCommand(EditSchemeView* videoFrameView)
 	{
 		videoFrameView->setSelectedItems(m_items);
 

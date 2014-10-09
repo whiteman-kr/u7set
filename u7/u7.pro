@@ -60,8 +60,6 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     ../lib/DeviceObject.cpp \
     VideoFramePropertiesDialog.cpp \
-    VideoFrameTabPage.cpp \
-    EditVideoFrameWidget.cpp \
     EditEngine.cpp \
     EditEngineAddItem.cpp \
     EditEngineSetPoints.cpp \
@@ -82,7 +80,11 @@ SOURCES +=\
 	../lib/CUtils.cpp \
     ../lib/Signal.cpp \
     SignalPropertiesDialog.cpp \
-    ../lib/PropertyEditor.cpp
+    ../lib/PropertyEditor.cpp \
+    SchemeTabPage.cpp \
+    EditSchemeWidget.cpp \
+    SchemeItemPropertiesDialog.cpp \
+    EditEngineSetProperty.cpp
 
 
 HEADERS  += \
@@ -107,8 +109,6 @@ HEADERS  += \
     EquipmentTabPage.h \
     ../include/DeviceObject.h \
     VideoFramePropertiesDialog.h \
-    VideoFrameTabPage.h \
-    EditVideoFrameWidget.h \
     EditEngine.h \
     EditEngineAddItem.h \
     EditEngineSetPoints.h \
@@ -131,7 +131,11 @@ HEADERS  += \
     ../include/Signal.h \
     SignalPropertiesDialog.h \
     ../include/OrderedHash.h \
-    ../include/PropertyEditor.h
+    ../include/PropertyEditor.h \
+    SchemeTabPage.h \
+    EditSchemeWidget.h \
+    SchemeItemPropertiesDialog.h \
+    EditEngineSetProperty.h
     ../include/Signal.h
 
 FORMS    += \
@@ -145,7 +149,8 @@ FORMS    += \
     VideoFramePropertiesDialog.ui \
     CheckInDialog.ui \
     DialogAfblEditor.ui \
-    DialogAfbProperties.ui
+    DialogAfbProperties.ui \
+    SchemeItemPropertiesDialog.ui
 
 RESOURCES += \
 	Resources.qrc
@@ -184,7 +189,8 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0027.sql \
     DatabaseUpgrade/Upgrade0028.sql \
     DatabaseUpgrade/Upgrade0029.sql \
-    DatabaseUpgrade/Upgrade0030.sql
+    DatabaseUpgrade/Upgrade0030.sql \
+    DatabaseUpgrade/Upgrade0031.sql
 
 
 CONFIG += precompile_header
