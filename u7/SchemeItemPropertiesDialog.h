@@ -11,7 +11,13 @@ namespace Ui {
 	class SchemeItemPropertiesDialog;
 }
 
+namespace EditEngine
+{
+	class EditEngine;
+}
+
 class SchemeItemPropertyEditor;
+
 
 
 class SchemeItemPropertiesDialog : public QDialog
@@ -19,7 +25,7 @@ class SchemeItemPropertiesDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit SchemeItemPropertiesDialog(QWidget *parent = 0);
+	explicit SchemeItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget *parent = 0);
 	virtual ~SchemeItemPropertiesDialog();
 
 public:
@@ -42,10 +48,20 @@ private:
 
 class SchemeItemPropertyEditor : public PropertyEditor
 {
+	Q_OBJECT
+
 public:
-	explicit SchemeItemPropertyEditor(QWidget* parent);
+	explicit SchemeItemPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent);
 	virtual ~SchemeItemPropertyEditor();
 
+protected slots:
+	virtual void valueChanged(QtProperty* property, QVariant value) override;
+
+protected:
+	EditEngine::EditEngine* editEngine();
+
+private:
+	EditEngine::EditEngine* m_editEngine = nullptr;
 };
 
 #endif // SCHEMEITEMPROPERTIESDIALOG_H

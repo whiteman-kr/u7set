@@ -63,6 +63,9 @@ namespace EditEngine
 		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items);
 		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::CVideoItem>& item);
 
+		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items);
+		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::CVideoItem>& item);
+
 //		/// <summary>
 //		/// Команда "Изменить размер"
 //		/// </summary>

@@ -5,6 +5,7 @@
 #include "EditEngineSetPoints.h"
 #include "EditEngineDeleteItem.h"
 #include "EditEngineMoveItem.h"
+#include "EditEngineSetProperty.h"
 
 namespace EditEngine
 {
@@ -236,6 +237,20 @@ namespace EditEngine
 
 		runMoveItem(xdiff, ydiff, items);
 		return;
+	}
+
+	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items)
+	{
+		addCommand(std::make_shared<SetPropertyCommand>(m_videoFrameView, propertyName, value, items, m_hScrollBar, m_vScrollBar), true);
+		return;
+	}
+
+	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::CVideoItem>& item)
+	{
+		std::vector<std::shared_ptr<VFrame30::CVideoItem>> items;
+		items.push_back(item);
+
+		runSetProperty(propertyName, value, items);
 	}
 
 	//
