@@ -92,23 +92,12 @@ SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitI
 QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 	int col = index.column();
-	QVector<int> signalsIDs;
-	signalsIDs << m_signalSet.key(index.row());
-	QVector<ObjectState> objectStates;
-	m_model->dbController()->checkoutSignals(&signalsIDs, &objectStates, m_model->parrentWindow());
-	if (objectStates.count() == 0)
+
+	if (!m_model->checkoutSignal(index.row()))
 	{
 		return nullptr;
 	}
-	if (objectStates[0].errCode != ERR_SIGNAL_OK)
-	{
-		m_model->showError(objectStates[0]);
-	}
-	if (objectStates[0].errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
-			&& objectStates[0].userId != m_model->dbController()->currentUser().userId())
-	{
-		return nullptr;
-	}
+
 	switch (col)
 	{
 		// LineEdit
@@ -415,6 +404,41 @@ QString SignalsModel::getUserStr(int userID) const
 	}
 }
 
+bool SignalsModel::checkoutSignal(int index)
+{
+	Signal& s = m_signalSet[index];
+	if (s.checkedOut())
+	{
+		if (s.userID() == dbController()->currentUser().userId())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	QVector<int> signalsIDs;
+	signalsIDs << m_signalSet.key(index);
+	QVector<ObjectState> objectStates;
+	dbController()->checkoutSignals(&signalsIDs, &objectStates, parrentWindow());
+	if (objectStates.count() == 0)
+	{
+		return false;
+	}
+	if (objectStates[0].errCode != ERR_SIGNAL_OK)
+	{
+		showError(objectStates[0]);
+	}
+	if (objectStates[0].errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+			&& objectStates[0].userId != dbController()->currentUser().userId())
+	{
+		return false;
+	}
+	return true;
+}
+
 void SignalsModel::showError(const ObjectState& state) const
 {
 	switch(state.errCode)
@@ -426,7 +450,10 @@ void SignalsModel::showError(const ObjectState& state) const
 			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Signal is checked out by \"%1\"").arg(m_usernameMap[state.userId]));
 			break;
 		case ERR_SIGNAL_DELETED:
-			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Signal was deleted before editing"));
+			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Signal was deleted already"));
+			break;
+		case ERR_SIGNAL_NOT_FOUND:
+			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Signal not found"));
 			break;
 		default:
 			assert(false);
@@ -593,12 +620,7 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 void SignalsModel::loadSignals()
 {
-	if (m_signalSet.count() > 0)
-	{
-		beginRemoveRows(QModelIndex(), 0, m_signalSet.count() - 1);
-		m_signalSet.clear();
-		endRemoveRows();
-	}
+	clearSignals();
 
 	std::vector<DbUser> list;
 	m_dbController->getUserList(&list, m_parentWindow);
@@ -623,6 +645,19 @@ void SignalsModel::loadSignals()
 
 		emit cellsSizeChanged();
 	}
+}
+
+void SignalsModel::clearSignals()
+{
+	if (m_signalSet.count() == 0)
+	{
+		return;
+	}
+	beginRemoveRows(QModelIndex(), 0, m_signalSet.count() - 1);
+	m_signalSet.clear();
+	endRemoveRows();
+
+	emit cellsSizeChanged();
 }
 
 void SignalsModel::addSignal()
@@ -688,6 +723,47 @@ void SignalsModel::addSignal()
 	}
 }
 
+bool SignalsModel::editSignal(int row)
+{
+	if (!checkoutSignal(row))
+	{
+		return false;
+	}
+
+	Signal signal = m_signalSet[row];
+	SignalPropertiesDialog dlg(signal, signal.type(), m_dataFormatInfo, m_unitInfo, m_parentWindow);
+
+	if (dlg.exec() == QDialog::Accepted)
+	{
+		m_signalSet[row]= signal;
+
+		ObjectState state;
+		dbController()->setSignalWorkcopy(&signal, &state, parrentWindow());
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			showError(state);
+		}
+
+		emit cellsSizeChanged();
+		return true;
+	}
+	return false;
+}
+
+void SignalsModel::deleteSignal(int id)
+{
+	ObjectState state;
+	dbController()->deleteSignal(id, &state, parrentWindow());
+	if (state.errCode != ERR_SIGNAL_OK)
+	{
+		showError(state);
+	}
+	int row = m_signalSet.keyIndex(id);
+	beginRemoveRows(QModelIndex(), row, row);
+	m_signalSet.remove(id);
+	endRemoveRows();
+}
+
 DbController *SignalsModel::dbController()
 {
 	return m_dbController;
@@ -719,12 +795,13 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setModel(m_signalsModel);
 	m_signalsView->setItemDelegate(m_signalsModel->createDelegate());
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
-	//m_signalsView->verticalHeader()->doubleClicked();
+
 	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeColumnsToContents);
+
 	m_signalsView->resizeColumnsToContents();
 	m_signalsView->resizeRowsToContents();
 
@@ -768,24 +845,21 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 SignalsTabPage::~SignalsTabPage()
 {
-	//theSettings.m_equipmentTabPageSplitterState = m_splitter->saveState();
-	//theSettings.writeUserScope();
 }
 
 void SignalsTabPage::CreateActions()
 {
-	/*m_addSystemAction = new QAction(tr("Add System"), this);
-	m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
-	//m_addSystemAction->setEnabled(false);
-	connect(m_addSystemAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSystem);
-	*/
 	QAction* action = new QAction(tr("Create signal"), this);
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
 	m_signalsView->addAction(action);
-	/*m_signalsView->addAction(menu->addAction(new QAction("Edit signal", this)));
-	m_signalsView->addAction(menu->addAction(new QAction("Delete signal", this)));
-	m_signalsView->addAction(menu->addAction(new QAction("Restore signal", this)));*/
-	return;
+
+	action = new QAction(tr("Edit signal"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
+	m_signalsView->addAction(action);
+
+	action = new QAction(tr("Delete signal"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
+	m_signalsView->addAction(action);
 }
 
 void SignalsTabPage::closeEvent(QCloseEvent* e)
@@ -798,17 +872,57 @@ void SignalsTabPage::projectOpened()
 	this->setEnabled(true);
 
 	m_signalsModel->loadSignals();
-
-	return;
 }
 
 void SignalsTabPage::projectClosed()
 {
 	this->setEnabled(false);
-	return;
+
+	m_signalsModel->clearSignals();
 }
 
-void SignalsTabPage::contextMenuRequested(QPoint)
+void SignalsTabPage::editSignal()
 {
-	//menu->popup(table->viewport()->mapToGlobal(pos));
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedIndexes();
+    if (selection.count() == 0)
+    {
+        QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+    }
+	QSet<int> editedRows;
+    for (int i = 0; i < selection.count(); i++)
+    {
+		int row = selection[i].row();
+		if (editedRows.contains(row))
+		{
+			continue;
+		}
+		editedRows.insert(row);
+		if (!m_signalsModel->editSignal(row))
+		{
+			break;
+		}
+	}
+}
+
+void SignalsTabPage::deleteSignal()
+{
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedIndexes();
+    if (selection.count() == 0)
+    {
+        QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+    }
+	QSet<int> deletedSignalsID;
+    for (int i = 0; i < selection.count(); i++)
+    {
+		int id = m_signalsModel->key(selection[i].row());
+		if (deletedSignalsID.contains(id))
+		{
+			continue;
+		}
+		deletedSignalsID.insert(id);
+	}
+	foreach(const int id, deletedSignalsID)
+	{
+		m_signalsModel->deleteSignal(id);
+	}
 }

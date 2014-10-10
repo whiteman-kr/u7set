@@ -55,12 +55,17 @@ public:
 	SignalsDelegate* createDelegate() { return new SignalsDelegate(m_dataFormatInfo, m_unitInfo, m_signalSet, this, parent()); }
 
 	void loadSignals();
+	void clearSignals();
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
+	int key(int row) { return m_signalSet.key(row); }
 
 	DbController* dbController();
 	QWidget* parrentWindow() { return m_parentWindow; }
 	void showError(const ObjectState& state) const;
+	bool checkoutSignal(int index);
+	bool editSignal(int row);
+	void deleteSignal(int row);
 
 signals:
 	void cellsSizeChanged();
@@ -104,16 +109,12 @@ protected:
 public slots:
 	void projectOpened();
 	void projectClosed();
-	void contextMenuRequested(QPoint);
+	void editSignal();
+	void deleteSignal();
 
 	// Data
 	//
 private:
-	//QAction* m_addSystemAction = nullptr;
-	//QAction* m_addCaseAction = nullptr;
-
-	//QTextEdit* m_propertyView = nullptr;
-	//QSplitter* m_splitter = nullptr;
 	SignalsModel* m_signalsModel = nullptr;
 	QTableView* m_signalsView = nullptr;
 	QMenu* m_signalsMenu = nullptr;
