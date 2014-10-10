@@ -9,6 +9,7 @@ class DbController;
 class QTableView;
 class QMenu;
 class SignalsModel;
+class QToolBar;
 
 
 class SignalsDelegate : public QStyledItemDelegate
@@ -54,7 +55,6 @@ public:
 
 	SignalsDelegate* createDelegate() { return new SignalsDelegate(m_dataFormatInfo, m_unitInfo, m_signalSet, this, parent()); }
 
-	void loadSignals();
 	void clearSignals();
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
@@ -67,10 +67,16 @@ public:
 	bool editSignal(int row);
 	void deleteSignal(int row);
 
+	void changeActionsVisibility(const QModelIndex& current, const QModelIndex& previous);
+
 signals:
 	void cellsSizeChanged();
+	void setCheckinVisibility(bool state);
+	void setUndoVisibility(bool state);
+	void setSignalOperationsVisibility(bool state);
 
 public slots:
+	void loadSignals();
 	void addSignal();
 
 private:
@@ -99,7 +105,7 @@ public:
 	virtual ~SignalsTabPage();
 
 protected:
-	void CreateActions();
+	void CreateActions(QToolBar* toolBar);
 
 	// Events
 	//
@@ -109,8 +115,11 @@ protected:
 public slots:
 	void projectOpened();
 	void projectClosed();
+
 	void editSignal();
 	void deleteSignal();
+	void undoSignal();
+	void checkinSignal();
 
 	// Data
 	//

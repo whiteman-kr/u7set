@@ -6,6 +6,7 @@
 #include <QFormLayout>
 #include <QComboBox>
 #include <QDialogButtonBox>
+#include <QToolBar>
 
 
 const int SC_CHECKED_OUT = 0,
@@ -649,13 +650,15 @@ void SignalsModel::loadSignals()
 
 void SignalsModel::clearSignals()
 {
-	if (m_signalSet.count() == 0)
+	if (m_signalSet.count() != 0)
 	{
-		return;
+		beginRemoveRows(QModelIndex(), 0, m_signalSet.count() - 1);
+		m_signalSet.clear();
+		endRemoveRows();
 	}
-	beginRemoveRows(QModelIndex(), 0, m_signalSet.count() - 1);
-	m_signalSet.clear();
-	endRemoveRows();
+
+	m_dataFormatInfo.clear();
+	m_unitInfo.clear();
 
 	emit cellsSizeChanged();
 }
@@ -764,6 +767,32 @@ void SignalsModel::deleteSignal(int id)
 	endRemoveRows();
 }
 
+void SignalsModel::changeActionsVisibility(const QModelIndex &current, const QModelIndex &/*previous*/)
+{
+	if (!current.isValid())
+	{
+		emit setSignalOperationsVisibility(false);
+		emit setCheckinVisibility(false);
+		emit setUndoVisibility(false);
+		return;
+	}
+
+	/*Signal& previousSignal = m_signalSet[previous.row()];
+	Signal& currentSignal = m_signalSet[current.row()];
+
+	if (currentSignal.checkedOut())
+	{
+
+	}
+
+	if (!previous.isValid() && current.isValid())
+	{
+		emit setSignalOperationsVisibility(true);
+	}*/
+}
+
+
+
 DbController *SignalsModel::dbController()
 {
 	return m_dbController;
@@ -779,14 +808,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
-	// Set context menu to Equipment View
-	//
-	/*m_equipmentView->setContextMenuPolicy(Qt::ActionsContextMenu);
-
-	m_equipmentView->addAction(m_addSystemAction);
-	m_equipmentView->addAction(m_addCaseAction);
-	m_equipmentView->addAction(m_addSubblockAction);
-	m_equipmentView->addAction(m_addBlockAction);*/
+	QToolBar* toolBar = new QToolBar(this);
 
 	// Property View
 	//
@@ -802,31 +824,22 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeColumnsToContents);
 
+	connect(m_signalsView->selectionModel(), &QItemSelectionModel::currentRowChanged, m_signalsModel, &SignalsModel::changeActionsVisibility);
+
 	m_signalsView->resizeColumnsToContents();
 	m_signalsView->resizeRowsToContents();
 
 	// Create Actions
 	//
-	CreateActions();
-
-	// Splitter
-	//
-	//m_splitter = new QSplitter();
-
-	//m_splitter->addWidget(m_equipmentView);
-	//m_splitter->addWidget(m_propertyView);
-
-	//m_splitter->setStretchFactor(0, 2);
-	//m_splitter->setStretchFactor(1, 1);
-
-	//m_splitter->restoreState(theSettings.m_equipmentTabPageSplitterState);
+	CreateActions(toolBar);
 
 	//
 	// Layouts
 	//
 
-	QHBoxLayout* pMainLayout = new QHBoxLayout();
+	QVBoxLayout* pMainLayout = new QVBoxLayout();
 
+	pMainLayout->addWidget(toolBar);
 	pMainLayout->addWidget(m_signalsView);
 
 	//pMainLayout->addWidget(m_splitter);
@@ -847,19 +860,40 @@ SignalsTabPage::~SignalsTabPage()
 {
 }
 
-void SignalsTabPage::CreateActions()
+void SignalsTabPage::CreateActions(QToolBar *toolBar)
 {
-	QAction* action = new QAction(tr("Create signal"), this);
+	QAction* action = new QAction(tr("Refresh signal list"), this);
+	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::loadSignals);
+	toolBar->addAction(action);
+
+	action = new QAction(tr("Create signal"), this);
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
 	m_signalsView->addAction(action);
+	toolBar->addAction(action);
 
 	action = new QAction(tr("Edit signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
+	connect(m_signalsModel, &SignalsModel::setSignalOperationsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
+	toolBar->addAction(action);
 
 	action = new QAction(tr("Delete signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
+	connect(m_signalsModel, &SignalsModel::setSignalOperationsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
+	action = new QAction(tr("Checkin signal"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::checkinSignal);
+	connect(m_signalsModel, &SignalsModel::setCheckinVisibility, action, &QAction::setVisible);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
+	action = new QAction(tr("Undo checkouted signal"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::undoSignal);
+	connect(m_signalsModel, &SignalsModel::setUndoVisibility, action, &QAction::setVisible);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
 }
 
 void SignalsTabPage::closeEvent(QCloseEvent* e)
@@ -925,4 +959,14 @@ void SignalsTabPage::deleteSignal()
 	{
 		m_signalsModel->deleteSignal(id);
 	}
+}
+
+void SignalsTabPage::undoSignal()
+{
+
+}
+
+void SignalsTabPage::checkinSignal()
+{
+
 }
