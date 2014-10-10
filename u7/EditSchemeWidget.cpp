@@ -3462,7 +3462,7 @@ void EditSchemeWidget::properties()
 {
 	if (m_propertiesDialog == nullptr)
 	{
-		m_propertiesDialog = new SchemeItemPropertiesDialog(this);
+		m_propertiesDialog = new SchemeItemPropertiesDialog(m_editEngine, this);
 	}
 
 	m_propertiesDialog->setObjects(schemeView()->selectedItems());

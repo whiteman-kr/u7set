@@ -193,11 +193,9 @@ signals:
     void showErrorMessage(QString message);
 	void propertiesChanged(QObjectList objects);
 
-	// Private functions and structs
+	// Protected functions and structs
 	//
-private:
-	//void resizeEvent(QResizeEvent* event);
-	//void moveEvent(QMoveEvent * event);
+protected:
 	void createValuesMap(QtAbstractPropertyManager* manager, QVariant::Type type, QMap<QtProperty*, QVariant>& values);
 	bool propertyByName(const QObject* object, const QString& name, QMetaProperty& metaProperty);
 
@@ -210,7 +208,7 @@ private:
 
 	// Data
 	//
-private:
+protected:
 	//QtTreePropertyBrowser* m_propertyEditor = nullptr;
 	QtGroupPropertyManager* m_propertyGroupManager = nullptr;
 
@@ -219,7 +217,7 @@ private:
 	QtMultiVariantPropertyManager* m_propertyDoubleManager = nullptr;
 	QtMultiVariantPropertyManager* m_propertyBoolManager = nullptr;
 
-    QMap<QString, QObject*> m_propToClassMap;   //Property Name to Class Map
+	QMap<QString, QObject*> m_propToClassMap;   // Property Name to Class Map
 };
 
 #endif // PROPERTYEDITOR_H

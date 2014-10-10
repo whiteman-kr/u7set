@@ -893,21 +893,3 @@ void PropertyEditor::onShowErrorMessage(QString message)
 {
 //	QMessageBox::warning(this, "Error", message);
 }
-/*
-void PropertyEditor::resizeEvent(QResizeEvent * event)
-{
-	if (m_propertyEditor != nullptr)
-	{
-		m_propertyEditor->resize(event->size());
-	}
-}
-
-void PropertyEditor::moveEvent(QMoveEvent * event)
-{
-	if (m_propertyEditor != nullptr)
-	{
-		m_propertyEditor->move(event->pos());
-	}
-
-}
-*/
