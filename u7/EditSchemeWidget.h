@@ -101,6 +101,7 @@ protected:
 
 	// Signals
 signals:
+	void selectionChanged();
 
 	// Properties
 	//
@@ -119,7 +120,11 @@ public:
 	const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems() const;
 	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items);
 	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::CVideoItem>>& items);
+	void setSelectedItem(const std::shared_ptr<VFrame30::CVideoItem>& item);
+	void addSelection(const std::shared_ptr<VFrame30::CVideoItem>& item);
+
 	void clearSelection();
+	void removeFromSelection(const std::shared_ptr<VFrame30::CVideoItem>& item);
 
 	// Data
 	//
@@ -278,6 +283,7 @@ protected slots:
 	void selectAll();
 
 	void properties();
+	void selectionChanged();
 
 	// Properties
 	//
@@ -289,7 +295,7 @@ public:
 	std::shared_ptr<VFrame30::CVideoLayer> activeLayer();
 
 	const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems() const;
-	std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems();
+	//std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems();
 
 	EditSchemeView* schemeView();
 	const EditSchemeView* schemeView() const;

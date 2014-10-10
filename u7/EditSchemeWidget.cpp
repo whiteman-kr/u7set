@@ -969,18 +969,56 @@ const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditSchemeView::select
 void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items)
 {
 	m_selectedItems = items;
+
+	emit selectionChanged();
 }
 
 void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::CVideoItem>>& items)
 {
 	m_selectedItems.clear();
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
+
+	emit selectionChanged();
+}
+
+void EditSchemeView::setSelectedItem(const std::shared_ptr<VFrame30::CVideoItem>& item)
+{
+	m_selectedItems.clear();
+	m_selectedItems.push_back(item);
+
+	emit selectionChanged();
+}
+
+void EditSchemeView::addSelection(const std::shared_ptr<VFrame30::CVideoItem>& item)
+{
+	m_selectedItems.push_back(item);
+	emit selectionChanged();
 }
 
 void EditSchemeView::clearSelection()
 {
+	if (m_selectedItems.empty() == true)
+	{
+		return;
+	}
+
 	m_selectedItems.clear();
+	emit selectionChanged();
 }
+
+void EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::CVideoItem>& item)
+{
+	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
+
+	if (findResult != m_selectedItems.end())
+	{
+		m_selectedItems.erase(findResult);
+		emit selectionChanged();
+	}
+
+	return;
+}
+
 
 //
 //
@@ -1077,6 +1115,8 @@ EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::CVideoFrame> videoF
 
 	connect(m_editEngine, &EditEngine::EditEngine::stateChanged, this, &EditSchemeWidget::editEngineStateChanged);
 	connect(m_editEngine, &EditEngine::EditEngine::modifiedChanged, this, &EditSchemeWidget::modifiedChangedSlot);
+
+	connect(m_videoFrameView, &EditSchemeView::selectionChanged, this, &EditSchemeWidget::selectionChanged);
 
 	return;
 }
@@ -1822,7 +1862,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 				// Переход в режим перемещения одного элемента
 				//
 				schemeView()->clearSelection();
-				selectedItems().push_back(itemUnderPoint);
+				schemeView()->setSelectedItem(itemUnderPoint);
 			}
 
 			// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
@@ -2000,16 +2040,7 @@ void EditSchemeWidget::mouseLeftUp_Selection(QMouseEvent* me)
 		{
 			// Если такой элемент уже есть в списке, то удалить его из списка выделенных
 			//
-			auto findResult = std::find(selectedItems().begin(), selectedItems().end(), item);
-
-			if (findResult != selectedItems().end())
-			{
-				selectedItems().erase(findResult);
-			}
-			else
-			{
-				selectedItems().push_back(item);
-			}
+			schemeView()->removeFromSelection(item);
 		}
 	}
 	else
@@ -2027,11 +2058,11 @@ void EditSchemeWidget::mouseLeftUp_Selection(QMouseEvent* me)
 
 			if (findResult != selectedItems().end())
 			{
-				selectedItems().erase(findResult);
+				schemeView()->removeFromSelection(*item);
 			}
 			else
 			{
-				selectedItems().push_back(*item);
+				schemeView()->addSelection(*item);
 			}
 		}
 	}
@@ -2962,11 +2993,6 @@ std::shared_ptr<VFrame30::CVideoLayer> EditSchemeWidget::activeLayer()
 	return m_videoFrameView->activeLayer();
 }
 
-std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditSchemeWidget::selectedItems()
-{
-	return m_videoFrameView->m_selectedItems;
-}
-
 QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool snapToGrid) const
 {
 	double docX = 0;	// Result
@@ -3468,7 +3494,17 @@ void EditSchemeWidget::properties()
 	m_propertiesDialog->setObjects(schemeView()->selectedItems());
 
 	m_propertiesDialog->show();
+	return;
+}
 
+void EditSchemeWidget::selectionChanged()
+{
+	if (m_propertiesDialog == nullptr)
+	{
+		m_propertiesDialog = new SchemeItemPropertiesDialog(m_editEngine, this);
+	}
+
+	m_propertiesDialog->setObjects(schemeView()->selectedItems());
 	return;
 }
 

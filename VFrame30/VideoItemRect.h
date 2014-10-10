@@ -11,6 +11,10 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
+		Q_PROPERTY(bool Fill READ fill WRITE setFill)
+		//Q_PROPERTY(QRgb LineColor READ lineColor WRITE setLineColor)
+
 #ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<CVideoItem>::DerivedType<CVideoItemRect>;
 #endif
