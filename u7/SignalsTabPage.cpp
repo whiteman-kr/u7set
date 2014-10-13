@@ -405,6 +405,20 @@ QString SignalsModel::getUserStr(int userID) const
 	}
 }
 
+void SignalsModel::changeCheckedoutSignalActionsVisibility()
+{
+	for (int i = 0; i < m_signalSet.count(); i++)
+	{
+		const Signal& signal = m_signalSet[i];
+		if (signal.checkedOut() && signal.userID() == dbController()->currentUser().userId())
+		{
+			emit setCheckedoutSignalActionsVisibility(true);
+			return;
+		}
+	}
+	emit setCheckedoutSignalActionsVisibility(false);
+}
+
 bool SignalsModel::checkoutSignal(int index)
 {
 	Signal& s = m_signalSet[index];
@@ -437,6 +451,7 @@ bool SignalsModel::checkoutSignal(int index)
 	{
 		return false;
 	}
+	emit setCheckedoutSignalActionsVisibility(true);
 	return true;
 }
 
@@ -609,7 +624,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 {
-	if (index.column() == SC_CHANNEL)
+	if (index.column() == SC_CHANNEL || index.column() == SC_CHECKED_OUT)
 	{
 		return QAbstractTableModel::flags(index);
 	}
@@ -646,6 +661,7 @@ void SignalsModel::loadSignals()
 
 		emit cellsSizeChanged();
 	}
+	changeCheckedoutSignalActionsVisibility();
 }
 
 void SignalsModel::clearSignals()
@@ -661,6 +677,16 @@ void SignalsModel::clearSignals()
 	m_unitInfo.clear();
 
 	emit cellsSizeChanged();
+}
+
+bool SignalsModel::isEditableSignal(int row)
+{
+	Signal& s = m_signalSet[row];
+	if (s.checkedOut() && s.userID() != dbController()->currentUser().userId())
+	{
+		return false;
+	}
+	return true;
 }
 
 void SignalsModel::addSignal()
@@ -767,32 +793,6 @@ void SignalsModel::deleteSignal(int id)
 	endRemoveRows();
 }
 
-void SignalsModel::changeActionsVisibility(const QModelIndex &current, const QModelIndex &/*previous*/)
-{
-	if (!current.isValid())
-	{
-		emit setSignalOperationsVisibility(false);
-		emit setCheckinVisibility(false);
-		emit setUndoVisibility(false);
-		return;
-	}
-
-	/*Signal& previousSignal = m_signalSet[previous.row()];
-	Signal& currentSignal = m_signalSet[current.row()];
-
-	if (currentSignal.checkedOut())
-	{
-
-	}
-
-	if (!previous.isValid() && current.isValid())
-	{
-		emit setSignalOperationsVisibility(true);
-	}*/
-}
-
-
-
 DbController *SignalsModel::dbController()
 {
 	return m_dbController;
@@ -818,13 +818,16 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setItemDelegate(m_signalsModel->createDelegate());
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
+	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+	m_signalsView->horizontalHeader()->setHighlightSections(false);
+
 	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeColumnsToContents);
 
-	connect(m_signalsView->selectionModel(), &QItemSelectionModel::currentRowChanged, m_signalsModel, &SignalsModel::changeActionsVisibility);
+	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
 
 	m_signalsView->resizeColumnsToContents();
 	m_signalsView->resizeRowsToContents();
@@ -873,27 +876,29 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	action = new QAction(tr("Edit signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
-	connect(m_signalsModel, &SignalsModel::setSignalOperationsVisibility, action, &QAction::setVisible);
+	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
 	action = new QAction(tr("Delete signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
-	connect(m_signalsModel, &SignalsModel::setSignalOperationsVisibility, action, &QAction::setVisible);
+	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(tr("Checkin signal"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::checkinSignal);
-	connect(m_signalsModel, &SignalsModel::setCheckinVisibility, action, &QAction::setVisible);
+	action = new QAction(tr("Checkin signals"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::checkinSignals);
+	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(tr("Undo checkouted signal"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::undoSignal);
-	connect(m_signalsModel, &SignalsModel::setUndoVisibility, action, &QAction::setVisible);
+	action = new QAction(tr("Undo checkouted signals"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::undoSignals);
+	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
+
+	changeSignalActionsVisibility();
 }
 
 void SignalsTabPage::closeEvent(QCloseEvent* e)
@@ -917,21 +922,14 @@ void SignalsTabPage::projectClosed()
 
 void SignalsTabPage::editSignal()
 {
-	QModelIndexList selection = m_signalsView->selectionModel()->selectedIndexes();
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
     if (selection.count() == 0)
     {
         QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
     }
-	QSet<int> editedRows;
     for (int i = 0; i < selection.count(); i++)
     {
-		int row = selection[i].row();
-		if (editedRows.contains(row))
-		{
-			continue;
-		}
-		editedRows.insert(row);
-		if (!m_signalsModel->editSignal(row))
+		if (!m_signalsModel->editSignal(selection[i].row()))
 		{
 			break;
 		}
@@ -940,7 +938,7 @@ void SignalsTabPage::editSignal()
 
 void SignalsTabPage::deleteSignal()
 {
-	QModelIndexList selection = m_signalsView->selectionModel()->selectedIndexes();
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
     if (selection.count() == 0)
     {
         QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
@@ -949,10 +947,6 @@ void SignalsTabPage::deleteSignal()
     for (int i = 0; i < selection.count(); i++)
     {
 		int id = m_signalsModel->key(selection[i].row());
-		if (deletedSignalsID.contains(id))
-		{
-			continue;
-		}
 		deletedSignalsID.insert(id);
 	}
 	foreach(const int id, deletedSignalsID)
@@ -961,12 +955,137 @@ void SignalsTabPage::deleteSignal()
 	}
 }
 
-void SignalsTabPage::undoSignal()
+QVector<int> SignalsTabPage::getSelectedSignalsID()
 {
+	QDialog dlg;
+	dlg.setWindowTitle(tr("Select signals..."));
+	QVBoxLayout* vl = new QVBoxLayout;
 
+	CheckedoutSignalsModel* proxyModel = new CheckedoutSignalsModel(m_signalsModel, &dlg);
+
+	QTableView* signalsView = new QTableView(&dlg);
+	signalsView->setModel(proxyModel);
+	signalsView->setColumnHidden(0, true);
+
+	vl->addWidget(signalsView);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	connect(buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+	vl->addWidget(buttonBox);
+
+	dlg.setLayout(vl);
+
+	if (dlg.exec() == QDialog::Rejected)
+	{
+		return QVector<int>();
+	}
+
+	QVector<int> IDs;
+	for (int i = 0; i < proxyModel->rowCount(); i++)
+	{
+		QModelIndex proxyIndex = proxyModel->index(i, SC_STR_ID);
+		if (proxyModel->data(proxyIndex, Qt::CheckStateRole) == Qt::Checked)
+		{
+			int sourceRow = proxyModel->mapToSource(proxyIndex).row();
+			IDs.append(m_signalsModel->key(sourceRow));
+		}
+	}
+	return IDs;
 }
 
-void SignalsTabPage::checkinSignal()
+void SignalsTabPage::undoSignals()
 {
+	QVector<int> IDs = getSelectedSignalsID();
+	for (int i = 0; i < IDs.count(); i++)
+	{
+		ObjectState state;
+		dbController()->undoSignalChanges(IDs[i], &state, this);
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			m_signalsModel->showError(state);
+		}
+	}
+	m_signalsModel->loadSignals();
+}
 
+void SignalsTabPage::checkinSignals()
+{
+	QVector<int> IDs = getSelectedSignalsID();
+	/*for (int i = 0; i < IDs.count(); i++)
+	{
+		ObjectState state;
+		dbController()->checkinSignals(IDs[i], &state, this);
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			m_signalsModel->showError(state);
+		}
+	}
+	m_signalsModel->loadSignals();*/
+}
+
+void SignalsTabPage::changeSignalActionsVisibility()
+{
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+    if (selection.count() == 0)
+    {
+		emit setSignalActionsVisibility(false);
+    }
+	else
+	{
+		for (int i = 0; i < selection.count(); i++)
+		{
+			if (m_signalsModel->isEditableSignal(selection[i].row()))
+			{
+				emit setSignalActionsVisibility(true);
+				return;
+			}
+		}
+		emit setSignalActionsVisibility(false);
+	}
+}
+
+
+CheckedoutSignalsModel::CheckedoutSignalsModel(SignalsModel* sourceModel, QObject* parent) :
+	QSortFilterProxyModel(parent),
+	m_sourceModel(sourceModel)
+{
+	setSourceModel(sourceModel);
+	states.resize(rowCount());
+}
+
+QVariant CheckedoutSignalsModel::data(const QModelIndex& index, int role) const
+{
+	if (index.column() == SC_STR_ID && role == Qt::CheckStateRole)
+	{
+		return states[index.row()];
+	}
+	return QSortFilterProxyModel::data(index, role);
+}
+
+bool CheckedoutSignalsModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+	if (index.column() == SC_STR_ID && role == Qt::CheckStateRole)
+	{
+		states[index.row()] = Qt::CheckState(value.toInt());
+		return true;
+	}
+	return QSortFilterProxyModel::setData(index, value, role);
+}
+
+Qt::ItemFlags CheckedoutSignalsModel::flags(const QModelIndex& index) const
+{
+	Qt::ItemFlags flags = QSortFilterProxyModel::flags(index);
+	flags &= ~Qt::ItemIsEditable;
+	if (index.column() == SC_STR_ID)
+	{
+		flags |= Qt::ItemIsUserCheckable;
+	}
+	return flags;
+}
+
+bool CheckedoutSignalsModel::filterAcceptsRow(int source_row, const QModelIndex&) const
+{
+	const Signal& signal = m_sourceModel->signal(source_row);
+	return signal.checkedOut() && signal.userID() == m_sourceModel->dbController()->currentUser().userId();
 }
