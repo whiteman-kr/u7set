@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "FblItemRect.h"
-#include "VideoLayer.h"
+#include "SchemeLayer.h"
 
 namespace VFrame30
 {
@@ -167,7 +167,7 @@ namespace VFrame30
 	//
 	bool FblItemRect::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CPosRectImpl::SaveData(message);
+		bool result = PosRectImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -207,7 +207,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CPosRectImpl::LoadData(message);
+		bool result = PosRectImpl::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -244,7 +244,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void FblItemRect::Draw(CDrawParam* drawParam, const CVideoFrame*, const CVideoLayer* pLayer) const
+	void FblItemRect::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* pLayer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);

@@ -5,7 +5,7 @@
 #include "VideoFrameLogic.h"
 #include "VideoFrameTech.h"
 #include "VideoFrameWiring.h"
-#include "VideoLayer.h"
+#include "SchemeLayer.h"
 #include "VideoItemLine.h"
 #include "VideoItemRect.h"
 #include "VideoItemConnectionLine.h"
@@ -44,17 +44,17 @@ namespace VFrame30
 
 		// Registering VideoLayers
 		//
-		VideoLayerFactory.Register<CVideoLayer>();
+		VideoLayerFactory.Register<SchemeLayer>();
 
 		// Registering VideoItems
 		//
-		VideoItemFactory.Register<CVideoItemLine>();
-		VideoItemFactory.Register<CVideoItemRect>();
-		VideoItemFactory.Register<CVideoItemConnectionLine>();
-		VideoItemFactory.Register<CFblItemLine>();
+		VideoItemFactory.Register<VideoItemLine>();
+		VideoItemFactory.Register<VideoItemRect>();
+		VideoItemFactory.Register<VideoItemConnectionLine>();
+		VideoItemFactory.Register<FblItemLine>();
 		VideoItemFactory.Register<FblItemRect>();
-		VideoItemFactory.Register<CVideoItemLink>();
-		VideoItemFactory.Register<CVideoItemFblElement>();
+		VideoItemFactory.Register<VideoItemLink>();
+		VideoItemFactory.Register<VideoItemFblElement>();
 		VideoItemFactory.Register<VideoItemInputSignal>();
 		VideoItemFactory.Register<VideoItemOutputSignal>();
 

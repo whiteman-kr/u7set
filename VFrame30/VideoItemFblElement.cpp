@@ -3,19 +3,19 @@
 
 namespace VFrame30
 {
-	CVideoItemFblElement::CVideoItemFblElement(void)
+	VideoItemFblElement::VideoItemFblElement(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemFblElement::CVideoItemFblElement(SchemeUnit unit) :
+	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit) :
 		FblItemRect(unit)
 	{
 	}
 
-	CVideoItemFblElement::CVideoItemFblElement(SchemeUnit unit, const Fbl::FblElement& fblElement) :
+	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Fbl::FblElement& fblElement) :
 		FblItemRect(unit)
 	{
 		m_fblElement = fblElement;
@@ -44,11 +44,11 @@ namespace VFrame30
 		m_fblElement.setParams(params);
 	}
 
-	CVideoItemFblElement::~CVideoItemFblElement(void)
+	VideoItemFblElement::~VideoItemFblElement(void)
 	{
 	}
 
-	void CVideoItemFblElement::Draw(CDrawParam* drawParam, const CVideoFrame* pFrame, const CVideoLayer* pLayer) const
+	void VideoItemFblElement::Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const
 	{
 		// Нарисовать прямоугольник и пины
 		//
@@ -104,7 +104,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemFblElement::SaveData(Proto::Envelope* message) const
+	bool VideoItemFblElement::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -124,7 +124,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemFblElement::LoadData(const Proto::Envelope& message)
+	bool VideoItemFblElement::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -156,7 +156,7 @@ namespace VFrame30
 		return true;
 	}
 
-	const Fbl::FblElement& CVideoItemFblElement::fblElement() const
+	const Fbl::FblElement& VideoItemFblElement::fblElement() const
 	{
 		return m_fblElement;
 	}

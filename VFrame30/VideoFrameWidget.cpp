@@ -9,7 +9,7 @@ namespace VFrame30
 
 	// VideoFrameWidget
 	//
-	VideoFrameBaseWidget::VideoFrameBaseWidget(std::shared_ptr<CVideoFrame> videoFrame)
+	VideoFrameBaseWidget::VideoFrameBaseWidget(std::shared_ptr<Scheme> videoFrame)
 	{
 		horzScrollBarValue = 0;
 		vertScrollBarValue = 0;
@@ -139,13 +139,13 @@ namespace VFrame30
 		return;
 	}
 
-	std::shared_ptr<CVideoFrame>& VideoFrameBaseWidget::videoFrame()
+	std::shared_ptr<Scheme>& VideoFrameBaseWidget::videoFrame()
 	{
 		VideoFrameView* ptr = dynamic_cast<VideoFrameView*>(widget());
 		if (ptr == nullptr)
 		{
 			assert(ptr != nullptr);
-			static std::shared_ptr<CVideoFrame> nullSharedPtr;
+			static std::shared_ptr<Scheme> nullSharedPtr;
 			return nullSharedPtr;
 		}
 

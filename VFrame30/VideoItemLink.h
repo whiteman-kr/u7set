@@ -5,19 +5,19 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT CVideoItemLink : public CFblItemLine
+	class VFRAME30LIBSHARED_EXPORT VideoItemLink : public FblItemLine
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<CVideoItemLink>;
+		friend ::Factory<VideoItem>::DerivedType<VideoItemLink>;
 #endif
 
 	private:
-		CVideoItemLink(void);
+		VideoItemLink(void);
 	public:
-		explicit CVideoItemLink(SchemeUnit unit);
-		virtual ~CVideoItemLink(void);
+		explicit VideoItemLink(SchemeUnit unit);
+		virtual ~VideoItemLink(void);
 
 		// Serialization
 		//
@@ -32,7 +32,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const CVideoFrame* pFrame, const CVideoLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
 
 		// Вычислить координаты точки
 		//

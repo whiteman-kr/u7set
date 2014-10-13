@@ -3,14 +3,14 @@
 
 namespace VFrame30
 {
-	CVideoItemLine::CVideoItemLine(void)
+	VideoItemLine::VideoItemLine(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemLine::CVideoItemLine(SchemeUnit unit) : 
+	VideoItemLine::VideoItemLine(SchemeUnit unit) : 
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
@@ -19,15 +19,15 @@ namespace VFrame30
 	}
 
 
-	CVideoItemLine::~CVideoItemLine(void)
+	VideoItemLine::~VideoItemLine(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool CVideoItemLine::SaveData(Proto::Envelope* message) const
+	bool VideoItemLine::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CPosLineImpl::SaveData(message);
+		bool result = PosLineImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemLine::LoadData(const Proto::Envelope& message)
+	bool VideoItemLine::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -55,7 +55,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CPosLineImpl::LoadData(message);
+		bool result = PosLineImpl::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -82,7 +82,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void CVideoItemLine::Draw(CDrawParam* drawParam, const CVideoFrame*, const CVideoLayer*) const
+	void VideoItemLine::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer*) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -116,7 +116,7 @@ namespace VFrame30
 
 	// Weight propertie
 	//
-	double CVideoItemLine::weight() const
+	double VideoItemLine::weight() const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -129,7 +129,7 @@ namespace VFrame30
 		}
 	}
 
-	void CVideoItemLine::setWeight(double weight)
+	void VideoItemLine::setWeight(double weight)
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -144,12 +144,12 @@ namespace VFrame30
 
 	// LineColor propertie
 	//
-	QRgb CVideoItemLine::lineColor() const
+	QRgb VideoItemLine::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void CVideoItemLine::setLineColor(QRgb color)
+	void VideoItemLine::setLineColor(QRgb color)
 	{
 		m_lineColor = color;
 	}

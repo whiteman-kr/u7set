@@ -3,16 +3,16 @@
 
 namespace VFrame30
 {
-	CPosLineImpl::CPosLineImpl(void)
+	PosLineImpl::PosLineImpl(void)
 	{
 		Init();
 	}
 
-	CPosLineImpl::~CPosLineImpl(void)
+	PosLineImpl::~PosLineImpl(void)
 	{
 	}
 
-	void CPosLineImpl::Init()
+	void PosLineImpl::Init()
 	{
 		m_startXDocPt = 0;
 		m_startYDocPt = 0;
@@ -22,9 +22,9 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CPosLineImpl::SaveData(Proto::Envelope* message) const
+	bool PosLineImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CVideoItem::SaveData(message);
+		bool result = VideoItem::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -44,7 +44,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CPosLineImpl::LoadData(const Proto::Envelope& message)
+	bool PosLineImpl::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -54,7 +54,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CVideoItem::LoadData(message);
+		bool result = VideoItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -80,7 +80,7 @@ namespace VFrame30
 
 	// Action Functions
 	//
-	void CPosLineImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
+	void PosLineImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
 	{ 
 		setStartXDocPt(startXDocPt() + horzOffsetDocPt);
 		setStartYDocPt(startYDocPt() + vertOffsetDocPt);
@@ -89,19 +89,19 @@ namespace VFrame30
 		setEndYDocPt(endYDocPt() + vertOffsetDocPt);
 	}
 
-	double CPosLineImpl::GetWidthInDocPt() const
+	double PosLineImpl::GetWidthInDocPt() const
 	{
 		double val = std::abs(m_startXDocPt - m_endXDocPt);
 		return val;
 	}
 
-	double CPosLineImpl::GetHeightInDocPt() const
+	double PosLineImpl::GetHeightInDocPt() const
 	{
 		double val = std::abs(m_startYDocPt - m_endYDocPt);
 		return val;
 	}
 
-	void CPosLineImpl::SetWidthInDocPt(double val)
+	void PosLineImpl::SetWidthInDocPt(double val)
 	{
 		if (val < 0)
 		{
@@ -118,7 +118,7 @@ namespace VFrame30
 		}		
 	}
 
-	void CPosLineImpl::SetHeightInDocPt(double val)
+	void PosLineImpl::SetHeightInDocPt(double val)
 	{
 		if (val < 0)
 		{
@@ -137,7 +137,7 @@ namespace VFrame30
 
 	// Рисование элемента при его создании изменении
 	//
-	void CPosLineImpl::DrawOutline(CDrawParam* drawParam) const
+	void PosLineImpl::DrawOutline(CDrawParam* drawParam) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -168,7 +168,7 @@ namespace VFrame30
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
-	void CPosLineImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
+	void PosLineImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -215,7 +215,7 @@ namespace VFrame30
 		return;
 	}	
 
-	bool CPosLineImpl::IsIntersectRect(double x, double y, double width, double height) const
+	bool PosLineImpl::IsIntersectRect(double x, double y, double width, double height) const
 	{
 		double ax1 = startXDocPt();
 		double ay1 = startYDocPt();
@@ -261,7 +261,7 @@ namespace VFrame30
 		return false;
 	}
 
-	QRectF CPosLineImpl::boundingRectInDocPt() const
+	QRectF PosLineImpl::boundingRectInDocPt() const
 	{
 		QRectF result(
 			std::min(m_startXDocPt, m_endXDocPt), 
@@ -274,45 +274,45 @@ namespace VFrame30
 
 	// IVideoItemPosLine implementation
 	//
-	double CPosLineImpl::startXDocPt() const
+	double PosLineImpl::startXDocPt() const
 	{
 		return m_startXDocPt;
 	}
-	void CPosLineImpl::setStartXDocPt(double value)
+	void PosLineImpl::setStartXDocPt(double value)
 	{
 		m_startXDocPt = value;
 	}
 
-	double CPosLineImpl::startYDocPt() const
+	double PosLineImpl::startYDocPt() const
 	{
 		return m_startYDocPt;
 	}
-	void CPosLineImpl::setStartYDocPt(double value)
+	void PosLineImpl::setStartYDocPt(double value)
 	{
 		m_startYDocPt = value;
 	}
 
-	double CPosLineImpl::endXDocPt() const
+	double PosLineImpl::endXDocPt() const
 	{
 		return m_endXDocPt;
 	}
-	void CPosLineImpl::setEndXDocPt(double value)
+	void PosLineImpl::setEndXDocPt(double value)
 	{
 		m_endXDocPt = value;
 	}
 
-	double CPosLineImpl::endYDocPt() const
+	double PosLineImpl::endYDocPt() const
 	{
 		return m_endYDocPt;
 	}
-	void CPosLineImpl::setEndYDocPt(double value)
+	void PosLineImpl::setEndYDocPt(double value)
 	{
 		m_endYDocPt = value;
 	}
 
 	// Реализация интерефейса IVideoItemPropertiesPos
 	//
-	double CPosLineImpl::left() const 
+	double PosLineImpl::left() const 
 	{
 		double pt = std::min(m_startXDocPt, m_endXDocPt);		// Value in UnitDocPt
 
@@ -328,7 +328,7 @@ namespace VFrame30
 
 		return pt;
 	}
-	void CPosLineImpl::setLeft(double value)
+	void PosLineImpl::setLeft(double value)
 	{
 		double left = std::min(m_startXDocPt, m_endXDocPt);
 
@@ -348,7 +348,7 @@ namespace VFrame30
 		m_endXDocPt = m_endXDocPt + delta;
 	}
 
-	double CPosLineImpl::top() const
+	double PosLineImpl::top() const
 	{
 		double pt = std::min(m_startYDocPt, m_endYDocPt);		// Value in UnitDocPt
 
@@ -364,7 +364,7 @@ namespace VFrame30
 				
 		return pt;
 	}
-	void CPosLineImpl::setTop(double value)
+	void PosLineImpl::setTop(double value)
 	{
 		double top = std::min(m_startYDocPt, m_endYDocPt);
 
@@ -384,7 +384,7 @@ namespace VFrame30
 		m_endYDocPt = m_endYDocPt + delta;
 	}
 
-	double CPosLineImpl::width() const
+	double PosLineImpl::width() const
 	{
 		double pt = std::abs(m_startXDocPt - m_endXDocPt);
 
@@ -400,7 +400,7 @@ namespace VFrame30
 
 		return pt;
 	}
-	void CPosLineImpl::setWidth(double value)
+	void PosLineImpl::setWidth(double value)
 	{
 		double pt = value;
 		if (pt < 0)
@@ -426,7 +426,7 @@ namespace VFrame30
 		}
 	}
 
-	double CPosLineImpl::height() const
+	double PosLineImpl::height() const
 	{
 		double pt = std::abs(m_startYDocPt - m_endYDocPt);
 
@@ -442,7 +442,7 @@ namespace VFrame30
 
 		return pt;	
 	}
-	void CPosLineImpl::setHeight(double value)
+	void PosLineImpl::setHeight(double value)
 	{
 		double pt = value;
 		if (pt < 0)
@@ -468,7 +468,7 @@ namespace VFrame30
 		}
 	}
 
-	std::vector<VideoItemPoint> CPosLineImpl::getPointList() const
+	std::vector<VideoItemPoint> PosLineImpl::getPointList() const
 	{
 		std::vector<VideoItemPoint> v(2);
 
@@ -478,7 +478,7 @@ namespace VFrame30
 		return v;
 	}
 
-	void CPosLineImpl::setPointList(const std::vector<VideoItemPoint>& points)
+	void PosLineImpl::setPointList(const std::vector<VideoItemPoint>& points)
 	{
 		if (points.size() != 2)
 		{

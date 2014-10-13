@@ -5,7 +5,7 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT CVideoFrameDiag : public CVideoFrame
+	class VFRAME30LIBSHARED_EXPORT CVideoFrameDiag : public Scheme
 	{
 		Q_OBJECT
 

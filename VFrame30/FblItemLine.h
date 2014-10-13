@@ -5,19 +5,19 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT CFblItemLine : public CPosConnectionImpl, public FblItem
+	class VFRAME30LIBSHARED_EXPORT FblItemLine : public PosConnectionImpl, public FblItem
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<CFblItemLine>;
+		friend ::Factory<VideoItem>::DerivedType<FblItemLine>;
 #endif
 
 	protected:
-		CFblItemLine(void);
-		CFblItemLine(SchemeUnit itemunit);
+		FblItemLine(void);
+		FblItemLine(SchemeUnit itemunit);
 	public:
-		virtual ~CFblItemLine(void);
+		virtual ~FblItemLine(void);
 		
 	public:
 		

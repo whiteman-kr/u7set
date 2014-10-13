@@ -75,7 +75,7 @@ class EditSchemeView : public VFrame30::VideoFrameView
 
 public:
 	explicit EditSchemeView(QWidget* parent = 0);
-	explicit EditSchemeView(std::shared_ptr<VFrame30::CVideoFrame>& videoFrame, QWidget* parent = nullptr);
+	explicit EditSchemeView(std::shared_ptr<VFrame30::Scheme>& videoFrame, QWidget* parent = nullptr);
 
 	virtual ~EditSchemeView();
 
@@ -97,7 +97,7 @@ protected:
 	// Some determine functions
 	//
 protected:
-	VideoItemAction getPossibleAction(VFrame30::CVideoItem* videoItem, QPointF point, int* outMovingEdgePointIndex);
+	VideoItemAction getPossibleAction(VFrame30::VideoItem* videoItem, QPointF point, int* outMovingEdgePointIndex);
 
 	// Signals
 signals:
@@ -109,23 +109,23 @@ public:
 	// Layer props
 	//
 	QUuid activeLayerGuid() const;
-	std::shared_ptr<VFrame30::CVideoLayer> activeLayer();
-	void setActiveLayer(std::shared_ptr<VFrame30::CVideoLayer> layer);
+	std::shared_ptr<VFrame30::SchemeLayer> activeLayer();
+	void setActiveLayer(std::shared_ptr<VFrame30::SchemeLayer> layer);
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
 
 	// Selection
 	//
-	const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems() const;
-	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items);
-	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::CVideoItem>>& items);
-	void setSelectedItem(const std::shared_ptr<VFrame30::CVideoItem>& item);
-	void addSelection(const std::shared_ptr<VFrame30::CVideoItem>& item);
+	const std::vector<std::shared_ptr<VFrame30::VideoItem>>& selectedItems() const;
+	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
+	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::VideoItem>>& items);
+	void setSelectedItem(const std::shared_ptr<VFrame30::VideoItem>& item);
+	void addSelection(const std::shared_ptr<VFrame30::VideoItem>& item);
 
 	void clearSelection();
-	bool removeFromSelection(const std::shared_ptr<VFrame30::CVideoItem>& item);
-	bool isItemSelected(const std::shared_ptr<VFrame30::CVideoItem>& item);
+	bool removeFromSelection(const std::shared_ptr<VFrame30::VideoItem>& item);
+	bool isItemSelected(const std::shared_ptr<VFrame30::VideoItem>& item);
 
 	// Data
 	//
@@ -134,8 +134,8 @@ private:
 	MouseState m_mouseState;
 
 protected:
-	std::shared_ptr<VFrame30::CVideoItem> m_newItem;
-	std::vector<std::shared_ptr<VFrame30::CVideoItem>> m_selectedItems;
+	std::shared_ptr<VFrame30::VideoItem> m_newItem;
+	std::vector<std::shared_ptr<VFrame30::VideoItem>> m_selectedItems;
 
 	// Selection area variables
 	//
@@ -184,7 +184,7 @@ private:
 	EditSchemeWidget();			// deleted;
 
 public:
-	explicit EditSchemeWidget(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo);
+	explicit EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo);
 	virtual ~EditSchemeWidget();
 	
 protected:
@@ -249,7 +249,7 @@ public:
 protected:
 	bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
 
-	void addItem(std::shared_ptr<VFrame30::CVideoItem> newItem);
+	void addItem(std::shared_ptr<VFrame30::VideoItem> newItem);
 
 	void setMouseCursor(QPoint mousePos);
 
@@ -293,13 +293,13 @@ protected slots:
 	// Properties
 	//
 public:
-	std::shared_ptr<VFrame30::CVideoFrame>& videoFrame();
-	std::shared_ptr<VFrame30::CVideoFrame>& videoFrame() const;
-	void setVideoFrame(std::shared_ptr<VFrame30::CVideoFrame>& videoFrame);
+	std::shared_ptr<VFrame30::Scheme>& videoFrame();
+	std::shared_ptr<VFrame30::Scheme>& videoFrame() const;
+	void setVideoFrame(std::shared_ptr<VFrame30::Scheme>& videoFrame);
 
-	std::shared_ptr<VFrame30::CVideoLayer> activeLayer();
+	std::shared_ptr<VFrame30::SchemeLayer> activeLayer();
 
-	const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems() const;
+	const std::vector<std::shared_ptr<VFrame30::VideoItem>>& selectedItems() const;
 
 	EditSchemeView* schemeView();
 	const EditSchemeView* schemeView() const;

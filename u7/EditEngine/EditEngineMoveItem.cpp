@@ -9,7 +9,7 @@ namespace EditEngine
 			EditSchemeView* videoFrameView,
 			double xdiff,
 			double ydiff,
-			const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items,
+			const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
 		EditCommand(videoFrameView, hScrollBar, vScrollBar)
@@ -29,7 +29,7 @@ namespace EditEngine
 		videoFrameView->setSelectedItems(m_items);
 
 		std::for_each(m_items.begin(), m_items.end(),
-			[this](const std::shared_ptr<VFrame30::CVideoItem>& item)
+			[this](const std::shared_ptr<VFrame30::VideoItem>& item)
 			{
 				item->MoveItem(m_xdiff, m_ydiff);
 			}
@@ -43,7 +43,7 @@ namespace EditEngine
 		videoFrameView->setSelectedItems(m_items);
 
 		std::for_each(m_items.begin(), m_items.end(),
-			[this](const std::shared_ptr<VFrame30::CVideoItem>& item)
+			[this](const std::shared_ptr<VFrame30::VideoItem>& item)
 			{
 				item->MoveItem(-m_xdiff, -m_ydiff);
 			}

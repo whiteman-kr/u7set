@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VideoLayer.h"
+#include "SchemeLayer.h"
 #include "../include/TypesAndEnums.h"
 
 namespace VFrame30
@@ -8,24 +8,24 @@ namespace VFrame30
 	class CDrawParam;
 	class VideoFrameWidgetAgent;
 	
-	class VFRAME30LIBSHARED_EXPORT CVideoFrame : 
+	class VFRAME30LIBSHARED_EXPORT Scheme :
 		public QObject,
-		public Proto::ObjectSerialization<CVideoFrame>,
-		public DebugInstCounter<CVideoFrame>
+		public Proto::ObjectSerialization<Scheme>,
+		public DebugInstCounter<Scheme>
 	{
 		Q_OBJECT
 	
 	protected:
-		CVideoFrame(void);
+		Scheme(void);
 	
 	public:
-		virtual ~CVideoFrame(void);
+		virtual ~Scheme(void);
 
 		void Init(void);
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<CVideoFrame>;
+		friend Proto::ObjectSerialization<Scheme>;
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -35,7 +35,7 @@ namespace VFrame30
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должен прочитаться
 		//
-		static CVideoFrame* CreateObject(const Proto::Envelope& message);
+		static Scheme* CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//
@@ -44,7 +44,7 @@ namespace VFrame30
 		void Print();
 
 		virtual void MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
-		void RunClickScript(const std::shared_ptr<CVideoItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
+		void RunClickScript(const std::shared_ptr<VideoItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
 
 		// Получить размер документа в точка
 		//
@@ -80,7 +80,7 @@ namespace VFrame30
 		void setUnit(SchemeUnit value);
 		
 	public:
-		std::vector<std::shared_ptr<CVideoLayer>> Layers;
+		std::vector<std::shared_ptr<SchemeLayer>> Layers;
 
 	private:
 		QUuid m_guid;
@@ -97,23 +97,23 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT VideoFrameSharedPtr
 	{
 	public:
-		VideoFrameSharedPtr(const std::shared_ptr<CVideoFrame>& sp) : m_sp(sp)
+		VideoFrameSharedPtr(const std::shared_ptr<Scheme>& sp) : m_sp(sp)
 		{
 		}
 
-		std::shared_ptr<CVideoFrame> get()
+		std::shared_ptr<Scheme> get()
 		{
 			return m_sp;
 		}
 		
 	private:
-		std::shared_ptr<CVideoFrame> m_sp;
+		std::shared_ptr<Scheme> m_sp;
 	};
 
 
 
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::CVideoFrame> VideoFrameFactory;
+	extern Factory<VFrame30::Scheme> VideoFrameFactory;
 #endif
 }
 

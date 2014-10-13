@@ -3,11 +3,11 @@
 
 namespace VFrame30
 {
-	CFblItemLine::CFblItemLine(void)
+	FblItemLine::FblItemLine(void)
 	{
 	}
 
-	CFblItemLine::CFblItemLine(SchemeUnit unit) :
+	FblItemLine::FblItemLine(SchemeUnit unit) :
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0xC0))
 	{
@@ -15,15 +15,15 @@ namespace VFrame30
 		m_static = false;
 	}
 
-	CFblItemLine::~CFblItemLine(void)
+	FblItemLine::~FblItemLine(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool CFblItemLine::SaveData(Proto::Envelope* message) const
+	bool FblItemLine::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CPosConnectionImpl::SaveData(message);
+		bool result = PosConnectionImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -47,7 +47,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItemLine::LoadData(const Proto::Envelope& message)
+	bool FblItemLine::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -57,7 +57,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CPosConnectionImpl::LoadData(message);
+		bool result = PosConnectionImpl::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -87,14 +87,14 @@ namespace VFrame30
 
 	// Properties and Data
 	//
-	bool CFblItemLine::IsFblItem() const
+	bool FblItemLine::IsFblItem() const
 	{
 		return true;
 	}
 
 	// Weight propertie
 	//
-	double CFblItemLine::weight() const
+	double FblItemLine::weight() const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -107,7 +107,7 @@ namespace VFrame30
 		}
 	}
 
-	void CFblItemLine::setWeight(double weight)
+	void FblItemLine::setWeight(double weight)
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -122,12 +122,12 @@ namespace VFrame30
 
 	// LineColor propertie
 	//
-	QRgb CFblItemLine::lineColor() const
+	QRgb FblItemLine::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void CFblItemLine::setLineColor(QRgb color)
+	void FblItemLine::setLineColor(QRgb color)
 	{
 		m_lineColor = color;
 	}

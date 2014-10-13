@@ -4,29 +4,29 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT CVideoLayer : 
+	class VFRAME30LIBSHARED_EXPORT SchemeLayer :
 		public QObject,
-		public Proto::ObjectSerialization<CVideoLayer>,
-		public DebugInstCounter<CVideoLayer>
+		public Proto::ObjectSerialization<SchemeLayer>,
+		public DebugInstCounter<SchemeLayer>
 	{
 		Q_OBJECT
 
 	public:
-		CVideoLayer(void);
-		CVideoLayer(const QString& name, bool compile);
-		virtual ~CVideoLayer(void);
+		SchemeLayer(void);
+		SchemeLayer(const QString& name, bool compile);
+		virtual ~SchemeLayer(void);
 
 	private:
 		void Init(const QString& name, bool compile);
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<CVideoLayer>;
+		friend Proto::ObjectSerialization<SchemeLayer>;
 
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должне прочитаться
-		static CVideoLayer* CreateObject(const Proto::Envelope& message);
+		static SchemeLayer* CreateObject(const Proto::Envelope& message);
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -41,8 +41,8 @@ namespace VFrame30
 		void ConnectionMapPosInc(VideoItemPoint pinPos);
 		int GetPinPosConnectinCount(VideoItemPoint pinPos) const;
 
-		std::shared_ptr<CVideoItem> getItemUnderPoint(QPointF point) const;
-		std::list<std::shared_ptr<CVideoItem>> getItemListInRectangle(const QRectF& rect) const;
+		std::shared_ptr<VideoItem> getItemUnderPoint(QPointF point) const;
+		std::list<std::shared_ptr<VideoItem>> getItemListInRectangle(const QRectF& rect) const;
 
 		// Properties
 		//
@@ -67,7 +67,7 @@ namespace VFrame30
 	public:
 		// Элементы слоя 
 		//
-		std::list<std::shared_ptr<CVideoItem>> Items;
+		std::list<std::shared_ptr<VideoItem>> Items;
 
 		// Таблица координат всех пинов, значением является количество координат лежащих на точке
 		//
@@ -82,7 +82,7 @@ namespace VFrame30
 	};
 
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::CVideoLayer> VideoLayerFactory;
+	extern Factory<VFrame30::SchemeLayer> VideoLayerFactory;
 #endif
 
 }

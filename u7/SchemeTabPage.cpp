@@ -93,7 +93,7 @@ void SchemesTabPage::projectClosed()
 
 SchemeControlTabPage::SchemeControlTabPage(const QString& fileExt,
 		DbController* dbcontroller, const QString& parentFileName,
-		std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc) :
+		std::function<VFrame30::Scheme*()> createVideoFrameFunc) :
 
 	HasDbController(dbcontroller),
 	m_createVideoFrameFunc(createVideoFrameFunc)
@@ -129,7 +129,7 @@ SchemeControlTabPage::~SchemeControlTabPage()
 {
 }
 
-VFrame30::CVideoFrame* SchemeControlTabPage::createVideoFrame() const
+VFrame30::Scheme* SchemeControlTabPage::createVideoFrame() const
 {
 	return m_createVideoFrameFunc();
 }
@@ -175,7 +175,7 @@ void SchemeControlTabPage::addFile()
 
 	// Create new videoframe and add it to the vcs
 	//
-	std::shared_ptr<VFrame30::CVideoFrame> vf(m_createVideoFrameFunc());
+	std::shared_ptr<VFrame30::Scheme> vf(m_createVideoFrameFunc());
 
 	vf->setGuid(QUuid::createUuid());
 
@@ -323,7 +323,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	// Load file
 	//
-	std::shared_ptr<VFrame30::CVideoFrame> vf(VFrame30::CVideoFrame::Create(out[0].get()->data()));
+	std::shared_ptr<VFrame30::Scheme> vf(VFrame30::Scheme::Create(out[0].get()->data()));
 
 	if (vf == nullptr)
 	{
@@ -393,7 +393,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Load file
 	//
-	std::shared_ptr<VFrame30::CVideoFrame> vf(VFrame30::CVideoFrame::Create(out[0].get()->data()));
+	std::shared_ptr<VFrame30::Scheme> vf(VFrame30::Scheme::Create(out[0].get()->data()));
 
 	QString tabPageTitle;
 	tabPageTitle = QString("%1: %2 ReadOnly").arg(vf->strID()).arg(changesetId);
@@ -449,7 +449,7 @@ const DbFileInfo& SchemeControlTabPage::parentFile() const
 // EditVideoFrameTabPage
 //
 //
-EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller) :
+EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller) :
 	HasDbController(dbcontroller),
 	m_videoFrameWidget(nullptr)
 {

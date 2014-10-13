@@ -5,12 +5,12 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT FblItemRect : public CPosRectImpl, public FblItem
+	class VFRAME30LIBSHARED_EXPORT FblItemRect : public PosRectImpl, public FblItem
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<FblItemRect>;
+		friend ::Factory<VideoItem>::DerivedType<FblItemRect>;
 #endif
 
 	protected:
@@ -32,7 +32,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const CVideoFrame* pFrame, const CVideoLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
 
 		// Вычислить координаты точки
 		//

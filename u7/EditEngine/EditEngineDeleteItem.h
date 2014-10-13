@@ -11,8 +11,8 @@ namespace EditEngine
 	public:
 		DeleteItemCommand(
 			EditSchemeView* videoFrameView,
-			std::vector<std::shared_ptr<VFrame30::CVideoItem>> items,
-			std::shared_ptr<VFrame30::CVideoLayer> layer,
+			std::vector<std::shared_ptr<VFrame30::VideoItem>> items,
+			std::shared_ptr<VFrame30::SchemeLayer> layer,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar);
 
@@ -23,11 +23,11 @@ namespace EditEngine
 		// Data
 		//
 	private:
-		std::vector<std::shared_ptr<VFrame30::CVideoItem>> m_items;				// Items for delete operation
-		std::vector<std::shared_ptr<VFrame30::CVideoItem>> m_prevOrder;			// Item's order in the layer before delete
-		std::vector<std::shared_ptr<VFrame30::CVideoItem>> m_selectedItems;
+		std::vector<std::shared_ptr<VFrame30::VideoItem>> m_items;				// Items for delete operation
+		std::vector<std::shared_ptr<VFrame30::VideoItem>> m_prevOrder;			// Item's order in the layer before delete
+		std::vector<std::shared_ptr<VFrame30::VideoItem>> m_selectedItems;
 
-		std::shared_ptr<VFrame30::CVideoLayer> m_layer;
+		std::shared_ptr<VFrame30::SchemeLayer> m_layer;
 	};
 
 }

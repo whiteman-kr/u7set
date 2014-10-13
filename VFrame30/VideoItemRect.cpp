@@ -3,14 +3,14 @@
 
 namespace VFrame30
 {
-	CVideoItemRect::CVideoItemRect(void)
+	VideoItemRect::VideoItemRect(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemRect::CVideoItemRect(SchemeUnit unit) : 
+	VideoItemRect::VideoItemRect(SchemeUnit unit) : 
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00)),
 		m_fillColor(qRgb(0xC0, 0xC0, 0xC0)),
@@ -38,15 +38,15 @@ namespace VFrame30
 		setItemUnit(unit);
 	}
 
-	CVideoItemRect::~CVideoItemRect(void)
+	VideoItemRect::~VideoItemRect(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool CVideoItemRect::SaveData(Proto::Envelope* message) const
+	bool VideoItemRect::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CPosRectImpl::SaveData(message);
+		bool result = PosRectImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -71,7 +71,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemRect::LoadData(const Proto::Envelope& message)
+	bool VideoItemRect::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -81,7 +81,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CPosRectImpl::LoadData(message);
+		bool result = PosRectImpl::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -115,7 +115,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void CVideoItemRect::Draw(CDrawParam* drawParam, const CVideoFrame*, const CVideoLayer*) const
+	void VideoItemRect::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer*) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -189,11 +189,11 @@ namespace VFrame30
 
 	// Properties and Data
 	//
-	IMPLEMENT_FONT_PROPERTIES(CVideoItemRect, Font, m_font);
+	IMPLEMENT_FONT_PROPERTIES(VideoItemRect, Font, m_font);
 
 	// Weight property
 	//
-	double CVideoItemRect::weight() const
+	double VideoItemRect::weight() const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -206,7 +206,7 @@ namespace VFrame30
 		}
 	}
 
-	void CVideoItemRect::setWeight(double weight)
+	void VideoItemRect::setWeight(double weight)
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -221,65 +221,65 @@ namespace VFrame30
 
 	// LineColor property
 	//
-	QRgb CVideoItemRect::lineColor() const
+	QRgb VideoItemRect::lineColor() const
 	{
 		return m_lineColor;
 	}
-	void CVideoItemRect::setLineColor(QRgb color)
+	void VideoItemRect::setLineColor(QRgb color)
 	{
 		m_lineColor = color;
 	}
 
 	// FillColor property
 	//
-	QRgb CVideoItemRect::fillColor() const
+	QRgb VideoItemRect::fillColor() const
 	{
 		return m_fillColor;
 	}
-	void CVideoItemRect::setFillColor(QRgb color)
+	void VideoItemRect::setFillColor(QRgb color)
 	{
 		m_fillColor = color;
 	}
 
 	// Fill property
 	//
-	bool CVideoItemRect::fill() const
+	bool VideoItemRect::fill() const
 	{
 		return m_fill;
 	}
-	void CVideoItemRect::setFill(bool fill)
+	void VideoItemRect::setFill(bool fill)
 	{
 		m_fill = fill;
 	}
 
 	// Text property
 	//
-	const QString& CVideoItemRect::text() const
+	const QString& VideoItemRect::text() const
 	{
 		return m_text;
 	}
-	void CVideoItemRect::setText(QString& value)
+	void VideoItemRect::setText(QString& value)
 	{
 		m_text = value;
 	}
 
 	// TextColor property
 	//
-	QRgb CVideoItemRect::textColor() const
+	QRgb VideoItemRect::textColor() const
 	{
 		return m_textColor;
 	}
-	void CVideoItemRect::setTextColor(QRgb color)
+	void VideoItemRect::setTextColor(QRgb color)
 	{
 		m_textColor = color;
 	}
 
-	bool CVideoItemRect::drawRect() const
+	bool VideoItemRect::drawRect() const
 	{
 		return m_drawRect;
 	}
 
-	void CVideoItemRect::setDrawRect(bool value)
+	void VideoItemRect::setDrawRect(bool value)
 	{
 		m_drawRect = value;
 	}

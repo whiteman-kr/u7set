@@ -44,7 +44,6 @@ OTHER_FILES += \
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
-    VideoLayer.h \
     VideoItem.h \
     VideoItemSignal.h \
     VideoItemRect.h \
@@ -83,9 +82,10 @@ HEADERS += VFrame30Lib_global.h \
     VFrame30.h \
     ../include/StreamedData.h \
     ../include/ProtoSerialization.h \
-    ../include/CUtils.h
+    ../include/CUtils.h \
+    SchemeLayer.h
 
-SOURCES += VideoLayer.cpp \
+SOURCES += \
     VideoItem.cpp \
     VideoItemSignal.cpp \
     VideoItemRect.cpp \
@@ -121,7 +121,8 @@ SOURCES += VideoLayer.cpp \
 	Configuration.cpp \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/CUtils.cpp
+    ../lib/CUtils.cpp \
+    SchemeLayer.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 #CONFIG(debug, debug|release): DEFINES += DEBUG

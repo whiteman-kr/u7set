@@ -6,7 +6,7 @@
 
 namespace VFrame30
 {
-	class CVideoFrame;
+	class Scheme;
 	class VideoFrameView;
 	class VideoFrameManager;
 
@@ -23,7 +23,7 @@ namespace VFrame30
 		VideoFrameBaseWidget();	// DELETED
 
 	public:
-		explicit VideoFrameBaseWidget(std::shared_ptr<CVideoFrame> videoFrame);
+		explicit VideoFrameBaseWidget(std::shared_ptr<Scheme> videoFrame);
 		virtual ~VideoFrameBaseWidget();
 
 	protected:
@@ -36,9 +36,9 @@ namespace VFrame30
 		// Methods
 		//
 	protected:
-		std::shared_ptr<CVideoFrame>& videoFrame();
+		std::shared_ptr<Scheme>& videoFrame();
 
-		void setVideoFrame(std::shared_ptr<CVideoFrame>& videoFrame);
+		void setVideoFrame(std::shared_ptr<Scheme>& videoFrame);
 
 		VideoFrameView* videoFrameView();
 

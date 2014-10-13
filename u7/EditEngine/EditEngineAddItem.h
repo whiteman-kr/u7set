@@ -9,7 +9,7 @@ namespace EditEngine
 	{
 		AddItemCommand();		// deleted;
 	public:
-		AddItemCommand(EditSchemeView* videoFrameView, std::list<std::shared_ptr<VFrame30::CVideoItem>> items, std::shared_ptr<VFrame30::CVideoLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		AddItemCommand(EditSchemeView* videoFrameView, std::list<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	protected:
 		virtual void executeCommand(EditSchemeView* videoFrameView) override;
@@ -18,9 +18,9 @@ namespace EditEngine
 		// Data
 		//
 	private:
-		std::list<std::shared_ptr<VFrame30::CVideoItem>> m_items;
-		std::vector<std::shared_ptr<VFrame30::CVideoItem>> m_selectedItems;
-		std::shared_ptr<VFrame30::CVideoLayer> m_layer;
+		std::list<std::shared_ptr<VFrame30::VideoItem>> m_items;
+		std::vector<std::shared_ptr<VFrame30::VideoItem>> m_selectedItems;
+		std::shared_ptr<VFrame30::SchemeLayer> m_layer;
 	};
 
 }

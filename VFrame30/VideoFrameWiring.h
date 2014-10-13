@@ -5,7 +5,7 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT CVideoFrameWiring : public CVideoFrame
+	class VFRAME30LIBSHARED_EXPORT CVideoFrameWiring : public Scheme
 	{
 		Q_OBJECT
 
