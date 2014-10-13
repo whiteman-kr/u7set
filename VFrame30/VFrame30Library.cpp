@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "VFrame30Library.h"
-#include "VideoFrame.h"
+#include "Scheme.h"
 #include "VideoFrameDiag.h"
 #include "VideoFrameLogic.h"
 #include "VideoFrameTech.h"

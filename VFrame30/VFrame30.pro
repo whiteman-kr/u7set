@@ -66,7 +66,6 @@ HEADERS += VFrame30Lib_global.h \
     FblConnectionsImpl.h \
     Fbl.h \
     DrawParam.h \
-    VideoFrame.h \
     Print.h \
     VFrame30Library.h \
     HorzVertLinks.h \
@@ -83,7 +82,8 @@ HEADERS += VFrame30Lib_global.h \
     ../include/StreamedData.h \
     ../include/ProtoSerialization.h \
     ../include/CUtils.h \
-    SchemeLayer.h
+    SchemeLayer.h \
+    Scheme.h
 
 SOURCES += \
     VideoItem.cpp \
@@ -107,7 +107,6 @@ SOURCES += \
     FblItem.cpp \
     Fbl.cpp \
     DrawParam.cpp \
-    VideoFrame.cpp \
     Print.cpp \
     Stable.cpp \
     VFrame30Library.cpp \
@@ -122,7 +121,8 @@ SOURCES += \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/CUtils.cpp \
-    SchemeLayer.cpp
+    SchemeLayer.cpp \
+    Scheme.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 #CONFIG(debug, debug|release): DEFINES += DEBUG

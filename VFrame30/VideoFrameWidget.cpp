@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "VideoFrameManager.h"
 #include "VideoFrameWidget.h"
-#include "VideoFrame.h"
+#include "Scheme.h"
 #include "VideoFrameView.h"
 
 namespace VFrame30
