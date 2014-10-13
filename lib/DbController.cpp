@@ -62,6 +62,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
 	connect(this, &DbController::signal_deleteSignal, m_worker, &DbWorker::slot_deleteSignal);
 	connect(this, &DbController::signal_undoSignalChanges, m_worker, &DbWorker::slot_undoSignalChanges);
+	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
 
 	m_thread.start();
 }
@@ -1239,6 +1240,37 @@ bool DbController::undoSignalChanges(int signalID, ObjectState* objectState, QWi
 	emit signal_undoSignalChanges(signalID, objectState);
 
 	ok = waitForComplete(parentWidget, tr("Undo signal changes"));
+
+	return ok;
+}
+
+
+bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_checkinSignals(signalIDs, comment, objectState);
+
+	ok = waitForComplete(parentWidget, tr("Checkin signals"));
 
 	return ok;
 }

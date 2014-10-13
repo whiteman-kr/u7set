@@ -3430,6 +3430,75 @@ void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 }
 
 
+void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState)
+{
+	AUTO_COMPLETE
+
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return;
+	}
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return;
+	}
+
+	objectState->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot checkin signals. Database connection is not opened."));
+		return;
+	}
+
+	int count = signalIDs->count();
+
+	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
+		.arg(currentUser().userId());
+
+
+	for(int i=0; i < count; i++)
+	{
+		if (i < count-1)
+		{
+			request += QString("%1,").arg(signalIDs->at(i));
+		}
+		else
+		{
+			request += QString("%1],").arg(signalIDs->at(i));
+		}
+	}
+
+	request += QString("'%1')").arg(comment);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't checkin signals! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next())
+	{
+		ObjectState os;
+
+		getObjectState(q, os);
+
+		objectState->append(os);
+	}
+}
+
+
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 {
 	if (user == nullptr)

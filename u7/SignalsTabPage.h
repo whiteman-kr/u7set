@@ -3,12 +3,14 @@
 #include "MainTabPage.h"
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
+#include <QSortFilterProxyModel>
 #include "../include/Signal.h"
 
 class DbController;
 class QTableView;
 class QMenu;
 class SignalsModel;
+class QToolBar;
 
 
 class SignalsDelegate : public QStyledItemDelegate
@@ -54,11 +56,12 @@ public:
 
 	SignalsDelegate* createDelegate() { return new SignalsDelegate(m_dataFormatInfo, m_unitInfo, m_signalSet, this, parent()); }
 
-	void loadSignals();
 	void clearSignals();
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
-	int key(int row) { return m_signalSet.key(row); }
+	int key(int row) const { return m_signalSet.key(row); }
+	const Signal& signal(int row) const { return m_signalSet[row]; }
+	bool isEditableSignal(int row);
 
 	DbController* dbController();
 	QWidget* parrentWindow() { return m_parentWindow; }
@@ -69,8 +72,10 @@ public:
 
 signals:
 	void cellsSizeChanged();
+	void setCheckedoutSignalActionsVisibility(bool state);
 
 public slots:
+	void loadSignals();
 	void addSignal();
 
 private:
@@ -87,6 +92,26 @@ private:
 	QString getUnitStr(int unitID) const;
 	QString getSensorStr(int sensorID) const;
 	QString getUserStr(int userID) const;
+
+	void changeCheckedoutSignalActionsVisibility();
+};
+
+
+class CheckedoutSignalsModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+public:
+	CheckedoutSignalsModel(SignalsModel* sourceModel, QObject* parent = 0);
+
+	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
+	Qt::ItemFlags flags(const QModelIndex & index) const override;
+
+	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+
+private:
+	SignalsModel* m_sourceModel;
+	QVector<Qt::CheckState> states;
 };
 
 
@@ -99,18 +124,28 @@ public:
 	virtual ~SignalsTabPage();
 
 protected:
-	void CreateActions();
+	void CreateActions(QToolBar* toolBar);
 
 	// Events
 	//
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
 
+signals:
+	void setSignalActionsVisibility(bool state);
+
 public slots:
 	void projectOpened();
 	void projectClosed();
+
 	void editSignal();
 	void deleteSignal();
+
+	QVector<int> getSelectedSignalsID();
+	void undoSignals();
+	void checkinSignals();
+
+	void changeSignalActionsVisibility();
 
 	// Data
 	//

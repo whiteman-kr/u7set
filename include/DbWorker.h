@@ -118,6 +118,8 @@ public slots:
 	void slot_deleteSignal(int signalID, ObjectState* objectState);
 	void slot_undoSignalChanges(int signalID, ObjectState* objectState);
 
+	void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
+
 	// Service
 	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);
