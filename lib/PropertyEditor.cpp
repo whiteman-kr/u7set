@@ -1,4 +1,5 @@
 #include "../include/PropertyEditor.h"
+//#include "PropertyEditor.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -397,6 +398,22 @@ QVariant QtMultiVariantPropertyManager::value(const QtProperty* property) const
 	return it.value().value;
 }
 
+QSet<QtProperty*> QtMultiVariantPropertyManager::propertyByName(const QString& propertyName)
+{
+	QSet<QtProperty*> result;
+	QSet<QtProperty*> allProps = properties();
+
+	for (auto p : allProps)
+	{
+		if (p->propertyName() == propertyName)
+		{
+			result << p;
+			return result;
+		}
+	}
+	return result;
+}
+
 void QtMultiVariantPropertyManager::setValue(QtProperty* property, const QVariant& value)
 {
 	const QMap<const QtProperty*, Data>::iterator it = values.find(property);
@@ -507,8 +524,6 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 PropertyEditor::PropertyEditor(QWidget* parent) :
 	QtTreePropertyBrowser(parent)
 {
-	//m_propertyEditor = new QtTreePropertyBrowser(parent);
-
 	m_propertyGroupManager = new QtGroupPropertyManager(this);
 	m_propertyStringManager = new QtMultiVariantPropertyManager(this, QVariant::String);
 	m_propertyIntManager = new QtMultiVariantPropertyManager(this, QVariant::Int);
@@ -553,9 +568,9 @@ void PropertyEditor::onCurrentItemChanged(QtBrowserItem* current)
 }
 
 
-void PropertyEditor::setObjects(QList<std::shared_ptr<QObject>>& objects)
+void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 {
-	clearObjects();
+	clearProperties();
 
 	QMap<QString, PropertyItem> propertyItems;
 	QList<QString> propertyNames;
@@ -580,7 +595,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject>>& objects)
 
 			PropertyItem pi;
 
-			pi.object = object;
+			pi.object = *pobject;
 			pi.type = metaProperty.type();
 			pi.value = object->property(name);
 
@@ -713,58 +728,92 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject>>& objects)
 	return;
 }
 
-void PropertyEditor::updateObjects()
+void PropertyEditor::updateProperties(const QString& propertyName)
 {
+	QSet<QtProperty*> props;
 	QMap<QtProperty*, QVariant> vals;
 
 	//m_propertyIntManager
 
-	QSet<QtProperty*> props = m_propertyIntManager->properties();
-	createValuesMap(m_propertyIntManager, m_propertyIntManager->type(), vals);
+	if (propertyName.isEmpty() == true)
+	{
+		props = m_propertyIntManager->properties();
+	}
+	else
+	{
+		props = m_propertyIntManager->propertyByName(propertyName);
+	}
+
+	createValuesMap(props, vals);
 
 	for (auto p : props)
 	{
 		m_propertyIntManager->setValue(p, vals.value(p));
 	}
 
-
 	//m_propertyBoolManager
 
-	props = m_propertyBoolManager->properties();
-	createValuesMap(m_propertyBoolManager, m_propertyBoolManager->type(), vals);
-
-	for (auto p = props.begin(); p != props.end(); p++)
+	if (propertyName.isEmpty() == true)
 	{
-		m_propertyBoolManager->setValue(*p, vals.value(*p));
+		props = m_propertyBoolManager->properties();
+	}
+	else
+	{
+		props = m_propertyBoolManager->propertyByName(propertyName);
 	}
 
+	createValuesMap(props, vals);
+
+	for (auto p : props)
+	{
+		m_propertyBoolManager->setValue(p, vals.value(p));
+	}
 
 	//m_propertyDoubleManager
 
-	props = m_propertyDoubleManager->properties();
-	createValuesMap(m_propertyDoubleManager, m_propertyDoubleManager->type(), vals);
-
-	for (auto p = props.begin(); p != props.end(); p++)
+	if (propertyName.isEmpty() == true)
 	{
-		m_propertyDoubleManager->setValue(*p, vals.value(*p));
+		props = m_propertyDoubleManager->properties();
+	}
+	else
+	{
+		props = m_propertyDoubleManager->propertyByName(propertyName);
+	}
+
+	createValuesMap(props, vals);
+
+	for (auto p : props)
+	{
+		m_propertyDoubleManager->setValue(p, vals.value(p));
 	}
 
 	//m_propertyStringManager
 
-	props = m_propertyStringManager->properties();
-	createValuesMap(m_propertyStringManager, m_propertyStringManager->type(), vals);
-
-	for (auto p = props.begin(); p != props.end(); p++)
+	if (propertyName.isEmpty() == true)
 	{
-		m_propertyStringManager->setValue(*p, vals.value(*p));
+		props = m_propertyStringManager->properties();
+	}
+	else
+	{
+		props = m_propertyStringManager->propertyByName(propertyName);
+	}
+
+	createValuesMap(props, vals);
+
+	for (auto p : props)
+	{
+		m_propertyStringManager->setValue(p, vals.value(p));
 	}
 }
 
-void PropertyEditor::createValuesMap(QtAbstractPropertyManager* manager, QVariant::Type type, QMap<QtProperty*, QVariant>& values)
+void PropertyEditor::updateProperties()
+{
+	updateProperties(QString());
+}
+
+void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values)
 {
 	values.clear();
-
-	QSet<QtProperty*> props = manager->properties();
 
 	for (auto p = props.begin(); p != props.end(); p++)
 	{
@@ -773,10 +822,10 @@ void PropertyEditor::createValuesMap(QtAbstractPropertyManager* manager, QVarian
 		bool sameValue = true;
 		QVariant value;
 
-		QList<QObject*> objects = m_propToClassMap.values(property->propertyName());
+		QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
 		for (auto i = objects.begin(); i != objects.end(); i++)
 		{
-			QObject* pObject = *i;
+			std::shared_ptr<QObject> pObject = *i;
 			QMetaProperty metaProperty;
 			if (propertyByName(pObject, property->propertyName(), metaProperty) == false)
 			{
@@ -784,9 +833,9 @@ void PropertyEditor::createValuesMap(QtAbstractPropertyManager* manager, QVarian
 				continue;
 			}
 
-			QVariant val = metaProperty.read(pObject);
+			QVariant val = metaProperty.read(pObject.get());
 
-			if (type == QVariant::Bool)
+			if (metaProperty.type() == QVariant::Bool)
 			{
 				if (val == true)
 				{
@@ -823,7 +872,7 @@ void PropertyEditor::createValuesMap(QtAbstractPropertyManager* manager, QVarian
 	}
 }
 
-void PropertyEditor::clearObjects()
+void PropertyEditor::clearProperties()
 {
 	clear();
 	m_propToClassMap.clear();
@@ -833,16 +882,16 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 {
 	// Set the new property value in all objects
 	//
-	QList<QObject*> objects = m_propToClassMap.values(property->propertyName());
+	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
 
 	QString errorString;
 	QMetaProperty writeProperty;
 
 	for (auto i = objects.begin(); i != objects.end(); i++)
 	{
-		QObject* pObject = *i;
+		QObject* pObject = i->get();
 
-		if (propertyByName(pObject, property->propertyName(), writeProperty) == false)
+		if (propertyByName(*i, property->propertyName(), writeProperty) == false)
 		{
 			Q_ASSERT(false);
 			continue;
@@ -867,6 +916,7 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 
 	if (errorString.isEmpty() == false)
 	{
+		updateProperties();
 		emit showErrorMessage(errorString);
 	}
 
@@ -875,7 +925,7 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 	return;
 }
 
-bool PropertyEditor::propertyByName(const QObject* object, const QString& name, QMetaProperty& metaProperty)
+bool PropertyEditor::propertyByName(const std::shared_ptr<QObject>& object, const QString& name, QMetaProperty& metaProperty)
 {
 	const QMetaObject* metaObject = object->metaObject();
 
@@ -891,23 +941,5 @@ bool PropertyEditor::propertyByName(const QObject* object, const QString& name, 
 
 void PropertyEditor::onShowErrorMessage(QString message)
 {
-//	QMessageBox::warning(this, "Error", message);
+	QMessageBox::warning(this, "Error", message);
 }
-/*
-void PropertyEditor::resizeEvent(QResizeEvent * event)
-{
-	if (m_propertyEditor != nullptr)
-	{
-		m_propertyEditor->resize(event->size());
-	}
-}
-
-void PropertyEditor::moveEvent(QMoveEvent * event)
-{
-	if (m_propertyEditor != nullptr)
-	{
-		m_propertyEditor->move(event->pos());
-	}
-
-}
-*/

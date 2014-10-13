@@ -1694,13 +1694,13 @@ void EquipmentTabPage::setProperties()
 	return;
 }
 
-void EquipmentTabPage::propertiesChanged(QObjectList objects)
+void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<QObject>> objects)
 {
 	std::vector<std::shared_ptr<DbFile>> files;
 
 	for (auto& o : objects)
 	{
-		Hardware::DeviceObject* device = dynamic_cast<Hardware::DeviceObject*>(o);
+		Hardware::DeviceObject* device = dynamic_cast<Hardware::DeviceObject*>(o.get());
 
 		if (device == nullptr)
 		{

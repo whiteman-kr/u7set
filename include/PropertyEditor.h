@@ -10,6 +10,7 @@
 #include <QtVariantPropertyManager>
 #include "../qtpropertybrowser/src/qteditorfactory.h"
 #include <memory>
+#include <QSet>
 
 class QtTreePropertyBrowser;
 class QtProperty;
@@ -119,6 +120,8 @@ public:
 
 	QVariant value(const QtProperty* property) const;
 
+	QSet<QtProperty*> propertyByName(const QString& propertyName);
+
 	const QVariant::Type type() const;
 
 	void emitSetValue(QtProperty* property, const QVariant& value);
@@ -168,9 +171,10 @@ private:
 
 // -------------------------------------------------------------------------------
 
+//template <class Type>
 class PropertyEditor : public QtTreePropertyBrowser
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	PropertyEditor(QWidget* parent);
@@ -179,39 +183,34 @@ public:
 	//
 public:
 	void setObjects(QList<std::shared_ptr<QObject>>& objects);
-	void updateObjects();
-	void clearObjects();
+	void updateProperties(const QString& propertyName);
+	void updateProperties();
+	void clearProperties();
 
 protected slots:
 	virtual void valueChanged(QtProperty* property, QVariant value);
-
-private slots:
 	void onShowErrorMessage (QString message);
 	void onCurrentItemChanged(QtBrowserItem* current);
 
 signals:
     void showErrorMessage(QString message);
-	void propertiesChanged(QObjectList objects);
+	void propertiesChanged(QList<std::shared_ptr<QObject>> objects);
 
-	// Private functions and structs
+	// Protected functions and structs
 	//
-private:
-	//void resizeEvent(QResizeEvent* event);
-	//void moveEvent(QMoveEvent * event);
-	void createValuesMap(QtAbstractPropertyManager* manager, QVariant::Type type, QMap<QtProperty*, QVariant>& values);
-	bool propertyByName(const QObject* object, const QString& name, QMetaProperty& metaProperty);
+protected:
+	bool propertyByName(const std::shared_ptr<QObject>& object, const QString& name, QMetaProperty& metaProperty);
 
 	struct PropertyItem
 	{
-		QObject* object = nullptr;
+		std::shared_ptr<QObject> object;
 		QVariant::Type type;
 		QVariant value;
 	};
 
 	// Data
 	//
-private:
-	//QtTreePropertyBrowser* m_propertyEditor = nullptr;
+protected:
 	QtGroupPropertyManager* m_propertyGroupManager = nullptr;
 
 	QtMultiVariantPropertyManager* m_propertyStringManager = nullptr;
@@ -219,7 +218,12 @@ private:
 	QtMultiVariantPropertyManager* m_propertyDoubleManager = nullptr;
 	QtMultiVariantPropertyManager* m_propertyBoolManager = nullptr;
 
-    QMap<QString, QObject*> m_propToClassMap;   //Property Name to Class Map
+	QMap<QString, std::shared_ptr<QObject>> m_propToClassMap;   //Property Name to Class Map
+
+	//Private Data
+	//
+private:
+	void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values);
 };
 
 #endif // PROPERTYEDITOR_H

@@ -180,7 +180,7 @@ public slots:
 
 	void setProperties();
 
-	void propertiesChanged(QObjectList objects);
+	void propertiesChanged(QList<std::shared_ptr<QObject>> objects);
 
 	// Data
 	//
