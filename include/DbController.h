@@ -94,6 +94,8 @@ public:
 	bool deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget);
 	bool undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget);
 
+	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -136,6 +138,7 @@ signals:
 	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
+	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
 	//
 	// Service functions
