@@ -5,7 +5,7 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT CFblItemLine : public CPosConnectionImpl, public CFblItem
+	class VFRAME30LIBSHARED_EXPORT CFblItemLine : public CPosConnectionImpl, public FblItem
 	{
 		Q_OBJECT
 

@@ -5,19 +5,19 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT CFblItemRect : public CPosRectImpl, public CFblItem
+	class VFRAME30LIBSHARED_EXPORT FblItemRect : public CPosRectImpl, public FblItem
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<CFblItemRect>;
+		friend ::Factory<CVideoItem>::DerivedType<FblItemRect>;
 #endif
 
 	protected:
-		CFblItemRect(void);
-		CFblItemRect(SchemeUnit itemunit);
+		FblItemRect(void);
+		FblItemRect(SchemeUnit itemunit);
 	public:
-		virtual ~CFblItemRect(void);
+		virtual ~FblItemRect(void);
 		
 		// Serialization
 		//

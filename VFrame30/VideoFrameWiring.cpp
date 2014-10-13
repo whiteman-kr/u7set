@@ -6,7 +6,7 @@ namespace VFrame30
 
 	CVideoFrameWiring::CVideoFrameWiring(void)
 	{
-		setUnit(Inch);
+		setUnit(SchemeUnit::Inch);
 
 		setDocWidth(mm2in(420));
 		setDocHeight(mm2in(297));

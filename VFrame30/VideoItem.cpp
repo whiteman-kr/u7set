@@ -11,7 +11,7 @@ namespace VFrame30
 	CVideoItem::CVideoItem() :
 		m_static(true),
 		m_locked(false),
-		m_itemUnit(Display),
+		m_itemUnit(SchemeUnit::Display),
 		m_acceptClick(false)
 	{	
 		m_guid = QUuid::createUuid();
@@ -309,7 +309,7 @@ namespace VFrame30
 
 	void CVideoItem::setItemUnit(SchemeUnit value)
 	{
-		assert(value == Display || value == Inch);
+		assert(value == SchemeUnit::Display || value == SchemeUnit::Inch);
 		m_itemUnit = value;
 	}
 

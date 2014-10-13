@@ -2348,6 +2348,13 @@ class VideoItemRect : public ::google::protobuf::Message {
   inline bool fill() const;
   inline void set_fill(bool value);
 
+  // optional bool drawrect = 8 [default = true];
+  inline bool has_drawrect() const;
+  inline void clear_drawrect();
+  static const int kDrawrectFieldNumber = 8;
+  inline bool drawrect() const;
+  inline void set_drawrect(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.VideoItemRect)
  private:
   inline void set_has_weight();
@@ -2364,6 +2371,8 @@ class VideoItemRect : public ::google::protobuf::Message {
   inline void clear_has_font();
   inline void set_has_fill();
   inline void clear_has_fill();
+  inline void set_has_drawrect();
+  inline void clear_has_drawrect();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2374,9 +2383,10 @@ class VideoItemRect : public ::google::protobuf::Message {
   ::Proto::FontParam* font_;
   ::google::protobuf::uint32 textcolor_;
   bool fill_;
+  bool drawrect_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -7019,6 +7029,28 @@ inline bool VideoItemRect::fill() const {
 inline void VideoItemRect::set_fill(bool value) {
   set_has_fill();
   fill_ = value;
+}
+
+// optional bool drawrect = 8 [default = true];
+inline bool VideoItemRect::has_drawrect() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void VideoItemRect::set_has_drawrect() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void VideoItemRect::clear_has_drawrect() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void VideoItemRect::clear_drawrect() {
+  drawrect_ = true;
+  clear_has_drawrect();
+}
+inline bool VideoItemRect::drawrect() const {
+  return drawrect_;
+}
+inline void VideoItemRect::set_drawrect(bool value) {
+  set_has_drawrect();
+  drawrect_ = value;
 }
 
 // -------------------------------------------------------------------

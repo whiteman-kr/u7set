@@ -6,7 +6,7 @@ namespace VFrame30
 
 	CVideoFrameDiag::CVideoFrameDiag(void)
 	{
-		setUnit(Display);
+		setUnit(SchemeUnit::Display);
 
 		setDocWidth(1000);
 		setDocHeight(750);

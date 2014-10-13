@@ -306,7 +306,7 @@ namespace VFrame30
 					continue;
 				}
 
-				CFblItem* pFblItem = dynamic_cast<CFblItem*>(item->get());
+				FblItem* pFblItem = dynamic_cast<FblItem*>(item->get());
 				if (pFblItem == nullptr)
 				{
 					assert(pFblItem);
@@ -346,7 +346,7 @@ namespace VFrame30
 					continue;
 				}
 
-				CFblItem* pFblItem = dynamic_cast<CFblItem*>(item->get());
+				FblItem* pFblItem = dynamic_cast<FblItem*>(item->get());
 				
 				if (pFblItem == nullptr)
 				{

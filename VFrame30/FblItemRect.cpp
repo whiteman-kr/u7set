@@ -4,29 +4,29 @@
 
 namespace VFrame30
 {
-	CFblItemRect::CFblItemRect(void)
+	FblItemRect::FblItemRect(void)
 	{
 	}
 
-	CFblItemRect::CFblItemRect(SchemeUnit unit) :
+	FblItemRect::FblItemRect(SchemeUnit unit) :
 		m_weight(0),
-		m_lineColor(qRgb(0x00, 0x00, 0x00)),
-		m_fillColor(qRgb(0xC0, 0xC0, 0xC0)),
-		m_textColor(qRgb(0x00, 0x00, 0x00))
+		m_lineColor(qRgb(0x00, 0x00, 0xC0)),
+		m_fillColor(qRgb(0xF0, 0xF0, 0xF0)),
+		m_textColor(qRgb(0x00, 0x00, 0xC0))
 	{
 		setItemUnit(unit);
-		m_font.name = "Arial";
+		m_font.setName("Arial");
 
 		switch (itemUnit())
 		{
 		case SchemeUnit::Display:
-			m_font.size = 12.0;
+			m_font.setSize(12.0, unit);
 			break;
 		case SchemeUnit::Inch:
-			m_font.size = mm2in(3.0);
+			m_font.setSize(mm2in(3.0), unit);
 			break;
 		case SchemeUnit::Millimeter:
-			m_font.size = mm2in(3.0);
+			m_font.setSize(mm2in(3.0), unit);
 			break;
 		default:
 			assert(false);
@@ -35,13 +35,13 @@ namespace VFrame30
 		m_static = false;
 	}
 
-	CFblItemRect::~CFblItemRect(void)
+	FblItemRect::~FblItemRect(void)
 	{
 	}
 
 	// Вычислить координаты точки
 	//
-	void CFblItemRect::SetConnectionsPos()
+	void FblItemRect::SetConnectionsPos()
 	{
 		QRectF ir(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 
@@ -84,7 +84,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool CFblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult) const
+	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult) const
 	{
 		if (pResult == nullptr)
 		{
@@ -138,7 +138,7 @@ namespace VFrame30
 		return false;
 	}
 
-	VideoItemPoint CFblItemRect::CalcPointPos(const QRectF& fblItemRect, const CFblConnectionPoint& connection, int pinCount, int index) const
+	VideoItemPoint FblItemRect::CalcPointPos(const QRectF& fblItemRect, const CFblConnectionPoint& connection, int pinCount, int index) const
 	{
 		if (pinCount == 0)
 		{
@@ -165,7 +165,7 @@ namespace VFrame30
 	
 	// Serialization
 	//
-	bool CFblItemRect::SaveData(Proto::Envelope* message) const
+	bool FblItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = CPosRectImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
@@ -177,7 +177,7 @@ namespace VFrame30
 
 		// --
 		//
-		result = CFblItem::SaveData(message);
+		result = FblItem::SaveData(message);
 		if (result == false)
 		{
 			return false;
@@ -197,7 +197,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItemRect::LoadData(const Proto::Envelope& message)
+	bool FblItemRect::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -213,7 +213,7 @@ namespace VFrame30
 			return false;
 		}
 
-		result = CFblItem::LoadData(message);
+		result = FblItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -244,7 +244,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void CFblItemRect::Draw(CDrawParam* drawParam, const CVideoFrame*, const CVideoLayer* pLayer) const
+	void FblItemRect::Draw(CDrawParam* drawParam, const CVideoFrame*, const CVideoLayer* pLayer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
@@ -390,16 +390,16 @@ namespace VFrame30
 
 	// Properties and Data
 	//
-	IMPLEMENT_FONT_PROPERTIES(CFblItemRect, Font, m_font);
+	IMPLEMENT_FONT_PROPERTIES(FblItemRect, Font, m_font);
 
-	bool CFblItemRect::IsFblItem() const
+	bool FblItemRect::IsFblItem() const
 	{
 		return true;
 	}
 	
 	// Weight propertie
 	//
-	double CFblItemRect::weight() const
+	double FblItemRect::weight() const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -412,7 +412,7 @@ namespace VFrame30
 		}
 	}
 
-	void CFblItemRect::setWeight(double weight)
+	void FblItemRect::setWeight(double weight)
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -427,33 +427,33 @@ namespace VFrame30
 
 	// LineColor propertie
 	//
-	QRgb CFblItemRect::lineColor() const
+	QRgb FblItemRect::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void CFblItemRect::setLineColor(QRgb color)
+	void FblItemRect::setLineColor(QRgb color)
 	{
 		m_lineColor = color;
 	}
 
 	// FillColor propertie
 	//
-	QRgb CFblItemRect::fillColor() const
+	QRgb FblItemRect::fillColor() const
 	{
 		return m_fillColor;
 	}
 
-	void CFblItemRect::setFillColor(QRgb color)
+	void FblItemRect::setFillColor(QRgb color)
 	{
 		m_fillColor = color;
 	}
 
-	QRgb CFblItemRect::textColor() const
+	QRgb FblItemRect::textColor() const
 	{
 		return m_textColor;
 	}
-	void CFblItemRect::setTextColor(QRgb color)
+	void FblItemRect::setTextColor(QRgb color)
 	{
 		m_textColor = color;
 	}

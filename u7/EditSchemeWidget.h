@@ -3,7 +3,7 @@
 #include "../VFrame30/VideoFrameView.h"
 #include "../VFrame30/VideoItem.h"
 #include "../VFrame30/FblItem.h"
-#include "EditEngine.h"
+#include "EditEngine/EditEngine.h"
 #include "../include/DbController.h"
 #include "SchemeItemPropertiesDialog.h"
 
@@ -124,7 +124,8 @@ public:
 	void addSelection(const std::shared_ptr<VFrame30::CVideoItem>& item);
 
 	void clearSelection();
-	void removeFromSelection(const std::shared_ptr<VFrame30::CVideoItem>& item);
+	bool removeFromSelection(const std::shared_ptr<VFrame30::CVideoItem>& item);
+	bool isItemSelected(const std::shared_ptr<VFrame30::CVideoItem>& item);
 
 	// Data
 	//
@@ -229,10 +230,14 @@ protected:
 	void mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* event);
 	void mouseMove_MovingEdgesOrVertex(QMouseEvent* event);
 
-	// Mouse Right Button Pressed action
+	// Mouse Right Button Down
 	//
 	void mouseRightDown_None(QMouseEvent* event);
 	void mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEvent* event);
+
+	// Mouse Right Button Up
+	//
+	void mouseRightUp_None(QMouseEvent* event);
 
 	// Methods
 	//
@@ -295,7 +300,6 @@ public:
 	std::shared_ptr<VFrame30::CVideoLayer> activeLayer();
 
 	const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems() const;
-	//std::vector<std::shared_ptr<VFrame30::CVideoItem>>& selectedItems();
 
 	EditSchemeView* schemeView();
 	const EditSchemeView* schemeView() const;

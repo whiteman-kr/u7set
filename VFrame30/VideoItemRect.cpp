@@ -17,18 +17,18 @@ namespace VFrame30
 		m_textColor(qRgb(0x00, 0x00, 0x00)),
 		m_fill(true)
 	{
-		m_font.name = "Arial";
+		m_font.setName("Arial");
 
 		switch (unit)
 		{
 		case SchemeUnit::Display:
-			m_font.size = 12.0;
+			m_font.setSize(12.0, unit);
 			break;
 		case SchemeUnit::Inch:
-			m_font.size = 0.15;
+			m_font.setSize(0.15, unit);
 			break;
 		case SchemeUnit::Millimeter:
-			m_font.size = mm2in(4.0);
+			m_font.setSize(mm2in(4.0), unit);
 			break;
 		default:
 			assert(false);
@@ -62,6 +62,7 @@ namespace VFrame30
 		rectMessage->set_linecolor(m_lineColor);
 		rectMessage->set_fillcolor(m_fillColor);
 		rectMessage->set_fill(m_fill);
+		rectMessage->set_drawrect(m_drawRect);
 
 		Proto::Write(rectMessage->mutable_text(), m_text);
 		rectMessage->set_textcolor(m_textColor);
@@ -102,6 +103,7 @@ namespace VFrame30
 		m_fill = rectMessage.fill();
 		m_text = Proto::Read(rectMessage.text());
 		m_textColor = rectMessage.textcolor();
+		m_drawRect = rectMessage.drawrect();
 		m_font.LoadData(rectMessage.font());
 
 		return true;
@@ -166,10 +168,13 @@ namespace VFrame30
 
 		// Drawing rect 
 		//
-		m_rectPen->setWidthF((qreal)m_weight);
+		if (drawRect() == true)
+		{
+			m_rectPen->setWidthF(static_cast<qreal>(m_weight));
 
-		p->setPen(*m_rectPen);
-		p->drawRect(r);						// 25%, 25%
+			p->setPen(*m_rectPen);
+			p->drawRect(r);
+		}
 
 		// Drawing Text
 		//
@@ -246,7 +251,7 @@ namespace VFrame30
 	{
 		m_fill = fill;
 	}
-	
+
 	// Text property
 	//
 	const QString& CVideoItemRect::text() const
@@ -268,5 +273,16 @@ namespace VFrame30
 	{
 		m_textColor = color;
 	}
+
+	bool CVideoItemRect::drawRect() const
+	{
+		return m_drawRect;
+	}
+
+	void CVideoItemRect::setDrawRect(bool value)
+	{
+		m_drawRect = value;
+	}
+
 }
 

@@ -1,6 +1,6 @@
 #include "SchemeItemPropertiesDialog.h"
 #include "ui_SchemeItemPropertiesDialog.h"
-#include "EditEngine.h"
+#include "EditEngine/EditEngine.h"
 
 
 SchemeItemPropertiesDialog::SchemeItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :

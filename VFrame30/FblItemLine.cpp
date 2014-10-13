@@ -9,7 +9,7 @@ namespace VFrame30
 
 	CFblItemLine::CFblItemLine(SchemeUnit unit) :
 		m_weight(0),
-		m_lineColor(qRgb(0x00, 0x00, 0x00))
+		m_lineColor(qRgb(0x00, 0x00, 0xC0))
 	{
 		setItemUnit(unit);
 		m_static = false;
@@ -31,7 +31,7 @@ namespace VFrame30
 			return false;
 		}
 
-		result = CFblItem::SaveData(message);
+		result = FblItem::SaveData(message);
 		if (result == false)
 		{
 			return false;
@@ -63,7 +63,7 @@ namespace VFrame30
 			return false;
 		}
 
-		result = CFblItem::LoadData(message);
+		result = FblItem::LoadData(message);
 		if (result == false)
 		{
 			return false;

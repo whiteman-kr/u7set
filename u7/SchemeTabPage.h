@@ -23,11 +23,13 @@ public:
 	virtual void openFile(std::vector<DbFileInfo> files) override;
 	virtual void viewFile(std::vector<DbFileInfo> files) override;
 	virtual void addFile() override;
+	virtual void deleteFile(std::vector<DbFileInfo> files) override;
 
 signals:
 	void openFileSignal(std::vector<DbFileInfo> files);
 	void viewFileSignal(std::vector<DbFileInfo> files);
 	void addFileSignal();
+	void deleteFileSignal(std::vector<DbFileInfo> files);
 
 	// Data
 	//
@@ -129,6 +131,8 @@ protected slots:
 	//void projectClosed();
 
 	void addFile();
+	void deleteFile(std::vector<DbFileInfo> files);
+
 	void openFiles(std::vector<DbFileInfo> files);
 	void viewFiles(std::vector<DbFileInfo> files);
 

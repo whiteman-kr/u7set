@@ -11,12 +11,12 @@ namespace VFrame30
 	}
 
 	CVideoItemFblElement::CVideoItemFblElement(SchemeUnit unit) :
-		CFblItemRect(unit)
+		FblItemRect(unit)
 	{
 	}
 
 	CVideoItemFblElement::CVideoItemFblElement(SchemeUnit unit, const Fbl::FblElement& fblElement) :
-		CFblItemRect(unit)
+		FblItemRect(unit)
 	{
 		m_fblElement = fblElement;
 
@@ -52,7 +52,7 @@ namespace VFrame30
 	{
 		// Нарисовать прямоугольник и пины
 		//
-		CFblItemRect::Draw(drawParam, pFrame, pLayer);
+		FblItemRect::Draw(drawParam, pFrame, pLayer);
 
 		//--
 		//
@@ -106,7 +106,7 @@ namespace VFrame30
 	//
 	bool CVideoItemFblElement::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CFblItemRect::SaveData(message);
+		bool result = FblItemRect::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -134,7 +134,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CFblItemRect::LoadData(message);
+		bool result = FblItemRect::LoadData(message);
 		if (result == false)
 		{
 			return false;

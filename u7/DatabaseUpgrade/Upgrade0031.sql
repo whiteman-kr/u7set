@@ -90,3 +90,63 @@ ORDER BY Name;
 
 $BODY$
   LANGUAGE sql;
+
+
+-------------------------------------------------------------------------------
+--
+--		get_file_history
+--
+-------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION get_file_history(file_id integer)
+RETURNS TABLE(changesetid int, userid int, checkintime timestamp with time zone, comment text, action int) AS
+$BODY$
+BEGIN
+
+	RETURN QUERY
+		SELECT
+			Changeset.ChangesetID AS ChangesetID,
+			Changeset.UserID AS UserID,
+			Changeset.Time AS Time,
+			Changeset.Comment AS Comment,
+			FileInstance.Action AS Action
+		FROM
+			FileInstance, Changeset
+		WHERE
+			FileInstance.FileID = file_id AND
+			FileInstance.ChangesetID =  Changeset.ChangesetID
+		ORDER BY
+			Changeset.ChangesetID DESC;
+END
+$BODY$
+LANGUAGE plpgsql;
+
+-------------------------------------------------------------------------------
+--
+--		get_specific_copy
+--
+-------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_specific_copy(IN user_id integer, IN file_id integer, IN changeset_id integer)
+RETURNS
+TABLE(fileid integer, name text, parentid integer, created timestamp with time zone, size integer, data bytea, checkintime timestamp with time zone, userid integer, action integer) AS
+$BODY$
+	SELECT
+		F.FileID AS FileID,
+		F.Name AS Name,
+		F.ParentID AS ParentID,
+		F.Created AS Created,
+		length(FI.Data) AS Size,
+		FI.Data as Data,
+		CS.Time As ChechInTime,
+		CS.UserID AS UserID,
+		FI.Action AS Action
+	FROM
+		File F, FileInstance FI, Changeset CS
+	WHERE
+		F.FileID = file_id AND
+		FI.FileID = file_id AND
+		FI.ChangesetId = changeset_id AND
+		CS.ChangesetID = changeset_id;
+$BODY$
+LANGUAGE sql;
+

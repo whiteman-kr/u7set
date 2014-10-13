@@ -19,7 +19,7 @@ ChangesetDialog::ChangesetDialog(const std::vector<DbChangesetInfo>& fileHistory
 	ui->changesetList->setColumnCount(4);
 
 	QStringList headerLabels;
-	headerLabels << tr("Changeset") << tr("User") << tr("Date") << tr("Comment");
+	headerLabels << tr("Changeset") << tr("User") << tr("Action") << tr("Date") << tr("Comment");
 
 	ui->changesetList->setHeaderLabels(headerLabels);
 
@@ -34,7 +34,8 @@ ChangesetDialog::ChangesetDialog(const std::vector<DbChangesetInfo>& fileHistory
 
 		QStringList itemTextList;
 		itemTextList << QString::number(ci.changeset());
-		itemTextList << ci.user().username();
+		itemTextList << QString::number(ci.userId());
+		itemTextList << ci.action().text();
 		itemTextList << ci.date().toString(Qt::SystemLocaleShortDate);
 		itemTextList << ci.comment();
 

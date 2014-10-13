@@ -407,25 +407,6 @@ void MainWindow::projectClosed()
 	return;
 }
 
-//void MainWindow::databaseError(QString message)
-//{
-//	QMessageBox::critical(this, qApp->applicationName(), message);
-//	return;
-//}
-
-//void MainWindow::databaseOperationCompleted(QString message)
-//{
-//	if (message.isEmpty() == false)
-//	{
-//		QMessageBox mb(this);
-
-//		mb.setText(message);
-
-//		mb.exec();
-//	}
-
-//	return;
-//}
 
 DbController* MainWindow::dbController()
 {

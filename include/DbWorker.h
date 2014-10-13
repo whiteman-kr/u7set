@@ -89,11 +89,15 @@ public slots:
 	void slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
 
+	void slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
+
 	void slot_checkIn(std::vector<DbFileInfo>* files, QString comment);
 	void slot_checkOut(std::vector<DbFileInfo>* files);
 	void slot_undoChanges(std::vector<DbFileInfo>* files);
 
 	void slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
+
+	void slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo>* out);
 
 	// Hardware Configuration
 	//

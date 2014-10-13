@@ -2119,6 +2119,101 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 	return;
 }
 
+void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true ||
+		out == nullptr)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+
+		const DbFileInfo& fi = files->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM get_specific_copy(%1, %2, %3);")
+				.arg(currentUser().userId())
+				.arg(fi.fileId())
+				.arg(changesetId);
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+		if (result == false)
+		{
+			emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't find workcopy for file: %1. Is file CheckedOut?").arg(fi.fileName()));
+			return;
+		}
+
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		file->setFileId(q.value("FileID").toInt());
+
+		file->setFileName(q.value("Name").toString());
+		file->setParentId(q.value("ParentID").toInt());
+		file->setChangeset(changesetId);							// From the param, not from the DB!!!
+		file->setCreated(q.value("Created").toString());
+		file->setLastCheckIn(q.value("CheckInTime").toString());	// setLastCheckIn BUT TIME IS CheckOutTime
+		file->setState(VcsState::CheckedOut);
+
+		int action = q.value("Action").toInt();
+		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
+
+		file->setUserId(q.value("UserID").toInt());
+
+		QByteArray data = q.value("Data").toByteArray();
+		file->swapData(data);
+
+		out->push_back(file);
+
+		assert(fi.fileId() == file->fileId());
+	}
+
+	return;
+}
+
 void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 {
 	// Init automitic varaiables
@@ -2423,6 +2518,62 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	int childCount = q.value(0).toInt();
 
 	*hasChildren = childCount > 0;
+
+	return;
+}
+
+void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (file == nullptr || file->fileId() == -1 || out == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_file_history(%1)")
+		.arg(file->fileId());
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbChangesetInfo ci;
+
+		ci.setChangeset(q.value("ChangesetID").toInt());
+		ci.setDate(q.value("CheckInTime").toString());
+		ci.setComment(q.value("Comment").toString());
+		ci.setUserId(q.value("UserID").toInt());
+		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
+
+		out->push_back(ci);
+	}
 
 	return;
 }

@@ -64,6 +64,9 @@ public:
 	bool setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWidget* parentWidget);
 	bool setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget);
 
+	bool getSpecificCopy(const std::vector<DbFileInfo>& files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
+	bool getSpecificCopy(const DbFileInfo& file, int changesetId, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
+
 	bool checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget);
 	bool checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget);
 	bool checkOut(DbFileInfo& file, QWidget* parentWidget);
@@ -72,6 +75,8 @@ public:
 	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 
 	bool fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget);
+
+	bool getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo>* out, QWidget* parentWidget);
 
 	// Hardware Configuration
 	//
@@ -118,12 +123,18 @@ signals:
 	void signal_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void signal_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
 
+	void signal_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
+
 	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
 
 	void signal_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
+	void signal_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo>* out);
+
+	// --
+	//
 	void signal_addDeviceObject(Hardware::DeviceObject* device, int parentId);
 
 	void signal_getSignalsIDs(QVector<int>* signalIDs);

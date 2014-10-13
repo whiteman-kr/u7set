@@ -60,11 +60,6 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     ../lib/DeviceObject.cpp \
     VideoFramePropertiesDialog.cpp \
-    EditEngine.cpp \
-    EditEngineAddItem.cpp \
-    EditEngineSetPoints.cpp \
-    EditEngineDeleteItem.cpp \
-    EditEngineMoveItem.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
     ../lib/DbController.cpp \
@@ -84,7 +79,12 @@ SOURCES +=\
     SchemeTabPage.cpp \
     EditSchemeWidget.cpp \
     SchemeItemPropertiesDialog.cpp \
-    EditEngineSetProperty.cpp
+    EditEngine/EditEngine.cpp \
+    EditEngine/EditEngineAddItem.cpp \
+    EditEngine/EditEngineDeleteItem.cpp \
+    EditEngine/EditEngineMoveItem.cpp \
+    EditEngine/EditEngineSetPoints.cpp \
+    EditEngine/EditEngineSetProperty.cpp
 
 
 HEADERS  += \
@@ -109,11 +109,6 @@ HEADERS  += \
     EquipmentTabPage.h \
     ../include/DeviceObject.h \
     VideoFramePropertiesDialog.h \
-    EditEngine.h \
-    EditEngineAddItem.h \
-    EditEngineSetPoints.h \
-    EditEngineDeleteItem.h \
-    EditEngineMoveItem.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
     ../include/DbController.h \
@@ -135,7 +130,12 @@ HEADERS  += \
     SchemeTabPage.h \
     EditSchemeWidget.h \
     SchemeItemPropertiesDialog.h \
-    EditEngineSetProperty.h
+    EditEngine/EditEngine.h \
+    EditEngine/EditEngineAddItem.h \
+    EditEngine/EditEngineDeleteItem.h \
+    EditEngine/EditEngineMoveItem.h \
+    EditEngine/EditEngineSetPoints.h \
+    EditEngine/EditEngineSetProperty.h
     ../include/Signal.h
 
 FORMS    += \

@@ -7,7 +7,7 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT CVideoItemFblElement : public CFblItemRect
+	class VFRAME30LIBSHARED_EXPORT CVideoItemFblElement : public FblItemRect
 	{
 		Q_OBJECT
 

@@ -52,11 +52,11 @@ namespace VFrame30
 		VideoItemFactory.Register<CVideoItemRect>();
 		VideoItemFactory.Register<CVideoItemConnectionLine>();
 		VideoItemFactory.Register<CFblItemLine>();
-		VideoItemFactory.Register<CFblItemRect>();
+		VideoItemFactory.Register<FblItemRect>();
 		VideoItemFactory.Register<CVideoItemLink>();
 		VideoItemFactory.Register<CVideoItemFblElement>();
-		VideoItemFactory.Register<CVideoItemInputSignal>();
-		VideoItemFactory.Register<CVideoItemOutputSignal>();
+		VideoItemFactory.Register<VideoItemInputSignal>();
+		VideoItemFactory.Register<VideoItemOutputSignal>();
 
 		return true;
 	}

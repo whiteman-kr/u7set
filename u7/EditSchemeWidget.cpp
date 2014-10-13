@@ -968,6 +968,30 @@ const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditSchemeView::select
 
 void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items)
 {
+	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
+	//
+	if (items.size() == m_selectedItems.size())
+	{
+		bool differs = false;
+
+		auto i = std::begin(items);
+		for (auto s = std::begin(m_selectedItems); s != std::end(m_selectedItems) && differs == false; ++s, ++i)
+		{
+			if (*s != *i)
+			{
+				differs = true;
+				break;
+			}
+		}
+
+		if (differs == false)
+		{
+			return;
+		}
+	}
+
+	// Set new selection
+	//
 	m_selectedItems = items;
 
 	emit selectionChanged();
@@ -975,6 +999,30 @@ void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30
 
 void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::CVideoItem>>& items)
 {
+	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
+	//
+	if (items.size() == m_selectedItems.size())
+	{
+		bool differs = false;
+
+		auto i = std::begin(items);
+		for (auto s = std::begin(m_selectedItems); s != std::end(m_selectedItems) && differs == false; ++s, ++i)
+		{
+			if (*s != *i)
+			{
+				differs = true;
+				break;
+			}
+		}
+
+		if (differs == false)
+		{
+			return;
+		}
+	}
+
+	// Set new selection
+	//
 	m_selectedItems.clear();
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
 
@@ -983,6 +1031,11 @@ void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::
 
 void EditSchemeView::setSelectedItem(const std::shared_ptr<VFrame30::CVideoItem>& item)
 {
+	if (m_selectedItems.size() == 1 && item == m_selectedItems.back())
+	{
+		return;
+	}
+
 	m_selectedItems.clear();
 	m_selectedItems.push_back(item);
 
@@ -991,8 +1044,15 @@ void EditSchemeView::setSelectedItem(const std::shared_ptr<VFrame30::CVideoItem>
 
 void EditSchemeView::addSelection(const std::shared_ptr<VFrame30::CVideoItem>& item)
 {
-	m_selectedItems.push_back(item);
-	emit selectionChanged();
+	auto fp = std::find(std::begin(m_selectedItems), std::end(m_selectedItems), item);
+
+	if (fp == std::end(m_selectedItems))
+	{
+		m_selectedItems.push_back(item);
+		emit selectionChanged();
+	}
+
+	return;
 }
 
 void EditSchemeView::clearSelection()
@@ -1006,7 +1066,7 @@ void EditSchemeView::clearSelection()
 	emit selectionChanged();
 }
 
-void EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::CVideoItem>& item)
+bool EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::CVideoItem>& item)
 {
 	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
 
@@ -1014,9 +1074,21 @@ void EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::CVideoI
 	{
 		m_selectedItems.erase(findResult);
 		emit selectionChanged();
+
+		// Was found and deleted
+		//
+		return true;
 	}
 
-	return;
+	// Was not found in selection list
+	//
+	return false;
+}
+
+bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::CVideoItem>& item)
+{
+	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
+	return findResult != m_selectedItems.end();
 }
 
 
@@ -1086,6 +1158,10 @@ EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::CVideoFrame> videoF
 	//
 	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditVideoFrameWidget::mouseRightDown_None, this, std::placeholders::_1)));
 	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
+
+	// Mouse Right Button Up
+	//
+	m_mouseRightUpStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemeWidget::mouseRightUp_None, this, std::placeholders::_1)));
 
 
 	// --
@@ -1236,7 +1312,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::CVideoItemInputSignal>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemInputSignal>(videoFrame()->unit()));
 			});
 
 	m_addOutputSignalAction = new QAction(tr("Output"), this);
@@ -1244,7 +1320,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::CVideoItemOutputSignal>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemOutputSignal>(videoFrame()->unit()));
 			});
 
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
@@ -1563,6 +1639,24 @@ void EditSchemeWidget::mouseReleaseEvent(QMouseEvent* event)
 
 	if (event->button() == Qt::RightButton)
 	{
+		for (auto msa = m_mouseRightUpStateAction.begin(); msa != m_mouseRightUpStateAction.end(); ++msa)
+		{
+			if (msa->mouseState == mouseState())
+			{
+				msa->action(event);
+				setMouseCursor(event->pos());
+
+				event->accept();
+				return;
+			}
+		}
+
+		// DefaultAction
+		//
+		//setMouseCursor(event->pos());
+
+		//event->accept();
+		//return;
 	}
 
 
@@ -1994,7 +2088,7 @@ void EditSchemeWidget::mouseLeftDown_AddSchemePosConnectionStartPoint(QMouseEven
 
 	// Проверить под кординатой нахождение пина
 	//
-	if (dynamic_cast<VFrame30::CFblItem*>(schemeView()->m_newItem.get()) != nullptr)
+	if (dynamic_cast<VFrame30::FblItem*>(schemeView()->m_newItem.get()) != nullptr)
 	{
 		// ??
 		//VFrame30Ext.IFblItem fblItem = schemeView.newItem as VFrame30Ext.IFblItem;
@@ -2040,7 +2134,14 @@ void EditSchemeWidget::mouseLeftUp_Selection(QMouseEvent* me)
 		{
 			// Если такой элемент уже есть в списке, то удалить его из списка выделенных
 			//
-			schemeView()->removeFromSelection(item);
+			bool wasDeleted = schemeView()->removeFromSelection(item);
+
+			if (wasDeleted == false)
+			{
+				// This item was not selected, so just select it
+				//
+				schemeView()->addSelection(item);
+			}
 		}
 	}
 	else
@@ -2959,6 +3060,31 @@ void EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEven
 	// --
 	//
 	schemeView()->update();
+
+	return;
+}
+
+void EditSchemeWidget::mouseRightUp_None(QMouseEvent* event)
+{
+	QPointF docPoint = widgetPointToDocument(event->pos(), false);
+
+	auto item = schemeView()->activeLayer()->getItemUnderPoint(docPoint);
+
+	if (item == nullptr)
+	{
+		schemeView()->clearSelection();
+		resetAction();
+	}
+	else
+	{
+		bool itemIsAlreadySelected = schemeView()->isItemSelected(item);
+
+		if (itemIsAlreadySelected == false)
+		{
+			schemeView()->setSelectedItem(item);
+			resetAction();
+		}
+	}
 
 	return;
 }

@@ -773,8 +773,7 @@ int DbFile::size() const
 // DbChangesetInfo
 //
 //
-DbChangesetInfo::DbChangesetInfo() :
-	m_changesetId(0)
+DbChangesetInfo::DbChangesetInfo()
 {
 }
 
@@ -803,14 +802,24 @@ void DbChangesetInfo::setDate(const QString& value)
 	m_date = QDateTime::fromString(value, "yyyy-MM-ddTHH:mm:ss");
 }
 
-const DbUser& DbChangesetInfo::user() const
+const VcsItemAction& DbChangesetInfo::action() const
 {
-	return m_user;
+	return m_action;
 }
 
-void DbChangesetInfo::setUser(const DbUser& value)
+void DbChangesetInfo::setAction(const VcsItemAction& value)
 {
-	m_user = value;
+	m_action = value;
+}
+
+int DbChangesetInfo::userId() const
+{
+	return m_userId;
+}
+
+void DbChangesetInfo::setUserId(int value)
+{
+	m_userId = value;
 }
 
 const QString& DbChangesetInfo::comment() const

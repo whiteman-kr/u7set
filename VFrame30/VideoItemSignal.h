@@ -6,14 +6,14 @@ namespace VFrame30
 {
 	// CVideoItemSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT CVideoItemSignal : public CFblItemRect
+	class VFRAME30LIBSHARED_EXPORT VideoItemSignal : public FblItemRect
 	{
 		Q_OBJECT
 
 	protected:
-		CVideoItemSignal(void);
-		CVideoItemSignal(SchemeUnit unit);
-		virtual ~CVideoItemSignal(void);
+		VideoItemSignal(void);
+		VideoItemSignal(SchemeUnit unit);
+		virtual ~VideoItemSignal(void);
 	
 	public:
 
@@ -36,19 +36,19 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT CVideoItemInputSignal : public CVideoItemSignal
+	class VFRAME30LIBSHARED_EXPORT VideoItemInputSignal : public VideoItemSignal
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<CVideoItemInputSignal>;
+		friend ::Factory<CVideoItem>::DerivedType<VideoItemInputSignal>;
 #endif
 
 	private:
-		CVideoItemInputSignal(void);
+		VideoItemInputSignal(void);
 	public:
-		explicit CVideoItemInputSignal(SchemeUnit unit);
-		virtual ~CVideoItemInputSignal(void);
+		explicit VideoItemInputSignal(SchemeUnit unit);
+		virtual ~VideoItemInputSignal(void);
 
 		// Serialization
 		//
@@ -65,19 +65,19 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT CVideoItemOutputSignal : public CVideoItemSignal
+	class VFRAME30LIBSHARED_EXPORT VideoItemOutputSignal : public VideoItemSignal
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<CVideoItemOutputSignal>;
+		friend ::Factory<CVideoItem>::DerivedType<VideoItemOutputSignal>;
 #endif
 
 	private:
-		CVideoItemOutputSignal(void);
+		VideoItemOutputSignal(void);
 	public:
-		explicit CVideoItemOutputSignal(SchemeUnit unit);
-		virtual ~CVideoItemOutputSignal(void);
+		explicit VideoItemOutputSignal(SchemeUnit unit);
+		virtual ~VideoItemOutputSignal(void);
 
 		// Serialization
 		//
