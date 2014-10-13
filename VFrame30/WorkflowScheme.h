@@ -6,13 +6,13 @@ namespace VFrame30
 {
 	// Технологический видеокадр
 	//
-	class VFRAME30LIBSHARED_EXPORT CVideoFrameTech : public Scheme
+	class VFRAME30LIBSHARED_EXPORT WorkflowScheme : public Scheme
 	{
 		Q_OBJECT
 
 	public:
-		CVideoFrameTech(void);
-		virtual ~CVideoFrameTech(void);
+		WorkflowScheme(void);
+		virtual ~WorkflowScheme(void);
 	};
 }
 

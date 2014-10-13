@@ -1,10 +1,10 @@
 #include "Stable.h"
 #include "VFrame30Library.h"
 #include "Scheme.h"
-#include "VideoFrameDiag.h"
-#include "VideoFrameLogic.h"
-#include "VideoFrameTech.h"
-#include "VideoFrameWiring.h"
+#include "DiagScheme.h"
+#include "LogicScheme.h"
+#include "WorkflowScheme.h"
+#include "WiringScheme.h"
 #include "SchemeLayer.h"
 #include "VideoItemLine.h"
 #include "VideoItemRect.h"
@@ -37,10 +37,10 @@ namespace VFrame30
 	{
 		// Registering VideoFrames
 		//
-		VideoFrameFactory.Register<CVideoFrameDiag>();
-		VideoFrameFactory.Register<CVideoFrameLogic>();
-		VideoFrameFactory.Register<CVideoFrameTech>();
-		VideoFrameFactory.Register<CVideoFrameWiring>();
+		VideoFrameFactory.Register<DiagScheme>();
+		VideoFrameFactory.Register<LogicScheme>();
+		VideoFrameFactory.Register<WorkflowScheme>();
+		VideoFrameFactory.Register<WiringScheme>();
 
 		// Registering VideoLayers
 		//

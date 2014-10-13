@@ -2,7 +2,7 @@
 #include "VideoFrameManager.h"
 #include "VideoFrameWidget.h"
 #include "Scheme.h"
-#include "VideoFrameView.h"
+#include "SchemeView.h"
 
 namespace VFrame30
 {
@@ -20,7 +20,7 @@ namespace VFrame30
 
 		// --
 		//
-		m_pVideoFrameView = new VideoFrameView(videoFrame, this);
+		m_pVideoFrameView = new SchemeView(videoFrame, this);
 
 		m_pVideoFrameView->setZoom(100);
 		setWidget(m_pVideoFrameView);
@@ -141,7 +141,7 @@ namespace VFrame30
 
 	std::shared_ptr<Scheme>& VideoFrameBaseWidget::videoFrame()
 	{
-		VideoFrameView* ptr = dynamic_cast<VideoFrameView*>(widget());
+		SchemeView* ptr = dynamic_cast<SchemeView*>(widget());
 		if (ptr == nullptr)
 		{
 			assert(ptr != nullptr);
@@ -152,9 +152,9 @@ namespace VFrame30
 		return ptr->videoFrame();
 	}
 
-	VideoFrameView* VideoFrameBaseWidget::videoFrameView()
+	SchemeView* VideoFrameBaseWidget::videoFrameView()
 	{
-		assert(dynamic_cast<VideoFrameView*>(widget()) != nullptr);
+		assert(dynamic_cast<SchemeView*>(widget()) != nullptr);
 
 		if (m_pVideoFrameView == nullptr)
 		{

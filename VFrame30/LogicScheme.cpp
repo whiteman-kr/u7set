@@ -1,9 +1,9 @@
 #include "Stable.h"
-#include "VideoFrameLogic.h"
+#include "LogicScheme.h"
 
 namespace VFrame30
 {
-	CVideoFrameLogic::CVideoFrameLogic(void)
+	LogicScheme::LogicScheme(void)
 	{
 		setUnit(SchemeUnit::Inch);
 
@@ -17,11 +17,11 @@ namespace VFrame30
 		return;
 	}
 
-	CVideoFrameLogic::~CVideoFrameLogic(void)
+	LogicScheme ::~LogicScheme (void)
 	{
 	}
 
-	void CVideoFrameLogic::Draw(CDrawParam* pDrawParam, const QRectF& clipRect) const
+	void LogicScheme::Draw(CDrawParam* pDrawParam, const QRectF& clipRect) const
 	{
 		BuildFblConnectionMap();
 

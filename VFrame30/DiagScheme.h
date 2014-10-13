@@ -5,13 +5,13 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT CVideoFrameDiag : public Scheme
+	class VFRAME30LIBSHARED_EXPORT DiagScheme : public Scheme
 	{
 		Q_OBJECT
 
 	public:
-		CVideoFrameDiag(void);
-		virtual ~CVideoFrameDiag(void);
+		DiagScheme(void);
+		virtual ~DiagScheme(void);
 	};
 
 }

@@ -1,10 +1,10 @@
 #include "Stable.h"
-#include "VideoFrameDiag.h"
+#include "DiagScheme.h"
 
 namespace VFrame30
 {
 
-	CVideoFrameDiag::CVideoFrameDiag(void)
+	DiagScheme::DiagScheme(void)
 	{
 		setUnit(SchemeUnit::Display);
 
@@ -17,7 +17,7 @@ namespace VFrame30
 		return;
 	}
 
-	CVideoFrameDiag::~CVideoFrameDiag(void)
+	DiagScheme::~DiagScheme(void)
 	{
 	}
 

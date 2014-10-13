@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/VideoFrameView.h"
+#include "../VFrame30/SchemeView.h"
 #include "../VFrame30/VideoItem.h"
 #include "../VFrame30/FblItem.h"
 #include "EditEngine/EditEngine.h"
@@ -69,7 +69,7 @@ class EditSchemeWidget;
 // EditVideoFrameView
 //
 //
-class EditSchemeView : public VFrame30::VideoFrameView
+class EditSchemeView : public VFrame30::SchemeView
 {
 	Q_OBJECT
 

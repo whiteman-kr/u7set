@@ -5,13 +5,13 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT CVideoFrameWiring : public Scheme
+	class VFRAME30LIBSHARED_EXPORT WiringScheme : public Scheme
 	{
 		Q_OBJECT
 
 	public:
-		CVideoFrameWiring(void);
-		virtual ~CVideoFrameWiring(void);
+		WiringScheme(void);
+		virtual ~WiringScheme(void);
 	};
 }
 

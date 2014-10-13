@@ -1,10 +1,10 @@
 #include "Stable.h"
-#include "VideoFrameTech.h"
+#include "WorkflowScheme.h"
 
 namespace VFrame30
 {
 
-	CVideoFrameTech::CVideoFrameTech(void)
+	WorkflowScheme::WorkflowScheme(void)
 	{
 		setUnit(SchemeUnit::Display);
 
@@ -17,7 +17,7 @@ namespace VFrame30
 		return;
 	}
 	
-	CVideoFrameTech::~CVideoFrameTech(void)
+	WorkflowScheme::~WorkflowScheme(void)
 	{
 	}
 }

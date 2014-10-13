@@ -47,7 +47,7 @@ const EditSchemeWidget::SizeActionToMouseCursor EditSchemeWidget::m_sizeActionTo
 //
 //
 EditSchemeView::EditSchemeView(QWidget* parent) :
-	VFrame30::VideoFrameView(parent),
+	VFrame30::SchemeView(parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
@@ -61,7 +61,7 @@ EditSchemeView::EditSchemeView(QWidget* parent) :
 }
 
 EditSchemeView::EditSchemeView(std::shared_ptr<VFrame30::Scheme>& videoFrame, QWidget* parent)
-	: VFrame30::VideoFrameView(videoFrame, parent),
+	: VFrame30::SchemeView(videoFrame, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
@@ -82,7 +82,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 {
 	// Draw videoframe
 	//
-	VFrame30::VideoFrameView::paintEvent(pe);
+	VFrame30::SchemeView::paintEvent(pe);
 
 	// Draw other -- selection, grid, outlines, rullers, etc
 	//

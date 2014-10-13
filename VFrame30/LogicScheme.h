@@ -5,13 +5,13 @@
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT CVideoFrameLogic : public Scheme
+	class VFRAME30LIBSHARED_EXPORT LogicScheme : public Scheme
 	{
 		Q_OBJECT
 
 	public:
-		CVideoFrameLogic(void);
-		virtual ~CVideoFrameLogic(void);
+		LogicScheme(void);
+		virtual ~LogicScheme(void);
 
 		// Methods
 		//

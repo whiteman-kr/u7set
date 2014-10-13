@@ -8,9 +8,9 @@
 #include "../include/CUtils.h"
 
 #include "Scheme.h"
-#include "VideoFrameLogic.h"
-#include "VideoFrameTech.h"
-#include "VideoFrameDiag.h"
-#include "VideoFrameWiring.h"
+#include "LogicScheme.h"
+#include "WorkflowScheme.h"
+#include "DiagScheme.h"
+#include "WiringScheme.h"
 
 

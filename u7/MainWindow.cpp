@@ -61,19 +61,19 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 //	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 
 	getCentralWidget()->addTabPage(
-		SchemesTabPage::create<VFrame30::CVideoFrameLogic>("als", dbController(), AlFileName, nullptr),
+		SchemesTabPage::create<VFrame30::LogicScheme>("als", dbController(), AlFileName, nullptr),
 		tr("Application Logic"));
 
 	getCentralWidget()->addTabPage(
-		SchemesTabPage::create<VFrame30::CVideoFrameTech>("wvs", dbController(), WvsFileName, nullptr),
+		SchemesTabPage::create<VFrame30::WorkflowScheme>("wvs", dbController(), WvsFileName, nullptr),
 		tr("Workflow Schemes"));
 
 	getCentralWidget()->addTabPage(
-		SchemesTabPage::create<VFrame30::CVideoFrameDiag>("dvs", dbController(), DvsFileName, nullptr),
+		SchemesTabPage::create<VFrame30::DiagScheme>("dvs", dbController(), DvsFileName, nullptr),
 		tr("Diag Schemes"));
 
 //	getCentralWidget()->addTabPage(
-//		VideoFrameTabPage::create<VFrame30::CVideoFrameWiring>("wvf", dbController(), dbcontroller()->alFileId(), nullptr),
+//		VideoFrameTabPage::create<VFrame30::WiringScheme>("ws", dbController(), dbcontroller()->alFileId(), nullptr),
 //		tr("Wiring"));
 
 	// --

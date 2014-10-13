@@ -1,10 +1,10 @@
 #include "Stable.h"
-#include "VideoFrameWiring.h"
+#include "WiringScheme.h"
 
 namespace VFrame30
 {
 
-	CVideoFrameWiring::CVideoFrameWiring(void)
+	WiringScheme::WiringScheme(void)
 	{
 		setUnit(SchemeUnit::Inch);
 
@@ -18,7 +18,7 @@ namespace VFrame30
 		return;
 	}
 	
-	CVideoFrameWiring::~CVideoFrameWiring(void)
+	WiringScheme::~WiringScheme(void)
 	{
 	}
 

@@ -7,7 +7,7 @@
 namespace VFrame30
 {
 	class Scheme;
-	class VideoFrameView;
+	class SchemeView;
 	class VideoFrameManager;
 
 	//
@@ -40,7 +40,7 @@ namespace VFrame30
 
 		void setVideoFrame(std::shared_ptr<Scheme>& videoFrame);
 
-		VideoFrameView* videoFrameView();
+		SchemeView* videoFrameView();
 
 		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
 
@@ -59,7 +59,7 @@ namespace VFrame30
 		int horzScrollBarValue;	// Horizintal scroll bar value in mousePressEvent -- midButton
 		int vertScrollBarValue;	// Vertical scroll bar value in mousePressEvent -- midButton
 
-		VideoFrameView* m_pVideoFrameView;
+		SchemeView* m_pVideoFrameView;
 	};
 
 //	//

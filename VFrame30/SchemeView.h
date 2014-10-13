@@ -4,13 +4,13 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT VideoFrameView : public QWidget
+	class VFRAME30LIBSHARED_EXPORT SchemeView : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit VideoFrameView(QWidget *parent = 0);
-		explicit VideoFrameView(std::shared_ptr<VFrame30::Scheme>& videoFrame, QWidget *parent = 0);
+		explicit SchemeView(QWidget *parent = 0);
+		explicit SchemeView(std::shared_ptr<VFrame30::Scheme>& videoFrame, QWidget *parent = 0);
 
 	protected:
 		void init();
