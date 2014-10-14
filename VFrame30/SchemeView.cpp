@@ -23,12 +23,12 @@ namespace VFrame30
 		m_zoom = 100;
 	}
 
-	std::shared_ptr<Scheme>& SchemeView::videoFrame()
+	std::shared_ptr<Scheme>& SchemeView::scheme()
 	{
 		return m_videoFrame;
 	}
 
-	std::shared_ptr<Scheme> SchemeView::videoFrame() const
+	std::shared_ptr<Scheme> SchemeView::scheme() const
 	{
 		return m_videoFrame;
 	}
@@ -57,7 +57,7 @@ namespace VFrame30
 
 		// Eсли курсор над элементом у которого установлен acceptClick, то заменить курор на руку
 		//
-		std::shared_ptr<Scheme>& vf = videoFrame();
+		std::shared_ptr<Scheme>& vf = scheme();
 		if (vf.get() == nullptr)
 		{
 			assert(vf.get() != nullptr);
@@ -106,7 +106,7 @@ namespace VFrame30
 
 	void SchemeView::paintEvent(QPaintEvent*)
 	{
-		if (videoFrame().get() == nullptr)
+		if (scheme().get() == nullptr)
 		{
 			return;
 		}
@@ -118,8 +118,8 @@ namespace VFrame30
 
 		// Calc size
 		//
-		int widthInPixel = videoFrame()->GetDocumentWidth(p.device()->logicalDpiX(), zoom());
-		int heightInPixel = videoFrame()->GetDocumentHeight(p.device()->logicalDpiY(), zoom());
+		int widthInPixel = scheme()->GetDocumentWidth(p.device()->logicalDpiX(), zoom());
+		int heightInPixel = scheme()->GetDocumentHeight(p.device()->logicalDpiY(), zoom());
 
 		// Clear device
 		//
@@ -132,9 +132,9 @@ namespace VFrame30
 
 		// Draw VideoFrame
 		//
-		QRectF clipRect(0, 0, videoFrame()->docWidth(), videoFrame()->docHeight());
+		QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
 
-		videoFrame()->Draw(&drawParam, clipRect);
+		scheme()->Draw(&drawParam, clipRect);
 
 		// Ending
 		//
@@ -177,7 +177,7 @@ namespace VFrame30
 		int x = mousePos.x();
 		int y = mousePos.y();
 
-		if (videoFrame()->unit() == SchemeUnit::Display)
+		if (scheme()->unit() == SchemeUnit::Display)
 		{
 			pDestDocPos->setX(x / (m_zoom / 100.0));
 			pDestDocPos->setY(y / (m_zoom / 100.0));
@@ -216,8 +216,8 @@ namespace VFrame30
 
 		// resize widget
 		//
-		int widthInPixel = videoFrame()->GetDocumentWidth(dpiX, m_zoom);
-		int heightInPixel = videoFrame()->GetDocumentHeight(dpiY, m_zoom);
+		int widthInPixel = scheme()->GetDocumentWidth(dpiX, m_zoom);
+		int heightInPixel = scheme()->GetDocumentHeight(dpiY, m_zoom);
 
 		QSize scaledPixelSize;
 

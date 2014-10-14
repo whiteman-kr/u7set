@@ -149,7 +149,7 @@ namespace VFrame30
 			return nullSharedPtr;
 		}
 
-		return ptr->videoFrame();
+		return ptr->scheme();
 	}
 
 	SchemeView* VideoFrameBaseWidget::videoFrameView()

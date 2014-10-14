@@ -104,10 +104,10 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	// Draw VideoFrame
 	//
-	QRectF clipRect(0, 0, videoFrame()->docWidth(), videoFrame()->docHeight());
+	QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
 
 	drawParam.setControlBarSize(
-		videoFrame()->unit() == VFrame30::SchemeUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+		scheme()->unit() == VFrame30::SchemeUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
 	// Draw selection
 	//
@@ -192,6 +192,46 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	//
 	VFrame30::VideoItem::DrawOutline(drawParam, m_selectedItems);
 
+	// Get bounding rect
+	//
+	double left = 0.0;
+	double right = 0.0;
+	double top = 0.0;
+	double bottom = 0.0;
+
+	for (auto it = std::begin(m_selectedItems); it != std::end(m_selectedItems); it++)
+	{
+
+		VFrame30::IPointList* ipoint = dynamic_cast<VFrame30::IPointList*>(it->get());
+		assert(ipoint != nullptr);
+
+		if (ipoint == nullptr)
+		{
+			continue;
+		}
+
+		std::vector<VFrame30::VideoItemPoint> points = ipoint->getPointList();
+
+		for (size_t i = 0; i < points.size(); i++)
+		{
+			const VFrame30::VideoItemPoint& p = points[i];
+
+			if (it == std::begin(m_selectedItems) && i == 0)
+			{
+				left = p.X;
+				right = p.X;
+				top = p.Y;
+				bottom = p.Y;
+				continue;
+			}
+
+			left = std::min(left, p.X);
+			right = std::max(right, p.X);
+			top = std::min(top, p.Y);
+			bottom = std::max(bottom, p.Y);
+		}
+	}
+
 	// Shift position back
 	//
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
@@ -200,6 +240,30 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 			si->MoveItem(-xdif, -ydif);
 		}
 		);
+
+	// Draw rullers by bounding rect
+	//
+	QPainter* p = drawParam->painter();
+
+	// Drwing resources initialization
+	//
+	QPen outlinePen(Qt::black);
+	outlinePen.setWidth(0);
+
+	QPainter::RenderHints oldrenderhints = p->renderHints();
+	p->setRenderHint(QPainter::Antialiasing, false);
+
+	p->setPen(outlinePen);
+	p->drawLine(QPointF(left, 0.0), QPointF(left, scheme()->docHeight()));
+	p->drawLine(QPointF(right, 0.0), QPointF(right, scheme()->docHeight()));
+
+	p->drawLine(QPointF(0.0, top), QPointF(scheme()->docWidth(), top));
+	p->drawLine(QPointF(0.0, bottom), QPointF(scheme()->docWidth(), bottom));
+
+	// --
+	//
+	p->setRenderHints(oldrenderhints);
+
 
 	return;
 }
@@ -639,10 +703,10 @@ void EditSchemeView::drawGrid(QPainter* p)
 {
 	assert(p);
 
-	auto unit = videoFrame()->unit();
+	auto unit = scheme()->unit();
 
-	double frameWidth = videoFrame()->docWidth();
-	double frameHeight = videoFrame()->docHeight();
+	double frameWidth = scheme()->docWidth();
+	double frameHeight = scheme()->docHeight();
 
 	double gridSize = unit == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
 
@@ -710,9 +774,9 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::VideoItem* videoItem
 		return VideoItemAction::NoAction;
 	}
 
-	if (videoItem->itemUnit() != videoFrame()->unit())
+	if (videoItem->itemUnit() != scheme()->unit())
 	{
-		assert(videoItem->itemUnit() == videoFrame()->unit());
+		assert(videoItem->itemUnit() == scheme()->unit());
 		return VideoItemAction::NoAction;
 	}
 
@@ -914,31 +978,31 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::VideoItem* videoItem
 
 QUuid EditSchemeView::activeLayerGuid() const
 {
-	if (m_activeLayer >= static_cast<int>(videoFrame()->Layers.size()))
+	if (m_activeLayer >= static_cast<int>(scheme()->Layers.size()))
 	{
-		assert(m_activeLayer < static_cast<int>(videoFrame()->Layers.size()));
+		assert(m_activeLayer < static_cast<int>(scheme()->Layers.size()));
 		return QUuid();
 	}
 
-	return videoFrame()->Layers[m_activeLayer]->guid();
+	return scheme()->Layers[m_activeLayer]->guid();
 }
 
 std::shared_ptr<VFrame30::SchemeLayer> EditSchemeView::activeLayer()
 {
-	if (m_activeLayer >= static_cast<int>(videoFrame()->Layers.size()))
+	if (m_activeLayer >= static_cast<int>(scheme()->Layers.size()))
 	{
-		assert(m_activeLayer < static_cast<int>(videoFrame()->Layers.size()));
+		assert(m_activeLayer < static_cast<int>(scheme()->Layers.size()));
 		return std::make_shared<VFrame30::SchemeLayer>("Error", false);
 	}
 
-	return videoFrame()->Layers[m_activeLayer];
+	return scheme()->Layers[m_activeLayer];
 }
 
 void EditSchemeView::setActiveLayer(std::shared_ptr<VFrame30::SchemeLayer> layer)
 {
-	for (int i = 0; i < static_cast<int>(videoFrame()->Layers.size()); i++)
+	for (int i = 0; i < static_cast<int>(scheme()->Layers.size()); i++)
 	{
-		if (videoFrame()->Layers[i] == layer)
+		if (scheme()->Layers[i] == layer)
 		{
 			m_activeLayer = i;
 			return;
@@ -3091,12 +3155,12 @@ void EditSchemeWidget::mouseRightUp_None(QMouseEvent* event)
 
 std::shared_ptr<VFrame30::Scheme>& EditSchemeWidget::videoFrame()
 {
-	return m_videoFrameView->videoFrame();
+	return m_videoFrameView->scheme();
 }
 
 std::shared_ptr<VFrame30::Scheme>& EditSchemeWidget::videoFrame() const
 {
-	return m_videoFrameView->videoFrame();
+	return m_videoFrameView->scheme();
 }
 
 EditSchemeView* EditSchemeWidget::schemeView()
