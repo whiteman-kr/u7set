@@ -64,6 +64,7 @@ public:
 	bool isEditableSignal(int row);
 
 	DbController* dbController();
+	const DbController* dbController() const;
 	QWidget* parrentWindow() { return m_parentWindow; }
 	void showError(const ObjectState& state) const;
 	bool checkoutSignal(int index);
@@ -109,6 +110,9 @@ public:
 
 	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
 
+	void initCheckStates(const QModelIndexList& list);
+	void setAllCheckStates(bool state);
+
 private:
 	SignalsModel* m_sourceModel;
 	QVector<Qt::CheckState> states;
@@ -141,9 +145,8 @@ public slots:
 	void editSignal();
 	void deleteSignal();
 
-	QVector<int> getSelectedSignalsID();
-	void undoSignals();
-	void checkinSignals();
+	void undoSignalChanges();
+	void showPendingChanges();
 
 	void changeSignalActionsVisibility();
 
