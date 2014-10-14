@@ -6,8 +6,8 @@ class EditSchemeView;
 
 namespace VFrame30
 {
-	class CVideoLayer;
-	class CVideoFrame;
+	class SchemeLayer;
+	class Scheme;
 }
 
 namespace EditEngine
@@ -50,21 +50,21 @@ namespace EditEngine
 		void resetModified();
 
 	public:
-		void runAddItem(std::list<std::shared_ptr<VFrame30::CVideoItem>> items, std::shared_ptr<VFrame30::CVideoLayer> layer);
-		void runAddItem(std::vector<std::shared_ptr<VFrame30::CVideoItem>> items, std::shared_ptr<VFrame30::CVideoLayer> layer);
-		void runAddItem(std::shared_ptr<VFrame30::CVideoItem> item, std::shared_ptr<VFrame30::CVideoLayer> layer);
+		void runAddItem(std::list<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::vector<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::shared_ptr<VFrame30::VideoItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
 
-		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items, std::shared_ptr<VFrame30::CVideoLayer> layer);
-		void runDeleteItem(std::shared_ptr<VFrame30::CVideoItem> item, std::shared_ptr<VFrame30::CVideoLayer> layer);
+		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runDeleteItem(std::shared_ptr<VFrame30::VideoItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
 
-		void runSetPoints(const std::vector<std::vector<VFrame30::VideoItemPoint>>& points, const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items);
-		void runSetPoints(const std::vector<VFrame30::VideoItemPoint>& points, const std::shared_ptr<VFrame30::CVideoItem>& item);
+		void runSetPoints(const std::vector<std::vector<VFrame30::VideoItemPoint>>& points, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
+		void runSetPoints(const std::vector<VFrame30::VideoItemPoint>& points, const std::shared_ptr<VFrame30::VideoItem>& item);
 
-		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items);
-		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::CVideoItem>& item);
+		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
+		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::VideoItem>& item);
 
-		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items);
-		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::CVideoItem>& item);
+		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
+		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::VideoItem>& item);
 
 //		/// <summary>
 //		/// Команда "Изменить размер"
@@ -209,7 +209,7 @@ namespace EditEngine
 		// Data
 		//
 	protected:
-		std::shared_ptr<VFrame30::CVideoLayer> m_activeLayer;		// Active Layer on operation start
+		std::shared_ptr<VFrame30::SchemeLayer> m_activeLayer;		// Active Layer on operation start
 
 		double m_zoom;
 

@@ -37,6 +37,12 @@ void SchemeFileView::addFile()
 	emit addFileSignal();
 }
 
+void SchemeFileView::deleteFile(std::vector<DbFileInfo> files)
+{
+	emit deleteFileSignal(files);
+}
+
+
 
 //
 //
@@ -87,7 +93,7 @@ void SchemesTabPage::projectClosed()
 
 SchemeControlTabPage::SchemeControlTabPage(const QString& fileExt,
 		DbController* dbcontroller, const QString& parentFileName,
-		std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc) :
+		std::function<VFrame30::Scheme*()> createVideoFrameFunc) :
 
 	HasDbController(dbcontroller),
 	m_createVideoFrameFunc(createVideoFrameFunc)
@@ -114,6 +120,7 @@ SchemeControlTabPage::SchemeControlTabPage(const QString& fileExt,
 	connect(m_filesView, &SchemeFileView::openFileSignal, this, &SchemeControlTabPage::openFiles);
 	connect(m_filesView, &SchemeFileView::viewFileSignal, this, &SchemeControlTabPage::viewFiles);
 	connect(m_filesView, &SchemeFileView::addFileSignal, this, &SchemeControlTabPage::addFile);
+	connect(m_filesView, &SchemeFileView::deleteFileSignal, this, &SchemeControlTabPage::deleteFile);
 
 	return;
 }
@@ -122,7 +129,7 @@ SchemeControlTabPage::~SchemeControlTabPage()
 {
 }
 
-VFrame30::CVideoFrame* SchemeControlTabPage::createVideoFrame() const
+VFrame30::Scheme* SchemeControlTabPage::createVideoFrame() const
 {
 	return m_createVideoFrameFunc();
 }
@@ -168,15 +175,15 @@ void SchemeControlTabPage::addFile()
 
 	// Create new videoframe and add it to the vcs
 	//
-	std::shared_ptr<VFrame30::CVideoFrame> vf(m_createVideoFrameFunc());
+	std::shared_ptr<VFrame30::Scheme> vf(m_createVideoFrameFunc());
 
 	vf->setGuid(QUuid::createUuid());
 
 	vf->setStrID("STRID");
 	vf->setCaption("Caption");
 
-	vf->setDocWidth(vf->unit() == VFrame30::Display ? 1280 : (420 / 25.4));
-	vf->setDocHeight(vf->unit() == VFrame30::Display ? 1024 : (297 / 25.4));
+	vf->setDocWidth(vf->unit() == VFrame30::SchemeUnit::Display ? 1280 : (420 / 25.4));
+	vf->setDocHeight(vf->unit() == VFrame30::SchemeUnit::Display ? 1024 : (297 / 25.4));
 
 	VideoFramePropertiesDialog propertiesDialog(vf, this);
 	if (propertiesDialog.exec() != QDialog::Accepted)
@@ -216,6 +223,29 @@ void SchemeControlTabPage::addFile()
 	}
 
 	m_filesView->filesViewSelectionChanged(QItemSelection(), QItemSelection());
+	return;
+}
+
+
+void SchemeControlTabPage::deleteFile(std::vector<DbFileInfo> files)
+{
+	if (files.empty() == true)
+	{
+		assert(files.empty() == false);
+		return;
+	}
+
+	std::vector<std::shared_ptr<DbFileInfo>> v;
+
+	for(const auto& f : files)
+	{
+		v.push_back(std::make_shared<DbFileInfo>(f));
+	}
+
+	dbcontroller()->deleteFiles(&v, this);
+
+	refreshFiles();
+
 	return;
 }
 
@@ -287,12 +317,13 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	bool result = dbcontroller()->getWorkcopy(files, &out, this);
 	if (result == false || out.size() != files.size())
 	{
+		QMessageBox::critical(this, tr("Error"), "Can't get file from the database.");
 		return;
 	}
 
 	// Load file
 	//
-	std::shared_ptr<VFrame30::CVideoFrame> vf(VFrame30::CVideoFrame::Create(out[0].get()->data()));
+	std::shared_ptr<VFrame30::Scheme> vf(VFrame30::Scheme::Create(out[0].get()->data()));
 
 	if (vf == nullptr)
 	{
@@ -318,9 +349,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 {
-	assert(false);
-
-	/*if (files.empty() == true || files.size() != 1)
+	if (files.empty() == true || files.size() != 1)
 	{
 		assert(files.empty() == false);
 		return;
@@ -354,7 +383,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	bool result = dbstore()->getSpecificCopy(changesetId, files, &out, this);
+	bool result = dbcontroller()->getSpecificCopy(files, changesetId, &out, this);
 	if (result == false || out.size() != files.size())
 	{
 		return;
@@ -364,7 +393,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Load file
 	//
-	std::shared_ptr<VFrame30::CVideoFrame> vf(VFrame30::CVideoFrame::Create(out[0].get()->data()));
+	std::shared_ptr<VFrame30::Scheme> vf(VFrame30::Scheme::Create(out[0].get()->data()));
 
 	QString tabPageTitle;
 	tabPageTitle = QString("%1: %2 ReadOnly").arg(vf->strID()).arg(changesetId);
@@ -373,7 +402,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	//
 	for (int i = 0; i < tabWidget->count(); i++)
 	{
-		EditVideoFrameTabPage* tb = dynamic_cast<EditVideoFrameTabPage*>(tabWidget->widget(i));
+		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
 		if (tb == nullptr)
 		{
 			// It can be control tab page
@@ -381,7 +410,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 			continue;
 		}
 
-		if (tb->fileInfo().fileName() == fi.fileName() &&
+		if (tb->fileInfo().fileId() == fi.fileId() &&
 			tb->fileInfo().changeset() == fi.changeset() &&
 			tb->readOnly() == true)
 		{
@@ -393,12 +422,12 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	// Create TabPage and add it to the TabControl
 	//
 
-	EditVideoFrameTabPage* editTabPage = new EditVideoFrameTabPage(vf, fi, dbstore());
+	EditSchemeTabPage* editTabPage = new EditSchemeTabPage(vf, fi, dbcontroller());
 	editTabPage->setReadOnly(true);
 
 	tabWidget->addTab(editTabPage, tabPageTitle);
 	tabWidget->setCurrentWidget(editTabPage);
-*/
+
 	return;
 }
 
@@ -420,7 +449,7 @@ const DbFileInfo& SchemeControlTabPage::parentFile() const
 // EditVideoFrameTabPage
 //
 //
-EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller) :
+EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller) :
 	HasDbController(dbcontroller),
 	m_videoFrameWidget(nullptr)
 {

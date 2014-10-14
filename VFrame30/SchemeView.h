@@ -1,16 +1,16 @@
 #pragma once
 
-#include "VideoFrame.h"
+#include "Scheme.h"
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT VideoFrameView : public QWidget
+	class VFRAME30LIBSHARED_EXPORT SchemeView : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit VideoFrameView(QWidget *parent = 0);
-		explicit VideoFrameView(std::shared_ptr<VFrame30::CVideoFrame>& videoFrame, QWidget *parent = 0);
+		explicit SchemeView(QWidget *parent = 0);
+		explicit SchemeView(std::shared_ptr<VFrame30::Scheme>& videoFrame, QWidget *parent = 0);
 
 	protected:
 		void init();
@@ -26,10 +26,10 @@ namespace VFrame30
 	public:
 		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
 
-		std::shared_ptr<CVideoFrame>& videoFrame();
-		std::shared_ptr<CVideoFrame> videoFrame() const;
+		std::shared_ptr<Scheme>& videoFrame();
+		std::shared_ptr<Scheme> videoFrame() const;
 
-		void setVideoFrame(std::shared_ptr<CVideoFrame>& videoFrame, bool repaint);
+		void setVideoFrame(std::shared_ptr<Scheme>& videoFrame, bool repaint);
 		
 		// Events
 		//
@@ -45,7 +45,7 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		std::shared_ptr<VFrame30::CVideoFrame> m_videoFrame;
+		std::shared_ptr<VFrame30::Scheme> m_videoFrame;
 		double m_zoom;
 	};
 }

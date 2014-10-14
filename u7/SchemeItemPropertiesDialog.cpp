@@ -1,6 +1,6 @@
 #include "SchemeItemPropertiesDialog.h"
 #include "ui_SchemeItemPropertiesDialog.h"
-#include "EditEngine.h"
+#include "EditEngine/EditEngine.h"
 
 
 SchemeItemPropertiesDialog::SchemeItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :
@@ -22,7 +22,7 @@ SchemeItemPropertiesDialog::~SchemeItemPropertiesDialog()
 	delete ui;
 }
 
-void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items)
+void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items)
 {
 	m_items = items;
 
@@ -63,12 +63,12 @@ void SchemeItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 		return;
 	}
 
-	std::vector<std::shared_ptr<VFrame30::CVideoItem>> items;
+	std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
 	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
 
 	for (auto& i : objects)
 	{
-		std::shared_ptr<VFrame30::CVideoItem> vi = std::dynamic_pointer_cast<VFrame30::CVideoItem>(i);
+		std::shared_ptr<VFrame30::VideoItem> vi = std::dynamic_pointer_cast<VFrame30::VideoItem>(i);
 		assert(vi.get() != nullptr);
 
 		items.push_back(vi);

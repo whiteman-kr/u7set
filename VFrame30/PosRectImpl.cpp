@@ -4,16 +4,16 @@
 
 namespace VFrame30
 {
-	CPosRectImpl::CPosRectImpl(void)
+	PosRectImpl::PosRectImpl(void)
 	{
 		Init();
 	}
 
-	CPosRectImpl::~CPosRectImpl(void)
+	PosRectImpl::~PosRectImpl(void)
 	{
 	}
 
-	void CPosRectImpl::Init()
+	void PosRectImpl::Init()
 	{
 		m_leftDocPt = 0;
 		m_topDocPt = 0;
@@ -21,9 +21,9 @@ namespace VFrame30
 		m_heightDocPt = 0;
 	}
 
-	bool CPosRectImpl::SaveData(Proto::Envelope* message) const
+	bool PosRectImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CVideoItem::SaveData(message);
+		bool result = VideoItem::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -43,7 +43,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CPosRectImpl::LoadData(const Proto::Envelope& message)
+	bool PosRectImpl::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -53,7 +53,7 @@ namespace VFrame30
 		
 		// --
 		//
-		bool result = CVideoItem::LoadData(message);
+		bool result = VideoItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -78,35 +78,35 @@ namespace VFrame30
 
 	// Action Functions
 	//
-	void CPosRectImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
+	void PosRectImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
 	{ 
 		setLeftDocPt(leftDocPt() + horzOffsetDocPt);
 		setTopDocPt(topDocPt() + vertOffsetDocPt);
 	}
 
-	double CPosRectImpl::GetWidthInDocPt() const
+	double PosRectImpl::GetWidthInDocPt() const
 	{
 		return m_widthDocPt;
 	}
 
-	double CPosRectImpl::GetHeightInDocPt() const
+	double PosRectImpl::GetHeightInDocPt() const
 	{
 		return m_heightDocPt;
 	}
 
-	void CPosRectImpl::SetWidthInDocPt(double val)
+	void PosRectImpl::SetWidthInDocPt(double val)
 	{
 		m_widthDocPt = val;
 	}
 
-	void CPosRectImpl::SetHeightInDocPt(double val)
+	void PosRectImpl::SetHeightInDocPt(double val)
 	{
 		m_heightDocPt = val;
 	}
 
 	// Рисование элемента при его создании изменении
 	//
-	void CPosRectImpl::DrawOutline(CDrawParam* drawParam) const
+	void PosRectImpl::DrawOutline(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -150,7 +150,7 @@ namespace VFrame30
 	
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
-	void CPosRectImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
+	void PosRectImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -224,24 +224,24 @@ namespace VFrame30
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
 	//
-	bool CPosRectImpl::IsIntersectRect(double x, double y, double width, double height) const
+	bool PosRectImpl::IsIntersectRect(double x, double y, double width, double height) const
 	{
 		QRectF itemRect(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 		QRectF detRect(x, y, width, height);
 		return itemRect.intersects(detRect);
 	}
 
-	QRectF CPosRectImpl::boundingRectInDocPt() const
+	QRectF PosRectImpl::boundingRectInDocPt() const
 	{
 		QRectF result(m_leftDocPt, m_topDocPt, m_widthDocPt, m_heightDocPt);
 		return result;
 	}
 
-	double CPosRectImpl::leftDocPt() const 
+	double PosRectImpl::leftDocPt() const 
 	{
 		return m_leftDocPt;
 	}
-	void CPosRectImpl::setLeftDocPt(double value) 
+	void PosRectImpl::setLeftDocPt(double value) 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -253,11 +253,11 @@ namespace VFrame30
 		}
 	}
 
-	double CPosRectImpl::topDocPt() const 
+	double PosRectImpl::topDocPt() const 
 	{
 		return m_topDocPt;
 	}
-	void CPosRectImpl::setTopDocPt(double value) 
+	void PosRectImpl::setTopDocPt(double value) 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -269,11 +269,11 @@ namespace VFrame30
 		}
 	}
 
-	double CPosRectImpl::widthDocPt() const 
+	double PosRectImpl::widthDocPt() const 
 	{
 		return m_widthDocPt;
 	}
-	void CPosRectImpl::setWidthDocPt(double value) 
+	void PosRectImpl::setWidthDocPt(double value) 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -290,11 +290,11 @@ namespace VFrame30
 		}
 	}
 
-	double CPosRectImpl::heightDocPt() const 
+	double PosRectImpl::heightDocPt() const 
 	{
 		return m_heightDocPt;
 	}
-	void CPosRectImpl::setHeightDocPt(double value) 
+	void PosRectImpl::setHeightDocPt(double value) 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -313,7 +313,7 @@ namespace VFrame30
 
 	// Реализация интерефейса IVideoItemPropertiesPos
 	//
-	double CPosRectImpl::left() const
+	double PosRectImpl::left() const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -326,7 +326,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}
 	}
-	void CPosRectImpl::setLeft(double value) 
+	void PosRectImpl::setLeft(double value) 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -339,7 +339,7 @@ namespace VFrame30
 		}
 	}
 
-	double CPosRectImpl::top() const 
+	double PosRectImpl::top() const 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -352,7 +352,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}			
 	}
-	void CPosRectImpl::setTop(double value) 
+	void PosRectImpl::setTop(double value) 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -366,7 +366,7 @@ namespace VFrame30
 		}
 	}
 
-	double CPosRectImpl::width() const 
+	double PosRectImpl::width() const 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -379,7 +379,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}
 	}
-	void CPosRectImpl::setWidth(double value) 
+	void PosRectImpl::setWidth(double value) 
 	{
 		if (value < 0)
 		{
@@ -397,7 +397,7 @@ namespace VFrame30
 		}
 	}
 
-	double CPosRectImpl::height() const 
+	double PosRectImpl::height() const 
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -410,7 +410,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
 		}			
 	}
-	void CPosRectImpl::setHeight(double value) 
+	void PosRectImpl::setHeight(double value) 
 	{
 		if (value < 0)	
 		{
@@ -428,7 +428,7 @@ namespace VFrame30
 		}
 	}
 
-	std::vector<VideoItemPoint> CPosRectImpl::getPointList() const
+	std::vector<VideoItemPoint> PosRectImpl::getPointList() const
 	{
 		std::vector<VideoItemPoint> v(2);
 
@@ -438,7 +438,7 @@ namespace VFrame30
 		return v;
 	}
 
-	void CPosRectImpl::setPointList(const std::vector<VideoItemPoint>& points)
+	void PosRectImpl::setPointList(const std::vector<VideoItemPoint>& points)
 	{
 		if (points.size() != 2)
 		{

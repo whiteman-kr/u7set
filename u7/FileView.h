@@ -45,6 +45,7 @@ private:
 		FileSizeColumn,
 		FileStateColumn,
 		FileUserColumn,
+		FileActionColumn,
 		FileLastCheckInColumn,
 
 		// Add other column befor this line
@@ -82,6 +83,7 @@ public:
 	virtual void checkIn(std::vector<DbFileInfo> files);
 	virtual void undoChanges(std::vector<DbFileInfo> files);
 	virtual void addFile();
+	virtual void deleteFile(std::vector<DbFileInfo> files);
 	virtual void getWorkcopy(std::vector<DbFileInfo> files);
 	virtual void setWorkcopy(std::vector<DbFileInfo> files);
 	virtual void refreshFiles();
@@ -98,6 +100,7 @@ protected slots:
 	void slot_CheckIn();
 	void slot_UndoChanges();
 	void slot_AddFile();
+	void slot_DeleteFile();
 	void slot_GetWorkcopy();
 	void slot_SetWorkcopy();
 	void slot_RefreshFiles();
@@ -129,23 +132,24 @@ private:
 	//	Contexet Menu
 	//
 protected:
-	QAction* m_openFileAction;
-	QAction* m_viewFileAction;
+	QAction* m_openFileAction = nullptr;
+	QAction* m_viewFileAction = nullptr;
 	// --
-	QAction* m_separatorAction0;
-	QAction* m_checkOutAction;
-	QAction* m_checkInAction;
-	QAction* m_undoChangesAction;
+	QAction* m_separatorAction0 = nullptr;
+	QAction* m_checkOutAction = nullptr;
+	QAction* m_checkInAction = nullptr;
+	QAction* m_undoChangesAction = nullptr;
 	// --
-	QAction* m_separatorAction1;
-	QAction* m_addFileAction;
+	QAction* m_separatorAction1 = nullptr;
+	QAction* m_addFileAction = nullptr;
+	QAction* m_deleteFileAction = nullptr;
 	// --
-	QAction* m_separatorAction2;
-	QAction* m_getWorkcopyAction;
-	QAction* m_setWorkcopyAction;
+	QAction* m_separatorAction2 = nullptr;
+	QAction* m_getWorkcopyAction = nullptr;
+	QAction* m_setWorkcopyAction = nullptr;
 	// --
-	QAction* m_separatorAction3;
-	QAction* m_refreshFileAction;
+	QAction* m_separatorAction3 = nullptr;
+	QAction* m_refreshFileAction = nullptr;
 	// End of ConextMenu
 };
 

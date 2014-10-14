@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "Configuration.h"
-#include "VideoFrame.h"
+#include "Scheme.h"
 
 namespace VFrame30
 {
@@ -77,7 +77,7 @@ namespace VFrame30
 		m_videoFrames.clear();
 		for (int i = 0; i < configuration.videoframes().size(); i++)
 		{
-			CVideoFrame* pVideoFrame = CVideoFrame::Create(configuration.videoframes(i));
+			Scheme* pVideoFrame = Scheme::Create(configuration.videoframes(i));
 
 			if (pVideoFrame == nullptr)
 			{
@@ -85,7 +85,7 @@ namespace VFrame30
 				continue;
 			}
 
-			m_videoFrames.push_back(std::shared_ptr<CVideoFrame>(pVideoFrame));
+			m_videoFrames.push_back(std::shared_ptr<Scheme>(pVideoFrame));
 		}
 
 		return true;
@@ -179,12 +179,12 @@ namespace VFrame30
 		return &m_videoFramesIDs;
 	}
 
-	const std::vector<std::shared_ptr<CVideoFrame>>& Configuration::videoFrames() const
+	const std::vector<std::shared_ptr<Scheme>>& Configuration::videoFrames() const
 	{
 		return m_videoFrames;
 	}
 
-	std::vector<std::shared_ptr<CVideoFrame>>* Configuration::mutableVideoFrames()
+	std::vector<std::shared_ptr<Scheme>>* Configuration::mutableVideoFrames()
 	{
 		return &m_videoFrames;
 	}

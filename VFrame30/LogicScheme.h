@@ -1,17 +1,17 @@
 #pragma once
 
-#include "VideoFrame.h"
+#include "Scheme.h"
 
 namespace VFrame30
 {
 
-	class VFRAME30LIBSHARED_EXPORT CVideoFrameLogic : public CVideoFrame
+	class VFRAME30LIBSHARED_EXPORT LogicScheme : public Scheme
 	{
 		Q_OBJECT
 
 	public:
-		CVideoFrameLogic(void);
-		virtual ~CVideoFrameLogic(void);
+		LogicScheme(void);
+		virtual ~LogicScheme(void);
 
 		// Methods
 		//

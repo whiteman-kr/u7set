@@ -12,7 +12,7 @@ namespace EditEngine
 		SetPointsCommand(
 				EditSchemeView* videoFrameView,
 				const std::vector<std::vector<VFrame30::VideoItemPoint>>& points,
-				const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items,
+				const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
 				QScrollBar* hScrollBar,
 				QScrollBar* vScrollBar);
 
@@ -25,7 +25,7 @@ namespace EditEngine
 	private:
 		std::vector<std::vector<VFrame30::VideoItemPoint>> m_newPoints;
 		std::vector<std::vector<VFrame30::VideoItemPoint>> m_oldPoints;
-		std::vector<std::shared_ptr<VFrame30::CVideoItem>> m_items;
+		std::vector<std::shared_ptr<VFrame30::VideoItem>> m_items;
 	};
 
 }

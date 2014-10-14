@@ -4,7 +4,7 @@
 
 namespace EditEngine
 {
-	AddItemCommand::AddItemCommand(EditSchemeView* videoFrameView, std::list<std::shared_ptr<VFrame30::CVideoItem>> items, std::shared_ptr<VFrame30::CVideoLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	AddItemCommand::AddItemCommand(EditSchemeView* videoFrameView, std::list<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 		: EditCommand(videoFrameView, hScrollBar, vScrollBar)
 	{
 		assert(videoFrameView != nullptr);
@@ -31,7 +31,7 @@ namespace EditEngine
 		for (auto si = m_items.begin(); si != m_items.end(); ++si)
 		{
 			auto findResult = std::find_if(m_layer->Items.begin(), m_layer->Items.end(),
-				[&si](std::shared_ptr<VFrame30::CVideoItem> item)
+				[&si](std::shared_ptr<VFrame30::VideoItem> item)
 				{
 					return item.get() == si->get();
 				});

@@ -3,14 +3,14 @@
 
 namespace VFrame30
 {
-	CVideoItemConnectionLine::CVideoItemConnectionLine(void)
+	VideoItemConnectionLine::VideoItemConnectionLine(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemConnectionLine::CVideoItemConnectionLine(SchemeUnit unit) : 
+	VideoItemConnectionLine::VideoItemConnectionLine(SchemeUnit unit) : 
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
@@ -19,15 +19,15 @@ namespace VFrame30
 	}
 
 
-	CVideoItemConnectionLine::~CVideoItemConnectionLine(void)
+	VideoItemConnectionLine::~VideoItemConnectionLine(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool CVideoItemConnectionLine::SaveData(Proto::Envelope* message) const
+	bool VideoItemConnectionLine::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CPosConnectionImpl::SaveData(message);
+		bool result = PosConnectionImpl::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemConnectionLine::LoadData(const Proto::Envelope& message)
+	bool VideoItemConnectionLine::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -55,7 +55,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CPosConnectionImpl::LoadData(message);
+		bool result = PosConnectionImpl::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -83,7 +83,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void CVideoItemConnectionLine::Draw(CDrawParam* drawParam, const CVideoFrame*, const CVideoLayer*) const
+	void VideoItemConnectionLine::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer*) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -119,7 +119,7 @@ namespace VFrame30
 
 	// Weight property
 	//
-	double CVideoItemConnectionLine::weight() const
+	double VideoItemConnectionLine::weight() const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -132,7 +132,7 @@ namespace VFrame30
 		}
 	}
 
-	void CVideoItemConnectionLine::setWeight(double weight)
+	void VideoItemConnectionLine::setWeight(double weight)
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -147,12 +147,12 @@ namespace VFrame30
 
 	// LineColor property
 	//
-	QRgb CVideoItemConnectionLine::lineColor() const
+	QRgb VideoItemConnectionLine::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void CVideoItemConnectionLine::setLineColor(QRgb color)
+	void VideoItemConnectionLine::setLineColor(QRgb color)
 	{
 		m_lineColor = color;
 	}

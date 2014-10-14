@@ -13,7 +13,7 @@ namespace EditEngine
 				EditSchemeView* videoFrameView,
 				double xdiff,
 				double ydiff,
-				const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items,
+				const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
 				QScrollBar* hScrollBar,
 				QScrollBar* vScrollBar);
 
@@ -26,7 +26,7 @@ namespace EditEngine
 	private:
 		double m_xdiff;
 		double m_ydiff;
-		std::vector<std::shared_ptr<VFrame30::CVideoItem>> m_items;
+		std::vector<std::shared_ptr<VFrame30::VideoItem>> m_items;
 	};
 
 }

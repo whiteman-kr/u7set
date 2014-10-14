@@ -69,16 +69,16 @@ namespace VFrame30
 			assert(pPaintDevice);
 		}
 
-		QFont f(font.name);
+		QFont f(font.name());
 
-		f.setBold(font.bold);
-		f.setItalic(font.italic);
+		f.setBold(font.bold());
+		f.setItalic(font.italic());
 
 		QRectF rc;
 
 		if (unit == SchemeUnit::Display)
 		{
-			f.setPointSize(static_cast<int>(font.size));
+			f.setPointSize(static_cast<int>(font.drawSize()));
 			rc = rect;
 		}
 		else
@@ -90,11 +90,12 @@ namespace VFrame30
 			// Фонт инфо требуется для вычисления соотношения между Point и Pixels
 			//
 			QFontInfo fi(f);
-			qreal pointsize = fi.pointSizeF();	
+			qreal pointsize = fi.pointSizeF();
 			qreal pixelsize = static_cast<qreal>(fi.pixelSize());
 			double p2p = pixelsize / pointsize;
 
-			f.setPixelSize(static_cast<int>(font.size * dpiY * p2p));
+			int pixelSize = static_cast<int>(font.drawSize() * dpiY * p2p);
+			f.setPixelSize(pixelSize > 0 ? pixelSize : 1);
 
 			rc.setLeft(rect.left() * dpiX);
 			rc.setTop(rect.top() * dpiY);

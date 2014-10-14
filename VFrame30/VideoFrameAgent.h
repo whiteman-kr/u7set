@@ -4,7 +4,7 @@
 
 namespace VFrame30
 {
-	class CVideoFrame;
+	class Scheme;
 
 	class VideoFrameAgent : public QObject, protected QScriptable
 	{
@@ -12,7 +12,7 @@ namespace VFrame30
 		Q_PROPERTY(QString strID READ strID)
 
 	public:
-		explicit VideoFrameAgent(QObject* pParent, const std::shared_ptr<const CVideoFrame>& videoFrame);
+		explicit VideoFrameAgent(QObject* pParent, const std::shared_ptr<const Scheme>& videoFrame);
 		~VideoFrameAgent();
 
 		// Properties
@@ -27,7 +27,7 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		std::shared_ptr<const CVideoFrame> m_videoFrame;
+		std::shared_ptr<const Scheme> m_videoFrame;
 	};
 }
 

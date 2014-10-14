@@ -7,21 +7,21 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT CVideoItemFblElement : public CFblItemRect
+	class VFRAME30LIBSHARED_EXPORT VideoItemFblElement : public FblItemRect
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<CVideoItemFblElement>;
+		friend ::Factory<VideoItem>::DerivedType<VideoItemFblElement>;
 #endif
 
 	private:
-		CVideoItemFblElement(void);
+		VideoItemFblElement(void);
 	public:
-		explicit CVideoItemFblElement(SchemeUnit unit);
-		CVideoItemFblElement(SchemeUnit unit, const Fbl::FblElement& fblElement);
+		explicit VideoItemFblElement(SchemeUnit unit);
+		VideoItemFblElement(SchemeUnit unit, const Fbl::FblElement& fblElement);
 
-		virtual ~CVideoItemFblElement(void);
+		virtual ~VideoItemFblElement(void);
 
 		// Draw Functions
 		//
@@ -29,7 +29,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const CVideoFrame* pFrame, const CVideoLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
 
 		// Serialization
 		//

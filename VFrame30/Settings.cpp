@@ -4,7 +4,8 @@
 
 namespace VFrame30
 {
-	SchemeUnit CSettings::m_regionalUnit = SchemeUnit::Inch;
+	//SchemeUnit CSettings::m_regionalUnit = SchemeUnit::Inch;
+	SchemeUnit CSettings::m_regionalUnit = SchemeUnit::Millimeter;
 
 	// ћинимальный грид, дл€ схем, используетс€ дл€ позиционировани€ (выравнивание€) пинов в Fbl едементах
 	//

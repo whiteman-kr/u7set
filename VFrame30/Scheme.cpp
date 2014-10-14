@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "VideoFrame.h"
+#include "Scheme.h"
 #include "FblItem.h"
 #include "VideoItemLink.h"
 #include "HorzVertLinks.h"
@@ -8,18 +8,18 @@
 
 namespace VFrame30
 {
-	Factory<VFrame30::CVideoFrame> VideoFrameFactory;
+	Factory<VFrame30::Scheme> VideoFrameFactory;
 
-	CVideoFrame::CVideoFrame(void)
+	Scheme::Scheme(void)
 	{
 		Init();
 	}
 
-	CVideoFrame::~CVideoFrame(void)
+	Scheme::~Scheme(void)
 	{
 	}
 
-	void CVideoFrame::Init(void)
+	void Scheme::Init(void)
 	{
 		m_guid = QUuid();  // GUID_NULL
 
@@ -29,7 +29,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoFrame::SaveData(Proto::Envelope* message) const
+	bool Scheme::SaveData(Proto::Envelope* message) const
 	{
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
@@ -58,7 +58,7 @@ namespace VFrame30
 		return saveLayersResult;
 	}
 
-	bool CVideoFrame::LoadData(const Proto::Envelope& message)
+	bool Scheme::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoframe() == false)
 		{
@@ -81,7 +81,7 @@ namespace VFrame30
 
 		for (int i = 0; i < videoframe.layers().size(); i++)
 		{
-			CVideoLayer* pLayer = CVideoLayer::Create(videoframe.layers(i));
+			SchemeLayer* pLayer = SchemeLayer::Create(videoframe.layers(i));
 			
 			if (pLayer == nullptr)
 			{
@@ -89,7 +89,7 @@ namespace VFrame30
 				continue;
 			}
 			
-			Layers.push_back(std::shared_ptr<CVideoLayer>(pLayer));
+			Layers.push_back(std::shared_ptr<SchemeLayer>(pLayer));
 		}
 
 		if (videoframe.layers().size() != (int)Layers.size())
@@ -102,7 +102,7 @@ namespace VFrame30
 		return true;
 	}
 
-	CVideoFrame* CVideoFrame::CreateObject(const Proto::Envelope& message)
+	Scheme* Scheme::CreateObject(const Proto::Envelope& message)
 	{
 		// Эта функция может создавать только один экземпляр
 		//
@@ -113,7 +113,7 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		CVideoFrame* pVideoFrame = VideoFrameFactory.Create(classNameHash);
+		Scheme* pVideoFrame = VideoFrameFactory.Create(classNameHash);
 
 		if (pVideoFrame == nullptr)
 		{
@@ -126,7 +126,7 @@ namespace VFrame30
 		return pVideoFrame;
 	}
 
-	void CVideoFrame::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
+	void Scheme::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -156,7 +156,7 @@ namespace VFrame30
 
 		for (auto layer = Layers.cbegin(); layer != Layers.cend(); ++layer)
 		{
-			const CVideoLayer* pLayer = layer->get();
+			const SchemeLayer* pLayer = layer->get();
 
 			if (pLayer->show() == false)
 			{
@@ -165,7 +165,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 			{
-				const std::shared_ptr<CVideoItem>& item = *vi;
+				const std::shared_ptr<VideoItem>& item = *vi;
 
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
@@ -175,13 +175,13 @@ namespace VFrame30
 		}
 	}
 
-	void CVideoFrame::Print()
+	void Scheme::Print()
 	{
 		assert(false);
 		//::MessageBox(NULL, GetStrID().c_str(), _T("Print"), MB_OK);
 	}
 
-	void CVideoFrame::MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
+	void Scheme::MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
 	{
 		if (pVideoFrameWidgetAgent == nullptr)
 		{
@@ -196,7 +196,7 @@ namespace VFrame30
 
 		for (auto layer = Layers.crbegin(); layer != Layers.crend(); layer++)
 		{
-			const CVideoLayer* pLayer = layer->get();
+			const SchemeLayer* pLayer = layer->get();
 
 			if (pLayer->show() == false)
 			{
@@ -205,7 +205,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<CVideoItem>& item = *vi;
+				const std::shared_ptr<VideoItem>& item = *vi;
 
 				if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
@@ -224,7 +224,7 @@ namespace VFrame30
 		return;
 	}
 
-	void CVideoFrame::RunClickScript(const std::shared_ptr<CVideoItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
+	void Scheme::RunClickScript(const std::shared_ptr<VideoItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
 	{
 		if (pVideoFrameWidgetAgent == nullptr || videoItem->acceptClick() == false || videoItem->clickScript().isEmpty() == true)
 		{
@@ -258,7 +258,7 @@ namespace VFrame30
 		return;
 	}
 
-	int CVideoFrame::GetDocumentWidth(double DpiX, double zoom) const
+	int Scheme::GetDocumentWidth(double DpiX, double zoom) const
 	{
 		if (unit() == SchemeUnit::Display)
 		{
@@ -270,7 +270,7 @@ namespace VFrame30
 		}
 	}
 
-	int CVideoFrame::GetDocumentHeight(double DpiY, double zoom) const
+	int Scheme::GetDocumentHeight(double DpiY, double zoom) const
 	{
 		if (unit() == SchemeUnit::Display)
 		{
@@ -282,12 +282,12 @@ namespace VFrame30
 		}
 	}
 
-	int CVideoFrame::GetLayerCount() const
+	int Scheme::GetLayerCount() const
 	{
 		return (int)Layers.size();
 	}
 
-	void CVideoFrame::BuildFblConnectionMap() const
+	void Scheme::BuildFblConnectionMap() const
 	{
 		// --
 		//
@@ -297,7 +297,7 @@ namespace VFrame30
 		//
 		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
 		{
-			CVideoLayer* pLayer = layer->get();
+			SchemeLayer* pLayer = layer->get();
 
 			for (auto item = pLayer->Items.begin(); item != pLayer->Items.end(); ++item)
 			{
@@ -306,14 +306,14 @@ namespace VFrame30
 					continue;
 				}
 
-				CFblItem* pFblItem = dynamic_cast<CFblItem*>(item->get());
+				FblItem* pFblItem = dynamic_cast<FblItem*>(item->get());
 				if (pFblItem == nullptr)
 				{
 					assert(pFblItem);
 					continue;
 				}
 
-				CVideoItemLink* pVideoItemLink = dynamic_cast<CVideoItemLink*>(item->get());
+				VideoItemLink* pVideoItemLink = dynamic_cast<VideoItemLink*>(item->get());
 				if (pVideoItemLink != nullptr)
 				{
 					const std::list<VideoItemPoint>& pointList = pVideoItemLink->GetPointList();
@@ -335,7 +335,7 @@ namespace VFrame30
 		//
 		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
 		{
-			CVideoLayer* pLayer = layer->get();
+			SchemeLayer* pLayer = layer->get();
 
 			pLayer->connectionMap.clear();
 
@@ -346,7 +346,7 @@ namespace VFrame30
 					continue;
 				}
 
-				CFblItem* pFblItem = dynamic_cast<CFblItem*>(item->get());
+				FblItem* pFblItem = dynamic_cast<FblItem*>(item->get());
 				
 				if (pFblItem == nullptr)
 				{
@@ -357,7 +357,7 @@ namespace VFrame30
 			
 				// Если элемент CVideoItemLink, то в качестве координат пинов будут крайние точки
 				//
-				CVideoItemLink* pVideoItemLink = dynamic_cast<CVideoItemLink*>(item->get());
+				VideoItemLink* pVideoItemLink = dynamic_cast<VideoItemLink*>(item->get());
 
 				if (pVideoItemLink != nullptr)
 				{
@@ -434,12 +434,12 @@ namespace VFrame30
 
 	// Guid
 	//
-	QUuid CVideoFrame::guid() const
+	QUuid Scheme::guid() const
 	{
 		return m_guid;
 	}
 
-	void CVideoFrame::setGuid(const QUuid& guid)
+	void Scheme::setGuid(const QUuid& guid)
 	{
 		m_guid = guid;
 		return;
@@ -447,60 +447,60 @@ namespace VFrame30
 
 	// StrID
 	//
-	QString CVideoFrame::strID() const
+	QString Scheme::strID() const
 	{
 		return m_strID;
 	}
 
-	void CVideoFrame::setStrID(const QString& strID)
+	void Scheme::setStrID(const QString& strID)
 	{
 		m_strID = strID;
 	}
 
 	// Caption
 	//
-	QString CVideoFrame::caption() const
+	QString Scheme::caption() const
 	{
 		return m_caption;
 	}
 
-	void CVideoFrame::setCaption(const QString& caption)
+	void Scheme::setCaption(const QString& caption)
 	{
 		m_caption = caption;
 	}
 
 	// Width
 	//
-	double CVideoFrame::docWidth() const
+	double Scheme::docWidth() const
 	{
 		return m_width;
 	}
 
-	void CVideoFrame::setDocWidth(double width)
+	void Scheme::setDocWidth(double width)
 	{
 		m_width = width;
 	}
 
 	// Height
 	//
-	double CVideoFrame::docHeight() const
+	double Scheme::docHeight() const
 	{
 		return m_height;
 	}
 
-	void CVideoFrame::setDocHeight(double height)
+	void Scheme::setDocHeight(double height)
 	{
 		m_height = height;
 	}
 
 	// Unit
 	//
-	SchemeUnit CVideoFrame::unit() const
+	SchemeUnit Scheme::unit() const
 	{
 		return m_unit;
 	}
 
-	void CVideoFrame::setUnit(SchemeUnit value)
+	void Scheme::setUnit(SchemeUnit value)
 	{
 		m_unit = value;
 	}

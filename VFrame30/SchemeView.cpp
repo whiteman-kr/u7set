@@ -1,39 +1,39 @@
 #include "Stable.h"
-#include "VideoFrameView.h"
+#include "SchemeView.h"
 
 namespace VFrame30
 {
-	VideoFrameView::VideoFrameView(QWidget *parent) :
+	SchemeView::SchemeView(QWidget *parent) :
 		QWidget(parent)
 	{
 		init();
 	}
 
-	VideoFrameView::VideoFrameView(std::shared_ptr<CVideoFrame> &videoFrame, QWidget* parent /*= 0*/) :
+	SchemeView::SchemeView(std::shared_ptr<Scheme> &videoFrame, QWidget* parent /*= 0*/) :
 		QWidget(parent)
 	{
 		this->m_videoFrame = videoFrame;
 		init();
 	}
 
-	void VideoFrameView::init()
+	void SchemeView::init()
 	{
 		setMouseTracking(true);
 
 		m_zoom = 100;
 	}
 
-	std::shared_ptr<CVideoFrame>& VideoFrameView::videoFrame()
+	std::shared_ptr<Scheme>& SchemeView::videoFrame()
 	{
 		return m_videoFrame;
 	}
 
-	std::shared_ptr<CVideoFrame> VideoFrameView::videoFrame() const
+	std::shared_ptr<Scheme> SchemeView::videoFrame() const
 	{
 		return m_videoFrame;
 	}
 
-	void VideoFrameView::setVideoFrame(std::shared_ptr<CVideoFrame>& videoFrame, bool repaint)
+	void SchemeView::setVideoFrame(std::shared_ptr<Scheme>& videoFrame, bool repaint)
 	{
 		assert(videoFrame.get() != nullptr);
 		m_videoFrame = videoFrame;
@@ -41,7 +41,7 @@ namespace VFrame30
 		setZoom(zoom(), repaint);		// Adhust sliders, widget etc.
 	}
 
-	void VideoFrameView::mouseMoveEvent(QMouseEvent* event)
+	void SchemeView::mouseMoveEvent(QMouseEvent* event)
 	{
 		// Если прижата какая либо кнопка, отдать управление дальше (VideoFrameWidget?)
 		//
@@ -57,7 +57,7 @@ namespace VFrame30
 
 		// Eсли курсор над элементом у которого установлен acceptClick, то заменить курор на руку
 		//
-		std::shared_ptr<CVideoFrame>& vf = videoFrame();
+		std::shared_ptr<Scheme>& vf = videoFrame();
 		if (vf.get() == nullptr)
 		{
 			assert(vf.get() != nullptr);
@@ -78,7 +78,7 @@ namespace VFrame30
 		
 		for (auto layer = vf->Layers.crbegin(); layer != vf->Layers.crend(); layer++)
 		{
-			const CVideoLayer* pLayer = layer->get();
+			const SchemeLayer* pLayer = layer->get();
 
 			if (pLayer->show() == false)
 			{
@@ -87,7 +87,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<CVideoItem>& item = *vi;
+				const std::shared_ptr<VideoItem>& item = *vi;
 
 				if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
@@ -104,7 +104,7 @@ namespace VFrame30
 		return;
 	}
 
-	void VideoFrameView::paintEvent(QPaintEvent*)
+	void SchemeView::paintEvent(QPaintEvent*)
 	{
 		if (videoFrame().get() == nullptr)
 		{
@@ -141,7 +141,7 @@ namespace VFrame30
 		return;
 	}
 
-	void VideoFrameView::Ajust(QPainter* painter, double startX, double startY) const
+	void SchemeView::Ajust(QPainter* painter, double startX, double startY) const
 	{
 		// Set transform matrix
 		//
@@ -166,7 +166,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool VideoFrameView::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	bool SchemeView::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX /*= 0*/, int dpiY /*= 0*/)
 	{
 		if (pDestDocPos == nullptr)
 		{
@@ -197,12 +197,12 @@ namespace VFrame30
 	// Properties
 	//
 
-	double VideoFrameView::zoom() const
+	double SchemeView::zoom() const
 	{
 		return m_zoom;
 	}
 
-	void VideoFrameView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	void SchemeView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
 	{
 		value = value > 500 ? 500 : value;
 		value = value < 50 ? 50 : value;
