@@ -1,5 +1,6 @@
 #include "CalibratorBase.h"
 
+
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -8,6 +9,7 @@
 #include <QPushButton>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
+#include <QKeyEvent>
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -34,20 +36,13 @@ void CalibratorBase::init(QWidget* parent)
     m_parentWidget = parent;
 
     createCalibrators();                // create objects of calibrators
-    createMainWnd();                    // create dialog initialization
+    createDialog();                    // create dialog initialization
 
     setHeaderList();                    // init calibrator list
 
     connect(&m_timer, &QTimer::timeout, this, &CalibratorBase::timeoutInitialization, Qt::QueuedConnection);
 
     emit calibratorOpen();           // open all calibratirs
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorBase::clear()
-{
-    removeCalibrators();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -71,7 +66,8 @@ void CalibratorBase::createCalibrators()
         manager->setIndex(index);
         manager->loadSettings();
 
-        appendCalibratorManger(manager);
+        m_calibratorManagerList.append(manager);
+
 
         QThread *pThread = new QThread;
         if (pThread != nullptr)
@@ -87,6 +83,8 @@ void CalibratorBase::createCalibrators()
         connect(this, &CalibratorBase::calibratorClose, calibrator, &Calibrator::close, Qt::QueuedConnection);
         connect(calibrator, &Calibrator::connected, this, &CalibratorBase::onCalibratorConnected, Qt::QueuedConnection);
         connect(calibrator, &Calibrator::disconnected, this, &CalibratorBase::onCalibratorDisconnected, Qt::QueuedConnection);
+
+        emit calibrator->disconnected();
     }
 }
 
@@ -96,10 +94,10 @@ void CalibratorBase::removeCalibrators()
 {
     emit calibratorClose();
 
-    int count = calibratorCount();
-    for(int index = count - 1; index >= 0; index--)
+    int count = m_calibratorManagerList.count();
+    for(int index = 0; index < count; index++)
     {
-        CalibratorManager* manager = getCalibratorManager(index);
+        CalibratorManager* manager = m_calibratorManagerList.at(index);
         if (manager == nullptr)
         {
             continue;
@@ -119,42 +117,49 @@ void CalibratorBase::removeCalibrators()
             }
         }
 
-        removeCalibratorManger(index);
+        delete manager;
     }
+
+    m_calibratorManagerList.clear();
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::createMainWnd()
+void CalibratorBase::createDialog()
 {
-    m_pMainWnd = new QDialog(m_parentWidget);
-    m_pMainWnd->setWindowFlags(Qt::Drawer);
-    m_pMainWnd->setFixedSize(500, 200);
-    m_pMainWnd->setWindowTitle(tr("Calibrators initialization"));
+    m_pDialog = new QDialog(m_parentWidget);
+    m_pDialog->setWindowFlags(Qt::Drawer);
+    m_pDialog->setFixedSize(500, 200);
+    m_pDialog->setWindowTitle(tr("Calibrators initialization"));
+    m_pDialog->installEventFilter(this);
 
-        m_pMenuBar = new QMenuBar(m_pMainWnd);
-        m_pCalibratorMenu = new QMenu(tr("&Calibrators"), m_pMainWnd);
+        m_pMenuBar = new QMenuBar(m_pDialog);
+        m_pCalibratorMenu = new QMenu(tr("&Calibrators"), m_pDialog);
 
         m_pInitAction = m_pCalibratorMenu->addAction(tr("&Initialization"));
+        m_pInitAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Calibrators.png")));
         m_pInitAction->setShortcut(Qt::CTRL + Qt::Key_I);
         m_pCalibratorMenu->addSeparator();
         m_pManageAction = m_pCalibratorMenu->addAction(tr("&Manage ..."));
+        m_pManageAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Manage.png")));
         m_pManageAction->setShortcut(Qt::CTRL + Qt::Key_M);
-        m_pEditAction = m_pCalibratorMenu->addAction(tr("&Edit settings ..."));
-        m_pEditAction->setShortcut(Qt::CTRL + Qt::Key_E);
+        m_pSettingsAction = m_pCalibratorMenu->addAction(tr("&Settings ..."));
+        m_pSettingsAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Settings.png")));
+        m_pSettingsAction->setShortcut(Qt::CTRL + Qt::Key_S);
 
 
         m_pMenuBar->addMenu(m_pCalibratorMenu);
 
         connect(m_pInitAction, &QAction::triggered, this, &CalibratorBase::onInitialization, Qt::QueuedConnection);
         connect(m_pManageAction, &QAction::triggered, this, &CalibratorBase::onManage, Qt::QueuedConnection);
-        connect(m_pEditAction, &QAction::triggered, this, &CalibratorBase::onEdit, Qt::QueuedConnection);
+        connect(m_pSettingsAction, &QAction::triggered, this, static_cast<void (CalibratorBase::*)()>(&CalibratorBase::onSettings), Qt::QueuedConnection);
 
         QVBoxLayout *mainLayout = new QVBoxLayout;
         mainLayout->setMenuBar(m_pMenuBar);
 
-        m_pCalibratorView = new QTableWidget(m_pMainWnd);
-        m_pCalibratorProgress = new QProgressBar(m_pMainWnd);
+        m_pCalibratorView = new QTableWidget(m_pDialog);
+        m_pCalibratorProgress = new QProgressBar(m_pDialog);
 
         QVBoxLayout *listLayout = new QVBoxLayout;
         listLayout->addWidget(m_pCalibratorView);
@@ -162,21 +167,10 @@ void CalibratorBase::createMainWnd()
 
         mainLayout->addLayout(listLayout);
 
-    m_pMainWnd->setLayout(mainLayout);
-
-    connect(m_pMainWnd, &QDialog::finished , this, &CalibratorBase::onClose, Qt::QueuedConnection);
+    m_pDialog->setLayout(mainLayout);
 }
 
-// -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::onClose()
-{
-    if (m_timeout != 0)
-    {
-        m_pMainWnd->show();
-        m_pMainWnd->activateWindow();
-    }
-}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -221,7 +215,7 @@ void CalibratorBase::setHeaderList()
         }
     }
 
-    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::editSettings, Qt::QueuedConnection);
+    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, static_cast<void (CalibratorBase::*)(int, int)>(&CalibratorBase::onSettings), Qt::QueuedConnection);
 
     // init context menu
     //
@@ -241,10 +235,10 @@ void CalibratorBase::setHeaderList()
 
 void CalibratorBase::updateList()
 {
-    int count = calibratorCount();
+    int count = m_calibratorManagerList.count();
     for(int index = 0; index < count; index++ )
     {
-        CalibratorManager* manager = getCalibratorManager(index);
+        CalibratorManager* manager = m_calibratorManagerList.at(index);
         if (manager == nullptr)
         {
             continue;
@@ -269,17 +263,12 @@ void CalibratorBase::updateList()
 
 void CalibratorBase::updateConnectedCalibrators()
 {
-    for(int i = 0; i < MAX_CALIBRATOR_COUNT; i++ )
-    {
-        m_connectedCalibratorsIndex[i] = -1;
-    }
-
     m_connectedCalibratorsCount = 0;
 
-    int count = calibratorCount();
+    int count = m_calibratorManagerList.count();
     for(int index = 0; index < count; index++ )
     {
-        CalibratorManager* manager = getCalibratorManager(index);
+        CalibratorManager* manager = m_calibratorManagerList.at(index);
         if (manager == nullptr)
         {
             continue;
@@ -287,7 +276,6 @@ void CalibratorBase::updateConnectedCalibrators()
 
         if (manager->calibratorIsConnected() == true)
         {
-            m_connectedCalibratorsIndex[ m_connectedCalibratorsCount ] = index;
             m_connectedCalibratorsCount ++;
         }
     }
@@ -301,114 +289,37 @@ void CalibratorBase::show()
 {
     updateList();
 
-    m_pMainWnd->show();
+    m_pDialog->show();
     m_pCalibratorProgress->setValue(0);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int CalibratorBase::calibratorCount()
+CalibratorManager* CalibratorBase::at(int index)
 {
-    int count = 0;
-
-    m_mutex.lock();
-
-        count =  m_calibratorManagerList.count();
-
-    m_mutex.unlock();
-
-    return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-CalibratorManager* CalibratorBase::getCalibratorManager(int index)
-{
-    CalibratorManager* pManager = nullptr;
-
-    m_mutex.lock();
-
-        switch(theOptions.getToolBar().m_measureKind)
-        {
-            case MEASURE_KIND_ONE:
-
-                index = m_connectedCalibratorsIndex[0];                                    // get first connected calibrator
-
-            case MEASURE_KIND_MULTI:
-
-                if (index < 0 || index >= m_calibratorManagerList.count())
-                {
-                    break;
-                }
-
-                pManager = m_calibratorManagerList.at(index);
-
-                break;
-
-            default:
-                assert(0);
-                break;
-        }
-
-    m_mutex.unlock();
-
-    return pManager;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorBase::appendCalibratorManger(CalibratorManager* pManager)
-{
-    if (pManager == nullptr)
+    if (index < 0 || index >= m_calibratorManagerList.count())
     {
-        return;
+        return nullptr;
     }
 
-    m_mutex.lock();
-
-        m_calibratorManagerList.append(pManager);
-
-    m_mutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorBase::removeCalibratorManger(int index)
-{
-    if (index < 0 || index >= calibratorCount())
-    {
-        return;
-    }
-
-    m_mutex.lock();
-
-        CalibratorManager* pManager = m_calibratorManagerList.at(index);
-        if (pManager != nullptr)
-        {
-            delete pManager;
-        }
-
-        m_calibratorManagerList.removeAt(index);
-
-    m_mutex.unlock();
-
+    return m_calibratorManagerList.at(index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void CalibratorBase::onInitialization()
 {
-    m_pMainWnd->setWindowFlags(Qt::Tool | Qt::WindowSystemMenuHint );
-    m_pMainWnd->show();
-    m_pMainWnd->activateWindow();
+    m_pDialog->setWindowFlags(Qt::Tool | Qt::WindowSystemMenuHint );
+    m_pDialog->show();
+    m_pDialog->activateWindow();
 
     m_pCalibratorMenu->setEnabled(false);
     m_pCalibratorView->setEnabled(false);
 
-    int count = calibratorCount();
-    for(int index = 0; index < count; index++ )
+    int calibratorCount = count();
+    for(int index = 0; index < calibratorCount; index++ )
     {
-        CalibratorManager* manager = getCalibratorManager(index);
+        CalibratorManager* manager = at(index);
         if (manager == nullptr)
         {
             continue;
@@ -446,9 +357,9 @@ void CalibratorBase::timeoutInitialization()
         m_pCalibratorMenu->setEnabled(true);
         m_pCalibratorView->setEnabled(true);
 
-        m_pMainWnd->setWindowFlags( Qt::Drawer );
-        m_pMainWnd->show();
-        m_pMainWnd->activateWindow();
+        m_pDialog->setWindowFlags( Qt::Drawer );
+        m_pDialog->show();
+        m_pDialog->activateWindow();
 
         updateList();
     }
@@ -459,16 +370,13 @@ void CalibratorBase::timeoutInitialization()
 void CalibratorBase::onManage()
 {
     int index = m_pCalibratorView->currentRow();
-    if (index < 0 || index >= calibratorCount())
+    if (index < 0 || index >= count())
     {
-        QMessageBox msg;
-        msg.setText(tr("Please, select calibrator for manage!"));
-        msg.exec();
-
+        QMessageBox::information(m_pDialog, m_pDialog->windowTitle(), tr("Please, select calibrator for manage!"));
         return;
     }
 
-    CalibratorManager* manager = getCalibratorManager(index);
+    CalibratorManager* manager = m_calibratorManagerList.at(index);
     if (manager == nullptr)
     {
         return;
@@ -479,42 +387,29 @@ void CalibratorBase::onManage()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::onEdit()
+void CalibratorBase::onSettings()
 {
     int index = m_pCalibratorView->currentRow();
-    if (index < 0 || index >= calibratorCount())
+    if (index < 0 || index >= count())
     {
-        QMessageBox msg;
-        msg.setText(tr("Please, select calibrator for manage!"));
-        msg.exec();
-
+        QMessageBox::information(m_pDialog, m_pDialog->windowTitle(), tr("Please, select calibrator for edit settings!"));
         return;
     }
 
-    editSettings(index, -1);
+    onSettings(index, -1);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::onContextMenu(QPoint)
-{
-    QMenu *menu = new QMenu(m_pCalibratorView);
-    menu->addAction(m_pManageAction);
-    menu->addAction(m_pEditAction);
-    menu->exec(QCursor::pos());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorBase::editSettings(int row,int)
+void CalibratorBase::onSettings(int row,int)
 {
     int index = row;
-    if (index < 0 || index >= calibratorCount())
+    if (index < 0 || index >= count())
     {
         return;
     }
 
-    CalibratorManager* manager = getCalibratorManager(index);
+    CalibratorManager* manager = m_calibratorManagerList.at(index);
     if (manager == nullptr)
     {
         return;
@@ -528,10 +423,10 @@ void CalibratorBase::editSettings(int row,int)
 
     // create dialog for select serial port and calibrator type
     //
-    QDialog* dialog = new QDialog(m_pMainWnd);
+    QDialog* dialog = new QDialog(m_pDialog);
     dialog->setWindowFlags(Qt::Drawer);
     dialog->setFixedSize(200, 120);
-    dialog->setWindowTitle(tr("Edit settings calibrator %1").arg(manager->getIndex() + 1));
+    dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->getIndex() + 1));
 
         // serial port
         //
@@ -608,6 +503,16 @@ void CalibratorBase::editSettings(int row,int)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void CalibratorBase::onContextMenu(QPoint)
+{
+    QMenu *menu = new QMenu(m_pCalibratorView);
+    menu->addAction(m_pManageAction);
+    menu->addAction(m_pSettingsAction);
+    menu->exec(QCursor::pos());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void CalibratorBase::onCalibratorConnected()
 {
     updateList();
@@ -620,6 +525,45 @@ void CalibratorBase::onCalibratorDisconnected()
 {
     updateList();
     updateConnectedCalibrators();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::HideToParent)
+    {
+        if (m_timeout != 0)
+        {
+            m_pDialog->show();
+            m_pDialog->activateWindow();
+
+            event->ignore();
+        }
+    }
+
+    if (event->type() == QEvent::KeyRelease)
+    {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
+
+        if (keyEvent->key() == Qt::Key_Return)
+        {
+            if (m_timeout == 0)
+            {
+                onSettings();
+            }
+        }
+    }
+
+    return QObject::eventFilter(object, event);
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorBase::clear()
+{
+    removeCalibrators();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

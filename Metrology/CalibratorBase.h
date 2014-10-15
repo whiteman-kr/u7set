@@ -2,7 +2,6 @@
 #define CALIBRATORBASE_H
 
 #include <QObject>
-#include <QMutex>
 #include <QList>
 #include <QThread>
 #include <QEvent>
@@ -19,6 +18,10 @@
 // ==============================================================================================
 
 const int MAX_CALIBRATOR_COUNT = 6;
+
+// ==============================================================================================
+
+const int CALIBRATOR_COUNT_FOR_CC = 2;
 
 // ==============================================================================================
 
@@ -49,82 +52,77 @@ public:
     explicit CalibratorBase(QObject *parent = 0);
             ~CalibratorBase();
 
-    void                        init(QWidget* parent = 0);
-    void                        clear();
+    void                    init(QWidget* parent = 0);
+    void                    show();
 
-    void                        show();
+    int                     count() { return m_calibratorManagerList.count(); }
 
-    int                         calibratorCount();
+    CalibratorManager*      at(int index);
 
-    CalibratorManager*          getCalibratorManager(int index);
+    int                     getConnectedCalibratorsCount() { return m_connectedCalibratorsCount; }
 
-    int                         getConnectedCalibratorsCount() { return m_connectedCalibratorsCount; }
+    void                    clear();
+
+
 
 private:
 
-    QMutex                      m_mutex;
+    QTimer                  m_timer;
+    int                     m_timeout = 0;
 
-    QTimer                      m_timer;
-    int                         m_timeout = 0;
+    CalibratorManagerList   m_calibratorManagerList;
 
-    QList<CalibratorManager*>   m_calibratorManagerList;
+    void                    createCalibrators();
+    void                    removeCalibrators();
 
-    int                         m_connectedCalibratorsCount = 0;
-    int                         m_connectedCalibratorsIndex[MAX_CALIBRATOR_COUNT];
+    int                     m_connectedCalibratorsCount = 0;
 
-
-    void                        updateConnectedCalibrators();
+    void                    updateConnectedCalibrators();
 
 private:
 
     // Elements of interface
     //
-    QWidget*            m_parentWidget = nullptr;
-    QDialog*            m_pMainWnd = nullptr;
+    QWidget*                m_parentWidget = nullptr;
+    QDialog*                m_pDialog = nullptr;
 
-    QMenu*              m_pCalibratorMenu = nullptr;
-    QMenuBar*           m_pMenuBar = nullptr;
-    QAction*            m_pInitAction = nullptr;
-    QAction*            m_pManageAction = nullptr;
-    QAction*            m_pEditAction = nullptr;
+    QMenuBar*               m_pMenuBar = nullptr;
+    QMenu*                  m_pCalibratorMenu = nullptr;
+    QAction*                m_pInitAction = nullptr;
+    QAction*                m_pManageAction = nullptr;
+    QAction*                m_pSettingsAction = nullptr;
 
-    QTableWidget*       m_pCalibratorView = nullptr;
-    QProgressBar*       m_pCalibratorProgress = nullptr;
+    QTableWidget*           m_pCalibratorView = nullptr;
+    QProgressBar*           m_pCalibratorProgress = nullptr;
 
+    void                    createDialog();
 
-    void                createCalibrators();
-    void                removeCalibrators();
+    void                    setHeaderList();
+    void                    updateList();
 
-    void                createMainWnd();
+protected:
 
-    void                setHeaderList();
-    void                updateList();
-
-    void                appendCalibratorManger(CalibratorManager* pManager);
-    void                removeCalibratorManger(int index);
+    bool                    eventFilter(QObject *object, QEvent *event);
 
 signals:
 
-    void                calibratorOpen();
-    void                calibratorClose();
+    void                    calibratorOpen();
+    void                    calibratorClose();
 
-    void                calibratorConnectedChanged(int);
+    void                    calibratorConnectedChanged(int);
 
 public slots:
 
-    void                timeoutInitialization();            // Slot of timer
+    void                    timeoutInitialization();            // Slot of timer
 
-    void                onInitialization();                 // Slot of calibrator menu - Initialization
-    void                onManage();                         // Slot of calibrator menu - Manage
-    void                onEdit();                           // Slot of calibrator menu - Edit setting
-    void                onContextMenu(QPoint);              // Slot of context menu - Manage
+    void                    onInitialization();                 // Slot of calibrator menu - Initialization
+    void                    onManage();                         // Slot of calibrator menu - Manage
+    void                    onSettings();                       // Slot of calibrator menu - Edit setting
+    void                    onSettings(int row,int);            // Slot for edit serial port and type of calibrator
+    void                    onContextMenu(QPoint);              // Slot of context menu
 
-    void                onClose();                          // Slot blocks close the windows, until the initialization process finishing
-
-    void                editSettings(int row,int);          // Slot for edit serial port and type of calibrator
-
-    void                onCalibratorConnected();            // Slots events from calibrator
-    void                onCalibratorDisconnected();         // Slots events from calibrator
+    void                    onCalibratorConnected();            // Slots events from calibrator
+    void                    onCalibratorDisconnected();         // Slots events from calibrator
 };
 
 // ==============================================================================================
