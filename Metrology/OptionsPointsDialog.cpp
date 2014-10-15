@@ -348,8 +348,6 @@ void OptionsPointsDialog::cellChanged(int row, int column)
         return;
     }
 
-    QMessageBox::information(this, windowTitle(), tr("Please, select point"));
-
     if (column != POINT_SENSOR_PERCENT)
     {
         return;
