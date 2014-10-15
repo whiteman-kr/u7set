@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <QSettings>
-#include <QMessageBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QListWidget>
@@ -108,6 +107,7 @@ OptionsDialog::~OptionsDialog()
 
 void OptionsDialog::createInterface()
 {
+    setWindowIcon(QIcon::fromTheme("empty", QIcon(":/icons/Options.png")));
     setMinimumSize(800, 400);
     restoreWindowPosition(this);
 
@@ -229,6 +229,11 @@ QHBoxLayout* OptionsDialog::createButtons()
 
 PropertyPage* OptionsDialog::createPage(int page)
 {
+    if (page < 0 || page >= OPTION_PAGE_COUNT)
+    {
+        return nullptr;
+    }
+
     PropertyPage* pPropertyPage = nullptr;
 
     switch (page)
@@ -253,6 +258,11 @@ PropertyPage* OptionsDialog::createPage(int page)
 
 PropertyPage* OptionsDialog::createPropertyList(int page)
 {
+    if (page < 0 || page >= OPTION_PAGE_COUNT)
+    {
+        return nullptr;
+    }
+
     QtVariantProperty *item = nullptr;
 
     QtVariantPropertyManager *manager = new QtVariantPropertyManager;
@@ -446,6 +456,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 PropertyPage* OptionsDialog::createPropertyDialog(int page)
 {
+    if (page < 0 || page >= OPTION_PAGE_COUNT)
+    {
+        return nullptr;
+    }
+
     QDialog* pDialogPage = nullptr;
 
     switch (page)
@@ -469,6 +484,11 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
         default:
             assert(nullptr);
             break;
+    }
+
+    if (pDialogPage != nullptr)
+    {
+        pDialogPage->setWindowTitle( OptionPage[page] );
     }
 
     return ( new PropertyPage(pDialogPage) );

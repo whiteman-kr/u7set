@@ -1,13 +1,14 @@
 #include "MeasureThread.h"
 
 #include <assert.h>
-#include <QMessageBox>
+
 #include <QTime>
+#include <QMessageBox>
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureThread::MeasureThread(QObject *parent) :
+MeasureThread::MeasureThread(QWidget *parent) :
     QThread(parent)
 {
 }
@@ -16,16 +17,16 @@ MeasureThread::MeasureThread(QObject *parent) :
 
 void MeasureThread::waitMeasureTimeout()
 {
-    for(int t = 0; t < theOptions.getToolBar().m_measureTimeout; t += MT_TIMEOUT_STEP )
+    for(int t = 0; t < theOptions.getToolBar().m_measureTimeout; t += MEASURE_THREAD_TIMEOUT_STEP )
     {
         if (m_cmdStopMeasure == true)
         {
             break;
         }
 
-        QThread::msleep(MT_TIMEOUT_STEP);
+        QThread::msleep(MEASURE_THREAD_TIMEOUT_STEP);
 
-        emit measureInfo(MT_TIMEOUT_STEP + t);
+        emit measureInfo(MEASURE_THREAD_TIMEOUT_STEP + t);
     }
 
     emit measureInfo(0);
@@ -80,58 +81,139 @@ void MeasureThread::run()
 
     m_cmdStopMeasure = false;
 
-    // Prepare calibreators
+    // Prepare calibrators
     //
-    int channelCount = theOptions.getChannelCount();
+    m_calibratorManagerList.clear();
+
+    int calibratorCount = theCalibratorBase.count();
 
     switch (m_measureType)
     {
         case MEASURE_TYPE_LINEARITY:
         case MEASURE_TYPE_COMPARATOR:
-
-            // select mode and unit
-            //
-            for (int c = 0; c < channelCount; c++)
             {
-                CalibratorManager* manager = theCalibratorBase.getCalibratorManager(c);
-                if (manager == nullptr)
-                {
-                    continue;
-                }
 
-                if (manager->calibratorIsConnected() == false)
-                {
-                    continue;
-                }
-
-                // if analog signal has output range
+                // create list of calibrators for measure
                 //
-                if (prepareCalibrator(manager, CALIBRATOR_MODE_MEASURE, CALIBRATOR_UNIT_MA) == false)
+                switch(theOptions.getToolBar().m_measureKind)
                 {
-                    // meassage box
+                    case MEASURE_KIND_ONE:
+
+                        // append first connected calibrator
+                        //
+                        for(int c = 0; c < calibratorCount; c ++)
+                        {
+                            CalibratorManager* manager = theCalibratorBase.at(c);
+                            if (manager == nullptr)
+                            {
+                                continue;
+                            }
+
+                            if (manager->calibratorIsConnected() == false)
+                            {
+                                continue;
+                            }
+
+                            m_calibratorManagerList.append(manager);
+
+                            break;
+                        }
+
+                        break;
+
+                    case MEASURE_KIND_MULTI:
+
+                        // append all calibrators
+                        //
+                        for(int c = 0; c < calibratorCount; c ++)
+                        {
+                            CalibratorManager* manager = theCalibratorBase.at(c);
+                            if (manager == nullptr)
+                            {
+                                continue;
+                            }
+
+                            m_calibratorManagerList.append(manager);
+                        }
+
+                        break;
+
+                    default:
+                        assert(0);
+                        break;
                 }
 
-                if (prepareCalibrator(manager, CALIBRATOR_MODE_SOURCE, CALIBRATOR_UNIT_LOW_OHM) == false)
+                // select mode and unit
+                //
+                int count = m_calibratorManagerList.count();
+                for (int c = 0; c < count; c++)
                 {
-                    // meassage box
+                    CalibratorManager* manager = m_calibratorManagerList.at(c);
+                    if (manager == nullptr)
+                    {
+                        continue;
+                    }
+
+                    if (manager->calibratorIsConnected() == false)
+                    {
+                        continue;
+                    }
+
+                    // if analog signal has output range
+                    //
+                    if (prepareCalibrator(manager, CALIBRATOR_MODE_MEASURE, CALIBRATOR_UNIT_MA) == false)
+                    {
+                        //emit showMsgBox(QString("Calibrator %d can not set measure mode").arg(manager->geIndex() + 1));
+                    }
+
+                    if (prepareCalibrator(manager, CALIBRATOR_MODE_SOURCE, CALIBRATOR_UNIT_LOW_OHM) == false)
+                    {
+                        //emit showMsgBox(QString("Calibrator %d can not set source mode").arg(manager->geIndex() + 1));
+                    }
                 }
             }
 
             break;
 
         case MEASURE_TYPE_COMPLEX_COMPARATOR:
+            {
+                // for verification the complex comparators need two calibrator
+                //
+                if (theCalibratorBase.getConnectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
+                {
+                    break;
+                }
 
+                // search two connected calibrators
+                //
+                int calibratorCount = theCalibratorBase.count();
+                for(int c = 0; c < calibratorCount; c ++)
+                {
+                    CalibratorManager* manager = theCalibratorBase.at(c);
+                    if (manager == nullptr)
+                    {
+                        continue;
+                    }
+
+                    if (manager->calibratorIsConnected() == false)
+                    {
+                        continue;
+                    }
+
+                    m_calibratorManagerList.append(manager);
+
+                    if (m_calibratorManagerList.count() == CALIBRATOR_COUNT_FOR_CC)
+                    {
+                        break;
+                    }
+                }
+            }
             break;
 
         default:
             assert(false);
             break;
     }
-
-    // additional delay for the calibrator model TRX-II
-    // as its hardware is too slow and without delay don't have time to execute commands
-    //
-    // QThread::msleep(5000);
 
     // start measure function
     //
@@ -148,16 +230,17 @@ void MeasureThread::run()
 
 void MeasureThread::measureLinearity()
 {
-    QTime responseTime;
-    int channelCount = theOptions.getChannelCount();
-
     int pointCount = theOptions.getLinearity().m_pointBase.count();
     if (pointCount == 0)
     {
-//        QMessageBox msg;
-//        msg.setText(tr("Don't set points for measure"));
-//        msg.exec();
+        //emit showMsgBox("The application don't have points of measured");
+        return;
+    }
 
+    int calibratorCount = m_calibratorManagerList.count();
+    if (calibratorCount == 0)
+    {
+        //emit showMsgBox("The application don't have connected calibrators");
         return;
     }
 
@@ -174,13 +257,14 @@ void MeasureThread::measureLinearity()
             continue;
         }
 
-        emit measureInfo(tr("set point %1 / %2 ").arg(p + 1).arg(pointCount));
+        emit measureInfo(tr("Set point %1 / %2 ").arg(p + 1).arg(pointCount));
 
         // set electric value
         //
-        for (int c = 0; c < channelCount; c++)
+
+        for (int c = 0; c < calibratorCount; c++)
         {
-            CalibratorManager* manager = theCalibratorBase.getCalibratorManager(c);
+            CalibratorManager* manager = m_calibratorManagerList.at(c);
             if (manager == nullptr)
             {
                 continue;
@@ -196,11 +280,12 @@ void MeasureThread::measureLinearity()
 
         // wait ready all calibrators
         //
+        QTime responseTime;
         responseTime.start();
 
-        for (int c = 0; c < channelCount; c++)
+        for (int c = 0; c < calibratorCount; c++)
         {
-            CalibratorManager* manager = theCalibratorBase.getCalibratorManager(c);
+            CalibratorManager* manager = m_calibratorManagerList.at(c);
             if (manager == nullptr)
             {
                 continue;
@@ -217,11 +302,13 @@ void MeasureThread::measureLinearity()
 
         qDebug("Function: %s, time waiting ready: %d ms", __FUNCTION__, responseTime.elapsed());
 
-        emit measureInfo(tr("wait measurement %1 / %2 ").arg(p + 1).arg(pointCount));
         // wait measure timeout
         //
+        emit measureInfo(tr("Wait timeout %1 / %2 ").arg(p + 1).arg(pointCount));
         waitMeasureTimeout();
 
+        // save measurement
+        //
         emit measureInfo(tr("Save measurement "));
 
         emit measureComplite();
@@ -247,4 +334,3 @@ void MeasureThread::measureComplexComprators()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-

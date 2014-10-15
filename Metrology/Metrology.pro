@@ -62,3 +62,7 @@ win32 {
         INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
 
+OTHER_FILES += \
+    translations/Metrology_ru.ts \
+    translations/Metrology_uk.ts
+
