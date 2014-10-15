@@ -1153,3 +1153,41 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 	}
 	emit dataChanged(index(0, 0), index(states.count() - 1, 0), QVector<int>() << Qt::CheckStateRole);
 }
+
+
+CheckedoutSignalsDialog::CheckedoutSignalsDialog(QString* /*comment*/)
+{
+	/*QVBoxLayout* vl = new QVBoxLayout;
+
+	CheckedoutSignalsModel* proxyModel = new CheckedoutSignalsModel(m_signalsModel, &dlg);
+
+	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+	if (selection.count() != 0)
+	{
+		proxyModel->initCheckStates(selection);
+	}
+
+	if (comment)
+	{
+		QPlainTextEdit* commentText = new QPlainTextEdit(&dlg);
+		vl->addWidget(commentText);
+	}
+
+	QCheckBox* selectAll = new QCheckBox(tr("Select all"), &dlg);
+	connect(selectAll, &QCheckBox::toggled, proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
+	vl->addWidget(selectAll);
+
+	QTableView* signalsView = new QTableView(&dlg);
+	signalsView->setModel(proxyModel);
+	signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
+	signalsView->resizeColumnsToContents();
+
+	vl->addWidget(signalsView);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	connect(buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+	vl->addWidget(buttonBox);
+
+	setLayout(vl);*/
+}

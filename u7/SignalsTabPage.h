@@ -119,6 +119,17 @@ private:
 };
 
 
+class CheckedoutSignalsDialog : public QDialog
+{
+	Q_OBJECT
+public:
+	CheckedoutSignalsDialog(QString* comment);
+
+public slots:
+	//void undoSignalChanges();
+};
+
+
 class SignalsTabPage : public MainTabPage
 {
 	Q_OBJECT
