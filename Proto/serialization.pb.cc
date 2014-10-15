@@ -449,7 +449,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(PosConnectionImpl));
   VideoItemRect_descriptor_ = file->message_type(16);
-  static const int VideoItemRect_offsets_[7] = {
+  static const int VideoItemRect_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemRect, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemRect, linecolor_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemRect, fillcolor_),
@@ -457,6 +457,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemRect, textcolor_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemRect, font_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemRect, fill_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemRect, drawrect_),
   };
   VideoItemRect_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1016,52 +1017,52 @@ void protobuf_AddDesc_serialization_2eproto() {
     " \002(\001\022\023\n\013startYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003"
     " \002(\001\022\021\n\tendYDocPt\030\004 \002(\001\":\n\021PosConnection"
     "Impl\022%\n\006points\030\001 \003(\0132\025.Proto.VideoItemPo"
-    "int\"\244\001\n\rVideoItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n"
+    "int\"\274\001\n\rVideoItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n"
     "\tlineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004t"
     "ext\030\004 \002(\0132\016.Proto.wstring\022\021\n\ttextColor\030\005"
     " \002(\r\022\036\n\004font\030\006 \002(\0132\020.Proto.FontParam\022\014\n\004"
-    "fill\030\007 \002(\010\"2\n\rVideoItemLine\022\016\n\006weight\030\001 "
-    "\002(\001\022\021\n\tlineColor\030\002 \002(\r\"<\n\027VideoItemConne"
-    "ctionLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002"
-    " \002(\r\"\363\001\n\022FblConnectionPoint\022$\n\005point\030\001 \002"
-    "(\0132\025.Proto.VideoItemPoint\022/\n\ndirrection\030"
-    "\002 \002(\0162\033.Proto.ConnectionDirrection\022\031\n\004uu"
-    "id\030\003 \002(\0132\013.Proto.Uuid\022\037\n\nsignalUuid\030\n \001("
-    "\0132\013.Proto.Uuid\022#\n\013signalStrID\030\013 \001(\0132\016.Pr"
-    "oto.wstring\022%\n\rsignalCaption\030\014 \001(\0132\016.Pro"
-    "to.wstring\"4\n\007FblItem\022)\n\006points\030\001 \003(\0132\031."
-    "Proto.FblConnectionPoint\"v\n\013FblItemRect\022"
-    "\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfi"
-    "llColor\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004font"
-    "\030\005 \002(\0132\020.Proto.FontParam\"0\n\013FblItemLine\022"
-    "\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"\021\n\017Vi"
-    "deoItemSignal\"\026\n\024VideoItemInputSignal\"\027\n"
-    "\025VideoItemOutputSignal\"\017\n\rVideoItemLink\""
-    ":\n\023VideoItemFblElement\022#\n\nfblelement\030\001 \002"
-    "(\0132\017.Proto.Envelope\"\366\003\n\014DeviceObject\022\031\n\004"
-    "uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016"
-    ".Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto."
-    "wstring\022(\n\020childRestriction\030\004 \001(\0132\016.Prot"
-    "o.wstring\022\025\n\006preset\030  \001(\010:\005false\022\031\n\npres"
-    "etRoot\030! \001(\010:\005false\022\"\n\npresetName\030\" \001(\0132"
-    "\016.Proto.wstring\022\037\n\004Root\030d \001(\0132\021.Proto.De"
-    "viceRoot\022#\n\006System\030e \001(\0132\023.Proto.DeviceS"
-    "ystem\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%"
-    "\n\007Chassis\030g \001(\0132\024.Proto.DeviceChassis\022#\n"
-    "\006Module\030h \001(\0132\023.Proto.DeviceModule\022+\n\nCo"
-    "ntroller\030i \001(\0132\027.Proto.DeviceController\022"
-    "+\n\nDiagSignal\030j \001(\0132\027.Proto.DeviceDiagSi"
-    "gnal\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDe"
-    "viceRack\"2\n\rDeviceChassis\022\020\n\005place\030\001 \001(\005"
-    ":\0010\022\017\n\004type\030\002 \001(\005:\0010\"1\n\014DeviceModule\022\020\n\005"
-    "place\030\001 \001(\005:\0010\022\017\n\004type\030\002 \001(\005:\0010\"\022\n\020Devic"
-    "eController\"\022\n\020DeviceDiagSignal*3\n\nSchem"
-    "eUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004In"
-    "ch\020\002*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Dis"
-    "crete\020\001*N\n\014FblParamType\022\022\n\016AnalogIntegra"
-    "l\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDiscrete"
-    "Value\020\002*-\n\024ConnectionDirrection\022\t\n\005Input"
-    "\020\000\022\n\n\006Output\020\001", 4614);
+    "fill\030\007 \002(\010\022\026\n\010drawrect\030\010 \001(\010:\004true\"2\n\rVi"
+    "deoItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor"
+    "\030\002 \002(\r\"<\n\027VideoItemConnectionLine\022\016\n\006wei"
+    "ght\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"\363\001\n\022FblConn"
+    "ectionPoint\022$\n\005point\030\001 \002(\0132\025.Proto.Video"
+    "ItemPoint\022/\n\ndirrection\030\002 \002(\0162\033.Proto.Co"
+    "nnectionDirrection\022\031\n\004uuid\030\003 \002(\0132\013.Proto"
+    ".Uuid\022\037\n\nsignalUuid\030\n \001(\0132\013.Proto.Uuid\022#"
+    "\n\013signalStrID\030\013 \001(\0132\016.Proto.wstring\022%\n\rs"
+    "ignalCaption\030\014 \001(\0132\016.Proto.wstring\"4\n\007Fb"
+    "lItem\022)\n\006points\030\001 \003(\0132\031.Proto.FblConnect"
+    "ionPoint\"v\n\013FblItemRect\022\016\n\006weight\030\001 \002(\001\022"
+    "\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n"
+    "\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.F"
+    "ontParam\"0\n\013FblItemLine\022\016\n\006weight\030\001 \002(\001\022"
+    "\021\n\tlineColor\030\002 \002(\r\"\021\n\017VideoItemSignal\"\026\n"
+    "\024VideoItemInputSignal\"\027\n\025VideoItemOutput"
+    "Signal\"\017\n\rVideoItemLink\":\n\023VideoItemFblE"
+    "lement\022#\n\nfblelement\030\001 \002(\0132\017.Proto.Envel"
+    "ope\"\366\003\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013.Pro"
+    "to.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstring\022\037"
+    "\n\007caption\030\003 \002(\0132\016.Proto.wstring\022(\n\020child"
+    "Restriction\030\004 \001(\0132\016.Proto.wstring\022\025\n\006pre"
+    "set\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010:\005fa"
+    "lse\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstring\022"
+    "\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006Syst"
+    "em\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack\030f "
+    "\001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001(\0132"
+    "\024.Proto.DeviceChassis\022#\n\006Module\030h \001(\0132\023."
+    "Proto.DeviceModule\022+\n\nController\030i \001(\0132\027"
+    ".Proto.DeviceController\022+\n\nDiagSignal\030j "
+    "\001(\0132\027.Proto.DeviceDiagSignal\"\014\n\nDeviceRo"
+    "ot\"\016\n\014DeviceSystem\"\014\n\nDeviceRack\"2\n\rDevi"
+    "ceChassis\022\020\n\005place\030\001 \001(\005:\0010\022\017\n\004type\030\002 \001("
+    "\005:\0010\"1\n\014DeviceModule\022\020\n\005place\030\001 \001(\005:\0010\022\017"
+    "\n\004type\030\002 \001(\005:\0010\"\022\n\020DeviceController\"\022\n\020D"
+    "eviceDiagSignal*3\n\nSchemeUnit\022\013\n\007Display"
+    "\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*)\n\rFblSigna"
+    "lType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014FblPa"
+    "ramType\022\022\n\016AnalogIntegral\020\000\022\027\n\023AnalogFlo"
+    "atingPoint\020\001\022\021\n\rDiscreteValue\020\002*-\n\024Conne"
+    "ctionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001", 4638);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -7546,6 +7547,7 @@ const int VideoItemRect::kTextFieldNumber;
 const int VideoItemRect::kTextColorFieldNumber;
 const int VideoItemRect::kFontFieldNumber;
 const int VideoItemRect::kFillFieldNumber;
+const int VideoItemRect::kDrawrectFieldNumber;
 #endif  // !_MSC_VER
 
 VideoItemRect::VideoItemRect()
@@ -7573,6 +7575,7 @@ void VideoItemRect::SharedCtor() {
   textcolor_ = 0u;
   font_ = NULL;
   fill_ = false;
+  drawrect_ = true;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -7621,6 +7624,7 @@ void VideoItemRect::Clear() {
       if (font_ != NULL) font_->::Proto::FontParam::Clear();
     }
     fill_ = false;
+    drawrect_ = true;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -7735,6 +7739,22 @@ bool VideoItemRect::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(64)) goto parse_drawrect;
+        break;
+      }
+
+      // optional bool drawrect = 8 [default = true];
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_drawrect:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &drawrect_)));
+          set_has_drawrect();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -7794,6 +7814,11 @@ void VideoItemRect::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->fill(), output);
   }
 
+  // optional bool drawrect = 8 [default = true];
+  if (has_drawrect()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->drawrect(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -7839,6 +7864,11 @@ void VideoItemRect::SerializeWithCachedSizes(
   // required bool fill = 7;
   if (has_fill()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->fill(), target);
+  }
+
+  // optional bool drawrect = 8 [default = true];
+  if (has_drawrect()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->drawrect(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -7897,6 +7927,11 @@ int VideoItemRect::ByteSize() const {
       total_size += 1 + 1;
     }
 
+    // optional bool drawrect = 8 [default = true];
+    if (has_drawrect()) {
+      total_size += 1 + 1;
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -7945,6 +7980,9 @@ void VideoItemRect::MergeFrom(const VideoItemRect& from) {
     if (from.has_fill()) {
       set_fill(from.fill());
     }
+    if (from.has_drawrect()) {
+      set_drawrect(from.drawrect());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -7982,6 +8020,7 @@ void VideoItemRect::Swap(VideoItemRect* other) {
     std::swap(textcolor_, other->textcolor_);
     std::swap(font_, other->font_);
     std::swap(fill_, other->fill_);
+    std::swap(drawrect_, other->drawrect_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

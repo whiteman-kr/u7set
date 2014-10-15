@@ -8,16 +8,17 @@
 const int	ERR_SIGNAL_OK = 0,
 			ERR_SIGNAL_IS_NOT_CHECKED_OUT = 1,
 			ERR_SIGNAL_ALREADY_CHECKED_OUT = 2,
-			ERR_SIGNAL_DELETED = 3;
+			ERR_SIGNAL_DELETED = 3,
+			ERR_SIGNAL_NOT_FOUND = 4;
 
 // System files names
 //
-extern const char* AfblFileName;		// Application Functional Block Library
-extern const char* AlFileName;			// Application Logic Schemes
-extern const char* HcFileName;			// Hardware Configuratiun
-extern const char* HpFileName;			// Hardware Presets
-extern const char* WvsFileName;		// Workflow Video Schemes
-extern const char* DvsFileName;		// Diagnostics Video Schemes
+extern const char* const AfblFileName;		// Application Functional Block Library
+extern const char* const AlFileName;			// Application Logic Schemes
+extern const char* const HcFileName;			// Hardware Configuratiun
+extern const char* const HpFileName;			// Hardware Presets
+extern const char* const WvsFileName;			// Workflow Video Schemes
+extern const char* const DvsFileName;			// Diagnostics Video Schemes
 
 //
 //
@@ -377,19 +378,23 @@ public:
 	void setDate(const QDateTime& value);
 	void setDate(const QString& value);
 
-	const DbUser& user() const;
-	void setUser(const DbUser& value);
+	int userId() const;
+	void setUserId(int value);
 
 	const QString& comment() const;
 	void setComment(const QString& value);
 
+	const VcsItemAction& action() const;
+	void setAction(const VcsItemAction& value);
+
 	// Data
 	//
 private:
-	int m_changesetId;
+	int m_changesetId = 0;
 	QDateTime m_date;
-	DbUser m_user;
+	int m_userId = -1;
 	QString m_comment;
+	VcsItemAction m_action;
 };
 
 // WIN_64 PLATFORM C4267 WARNING ISSUE, IT IS NOT ENOUGH TO DISBALE THIS WARNING

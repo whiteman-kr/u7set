@@ -26,13 +26,13 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT CPosLineImpl : public CVideoItem, public IVideoItemPosLine
+	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public VideoItem, public IVideoItemPosLine
 	{
 		Q_OBJECT
 
 	protected:
-		CPosLineImpl(void);
-		virtual ~CPosLineImpl(void);
+		PosLineImpl(void);
+		virtual ~PosLineImpl(void);
 
 	private:
 		void Init(void);

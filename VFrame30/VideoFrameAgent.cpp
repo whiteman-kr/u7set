@@ -1,10 +1,10 @@
 #include "Stable.h"
 #include "VideoFrameAgent.h"
-#include "VideoFrame.h"
+#include "Scheme.h"
 
 namespace VFrame30
 {
-	VideoFrameAgent::VideoFrameAgent(QObject* pParent, const std::shared_ptr<const CVideoFrame>& videoFrame)
+	VideoFrameAgent::VideoFrameAgent(QObject* pParent, const std::shared_ptr<const Scheme>& videoFrame)
 		: QObject(pParent), 
 		m_videoFrame(videoFrame)
 	{

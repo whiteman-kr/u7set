@@ -4,19 +4,19 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT CVideoItemLine : public CPosLineImpl
+	class VFRAME30LIBSHARED_EXPORT VideoItemLine : public PosLineImpl
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<CVideoItemLine>;
+		friend ::Factory<VideoItem>::DerivedType<VideoItemLine>;
 #endif
 
 	private:
-		CVideoItemLine(void);
+		VideoItemLine(void);
 	public:
-		explicit CVideoItemLine(SchemeUnit unit);
-		virtual ~CVideoItemLine(void);
+		explicit VideoItemLine(SchemeUnit unit);
+		virtual ~VideoItemLine(void);
 
 		// Serialization
 		//
@@ -31,7 +31,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const CVideoFrame* pFrame, const CVideoLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
 
 		// Properties and Data
 	public:

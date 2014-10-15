@@ -3,24 +3,24 @@
 
 namespace VFrame30
 {
-	CPosConnectionImpl::CPosConnectionImpl(void)
+	PosConnectionImpl::PosConnectionImpl(void)
 	{
 		Init();
 	}
 
-	CPosConnectionImpl::~CPosConnectionImpl(void)
+	PosConnectionImpl::~PosConnectionImpl(void)
 	{
 	}
 
-	void CPosConnectionImpl::Init(void)
+	void PosConnectionImpl::Init(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool CPosConnectionImpl::SaveData(Proto::Envelope* message) const
+	bool PosConnectionImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CVideoItem::SaveData(message);
+		bool result = VideoItem::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CPosConnectionImpl::LoadData(const Proto::Envelope& message)
+	bool PosConnectionImpl::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -55,7 +55,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CVideoItem::LoadData(message);
+		bool result = VideoItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -82,7 +82,7 @@ namespace VFrame30
 
 	// Action Functions
 	//
-	void CPosConnectionImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
+	void PosConnectionImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
 	{
 		for(auto pt = points.begin(); pt != points.end(); ++pt)
 		{
@@ -91,7 +91,7 @@ namespace VFrame30
 		}
 	}
 
-	double CPosConnectionImpl::GetWidthInDocPt() const
+	double PosConnectionImpl::GetWidthInDocPt() const
 	{
 		if (points.size() == 0)
 		{
@@ -110,7 +110,7 @@ namespace VFrame30
 		return maxval - minval;
 	}
 
-	double CPosConnectionImpl::GetHeightInDocPt() const
+	double PosConnectionImpl::GetHeightInDocPt() const
 	{
 		if (points.size() == 0)
 		{
@@ -129,11 +129,11 @@ namespace VFrame30
 		return maxval - minval;
 	}
 
-	void CPosConnectionImpl::SetWidthInDocPt(double /*val*/)
+	void PosConnectionImpl::SetWidthInDocPt(double /*val*/)
 	{
 	}
 
-	void CPosConnectionImpl::SetHeightInDocPt(double /*val*/)
+	void PosConnectionImpl::SetHeightInDocPt(double /*val*/)
 	{
 	}
 
@@ -142,7 +142,7 @@ namespace VFrame30
 
 	// Рисование элемента при его создании изменении
 	//
-	void CPosConnectionImpl::DrawOutline(CDrawParam* drawParam) const
+	void PosConnectionImpl::DrawOutline(CDrawParam* drawParam) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -195,7 +195,7 @@ namespace VFrame30
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
-	void CPosConnectionImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
+	void PosConnectionImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -253,7 +253,7 @@ namespace VFrame30
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
 	// 
-	bool CPosConnectionImpl::IsIntersectRect(double x, double y, double width, double height) const
+	bool PosConnectionImpl::IsIntersectRect(double x, double y, double width, double height) const
 	{
 		// Проверить, пересекает ли хоть одна прямая intersectRectangleIn
 		//
@@ -279,7 +279,7 @@ namespace VFrame30
 		return false;
 	}
 
-	QRectF CPosConnectionImpl::boundingRectInDocPt() const
+	QRectF PosConnectionImpl::boundingRectInDocPt() const
 	{
 		if (points.size() == 0)
 		{
@@ -306,22 +306,22 @@ namespace VFrame30
 	
 	// Реализация интерефейса IVideoItemPosLine
 	//
-	const std::list<VideoItemPoint>& CPosConnectionImpl::GetPointList() const
+	const std::list<VideoItemPoint>& PosConnectionImpl::GetPointList() const
 	{
 		return points;
 	}
 
-	void CPosConnectionImpl::SetPointList(const std::list<VideoItemPoint>& newpoints)
+	void PosConnectionImpl::SetPointList(const std::list<VideoItemPoint>& newpoints)
 	{
 		points.assign(newpoints.begin(), newpoints.end());
 	}
 
-	void CPosConnectionImpl::AddPoint(double x, double y)
+	void PosConnectionImpl::AddPoint(double x, double y)
 	{
 		points.push_back(VideoItemPoint(x, y));
 	}
 
-	void CPosConnectionImpl::RemoveSamePoints()
+	void PosConnectionImpl::RemoveSamePoints()
 	{
 		if (points.size() <= 2)
 		{
@@ -331,13 +331,13 @@ namespace VFrame30
 		points.unique();
 	}
 
-	void CPosConnectionImpl::DeleteAllPoints()
+	void PosConnectionImpl::DeleteAllPoints()
 	{
 		points.clear();
 		extPoints.clear();
 	}
 
-	void CPosConnectionImpl::DeleteLastPoint()
+	void PosConnectionImpl::DeleteLastPoint()
 	{
 		if (points.empty() == false)
 		{
@@ -345,27 +345,27 @@ namespace VFrame30
 		}
 	}
 
-	const std::list<VideoItemPoint>& CPosConnectionImpl::GetExtensionPoints() const
+	const std::list<VideoItemPoint>& PosConnectionImpl::GetExtensionPoints() const
 	{
 		return extPoints;
 	}
 	
-	void CPosConnectionImpl::SetExtensionPoints(const std::list<VideoItemPoint>& extPoints)
+	void PosConnectionImpl::SetExtensionPoints(const std::list<VideoItemPoint>& extPoints)
 	{
 		this->extPoints = extPoints;
 	}
 
-	void CPosConnectionImpl::AddExtensionPoint(double x, double y)
+	void PosConnectionImpl::AddExtensionPoint(double x, double y)
 	{
 		extPoints.push_back(VideoItemPoint(x, y));
 	}
 
-	void CPosConnectionImpl::DeleteAllExtensionPoints()
+	void PosConnectionImpl::DeleteAllExtensionPoints()
 	{
 		extPoints.clear();
 	}
 
-	void CPosConnectionImpl::DeleteLastExtensionPoint()
+	void PosConnectionImpl::DeleteLastExtensionPoint()
 	{
 		if (extPoints.empty() == false)
 		{
@@ -375,7 +375,7 @@ namespace VFrame30
 		
 	// Реализация интерефейса IVideoItemPropertiesPos
 	//
-	double CPosConnectionImpl::left() const
+	double PosConnectionImpl::left() const
 	{
 		if (points.size() == 0)
 		{
@@ -402,13 +402,13 @@ namespace VFrame30
 		return val;
 	}
 	
-	void CPosConnectionImpl::setLeft(double)
+	void PosConnectionImpl::setLeft(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
 	}
 
-	double CPosConnectionImpl::top() const
+	double PosConnectionImpl::top() const
 	{
 		if (points.size() == 0)
 		{
@@ -435,13 +435,13 @@ namespace VFrame30
 		return val;
 	}
 	
-	void CPosConnectionImpl::setTop(double)
+	void PosConnectionImpl::setTop(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
 	}
 
-	double CPosConnectionImpl::width() const
+	double PosConnectionImpl::width() const
 	{
 		if (points.size() == 0)
 		{
@@ -472,13 +472,13 @@ namespace VFrame30
 		return val;
 	}
 	
-	void CPosConnectionImpl::setWidth(double)
+	void PosConnectionImpl::setWidth(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
 	}
 
-	double CPosConnectionImpl::height() const
+	double PosConnectionImpl::height() const
 	{
 		if (points.size() == 0)
 		{
@@ -509,19 +509,19 @@ namespace VFrame30
 		return val;
 	}
 
-	void CPosConnectionImpl::setHeight(double)
+	void PosConnectionImpl::setHeight(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
 	}
 
-	std::vector<VideoItemPoint> CPosConnectionImpl::getPointList() const
+	std::vector<VideoItemPoint> PosConnectionImpl::getPointList() const
 	{
 		std::vector<VideoItemPoint> v(points.begin(), points.end());
 		return v;
 	}
 
-	void CPosConnectionImpl::setPointList(const std::vector<VideoItemPoint>& points)
+	void PosConnectionImpl::setPointList(const std::vector<VideoItemPoint>& points)
 	{
 		this->points.assign(points.begin(), points.end());
 		extPoints.clear();

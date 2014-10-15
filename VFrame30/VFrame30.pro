@@ -44,7 +44,6 @@ OTHER_FILES += \
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
-    VideoLayer.h \
     VideoItem.h \
     VideoItemSignal.h \
     VideoItemRect.h \
@@ -52,10 +51,6 @@ HEADERS += VFrame30Lib_global.h \
     VideoItemLine.h \
     VideoItemFblElement.h \
     VideoItemConnectionLine.h \
-    VideoFrameWiring.h \
-    VideoFrameTech.h \
-    VideoFrameLogic.h \
-    VideoFrameDiag.h \
     Settings.h \
     PosRectImpl.h \
     PosLineImpl.h \
@@ -67,13 +62,11 @@ HEADERS += VFrame30Lib_global.h \
     FblConnectionsImpl.h \
     Fbl.h \
     DrawParam.h \
-    VideoFrame.h \
     Print.h \
     VFrame30Library.h \
     HorzVertLinks.h \
 	../include/TypesAndEnums.h \
     VideoFrameManager.h \
-    VideoFrameView.h \
     VideoFrameWidget.h \
     VideoFrameWidgetAgent.h \
     VideoFrameAgent.h \
@@ -83,9 +76,16 @@ HEADERS += VFrame30Lib_global.h \
     VFrame30.h \
     ../include/StreamedData.h \
     ../include/ProtoSerialization.h \
-    ../include/CUtils.h
+    ../include/CUtils.h \
+    SchemeLayer.h \
+    Scheme.h \
+    WorkflowScheme.h \
+    LogicScheme.h \
+    DiagScheme.h \
+    WiringScheme.h \
+    SchemeView.h
 
-SOURCES += VideoLayer.cpp \
+SOURCES += \
     VideoItem.cpp \
     VideoItemSignal.cpp \
     VideoItemRect.cpp \
@@ -93,10 +93,6 @@ SOURCES += VideoLayer.cpp \
     VideoItemLine.cpp \
     VideoItemFblElement.cpp \
     VideoItemConnectionLine.cpp \
-    VideoFrameWiring.cpp \
-    VideoFrameTech.cpp \
-    VideoFrameLogic.cpp \
-    VideoFrameDiag.cpp \
     Settings.cpp \
     PosRectImpl.cpp \
     PosLineImpl.cpp \
@@ -107,13 +103,11 @@ SOURCES += VideoLayer.cpp \
     FblItem.cpp \
     Fbl.cpp \
     DrawParam.cpp \
-    VideoFrame.cpp \
     Print.cpp \
     Stable.cpp \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
     VideoFrameManager.cpp \
-    VideoFrameView.cpp \
     VideoFrameWidget.cpp \
     VideoFrameWidgetAgent.cpp \
     VideoFrameAgent.cpp \
@@ -121,7 +115,14 @@ SOURCES += VideoLayer.cpp \
 	Configuration.cpp \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/CUtils.cpp
+    ../lib/CUtils.cpp \
+    SchemeLayer.cpp \
+    Scheme.cpp \
+    WorkflowScheme.cpp \
+    LogicScheme.cpp \
+    DiagScheme.cpp \
+    WiringScheme.cpp \
+    SchemeView.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 #CONFIG(debug, debug|release): DEFINES += DEBUG

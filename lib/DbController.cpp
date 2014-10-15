@@ -30,6 +30,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getUserList, m_worker, &DbWorker::slot_getUserList);
 
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
+	connect(this, &DbController::signal_getFileInfo, m_worker, &DbWorker::slot_getFileInfo);
+
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
 
@@ -39,11 +41,15 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getWorkcopy, m_worker, &DbWorker::slot_getWorkcopy);
 	connect(this, &DbController::signal_setWorkcopy, m_worker, &DbWorker::slot_setWorkcopy);
 
+	connect(this, &DbController::signal_getSpecificCopy, m_worker, &DbWorker::slot_getSpecificCopy);
+
 	connect(this, &DbController::signal_checkIn, m_worker, &DbWorker::slot_checkIn);
 	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
 	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
 
 	connect(this, &DbController::signal_fileHasChildren, m_worker, &DbWorker::slot_fileHasChildren);
+
+	connect(this, &DbController::signal_getFileHistory, m_worker, &DbWorker::slot_getFileHistory);
 
 	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
@@ -54,6 +60,9 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getDataFormats, m_worker, &DbWorker::slot_getDataFormats);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
+	connect(this, &DbController::signal_deleteSignal, m_worker, &DbWorker::slot_deleteSignal);
+	connect(this, &DbController::signal_undoSignalChanges, m_worker, &DbWorker::slot_undoSignalChanges);
+	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
 
 	m_thread.start();
 }
@@ -313,6 +322,62 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, con
 	emit signal_getFileList(files, parentId, filter);
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list"));
+	return result;
+}
+
+bool DbController::getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	std::vector<int> fileIds;
+	fileIds.push_back(fileId);
+
+	std::vector<DbFileInfo> proxyOut;
+
+	bool result = getFileInfo(&fileIds, &proxyOut, parentWidget);
+
+	if (result == false || proxyOut.size() != 1)
+	{
+		return false;
+	}
+
+	assert(fileId == proxyOut[0].fileId());
+
+	*out = proxyOut[0];
+
+	return result;
+}
+
+bool DbController::getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (fileIds == nullptr ||
+		fileIds->empty() == true ||
+		out == nullptr)
+	{
+		assert(fileIds != nullptr);
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFileInfo(fileIds, out);
+
+	bool result = waitForComplete(parentWidget, tr("Geting files info"));
 	return result;
 }
 
@@ -583,6 +648,56 @@ bool DbController::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* par
 	return setWorkcopy(files, parentWidget);
 }
 
+bool DbController::getSpecificCopy(const std::vector<DbFileInfo>& files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr || files.empty() == true)
+	{
+		assert(out != nullptr);
+		assert(files.empty() == true);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getSpecificCopy(&files, changesetId, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting file copy"));
+	return out;
+}
+
+bool DbController::getSpecificCopy(const DbFileInfo& file, int changesetId, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	std::vector<DbFileInfo> fiv;
+	fiv.push_back(file);
+
+	std::vector<std::shared_ptr<DbFile>> outvector;
+	bool result = getSpecificCopy(fiv, changesetId, &outvector, parentWidget);
+
+	if (result == false || outvector.size() != 1)
+	{
+		return false;
+	}
+
+	*out = outvector.front();
+	return true;
+}
+
 bool DbController::checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget)
 {
 	std::vector<DbFileInfo> fv {file};
@@ -718,6 +833,35 @@ bool DbController::fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget*
 	emit signal_fileHasChildren(hasChildren, &file);
 
 	ok = waitForComplete(parentWidget, tr("Checking file children"));
+	return true;
+}
+
+bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (file.fileId() == -1 || out == nullptr)
+	{
+		assert(file.fileId() != -1);
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	DbFileInfo f(file);
+
+	emit signal_getFileHistory(&f, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting object history"));
 	return true;
 }
 
@@ -1048,7 +1192,87 @@ bool DbController::setSignalWorkcopy(Signal *signal, ObjectState *objectState, Q
 	ok = waitForComplete(parentWidget, tr("Set signal workcopy"));
 
 	return ok;
+}
 
+
+bool DbController::deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget)
+{
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_deleteSignal(signalID, objectState);
+
+	ok = waitForComplete(parentWidget, tr("Delete signal"));
+
+	return ok;
+}
+
+
+bool DbController::undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget)
+{
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_undoSignalChanges(signalID, objectState);
+
+	ok = waitForComplete(parentWidget, tr("Undo signal changes"));
+
+	return ok;
+}
+
+
+bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_checkinSignals(signalIDs, comment, objectState);
+
+	ok = waitForComplete(parentWidget, tr("Checkin signals"));
+
+	return ok;
 }
 
 

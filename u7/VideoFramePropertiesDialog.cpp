@@ -1,7 +1,7 @@
 #include "VideoFramePropertiesDialog.h"
 #include "ui_VideoFramePropertiesDialog.h"
 
-VideoFramePropertiesDialog::VideoFramePropertiesDialog(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, QWidget* parent) :
+VideoFramePropertiesDialog::VideoFramePropertiesDialog(std::shared_ptr<VFrame30::Scheme> videoFrame, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::VideoFramePropertiesDialog),
 	m_videoFrame(videoFrame)

@@ -149,13 +149,13 @@ namespace VFrame30
 
 	// CFblItem
 	//
-	class VFRAME30LIBSHARED_EXPORT CFblItem
+	class VFRAME30LIBSHARED_EXPORT FblItem
 	{
 	protected:
-		CFblItem(void);
+		FblItem(void);
 
 	public:
-		virtual ~CFblItem(void);
+		virtual ~FblItem(void);
 		
 	public:
 		// Serialization

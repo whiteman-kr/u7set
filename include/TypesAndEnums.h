@@ -4,7 +4,7 @@ namespace VFrame30
 {
 	// SchemeUnit
 	//
-	enum SchemeUnit
+	enum class SchemeUnit
 	{
 		Display,			// измерение в точках устройства (пиксели для дисплея)
 		Millimeter,			// измерение в мм

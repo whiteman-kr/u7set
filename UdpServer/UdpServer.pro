@@ -21,11 +21,12 @@ SOURCES +=\
     mainwindow2.cpp \
     ../lib/BaseService.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
     ../include/SocketIO.h \
     ../include/UdpSocket.h \
     ServerSocket.h \
-    ../include/BaseService.h
+    ../include/BaseService.h \
+    mainwindow2.h
 
 FORMS    += mainwindow.ui
 

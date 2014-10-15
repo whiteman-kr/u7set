@@ -1,15 +1,15 @@
 #include "Stable.h"
 #include "VideoFrameManager.h"
 #include "VideoFrameWidget.h"
-#include "VideoFrame.h"
-#include "VideoFrameView.h"
+#include "Scheme.h"
+#include "SchemeView.h"
 
 namespace VFrame30
 {
 
 	// VideoFrameWidget
 	//
-	VideoFrameBaseWidget::VideoFrameBaseWidget(std::shared_ptr<CVideoFrame> videoFrame)
+	VideoFrameBaseWidget::VideoFrameBaseWidget(std::shared_ptr<Scheme> videoFrame)
 	{
 		horzScrollBarValue = 0;
 		vertScrollBarValue = 0;
@@ -20,7 +20,7 @@ namespace VFrame30
 
 		// --
 		//
-		m_pVideoFrameView = new VideoFrameView(videoFrame, this);
+		m_pVideoFrameView = new SchemeView(videoFrame, this);
 
 		m_pVideoFrameView->setZoom(100);
 		setWidget(m_pVideoFrameView);
@@ -139,22 +139,22 @@ namespace VFrame30
 		return;
 	}
 
-	std::shared_ptr<CVideoFrame>& VideoFrameBaseWidget::videoFrame()
+	std::shared_ptr<Scheme>& VideoFrameBaseWidget::videoFrame()
 	{
-		VideoFrameView* ptr = dynamic_cast<VideoFrameView*>(widget());
+		SchemeView* ptr = dynamic_cast<SchemeView*>(widget());
 		if (ptr == nullptr)
 		{
 			assert(ptr != nullptr);
-			static std::shared_ptr<CVideoFrame> nullSharedPtr;
+			static std::shared_ptr<Scheme> nullSharedPtr;
 			return nullSharedPtr;
 		}
 
 		return ptr->videoFrame();
 	}
 
-	VideoFrameView* VideoFrameBaseWidget::videoFrameView()
+	SchemeView* VideoFrameBaseWidget::videoFrameView()
 	{
-		assert(dynamic_cast<VideoFrameView*>(widget()) != nullptr);
+		assert(dynamic_cast<SchemeView*>(widget()) != nullptr);
 
 		if (m_pVideoFrameView == nullptr)
 		{

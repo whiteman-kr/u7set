@@ -1,11 +1,15 @@
 #include "../include/BaseService.h"
+#include <QFileInfo>
 
 
 // BaseServiceWorker class implementation
 //
 
 BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceController, int serviceType) :
-    m_baseSocketThread(nullptr),
+	m_serverSocketThread(nullptr),
+	m_sendFileClientSocketThread(nullptr),
+	m_sendFileStartBuffer(nullptr),
+	m_fileToSend(nullptr),
     m_baseServiceController(baseServiceController),
     m_serviceType(serviceType)
 {
@@ -15,12 +19,15 @@ BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceControlle
 
 BaseServiceWorker::~BaseServiceWorker()
 {
+	delete m_sendFileClientSocketThread;
+	delete m_fileToSend;
+	delete m_sendFileStartBuffer;
 }
 
 
 void BaseServiceWorker::onThreadStarted()
 {
-	m_baseSocketThread = new UdpSocketThread;
+	m_serverSocketThread = new UdpSocketThread;
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, serviceTypesInfo[m_serviceType].port);
 
@@ -31,7 +38,7 @@ void BaseServiceWorker::onThreadStarted()
 	connect(this, &BaseServiceWorker::stopMainFunction, m_baseServiceController, &BaseServiceController::stopMainFunction);
 	connect(this, &BaseServiceWorker::restartMainFunction, m_baseServiceController, &BaseServiceController::restartMainFunction);
 
-	m_baseSocketThread->run(serverSocket);
+	m_serverSocketThread->run(serverSocket);
 
 	threadStarted();
 }
@@ -41,7 +48,7 @@ void BaseServiceWorker::onThreadFinished()
 {
 	threadFinished();
 
-	delete m_baseSocketThread;
+	delete m_serverSocketThread;
 
     deleteLater();
 }
@@ -84,7 +91,82 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 }
 
 
-// BaseServiceWorker class implementation
+void BaseServiceWorker::onSendFile(QHostAddress address, quint16 port, QString fileName)
+{
+	if (m_sendFileClientSocketThread != nullptr)
+	{
+		assert(m_sendFileClientSocketThread == nullptr);	// file send already running
+		return;
+	}
+
+	assert(m_fileToSend == nullptr);	// must be null
+	assert(m_sendFileStartBuffer == nullptr);
+
+	m_fileToSend = new QFile(fileName);
+
+	if (!m_fileToSend->open(QIODevice::ReadOnly))
+	{
+		delete m_fileToSend;
+
+		m_fileToSend = nullptr;
+
+		emit endSendFile(false);
+
+		return;
+	}
+
+	m_sendFileStartBuffer = new char[MAX_DATAGRAM_SIZE];
+
+	m_sendFileClientSocketThread = new UdpSocketThread;
+
+	UdpClientSocket* clientSocket = new UdpClientSocket(address, port);
+
+	connect(this, &BaseServiceWorker::sendFileRequest, clientSocket, &UdpClientSocket::sendRequest);
+	connect(clientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceWorker::onSendFileRequestAck);
+
+	m_sendFileClientSocketThread->run(clientSocket);
+
+	QFileInfo fi(*m_fileToSend);
+
+	QString fName = fi.fileName();
+	quint64 fileSize = fi.size();
+
+	QChar* strPtr = fName.data();
+
+	ushort* bufferPtr = reinterpret_cast<ushort*>(m_sendFileStartBuffer);
+
+	int i = 0;
+	do
+	{
+		if (strPtr->isNull())
+		{
+			break;
+		}
+
+		bufferPtr[i] = strPtr->unicode();
+
+		strPtr++;
+
+		i++;
+	}
+	while (i < 63);
+
+	bufferPtr[i] = 0;
+
+	i++;
+
+	*((quint32*)(bufferPtr + i)) = fileSize;
+
+	sendFileRequest(RQID_SEND_FILE_START, m_sendFileStartBuffer, i * sizeof(ushort) + sizeof(quint32));
+}
+
+
+void BaseServiceWorker::onSendFileRequestAck(RequestHeader header, QByteArray data)
+{
+
+}
+
+// MainFunctionWorker class implementation
 //
 
 MainFunctionWorker::MainFunctionWorker(BaseServiceController *baseServiceController) :
@@ -151,6 +233,9 @@ BaseServiceController::BaseServiceController(int serviceType) :
 
 	connect(&m_baseWorkerThread, &QThread::started, worker, &BaseServiceWorker::onThreadStarted);
 	connect(&m_baseWorkerThread, &QThread::finished, worker, &BaseServiceWorker::onThreadFinished);
+
+	connect(this, &BaseServiceController::sendFile, worker, &BaseServiceWorker::onSendFile);
+	connect(worker, &BaseServiceWorker::endSendFile, this, &BaseServiceController::onEndSendFile);
 
     m_baseWorkerThread.start();
 
@@ -309,3 +394,7 @@ void BaseServiceController::onMainFunctionStopped()
 	m_mainFunctionStopped = true;
 }
 
+
+void BaseServiceController::onEndSendFile(bool result)
+{
+}

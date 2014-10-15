@@ -36,6 +36,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Type ObjectState was added", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0028.sql"},
 	{"File API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0029.sql"},
 	{"Signal API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0030.sql"},
+	{"File API, adding get_file_info", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0031.sql"},
 };
 
 
@@ -1572,6 +1573,89 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 	return;
 }
 
+void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (fileIds == nullptr ||
+		fileIds->empty() == true ||
+		out == nullptr)
+	{
+		assert(fileIds != nullptr);
+		assert(out != nullptr);
+		return;
+	}
+
+	out->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file list. Database connection is not openned."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM get_file_info(%1, ARRAY[")
+			.arg(currentUser().userId());
+
+	for (auto it = fileIds->begin(); it != fileIds->end(); ++it)
+	{
+		if (it == fileIds->begin())
+		{
+			request += QString("%1").arg(*it);
+		}
+		else
+		{
+			request += QString(", %1").arg(*it);
+		}
+	}
+
+	request += "]);";
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get file info. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbFileInfo fileInfo;
+
+		fileInfo.setFileName(q.value("Name").toString());
+		fileInfo.setFileId(q.value("FileID").toInt());
+		bool deleted = q.value("Deleted").toBool();
+		fileInfo.setParentId(q.value("ParentID").toInt());
+		fileInfo.setSize(q.value("Size").toInt());
+		fileInfo.setChangeset(q.value("ChangesetID").toInt());
+		fileInfo.setCreated(q.value("Created").toString());
+		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
+		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
+		fileInfo.setUserId(q.value("UserID").toInt());
+
+		if (deleted == false)
+		{
+			out->push_back(fileInfo);
+		}
+	}
+
+	return;
+}
+
 void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId)
 {
 	// Init automitic varaiables
@@ -2035,6 +2119,101 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 	return;
 }
 
+void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (files == nullptr ||
+		files->empty() == true ||
+		out == nullptr)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < files->size(); i++)
+	{
+
+		const DbFileInfo& fi = files->at(i);
+
+		// Set progress value here
+		// ...
+		// -- end ofSet progress value here
+
+		if (m_progress->wasCanceled() == true)
+		{
+			break;
+		}
+
+		// request
+		//
+		QString request = QString("SELECT * FROM get_specific_copy(%1, %2, %3);")
+				.arg(currentUser().userId())
+				.arg(fi.fileId())
+				.arg(changesetId);
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+		if (result == false)
+		{
+			emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() == false)
+		{
+			emitError(tr("Can't find workcopy for file: %1. Is file CheckedOut?").arg(fi.fileName()));
+			return;
+		}
+
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		file->setFileId(q.value("FileID").toInt());
+
+		file->setFileName(q.value("Name").toString());
+		file->setParentId(q.value("ParentID").toInt());
+		file->setChangeset(changesetId);							// From the param, not from the DB!!!
+		file->setCreated(q.value("Created").toString());
+		file->setLastCheckIn(q.value("CheckInTime").toString());	// setLastCheckIn BUT TIME IS CheckOutTime
+		file->setState(VcsState::CheckedOut);
+
+		int action = q.value("Action").toInt();
+		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
+
+		file->setUserId(q.value("UserID").toInt());
+
+		QByteArray data = q.value("Data").toByteArray();
+		file->swapData(data);
+
+		out->push_back(file);
+
+		assert(fi.fileId() == file->fileId());
+	}
+
+	return;
+}
+
 void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 {
 	// Init automitic varaiables
@@ -2339,6 +2518,62 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	int childCount = q.value(0).toInt();
 
 	*hasChildren = childCount > 0;
+
+	return;
+}
+
+void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (file == nullptr || file->fileId() == -1 || out == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot execute function. Database connection is not openned."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_file_history(%1)")
+		.arg(file->fileId());
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(tr("Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		DbChangesetInfo ci;
+
+		ci.setChangeset(q.value("ChangesetID").toInt());
+		ci.setDate(q.value("CheckInTime").toString());
+		ci.setComment(q.value("Comment").toString());
+		ci.setUserId(q.value("UserID").toInt());
+		ci.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
+
+		out->push_back(ci);
+	}
 
 	return;
 }
@@ -3102,7 +3337,164 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	}
 	else
 	{
-		emitError(tr("Can't getlatest signal! No data returned!"));
+		emitError(tr("Can't get latest signal! No data returned!"));
+	}
+}
+
+
+void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
+{
+	AUTO_COMPLETE
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot delete signal. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM delete_signal(%1, %2)")
+		.arg(currentUser().userId()).arg(signalID);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't delete signal! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() != false)
+	{
+		getObjectState(q, *objectState);
+	}
+	else
+	{
+		emitError(tr("Can't delete signal! No data returned!"));
+	}
+}
+
+
+void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
+{
+	AUTO_COMPLETE
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot undo signal changes. Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM undo_signal_changes(%1, %2)")
+		.arg(currentUser().userId()).arg(signalID);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't undo signal changes! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() != false)
+	{
+		getObjectState(q, *objectState);
+	}
+	else
+	{
+		emitError(tr("Can't undo signal changes! No data returned!"));
+	}
+}
+
+
+void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState)
+{
+	AUTO_COMPLETE
+
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return;
+	}
+
+	if (objectState == nullptr)
+	{
+		assert(objectState != nullptr);
+		return;
+	}
+
+	objectState->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot checkin signals. Database connection is not opened."));
+		return;
+	}
+
+	int count = signalIDs->count();
+
+	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
+		.arg(currentUser().userId());
+
+
+	for(int i=0; i < count; i++)
+	{
+		if (i < count-1)
+		{
+			request += QString("%1,").arg(signalIDs->at(i));
+		}
+		else
+		{
+			request += QString("%1],").arg(signalIDs->at(i));
+		}
+	}
+
+	request += QString("'%1')").arg(comment);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't checkin signals! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next())
+	{
+		ObjectState os;
+
+		getObjectState(q, os);
+
+		objectState->append(os);
 	}
 }
 
