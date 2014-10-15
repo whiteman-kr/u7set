@@ -5,7 +5,7 @@
 
 namespace VFrame30
 {
-	class CVideoFrame;
+	class Scheme;
 
 	class VFRAME30LIBSHARED_EXPORT Configuration : 
 		public QObject,
@@ -52,8 +52,8 @@ namespace VFrame30
 		const std::vector<QUuid>& videoFramesIDs() const;
 		std::vector<QUuid>* mutableVideoFramesIDs();
 
-		const std::vector<std::shared_ptr<CVideoFrame>>& videoFrames() const;
-		std::vector<std::shared_ptr<CVideoFrame>>* mutableVideoFrames();
+		const std::vector<std::shared_ptr<Scheme>>& videoFrames() const;
+		std::vector<std::shared_ptr<Scheme>>* mutableVideoFrames();
 
 	private:
 		QUuid m_guid;												// Configuration ID
@@ -63,7 +63,7 @@ namespace VFrame30
 		QString m_globals;											// Global scripts functions
 		
 		std::vector<QUuid> m_videoFramesIDs;						// The list of VideoFrame's ID's
-		std::vector<std::shared_ptr<CVideoFrame>> m_videoFrames;	// The list of VideoFrame's
+		std::vector<std::shared_ptr<Scheme>> m_videoFrames;	// The list of VideoFrame's
 	};
 
 

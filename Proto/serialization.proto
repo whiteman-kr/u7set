@@ -252,6 +252,7 @@ message VideoItemRect
 	required uint32 textColor = 5;
 	required FontParam font = 6;
 	required bool fill = 7;
+	optional bool drawrect = 8 [default = true];
 }
 
 

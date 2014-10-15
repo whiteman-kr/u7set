@@ -4,27 +4,27 @@
 
 namespace VFrame30
 {
-	Factory<VFrame30::CVideoItem> VideoItemFactory;
+	Factory<VFrame30::VideoItem> VideoItemFactory;
 
 	// CVideoItem
 
-	CVideoItem::CVideoItem() :
+	VideoItem::VideoItem() :
 		m_static(true),
 		m_locked(false),
-		m_itemUnit(Display),
+		m_itemUnit(SchemeUnit::Display),
 		m_acceptClick(false)
 	{	
 		m_guid = QUuid::createUuid();
 	}
 
-	CVideoItem::~CVideoItem()
+	VideoItem::~VideoItem()
 	{
 	}
 	
 	// Serialization
 	//
 
-	bool CVideoItem::SaveData(Proto::Envelope* message) const
+	bool VideoItem::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
@@ -48,7 +48,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItem::LoadData(const Proto::Envelope& message)
+	bool VideoItem::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -77,7 +77,7 @@ namespace VFrame30
 		return true;
 	}
 
-	CVideoItem* CVideoItem::CreateObject(const Proto::Envelope& message)
+	VideoItem* VideoItem::CreateObject(const Proto::Envelope& message)
 	{
 		// Эта функция может создавать только один экземпляр
 		//
@@ -88,7 +88,7 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		CVideoItem* pVideoItem = VideoItemFactory.Create(classNameHash);
+		VideoItem* pVideoItem = VideoItemFactory.Create(classNameHash);
 
 		if (pVideoItem == nullptr)
 		{
@@ -104,29 +104,29 @@ namespace VFrame30
 	// Action Functions
 	//
 
-	void CVideoItem::MoveItem(double /*horzOffsetDocPt*/, double /*vertOffsetDocPt*/)
+	void VideoItem::MoveItem(double /*horzOffsetDocPt*/, double /*vertOffsetDocPt*/)
 	{
 		assert(false);	// Implement in child classes
 	}
 
-	double CVideoItem::GetWidthInDocPt() const
-	{
-		assert(false);	// Implement in child classes
-		return 0;
-	}
-
-	double CVideoItem::GetHeightInDocPt() const
+	double VideoItem::GetWidthInDocPt() const
 	{
 		assert(false);	// Implement in child classes
 		return 0;
 	}
 
-	void CVideoItem::SetWidthInDocPt(double /*widthInDocPt*/)
+	double VideoItem::GetHeightInDocPt() const
+	{
+		assert(false);	// Implement in child classes
+		return 0;
+	}
+
+	void VideoItem::SetWidthInDocPt(double /*widthInDocPt*/)
 	{
 		assert(false);	// Implement in child classes
 	}
 
-	void CVideoItem::SetHeightInDocPt(double /*heightInDocPt*/)
+	void VideoItem::SetHeightInDocPt(double /*heightInDocPt*/)
 	{
 		assert(false);	// Implement in child classes
 	}
@@ -137,17 +137,17 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void CVideoItem::Draw(CDrawParam*, const CVideoFrame*, const CVideoLayer*) const
+	void VideoItem::Draw(CDrawParam*, const Scheme*, const SchemeLayer*) const
 	{
 	}
 
 	// Рисование элемента при его создании изменении
 	//
-	void CVideoItem::DrawOutline(CDrawParam* ) const
+	void VideoItem::DrawOutline(CDrawParam* ) const
 	{
 	}
 
-	void CVideoItem::DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<CVideoItem>>& items)
+	void VideoItem::DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items)
 	{
 		if (pDrawParam == nullptr)
 		{
@@ -163,11 +163,11 @@ namespace VFrame30
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
-	void CVideoItem::DrawSelection(CDrawParam*, bool) const
+	void VideoItem::DrawSelection(CDrawParam*, bool) const
 	{
 	}
 
-	void CVideoItem::DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<CVideoItem>>& items, bool drawSizeBar)
+	void VideoItem::DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items, bool drawSizeBar)
 	{
 		if (pDrawParam == nullptr)
 		{
@@ -183,7 +183,7 @@ namespace VFrame30
 
 	// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
 	// 
-	bool CVideoItem::IsIntersectPoint(double x, double y) const
+	bool VideoItem::IsIntersectPoint(double x, double y) const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -200,7 +200,7 @@ namespace VFrame30
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
 	// 
-	bool CVideoItem::IsIntersectRect(double x, double y, double width, double height) const
+	bool VideoItem::IsIntersectRect(double x, double y, double width, double height) const
 	{ 
 		x = x; y = y; width = width; height = height;		// убираю unreferenced warning
 		assert(false);
@@ -209,53 +209,53 @@ namespace VFrame30
 
 	// IVideoItemPropertiesPos interface implementation
 	//
-	double CVideoItem::left() const
+	double VideoItem::left() const
 	{
 		assert(true);
 		return 0;
 	}
-	void CVideoItem::setLeft(double)
+	void VideoItem::setLeft(double)
 	{
 		assert(true);
 	}
 
-	double CVideoItem::top() const
+	double VideoItem::top() const
 	{
 		assert(false);
 		return 0;
 	}
-	void CVideoItem::setTop(double)
+	void VideoItem::setTop(double)
 	{
 		assert(false);
 	}
 
-	double CVideoItem::width() const
+	double VideoItem::width() const
 	{
 		assert(false);
 		return 0;
 	}
-	void CVideoItem::setWidth(double)
+	void VideoItem::setWidth(double)
 	{
 		assert(false);
 	}
 
-	double CVideoItem::height() const
+	double VideoItem::height() const
 	{
 		assert(false);
 		return 0;
 	}
-	void CVideoItem::setHeight(double)
+	void VideoItem::setHeight(double)
 	{
 		assert(false);
 	}
 
-	std::vector<VideoItemPoint> CVideoItem::getPointList() const
+	std::vector<VideoItemPoint> VideoItem::getPointList() const
 	{
 		Q_ASSERT(false);
 		return std::vector<VideoItemPoint>();
 	}
 
-	void CVideoItem::setPointList(const std::vector<VideoItemPoint>& /*points*/)
+	void VideoItem::setPointList(const std::vector<VideoItemPoint>& /*points*/)
 	{
 		Q_ASSERT(false);
 	}
@@ -263,38 +263,38 @@ namespace VFrame30
 	// Properties and Data
 	//
 
-	bool CVideoItem::IsStatic() const
+	bool VideoItem::IsStatic() const
 	{
 		return m_static;
 	}
 
-	bool CVideoItem::IsDynamic() const
+	bool VideoItem::IsDynamic() const
 	{
 		return !m_static;
 	}
 
-	bool CVideoItem::IsFblItem() const
+	bool VideoItem::IsFblItem() const
 	{
 		return false;
 	}
 
-	bool CVideoItem::IsLocked() const
+	bool VideoItem::IsLocked() const
 	{
 		return m_locked;
 	}
 
-	void CVideoItem::setLocked(bool lock)
+	void VideoItem::setLocked(bool lock)
 	{
 		m_locked = lock;
 		return;
 	}
 
-	const QUuid& CVideoItem::guid() const
+	const QUuid& VideoItem::guid() const
 	{
 		return m_guid;
 	}
 
-	void CVideoItem::setGuid(const QUuid& guid)
+	void VideoItem::setGuid(const QUuid& guid)
 	{
 		m_guid = guid;
 		return;
@@ -302,42 +302,42 @@ namespace VFrame30
 
 	// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 	//
-	SchemeUnit CVideoItem::itemUnit() const
+	SchemeUnit VideoItem::itemUnit() const
 	{
 		return m_itemUnit;
 	}
 
-	void CVideoItem::setItemUnit(SchemeUnit value)
+	void VideoItem::setItemUnit(SchemeUnit value)
 	{
-		assert(value == Display || value == Inch);
+		assert(value == SchemeUnit::Display || value == SchemeUnit::Inch);
 		m_itemUnit = value;
 	}
 
 	// AcceptClick property
 	//
-	bool CVideoItem::acceptClick() const
+	bool VideoItem::acceptClick() const
 	{
 		return m_acceptClick;
 	}
 
-	void CVideoItem::setAcceptClick(bool value)
+	void VideoItem::setAcceptClick(bool value)
 	{
 		m_acceptClick = value;
 	}
 
 	// ClickScript property
 	//
-	const QString& CVideoItem::clickScript() const
+	const QString& VideoItem::clickScript() const
 	{
 		return m_clickScript;
 	}
 
-	void CVideoItem::setClickScript(const QString value)
+	void VideoItem::setClickScript(const QString& value)
 	{
 		m_clickScript = value;
 	}
 
-	QRectF CVideoItem::boundingRectInDocPt() const
+	QRectF VideoItem::boundingRectInDocPt() const
 	{
 		assert(false);		// Must be implemented in child classes
 		return QRectF();

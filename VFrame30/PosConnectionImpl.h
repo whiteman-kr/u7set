@@ -28,13 +28,13 @@ namespace VFrame30
 		virtual void DeleteLastExtensionPoint() = 0;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT CPosConnectionImpl : public CVideoItem, public IVideoItemPosConnection
+	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public VideoItem, public IVideoItemPosConnection
 	{
 		Q_OBJECT
 
 	protected:
-		CPosConnectionImpl(void);
-		virtual ~CPosConnectionImpl(void);
+		PosConnectionImpl(void);
+		virtual ~PosConnectionImpl(void);
 
 	private:
 		void Init(void);

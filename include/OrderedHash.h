@@ -9,6 +9,8 @@ private:
 	QVector<KEY> m_keyVector;
 	QHash<KEY, int> m_hash;
 
+	void recalcHash();
+
 public:
 	OrderedHash();
 
@@ -19,6 +21,8 @@ public:
 	bool contains(const KEY& key) const;
 
 	void append(const KEY& key, const VALUE& value);
+	void remove(const KEY& key);
+	void removeAt(const int index);
 
 	const VALUE value(const KEY& key) const;
 
@@ -30,6 +34,17 @@ public:
 
 	QList<VALUE> toList() const;
 };
+
+
+template <typename KEY, typename VALUE>
+void OrderedHash<KEY, VALUE>::recalcHash()
+{
+	m_hash.clear();
+	for (int i = 0; i < m_keyVector.count(); i++)
+	{
+		m_hash[m_keyVector[i]] = i;
+	}
+}
 
 
 template <typename KEY, typename VALUE>
@@ -86,6 +101,30 @@ void OrderedHash<KEY, VALUE>::append(const KEY& key, const VALUE& value)
 		m_keyVector.append(key);
 		m_hash.insert(key, newValueIndex);
 	}
+}
+
+
+template <typename KEY, typename VALUE>
+void OrderedHash<KEY, VALUE>::remove(const KEY &key)
+{
+	int index = m_hash[key];
+
+	m_hash.remove(key);
+	m_valueVector.remove(index);
+	m_keyVector.remove(index);
+
+	recalcHash();
+}
+
+
+template <typename KEY, typename VALUE>
+void OrderedHash<KEY, VALUE>::removeAt(const int index)
+{
+	m_hash.remove(m_keyVector[index]);
+	m_valueVector.removeAt(index);
+	m_keyVector.removeAt(index);
+
+	recalcHash();
 }
 
 

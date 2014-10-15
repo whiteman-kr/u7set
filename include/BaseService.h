@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QThread>
 #include <QDebug>
+#include <QFile>
 #include "../qtservice/src/qtservice.h"
 #include "../include/UdpSocket.h"
 
@@ -20,7 +21,11 @@ class BaseServiceWorker : public QObject
 private:
     int m_serviceType;
 
-    UdpSocketThread* m_baseSocketThread;
+	UdpSocketThread* m_serverSocketThread;
+
+	UdpSocketThread* m_sendFileClientSocketThread;
+	QFile* m_fileToSend;
+	char* m_sendFileStartBuffer;
 
     BaseServiceController* m_baseServiceController;
 
@@ -39,11 +44,20 @@ signals:
 	void stopMainFunction();
 	void restartMainFunction();
 
+	void endSendFile(bool result);
+
+	void sendFileRequest(quint32 requestID, char* requestData, quint32 requestDataSize);
+
+private slots:
+	void onSendFileRequestAck(RequestHeader header, QByteArray data);
+
 public slots:
 	void onThreadStarted();
 	void onThreadFinished();
 
     void onBaseRequest(UdpRequest request);
+
+	void onSendFile(QHostAddress address, quint16 port, QString fileName);
 };
 
 
@@ -118,10 +132,15 @@ private:
 
 	void checkMainFunctionState();
 
+signals:
+	void sendFile(QHostAddress address, quint16 port, QString fileName);
+
 public slots:
 	void stopMainFunction();
 	void startMainFunction();
 	void restartMainFunction();
+
+	virtual void onEndSendFile(bool result);
 
 private slots:
 	void onTimer500ms();

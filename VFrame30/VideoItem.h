@@ -8,8 +8,8 @@
 
 namespace VFrame30
 {
-	class CVideoFrame;
-	class CVideoLayer;
+	class Scheme;
+	class SchemeLayer;
 }
 
 
@@ -114,24 +114,27 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT CVideoItem : 
+	class VFRAME30LIBSHARED_EXPORT VideoItem :
 		public QObject, 
 		public IVideoItemPropertiesPos, 
 		public IPointList,
-		public Proto::ObjectSerialization<CVideoItem>,
-		public DebugInstCounter<CVideoItem>
+		public Proto::ObjectSerialization<VideoItem>,
+		public DebugInstCounter<VideoItem>
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(bool AcceptClick READ acceptClick  WRITE setAcceptClick)
+		Q_PROPERTY(QString ClickScript READ clickScript  WRITE setClickScript)
+
 	protected:
-		CVideoItem();
+		VideoItem();
 
 	public:
-		virtual ~CVideoItem();
+		virtual ~VideoItem();
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<CVideoItem>;	// Для вызоыв CreateObject из Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<VideoItem>;	// Для вызоыв CreateObject из Proto::ObjectSerialization
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -140,7 +143,7 @@ namespace VFrame30
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должне прочитаться
-		static CVideoItem* CreateObject(const Proto::Envelope& message);
+		static VideoItem* CreateObject(const Proto::Envelope& message);
 
 		// Action Functions
 		//
@@ -159,17 +162,17 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* pDrawParam, const CVideoFrame* pFrame, const CVideoLayer* pLayer) const;
+		virtual void Draw(CDrawParam* pDrawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const;
 
 		// Рисование элемента при его создании изменении
 		//
 		virtual void DrawOutline(CDrawParam* pDrawParam) const;
-		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<CVideoItem>>& items);
+		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items);
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
 		virtual void DrawSelection(CDrawParam* pDrawParam, bool drawSizeBar) const;
-		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<CVideoItem>>& items, bool drawSizeBar);
+		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items, bool drawSizeBar);
 
 		// Determine and Calculation Functions
 		//
@@ -227,7 +230,7 @@ namespace VFrame30
 		void setAcceptClick(bool value);
 
 		const QString& clickScript() const;
-		void setClickScript(const QString value);
+		void setClickScript(const QString& value);
 
 		// Get VideoItem bounding rectangle in itemUnit()
 		//
@@ -242,11 +245,11 @@ namespace VFrame30
 		SchemeUnit m_itemUnit;		// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 
 		bool m_acceptClick;			// The VideoItem accept mouse Left button click and runs script
-		QString m_clickScript;	// Qt script on mouse left button click
+		QString m_clickScript;		// Qt script on mouse left button click
 	};
 
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::CVideoItem> VideoItemFactory;
+	extern Factory<VFrame30::VideoItem> VideoItemFactory;
 #endif
 }
 

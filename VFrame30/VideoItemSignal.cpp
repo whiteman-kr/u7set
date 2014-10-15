@@ -6,25 +6,25 @@ namespace VFrame30
 	//
 	// CVideoItemSignal
 	//
-	CVideoItemSignal::CVideoItemSignal(void)
+	VideoItemSignal::VideoItemSignal(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemSignal::CVideoItemSignal(SchemeUnit unit) :
-		CFblItemRect(unit)
+	VideoItemSignal::VideoItemSignal(SchemeUnit unit) :
+		FblItemRect(unit)
 	{
 	}
 
-	CVideoItemSignal::~CVideoItemSignal(void)
+	VideoItemSignal::~VideoItemSignal(void)
 	{
 	}
 
-	bool CVideoItemSignal::SaveData(Proto::Envelope* message) const
+	bool VideoItemSignal::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CFblItemRect::SaveData(message);
+		bool result = FblItemRect::SaveData(message);
 
 		if (result == false || message->has_videoitem() == false)
 		{
@@ -42,7 +42,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemSignal::LoadData(const Proto::Envelope& message)
+	bool VideoItemSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -52,7 +52,7 @@ namespace VFrame30
 		
 		// --
 		//
-		bool result = CFblItemRect::LoadData(message);
+		bool result = FblItemRect::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -76,20 +76,20 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	CVideoItemInputSignal::CVideoItemInputSignal(void)
+	VideoItemInputSignal::VideoItemInputSignal(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemInputSignal::CVideoItemInputSignal(SchemeUnit unit) :
-		CVideoItemSignal(unit)
+	VideoItemInputSignal::VideoItemInputSignal(SchemeUnit unit) :
+		VideoItemSignal(unit)
 	{
 		AddOutput();
 	}
 
-	CVideoItemInputSignal::~CVideoItemInputSignal(void)
+	VideoItemInputSignal::~VideoItemInputSignal(void)
 	{
 #ifdef _DEBUG
 		assert(outputsCount() == 1);
@@ -98,9 +98,9 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemInputSignal::SaveData(Proto::Envelope* message) const
+	bool VideoItemInputSignal::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CVideoItemSignal::SaveData(message);
+		bool result = VideoItemSignal::SaveData(message);
 		
 		if (result == false || message->has_videoitem() == false)
 		{
@@ -118,7 +118,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemInputSignal::LoadData(const Proto::Envelope& message)
+	bool VideoItemInputSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -128,7 +128,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CVideoItemSignal::LoadData(message);
+		bool result = VideoItemSignal::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -151,20 +151,20 @@ namespace VFrame30
 	//
 	// CVideoItemOutputSignal
 	//
-	CVideoItemOutputSignal::CVideoItemOutputSignal(void)
+	VideoItemOutputSignal::VideoItemOutputSignal(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemOutputSignal::CVideoItemOutputSignal(SchemeUnit unit) :
-		CVideoItemSignal(unit)
+	VideoItemOutputSignal::VideoItemOutputSignal(SchemeUnit unit) :
+		VideoItemSignal(unit)
 	{
 		AddInput();
 	}
 
-	CVideoItemOutputSignal::~CVideoItemOutputSignal(void)
+	VideoItemOutputSignal::~VideoItemOutputSignal(void)
 	{
 #ifdef _DEBUG
 		assert(inputsCount() == 1);
@@ -173,9 +173,9 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemOutputSignal::SaveData(Proto::Envelope* message) const
+	bool VideoItemOutputSignal::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CVideoItemSignal::SaveData(message);
+		bool result = VideoItemSignal::SaveData(message);
 		
 		if (result == false || message->has_videoitem() == false)
 		{
@@ -193,7 +193,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemOutputSignal::LoadData(const Proto::Envelope& message)
+	bool VideoItemOutputSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -203,7 +203,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CVideoItemSignal::LoadData(message);
+		bool result = VideoItemSignal::LoadData(message);
 		if (result == false)
 		{
 			return false;

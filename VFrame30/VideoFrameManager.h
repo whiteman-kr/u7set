@@ -2,7 +2,7 @@
 
 namespace VFrame30
 {
-	class CVideoFrame;
+	class Scheme;
 
 	class VFRAME30LIBSHARED_EXPORT VideoFrameManager
 	{
@@ -23,7 +23,7 @@ namespace VFrame30
 		// Get VideoFrame from container, videoframe must be loaded before.
 		// VideoFrame may be just read, don't do any modification, becaouse it's NOT thread safe.
 		//
-		bool getVideoFrame(const QString& strID, std::shared_ptr<const CVideoFrame>* videoFrame) const;
+		bool getVideoFrame(const QString& strID, std::shared_ptr<const Scheme>* videoFrame) const;
 
 		// Data
 		//
@@ -31,7 +31,7 @@ namespace VFrame30
 		mutable QMutex mutex;			// mutex used just for videoFrames map, any videoframe after getting
 		// canniot be modified.
 
-		std::map<QString, std::shared_ptr<CVideoFrame>> videoFrames;
+		std::map<QString, std::shared_ptr<Scheme>> videoFrames;
 	};
 
 }

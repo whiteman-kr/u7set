@@ -12,7 +12,7 @@ class VideoFramePropertiesDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	VideoFramePropertiesDialog(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, QWidget* parent);
+	VideoFramePropertiesDialog(std::shared_ptr<VFrame30::Scheme> videoFrame, QWidget* parent);
 	~VideoFramePropertiesDialog();
 
 protected slots:
@@ -21,6 +21,6 @@ protected slots:
 private:
 	Ui::VideoFramePropertiesDialog *ui;
 
-	std::shared_ptr<VFrame30::CVideoFrame> m_videoFrame;
+	std::shared_ptr<VFrame30::Scheme> m_videoFrame;
 };
 

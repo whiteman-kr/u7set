@@ -97,17 +97,17 @@ namespace VFrame30
 	// CFblItem
 	//
 
-	CFblItem::CFblItem(void)
+	FblItem::FblItem(void)
 	{
 	}
 
-	CFblItem::~CFblItem(void)
+	FblItem::~FblItem(void)
 	{
 	}
 		
 	// Serialization
 	//
-	bool CFblItem::SaveData(Proto::Envelope* message) const
+	bool FblItem::SaveData(Proto::Envelope* message) const
 	{
 		Proto::FblItem* fblItemMessage = message->mutable_videoitem()->mutable_fblitem();
 
@@ -132,7 +132,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblItem::LoadData(const Proto::Envelope& message)
+	bool FblItem::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -176,7 +176,7 @@ namespace VFrame30
 
 	// Drawing stuff
 	//
-	void CFblItem::DrawPinCross(QPainter* p, double x, double y, double pinWidth) const
+	void FblItem::DrawPinCross(QPainter* p, double x, double y, double pinWidth) const
 	{
 		double crossSize = pinWidth / 3;
 
@@ -189,14 +189,14 @@ namespace VFrame30
 		p->drawLine(cross_pt2, cross_pt4);
 	}
 
-	void CFblItem::DrawPinJoint(QPainter* p, double x, double y, double pinWidth) const
+	void FblItem::DrawPinJoint(QPainter* p, double x, double y, double pinWidth) const
 	{
 		double radius = static_cast<double>(pinWidth) / 8.0;
 
 		p->drawEllipse(QPointF(x, y), radius, radius);
 	}
 
-	double CFblItem::GetPinWidth(SchemeUnit unit, int dpi) const
+	double FblItem::GetPinWidth(SchemeUnit unit, int dpi) const
 	{
 		double pinWidth = static_cast<float>(mm2in(3));	// 3 мм!
 
@@ -210,27 +210,27 @@ namespace VFrame30
 
 	// Connections
 	//
-	const std::list<CFblConnectionPoint>& CFblItem::inputs() const
+	const std::list<CFblConnectionPoint>& FblItem::inputs() const
 	{
 		return m_inputPoints;
 	}
 
-	const std::list<CFblConnectionPoint>& CFblItem::outputs() const
+	const std::list<CFblConnectionPoint>& FblItem::outputs() const
 	{
 		return m_outputPoints;
 	}
 
-	std::list<CFblConnectionPoint>* CFblItem::mutableInputs()
+	std::list<CFblConnectionPoint>* FblItem::mutableInputs()
 	{
 		return &m_inputPoints;
 	}
 
-	std::list<CFblConnectionPoint>* CFblItem::mutableOutputs()
+	std::list<CFblConnectionPoint>* FblItem::mutableOutputs()
 	{
 		return &m_outputPoints;
 	}
 
-	bool CFblItem::GetConnectionPoint(const QUuid& guid, CFblConnectionPoint* pResult) const
+	bool FblItem::GetConnectionPoint(const QUuid& guid, CFblConnectionPoint* pResult) const
 	{
 		if (pResult == nullptr)
 		{
@@ -261,41 +261,41 @@ namespace VFrame30
 		return false;
 	}
 
-	int CFblItem::inputsCount() const
+	int FblItem::inputsCount() const
 	{
 		return static_cast<int>(m_inputPoints.size());
 	}
 
-	int CFblItem::outputsCount() const
+	int FblItem::outputsCount() const
 	{
 		return static_cast<int>(m_outputPoints.size());
 	}
 
-	void CFblItem::AddInput()
+	void FblItem::AddInput()
 	{
 		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Input, QUuid::createUuid());
 		m_inputPoints.push_back(cp);
 	}
 
-	void CFblItem::AddOutput()
+	void FblItem::AddOutput()
 	{
 		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Output, QUuid::createUuid());
 		m_outputPoints.push_back(cp);
 	}
 
-	void CFblItem::ClearAssociatedConnections()
+	void FblItem::ClearAssociatedConnections()
 	{
 		std::for_each(m_inputPoints.begin(), m_inputPoints.end(), [](CFblConnectionPoint& pin){pin.ClearAssociattdIOs();});
 		std::for_each(m_outputPoints.begin(), m_outputPoints.end(), [](CFblConnectionPoint& pin){pin.ClearAssociattdIOs();});
 	}
 
-	void CFblItem::SetConnectionsPos()
+	void FblItem::SetConnectionsPos()
 	{
 		assert(false);	// должно быть реализовано у наследников, CFblItemLine, CFblItemRect
 		return;
 	}
 
-	bool CFblItem::GetConnectionPointPos(const QUuid&, VideoItemPoint*) const
+	bool FblItem::GetConnectionPointPos(const QUuid&, VideoItemPoint*) const
 	{
 		assert(false);	// должно быть реализовано у наследников, CFblItemLine, CFblItemRect
 		return false;

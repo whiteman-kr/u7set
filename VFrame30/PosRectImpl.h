@@ -31,13 +31,13 @@ namespace VFrame30
 
 	// Реализация базовых интерефейсов для элементов прямоугольного типа
 	//
-	class VFRAME30LIBSHARED_EXPORT CPosRectImpl : public CVideoItem, public IVideoItemPosRect
+	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public VideoItem, public IVideoItemPosRect
 	{
 		Q_OBJECT
 
 	protected:
-		CPosRectImpl(void);
-		virtual ~CPosRectImpl(void);
+		PosRectImpl(void);
+		virtual ~PosRectImpl(void);
 
 	private:
 		void Init(void);

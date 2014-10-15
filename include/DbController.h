@@ -45,6 +45,9 @@ public:
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, QWidget* parentWidget);
 
+	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
+	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);
+
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
 
@@ -61,6 +64,9 @@ public:
 	bool setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files, QWidget* parentWidget);
 	bool setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget);
 
+	bool getSpecificCopy(const std::vector<DbFileInfo>& files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
+	bool getSpecificCopy(const DbFileInfo& file, int changesetId, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
+
 	bool checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget);
 	bool checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget);
 	bool checkOut(DbFileInfo& file, QWidget* parentWidget);
@@ -69,6 +75,8 @@ public:
 	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 
 	bool fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget);
+
+	bool getFileHistory(const DbFileInfo& file, std::vector<DbChangesetInfo>* out, QWidget* parentWidget);
 
 	// Hardware Configuration
 	//
@@ -88,6 +96,11 @@ public:
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
 
+	bool deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget);
+	bool undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget);
+
+	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -101,6 +114,8 @@ signals:
 	void signal_getUserList(std::vector<DbUser>* out);
 
 	void signal_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter);
+	void signal_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+
 	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);
 
@@ -110,12 +125,18 @@ signals:
 	void signal_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void signal_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
 
+	void signal_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
+
 	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
 
 	void signal_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
+	void signal_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo>* out);
+
+	// --
+	//
 	void signal_addDeviceObject(Hardware::DeviceObject* device, int parentId);
 
 	void signal_getSignalsIDs(QVector<int>* signalIDs);
@@ -126,6 +147,9 @@ signals:
 	void signal_getDataFormats(DataFormatList* dataFormats);
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
+	void signal_deleteSignal(int signalID, ObjectState* objectState);
+	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
+	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
 	//
 	// Service functions

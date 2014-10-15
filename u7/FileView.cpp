@@ -54,6 +54,9 @@ QVariant FilesModel::data(const QModelIndex& index, int role /*= Qt::DisplayRole
 			case FileUserColumn:
 				return QVariant(fileInfo->userId());
 
+			case FileActionColumn:
+				return QVariant(fileInfo->action().text());
+
 			case FileLastCheckInColumn:
 				return QVariant(fileInfo->lastCheckIn().toString());
 
@@ -85,6 +88,9 @@ QVariant FilesModel::headerData(int section, Qt::Orientation orientation, int ro
 
 			case FileUserColumn:
 				return QObject::tr("User");
+
+			case FileActionColumn:
+				return QObject::tr("Action");
 
 			case FileLastCheckInColumn:
 				return QObject::tr("Last Check In");
@@ -188,7 +194,6 @@ void FilesModel::setFilter(const QString& value)
 	m_filter = value;
 }
 
-
 //
 //
 // FileView
@@ -246,6 +251,7 @@ FileView::FileView(DbController* pDbStore, const QString& parentFileName) :
 
 	addAction(m_separatorAction1);
 	addAction(m_addFileAction);
+	addAction(m_deleteFileAction);
 
 	addAction(m_separatorAction2);
 	addAction(m_getWorkcopyAction);
@@ -305,6 +311,11 @@ void FileView::CreateActions()
 	m_addFileAction->setStatusTip(tr("Add file to version control..."));
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, this, &FileView::slot_AddFile);
+
+	m_deleteFileAction = new QAction(tr("Delete File..."), this);
+	m_deleteFileAction ->setStatusTip(tr("Mark file as deleted..."));
+	m_deleteFileAction ->setEnabled(false);
+	connect(m_deleteFileAction , &QAction::triggered, this, &FileView::slot_DeleteFile);
 
 	m_separatorAction2 = new QAction(this);
 	m_separatorAction2->setSeparator(true);
@@ -518,6 +529,11 @@ void FileView::addFile()
 	filesViewSelectionChanged(QItemSelection(), QItemSelection());*/
 }
 
+void FileView::deleteFile(std::vector<DbFileInfo> files)
+{
+	assert(false);
+}
+
 void FileView::getWorkcopy(std::vector<DbFileInfo> files)
 {
 	// Select destination folder
@@ -655,7 +671,8 @@ void FileView::slot_OpenFile()
 	{
 		auto file = selectedFiles[i];
 
-		if (file.state() == VcsState::CheckedOut)
+		if (file.state() == VcsState::CheckedOut &&
+			(file.fileId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
 		{
 			files.push_back(file);
 		}
@@ -783,7 +800,34 @@ void FileView::slot_UndoChanges()
 void FileView::slot_AddFile()
 {
 	addFile();
+	return;
+}
 
+void FileView::slot_DeleteFile()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+
+		if (file.state() == VcsState::CheckedIn ||
+			(file.state() == VcsState::CheckedOut && file.userId() == dbController()->currentUser().userId()))
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	deleteFile(files);
 	return;
 }
 
@@ -863,6 +907,7 @@ void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, con
 	bool hasUndoPossibility = false;
 	bool canGetWorkcopy = false;
 	int canSetWorkcopy = 0;
+	bool hasDeletePossibility = false;
 
 	int currentUserId = dbController()->currentUser().userId();;
 
@@ -909,6 +954,13 @@ void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, con
 			canGetWorkcopy = true;
 			canSetWorkcopy ++;
 		}
+
+		// hasDeletePossibility
+		if ((fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId) ||
+			fileInfo->state() == VcsState::CheckedIn)
+		{
+			hasDeletePossibility = true;
+		}
 	}
 
 	m_openFileAction->setEnabled(hasOpenPossibility);
@@ -920,6 +972,8 @@ void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, con
 
 	m_getWorkcopyAction->setEnabled(canGetWorkcopy);
 	m_setWorkcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
+
+	m_deleteFileAction->setEnabled(hasDeletePossibility);
 
 	return;
 

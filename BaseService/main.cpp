@@ -26,6 +26,8 @@ public:
 	BaseService(int argc, char ** argv, const QString & name, int serviceType);
 	virtual ~BaseService();
 
+	void sendFile(QHostAddress address, quint16 port, QString fileName);
+
 protected:
 	void start() override;
 	void stop() override;
@@ -60,6 +62,13 @@ void BaseService::stop()
 	delete m_baseServiceController;
 }
 
+
+void BaseService::sendFile(QHostAddress address, quint16 port, QString fileName)
+{
+	assert(m_baseServiceController != nullptr);
+
+	emit m_baseServiceController->sendFile(address, port, fileName);
+}
 
 
 int main(int argc, char *argv[])

@@ -78,6 +78,8 @@ public slots:
 	// File management
 	//
 	void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter);
+	void slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+
 	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
 	void slot_deleteFiles(std::vector<DbFileInfo>* files);
 
@@ -87,11 +89,15 @@ public slots:
 	void slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
 
+	void slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
+
 	void slot_checkIn(std::vector<DbFileInfo>* files, QString comment);
 	void slot_checkOut(std::vector<DbFileInfo>* files);
 	void slot_undoChanges(std::vector<DbFileInfo>* files);
 
 	void slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
+
+	void slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo>* out);
 
 	// Hardware Configuration
 	//
@@ -108,6 +114,11 @@ public slots:
 
 	void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState);
+
+	void slot_deleteSignal(int signalID, ObjectState* objectState);
+	void slot_undoSignalChanges(int signalID, ObjectState* objectState);
+
+	void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
 	// Service
 	//
