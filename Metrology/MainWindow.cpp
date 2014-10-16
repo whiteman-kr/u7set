@@ -208,8 +208,6 @@ void  MainWindow::createActions()
 
 void MainWindow::updateActions()
 {
-    return;
-
     bool startMeasure = true;
     bool stopMeasure = true;
 
