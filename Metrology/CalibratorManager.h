@@ -27,6 +27,7 @@ public:
     void            setIndex(int index)             { m_index = index;  }
 
     Calibrator*     getCalibrator()                 { return m_pCalibrator; }
+    QString         getPortName()                   { if (m_pCalibrator == nullptr) return ""; return m_pCalibrator->getPortName(); }
 
     bool            calibratorIsConnected();
 
@@ -123,6 +124,7 @@ public:
 
     int                         append(CalibratorManager* pManager);
     CalibratorManager*          at(int index);
+    bool                        removeAt(int index);
 
     void                        clear();
 };

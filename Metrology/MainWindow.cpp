@@ -22,12 +22,26 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    // init calibration base
+    //
     theCalibratorBase.init(this);
-    connect( &theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::onCalibratorConnectedChanged );
 
+    connect( &theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged );
+
+    // init interface
+    //
     createInterface();
 
-    initMeasureThread();
+    // init measure thread
+    //
+    connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::measureThreadStarted, Qt::QueuedConnection );
+    connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection );
+    connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection );
+    connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection );
+
+    m_measureThread.init(this);
+
+    measureThreadStoped();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,18 +68,6 @@ bool MainWindow::createInterface()
     setMeasureType(MEASURE_TYPE_LINEARITY);
 
     return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::initMeasureThread()
-{
-    connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::onMeasureThreadStarted, Qt::QueuedConnection );
-    connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::onMeasureThreadStoped, Qt::QueuedConnection );
-    connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::onMeasureThreadInfo), Qt::QueuedConnection );
-    connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::onMeasureThreadInfo), Qt::QueuedConnection );
-
-    onMeasureThreadStoped();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -206,6 +208,8 @@ void  MainWindow::createActions()
 
 void MainWindow::updateActions()
 {
+    return;
+
     bool startMeasure = true;
     bool stopMeasure = true;
 
@@ -856,7 +860,7 @@ void MainWindow::setOutputSignalType(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onCalibratorConnectedChanged(int count)
+void MainWindow::calibratorConnectedChanged(int count)
 {
     updateActions();
 
@@ -865,7 +869,7 @@ void MainWindow::onCalibratorConnectedChanged(int count)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onMeasureThreadStarted()
+void MainWindow::measureThreadStarted()
 {
     updateActions();
 
@@ -892,7 +896,7 @@ void MainWindow::onMeasureThreadStarted()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onMeasureThreadStoped()
+void MainWindow::measureThreadStoped()
 {
     updateActions();
 
@@ -912,14 +916,14 @@ void MainWindow::onMeasureThreadStoped()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onMeasureThreadInfo(QString msg)
+void MainWindow::setMeasureThreadInfo(QString msg)
 {
     m_statusMeasureThreadInfo->setText(msg);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onMeasureThreadInfo(int timeout)
+void MainWindow::setMeasureThreadInfo(int timeout)
 {
     m_statusMeasureTimeout->setValue(timeout);
 }

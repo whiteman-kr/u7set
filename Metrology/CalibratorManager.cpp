@@ -640,6 +640,24 @@ CalibratorManager* CalibratorManagerList::at(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool CalibratorManagerList::removeAt(int index)
+{
+    if (index < 0 || index >= count())
+    {
+        return false;
+    }
+
+    m_mutex.lock();
+
+        m_list.removeAt(index);
+
+    m_mutex.unlock();
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void CalibratorManagerList::clear()
 {
     m_mutex.lock();
