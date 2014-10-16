@@ -1,27 +1,33 @@
 #include "Stable.h"
 #include "Fbl.h"
 
-namespace Fbl
+namespace Afbl
 {
 	//
 	//
 	//							FblParamValue		
 	//
 	//
-	bool FblParamValue::SaveData(Proto::FblParamValue* message) const
+	bool AfbParamValue::SaveData(Proto::FblParamValue* /*message*/) const
 	{
-		message->set_integralvalue(IntegralValue);
-		message->set_floatingpoint(FloatingPoint);
-		message->set_discrete(Discrete);
-		return true;
+		assert(false);
+		return false;
+
+//		message->set_integralvalue(IntegralValue);
+//		message->set_floatingpoint(FloatingPoint);
+//		message->set_discrete(Discrete);
+//		return true;
 	}
 
-	bool FblParamValue::LoadData(const Proto::FblParamValue& message)
+	bool AfbParamValue::LoadData(const Proto::FblParamValue& /*message*/)
 	{
-		IntegralValue = message.integralvalue();
-		FloatingPoint = message.floatingpoint();
-		Discrete = message.discrete();
-		return true;
+		assert(false);
+		return false;
+
+//		IntegralValue = message.integralvalue();
+//		FloatingPoint = message.floatingpoint();
+//		Discrete = message.discrete();
+//		return true;
 	}
 
 	//
@@ -29,32 +35,38 @@ namespace Fbl
 	//							FblElementParam		
 	//
 	//
-	bool FblElementParam::SaveData(Proto::FblElementParam* message) const
+	bool AfbElementParam::SaveData(Proto::FblElementParam* /*message*/) const
 	{
-		Proto::Write(message->mutable_caption(), m_caption);
-		message->set_type(static_cast<Proto::FblParamType>(m_type));
+		assert(false);
+		return false;
 
-		m_value.SaveData(message->mutable_value());
-		m_defaultValue.SaveData(message->mutable_defaultvalue());
+//		Proto::Write(message->mutable_caption(), m_caption);
+//		message->set_type(static_cast<Proto::FblParamType>(m_type));
 
-		m_lowLimit.SaveData(message->mutable_lowlimit());
-		m_highLimit.SaveData(message->mutable_highlimit());
+//		m_value.SaveData(message->mutable_value());
+//		m_defaultValue.SaveData(message->mutable_defaultvalue());
 
-		return true;
+//		m_lowLimit.SaveData(message->mutable_lowlimit());
+//		m_highLimit.SaveData(message->mutable_highlimit());
+
+//		return true;
 	}
 
-	bool FblElementParam::LoadData(const Proto::FblElementParam& message)
+	bool AfbElementParam::LoadData(const Proto::FblElementParam& /*message*/)
 	{
-		m_caption = Proto::Read(message.caption());
-		m_type = static_cast<FblParamType>(message.type());
+		assert(false);
+		return false;
 
-		m_value.LoadData(message.value());
-		m_defaultValue.LoadData(message.defaultvalue());
+//		m_caption = Proto::Read(message.caption());
+//		m_type = static_cast<FblParamType>(message.type());
 
-		m_lowLimit.LoadData(message.lowlimit());
-		m_highLimit.LoadData(message.highlimit());
+//		m_value.LoadData(message.value());
+//		m_defaultValue.LoadData(message.defaultvalue());
 
-		return true;
+//		m_lowLimit.LoadData(message.lowlimit());
+//		m_highLimit.LoadData(message.highlimit());
+
+//		return true;
 	}
 
 	//
@@ -62,49 +74,55 @@ namespace Fbl
 	//							CFblElementSignal		
 	//
 	//
-	FblElementSignal::FblElementSignal(void)
+	AfbElementSignal::AfbElementSignal(void)
 	{
-		m_type = FblSignalType::Analog;
+		m_type = AfbSignalType::Analog;
 	}
 
-	FblElementSignal::~FblElementSignal(void)
+	AfbElementSignal::~AfbElementSignal(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool FblElementSignal::SaveData(Proto::FblElementSignal* message) const
+	bool AfbElementSignal::SaveData(Proto::FblElementSignal* /*message*/) const
 	{
-		Proto::Write(message->mutable_caption(), m_caption);
-		message->set_type(static_cast<Proto::FblSignalType>(m_type));
-		return true;
+		assert(false);
+		return false;
+
+//		Proto::Write(message->mutable_caption(), m_caption);
+//		message->set_type(static_cast<Proto::FblSignalType>(m_type));
+//		return true;
 	}
 	
-	bool FblElementSignal::LoadData(const Proto::FblElementSignal& message)
+	bool AfbElementSignal::LoadData(const Proto::FblElementSignal& /*message*/)
 	{
-		m_caption = Proto::Read(message.caption());
-		m_type = static_cast<FblSignalType>(message.type());
-		return true;
+		assert(false);
+		return false;
+
+//		m_caption = Proto::Read(message.caption());
+//		m_type = static_cast<FblSignalType>(message.type());
+//		return true;
 	}
 
 	// Caption
 	//
-	const QString& FblElementSignal::caption() const
+	const QString& AfbElementSignal::caption() const
 	{
 		return m_caption;
 	}
-	void FblElementSignal::setCaption(const QString& caption)
+	void AfbElementSignal::setCaption(const QString& caption)
 	{
 		m_caption = caption;
 	}
 
 	// Type
 	//
-	FblSignalType FblElementSignal::type() const
+	AfbSignalType AfbElementSignal::type() const
 	{
 		return m_type;
 	}
-	void FblElementSignal::setType(FblSignalType type)
+	void AfbElementSignal::setType(AfbSignalType type)
 	{
 		m_type = type;
 	}
@@ -115,75 +133,75 @@ namespace Fbl
 	//
 	//
 
-	FblElementParam::FblElementParam(void)
+	AfbElementParam::AfbElementParam(void)
 	{
 	}
 
-	FblElementParam::~FblElementParam(void)
+	AfbElementParam::~AfbElementParam(void)
 	{
 	}
 
 	// Caption
 	//
-	const QString& FblElementParam::caption() const
+	const QString& AfbElementParam::caption() const
 	{
 		return m_caption;
 	}
-	void FblElementParam::setCaption(const QString& caption)
+	void AfbElementParam::setCaption(const QString& caption)
 	{
 		m_caption = caption;
 	}
 
 	// Type
 	//
-	FblParamType FblElementParam::type() const
+	AfbParamType AfbElementParam::type() const
 	{
 		return m_type;
 	}
-	void FblElementParam::setType(FblParamType type)
+	void AfbElementParam::setType(AfbParamType type)
 	{
 		m_type = type;
 	}
 
 	// Value
 	//
-	const FblParamValue& FblElementParam::value() const
+	const AfbParamValue& AfbElementParam::value() const
 	{
 		return m_value;
 	}
-	void FblElementParam::setValue(const FblParamValue& value)
+	void AfbElementParam::setValue(const AfbParamValue& value)
 	{
 		m_value = value;
 	}
 
 	// Defaut Value
 	//
-	const FblParamValue& FblElementParam::defaultValue() const
+	const AfbParamValue& AfbElementParam::defaultValue() const
 	{
 		return m_defaultValue;
 	}
-	void FblElementParam::setDefaultValue(const FblParamValue& defaultValue)
+	void AfbElementParam::setDefaultValue(const AfbParamValue& defaultValue)
 	{
 		m_defaultValue = defaultValue;
 	}
 
 	// LowLimit
-	const FblParamValue& FblElementParam::lowLimit() const
+	const AfbParamValue& AfbElementParam::lowLimit() const
 	{
 		return m_lowLimit;
 	}
-	void FblElementParam::setLowLimit(const FblParamValue& lowLimit)
+	void AfbElementParam::setLowLimit(const AfbParamValue& lowLimit)
 	{
 		m_lowLimit = lowLimit;
 	}
 
 	// highLimit
 	//
-	const FblParamValue& FblElementParam::highLimit() const
+	const AfbParamValue& AfbElementParam::highLimit() const
 	{
 		return m_highLimit;
 	}
-	void FblElementParam::setHighLimit(const FblParamValue& highLimit)
+	void AfbElementParam::setHighLimit(const AfbParamValue& highLimit)
 	{
 		m_highLimit = highLimit;
 	}
@@ -194,122 +212,141 @@ namespace Fbl
 	//
 	//
 
-	FblElement::FblElement(void)
+	AfbElement::AfbElement(void)
 	{
 		Init();
 	}
 
-	FblElement::~FblElement(void)
+	AfbElement::~AfbElement(void)
 	{
 	}
 
-	void FblElement::Init(void)
+	void AfbElement::Init(void)
 	{
 		m_opcode = 0;
 		m_guid = QUuid();
 	}
 
+	bool AfbElement::loadFromXml(const QByteArray& data)
+	{
+		return true;
+	}
+
+	bool AfbElement::saveToXml(QByteArray* data) const
+	{
+		return true;
+	}
+
 	// Serialization
 	//
-	bool FblElement::SaveData(Proto::Envelope* message) const
+	bool AfbElement::SaveData(Proto::Envelope* /*message*/) const
 	{
-		quint32 classnamehash = CUtils::GetClassHashCode("FblElement");
-		message->set_classnamehash(classnamehash);	// ќб€зательное поле, хш имени класса, по нему восстанавливаетс€ класс.
+		assert(false);
+		return false;
 
-		Proto::FblElement* pMutableFblElement = message->mutable_fblelement();
+//		quint32 classnamehash = CUtils::GetClassHashCode("FblElement");
+//		message->set_classnamehash(classnamehash);	// ќб€зательное поле, хш имени класса, по нему восстанавливаетс€ класс.
 
-		Proto::Write(pMutableFblElement->mutable_uuid(), m_guid);
-		Proto::Write(pMutableFblElement->mutable_strid(), m_strID);
-		Proto::Write(pMutableFblElement->mutable_caption(), m_caption);
-		pMutableFblElement->set_opcode(m_opcode);
+//		Proto::FblElement* pMutableFblElement = message->mutable_fblelement();
 
-		for (auto signal = m_inputSignals.begin(); signal != m_inputSignals.end(); ++signal)
-		{
-			Proto::FblElementSignal* s = pMutableFblElement->mutable_inputsignals()->Add();
-			signal->SaveData(s);
-		}
+//		Proto::Write(pMutableFblElement->mutable_uuid(), m_guid);
+//		Proto::Write(pMutableFblElement->mutable_strid(), m_strID);
+//		Proto::Write(pMutableFblElement->mutable_caption(), m_caption);
+//		pMutableFblElement->set_opcode(m_opcode);
 
-		for (auto signal = m_outputSignals.begin(); signal != m_outputSignals.end(); ++signal)
-		{
-			Proto::FblElementSignal* s = pMutableFblElement->mutable_outputsignals()->Add();
-			signal->SaveData(s);
-		}
+//		for (auto signal = m_inputSignals.begin(); signal != m_inputSignals.end(); ++signal)
+//		{
+//			Proto::FblElementSignal* s = pMutableFblElement->mutable_inputsignals()->Add();
+//			signal->SaveData(s);
+//		}
 
-		for (auto param = m_params.begin(); param != m_params.end(); ++param)
-		{
-			Proto::FblElementParam* p = pMutableFblElement->mutable_params()->Add();
-			param->SaveData(p);
-		}
+//		for (auto signal = m_outputSignals.begin(); signal != m_outputSignals.end(); ++signal)
+//		{
+//			Proto::FblElementSignal* s = pMutableFblElement->mutable_outputsignals()->Add();
+//			signal->SaveData(s);
+//		}
+
+//		for (auto param = m_params.begin(); param != m_params.end(); ++param)
+//		{
+//			Proto::FblElementParam* p = pMutableFblElement->mutable_params()->Add();
+//			param->SaveData(p);
+//		}
 		
-		return true;
+//		return true;
 	}
 
-	bool FblElement::LoadData(const Proto::Envelope& message)
+	bool AfbElement::LoadData(const Proto::Envelope& /*message*/)
 	{
-		if (message.has_fblelement() == false)
-		{
-			assert(message.has_fblelement());
-			return false;
-		}
+		assert(false);
+		return false;
 
-		const Proto::FblElement& fblelement = message.fblelement();
+//		if (message.has_fblelement() == false)
+//		{
+//			assert(message.has_fblelement());
+//			return false;
+//		}
 
-		m_guid = Proto::Read(fblelement.uuid());
-		m_strID = Proto::Read(fblelement.strid());
-		m_caption = Proto::Read(fblelement.caption());
-		m_opcode = fblelement.opcode();
+//		const Proto::FblElement& fblelement = message.fblelement();
+
+//		m_guid = Proto::Read(fblelement.uuid());
+//		m_strID = Proto::Read(fblelement.strid());
+//		m_caption = Proto::Read(fblelement.caption());
+//		m_opcode = fblelement.opcode();
 			
-		// Read input signals
-		//
-		m_inputSignals.clear();
-		for (int i = 0; i < fblelement.inputsignals().size(); i++)
-		{
-			Fbl::FblElementSignal s;
-			s.LoadData(fblelement.inputsignals(i));
+//		// Read input signals
+//		//
+//		m_inputSignals.clear();
+//		for (int i = 0; i < fblelement.inputsignals().size(); i++)
+//		{
+//			Fbl::FblElementSignal s;
+//			s.LoadData(fblelement.inputsignals(i));
 			
-			m_inputSignals.push_back(s);
-		}
+//			m_inputSignals.push_back(s);
+//		}
 
-		// Read output signals
-		//
-		m_outputSignals.clear();
-		for (int i = 0; i < fblelement.outputsignals().size(); i++)
-		{
-			Fbl::FblElementSignal s;
-			s.LoadData(fblelement.outputsignals(i));
+//		// Read output signals
+//		//
+//		m_outputSignals.clear();
+//		for (int i = 0; i < fblelement.outputsignals().size(); i++)
+//		{
+//			Fbl::FblElementSignal s;
+//			s.LoadData(fblelement.outputsignals(i));
 			
-			m_outputSignals.push_back(s);
-		}
+//			m_outputSignals.push_back(s);
+//		}
 
-		// Read params
-		//
-		m_params.clear();
-		for (int i = 0; i < fblelement.params().size(); i++)
-		{
-			Fbl::FblElementParam p;
-			p.LoadData(fblelement.params(i));
+//		// Read params
+//		//
+//		m_params.clear();
+//		for (int i = 0; i < fblelement.params().size(); i++)
+//		{
+//			Fbl::FblElementParam p;
+//			p.LoadData(fblelement.params(i));
 			
-			m_params.push_back(p);
-		}
+//			m_params.push_back(p);
+//		}
 
-		return true;
+//		return true;
 	}
 
-	FblElement* FblElement::CreateObject(const Proto::Envelope& message)
+	AfbElement* AfbElement::CreateObject(const Proto::Envelope& /*message*/)
 	{
-		// Ёта функци€ может создавать только один экземпл€р
-		//
-		if (message.has_fblelement() == false)
-		{
-			assert(message.has_fblelement());
-			return nullptr;
-		}
+		assert(false);
+		return nullptr;
 
-		FblElement* pFblElement = new FblElement();
+//		// Ёта функци€ может создавать только один экземпл€р
+//		//
+//		if (message.has_fblelement() == false)
+//		{
+//			assert(message.has_fblelement());
+//			return nullptr;
+//		}
+
+//		FblElement* pFblElement = new FblElement();
 		
-		pFblElement->LoadData(message);
+//		pFblElement->LoadData(message);
 
-		return pFblElement;
+//		return pFblElement;
 	}
 
 	// Properties and Data
@@ -317,11 +354,11 @@ namespace Fbl
 
 	// Guid
 	//
-	const QUuid& FblElement::guid() const
+	const QUuid& AfbElement::guid() const
 	{
 		return m_guid;
 	}
-	void FblElement::setGuid(const QUuid& guid)
+	void AfbElement::setGuid(const QUuid& guid)
 	{
 		m_guid = guid;
 		return;
@@ -329,66 +366,66 @@ namespace Fbl
 
 	// StrID
 	//
-	const QString& FblElement::strID() const
+	const QString& AfbElement::strID() const
 	{
 		return m_strID;
 	}
-	void FblElement::setStrID(const QString& strID)
+	void AfbElement::setStrID(const QString& strID)
 	{
 		m_strID = strID;
 	}
 
 	// Caption
 	//
-	const QString& FblElement::caption() const
+	const QString& AfbElement::caption() const
 	{
 		return m_caption;
 	}
-	void FblElement::setCaption(const QString& caption)
+	void AfbElement::setCaption(const QString& caption)
 	{
 		m_caption = caption;
 	}
 
 	// Opcode
 	//
-	unsigned int FblElement::opcode() const
+	unsigned int AfbElement::opcode() const
 	{
 		return m_opcode;
 	}
-	void FblElement::setOpcode(unsigned int value)
+	void AfbElement::setOpcode(unsigned int value)
 	{
 		m_opcode = value;
 	}
 
 	// InputSignals
 	//
-	const std::vector<FblElementSignal>& FblElement::inputSignals() const
+	const std::vector<AfbElementSignal>& AfbElement::inputSignals() const
 	{
 		return m_inputSignals;
 	}
-	void FblElement::setInputSignals(const std::vector<FblElementSignal>& inputsignals)
+	void AfbElement::setInputSignals(const std::vector<AfbElementSignal>& inputsignals)
 	{
 		m_inputSignals = inputsignals;
 	}
 
 	// OutputSignals
 	//
-	const std::vector<FblElementSignal>& FblElement::outputSignals() const
+	const std::vector<AfbElementSignal>& AfbElement::outputSignals() const
 	{
 		return m_outputSignals;
 	}
-	void FblElement::setOutputSignals(const std::vector<FblElementSignal>& outputsignals)
+	void AfbElement::setOutputSignals(const std::vector<AfbElementSignal>& outputsignals)
 	{
 		m_outputSignals = outputsignals;
 	}
 
 	// Params
 	//
-	const std::vector<FblElementParam>& FblElement::params() const
+	const std::vector<AfbElementParam>& AfbElement::params() const
 	{
 		return m_params;
 	}
-	void FblElement::setParams(const std::vector<FblElementParam>& params)
+	void AfbElement::setParams(const std::vector<AfbElementParam>& params)
 	{
 		m_params = params;
 	}
@@ -413,15 +450,15 @@ namespace Fbl
 	{
 	}
 
-	std::shared_ptr<FblElement> FblElementCollection::Get(const QUuid& guid) const
+	std::shared_ptr<AfbElement> FblElementCollection::Get(const QUuid& guid) const
 	{
 		auto result = std::find_if(elements.begin(), elements.end(),
-			[&guid](const std::shared_ptr<FblElement>& fblelement)
+			[&guid](const std::shared_ptr<AfbElement>& fblelement)
 			{
 				return fblelement->guid() == guid;
 			});
 		
-		return result == elements.end() ? std::shared_ptr<FblElement>(nullptr) : *result;
+		return result == elements.end() ? std::shared_ptr<AfbElement>(nullptr) : *result;
 	}
 
 }

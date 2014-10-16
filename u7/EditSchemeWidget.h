@@ -290,6 +290,8 @@ protected slots:
 	void properties();
 	void selectionChanged();
 
+	void addFblElement();
+
 	// Properties
 	//
 public:

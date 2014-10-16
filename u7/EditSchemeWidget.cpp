@@ -1389,11 +1389,7 @@ void EditSchemeWidget::createActions()
 
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
 	m_addFblElementAction->setEnabled(true);
-	connect(m_addFblElementAction, &QAction::triggered,
-			[this](bool)
-			{
-				addItem(std::make_shared<VFrame30::VideoItemFblElement>(videoFrame()->unit()));
-			});
+	connect(m_addFblElementAction, &QAction::triggered, this, &EditSchemeWidget::addFblElement);
 
 	m_addLinkAction = new QAction(tr("Link"), this);
 	m_addLinkAction->setEnabled(true);
@@ -3669,6 +3665,11 @@ void EditSchemeWidget::selectionChanged()
 
 	m_propertiesDialog->setObjects(schemeView()->selectedItems());
 	return;
+}
+
+void EditSchemeWidget::addFblElement()
+{
+	// addItem(std::make_shared<VFrame30::VideoItemFblElement>(videoFrame()->unit()));
 }
 
 MouseState EditSchemeWidget::mouseState() const

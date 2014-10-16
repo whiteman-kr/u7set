@@ -19,7 +19,7 @@ namespace VFrame30
 		VideoItemFblElement(void);
 	public:
 		explicit VideoItemFblElement(SchemeUnit unit);
-		VideoItemFblElement(SchemeUnit unit, const Fbl::FblElement& fblElement);
+		VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement);
 
 		virtual ~VideoItemFblElement(void);
 
@@ -40,10 +40,10 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		const Fbl::FblElement& fblElement() const;
+		const Afbl::AfbElement& fblElement() const;
 
 	private:
-		Fbl::FblElement m_fblElement;
+		Afbl::AfbElement m_fblElement;
 	};
 
 }
