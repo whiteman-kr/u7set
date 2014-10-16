@@ -39,7 +39,7 @@ namespace VFrame30
 		// ≈сли в connectionMap есть pinPos, то инкрементировать значение, иначе добавить новую запись со сзначением 1
 		//
 		void ConnectionMapPosInc(VideoItemPoint pinPos);
-		int GetPinPosConnectinCount(VideoItemPoint pinPos) const;
+		int GetPinPosConnectinCount(VideoItemPoint pinPos, SchemeUnit unit) const;
 
 		std::shared_ptr<VideoItem> getItemUnderPoint(QPointF point) const;
 		std::list<std::shared_ptr<VideoItem>> getItemListInRectangle(const QRectF& rect) const;

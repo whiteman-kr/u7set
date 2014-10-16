@@ -3244,35 +3244,8 @@ QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool 
 
 QPointF EditSchemeWidget::snapToGrid(QPointF pt) const
 {
-	QPointF result;
 	double gridSize = videoFrame()->unit() == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
-
-	// SnapToGrid для Xin
-	//
-	double restX = pt.x() - (double)((int)(pt.x() / gridSize)) * gridSize;
-
-	if (restX <= gridSize / 2)
-	{
-		result.setX((double)((int)(pt.x() / gridSize)) * gridSize);
-	}
-	else
-	{
-		result.setX((double)((int)(pt.x() / gridSize)) * gridSize + gridSize);
-	}
-
-	// SnapToGrid для YXin
-	//
-	double restY = pt.y() - (double)((int)(pt.y() / gridSize)) * gridSize;
-
-	if (restY <= gridSize / 2)
-	{
-		result.setY((double)((int)(pt.y() / gridSize)) * gridSize);
-	}
-	else
-	{
-		result.setY((double)((int)(pt.y() / gridSize)) * gridSize + gridSize);
-	}
-
+	QPointF result = CUtils::snapToGrid(pt, gridSize);
 	return result;
 }
 
