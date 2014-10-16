@@ -13,18 +13,21 @@
 
 // ==============================================================================================
 
-class CalibratorManager : public QDialog
+class CalibratorManager : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CalibratorManager(Calibrator* pCalibrator, QWidget *parent = 0);
+    explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent);
     ~CalibratorManager();
 
-    int             getIndex()                      { return m_index; }
-    void            setIndex(int index)             { m_index = index; }
+    void            show()                          { if (m_pDialog != nullptr) m_pDialog->show(); }
+
+    int             getIndex()                      { return m_index;   }
+    void            setIndex(int index)             { m_index = index;  }
 
     Calibrator*     getCalibrator()                 { return m_pCalibrator; }
+    QString         getPortName()                   { if (m_pCalibrator == nullptr) return ""; return m_pCalibrator->getPortName(); }
 
     bool            calibratorIsConnected();
 
@@ -42,14 +45,16 @@ public:
 
 private:
 
-    int             m_index = -1;                                                           // index calibrator in a common base calibrators CalibratorBase
-
     Calibrator*     m_pCalibrator = nullptr;
+    int             m_index = -1;                                                           // index calibrator in a common base calibrators CalibratorBase
 
     bool            m_ready = false;
 
     // Elements of interface - Menu
     //
+    QWidget*        m_parentWidget = nullptr;
+    QDialog*        m_pDialog = nullptr;
+
     QFont*          m_pFont;
     QLabel*         m_pMeasureLabel = nullptr;
     QLineEdit*      m_pMeasureEdit = nullptr;
@@ -67,9 +72,10 @@ private:
     QDialog*        m_pErrorDialog = nullptr;
     QTextEdit*      m_pErrorList = nullptr;
 
-    void            createInterface();
-    void            initInterface();
+    void            createDialog();
+    void            initDialog();
     void            enableInterface(bool enable);
+    void            updateValue();
 
 signals:
 
@@ -84,8 +90,8 @@ private slots:
 
     void            onCalibratorError(QString text);
 
-    void            onConnect();
-    void            onDisconnect();
+    void            onCalibratorConnect();
+    void            onCalibratorDisconnect();
 
     void            onUnitChanged();
     void            onValueChanging();
@@ -95,12 +101,32 @@ private slots:
     void            onStepDown();
     void            onStepUp();
 
-    void            onModeList(int mode);
-    void            onUnitList(int unit);
+    void            onModeUnitList(int);
 
     void            onErrorList();
 
     void            onRemoveControl();
+};
+
+// ==============================================================================================
+
+class CalibratorManagerList
+{
+private:
+
+    QMutex                      m_mutex;
+
+    QList<CalibratorManager*>   m_list;
+
+public:
+
+    int                         count();
+
+    int                         append(CalibratorManager* pManager);
+    CalibratorManager*          at(int index);
+    bool                        removeAt(int index);
+
+    void                        clear();
 };
 
 // ==============================================================================================

@@ -2,14 +2,13 @@
 #define MEASURETHREAD_H
 
 #include <QThread>
-#include <QMutex>
+#include <QMessageBox>
 #include "Measure.h"
 #include "CalibratorBase.h"
 
 // ==============================================================================================
 
-const int MT_TIMEOUT_STEP       = 100; // 100 milliseconds
-const int MT_VALUE_IS_READY     = 0xFFFF;
+const int MEASURE_THREAD_TIMEOUT_STEP = 100; // 100 milliseconds
 
 // ==============================================================================================
 
@@ -19,43 +18,51 @@ class MeasureThread : public QThread
 
 public:
 
-    explicit MeasureThread(QObject *parent = 0);
+    explicit                MeasureThread(QObject *parent = 0);
 
-    void        setMeasureType(int type)    { m_measureType = type; }
-    int         getMeasureType()            { return m_measureType; }
+    void                    init(QWidget* parent = 0);
 
-    bool        stop();
+    void                    setMeasureType(int type)    { m_measureType = type; }
+    void                    stop()                      { m_cmdStopMeasure = true; }
 
 private:
 
-    QMutex      m_mutex;
+    QWidget*                m_parentWidget = nullptr;
 
-    int         m_measureType = MEASURE_TYPE_UNKNOWN;
+    int                     m_measureType = MEASURE_TYPE_UNKNOWN;
+    bool                    m_cmdStopMeasure = true;
 
-    bool        m_cmdStopMeasure = true;
+    CalibratorManagerList   m_calibratorManagerList;
 
-    void        waitMeasureTimeout();
+    void                    waitMeasureTimeout();
 
-    bool        prepareCalibrator(CalibratorManager* manager, int mode, int unit);
+    bool                    prepareCalibrator(CalibratorManager* manager, int mode, int unit);
 
-    void        measureLinearity();
-    void        measureComprators();
-    void        measureComplexComprators();
+    void                    measureLinearity();
+    void                    measureComprators();
+    void                    measureComplexComprators();
 
 protected:
 
-    void        run();
+    void                    run();
 
 signals:
 
+    void                    showMsgBox(QString);
+
     // measure thread signals
     //
-    void        measureInfo(QString);
-    void        measureInfo(int);
-    void        measureComplite();
+    void                    measureInfo(QString);
+    void                    measureInfo(int);
+    void                    measureComplite();
 
-public slots:
+private slots:
 
+    void                    msgBox(QString text)        { QMessageBox::information(m_parentWidget, tr("Measurement process"), text); }
+
+    void                    calibratorDisconnected();
+
+    void                    finish();
 };
 
 // ==============================================================================================

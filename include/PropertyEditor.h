@@ -1,6 +1,8 @@
 #ifndef PROPERTYEDITOR_H
 #define PROPERTYEDITOR_H
 
+#include "../qtpropertybrowser/src/qteditorfactory.h"
+#include <memory>
 #include <QWidget>
 #include <QMap>
 #include <QVariant>
@@ -8,8 +10,8 @@
 #include <QCheckBox>
 #include <QtTreePropertyBrowser>
 #include <QtVariantPropertyManager>
-#include "../qtpropertybrowser/src/qteditorfactory.h"
-#include <memory>
+#include <QTextEdit>
+#include <QDialog>
 #include <QSet>
 
 class QtTreePropertyBrowser;
@@ -19,7 +21,47 @@ class QtIntPropertyManager;
 class QtDoublePropertyManager;
 class QtGroupPropertyManager;
 
-//-------------------------------------------------------------------------------------
+
+class QtMultiColorEdit : public QWidget
+{
+	Q_OBJECT
+
+public:
+	QtMultiColorEdit(QWidget* parent);
+	void setValue(QVariant value);
+
+public slots:
+	void onEditingFinished();
+
+signals:
+	void valueChanged(QVariant value);
+
+private slots:
+	void onButtonPressed();
+
+private:
+	bool eventFilter(QObject* watched, QEvent* event);
+	QColor colorFromText(const QString& t);
+
+
+private:
+	QLineEdit* m_lineEdit = nullptr;
+	bool m_escape = false;
+	bool m_editingFinished = false;
+};
+
+class MultiLineEdit : public QDialog
+{
+public:
+	MultiLineEdit(QWidget* parent, const QString& text);
+	QString text();
+
+private:
+	QString m_text;
+	QTextEdit* m_textEdit = nullptr;
+
+	virtual void accept();
+};
 
 class QtMultiCheckBox : public QWidget
 {
@@ -52,18 +94,20 @@ public:
 	void setValue(QString value);
 
 public slots:
-	void onValueChanged(QString value);
 	void onEditingFinished();
 
 signals:
 	void valueChanged(QVariant value);
+
+private slots:
+	void onButtonPressed();
 
 private:
 	bool eventFilter(QObject* watched, QEvent* event);
 
 private:
 	QLineEdit* m_lineEdit = nullptr;
-	QString m_text;
+	//QString m_text;
 	bool m_escape = false;
 	bool m_editingFinished = false;
 };
@@ -217,6 +261,7 @@ protected:
 	QtMultiVariantPropertyManager* m_propertyIntManager = nullptr;
 	QtMultiVariantPropertyManager* m_propertyDoubleManager = nullptr;
 	QtMultiVariantPropertyManager* m_propertyBoolManager = nullptr;
+	QtMultiVariantPropertyManager* m_propertyColorManager = nullptr;
 
 	QMap<QString, std::shared_ptr<QObject>> m_propToClassMap;   //Property Name to Class Map
 

@@ -17,33 +17,57 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QStyle>
 #include <QStyleOptionButton>
 #include <QPainter>
 #include <QApplication>
+#include <QToolButton>
+#include <QPushButton>
+#include <QTextEdit>
+#include <QDialog>
+#include <QRegExpValidator>
+#include <QColorDialog>
 
 //
-// ---------QtMultiTextEdit----------
+// ---------QtMultiColorEdit----------
 //
 
-QtMultiTextEdit::QtMultiTextEdit(QWidget* parent):
+QtMultiColorEdit::QtMultiColorEdit(QWidget* parent):
 	QWidget(parent)
 {
 	m_lineEdit = new QLineEdit(parent);
 
-	connect(m_lineEdit, &QLineEdit::textEdited, this, &QtMultiTextEdit::onValueChanged);
-	connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
+	QToolButton* button = new QToolButton(parent);
+	button->setText("...");
+
+	connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiColorEdit::onEditingFinished);
+
+	connect(button, &QToolButton::clicked, this, &QtMultiColorEdit::onButtonPressed);
 
 	QHBoxLayout* lt = new QHBoxLayout;
 	lt->setContentsMargins(0, 0, 0, 0);
+	lt->setSpacing(0);
 	lt->addWidget(m_lineEdit);
+	lt->addWidget(button, 0, Qt::AlignRight);
+
 	setLayout(lt);
 
 	m_lineEdit->installEventFilter(this);
+
+	QRegExp regexp("\\[([1,2]?[0-9]{0,2};){3}[1,2]?[0-9]{0,2}\\]");
+	QRegExpValidator *validator = new QRegExpValidator(regexp, this);
+	m_lineEdit->setValidator(validator);
 }
 
-bool QtMultiTextEdit::eventFilter(QObject* watched, QEvent* event)
+bool QtMultiColorEdit::eventFilter(QObject* watched, QEvent* event)
 {
+	if (m_lineEdit == nullptr)
+	{
+		Q_ASSERT(m_lineEdit);
+		return QWidget::eventFilter(watched, event);
+	}
+
 	if (watched == m_lineEdit && event->type() == QEvent::KeyPress)
 	{
 		QKeyEvent* ke = static_cast<QKeyEvent*>(event);
@@ -56,16 +80,209 @@ bool QtMultiTextEdit::eventFilter(QObject* watched, QEvent* event)
 	return QWidget::eventFilter(watched, event);
 }
 
-void QtMultiTextEdit::setValue(QString value)
+void QtMultiColorEdit::onButtonPressed()
 {
-	m_lineEdit->blockSignals(true);
-	m_lineEdit->setText(value);
-	m_lineEdit->blockSignals(false);
+	QString t = m_lineEdit->text();
+	QColor color = colorFromText(t);
+
+	QColorDialog dialog(color, this);
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		setValue(dialog.selectedColor());
+		emit valueChanged(dialog.selectedColor());
+	}
 }
 
-void QtMultiTextEdit::onValueChanged(QString value)
+void QtMultiColorEdit::setValue(QVariant value)
 {
-	m_text = value;
+	if (m_lineEdit == nullptr)
+	{
+		Q_ASSERT(m_lineEdit);
+		return;
+	}
+
+	QColor color = value.value<QColor>();
+	QString val = QString("[%1;%2;%3;%4]").
+				  arg(color.red()).
+				  arg(color.green()).
+				  arg(color.blue()).
+				  arg(color.alpha());
+
+	m_lineEdit->setText(val);
+}
+
+void QtMultiColorEdit::onEditingFinished()
+{
+	if (m_escape == false)
+	{
+		if (m_editingFinished == false)
+		{
+
+			QString t = m_lineEdit->text();
+
+			QColor color = colorFromText(t);
+
+			emit valueChanged(color);
+
+			m_editingFinished = true;	//a "static" value. On "Enter", onEditingFinished comes twice???
+		}
+	}
+}
+
+QColor QtMultiColorEdit::colorFromText(const QString& t)
+{
+	QString text = t;
+	text.remove(QRegExp("[\\[,\\]]"));
+
+	QStringList l = text.split(";");
+	if (l.count() != 4)
+	{
+		Q_ASSERT(l.count() == 4);
+		return QColor();
+	}
+
+	int r = l[0].toInt();
+	int g = l[1].toInt();
+	int b = l[2].toInt();
+	int a = l[3].toInt();
+
+	if (r < 0 || r > 255)
+		r = 255;
+
+	if (g < 0 || g > 255)
+		g = 255;
+
+	if (b < 0 || b > 255)
+		b = 255;
+
+	if (a < 0 || a > 255)
+		a = 255;
+
+	return QColor(r, g, b, a);
+}
+
+//
+// ---------MultiLineEdit----------
+//
+MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text):
+	QDialog(parent)
+{
+	setWindowTitle("Text Editor");
+
+	QString value = text;
+
+	QVBoxLayout* vl = new QVBoxLayout();
+
+	m_textEdit = new QTextEdit(this);
+	m_textEdit->setTabChangesFocus(true);
+	m_textEdit->setPlainText(value);
+
+	QPushButton* okButton = new QPushButton("OK", this);
+	QPushButton* cancelButton = new QPushButton("Cancel", this);
+
+	okButton->setDefault(true);
+
+	connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
+	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+
+	QHBoxLayout *hl = new QHBoxLayout();
+	hl->addStretch();
+	hl->addWidget(okButton);
+	hl->addWidget(cancelButton);
+
+
+	vl->addWidget(m_textEdit);
+	vl->addLayout(hl);
+
+	setLayout(vl);
+}
+
+QString MultiLineEdit::text()
+{
+	return m_text;
+}
+
+void MultiLineEdit::accept()
+{
+	if (m_textEdit == nullptr)
+	{
+		Q_ASSERT(m_textEdit);
+		return;
+	}
+
+	m_text = m_textEdit->toPlainText();
+
+	QDialog::accept();
+}
+
+//
+// ---------QtMultiTextEdit----------
+//
+
+QtMultiTextEdit::QtMultiTextEdit(QWidget* parent):
+	QWidget(parent)
+{
+	m_lineEdit = new QLineEdit(parent);
+
+	QToolButton* button = new QToolButton(parent);
+	button->setText("...");
+
+	connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
+
+	connect(button, &QToolButton::clicked, this, &QtMultiTextEdit::onButtonPressed);
+
+	QHBoxLayout* lt = new QHBoxLayout;
+	lt->setContentsMargins(0, 0, 0, 0);
+	lt->setSpacing(0);
+	lt->addWidget(m_lineEdit);
+	lt->addWidget(button, 0, Qt::AlignRight);
+
+	setLayout(lt);
+
+	m_lineEdit->installEventFilter(this);
+}
+
+bool QtMultiTextEdit::eventFilter(QObject* watched, QEvent* event)
+{
+	if (m_lineEdit == nullptr)
+	{
+		Q_ASSERT(m_lineEdit);
+		return QWidget::eventFilter(watched, event);
+	}
+
+	if (watched == m_lineEdit && event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent* ke = static_cast<QKeyEvent*>(event);
+		if (ke->key() == Qt::Key_Escape)
+		{
+			m_escape = true;
+		}
+	}
+
+	return QWidget::eventFilter(watched, event);
+}
+
+void QtMultiTextEdit::onButtonPressed()
+{
+	MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_lineEdit->text());
+	if (multlLineEdit->exec() == QDialog::Accepted)
+	{
+		QString value = multlLineEdit->text();
+
+		setValue(value);
+		emit valueChanged(value);
+	}
+}
+
+void QtMultiTextEdit::setValue(QString value)
+{
+	if (m_lineEdit == nullptr)
+	{
+		Q_ASSERT(m_lineEdit);
+		return;
+	}
+
+	m_lineEdit->setText(value);
 }
 
 void QtMultiTextEdit::onEditingFinished()
@@ -74,11 +291,10 @@ void QtMultiTextEdit::onEditingFinished()
 	{
 		if (m_editingFinished == false)
 		{
-			emit valueChanged(m_text);
+			emit valueChanged(m_lineEdit->text());
 			m_editingFinished = true;	//a "static" value. On "Enter", onEditingFinished comes twice???
 		}
 	}
-
 }
 
 //
@@ -106,6 +322,12 @@ QtMultiDoubleSpinBox::QtMultiDoubleSpinBox(QWidget* parent):
 
 bool QtMultiDoubleSpinBox::eventFilter(QObject* watched, QEvent* event)
 {
+	if (m_spinBox == nullptr)
+	{
+		Q_ASSERT(m_spinBox);
+		return QWidget::eventFilter(watched, event);
+	}
+
 	if (watched == m_spinBox && event->type() == QEvent::KeyPress)
 	{
 		QKeyEvent* ke = static_cast<QKeyEvent*>(event);
@@ -120,6 +342,12 @@ bool QtMultiDoubleSpinBox::eventFilter(QObject* watched, QEvent* event)
 
 void QtMultiDoubleSpinBox::setValue(double value)
 {
+	if (m_spinBox == nullptr)
+	{
+		Q_ASSERT(m_spinBox);
+		return;
+	}
+
 	m_spinBox->blockSignals(true);
 	m_spinBox->setValue(value);
 	m_spinBox->blockSignals(false);
@@ -157,6 +385,12 @@ QtMultiIntSpinBox::QtMultiIntSpinBox(QWidget* parent):
 
 bool QtMultiIntSpinBox::eventFilter(QObject * watched, QEvent * event)
 {
+	if (m_spinBox == nullptr)
+	{
+		Q_ASSERT(m_spinBox);
+		return false;
+	}
+
 	if (watched == m_spinBox && event->type() == QEvent::KeyPress)
 	{
 		QKeyEvent* ke = static_cast<QKeyEvent*>(event);
@@ -171,6 +405,12 @@ bool QtMultiIntSpinBox::eventFilter(QObject * watched, QEvent * event)
 
 void QtMultiIntSpinBox::setValue(int value)
 {
+	if (m_spinBox == nullptr)
+	{
+		Q_ASSERT(m_spinBox);
+		return;
+	}
+
 	m_spinBox->blockSignals(true);
 	m_spinBox->setValue(value);
 	m_spinBox->blockSignals(false);
@@ -225,8 +465,36 @@ static QIcon drawCheckBox(int state)
 		const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
 		QPainter painter(&pixmap);
 		painter.translate(xoff, yoff);
-		painter.translate(1, 0);
 		style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, &painter);
+	}
+	return QIcon(pixmap);
+}
+
+static QIcon drawColorBox(QColor color)
+{
+	const QStyle *style = QApplication::style();
+	// Figure out size of an indicator and make sure it is not scaled down in a list view item
+	// by making the pixmap as big as a list view icon and centering the indicator in it.
+	// (if it is smaller, it can't be helped)
+	const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth);
+	const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight);
+	const int listViewIconSize = indicatorWidth;
+	const int pixmapWidth = indicatorWidth;
+	const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
+
+	QRect rect = QRect(0, 0, indicatorWidth - 1, indicatorHeight - 1);
+	QPixmap pixmap = QPixmap(pixmapWidth, pixmapHeight);
+	pixmap.fill(Qt::transparent);
+	{
+		// Center?
+		const int xoff = (pixmapWidth  > indicatorWidth)  ? (pixmapWidth  - indicatorWidth)  / 2 : 0;
+		const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
+		QPainter painter(&pixmap);
+		painter.translate(xoff, yoff);
+
+		painter.setPen(QColor(Qt::black));
+		painter.setBrush(QBrush(color));
+		painter.drawRect(rect);
 	}
 	return QIcon(pixmap);
 }
@@ -239,13 +507,19 @@ QtMultiCheckBox::QtMultiCheckBox(QWidget* parent):
 	connect(m_checkBox, &QCheckBox::stateChanged, this, &QtMultiCheckBox::onStateChanged);
 
 	QHBoxLayout*lt = new QHBoxLayout;
-	lt->setContentsMargins(4, 1, 0, 0);
+	lt->setContentsMargins(3, 1, 0, 0);
 	lt->addWidget(m_checkBox);
 	setLayout(lt);
 }
 
 void QtMultiCheckBox::setCheckState(Qt::CheckState state)
 {
+	if (m_checkBox == nullptr)
+	{
+		Q_ASSERT(m_checkBox);
+		return;
+	}
+
 	m_checkBox->blockSignals(true);
 	m_checkBox->setCheckState(state);
 	updateText();
@@ -254,6 +528,12 @@ void QtMultiCheckBox::setCheckState(Qt::CheckState state)
 
 void QtMultiCheckBox::onStateChanged(int state)
 {
+	if (m_checkBox == nullptr)
+	{
+		Q_ASSERT(m_checkBox);
+		return;
+	}
+
 	updateText();
 
 	m_checkBox->setTristate(false);
@@ -263,6 +543,12 @@ void QtMultiCheckBox::onStateChanged(int state)
 
 void QtMultiCheckBox::updateText()
 {
+	if (m_checkBox == nullptr)
+	{
+		Q_ASSERT(m_checkBox);
+		return;
+	}
+
 	switch (m_checkBox->checkState())
 	{
 		case Qt::Checked:           m_checkBox->setText("True");                break;
@@ -284,6 +570,17 @@ QtMultiVariantFactory::QtMultiVariantFactory(QObject* parent):
 
 QWidget* QtMultiVariantFactory::createEditor(QtMultiVariantPropertyManager* manager, QtProperty* property, QWidget* parent)
 {
+	if (manager == nullptr)
+	{
+		Q_ASSERT(manager);
+		return new QWidget();
+	}
+	if (property == nullptr)
+	{
+		Q_ASSERT(property);
+		return new QWidget();
+	}
+
 	m_manager = manager;
 	m_property = property;
 
@@ -333,11 +630,26 @@ QWidget* QtMultiVariantFactory::createEditor(QtMultiVariantPropertyManager* mana
 			}
 			break;
 
+		case QVariant::Color:
+			{
+				QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
+				editor = m_editor;
+				m_editor->setValue(manager->value(property));
+
+				connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+				connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+			}
+			break;
+
 		default:
 			Q_ASSERT(false);
 	}
 
-	Q_ASSERT(editor);
+	if (editor == nullptr)
+	{
+		Q_ASSERT(editor);
+		return new QWidget();
+	}
 
 	return editor;
 }
@@ -362,6 +674,17 @@ void QtMultiVariantFactory::disconnectPropertyManager(QtMultiVariantPropertyMana
 
 void QtMultiVariantFactory::slotSetValue(QVariant value)
 {
+	if (m_manager == nullptr)
+	{
+		Q_ASSERT(m_manager);
+		return;
+	}
+	if (m_property == nullptr)
+	{
+		Q_ASSERT(m_property);
+		return;
+	}
+
 	m_manager->setValue(m_property, value);
 	m_manager->emitSetValue(m_property, value);
 }
@@ -389,6 +712,12 @@ const QVariant::Type QtMultiVariantPropertyManager::type() const
 
 QVariant QtMultiVariantPropertyManager::value(const QtProperty* property) const
 {
+	if (property == nullptr)
+	{
+		Q_ASSERT(property);
+		return QVariant();
+	}
+
 	const QMap<const QtProperty*, Data>::const_iterator it = values.constFind(property);
 	if (it == values.end())
 	{
@@ -416,6 +745,12 @@ QSet<QtProperty*> QtMultiVariantPropertyManager::propertyByName(const QString& p
 
 void QtMultiVariantPropertyManager::setValue(QtProperty* property, const QVariant& value)
 {
+	if (property == nullptr)
+	{
+		Q_ASSERT(property);
+		return;
+	}
+
 	const QMap<const QtProperty*, Data>::iterator it = values.find(property);
 	if (it == values.end())
 	{
@@ -439,21 +774,49 @@ void QtMultiVariantPropertyManager::setValue(QtProperty* property, const QVarian
 
 void QtMultiVariantPropertyManager::emitSetValue(QtProperty* property, const QVariant& value)
 {
+	if (property == nullptr)
+	{
+		Q_ASSERT(property);
+		return;
+	}
+
 	valueChanged(property, value);
 }
 
 void QtMultiVariantPropertyManager::initializeProperty(QtProperty* property)
 {
+	if (property == nullptr)
+	{
+		Q_ASSERT(property);
+		return;
+	}
+
 	values[property] = QtMultiVariantPropertyManager::Data();
 }
 void QtMultiVariantPropertyManager::uninitializeProperty(QtProperty* property)
 {
-	values.remove(property);
+	if (property == nullptr)
+	{
+		Q_ASSERT(property);
+		return;
+	}
 
+	values.remove(property);
 }
 
 QIcon QtMultiVariantPropertyManager::valueIcon(const QtProperty* property) const
 {
+	if (property == nullptr)
+	{
+		Q_ASSERT(property);
+		return QIcon();
+	}
+
+	if (value(property).isNull())
+	{
+		return QIcon();
+	}
+
 	switch (type())
 	{
 		case QVariant::Bool:
@@ -462,12 +825,24 @@ QIcon QtMultiVariantPropertyManager::valueIcon(const QtProperty* property) const
 				return drawCheckBox(checkState);
 			}
 			break;
+		case QVariant::Color:
+			{
+				QColor color = value(property).value<QColor>();
+				return drawColorBox(color);
+			}
+			break;
 	}
 	return QIcon();
 }
 
 QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) const
 {
+	if (property == nullptr)
+	{
+		Q_ASSERT(property);
+		return QString();
+	}
+
 	if (value(property).isNull() == false)
 	{
 		switch (type())
@@ -503,6 +878,19 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 			case QVariant::String:
 				{
 					QString val = value(property).toString();
+					val.replace("\n", " ");
+					return val;
+				}
+				break;
+
+			case QVariant::Color:
+				{
+					QColor color = value(property).value<QColor>();
+					QString val = QString("[%1;%2;%3;%4]").
+								  arg(color.red()).
+								  arg(color.green()).
+								  arg(color.blue()).
+								  arg(color.alpha());
 					return val;
 				}
 				break;
@@ -514,8 +902,6 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 
 	return QString("");
 }
-
-
 
 //
 // ------- Property Editor ----------
@@ -529,21 +915,25 @@ PropertyEditor::PropertyEditor(QWidget* parent) :
 	m_propertyIntManager = new QtMultiVariantPropertyManager(this, QVariant::Int);
 	m_propertyDoubleManager = new QtMultiVariantPropertyManager(this, QVariant::Double);
 	m_propertyBoolManager = new QtMultiVariantPropertyManager(this, QVariant::Bool);
+	m_propertyColorManager = new QtMultiVariantPropertyManager(this, QVariant::Color);
 
 	QtMultiVariantFactory* spinBoxFactory = new QtMultiVariantFactory(this);
 	QtMultiVariantFactory* doubleSpinBoxFactory = new QtMultiVariantFactory(this);
 	QtMultiVariantFactory* lineEditFactory = new QtMultiVariantFactory(this);
 	QtMultiVariantFactory *checkBoxFactory = new QtMultiVariantFactory(this);
+	QtMultiVariantFactory *colorFactory = new QtMultiVariantFactory(this);
 
 	setFactoryForManager(m_propertyStringManager, lineEditFactory);
 	setFactoryForManager(m_propertyIntManager, spinBoxFactory);
 	setFactoryForManager(m_propertyDoubleManager, doubleSpinBoxFactory);
 	setFactoryForManager(m_propertyBoolManager, checkBoxFactory);
+	setFactoryForManager(m_propertyColorManager, colorFactory);
 
 	connect(m_propertyIntManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
 	connect(m_propertyStringManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
 	connect(m_propertyDoubleManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
 	connect(m_propertyBoolManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
+	connect(m_propertyColorManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
 
 	connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
 
@@ -706,6 +1096,14 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 				else
 				{
 					m_propertyBoolManager->setValue(subProperty, Qt::PartiallyChecked);
+				}
+				break;
+
+			case QVariant::Color:
+				subProperty = m_propertyColorManager->addProperty(name);
+				if (sameValue == true)
+				{
+					m_propertyColorManager->setValue(subProperty, value);
 				}
 				break;
 

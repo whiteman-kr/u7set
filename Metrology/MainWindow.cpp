@@ -22,11 +22,26 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    // init calibration base
+    //
     theCalibratorBase.init(this);
 
+    connect( &theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged );
+
+    // init interface
+    //
     createInterface();
 
-    initMeasureThread();
+    // init measure thread
+    //
+    connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::measureThreadStarted, Qt::QueuedConnection );
+    connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection );
+    connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection );
+    connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection );
+
+    m_measureThread.init(this);
+
+    measureThreadStoped();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -39,6 +54,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
+    setWindowIcon(QIcon::fromTheme("empty", QIcon(":/icons/Metrology.ico")));
     setWindowTitle(tr("Metrology"));
     restoreWindowPosition(this);
 
@@ -49,19 +65,9 @@ bool MainWindow::createInterface()
     createPanels();
     createStatusBar();
 
+    setMeasureType(MEASURE_TYPE_LINEARITY);
+
     return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::initMeasureThread()
-{
-    connect(&MeasureThread, &MeasureThread::started, this, &MainWindow::onMeasureThreadStarted, Qt::QueuedConnection );
-    connect(&MeasureThread, &MeasureThread::finished, this, &MainWindow::onMeasureThreadStoped, Qt::QueuedConnection );
-    connect(&MeasureThread, SIGNAL(measureInfo(QString)), this, SLOT(onMeasureThreadInfo(QString)), Qt::QueuedConnection );
-    connect(&MeasureThread, SIGNAL(measureInfo(int)), this, SLOT(onMeasureThreadInfo(int)), Qt::QueuedConnection );
-
-    onMeasureThreadStoped();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -72,22 +78,27 @@ void  MainWindow::createActions()
     //
     m_pStartMeasureAction = new QAction(tr("&Start"), this);
     m_pStartMeasureAction->setShortcut(Qt::Key_F5);
-    m_pStartMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+    m_pStartMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Start.png")));
+    m_pStartMeasureAction->setToolTip(tr("To start the measurement process"));
     connect(m_pStartMeasureAction, &QAction::triggered, this, &MainWindow::startMeasure);
+
 
     m_pStopMeasureAction = new QAction(tr("&Stop"), this);
     m_pStopMeasureAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
-    m_pStopMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+    m_pStopMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Stop.png")));
+    m_pStopMeasureAction->setToolTip(tr("To stop the measurement process"));
     connect(m_pStopMeasureAction, &QAction::triggered, this, &MainWindow::stopMeasure);
 
     m_pPrintMeasureAction = new QAction(tr("&Print ..."), this);
     m_pPrintMeasureAction->setShortcut(Qt::CTRL + Qt::Key_P);
-    m_pPrintMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+    m_pPrintMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Print.png")));
+    m_pPrintMeasureAction->setToolTip(tr("Printing of the measurements"));
     connect(m_pPrintMeasureAction, &QAction::triggered, this, &MainWindow::printMeasure);
 
     m_pExportMeasureAction = new QAction(tr("&Export ..."), this);
     m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_E);
-    m_pExportMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+    m_pExportMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Export.png")));
+    m_pExportMeasureAction->setToolTip(tr("Export of the measurements"));
     connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::exportMeasure);
 
 
@@ -95,71 +106,151 @@ void  MainWindow::createActions()
     //
     m_pCutMeasureAction = new QAction(tr("Cu&t"), this);
     m_pCutMeasureAction->setShortcut(Qt::CTRL + Qt::Key_X);
-    m_pCutMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+    m_pCutMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Cut.png")));
+    m_pCutMeasureAction->setToolTip(tr("Cut of the measurements"));
     connect(m_pCutMeasureAction, &QAction::triggered, this, &MainWindow::cutMeasure);
 
     m_pCopyMeasureAction = new QAction(tr("&Copy"), this);
     m_pCopyMeasureAction->setShortcut(Qt::CTRL + Qt::Key_C);
-    m_pCopyMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+    m_pCopyMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Copy.png")));
+    m_pCopyMeasureAction->setToolTip(tr("Copy of the measurements"));
     connect(m_pCopyMeasureAction, &QAction::triggered, this, &MainWindow::copyMeasure);
 
     m_pRemoveMeasureAction = new QAction(tr("&Delete"), this);
     m_pRemoveMeasureAction->setShortcut(Qt::CTRL + Qt::Key_Delete);
-    m_pRemoveMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+    m_pRemoveMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Remove.png")));
+    m_pRemoveMeasureAction->setToolTip(tr("Delete the selected measurements"));
     connect(m_pRemoveMeasureAction, &QAction::triggered, this, &MainWindow::removeMeasure);
 
     m_pSelectAllMeasureAction = new QAction(tr("Select &All"), this);
     m_pSelectAllMeasureAction->setShortcut(Qt::CTRL + Qt::Key_A);
+    m_pSelectAllMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/SelectAll.png")));
+    m_pSelectAllMeasureAction->setToolTip(tr("Select all measurements"));
     connect(m_pSelectAllMeasureAction, &QAction::triggered, this, &MainWindow::selectAllMeasure);
 
     // View
     //
     m_pShowReportsAction = new QAction(tr("&Reports ..."), this);
     m_pShowReportsAction->setShortcut(Qt::CTRL + Qt::Key_R);
+    m_pShowReportsAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Reports.png")));
+    m_pShowReportsAction->setToolTip(tr("Preview the report on the measurements"));
     connect(m_pShowReportsAction, &QAction::triggered, this, &MainWindow::showReports);
 
     m_pShowCalculateAction = new QAction(tr("Metrological &calculator ..."), this);
     m_pShowCalculateAction->setShortcut(Qt::ALT + Qt::Key_C);
+    m_pShowCalculateAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Calculator.png")));
+    m_pShowCalculateAction->setToolTip(tr("Calculator for converting metrological quantities"));
     connect(m_pShowCalculateAction, &QAction::triggered, this, &MainWindow::showCalculate);
 
     // Tools
     //
     m_pCalibratorsAction = new QAction(tr("&Calibrations ..."), this);
+    m_pCalibratorsAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Calibrators.png")));
+    m_pCalibratorsAction->setToolTip(tr("Connecting and configuring calibrators"));
     connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::calibrators);
 
     m_pShowOutputSignalListAction = new QAction(tr("Signals input/output ..."), this);
+    m_pShowOutputSignalListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/InOut.png")));
+    m_pShowOutputSignalListAction->setToolTip("");
     connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
 
-//    m_pShowComlexComparatorListAction = new QAction(tr("&Signals of complex comparator..."), this);
-//    connect(m_pShowComlexComparatorListAction, &QAction::triggered, this, &MainWindow::showComlexComparatorList);
-
     m_pShowOutputRangeListAction = new QAction(tr("Signals with output ranges ..."), this);
+    m_pShowOutputRangeListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/OutRange.png")));
+    m_pShowOutputRangeListAction->setToolTip("");
     connect(m_pShowOutputRangeListAction, &QAction::triggered, this, &MainWindow::showOutputRangeList);
+
+    m_pShowComlexComparatorListAction = new QAction(tr("&Signals of complex comparator ..."), this);
+    m_pShowComlexComparatorListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Complex.png")));
+    m_pShowComlexComparatorListAction->setToolTip("");
+    connect(m_pShowComlexComparatorListAction, &QAction::triggered, this, &MainWindow::showComlexComparatorList);
 
     m_pOptionsAction = new QAction(tr("&Options ..."), this);
     m_pOptionsAction->setShortcut(Qt::CTRL + Qt::Key_O);
+    m_pOptionsAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Options.png")));
+    m_pOptionsAction->setToolTip(tr("Editing application settings"));
     connect(m_pOptionsAction, &QAction::triggered, this, &MainWindow::options);
 
 
     // ?
     //
     m_pShowSignalListAction = new QAction(tr("&Signals ..."), this);
+    m_pShowSignalListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Signals.png")));
+    m_pShowSignalListAction->setToolTip("");
     connect(m_pShowSignalListAction, &QAction::triggered, this, &MainWindow::showSignalList);
 
     m_pShowComparatorsListAction = new QAction(tr("&Comparators ..."), this);
+    m_pShowComparatorsListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Signals.png")));
+    m_pShowComparatorsListAction->setToolTip("");
     connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
     m_pShowCorrecrtionsListAction = new QAction(tr("Co&rrections ..."), this);
+    m_pShowCorrecrtionsListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Signals.png")));
+    m_pShowCorrecrtionsListAction->setToolTip("");
     connect(m_pShowCorrecrtionsListAction, &QAction::triggered, this, &MainWindow::showCorrecrtionsList);
 
     m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
+    m_pShowStatisticAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Statistics.png")));
+    m_pShowStatisticAction->setToolTip("");
     connect(m_pShowStatisticAction, &QAction::triggered, this, &MainWindow::showStatistic);
 
     m_pAboutConnectionAction = new QAction(tr("About connect to server ..."), this);
+    m_pAboutConnectionAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/About connection.png")));
+    m_pAboutConnectionAction->setToolTip("");
     connect(m_pAboutConnectionAction, &QAction::triggered, this, &MainWindow::aboutConnection);
 
     m_pAboutAppAction = new QAction(tr("About Metrology ..."), this);
+    m_pAboutAppAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/About Application.png")));
+    m_pAboutAppAction->setToolTip("");
     connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updateActions()
+{
+    bool startMeasure = true;
+    bool stopMeasure = true;
+
+    if (m_measureThread.isRunning() == true)
+    {
+        startMeasure = false;
+    }
+    else
+    {
+        stopMeasure = false;
+    }
+
+    switch(m_measureType)
+    {
+        case MEASURE_TYPE_LINEARITY:
+        case MEASURE_TYPE_COMPARATOR:
+
+            if (theCalibratorBase.getConnectedCalibratorsCount() == 0)
+            {
+               startMeasure = false;
+            }
+
+            break;
+
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:
+
+            if (theCalibratorBase.getConnectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
+            {
+                startMeasure = false;
+            }
+
+            break;
+
+        default:
+
+            startMeasure = false;
+
+            break;
+    }
+
+
+    m_pStartMeasureAction->setEnabled(startMeasure);
+    m_pStopMeasureAction->setEnabled(stopMeasure);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -204,8 +295,8 @@ void MainWindow::createMenu()
     m_pSettingMenu->addAction(m_pCalibratorsAction);
     m_pSettingMenu->addSeparator();
     m_pSettingMenu->addAction(m_pShowOutputSignalListAction);
-//    m_pSettingMenu->addAction(m_pShowComlexComparatorListAction);
     m_pSettingMenu->addAction(m_pShowOutputRangeListAction);
+    m_pSettingMenu->addAction(m_pShowComlexComparatorListAction);
     m_pSettingMenu->addSeparator();
     m_pSettingMenu->addAction(m_pOptionsAction);
 
@@ -244,8 +335,6 @@ bool MainWindow::createToolBars()
         m_pMeasureControlToolBar->addAction(m_pCopyMeasureAction);
         m_pMeasureControlToolBar->addAction(m_pRemoveMeasureAction);
         m_pMeasureControlToolBar->addSeparator();
-
-        m_pMeasureControlToolBar->setIconSize(QSize(16,16));
     }
 
     // Control panel measure timeout
@@ -314,7 +403,7 @@ bool MainWindow::createToolBars()
 
         measureKindList->setCurrentIndex(theOptions.getToolBar().m_measureKind);
 
-        connect(measureKindList, SIGNAL(currentIndexChanged(int)), this, SLOT(setMeasureKind(int)), Qt::QueuedConnection);
+        connect(measureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureKind, Qt::QueuedConnection);
     }
 
 
@@ -343,7 +432,7 @@ bool MainWindow::createToolBars()
         }
         outputSignalList->setCurrentIndex(theOptions.getToolBar().m_outputSignalType);
 
-        connect(outputSignalList, SIGNAL(currentIndexChanged(int)), this, SLOT(setOutputSignalType(int)), Qt::QueuedConnection);
+        connect(outputSignalList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setOutputSignalType, Qt::QueuedConnection);
     }
 
     // Control panel selecting analog signal
@@ -426,13 +515,29 @@ bool MainWindow::createToolBars()
     }
 
 
-//    // Control panel selecting signal of complex comparator
-//    //
-//    pComplexComporatorSignalToolBar = new QToolBar(this);
-//    pSelectComplexComporatorSignalToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-//    pSelectComplexComporatorSignalToolBar->setWindowTitle(tr("Control panel selecting signal of complex comparator"));
-//    addToolBarBreak(Qt::TopToolBarArea);
-//    addToolBar(pSelectComplexComporatorSignalToolBar);
+    // Control panel selecting signal of complex comparator
+    //
+    m_pComplexComporatorToolBar = new QToolBar(this);
+    if (m_pComplexComporatorToolBar != nullptr)
+    {
+        m_pComplexComporatorToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+        m_pComplexComporatorToolBar->setWindowTitle(tr("Control panel selecting signal of complex comparator"));
+        addToolBarBreak(Qt::TopToolBarArea);
+        addToolBar(m_pComplexComporatorToolBar);
+
+        QLabel* ccTypeLabel = new QLabel(m_pComplexComporatorToolBar);
+        m_pComplexComporatorToolBar->addWidget(ccTypeLabel);
+        ccTypeLabel->setText(tr(" Type "));
+        ccTypeLabel->setEnabled(false);
+
+
+        QComboBox* ccTypeCombo = new QComboBox(m_pComplexComporatorToolBar);
+        m_pComplexComporatorToolBar->addWidget(ccTypeCombo);
+        ccTypeCombo->addItem("");
+        ccTypeCombo->setEnabled(false);
+        ccTypeCombo->setFixedWidth(60);
+
+    }
 
     return true;
 }
@@ -458,6 +563,8 @@ void MainWindow::createTabPages()
     }
 
     setCentralWidget(m_pMainTab);
+
+    connect(m_pMainTab, &QTabWidget::currentChanged, this, &MainWindow::setMeasureType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -486,7 +593,8 @@ void MainWindow::createPanels()
         {
             findAction->setText(tr("&Find ..."));
             findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-            findAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/win/empty.png")));
+            findAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Find.png")));
+            findAction->setToolTip(tr("Find data in list of measurements"));
 
             if(m_pEditMenu != nullptr)
             {
@@ -526,6 +634,8 @@ void MainWindow::createPanels()
         {
             m_pViewPanelMenu->addAction(m_pSignalInfoPanel->toggleViewAction());
         }
+
+        m_pSignalInfoPanel->hide();
     }
 
     // Panel comparator information
@@ -546,22 +656,32 @@ void MainWindow::createPanels()
         {
             m_pViewPanelMenu->addAction(m_pComparatorInfoPanel->toggleViewAction());
         }
+
+        m_pComparatorInfoPanel->hide();
     }
 
 
-//    // Panel complex comparator information
-//    //
-//    m_pComplexComparatorInfoPanel = new QDockWidget(tr("Panel complex comparator information"), this);
-//    m_pComplexComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
+    // Panel complex comparator information
+    //
+    m_pComplexComparatorInfoPanel = new QDockWidget(tr("Panel complex comparator information"), this);
+    if (m_pComplexComparatorInfoPanel != nullptr)
+    {
+        m_pComplexComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
 
-//    m_pComplexComparatorInfoView = new QTableView;
+        m_pComplexComparatorInfoView = new QTableView;
+        if (m_pComplexComparatorInfoView != nullptr)
+        {
+            m_pComplexComparatorInfoPanel->setWidget(m_pComplexComparatorInfoView);
+        }
+        addDockWidget(Qt::BottomDockWidgetArea, m_pComplexComparatorInfoPanel);
 
-//    m_pComplexComparatorInfoPanel->setWidget(m_pComplexComparatorInfoView);
-//    addDockWidget(Qt::BottomDockWidgetArea, m_pComplexComparatorInfoPanel);
+        if (m_pViewPanelMenu != nullptr)
+        {
+            m_pViewPanelMenu->addAction(m_pComplexComparatorInfoPanel->toggleViewAction());
+        }
 
-//    m_pViewPanelMenu->addAction(m_pComplexComparatorInfoPanel->toggleViewAction());
-
-//    m_pComplexComparatorInfoPanel->hide();
+        m_pComplexComparatorInfoPanel->hide();
+    }
 
 }
 
@@ -579,8 +699,8 @@ void MainWindow::createStatusBar()
     m_statusMeasureThreadInfo = new QLabel(pStatusBar);
     m_statusMeasureTimeout = new QProgressBar(pStatusBar);
     m_statusMeasureThreadState = new QLabel(pStatusBar);
-    m_statusMeasureThreadState = new QLabel(pStatusBar);
     m_statusMeasureCount = new QLabel(pStatusBar);
+    m_statusCalibratorCount = new QLabel(pStatusBar);
     m_statusConnectToServer = new QLabel(pStatusBar);
 
     m_statusMeasureTimeout->setTextVisible(false);
@@ -590,7 +710,7 @@ void MainWindow::createStatusBar()
     m_statusMeasureTimeout->setLayoutDirection(Qt::LeftToRight);
 
     pStatusBar->addWidget(m_statusConnectToServer);
-    pStatusBar->addWidget(m_statusConnectToServer);
+    pStatusBar->addWidget(m_statusCalibratorCount);
     pStatusBar->addWidget(m_statusMeasureCount);
     pStatusBar->addWidget(m_statusMeasureThreadState);
     pStatusBar->addWidget(m_statusMeasureTimeout);
@@ -606,34 +726,81 @@ void MainWindow::createStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::startMeasure()
+void MainWindow::setMeasureType(int type)
 {
-    if (MeasureThread.isRunning() == true)
-    {
-        return;
-    }
-
-    int type = m_pMainTab->currentIndex();
     if (type < 0 || type >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    MeasureThread.setMeasureType(type);
+    switch(type)
+    {
+        case MEASURE_TYPE_LINEARITY:
+        case MEASURE_TYPE_COMPARATOR:
 
-    MeasureThread.start();
+            m_pMeasureKind->show();
+            m_pOutputSignalToolBar->show();
+            m_pAnalogSignalToolBar->show();
+            m_pComplexComporatorToolBar->hide();
+
+            m_pSignalInfoPanel->show();
+            m_pComparatorInfoPanel->show();
+            m_pComplexComparatorInfoPanel->hide();
+
+            break;
+
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:
+
+            m_pMeasureKind->hide();
+            m_pOutputSignalToolBar->hide();
+            m_pAnalogSignalToolBar->hide();
+            m_pComplexComporatorToolBar->show();
+
+            m_pSignalInfoPanel->hide();
+            m_pComparatorInfoPanel->hide();
+            m_pComplexComparatorInfoPanel->show();
+
+            break;
+
+        default:
+            assert(0);
+            break;
+    }
+
+    m_measureType = type;
+
+    updateActions();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::startMeasure()
+{
+    if (m_measureThread.isRunning() == true)
+    {
+        return;
+    }
+
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+
+    m_measureThread.setMeasureType(m_measureType);
+    m_measureThread.start();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::stopMeasure()
 {
-    if (MeasureThread.isFinished() == true)
+    if (m_measureThread.isFinished() == true)
     {
         return;
     }
 
-    MeasureThread.stop();
+    m_measureThread.stop();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -671,6 +838,8 @@ void MainWindow::setMeasureTimeout(QString value)
 {
     theOptions.getToolBar().m_measureTimeout = value.toDouble() * 1000;
     theOptions.getToolBar().save();
+
+    m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -689,12 +858,23 @@ void MainWindow::setOutputSignalType(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onMeasureThreadStarted()
+void MainWindow::calibratorConnectedChanged(int count)
 {
+    updateActions();
+
+    m_statusCalibratorCount->setText( tr(" Connected calibrators: %1 ").arg(count) );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::measureThreadStarted()
+{
+    updateActions();
+
     m_pMeasureKind->setDisabled(true);
     m_pOutputSignalToolBar->setDisabled(true);
     m_pAnalogSignalToolBar->setDisabled(true);
-    //m_pComplexComporatorSignalToolBar->setDisabled(true);
+    m_pComplexComporatorToolBar->setDisabled(true);
 
     m_statusMeasureThreadInfo->setText("");
 
@@ -714,12 +894,14 @@ void MainWindow::onMeasureThreadStarted()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onMeasureThreadStoped()
+void MainWindow::measureThreadStoped()
 {
+    updateActions();
+
     m_pMeasureKind->setEnabled(true);
     m_pOutputSignalToolBar->setEnabled(true);
     m_pAnalogSignalToolBar->setEnabled(true);
-    //m_pComplexComporatorSignalToolBar->setEnabled(true);
+    m_pComplexComporatorToolBar->setEnabled(true);
 
     m_statusMeasureThreadInfo->setText("");
 
@@ -732,14 +914,14 @@ void MainWindow::onMeasureThreadStoped()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onMeasureThreadInfo(QString msg)
+void MainWindow::setMeasureThreadInfo(QString msg)
 {
     m_statusMeasureThreadInfo->setText(msg);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onMeasureThreadInfo(int timeout)
+void MainWindow::setMeasureThreadInfo(int timeout)
 {
     m_statusMeasureTimeout->setValue(timeout);
 }
@@ -748,14 +930,10 @@ void MainWindow::onMeasureThreadInfo(int timeout)
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-    if (MeasureThread.isRunning() == true)
+    if (m_measureThread.isRunning() == true)
     {
-        QMessageBox msg;
-        msg.setText(m_statusMeasureThreadState->text());
-        msg.exec();
-
+        QMessageBox::information(this, windowTitle(), m_statusMeasureThreadState->text());
         e->ignore();
-
         return;
     }
 
