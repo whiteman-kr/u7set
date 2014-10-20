@@ -20,13 +20,13 @@ namespace VFrame30
 		switch (itemUnit())
 		{
 		case SchemeUnit::Display:
-			m_font.setSize(12.0, unit);
+			m_font.setSize(10.0, SchemeUnit::Display);
 			break;
 		case SchemeUnit::Inch:
-			m_font.setSize(mm2in(3.0), unit);
+			m_font.setSize(mm2in(2.2), SchemeUnit::Inch);
 			break;
 		case SchemeUnit::Millimeter:
-			m_font.setSize(mm2in(3.0), unit);
+			m_font.setSize(2.2, SchemeUnit::Millimeter);
 			break;
 		default:
 			assert(false);

@@ -3712,7 +3712,7 @@ void EditSchemeWidget::addFblElement()
 		elements.push_back(afb);
 	}
 
-	scheme()->mutable_afbCollection()->setElements(elements);
+	scheme()->setAfbCollection(elements);
 
 	// Select Afb, create such scheme item and add it to th scheme
 	//

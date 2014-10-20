@@ -96,6 +96,11 @@ private:
 		AfbElementParam(void);
 		virtual ~AfbElementParam(void);
 
+		// Methods
+		//
+	public:
+		void update(const AfbParamType& type, const AfbParamValue& lowLimit, const AfbParamValue& highLimit);
+
 		// Serialization
 		//
 	public:
@@ -104,6 +109,7 @@ private:
 
 		bool loadFromXml(QXmlStreamReader* xmlReader);
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+
 
 		// Properties
 		//
@@ -160,7 +166,12 @@ private:
 		friend Proto::ObjectSerialization<AfbElement>;
 
 	public:
+		bool loadFromXml(const Proto::AfbElementXml& data);
+		bool loadFromXml(const QByteArray& data);
 		bool loadFromXml(QXmlStreamReader* xmlReader);
+
+		bool saveToXml(Proto::AfbElementXml* dst) const;
+		bool saveToXml(QByteArray* dst) const;
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 
 	protected:
@@ -175,6 +186,7 @@ private:
 		// Methods
 		//
 	public:
+		void updateParams(const std::vector<AfbElementParam>& params);
 
 	// Properties and Datas
 	//
@@ -229,10 +241,13 @@ private:
 		// Serialization
 		//
 	public:
+		bool SaveData(Proto::AfbElementCollection* message) const;
+		bool LoadData(const Proto::AfbElementCollection& message);
 
 		// Methods
 		//
 	public:
+
 		void setElements(const std::vector<std::shared_ptr<AfbElement>>& elements);
 
 		const std::vector<std::shared_ptr<AfbElement>>& elements() const;

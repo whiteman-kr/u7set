@@ -57,7 +57,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, unit, SchemeUnit::Inch, ConvertDirection::Horz);
 			m_size = pt;
 		}
 	}

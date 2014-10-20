@@ -22,6 +22,21 @@ namespace VFrame30
 	{
 	}
 
+	const QStringList& VideoItemSignal::signalStrIds()
+	{
+		return m_signalStrIds;
+	}
+
+	void VideoItemSignal::setSignalStrIds(const QStringList& s)
+	{
+		m_signalStrIds = s;
+	}
+
+	QStringList* VideoItemSignal::mutable_signalStrIds()
+	{
+		return &m_signalStrIds;
+	}
+
 	bool VideoItemSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
@@ -35,9 +50,13 @@ namespace VFrame30
 
 		// --
 		//
-		/*Proto::VideoItemSignal* signal = */message->mutable_videoitem()->mutable_signal();
+		Proto::VideoItemSignal* signal = message->mutable_videoitem()->mutable_signal();
 
-		//pSignal->set_leftdocpt(leftDocPt);
+		for (const QString& strId : m_signalStrIds)
+		{
+			::Proto::wstring* ps = signal->add_signalstrids();
+			Proto::Write(ps, strId);
+		}
 
 		return true;
 	}
@@ -65,9 +84,17 @@ namespace VFrame30
 			assert(message.videoitem().has_signal());
 			return false;
 		}
-		/*const Proto::VideoItemSignal& signal = */message.videoitem().signal();
 
-		//leftDocPt = signal.leftdocpt();
+		const Proto::VideoItemSignal& signal = message.videoitem().signal();
+
+		m_signalStrIds.clear();
+		m_signalStrIds.reserve(signal.signalstrids_size());
+
+		for (int i = 0; i < signal.signalstrids_size(); i++)
+		{
+			QString s = Proto::Read(signal.signalstrids().Get(i));
+			m_signalStrIds.push_back(s);
+		}
 
 		return true;
 	}

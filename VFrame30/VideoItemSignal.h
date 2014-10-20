@@ -10,6 +10,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(QStringList StrIds READ signalStrIds WRITE setSignalStrIds)
+
 	protected:
 		VideoItemSignal(void);
 		VideoItemSignal(SchemeUnit unit);
@@ -27,9 +29,17 @@ namespace VFrame30
 		//
 	public:
 
-		// Properties and Data
+		// Properties
+		//
 	public:
+		const QStringList& signalStrIds();
+		void setSignalStrIds(const QStringList& s);
+		QStringList* mutable_signalStrIds();
+
+		// Data
+		//
 	private:
+		QStringList m_signalStrIds;
 	};
 
 

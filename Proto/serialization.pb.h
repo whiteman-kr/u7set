@@ -40,6 +40,8 @@ class FontParam;
 class VideoItemPoint;
 class Envelope;
 class Configuration;
+class AfbElementCollection;
+class AfbElementXml;
 class FblElement;
 class FblElementSignal;
 class FblElementParam;
@@ -91,6 +93,25 @@ inline bool SchemeUnit_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<SchemeUnit>(
     SchemeUnit_descriptor(), name, value);
 }
+enum ConnectionDirrection {
+  Input = 0,
+  Output = 1
+};
+bool ConnectionDirrection_IsValid(int value);
+const ConnectionDirrection ConnectionDirrection_MIN = Input;
+const ConnectionDirrection ConnectionDirrection_MAX = Output;
+const int ConnectionDirrection_ARRAYSIZE = ConnectionDirrection_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor();
+inline const ::std::string& ConnectionDirrection_Name(ConnectionDirrection value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    ConnectionDirrection_descriptor(), value);
+}
+inline bool ConnectionDirrection_Parse(
+    const ::std::string& name, ConnectionDirrection* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<ConnectionDirrection>(
+    ConnectionDirrection_descriptor(), name, value);
+}
 enum FblSignalType {
   Analog = 0,
   Discrete = 1
@@ -129,25 +150,6 @@ inline bool FblParamType_Parse(
     const ::std::string& name, FblParamType* value) {
   return ::google::protobuf::internal::ParseNamedEnum<FblParamType>(
     FblParamType_descriptor(), name, value);
-}
-enum ConnectionDirrection {
-  Input = 0,
-  Output = 1
-};
-bool ConnectionDirrection_IsValid(int value);
-const ConnectionDirrection ConnectionDirrection_MIN = Input;
-const ConnectionDirrection ConnectionDirrection_MAX = Output;
-const int ConnectionDirrection_ARRAYSIZE = ConnectionDirrection_MAX + 1;
-
-const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor();
-inline const ::std::string& ConnectionDirrection_Name(ConnectionDirrection value) {
-  return ::google::protobuf::internal::NameOfEnum(
-    ConnectionDirrection_descriptor(), value);
-}
-inline bool ConnectionDirrection_Parse(
-    const ::std::string& name, ConnectionDirrection* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<ConnectionDirrection>(
-    ConnectionDirrection_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -843,6 +845,178 @@ class Configuration : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class AfbElementCollection : public ::google::protobuf::Message {
+ public:
+  AfbElementCollection();
+  virtual ~AfbElementCollection();
+
+  AfbElementCollection(const AfbElementCollection& from);
+
+  inline AfbElementCollection& operator=(const AfbElementCollection& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const AfbElementCollection& default_instance();
+
+  void Swap(AfbElementCollection* other);
+
+  // implements Message ----------------------------------------------
+
+  AfbElementCollection* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const AfbElementCollection& from);
+  void MergeFrom(const AfbElementCollection& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.AfbElementXml elements = 1;
+  inline int elements_size() const;
+  inline void clear_elements();
+  static const int kElementsFieldNumber = 1;
+  inline const ::Proto::AfbElementXml& elements(int index) const;
+  inline ::Proto::AfbElementXml* mutable_elements(int index);
+  inline ::Proto::AfbElementXml* add_elements();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbElementXml >&
+      elements() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbElementXml >*
+      mutable_elements();
+
+  // @@protoc_insertion_point(class_scope:Proto.AfbElementCollection)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbElementXml > elements_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static AfbElementCollection* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class AfbElementXml : public ::google::protobuf::Message {
+ public:
+  AfbElementXml();
+  virtual ~AfbElementXml();
+
+  AfbElementXml(const AfbElementXml& from);
+
+  inline AfbElementXml& operator=(const AfbElementXml& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const AfbElementXml& default_instance();
+
+  void Swap(AfbElementXml* other);
+
+  // implements Message ----------------------------------------------
+
+  AfbElementXml* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const AfbElementXml& from);
+  void MergeFrom(const AfbElementXml& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required bytes data = 1;
+  inline bool has_data() const;
+  inline void clear_data();
+  static const int kDataFieldNumber = 1;
+  inline const ::std::string& data() const;
+  inline void set_data(const ::std::string& value);
+  inline void set_data(const char* value);
+  inline void set_data(const void* value, size_t size);
+  inline ::std::string* mutable_data();
+  inline ::std::string* release_data();
+  inline void set_allocated_data(::std::string* data);
+
+  // @@protoc_insertion_point(class_scope:Proto.AfbElementXml)
+ private:
+  inline void set_has_data();
+  inline void clear_has_data();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* data_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static AfbElementXml* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class FblElement : public ::google::protobuf::Message {
  public:
   FblElement();
@@ -1452,6 +1626,15 @@ class VideoFrame : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
       mutable_layers();
 
+  // required .Proto.AfbElementCollection afbs = 101;
+  inline bool has_afbs() const;
+  inline void clear_afbs();
+  static const int kAfbsFieldNumber = 101;
+  inline const ::Proto::AfbElementCollection& afbs() const;
+  inline ::Proto::AfbElementCollection* mutable_afbs();
+  inline ::Proto::AfbElementCollection* release_afbs();
+  inline void set_allocated_afbs(::Proto::AfbElementCollection* afbs);
+
   // @@protoc_insertion_point(class_scope:Proto.VideoFrame)
  private:
   inline void set_has_uuid();
@@ -1466,6 +1649,8 @@ class VideoFrame : public ::google::protobuf::Message {
   inline void clear_has_height();
   inline void set_has_unit();
   inline void clear_has_unit();
+  inline void set_has_afbs();
+  inline void clear_has_afbs();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1475,10 +1660,11 @@ class VideoFrame : public ::google::protobuf::Message {
   double width_;
   double height_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > layers_;
+  ::Proto::AfbElementCollection* afbs_;
   int unit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -3078,14 +3264,27 @@ class VideoItemSignal : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
+  // repeated .Proto.wstring signalStrIDs = 1;
+  inline int signalstrids_size() const;
+  inline void clear_signalstrids();
+  static const int kSignalStrIDsFieldNumber = 1;
+  inline const ::Proto::wstring& signalstrids(int index) const;
+  inline ::Proto::wstring* mutable_signalstrids(int index);
+  inline ::Proto::wstring* add_signalstrids();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
+      signalstrids() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
+      mutable_signalstrids();
+
   // @@protoc_insertion_point(class_scope:Proto.VideoItemSignal)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::google::protobuf::RepeatedPtrField< ::Proto::wstring > signalstrids_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[1];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -3366,26 +3565,39 @@ class VideoItemFblElement : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.Envelope fblelement = 1;
-  inline bool has_fblelement() const;
-  inline void clear_fblelement();
-  static const int kFblelementFieldNumber = 1;
-  inline const ::Proto::Envelope& fblelement() const;
-  inline ::Proto::Envelope* mutable_fblelement();
-  inline ::Proto::Envelope* release_fblelement();
-  inline void set_allocated_fblelement(::Proto::Envelope* fblelement);
+  // required .Proto.Uuid afbGuid = 1;
+  inline bool has_afbguid() const;
+  inline void clear_afbguid();
+  static const int kAfbGuidFieldNumber = 1;
+  inline const ::Proto::Uuid& afbguid() const;
+  inline ::Proto::Uuid* mutable_afbguid();
+  inline ::Proto::Uuid* release_afbguid();
+  inline void set_allocated_afbguid(::Proto::Uuid* afbguid);
+
+  // repeated .Proto.FblElementParam params = 2;
+  inline int params_size() const;
+  inline void clear_params();
+  static const int kParamsFieldNumber = 2;
+  inline const ::Proto::FblElementParam& params(int index) const;
+  inline ::Proto::FblElementParam* mutable_params(int index);
+  inline ::Proto::FblElementParam* add_params();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+      params() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+      mutable_params();
 
   // @@protoc_insertion_point(class_scope:Proto.VideoItemFblElement)
  private:
-  inline void set_has_fblelement();
-  inline void clear_has_fblelement();
+  inline void set_has_afbguid();
+  inline void clear_has_afbguid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::Envelope* fblelement_;
+  ::Proto::Uuid* afbguid_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4981,6 +5193,109 @@ Configuration::mutable_videoframes() {
 
 // -------------------------------------------------------------------
 
+// AfbElementCollection
+
+// repeated .Proto.AfbElementXml elements = 1;
+inline int AfbElementCollection::elements_size() const {
+  return elements_.size();
+}
+inline void AfbElementCollection::clear_elements() {
+  elements_.Clear();
+}
+inline const ::Proto::AfbElementXml& AfbElementCollection::elements(int index) const {
+  return elements_.Get(index);
+}
+inline ::Proto::AfbElementXml* AfbElementCollection::mutable_elements(int index) {
+  return elements_.Mutable(index);
+}
+inline ::Proto::AfbElementXml* AfbElementCollection::add_elements() {
+  return elements_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbElementXml >&
+AfbElementCollection::elements() const {
+  return elements_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbElementXml >*
+AfbElementCollection::mutable_elements() {
+  return &elements_;
+}
+
+// -------------------------------------------------------------------
+
+// AfbElementXml
+
+// required bytes data = 1;
+inline bool AfbElementXml::has_data() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void AfbElementXml::set_has_data() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void AfbElementXml::clear_has_data() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void AfbElementXml::clear_data() {
+  if (data_ != &::google::protobuf::internal::kEmptyString) {
+    data_->clear();
+  }
+  clear_has_data();
+}
+inline const ::std::string& AfbElementXml::data() const {
+  return *data_;
+}
+inline void AfbElementXml::set_data(const ::std::string& value) {
+  set_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    data_ = new ::std::string;
+  }
+  data_->assign(value);
+}
+inline void AfbElementXml::set_data(const char* value) {
+  set_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    data_ = new ::std::string;
+  }
+  data_->assign(value);
+}
+inline void AfbElementXml::set_data(const void* value, size_t size) {
+  set_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    data_ = new ::std::string;
+  }
+  data_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* AfbElementXml::mutable_data() {
+  set_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    data_ = new ::std::string;
+  }
+  return data_;
+}
+inline ::std::string* AfbElementXml::release_data() {
+  clear_has_data();
+  if (data_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = data_;
+    data_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void AfbElementXml::set_allocated_data(::std::string* data) {
+  if (data_ != &::google::protobuf::internal::kEmptyString) {
+    delete data_;
+  }
+  if (data) {
+    set_has_data();
+    data_ = data;
+  } else {
+    clear_has_data();
+    data_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
 // FblElement
 
 // required .Proto.Uuid uuid = 1;
@@ -5754,6 +6069,44 @@ VideoFrame::layers() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
 VideoFrame::mutable_layers() {
   return &layers_;
+}
+
+// required .Proto.AfbElementCollection afbs = 101;
+inline bool VideoFrame::has_afbs() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void VideoFrame::set_has_afbs() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void VideoFrame::clear_has_afbs() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void VideoFrame::clear_afbs() {
+  if (afbs_ != NULL) afbs_->::Proto::AfbElementCollection::Clear();
+  clear_has_afbs();
+}
+inline const ::Proto::AfbElementCollection& VideoFrame::afbs() const {
+  return afbs_ != NULL ? *afbs_ : *default_instance_->afbs_;
+}
+inline ::Proto::AfbElementCollection* VideoFrame::mutable_afbs() {
+  set_has_afbs();
+  if (afbs_ == NULL) afbs_ = new ::Proto::AfbElementCollection;
+  return afbs_;
+}
+inline ::Proto::AfbElementCollection* VideoFrame::release_afbs() {
+  clear_has_afbs();
+  ::Proto::AfbElementCollection* temp = afbs_;
+  afbs_ = NULL;
+  return temp;
+}
+inline void VideoFrame::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
+  delete afbs_;
+  afbs_ = afbs;
+  if (afbs) {
+    set_has_afbs();
+  } else {
+    clear_has_afbs();
+  }
 }
 
 // -------------------------------------------------------------------
@@ -7577,6 +7930,31 @@ inline void FblItemLine::set_linecolor(::google::protobuf::uint32 value) {
 
 // VideoItemSignal
 
+// repeated .Proto.wstring signalStrIDs = 1;
+inline int VideoItemSignal::signalstrids_size() const {
+  return signalstrids_.size();
+}
+inline void VideoItemSignal::clear_signalstrids() {
+  signalstrids_.Clear();
+}
+inline const ::Proto::wstring& VideoItemSignal::signalstrids(int index) const {
+  return signalstrids_.Get(index);
+}
+inline ::Proto::wstring* VideoItemSignal::mutable_signalstrids(int index) {
+  return signalstrids_.Mutable(index);
+}
+inline ::Proto::wstring* VideoItemSignal::add_signalstrids() {
+  return signalstrids_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
+VideoItemSignal::signalstrids() const {
+  return signalstrids_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
+VideoItemSignal::mutable_signalstrids() {
+  return &signalstrids_;
+}
+
 // -------------------------------------------------------------------
 
 // VideoItemInputSignal
@@ -7593,42 +7971,67 @@ inline void FblItemLine::set_linecolor(::google::protobuf::uint32 value) {
 
 // VideoItemFblElement
 
-// required .Proto.Envelope fblelement = 1;
-inline bool VideoItemFblElement::has_fblelement() const {
+// required .Proto.Uuid afbGuid = 1;
+inline bool VideoItemFblElement::has_afbguid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItemFblElement::set_has_fblelement() {
+inline void VideoItemFblElement::set_has_afbguid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItemFblElement::clear_has_fblelement() {
+inline void VideoItemFblElement::clear_has_afbguid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItemFblElement::clear_fblelement() {
-  if (fblelement_ != NULL) fblelement_->::Proto::Envelope::Clear();
-  clear_has_fblelement();
+inline void VideoItemFblElement::clear_afbguid() {
+  if (afbguid_ != NULL) afbguid_->::Proto::Uuid::Clear();
+  clear_has_afbguid();
 }
-inline const ::Proto::Envelope& VideoItemFblElement::fblelement() const {
-  return fblelement_ != NULL ? *fblelement_ : *default_instance_->fblelement_;
+inline const ::Proto::Uuid& VideoItemFblElement::afbguid() const {
+  return afbguid_ != NULL ? *afbguid_ : *default_instance_->afbguid_;
 }
-inline ::Proto::Envelope* VideoItemFblElement::mutable_fblelement() {
-  set_has_fblelement();
-  if (fblelement_ == NULL) fblelement_ = new ::Proto::Envelope;
-  return fblelement_;
+inline ::Proto::Uuid* VideoItemFblElement::mutable_afbguid() {
+  set_has_afbguid();
+  if (afbguid_ == NULL) afbguid_ = new ::Proto::Uuid;
+  return afbguid_;
 }
-inline ::Proto::Envelope* VideoItemFblElement::release_fblelement() {
-  clear_has_fblelement();
-  ::Proto::Envelope* temp = fblelement_;
-  fblelement_ = NULL;
+inline ::Proto::Uuid* VideoItemFblElement::release_afbguid() {
+  clear_has_afbguid();
+  ::Proto::Uuid* temp = afbguid_;
+  afbguid_ = NULL;
   return temp;
 }
-inline void VideoItemFblElement::set_allocated_fblelement(::Proto::Envelope* fblelement) {
-  delete fblelement_;
-  fblelement_ = fblelement;
-  if (fblelement) {
-    set_has_fblelement();
+inline void VideoItemFblElement::set_allocated_afbguid(::Proto::Uuid* afbguid) {
+  delete afbguid_;
+  afbguid_ = afbguid;
+  if (afbguid) {
+    set_has_afbguid();
   } else {
-    clear_has_fblelement();
+    clear_has_afbguid();
   }
+}
+
+// repeated .Proto.FblElementParam params = 2;
+inline int VideoItemFblElement::params_size() const {
+  return params_.size();
+}
+inline void VideoItemFblElement::clear_params() {
+  params_.Clear();
+}
+inline const ::Proto::FblElementParam& VideoItemFblElement::params(int index) const {
+  return params_.Get(index);
+}
+inline ::Proto::FblElementParam* VideoItemFblElement::mutable_params(int index) {
+  return params_.Mutable(index);
+}
+inline ::Proto::FblElementParam* VideoItemFblElement::add_params() {
+  return params_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+VideoItemFblElement::params() const {
+  return params_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+VideoItemFblElement::mutable_params() {
+  return &params_;
 }
 
 // -------------------------------------------------------------------
@@ -8265,16 +8668,16 @@ inline const EnumDescriptor* GetEnumDescriptor< ::Proto::SchemeUnit>() {
   return ::Proto::SchemeUnit_descriptor();
 }
 template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Proto::ConnectionDirrection>() {
+  return ::Proto::ConnectionDirrection_descriptor();
+}
+template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblSignalType>() {
   return ::Proto::FblSignalType_descriptor();
 }
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblParamType>() {
   return ::Proto::FblParamType_descriptor();
-}
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::Proto::ConnectionDirrection>() {
-  return ::Proto::ConnectionDirrection_descriptor();
 }
 
 }  // namespace google
