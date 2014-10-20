@@ -2,7 +2,7 @@
 #define DIALOGAFBPROPERTIES_H
 
 #include <QDialog>
-#include "AFBLibrary.h"
+#include "../include/DbController.h"
 
 namespace Ui {
 class DialogAfbProperties;
@@ -22,6 +22,8 @@ private slots:
     void on_m_validate_clicked();
 
     void on_DialogAfbProperties_finished(int result);
+
+	void on_m_loadFbl_clicked();
 
 private:
     Ui::DialogAfbProperties *ui;

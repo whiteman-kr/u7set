@@ -1,5 +1,7 @@
 #include "Stable.h"
 #include "Fbl.h"
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
 
 namespace Afbl
 {
@@ -8,6 +10,45 @@ namespace Afbl
 	//							FblParamValue		
 	//
 	//
+	AfbParamValue::AfbParamValue()
+	{
+		IntegralValue = 0;
+		FloatingPoint = 0.0;
+		Discrete = false;
+		Type = AfbParamType::AnalogIntegral;
+	}
+
+	AfbParamValue::AfbParamValue(long long value, AfbParamType type)
+	{
+		Q_ASSERT(type == AfbParamType::AnalogIntegral);
+
+		IntegralValue = value;
+		FloatingPoint = 0.0;
+		Discrete = false;
+		Type = type;
+	}
+
+	AfbParamValue::AfbParamValue(double value, AfbParamType type)
+	{
+		Q_ASSERT(type == AfbParamType::AnalogFloatingPoint);
+
+		IntegralValue = 0;
+		FloatingPoint = value;
+		Discrete = false;
+		Type = type;
+	}
+
+	AfbParamValue::AfbParamValue(bool value, AfbParamType type)
+	{
+		Q_ASSERT(type == AfbParamType::DiscreteValue);
+
+		IntegralValue = 0;
+		FloatingPoint = 0.0;
+		Discrete = value;
+		Type = type;
+	}
+
+
 	bool AfbParamValue::SaveData(Proto::FblParamValue* /*message*/) const
 	{
 		assert(false);
@@ -28,6 +69,130 @@ namespace Afbl
 //		FloatingPoint = message.floatingpoint();
 //		Discrete = message.discrete();
 //		return true;
+	}
+
+	bool AfbParamValue::loadFromXml(QXmlStreamReader* xmlReader)
+	{
+		if (xmlReader == nullptr)
+		{
+			Q_ASSERT(xmlReader);
+			return false;
+		}
+
+		if (xmlReader->name() != "AfbParamValue")
+		{
+			xmlReader->raiseError(QObject::tr("AfbParamValue expected."));
+			return !xmlReader->hasError();
+		}
+
+		if (xmlReader->attributes().hasAttribute("Type"))
+		{
+			QString stringType = xmlReader->attributes().value("Type").toString();
+			if (stringType == "AnalogIntegral")
+			{
+				Type = AfbParamType::AnalogIntegral;
+			}
+			else
+			{
+				if (stringType == "AnalogFloatingPoint")
+				{
+					Type = AfbParamType::AnalogFloatingPoint;
+				}
+				else
+				{
+					if (stringType == "DiscreteValue")
+					{
+						Type = AfbParamType::DiscreteValue;
+					}
+					else
+					{
+						Q_ASSERT(false);
+					}
+				}
+			}
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbParamValue - No Type found"));
+		}
+
+		if (xmlReader->attributes().hasAttribute("Value"))
+		{
+			switch (Type)
+			{
+				case AfbParamType::AnalogIntegral:
+					{
+						IntegralValue = xmlReader->attributes().value("Value").toLongLong();
+						//qDebug()<<"Param Value = "<< QString::number(IntegralValue);
+					}
+					break;
+				case AfbParamType::AnalogFloatingPoint:
+					{
+						FloatingPoint = xmlReader->attributes().value("Value").toDouble();
+						//qDebug()<<"Param Value = "<< QString::number(FloatingPoint);
+					}
+					break;
+				case AfbParamType::DiscreteValue:
+					{
+						Discrete = xmlReader->attributes().value("Value") == "0" ? false : true;
+						//qDebug()<<"Param Value = "<< QString(Discrete ? "true" : "false");
+					}
+					break;
+				default:
+					Q_ASSERT(false);
+			}
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbParamValue - No Value found"));
+		}
+
+		//qDebug()<<"Param Type = "<< QString::number(Type);
+
+		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
+		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
+
+		return !xmlReader->hasError();
+
+	}
+
+	bool AfbParamValue::saveToXml(QXmlStreamWriter* xmlWriter) const
+	{
+		if (xmlWriter == nullptr)
+		{
+			Q_ASSERT(xmlWriter);
+			return false;
+		}
+
+		xmlWriter->writeStartElement("AfbParamValue");
+
+		switch (Type)
+		{
+			case AnalogIntegral:
+				{
+					xmlWriter->writeAttribute("Type", "AnalogIntegral");
+					xmlWriter->writeAttribute("Value", QString::number(IntegralValue));
+				}
+				break;
+			case AnalogFloatingPoint:
+				{
+					xmlWriter->writeAttribute("Type", "AnalogFloatingPoint");
+					xmlWriter->writeAttribute("Value", QString::number(FloatingPoint));
+				}
+				break;
+			case DiscreteValue:
+				{
+					xmlWriter->writeAttribute("Type", "DiscreteValue");
+					xmlWriter->writeAttribute("Value", QString::number(Discrete));
+				}
+				break;
+			default:
+				Q_ASSERT(false);
+		}
+
+		xmlWriter->writeEndElement();
+
+		return true;
 	}
 
 	//
@@ -69,6 +234,130 @@ namespace Afbl
 //		return true;
 	}
 
+	bool AfbElementParam::loadFromXml(QXmlStreamReader* xmlReader)
+	{
+		if (xmlReader == nullptr)
+		{
+			Q_ASSERT(xmlReader);
+			return false;
+		}
+
+		if (xmlReader->name() != "AfbElementParam")
+		{
+			xmlReader->raiseError(QObject::tr("AfbElementParam expected."));
+			return !xmlReader->hasError();
+		}
+
+		if (xmlReader->attributes().hasAttribute("Caption"))
+		{
+			setCaption(xmlReader->attributes().value("Caption").toString());
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElementParam - No Caption found"));
+		}
+
+		if (xmlReader->attributes().hasAttribute("Type"))
+		{
+			setType((AfbParamType)xmlReader->attributes().value("Type").toInt());
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElementParam - No Type found"));
+		}
+
+		//qDebug()<<"Param caption = "<< caption();
+		//qDebug()<<"Param Type = "<< QString::number(type());
+
+		// Read values
+		//
+		while (xmlReader->readNextStartElement())
+		{
+			//qDebug()<<xmlReader->name();
+
+			QString valueName = xmlReader->name().toString();
+
+			while (xmlReader->readNextStartElement())
+			{
+				AfbParamValue value;
+				value.loadFromXml(xmlReader);
+
+				if (valueName == "Value")
+				{
+					setValue(value);
+				}
+				if (valueName == "Default")
+				{
+					setDefaultValue(value);
+				}
+				if (valueName == "LowLimit")
+				{
+					setLowLimit(value);
+				}
+				if (valueName == "HighLimit")
+				{
+					setHighLimit(value);
+				}
+			}
+		}
+
+		return !xmlReader->hasError();
+
+	}
+
+	bool AfbElementParam::saveToXml(QXmlStreamWriter* xmlWriter) const
+	{
+		if (xmlWriter == nullptr)
+		{
+			Q_ASSERT(xmlWriter);
+			return false;
+		}
+
+		xmlWriter->writeStartElement("AfbElementParam");
+		xmlWriter->writeAttribute("Caption", caption());
+
+		switch (type())
+		{
+			case AnalogIntegral:
+				{
+					xmlWriter->writeAttribute("Type", "AnalogIntegral");
+				}
+				break;
+			case AnalogFloatingPoint:
+				{
+					xmlWriter->writeAttribute("Type", "AnalogFloatingPoint");
+				}
+				break;
+			case DiscreteValue:
+				{
+					xmlWriter->writeAttribute("Type", "DiscreteValue");
+				}
+				break;
+			default:
+				Q_ASSERT(false);
+		}
+
+		xmlWriter->writeStartElement("Value");
+		value().saveToXml(xmlWriter);
+		xmlWriter->writeEndElement();
+
+		xmlWriter->writeStartElement("Default");
+		defaultValue().saveToXml(xmlWriter);
+		xmlWriter->writeEndElement();
+
+		xmlWriter->writeStartElement("LowLimit");
+		lowLimit().saveToXml(xmlWriter);
+		xmlWriter->writeEndElement();
+
+		xmlWriter->writeStartElement("HighLimit");
+		highLimit().saveToXml(xmlWriter);
+		xmlWriter->writeEndElement();
+
+		xmlWriter->writeEndElement();
+
+		return true;
+	}
+
 	//
 	//
 	//							CFblElementSignal		
@@ -103,6 +392,72 @@ namespace Afbl
 //		m_caption = Proto::Read(message.caption());
 //		m_type = static_cast<FblSignalType>(message.type());
 //		return true;
+	}
+
+	bool AfbElementSignal::saveToXml(QXmlStreamWriter* xmlWriter) const
+	{
+		if (xmlWriter == nullptr)
+		{
+			Q_ASSERT(xmlWriter);
+			return false;
+		}
+
+		xmlWriter->writeStartElement("AfbElementSignal");
+		xmlWriter->writeAttribute("Caption", caption());
+		xmlWriter->writeAttribute("Type", type() == AfbSignalType::Analog ? "Analog" : "Discrete");
+		xmlWriter->writeEndElement();
+
+		return true;
+	}
+
+	bool AfbElementSignal::loadFromXml(QXmlStreamReader* xmlReader)
+	{
+		if (xmlReader == nullptr)
+		{
+			Q_ASSERT(xmlReader);
+			return false;
+		}
+
+		if (xmlReader->name() != "AfbElementSignal")
+		{
+			xmlReader->raiseError(QObject::tr("AfbElementSignal expected."));
+			return !xmlReader->hasError();
+		}
+
+		if (xmlReader->attributes().hasAttribute("Caption"))
+		{
+			setCaption(xmlReader->attributes().value("Caption").toString());
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Caption found"));
+		}
+
+		if (xmlReader->attributes().hasAttribute("Type"))
+		{
+			if (xmlReader->attributes().value("Type").toString() == "Analog")
+			{
+				setType(AfbSignalType::Analog);
+			}
+			else
+			{
+				setType(AfbSignalType::Discrete);
+			}
+
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Type found"));
+		}
+
+		//qDebug()<<"Signal caption = "<< caption();
+		//qDebug()<<"Signal Type = "<< QString::number(type());
+
+		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
+		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
+
+		return !xmlReader->hasError();
+
 	}
 
 	// Caption
@@ -224,16 +579,212 @@ namespace Afbl
 	void AfbElement::Init(void)
 	{
 		m_opcode = 0;
-		m_guid = QUuid();
+		m_guid = QUuid::createUuid();
 	}
 
-	bool AfbElement::loadFromXml(const QByteArray& data)
+	bool AfbElement::loadFromXml(QXmlStreamReader* xmlReader)
 	{
-		return true;
+		if (xmlReader == nullptr)
+		{
+			Q_ASSERT(xmlReader);
+			return false;
+		}
+
+		if (xmlReader->readNextStartElement() == false)
+		{
+			return !xmlReader->hasError();
+		}
+
+		//qDebug()<<xmlReader->name();
+		if (xmlReader->name() != "ApplicationFunctionalBlocks")
+		{
+			xmlReader->raiseError(QObject::tr("The file is not an ApplicationFunctionalBlocks file."));
+			return !xmlReader->hasError();
+		}
+
+		if (xmlReader->readNextStartElement() == false)
+		{
+			return !xmlReader->hasError();
+		}
+
+
+		if (xmlReader->name() != "AfbElement")
+		{
+			xmlReader->raiseError(QObject::tr("AfbElement expected."));
+			return !xmlReader->hasError();
+		}
+
+		if (xmlReader->attributes().hasAttribute("Guid"))
+
+		{
+			setGuid(QUuid(xmlReader->attributes().value("Guid").toString()));
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElement - No Guid found"));
+		}
+
+		if (xmlReader->attributes().hasAttribute("StrId"))
+		{
+			setStrID(xmlReader->attributes().value("StrId").toString());
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElement - No StrId found"));
+		}
+
+		if (xmlReader->attributes().hasAttribute("Caption"))
+		{
+			setCaption(xmlReader->attributes().value("Caption").toString());
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElement - No Caption found"));
+		}
+
+		if (xmlReader->attributes().hasAttribute("OpCode"))
+		{
+			setOpcode(xmlReader->attributes().value("OpCode").toInt());
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElement - No OpCode found"));
+		}
+
+		//qDebug()<<"Guid ="<<guid().toString();
+		//qDebug()<<"StrId ="<<strID();
+		//qDebug()<<"Caption ="<<caption();
+		//qDebug()<<"OpCode ="<<opcode();
+
+		std::vector<AfbElementSignal> inputSignals;
+		std::vector<AfbElementSignal> outputSignals;
+		std::vector<AfbElementParam> params;
+
+		while (xmlReader->readNextStartElement())
+		{
+			// Input or output signals
+			//
+			if (xmlReader->name() == "OutputSignals" || xmlReader->name() == "InputSignals")
+			{
+				enum LoadSignalType {InputSignal, OutputSignal} loadSignalType;
+				loadSignalType = xmlReader->name() == "OutputSignals" ? LoadSignalType::OutputSignal
+															: LoadSignalType::InputSignal;
+
+				//qDebug()<<xmlReader->name().toString();
+
+				// Read signals
+				//
+				while (xmlReader->readNextStartElement())
+				{
+					if (xmlReader->name() == "AfbElementSignal")
+					{
+						//qDebug()<<xmlReader->name().toString();
+
+						AfbElementSignal afbSignal;
+						afbSignal.loadFromXml(xmlReader);
+						if (loadSignalType == LoadSignalType::InputSignal)
+						{
+							inputSignals.push_back(afbSignal);
+						}
+						else
+						{
+							outputSignals.push_back(afbSignal);
+						}
+					}
+					else
+					{
+						xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
+						xmlReader->skipCurrentElement();
+					}
+				}
+				continue;
+			}
+
+			if (xmlReader->name() == "Params")
+			{
+				//qDebug()<<xmlReader->name().toString();
+
+				// Read params
+				//
+				while (xmlReader->readNextStartElement())
+				{
+					if (xmlReader->name() == "AfbElementParam")
+					{
+						//qDebug()<<xmlReader->name().toString();
+
+						AfbElementParam afbParam;
+						afbParam.loadFromXml(xmlReader);
+						params.push_back(afbParam);
+					}
+					else
+					{
+						xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
+						xmlReader->skipCurrentElement();
+					}
+				}
+				continue;
+			}
+
+			xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
+			xmlReader->skipCurrentElement();
+		}
+
+		//qDebug()<<"finished.";
+
+		setInputSignals(inputSignals);
+		setOutputSignals(outputSignals);
+
+		return !xmlReader->error();
+
 	}
 
-	bool AfbElement::saveToXml(QByteArray* data) const
+	bool AfbElement::saveToXml(QXmlStreamWriter* xmlWriter) const
 	{
+		if (xmlWriter == nullptr)
+		{
+			Q_ASSERT(xmlWriter);
+			return false;
+		}
+
+		xmlWriter->setAutoFormatting(true);
+		xmlWriter->writeStartDocument();
+
+		xmlWriter->writeStartElement("ApplicationFunctionalBlocks");
+
+		xmlWriter->writeStartElement("AfbElement");
+		xmlWriter->writeAttribute("Guid", guid().toString());
+		xmlWriter->writeAttribute("StrId", strID());
+		xmlWriter->writeAttribute("Caption", caption());
+		xmlWriter->writeAttribute("OpCode", QString::number(opcode()));
+
+		xmlWriter->writeStartElement("InputSignals");
+		for (auto s : inputSignals())
+		{
+			s.saveToXml(xmlWriter);
+		}
+		xmlWriter->writeEndElement(); //"InputSignals"
+
+		xmlWriter->writeStartElement("OutputSignals");
+		for (auto s : outputSignals())
+		{
+			s.saveToXml(xmlWriter);
+		}
+		xmlWriter->writeEndElement(); //"OutputSignals"
+
+		xmlWriter->writeStartElement("Params");
+		for (auto s : params())
+		{
+			s.saveToXml(xmlWriter);
+		}
+		xmlWriter->writeEndElement(); //"Params"
+
+		xmlWriter->writeEndElement(); //"AfbElement"
+
+		xmlWriter->writeEndElement(); //"ApplicationFunctionalBlocks"
+
+		xmlWriter->writeEndDocument();
+
+
 		return true;
 	}
 

@@ -24,17 +24,27 @@ namespace Afbl
 
 	// Значение параметра элемента
 	//
-	struct AfbParamValue
+	struct VFRAME30LIBSHARED_EXPORT AfbParamValue
 	{
 		long long IntegralValue;
 		double FloatingPoint;
 		bool Discrete;
+		AfbParamType Type;	// Тип данных параметра
 
 		// Serialization
 		//
 	public:
+
+		AfbParamValue();
+		AfbParamValue(long long value, AfbParamType type);
+		AfbParamValue(double value, AfbParamType type);
+		AfbParamValue(bool value, AfbParamType type);
+
 		bool SaveData(Proto::FblParamValue* message) const;
 		bool LoadData(const Proto::FblParamValue& message);
+
+		bool loadFromXml(QXmlStreamReader* xmlReader);
+		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 	};
 
 		
@@ -54,6 +64,9 @@ namespace Afbl
 	public:
 		bool SaveData(Proto::FblElementSignal* message) const;
 		bool LoadData(const Proto::FblElementSignal& message);
+
+		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+		bool loadFromXml(QXmlStreamReader* xmlReader);
 
 		// Properties
 		//
@@ -88,6 +101,9 @@ private:
 	public:
 		bool SaveData(Proto::FblElementParam* message) const;
 		bool LoadData(const Proto::FblElementParam& message);
+
+		bool loadFromXml(QXmlStreamReader* xmlReader);
+		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 
 		// Properties
 		//
@@ -144,8 +160,8 @@ private:
 		friend Proto::ObjectSerialization<AfbElement>;
 
 	public:
-		bool loadFromXml(const QByteArray& data);
-		bool saveToXml(QByteArray* data) const;
+		bool loadFromXml(QXmlStreamReader* xmlReader);
+		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
