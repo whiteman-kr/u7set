@@ -1161,11 +1161,14 @@ bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::VideoItem>& 
 // EditVideoFrameWidget
 //
 //
-EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo) :
+EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbController) :
 	m_fileInfo(fileInfo),
 	m_snapToGrid(true),
-	m_editEngine(nullptr)
+	m_editEngine(nullptr),
+	m_dbcontroller(dbController)
 {
+	assert(m_dbcontroller);
+
 	createActions();
 
 	// Left Button Down
@@ -1349,7 +1352,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addLineAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemLine>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemLine>(scheme()->unit()));
 			});
 
 	m_addConnectionLineAction = new QAction(tr("Connection Line"), this);
@@ -1357,7 +1360,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addConnectionLineAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemConnectionLine>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemConnectionLine>(scheme()->unit()));
 			});
 
 	m_addRectAction = new QAction(tr("Rect"), this);
@@ -1365,7 +1368,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addRectAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemRect>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemRect>(scheme()->unit()));
 			});
 
 	m_addSeparatorAction0 = new QAction(this);
@@ -1376,7 +1379,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemInputSignal>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemInputSignal>(scheme()->unit()));
 			});
 
 	m_addOutputSignalAction = new QAction(tr("Output"), this);
@@ -1384,7 +1387,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemOutputSignal>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemOutputSignal>(scheme()->unit()));
 			});
 
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
@@ -1396,7 +1399,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addLinkAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemLink>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemLink>(scheme()->unit()));
 			});
 
 	//
@@ -1798,7 +1801,7 @@ void EditSchemeWidget::wheelEvent(QWheelEvent* event)
 		int newHorzValue = 0;
 		int newVertValue = 0;
 
-		switch (videoFrame()->unit())
+		switch (scheme()->unit())
 		{
 		case VFrame30::SchemeUnit::Display:
 			newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * zoom / 100.0);
@@ -3149,12 +3152,22 @@ void EditSchemeWidget::mouseRightUp_None(QMouseEvent* event)
 	return;
 }
 
-std::shared_ptr<VFrame30::Scheme>& EditSchemeWidget::videoFrame()
+DbController* EditSchemeWidget::dbcontroller()
+{
+	return m_dbcontroller;
+}
+
+DbController* EditSchemeWidget::db()
+{
+	return m_dbcontroller;
+}
+
+std::shared_ptr<VFrame30::Scheme>& EditSchemeWidget::scheme()
 {
 	return m_videoFrameView->scheme();
 }
 
-std::shared_ptr<VFrame30::Scheme>& EditSchemeWidget::videoFrame() const
+std::shared_ptr<VFrame30::Scheme>& EditSchemeWidget::scheme() const
 {
 	return m_videoFrameView->scheme();
 }
@@ -3187,8 +3200,8 @@ QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool 
 	double dpiX = logicalDpiX();
 	double dpiY = logicalDpiY();
 
-	int widthInPixels = videoFrame()->GetDocumentWidth(dpiX, zoom());
-	int heightInPixels = videoFrame()->GetDocumentHeight(dpiY, zoom());
+	int widthInPixels = scheme()->GetDocumentWidth(dpiX, zoom());
+	int heightInPixels = scheme()->GetDocumentHeight(dpiY, zoom());
 
 	QRect clientRect = geometry();
 
@@ -3218,7 +3231,7 @@ QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool 
 
 	// Приведение к маскштабу
 	//
-	if (videoFrame()->unit() == VFrame30::SchemeUnit::Display)
+	if (scheme()->unit() == VFrame30::SchemeUnit::Display)
 	{
 		docX = x / (zoom() / 100.0);
 		docY = y / (zoom() / 100.0);
@@ -3240,7 +3253,7 @@ QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool 
 
 QPointF EditSchemeWidget::snapToGrid(QPointF pt) const
 {
-	double gridSize = videoFrame()->unit() == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
+	double gridSize = scheme()->unit() == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
 	QPointF result = CUtils::snapToGrid(pt, gridSize);
 	return result;
 }
@@ -3258,8 +3271,8 @@ bool EditSchemeWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDest
 
 	double zoom = schemeView()->zoom();
 
-	int widthInPixels = videoFrame()->GetDocumentWidth(dpiX, zoom);
-	int heightInPixels = videoFrame()->GetDocumentHeight(dpiY, zoom);
+	int widthInPixels = scheme()->GetDocumentWidth(dpiX, zoom);
+	int heightInPixels = scheme()->GetDocumentHeight(dpiY, zoom);
 
 	int startX = 0;
 	int startY = 0;
@@ -3285,7 +3298,7 @@ bool EditSchemeWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDest
 	int x = mousePos.x() - startX;
 	int y = mousePos.y() - startY;
 
-	if (videoFrame()->unit() == VFrame30::SchemeUnit::Display)
+	if (scheme()->unit() == VFrame30::SchemeUnit::Display)
 	{
 		pDestDocPos->setX(x / (zoom / 100.0));
 		pDestDocPos->setY(y / (zoom / 100.0));
@@ -3669,7 +3682,58 @@ void EditSchemeWidget::selectionChanged()
 
 void EditSchemeWidget::addFblElement()
 {
-	// addItem(std::make_shared<VFrame30::VideoItemFblElement>(videoFrame()->unit()));
+	// Get available Afb list
+	//
+	std::vector<DbFileInfo> fileList;
+
+	bool result = db()->getFileList(&fileList, db()->afblFileId(), "afb", this);
+	if (result == false || fileList.empty() == true)
+	{
+		return;
+	}
+
+	// Read all Afb's and refresh it in scheme
+	//
+	std::vector<std::shared_ptr<DbFile>> files;
+	result = db()->getLatestVersion(fileList, &files, this);
+	if (result == false)
+	{
+		return;
+	}
+
+	std::vector<std::shared_ptr<Afbl::AfbElement>> elements;
+	elements.reserve(files.size());
+
+	for (auto& f : files)
+	{
+		std::shared_ptr<Afbl::AfbElement> afb = std::make_shared<Afbl::AfbElement>();
+		result = afb->loadFromXml(f->data());
+
+		elements.push_back(afb);
+	}
+
+	scheme()->mutable_afbCollection()->setElements(elements);
+
+	// Select Afb, create such scheme item and add it to th scheme
+	//
+	QMenu* menu = new QMenu(this);
+
+	for (std::shared_ptr<Afbl::AfbElement>& afb : elements)
+	{
+		QAction* a = new QAction(afb->caption(), this);
+
+		connect(a, &QAction::triggered,
+			[this, afb]()
+			{
+				addItem(std::make_shared<VFrame30::VideoItemFblElement>(scheme()->unit(), *(afb.get())));
+			});
+
+		menu->addAction(a);
+	}
+
+	menu->exec(this->cursor().pos());
+
+	return;
 }
 
 MouseState EditSchemeWidget::mouseState() const
@@ -3715,7 +3779,7 @@ void EditSchemeWidget::setZoom(double zoom, int horzScrollValue /*= -1*/, int ve
 	int newHorzValue = 0;
 	int newVertValue = 0;
 
-	switch (videoFrame()->unit())
+	switch (scheme()->unit())
 	{
 	case VFrame30::SchemeUnit::Display:
 		newHorzValue = horizontalScrollBar()->value() - static_cast<int>(dPos.x() * zoom / 100.0);

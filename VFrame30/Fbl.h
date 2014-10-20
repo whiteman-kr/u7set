@@ -201,12 +201,12 @@ private:
 	//	FblElementCollection - Коллекция прототипов FBL элементов
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT FblElementCollection :
-		public VFrame30::DebugInstCounter<FblElementCollection>
+	class VFRAME30LIBSHARED_EXPORT AfbElementCollection :
+		public VFrame30::DebugInstCounter<AfbElementCollection>
 	{
 	public:
-		FblElementCollection(void);
-		virtual ~FblElementCollection(void);
+		AfbElementCollection(void);
+		virtual ~AfbElementCollection(void);
 
 		void Init(void);
 
@@ -217,12 +217,17 @@ private:
 		// Methods
 		//
 	public:
-		std::shared_ptr<AfbElement> Get(const QUuid& QUuid) const;
+		void setElements(const std::vector<std::shared_ptr<AfbElement>>& elements);
+
+		const std::vector<std::shared_ptr<AfbElement>>& elements() const;
+		std::vector<std::shared_ptr<AfbElement>>* mutable_elements();
+
+		std::shared_ptr<AfbElement> get(const QUuid& QUuid) const;
 
 		// Properties and Datas
 		//
 	public:
-		std::vector<std::shared_ptr<AfbElement>> elements;
+		std::vector<std::shared_ptr<AfbElement>> m_elements;
 	};
 }
 

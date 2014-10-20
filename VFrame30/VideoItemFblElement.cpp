@@ -16,19 +16,18 @@ namespace VFrame30
 	}
 
 	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement) :
-		FblItemRect(unit)
+		FblItemRect(unit),
+		m_afblElement(fblElement)
 	{
-		m_fblElement = fblElement;
-
 		// Создать входные и выходные сигналы в VFrame30::FblEtem
 		//
-		const std::vector<Afbl::AfbElementSignal>& inputSignals = m_fblElement.inputSignals();
+		const std::vector<Afbl::AfbElementSignal>& inputSignals = m_afblElement.inputSignals();
 		for (auto s = inputSignals.begin(); s != inputSignals.end(); ++s)
 		{
 			AddInput();
 		}
 
-		const std::vector<Afbl::AfbElementSignal>& outputSignals = m_fblElement.outputSignals();
+		const std::vector<Afbl::AfbElementSignal>& outputSignals = m_afblElement.outputSignals();
 		for (auto s = outputSignals.begin(); s != outputSignals.end(); ++s)
 		{
 			AddOutput();
@@ -36,12 +35,13 @@ namespace VFrame30
 
 		// Проинициализировать паремтры значением по умолчанию
 		//
-		std::vector<Afbl::AfbElementParam> params = m_fblElement.params();
+		std::vector<Afbl::AfbElementParam> params = m_afblElement.params();
 		for (auto p = params.begin(); p != params.end(); ++p)
 		{
 			p->setValue(p->defaultValue());
 		}
-		m_fblElement.setParams(params);
+
+		m_afblElement.setParams(params);
 	}
 
 	VideoItemFblElement::~VideoItemFblElement(void)
@@ -97,7 +97,7 @@ namespace VFrame30
 		//
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), m_fblElement.caption(), r);
+		DrawHelper::DrawText(p, m_font, itemUnit(), m_afblElement.caption(), r);
 
 		return;
 	}
@@ -118,7 +118,7 @@ namespace VFrame30
 		//
 		Proto::VideoItemFblElement* vifble = message->mutable_videoitem()->mutable_videoitemfblelement();
 
-		m_fblElement.Save(vifble->mutable_fblelement());
+		m_afblElement.Save(vifble->mutable_fblelement());
 		//vifble->set_weight(weight);
 
 		return true;
@@ -150,7 +150,7 @@ namespace VFrame30
 		
 		const Proto::VideoItemFblElement& vifble = message.videoitem().videoitemfblelement();
 		
-		m_fblElement.Load(vifble.fblelement());
+		m_afblElement.Load(vifble.fblelement());
 		//fill = vifble.fill();
 
 		return true;
@@ -158,6 +158,6 @@ namespace VFrame30
 
 	const Afbl::AfbElement& VideoItemFblElement::fblElement() const
 	{
-		return m_fblElement;
+		return m_afblElement;
 	}
 }

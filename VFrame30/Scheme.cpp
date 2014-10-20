@@ -504,4 +504,15 @@ namespace VFrame30
 	{
 		m_unit = value;
 	}
+
+	const Afbl::AfbElementCollection& Scheme::afbCollection() const
+	{
+		return m_afbCollection;
+	}
+
+	Afbl::AfbElementCollection* Scheme::mutable_afbCollection()
+	{
+		return &m_afbCollection;
+	}
+
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SchemeLayer.h"
+#include "Fbl.h"
 #include "../include/TypesAndEnums.h"
 
 namespace VFrame30
@@ -78,6 +79,9 @@ namespace VFrame30
 
 		SchemeUnit unit() const;
 		void setUnit(SchemeUnit value);
+
+		const Afbl::AfbElementCollection& afbCollection() const;
+		Afbl::AfbElementCollection* mutable_afbCollection();
 		
 	public:
 		std::vector<std::shared_ptr<SchemeLayer>> Layers;
@@ -91,6 +95,8 @@ namespace VFrame30
 		double m_height;			// pixels or inches, depends on m_unit
 
 		SchemeUnit m_unit;			// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
+
+		Afbl::AfbElementCollection m_afbCollection;
 	};
 
 

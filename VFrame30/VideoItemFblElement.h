@@ -43,7 +43,7 @@ namespace VFrame30
 		const Afbl::AfbElement& fblElement() const;
 
 	private:
-		Afbl::AfbElement m_fblElement;
+		Afbl::AfbElement m_afblElement;
 	};
 
 }

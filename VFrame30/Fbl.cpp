@@ -437,28 +437,43 @@ namespace Afbl
 	//
 	//
 
-	FblElementCollection::FblElementCollection(void)
+	AfbElementCollection::AfbElementCollection(void)
 	{
 		Init();
 	}
 
-	FblElementCollection::~FblElementCollection(void)
+	AfbElementCollection::~AfbElementCollection(void)
 	{
 	}
 
-	void FblElementCollection::Init(void)
+	void AfbElementCollection::Init(void)
 	{
 	}
 
-	std::shared_ptr<AfbElement> FblElementCollection::Get(const QUuid& guid) const
+	void AfbElementCollection::setElements(const std::vector<std::shared_ptr<AfbElement>>& elements)
 	{
-		auto result = std::find_if(elements.begin(), elements.end(),
+		m_elements = elements;
+	}
+
+	const std::vector<std::shared_ptr<AfbElement>>& AfbElementCollection::elements() const
+	{
+		return m_elements;
+	}
+
+	std::vector<std::shared_ptr<AfbElement>>* AfbElementCollection::mutable_elements()
+	{
+		return &m_elements;
+	}
+
+	std::shared_ptr<AfbElement> AfbElementCollection::get(const QUuid& guid) const
+	{
+		auto result = std::find_if(m_elements.begin(), m_elements.end(),
 			[&guid](const std::shared_ptr<AfbElement>& fblelement)
 			{
 				return fblelement->guid() == guid;
 			});
 		
-		return result == elements.end() ? std::shared_ptr<AfbElement>(nullptr) : *result;
+		return result == m_elements.end() ? std::shared_ptr<AfbElement>() : *result;
 	}
 
 }
