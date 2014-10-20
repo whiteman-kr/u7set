@@ -80,7 +80,6 @@ protected:
 public:
 
     bool createInterface();
-    void initMeasureThread();
 
     void createActions();
     void updateActions();
@@ -192,16 +191,16 @@ private slots:
 
     // Slots of calibrator base
     //
-    void onCalibratorConnectedChanged(int);
+    void calibratorConnectedChanged(int);
 
 private slots:
 
     // Slots of measure thread
     //
-    void onMeasureThreadStarted();
-    void onMeasureThreadStoped();
-    void onMeasureThreadInfo(QString msg);
-    void onMeasureThreadInfo(int timeout);
+    void measureThreadStarted();
+    void measureThreadStoped();
+    void setMeasureThreadInfo(QString msg);
+    void setMeasureThreadInfo(int timeout);
 };
 
 // ==============================================================================================

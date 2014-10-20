@@ -75,7 +75,7 @@ class EditSchemeView : public VFrame30::SchemeView
 
 public:
 	explicit EditSchemeView(QWidget* parent = 0);
-	explicit EditSchemeView(std::shared_ptr<VFrame30::Scheme>& videoFrame, QWidget* parent = nullptr);
+	explicit EditSchemeView(std::shared_ptr<VFrame30::Scheme>& scheme, QWidget* parent = nullptr);
 
 	virtual ~EditSchemeView();
 
@@ -289,6 +289,8 @@ protected slots:
 
 	void properties();
 	void selectionChanged();
+
+	void addFblElement();
 
 	// Properties
 	//

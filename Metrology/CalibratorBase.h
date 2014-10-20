@@ -17,11 +17,11 @@
 
 // ==============================================================================================
 
-const int MAX_CALIBRATOR_COUNT = 6;
+const int MAX_CALIBRATOR_COUNT = 6;         // max amount calibrators in calibrator base
 
 // ==============================================================================================
 
-const int CALIBRATOR_COUNT_FOR_CC = 2;
+const int CALIBRATOR_COUNT_FOR_CC = 2;      // amount calibrators for measure complex cpmporator
 
 // ==============================================================================================
 

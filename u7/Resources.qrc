@@ -32,9 +32,7 @@
         <file>DatabaseUpgrade/Upgrade0030.sql</file>
         <file>DatabaseUpgrade/Upgrade0031.sql</file>
     </qresource>
-    <qresource prefix="/">
-        <file>afb_schema.xsd</file>
-    </qresource>
+    <qresource prefix="/"/>
     <qresource prefix="/Images">
         <file>Images/cross.png</file>
         <file>Images/lock.png</file>

@@ -263,7 +263,7 @@ namespace EditEngine
 		m_zoom(100.0)
 	{
 		assert(videoFrameView != nullptr);
-		assert(videoFrameView->videoFrame() != nullptr);
+		assert(videoFrameView->scheme() != nullptr);
 		assert(hScrollBar != nullptr);
 		assert(vScrollBar != nullptr);
 

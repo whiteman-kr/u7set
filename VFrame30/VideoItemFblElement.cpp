@@ -15,20 +15,20 @@ namespace VFrame30
 	{
 	}
 
-	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Fbl::FblElement& fblElement) :
+	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement) :
 		FblItemRect(unit)
 	{
 		m_fblElement = fblElement;
 
 		// Создать входные и выходные сигналы в VFrame30::FblEtem
 		//
-		const std::vector<Fbl::FblElementSignal>& inputSignals = m_fblElement.inputSignals();
+		const std::vector<Afbl::AfbElementSignal>& inputSignals = m_fblElement.inputSignals();
 		for (auto s = inputSignals.begin(); s != inputSignals.end(); ++s)
 		{
 			AddInput();
 		}
 
-		const std::vector<Fbl::FblElementSignal>& outputSignals = m_fblElement.outputSignals();
+		const std::vector<Afbl::AfbElementSignal>& outputSignals = m_fblElement.outputSignals();
 		for (auto s = outputSignals.begin(); s != outputSignals.end(); ++s)
 		{
 			AddOutput();
@@ -36,7 +36,7 @@ namespace VFrame30
 
 		// Проинициализировать паремтры значением по умолчанию
 		//
-		std::vector<Fbl::FblElementParam> params = m_fblElement.params();
+		std::vector<Afbl::AfbElementParam> params = m_fblElement.params();
 		for (auto p = params.begin(); p != params.end(); ++p)
 		{
 			p->setValue(p->defaultValue());
@@ -156,7 +156,7 @@ namespace VFrame30
 		return true;
 	}
 
-	const Fbl::FblElement& VideoItemFblElement::fblElement() const
+	const Afbl::AfbElement& VideoItemFblElement::fblElement() const
 	{
 		return m_fblElement;
 	}

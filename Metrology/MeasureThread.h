@@ -2,6 +2,7 @@
 #define MEASURETHREAD_H
 
 #include <QThread>
+#include <QMessageBox>
 #include "Measure.h"
 #include "CalibratorBase.h"
 
@@ -17,16 +18,18 @@ class MeasureThread : public QThread
 
 public:
 
-    explicit                MeasureThread(QWidget *parent = 0);
+    explicit                MeasureThread(QObject *parent = 0);
+
+    void                    init(QWidget* parent = 0);
 
     void                    setMeasureType(int type)    { m_measureType = type; }
-
-    bool                    stop();
+    void                    stop()                      { m_cmdStopMeasure = true; }
 
 private:
 
-    int                     m_measureType = MEASURE_TYPE_UNKNOWN;
+    QWidget*                m_parentWidget = nullptr;
 
+    int                     m_measureType = MEASURE_TYPE_UNKNOWN;
     bool                    m_cmdStopMeasure = true;
 
     CalibratorManagerList   m_calibratorManagerList;
@@ -41,15 +44,25 @@ private:
 
 protected:
 
-    void                     run();
+    void                    run();
 
 signals:
+
+    void                    showMsgBox(QString);
 
     // measure thread signals
     //
     void                    measureInfo(QString);
     void                    measureInfo(int);
     void                    measureComplite();
+
+private slots:
+
+    void                    msgBox(QString text)        { QMessageBox::information(m_parentWidget, tr("Measurement process"), text); }
+
+    void                    calibratorDisconnected();
+
+    void                    finish();
 };
 
 // ==============================================================================================

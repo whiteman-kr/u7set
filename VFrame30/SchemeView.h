@@ -10,7 +10,7 @@ namespace VFrame30
 
 	public:
 		explicit SchemeView(QWidget *parent = 0);
-		explicit SchemeView(std::shared_ptr<VFrame30::Scheme>& videoFrame, QWidget *parent = 0);
+		explicit SchemeView(std::shared_ptr<VFrame30::Scheme>& scheme, QWidget *parent = 0);
 
 	protected:
 		void init();
@@ -26,10 +26,10 @@ namespace VFrame30
 	public:
 		bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
 
-		std::shared_ptr<Scheme>& videoFrame();
-		std::shared_ptr<Scheme> videoFrame() const;
+		std::shared_ptr<Scheme>& scheme();
+		std::shared_ptr<Scheme> scheme() const;
 
-		void setVideoFrame(std::shared_ptr<Scheme>& videoFrame, bool repaint);
+		void setVideoFrame(std::shared_ptr<Scheme>& scheme, bool repaint);
 		
 		// Events
 		//

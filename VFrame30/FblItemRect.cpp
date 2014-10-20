@@ -147,18 +147,17 @@ namespace VFrame30
 		}
 
 		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
-		double minFblGridSize = CSettings::minFblGridSize(itemUnit());
+		double minFblGridSize = CSettings::minFblGridSize(CSettings::regionalUnit());
 
 		// вертикальное расстояние между пинами
 		//
 		double height = fblItemRect.height();
-		height = CUtils::Round(height, 6);
 
-		double pinVertGap = height / pinCount;
+		double pinVertGap = height / static_cast<double>(pinCount + 1);
+		pinVertGap = CUtils::snapToGrid(pinVertGap, minFblGridSize);
 
-		double y = pinVertGap / 2 + pinVertGap * index;
-		y = floor(y / minFblGridSize) * minFblGridSize;			// выровнять по сетке
-		y += fblItemRect.top();
+		double y = fblItemRect.top() + pinVertGap * static_cast<double>(index + 1);
+		y = CUtils::snapToGrid(y ,minFblGridSize);
 
 		return VideoItemPoint(x, y);
 	}
@@ -321,7 +320,7 @@ namespace VFrame30
 			VideoItemPoint vip;
 			GetConnectionPointPos(input->guid(), &vip);
 
-			int connectionCount = pLayer->GetPinPosConnectinCount(vip);
+			int connectionCount = pLayer->GetPinPosConnectinCount(vip, itemUnit());
 
 			// Рисование пина
 			//
@@ -358,7 +357,7 @@ namespace VFrame30
 			VideoItemPoint vip;
 			GetConnectionPointPos(output->guid(), &vip);
 
-			int connectionCount = pLayer->GetPinPosConnectinCount(vip);
+			int connectionCount = pLayer->GetPinPosConnectinCount(vip, itemUnit());
 
 			// Рисование пина
 			//

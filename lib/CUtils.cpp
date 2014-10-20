@@ -345,6 +345,86 @@ void CUtils::ConvertPoint(double& x, double& y, VFrame30::SchemeUnit convertFrom
 	return;
 }
 
+QPointF CUtils::snapToGrid(const QPointF& pt, double gridSize)
+{
+	QPointF result;
+
+	// SnapToGrid дл€ Xin
+	//
+	double restX = pt.x() - floor(pt.x() / gridSize) * gridSize;
+
+	if (restX <= gridSize / 2)
+	{
+		result.setX(floor(pt.x() / gridSize) * gridSize);
+	}
+	else
+	{
+		result.setX(floor(pt.x() / gridSize) * gridSize + gridSize);
+	}
+
+	// SnapToGrid дл€ YXin
+	//
+	double restY = pt.y() - floor(pt.y() / gridSize) * gridSize;
+
+	if (restY <= gridSize / 2)
+	{
+		result.setY(floor(pt.y() / gridSize) * gridSize);
+	}
+	else
+	{
+		result.setY(floor(pt.y() / gridSize) * gridSize + gridSize);
+	}
+
+	return result;
+}
+
+QPointF CUtils::snapToGrid(double x, double y, double gridSize)
+{
+	QPointF result;
+
+	// SnapToGrid дл€ Xin
+	//
+	double restX = x - floor(x / gridSize) * gridSize;
+
+	if (restX <= gridSize / 2)
+	{
+		result.setX(floor(x / gridSize) * gridSize);
+	}
+	else
+	{
+		result.setX(floor(x / gridSize) * gridSize + gridSize);
+	}
+
+	// SnapToGrid дл€ YXin
+	//
+	double restY = y - floor(y / gridSize) * gridSize;
+
+	if (restY <= gridSize / 2)
+	{
+		result.setY(floor(y / gridSize) * gridSize);
+	}
+	else
+	{
+		result.setY(floor(y / gridSize) * gridSize + gridSize);
+	}
+
+	return result;
+}
+
+double CUtils::snapToGrid(double value, double gridSize)
+{
+	double rest = value - floor(value / gridSize) * gridSize;
+
+	if (rest <= gridSize / 2)
+	{
+		return floor(value / gridSize) * gridSize;
+	}
+	else
+	{
+		return floor(value / gridSize) * gridSize + gridSize;
+	}
+}
+
 /// <summary>
 /// ќпредение пересечени€ двух отрезков
 /// </summary>
