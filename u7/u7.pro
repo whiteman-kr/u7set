@@ -65,7 +65,6 @@ SOURCES +=\
     ../lib/DbController.cpp \
     ../lib/DbWorker.cpp \
     ../lib/DbProgressDialog.cpp \
-    AfbLibrary.cpp \
     DialogAfblEditor.cpp \
     DialogAfbProperties.cpp \
     xmlsyntaxhighlighter.cpp \
@@ -114,7 +113,6 @@ HEADERS  += \
     ../include/DbController.h \
     ../include/DbWorker.h \
     ../include/DbProgressDialog.h \
-    AfbLibrary.h \
     DialogAfblEditor.h \
     DialogAfbProperties.h \
     xmlsyntaxhighlighter.h \
@@ -190,7 +188,8 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0028.sql \
     DatabaseUpgrade/Upgrade0029.sql \
     DatabaseUpgrade/Upgrade0030.sql \
-    DatabaseUpgrade/Upgrade0031.sql
+    DatabaseUpgrade/Upgrade0031.sql \
+    Tools/afbschema.xsd
 
 
 CONFIG += precompile_header
