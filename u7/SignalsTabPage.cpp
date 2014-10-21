@@ -1118,7 +1118,7 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 }
 
 
-CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelIndexList& selection, QWidget* parent) :
+CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelIndexList selection, QWidget* parent) :
 	QDialog(parent),
 	m_sourceModel(sourceModel)
 {
@@ -1266,7 +1266,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 	setLayout(vl);
 }
 
-void UndoSignalsDialog::setCheckStates(QModelIndexList& selection, bool fromSourceModel)
+void UndoSignalsDialog::setCheckStates(QModelIndexList selection, bool fromSourceModel)
 {
 	if (!selection.isEmpty())
 	{

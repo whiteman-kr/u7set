@@ -30,6 +30,8 @@ HEADERS  += \
 
 FORMS    += mainwindow.ui
 
+QMAKE_CXXFLAGS += -std=c++11
+
 
 # Visual Leak Detector
 #

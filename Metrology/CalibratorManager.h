@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QTextEdit>
+#include <QMutex>
 
 #include "Calibrator.h"
 
