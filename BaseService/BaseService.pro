@@ -29,7 +29,7 @@ HEADERS += \
 
 include(../qtservice/src/qtservice.pri)
 
-QMAKE_CXXFLAGS += -std=c++11
+unix:QMAKE_CXXFLAGS += -std=c++11
 
 
 # Visual Leak Detector

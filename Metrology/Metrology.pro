@@ -46,7 +46,7 @@ RESOURCES += \
 TRANSLATIONS = translations/Metrology_ru.ts \
                 translations/Metrology_uk.ts
 
-QMAKE_CXXFLAGS += -std=c++11
+unix:QMAKE_CXXFLAGS += -std=c++11
 
 
 # Visual Leak Detector
