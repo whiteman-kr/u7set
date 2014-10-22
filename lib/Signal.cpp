@@ -11,76 +11,64 @@ SignalSet::~SignalSet()
 	clear();
 }
 
-/*
-void SignalSet::insert(const Signal& signal)
+
+void SignalSet::clear()
 {
+	OrderedHash<int, Signal>::clear();
+
+	m_groupSignals.clear();
+}
+
+
+void SignalSet::append(const int& signalID, const Signal& signal)
+{
+	OrderedHash<int, Signal>::append(signalID, signal);
+
+	m_groupSignals.insert(signal.signalGroupID(), signalID);
+}
+
+
+void SignalSet::remove(const int& signalID)
+{
+	Signal signal = value(signalID);
+
+	OrderedHash<int, Signal>::remove(signalID);
+
+	m_groupSignals.remove(signal.signalGroupID(), signalID);
+}
+
+
+void SignalSet::removeAt(const int index)
+{
+	const Signal& signal = OrderedHash<int, Signal>::operator [](index);
+
+	int signalGroupID = signal.signalGroupID();
 	int signalID = signal.ID();
 
-	if (m_signalSet.contains(signalID))
-	{
-		assert(false);			// signal with this ID alredy in set
+	OrderedHash<int, Signal>::removeAt(index);
 
-		Signal* oldSignal = m_signalSet.value(signalID);
-
-		*oldSignal = signal;
-	}
-	else
-	{
-		Signal* newSignal = new Signal;
-
-		*newSignal = signal;
-
-		m_signalSet.insert(signalID, newSignal);
-	}
+	m_groupSignals.remove(signalGroupID, signalID);
 }
 
 
-Signal* SignalSet::getSignal(int signalID)
+QVector<int> SignalSet::getChannelSignalsID(const Signal& signal)
 {
-	if (m_signalSet.contains(signalID))
+	return getChannelSignalsID(signal.signalGroupID());
+}
+
+
+QVector<int> SignalSet::getChannelSignalsID(int signalGroupID)
+{
+	QVector<int> channelSignalsID;
+
+	QList<int> signalsID = m_groupSignals.values(signalGroupID);
+
+	int signalCount = signalsID.count();
+
+	for(int i = 0; i< signalCount; i++)
 	{
-		return m_signalSet.value(signalID);
+		channelSignalsID.append(signalsID.at(i));
 	}
 
-	assert(false);			// signal not found
-
-	return nullptr;
+	return channelSignalsID;
 }
-
-const Signal* SignalSet::getConstSignal(int signalID) const
-{
-	if (m_signalSet.contains(signalID))
-	{
-		return const_cast<Signal*>(m_signalSet.value(signalID));
-	}
-
-	assert(false);			// signal not found
-
-	return nullptr;
-}
-
-
-bool SignalSet::haveSignal(int signalID)
-{
-	return m_signalSet.contains(signalID);
-}
-
-
-bool SignalSet::contains(int signalID)
-{
-	return m_signalSet.contains(signalID);
-}
-
-
-void SignalSet::removeAll()
-{
-	QHashIterator<int, Signal*> i(m_signalSet);
-
-	while (i.hasNext())
-	{
-		i.next();
-		delete i.value();
-	}
-
-	m_signalSet.clear();
-}*/

@@ -132,7 +132,7 @@ class CheckinSignalsDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	CheckinSignalsDialog(SignalsModel* sourceModel, QModelIndexList& selection, QWidget *parent = 0);
+    CheckinSignalsDialog(SignalsModel* sourceModel, QModelIndexList selection, QWidget *parent = 0);
 
 public slots:
 	void checkinSelected();
@@ -153,7 +153,7 @@ class UndoSignalsDialog : public QDialog
 public:
 	UndoSignalsDialog(SignalsModel* sourceModel, QWidget *parent = 0);
 
-	void setCheckStates(QModelIndexList& selection, bool fromSourceModel);
+    void setCheckStates(QModelIndexList selection, bool fromSourceModel);
 
 public slots:
 	void undoSelected();

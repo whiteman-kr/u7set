@@ -35,6 +35,8 @@ RESOURCES += \
 
 include(../qtsingleapplication/src/qtsingleapplication.pri)
 
+unix:QMAKE_CXXFLAGS += -std=c++11
+
 
 # Visual Leak Detector
 #

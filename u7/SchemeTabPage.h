@@ -72,6 +72,56 @@ protected:
 };
 
 
+//
+//
+// VideoFrameControlTabPage
+//
+//
+class SchemeControlTabPage : public QWidget, public HasDbController
+{
+    Q_OBJECT
+public:
+    SchemeControlTabPage(
+        const QString& fileExt,
+        DbController* dbcontroller,
+        const QString& parentFileName,
+        std::function<VFrame30::Scheme*()> createVideoFrameFunc);
+
+    virtual ~SchemeControlTabPage();
+
+public:
+    VFrame30::Scheme* createVideoFrame() const;
+
+protected:
+    void CreateActions();
+
+signals:
+
+protected slots:
+    //void projectOpened();
+    //void projectClosed();
+
+    void addFile();
+    void deleteFile(std::vector<DbFileInfo> files);
+
+    void openFiles(std::vector<DbFileInfo> files);
+    void viewFiles(std::vector<DbFileInfo> files);
+
+    void refreshFiles();
+
+    // Properties
+    //
+public:
+    const DbFileInfo& parentFile() const;
+
+    // Data
+    //
+private:
+    std::function<VFrame30::Scheme*()> m_createVideoFrameFunc;
+    SchemeFileView* m_filesView;
+};
+
+
 // Create MainTab!!!
 //
 template<typename VideoFrameType>
@@ -100,55 +150,6 @@ SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbc
 	return p;
 }
 
-
-//
-//
-// VideoFrameControlTabPage
-//
-//
-class SchemeControlTabPage : public QWidget, public HasDbController
-{
-	Q_OBJECT
-public:
-	SchemeControlTabPage(
-		const QString& fileExt,
-		DbController* dbcontroller,
-		const QString& parentFileName,
-		std::function<VFrame30::Scheme*()> createVideoFrameFunc);
-
-	virtual ~SchemeControlTabPage();
-
-public:
-	VFrame30::Scheme* createVideoFrame() const;
-
-protected:
-	void CreateActions();
-
-signals:
-
-protected slots:
-	//void projectOpened();
-	//void projectClosed();
-
-	void addFile();
-	void deleteFile(std::vector<DbFileInfo> files);
-
-	void openFiles(std::vector<DbFileInfo> files);
-	void viewFiles(std::vector<DbFileInfo> files);
-
-	void refreshFiles();
-
-	// Properties
-	//
-public:
-	const DbFileInfo& parentFile() const;
-
-	// Data
-	//
-private:
-	std::function<VFrame30::Scheme*()> m_createVideoFrameFunc;
-	SchemeFileView* m_filesView;
-};
 
 //
 //
