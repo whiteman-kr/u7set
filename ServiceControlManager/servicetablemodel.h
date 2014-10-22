@@ -3,7 +3,8 @@
 
 #include <QAbstractTableModel>
 #include <QHostAddress>
-#include "../include/SocketIO.h"
+#include "../include/UdpSocket.h"
+
 
 const quint32   SS_MF_UNDEFINED = 10,
                 SS_MF_UNAVAILABLE = 11;
@@ -47,7 +48,7 @@ signals:
     void serviceStateChanged(int row);
 
 public slots:
-    void serviceAckReceived(RequestHeader header, QByteArray data);
+	void serviceAckReceived(const UdpRequest udpRequest);
     void serviceNotFound();
     void checkServiceStates();
 

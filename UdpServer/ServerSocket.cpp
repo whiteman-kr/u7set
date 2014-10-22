@@ -24,7 +24,7 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
 
     newRequest.initAck(request);
 
-    switch (request.id())
+    switch (request.ID())
     {
     case RQID_GET_SERVICE_INFO:
         {
@@ -42,7 +42,7 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
             out << quint32(isRunning ? SS_MF_WORK : SS_MF_STOPPED);
             out << quint32(isRunning ? lastStartTime.secsTo(currentTime) : 0);
 
-            newRequest.setData(array.constData(), array.size());
+            newRequest.writeData(array.constData(), array.size());
 
             emit ackIsReady(newRequest);
             return;

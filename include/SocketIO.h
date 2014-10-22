@@ -3,6 +3,9 @@
 #include <QtGlobal>
 
 
+const int MAX_DATAGRAM_SIZE = 4096;
+
+
 const quint32   STP_BASE = 0,
 				STP_CONFIG = 1,
 				STP_FSC_AQUISION = 2,
@@ -32,6 +35,11 @@ const quint32   SS_MF_STOPPED = 0,
                 SS_MF_STARTS = 1,
                 SS_MF_WORK = 2,
                 SS_MF_STOPS = 3;
+
+
+// Request error codes
+const quint32	RQERROR_OK = 0,
+				RQERROR_UNKNOWN = 1;
 
 
 struct ServiceTypeInfo
@@ -89,4 +97,37 @@ struct AckGetServiceInfo
 };
 
 
+// RQID_SEND_FILE_START request data format
+//
+struct SendFileStart
+{
+	ushort fileName[64];				// unicode 0-terminated string
+	quint32 fileSize;
+};
+
+
+// RQID_SEND_FILE_NEXT request data format
+//
+const int SEND_FILE_DATA_SIZE = MAX_DATAGRAM_SIZE - sizeof(RequestHeader) - 5 * sizeof(quint32);
+
+const int SEND_FILE_MAX_SIZE = 1024 * 1024 * 10;	// max file - 10 MBytes
+
+struct SendFileNext
+{
+	quint32 fileID;
+	quint32 partNo;
+	quint32 partCount;
+	quint32 dataSize;
+	quint32 CRC32;
+
+	char data[SEND_FILE_DATA_SIZE];
+};
+
+
 #pragma pack(pop)
+
+const quint32 CRC32_INITIAL_VALUE = 0xFFFFFFFF;
+
+quint32 CRC32(quint32 initialValue, const char* buffer, int len, bool finishCalc);
+
+quint32 CRC32(const char* buffer, int len);

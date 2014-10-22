@@ -300,29 +300,29 @@ void ServiceTableModel::addAddress(QString connectionAddress)
     emit serviceStateChanged(m_hostsInfo.count() - 1);
 }
 
-void ServiceTableModel::serviceAckReceived(RequestHeader header, QByteArray data)
+
+void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 {
     UdpClientSocket* socket = dynamic_cast<UdpClientSocket*>(sender());
     if (socket == nullptr)
     {
         return;
     }
-    switch (header.id)
+	switch (udpRequest.ID())
     {
     case RQID_GET_SERVICE_INFO:
     {
-        if (data.count() != 32)
-        {
-            return;
-        }
         quint32 ip = socket->serverAddress().toIPv4Address();
         QPair<int, int> place = getServiceState(ip, socket->port());
+
         if (place.first == -1 || place.first >= m_hostsInfo.count() || place.second == -1 || place.second >= RQSTP_COUNT)
         {
             return;
         }
+
         ServiceInformation& info = m_hostsInfo[place.first].servicesData[place.second].information;
-        ServiceInformation& newInfo = *(ServiceInformation*)data.constData();
+		ServiceInformation& newInfo = *(ServiceInformation*)udpRequest.data();
+
         if (info.mainFunctionState != newInfo.mainFunctionState)
         {
             info = newInfo;

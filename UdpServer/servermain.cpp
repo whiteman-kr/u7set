@@ -1,4 +1,5 @@
-#include "mainwindow2.h"
+#include "servermainwindow.h"
+#include "../include/UdpSocket.h"
 #include <QApplication>
 
 
@@ -17,8 +18,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    qRegisterMetaType<UdpRequest>("UdpRequest");
-    MainWindow w;
+	ServerMainWindow w;
     w.show();
 
     return a.exec();

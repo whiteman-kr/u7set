@@ -1,15 +1,62 @@
 #include "../include/BaseService.h"
-#include <QFileInfo>
+
+
+quint32 ReceivedFile::m_serialID = 0;
+
+
+ReceivedFile::ReceivedFile(const QString& fileName, quint32 fileSize)
+{
+	if (fileSize > SEND_FILE_MAX_SIZE)
+	{
+		assert(fileSize <= SEND_FILE_MAX_SIZE);
+		return;
+	}
+
+	m_serialID++;
+
+	m_ID = m_serialID;
+
+	m_fileName = fileName;
+	m_fileSize = fileSize;
+
+	m_data = new char [fileSize];
+
+	assert(m_data != nullptr);
+}
+
+
+ReceivedFile::~ReceivedFile()
+{
+	delete m_data;
+}
+
+
+bool ReceivedFile::appendData(char* ptr, quint32 len)
+{
+	if (m_dataSize + len > m_fileSize)
+	{
+		assert(m_dataSize + len <= m_fileSize);
+		return false;
+	}
+
+	if (m_data == nullptr)
+	{
+		assert(m_data != nullptr);
+		return false;
+	}
+
+	memcpy(m_data + m_dataSize, ptr, len);
+
+	m_dataSize += len;
+
+	return true;
+}
 
 
 // BaseServiceWorker class implementation
 //
 
 BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceController, int serviceType) :
-	m_serverSocketThread(nullptr),
-	m_sendFileClientSocketThread(nullptr),
-	m_sendFileStartBuffer(nullptr),
-	m_fileToSend(nullptr),
     m_baseServiceController(baseServiceController),
     m_serviceType(serviceType)
 {
@@ -20,8 +67,17 @@ BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceControlle
 BaseServiceWorker::~BaseServiceWorker()
 {
 	delete m_sendFileClientSocketThread;
-	delete m_fileToSend;
-	delete m_sendFileStartBuffer;
+
+	QHashIterator<quint32, ReceivedFile*> i(m_receivedFile);
+
+	while (i.hasNext())
+	{
+		i.next();
+
+		delete i.value();
+	}
+
+	m_receivedFile.clear();
 }
 
 
@@ -31,12 +87,15 @@ void BaseServiceWorker::onThreadStarted()
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, serviceTypesInfo[m_serviceType].port);
 
-    connect(serverSocket, &UdpServerSocket::request, this, &BaseServiceWorker::onBaseRequest);
+	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &BaseServiceWorker::onBaseRequest);
     connect(this, &BaseServiceWorker::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
 
 	connect(this, &BaseServiceWorker::startMainFunction, m_baseServiceController, &BaseServiceController::startMainFunction);
 	connect(this, &BaseServiceWorker::stopMainFunction, m_baseServiceController, &BaseServiceController::stopMainFunction);
 	connect(this, &BaseServiceWorker::restartMainFunction, m_baseServiceController, &BaseServiceController::restartMainFunction);
+
+	connect(m_baseServiceController, &BaseServiceController::sendFile, this, &BaseServiceWorker::onSendFile);
+	connect(this, &BaseServiceWorker::endSendFile, m_baseServiceController, &BaseServiceController::onEndSendFile);
 
 	m_serverSocketThread->run(serverSocket);
 
@@ -60,34 +119,37 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 
     ack.initAck(request);
 
-    switch(request.id())
+	switch(request.ID())
     {
-    case RQID_GET_SERVICE_INFO:
+		case RQID_GET_SERVICE_INFO:
+			ServiceInformation si;
+			m_baseServiceController->getServiceInfo(si);
+			ack.writeData(reinterpret_cast<const char*>(&si), sizeof(si));
+			break;
 
-		ServiceInformation si;
+		case RQID_SERVICE_MF_START:
+			emit startMainFunction();
+			break;
 
-		m_baseServiceController->getServiceInfo(si);
+		case RQID_SERVICE_MF_STOP:
+			emit stopMainFunction();
+			break;
 
-		ack.setData(reinterpret_cast<const char*>(&si), sizeof(si));
+		case RQID_SERVICE_MF_RESTART:
+			emit restartMainFunction();
+			break;
 
-		emit ackBaseRequest(ack);
-        return;
+		case RQID_SEND_FILE_START:
+			onSendFileStartRequest(request, ack);
+			break;
 
-	case RQID_SERVICE_MF_START:
-		emit startMainFunction();
-		emit ackBaseRequest(ack);
-		return;
+		default:
+			assert(false);
+			ack.setErrorCode(RQERROR_UNKNOWN);
+			break;
+	}
 
-	case RQID_SERVICE_MF_STOP:
-		emit stopMainFunction();
-		emit ackBaseRequest(ack);
-		return;
-
-	case RQID_SERVICE_MF_RESTART:
-		emit restartMainFunction();
-		emit ackBaseRequest(ack);
-		return;
-    }
+	emit ackBaseRequest(ack);
 }
 
 
@@ -99,43 +161,50 @@ void BaseServiceWorker::onSendFile(QHostAddress address, quint16 port, QString f
 		return;
 	}
 
-	assert(m_fileToSend == nullptr);	// must be null
-	assert(m_sendFileStartBuffer == nullptr);
+	m_fileToSend.setFileName(fileName);
 
-	m_fileToSend = new QFile(fileName);
-
-	if (!m_fileToSend->open(QIODevice::ReadOnly))
+	if (!m_fileToSend.open(QIODevice::ReadOnly))
 	{
-		delete m_fileToSend;
-
-		m_fileToSend = nullptr;
-
-		emit endSendFile(false);
-
+		emit endSendFile(false, fileName);
 		return;
 	}
 
-	m_sendFileStartBuffer = new char[MAX_DATAGRAM_SIZE];
+	m_fileToSendInfo.setFile(m_fileToSend);
 
+	if (m_fileToSendInfo.size() > SEND_FILE_MAX_SIZE)
+	{
+		m_fileToSend.close();
+		emit endSendFile(false, fileName);
+		return;
+	}
+
+	// run UDP client socket thread for send file
+	//
 	m_sendFileClientSocketThread = new UdpSocketThread;
 
 	UdpClientSocket* clientSocket = new UdpClientSocket(address, port);
 
 	connect(this, &BaseServiceWorker::sendFileRequest, clientSocket, &UdpClientSocket::sendRequest);
-	connect(clientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceWorker::onSendFileRequestAck);
+	connect(clientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceWorker::onSendFileAckReceived);
+	connect(clientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceWorker::onSendFileAckTimeout);
 
 	m_sendFileClientSocketThread->run(clientSocket);
 
-	QFileInfo fi(*m_fileToSend);
+	// compose SEND_FILE_START request
+	//
 
-	QString fName = fi.fileName();
-	quint64 fileSize = fi.size();
+	// set file  name
+	//
+	memset(m_sendFileStart.fileName, 0, sizeof(m_sendFileStart.fileName));
+
+	QString fName = m_fileToSendInfo.fileName();
 
 	QChar* strPtr = fName.data();
 
-	ushort* bufferPtr = reinterpret_cast<ushort*>(m_sendFileStartBuffer);
-
 	int i = 0;
+
+	int fileNameLen = sizeof(m_sendFileStart.fileName) / sizeof(ushort);
+
 	do
 	{
 		if (strPtr->isNull())
@@ -143,28 +212,158 @@ void BaseServiceWorker::onSendFile(QHostAddress address, quint16 port, QString f
 			break;
 		}
 
-		bufferPtr[i] = strPtr->unicode();
+		m_sendFileStart.fileName[i] = strPtr->unicode();
 
 		strPtr++;
 
 		i++;
 	}
-	while (i < 63);
+	while (i < fileNameLen - 1);
 
-	bufferPtr[i] = 0;
+	m_sendFileStart.fileName[i] = 0;
 
-	i++;
+	// set file size
+	//
+	m_sendFileStart.fileSize = m_fileToSendInfo.size();
 
-	*((quint32*)(bufferPtr + i)) = fileSize;
+	// send REND_FILE_START request
+	//
+	sendFileRequest(RQID_SEND_FILE_START, reinterpret_cast<char*>(&m_sendFileStart), sizeof(m_sendFileStart));
 
-	sendFileRequest(RQID_SEND_FILE_START, m_sendFileStartBuffer, i * sizeof(ushort) + sizeof(quint32));
+	m_sendFileFirstRead = true;
+
+	m_sendFileReadNextPartOK = sendFileReadNextPart();
 }
 
 
-void BaseServiceWorker::onSendFileRequestAck(RequestHeader header, QByteArray data)
+bool BaseServiceWorker::sendFileReadNextPart()
 {
+	bool lastPart = false;
 
+	if (m_sendFileFirstRead)
+	{
+		// init send file variables
+		//
+		m_sendFileNext.fileID = 0;
+		m_sendFileNext.partNo = 0;
+		m_sendFileNext.partCount = m_fileToSendInfo.size() / SEND_FILE_DATA_SIZE + (m_fileToSendInfo.size() % SEND_FILE_DATA_SIZE == 0 ? 0 : 1);
+		m_sendFileNext.dataSize = 0;
+		m_sendFileNext.CRC32 = CRC32_INITIAL_VALUE;
+
+		m_sendFileFirstRead = false;
+	}
+	else
+	{
+		m_sendFileNext.partNo++;
+	}
+
+	if (m_sendFileNext.partNo == m_sendFileNext.partCount - 1)
+	{
+		lastPart = true;
+	}
+
+	quint64 readed = m_fileToSend.read(m_sendFileNext.data, SEND_FILE_DATA_SIZE);
+
+	m_sendFileNext.dataSize = readed;
+
+	m_sendFileNext.CRC32 = CRC32(m_sendFileNext.CRC32, m_sendFileNext.data, readed, lastPart);
+
+	return true;
 }
+
+
+void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
+{
+	udpRequest.initRead();
+
+	switch(udpRequest.ID())
+	{
+		case RQID_SEND_FILE_START:
+
+			if (udpRequest.errorCode() == RQERROR_OK)
+			{
+				m_sendFileNext.fileID = udpRequest.readDword();
+
+				sendFileRequest(RQID_SEND_FILE_NEXT, reinterpret_cast<char*>(&m_sendFileNext), sizeof(m_sendFileNext));
+			}
+			else
+			{
+				stopSendFile();
+				emit endSendFile(false, m_fileToSendInfo.fileName());
+			}
+
+			break;
+
+		case RQID_SEND_FILE_NEXT:
+
+			if (udpRequest.errorCode() == RQERROR_OK)
+			{
+				if (m_sendFileNext.partNo <= m_sendFileNext.partCount - 1)
+				{
+					sendFileRequest(RQID_SEND_FILE_NEXT, reinterpret_cast<char*>(&m_sendFileNext), sizeof(m_sendFileNext));
+				}
+
+				if (m_sendFileNext.partNo != m_sendFileNext.partCount - 1)
+				{
+					sendFileReadNextPart();
+				}
+				else
+				{
+					stopSendFile();
+					emit endSendFile(true, m_fileToSendInfo.fileName());
+				}
+			}
+			else
+			{
+				stopSendFile();
+				emit endSendFile(false, m_fileToSendInfo.fileName());
+			}
+			break;
+	}
+}
+
+
+void BaseServiceWorker::onSendFileAckTimeout()
+{
+}
+
+
+void BaseServiceWorker::stopSendFile()
+{
+	m_fileToSend.close();
+
+	m_sendFileClientSocketThread->quit();
+
+	delete m_sendFileClientSocketThread;
+
+	m_sendFileClientSocketThread = nullptr;
+}
+
+
+void BaseServiceWorker::onSendFileStartRequest(const UdpRequest& request, UdpRequest& ack)
+{
+	const SendFileStart* sendFileStart = reinterpret_cast<const SendFileStart*>(request.data());
+
+	QString fileName(reinterpret_cast<const QChar*>(sendFileStart->fileName));
+
+	ReceivedFile* rf = new ReceivedFile(fileName, sendFileStart->fileSize);
+
+	if (rf->ID() == 0)
+	{
+		// error
+		//
+		ack.writeDword(0);
+
+		delete rf;
+	}
+	else
+	{
+		ack.writeDword(rf->ID());
+
+		m_receivedFile.insert(rf->ID(), rf);
+	}
+}
+
 
 // MainFunctionWorker class implementation
 //
@@ -215,7 +414,9 @@ BaseServiceController::BaseServiceController(int serviceType) :
 	m_mainFunctionNeedRestart(false),
 	m_mainFunctionStopped(false)
 {
-    assert(m_serviceType >= 0 && m_serviceType < RQSTP_COUNT);
+	qRegisterMetaType<QHostAddress>("QHostAddress");
+
+	assert(m_serviceType >= 0 && m_serviceType < RQSTP_COUNT);
 
 	qRegisterMetaType<UdpRequest>("UdpRequest");
 
@@ -233,9 +434,6 @@ BaseServiceController::BaseServiceController(int serviceType) :
 
 	connect(&m_baseWorkerThread, &QThread::started, worker, &BaseServiceWorker::onThreadStarted);
 	connect(&m_baseWorkerThread, &QThread::finished, worker, &BaseServiceWorker::onThreadFinished);
-
-	connect(this, &BaseServiceController::sendFile, worker, &BaseServiceWorker::onSendFile);
-	connect(worker, &BaseServiceWorker::endSendFile, this, &BaseServiceController::onEndSendFile);
 
     m_baseWorkerThread.start();
 
@@ -395,6 +593,10 @@ void BaseServiceController::onMainFunctionStopped()
 }
 
 
-void BaseServiceController::onEndSendFile(bool result)
+void BaseServiceController::onEndSendFile(bool result, QString fileName)
 {
+	if (result == false)
+	{
+		qDebug() << "Send file error: " << fileName;
+	}
 }
