@@ -702,11 +702,6 @@ void SignalsModel::loadSignals()
 	}
 
 	changeCheckedoutSignalActionsVisibility();
-
-	QVector<int> signalsID = m_signalSet.getChannelSignalsID(m_signalSet.value(9));
-
-	int a =0;
-	a++;
 }
 
 void SignalsModel::clearSignals()
