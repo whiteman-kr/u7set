@@ -60,17 +60,11 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     ../lib/DeviceObject.cpp \
     VideoFramePropertiesDialog.cpp \
-    EditEngine.cpp \
-    EditEngineAddItem.cpp \
-    EditEngineSetPoints.cpp \
-    EditEngineDeleteItem.cpp \
-    EditEngineMoveItem.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
     ../lib/DbController.cpp \
     ../lib/DbWorker.cpp \
     ../lib/DbProgressDialog.cpp \
-    AfbLibrary.cpp \
     DialogAfblEditor.cpp \
     DialogAfbProperties.cpp \
     xmlsyntaxhighlighter.cpp \
@@ -84,7 +78,12 @@ SOURCES +=\
     SchemeTabPage.cpp \
     EditSchemeWidget.cpp \
     SchemeItemPropertiesDialog.cpp \
-    EditEngineSetProperty.cpp
+    EditEngine/EditEngine.cpp \
+    EditEngine/EditEngineAddItem.cpp \
+    EditEngine/EditEngineDeleteItem.cpp \
+    EditEngine/EditEngineMoveItem.cpp \
+    EditEngine/EditEngineSetPoints.cpp \
+    EditEngine/EditEngineSetProperty.cpp
 
 
 HEADERS  += \
@@ -109,17 +108,11 @@ HEADERS  += \
     EquipmentTabPage.h \
     ../include/DeviceObject.h \
     VideoFramePropertiesDialog.h \
-    EditEngine.h \
-    EditEngineAddItem.h \
-    EditEngineSetPoints.h \
-    EditEngineDeleteItem.h \
-    EditEngineMoveItem.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
     ../include/DbController.h \
     ../include/DbWorker.h \
     ../include/DbProgressDialog.h \
-    AfbLibrary.h \
     DialogAfblEditor.h \
     DialogAfbProperties.h \
     xmlsyntaxhighlighter.h \
@@ -135,7 +128,12 @@ HEADERS  += \
     SchemeTabPage.h \
     EditSchemeWidget.h \
     SchemeItemPropertiesDialog.h \
-    EditEngineSetProperty.h
+    EditEngine/EditEngine.h \
+    EditEngine/EditEngineAddItem.h \
+    EditEngine/EditEngineDeleteItem.h \
+    EditEngine/EditEngineMoveItem.h \
+    EditEngine/EditEngineSetPoints.h \
+    EditEngine/EditEngineSetProperty.h
     ../include/Signal.h
 
 FORMS    += \
@@ -190,7 +188,8 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0028.sql \
     DatabaseUpgrade/Upgrade0029.sql \
     DatabaseUpgrade/Upgrade0030.sql \
-    DatabaseUpgrade/Upgrade0031.sql
+    DatabaseUpgrade/Upgrade0031.sql \
+    Tools/afbschema.xsd
 
 
 CONFIG += precompile_header

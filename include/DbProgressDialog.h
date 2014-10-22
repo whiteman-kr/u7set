@@ -15,7 +15,7 @@ public:
     static void ShowProgressDialog(QWidget* parent, const QString& description, DbProgress* progress);
 
 protected:
-    virtual void ProgressDialog::timerEvent(QTimerEvent*) override;
+    virtual void timerEvent(QTimerEvent*) override;
 
 protected slots:
     void cancel();

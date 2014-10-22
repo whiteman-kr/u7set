@@ -7,23 +7,32 @@ class QBrush;
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT CVideoItemRect : public CPosRectImpl
+	class VFRAME30LIBSHARED_EXPORT VideoItemRect : public PosRectImpl
 	{
 		Q_OBJECT
 
 		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
 		Q_PROPERTY(bool Fill READ fill WRITE setFill)
 		//Q_PROPERTY(QRgb LineColor READ lineColor WRITE setLineColor)
+		//Q_PROPERTY(QRgb FillColor....)
+		Q_PROPERTY(QString Text READ text WRITE setText)
+		//Q_PROPERTY(QRgb TextColor....)
+		Q_PROPERTY(bool DrawRect READ drawRect WRITE setDrawRect)
+
+		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
+		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
+		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
+		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<CVideoItem>::DerivedType<CVideoItemRect>;
+		friend ::Factory<VideoItem>::DerivedType<VideoItemRect>;
 #endif
 
-	private:
-		CVideoItemRect(void);
+		VideoItemRect(void);
+
 	public:
-		explicit CVideoItemRect(SchemeUnit unit);
-		virtual ~CVideoItemRect(void);
+		explicit VideoItemRect(SchemeUnit unit);
+		virtual ~VideoItemRect(void);
 
 		// Serialization
 		//
@@ -38,9 +47,10 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const CVideoFrame* pFrame, const CVideoLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
 
 		// Properties and Data
+		//
 	public:
 		double weight() const;
 		void setWeight(double weight);
@@ -62,6 +72,9 @@ namespace VFrame30
 		bool fill() const;
 		void setFill(bool fill);
 
+		bool drawRect() const;
+		void setDrawRect(bool value);
+
 	private:
 		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
 		QRgb m_lineColor;
@@ -70,6 +83,7 @@ namespace VFrame30
 		QRgb m_textColor;
 		FontParam m_font;
 		bool m_fill;
+		bool m_drawRect = true;				// Rect is visible, thikness 0 is possible
 
 		// Drawing resources
 		//

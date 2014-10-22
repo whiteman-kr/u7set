@@ -47,7 +47,7 @@ const EditSchemeWidget::SizeActionToMouseCursor EditSchemeWidget::m_sizeActionTo
 //
 //
 EditSchemeView::EditSchemeView(QWidget* parent) :
-	VFrame30::VideoFrameView(parent),
+	VFrame30::SchemeView(parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
@@ -60,8 +60,8 @@ EditSchemeView::EditSchemeView(QWidget* parent) :
 {
 }
 
-EditSchemeView::EditSchemeView(std::shared_ptr<VFrame30::CVideoFrame>& videoFrame, QWidget* parent)
-	: VFrame30::VideoFrameView(videoFrame, parent),
+EditSchemeView::EditSchemeView(std::shared_ptr<VFrame30::Scheme>& videoFrame, QWidget* parent)
+	: VFrame30::SchemeView(videoFrame, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
@@ -82,7 +82,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 {
 	// Draw videoframe
 	//
-	VFrame30::VideoFrameView::paintEvent(pe);
+	VFrame30::SchemeView::paintEvent(pe);
 
 	// Draw other -- selection, grid, outlines, rullers, etc
 	//
@@ -104,26 +104,26 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	// Draw VideoFrame
 	//
-	QRectF clipRect(0, 0, videoFrame()->docWidth(), videoFrame()->docHeight());
+	QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
 
 	drawParam.setControlBarSize(
-		videoFrame()->unit() == VFrame30::SchemeUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
+		scheme()->unit() == VFrame30::SchemeUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
 	// Draw selection
 	//
 	if (m_selectedItems.empty() == false)
 	{
-		VFrame30::CVideoItem::DrawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
+		VFrame30::VideoItem::DrawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
 	}
 
 	// Draw newItem outline
 	//
 	if (m_newItem)
 	{
-		std::vector<std::shared_ptr<VFrame30::CVideoItem>> outlines;
+		std::vector<std::shared_ptr<VFrame30::VideoItem>> outlines;
 		outlines.push_back(m_newItem);
 
-		VFrame30::CVideoItem::DrawOutline(&drawParam, outlines);
+		VFrame30::VideoItem::DrawOutline(&drawParam, outlines);
 	}
 
 	// Draw selection bar
@@ -182,7 +182,7 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	// Shift position
 	//
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif](std::shared_ptr<VFrame30::CVideoItem> si)
+		[xdif, ydif](std::shared_ptr<VFrame30::VideoItem> si)
 		{
 			si->MoveItem(xdif, ydif);
 		}
@@ -190,16 +190,80 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 
 	// Draw outline
 	//
-	VFrame30::CVideoItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::VideoItem::DrawOutline(drawParam, m_selectedItems);
+
+	// Get bounding rect
+	//
+	double left = 0.0;
+	double right = 0.0;
+	double top = 0.0;
+	double bottom = 0.0;
+
+	for (auto it = std::begin(m_selectedItems); it != std::end(m_selectedItems); it++)
+	{
+
+		VFrame30::IPointList* ipoint = dynamic_cast<VFrame30::IPointList*>(it->get());
+		assert(ipoint != nullptr);
+
+		if (ipoint == nullptr)
+		{
+			continue;
+		}
+
+		std::vector<VFrame30::VideoItemPoint> points = ipoint->getPointList();
+
+		for (size_t i = 0; i < points.size(); i++)
+		{
+			const VFrame30::VideoItemPoint& p = points[i];
+
+			if (it == std::begin(m_selectedItems) && i == 0)
+			{
+				left = p.X;
+				right = p.X;
+				top = p.Y;
+				bottom = p.Y;
+				continue;
+			}
+
+			left = std::min(left, p.X);
+			right = std::max(right, p.X);
+			top = std::min(top, p.Y);
+			bottom = std::max(bottom, p.Y);
+		}
+	}
 
 	// Shift position back
 	//
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif](std::shared_ptr<VFrame30::CVideoItem> si)
+		[xdif, ydif](std::shared_ptr<VFrame30::VideoItem> si)
 		{
 			si->MoveItem(-xdif, -ydif);
 		}
 		);
+
+	// Draw rullers by bounding rect
+	//
+	QPainter* p = drawParam->painter();
+
+	// Drwing resources initialization
+	//
+	QPen outlinePen(Qt::black);
+	outlinePen.setWidth(0);
+
+	QPainter::RenderHints oldrenderhints = p->renderHints();
+	p->setRenderHint(QPainter::Antialiasing, false);
+
+	p->setPen(outlinePen);
+	p->drawLine(QPointF(left, 0.0), QPointF(left, scheme()->docHeight()));
+	p->drawLine(QPointF(right, 0.0), QPointF(right, scheme()->docHeight()));
+
+	p->drawLine(QPointF(0.0, top), QPointF(scheme()->docWidth(), top));
+	p->drawLine(QPointF(0.0, bottom), QPointF(scheme()->docWidth(), bottom));
+
+	// --
+	//
+	p->setRenderHints(oldrenderhints);
+
 
 	return;
 }
@@ -302,7 +366,7 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// Draw item outline
 	//
-	VFrame30::CVideoItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::VideoItem::DrawOutline(drawParam, m_selectedItems);
 
 	// restore position
 	//
@@ -365,7 +429,7 @@ void EditSchemeView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 
 	// Draw outline
 	//
-	VFrame30::CVideoItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::VideoItem::DrawOutline(drawParam, m_selectedItems);
 
 	// Resotore points
 	//
@@ -626,7 +690,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 
 	// Draw item outline
 	//
-	VFrame30::CVideoItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::VideoItem::DrawOutline(drawParam, m_selectedItems);
 
 	// Restore ald position
 	//
@@ -639,10 +703,10 @@ void EditSchemeView::drawGrid(QPainter* p)
 {
 	assert(p);
 
-	auto unit = videoFrame()->unit();
+	auto unit = scheme()->unit();
 
-	double frameWidth = videoFrame()->docWidth();
-	double frameHeight = videoFrame()->docHeight();
+	double frameWidth = scheme()->docWidth();
+	double frameHeight = scheme()->docHeight();
 
 	double gridSize = unit == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
 
@@ -702,7 +766,7 @@ void EditSchemeView::drawGrid(QPainter* p)
 	return;
 }
 
-VideoItemAction EditSchemeView::getPossibleAction(VFrame30::CVideoItem* videoItem, QPointF point, int* outMovingEdgePointIndex)
+VideoItemAction EditSchemeView::getPossibleAction(VFrame30::VideoItem* videoItem, QPointF point, int* outMovingEdgePointIndex)
 {
 	if (videoItem == nullptr)
 	{
@@ -710,9 +774,9 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::CVideoItem* videoIte
 		return VideoItemAction::NoAction;
 	}
 
-	if (videoItem->itemUnit() != videoFrame()->unit())
+	if (videoItem->itemUnit() != scheme()->unit())
 	{
-		assert(videoItem->itemUnit() == videoFrame()->unit());
+		assert(videoItem->itemUnit() == scheme()->unit());
 		return VideoItemAction::NoAction;
 	}
 
@@ -914,31 +978,31 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::CVideoItem* videoIte
 
 QUuid EditSchemeView::activeLayerGuid() const
 {
-	if (m_activeLayer >= static_cast<int>(videoFrame()->Layers.size()))
+	if (m_activeLayer >= static_cast<int>(scheme()->Layers.size()))
 	{
-		assert(m_activeLayer < static_cast<int>(videoFrame()->Layers.size()));
+		assert(m_activeLayer < static_cast<int>(scheme()->Layers.size()));
 		return QUuid();
 	}
 
-	return videoFrame()->Layers[m_activeLayer]->guid();
+	return scheme()->Layers[m_activeLayer]->guid();
 }
 
-std::shared_ptr<VFrame30::CVideoLayer> EditSchemeView::activeLayer()
+std::shared_ptr<VFrame30::SchemeLayer> EditSchemeView::activeLayer()
 {
-	if (m_activeLayer >= static_cast<int>(videoFrame()->Layers.size()))
+	if (m_activeLayer >= static_cast<int>(scheme()->Layers.size()))
 	{
-		assert(m_activeLayer < static_cast<int>(videoFrame()->Layers.size()));
-		return std::make_shared<VFrame30::CVideoLayer>("Error", false);
+		assert(m_activeLayer < static_cast<int>(scheme()->Layers.size()));
+		return std::make_shared<VFrame30::SchemeLayer>("Error", false);
 	}
 
-	return videoFrame()->Layers[m_activeLayer];
+	return scheme()->Layers[m_activeLayer];
 }
 
-void EditSchemeView::setActiveLayer(std::shared_ptr<VFrame30::CVideoLayer> layer)
+void EditSchemeView::setActiveLayer(std::shared_ptr<VFrame30::SchemeLayer> layer)
 {
-	for (int i = 0; i < static_cast<int>(videoFrame()->Layers.size()); i++)
+	for (int i = 0; i < static_cast<int>(scheme()->Layers.size()); i++)
 	{
-		if (videoFrame()->Layers[i] == layer)
+		if (scheme()->Layers[i] == layer)
 		{
 			m_activeLayer = i;
 			return;
@@ -961,38 +1025,98 @@ void EditSchemeView::setMouseState(MouseState state)
 	m_mouseState = state;
 }
 
-const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditSchemeView::selectedItems() const
+const std::vector<std::shared_ptr<VFrame30::VideoItem>>& EditSchemeView::selectedItems() const
 {
 	return m_selectedItems;
 }
 
-void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& items)
+void EditSchemeView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items)
 {
+	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
+	//
+	if (items.size() == m_selectedItems.size())
+	{
+		bool differs = false;
+
+		auto i = std::begin(items);
+		for (auto s = std::begin(m_selectedItems); s != std::end(m_selectedItems) && differs == false; ++s, ++i)
+		{
+			if (*s != *i)
+			{
+				differs = true;
+				break;
+			}
+		}
+
+		if (differs == false)
+		{
+			return;
+		}
+	}
+
+	// Set new selection
+	//
 	m_selectedItems = items;
 
 	emit selectionChanged();
 }
 
-void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::CVideoItem>>& items)
+void EditSchemeView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::VideoItem>>& items)
 {
+	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
+	//
+	if (items.size() == m_selectedItems.size())
+	{
+		bool differs = false;
+
+		auto i = std::begin(items);
+		for (auto s = std::begin(m_selectedItems); s != std::end(m_selectedItems) && differs == false; ++s, ++i)
+		{
+			if (*s != *i)
+			{
+				differs = true;
+				break;
+			}
+		}
+
+		if (differs == false)
+		{
+			return;
+		}
+	}
+
+	// Set new selection
+	//
 	m_selectedItems.clear();
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
 
 	emit selectionChanged();
 }
 
-void EditSchemeView::setSelectedItem(const std::shared_ptr<VFrame30::CVideoItem>& item)
+void EditSchemeView::setSelectedItem(const std::shared_ptr<VFrame30::VideoItem>& item)
 {
+	if (m_selectedItems.size() == 1 && item == m_selectedItems.back())
+	{
+		return;
+	}
+
 	m_selectedItems.clear();
 	m_selectedItems.push_back(item);
 
 	emit selectionChanged();
 }
 
-void EditSchemeView::addSelection(const std::shared_ptr<VFrame30::CVideoItem>& item)
+void EditSchemeView::addSelection(const std::shared_ptr<VFrame30::VideoItem>& item)
 {
-	m_selectedItems.push_back(item);
-	emit selectionChanged();
+	auto fp = std::find(std::begin(m_selectedItems), std::end(m_selectedItems), item);
+
+	if (fp == std::end(m_selectedItems))
+	{
+		m_selectedItems.push_back(item);
+		emit selectionChanged();
+	}
+
+	return;
 }
 
 void EditSchemeView::clearSelection()
@@ -1006,7 +1130,7 @@ void EditSchemeView::clearSelection()
 	emit selectionChanged();
 }
 
-void EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::CVideoItem>& item)
+bool EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::VideoItem>& item)
 {
 	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
 
@@ -1014,9 +1138,21 @@ void EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::CVideoI
 	{
 		m_selectedItems.erase(findResult);
 		emit selectionChanged();
+
+		// Was found and deleted
+		//
+		return true;
 	}
 
-	return;
+	// Was not found in selection list
+	//
+	return false;
+}
+
+bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::VideoItem>& item)
+{
+	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
+	return findResult != m_selectedItems.end();
 }
 
 
@@ -1025,7 +1161,7 @@ void EditSchemeView::removeFromSelection(const std::shared_ptr<VFrame30::CVideoI
 // EditVideoFrameWidget
 //
 //
-EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo) :
+EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo) :
 	m_fileInfo(fileInfo),
 	m_snapToGrid(true),
 	m_editEngine(nullptr)
@@ -1086,6 +1222,10 @@ EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::CVideoFrame> videoF
 	//
 	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditVideoFrameWidget::mouseRightDown_None, this, std::placeholders::_1)));
 	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
+
+	// Mouse Right Button Up
+	//
+	m_mouseRightUpStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemeWidget::mouseRightUp_None, this, std::placeholders::_1)));
 
 
 	// --
@@ -1209,7 +1349,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addLineAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::CVideoItemLine>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemLine>(videoFrame()->unit()));
 			});
 
 	m_addConnectionLineAction = new QAction(tr("Connection Line"), this);
@@ -1217,7 +1357,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addConnectionLineAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::CVideoItemConnectionLine>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemConnectionLine>(videoFrame()->unit()));
 			});
 
 	m_addRectAction = new QAction(tr("Rect"), this);
@@ -1225,7 +1365,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addRectAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::CVideoItemRect>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemRect>(videoFrame()->unit()));
 			});
 
 	m_addSeparatorAction0 = new QAction(this);
@@ -1236,7 +1376,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::CVideoItemInputSignal>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemInputSignal>(videoFrame()->unit()));
 			});
 
 	m_addOutputSignalAction = new QAction(tr("Output"), this);
@@ -1244,23 +1384,19 @@ void EditSchemeWidget::createActions()
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::CVideoItemOutputSignal>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemOutputSignal>(videoFrame()->unit()));
 			});
 
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
 	m_addFblElementAction->setEnabled(true);
-	connect(m_addFblElementAction, &QAction::triggered,
-			[this](bool)
-			{
-				addItem(std::make_shared<VFrame30::CVideoItemFblElement>(videoFrame()->unit()));
-			});
+	connect(m_addFblElementAction, &QAction::triggered, this, &EditSchemeWidget::addFblElement);
 
 	m_addLinkAction = new QAction(tr("Link"), this);
 	m_addLinkAction->setEnabled(true);
 	connect(m_addLinkAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::CVideoItemLink>(videoFrame()->unit()));
+				addItem(std::make_shared<VFrame30::VideoItemLink>(videoFrame()->unit()));
 			});
 
 	//
@@ -1563,6 +1699,24 @@ void EditSchemeWidget::mouseReleaseEvent(QMouseEvent* event)
 
 	if (event->button() == Qt::RightButton)
 	{
+		for (auto msa = m_mouseRightUpStateAction.begin(); msa != m_mouseRightUpStateAction.end(); ++msa)
+		{
+			if (msa->mouseState == mouseState())
+			{
+				msa->action(event);
+				setMouseCursor(event->pos());
+
+				event->accept();
+				return;
+			}
+		}
+
+		// DefaultAction
+		//
+		//setMouseCursor(event->pos());
+
+		//event->accept();
+		//return;
 	}
 
 
@@ -1994,7 +2148,7 @@ void EditSchemeWidget::mouseLeftDown_AddSchemePosConnectionStartPoint(QMouseEven
 
 	// Проверить под кординатой нахождение пина
 	//
-	if (dynamic_cast<VFrame30::CFblItem*>(schemeView()->m_newItem.get()) != nullptr)
+	if (dynamic_cast<VFrame30::FblItem*>(schemeView()->m_newItem.get()) != nullptr)
 	{
 		// ??
 		//VFrame30Ext.IFblItem fblItem = schemeView.newItem as VFrame30Ext.IFblItem;
@@ -2040,7 +2194,14 @@ void EditSchemeWidget::mouseLeftUp_Selection(QMouseEvent* me)
 		{
 			// Если такой элемент уже есть в списке, то удалить его из списка выделенных
 			//
-			schemeView()->removeFromSelection(item);
+			bool wasDeleted = schemeView()->removeFromSelection(item);
+
+			if (wasDeleted == false)
+			{
+				// This item was not selected, so just select it
+				//
+				schemeView()->addSelection(item);
+			}
 		}
 	}
 	else
@@ -2113,10 +2274,10 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	{
 		// Copy VideoItems and move copied items
 		//
-		std::vector<std::shared_ptr<VFrame30::CVideoItem>> newItems;
+		std::vector<std::shared_ptr<VFrame30::VideoItem>> newItems;
 
 		std::for_each(selectedItems().begin(), selectedItems().end(),
-			[xdif, ydif, &newItems](const std::shared_ptr<VFrame30::CVideoItem>& si)
+			[xdif, ydif, &newItems](const std::shared_ptr<VFrame30::VideoItem>& si)
 			{
 				QByteArray data;
 
@@ -2129,7 +2290,7 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 					return;
 				}
 
-				VFrame30::CVideoItem* newItemRawPtr = VFrame30::CVideoItem::Create(data);
+				VFrame30::VideoItem* newItemRawPtr = VFrame30::VideoItem::Create(data);
 
 				if (newItemRawPtr == nullptr)
 				{
@@ -2137,7 +2298,7 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 					return;
 				}
 
-				std::shared_ptr<VFrame30::CVideoItem> newItem(newItemRawPtr);
+				std::shared_ptr<VFrame30::VideoItem> newItem(newItemRawPtr);
 
 				newItem->MoveItem(xdif, ydif);
 
@@ -2963,14 +3124,39 @@ void EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEven
 	return;
 }
 
-std::shared_ptr<VFrame30::CVideoFrame>& EditSchemeWidget::videoFrame()
+void EditSchemeWidget::mouseRightUp_None(QMouseEvent* event)
 {
-	return m_videoFrameView->videoFrame();
+	QPointF docPoint = widgetPointToDocument(event->pos(), false);
+
+	auto item = schemeView()->activeLayer()->getItemUnderPoint(docPoint);
+
+	if (item == nullptr)
+	{
+		schemeView()->clearSelection();
+		resetAction();
+	}
+	else
+	{
+		bool itemIsAlreadySelected = schemeView()->isItemSelected(item);
+
+		if (itemIsAlreadySelected == false)
+		{
+			schemeView()->setSelectedItem(item);
+			resetAction();
+		}
+	}
+
+	return;
 }
 
-std::shared_ptr<VFrame30::CVideoFrame>& EditSchemeWidget::videoFrame() const
+std::shared_ptr<VFrame30::Scheme>& EditSchemeWidget::videoFrame()
 {
-	return m_videoFrameView->videoFrame();
+	return m_videoFrameView->scheme();
+}
+
+std::shared_ptr<VFrame30::Scheme>& EditSchemeWidget::videoFrame() const
+{
+	return m_videoFrameView->scheme();
 }
 
 EditSchemeView* EditSchemeWidget::schemeView()
@@ -2983,12 +3169,12 @@ const EditSchemeView* EditSchemeWidget::schemeView() const
 	return m_videoFrameView;
 }
 
-const std::vector<std::shared_ptr<VFrame30::CVideoItem>>& EditSchemeWidget::selectedItems() const
+const std::vector<std::shared_ptr<VFrame30::VideoItem>>& EditSchemeWidget::selectedItems() const
 {
 	return m_videoFrameView->m_selectedItems;
 }
 
-std::shared_ptr<VFrame30::CVideoLayer> EditSchemeWidget::activeLayer()
+std::shared_ptr<VFrame30::SchemeLayer> EditSchemeWidget::activeLayer()
 {
 	return m_videoFrameView->activeLayer();
 }
@@ -3054,35 +3240,8 @@ QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool 
 
 QPointF EditSchemeWidget::snapToGrid(QPointF pt) const
 {
-	QPointF result;
 	double gridSize = videoFrame()->unit() == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
-
-	// SnapToGrid для Xin
-	//
-	double restX = pt.x() - (double)((int)(pt.x() / gridSize)) * gridSize;
-
-	if (restX <= gridSize / 2)
-	{
-		result.setX((double)((int)(pt.x() / gridSize)) * gridSize);
-	}
-	else
-	{
-		result.setX((double)((int)(pt.x() / gridSize)) * gridSize + gridSize);
-	}
-
-	// SnapToGrid для YXin
-	//
-	double restY = pt.y() - (double)((int)(pt.y() / gridSize)) * gridSize;
-
-	if (restY <= gridSize / 2)
-	{
-		result.setY((double)((int)(pt.y() / gridSize)) * gridSize);
-	}
-	else
-	{
-		result.setY((double)((int)(pt.y() / gridSize)) * gridSize + gridSize);
-	}
-
+	QPointF result = CUtils::snapToGrid(pt, gridSize);
 	return result;
 }
 
@@ -3140,7 +3299,7 @@ bool EditSchemeWidget::MousePosToDocPoint(const QPoint& mousePos, QPointF* pDest
 	return true;
 }
 
-void EditSchemeWidget::addItem(std::shared_ptr<VFrame30::CVideoItem> newItem)
+void EditSchemeWidget::addItem(std::shared_ptr<VFrame30::VideoItem> newItem)
 {
 	if (newItem == nullptr)
 	{
@@ -3475,7 +3634,7 @@ void EditSchemeWidget::selectAll()
 {
 	schemeView()->clearSelection();
 
-	std::vector<std::shared_ptr<VFrame30::CVideoItem>> items;
+	std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
 	items.assign(schemeView()->activeLayer()->Items.begin(), schemeView()->activeLayer()->Items.end());
 
 	schemeView()->setSelectedItems(items);
@@ -3506,6 +3665,11 @@ void EditSchemeWidget::selectionChanged()
 
 	m_propertiesDialog->setObjects(schemeView()->selectedItems());
 	return;
+}
+
+void EditSchemeWidget::addFblElement()
+{
+	// addItem(std::make_shared<VFrame30::VideoItemFblElement>(videoFrame()->unit()));
 }
 
 MouseState EditSchemeWidget::mouseState() const

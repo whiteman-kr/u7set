@@ -6,6 +6,9 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDateTime>
+#include "../VFrame30/Fbl.h"
+
+using namespace Afbl;
 
 DialogAfblEditor::DialogAfblEditor(DbController* pDbController, QWidget *parent) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -117,13 +120,73 @@ void DialogAfblEditor::on_m_add_clicked()
         return;
     }
 
-    Afb afb;
+	AfbElement afb;
     afb.setCaption(caption);
+	afb.setStrID("#" + caption);
 
-    QByteArray byteArray;
+	// Add test signals
+	//
 
-    QXmlStreamWriter wr(&byteArray);
-    afb.storeToXml(wr);
+	AfbElementSignal signal;
+	signal.setCaption("SignalCaption");
+	signal.setType(AfbSignalType::Analog);
+
+	std::vector<AfbElementSignal> afbSignals;
+	afbSignals.push_back(signal);
+	afb.setInputSignals(afbSignals);
+	afb.setOutputSignals(afbSignals);
+
+	// Add test params
+	//
+
+	// Param 1
+	//
+
+	AfbElementParam param1;
+	param1.setCaption("Param1Caption");
+	param1.setType(AfbParamType::AnalogIntegral);
+	param1.setValue(AfbParamValue((long long)0, AfbParamType::AnalogIntegral));
+	param1.setDefaultValue(AfbParamValue((long long)0, AfbParamType::AnalogIntegral));
+	param1.setLowLimit(AfbParamValue((long long)0, AfbParamType::AnalogIntegral));
+	param1.setHighLimit(AfbParamValue((long long)100, AfbParamType::AnalogIntegral));
+
+	// Param 2
+	//
+
+	AfbElementParam param2;
+	param2.setCaption("Param2Caption");
+	param2.setType(AfbParamType::AnalogFloatingPoint);
+	param2.setValue(AfbParamValue((double)1.5, AfbParamType::AnalogFloatingPoint));
+	param2.setDefaultValue(AfbParamValue((double)1.5, AfbParamType::AnalogFloatingPoint));
+	param2.setLowLimit(AfbParamValue((double)0.5, AfbParamType::AnalogFloatingPoint));
+	param2.setHighLimit(AfbParamValue((double)100.5, AfbParamType::AnalogFloatingPoint));
+
+	// Param 3
+	//
+
+	AfbElementParam param3;
+	param3.setCaption("Param3Caption");
+	param3.setType(AfbParamType::DiscreteValue);
+	param3.setValue(AfbParamValue(false, AfbParamType::DiscreteValue));
+	param3.setDefaultValue(AfbParamValue(true, AfbParamType::DiscreteValue));
+
+	std::vector<AfbElementParam> afbParams;
+	afbParams.push_back(param1);
+	afbParams.push_back(param2);
+	afbParams.push_back(param3);
+
+	//
+
+	afb.setInputSignals(afbSignals);
+	afb.setOutputSignals(afbSignals);
+	afb.setParams(afbParams);
+
+	// Store and add to the database
+
+	QByteArray byteArray;
+	QXmlStreamWriter xmlWriter(&byteArray);
+
+	afb.saveToXml(&xmlWriter);
 
     std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
     pf->setFileName(caption + ".afb");

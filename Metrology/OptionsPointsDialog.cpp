@@ -87,7 +87,7 @@ OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidg
     connect(m_removeButton, &QPushButton::clicked, this, &OptionsPointsDialog::onRemovePoint);
     connect(m_upButton, &QPushButton::clicked, this, &OptionsPointsDialog::onUpPoint);
     connect(m_downButton, &QPushButton::clicked, this, &OptionsPointsDialog::onDownPoint);
-    connect(m_rangeTypeList, SIGNAL(currentIndexChanged(int)), this, SLOT(onRangeType(int)));
+    connect(m_rangeTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OptionsPointsDialog::onRangeType);
     connect(m_pointCountEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
     connect(m_lowRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
     connect(m_highRangeEdit, &QLineEdit::textChanged, this, &OptionsPointsDialog::onAutomaticCalculatePoints);
@@ -151,7 +151,8 @@ void OptionsPointsDialog::setHeaderList()
             m_pAction[sensor]->setCheckable(true);
             m_pAction[sensor]->setChecked(sensor > POINT_SENSOR_I_4_20_MA ? false : true);
 
-            connect(m_headerContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onAction(QAction*)), Qt::QueuedConnection);
+
+            connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &OptionsPointsDialog::onAction, Qt::QueuedConnection);
         }
     }
 
@@ -357,10 +358,7 @@ void OptionsPointsDialog::cellChanged(int row, int column)
     int index = row;
     if (index < 0 || index >= m_linearity.m_pointBase.count())
     {
-        QMessageBox msg;
-        msg.setText(tr("Please, select point"));
-        msg.exec();
-
+        QMessageBox::information(this, windowTitle(), tr("Please, select point"));
         return;
     }
 

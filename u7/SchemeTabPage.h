@@ -23,11 +23,13 @@ public:
 	virtual void openFile(std::vector<DbFileInfo> files) override;
 	virtual void viewFile(std::vector<DbFileInfo> files) override;
 	virtual void addFile() override;
+	virtual void deleteFile(std::vector<DbFileInfo> files) override;
 
 signals:
 	void openFileSignal(std::vector<DbFileInfo> files);
 	void viewFileSignal(std::vector<DbFileInfo> files);
 	void addFileSignal();
+	void deleteFileSignal(std::vector<DbFileInfo> files);
 
 	// Data
 	//
@@ -65,8 +67,58 @@ public slots:
 	// Data
 	//
 protected:
-	std::function<VFrame30::CVideoFrame*()> m_createVideoFrameFunc;	// same as in VideoFrameControlTabPage
+	std::function<VFrame30::Scheme*()> m_createVideoFrameFunc;	// same as in VideoFrameControlTabPage
 	QTabWidget* m_tabWidget;
+};
+
+
+//
+//
+// VideoFrameControlTabPage
+//
+//
+class SchemeControlTabPage : public QWidget, public HasDbController
+{
+    Q_OBJECT
+public:
+    SchemeControlTabPage(
+        const QString& fileExt,
+        DbController* dbcontroller,
+        const QString& parentFileName,
+        std::function<VFrame30::Scheme*()> createVideoFrameFunc);
+
+    virtual ~SchemeControlTabPage();
+
+public:
+    VFrame30::Scheme* createVideoFrame() const;
+
+protected:
+    void CreateActions();
+
+signals:
+
+protected slots:
+    //void projectOpened();
+    //void projectClosed();
+
+    void addFile();
+    void deleteFile(std::vector<DbFileInfo> files);
+
+    void openFiles(std::vector<DbFileInfo> files);
+    void viewFiles(std::vector<DbFileInfo> files);
+
+    void refreshFiles();
+
+    // Properties
+    //
+public:
+    const DbFileInfo& parentFile() const;
+
+    // Data
+    //
+private:
+    std::function<VFrame30::Scheme*()> m_createVideoFrameFunc;
+    SchemeFileView* m_filesView;
 };
 
 
@@ -75,15 +127,15 @@ protected:
 template<typename VideoFrameType>
 SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbcontroller,  const QString& parentFileName, QWidget* parent)
 {
-	static_assert(std::is_base_of<VFrame30::CVideoFrame, VideoFrameType>::value, "Base class must be VFrame30::CVideoFrame");
+	static_assert(std::is_base_of<VFrame30::Scheme, VideoFrameType>::value, "Base class must be VFrame30::CVideoFrame");
 	assert(dbcontroller != nullptr);
 
 	SchemesTabPage* p = new SchemesTabPage(dbcontroller, parent);
 
 	// Create VideoFrame function, will be stored in two places, VideoFrameTabPage and VideoFrameControlTabPage
 	//
-	std::function<VFrame30::CVideoFrame*()> createFunc(
-		[]() -> VFrame30::CVideoFrame*
+	std::function<VFrame30::Scheme*()> createFunc(
+		[]() -> VFrame30::Scheme*
 		{
 			return new VideoFrameType();
 		});
@@ -101,53 +153,6 @@ SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbc
 
 //
 //
-// VideoFrameControlTabPage
-//
-//
-class SchemeControlTabPage : public QWidget, public HasDbController
-{
-	Q_OBJECT
-public:
-	SchemeControlTabPage(
-		const QString& fileExt,
-		DbController* dbcontroller,
-		const QString& parentFileName,
-		std::function<VFrame30::CVideoFrame*()> createVideoFrameFunc);
-
-	virtual ~SchemeControlTabPage();
-
-public:
-	VFrame30::CVideoFrame* createVideoFrame() const;
-
-protected:
-	void CreateActions();
-
-signals:
-
-protected slots:
-	//void projectOpened();
-	//void projectClosed();
-
-	void addFile();
-	void openFiles(std::vector<DbFileInfo> files);
-	void viewFiles(std::vector<DbFileInfo> files);
-
-	void refreshFiles();
-
-	// Properties
-	//
-public:
-	const DbFileInfo& parentFile() const;
-
-	// Data
-	//
-private:
-	std::function<VFrame30::CVideoFrame*()> m_createVideoFrameFunc;
-	SchemeFileView* m_filesView;
-};
-
-//
-//
 // EditVideoFrameTabPage
 //
 //
@@ -157,7 +162,7 @@ class EditSchemeTabPage : public QWidget, public HasDbController
 private:
 	EditSchemeTabPage();		// Deleted
 public:
-	EditSchemeTabPage(std::shared_ptr<VFrame30::CVideoFrame> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
+	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
 	virtual ~EditSchemeTabPage();
 
 protected:

@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "VideoFrameManager.h"
-#include "VideoFrame.h"
+#include "Scheme.h"
 
 namespace VFrame30
 {
@@ -24,7 +24,7 @@ namespace VFrame30
 			return false;
 		}
 
-		CVideoFrame* pVideoFrame = VFrame30::CVideoFrame::Create(fileName);
+		Scheme* pVideoFrame = VFrame30::Scheme::Create(fileName);
 		if (pVideoFrame == nullptr)
 		{
 			return false;
@@ -32,11 +32,11 @@ namespace VFrame30
 
 		QMutexLocker ml(&mutex);
 
-		videoFrames[pVideoFrame->strID()] = std::shared_ptr<CVideoFrame>(pVideoFrame);
+		videoFrames[pVideoFrame->strID()] = std::shared_ptr<Scheme>(pVideoFrame);
 		return true;
 	}
 
-	bool VideoFrameManager::getVideoFrame(const QString& strID, std::shared_ptr<const CVideoFrame>* videoFrame) const
+	bool VideoFrameManager::getVideoFrame(const QString& strID, std::shared_ptr<const Scheme>* videoFrame) const
 	{
 		if (videoFrame == nullptr)
 		{

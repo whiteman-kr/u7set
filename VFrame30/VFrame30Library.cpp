@@ -1,11 +1,11 @@
 #include "Stable.h"
 #include "VFrame30Library.h"
-#include "VideoFrame.h"
-#include "VideoFrameDiag.h"
-#include "VideoFrameLogic.h"
-#include "VideoFrameTech.h"
-#include "VideoFrameWiring.h"
-#include "VideoLayer.h"
+#include "Scheme.h"
+#include "DiagScheme.h"
+#include "LogicScheme.h"
+#include "WorkflowScheme.h"
+#include "WiringScheme.h"
+#include "SchemeLayer.h"
 #include "VideoItemLine.h"
 #include "VideoItemRect.h"
 #include "VideoItemConnectionLine.h"
@@ -37,26 +37,26 @@ namespace VFrame30
 	{
 		// Registering VideoFrames
 		//
-		VideoFrameFactory.Register<CVideoFrameDiag>();
-		VideoFrameFactory.Register<CVideoFrameLogic>();
-		VideoFrameFactory.Register<CVideoFrameTech>();
-		VideoFrameFactory.Register<CVideoFrameWiring>();
+		VideoFrameFactory.Register<DiagScheme>();
+		VideoFrameFactory.Register<LogicScheme>();
+		VideoFrameFactory.Register<WorkflowScheme>();
+		VideoFrameFactory.Register<WiringScheme>();
 
 		// Registering VideoLayers
 		//
-		VideoLayerFactory.Register<CVideoLayer>();
+		VideoLayerFactory.Register<SchemeLayer>();
 
 		// Registering VideoItems
 		//
-		VideoItemFactory.Register<CVideoItemLine>();
-		VideoItemFactory.Register<CVideoItemRect>();
-		VideoItemFactory.Register<CVideoItemConnectionLine>();
-		VideoItemFactory.Register<CFblItemLine>();
-		VideoItemFactory.Register<CFblItemRect>();
-		VideoItemFactory.Register<CVideoItemLink>();
-		VideoItemFactory.Register<CVideoItemFblElement>();
-		VideoItemFactory.Register<CVideoItemInputSignal>();
-		VideoItemFactory.Register<CVideoItemOutputSignal>();
+		VideoItemFactory.Register<VideoItemLine>();
+		VideoItemFactory.Register<VideoItemRect>();
+		VideoItemFactory.Register<VideoItemConnectionLine>();
+		VideoItemFactory.Register<FblItemLine>();
+		VideoItemFactory.Register<FblItemRect>();
+		VideoItemFactory.Register<VideoItemLink>();
+		VideoItemFactory.Register<VideoItemFblElement>();
+		VideoItemFactory.Register<VideoItemInputSignal>();
+		VideoItemFactory.Register<VideoItemOutputSignal>();
 
 		return true;
 	}

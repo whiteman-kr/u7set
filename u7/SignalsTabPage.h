@@ -11,6 +11,8 @@ class QTableView;
 class QMenu;
 class SignalsModel;
 class QToolBar;
+class QPlainTextEdit;
+class QSplitter;
 
 
 class SignalsDelegate : public QStyledItemDelegate
@@ -64,8 +66,11 @@ public:
 	bool isEditableSignal(int row);
 
 	DbController* dbController();
+	const DbController* dbController() const;
 	QWidget* parrentWindow() { return m_parentWindow; }
+	QString errorMessage(const ObjectState& state) const;
 	void showError(const ObjectState& state) const;
+	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
 	bool editSignal(int row);
 	void deleteSignal(int row);
@@ -93,6 +98,11 @@ private:
 	QString getSensorStr(int sensorID) const;
 	QString getUserStr(int userID) const;
 
+	const QPixmap lock = QPixmap(":/Images/Images/lock.png");
+	const QPixmap plus = QPixmap(":/Images/Images/plus.png");
+	const QPixmap pencil = QPixmap(":/Images/Images/pencil.png");
+	const QPixmap cross = QPixmap(":/Images/Images/cross.png");
+
 	void changeCheckedoutSignalActionsVisibility();
 };
 
@@ -109,9 +119,48 @@ public:
 
 	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
 
+	void initCheckStates(const QModelIndexList& list, bool fromSourceModel = true);
+	void setAllCheckStates(bool state);
+
 private:
 	SignalsModel* m_sourceModel;
 	QVector<Qt::CheckState> states;
+};
+
+
+class CheckinSignalsDialog : public QDialog
+{
+	Q_OBJECT
+public:
+    CheckinSignalsDialog(SignalsModel* sourceModel, QModelIndexList selection, QWidget *parent = 0);
+
+public slots:
+	void checkinSelected();
+	void undoSignalChanges();
+
+private:
+	SignalsModel *m_sourceModel;
+	CheckedoutSignalsModel* m_proxyModel;
+	QTableView* m_signalsView;
+	QPlainTextEdit* m_commentEdit;
+	QSplitter* m_splitter;
+};
+
+
+class UndoSignalsDialog : public QDialog
+{
+	Q_OBJECT
+public:
+	UndoSignalsDialog(SignalsModel* sourceModel, QWidget *parent = 0);
+
+    void setCheckStates(QModelIndexList selection, bool fromSourceModel);
+
+public slots:
+	void undoSelected();
+
+private:
+	SignalsModel *m_sourceModel;
+	CheckedoutSignalsModel* m_proxyModel;
 };
 
 
@@ -141,9 +190,8 @@ public slots:
 	void editSignal();
 	void deleteSignal();
 
-	QVector<int> getSelectedSignalsID();
-	void undoSignals();
-	void checkinSignals();
+	void undoSignalChanges();
+	void showPendingChanges();
 
 	void changeSignalActionsVisibility();
 

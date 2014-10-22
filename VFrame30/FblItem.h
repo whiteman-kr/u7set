@@ -35,101 +35,37 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		const VideoItemPoint& point() const
-		{
-			return m_point;
-		}
-		void setPoint(const VideoItemPoint& value)
-		{
-			m_point = value;
-		}
+		const VideoItemPoint& point() const;
+		void setPoint(const VideoItemPoint& value);
 
-		double x() const
-		{
-			return m_point.X;
-		}
-		void setX(double val)
-		{
-			m_point.X = val;
-		}
+		double x() const;
+		void setX(double val);
 
-		double y() const
-		{
-			return m_point.Y;
-		}
-		void setY(double val)
-		{
-			m_point.Y = val;
-		}
+		double y() const;
+		void setY(double val);
 
-		ConnectionDirrection dirrection() const
-		{
-			return m_dirrection;
-		}
-		bool IsInput() const
-		{
-			return m_dirrection == ConnectionDirrection::Input;
-		}
-		bool IsOutput() const
-		{
-			return m_dirrection == ConnectionDirrection::Output;
-		}
+		ConnectionDirrection dirrection() const;
+		bool IsInput() const;
+		bool IsOutput() const;
 
-		const QUuid& guid() const
-		{
-			return m_guid;
-		}
-		void setGuid(const QUuid& guid)
-		{
-			m_guid = guid;
-		}
+		const QUuid& guid() const;
+		void setGuid(const QUuid& guid);
 
-		const std::list<QUuid>& associatedIOs() const
-		{
-			return m_associatedIOs;
-		}
-		void ClearAssociattdIOs()
-		{
-			m_associatedIOs.clear();
-		}
-		void AddAssociattedIOs(const QUuid& guid)
-		{
-			m_associatedIOs.push_back(guid);
-		}
+		const std::list<QUuid>& associatedIOs() const;
+		void ClearAssociattdIOs();
+		void AddAssociattedIOs(const QUuid& guid);
 
-		bool HasConnection() const
-		{
-			assert(!(IsInput() && m_associatedIOs.size() > 1));
-			return !m_associatedIOs.empty();
-		}
+		bool HasConnection() const;
 
-		const QUuid& signalGuid() const
-		{
-			return m_signalGuid;
-		}
-		void setSignalGuid(const QUuid& guid)
-		{
-			m_signalGuid = guid;
-		}
+		const QUuid& signalGuid() const;
+		void setSignalGuid(const QUuid& guid);
 
-		const QString& signalStrID() const
-		{
-			return m_signalStrID;
-		}
-		void setSignalStrID(const QString& strid)
-		{
-			m_signalStrID = strid;
-		}
+		const QString& signalStrID() const;
+		void setSignalStrID(const QString& strid);
 
-		const QString& signalCaption() const
-		{
-			return m_signalCaption;
-		}
-		void setSignalCaption(const QString& caption)
-		{
-			m_signalCaption = caption;
-		}
-			
+		const QString& signalCaption() const;
+		void setSignalCaption(const QString& caption);
+
 		// Data
 		//
 	private:
@@ -149,13 +85,13 @@ namespace VFrame30
 
 	// CFblItem
 	//
-	class VFRAME30LIBSHARED_EXPORT CFblItem
+	class VFRAME30LIBSHARED_EXPORT FblItem
 	{
 	protected:
-		CFblItem(void);
+		FblItem(void);
 
 	public:
-		virtual ~CFblItem(void);
+		virtual ~FblItem(void);
 		
 	public:
 		// Serialization

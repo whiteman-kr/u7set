@@ -378,19 +378,23 @@ public:
 	void setDate(const QDateTime& value);
 	void setDate(const QString& value);
 
-	const DbUser& user() const;
-	void setUser(const DbUser& value);
+	int userId() const;
+	void setUserId(int value);
 
 	const QString& comment() const;
 	void setComment(const QString& value);
 
+	const VcsItemAction& action() const;
+	void setAction(const VcsItemAction& value);
+
 	// Data
 	//
 private:
-	int m_changesetId;
+	int m_changesetId = 0;
 	QDateTime m_date;
-	DbUser m_user;
+	int m_userId = -1;
 	QString m_comment;
+	VcsItemAction m_action;
 };
 
 // WIN_64 PLATFORM C4267 WARNING ISSUE, IT IS NOT ENOUGH TO DISBALE THIS WARNING

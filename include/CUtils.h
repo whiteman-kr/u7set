@@ -41,6 +41,10 @@ public:
 	static double ConvertPoint(double point, VFrame30::SchemeUnit convertFrom, VFrame30::SchemeUnit convertTo, VFrame30::ConvertDirection convertDirection);
 	static void ConvertPoint(double& x, double& y, VFrame30::SchemeUnit convertFrom, VFrame30::SchemeUnit convertTo);
 
+	static QPointF snapToGrid(const QPointF& pt, double gridSize);
+	static QPointF snapToGrid(double x, double y, double gridSize);
+	static double snapToGrid(double value, double gridSize);
+
 	/// <summary>
 	/// Опредение пересечения двух отрезков
 	/// </summary>

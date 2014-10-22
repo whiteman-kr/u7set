@@ -3,32 +3,32 @@
 
 namespace VFrame30
 {
-	CVideoItemFblElement::CVideoItemFblElement(void)
+	VideoItemFblElement::VideoItemFblElement(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemFblElement::CVideoItemFblElement(SchemeUnit unit) :
-		CFblItemRect(unit)
+	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit) :
+		FblItemRect(unit)
 	{
 	}
 
-	CVideoItemFblElement::CVideoItemFblElement(SchemeUnit unit, const Fbl::FblElement& fblElement) :
-		CFblItemRect(unit)
+	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement) :
+		FblItemRect(unit)
 	{
 		m_fblElement = fblElement;
 
 		// Создать входные и выходные сигналы в VFrame30::FblEtem
 		//
-		const std::vector<Fbl::FblElementSignal>& inputSignals = m_fblElement.inputSignals();
+		const std::vector<Afbl::AfbElementSignal>& inputSignals = m_fblElement.inputSignals();
 		for (auto s = inputSignals.begin(); s != inputSignals.end(); ++s)
 		{
 			AddInput();
 		}
 
-		const std::vector<Fbl::FblElementSignal>& outputSignals = m_fblElement.outputSignals();
+		const std::vector<Afbl::AfbElementSignal>& outputSignals = m_fblElement.outputSignals();
 		for (auto s = outputSignals.begin(); s != outputSignals.end(); ++s)
 		{
 			AddOutput();
@@ -36,7 +36,7 @@ namespace VFrame30
 
 		// Проинициализировать паремтры значением по умолчанию
 		//
-		std::vector<Fbl::FblElementParam> params = m_fblElement.params();
+		std::vector<Afbl::AfbElementParam> params = m_fblElement.params();
 		for (auto p = params.begin(); p != params.end(); ++p)
 		{
 			p->setValue(p->defaultValue());
@@ -44,15 +44,15 @@ namespace VFrame30
 		m_fblElement.setParams(params);
 	}
 
-	CVideoItemFblElement::~CVideoItemFblElement(void)
+	VideoItemFblElement::~VideoItemFblElement(void)
 	{
 	}
 
-	void CVideoItemFblElement::Draw(CDrawParam* drawParam, const CVideoFrame* pFrame, const CVideoLayer* pLayer) const
+	void VideoItemFblElement::Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const
 	{
 		// Нарисовать прямоугольник и пины
 		//
-		CFblItemRect::Draw(drawParam, pFrame, pLayer);
+		FblItemRect::Draw(drawParam, pFrame, pLayer);
 
 		//--
 		//
@@ -104,9 +104,9 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool CVideoItemFblElement::SaveData(Proto::Envelope* message) const
+	bool VideoItemFblElement::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CFblItemRect::SaveData(message);
+		bool result = FblItemRect::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -124,7 +124,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemFblElement::LoadData(const Proto::Envelope& message)
+	bool VideoItemFblElement::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -134,7 +134,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CFblItemRect::LoadData(message);
+		bool result = FblItemRect::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -156,7 +156,7 @@ namespace VFrame30
 		return true;
 	}
 
-	const Fbl::FblElement& CVideoItemFblElement::fblElement() const
+	const Afbl::AfbElement& VideoItemFblElement::fblElement() const
 	{
 		return m_fblElement;
 	}

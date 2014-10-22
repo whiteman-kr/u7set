@@ -1,33 +1,33 @@
 #include "Stable.h"
 #include "VideoItemLink.h"
-#include "VideoLayer.h"
+#include "SchemeLayer.h"
 
 namespace VFrame30
 {
-	CVideoItemLink::CVideoItemLink(void)
+	VideoItemLink::VideoItemLink(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	CVideoItemLink::CVideoItemLink(SchemeUnit unit) : 
-		CFblItemLine(unit)
+	VideoItemLink::VideoItemLink(SchemeUnit unit) : 
+		FblItemLine(unit)
 	{
 		//AddInput();
 		//AddOutput();
 	}
 
 
-	CVideoItemLink::~CVideoItemLink(void)
+	VideoItemLink::~VideoItemLink(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool CVideoItemLink::SaveData(Proto::Envelope* message) const
+	bool VideoItemLink::SaveData(Proto::Envelope* message) const
 	{
-		bool result = CFblItemLine::SaveData(message);
+		bool result = FblItemLine::SaveData(message);
 		if (result == false || message->has_videoitem() == false)
 		{
 			assert(result);
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CVideoItemLink::LoadData(const Proto::Envelope& message)
+	bool VideoItemLink::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_videoitem() == false)
 		{
@@ -55,7 +55,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = CFblItemLine::LoadData(message);
+		bool result = FblItemLine::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -82,7 +82,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void CVideoItemLink::Draw(CDrawParam* drawParam, const CVideoFrame*, const CVideoLayer* pLayer) const
+	void VideoItemLink::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* pLayer) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -140,7 +140,7 @@ namespace VFrame30
 		//
 		auto drawPin = [&](VideoItemPoint pt)
 			{
-				int connectionCount = pLayer->GetPinPosConnectinCount(pt);
+				int connectionCount = pLayer->GetPinPosConnectinCount(pt, itemUnit());
 
 				if (connectionCount > 1)
 				{
@@ -166,13 +166,13 @@ namespace VFrame30
 
 	// Вычислить координаты точки
 	//
-	void CVideoItemLink::SetConnectionsPos()
+	void VideoItemLink::SetConnectionsPos()
 	{
 		return;
 	}
 
 	//bool CVideoItemLink::GetConnectionPointPos(const GUID& connectionPointGuid, VideoItemPoint* pResult) const
-	bool CVideoItemLink::GetConnectionPointPos(const QUuid&, VideoItemPoint*) const
+	bool VideoItemLink::GetConnectionPointPos(const QUuid&, VideoItemPoint*) const
 	{
 		return false;
 	}

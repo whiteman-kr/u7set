@@ -60,9 +60,6 @@ private slots:
 	void projectOpened(DbProject project);
 	void projectClosed();
 
-	//void databaseError(QString message);
-	//void databaseOperationCompleted(QString message);
-
 	// Properties
 	//
 protected:

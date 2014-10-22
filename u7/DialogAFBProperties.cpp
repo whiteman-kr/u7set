@@ -6,6 +6,9 @@
 #include <QMessageBox>
 #include "xmlsyntaxhighlighter.h"
 #include <QtXmlPatterns>
+#include "../VFrame30/Fbl.h"
+
+using namespace Afbl;
 
 // XmlSchemaMessageHandler
 //
@@ -65,6 +68,12 @@ DialogAfbProperties::DialogAfbProperties(const QString &caption, QByteArray* pDa
     setWindowTitle(caption);
     new XmlSyntaxHighlighter(ui->m_text->document());
 
+	if (pData == nullptr)
+	{
+		Q_ASSERT(pData);
+		return;
+	}
+
     QString s(*pData);
 
     ui->m_text->setPlainText(s);
@@ -73,11 +82,13 @@ DialogAfbProperties::DialogAfbProperties(const QString &caption, QByteArray* pDa
     if (caption.right(4) == ".afb")
     {
         ui->m_validate->setVisible(true);
-    }
+		ui->m_loadFbl->setVisible(true);
+	}
     else
     {
         ui->m_validate->setVisible(false);
-    }
+		ui->m_loadFbl->setVisible(false);
+	}
 
     if (readOnly == true)
     {
@@ -100,7 +111,13 @@ DialogAfbProperties::~DialogAfbProperties()
 
 void DialogAfbProperties::on_DialogAfbProperties_accepted()
 {
-    if (m_readOnly == false)
+	if (m_pData == nullptr)
+	{
+		Q_ASSERT(m_pData);
+		return;
+	}
+
+	if (m_readOnly == false)
     {
         QString s = ui->m_text->toPlainText();
         *m_pData = s.toUtf8();
@@ -209,4 +226,34 @@ void DialogAfbProperties::on_DialogAfbProperties_finished(int result)
 
     theSettings.m_abflPropertiesWindowPos = pos();
     theSettings.m_abflPropertiesWindowGeometry = saveGeometry();
+}
+
+void DialogAfbProperties::on_m_loadFbl_clicked()
+{
+	if (m_pData == nullptr)
+	{
+		Q_ASSERT(m_pData);
+		return;
+	}
+
+	AfbElement afb;
+
+	QString s = ui->m_text->toPlainText();
+	QByteArray textData = s.toUtf8();
+
+	QXmlStreamReader xmlReader(textData);
+
+	if (afb.loadFromXml(&xmlReader) == true)
+	{
+		QMessageBox::information(this, "XML Read", "XML debug read successful!");
+	}
+	else
+	{
+		QMessageBox::critical(this, "XML Read Error", xmlReader.errorString());
+	}
+
+
+
+
+
 }

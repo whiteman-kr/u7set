@@ -22,6 +22,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    int                 m_measureType = MEASURE_TYPE_UNKNOWN;
+
     // Elements of interface - Menu
     //
     QMenu*              m_pMeasureMenu = nullptr;
@@ -38,7 +40,7 @@ public:
     QToolBar*           m_pMeasureKind = nullptr;
     QToolBar*           m_pOutputSignalToolBar = nullptr;
     QToolBar*           m_pAnalogSignalToolBar = nullptr;
-    QToolBar*           m_pComplexComporatorSignalToolBar = nullptr;
+    QToolBar*           m_pComplexComporatorToolBar = nullptr;
 
     // Elements of interface - Pages of Tab
     //
@@ -64,27 +66,29 @@ public:
     QProgressBar*       m_statusMeasureTimeout = nullptr;
     QLabel*             m_statusMeasureThreadState = nullptr;
     QLabel*             m_statusMeasureCount = nullptr;
+    QLabel*             m_statusCalibratorCount = nullptr;
     QLabel*             m_statusConnectToServer = nullptr;
 
 public:
 
-    MeasureThread       MeasureThread;
+    MeasureThread       m_measureThread;
 
 protected:
 
-    void            closeEvent(QCloseEvent* e);
+    void                closeEvent(QCloseEvent* e);
 
 public:
 
     bool createInterface();
-    void initMeasureThread();
 
     void createActions();
+    void updateActions();
     void createMenu();
     bool createToolBars();
     void createTabPages();
     void createPanels();
     void createStatusBar();
+
 
 private:
 
@@ -114,8 +118,8 @@ private:
     //
     QAction* m_pCalibratorsAction = nullptr;
     QAction* m_pShowOutputSignalListAction = nullptr;
-    //QAction* m_pShowComlexComparatorListAction = nullptr;
     QAction* m_pShowOutputRangeListAction = nullptr;
+    QAction* m_pShowComlexComparatorListAction = nullptr;
     QAction* m_pOptionsAction;
 
     // menu - ?
@@ -126,7 +130,6 @@ private:
     QAction* m_pShowStatisticAction = nullptr;
     QAction* m_pAboutConnectionAction = nullptr;
     QAction* m_pAboutAppAction = nullptr;
-
 
 private slots:
 
@@ -156,8 +159,8 @@ private slots:
     //
     void calibrators();
     void showOutputSignalList() {};
-    //void showComlexComparatorList() {};
     void showOutputRangeList() {};
+    void showComlexComparatorList() {};
     void options();
 
     // menu - ?
@@ -171,20 +174,33 @@ private slots:
 
 private slots:
 
+    // Slots of tab -- page measure type
+    //
+    void setMeasureType(int type);
+
+private slots:
+
     // Slots of control panels
     //
     void setMeasureKind(int index);
     void setMeasureTimeout(QString value);
     void setOutputSignalType(int index);
 
+
+private slots:
+
+    // Slots of calibrator base
+    //
+    void calibratorConnectedChanged(int);
+
 private slots:
 
     // Slots of measure thread
     //
-    void onMeasureThreadStarted();
-    void onMeasureThreadStoped();
-    void onMeasureThreadInfo(QString msg);
-    void onMeasureThreadInfo(int timeout);
+    void measureThreadStarted();
+    void measureThreadStoped();
+    void setMeasureThreadInfo(QString msg);
+    void setMeasureThreadInfo(int timeout);
 };
 
 // ==============================================================================================

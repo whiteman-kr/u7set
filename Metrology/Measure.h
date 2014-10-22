@@ -7,7 +7,7 @@ const char* const MeasureType[] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Measurements of linearity"),
             QT_TRANSLATE_NOOP("Measure.h", "Measurements of comparators"),
-        //    QT_TRANSLATE_NOOP("Measure.h", "Measurements of complex comparators"),
+            QT_TRANSLATE_NOOP("Measure.h", "Measurements of complex comparators"),
 };
 
 

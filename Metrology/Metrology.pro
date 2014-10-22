@@ -46,6 +46,8 @@ RESOURCES += \
 TRANSLATIONS = translations/Metrology_ru.ts \
                 translations/Metrology_uk.ts
 
+unix:QMAKE_CXXFLAGS += -std=c++11
+
 
 # Visual Leak Detector
 #
@@ -61,4 +63,8 @@ win32 {
         INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
         INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+
+OTHER_FILES += \
+    translations/Metrology_ru.ts \
+    translations/Metrology_uk.ts
 
