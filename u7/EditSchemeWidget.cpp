@@ -1,5 +1,8 @@
 #include "Stable.h"
+#include "EditEngine/EditEngine.h"
 #include "EditSchemeWidget.h"
+#include "SchemePropertiesDialog.h"
+#include "SchemeItemPropertiesDialog.h"
 #include "../VFrame30/VideoItemLine.h"
 #include "../VFrame30/VideoItemRect.h"
 #include "../VFrame30/VideoItemConnectionLine.h"
@@ -245,8 +248,6 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	//
 	QPainter* p = drawParam->painter();
 
-	// Drwing resources initialization
-	//
 	QPen outlinePen(Qt::black);
 	outlinePen.setWidth(0);
 
@@ -364,6 +365,56 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	m_addRectStartPoint = VFrame30::VideoItemPoint(x1, y1);
 	m_addRectEndPoint = VFrame30::VideoItemPoint(x2, y2);
 
+	// Draw rullers by bounding rect
+	//
+	QPainter* p = drawParam->painter();
+
+	QRectF rullerRect(m_addRectStartPoint, m_addRectEndPoint);
+
+	QPen outlinePen(Qt::black);
+	outlinePen.setWidth(0);
+
+	QPainter::RenderHints oldrenderhints = p->renderHints();
+	p->setRenderHint(QPainter::Antialiasing, false);
+
+	p->setPen(outlinePen);
+
+	switch (mouseState())
+	{
+	case MouseState::SizingTopLeft:
+		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), scheme()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(scheme()->docWidth(), rullerRect.top()));
+		break;
+	case MouseState::SizingTop:
+		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(scheme()->docWidth(), rullerRect.top()));
+		break;
+	case MouseState::SizingTopRight:
+		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), scheme()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerRect.top()), QPointF(scheme()->docWidth(), rullerRect.top()));
+		break;
+	case MouseState::SizingRight:
+		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), scheme()->docHeight()));
+		break;
+	case MouseState::SizingBottomRight:
+		p->drawLine(QPointF(rullerRect.right(), 0.0), QPointF(rullerRect.right(), scheme()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(scheme()->docWidth(), rullerRect.bottom()));
+		break;
+	case MouseState::SizingBottom:
+		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(scheme()->docWidth(), rullerRect.bottom()));
+		break;
+	case MouseState::SizingBottomLeft:
+		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), scheme()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerRect.bottom()), QPointF(scheme()->docWidth(), rullerRect.bottom()));
+		break;
+	case MouseState::SizingLeft:
+		p->drawLine(QPointF(rullerRect.left(), 0.0), QPointF(rullerRect.left(), scheme()->docHeight()));
+		break;
+	default:
+		assert(false);
+		break;
+	}
+	p->setRenderHints(oldrenderhints);
+
 	// Draw item outline
 	//
 	VFrame30::VideoItem::DrawOutline(drawParam, m_selectedItems);
@@ -427,6 +478,34 @@ void EditSchemeView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 		itemPos->setEndYDocPt(itemPos->endYDocPt() + ydif);
 	}
 
+	// Draw rullers
+	//
+	QPainter* p = drawParam->painter();
+
+	QPen outlinePen(Qt::black);
+	outlinePen.setWidth(0);
+
+	QPainter::RenderHints oldrenderhints = p->renderHints();
+	p->setRenderHint(QPainter::Antialiasing, false);
+
+	p->setPen(outlinePen);
+
+	switch (mouseState())
+	{
+	case MouseState::MovingStartLinePoint:
+		p->drawLine(QPointF(itemPos->startXDocPt(), 0.0), QPointF(itemPos->startXDocPt(), scheme()->docHeight()));
+		p->drawLine(QPointF(0.0, itemPos->startYDocPt()), QPointF(scheme()->docWidth(), itemPos->startYDocPt()));
+		break;
+	case MouseState::MovingEndLinePoint:
+		p->drawLine(QPointF(itemPos->endXDocPt(), 0.0), QPointF(itemPos->endXDocPt(), scheme()->docHeight()));
+		p->drawLine(QPointF(0.0, itemPos->endYDocPt()), QPointF(scheme()->docWidth(), itemPos->endYDocPt()));
+		break;
+	default:
+		assert(false);
+		break;
+	}
+	p->setRenderHints(oldrenderhints);
+
 	// Draw outline
 	//
 	VFrame30::VideoItem::DrawOutline(drawParam, m_selectedItems);
@@ -482,6 +561,8 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		return;
 	}
 
+	QPointF rullerPoint;
+
 	// Calculate new position
 	//
 	switch (mouseState())
@@ -503,6 +584,8 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 			op.Y += diff;
 
 			points[m_movingEdgePointIndex + 1] = op;
+
+			rullerPoint.setY(op.Y);
 
 			// ≈сли по сторонам есть еще √ќ–»«ќЌј“Ћ№Ќџ≈ линии то добавить точку,
 			// что бы ребро не т€нуло по диагонали соседние отрезки
@@ -536,6 +619,8 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 			op.X += diff;
 
 			points[m_movingEdgePointIndex + 1] = op;
+
+			rullerPoint.setX(op.X);
 
 			// ≈сли по сторонам есть еще ¬≈–“» јЋ№Ќџ≈ линии то добавить точку,
 			// что бы ребро не т€нуло по диагонали соседние отрезки
@@ -674,6 +759,9 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 			pt.Y += diffY;
 
 			points[m_movingEdgePointIndex] = pt;
+
+			rullerPoint.setX(pt.X);
+			rullerPoint.setY(pt.Y);
 		}
 		break;
 	}
@@ -691,6 +779,37 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	// Draw item outline
 	//
 	VFrame30::VideoItem::DrawOutline(drawParam, m_selectedItems);
+
+	// Draw rullers
+	//
+	QPainter* p = drawParam->painter();
+
+	QPen outlinePen(Qt::black);
+	outlinePen.setWidth(0);
+
+	QPainter::RenderHints oldrenderhints = p->renderHints();
+	p->setRenderHint(QPainter::Antialiasing, false);
+
+	p->setPen(outlinePen);
+
+	switch (mouseState())
+	{
+	case MouseState::MovingHorizontalEdge:
+		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(scheme()->docWidth(), rullerPoint.y()));
+		break;
+	case MouseState::MovingVerticalEdge:
+		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), scheme()->docHeight()));
+		break;
+	case MouseState::MovingConnectionLinePoint:
+		p->drawLine(QPointF(rullerPoint.x(), 0.0), QPointF(rullerPoint.x(), scheme()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerPoint.y()), QPointF(scheme()->docWidth(), rullerPoint.y()));
+		break;
+	default:
+		assert(false);
+		break;
+	}
+	p->setRenderHints(oldrenderhints);
+
 
 	// Restore ald position
 	//
@@ -1327,9 +1446,9 @@ void EditSchemeWidget::createActions()
 	m_fileSeparatorAction2->setSeparator(true);
 
 	m_filePropertiesAction = new QAction(tr("Properties..."), this);
-	m_filePropertiesAction->setStatusTip(tr("Edit file properties"));
-	m_filePropertiesAction->setEnabled(false);
-	//connect(m_filePropertiesAction, &QAction::triggered, this, &EditSchemeWidget::properties);
+	m_filePropertiesAction->setStatusTip(tr("Edit scheme properties"));
+	m_filePropertiesAction->setEnabled(true);
+	connect(m_filePropertiesAction, &QAction::triggered, this, &EditSchemeWidget::schemeProperties);
 
 	m_fileSeparatorAction3 = new QAction(this);
 	m_fileSeparatorAction3->setSeparator(true);
@@ -3595,11 +3714,21 @@ void EditSchemeWidget::deleteKey()
 void EditSchemeWidget::undo()
 {
 	m_editEngine->undo(1);
+
+	if (m_schemePropertiesDialog != nullptr && m_schemePropertiesDialog->isVisible())
+	{
+		m_schemePropertiesDialog->setScheme(scheme());
+	}
 }
 
 void EditSchemeWidget::redo()
 {
 	m_editEngine->redo(1);
+
+	if (m_schemePropertiesDialog != nullptr && m_schemePropertiesDialog->isVisible())
+	{
+		m_schemePropertiesDialog->setScheme(scheme());
+	}
 }
 
 void EditSchemeWidget::editEngineStateChanged(bool canUndo, bool canRedo)
@@ -3656,27 +3785,38 @@ void EditSchemeWidget::selectAll()
 	return;
 }
 
-void EditSchemeWidget::properties()
+void EditSchemeWidget::schemeProperties()
 {
-	if (m_propertiesDialog == nullptr)
+	if (m_schemePropertiesDialog == nullptr)
 	{
-		m_propertiesDialog = new SchemeItemPropertiesDialog(m_editEngine, this);
+		m_schemePropertiesDialog = new SchemePropertiesDialog(m_editEngine, this);
 	}
 
-	m_propertiesDialog->setObjects(schemeView()->selectedItems());
+	m_schemePropertiesDialog->setScheme(scheme());
+	m_schemePropertiesDialog->show();
+	return;
+}
 
-	m_propertiesDialog->show();
+void EditSchemeWidget::properties()
+{
+	if (m_itemsPropertiesDialog == nullptr)
+	{
+		m_itemsPropertiesDialog = new SchemeItemPropertiesDialog(m_editEngine, this);
+	}
+
+	m_itemsPropertiesDialog->setObjects(schemeView()->selectedItems());
+	m_itemsPropertiesDialog->show();
 	return;
 }
 
 void EditSchemeWidget::selectionChanged()
 {
-	if (m_propertiesDialog == nullptr)
+	if (m_itemsPropertiesDialog == nullptr)
 	{
-		m_propertiesDialog = new SchemeItemPropertiesDialog(m_editEngine, this);
+		m_itemsPropertiesDialog = new SchemeItemPropertiesDialog(m_editEngine, this);
 	}
 
-	m_propertiesDialog->setObjects(schemeView()->selectedItems());
+	m_itemsPropertiesDialog->setObjects(schemeView()->selectedItems());
 	return;
 }
 

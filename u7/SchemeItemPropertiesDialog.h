@@ -37,7 +37,6 @@ private:
 	SchemeItemPropertyEditor* m_propertyEditor = nullptr;
 
 	std::vector<std::shared_ptr<VFrame30::VideoItem>> m_items;
-	std::vector<std::shared_ptr<VFrame30::VideoItem>> m_itemsLocalCopy;
 };
 
 //

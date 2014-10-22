@@ -243,7 +243,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void FblItemRect::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* pLayer) const
+	void FblItemRect::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
@@ -320,7 +320,7 @@ namespace VFrame30
 			VideoItemPoint vip;
 			GetConnectionPointPos(input->guid(), &vip);
 
-			int connectionCount = pLayer->GetPinPosConnectinCount(vip, itemUnit());
+			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
 			// Рисование пина
 			//
@@ -357,7 +357,7 @@ namespace VFrame30
 			VideoItemPoint vip;
 			GetConnectionPointPos(output->guid(), &vip);
 
-			int connectionCount = pLayer->GetPinPosConnectinCount(vip, itemUnit());
+			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
 			// Рисование пина
 			//

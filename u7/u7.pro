@@ -83,7 +83,9 @@ SOURCES +=\
     EditEngine/EditEngineDeleteItem.cpp \
     EditEngine/EditEngineMoveItem.cpp \
     EditEngine/EditEngineSetPoints.cpp \
-    EditEngine/EditEngineSetProperty.cpp
+    EditEngine/EditEngineSetProperty.cpp \
+    SchemePropertiesDialog.cpp \
+    EditEngine/EditEngineSetSchemeProperty.cpp
 
 
 HEADERS  += \
@@ -133,7 +135,9 @@ HEADERS  += \
     EditEngine/EditEngineDeleteItem.h \
     EditEngine/EditEngineMoveItem.h \
     EditEngine/EditEngineSetPoints.h \
-    EditEngine/EditEngineSetProperty.h
+    EditEngine/EditEngineSetProperty.h \
+    SchemePropertiesDialog.h \
+    EditEngine/EditEngineSetSchemeProperty.h
     ../include/Signal.h
 
 FORMS    += \
@@ -148,7 +152,8 @@ FORMS    += \
     CheckInDialog.ui \
     DialogAfblEditor.ui \
     DialogAfbProperties.ui \
-    SchemeItemPropertiesDialog.ui
+    SchemeItemPropertiesDialog.ui \
+    SchemePropertiesDialog.ui
 
 RESOURCES += \
 	Resources.qrc

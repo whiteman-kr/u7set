@@ -22,14 +22,84 @@ namespace VFrame30
 	{
 	}
 
-	const QStringList& VideoItemSignal::signalStrIds()
+	void VideoItemSignal::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* layer) const
 	{
-		return m_signalStrIds;
+		FblItemRect::Draw(drawParam, scheme, layer);
+
+		//--
+		//
+		QPainter* p = drawParam->painter();
+
+		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		if (std::abs(r.left() - r.right()) < 0.000001)
+		{
+			r.setRight(r.left() + 0.000001);
+		}
+
+		if (std::abs(r.bottom() - r.top()) < 0.000001)
+		{
+			r.setBottom(r.top() + 0.000001);
+		}
+
+		int dpiX = 96;
+		QPaintDevice* pPaintDevice = p->device();
+		if (pPaintDevice == nullptr)
+		{
+			assert(pPaintDevice);
+			dpiX = 96;
+		}
+		else
+		{
+			dpiX = pPaintDevice->logicalDpiX();
+		}
+
+		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+
+		if (inputsCount() > 0)
+		{
+			r.setLeft(r.left() + pinWidth);
+		}
+
+		if (outputsCount() > 0)
+		{
+			r.setRight(r.right() - pinWidth);
+		}
+
+		r.setLeft(r.left() + m_font.drawSize() / 4.0);
+		r.setRight(r.right() - m_font.drawSize() / 4.0);
+
+		// Draw Signals StrIDs
+		//
+		p->setPen(textColor());
+
+		DrawHelper::DrawText(p, m_font, itemUnit(), signalStrIds(), r);
+
+		return;
 	}
 
-	void VideoItemSignal::setSignalStrIds(const QStringList& s)
+	QString VideoItemSignal::signalStrIds() const
 	{
-		m_signalStrIds = s;
+		QString result;
+
+		for (QString s : m_signalStrIds)
+		{
+			s = s.trimmed();
+
+			if (result.isEmpty() == false)
+			{
+				result.append(QChar::LineFeed);
+			}
+
+			result.append(s);
+		}
+
+		return result;
+	}
+
+	void VideoItemSignal::setSignalStrIds(const QString& s)
+	{
+		m_signalStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 	}
 
 	QStringList* VideoItemSignal::mutable_signalStrIds()

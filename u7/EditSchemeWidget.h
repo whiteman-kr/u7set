@@ -3,9 +3,7 @@
 #include "../VFrame30/SchemeView.h"
 #include "../VFrame30/VideoItem.h"
 #include "../VFrame30/FblItem.h"
-#include "EditEngine/EditEngine.h"
 #include "../include/DbController.h"
-#include "SchemeItemPropertiesDialog.h"
 
 #define GridSizeDisplay				5
 #define GridSizeMm					mm2in(0.5)
@@ -63,6 +61,13 @@ enum VideoItemAction
 };
 
 class EditSchemeWidget;
+class SchemePropertiesDialog;
+class SchemeItemPropertiesDialog;
+
+namespace EditEngine
+{
+	class EditEngine;
+}
 
 //
 //
@@ -287,6 +292,7 @@ protected slots:
 	void zoom100();
 	void selectAll();
 
+	void schemeProperties();
 	void properties();
 	void selectionChanged();
 
@@ -347,7 +353,8 @@ private:
 	EditSchemeView* m_videoFrameView;
 	EditEngine::EditEngine* m_editEngine;
 
-	SchemeItemPropertiesDialog* m_propertiesDialog = nullptr;
+	SchemePropertiesDialog* m_schemePropertiesDialog = nullptr;
+	SchemeItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;
 
 	// Temporary and state variables
 	//

@@ -47,6 +47,7 @@ class FblElementSignal;
 class FblElementParam;
 class FblParamValue;
 class VideoFrame;
+class LogicScheme;
 class VideoLayer;
 class VideoItem;
 class PosRectImpl;
@@ -1635,6 +1636,15 @@ class VideoFrame : public ::google::protobuf::Message {
   inline ::Proto::AfbElementCollection* release_afbs();
   inline void set_allocated_afbs(::Proto::AfbElementCollection* afbs);
 
+  // optional .Proto.LogicScheme logics_scheme = 200;
+  inline bool has_logics_scheme() const;
+  inline void clear_logics_scheme();
+  static const int kLogicsSchemeFieldNumber = 200;
+  inline const ::Proto::LogicScheme& logics_scheme() const;
+  inline ::Proto::LogicScheme* mutable_logics_scheme();
+  inline ::Proto::LogicScheme* release_logics_scheme();
+  inline void set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme);
+
   // @@protoc_insertion_point(class_scope:Proto.VideoFrame)
  private:
   inline void set_has_uuid();
@@ -1651,6 +1661,8 @@ class VideoFrame : public ::google::protobuf::Message {
   inline void clear_has_unit();
   inline void set_has_afbs();
   inline void clear_has_afbs();
+  inline void set_has_logics_scheme();
+  inline void clear_has_logics_scheme();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1661,10 +1673,11 @@ class VideoFrame : public ::google::protobuf::Message {
   double height_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > layers_;
   ::Proto::AfbElementCollection* afbs_;
+  ::Proto::LogicScheme* logics_scheme_;
   int unit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1672,6 +1685,91 @@ class VideoFrame : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static VideoFrame* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class LogicScheme : public ::google::protobuf::Message {
+ public:
+  LogicScheme();
+  virtual ~LogicScheme();
+
+  LogicScheme(const LogicScheme& from);
+
+  inline LogicScheme& operator=(const LogicScheme& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const LogicScheme& default_instance();
+
+  void Swap(LogicScheme* other);
+
+  // implements Message ----------------------------------------------
+
+  LogicScheme* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const LogicScheme& from);
+  void MergeFrom(const LogicScheme& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.wstring hardware_strids = 1;
+  inline int hardware_strids_size() const;
+  inline void clear_hardware_strids();
+  static const int kHardwareStridsFieldNumber = 1;
+  inline const ::Proto::wstring& hardware_strids(int index) const;
+  inline ::Proto::wstring* mutable_hardware_strids(int index);
+  inline ::Proto::wstring* add_hardware_strids();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
+      hardware_strids() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
+      mutable_hardware_strids();
+
+  // @@protoc_insertion_point(class_scope:Proto.LogicScheme)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::wstring > hardware_strids_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static LogicScheme* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -6107,6 +6205,73 @@ inline void VideoFrame::set_allocated_afbs(::Proto::AfbElementCollection* afbs) 
   } else {
     clear_has_afbs();
   }
+}
+
+// optional .Proto.LogicScheme logics_scheme = 200;
+inline bool VideoFrame::has_logics_scheme() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void VideoFrame::set_has_logics_scheme() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void VideoFrame::clear_has_logics_scheme() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void VideoFrame::clear_logics_scheme() {
+  if (logics_scheme_ != NULL) logics_scheme_->::Proto::LogicScheme::Clear();
+  clear_has_logics_scheme();
+}
+inline const ::Proto::LogicScheme& VideoFrame::logics_scheme() const {
+  return logics_scheme_ != NULL ? *logics_scheme_ : *default_instance_->logics_scheme_;
+}
+inline ::Proto::LogicScheme* VideoFrame::mutable_logics_scheme() {
+  set_has_logics_scheme();
+  if (logics_scheme_ == NULL) logics_scheme_ = new ::Proto::LogicScheme;
+  return logics_scheme_;
+}
+inline ::Proto::LogicScheme* VideoFrame::release_logics_scheme() {
+  clear_has_logics_scheme();
+  ::Proto::LogicScheme* temp = logics_scheme_;
+  logics_scheme_ = NULL;
+  return temp;
+}
+inline void VideoFrame::set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme) {
+  delete logics_scheme_;
+  logics_scheme_ = logics_scheme;
+  if (logics_scheme) {
+    set_has_logics_scheme();
+  } else {
+    clear_has_logics_scheme();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// LogicScheme
+
+// repeated .Proto.wstring hardware_strids = 1;
+inline int LogicScheme::hardware_strids_size() const {
+  return hardware_strids_.size();
+}
+inline void LogicScheme::clear_hardware_strids() {
+  hardware_strids_.Clear();
+}
+inline const ::Proto::wstring& LogicScheme::hardware_strids(int index) const {
+  return hardware_strids_.Get(index);
+}
+inline ::Proto::wstring* LogicScheme::mutable_hardware_strids(int index) {
+  return hardware_strids_.Mutable(index);
+}
+inline ::Proto::wstring* LogicScheme::add_hardware_strids() {
+  return hardware_strids_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
+LogicScheme::hardware_strids() const {
+  return hardware_strids_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
+LogicScheme::mutable_hardware_strids() {
+  return &hardware_strids_;
 }
 
 // -------------------------------------------------------------------

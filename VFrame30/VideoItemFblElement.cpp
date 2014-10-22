@@ -94,14 +94,18 @@ namespace VFrame30
 		
 		if (inputsCount() > 0)
 		{
-			r.setLeft(r.left() + pinWidth + m_font.drawSize() / 4.0);
-		}
-		if (outputsCount() > 0)
-		{
-			r.setRight(r.right() - pinWidth -  m_font.drawSize() / 4.0);
+			r.setLeft(r.left() + pinWidth);
 		}
 
-		// Вывод названия Fbl элемента
+		if (outputsCount() > 0)
+		{
+			r.setRight(r.right() - pinWidth);
+		}
+
+		r.setLeft(r.left() + m_font.drawSize() / 4.0);
+		r.setRight(r.right() - m_font.drawSize() / 4.0);
+
+		// Draw Afb element name
 		//
 		p->setPen(textColor());
 

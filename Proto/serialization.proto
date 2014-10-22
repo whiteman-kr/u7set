@@ -256,6 +256,21 @@ message VideoFrame
 
 	repeated Envelope layers = 100;				// Список слоев
 	required AfbElementCollection afbs = 101;	// Application Fuynctional Block stored as XML
+
+	// Derived from VideoFrame
+	//
+	optional LogicScheme logics_scheme = 200;
+}
+
+
+//
+//
+// LogicScheme
+//
+//
+message LogicScheme
+{
+	repeated wstring hardware_strids = 1;
 }
 
 
