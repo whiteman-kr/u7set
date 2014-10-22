@@ -325,6 +325,8 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 
 void BaseServiceWorker::onSendFileAckTimeout()
 {
+	stopSendFile();
+	emit endSendFile(false, m_fileToSendInfo.fileName());
 }
 
 

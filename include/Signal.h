@@ -2,6 +2,7 @@
 #define SIGNAL_H
 
 #include <QString>
+#include <QMultiHash>
 #include "../include/DbStruct.h"
 #include "../include/OrderedHash.h"
 
@@ -275,20 +276,20 @@ public:
 class SignalSet : public OrderedHash<int, Signal>
 {
 private:
-	//QHash<int, Signal*> m_signalSet;
+	QMultiHash<int, int> m_groupSignals;
 
 public:
 	SignalSet();
 	virtual ~SignalSet();
 
-/*	void insert(const Signal& signal);
-	Signal* getSignal(int signalID);
-	const Signal* getConstSignal(int signalID) const;
-	bool haveSignal(int signalID);
+	virtual void clear() override;
 
-	bool contains(int signalID);
+	virtual void append(const int& signalID, const Signal& signal);
+	virtual void remove(const int& signalID);
+	virtual void removeAt(const int index);
 
-	void removeAll();*/
+	QVector<int> getChannelSignalsID(const Signal& signal);
+	QVector<int> getChannelSignalsID(int signalGroupID);
 };
 
 
