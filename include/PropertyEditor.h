@@ -231,8 +231,11 @@ public:
 	void updateProperties();
 	void clearProperties();
 
-protected slots:
+protected:
 	virtual void valueChanged(QtProperty* property, QVariant value);
+
+private slots:
+	void onValueChanged(QtProperty* property, QVariant value);
 	void onShowErrorMessage (QString message);
 	void onCurrentItemChanged(QtBrowserItem* current);
 

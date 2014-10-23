@@ -36,9 +36,9 @@ namespace Afbl
 	public:
 
 		AfbParamValue();
-		AfbParamValue(long long value, AfbParamType type);
-		AfbParamValue(double value, AfbParamType type);
-		AfbParamValue(bool value, AfbParamType type);
+		explicit AfbParamValue(long long value);
+		explicit AfbParamValue(double value);
+		explicit AfbParamValue(bool value);
 
 		bool SaveData(Proto::FblParamValue* message) const;
 		bool LoadData(const Proto::FblParamValue& message);

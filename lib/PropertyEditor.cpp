@@ -737,7 +737,6 @@ QSet<QtProperty*> QtMultiVariantPropertyManager::propertyByName(const QString& p
 		if (p->propertyName() == propertyName)
 		{
 			result << p;
-			return result;
 		}
 	}
 	return result;
@@ -758,7 +757,7 @@ void QtMultiVariantPropertyManager::setValue(QtProperty* property, const QVarian
 		return;
 	}
 
-	if (value.isNull())
+	if (value.isValid() == false)
 	{
 		it.value().value = QVariant();
 	}
@@ -780,7 +779,7 @@ void QtMultiVariantPropertyManager::emitSetValue(QtProperty* property, const QVa
 		return;
 	}
 
-	valueChanged(property, value);
+	emit valueChanged(property, value);
 }
 
 void QtMultiVariantPropertyManager::initializeProperty(QtProperty* property)
@@ -812,7 +811,7 @@ QIcon QtMultiVariantPropertyManager::valueIcon(const QtProperty* property) const
 		return QIcon();
 	}
 
-	if (value(property).isNull())
+	if (value(property).isValid() == false)
 	{
 		return QIcon();
 	}
@@ -843,7 +842,7 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 		return QString();
 	}
 
-	if (value(property).isNull() == false)
+	if (value(property).isValid() == true)
 	{
 		switch (type())
 		{
@@ -929,11 +928,11 @@ PropertyEditor::PropertyEditor(QWidget* parent) :
 	setFactoryForManager(m_propertyBoolManager, checkBoxFactory);
 	setFactoryForManager(m_propertyColorManager, colorFactory);
 
-	connect(m_propertyIntManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
-	connect(m_propertyStringManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
-	connect(m_propertyDoubleManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
-	connect(m_propertyBoolManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
-	connect(m_propertyColorManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
+	connect(m_propertyIntManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+	connect(m_propertyStringManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+	connect(m_propertyDoubleManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+	connect(m_propertyBoolManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+	connect(m_propertyColorManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
 
 	connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
 
@@ -1202,6 +1201,7 @@ void PropertyEditor::updateProperties(const QString& propertyName)
 	{
 		m_propertyStringManager->setValue(p, vals.value(p));
 	}
+
 }
 
 void PropertyEditor::updateProperties()
@@ -1272,8 +1272,20 @@ void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProp
 
 void PropertyEditor::clearProperties()
 {
+	m_propertyBoolManager->clear();
+	m_propertyColorManager->clear();
+	m_propertyDoubleManager->clear();
+	m_propertyStringManager->clear();
+	m_propertyIntManager->clear();
+	m_propertyGroupManager->clear();
 	clear();
 	m_propToClassMap.clear();
+}
+
+void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)
+{
+	valueChanged(property, value);
+	updateProperties(property->propertyName());
 }
 
 void PropertyEditor::valueChanged(QtProperty* property, QVariant value)

@@ -145,10 +145,10 @@ void DialogAfblEditor::on_m_add_clicked()
 	AfbElementParam param1;
 	param1.setCaption("Param1Caption");
 	param1.setType(AfbParamType::AnalogIntegral);
-	param1.setValue(AfbParamValue((long long)0, AfbParamType::AnalogIntegral));
-	param1.setDefaultValue(AfbParamValue((long long)0, AfbParamType::AnalogIntegral));
-	param1.setLowLimit(AfbParamValue((long long)0, AfbParamType::AnalogIntegral));
-	param1.setHighLimit(AfbParamValue((long long)100, AfbParamType::AnalogIntegral));
+	param1.setValue(AfbParamValue((long long)0));
+	param1.setDefaultValue(AfbParamValue((long long)0));
+	param1.setLowLimit(AfbParamValue((long long)0));
+	param1.setHighLimit(AfbParamValue((long long)100));
 
 	// Param 2
 	//
@@ -156,10 +156,10 @@ void DialogAfblEditor::on_m_add_clicked()
 	AfbElementParam param2;
 	param2.setCaption("Param2Caption");
 	param2.setType(AfbParamType::AnalogFloatingPoint);
-	param2.setValue(AfbParamValue((double)1.5, AfbParamType::AnalogFloatingPoint));
-	param2.setDefaultValue(AfbParamValue((double)1.5, AfbParamType::AnalogFloatingPoint));
-	param2.setLowLimit(AfbParamValue((double)0.5, AfbParamType::AnalogFloatingPoint));
-	param2.setHighLimit(AfbParamValue((double)100.5, AfbParamType::AnalogFloatingPoint));
+	param2.setValue(AfbParamValue((double)1.5));
+	param2.setDefaultValue(AfbParamValue((double)1.5));
+	param2.setLowLimit(AfbParamValue((double)0.5));
+	param2.setHighLimit(AfbParamValue((double)100.5));
 
 	// Param 3
 	//
@@ -167,8 +167,10 @@ void DialogAfblEditor::on_m_add_clicked()
 	AfbElementParam param3;
 	param3.setCaption("Param3Caption");
 	param3.setType(AfbParamType::DiscreteValue);
-	param3.setValue(AfbParamValue(false, AfbParamType::DiscreteValue));
-	param3.setDefaultValue(AfbParamValue(true, AfbParamType::DiscreteValue));
+	param3.setValue(AfbParamValue(false));
+	param3.setDefaultValue(AfbParamValue(true));
+	param3.setLowLimit(AfbParamValue(false));
+	param3.setHighLimit(AfbParamValue(false));
 
 	std::vector<AfbElementParam> afbParams;
 	afbParams.push_back(param1);
