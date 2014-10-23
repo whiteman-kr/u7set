@@ -30,7 +30,11 @@ public:
 
 	quint32 ID() { return m_ID; }
 
-	bool appendData(char* ptr, quint32 len);
+	bool appendData(const char *ptr, quint32 len);
+
+	QString fileName() const { return m_fileName; }
+
+	quint32 CRC32();
 };
 
 
@@ -69,6 +73,7 @@ private:
 	QHash<quint32, ReceivedFile*> m_receivedFile;
 
 	void onSendFileStartRequest(const UdpRequest &request, UdpRequest &ack);
+	void onSendFileNextRequest(const UdpRequest &request, UdpRequest &ack);
 
 public:
     BaseServiceWorker(BaseServiceController* baseServiceController, int serviceType);
@@ -85,8 +90,9 @@ signals:
 	void restartMainFunction();
 
 	void endSendFile(bool result, QString fileName);
+	void fileReceived(ReceivedFile* receivedFile);
 
-	void sendFileRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
+	void sendFileRequest(UdpRequest request);
 
 private slots:
 	void onSendFileAckReceived(UdpRequest udpRequest);
@@ -99,6 +105,7 @@ public slots:
     void onBaseRequest(UdpRequest request);
 
 	void onSendFile(QHostAddress address, quint16 port, QString fileName);
+	void onFreeReceivedFile(quint32 fileID);
 };
 
 
@@ -176,12 +183,15 @@ private:
 signals:
 	void sendFile(QHostAddress address, quint16 port, QString fileName);
 
+	void freeReceivedFile(quint32 fileID);
+
 public slots:
 	void stopMainFunction();
 	void startMainFunction();
 	void restartMainFunction();
 
 	virtual void onEndSendFile(bool result, QString fileName);
+	virtual void onFileReceived(ReceivedFile* receivedFile);
 
 private slots:
 	void onTimer500ms();

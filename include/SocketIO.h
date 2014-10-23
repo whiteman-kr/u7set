@@ -39,7 +39,9 @@ const quint32   SS_MF_STOPPED = 0,
 
 // Request error codes
 const quint32	RQERROR_OK = 0,
-				RQERROR_UNKNOWN = 1;
+				RQERROR_UNKNOWN_REQUEST = 1,
+				RQERROR_UNKNOWN_FILE_ID = 2,
+				RQERROR_RECEIVE_FILE = 3;				// file receive error on receiver side
 
 
 struct ServiceTypeInfo

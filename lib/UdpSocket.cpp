@@ -130,6 +130,8 @@ void UdpClientSocket::onSocketReadyRead()
     }
     else
     {
+		qDebug() << "Receive ACK on request " << m_ack.ID();
+
 		emit ackReceived(m_ack);
     }
 }
@@ -167,7 +169,7 @@ void UdpClientSocket::setPort(quint16 port)
 }
 
 
-void UdpClientSocket::sendRequest(quint32 requestID, const char *requestData, quint32 requestDataSize)
+void UdpClientSocket::sendRequest(UdpRequest request)
 {
     QMutexLocker m(&m_mutex);
 
@@ -177,22 +179,11 @@ void UdpClientSocket::sendRequest(quint32 requestID, const char *requestData, qu
 		return;
 	}
 
-	if (requestData == nullptr && requestDataSize > 0)
-	{
-		assert(requestData != nullptr);
-		return;
-	}
-
-	if (requestDataSize + sizeof(RequestHeader) > MAX_DATAGRAM_SIZE)
-	{
-		assert(requestDataSize + sizeof(RequestHeader) <= MAX_DATAGRAM_SIZE);
-		return;
-	}
-
 	m_request.setAddress(m_serverAddress);
 	m_request.setPort(m_port);
 
-	m_request.setID(requestID);
+	m_request.setID(request.ID());
+
 	m_request.setClientID(m_clientID);
 	m_request.setVersion(m_protocolVersion);
 	m_request.setNo(m_requestNo);
@@ -200,10 +191,12 @@ void UdpClientSocket::sendRequest(quint32 requestID, const char *requestData, qu
 
 	m_request.initWrite();
 
-	if (requestDataSize > 0)
+	if (request.dataSize() > 0)
 	{
-		m_request.writeData(requestData, requestDataSize);
+		m_request.writeData(request.data(), request.dataSize());
 	}
+
+	qDebug() << "Send request " << m_request.ID();
 
 	qint64 sent = m_socket.writeDatagram(m_request.rawData(), m_request.rawDataSize(), m_serverAddress, m_port);
 
@@ -248,6 +241,8 @@ void UdpClientSocket::onAckTimerTimeout()
     {
        m_retryCtr = 0;
        m_state = UdpClientSocketState::readyToSend;
+
+	   qDebug() << "ACK timeout on request " << m_request.ID();
 
 	   emit ackTimeout(m_request);
     }

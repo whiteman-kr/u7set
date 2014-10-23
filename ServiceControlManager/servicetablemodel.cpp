@@ -273,7 +273,7 @@ void ServiceTableModel::checkAddress(QString connectionAddress)
         UdpClientSocket* socket = new UdpClientSocket(QHostAddress(connectionAddress), serviceTypesInfo[i].port);
         connect(socket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotFound);
         connect(socket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
-        socket->sendRequest(RQID_GET_SERVICE_INFO, nullptr, 0);
+		socket->sendShortRequest(RQID_GET_SERVICE_INFO);
     }
 }
 
@@ -387,7 +387,7 @@ void ServiceTableModel::checkServiceStates()
             {
                 qApp->processEvents();
             }
-            clientSocket->sendRequest(RQID_GET_SERVICE_INFO, nullptr, 0);
+			clientSocket->sendShortRequest(RQID_GET_SERVICE_INFO);
         }
     }
 }
@@ -410,7 +410,7 @@ void ServiceTableModel::sendCommand(int row, int col, int command)
     {
         qApp->processEvents();
     }
-    clientSocket->sendRequest(command, nullptr, 0);
+	clientSocket->sendShortRequest(command);
     m_freezeUpdate = false;
 }
 

@@ -24,7 +24,7 @@ private slots:
 	void on_sendFileButton_clicked();
 
 signals:
-    void clientSendRequest(quint32 requestID, char* requestData, quint32 requestDataSize);
+	void clientSendRequest(UdpRequest request);
 
 private:
     Ui::MainWindow *ui;
