@@ -461,7 +461,7 @@ EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFram
 
 	// Create controls
 	//
-	m_videoFrameWidget = new EditSchemeWidget(videoFrame, fileInfo);
+	m_videoFrameWidget = new EditSchemeWidget(videoFrame, fileInfo, dbcontroller);
 
 	connect(m_videoFrameWidget, &EditSchemeWidget::closeTab, this, &EditSchemeTabPage::closeTab);
 	connect(m_videoFrameWidget, &EditSchemeWidget::modifiedChanged, this, &EditSchemeTabPage::modifiedChanged);
@@ -503,22 +503,22 @@ void EditSchemeTabPage::setPageTitle()
 	{
 		if (fileInfo().changeset() != -1)
 		{
-			newTitle = QString("%1: %2 ReadOnly").arg(m_videoFrameWidget->videoFrame()->strID()).arg(fileInfo().changeset());
+			newTitle = QString("%1: %2 ReadOnly").arg(m_videoFrameWidget->scheme()->strID()).arg(fileInfo().changeset());
 		}
 		else
 		{
-			newTitle = QString("%1: ReadOnly").arg(m_videoFrameWidget->videoFrame()->strID());
+			newTitle = QString("%1: ReadOnly").arg(m_videoFrameWidget->scheme()->strID());
 		}
 	}
 	else
 	{
 		if (modified() == true)
 		{
-			newTitle = m_videoFrameWidget->videoFrame()->strID() + "*";
+			newTitle = m_videoFrameWidget->scheme()->strID() + "*";
 		}
 		else
 		{
-			newTitle = m_videoFrameWidget->videoFrame()->strID();
+			newTitle = m_videoFrameWidget->scheme()->strID();
 		}
 	}
 
@@ -653,7 +653,7 @@ void EditSchemeTabPage::checkOutFile()
 		return;
 	}
 
-	m_videoFrameWidget->videoFrame()->Load(out[0].get()->data());
+	m_videoFrameWidget->scheme()->Load(out[0].get()->data());
 
 	setFileInfo(*(out.front().get()));
 
@@ -733,7 +733,7 @@ bool EditSchemeTabPage::saveWorkcopy()
 	}
 
 	QByteArray data;
-	m_videoFrameWidget->videoFrame()->Save(data);
+	m_videoFrameWidget->scheme()->Save(data);
 
 	if (data.isEmpty() == true)
 	{
@@ -774,7 +774,7 @@ void EditSchemeTabPage::getCurrentWorkcopy()
 	//
 	QString fileName = dir + fileInfo().fileName();
 
-	bool writeResult = m_videoFrameWidget->videoFrame()->Save(fileName);
+	bool writeResult = m_videoFrameWidget->scheme()->Save(fileName);
 
 	if (writeResult == false)
 	{
@@ -807,7 +807,7 @@ void EditSchemeTabPage::setCurrentWorkcopy()
 
 	// Load file
 	//
-	bool readResult = m_videoFrameWidget->videoFrame()->Load(fileName);
+	bool readResult = m_videoFrameWidget->scheme()->Load(fileName);
 	if (readResult == false)
 	{
 		QMessageBox mb(this);

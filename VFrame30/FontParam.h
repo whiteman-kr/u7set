@@ -22,8 +22,8 @@
 	const QString& classname::get##propname##Name() const		{ 	return varname.name();	} \
 	void classname::set##propname##Name(const QString& value)	{	varname.setName(value); } \
 	\
-	double classname::get##propname##Size() const				{	return varname.size(itemUnit());	} \
-	void classname::set##propname##Size(double value)			{	varname.setSize(value, itemUnit());	} \
+	double classname::get##propname##Size() const				{	return varname.size(CSettings::regionalUnit());	} \
+	void classname::set##propname##Size(double value)			{	varname.setSize(value, CSettings::regionalUnit());	} \
 	\
 	bool classname::get##propname##Bold() const					{	return varname.bold();	} \
 	void classname::set##propname##Bold(bool value)				{	varname.setBold(value); } \

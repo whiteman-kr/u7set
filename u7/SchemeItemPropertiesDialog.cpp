@@ -13,7 +13,6 @@ SchemeItemPropertiesDialog::SchemeItemPropertiesDialog(EditEngine::EditEngine* e
 
 	ui->horizontalLayout->addWidget(m_propertyEditor);
 
-
 	return;
 }
 

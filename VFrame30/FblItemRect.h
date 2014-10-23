@@ -9,6 +9,11 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
+		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
+		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
+		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
+
 #ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<VideoItem>::DerivedType<FblItemRect>;
 #endif
@@ -32,7 +37,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* layer) const override;
 
 		// Вычислить координаты точки
 		//

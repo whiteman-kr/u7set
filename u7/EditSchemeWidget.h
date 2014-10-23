@@ -3,9 +3,7 @@
 #include "../VFrame30/SchemeView.h"
 #include "../VFrame30/VideoItem.h"
 #include "../VFrame30/FblItem.h"
-#include "EditEngine/EditEngine.h"
 #include "../include/DbController.h"
-#include "SchemeItemPropertiesDialog.h"
 
 #define GridSizeDisplay				5
 #define GridSizeMm					mm2in(0.5)
@@ -63,6 +61,13 @@ enum VideoItemAction
 };
 
 class EditSchemeWidget;
+class SchemePropertiesDialog;
+class SchemeItemPropertiesDialog;
+
+namespace EditEngine
+{
+	class EditEngine;
+}
 
 //
 //
@@ -184,7 +189,7 @@ private:
 	EditSchemeWidget();			// deleted;
 
 public:
-	explicit EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo);
+	EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* dbController);
 	virtual ~EditSchemeWidget();
 	
 protected:
@@ -287,6 +292,7 @@ protected slots:
 	void zoom100();
 	void selectAll();
 
+	void schemeProperties();
 	void properties();
 	void selectionChanged();
 
@@ -295,9 +301,12 @@ protected slots:
 	// Properties
 	//
 public:
-	std::shared_ptr<VFrame30::Scheme>& videoFrame();
-	std::shared_ptr<VFrame30::Scheme>& videoFrame() const;
-	void setVideoFrame(std::shared_ptr<VFrame30::Scheme>& videoFrame);
+	DbController* dbcontroller();
+	DbController* db();
+
+	std::shared_ptr<VFrame30::Scheme>& scheme();
+	std::shared_ptr<VFrame30::Scheme>& scheme() const;
+	void setScheme(std::shared_ptr<VFrame30::Scheme>& scheme);
 
 	std::shared_ptr<VFrame30::SchemeLayer> activeLayer();
 
@@ -331,6 +340,8 @@ public:
 	//
 private:
 	DbFileInfo m_fileInfo;
+	DbController* m_dbcontroller = nullptr;
+
 	bool m_snapToGrid;
 
 	// Interface data
@@ -342,7 +353,8 @@ private:
 	EditSchemeView* m_videoFrameView;
 	EditEngine::EditEngine* m_editEngine;
 
-	SchemeItemPropertiesDialog* m_propertiesDialog = nullptr;
+	SchemePropertiesDialog* m_schemePropertiesDialog = nullptr;
+	SchemeItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;
 
 	// Temporary and state variables
 	//

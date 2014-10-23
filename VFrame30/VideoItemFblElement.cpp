@@ -1,5 +1,6 @@
 #include "Stable.h"
 #include "VideoItemFblElement.h"
+#include "Scheme.h"
 
 namespace VFrame30
 {
@@ -16,19 +17,19 @@ namespace VFrame30
 	}
 
 	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement) :
-		FblItemRect(unit)
+		FblItemRect(unit),
+		m_afbGuid(fblElement.guid()),
+		m_params(fblElement.params())
 	{
-		m_fblElement = fblElement;
-
 		// Создать входные и выходные сигналы в VFrame30::FblEtem
 		//
-		const std::vector<Afbl::AfbElementSignal>& inputSignals = m_fblElement.inputSignals();
+		const std::vector<Afbl::AfbElementSignal>& inputSignals = fblElement.inputSignals();
 		for (auto s = inputSignals.begin(); s != inputSignals.end(); ++s)
 		{
 			AddInput();
 		}
 
-		const std::vector<Afbl::AfbElementSignal>& outputSignals = m_fblElement.outputSignals();
+		const std::vector<Afbl::AfbElementSignal>& outputSignals = fblElement.outputSignals();
 		for (auto s = outputSignals.begin(); s != outputSignals.end(); ++s)
 		{
 			AddOutput();
@@ -36,23 +37,30 @@ namespace VFrame30
 
 		// Проинициализировать паремтры значением по умолчанию
 		//
-		std::vector<Afbl::AfbElementParam> params = m_fblElement.params();
-		for (auto p = params.begin(); p != params.end(); ++p)
+		for (auto& p : m_params)
 		{
-			p->setValue(p->defaultValue());
+			p.setValue(p.defaultValue());
 		}
-		m_fblElement.setParams(params);
 	}
 
 	VideoItemFblElement::~VideoItemFblElement(void)
 	{
 	}
 
-	void VideoItemFblElement::Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const
+	void VideoItemFblElement::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const
 	{
+		std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(afbGuid());
+		if (afb.get() == nullptr)
+		{
+			// Such AfbItem was not found
+			//
+			assert(afb.get() != nullptr);
+			return;
+		}
+
 		// Нарисовать прямоугольник и пины
 		//
-		FblItemRect::Draw(drawParam, pFrame, pLayer);
+		FblItemRect::Draw(drawParam, scheme, pLayer);
 
 		//--
 		//
@@ -88,16 +96,20 @@ namespace VFrame30
 		{
 			r.setLeft(r.left() + pinWidth);
 		}
+
 		if (outputsCount() > 0)
 		{
 			r.setRight(r.right() - pinWidth);
 		}
 
-		// Вывод названия Fbl элемента
+		r.setLeft(r.left() + m_font.drawSize() / 4.0);
+		r.setRight(r.right() - m_font.drawSize() / 4.0);
+
+		// Draw Afb element name
 		//
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), m_fblElement.caption(), r);
+		DrawHelper::DrawText(p, m_font, itemUnit(), afb->caption(), r);
 
 		return;
 	}
@@ -118,8 +130,13 @@ namespace VFrame30
 		//
 		Proto::VideoItemFblElement* vifble = message->mutable_videoitem()->mutable_videoitemfblelement();
 
-		m_fblElement.Save(vifble->mutable_fblelement());
-		//vifble->set_weight(weight);
+		Proto::Write(vifble->mutable_afbguid(), m_afbGuid);
+
+		for (const Afbl::AfbElementParam& p : m_params)
+		{
+			::Proto::FblElementParam* protoParam = vifble->mutable_params()->Add();
+			p.SaveData(protoParam);
+		}
 
 		return true;
 	}
@@ -150,14 +167,25 @@ namespace VFrame30
 		
 		const Proto::VideoItemFblElement& vifble = message.videoitem().videoitemfblelement();
 		
-		m_fblElement.Load(vifble.fblelement());
-		//fill = vifble.fill();
+		m_afbGuid = Proto::Read(vifble.afbguid());
+
+		m_params.clear();
+		for (int i = 0; i < vifble.params_size(); i++)
+		{
+			Afbl::AfbElementParam p;
+			p.LoadData(vifble.params(i));
+		}
 
 		return true;
 	}
 
-	const Afbl::AfbElement& VideoItemFblElement::fblElement() const
+	const QUuid& VideoItemFblElement::afbGuid() const
 	{
-		return m_fblElement;
+		return m_afbGuid;
+	}
+
+	const std::vector<Afbl::AfbElementParam>& VideoItemFblElement::params() const
+	{
+		return m_params;
 	}
 }
