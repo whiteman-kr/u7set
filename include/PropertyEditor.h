@@ -246,8 +246,6 @@ signals:
 	// Protected functions and structs
 	//
 protected:
-	bool propertyByName(const std::shared_ptr<QObject>& object, const QString& name, QMetaProperty& metaProperty);
-
 	struct PropertyItem
 	{
 		std::shared_ptr<QObject> object;
