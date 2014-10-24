@@ -29,8 +29,12 @@ public:
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 signals:
+	void itemDoubleClicked(int row);
 
 public slots:
+
+protected:
+	bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
 
 private:
 	const DataFormatList& m_dataFormatInfo;

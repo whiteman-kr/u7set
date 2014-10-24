@@ -11,7 +11,6 @@
 #include <QCheckBox>
 #include <QPlainTextEdit>
 
-
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
 SC_NAME = 2,
@@ -346,6 +345,22 @@ void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionVi
 	}
 }
 
+bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QStyleOptionViewItem &, const QModelIndex &index)
+{
+	if (event->type() == QEvent::MouseButtonDblClick)
+	{
+		QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+		if (mouseEvent == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+		emit itemDoubleClicked(index.row());
+		return true;
+	}
+	return false;
+}
+
 
 SignalsModel::SignalsModel(DbController* dbController, QWidget *parent) :
 	QAbstractTableModel(parent),
@@ -451,7 +466,6 @@ bool SignalsModel::checkoutSignal(int index)
 		return false;
 	}
 	emit setCheckedoutSignalActionsVisibility(true);
-	//emit headerDataChanged(Qt::Vertical, index, index);
 	return true;
 }
 
@@ -871,7 +885,8 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
-	m_signalsView->setItemDelegate(m_signalsModel->createDelegate());
+	SignalsDelegate* delegate = m_signalsModel->createDelegate();
+	m_signalsView->setItemDelegate(delegate);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
@@ -885,6 +900,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeRowsToContents);
+	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
 
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
 
