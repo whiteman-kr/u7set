@@ -11,49 +11,40 @@ namespace Afbl
 	//
 	//
 	AfbParamValue::AfbParamValue()
+		:Type(AfbParamType::AnalogIntegral),
+		  IntegralValue(0),
+		  FloatingPoint(0.0),
+		  Discrete(false)
 	{
-		IntegralValue = 0;
-		FloatingPoint = 0.0;
-		Discrete = false;
+	}
+
+	AfbParamValue::AfbParamValue(int32_t value)
+		:AfbParamValue()
+	{
 		Type = AfbParamType::AnalogIntegral;
-	}
-
-	AfbParamValue::AfbParamValue(long long value, AfbParamType type)
-	{
-		Q_ASSERT(type == AfbParamType::AnalogIntegral);
-
 		IntegralValue = value;
-		FloatingPoint = 0.0;
-		Discrete = false;
-		Type = type;
 	}
 
-	AfbParamValue::AfbParamValue(double value, AfbParamType type)
+	AfbParamValue::AfbParamValue(double value)
+		:AfbParamValue()
 	{
-		Q_ASSERT(type == AfbParamType::AnalogFloatingPoint);
-
-		IntegralValue = 0;
+		Type = AfbParamType::AnalogFloatingPoint;
 		FloatingPoint = value;
-		Discrete = false;
-		Type = type;
 	}
 
-	AfbParamValue::AfbParamValue(bool value, AfbParamType type)
+	AfbParamValue::AfbParamValue(bool value)
+		:AfbParamValue()
 	{
-		Q_ASSERT(type == AfbParamType::DiscreteValue);
-
-		IntegralValue = 0;
-		FloatingPoint = 0.0;
+		Type = AfbParamType::DiscreteValue;
 		Discrete = value;
-		Type = type;
 	}
-
 
 	bool AfbParamValue::SaveData(Proto::FblParamValue* message) const
 	{
 		message->set_integralvalue(IntegralValue);
 		message->set_floatingpoint(FloatingPoint);
 		message->set_discrete(Discrete);
+		message->set_type(Type);
 		return true;
 	}
 
@@ -62,6 +53,7 @@ namespace Afbl
 		IntegralValue = message.integralvalue();
 		FloatingPoint = message.floatingpoint();
 		Discrete = message.discrete();
+		Type = static_cast<AfbParamType>(message.type());
 		return true;
 	}
 
@@ -116,20 +108,17 @@ namespace Afbl
 			{
 				case AfbParamType::AnalogIntegral:
 					{
-						IntegralValue = xmlReader->attributes().value("Value").toLongLong();
-						//qDebug()<<"Param Value = "<< QString::number(IntegralValue);
+						IntegralValue = xmlReader->attributes().value("Value").toInt();
 					}
 					break;
 				case AfbParamType::AnalogFloatingPoint:
 					{
 						FloatingPoint = xmlReader->attributes().value("Value").toDouble();
-						//qDebug()<<"Param Value = "<< QString::number(FloatingPoint);
 					}
 					break;
 				case AfbParamType::DiscreteValue:
 					{
 						Discrete = xmlReader->attributes().value("Value") == "0" ? false : true;
-						//qDebug()<<"Param Value = "<< QString(Discrete ? "true" : "false");
 					}
 					break;
 				default:
@@ -140,8 +129,6 @@ namespace Afbl
 		{
 			xmlReader->raiseError(QObject::tr("AfbParamValue - No Value found"));
 		}
-
-		//qDebug()<<"Param Type = "<< QString::number(Type);
 
 		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
 		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
@@ -213,11 +200,11 @@ namespace Afbl
 			case QMetaType::UInt:
 			case QMetaType::Long:
 			case QMetaType::LongLong:
-				return AfbParamValue(static_cast<long long>(value.toLongLong()), AfbParamType::AnalogIntegral);
+				return AfbParamValue(static_cast<int32_t>(value.toInt()));
 			case QMetaType::Double:
-				return AfbParamValue(value.toDouble(), AfbParamType::AnalogFloatingPoint);
+				return AfbParamValue(value.toDouble());
 			case QMetaType::Bool:
-				return AfbParamValue(value.toBool(), AfbParamType::DiscreteValue);
+				return AfbParamValue(value.toBool());
 			default:
 				assert(false);
 				return AfbParamValue();
@@ -315,9 +302,6 @@ namespace Afbl
 		{
 			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Type found"));
 		}
-
-		//qDebug()<<"Signal caption = "<< caption();
-		//qDebug()<<"Signal Type = "<< QString::number(type());
 
 		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
 		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
@@ -433,15 +417,10 @@ namespace Afbl
 			xmlReader->raiseError(QObject::tr("AfbElementParam - No Type found"));
 		}
 
-		//qDebug()<<"Param caption = "<< caption();
-		//qDebug()<<"Param Type = "<< QString::number(type());
-
 		// Read values
 		//
 		while (xmlReader->readNextStartElement())
 		{
-			//qDebug()<<xmlReader->name();
-
 			QString valueName = xmlReader->name().toString();
 
 			while (xmlReader->readNextStartElement())
@@ -639,7 +618,6 @@ namespace Afbl
 			return !xmlReader->hasError();
 		}
 
-		//qDebug()<<xmlReader->name();
 		if (xmlReader->name() != "ApplicationFunctionalBlocks")
 		{
 			xmlReader->raiseError(QObject::tr("The file is not an ApplicationFunctionalBlocks file."));
@@ -695,11 +673,6 @@ namespace Afbl
 			xmlReader->raiseError(QObject::tr("AfbElement - No OpCode found"));
 		}
 
-		//qDebug()<<"Guid ="<<guid().toString();
-		//qDebug()<<"StrId ="<<strID();
-		//qDebug()<<"Caption ="<<caption();
-		//qDebug()<<"OpCode ="<<opcode();
-
 		std::vector<AfbElementSignal> inputSignals;
 		std::vector<AfbElementSignal> outputSignals;
 		std::vector<AfbElementParam> params;
@@ -714,16 +687,12 @@ namespace Afbl
 				loadSignalType = xmlReader->name() == "OutputSignals" ? LoadSignalType::OutputSignal
 															: LoadSignalType::InputSignal;
 
-				//qDebug()<<xmlReader->name().toString();
-
 				// Read signals
 				//
 				while (xmlReader->readNextStartElement())
 				{
 					if (xmlReader->name() == "AfbElementSignal")
 					{
-						//qDebug()<<xmlReader->name().toString();
-
 						AfbElementSignal afbSignal;
 						afbSignal.loadFromXml(xmlReader);
 						if (loadSignalType == LoadSignalType::InputSignal)
@@ -746,16 +715,12 @@ namespace Afbl
 
 			if (xmlReader->name() == "Params")
 			{
-				//qDebug()<<xmlReader->name().toString();
-
 				// Read params
 				//
 				while (xmlReader->readNextStartElement())
 				{
 					if (xmlReader->name() == "AfbElementParam")
 					{
-						//qDebug()<<xmlReader->name().toString();
-
 						AfbElementParam afbParam;
 						afbParam.loadFromXml(xmlReader);
 						params.push_back(afbParam);
@@ -772,8 +737,6 @@ namespace Afbl
 			xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
 			xmlReader->skipCurrentElement();
 		}
-
-		//qDebug()<<"finished.";
 
 		setInputSignals(inputSignals);
 		setOutputSignals(outputSignals);
@@ -863,7 +826,7 @@ namespace Afbl
 		return false;
 
 //		quint32 classnamehash = CUtils::GetClassHashCode("FblElement");
-//		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
+//		message->set_classnamehash(classnamehash);	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
 
 //		Proto::FblElement* pMutableFblElement = message->mutable_fblelement();
 
@@ -952,7 +915,7 @@ namespace Afbl
 		assert(false);
 		return nullptr;
 
-//		// Эта функция может создавать только один экземпляр
+//		// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 //		//
 //		if (message.has_fblelement() == false)
 //		{
@@ -1076,7 +1039,7 @@ namespace Afbl
 
 	//
 	//
-	//				FblElementCollection - Коллекция прототипов FBL элементов
+	//				FblElementCollection - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ FBL пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	//
 	//
 

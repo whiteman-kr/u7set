@@ -26,7 +26,7 @@ namespace Afbl
 	//
 	struct VFRAME30LIBSHARED_EXPORT AfbParamValue
 	{
-		long long IntegralValue;
+		int32_t IntegralValue;
 		double FloatingPoint;
 		bool Discrete;
 		AfbParamType Type;	// Тип данных параметра
@@ -36,9 +36,9 @@ namespace Afbl
 	public:
 
 		AfbParamValue();
-		AfbParamValue(long long value, AfbParamType type);
-		AfbParamValue(double value, AfbParamType type);
-		AfbParamValue(bool value, AfbParamType type);
+		explicit AfbParamValue(int32_t value);
+		explicit AfbParamValue(double value);
+		explicit AfbParamValue(bool value);
 
 		bool SaveData(Proto::FblParamValue* message) const;
 		bool LoadData(const Proto::FblParamValue& message);

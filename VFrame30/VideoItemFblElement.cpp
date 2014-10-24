@@ -37,7 +37,6 @@ namespace VFrame30
 
 		// Проинициализировать паремтры значением по умолчанию and add Afb properties to class meta object
 		//
-		//qDebug() << Q_FUNC_INFO << " Param count " << m_params.size();
 		for (Afbl::AfbElementParam& p : m_params)
 		{
 			p.setValue(p.defaultValue());
@@ -173,15 +172,37 @@ namespace VFrame30
 		m_afbGuid = Proto::Read(vifble.afbguid());
 
 		m_params.clear();
+		m_params.reserve(vifble.params_size());
+
 		for (int i = 0; i < vifble.params_size(); i++)
 		{
 			Afbl::AfbElementParam p;
 			p.LoadData(vifble.params(i));
+
+			m_params.push_back(p);
 		}
 
 		// Add afb properties to class meta object
 		//
 		addQtDynamicParamProperties();
+
+		return true;
+	}
+
+	bool VideoItemFblElement::setAfbParam(const QString& name, QVariant value)
+	{
+		auto found = std::find_if(m_params.begin(), m_params.end(), [&name](const Afbl::AfbElementParam& p)
+			{
+				return p.caption() == name;
+			});
+
+		if (found == m_params.end())
+		{
+			assert(found != m_params.end());
+			return false;
+		}
+
+		found->setValue(Afbl::AfbParamValue::fromQVariant(value));
 
 		return true;
 	}

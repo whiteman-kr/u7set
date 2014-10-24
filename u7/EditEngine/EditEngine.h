@@ -167,6 +167,7 @@ namespace EditEngine
 	signals:
 		void stateChanged(bool canUndo, bool canRedo);
 		void modifiedChanged(bool modified);
+		void propertiesChanged();
 
 		// Data
 		//

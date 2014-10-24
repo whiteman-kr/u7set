@@ -39,6 +39,9 @@ namespace VFrame30
 
 		// Methods
 		//
+	public:
+		bool setAfbParam(const QString& name, QVariant value);
+
 	protected:
 		void addQtDynamicParamProperties();
 

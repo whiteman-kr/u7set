@@ -100,6 +100,7 @@ namespace EditEngine
 		m_videoFrameView->update();
 
 		emit stateChanged(canUndo(), canRedo());
+		emit propertiesChanged();
 
 		return;
 	}
@@ -122,6 +123,7 @@ namespace EditEngine
 		m_videoFrameView->update();
 
 		emit stateChanged(canUndo(), canRedo());
+		emit propertiesChanged();
 
 		return;
 	}
