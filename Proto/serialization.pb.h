@@ -1465,12 +1465,12 @@ class FblParamValue : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int64 integralvalue = 1;
+  // required int32 integralvalue = 1;
   inline bool has_integralvalue() const;
   inline void clear_integralvalue();
   static const int kIntegralvalueFieldNumber = 1;
-  inline ::google::protobuf::int64 integralvalue() const;
-  inline void set_integralvalue(::google::protobuf::int64 value);
+  inline ::google::protobuf::int32 integralvalue() const;
+  inline void set_integralvalue(::google::protobuf::int32 value);
 
   // required double floatingpoint = 2;
   inline bool has_floatingpoint() const;
@@ -1486,6 +1486,13 @@ class FblParamValue : public ::google::protobuf::Message {
   inline bool discrete() const;
   inline void set_discrete(bool value);
 
+  // required int32 type = 4;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 4;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.FblParamValue)
  private:
   inline void set_has_integralvalue();
@@ -1494,15 +1501,18 @@ class FblParamValue : public ::google::protobuf::Message {
   inline void clear_has_floatingpoint();
   inline void set_has_discrete();
   inline void clear_has_discrete();
+  inline void set_has_type();
+  inline void clear_has_type();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int64 integralvalue_;
   double floatingpoint_;
+  ::google::protobuf::int32 integralvalue_;
   bool discrete_;
+  ::google::protobuf::int32 type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5893,7 +5903,7 @@ inline void FblElementParam::set_allocated_highlimit(::Proto::FblParamValue* hig
 
 // FblParamValue
 
-// required int64 integralvalue = 1;
+// required int32 integralvalue = 1;
 inline bool FblParamValue::has_integralvalue() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -5904,13 +5914,13 @@ inline void FblParamValue::clear_has_integralvalue() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void FblParamValue::clear_integralvalue() {
-  integralvalue_ = GOOGLE_LONGLONG(0);
+  integralvalue_ = 0;
   clear_has_integralvalue();
 }
-inline ::google::protobuf::int64 FblParamValue::integralvalue() const {
+inline ::google::protobuf::int32 FblParamValue::integralvalue() const {
   return integralvalue_;
 }
-inline void FblParamValue::set_integralvalue(::google::protobuf::int64 value) {
+inline void FblParamValue::set_integralvalue(::google::protobuf::int32 value) {
   set_has_integralvalue();
   integralvalue_ = value;
 }
@@ -5957,6 +5967,28 @@ inline bool FblParamValue::discrete() const {
 inline void FblParamValue::set_discrete(bool value) {
   set_has_discrete();
   discrete_ = value;
+}
+
+// required int32 type = 4;
+inline bool FblParamValue::has_type() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void FblParamValue::set_has_type() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void FblParamValue::clear_has_type() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void FblParamValue::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 FblParamValue::type() const {
+  return type_;
+}
+inline void FblParamValue::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
 }
 
 // -------------------------------------------------------------------

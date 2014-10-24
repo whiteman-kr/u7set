@@ -37,6 +37,14 @@ namespace VFrame30
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
+		// Methods
+		//
+	public:
+		bool setAfbParam(const QString& name, QVariant value);
+
+	protected:
+		void addQtDynamicParamProperties();
+
 		// Properties and Data
 		//
 	public:

@@ -208,9 +208,10 @@ message FblElementParam
 //
 message FblParamValue
 {
-	required int64 integralvalue = 1;
+	required int32 integralvalue = 1;
 	required double floatingpoint = 2;
 	required bool discrete = 3;
+	required int32 type = 4;
 }
 
 
@@ -232,7 +233,7 @@ enum FblSignalType
 //
 enum FblParamType
 {
-	AnalogIntegral = 0;			// Аналоговый целочисленный (long long - 64bit signed ind)
+	AnalogIntegral = 0;			// Аналоговый целочисленный (32bit signed int)
 	AnalogFloatingPoint = 1;	// Аналоговый с плавающей запятой (double, 64bit)
 	DiscreteValue = 2;			// Дискретный (c++ bool)
 }

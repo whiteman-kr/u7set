@@ -538,7 +538,7 @@ void QtMultiCheckBox::onStateChanged(int state)
 
 	m_checkBox->setTristate(false);
 
-	emit valueChanged(state);
+	emit valueChanged(state == Qt::Checked ? true : false);
 }
 
 void QtMultiCheckBox::updateText()
@@ -612,7 +612,15 @@ QWidget* QtMultiVariantFactory::createEditor(QtMultiVariantPropertyManager* mana
 			{
 				QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
 				editor = m_editor;
-				m_editor->setCheckState((Qt::CheckState)manager->value(property).toInt());
+
+				if (manager->value(property).isValid() == true)
+				{
+					m_editor->setCheckState(manager->value(property).toBool() == true ? Qt::Checked : Qt::Unchecked);
+				}
+				else
+				{
+					m_editor->setCheckState(Qt::PartiallyChecked);
+				}
 
 				connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 				connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
@@ -737,7 +745,6 @@ QSet<QtProperty*> QtMultiVariantPropertyManager::propertyByName(const QString& p
 		if (p->propertyName() == propertyName)
 		{
 			result << p;
-			return result;
 		}
 	}
 	return result;
@@ -758,7 +765,7 @@ void QtMultiVariantPropertyManager::setValue(QtProperty* property, const QVarian
 		return;
 	}
 
-	if (value.isNull())
+	if (value.isValid() == false)
 	{
 		it.value().value = QVariant();
 	}
@@ -780,7 +787,7 @@ void QtMultiVariantPropertyManager::emitSetValue(QtProperty* property, const QVa
 		return;
 	}
 
-	valueChanged(property, value);
+	emit valueChanged(property, value);
 }
 
 void QtMultiVariantPropertyManager::initializeProperty(QtProperty* property)
@@ -812,23 +819,28 @@ QIcon QtMultiVariantPropertyManager::valueIcon(const QtProperty* property) const
 		return QIcon();
 	}
 
-	if (value(property).isNull())
-	{
-		return QIcon();
-	}
-
 	switch (type())
 	{
 		case QVariant::Bool:
 			{
-				Qt::CheckState checkState = (Qt::CheckState)value(property).toInt();
-				return drawCheckBox(checkState);
+				if (value(property).isValid() == true)
+				{
+					Qt::CheckState checkState = value(property).toBool() == true ? Qt::Checked : Qt::Unchecked;
+					return drawCheckBox(checkState);
+				}
+				else
+				{
+					return drawCheckBox(Qt::PartiallyChecked);
+				}
 			}
 			break;
 		case QVariant::Color:
 			{
-				QColor color = value(property).value<QColor>();
-				return drawColorBox(color);
+				if (value(property).isValid() == true)
+				{
+					QColor color = value(property).value<QColor>();
+					return drawColorBox(color);
+				}
 			}
 			break;
 	}
@@ -843,7 +855,7 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 		return QString();
 	}
 
-	if (value(property).isNull() == false)
+	if (value(property).isValid() == true)
 	{
 		switch (type())
 		{
@@ -862,17 +874,7 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 				break;
 			case QVariant::Bool:
 				{
-					Qt::CheckState checkState = (Qt::CheckState)value(property).toInt();
-
-					switch (checkState)
-					{
-						case Qt::Checked:           return("True");
-						case Qt::Unchecked:         return("False");
-						case Qt::PartiallyChecked:  return("<Different values>");
-					}
-
-					return "???";
-
+					return value(property).toBool() == true ? "True" : "False";
 				}
 				break;
 			case QVariant::String:
@@ -897,6 +899,16 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 
 			default:
 				Q_ASSERT(false);
+		}
+	}
+	else
+	{
+		switch (type())
+		{
+			case QVariant::Bool:
+				{
+					return "<Different values>";
+				}
 		}
 	}
 
@@ -929,11 +941,11 @@ PropertyEditor::PropertyEditor(QWidget* parent) :
 	setFactoryForManager(m_propertyBoolManager, checkBoxFactory);
 	setFactoryForManager(m_propertyColorManager, colorFactory);
 
-	connect(m_propertyIntManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
-	connect(m_propertyStringManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
-	connect(m_propertyDoubleManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
-	connect(m_propertyBoolManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
-	connect(m_propertyColorManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::valueChanged);
+	connect(m_propertyIntManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+	connect(m_propertyStringManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+	connect(m_propertyDoubleManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+	connect(m_propertyBoolManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
+	connect(m_propertyColorManager, &QtMultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
 
 	connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
 
@@ -971,6 +983,8 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 	{
 		QObject* object = pobject->get();
 
+		// Add static properties declared by Q_PROPERTY
+		//
 		const QMetaObject* metaObject = object->metaObject();
 
 		for (int i = 0; i < metaObject->propertyCount(); ++i)
@@ -987,6 +1001,25 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 
 			pi.object = *pobject;
 			pi.type = metaProperty.type();
+			pi.value = object->property(name);
+
+			propertyItems.insertMulti(name, pi);
+
+			if (propertyNames.indexOf(name) == -1)
+			{
+				propertyNames.append(name);
+			}
+		}
+
+		//Add dynamic properties added by SetProperty
+		//
+		QList<QByteArray> dynamicPropNames = object->dynamicPropertyNames();
+		for (auto name : dynamicPropNames)
+		{
+			PropertyItem pi;
+
+			pi.object = *pobject;
+			pi.type = object->property(name).type();
 			pi.value = object->property(name);
 
 			propertyItems.insertMulti(name, pi);
@@ -1091,11 +1124,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 				subProperty = m_propertyBoolManager->addProperty(name);
 				if (sameValue == true)
 				{
-					m_propertyBoolManager->setValue(subProperty, value.toBool() == true ? Qt::Checked : Qt::Unchecked);
-				}
-				else
-				{
-					m_propertyBoolManager->setValue(subProperty, Qt::PartiallyChecked);
+					m_propertyBoolManager->setValue(subProperty, value.toBool());
 				}
 				break;
 
@@ -1126,7 +1155,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 	return;
 }
 
-void PropertyEditor::updateProperties(const QString& propertyName)
+void PropertyEditor::updateProperty(const QString& propertyName)
 {
 	QSet<QtProperty*> props;
 	QMap<QtProperty*, QVariant> vals;
@@ -1202,11 +1231,12 @@ void PropertyEditor::updateProperties(const QString& propertyName)
 	{
 		m_propertyStringManager->setValue(p, vals.value(p));
 	}
+
 }
 
 void PropertyEditor::updateProperties()
 {
-	updateProperties(QString());
+	updateProperty(QString());
 }
 
 void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values)
@@ -1223,27 +1253,9 @@ void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProp
 		QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
 		for (auto i = objects.begin(); i != objects.end(); i++)
 		{
-			std::shared_ptr<QObject> pObject = *i;
-			QMetaProperty metaProperty;
-			if (propertyByName(pObject, property->propertyName(), metaProperty) == false)
-			{
-				Q_ASSERT(false);
-				continue;
-			}
+			QObject* pObject = (*i).get();
 
-			QVariant val = metaProperty.read(pObject.get());
-
-			if (metaProperty.type() == QVariant::Bool)
-			{
-				if (val == true)
-				{
-					val = Qt::Checked;
-				}
-				else
-				{
-					val = Qt::Unchecked;
-				}
-			}
+			QVariant val = pObject->property(property->propertyName().toStdString().c_str());
 
 			if (i == objects.begin())
 			{
@@ -1272,8 +1284,20 @@ void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProp
 
 void PropertyEditor::clearProperties()
 {
+	m_propertyBoolManager->clear();
+	m_propertyColorManager->clear();
+	m_propertyDoubleManager->clear();
+	m_propertyStringManager->clear();
+	m_propertyIntManager->clear();
+	m_propertyGroupManager->clear();
 	clear();
 	m_propToClassMap.clear();
+}
+
+void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)
+{
+	valueChanged(property, value);
+	updateProperty(property->propertyName());
 }
 
 void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
@@ -1283,29 +1307,14 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
 
 	QString errorString;
-	QMetaProperty writeProperty;
 
 	for (auto i = objects.begin(); i != objects.end(); i++)
 	{
 		QObject* pObject = i->get();
 
-		if (propertyByName(*i, property->propertyName(), writeProperty) == false)
-		{
-			Q_ASSERT(false);
-			continue;
-		}
+		pObject->setProperty(property->propertyName().toStdString().c_str(), value);
 
-		if (writeProperty.type() == QVariant::Bool)
-		{
-			if (value == Qt::Unchecked)
-				value = false;
-			else
-				value = true;
-		}
-
-		writeProperty.write(pObject, value);
-
-		if (writeProperty.read(pObject) != value && errorString.isEmpty() == true)
+		if (pObject->property(property->propertyName().toStdString().c_str()) != value && errorString.isEmpty() == true)
 		{
 			errorString = QString("Property: %1 - incorrect input value")
 						  .arg(property->propertyName());
@@ -1321,20 +1330,6 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 	emit propertiesChanged(objects);
 
 	return;
-}
-
-bool PropertyEditor::propertyByName(const std::shared_ptr<QObject>& object, const QString& name, QMetaProperty& metaProperty)
-{
-	const QMetaObject* metaObject = object->metaObject();
-
-	int index = metaObject->indexOfProperty(name.toStdString().c_str());
-	if (index == -1)
-	{
-		Q_ASSERT(false);
-		return false;
-	}
-	metaProperty = metaObject->property(index);
-	return true;
 }
 
 void PropertyEditor::onShowErrorMessage(QString message)

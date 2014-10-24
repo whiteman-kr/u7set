@@ -227,12 +227,17 @@ public:
 	//
 public:
 	void setObjects(QList<std::shared_ptr<QObject>>& objects);
-	void updateProperties(const QString& propertyName);
-	void updateProperties();
 	void clearProperties();
 
-protected slots:
+protected:
 	virtual void valueChanged(QtProperty* property, QVariant value);
+
+protected slots:
+	void updateProperty(const QString& propertyName);
+	void updateProperties();
+
+private slots:
+	void onValueChanged(QtProperty* property, QVariant value);
 	void onShowErrorMessage (QString message);
 	void onCurrentItemChanged(QtBrowserItem* current);
 
@@ -243,8 +248,6 @@ signals:
 	// Protected functions and structs
 	//
 protected:
-	bool propertyByName(const std::shared_ptr<QObject>& object, const QString& name, QMetaProperty& metaProperty);
-
 	struct PropertyItem
 	{
 		std::shared_ptr<QObject> object;

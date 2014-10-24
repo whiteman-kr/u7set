@@ -35,12 +35,14 @@ namespace VFrame30
 			AddOutput();
 		}
 
-		// Проинициализировать паремтры значением по умолчанию
+		// Проинициализировать паремтры значением по умолчанию and add Afb properties to class meta object
 		//
-		for (auto& p : m_params)
+		for (Afbl::AfbElementParam& p : m_params)
 		{
 			p.setValue(p.defaultValue());
 		}
+
+		addQtDynamicParamProperties();
 	}
 
 	VideoItemFblElement::~VideoItemFblElement(void)
@@ -170,13 +172,59 @@ namespace VFrame30
 		m_afbGuid = Proto::Read(vifble.afbguid());
 
 		m_params.clear();
+		m_params.reserve(vifble.params_size());
+
 		for (int i = 0; i < vifble.params_size(); i++)
 		{
 			Afbl::AfbElementParam p;
 			p.LoadData(vifble.params(i));
+
+			m_params.push_back(p);
 		}
 
+		// Add afb properties to class meta object
+		//
+		addQtDynamicParamProperties();
+
 		return true;
+	}
+
+	bool VideoItemFblElement::setAfbParam(const QString& name, QVariant value)
+	{
+		auto found = std::find_if(m_params.begin(), m_params.end(), [&name](const Afbl::AfbElementParam& p)
+			{
+				return p.caption() == name;
+			});
+
+		if (found == m_params.end())
+		{
+			assert(found != m_params.end());
+			return false;
+		}
+
+		found->setValue(Afbl::AfbParamValue::fromQVariant(value));
+
+		return true;
+	}
+
+	void VideoItemFblElement::addQtDynamicParamProperties()
+	{
+		// Clear all dynamic properties
+		//
+		QList<QByteArray> dynamicProperties = dynamicPropertyNames();
+		for (QByteArray& p : dynamicProperties)
+		{
+			QString name(p);
+			setProperty(name.toStdString().c_str(), QVariant());		// Delete property be setting invalid QVariant()
+		}
+
+		// Set new Param Propereties
+		//
+		for (Afbl::AfbElementParam& p : m_params)
+		{
+			QVariant value = p.value().toQVariant();
+			setProperty(p.caption().toStdString().c_str(), value);
+		}
 	}
 
 	const QUuid& VideoItemFblElement::afbGuid() const

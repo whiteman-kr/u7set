@@ -1,6 +1,7 @@
 #include "EditEngineSetProperty.h"
 #include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
+#include "../../VFrame30/VideoItemFblElement.h"
 
 namespace EditEngine
 {
@@ -41,13 +42,40 @@ namespace EditEngine
 	{
 		std::list<std::shared_ptr<VFrame30::VideoItem>> sel;
 
-		std::for_each(m_items.begin(), m_items.end(),
-			[this, &sel](Record& r)
+		for (Record& r : m_items)
+		{
+			QList<QByteArray> dynamicProperties = r.item->dynamicPropertyNames();
+
+			bool isDynamic = false;
+			for (QByteArray& ba : dynamicProperties)
 			{
-				sel.push_back(r.item);
-				r.item->setProperty(r.propertyName.toStdString().c_str(), r.newValue);
+				QString strName(ba);
+
+				if (r.propertyName == strName)
+				{
+					isDynamic = true;
+					break;
+				}
 			}
-			);
+
+			if (isDynamic == true)
+			{
+				// Apparently it is FblParam, only VFrame30::VideoItemFblElement can have such kind of props
+				//
+				VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(r.item.get());
+
+				if (fblElement == nullptr)
+				{
+					assert(fblElement != nullptr);
+					continue;
+				}
+
+				fblElement->setAfbParam(r.propertyName, r.newValue);
+			}
+
+			sel.push_back(r.item);
+			r.item->setProperty(r.propertyName.toStdString().c_str(), r.newValue);
+		}
 
 		videoFrameView->setSelectedItems(sel);
 		return;
@@ -57,13 +85,43 @@ namespace EditEngine
 	{
 		std::list<std::shared_ptr<VFrame30::VideoItem>> sel;
 
-		std::for_each(m_items.begin(), m_items.end(),
-			[this, &sel](Record& r)
+		for (Record& r : m_items)
+		{
+			QList<QByteArray> dynamicProperties = r.item->dynamicPropertyNames();
+
+			bool isDynamic = false;
+			for (QByteArray& ba : dynamicProperties)
 			{
-				sel.push_back(r.item);
-				r.item->setProperty(r.propertyName.toStdString().c_str(), r.oldValue);
+				QString strName(ba);
+
+				if (r.propertyName == strName)
+				{
+					isDynamic = true;
+					break;
+				}
 			}
-			);
+
+			if (isDynamic == true)
+			{
+				// Apparently it is FblParam, only VFrame30::VideoItemFblElement can have such kind of props
+				//
+				VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(r.item.get());
+
+				if (fblElement == nullptr)
+				{
+					assert(fblElement != nullptr);
+					continue;
+				}
+
+				fblElement->setAfbParam(r.propertyName, r.newValue);
+
+			}
+
+			// --
+			//
+			sel.push_back(r.item);
+			r.item->setProperty(r.propertyName.toStdString().c_str(), r.oldValue);
+		}
 
 		videoFrameView->setSelectedItems(sel);
 		return;
