@@ -49,26 +49,20 @@ namespace Afbl
 	}
 
 
-	bool AfbParamValue::SaveData(Proto::FblParamValue* /*message*/) const
+	bool AfbParamValue::SaveData(Proto::FblParamValue* message) const
 	{
-		assert(false);
-		return false;
-
-//		message->set_integralvalue(IntegralValue);
-//		message->set_floatingpoint(FloatingPoint);
-//		message->set_discrete(Discrete);
-//		return true;
+		message->set_integralvalue(IntegralValue);
+		message->set_floatingpoint(FloatingPoint);
+		message->set_discrete(Discrete);
+		return true;
 	}
 
-	bool AfbParamValue::LoadData(const Proto::FblParamValue& /*message*/)
+	bool AfbParamValue::LoadData(const Proto::FblParamValue& message)
 	{
-		assert(false);
-		return false;
-
-//		IntegralValue = message.integralvalue();
-//		FloatingPoint = message.floatingpoint();
-//		Discrete = message.discrete();
-//		return true;
+		IntegralValue = message.integralvalue();
+		FloatingPoint = message.floatingpoint();
+		Discrete = message.discrete();
+		return true;
 	}
 
 	bool AfbParamValue::loadFromXml(QXmlStreamReader* xmlReader)
@@ -193,6 +187,41 @@ namespace Afbl
 		xmlWriter->writeEndElement();
 
 		return true;
+	}
+
+	QVariant AfbParamValue::toQVariant() const
+	{
+		switch(Type)
+		{
+			case AfbParamType::AnalogIntegral:
+				return QVariant(IntegralValue);
+			case AfbParamType::AnalogFloatingPoint:
+				return QVariant(FloatingPoint);
+			case AfbParamType::DiscreteValue:
+				return QVariant(Discrete);
+			default:
+				assert(false);
+				return QVariant();
+		}
+	}
+
+	AfbParamValue AfbParamValue::fromQVariant(QVariant value)
+	{
+		switch (value.type())
+		{
+			case QMetaType::Int:
+			case QMetaType::UInt:
+			case QMetaType::Long:
+			case QMetaType::LongLong:
+				return AfbParamValue(static_cast<long long>(value.toLongLong()), AfbParamType::AnalogIntegral);
+			case QMetaType::Double:
+				return AfbParamValue(value.toDouble(), AfbParamType::AnalogFloatingPoint);
+			case QMetaType::Bool:
+				return AfbParamValue(value.toBool(), AfbParamType::DiscreteValue);
+			default:
+				assert(false);
+				return AfbParamValue();
+		}
 	}
 
 	//
@@ -748,6 +777,7 @@ namespace Afbl
 
 		setInputSignals(inputSignals);
 		setOutputSignals(outputSignals);
+		setParams(params);
 
 		return !xmlReader->error();
 

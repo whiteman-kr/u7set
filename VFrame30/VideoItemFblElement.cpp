@@ -35,12 +35,15 @@ namespace VFrame30
 			AddOutput();
 		}
 
-		// Проинициализировать паремтры значением по умолчанию
+		// Проинициализировать паремтры значением по умолчанию and add Afb properties to class meta object
 		//
-		for (auto& p : m_params)
+		//qDebug() << Q_FUNC_INFO << " Param count " << m_params.size();
+		for (Afbl::AfbElementParam& p : m_params)
 		{
 			p.setValue(p.defaultValue());
 		}
+
+		addQtDynamicParamProperties();
 	}
 
 	VideoItemFblElement::~VideoItemFblElement(void)
@@ -176,7 +179,31 @@ namespace VFrame30
 			p.LoadData(vifble.params(i));
 		}
 
+		// Add afb properties to class meta object
+		//
+		addQtDynamicParamProperties();
+
 		return true;
+	}
+
+	void VideoItemFblElement::addQtDynamicParamProperties()
+	{
+		// Clear all dynamic properties
+		//
+		QList<QByteArray> dynamicProperties = dynamicPropertyNames();
+		for (QByteArray& p : dynamicProperties)
+		{
+			QString name(p);
+			setProperty(name.toStdString().c_str(), QVariant());		// Delete property be setting invalid QVariant()
+		}
+
+		// Set new Param Propereties
+		//
+		for (Afbl::AfbElementParam& p : m_params)
+		{
+			QVariant value = p.value().toQVariant();
+			setProperty(p.caption().toStdString().c_str(), value);
+		}
 	}
 
 	const QUuid& VideoItemFblElement::afbGuid() const

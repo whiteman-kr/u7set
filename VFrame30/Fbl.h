@@ -45,6 +45,9 @@ namespace Afbl
 
 		bool loadFromXml(QXmlStreamReader* xmlReader);
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+
+		QVariant toQVariant() const;
+		static AfbParamValue fromQVariant(QVariant value);
 	};
 
 		
