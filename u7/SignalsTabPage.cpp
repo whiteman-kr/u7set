@@ -341,7 +341,6 @@ void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionVi
 	if (cb)
 	{
 		cb->showPopup();
-		//cb->view()->updateGeometry();
 	}
 }
 
@@ -448,22 +447,21 @@ bool SignalsModel::checkoutSignal(int index)
 		}
 	}
 
-	QVector<int> signalsIDs;
-	signalsIDs << m_signalSet.key(index);
+	QVector<int> signalsIDs = m_signalSet.getChannelSignalsID(m_signalSet[index].signalGroupID());
 	QVector<ObjectState> objectStates;
 	dbController()->checkoutSignals(&signalsIDs, &objectStates, parrentWindow());
 	if (objectStates.count() == 0)
 	{
 		return false;
 	}
-	if (objectStates[0].errCode != ERR_SIGNAL_OK)
+	showErrors(objectStates);
+	foreach (const ObjectState& objectState, objectStates)
 	{
-		showError(objectStates[0]);
-	}
-	if (objectStates[0].errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
-			&& objectStates[0].userId != dbController()->currentUser().userId())
-	{
-		return false;
+		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+				&& objectState.userId != dbController()->currentUser().userId())
+		{
+			return false;
+		}
 	}
 	emit setCheckedoutSignalActionsVisibility(true);
 	return true;
@@ -744,6 +742,17 @@ void SignalsModel::clearSignals()
 	emit cellsSizeChanged();
 }
 
+QVector<int> SignalsModel::getSameChannelSignals(int row)
+{
+	QVector<int> sameChannelSignalRows;
+	QVector<int>& sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[row].signalGroupID());
+	foreach (const int id, sameChannelSignalIDs)
+	{
+		sameChannelSignalRows.append(m_signalSet.keyIndex(id));
+	}
+	return sameChannelSignalRows;
+}
+
 bool SignalsModel::isEditableSignal(int row)
 {
 	Signal& s = m_signalSet[row];
@@ -838,19 +847,32 @@ bool SignalsModel::editSignal(int row)
 			showError(state);
 		}
 
-		emit cellsSizeChanged();
+		loadSignals();
 		return true;
+	}
+	else
+	{
+		// Because signals was checkedout and should be updated
+		//
+		loadSignals();
 	}
 	return false;
 }
 
-void SignalsModel::deleteSignal(int id)
+void SignalsModel::deleteSignal(const QSet<int>& signalGroupIDs)
 {
 	ObjectState state;
-	dbController()->deleteSignal(id, &state, parrentWindow());
-	if (state.errCode != ERR_SIGNAL_OK)
+	foreach (const int groupID, signalGroupIDs)
 	{
-		showError(state);
+		QVector<int> signalIDs = m_signalSet.getChannelSignalsID(groupID);
+		foreach (const int signalID, signalIDs)
+		{
+			dbController()->deleteSignal(signalID, &state, parrentWindow());
+			if (state.errCode != ERR_SIGNAL_OK)
+			{
+				showError(state);
+			}
+		}
 	}
 	loadSignals();
 }
@@ -901,6 +923,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
+	connect(delegate, &SignalsDelegate::closeEditor, m_signalsModel, &SignalsModel::loadSignals);
 
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
 
@@ -922,8 +945,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	pMainLayout->addWidget(toolBar);
 	pMainLayout->addWidget(m_signalsView);
-
-	//pMainLayout->addWidget(m_splitter);
 
 	setLayout(pMainLayout);
 
@@ -1021,16 +1042,13 @@ void SignalsTabPage::deleteSignal()
     {
         QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
     }
-	QSet<int> deletedSignalsID;
+	QSet<int> deletedSignalGroupIDs;
     for (int i = 0; i < selection.count(); i++)
     {
-		int id = m_signalsModel->key(selection[i].row());
-		deletedSignalsID.insert(id);
+		int groupId = m_signalsModel->signal(selection[i].row()).signalGroupID();
+		deletedSignalGroupIDs.insert(groupId);
 	}
-	foreach(const int id, deletedSignalsID)
-	{
-		m_signalsModel->deleteSignal(id);
-	}
+	m_signalsModel->deleteSignal(deletedSignalGroupIDs);
 }
 
 void SignalsTabPage::undoSignalChanges()
@@ -1130,7 +1148,7 @@ bool CheckedoutSignalsModel::setData(const QModelIndex& index, const QVariant& v
 {
 	if (index.column() == SC_STR_ID && role == Qt::CheckStateRole)
 	{
-		states[index.row()] = Qt::CheckState(value.toInt());
+		setCheckState(index.row(), Qt::CheckState(value.toInt()));
 		return true;
 	}
 	return QSortFilterProxyModel::setData(index, value, role);
@@ -1160,9 +1178,7 @@ void CheckedoutSignalsModel::initCheckStates(const QModelIndexList& list, bool f
 		QModelIndex proxyIndex = fromSourceModel ? mapFromSource(list[i]) : list[i];
 		if (proxyIndex.isValid())
 		{
-			int checkedRow = proxyIndex.row();
-			states[checkedRow] = Qt::Checked;
-			emit dataChanged(index(checkedRow, 0), index(checkedRow, 0), QVector<int>() << Qt::CheckStateRole);
+			setCheckState(proxyIndex.row(), Qt::Checked);
 		}
 	}
 }
@@ -1174,6 +1190,21 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 		states[i] = state ? Qt::Checked : Qt::Unchecked;
 	}
 	emit dataChanged(index(0, 0), index(states.count() - 1, 0), QVector<int>() << Qt::CheckStateRole);
+}
+
+void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
+{
+	QVector<int>& sourceRows = m_sourceModel->getSameChannelSignals(mapToSource(index(row, 0)).row());
+	foreach (const int sourceRow, sourceRows)
+	{
+		QModelIndex changedIndex = mapFromSource(m_sourceModel->index(sourceRow, 0));
+		if (!changedIndex.isValid())
+		{
+			continue;
+		}
+		states[changedIndex.row()] = state;
+		emit dataChanged(changedIndex, changedIndex, QVector<int>() << Qt::CheckStateRole);
+	}
 }
 
 
@@ -1197,7 +1228,6 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelInde
 	}
 
 	m_commentEdit = new QPlainTextEdit(this);
-	//m_commentEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
 	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
 	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);

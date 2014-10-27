@@ -68,6 +68,7 @@ public:
 	int key(int row) const { return m_signalSet.key(row); }
 	int getKeyIndex(int key) { return m_signalSet.keyIndex(key); }
 	const Signal& signal(int row) const { return m_signalSet[row]; }
+	QVector<int> getSameChannelSignals(int row);
 	bool isEditableSignal(int row);
 
 	DbController* dbController();
@@ -78,7 +79,7 @@ public:
 	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
 	bool editSignal(int row);
-	void deleteSignal(int row);
+	void deleteSignal(const QSet<int>& signalGroupIDs);
 
 signals:
 	void cellsSizeChanged();
@@ -128,6 +129,7 @@ public:
 
 	void initCheckStates(const QModelIndexList& list, bool fromSourceModel = true);
 	void setAllCheckStates(bool state);
+	void setCheckState(int row, Qt::CheckState state);
 
 private:
 	SignalsModel* m_sourceModel;
