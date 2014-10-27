@@ -447,7 +447,15 @@ bool SignalsModel::checkoutSignal(int index)
 		}
 	}
 
-	QVector<int> signalsIDs = m_signalSet.getChannelSignalsID(m_signalSet[index].signalGroupID());
+	QVector<int> signalsIDs;
+	if (m_signalSet[index].signalGroupID() != 0)
+	{
+		signalsIDs = m_signalSet.getChannelSignalsID(m_signalSet[index].signalGroupID());
+	}
+	else
+	{
+		signalsIDs << m_signalSet.key(index);
+	}
 	QVector<ObjectState> objectStates;
 	dbController()->checkoutSignals(&signalsIDs, &objectStates, parrentWindow());
 	if (objectStates.count() == 0)
@@ -745,10 +753,17 @@ void SignalsModel::clearSignals()
 QVector<int> SignalsModel::getSameChannelSignals(int row)
 {
 	QVector<int> sameChannelSignalRows;
-	QVector<int>& sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[row].signalGroupID());
-	foreach (const int id, sameChannelSignalIDs)
+	if (m_signalSet[row].signalGroupID() != 0)
 	{
-		sameChannelSignalRows.append(m_signalSet.keyIndex(id));
+		QVector<int>& sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[row].signalGroupID());
+		foreach (const int id, sameChannelSignalIDs)
+		{
+			sameChannelSignalRows.append(m_signalSet.keyIndex(id));
+		}
+	}
+	else
+	{
+		sameChannelSignalRows.append(row);
 	}
 	return sameChannelSignalRows;
 }
@@ -859,22 +874,27 @@ bool SignalsModel::editSignal(int row)
 	return false;
 }
 
-void SignalsModel::deleteSignal(const QSet<int>& signalGroupIDs)
+void SignalsModel::deleteSignalGroups(const QSet<int>& signalGroupIDs)
 {
-	ObjectState state;
 	foreach (const int groupID, signalGroupIDs)
 	{
 		QVector<int> signalIDs = m_signalSet.getChannelSignalsID(groupID);
 		foreach (const int signalID, signalIDs)
 		{
-			dbController()->deleteSignal(signalID, &state, parrentWindow());
-			if (state.errCode != ERR_SIGNAL_OK)
-			{
-				showError(state);
-			}
+			deleteSignal(signalID);
 		}
 	}
 	loadSignals();
+}
+
+void SignalsModel::deleteSignal(int signalID)
+{
+	ObjectState state;
+	dbController()->deleteSignal(signalID, &state, parrentWindow());
+	if (state.errCode != ERR_SIGNAL_OK)
+	{
+		showError(state);
+	}
 }
 
 DbController *SignalsModel::dbController()
@@ -1045,10 +1065,18 @@ void SignalsTabPage::deleteSignal()
 	QSet<int> deletedSignalGroupIDs;
     for (int i = 0; i < selection.count(); i++)
     {
-		int groupId = m_signalsModel->signal(selection[i].row()).signalGroupID();
-		deletedSignalGroupIDs.insert(groupId);
+		int row = selection[i].row();
+		int groupId = m_signalsModel->signal(row).signalGroupID();
+		if (groupId != 0)
+		{
+			deletedSignalGroupIDs.insert(groupId);
+		}
+		else
+		{
+			m_signalsModel->deleteSignal(m_signalsModel->key(row));
+		}
 	}
-	m_signalsModel->deleteSignal(deletedSignalGroupIDs);
+	m_signalsModel->deleteSignalGroups(deletedSignalGroupIDs);
 }
 
 void SignalsTabPage::undoSignalChanges()

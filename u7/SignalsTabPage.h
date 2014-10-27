@@ -79,7 +79,8 @@ public:
 	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
 	bool editSignal(int row);
-	void deleteSignal(const QSet<int>& signalGroupIDs);
+	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
+	void deleteSignal(int signalID);
 
 signals:
 	void cellsSizeChanged();
