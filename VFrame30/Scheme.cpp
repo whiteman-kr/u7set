@@ -36,11 +36,12 @@ namespace VFrame30
 
 		message->set_classnamehash(classnamehash);	// Обязательное поле, хэш имени класса, по нему восстанавливается класс.
 		
-		auto pMutableVideoFrame = message->mutable_videoframe();
+		Proto::VideoFrame* pMutableVideoFrame = message->mutable_videoframe();
 
 		Proto::Write(pMutableVideoFrame->mutable_uuid(), m_guid);
 		Proto::Write(pMutableVideoFrame->mutable_strid(), m_strID);
 		Proto::Write(pMutableVideoFrame->mutable_caption(), m_caption);
+
 		pMutableVideoFrame->set_width(m_width);
 		pMutableVideoFrame->set_height(m_height);
 		pMutableVideoFrame->set_unit(static_cast<Proto::SchemeUnit>(m_unit));
@@ -54,6 +55,10 @@ namespace VFrame30
 			Proto::Envelope* pLayerMessage = pMutableVideoFrame->add_layers();
 			saveLayersResult &= layer->get()->Save(pLayerMessage);
 		}
+
+		// Save Afb Collection
+		//
+		m_afbCollection.SaveData(pMutableVideoFrame->mutable_afbs());
 
 		return saveLayersResult;
 	}
@@ -98,6 +103,10 @@ namespace VFrame30
 			Layers.clear();
 			return false;
 		}
+
+		// Load Afb Collection
+		//
+		m_afbCollection.LoadData(videoframe.afbs());
 
 		return true;
 	}
@@ -504,4 +513,21 @@ namespace VFrame30
 	{
 		m_unit = value;
 	}
+
+	const Afbl::AfbElementCollection& Scheme::afbCollection() const
+	{
+		return m_afbCollection;
+	}
+
+	void Scheme::setAfbCollection(const std::vector<std::shared_ptr<Afbl::AfbElement>>& elements)
+	{
+		// set new collection
+		//
+		m_afbCollection.setElements(elements);
+
+		// update videoframe items
+		//
+	}
+
+
 }

@@ -26,7 +26,7 @@ namespace Afbl
 	//
 	struct VFRAME30LIBSHARED_EXPORT AfbParamValue
 	{
-		long long IntegralValue;
+		int32_t IntegralValue;
 		double FloatingPoint;
 		bool Discrete;
 		AfbParamType Type;	// Тип данных параметра
@@ -36,15 +36,18 @@ namespace Afbl
 	public:
 
 		AfbParamValue();
-		AfbParamValue(long long value, AfbParamType type);
-		AfbParamValue(double value, AfbParamType type);
-		AfbParamValue(bool value, AfbParamType type);
+		explicit AfbParamValue(int32_t value);
+		explicit AfbParamValue(double value);
+		explicit AfbParamValue(bool value);
 
 		bool SaveData(Proto::FblParamValue* message) const;
 		bool LoadData(const Proto::FblParamValue& message);
 
 		bool loadFromXml(QXmlStreamReader* xmlReader);
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+
+		QVariant toQVariant() const;
+		static AfbParamValue fromQVariant(QVariant value);
 	};
 
 		
@@ -96,6 +99,11 @@ private:
 		AfbElementParam(void);
 		virtual ~AfbElementParam(void);
 
+		// Methods
+		//
+	public:
+		void update(const AfbParamType& type, const AfbParamValue& lowLimit, const AfbParamValue& highLimit);
+
 		// Serialization
 		//
 	public:
@@ -104,6 +112,7 @@ private:
 
 		bool loadFromXml(QXmlStreamReader* xmlReader);
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+
 
 		// Properties
 		//
@@ -160,7 +169,12 @@ private:
 		friend Proto::ObjectSerialization<AfbElement>;
 
 	public:
+		bool loadFromXml(const Proto::AfbElementXml& data);
+		bool loadFromXml(const QByteArray& data);
 		bool loadFromXml(QXmlStreamReader* xmlReader);
+
+		bool saveToXml(Proto::AfbElementXml* dst) const;
+		bool saveToXml(QByteArray* dst) const;
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 
 	protected:
@@ -175,6 +189,7 @@ private:
 		// Methods
 		//
 	public:
+		void updateParams(const std::vector<AfbElementParam>& params);
 
 	// Properties and Datas
 	//
@@ -217,28 +232,36 @@ private:
 	//	FblElementCollection - Коллекция прототипов FBL элементов
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT FblElementCollection :
-		public VFrame30::DebugInstCounter<FblElementCollection>
+	class VFRAME30LIBSHARED_EXPORT AfbElementCollection :
+		public VFrame30::DebugInstCounter<AfbElementCollection>
 	{
 	public:
-		FblElementCollection(void);
-		virtual ~FblElementCollection(void);
+		AfbElementCollection(void);
+		virtual ~AfbElementCollection(void);
 
 		void Init(void);
 
 		// Serialization
 		//
 	public:
+		bool SaveData(Proto::AfbElementCollection* message) const;
+		bool LoadData(const Proto::AfbElementCollection& message);
 
 		// Methods
 		//
 	public:
-		std::shared_ptr<AfbElement> Get(const QUuid& QUuid) const;
+
+		void setElements(const std::vector<std::shared_ptr<AfbElement>>& elements);
+
+		const std::vector<std::shared_ptr<AfbElement>>& elements() const;
+		std::vector<std::shared_ptr<AfbElement>>* mutable_elements();
+
+		std::shared_ptr<AfbElement> get(const QUuid& QUuid) const;
 
 		// Properties and Datas
 		//
 	public:
-		std::vector<std::shared_ptr<AfbElement>> elements;
+		std::vector<std::shared_ptr<AfbElement>> m_elements;
 	};
 }
 

@@ -29,7 +29,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const override;
 
 		// Serialization
 		//
@@ -37,13 +37,24 @@ namespace VFrame30
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
+		// Methods
+		//
+	public:
+		bool setAfbParam(const QString& name, QVariant value);
+
+	protected:
+		void addQtDynamicParamProperties();
+
 		// Properties and Data
 		//
 	public:
-		const Afbl::AfbElement& fblElement() const;
+		const QUuid& afbGuid() const;
+
+		const std::vector<Afbl::AfbElementParam>& params() const;
 
 	private:
-		Afbl::AfbElement m_fblElement;
+		QUuid m_afbGuid;
+		std::vector<Afbl::AfbElementParam> m_params;
 	};
 
 }

@@ -1,6 +1,17 @@
 package Proto;
 
-// GUID
+//------------------------------------------------------------------------------------------
+//
+//
+//								Global structs
+//
+//
+//------------------------------------------------------------------------------------------
+
+//
+//
+// QUuid
+//
 //
 message Uuid
 {
@@ -8,7 +19,11 @@ message Uuid
 }
 
 
+//
+//
 // Unicode строка
+//
+//
 //
 message wstring
 {
@@ -16,8 +31,10 @@ message wstring
 }
 
 
-
+//
+//
 // FontParam
+//
 //
 message FontParam
 {
@@ -27,8 +44,10 @@ message FontParam
 	required bool italic = 4;
 }
 
-
+//
+//
 // VideoItemPoint
+//
 //
 message VideoItemPoint
 {
@@ -36,8 +55,10 @@ message VideoItemPoint
 	required double y = 2;
 }
 
-
+//
+//
 // SchemeUnit
+//
 //
 enum SchemeUnit
 {
@@ -46,24 +67,11 @@ enum SchemeUnit
 	Inch = 2;				// измерение в дюймах
 }
 
-// FblSignalType - тип сигнала в FblElement
-//
-enum FblSignalType
-{
-	Analog = 0;
-	Discrete = 1;
-}
 
-// FblParamType	- Тип параметра для FblElement
 //
-enum FblParamType
-{
-	AnalogIntegral = 0;			// Аналоговый целочисленный (long long - 64bit signed ind)
-	AnalogFloatingPoint = 1;	// Аналоговый с плавающей запятой (double, 64bit)
-	DiscreteValue = 2;			// Дискретный (c++ bool)
-}
-
+//
 // ConnectionDirrection
+//
 //
 enum ConnectionDirrection
 {
@@ -72,8 +80,13 @@ enum ConnectionDirrection
 }
 
 
-// Envelope - универсальная структура, хранит любой корневой тип
+//------------------------------------------------------------------------------------------
 //
+//
+//		Envelope - универсальная структура, хранит любой корневой тип
+//
+//
+//------------------------------------------------------------------------------------------
 message Envelope
 {
 	// Класс, для сериализации
@@ -90,7 +103,14 @@ message Envelope
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 }
 
-// VFrame30::Configuration
+
+//------------------------------------------------------------------------------------------
+//
+//
+//			VFrame30::Configuration
+//
+//
+//------------------------------------------------------------------------------------------
 message Configuration
 {
 	required Uuid uuid = 1;
@@ -103,7 +123,42 @@ message Configuration
 	repeated Envelope videoFrames = 101;
 }
 
-// Fbl::FblElement
+
+//------------------------------------------------------------------------------------------
+//
+//
+//								Afbl namespace
+//
+//
+//------------------------------------------------------------------------------------------
+
+
+//
+//
+// Afbl::AfbElementCollection stored as XML
+//
+//
+message AfbElementCollection
+{
+	repeated AfbElementXml elements = 1;
+}
+
+
+//
+//
+// Afbl::AfbElement stored as XML
+//
+//
+message AfbElementXml
+{
+	required bytes data = 1;
+}
+
+
+//
+//
+// Afbl::FblElement stored as Protobuf
+//
 //
 message FblElement
 {
@@ -117,7 +172,11 @@ message FblElement
 	repeated FblElementParam params = 13;
 }
 
-// Fbl::FblElementSignal
+
+//
+//
+// Afbl::FblElementSignal
+//
 //
 message FblElementSignal
 {
@@ -125,7 +184,11 @@ message FblElementSignal
 	required FblSignalType type = 2;
 }
 
-// Fbl::FblElementParam
+
+//
+//
+// Afbl::FblElementParam
+//
 //
 message FblElementParam
 {
@@ -137,17 +200,52 @@ message FblElementParam
 	required FblParamValue highlimit = 6;
 }
 
-// Fbl::FblParamValue
+
+//
+//
+// Afbl::FblParamValue
+//
 //
 message FblParamValue
 {
-	required int64 integralvalue = 1;
+	required int32 integralvalue = 1;
 	required double floatingpoint = 2;
 	required bool discrete = 3;
+	required int32 type = 4;
 }
 
-// VFrame30::CVideoFrame
+
 //
+//
+// FblSignalType - тип сигнала в FblElement
+//
+//
+enum FblSignalType
+{
+	Analog = 0;
+	Discrete = 1;
+}
+
+//
+//
+// FblParamType	- Тип параметра для FblElement
+//
+//
+enum FblParamType
+{
+	AnalogIntegral = 0;			// Аналоговый целочисленный (32bit signed int)
+	AnalogFloatingPoint = 1;	// Аналоговый с плавающей запятой (double, 64bit)
+	DiscreteValue = 2;			// Дискретный (c++ bool)
+}
+
+
+//------------------------------------------------------------------------------------------
+//
+//
+//			VFrame30::CVideoFrame
+//
+//
+//------------------------------------------------------------------------------------------
 message VideoFrame
 {
 	required Uuid uuid = 1;
@@ -157,12 +255,33 @@ message VideoFrame
 	required double height = 5;
 	required SchemeUnit unit = 6;
 
-	repeated Envelope layers = 100;		// Список слоев
+	repeated Envelope layers = 100;				// Список слоев
+	required AfbElementCollection afbs = 101;	// Application Fuynctional Block stored as XML
+
+	// Derived from VideoFrame
+	//
+	optional LogicScheme logics_scheme = 200;
 }
 
 
-// VFrame30::CVideoLayer
 //
+//
+// LogicScheme
+//
+//
+message LogicScheme
+{
+	repeated wstring hardware_strids = 1;
+}
+
+
+//------------------------------------------------------------------------------------------
+//
+//
+//			VFrame30::VideoLayer
+//
+//
+//------------------------------------------------------------------------------------------
 message VideoLayer
 {
 	required Uuid uuid = 1;
@@ -175,8 +294,13 @@ message VideoLayer
 }
 
 
-// VFrame30::VideoItem
+//------------------------------------------------------------------------------------------
 //
+//
+//			VFrame30::VideItems
+//
+//
+//------------------------------------------------------------------------------------------
 message VideoItem
 {
 	required Uuid uuid = 1;
@@ -212,7 +336,10 @@ message VideoItem
 }
 
 
+//
+//
 // PosRectImpl
+//
 //
 message PosRectImpl
 {
@@ -223,7 +350,10 @@ message PosRectImpl
 }
 
 
+//
+//
 // PosLineImpl
+//
 //
 message PosLineImpl
 {
@@ -234,14 +364,21 @@ message PosLineImpl
 }
 
 
+//
+//
 // PosConnectionImpl
+//
 //
 message PosConnectionImpl
 {
 	repeated VideoItemPoint points = 1;
 }
 
+
+//
+//
 // VideoItemRect
+//
 //
 message VideoItemRect
 {
@@ -255,8 +392,10 @@ message VideoItemRect
 	optional bool drawrect = 8 [default = true];
 }
 
-
+//
+//
 // VideoItemLine
+//
 //
 message VideoItemLine
 {
@@ -264,7 +403,10 @@ message VideoItemLine
 	required uint32 lineColor = 2;
 }
 
+//
+//
 // VideoItemConnectionLine
+//
 //
 message VideoItemConnectionLine
 {
@@ -273,7 +415,10 @@ message VideoItemConnectionLine
 }
 
 
+//
+//
 // FblConnectionPoint
+//
 //
 message FblConnectionPoint
 {
@@ -286,7 +431,11 @@ message FblConnectionPoint
 	optional wstring signalCaption = 12;
 }
 
+
+//
+//
 // FblItem
+//
 //
 message FblItem
 {
@@ -294,7 +443,10 @@ message FblItem
 }
 
 
+//
+//
 // FblItemRect
+//
 //
 message FblItemRect
 {
@@ -306,7 +458,10 @@ message FblItemRect
 }
 
 
+//
+//
 // FblItemLine
+//
 //
 message FblItemLine
 {
@@ -315,39 +470,57 @@ message FblItemLine
 }
 
 
+//
+//
 // VideoItemSignal
+//
 //
 message VideoItemSignal
 {
+	repeated wstring signalStrIDs = 1;
 }
 
 
+//
+//
 // VideoItemInputSignal
+//
 //
 message VideoItemInputSignal
 {
 }
 
 
+
+//
+//
 // VideoItemOutputSignal
+//
 //
 message VideoItemOutputSignal
 {
 }
 
 
+//
+//
 // VideoItemLink
+//
 //
 message VideoItemLink
 {
 }
 
 
+//
+//
 // VideoItemFblElement
+//
 //
 message VideoItemFblElement
 {
-	required Envelope fblelement = 1;
+	required Uuid afbGuid = 1;
+	repeated FblElementParam params = 2;
 }
 
 
@@ -413,4 +586,10 @@ message DeviceDiagSignal
 {
 }
 
-
+//------------------------------------------------------------------------------------------
+//
+//
+//			??????
+//
+//
+//------------------------------------------------------------------------------------------

@@ -66,6 +66,8 @@ namespace EditEngine
 		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
 		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::VideoItem>& item);
 
+		void runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Scheme>& scheme);
+
 //		/// <summary>
 //		/// Команда "Изменить размер"
 //		/// </summary>
@@ -165,6 +167,7 @@ namespace EditEngine
 	signals:
 		void stateChanged(bool canUndo, bool canRedo);
 		void modifiedChanged(bool modified);
+		void propertiesChanged();
 
 		// Data
 		//

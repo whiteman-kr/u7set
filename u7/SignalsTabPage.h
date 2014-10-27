@@ -29,8 +29,12 @@ public:
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 signals:
+	void itemDoubleClicked(int row);
 
 public slots:
+
+protected:
+	bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
 
 private:
 	const DataFormatList& m_dataFormatInfo;
@@ -62,7 +66,9 @@ public:
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
 	int key(int row) const { return m_signalSet.key(row); }
+	int getKeyIndex(int key) { return m_signalSet.keyIndex(key); }
 	const Signal& signal(int row) const { return m_signalSet[row]; }
+	QVector<int> getSameChannelSignals(int row);
 	bool isEditableSignal(int row);
 
 	DbController* dbController();
@@ -73,11 +79,13 @@ public:
 	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
 	bool editSignal(int row);
-	void deleteSignal(int row);
+	void deleteSignal(const QSet<int>& signalGroupIDs);
 
 signals:
 	void cellsSizeChanged();
 	void setCheckedoutSignalActionsVisibility(bool state);
+	void aboutToClearSignals();
+	void signalsRestored();
 
 public slots:
 	void loadSignals();
@@ -121,6 +129,7 @@ public:
 
 	void initCheckStates(const QModelIndexList& list, bool fromSourceModel = true);
 	void setAllCheckStates(bool state);
+	void setCheckState(int row, Qt::CheckState state);
 
 private:
 	SignalsModel* m_sourceModel;
@@ -136,7 +145,9 @@ public:
 
 public slots:
 	void checkinSelected();
-	void undoSignalChanges();
+	void undoSelected();
+	void cancel();
+	void openUndoDialog();
 
 private:
 	SignalsModel *m_sourceModel;
@@ -144,6 +155,8 @@ private:
 	QTableView* m_signalsView;
 	QPlainTextEdit* m_commentEdit;
 	QSplitter* m_splitter;
+
+	void saveGeometry();
 };
 
 
@@ -195,12 +208,20 @@ public slots:
 
 	void changeSignalActionsVisibility();
 
+	void saveSelection();
+	void restoreSelection();
+
 	// Data
 	//
 private:
 	SignalsModel* m_signalsModel = nullptr;
 	QTableView* m_signalsView = nullptr;
-	QMenu* m_signalsMenu = nullptr;
+
+	QList<int> selectedRowsSignalID;
+	int focusedCellSignalID;
+	int focusedCellColumn;
+	int horizontalScrollPosition;
+	int verticalScrollPosition;
 };
 
 

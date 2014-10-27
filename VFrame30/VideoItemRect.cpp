@@ -25,10 +25,10 @@ namespace VFrame30
 			m_font.setSize(12.0, unit);
 			break;
 		case SchemeUnit::Inch:
-			m_font.setSize(0.15, unit);
+			m_font.setSize(mm2in(2.5), unit);
 			break;
 		case SchemeUnit::Millimeter:
-			m_font.setSize(mm2in(4.0), unit);
+			m_font.setSize(mm2in(2.5), unit);
 			break;
 		default:
 			assert(false);
