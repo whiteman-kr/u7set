@@ -36,5 +36,5 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_sendFileButton_clicked()
 {
-	emit m_ServiceController->sendFile(QHostAddress("127.0.0.1"), PORT_BASE_SERVICE, "d:/base.css");
+	emit m_ServiceController->sendFile(QHostAddress("127.0.0.1"), PORT_BASE_SERVICE, "d:/qqq.pdf");
 }

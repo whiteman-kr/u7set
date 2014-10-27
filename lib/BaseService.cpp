@@ -315,8 +315,6 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 			{
 				m_sendFileNext.fileID = udpRequest.readDword();
 
-				qDebug() << "START partNo = " << m_sendFileNext.partNo << " len = " << m_sendFileNext.dataSize;
-
 				request.setID(RQID_SEND_FILE_NEXT);
 
 				request.initWrite();
@@ -350,8 +348,6 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 				}
 				else
 				{
-					qDebug() << "NEXT partNo = " << m_sendFileNext.partNo << " len = " << m_sendFileNext.dataSize;
-
 					request.setID(RQID_SEND_FILE_NEXT);
 
 					request.initWrite();
@@ -432,8 +428,6 @@ void BaseServiceWorker::onSendFileNextRequest(const UdpRequest &request, UdpRequ
 {
 	const SendFileNext* sendFileNext = reinterpret_cast<const SendFileNext*>(request.data());
 
-	qDebug() << "Receive next part: no = " <<  sendFileNext->partNo << " len = " << sendFileNext->dataSize;
-
 	if (m_receivedFile.contains(sendFileNext->fileID) == false)
 	{
 		ack.setErrorCode(RQERROR_UNKNOWN_FILE_ID);
@@ -452,11 +446,12 @@ void BaseServiceWorker::onSendFileNextRequest(const UdpRequest &request, UdpRequ
 		return;
 	}
 
-	rf->appendData(sendFileNext->data, sendFileNext->dataSize);
+//	rf->appendData(sendFileNext->data, sendFileNext->dataSize);
 
-/*	if (!rf->appendData(sendFileNext->data, sendFileNext->dataSize))
+	if (!rf->appendData(sendFileNext->data, sendFileNext->dataSize))
 	{
-		qDebug() << "EFwefiowejpfwjeofjweofijwoefjiwoeifjowef";
+		qDebug() << "File Receive Error";
+
 		ack.setErrorCode(RQERROR_RECEIVE_FILE);
 
 		m_receivedFile.remove(sendFileNext->fileID);
@@ -464,7 +459,7 @@ void BaseServiceWorker::onSendFileNextRequest(const UdpRequest &request, UdpRequ
 		delete rf;
 
 		return;
-	}*/
+	}
 
 	if (sendFileNext->partNo < sendFileNext->partCount - 1)
 	{
