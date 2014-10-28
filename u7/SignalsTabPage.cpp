@@ -15,33 +15,34 @@ const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
 SC_NAME = 2,
 SC_CHANNEL = 3,
-SC_DATA_FORMAT = 4,
-SC_DATA_SIZE = 5,
-SC_LOW_ADC = 6,
-SC_HIGH_ADC = 7,
-SC_LOW_LIMIT = 8,
-SC_HIGH_LIMIT = 9,
-SC_UNIT = 10,
-SC_ADJUSTMENT = 11,
-SC_DROP_LIMIT = 12,
-SC_EXCESS_LIMIT = 13,
-SC_UNBALANCE_LIMIT = 14,
-SC_INPUT_LOW_LIMIT = 15,
-SC_INPUT_HIGH_LIMIT = 16,
-SC_INPUT_UNIT = 17,
-SC_INPUT_SENSOR = 18,
-SC_OUTPUT_LOW_LIMIT = 19,
-SC_OUTPUT_HIGH_LIMIT = 20,
-SC_OUTPUT_UNIT = 21,
-SC_OUTPUT_SENSOR = 22,
-SC_ACQUIRE = 23,
-SC_CALCULATED = 24,
-SC_NORMAL_STATE = 25,
-SC_DECIMAL_PLACES = 26,
-SC_APERTURE = 27,
-SC_IN_OUT_TYPE = 28,
-SC_DEVICE_STR_ID = 29,
-SC_LAST_CHANGE_USER = 30;
+SC_TYPE = 4,
+SC_DATA_FORMAT = 5,
+SC_DATA_SIZE = 6,
+SC_ACQUIRE = 7,
+SC_IN_OUT_TYPE = 8,
+SC_DEVICE_STR_ID = 9,
+SC_LOW_ADC = 10,
+SC_HIGH_ADC = 11,
+SC_LOW_LIMIT = 12,
+SC_HIGH_LIMIT = 13,
+SC_UNIT = 14,
+SC_ADJUSTMENT = 15,
+SC_DROP_LIMIT = 16,
+SC_EXCESS_LIMIT = 17,
+SC_UNBALANCE_LIMIT = 18,
+SC_INPUT_LOW_LIMIT = 19,
+SC_INPUT_HIGH_LIMIT = 20,
+SC_INPUT_UNIT = 21,
+SC_INPUT_SENSOR = 22,
+SC_OUTPUT_LOW_LIMIT = 23,
+SC_OUTPUT_HIGH_LIMIT = 24,
+SC_OUTPUT_UNIT = 25,
+SC_OUTPUT_SENSOR = 26,
+SC_CALCULATED = 27,
+SC_NORMAL_STATE = 28,
+SC_DECIMAL_PLACES = 29,
+SC_APERTURE = 30,
+SC_LAST_CHANGE_USER = 31;
 
 
 const char* Columns[] =
@@ -50,8 +51,12 @@ const char* Columns[] =
 	"External ID",
 	"Name",
 	"Channel",
+	"A/D",
 	"Data format",
 	"Data size",
+	"Acquire",
+	"Input-output type",
+	"Device ID",
 	"Low ADC",
 	"High ADC",
 	"Low limit",
@@ -69,13 +74,10 @@ const char* Columns[] =
 	"Output high Limit",
 	"Output unit",
 	"Output sensor",
-	"Acquire",
 	"Calculated",
 	"Normal state",
 	"Decimal places",
 	"Aperture",
-	"Input-output type",
-	"Device ID",
 	"Last change user",
 };
 
@@ -266,6 +268,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(m_signalSet[row].inOutType()); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
+		case SC_TYPE:
 		default:
 			assert(false);
 	}
@@ -321,6 +324,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(SignalInOutType(cb->currentIndex())); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
+		case SC_TYPE:
 		default:
 			assert(false);
 			return;
@@ -527,55 +531,115 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		switch (col)
+		if (signal.type() == SignalType::analog)
 		{
-			case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
-			case SC_STR_ID: return signal.strID();
-			case SC_EXT_STR_ID: return signal.extStrID();
-			case SC_NAME: return signal.name();
-			case SC_CHANNEL: return signal.channel();
-			case SC_DATA_FORMAT:
-				if (m_dataFormatInfo.contains(signal.dataFormat()))
-				{
-					return m_dataFormatInfo.value(signal.dataFormat());
-				}
-				else
-				{
-					return tr("Unknown data format");
-				}
+			switch (col)
+			{
+				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
+				case SC_STR_ID: return signal.strID();
+				case SC_EXT_STR_ID: return signal.extStrID();
+				case SC_NAME: return signal.name();
+				case SC_CHANNEL: return signal.channel();
+				case SC_TYPE: return QChar('A');
+				case SC_DATA_FORMAT:
+					if (m_dataFormatInfo.contains(signal.dataFormat()))
+					{
+						return m_dataFormatInfo.value(signal.dataFormat());
+					}
+					else
+					{
+						return tr("Unknown data format");
+					}
 
-			case SC_DATA_SIZE: return signal.dataSize();
-			case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
-			case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
-			case SC_LOW_LIMIT: return signal.lowLimit();
-			case SC_HIGH_LIMIT: return signal.highLimit();
-			case SC_UNIT: return getUnitStr(signal.unitID());
+				case SC_DATA_SIZE: return signal.dataSize();
+				case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
+				case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
+				case SC_LOW_LIMIT: return signal.lowLimit();
+				case SC_HIGH_LIMIT: return signal.highLimit();
+				case SC_UNIT: return getUnitStr(signal.unitID());
 
-			case SC_ADJUSTMENT: return signal.adjustment();
-			case SC_DROP_LIMIT: return signal.dropLimit();
-			case SC_EXCESS_LIMIT: return signal.excessLimit();
-			case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
+				case SC_ADJUSTMENT: return signal.adjustment();
+				case SC_DROP_LIMIT: return signal.dropLimit();
+				case SC_EXCESS_LIMIT: return signal.excessLimit();
+				case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
 
-			case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
-			case SC_INPUT_HIGH_LIMIT: return signal.inputHighLimit();
-			case SC_INPUT_UNIT: return getUnitStr(signal.inputUnitID());
-			case SC_INPUT_SENSOR: return getSensorStr(signal.inputSensorID());
+				case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
+				case SC_INPUT_HIGH_LIMIT: return signal.inputHighLimit();
+				case SC_INPUT_UNIT: return getUnitStr(signal.inputUnitID());
+				case SC_INPUT_SENSOR: return getSensorStr(signal.inputSensorID());
 
-			case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
-			case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
-			case SC_OUTPUT_UNIT: return getUnitStr(signal.outputUnitID());
-			case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());
+				case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
+				case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
+				case SC_OUTPUT_UNIT: return getUnitStr(signal.outputUnitID());
+				case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());
 
-			case SC_ACQUIRE: return signal.acquire() ? "Yes" : "No";
-			case SC_CALCULATED: return signal.calculated() ? "Yes" : "No";
-			case SC_NORMAL_STATE: return signal.normalState();
-			case SC_DECIMAL_PLACES: return signal.decimalPlaces();
-			case SC_APERTURE: return signal.aperture();
-			case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
-			case SC_DEVICE_STR_ID: return signal.deviceStrID();
+				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
+				case SC_CALCULATED: return signal.calculated() ? tr("Yes") : tr("No");
+				case SC_NORMAL_STATE: return signal.normalState();
+				case SC_DECIMAL_PLACES: return signal.decimalPlaces();
+				case SC_APERTURE: return signal.aperture();
+				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
-			default:
-				assert(false);
+				default:
+					assert(false);
+			}
+		}
+		else
+		{
+			switch (col)
+			{
+				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
+				case SC_STR_ID: return signal.strID();
+				case SC_EXT_STR_ID: return signal.extStrID();
+				case SC_NAME: return signal.name();
+				case SC_CHANNEL: return signal.channel();
+				case SC_TYPE: return QChar('D');
+				case SC_DATA_FORMAT:
+					if (m_dataFormatInfo.contains(signal.dataFormat()))
+					{
+						return m_dataFormatInfo.value(signal.dataFormat());
+					}
+					else
+					{
+						return tr("Unknown data format");
+					}
+
+				case SC_DATA_SIZE: return signal.dataSize();
+				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
+				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_DEVICE_STR_ID: return signal.deviceStrID();
+
+				case SC_LOW_ADC:
+				case SC_HIGH_ADC:
+				case SC_LOW_LIMIT:
+				case SC_HIGH_LIMIT:
+				case SC_UNIT:
+
+				case SC_ADJUSTMENT:
+				case SC_DROP_LIMIT:
+				case SC_EXCESS_LIMIT:
+				case SC_UNBALANCE_LIMIT:
+
+				case SC_INPUT_LOW_LIMIT:
+				case SC_INPUT_HIGH_LIMIT:
+				case SC_INPUT_UNIT:
+				case SC_INPUT_SENSOR:
+
+				case SC_OUTPUT_LOW_LIMIT:
+				case SC_OUTPUT_HIGH_LIMIT:
+				case SC_OUTPUT_UNIT:
+				case SC_OUTPUT_SENSOR:
+
+				case SC_CALCULATED:
+				case SC_NORMAL_STATE:
+				case SC_DECIMAL_PLACES:
+				case SC_APERTURE:
+					return QVariant();
+
+				default:
+					assert(false);
+			}
 		}
 	}
 
@@ -667,6 +731,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
 			case SC_CHANNEL:
+			case SC_TYPE:
 			default:
 				assert(false);
 		}
@@ -683,7 +748,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 {
-	if (index.column() == SC_CHANNEL || index.column() == SC_LAST_CHANGE_USER)
+	if (index.column() == SC_CHANNEL || index.column() == SC_LAST_CHANGE_USER || index.column() == SC_TYPE)
 	{
 		return QAbstractTableModel::flags(index) & ~Qt::ItemIsEditable;
 	}
