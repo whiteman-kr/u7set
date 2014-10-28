@@ -31,7 +31,7 @@ ReceivedFile::~ReceivedFile()
 }
 
 
-bool ReceivedFile::appendData(char* ptr, quint32 len)
+bool ReceivedFile::appendData(const char* ptr, quint32 len)
 {
 	if (m_dataSize + len > m_fileSize)
 	{
@@ -50,6 +50,20 @@ bool ReceivedFile::appendData(char* ptr, quint32 len)
 	m_dataSize += len;
 
 	return true;
+}
+
+
+quint32 ReceivedFile::CRC32()
+{
+	assert(m_dataSize == m_fileSize);
+
+	if (m_data == nullptr)
+	{
+		assert(m_data != nullptr);
+		return 0;
+	}
+
+	return ::CRC32(m_data, m_dataSize);
 }
 
 
@@ -97,6 +111,9 @@ void BaseServiceWorker::onThreadStarted()
 	connect(m_baseServiceController, &BaseServiceController::sendFile, this, &BaseServiceWorker::onSendFile);
 	connect(this, &BaseServiceWorker::endSendFile, m_baseServiceController, &BaseServiceController::onEndSendFile);
 
+	connect(this, &BaseServiceWorker::fileReceived, m_baseServiceController, &BaseServiceController::onFileReceived);
+	connect(m_baseServiceController, &BaseServiceController::freeReceivedFile, this, &BaseServiceWorker::onFreeReceivedFile);
+
 	m_serverSocketThread->run(serverSocket);
 
 	threadStarted();
@@ -143,9 +160,13 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 			onSendFileStartRequest(request, ack);
 			break;
 
+		case RQID_SEND_FILE_NEXT:
+			onSendFileNextRequest(request, ack);
+			break;
+
 		default:
 			assert(false);
-			ack.setErrorCode(RQERROR_UNKNOWN);
+			ack.setErrorCode(RQERROR_UNKNOWN_REQUEST);
 			break;
 	}
 
@@ -228,7 +249,15 @@ void BaseServiceWorker::onSendFile(QHostAddress address, quint16 port, QString f
 
 	// send REND_FILE_START request
 	//
-	sendFileRequest(RQID_SEND_FILE_START, reinterpret_cast<char*>(&m_sendFileStart), sizeof(m_sendFileStart));
+	UdpRequest request;
+
+	request.setID(RQID_SEND_FILE_START);
+
+	request.initWrite();
+
+	request.writeData(reinterpret_cast<char*>(&m_sendFileStart), sizeof(m_sendFileStart));
+
+	sendFileRequest(request);
 
 	m_sendFileFirstRead = true;
 
@@ -276,6 +305,8 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 {
 	udpRequest.initRead();
 
+	UdpRequest request;
+
 	switch(udpRequest.ID())
 	{
 		case RQID_SEND_FILE_START:
@@ -284,7 +315,20 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 			{
 				m_sendFileNext.fileID = udpRequest.readDword();
 
-				sendFileRequest(RQID_SEND_FILE_NEXT, reinterpret_cast<char*>(&m_sendFileNext), sizeof(m_sendFileNext));
+				qDebug() << "START partNo = " << m_sendFileNext.partNo << " len = " << m_sendFileNext.dataSize;
+
+				request.setID(RQID_SEND_FILE_NEXT);
+
+				request.initWrite();
+
+				request.writeData(reinterpret_cast<char*>(&m_sendFileNext), sizeof(m_sendFileNext));
+
+				sendFileRequest(request);
+
+				if (m_sendFileNext.partNo != m_sendFileNext.partCount - 1)
+				{
+					sendFileReadNextPart();
+				}
 			}
 			else
 			{
@@ -295,22 +339,39 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 			break;
 
 		case RQID_SEND_FILE_NEXT:
-
 			if (udpRequest.errorCode() == RQERROR_OK)
 			{
-				if (m_sendFileNext.partNo <= m_sendFileNext.partCount - 1)
+				if (m_sendFileNext.partNo == m_sendFileNext.partCount)
 				{
-					sendFileRequest(RQID_SEND_FILE_NEXT, reinterpret_cast<char*>(&m_sendFileNext), sizeof(m_sendFileNext));
-				}
-
-				if (m_sendFileNext.partNo != m_sendFileNext.partCount - 1)
-				{
-					sendFileReadNextPart();
+					// this is ack on last part send
+					//
+					stopSendFile();
+					emit endSendFile(true, m_fileToSendInfo.fileName());
 				}
 				else
 				{
-					stopSendFile();
-					emit endSendFile(true, m_fileToSendInfo.fileName());
+					qDebug() << "NEXT partNo = " << m_sendFileNext.partNo << " len = " << m_sendFileNext.dataSize;
+
+					request.setID(RQID_SEND_FILE_NEXT);
+
+					request.initWrite();
+
+					request.writeData(reinterpret_cast<char*>(&m_sendFileNext), sizeof(m_sendFileNext));
+
+					sendFileRequest(request);
+
+					if (m_sendFileNext.partNo != m_sendFileNext.partCount - 1)
+					{
+						// no last part, - read next part
+						//
+						sendFileReadNextPart();
+					}
+					else
+					{
+						// last part, set partNo equal to partCount
+						//
+						m_sendFileNext.partNo++;
+					}
 				}
 			}
 			else
@@ -363,6 +424,82 @@ void BaseServiceWorker::onSendFileStartRequest(const UdpRequest& request, UdpReq
 		ack.writeDword(rf->ID());
 
 		m_receivedFile.insert(rf->ID(), rf);
+	}
+}
+
+
+void BaseServiceWorker::onSendFileNextRequest(const UdpRequest &request, UdpRequest &ack)
+{
+	const SendFileNext* sendFileNext = reinterpret_cast<const SendFileNext*>(request.data());
+
+	qDebug() << "Receive next part: no = " <<  sendFileNext->partNo << " len = " << sendFileNext->dataSize;
+
+	if (m_receivedFile.contains(sendFileNext->fileID) == false)
+	{
+		ack.setErrorCode(RQERROR_UNKNOWN_FILE_ID);
+		return;
+
+	}
+
+	ReceivedFile* rf = 	m_receivedFile.value(sendFileNext->fileID);
+
+	if (rf == nullptr)
+	{
+		ack.setErrorCode(RQERROR_RECEIVE_FILE);
+
+		m_receivedFile.remove(sendFileNext->fileID);
+
+		return;
+	}
+
+	rf->appendData(sendFileNext->data, sendFileNext->dataSize);
+
+/*	if (!rf->appendData(sendFileNext->data, sendFileNext->dataSize))
+	{
+		qDebug() << "EFwefiowejpfwjeofjweofijwoefjiwoeifjowef";
+		ack.setErrorCode(RQERROR_RECEIVE_FILE);
+
+		m_receivedFile.remove(sendFileNext->fileID);
+
+		delete rf;
+
+		return;
+	}*/
+
+	if (sendFileNext->partNo < sendFileNext->partCount - 1)
+	{
+		return;
+	}
+
+	// file receive was completed
+	//
+
+	quint32 crc32 = rf->CRC32();
+
+	if (crc32 != sendFileNext->CRC32)
+	{
+		ack.setErrorCode(RQERROR_RECEIVE_FILE);
+
+		m_receivedFile.remove(sendFileNext->fileID);
+
+		delete rf;
+
+		return;
+	}
+
+	emit fileReceived(rf);
+}
+
+
+void BaseServiceWorker::onFreeReceivedFile(quint32 fileID)
+{
+	if (m_receivedFile.contains(fileID))
+	{
+		ReceivedFile* rf = m_receivedFile.value(fileID);
+
+		delete rf;
+
+		m_receivedFile.remove(fileID);
 	}
 }
 
@@ -601,4 +738,23 @@ void BaseServiceController::onEndSendFile(bool result, QString fileName)
 	{
 		qDebug() << "Send file error: " << fileName;
 	}
+	else
+	{
+		qDebug() << "File " << fileName << " sent OK";
+	}
 }
+
+
+void BaseServiceController::onFileReceived(ReceivedFile* receivedFile)
+{
+	if (receivedFile == nullptr)
+	{
+		assert(receivedFile != nullptr);
+		return;
+	}
+
+	qDebug() << "File " << receivedFile->fileName() << " received OK";
+
+	emit freeReceivedFile(receivedFile->ID());
+}
+

@@ -2863,6 +2863,55 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 	return;
 }
 
+
+void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (signal == nullptr)
+	{
+		assert(signal != nullptr);
+		return;
+	}
+
+	signal->setID(0);		// bad signal flag
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get latest signal. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
+		.arg(currentUser().userId()).arg(signalID);
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		getSignalData(q, *signal);
+	}
+
+	return;
+}
+
+
+
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 {
 	s.setID(q.value("signalid").toInt());

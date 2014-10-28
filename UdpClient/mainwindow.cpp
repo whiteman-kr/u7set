@@ -27,7 +27,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    emit clientSendRequest(RQID_GET_SERVICE_INFO, 0, 0);
+	UdpRequest request;
+
+	request.setID(RQID_GET_SERVICE_INFO);
+
+	emit clientSendRequest(request);
 }
 
 void MainWindow::on_sendFileButton_clicked()

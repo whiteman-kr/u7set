@@ -29,8 +29,12 @@ public:
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 signals:
+	void itemDoubleClicked(int row);
 
 public slots:
+
+protected:
+	bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
 
 private:
 	const DataFormatList& m_dataFormatInfo;
@@ -64,6 +68,7 @@ public:
 	int key(int row) const { return m_signalSet.key(row); }
 	int getKeyIndex(int key) { return m_signalSet.keyIndex(key); }
 	const Signal& signal(int row) const { return m_signalSet[row]; }
+	QVector<int> getSameChannelSignals(int row);
 	bool isEditableSignal(int row);
 
 	DbController* dbController();
@@ -74,7 +79,8 @@ public:
 	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
 	bool editSignal(int row);
-	void deleteSignal(int row);
+	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
+	void deleteSignal(int signalID);
 
 signals:
 	void cellsSizeChanged();
@@ -124,6 +130,7 @@ public:
 
 	void initCheckStates(const QModelIndexList& list, bool fromSourceModel = true);
 	void setAllCheckStates(bool state);
+	void setCheckState(int row, Qt::CheckState state);
 
 private:
 	SignalsModel* m_sourceModel;

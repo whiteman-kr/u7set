@@ -190,8 +190,17 @@ public slots:
     void onSocketThreadStartedSlot();
     void onSocketThreadFinishedSlot();
 
-	void sendShortRequest(quint32 requestID) { sendRequest(requestID, 0, 0); }
-	void sendRequest(quint32 requestID, const char *requestData, quint32 requestDataSize);
+	void sendRequest(UdpRequest request);
+
+	void sendShortRequest(quint32 requestID)
+	{
+		UdpRequest request;
+
+		request.setID(requestID);
+
+		sendRequest(request);
+	}
+
 
 private slots:
     void onSocketReadyRead();
