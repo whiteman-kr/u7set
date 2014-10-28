@@ -662,6 +662,16 @@ namespace Hardware
 		moduleMessage->set_place(m_place);
 		moduleMessage->set_type(m_type);
 
+		if (m_configurationInput.isEmpty() == false)
+		{
+			Proto::Write(moduleMessage->mutable_configuration_input(), m_configurationInput);
+		}
+
+		if (m_configurationOutput.isEmpty() == false)
+		{
+			Proto::Write(moduleMessage->mutable_configuration_output(), m_configurationOutput);
+		}
+
 		return true;
 	}
 
@@ -692,6 +702,24 @@ namespace Hardware
 		m_place = moduleMessage.place();
 		m_type =  moduleMessage.type();
 
+		if (moduleMessage.has_configuration_input() == true)
+		{
+			m_configurationInput = Proto::Read(moduleMessage.configuration_input());
+		}
+		else
+		{
+			m_configurationInput.clear();
+		}
+
+		if (moduleMessage.has_configuration_output() == true)
+		{
+			m_configurationOutput = Proto::Read(moduleMessage.configuration_output());
+		}
+		else
+		{
+			m_configurationOutput.clear();
+		}
+
 		return true;
 	}
 
@@ -720,6 +748,27 @@ namespace Hardware
 		m_type = value;
 	}
 
+	QString DeviceModule::configurationInput() const
+	{
+		QString s(m_configurationInput);		// Return Value Optimization
+		return m_configurationInput;
+	}
+
+	void DeviceModule::setConfigurationInput(const QString& value)
+	{
+		m_configurationInput = value;
+	}
+
+	QString DeviceModule::configurationOutput() const
+	{
+		QString s(m_configurationOutput);		// Return Value Optimization
+		return m_configurationOutput;
+	}
+
+	void DeviceModule::setConfigurationOutput(const QString& value)
+	{
+		m_configurationOutput = value;
+	}
 
 	//
 	//

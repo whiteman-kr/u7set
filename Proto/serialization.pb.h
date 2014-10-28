@@ -4328,20 +4328,44 @@ class DeviceModule : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
+  // optional .Proto.wstring configuration_input = 3;
+  inline bool has_configuration_input() const;
+  inline void clear_configuration_input();
+  static const int kConfigurationInputFieldNumber = 3;
+  inline const ::Proto::wstring& configuration_input() const;
+  inline ::Proto::wstring* mutable_configuration_input();
+  inline ::Proto::wstring* release_configuration_input();
+  inline void set_allocated_configuration_input(::Proto::wstring* configuration_input);
+
+  // optional .Proto.wstring configuration_output = 4;
+  inline bool has_configuration_output() const;
+  inline void clear_configuration_output();
+  static const int kConfigurationOutputFieldNumber = 4;
+  inline const ::Proto::wstring& configuration_output() const;
+  inline ::Proto::wstring* mutable_configuration_output();
+  inline ::Proto::wstring* release_configuration_output();
+  inline void set_allocated_configuration_output(::Proto::wstring* configuration_output);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
  private:
   inline void set_has_place();
   inline void clear_has_place();
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_configuration_input();
+  inline void clear_has_configuration_input();
+  inline void set_has_configuration_output();
+  inline void clear_has_configuration_output();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 place_;
   ::google::protobuf::int32 type_;
+  ::Proto::wstring* configuration_input_;
+  ::Proto::wstring* configuration_output_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -8841,6 +8865,82 @@ inline ::google::protobuf::int32 DeviceModule::type() const {
 inline void DeviceModule::set_type(::google::protobuf::int32 value) {
   set_has_type();
   type_ = value;
+}
+
+// optional .Proto.wstring configuration_input = 3;
+inline bool DeviceModule::has_configuration_input() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void DeviceModule::set_has_configuration_input() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void DeviceModule::clear_has_configuration_input() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void DeviceModule::clear_configuration_input() {
+  if (configuration_input_ != NULL) configuration_input_->::Proto::wstring::Clear();
+  clear_has_configuration_input();
+}
+inline const ::Proto::wstring& DeviceModule::configuration_input() const {
+  return configuration_input_ != NULL ? *configuration_input_ : *default_instance_->configuration_input_;
+}
+inline ::Proto::wstring* DeviceModule::mutable_configuration_input() {
+  set_has_configuration_input();
+  if (configuration_input_ == NULL) configuration_input_ = new ::Proto::wstring;
+  return configuration_input_;
+}
+inline ::Proto::wstring* DeviceModule::release_configuration_input() {
+  clear_has_configuration_input();
+  ::Proto::wstring* temp = configuration_input_;
+  configuration_input_ = NULL;
+  return temp;
+}
+inline void DeviceModule::set_allocated_configuration_input(::Proto::wstring* configuration_input) {
+  delete configuration_input_;
+  configuration_input_ = configuration_input;
+  if (configuration_input) {
+    set_has_configuration_input();
+  } else {
+    clear_has_configuration_input();
+  }
+}
+
+// optional .Proto.wstring configuration_output = 4;
+inline bool DeviceModule::has_configuration_output() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DeviceModule::set_has_configuration_output() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DeviceModule::clear_has_configuration_output() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DeviceModule::clear_configuration_output() {
+  if (configuration_output_ != NULL) configuration_output_->::Proto::wstring::Clear();
+  clear_has_configuration_output();
+}
+inline const ::Proto::wstring& DeviceModule::configuration_output() const {
+  return configuration_output_ != NULL ? *configuration_output_ : *default_instance_->configuration_output_;
+}
+inline ::Proto::wstring* DeviceModule::mutable_configuration_output() {
+  set_has_configuration_output();
+  if (configuration_output_ == NULL) configuration_output_ = new ::Proto::wstring;
+  return configuration_output_;
+}
+inline ::Proto::wstring* DeviceModule::release_configuration_output() {
+  clear_has_configuration_output();
+  ::Proto::wstring* temp = configuration_output_;
+  configuration_output_ = NULL;
+  return temp;
+}
+inline void DeviceModule::set_allocated_configuration_output(::Proto::wstring* configuration_output) {
+  delete configuration_output_;
+  configuration_output_ = configuration_output;
+  if (configuration_output) {
+    set_has_configuration_output();
+  } else {
+    clear_has_configuration_output();
+  }
 }
 
 // -------------------------------------------------------------------

@@ -576,6 +576,8 @@ message DeviceModule
 {
 	optional int32 place = 1 [default = 0];
 	optional int32 type = 2 [default = 0];
+	optional wstring configuration_input = 3;
+	optional wstring configuration_output = 4;
 }
 
 message DeviceController

@@ -53,6 +53,7 @@ public:
 	int hpFileId() const;
 	int wvsFileId() const;
 	int dvsFileId() const;
+	int mcFileId() const;
 
 	std::vector<DbFileInfo> systemFiles() const;
 
@@ -168,6 +169,7 @@ private:
 	int m_hpFileId = -1;	// Hardware Presets
 	int m_wvsFileId = -1;	// Workflow Visualization Schemes
 	int m_dvsFileId = -1;	// Diagnostics Visualization Schemes
+	int m_mcFileId = -1;	// Module Configuration Template
 
 	std::vector<DbFileInfo> m_systemFiles;		// All system files
 
