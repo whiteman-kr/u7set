@@ -10,6 +10,8 @@
 #include <QDesktopWidget>
 #include <QCheckBox>
 #include <QPlainTextEdit>
+#include <QRadioButton>
+#include <QButtonGroup>
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -18,28 +20,28 @@ SC_CHANNEL = 3,
 SC_TYPE = 4,
 SC_DATA_FORMAT = 5,
 SC_DATA_SIZE = 6,
-SC_ACQUIRE = 7,
-SC_IN_OUT_TYPE = 8,
-SC_DEVICE_STR_ID = 9,
-SC_LOW_ADC = 10,
-SC_HIGH_ADC = 11,
-SC_LOW_LIMIT = 12,
-SC_HIGH_LIMIT = 13,
-SC_UNIT = 14,
-SC_ADJUSTMENT = 15,
-SC_DROP_LIMIT = 16,
-SC_EXCESS_LIMIT = 17,
-SC_UNBALANCE_LIMIT = 18,
-SC_INPUT_LOW_LIMIT = 19,
-SC_INPUT_HIGH_LIMIT = 20,
-SC_INPUT_UNIT = 21,
-SC_INPUT_SENSOR = 22,
-SC_OUTPUT_LOW_LIMIT = 23,
-SC_OUTPUT_HIGH_LIMIT = 24,
-SC_OUTPUT_UNIT = 25,
-SC_OUTPUT_SENSOR = 26,
-SC_CALCULATED = 27,
-SC_NORMAL_STATE = 28,
+SC_NORMAL_STATE = 7,
+SC_ACQUIRE = 8,
+SC_IN_OUT_TYPE = 9,
+SC_DEVICE_STR_ID = 10,
+SC_LOW_ADC = 11,
+SC_HIGH_ADC = 12,
+SC_LOW_LIMIT = 13,
+SC_HIGH_LIMIT = 14,
+SC_UNIT = 15,
+SC_ADJUSTMENT = 16,
+SC_DROP_LIMIT = 17,
+SC_EXCESS_LIMIT = 18,
+SC_UNBALANCE_LIMIT = 19,
+SC_INPUT_LOW_LIMIT = 20,
+SC_INPUT_HIGH_LIMIT = 21,
+SC_INPUT_UNIT = 22,
+SC_INPUT_SENSOR = 23,
+SC_OUTPUT_LOW_LIMIT = 24,
+SC_OUTPUT_HIGH_LIMIT = 25,
+SC_OUTPUT_UNIT = 26,
+SC_OUTPUT_SENSOR = 27,
+SC_CALCULATED = 28,
 SC_DECIMAL_PLACES = 29,
 SC_APERTURE = 30,
 SC_LAST_CHANGE_USER = 31;
@@ -54,6 +56,7 @@ const char* Columns[] =
 	"A/D",
 	"Data format",
 	"Data size",
+	"Normal state",
 	"Acquire",
 	"Input-output type",
 	"Device ID",
@@ -75,7 +78,6 @@ const char* Columns[] =
 	"Output unit",
 	"Output sensor",
 	"Calculated",
-	"Normal state",
 	"Decimal places",
 	"Aperture",
 	"Last change user",
@@ -984,13 +986,37 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
+	QWidget* widget = new QWidget(this);
+	QVBoxLayout* vbl = new QVBoxLayout;
+	vbl->setSpacing(0);
+	vbl->setContentsMargins(0,0,0,0);
+	QButtonGroup* bg = new QButtonGroup(this);
+	bg->setExclusive(true);
+
+	QRadioButton* rb = new QRadioButton(tr("Analog signals"), this);
+	vbl->addWidget(rb);
+	bg->addButton(rb, ST_ANALOG);
+
+	rb = new QRadioButton(tr("Discrete signals"), this);
+	vbl->addWidget(rb);
+	bg->addButton(rb, ST_DISCRETE);
+
+	rb = new QRadioButton(tr("All signals"), this);
+	rb->setChecked(true);
+	vbl->addWidget(rb);
+	bg->addButton(rb, ST_ANY);
+
+	widget->setLayout(vbl);
+
 	QToolBar* toolBar = new QToolBar(this);
+	toolBar->addWidget(widget);
 
 	// Property View
 	//
 	m_signalsModel = new SignalsModel(dbcontroller, this);
+	m_signalsProxyModel = new SignalsProxyModel(m_signalsModel, this);
 	m_signalsView = new QTableView(this);
-	m_signalsView->setModel(m_signalsModel);
+	m_signalsView->setModel(m_signalsProxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate();
 	m_signalsView->setItemDelegate(delegate);
@@ -1009,6 +1035,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
 	connect(delegate, &SignalsDelegate::closeEditor, m_signalsModel, &SignalsModel::loadSignals);
+	connect(bg, static_cast<void(QButtonGroup::*)(int,bool)>(&QButtonGroup::buttonToggled), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
 
@@ -1113,7 +1140,8 @@ void SignalsTabPage::editSignal()
     }
     for (int i = 0; i < selection.count(); i++)
     {
-		if (!m_signalsModel->editSignal(selection[i].row()))
+		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		if (!m_signalsModel->editSignal(row))
 		{
 			break;
 		}
@@ -1130,7 +1158,7 @@ void SignalsTabPage::deleteSignal()
 	QSet<int> deletedSignalGroupIDs;
     for (int i = 0; i < selection.count(); i++)
     {
-		int row = selection[i].row();
+		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
 		int groupId = m_signalsModel->signal(row).signalGroupID();
 		if (groupId != 0)
 		{
@@ -1148,7 +1176,9 @@ void SignalsTabPage::undoSignalChanges()
 {
 	UndoSignalsDialog dlg(m_signalsModel, this);
 
-	dlg.setCheckStates(m_signalsView->selectionModel()->selectedRows(), true);
+	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
+	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
+	dlg.setCheckStates(sourceSelection.indexes(), true);
 
 	if (dlg.exec() == QDialog::Rejected)
 	{
@@ -1160,7 +1190,10 @@ void SignalsTabPage::undoSignalChanges()
 
 void SignalsTabPage::showPendingChanges()
 {
-	CheckinSignalsDialog dlg(m_signalsModel, m_signalsView->selectionModel()->selectedRows(), this);
+	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
+	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
+
+	CheckinSignalsDialog dlg(m_signalsModel, sourceSelection.indexes(), this);
 
 	if (dlg.exec() == QDialog::Rejected)
 	{
@@ -1181,7 +1214,8 @@ void SignalsTabPage::changeSignalActionsVisibility()
 	{
 		for (int i = 0; i < selection.count(); i++)
 		{
-			if (m_signalsModel->isEditableSignal(selection[i].row()))
+			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+			if (m_signalsModel->isEditableSignal(row))
 			{
 				emit setSignalActionsVisibility(true);
 				return;
@@ -1199,11 +1233,16 @@ void SignalsTabPage::saveSelection()
 	QModelIndexList& selectedList = m_signalsView->selectionModel()->selectedRows(0);
 	foreach (const QModelIndex& index, selectedList)
 	{
-		selectedRowsSignalID.append(m_signalsModel->key(index.row()));
+		int row = m_signalsProxyModel->mapToSource(index).row();
+		selectedRowsSignalID.append(m_signalsModel->key(row));
 	}
 	QModelIndex index = m_signalsView->currentIndex();
-	focusedCellSignalID = m_signalsModel->key(index.row());
-	focusedCellColumn = index.column();
+	if (index.isValid())
+	{
+		int row = m_signalsProxyModel->mapToSource(index).row();
+		focusedCellSignalID = m_signalsModel->key(row);
+		focusedCellColumn = index.column();
+	}
 	horizontalScrollPosition = m_signalsView->horizontalScrollBar()->value();
 	verticalScrollPosition = m_signalsView->verticalScrollBar()->value();
 }
@@ -1212,11 +1251,46 @@ void SignalsTabPage::restoreSelection()
 {
 	foreach (int id, selectedRowsSignalID)
 	{
-		m_signalsView->selectRow(m_signalsModel->getKeyIndex(id));
+		QModelIndex& sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(id), 0);
+		QModelIndex& proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
+		m_signalsView->selectRow(proxyIndex.row());
 	}
-	m_signalsView->setCurrentIndex(m_signalsModel->index(m_signalsModel->getKeyIndex(focusedCellSignalID), focusedCellColumn));
+	QModelIndex& sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(focusedCellSignalID), focusedCellColumn);
+	m_signalsView->setCurrentIndex(m_signalsProxyModel->mapFromSource(sourceIndex));
 	m_signalsView->horizontalScrollBar()->setValue(horizontalScrollPosition);
 	m_signalsView->verticalScrollBar()->setValue(verticalScrollPosition);
+}
+
+void SignalsTabPage::changeSignalTypeFilter(int signalType, bool checked)
+{
+	if (!checked)
+	{
+		return;
+	}
+
+	saveSelection();
+	m_signalsProxyModel->setSignalTypeFilter(signalType);
+	restoreSelection();
+
+	switch(signalType)
+	{
+		case ST_DISCRETE:
+			for (int i = SC_LOW_ADC; i <= SC_APERTURE; i++)
+			{
+				m_signalsView->setColumnHidden(i, true);
+			}
+			break;
+		case ST_ANALOG:
+		case ST_ANY:
+			for (int i = SC_LOW_ADC; i <= SC_APERTURE; i++)
+			{
+				m_signalsView->setColumnHidden(i, false);
+			}
+			break;
+		default:
+			assert(false);
+	}
+	m_signalsView->resizeColumnsToContents();
 }
 
 
@@ -1567,4 +1641,24 @@ void UndoSignalsDialog::undoSelected()
 	settings.setValue("Undo signals dialog: size", size());
 
 	accept();
+}
+
+
+SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent) :
+	QSortFilterProxyModel(parent),
+	m_sourceModel(sourceModel)
+{
+	setSourceModel(sourceModel);
+}
+
+bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
+{
+	return m_signalType == ST_ANY || m_signalType == m_sourceModel->signal(source_row).type();
+}
+
+void SignalsProxyModel::setSignalTypeFilter(int signalType)
+{
+	beginResetModel();
+	m_signalType = signalType;
+	endResetModel();
 }

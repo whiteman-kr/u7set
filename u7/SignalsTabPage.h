@@ -15,6 +15,11 @@ class QPlainTextEdit;
 class QSplitter;
 
 
+const int ST_ANALOG = SignalType::analog,
+ST_DISCRETE = SignalType::discrete,
+ST_ANY = 0xff;
+
+
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
@@ -116,6 +121,21 @@ private:
 };
 
 
+class SignalsProxyModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+public:
+	SignalsProxyModel(SignalsModel* sourceModel, QObject* parent = 0);
+
+	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+	void setSignalTypeFilter(int signalType);
+
+private:
+	SignalsModel* m_sourceModel;
+	int m_signalType = ST_ANY;
+};
+
+
 class CheckedoutSignalsModel : public QSortFilterProxyModel
 {
 	Q_OBJECT
@@ -153,7 +173,7 @@ public slots:
 private:
 	SignalsModel *m_sourceModel;
 	CheckedoutSignalsModel* m_proxyModel;
-	QTableView* m_signalsView;
+	QTableView* m_signalsView = nullptr;
 	QPlainTextEdit* m_commentEdit;
 	QSplitter* m_splitter;
 
@@ -212,15 +232,18 @@ public slots:
 	void saveSelection();
 	void restoreSelection();
 
+	void changeSignalTypeFilter(int signalType, bool checked);
+
 	// Data
 	//
 private:
 	SignalsModel* m_signalsModel = nullptr;
+	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
 
 	QList<int> selectedRowsSignalID;
-	int focusedCellSignalID;
-	int focusedCellColumn;
+	int focusedCellSignalID = -1;
+	int focusedCellColumn = -1;
 	int horizontalScrollPosition;
 	int verticalScrollPosition;
 };
