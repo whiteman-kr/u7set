@@ -634,6 +634,8 @@ void FileView::projectOpened()
 {
 	this->setEnabled(true);
 
+	filesViewSelectionChanged(QItemSelection(), QItemSelection());
+
 	m_addFileAction->setEnabled(true);
 	m_refreshFileAction->setEnabled(true);
 
@@ -987,6 +989,11 @@ FilesModel& FileView::filesModel()
 const DbFileInfo& FileView::parentFile() const
 {
 	return m_parentFile;
+}
+
+int FileView::parentFileId() const
+{
+	return m_parentFile.fileId();
 }
 
 DbController* FileView::dbController()

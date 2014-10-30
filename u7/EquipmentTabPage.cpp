@@ -785,16 +785,7 @@ void EquipmentView::addSystem()
 {
 	// Add new system to the root
 	//
-	std::shared_ptr<Hardware::DeviceObject> system;
-
-	if (isConfigurationMode() == true)
-	{
-		system = std::make_shared<Hardware::DeviceSystem>(false);
-	}
-	else
-	{
-		system = std::make_shared<Hardware::DeviceSystem>(true);
-	}
+	std::shared_ptr<Hardware::DeviceObject> system = std::make_shared<Hardware::DeviceSystem>(isPresetMode());
 
 	system->setStrId("SYSTEMID");
 	system->setCaption(tr("System"));
@@ -805,16 +796,7 @@ void EquipmentView::addSystem()
 
 void EquipmentView::addRack()
 {
-	std::shared_ptr<Hardware::DeviceObject> rack;
-
-	if (isConfigurationMode() == true)
-	{
-		rack = std::make_shared<Hardware::DeviceRack>(false);
-	}
-	else
-	{
-		rack = std::make_shared<Hardware::DeviceRack>(true);
-	}
+	std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>(isPresetMode());
 
 	rack->setStrId("$(PARENT)_RACKID");
 	rack->setCaption(tr("Rack"));
@@ -825,41 +807,34 @@ void EquipmentView::addRack()
 
 void EquipmentView::addChassis()
 {
-	std::shared_ptr<Hardware::DeviceObject> ñhassis;
+	std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(isPresetMode());
 
-	if (isConfigurationMode() == true)
-	{
-		ñhassis = std::make_shared<Hardware::DeviceChassis>(false);
-	}
-	else
-	{
-		ñhassis = std::make_shared<Hardware::DeviceChassis>(true);
-	}
+    chassis->setStrId("$(PARENT)_CHASSISID");
+    chassis->setCaption(tr("Chassis"));
 
-	ñhassis->setStrId("$(PARENT)_CHASSISID");
-	ñhassis->setCaption(tr("Chassis"));
-
-	addDeviceObject(ñhassis);
+    addDeviceObject(chassis);
 	return;
 }
 
 void EquipmentView::addModule()
 {
-	std::shared_ptr<Hardware::DeviceObject> module;
-
-	if (isConfigurationMode() == true)
-	{
-		module = std::make_shared<Hardware::DeviceModule>(false);
-	}
-	else
-	{
-		module = std::make_shared<Hardware::DeviceModule>(true);
-	}
+	std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>(isPresetMode());
 
 	module->setStrId("$(PARENT)_MD00");
 	module->setCaption(tr("Module"));
 
 	addDeviceObject(module);
+	return;
+}
+
+void EquipmentView::addController()
+{
+	std::shared_ptr<Hardware::DeviceObject> controller = std::make_shared<Hardware::DeviceController>(isPresetMode());
+
+	controller->setStrId("$(PARENT)_CTRLXXX");
+	controller->setCaption(tr("Controller"));
+
+	addDeviceObject(controller);
 	return;
 }
 
@@ -888,15 +863,15 @@ void EquipmentView::addPresetChassis()
 {
 	if (isPresetMode() == true)
 	{
-		std::shared_ptr<Hardware::DeviceObject> ñhassis = std::make_shared<Hardware::DeviceChassis>(true);
+        std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(true);
 
-		ñhassis->setStrId("$(PARENT)_CHASSISID");
-		ñhassis->setCaption(tr("Chassis"));
+        chassis->setStrId("$(PARENT)_CHASSISID");
+        chassis->setCaption(tr("Chassis"));
 
-		ñhassis->setPresetRoot(true);
-		ñhassis->setPresetName("PRESET_NAME");
+        chassis->setPresetRoot(true);
+        chassis->setPresetName("PRESET_NAME");
 
-		addDeviceObject(ñhassis);
+        addDeviceObject(chassis);
 	}
 	else
 	{
@@ -1433,6 +1408,7 @@ void EquipmentTabPage::projectOpened()
 void EquipmentTabPage::projectClosed()
 {
 	this->setEnabled(false);
+	m_propertyEditor->clear();
 	return;
 }
 

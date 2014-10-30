@@ -55,6 +55,7 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
 	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
+	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
 	connect(this, &DbController::signal_getDataFormats, m_worker, &DbWorker::slot_getDataFormats);
@@ -1052,6 +1053,31 @@ bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
 	emit signal_getSignals(signalSet);
 
 	ok = waitForComplete(parentWidget, tr("Reading signals"));
+
+	return ok;
+}
+
+
+bool DbController::getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget)
+{
+	if (signal == nullptr)
+	{
+		assert(signal != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getLatestSignal(signalID, signal);
+
+	ok = waitForComplete(parentWidget, tr("Reading latest signal"));
 
 	return ok;
 }

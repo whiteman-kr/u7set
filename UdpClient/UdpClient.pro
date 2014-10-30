@@ -17,14 +17,19 @@ TEMPLATE = app
 SOURCES += \
         mainwindow.cpp \
         clientmain.cpp \
-        ../lib/UdpSocket.cpp
+        ../lib/UdpSocket.cpp \
+    ../lib/BaseService.cpp \
+    ../lib/SocketIO.cpp
 
 
 HEADERS  += mainwindow.h \
         ../include/SocketIO.h \
-        ../include/UdpSocket.h
+        ../include/UdpSocket.h \
+    ../include/BaseService.h
 
 FORMS    += mainwindow.ui
+
+unix:QMAKE_CXXFLAGS += -std=c++11
 
 
 # Visual Leak Detector

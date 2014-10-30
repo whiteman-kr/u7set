@@ -22,6 +22,91 @@ namespace VFrame30
 	{
 	}
 
+	void VideoItemSignal::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* layer) const
+	{
+		FblItemRect::Draw(drawParam, scheme, layer);
+
+		//--
+		//
+		QPainter* p = drawParam->painter();
+
+		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		if (std::abs(r.left() - r.right()) < 0.000001)
+		{
+			r.setRight(r.left() + 0.000001);
+		}
+
+		if (std::abs(r.bottom() - r.top()) < 0.000001)
+		{
+			r.setBottom(r.top() + 0.000001);
+		}
+
+		int dpiX = 96;
+		QPaintDevice* pPaintDevice = p->device();
+		if (pPaintDevice == nullptr)
+		{
+			assert(pPaintDevice);
+			dpiX = 96;
+		}
+		else
+		{
+			dpiX = pPaintDevice->logicalDpiX();
+		}
+
+		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+
+		if (inputsCount() > 0)
+		{
+			r.setLeft(r.left() + pinWidth);
+		}
+
+		if (outputsCount() > 0)
+		{
+			r.setRight(r.right() - pinWidth);
+		}
+
+		r.setLeft(r.left() + m_font.drawSize() / 4.0);
+		r.setRight(r.right() - m_font.drawSize() / 4.0);
+
+		// Draw Signals StrIDs
+		//
+		p->setPen(textColor());
+
+		DrawHelper::DrawText(p, m_font, itemUnit(), signalStrIds(), r);
+
+		return;
+	}
+
+	QString VideoItemSignal::signalStrIds() const
+	{
+		QString result;
+
+		for (QString s : m_signalStrIds)
+		{
+			s = s.trimmed();
+
+			if (result.isEmpty() == false)
+			{
+				result.append(QChar::LineFeed);
+			}
+
+			result.append(s);
+		}
+
+		return result;
+	}
+
+	void VideoItemSignal::setSignalStrIds(const QString& s)
+	{
+		m_signalStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+	}
+
+	QStringList* VideoItemSignal::mutable_signalStrIds()
+	{
+		return &m_signalStrIds;
+	}
+
 	bool VideoItemSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
@@ -35,9 +120,13 @@ namespace VFrame30
 
 		// --
 		//
-		/*Proto::VideoItemSignal* signal = */message->mutable_videoitem()->mutable_signal();
+		Proto::VideoItemSignal* signal = message->mutable_videoitem()->mutable_signal();
 
-		//pSignal->set_leftdocpt(leftDocPt);
+		for (const QString& strId : m_signalStrIds)
+		{
+			::Proto::wstring* ps = signal->add_signalstrids();
+			Proto::Write(ps, strId);
+		}
 
 		return true;
 	}
@@ -65,9 +154,17 @@ namespace VFrame30
 			assert(message.videoitem().has_signal());
 			return false;
 		}
-		/*const Proto::VideoItemSignal& signal = */message.videoitem().signal();
 
-		//leftDocPt = signal.leftdocpt();
+		const Proto::VideoItemSignal& signal = message.videoitem().signal();
+
+		m_signalStrIds.clear();
+		m_signalStrIds.reserve(signal.signalstrids_size());
+
+		for (int i = 0; i < signal.signalstrids_size(); i++)
+		{
+			QString s = Proto::Read(signal.signalstrids().Get(i));
+			m_signalStrIds.push_back(s);
+		}
 
 		return true;
 	}

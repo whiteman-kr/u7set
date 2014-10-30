@@ -4,11 +4,38 @@
 #include <QThread>
 #include <QDebug>
 #include <QFile>
+#include <QFileInfo>
 #include "../qtservice/src/qtservice.h"
 #include "../include/UdpSocket.h"
 
 
 class BaseServiceController;
+
+
+class ReceivedFile
+{
+private:
+	static quint32 m_serialID;
+
+	quint32 m_ID = 0;
+	QString m_fileName;
+	quint32 m_fileSize = 0;
+	quint32 m_CRC32 = CRC32_INITIAL_VALUE;
+	quint32 m_dataSize = 0;
+	char* m_data = nullptr;
+
+public:
+	ReceivedFile(const QString& fileName, quint32 fileSize);
+	~ReceivedFile();
+
+	quint32 ID() { return m_ID; }
+
+	bool appendData(const char *ptr, quint32 len);
+
+	QString fileName() const { return m_fileName; }
+
+	quint32 CRC32();
+};
 
 
 // BaseServiceWorker class
@@ -19,18 +46,36 @@ class BaseServiceWorker : public QObject
     Q_OBJECT
 
 private:
-    int m_serviceType;
+	int m_serviceType = STP_BASE;
 
-	UdpSocketThread* m_serverSocketThread;
+	BaseServiceController* m_baseServiceController;
 
-	UdpSocketThread* m_sendFileClientSocketThread;
-	QFile* m_fileToSend;
-	char* m_sendFileStartBuffer;
+	UdpSocketThread* m_serverSocketThread = nullptr;
 
-    BaseServiceController* m_baseServiceController;
+	// members needed for file sending
+	//
+	UdpSocketThread* m_sendFileClientSocketThread = nullptr;
+
+	QFile m_fileToSend;
+	QFileInfo m_fileToSendInfo;
+
+	SendFileStart m_sendFileStart;
+	SendFileNext m_sendFileNext;
+
+	bool m_sendFileReadNextPartOK = false;
+	bool m_sendFileFirstRead = true;
+
+	bool sendFileReadNextPart();
+	void stopSendFile();
+
+	// members needed for file receiving
+	//
+	QHash<quint32, ReceivedFile*> m_receivedFile;
+
+	void onSendFileStartRequest(const UdpRequest &request, UdpRequest &ack);
+	void onSendFileNextRequest(const UdpRequest &request, UdpRequest &ack);
 
 public:
-
     BaseServiceWorker(BaseServiceController* baseServiceController, int serviceType);
     virtual ~BaseServiceWorker();
 
@@ -44,12 +89,14 @@ signals:
 	void stopMainFunction();
 	void restartMainFunction();
 
-	void endSendFile(bool result);
+	void endSendFile(bool result, QString fileName);
+	void fileReceived(ReceivedFile* receivedFile);
 
-	void sendFileRequest(quint32 requestID, char* requestData, quint32 requestDataSize);
+	void sendFileRequest(UdpRequest request);
 
 private slots:
-	void onSendFileRequestAck(RequestHeader header, QByteArray data);
+	void onSendFileAckReceived(UdpRequest udpRequest);
+	void onSendFileAckTimeout();
 
 public slots:
 	void onThreadStarted();
@@ -58,6 +105,7 @@ public slots:
     void onBaseRequest(UdpRequest request);
 
 	void onSendFile(QHostAddress address, quint16 port, QString fileName);
+	void onFreeReceivedFile(quint32 fileID);
 };
 
 
@@ -135,12 +183,15 @@ private:
 signals:
 	void sendFile(QHostAddress address, quint16 port, QString fileName);
 
+	void freeReceivedFile(quint32 fileID);
+
 public slots:
 	void stopMainFunction();
 	void startMainFunction();
 	void restartMainFunction();
 
-	virtual void onEndSendFile(bool result);
+	virtual void onEndSendFile(bool result, QString fileName);
+	virtual void onFileReceived(ReceivedFile* receivedFile);
 
 private slots:
 	void onTimer500ms();

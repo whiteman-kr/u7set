@@ -65,7 +65,6 @@ SOURCES +=\
     ../lib/DbController.cpp \
     ../lib/DbWorker.cpp \
     ../lib/DbProgressDialog.cpp \
-    AfbLibrary.cpp \
     DialogAfblEditor.cpp \
     DialogAfbProperties.cpp \
     xmlsyntaxhighlighter.cpp \
@@ -84,7 +83,9 @@ SOURCES +=\
     EditEngine/EditEngineDeleteItem.cpp \
     EditEngine/EditEngineMoveItem.cpp \
     EditEngine/EditEngineSetPoints.cpp \
-    EditEngine/EditEngineSetProperty.cpp
+    EditEngine/EditEngineSetProperty.cpp \
+    SchemePropertiesDialog.cpp \
+    EditEngine/EditEngineSetSchemeProperty.cpp
 
 
 HEADERS  += \
@@ -114,7 +115,6 @@ HEADERS  += \
     ../include/DbController.h \
     ../include/DbWorker.h \
     ../include/DbProgressDialog.h \
-    AfbLibrary.h \
     DialogAfblEditor.h \
     DialogAfbProperties.h \
     xmlsyntaxhighlighter.h \
@@ -135,7 +135,9 @@ HEADERS  += \
     EditEngine/EditEngineDeleteItem.h \
     EditEngine/EditEngineMoveItem.h \
     EditEngine/EditEngineSetPoints.h \
-    EditEngine/EditEngineSetProperty.h
+    EditEngine/EditEngineSetProperty.h \
+    SchemePropertiesDialog.h \
+    EditEngine/EditEngineSetSchemeProperty.h
     ../include/Signal.h
 
 FORMS    += \
@@ -150,7 +152,8 @@ FORMS    += \
     CheckInDialog.ui \
     DialogAfblEditor.ui \
     DialogAfbProperties.ui \
-    SchemeItemPropertiesDialog.ui
+    SchemeItemPropertiesDialog.ui \
+    SchemePropertiesDialog.ui
 
 RESOURCES += \
 	Resources.qrc
@@ -190,7 +193,9 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0028.sql \
     DatabaseUpgrade/Upgrade0029.sql \
     DatabaseUpgrade/Upgrade0030.sql \
-    DatabaseUpgrade/Upgrade0031.sql
+    DatabaseUpgrade/Upgrade0031.sql \
+    Tools/afbschema.xsd \
+    DatabaseUpgrade/Upgrade0032.sql
 
 
 CONFIG += precompile_header

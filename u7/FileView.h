@@ -114,6 +114,7 @@ public:
 	FilesModel& filesModel();
 
 	const DbFileInfo& parentFile() const;
+	int parentFileId() const;
 
 	// Protected properties
 	//

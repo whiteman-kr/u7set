@@ -37,6 +37,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"File API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0029.sql"},
 	{"Signal API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0030.sql"},
 	{"File API, adding get_file_info", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0031.sql"},
+	{"Add MC system file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0032.sql"},
 };
 
 
@@ -192,6 +193,12 @@ int DbWorker::dvsFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_dvsFileId;
+}
+
+int DbWorker::mcFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_mcFileId;
 }
 
 std::vector<DbFileInfo> DbWorker::systemFiles() const
@@ -667,6 +674,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_hpFileId = -1;
 	m_wvsFileId = -1;
 	m_dvsFileId = -1;
+	m_mcFileId = -1;
 	m_systemFiles.clear();
 	m_mutex.unlock();
 
@@ -719,6 +727,14 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			m_systemFiles.push_back(fi);
 			continue;
 		}
+
+		if (fi.fileName() == McFileName)
+		{
+			QMutexLocker locker(&m_mutex);
+			m_mcFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
 	}
 
 
@@ -729,6 +745,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result &= m_hpFileId != -1;
 	result &= m_wvsFileId != -1;
 	result &= m_dvsFileId != -1;
+	result &= m_mcFileId != -1;
 	m_mutex.unlock();
 
 	if (result == false)
@@ -745,6 +762,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		assert(m_hpFileId != -1);
 		assert(m_wvsFileId != -1);
 		assert(m_dvsFileId != -1);
+		assert(m_mcFileId != -1);
 
 		return;
 	}
@@ -1205,87 +1223,35 @@ void DbWorker::slot_createUser(DbUser user)
 		return;
 	}
 
-	// Start transaction
+	// Check if such user already exists
+	// SELECT * FROM creat_user();
 	//
-	bool result = db.transaction();
+	QString request = QString("SELECT * FROM create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
+					  .arg(currentUser().userId())
+					  .arg(user.username())
+					  .arg(user.firstName())
+					  .arg(user.lastName())
+					  .arg(user.password())
+					  .arg(user.isAdminstrator() ? "true" : "false")
+					  .arg(user.isReadonly() ? "true" : "false")
+					  .arg(user.isDisabled() ? "true" : "false");
+
+	QSqlQuery query(db);
+	bool result = query.exec(request);
 
 	if (result == false)
 	{
-		emitError(db.lastError());
+		emitError(tr("Can't create user %1, error: %2").arg(user.username()).arg(db.lastError().text()));
 		return;
 	}
 
+	if (query.size() > 0)
 	{
-		std::shared_ptr<int*> finishTransaction(nullptr, [this, &db, &result](void*)
-		{
-			if (result == true)
-			{
-				qDebug() << "CreateUser: Commit changes.";
-				result = db.commit();
-				if (result == false)
-				{
-					emitError(db.lastError());
-				}
-			}
-			else
-			{
-				qDebug() << "CreateUser: Rollback changes.";
-				db.rollback();
-			}
-			});
+		result = query.next();
+		assert(result);
 
-
-		// Check if such user already exists
-		// SELECT "UserID" FROM "User" WHERE "Username"='Administrator';
-		//
-		QSqlQuery query(db);
-		result = query.exec(QString("SELECT \"UserID\" FROM \"User\" WHERE \"Username\"='%1';").arg(user.username()));
-
-		if (result == false)
-		{
-			emitError(tr("Can't create user %1, error: %2").arg(user.username()).arg(db.lastError().text()));
-			return;
-		}
-
-		if (query.size() > 0)
-		{
-			result = query.next();
-			assert(result);
-
-			int userID = query.value("UserID").toInt();
-
-			if (userID != 0)
-			{
-				emitError(tr("User %1 already exists").arg(user.username()));
-				return;
-			}
-		}
-
-		// Create User
-		// INSERT INTO "User"("Username", "FirstName", "LastName", "Password", "Administrator", "ReadOnly", "Disabled")
-		//		VALUES (:username, :firstName, :lastName, :password, :administrator, :readonly, :disabled);
-		//
-
-		query.prepare("INSERT INTO \"User\"(\"Username\", \"FirstName\", \"LastName\", \"Password\", \"Administrator\", \"ReadOnly\", \"Disabled\") "
-					  "VALUES (:username, :firstName, :lastName, :password, :administrator, :readonly, :disabled);");
-
-		query.bindValue(":username", user.username());
-		query.bindValue(":firstName", user.firstName());
-		query.bindValue(":lastName", user.lastName());
-		query.bindValue(":password", user.newPassword());
-		query.bindValue(":administrator", user.isAdminstrator());
-		query.bindValue(":readonly", user.isReadonly());
-		query.bindValue(":disabled", user.isDisabled());
-
-		result = query.exec();
-
-		if (result == false)
-		{
-			emitError(tr("Create user error: %1").arg(query.lastError().text()));
-			return;
-		}
-	}	// commit will happen here, by auto variable finishTransaction
-
+		//int userID = query.value("UserID").toInt();
+	}
 
 	return;
 }
@@ -2896,6 +2862,55 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 	return;
 }
+
+
+void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (signal == nullptr)
+	{
+		assert(signal != nullptr);
+		return;
+	}
+
+	signal->setID(0);		// bad signal flag
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get latest signal. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
+		.arg(currentUser().userId()).arg(signalID);
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		getSignalData(q, *signal);
+	}
+
+	return;
+}
+
+
 
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 {

@@ -18,17 +18,21 @@ SOURCES +=\
     servermain.cpp \
     ../lib/UdpSocket.cpp \
     ServerSocket.cpp \
-    mainwindow2.cpp \
-    ../lib/BaseService.cpp
+    ../lib/BaseService.cpp \
+    servermainwindow.cpp \
+    ../lib/SocketIO.cpp
 
 HEADERS  += \
     ../include/SocketIO.h \
     ../include/UdpSocket.h \
     ServerSocket.h \
     ../include/BaseService.h \
-    mainwindow2.h
+    servermainwindow.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    servermainwindow.ui
+
+unix:QMAKE_CXXFLAGS += -std=c++11
 
 
 # Visual Leak Detector

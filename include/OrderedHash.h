@@ -14,15 +14,15 @@ private:
 public:
 	OrderedHash();
 
-	void clear();
+	virtual void clear();
 
 	bool isEmpty() const;
 	int count() const;
 	bool contains(const KEY& key) const;
 
-	void append(const KEY& key, const VALUE& value);
-	void remove(const KEY& key);
-	void removeAt(const int index);
+	virtual void append(const KEY& key, const VALUE& value);
+	virtual void remove(const KEY& key);
+	virtual void removeAt(const int index);
 
 	const VALUE value(const KEY& key) const;
 

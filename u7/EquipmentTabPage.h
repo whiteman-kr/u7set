@@ -115,6 +115,7 @@ public slots:
 	void addRack();
 	void addChassis();
 	void addModule();
+	void addController();
 
 	void addPresetRack();
 	void addPresetChassis();
@@ -159,7 +160,6 @@ public:
 
 protected:
 	void CreateActions();
-
 
 	bool isPresetMode() const;
 	bool isConfigurationMode() const;

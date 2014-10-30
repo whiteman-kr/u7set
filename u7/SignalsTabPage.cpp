@@ -10,39 +10,41 @@
 #include <QDesktopWidget>
 #include <QCheckBox>
 #include <QPlainTextEdit>
-
+#include <QRadioButton>
+#include <QButtonGroup>
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
 SC_NAME = 2,
 SC_CHANNEL = 3,
-SC_DATA_FORMAT = 4,
-SC_DATA_SIZE = 5,
-SC_LOW_ADC = 6,
-SC_HIGH_ADC = 7,
-SC_LOW_LIMIT = 8,
-SC_HIGH_LIMIT = 9,
-SC_UNIT = 10,
-SC_ADJUSTMENT = 11,
-SC_DROP_LIMIT = 12,
-SC_EXCESS_LIMIT = 13,
-SC_UNBALANCE_LIMIT = 14,
-SC_INPUT_LOW_LIMIT = 15,
-SC_INPUT_HIGH_LIMIT = 16,
-SC_INPUT_UNIT = 17,
-SC_INPUT_SENSOR = 18,
-SC_OUTPUT_LOW_LIMIT = 19,
-SC_OUTPUT_HIGH_LIMIT = 20,
-SC_OUTPUT_UNIT = 21,
-SC_OUTPUT_SENSOR = 22,
-SC_ACQUIRE = 23,
-SC_CALCULATED = 24,
-SC_NORMAL_STATE = 25,
-SC_DECIMAL_PLACES = 26,
-SC_APERTURE = 27,
-SC_IN_OUT_TYPE = 28,
-SC_DEVICE_STR_ID = 29,
-SC_LAST_CHANGE_USER = 30;
+SC_TYPE = 4,
+SC_DATA_FORMAT = 5,
+SC_DATA_SIZE = 6,
+SC_NORMAL_STATE = 7,
+SC_ACQUIRE = 8,
+SC_IN_OUT_TYPE = 9,
+SC_DEVICE_STR_ID = 10,
+SC_LOW_ADC = 11,
+SC_HIGH_ADC = 12,
+SC_LOW_LIMIT = 13,
+SC_HIGH_LIMIT = 14,
+SC_UNIT = 15,
+SC_ADJUSTMENT = 16,
+SC_DROP_LIMIT = 17,
+SC_EXCESS_LIMIT = 18,
+SC_UNBALANCE_LIMIT = 19,
+SC_INPUT_LOW_LIMIT = 20,
+SC_INPUT_HIGH_LIMIT = 21,
+SC_INPUT_UNIT = 22,
+SC_INPUT_SENSOR = 23,
+SC_OUTPUT_LOW_LIMIT = 24,
+SC_OUTPUT_HIGH_LIMIT = 25,
+SC_OUTPUT_UNIT = 26,
+SC_OUTPUT_SENSOR = 27,
+SC_CALCULATED = 28,
+SC_DECIMAL_PLACES = 29,
+SC_APERTURE = 30,
+SC_LAST_CHANGE_USER = 31;
 
 
 const char* Columns[] =
@@ -51,8 +53,13 @@ const char* Columns[] =
 	"External ID",
 	"Name",
 	"Channel",
+	"A/D",
 	"Data format",
 	"Data size",
+	"Normal state",
+	"Acquire",
+	"Input-output type",
+	"Device ID",
 	"Low ADC",
 	"High ADC",
 	"Low limit",
@@ -70,17 +77,14 @@ const char* Columns[] =
 	"Output high Limit",
 	"Output unit",
 	"Output sensor",
-	"Acquire",
 	"Calculated",
-	"Normal state",
 	"Decimal places",
 	"Aperture",
-	"Input-output type",
-	"Device ID",
 	"Last change user",
 };
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
+
 
 
 SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, QObject *parent) :
@@ -266,6 +270,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(m_signalSet[row].inOutType()); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
+		case SC_TYPE:
 		default:
 			assert(false);
 	}
@@ -321,6 +326,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(SignalInOutType(cb->currentIndex())); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
+		case SC_TYPE:
 		default:
 			assert(false);
 			return;
@@ -341,8 +347,23 @@ void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionVi
 	if (cb)
 	{
 		cb->showPopup();
-		//cb->view()->updateGeometry();
 	}
+}
+
+bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QStyleOptionViewItem &, const QModelIndex &index)
+{
+	if (event->type() == QEvent::MouseButtonDblClick)
+	{
+		QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+		if (mouseEvent == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+		emit itemDoubleClicked(index.row());
+		return true;
+	}
+	return false;
 }
 
 
@@ -433,45 +454,68 @@ bool SignalsModel::checkoutSignal(int index)
 	}
 
 	QVector<int> signalsIDs;
-	signalsIDs << m_signalSet.key(index);
+	if (m_signalSet[index].signalGroupID() != 0)
+	{
+		signalsIDs = m_signalSet.getChannelSignalsID(m_signalSet[index].signalGroupID());
+	}
+	else
+	{
+		signalsIDs << m_signalSet.key(index);
+	}
 	QVector<ObjectState> objectStates;
 	dbController()->checkoutSignals(&signalsIDs, &objectStates, parrentWindow());
 	if (objectStates.count() == 0)
 	{
 		return false;
 	}
-	if (objectStates[0].errCode != ERR_SIGNAL_OK)
+	showErrors(objectStates);
+	foreach (const ObjectState& objectState, objectStates)
 	{
-		showError(objectStates[0]);
-	}
-	if (objectStates[0].errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
-			&& objectStates[0].userId != dbController()->currentUser().userId())
-	{
-		return false;
+		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+				&& objectState.userId != dbController()->currentUser().userId())
+		{
+			return false;
+		}
 	}
 	emit setCheckedoutSignalActionsVisibility(true);
 	return true;
 }
 
-void SignalsModel::showError(const ObjectState& state) const
+QString SignalsModel::errorMessage(const ObjectState& state) const
 {
 	switch(state.errCode)
 	{
-		case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
-			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Signal could not be checked out"));
-			break;
-		case ERR_SIGNAL_ALREADY_CHECKED_OUT:
-			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Signal is checked out by \"%1\"").arg(m_usernameMap[state.userId]));
-			break;
-		case ERR_SIGNAL_DELETED:
-			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Signal was deleted already"));
-			break;
-		case ERR_SIGNAL_NOT_FOUND:
-			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Signal not found"));
-			break;
+		case ERR_SIGNAL_IS_NOT_CHECKED_OUT: return tr("Signal %1 could not be checked out").arg(state.id);
+		case ERR_SIGNAL_ALREADY_CHECKED_OUT: return tr("Signal %1 is checked out by \"%2\"").arg(state.id).arg(m_usernameMap[state.userId]);
+		case ERR_SIGNAL_DELETED: return tr("Signal %1 was deleted already").arg(state.id);
+		case ERR_SIGNAL_NOT_FOUND: return tr("Signal %1 not found").arg(state.id);
 		default:
 			assert(false);
-			QMessageBox::critical(m_parentWindow, tr("Error"), tr("Unknown error %1").arg(state.errCode));
+			return tr("Unknown error %1").arg(state.errCode);
+	}
+}
+
+void SignalsModel::showError(const ObjectState& state) const
+{
+	if (state.errCode != ERR_SIGNAL_OK)
+	{
+		QMessageBox::critical(m_parentWindow, tr("Error"), errorMessage(state));
+	}
+}
+
+void SignalsModel::showErrors(const QVector<ObjectState>& states) const
+{
+	QString message;
+	foreach (const ObjectState& state, states)
+	{
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			message += errorMessage(state) + "\n";
+		}
+	}
+	if (!message.isEmpty())
+	{
+		QMessageBox::critical(m_parentWindow, tr("Error"), message);
 	}
 }
 
@@ -489,55 +533,115 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		switch (col)
+		if (signal.type() == SignalType::analog)
 		{
-			case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
-			case SC_STR_ID: return signal.strID();
-			case SC_EXT_STR_ID: return signal.extStrID();
-			case SC_NAME: return signal.name();
-			case SC_CHANNEL: return signal.channel();
-			case SC_DATA_FORMAT:
-				if (m_dataFormatInfo.contains(signal.dataFormat()))
-				{
-					return m_dataFormatInfo.value(signal.dataFormat());
-				}
-				else
-				{
-					return tr("Unknown data format");
-				}
+			switch (col)
+			{
+				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
+				case SC_STR_ID: return signal.strID();
+				case SC_EXT_STR_ID: return signal.extStrID();
+				case SC_NAME: return signal.name();
+				case SC_CHANNEL: return signal.channel();
+				case SC_TYPE: return QChar('A');
+				case SC_DATA_FORMAT:
+					if (m_dataFormatInfo.contains(signal.dataFormat()))
+					{
+						return m_dataFormatInfo.value(signal.dataFormat());
+					}
+					else
+					{
+						return tr("Unknown data format");
+					}
 
-			case SC_DATA_SIZE: return signal.dataSize();
-			case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
-			case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
-			case SC_LOW_LIMIT: return signal.lowLimit();
-			case SC_HIGH_LIMIT: return signal.highLimit();
-			case SC_UNIT: return getUnitStr(signal.unitID());
+				case SC_DATA_SIZE: return signal.dataSize();
+				case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
+				case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
+				case SC_LOW_LIMIT: return signal.lowLimit();
+				case SC_HIGH_LIMIT: return signal.highLimit();
+				case SC_UNIT: return getUnitStr(signal.unitID());
 
-			case SC_ADJUSTMENT: return signal.adjustment();
-			case SC_DROP_LIMIT: return signal.dropLimit();
-			case SC_EXCESS_LIMIT: return signal.excessLimit();
-			case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
+				case SC_ADJUSTMENT: return signal.adjustment();
+				case SC_DROP_LIMIT: return signal.dropLimit();
+				case SC_EXCESS_LIMIT: return signal.excessLimit();
+				case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
 
-			case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
-			case SC_INPUT_HIGH_LIMIT: return signal.inputHighLimit();
-			case SC_INPUT_UNIT: return getUnitStr(signal.inputUnitID());
-			case SC_INPUT_SENSOR: return getSensorStr(signal.inputSensorID());
+				case SC_INPUT_LOW_LIMIT: return signal.inputLowLimit();
+				case SC_INPUT_HIGH_LIMIT: return signal.inputHighLimit();
+				case SC_INPUT_UNIT: return getUnitStr(signal.inputUnitID());
+				case SC_INPUT_SENSOR: return getSensorStr(signal.inputSensorID());
 
-			case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
-			case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
-			case SC_OUTPUT_UNIT: return getUnitStr(signal.outputUnitID());
-			case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());
+				case SC_OUTPUT_LOW_LIMIT: return signal.outputLowLimit();
+				case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
+				case SC_OUTPUT_UNIT: return getUnitStr(signal.outputUnitID());
+				case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());
 
-			case SC_ACQUIRE: return signal.acquire() ? "Yes" : "No";
-			case SC_CALCULATED: return signal.calculated() ? "Yes" : "No";
-			case SC_NORMAL_STATE: return signal.normalState();
-			case SC_DECIMAL_PLACES: return signal.decimalPlaces();
-			case SC_APERTURE: return signal.aperture();
-			case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
-			case SC_DEVICE_STR_ID: return signal.deviceStrID();
+				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
+				case SC_CALCULATED: return signal.calculated() ? tr("Yes") : tr("No");
+				case SC_NORMAL_STATE: return signal.normalState();
+				case SC_DECIMAL_PLACES: return signal.decimalPlaces();
+				case SC_APERTURE: return signal.aperture();
+				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
-			default:
-				assert(false);
+				default:
+					assert(false);
+			}
+		}
+		else
+		{
+			switch (col)
+			{
+				case SC_LAST_CHANGE_USER: return getUserStr(signal.userID());
+				case SC_STR_ID: return signal.strID();
+				case SC_EXT_STR_ID: return signal.extStrID();
+				case SC_NAME: return signal.name();
+				case SC_CHANNEL: return signal.channel();
+				case SC_TYPE: return QChar('D');
+				case SC_DATA_FORMAT:
+					if (m_dataFormatInfo.contains(signal.dataFormat()))
+					{
+						return m_dataFormatInfo.value(signal.dataFormat());
+					}
+					else
+					{
+						return tr("Unknown data format");
+					}
+
+				case SC_DATA_SIZE: return signal.dataSize();
+				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
+				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_DEVICE_STR_ID: return signal.deviceStrID();
+
+				case SC_LOW_ADC:
+				case SC_HIGH_ADC:
+				case SC_LOW_LIMIT:
+				case SC_HIGH_LIMIT:
+				case SC_UNIT:
+
+				case SC_ADJUSTMENT:
+				case SC_DROP_LIMIT:
+				case SC_EXCESS_LIMIT:
+				case SC_UNBALANCE_LIMIT:
+
+				case SC_INPUT_LOW_LIMIT:
+				case SC_INPUT_HIGH_LIMIT:
+				case SC_INPUT_UNIT:
+				case SC_INPUT_SENSOR:
+
+				case SC_OUTPUT_LOW_LIMIT:
+				case SC_OUTPUT_HIGH_LIMIT:
+				case SC_OUTPUT_UNIT:
+				case SC_OUTPUT_SENSOR:
+
+				case SC_CALCULATED:
+				case SC_NORMAL_STATE:
+				case SC_DECIMAL_PLACES:
+				case SC_APERTURE:
+					return QVariant();
+
+				default:
+					assert(false);
+			}
 		}
 	}
 
@@ -555,9 +659,9 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 			{
 				switch (signal.instanceAction())
 				{
-					case InstanceAction::added: return QPixmap(":/Images/Images/plus.png");
-					case InstanceAction::modified: return QPixmap(":/Images/Images/pencil.png");
-					case InstanceAction::deleted: return QPixmap(":/Images/Images/cross.png");
+					case InstanceAction::added: return plus;
+					case InstanceAction::modified: return pencil;
+					case InstanceAction::deleted: return cross;
 					default:
 						assert(false);
 						return QVariant();
@@ -565,7 +669,7 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 			}
 			else
 			{
-				return QPixmap(":/Images/Images/lock.png");
+				return lock;
 			}
 		}
 	}
@@ -629,6 +733,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
 			case SC_CHANNEL:
+			case SC_TYPE:
 			default:
 				assert(false);
 		}
@@ -645,7 +750,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 {
-	if (index.column() == SC_CHANNEL || index.column() == SC_LAST_CHANGE_USER)
+	if (index.column() == SC_CHANNEL || index.column() == SC_LAST_CHANGE_USER || index.column() == SC_TYPE)
 	{
 		return QAbstractTableModel::flags(index) & ~Qt::ItemIsEditable;
 	}
@@ -657,6 +762,12 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 void SignalsModel::loadSignals()
 {
+	bool signalsCleared = false;
+	if (m_signalSet.count() != 0)
+	{
+		signalsCleared = true;
+		emit aboutToClearSignals();
+	}
 	clearSignals();
 
 	std::vector<DbUser> list;
@@ -680,8 +791,14 @@ void SignalsModel::loadSignals()
 		beginInsertRows(QModelIndex(), 0, m_signalSet.count() - 1);
 		endInsertRows();
 
+		if (signalsCleared)
+		{
+			emit signalsRestored();
+		}
+
 		emit cellsSizeChanged();
 	}
+
 	changeCheckedoutSignalActionsVisibility();
 }
 
@@ -698,6 +815,24 @@ void SignalsModel::clearSignals()
 	m_unitInfo.clear();
 
 	emit cellsSizeChanged();
+}
+
+QVector<int> SignalsModel::getSameChannelSignals(int row)
+{
+	QVector<int> sameChannelSignalRows;
+	if (m_signalSet[row].signalGroupID() != 0)
+	{
+		QVector<int>& sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[row].signalGroupID());
+		foreach (const int id, sameChannelSignalIDs)
+		{
+			sameChannelSignalRows.append(m_signalSet.keyIndex(id));
+		}
+	}
+	else
+	{
+		sameChannelSignalRows.append(row);
+	}
+	return sameChannelSignalRows;
 }
 
 bool SignalsModel::isEditableSignal(int row)
@@ -794,21 +929,39 @@ bool SignalsModel::editSignal(int row)
 			showError(state);
 		}
 
-		emit cellsSizeChanged();
+		loadSignals();
 		return true;
+	}
+	else
+	{
+		// Because signals was checkedout and should be updated
+		//
+		loadSignals();
 	}
 	return false;
 }
 
-void SignalsModel::deleteSignal(int id)
+void SignalsModel::deleteSignalGroups(const QSet<int>& signalGroupIDs)
+{
+	foreach (const int groupID, signalGroupIDs)
+	{
+		QVector<int> signalIDs = m_signalSet.getChannelSignalsID(groupID);
+		foreach (const int signalID, signalIDs)
+		{
+			deleteSignal(signalID);
+		}
+	}
+	loadSignals();
+}
+
+void SignalsModel::deleteSignal(int signalID)
 {
 	ObjectState state;
-	dbController()->deleteSignal(id, &state, parrentWindow());
+	dbController()->deleteSignal(signalID, &state, parrentWindow());
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
 		showError(state);
 	}
-	loadSignals();
 }
 
 DbController *SignalsModel::dbController()
@@ -821,6 +974,8 @@ const DbController *SignalsModel::dbController() const
 	return m_dbController;
 }
 
+
+
 //
 //
 // SignalsTabPage
@@ -831,27 +986,61 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
+	QWidget* widget = new QWidget(this);
+	QVBoxLayout* vbl = new QVBoxLayout;
+	vbl->setSpacing(0);
+	vbl->setContentsMargins(0,0,0,0);
+	QButtonGroup* bg = new QButtonGroup(this);
+	bg->setExclusive(true);
+
+	QRadioButton* rb = new QRadioButton(tr("Analog signals"), this);
+	vbl->addWidget(rb);
+	bg->addButton(rb, ST_ANALOG);
+
+	rb = new QRadioButton(tr("Discrete signals"), this);
+	vbl->addWidget(rb);
+	bg->addButton(rb, ST_DISCRETE);
+
+	rb = new QRadioButton(tr("All signals"), this);
+	rb->setChecked(true);
+	vbl->addWidget(rb);
+	bg->addButton(rb, ST_ANY);
+
+	widget->setLayout(vbl);
+
 	QToolBar* toolBar = new QToolBar(this);
+	toolBar->addWidget(widget);
 
 	// Property View
 	//
 	m_signalsModel = new SignalsModel(dbcontroller, this);
+	m_signalsProxyModel = new SignalsProxyModel(m_signalsModel, this);
 	m_signalsView = new QTableView(this);
-	m_signalsView->setModel(m_signalsModel);
+	m_signalsView->setModel(m_signalsProxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
-	m_signalsView->setItemDelegate(m_signalsModel->createDelegate());
+	SignalsDelegate* delegate = m_signalsModel->createDelegate();
+	m_signalsView->setItemDelegate(delegate);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	m_signalsView->horizontalHeader()->setHighlightSections(false);
+
+	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
 	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeColumnsToContents);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeColumnsToContents);
+	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeRowsToContents);
+	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
+	connect(delegate, &SignalsDelegate::closeEditor, m_signalsModel, &SignalsModel::loadSignals);
+	connect(bg, static_cast<void(QButtonGroup::*)(int,bool)>(&QButtonGroup::buttonToggled), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
+
+	connect(m_signalsModel, &SignalsModel::aboutToClearSignals, this, &SignalsTabPage::saveSelection);
+	connect(m_signalsModel, &SignalsModel::signalsRestored, this, &SignalsTabPage::restoreSelection);
 
 	m_signalsView->resizeColumnsToContents();
 	m_signalsView->resizeRowsToContents();
@@ -868,8 +1057,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	pMainLayout->addWidget(toolBar);
 	pMainLayout->addWidget(m_signalsView);
-
-	//pMainLayout->addWidget(m_splitter);
 
 	setLayout(pMainLayout);
 
@@ -953,7 +1140,8 @@ void SignalsTabPage::editSignal()
     }
     for (int i = 0; i < selection.count(); i++)
     {
-		if (!m_signalsModel->editSignal(selection[i].row()))
+		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		if (!m_signalsModel->editSignal(row))
 		{
 			break;
 		}
@@ -967,101 +1155,51 @@ void SignalsTabPage::deleteSignal()
     {
         QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
     }
-	QSet<int> deletedSignalsID;
+	QSet<int> deletedSignalGroupIDs;
     for (int i = 0; i < selection.count(); i++)
     {
-		int id = m_signalsModel->key(selection[i].row());
-		deletedSignalsID.insert(id);
+		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		int groupId = m_signalsModel->signal(row).signalGroupID();
+		if (groupId != 0)
+		{
+			deletedSignalGroupIDs.insert(groupId);
+		}
+		else
+		{
+			m_signalsModel->deleteSignal(m_signalsModel->key(row));
+		}
 	}
-	foreach(const int id, deletedSignalsID)
-	{
-		m_signalsModel->deleteSignal(id);
-	}
+	m_signalsModel->deleteSignalGroups(deletedSignalGroupIDs);
 }
 
 void SignalsTabPage::undoSignalChanges()
 {
-	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
-	if (selection.count() == 0)
-	{
-		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
-	}
-	for (int i = 0; i < selection.count(); i++)
-	{
-		ObjectState state;
-		dbController()->undoSignalChanges(m_signalsModel->key(selection[i].row()), &state, this);
-		if (state.errCode != ERR_SIGNAL_OK)
-		{
-			m_signalsModel->showError(state);
-		}
-	}
-}
+	UndoSignalsDialog dlg(m_signalsModel, this);
 
-void SignalsTabPage::showPendingChanges()
-{
-	QDialog dlg;
-	dlg.setWindowTitle(tr("Pending changes"));
-
-	QSettings settings;
-	dlg.resize(settings.value("Pending changes dialog: size", qApp->desktop()->size() * 3 / 4).toSize());
-
-	QVBoxLayout* vl = new QVBoxLayout;
-
-	CheckedoutSignalsModel* proxyModel = new CheckedoutSignalsModel(m_signalsModel, &dlg);
-
-	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
-	if (selection.count() != 0)
-	{
-		proxyModel->initCheckStates(selection);
-	}
-
-	QPlainTextEdit* commentText = new QPlainTextEdit(&dlg);
-	vl->addWidget(commentText);
-
-	QCheckBox* selectAll = new QCheckBox(tr("Select all"), &dlg);
-	connect(selectAll, &QCheckBox::toggled, proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
-	vl->addWidget(selectAll);
-
-	QTableView* signalsView = new QTableView(&dlg);
-	signalsView->setModel(proxyModel);
-	signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
-	signalsView->resizeColumnsToContents();
-
-	vl->addWidget(signalsView);
-
-	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	connect(buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
-	connect(buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
-	vl->addWidget(buttonBox);
-
-	dlg.setLayout(vl);
+	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
+	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
+	dlg.setCheckStates(sourceSelection.indexes(), true);
 
 	if (dlg.exec() == QDialog::Rejected)
 	{
 		return;
 	}
 
-	settings.setValue("Pending changes dialog: size", dlg.size());
+	m_signalsModel->loadSignals();
+}
 
-	QVector<int> IDs;
-	for (int i = 0; i < proxyModel->rowCount(); i++)
+void SignalsTabPage::showPendingChanges()
+{
+	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
+	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
+
+	CheckinSignalsDialog dlg(m_signalsModel, sourceSelection.indexes(), this);
+
+	if (dlg.exec() == QDialog::Rejected)
 	{
-		QModelIndex proxyIndex = proxyModel->index(i, SC_STR_ID);
-		if (proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
-		{
-			continue;
-		}
-		int sourceRow = proxyModel->mapToSource(proxyIndex).row();
-		IDs << m_signalsModel->key(sourceRow);
-		//dbController()->undoSignalChanges(m_signalsModel->key(sourceRow), &state, this);
+		return;
 	}
-	QVector<ObjectState> states;
-	states.resize(IDs.size());
-	dbController()->checkinSignals(&IDs, commentText->toPlainText(), &states, this);
-	if (states[0].errCode != ERR_SIGNAL_OK)
-	{
-		m_signalsModel->showError(states[0]);
-	}
+
 	m_signalsModel->loadSignals();
 }
 
@@ -1076,7 +1214,8 @@ void SignalsTabPage::changeSignalActionsVisibility()
 	{
 		for (int i = 0; i < selection.count(); i++)
 		{
-			if (m_signalsModel->isEditableSignal(selection[i].row()))
+			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+			if (m_signalsModel->isEditableSignal(row))
 			{
 				emit setSignalActionsVisibility(true);
 				return;
@@ -1084,6 +1223,74 @@ void SignalsTabPage::changeSignalActionsVisibility()
 		}
 		emit setSignalActionsVisibility(false);
 	}
+}
+
+void SignalsTabPage::saveSelection()
+{
+	// Save signal id list of selected rows and signal id with column number of focused cell
+	//
+	selectedRowsSignalID.clear();
+	QModelIndexList& selectedList = m_signalsView->selectionModel()->selectedRows(0);
+	foreach (const QModelIndex& index, selectedList)
+	{
+		int row = m_signalsProxyModel->mapToSource(index).row();
+		selectedRowsSignalID.append(m_signalsModel->key(row));
+	}
+	QModelIndex index = m_signalsView->currentIndex();
+	if (index.isValid())
+	{
+		int row = m_signalsProxyModel->mapToSource(index).row();
+		focusedCellSignalID = m_signalsModel->key(row);
+		focusedCellColumn = index.column();
+	}
+	horizontalScrollPosition = m_signalsView->horizontalScrollBar()->value();
+	verticalScrollPosition = m_signalsView->verticalScrollBar()->value();
+}
+
+void SignalsTabPage::restoreSelection()
+{
+	foreach (int id, selectedRowsSignalID)
+	{
+		QModelIndex& sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(id), 0);
+		QModelIndex& proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
+		m_signalsView->selectRow(proxyIndex.row());
+	}
+	QModelIndex& sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(focusedCellSignalID), focusedCellColumn);
+	m_signalsView->setCurrentIndex(m_signalsProxyModel->mapFromSource(sourceIndex));
+	m_signalsView->horizontalScrollBar()->setValue(horizontalScrollPosition);
+	m_signalsView->verticalScrollBar()->setValue(verticalScrollPosition);
+}
+
+void SignalsTabPage::changeSignalTypeFilter(int signalType, bool checked)
+{
+	if (!checked)
+	{
+		return;
+	}
+
+	saveSelection();
+	m_signalsProxyModel->setSignalTypeFilter(signalType);
+	restoreSelection();
+
+	switch(signalType)
+	{
+		case ST_DISCRETE:
+			for (int i = SC_LOW_ADC; i <= SC_APERTURE; i++)
+			{
+				m_signalsView->setColumnHidden(i, true);
+			}
+			break;
+		case ST_ANALOG:
+		case ST_ANY:
+			for (int i = SC_LOW_ADC; i <= SC_APERTURE; i++)
+			{
+				m_signalsView->setColumnHidden(i, false);
+			}
+			break;
+		default:
+			assert(false);
+	}
+	m_signalsView->resizeColumnsToContents();
 }
 
 
@@ -1108,7 +1315,7 @@ bool CheckedoutSignalsModel::setData(const QModelIndex& index, const QVariant& v
 {
 	if (index.column() == SC_STR_ID && role == Qt::CheckStateRole)
 	{
-		states[index.row()] = Qt::CheckState(value.toInt());
+		setCheckState(index.row(), Qt::CheckState(value.toInt()));
 		return true;
 	}
 	return QSortFilterProxyModel::setData(index, value, role);
@@ -1131,16 +1338,14 @@ bool CheckedoutSignalsModel::filterAcceptsRow(int source_row, const QModelIndex&
 	return signal.checkedOut() && signal.userID() == m_sourceModel->dbController()->currentUser().userId();
 }
 
-void CheckedoutSignalsModel::initCheckStates(const QModelIndexList& list)
+void CheckedoutSignalsModel::initCheckStates(const QModelIndexList& list, bool fromSourceModel)
 {
 	for (int i = 0; i < list.count(); i++)
 	{
-		QModelIndex proxyIndex = mapFromSource(list[i]);
+		QModelIndex proxyIndex = fromSourceModel ? mapFromSource(list[i]) : list[i];
 		if (proxyIndex.isValid())
 		{
-			int checkedRow = proxyIndex.row();
-			states[checkedRow] = Qt::Checked;
-			emit dataChanged(index(checkedRow, 0), index(checkedRow, 0), QVector<int>() << Qt::CheckStateRole);
+			setCheckState(proxyIndex.row(), Qt::Checked);
 		}
 	}
 }
@@ -1152,4 +1357,308 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 		states[i] = state ? Qt::Checked : Qt::Unchecked;
 	}
 	emit dataChanged(index(0, 0), index(states.count() - 1, 0), QVector<int>() << Qt::CheckStateRole);
+}
+
+void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
+{
+	QVector<int>& sourceRows = m_sourceModel->getSameChannelSignals(mapToSource(index(row, 0)).row());
+	foreach (const int sourceRow, sourceRows)
+	{
+		QModelIndex changedIndex = mapFromSource(m_sourceModel->index(sourceRow, 0));
+		if (!changedIndex.isValid())
+		{
+			continue;
+		}
+		states[changedIndex.row()] = state;
+		emit dataChanged(changedIndex, changedIndex, QVector<int>() << Qt::CheckStateRole);
+	}
+}
+
+
+CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelIndexList selection, QWidget* parent) :
+	QDialog(parent),
+	m_sourceModel(sourceModel)
+{
+	setWindowTitle(tr("Pending changes"));
+
+	m_splitter = new QSplitter(Qt::Vertical, this);
+
+	QVBoxLayout* vl1 = new QVBoxLayout;
+	QVBoxLayout* vl2 = new QVBoxLayout;
+	vl2->setMargin(0);
+
+	m_proxyModel = new CheckedoutSignalsModel(sourceModel, this);
+
+	if (selection.count() != 0)
+	{
+		m_proxyModel->initCheckStates(selection);
+	}
+
+	m_commentEdit = new QPlainTextEdit(this);
+
+	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
+	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
+	vl2->addWidget(selectAll);
+
+	m_signalsView = new QTableView(this);
+	m_signalsView->setModel(m_proxyModel);
+	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
+	m_signalsView->resizeColumnsToContents();
+	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
+	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
+
+	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+	m_signalsView->horizontalHeader()->setHighlightSections(false);
+
+	QAction* undoAction = new QAction(tr("Undo signal changes"), this);
+	connect(undoAction, &QAction::triggered, this, &CheckinSignalsDialog::openUndoDialog);
+	m_signalsView->addAction(undoAction);
+
+	vl2->addWidget(m_signalsView);
+
+	vl2->addWidget(new QLabel(tr("Comment:"), this));
+
+	QWidget* w = new QWidget(this);
+
+	w->setLayout(vl2);
+
+	m_splitter->addWidget(w);
+	m_splitter->addWidget(m_commentEdit);
+
+	vl1->addWidget(m_splitter);
+
+	QHBoxLayout* hl = new QHBoxLayout;
+	hl->addStretch();
+
+	QPushButton* checkinSelectedButton = new QPushButton(tr("Checkin"), this);
+	connect(checkinSelectedButton, &QPushButton::clicked, this, &CheckinSignalsDialog::checkinSelected);
+	hl->addWidget(checkinSelectedButton);
+
+	QPushButton* undoSelectedButton = new QPushButton(tr("Undo"), this);
+	connect(undoSelectedButton, &QPushButton::clicked, this, &CheckinSignalsDialog::undoSelected);
+	hl->addWidget(undoSelectedButton);
+
+	QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
+	connect(cancelButton, &QPushButton::clicked, this, &CheckinSignalsDialog::cancel);
+	hl->addWidget(cancelButton);
+
+	vl1->addLayout(hl);
+
+	setLayout(vl1);
+
+	QSettings settings;
+	resize(settings.value("Pending changes dialog: size", qApp->desktop()->size() * 3 / 4).toSize());
+	m_splitter->setChildrenCollapsible(false);
+
+	QList<int> list = m_splitter->sizes();
+	list[0] = height();
+	list[1] = m_commentEdit->height();
+	m_splitter->setSizes(list);
+
+	m_splitter->restoreState(settings.value("Pending changes dialog: splitter position", m_splitter->saveState()).toByteArray());
+}
+
+void CheckinSignalsDialog::checkinSelected()
+{
+	QString commentText = m_commentEdit->toPlainText();
+	if (commentText.isEmpty())
+	{
+		QMessageBox::warning(m_sourceModel->parrentWindow(), tr("Warning"), tr("Checkin comment is empty"));
+		return;
+	}
+	QVector<int> IDs;
+	for (int i = 0; i < m_proxyModel->rowCount(); i++)
+	{
+		QModelIndex proxyIndex = m_proxyModel->index(i, SC_STR_ID);
+		if (m_proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
+		{
+			continue;
+		}
+		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
+		IDs << m_sourceModel->key(sourceRow);
+	}
+	if (IDs.count() == 0)
+	{
+		QMessageBox::warning(m_sourceModel->parrentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		return;
+	}
+	QVector<ObjectState> states;
+	states.resize(IDs.size());
+	m_sourceModel->dbController()->checkinSignals(&IDs, commentText, &states, this);
+	m_sourceModel->showErrors(states);
+
+	saveGeometry();
+
+	accept();
+}
+
+void CheckinSignalsDialog::undoSelected()
+{
+	QVector<int> IDs;
+	for (int i = 0; i < m_proxyModel->rowCount(); i++)
+	{
+		QModelIndex proxyIndex = m_proxyModel->index(i, SC_STR_ID);
+		if (m_proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
+		{
+			continue;
+		}
+		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
+		IDs << m_sourceModel->key(sourceRow);
+	}
+	if (IDs.count() == 0)
+	{
+		QMessageBox::warning(m_sourceModel->parrentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		return;
+	}
+	QVector<ObjectState> states;
+	foreach (int ID, IDs)
+	{
+		ObjectState state;
+		m_sourceModel->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parrentWindow());
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			states << state;
+		}
+	}
+	if (!states.isEmpty())
+	{
+		m_sourceModel->showErrors(states);
+	}
+
+	saveGeometry();
+
+	accept();
+}
+
+void CheckinSignalsDialog::cancel()
+{
+	saveGeometry();
+
+	reject();
+}
+
+void CheckinSignalsDialog::openUndoDialog()
+{
+	UndoSignalsDialog dlg(m_sourceModel, this);
+
+	dlg.setCheckStates(m_signalsView->selectionModel()->selectedRows(), false);
+
+	if (dlg.exec() == QDialog::Rejected)
+	{
+		return;
+	}
+
+	m_sourceModel->loadSignals();
+}
+
+void CheckinSignalsDialog::saveGeometry()
+{
+	QSettings settings;
+	settings.setValue("Pending changes dialog: size", size());
+	settings.setValue("Pending changes dialog: splitter position", m_splitter->saveState());
+}
+
+
+
+UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent) :
+	QDialog(parent),
+	m_sourceModel(sourceModel)
+{
+	setWindowTitle(tr("Undo signals to precheckout state"));
+
+	QSettings settings;
+	resize(settings.value("Undo signals dialog: size", qApp->desktop()->size() * 3 / 4).toSize());
+
+	QVBoxLayout* vl = new QVBoxLayout;
+
+	m_proxyModel = new CheckedoutSignalsModel(sourceModel, this);
+
+	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
+	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
+	vl->addWidget(selectAll);
+
+	QTableView* signalsView = new QTableView(this);
+	signalsView->setModel(m_proxyModel);
+	signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
+	signalsView->resizeColumnsToContents();
+	signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
+
+	signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+	signalsView->horizontalHeader()->setHighlightSections(false);
+
+	vl->addWidget(signalsView);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &UndoSignalsDialog::undoSelected);
+	connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+	vl->addWidget(buttonBox);
+
+	setLayout(vl);
+}
+
+void UndoSignalsDialog::setCheckStates(QModelIndexList selection, bool fromSourceModel)
+{
+	if (!selection.isEmpty())
+	{
+		m_proxyModel->initCheckStates(selection, fromSourceModel);
+	}
+}
+
+void UndoSignalsDialog::undoSelected()
+{
+	QVector<int> IDs;
+	for (int i = 0; i < m_proxyModel->rowCount(); i++)
+	{
+		QModelIndex proxyIndex = m_proxyModel->index(i, SC_STR_ID);
+		if (m_proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
+		{
+			continue;
+		}
+		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
+		IDs << m_sourceModel->key(sourceRow);
+	}
+	if (IDs.count() == 0)
+	{
+		QMessageBox::warning(m_sourceModel->parrentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		return;
+	}
+	QVector<ObjectState> states;
+	foreach (int ID, IDs)
+	{
+		ObjectState state;
+		m_sourceModel->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parrentWindow());
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			states << state;
+		}
+	}
+	if (!states.isEmpty())
+	{
+		m_sourceModel->showErrors(states);
+	}
+
+	QSettings settings;
+	settings.setValue("Undo signals dialog: size", size());
+
+	accept();
+}
+
+
+SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent) :
+	QSortFilterProxyModel(parent),
+	m_sourceModel(sourceModel)
+{
+	setSourceModel(sourceModel);
+}
+
+bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
+{
+	return m_signalType == ST_ANY || m_signalType == m_sourceModel->signal(source_row).type();
+}
+
+void SignalsProxyModel::setSignalTypeFilter(int signalType)
+{
+	beginResetModel();
+	m_signalType = signalType;
+	endResetModel();
 }

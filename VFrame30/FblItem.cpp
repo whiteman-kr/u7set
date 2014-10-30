@@ -92,6 +92,112 @@ namespace VFrame30
 		return true;
 	}
 
+	const VideoItemPoint& CFblConnectionPoint::point() const
+	{
+		return m_point;
+	}
+
+	void CFblConnectionPoint::setPoint(const VideoItemPoint& value)
+	{
+		m_point = value;
+	}
+
+	double CFblConnectionPoint::x() const
+	{
+		return m_point.X;
+	}
+
+	void CFblConnectionPoint::setX(double val)
+	{
+		m_point.X = val;
+	}
+
+	double CFblConnectionPoint::y() const
+	{
+		return m_point.Y;
+	}
+
+	void CFblConnectionPoint::setY(double val)
+	{
+		m_point.Y = val;
+	}
+
+	ConnectionDirrection CFblConnectionPoint::dirrection() const
+	{
+		return m_dirrection;
+	}
+
+	bool CFblConnectionPoint::IsInput() const
+	{
+		return m_dirrection == ConnectionDirrection::Input;
+	}
+
+	bool CFblConnectionPoint::IsOutput() const
+	{
+		return m_dirrection == ConnectionDirrection::Output;
+	}
+
+	const QUuid& CFblConnectionPoint::guid() const
+	{
+		return m_guid;
+	}
+
+	void CFblConnectionPoint::setGuid(const QUuid& guid)
+	{
+		m_guid = guid;
+	}
+
+	const std::list<QUuid>& CFblConnectionPoint::associatedIOs() const
+	{
+		return m_associatedIOs;
+	}
+
+	void CFblConnectionPoint::ClearAssociattdIOs()
+	{
+		m_associatedIOs.clear();
+	}
+
+	void CFblConnectionPoint::AddAssociattedIOs(const QUuid& guid)
+	{
+		m_associatedIOs.push_back(guid);
+	}
+
+	bool CFblConnectionPoint::HasConnection() const
+	{
+		assert(!(IsInput() && m_associatedIOs.size() > 1));
+		return !m_associatedIOs.empty();
+	}
+
+	const QUuid& CFblConnectionPoint::signalGuid() const
+	{
+		return m_signalGuid;
+	}
+
+	void CFblConnectionPoint::setSignalGuid(const QUuid& guid)
+	{
+		m_signalGuid = guid;
+	}
+
+	const QString& CFblConnectionPoint::signalStrID() const
+	{
+		return m_signalStrID;
+	}
+
+	void CFblConnectionPoint::setSignalStrID(const QString& strid)
+	{
+		m_signalStrID = strid;
+	}
+
+	const QString& CFblConnectionPoint::signalCaption() const
+	{
+		return m_signalCaption;
+	}
+
+	void CFblConnectionPoint::setSignalCaption(const QString& caption)
+	{
+		m_signalCaption = caption;
+	}
+
 
 	//
 	// CFblItem

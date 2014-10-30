@@ -13,7 +13,6 @@ SchemeItemPropertiesDialog::SchemeItemPropertiesDialog(EditEngine::EditEngine* e
 
 	ui->horizontalLayout->addWidget(m_propertyEditor);
 
-
 	return;
 }
 
@@ -49,6 +48,8 @@ SchemeItemPropertyEditor::SchemeItemPropertyEditor(EditEngine::EditEngine* editE
 	m_editEngine(editEngine)
 {
 	assert(m_editEngine);
+
+	connect(m_editEngine, &EditEngine::EditEngine::propertiesChanged, this, &SchemeItemPropertyEditor::updateProperties);
 }
 
 SchemeItemPropertyEditor::~SchemeItemPropertyEditor()
@@ -75,48 +76,6 @@ void SchemeItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 	}
 
 	editEngine()->runSetProperty(property->propertyName(), value, items);
-
-
-	// Set the new property value in all objects
-	//
-
-	//update();
-
-	//QList<QObject*> objects = m_propToClassMap.values(property->propertyName());
-
-	/*QString errorString;
-	QMetaProperty writeProperty;
-
-	for (auto i = objects.begin(); i != objects.end(); i++)
-	{
-		QObject* pObject = *i;
-
-		if (propertyByName(pObject, property->propertyName(), writeProperty) == false)
-		{
-			Q_ASSERT(false);
-			continue;
-		}
-
-		if (writeProperty.type() == QVariant::Bool)
-		{
-			if (value == Qt::Unchecked)
-				value = false;
-			else
-				value = true;
-		}
-
-		writeProperty.write(pObject, value);
-
-		if (writeProperty.read(pObject) != value && errorString.isEmpty() == true)
-		{
-			errorString = QString("Property: %1 - incorrect input value")
-						  .arg(property->propertyName());
-		}
-	}
-
-	if (errorString.isEmpty() == false)
-	{
-	}*/
 
 	return;
 }

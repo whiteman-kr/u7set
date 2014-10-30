@@ -6,6 +6,7 @@
 #include "EditEngineDeleteItem.h"
 #include "EditEngineMoveItem.h"
 #include "EditEngineSetProperty.h"
+#include "EditEngineSetSchemeProperty.h"
 
 namespace EditEngine
 {
@@ -99,6 +100,7 @@ namespace EditEngine
 		m_videoFrameView->update();
 
 		emit stateChanged(canUndo(), canRedo());
+		emit propertiesChanged();
 
 		return;
 	}
@@ -121,6 +123,7 @@ namespace EditEngine
 		m_videoFrameView->update();
 
 		emit stateChanged(canUndo(), canRedo());
+		emit propertiesChanged();
 
 		return;
 	}
@@ -250,7 +253,13 @@ namespace EditEngine
 		std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
 		items.push_back(item);
 
-		runSetProperty(propertyName, value, items);
+		return runSetProperty(propertyName, value, items);
+	}
+
+	void EditEngine::runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Scheme>& scheme)
+	{
+		addCommand(std::make_shared<SetSchemePropertyCommand>(m_videoFrameView, propertyName, value, scheme, m_hScrollBar, m_vScrollBar), true);
+		return;
 	}
 
 	//
@@ -263,7 +272,7 @@ namespace EditEngine
 		m_zoom(100.0)
 	{
 		assert(videoFrameView != nullptr);
-		assert(videoFrameView->videoFrame() != nullptr);
+		assert(videoFrameView->scheme() != nullptr);
 		assert(hScrollBar != nullptr);
 		assert(vScrollBar != nullptr);
 

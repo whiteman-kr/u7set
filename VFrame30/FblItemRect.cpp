@@ -20,13 +20,13 @@ namespace VFrame30
 		switch (itemUnit())
 		{
 		case SchemeUnit::Display:
-			m_font.setSize(12.0, unit);
+			m_font.setSize(10.0, SchemeUnit::Display);
 			break;
 		case SchemeUnit::Inch:
-			m_font.setSize(mm2in(3.0), unit);
+			m_font.setSize(mm2in(2.2), SchemeUnit::Inch);
 			break;
 		case SchemeUnit::Millimeter:
-			m_font.setSize(mm2in(3.0), unit);
+			m_font.setSize(2.2, SchemeUnit::Millimeter);
 			break;
 		default:
 			assert(false);
@@ -147,18 +147,17 @@ namespace VFrame30
 		}
 
 		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
-		double minFblGridSize = CSettings::minFblGridSize(itemUnit());
+		double minFblGridSize = CSettings::minFblGridSize(CSettings::regionalUnit());
 
 		// вертикальное расстояние между пинами
 		//
 		double height = fblItemRect.height();
-		height = CUtils::Round(height, 6);
 
-		double pinVertGap = height / pinCount;
+		double pinVertGap = height / static_cast<double>(pinCount + 1);
+		pinVertGap = CUtils::snapToGrid(pinVertGap, minFblGridSize);
 
-		double y = pinVertGap / 2 + pinVertGap * index;
-		y = floor(y / minFblGridSize) * minFblGridSize;			// выровнять по сетке
-		y += fblItemRect.top();
+		double y = fblItemRect.top() + pinVertGap * static_cast<double>(index + 1);
+		y = CUtils::snapToGrid(y ,minFblGridSize);
 
 		return VideoItemPoint(x, y);
 	}
@@ -244,7 +243,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void FblItemRect::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* pLayer) const
+	void FblItemRect::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
@@ -321,7 +320,7 @@ namespace VFrame30
 			VideoItemPoint vip;
 			GetConnectionPointPos(input->guid(), &vip);
 
-			int connectionCount = pLayer->GetPinPosConnectinCount(vip);
+			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
 			// Рисование пина
 			//
@@ -358,7 +357,7 @@ namespace VFrame30
 			VideoItemPoint vip;
 			GetConnectionPointPos(output->guid(), &vip);
 
-			int connectionCount = pLayer->GetPinPosConnectinCount(vip);
+			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
 			// Рисование пина
 			//

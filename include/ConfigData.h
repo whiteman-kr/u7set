@@ -25,7 +25,7 @@ public:
 
 	int actualSize() const;
 
-	QList <ConfigValue>& values();
+	QList<ConfigValue>& values();
 
 	bool be() const;
 	void setBe(const bool& be);
@@ -41,7 +41,7 @@ private:
 	int m_size;               // размер структуры, указанный в xml-файле. если не указан - равен по умолчанию 0
 	bool m_be;                // Big Endian
 
-	QList <ConfigValue> m_values;
+	QList<ConfigValue> m_values;
 };
 
 //----------------------------------------------------------------------------------------------------------

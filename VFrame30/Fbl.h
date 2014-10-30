@@ -3,11 +3,11 @@
 #include "../include/ProtoSerialization.h"
 #include "DebugInstCounter.h"
 
-namespace Fbl
+namespace Afbl
 {
 	// Тип сигнала элемента
 	//
-	enum FblSignalType			
+	enum AfbSignalType
 	{
 		Analog,
 		Discrete
@@ -15,7 +15,7 @@ namespace Fbl
 
 	// Тип параметра элемента
 	//
-	enum FblParamType
+	enum AfbParamType
 	{
 		AnalogIntegral,
 		AnalogFloatingPoint,
@@ -24,17 +24,30 @@ namespace Fbl
 
 	// Значение параметра элемента
 	//
-	struct FblParamValue
+	struct VFRAME30LIBSHARED_EXPORT AfbParamValue
 	{
-		long long IntegralValue;
+		int32_t IntegralValue;
 		double FloatingPoint;
 		bool Discrete;
+		AfbParamType Type;	// Тип данных параметра
 
 		// Serialization
 		//
 	public:
+
+		AfbParamValue();
+		explicit AfbParamValue(int32_t value);
+		explicit AfbParamValue(double value);
+		explicit AfbParamValue(bool value);
+
 		bool SaveData(Proto::FblParamValue* message) const;
 		bool LoadData(const Proto::FblParamValue& message);
+
+		bool loadFromXml(QXmlStreamReader* xmlReader);
+		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+
+		QVariant toQVariant() const;
+		static AfbParamValue fromQVariant(QVariant value);
 	};
 
 		
@@ -43,11 +56,11 @@ namespace Fbl
 	//	CFblElementSignal	- Сигнал FBL элемента
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT FblElementSignal
+	class VFRAME30LIBSHARED_EXPORT AfbElementSignal
 	{
 	public:
-		FblElementSignal(void);
-		virtual ~FblElementSignal(void);
+		AfbElementSignal(void);
+		virtual ~AfbElementSignal(void);
 
 		// Serialization
 		//
@@ -55,20 +68,23 @@ namespace Fbl
 		bool SaveData(Proto::FblElementSignal* message) const;
 		bool LoadData(const Proto::FblElementSignal& message);
 
+		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+		bool loadFromXml(QXmlStreamReader* xmlReader);
+
 		// Properties
 		//
 	public:
 		const QString& caption() const;
 		void setCaption(const QString& caption);
 
-		FblSignalType type() const;
-		void setType(FblSignalType type);
+		AfbSignalType type() const;
+		void setType(AfbSignalType type);
 
 		// Data
 		//
 private:
 		QString m_caption;
-		FblSignalType m_type;
+		AfbSignalType m_type;
 	};
 
 
@@ -77,11 +93,16 @@ private:
 	//	CFblElementParam	- Параметр FBL элемента
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT FblElementParam
+	class VFRAME30LIBSHARED_EXPORT AfbElementParam
 	{
 	public:
-		FblElementParam(void);
-		virtual ~FblElementParam(void);
+		AfbElementParam(void);
+		virtual ~AfbElementParam(void);
+
+		// Methods
+		//
+	public:
+		void update(const AfbParamType& type, const AfbParamValue& lowLimit, const AfbParamValue& highLimit);
 
 		// Serialization
 		//
@@ -89,38 +110,42 @@ private:
 		bool SaveData(Proto::FblElementParam* message) const;
 		bool LoadData(const Proto::FblElementParam& message);
 
+		bool loadFromXml(QXmlStreamReader* xmlReader);
+		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+
+
 		// Properties
 		//
 	public:
 		const QString& caption() const;
 		void setCaption(const QString& caption);
 
-		FblParamType type() const;
-		void setType(FblParamType type);
+		AfbParamType type() const;
+		void setType(AfbParamType type);
 
-		const FblParamValue& value() const;
-		void setValue(const FblParamValue& value);
+		const AfbParamValue& value() const;
+		void setValue(const AfbParamValue& value);
 
-		const FblParamValue& defaultValue() const;
-		void setDefaultValue(const FblParamValue& defaultValue);
+		const AfbParamValue& defaultValue() const;
+		void setDefaultValue(const AfbParamValue& defaultValue);
 
-		const FblParamValue& lowLimit() const;
-		void setLowLimit(const FblParamValue& lowLimit);
+		const AfbParamValue& lowLimit() const;
+		void setLowLimit(const AfbParamValue& lowLimit);
 
-		const FblParamValue& highLimit() const;
-		void setHighLimit(const FblParamValue& highLimit);
+		const AfbParamValue& highLimit() const;
+		void setHighLimit(const AfbParamValue& highLimit);
 						
 		// Data
 		//
 	private:
 		QString m_caption;				// Наименование параметра
-		FblParamType m_type;			// Тип данных параметра
+		AfbParamType m_type;			// Тип данных параметра
 
-		FblParamValue m_value;			// Значение параметра
-		FblParamValue m_defaultValue;	// Значение по умолчанию
+		AfbParamValue m_value;			// Значение параметра
+		AfbParamValue m_defaultValue;	// Значение по умолчанию
 
-		FblParamValue m_lowLimit;		// Нижний предел параметра
-		FblParamValue m_highLimit;		// Верхний предел параметра
+		AfbParamValue m_lowLimit;		// Нижний предел параметра
+		AfbParamValue m_highLimit;		// Верхний предел параметра
 	};
 	
 
@@ -129,19 +154,28 @@ private:
 	//	FblElement	- Прототип FBL элемента
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT FblElement :
-		public Proto::ObjectSerialization<FblElement>,
-		public VFrame30::DebugInstCounter<FblElement>
+	class VFRAME30LIBSHARED_EXPORT AfbElement :
+		public Proto::ObjectSerialization<AfbElement>,
+		public VFrame30::DebugInstCounter<AfbElement>
 	{
 	public:
-		FblElement(void);
-		virtual ~FblElement(void);
+		AfbElement(void);
+		virtual ~AfbElement(void);
 
 		void Init(void);
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<FblElement>;
+		friend Proto::ObjectSerialization<AfbElement>;
+
+	public:
+		bool loadFromXml(const Proto::AfbElementXml& data);
+		bool loadFromXml(const QByteArray& data);
+		bool loadFromXml(QXmlStreamReader* xmlReader);
+
+		bool saveToXml(Proto::AfbElementXml* dst) const;
+		bool saveToXml(QByteArray* dst) const;
+		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -150,11 +184,12 @@ private:
 	private:
 		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
 		// и должне прочитаться
-		static FblElement* CreateObject(const Proto::Envelope& message);
+		static AfbElement* CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//
 	public:
+		void updateParams(const std::vector<AfbElementParam>& params);
 
 	// Properties and Datas
 	//
@@ -171,14 +206,14 @@ private:
 		unsigned int opcode() const;
 		void setOpcode(unsigned int value);
 
-		const std::vector<FblElementSignal>& inputSignals() const;
-		void setInputSignals(const std::vector<FblElementSignal>& inputsignals);
+		const std::vector<AfbElementSignal>& inputSignals() const;
+		void setInputSignals(const std::vector<AfbElementSignal>& inputsignals);
 
-		const std::vector<FblElementSignal>& outputSignals() const;
-		void setOutputSignals(const std::vector<FblElementSignal>& outputsignals);
+		const std::vector<AfbElementSignal>& outputSignals() const;
+		void setOutputSignals(const std::vector<AfbElementSignal>& outputsignals);
 
-		const std::vector<FblElementParam>& params() const;
-		void setParams(const std::vector<FblElementParam>& params);
+		const std::vector<AfbElementParam>& params() const;
+		void setParams(const std::vector<AfbElementParam>& params);
 
 	private:
 		QUuid m_guid;
@@ -186,10 +221,10 @@ private:
 		QString m_caption;
 		unsigned int m_opcode;
 
-		std::vector<FblElementSignal> m_inputSignals;
-		std::vector<FblElementSignal> m_outputSignals;
+		std::vector<AfbElementSignal> m_inputSignals;
+		std::vector<AfbElementSignal> m_outputSignals;
 
-		std::vector<FblElementParam> m_params;
+		std::vector<AfbElementParam> m_params;
 	};
 
 	//
@@ -197,28 +232,36 @@ private:
 	//	FblElementCollection - Коллекция прототипов FBL элементов
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT FblElementCollection :
-		public VFrame30::DebugInstCounter<FblElementCollection>
+	class VFRAME30LIBSHARED_EXPORT AfbElementCollection :
+		public VFrame30::DebugInstCounter<AfbElementCollection>
 	{
 	public:
-		FblElementCollection(void);
-		virtual ~FblElementCollection(void);
+		AfbElementCollection(void);
+		virtual ~AfbElementCollection(void);
 
 		void Init(void);
 
 		// Serialization
 		//
 	public:
+		bool SaveData(Proto::AfbElementCollection* message) const;
+		bool LoadData(const Proto::AfbElementCollection& message);
 
 		// Methods
 		//
 	public:
-		std::shared_ptr<FblElement> Get(const QUuid& QUuid) const;
+
+		void setElements(const std::vector<std::shared_ptr<AfbElement>>& elements);
+
+		const std::vector<std::shared_ptr<AfbElement>>& elements() const;
+		std::vector<std::shared_ptr<AfbElement>>* mutable_elements();
+
+		std::shared_ptr<AfbElement> get(const QUuid& QUuid) const;
 
 		// Properties and Datas
 		//
 	public:
-		std::vector<std::shared_ptr<FblElement>> elements;
+		std::vector<std::shared_ptr<AfbElement>> m_elements;
 	};
 }
 

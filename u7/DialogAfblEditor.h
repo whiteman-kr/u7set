@@ -3,7 +3,6 @@
 
 #include <QDialog>
 #include "../include/DbController.h"
-#include "AfbLibrary.h"
 
 namespace Ui {
 class DialogAfblEditor;

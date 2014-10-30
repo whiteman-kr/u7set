@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+#include "../include/BaseService.h"
 #include "ClientSocket.h"
 
 namespace Ui {
@@ -20,13 +21,17 @@ public:
 private slots:
     void on_pushButton_clicked();
 
+	void on_sendFileButton_clicked();
+
 signals:
-    void clientSendRequest(quint32 requestID, char* requestData, quint32 requestDataSize);
+	void clientSendRequest(UdpRequest request);
 
 private:
     Ui::MainWindow *ui;
 
     UdpSocketThread m_clientSocketThread;
+
+	BaseServiceController* m_ServiceController = nullptr;
 };
 
 #endif // MAINWINDOW_H

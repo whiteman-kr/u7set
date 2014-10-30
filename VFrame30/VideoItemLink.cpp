@@ -140,7 +140,7 @@ namespace VFrame30
 		//
 		auto drawPin = [&](VideoItemPoint pt)
 			{
-				int connectionCount = pLayer->GetPinPosConnectinCount(pt);
+				int connectionCount = pLayer->GetPinPosConnectinCount(pt, itemUnit());
 
 				if (connectionCount > 1)
 				{
