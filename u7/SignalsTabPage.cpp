@@ -87,12 +87,13 @@ const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
 
 
 
-SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, QObject *parent) :
+SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
 	QStyledItemDelegate(parent),
 	m_dataFormatInfo(dataFormatInfo),
 	m_unitInfo(unitInfo),
 	m_signalSet(signalSet),
-	m_model(model)
+	m_model(model),
+	m_proxyModel(proxyModel)
 {
 
 }
@@ -100,11 +101,14 @@ SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitI
 QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 	int col = index.column();
+	int row = m_proxyModel->mapToSource(index).row();
 
-	if (!m_model->checkoutSignal(index.row()))
+	if (!m_model->checkoutSignal(row))
 	{
 		return nullptr;
 	}
+
+	m_model->loadSignal(row);
 
 	switch (col)
 	{
@@ -224,7 +228,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
 	int col = index.column();
-	int row = index.row();
+	int row = m_proxyModel->mapToSource(index).row();
 	if (row >= m_signalSet.count())
 	{
 		return;
@@ -279,7 +283,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const QModelIndex &index) const
 {
 	int col = index.column();
-	int row = index.row();
+	int row = m_proxyModel->mapToSource(index).row();
 	if (row >= m_signalSet.count())
 	{
 		return;
@@ -360,7 +364,7 @@ bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QSt
 			assert(false);
 			return false;
 		}
-		emit itemDoubleClicked(index.row());
+		emit itemDoubleClicked(m_proxyModel->mapToSource(index).row());
 		return true;
 	}
 	return false;
@@ -802,6 +806,12 @@ void SignalsModel::loadSignals()
 	changeCheckedoutSignalActionsVisibility();
 }
 
+void SignalsModel::loadSignal(int row)
+{
+	dbController()->getLatestSignal(key(row), &m_signalSet[row], parrentWindow());
+	emit cellsSizeChanged();
+}
+
 void SignalsModel::clearSignals()
 {
 	if (m_signalSet.count() != 0)
@@ -915,13 +925,13 @@ bool SignalsModel::editSignal(int row)
 		return false;
 	}
 
+	loadSignal(row);
+
 	Signal signal = m_signalSet[row];
 	SignalPropertiesDialog dlg(signal, signal.type(), m_dataFormatInfo, m_unitInfo, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		m_signalSet[row]= signal;
-
 		ObjectState state;
 		dbController()->setSignalWorkcopy(&signal, &state, parrentWindow());
 		if (state.errCode != ERR_SIGNAL_OK)
@@ -929,15 +939,10 @@ bool SignalsModel::editSignal(int row)
 			showError(state);
 		}
 
-		loadSignals();
+		loadSignal(row);
 		return true;
 	}
-	else
-	{
-		// Because signals was checkedout and should be updated
-		//
-		loadSignals();
-	}
+
 	return false;
 }
 
@@ -1018,7 +1023,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsProxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
-	SignalsDelegate* delegate = m_signalsModel->createDelegate();
+	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
