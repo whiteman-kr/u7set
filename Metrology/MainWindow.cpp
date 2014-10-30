@@ -17,6 +17,7 @@
 #include "CalibratorBase.h"
 #include "OptionsDialog.h"
 
+
 // -------------------------------------------------------------------------------------------------------------------
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -26,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //
     theCalibratorBase.init(this);
 
-    connect( &theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged );
+    connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
 
     // init interface
     //
@@ -34,10 +35,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // init measure thread
     //
-    connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::measureThreadStarted, Qt::QueuedConnection );
-    connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection );
-    connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection );
-    connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection );
+    connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::measureThreadStarted, Qt::QueuedConnection);
+    connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection);
+    connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
+    connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
+    connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
     m_measureThread.init(this);
 
@@ -61,7 +63,7 @@ bool MainWindow::createInterface()
     createActions();
     createMenu();
     createToolBars();
-    createTabPages();
+    createMeasurePages();
     createPanels();
     createStatusBar();
 
@@ -368,12 +370,12 @@ bool MainWindow::createToolBars()
             measureTimeoutList->addItem(QString::number(MeasureTimeout[t], 10, 1));
         }
 
-        measureTimeoutList->setCurrentText(QString::number(double(theOptions.getToolBar().m_measureTimeout) / 1000, 10, 1));
+        measureTimeoutList->setCurrentText(QString::number(double(theOptions.toolBar().m_measureTimeout) / 1000, 10, 1));
 
         measureTimeoutUnitLabel->setText(tr(" sec."));
         measureTimeoutUnitLabel->setEnabled(false);
 
-        connect(measureTimeoutList, &QComboBox::currentTextChanged, this, &MainWindow::setMeasureTimeout, Qt::QueuedConnection);
+        connect(measureTimeoutList, &QComboBox::currentTextChanged, this, &MainWindow::setMeasureTimeout);
     }
 
 
@@ -401,9 +403,9 @@ bool MainWindow::createToolBars()
             measureKindList->addItem(MeasureKind[k]);
         }
 
-        measureKindList->setCurrentIndex(theOptions.getToolBar().m_measureKind);
+        measureKindList->setCurrentIndex(theOptions.toolBar().m_measureKind);
 
-        connect(measureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureKind, Qt::QueuedConnection);
+        connect(measureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureKind);
     }
 
 
@@ -430,9 +432,9 @@ bool MainWindow::createToolBars()
         {
             outputSignalList->addItem(OutputSignalType[s]);
         }
-        outputSignalList->setCurrentIndex(theOptions.getToolBar().m_outputSignalType);
+        outputSignalList->setCurrentIndex(theOptions.toolBar().m_outputSignalType);
 
-        connect(outputSignalList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setOutputSignalType, Qt::QueuedConnection);
+        connect(outputSignalList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setOutputSignalType);
     }
 
     // Control panel selecting analog signal
@@ -536,7 +538,6 @@ bool MainWindow::createToolBars()
         ccTypeCombo->addItem("");
         ccTypeCombo->setEnabled(false);
         ccTypeCombo->setFixedWidth(60);
-
     }
 
     return true;
@@ -544,22 +545,27 @@ bool MainWindow::createToolBars()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::createTabPages()
+void MainWindow::createMeasurePages()
 {
     m_pMainTab = new QTabWidget();
     m_pMainTab->setTabPosition(QTabWidget::South);
 
-    for(int t = 0; t < MEASURE_TYPE_COUNT; t++)
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
     {
-        QTableView* pView = new QTableView;
-        if (pView != nullptr)
+        MeasureView* pView = new MeasureView(type, this);
+        if (pView == nullptr)
         {
-            m_pMainTab->addTab(pView, tr(MeasureType[t]));
-
-            pView->setFrameStyle(QFrame::NoFrame);
-
-            m_measureView.append(pView);
+            continue;
         }
+
+        m_pMainTab->addTab(pView, tr(MeasureType[type]));
+
+        pView->setFrameStyle(QFrame::NoFrame);
+
+        m_measureView[type] = pView;
+
+        connect(this, &MainWindow::appendMeasure, pView, &MeasureView::appendMeasure, Qt::QueuedConnection);
+        connect(pView, &MeasureView::measureCountChanged, this, &MainWindow::measureCountChanged, Qt::QueuedConnection);
     }
 
     setCentralWidget(m_pMainTab);
@@ -733,6 +739,14 @@ void MainWindow::setMeasureType(int type)
         return;
     }
 
+    MeasureView* pView = m_measureView[type];
+    if (pView == nullptr)
+    {
+        return;
+    }
+
+    measureCountChanged(pView->measureCount());
+
     switch(type)
     {
         case MEASURE_TYPE_LINEARITY:
@@ -770,6 +784,15 @@ void MainWindow::setMeasureType(int type)
     m_measureType = type;
 
     updateActions();
+
+
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::measureCountChanged(int count)
+{
+    m_statusMeasureCount->setText(tr("Measurement 0 / %1 ").arg(count));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -814,8 +837,24 @@ void MainWindow::calibrators()
 
 void MainWindow::options()
 {
-   OptionsDialog dialog;
-   dialog.exec();
+    OptionsDialog dialog;
+    dialog.exec();
+
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+    {
+        if (theOptions.m_updateColumnView[type] = false)
+        {
+            continue;
+        }
+
+        MeasureView* pView = m_measureView[type];
+        if (pView == nullptr)
+        {
+            continue;
+        }
+
+        pView->updateColumn();
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -828,18 +867,18 @@ void MainWindow::setMeasureKind(int index)
         return;
     }
 
-    theOptions.getToolBar().m_measureKind = kind;
-    theOptions.getToolBar().save();
+    theOptions.toolBar().m_measureKind = kind;
+    theOptions.toolBar().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::setMeasureTimeout(QString value)
 {
-    theOptions.getToolBar().m_measureTimeout = value.toDouble() * 1000;
-    theOptions.getToolBar().save();
+    theOptions.toolBar().m_measureTimeout = value.toDouble() * 1000;
+    theOptions.toolBar().save();
 
-    m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
+    m_statusMeasureTimeout->setRange(0, theOptions.toolBar().m_measureTimeout);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -852,8 +891,8 @@ void MainWindow::setOutputSignalType(int index)
         return;
     }
 
-    theOptions.getToolBar().m_outputSignalType = type;
-    theOptions.getToolBar().save();
+    theOptions.toolBar().m_outputSignalType = type;
+    theOptions.toolBar().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -878,10 +917,10 @@ void MainWindow::measureThreadStarted()
 
     m_statusMeasureThreadInfo->setText("");
 
-    if (theOptions.getToolBar().m_measureTimeout != 0)
+    if (theOptions.toolBar().m_measureTimeout != 0)
     {
         m_statusMeasureTimeout->show();
-        m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
+        m_statusMeasureTimeout->setRange(0, theOptions.toolBar().m_measureTimeout);
         m_statusMeasureTimeout->setValue(0);
     }
     else
@@ -906,7 +945,7 @@ void MainWindow::measureThreadStoped()
     m_statusMeasureThreadInfo->setText("");
 
     m_statusMeasureTimeout->hide();
-    m_statusMeasureTimeout->setRange(0, theOptions.getToolBar().m_measureTimeout);
+    m_statusMeasureTimeout->setRange(0, theOptions.toolBar().m_measureTimeout);
     m_statusMeasureTimeout->setValue(0);
 
     m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));
@@ -924,6 +963,24 @@ void MainWindow::setMeasureThreadInfo(QString msg)
 void MainWindow::setMeasureThreadInfo(int timeout)
 {
     m_statusMeasureTimeout->setValue(timeout);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::measureComplite(MeasureItem* pMeasure)
+{
+    if (pMeasure == nullptr)
+    {
+        return;
+    }
+
+    int type = pMeasure->measureType();
+    if (type < 0 || type >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    emit appendMeasure(pMeasure);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

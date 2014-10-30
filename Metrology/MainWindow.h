@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QProgressBar>
 
+#include "MeasureView.h"
 #include "MeasureThread.h"
 
 // ==============================================================================================
@@ -45,7 +46,7 @@ public:
     // Elements of interface - Pages of Tab
     //
     QTabWidget*         m_pMainTab = nullptr;
-    QList<QTableView*>  m_measureView;
+    MeasureView*        m_measureView[MEASURE_TYPE_COUNT];
 
     // Elements of interface - Panels
     //
@@ -85,7 +86,7 @@ public:
     void updateActions();
     void createMenu();
     bool createToolBars();
-    void createTabPages();
+    void createMeasurePages();
     void createPanels();
     void createStatusBar();
 
@@ -130,6 +131,10 @@ private:
     QAction* m_pShowStatisticAction = nullptr;
     QAction* m_pAboutConnectionAction = nullptr;
     QAction* m_pAboutAppAction = nullptr;
+
+signals:
+
+    void appendMeasure(MeasureItem*);
 
 private slots:
 
@@ -177,6 +182,7 @@ private slots:
     // Slots of tab -- page measure type
     //
     void setMeasureType(int type);
+    void measureCountChanged(int count);
 
 private slots:
 
@@ -185,7 +191,6 @@ private slots:
     void setMeasureKind(int index);
     void setMeasureTimeout(QString value);
     void setOutputSignalType(int index);
-
 
 private slots:
 
@@ -201,6 +206,7 @@ private slots:
     void measureThreadStoped();
     void setMeasureThreadInfo(QString msg);
     void setMeasureThreadInfo(int timeout);
+    void measureComplite(MeasureItem* pMeasure);
 };
 
 // ==============================================================================================

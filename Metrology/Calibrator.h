@@ -243,24 +243,25 @@ public:
 
     bool        isOpenPort()                    { return m_port.isOpen(); }
 
-    QString		getPortName()                   { return m_portName; }
+    QString		portName()                      { return m_portName; }
     void		setPortName(QString portName)   { m_portName = portName; }
 
-    int			getType()                       { return m_type; }
-    QString		getTypeString()                 { if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT) return ""; else return CalibratorType[ m_type ]; }
+    int			type()                          { return m_type; }
     void		setType(int type)               { m_type = type; }
-    QString		getName()                       { return m_name; }
-    QString		getSerialNo()                   { return m_serialNo; }
-    int			getTimeout()                    { return m_timeout; }
+    QString		typeString()                    { if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT) return ""; return CalibratorType[ m_type ]; }
 
-    int			getMode()                       { return m_mode; }
-    int			getMeasureUnit()                { return m_measureUnit; }
-    int			getSourceUnit()                 { return m_sourceUnit; }
+    QString		name()                          { return m_name; }
+    QString		serialNo()                      { return m_serialNo; }
+    int			timeout()                       { return m_timeout;    }
 
-    double		getMeasureValue()               { return m_measureValue; }
-    double		getSourceValue()                { return m_sourceValue; }
+    int			mode()                          { return m_mode; }
+    int			measureUnit()                   { return m_measureUnit; }
+    int			sourceUnit()                    { return m_sourceUnit; }
 
-    QString     getLastError()                  { return m_lastError; }
+    double		measureValue()                  { return m_measureValue; }
+    double		sourceValue()                   { return m_sourceValue; }
+
+    QString     lastError()                     { return m_lastError; }
 
     void        setWaitResponse(bool enable)    { m_enableWaitResponse = enable; }
 
