@@ -32,7 +32,7 @@ void MeasureThread::init(QWidget* parent)
             continue;
         }
 
-        Calibrator* calibrator = manager->getCalibrator();
+        Calibrator* calibrator = manager->calibrator();
         if (calibrator == nullptr)
         {
             continue;
@@ -46,7 +46,7 @@ void MeasureThread::init(QWidget* parent)
 
 void MeasureThread::waitMeasureTimeout()
 {
-    for(int t = 0; t < theOptions.getToolBar().m_measureTimeout; t += MEASURE_THREAD_TIMEOUT_STEP )
+    for(int t = 0; t < theOptions.toolBar().m_measureTimeout; t += MEASURE_THREAD_TIMEOUT_STEP )
     {
         if (m_cmdStopMeasure == true)
         {
@@ -116,7 +116,7 @@ void MeasureThread::calibratorDisconnected()
     Calibrator* disconnectedCalibrator = dynamic_cast<Calibrator*> (sender());
     if (disconnectedCalibrator != nullptr)
     {
-        emit showMsgBox(tr("Calibrator: %1 - disconnected.").arg(disconnectedCalibrator->getPortName()));
+        emit showMsgBox(tr("Calibrator: %1 - disconnected.").arg(disconnectedCalibrator->portName()));
     }
 }
 
@@ -144,7 +144,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* manager, int mode, int 
         return false;
     }
 
-    emit measureInfo(QString("Prepare calibrator: %1 ").arg(manager->getPortName()));
+    emit measureInfo(QString("Prepare calibrator: %1 ").arg(manager->portName()));
 
     return manager->setUnit(mode, unit);;
 }
@@ -195,7 +195,7 @@ void MeasureThread::run()
 
                 m_calibratorManagerList.append(manager);
 
-                if (theOptions.getToolBar().m_measureKind == MEASURE_KIND_ONE)
+                if (theOptions.toolBar().m_measureKind == MEASURE_KIND_ONE)
                 {
                     break;
                 }
@@ -264,14 +264,14 @@ void MeasureThread::run()
         //
         if (prepareCalibrator(manager, CALIBRATOR_MODE_MEASURE, CALIBRATOR_UNIT_MA) == false)
         {
-            emit showMsgBox(QString("Calibrator: %1 - can't set measure mode.\nThis is calibrator will be excluded from the measurement process.").arg(manager->getPortName()));
+            emit showMsgBox(QString("Calibrator: %1 - can't set measure mode.\nThis is calibrator will be excluded from the measurement process.").arg(manager->portName()));
             m_calibratorManagerList.removeAt(c);
             continue;
         }
 
         if (prepareCalibrator(manager, CALIBRATOR_MODE_SOURCE, CALIBRATOR_UNIT_LOW_OHM) == false)
         {
-            emit showMsgBox(QString("Calibrator: %1 - can't set source mode.\nThis is calibrator will be excluded from the measurement process.").arg(manager->getPortName()));
+            emit showMsgBox(QString("Calibrator: %1 - can't set source mode.\nThis is calibrator will be excluded from the measurement process.").arg(manager->portName()));
             m_calibratorManagerList.removeAt(c);
             continue;
         }
@@ -371,9 +371,25 @@ void MeasureThread::measureLinearity()
 
         // save measurement
         //
-        emit measureInfo(tr("Save measurement "));
+        emit measureInfo(tr("Save measurements "));
 
-        emit measureComplite();
+
+
+        for (int c = 0; c < calibratorCount; c++)
+        {
+            CalibratorManager* manager = m_calibratorManagerList.at(c);
+            if (manager == nullptr)
+            {
+                continue;
+            }
+
+            if (manager->calibratorIsConnected() == false)
+            {
+                continue;
+            }
+
+            emit measureComplite(new LinearetyMeasureItem);
+        }
     }
 }
 

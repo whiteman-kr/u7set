@@ -36,13 +36,13 @@ void CalibratorBase::init(QWidget* parent)
     m_parentWidget = parent;
 
     createCalibrators();                // create objects of calibrators
-    createDialog();                    // create dialog initialization
+    createDialog();                     // create dialog initialization
 
     setHeaderList();                    // init calibrator list
 
     connect(&m_timer, &QTimer::timeout, this, &CalibratorBase::timeoutInitialization, Qt::QueuedConnection);
 
-    emit calibratorOpen();           // open all calibratirs
+    emit calibratorOpen();              // open all calibratirs
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ void CalibratorBase::createCalibrators()
         {
             calibrator->moveToThread(pThread);
 
-            connect( pThread, &QThread::finished, calibrator, &Calibrator::deleteLater );
+            connect(pThread, &QThread::finished, calibrator, &Calibrator::deleteLater);
 
             pThread->start();
         }
@@ -103,7 +103,7 @@ void CalibratorBase::removeCalibrators()
             continue;
         }
 
-        Calibrator* calibrator = manager->getCalibrator();
+        Calibrator* calibrator = manager->calibrator();
         if (calibrator != nullptr)
         {
             calibrator->setWaitResponse(false);
@@ -151,9 +151,9 @@ void CalibratorBase::createDialog()
 
         m_pMenuBar->addMenu(m_pCalibratorMenu);
 
-        connect(m_pInitAction, &QAction::triggered, this, &CalibratorBase::onInitialization, Qt::QueuedConnection);
-        connect(m_pManageAction, &QAction::triggered, this, &CalibratorBase::onManage, Qt::QueuedConnection);
-        connect(m_pSettingsAction, &QAction::triggered, this, static_cast<void (CalibratorBase::*)()>(&CalibratorBase::onSettings), Qt::QueuedConnection);
+        connect(m_pInitAction, &QAction::triggered, this, &CalibratorBase::onInitialization);
+        connect(m_pManageAction, &QAction::triggered, this, &CalibratorBase::onManage);
+        connect(m_pSettingsAction, &QAction::triggered, this, static_cast<void (CalibratorBase::*)()>(&CalibratorBase::onSettings));
 
         QVBoxLayout *mainLayout = new QVBoxLayout;
         mainLayout->setMenuBar(m_pMenuBar);
@@ -189,7 +189,6 @@ void CalibratorBase::setHeaderList()
     m_pCalibratorView->setHorizontalHeaderLabels(horizontalHeaderLabels);
     m_pCalibratorView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-
     // init rows
     //
     QStringList verticalHeaderLabels;
@@ -215,13 +214,12 @@ void CalibratorBase::setHeaderList()
         }
     }
 
-    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, static_cast<void (CalibratorBase::*)(int, int)>(&CalibratorBase::onSettings), Qt::QueuedConnection);
+    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, static_cast<void (CalibratorBase::*)(int, int)>(&CalibratorBase::onSettings));
 
     // init context menu
     //
     m_pCalibratorView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_pCalibratorView, &QTableWidget::customContextMenuRequested, this, &CalibratorBase::onContextMenu);
-
 
     // init progress
     //
@@ -244,16 +242,16 @@ void CalibratorBase::updateList()
             continue;
         }
 
-        Calibrator* pCalibrator = manager->getCalibrator();
+        Calibrator* pCalibrator = manager->calibrator();
         if (pCalibrator == nullptr)
         {
             continue;
         }
 
-        m_pCalibratorView->item(index, CalibratorColumnPort)->setText(pCalibrator->getPortName());
-        m_pCalibratorView->item(index, CalibratorColumnType)->setText(pCalibrator->getTypeString());
+        m_pCalibratorView->item(index, CalibratorColumnPort)->setText(pCalibrator->portName());
+        m_pCalibratorView->item(index, CalibratorColumnType)->setText(pCalibrator->typeString());
         m_pCalibratorView->item(index, CalibratorColumnConnect)->setText(pCalibrator->isConnected() ? tr("Yes") : tr("No"));
-        m_pCalibratorView->item(index, CalibratorColumnSN)->setText(pCalibrator->getSerialNo());
+        m_pCalibratorView->item(index, CalibratorColumnSN)->setText(pCalibrator->serialNo());
 
         m_pCalibratorView->item(index, CalibratorColumnConnect)->setBackgroundColor(pCalibrator->isConnected() ? Qt::green : Qt::white);
     }
@@ -325,7 +323,7 @@ void CalibratorBase::onInitialization()
             continue;
         }
 
-        Calibrator* calibrator = manager->getCalibrator();
+        Calibrator* calibrator = manager->calibrator();
         if (calibrator == nullptr)
         {
             continue;
@@ -415,7 +413,7 @@ void CalibratorBase::onSettings(int row,int)
         return;
     }
 
-    Calibrator* calibrator = manager->getCalibrator();
+    Calibrator* calibrator = manager->calibrator();
     if (calibrator == nullptr)
     {
         return;
@@ -426,7 +424,7 @@ void CalibratorBase::onSettings(int row,int)
     QDialog* dialog = new QDialog(m_pDialog);
     dialog->setWindowFlags(Qt::Drawer);
     dialog->setFixedSize(200, 120);
-    dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->getIndex() + 1));
+    dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->index() + 1));
 
         // serial port
         //
@@ -442,7 +440,7 @@ void CalibratorBase::onSettings(int row,int)
             portCombo->addItem(info.portName());
         }
         portCombo->setEditable(true);
-        portCombo->setCurrentText(calibrator->getPortName());
+        portCombo->setCurrentText(calibrator->portName());
 
         portLayout->addWidget(portLabel);
         portLayout->addWidget(portCombo);
@@ -460,7 +458,7 @@ void CalibratorBase::onSettings(int row,int)
         {
             typeCombo->addItem(CalibratorType[t]);
         }
-        typeCombo->setCurrentIndex(calibrator->getType());
+        typeCombo->setCurrentIndex(calibrator->type());
 
         typeLayout->addWidget(typeLabel);
         typeLayout->addWidget(typeCombo);
@@ -472,8 +470,8 @@ void CalibratorBase::onSettings(int row,int)
         QPushButton* okButton = new QPushButton(tr("OK"));
         QPushButton* cancelButton = new QPushButton(tr("Cancel"));
 
-        connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept, Qt::QueuedConnection);
-        connect(cancelButton, &QPushButton::clicked, dialog, &QDialog::reject, Qt::QueuedConnection);
+        connect(okButton, &QPushButton::clicked, dialog, &QDialog::accept);
+        connect(cancelButton, &QPushButton::clicked, dialog, &QDialog::reject);
 
         buttonLayout->addWidget(okButton);
         buttonLayout->addWidget(cancelButton);
@@ -542,8 +540,10 @@ bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
         }
     }
 
-    if (event->type() == QEvent::KeyRelease)
+    if (event->type() == QEvent::KeyPress)
     {
+        object;
+
         QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
 
         if (keyEvent->key() == Qt::Key_Return)

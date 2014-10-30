@@ -158,6 +158,140 @@ ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+MeasureViewOption::MeasureViewOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+MeasureViewOption::MeasureViewOption(const MeasureViewOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+MeasureViewOption::~MeasureViewOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::init()
+{
+    MeasureViewHeader header;
+
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
+    {
+        header.setMeasureType(type);
+
+        for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+        {
+            MeasureViewColumn* pColumn = header.column(column);
+            if (pColumn != nullptr)
+            {
+                m_column[type][column] = *pColumn;
+            }
+        }
+    }
+
+    header.setMeasureType(MEASURE_TYPE_UNKNOWN);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::load()
+{
+    QSettings s;
+
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
+    {
+        for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+        {
+            MeasureViewColumn c = m_column[type][column];
+
+            if (c.title().isEmpty() == false)
+            {
+                m_column[type][column].setWidth( s.value(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.width()).toInt() );
+                m_column[type][column].setVisible( s.value(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.enableVisible()).toBool() );
+                m_column[type][column].setColor( s.value(QString("%1/Header/%2/%3/Color").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.color().rgb()).toInt() );
+            }
+        }
+    }
+
+    m_font.fromString( s.value( QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), "Segoe UI, 10").toString() );
+    m_fontBold = m_font;
+    m_fontBold.setBold(true);
+
+    m_showExternalID = s.value( QString("%1ShowExternalID").arg(MEASURE_VIEW_OPTIONS_KEY), true).toBool();
+    m_showDisplayingValueType = s.value( QString("%1ShowDisplayingValueType").arg(MEASURE_VIEW_OPTIONS_KEY), DISPLAYING_VALUE_TYPE_PHYSICAL).toInt();
+
+    m_colorLimitError = s.value( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_LIMIT_ERROR.rgb()).toInt();
+    m_colorControlError = s.value( QString("%1ColorControlError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_CONTROL_ERROR.rgb()).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewOption::save()
+{
+    QSettings s;
+
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
+    {
+        for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+        {
+            MeasureViewColumn c = m_column[type][column];
+
+            if (c.title().isEmpty() == false)
+            {
+                s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.width());
+                s.setValue(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.enableVisible());
+                s.setValue(QString("%1/Header/%2/%3/Color").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.color().rgb());
+            }
+        }
+    }
+
+    s.setValue( QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), m_font.toString());
+
+    s.setValue( QString("%1ShowExternalID").arg(MEASURE_VIEW_OPTIONS_KEY), m_showExternalID);
+    s.setValue( QString("%1ShowDisplayingValueType").arg(MEASURE_VIEW_OPTIONS_KEY), m_showDisplayingValueType);
+
+    s.setValue( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorLimitError.rgb() );
+    s.setValue( QString("%1ColorControlError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorControlError.rgb() );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
+{
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type ++)
+    {
+        for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+        {
+            m_column[type][column] = from.m_column[type][column];
+        }
+    }
+
+    m_font.fromString( from.m_font.toString() );
+    m_fontBold = m_font;
+    m_fontBold.setBold(true);
+
+    m_showExternalID = from.m_showExternalID;
+    m_showDisplayingValueType = from.m_showDisplayingValueType;
+
+    m_colorControlError = from.m_colorControlError;
+    m_colorLimitError = from.m_colorLimitError;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 LinearityPoint::LinearityPoint()
 {
     setPercent(0);
@@ -593,8 +727,8 @@ void LinearityOption::load()
 
     m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.5).toDouble();
     m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
-    m_errorType  = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
-    m_errorCalcBySCO  = s.value( QString("%1ErrorCalcBySCO ").arg(LINEARITY_OPTIONS_KEY), false).toBool();
+    m_errorType  = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), ERROR_TYPE_REDUCE).toInt();
+    m_errorCalcBySCO  = s.value( QString("%1ErrorCalcByMSE ").arg(LINEARITY_OPTIONS_KEY), false).toBool();
 
     m_measureTimeInPoint = s.value( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
     m_measureCountInPoint = s.value( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
@@ -603,8 +737,8 @@ void LinearityOption::load()
     m_lowLimitRange = s.value( QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), 0).toDouble();
     m_highLimitRange = s.value( QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
 
+    m_viewType = s.value( QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
     m_showOutputRangeColumn = s.value( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), false).toBool();
-    m_considerCorrectOutput = s.value( QString("%1ConsiderCorrectOutput").arg(LINEARITY_OPTIONS_KEY), false).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -618,7 +752,7 @@ void LinearityOption::save()
     s.setValue( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), m_errorValue);
     s.setValue( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), m_errorCtrl);
     s.setValue( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
-    s.setValue( QString("%1ErrorCalcBySCO").arg(LINEARITY_OPTIONS_KEY), m_errorCalcBySCO);
+    s.setValue( QString("%1ErrorCalcByMSE").arg(LINEARITY_OPTIONS_KEY), m_errorCalcBySCO);
 
     s.setValue( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
     s.setValue( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
@@ -627,8 +761,8 @@ void LinearityOption::save()
     s.setValue( QString("%1LowLimitRange").arg(LINEARITY_OPTIONS_KEY), m_lowLimitRange);
     s.setValue( QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
+    s.setValue( QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
     s.setValue( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
-    s.setValue( QString("%1ConsiderCorrectOutput").arg(LINEARITY_OPTIONS_KEY), m_considerCorrectOutput);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -649,8 +783,8 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
     m_lowLimitRange = from.m_lowLimitRange;
     m_highLimitRange = from.m_highLimitRange;
 
+    m_viewType = from.m_viewType;
     m_showOutputRangeColumn = from.m_showOutputRangeColumn;
-    m_considerCorrectOutput = from.m_considerCorrectOutput;
 
     return *this;
 }
@@ -691,6 +825,7 @@ int Options::getChannelCount()
         default:                    assert(0);                      break;
     }
 
+
     return count;
 }
 
@@ -700,6 +835,8 @@ void Options::load()
 {
     m_toolBar.load();
     m_connectTcpIp.load();
+    m_measureView.init();
+    m_measureView.load();
     m_linearity.load();
 }
 
@@ -709,6 +846,7 @@ void Options::save()
 {
     m_toolBar.save();
     m_connectTcpIp.save();
+    m_measureView.save();
     m_linearity.save();
 }
 
@@ -718,8 +856,14 @@ Options& Options::operator=(const Options& from)
 {
     m_mutex.lock();
 
+        for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+        {
+            m_updateColumnView[type] = from.m_updateColumnView[type];
+        }
+
         m_toolBar = from.m_toolBar;
         m_connectTcpIp = from.m_connectTcpIp;
+        m_measureView = from.m_measureView;
         m_linearity = from.m_linearity;
 
     m_mutex.unlock();

@@ -23,11 +23,11 @@ public:
 
     void            show()                          { if (m_pDialog != nullptr) m_pDialog->show(); }
 
-    int             getIndex()                      { return m_index;   }
+    int             index()                         { return m_index;   }
     void            setIndex(int index)             { m_index = index;  }
 
-    Calibrator*     getCalibrator()                 { return m_pCalibrator; }
-    QString         getPortName()                   { if (m_pCalibrator == nullptr) return ""; return m_pCalibrator->getPortName(); }
+    Calibrator*     calibrator()                    { return m_pCalibrator; }
+    QString         portName()                      { if (m_pCalibrator == nullptr) return ""; return m_pCalibrator->portName(); }
 
     bool            calibratorIsConnected();
 
