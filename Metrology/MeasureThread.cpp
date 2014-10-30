@@ -299,7 +299,7 @@ void MeasureThread::measureLinearity()
         return;
     }
 
-    int pointCount = theOptions.getLinearity().m_pointBase.count();
+    int pointCount = theOptions.linearity().m_pointBase.count();
     if (pointCount == 0)
     {
         emit showMsgBox("The measurement process don't have points of linearity");
@@ -313,7 +313,7 @@ void MeasureThread::measureLinearity()
             break;
         }
 
-        LinearityPoint* pPoint = theOptions.getLinearity().m_pointBase.at(p);
+        LinearityPoint* pPoint = theOptions.linearity().m_pointBase.at(p);
         if (pPoint == nullptr)
         {
             continue;

@@ -152,14 +152,14 @@ QString MeasureModel::measureLinearity(const QModelIndex& index) const
 
     int detailValueType = VALUE_TYPE_UNKNOWN;
 
-    switch (theOptions.getLinearity().m_viewType)
+    switch (theOptions.linearity().m_viewType)
     {
         case LO_VIEW_TYPE_DETAIL_PHYSICAL:  detailValueType = VALUE_TYPE_PHYSICAL;  break;
         case LO_VIEW_TYPE_DETAIL_OUTPUT:    detailValueType = VALUE_TYPE_OUTPUT;    break;
         default:                            detailValueType = VALUE_TYPE_ELECTRIC;  break;
     }
 
-    int errorType = theOptions.getLinearity().m_errorType;
+    int errorType = theOptions.linearity().m_errorType;
 
     QString result;
 

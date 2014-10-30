@@ -370,22 +370,22 @@ class Options : public QObject
     Q_OBJECT
 
 public:
-    explicit            Options(QObject *parent = 0);
-    explicit            Options(const Options& from, QObject *parent = 0);
-                        ~Options();
+    explicit Options(QObject *parent = 0);
+    explicit Options(const Options& from, QObject *parent = 0);
+    ~Options();
 
-    int                 getChannelCount();
+    int getChannelCount();
 
-    bool                m_updateColumnView[MEASURE_TYPE_COUNT];             // determined the need to update the view after changing settings
+    bool m_updateColumnView[MEASURE_TYPE_COUNT];             // determined the need to update the view after changing settings
 
 private:
 
-    QMutex              m_mutex;
+    QMutex m_mutex;
 
-    ToolBarOption       m_toolBar;
-    TcpIpOption         m_connectTcpIp;
-    MeasureViewOption   m_measureView;
-    LinearityOption     m_linearity;
+    ToolBarOption m_toolBar;
+    TcpIpOption m_connectTcpIp;
+    MeasureViewOption m_measureView;
+    LinearityOption m_linearity;
 
 public:
 
@@ -398,7 +398,7 @@ public:
     MeasureViewOption& measureView() { return m_measureView; }
     void setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
 
-    LinearityOption& getLinearity() { return m_linearity; }
+    LinearityOption& linearity() { return m_linearity; }
     void setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
 
     void load();

@@ -230,14 +230,14 @@ void MeasureViewHeader::updateColumnState()
             {
                 // output range
                 //
-                bool visibleOutput = theOptions.getLinearity().m_showOutputRangeColumn;
+                bool visibleOutput = theOptions.linearity().m_showOutputRangeColumn;
 
                 setColumnVisible(MVC_CMN_L_OUT_NOMINAL, visibleOutput);
                 setColumnVisible(MVC_CMN_L_OUT_MEASURE, visibleOutput);
 
                 // list type
                 //
-                switch(theOptions.getLinearity().m_viewType)
+                switch(theOptions.linearity().m_viewType)
                 {
                     case LO_VIEW_TYPE_SIMPLE:
 
