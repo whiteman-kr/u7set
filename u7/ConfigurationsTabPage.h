@@ -5,11 +5,11 @@
 #include "FileView.h"
 #include "../include/ConfigData.h"
 
-/*class ConfigurationFileView : public FileView
+class ConfigurationFileView : public FileView
 {
 	Q_OBJECT
 public:
-	ConfigurationFileView(DbStore* dbstore);
+	ConfigurationFileView(DbController* dbcontroller);
 	virtual ~ConfigurationFileView();
 
 	// Methods
@@ -27,6 +27,7 @@ signals:
 	//
 protected:
 };
+
 
 class ConfigurationsTabPage : public MainTabPage
 {
@@ -57,6 +58,7 @@ private:
 	QTabWidget* m_tabWidget;
 	QSplitter* m_splitter;
 };
+
 
 class ModuleConfigurationTabPage : public QWidget
 {
@@ -111,6 +113,3 @@ protected:
 
 	DbController* m_dbController;
 };
-
-
-*/

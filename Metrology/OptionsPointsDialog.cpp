@@ -127,9 +127,9 @@ void OptionsPointsDialog::setHeaderList()
         }
     }
 
-    connect( m_pointList, &QTableWidget::cellDoubleClicked, this, &OptionsPointsDialog::onEditPoint );
-    connect( m_pointList, &QTableWidget::cellChanged, this, &OptionsPointsDialog::cellChanged );
-    connect( m_pointList, &QTableWidget::currentCellChanged, this, &OptionsPointsDialog::currentCellChanged );
+    connect(m_pointList, &QTableWidget::cellDoubleClicked, this, &OptionsPointsDialog::onEditPoint);
+    connect(m_pointList, &QTableWidget::cellChanged, this, &OptionsPointsDialog::cellChanged);
+    connect(m_pointList, &QTableWidget::currentCellChanged, this, &OptionsPointsDialog::currentCellChanged);
 
     // init context menu
     //
@@ -152,12 +152,12 @@ void OptionsPointsDialog::setHeaderList()
             m_pAction[sensor]->setChecked(sensor > POINT_SENSOR_I_4_20_MA ? false : true);
 
 
-            connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &OptionsPointsDialog::onAction, Qt::QueuedConnection);
+            connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &OptionsPointsDialog::onAction);
         }
     }
 
     DoubleDelegate * delegate = new DoubleDelegate(this);
-     m_pointList->setItemDelegate(delegate);
+    m_pointList->setItemDelegate(delegate);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ void OptionsPointsDialog::updateList()
     m_pointList->setRowCount(rowCount);
 
     m_updatingList = true;
-    QTableWidgetItem* item = nullptr;
+    QTableWidgetItem* cell = nullptr;
     QStringList verticalHeaderLabels;
     int selectedRow = m_pointList->currentRow();
 
@@ -236,13 +236,13 @@ void OptionsPointsDialog::updateList()
 
         for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
         {
-            item = new QTableWidgetItem( QString::number(point->getSensorValue(sensor), 10, 3));
-            item->setTextAlignment(Qt::AlignHCenter);
-            m_pointList->setItem(index, sensor, item);
+            cell = new QTableWidgetItem( QString::number(point->getSensorValue(sensor), 10, 3));
+            cell->setTextAlignment(Qt::AlignHCenter);
+            m_pointList->setItem(index, sensor, cell);
 
             if (sensor != POINT_SENSOR_PERCENT)
             {
-                item->setTextColor( Qt::darkGray  );
+                cell->setTextColor( Qt::darkGray  );
             }
         }
     }
@@ -353,8 +353,6 @@ void OptionsPointsDialog::cellChanged(int row, int column)
         return;
     }
 
-    QString value = m_pointList->item(row, column)->text();
-
     int index = row;
     if (index < 0 || index >= m_linearity.m_pointBase.count())
     {
@@ -368,6 +366,7 @@ void OptionsPointsDialog::cellChanged(int row, int column)
         return;
     }
 
+    QString value = m_pointList->item(row, column)->text();
     point->setPercent( value.toDouble() );
 
     updateList();

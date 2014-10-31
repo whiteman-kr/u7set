@@ -31,20 +31,8 @@ namespace Hardware
 			L".hcs",		// Chassis
 			L".hmd",		// Module
 			L".hcr",		// Controller
-			L".hds"			// DiagSignal
+			L".hds"			// Diagnostics Signal
 		};
-
-
-//	struct DeviceRestriction
-//	{
-//		// Data
-//		//
-//		int m_place;
-//		std::vector<int> m_allowedTypes;
-
-//		// Functions
-//		//
-//	};
 
 
 	//
@@ -291,6 +279,9 @@ namespace Hardware
 		Q_PROPERTY(int Place READ place WRITE setPlace)
 		Q_PROPERTY(int Type READ type WRITE setType)
 
+		Q_PROPERTY(QString ConfigurationInput READ configurationInput WRITE setConfigurationInput)
+		Q_PROPERTY(QString ConfigurationOutput READ configurationOutput WRITE setConfigurationOutput)
+
 	public:
 		explicit DeviceModule(bool preset = false);
 		virtual ~DeviceModule();
@@ -313,6 +304,12 @@ namespace Hardware
 		int type() const;
 		void setType(int value);
 
+		QString configurationInput() const;
+		void setConfigurationInput(const QString& value);
+
+		QString configurationOutput() const;
+		void setConfigurationOutput(const QString& value);
+
 		// Data
 		//
 	private:
@@ -320,6 +317,9 @@ namespace Hardware
 
 		int m_place = 0;
 		int m_type = 0;
+
+		QString m_configurationInput;
+		QString m_configurationOutput;
 	};
 
 

@@ -58,7 +58,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Hardware Configuration"));
 	getCentralWidget()->addTabPage(new SignalsTabPage(dbController(), nullptr), tr("Application Signals"));
 //	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
-//	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
+	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 
 	getCentralWidget()->addTabPage(
 		SchemesTabPage::create<VFrame30::LogicScheme>("als", dbController(), AlFileName, nullptr),

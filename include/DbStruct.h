@@ -19,6 +19,7 @@ extern const char* const HcFileName;			// Hardware Configuratiun
 extern const char* const HpFileName;			// Hardware Presets
 extern const char* const WvsFileName;			// Workflow Video Schemes
 extern const char* const DvsFileName;			// Diagnostics Video Schemes
+extern const char* const McFileName;			// Diagnostics Video Schemes
 
 //
 //

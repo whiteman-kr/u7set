@@ -13,13 +13,19 @@ class SignalsModel;
 class QToolBar;
 class QPlainTextEdit;
 class QSplitter;
+class SignalsProxyModel;
+
+
+const int ST_ANALOG = SignalType::analog,
+ST_DISCRETE = SignalType::discrete,
+ST_ANY = 0xff;
 
 
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, QObject *parent = 0);
+    explicit SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitInfo, SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = 0);
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
@@ -41,6 +47,7 @@ private:
 	const UnitList& m_unitInfo;
 	SignalSet& m_signalSet;
 	SignalsModel* m_model;
+	SignalsProxyModel* m_proxyModel;
 };
 
 
@@ -60,7 +67,7 @@ public:
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags(const QModelIndex & index) const;
 
-	SignalsDelegate* createDelegate() { return new SignalsDelegate(m_dataFormatInfo, m_unitInfo, m_signalSet, this, parent()); }
+	SignalsDelegate* createDelegate(SignalsProxyModel* signalsProxyModel) { return new SignalsDelegate(m_dataFormatInfo, m_unitInfo, m_signalSet, this, signalsProxyModel, parent()); }
 
 	void clearSignals();
 
@@ -79,7 +86,8 @@ public:
 	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
 	bool editSignal(int row);
-	void deleteSignal(const QSet<int>& signalGroupIDs);
+	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
+	void deleteSignal(int signalID);
 
 signals:
 	void cellsSizeChanged();
@@ -89,6 +97,7 @@ signals:
 
 public slots:
 	void loadSignals();
+	void loadSignal(int row);
 	void addSignal();
 
 private:
@@ -112,6 +121,21 @@ private:
 	const QPixmap cross = QPixmap(":/Images/Images/cross.png");
 
 	void changeCheckedoutSignalActionsVisibility();
+};
+
+
+class SignalsProxyModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+public:
+	SignalsProxyModel(SignalsModel* sourceModel, QObject* parent = 0);
+
+	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+	void setSignalTypeFilter(int signalType);
+
+private:
+	SignalsModel* m_sourceModel;
+	int m_signalType = ST_ANY;
 };
 
 
@@ -152,7 +176,7 @@ public slots:
 private:
 	SignalsModel *m_sourceModel;
 	CheckedoutSignalsModel* m_proxyModel;
-	QTableView* m_signalsView;
+	QTableView* m_signalsView = nullptr;
 	QPlainTextEdit* m_commentEdit;
 	QSplitter* m_splitter;
 
@@ -211,15 +235,18 @@ public slots:
 	void saveSelection();
 	void restoreSelection();
 
+	void changeSignalTypeFilter(int signalType, bool checked);
+
 	// Data
 	//
 private:
 	SignalsModel* m_signalsModel = nullptr;
+	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
 
 	QList<int> selectedRowsSignalID;
-	int focusedCellSignalID;
-	int focusedCellColumn;
+	int focusedCellSignalID = -1;
+	int focusedCellColumn = -1;
 	int horizontalScrollPosition;
 	int verticalScrollPosition;
 };

@@ -194,7 +194,8 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0029.sql \
     DatabaseUpgrade/Upgrade0030.sql \
     DatabaseUpgrade/Upgrade0031.sql \
-    Tools/afbschema.xsd
+    Tools/afbschema.xsd \
+    DatabaseUpgrade/Upgrade0032.sql
 
 
 CONFIG += precompile_header
