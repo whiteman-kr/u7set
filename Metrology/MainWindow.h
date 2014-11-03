@@ -146,7 +146,7 @@ private slots:
     void startMeasure();
     void stopMeasure();
     void printMeasure() {};
-    void exportMeasure() {};
+    void exportMeasure();
 
     // menu - Edit
     //

@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport concurrent
 
 TARGET = Metrology
 TEMPLATE = app
@@ -27,7 +27,8 @@ SOURCES += \
     MeasureViewHeader.cpp \
     MeasureView.cpp \
     OptionsMvhDialog.cpp \
-    MeasureBase.cpp
+    MeasureBase.cpp \
+    ExportMeasure.cpp
 
 
 HEADERS  += \
@@ -43,7 +44,8 @@ HEADERS  += \
     MeasureViewHeader.h \
     MeasureView.h \
     OptionsMvhDialog.h \
-    MeasureBase.h
+    MeasureBase.h \
+    ExportMeasure.h
 
 
 FORMS    +=

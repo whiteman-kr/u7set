@@ -21,10 +21,20 @@ const int   MEASURE_TYPE_UNKNOWN            = -1,
             MEASURE_TYPE_COMPARATOR         = 1,
             MEASURE_TYPE_COMPLEX_COMPARATOR	= 2;
 
+// ----------------------------------------------------------------------------------------------
 
 #define		ERR_MEASURE_TYPE(type) (type < 0 || type >= MEASURE_TYPE_COUNT)
 #define		TEST_MEASURE_TYPE(type)				if (ERR_MEASURE_TYPE(type)) { return; }
 #define		TEST_MEASURE_TYPE1(type, retVal)	if (ERR_MEASURE_TYPE(type)) { return retVal; }
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const MeasureFileName[MEASURE_TYPE_COUNT] =
+{
+            QT_TRANSLATE_NOOP("Measure.h", "Linearity"),
+            QT_TRANSLATE_NOOP("Measure.h", "Comparators"),
+            QT_TRANSLATE_NOOP("Measure.h", "ComplexComparators"),
+};
 
 // ==============================================================================================
 
