@@ -9,7 +9,7 @@
               <xs:element name="InputSignals">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="AfbElementSignal">
+                    <xs:element maxOccurs="unbounded" name="AfbElementSignal">
                       <xs:complexType>
                         <xs:attribute name="Caption" type="xs:string" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
@@ -17,11 +17,15 @@
                     </xs:element>
                   </xs:sequence>
                 </xs:complexType>
+				<xs:unique name = "InputSignalsUnique">
+					 <xs:selector xpath="AfbElementSignal"/>  
+				        <xs:field xpath="@Caption"/>  
+				</xs:unique>
               </xs:element>
               <xs:element name="OutputSignals">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="AfbElementSignal">
+                    <xs:element maxOccurs="unbounded" name="AfbElementSignal">
                       <xs:complexType>
                         <xs:attribute name="Caption" type="xs:string" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
@@ -29,6 +33,10 @@
                     </xs:element>
                   </xs:sequence>
                 </xs:complexType>
+				<xs:unique name = "OutputSignalsUnique">
+					 <xs:selector xpath="AfbElementSignal"/>  
+				        <xs:field xpath="@Caption"/>  
+				</xs:unique>
               </xs:element>
               <xs:element name="Params">
                 <xs:complexType>
@@ -91,6 +99,10 @@
                     </xs:element>
                   </xs:sequence>
                 </xs:complexType>
+				<xs:unique name = "ParamsUnique">
+					 <xs:selector xpath="AfbElementParam"/>  
+				        <xs:field xpath="@Caption"/>  
+				</xs:unique>
               </xs:element>
             </xs:sequence>
             <xs:attribute name="Guid" type="xs:string" use="required" />
