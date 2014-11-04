@@ -17,99 +17,23 @@ MC_WARNING = 1,
 MC_MESSAGE = 2,
 MC_CONFIG = 3;
 
-template<class T> class QAsyncQueue
-{
-public:
 
-	QAsyncQueue(uint max = -1)
-		: m_max(max)
-	{
-	}
-
-	~QAsyncQueue()
-	{
-		clear();
-	}
-
-	uint count()
-	{
-		m_mutex.lock();
-		int count = m_queue.count();
-		m_mutex.unlock();
-		return count;
-	}
-
-	bool isFull()
-	{
-		if (m_max == -1)
-		{
-			return false;
-		}
-
-		m_mutex.lock();
-		int count = m_queue.count();
-		m_mutex.unlock();
-		return count >= m_max;
-	}
-
-	bool isEmpty()
-	{
-		m_mutex.lock();
-		bool empty = m_queue.isEmpty();
-		m_mutex.unlock();
-		return empty;
-	}
-
-	void clear()
-	{
-		m_mutex.lock();
-		m_queue.clear();
-		m_mutex.unlock();
-	}
-
-	void push(const T& t)
-	{
-		m_mutex.lock();
-		m_queue.enqueue(t);
-		m_mutex.unlock();
-	}
-
-	T pull()
-	{
-		m_mutex.lock();
-		T i = m_queue.dequeue();
-		m_mutex.unlock();
-		return i;
-	}
-
-private:
-
-	QQueue<T> m_queue;
-	QMutex m_mutex;
-	int m_max;
-};
-
-class CircularLoggerImplementation : public QObject
+class CircularLoggerWorker : public QObject
 {
 	Q_OBJECT
 public:
-	CircularLoggerImplementation(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
-	~CircularLoggerImplementation();
+	CircularLoggerWorker(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
+	~CircularLoggerWorker();
 
-	void pushRecord(const QString& record);
 	void close();
 
-signals:
-	void queueIsNotEmpty();
-
 public slots:
-	void flushQueue();
+	void writeRecord(const QString record);
+	void flushStream();
 
 private:
 	QTextStream* m_stream = nullptr;
-	QAsyncQueue<QString> m_queue;
 	QFile* m_file = nullptr;
-	QMap<int,int> m_fileIDtoIndexMap;
 
 	void detectFiles();
 	void removeOldFiles();
@@ -139,6 +63,9 @@ public:
 	~CircularLogger();
 
 	void initLog(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
+
+signals:
+	void writeRecord(const QString record);
 
 public slots:
 
@@ -179,16 +106,14 @@ public slots:
 	QString write(int type, int category, QString function, QString message/*ip, header*/)
 	{
 		QString record = composeRecord(type, category, function, message);
-		writeRecord(record);
+		emit writeRecord(record);
 		return record;
 	}
 
 private:
 
-	CircularLoggerImplementation* m_circularLoggerImplementation = nullptr;
+	CircularLoggerWorker* m_circularLoggerWorker = nullptr;
 	QThread* m_thread = nullptr;
-
-	void writeRecord(const QString& record);
 
 	QString composeRecord(int type, int category, QString function, QString message/*ip, header*/);
 };
