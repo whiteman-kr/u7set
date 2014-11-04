@@ -15,6 +15,7 @@
 #include <QCloseEvent>
 
 #include "CalibratorBase.h"
+#include "ExportMeasure.h"
 #include "OptionsDialog.h"
 
 
@@ -56,7 +57,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-    setWindowIcon(QIcon::fromTheme("empty", QIcon(":/icons/Metrology.ico")));
+    setWindowIcon(QIcon(":/icons/Metrology.ico"));
     setWindowTitle(tr("Metrology"));
     restoreWindowPosition(this);
 
@@ -78,55 +79,53 @@ void  MainWindow::createActions()
 {
     // Measure
     //
-    m_pStartMeasureAction = new QAction(tr("&Start"), this);
+    m_pStartMeasureAction = new QAction(tr("Start"), this);
     m_pStartMeasureAction->setShortcut(Qt::Key_F5);
-    m_pStartMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Start.png")));
+    m_pStartMeasureAction->setIcon(QIcon(":/icons/Start.png"));
     m_pStartMeasureAction->setToolTip(tr("To start the measurement process"));
     connect(m_pStartMeasureAction, &QAction::triggered, this, &MainWindow::startMeasure);
 
-
-    m_pStopMeasureAction = new QAction(tr("&Stop"), this);
+    m_pStopMeasureAction = new QAction(tr("Stop"), this);
     m_pStopMeasureAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
-    m_pStopMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Stop.png")));
+    m_pStopMeasureAction->setIcon(QIcon(":/icons/Stop.png"));
     m_pStopMeasureAction->setToolTip(tr("To stop the measurement process"));
     connect(m_pStopMeasureAction, &QAction::triggered, this, &MainWindow::stopMeasure);
 
     m_pPrintMeasureAction = new QAction(tr("&Print ..."), this);
     m_pPrintMeasureAction->setShortcut(Qt::CTRL + Qt::Key_P);
-    m_pPrintMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Print.png")));
+    m_pPrintMeasureAction->setIcon(QIcon(":/icons/Print.png"));
     m_pPrintMeasureAction->setToolTip(tr("Printing of the measurements"));
     connect(m_pPrintMeasureAction, &QAction::triggered, this, &MainWindow::printMeasure);
 
     m_pExportMeasureAction = new QAction(tr("&Export ..."), this);
-    m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_E);
-    m_pExportMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Export.png")));
-    m_pExportMeasureAction->setToolTip(tr("Export of the measurements"));
+    m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_S);
+    m_pExportMeasureAction->setIcon(QIcon(":/icons/Export.png"));
+    m_pExportMeasureAction->setToolTip(tr("Export measurements"));
     connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::exportMeasure);
-
 
     // Edit
     //
     m_pCutMeasureAction = new QAction(tr("Cu&t"), this);
     m_pCutMeasureAction->setShortcut(Qt::CTRL + Qt::Key_X);
-    m_pCutMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Cut.png")));
+    m_pCutMeasureAction->setIcon(QIcon(":/icons/Cut.png"));
     m_pCutMeasureAction->setToolTip(tr("Cut of the measurements"));
     connect(m_pCutMeasureAction, &QAction::triggered, this, &MainWindow::cutMeasure);
 
     m_pCopyMeasureAction = new QAction(tr("&Copy"), this);
     m_pCopyMeasureAction->setShortcut(Qt::CTRL + Qt::Key_C);
-    m_pCopyMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Copy.png")));
+    m_pCopyMeasureAction->setIcon(QIcon(":/icons/Copy.png"));
     m_pCopyMeasureAction->setToolTip(tr("Copy of the measurements"));
     connect(m_pCopyMeasureAction, &QAction::triggered, this, &MainWindow::copyMeasure);
 
     m_pRemoveMeasureAction = new QAction(tr("&Delete"), this);
     m_pRemoveMeasureAction->setShortcut(Qt::CTRL + Qt::Key_Delete);
-    m_pRemoveMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Remove.png")));
+    m_pRemoveMeasureAction->setIcon(QIcon(":/icons/Remove.png"));
     m_pRemoveMeasureAction->setToolTip(tr("Delete the selected measurements"));
     connect(m_pRemoveMeasureAction, &QAction::triggered, this, &MainWindow::removeMeasure);
 
     m_pSelectAllMeasureAction = new QAction(tr("Select &All"), this);
     m_pSelectAllMeasureAction->setShortcut(Qt::CTRL + Qt::Key_A);
-    m_pSelectAllMeasureAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/SelectAll.png")));
+    m_pSelectAllMeasureAction->setIcon(QIcon(":/icons/SelectAll.png"));
     m_pSelectAllMeasureAction->setToolTip(tr("Select all measurements"));
     connect(m_pSelectAllMeasureAction, &QAction::triggered, this, &MainWindow::selectAllMeasure);
 
@@ -134,41 +133,41 @@ void  MainWindow::createActions()
     //
     m_pShowReportsAction = new QAction(tr("&Reports ..."), this);
     m_pShowReportsAction->setShortcut(Qt::CTRL + Qt::Key_R);
-    m_pShowReportsAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Reports.png")));
+    m_pShowReportsAction->setIcon(QIcon(":/icons/Reports.png"));
     m_pShowReportsAction->setToolTip(tr("Preview the report on the measurements"));
     connect(m_pShowReportsAction, &QAction::triggered, this, &MainWindow::showReports);
 
     m_pShowCalculateAction = new QAction(tr("Metrological &calculator ..."), this);
     m_pShowCalculateAction->setShortcut(Qt::ALT + Qt::Key_C);
-    m_pShowCalculateAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Calculator.png")));
+    m_pShowCalculateAction->setIcon(QIcon(":/icons/Calculator.png"));
     m_pShowCalculateAction->setToolTip(tr("Calculator for converting metrological quantities"));
     connect(m_pShowCalculateAction, &QAction::triggered, this, &MainWindow::showCalculate);
 
     // Tools
     //
     m_pCalibratorsAction = new QAction(tr("&Calibrations ..."), this);
-    m_pCalibratorsAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Calibrators.png")));
+    m_pCalibratorsAction->setIcon(QIcon(":/icons/Calibrators.png"));
     m_pCalibratorsAction->setToolTip(tr("Connecting and configuring calibrators"));
     connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::calibrators);
 
     m_pShowOutputSignalListAction = new QAction(tr("Signals input/output ..."), this);
-    m_pShowOutputSignalListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/InOut.png")));
+    m_pShowOutputSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
     m_pShowOutputSignalListAction->setToolTip("");
     connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
 
     m_pShowOutputRangeListAction = new QAction(tr("Signals with output ranges ..."), this);
-    m_pShowOutputRangeListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/OutRange.png")));
+    m_pShowOutputRangeListAction->setIcon(QIcon(":/icons/OutRange.png"));
     m_pShowOutputRangeListAction->setToolTip("");
     connect(m_pShowOutputRangeListAction, &QAction::triggered, this, &MainWindow::showOutputRangeList);
 
     m_pShowComlexComparatorListAction = new QAction(tr("&Signals of complex comparator ..."), this);
-    m_pShowComlexComparatorListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Complex.png")));
+    m_pShowComlexComparatorListAction->setIcon(QIcon(":/icons/Complex.png"));
     m_pShowComlexComparatorListAction->setToolTip("");
     connect(m_pShowComlexComparatorListAction, &QAction::triggered, this, &MainWindow::showComlexComparatorList);
 
     m_pOptionsAction = new QAction(tr("&Options ..."), this);
     m_pOptionsAction->setShortcut(Qt::CTRL + Qt::Key_O);
-    m_pOptionsAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Options.png")));
+    m_pOptionsAction->setIcon(QIcon(":/icons/Options.png"));
     m_pOptionsAction->setToolTip(tr("Editing application settings"));
     connect(m_pOptionsAction, &QAction::triggered, this, &MainWindow::options);
 
@@ -176,32 +175,32 @@ void  MainWindow::createActions()
     // ?
     //
     m_pShowSignalListAction = new QAction(tr("&Signals ..."), this);
-    m_pShowSignalListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Signals.png")));
+    m_pShowSignalListAction->setIcon(QIcon(":/icons/Signals.png"));
     m_pShowSignalListAction->setToolTip("");
     connect(m_pShowSignalListAction, &QAction::triggered, this, &MainWindow::showSignalList);
 
     m_pShowComparatorsListAction = new QAction(tr("&Comparators ..."), this);
-    m_pShowComparatorsListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Signals.png")));
+    m_pShowComparatorsListAction->setIcon(QIcon(":/icons/Signals.png"));
     m_pShowComparatorsListAction->setToolTip("");
     connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
     m_pShowCorrecrtionsListAction = new QAction(tr("Co&rrections ..."), this);
-    m_pShowCorrecrtionsListAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Signals.png")));
+    m_pShowCorrecrtionsListAction->setIcon(QIcon(":/icons/Signals.png"));
     m_pShowCorrecrtionsListAction->setToolTip("");
     connect(m_pShowCorrecrtionsListAction, &QAction::triggered, this, &MainWindow::showCorrecrtionsList);
 
     m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
-    m_pShowStatisticAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Statistics.png")));
+    m_pShowStatisticAction->setIcon(QIcon(":/icons/Statistics.png"));
     m_pShowStatisticAction->setToolTip("");
     connect(m_pShowStatisticAction, &QAction::triggered, this, &MainWindow::showStatistic);
 
     m_pAboutConnectionAction = new QAction(tr("About connect to server ..."), this);
-    m_pAboutConnectionAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/About connection.png")));
+    m_pAboutConnectionAction->setIcon(QIcon(":/icons/About connection.png"));
     m_pAboutConnectionAction->setToolTip("");
     connect(m_pAboutConnectionAction, &QAction::triggered, this, &MainWindow::aboutConnection);
 
     m_pAboutAppAction = new QAction(tr("About Metrology ..."), this);
-    m_pAboutAppAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/About Application.png")));
+    m_pAboutAppAction->setIcon(QIcon(":/icons/About Application.png"));
     m_pAboutAppAction->setToolTip("");
     connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
 }
@@ -272,7 +271,6 @@ void MainWindow::createMenu()
     m_pMeasureMenu->addSeparator();
     m_pMeasureMenu->addAction(m_pPrintMeasureAction);
     m_pMeasureMenu->addAction(m_pExportMeasureAction);
-
 
     m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
 
@@ -599,7 +597,7 @@ void MainWindow::createPanels()
         {
             findAction->setText(tr("&Find ..."));
             findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-            findAction->setIcon(QIcon::fromTheme("empty", QIcon(":/icons/Find.png")));
+            findAction->setIcon(QIcon(":/icons/Find.png"));
             findAction->setToolTip(tr("Find data in list of measurements"));
 
             if(m_pEditMenu != nullptr)
@@ -745,7 +743,7 @@ void MainWindow::setMeasureType(int type)
         return;
     }
 
-    measureCountChanged(pView->measureCount());
+    measureCountChanged(pView->table().count());
 
     switch(type)
     {
@@ -784,8 +782,6 @@ void MainWindow::setMeasureType(int type)
     m_measureType = type;
 
     updateActions();
-
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -824,6 +820,25 @@ void MainWindow::stopMeasure()
     }
 
     m_measureThread.stop();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::exportMeasure()
+{
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    MeasureView* pView = m_measureView[m_measureType];
+    if (pView == nullptr)
+    {
+        return;
+    }
+
+    ExportMeasure* dialog = new ExportMeasure(pView, this);
+    dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

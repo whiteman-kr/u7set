@@ -4,6 +4,7 @@
 #include <QTableView>
 #include <QMenu>
 #include <QList>
+
 #include "Measure.h"
 #include "MeasureViewHeader.h"
 #include "MeasureBase.h"
@@ -16,19 +17,28 @@ class MeasureModel : public QAbstractTableModel
 
 public:
 
+    explicit            MeasureModel(QObject* parent = 0);
     explicit            MeasureModel(int type, QObject* parent = 0);
                         ~MeasureModel();
 
-    MeasureViewHeader   m_header;
+    int                 measureType() { return m_measureType; }
+    void                setMeasureType(int type);
+
+    MeasureViewHeader&  header() { return m_header; }
 
     int                 count() { return m_measureBase.count(); }
 
+    bool                columnIsVisible(int column);
+
     int                 append(MeasureItem* pMeasure);
+
+    QString             text(int row, int column) const;
 
 private:
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 
+    MeasureViewHeader   m_header;
     MeasureBase         m_measureBase;
 
     int                 columnCount(const QModelIndex &parent) const;
@@ -37,9 +47,10 @@ private:
     QVariant            headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
     QVariant            data(const QModelIndex &index, int role) const;
 
-    QString             measureLinearity(const QModelIndex& index) const;
-    QString             measureComparator(const QModelIndex& index) const;
-    QString             measureComplexComparator(const QModelIndex& index) const;
+    QString             textLinearity(int row, int column) const;
+    QString             textComparator(int row, int column) const;
+    QString             textComplexComparator(int row, int column) const;
+
 };
 
 // ==============================================================================================
@@ -54,13 +65,15 @@ public:
 
     void                updateColumn();
 
-    int                 measureCount() { return m_pModel->count(); }
+    MeasureModel&       table() { return m_Table; }
+
+    int                 measureType() { return  m_measureType; }
 
 private:
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 
-    MeasureModel*       m_pModel = nullptr;
+    MeasureModel        m_Table;
 
     QMenu*              m_headerContextMenu = nullptr;
     QList<QAction*>     m_actionList;

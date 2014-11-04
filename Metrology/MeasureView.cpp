@@ -1,12 +1,18 @@
 #include "MeasureView.h"
 
 #include <QHeaderView>
-
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
+
+MeasureModel::MeasureModel(QObject*)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 
 MeasureModel::MeasureModel(int type, QObject*) :
      m_measureType(type)
@@ -19,6 +25,43 @@ MeasureModel::MeasureModel(int type, QObject*) :
 MeasureModel::~MeasureModel()
 {
     m_measureBase.clear();
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureModel::setMeasureType(int type)
+{
+    if (type < 0 || type >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    m_measureType = type;
+    m_header.init(type);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MeasureModel::columnIsVisible(int column)
+{
+    if (column < 0 || column >= m_header.count())
+    {
+        return false;
+    }
+
+    MeasureViewColumn* pColumn = m_header.column(column);
+    if (pColumn == nullptr)
+    {
+        return false;
+    }
+
+    if (pColumn->title().isEmpty() == true)
+    {
+        return false;
+    }
+
+    return pColumn->enableVisible();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -112,17 +155,7 @@ QVariant MeasureModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
-        QString result;
-
-        switch(m_measureType)
-        {
-            case MEASURE_TYPE_LINEARITY:            result = measureLinearity(index);           break;
-            case MEASURE_TYPE_COMPARATOR:           result = measureComparator(index);          break;
-            case MEASURE_TYPE_COMPLEX_COMPARATOR:   result = measureComplexComparator(index);   break;
-            default:                                result = "";                                break;
-        }
-
-        return result;
+        return text(index.row(), index.column());
     }
 
     return QVariant();
@@ -130,15 +163,46 @@ QVariant MeasureModel::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureModel::measureLinearity(const QModelIndex& index) const
+QString MeasureModel::text(int row, int column) const
 {
-    int row = index.row();
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return "";
+    }
+
     if (row < 0 || row >= m_measureBase.count())
     {
         return "";
     }
 
-    int column = index.column();
+    if (column < 0 || column > m_header.count())
+    {
+        return "";
+    }
+
+    QString result;
+
+    switch(m_measureType)
+    {
+        case MEASURE_TYPE_LINEARITY:            result = textLinearity(row, column);         break;
+        case MEASURE_TYPE_COMPARATOR:           result = textComparator(row, column);        break;
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:   result = textComplexComparator(row, column); break;
+        default:                                result = "";                                 break;
+    }
+
+    return result;
+
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureModel::textLinearity(int row, int column) const
+{
+    if (row < 0 || row >= m_measureBase.count())
+    {
+        return "";
+    }
+
     if (column < 0 || column > m_header.count())
     {
         return "";
@@ -221,15 +285,13 @@ QString MeasureModel::measureLinearity(const QModelIndex& index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureModel::measureComparator(const QModelIndex& index) const
+QString MeasureModel::textComparator(int row, int column) const
 {
-    int row = index.row();
     if (row < 0 || row >= m_measureBase.count())
     {
         return "";
     }
 
-    int column = index.column();
     if (column < 0 || column > m_header.count())
     {
         return "";
@@ -259,15 +321,13 @@ QString MeasureModel::measureComparator(const QModelIndex& index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureModel::measureComplexComparator(const QModelIndex& index) const
+QString MeasureModel::textComplexComparator(int row, int column) const
 {
-    int row = index.row();
     if (row < 0 || row >= m_measureBase.count())
     {
         return "";
     }
 
-    int column = index.column();
     if (column < 0 || column > m_header.count())
     {
         return "";
@@ -321,7 +381,6 @@ int MeasureModel::append(MeasureItem* pMeasure)
     return indexBase;
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -330,13 +389,9 @@ MeasureView::MeasureView(int type, QWidget *parent) :
     QTableView(parent),
     m_measureType(type)
 {
-    m_pModel = new MeasureModel(type);
-    if (m_pModel == nullptr)
-    {
-        return;
-    }
+    m_Table.setMeasureType(type);
 
-    setModel(m_pModel);
+    setModel(&m_Table);
 
     m_headerContextMenu = new QMenu(this);
 
@@ -351,29 +406,20 @@ MeasureView::MeasureView(int type, QWidget *parent) :
 
 MeasureView::~MeasureView()
 {
-    if (m_pModel != nullptr)
-    {
-        delete m_pModel;
-    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MeasureView::updateColumn()
 {
-    if (m_pModel == nullptr)
-    {
-        return;
-    }
-
     m_headerContextMenu->clear();
 
-    m_pModel->m_header.updateColumnState();
+    m_Table.header().updateColumnState();
 
-    int count = m_pModel->m_header.count();
+    int count = m_Table.header().count();
     for (int index = 0; index < count; index++)
     {
-        MeasureViewColumn* pColumn = m_pModel->m_header.column(index);
+        MeasureViewColumn* pColumn = m_Table.header().column(index);
         if (pColumn == nullptr)
         {
             continue;
@@ -395,8 +441,6 @@ void MeasureView::updateColumn()
             }
         }
     }
-
-    //resizeRowsToContents();
 
     QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
     verticalHeader()->setDefaultSectionSize(cellSize.height());
@@ -423,18 +467,13 @@ void MeasureView::onHeaderContextAction(QAction* action)
         return;
     }
 
-    if (m_pModel == nullptr)
-    {
-        return;
-    }
-
     int index = action->data().toInt();
-    if (index < 0 || index >= m_pModel->m_header.count())
+    if (index < 0 || index >= m_Table.header().count())
     {
         return;
     }
 
-    MeasureViewColumn* pColumn = m_pModel->m_header.column(index);
+    MeasureViewColumn* pColumn = m_Table.header().column(index);
     if (pColumn == nullptr)
     {
         return;
@@ -447,17 +486,12 @@ void MeasureView::onHeaderContextAction(QAction* action)
 
 void MeasureView::onColumnResized(int index, int, int width)
 {
-    if (m_pModel == nullptr)
+    if (index < 0 || index >= m_Table.header().count())
     {
         return;
     }
 
-    if (index < 0 || index >= m_pModel->m_header.count())
-    {
-        return;
-    }
-
-    MeasureViewColumn* pColumn = m_pModel->m_header.column(index);
+    MeasureViewColumn* pColumn = m_Table.header().column(index);
     if (pColumn == nullptr)
     {
         return;
@@ -485,13 +519,13 @@ void MeasureView::appendMeasure(MeasureItem* pMeasure)
         return;
     }
 
-    int index = m_pModel->append(pMeasure);
+    int index = m_Table.append(pMeasure);
     if (index == -1)
     {
         return;
     }
 
-    emit measureCountChanged(m_pModel->count());
+    emit measureCountChanged(m_Table.count());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
