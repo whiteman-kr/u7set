@@ -3,6 +3,8 @@
 #include <QMessageBox>
 #include <QHeaderView>
 
+#include "Delegate.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
 OptionsPointsDialog::OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent) :

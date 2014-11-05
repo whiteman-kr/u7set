@@ -12,6 +12,7 @@
 
 #include "MeasureView.h"
 #include "MeasureThread.h"
+#include "FindMeasure.h"
 
 // ==============================================================================================
 
@@ -23,7 +24,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    int                 m_measureType = MEASURE_TYPE_UNKNOWN;
+    int                 measureType() { return m_measureType; }
 
     // Elements of interface - Menu
     //
@@ -50,8 +51,7 @@ public:
 
     // Elements of interface - Panels
     //
-    QDockWidget*        m_pFindMeasurePanel = nullptr;
-    QTableView*         m_pFindMeasureView = nullptr;
+    FindMeasure*        m_pFindMeasurePanel = nullptr;
     QDockWidget*        m_pSignalInfoPanel = nullptr;
     QTableView*         m_pSignalInfoView = nullptr;
     QDockWidget*        m_pComparatorInfoPanel = nullptr;
@@ -74,6 +74,9 @@ public:
 
     MeasureThread       m_measureThread;
 
+    void                loadSettings();
+    void                saveSettings();
+
 protected:
 
     void                closeEvent(QCloseEvent* e);
@@ -92,6 +95,8 @@ public:
 
 
 private:
+
+    int m_measureType = MEASURE_TYPE_UNKNOWN;
 
     // Actions of main menu
     //
@@ -153,7 +158,7 @@ private slots:
     void cutMeasure() {};
     void copyMeasure() {};
     void removeMeasure() {};
-    void selectAllMeasure() {};
+    void selectAllMeasure();
 
     // menu - View
     //

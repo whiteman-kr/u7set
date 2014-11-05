@@ -15,11 +15,6 @@
 
 #define                 WINDOW_GEOMETRY_OPTIONS_KEY		"Options/Window/"
 
-// ----------------------------------------------------------------------------------------------
-
-void                    restoreWindowPosition(QWidget* pWidget);
-void                    saveWindowPosition(QWidget* pWidget);
-
 // ==============================================================================================
 
 #define                 TCPIP_OPTIONS_KEY               "Options/TcpIp/"
@@ -107,8 +102,8 @@ const int				MWO_PARAM_FONT					= 0,
 
 // ----------------------------------------------------------------------------------------------
 
-#define                 COLOR_LIMIT_ERROR       QColor(0xFF, 0xD0, 0xD0)
-#define					COLOR_CONTROL_ERROR		QColor(0xFF, 0xFF, 0x99)
+#define                 COLOR_LIMIT_ERROR               QColor(0xFF, 0xD0, 0xD0)
+#define					COLOR_CONTROL_ERROR             QColor(0xFF, 0xFF, 0x99)
 
 // ----------------------------------------------------------------------------------------------
 
@@ -362,6 +357,7 @@ public:
 
     LinearityOption&    operator=(const LinearityOption& from);
 };
+
 
 // ==============================================================================================
 

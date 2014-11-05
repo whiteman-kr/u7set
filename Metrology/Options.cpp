@@ -2,46 +2,12 @@
 
 #include <QSettings>
 #include <QWidget>
+#include <QMainWindow>
 #include "CalibratorBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Options theOptions;
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-void restoreWindowPosition(QWidget* pWidget)
-{
-    if (pWidget == nullptr)
-    {
-        return;
-    }
-
-    QSettings s;
-
-    QString className = pWidget->metaObject()->className();
-    QByteArray geometry = s.value(QString("%1%2/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY).arg(className)).toByteArray();
-
-    pWidget->restoreGeometry( geometry );
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void saveWindowPosition(QWidget* pWidget)
-{
-    if (pWidget == nullptr)
-    {
-        return;
-    }
-
-    QSettings s;
-
-    QString className = pWidget->metaObject()->className();
-
-    s.setValue(QString("%1%2/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY).arg(className), pWidget->saveGeometry());
-}
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

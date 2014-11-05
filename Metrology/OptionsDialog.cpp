@@ -89,7 +89,7 @@ PropertyPage::~PropertyPage()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-static int activePage = OPTION_PAGE_LINEARETY_MEASURE;
+int OptionsDialog::m_activePage = OPTION_PAGE_LINEARETY_MEASURE;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -119,7 +119,7 @@ void OptionsDialog::createInterface()
 {
     setWindowIcon(QIcon::fromTheme("empty", QIcon(":/icons/Options.png")));
     setMinimumSize(850, 400);
-    restoreWindowPosition(this);
+    loadSettings();
 
     // create interface
     //
@@ -135,7 +135,7 @@ void OptionsDialog::createInterface()
 
     // set active page
     //
-    setActivePage(activePage);
+    setActivePage(m_activePage);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -640,9 +640,9 @@ bool OptionsDialog::setActivePage(int page)
 
     // hide current page
     //
-    if (activePage >= 0 && activePage < m_pageList.count() )
+    if (m_activePage >= 0 && m_activePage < m_pageList.count() )
     {
-        PropertyPage* pCurrentPage = m_pageList.at(activePage);
+        PropertyPage* pCurrentPage = m_pageList.at(m_activePage);
         if (pCurrentPage != nullptr )
         {
             QWidget* pWidget = pCurrentPage->getWidget();
@@ -669,7 +669,7 @@ bool OptionsDialog::setActivePage(int page)
         }
     }
 
-    activePage = page;
+    m_activePage = page;
 
     // select tree item
     //
@@ -987,6 +987,28 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void OptionsDialog::loadSettings()
+{
+    QSettings s;
+
+    QByteArray geometry = s.value(QString("%1OptionsDialog/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY)).toByteArray();
+    restoreGeometry( geometry );
+
+    m_activePage = s.value( QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), OPTION_PAGE_LINEARETY_MEASURE).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::saveSettings()
+{
+    QSettings s;
+
+    s.setValue(QString("%1OptionsDialog/Geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY), saveGeometry());
+    s.setValue(QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), m_activePage);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void OptionsDialog::onOk()
 {
     onApply();
@@ -1008,14 +1030,14 @@ bool OptionsDialog::event(QEvent * e)
 {
     if ( e->type() == QEvent::Hide)
     {
-        saveWindowPosition(this);
+        saveSettings();
     }
 
     if (e->type() == QEvent::KeyRelease)
     {
-        if (activePage >= 0 && activePage < m_pageList.count() )
+        if (m_activePage >= 0 && m_activePage < m_pageList.count() )
         {
-            PropertyPage* pActivePage = m_pageList.at(activePage);
+            PropertyPage* pActivePage = m_pageList.at(m_activePage);
             if (pActivePage != nullptr )
             {
                 if (pActivePage->getType() == PROPERTY_PAGE_TYPE_LIST)
@@ -1036,7 +1058,6 @@ bool OptionsDialog::event(QEvent * e)
         }
 
     }
-
 
     return QDialog::event(e);
 }

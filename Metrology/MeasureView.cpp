@@ -7,14 +7,14 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureModel::MeasureModel(QObject*)
+MeasureTable::MeasureTable(QObject*)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 
-MeasureModel::MeasureModel(int type, QObject*) :
+MeasureTable::MeasureTable(int type, QObject*) :
      m_measureType(type)
 {
     m_header.init(type);
@@ -22,7 +22,7 @@ MeasureModel::MeasureModel(int type, QObject*) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureModel::~MeasureModel()
+MeasureTable::~MeasureTable()
 {
     m_measureBase.clear();
 }
@@ -30,7 +30,7 @@ MeasureModel::~MeasureModel()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureModel::setMeasureType(int type)
+void MeasureTable::setMeasureType(int type)
 {
     if (type < 0 || type >= MEASURE_TYPE_COUNT)
     {
@@ -43,7 +43,7 @@ void MeasureModel::setMeasureType(int type)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureModel::columnIsVisible(int column)
+bool MeasureTable::columnIsVisible(int column)
 {
     if (column < 0 || column >= m_header.count())
     {
@@ -66,21 +66,21 @@ bool MeasureModel::columnIsVisible(int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int MeasureModel::columnCount(const QModelIndex&) const
+int MeasureTable::columnCount(const QModelIndex&) const
 {
     return m_header.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int MeasureModel::rowCount(const QModelIndex&) const
+int MeasureTable::rowCount(const QModelIndex&) const
 {
     return m_measureBase.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVariant MeasureModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant MeasureTable::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
     {
@@ -108,7 +108,7 @@ QVariant MeasureModel::headerData(int section, Qt::Orientation orientation, int 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVariant MeasureModel::data(const QModelIndex &index, int role) const
+QVariant MeasureTable::data(const QModelIndex &index, int role) const
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
     {
@@ -163,7 +163,7 @@ QVariant MeasureModel::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureModel::text(int row, int column) const
+QString MeasureTable::text(int row, int column) const
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
     {
@@ -196,7 +196,7 @@ QString MeasureModel::text(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureModel::textLinearity(int row, int column) const
+QString MeasureTable::textLinearity(int row, int column) const
 {
     if (row < 0 || row >= m_measureBase.count())
     {
@@ -285,7 +285,7 @@ QString MeasureModel::textLinearity(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureModel::textComparator(int row, int column) const
+QString MeasureTable::textComparator(int row, int column) const
 {
     if (row < 0 || row >= m_measureBase.count())
     {
@@ -321,7 +321,7 @@ QString MeasureModel::textComparator(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureModel::textComplexComparator(int row, int column) const
+QString MeasureTable::textComplexComparator(int row, int column) const
 {
     if (row < 0 || row >= m_measureBase.count())
     {
@@ -357,7 +357,7 @@ QString MeasureModel::textComplexComparator(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int MeasureModel::append(MeasureItem* pMeasure)
+int MeasureTable::append(MeasureItem* pMeasure)
 {
     if (pMeasure == nullptr)
     {
