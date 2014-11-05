@@ -20,12 +20,14 @@ TEMPLATE = app
 SOURCES += main.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/BaseService.cpp \
-    ../lib/SocketIO.cpp
+    ../lib/SocketIO.cpp \
+    ../lib/CircularLogger.cpp
 
 HEADERS += \
     ../include/SocketIO.h \
     ../include/UdpSocket.h \
-    ../include/BaseService.h
+    ../include/BaseService.h \
+    ../include/CircularLogger.h
 
 include(../qtservice/src/qtservice.pri)
 
