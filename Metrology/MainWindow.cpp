@@ -1,6 +1,5 @@
 #include "MainWindow.h"
 
-#include <QDebug>
 #include <QSettings>
 #include <QMessageBox>
 #include <QMenuBar>
@@ -18,6 +17,7 @@
 #include "ExportMeasure.h"
 #include "OptionsDialog.h"
 
+#include <QWindow>
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -59,7 +59,6 @@ bool MainWindow::createInterface()
 {
     setWindowIcon(QIcon(":/icons/Metrology.ico"));
     setWindowTitle(tr("Metrology"));
-    restoreWindowPosition(this);
 
     createActions();
     createMenu();
@@ -67,6 +66,8 @@ bool MainWindow::createInterface()
     createMeasurePages();
     createPanels();
     createStatusBar();
+
+    loadSettings();
 
     setMeasureType(MEASURE_TYPE_LINEARITY);
 
@@ -98,7 +99,7 @@ void  MainWindow::createActions()
     connect(m_pPrintMeasureAction, &QAction::triggered, this, &MainWindow::printMeasure);
 
     m_pExportMeasureAction = new QAction(tr("&Export ..."), this);
-    m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_S);
+    m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_E);
     m_pExportMeasureAction->setIcon(QIcon(":/icons/Export.png"));
     m_pExportMeasureAction->setToolTip(tr("Export measurements"));
     connect(m_pExportMeasureAction, &QAction::triggered, this, &MainWindow::exportMeasure);
@@ -324,6 +325,7 @@ bool MainWindow::createToolBars()
     {
         m_pMeasureControlToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         m_pMeasureControlToolBar->setWindowTitle(tr("Control panel measure process"));
+        m_pMeasureControlToolBar->setObjectName(m_pMeasureControlToolBar->windowTitle());
         addToolBarBreak(Qt::TopToolBarArea);
         addToolBar(m_pMeasureControlToolBar);
 
@@ -344,6 +346,7 @@ bool MainWindow::createToolBars()
     {
         m_pMeasureTimeout->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         m_pMeasureTimeout->setWindowTitle(tr("Control panel measure timeout"));
+        m_pMeasureTimeout->setObjectName(m_pMeasureTimeout->windowTitle());
         addToolBarBreak(Qt::RightToolBarArea);
         addToolBar(m_pMeasureTimeout);
 
@@ -384,6 +387,7 @@ bool MainWindow::createToolBars()
     {
         m_pMeasureKind->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         m_pMeasureKind->setWindowTitle(tr("Control panel measure kind"));
+        m_pMeasureKind->setObjectName(m_pMeasureKind->windowTitle());
         addToolBarBreak(Qt::RightToolBarArea);
         addToolBar(m_pMeasureKind);
 
@@ -414,6 +418,7 @@ bool MainWindow::createToolBars()
     {
         m_pOutputSignalToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         m_pOutputSignalToolBar->setWindowTitle(tr("Control panel output signals"));
+        m_pOutputSignalToolBar->setObjectName(m_pOutputSignalToolBar->windowTitle());
         addToolBarBreak(Qt::RightToolBarArea);
         addToolBar(m_pOutputSignalToolBar);
 
@@ -442,6 +447,7 @@ bool MainWindow::createToolBars()
     {
         m_pAnalogSignalToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         m_pAnalogSignalToolBar->setWindowTitle(tr("Control panel selecting analog signal"));
+        m_pAnalogSignalToolBar->setObjectName(m_pAnalogSignalToolBar->windowTitle());
         addToolBarBreak(Qt::TopToolBarArea);
         addToolBar(m_pAnalogSignalToolBar);
 
@@ -522,6 +528,7 @@ bool MainWindow::createToolBars()
     {
         m_pComplexComporatorToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         m_pComplexComporatorToolBar->setWindowTitle(tr("Control panel selecting signal of complex comparator"));
+        m_pComplexComporatorToolBar->setObjectName(m_pComplexComporatorToolBar->windowTitle());
         addToolBarBreak(Qt::TopToolBarArea);
         addToolBar(m_pComplexComporatorToolBar);
 
@@ -575,22 +582,16 @@ void MainWindow::createMeasurePages()
 
 void MainWindow::createPanels()
 {
-    // Search panel measurements
+    // Search measurements panel
     //
-    m_pFindMeasurePanel = new QDockWidget(tr("Search panel measurements"), this);
+    m_pFindMeasurePanel = new FindMeasure(this);
     if (m_pFindMeasurePanel != nullptr)
     {
-        m_pFindMeasurePanel->setAllowedAreas(Qt::RightDockWidgetArea);
-
-        m_pFindMeasureView = new QTableView;
-        if (m_pFindMeasureView != nullptr)
-        {
-            m_pFindMeasurePanel->setWidget(m_pFindMeasureView);
-        }
+        m_pFindMeasurePanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
         addDockWidget(Qt::RightDockWidgetArea, m_pFindMeasurePanel);
-        m_pFindMeasurePanel->hide();
 
+        m_pFindMeasurePanel->hide();
 
         QAction* findAction = m_pFindMeasurePanel->toggleViewAction();
         if (findAction != nullptr)
@@ -622,6 +623,7 @@ void MainWindow::createPanels()
     // Panel signal information
     //
     m_pSignalInfoPanel = new QDockWidget(tr("Panel signal information"), this);
+    m_pSignalInfoPanel->setObjectName("Panel signal information");
     if (m_pSignalInfoPanel != nullptr)
     {
         m_pSignalInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
@@ -645,6 +647,7 @@ void MainWindow::createPanels()
     // Panel comparator information
     //
     m_pComparatorInfoPanel = new QDockWidget(tr("Panel comparator information"), this);
+    m_pComparatorInfoPanel->setObjectName("Panel comparator information");
     if (m_pComparatorInfoPanel != nullptr)
     {
         m_pComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
@@ -668,6 +671,7 @@ void MainWindow::createPanels()
     // Panel complex comparator information
     //
     m_pComplexComparatorInfoPanel = new QDockWidget(tr("Panel complex comparator information"), this);
+    m_pComplexComparatorInfoPanel->setObjectName("Panel complex comparator information");
     if (m_pComplexComparatorInfoPanel != nullptr)
     {
         m_pComplexComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
@@ -782,6 +786,11 @@ void MainWindow::setMeasureType(int type)
     m_measureType = type;
 
     updateActions();
+
+    if (m_pFindMeasurePanel != nullptr)
+    {
+        m_pFindMeasurePanel->table().clear();
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -837,8 +846,26 @@ void MainWindow::exportMeasure()
         return;
     }
 
-    ExportMeasure* dialog = new ExportMeasure(pView, this);
+    ExportMeasure* dialog = new ExportMeasure(pView);
     dialog->exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::selectAllMeasure()
+{
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    MeasureView* pView = m_measureView[m_measureType];
+    if (pView == nullptr)
+    {
+        return;
+    }
+
+    pView->selectAll();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1000,6 +1027,29 @@ void MainWindow::measureComplite(MeasureItem* pMeasure)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::loadSettings()
+{
+    QSettings s;
+
+    QByteArray geometry = s.value(QString("%1MainWindow/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY)).toByteArray();
+    QByteArray state = s.value(QString("%1MainWindow/State").arg(WINDOW_GEOMETRY_OPTIONS_KEY)).toByteArray();
+
+    restoreGeometry( geometry );
+    restoreState(state);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::saveSettings()
+{
+    QSettings s;
+
+    s.setValue(QString("%1MainWindow/Geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY), saveGeometry());
+    s.setValue(QString("%1MainWindow/State").arg(WINDOW_GEOMETRY_OPTIONS_KEY), saveState());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::closeEvent(QCloseEvent* e)
 {
     if (m_measureThread.isRunning() == true)
@@ -1011,7 +1061,7 @@ void MainWindow::closeEvent(QCloseEvent* e)
 
     theCalibratorBase.clear();
 
-    saveWindowPosition(this);
+    saveSettings();
 
     QMainWindow::closeEvent(e);
 }

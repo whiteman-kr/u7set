@@ -8,11 +8,11 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ExportMeasure::ExportMeasure(MeasureView* pView, QWidget *parent) :
-    QObject(parent),
+ExportMeasure::ExportMeasure(MeasureView* pView) :
+    QObject(pView),
     m_pView(pView)
 {
-    m_pDialog = new QDialog(parent);
+    m_pDialog = new QDialog(pView);
 
     m_pDialog->setWindowFlags(Qt::Drawer);
     m_pDialog->setFixedSize(300, 70);

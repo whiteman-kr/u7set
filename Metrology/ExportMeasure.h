@@ -20,7 +20,7 @@ class ExportMeasure : public QObject
 
 public:
 
-    explicit ExportMeasure(MeasureView* pView, QWidget *parent = 0);
+    explicit ExportMeasure(MeasureView* pView = 0);
     ~ExportMeasure();
 
     void exec();

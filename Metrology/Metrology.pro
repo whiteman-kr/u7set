@@ -28,7 +28,9 @@ SOURCES += \
     MeasureView.cpp \
     OptionsMvhDialog.cpp \
     MeasureBase.cpp \
-    ExportMeasure.cpp
+    ExportMeasure.cpp \
+    Delegate.cpp \
+    FindMeasure.cpp
 
 
 HEADERS  += \
@@ -45,7 +47,9 @@ HEADERS  += \
     MeasureView.h \
     OptionsMvhDialog.h \
     MeasureBase.h \
-    ExportMeasure.h
+    ExportMeasure.h \
+    Delegate.h \
+    FindMeasure.h
 
 
 FORMS    +=
