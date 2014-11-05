@@ -178,6 +178,8 @@ public slots:
 	void setActionState();
 	void modeSwitched();
 
+	void moduleConfiguration();
+
 	void setProperties();
 
 	void propertiesChanged(QList<std::shared_ptr<QObject>> objects);
@@ -209,6 +211,9 @@ private:
 	//----------------------------------
 	QAction* m_SeparatorAction3 = nullptr;
 	QAction* m_switchMode = nullptr;
+	QAction* m_SeparatorAction4 = nullptr;
+	QAction* m_moduleConfigurationAction = nullptr;
+
 
 	//--
 	//

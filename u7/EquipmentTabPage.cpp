@@ -1236,6 +1236,9 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	// -----------------
 	m_equipmentView->addAction(m_SeparatorAction3);
 	m_equipmentView->addAction(m_switchMode);
+	// -----------------
+	m_equipmentView->addAction(m_SeparatorAction4);
+	m_equipmentView->addAction(m_moduleConfigurationAction);
 
 	// Property View
 	//
@@ -1371,6 +1374,7 @@ void EquipmentTabPage::CreateActions()
 	m_refreshAction->setEnabled(false);
 	connect(m_refreshAction, &QAction::triggered, m_equipmentView, &EquipmentView::refreshSelectedDevices);
 
+	//-----------------------------------
 	m_SeparatorAction3 = new QAction(this);
 	m_SeparatorAction3->setSeparator(true);
 
@@ -1379,6 +1383,15 @@ void EquipmentTabPage::CreateActions()
 	m_switchMode->setEnabled(true);
 	connect(m_switchMode, &QAction::triggered, m_equipmentModel, &EquipmentModel::switchMode);
 	connect(m_switchMode, &QAction::triggered, this, &EquipmentTabPage::modeSwitched);
+
+	//-----------------------------------
+	m_SeparatorAction4 = new QAction(this);
+	m_SeparatorAction4->setSeparator(true);
+
+	m_moduleConfigurationAction = new QAction(tr("Module Configuration..."), this);
+	m_moduleConfigurationAction->setStatusTip(tr("Edit module configuration"));
+	m_moduleConfigurationAction->setEnabled(false);
+	connect(m_moduleConfigurationAction, &QAction::triggered, this, &EquipmentTabPage::moduleConfiguration);
 
 	return;
 }
@@ -1442,6 +1455,8 @@ void EquipmentTabPage::setActionState()
 	m_addPresetRackAction->setEnabled(false);
 	m_addPresetChassisAction->setEnabled(false);
 	m_addPresetModuleAction->setEnabled(false);
+
+	m_moduleConfigurationAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -1590,6 +1605,8 @@ void EquipmentTabPage::setActionState()
 				if (isConfigurationMode() == true)
 				{
 					m_addModuleAction->setEnabled(true);
+
+					m_moduleConfigurationAction->setEnabled(canAnyBeCheckedIn);
 				}
 				else
 				{
@@ -1635,6 +1652,40 @@ void EquipmentTabPage::modeSwitched()
 	}
 
 	setActionState();
+
+	return;
+}
+
+void EquipmentTabPage::moduleConfiguration()
+{
+	//assert(m_propertyEditor != nullptr);
+
+	// Get objects from the selected rows
+	//
+	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		//m_propertyEditor->clear();
+		return;
+	}
+
+	std::shared_ptr<QObject> module;
+
+	std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObjectSharedPtr(selectedIndexList[0]);
+
+	if (device.get() == nullptr || dynamic_cast<Hardware::DeviceModule*>(device.get()) == nullptr)
+	{
+		assert(device);
+		assert(dynamic_cast<Hardware::DeviceModule*>(device.get()) != nullptr);
+		return;
+	}
+
+
+
+	// Set objects to the PropertyEditor
+	//
+	//m_propertyEditor->setObjects(devices);
 
 	return;
 }
