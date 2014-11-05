@@ -164,6 +164,7 @@ private:
 
     Options                 m_options;
 
+    static int              m_activePage;
     bool                    setActivePage(int page);
 
     void                    createInterface();
@@ -196,6 +197,9 @@ private:
 
     void                    restoreProperty();
     void                    applyProperty();
+
+    void                    loadSettings();
+    void                    saveSettings();
 
 protected:
 

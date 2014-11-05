@@ -11,15 +11,15 @@
 
 // ==============================================================================================
 
-class MeasureModel : public QAbstractTableModel
+class MeasureTable : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
 
-    explicit            MeasureModel(QObject* parent = 0);
-    explicit            MeasureModel(int type, QObject* parent = 0);
-                        ~MeasureModel();
+    explicit            MeasureTable(QObject* parent = 0);
+    explicit            MeasureTable(int type, QObject* parent = 0);
+                        ~MeasureTable();
 
     int                 measureType() { return m_measureType; }
     void                setMeasureType(int type);
@@ -65,7 +65,7 @@ public:
 
     void                updateColumn();
 
-    MeasureModel&       table() { return m_Table; }
+    MeasureTable&       table() { return m_Table; }
 
     int                 measureType() { return  m_measureType; }
 
@@ -73,7 +73,7 @@ private:
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 
-    MeasureModel        m_Table;
+    MeasureTable        m_Table;
 
     QMenu*              m_headerContextMenu = nullptr;
     QList<QAction*>     m_actionList;

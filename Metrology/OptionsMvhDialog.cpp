@@ -3,6 +3,8 @@
 #include <QColorDialog>
 #include <QHeaderView>
 
+#include "Delegate.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
 OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget *parent) :
@@ -159,8 +161,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
         m_columnList->setItem(index, MVH_COLUMN_WIDTH, cell);
 
         cell = new QTableWidgetItem("");
-        QVariant var; var.setValue(column);
-        cell->setData(Qt::UserRole, var );
+        cell->setData(Qt::UserRole, column.color() );
         m_columnList->setItem(index, MVH_COLUMN_COLOR, cell);
 
         cell = new QTableWidgetItem( column.boldFont() ? tr("True") : tr("False"));
