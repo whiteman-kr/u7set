@@ -59,10 +59,10 @@ namespace Hardware
 		const QString& value() const;
 		void setValue(const QString& value);
 
-		const std::shared_ptr<ModuleConfigurationStruct>& data() const;
-		void setData(const std::shared_ptr<ModuleConfigurationStruct>& data);
+//		const std::shared_ptr<ModuleConfigurationStruct>& data() const;
+//		void setData(const std::shared_ptr<ModuleConfigurationStruct>& data);
 
-		//Data
+		// Data
 		//
 	private:
 		QString m_name;
@@ -74,7 +74,7 @@ namespace Hardware
 		QString m_defaultValue;
 		QString m_value;
 
-		std::shared_ptr<ModuleConfigurationStruct> m_data;   // указатель на структуру типа Type. Заполняется после загрузки.
+		//std::shared_ptr<ModuleConfigurationStruct> m_data;   // указатель на структуру типа Type. Заполняется после загрузки.
 	};
 
 	Q_DECLARE_METATYPE(ModuleConfigurationValue*)
@@ -111,7 +111,7 @@ namespace Hardware
 
 		int actualSize() const;
 
-		QList<ModuleConfigurationValue>& values();
+		const QList<ModuleConfigurationValue>& values() const;
 
 		bool be() const;
 		void setBe(bool be);
@@ -183,9 +183,12 @@ namespace Hardware
 		virtual ~ModuleConfiguration();
 
 		// Methods
+		//
 	public:
 		bool load(const ::Proto::ModuleConfiguration& message);
 		void save(::Proto::ModuleConfiguration* message) const;
+
+		void addUserPropertiesToObject(QObject* object) const;
 
 		QString lastError() const;
 
@@ -196,9 +199,8 @@ namespace Hardware
 		void readDeclaration(QXmlStreamReader& reader);
 		void readDefinition(QXmlStreamReader& reader);
 
-		void appendVariableItems(const std::shared_ptr<ModuleConfigurationStruct> &pData);
-		void createMembers();
-		void setVals();
+		void createUserProperties(QString* errorMessage);
+		void parseUserProperties(const ModuleConfigurationStruct& structure, const QString& parentVariableName, QString* errorMessage);
 
 		// Properties
 		//
@@ -233,12 +235,12 @@ namespace Hardware
 		int m_uartID = -1;						// Module UART ID, for this configuration
 		int m_minFrameSize = -1;				// Flash memory frame size
 
-		//QMap<QString, QString> m_valMap;		// Values
-
-		QList<ModuleConfigurationStruct> m_structures;			// Paresed structures	(declarations)
-		QList<ModuleConfigurationVariable> m_variables;			// Paresed variables	(definitions)
+		QMap<QString, ModuleConfigurationStruct> m_structures;		// Paresed structures	(declarations)
+		QList<ModuleConfigurationVariable> m_variables;				// Paresed variables	(definitions)
 
 		QString m_xmlStructDesctription;		// Unparsed XML of Structure Description;
 		QString m_lastError;
+
+		QMap<QString, ModuleConfigurationValue> m_userProperties;
 	};
 }

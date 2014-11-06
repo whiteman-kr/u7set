@@ -880,6 +880,12 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 			case QVariant::String:
 				{
 					QString val = value(property).toString();
+
+					if (val.length() > 32)
+					{
+						val = val.left(32) + "...";
+					}
+
 					val.replace("\n", " ");
 					return val;
 				}

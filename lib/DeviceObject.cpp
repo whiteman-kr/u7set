@@ -710,10 +710,11 @@ namespace Hardware
 		if (moduleMessage.has_module_configuration() == true)
 		{
 			m_moduleConfiguration.load(moduleMessage.module_configuration());
-		}
 
-//		m_configurationInput = QString::fromStdString(moduleMessage.configuration_input());
-//		m_configurationOutput = QString::fromStdString(moduleMessage.configuration_output());
+			// Set configuration user properties to Qt meta system
+			//
+			m_moduleConfiguration.addUserPropertiesToObject(this);
+		}
 
 		return true;
 	}

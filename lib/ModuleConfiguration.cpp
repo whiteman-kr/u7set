@@ -54,7 +54,7 @@ namespace Hardware
 
 		if (attr.hasAttribute("user"))
 		{
-			setUserProperty(attr.value("user").toString().compare("true", Qt::CaseInsensitive));
+			setUserProperty(attr.value("user").compare("true", Qt::CaseInsensitive) == 0);
 		}
 		else
 		{
@@ -160,15 +160,15 @@ namespace Hardware
 		m_value = value;
 	}
 
-	const std::shared_ptr<ModuleConfigurationStruct>& ModuleConfigurationValue::data() const
-	{
-		return m_data;
-	}
+//	const std::shared_ptr<ModuleConfigurationStruct>& ModuleConfigurationValue::data() const
+//	{
+//		return m_data;
+//	}
 
-	void ModuleConfigurationValue::setData(const std::shared_ptr<ModuleConfigurationStruct>& data)
-	{
-		m_data = data;
-	}
+//	void ModuleConfigurationValue::setData(const std::shared_ptr<ModuleConfigurationStruct>& data)
+//	{
+//		m_data = data;
+//	}
 
 
 	// ----------------------------------------------------------------------------
@@ -290,7 +290,7 @@ namespace Hardware
 		}
 	}
 
-	QList<ModuleConfigurationValue>& ModuleConfigurationStruct::values()
+	const QList<ModuleConfigurationValue>& ModuleConfigurationStruct::values() const
 	{
 		return m_values;
 	}
@@ -418,6 +418,20 @@ namespace Hardware
 
 		bool result = readStructure(m_xmlStructDesctription);
 
+		for (const ::Proto::ModuleConfigurationValue& pv : message.values())
+		{
+			assert(pv.name().empty() == false);
+
+			QString name = QString::fromStdString(pv.name());
+			QString value = QString::fromStdString(pv.value());
+
+			bool contains = m_userProperties.contains(name);
+			if (contains == true)
+			{
+				m_userProperties[name].setValue(value);
+			}
+		}
+
 		return result;
 	}
 
@@ -431,6 +445,42 @@ namespace Hardware
 
 		message->mutable_struct_description()->assign(m_xmlStructDesctription.toStdString());
 
+		for (const ModuleConfigurationValue& v : m_userProperties)
+		{
+			::Proto::ModuleConfigurationValue* pv = message->add_values();
+			pv->set_name(v.name().toStdString());
+			pv->set_value(v.value().toStdString());
+		}
+
+		return;
+	}
+
+	void ModuleConfiguration::addUserPropertiesToObject(QObject* object) const
+	{
+		if (object == nullptr)
+		{
+			assert(object != nullptr);
+			return;
+		}
+
+		// Delete all previous dynamic properties
+		//
+		QList<QByteArray> dynamicProperties(object->dynamicPropertyNames());
+
+		for (const QByteArray& ba : dynamicProperties)
+		{
+			QString name(ba);
+			object->setProperty(name.toStdString().c_str(), QVariant());
+		}
+
+		// Set new user properties
+		//
+		for (const ModuleConfigurationValue& up : m_userProperties)
+		{
+			object->setProperty(up.name().toStdString().c_str(), QVariant(up.value()));
+			qDebug() << "Added User Property " << up.name() << " with value " << up.value();
+		}
+
 		return;
 	}
 
@@ -438,6 +488,48 @@ namespace Hardware
 	{
 		return m_lastError;
 	}
+
+	void ModuleConfiguration::skipUnknownElement(QXmlStreamReader* reader, QString* errorMessage)
+	{
+		if (reader == nullptr || errorMessage == nullptr)
+		{
+			assert(reader);
+			assert(errorMessage);
+			return;
+		}
+
+		if (errorMessage->isEmpty() == false)
+		{
+			*errorMessage += "\n";
+		}
+
+		*errorMessage += tr("Unknown XML tag %1").arg(reader->name().toString());
+
+		qDebug() << Q_FUNC_INFO << ("Unknown tag: ") << reader->name().toString() << endl;
+
+		reader->readNext();
+
+		while (reader->atEnd() == false)
+		{
+			if (reader->isEndElement() == true)
+			{
+				reader->readNext();
+				break;
+			}
+
+			if (reader->isStartElement() == true)
+			{
+				skipUnknownElement(reader, errorMessage);
+			}
+			else
+			{
+				reader->readNext();
+			}
+		}
+
+		return;
+	}
+
 
 	bool ModuleConfiguration::readStructure(const QString& data)
 	{
@@ -546,8 +638,10 @@ namespace Hardware
 			}
 		}
 
-		createMembers();
-		setVals();
+		//createMembers();
+		//setVals();
+
+		createUserProperties(&m_lastError);
 
 		return true;
 	}
@@ -570,7 +664,7 @@ namespace Hardware
 				{
 					ModuleConfigurationStruct configStruct;
 					configStruct.readStruct(reader, &m_lastError);
-					m_structures.append(configStruct);
+					m_structures[configStruct.name()] = configStruct;
 				}
 				else
 				{
@@ -620,152 +714,76 @@ namespace Hardware
 		return;
 	}
 
-	void ModuleConfiguration::skipUnknownElement(QXmlStreamReader* reader, QString* errorMessage)
+	void ModuleConfiguration::createUserProperties(QString* errorMessage)
 	{
-		if (reader == nullptr || errorMessage == nullptr)
+		if (errorMessage == nullptr)
 		{
-			assert(reader);
 			assert(errorMessage);
 			return;
 		}
 
-		if (errorMessage->isEmpty() == false)
+		m_userProperties.clear();
+
+		for (const ModuleConfigurationVariable& variable : m_variables)
 		{
-			*errorMessage += "\n";
+			if (m_structures.contains(variable.type()) == false)
+			{
+				*errorMessage += tr("Can't find structure %1 in variable %2").arg(variable.type()).arg(variable.name());
+				continue;
+			}
+
+			ModuleConfigurationStruct structure = m_structures.value(variable.type());
+
+			parseUserProperties(structure, variable.name(), errorMessage);
 		}
 
-		*errorMessage += tr("Unknown XML tag %1").arg(reader->name().toString());
+		return;
+	}
 
-		qDebug() << Q_FUNC_INFO << ("Unknown tag: ") << reader->name().toString() << endl;
-
-		reader->readNext();
-
-		while (reader->atEnd() == false)
+	void ModuleConfiguration::parseUserProperties(const ModuleConfigurationStruct& structure, const QString& parentVariableName, QString* errorMessage)
+	{
+		if (parentVariableName == nullptr || errorMessage == nullptr)
 		{
-			if (reader->isEndElement() == true)
-			{
-				reader->readNext();
+			assert(parentVariableName != nullptr);
+			assert(errorMessage != nullptr);
+			return;
+		}
+
+		int count = 0;
+		for (const ModuleConfigurationValue& structValue : structure.values())
+		{
+			count ++;
+			if (count > 2)
 				break;
+
+			QString varName = parentVariableName + "\\" + structValue.name();
+			//QString varName = QString("aa%1=-").arg(count);
+
+			if (m_structures.contains(structValue.type()) == true)
+			{
+				// It is nested stuctrure
+				//
+				ModuleConfigurationStruct nestedStruct = m_structures.value(structValue.type());
+				parseUserProperties(nestedStruct, varName, errorMessage);
+				continue;
 			}
 
-			if (reader->isStartElement() == true)
+			// It is one of the trivial(?) types
+			//
+			if (structValue.userProperty() == true)
 			{
-				skipUnknownElement(reader, errorMessage);
-			}
-			else
-			{
-				reader->readNext();
+				ModuleConfigurationValue v(structValue);
+
+				v.setName(varName);					// Set Full qualified name
+				v.setValue(v.defaultValue());
+
+				m_userProperties[varName] = v;
 			}
 		}
 
 		return;
 	}
 
-	void ModuleConfiguration::appendVariableItems(const std::shared_ptr<ModuleConfigurationStruct>& data)
-	{
-//		if (data == nullptr)
-//		{
-//			assert(data != nullptr);
-//			return;
-//		}
-
-//		auto structIt = std::find_if(m_structures.begin(), m_structures.end(),
-//			[&data](const ModuleConfigurationStruct& s)
-//			{
-//				return s.name() == data->name();
-//			});
-
-//		if (structIt == nullptr)
-//		{
-//			assert(structIt != nullptr);
-//			return;
-//		}
-
-//		const ModuleConfigurationStruct& str = *structIt;
-
-//		for (const ModuleConfigurationValue& v : str.values())
-//		{
-//			ModuleConfigurationValue val(v);
-
-
-//			auto valStruct = std::find_if(m_structures.begin(), m_structures.end(),
-//				[&data](const ModuleConfigurationStruct& s)
-//				{
-//					return s.name() == data->name();
-//				});
-
-//			if (structIt == nullptr)
-//			{
-//				assert(structIt != nullptr);
-//				return;
-//			}
-
-//			int childStructIndex = getStructureIndexByType(val.type());
-//			if (childStructIndex != -1)
-//			{
-//				// Вложенная структура
-//				//
-//				const ConfigStruct& inStr = structures()[childStructIndex];
-//				val.setData(std::make_shared<ConfigStruct>(inStr.name(), inStr.size(), inStr.be()));
-//				appendVariableItems(val.pData());
-//				pData->setDataSize (pData->dataSize() + val.pData()->actualSize());   // увеличить размер на размер вложенной структуры
-//			}
-//			else
-//			{
-//				// Простое значение
-//				//
-//				int typeSize = val.typeSize();
-//				int arraySize = val.arraySize();
-//				if (typeSize == -1 || arraySize == -1)
-//				{
-//					QMessageBox::critical(0, QString("Error"), QString("Wrong type description: ") + val.type());
-//					return;
-//				}
-//				else
-//				{
-//					// увеличить размер структуры на размер переменной
-//					//
-//					int valMaxAddress = val.offset() + typeSize * arraySize;
-
-//					if (pData->dataSize() < valMaxAddress)
-//						pData->setDataSize(valMaxAddress);
-//				}
-//			}
-
-//			pData->values().append(val);
-//		}
-
-		return;
-	}
-
-	void ModuleConfiguration::createMembers()
-	{
-//		for (int v = 0; v < m_variables.size(); v++)
-//		{
-//			ModuleConfigurationVariable& var = variables()[v];
-
-//			auto structIt = std::find_if(m_structures.begin(), m_structures.end(),
-//				[&var](const ModuleConfigurationStruct& s)
-//				{
-//					return s.name() == var.name();
-//				});
-
-//			if (structIt == m_structures.end())
-//			{
-//				continue;
-//			}
-
-//			const ModuleConfigurationStruct& str = *structIt;
-
-//			var.setData(std::make_shared<ModuleConfigurationStruct>(str.name(), str.size(), str.be()));
-
-//			appendVariableItems(var.pData());
-//		}
-	}
-
-	void ModuleConfiguration::setVals()
-	{
-	}
 
 	bool ModuleConfiguration::hasConfiguration() const
 	{
