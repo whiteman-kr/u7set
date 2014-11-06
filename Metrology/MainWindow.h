@@ -10,7 +10,9 @@
 #include <QLabel>
 #include <QProgressBar>
 
+#include "MeasureView.h"
 #include "MeasureThread.h"
+#include "FindMeasure.h"
 
 // ==============================================================================================
 
@@ -22,7 +24,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    int                 m_measureType = MEASURE_TYPE_UNKNOWN;
+    int                 measureType() { return m_measureType; }
 
     // Elements of interface - Menu
     //
@@ -45,12 +47,11 @@ public:
     // Elements of interface - Pages of Tab
     //
     QTabWidget*         m_pMainTab = nullptr;
-    QList<QTableView*>  m_measureView;
+    MeasureView*        m_measureView[MEASURE_TYPE_COUNT];
 
     // Elements of interface - Panels
     //
-    QDockWidget*        m_pFindMeasurePanel = nullptr;
-    QTableView*         m_pFindMeasureView = nullptr;
+    FindMeasure*        m_pFindMeasurePanel = nullptr;
     QDockWidget*        m_pSignalInfoPanel = nullptr;
     QTableView*         m_pSignalInfoView = nullptr;
     QDockWidget*        m_pComparatorInfoPanel = nullptr;
@@ -73,6 +74,9 @@ public:
 
     MeasureThread       m_measureThread;
 
+    void                loadSettings();
+    void                saveSettings();
+
 protected:
 
     void                closeEvent(QCloseEvent* e);
@@ -85,12 +89,14 @@ public:
     void updateActions();
     void createMenu();
     bool createToolBars();
-    void createTabPages();
+    void createMeasurePages();
     void createPanels();
     void createStatusBar();
 
 
 private:
+
+    int m_measureType = MEASURE_TYPE_UNKNOWN;
 
     // Actions of main menu
     //
@@ -131,6 +137,10 @@ private:
     QAction* m_pAboutConnectionAction = nullptr;
     QAction* m_pAboutAppAction = nullptr;
 
+signals:
+
+    void appendMeasure(MeasureItem*);
+
 private slots:
 
     // Slots of main menu
@@ -141,14 +151,14 @@ private slots:
     void startMeasure();
     void stopMeasure();
     void printMeasure() {};
-    void exportMeasure() {};
+    void exportMeasure();
 
     // menu - Edit
     //
     void cutMeasure() {};
     void copyMeasure() {};
     void removeMeasure() {};
-    void selectAllMeasure() {};
+    void selectAllMeasure();
 
     // menu - View
     //
@@ -177,6 +187,7 @@ private slots:
     // Slots of tab -- page measure type
     //
     void setMeasureType(int type);
+    void measureCountChanged(int count);
 
 private slots:
 
@@ -185,7 +196,6 @@ private slots:
     void setMeasureKind(int index);
     void setMeasureTimeout(QString value);
     void setOutputSignalType(int index);
-
 
 private slots:
 
@@ -201,6 +211,7 @@ private slots:
     void measureThreadStoped();
     void setMeasureThreadInfo(QString msg);
     void setMeasureThreadInfo(int timeout);
+    void measureComplite(MeasureItem* pMeasure);
 };
 
 // ==============================================================================================

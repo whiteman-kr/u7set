@@ -214,47 +214,47 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="255"/>
+        <location filename="../CalibratorBase.cpp" line="253"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="255"/>
+        <location filename="../CalibratorBase.cpp" line="253"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="375"/>
+        <location filename="../CalibratorBase.cpp" line="373"/>
         <source>Please, select calibrator for manage!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="395"/>
+        <location filename="../CalibratorBase.cpp" line="393"/>
         <source>Please, select calibrator for edit settings!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="429"/>
+        <location filename="../CalibratorBase.cpp" line="427"/>
         <source>Settings calibrator %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="436"/>
+        <location filename="../CalibratorBase.cpp" line="434"/>
         <source>Serial port:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="455"/>
+        <location filename="../CalibratorBase.cpp" line="453"/>
         <source>Calibrator type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="472"/>
+        <location filename="../CalibratorBase.cpp" line="470"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../CalibratorBase.cpp" line="473"/>
+        <location filename="../CalibratorBase.cpp" line="471"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -327,9 +327,40 @@
     </message>
 </context>
 <context>
+    <name>ExportMeasure</name>
+    <message>
+        <location filename="../ExportMeasure.cpp" line="28"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ExportMeasure.cpp" line="75"/>
+        <source>Measurements is absent!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ExportMeasure.cpp" line="85"/>
+        <source>CSV files (*.csv);;All Files (*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ExportMeasure.h" line="51"/>
+        <source>Export is complited!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ExportMeasure.h</name>
+    <message>
+        <location filename="../ExportMeasure.h" line="13"/>
+        <source>Export measurements</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LinearityPointBase</name>
     <message>
-        <location filename="../Options.cpp" line="419"/>
+        <location filename="../Options.cpp" line="553"/>
         <source>The measurement points are not set</source>
         <translation type="unfinished"></translation>
     </message>
@@ -337,571 +368,987 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../MainWindow.cpp" line="44"/>
+        <location filename="../MainWindow.cpp" line="61"/>
         <source>Metrology</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="77"/>
-        <source>&amp;Start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="80"/>
+        <location filename="../MainWindow.cpp" line="85"/>
         <source>To start the measurement process</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="84"/>
-        <source>&amp;Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="87"/>
+        <location filename="../MainWindow.cpp" line="91"/>
         <source>To stop the measurement process</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="90"/>
+        <location filename="../MainWindow.cpp" line="94"/>
         <source>&amp;Print ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="93"/>
+        <location filename="../MainWindow.cpp" line="97"/>
         <source>Printing of the measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="96"/>
+        <location filename="../MainWindow.cpp" line="100"/>
         <source>&amp;Export ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="99"/>
-        <source>Export of the measurements</source>
+        <location filename="../MainWindow.cpp" line="82"/>
+        <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="105"/>
-        <source>Cu&amp;t</source>
+        <location filename="../MainWindow.cpp" line="88"/>
+        <source>Stop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="103"/>
+        <source>Export measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="108"/>
-        <source>Cut of the measurements</source>
+        <source>Cu&amp;t</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="111"/>
-        <source>&amp;Copy</source>
+        <source>Cut of the measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="114"/>
-        <source>Copy of the measurements</source>
+        <source>&amp;Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="117"/>
-        <source>&amp;Delete</source>
+        <source>Copy of the measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="120"/>
-        <source>Delete the selected measurements</source>
+        <source>&amp;Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="123"/>
-        <source>Select &amp;All</source>
+        <source>Delete the selected measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="126"/>
+        <source>Select &amp;All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="129"/>
         <source>Select all measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="131"/>
+        <location filename="../MainWindow.cpp" line="134"/>
         <source>&amp;Reports ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="134"/>
+        <location filename="../MainWindow.cpp" line="137"/>
         <source>Preview the report on the measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="137"/>
+        <location filename="../MainWindow.cpp" line="140"/>
         <source>Metrological &amp;calculator ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="140"/>
+        <location filename="../MainWindow.cpp" line="143"/>
         <source>Calculator for converting metrological quantities</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="145"/>
+        <location filename="../MainWindow.cpp" line="148"/>
         <source>&amp;Calibrations ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="147"/>
+        <location filename="../MainWindow.cpp" line="150"/>
         <source>Connecting and configuring calibrators</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="150"/>
+        <location filename="../MainWindow.cpp" line="153"/>
         <source>Signals input/output ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="155"/>
+        <location filename="../MainWindow.cpp" line="158"/>
         <source>Signals with output ranges ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="160"/>
+        <location filename="../MainWindow.cpp" line="163"/>
         <source>&amp;Signals of complex comparator ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="165"/>
+        <location filename="../MainWindow.cpp" line="168"/>
         <source>&amp;Options ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="168"/>
+        <location filename="../MainWindow.cpp" line="171"/>
         <source>Editing application settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="174"/>
+        <location filename="../MainWindow.cpp" line="177"/>
         <source>&amp;Signals ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="179"/>
+        <location filename="../MainWindow.cpp" line="182"/>
         <source>&amp;Comparators ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="184"/>
+        <location filename="../MainWindow.cpp" line="187"/>
         <source>Co&amp;rrections ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="189"/>
+        <location filename="../MainWindow.cpp" line="192"/>
         <source>Sta&amp;tistics ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="194"/>
+        <location filename="../MainWindow.cpp" line="197"/>
         <source>About connect to server ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="199"/>
+        <location filename="../MainWindow.cpp" line="202"/>
         <source>About Metrology ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="264"/>
+        <location filename="../MainWindow.cpp" line="267"/>
         <source>&amp;Measure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="273"/>
+        <location filename="../MainWindow.cpp" line="275"/>
         <source>&amp;Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="282"/>
+        <location filename="../MainWindow.cpp" line="284"/>
         <source>&amp;View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="291"/>
+        <location filename="../MainWindow.cpp" line="293"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="302"/>
+        <location filename="../MainWindow.cpp" line="304"/>
         <source>&amp;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="324"/>
+        <location filename="../MainWindow.cpp" line="326"/>
         <source>Control panel measure process</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="344"/>
+        <location filename="../MainWindow.cpp" line="346"/>
         <source>Control panel measure timeout</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="358"/>
+        <location filename="../MainWindow.cpp" line="360"/>
         <source> Measure timeout </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="371"/>
+        <location filename="../MainWindow.cpp" line="373"/>
         <source> sec.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="384"/>
+        <location filename="../MainWindow.cpp" line="386"/>
         <source>Control panel measure kind</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="394"/>
+        <location filename="../MainWindow.cpp" line="396"/>
         <source> Measure kind </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="414"/>
+        <location filename="../MainWindow.cpp" line="416"/>
         <source>Control panel output signals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="422"/>
+        <location filename="../MainWindow.cpp" line="424"/>
         <source> Output signals </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="442"/>
+        <location filename="../MainWindow.cpp" line="444"/>
         <source>Control panel selecting analog signal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="448"/>
+        <location filename="../MainWindow.cpp" line="450"/>
         <source> Case </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="459"/>
+        <location filename="../MainWindow.cpp" line="461"/>
         <source> Signal </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="472"/>
+        <location filename="../MainWindow.cpp" line="474"/>
         <source> Case No </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="483"/>
+        <location filename="../MainWindow.cpp" line="485"/>
         <source> Subblock </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="494"/>
+        <location filename="../MainWindow.cpp" line="496"/>
         <source> Block </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="505"/>
+        <location filename="../MainWindow.cpp" line="507"/>
         <source> Entry </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="522"/>
+        <location filename="../MainWindow.cpp" line="524"/>
         <source>Control panel selecting signal of complex comparator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="528"/>
+        <location filename="../MainWindow.cpp" line="530"/>
         <source> Type </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="574"/>
+        <location filename="../MainWindow.cpp" line="580"/>
         <source>Search panel measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="592"/>
+        <location filename="../MainWindow.cpp" line="598"/>
         <source>&amp;Find ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="595"/>
+        <location filename="../MainWindow.cpp" line="601"/>
         <source>Find data in list of measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="618"/>
+        <location filename="../MainWindow.cpp" line="624"/>
         <source>Panel signal information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="641"/>
+        <location filename="../MainWindow.cpp" line="647"/>
         <source>Panel comparator information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="664"/>
+        <location filename="../MainWindow.cpp" line="670"/>
         <source>Panel complex comparator information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="721"/>
+        <location filename="../MainWindow.cpp" line="727"/>
         <source>Measurement 0/0 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="722"/>
+        <location filename="../MainWindow.cpp" line="728"/>
         <source>Connect to server: offline </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="863"/>
+        <location filename="../MainWindow.cpp" line="791"/>
+        <source>Measurement 0 / %1 </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="919"/>
         <source> Connected calibrators: %1 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="890"/>
+        <location filename="../MainWindow.cpp" line="946"/>
         <source>The measurement process is started </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="910"/>
+        <location filename="../MainWindow.cpp" line="966"/>
         <source>The measurement process is stopped </source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Measure</name>
+    <message>
+        <location filename="../Measure.cpp" line="27"/>
+        <location filename="../Measure.cpp" line="34"/>
+        <location filename="../Measure.cpp" line="41"/>
+        <location filename="../Measure.cpp" line="48"/>
+        <source>No</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>Measure.h</name>
     <message>
-        <location filename="../Measure.h" line="8"/>
+        <location filename="../Measure.h" line="11"/>
         <source>Measurements of linearity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="9"/>
+        <location filename="../Measure.h" line="12"/>
         <source>Measurements of comparators</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="10"/>
+        <location filename="../Measure.h" line="13"/>
         <source>Measurements of complex comparators</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="40"/>
+        <location filename="../Measure.h" line="34"/>
+        <source>Linearity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="35"/>
+        <source>Comparators</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="36"/>
+        <source>ComplexComparators</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="53"/>
         <source> in one channel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="41"/>
+        <location filename="../Measure.h" line="54"/>
         <source> in all channels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="60"/>
+        <location filename="../Measure.h" line="73"/>
         <source>Input</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="61"/>
+        <location filename="../Measure.h" line="74"/>
+        <location filename="../Measure.h" line="144"/>
         <source>Output</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="62"/>
+        <location filename="../Measure.h" line="75"/>
         <source>Correct</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="82"/>
+        <location filename="../Measure.h" line="95"/>
         <source>Don&apos;t used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="83"/>
+        <location filename="../Measure.h" line="96"/>
         <source>Correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="84"/>
+        <location filename="../Measure.h" line="97"/>
         <source>Signal MPS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="85"/>
+        <location filename="../Measure.h" line="98"/>
         <source>P → T</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="86"/>
+        <location filename="../Measure.h" line="99"/>
         <source>T → P</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="109"/>
+        <location filename="../Measure.h" line="122"/>
         <source>Addition (+)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="110"/>
+        <location filename="../Measure.h" line="123"/>
         <source>Subtraction (-)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="129"/>
+        <location filename="../Measure.h" line="142"/>
+        <source>Electric</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="143"/>
+        <source>Physical</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="164"/>
         <source>Absolute</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Measure.h" line="130"/>
+        <location filename="../Measure.h" line="165"/>
         <source>Reduce</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="184"/>
+        <source>System error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="185"/>
+        <source>MSE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="186"/>
+        <source>Low border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="187"/>
+        <source>High border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Measure.h" line="188"/>
+        <location filename="../Measure.h" line="189"/>
+        <location filename="../Measure.h" line="190"/>
+        <location filename="../Measure.h" line="191"/>
+        <location filename="../Measure.h" line="192"/>
+        <location filename="../Measure.h" line="193"/>
+        <location filename="../Measure.h" line="194"/>
+        <location filename="../Measure.h" line="195"/>
+        <location filename="../Measure.h" line="196"/>
+        <location filename="../Measure.h" line="197"/>
+        <location filename="../Measure.h" line="198"/>
+        <location filename="../Measure.h" line="199"/>
+        <source>reserve</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>MeasureThread</name>
     <message>
-        <location filename="../MeasureThread.cpp" line="260"/>
+        <location filename="../MeasureThread.cpp" line="119"/>
+        <source>Calibrator: %1 - disconnected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureThread.cpp" line="322"/>
         <source>Set point %1 / %2 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="307"/>
+        <location filename="../MeasureThread.cpp" line="369"/>
         <source>Wait timeout %1 / %2 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MeasureThread.cpp" line="312"/>
-        <source>Save measurement </source>
+        <location filename="../MeasureThread.cpp" line="374"/>
+        <source>Save measurements </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureThread.cpp" line="403"/>
+        <source>The measurement process don&apos;t have calibrators for measure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureThread.cpp" line="407"/>
+        <source>Comprators </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureThread.cpp" line="419"/>
+        <source>The measurement process don&apos;t have enough calibrators for measure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureThread.cpp" line="424"/>
+        <source>Complex Comprators </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureThread.h" line="61"/>
+        <source>Measurement process</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MeasureViewHeader</name>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="17"/>
+        <source>Index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="18"/>
+        <source>Case</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="19"/>
+        <source>ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="20"/>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="21"/>
+        <source>Case No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="22"/>
+        <source>Subblock</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="23"/>
+        <source>Block</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="24"/>
+        <source>Entry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="25"/>
+        <source>Adjustment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="26"/>
+        <source>El. range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="27"/>
+        <source>Ph. range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="28"/>
+        <source>Out. range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="29"/>
+        <source>El. nominal value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="30"/>
+        <source>Ph. nominal value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="31"/>
+        <source>Out. nominal value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="32"/>
+        <source>Value to %</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="33"/>
+        <source>El. measure value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="34"/>
+        <source>Ph. measure value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="35"/>
+        <source>Out. measure value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="36"/>
+        <source>System error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="37"/>
+        <source>MSE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="38"/>
+        <source>Low border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="39"/>
+        <source>High border</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="40"/>
+        <source>Amount measuremets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="41"/>
+        <source>Value 1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="42"/>
+        <source>Value 2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="43"/>
+        <source>Value 3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="44"/>
+        <source>Value 4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="45"/>
+        <source>Value 5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="46"/>
+        <source>Value 6</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="47"/>
+        <source>Value 7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="48"/>
+        <source>Value 8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="49"/>
+        <source>Value 9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="50"/>
+        <source>Value 10</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="51"/>
+        <source>Value 11</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="52"/>
+        <source>Value 12</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="53"/>
+        <source>Value 13</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="54"/>
+        <source>Value 14</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="55"/>
+        <source>Value 15</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="56"/>
+        <source>Value 16</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="57"/>
+        <source>Value 17</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="58"/>
+        <source>Value 18</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="59"/>
+        <source>Value 19</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="60"/>
+        <source>Value 20</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="61"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="62"/>
+        <source>Error of output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="63"/>
+        <source>Limit error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MeasureViewHeader.cpp" line="64"/>
+        <source>Measurement time</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>Options.h</name>
     <message>
-        <location filename="../Options.h" line="27"/>
+        <location filename="../Options.h" line="31"/>
         <source>IP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="28"/>
+        <location filename="../Options.h" line="32"/>
         <source>Port</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="86"/>
+        <location filename="../Options.h" line="93"/>
+        <source>Font of measurements list </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="94"/>
+        <source>Show external ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="95"/>
+        <source>Displaying value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="96"/>
+        <source>Measurement over limit error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="97"/>
+        <source>Measurement over control error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="117"/>
+        <source>Show in physical units</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="118"/>
+        <source>Show in electrical units</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="119"/>
+        <source>Displayed as a percentage (%) of the range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="164"/>
         <source>%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="87"/>
+        <location filename="../Options.h" line="165"/>
         <source>0 - 5 V</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="88"/>
+        <location filename="../Options.h" line="166"/>
         <source>0 - 5 mA</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="89"/>
+        <location filename="../Options.h" line="167"/>
         <source>4 - 20 mA</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="90"/>
+        <location filename="../Options.h" line="168"/>
         <source>0 - 100 °C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="91"/>
+        <location filename="../Options.h" line="169"/>
         <source>0 - 150 °C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="92"/>
+        <location filename="../Options.h" line="170"/>
         <source>0 - 200 °C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="93"/>
+        <location filename="../Options.h" line="171"/>
         <source>0 - 400 °C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="186"/>
-        <source>Permissible error</source>
+        <location filename="../Options.h" line="264"/>
+        <source>Limit error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="187"/>
+        <location filename="../Options.h" line="313"/>
+        <source>Simple</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="314"/>
+        <source>Extended (show columns for metrological certification)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="315"/>
+        <source>Detail electric (show all measurements at one point)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="316"/>
+        <source>Detail physical (show all measurements at one point)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="317"/>
+        <source>Detail output (show all measurements at one point)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="265"/>
         <source>Control error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="188"/>
+        <location filename="../Options.h" line="266"/>
         <source>Error type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="189"/>
+        <location filename="../Options.h" line="267"/>
         <source>Calculate error by standard deviation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="190"/>
+        <location filename="../Options.h" line="268"/>
         <source>Measure time in a point, (sec)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="191"/>
+        <location filename="../Options.h" line="269"/>
         <source>Count of measurements in a point</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="192"/>
+        <location filename="../Options.h" line="270"/>
         <source>Division of the measure range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="193"/>
+        <location filename="../Options.h" line="271"/>
         <source>Count of points</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="194"/>
+        <location filename="../Options.h" line="272"/>
         <source>Lower limit of the measure range, (%)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="195"/>
+        <location filename="../Options.h" line="273"/>
         <source>High limit of the measure range, (%)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="196"/>
+        <location filename="../Options.h" line="274"/>
         <source>Points of range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="197"/>
+        <location filename="../Options.h" line="275"/>
+        <source>Type of measurements list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../Options.h" line="276"/>
         <source>Show column of output values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="198"/>
-        <source>Consider correction for output signals</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../Options.h" line="221"/>
+        <location filename="../Options.h" line="300"/>
         <source>Manual division of the measure range</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Options.h" line="222"/>
+        <location filename="../Options.h" line="301"/>
         <source>Automatic division of the measure range</source>
         <translation type="unfinished"></translation>
     </message>
@@ -909,47 +1356,62 @@
 <context>
     <name>OptionsDialog</name>
     <message>
-        <location filename="../OptionsDialog.cpp" line="212"/>
+        <location filename="../OptionsDialog.cpp" line="222"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="213"/>
+        <location filename="../OptionsDialog.cpp" line="223"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="214"/>
+        <location filename="../OptionsDialog.cpp" line="224"/>
         <source>Apply</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="276"/>
+        <location filename="../OptionsDialog.cpp" line="286"/>
         <source>Server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="299"/>
+        <location filename="../OptionsDialog.cpp" line="309"/>
         <source>Metrological error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="332"/>
+        <location filename="../OptionsDialog.cpp" line="342"/>
         <source>Measurements at the single point</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="352"/>
+        <location filename="../OptionsDialog.cpp" line="362"/>
         <source>Measurement points</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="408"/>
-        <source>The output values</source>
+        <location filename="../OptionsDialog.cpp" line="418"/>
+        <source>The list of measurements</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsDialog.cpp" line="574"/>
+        <location filename="../OptionsDialog.cpp" line="450"/>
+        <source>Font</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsDialog.cpp" line="457"/>
+        <source>Displaying measurements</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsDialog.cpp" line="475"/>
+        <source>Colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsDialog.cpp" line="665"/>
         <source>Options - %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1082,6 +1544,63 @@
     </message>
 </context>
 <context>
+    <name>OptionsMeasureViewHeaderDialog</name>
+    <message>
+        <location filename="../OptionsMvhDialog.cpp" line="17"/>
+        <source>Measure type: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsMvhDialog.cpp" line="137"/>
+        <location filename="../OptionsMvhDialog.cpp" line="166"/>
+        <location filename="../OptionsMvhDialog.cpp" line="305"/>
+        <location filename="../OptionsMvhDialog.cpp" line="332"/>
+        <source>True</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsMvhDialog.cpp" line="137"/>
+        <location filename="../OptionsMvhDialog.cpp" line="166"/>
+        <location filename="../OptionsMvhDialog.cpp" line="305"/>
+        <location filename="../OptionsMvhDialog.cpp" line="332"/>
+        <source>False</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsMvhDialog.cpp" line="317"/>
+        <source>Select column color</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>OptionsMvhDialog.h</name>
+    <message>
+        <location filename="../OptionsMvhDialog.h" line="23"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsMvhDialog.h" line="24"/>
+        <source>Visible</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsMvhDialog.h" line="25"/>
+        <source>Width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsMvhDialog.h" line="26"/>
+        <source>Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../OptionsMvhDialog.h" line="27"/>
+        <source>Bold font</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>OptionsPointsDialog</name>
     <message>
         <location filename="../OptionsPointsDialog.cpp" line="30"/>
@@ -1124,8 +1643,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../OptionsPointsDialog.cpp" line="351"/>
-        <location filename="../OptionsPointsDialog.cpp" line="363"/>
+        <location filename="../OptionsPointsDialog.cpp" line="359"/>
         <source>Please, select point</source>
         <translation type="unfinished"></translation>
     </message>

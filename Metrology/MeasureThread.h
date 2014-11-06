@@ -54,7 +54,7 @@ signals:
     //
     void                    measureInfo(QString);
     void                    measureInfo(int);
-    void                    measureComplite();
+    void                    measureComplite(MeasureItem*);
 
 private slots:
 

@@ -164,6 +164,7 @@ private:
 
     Options                 m_options;
 
+    static int              m_activePage;
     bool                    setActivePage(int page);
 
     void                    createInterface();
@@ -188,6 +189,7 @@ private:
     QMap<QtProperty*,QVariant>   m_propertyValueList;
 
     void                    appendProperty(QtProperty* property, int page, int param);
+    void                    expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded);
     void                    clearProperty();
 
     QtProperty*             m_currentPropertyItem = nullptr;
@@ -195,6 +197,9 @@ private:
 
     void                    restoreProperty();
     void                    applyProperty();
+
+    void                    loadSettings();
+    void                    saveSettings();
 
 protected:
 
@@ -208,6 +213,7 @@ private slots:
     void                    onBrowserItem(QtBrowserItem*);
 
     void                    updateLinearityPage(bool isDialog);
+    void                    updateMeasureViewPage(bool isDialog);
 
     void                    onOk();
     void                    onApply();

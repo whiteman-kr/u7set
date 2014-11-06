@@ -11,27 +11,8 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QTableWidget>
-#include <QItemDelegate>
 
 #include "Options.h"
-
-// ==============================================================================================
-
-class DoubleDelegate : public QItemDelegate
-{
-    Q_OBJECT
-
-public:
-
-    DoubleDelegate(QObject *parent) : QItemDelegate(parent) {}
-
-    QWidget * createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const
-    {
-        QLineEdit *editor = new QLineEdit(parent);
-        editor->setValidator(new QRegExpValidator(QRegExp("^[-]{0,1}[0-9]*[.]{0,1}[0-9]*$"),editor));
-        return editor;
-    }
-};
 
 // ==============================================================================================
 

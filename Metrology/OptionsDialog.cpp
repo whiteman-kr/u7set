@@ -8,6 +8,7 @@
 #include <QPushButton>
 
 #include "OptionsPointsDialog.h"
+#include "OptionsMvhDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -76,15 +77,19 @@ PropertyPage::~PropertyPage()
         default:
             assert(0);
             break;
-
     }
+
+    m_type = PROPERTY_PAGE_TYPE_UNKNOWN;
+    m_page = OPTION_PAGE_UNKNOWN;
+
+    m_pWidget = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-static int activePage = OPTION_PAGE_LINEARETY_MEASURE;
+int OptionsDialog::m_activePage = OPTION_PAGE_LINEARETY_MEASURE;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -92,6 +97,11 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
     QDialog(parent)
 {
     m_options = theOptions;
+
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+    {
+        m_options.m_updateColumnView[type] = false;
+    }
 
     createInterface();
 }
@@ -108,8 +118,8 @@ OptionsDialog::~OptionsDialog()
 void OptionsDialog::createInterface()
 {
     setWindowIcon(QIcon::fromTheme("empty", QIcon(":/icons/Options.png")));
-    setMinimumSize(800, 400);
-    restoreWindowPosition(this);
+    setMinimumSize(850, 400);
+    loadSettings();
 
     // create interface
     //
@@ -125,7 +135,7 @@ void OptionsDialog::createInterface()
 
     // set active page
     //
-    setActivePage(activePage);
+    setActivePage(m_activePage);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -176,7 +186,7 @@ QHBoxLayout* OptionsDialog::createPages()
         m_pageList.append(pPropertyPage);
     }
 
-    connect(m_pPageTree, &QTreeWidget::currentItemChanged , this, &OptionsDialog::onPageChanged );
+    connect(m_pPageTree, &QTreeWidget::currentItemChanged , this, &OptionsDialog::onPageChanged);
 
     pagesLayout->addWidget(m_pPageTree);
 
@@ -275,18 +285,18 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
             {
                 QtProperty *serverGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server"));
 
-                item = manager->addProperty(QVariant::String, TcpIpParamName[TCPIP_PARAM_SERVER_IP]);
-                item->setValue( m_options.getTcpIp().m_serverIP );
-                appendProperty(item, page, TCPIP_PARAM_SERVER_IP);
-                serverGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::String, TcpIpParamName[TCPIP_PARAM_SERVER_IP]);
+                    item->setValue( m_options.connectTcpIp().m_serverIP );
+                    appendProperty(item, page, TCPIP_PARAM_SERVER_IP);
+                    serverGroup->addSubProperty(item);
 
-                item = manager->addProperty(QVariant::Int, TcpIpParamName[TCPIP_PARAM_SERVER_PORT]);
-                item->setValue( m_options.getTcpIp().m_serverPort );
-                item->setAttribute(QLatin1String("minimum"), 1);
-                item->setAttribute(QLatin1String("maximum"), 65535);
-                item->setAttribute(QLatin1String("singleStep"), 1);
-                appendProperty(item, page, TCPIP_PARAM_SERVER_PORT);
-                serverGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Int, TcpIpParamName[TCPIP_PARAM_SERVER_PORT]);
+                    item->setValue( m_options.connectTcpIp().m_serverPort );
+                    item->setAttribute(QLatin1String("minimum"), 1);
+                    item->setAttribute(QLatin1String("maximum"), 65535);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    appendProperty(item, page, TCPIP_PARAM_SERVER_PORT);
+                    serverGroup->addSubProperty(item);
 
                 editor->setFactoryForManager(manager, factory);
 
@@ -298,124 +308,130 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
             {
                 QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
-                item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR]);
-                item->setValue( m_options.getLinearity().m_errorValue );
-                item->setAttribute(QLatin1String("singleStep"), 0.1);
-                item->setAttribute(QLatin1String("decimals"), 3);
-                appendProperty(item, page, LO_PARAM_ERROR);
-                errorGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR]);
+                    item->setValue( m_options.linearity().m_errorValue );
+                    item->setAttribute(QLatin1String("singleStep"), 0.1);
+                    item->setAttribute(QLatin1String("decimals"), 3);
+                    appendProperty(item, page, LO_PARAM_ERROR);
+                    errorGroup->addSubProperty(item);
 
-                item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR_CTRL]);
-                item->setValue( m_options.getLinearity().m_errorCtrl );
-                item->setAttribute(QLatin1String("singleStep"), 0.1);
-                item->setAttribute(QLatin1String("decimals"), 3);
-                appendProperty(item, page, LO_PARAM_ERROR_CTRL);
-                errorGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR_CTRL]);
+                    item->setValue( m_options.linearity().m_errorCtrl );
+                    item->setAttribute(QLatin1String("singleStep"), 0.1);
+                    item->setAttribute(QLatin1String("decimals"), 3);
+                    appendProperty(item, page, LO_PARAM_ERROR_CTRL);
+                    errorGroup->addSubProperty(item);
 
-                item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_ERROR_TYPE]);
-                QStringList errorTypeList;
-                for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
-                {
-                    errorTypeList.append(MeasureErrorTypeStr[e]);
-                }
-                item->setAttribute(QLatin1String("enumNames"), errorTypeList);
-                item->setValue(m_options.getLinearity().m_errorType);
-                appendProperty(item, page, LO_PARAM_ERROR_TYPE);
-                errorGroup->addSubProperty(item);
+                    item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_ERROR_TYPE]);
+                    QStringList errorTypeList;
+                    for(int e = 0; e < ERROR_TYPE_COUNT; e++)
+                    {
+                        errorTypeList.append(ErrorType[e]);
+                    }
+                    item->setAttribute(QLatin1String("enumNames"), errorTypeList);
+                    item->setValue(m_options.linearity().m_errorType);
+                    appendProperty(item, page, LO_PARAM_ERROR_TYPE);
+                    errorGroup->addSubProperty(item);
 
-                item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_ERROR_BY_SCO]);
-                item->setValue( m_options.getLinearity().m_errorCalcBySCO );
-                appendProperty(item, page, LO_PARAM_ERROR_BY_SCO);
-                errorGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_ERROR_BY_SCO]);
+                    item->setValue( m_options.linearity().m_errorCalcBySCO );
+                    appendProperty(item, page, LO_PARAM_ERROR_BY_SCO);
+                    errorGroup->addSubProperty(item);
 
 
                 QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements at the single point"));
 
-                item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_TIME]);
-                item->setValue(m_options.getLinearity().m_measureTimeInPoint);
-                item->setAttribute(QLatin1String("minimum"), 1);
-                item->setAttribute(QLatin1String("maximum"), 60);
-                item->setAttribute(QLatin1String("singleStep"), 1);
-                appendProperty(item, page, LO_PARAM_MEASURE_TIME);
-                measureGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_TIME]);
+                    item->setValue(m_options.linearity().m_measureTimeInPoint);
+                    item->setAttribute(QLatin1String("minimum"), 1);
+                    item->setAttribute(QLatin1String("maximum"), 60);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    appendProperty(item, page, LO_PARAM_MEASURE_TIME);
+                    measureGroup->addSubProperty(item);
 
 
-                item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_IN_POINT]);
-                item->setValue(m_options.getLinearity().m_measureCountInPoint);
-                item->setAttribute(QLatin1String("minimum"), 1);
-                item->setAttribute(QLatin1String("maximum"), 20);
-                item->setAttribute(QLatin1String("singleStep"), 1);
-                appendProperty(item, page, LO_PARAM_MEASURE_IN_POINT);
-                measureGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_IN_POINT]);
+                    item->setValue(m_options.linearity().m_measureCountInPoint);
+                    item->setAttribute(QLatin1String("minimum"), 1);
+                    item->setAttribute(QLatin1String("maximum"), MEASUREMENT_IN_POINT);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    appendProperty(item, page, LO_PARAM_MEASURE_IN_POINT);
+                    measureGroup->addSubProperty(item);
 
 
                 QtProperty *pointGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurement points"));
 
-                item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_RANGE_TYPE]);
-                QStringList rangeTypeList;
-                for(int r = 0; r < LO_RANGE_TYPE_COUNT; r++)
-                {
-                    rangeTypeList.append(LinearityRangeTypeStr[r]);
-                }
-                item->setAttribute(QLatin1String("enumNames"), rangeTypeList);
-                item->setValue(m_options.getLinearity().m_rangeType);
-                appendProperty(item, page, LO_PARAM_RANGE_TYPE);
-                pointGroup->addSubProperty(item);
+                    item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_RANGE_TYPE]);
+                    QStringList rangeTypeList;
+                    for(int r = 0; r < LO_RANGE_TYPE_COUNT; r++)
+                    {
+                        rangeTypeList.append(LinearityRangeTypeStr[r]);
+                    }
+                    item->setAttribute(QLatin1String("enumNames"), rangeTypeList);
+                    item->setValue(m_options.linearity().m_rangeType);
+                    appendProperty(item, page, LO_PARAM_RANGE_TYPE);
+                    pointGroup->addSubProperty(item);
 
-                item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_POINT_COUNT]);
-                item->setValue(m_options.getLinearity().m_pointBase.count());
-                switch( m_options.getLinearity().m_rangeType)
-                {
-                    case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
-                    case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
-                    default:                        assert(0);                  break;
-                }
-                appendProperty(item, page, LO_PARAM_POINT_COUNT);
-                pointGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_POINT_COUNT]);
+                    item->setValue(m_options.linearity().m_pointBase.count());
+                    switch( m_options.linearity().m_rangeType)
+                    {
+                        case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
+                        case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
+                        default:                        assert(0);                  break;
+                    }
+                    appendProperty(item, page, LO_PARAM_POINT_COUNT);
+                    pointGroup->addSubProperty(item);
 
-                item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_LOW_RANGE]);
-                item->setValue( m_options.getLinearity().m_lowLimitRange );
-                item->setAttribute(QLatin1String("singleStep"), 1);
-                item->setAttribute(QLatin1String("decimals"), 1);
-                switch( m_options.getLinearity().m_rangeType)
-                {
-                    case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
-                    case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
-                    default:                        assert(0);                  break;
-                }
-                appendProperty(item, page, LO_PARAM_LOW_RANGE);
-                pointGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_LOW_RANGE]);
+                    item->setValue( m_options.linearity().m_lowLimitRange );
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    item->setAttribute(QLatin1String("decimals"), 1);
+                    switch( m_options.linearity().m_rangeType)
+                    {
+                        case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
+                        case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
+                        default:                        assert(0);                  break;
+                    }
+                    appendProperty(item, page, LO_PARAM_LOW_RANGE);
+                    pointGroup->addSubProperty(item);
 
-                item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_HIGH_RANGE]);
-                item->setValue( m_options.getLinearity().m_highLimitRange );
-                item->setAttribute(QLatin1String("singleStep"), 1);
-                item->setAttribute(QLatin1String("decimals"), 1);
-                switch( m_options.getLinearity().m_rangeType)
-                {
-                    case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
-                    case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
-                    default:                        assert(0);                  break;
-                }
-                appendProperty(item, page, LO_PARAM_HIGH_RANGE);
-                pointGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_HIGH_RANGE]);
+                    item->setValue( m_options.linearity().m_highLimitRange );
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    item->setAttribute(QLatin1String("decimals"), 1);
+                    switch( m_options.linearity().m_rangeType)
+                    {
+                        case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
+                        case LO_RANGE_TYPE_AUTOMATIC:   item->setEnabled(true);     break;
+                        default:                        assert(0);                  break;
+                    }
+                    appendProperty(item, page, LO_PARAM_HIGH_RANGE);
+                    pointGroup->addSubProperty(item);
 
-                item = manager->addProperty(QVariant::String, LinearityParamName[LO_PARAM_VALUE_POINTS]);
-                item->setValue(m_options.getLinearity().m_pointBase.text());
-                appendProperty(item, page, LO_PARAM_VALUE_POINTS);
-                pointGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::String, LinearityParamName[LO_PARAM_VALUE_POINTS]);
+                    item->setValue(m_options.linearity().m_pointBase.text());
+                    appendProperty(item, page, LO_PARAM_VALUE_POINTS);
+                    pointGroup->addSubProperty(item);
 
 
-                QtProperty *outputrangeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("The output values"));
+                QtProperty *outputrangeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("The list of measurements"));
 
-                item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_OUTPUT_RANGE]);
-                item->setValue( m_options.getLinearity().m_showOutputRangeColumn );
-                appendProperty(item, page, LO_PARAM_OUTPUT_RANGE);
-                outputrangeGroup->addSubProperty(item);
+                    item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_LIST_TYPE]);
+                    QStringList listTypeList;
+                    for(int r = 0; r < LO_VIEW_TYPE_COUNT; r++)
+                    {
+                        listTypeList.append(LinearityViewTypeStr[r]);
+                    }
+                    item->setAttribute(QLatin1String("enumNames"), listTypeList);
+                    item->setValue(m_options.linearity().m_viewType);
+                    appendProperty(item, page, LO_PARAM_LIST_TYPE);
+                    outputrangeGroup->addSubProperty(item);
 
-                item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_CORRECT_OUTPUT]);
-                item->setValue( m_options.getLinearity().m_considerCorrectOutput );
-                appendProperty(item, page, LO_PARAM_CORRECT_OUTPUT);
-                outputrangeGroup->addSubProperty(item);
+                    item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_OUTPUT_RANGE]);
+                    item->setValue( m_options.linearity().m_showOutputRangeColumn );
+                    appendProperty(item, page, LO_PARAM_OUTPUT_RANGE);
+                    outputrangeGroup->addSubProperty(item);
 
                 editor->setFactoryForManager(manager, factory);
 
@@ -428,8 +444,58 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
         case OPTION_PAGE_SETTING_MEASURE:
             break;
+
         case OPTION_PAGE_MEASURE_VIEW_TEXT:
+            {
+                QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
+
+                    item = manager->addProperty(QVariant::Font, MeasureViewParam[MWO_PARAM_FONT]);
+                    item->setValue( m_options.measureView().m_font );
+                    appendProperty(item, page, MWO_PARAM_FONT);
+                    fontGroup->addSubProperty(item);
+
+                QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying measurements"));
+
+                    item = manager->addProperty(QVariant::Bool, MeasureViewParam[MWO_PARAM_ID]);
+                    item->setValue( m_options.measureView().m_showExternalID );
+                    appendProperty(item, page, MWO_PARAM_ID);
+                    measureGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), MeasureViewParam[MWO_PARAM_DISPLAYING_VALUE]);
+                    QStringList valueTypeList;
+                    for(int t = 0; t < DISPLAYING_VALUE_TYPE_COUNT; t++)
+                    {
+                        valueTypeList.append(DisplayingValueType[t]);
+                    }
+                    item->setAttribute(QLatin1String("enumNames"), valueTypeList);
+                    item->setValue(m_options.measureView().m_showDisplayingValueType);
+                    appendProperty(item, page, MWO_PARAM_DISPLAYING_VALUE);
+                    measureGroup->addSubProperty(item);
+
+                QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
+
+                    item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_LIMIT_ERROR]);
+                    item->setValue( m_options.measureView().m_colorLimitError );
+                    appendProperty(item, page, MWO_PARAM_COLOR_LIMIT_ERROR);
+                    colorGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_CONTROL_ERROR]);
+                    item->setValue( m_options.measureView().m_colorControlError );
+                    appendProperty(item, page, MWO_PARAM_COLOR_CONTROL_ERROR);
+                    colorGroup->addSubProperty(item);
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(fontGroup);
+                editor->addProperty(measureGroup);
+                editor->addProperty(colorGroup);
+
+                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_FONT, false);
+                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_CONTROL_ERROR, false);
+                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_LIMIT_ERROR, false);
+            }
             break;
+
         case OPTION_PAGE_SIGNAL_INFO:
             break;
         case OPTION_PAGE_REPORT_HEADER:
@@ -446,8 +512,8 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
     editor->setPropertiesWithoutValueMarked(true);
     editor->setRootIsDecorated(false);
 
-    connect(manager, &QtVariantPropertyManager::valueChanged, this, &OptionsDialog::onPropertyValueChanged );
-    connect(editor, &QtTreePropertyBrowser::currentItemChanged, this, &OptionsDialog::onBrowserItem );
+    connect(manager, &QtVariantPropertyManager::valueChanged, this, &OptionsDialog::onPropertyValueChanged);
+    connect(editor, &QtTreePropertyBrowser::currentItemChanged, this, &OptionsDialog::onBrowserItem);
 
     return (new PropertyPage(manager, factory, editor));
 }
@@ -467,17 +533,19 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
     {
         case OPTION_PAGE_LINEARETY_POINT:
             {
-                OptionsPointsDialog* dialog = new OptionsPointsDialog(m_options.getLinearity());
+                OptionsPointsDialog* dialog = new OptionsPointsDialog(m_options.linearity());
+                connect(dialog, &OptionsPointsDialog::updateLinearityPage, this, &OptionsDialog::updateLinearityPage);
 
-                connect(dialog, &OptionsPointsDialog::updateLinearityPage, this, &OptionsDialog::updateLinearityPage );
                 pDialogPage = dialog;
             }
             break;
 
         case OPTION_PAGE_MEASURE_VIEW_COLUMN:
             {
-                pDialogPage = new QDialog;
-                pDialogPage->setStyleSheet(".QDialog { border: 1px solid grey } ");
+                OptionsMeasureViewHeaderDialog* dialog = new OptionsMeasureViewHeaderDialog(m_options.measureView());
+                connect(dialog, &OptionsMeasureViewHeaderDialog::updateMeasureViewPage, this, &OptionsDialog::updateMeasureViewPage);
+
+                pDialogPage = dialog;
             }
             break;
 
@@ -510,6 +578,29 @@ void OptionsDialog::appendProperty(QtProperty* property, int page, int param)
 
     m_propertyItemList[property] = (page << 8) | param;
     m_propertyValueList[property] = ((QtVariantProperty*) property)->value();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded)
+{
+    if (pEditor == nullptr)
+    {
+        return;
+    }
+
+    if (page < 0 || page >= OPTION_PAGE_COUNT)
+    {
+        return;
+    }
+
+    QtProperty* pProperty = m_propertyItemList.key( (page << 8) | param );
+    if (pProperty == nullptr)
+    {
+        return;
+    }
+
+    pEditor->setExpanded( pEditor->items( pProperty )[0], expanded);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -549,9 +640,9 @@ bool OptionsDialog::setActivePage(int page)
 
     // hide current page
     //
-    if (activePage >= 0 && activePage < m_pageList.count() )
+    if (m_activePage >= 0 && m_activePage < m_pageList.count() )
     {
-        PropertyPage* pCurrentPage = m_pageList.at(activePage);
+        PropertyPage* pCurrentPage = m_pageList.at(m_activePage);
         if (pCurrentPage != nullptr )
         {
             QWidget* pWidget = pCurrentPage->getWidget();
@@ -578,7 +669,7 @@ bool OptionsDialog::setActivePage(int page)
         }
     }
 
-    activePage = page;
+    m_activePage = page;
 
     // select tree item
     //
@@ -611,7 +702,9 @@ void OptionsDialog::onPropertyValueChanged(QtProperty *property, const QVariant 
 
     if( type == QVariant::Bool ||                               // check
         type == QtVariantPropertyManager::enumTypeId() ||       // list of values
-        type == QVariant::String)                               // string
+        type == QVariant::String ||                             // string
+        type == QVariant::Font ||                               // font
+        type == QVariant::Color    )                            // color
    {
         applyProperty();
    }
@@ -680,8 +773,8 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case TCPIP_PARAM_SERVER_IP:     m_options.getTcpIp().m_serverIP = value.toString();                 break;
-                    case TCPIP_PARAM_SERVER_PORT:   m_options.getTcpIp().m_serverPort = value.toInt();                  break;
+                    case TCPIP_PARAM_SERVER_IP:     m_options.connectTcpIp().m_serverIP = value.toString();                 break;
+                    case TCPIP_PARAM_SERVER_PORT:   m_options.connectTcpIp().m_serverPort = value.toInt();                  break;
                 }
             }
             break;
@@ -690,26 +783,32 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case LO_PARAM_ERROR:            m_options.getLinearity().m_errorValue = value.toDouble();           break;
-                    case LO_PARAM_ERROR_CTRL:       m_options.getLinearity().m_errorCtrl = value.toDouble();            break;
-                    case LO_PARAM_ERROR_TYPE:       m_options.getLinearity().m_errorType = value.toInt();               break;
-                    case LO_PARAM_ERROR_BY_SCO:     m_options.getLinearity().m_errorCalcBySCO = value.toBool();         break;
-                    case LO_PARAM_MEASURE_TIME:     m_options.getLinearity().m_measureTimeInPoint = value.toInt();      break;
-                    case LO_PARAM_MEASURE_IN_POINT: m_options.getLinearity().m_measureCountInPoint = value.toInt();     break;
-                    case LO_PARAM_RANGE_TYPE:       m_options.getLinearity().m_rangeType = value.toInt();
-                                                    m_options.getLinearity().recalcPoints();
+                    case LO_PARAM_ERROR:            m_options.linearity().m_errorValue = value.toDouble();           break;
+                    case LO_PARAM_ERROR_CTRL:       m_options.linearity().m_errorCtrl = value.toDouble();            break;
+                    case LO_PARAM_ERROR_TYPE:       m_options.linearity().m_errorType = value.toInt();
+                                                    m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
+                                                    break;
+                    case LO_PARAM_ERROR_BY_SCO:     m_options.linearity().m_errorCalcBySCO = value.toBool();         break;
+                    case LO_PARAM_MEASURE_TIME:     m_options.linearity().m_measureTimeInPoint = value.toInt();      break;
+                    case LO_PARAM_MEASURE_IN_POINT: m_options.linearity().m_measureCountInPoint = value.toInt();     break;
+                    case LO_PARAM_RANGE_TYPE:       m_options.linearity().m_rangeType = value.toInt();
+                                                    m_options.linearity().recalcPoints();
                                                     updateLinearityPage(false);                                         break;
-                    case LO_PARAM_POINT_COUNT:      m_options.getLinearity().recalcPoints(value.toInt());
+                    case LO_PARAM_POINT_COUNT:      m_options.linearity().recalcPoints(value.toInt());
                                                     updateLinearityPage(false);                                         break;
-                    case LO_PARAM_LOW_RANGE:        m_options.getLinearity().m_lowLimitRange = value.toDouble();
-                                                    m_options.getLinearity().recalcPoints();
+                    case LO_PARAM_LOW_RANGE:        m_options.linearity().m_lowLimitRange = value.toDouble();
+                                                    m_options.linearity().recalcPoints();
                                                     updateLinearityPage(false);                                         break;
-                    case LO_PARAM_HIGH_RANGE:       m_options.getLinearity().m_highLimitRange = value.toDouble();
-                                                    m_options.getLinearity().recalcPoints();
+                    case LO_PARAM_HIGH_RANGE:       m_options.linearity().m_highLimitRange = value.toDouble();
+                                                    m_options.linearity().recalcPoints();
                                                     updateLinearityPage(false);                                         break;
                     case LO_PARAM_VALUE_POINTS:     setActivePage(OPTION_PAGE_LINEARETY_POINT);                         break;
-                    case LO_PARAM_OUTPUT_RANGE:     m_options.getLinearity().m_showOutputRangeColumn = value.toBool();  break;
-                    case LO_PARAM_CORRECT_OUTPUT:	m_options.getLinearity().m_considerCorrectOutput = value.toBool();  break;
+                    case LO_PARAM_LIST_TYPE:        m_options.linearity().m_viewType = value.toInt();
+                                                    m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
+                                                    break;
+                    case LO_PARAM_OUTPUT_RANGE:     m_options.linearity().m_showOutputRangeColumn = value.toBool();
+                                                    m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
+                                                    break;
                     default:                        assert(0);                                                          break;
                 }
             }
@@ -720,7 +819,22 @@ void OptionsDialog::applyProperty()
             break;
 
         case OPTION_PAGE_MEASURE_VIEW_TEXT:
+            {
+                switch(param)
+                    {
+                        case MWO_PARAM_FONT:                m_options.measureView().m_font.fromString(value.toString());           break;
+                        case MWO_PARAM_ID:                  m_options.measureView().m_showExternalID = value.toBool();                    break;
+                        case MWO_PARAM_DISPLAYING_VALUE:    m_options.measureView().m_showDisplayingValueType = value.toInt();           break;
+                        case MWO_PARAM_COLOR_CONTROL_ERROR: m_options.measureView().m_colorControlError.setNamedColor(value.toString()); break;
+                        case MWO_PARAM_COLOR_LIMIT_ERROR:   m_options.measureView().m_colorLimitError.setNamedColor(value.toString());   break;
+                        default:                            assert(0);                                                                      break;
+                    }
 
+                    for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+                    {
+                        m_options.m_updateColumnView[type] = true;
+                    }
+                }
             break;
 
         case OPTION_PAGE_MEASURE_VIEW_COLUMN:
@@ -777,7 +891,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
     {
         // set options to dialog
         //
-        dialog->m_linearity = m_options.getLinearity();
+        dialog->m_linearity = m_options.linearity();
     }
 
     QtVariantProperty *property = nullptr;
@@ -785,15 +899,15 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_RANGE_TYPE );
     if (property != nullptr)
     {
-        property->setValue( m_options.getLinearity().m_rangeType );
+        property->setValue( m_options.linearity().m_rangeType );
     }
 
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_POINT_COUNT );
     if (property != nullptr)
     {
-        property->setValue( m_options.getLinearity().m_pointBase.count() );
+        property->setValue( m_options.linearity().m_pointBase.count() );
 
-        switch( m_options.getLinearity().m_rangeType)
+        switch( m_options.linearity().m_rangeType)
         {
             case LO_RANGE_TYPE_MANUAL:      property->setEnabled(false);    break;
             case LO_RANGE_TYPE_AUTOMATIC:   property->setEnabled(true);     break;
@@ -804,9 +918,9 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_LOW_RANGE );
     if (property != nullptr)
     {
-        property->setValue( m_options.getLinearity().m_lowLimitRange );
+        property->setValue( m_options.linearity().m_lowLimitRange );
 
-        switch( m_options.getLinearity().m_rangeType)
+        switch( m_options.linearity().m_rangeType)
         {
             case LO_RANGE_TYPE_MANUAL:      property->setEnabled(false);    break;
             case LO_RANGE_TYPE_AUTOMATIC:   property->setEnabled(true);     break;
@@ -817,9 +931,9 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_HIGH_RANGE );
     if (property != nullptr)
     {
-        property->setValue( m_options.getLinearity().m_highLimitRange );
+        property->setValue( m_options.linearity().m_highLimitRange );
 
-        switch( m_options.getLinearity().m_rangeType)
+        switch( m_options.linearity().m_rangeType)
         {
             case LO_RANGE_TYPE_MANUAL:      property->setEnabled(false);    break;
             case LO_RANGE_TYPE_AUTOMATIC:   property->setEnabled(true);     break;
@@ -831,8 +945,66 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_VALUE_POINTS );
     if (property != nullptr)
     {
-        property->setValue( m_options.getLinearity().m_pointBase.text() );
+        property->setValue( m_options.linearity().m_pointBase.text() );
     }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::updateMeasureViewPage(bool isDialog)
+{
+    PropertyPage* page = m_pageList[OPTION_PAGE_MEASURE_VIEW_COLUMN];
+    if (page == nullptr)
+    {
+        return;
+    }
+
+    OptionsMeasureViewHeaderDialog* dialog = (OptionsMeasureViewHeaderDialog*) page->getWidget();
+    if (dialog == nullptr)
+    {
+        return;
+    }
+
+    if (isDialog == true)
+    {
+        // get options from dialog
+        //
+        m_options.setMeasureView( dialog->m_header );
+
+        int measureType = dialog->m_measureType;
+        if (measureType >= 0 || measureType < MEASURE_TYPE_COUNT)
+        {
+            m_options.m_updateColumnView[measureType] = true;
+        }
+    }
+    else
+    {
+        // set options to dialog
+        //
+        dialog->m_header = m_options.measureView();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::loadSettings()
+{
+    QSettings s;
+
+    QByteArray geometry = s.value(QString("%1OptionsDialog/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY)).toByteArray();
+    restoreGeometry( geometry );
+
+    m_activePage = s.value( QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), OPTION_PAGE_LINEARETY_MEASURE).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::saveSettings()
+{
+    QSettings s;
+
+    s.setValue(QString("%1OptionsDialog/Geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY), saveGeometry());
+    s.setValue(QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), m_activePage);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -858,14 +1030,14 @@ bool OptionsDialog::event(QEvent * e)
 {
     if ( e->type() == QEvent::Hide)
     {
-        saveWindowPosition(this);
+        saveSettings();
     }
 
     if (e->type() == QEvent::KeyRelease)
     {
-        if (activePage >= 0 && activePage < m_pageList.count() )
+        if (m_activePage >= 0 && m_activePage < m_pageList.count() )
         {
-            PropertyPage* pActivePage = m_pageList.at(activePage);
+            PropertyPage* pActivePage = m_pageList.at(m_activePage);
             if (pActivePage != nullptr )
             {
                 if (pActivePage->getType() == PROPERTY_PAGE_TYPE_LIST)
@@ -886,7 +1058,6 @@ bool OptionsDialog::event(QEvent * e)
         }
 
     }
-
 
     return QDialog::event(e);
 }
