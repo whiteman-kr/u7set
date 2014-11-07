@@ -254,6 +254,7 @@ QtMultiTextEdit::QtMultiTextEdit(QWidget* parent):
 	setLayout(lt);
 
 	m_lineEdit->installEventFilter(this);
+	QTimer::singleShot(0, m_lineEdit, SLOT(setFocus()));
 }
 
 bool QtMultiTextEdit::eventFilter(QObject* watched, QEvent* event)
@@ -1415,6 +1416,7 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 	// Set the new property value in all objects
 	//
 	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property);
+	QList<std::shared_ptr<QObject>> modifiedObjects;
 
 	if (objects.size() == 0)
 	{
@@ -1428,6 +1430,12 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 	{
 		QObject* pObject = i->get();
 
+		// Do not set property, if it has same value
+		if (pObject->property(property->propertyName().toStdString().c_str()) == value)
+		{
+			continue;
+		}
+
 		pObject->setProperty(property->propertyName().toStdString().c_str(), value);
 
 		if (pObject->property(property->propertyName().toStdString().c_str()) != value && errorString.isEmpty() == true)
@@ -1435,6 +1443,8 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 			errorString = QString("Property: %1 - incorrect input value")
 						  .arg(property->propertyName());
 		}
+
+		modifiedObjects.append(*i);
 	}
 
 	if (errorString.isEmpty() == false)
@@ -1442,7 +1452,10 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 		emit showErrorMessage(errorString);
 	}
 
-	emit propertiesChanged(objects);
+	if (modifiedObjects.count() > 0)
+	{
+		emit propertiesChanged(modifiedObjects);
+	}
 
 	return;
 }
