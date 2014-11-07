@@ -61,6 +61,7 @@ private:
 	QTextEdit* m_textEdit = nullptr;
 
 	virtual void accept();
+	virtual void closeEvent(QCloseEvent *event);
 };
 
 class QtMultiCheckBox : public QWidget

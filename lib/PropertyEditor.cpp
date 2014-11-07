@@ -1,4 +1,5 @@
 #include "../include/PropertyEditor.h"
+#include "Settings.h"
 //#include "PropertyEditor.h"
 
 #include <QtTreePropertyBrowser>
@@ -165,9 +166,15 @@ QColor QtMultiColorEdit::colorFromText(const QString& t)
 // ---------MultiLineEdit----------
 //
 MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text):
-	QDialog(parent)
+	QDialog(parent, Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle("Text Editor");
+
+	if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
+	{
+		move(theSettings.m_multiLinePropertyEditorWindowPos);
+		restoreGeometry(theSettings.m_multiLinePropertyEditorGeometry);
+	}
 
 	QString value = text;
 
@@ -200,6 +207,13 @@ MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text):
 QString MultiLineEdit::text()
 {
 	return m_text;
+}
+
+void MultiLineEdit::closeEvent(QCloseEvent *event)
+{
+	Q_UNUSED(event);
+	theSettings.m_multiLinePropertyEditorWindowPos = pos();
+	theSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
 }
 
 void MultiLineEdit::accept()
