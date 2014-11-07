@@ -61,6 +61,7 @@ private:
 	QTextEdit* m_textEdit = nullptr;
 
 	virtual void accept();
+	virtual void closeEvent(QCloseEvent *event);
 };
 
 class QtMultiCheckBox : public QWidget
@@ -171,6 +172,9 @@ public:
 	void emitSetValue(QtProperty* property, const QVariant& value);
 
 private:
+	virtual QString displayText(const QtProperty *property) const;
+
+private:
     struct Data
     {
         QVariant value;
@@ -223,6 +227,7 @@ class PropertyEditor : public QtTreePropertyBrowser
 public:
 	PropertyEditor(QWidget* parent);
 
+	void updateProperty(const QString& propertyName);
 	// Public functions
 	//
 public:
@@ -233,7 +238,6 @@ protected:
 	virtual void valueChanged(QtProperty* property, QVariant value);
 
 protected slots:
-	void updateProperty(const QString& propertyName);
 	void updateProperties();
 
 private slots:
@@ -266,12 +270,14 @@ protected:
 	QtMultiVariantPropertyManager* m_propertyBoolManager = nullptr;
 	QtMultiVariantPropertyManager* m_propertyColorManager = nullptr;
 
-	QMap<QString, std::shared_ptr<QObject>> m_propToClassMap;   //Property Name to Class Map
+	QMap<QtProperty*, std::shared_ptr<QObject>> m_propToClassMap;   //Property Name to Class Map
 
 	//Private Data
 	//
 private:
 	void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values);
+	QtProperty* createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QVariant& value, QVariant::Type type, bool sameValue);
+
 };
 
 #endif // PROPERTYEDITOR_H

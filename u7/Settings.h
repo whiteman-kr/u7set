@@ -68,6 +68,11 @@ public:
     //
     QPoint m_abflPropertiesWindowPos;
     QByteArray m_abflPropertiesWindowGeometry;
+
+	// Property Editor Options
+	//
+	QPoint m_multiLinePropertyEditorWindowPos;
+	QByteArray m_multiLinePropertyEditorGeometry;
 private:
 	// --
 	//

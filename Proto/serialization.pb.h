@@ -73,6 +73,8 @@ class DeviceChassis;
 class DeviceModule;
 class DeviceController;
 class DeviceDiagSignal;
+class ModuleConfiguration;
+class ModuleConfigurationValue;
 
 enum SchemeUnit {
   Display = 0,
@@ -4328,23 +4330,14 @@ class DeviceModule : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
-  // optional .Proto.wstring configuration_input = 3;
-  inline bool has_configuration_input() const;
-  inline void clear_configuration_input();
-  static const int kConfigurationInputFieldNumber = 3;
-  inline const ::Proto::wstring& configuration_input() const;
-  inline ::Proto::wstring* mutable_configuration_input();
-  inline ::Proto::wstring* release_configuration_input();
-  inline void set_allocated_configuration_input(::Proto::wstring* configuration_input);
-
-  // optional .Proto.wstring configuration_output = 4;
-  inline bool has_configuration_output() const;
-  inline void clear_configuration_output();
-  static const int kConfigurationOutputFieldNumber = 4;
-  inline const ::Proto::wstring& configuration_output() const;
-  inline ::Proto::wstring* mutable_configuration_output();
-  inline ::Proto::wstring* release_configuration_output();
-  inline void set_allocated_configuration_output(::Proto::wstring* configuration_output);
+  // optional .Proto.ModuleConfiguration module_configuration = 3;
+  inline bool has_module_configuration() const;
+  inline void clear_module_configuration();
+  static const int kModuleConfigurationFieldNumber = 3;
+  inline const ::Proto::ModuleConfiguration& module_configuration() const;
+  inline ::Proto::ModuleConfiguration* mutable_module_configuration();
+  inline ::Proto::ModuleConfiguration* release_module_configuration();
+  inline void set_allocated_module_configuration(::Proto::ModuleConfiguration* module_configuration);
 
   // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
  private:
@@ -4352,20 +4345,17 @@ class DeviceModule : public ::google::protobuf::Message {
   inline void clear_has_place();
   inline void set_has_type();
   inline void clear_has_type();
-  inline void set_has_configuration_input();
-  inline void clear_has_configuration_input();
-  inline void set_has_configuration_output();
-  inline void clear_has_configuration_output();
+  inline void set_has_module_configuration();
+  inline void clear_has_module_configuration();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 place_;
   ::google::protobuf::int32 type_;
-  ::Proto::wstring* configuration_input_;
-  ::Proto::wstring* configuration_output_;
+  ::Proto::ModuleConfiguration* module_configuration_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4517,6 +4507,208 @@ class DeviceDiagSignal : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static DeviceDiagSignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ModuleConfiguration : public ::google::protobuf::Message {
+ public:
+  ModuleConfiguration();
+  virtual ~ModuleConfiguration();
+
+  ModuleConfiguration(const ModuleConfiguration& from);
+
+  inline ModuleConfiguration& operator=(const ModuleConfiguration& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ModuleConfiguration& default_instance();
+
+  void Swap(ModuleConfiguration* other);
+
+  // implements Message ----------------------------------------------
+
+  ModuleConfiguration* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ModuleConfiguration& from);
+  void MergeFrom(const ModuleConfiguration& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string struct_description = 1;
+  inline bool has_struct_description() const;
+  inline void clear_struct_description();
+  static const int kStructDescriptionFieldNumber = 1;
+  inline const ::std::string& struct_description() const;
+  inline void set_struct_description(const ::std::string& value);
+  inline void set_struct_description(const char* value);
+  inline void set_struct_description(const char* value, size_t size);
+  inline ::std::string* mutable_struct_description();
+  inline ::std::string* release_struct_description();
+  inline void set_allocated_struct_description(::std::string* struct_description);
+
+  // repeated .Proto.ModuleConfigurationValue values = 2;
+  inline int values_size() const;
+  inline void clear_values();
+  static const int kValuesFieldNumber = 2;
+  inline const ::Proto::ModuleConfigurationValue& values(int index) const;
+  inline ::Proto::ModuleConfigurationValue* mutable_values(int index);
+  inline ::Proto::ModuleConfigurationValue* add_values();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue >&
+      values() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue >*
+      mutable_values();
+
+  // @@protoc_insertion_point(class_scope:Proto.ModuleConfiguration)
+ private:
+  inline void set_has_struct_description();
+  inline void clear_has_struct_description();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* struct_description_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue > values_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ModuleConfiguration* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ModuleConfigurationValue : public ::google::protobuf::Message {
+ public:
+  ModuleConfigurationValue();
+  virtual ~ModuleConfigurationValue();
+
+  ModuleConfigurationValue(const ModuleConfigurationValue& from);
+
+  inline ModuleConfigurationValue& operator=(const ModuleConfigurationValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ModuleConfigurationValue& default_instance();
+
+  void Swap(ModuleConfigurationValue* other);
+
+  // implements Message ----------------------------------------------
+
+  ModuleConfigurationValue* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ModuleConfigurationValue& from);
+  void MergeFrom(const ModuleConfigurationValue& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string name = 1;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 1;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
+
+  // required string value = 2;
+  inline bool has_value() const;
+  inline void clear_value();
+  static const int kValueFieldNumber = 2;
+  inline const ::std::string& value() const;
+  inline void set_value(const ::std::string& value);
+  inline void set_value(const char* value);
+  inline void set_value(const char* value, size_t size);
+  inline ::std::string* mutable_value();
+  inline ::std::string* release_value();
+  inline void set_allocated_value(::std::string* value);
+
+  // @@protoc_insertion_point(class_scope:Proto.ModuleConfigurationValue)
+ private:
+  inline void set_has_name();
+  inline void clear_has_name();
+  inline void set_has_value();
+  inline void clear_has_value();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* name_;
+  ::std::string* value_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ModuleConfigurationValue* default_instance_;
 };
 // ===================================================================
 
@@ -8867,79 +9059,41 @@ inline void DeviceModule::set_type(::google::protobuf::int32 value) {
   type_ = value;
 }
 
-// optional .Proto.wstring configuration_input = 3;
-inline bool DeviceModule::has_configuration_input() const {
+// optional .Proto.ModuleConfiguration module_configuration = 3;
+inline bool DeviceModule::has_module_configuration() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void DeviceModule::set_has_configuration_input() {
+inline void DeviceModule::set_has_module_configuration() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void DeviceModule::clear_has_configuration_input() {
+inline void DeviceModule::clear_has_module_configuration() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void DeviceModule::clear_configuration_input() {
-  if (configuration_input_ != NULL) configuration_input_->::Proto::wstring::Clear();
-  clear_has_configuration_input();
+inline void DeviceModule::clear_module_configuration() {
+  if (module_configuration_ != NULL) module_configuration_->::Proto::ModuleConfiguration::Clear();
+  clear_has_module_configuration();
 }
-inline const ::Proto::wstring& DeviceModule::configuration_input() const {
-  return configuration_input_ != NULL ? *configuration_input_ : *default_instance_->configuration_input_;
+inline const ::Proto::ModuleConfiguration& DeviceModule::module_configuration() const {
+  return module_configuration_ != NULL ? *module_configuration_ : *default_instance_->module_configuration_;
 }
-inline ::Proto::wstring* DeviceModule::mutable_configuration_input() {
-  set_has_configuration_input();
-  if (configuration_input_ == NULL) configuration_input_ = new ::Proto::wstring;
-  return configuration_input_;
+inline ::Proto::ModuleConfiguration* DeviceModule::mutable_module_configuration() {
+  set_has_module_configuration();
+  if (module_configuration_ == NULL) module_configuration_ = new ::Proto::ModuleConfiguration;
+  return module_configuration_;
 }
-inline ::Proto::wstring* DeviceModule::release_configuration_input() {
-  clear_has_configuration_input();
-  ::Proto::wstring* temp = configuration_input_;
-  configuration_input_ = NULL;
+inline ::Proto::ModuleConfiguration* DeviceModule::release_module_configuration() {
+  clear_has_module_configuration();
+  ::Proto::ModuleConfiguration* temp = module_configuration_;
+  module_configuration_ = NULL;
   return temp;
 }
-inline void DeviceModule::set_allocated_configuration_input(::Proto::wstring* configuration_input) {
-  delete configuration_input_;
-  configuration_input_ = configuration_input;
-  if (configuration_input) {
-    set_has_configuration_input();
+inline void DeviceModule::set_allocated_module_configuration(::Proto::ModuleConfiguration* module_configuration) {
+  delete module_configuration_;
+  module_configuration_ = module_configuration;
+  if (module_configuration) {
+    set_has_module_configuration();
   } else {
-    clear_has_configuration_input();
-  }
-}
-
-// optional .Proto.wstring configuration_output = 4;
-inline bool DeviceModule::has_configuration_output() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void DeviceModule::set_has_configuration_output() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void DeviceModule::clear_has_configuration_output() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void DeviceModule::clear_configuration_output() {
-  if (configuration_output_ != NULL) configuration_output_->::Proto::wstring::Clear();
-  clear_has_configuration_output();
-}
-inline const ::Proto::wstring& DeviceModule::configuration_output() const {
-  return configuration_output_ != NULL ? *configuration_output_ : *default_instance_->configuration_output_;
-}
-inline ::Proto::wstring* DeviceModule::mutable_configuration_output() {
-  set_has_configuration_output();
-  if (configuration_output_ == NULL) configuration_output_ = new ::Proto::wstring;
-  return configuration_output_;
-}
-inline ::Proto::wstring* DeviceModule::release_configuration_output() {
-  clear_has_configuration_output();
-  ::Proto::wstring* temp = configuration_output_;
-  configuration_output_ = NULL;
-  return temp;
-}
-inline void DeviceModule::set_allocated_configuration_output(::Proto::wstring* configuration_output) {
-  delete configuration_output_;
-  configuration_output_ = configuration_output;
-  if (configuration_output) {
-    set_has_configuration_output();
-  } else {
-    clear_has_configuration_output();
+    clear_has_module_configuration();
   }
 }
 
@@ -8950,6 +9104,249 @@ inline void DeviceModule::set_allocated_configuration_output(::Proto::wstring* c
 // -------------------------------------------------------------------
 
 // DeviceDiagSignal
+
+// -------------------------------------------------------------------
+
+// ModuleConfiguration
+
+// optional string struct_description = 1;
+inline bool ModuleConfiguration::has_struct_description() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ModuleConfiguration::set_has_struct_description() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ModuleConfiguration::clear_has_struct_description() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ModuleConfiguration::clear_struct_description() {
+  if (struct_description_ != &::google::protobuf::internal::kEmptyString) {
+    struct_description_->clear();
+  }
+  clear_has_struct_description();
+}
+inline const ::std::string& ModuleConfiguration::struct_description() const {
+  return *struct_description_;
+}
+inline void ModuleConfiguration::set_struct_description(const ::std::string& value) {
+  set_has_struct_description();
+  if (struct_description_ == &::google::protobuf::internal::kEmptyString) {
+    struct_description_ = new ::std::string;
+  }
+  struct_description_->assign(value);
+}
+inline void ModuleConfiguration::set_struct_description(const char* value) {
+  set_has_struct_description();
+  if (struct_description_ == &::google::protobuf::internal::kEmptyString) {
+    struct_description_ = new ::std::string;
+  }
+  struct_description_->assign(value);
+}
+inline void ModuleConfiguration::set_struct_description(const char* value, size_t size) {
+  set_has_struct_description();
+  if (struct_description_ == &::google::protobuf::internal::kEmptyString) {
+    struct_description_ = new ::std::string;
+  }
+  struct_description_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ModuleConfiguration::mutable_struct_description() {
+  set_has_struct_description();
+  if (struct_description_ == &::google::protobuf::internal::kEmptyString) {
+    struct_description_ = new ::std::string;
+  }
+  return struct_description_;
+}
+inline ::std::string* ModuleConfiguration::release_struct_description() {
+  clear_has_struct_description();
+  if (struct_description_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = struct_description_;
+    struct_description_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ModuleConfiguration::set_allocated_struct_description(::std::string* struct_description) {
+  if (struct_description_ != &::google::protobuf::internal::kEmptyString) {
+    delete struct_description_;
+  }
+  if (struct_description) {
+    set_has_struct_description();
+    struct_description_ = struct_description;
+  } else {
+    clear_has_struct_description();
+    struct_description_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// repeated .Proto.ModuleConfigurationValue values = 2;
+inline int ModuleConfiguration::values_size() const {
+  return values_.size();
+}
+inline void ModuleConfiguration::clear_values() {
+  values_.Clear();
+}
+inline const ::Proto::ModuleConfigurationValue& ModuleConfiguration::values(int index) const {
+  return values_.Get(index);
+}
+inline ::Proto::ModuleConfigurationValue* ModuleConfiguration::mutable_values(int index) {
+  return values_.Mutable(index);
+}
+inline ::Proto::ModuleConfigurationValue* ModuleConfiguration::add_values() {
+  return values_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue >&
+ModuleConfiguration::values() const {
+  return values_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue >*
+ModuleConfiguration::mutable_values() {
+  return &values_;
+}
+
+// -------------------------------------------------------------------
+
+// ModuleConfigurationValue
+
+// required string name = 1;
+inline bool ModuleConfigurationValue::has_name() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ModuleConfigurationValue::set_has_name() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ModuleConfigurationValue::clear_has_name() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ModuleConfigurationValue::clear_name() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    name_->clear();
+  }
+  clear_has_name();
+}
+inline const ::std::string& ModuleConfigurationValue::name() const {
+  return *name_;
+}
+inline void ModuleConfigurationValue::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void ModuleConfigurationValue::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void ModuleConfigurationValue::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ModuleConfigurationValue::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  return name_;
+}
+inline ::std::string* ModuleConfigurationValue::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ModuleConfigurationValue::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string value = 2;
+inline bool ModuleConfigurationValue::has_value() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ModuleConfigurationValue::set_has_value() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ModuleConfigurationValue::clear_has_value() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ModuleConfigurationValue::clear_value() {
+  if (value_ != &::google::protobuf::internal::kEmptyString) {
+    value_->clear();
+  }
+  clear_has_value();
+}
+inline const ::std::string& ModuleConfigurationValue::value() const {
+  return *value_;
+}
+inline void ModuleConfigurationValue::set_value(const ::std::string& value) {
+  set_has_value();
+  if (value_ == &::google::protobuf::internal::kEmptyString) {
+    value_ = new ::std::string;
+  }
+  value_->assign(value);
+}
+inline void ModuleConfigurationValue::set_value(const char* value) {
+  set_has_value();
+  if (value_ == &::google::protobuf::internal::kEmptyString) {
+    value_ = new ::std::string;
+  }
+  value_->assign(value);
+}
+inline void ModuleConfigurationValue::set_value(const char* value, size_t size) {
+  set_has_value();
+  if (value_ == &::google::protobuf::internal::kEmptyString) {
+    value_ = new ::std::string;
+  }
+  value_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ModuleConfigurationValue::mutable_value() {
+  set_has_value();
+  if (value_ == &::google::protobuf::internal::kEmptyString) {
+    value_ = new ::std::string;
+  }
+  return value_;
+}
+inline ::std::string* ModuleConfigurationValue::release_value() {
+  clear_has_value();
+  if (value_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = value_;
+    value_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ModuleConfigurationValue::set_allocated_value(::std::string* value) {
+  if (value_ != &::google::protobuf::internal::kEmptyString) {
+    delete value_;
+  }
+  if (value) {
+    set_has_value();
+    value_ = value;
+  } else {
+    clear_has_value();
+    value_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
 
 
 // @@protoc_insertion_point(namespace_scope)

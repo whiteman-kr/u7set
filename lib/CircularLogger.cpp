@@ -4,7 +4,7 @@
 #include <QDateTime>
 #include <QThread>
 #include <QApplication>
-#include <QHostInfo>
+#include <QTimer>
 #include <QDebug>
 
 
@@ -43,32 +43,25 @@ CircularLogger::~CircularLogger()
 		m_thread->wait();
 	}
 
-	if (m_circularLoggerImplementation != nullptr)
+	if (m_circularLoggerWorker != nullptr)
 	{
-		delete m_circularLoggerImplementation;
+		delete m_circularLoggerWorker;
 	}
-}
-
-void CircularLogger::writeRecord(const QString& record)
-{
-	if (m_circularLoggerImplementation == nullptr)
-	{
-		qDebug() << "Error writing message " << record << " You should init log";
-		Q_ASSERT(false);
-		return;
-	}
-	m_circularLoggerImplementation->pushRecord(record);
 }
 
 void CircularLogger::initLog(QString logName, int fileCount, int fileSizeInMB, QString placementPath)
 {
-	m_circularLoggerImplementation = new CircularLoggerImplementation(logName, fileCount, fileSizeInMB, placementPath);
+	m_circularLoggerWorker = new CircularLoggerWorker(logName, fileCount, fileSizeInMB, placementPath);
 	m_thread = new QThread(this);
 	m_thread->start();
-	m_circularLoggerImplementation->moveToThread(m_thread);
+	m_circularLoggerWorker->moveToThread(m_thread);
+
+	connect(this, &CircularLogger::writeRecord,
+			m_circularLoggerWorker, &CircularLoggerWorker::writeRecord,
+			Qt::QueuedConnection);
 }
 
-QString CircularLogger::composeRecord(int type, int category, QString function, QString message)
+QString CircularLogger::composeRecord(int type, int category, const QString &function, const QString &message)
 {
 	QString record;
 
@@ -82,7 +75,7 @@ QString CircularLogger::composeRecord(int type, int category, QString function, 
 		record = "???";
 	}
 
-	record += '_';
+	record += ' ';
 
 	if (category >= 0 && category < CATEGORY_TYPE_COUNT)
 	{
@@ -97,13 +90,15 @@ QString CircularLogger::composeRecord(int type, int category, QString function, 
 	record += "  ";
 	record += QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz");
 
-	record += "  ";
+	record += "  \"";
 	record += message;
+	record += '\"';
 
 	if (!function.isEmpty())
 	{
-		record += " FN=";
+		record += " \"FN=";
 		record += function;
+		record += '\"';
 	}
 	else
 	{
@@ -114,18 +109,16 @@ QString CircularLogger::composeRecord(int type, int category, QString function, 
 }
 
 
-CircularLoggerImplementation::CircularLoggerImplementation(QString logName, int fileCount, int fileSizeInMB, QString placementPath) :
+CircularLoggerWorker::CircularLoggerWorker(QString logName, int fileCount, int fileSizeInMB, QString placementPath) :
 	QObject(nullptr),
-	m_queue(1000),
 	m_logName(logName),
 	m_path(placementPath.isEmpty() ? qApp->applicationDirPath() + "/Log" : placementPath),
 	m_fileCount(fileCount),
 	m_fileSizeLimit(fileSizeInMB)
 {
-	connect(this, &CircularLoggerImplementation::queueIsNotEmpty, this, &CircularLoggerImplementation::flushQueue, Qt::QueuedConnection);
 }
 
-CircularLoggerImplementation::~CircularLoggerImplementation()
+CircularLoggerWorker::~CircularLoggerWorker()
 {
 	if (m_file != nullptr)
 	{
@@ -135,15 +128,18 @@ CircularLoggerImplementation::~CircularLoggerImplementation()
 	}
 }
 
-void CircularLoggerImplementation::pushRecord(const QString& record)
+void CircularLoggerWorker::writeRecord(const QString record)
 {
-	m_queue.push(record);
-	emit queueIsNotEmpty();
+	if (m_file == nullptr)
+	{
+		detectFiles();
+	}
+	*m_stream << record << '\n';
 
 	qDebug() << record;
 }
 
-void CircularLoggerImplementation::close()
+void CircularLoggerWorker::close()
 {
 	if (m_file != nullptr)
 	{
@@ -152,31 +148,12 @@ void CircularLoggerImplementation::close()
 	}
 }
 
-void CircularLoggerImplementation::flushQueue()
+void CircularLoggerWorker::flushStream()
 {
-	if (m_file == nullptr)
-	{
-		detectFiles();
-	}
-	while (!m_queue.isEmpty())
-	{
-		checkFileSize();
-		if (m_queue.isFull())
-		{
-			m_queue.clear();
-			*m_stream << QString("APP_ERR  %1  Log file records queue is full FN=%2")
-						 .arg(QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz"))
-						 .arg(MESSAGE_POSITION);
-		}
-		else
-		{
-			*m_stream << m_queue.pull() << '\n';
-		}
-	}
 	m_stream->flush();
 }
 
-void CircularLoggerImplementation::detectFiles()
+void CircularLoggerWorker::detectFiles()
 {
 	QDir dir;
 	if (!dir.exists(m_path))
@@ -218,7 +195,7 @@ void CircularLoggerImplementation::detectFiles()
 	openFile(m_endFileNumber);
 }
 
-void CircularLoggerImplementation::removeOldFiles()
+void CircularLoggerWorker::removeOldFiles()
 {
 	while (m_endFileID - m_beginFileID >= m_fileCount)
 	{
@@ -232,7 +209,7 @@ void CircularLoggerImplementation::removeOldFiles()
 	}
 }
 
-void CircularLoggerImplementation::checkFileSize()
+void CircularLoggerWorker::checkFileSize()
 {
 	if (m_file->size() >= m_fileSizeLimit * 1024 * 1024)
 	{
@@ -253,7 +230,7 @@ void CircularLoggerImplementation::checkFileSize()
 	}
 }
 
-int CircularLoggerImplementation::getFileID(int index)
+int CircularLoggerWorker::getFileID(int index)
 {
 	QFile file(fileName(index));
 	file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -261,18 +238,22 @@ int CircularLoggerImplementation::getFileID(int index)
 	return in.readLine().toInt();
 }
 
-QString CircularLoggerImplementation::fileName(int index)
+QString CircularLoggerWorker::fileName(int index)
 {
 	return m_path + '/' + m_logName + '_' + QString("%1").arg(index, 3, 10, QChar('0')) + ".log";
 }
 
-void CircularLoggerImplementation::openFile(int index)
+void CircularLoggerWorker::openFile(int index)
 {
 	if (m_file == nullptr)
 	{
 		m_file = new QFile(fileName(index));
 		m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 		m_stream = new QTextStream(m_file);
+
+		QTimer* timer = new QTimer(this);
+		connect(timer, &QTimer::timeout, this, &CircularLoggerWorker::flushStream);
+		timer->start(1000);
 	}
 	else
 	{
@@ -286,25 +267,21 @@ void CircularLoggerImplementation::openFile(int index)
 	writeFirstRecord();
 }
 
-void CircularLoggerImplementation::writeFirstRecord()
+void CircularLoggerWorker::writeFirstRecord()
 {
-	*m_stream << tr("\n# Opened ")
+	*m_stream << tr("\nLOG OPN  ")
 			  << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz")
-			  << "  by application \""
-			  << qApp->applicationName()
-			  << "\" host="
-			  << QHostInfo::localHostName()
-			  << "\n\n";
+			  << "  \"by application "
+			  << qApp->applicationFilePath()
+			  << "\"\n";
 }
 
-void CircularLoggerImplementation::writeLastRecord()
+void CircularLoggerWorker::writeLastRecord()
 {
-	*m_stream << tr("\n# Closed ")
+	*m_stream << tr("LOG CLS  ")
 			  << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz")
-			  << "  by application \""
-			  << qApp->applicationName()
-			  << "\" host="
-			  << QHostInfo::localHostName()
-			  << "\n\n";
+			  << "  \"by application "
+			  << qApp->applicationFilePath()
+			  << "\"\n";
 	m_stream->flush();
 }

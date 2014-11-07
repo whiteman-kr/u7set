@@ -137,6 +137,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* DeviceDiagSignal_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   DeviceDiagSignal_reflection_ = NULL;
+const ::google::protobuf::Descriptor* ModuleConfiguration_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  ModuleConfiguration_reflection_ = NULL;
+const ::google::protobuf::Descriptor* ModuleConfigurationValue_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  ModuleConfigurationValue_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* SchemeUnit_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblSignalType_descriptor_ = NULL;
@@ -789,11 +795,10 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceChassis));
   DeviceModule_descriptor_ = file->message_type(36);
-  static const int DeviceModule_offsets_[4] = {
+  static const int DeviceModule_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, place_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, type_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, configuration_input_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, configuration_output_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, module_configuration_),
   };
   DeviceModule_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -834,6 +839,38 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceDiagSignal));
+  ModuleConfiguration_descriptor_ = file->message_type(39);
+  static const int ModuleConfiguration_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, struct_description_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, values_),
+  };
+  ModuleConfiguration_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      ModuleConfiguration_descriptor_,
+      ModuleConfiguration::default_instance_,
+      ModuleConfiguration_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(ModuleConfiguration));
+  ModuleConfigurationValue_descriptor_ = file->message_type(40);
+  static const int ModuleConfigurationValue_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, value_),
+  };
+  ModuleConfigurationValue_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      ModuleConfigurationValue_descriptor_,
+      ModuleConfigurationValue::default_instance_,
+      ModuleConfigurationValue_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(ModuleConfigurationValue));
   SchemeUnit_descriptor_ = file->enum_type(0);
   ConnectionDirrection_descriptor_ = file->enum_type(1);
   FblSignalType_descriptor_ = file->enum_type(2);
@@ -928,6 +965,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
     DeviceController_descriptor_, &DeviceController::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DeviceDiagSignal_descriptor_, &DeviceDiagSignal::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    ModuleConfiguration_descriptor_, &ModuleConfiguration::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    ModuleConfigurationValue_descriptor_, &ModuleConfigurationValue::default_instance());
 }
 
 }  // namespace
@@ -1011,6 +1052,10 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete DeviceController_reflection_;
   delete DeviceDiagSignal::default_instance_;
   delete DeviceDiagSignal_reflection_;
+  delete ModuleConfiguration::default_instance_;
+  delete ModuleConfiguration_reflection_;
+  delete ModuleConfigurationValue::default_instance_;
+  delete ModuleConfigurationValue_reflection_;
 }
 
 void protobuf_AddDesc_serialization_2eproto() {
@@ -1136,17 +1181,20 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\030j \001(\0132\027.Proto.DeviceDiagSignal\"\014\n\nDevic"
     "eRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRack\"2\n\rD"
     "eviceChassis\022\020\n\005place\030\001 \001(\005:\0010\022\017\n\004type\030\002"
-    " \001(\005:\0010\"\214\001\n\014DeviceModule\022\020\n\005place\030\001 \001(\005:"
-    "\0010\022\017\n\004type\030\002 \001(\005:\0010\022+\n\023configuration_inp"
-    "ut\030\003 \001(\0132\016.Proto.wstring\022,\n\024configuratio"
-    "n_output\030\004 \001(\0132\016.Proto.wstring\"\022\n\020Device"
-    "Controller\"\022\n\020DeviceDiagSignal*3\n\nScheme"
-    "Unit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inc"
-    "h\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n"
-    "\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022"
-    "\014\n\010Discrete\020\001*N\n\014FblParamType\022\022\n\016AnalogI"
-    "ntegral\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDi"
-    "screteValue\020\002", 5053);
+    " \001(\005:\0010\"k\n\014DeviceModule\022\020\n\005place\030\001 \001(\005:\001"
+    "0\022\017\n\004type\030\002 \001(\005:\0010\0228\n\024module_configurati"
+    "on\030\003 \001(\0132\032.Proto.ModuleConfiguration\"\022\n\020"
+    "DeviceController\"\022\n\020DeviceDiagSignal\"b\n\023"
+    "ModuleConfiguration\022\032\n\022struct_descriptio"
+    "n\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleCo"
+    "nfigurationValue\"7\n\030ModuleConfigurationV"
+    "alue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSch"
+    "emeUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004"
+    "Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020"
+    "\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog"
+    "\020\000\022\014\n\010Discrete\020\001*N\n\014FblParamType\022\022\n\016Anal"
+    "ogIntegral\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n"
+    "\rDiscreteValue\020\002", 5176);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -1188,6 +1236,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   DeviceModule::default_instance_ = new DeviceModule();
   DeviceController::default_instance_ = new DeviceController();
   DeviceDiagSignal::default_instance_ = new DeviceDiagSignal();
+  ModuleConfiguration::default_instance_ = new ModuleConfiguration();
+  ModuleConfigurationValue::default_instance_ = new ModuleConfigurationValue();
   Uuid::default_instance_->InitAsDefaultInstance();
   wstring::default_instance_->InitAsDefaultInstance();
   FontParam::default_instance_->InitAsDefaultInstance();
@@ -1227,6 +1277,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   DeviceModule::default_instance_->InitAsDefaultInstance();
   DeviceController::default_instance_->InitAsDefaultInstance();
   DeviceDiagSignal::default_instance_->InitAsDefaultInstance();
+  ModuleConfiguration::default_instance_->InitAsDefaultInstance();
+  ModuleConfigurationValue::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_serialization_2eproto);
 }
 
@@ -13141,8 +13193,7 @@ void DeviceChassis::Swap(DeviceChassis* other) {
 #ifndef _MSC_VER
 const int DeviceModule::kPlaceFieldNumber;
 const int DeviceModule::kTypeFieldNumber;
-const int DeviceModule::kConfigurationInputFieldNumber;
-const int DeviceModule::kConfigurationOutputFieldNumber;
+const int DeviceModule::kModuleConfigurationFieldNumber;
 #endif  // !_MSC_VER
 
 DeviceModule::DeviceModule()
@@ -13151,8 +13202,7 @@ DeviceModule::DeviceModule()
 }
 
 void DeviceModule::InitAsDefaultInstance() {
-  configuration_input_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
-  configuration_output_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
+  module_configuration_ = const_cast< ::Proto::ModuleConfiguration*>(&::Proto::ModuleConfiguration::default_instance());
 }
 
 DeviceModule::DeviceModule(const DeviceModule& from)
@@ -13165,8 +13215,7 @@ void DeviceModule::SharedCtor() {
   _cached_size_ = 0;
   place_ = 0;
   type_ = 0;
-  configuration_input_ = NULL;
-  configuration_output_ = NULL;
+  module_configuration_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -13176,8 +13225,7 @@ DeviceModule::~DeviceModule() {
 
 void DeviceModule::SharedDtor() {
   if (this != default_instance_) {
-    delete configuration_input_;
-    delete configuration_output_;
+    delete module_configuration_;
   }
 }
 
@@ -13206,11 +13254,8 @@ void DeviceModule::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     place_ = 0;
     type_ = 0;
-    if (has_configuration_input()) {
-      if (configuration_input_ != NULL) configuration_input_->::Proto::wstring::Clear();
-    }
-    if (has_configuration_output()) {
-      if (configuration_output_ != NULL) configuration_output_->::Proto::wstring::Clear();
+    if (has_module_configuration()) {
+      if (module_configuration_ != NULL) module_configuration_->::Proto::ModuleConfiguration::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -13250,31 +13295,17 @@ bool DeviceModule::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_configuration_input;
+        if (input->ExpectTag(26)) goto parse_module_configuration;
         break;
       }
 
-      // optional .Proto.wstring configuration_input = 3;
+      // optional .Proto.ModuleConfiguration module_configuration = 3;
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_configuration_input:
+         parse_module_configuration:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_configuration_input()));
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(34)) goto parse_configuration_output;
-        break;
-      }
-
-      // optional .Proto.wstring configuration_output = 4;
-      case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_configuration_output:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_configuration_output()));
+               input, mutable_module_configuration()));
         } else {
           goto handle_uninterpreted;
         }
@@ -13310,16 +13341,10 @@ void DeviceModule::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->type(), output);
   }
 
-  // optional .Proto.wstring configuration_input = 3;
-  if (has_configuration_input()) {
+  // optional .Proto.ModuleConfiguration module_configuration = 3;
+  if (has_module_configuration()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, this->configuration_input(), output);
-  }
-
-  // optional .Proto.wstring configuration_output = 4;
-  if (has_configuration_output()) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      4, this->configuration_output(), output);
+      3, this->module_configuration(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -13340,18 +13365,11 @@ void DeviceModule::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->type(), target);
   }
 
-  // optional .Proto.wstring configuration_input = 3;
-  if (has_configuration_input()) {
+  // optional .Proto.ModuleConfiguration module_configuration = 3;
+  if (has_module_configuration()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        3, this->configuration_input(), target);
-  }
-
-  // optional .Proto.wstring configuration_output = 4;
-  if (has_configuration_output()) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        4, this->configuration_output(), target);
+        3, this->module_configuration(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -13379,18 +13397,11 @@ int DeviceModule::ByteSize() const {
           this->type());
     }
 
-    // optional .Proto.wstring configuration_input = 3;
-    if (has_configuration_input()) {
+    // optional .Proto.ModuleConfiguration module_configuration = 3;
+    if (has_module_configuration()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->configuration_input());
-    }
-
-    // optional .Proto.wstring configuration_output = 4;
-    if (has_configuration_output()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->configuration_output());
+          this->module_configuration());
     }
 
   }
@@ -13426,11 +13437,8 @@ void DeviceModule::MergeFrom(const DeviceModule& from) {
     if (from.has_type()) {
       set_type(from.type());
     }
-    if (from.has_configuration_input()) {
-      mutable_configuration_input()->::Proto::wstring::MergeFrom(from.configuration_input());
-    }
-    if (from.has_configuration_output()) {
-      mutable_configuration_output()->::Proto::wstring::MergeFrom(from.configuration_output());
+    if (from.has_module_configuration()) {
+      mutable_module_configuration()->::Proto::ModuleConfiguration::MergeFrom(from.module_configuration());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -13450,11 +13458,8 @@ void DeviceModule::CopyFrom(const DeviceModule& from) {
 
 bool DeviceModule::IsInitialized() const {
 
-  if (has_configuration_input()) {
-    if (!this->configuration_input().IsInitialized()) return false;
-  }
-  if (has_configuration_output()) {
-    if (!this->configuration_output().IsInitialized()) return false;
+  if (has_module_configuration()) {
+    if (!this->module_configuration().IsInitialized()) return false;
   }
   return true;
 }
@@ -13463,8 +13468,7 @@ void DeviceModule::Swap(DeviceModule* other) {
   if (other != this) {
     std::swap(place_, other->place_);
     std::swap(type_, other->type_);
-    std::swap(configuration_input_, other->configuration_input_);
-    std::swap(configuration_output_, other->configuration_output_);
+    std::swap(module_configuration_, other->module_configuration_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -13788,6 +13792,557 @@ void DeviceDiagSignal::Swap(DeviceDiagSignal* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = DeviceDiagSignal_descriptor_;
   metadata.reflection = DeviceDiagSignal_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int ModuleConfiguration::kStructDescriptionFieldNumber;
+const int ModuleConfiguration::kValuesFieldNumber;
+#endif  // !_MSC_VER
+
+ModuleConfiguration::ModuleConfiguration()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void ModuleConfiguration::InitAsDefaultInstance() {
+}
+
+ModuleConfiguration::ModuleConfiguration(const ModuleConfiguration& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void ModuleConfiguration::SharedCtor() {
+  _cached_size_ = 0;
+  struct_description_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+ModuleConfiguration::~ModuleConfiguration() {
+  SharedDtor();
+}
+
+void ModuleConfiguration::SharedDtor() {
+  if (struct_description_ != &::google::protobuf::internal::kEmptyString) {
+    delete struct_description_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void ModuleConfiguration::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ModuleConfiguration::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return ModuleConfiguration_descriptor_;
+}
+
+const ModuleConfiguration& ModuleConfiguration::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+ModuleConfiguration* ModuleConfiguration::default_instance_ = NULL;
+
+ModuleConfiguration* ModuleConfiguration::New() const {
+  return new ModuleConfiguration;
+}
+
+void ModuleConfiguration::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_struct_description()) {
+      if (struct_description_ != &::google::protobuf::internal::kEmptyString) {
+        struct_description_->clear();
+      }
+    }
+  }
+  values_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool ModuleConfiguration::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string struct_description = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_struct_description()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->struct_description().data(), this->struct_description().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_values;
+        break;
+      }
+
+      // repeated .Proto.ModuleConfigurationValue values = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_values:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_values()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_values;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void ModuleConfiguration::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional string struct_description = 1;
+  if (has_struct_description()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->struct_description().data(), this->struct_description().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->struct_description(), output);
+  }
+
+  // repeated .Proto.ModuleConfigurationValue values = 2;
+  for (int i = 0; i < this->values_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->values(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* ModuleConfiguration::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional string struct_description = 1;
+  if (has_struct_description()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->struct_description().data(), this->struct_description().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->struct_description(), target);
+  }
+
+  // repeated .Proto.ModuleConfigurationValue values = 2;
+  for (int i = 0; i < this->values_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->values(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int ModuleConfiguration::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional string struct_description = 1;
+    if (has_struct_description()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->struct_description());
+    }
+
+  }
+  // repeated .Proto.ModuleConfigurationValue values = 2;
+  total_size += 1 * this->values_size();
+  for (int i = 0; i < this->values_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->values(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ModuleConfiguration::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const ModuleConfiguration* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const ModuleConfiguration*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void ModuleConfiguration::MergeFrom(const ModuleConfiguration& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  values_.MergeFrom(from.values_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_struct_description()) {
+      set_struct_description(from.struct_description());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void ModuleConfiguration::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ModuleConfiguration::CopyFrom(const ModuleConfiguration& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ModuleConfiguration::IsInitialized() const {
+
+  for (int i = 0; i < values_size(); i++) {
+    if (!this->values(i).IsInitialized()) return false;
+  }
+  return true;
+}
+
+void ModuleConfiguration::Swap(ModuleConfiguration* other) {
+  if (other != this) {
+    std::swap(struct_description_, other->struct_description_);
+    values_.Swap(&other->values_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata ModuleConfiguration::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = ModuleConfiguration_descriptor_;
+  metadata.reflection = ModuleConfiguration_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int ModuleConfigurationValue::kNameFieldNumber;
+const int ModuleConfigurationValue::kValueFieldNumber;
+#endif  // !_MSC_VER
+
+ModuleConfigurationValue::ModuleConfigurationValue()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void ModuleConfigurationValue::InitAsDefaultInstance() {
+}
+
+ModuleConfigurationValue::ModuleConfigurationValue(const ModuleConfigurationValue& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void ModuleConfigurationValue::SharedCtor() {
+  _cached_size_ = 0;
+  name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  value_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+ModuleConfigurationValue::~ModuleConfigurationValue() {
+  SharedDtor();
+}
+
+void ModuleConfigurationValue::SharedDtor() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (value_ != &::google::protobuf::internal::kEmptyString) {
+    delete value_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void ModuleConfigurationValue::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ModuleConfigurationValue::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return ModuleConfigurationValue_descriptor_;
+}
+
+const ModuleConfigurationValue& ModuleConfigurationValue::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+ModuleConfigurationValue* ModuleConfigurationValue::default_instance_ = NULL;
+
+ModuleConfigurationValue* ModuleConfigurationValue::New() const {
+  return new ModuleConfigurationValue;
+}
+
+void ModuleConfigurationValue::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_name()) {
+      if (name_ != &::google::protobuf::internal::kEmptyString) {
+        name_->clear();
+      }
+    }
+    if (has_value()) {
+      if (value_ != &::google::protobuf::internal::kEmptyString) {
+        value_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool ModuleConfigurationValue::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required string name = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_name()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->name().data(), this->name().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_value;
+        break;
+      }
+
+      // required string value = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_value:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_value()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->value().data(), this->value().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void ModuleConfigurationValue::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required string name = 1;
+  if (has_name()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->name().data(), this->name().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->name(), output);
+  }
+
+  // required string value = 2;
+  if (has_value()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->value().data(), this->value().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->value(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* ModuleConfigurationValue::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required string name = 1;
+  if (has_name()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->name().data(), this->name().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->name(), target);
+  }
+
+  // required string value = 2;
+  if (has_value()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->value().data(), this->value().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->value(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int ModuleConfigurationValue::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required string name = 1;
+    if (has_name()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->name());
+    }
+
+    // required string value = 2;
+    if (has_value()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->value());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ModuleConfigurationValue::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const ModuleConfigurationValue* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const ModuleConfigurationValue*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void ModuleConfigurationValue::MergeFrom(const ModuleConfigurationValue& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_name()) {
+      set_name(from.name());
+    }
+    if (from.has_value()) {
+      set_value(from.value());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void ModuleConfigurationValue::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ModuleConfigurationValue::CopyFrom(const ModuleConfigurationValue& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ModuleConfigurationValue::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+
+  return true;
+}
+
+void ModuleConfigurationValue::Swap(ModuleConfigurationValue* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    std::swap(value_, other->value_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata ModuleConfigurationValue::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = ModuleConfigurationValue_descriptor_;
+  metadata.reflection = ModuleConfigurationValue_reflection_;
   return metadata;
 }
 

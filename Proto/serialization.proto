@@ -576,8 +576,7 @@ message DeviceModule
 {
 	optional int32 place = 1 [default = 0];
 	optional int32 type = 2 [default = 0];
-	optional wstring configuration_input = 3;
-	optional wstring configuration_output = 4;
+	optional ModuleConfiguration module_configuration = 3;
 }
 
 message DeviceController
@@ -586,6 +585,20 @@ message DeviceController
 
 message DeviceDiagSignal
 {
+}
+
+// Module Configuration
+//
+message ModuleConfiguration
+{
+	optional string struct_description = 1;				// XML description of the mudule configuration structure
+	repeated ModuleConfigurationValue values = 2;		// Values array
+}
+
+message ModuleConfigurationValue
+{
+	required string name = 1;
+	required string value = 2;
 }
 
 //------------------------------------------------------------------------------------------

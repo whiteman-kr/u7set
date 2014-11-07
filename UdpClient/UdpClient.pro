@@ -19,13 +19,15 @@ SOURCES += \
         clientmain.cpp \
         ../lib/UdpSocket.cpp \
     ../lib/BaseService.cpp \
-    ../lib/SocketIO.cpp
+    ../lib/SocketIO.cpp \
+    ../lib/CircularLogger.cpp
 
 
 HEADERS  += mainwindow.h \
         ../include/SocketIO.h \
         ../include/UdpSocket.h \
-    ../include/BaseService.h
+    ../include/BaseService.h \
+    ../include/CircularLogger.h
 
 FORMS    += mainwindow.ui
 

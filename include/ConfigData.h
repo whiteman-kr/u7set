@@ -84,7 +84,7 @@ class ConfigValue
 {
 public:
 	ConfigValue();
-	~ConfigValue();
+	virtual ~ConfigValue();
 
 	// Public methods
 	//
@@ -100,14 +100,17 @@ public:
 	const QString& type() const;
 	void setType(const QString& type);
 
-	int offset();
-	void setOffset(const int& offset);
+	int offset() const;
+	void setOffset(int offset);
 
-	int bit();
-	void setBit(const int& bit);
+	int bit() const;
+	void setBit(int bit);
 
-	int boolSize();
-	void setBoolSize(const int& boolSize);
+	int boolSize() const;
+	void setBoolSize(int boolSize);
+
+	bool userProperty() const;
+	void setUserProperty(bool value);
 
 	const QString& defaultValue() const;
 	void setDefaultValue(const QString& defaultValue);
@@ -126,14 +129,16 @@ public:
 private:
 	QString m_name;
 	QString m_type;
-	int m_offset;
-	int m_bit;
-	int m_boolSize; // количество байт, в которых размещается bool
+	int m_offset = -1;
+	int m_bit = -1;
+	int m_boolSize = -1;				// количество байт, в которых размещается bool
+	bool m_userProperty = false;		// This property must be set by user
 	QString m_defaultValue;
 	QString m_value;
-	std::shared_ptr<ConfigStruct> m_pData;   // указатель на структуру типа Type. Заполняется после загрузки.
 
+	std::shared_ptr<ConfigStruct> m_pData;   // указатель на структуру типа Type. Заполняется после загрузки.
 };
+
 Q_DECLARE_METATYPE(ConfigValue*)
 
 //----------------------------------------------------------------------------------------------------------
@@ -170,6 +175,7 @@ public:
     void writeDeclaration(QXmlStreamWriter& writer);
     void writeDefinition(QXmlStreamWriter& writer);
     void writeData(QXmlStreamWriter& writer);
+
 private:
     // чтение элементов из XML
     //
@@ -200,8 +206,6 @@ private:
 
 	QList<ConfigStruct> m_structures;
 	QList<ConfigVariable> m_variables;
-
-
 };
 
 //----------------------------------------------------------------------------------------------------------

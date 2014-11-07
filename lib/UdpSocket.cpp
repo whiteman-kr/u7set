@@ -130,8 +130,6 @@ void UdpClientSocket::onSocketReadyRead()
     }
     else
     {
-		qDebug() << "Receive ACK on request " << m_ack.ID();
-
 		emit ackReceived(m_ack);
     }
 }
@@ -196,8 +194,6 @@ void UdpClientSocket::sendRequest(UdpRequest request)
 		m_request.writeData(request.data(), request.dataSize());
 	}
 
-	qDebug() << "Send request " << m_request.ID();
-
 	qint64 sent = m_socket.writeDatagram(m_request.rawData(), m_request.rawDataSize(), m_serverAddress, m_port);
 
     if (sent == -1)
@@ -242,8 +238,6 @@ void UdpClientSocket::onAckTimerTimeout()
        m_retryCtr = 0;
        m_state = UdpClientSocketState::readyToSend;
 
-	   qDebug() << "ACK timeout on request " << m_request.ID();
-
 	   emit ackTimeout(m_request);
     }
 
@@ -274,6 +268,8 @@ UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, cha
     m_address(senderAddress),
 	m_port(senderPort)
 {
+	memset(m_header, sizeof(RequestHeader), 0);
+
     if (receivedData != nullptr && (receivedDataSize >= sizeof(RequestHeader) && receivedDataSize <= MAX_DATAGRAM_SIZE))
     {
 		memcpy(m_rawData, receivedData, m_rawDataSize);
@@ -289,6 +285,7 @@ UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, cha
 
 UdpRequest::UdpRequest()
 {
+	memset(m_header, sizeof(RequestHeader), 0);
 }
 
 
@@ -298,6 +295,8 @@ void UdpRequest::initAck(const UdpRequest& request)
 
     m_address = request.m_address;
     m_port = request.m_port;
+
+	memset(m_header, sizeof(RequestHeader), 0);
 
 	// copy request header
 	//

@@ -56,7 +56,7 @@ void SchemePropertyEditor::valueChanged(QtProperty* property, QVariant value)
 		return;
 	}
 
-	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
+	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property);
 
 	if (objects.size() != 1)
 	{

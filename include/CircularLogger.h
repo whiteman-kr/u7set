@@ -8,108 +8,32 @@
 class QFile;
 class QTextStream;
 
-const int MT_USER_ACTION = 0,
-MT_NET = 1,
-MT_APPLICATION = 2;
+const int	MT_USER_ACTION = 0,
+			MT_NET = 1,
+			MT_APPLICATION = 2;
 
-const int MC_ERROR = 0,
-MC_WARNING = 1,
-MC_MESSAGE = 2,
-MC_CONFIG = 3;
+const int	MC_ERROR = 0,
+			MC_WARNING = 1,
+			MC_MESSAGE = 2,
+			MC_CONFIG = 3;
 
-template<class T> class QAsyncQueue
-{
-public:
 
-	QAsyncQueue(uint max = -1)
-		: m_max(max)
-	{
-	}
-
-	~QAsyncQueue()
-	{
-		clear();
-	}
-
-	uint count()
-	{
-		m_mutex.lock();
-		int count = m_queue.count();
-		m_mutex.unlock();
-		return count;
-	}
-
-	bool isFull()
-	{
-		if (m_max == -1)
-		{
-			return false;
-		}
-
-		m_mutex.lock();
-		int count = m_queue.count();
-		m_mutex.unlock();
-		return count >= m_max;
-	}
-
-	bool isEmpty()
-	{
-		m_mutex.lock();
-		bool empty = m_queue.isEmpty();
-		m_mutex.unlock();
-		return empty;
-	}
-
-	void clear()
-	{
-		m_mutex.lock();
-		m_queue.clear();
-		m_mutex.unlock();
-	}
-
-	void push(const T& t)
-	{
-		m_mutex.lock();
-		m_queue.enqueue(t);
-		m_mutex.unlock();
-	}
-
-	T pull()
-	{
-		m_mutex.lock();
-		T i = m_queue.dequeue();
-		m_mutex.unlock();
-		return i;
-	}
-
-private:
-
-	QQueue<T> m_queue;
-	QMutex m_mutex;
-	int m_max;
-};
-
-class CircularLoggerImplementation : public QObject
+class CircularLoggerWorker : public QObject
 {
 	Q_OBJECT
 public:
-	CircularLoggerImplementation(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
-	~CircularLoggerImplementation();
+	CircularLoggerWorker(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
+	~CircularLoggerWorker();
 
-	void pushRecord(const QString& record);
 	void close();
 
-signals:
-	void queueIsNotEmpty();
-
 public slots:
-	void flushQueue();
+	void writeRecord(const QString record);
+	void flushStream();
 
 private:
 	QTextStream* m_stream = nullptr;
-	QAsyncQueue<QString> m_queue;
 	QFile* m_file = nullptr;
-	QMap<int,int> m_fileIDtoIndexMap;
 
 	void detectFiles();
 	void removeOldFiles();
@@ -140,19 +64,22 @@ public:
 
 	void initLog(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
 
+signals:
+	void writeRecord(const QString record);
+
 public slots:
 
-	QString appErr(char* function, QString message)
+	QString appErr(const QString& function, const QString& message)
 	{
 		return write(MT_APPLICATION, MC_ERROR, function, message);
 	}
 
-	QString appWrn(char* function, QString message)
+	QString appWrn(const QString& function, const QString& message)
 	{
 		return write(MT_APPLICATION, MC_WARNING, function, message);
 	}
 
-	QString appMsg(char* function, QString message)
+	QString appMsg(const QString& function, const QString& message)
 	{
 		return write(MT_APPLICATION, MC_MESSAGE, function, message);
 	}
@@ -161,41 +88,38 @@ public slots:
 	QString netWrn(char* function, QHostAddress& IP, RequestHeader& header, char* message, ...);
 	QString netMsg(char* function, QHostAddress& IP, RequestHeader& header, char* message, ...);*/
 
-	QString userErr(char* function, QString message)
+	QString userErr(const QString& function, const QString& message)
 	{
 		return write(MT_USER_ACTION, MC_ERROR, function, message);
 	}
 
-	QString userWrn(char* function, QString message)
+	QString userWrn(const QString& function, const QString& message)
 	{
 		return write(MT_USER_ACTION, MC_WARNING, function, message);
 	}
 
-	QString userMsg(char* function, QString message)
+	QString userMsg(const QString& function, const QString& message)
 	{
 		return write(MT_USER_ACTION, MC_MESSAGE, function, message);
 	}
 
-	QString write(int type, int category, QString function, QString message/*ip, header*/)
+	QString write(int type, int category, QString function, const QString& message/*ip, header*/)
 	{
 		QString record = composeRecord(type, category, function, message);
-		writeRecord(record);
+		emit writeRecord(record);
 		return record;
 	}
 
 private:
 
-	CircularLoggerImplementation* m_circularLoggerImplementation = nullptr;
+	CircularLoggerWorker* m_circularLoggerWorker = nullptr;
 	QThread* m_thread = nullptr;
 
-	void writeRecord(const QString& record);
-
-	QString composeRecord(int type, int category, QString function, QString message/*ip, header*/);
+	QString composeRecord(int type, int category, const QString& function, const QString& message/*ip, header*/);
 };
 
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-#define MESSAGE_POSITION Q_FUNC_INFO " POS=" __FILE__ ":" TOSTRING(__LINE__)
+#define MESSAGE_POSITION QString("%1\" \"POS=%2:%3").arg(Q_FUNC_INFO).arg(__FILE__).arg(__LINE__)
+
 #define APP_ERR(log,str) (log).appErr(MESSAGE_POSITION,str);
 #define APP_WRN(log,str) (log).appWrn(MESSAGE_POSITION,str);
 #define APP_MSG(log,str) (log).appMsg(MESSAGE_POSITION,str);

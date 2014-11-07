@@ -65,7 +65,7 @@ void SchemeItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 	}
 
 	std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
-	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
+	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property);
 
 	for (auto& i : objects)
 	{

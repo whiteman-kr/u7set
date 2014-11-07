@@ -47,7 +47,9 @@ void Settings::writeUserScope() const
     s.setValue("AFBLProperties/pos", m_abflPropertiesWindowPos);
     s.setValue("AFBLProperties/geometry", m_abflPropertiesWindowGeometry);
 
-    return;
+	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
+	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
+	return;
 }
 void Settings::loadUserScope()
 {
@@ -68,6 +70,9 @@ void Settings::loadUserScope()
 
     m_abflPropertiesWindowPos = s.value("AFBLProperties/pos", QPoint(-1, -1)).toPoint();
     m_abflPropertiesWindowGeometry = s.value("AFBLProperties/geometry").toByteArray();
+
+	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
+	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
 
     return;
 }
