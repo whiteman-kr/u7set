@@ -7,7 +7,7 @@
 #include <QListWidget>
 #include <QPushButton>
 
-#include "FilePropertyManager.h"
+#include "FolderPropertyManager.h"
 #include "OptionsPointsDialog.h"
 #include "OptionsMvhDialog.h"
 
@@ -511,9 +511,8 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
             {
                 QtProperty *databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Database"));
 
-                    item = manager->addProperty(VariantManager::filePathTypeId(), DatabaseParam[DBO_PARAM_PATH]);
+                    item = manager->addProperty(VariantManager::folerPathTypeId(), DatabaseParam[DBO_PARAM_PATH]);
                     item->setValue( m_options.database().m_path );
-                    item->setAttribute("filter", "SQLite database files (*.db)");
                     appendProperty(item, page, DBO_PARAM_PATH);
                     databaseGroup->addSubProperty(item);
 
@@ -548,8 +547,8 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                     appendProperty(item, page, BUO_PARAM_ON_EXIT);
                     backupGroup->addSubProperty(item);
 
-                    item = manager->addProperty(QVariant::String, BackupParam[BUO_PARAM_FOLDER]);
-                    item->setValue( m_options.backup().m_directory );
+                    item = manager->addProperty(VariantManager::folerPathTypeId(), BackupParam[BUO_PARAM_FOLDER]);
+                    item->setValue( m_options.backup().m_path );
                     appendProperty(item, page, BUO_PARAM_FOLDER);
                     backupGroup->addSubProperty(item);
 
@@ -759,7 +758,8 @@ void OptionsDialog::onPropertyValueChanged(QtProperty *property, const QVariant 
         type == QtVariantPropertyManager::enumTypeId() ||       // list of values
         type == QVariant::String ||                             // string
         type == QVariant::Font ||                               // font
-        type == QVariant::Color    )                            // color
+        type == QVariant::Color  ||                             // color
+        type == VariantManager::folerPathTypeId()    )          // folder
    {
         applyProperty();
    }
@@ -921,7 +921,7 @@ void OptionsDialog::applyProperty()
                 {
                     case BUO_PARAM_ON_START:            m_options.backup().m_onStart = value.toBool();      break;
                     case BUO_PARAM_ON_EXIT:             m_options.backup().m_onExit = value.toBool();       break;
-                    case BUO_PARAM_FOLDER:              m_options.backup().m_directory = value.toString();  break;
+                    case BUO_PARAM_FOLDER:              m_options.backup().m_path = value.toString();  break;
                     default:                            assert(0);                                          break;
                 }
             }

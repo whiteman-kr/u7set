@@ -1,8 +1,7 @@
  #include "Options.h"
 
 #include <QSettings>
-#include <QWidget>
-#include <QMainWindow>
+#include <QTemporaryDir>
 #include "CalibratorBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -284,7 +283,7 @@ void DatabaseOption::load()
 {
     QSettings s;
 
-    m_path = s.value( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), "..").toString();
+    m_path = s.value( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
     m_type = s.value( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), 0).toInt();
 }
 
@@ -836,82 +835,6 @@ BackupOption::~BackupOption()
 
 void BackupOption::createBackup()
 {
-//    CString BackupDataDirectory;
-
-//	SYSTEMTIME Time;
-//	GetLocalTime(&Time);
-
-//	CString strTime;
-//	strTime.Format(	_T("%02d-%02d-%04d_%02d-%02d-%02d"),
-//					Time.wDay,
-//					Time.wMonth,
-//					Time.wYear,
-//					Time.wHour,
-//					Time.wMinute,
-//					Time.wSecond);
-
-
-//	BackupDataDirectory.Format(_T("%s\\BackupMetrology_%s\\"), Directory, strTime);
-//	BackupDataDirectory.AppendChar('\0');
-//	CreateDirectory(BackupDataDirectory, NULL);
-
-//	CString Path;
-//	int ErrorCode = 0;
-
-//	switch(theApp.Database.DriverType)
-//	{
-//		case DATABASE_DRIVER_TYPE_DBF:
-//			{
-//				Path.Format(_T("%s\\*.*"), theApp.Database.Path);
-//				Path.AppendChar('\0');
-
-//				SHFILEOPSTRUCT fo;
-//				ZeroMemory(&fo, sizeof(SHFILEOPSTRUCT));
-
-//				fo.hwnd = NULL;
-//				fo.wFunc = FO_COPY;
-//				fo.pFrom = Path;
-//				fo.pTo   = BackupDataDirectory;
-//				fo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_SILENT;
-
-//				int RetCode = SHFileOperation(&fo);
-//				if (RetCode != NULL || fo.fAnyOperationsAborted == TRUE)
-//				{
-//					ErrorCode = RetCode;
-//				}
-//			}
-//			break;
-
-//		case DATABASE_DRIVER_TYPE_MDB:
-//			{
-//				Path.Format(_T("%s%s.%s"), BackupDataDirectory, DATABASE_NAME, DatabaseDriverExt[theApp.Database.DriverType] );
-//				if ( CopyFile(theApp.Database.Path, Path, FALSE) == FALSE)
-//				{
-//					ErrorCode = GetLastError();
-//				}
-//			}
-//			break;
-//	}
-
-//	if (ErrorCode != 0)
-//	{
-//		LPVOID lpMsgBuf = NULL;
-
-//		FormatMessage(	FORMAT_MESSAGE_ALLOCATE_BUFFER |
-//						FORMAT_MESSAGE_FROM_SYSTEM |
-//						FORMAT_MESSAGE_IGNORE_INSERTS,
-//						NULL,
-//						ErrorCode,
-//						MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-//						(LPTSTR) &lpMsgBuf,
-//						0, NULL );
-
-//		CString str;
-//		str.Format(_T("Не удалось создать резервную копию измерений.\nКод ошибки: %d\n%s"), ErrorCode, lpMsgBuf);
-//		AfxMessageBox(str, MB_ICONEXCLAMATION);
-
-//		LocalFree(lpMsgBuf);
-//	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -938,11 +861,14 @@ void BackupOption::createBackupOnExit()
 
 void BackupOption::load()
 {
+    QTemporaryDir tmpDir;
+    QString path = tmpDir.path().left( tmpDir.path().lastIndexOf("/", -1) );
+
     QSettings s;
 
     m_onStart = s.value( QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), false).toBool();
     m_onExit = s.value( QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), true).toBool();
-    m_directory = s.value( QString("%1Directory").arg(BACKUP_OPTIONS_REG_KEY), "").toString();
+    m_path = s.value( QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), path).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -953,7 +879,7 @@ void BackupOption::save()
 
     s.setValue( QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), m_onStart);
     s.setValue( QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), m_onExit);
-    s.setValue( QString("%1Directory").arg(BACKUP_OPTIONS_REG_KEY), m_directory);
+    s.setValue( QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), m_path);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -962,7 +888,7 @@ BackupOption& BackupOption::operator=(const BackupOption& from)
 {
     m_onStart = from.m_onStart;
     m_onExit = from.m_onExit;
-    m_directory = from.m_directory;
+    m_path = from.m_path;
 
     return *this;
 }

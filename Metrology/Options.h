@@ -154,7 +154,7 @@ public:
 
 // ==============================================================================================
 
-#define                 DATABASE_OPTIONS_REG_KEY		"Options\\Database"
+#define                 DATABASE_OPTIONS_REG_KEY		"Options/Database/"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -409,7 +409,7 @@ public:
 
 // ==============================================================================================
 
-#define					BACKUP_OPTIONS_REG_KEY		"Options\\BackupMeasure"
+#define					BACKUP_OPTIONS_REG_KEY		"Options/BackupMeasure/"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -417,7 +417,7 @@ const char* const		BackupParam[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "On start application"),
                         QT_TRANSLATE_NOOP("Options.h", "On exit application"),
-                        QT_TRANSLATE_NOOP("Options.h", "Directory for reserve copy"),
+                        QT_TRANSLATE_NOOP("Options.h", "Path for reserve copy"),
 };
 
 const int				BUO_PARAM_COUNT     = sizeof(BackupParam)/sizeof(char*);
@@ -439,7 +439,7 @@ public:
 
     bool				m_onStart = false;
     bool                m_onExit = true;
-    QString				m_directory;
+    QString				m_path;
 
     void				createBackup();
     void				createBackupOnStart();

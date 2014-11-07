@@ -31,7 +31,7 @@ SOURCES += \
     ExportMeasure.cpp \
     Delegate.cpp \
     FindMeasure.cpp \
-    FilePropertyManager.cpp
+    FolderPropertyManager.cpp
 
 
 HEADERS  += \
@@ -51,7 +51,7 @@ HEADERS  += \
     ExportMeasure.h \
     Delegate.h \
     FindMeasure.h \
-    FilePropertyManager.h
+    FolderPropertyManager.h
 
 
 FORMS    +=

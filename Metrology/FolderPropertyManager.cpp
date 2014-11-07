@@ -1,4 +1,4 @@
-#include "FilePropertyManager.h"
+#include "FolderPropertyManager.h"
 
 #include <QHBoxLayout>
 #include <QToolButton>
@@ -7,7 +7,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-FileEdit::FileEdit(QWidget *parent)
+FolderEdit::FolderEdit(QWidget *parent)
     : QWidget(parent)
 {
     m_edit = new QLineEdit(this);
@@ -27,24 +27,24 @@ FileEdit::FileEdit(QWidget *parent)
     setFocusPolicy(Qt::StrongFocus);
     setAttribute(Qt::WA_InputMethodEnabled);
 
-    connect(m_edit, &QLineEdit::textEdited, this, &FileEdit::filePathChanged);
-    connect(m_button, &QToolButton::clicked, this, &FileEdit::buttonClicked);
+    connect(m_edit, &QLineEdit::textEdited, this, &FolderEdit::folderPathChanged);
+    connect(m_button, &QToolButton::clicked, this, &FolderEdit::buttonClicked);
 }
 
-void FileEdit::buttonClicked()
+void FolderEdit::buttonClicked()
 {
-    QString filePath = QFileDialog::getOpenFileName(this, tr("Select file"), m_edit->text(), m_filter);
-    if (filePath.isEmpty() == true)
+    QString path = QFileDialog::getExistingDirectory(this, tr("Select directory"), m_edit->text());
+    if (path.isEmpty() == true)
     {
         return;
     }
 
-    m_edit->setText(filePath);
+    m_edit->setText(path);
 
-    emit filePathChanged(filePath);
+    emit folderPathChanged(path);
 }
 
-void FileEdit::focusInEvent(QFocusEvent *e)
+void FolderEdit::focusInEvent(QFocusEvent *e)
 {
     m_edit->event(e);
 
@@ -56,19 +56,19 @@ void FileEdit::focusInEvent(QFocusEvent *e)
     QWidget::focusInEvent(e);
 }
 
-void FileEdit::focusOutEvent(QFocusEvent *e)
+void FolderEdit::focusOutEvent(QFocusEvent *e)
 {
     m_edit->event(e);
 
     QWidget::focusOutEvent(e);
 }
 
-void FileEdit::keyPressEvent(QKeyEvent *e)
+void FolderEdit::keyPressEvent(QKeyEvent *e)
 {
     m_edit->event(e);
 }
 
-void FileEdit::keyReleaseEvent(QKeyEvent *e)
+void FolderEdit::keyReleaseEvent(QKeyEvent *e)
 {
     m_edit->event(e);
 }
@@ -77,8 +77,8 @@ void FileEdit::keyReleaseEvent(QKeyEvent *e)
 
 VariantFactory::~VariantFactory()
 {
-    QList<FileEdit *> editors = m_editorToPropertyMap.keys();
-    QListIterator<FileEdit *> it(editors);
+    QList<FolderEdit *> editors = m_editorToPropertyMap.keys();
+    QListIterator<FolderEdit *> it(editors);
 
     while (it.hasNext() == true)
     {
@@ -89,7 +89,6 @@ VariantFactory::~VariantFactory()
 void VariantFactory::connectPropertyManager(QtVariantPropertyManager *manager)
 {
     connect(manager, &QtVariantPropertyManager::valueChanged, this, &VariantFactory::slotPropertyChanged);
-    connect(manager, &QtVariantPropertyManager::attributeChanged, this, &VariantFactory::slotPropertyAttributeChanged);
 
     QtVariantEditorFactory::connectPropertyManager(manager);
 }
@@ -97,25 +96,23 @@ void VariantFactory::connectPropertyManager(QtVariantPropertyManager *manager)
 void VariantFactory::disconnectPropertyManager(QtVariantPropertyManager *manager)
 {
     disconnect(manager, &QtVariantPropertyManager::valueChanged, this, &VariantFactory::slotPropertyChanged);
-    disconnect(manager, &QtVariantPropertyManager::attributeChanged, this, &VariantFactory::slotPropertyAttributeChanged);
 
     QtVariantEditorFactory::disconnectPropertyManager(manager);
 }
 
 QWidget *VariantFactory::createEditor(QtVariantPropertyManager *manager, QtProperty *property, QWidget *parent)
 {
-    if (manager->propertyType(property) == VariantManager::filePathTypeId())
+    if (manager->propertyType(property) == VariantManager::folerPathTypeId())
     {
-        FileEdit *editor = new FileEdit(parent);
+        FolderEdit *editor = new FolderEdit(parent);
 
-        editor->setFilePath(manager->value(property).toString());
-        editor->setFilter(manager->attributeValue(property, QLatin1String("filter")).toString());
+        editor->setFolderPath(manager->value(property).toString());
 
         m_createdEditorsMap[property].append(editor);
         m_editorToPropertyMap[editor] = property;
 
-        connect(editor, &FileEdit::filePathChanged, this, &VariantFactory::slotSetValue);
-        connect(editor, &FileEdit::destroyed, this, &VariantFactory::slotEditorDestroyed);
+        connect(editor, &FolderEdit::folderPathChanged, this, &VariantFactory::slotSetValue);
+        connect(editor, &FolderEdit::destroyed, this, &VariantFactory::slotEditorDestroyed);
 
         return editor;
     }
@@ -131,40 +128,19 @@ void VariantFactory::slotPropertyChanged(QtProperty *property, const QVariant &v
         return;
     }
 
-    QList<FileEdit *> editors = m_createdEditorsMap[property];
-    QListIterator<FileEdit *> itEditor(editors);
+    QList<FolderEdit *> editors = m_createdEditorsMap[property];
+    QListIterator<FolderEdit *> itEditor(editors);
 
     while (itEditor.hasNext() == true)
     {
-        itEditor.next()->setFilePath(value.toString());
-    }
-}
-
-void VariantFactory::slotPropertyAttributeChanged(QtProperty *property, const QString &attribute, const QVariant &value)
-{
-    if (m_createdEditorsMap.contains(property) == false)
-    {
-        return;
-    }
-
-    if (attribute != QLatin1String("filter"))
-    {
-        return;
-    }
-
-    QList<FileEdit *> editors = m_createdEditorsMap[property];
-    QListIterator<FileEdit *> itEditor(editors);
-
-    while (itEditor.hasNext() == true)
-    {
-        itEditor.next()->setFilter(value.toString());
+        itEditor.next()->setFolderPath(value.toString());
     }
 }
 
 void VariantFactory::slotSetValue(const QString &value)
 {
     QObject *object = sender();
-    QMap<FileEdit *, QtProperty *>::ConstIterator itEditor = m_editorToPropertyMap.constBegin();
+    QMap<FolderEdit *, QtProperty *>::ConstIterator itEditor = m_editorToPropertyMap.constBegin();
 
     while (itEditor != m_editorToPropertyMap.constEnd())
     {
@@ -188,13 +164,13 @@ void VariantFactory::slotSetValue(const QString &value)
 
 void VariantFactory::slotEditorDestroyed(QObject *object)
 {
-    QMap<FileEdit *, QtProperty *>::ConstIterator itEditor = m_editorToPropertyMap.constBegin();
+    QMap<FolderEdit *, QtProperty *>::ConstIterator itEditor = m_editorToPropertyMap.constBegin();
 
     while (itEditor != m_editorToPropertyMap.constEnd())
     {
         if (itEditor.key() == object)
         {
-            FileEdit *editor = itEditor.key();
+            FolderEdit *editor = itEditor.key();
             QtProperty *property = itEditor.value();
 
             m_editorToPropertyMap.remove(editor);
@@ -213,22 +189,22 @@ void VariantFactory::slotEditorDestroyed(QObject *object)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-class FilePathPropertyType
+class FolderPathPropertyType
 {
 };
 
-Q_DECLARE_METATYPE(FilePathPropertyType)
+Q_DECLARE_METATYPE(FolderPathPropertyType)
 
-int VariantManager::filePathTypeId()
+int VariantManager::folerPathTypeId()
 {
-    return qMetaTypeId<FilePathPropertyType>();
+    return qMetaTypeId<FolderPathPropertyType>();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool VariantManager::isPropertyTypeSupported(int propertyType) const
 {
-    if (propertyType == filePathTypeId())
+    if (propertyType == folerPathTypeId())
     {
         return true;
     }
@@ -238,7 +214,7 @@ bool VariantManager::isPropertyTypeSupported(int propertyType) const
 
 int VariantManager::valueType(int propertyType) const
 {
-    if (propertyType == filePathTypeId())
+    if (propertyType == folerPathTypeId())
     {
         return QVariant::String;
     }
@@ -254,48 +230,6 @@ QVariant VariantManager::value(const QtProperty *property) const
     }
 
     return QtVariantPropertyManager::value(property);
-}
-
-QStringList VariantManager::attributes(int propertyType) const
-{
-    if (propertyType == filePathTypeId())
-    {
-        QStringList attr;
-        attr << QLatin1String("filter");
-
-        return attr;
-    }
-
-    return QtVariantPropertyManager::attributes(propertyType);
-}
-
-int VariantManager::attributeType(int propertyType, const QString &attribute) const
-{
-    if (propertyType == filePathTypeId())
-    {
-        if (attribute == QLatin1String("filter"))
-        {
-            return QVariant::String;
-        }
-
-        return 0;
-    }
-    return QtVariantPropertyManager::attributeType(propertyType, attribute);
-}
-
-QVariant VariantManager::attributeValue(const QtProperty *property, const QString &attribute)
-{
-    if (m_valuesMap.contains(property) == true)
-    {
-        if (attribute == QLatin1String("filter"))
-        {
-            return m_valuesMap[property].filter;
-        }
-
-        return QVariant();
-    }
-
-    return QtVariantPropertyManager::attributeValue(property, attribute);
 }
 
 QString VariantManager::valueText(const QtProperty *property) const
@@ -337,39 +271,9 @@ void VariantManager::setValue(QtProperty *property, const QVariant &val)
     QtVariantPropertyManager::setValue(property, val);
 }
 
-void VariantManager::setAttribute(QtProperty *property, const QString &attribute, const QVariant &val)
-{
-    if (m_valuesMap.contains(property) == true)
-    {
-        if (attribute == QLatin1String("filter"))
-        {
-            if (val.type() != QVariant::String && val.canConvert(QVariant::String) == false)
-            {
-                return;
-            }
-
-            QString str = qVariantValue<QString>(val);
-            Data d = m_valuesMap[property];
-
-            if (d.filter == str)
-            {
-                return;
-            }
-
-            d.filter = str;
-            m_valuesMap[property] = d;
-
-            emit attributeChanged(property, attribute, str);
-        }
-        return;
-    }
-
-    QtVariantPropertyManager::setAttribute(property, attribute, val);
-}
-
 void VariantManager::initializeProperty(QtProperty *property)
 {
-    if (propertyType(property) == filePathTypeId())
+    if (propertyType(property) == folerPathTypeId())
     {
         m_valuesMap[property] = Data();
     }
