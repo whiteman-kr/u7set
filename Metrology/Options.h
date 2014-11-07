@@ -27,10 +27,10 @@ const char* const       TcpIpParamName[] =
                         QT_TRANSLATE_NOOP("Options.h", "Port"),
 };
 
-const int               TCPIP_PARAM_COUNT				= sizeof(TcpIpParamName)/sizeof(char*);
+const int               TCPIP_PARAM_COUNT       = sizeof(TcpIpParamName)/sizeof(char*);
 
-const int               TCPIP_PARAM_SERVER_IP			= 0,
-                        TCPIP_PARAM_SERVER_PORT         = 1;
+const int               TCPIP_PARAM_SERVER_IP   = 0,
+                        TCPIP_PARAM_SERVER_PORT = 1;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -114,11 +114,11 @@ const char* const       DisplayingValueType[] =
                         QT_TRANSLATE_NOOP("Options.h", "Displayed as a percentage (%) of the range"),
 };
 
-const int				DISPLAYING_VALUE_TYPE_COUNT			= sizeof(DisplayingValueType)/sizeof(char*);
+const int				DISPLAYING_VALUE_TYPE_COUNT     = sizeof(DisplayingValueType)/sizeof(char*);
 
-const int				DISPLAYING_VALUE_TYPE_PHYSICAL		= 0,
-                        DISPLAYING_VALUE_TYPE_ELECTRIC		= 1,
-                        DISPLAYING_VALUE_TYPE_PERCENT		= 2;
+const int				DISPLAYING_VALUE_TYPE_PHYSICAL  = 0,
+                        DISPLAYING_VALUE_TYPE_ELECTRIC  = 1,
+                        DISPLAYING_VALUE_TYPE_PERCENT   = 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -150,6 +150,55 @@ public:
     void                save();
 
     MeasureViewOption&  operator=(const MeasureViewOption& from);
+};
+
+// ==============================================================================================
+
+#define                 DATABASE_OPTIONS_REG_KEY		"Options\\Database"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		DatabaseParam[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Path"),
+                        QT_TRANSLATE_NOOP("Options.h", "Type"),
+};
+
+const int				DBO_PARAM_COUNT = sizeof(DatabaseParam)/sizeof(char*);
+
+const int				DBO_PARAM_PATH  = 0,
+                        DBO_PARAM_TYPE  = 1;
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const       DatabaseType[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "SQLite"),
+};
+
+const int				DATABASE_TYPE_COUNT     = sizeof(DatabaseType)/sizeof(char*);
+
+const int				DATABASE_TYPE_SQLITE    = 0;
+
+
+// ----------------------------------------------------------------------------------------------
+
+class DatabaseOption : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit            DatabaseOption(QObject *parent = 0);
+    explicit            DatabaseOption(const DatabaseOption& from, QObject *parent = 0);
+                        ~DatabaseOption();
+
+    QString             m_path;
+    int					m_type;
+
+    void                load();
+    void                save();
+
+    DatabaseOption&     operator=(const DatabaseOption& from);
 };
 
 // ==============================================================================================
@@ -358,6 +407,49 @@ public:
     LinearityOption&    operator=(const LinearityOption& from);
 };
 
+// ==============================================================================================
+
+#define					BACKUP_OPTIONS_REG_KEY		"Options\\BackupMeasure"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		BackupParam[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "On start application"),
+                        QT_TRANSLATE_NOOP("Options.h", "On exit application"),
+                        QT_TRANSLATE_NOOP("Options.h", "Directory for reserve copy"),
+};
+
+const int				BUO_PARAM_COUNT     = sizeof(BackupParam)/sizeof(char*);
+
+const int				BUO_PARAM_ON_START  = 0,
+                        BUO_PARAM_ON_EXIT   = 1,
+                        BUO_PARAM_FOLDER    = 2;
+
+// ----------------------------------------------------------------------------------------------
+
+class BackupOption : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit            BackupOption(QObject *parent = 0);
+    explicit            BackupOption(const BackupOption& from, QObject *parent = 0);
+                        ~BackupOption();
+
+    bool				m_onStart = false;
+    bool                m_onExit = true;
+    QString				m_directory;
+
+    void				createBackup();
+    void				createBackupOnStart();
+    void				createBackupOnExit();
+
+    void				load();
+    void				save();
+
+    BackupOption&       operator=(const BackupOption& from);
+};
 
 // ==============================================================================================
 
@@ -381,7 +473,9 @@ private:
     ToolBarOption m_toolBar;
     TcpIpOption m_connectTcpIp;
     MeasureViewOption m_measureView;
+    DatabaseOption m_database;
     LinearityOption m_linearity;
+    BackupOption m_backup;
 
 public:
 
@@ -394,8 +488,15 @@ public:
     MeasureViewOption& measureView() { return m_measureView; }
     void setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
 
+    DatabaseOption& database() { return m_database; }
+    void setDatabase(const DatabaseOption& database) { m_database = database; }
+
     LinearityOption& linearity() { return m_linearity; }
     void setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
+
+    BackupOption& backup() { return m_backup; }
+    void setBackup(const BackupOption& backup) { m_backup = backup; }
+
 
     void load();
     void save();

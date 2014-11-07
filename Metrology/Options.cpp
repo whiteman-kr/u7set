@@ -258,6 +258,60 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+DatabaseOption::DatabaseOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::~DatabaseOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::load()
+{
+    QSettings s;
+
+    m_path = s.value( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), "..").toString();
+    m_type = s.value( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), 0).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), m_path );
+    s.setValue( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), m_type );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
+{
+    m_path = from.m_path;
+    m_type = from.m_type;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 LinearityPoint::LinearityPoint()
 {
     setPercent(0);
@@ -759,6 +813,164 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+BackupOption::BackupOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+BackupOption::BackupOption(const BackupOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+BackupOption::~BackupOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::createBackup()
+{
+//    CString BackupDataDirectory;
+
+//	SYSTEMTIME Time;
+//	GetLocalTime(&Time);
+
+//	CString strTime;
+//	strTime.Format(	_T("%02d-%02d-%04d_%02d-%02d-%02d"),
+//					Time.wDay,
+//					Time.wMonth,
+//					Time.wYear,
+//					Time.wHour,
+//					Time.wMinute,
+//					Time.wSecond);
+
+
+//	BackupDataDirectory.Format(_T("%s\\BackupMetrology_%s\\"), Directory, strTime);
+//	BackupDataDirectory.AppendChar('\0');
+//	CreateDirectory(BackupDataDirectory, NULL);
+
+//	CString Path;
+//	int ErrorCode = 0;
+
+//	switch(theApp.Database.DriverType)
+//	{
+//		case DATABASE_DRIVER_TYPE_DBF:
+//			{
+//				Path.Format(_T("%s\\*.*"), theApp.Database.Path);
+//				Path.AppendChar('\0');
+
+//				SHFILEOPSTRUCT fo;
+//				ZeroMemory(&fo, sizeof(SHFILEOPSTRUCT));
+
+//				fo.hwnd = NULL;
+//				fo.wFunc = FO_COPY;
+//				fo.pFrom = Path;
+//				fo.pTo   = BackupDataDirectory;
+//				fo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_SILENT;
+
+//				int RetCode = SHFileOperation(&fo);
+//				if (RetCode != NULL || fo.fAnyOperationsAborted == TRUE)
+//				{
+//					ErrorCode = RetCode;
+//				}
+//			}
+//			break;
+
+//		case DATABASE_DRIVER_TYPE_MDB:
+//			{
+//				Path.Format(_T("%s%s.%s"), BackupDataDirectory, DATABASE_NAME, DatabaseDriverExt[theApp.Database.DriverType] );
+//				if ( CopyFile(theApp.Database.Path, Path, FALSE) == FALSE)
+//				{
+//					ErrorCode = GetLastError();
+//				}
+//			}
+//			break;
+//	}
+
+//	if (ErrorCode != 0)
+//	{
+//		LPVOID lpMsgBuf = NULL;
+
+//		FormatMessage(	FORMAT_MESSAGE_ALLOCATE_BUFFER |
+//						FORMAT_MESSAGE_FROM_SYSTEM |
+//						FORMAT_MESSAGE_IGNORE_INSERTS,
+//						NULL,
+//						ErrorCode,
+//						MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+//						(LPTSTR) &lpMsgBuf,
+//						0, NULL );
+
+//		CString str;
+//		str.Format(_T("Не удалось создать резервную копию измерений.\nКод ошибки: %d\n%s"), ErrorCode, lpMsgBuf);
+//		AfxMessageBox(str, MB_ICONEXCLAMATION);
+
+//		LocalFree(lpMsgBuf);
+//	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::createBackupOnStart()
+{
+    if (m_onStart == true)
+    {
+        createBackup();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::createBackupOnExit()
+{
+    if (m_onExit == true)
+    {
+        createBackup();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::load()
+{
+    QSettings s;
+
+    m_onStart = s.value( QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), false).toBool();
+    m_onExit = s.value( QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), true).toBool();
+    m_directory = s.value( QString("%1Directory").arg(BACKUP_OPTIONS_REG_KEY), "").toString();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), m_onStart);
+    s.setValue( QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), m_onExit);
+    s.setValue( QString("%1Directory").arg(BACKUP_OPTIONS_REG_KEY), m_directory);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+BackupOption& BackupOption::operator=(const BackupOption& from)
+{
+    m_onStart = from.m_onStart;
+    m_onExit = from.m_onExit;
+    m_directory = from.m_directory;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 Options::Options(QObject *parent) :
     QObject(parent)
 {
@@ -791,7 +1003,6 @@ int Options::getChannelCount()
         default:                    assert(0);                      break;
     }
 
-
     return count;
 }
 
@@ -803,7 +1014,9 @@ void Options::load()
     m_connectTcpIp.load();
     m_measureView.init();
     m_measureView.load();
+    m_database.load();
     m_linearity.load();
+    m_backup.load();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -813,7 +1026,9 @@ void Options::save()
     m_toolBar.save();
     m_connectTcpIp.save();
     m_measureView.save();
+    m_database.save();
     m_linearity.save();
+    m_backup.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -830,7 +1045,9 @@ Options& Options::operator=(const Options& from)
         m_toolBar = from.m_toolBar;
         m_connectTcpIp = from.m_connectTcpIp;
         m_measureView = from.m_measureView;
+        m_database = from.m_database;
         m_linearity = from.m_linearity;
+        m_backup = from.m_backup;
 
     m_mutex.unlock();
 

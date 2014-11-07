@@ -30,7 +30,8 @@ SOURCES += \
     MeasureBase.cpp \
     ExportMeasure.cpp \
     Delegate.cpp \
-    FindMeasure.cpp
+    FindMeasure.cpp \
+    FilePropertyManager.cpp
 
 
 HEADERS  += \
@@ -49,7 +50,8 @@ HEADERS  += \
     MeasureBase.h \
     ExportMeasure.h \
     Delegate.h \
-    FindMeasure.h
+    FindMeasure.h \
+    FilePropertyManager.h
 
 
 FORMS    +=
