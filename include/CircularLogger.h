@@ -8,14 +8,14 @@
 class QFile;
 class QTextStream;
 
-const int MT_USER_ACTION = 0,
-MT_NET = 1,
-MT_APPLICATION = 2;
+const int	MT_USER_ACTION = 0,
+			MT_NET = 1,
+			MT_APPLICATION = 2;
 
-const int MC_ERROR = 0,
-MC_WARNING = 1,
-MC_MESSAGE = 2,
-MC_CONFIG = 3;
+const int	MC_ERROR = 0,
+			MC_WARNING = 1,
+			MC_MESSAGE = 2,
+			MC_CONFIG = 3;
 
 
 class CircularLoggerWorker : public QObject
@@ -69,17 +69,17 @@ signals:
 
 public slots:
 
-	QString appErr(char* function, QString message)
+	QString appErr(const QString& function, const QString& message)
 	{
 		return write(MT_APPLICATION, MC_ERROR, function, message);
 	}
 
-	QString appWrn(char* function, QString message)
+	QString appWrn(const QString& function, const QString& message)
 	{
 		return write(MT_APPLICATION, MC_WARNING, function, message);
 	}
 
-	QString appMsg(char* function, QString message)
+	QString appMsg(const QString& function, const QString& message)
 	{
 		return write(MT_APPLICATION, MC_MESSAGE, function, message);
 	}
@@ -88,22 +88,22 @@ public slots:
 	QString netWrn(char* function, QHostAddress& IP, RequestHeader& header, char* message, ...);
 	QString netMsg(char* function, QHostAddress& IP, RequestHeader& header, char* message, ...);*/
 
-	QString userErr(char* function, QString message)
+	QString userErr(const QString& function, const QString& message)
 	{
 		return write(MT_USER_ACTION, MC_ERROR, function, message);
 	}
 
-	QString userWrn(char* function, QString message)
+	QString userWrn(const QString& function, const QString& message)
 	{
 		return write(MT_USER_ACTION, MC_WARNING, function, message);
 	}
 
-	QString userMsg(char* function, QString message)
+	QString userMsg(const QString& function, const QString& message)
 	{
 		return write(MT_USER_ACTION, MC_MESSAGE, function, message);
 	}
 
-	QString write(int type, int category, QString function, QString message/*ip, header*/)
+	QString write(int type, int category, QString function, const QString& message/*ip, header*/)
 	{
 		QString record = composeRecord(type, category, function, message);
 		emit writeRecord(record);
@@ -115,12 +115,13 @@ private:
 	CircularLoggerWorker* m_circularLoggerWorker = nullptr;
 	QThread* m_thread = nullptr;
 
-	QString composeRecord(int type, int category, QString function, QString message/*ip, header*/);
+	QString composeRecord(int type, int category, const QString& function, const QString& message/*ip, header*/);
 };
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
-#define MESSAGE_POSITION Q_FUNC_INFO " POS=" __FILE__ ":" TOSTRING(__LINE__)
+#define MESSAGE_POSITION QString("%1 POS=%2:%3").arg(Q_FUNC_INFO).arg(__FILE__).arg(__LINE__)
+
 #define APP_ERR(log,str) (log).appErr(MESSAGE_POSITION,str);
 #define APP_WRN(log,str) (log).appWrn(MESSAGE_POSITION,str);
 #define APP_MSG(log,str) (log).appMsg(MESSAGE_POSITION,str);

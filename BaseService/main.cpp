@@ -19,8 +19,8 @@
 class BaseService : public QtService<QCoreApplication>
 {
 private:
-	BaseServiceController* m_baseServiceController;
-	int m_serviceType;
+	BaseServiceController* m_baseServiceController = nullptr;
+	int m_serviceType = 0;
 
 public:
 	BaseService(int argc, char ** argv, const QString & name, int serviceType);
@@ -40,9 +40,14 @@ protected:
 
 BaseService::BaseService(int argc, char ** argv, const QString & name, int serviceType):
 	QtService(argc, argv, name),
-	m_baseServiceController(nullptr),
 	m_serviceType(serviceType)
 {
+	if ( !(m_serviceType >= 0 && m_serviceType < SERVICE_TYPE_COUNT))
+	{
+		assert(m_serviceType >= 0 && m_serviceType);
+
+		m_serviceType = STP_BASE;
+	}
 }
 
 
