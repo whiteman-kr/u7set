@@ -8,9 +8,22 @@ const int MAX_DATAGRAM_SIZE = 4096;
 
 const quint32   STP_BASE = 0,
 				STP_CONFIG = 1,
-				STP_FSC_AQUISION = 2,
+				STP_FSC_ACQUISITION = 2,
 				STP_FSC_TUNING = 3,
 				STP_ARCHIVING = 4;
+
+
+const char* const serviceTypeStr[] =
+{
+	"RPCT Base Service",
+	"RPCT Configuration Service",
+	"RPCT FSC Data Acquisition Service",
+	"RPCT FSC Tuning Service",
+	"RPCT Data Archiving Service"
+};
+
+
+const quint32	SERVICE_TYPE_COUNT = sizeof(serviceTypeStr) / sizeof(const char*);
 
 
 const quint16   PORT_BASE_SERVICE = 13300,
@@ -27,8 +40,7 @@ const quint32   RQID_GET_SERVICE_INFO = 1000,
                 RQID_SERVICE_MF_RESTART = 1102,
 
                 RQID_SEND_FILE_START = 1200,
-                RQID_SEND_FILE_NEXT = 1201,
-                RQID_SEND_FILE_CANCEL = 1202;
+				RQID_SEND_FILE_NEXT = 1201;
 
 
 const quint32   SS_MF_STOPPED = 0,
@@ -38,30 +50,30 @@ const quint32   SS_MF_STOPPED = 0,
 
 
 // Request error codes
+//
 const quint32	RQERROR_OK = 0,
 				RQERROR_UNKNOWN_REQUEST = 1,
 				RQERROR_UNKNOWN_FILE_ID = 2,
-				RQERROR_RECEIVE_FILE = 3;				// file receive error on receiver side
+				RQERROR_RECEIVE_FILE = 3,				// file receive error on receiver side
+				RQERROR_TIMEOUT = 4;					// request ack timeout
 
 
 struct ServiceTypeInfo
 {
     quint32 serviceType;
     quint16 port;
-    char* name;
+	const char* name;
 };
 
 
 const ServiceTypeInfo serviceTypesInfo[] =
 {
-	{STP_BASE, PORT_BASE_SERVICE, "Base Service"},
-	{STP_CONFIG, PORT_CONFIG_SERVICE, "Configuration Service"},
-	{STP_FSC_AQUISION, PORT_FCS_AQUISION_SERVICE, "FSC Data Acquisition Service"},
-	{STP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, "FSC Tuning Service"},
-	{STP_ARCHIVING, PORT_ARCHIVING_SERVICE, "Data Archiving Service"},
+	{ STP_BASE, PORT_BASE_SERVICE, serviceTypeStr[STP_BASE] },
+	{ STP_CONFIG, PORT_CONFIG_SERVICE, serviceTypeStr[STP_CONFIG]},
+	{ STP_FSC_ACQUISITION, PORT_FCS_AQUISION_SERVICE, serviceTypeStr[STP_FSC_ACQUISITION]},
+	{ STP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, serviceTypeStr[STP_FSC_TUNING]},
+	{ STP_ARCHIVING, PORT_ARCHIVING_SERVICE, serviceTypeStr[STP_ARCHIVING]},
 };
-
-const int RQSTP_COUNT = sizeof(serviceTypesInfo) / sizeof(ServiceTypeInfo);
 
 
 #pragma pack(push, 1)

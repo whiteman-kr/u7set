@@ -61,7 +61,7 @@ void CircularLogger::initLog(QString logName, int fileCount, int fileSizeInMB, Q
 			Qt::QueuedConnection);
 }
 
-QString CircularLogger::composeRecord(int type, int category, QString function, QString message)
+QString CircularLogger::composeRecord(int type, int category, const QString &function, const QString &message)
 {
 	QString record;
 
@@ -269,8 +269,8 @@ void CircularLoggerWorker::writeFirstRecord()
 {
 	*m_stream << tr("\n# Opened ")
 			  << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz")
-			  << "  by application \""
-			  << qApp->applicationName()
+			  << "  by application "
+			  << qApp->applicationFilePath()
 			  << "\n\n";
 }
 
@@ -278,8 +278,8 @@ void CircularLoggerWorker::writeLastRecord()
 {
 	*m_stream << tr("\n# Closed ")
 			  << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz")
-			  << "  by application \""
-			  << qApp->applicationName()
+			  << "  by application "
+			  << qApp->applicationFilePath()
 			  << "\n\n";
 	m_stream->flush();
 }
