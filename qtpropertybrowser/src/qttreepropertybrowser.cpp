@@ -618,18 +618,19 @@ void QtTreePropertyBrowserPrivate::propertyChanged(QtBrowserItem *index)
 
 void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
 {
-	//this function is optimized to improve performance on many items
-
 	QtProperty *property = m_itemToIndex[item]->property();
     QIcon expandIcon;
     if (property->hasValue()) {
-		QString toolTip = property->toolTip();
-		if (toolTip.isEmpty())
-			toolTip = property->displayText();
-		item->setToolTip(1, toolTip);
+		//QString toolTip = property->toolTip();
+		//if (toolTip.isEmpty())
+		//    toolTip = property->displayText();
+		//item->setToolTip(1, toolTip);
         item->setIcon(1, property->valueIcon());
-        property->displayText().isEmpty() ? item->setText(1, property->valueText()) : item->setText(1, property->displayText());
-    } else if (markPropertiesWithoutValue() && !m_treeWidget->rootIsDecorated()) {
+
+		//property->displayText().isEmpty() ? item->setText(1, property->valueText()) : item->setText(1, property->displayText());
+		item->setText(1, property->valueText());
+
+	} else if (markPropertiesWithoutValue() && !m_treeWidget->rootIsDecorated()) {
         expandIcon = m_expandIcon;
     }
 	item->setIcon(0, expandIcon);
@@ -637,8 +638,12 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
 	item->setToolTip(0, property->propertyName());
 	//item->setStatusTip(0, property->statusTip());
 	//item->setWhatsThis(0, property->whatsThis());
-	item->setText(0, property->propertyName());
-	bool wasEnabled = item->flags() & Qt::ItemIsEnabled;
+
+	//item->setText(0, property->propertyName());
+
+	item->setText(0, property->displayText().isEmpty() ? property->propertyName() : property->displayText());
+
+	/*bool wasEnabled = item->flags() & Qt::ItemIsEnabled;
 	bool isEnabled = wasEnabled;
 	if (property->isEnabled()) {
         QTreeWidgetItem *parent = item->parent();
@@ -654,7 +659,7 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
             enableItem(item);
         else
             disableItem(item);
-	}
+	}*/
 	//m_treeWidget->viewport()->update();
 }
 
