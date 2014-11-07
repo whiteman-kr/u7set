@@ -305,8 +305,8 @@ void QtMultiTextEdit::onEditingFinished()
 	{
 		if (m_editingFinished == false)
 		{
-			emit valueChanged(m_lineEdit->text());
 			m_editingFinished = true;	//a "static" value. On "Enter", onEditingFinished comes twice???
+			emit valueChanged(m_lineEdit->text());
 		}
 	}
 }
@@ -935,6 +935,20 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 	return QString("");
 }
 
+QString QtMultiVariantPropertyManager::displayText(const QtProperty *property) const
+{
+	QString str = property->propertyName();
+
+	int slashIndex = str.lastIndexOf("\\");
+
+	if (slashIndex != -1)
+	{
+		str = str.right(str.length() - slashIndex - 1);
+	}
+
+	return str;
+}
+
 //
 // ------- Property Editor ----------
 //
@@ -992,6 +1006,8 @@ void PropertyEditor::onCurrentItemChanged(QtBrowserItem* current)
 
 void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 {
+	setVisible(false);
+
 	clearProperties();
 
 	QMap<QString, PropertyItem> propertyItems;
@@ -1017,7 +1033,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 				continue;
 			}
 
-			PropertyItem pi;
+static PropertyItem pi;
 
 			pi.object = *pobject;
 			pi.type = metaProperty.type();
@@ -1036,7 +1052,8 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 		QList<QByteArray> dynamicPropNames = object->dynamicPropertyNames();
 		for (auto name : dynamicPropNames)
 		{
-			PropertyItem pi;
+
+static PropertyItem pi;
 
 			pi.object = *pobject;
 			pi.type = object->property(name).type();
@@ -1051,16 +1068,13 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 		}
 	}
 
-	QtProperty* commonProperty = m_propertyGroupManager->addProperty(tr("Common"));
-
 	// add only common properties with same type
 	//
-	for (auto n = propertyNames.begin(); n != propertyNames.end(); n++)
+	for (auto name = propertyNames.begin(); name != propertyNames.end(); name++)
 	{
 		// take all properties witn the same name
 		//
-		QString name = *n;
-		QList<PropertyItem> items = propertyItems.values(name);
+		QList<PropertyItem> items = propertyItems.values(*name);
 
 		if (items.size() != objects.size())
 		{
@@ -1069,8 +1083,8 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 
 		// now check if all properties have the same type and values
 		//
-		QVariant::Type type;
-		QVariant value;
+static QVariant::Type type;
+static QVariant value;
 
 		bool sameType = true;
 		bool sameValue = true;
@@ -1101,8 +1115,6 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 					sameValue = false;
 				}
 			}
-
-			m_propToClassMap.insertMulti(name, pi.object);
 		}
 
 		if (sameType == false)
@@ -1110,6 +1122,83 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 			continue;   // properties are not the same type
 		}
 
+		QtProperty* property = createProperty(nullptr, *name, *name, value, type, sameValue);
+
+		for (auto p = items.begin(); p != items.end(); p++)
+		{
+			PropertyItem& pi = *p;
+			m_propToClassMap.insertMulti(property, pi.object);
+		}
+	}
+
+	setVisible(true);
+	return;
+}
+
+QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QVariant& value, QVariant::Type type, bool sameValue)
+{
+	int slashPos = name.indexOf("\\");
+	if (parentProperty == nullptr || slashPos != -1)
+	{
+		QString groupName;
+		QString propName;
+
+		if (slashPos == -1)
+		{
+			propName = name;
+			groupName = "Common";
+		}
+		else
+		{
+			propName = name.right(name.length() - slashPos - 1);
+			groupName = name.left(slashPos);
+		}
+
+		// Add the property now
+		//
+		QtProperty* subGroup = nullptr;
+		QList<QtProperty*> propList;
+
+		if (parentProperty != nullptr)
+		{
+			// Find, if group already exists
+			//
+			propList = parentProperty->subProperties();
+		}
+		else
+		{
+			propList = properties();
+		}
+
+		for (QtProperty* p : propList)
+		{
+			if (p->propertyName() == groupName)
+			{
+				subGroup = p;
+				break;
+			}
+		}
+
+		if (subGroup == nullptr)
+		{
+			subGroup = m_propertyGroupManager->addProperty(groupName);
+		}
+
+		QtProperty* property = createProperty(subGroup, propName, fullName, value, type, sameValue);
+
+		if (parentProperty == nullptr)
+		{
+			addProperty(subGroup);
+		}
+		else
+		{
+			parentProperty->addSubProperty(subGroup);
+		}
+
+		return property;
+	}
+	else
+	{
 		// Add the property now
 		//
 		QtProperty* subProperty = nullptr;
@@ -1117,7 +1206,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 		switch (type)
 		{
 			case QVariant::Int:
-				subProperty = m_propertyIntManager->addProperty(name);
+				subProperty = m_propertyIntManager->addProperty(fullName);
 				if (sameValue == true)
 				{
 					m_propertyIntManager->setValue(subProperty, value.toInt());
@@ -1125,7 +1214,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 				break;
 
 			case QVariant::String:
-				subProperty = m_propertyStringManager->addProperty(name);
+				subProperty = m_propertyStringManager->addProperty(fullName);
 				if (sameValue == true)
 				{
 					m_propertyStringManager->setValue(subProperty, value.toString());
@@ -1133,7 +1222,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 				break;
 
 			case QVariant::Double:
-				subProperty = m_propertyDoubleManager->addProperty(name);
+				subProperty = m_propertyDoubleManager->addProperty(fullName);
 				if (sameValue == true)
 				{
 					m_propertyDoubleManager->setValue(subProperty, value.toDouble());
@@ -1141,7 +1230,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 				break;
 
 			case QVariant::Bool:
-				subProperty = m_propertyBoolManager->addProperty(name);
+				subProperty = m_propertyBoolManager->addProperty(fullName);
 				if (sameValue == true)
 				{
 					m_propertyBoolManager->setValue(subProperty, value.toBool());
@@ -1149,7 +1238,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 				break;
 
 			case QVariant::Color:
-				subProperty = m_propertyColorManager->addProperty(name);
+				subProperty = m_propertyColorManager->addProperty(fullName);
 				if (sameValue == true)
 				{
 					m_propertyColorManager->setValue(subProperty, value);
@@ -1158,21 +1247,22 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 
 			default:
 				Q_ASSERT(false);
-				continue;
+				return nullptr;
 		}
 
-		if (subProperty == nullptr)
+
+
+		if (parentProperty == nullptr)
 		{
-			Q_ASSERT(subProperty);
-			continue;
+			Q_ASSERT(parentProperty);
+			return nullptr;
 		}
 
-		commonProperty->addSubProperty(subProperty);
+		parentProperty->addSubProperty(subProperty);
+
+		return subProperty;
 	}
 
-	addProperty(commonProperty);
-
-	return;
 }
 
 void PropertyEditor::updateProperty(const QString& propertyName)
@@ -1270,7 +1360,7 @@ void PropertyEditor::createValuesMap(const QSet<QtProperty*>& props, QMap<QtProp
 		bool sameValue = true;
 		QVariant value;
 
-		QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
+		QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property);
 		for (auto i = objects.begin(); i != objects.end(); i++)
 		{
 			QObject* pObject = (*i).get();
@@ -1324,7 +1414,13 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 {
 	// Set the new property value in all objects
 	//
-	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property->propertyName());
+	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property);
+
+	if (objects.size() == 0)
+	{
+		Q_ASSERT(objects.size() > 0);
+		return;
+	}
 
 	QString errorString;
 
@@ -1343,7 +1439,6 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 
 	if (errorString.isEmpty() == false)
 	{
-		updateProperties();
 		emit showErrorMessage(errorString);
 	}
 
