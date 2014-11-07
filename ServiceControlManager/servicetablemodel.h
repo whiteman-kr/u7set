@@ -24,7 +24,7 @@ struct ServiceData
 struct HostInfo
 {
     quint32 ip;
-    ServiceData servicesData[RQSTP_COUNT];
+	ServiceData servicesData[SERVICE_TYPE_COUNT];
 
     HostInfo() : ip(0) {}
 };

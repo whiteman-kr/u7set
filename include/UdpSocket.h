@@ -29,7 +29,7 @@ private:
 	quint16 m_port = 0;
 
 	char m_rawData[MAX_DATAGRAM_SIZE];
-	quint32 m_rawDataSize = 0;
+	quint32 m_rawDataSize = sizeof(RequestHeader);
 
 	RequestHeader* m_header = reinterpret_cast<RequestHeader*>(m_rawData);
 	char* m_data = m_rawData + sizeof(RequestHeader);
@@ -56,11 +56,11 @@ public:
 	quint16 port() const { return m_port; }
 	void setPort(quint16 port) { m_port = port; }
 
-	const char* rawData() const { return m_rawData; }				// return pointer on request header
-	const char* data() const { return m_data; }						// return pointer on request data after header
+	const char* rawData() const { return m_rawData; }							// return pointer on request header
+	const char* data() const { return m_data; }									// return pointer on request data after header
 
-	quint32 rawDataSize() const { return m_rawDataSize; }
-	quint32 dataSize() const { return m_rawDataSize - sizeof(RequestHeader); }
+	quint32 rawDataSize() const { return m_rawDataSize; }						// full request length with header
+	quint32 dataSize() const { return m_rawDataSize - sizeof(RequestHeader); }	// request length without header
 
 	quint32 ID() const { return m_header->id; }
 	void setID(quint32 id) { m_header->id = id; }

@@ -10,6 +10,8 @@ QT       -= gui
 
 QT       += network
 
+QT		 += widgets
+
 TARGET = BaseService
 CONFIG   += console
 CONFIG   -= app_bundle

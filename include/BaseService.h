@@ -7,10 +7,14 @@
 #include <QFileInfo>
 #include "../qtservice/src/qtservice.h"
 #include "../include/UdpSocket.h"
+#include "../include/CircularLogger.h"
+
+
+
+
 
 
 class BaseServiceController;
-
 
 class ReceivedFile
 {
@@ -50,6 +54,8 @@ private:
 
 	BaseServiceController* m_baseServiceController;
 
+	CircularLogger& m_log;
+
 	UdpSocketThread* m_serverSocketThread = nullptr;
 
 	// members needed for file sending
@@ -66,7 +72,7 @@ private:
 	bool m_sendFileFirstRead = true;
 
 	bool sendFileReadNextPart();
-	void stopSendFile();
+	void stopSendFile(quint32 errorCode);
 
 	// members needed for file receiving
 	//
@@ -200,10 +206,14 @@ private slots:
 	void onMainFunctionStopped();
 
 public:
+	CircularLogger log;
+
     BaseServiceController(int serviceType);
     virtual ~BaseServiceController();
 
 	void getServiceInfo(ServiceInformation& serviceInfo);
+
+	virtual void initLog();
 };
 
 

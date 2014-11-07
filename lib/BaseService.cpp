@@ -72,9 +72,12 @@ quint32 ReceivedFile::CRC32()
 
 BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceController, int serviceType) :
     m_baseServiceController(baseServiceController),
+	m_log(m_baseServiceController->log),
     m_serviceType(serviceType)
 {
     assert(m_baseServiceController != nullptr);
+
+
 }
 
 
@@ -145,14 +148,17 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 			break;
 
 		case RQID_SERVICE_MF_START:
+			APP_MSG(m_log, QString("Main function START request from %1.").arg(request.address().toString()));
 			emit startMainFunction();
 			break;
 
 		case RQID_SERVICE_MF_STOP:
+			APP_MSG(m_log, QString("Main function STOP request from %1.").arg(request.address().toString()));
 			emit stopMainFunction();
 			break;
 
 		case RQID_SERVICE_MF_RESTART:
+			APP_MSG(m_log, QString("Main function RESTART request from %1.").arg(request.address().toString()));
 			emit restartMainFunction();
 			break;
 
@@ -259,6 +265,10 @@ void BaseServiceWorker::onSendFile(QHostAddress address, quint16 port, QString f
 
 	sendFileRequest(request);
 
+	m_sendFileNext.fileID = 0;
+
+	APP_MSG(m_log, QString("Sending of file %1 was started").arg(fName));
+
 	m_sendFileFirstRead = true;
 
 	m_sendFileReadNextPartOK = sendFileReadNextPart();
@@ -330,7 +340,7 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 			}
 			else
 			{
-				stopSendFile();
+				stopSendFile(udpRequest.errorCode());
 				emit endSendFile(false, m_fileToSendInfo.fileName());
 			}
 
@@ -343,7 +353,7 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 				{
 					// this is ack on last part send
 					//
-					stopSendFile();
+					stopSendFile(udpRequest.errorCode());
 					emit endSendFile(true, m_fileToSendInfo.fileName());
 				}
 				else
@@ -372,7 +382,7 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 			}
 			else
 			{
-				stopSendFile();
+				stopSendFile(udpRequest.errorCode());
 				emit endSendFile(false, m_fileToSendInfo.fileName());
 			}
 			break;
@@ -382,13 +392,22 @@ void BaseServiceWorker::onSendFileAckReceived(UdpRequest udpRequest)
 
 void BaseServiceWorker::onSendFileAckTimeout()
 {
-	stopSendFile();
+	stopSendFile(RQERROR_TIMEOUT);
 	emit endSendFile(false, m_fileToSendInfo.fileName());
 }
 
 
-void BaseServiceWorker::stopSendFile()
+void BaseServiceWorker::stopSendFile(quint32 errorCode)
 {
+	if (errorCode == RQERROR_OK)
+	{
+		APP_MSG(m_log, QString("Sending of file %1 (ID = %2) was finished OK.").arg(m_fileToSendInfo.fileName()).arg(m_sendFileNext.fileID));
+	}
+	else
+	{
+		APP_WRN(m_log, QString("Sending of file %1 (ID = %2) was finished. Error code = %3.").arg(m_fileToSendInfo.fileName()).arg(m_sendFileNext.fileID).arg(errorCode));
+	}
+
 	m_fileToSend.close();
 
 	m_sendFileClientSocketThread->quit();
@@ -404,6 +423,8 @@ void BaseServiceWorker::onSendFileStartRequest(const UdpRequest& request, UdpReq
 	const SendFileStart* sendFileStart = reinterpret_cast<const SendFileStart*>(request.data());
 
 	QString fileName(reinterpret_cast<const QChar*>(sendFileStart->fileName));
+
+	APP_MSG(m_log, QString("Receiving of file %1 was started.").arg(fileName));
 
 	ReceivedFile* rf = new ReceivedFile(fileName, sendFileStart->fileSize);
 
@@ -443,16 +464,18 @@ void BaseServiceWorker::onSendFileNextRequest(const UdpRequest &request, UdpRequ
 
 		m_receivedFile.remove(sendFileNext->fileID);
 
+		APP_ERR(m_log, QString("Receiving of file was terminated. Internal error."));
+
 		return;
 	}
-
-//	rf->appendData(sendFileNext->data, sendFileNext->dataSize);
 
 	if (!rf->appendData(sendFileNext->data, sendFileNext->dataSize))
 	{
 		qDebug() << "File Receive Error";
 
 		ack.setErrorCode(RQERROR_RECEIVE_FILE);
+
+		APP_WRN(m_log, QString("Receiving of file %1 (ID = %2) was terminated.").arg(rf->fileName()).arg(rf->ID()));
 
 		m_receivedFile.remove(sendFileNext->fileID);
 
@@ -475,12 +498,16 @@ void BaseServiceWorker::onSendFileNextRequest(const UdpRequest &request, UdpRequ
 	{
 		ack.setErrorCode(RQERROR_RECEIVE_FILE);
 
+		APP_WRN(m_log, QString("Receiving of file %1 (ID = %2) was terminated. Bad CRC32.").arg(rf->fileName()).arg(rf->ID()));
+
 		m_receivedFile.remove(sendFileNext->fileID);
 
 		delete rf;
 
 		return;
 	}
+
+	APP_MSG(m_log, QString("Receiving of file %1 (ID = %2) was finished OK.").arg(rf->fileName()).arg(rf->ID()));
 
 	emit fileReceived(rf);
 }
@@ -548,11 +575,14 @@ BaseServiceController::BaseServiceController(int serviceType) :
 	m_mainFunctionNeedRestart(false),
 	m_mainFunctionStopped(false)
 {
+	assert(m_serviceType >= 0 && m_serviceType < SERVICE_TYPE_COUNT);
+
 	qRegisterMetaType<QHostAddress>("QHostAddress");
-
-	assert(m_serviceType >= 0 && m_serviceType < RQSTP_COUNT);
-
 	qRegisterMetaType<UdpRequest>("UdpRequest");
+
+	initLog();
+
+	APP_MSG(log, QString(serviceTypeStr[m_serviceType]) + " was started");
 
 	// start timer
 	//
@@ -585,6 +615,8 @@ BaseServiceController::~BaseServiceController()
 
 	m_baseWorkerThread.quit();
     m_baseWorkerThread.wait();
+
+	APP_MSG(log, QString(serviceTypeStr[m_serviceType]) + " was finished");
 }
 
 
@@ -614,6 +646,14 @@ void BaseServiceController::getServiceInfo(ServiceInformation &serviceInfo)
 }
 
 
+void BaseServiceController::initLog()
+{
+	QFileInfo fi(qApp->applicationFilePath());
+
+	log.initLog(fi.baseName(), 5, 10);
+}
+
+
 void BaseServiceController::stopMainFunction()
 {
 	qDebug() << "Called BaseServiceController::stopMainFunction";
@@ -629,6 +669,8 @@ void BaseServiceController::stopMainFunction()
 
 	// m_mainFunctionState = MainFunctionState::Stopped setted in testMainFunctionState
 	//
+
+	APP_MSG(log, QString("Main function was stopped."));
 }
 
 
@@ -659,6 +701,8 @@ void BaseServiceController::startMainFunction()
 	m_mainFunctionStartTime = QDateTime::currentMSecsSinceEpoch();
 
 	m_mainFunctionThread.start();
+
+	APP_MSG(log, QString("Main function was started."));
 
 	// m_mainFunctionState = MainFunctionState::Work setted in slot onMainFunctionWork
 	//
