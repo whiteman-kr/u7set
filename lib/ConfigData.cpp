@@ -712,10 +712,7 @@ void ConfigConfiguration::writeData(QXmlStreamWriter& writer)
 //----------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------
 //
-ConfigValue::ConfigValue():
-	m_offset(-1),
-	m_bit(-1),
-	m_boolSize(1)
+ConfigValue::ConfigValue()
 {
 }
 
@@ -798,34 +795,44 @@ void ConfigValue::setType(const QString& type)
 	m_type = type;
 }
 
-int ConfigValue::offset()
+int ConfigValue::offset() const
 {
 	return m_offset;
 }
 
-void ConfigValue::setOffset(const int& offset)
+void ConfigValue::setOffset(int offset)
 {
 	m_offset = offset;
 }
 
-int ConfigValue::bit()
+int ConfigValue::bit() const
 {
 	return m_bit;
 }
 
-void ConfigValue::setBit(const int& bit)
+void ConfigValue::setBit(int bit)
 {
 	m_bit = bit;
 }
 
-int ConfigValue::boolSize()
+int ConfigValue::boolSize() const
 {
 	return m_boolSize;
 }
 
-void ConfigValue::setBoolSize(const int& boolSize)
+void ConfigValue::setBoolSize(int boolSize)
 {
 	m_boolSize = boolSize;
+}
+
+bool ConfigValue::userProperty() const
+{
+	return m_userProperty;
+}
+
+void ConfigValue::setUserProperty(bool value)
+{
+	m_userProperty = value;
 }
 
 const QString& ConfigValue::defaultValue() const
@@ -866,7 +873,7 @@ void ConfigValue::readValue(QXmlStreamReader& reader)
 
     bool ok = false;
 
-    // Чтение параметров Value
+	// Reading "Value" attributes and data
     //
 
     QXmlStreamAttributes attr = reader.attributes();
@@ -874,22 +881,36 @@ void ConfigValue::readValue(QXmlStreamReader& reader)
     {
         setName(attr.value("name").toString());
     }
+
     if (attr.hasAttribute("type"))
     {
         setType(attr.value("type").toString());
     }
+
     if (attr.hasAttribute("offset"))
     {
         setOffset(attr.value("offset").toString().toInt(&ok));
     }
+
     if (attr.hasAttribute("bit"))
     {
         setBit(attr.value("bit").toString().toInt(&ok));
     }
+
     if (attr.hasAttribute("size"))
     {
         setBoolSize(attr.value("size").toString().toInt(&ok));
     }
+
+	if (attr.hasAttribute("user"))
+	{
+		setUserProperty(attr.value("user").toString().compare("true", Qt::CaseInsensitive));
+	}
+	else
+	{
+		setUserProperty(false);
+	}
+
     if (attr.hasAttribute("default"))
     {
         setDefaultValue(attr.value("default").toString());
@@ -897,11 +918,14 @@ void ConfigValue::readValue(QXmlStreamReader& reader)
 
     setValue(defaultValue());
 
-    //Завершение чтения
+	// Завершение чтения
     //
     reader.readElementText();
+
     if (reader.isEndElement())
+	{
         reader.readNext();
+	}
 }
 
 void ConfigValue::writeValue(QXmlStreamWriter& writer)
@@ -1143,6 +1167,8 @@ bool ConfigDataReader::load(const QByteArray& data)
         QJsonArray array = jFrame.value("data").toArray();
         for (int i = 0; i < array.size(); i++)
         {
+			//int v = array[i].toInt();
+			//int v = array[i].toInt();
             item.m_data.push_back((int)array[i].toDouble());
         }
 

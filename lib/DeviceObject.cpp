@@ -662,16 +662,21 @@ namespace Hardware
 		moduleMessage->set_place(m_place);
 		moduleMessage->set_type(m_type);
 
-		if (m_configurationInput.isEmpty() == false)
+		if (m_moduleConfiguration.hasConfiguration() == true)
 		{
-			Proto::Write(moduleMessage->mutable_configuration_input(), m_configurationInput);
+			m_moduleConfiguration.save(moduleMessage->mutable_module_configuration());
+		}
+
+/*		if (m_configurationInput.isEmpty() == false)
+		{
+			moduleMessage->set_configuration_input(m_configurationInput.toStdString());
 		}
 
 		if (m_configurationOutput.isEmpty() == false)
 		{
-			Proto::Write(moduleMessage->mutable_configuration_output(), m_configurationOutput);
+			moduleMessage->set_configuration_output(m_configurationOutput.toStdString());
 		}
-
+*/
 		return true;
 	}
 
@@ -702,22 +707,13 @@ namespace Hardware
 		m_place = moduleMessage.place();
 		m_type =  moduleMessage.type();
 
-		if (moduleMessage.has_configuration_input() == true)
+		if (moduleMessage.has_module_configuration() == true)
 		{
-			m_configurationInput = Proto::Read(moduleMessage.configuration_input());
-		}
-		else
-		{
-			m_configurationInput.clear();
-		}
+			m_moduleConfiguration.load(moduleMessage.module_configuration());
 
-		if (moduleMessage.has_configuration_output() == true)
-		{
-			m_configurationOutput = Proto::Read(moduleMessage.configuration_output());
-		}
-		else
-		{
-			m_configurationOutput.clear();
+			// Set configuration user properties to Qt meta system
+			//
+			m_moduleConfiguration.addUserPropertiesToObject(this);
 		}
 
 		return true;
@@ -748,26 +744,37 @@ namespace Hardware
 		m_type = value;
 	}
 
-	QString DeviceModule::configurationInput() const
+//	QString DeviceModule::configurationInput() const
+//	{
+//		QString s(m_configurationInput);		// Return Value Optimization
+//		return m_configurationInput;
+//	}
+
+//	void DeviceModule::setConfigurationInput(const QString& value)
+//	{
+//		m_configurationInput = value;
+//	}
+
+//	QString DeviceModule::configurationOutput() const
+//	{
+//		QString s(m_configurationOutput);		// Return Value Optimization
+//		return m_configurationOutput;
+//	}
+
+//	void DeviceModule::setConfigurationOutput(const QString& value)
+//	{
+//		m_configurationOutput = value;
+//	}
+
+	const QString& DeviceModule::configurationStruct() const
 	{
-		QString s(m_configurationInput);		// Return Value Optimization
-		return m_configurationInput;
+		return m_moduleConfiguration.structDescription();
 	}
 
-	void DeviceModule::setConfigurationInput(const QString& value)
+	void DeviceModule::setConfigurationStruct(const QString& value)
 	{
-		m_configurationInput = value;
-	}
-
-	QString DeviceModule::configurationOutput() const
-	{
-		QString s(m_configurationOutput);		// Return Value Optimization
-		return m_configurationOutput;
-	}
-
-	void DeviceModule::setConfigurationOutput(const QString& value)
-	{
-		m_configurationOutput = value;
+		m_moduleConfiguration.setHasConfiguration(true);
+		m_moduleConfiguration.setStructDescription(value);
 	}
 
 	//

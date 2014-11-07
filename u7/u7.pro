@@ -85,7 +85,8 @@ SOURCES +=\
     EditEngine/EditEngineSetPoints.cpp \
     EditEngine/EditEngineSetProperty.cpp \
     SchemePropertiesDialog.cpp \
-    EditEngine/EditEngineSetSchemeProperty.cpp
+    EditEngine/EditEngineSetSchemeProperty.cpp \
+    ../lib/ModuleConfiguration.cpp
 
 
 HEADERS  += \
@@ -137,7 +138,8 @@ HEADERS  += \
     EditEngine/EditEngineSetPoints.h \
     EditEngine/EditEngineSetProperty.h \
     SchemePropertiesDialog.h \
-    EditEngine/EditEngineSetSchemeProperty.h
+    EditEngine/EditEngineSetSchemeProperty.h \
+    ../include/ModuleConfiguration.h
     ../include/Signal.h
 
 FORMS    += \

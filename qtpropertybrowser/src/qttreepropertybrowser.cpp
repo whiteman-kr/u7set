@@ -588,10 +588,10 @@ void QtTreePropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, QtBrow
     m_itemToIndex[newItem] = index;
     m_indexToItem[index] = newItem;
 
-    newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
-    m_treeWidget->setItemExpanded(newItem, true);
+	newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
+	m_treeWidget->setItemExpanded(newItem, true);
 
-    updateItem(newItem);
+	updateItem(newItem);
 }
 
 void QtTreePropertyBrowserPrivate::propertyRemoved(QtBrowserItem *index)
@@ -618,27 +618,29 @@ void QtTreePropertyBrowserPrivate::propertyChanged(QtBrowserItem *index)
 
 void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
 {
-    QtProperty *property = m_itemToIndex[item]->property();
+	//this function is optimized to improve performance on many items
+
+	QtProperty *property = m_itemToIndex[item]->property();
     QIcon expandIcon;
     if (property->hasValue()) {
-        QString toolTip = property->toolTip();
-        if (toolTip.isEmpty())
-            toolTip = property->displayText();
-        item->setToolTip(1, toolTip);
+		QString toolTip = property->toolTip();
+		if (toolTip.isEmpty())
+			toolTip = property->displayText();
+		item->setToolTip(1, toolTip);
         item->setIcon(1, property->valueIcon());
         property->displayText().isEmpty() ? item->setText(1, property->valueText()) : item->setText(1, property->displayText());
     } else if (markPropertiesWithoutValue() && !m_treeWidget->rootIsDecorated()) {
         expandIcon = m_expandIcon;
     }
-    item->setIcon(0, expandIcon);
-    item->setFirstColumnSpanned(!property->hasValue());
-    item->setToolTip(0, property->propertyName());
-    item->setStatusTip(0, property->statusTip());
-    item->setWhatsThis(0, property->whatsThis());
-    item->setText(0, property->propertyName());
-    bool wasEnabled = item->flags() & Qt::ItemIsEnabled;
-    bool isEnabled = wasEnabled;
-    if (property->isEnabled()) {
+	item->setIcon(0, expandIcon);
+	//item->setFirstColumnSpanned(!property->hasValue());
+	item->setToolTip(0, property->propertyName());
+	//item->setStatusTip(0, property->statusTip());
+	//item->setWhatsThis(0, property->whatsThis());
+	item->setText(0, property->propertyName());
+	bool wasEnabled = item->flags() & Qt::ItemIsEnabled;
+	bool isEnabled = wasEnabled;
+	if (property->isEnabled()) {
         QTreeWidgetItem *parent = item->parent();
         if (!parent || (parent->flags() & Qt::ItemIsEnabled))
             isEnabled = true;
@@ -652,8 +654,8 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
             enableItem(item);
         else
             disableItem(item);
-    }
-    m_treeWidget->viewport()->update();
+	}
+	//m_treeWidget->viewport()->update();
 }
 
 QColor QtTreePropertyBrowserPrivate::calculatedBackgroundColor(QtBrowserItem *item) const
@@ -1044,7 +1046,7 @@ bool QtTreePropertyBrowser::propertiesWithoutValueMarked() const
 */
 void QtTreePropertyBrowser::itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem)
 {
-    d_ptr->propertyInserted(item, afterItem);
+	d_ptr->propertyInserted(item, afterItem);
 }
 
 /*!

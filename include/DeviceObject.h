@@ -2,6 +2,7 @@
 #include "DbStruct.h"
 #include "QUuid"
 #include "../include/ProtoSerialization.h"
+#include "../include/ModuleConfiguration.h"
 
 namespace Hardware
 {
@@ -279,8 +280,8 @@ namespace Hardware
 		Q_PROPERTY(int Place READ place WRITE setPlace)
 		Q_PROPERTY(int Type READ type WRITE setType)
 
-		Q_PROPERTY(QString ConfigurationInput READ configurationInput WRITE setConfigurationInput)
-		Q_PROPERTY(QString ConfigurationOutput READ configurationOutput WRITE setConfigurationOutput)
+		Q_PROPERTY(QString ConfigurationStruct READ configurationStruct WRITE setConfigurationStruct)
+		//Q_PROPERTY(QString ConfigurationOutput READ configurationOutput WRITE setConfigurationOutput)
 
 	public:
 		explicit DeviceModule(bool preset = false);
@@ -304,11 +305,14 @@ namespace Hardware
 		int type() const;
 		void setType(int value);
 
-		QString configurationInput() const;
-		void setConfigurationInput(const QString& value);
+		//QString configurationInput() const;
+		//void setConfigurationInput(const QString& value);
 
-		QString configurationOutput() const;
-		void setConfigurationOutput(const QString& value);
+		//QString configurationOutput() const;
+		//void setConfigurationOutput(const QString& value);
+
+		const QString& configurationStruct() const;
+		void setConfigurationStruct(const QString& value);
 
 		// Data
 		//
@@ -320,6 +324,8 @@ namespace Hardware
 
 		QString m_configurationInput;
 		QString m_configurationOutput;
+
+		ModuleConfiguration m_moduleConfiguration;
 	};
 
 
