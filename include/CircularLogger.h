@@ -122,8 +122,6 @@ private:
 #define TOSTRING(x) STRINGIFY(x)
 #define MESSAGE_POSITION QString("%1 POS=%2:%3").arg(Q_FUNC_INFO).arg(__FILE__).arg(__LINE__)
 
-//#define MESSAGE_POSITION Q_FUNC_INFO##" POS="##__FILE__##":"##TOSTRING(__LINE__)
-
 #define APP_ERR(log,str) (log).appErr(MESSAGE_POSITION,str);
 #define APP_WRN(log,str) (log).appWrn(MESSAGE_POSITION,str);
 #define APP_MSG(log,str) (log).appMsg(MESSAGE_POSITION,str);
