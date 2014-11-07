@@ -1,5 +1,6 @@
 #include "../include/DeviceObject.h"
 #include "../include/ProtoSerialization.h"
+#include <QDynamicPropertyChangeEvent>
 
 
 namespace Hardware
@@ -639,6 +640,7 @@ namespace Hardware
 	DeviceModule::DeviceModule(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
+
 	}
 
 	DeviceModule::~DeviceModule()
@@ -724,6 +726,34 @@ namespace Hardware
 		return m_deviceType;
 	}
 
+	bool DeviceModule::event(QEvent* e)
+	{
+		if (e->type() == QEvent::DynamicPropertyChange)
+		{
+			// Configuration property was changed
+			//
+			 QDynamicPropertyChangeEvent* d = dynamic_cast<QDynamicPropertyChangeEvent*>(e);
+			 assert(d != nullptr);
+
+			QString propertyName = d->propertyName();
+
+			QVariant value = this->property(propertyName.toStdString().c_str());
+
+			if (value.isValid() == true)
+			{
+				m_moduleConfiguration.setUserProperty(propertyName, value);
+			}
+
+			// Accept event
+			//
+			return true;
+		}
+
+		// Event was not recognized
+		//
+		return false;
+	}
+
 	int DeviceModule::place() const
 	{
 		return m_place;
@@ -775,6 +805,9 @@ namespace Hardware
 	{
 		m_moduleConfiguration.setHasConfiguration(true);
 		m_moduleConfiguration.setStructDescription(value);
+
+		m_moduleConfiguration.readStructure(value);
+		m_moduleConfiguration.addUserPropertiesToObject(this);
 	}
 
 	//

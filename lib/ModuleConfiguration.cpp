@@ -478,10 +478,28 @@ namespace Hardware
 		for (const ModuleConfigurationValue& up : m_userProperties)
 		{
 			object->setProperty(up.name().toStdString().c_str(), QVariant(up.value()));
-			qDebug() << "Added User Property " << up.name() << " with value " << up.value();
 		}
 
 		return;
+	}
+
+	bool ModuleConfiguration::setUserProperty(const QString& name, const QVariant& value)
+	{
+		assert(name.isEmpty() == false);
+		assert(value.isValid() == true);
+
+		bool exists = m_userProperties.contains(name);
+
+		if (exists == false)
+		{
+			return false;
+		}
+
+		ModuleConfigurationValue& p = m_userProperties[name];
+
+		p.setValue(value.toString());
+
+		return true;
 	}
 
 	QString ModuleConfiguration::lastError() const
@@ -534,6 +552,8 @@ namespace Hardware
 	bool ModuleConfiguration::readStructure(const QString& data)
 	{
 		m_lastError.clear();
+		m_structures.clear();
+		m_variables.clear();
 
 		QXmlStreamReader reader(data);
 
@@ -638,9 +658,9 @@ namespace Hardware
 			}
 		}
 
-		//createMembers();
-		//setVals();
 
+		// --
+		//
 		createUserProperties(&m_lastError);
 
 		return true;
@@ -722,8 +742,6 @@ namespace Hardware
 			return;
 		}
 
-		m_userProperties.clear();
-
 		for (const ModuleConfigurationVariable& variable : m_variables)
 		{
 			if (m_structures.contains(variable.type()) == false)
@@ -734,7 +752,7 @@ namespace Hardware
 
 			ModuleConfigurationStruct structure = m_structures.value(variable.type());
 
-			parseUserProperties(structure, variable.name(), errorMessage);
+			parseUserProperties(structure, "Configuration\\" + variable.name(), errorMessage);
 		}
 
 		return;
@@ -749,15 +767,9 @@ namespace Hardware
 			return;
 		}
 
-		int count = 0;
 		for (const ModuleConfigurationValue& structValue : structure.values())
 		{
-			count ++;
-			if (count > 2)
-				break;
-
 			QString varName = parentVariableName + "\\" + structValue.name();
-			//QString varName = QString("aa%1=-").arg(count);
 
 			if (m_structures.contains(structValue.type()) == true)
 			{
@@ -770,7 +782,7 @@ namespace Hardware
 
 			// It is one of the trivial(?) types
 			//
-			if (structValue.userProperty() == true)
+			if (structValue.userProperty() == true && m_userProperties.contains(varName) == false)
 			{
 				ModuleConfigurationValue v(structValue);
 

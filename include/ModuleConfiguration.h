@@ -189,13 +189,15 @@ namespace Hardware
 		void save(::Proto::ModuleConfiguration* message) const;
 
 		void addUserPropertiesToObject(QObject* object) const;
+		bool setUserProperty(const QString& name, const QVariant& value);
 
 		QString lastError() const;
 
 		static void skipUnknownElement(QXmlStreamReader* reader, QString* errorMessage);
 
-	protected:
 		bool readStructure(const QString& data);
+
+	protected:
 		void readDeclaration(QXmlStreamReader& reader);
 		void readDefinition(QXmlStreamReader& reader);
 

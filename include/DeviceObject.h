@@ -296,6 +296,8 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
+		virtual bool event(QEvent* e) override;
+
 		// Properties
 		//
 	public:
