@@ -47,7 +47,8 @@ private:
 private:
 	QLineEdit* m_lineEdit = nullptr;
 	bool m_escape = false;
-	bool m_editingFinished = false;
+	QColor m_oldColor;
+
 };
 
 class MultiLineEdit : public QDialog
@@ -108,9 +109,8 @@ private:
 
 private:
 	QLineEdit* m_lineEdit = nullptr;
-	//QString m_text;
 	bool m_escape = false;
-	bool m_editingFinished = false;
+	QString m_oldValue;
 };
 
 class QtMultiDoubleSpinBox : public QWidget
@@ -161,13 +161,17 @@ class QtMultiVariantPropertyManager : public QtAbstractPropertyManager
     Q_OBJECT
 
 public:
-	QtMultiVariantPropertyManager(QObject* parent, QVariant::Type type);
+	QtMultiVariantPropertyManager(QObject* parent);
+
+	QVariant attribute(const QtProperty* property, const QString& attribute) const;
+	bool hasAttribute(const QtProperty* property, const QString& attribute) const;
 
 	QVariant value(const QtProperty* property) const;
+	int valueType(const QtProperty* property) const;
+
+	bool sameValue(const QtProperty* property) const;
 
 	QSet<QtProperty*> propertyByName(const QString& propertyName);
-
-	const QVariant::Type type() const;
 
 	void emitSetValue(QtProperty* property, const QVariant& value);
 
@@ -175,15 +179,17 @@ private:
 	virtual QString displayText(const QtProperty *property) const;
 
 private:
-    struct Data
+
+	struct Data
     {
         QVariant value;
-    };
+		QMap<QString, QVariant> attributes;
+	};
     QMap<const QtProperty*, Data> values;
-	QVariant::Type m_type;
 
 public slots:
 	void setValue(QtProperty* property, const QVariant& value);
+	void setAttribute (QtProperty* property, const QString& attribute, const QVariant& value);
 
 signals:
 	void valueChanged(QtProperty* property, QVariant value);
@@ -264,11 +270,7 @@ protected:
 protected:
 	QtGroupPropertyManager* m_propertyGroupManager = nullptr;
 
-	QtMultiVariantPropertyManager* m_propertyStringManager = nullptr;
-	QtMultiVariantPropertyManager* m_propertyIntManager = nullptr;
-	QtMultiVariantPropertyManager* m_propertyDoubleManager = nullptr;
-	QtMultiVariantPropertyManager* m_propertyBoolManager = nullptr;
-	QtMultiVariantPropertyManager* m_propertyColorManager = nullptr;
+	QtMultiVariantPropertyManager* m_propertyVariantManager = nullptr;
 
 	QMap<QtProperty*, std::shared_ptr<QObject>> m_propToClassMap;   //Property Name to Class Map
 
