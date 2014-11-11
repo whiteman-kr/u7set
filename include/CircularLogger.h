@@ -118,9 +118,7 @@ private:
 	QString composeRecord(int type, int category, const QString& function, const QString& message/*ip, header*/);
 };
 
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-#define MESSAGE_POSITION QString("%1 POS=%2:%3").arg(Q_FUNC_INFO).arg(__FILE__).arg(__LINE__)
+#define MESSAGE_POSITION QString("%1\" \"POS=%2:%3").arg(Q_FUNC_INFO).arg(__FILE__).arg(__LINE__)
 
 #define APP_ERR(log,str) (log).appErr(MESSAGE_POSITION,str);
 #define APP_WRN(log,str) (log).appWrn(MESSAGE_POSITION,str);

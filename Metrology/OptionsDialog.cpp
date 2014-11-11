@@ -7,6 +7,7 @@
 #include <QListWidget>
 #include <QPushButton>
 
+#include "FolderPropertyManager.h"
 #include "OptionsPointsDialog.h"
 #include "OptionsMvhDialog.h"
 
@@ -275,8 +276,13 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
     QtVariantProperty *item = nullptr;
 
-    QtVariantPropertyManager *manager = new QtVariantPropertyManager;
-    QtVariantEditorFactory *factory = new QtVariantEditorFactory;
+
+    QtVariantPropertyManager *manager = new VariantManager();
+    QtVariantEditorFactory *factory = new VariantFactory();
+
+    //QtVariantPropertyManager *manager = new QtVariantPropertyManager;
+    //QtVariantEditorFactory *factory = new QtVariantEditorFactory;
+
     QtTreePropertyBrowser *editor = new QtTreePropertyBrowser;
 
     switch (page)
@@ -500,10 +506,58 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
             break;
         case OPTION_PAGE_REPORT_HEADER:
             break;
+
         case OPTION_PAGE_DATABASE:
+            {
+                QtProperty *databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Database"));
+
+                    item = manager->addProperty(VariantManager::folerPathTypeId(), DatabaseParam[DBO_PARAM_PATH]);
+                    item->setValue( m_options.database().m_path );
+                    appendProperty(item, page, DBO_PARAM_PATH);
+                    databaseGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), DatabaseParam[DBO_PARAM_TYPE]);
+                    QStringList valueTypeList;
+                    for(int t = 0; t < DATABASE_TYPE_COUNT; t++)
+                    {
+                        valueTypeList.append(DatabaseType[t]);
+                    }
+                    item->setAttribute(QLatin1String("enumNames"), valueTypeList);
+                    item->setValue(m_options.database().m_type);
+                    appendProperty(item, page, DBO_PARAM_TYPE);
+                    databaseGroup->addSubProperty(item);
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(databaseGroup);
+            }
             break;
+
         case OPTION_PAGE_BACKUP:
+            {
+                QtProperty *backupGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Backup"));
+
+                    item = manager->addProperty(QVariant::Bool, BackupParam[BUO_PARAM_ON_START]);
+                    item->setValue( m_options.backup().m_onStart );
+                    appendProperty(item, page, BUO_PARAM_ON_START);
+                    backupGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Bool, BackupParam[BUO_PARAM_ON_EXIT]);
+                    item->setValue( m_options.backup().m_onExit );
+                    appendProperty(item, page, BUO_PARAM_ON_EXIT);
+                    backupGroup->addSubProperty(item);
+
+                    item = manager->addProperty(VariantManager::folerPathTypeId(), BackupParam[BUO_PARAM_FOLDER]);
+                    item->setValue( m_options.backup().m_path );
+                    appendProperty(item, page, BUO_PARAM_FOLDER);
+                    backupGroup->addSubProperty(item);
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(backupGroup);
+            }
             break;
+
         default:
             assert(nullptr);
             break;
@@ -704,7 +758,8 @@ void OptionsDialog::onPropertyValueChanged(QtProperty *property, const QVariant 
         type == QtVariantPropertyManager::enumTypeId() ||       // list of values
         type == QVariant::String ||                             // string
         type == QVariant::Font ||                               // font
-        type == QVariant::Color    )                            // color
+        type == QVariant::Color  ||                             // color
+        type == VariantManager::folerPathTypeId()    )          // folder
    {
         applyProperty();
    }
@@ -783,33 +838,33 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case LO_PARAM_ERROR:            m_options.linearity().m_errorValue = value.toDouble();           break;
-                    case LO_PARAM_ERROR_CTRL:       m_options.linearity().m_errorCtrl = value.toDouble();            break;
+                    case LO_PARAM_ERROR:            m_options.linearity().m_errorValue = value.toDouble();                  break;
+                    case LO_PARAM_ERROR_CTRL:       m_options.linearity().m_errorCtrl = value.toDouble();                   break;
                     case LO_PARAM_ERROR_TYPE:       m_options.linearity().m_errorType = value.toInt();
                                                     m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
                                                     break;
-                    case LO_PARAM_ERROR_BY_SCO:     m_options.linearity().m_errorCalcBySCO = value.toBool();         break;
-                    case LO_PARAM_MEASURE_TIME:     m_options.linearity().m_measureTimeInPoint = value.toInt();      break;
-                    case LO_PARAM_MEASURE_IN_POINT: m_options.linearity().m_measureCountInPoint = value.toInt();     break;
+                    case LO_PARAM_ERROR_BY_SCO:     m_options.linearity().m_errorCalcBySCO = value.toBool();                break;
+                    case LO_PARAM_MEASURE_TIME:     m_options.linearity().m_measureTimeInPoint = value.toInt();             break;
+                    case LO_PARAM_MEASURE_IN_POINT: m_options.linearity().m_measureCountInPoint = value.toInt();            break;
                     case LO_PARAM_RANGE_TYPE:       m_options.linearity().m_rangeType = value.toInt();
                                                     m_options.linearity().recalcPoints();
-                                                    updateLinearityPage(false);                                         break;
+                                                    updateLinearityPage(false);                                             break;
                     case LO_PARAM_POINT_COUNT:      m_options.linearity().recalcPoints(value.toInt());
-                                                    updateLinearityPage(false);                                         break;
+                                                    updateLinearityPage(false);                                             break;
                     case LO_PARAM_LOW_RANGE:        m_options.linearity().m_lowLimitRange = value.toDouble();
                                                     m_options.linearity().recalcPoints();
-                                                    updateLinearityPage(false);                                         break;
+                                                    updateLinearityPage(false);                                             break;
                     case LO_PARAM_HIGH_RANGE:       m_options.linearity().m_highLimitRange = value.toDouble();
                                                     m_options.linearity().recalcPoints();
-                                                    updateLinearityPage(false);                                         break;
-                    case LO_PARAM_VALUE_POINTS:     setActivePage(OPTION_PAGE_LINEARETY_POINT);                         break;
+                                                    updateLinearityPage(false);                                             break;
+                    case LO_PARAM_VALUE_POINTS:     setActivePage(OPTION_PAGE_LINEARETY_POINT);                             break;
                     case LO_PARAM_LIST_TYPE:        m_options.linearity().m_viewType = value.toInt();
                                                     m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
                                                     break;
                     case LO_PARAM_OUTPUT_RANGE:     m_options.linearity().m_showOutputRangeColumn = value.toBool();
                                                     m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
                                                     break;
-                    default:                        assert(0);                                                          break;
+                    default:                        assert(0);                                                              break;
                 }
             }
             break;
@@ -821,20 +876,20 @@ void OptionsDialog::applyProperty()
         case OPTION_PAGE_MEASURE_VIEW_TEXT:
             {
                 switch(param)
-                    {
-                        case MWO_PARAM_FONT:                m_options.measureView().m_font.fromString(value.toString());           break;
-                        case MWO_PARAM_ID:                  m_options.measureView().m_showExternalID = value.toBool();                    break;
-                        case MWO_PARAM_DISPLAYING_VALUE:    m_options.measureView().m_showDisplayingValueType = value.toInt();           break;
-                        case MWO_PARAM_COLOR_CONTROL_ERROR: m_options.measureView().m_colorControlError.setNamedColor(value.toString()); break;
-                        case MWO_PARAM_COLOR_LIMIT_ERROR:   m_options.measureView().m_colorLimitError.setNamedColor(value.toString());   break;
-                        default:                            assert(0);                                                                      break;
-                    }
-
-                    for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
-                    {
-                        m_options.m_updateColumnView[type] = true;
-                    }
+                {
+                    case MWO_PARAM_FONT:                m_options.measureView().m_font.fromString(value.toString());                    break;
+                    case MWO_PARAM_ID:                  m_options.measureView().m_showExternalID = value.toBool();                      break;
+                    case MWO_PARAM_DISPLAYING_VALUE:    m_options.measureView().m_showDisplayingValueType = value.toInt();              break;
+                    case MWO_PARAM_COLOR_CONTROL_ERROR: m_options.measureView().m_colorControlError.setNamedColor(value.toString());    break;
+                    case MWO_PARAM_COLOR_LIMIT_ERROR:   m_options.measureView().m_colorLimitError.setNamedColor(value.toString());      break;
+                    default:                            assert(0);                                                                      break;
                 }
+
+                for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+                {
+                    m_options.m_updateColumnView[type] = true;
+                }
+            }
             break;
 
         case OPTION_PAGE_MEASURE_VIEW_COLUMN:
@@ -850,11 +905,26 @@ void OptionsDialog::applyProperty()
             break;
 
         case OPTION_PAGE_DATABASE:
-
+            {
+                switch(param)
+                {
+                    case DBO_PARAM_PATH:                m_options.database().m_path = value.toString(); break;
+                    case DBO_PARAM_TYPE:                m_options.database().m_type = value.toBool();   break;
+                    default:                            assert(0);                                      break;
+                }
+            }
             break;
 
         case OPTION_PAGE_BACKUP:
-
+            {
+                switch(param)
+                {
+                    case BUO_PARAM_ON_START:            m_options.backup().m_onStart = value.toBool();      break;
+                    case BUO_PARAM_ON_EXIT:             m_options.backup().m_onExit = value.toBool();       break;
+                    case BUO_PARAM_FOLDER:              m_options.backup().m_path = value.toString();  break;
+                    default:                            assert(0);                                          break;
+                }
+            }
             break;
 
         default:
@@ -1063,4 +1133,7 @@ bool OptionsDialog::event(QEvent * e)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 

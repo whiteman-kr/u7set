@@ -1,8 +1,7 @@
  #include "Options.h"
 
 #include <QSettings>
-#include <QWidget>
-#include <QMainWindow>
+#include <QTemporaryDir>
 #include "CalibratorBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -250,6 +249,60 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 
     m_colorControlError = from.m_colorControlError;
     m_colorLimitError = from.m_colorLimitError;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::DatabaseOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption::~DatabaseOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::load()
+{
+    QSettings s;
+
+    m_path = s.value( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
+    m_type = s.value( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), 0).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), m_path );
+    s.setValue( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), m_type );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
+{
+    m_path = from.m_path;
+    m_type = from.m_type;
 
     return *this;
 }
@@ -759,6 +812,91 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+BackupOption::BackupOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+BackupOption::BackupOption(const BackupOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+BackupOption::~BackupOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::createBackup()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::createBackupOnStart()
+{
+    if (m_onStart == true)
+    {
+        createBackup();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::createBackupOnExit()
+{
+    if (m_onExit == true)
+    {
+        createBackup();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::load()
+{
+    QTemporaryDir tmpDir;
+    QString path = tmpDir.path().left( tmpDir.path().lastIndexOf("/", -1) );
+
+    QSettings s;
+
+    m_onStart = s.value( QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), false).toBool();
+    m_onExit = s.value( QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), true).toBool();
+    m_path = s.value( QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), path).toString();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BackupOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1OnStart").arg(BACKUP_OPTIONS_REG_KEY), m_onStart);
+    s.setValue( QString("%1OnExit").arg(BACKUP_OPTIONS_REG_KEY), m_onExit);
+    s.setValue( QString("%1Path").arg(BACKUP_OPTIONS_REG_KEY), m_path);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+BackupOption& BackupOption::operator=(const BackupOption& from)
+{
+    m_onStart = from.m_onStart;
+    m_onExit = from.m_onExit;
+    m_path = from.m_path;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 Options::Options(QObject *parent) :
     QObject(parent)
 {
@@ -791,7 +929,6 @@ int Options::getChannelCount()
         default:                    assert(0);                      break;
     }
 
-
     return count;
 }
 
@@ -803,7 +940,9 @@ void Options::load()
     m_connectTcpIp.load();
     m_measureView.init();
     m_measureView.load();
+    m_database.load();
     m_linearity.load();
+    m_backup.load();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -813,7 +952,9 @@ void Options::save()
     m_toolBar.save();
     m_connectTcpIp.save();
     m_measureView.save();
+    m_database.save();
     m_linearity.save();
+    m_backup.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -830,7 +971,9 @@ Options& Options::operator=(const Options& from)
         m_toolBar = from.m_toolBar;
         m_connectTcpIp = from.m_connectTcpIp;
         m_measureView = from.m_measureView;
+        m_database = from.m_database;
         m_linearity = from.m_linearity;
+        m_backup = from.m_backup;
 
     m_mutex.unlock();
 

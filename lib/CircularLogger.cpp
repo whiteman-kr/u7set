@@ -75,7 +75,7 @@ QString CircularLogger::composeRecord(int type, int category, const QString &fun
 		record = "???";
 	}
 
-	record += '_';
+	record += ' ';
 
 	if (category >= 0 && category < CATEGORY_TYPE_COUNT)
 	{
@@ -90,13 +90,15 @@ QString CircularLogger::composeRecord(int type, int category, const QString &fun
 	record += "  ";
 	record += QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz");
 
-	record += "  ";
+	record += "  \"";
 	record += message;
+	record += '\"';
 
 	if (!function.isEmpty())
 	{
-		record += " FN=";
+		record += " \"FN=";
 		record += function;
+		record += '\"';
 	}
 	else
 	{
@@ -267,19 +269,19 @@ void CircularLoggerWorker::openFile(int index)
 
 void CircularLoggerWorker::writeFirstRecord()
 {
-	*m_stream << tr("\n# Opened ")
+	*m_stream << tr("\nLOG OPN  ")
 			  << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz")
-			  << "  by application "
+			  << "  \"by application "
 			  << qApp->applicationFilePath()
-			  << "\n\n";
+			  << "\"\n";
 }
 
 void CircularLoggerWorker::writeLastRecord()
 {
-	*m_stream << tr("\n# Closed ")
+	*m_stream << tr("LOG CLS  ")
 			  << QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz")
-			  << "  by application "
+			  << "  \"by application "
 			  << qApp->applicationFilePath()
-			  << "\n\n";
+			  << "\"\n";
 	m_stream->flush();
 }
