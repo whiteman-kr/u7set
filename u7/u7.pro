@@ -86,7 +86,9 @@ SOURCES +=\
     EditEngine/EditEngineSetProperty.cpp \
     SchemePropertiesDialog.cpp \
     EditEngine/EditEngineSetSchemeProperty.cpp \
-    ../lib/ModuleConfiguration.cpp
+    ../lib/ModuleConfiguration.cpp \
+    BuildTabPage.cpp \
+    ../lib/OutputLog.cpp
 
 
 HEADERS  += \
@@ -139,7 +141,9 @@ HEADERS  += \
     EditEngine/EditEngineSetProperty.h \
     SchemePropertiesDialog.h \
     EditEngine/EditEngineSetSchemeProperty.h \
-    ../include/ModuleConfiguration.h
+    ../include/ModuleConfiguration.h \
+    BuildTabPage.h \
+    ../include/OutputLog.h
     ../include/Signal.h
 
 FORMS    += \

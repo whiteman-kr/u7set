@@ -41,6 +41,8 @@ void Settings::writeUserScope() const
 
 	s.setValue("EquipmentTabPage/Splitter/state", m_equipmentTabPageSplitterState);
 
+	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
+
     s.setValue("AFBLEditor/pos", m_abflEditorWindowPos);
     s.setValue("AFBLEditor/geometry", m_abflEditorWindowGeometry);
 
@@ -64,6 +66,8 @@ void Settings::loadUserScope()
 	m_configurationTabPageSplitterState = s.value("ConfigurationTabPage/Splitter/state").toByteArray();
 
 	m_equipmentTabPageSplitterState = s.value("EquipmentTabPage/Splitter/state").toByteArray();
+
+	m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
 
     m_abflEditorWindowPos = s.value("AFBLEditor/pos", QPoint(-1, -1)).toPoint();
     m_abflEditorWindowGeometry = s.value("AFBLEditor/geometry").toByteArray();
