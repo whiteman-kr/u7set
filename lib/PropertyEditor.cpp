@@ -29,6 +29,108 @@
 #include <QDialog>
 #include <QRegExpValidator>
 #include <QColorDialog>
+#include <QFileDialog>
+
+int FilePathPropertyType::filePathTypeId()
+{
+	return qMetaTypeId<FilePathPropertyType>();
+}
+
+//
+// ------------ QtMultiFilePathEdit ------------
+//
+QtMultiFilePathEdit::QtMultiFilePathEdit(QWidget* parent):
+	QWidget(parent)
+{
+	m_lineEdit = new QLineEdit(parent);
+
+	QToolButton* button = new QToolButton(parent);
+	button->setText("...");
+
+	connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiFilePathEdit::onEditingFinished);
+
+	connect(button, &QToolButton::clicked, this, &QtMultiFilePathEdit::onButtonPressed);
+
+	QHBoxLayout* lt = new QHBoxLayout;
+	lt->setContentsMargins(0, 0, 0, 0);
+	lt->setSpacing(0);
+	lt->addWidget(m_lineEdit);
+	lt->addWidget(button, 0, Qt::AlignRight);
+
+	setLayout(lt);
+
+	m_lineEdit->installEventFilter(this);
+
+	QTimer::singleShot(0, m_lineEdit, SLOT(setFocus()));
+}
+
+bool QtMultiFilePathEdit::eventFilter(QObject* watched, QEvent* event)
+{
+	if (m_lineEdit == nullptr)
+	{
+		Q_ASSERT(m_lineEdit);
+		return QWidget::eventFilter(watched, event);
+	}
+
+	if (watched == m_lineEdit && event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent* ke = static_cast<QKeyEvent*>(event);
+		if (ke->key() == Qt::Key_Escape)
+		{
+			m_escape = true;
+		}
+	}
+
+	return QWidget::eventFilter(watched, event);
+}
+
+void QtMultiFilePathEdit::onButtonPressed()
+{
+	FilePathPropertyType f = m_oldPath.value<FilePathPropertyType>();
+
+	QString filePath = QFileDialog::getOpenFileName(this, tr("Select file"), f.filePath, f.filter);
+	if (filePath.isEmpty() == true)
+	{
+		return;
+	}
+
+	f.filePath = QDir::toNativeSeparators(filePath);
+
+	setValue(QVariant::fromValue(f));
+	emit valueChanged(QVariant::fromValue(f));
+}
+
+void QtMultiFilePathEdit::setValue(QVariant value)
+{
+	if (m_lineEdit == nullptr)
+	{
+		Q_ASSERT(m_lineEdit);
+		return;
+	}
+
+	m_oldPath = value;
+
+	FilePathPropertyType f = value.value<FilePathPropertyType>();
+	m_lineEdit->setText(f.filePath);
+}
+
+void QtMultiFilePathEdit::onEditingFinished()
+{
+	if (m_escape == false)
+	{
+		QString t = m_lineEdit->text();
+
+		FilePathPropertyType f = m_oldPath.value<FilePathPropertyType>();
+
+		if (f.filePath != t)
+		{
+			f.filePath = t;
+			emit valueChanged(QVariant::fromValue(f));
+		}
+	}
+}
+
+
 
 //
 // ---------QtMultiColorEdit----------
@@ -602,71 +704,83 @@ QWidget* QtMultiVariantFactory::createEditor(QtMultiVariantPropertyManager* mana
 
 	QWidget* editor = nullptr;
 
-	switch(manager->value(property).type())
+	if (manager->value(property).userType() == FilePathPropertyType::filePathTypeId())
 	{
-		case QVariant::Int:
-			{
-				QtMultiIntSpinBox* m_editor = new QtMultiIntSpinBox(parent);
-				editor = m_editor;
-				m_editor->setValue(manager->value(property).toInt());
+		QtMultiFilePathEdit* m_editor = new QtMultiFilePathEdit(parent);
+		editor = m_editor;
+		m_editor->setValue(manager->value(property));
 
-				connect(m_editor, &QtMultiIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-				connect(m_editor, &QtMultiIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-			}
-			break;
-		case QVariant::Double:
-			{
-				QtMultiDoubleSpinBox* m_editor = new QtMultiDoubleSpinBox(parent);
-				editor = m_editor;
-				m_editor->setValue(manager->value(property).toDouble());
-
-				connect(m_editor, &QtMultiDoubleSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-				connect(m_editor, &QtMultiDoubleSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-			}
-			break;
-		case QVariant::Bool:
-			{
-				QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
-				editor = m_editor;
-
-				if (manager->sameValue(property) == true)
+		connect(m_editor, &QtMultiFilePathEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+		connect(m_editor, &QtMultiFilePathEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+	}
+	else
+	{
+		switch(manager->value(property).userType())
+		{
+			case QVariant::Int:
 				{
-					m_editor->setCheckState(manager->value(property).toBool() == true ? Qt::Checked : Qt::Unchecked);
+					QtMultiIntSpinBox* m_editor = new QtMultiIntSpinBox(parent);
+					editor = m_editor;
+					m_editor->setValue(manager->value(property).toInt());
+
+					connect(m_editor, &QtMultiIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+					connect(m_editor, &QtMultiIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 				}
-				else
+				break;
+			case QVariant::Double:
 				{
-					m_editor->setCheckState(Qt::PartiallyChecked);
+					QtMultiDoubleSpinBox* m_editor = new QtMultiDoubleSpinBox(parent);
+					editor = m_editor;
+					m_editor->setValue(manager->value(property).toDouble());
+
+					connect(m_editor, &QtMultiDoubleSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+					connect(m_editor, &QtMultiDoubleSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 				}
+				break;
+			case QVariant::Bool:
+				{
+					QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
+					editor = m_editor;
 
-				connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-				connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-			}
-			break;
+					if (manager->sameValue(property) == true)
+					{
+						m_editor->setCheckState(manager->value(property).toBool() == true ? Qt::Checked : Qt::Unchecked);
+					}
+					else
+					{
+						m_editor->setCheckState(Qt::PartiallyChecked);
+					}
 
-		case QVariant::String:
-			{
-				QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent);
-				editor = m_editor;
-				m_editor->setValue(manager->value(property).toString());
+					connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+					connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+				}
+				break;
 
-				connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-				connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-			}
-			break;
+			case QVariant::String:
+				{
+					QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent);
+					editor = m_editor;
+					m_editor->setValue(manager->value(property).toString());
 
-		case QVariant::Color:
-			{
-				QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
-				editor = m_editor;
-				m_editor->setValue(manager->value(property));
+					connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+					connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+				}
+				break;
 
-				connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-				connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-			}
-			break;
+			case QVariant::Color:
+				{
+					QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
+					editor = m_editor;
+					m_editor->setValue(manager->value(property));
 
-		default:
-			Q_ASSERT(false);
+					connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+					connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+				}
+				break;
+
+			default:
+				Q_ASSERT(false);
+		}
 	}
 
 	if (editor == nullptr)
@@ -913,7 +1027,12 @@ QIcon QtMultiVariantPropertyManager::valueIcon(const QtProperty* property) const
 		return QIcon();
 	}
 
-	switch (value(property).type())
+	if (value(property).userType() == FilePathPropertyType::filePathTypeId())
+	{
+		return QIcon();
+	}
+
+	switch (value(property).userType())
 	{
 		case QVariant::Bool:
 			{
@@ -951,7 +1070,15 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 
 	if (sameValue(property) == true)
 	{
-		switch (value(property).type())
+		int type = value(property).userType();
+
+		if (type == FilePathPropertyType::filePathTypeId())
+		{
+			FilePathPropertyType f = value(property).value<FilePathPropertyType>();
+			return f.filePath;
+		}
+
+		switch (type)
 		{
 			case QVariant::Int:
 				{
@@ -1108,8 +1235,11 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 static PropertyItem pi;
 
 			pi.object = *pobject;
-			pi.type = metaProperty.type();
 			pi.value = object->property(name);
+			pi.type = pi.value.userType();
+
+			//if (pi.type == QVariant::UserType)
+				//pi.type = pi.value.userType();
 
 			propertyItems.insertMulti(name, pi);
 
@@ -1128,8 +1258,11 @@ static PropertyItem pi;
 static PropertyItem pi;
 
 			pi.object = *pobject;
-			pi.type = object->property(name).type();
 			pi.value = object->property(name);
+			pi.type = pi.value.userType();
+
+			//if (pi.type == QVariant::UserType)
+				//pi.type = pi.value.userType();
 
 			propertyItems.insertMulti(name, pi);
 
@@ -1155,7 +1288,7 @@ static PropertyItem pi;
 
 		// now check if all properties have the same type and values
 		//
-static QVariant::Type type;
+static int type;
 static QVariant value;
 
 		bool sameType = true;
@@ -1207,7 +1340,7 @@ static QVariant value;
 	return;
 }
 
-QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QVariant& value, QVariant::Type type, bool sameValue)
+QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QVariant& value, int type, bool sameValue)
 {
 	int slashPos = name.indexOf("\\");
 	if (parentProperty == nullptr || slashPos != -1)
@@ -1275,71 +1408,88 @@ QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QSt
 		//
 		QtProperty* subProperty = nullptr;
 
-		switch (type)
+		if (type == FilePathPropertyType::filePathTypeId())
 		{
-			case QVariant::Int:
-				subProperty = m_propertyVariantManager->addProperty(fullName);
-				if (sameValue == true)
-				{
-					m_propertyVariantManager->setValue(subProperty, value.toInt());
-				}
-				else
-				{
-					m_propertyVariantManager->setValue(subProperty, (int)0);
-				}
-				break;
+			subProperty = m_propertyVariantManager->addProperty(fullName);
+			if (sameValue == true)
+			{
+				m_propertyVariantManager->setValue(subProperty, value);
+			}
+			else
+			{
+				FilePathPropertyType f;
+				m_propertyVariantManager->setValue(subProperty, QVariant::fromValue(f));
+			}
+		}
+		else
+		{
 
-			case QVariant::String:
-				subProperty = m_propertyVariantManager->addProperty(fullName);
-				if (sameValue == true)
-				{
-					m_propertyVariantManager->setValue(subProperty, value.toString());
-				}
-				else
-				{
-					m_propertyVariantManager->setValue(subProperty, QString());
-				}
-				break;
+			switch (type)
+			{
+				case QVariant::Int:
+					subProperty = m_propertyVariantManager->addProperty(fullName);
+					if (sameValue == true)
+					{
+						m_propertyVariantManager->setValue(subProperty, value.toInt());
+					}
+					else
+					{
+						m_propertyVariantManager->setValue(subProperty, (int)0);
+					}
+					break;
 
-			case QVariant::Double:
-				subProperty = m_propertyVariantManager->addProperty(fullName);
-				if (sameValue == true)
-				{
-					m_propertyVariantManager->setValue(subProperty, value.toDouble());
-				}
-				else
-				{
-					m_propertyVariantManager->setValue(subProperty, (double)0);
-				}
-				break;
+				case QVariant::String:
+					subProperty = m_propertyVariantManager->addProperty(fullName);
+					if (sameValue == true)
+					{
+						m_propertyVariantManager->setValue(subProperty, value.toString());
+					}
+					else
+					{
+						m_propertyVariantManager->setValue(subProperty, QString());
+					}
+					break;
 
-			case QVariant::Bool:
-				subProperty = m_propertyVariantManager->addProperty(fullName);
-				if (sameValue == true)
-				{
-					m_propertyVariantManager->setValue(subProperty, value.toBool());
-				}
-				else
-				{
-					m_propertyVariantManager->setValue(subProperty, false);
-				}
-				break;
+				case QVariant::Double:
+					subProperty = m_propertyVariantManager->addProperty(fullName);
+					if (sameValue == true)
+					{
+						m_propertyVariantManager->setValue(subProperty, value.toDouble());
+					}
+					else
+					{
+						m_propertyVariantManager->setValue(subProperty, (double)0);
+					}
+					break;
 
-			case QVariant::Color:
-				subProperty = m_propertyVariantManager->addProperty(fullName);
-				if (sameValue == true)
-				{
-					m_propertyVariantManager->setValue(subProperty, value);
-				}
-				else
-				{
-					m_propertyVariantManager->setValue(subProperty, QColor(Qt::black));
-				}
-				break;
+				case QVariant::Bool:
+					subProperty = m_propertyVariantManager->addProperty(fullName);
+					if (sameValue == true)
+					{
+						m_propertyVariantManager->setValue(subProperty, value.toBool());
+					}
+					else
+					{
+						m_propertyVariantManager->setValue(subProperty, false);
+					}
+					break;
 
-			default:
-				Q_ASSERT(false);
-				return nullptr;
+				case QVariant::Color:
+					subProperty = m_propertyVariantManager->addProperty(fullName);
+					if (sameValue == true)
+					{
+						m_propertyVariantManager->setValue(subProperty, value);
+					}
+					else
+					{
+						m_propertyVariantManager->setValue(subProperty, QColor(Qt::black));
+					}
+					break;
+
+				default:
+					Q_ASSERT(false);
+					return nullptr;
+			}
 		}
 
 		m_propertyVariantManager->setAttribute(subProperty, "@propertyEditor@sameValue", sameValue);
@@ -1494,3 +1644,4 @@ void PropertyEditor::onShowErrorMessage(QString message)
 {
 	QMessageBox::warning(this, "Error", message);
 }
+

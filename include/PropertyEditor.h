@@ -16,10 +16,50 @@
 
 class QtTreePropertyBrowser;
 class QtProperty;
-class QtStringPropertyManager;
-class QtIntPropertyManager;
-class QtDoublePropertyManager;
-class QtGroupPropertyManager;
+
+
+struct FilePathPropertyType
+{
+	FilePathPropertyType()
+	{
+		filter = "*.*";
+	}
+
+	QString filePath;
+	QString filter;
+
+	static int filePathTypeId();
+};
+
+Q_DECLARE_METATYPE(FilePathPropertyType)
+
+
+class QtMultiFilePathEdit : public QWidget
+{
+	Q_OBJECT
+
+public:
+	QtMultiFilePathEdit(QWidget* parent);
+	void setValue(QVariant value);
+
+public slots:
+	void onEditingFinished();
+
+signals:
+	void valueChanged(QVariant value);
+
+private slots:
+	void onButtonPressed();
+
+private:
+	bool eventFilter(QObject* watched, QEvent* event);
+
+private:
+	QLineEdit* m_lineEdit = nullptr;
+	bool m_escape = false;
+	QVariant m_oldPath;
+
+};
 
 
 class QtMultiColorEdit : public QWidget
@@ -261,7 +301,7 @@ protected:
 	struct PropertyItem
 	{
 		std::shared_ptr<QObject> object;
-		QVariant::Type type;
+		int type;
 		QVariant value;
 	};
 
@@ -278,8 +318,7 @@ protected:
 	//
 private:
 	void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values);
-	QtProperty* createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QVariant& value, QVariant::Type type, bool sameValue);
-
+	QtProperty* createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QVariant& value, int type, bool sameValue);
 };
 
 #endif // PROPERTYEDITOR_H
