@@ -11,7 +11,8 @@
 //
 
 BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
-	MainTabPage(dbcontroller, parent)
+	MainTabPage(dbcontroller, parent),
+	m_builder(&m_outputLog)
 {
 	assert(dbcontroller != nullptr);
 
@@ -115,6 +116,9 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::build);
 	connect(m_cancelButton, &QAbstractButton::clicked, this, &BuildTabPage::cancel);
+
+	connect(&m_builder, &ProjectBuilder::buildStarted, this, &BuildTabPage::buildStarted);
+	connect(&m_builder, &ProjectBuilder::buildFinished, this, &BuildTabPage::buildFinished);
 
 	// Output Log
 	//
@@ -249,14 +253,34 @@ void BuildTabPage::build()
 	{
 		m_outputLog.writeError(tr("Nothing to build"));
 		m_outputLog.writeMessage(tr("Select build task."));
-
 		return;
 	}
+
+	m_builder.start(
+		db()->currentProject().projectName(),
+		db()->host(),
+		db()->port(),
+		db()->serverUsername(),
+		db()->serverPassword(),
+		db()->currentUser().username(),
+		db()->currentUser().password());
 
 	return;
 }
 
 void BuildTabPage::cancel()
 {
+	m_builder.stop();
 }
 
+void BuildTabPage::buildStarted()
+{
+	m_buildButton->setEnabled(false);
+	m_cancelButton->setEnabled(true);
+}
+
+void BuildTabPage::buildFinished()
+{
+	m_buildButton->setEnabled(true);
+	m_cancelButton->setEnabled(false);
+}

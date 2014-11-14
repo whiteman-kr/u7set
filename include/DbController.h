@@ -200,6 +200,8 @@ public:
 	std::vector<DbFileInfo> systemFiles() const;
 	DbFileInfo systemFileInfo(const QString& fileName) const;
 
+	QString lastError() const;
+
 	//
 	// Data
 	//
@@ -211,6 +213,8 @@ private:
 	mutable QMutex m_operationMutex;	// Non Recursive mutex for single opartion at a time
 
 	DbProgress m_progress;
+
+	QString m_lastError;
 };
 
 

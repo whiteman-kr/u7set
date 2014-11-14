@@ -88,7 +88,8 @@ SOURCES +=\
     EditEngine/EditEngineSetSchemeProperty.cpp \
     ../lib/ModuleConfiguration.cpp \
     BuildTabPage.cpp \
-    ../lib/OutputLog.cpp
+    ../lib/OutputLog.cpp \
+    ProjectBuilder.cpp
 
 
 HEADERS  += \
@@ -143,7 +144,8 @@ HEADERS  += \
     EditEngine/EditEngineSetSchemeProperty.h \
     ../include/ModuleConfiguration.h \
     BuildTabPage.h \
-    ../include/OutputLog.h
+    ../include/OutputLog.h \
+    ProjectBuilder.h
     ../include/Signal.h
 
 FORMS    += \

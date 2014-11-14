@@ -1,5 +1,6 @@
 #pragma once
 #include "MainTabPage.h"
+#include "ProjectBuilder.h"
 #include "../include/DeviceObject.h"
 #include "../include/OutputLog.h"
 
@@ -13,7 +14,6 @@ public:
 	QString name;
 	bool build = true;
 };
-
 
 
 //
@@ -48,6 +48,9 @@ protected slots:
 	void build();
 	void cancel();
 
+	void buildStarted();
+	void buildFinished();
+
 	// Data
 	//
 private:
@@ -63,10 +66,11 @@ private:
 
 	bool m_buildEquipmentConfiguration = false;
 
-	std::vector<BuildTask> m_tasks;
-
 	OutputLog m_outputLog;
 	int m_logTimerId = -1;
+
+	std::vector<BuildTask> m_tasks;
+	ProjectBuilder m_builder;				// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
 };
 
 
