@@ -15,8 +15,8 @@ struct ServiceData
 {
     ServiceInformation information;
 
-    UdpClientSocket* clientSocket;
-    QWidget* statusWidget;
+	UdpClientSocket* clientSocket = nullptr;
+	QWidget* statusWidget = nullptr;
 
     ServiceData();
 };
