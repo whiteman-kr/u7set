@@ -39,50 +39,45 @@ void BuildWorkerThread::run()
 		m_log->writeMessage(tr("Opening project %1: ok").arg(projectName()), true);
 	}
 
-	// Get Equipment from the database
-	//
-	m_log->writeMessage("");
-	m_log->writeMessage(tr("Getting equipment"));
-
-	Hardware::DeviceRoot deviceRoot;
-	int rootFileId = db.hcFileId();
-	deviceRoot.fileInfo().setFileId(rootFileId);
-
-	ok = getEquipment(&db, &deviceRoot);
-
-	if (ok == false)
+	do
 	{
-		m_log->writeError(tr("Getting equipment: error"), true);
-		return;
-	}
-	else
-	{
-		m_log->writeMessage(tr("Getting equipment: ok"));
-	}
+		// Get Equipment from the database
+		//
+		m_log->writeMessage("");
+		m_log->writeMessage(tr("Getting equipment"));
 
-	//---
+		Hardware::DeviceRoot deviceRoot;
+		int rootFileId = db.hcFileId();
+		deviceRoot.fileInfo().setFileId(rootFileId);
 
-/*	for (int i =0; i < 5; i++)
-	{
+		ok = getEquipment(&db, &deviceRoot);
+
 		if (QThread::currentThread()->isInterruptionRequested() == true)
 		{
 			break;
 		}
 
-		QThread::yieldCurrentThread();
-
-		QThread::sleep(1);
-	}*/
+		if (ok == false)
+		{
+			m_log->writeError(tr("Getting equipment: error"), true);
+			break;
+		}
+		else
+		{
+			m_log->writeMessage(tr("Getting equipment: ok"));
+		}
+	}
+	while (false);
 
 	// Closing project and saying bye-bye!
 	//
 	ok = db.closeProject(nullptr);
 
-
 	if (QThread::currentThread()->isInterruptionRequested() == true)
 	{
 		str = tr("Building project %1: canceled").arg(projectName());
 
+		m_log->writeMessage("");
 		m_log->writeError(str, true);
 		qDebug() << str;
 	}
@@ -90,6 +85,7 @@ void BuildWorkerThread::run()
 	{
 		str = tr("Building project %1: ok").arg(projectName());
 
+		m_log->writeMessage("");
 		m_log->writeSuccess(str, true);
 		qDebug() << str;
 
@@ -105,24 +101,42 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 	assert(db->isProjectOpened() == true);
 	assert(parent != nullptr);
 
+
+//static qint64 databaseWork = 0;		// DEBUG
+//static qint64 parsingWork = 0;
+//static qint64 filessize = 0;
+////static qint64 parsingWork = 0;
+
+
+	if (QThread::currentThread()->isInterruptionRequested() == true)
+	{
+		return false;
+	}
+
+	if (parent->deviceType() == Hardware::DeviceType::System)
+	{
+		m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()));
+	}
+
 	std::vector<DbFileInfo> files;
 
-	qDebug() << "before db->getFileList";
+//		qint64 t1 = QDateTime::currentMSecsSinceEpoch();
 
 	bool ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
-
-	qDebug() << "after db->getFileList";
-
 	if (ok == false)
 	{
 		return false;
 	}
 
-/*	parent->deleteAllChildren();
+//		databaseWork += QDateTime::currentMSecsSinceEpoch() - t1;
+
+	parent->deleteAllChildren();
 
 	for (auto& fi : files)
 	{
 		std::shared_ptr<DbFile> file;
+
+//			qint64 t2 = QDateTime::currentMSecsSinceEpoch();	// DEBUG
 
 		ok = db->getLatestVersion(fi, &file, nullptr);
 
@@ -130,9 +144,15 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 		{
 			return false;
 		}
+//			databaseWork += QDateTime::currentMSecsSinceEpoch() - t2;		// DEBUG
+//			filessize += file->size();
+
+//			qint64 t3 = QDateTime::currentMSecsSinceEpoch();	// DEBUG
 
 		Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
 		assert(object);
+
+//			parsingWork += QDateTime::currentMSecsSinceEpoch() - t3;		// DEBUG
 
 		if (object == nullptr)
 		{
@@ -144,27 +164,32 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 		std::shared_ptr<Hardware::DeviceObject> sp(object);
 
 		parent->addChild(sp);
-
-		// log
-		//
-		if (sp->deviceType() == Hardware::DeviceType::System)
-		{
-			m_log->writeMessage(tr("Getting system %1...").arg(sp->caption()));
-		}
-	}*/
+	}
 
 	files.clear();
 
-//	for (int i = 0 ; i < parent->childrenCount(); i++)
+	for (int i = 0 ; i < parent->childrenCount(); i++)
+	{
+		std::shared_ptr<Hardware::DeviceObject> child = parent->childSharedPtr(i);
+
+		ok = getEquipment(db, child.get());
+
+		if (ok == false)
+		{
+			return false;
+		}
+	}
+
+//	// DEBUG
+//	if (parent->fileInfo().fileId() == db->hcFileId())
 //	{
-//		std::shared_ptr<Hardware::DeviceObject> child = parent->childSharedPtr(i);
+//		qDebug() << "DatabaseWork " << databaseWork;
+//		qDebug() << "parsingWork " << parsingWork;
+//		qDebug() << "fileSize " << filessize;
 
-//		ok = getEquipment(db, child.get());
-
-//		if (ok == false)
-//		{
-//			return false;
-//		}
+//		databaseWork = 0;
+//		parsingWork = 0;
+//		filessize = 0;
 //	}
 
 	return true;
