@@ -12,7 +12,7 @@ QT       += network
 
 QT		 += widgets
 
-TARGET = BaseService
+TARGET = BaseSrv
 CONFIG   += console
 CONFIG   -= app_bundle
 
