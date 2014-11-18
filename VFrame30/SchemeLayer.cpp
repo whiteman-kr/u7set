@@ -71,7 +71,7 @@ namespace VFrame30
 		const Proto::VideoLayer& videoLayer = message.videolayer();
 
 		m_guid = Proto::Read(videoLayer.uuid());
-		m_name = Proto::Read(videoLayer.name());
+		Proto::Read(videoLayer.name(), &m_name);
 
 		m_compile = videoLayer.compile();
 		m_show = videoLayer.show();

@@ -307,13 +307,7 @@ namespace Hardware
 		int type() const;
 		void setType(int value);
 
-		//QString configurationInput() const;
-		//void setConfigurationInput(const QString& value);
-
-		//QString configurationOutput() const;
-		//void setConfigurationOutput(const QString& value);
-
-		const QString& configurationStruct() const;
+		QString configurationStruct() const;
 		void setConfigurationStruct(const QString& value);
 
 		// Data

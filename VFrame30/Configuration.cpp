@@ -60,10 +60,10 @@ namespace VFrame30
 		const Proto::Configuration& configuration = message.configuration();
 
 		m_guid = Proto::Read(configuration.uuid());
-		m_strID = Proto::Read(configuration.strid());
-		m_caption = Proto::Read(configuration.caption());
-		m_variables = Proto::Read(configuration.variables());
-		m_globals = Proto::Read(configuration.globals());
+		Proto::Read(configuration.strid(), &m_strID);
+		Proto::Read(configuration.caption(), &m_caption);
+		Proto::Read(configuration.variables(), &m_variables);
+		Proto::Read(configuration.globals(), &m_globals);
 
 		m_videoFramesIDs.clear();
 		for (int i = 0; i < configuration.videoframesids().size(); i++)

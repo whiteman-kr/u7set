@@ -67,7 +67,7 @@ namespace VFrame30
 
 		if (videoitem.has_clickscript() == true)
 		{
-			m_clickScript = Proto::Read(videoitem.clickscript());
+			Proto::Read(videoitem.clickscript(), &m_clickScript);
 		}
 		else
 		{

@@ -101,13 +101,6 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 	assert(db->isProjectOpened() == true);
 	assert(parent != nullptr);
 
-
-//static qint64 databaseWork = 0;		// DEBUG
-//static qint64 parsingWork = 0;
-//static qint64 filessize = 0;
-////static qint64 parsingWork = 0;
-
-
 	if (QThread::currentThread()->isInterruptionRequested() == true)
 	{
 		return false;
@@ -120,15 +113,11 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	std::vector<DbFileInfo> files;
 
-//		qint64 t1 = QDateTime::currentMSecsSinceEpoch();
-
 	bool ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
 	if (ok == false)
 	{
 		return false;
 	}
-
-//		databaseWork += QDateTime::currentMSecsSinceEpoch() - t1;
 
 	parent->deleteAllChildren();
 
@@ -136,27 +125,22 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 	{
 		std::shared_ptr<DbFile> file;
 
-//			qint64 t2 = QDateTime::currentMSecsSinceEpoch();	// DEBUG
-
 		ok = db->getLatestVersion(fi, &file, nullptr);
 
 		if (file == false || ok == false)
 		{
 			return false;
 		}
-//			databaseWork += QDateTime::currentMSecsSinceEpoch() - t2;		// DEBUG
-//			filessize += file->size();
-
-//			qint64 t3 = QDateTime::currentMSecsSinceEpoch();	// DEBUG
 
 		Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
-		assert(object);
-
-//			parsingWork += QDateTime::currentMSecsSinceEpoch() - t3;		// DEBUG
 
 		if (object == nullptr)
 		{
 			return false;
+		}
+		else
+		{
+			assert(object);
 		}
 
 		object->setFileInfo(fi);
@@ -179,18 +163,6 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 			return false;
 		}
 	}
-
-//	// DEBUG
-//	if (parent->fileInfo().fileId() == db->hcFileId())
-//	{
-//		qDebug() << "DatabaseWork " << databaseWork;
-//		qDebug() << "parsingWork " << parsingWork;
-//		qDebug() << "fileSize " << filessize;
-
-//		databaseWork = 0;
-//		parsingWork = 0;
-//		filessize = 0;
-//	}
 
 	return true;
 }

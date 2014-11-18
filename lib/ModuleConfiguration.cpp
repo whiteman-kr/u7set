@@ -1,5 +1,5 @@
-#include "../include/ModuleConfiguration.h"
 
+#include "../include/ModuleConfiguration.h"
 
 namespace Hardware
 {
@@ -19,54 +19,54 @@ namespace Hardware
 
 	void ModuleConfigurationValue::readValue(QXmlStreamReader& reader)
 	{
-		Q_ASSERT(reader.name() == "value");
+		assert(reader.name() == "value");
 
 		bool ok = false;
 
 		// Reading "Value" attributes and data
 		//
-
 		QXmlStreamAttributes attr = reader.attributes();
+
 		if (attr.hasAttribute("name"))
 		{
-			setName(attr.value("name").toString());
+			m_name = attr.value("name").toString();
 		}
 
 		if (attr.hasAttribute("type"))
 		{
-			setType(attr.value("type").toString());
+			m_type = attr.value("type").toString();
 		}
 
 		if (attr.hasAttribute("offset"))
 		{
-			setOffset(attr.value("offset").toInt(&ok));
+			m_offset = attr.value("offset").toInt(&ok);
 		}
 
 		if (attr.hasAttribute("bit"))
 		{
-			setBit(attr.value("bit").toInt(&ok));
+			m_bit = attr.value("bit").toInt(&ok);
 		}
 
 		if (attr.hasAttribute("size"))
 		{
-			setBoolSize(attr.value("size").toInt(&ok));
+			m_boolSize = attr.value("size").toInt(&ok);
 		}
 
 		if (attr.hasAttribute("user"))
 		{
-			setUserProperty(attr.value("user").compare("true", Qt::CaseInsensitive) == 0);
+			m_userProperty = attr.value("user").compare("true", Qt::CaseInsensitive) == 0;
 		}
 		else
 		{
-			setUserProperty(false);
+			m_userProperty = false;
 		}
 
 		if (attr.hasAttribute("default"))
 		{
-			setDefaultValue(attr.value("default").toString());
+			m_defaultValue = attr.value("default").toString();
 		}
 
-		setValue(defaultValue());
+		m_value = m_defaultValue;
 
 		// Finishing
 		//
@@ -160,16 +160,6 @@ namespace Hardware
 		m_value = value;
 	}
 
-//	const std::shared_ptr<ModuleConfigurationStruct>& ModuleConfigurationValue::data() const
-//	{
-//		return m_data;
-//	}
-
-//	void ModuleConfigurationValue::setData(const std::shared_ptr<ModuleConfigurationStruct>& data)
-//	{
-//		m_data = data;
-//	}
-
 
 	// ----------------------------------------------------------------------------
 	//
@@ -178,6 +168,7 @@ namespace Hardware
 	// ----------------------------------------------------------------------------
 	ModuleConfigurationStruct::ModuleConfigurationStruct()
 	{
+		m_values.reserve(32);
 	}
 
 	ModuleConfigurationStruct::ModuleConfigurationStruct(const QString& name, int size, bool be) :
@@ -186,6 +177,7 @@ namespace Hardware
 		m_size(size),
 		m_be(be)
 	{
+		m_values.reserve(32);
 	}
 
 	void ModuleConfigurationStruct::readStruct(QXmlStreamReader& reader, QString* errorMessage)
@@ -290,7 +282,7 @@ namespace Hardware
 		}
 	}
 
-	const QList<ModuleConfigurationValue>& ModuleConfigurationStruct::values() const
+	const QVector<ModuleConfigurationValue>& ModuleConfigurationStruct::values() const
 	{
 		return m_values;
 	}
@@ -398,6 +390,8 @@ namespace Hardware
 
 	ModuleConfiguration::ModuleConfiguration()
 	{
+		m_structures.reserve(64);
+		m_userProperties.reserve(256);
 	}
 
 	ModuleConfiguration::~ModuleConfiguration()
@@ -407,16 +401,14 @@ namespace Hardware
 	bool ModuleConfiguration::load(const Proto::ModuleConfiguration& message)
 	{
 		m_hasConfiguration = message.has_struct_description();
-
-		if (message.has_struct_description() == false)
+		if (m_hasConfiguration == false)
 		{
 			return true;
 		}
 
-		const std::string& description = message.struct_description();
-		m_xmlStructDesctription = QString::fromStdString(description);
+		m_xmlStructDesctription = message.struct_description();
 
-		bool result = readStructure(m_xmlStructDesctription);
+		bool result = readStructure(m_xmlStructDesctription.data());
 
 		for (const ::Proto::ModuleConfigurationValue& pv : message.values())
 		{
@@ -443,7 +435,7 @@ namespace Hardware
 			return;
 		}
 
-		message->mutable_struct_description()->assign(m_xmlStructDesctription.toStdString());
+		message->mutable_struct_description()->assign(m_xmlStructDesctription);
 
 		for (const ModuleConfigurationValue& v : m_userProperties)
 		{
@@ -549,11 +541,15 @@ namespace Hardware
 	}
 
 
-	bool ModuleConfiguration::readStructure(const QString& data)
+	bool ModuleConfiguration::readStructure(const char* data)
 	{
 		m_lastError.clear();
+
 		m_structures.clear();
+		m_structures.reserve(64);
+
 		m_variables.clear();
+		m_variables.reserve(64);
 
 		QXmlStreamReader reader(data);
 
@@ -680,7 +676,7 @@ namespace Hardware
 
 			if (reader.isStartElement() == true)
 			{
-				if (reader.name() == "struct")
+				if (reader.name().compare("struct") == 0)
 				{
 					ModuleConfigurationStruct configStruct;
 					configStruct.readStruct(reader, &m_lastError);
@@ -714,7 +710,7 @@ namespace Hardware
 
 			if (reader.isStartElement() == true)
 			{
-				if (reader.name() == "variable")
+				if (reader.name().compare("variable") == 0)
 				{
 					ModuleConfigurationVariable var;
 					var.readVariable(reader);
@@ -750,7 +746,7 @@ namespace Hardware
 				continue;
 			}
 
-			ModuleConfigurationStruct structure = m_structures.value(variable.type());
+			ModuleConfigurationStruct& structure = m_structures[variable.type()];
 
 			parseUserProperties(structure, "Configuration\\" + variable.name(), errorMessage);
 		}
@@ -760,22 +756,27 @@ namespace Hardware
 
 	void ModuleConfiguration::parseUserProperties(const ModuleConfigurationStruct& structure, const QString& parentVariableName, QString* errorMessage)
 	{
-		if (parentVariableName == nullptr || errorMessage == nullptr)
+		if (errorMessage == nullptr)
 		{
-			assert(parentVariableName != nullptr);
 			assert(errorMessage != nullptr);
 			return;
 		}
 
-		for (const ModuleConfigurationValue& structValue : structure.values())
+		const QVector<ModuleConfigurationValue>& v = structure.values();
+
+		QString varName;
+
+		for (const ModuleConfigurationValue& structValue : v)
 		{
-			QString varName = parentVariableName + "\\" + structValue.name();
+			varName = parentVariableName;
+			varName.push_back('\\');
+			varName.push_back(structValue.name());
 
 			if (m_structures.contains(structValue.type()) == true)
 			{
 				// It is nested stuctrure
 				//
-				ModuleConfigurationStruct nestedStruct = m_structures.value(structValue.type());
+				ModuleConfigurationStruct& nestedStruct = m_structures[structValue.type()];
 				parseUserProperties(nestedStruct, varName, errorMessage);
 				continue;
 			}
@@ -789,7 +790,7 @@ namespace Hardware
 				v.setName(varName);					// Set Full qualified name
 				v.setValue(v.defaultValue());
 
-				m_userProperties[varName] = v;
+				m_userProperties.insert(varName, v);
 			}
 		}
 
@@ -847,12 +848,12 @@ namespace Hardware
 		m_minFrameSize = value;
 	}
 
-	const QString& ModuleConfiguration::structDescription() const
+	const std::string& ModuleConfiguration::structDescription() const
 	{
 		return m_xmlStructDesctription;
 	}
 
-	void ModuleConfiguration::setStructDescription(const QString& value)
+	void ModuleConfiguration::setStructDescription(const std::string& value)
 	{
 		m_xmlStructDesctription = value;
 	}

@@ -220,6 +220,8 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 #Optimization flags
 #
 win32 {
+	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
+	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
 }
 unix {
 	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0

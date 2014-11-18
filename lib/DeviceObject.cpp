@@ -92,12 +92,12 @@ namespace Hardware
 		const Proto::DeviceObject& deviceobject = message.deviceobject();
 
 		m_uuid = Proto::Read(deviceobject.uuid());
-		m_strId = Proto::Read(deviceobject.strid());
-		m_caption = Proto::Read(deviceobject.caption());
+		Proto::Read(deviceobject.strid(), &m_strId);
+		Proto::Read(deviceobject.caption(), &m_caption);
 
 		if (deviceobject.has_childrestriction() == true)
 		{
-			m_childRestriction = Proto::Read(deviceobject.childrestriction());
+			Proto::Read(deviceobject.childrestriction(), &m_childRestriction);
 		}
 		else
 		{
@@ -108,16 +108,22 @@ namespace Hardware
 		{
 			m_preset = deviceobject.preset();
 
-			assert(deviceobject.has_presetroot() == true);
 			if (deviceobject.has_presetroot() == true)
 			{
 				m_presetRoot = deviceobject.presetroot();
 			}
+			else
+			{
+				assert(deviceobject.has_presetroot() == true);
+			}
 
-			assert(deviceobject.has_presetname());
 			if (deviceobject.has_presetname() == true)
 			{
-				m_presetName = Proto::Read(deviceobject.presetname());
+				Proto::Read(deviceobject.presetname(), &m_presetName);
+			}
+			else
+			{
+				assert(deviceobject.has_presetname());
 			}
 		}
 
@@ -774,39 +780,18 @@ namespace Hardware
 		m_type = value;
 	}
 
-//	QString DeviceModule::configurationInput() const
-//	{
-//		QString s(m_configurationInput);		// Return Value Optimization
-//		return m_configurationInput;
-//	}
-
-//	void DeviceModule::setConfigurationInput(const QString& value)
-//	{
-//		m_configurationInput = value;
-//	}
-
-//	QString DeviceModule::configurationOutput() const
-//	{
-//		QString s(m_configurationOutput);		// Return Value Optimization
-//		return m_configurationOutput;
-//	}
-
-//	void DeviceModule::setConfigurationOutput(const QString& value)
-//	{
-//		m_configurationOutput = value;
-//	}
-
-	const QString& DeviceModule::configurationStruct() const
+	QString DeviceModule::configurationStruct() const
 	{
-		return m_moduleConfiguration.structDescription();
+		QString s = QString::fromStdString(m_moduleConfiguration.structDescription());
+		return s;
 	}
 
 	void DeviceModule::setConfigurationStruct(const QString& value)
 	{
 		m_moduleConfiguration.setHasConfiguration(true);
-		m_moduleConfiguration.setStructDescription(value);
+		m_moduleConfiguration.setStructDescription(value.toStdString());
 
-		m_moduleConfiguration.readStructure(value);
+		m_moduleConfiguration.readStructure(value.toStdString().data());
 		m_moduleConfiguration.addUserPropertiesToObject(this);
 	}
 

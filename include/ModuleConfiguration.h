@@ -59,12 +59,9 @@ namespace Hardware
 		const QString& value() const;
 		void setValue(const QString& value);
 
-//		const std::shared_ptr<ModuleConfigurationStruct>& data() const;
-//		void setData(const std::shared_ptr<ModuleConfigurationStruct>& data);
-
 		// Data
 		//
-	private:
+	protected:
 		QString m_name;
 		QString m_type;
 		int m_offset = -1;
@@ -73,8 +70,6 @@ namespace Hardware
 		bool m_userProperty = false;		// This property must be set by user
 		QString m_defaultValue;
 		QString m_value;
-
-		//std::shared_ptr<ModuleConfigurationStruct> m_data;   // указатель на структуру типа Type. Заполняется после загрузки.
 	};
 
 	Q_DECLARE_METATYPE(ModuleConfigurationValue*)
@@ -111,7 +106,7 @@ namespace Hardware
 
 		int actualSize() const;
 
-		const QList<ModuleConfigurationValue>& values() const;
+		const QVector<ModuleConfigurationValue>& values() const;
 
 		bool be() const;
 		void setBe(bool be);
@@ -124,7 +119,7 @@ namespace Hardware
 		int m_size = 0;				// размер структуры, указанный в xml-файле. если не указан - равен по умолчанию 0
 		bool m_be = false;			// Big Endian
 
-		QList<ModuleConfigurationValue> m_values;
+		QVector<ModuleConfigurationValue> m_values;
 	};
 
 	// ----------------------------------------------------------------------------
@@ -195,7 +190,7 @@ namespace Hardware
 
 		static void skipUnknownElement(QXmlStreamReader* reader, QString* errorMessage);
 
-		bool readStructure(const QString& data);
+		bool readStructure(const char* data);
 
 	protected:
 		void readDeclaration(QXmlStreamReader& reader);
@@ -222,8 +217,8 @@ namespace Hardware
 		int minFrameSize() const;
 		void setMinFrameSize(int value);
 
-		const QString& structDescription() const;
-		void setStructDescription(const QString& value);
+		const std::string& structDescription() const;
+		void setStructDescription(const std::string& value);
 
 		// Data
 		//
@@ -237,12 +232,12 @@ namespace Hardware
 		int m_uartID = -1;						// Module UART ID, for this configuration
 		int m_minFrameSize = -1;				// Flash memory frame size
 
-		QMap<QString, ModuleConfigurationStruct> m_structures;		// Paresed structures	(declarations)
-		QList<ModuleConfigurationVariable> m_variables;				// Paresed variables	(definitions)
+		QHash<QString, ModuleConfigurationStruct> m_structures;		// Paresed structures	(declarations)
+		QVector<ModuleConfigurationVariable> m_variables;				// Paresed variables	(definitions)
 
-		QString m_xmlStructDesctription;		// Unparsed XML of Structure Description;
+		std::string m_xmlStructDesctription;	// Unparsed XML of Structure Description;
 		QString m_lastError;
 
-		QMap<QString, ModuleConfigurationValue> m_userProperties;
+		QHash<QString, ModuleConfigurationValue> m_userProperties;
 	};
 }
