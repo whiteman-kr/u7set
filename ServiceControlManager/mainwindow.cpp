@@ -21,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_serviceTable(new QTableView(this)),
 	m_trayIcon(new QSystemTrayIcon(this))
 {
+	qRegisterMetaType<ServiceInformation>("ServiceInformation");
+
 	connect(this, &MainWindow::commandPushed, m_serviceModel, &ServiceTableModel::sendCommand);
 
 	m_serviceTable->setModel(m_serviceModel);
@@ -196,37 +198,8 @@ void MainWindow::connectionClicked(QAction *selectedAction)
 
 void MainWindow::scanNetwork()
 {
-	ScanOptionsWidget sow(nullptr);
-	if (sow.exec() == QDialog::Rejected)
-	{
-		return;
-	}
-	QStringList address = sow.getSelectedAddress().split("/");
-	if (address.count() == 1)
-	{
-		m_serviceModel->addAddress(address[0]);
-	}
-	else
-	{
-		QHostAddress ha(address[0]);
-		quint32 mask = ha.toIPv4Address();
-		quint32 bitsCount = address[1].toUInt();
-		if (bitsCount > 32)
-		{
-			bitsCount = 32;
-		}
-		mask &= (~0) << bitsCount;
-		quint64 counter = 1 << bitsCount;
-		for (quint32 i = 0; i < counter; i++)
-		{
-			if (sow.broadcast(mask + i))
-			{
-				continue;
-			}
-			QHostAddress peerAddress(mask + i);
-			m_serviceModel->checkAddress(peerAddress.toString());
-		}
-	}
+	ScanOptionsWidget sow(m_serviceModel, this);
+	sow.exec();
 }
 
 void MainWindow::startService()
