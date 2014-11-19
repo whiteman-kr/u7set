@@ -43,11 +43,11 @@ namespace Proto
 
 	// Read/write wstring message
 	//
-	QString Read(const Proto::wstring& message)
+	void Read(const Proto::wstring& message, QString* dst)
 	{
-		QString qstr = QString::fromUtf16(reinterpret_cast<const ushort*>(message.text().data()),
+		*dst = QString::fromUtf16(reinterpret_cast<const ushort*>(message.text().data()),
 										  static_cast<int>(message.text().size() / 2) - 1);
-		return qstr;
+		return;
 	}
 
 	void Write(Proto::wstring* pMessage, const QString& str)

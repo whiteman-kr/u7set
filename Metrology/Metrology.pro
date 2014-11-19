@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport concurrent
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport concurrent sql
 
 TARGET = Metrology
 TEMPLATE = app
@@ -31,7 +31,8 @@ SOURCES += \
     ExportMeasure.cpp \
     Delegate.cpp \
     FindMeasure.cpp \
-    FolderPropertyManager.cpp
+    FolderPropertyManager.cpp \
+    Database.cpp
 
 
 HEADERS  += \
@@ -51,7 +52,8 @@ HEADERS  += \
     ExportMeasure.h \
     Delegate.h \
     FindMeasure.h \
-    FolderPropertyManager.h
+    FolderPropertyManager.h \
+    Database.h
 
 
 FORMS    +=

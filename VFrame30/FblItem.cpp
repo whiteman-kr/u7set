@@ -73,7 +73,7 @@ namespace VFrame30
 
 		if (cpm.has_signalstrid() == true)
 		{
-			m_signalStrID = Proto::Read(cpm.signalstrid());
+			Proto::Read(cpm.signalstrid(), &m_signalStrID);
 		}
 		else
 		{
@@ -82,7 +82,7 @@ namespace VFrame30
 
 		if (cpm.has_signalcaption() == true)
 		{
-			m_signalCaption = Proto::Read(cpm.signalcaption());
+			Proto::Read(cpm.signalcaption(), &m_signalCaption);
 		}
 		else
 		{

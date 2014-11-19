@@ -13,3 +13,9 @@ DbController* MainTabPage::dbController()
 	assert(m_dbController != nullptr);
 	return m_dbController;
 }
+
+DbController* MainTabPage::db()
+{
+	assert(m_dbController != nullptr);
+	return m_dbController;
+}

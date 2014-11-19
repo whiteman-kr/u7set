@@ -336,7 +336,7 @@ void MeasureThread::measureLinearity()
                 continue;
             }
 
-            manager->setValue( pPoint->getSensorValue(POINT_SENSOR_I_0_5_MA) );
+            manager->setValue( pPoint->sensorValue(POINT_SENSOR_I_0_5_MA) );
         }
 
         // wait ready all calibrators,

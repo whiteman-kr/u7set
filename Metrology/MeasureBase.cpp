@@ -163,26 +163,10 @@ int MeasureBase::formatLinearityMeasure(MeasureItem* pMeasure)
     m->position().setSubblock(0);
     m->position().setEntry(0);
 
-    m->setHasOutput(true);
-
-    m->setLowLimit(VALUE_TYPE_ELECTRIC, 50);
-    m->setHighLimit(VALUE_TYPE_ELECTRIC, 100);
-
-    m->setLowLimit(VALUE_TYPE_PHYSICAL, 0);
-    m->setHighLimit(VALUE_TYPE_PHYSICAL, 100);
-
-    m->setLowLimit(VALUE_TYPE_OUTPUT, 4);
-    m->setHighLimit(VALUE_TYPE_OUTPUT, 20);
-
-    m->setUnit(VALUE_TYPE_ELECTRIC, "Ohm");
-    m->setUnit(VALUE_TYPE_PHYSICAL, "°С");
-    m->setUnit(VALUE_TYPE_OUTPUT, "mA");
 
     m->setValuePrecision(VALUE_TYPE_ELECTRIC, 3);
     m->setValuePrecision(VALUE_TYPE_PHYSICAL, 2);
     m->setValuePrecision(VALUE_TYPE_OUTPUT, 3);
-
-    m->setAdjustment(0);
 
     // nominal
     //
@@ -207,6 +191,23 @@ int MeasureBase::formatLinearityMeasure(MeasureItem* pMeasure)
     m->setMeasure(VALUE_TYPE_PHYSICAL, 0);
     m->setMeasure(VALUE_TYPE_OUTPUT, 0);
 
+    // limits
+    //
+    m->setLowLimit(VALUE_TYPE_ELECTRIC, 50);
+    m->setHighLimit(VALUE_TYPE_ELECTRIC, 100);
+    m->setUnit(VALUE_TYPE_ELECTRIC, "Ohm");
+
+    m->setLowLimit(VALUE_TYPE_PHYSICAL, 0);
+    m->setHighLimit(VALUE_TYPE_PHYSICAL, 100);
+    m->setUnit(VALUE_TYPE_PHYSICAL, "°С");
+
+    m->setLowLimit(VALUE_TYPE_OUTPUT, 4);
+    m->setHighLimit(VALUE_TYPE_OUTPUT, 20);
+    m->setUnit(VALUE_TYPE_OUTPUT, "mA");
+
+    m->setHasOutput(true);
+    m->setAdjustment(0);
+
     // calc errors
     //
     m->setErrorInput(ERROR_TYPE_ABSOLUTE, 0);
@@ -221,10 +222,12 @@ int MeasureBase::formatLinearityMeasure(MeasureItem* pMeasure)
     m->setErrorPrecision(ERROR_TYPE_ABSOLUTE, 0);
     m->setErrorPrecision(ERROR_TYPE_REDUCE, 2);
 
-    m->setErrorAddional(ADDITIONAL_ERROR_SYSTEM, 0);
-    m->setErrorAddional(ADDITIONAL_ERROR_MSE, 0);
-    m->setErrorAddional(ADDITIONAL_ERROR_LOW_BORDER, 0);
-    m->setErrorAddional(ADDITIONAL_ERROR_HIGH_BORDER, 0);
+    m->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MIN, 0);
+    m->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX, 0);
+    m->setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, 0);
+    m->setAdditionalValue(ADDITIONAL_VALUE_MSE, 0);
+    m->setAdditionalValue(ADDITIONAL_VALUE_LOW_BORDER, 0);
+    m->setAdditionalValue(ADDITIONAL_VALUE_HIGH_BORDER, 0);
 
 
     return m->baseIndex();
