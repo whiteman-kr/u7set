@@ -238,7 +238,7 @@ void OptionsPointsDialog::updateList()
 
         for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
         {
-            cell = new QTableWidgetItem( QString::number(point->getSensorValue(sensor), 10, 3));
+            cell = new QTableWidgetItem( QString::number(point->sensorValue(sensor), 10, 3));
             cell->setTextAlignment(Qt::AlignHCenter);
             m_pointList->setItem(index, sensor, cell);
 
