@@ -15,11 +15,11 @@ const quint32   STP_BASE = 0,
 
 const char* const serviceTypeStr[] =
 {
-	"RPCT Base Service",
-	"RPCT Configuration Service",
-	"RPCT FSC Data Acquisition Service",
-	"RPCT FSC Tuning Service",
-	"RPCT Data Archiving Service"
+	"Base Service",
+	"Configuration Service",
+	"FSC Data Acquisition Service",
+	"FSC Tuning Service",
+	"Data Archiving Service"
 };
 
 

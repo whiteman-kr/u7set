@@ -24,7 +24,7 @@ public:
 
 protected:
 	virtual void timerEvent(QTimerEvent* pTimerEvent) override;
-	void writeLog(const LogItem& logItem);
+	void writeLog(const OutputLogItem& logItem);
 
 private slots:
 	void configureClicked();

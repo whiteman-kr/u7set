@@ -429,7 +429,6 @@ QtServiceBasePrivate::QtServiceBasePrivate(const QString &name)
 
 QtServiceBasePrivate::~QtServiceBasePrivate()
 {
-
 }
 
 void QtServiceBasePrivate::startService()

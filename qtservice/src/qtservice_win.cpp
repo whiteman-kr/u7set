@@ -802,10 +802,51 @@ bool QtServiceBasePrivate::start()
         return false;
 
     if (!ht->calledOk()) {
-        if (ht->runningAsConsole())
-            return controller.start(args.mid(1));
-        else
-            return false;
+
+		// WhiteMan begin 10.11.2014
+		//
+
+		// --- original code start
+		//
+		//	if (ht->runningAsConsole())
+		//		return controller.start(args.mid(1));
+		//  else
+		//      return false;
+		//
+		// --- original code end
+
+		// after this memory leak detected by reasone
+		//
+		// Not deleted HandlerThread* ht, allocated in this file, line 792
+		// Not called QtServiceBasePrivate::sysCleanup()
+
+		// --- new code start
+		//
+		bool result = false;
+
+		if (ht->runningAsConsole())
+		{
+			result = controller.start(args.mid(1));
+		}
+
+		if (ht->isRunning())
+		{
+			ht->wait(1000);         // let the handler thread finish
+		}
+
+		if (ht->isFinished())
+		{
+			delete ht;
+		}
+
+		sysCleanup();
+
+		return result;
+		//
+		// --- new code end
+
+		//
+		// WhiteMan end 10.11.2014
     }
 
     int argc = sys->serviceArgs.size();

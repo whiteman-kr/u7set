@@ -165,7 +165,7 @@ void ModuleConfigurator::timerEvent(QTimerEvent* pTimerEvent)
 		theLog.windowMessageListEmpty() == false && 
 		m_pLog != nullptr)
 	{
-		std::list<LogItem> messages;
+		std::list<OutputLogItem> messages;
 		for (int i = 0; i < 10 && theLog.windowMessageListEmpty() == false; i++)
 		{
 			messages.push_back(theLog.popWindowMessages());
@@ -180,7 +180,7 @@ void ModuleConfigurator::timerEvent(QTimerEvent* pTimerEvent)
 	return;
 }
 
-void ModuleConfigurator::writeLog(const LogItem& logItem)
+void ModuleConfigurator::writeLog(const OutputLogItem& logItem)
 {
 	if (m_pLog == nullptr)
 	{

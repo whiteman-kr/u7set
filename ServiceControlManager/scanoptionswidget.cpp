@@ -11,7 +11,7 @@ ScanOptionsWidget::ScanOptionsWidget(QWidget *parent) :
 {
     setWindowTitle(tr("Scan settings"));
     QRegExp re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[1-9]|[1-2][0-9]|3[0-2]?)?)\\b");
-    QRegExpValidator* rev = new QRegExpValidator(re);
+	QRegExpValidator* rev = new QRegExpValidator(re, this);
     m_addressEdit = new QLineEdit(this);
     m_addressEdit->setValidator(rev);
 
@@ -36,6 +36,12 @@ ScanOptionsWidget::ScanOptionsWidget(QWidget *parent) :
             if (addressList[j].prefixLength() >= 0)
             {
                 ipStr += "/" + QString::number(32 - addressList[j].prefixLength());
+				if (ip.protocol() == QAbstractSocket::IPv4Protocol)
+				{
+					uint bitCount = 32 - addressList[j].prefixLength();
+					quint32 mask = (~0u) << bitCount;
+					m_broadcastSet.insert((ip.toIPv4Address() & mask) + ~mask);
+				}
             }
             addressCombo->addItem(ipStr);
         }

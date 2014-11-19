@@ -59,6 +59,10 @@ public:
 	//
 	//QByteArray m_equipmentTabPageSplitterState;
 
+	// Build Tab Page
+	//
+	QByteArray m_buildTabPageSplitterState;
+
     // AFBL Editor options
     //
     QPoint m_abflEditorWindowPos;
@@ -73,11 +77,12 @@ public:
 	//
 	QPoint m_multiLinePropertyEditorWindowPos;
 	QByteArray m_multiLinePropertyEditorGeometry;
+
 private:
 	// --
 	//
 	QString m_serverIpAddress;
-	int m_serverPort;
+	int m_serverPort = 0;
 	QString m_serverUsername;
 	QString m_serverPassword;
 };
