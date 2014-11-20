@@ -9,6 +9,7 @@
 class QLineEdit;
 class ServiceTableModel;
 class QUdpSocket;
+//class QTimer;
 
 class SubnetChecker : public QObject
 {
@@ -35,6 +36,7 @@ private:
 	int m_checkedHostCount = 1;
 	RequestHeader m_requestHeader;
 	QUdpSocket* m_socket;
+	QTimer* m_sendPacketTimer;
 
 	void setSubnet(int index);
 };

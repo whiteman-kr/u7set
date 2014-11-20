@@ -159,9 +159,9 @@ void SubnetChecker::startChecking()
 	m_requestHeader.id = RQID_GET_SERVICE_INFO;
 	m_requestHeader.dataSize = 0;
 
-	QTimer* timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(checkNextHost()));
-	timer->start(0);
+	m_sendPacketTimer = new QTimer(this);
+	connect(m_sendPacketTimer, SIGNAL(timeout()), this, SLOT(checkNextHost()));
+	m_sendPacketTimer->start(0);
 }
 
 void SubnetChecker::checkNextHost()
@@ -194,10 +194,8 @@ void SubnetChecker::checkNextHost()
 		m_subnetIndex++;
 		if (m_subnetIndex >= m_subnetList.count())
 		{
-			//this magic allow us to keep listening for last answers
-			thread()->msleep(100);
-			readAck();
-			QTimer::singleShot(1, this, SLOT(stopChecking()));
+			m_sendPacketTimer->stop();
+			QTimer::singleShot(100, this, SLOT(stopChecking())); //100ms for answers on last packets
 			return;
 		}
 		setSubnet(m_subnetIndex);
