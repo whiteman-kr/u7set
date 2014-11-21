@@ -10,6 +10,7 @@
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QTimer>
+#include <QSettings>
 
 ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *parent) :
 	QDialog(parent),
@@ -25,7 +26,6 @@ ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *p
     fl->addRow(tr("Enter IP or subnet"), m_addressEdit);
 
     QComboBox* addressCombo = new QComboBox;
-    connect(addressCombo, &QComboBox::currentTextChanged, m_addressEdit, &QLineEdit::setText);
 
     QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
     for (int i = 0; i < interfaceList.count(); i++)
@@ -47,6 +47,11 @@ ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *p
             addressCombo->addItem(ipStr);
         }
     }
+
+	QSettings settings;
+	m_addressEdit->setText(settings.value("last scan target", addressCombo->currentText()).toString());
+
+	connect(addressCombo, &QComboBox::currentTextChanged, m_addressEdit, &QLineEdit::setText);
 
     fl->addRow(tr("Or select from following"), addressCombo);
 
@@ -137,6 +142,10 @@ void ScanOptionsWidget::startChecking()
 
 		progress->open();
 	}
+
+	QSettings settings;
+	settings.setValue("last scan target", m_addressEdit->text());
+
 	accept();
 }
 
