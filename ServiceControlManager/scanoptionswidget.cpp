@@ -126,7 +126,7 @@ void ScanOptionsWidget::startChecking()
 		progress->setMinimumDuration(0);
 
 		connect(checker, &SubnetChecker::setChecked, progress, &QProgressDialog::setValue, Qt::QueuedConnection);
-		connect(checker, &SubnetChecker::hostFound, m_serviceModel, &ServiceTableModel::setServiceInformation);
+		connect(checker, &SubnetChecker::hostFound, m_serviceModel, &ServiceTableModel::setServiceInformation, Qt::QueuedConnection);
 		connect(progress, &QProgressDialog::canceled, checker, &SubnetChecker::stopChecking, Qt::QueuedConnection);
 		connect(progress, &QProgressDialog::canceled, progress, &QObject::deleteLater);
 		connect(progress, &QProgressDialog::rejected, progress, &QObject::deleteLater);
@@ -144,14 +144,16 @@ void ScanOptionsWidget::startChecking()
 SubnetChecker::SubnetChecker(QList<QPair<quint32,uint>>& subnetList, QObject* parent) :
 	QObject(parent),
 	m_subnetList(std::move(subnetList)),
-	m_socket(new QUdpSocket(this))
+	m_socket(nullptr)
 {
 	setSubnet(0);
-	connect(m_socket, &QUdpSocket::readyRead, this, &SubnetChecker::readAck);
 }
 
 void SubnetChecker::startChecking()
 {
+	m_socket = new QUdpSocket(this);
+	connect(m_socket, &QUdpSocket::readyRead, this, &SubnetChecker::readAck);
+
 	m_requestHeader.clientID = 0;
 	m_requestHeader.version = 0;
 	m_requestHeader.no = 1;
@@ -161,7 +163,7 @@ void SubnetChecker::startChecking()
 
 	m_sendPacketTimer = new QTimer(this);
 	connect(m_sendPacketTimer, SIGNAL(timeout()), this, SLOT(checkNextHost()));
-	m_sendPacketTimer->start(0);
+	m_sendPacketTimer->start(5);
 }
 
 void SubnetChecker::checkNextHost()
@@ -180,7 +182,7 @@ void SubnetChecker::checkNextHost()
 			if (m_socket->error() == QAbstractSocket::NetworkError)
 			{
 				//Looks like buffer overflow
-				thread()->msleep(1);
+				thread()->msleep(5);
 				return;
 			}
 			qDebug() << "Socket error " << m_socket->error() << "(ip=" << ip.toString() << "): " << m_socket->errorString();
