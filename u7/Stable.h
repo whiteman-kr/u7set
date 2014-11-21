@@ -40,6 +40,7 @@
 #include <QMetaClassInfo>
 #include <QJSEngine>
 #include <QQmlEngine>
+#include <QHash>
 
 
 // Qt Widgets

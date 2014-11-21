@@ -162,7 +162,8 @@ namespace VFrame30
 
 		for (int i = 0; i < signal.signalstrids_size(); i++)
 		{
-			QString s = Proto::Read(signal.signalstrids().Get(i));
+			QString s;
+			Proto::Read(signal.signalstrids().Get(i), &s);
 			m_signalStrIds.push_back(s);
 		}
 

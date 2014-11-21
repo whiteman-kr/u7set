@@ -234,8 +234,8 @@ class LinearityPoint
 {
 public:
 
-    explicit            LinearityPoint();
-    explicit            LinearityPoint(double percent);
+    explicit            LinearityPoint() { setPercent(0); }
+    explicit            LinearityPoint(double percent) { setPercent(percent); }
 
 private:
 
@@ -246,14 +246,14 @@ private:
 
 public:
 
-    void                setID(int id);
+    int                 pointID() { return m_pointID; }
+    void                setPointID(int id) { m_pointID = id; }
 
+    double              percent() {return m_percentValue; }
     void                setPercent(double value);
-    double              getPrecent() ;
 
-    double              getSensorValue(int sensor);
+    double              sensorValue(int sensor);
 };
-
 
 // ==============================================================================================
 

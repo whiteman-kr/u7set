@@ -28,6 +28,8 @@ public:
 	virtual ~OutputLog(void);
 
 public:
+	void clear();
+
 	void write(const QString& str, OutputMessageLevel level, bool bold);
 	void writeMessage(const QString& str, bool bold = false);
 	void writeSuccess(const QString& str, bool bold = false);
@@ -41,9 +43,7 @@ public:
 
 private:
 	std::list<OutputLogItem> windowMessageList;		// List buffer for writing messages to main window Log Widget
-	std::list<OutputLogItem> fileMessageList;			// List buffer for writing messages to log file
+	std::list<OutputLogItem> fileMessageList;		// List buffer for writing messages to log file
 
-	mutable QMutex mutex;						// access to windowMessageList, fileMessageList
+	mutable QMutex mutex;							// access to windowMessageList, fileMessageList
 };
-
-extern OutputLog theLog;

@@ -13,11 +13,10 @@
 #include <QComboBox>
 #include <QCloseEvent>
 
+#include "Database.h"
 #include "CalibratorBase.h"
 #include "ExportMeasure.h"
 #include "OptionsDialog.h"
-
-#include <QWindow>
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +44,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_measureThread.init(this);
 
     measureThreadStoped();
+
+    // open database
+    //
+    theDatabase.open();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1052,6 +1055,8 @@ void MainWindow::saveSettings()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
+    theDatabase.close();
+
     if (m_measureThread.isRunning() == true)
     {
         QMessageBox::information(this, windowTitle(), m_statusMeasureThreadState->text());

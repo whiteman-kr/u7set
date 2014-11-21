@@ -248,10 +248,10 @@ QString MeasureTable::textLinearity(int row, int column) const
         case MVC_CMN_L_EL_MEASURE:				result = m->measureString(VALUE_TYPE_ELECTRIC); break;
         case MVC_CMN_L_PH_MEASURE:				result = m->measureString(VALUE_TYPE_PHYSICAL); break;
         case MVC_CMN_L_OUT_MEASURE:				result = m->measureString(VALUE_TYPE_OUTPUT); break;
-        case MVC_CMN_L_SYSTEM_ERROR:			result = QString::number(m->errorAddional(ADDITIONAL_ERROR_SYSTEM), 10, 2); break;
-        case MVC_CMN_L_MSE:                     result = QString::number(m->errorAddional(ADDITIONAL_ERROR_MSE), 10, 2); break;
-        case MVC_CMN_L_LOW_BORDER:				result = QString::number(m->errorAddional(ADDITIONAL_ERROR_LOW_BORDER), 10, 2); break;
-        case MVC_CMN_L_HIGH_BORDER:             result = QString::number(m->errorAddional(ADDITIONAL_ERROR_HIGH_BORDER), 10, 2); break;
+        case MVC_CMN_L_SYSTEM_ERROR:			result = QString::number(m->additionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR), 10, 2); break;
+        case MVC_CMN_L_MSE:                     result = QString::number(m->additionalValue(ADDITIONAL_VALUE_MSE), 10, 2); break;
+        case MVC_CMN_L_LOW_BORDER:				result = QString::number(m->additionalValue(ADDITIONAL_VALUE_LOW_BORDER), 10, 2); break;
+        case MVC_CMN_L_HIGH_BORDER:             result = QString::number(m->additionalValue(ADDITIONAL_VALUE_HIGH_BORDER), 10, 2); break;
         case MVC_CMN_L_VALUE_COUNT:             result = QString::number(m->measureArrayCount()); break;
         case MVC_CMN_L_VALUE_0:                 result = m->measureItemString(detailValueType, 0); break;
         case MVC_CMN_L_VALUE_1:                 result = m->measureItemString(detailValueType, 1); break;

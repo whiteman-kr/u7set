@@ -311,27 +311,6 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityPoint::LinearityPoint()
-{
-    setPercent(0);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-LinearityPoint::LinearityPoint(double percent)
-{
-    setPercent(percent);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void LinearityPoint::setID(int id)
-{
-    m_pointID = id;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void LinearityPoint::setPercent(double value)
 {
     m_percentValue = value;
@@ -355,14 +334,7 @@ void LinearityPoint::setPercent(double value)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-double LinearityPoint::getPrecent()
-{
-    return m_percentValue;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-double LinearityPoint::getSensorValue(int sensor)
+double LinearityPoint::sensorValue(int sensor)
 {
     if (sensor < 0 || sensor >= POINT_SENSOR_COUNT)
     {
@@ -371,7 +343,6 @@ double LinearityPoint::getSensorValue(int sensor)
 
     return m_sensorValue[sensor];
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -579,7 +550,7 @@ QString LinearityPointBase::text()
                 LinearityPoint* point = m_pointList.at(index);
                 if (point != nullptr)
                 {
-                    retText.append(QString("%1%").arg(QString::number(point->getPrecent(), 10, 1)));
+                    retText.append(QString("%1%").arg(QString::number(point->percent(), 10, 1)));
                 }
                 else
                 {
@@ -636,7 +607,7 @@ void LinearityPointBase::save()
             LinearityPoint* point = m_pointList.at(index);
             if (point != nullptr)
             {
-                point->setID(index);
+                point->setPointID(index);
             }
         }
 
@@ -660,7 +631,7 @@ LinearityPointBase& LinearityPointBase::operator=(const LinearityPointBase& from
             LinearityPoint* from_point = from.m_pointList.at(index);
             if (from_point != nullptr)
             {
-                LinearityPoint* point = new LinearityPoint( from_point->getPrecent() );
+                LinearityPoint* point = new LinearityPoint( from_point->percent() );
                 if (point != nullptr)
                 {
                     m_pointList.append(point);

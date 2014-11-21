@@ -19,7 +19,7 @@ namespace VFrame30
 
 	bool FontParam::LoadData(const Proto::FontParam& message)
 	{
-		m_name = Proto::Read(message.name());
+		Proto::Read(message.name(), &m_name);
 		m_size = message.size();
 		m_bold = message.bold();
 		m_italic = message.italic();

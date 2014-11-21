@@ -19,6 +19,7 @@ public slots:
 	//
 protected:
 	DbController* dbController();
+	DbController* db();
 
 	// Data
 	//

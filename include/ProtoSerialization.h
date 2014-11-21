@@ -255,7 +255,7 @@ namespace Proto
 		{
 			Proto::Envelope message;
 
-			bool result = message.ParseFromArray(data.data(), data.size());
+			bool result = message.ParseFromArray(data.constData(), data.size());
 			if (result == false)
 			{
 				return nullptr;
@@ -288,7 +288,7 @@ namespace Proto
 
 	// Read/write wstring message
 	//
-	QString Read(const Proto::wstring& message);
+	void Read(const Proto::wstring& message, QString* dst);
 	void Write(Proto::wstring* pMessage, const QString& str);
 }
 

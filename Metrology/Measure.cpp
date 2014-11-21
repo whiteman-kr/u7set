@@ -139,9 +139,9 @@ LinearetyMeasureItem::LinearetyMeasureItem() :
         m_errorPrecision[e] = 0;
     }
 
-    for(int a = 0; a < ADDITIONAL_ERROR_COUNT; a++)
+    for(int a = 0; a < ADDITIONAL_VALUE_COUNT; a++)
     {
-        m_errorAddional[a] = 0;
+        m_additionalValue[a] = 0;
     }
 }
 

@@ -4,7 +4,7 @@
 #include <QObject>
 #include "../include/configdata.h"
 
-class Log;
+class OutputLog;
 
 const int ProtocolMaxVersion = 1;					// The maximum protocol version, changing it, change CONF_HEADER typedef
 
@@ -51,8 +51,8 @@ struct CONF_HEADER_V1
 									// !!! ATTENTION !!!
 									// HEADER CRC IS CALCULATED BY NORMAL POLY, BUT STORED IN BIG-ENDIAN
 
-	void dump(Log& log);
-	void dumpFlagsState(Log& log);
+	void dump(OutputLog& log);
+	void dumpFlagsState(OutputLog& log);
 	
 	void setCrc();
 	bool checkCrc();
@@ -157,7 +157,7 @@ struct CONF_IDENTIFICATION_DATA_V1
 	CONF_IDENTIFICATION_RECORD firstConfiguration;		// The first configuration Id record
 	CONF_IDENTIFICATION_RECORD lastConfiguration;		// The last configuration Id record
 
-	void dump(Log& log);
+	void dump(OutputLog& log);
 };
 #pragma pack(pop)
 
