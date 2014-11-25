@@ -40,7 +40,11 @@ const quint32   RQID_GET_SERVICE_INFO = 1000,
                 RQID_SERVICE_MF_RESTART = 1102,
 
                 RQID_SEND_FILE_START = 1200,
-				RQID_SEND_FILE_NEXT = 1201;
+				RQID_SEND_FILE_NEXT = 1201,
+
+				RQID_GET_DATA_SOURCES_IDS = 1250,
+				RQID_GET_DATA_SOURCES_INFO = 1251,
+				RQID_GET_DATA_SOURCES_STATE = 1252;
 
 
 const quint32   SS_MF_STOPPED = 0,
@@ -135,6 +139,30 @@ struct SendFileNext
 	quint32 CRC32;
 
 	char data[SEND_FILE_DATA_SIZE];
+};
+
+
+// RQID_GET_DATA_SOURCES_INFO request data format
+//
+struct DataSourceInfo
+{
+	quint32 ID;
+	quint16 name[32];
+	quint32 ip;
+	quint32 port;
+	quint32 partCount;
+};
+
+
+// RQID_GET_DATA_SOURCES_STATE request data format
+//
+struct DataSourceState
+{
+	quint32 ID;
+	quint32 state;
+	quint64 uptime;
+	quint64 receivedSize;
+	double receiveSpeed;
 };
 
 
