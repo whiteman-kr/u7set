@@ -75,7 +75,6 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
     {
 
     },
-
 };
 
 

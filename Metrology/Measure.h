@@ -1,8 +1,8 @@
 #pragma once
 
 #include <assert.h>
-#include <QtGlobal>
 #include <QDateTime>
+#include "Calibrator.h"
 
 // ==============================================================================================
 
@@ -255,7 +255,13 @@ public:
     void setEntry(int entry) { m_entry = entry; }
 
     QString entryString() const;
+
+    DevicePosition& operator=(const DevicePosition& from);
 };
+
+// ==============================================================================================
+
+#define     MEASURE_TIME_FORMAT     "dd-MM-yyyy hh:mm:ss"
 
 // ==============================================================================================
 
@@ -268,43 +274,34 @@ public:
 
 private:
 
-    int m_baseIndex = -1;                               // index of record in array MeasureBase
-    int m_tableIndex = -1;                              // index of record in table SQL
-
-    int m_recordID = -1;                                // primary key value of record
-    bool m_filter = false;                              // filter for record, if "true" - hide record
     int m_measureType = MEASURE_TYPE_UNKNOWN;           // measure tyupe
+
+    int m_measureID = -1;                               // primary key of record in SQL table
+    bool m_filter = false;                              // filter for record, if "true" - hide record
 
     QDateTime m_measureTime;                            // measure time
     int m_reportType = -1;                              // report type
 
 public:
 
-    QString strID(bool external);
+    int measureType() const { return m_measureType; }
+    void setMeasureType(int type) { m_measureType = type; }
 
-    int baseIndex() const { return m_baseIndex; }
-    void setBaseIndex(int index) { m_baseIndex = index; }
-
-    int tableIndex() const { return m_tableIndex; }
-    void setTableIndex(int index) { m_tableIndex = index; }
-
-    int recordID() const { return m_recordID; }
-    void setRecordID(int record) { m_recordID = record; }
+    int measureID() const { return m_measureID; }
+    void setMeasureID(int id) { m_measureID = id; }
 
     bool filter() const { return m_filter; }
     void setFilter(bool filter) { m_filter = filter; }
 
-    int measureType() const { return m_measureType; }
-    void setMeasureType(int type) { m_measureType = type; }
-
     QDateTime measureTime() const { return m_measureTime; }
     void setMeasureTime(QDateTime time) { m_measureTime = time; }
-
-    QString measureTimeString() const;
 
     int reportType() const { return m_reportType; }
     void setReportType(int type) { m_reportType = type; }
 
+    MeasureItem* at(int index);
+
+    MeasureItem& operator=(MeasureItem& from);
 };
 
 // ==============================================================================================
@@ -315,6 +312,7 @@ class LinearetyMeasureItem : public MeasureItem
 public:
 
     explicit LinearetyMeasureItem();
+    explicit LinearetyMeasureItem(Calibrator* pCalibrator);
 
 private:
 
@@ -422,6 +420,83 @@ public:
 
     double additionalValue(int type) const { if (type < 0 || type >= ADDITIONAL_VALUE_COUNT) { assert(0); return 0; } return m_additionalValue[type]; }
     void setAdditionalValue(int type, double value) { if (type < 0 || type >= ADDITIONAL_VALUE_COUNT) { assert(0); return; } m_additionalValue[type] = value; }
+
+    void updateMeasureArray(int type, MeasureItem* pMeasure);
+    void updateAdditionalValue(MeasureItem* pMeasure);
+
+    LinearetyMeasureItem& operator=(const LinearetyMeasureItem& from);
+};
+
+// ==============================================================================================
+
+class ComparatorMeasureItem : public MeasureItem
+{
+
+public:
+
+    explicit ComparatorMeasureItem();
+    explicit ComparatorMeasureItem(Calibrator* pCalibrator);
+
+private:
+
+    QString m_strID;
+    QString m_extStrID;
+    QString m_name;
+
+    DevicePosition m_position;
+
+public:
+
+    QString strID() const { return m_strID; }
+    void setStrID(const QString& strID) { m_strID = strID; }
+
+    QString extStrID() const { return m_extStrID; }
+    void setExtStrID(const QString& extStrID) { m_extStrID = extStrID; }
+
+    QString name() const { return m_name; }
+    void setName(const QString& name) { m_name = name; }
+
+    DevicePosition& position() { return m_position; }
+
+    void updateHysteresis(MeasureItem* pMeasure);
+};
+
+// ==============================================================================================
+
+const int COMPLEX_COMPARATOR_SIGNAL_COUNT = 2;
+
+// ==============================================================================================
+
+class ComplexComparatorMeasureItem : public MeasureItem
+{
+
+public:
+
+    explicit ComplexComparatorMeasureItem();
+    explicit ComplexComparatorMeasureItem(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator);
+
+private:
+
+    QString m_strID;
+    QString m_extStrID;
+    QString m_name;
+
+    DevicePosition m_position;
+
+public:
+
+    QString strID() const { return m_strID; }
+    void setStrID(const QString& strID) { m_strID = strID; }
+
+    QString extStrID() const { return m_extStrID; }
+    void setExtStrID(const QString& extStrID) { m_extStrID = extStrID; }
+
+    QString name() const { return m_name; }
+    void setName(const QString& name) { m_name = name; }
+
+    DevicePosition& position() { return m_position; }
+
+    void updateHysteresis(MeasureItem* pMeasure);
 };
 
 // ==============================================================================================

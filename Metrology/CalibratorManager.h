@@ -19,8 +19,8 @@ class CalibratorManager : public QObject
     Q_OBJECT
 
 public:
-    explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent);
-    ~CalibratorManager();
+    explicit        CalibratorManager(Calibrator* pCalibrator, QWidget* parent);
+                    ~CalibratorManager();
 
     void            show()                          { if (m_pDialog != nullptr) m_pDialog->show(); }
 
@@ -47,7 +47,7 @@ public:
 private:
 
     Calibrator*     m_pCalibrator = nullptr;
-    int             m_index = -1;                                                           // index calibrator in a common base calibrators CalibratorBase
+    int             m_index = -1;                   // index calibrator in a common base calibrators CalibratorBase
 
     bool            m_ready = false;
 

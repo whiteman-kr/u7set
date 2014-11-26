@@ -12,6 +12,12 @@ Database theDatabase;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+SqlFieldBase::SqlFieldBase()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SqlFieldBase::init(int objectType, int)
 {
     switch(objectType)
@@ -37,7 +43,7 @@ int SqlFieldBase::init(int objectType, int)
         case SQL_TABLE_LINEARETY:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             append("Filter",						QVariant::Bool);
 
@@ -101,7 +107,7 @@ int SqlFieldBase::init(int objectType, int)
         case SQL_TABLE_LINEARETY_20_OUT:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             append(QString("MeasurementCount"),     QVariant::Int);
 
@@ -131,7 +137,7 @@ int SqlFieldBase::init(int objectType, int)
         case SQL_TABLE_LINEARETY_ADD_VAL:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             append(QString("ValueCount"),           QVariant::Int);
 
@@ -166,14 +172,29 @@ int SqlFieldBase::init(int objectType, int)
         case SQL_TABLE_COMPARATOR:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             break;
+
+        case SQL_TABLE_COMPARATOR_HYSTERESIS:
+
+            append("ObjectID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
+
+            break;
+
 
         case SQL_TABLE_COMPLEX_COMPARATOR:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
+
+            break;
+
+        case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
+
+            append("ObjectID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             break;
 
@@ -278,6 +299,84 @@ QString SqlFieldBase::extFieldName(int index)
     return result;
 }
 
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlObjectInfo::SqlObjectInfo()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SqlObjectInfo::init(int objectType)
+{
+    if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
+    {
+        return false;
+    }
+
+    m_objectType = objectType;
+    m_objectID = SqlObjectID[objectType];
+    m_name = SqlTabletName[objectType];
+    m_version = SqlTableVersion[objectType];
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SqlObjectInfo::clear()
+{
+    m_objectType = SQL_TABLE_UNKNONW;
+    m_objectID = SQL_OBJECT_ID_UNKNONW;
+    m_name.clear();
+    m_version = SQL_TABLE_VER_UNKNONW;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlObjectInfo& SqlObjectInfo::operator=(SqlObjectInfo& from)
+{
+    m_objectType = from.m_objectType;
+    m_objectID = from.m_objectID;
+    m_name = from.m_name;
+    m_version = from.m_version;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlHistoryDatabase::SqlHistoryDatabase()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlHistoryDatabase::SqlHistoryDatabase(int objectID, int version, QString event,  QString time)
+{
+    m_objectID = objectID;
+    m_version = version;
+    m_event = event;
+    m_time = time;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlHistoryDatabase& SqlHistoryDatabase::operator=(SqlHistoryDatabase& from)
+{
+    m_objectID = from.m_objectID;
+    m_version = from.m_version;
+    m_event = from.m_event;
+    m_time = from.m_time;
+
+    return *this;
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -288,7 +387,7 @@ SqlTable::SqlTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::count()
+int SqlTable::recordCount()
 {
     if (isOpen() == false)
     {
@@ -325,7 +424,7 @@ int SqlTable::lastKey()
         return SQL_INVALID_KEY;
     }
 
-    QSqlQuery query(QString("SELECT max(%1) FROM %2").arg(m_fieldBase.field(SQL_FIELD_KEY).name() ).arg(m_info.name()));
+    QSqlQuery query(QString("SELECT max(%1) FROM %2").arg(m_fieldBase.field(SQL_FIELD_KEY).name()).arg(m_info.name()));
     if (query.next() == false)
     {
         return SQL_INVALID_KEY;
@@ -416,7 +515,6 @@ bool SqlTable::open()
 void SqlTable::close()
 {
     m_fieldBase.clear();
-    m_info.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -452,7 +550,7 @@ bool SqlTable::create()
                 case SQL_TABLE_LINEARETY_20_PH:
                 case SQL_TABLE_LINEARETY_20_OUT:
                 case SQL_TABLE_LINEARETY_ADD_VAL:
-                    request.append(QString(" REFERENCES %1(RecordID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARETY]));
+                    request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARETY]));
                     break;
             }
         }
@@ -542,6 +640,8 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
         }
     }
 
+    // exec select
+    //
     QSqlQuery query;
     if (query.exec(request) == false)
     {
@@ -595,7 +695,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                 {
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
 
-                    measure->setRecordID(query.value(field++).toInt());
+                    measure->setMeasureID(query.value(field++).toInt());
 
                     measure->setFilter(query.value(field++).toBool());
 
@@ -650,7 +750,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                     measure->setErrorPrecision(ERROR_TYPE_ABSOLUTE, query.value(field++).toInt());
                     measure->setErrorPrecision(ERROR_TYPE_REDUCE, query.value(field++).toInt());
 
-                    measure->setMeasureTime(query.value(field++).toDateTime());
+                    measure->setMeasureTime( QDateTime::fromString( query.value(field++).toString(), MEASURE_TIME_FORMAT));
                 }
                 break;
 
@@ -675,7 +775,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
 
-                    measure->setRecordID(query.value(field++).toInt());
+                    measure->setMeasureID(query.value(field++).toInt());
 
                     measure->setMeasureArrayCount(query.value(field++).toInt());
 
@@ -706,7 +806,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                 {
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
 
-                    measure->setRecordID(query.value(field++).toInt());
+                    measure->setMeasureID(query.value(field++).toInt());
 
                     measure->setAdditionalValueCount(query.value(field++).toInt());
 
@@ -733,7 +833,18 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                 }
                 break;
 
+            case SQL_TABLE_COMPARATOR_HYSTERESIS:
+                {
+                }
+                break;
+
+
             case SQL_TABLE_COMPLEX_COMPARATOR:
+                {
+                }
+                break;
+
+            case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
                 {
                 }
                 break;
@@ -882,7 +993,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 {
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
 
-                    query.bindValue(field++, measure->recordID());
+                    measure->setMeasureID( lastKey() + 1);
+
+                    query.bindValue(field++, measure->measureID());
 
                     query.bindValue(field++, measure->filter());
 
@@ -939,7 +1052,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_REDUCE));
 
-                    query.bindValue(field++, measure->measureTime());
+                    measure->setMeasureTime(QDateTime::currentDateTime());
+
+                    query.bindValue(field++, measure->measureTime().toString(MEASURE_TIME_FORMAT));
 
                 }
                 break;
@@ -965,7 +1080,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
 
-                    query.bindValue(field++, measure->recordID());
+                    query.bindValue(field++, measure->measureID());
 
                     query.bindValue(field++, measure->measureArrayCount());
 
@@ -996,7 +1111,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 {
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
 
-                    query.bindValue(field++, measure->recordID());
+                    query.bindValue(field++, measure->measureID());
 
                     query.bindValue(field++, measure->additionalValueCount());
 
@@ -1006,6 +1121,16 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MSE));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_LOW_BORDER));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_HIGH_BORDER));
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
                 }
                 break;
 
@@ -1023,7 +1148,18 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 }
                 break;
 
+            case SQL_TABLE_COMPARATOR_HYSTERESIS:
+                {
+                }
+                break;
+
+
             case SQL_TABLE_COMPLEX_COMPARATOR:
+                {
+                }
+                break;
+
+            case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
                 {
                 }
                 break;
@@ -1078,8 +1214,8 @@ int SqlTable::remove(int* key, int keyCount)
         return 0;
     }
 
-    int recordCount = count();
-    if (recordCount == 0)
+    int count = recordCount();
+    if (count == 0)
     {
         return 0;
     }
@@ -1104,7 +1240,18 @@ int SqlTable::remove(int* key, int keyCount)
         return 0;
     }
 
-    return recordCount - count();
+    return count - recordCount();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlTable& SqlTable::operator=(SqlTable& from)
+{
+    m_pDatabase = from.m_pDatabase;
+    m_info = from.m_info;
+    m_fieldBase = from.m_fieldBase;
+
+    return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1133,7 +1280,12 @@ Database::~Database()
 {
     for(int type = 0; type < SQL_TABLE_COUNT; type++)
     {
-        m_table[type].close();
+        if (m_table[type].isOpen() == true)
+        {
+            m_table[type].close();
+        }
+
+        m_table[type].info().clear();
     }
 }
 
@@ -1171,6 +1323,12 @@ bool Database::open()
     {
         QMessageBox::information(nullptr, tr("Database"), tr("Cannot open database"));
         return false;
+    }
+
+    QSqlQuery query;
+    if (query.exec("PRAGMA foreign_keys=on") == false)
+    {
+        QMessageBox::information(nullptr, tr("Database"), tr("Error set option [foreign keys]"));
     }
 
     initVersion();
@@ -1241,7 +1399,7 @@ void Database::initVersion()
     {
         if (table.open() == true)
         {
-            info.resize(table.count());
+            info.resize(table.recordCount());
 
             int count = table.read(info.data());
             for (int i = 0; i < count; i++)
@@ -1284,5 +1442,78 @@ void Database::createTables()
     }
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+bool Database::appendMeasure(MeasureItem* pMeasure)
+{
+    if (pMeasure == nullptr)
+    {
+        return false;
+    }
+
+    int measureType = pMeasure->measureType();
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+    {
+        return false;
+    }
+
+    bool result = false;
+
+    for (int type = 0; type < SQL_TABLE_COUNT; type++)
+    {
+        if ( SqlTableByMeasureType[type] != measureType )
+        {
+            continue;
+        }
+
+        SqlTable& table = m_table[type];
+
+        if (table.open() == true)
+        {
+            if (table.write(pMeasure) == 1)
+            {
+                result = true;
+            }
+
+            table.close();
+        }
+    }
+
+    return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool Database::removeMeasure(int measuteType, QVector<int> keyList)
+{
+    bool result = false;
+
+    for (int type = 0; type < SQL_TABLE_COUNT; type++)
+    {
+        if ( SqlTableByMeasureType[type] != measuteType )
+        {
+            continue;
+        }
+
+        SqlTable& table = m_table[type];
+
+        if (table.open() == true)
+        {
+            if (table.remove(keyList.data(), keyList.count()) == keyList.count())
+            {
+                result = true;
+            }
+
+            table.close();
+        }
+
+        break;
+    }
+
+    return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 

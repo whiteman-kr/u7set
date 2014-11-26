@@ -1,10 +1,8 @@
 #ifndef MEASUREBASE_H
 #define MEASUREBASE_H
 
-#include <QObject>
 #include <QMutex>
-#include <QList>
-#include <QMap>
+#include <QVector>
 
 #include "Measure.h"
 
@@ -18,13 +16,13 @@ public:
 
     explicit                MeasureBase(QObject *parent = 0);
 
-    void                    setMeasureType(int type)    { m_measureType = type; }
+    int                     load(int measureType);
 
     int                     count() const;
 
     int                     append(MeasureItem* pMeasure);
     MeasureItem*            at(int index) const;
-    bool                    removeAt(int index);
+    bool                    remove(int index);
 
     void                    clear();
 
@@ -34,11 +32,7 @@ private:
 
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
 
-    QList<MeasureItem*>     m_measureList;
-
-    int                     formatLinearityMeasure(MeasureItem* pMeasure);
-    int                     formatComparatorMeasure(MeasureItem* pMeasure);
-    int                     formatComplexComparatorMeasure(MeasureItem* pMeasure);
+    QVector<MeasureItem*>   m_measureList;
 
 signals:
 
