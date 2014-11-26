@@ -131,7 +131,7 @@ namespace Afbl
 		}
 
 		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
-		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
+		assert(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
 
 		return !xmlReader->hasError();
 
@@ -373,7 +373,7 @@ namespace Afbl
 
 	bool AfbElementParam::LoadData(const Proto::FblElementParam& message)
 	{
-		m_caption = Proto::Read(message.caption());
+		Proto::Read(message.caption(), &m_caption);
 		m_type = static_cast<AfbParamType>(message.type());
 
 		m_value.LoadData(message.value());

@@ -1265,7 +1265,6 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	pMainLayout->addWidget(m_splitter);
 
-
 	setLayout(pMainLayout);
 
 	// --

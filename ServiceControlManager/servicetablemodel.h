@@ -15,8 +15,8 @@ struct ServiceData
 {
     ServiceInformation information;
 
-    UdpClientSocket* clientSocket;
-    QWidget* statusWidget;
+	UdpClientSocket* clientSocket = nullptr;
+	QWidget* statusWidget = nullptr;
 
     ServiceData();
 };
@@ -54,6 +54,8 @@ public slots:
 
     void sendCommand(int row, int col, int command);
     void removeHost(int row);
+
+	void setServiceInformation(quint32 ip, quint16 port, ServiceInformation serviceInfo);
 
 private:
     QVector<HostInfo> m_hostsInfo;

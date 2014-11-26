@@ -86,7 +86,10 @@ SOURCES +=\
     EditEngine/EditEngineSetProperty.cpp \
     SchemePropertiesDialog.cpp \
     EditEngine/EditEngineSetSchemeProperty.cpp \
-    ../lib/ModuleConfiguration.cpp
+    ../lib/ModuleConfiguration.cpp \
+    BuildTabPage.cpp \
+    ../lib/OutputLog.cpp \
+    ProjectBuilder.cpp
 
 
 HEADERS  += \
@@ -139,7 +142,10 @@ HEADERS  += \
     EditEngine/EditEngineSetProperty.h \
     SchemePropertiesDialog.h \
     EditEngine/EditEngineSetSchemeProperty.h \
-    ../include/ModuleConfiguration.h
+    ../include/ModuleConfiguration.h \
+    BuildTabPage.h \
+    ../include/OutputLog.h \
+    ProjectBuilder.h
     ../include/Signal.h
 
 FORMS    += \
@@ -214,6 +220,8 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 #Optimization flags
 #
 win32 {
+	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
+	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
 }
 unix {
 	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0

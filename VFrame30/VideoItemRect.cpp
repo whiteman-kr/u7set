@@ -101,7 +101,7 @@ namespace VFrame30
 		m_lineColor = rectMessage.linecolor();
 		m_fillColor = rectMessage.fillcolor();
 		m_fill = rectMessage.fill();
-		m_text = Proto::Read(rectMessage.text());
+		Proto::Read(rectMessage.text(), &m_text);
 		m_textColor = rectMessage.textcolor();
 		m_drawRect = rectMessage.drawrect();
 		m_font.LoadData(rectMessage.font());

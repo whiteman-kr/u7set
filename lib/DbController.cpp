@@ -1339,6 +1339,8 @@ bool DbController::initOperation()
 		return false;
 	}
 
+	m_lastError.clear();
+
 	return m_progress.init();
 }
 
@@ -1347,6 +1349,12 @@ bool DbController::initOperation()
 bool DbController::waitForComplete(QWidget* parentWidget, const QString& description)
 {
 	bool result = m_progress.run(parentWidget, description);
+
+	if (result == false || m_progress.hasError())
+	{
+		m_lastError = m_progress.errorMessage();
+	}
+
 	m_operationMutex.unlock();						// WAS LOCKED IN initOperation
 	return result;
 }
@@ -1503,6 +1511,11 @@ DbFileInfo DbController::systemFileInfo(const QString& fileName) const
 	}
 
 	return result;
+}
+
+QString DbController::lastError() const
+{
+	return m_lastError;
 }
 
 HasDbController::HasDbController()

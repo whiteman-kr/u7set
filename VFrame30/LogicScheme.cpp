@@ -76,7 +76,8 @@ namespace VFrame30
 
 		for (int i = 0; i < ls.hardware_strids_size(); i++)
 		{
-			QString s = Proto::Read(ls.hardware_strids(i));
+			QString s;
+			Proto::Read(ls.hardware_strids(i), &s);
 			m_hardwareStrIds.push_back(s);
 		}
 

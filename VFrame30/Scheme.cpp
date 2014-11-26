@@ -74,8 +74,8 @@ namespace VFrame30
 		const Proto::VideoFrame& videoframe = message.videoframe();
 
 		m_guid = Proto::Read(videoframe.uuid());
-		m_strID = Proto::Read(videoframe.strid());
-		m_caption = Proto::Read(videoframe.caption());
+		Proto::Read(videoframe.strid(), &m_strID);
+		Proto::Read(videoframe.caption(), &m_caption);
 		m_width = videoframe.width();
 		m_height = videoframe.height();
 		m_unit = static_cast<SchemeUnit>(videoframe.unit());

@@ -665,7 +665,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	//
 	std::vector<DbFileInfo> systemFiles;
 
-	slot_getFileList(&systemFiles, rootFileId(), "%");
+	getFileList_worker(&systemFiles, rootFileId(), "%");
 
 	m_mutex.lock();
 	m_afblFileId = -1;
@@ -1480,6 +1480,11 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 			this->m_progress->setCompleted(true);			// set complete flag on return
 		});
 
+	return getFileList_worker(files, parentId, filter);
+}
+
+void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter)
+{
 	// Check parameters
 	//
 	if (files == nullptr)

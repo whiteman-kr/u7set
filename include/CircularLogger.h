@@ -63,6 +63,7 @@ public:
 	~CircularLogger();
 
 	void initLog(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
+	void initLog(int fileCount, int fileSizeInMB, QString placementPath = "");
 
 signals:
 	void writeRecord(const QString record);

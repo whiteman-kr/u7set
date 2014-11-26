@@ -216,7 +216,7 @@ QPair<int,int> ServiceTableModel::getServiceState(quint32 ip, quint16 port)
             return QPair<int,int>(i, portIndex);
         }
     }
-    return QPair<int, int>(-1, -1);
+    return QPair<int, int>(-1, portIndex);
 }
 
 void ServiceTableModel::checkForDeletingSocket(UdpClientSocket *socket)
@@ -233,6 +233,7 @@ void ServiceTableModel::checkForDeletingSocket(UdpClientSocket *socket)
     }
     if (portIndex == -1)
     {
+		socket->deleteLater();
         return;
     }
     for (int i = 0; i < m_hostsInfo.count(); i++)
@@ -250,7 +251,9 @@ void ServiceTableModel::checkForDeletingSocket(UdpClientSocket *socket)
         {
             socket->deleteLater();
         }
+		return;
     }
+	socket->deleteLater();
 }
 
 void ServiceTableModel::checkAddress(QString connectionAddress)
@@ -280,11 +283,11 @@ void ServiceTableModel::checkAddress(QString connectionAddress)
 void ServiceTableModel::addAddress(QString connectionAddress)
 {
     QHostAddress ha(connectionAddress);
-    quint32 ip = ha.toIPv4Address();
     if (ha.protocol() != QAbstractSocket::IPv4Protocol)
     {
         return;
     }
+	quint32 ip = ha.toIPv4Address();
     for (int i = 0; i < m_hostsInfo.count(); i++)
     {
         if (m_hostsInfo[i].ip == ip)
@@ -315,10 +318,28 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
         quint32 ip = socket->serverAddress().toIPv4Address();
         QPair<int, int> place = getServiceState(ip, socket->port());
 
-		if (place.first == -1 || place.first >= m_hostsInfo.count() || place.second == -1 || place.second >= SERVICE_TYPE_COUNT)
+		if (place.first >= m_hostsInfo.count() || place.second == -1 || place.second >= SERVICE_TYPE_COUNT)
         {
+			checkForDeletingSocket(socket);
             return;
         }
+
+		if (place.first == -1)
+		{
+			const QHostAddress& sa = socket->serverAddress();
+		    if (sa.protocol() != QAbstractSocket::IPv4Protocol)
+		    {
+		        return;
+		    }
+		    HostInfo hi;
+		    hi.ip = sa.toIPv4Address();
+			hi.servicesData[place.second].information = *(ServiceInformation*)udpRequest.data();
+			hi.servicesData[place.second].clientSocket = socket;
+		    beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
+		    m_hostsInfo.append(hi);
+		    endInsertRows();
+			return;
+		}
 
         ServiceInformation& info = m_hostsInfo[place.first].servicesData[place.second].information;
 		ServiceInformation& newInfo = *(ServiceInformation*)udpRequest.data();
@@ -363,6 +384,7 @@ void ServiceTableModel::serviceNotFound()
             return;
         }
     }
+	socket->deleteLater();
 }
 
 void ServiceTableModel::checkServiceStates()
@@ -383,11 +405,10 @@ void ServiceTableModel::checkServiceStates()
                 connect(clientSocket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
                 m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
             }
-            while (clientSocket->isWaitingForAck())
-            {
-                qApp->processEvents();
-            }
-			clientSocket->sendShortRequest(RQID_GET_SERVICE_INFO);
+			if (!clientSocket->isWaitingForAck())
+			{
+				clientSocket->sendShortRequest(RQID_GET_SERVICE_INFO);
+			}
         }
     }
 }
@@ -429,5 +450,41 @@ void ServiceTableModel::removeHost(int row)
         }
     }
     m_hostsInfo.removeAt(row);
-    endRemoveRows();
+	endRemoveRows();
+}
+
+void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, ServiceInformation serviceInfo)
+{
+	QPair<int, int> place = getServiceState(ip, port);
+
+	if (place.first >= m_hostsInfo.count() || place.second == -1 || place.second >= SERVICE_TYPE_COUNT)
+    {
+        return;
+    }
+
+	if (place.first == -1)
+	{
+		HostInfo hi;
+	    hi.ip = ip;
+		hi.servicesData[place.second].information = serviceInfo;
+	    beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
+	    m_hostsInfo.append(hi);
+	    endInsertRows();
+	}
+	else
+	{
+		ServiceInformation& info = m_hostsInfo[place.first].servicesData[place.second].information;
+
+        if (info.mainFunctionState != serviceInfo.mainFunctionState)
+        {
+            info = serviceInfo;
+            emit serviceStateChanged(place.first);
+        }
+        else
+        {
+            info = serviceInfo;
+        }
+        QModelIndex changedIndex = index(place.first, place.second);
+        emit dataChanged(changedIndex, changedIndex);
+	}
 }

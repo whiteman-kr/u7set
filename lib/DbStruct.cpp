@@ -39,8 +39,11 @@ bool DbProgress::init()
 
 bool DbProgress::run(QWidget* parentWidget, const QString& description)
 {
+	const bool isGuiThread = QThread::currentThread() == QCoreApplication::instance()->thread();
+
     if (m_progressEnabled == true)
     {
+		assert(isGuiThread == true);
         ProgressDialog::ShowProgressDialog(parentWidget, description, this);
     }
     else
@@ -54,14 +57,17 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 
 	if (hasError() == true)
 	{
-		QMessageBox mb;
-		mb.setText(errorMessage());
-		mb.exec();
+		if (isGuiThread == true)
+		{
+			QMessageBox mb;
+			mb.setText(errorMessage());
+			mb.exec();
+		}
 
 		return false;
 	}
 
-	if (completeMessage().isEmpty() == false)
+	if (completeMessage().isEmpty() == false && isGuiThread == true)
 	{
 		QMessageBox mb;
 		mb.setText(completeMessage());
