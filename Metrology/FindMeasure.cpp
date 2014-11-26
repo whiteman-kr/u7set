@@ -195,7 +195,7 @@ FindItem FindMeasureTable::at(int index)
 {
     if (index < 0 || index >= count())
     {
-        return FindItem::FindItem();
+        return FindItem();
     }
 
     return m_findItemList.at(index);

@@ -145,7 +145,7 @@ HEADERS  += \
     ../include/ModuleConfiguration.h \
     BuildTabPage.h \
     ../include/OutputLog.h \
-    ProjectBuilder.h
+    ProjectBuilder.h \
     ../include/Signal.h
 
 FORMS    += \

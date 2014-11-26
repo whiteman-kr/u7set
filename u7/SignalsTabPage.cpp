@@ -832,7 +832,7 @@ QVector<int> SignalsModel::getSameChannelSignals(int row)
 	QVector<int> sameChannelSignalRows;
 	if (m_signalSet[row].signalGroupID() != 0)
 	{
-		QVector<int>& sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[row].signalGroupID());
+        QVector<int> sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[row].signalGroupID());
 		foreach (const int id, sameChannelSignalIDs)
 		{
 			sameChannelSignalRows.append(m_signalSet.keyIndex(id));
@@ -1235,7 +1235,7 @@ void SignalsTabPage::saveSelection()
 	// Save signal id list of selected rows and signal id with column number of focused cell
 	//
 	selectedRowsSignalID.clear();
-	QModelIndexList& selectedList = m_signalsView->selectionModel()->selectedRows(0);
+    QModelIndexList selectedList = m_signalsView->selectionModel()->selectedRows(0);
 	foreach (const QModelIndex& index, selectedList)
 	{
 		int row = m_signalsProxyModel->mapToSource(index).row();
@@ -1256,11 +1256,11 @@ void SignalsTabPage::restoreSelection()
 {
 	foreach (int id, selectedRowsSignalID)
 	{
-		QModelIndex& sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(id), 0);
-		QModelIndex& proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
+        QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(id), 0);
+        QModelIndex proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
 		m_signalsView->selectRow(proxyIndex.row());
 	}
-	QModelIndex& sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(focusedCellSignalID), focusedCellColumn);
+    QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(focusedCellSignalID), focusedCellColumn);
 	m_signalsView->setCurrentIndex(m_signalsProxyModel->mapFromSource(sourceIndex));
 	m_signalsView->horizontalScrollBar()->setValue(horizontalScrollPosition);
 	m_signalsView->verticalScrollBar()->setValue(verticalScrollPosition);
@@ -1366,7 +1366,7 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 
 void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
 {
-	QVector<int>& sourceRows = m_sourceModel->getSameChannelSignals(mapToSource(index(row, 0)).row());
+    QVector<int> sourceRows = m_sourceModel->getSameChannelSignals(mapToSource(index(row, 0)).row());
 	foreach (const int sourceRow, sourceRows)
 	{
 		QModelIndex changedIndex = mapFromSource(m_sourceModel->index(sourceRow, 0));

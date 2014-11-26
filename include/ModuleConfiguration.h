@@ -72,7 +72,7 @@ namespace Hardware
 		QString m_value;
 	};
 
-	Q_DECLARE_METATYPE(ModuleConfigurationValue*)
+    //Q_DECLARE_METATYPE(ModuleConfigurationValue*)
 
 
 	// ----------------------------------------------------------------------------
