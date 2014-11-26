@@ -13,11 +13,10 @@
 #include <QComboBox>
 #include <QCloseEvent>
 
+#include "Database.h"
 #include "CalibratorBase.h"
 #include "ExportMeasure.h"
 #include "OptionsDialog.h"
-
-#include <QWindow>
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -66,6 +65,7 @@ bool MainWindow::createInterface()
     createMeasurePages();
     createPanels();
     createStatusBar();
+    createContextMenu();
 
     loadSettings();
 
@@ -106,12 +106,6 @@ void  MainWindow::createActions()
 
     // Edit
     //
-    m_pCutMeasureAction = new QAction(tr("Cu&t"), this);
-    m_pCutMeasureAction->setShortcut(Qt::CTRL + Qt::Key_X);
-    m_pCutMeasureAction->setIcon(QIcon(":/icons/Cut.png"));
-    m_pCutMeasureAction->setToolTip(tr("Cut of the measurements"));
-    connect(m_pCutMeasureAction, &QAction::triggered, this, &MainWindow::cutMeasure);
-
     m_pCopyMeasureAction = new QAction(tr("&Copy"), this);
     m_pCopyMeasureAction->setShortcut(Qt::CTRL + Qt::Key_C);
     m_pCopyMeasureAction->setIcon(QIcon(":/icons/Copy.png"));
@@ -227,7 +221,7 @@ void MainWindow::updateActions()
         case MEASURE_TYPE_LINEARITY:
         case MEASURE_TYPE_COMPARATOR:
 
-            if (theCalibratorBase.getConnectedCalibratorsCount() == 0)
+            if (theCalibratorBase.connectedCalibratorsCount() == 0)
             {
                startMeasure = false;
             }
@@ -236,7 +230,7 @@ void MainWindow::updateActions()
 
         case MEASURE_TYPE_COMPLEX_COMPARATOR:
 
-            if (theCalibratorBase.getConnectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
+            if (theCalibratorBase.connectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
             {
                 startMeasure = false;
             }
@@ -275,7 +269,6 @@ void MainWindow::createMenu()
 
     m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
 
-    m_pEditMenu->addAction(m_pCutMeasureAction);
     m_pEditMenu->addAction(m_pCopyMeasureAction);
     m_pEditMenu->addAction(m_pRemoveMeasureAction);
     m_pEditMenu->addSeparator();
@@ -734,6 +727,33 @@ void MainWindow::createStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::createContextMenu()
+{
+    // create context menu
+    //
+    m_pContextMenu = new QMenu(this);
+
+    m_pContextMenu->addAction(m_pCopyMeasureAction);
+    m_pContextMenu->addSeparator();
+    m_pContextMenu->addAction(m_pRemoveMeasureAction);
+
+    // init context menu
+    //
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+    {
+        MeasureView* pView = m_measureView[type];
+        if (pView == nullptr)
+        {
+            continue;
+        }
+
+        pView->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(pView, &QTableView::customContextMenuRequested, this, &MainWindow::onContextMenu);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::setMeasureType(int type)
 {
     if (type < 0 || type >= MEASURE_TYPE_COUNT)
@@ -852,6 +872,42 @@ void MainWindow::exportMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::copyMeasure()
+{
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    MeasureView* pView = m_measureView[m_measureType];
+    if (pView == nullptr)
+    {
+        return;
+    }
+
+    pView->copyMeasure();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::removeMeasure()
+{
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    MeasureView* pView = m_measureView[m_measureType];
+    if (pView == nullptr)
+    {
+        return;
+    }
+
+    pView->removeMeasure();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::selectAllMeasure()
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
@@ -935,6 +991,18 @@ void MainWindow::setOutputSignalType(int index)
 
     theOptions.toolBar().m_outputSignalType = type;
     theOptions.toolBar().save();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onContextMenu(QPoint)
+{
+    if (m_pContextMenu == nullptr)
+    {
+        return;
+    }
+
+    m_pContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1058,6 +1126,8 @@ void MainWindow::closeEvent(QCloseEvent* e)
         e->ignore();
         return;
     }
+
+    theDatabase.close();
 
     theCalibratorBase.clear();
 

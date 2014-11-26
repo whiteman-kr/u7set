@@ -74,7 +74,7 @@ void ColorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                 }
                 else
                 {
-                    painter->fillRect(option.rect, option.palette.midlight());
+                    painter->fillRect(option.rect, option.palette.window());
                 }
             }
 
@@ -114,14 +114,14 @@ void FindTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 
     if ((option.state & QStyle::State_Selected) != 0)
     {
-        if ((option.state & QStyle::State_HasFocus) != 0)
-        {
+//        if ((option.state & QStyle::State_HasFocus) != 0)
+//        {
             painter->fillRect(option.rect, option.palette.highlight());
-        }
-        else
-        {
-            painter->fillRect(option.rect, option.palette.midlight());
-        }
+//        }
+//        else
+//        {
+//            painter->fillRect(option.rect, option.palette.window());
+//        }
     }
 
     QString offerText = item.text().left(item.beginPos());

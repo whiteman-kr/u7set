@@ -2,6 +2,7 @@
 
 #include <QSettings>
 #include <QTemporaryDir>
+#include "Database.h"
 #include "CalibratorBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -270,7 +271,6 @@ DatabaseOption::DatabaseOption(const DatabaseOption& from, QObject *parent) :
     *this = from;
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
 DatabaseOption::~DatabaseOption()
@@ -311,27 +311,6 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityPoint::LinearityPoint()
-{
-    setPercent(0);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-LinearityPoint::LinearityPoint(double percent)
-{
-    setPercent(percent);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void LinearityPoint::setID(int id)
-{
-    m_pointID = id;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void LinearityPoint::setPercent(double value)
 {
     m_percentValue = value;
@@ -355,14 +334,7 @@ void LinearityPoint::setPercent(double value)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-double LinearityPoint::getPrecent()
-{
-    return m_percentValue;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-double LinearityPoint::getSensorValue(int sensor)
+double LinearityPoint::sensorValue(int sensor)
 {
     if (sensor < 0 || sensor >= POINT_SENSOR_COUNT)
     {
@@ -371,7 +343,6 @@ double LinearityPoint::getSensorValue(int sensor)
 
     return m_sensorValue[sensor];
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -414,13 +385,8 @@ int LinearityPointBase::count()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int LinearityPointBase::append(LinearityPoint* point)
+int LinearityPointBase::append(LinearityPoint point)
 {
-    if (point == nullptr)
-    {
-        return -1;
-    }
-
     int index = -1;
 
     m_mutex.lock();
@@ -435,14 +401,9 @@ int LinearityPointBase::append(LinearityPoint* point)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int LinearityPointBase::insert(int index, LinearityPoint* point)
+int LinearityPointBase::insert(int index, LinearityPoint point)
 {
     if (index < 0 || index > count())
-    {
-        return -1;
-    }
-
-    if (point == nullptr)
     {
         return -1;
     }
@@ -467,39 +428,7 @@ bool LinearityPointBase::removeAt(int index)
 
     m_mutex.lock();
 
-        LinearityPoint* point = m_pointList.at(index);
-        if (point != nullptr)
-        {
-            delete point;
-        }
         m_pointList.removeAt(index);
-
-    m_mutex.unlock();
-
-    return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool LinearityPointBase::removeAt(LinearityPoint* point)
-{
-    if (point == nullptr)
-    {
-        return false;
-    }
-
-    m_mutex.lock();
-
-        int index = m_pointList.indexOf(point);
-        if (index != -1)
-        {
-            LinearityPoint* point = m_pointList.at(index);
-            if (point != nullptr)
-            {
-                delete point;
-            }
-            m_pointList.removeAt(index);
-        }
 
     m_mutex.unlock();
 
@@ -512,39 +441,9 @@ void LinearityPointBase::clear()
 {
     m_mutex.lock();
 
-        int count = m_pointList.count();
-        for(int index = 0; index < count ; index ++)
-        {
-            LinearityPoint* point = m_pointList.at(index);
-            if (point != nullptr)
-            {
-                delete point;
-            }
-        }
-
         m_pointList.clear();
 
     m_mutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-LinearityPoint* LinearityPointBase::at(int index)
-{
-    if (index < 0 || index >= count())
-    {
-        return nullptr;
-    }
-
-    LinearityPoint* point = nullptr;
-
-    m_mutex.lock();
-
-        point = m_pointList[index];
-
-    m_mutex.unlock();
-
-    return point;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -553,7 +452,9 @@ void LinearityPointBase::swap(int i, int j)
 {
     m_mutex.lock();
 
-        m_pointList.swap(i, j);
+        LinearityPoint point    = m_pointList[j];
+        m_pointList[j]          = m_pointList[i];
+        m_pointList[i]          = point;
 
     m_mutex.unlock();
 
@@ -563,86 +464,104 @@ void LinearityPointBase::swap(int i, int j)
 
 QString LinearityPointBase::text()
 {
-    QString retText;
+    QString result;
 
     m_mutex.lock();
 
         if (m_pointList.isEmpty() == true)
         {
-            retText = tr("The measurement points are not set");
+            result = tr("The measurement points are not set");
         }
         else
         {
             int count = m_pointList.count();
             for(int index = 0; index < count; index++)
             {
-                LinearityPoint* point = m_pointList.at(index);
-                if (point != nullptr)
-                {
-                    retText.append(QString("%1%").arg(QString::number(point->getPrecent(), 10, 1)));
-                }
-                else
-                {
-                    retText.append(QString("?%"));
-                }
+                LinearityPoint point = m_pointList.at(index);
+                result.append(QString("%1%").arg(QString::number(point.percent(), 10, 1)));
 
                 if (index != count - 1 )
                 {
-                    retText.append(QString(", "));
+                    result.append(QString(", "));
                 }
             }
         }
 
     m_mutex.unlock();
 
-    return retText;
+    return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void LinearityPointBase::load()
 {
-    // load from table of database
+    if (theDatabase.isOpen() == false)
+    {
+        return;
+    }
+
+    SqlTable* pTable = theDatabase.openTable(SQL_TABLE_LINEARETY_POINT);
+    if (pTable == nullptr)
+    {
+        return;
+    }
 
     m_mutex.lock();
 
-        if (m_pointList.isEmpty() == true)
+        int recordCount = pTable->recordCount();
+        if (recordCount != 0)
         {
-            const int count = 7;
-            double value[count] = {2, 20, 40, 50, 60, 80, 98};
+            m_pointList.resize(recordCount);
+            pTable->read(m_pointList.data());
+        }
+        else
+        {
+            const int valueCount = 7;
+            double value[valueCount] = {2, 20, 40, 50, 60, 80, 98};
 
-            for(int index = 0; index < count; index++)
+            for(int index = 0; index < valueCount; index++)
             {
-                LinearityPoint* point = new LinearityPoint( value[index] );
-                if (point != nullptr)
-                {
-                    m_pointList.append( point );
-                }
+                m_pointList.append( LinearityPoint( value[index] ) );
             }
         }
 
     m_mutex.unlock();
+
+    pTable->close();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void LinearityPointBase::save()
 {
-    m_mutex.lock();
+    if (theDatabase.isOpen() == false)
+    {
+        return;
+    }
 
-        int count = m_pointList.count();
-        for(int index = 0; index < count; index++)
-        {
-            LinearityPoint* point = m_pointList.at(index);
-            if (point != nullptr)
+    SqlTable* pTable = theDatabase.openTable(SQL_TABLE_LINEARETY_POINT);
+    if (pTable == nullptr)
+    {
+        return;
+    }
+
+    if (pTable->clear() == true)
+    {
+        m_mutex.lock();
+
+            int count = m_pointList.count();
+            for(int index = 0; index < count; index++)
             {
-                point->setID(index);
+                m_pointList[index].setPointID(index);
             }
-        }
 
-    m_mutex.unlock();
+            pTable->write(m_pointList.data(), m_pointList.count());
 
-    // save to table of database
+        m_mutex.unlock();
+    }
+
+    pTable->close();
 }
 
 
@@ -654,23 +573,23 @@ LinearityPointBase& LinearityPointBase::operator=(const LinearityPointBase& from
 
     m_mutex.lock();
 
-        int count = from.m_pointList.count();
-        for(int index = 0; index < count; index++)
-        {
-            LinearityPoint* from_point = from.m_pointList.at(index);
-            if (from_point != nullptr)
-            {
-                LinearityPoint* point = new LinearityPoint( from_point->getPrecent() );
-                if (point != nullptr)
-                {
-                    m_pointList.append(point);
-                }
-            }
-        }
+        m_pointList = from.m_pointList;
 
     m_mutex.unlock();
 
     return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+LinearityPoint& LinearityPointBase::operator[](int index)
+{
+    if (index < 0 || index >= count())
+    {
+        assert(0);
+    }
+
+    return m_pointList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -721,8 +640,7 @@ void LinearityOption::recalcPoints(int count)
 
     if (count == 1)
     {
-        LinearityPoint* point = new LinearityPoint( (m_lowLimitRange + m_highLimitRange) / 2 );
-        m_pointBase.append( point );
+        m_pointBase.append(  LinearityPoint( (m_lowLimitRange + m_highLimitRange) / 2 ) );
     }
     else
     {
@@ -730,8 +648,7 @@ void LinearityOption::recalcPoints(int count)
 
         for (int p = 0; p < count ; p++)
         {
-            LinearityPoint* point = new LinearityPoint( m_lowLimitRange + ( p * value ) );
-            m_pointBase.append( point );
+            m_pointBase.append( LinearityPoint( m_lowLimitRange + ( p * value ) ) );
         }
     }
 }
@@ -918,7 +835,7 @@ Options::~Options()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int Options::getChannelCount()
+int Options::channelCount()
 {
     int count = 0;
 
@@ -937,11 +854,17 @@ int Options::getChannelCount()
 void Options::load()
 {
     m_toolBar.load();
+
     m_connectTcpIp.load();
+
     m_measureView.init();
     m_measureView.load();
+
     m_database.load();
+    theDatabase.open();
+
     m_linearity.load();
+
     m_backup.load();
 }
 

@@ -61,6 +61,12 @@ void CircularLogger::initLog(QString logName, int fileCount, int fileSizeInMB, Q
 			Qt::QueuedConnection);
 }
 
+void CircularLogger::initLog(int fileCount, int fileSizeInMB, QString placementPath)
+{
+	QFileInfo fi(qApp->applicationFilePath());
+	initLog(fi.baseName(), fileCount, fileSizeInMB, placementPath);
+}
+
 QString CircularLogger::composeRecord(int type, int category, const QString &function, const QString &message)
 {
 	QString record;

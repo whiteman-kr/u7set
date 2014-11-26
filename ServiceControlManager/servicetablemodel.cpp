@@ -450,5 +450,41 @@ void ServiceTableModel::removeHost(int row)
         }
     }
     m_hostsInfo.removeAt(row);
-    endRemoveRows();
+	endRemoveRows();
+}
+
+void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, ServiceInformation serviceInfo)
+{
+	QPair<int, int> place = getServiceState(ip, port);
+
+	if (place.first >= m_hostsInfo.count() || place.second == -1 || place.second >= SERVICE_TYPE_COUNT)
+    {
+        return;
+    }
+
+	if (place.first == -1)
+	{
+		HostInfo hi;
+	    hi.ip = ip;
+		hi.servicesData[place.second].information = serviceInfo;
+	    beginInsertRows(QModelIndex(), m_hostsInfo.count(), m_hostsInfo.count());
+	    m_hostsInfo.append(hi);
+	    endInsertRows();
+	}
+	else
+	{
+		ServiceInformation& info = m_hostsInfo[place.first].servicesData[place.second].information;
+
+        if (info.mainFunctionState != serviceInfo.mainFunctionState)
+        {
+            info = serviceInfo;
+            emit serviceStateChanged(place.first);
+        }
+        else
+        {
+            info = serviceInfo;
+        }
+        QModelIndex changedIndex = index(place.first, place.second);
+        emit dataChanged(changedIndex, changedIndex);
+	}
 }

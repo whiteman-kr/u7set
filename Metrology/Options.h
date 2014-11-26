@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QVector>
 #include <QColor>
 #include <QFont>
 
@@ -234,8 +235,8 @@ class LinearityPoint
 {
 public:
 
-    explicit            LinearityPoint();
-    explicit            LinearityPoint(double percent);
+    explicit            LinearityPoint() { setPercent(0); }
+    explicit            LinearityPoint(double percent) { setPercent(percent); }
 
 private:
 
@@ -246,14 +247,14 @@ private:
 
 public:
 
-    void                setID(int id);
+    int                 pointID() { return m_pointID; }
+    void                setPointID(int id) { m_pointID = id; }
 
+    double              percent() {return m_percentValue; }
     void                setPercent(double value);
-    double              getPrecent() ;
 
-    double              getSensorValue(int sensor);
+    double              sensorValue(int sensor);
 };
-
 
 // ==============================================================================================
 
@@ -261,30 +262,28 @@ class LinearityPointBase : public QObject
 {
     Q_OBJECT
 
-private:
-
-    QMutex              m_mutex;
-
-    QList<LinearityPoint*>	m_pointList;                                  // list of measurement points
-
 public:
 
     explicit            LinearityPointBase(QObject *parent = 0);
     explicit            LinearityPointBase(const LinearityPointBase& from, QObject *parent = 0);
                         ~LinearityPointBase();
 
+private:
+
+    QMutex              m_mutex;
+
+    QVector<LinearityPoint>	m_pointList;                                  // list of measurement points
+
+public:
+
     int                 count();
     bool                isEmpty() { return count() == 0; }
 
-    int                 append(LinearityPoint* point);
-    int                 insert(int index, LinearityPoint* point);
-
+    int                 append(LinearityPoint point);
+    int                 insert(int index, LinearityPoint point);
     bool                removeAt(int index);
-    bool                removeAt(LinearityPoint* point);
 
     void                clear();
-
-    LinearityPoint*     at(int index);
 
     void                swap(int i, int j);
 
@@ -294,6 +293,7 @@ public:
     void                save();
 
     LinearityPointBase& operator=(const LinearityPointBase& from);
+    LinearityPoint&     operator[](int index);
 };
 
 
@@ -458,52 +458,51 @@ class Options : public QObject
     Q_OBJECT
 
 public:
-    explicit Options(QObject *parent = 0);
-    explicit Options(const Options& from, QObject *parent = 0);
-    ~Options();
 
-    int getChannelCount();
+    explicit            Options(QObject *parent = 0);
+    explicit            Options(const Options& from, QObject *parent = 0);
+                        ~Options();
 
-    bool m_updateColumnView[MEASURE_TYPE_COUNT];             // determined the need to update the view after changing settings
+    int                 channelCount();
+
+    bool                m_updateColumnView[MEASURE_TYPE_COUNT];             // determined the need to update the view after changing settings
 
 private:
 
-    QMutex m_mutex;
+    QMutex              m_mutex;
 
-    ToolBarOption m_toolBar;
-    TcpIpOption m_connectTcpIp;
-    MeasureViewOption m_measureView;
-    DatabaseOption m_database;
-    LinearityOption m_linearity;
-    BackupOption m_backup;
+    ToolBarOption       m_toolBar;
+    TcpIpOption         m_connectTcpIp;
+    MeasureViewOption   m_measureView;
+    DatabaseOption      m_database;
+    LinearityOption     m_linearity;
+    BackupOption        m_backup;
 
 public:
 
-    ToolBarOption& toolBar() { return m_toolBar; }
-    void setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
+    ToolBarOption&      toolBar() { return m_toolBar; }
+    void                setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
 
-    TcpIpOption& connectTcpIp() { return m_connectTcpIp; }
-    void setConnectTcpIp(const TcpIpOption& connectTcpIp) { m_connectTcpIp = connectTcpIp; }
+    TcpIpOption&        connectTcpIp() { return m_connectTcpIp; }
+    void                setConnectTcpIp(const TcpIpOption& connectTcpIp) { m_connectTcpIp = connectTcpIp; }
 
-    MeasureViewOption& measureView() { return m_measureView; }
-    void setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
+    MeasureViewOption&  measureView() { return m_measureView; }
+    void                setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
 
-    DatabaseOption& database() { return m_database; }
-    void setDatabase(const DatabaseOption& database) { m_database = database; }
+    DatabaseOption&     database() { return m_database; }
+    void                setDatabase(const DatabaseOption& database) { m_database = database; }
 
-    LinearityOption& linearity() { return m_linearity; }
-    void setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
+    LinearityOption&    linearity() { return m_linearity; }
+    void                setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
 
-    BackupOption& backup() { return m_backup; }
-    void setBackup(const BackupOption& backup) { m_backup = backup; }
+    BackupOption&       backup() { return m_backup; }
+    void                etBackup(const BackupOption& backup) { m_backup = backup; }
 
+    void                load();
+    void                save();
 
-    void load();
-    void save();
-
-    inline Options& operator=(const Options& from);
+    inline Options&     operator=(const Options& from);
 };
-
 
 // ==============================================================================================
 
