@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(m_serviceModel, &ServiceTableModel::dataChanged, m_serviceTable, &QTableView::resizeColumnsToContents);
 	connect(m_serviceModel, &ServiceTableModel::serviceStateChanged, m_serviceTable, &QTableView::resizeRowToContents);
 	connect(m_serviceModel, &ServiceTableModel::rowsAboutToBeInserted, m_serviceTable, &QTableView::resizeColumnsToContents);
+	connect(m_serviceTable, &QTableView::doubleClicked, m_serviceModel, &ServiceTableModel::openServiceStatusWidget);
 	m_serviceTable->resizeColumnsToContents();
 	setCentralWidget(m_serviceTable);
 
