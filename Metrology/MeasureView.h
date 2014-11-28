@@ -30,7 +30,8 @@ public:
 
     bool                columnIsVisible(int column);
 
-    int                 append(MeasureItem* pMeasure);
+    bool                append(MeasureItem* pMeasure);
+    bool                remove(const QList<int> removeIndexList);
 
     QString             text(int row, int column) const;
 
@@ -63,20 +64,20 @@ public:
     explicit            MeasureView(int type, QWidget *parent = 0);
                         ~MeasureView();
 
+    int                 measureType()   { return m_measureType; }
+    MeasureTable&       table()         { return m_table; }
+
     void                updateColumn();
-
-    MeasureTable&       table() { return m_Table; }
-
-    int                 measureType() { return  m_measureType; }
 
 private:
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
-
-    MeasureTable        m_Table;
+    MeasureTable        m_table;
 
     QMenu*              m_headerContextMenu = nullptr;
     QList<QAction*>     m_actionList;
+
+    void                createContextMenu();
 
 signals:
 
@@ -90,6 +91,9 @@ public slots:
     void                onColumnResized(int index, int, int width);
 
     void                appendMeasure(MeasureItem* pMeasure);
+    void                removeMeasure();
+
+    void                copyMeasure();
 };
 
 // ==============================================================================================

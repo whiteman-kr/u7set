@@ -1,5 +1,9 @@
 #include "Measure.h"
 
+#include "Options.h"
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
 QString DevicePosition::caseString() const
@@ -50,6 +54,25 @@ QString DevicePosition::entryString() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+DevicePosition& DevicePosition::operator=(const DevicePosition& from)
+{
+    m_deviceStrID = from.m_deviceStrID;
+
+    m_caseNo = from.m_caseNo;
+    m_caseType = from.m_caseType;
+
+    m_channel = from.m_channel;
+    m_subblock = from.m_subblock;
+    m_block = from.m_block;
+    m_entry = from.m_entry;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 MeasureItem::MeasureItem(int type)
 {
     m_measureType = type;
@@ -57,58 +80,46 @@ MeasureItem::MeasureItem(int type)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureItem::strID(bool external)
+MeasureItem* MeasureItem::at(int index)
 {
-    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-    {
-        return "";
-    }
-
-    QString result;
+    MeasureItem* pMeasure = nullptr;
 
     switch(m_measureType)
     {
-        case MEASURE_TYPE_LINEARITY:
-            {
-                LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (this);
-                if (measure == nullptr)
-                {
-                    break;
-                }
-
-                if  (external == true)
-                {
-                    result = measure->extStrID();
-                }
-                else
-                {
-                    result = measure->strID();
-                }
-            }
-            break;
-
-        case MEASURE_TYPE_COMPARATOR:
-            break;
-
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-            break;
-
-        default:
-            assert(0);
-            break;
-
+        case MEASURE_TYPE_LINEARITY:            pMeasure = static_cast<LinearetyMeasureItem*> (this) + index;           break;
+        case MEASURE_TYPE_COMPARATOR:           pMeasure = static_cast<ComparatorMeasureItem*> (this) + index;          break;
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasure = static_cast<ComplexComparatorMeasureItem*> (this) + index;   break;
+        default:                                assert(0);                                                              break;
     }
 
-    return result;
+    return pMeasure;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureItem::measureTimeString() const
+MeasureItem& MeasureItem::operator=(MeasureItem& from)
 {
-    return m_measureTime.date().toString("dd-mm-yyyy ") + m_measureTime.time().toString("hh:mm:ss");
+    m_measureType = from.m_measureType;
+
+    m_measureID = from.m_measureID;
+    m_filter = from.m_filter;
+
+    m_measureTime = from.m_measureTime;
+    m_reportType = from.m_reportType;
+
+    switch(m_measureType)
+    {
+        case MEASURE_TYPE_LINEARITY:            *static_cast<LinearetyMeasureItem*> (this) = *static_cast <LinearetyMeasureItem*> (&from);                  break;
+        case MEASURE_TYPE_COMPARATOR:           *static_cast<ComparatorMeasureItem*> (this) = *static_cast <ComparatorMeasureItem*> (&from);                break;
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:   *static_cast<ComplexComparatorMeasureItem*> (this) = *static_cast <ComplexComparatorMeasureItem*> (&from);  break;
+        default:                                assert(0);                                                                                                  break;
+    }
+
+    return *this;
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
 LinearetyMeasureItem::LinearetyMeasureItem() :
@@ -116,9 +127,6 @@ LinearetyMeasureItem::LinearetyMeasureItem() :
 {
     for(int v = 0; v < VALUE_TYPE_COUNT; v++)
     {
-        m_lowLimit[v] = 0;
-        m_highLimit[v] = 0;
-
         m_nominal[v] = 0;
         m_measure[v] = 0;
 
@@ -126,6 +134,9 @@ LinearetyMeasureItem::LinearetyMeasureItem() :
         {
             m_measureArray[v][m] = 0;
         }
+
+        m_lowLimit[v] = 0;
+        m_highLimit[v] = 0;
 
         m_valuePrecision[v] = 0;
     }
@@ -143,6 +154,98 @@ LinearetyMeasureItem::LinearetyMeasureItem() :
     {
         m_additionalValue[a] = 0;
     }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator)
+{
+    if (pCalibrator == nullptr)
+    {
+        return;
+    }
+
+    setMeasureType(MEASURE_TYPE_LINEARITY);
+
+    // features
+    //
+    setStrID("#IDMPS");
+    setExtStrID("IDMPS");
+    setName("This is signal of the block MPS");
+
+    position().setCaseNo(0);
+    position().setCaseType("CASE-1");
+    position().setChannel(0);
+    position().setBlock(0);
+    position().setSubblock(0);
+    position().setEntry(0);
+
+    setValuePrecision(VALUE_TYPE_ELECTRIC, 3);
+    setValuePrecision(VALUE_TYPE_PHYSICAL, 2);
+    setValuePrecision(VALUE_TYPE_OUTPUT, 3);
+
+    // nominal
+    //
+    setNominal(VALUE_TYPE_ELECTRIC, pCalibrator->sourceValue());
+    setNominal(VALUE_TYPE_PHYSICAL, rand());
+    setNominal(VALUE_TYPE_OUTPUT, 0);
+
+    setPercent(0);
+
+    // measure
+    //
+    int measureCount = theOptions.linearity().m_measureCountInPoint > MEASUREMENT_IN_POINT ? MEASUREMENT_IN_POINT : theOptions.linearity().m_measureCountInPoint;
+
+    setMeasureArrayCount(measureCount);
+
+    for(int index = 0; index < measureCount; index++)
+    {
+        setMeasureItemArray(VALUE_TYPE_ELECTRIC, index, 0);
+        setMeasureItemArray(VALUE_TYPE_PHYSICAL, index, 0);
+        setMeasureItemArray(VALUE_TYPE_OUTPUT, index, pCalibrator->measureValue());
+    }
+
+    setMeasure(VALUE_TYPE_ELECTRIC, 0);
+    setMeasure(VALUE_TYPE_PHYSICAL, 0);
+    setMeasure(VALUE_TYPE_OUTPUT, pCalibrator->measureValue());
+
+    // limits
+    //
+    setLowLimit(VALUE_TYPE_ELECTRIC, 50);
+    setHighLimit(VALUE_TYPE_ELECTRIC, 100);
+    setUnit(VALUE_TYPE_ELECTRIC, CalibratorUnit[pCalibrator->sourceUnit()]);
+
+    setLowLimit(VALUE_TYPE_PHYSICAL, 0);
+    setHighLimit(VALUE_TYPE_PHYSICAL, 100);
+    setUnit(VALUE_TYPE_PHYSICAL, "°С");
+
+    setLowLimit(VALUE_TYPE_OUTPUT, 4);
+    setHighLimit(VALUE_TYPE_OUTPUT, 20);
+    setUnit(VALUE_TYPE_OUTPUT, CalibratorUnit[pCalibrator->measureUnit()]);
+
+    setHasOutput(true);
+    setAdjustment(0);
+
+    // calc errors
+    //
+    setErrorInput(ERROR_TYPE_ABSOLUTE, 0);
+    setErrorInput(ERROR_TYPE_REDUCE, 0);
+
+    setErrorOutput(ERROR_TYPE_ABSOLUTE, 0);
+    setErrorOutput(ERROR_TYPE_REDUCE, 0);
+
+    setErrorLimit(ERROR_TYPE_ABSOLUTE, 0);
+    setErrorLimit(ERROR_TYPE_REDUCE, 0);
+
+    setErrorPrecision(ERROR_TYPE_ABSOLUTE, 0);
+    setErrorPrecision(ERROR_TYPE_REDUCE, 2);
+
+    setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MIN, 0);
+    setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX, 0);
+    setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, 0);
+    setAdditionalValue(ADDITIONAL_VALUE_MSE, 0);
+    setAdditionalValue(ADDITIONAL_VALUE_LOW_BORDER, 0);
+    setAdditionalValue(ADDITIONAL_VALUE_HIGH_BORDER, 0);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -207,3 +310,195 @@ QString LinearetyMeasureItem::measureItemString(int type, int index) const
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+void LinearetyMeasureItem::updateMeasureArray(int valueType, MeasureItem* pMeasure)
+{
+    if (pMeasure == nullptr)
+    {
+        return;
+    }
+
+    int measureType = pMeasure->measureType();
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    LinearetyMeasureItem* pLinearetyMeasureItem = static_cast <LinearetyMeasureItem*> (pMeasure);
+
+    m_measureArrayCount = pLinearetyMeasureItem->measureArrayCount();
+
+    for(int m = 0; m < MEASUREMENT_IN_POINT; m++)
+    {
+        m_measureArray[valueType][m] = pLinearetyMeasureItem->measureItemArray(valueType, m);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearetyMeasureItem::updateAdditionalValue(MeasureItem* pMeasure)
+{
+    if (pMeasure == nullptr)
+    {
+        return;
+    }
+
+    int measureType = pMeasure->measureType();
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    LinearetyMeasureItem* pLinearetyMeasureItem = static_cast <LinearetyMeasureItem*> (pMeasure);
+
+    for(int a = 0; a < ADDITIONAL_VALUE_COUNT; a++)
+    {
+        m_additionalValue[a] = pLinearetyMeasureItem->additionalValue(a);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+LinearetyMeasureItem& LinearetyMeasureItem::operator=(const LinearetyMeasureItem& from)
+{
+    m_strID = from.m_strID;
+    m_extStrID = from.m_extStrID;
+    m_name = from.m_name;
+
+    m_position = from.m_position;
+
+    for(int v = 0; v < VALUE_TYPE_COUNT; v++)
+    {
+        m_nominal[v] = from.m_nominal[v];
+        m_measure[v] = from.m_measure[v];
+
+        for(int m = 0; m < MEASUREMENT_IN_POINT; m++)
+        {
+            m_measureArray[v][m] = from.m_measureArray[v][m];
+        }
+
+        m_lowLimit[v] = from.m_lowLimit[v];;
+        m_highLimit[v] = from.m_highLimit[v];;
+        m_unit[v] = from.m_unit[v];;
+
+        m_valuePrecision[v] = from.m_valuePrecision[v];
+    }
+
+    m_percent = from.m_percent;
+    m_measureArrayCount = from.m_measureArrayCount;
+
+    m_hasOutput = from.m_hasOutput;
+    m_adjustment = from.m_adjustment;
+
+    for(int e = 0; e < ERROR_TYPE_COUNT; e++)
+    {
+        m_errorInput[e] = from.m_errorInput[e];;
+        m_errorOutput[e] = from.m_errorOutput[e];;
+        m_errorLimit[e] = from.m_errorLimit[e];;
+
+        m_errorPrecision[e] = from.m_errorPrecision[e];;
+    }
+
+    m_additionalValueCount = from.m_additionalValueCount;
+
+    for(int a = 0; a < ADDITIONAL_VALUE_COUNT; a++)
+    {
+        m_additionalValue[a] = from.m_additionalValue[a];;
+    }
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorMeasureItem::ComparatorMeasureItem() :
+    MeasureItem(MEASURE_TYPE_COMPARATOR)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorMeasureItem::ComparatorMeasureItem(Calibrator* pCalibrator)
+{
+    if (pCalibrator == nullptr)
+    {
+        return;
+    }
+
+    setMeasureType(MEASURE_TYPE_COMPARATOR);
+
+    // features
+    //
+    setStrID("#IDMPS");
+    setExtStrID("IDMPS");
+    setName("This is signal of the block MPS");
+
+    position().setCaseNo(0);
+    position().setCaseType("CASE-1");
+    position().setChannel(0);
+    position().setBlock(0);
+    position().setSubblock(0);
+    position().setEntry(0);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorMeasureItem::updateHysteresis(MeasureItem* pMeasure)
+{
+    if (pMeasure == nullptr)
+    {
+        return;
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+
+ComplexComparatorMeasureItem::ComplexComparatorMeasureItem() :
+    MeasureItem(MEASURE_TYPE_COMPLEX_COMPARATOR)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComplexComparatorMeasureItem::ComplexComparatorMeasureItem(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator)
+{
+    if (pMainCalibrator == nullptr || pSubCalibrator == nullptr)
+    {
+        return;
+    }
+
+    setMeasureType(MEASURE_TYPE_COMPLEX_COMPARATOR);
+
+    // features
+    //
+    setStrID("#IDMPS");
+    setExtStrID("IDMPS");
+    setName("This is signal of the block MPS");
+
+    position().setCaseNo(0);
+    position().setCaseType("CASE-1");
+    position().setChannel(0);
+    position().setBlock(0);
+    position().setSubblock(0);
+    position().setEntry(0);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComplexComparatorMeasureItem::updateHysteresis(MeasureItem* pMeasure)
+{
+    if (pMeasure == nullptr)
+    {
+        return;
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+

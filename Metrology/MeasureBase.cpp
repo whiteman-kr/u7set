@@ -1,10 +1,236 @@
 #include "MeasureBase.h"
 
+#include "Database.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
 MeasureBase::MeasureBase(QObject *parent) :
     QObject(parent)
 {
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// each measurement is located in several tables,
+// firstly read data from the main table, and additional sub tables in memory
+// later update the data in the main table from sub tables
+//
+int MeasureBase::load(int measureType)
+{
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+    {
+        return -1;
+    }
+
+    m_measureType = measureType;
+
+    struct tableData
+    {
+        int             objectType;
+        MeasureItem*    pMeasureItem;
+        int             count;
+    };
+
+    QVector<tableData> tableList;
+
+    // read all table of current MEASURE_TYPE in memory
+    //
+    for(int objectType = 0; objectType < SQL_TABLE_COUNT; objectType++)
+    {
+        if (SqlTableByMeasureType[objectType] == measureType)
+        {
+            SqlTable* table = theDatabase.openTable(objectType);
+            if (table != nullptr)
+            {
+                tableData data;
+
+                data.objectType = objectType;
+                data.pMeasureItem = nullptr;
+                data.count = table->recordCount();
+
+                switch(measureType)
+                {
+                    case MEASURE_TYPE_LINEARITY:            data.pMeasureItem = new LinearetyMeasureItem[data.count];           break;
+                    case MEASURE_TYPE_COMPARATOR:           data.pMeasureItem = new ComparatorMeasureItem[data.count];          break;
+                    case MEASURE_TYPE_COMPLEX_COMPARATOR:   data.pMeasureItem = new ComplexComparatorMeasureItem[data.count];   break;
+                    default:                                assert(0);                                                          break;
+                }
+
+                if (data.pMeasureItem != nullptr)
+                {
+                    if (table->read(data.pMeasureItem) == data.count)
+                    {
+                        tableList.append( data );
+                    }
+                }
+
+                table->close();
+            }
+        }
+    }
+
+    // if tables of current MEASURE_TYPE is not exist, then exit
+    //
+    int tableCount = tableList.count();
+    if (tableCount == 0)
+    {
+        return 0;
+    }
+
+    // get main table, afterwards from sub tables update data in main table
+    // addpend data-measurement in MeasureBase
+    //
+
+    tableData mainTable = tableList[SQL_TABLE_MEASURE_MAIN];
+
+    for(int mainIndex = 0; mainIndex < mainTable.count; mainIndex++)
+    {
+        MeasureItem* pMainMeasure = mainTable.pMeasureItem->at(mainIndex);
+        if (pMainMeasure == nullptr)
+        {
+            continue;
+        }
+
+        for(int sub_table = 1; sub_table < tableCount; sub_table++)
+        {
+            tableData subTable = tableList[sub_table];
+
+            for(int subIndex = 0; subIndex < subTable.count; subIndex++)
+            {
+                MeasureItem* pSubMeasure = subTable.pMeasureItem->at(subIndex);
+                if (pSubMeasure == nullptr)
+                {
+                    continue;
+                }
+
+                // update main measurement from sub measurement
+                //
+                if (pMainMeasure->measureID() == pSubMeasure->measureID())
+                {
+                    switch(subTable.objectType)
+                    {
+                        case SQL_TABLE_LINEARETY_20_EL:                 static_cast<LinearetyMeasureItem*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_ELECTRIC, pSubMeasure); break;
+                        case SQL_TABLE_LINEARETY_20_PH:                 static_cast<LinearetyMeasureItem*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_PHYSICAL, pSubMeasure); break;
+                        case SQL_TABLE_LINEARETY_20_OUT:                static_cast<LinearetyMeasureItem*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_OUTPUT, pSubMeasure);   break;
+                        case SQL_TABLE_LINEARETY_ADD_VAL:               static_cast<LinearetyMeasureItem*>(pMainMeasure)->updateAdditionalValue(pSubMeasure);                   break;
+                        case SQL_TABLE_COMPARATOR_HYSTERESIS:           static_cast<ComparatorMeasureItem*>(pMainMeasure)->updateHysteresis(pSubMeasure);                       break;
+                        case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:   static_cast<ComplexComparatorMeasureItem*>(pMainMeasure)->updateHysteresis(pSubMeasure);                break;
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+
+    // append measuremets to MeasureBase from updated main table
+    //
+    m_mutex.lock();
+
+        for(int index = 0; index < mainTable.count; index++)
+        {
+            MeasureItem* pMeasureTable = mainTable.pMeasureItem->at(index);
+            if (pMeasureTable == nullptr)
+            {
+                continue;
+            }
+
+            MeasureItem* pMeasureAppend = nullptr;
+
+            switch(measureType)
+            {
+                case MEASURE_TYPE_LINEARITY:            pMeasureAppend  = new LinearetyMeasureItem;         break;
+                case MEASURE_TYPE_COMPARATOR:           pMeasureAppend  = new ComparatorMeasureItem;        break;
+                case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasureAppend  = new ComplexComparatorMeasureItem; break;
+                default:                                assert(0);                                          break;
+            }
+
+            if (pMeasureAppend == nullptr)
+            {
+                continue;
+            }
+
+            *pMeasureAppend = *pMeasureTable;
+
+            m_measureList.append(pMeasureAppend);
+        }
+
+    m_mutex.unlock();
+
+    // if measurement is nonexistentin in main table, but exist in sub table,
+    // need remove this measurement in sub table
+    // remove nonexistent indexes-measurements-ID in sub tables
+    //
+    for(int sub_table = 1; sub_table < tableCount; sub_table++)
+    {
+        tableData subTable = tableList[sub_table];
+
+        QVector<int> removeKeyList;
+
+        for(int subIndex = 0; subIndex < subTable.count; subIndex++)
+        {
+            MeasureItem* pSubMeasure = subTable.pMeasureItem->at(subIndex);
+            if (pSubMeasure == nullptr)
+            {
+                continue;
+            }
+
+            bool foundMeasure = false;
+
+            for(int mainIndex = 0; mainIndex < mainTable.count; mainIndex++)
+            {
+                MeasureItem* pMainMeasure = mainTable.pMeasureItem->at(mainIndex);
+                if (pMainMeasure == nullptr)
+                {
+                    continue;
+                }
+
+                if (pMainMeasure->measureID() == pSubMeasure->measureID())
+                {
+                    foundMeasure = true;
+                    break;
+                }
+            }
+
+            // if measurement is not found in main table then need remove it in sub table
+            //
+            if (foundMeasure == false)
+            {
+                removeKeyList.append(pSubMeasure->measureID());
+            }
+        }
+
+        // remove unnecessary measurement from sub table
+        //
+        SqlTable* table = theDatabase.openTable(subTable.objectType);
+        if (table != nullptr)
+        {
+            table->remove(removeKeyList.data(), removeKeyList.count());
+            table->close();
+        }
+    }
+
+    // remove table data from memory
+    //
+    for(int t = 0; t < tableCount; t++)
+    {
+        tableData table = tableList[t];
+
+        if (table.pMeasureItem == nullptr)
+        {
+            continue;
+        }
+
+        switch(measureType)
+        {
+            case MEASURE_TYPE_LINEARITY:            delete [] static_cast<LinearetyMeasureItem*> (table.pMeasureItem);          break;
+            case MEASURE_TYPE_COMPARATOR:           delete [] static_cast<ComparatorMeasureItem*> (table.pMeasureItem);         break;
+            case MEASURE_TYPE_COMPLEX_COMPARATOR:   delete [] static_cast<ComplexComparatorMeasureItem*> (table.pMeasureItem);  break;
+            default:                                assert(0);                                                                  break;
+        }
+    }
+
+
+    return count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -37,28 +263,13 @@ int MeasureBase::append(MeasureItem* pMeasure)
         return -1;
     }
 
-    int index = -1;
-
-    switch (type)
-    {
-        case MEASURE_TYPE_LINEARITY:            index = formatLinearityMeasure(pMeasure);           break;
-        case MEASURE_TYPE_COMPARATOR:           index = formatComparatorMeasure(pMeasure);          break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   index = formatComplexComparatorMeasure(pMeasure);   break;
-        default:                                assert(0);                                          break;
-    }
-
-    if (index == -1)
-    {
-        return -1;
-    }
-
     m_mutex.lock();
 
         m_measureList.append(pMeasure);
 
     m_mutex.unlock();
 
-    return pMeasure->baseIndex();
+    return count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -83,7 +294,7 @@ MeasureItem* MeasureBase::at(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureBase::removeAt(int index)
+bool MeasureBase::remove(int index)
 {
     if (index < 0 || index >= count())
     {
@@ -115,12 +326,10 @@ void MeasureBase::clear()
         for(int m = 0; m < count; m++)
         {
             MeasureItem* pMeasure = m_measureList.at(m) ;
-            if (pMeasure == nullptr)
+            if (pMeasure != nullptr)
             {
-                continue;
+                delete pMeasure;
             }
-
-            delete pMeasure;
         }
 
         m_measureList.clear();
@@ -130,157 +339,4 @@ void MeasureBase::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int MeasureBase::formatLinearityMeasure(MeasureItem* pMeasure)
-{
-    if (pMeasure == nullptr)
-    {
-        return -1;
-    }
 
-    if (pMeasure->measureType() != MEASURE_TYPE_LINEARITY)
-    {
-        return -1;
-    }
-
-    LinearetyMeasureItem* m = static_cast<LinearetyMeasureItem*> (pMeasure);
-    if (m == nullptr)
-    {
-        return -1;
-    }
-
-    m->setBaseIndex(count());
-
-    // features
-    //
-    m->setStrID("#IDMPS");
-    m->setExtStrID("IDMPS");
-    m->setName("This is signal of the block MPS");
-
-    m->position().setCaseNo(0);
-    m->position().setCaseType("CASE-1");
-    m->position().setChannel(0);
-    m->position().setBlock(0);
-    m->position().setSubblock(0);
-    m->position().setEntry(0);
-
-
-    m->setValuePrecision(VALUE_TYPE_ELECTRIC, 3);
-    m->setValuePrecision(VALUE_TYPE_PHYSICAL, 2);
-    m->setValuePrecision(VALUE_TYPE_OUTPUT, 3);
-
-    // nominal
-    //
-    m->setNominal(VALUE_TYPE_ELECTRIC, 0);
-    m->setNominal(VALUE_TYPE_PHYSICAL, 0);
-    m->setNominal(VALUE_TYPE_OUTPUT, 0);
-
-    m->setPercent(0);
-
-    // measure
-    //
-    m->setMeasureArrayCount(0);
-
-    for(int index = 0; index < MEASUREMENT_IN_POINT; index++)
-    {
-        m->setMeasureItemArray(VALUE_TYPE_ELECTRIC, index, 0);
-        m->setMeasureItemArray(VALUE_TYPE_PHYSICAL, index, 0);
-        m->setMeasureItemArray(VALUE_TYPE_OUTPUT, index, 0);
-    }
-
-    m->setMeasure(VALUE_TYPE_ELECTRIC, 0);
-    m->setMeasure(VALUE_TYPE_PHYSICAL, 0);
-    m->setMeasure(VALUE_TYPE_OUTPUT, 0);
-
-    // limits
-    //
-    m->setLowLimit(VALUE_TYPE_ELECTRIC, 50);
-    m->setHighLimit(VALUE_TYPE_ELECTRIC, 100);
-    m->setUnit(VALUE_TYPE_ELECTRIC, "Ohm");
-
-    m->setLowLimit(VALUE_TYPE_PHYSICAL, 0);
-    m->setHighLimit(VALUE_TYPE_PHYSICAL, 100);
-    m->setUnit(VALUE_TYPE_PHYSICAL, "°С");
-
-    m->setLowLimit(VALUE_TYPE_OUTPUT, 4);
-    m->setHighLimit(VALUE_TYPE_OUTPUT, 20);
-    m->setUnit(VALUE_TYPE_OUTPUT, "mA");
-
-    m->setHasOutput(true);
-    m->setAdjustment(0);
-
-    // calc errors
-    //
-    m->setErrorInput(ERROR_TYPE_ABSOLUTE, 0);
-    m->setErrorInput(ERROR_TYPE_REDUCE, 0);
-
-    m->setErrorOutput(ERROR_TYPE_ABSOLUTE, 0);
-    m->setErrorOutput(ERROR_TYPE_REDUCE, 0);
-
-    m->setErrorLimit(ERROR_TYPE_ABSOLUTE, 0);
-    m->setErrorLimit(ERROR_TYPE_REDUCE, 0);
-
-    m->setErrorPrecision(ERROR_TYPE_ABSOLUTE, 0);
-    m->setErrorPrecision(ERROR_TYPE_REDUCE, 2);
-
-    m->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MIN, 0);
-    m->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX, 0);
-    m->setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, 0);
-    m->setAdditionalValue(ADDITIONAL_VALUE_MSE, 0);
-    m->setAdditionalValue(ADDITIONAL_VALUE_LOW_BORDER, 0);
-    m->setAdditionalValue(ADDITIONAL_VALUE_HIGH_BORDER, 0);
-
-
-    return m->baseIndex();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int MeasureBase::formatComparatorMeasure(MeasureItem* pMeasure)
-{
-    if (pMeasure == nullptr)
-    {
-        return -1;
-    }
-
-    if (pMeasure->measureType() != MEASURE_TYPE_COMPARATOR)
-    {
-        return -1;
-    }
-
-    MeasureItem* m = static_cast<LinearetyMeasureItem*> (pMeasure);
-    if (m == nullptr)
-    {
-        return -1;
-    }
-
-    m->setBaseIndex(count());
-
-    return m->baseIndex();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int MeasureBase::formatComplexComparatorMeasure(MeasureItem* pMeasure)
-{
-    if (pMeasure == nullptr)
-    {
-        return -1;
-    }
-
-    if (pMeasure->measureType() != MEASURE_TYPE_COMPLEX_COMPARATOR)
-    {
-        return -1;
-    }
-
-    MeasureItem* m = static_cast<LinearetyMeasureItem*> (pMeasure);
-    if (m == nullptr)
-    {
-        return -1;
-    }
-
-    m->setBaseIndex(count());
-
-    return m->baseIndex();
-}
-
-// -------------------------------------------------------------------------------------------------------------------

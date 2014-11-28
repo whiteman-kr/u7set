@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QtSql>
 #include <QMutex>
-//#include <QSqlField>
+#include "Measure.h"
 
 // ==============================================================================================
 
@@ -18,6 +18,8 @@
 class SqlFieldBase : public QSqlRecord
 {
 public:
+
+    explicit            SqlFieldBase();
 
     int                 init(int objectType, int version);
 
@@ -42,8 +44,10 @@ const char* const		SqlTabletName[] =
                         QT_TRANSLATE_NOOP("Database.h", "LinearetyPoint"),
 
                         QT_TRANSLATE_NOOP("Database.h", "ComparatorMeasure"),
+                        QT_TRANSLATE_NOOP("Database.h", "ComparatorHysteresis"),
 
                         QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorMeasure"),
+                        QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorHysteresis"),
                         QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorPoint"),
                         QT_TRANSLATE_NOOP("Database.h", "ComplexComparatorSignal"),
 
@@ -54,21 +58,23 @@ const char* const		SqlTabletName[] =
 
 const int               SQL_TABLE_COUNT                    = sizeof(SqlTabletName)/sizeof(char*);
 
-const int               SQL_TABLE_UNKNONW               	= -1,
-                        SQL_TABLE_DATABASE_INFO             = 0,
-                        SQL_TABLE_HISTORY                   = 1,
-                        SQL_TABLE_LINEARETY                 = 2,
-                        SQL_TABLE_LINEARETY_20_EL           = 3,
-                        SQL_TABLE_LINEARETY_20_PH           = 4,
-                        SQL_TABLE_LINEARETY_20_OUT          = 5,
-                        SQL_TABLE_LINEARETY_ADD_VAL         = 6,
-                        SQL_TABLE_LINEARETY_POINT           = 7,
-                        SQL_TABLE_COMPARATOR                = 8,
-                        SQL_TABLE_COMPLEX_COMPARATOR        = 9,
-                        SQL_TABLE_COMPLEX_COMPARATOR_POINT  = 10,
-                        SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL = 11,
-                        SQL_TABLE_OUTPUT_SIGNAL             = 12,
-                        SQL_TABLE_REPORT_HEADER             = 13;
+const int               SQL_TABLE_UNKNONW                       = -1,
+                        SQL_TABLE_DATABASE_INFO                 = 0,
+                        SQL_TABLE_HISTORY                       = 1,
+                        SQL_TABLE_LINEARETY                     = 2,
+                        SQL_TABLE_LINEARETY_20_EL               = 3,
+                        SQL_TABLE_LINEARETY_20_PH               = 4,
+                        SQL_TABLE_LINEARETY_20_OUT              = 5,
+                        SQL_TABLE_LINEARETY_ADD_VAL             = 6,
+                        SQL_TABLE_LINEARETY_POINT               = 7,
+                        SQL_TABLE_COMPARATOR                    = 8,
+                        SQL_TABLE_COMPARATOR_HYSTERESIS         = 9,
+                        SQL_TABLE_COMPLEX_COMPARATOR            = 10,
+                        SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS = 11,
+                        SQL_TABLE_COMPLEX_COMPARATOR_POINT      = 12,
+                        SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL     = 13,
+                        SQL_TABLE_OUTPUT_SIGNAL                 = 14,
+                        SQL_TABLE_REPORT_HEADER                 = 15;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -89,17 +95,24 @@ const int				SqlTableVersion[SQL_TABLE_COUNT] =
 {
                         DATABASE_VERSION,   //    SQL_TABLE_DATABASE_INFO
                         0,                  //    SQL_TABLE_HISTORY
+
                         0,                  //    SQL_TABLE_LINEARETY
                         0,                  //    SQL_TABLE_LINEARETY_20_EL
                         0,                  //    SQL_TABLE_LINEARETY_20_PH
                         0,                  //    SQL_TABLE_LINEARETY_20_OUT
-                        0,                  //    SQL_TABLE_LINEARETY_ADD_ERR
+                        0,                  //    SQL_TABLE_LINEARETY_ADD_VAL
                         0,                  //    SQL_TABLE_LINEARETY_POINT
+
                         0,                  //    SQL_TABLE_COMPARATOR
+                        0,                  //    SQL_TABLE_COMPARATOR_HYSTERESIS
+
                         0,                  //    SQL_TABLE_COMPLEX_COMPARATOR
+                        0,                  //    SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
                         0,                  //    SQL_TABLE_COMPLEX_COMPARATOR_POINT
                         0,                  //    SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
+
                         0,                  //    SQL_TABLE_OUTPUT_SIGNAL
+
                         0,                  //    SQL_TABLE_REPORT_HEADER
 };
 
@@ -116,18 +129,58 @@ const int               SqlObjectID[SQL_TABLE_COUNT] =
 {
                         0,          //    SQL_TABLE_DATABASE_INFO
                         1,          //    SQL_TABLE_HISTORY
+
                         100,        //    SQL_TABLE_LINEARETY
                         101,        //    SQL_TABLE_LINEARETY_20_EL
                         102,        //    SQL_TABLE_LINEARETY_20_PH
                         103,        //    SQL_TABLE_LINEARETY_20_OUT
-                        104,        //    SQL_TABLE_LINEARETY_ADD_ERR
+                        104,        //    SQL_TABLE_LINEARETY_ADD_VAL
                         110,        //    SQL_TABLE_LINEARETY_POINT
+
                         200,        //    SQL_TABLE_COMPARATOR
+                        201,        //    SQL_TABLE_COMPARATOR_HYSTERESIS
+
                         300,        //    SQL_TABLE_COMPLEX_COMPARATOR
+                        301,        //    SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS
                         310,        //    SQL_TABLE_COMPLEX_COMPARATOR_POINT
                         320,        //    SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL
+
                         420,        //    SQL_TABLE_OUTPUT_SIGNAL
+
                         500,        //    SQL_TABLE_REPORT_HEADER
+};
+
+// ==============================================================================================
+
+const int               SQL_TABLE_MEASURE_MAIN  = 0,
+                        SQL_TABLE_MEASURE_SUB   = 1,
+                        SQL_TABLE_CONFIG        = 2;
+
+// ----------------------------------------------------------------------------------------------
+
+const int               SqlTableByMeasureType[SQL_TABLE_COUNT] =
+{
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_DATABASE_INFO                       // SQL_TABLE_CONFIG
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_HISTORY                             // SQL_TABLE_CONFIG
+
+                        MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY                           // SQL_TABLE_MEASURE_MAIN
+                        MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_20_EL                     // SQL_TABLE_MEASURE_SUB
+                        MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_20_PH                     // SQL_TABLE_MEASURE_SUB
+                        MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_20_OUT                    // SQL_TABLE_MEASURE_SUB
+                        MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_ADD_VAL                   // SQL_TABLE_MEASURE_SUB
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_LINEARETY_POINT                     // SQL_TABLE_CONFIG
+
+                        MEASURE_TYPE_COMPARATOR,            //    SQL_TABLE_COMPARATOR                          // SQL_TABLE_MEASURE_MAIN
+                        MEASURE_TYPE_COMPARATOR,            //    SQL_TABLE_COMPARATOR_HYSTERESIS               // SQL_TABLE_MEASURE_SUB
+
+                        MEASURE_TYPE_COMPLEX_COMPARATOR,    //    SQL_TABLE_COMPLEX_COMPARATOR                  // SQL_TABLE_MEASURE_MAIN
+                        MEASURE_TYPE_COMPLEX_COMPARATOR,    //    SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS       // SQL_TABLE_MEASURE_SUB
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR_POINT            // SQL_TABLE_CONFIG
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL           // SQL_TABLE_CONFIG
+
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_OUTPUT_SIGNAL                       // SQL_TABLE_CONFIG
+
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_REPORT_HEADER                       // SQL_TABLE_CONFIG
 };
 
 // ==============================================================================================
@@ -147,60 +200,35 @@ const int				SQL_INVALID_RECORD  = -1;
 //
 class SqlObjectInfo
 {
+public:
+
+    explicit            SqlObjectInfo();
+
 private:
 
-    int m_objectType = SQL_TABLE_UNKNONW;           // тип таблицы
-    int m_objectID = SQL_OBJECT_ID_UNKNONW;			// уникалильный идентификатор таблицы в БД
-    QString m_name;                                     // наименование таблицы
-    int  m_version = SQL_TABLE_VER_UNKNONW;          // версия таблицы, считывается при инициализации БД
+    int                 m_objectType = SQL_TABLE_UNKNONW;           // тип таблицы
+    int                 m_objectID = SQL_OBJECT_ID_UNKNONW;			// уникалильный идентификатор таблицы в БД
+    QString             m_name;                                     // наименование таблицы
+    int                 m_version = SQL_TABLE_VER_UNKNONW;          // версия таблицы, считывается при инициализации БД
 
 public:
 
-    bool init(int objectType)
-    {
-        if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
-        {
-            return false;
-        }
+    bool                init(int objectType);
+    void                clear();
 
-        m_objectType = objectType;
-        m_objectID = SqlObjectID[objectType];
-        m_name = SqlTabletName[objectType];
-        m_version = SqlTableVersion[objectType];
+    int                 objectType() { return m_objectType; }
+    void                setObjectType(int type) { m_objectType = type; }
 
-        return true;
-    }
+    int                 objectID() { return m_objectID; }
+    void                setObjectID(int objectID) { m_objectID = objectID; }
 
-    void clear()
-    {
-        m_objectType = SQL_TABLE_UNKNONW;
-        m_objectID = SQL_OBJECT_ID_UNKNONW;
-        m_name.clear();
-        m_version = SQL_TABLE_VER_UNKNONW;
-    }
+    QString             name() { return m_name; }
+    void                setName(QString name) { m_name = name; }
 
+    int                 version() { return m_version; }
+    void                setVersion(int verison) { m_version = verison; }
 
-    int objectType() { return m_objectType; }
-    void setObjectType(int type) { m_objectType = type; }
-
-    int objectID() { return m_objectID; }
-    void setObjectID(int objectID) { m_objectID = objectID; }
-
-    QString name() { return m_name; }
-    void setName(QString name) { m_name = name; }
-
-    int version() { return m_version; }
-    void setVersion(int verison) { m_version = verison; }
-
-    SqlObjectInfo& operator=(SqlObjectInfo& from)
-    {
-        m_objectType = from.m_objectType;
-        m_objectID = from.m_objectID;
-        m_name = from.m_name;
-        m_version = from.m_version;
-
-        return *this;
-    }
+    SqlObjectInfo&      operator=(SqlObjectInfo& from);
 };
 
 
@@ -208,46 +236,34 @@ public:
 
 class SqlHistoryDatabase
 {
+
 public:
-    explicit SqlHistoryDatabase(int objectID, int version, QString event,  QString time)
-    {
-        m_objectID = objectID;
-        m_version = version;
-        m_event = event;
-        m_time = time;
-    }
+
+    explicit            SqlHistoryDatabase();
+    explicit            SqlHistoryDatabase(int objectID, int version, QString event,  QString time);
 
 private:
 
-    int m_objectID = SQL_OBJECT_ID_UNKNONW;
-    int m_version = SQL_TABLE_VER_UNKNONW;
-    QString m_event;
-    QString m_time = SQL_TABLE_UNKNONW;
-
+    int                 m_objectID = SQL_OBJECT_ID_UNKNONW;
+    int                 m_version = SQL_TABLE_VER_UNKNONW;
+    QString             m_event;
+    QString             m_time;
 
 public:
 
-    int objectID() { return m_objectID; }
-    void setObjectID(int objectID) { m_objectID = objectID; }
+    int                 objectID() { return m_objectID; }
+    void                setObjectID(int objectID) { m_objectID = objectID; }
 
-    int version() { return m_version; }
-    void setVersion(int verison) { m_version = verison; }
+    int                 version() { return m_version; }
+    void                setVersion(int verison) { m_version = verison; }
 
-    QString event() { return m_event; }
-    void setEvent(QString event) { m_event = event; }
+    QString             event() { return m_event; }
+    void                setEvent(QString event) { m_event = event; }
 
-    QString time() { return m_time; }
-    void setTime(QString time) { m_time = time; }
+    QString             time() { return m_time; }
+    void                setTime(QString time) { m_time = time; }
 
-    SqlHistoryDatabase& operator=(SqlHistoryDatabase& from)
-    {
-        m_objectID = from.m_objectID;
-        m_version = from.m_version;
-        m_event = from.m_event;
-        m_time = from.m_time;
-
-        return *this;
-    }
+    SqlHistoryDatabase& operator=(SqlHistoryDatabase& from);
 };
 
 // ==============================================================================================
@@ -256,53 +272,45 @@ class SqlTable
 {
 public:
 
-    explicit SqlTable();
+    explicit            SqlTable();
 
 private:
 
-    QSqlDatabase*   m_pDatabase;
-    SqlObjectInfo   m_info;
-    SqlFieldBase    m_fieldBase;
+    QSqlDatabase*       m_pDatabase;
+    SqlObjectInfo       m_info;
+    SqlFieldBase        m_fieldBase;
 
 public:
 
-    SqlObjectInfo&  info() { return m_info; }
-    void            setInfo(SqlObjectInfo info) { m_info = info; }
+    SqlObjectInfo&      info() { return m_info; }
+    void                setInfo(SqlObjectInfo info) { m_info = info; }
 
-    bool			isEmpty() { return count() == 0; }
-    int				count();
-    int				lastKey();
+    bool                isEmpty() { return recordCount() == 0; }
+    int                 recordCount();
+    int                 lastKey();
 
-    bool            init(int objectType, QSqlDatabase* pDatabase);
+    bool                init(int objectType, QSqlDatabase* pDatabase);
 
-    bool            isExist();
-    bool            isOpen() { return m_fieldBase.count() != 0; }
-    bool			open();
-    void			close();
+    bool                isExist();
+    bool                isOpen() { return m_fieldBase.count() != 0; }
+    bool                open();
+    void                close();
 
-    bool            create();
-    bool			drop();
-    bool			clear();
+    bool                create();
+    bool                drop();
+    bool                clear();
 
-    int             read(void* pRecord, int key) { return read(pRecord, &key, 1); }
-    int             read(void* pRecord, int* key = nullptr, int keyCount = 0);                        // read record form table, if key == nullptr in the array pRecord will be record all records of table
+    int                 read(void* pRecord, int key) { return read(pRecord, &key, 1); }
+    int                 read(void* pRecord, int* key = nullptr, int keyCount = 0);                        // read record form table, if key == nullptr in the array pRecord will be record all records of table
 
-    int             write(void* pRecord) { return write(pRecord, 1); }
-    int             write(void* pRecord, int count, int key) { return write(pRecord, count, &key); }
-    int             write(void* pRecord, int count, int* key = nullptr);                              // insert or update records in a table, pRecord - array of record, count - amount records
+    int                 write(void* pRecord) { return write(pRecord, 1); }
+    int                 write(void* pRecord, int count, int key) { return write(pRecord, count, &key); }
+    int                 write(void* pRecord, int recordCount, int* key = nullptr);                              // insert or update records in a table, pRecord - array of record, count - amount records
 
-    int             remove(int key) { return remove(&key, 1); }                                       // remove records by key
-    int             remove(int* key, int keyCount);
+    int                 remove(int key) { return remove(&key, 1); }                                       // remove records by key
+    int                 remove(int* key, int keyCount);
 
-    SqlTable& operator=(SqlTable& from)
-    {
-        m_pDatabase = from.m_pDatabase;
-        m_info = from.m_info;
-        m_fieldBase = from.m_fieldBase;
-
-        return *this;
-    }
-
+    SqlTable&           operator=(SqlTable& from);
 };
 
 // ==============================================================================================
@@ -313,35 +321,32 @@ class Database : public QObject
 
 public:
 
-    explicit Database(QObject* parent = 0);
-    ~Database();
+    explicit            Database(QObject* parent = 0);
+                        ~Database();
 
-    static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
+    bool                isOpen() { return m_database.isOpen(); }
+    bool                open();
+    void                close();
 
-    bool isOpen() { return m_database.isOpen(); }
-    bool open();
-    void close();
+    SqlTable*           openTable(int objectType);
 
-    SqlTable* openTable(int objectType);
+    bool                appendMeasure(MeasureItem* pMeasure);
+    bool                removeMeasure(int measuteType, QVector<int> keyList);
 
 private:
 
-    QSqlDatabase m_database;
+    QSqlDatabase        m_database;
+    SqlTable            m_table[SQL_TABLE_COUNT];
 
-    SqlTable m_table[SQL_TABLE_COUNT];
+    static SqlHistoryDatabase m_history[DATABASE_VERSION + 1];
 
-    void initVersion();
-    void createTables();
-
-signals:
-
-public slots:
-
+    void                initVersion();
+    void                createTables();
 };
 
 // ==============================================================================================
 
-extern Database theDatabase;
+extern Database         theDatabase;
 
 // ==============================================================================================
 

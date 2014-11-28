@@ -145,7 +145,7 @@ HEADERS  += \
     ../include/ModuleConfiguration.h \
     BuildTabPage.h \
     ../include/OutputLog.h \
-    ProjectBuilder.h
+    ProjectBuilder.h \
     ../include/Signal.h
 
 FORMS    += \
@@ -263,6 +263,17 @@ DEPENDPATH += ../VFrame30
 #
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
+# OpenMP
+#
+#win32 {
+#	QMAKE_CXXFLAGS += /openmp
+	#CONFIG(debug, debug|release): LIBS += -lvcompd
+	#CONFIG(release, debug|release): LIBS += -lvcomp;
+#}
+#unix {
+	#CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	#CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+#}
 
 # Visual Leak Detector
 #

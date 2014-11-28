@@ -100,10 +100,8 @@ class EquipmentView : public QTreeView
 {
 	Q_OBJECT
 
-private:
-	EquipmentView();
-
 public:
+	EquipmentView() = delete;
 	EquipmentView(DbController* dbcontroller);
 	virtual ~EquipmentView();
 
@@ -131,6 +129,7 @@ public slots:
 	void checkOutSelectedDevices();
 	void undoChangesSelectedDevices();
 	void refreshSelectedDevices();
+
 
 	// Properties
 	//

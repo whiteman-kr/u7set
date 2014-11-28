@@ -234,11 +234,12 @@ void OptionsPointsDialog::updateList()
         verticalHeaderLabels.append(QString("%1").arg(index + 1));
         m_pointList->setRowHeight(index, 18);
 
-        LinearityPoint* point = m_linearity.m_pointBase.at(index);
+        //LinearityPoint* point = m_linearity.m_pointBase.at(index);
+        LinearityPoint point = m_linearity.m_pointBase[index];
 
         for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
         {
-            cell = new QTableWidgetItem( QString::number(point->sensorValue(sensor), 10, 3));
+            cell = new QTableWidgetItem( QString::number(point.sensorValue(sensor), 10, 3));
             cell->setTextAlignment(Qt::AlignHCenter);
             m_pointList->setItem(index, sensor, cell);
 
@@ -320,13 +321,7 @@ void OptionsPointsDialog::onAddPoint()
         index = m_linearity.m_pointBase.count() - 1;
     }
 
-    LinearityPoint* point = new LinearityPoint(0);
-    if (point == nullptr)
-    {
-        return;
-    }
-
-    m_linearity.m_pointBase.insert(index + 1, point );
+    m_linearity.m_pointBase.insert(index + 1, LinearityPoint() );
 
     updateList();
 
@@ -362,14 +357,8 @@ void OptionsPointsDialog::cellChanged(int row, int column)
         return;
     }
 
-    LinearityPoint* point = m_linearity.m_pointBase.at(index);
-    if (point == nullptr)
-    {
-        return;
-    }
-
     QString value = m_pointList->item(row, column)->text();
-    point->setPercent( value.toDouble() );
+    m_linearity.m_pointBase[index].setPercent( value.toDouble() );
 
     updateList();
 
