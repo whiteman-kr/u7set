@@ -1278,15 +1278,7 @@ Database::Database(QObject* parent) :
 
 Database::~Database()
 {
-    for(int type = 0; type < SQL_TABLE_COUNT; type++)
-    {
-        if (m_table[type].isOpen() == true)
-        {
-            m_table[type].close();
-        }
-
-        m_table[type].info().clear();
-    }
+    close();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1296,7 +1288,7 @@ bool Database::open()
     QString path = theOptions.database().m_path;
     if (path.isEmpty() == true)
     {
-        QMessageBox::information(nullptr, tr("Database"), tr("Invalid path!"));
+        QMessageBox::critical(nullptr, tr("Database"), tr("Invalid path!"));
         return false;
     }
 
@@ -1321,14 +1313,14 @@ bool Database::open()
 
     if (m_database.open() == false)
     {
-        QMessageBox::information(nullptr, tr("Database"), tr("Cannot open database"));
+        QMessageBox::critical(nullptr, tr("Database"), tr("Cannot open database"));
         return false;
     }
 
     QSqlQuery query;
     if (query.exec("PRAGMA foreign_keys=on") == false)
     {
-        QMessageBox::information(nullptr, tr("Database"), tr("Error set option [foreign keys]"));
+        QMessageBox::critical(nullptr, tr("Database"), tr("Error set option [foreign keys]"));
     }
 
     initVersion();
@@ -1341,6 +1333,16 @@ bool Database::open()
 
 void Database::close()
 {
+    for(int type = 0; type < SQL_TABLE_COUNT; type++)
+    {
+        if (m_table[type].isOpen() == true)
+        {
+            m_table[type].close();
+        }
+
+        m_table[type].info().clear();
+    }
+
     if (m_database.isOpen() == true)
     {
         m_database.close();
@@ -1435,7 +1437,7 @@ void Database::createTables()
             {
                 if (table.create() == false)
                 {
-                    QMessageBox::information(nullptr, tr("Database"), tr("Cannot create table: %1").arg(table.info().name()));
+                    QMessageBox::critical(nullptr, tr("Database"), tr("Cannot create table: %1").arg(table.info().name()));
                 }
             }
         }

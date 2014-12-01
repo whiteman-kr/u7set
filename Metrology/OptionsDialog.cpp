@@ -535,26 +535,29 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
         case OPTION_PAGE_BACKUP:
             {
-                QtProperty *backupGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Backup"));
+                QtProperty *eventGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Events"));
 
                     item = manager->addProperty(QVariant::Bool, BackupParam[BUO_PARAM_ON_START]);
                     item->setValue( m_options.backup().m_onStart );
                     appendProperty(item, page, BUO_PARAM_ON_START);
-                    backupGroup->addSubProperty(item);
+                    eventGroup->addSubProperty(item);
 
                     item = manager->addProperty(QVariant::Bool, BackupParam[BUO_PARAM_ON_EXIT]);
                     item->setValue( m_options.backup().m_onExit );
                     appendProperty(item, page, BUO_PARAM_ON_EXIT);
-                    backupGroup->addSubProperty(item);
+                    eventGroup->addSubProperty(item);
 
-                    item = manager->addProperty(VariantManager::folerPathTypeId(), BackupParam[BUO_PARAM_FOLDER]);
+                QtProperty *pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Path"));
+
+                    item = manager->addProperty(VariantManager::folerPathTypeId(), BackupParam[BUO_PARAM_PATH]);
                     item->setValue( m_options.backup().m_path );
-                    appendProperty(item, page, BUO_PARAM_FOLDER);
-                    backupGroup->addSubProperty(item);
+                    appendProperty(item, page, BUO_PARAM_PATH);
+                    pathGroup->addSubProperty(item);
 
                 editor->setFactoryForManager(manager, factory);
 
-                editor->addProperty(backupGroup);
+                editor->addProperty(eventGroup);
+                editor->addProperty(pathGroup);
             }
             break;
 
@@ -921,7 +924,7 @@ void OptionsDialog::applyProperty()
                 {
                     case BUO_PARAM_ON_START:            m_options.backup().m_onStart = value.toBool();      break;
                     case BUO_PARAM_ON_EXIT:             m_options.backup().m_onExit = value.toBool();       break;
-                    case BUO_PARAM_FOLDER:              m_options.backup().m_path = value.toString();  break;
+                    case BUO_PARAM_PATH:                m_options.backup().m_path = value.toString();       break;
                     default:                            assert(0);                                          break;
                 }
             }

@@ -268,7 +268,7 @@ void  CalibratorManager::onCalibratorError(QString text)
         return;
     }
 
-    QMessageBox::information(m_pDialog, m_pDialog->windowTitle(), text);
+    QMessageBox::critical(m_pDialog, m_pDialog->windowTitle(), text);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

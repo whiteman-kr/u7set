@@ -30,7 +30,11 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
+    theOptions.backup().createBackupOnStart();
+
     int result = a.exec();
+
+    theOptions.backup().createBackupOnExit();
 
     return result;
 }
