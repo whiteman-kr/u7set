@@ -65,6 +65,8 @@ namespace Hardware
 		Proto::Write(pMutableDeviceObject->mutable_strid(), m_strId);
 		Proto::Write(pMutableDeviceObject->mutable_caption(), m_caption);
 
+		pMutableDeviceObject->set_place(m_place);
+
 		if (m_childRestriction.isEmpty() == false)
 		{
 			Proto::Write(pMutableDeviceObject->mutable_childrestriction(), m_childRestriction);
@@ -94,6 +96,7 @@ namespace Hardware
 		m_uuid = Proto::Read(deviceobject.uuid());
 		Proto::Read(deviceobject.strid(), &m_strId);
 		Proto::Read(deviceobject.caption(), &m_caption);
+		m_place = deviceobject.place();
 
 		if (deviceobject.has_childrestriction() == true)
 		{
@@ -311,6 +314,17 @@ namespace Hardware
 		return boolResult;
 	}
 
+	void DeviceObject::sortChildrenByPlace()
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				return o1->m_place < o2->m_place;
+			});
+
+		return;
+	}
+
 	const QString& DeviceObject::strId() const
 	{
 		return m_strId;
@@ -354,6 +368,16 @@ namespace Hardware
 	void DeviceObject::setChildRestriction(const QString& value)
 	{
 		m_childRestriction = value;
+	}
+
+	int DeviceObject::place() const
+	{
+		return m_place;
+	}
+
+	void DeviceObject::setPlace(int value)
+	{
+		m_place = value;
 	}
 
 	bool DeviceObject::preset() const
@@ -577,7 +601,6 @@ namespace Hardware
 		//
 		Proto::DeviceChassis* chassisMessage = message->mutable_deviceobject()->mutable_chassis();
 
-		chassisMessage->set_place(m_place);
 		chassisMessage->set_type(m_type);
 
 		return true;
@@ -607,7 +630,6 @@ namespace Hardware
 
 		const Proto::DeviceChassis& chassisMessage = message.deviceobject().chassis();
 
-		m_place = chassisMessage.place();
 		m_type =  chassisMessage.type();
 
 		return true;
@@ -616,16 +638,6 @@ namespace Hardware
 	DeviceType DeviceChassis::deviceType() const
 	{
 		return m_deviceType;
-	}
-
-	int DeviceChassis::place() const
-	{
-		return m_place;
-	}
-
-	void DeviceChassis::setPlace(int value)
-	{
-		m_place = value;
 	}
 
 	int DeviceChassis::type() const
@@ -667,7 +679,6 @@ namespace Hardware
 		//
 		Proto::DeviceModule* moduleMessage = message->mutable_deviceobject()->mutable_module();
 
-		moduleMessage->set_place(m_place);
 		moduleMessage->set_type(m_type);
 
 		if (m_moduleConfiguration.hasConfiguration() == true)
@@ -675,16 +686,6 @@ namespace Hardware
 			m_moduleConfiguration.save(moduleMessage->mutable_module_configuration());
 		}
 
-/*		if (m_configurationInput.isEmpty() == false)
-		{
-			moduleMessage->set_configuration_input(m_configurationInput.toStdString());
-		}
-
-		if (m_configurationOutput.isEmpty() == false)
-		{
-			moduleMessage->set_configuration_output(m_configurationOutput.toStdString());
-		}
-*/
 		return true;
 	}
 
@@ -712,7 +713,6 @@ namespace Hardware
 
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
-		m_place = moduleMessage.place();
 		m_type =  moduleMessage.type();
 
 		if (moduleMessage.has_module_configuration() == true)
@@ -758,16 +758,6 @@ namespace Hardware
 		// Event was not recognized
 		//
 		return false;
-	}
-
-	int DeviceModule::place() const
-	{
-		return m_place;
-	}
-
-	void DeviceModule::setPlace(int value)
-	{
-		m_place = value;
 	}
 
 	int DeviceModule::type() const

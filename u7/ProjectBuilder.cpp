@@ -121,6 +121,7 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	parent->deleteAllChildren();
 
+//#pragma omp for
 	for (auto& fi : files)
 	{
 		std::shared_ptr<DbFile> file;

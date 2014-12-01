@@ -352,8 +352,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 		parentObject->addChild(sp);
 	}
 
-	// TODO:: sort files in parent DeviceObject !!!!!!!!!!!
-	//
+	parentObject->sortChildrenByPlace();
 
 	return;
 }
@@ -1165,6 +1164,7 @@ void EquipmentView::refreshSelectedDevices()
 	equipmentModel()->refreshDeviceObject(selected);
 	return;
 }
+
 
 EquipmentModel* EquipmentView::equipmentModel()
 {
