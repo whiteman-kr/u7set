@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	m_clientSocketThread.run(m_clientSocket);
 
-	m_ServiceController = new BaseServiceController(STP_CONFIG);
+	m_ServiceController = new BaseServiceController(STP_CONFIG, new MainFunctionWorker());
 }
 
 MainWindow::~MainWindow()

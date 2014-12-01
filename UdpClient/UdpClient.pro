@@ -29,6 +29,8 @@ HEADERS  += mainwindow.h \
     ../include/BaseService.h \
     ../include/CircularLogger.h
 
+include(../qtservice/src/qtservice.pri)
+
 FORMS    += mainwindow.ui
 
 unix:QMAKE_CXXFLAGS += -std=c++11

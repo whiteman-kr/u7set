@@ -7,7 +7,7 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	m_ServiceController = new BaseServiceController(STP_BASE);
+	m_ServiceController = new BaseServiceController(STP_BASE, new MainFunctionWorker());
 }
 
 ServerMainWindow::~ServerMainWindow()

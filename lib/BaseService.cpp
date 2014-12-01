@@ -529,10 +529,8 @@ void BaseServiceWorker::onFreeReceivedFile(quint32 fileID)
 // MainFunctionWorker class implementation
 //
 
-MainFunctionWorker::MainFunctionWorker(BaseServiceController *baseServiceController) :
-	m_baseServiceController(baseServiceController)
+MainFunctionWorker::MainFunctionWorker()
 {
-	assert(m_baseServiceController != nullptr);
 }
 
 
@@ -555,7 +553,9 @@ void MainFunctionWorker::onThreadFinishedSlot()
 
 	emit mainFunctionStopped();
 
-	deleteLater();
+	//deleteLater();
+
+	moveToThread(nullptr);
 }
 
 
@@ -563,7 +563,7 @@ void MainFunctionWorker::onThreadFinishedSlot()
 //
 
 
-BaseServiceController::BaseServiceController(int serviceType) :
+BaseServiceController::BaseServiceController(int serviceType, MainFunctionWorker* mainFunctionWorker) :
     m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
     m_mainFunctionStartTime(0),
 	m_mainFunctionState(MainFunctionState::stopped),
@@ -573,7 +573,8 @@ BaseServiceController::BaseServiceController(int serviceType) :
 	m_crc(0xF0F1F2F3),
 	m_serviceType(serviceType),
 	m_mainFunctionNeedRestart(false),
-	m_mainFunctionStopped(false)
+	m_mainFunctionStopped(false),
+	m_mainFunctionWorker(mainFunctionWorker)
 {
 	assert(m_serviceType >= 0 && m_serviceType < SERVICE_TYPE_COUNT);
 
@@ -603,6 +604,8 @@ BaseServiceController::BaseServiceController(int serviceType) :
 
 	// start MainFunctionWorker
 	//
+	m_mainFunctionWorker->setController(this);
+
 	startMainFunction();
 }
 
@@ -615,6 +618,8 @@ BaseServiceController::~BaseServiceController()
 
 	m_baseWorkerThread.quit();
     m_baseWorkerThread.wait();
+
+	delete m_mainFunctionWorker;
 
 	APP_MSG(log, QString(serviceTypeStr[m_serviceType]) + " was finished");
 }
@@ -688,15 +693,15 @@ void BaseServiceController::startMainFunction()
 
 	m_mainFunctionState = MainFunctionState::starts;
 
-	MainFunctionWorker* mainFunctionWorker = new MainFunctionWorker(this);
+	//MainFunctionWorker* mainFunctionWorker = new MainFunctionWorker(this);
 
-	connect(mainFunctionWorker, &MainFunctionWorker::mainFunctionWork, this, &BaseServiceController::onMainFunctionWork);
-	connect(mainFunctionWorker, &MainFunctionWorker::mainFunctionStopped, this, &BaseServiceController::onMainFunctionStopped);
+	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionWork, this, &BaseServiceController::onMainFunctionWork);
+	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionStopped, this, &BaseServiceController::onMainFunctionStopped);
 
-	connect(&m_mainFunctionThread, &QThread::started, mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
-	connect(&m_mainFunctionThread, &QThread::finished, mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
+	connect(&m_mainFunctionThread, &QThread::started, m_mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
+	connect(&m_mainFunctionThread, &QThread::finished, m_mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
 
-	mainFunctionWorker->moveToThread(&m_mainFunctionThread);
+	m_mainFunctionWorker->moveToThread(&m_mainFunctionThread);
 
 	m_mainFunctionStartTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -797,3 +802,44 @@ void BaseServiceController::onFileReceived(ReceivedFile* receivedFile)
 	emit freeReceivedFile(receivedFile->ID());
 }
 
+
+// BaseService class implementation
+//
+
+BaseService::BaseService(int argc, char ** argv, const QString & name, int serviceType, MainFunctionWorker* mainFunctionWorker):
+	QtService(argc, argv, name),
+	m_serviceType(serviceType),
+	m_mainFunctionWorker(mainFunctionWorker)
+{
+	if ( !(m_serviceType >= 0 && m_serviceType < SERVICE_TYPE_COUNT))
+	{
+		assert(m_serviceType >= 0 && m_serviceType);
+
+		m_serviceType = STP_BASE;
+	}
+}
+
+
+BaseService::~BaseService()
+{
+}
+
+
+void BaseService::start()
+{
+	m_baseServiceController = new BaseServiceController(m_serviceType, m_mainFunctionWorker);
+}
+
+
+void BaseService::stop()
+{
+	delete m_baseServiceController;
+}
+
+
+void BaseService::sendFile(QHostAddress address, quint16 port, QString fileName)
+{
+	assert(m_baseServiceController != nullptr);
+
+	emit m_baseServiceController->sendFile(address, port, fileName);
+}

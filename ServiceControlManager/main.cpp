@@ -3,6 +3,8 @@
 #include <QTranslator>
 #include <QSettings>
 
+#include "../include/SocketIO.h"
+
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
     #include <vld.h>		// Enable Visula Leak Detector

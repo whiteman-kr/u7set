@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtGlobal>
+#include <QDebug>
 
 
 const int MAX_DATAGRAM_SIZE = 4096;
@@ -130,6 +131,7 @@ const int SEND_FILE_DATA_SIZE = MAX_DATAGRAM_SIZE - sizeof(RequestHeader) - 5 * 
 
 const int SEND_FILE_MAX_SIZE = 1024 * 1024 * 10;	// max file - 10 MBytes
 
+
 struct SendFileNext
 {
 	quint32 fileID;
@@ -142,27 +144,80 @@ struct SendFileNext
 };
 
 
+
+// Serialization framework
+//
+#define BEGIN_SERIALIZATION() char* _ptr = buffer;
+
+#define SERIALIZE_VAR(variable_type, variable) { if (write) { *((variable_type*)_ptr) = variable; } else { variable = *((variable_type*)_ptr);} _ptr += sizeof(variable_type); }
+
+#define SERIALIZE_ARRAY(variable_type, variable, len) { if (write) { memcpy(_ptr, variable, sizeof(variable_type)*len); } else { memcpy(variable, _ptr, sizeof(variable_type)*len);} _ptr += sizeof(variable_type)*len; }
+
+#define END_SERIALIZATION() if (write) { *((char*)buffer - sizeof(quint16)) = _ptr - (char*)buffer; setSize(_ptr - (char*)buffer); } else { Q_ASSERT(_ptr - (char*)buffer == size()); } return _ptr;
+
+
+struct Serializable
+{
+	Serializable(quint16 version) :
+		m_structureVersion(version),
+		m_structureSize(0) {}
+
+	char* serializeTo(char* buffer)
+	{
+		return serialize(serializeVersion(buffer, true), true);
+	}
+
+	char* serializeFrom(char* buffer)
+	{
+		return serialize(serializeVersion(buffer, false), false);
+	}
+
+	quint16 version() { return m_structureVersion; }
+	quint16 size() { return m_structureSize; }
+
+private:
+	quint16 m_structureVersion;
+	quint16 m_structureSize;
+
+	char* serializeVersion(char* buffer, bool write);
+
+protected:
+	virtual char* serialize(char* buffer, bool write) = 0;
+	void setSize(quint16 size) { m_structureSize = size; }
+};
+
+
 // RQID_GET_DATA_SOURCES_INFO request data format
 //
-struct DataSourceInfo
+struct DataSourceInfo : public Serializable
 {
 	quint32 ID;
 	quint16 name[32];
 	quint32 ip;
 	quint32 port;
 	quint32 partCount;
+
+	DataSourceInfo() : Serializable(1) {}
+
+protected:
+	virtual char *serialize(char *buffer, bool write) override;
 };
 
 
 // RQID_GET_DATA_SOURCES_STATE request data format
 //
-struct DataSourceState
+struct DataSourceState : public Serializable
 {
 	quint32 ID;
 	quint32 state;
 	quint64 uptime;
 	quint64 receivedSize;
 	double receiveSpeed;
+
+	DataSourceState() : Serializable(1) {}
+
+protected:
+	virtual char *serialize(char *buffer, bool write) override;
 };
 
 

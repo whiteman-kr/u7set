@@ -100,3 +100,49 @@ quint32 CRC32(const char* buffer, int len)
 {
 	return CRC32(CRC32_INITIAL_VALUE, buffer, len, true);
 }
+
+
+
+char *Serializable::serializeVersion(char *buffer, bool write)
+{
+	if (write)
+	{
+		*((quint16*)buffer) = m_structureVersion;
+		*((quint16*)buffer + 1) = 0;	// real structure size will be written in END_SERIALIZATION
+	}
+	else
+	{
+		m_structureVersion = *((quint16*)buffer);
+		m_structureSize = *((quint16*)buffer + 1);
+	}
+
+	return buffer + sizeof(quint16) * 2;
+}
+
+
+char* DataSourceInfo::serialize(char* buffer, bool write)
+{
+	BEGIN_SERIALIZATION();
+
+	SERIALIZE_VAR(quint32, ID);
+	SERIALIZE_ARRAY(quint16, name, 32);
+	SERIALIZE_VAR(quint32, ip);
+	SERIALIZE_VAR(quint32, port);
+	SERIALIZE_VAR(quint32, partCount);
+
+	END_SERIALIZATION();
+}
+
+
+char* DataSourceState::serialize(char* buffer, bool write)
+{
+	BEGIN_SERIALIZATION();
+
+	SERIALIZE_VAR(quint32, ID);
+	SERIALIZE_VAR(quint32, state);
+	SERIALIZE_VAR(quint64, uptime);
+	SERIALIZE_VAR(quint64, receivedSize);
+	SERIALIZE_VAR(double, receiveSpeed);
+
+	END_SERIALIZATION();
+}
