@@ -62,6 +62,9 @@ public:
 	QString projectUserPassword() const;
 	void setProjectUserPassword(const QString& value);
 
+	bool onlyCheckedIn() const;
+	void setOnlyCheckedIn(bool value);
+
 	// Data
 	//
 private:
@@ -77,7 +80,9 @@ private:
 	QString m_projectUserName;
 	QString m_projectUserPassword;
 
-	OutputLog* m_log;		// Probably it's better to make it as shared_ptr
+	bool m_onlyCheckedIn = true;		// Don't get workcopy of checked out files, use unly checked in copy
+
+	OutputLog* m_log;					// Probably it's better to make it as shared_ptr
 };
 
 class ProjectBuilder : public QObject
@@ -91,7 +96,15 @@ public:
 	// Public methods
 	//
 public:
-	bool start(QString projectName, QString serverIp, int serverPort, QString serverUserName, QString serverPassword, QString projectUserName, QString projectUserPassword);
+	bool start(QString projectName,
+			   QString serverIp,
+			   int serverPort,
+			   QString serverUserName,
+			   QString serverPassword,
+			   QString projectUserName,
+			   QString projectUserPassword,
+			   bool onlyCheckedIn);
+
 	void stop();
 
 	bool isRunning() const;

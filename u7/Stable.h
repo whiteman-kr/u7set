@@ -111,10 +111,6 @@
 #endif
 #endif
 
-#ifdef Q_OS_LINUX
-#pragma GCC diagnostic ignored "-Wswitch"
-#endif
-
 #endif // STABLE_H
 
 

@@ -1133,13 +1133,13 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 		switch (value(property).type())
 		{
 			case QVariant::Bool:
-				{
-					return "<Different values>";
-				}
+				return "<Different values>";
+			default:
+				return QString();
 		}
 	}
 
-	return QString("");
+	return QString();
 }
 
 QString QtMultiVariantPropertyManager::displayText(const QtProperty *property) const

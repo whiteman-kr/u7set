@@ -11,6 +11,7 @@ namespace Hardware
 {
 	class ModuleConfigurationStruct;
 	class McFirmware;
+	struct McDataChunk;
 
 
 	// ----------------------------------------------------------------------------
@@ -152,8 +153,8 @@ namespace Hardware
 		int frameIndex() const;
 		void setFrameIndex(int frameIndex);
 
-		const std::shared_ptr<ModuleConfigurationStruct>& data() const;
-		void setData(const std::shared_ptr<ModuleConfigurationStruct>& data);
+		//const std::shared_ptr<ModuleConfigurationStruct>& data() const;
+		//void setData(const std::shared_ptr<ModuleConfigurationStruct>& data);
 
 		// Data
 		//
@@ -161,7 +162,7 @@ namespace Hardware
 		QString m_name;
 		QString m_type;
 		int m_frameIndex = -1;
-		std::shared_ptr<ModuleConfigurationStruct> m_data;		// указатель на структуру типа Type. Заполняется после загрузки.
+		//std::shared_ptr<ModuleConfigurationStruct> m_data;		// указатель на структуру типа Type. Заполняется после загрузки.
 	};
 
 	// ----------------------------------------------------------------------------
@@ -184,7 +185,7 @@ namespace Hardware
 		bool load(const ::Proto::ModuleConfiguration& message);
 		void save(::Proto::ModuleConfiguration* message) const;
 
-		bool compile(McFirmware* dest, const QString& deviceStrId, QString* errorString) const;
+		bool compile(McFirmware* dest, const QString& deviceStrId, int changeset, QString* errorString) const;
 
 		void addUserPropertiesToObject(QObject* object) const;
 		bool setUserProperty(const QString& name, const QVariant& value);
@@ -202,6 +203,8 @@ namespace Hardware
 
 		void createUserProperties(QString* errorMessage);
 		void parseUserProperties(const ModuleConfigurationStruct& structure, const QString& parentVariableName, QString* errorMessage);
+
+		bool compileVariable(const ModuleConfigurationVariable& var, McDataChunk* chunk, QString* errorString) const;
 
 		// Properties
 		//
@@ -247,7 +250,18 @@ namespace Hardware
 
 	// Compiled chunk of module configuration
 	//
+	struct McDataChunk
+	{
+		McDataChunk(const QString deviceStrId, int deviceChangeset, int frameIndex);
 
+		QString deviceStrId;
+		int deviceChangeset;
+		int frameIndex;
+		QByteArray data;
+	};
+
+	// Compiled Module Configuration Firmware
+	//
 	class McFirmware
 	{
 	public:
@@ -273,23 +287,16 @@ namespace Hardware
 		int frameSize() const;
 		void setFrameSize(int value);
 
+		void addChunk(const McDataChunk& chunk);
+
 		// Data
 		//
 	private:
-		struct McDataChank
-		{
-			QString deviceStrId;
-			int deviceChangeset;
-			int frameIndex;
-			int offset;
-			QByteArray data;
-		};
-
 		QString m_name;
 
 		int m_uartID = -1;						// Module UART ID, for this configuration
-		int m_frameSize = -1;				// Flash memory frame size
+		int m_frameSize = -1;					// Flash memory frame size
 
-		std::list<McDataChank> m_data;
+		std::list<McDataChunk> m_data;
 	};
 }

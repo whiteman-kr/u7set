@@ -371,15 +371,15 @@ namespace Hardware
 		m_frameIndex = frameIndex;
 	}
 
-	const std::shared_ptr<ModuleConfigurationStruct>& ModuleConfigurationVariable::data() const
-	{
-		return m_data;
-	}
+//	const std::shared_ptr<ModuleConfigurationStruct>& ModuleConfigurationVariable::data() const
+//	{
+//		return m_data;
+//	}
 
-	void ModuleConfigurationVariable::setData(const std::shared_ptr<ModuleConfigurationStruct>& data)
-	{
-		m_data = data;
-	}
+//	void ModuleConfigurationVariable::setData(const std::shared_ptr<ModuleConfigurationStruct>& data)
+//	{
+//		m_data = data;
+//	}
 
 
 	// ----------------------------------------------------------------------------
@@ -449,7 +449,7 @@ namespace Hardware
 		return;
 	}
 
-	bool ModuleConfiguration::compile(McFirmware* dest, const QString& deviceStrId, QString* errorString) const
+	bool ModuleConfiguration::compile(McFirmware* dest, const QString& deviceStrId, int changeset, QString* errorString) const
 	{
 		if (dest == nullptr || errorString == nullptr)
 		{
@@ -459,6 +459,27 @@ namespace Hardware
 		}
 
 		errorString->clear();
+
+		if (dest->uartId() != uartId())
+		{
+			*errorString = tr("UartIds of the destination firmware and source configuration are different. (destination: %1, source: %2)")
+						  .arg(dest->uartId())
+						  .arg(uartId());
+			return false;
+		}
+
+		for (const ModuleConfigurationVariable& var : m_variables)
+		{
+			McDataChunk chunk(deviceStrId, changeset, var.frameIndex());
+			bool ok = compileVariable(var, &chunk, errorString);
+
+			if (ok == false)
+			{
+				return false;
+			}
+
+			dest->addChunk(chunk);
+		}
 
 		return true;
 	}
@@ -813,6 +834,37 @@ namespace Hardware
 		return;
 	}
 
+	bool ModuleConfiguration::compileVariable(const ModuleConfigurationVariable& var, McDataChunk* chunk, QString* errorString) const
+	{
+		if (chunk == nullptr || errorString == nullptr)
+		{
+			assert(chunk != nullptr);
+			assert(errorString != nullptr);
+			return false;
+		}
+
+		assert(chunk->frameIndex == var.frameIndex());
+
+		QString type = var.type();
+
+		auto foundStruct = std::find_if(m_structures.begin(), m_structures.end(),
+				  [&type](const ModuleConfigurationStruct& s)
+			{
+				return s.name() == type;
+			});
+
+		if (foundStruct == m_structures.end())
+		{
+			*errorString = (tr("Can't find structure %1").arg(type));
+			return false;
+		}
+
+		// int structSize =
+		// compileStruct(.....);
+
+		return true;
+	}
+
 
 	bool ModuleConfiguration::hasConfiguration() const
 	{
@@ -875,6 +927,17 @@ namespace Hardware
 	}
 
 	//
+	// Compiled chunk of module configuration
+	//
+	McDataChunk::McDataChunk(const QString deviceStrId, int deviceChangeset, int frameIndex) :
+		deviceStrId(deviceStrId),
+		deviceChangeset(deviceChangeset),
+		frameIndex(frameIndex)
+	{
+
+	}
+
+	//
 	// McFirmware -- Compiled chunk of module configuration
 	//
 	McFirmware::McFirmware()
@@ -914,5 +977,10 @@ namespace Hardware
 	void McFirmware::setFrameSize(int value)
 	{
 		m_frameSize = value;
+	}
+
+	void McFirmware::addChunk(const McDataChunk& chunk)
+	{
+		m_data.push_back(chunk);
 	}
 }

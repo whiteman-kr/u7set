@@ -764,6 +764,9 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 			rullerPoint.setY(pt.Y);
 		}
 		break;
+
+		default:
+			void();
 	}
 
 	// Set calculated pos to SchemeItem
@@ -1282,8 +1285,6 @@ bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::VideoItem>& 
 //
 EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbController) :
 	m_fileInfo(fileInfo),
-	m_snapToGrid(true),
-	m_editEngine(nullptr),
 	m_dbcontroller(dbController)
 {
 	assert(m_dbcontroller);
@@ -3222,7 +3223,7 @@ void EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEven
 		return;
 	}
 
-	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
+	//QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
 
 	auto extPoints = itemPos->GetExtensionPoints();
 
@@ -3486,7 +3487,7 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 {
 	setCursor(QCursor(Qt::CursorShape::ArrowCursor));
 
-	for (int i = 0; i < sizeof(m_mouseStateCursor) / sizeof(m_mouseStateCursor[0]); i++)
+	for (size_t i = 0; i < sizeof(m_mouseStateCursor) / sizeof(m_mouseStateCursor[0]); i++)
 	{
 		if (mouseState() == m_mouseStateCursor[i].mouseState)
 		{
@@ -3571,6 +3572,8 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 				case VideoItemAction::MoveConnectionLinePoint:
 					setCursor(Qt::SizeAllCursor);
 					return;
+				default:
+					void();
 				}
 			}
 		}

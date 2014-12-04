@@ -12,8 +12,8 @@ using namespace Afbl;
 
 DialogAfblEditor::DialogAfblEditor(DbController* pDbController, QWidget *parent) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-    m_pDbController(pDbController),
-    ui(new Ui::DialogAfblEditor)
+	ui(new Ui::DialogAfblEditor),
+	m_pDbController(pDbController)
 {
     ui->setupUi(this);
     setWindowTitle(tr("AFB Library Editor"));
@@ -83,7 +83,7 @@ void DialogAfblEditor::refreshFiles()
 	files.insert(files.begin(), xsdfiles.begin(), xsdfiles.end());
     files.insert(files.begin(), afbfiles.begin(), afbfiles.end());
 
-    for (int i = 0; i < files.size(); i++)
+	for (size_t i = 0; i < files.size(); i++)
     {
         DbFileInfo& fi = files[i];
 
@@ -430,7 +430,7 @@ void DialogAfblEditor::on_m_afbTree_itemSelectionChanged()
     bool enableView = selectedFiles.size() == 1;
 
     bool enableCheckOut = false;
-    int count = 0;
+	size_t count = 0;
     for (auto i = selectedFiles.begin(); i != selectedFiles.end(); i++)
     {
         if ((*i)->state() == VcsState::CheckedIn)

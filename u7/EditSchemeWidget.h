@@ -186,7 +186,7 @@ class EditSchemeWidget : public QScrollArea
 	Q_OBJECT
 
 private:
-	EditSchemeWidget();			// deleted;
+	EditSchemeWidget() = delete;
 
 public:
 	EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* dbController);
@@ -340,9 +340,9 @@ public:
 	//
 private:
 	DbFileInfo m_fileInfo;
-	DbController* m_dbcontroller = nullptr;
+	DbController* m_dbcontroller;
 
-	bool m_snapToGrid;
+	bool m_snapToGrid = true;
 
 	// Interface data
 	//
@@ -350,8 +350,8 @@ private:
 	int horzScrollBarValue;		// Horizintal scroll bar value in mousePressEvent -- midButton
 	int vertScrollBarValue;		// Vertical scroll bar value in mousePressEvent -- midButton
 
-	EditSchemeView* m_videoFrameView;
-	EditEngine::EditEngine* m_editEngine;
+	EditSchemeView* m_videoFrameView = nullptr;
+	EditEngine::EditEngine* m_editEngine = nullptr;
 
 	SchemePropertiesDialog* m_schemePropertiesDialog = nullptr;
 	SchemeItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;

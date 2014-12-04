@@ -179,8 +179,8 @@ namespace Hardware
 
 	QString DeviceObject::fileExtension() const
 	{
-		int index = static_cast<int>(deviceType());
-		assert(index >= 0 && index < sizeof(Hardware::DeviceObjectExtensions) / sizeof(Hardware::DeviceObjectExtensions[0]));
+		size_t index = static_cast<size_t>(deviceType());
+		assert(index < sizeof(Hardware::DeviceObjectExtensions) / sizeof(Hardware::DeviceObjectExtensions[0]));
 
 		QString result = QString::fromWCharArray(Hardware::DeviceObjectExtensions[index]);
 		return result;
@@ -771,7 +771,7 @@ namespace Hardware
 
 	bool DeviceModule::compileConfiguration(McFirmware* dest, QString* errorString) const
 	{
-		bool ok = m_moduleConfiguration.compile(dest, m_strId, errorString);
+		bool ok = m_moduleConfiguration.compile(dest, m_strId, fileInfo().changeset(), errorString);
 		return ok;
 	}
 

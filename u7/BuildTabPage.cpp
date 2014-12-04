@@ -231,7 +231,7 @@ void BuildTabPage::projectClosed()
 void BuildTabPage::build()
 {
 	assert(m_taskTable);
-	assert(m_taskTable->rowCount() == m_tasks.size());
+	assert(static_cast<size_t>(m_taskTable->rowCount()) == m_tasks.size());
 
 	m_outputLog.clear();
 	m_outputWidget->clear();
@@ -263,7 +263,8 @@ void BuildTabPage::build()
 		db()->serverUsername(),
 		db()->serverPassword(),
 		db()->currentUser().username(),
-		db()->currentUser().password());
+		db()->currentUser().password(),
+		false);
 
 	return;
 }

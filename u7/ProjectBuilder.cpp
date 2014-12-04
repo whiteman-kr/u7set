@@ -11,6 +11,12 @@ void BuildWorkerThread::run()
 	QThread::currentThread()->setTerminationEnabled(true);
 
 	qDebug() << "Building started";
+	m_log->writeMessage("Building started");
+
+	if (onlyCheckedIn() == false)
+	{
+		m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true);
+	}
 
 	QString str;
 	bool ok = false;
@@ -138,7 +144,17 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	std::vector<DbFileInfo> files;
 
-	bool ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+	bool ok = false;
+
+	if (onlyCheckedIn() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+	}
+
 	if (ok == false)
 	{
 		return false;
@@ -150,7 +166,14 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 	{
 		std::shared_ptr<DbFile> file;
 
-		ok = db->getLatestVersion(fi, &file, nullptr);
+		if (onlyCheckedIn() == true)
+		{
+			assert(false);
+		}
+		else
+		{
+			ok = db->getLatestVersion(fi, &file, nullptr);
+		}
 
 		if (file == false || ok == false)
 		{
@@ -234,6 +257,7 @@ bool BuildWorkerThread::generateModulesConfigurations(
 		if (child->deviceType() < Hardware::DeviceType::Module)
 		{
 			generateModulesConfigurations(db, child);
+			continue;
 		}
 
 		// This is Module, if it has configuration process it.
@@ -252,6 +276,8 @@ bool BuildWorkerThread::generateModulesConfigurations(
 
 		// Get the firmware by it's name or create new if it does not exists
 		//
+		const Hardware::ModuleConfiguration& moduleConfiguration = module->moduleConfiguration();
+
 		QString confFileName = module->confFirmwareName();
 		std::shared_ptr<Hardware::McFirmware> firmware;
 
@@ -262,7 +288,11 @@ bool BuildWorkerThread::generateModulesConfigurations(
 		catch(std::out_of_range)
 		{
 			firmware = std::make_shared<Hardware::McFirmware>();
-			firmwares->operator [](confFileName) = firmware;
+
+			firmware->setName(confFileName);
+			firmware->setUartId(moduleConfiguration.uartId());
+
+			firmwares->insert(std::make_pair(confFileName, firmware));
 		}
 
 		QString error;
@@ -276,6 +306,10 @@ bool BuildWorkerThread::generateModulesConfigurations(
 			// Somthing went wrong.
 			//
 			m_log->writeError(error, false);
+			m_log->writeError(tr("Device StrId: %1, caption: %2, place: %3")
+							  .arg(module->strId())
+							  .arg(module->caption())
+							  .arg(module->place()), false);
 			return false;
 		}
 	}
@@ -373,6 +407,16 @@ void BuildWorkerThread::setProjectUserPassword(const QString& value)
 	m_projectUserPassword = value;
 }
 
+bool BuildWorkerThread::onlyCheckedIn() const
+{
+	return m_onlyCheckedIn;
+
+}
+
+void BuildWorkerThread::setOnlyCheckedIn(bool value)
+{
+	m_onlyCheckedIn = value;
+}
 
 ProjectBuilder::ProjectBuilder(OutputLog* log) :
 	m_log(log)
@@ -407,7 +451,14 @@ ProjectBuilder::~ProjectBuilder()
 	return;
 }
 
-bool ProjectBuilder::start(QString projectName, QString ipAddress, int port, QString serverUserName, QString serverPassword, QString projectUserName, QString projectUserPassword)
+bool ProjectBuilder::start(QString projectName,
+						   QString ipAddress,
+						   int port,
+						   QString serverUserName,
+						   QString serverPassword,
+						   QString projectUserName,
+						   QString projectUserPassword,
+						   bool onlyCheckedIn)
 {
 	assert(m_thread != nullptr);
 
@@ -427,6 +478,7 @@ bool ProjectBuilder::start(QString projectName, QString ipAddress, int port, QSt
 	m_thread->setServerPassword(serverPassword);
 	m_thread->setProjectUserName(projectUserName);
 	m_thread->setProjectUserPassword(projectUserPassword);
+	m_thread->setOnlyCheckedIn(onlyCheckedIn);
 
 	// Ready? Go!
 	//
@@ -445,7 +497,7 @@ bool ProjectBuilder::isRunning() const
 	return result;
 }
 
-void ProjectBuilder::handleResults(QString result)
+void ProjectBuilder::handleResults(QString /*result*/)
 {
 }
 
