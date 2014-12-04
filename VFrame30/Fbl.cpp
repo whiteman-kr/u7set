@@ -11,7 +11,7 @@ namespace Afbl
 	//
 	//
 	AfbParamValue::AfbParamValue()
-		:Type(AfbParamType::AnalogIntegral),
+		: Type(AfbParamType::AnalogIntegral),
 		  IntegralValue(0),
 		  FloatingPoint(0.0),
 		  Discrete(false)

@@ -29,7 +29,7 @@ namespace Afbl
 		int32_t IntegralValue;
 		double FloatingPoint;
 		bool Discrete;
-		AfbParamType Type;	// Тип данных параметра
+		AfbParamType Type;				// Param data type
 
 		// Serialization
 		//

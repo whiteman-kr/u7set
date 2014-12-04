@@ -8,6 +8,7 @@ class DbController;
 namespace Hardware
 {
 	class DeviceObject;
+	class McFirmware;
 }
 
 class BuildWorkerThread : public QThread
@@ -17,7 +18,20 @@ class BuildWorkerThread : public QThread
 private:
 	virtual void run() override;
 
+	// Get Equipment from the prokect database
+	//
 	bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
+
+	// Generate Modules Configurations Firmwares
+	//
+	bool generateModulesConfigurations(DbController* db, const Hardware::DeviceObject *root);
+	bool generateModulesConfigurations(
+			DbController* db,
+			const Hardware::DeviceObject* parent,
+			std::map<QString, std::shared_ptr<Hardware::McFirmware>>* firmwares);
+
+	// What's the next compilation task?
+	//
 
 signals:
 	void resultReady(const QString &s);

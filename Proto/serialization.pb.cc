@@ -839,9 +839,10 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceDiagSignal));
   ModuleConfiguration_descriptor_ = file->message_type(39);
-  static const int ModuleConfiguration_offsets_[2] = {
+  static const int ModuleConfiguration_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, struct_description_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, values_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, name_),
   };
   ModuleConfiguration_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1183,16 +1184,17 @@ void protobuf_AddDesc_serialization_2eproto() {
     " \001(\005:\0010\"Y\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010"
     "\0228\n\024module_configuration\030\003 \001(\0132\032.Proto.M"
     "oduleConfiguration\"\022\n\020DeviceController\"\022"
-    "\n\020DeviceDiagSignal\"b\n\023ModuleConfiguratio"
+    "\n\020DeviceDiagSignal\"p\n\023ModuleConfiguratio"
     "n\022\032\n\022struct_description\030\001 \001(\t\022/\n\006values\030"
-    "\002 \003(\0132\037.Proto.ModuleConfigurationValue\"7"
-    "\n\030ModuleConfigurationValue\022\014\n\004name\030\001 \002(\t"
-    "\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display"
-    "\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connecti"
-    "onDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rF"
-    "blSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N"
-    "\n\014FblParamType\022\022\n\016AnalogIntegral\020\000\022\027\n\023An"
-    "alogFloatingPoint\020\001\022\021\n\rDiscreteValue\020\002", 5158);
+    "\002 \003(\0132\037.Proto.ModuleConfigurationValue\022\014"
+    "\n\004name\030\003 \001(\t\"7\n\030ModuleConfigurationValue"
+    "\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeU"
+    "nit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch"
+    "\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n"
+    "\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014"
+    "\n\010Discrete\020\001*N\n\014FblParamType\022\022\n\016AnalogIn"
+    "tegral\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDis"
+    "creteValue\020\002", 5172);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -13759,6 +13761,7 @@ void DeviceDiagSignal::Swap(DeviceDiagSignal* other) {
 #ifndef _MSC_VER
 const int ModuleConfiguration::kStructDescriptionFieldNumber;
 const int ModuleConfiguration::kValuesFieldNumber;
+const int ModuleConfiguration::kNameFieldNumber;
 #endif  // !_MSC_VER
 
 ModuleConfiguration::ModuleConfiguration()
@@ -13778,6 +13781,7 @@ ModuleConfiguration::ModuleConfiguration(const ModuleConfiguration& from)
 void ModuleConfiguration::SharedCtor() {
   _cached_size_ = 0;
   struct_description_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -13788,6 +13792,9 @@ ModuleConfiguration::~ModuleConfiguration() {
 void ModuleConfiguration::SharedDtor() {
   if (struct_description_ != &::google::protobuf::internal::kEmptyString) {
     delete struct_description_;
+  }
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
   }
   if (this != default_instance_) {
   }
@@ -13819,6 +13826,11 @@ void ModuleConfiguration::Clear() {
     if (has_struct_description()) {
       if (struct_description_ != &::google::protobuf::internal::kEmptyString) {
         struct_description_->clear();
+      }
+    }
+    if (has_name()) {
+      if (name_ != &::google::protobuf::internal::kEmptyString) {
+        name_->clear();
       }
     }
   }
@@ -13860,6 +13872,23 @@ bool ModuleConfiguration::MergePartialFromCodedStream(
           goto handle_uninterpreted;
         }
         if (input->ExpectTag(18)) goto parse_values;
+        if (input->ExpectTag(26)) goto parse_name;
+        break;
+      }
+
+      // optional string name = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_name:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_name()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->name().data(), this->name().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -13897,6 +13926,15 @@ void ModuleConfiguration::SerializeWithCachedSizes(
       2, this->values(i), output);
   }
 
+  // optional string name = 3;
+  if (has_name()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->name().data(), this->name().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      3, this->name(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -13922,6 +13960,16 @@ void ModuleConfiguration::SerializeWithCachedSizes(
         2, this->values(i), target);
   }
 
+  // optional string name = 3;
+  if (has_name()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->name().data(), this->name().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->name(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -13938,6 +13986,13 @@ int ModuleConfiguration::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->struct_description());
+    }
+
+    // optional string name = 3;
+    if (has_name()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->name());
     }
 
   }
@@ -13979,6 +14034,9 @@ void ModuleConfiguration::MergeFrom(const ModuleConfiguration& from) {
     if (from.has_struct_description()) {
       set_struct_description(from.struct_description());
     }
+    if (from.has_name()) {
+      set_name(from.name());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -14007,6 +14065,7 @@ void ModuleConfiguration::Swap(ModuleConfiguration* other) {
   if (other != this) {
     std::swap(struct_description_, other->struct_description_);
     values_.Swap(&other->values_);
+    std::swap(name_, other->name_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

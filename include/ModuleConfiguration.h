@@ -10,6 +10,7 @@
 namespace Hardware
 {
 	class ModuleConfigurationStruct;
+	class McFirmware;
 
 
 	// ----------------------------------------------------------------------------
@@ -183,6 +184,8 @@ namespace Hardware
 		bool load(const ::Proto::ModuleConfiguration& message);
 		void save(::Proto::ModuleConfiguration* message) const;
 
+		bool compile(McFirmware* dest, const QString& deviceStrId, QString* errorString) const;
+
 		void addUserPropertiesToObject(QObject* object) const;
 		bool setUserProperty(const QString& name, const QVariant& value);
 
@@ -191,6 +194,7 @@ namespace Hardware
 		static void skipUnknownElement(QXmlStreamReader* reader, QString* errorMessage);
 
 		bool readStructure(const char* data);
+
 
 	protected:
 		void readDeclaration(QXmlStreamReader& reader);
@@ -233,11 +237,59 @@ namespace Hardware
 		int m_minFrameSize = -1;				// Flash memory frame size
 
 		QHash<QString, ModuleConfigurationStruct> m_structures;		// Paresed structures	(declarations)
-		QVector<ModuleConfigurationVariable> m_variables;				// Paresed variables	(definitions)
+		QVector<ModuleConfigurationVariable> m_variables;			// Paresed variables	(definitions)
 
-		std::string m_xmlStructDesctription;	// Unparsed XML of Structure Description;
+		std::string m_xmlStructDesctription;						// Unparsed XML of Structure Description;
 		QString m_lastError;
 
 		QHash<QString, ModuleConfigurationValue> m_userProperties;
+	};
+
+	// Compiled chunk of module configuration
+	//
+
+	class McFirmware
+	{
+	public:
+		McFirmware();
+		~McFirmware();
+
+		// Public methods
+	public:
+		//bool save() const;
+		//bool load();
+
+		//bool addDataChunk();
+
+		// Properties
+		//
+	public:
+		QString name() const;
+		void setName(const QString& value);
+
+		int uartId() const;
+		void setUartId(int value);
+
+		int frameSize() const;
+		void setFrameSize(int value);
+
+		// Data
+		//
+	private:
+		struct McDataChank
+		{
+			QString deviceStrId;
+			int deviceChangeset;
+			int frameIndex;
+			int offset;
+			QByteArray data;
+		};
+
+		QString m_name;
+
+		int m_uartID = -1;						// Module UART ID, for this configuration
+		int m_frameSize = -1;				// Flash memory frame size
+
+		std::list<McDataChank> m_data;
 	};
 }
