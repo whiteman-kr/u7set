@@ -437,7 +437,7 @@ namespace Hardware
 		}
 
 		message->mutable_struct_description()->assign(m_xmlStructDesctription);
-		message->mutable_struct_description()->assign(m_name.toStdString());
+		message->mutable_name()->assign(m_name.toStdString());
 
 		for (const ModuleConfigurationValue& v : m_userProperties)
 		{
