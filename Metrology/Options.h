@@ -8,6 +8,7 @@
 #include <QVector>
 #include <QColor>
 #include <QFont>
+#include <QTimer>
 
 #include "Measure.h"
 #include "MeasureViewHeader.h"
@@ -420,11 +421,11 @@ const char* const		BackupParam[] =
                         QT_TRANSLATE_NOOP("Options.h", "Path for reserve copy"),
 };
 
-const int				BUO_PARAM_COUNT     = sizeof(BackupParam)/sizeof(char*);
+const int				BUO_PARAM_COUNT         = sizeof(BackupParam)/sizeof(char*);
 
-const int				BUO_PARAM_ON_START  = 0,
-                        BUO_PARAM_ON_EXIT   = 1,
-                        BUO_PARAM_FOLDER    = 2;
+const int				BUO_PARAM_ON_START      = 0,
+                        BUO_PARAM_ON_EXIT       = 1,
+                        BUO_PARAM_PATH          = 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -441,7 +442,7 @@ public:
     bool                m_onExit = true;
     QString				m_path;
 
-    void				createBackup();
+    bool				createBackup();
     void				createBackupOnStart();
     void				createBackupOnExit();
 

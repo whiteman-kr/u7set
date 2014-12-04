@@ -26,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // init calibration base
     //
     theCalibratorBase.init(this);
-
     connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
 
     // init interface
@@ -1122,12 +1121,10 @@ void MainWindow::closeEvent(QCloseEvent* e)
 {
     if (m_measureThread.isRunning() == true)
     {
-        QMessageBox::information(this, windowTitle(), m_statusMeasureThreadState->text());
+        QMessageBox::critical(this, windowTitle(), m_statusMeasureThreadState->text());
         e->ignore();
         return;
     }
-
-    theDatabase.close();
 
     theCalibratorBase.clear();
 

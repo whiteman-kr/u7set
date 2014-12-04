@@ -2,6 +2,7 @@
 
 #include <QSettings>
 #include <QTemporaryDir>
+#include <QMessageBox>
 #include "Database.h"
 #include "CalibratorBase.h"
 
@@ -750,8 +751,17 @@ BackupOption::~BackupOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void BackupOption::createBackup()
+bool BackupOption::createBackup()
 {
+    QString sourcePath = theOptions.database().m_path + "/" + DATABASE_NAME;
+    QString destPath = m_path + "/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + DATABASE_NAME;
+
+    if (QFile::copy(sourcePath, destPath) == false)
+    {
+        QMessageBox::critical(nullptr, tr("Backup"), tr("Error reserve copy database"));
+    }
+
+    return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
