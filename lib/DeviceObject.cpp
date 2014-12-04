@@ -5,7 +5,16 @@
 
 namespace Hardware
 {
-	//const static wchar_t* DeviceObjectExtensions = {L".hroot"}, {L".hsystem"};
+	const wchar_t* DeviceObjectExtensions[] =
+		{
+			L".hrt",		// Root
+			L".hsm",		// System
+			L".hrk",		// Rack
+			L".hcs",		// Chassis
+			L".hmd",		// Module
+			L".hcr",		// Controller
+			L".hds"			// Diagnostics Signal
+		};
 
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
@@ -171,15 +180,15 @@ namespace Hardware
 	QString DeviceObject::fileExtension() const
 	{
 		int index = static_cast<int>(deviceType());
-		assert(index >= 0 && index < sizeof(DeviceObjectExtensions) / sizeof(DeviceObjectExtensions[0]));
+		assert(index >= 0 && index < sizeof(Hardware::DeviceObjectExtensions) / sizeof(Hardware::DeviceObjectExtensions[0]));
 
-		QString result = QString::fromWCharArray(DeviceObjectExtensions[index]);
+		QString result = QString::fromWCharArray(Hardware::DeviceObjectExtensions[index]);
 		return result;
 	}
 
 	QString DeviceObject::fileExtension(DeviceType device)
 	{
-		QString result = QString::fromWCharArray(DeviceObjectExtensions[static_cast<int>(device)]);
+		QString result = QString::fromWCharArray(Hardware::DeviceObjectExtensions[static_cast<int>(device)]);
 		return result;
 	}
 
@@ -760,6 +769,12 @@ namespace Hardware
 		return false;
 	}
 
+	bool DeviceModule::compileConfiguration(McFirmware* dest, QString* errorString) const
+	{
+		bool ok = m_moduleConfiguration.compile(dest, m_strId, errorString);
+		return ok;
+	}
+
 	int DeviceModule::type() const
 	{
 		return m_type;
@@ -783,6 +798,22 @@ namespace Hardware
 
 		m_moduleConfiguration.readStructure(value.toStdString().data());
 		m_moduleConfiguration.addUserPropertiesToObject(this);
+	}
+
+	QString DeviceModule::confFirmwareName() const
+	{
+		QString v(m_moduleConfiguration.name());
+		return v;
+	}
+
+	void DeviceModule::setConfFirmwareName(const QString& value)
+	{
+		m_moduleConfiguration.setName(value);
+	}
+
+	const ModuleConfiguration& DeviceModule::moduleConfiguration() const
+	{
+		return m_moduleConfiguration;
 	}
 
 	//

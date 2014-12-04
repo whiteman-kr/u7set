@@ -407,6 +407,7 @@ namespace Hardware
 		}
 
 		m_xmlStructDesctription = message.struct_description();
+		m_name.fromStdString(message.name());
 
 		bool result = readStructure(m_xmlStructDesctription.data());
 
@@ -436,6 +437,7 @@ namespace Hardware
 		}
 
 		message->mutable_struct_description()->assign(m_xmlStructDesctription);
+		message->mutable_struct_description()->assign(m_name.toStdString());
 
 		for (const ModuleConfigurationValue& v : m_userProperties)
 		{
@@ -445,6 +447,20 @@ namespace Hardware
 		}
 
 		return;
+	}
+
+	bool ModuleConfiguration::compile(McFirmware* dest, const QString& deviceStrId, QString* errorString) const
+	{
+		if (dest == nullptr || errorString == nullptr)
+		{
+			assert(dest);
+			assert(errorString);
+			return false;
+		}
+
+		errorString->clear();
+
+		return true;
 	}
 
 	void ModuleConfiguration::addUserPropertiesToObject(QObject* object) const
@@ -856,5 +872,47 @@ namespace Hardware
 	void ModuleConfiguration::setStructDescription(const std::string& value)
 	{
 		m_xmlStructDesctription = value;
+	}
+
+	//
+	// McFirmware -- Compiled chunk of module configuration
+	//
+	McFirmware::McFirmware()
+	{
+	}
+
+	McFirmware::~McFirmware()
+	{
+	}
+
+	QString McFirmware::name() const
+	{
+		QString n(m_name);
+		return n;
+	}
+
+	void McFirmware::setName(const QString& value)
+	{
+		m_name = value;
+	}
+
+	int McFirmware::uartId() const
+	{
+		return m_uartID;
+	}
+
+	void McFirmware::setUartId(int value)
+	{
+		m_uartID = value;
+	}
+
+	int McFirmware::frameSize() const
+	{
+		return m_frameSize;
+	}
+
+	void McFirmware::setFrameSize(int value)
+	{
+		m_frameSize = value;
 	}
 }

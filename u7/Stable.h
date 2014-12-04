@@ -103,14 +103,16 @@
 // Disable some warnings
 //
 #ifdef Q_OS_WIN
-
 #pragma warning(disable : 4482)		// nonstandard extension used: enum 'enum' used in qualified name
 
 	// Disable 4996 warning
-	#ifndef _SCL_SECURE_NO_WARNINGS
-		#define _SCL_SECURE_NO_WARNINGS
-	#endif
+#ifndef _SCL_SECURE_NO_WARNINGS
+	#define _SCL_SECURE_NO_WARNINGS
+#endif
+#endif
 
+#ifdef Q_OS_LINUX
+#pragma GCC diagnostic ignored "-Wswitch"
 #endif
 
 #endif // STABLE_H

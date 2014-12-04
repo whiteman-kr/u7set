@@ -203,7 +203,8 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0030.sql \
     DatabaseUpgrade/Upgrade0031.sql \
     Tools/afbschema.xsd \
-    DatabaseUpgrade/Upgrade0032.sql
+    DatabaseUpgrade/Upgrade0032.sql \
+    ../Proto/proto_compile.sh
 
 
 CONFIG += precompile_header
@@ -216,6 +217,7 @@ unix:QMAKE_CXXFLAGS += -std=c++11
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+
 
 #Optimization flags
 #

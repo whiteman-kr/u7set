@@ -592,6 +592,7 @@ message ModuleConfiguration
 {
 	optional string struct_description = 1;				// XML description of the mudule configuration structure
 	repeated ModuleConfigurationValue values = 2;		// Values array
+    optional string name = 3 [default = ""];            // Configuration Name
 }
 
 message ModuleConfigurationValue

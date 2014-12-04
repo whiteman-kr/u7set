@@ -41,6 +41,7 @@ void BuildWorkerThread::run()
 
 	do
 	{
+		//
 		// Get Equipment from the database
 		//
 		m_log->writeMessage("");
@@ -59,13 +60,37 @@ void BuildWorkerThread::run()
 
 		if (ok == false)
 		{
-			m_log->writeError(tr("Getting equipment: error"), true);
+			m_log->writeError(tr("Error"), true);
 			break;
 		}
 		else
 		{
-			m_log->writeMessage(tr("Getting equipment: ok"));
+			m_log->writeMessage(tr("Ok"));
 		}
+
+		//
+		// Generate Module Confuiguration Binary File
+		//
+		m_log->writeMessage("");
+		m_log->writeMessage(tr("Generating modules configurations"));
+
+		ok = generateModulesConfigurations(&db, &deviceRoot);
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			break;
+		}
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("Error"), true);
+			break;
+		}
+		else
+		{
+			m_log->writeMessage(tr("Ok"));
+		}
+
 	}
 	while (false);
 
@@ -121,7 +146,6 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	parent->deleteAllChildren();
 
-//#pragma omp for
 	for (auto& fi : files)
 	{
 		std::shared_ptr<DbFile> file;
@@ -161,6 +185,97 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 		if (ok == false)
 		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool BuildWorkerThread::generateModulesConfigurations(DbController* db, const Hardware::DeviceObject* root)
+{
+	std::map<QString, std::shared_ptr<Hardware::McFirmware>> firmwares;
+
+	bool ok = generateModulesConfigurations(db, root, &firmwares);
+
+	return ok;
+}
+
+bool BuildWorkerThread::generateModulesConfigurations(
+		DbController* db,
+		const Hardware::DeviceObject* parent,
+		std::map<QString, std::shared_ptr<Hardware::McFirmware>>* firmwares)
+{
+	assert(db != nullptr);
+	assert(db->isProjectOpened() == true);
+	assert(parent != nullptr);
+	assert(parent->deviceType() < Hardware::DeviceType::Module);
+	assert(firmwares != nullptr);
+
+	if (QThread::currentThread()->isInterruptionRequested() == true)
+	{
+		return false;
+	}
+
+	if (parent->deviceType() == Hardware::DeviceType::System)
+	{
+		m_log->writeMessage(tr("System %1...").arg(parent->caption()));
+	}
+
+	for (int i = 0; i < parent->childrenCount(); i++)
+	{
+		Hardware::DeviceObject* child = parent->child(i);
+
+		if (child->deviceType() > Hardware::DeviceType::Module)
+		{
+			continue;
+		}
+
+		if (child->deviceType() < Hardware::DeviceType::Module)
+		{
+			generateModulesConfigurations(db, child);
+		}
+
+		// This is Module, if it has configuration process it.
+		//
+		assert(child->deviceType() == Hardware::DeviceType::Module);
+
+		Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
+		assert(module != nullptr);
+
+		if (module->moduleConfiguration().hasConfiguration() == false)
+		{
+			// Module does not have configuration, process the next child;
+			//
+			continue;
+		}
+
+		// Get the firmware by it's name or create new if it does not exists
+		//
+		QString confFileName = module->confFirmwareName();
+		std::shared_ptr<Hardware::McFirmware> firmware;
+
+		try
+		{
+			firmware = firmwares->at(confFileName);
+		}
+		catch(std::out_of_range)
+		{
+			firmware = std::make_shared<Hardware::McFirmware>();
+			firmwares->operator [](confFileName) = firmware;
+		}
+
+		QString error;
+
+		// Compile configuration to firmware
+		//
+		bool ok = module->compileConfiguration(firmware.get(), &error);
+
+		if (ok == false)
+		{
+			// Somthing went wrong.
+			//
+			m_log->writeError(error, false);
 			return false;
 		}
 	}
