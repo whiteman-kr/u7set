@@ -1,5 +1,5 @@
-#include "stable.h"
-#include "Crc.h"
+#include "Stable.h"
+#include "crc.h"
 
 // Using normal poly 0x000000000000001B
 
@@ -14,7 +14,7 @@ uint64_t Crc::setDataBlockCrc(uint16_t frameIndex, void* datablock, int blockSiz
 // !!! ATTENTION !!!
 // HEADER CRC IS CALCULATED BY NORMAL POLY, BUT STORED IN BIG-ENDIAN
 //
-#pragma message (__FUNCTION__" !!! ATTENTION !!! HEADER CRC IS CALCULATED BY NORMAL POLY, BUT STORED IN BIG-ENDIAN. SUPPOSED TO BE REMOVED IN THE FUTURE.")
+//#pragma message (__FUNCTION__" !!! ATTENTION !!! HEADER CRC IS CALCULATED BY NORMAL POLY, BUT STORED IN BIG-ENDIAN. SUPPOSED TO BE REMOVED IN THE FUTURE.")
 
 	std::vector<uint8_t> buffer;
 	buffer.resize(blockSize + sizeof(decltype(frameIndex)), 0);
@@ -22,7 +22,7 @@ uint64_t Crc::setDataBlockCrc(uint16_t frameIndex, void* datablock, int blockSiz
 	*reinterpret_cast<decltype(frameIndex)*>(buffer.data()) = qToBigEndian(frameIndex);
 	memcpy(buffer.data() + sizeof(decltype(frameIndex)), datablock, blockSize);
 
-	uint64_t crc = Crc::crc64(buffer.data(), buffer.size() - sizeof(crc));
+	quint64 crc = Crc::crc64(buffer.data(), buffer.size() - sizeof(crc));
 	*reinterpret_cast<uint64_t*>(buffer.data() + buffer.size() - sizeof(crc)) = qToBigEndian(crc);						// CONVERT CRC HERE
 
 	// Check calculated data CRC

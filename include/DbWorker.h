@@ -10,6 +10,9 @@ namespace Hardware
 	class DeviceObject;
 };
 
+class DbProgress;
+
+
 class DbWorker : public QObject
 {
 	Q_OBJECT

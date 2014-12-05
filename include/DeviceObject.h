@@ -1,6 +1,7 @@
 #pragma once
 #include "DbStruct.h"
 #include "QUuid"
+#include "../include/Factory.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 

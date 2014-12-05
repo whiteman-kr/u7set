@@ -22,6 +22,10 @@ private:
 	//
 	bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
+	// Expand Devices StrId
+	//
+	bool expandDeviceStrId(Hardware::DeviceObject* device);
+
 	// Generate Modules Configurations Firmwares
 	//
 	bool generateModulesConfigurations(DbController* db, const Hardware::DeviceObject *root);

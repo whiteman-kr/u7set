@@ -75,6 +75,16 @@ void BuildWorkerThread::run()
 		}
 
 		//
+		// Expand Devices StrId
+		//
+		m_log->writeMessage("");
+		m_log->writeMessage(tr("Expanding devices StrIds"));
+
+		expandDeviceStrId(&deviceRoot);
+
+		m_log->writeMessage(tr("Ok"));
+
+		//
 		// Generate Module Confuiguration Binary File
 		//
 		m_log->writeMessage("");
@@ -215,6 +225,26 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 	return true;
 }
 
+bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
+{
+	if (device->parent() != nullptr)
+	{
+		QString strId = device->strId();
+
+		strId.replace(QString("$(PARENT)"), device->parent()->strId(), Qt::CaseInsensitive);
+		strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+
+		device->setStrId(strId);
+	}
+
+	for (int i = 0; i < device->childrenCount(); i++)
+	{
+		expandDeviceStrId(device->child(i));
+	}
+
+	return true;
+}
+
 bool BuildWorkerThread::generateModulesConfigurations(DbController* db, const Hardware::DeviceObject* root)
 {
 	std::map<QString, std::shared_ptr<Hardware::McFirmware>> firmwares;
@@ -299,6 +329,8 @@ bool BuildWorkerThread::generateModulesConfigurations(
 
 		// Compile configuration to firmware
 		//
+		qDebug() << module->strId();
+
 		bool ok = module->compileConfiguration(firmware.get(), &error);
 
 		if (ok == false)

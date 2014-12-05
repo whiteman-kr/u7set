@@ -116,7 +116,6 @@ SOURCES += \
 	Configuration.cpp \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/CUtils.cpp \
     SchemeLayer.cpp \
     Scheme.cpp \
     WorkflowScheme.cpp \

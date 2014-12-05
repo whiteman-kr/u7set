@@ -4,6 +4,7 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include "../include/DbProgressDialog.h"
+#include "../include/DbProgress.h"
 
 //
 //
