@@ -31,8 +31,8 @@ namespace Hardware
 	public:
 		void readValue(QXmlStreamReader& reader);
 
-		int typeSize();     // получить размер типа в битах, или -1 если тип не найден
-		int arraySize();    // получить размер массива в []. 1 - если скобок нет, -1 при ошибке (нет закрывающей скобки или некорректное число)
+		int typeSize() const;     // получить размер типа в битах, или -1 если тип не найден
+		int arraySize() const;    // получить размер массива в []. 1 - если скобок нет, -1 при ошибке (нет закрывающей скобки или некорректное число)
 
 		// Properties
 		//
@@ -103,11 +103,6 @@ namespace Hardware
 		int size() const;
 		void setSize(int size);
 
-		int dataSize() const;
-		void setDataSize(int dataSize);
-
-		int actualSize() const;
-
 		const QVector<ModuleConfigurationValue>& values() const;
 
 		bool be() const;
@@ -116,9 +111,8 @@ namespace Hardware
 		// Data
 		//
 	private:
-		QString m_name;				// Straucture name
-		int m_dataSize = 0;			// размер структуры в байтах = размер всех данных + размер всех вложенных структур. вычисляется при построении дерева
-		int m_size = 0;				// размер структуры, указанный в xml-файле. если не указан - равен по умолчанию 0
+		QString m_name;				// Structure name
+		int m_size = -1;			// Structure size, entered by user. Optional, if initialized, should be >= actual data size.
 		bool m_be = false;			// Big Endian
 
 		QVector<ModuleConfigurationValue> m_values;
@@ -205,6 +199,9 @@ namespace Hardware
 		void parseUserProperties(const ModuleConfigurationStruct& structure, const QString& parentVariableName, QString* errorMessage);
 
 		bool compileVariable(const ModuleConfigurationVariable& var, McDataChunk* chunk, QString* errorString) const;
+		bool compileStructure(const ModuleConfigurationStruct& compileStruct, McDataChunk* chunk, int baseAddress, QMap<QString, int>& structSizeMap, QString* errorString) const;
+		bool countStructureSize(const ModuleConfigurationStruct& compileStruct, QMap<QString, int>& structSizeMap) const;
+		int getStructureSize(const ModuleConfigurationStruct& compileStruct, QMap<QString, int>& structSizeMap) const;
 
 		// Properties
 		//
