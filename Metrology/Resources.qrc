@@ -27,5 +27,6 @@
         <file>icons/Export.png</file>
         <file>icons/Save.png</file>
         <file>icons/Search.png</file>
+        <file>icons/Preview.png</file>
     </qresource>
 </RCC>

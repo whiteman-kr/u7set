@@ -285,7 +285,7 @@ void DatabaseOption::load()
     QSettings s;
 
     m_path = s.value( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
-    m_type = s.value( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), 0).toInt();
+    m_type = s.value( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -301,6 +301,101 @@ void DatabaseOption::save()
 // -------------------------------------------------------------------------------------------------------------------
 
 DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
+{
+    m_path = from.m_path;
+    m_type = from.m_type;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ReportOption::ReportOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ReportOption::ReportOption(const ReportOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ReportOption::~ReportOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ReportOption::init()
+{
+
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int ReportOption::reportTypeByMeasureType(int measureType)
+{
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+    {
+        return REPORT_TYPE_UNKNOWN;
+    }
+
+    int reportType = REPORT_TYPE_UNKNOWN;
+
+    switch (measureType)
+    {
+        case MEASURE_TYPE_LINEARITY:
+
+                switch(theOptions.linearity().m_viewType)
+                {
+                    case LO_VIEW_TYPE_SIMPLE:           reportType = REPORT_TYPE_LINEARITY;                 break;
+                    case LO_VIEW_TYPE_EXTENDED:         reportType = REPORT_TYPE_LINEARITY_CERTIFICATION;   break;
+                    case LO_VIEW_TYPE_DETAIL_ELRCTRIC:  reportType = REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC; break;
+                    case LO_VIEW_TYPE_DETAIL_PHYSICAL:  reportType = REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL; break;
+                    case LO_VIEW_TYPE_DETAIL_OUTPUT:    reportType = REPORT_TYPE_LINEARITY_DETAIL_OUTPUT;   break;
+                    default:                            reportType = REPORT_TYPE_UNKNOWN;                   break;
+                }
+
+            break;
+
+        case MEASURE_TYPE_COMPARATOR:           reportType = REPORT_TYPE_COMPARATOR;                        break;
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:   reportType = REPORT_TYPE_COMPLEX_COMPARATOR;                break;
+        default:                                reportType = REPORT_TYPE_UNKNOWN;                           break;
+    }
+
+    return reportType;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ReportOption::load()
+{
+    QSettings s;
+
+    m_path = s.value( QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), QDir::currentPath() + "/reports").toString();
+    m_type = s.value( QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), REPORT_TYPE_LINEARITY).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ReportOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), m_path );
+    s.setValue( QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), m_type );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ReportOption& ReportOption::operator=(const ReportOption& from)
 {
     m_path = from.m_path;
     m_type = from.m_type;
@@ -873,6 +968,9 @@ void Options::load()
     m_database.load();
     theDatabase.open();
 
+    m_report.load();
+    m_report.init();
+
     m_linearity.load();
 
     m_backup.load();
@@ -886,6 +984,7 @@ void Options::save()
     m_connectTcpIp.save();
     m_measureView.save();
     m_database.save();
+    m_report.save();
     m_linearity.save();
     m_backup.save();
 }
@@ -905,6 +1004,7 @@ Options& Options::operator=(const Options& from)
         m_connectTcpIp = from.m_connectTcpIp;
         m_measureView = from.m_measureView;
         m_database = from.m_database;
+        m_report = from.m_report;
         m_linearity = from.m_linearity;
         m_backup = from.m_backup;
 

@@ -504,7 +504,32 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
         case OPTION_PAGE_SIGNAL_INFO:
             break;
+
         case OPTION_PAGE_REPORT_HEADER:
+            {
+                QtProperty *locationGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location"));
+
+                    item = manager->addProperty(VariantManager::folerPathTypeId(), ReportParam[RO_PARAM_PATH]);
+                    item->setValue( m_options.report().m_path );
+                    appendProperty(item, page, RO_PARAM_PATH);
+                    locationGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), ReportParam[RO_PARAM_TYPE]);
+                    QStringList valueTypeList;
+                    for(int t = 0; t < REPORT_TYPE_COUNT; t++)
+                    {
+                        valueTypeList.append(ReportType[t]);
+                    }
+                    item->setAttribute(QLatin1String("enumNames"), valueTypeList);
+                    item->setValue(m_options.report().m_type);
+                    appendProperty(item, page, DBO_PARAM_TYPE);
+                    locationGroup->addSubProperty(item);
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(locationGroup);
+
+            }
             break;
 
         case OPTION_PAGE_DATABASE:
@@ -904,7 +929,14 @@ void OptionsDialog::applyProperty()
             break;
 
         case OPTION_PAGE_REPORT_HEADER:
-
+            {
+                switch(param)
+                {
+                    case RO_PARAM_PATH:                 m_options.report().m_path = value.toString();   break;
+                    case RO_PARAM_TYPE:                 m_options.report().m_type = value.toBool();     break;
+                    default:                            assert(0);                                      break;
+                }
+            }
             break;
 
         case OPTION_PAGE_DATABASE:

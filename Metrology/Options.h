@@ -87,7 +87,7 @@ public:
 
 const char* const		MeasureViewParam[] =
 {
-                        QT_TRANSLATE_NOOP("Options.h", "Font of measurements list "),
+                        QT_TRANSLATE_NOOP("Options.h", "Font of measurements list"),
                         QT_TRANSLATE_NOOP("Options.h", "Show external ID"),
                         QT_TRANSLATE_NOOP("Options.h", "Displaying value"),
                         QT_TRANSLATE_NOOP("Options.h", "Measurement over limit error"),
@@ -201,6 +201,83 @@ public:
     void                save();
 
     DatabaseOption&     operator=(const DatabaseOption& from);
+};
+
+// ==============================================================================================
+
+#define                 REPORT_OPTIONS_REG_KEY		"Options/Reports/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		ReportParam[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Path"),
+                        QT_TRANSLATE_NOOP("Options.h", "Type"),
+};
+
+const int				RO_PARAM_COUNT = sizeof(ReportParam)/sizeof(char*);
+
+const int				RO_PARAM_PATH  = 0,
+                        RO_PARAM_TYPE  = 1;
+
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const       ReportType[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity - simple"),
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity - metrological certification"),
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity - detail electric"),
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity - detail physical"),
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity - detail output"),
+                        QT_TRANSLATE_NOOP("Options.h", "Comparators"),
+                        QT_TRANSLATE_NOOP("Options.h", "Complex comparators"),
+};
+
+const int               REPORT_TYPE_COUNT                       = sizeof(ReportType)/sizeof(char*);
+
+const int               REPORT_TYPE_UNKNOWN                     = -1,
+                        REPORT_TYPE_LINEARITY                   = 0,
+                        REPORT_TYPE_LINEARITY_CERTIFICATION     = 1,
+                        REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC   = 2,
+                        REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL   = 3,
+                        REPORT_TYPE_LINEARITY_DETAIL_OUTPUT     = 4,
+                        REPORT_TYPE_COMPARATOR                  = 5,
+                        REPORT_TYPE_COMPLEX_COMPARATOR          = 6;
+
+const char* const       ReportFileName[REPORT_TYPE_COUNT] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "LinearityCertification.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "LinearityDetailEl.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "LinearityDetailPh.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "LinearityDetailOut.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "Comparators.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "ComplexComparators.ncr"),
+};
+
+// ----------------------------------------------------------------------------------------------
+
+class ReportOption : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit            ReportOption(QObject *parent = 0);
+    explicit            ReportOption(const ReportOption& from, QObject *parent = 0);
+                        ~ReportOption();
+
+    QString             m_path;
+    int					m_type = REPORT_TYPE_LINEARITY;
+
+    void                init();
+
+    int                 reportTypeByMeasureType(int measureType);
+
+    void                load();
+    void                save();
+
+    ReportOption&       operator=(const ReportOption& from);
 };
 
 // ==============================================================================================
@@ -476,6 +553,7 @@ private:
     TcpIpOption         m_connectTcpIp;
     MeasureViewOption   m_measureView;
     DatabaseOption      m_database;
+    ReportOption        m_report;
     LinearityOption     m_linearity;
     BackupOption        m_backup;
 
@@ -492,6 +570,9 @@ public:
 
     DatabaseOption&     database() { return m_database; }
     void                setDatabase(const DatabaseOption& database) { m_database = database; }
+
+    ReportOption&       report() { return m_report; }
+    void                setReport(const ReportOption& report) { m_report = report; }
 
     LinearityOption&    linearity() { return m_linearity; }
     void                setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }

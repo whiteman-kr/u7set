@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport concurrent sql
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport concurrent sql printsupport
 
 TARGET = Metrology
 TEMPLATE = app
@@ -32,7 +32,8 @@ SOURCES += \
     Delegate.cpp \
     FindMeasure.cpp \
     FolderPropertyManager.cpp \
-    Database.cpp
+    Database.cpp \
+    ReportView.cpp
 
 
 HEADERS  += \
@@ -53,7 +54,8 @@ HEADERS  += \
     Delegate.h \
     FindMeasure.h \
     FolderPropertyManager.h \
-    Database.h
+    Database.h \
+    ReportView.h
 
 
 FORMS    +=
@@ -63,6 +65,10 @@ RESOURCES += \
 
 TRANSLATIONS = translations/Metrology_ru.ts \
                 translations/Metrology_uk.ts
+OTHER_FILES += \
+    translations/Metrology_ru.ts \
+    translations/Metrology_uk.ts
+
 
 unix:QMAKE_CXXFLAGS += -std=c++11
 
@@ -82,7 +88,20 @@ win32 {
         INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
 
-OTHER_FILES += \
-    translations/Metrology_ru.ts \
-    translations/Metrology_uk.ts
+
+# NCReport
+#
+win32
+{
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files/NCReport/2.13.0.VS2013.Qt5.3.2.eval/lib/" -lNCReportDebug2
+    else: CONFIG(release, debug|release) : LIBS += -L"C:/Program Files/NCReport/2.13.0.VS2013.Qt5.3.2.eval/lib/" -lNCReport2
+
+    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/NCReport/2.13.0.VS2013.Qt5.3.2.eval/lib/" -lNCReportDebug2
+    else: CONFIG(release, debug|release) : LIBS += -L"C:/Program Files (x86)/NCReport/2.13.0.VS2013.Qt5.3.2.eval/lib/" -lNCReport2
+
+    INCLUDEPATH += "C:/Program Files/NCReport/2.13.0.VS2013.Qt5.3.2.eval/include"
+    INCLUDEPATH += "C:/Program Files (x86)/NCReport/2.13.0.VS2013.Qt5.3.2.eval/include"
+}
+o
+
 
