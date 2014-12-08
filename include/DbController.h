@@ -1,9 +1,11 @@
 #pragma once
 
-#include "DbStruct.h"
-#include "DbWorker.h"
-#include "DeviceObject.h"
 #include <QVector>
+
+#include "../include/DbStruct.h"
+#include "../include/DbWorker.h"
+#include "../include/DeviceObject.h"
+#include "../include/DbProgress.h"
 
 class DbController : public QObject
 {

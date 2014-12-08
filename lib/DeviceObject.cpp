@@ -1,6 +1,8 @@
 #include "../include/DeviceObject.h"
 #include "../include/ProtoSerialization.h"
 #include <QDynamicPropertyChangeEvent>
+#include <QJSEngine>
+#include <QQmlEngine>
 
 
 namespace Hardware

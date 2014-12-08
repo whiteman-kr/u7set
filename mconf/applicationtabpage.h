@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "ui_applicationtabpage.h"
-#include "../include/configdata.h"
+#include "../include/ConfigData.h"
 
 class ApplicationTabPage : public QWidget
 {

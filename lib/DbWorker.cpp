@@ -1,6 +1,8 @@
+#include <functional>
 #include "../include/DbWorker.h"
 #include "../include/DeviceObject.h"
-#include <functional>
+#include "../include/DbProgress.h"
+
 
 // Upgrade database
 //

@@ -57,24 +57,23 @@ SOURCES +=\
     UserManagementDialog.cpp \
     ../lib/ConfigData.cpp \
     ../lib/DbStruct.cpp \
+	../lib/DeviceObject.cpp \
+	../lib/DbController.cpp \
+	../lib/DbWorker.cpp \
+	../lib/DbProgressDialog.cpp \
+	../lib/StreamedData.cpp \
+	../lib/ProtoSerialization.cpp \
+	../lib/Signal.cpp \
+	../lib/PropertyEditor.cpp \
     EquipmentTabPage.cpp \
-    ../lib/DeviceObject.cpp \
     VideoFramePropertiesDialog.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
-    ../lib/DbController.cpp \
-    ../lib/DbWorker.cpp \
-    ../lib/DbProgressDialog.cpp \
     DialogAfblEditor.cpp \
     DialogAfbProperties.cpp \
     xmlsyntaxhighlighter.cpp \
     SignalsTabPage.cpp \
-    ../lib/StreamedData.cpp \
-    ../lib/ProtoSerialization.cpp \
-	../lib/CUtils.cpp \
-    ../lib/Signal.cpp \
     SignalPropertiesDialog.cpp \
-    ../lib/PropertyEditor.cpp \
     SchemeTabPage.cpp \
     EditSchemeWidget.cpp \
     SchemeItemPropertiesDialog.cpp \
@@ -89,7 +88,8 @@ SOURCES +=\
     ../lib/ModuleConfiguration.cpp \
     BuildTabPage.cpp \
     ../lib/OutputLog.cpp \
-    ProjectBuilder.cpp
+    ProjectBuilder.cpp \
+    ../lib/DbProgress.cpp
 
 
 HEADERS  += \
@@ -111,26 +111,26 @@ HEADERS  += \
     UserManagementDialog.h \
     ../include/ConfigData.h \
     ../include/DbStruct.h \
+	../include/DeviceObject.h \
+	../include/DbController.h \
+	../include/DbWorker.h \
+	../include/DbProgressDialog.h \
+	../include/StreamedData.h \
+	../include/ProtoSerialization.h \
+	../include/Factory.h \
+	../include/CUtils.h \
+	../include/Signal.h \
+	../include/OrderedHash.h \
+	../include/PropertyEditor.h \
     EquipmentTabPage.h \
-    ../include/DeviceObject.h \
     VideoFramePropertiesDialog.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
-    ../include/DbController.h \
-    ../include/DbWorker.h \
-    ../include/DbProgressDialog.h \
     DialogAfblEditor.h \
     DialogAfbProperties.h \
     xmlsyntaxhighlighter.h \
     SignalsTabPage.h \
-    ../include/StreamedData.h \
-    ../include/ProtoSerialization.h \
-    ../include/Factory.h \
-    ../include/CUtils.h \
-    ../include/Signal.h \
     SignalPropertiesDialog.h \
-    ../include/OrderedHash.h \
-    ../include/PropertyEditor.h \
     SchemeTabPage.h \
     EditSchemeWidget.h \
     SchemeItemPropertiesDialog.h \
@@ -146,7 +146,8 @@ HEADERS  += \
     BuildTabPage.h \
     ../include/OutputLog.h \
     ProjectBuilder.h \
-    ../include/Signal.h
+    ../include/Signal.h \
+    ../include/DbProgress.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -202,8 +203,8 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0029.sql \
     DatabaseUpgrade/Upgrade0030.sql \
     DatabaseUpgrade/Upgrade0031.sql \
+	DatabaseUpgrade/Upgrade0032.sql \
     Tools/afbschema.xsd \
-    DatabaseUpgrade/Upgrade0032.sql \
     ../Proto/proto_compile.sh
 
 

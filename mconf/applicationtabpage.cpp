@@ -1,6 +1,6 @@
-#include "stable.h"
+#include "Stable.h"
 #include "applicationtabpage.h"
-#include "log.h"
+#include "../include/OutputLog.h"
 
 ApplicationTabPage::ApplicationTabPage(QWidget *parent)
 	: QWidget(parent)

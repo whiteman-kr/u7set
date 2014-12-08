@@ -819,7 +819,7 @@ void EquipmentView::addModule()
 {
 	std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>(isPresetMode());
 
-	module->setStrId("$(PARENT)_MD00");
+	module->setStrId("$(PARENT)_MD$(PLACE)");
 	module->setCaption(tr("Module"));
 
 	addDeviceObject(module);

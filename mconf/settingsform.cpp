@@ -1,4 +1,4 @@
-#include "stable.h"
+#include "Stable.h"
 #include "settingsform.h"
 
 SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
@@ -13,7 +13,7 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	// Enumerate all com ports
 	//
 	std::list<QString> serialPorts;
-	HKEY hSerialCommKey = 0;
+/*	HKEY hSerialCommKey = 0;
 
 	LONG openRegKeyResult = ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"HARDWARE\\DEVICEMAP\\SERIALCOMM", 0, KEY_READ, &hSerialCommKey);
 	if (openRegKeyResult ==  ERROR_SUCCESS)
@@ -54,7 +54,7 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 			QString s = "\\\\.\\COM" + QString().setNum(i);
 			serialPorts.push_back(s);
 		}
-	}
+	}*/
 	
 	// ComPort 
 	//
