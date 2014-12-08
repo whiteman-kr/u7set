@@ -4578,18 +4578,33 @@ class ModuleConfiguration : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue >*
       mutable_values();
 
+  // optional string name = 3;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 3;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
+
   // @@protoc_insertion_point(class_scope:Proto.ModuleConfiguration)
  private:
   inline void set_has_struct_description();
   inline void clear_has_struct_description();
+  inline void set_has_name();
+  inline void clear_has_name();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* struct_description_;
   ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue > values_;
+  ::std::string* name_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9170,6 +9185,76 @@ ModuleConfiguration::values() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue >*
 ModuleConfiguration::mutable_values() {
   return &values_;
+}
+
+// optional string name = 3;
+inline bool ModuleConfiguration::has_name() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ModuleConfiguration::set_has_name() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ModuleConfiguration::clear_has_name() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ModuleConfiguration::clear_name() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    name_->clear();
+  }
+  clear_has_name();
+}
+inline const ::std::string& ModuleConfiguration::name() const {
+  return *name_;
+}
+inline void ModuleConfiguration::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void ModuleConfiguration::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void ModuleConfiguration::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ModuleConfiguration::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  return name_;
+}
+inline ::std::string* ModuleConfiguration::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ModuleConfiguration::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

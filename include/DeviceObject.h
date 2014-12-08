@@ -1,6 +1,7 @@
 #pragma once
 #include "DbStruct.h"
 #include "QUuid"
+#include "../include/Factory.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 
@@ -24,17 +25,7 @@ namespace Hardware
 		DeviceTypeCount
 	};
 
-	const static wchar_t* DeviceObjectExtensions[] =
-		{
-			L".hrt",		// Root
-			L".hsm",		// System
-			L".hrk",		// Rack
-			L".hcs",		// Chassis
-			L".hmd",		// Module
-			L".hcr",		// Controller
-			L".hds"			// Diagnostics Signal
-		};
-
+	extern const wchar_t* DeviceObjectExtensions[];
 
 	//
 	//
@@ -281,7 +272,9 @@ namespace Hardware
 		Q_OBJECT
 
 		Q_PROPERTY(int Type READ type WRITE setType)
-		Q_PROPERTY(QString ConfigurationStruct READ configurationStruct WRITE setConfigurationStruct)
+
+		Q_PROPERTY(QString ConfStruct READ configurationStruct WRITE setConfigurationStruct)
+		Q_PROPERTY(QString ConfFirmwareName READ confFirmwareName WRITE setConfFirmwareName)
 
 	public:
 		explicit DeviceModule(bool preset = false);
@@ -298,6 +291,11 @@ namespace Hardware
 
 		virtual bool event(QEvent* e) override;
 
+		// Public Methods
+		//
+	public:
+		bool compileConfiguration(McFirmware* dest, QString* errorString) const;
+
 		// Properties
 		//
 	public:
@@ -306,6 +304,11 @@ namespace Hardware
 
 		QString configurationStruct() const;
 		void setConfigurationStruct(const QString& value);
+
+		QString confFirmwareName() const;
+		void setConfFirmwareName(const QString& value);
+
+		const ModuleConfiguration& moduleConfiguration() const;
 
 		// Data
 		//

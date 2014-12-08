@@ -40,7 +40,8 @@ CONFIG(release, debug|release) {
 
 OTHER_FILES += \
     ../Proto/proto_compile.bat \
-    ../Proto/serialization.proto
+    ../Proto/serialization.proto \
+    ../Proto/proto_compile.sh
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
@@ -115,7 +116,6 @@ SOURCES += \
 	Configuration.cpp \
     ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/CUtils.cpp \
     SchemeLayer.cpp \
     Scheme.cpp \
     WorkflowScheme.cpp \

@@ -777,7 +777,7 @@ void SignalsModel::loadSignals()
 	std::vector<DbUser> list;
 	m_dbController->getUserList(&list, m_parentWindow);
 	m_usernameMap.clear();
-	for (int i = 0; i < list.size(); i++)
+	for (size_t i = 0; i < list.size(); i++)
 	{
 		m_usernameMap[list[i].userId()] = list[i].username();
 	}

@@ -11,6 +11,12 @@ void BuildWorkerThread::run()
 	QThread::currentThread()->setTerminationEnabled(true);
 
 	qDebug() << "Building started";
+	m_log->writeMessage("Building started");
+
+	if (onlyCheckedIn() == false)
+	{
+		m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true);
+	}
 
 	QString str;
 	bool ok = false;
@@ -41,6 +47,7 @@ void BuildWorkerThread::run()
 
 	do
 	{
+		//
 		// Get Equipment from the database
 		//
 		m_log->writeMessage("");
@@ -59,13 +66,47 @@ void BuildWorkerThread::run()
 
 		if (ok == false)
 		{
-			m_log->writeError(tr("Getting equipment: error"), true);
+			m_log->writeError(tr("Error"), true);
 			break;
 		}
 		else
 		{
-			m_log->writeMessage(tr("Getting equipment: ok"));
+			m_log->writeMessage(tr("Ok"));
 		}
+
+		//
+		// Expand Devices StrId
+		//
+		m_log->writeMessage("");
+		m_log->writeMessage(tr("Expanding devices StrIds"));
+
+		expandDeviceStrId(&deviceRoot);
+
+		m_log->writeMessage(tr("Ok"));
+
+		//
+		// Generate Module Confuiguration Binary File
+		//
+		m_log->writeMessage("");
+		m_log->writeMessage(tr("Generating modules configurations"));
+
+		ok = generateModulesConfigurations(&db, &deviceRoot);
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			break;
+		}
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("Error"), true);
+			break;
+		}
+		else
+		{
+			m_log->writeMessage(tr("Ok"));
+		}
+
 	}
 	while (false);
 
@@ -113,7 +154,17 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	std::vector<DbFileInfo> files;
 
-	bool ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+	bool ok = false;
+
+	if (onlyCheckedIn() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+	}
+
 	if (ok == false)
 	{
 		return false;
@@ -121,12 +172,18 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	parent->deleteAllChildren();
 
-//#pragma omp for
 	for (auto& fi : files)
 	{
 		std::shared_ptr<DbFile> file;
 
-		ok = db->getLatestVersion(fi, &file, nullptr);
+		if (onlyCheckedIn() == true)
+		{
+			assert(false);
+		}
+		else
+		{
+			ok = db->getLatestVersion(fi, &file, nullptr);
+		}
 
 		if (file == false || ok == false)
 		{
@@ -161,6 +218,130 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 		if (ok == false)
 		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
+{
+	if (device->parent() != nullptr)
+	{
+		QString strId = device->strId();
+
+		strId.replace(QString("$(PARENT)"), device->parent()->strId(), Qt::CaseInsensitive);
+		strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+
+		device->setStrId(strId);
+	}
+
+	for (int i = 0; i < device->childrenCount(); i++)
+	{
+		expandDeviceStrId(device->child(i));
+	}
+
+	return true;
+}
+
+bool BuildWorkerThread::generateModulesConfigurations(DbController* db, const Hardware::DeviceObject* root)
+{
+	std::map<QString, std::shared_ptr<Hardware::McFirmware>> firmwares;
+
+	bool ok = generateModulesConfigurations(db, root, &firmwares);
+
+	return ok;
+}
+
+bool BuildWorkerThread::generateModulesConfigurations(
+		DbController* db,
+		const Hardware::DeviceObject* parent,
+		std::map<QString, std::shared_ptr<Hardware::McFirmware>>* firmwares)
+{
+	assert(db != nullptr);
+	assert(db->isProjectOpened() == true);
+	assert(parent != nullptr);
+	assert(parent->deviceType() < Hardware::DeviceType::Module);
+	assert(firmwares != nullptr);
+
+	if (QThread::currentThread()->isInterruptionRequested() == true)
+	{
+		return false;
+	}
+
+	if (parent->deviceType() == Hardware::DeviceType::System)
+	{
+		m_log->writeMessage(tr("System %1...").arg(parent->caption()));
+	}
+
+	for (int i = 0; i < parent->childrenCount(); i++)
+	{
+		Hardware::DeviceObject* child = parent->child(i);
+
+		if (child->deviceType() > Hardware::DeviceType::Module)
+		{
+			continue;
+		}
+
+		if (child->deviceType() < Hardware::DeviceType::Module)
+		{
+			generateModulesConfigurations(db, child);
+			continue;
+		}
+
+		// This is Module, if it has configuration process it.
+		//
+		assert(child->deviceType() == Hardware::DeviceType::Module);
+
+		Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
+		assert(module != nullptr);
+
+		if (module->moduleConfiguration().hasConfiguration() == false)
+		{
+			// Module does not have configuration, process the next child;
+			//
+			continue;
+		}
+
+		// Get the firmware by it's name or create new if it does not exists
+		//
+		const Hardware::ModuleConfiguration& moduleConfiguration = module->moduleConfiguration();
+
+		QString confFileName = module->confFirmwareName();
+		std::shared_ptr<Hardware::McFirmware> firmware;
+
+		try
+		{
+			firmware = firmwares->at(confFileName);
+		}
+		catch(std::out_of_range)
+		{
+			firmware = std::make_shared<Hardware::McFirmware>();
+
+			firmware->setName(confFileName);
+			firmware->setUartId(moduleConfiguration.uartId());
+
+			firmwares->insert(std::make_pair(confFileName, firmware));
+		}
+
+		QString error;
+
+		// Compile configuration to firmware
+		//
+		qDebug() << module->strId();
+
+		bool ok = module->compileConfiguration(firmware.get(), &error);
+
+		if (ok == false)
+		{
+			// Somthing went wrong.
+			//
+			m_log->writeError(error, false);
+			m_log->writeError(tr("Device StrId: %1, caption: %2, place: %3")
+							  .arg(module->strId())
+							  .arg(module->caption())
+							  .arg(module->place()), false);
 			return false;
 		}
 	}
@@ -258,6 +439,16 @@ void BuildWorkerThread::setProjectUserPassword(const QString& value)
 	m_projectUserPassword = value;
 }
 
+bool BuildWorkerThread::onlyCheckedIn() const
+{
+	return m_onlyCheckedIn;
+
+}
+
+void BuildWorkerThread::setOnlyCheckedIn(bool value)
+{
+	m_onlyCheckedIn = value;
+}
 
 ProjectBuilder::ProjectBuilder(OutputLog* log) :
 	m_log(log)
@@ -292,7 +483,14 @@ ProjectBuilder::~ProjectBuilder()
 	return;
 }
 
-bool ProjectBuilder::start(QString projectName, QString ipAddress, int port, QString serverUserName, QString serverPassword, QString projectUserName, QString projectUserPassword)
+bool ProjectBuilder::start(QString projectName,
+						   QString ipAddress,
+						   int port,
+						   QString serverUserName,
+						   QString serverPassword,
+						   QString projectUserName,
+						   QString projectUserPassword,
+						   bool onlyCheckedIn)
 {
 	assert(m_thread != nullptr);
 
@@ -312,6 +510,7 @@ bool ProjectBuilder::start(QString projectName, QString ipAddress, int port, QSt
 	m_thread->setServerPassword(serverPassword);
 	m_thread->setProjectUserName(projectUserName);
 	m_thread->setProjectUserPassword(projectUserPassword);
+	m_thread->setOnlyCheckedIn(onlyCheckedIn);
 
 	// Ready? Go!
 	//
@@ -330,7 +529,7 @@ bool ProjectBuilder::isRunning() const
 	return result;
 }
 
-void ProjectBuilder::handleResults(QString result)
+void ProjectBuilder::handleResults(QString /*result*/)
 {
 }
 

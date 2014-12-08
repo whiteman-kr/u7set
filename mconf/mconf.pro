@@ -17,7 +17,7 @@
 
 #FORMS    += mainwindow.ui
 
-QT += core sql network xml widgets gui
+QT += core sql network xml widgets gui serialport qml
 
 TARGET = mconf
 TEMPLATE = app
@@ -29,34 +29,38 @@ DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 win32:LIBS += advapi32.lib
 
 HEADERS += crc.h \
-	log.h \
 	settings.h \
-	stable.h \
+	Stable.h \
 	configurator.h \
 	applicationtabpage.h \
 	diagtabpage.h \
 	moduleconfigurator.h \
 	settingsform.h \
 	ftdi/ftd2xx.h \
-    ../include/dbstruct.h \
-    ../include/dbstore.h \
-    ../include/configdata.h \
-    ../include/DeviceObject.h
+	../include/DbStruct.h \
+	../include/ConfigData.h \
+    ../include/DeviceObject.h \
+    ../include/OutputLog.h \
+    ../Proto/serialization.pb.h \
+    ../include/ModuleConfiguration.h \
+    ../include/ProtoSerialization.h
 
 SOURCES += applicationtabpage.cpp \
 	configurator.cpp \
 	crc.cpp \
 	diagtabpage.cpp \
-	log.cpp \
 	main.cpp \
 	moduleconfigurator.cpp \
 	settings.cpp \
 	settingsform.cpp \
-	stable.cpp \
-    ../lib/dbstruct.cpp \
-    ../lib/dbstore.cpp \
-    ../lib/configdata.cpp \
-    ../lib/DeviceObject.cpp
+	Stable.cpp \
+	../lib/DbStruct.cpp \
+	../lib/ConfigData.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/OutputLog.cpp \
+    ../Proto/serialization.pb.cc \
+    ../lib/ModuleConfiguration.cpp \
+    ../lib/ProtoSerialization.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui \
@@ -72,3 +76,34 @@ win32: LIBS += -L$$PWD/ftdi/ -lftd2xx
 
 INCLUDEPATH += $$PWD/ftdi
 DEPENDPATH += $$PWD/ftdi
+
+#c++11 support for GCC
+#
+unix:QMAKE_CXXFLAGS += -std=c++11
+
+# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+#
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+
+
+#Optimization flags
+#
+win32 {
+	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
+	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
+}
+unix {
+	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
+	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
+}
+
+#protobuf
+#
+win32 {
+	LIBS += -L$$DESTDIR -lprotobuf
+
+	INCLUDEPATH += ./../Protobuf
+}
+unix {
+	LIBS += -lprotobuf
+}
