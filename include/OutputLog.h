@@ -36,7 +36,7 @@ public:
 	void writeWarning(const QString& str, bool bold = false);
 	void writeError(const QString& str, bool bold = false);
 
-	void writeDump(const std::vector<uint8_t>& data);
+	void writeDump(const std::vector<char>& data);
 
 	bool windowMessageListEmpty() const;
 	OutputLogItem popWindowMessages();

@@ -2,6 +2,7 @@
 #define CONFIGURATOR_H
 
 #include <QObject>
+#include <QSerialPort>
 #include "../include/ConfigData.h"
 
 class OutputLog;
@@ -179,53 +180,61 @@ typedef CONF_IDENTIFICATION_DATA_V1 CONF_IDENTIFICATION_DATA;	// Current version
 //
 //	Configurator
 //
-//class Configurator : public QObject
-//{
-//	Q_OBJECT
+class Configurator : public QObject
+{
+	Q_OBJECT
 
-//public:
-//	Configurator(QString device, QObject* parent = nullptr);
-//	~Configurator();
+public:
+	Configurator(QString serialDevide, QObject* parent = nullptr);
+	virtual ~Configurator();
 	
-//protected:
+protected:
+	bool openConnection();
+	bool closeConnection();
+
+	bool send(int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<char>& requestData, CONF_HEADER* pReceivedHeader, std::vector<char>* replyData);
+
 //	HANDLE openConnection();
 //	bool closeConnection(HANDLE hDevice);
 
 //	bool send(HANDLE hDevice, int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<uint8_t>& requestData, CONF_HEADER* pReceivedHeader, std::vector<uint8_t>* replyData);
 
-//	// Slots
-//	//
-//public slots:
-//	void setSettings(QString device, bool showDebugInfo);
-//	void readConfiguration(int param);
-//	void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2);
-//	void writeConfData(ConfigDataReader conf);
-//	void eraseFlashMemory(int param);
+	// Slots
+	//
+public slots:
+	void setSettings(QString device, bool showDebugInfo);
+	void readConfiguration(int param);
+	void readConfigurationWorker(int param);
+	void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2);
+	void writeConfData(ConfigDataReader conf);
+	void eraseFlashMemory(int param);
 
-//	// Signals
-//	//
-//signals:
-//	void communicationStarted();
-//	void communicationFinished();
-//	void communicationReadFinished(int protocolVersion, std::vector<uint8_t> data);
+	// Signals
+	//
+signals:
+	void communicationStarted();
+	void communicationFinished();
+	void communicationReadFinished(int protocolVersion, std::vector<uint8_t> data);
 
-//	// Properties
-//	//
-//protected:
-//	QString device() const;
-//	void setDevice(const QString& device);
+	// Properties
+	//
+protected:
+	QString device() const;
+	void setDevice(const QString& device);
 
-//	bool showDebugInfo() const;
-//	void setShowDebugInfo(bool showDebugInfo);
+	bool showDebugInfo() const;
+	void setShowDebugInfo(bool showDebugInfo);
 
-//	// Data
-//	//
-//private:
-//	QString m_Device;
-//	bool m_showDebugInfo = false;
-//	uint32_t m_configuratorfactoryNo = 0;
+	// Data
+	//
+private:
+	QString m_device;
+	bool m_showDebugInfo = false;
+	uint32_t m_configuratorfactoryNo = 0;
 
-//	mutable QMutex mutex;			// m_Device
-//};
+	QSerialPort serialPort;
+
+	mutable QMutex mutex;			// m_device
+};
 
 #endif // CONFIGURATOR_H

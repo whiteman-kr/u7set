@@ -7,6 +7,8 @@
 
 namespace Hardware
 {
+	extern const wchar_t* DeviceObjectExtensions[];
+
 	void Init();
 	void Shutdwon();
 
@@ -25,7 +27,44 @@ namespace Hardware
 		DeviceTypeCount
 	};
 
-	extern const wchar_t* DeviceObjectExtensions[];
+	//
+	//
+	// DynamicProperty
+	//
+	//
+	class DynamicProperty
+	{
+	public:
+		DynamicProperty();
+		DynamicProperty(const QString& name, const QVariant& min, const QVariant& max, const QVariant& defaultVal, const QVariant& value);
+
+		// Properties
+		//
+	public:
+		QString name() const;
+		const char* name_c_str() const;
+		void setName(const QString& value);
+
+		QVariant min() const;
+		QVariant max() const;
+		QVariant defaultValue() const;
+
+		QVariant value() const;
+		void setValue(QVariant v);
+
+		// Data
+		//
+	private:
+		QString m_name;
+		QByteArray m_c_str_name;
+
+		QVariant m_min;
+		QVariant m_max;
+		QVariant m_default;
+
+		QVariant m_value;
+	};
+
 
 	//
 	//
@@ -42,6 +81,7 @@ namespace Hardware
 		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
 		Q_PROPERTY(QString ChildRestriction READ childRestriction WRITE setChildRestriction)
 		Q_PROPERTY(int Place READ place WRITE setPlace)
+		Q_PROPERTY(QString DynamicProperties READ dynamicProperties WRITE setDynamicProperties)
 
 	protected:
 		explicit DeviceObject(bool preset = false);
@@ -65,9 +105,20 @@ namespace Hardware
 		//
 		static DeviceObject* CreateObject(const Proto::Envelope& message);
 
+		// Public methods
+		//
 	public:
+		virtual bool event(QEvent* e) override;
 
-		// Properties and Methods
+		// Protected methods
+		//
+	protected:
+
+		// Parse m_dynamicProperties and create Qt meta system dynamic properies
+		void parseDynamicPropertiesStruct();
+
+
+		// Properties, etc
 		//
 	public:
 		DeviceObject* parent();
@@ -109,6 +160,9 @@ namespace Hardware
 		const QString& childRestriction() const;
 		void setChildRestriction(const QString& value);
 
+		const QString& dynamicProperties() const;
+		void setDynamicProperties(const QString& value);
+
 		int place() const;
 		void setPlace(int value);
 
@@ -135,6 +189,7 @@ namespace Hardware
 		DbFileInfo m_fileInfo;
 
 		QString m_childRestriction;			// Restriction script for child items
+		QString m_dynamicPropertiesStruct;	// Desctription of the Object's dynamic properties
 
 		int m_place = 0;
 
@@ -145,6 +200,8 @@ namespace Hardware
 		QString m_presetName;				// PresetName, if it is preset
 		//QUuid m_presetId;
 
+	private:
+		QHash<QString, DynamicProperty> m_dynamicProperties;
 	};
 
 

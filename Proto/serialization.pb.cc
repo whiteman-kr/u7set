@@ -143,6 +143,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* ModuleConfigurationValue_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ModuleConfigurationValue_reflection_ = NULL;
+const ::google::protobuf::Descriptor* Property_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  Property_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* SchemeUnit_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblSignalType_descriptor_ = NULL;
@@ -709,12 +712,14 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(VideoItemFblElement));
   DeviceObject_descriptor_ = file->message_type(31);
-  static const int DeviceObject_offsets_[15] = {
+  static const int DeviceObject_offsets_[17] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, strid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, childrestriction_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, place_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, dynamic_properties_struct_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, properties_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, preset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, presetroot_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, presetname_),
@@ -871,6 +876,22 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfigurationValue));
+  Property_descriptor_ = file->message_type(41);
+  static const int Property_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, name_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, value_),
+  };
+  Property_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      Property_descriptor_,
+      Property::default_instance_,
+      Property_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(Property));
   SchemeUnit_descriptor_ = file->enum_type(0);
   ConnectionDirrection_descriptor_ = file->enum_type(1);
   FblSignalType_descriptor_ = file->enum_type(2);
@@ -969,6 +990,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
     ModuleConfiguration_descriptor_, &ModuleConfiguration::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ModuleConfigurationValue_descriptor_, &ModuleConfigurationValue::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    Property_descriptor_, &Property::default_instance());
 }
 
 }  // namespace
@@ -1056,6 +1079,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete ModuleConfiguration_reflection_;
   delete ModuleConfigurationValue::default_instance_;
   delete ModuleConfigurationValue_reflection_;
+  delete Property::default_instance_;
+  delete Property_reflection_;
 }
 
 void protobuf_AddDesc_serialization_2eproto() {
@@ -1166,35 +1191,38 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ItemOutputSignal\"\017\n\rVideoItemLink\"[\n\023Vid"
     "eoItemFblElement\022\034\n\007afbGuid\030\001 \002(\0132\013.Prot"
     "o.Uuid\022&\n\006params\030\002 \003(\0132\026.Proto.FblElemen"
-    "tParam\"\210\004\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013."
+    "tParam\"\320\004\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013."
     "Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstrin"
     "g\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022(\n\020ch"
     "ildRestriction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005"
-    "place\030\005 \001(\005:\0010\022\025\n\006preset\030  \001(\010:\005false\022\031\n"
-    "\npresetRoot\030! \001(\010:\005false\022\"\n\npresetName\030\""
-    " \001(\0132\016.Proto.wstring\022\037\n\004Root\030d \001(\0132\021.Pro"
-    "to.DeviceRoot\022#\n\006System\030e \001(\0132\023.Proto.De"
-    "viceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceR"
-    "ack\022%\n\007Chassis\030g \001(\0132\024.Proto.DeviceChass"
-    "is\022#\n\006Module\030h \001(\0132\023.Proto.DeviceModule\022"
-    "+\n\nController\030i \001(\0132\027.Proto.DeviceContro"
-    "ller\022+\n\nDiagSignal\030j \001(\0132\027.Proto.DeviceD"
-    "iagSignal\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\""
-    "\014\n\nDeviceRack\" \n\rDeviceChassis\022\017\n\004type\030\001"
-    " \001(\005:\0010\"Y\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010"
-    "\0228\n\024module_configuration\030\003 \001(\0132\032.Proto.M"
-    "oduleConfiguration\"\022\n\020DeviceController\"\022"
-    "\n\020DeviceDiagSignal\"p\n\023ModuleConfiguratio"
-    "n\022\032\n\022struct_description\030\001 \001(\t\022/\n\006values\030"
-    "\002 \003(\0132\037.Proto.ModuleConfigurationValue\022\014"
-    "\n\004name\030\003 \001(\t\"7\n\030ModuleConfigurationValue"
-    "\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeU"
-    "nit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch"
-    "\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n"
-    "\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014"
-    "\n\010Discrete\020\001*N\n\014FblParamType\022\022\n\016AnalogIn"
-    "tegral\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDis"
-    "creteValue\020\002", 5172);
+    "place\030\005 \001(\005:\0010\022!\n\031dynamic_properties_str"
+    "uct\030\006 \001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Pr"
+    "operty\022\025\n\006preset\030  \001(\010:\005false\022\031\n\npresetR"
+    "oot\030! \001(\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.P"
+    "roto.wstring\022\037\n\004Root\030d \001(\0132\021.Proto.Devic"
+    "eRoot\022#\n\006System\030e \001(\0132\023.Proto.DeviceSyst"
+    "em\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007C"
+    "hassis\030g \001(\0132\024.Proto.DeviceChassis\022#\n\006Mo"
+    "dule\030h \001(\0132\023.Proto.DeviceModule\022+\n\nContr"
+    "oller\030i \001(\0132\027.Proto.DeviceController\022+\n\n"
+    "DiagSignal\030j \001(\0132\027.Proto.DeviceDiagSigna"
+    "l\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDevic"
+    "eRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\""
+    "Y\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\0228\n\024modu"
+    "le_configuration\030\003 \001(\0132\032.Proto.ModuleCon"
+    "figuration\"\022\n\020DeviceController\"\022\n\020Device"
+    "DiagSignal\"r\n\023ModuleConfiguration\022\032\n\022str"
+    "uct_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037."
+    "Proto.ModuleConfigurationValue\022\016\n\004name\030\003"
+    " \001(\t:\000\"7\n\030ModuleConfigurationValue\022\014\n\004na"
+    "me\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004n"
+    "ame\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUnit\022\013"
+    "\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n"
+    "\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Outp"
+    "ut\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Dis"
+    "crete\020\001*N\n\014FblParamType\022\022\n\016AnalogIntegra"
+    "l\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDiscrete"
+    "Value\020\002", 5287);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -1238,6 +1266,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   DeviceDiagSignal::default_instance_ = new DeviceDiagSignal();
   ModuleConfiguration::default_instance_ = new ModuleConfiguration();
   ModuleConfigurationValue::default_instance_ = new ModuleConfigurationValue();
+  Property::default_instance_ = new Property();
   Uuid::default_instance_->InitAsDefaultInstance();
   wstring::default_instance_->InitAsDefaultInstance();
   FontParam::default_instance_->InitAsDefaultInstance();
@@ -1279,6 +1308,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   DeviceDiagSignal::default_instance_->InitAsDefaultInstance();
   ModuleConfiguration::default_instance_->InitAsDefaultInstance();
   ModuleConfigurationValue::default_instance_->InitAsDefaultInstance();
+  Property::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_serialization_2eproto);
 }
 
@@ -11671,6 +11701,8 @@ const int DeviceObject::kStrIdFieldNumber;
 const int DeviceObject::kCaptionFieldNumber;
 const int DeviceObject::kChildRestrictionFieldNumber;
 const int DeviceObject::kPlaceFieldNumber;
+const int DeviceObject::kDynamicPropertiesStructFieldNumber;
+const int DeviceObject::kPropertiesFieldNumber;
 const int DeviceObject::kPresetFieldNumber;
 const int DeviceObject::kPresetRootFieldNumber;
 const int DeviceObject::kPresetNameFieldNumber;
@@ -11716,6 +11748,7 @@ void DeviceObject::SharedCtor() {
   caption_ = NULL;
   childrestriction_ = NULL;
   place_ = 0;
+  dynamic_properties_struct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   preset_ = false;
   presetroot_ = false;
   presetname_ = NULL;
@@ -11734,6 +11767,9 @@ DeviceObject::~DeviceObject() {
 }
 
 void DeviceObject::SharedDtor() {
+  if (dynamic_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
+    delete dynamic_properties_struct_;
+  }
   if (this != default_instance_) {
     delete uuid_;
     delete strid_;
@@ -11786,13 +11822,18 @@ void DeviceObject::Clear() {
       if (childrestriction_ != NULL) childrestriction_->::Proto::wstring::Clear();
     }
     place_ = 0;
+    if (has_dynamic_properties_struct()) {
+      if (dynamic_properties_struct_ != &::google::protobuf::internal::kEmptyString) {
+        dynamic_properties_struct_->clear();
+      }
+    }
     preset_ = false;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     presetroot_ = false;
     if (has_presetname()) {
       if (presetname_ != NULL) presetname_->::Proto::wstring::Clear();
     }
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (has_root()) {
       if (root_ != NULL) root_->::Proto::DeviceRoot::Clear();
     }
@@ -11811,10 +11852,13 @@ void DeviceObject::Clear() {
     if (has_controller()) {
       if (controller_ != NULL) controller_->::Proto::DeviceController::Clear();
     }
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (has_diagsignal()) {
       if (diagsignal_ != NULL) diagsignal_->::Proto::DeviceDiagSignal::Clear();
     }
   }
+  properties_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -11892,6 +11936,38 @@ bool DeviceObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(50)) goto parse_dynamic_properties_struct;
+        break;
+      }
+
+      // optional string dynamic_properties_struct = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_dynamic_properties_struct:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_dynamic_properties_struct()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->dynamic_properties_struct().data(), this->dynamic_properties_struct().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(58)) goto parse_properties;
+        break;
+      }
+
+      // repeated .Proto.Property properties = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_properties:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_properties()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(58)) goto parse_properties;
         if (input->ExpectTag(256)) goto parse_preset;
         break;
       }
@@ -12087,6 +12163,21 @@ void DeviceObject::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->place(), output);
   }
 
+  // optional string dynamic_properties_struct = 6;
+  if (has_dynamic_properties_struct()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->dynamic_properties_struct().data(), this->dynamic_properties_struct().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->dynamic_properties_struct(), output);
+  }
+
+  // repeated .Proto.Property properties = 7;
+  for (int i = 0; i < this->properties_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      7, this->properties(i), output);
+  }
+
   // optional bool preset = 32 [default = false];
   if (has_preset()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(32, this->preset(), output);
@@ -12184,6 +12275,23 @@ void DeviceObject::SerializeWithCachedSizes(
   // optional int32 place = 5 [default = 0];
   if (has_place()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->place(), target);
+  }
+
+  // optional string dynamic_properties_struct = 6;
+  if (has_dynamic_properties_struct()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->dynamic_properties_struct().data(), this->dynamic_properties_struct().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->dynamic_properties_struct(), target);
+  }
+
+  // repeated .Proto.Property properties = 7;
+  for (int i = 0; i < this->properties_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        7, this->properties(i), target);
   }
 
   // optional bool preset = 32 [default = false];
@@ -12298,11 +12406,20 @@ int DeviceObject::ByteSize() const {
           this->place());
     }
 
+    // optional string dynamic_properties_struct = 6;
+    if (has_dynamic_properties_struct()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->dynamic_properties_struct());
+    }
+
     // optional bool preset = 32 [default = false];
     if (has_preset()) {
       total_size += 2 + 1;
     }
 
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional bool presetRoot = 33 [default = false];
     if (has_presetroot()) {
       total_size += 2 + 1;
@@ -12315,8 +12432,6 @@ int DeviceObject::ByteSize() const {
           this->presetname());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional .Proto.DeviceRoot Root = 100;
     if (has_root()) {
       total_size += 2 +
@@ -12359,6 +12474,8 @@ int DeviceObject::ByteSize() const {
           this->controller());
     }
 
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional .Proto.DeviceDiagSignal DiagSignal = 106;
     if (has_diagsignal()) {
       total_size += 2 +
@@ -12367,6 +12484,14 @@ int DeviceObject::ByteSize() const {
     }
 
   }
+  // repeated .Proto.Property properties = 7;
+  total_size += 1 * this->properties_size();
+  for (int i = 0; i < this->properties_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->properties(i));
+  }
+
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -12392,6 +12517,7 @@ void DeviceObject::MergeFrom(const ::google::protobuf::Message& from) {
 
 void DeviceObject::MergeFrom(const DeviceObject& from) {
   GOOGLE_CHECK_NE(&from, this);
+  properties_.MergeFrom(from.properties_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_uuid()) {
       mutable_uuid()->::Proto::Uuid::MergeFrom(from.uuid());
@@ -12408,17 +12534,20 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     if (from.has_place()) {
       set_place(from.place());
     }
+    if (from.has_dynamic_properties_struct()) {
+      set_dynamic_properties_struct(from.dynamic_properties_struct());
+    }
     if (from.has_preset()) {
       set_preset(from.preset());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_presetroot()) {
       set_presetroot(from.presetroot());
     }
     if (from.has_presetname()) {
       mutable_presetname()->::Proto::wstring::MergeFrom(from.presetname());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_root()) {
       mutable_root()->::Proto::DeviceRoot::MergeFrom(from.root());
     }
@@ -12437,6 +12566,8 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     if (from.has_controller()) {
       mutable_controller()->::Proto::DeviceController::MergeFrom(from.controller());
     }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_diagsignal()) {
       mutable_diagsignal()->::Proto::DeviceDiagSignal::MergeFrom(from.diagsignal());
     }
@@ -12471,6 +12602,9 @@ bool DeviceObject::IsInitialized() const {
   if (has_childrestriction()) {
     if (!this->childrestriction().IsInitialized()) return false;
   }
+  for (int i = 0; i < properties_size(); i++) {
+    if (!this->properties(i).IsInitialized()) return false;
+  }
   if (has_presetname()) {
     if (!this->presetname().IsInitialized()) return false;
   }
@@ -12487,6 +12621,8 @@ void DeviceObject::Swap(DeviceObject* other) {
     std::swap(caption_, other->caption_);
     std::swap(childrestriction_, other->childrestriction_);
     std::swap(place_, other->place_);
+    std::swap(dynamic_properties_struct_, other->dynamic_properties_struct_);
+    properties_.Swap(&other->properties_);
     std::swap(preset_, other->preset_);
     std::swap(presetroot_, other->presetroot_);
     std::swap(presetname_, other->presetname_);
@@ -13876,7 +14012,7 @@ bool ModuleConfiguration::MergePartialFromCodedStream(
         break;
       }
 
-      // optional string name = 3;
+      // optional string name = 3 [default = ""];
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -13926,7 +14062,7 @@ void ModuleConfiguration::SerializeWithCachedSizes(
       2, this->values(i), output);
   }
 
-  // optional string name = 3;
+  // optional string name = 3 [default = ""];
   if (has_name()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
       this->name().data(), this->name().length(),
@@ -13960,7 +14096,7 @@ void ModuleConfiguration::SerializeWithCachedSizes(
         2, this->values(i), target);
   }
 
-  // optional string name = 3;
+  // optional string name = 3 [default = ""];
   if (has_name()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
       this->name().data(), this->name().length(),
@@ -13988,7 +14124,7 @@ int ModuleConfiguration::ByteSize() const {
           this->struct_description());
     }
 
-    // optional string name = 3;
+    // optional string name = 3 [default = ""];
     if (has_name()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -14360,6 +14496,289 @@ void ModuleConfigurationValue::Swap(ModuleConfigurationValue* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = ModuleConfigurationValue_descriptor_;
   metadata.reflection = ModuleConfigurationValue_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int Property::kNameFieldNumber;
+const int Property::kValueFieldNumber;
+#endif  // !_MSC_VER
+
+Property::Property()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void Property::InitAsDefaultInstance() {
+}
+
+Property::Property(const Property& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void Property::SharedCtor() {
+  _cached_size_ = 0;
+  name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  value_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+Property::~Property() {
+  SharedDtor();
+}
+
+void Property::SharedDtor() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (value_ != &::google::protobuf::internal::kEmptyString) {
+    delete value_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void Property::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* Property::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return Property_descriptor_;
+}
+
+const Property& Property::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+Property* Property::default_instance_ = NULL;
+
+Property* Property::New() const {
+  return new Property;
+}
+
+void Property::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_name()) {
+      if (name_ != &::google::protobuf::internal::kEmptyString) {
+        name_->clear();
+      }
+    }
+    if (has_value()) {
+      if (value_ != &::google::protobuf::internal::kEmptyString) {
+        value_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool Property::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required string name = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_name()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->name().data(), this->name().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_value;
+        break;
+      }
+
+      // required string value = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_value:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_value()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->value().data(), this->value().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void Property::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required string name = 1;
+  if (has_name()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->name().data(), this->name().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->name(), output);
+  }
+
+  // required string value = 2;
+  if (has_value()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->value().data(), this->value().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->value(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* Property::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required string name = 1;
+  if (has_name()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->name().data(), this->name().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->name(), target);
+  }
+
+  // required string value = 2;
+  if (has_value()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->value().data(), this->value().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->value(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int Property::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required string name = 1;
+    if (has_name()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->name());
+    }
+
+    // required string value = 2;
+    if (has_value()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->value());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void Property::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const Property* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const Property*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void Property::MergeFrom(const Property& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_name()) {
+      set_name(from.name());
+    }
+    if (from.has_value()) {
+      set_value(from.value());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void Property::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void Property::CopyFrom(const Property& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Property::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+
+  return true;
+}
+
+void Property::Swap(Property* other) {
+  if (other != this) {
+    std::swap(name_, other->name_);
+    std::swap(value_, other->value_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata Property::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = Property_descriptor_;
+  metadata.reflection = Property_reflection_;
   return metadata;
 }
 

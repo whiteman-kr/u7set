@@ -539,6 +539,8 @@ message DeviceObject
 	required wstring caption = 3;
 	optional wstring childRestriction = 4;
 	optional int32 place = 5 [default = 0];
+	optional string dynamic_properties_struct = 6;
+	repeated Property properties = 7;
 
 	optional bool preset = 32 [default = false];
 	optional bool presetRoot = 33 [default = false];
@@ -596,6 +598,12 @@ message ModuleConfiguration
 }
 
 message ModuleConfigurationValue
+{
+	required string name = 1;
+	required string value = 2;
+}
+
+message Property
 {
 	required string name = 1;
 	required string value = 2;

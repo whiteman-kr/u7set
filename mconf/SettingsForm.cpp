@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "settingsform.h"
+#include "SettingsForm.h"
 
 SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	: QDialog(parent),
@@ -12,8 +12,36 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 
 	// Enumerate all com ports
 	//
+	QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
+
+	for (const QSerialPortInfo& pi : ports)
+	{
+		qDebug() << "Port";
+		qDebug() << pi.description();
+		qDebug() << pi.manufacturer();
+		qDebug() << pi.portName();
+		qDebug() << pi.serialNumber();
+		qDebug() << pi.systemLocation();
+	}
+
+	// ComPort
+	//
+	m_pSerialPort = new QComboBox();
+	m_pSerialPortLabel = new QLabel(tr("&Serial Port"));
+	m_pSerialPortLabel->setBuddy(m_pSerialPort);
+
+	for (const QSerialPortInfo& pi : ports)
+	{
+		m_pSerialPort->addItem(pi.systemLocation());
+	}
+
+	m_pSerialPort->setCurrentText(m_settings.serialPort());
+
+
+/*
 	std::list<QString> serialPorts;
-/*	HKEY hSerialCommKey = 0;
+
+	HKEY hSerialCommKey = 0;
 
 	LONG openRegKeyResult = ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"HARDWARE\\DEVICEMAP\\SERIALCOMM", 0, KEY_READ, &hSerialCommKey);
 	if (openRegKeyResult ==  ERROR_SUCCESS)
@@ -54,7 +82,7 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 			QString s = "\\\\.\\COM" + QString().setNum(i);
 			serialPorts.push_back(s);
 		}
-	}*/
+	}
 	
 	// ComPort 
 	//
@@ -68,6 +96,7 @@ SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
 	}
 
 	m_pSerialPort->setCurrentText(m_settings.serialPort());
+	*/
 
 	// ShowDebugInfo Check Box
 	//

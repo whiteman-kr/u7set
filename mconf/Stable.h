@@ -24,6 +24,9 @@
 #include <QSqlQuery>
 #include <QtEndian>
 
+#include <QSerialPort>
+#include <QSerialPortInfo>
+
 // Log
 //
 #include "../include/OutputLog.h"

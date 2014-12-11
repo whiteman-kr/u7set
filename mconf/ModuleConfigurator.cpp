@@ -1,9 +1,9 @@
 #include "Stable.h"
-#include "moduleconfigurator.h"
-#include "configurator.h"
-#include "settingsform.h"
-#include "diagtabpage.h"
-#include "applicationtabpage.h"
+#include "ModuleConfigurator.h"
+#include "Configurator.h"
+#include "SettingsForm.h"
+#include "DiagTabPage.h"
+#include "ApplicationTabPage.h"
 
 ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	: QMainWindow(parent)
@@ -109,28 +109,28 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	//
 	qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
 
-//	m_pConfigurator = new Configurator(m_settings.serialPort());
-//	m_pConfigurationThread = new QThread(this);
+	m_pConfigurator = new Configurator(m_settings.serialPort());
+	m_pConfigurationThread = new QThread(this);
 	
-//	connect(this, &ModuleConfigurator::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
+	connect(this, &ModuleConfigurator::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 	
-//	connect(this, &ModuleConfigurator::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
-//	connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
-//	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::writeConfData);
-//	//connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::writeDiagData);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
-//	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
+	connect(this, &ModuleConfigurator::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
+	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
+	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::writeConfData);
+	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::writeDiagData);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
+	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
 	
-//	connect(m_pConfigurator, &Configurator::communicationStarted, this, &ModuleConfigurator::disableControls);
-//	connect(m_pConfigurator, &Configurator::communicationFinished, this, &ModuleConfigurator::enableControls);
-//	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &ModuleConfigurator::communicationReadFinished);
+	connect(m_pConfigurator, &Configurator::communicationStarted, this, &ModuleConfigurator::disableControls);
+	connect(m_pConfigurator, &Configurator::communicationFinished, this, &ModuleConfigurator::enableControls);
+	connect(m_pConfigurator, &Configurator::communicationReadFinished, this, &ModuleConfigurator::communicationReadFinished);
 	
-//	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
+	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
 	
-//	m_pConfigurator->moveToThread(m_pConfigurationThread);
+	m_pConfigurator->moveToThread(m_pConfigurationThread);
 
-//	m_pConfigurationThread->start();
+	m_pConfigurationThread->start();
 
-//	emit setCommunicationSettings(m_settings.serialPort(), m_settings.showDebugInfo());
+	emit setCommunicationSettings(m_settings.serialPort(), m_settings.showDebugInfo());
 
 	// Start Timer
 	//

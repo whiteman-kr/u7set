@@ -35,6 +35,87 @@ namespace Hardware
 	{
 	}
 
+
+	//
+	//
+	// DynamicProperty
+	//
+	//
+	DynamicProperty::DynamicProperty()
+	{
+	}
+
+	DynamicProperty::DynamicProperty(const QString& name, const QVariant& min, const QVariant& max, const QVariant& defaultVal, const QVariant& value) :
+		m_name(name),
+		m_c_str_name(name.toStdString().c_str()),
+		m_min(min),
+		m_max(max),
+		m_default(defaultVal),
+		m_value(value)
+	{
+
+	}
+
+	QString DynamicProperty::name() const
+	{
+		return m_name;
+	}
+
+	const char* DynamicProperty::name_c_str() const
+	{
+		return m_c_str_name.constData();
+	}
+
+	void DynamicProperty::setName(const QString& value)
+	{
+		m_name = value;
+		m_c_str_name = QByteArray(value.toStdString().c_str());
+	}
+
+	QVariant DynamicProperty::min() const
+	{
+		return m_min;
+	}
+
+	QVariant DynamicProperty::max() const
+	{
+		return m_max;
+	}
+
+	QVariant DynamicProperty::defaultValue() const
+	{
+		return m_default;
+	}
+
+	QVariant DynamicProperty::value() const
+	{
+		return m_value;
+	}
+
+	void DynamicProperty::setValue(QVariant v)
+	{
+		assert(v.type() == m_default.type());
+		assert(v.type() == m_min.type());
+		assert(v.type() == m_max.type());
+
+		if (v.type() == QVariant::Int ||
+			v.type() == QVariant::UInt ||
+			v.type() == QVariant::Double)
+		{
+				if (v < m_min)
+				{
+					v = m_min;
+				}
+
+				if (v > m_max)
+				{
+					v = m_max;
+				}
+		}
+
+		m_value = v;
+	}
+
 	//
 	//
 	// DeviceObject
@@ -83,6 +164,11 @@ namespace Hardware
 			Proto::Write(pMutableDeviceObject->mutable_childrestriction(), m_childRestriction);
 		}
 
+		if (m_dynamicPropertiesStruct.isEmpty() == false)
+		{
+			pMutableDeviceObject->set_dynamic_properties_struct(m_dynamicPropertiesStruct.toStdString());
+		}
+
 		if (m_preset == true)
 		{
 			pMutableDeviceObject->set_preset(m_preset);
@@ -116,6 +202,16 @@ namespace Hardware
 		else
 		{
 			m_childRestriction.clear();
+		}
+
+		if (deviceobject.has_dynamic_properties_struct() == true)
+		{
+			m_dynamicPropertiesStruct = QString::fromStdString(deviceobject.dynamic_properties_struct());
+			parseDynamicPropertiesStruct();
+		}
+		else
+		{
+			m_dynamicPropertiesStruct.clear();
 		}
 
 		if (deviceobject.has_preset() == true && deviceobject.preset() == true)
@@ -166,6 +262,250 @@ namespace Hardware
 		pDeviceObject->LoadData(message);
 
 		return pDeviceObject;
+	}
+
+	bool DeviceObject::event(QEvent* e)
+	{
+		if (e->type() == QEvent::DynamicPropertyChange)
+		{
+			// Configuration property was changed
+			//
+			QDynamicPropertyChangeEvent* d = dynamic_cast<QDynamicPropertyChangeEvent*>(e);
+			assert(d != nullptr);
+
+			QString propertyName = d->propertyName();
+			QVariant value = this->property(propertyName.toStdString().c_str());
+
+			if (value.isValid() == true)
+			{
+				auto it = m_dynamicProperties.find(propertyName);
+
+				if (it == m_dynamicProperties.end())
+				{
+					// can't find property,
+					// probably it is adding it to the qt meta system now?
+					//
+				}
+				else
+				{
+					(*it).setValue(value);
+				}
+			}
+
+			// Accept event
+			//
+			return true;
+		}
+
+		// Event was not recognized
+		//
+		return false;
+	}
+
+	// Parse m_dynamicProperties and create Qt meta system dynamic properies
+	void DeviceObject::parseDynamicPropertiesStruct()
+	{
+		// Delete all previous object's dynamic properties
+		//
+		QList<QByteArray> dynamicProps = dynamicPropertyNames();
+
+		for (const QByteArray& p : dynamicProps)
+		{
+			setProperty(QString(p).toStdString().c_str(), QVariant());
+		}
+
+		// Parse struct (rows, divided by semicolon) and create new properties
+		//
+
+		/*
+		 name;			type;		min;		max;		default
+
+		 Example:
+		 Server\IP;		string;		0;			0;			192.168.75.254
+		 Server\Port;	uint32_t;	1;			65535;		2345
+		 .
+		 .
+
+		 name: property name, can be devided by symbol '\'
+		 type: property type, can by one of
+					qint32  (4 bytes signed integral),
+					quint32 (4 bytes unsigned integer)
+					bool (true, false),
+					double,
+					string
+		 min: property minimum value (ignored for bool, string)
+		 max: property maximim value (ignored for bool, string)
+		 default: can be any value of the specified type
+
+		 */
+
+		QHash<QString, DynamicProperty> parsedProperties;
+
+		QStringList rows = m_dynamicPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
+
+		for (const QString& r : rows)
+		{
+			QStringList columns = r.split(';');
+
+			if (columns.count() != 5)
+			{
+				qDebug() << Q_FUNC_INFO << " Wrong proprty struct: " << r;
+				qDebug() << Q_FUNC_INFO << " Expected: name;type;min;max;default";
+				continue;
+			}
+
+			QString name(columns[0]);
+			QStringRef type(&columns[1]);
+			QStringRef min(&columns[2]);
+			QStringRef max(&columns[3]);
+			QStringRef defaultValue(&columns[4]);
+
+			if (name.isEmpty() || name.size() > 1024)
+			{
+				qDebug() << Q_FUNC_INFO << " DynamicProperties: filed name must have size  from 1 to 1024, name: " << name;
+				continue;
+			}
+
+			if (type != "qint32" &&
+				type != "quint32" &&
+				type != "bool" &&
+				type != "double" &&
+				type != "string")
+			{
+				qDebug() << Q_FUNC_INFO << " DynamicProperties: wrong filed tyep: " << type;
+				continue;
+			}
+
+
+			if (type == "qint32")
+			{
+				// Min
+				//
+				bool ok = false;
+				qint32 minInt = min.toInt(&ok);
+				if (ok == false)
+				{
+					minInt = std::numeric_limits<qint32>::min();
+				}
+
+				// Max
+				//
+				qint32 maxInt = max.toInt(&ok);
+				if (ok == false)
+				{
+					maxInt = std::numeric_limits<qint32>::max();
+				}
+
+				// Default Value
+				//
+				qint32 defaultInt = defaultValue.toInt();
+
+				DynamicProperty dp(name, QVariant(minInt), QVariant(maxInt), QVariant(defaultInt), QVariant(defaultInt));
+				parsedProperties.insert(name, dp);
+				continue;
+			}
+
+			if (type == "quint32")
+			{
+				// Min
+				//
+				bool ok = false;
+				quint32 minUInt = min.toUInt(&ok);
+				if (ok == false)
+				{
+					minUInt = std::numeric_limits<quint32>::min();
+				}
+
+				// Max
+				//
+				quint32 maxUInt = max.toUInt(&ok);
+				if (ok == false)
+				{
+					maxUInt = std::numeric_limits<quint32>::max();
+				}
+
+				// Default Value
+				//
+				quint32 defaultUInt = defaultValue.toUInt();
+
+				DynamicProperty dp(name, QVariant(minUInt), QVariant(maxUInt), QVariant(defaultUInt), QVariant(defaultUInt));
+				parsedProperties.insert(name, dp);
+
+				continue;
+			}
+
+			if (type == "double")
+			{
+				// Min
+				//
+				bool ok = false;
+				double minDouble = min.toDouble(&ok);
+				if (ok == false)
+				{
+					minDouble = std::numeric_limits<double>::min();
+				}
+
+				// Max
+				//
+				double maxDouble = max.toDouble(&ok);
+				if (ok == false)
+				{
+					maxDouble = std::numeric_limits<double>::max();
+				}
+
+				// Default Value
+				//
+				double defaultDouble = defaultValue.toDouble();
+
+				DynamicProperty dp(name, QVariant(minDouble), QVariant(maxDouble), QVariant(defaultDouble), QVariant(defaultDouble));
+				parsedProperties.insert(name, dp);
+
+				continue;
+			}
+
+			if (type == "bool")
+			{
+				// Default Value
+				//
+				bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
+				DynamicProperty dp(name, QVariant(false), QVariant(true), QVariant(defaultBool), QVariant(defaultBool));
+				parsedProperties.insert(name, dp);
+				continue;
+			}
+
+			if (type == "string")
+			{
+				DynamicProperty dp(name, QVariant(""), QVariant(""), QVariant(defaultValue.toString()), QVariant(defaultValue.toString()));
+				parsedProperties.insert(name, dp);
+				continue;
+			}
+
+			assert(false);
+		}
+
+		// Set to parsed properties old value
+		//
+		for (DynamicProperty& p : parsedProperties)
+		{
+			auto it = m_dynamicProperties.find(p.name());
+
+			if (it != m_dynamicProperties.end() && (*it).value().type() == p.value().type())
+			{
+				p.setValue((*it).value().type());
+			}
+		}
+
+		// Add all properties to QObject meta system
+		//
+		m_dynamicProperties.clear();
+
+		for (DynamicProperty& p : parsedProperties)
+		{
+			this->setProperty(p.name_c_str(), p.value());
+		}
+
+		m_dynamicProperties.swap(parsedProperties);
+		return;
 	}
 
 	DeviceObject* DeviceObject::parent()
@@ -379,6 +719,20 @@ namespace Hardware
 	void DeviceObject::setChildRestriction(const QString& value)
 	{
 		m_childRestriction = value;
+	}
+
+	const QString& DeviceObject::dynamicProperties() const
+	{
+		return m_dynamicPropertiesStruct;
+	}
+
+	void DeviceObject::setDynamicProperties(const QString& value)
+	{
+		if (m_dynamicPropertiesStruct != value)
+		{
+			m_dynamicPropertiesStruct = value;
+			parseDynamicPropertiesStruct();
+		}
 	}
 
 	int DeviceObject::place() const
@@ -749,8 +1103,8 @@ namespace Hardware
 		{
 			// Configuration property was changed
 			//
-			 QDynamicPropertyChangeEvent* d = dynamic_cast<QDynamicPropertyChangeEvent*>(e);
-			 assert(d != nullptr);
+			QDynamicPropertyChangeEvent* d = dynamic_cast<QDynamicPropertyChangeEvent*>(e);
+			assert(d != nullptr);
 
 			QString propertyName = d->propertyName();
 

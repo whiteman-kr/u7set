@@ -5,7 +5,7 @@
 #include "ui_moduleconfigurator.h"
 #include "../include/ConfigData.h"
 #include "../include/OutputLog.h"
-#include "settings.h"
+#include "Settings.h"
 
 class QLineEdit;
 class QPushButton;
@@ -50,21 +50,21 @@ private:
 	Ui::ModuleConfiguratorClass ui;
 	Settings m_settings;
 
-	QTabWidget* m_tabWidget;
+	QTabWidget* m_tabWidget = nullptr;
 
-	QTextEdit* m_pLog;
+	QTextEdit* m_pLog = nullptr;
 
-	QPushButton* m_pReadButton;
-	QPushButton* m_pConfigureButton;
-	QPushButton* m_pEraseButton;
+	QPushButton* m_pReadButton = nullptr;
+	QPushButton* m_pConfigureButton = nullptr;
+	QPushButton* m_pEraseButton = nullptr;
 
-	QPushButton* m_pSettingsButton;
-	QPushButton* m_pClearLogButton;
+	QPushButton* m_pSettingsButton = nullptr;
+	QPushButton* m_pClearLogButton = nullptr;
 
 	int m_logTimerId;
 
-	Configurator* m_pConfigurator;
-	QThread* m_pConfigurationThread;
+	Configurator* m_pConfigurator = nullptr;
+	QThread* m_pConfigurationThread = nullptr;
 };
 
 #endif // MODULECONFIGURATOR_H

@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "moduleconfigurator.h"
+#include "ModuleConfigurator.h"
 #include "../include/ConfigData.h"
 #include <QtWidgets/QApplication>
 

@@ -1,9 +1,14 @@
 #include "Stable.h"
-#include "settings.h"
+#include "Settings.h"
 
 
 Settings::Settings(void) :
+#ifdef Q_OS_LINUX
+	m_serialPort("ttyS0"),
+#endif
+#ifdef Q_OS_WIN32
 	m_serialPort("\\\\.\\COM3"),
+#endif
 	m_showDebugInfo(false),
 	m_expertMode(false),
 	m_server("127.0.0.1"),
@@ -20,6 +25,7 @@ Settings::~Settings(void)
 void Settings::save() const
 {
 	QSettings s;
+
 	s.setValue("m_serialPort", m_serialPort);
 	s.setValue("m_showDebugInfo", m_showDebugInfo);
 	s.setValue("m_expertMode", m_expertMode);
@@ -34,6 +40,7 @@ void Settings::save() const
 void Settings::load()
 {
 	QSettings s;
+
 	m_serialPort = s.value("m_serialPort").toString();
 	m_showDebugInfo = s.value("m_showDebugInfo").toBool();
 	m_expertMode = s.value("m_expertMode").toBool();

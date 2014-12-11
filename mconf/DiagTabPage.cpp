@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "diagtabpage.h"
+#include "DiagTabPage.h"
 
 DiagTabPage::DiagTabPage(QWidget *parent)
 	: QWidget(parent)

@@ -1,9 +1,11 @@
 #include "Stable.h"
-#include "configurator.h"
-#include "crc.h"
+#include "Configurator.h"
+#include "Crc.h"
+
 #ifdef Q_OS_WIN32
-	#include "./ftdi/ftd2xx.h"
+#include "./ftdi/ftd2xx.h"
 #endif
+
 
 //
 // Uuid
@@ -228,39 +230,425 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog& log)
 //
 // Configurator
 //
-//Configurator::Configurator(QString device, QObject *parent)
-//	: QObject(parent),
-//	m_Device(device)
-//{
-//}
+Configurator::Configurator(QString serialDevide, QObject* parent)
+	: QObject(parent),
+	m_device(serialDevide)
+{
+}
 
-//Configurator::~Configurator()
-//{
+Configurator::~Configurator()
+{
+}
 
-//}
+QString Configurator::device() const
+{
+	QMutexLocker ml(&mutex);
+	return m_device;
+}
 
-//QString Configurator::device() const
-//{
-//	QMutexLocker ml(&mutex);
-//	return m_Device;
-//}
+void Configurator::setDevice(const QString& device)
+{
+	QMutexLocker ml(&mutex);
+	m_device = device;
+	return;
+}
 
-//void Configurator::setDevice(const QString& device)
-//{
-//	QMutexLocker ml(&mutex);
-//	m_Device = device;
-//	return;
-//}
+bool Configurator::showDebugInfo() const
+{
+	return m_showDebugInfo;
+}
 
-//bool Configurator::showDebugInfo() const
-//{
-//	return m_showDebugInfo;
-//}
+void Configurator::setShowDebugInfo(bool showDebugInfo)
+{
+	m_showDebugInfo = showDebugInfo;
+}
 
-//void Configurator::setShowDebugInfo(bool showDebugInfo)
-//{
-//	m_showDebugInfo = showDebugInfo;
-//}
+bool Configurator::openConnection()
+{
+	m_configuratorfactoryNo = 0;
+
+	// Check configurator serial no
+	//
+#ifdef Q_OS_UNIX
+	theLog.writeMessage("The Linux version does not support configurator Factory No (FTDI programmer factory number).");
+	theLog.writeMessage("You can still continue using configurator, but a Factory No will not be written to the configured module.");
+#endif
+
+	// Read programmers factory no
+	//
+#ifdef Q_OS_WIN32
+	DWORD DeviceCount = 0;
+	FT_STATUS Result = FT_CreateDeviceInfoList(&DeviceCount);
+	if (Result != FT_OK)
+	{
+		theLog.writeError(__FUNCTION__ + tr(" FT_CreateDeviceInfoList error."));
+		return INVALID_HANDLE_VALUE;
+	}
+
+	if (DeviceCount == 0)
+	{
+		theLog.writeError(__FUNCTION__ + tr(" Can't find any configurator."));
+		return INVALID_HANDLE_VALUE;
+	}
+
+	if (DeviceCount != 1)
+	{
+		theLog.writeError(__FUNCTION__ + tr(" There are more than one configurator, please leave only one."));
+		return INVALID_HANDLE_VALUE;
+	}
+
+	FT_HANDLE ftHandle;
+
+	if (FT_Open(0, &ftHandle) != FT_OK)
+	{
+		theLog.writeError(__FUNCTION__ + tr(" FT_Open error."));
+		return INVALID_HANDLE_VALUE;
+	}
+
+
+	FT_PROGRAM_DATA ftData = FT_PROGRAM_DATA();
+	char ManufacturerBuf[32];
+	char ManufacturerIdBuf[16];
+	char DescriptionBuf[64];
+	char SerialNumberBuf[16];
+
+	ftData.Signature1 = 0x00000000;
+	ftData.Signature2 = 0xffffffff;
+	ftData.Version = 0x00000005;					// EEPROM structure with FT232H extensions
+	ftData.Manufacturer = ManufacturerBuf;
+	ftData.ManufacturerId = ManufacturerIdBuf;
+	ftData.Description = DescriptionBuf;
+	ftData.SerialNumber = SerialNumberBuf;
+
+	if (FT_EE_Read(ftHandle, &ftData) == FT_OK)
+	{
+		QString serialNo = SerialNumberBuf;
+
+		bool converted = false;
+		int sn = serialNo.toUInt(&converted);
+
+		if (converted == false || sn == 0)
+		{
+			theLog.writeError(__FUNCTION__ + tr(" Wrong configuration factory no(") + SerialNumberBuf + ")");
+			return INVALID_HANDLE_VALUE;
+		}
+
+		m_configuratorfactoryNo = sn;
+		theLog.writeMessage(tr("Configurator factory no:") + QString().setNum(m_configuratorfactoryNo));
+	}
+	else
+	{
+		theLog.writeError(__FUNCTION__ + tr(" FT_Read error."));
+		return INVALID_HANDLE_VALUE;
+	}
+
+	FT_Close(ftHandle);
+#endif
+
+	// Open port
+	//
+	serialPort.setPortName(device());
+
+	serialPort.setBaudRate(QSerialPort::Baud115200);
+	serialPort.setDataBits(QSerialPort::Data8);
+	serialPort.setParity(QSerialPort::NoParity);
+	serialPort.setStopBits(QSerialPort::OneStop);
+
+	//!!!!!!!!!!Cannot create children for a parent that is in a different thread.
+
+	bool ok = serialPort.open(QIODevice::ReadWrite);
+
+
+	if (ok == false)
+	{
+		theLog.writeError(__FUNCTION__ + tr(" %1").arg(serialPort.errorString()));
+
+#ifdef Q_OS_LINUX
+		if (serialPort.error() == QSerialPort::PermissionError)
+		{
+			theLog.writeMessage(tr("Add user to the dialout group by the following command:"));
+			theLog.writeMessage(tr("sudo usermod -a -G dialout USER"));
+			theLog.writeMessage(tr("Then user has to logout and log in back."));
+		}
+#endif
+
+		return false;
+	}
+
+//	// Define the control setting for a serial communications device.
+//	//
+//	DCB dcb = DCB();
+
+//	if (GetCommState(hDevice, &dcb) == FALSE)
+//	{
+//		theLog.writeError(__FUNCTION__ + tr(" GetCommState failed whith error ") + QString().setNum(::GetLastError()) + ".");
+
+//		::CloseHandle(hDevice);
+//		return INVALID_HANDLE_VALUE;
+//	}
+
+//	dcb.BaudRate = CBR_115200;
+//	dcb.ByteSize = 8;
+//	dcb.Parity = NOPARITY;
+//	dcb.StopBits = ONESTOPBIT;
+
+//	if (SetCommState(hDevice, &dcb) == FALSE)
+//	{
+//		theLog.writeError(__FUNCTION__ + tr(" SetCommState failed whith error ") + QString().setNum(::GetLastError()) + ".");
+
+//		::CloseHandle(hDevice);
+//		return INVALID_HANDLE_VALUE;
+//	}
+
+//	// Set timeout intervals
+//	//
+//	COMMTIMEOUTS ct = COMMTIMEOUTS();
+
+//	ct.ReadIntervalTimeout = 1000;
+//	ct.ReadTotalTimeoutMultiplier = 10;
+//	ct.ReadTotalTimeoutConstant = 4000;
+//	ct.WriteTotalTimeoutMultiplier = 0;
+//	ct.WriteTotalTimeoutConstant = 0;
+
+//	if (SetCommTimeouts(hDevice, &ct) == FALSE)
+//	{
+//		theLog.writeError(__FUNCTION__ + tr(" SetCommTimeouts failed whith error ") + QString().setNum(::GetLastError()) + ".");
+
+//		::CloseHandle(hDevice);
+//		return INVALID_HANDLE_VALUE;
+//	}
+
+//	// Set Waiting Events Flags
+//	//
+//	::SetCommMask(hDevice, EV_TXEMPTY);
+
+//	// Clear all buffers
+//	//
+//	::PurgeComm(hDevice, PURGE_RXCLEAR | PURGE_TXCLEAR);
+
+//	return hDevice;
+	return true;
+}
+
+bool Configurator::closeConnection()
+{
+	m_configuratorfactoryNo = 0;
+
+	if (serialPort.isOpen() == false)
+	{
+		theLog.writeError("CloseConnection error: The port was already closed.");
+		return false;
+	}
+
+	serialPort.close();
+
+	return true;
+}
+
+bool Configurator::send(int moduleUartId,
+	ConfigureCommand opcode,
+	uint16_t frameIndex,
+	uint16_t blockSize,
+	const std::vector<char>& requestData,
+	CONF_HEADER* pReceivedHeader,
+	std::vector<char>* replyData)
+{
+	if (serialPort.isOpen() == false)
+	{
+		theLog.writeError(tr("Port is not opened: %1").arg(device()));
+		return false;
+	}
+
+	if (replyData == nullptr || pReceivedHeader == nullptr)
+	{
+		assert(replyData != nullptr);
+		assert(pReceivedHeader != nullptr);
+		return false;
+	}
+
+	// Generate packet
+	//
+	std::vector<char> buffer;				//
+	int expecetedDataBytes = 0;				// Expecting reply in expecetedDataBytes to read from device + sizeof(CONF_HEADER)
+	int headerSize = 0;
+
+	switch (opcode)
+	{
+//	case Read:
+//		{
+//			CONF_HEADER readHeader = CONF_HEADER();
+
+//			readHeader.version = static_cast<uint16_t>(ProtocolMaxVersion);
+//			readHeader.moduleUartId = static_cast<uint16_t>(moduleUartId);
+//			readHeader.opcode = static_cast<uint16_t>(opcode);
+//			readHeader.frameIndex = static_cast<uint16_t>(frameIndex);
+//			readHeader.setCrc();			// Calculate and set CRC for formed header
+
+//			buffer.resize(sizeof(readHeader), 0);
+//			memcpy(buffer.data(), &readHeader, sizeof(readHeader));
+
+//			expecetedDataBytes = blockSize;
+//			headerSize = sizeof(readHeader);
+
+//			if (showDebugInfo() == true)
+//			{
+//				theLog.writeMessage("");
+//				theLog.writeMessage(tr("Sending header, opcode Read:"), true);
+//				readHeader.dump(theLog);
+//			}
+//		}
+//		break;
+
+//	case Write:
+//		{
+//			assert(requestData.size() == blockSize);
+
+//			CONF_HEADER writeHeader = CONF_HEADER();
+
+//			writeHeader.version = static_cast<uint16_t>(ProtocolMaxVersion);
+//			writeHeader.moduleUartId = static_cast<uint16_t>(moduleUartId);
+//			writeHeader.opcode = static_cast<uint16_t>(opcode);
+//			writeHeader.frameIndex = static_cast<uint16_t>(frameIndex);
+//			writeHeader.frameSize = blockSize - sizeof(writeHeader.crc64);
+//			writeHeader.blockSize = blockSize;
+//			writeHeader.setCrc();
+
+//			buffer.resize(sizeof(writeHeader) + requestData.size(), 0);
+
+//			memcpy(buffer.data(), &writeHeader, sizeof(writeHeader));
+//			memcpy(static_cast<uint8_t*>(buffer.data()) + sizeof(writeHeader), requestData.data(), requestData.size());
+
+//			expecetedDataBytes = 0;
+//			headerSize = sizeof(writeHeader);
+
+//			if (showDebugInfo() == true)
+//			{
+//				theLog.writeMessage("");
+//				theLog.writeMessage(tr("Sending header, opcode Write:"), true);
+
+//				writeHeader.dump(theLog);
+//				theLog.writeDump(requestData);
+//			}
+//		}
+//		break;
+
+	case Nop:
+		{
+			CONF_HEADER nopHeader = CONF_HEADER();
+
+			nopHeader.version = static_cast<uint16_t>(ProtocolMaxVersion);
+			nopHeader.opcode = static_cast<uint16_t>(opcode);
+			nopHeader.setCrc();
+
+			buffer.resize(sizeof(nopHeader), 0);
+			memcpy(buffer.data(), &nopHeader, sizeof(nopHeader));
+
+			headerSize = sizeof(nopHeader);
+			expecetedDataBytes = 0;							// Not expecting any data, just header
+
+			if (showDebugInfo() == true)
+			{
+				theLog.writeMessage("");
+				theLog.writeMessage(tr("Sending header, opcode Nop"), true);
+				nopHeader.dump(theLog);
+			}
+		}
+		break;
+
+	default:
+		assert(false);
+		theLog.writeError(__FUNCTION__ + tr(" Unknown command ") + opcode + ".");
+		return false;
+	}
+
+	// Send Request
+	//
+
+	// Clear all buffers
+	//
+	serialPort.clear();
+
+	// Send Data
+	//
+
+	qint64 writtenBytes = serialPort.write(buffer.data(), buffer.size());
+	serialPort.waitForBytesWritten(1000);
+
+	if (writtenBytes != buffer.size())
+	{
+		theLog.writeError(tr("Written bytes number is ") + writtenBytes + ", expected is " + sizeof(buffer));
+		theLog.writeError(tr("Operation terminated."), true);
+		return false;
+	}
+
+
+	// Read reply
+	//
+	std::vector<char> recHeaderBuffer;
+	recHeaderBuffer.resize(headerSize);
+
+	qint64 bytesReadHeader = serialPort.read(recHeaderBuffer.data(), recHeaderBuffer.size());
+
+	if (recHeaderBuffer.size() != bytesReadHeader)
+	{
+		theLog.writeError(tr("Received ") + QString().setNum(bytesReadHeader) + " bytes, expected " + QString().setNum(recHeaderBuffer.size()) + ".");
+		return false;
+	}
+
+	// fill output header
+	//
+	*pReceivedHeader = *reinterpret_cast<decltype(pReceivedHeader)>(recHeaderBuffer.data());
+
+	if (showDebugInfo() == true)
+	{
+		// Show Received Header as debug info
+		//
+		theLog.writeMessage(tr("Received header:"), true);
+		pReceivedHeader->dump(theLog);
+	}
+
+	// Check received header checksum
+	//
+	if (pReceivedHeader->checkCrc() == false)
+	{
+		theLog.writeError(tr("Wrong CRC, received value is: ") +
+			QString().setNum(pReceivedHeader->crc64, 16).rightJustified(16, '0') + ".");
+
+		return false;
+	}
+
+	if (expecetedDataBytes == 0)
+	{
+		// We are not expecting any data
+		//
+		return true;
+	}
+
+	// Read Data
+	//
+	std::vector<char> recDataBuffer;
+	recDataBuffer.resize(expecetedDataBytes);
+
+	qint64 bytesReadData = serialPort.read(recDataBuffer.data(), recDataBuffer.size());
+
+	if (bytesReadData != recDataBuffer.size())
+	{
+		theLog.writeError(tr("Received data ") + QString().setNum(bytesReadData) + " bytes, expected " + QString().setNum(recDataBuffer.size()) + ".");
+		return false;
+	}
+
+	*replyData = recDataBuffer;
+
+	if (showDebugInfo() == true)
+	{
+		// Show received data
+		//
+		theLog.writeDump(*replyData);
+	}
+
+	return true;
+}
+
 
 //HANDLE Configurator::openConnection()
 //{
@@ -630,43 +1018,50 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog& log)
 //	return true;
 //}
 
-//void Configurator::setSettings(QString device, bool showDebugInfo)
-//{
-//	this->setDevice(device);
-//	this->setShowDebugInfo(showDebugInfo);
-//	return;
-//}
+void Configurator::setSettings(QString device, bool showDebugInfo)
+{
+	this->setDevice(device);
+	this->setShowDebugInfo(showDebugInfo);
+	return;
+}
 
-//void Configurator::readConfiguration(int /*param*/)
-//{
-//	emit communicationStarted();
+void Configurator::readConfiguration(int param)
+{
+	emit communicationStarted();
 
-//	// Open port
-//	//
-//	HANDLE hDevice = openConnection();
-//	if (hDevice == INVALID_HANDLE_VALUE)
-//	{
-//		theLog.writeError(tr("Cannot open ") + device() + ".", true);
-//		emit communicationFinished();
-//		return;
-//	}
+	readConfigurationWorker(param);
 
-//	try
-//	{
-//		//
-//		// PING command
-//		//
-//		std::vector<uint8_t> nopReply;
-//		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+	emit communicationFinished();
 
-//		if (send(hDevice, 0, Nop, 0, 0, std::vector<uint8_t>(), &pingReceivedHeader, &nopReply) == false)
-//		{
-//			throw tr("Communication error.");
-//		}
+	return;
+}
 
-//		int protocolVersion = pingReceivedHeader.version;
-//		int moduleUartId = 0;
-//		int blockSize = 0;
+void Configurator::readConfigurationWorker(int /*param*/)
+{
+	// Open port
+	//
+	bool ok = openConnection();
+	if (ok == false)
+	{
+		return;
+	}
+
+	try
+	{
+		//
+		// PING command
+		//
+		std::vector<char> nopReply;
+		CONF_HEADER pingReceivedHeader = CONF_HEADER();
+
+		if (send(0, Nop, 0, 0, std::vector<char>(), &pingReceivedHeader, &nopReply) == false)
+		{
+			throw tr("Communication error (ping send error).");
+		}
+
+		int protocolVersion = pingReceivedHeader.version;
+		int moduleUartId = 0;
+		int blockSize = 0;
 		
 //		switch (protocolVersion)
 //		{
@@ -792,26 +1187,26 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog& log)
 //		// --
 //		//
 //		theLog.writeSuccess(tr("Successful."), true);
-//	}
-//	catch (QString str)
-//	{
-//		theLog.writeError(str, true);
-//	}
+	}
+	catch (QString str)
+	{
+		theLog.writeError(str, true);
+	}
 
-//	// Close connection
-//	//
-//	if (closeConnection(hDevice) == false)
-//	{
-//		theLog.writeError(tr("CloseConnection failed with error ") + QString().setNum(::GetLastError()) + ".");
-//	}
+	// Close connection
+	//
+	if (closeConnection() == false)
+	{
+		theLog.writeError(tr("CloseConnection failed with error "));
+	}
 
-//	emit communicationFinished();
-//	return;
-//}
+	emit communicationFinished();
+	return;
+}
 
-//void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2)
-//{
-//	emit communicationStarted();
+void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2)
+{
+	emit communicationStarted();
 
 //	// Open port
 //	//
@@ -1051,13 +1446,13 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog& log)
 //		theLog.writeError(tr("CloseConnection failed with error ") + QString().setNum(::GetLastError()) + ".");
 //	}
 
-//	emit communicationFinished();
-//	return;
-//}
+	emit communicationFinished();
+	return;
+}
 
-//void Configurator::writeConfData(ConfigDataReader conf)
-//{
-//	emit communicationStarted();
+void Configurator::writeConfData(ConfigDataReader conf)
+{
+	emit communicationStarted();
 
 //	// Open port
 //	//
@@ -1307,13 +1702,13 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog& log)
 //		theLog.writeError(tr("CloseConnection failed with error ") + QString().setNum(::GetLastError()) + ".");
 //	}
 
-//	emit communicationFinished();
-//	return;
-//}
+	emit communicationFinished();
+	return;
+}
 
-//void Configurator::eraseFlashMemory(int)
-//{
-//	emit communicationStarted();
+void Configurator::eraseFlashMemory(int)
+{
+	emit communicationStarted();
 
 //	// Open port
 //	//
@@ -1474,7 +1869,6 @@ void CONF_IDENTIFICATION_DATA_V1::dump(OutputLog& log)
 //		theLog.writeError(tr("CloseConnection failed with error ") + QString().setNum(::GetLastError()) + ".");
 //	}
 
-//	emit communicationFinished();
-//	return;
-
-//}
+	emit communicationFinished();
+	return;
+}
