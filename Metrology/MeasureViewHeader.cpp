@@ -278,7 +278,6 @@ void MeasureViewHeader::updateColumnState()
 
                     case LO_VIEW_TYPE_DETAIL_ELRCTRIC:
                     case LO_VIEW_TYPE_DETAIL_PHYSICAL:
-                    case LO_VIEW_TYPE_DETAIL_OUTPUT:
 
                         setColumnVisible(MVC_CMN_L_PERCENT, false);
                         setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);

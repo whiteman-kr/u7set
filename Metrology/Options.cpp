@@ -4,7 +4,6 @@
 #include <QTemporaryDir>
 #include <QMessageBox>
 #include "Database.h"
-#include "CalibratorBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -312,6 +311,232 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+void REPORT_HEADER::init(int type)
+{
+    if ( type < 0 || type >=  REPORT_TYPE_COUNT)
+    {
+        return;
+    }
+
+    m_type = type;
+
+    m_documentTitle = QString("%1 %2").arg(QT_TRANSLATE_NOOP("Options.cpp", "Protocol №")).arg(m_type + 1);
+    m_reportTitle = QString("%1 %2").arg(QT_TRANSLATE_NOOP("Options.cpp", "Report of ")).arg(ReportType[m_type]);;
+    m_date = QDate::currentDate().toString("dd.MM.yyyy");
+    m_tableTitle = QString("%1 %2").arg(QT_TRANSLATE_NOOP("Options.cpp", "Table: ")).arg(ReportType[m_type]);
+    m_conclusion = QT_TRANSLATE_NOOP("Options.cpp", "This is report has not problems");
+
+    m_T = 20;
+    m_P = 100;
+    m_H = 70;
+    m_V = 220;
+    m_F = 50;
+
+    int objectID = SQL_TABLE_UNKNONW;
+
+    switch(m_type)
+    {
+        case REPORT_TYPE_LINEARITY:                 objectID = SqlObjectID[SQL_TABLE_LINEARETY];            break;
+        case REPORT_TYPE_LINEARITY_CERTIFICATION:   objectID = SqlObjectID[SQL_TABLE_LINEARETY_ADD_VAL];    break;
+        case REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC: objectID = SqlObjectID[SQL_TABLE_LINEARETY_20_EL];      break;
+        case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: objectID = SqlObjectID[SQL_TABLE_LINEARETY_20_PH];      break;
+        case REPORT_TYPE_COMPARATOR:                objectID = SqlObjectID[SQL_TABLE_COMPARATOR];           break;
+        case REPORT_TYPE_COMPLEX_COMPARATOR:        objectID = SqlObjectID[SQL_TABLE_COMPLEX_COMPARATOR];   break;
+        default:                                    objectID = SqlObjectID[SQL_TABLE_UNKNONW];              break;
+    }
+
+    m_linkObjectID = objectID;
+
+    m_reportFile = ReportFileName[m_type];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ReportHeaderBase::ReportHeaderBase(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ReportHeaderBase::ReportHeaderBase(const ReportHeaderBase& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ReportHeaderBase::~ReportHeaderBase()
+{
+    clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int ReportHeaderBase::count()
+{
+    int count = 0;
+
+    m_mutex.lock();
+
+        count = m_headerList.count();
+
+    m_mutex.unlock();
+
+    return count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ReportHeaderBase::clear()
+{
+    m_mutex.lock();
+
+        m_headerList.clear();
+
+    m_mutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ReportHeaderBase::reportsIsExist()
+{
+    QString dontExistReports;
+
+    int reportCount = count();
+    for (int r = 0; r < reportCount; r++)
+    {
+        REPORT_HEADER header = m_headerList[r];
+
+        QString path = theOptions.report().m_path + "/" + header.m_reportFile;
+        if (QFile::exists(path) == false)
+        {
+            dontExistReports.append("- " + header.m_reportFile + "\n");
+        }
+    }
+
+    if (dontExistReports.isEmpty() == true)
+    {
+        return true;
+    }
+
+    dontExistReports.insert(0, "The application can not detect the following reports, functions of the application will be limited.\n\n");
+
+    QMessageBox::information(nullptr, tr("Reports"), dontExistReports);
+
+    return false;
+
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ReportHeaderBase::load()
+{
+    if (theDatabase.isOpen() == false)
+    {
+        return;
+    }
+
+    SqlTable* pTable = theDatabase.openTable(SQL_TABLE_REPORT_HEADER);
+    if (pTable == nullptr)
+    {
+        return;
+    }
+
+    m_mutex.lock();
+
+        int recordCount = pTable->recordCount();
+        if (recordCount == REPORT_TYPE_COUNT)
+        {
+            m_headerList.resize(recordCount);
+            pTable->read(m_headerList.data());
+        }
+        else
+        {
+            for(int type = 0; type < REPORT_TYPE_COUNT; type++)
+            {
+                REPORT_HEADER header;
+
+                header.init(type);
+                m_headerList.append(header);
+            }
+
+            if (pTable->clear() == true)
+            {
+                pTable->write(m_headerList.data(), m_headerList.count());
+            }
+
+        }
+
+    m_mutex.unlock();
+
+    pTable->close();
+
+    reportsIsExist();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ReportHeaderBase::save()
+{
+    if (theDatabase.isOpen() == false)
+    {
+        return;
+    }
+
+    SqlTable* pTable = theDatabase.openTable(SQL_TABLE_REPORT_HEADER);
+    if (pTable == nullptr)
+    {
+        return;
+    }
+
+    if (pTable->clear() == true)
+    {
+        m_mutex.lock();
+
+            pTable->write(m_headerList.data(), m_headerList.count());
+
+        m_mutex.unlock();
+    }
+
+    pTable->close();
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ReportHeaderBase& ReportHeaderBase::operator=(const ReportHeaderBase& from)
+{
+    clear();
+
+    m_mutex.lock();
+
+        m_headerList = from.m_headerList;
+
+    m_mutex.unlock();
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+REPORT_HEADER& ReportHeaderBase::operator[](int index)
+{
+    if (index < 0 || index >= count())
+    {
+        assert(0);
+    }
+
+    return m_headerList[index];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 ReportOption::ReportOption(QObject *parent) :
     QObject(parent)
 {
@@ -359,7 +584,6 @@ int ReportOption::reportTypeByMeasureType(int measureType)
                     case LO_VIEW_TYPE_EXTENDED:         reportType = REPORT_TYPE_LINEARITY_CERTIFICATION;   break;
                     case LO_VIEW_TYPE_DETAIL_ELRCTRIC:  reportType = REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC; break;
                     case LO_VIEW_TYPE_DETAIL_PHYSICAL:  reportType = REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL; break;
-                    case LO_VIEW_TYPE_DETAIL_OUTPUT:    reportType = REPORT_TYPE_LINEARITY_DETAIL_OUTPUT;   break;
                     default:                            reportType = REPORT_TYPE_UNKNOWN;                   break;
                 }
 
@@ -381,6 +605,8 @@ void ReportOption::load()
 
     m_path = s.value( QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), QDir::currentPath() + "/reports").toString();
     m_type = s.value( QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), REPORT_TYPE_LINEARITY).toInt();
+
+    m_headerBase.load();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -391,6 +617,8 @@ void ReportOption::save()
 
     s.setValue( QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), m_path );
     s.setValue( QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), m_type );
+
+    m_headerBase.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -399,6 +627,8 @@ ReportOption& ReportOption::operator=(const ReportOption& from)
 {
     m_path = from.m_path;
     m_type = from.m_type;
+
+    m_headerBase = from.m_headerBase;
 
     return *this;
 }
@@ -515,7 +745,7 @@ int LinearityPointBase::insert(int index, LinearityPoint point)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool LinearityPointBase::removeAt(int index)
+bool LinearityPointBase::remove(int index)
 {
     if (index < 0 || index >= count())
     {

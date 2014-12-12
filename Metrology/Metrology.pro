@@ -67,7 +67,8 @@ TRANSLATIONS = translations/Metrology_ru.ts \
                 translations/Metrology_uk.ts
 OTHER_FILES += \
     translations/Metrology_ru.ts \
-    translations/Metrology_uk.ts
+    translations/Metrology_uk.ts \
+    reports/Linearity.ncr
 
 
 unix:QMAKE_CXXFLAGS += -std=c++11
@@ -75,11 +76,15 @@ unix:QMAKE_CXXFLAGS += -std=c++11
 
 # Visual Leak Detector
 #
-win32 {
-        contains(QMAKE_TARGET.arch, x86_64) {
+win32
+{
+        contains(QMAKE_TARGET.arch, x86_64)
+        {
                 LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
                 LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-        } else {
+        }
+        else
+        {
                 LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
                 LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
         }
@@ -102,6 +107,6 @@ win32
     INCLUDEPATH += "C:/Program Files/NCReport/2.13.0.VS2013.Qt5.3.2.eval/include"
     INCLUDEPATH += "C:/Program Files (x86)/NCReport/2.13.0.VS2013.Qt5.3.2.eval/include"
 }
-o
+
 
 

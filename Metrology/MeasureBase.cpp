@@ -110,7 +110,6 @@ int MeasureBase::load(int measureType)
                     {
                         case SQL_TABLE_LINEARETY_20_EL:                 static_cast<LinearetyMeasureItem*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_ELECTRIC, pSubMeasure); break;
                         case SQL_TABLE_LINEARETY_20_PH:                 static_cast<LinearetyMeasureItem*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_PHYSICAL, pSubMeasure); break;
-                        case SQL_TABLE_LINEARETY_20_OUT:                static_cast<LinearetyMeasureItem*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_OUTPUT, pSubMeasure);   break;
                         case SQL_TABLE_LINEARETY_ADD_VAL:               static_cast<LinearetyMeasureItem*>(pMainMeasure)->updateAdditionalValue(pSubMeasure);                   break;
                         case SQL_TABLE_COMPARATOR_HYSTERESIS:           static_cast<ComparatorMeasureItem*>(pMainMeasure)->updateHysteresis(pSubMeasure);                       break;
                         case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:   static_cast<ComplexComparatorMeasureItem*>(pMainMeasure)->updateHysteresis(pSubMeasure);                break;

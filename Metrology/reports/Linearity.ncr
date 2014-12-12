@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.13.0" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>en,ru,uk</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE">SELECT * FROM LinearetyMeasure</datasource>
+        <datasource id="DataSource2" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE">SELECT * FROM ReportOption INNER JOIN LinearetyMeasure ON ReportOption.LinkObjectID = LinearetyMeasure.ObjectID GROUP BY ReportID</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="PH" height="49.157" autoHeight="true">
+        <field id="5ZY4H" zValue="1" posX="1.587" posY="1.587" width="165.100" height="6.350" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="16" fontWeight="bold" alignment="36" tr="1" type="txt" ftype="ds">
+            <tr lang="en">DataSource2.DocumentTitle</tr>
+        </field>
+        <field id="SUIYK" zValue="2" posX="1.587" posY="7.938" width="165.100" height="4.762" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="12" fontWeight="bold" alignment="36" tr="1" type="txt" ftype="ds">
+            <tr lang="en">DataSource2.ReportTitle</tr>
+        </field>
+        <field id="HTPFP" zValue="3" posX="1.587" posY="15.875" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="tpl" fontName="Arial" fontSize="10" tr="1" type="txt" ftype="tpl">
+            <tr lang="en">Environment temperature $D{DataSource2.Temperature} °С</tr>
+        </field>
+        <field id="N7Q30" zValue="4" posX="1.587" posY="20.637" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="tpl" fontName="Arial" fontSize="10" tr="1" type="txt" ftype="tpl">
+            <tr lang="en">Atmospheric pressure $D{DataSource2.Pressure} kPa</tr>
+        </field>
+        <field id="ROE94" zValue="5" posX="1.587" posY="30.162" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="tpl" fontName="Arial" fontSize="10" tr="1" type="txt" ftype="tpl">
+            <tr lang="en">Power voltage $D{DataSource2.Voltage} V</tr>
+        </field>
+        <field id="YXWQN" zValue="6" posX="1.587" posY="25.400" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="tpl" fontName="Arial" fontSize="10" tr="1" type="txt" ftype="tpl">
+            <tr lang="en">Relative humidity $D{DataSource2.Humidity} %</tr>
+        </field>
+        <field id="4ZJ7U" zValue="8" posX="1.587" posY="34.925" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="tpl" fontName="Arial" fontSize="10" tr="1" type="txt" ftype="tpl">
+            <tr lang="en">Power frequency $D{DataSource2.Frequency} Hz</tr>
+        </field>
+        <line id="BF2LX" zValue="9" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="42.862" toX="168.275" toY="42.862"/>
+        <line id="XL7BL" zValue="11" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="49.212" toX="168.275" toY="49.212"/>
+        <line id="XYEUX" zValue="12" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="49.212" toX="1.587" toY="42.862"/>
+        <line id="LK9N0" zValue="13" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="168.275" fromY="49.212" toX="168.275" toY="42.862"/>
+        <line id="XH9BV" zValue="14" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="17.462" fromY="49.212" toX="17.462" toY="42.862"/>
+        <line id="UOU92" zValue="15" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="41.275" fromY="49.212" toX="41.275" toY="42.862"/>
+        <line id="TUHHW" zValue="16" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="58.737" fromY="49.212" toX="58.737" toY="42.862"/>
+        <label id="S6XTL" zValue="17" posX="3.175" posY="44.450" width="12.700" height="4.762" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+            <tr lang="en">ID</tr>
+        </label>
+        <label id="LOA6H" zValue="18" posX="19.050" posY="44.450" width="20.637" height="4.762" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+            <tr lang="en">Int ID</tr>
+        </label>
+        <label id="OZZ3M" zValue="19" posX="42.862" posY="44.450" width="14.287" height="4.762" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+            <tr lang="en">Ext ID</tr>
+        </label>
+    </pageheader>
+    <pagefooter id="PF" height="10.000">
+        <field id="TTF91" zValue="0" posX="136.525" posY="0.000" width="31.750" height="4.762" resource="tpl" template="true" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="tpl">
+            <tr lang="en">page  $V{gpageno}</tr>
+        </field>
+    </pagefooter>
+    <reportfooter id="RF" height="22.977">
+        <field id="OAVD0" zValue="0" posX="20.637" posY="7.938" width="147.637" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" tr="1" type="txt" ftype="ds">
+            <tr lang="en">DataSource2.Conclusion</tr>
+        </field>
+        <line id="W6XU1" zValue="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="20.637" fromY="12.700" toX="168.275" toY="12.700"/>
+        <label id="XF1L8" zValue="2" posX="1.587" posY="7.938" width="19.050" height="4.762" fontName="Arial" fontSize="10" alignment="1" tr="1">
+            <tr lang="en">Conclusion</tr>
+        </label>
+        <line id="QPW9C" zValue="3" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="17.462" toX="168.275" toY="17.462"/>
+    </reportfooter>
+    <details>
+        <detail id="Detail1" height="3.342" datasource="DataSource1">
+            <items>
+                <field id="N7Q30" zValue="0" posX="3.175" posY="0.000" width="12.700" height="3.175" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
+                    <tr lang="en">DataSource1.MeasureID</tr>
+                    <tr lang="uk">DataSource1.MeasureID</tr>
+                    <tr lang="ru">DataSource1.MeasureID</tr>
+                </field>
+                <field id="N7Q30" typeId="131074" zValue="1" posX="19.050" posY="0.000" width="20.637" height="3.175" description="StrID" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
+                    <tr lang="en">StrID</tr>
+                </field>
+                <field id="YXWQN" typeId="131074" zValue="2" posX="42.862" posY="0.000" width="14.287" height="3.175" description="ExtStrID" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
+                    <tr lang="en">ExtStrID</tr>
+                </field>
+                <line id="PM4BE" zValue="4" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="3.175" toX="168.275" toY="3.175"/>
+                <line id="60A4E" zValue="5" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="168.275" fromY="-1.587" toX="168.275" toY="3.175"/>
+                <line id="44E9E" zValue="6" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="3.175" toX="1.587" toY="-1.587"/>
+                <line id="A0WYW" zValue="7" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="17.462" fromY="3.175" toX="17.462" toY="0.000"/>
+                <line id="ZSO32" zValue="8" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="41.275" fromY="3.175" toX="41.275" toY="0.000"/>
+                <line id="JTAQU" zValue="9" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="58.737" fromY="3.175" toX="58.737" toY="0.000"/>
+            </items>
+        </detail>
+    </details>
+</NCReport>

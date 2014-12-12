@@ -26,7 +26,7 @@ int SqlFieldBase::init(int objectType, int)
 
             append("ID",                            QVariant::Int);
             append("ObjectID",						QVariant::Int);
-            append("Name",							QVariant::String, 255);
+            append("Name",							QVariant::String, 256);
             append("Version",						QVariant::Int);
 
             break;
@@ -35,7 +35,7 @@ int SqlFieldBase::init(int objectType, int)
 
             append("ObjectID",						QVariant::Int);
             append("Version",						QVariant::Int);
-            append("Event",							QVariant::String, 255);
+            append("Event",							QVariant::String, 256);
             append("Time",                          QVariant::String, 64);
 
             break;
@@ -49,9 +49,9 @@ int SqlFieldBase::init(int objectType, int)
 
             append("StrID",                         QVariant::String, 64);
             append("ExtStrID",						QVariant::String, 64);
-            append("Name",                          QVariant::String, 255);
+            append("Name",                          QVariant::String, 256);
 
-            append("DevStrID",						QVariant::String, 255);
+            append("DevStrID",						QVariant::String, 256);
             append("CaseNo",                        QVariant::Int);
             append("CaseType",						QVariant::String, 64);
             append("Channel",						QVariant::Int);
@@ -104,7 +104,6 @@ int SqlFieldBase::init(int objectType, int)
 
         case SQL_TABLE_LINEARETY_20_EL:
         case SQL_TABLE_LINEARETY_20_PH:
-        case SQL_TABLE_LINEARETY_20_OUT:
 
             append("ObjectID",						QVariant::Int);
             append("MeasureID",						QVariant::Int);
@@ -223,6 +222,31 @@ int SqlFieldBase::init(int objectType, int)
 
             append("ObjectID",						QVariant::Int);
             append("ReportID",						QVariant::Int);
+
+
+            append("DocumentTitle",                 QVariant::String, 256);
+            append("ReportTitle",                   QVariant::String, 256);
+            append("Date",                          QVariant::String, 32);
+            append("TableTitle",                    QVariant::String, 256);
+            append("Conclusion",                    QVariant::String, 256);
+
+            append("Temperature",                   QVariant::Double);
+            append("Pressure",                      QVariant::Double);
+            append("Humidity",                      QVariant::Double);
+            append("Voltage",                       QVariant::Double);
+            append("Frequency",                     QVariant::Double);
+
+            append("Calibrator0",                   QVariant::String, 64);
+            append("Calibrator1",                   QVariant::String, 64);
+            append("Calibrator2",                   QVariant::String, 64);
+            append("Calibrator3",                   QVariant::String, 64);
+            append("Calibrator4",                   QVariant::String, 64);
+            append("Calibrator5",                   QVariant::String, 64);
+
+            append("LinkObjectID",                  QVariant::Int);
+            append("ReportFile",                    QVariant::String, 256);
+
+            append("Param",                         QVariant::Int);
 
             break;
 
@@ -548,7 +572,6 @@ bool SqlTable::create()
             {
                 case SQL_TABLE_LINEARETY_20_EL:
                 case SQL_TABLE_LINEARETY_20_PH:
-                case SQL_TABLE_LINEARETY_20_OUT:
                 case SQL_TABLE_LINEARETY_ADD_VAL:
                     request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARETY]));
                     break;
@@ -756,7 +779,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
             case SQL_TABLE_LINEARETY_20_EL:
             case SQL_TABLE_LINEARETY_20_PH:
-            case SQL_TABLE_LINEARETY_20_OUT:
                 {
                     int valueType = VALUE_TYPE_UNKNOWN;
 
@@ -764,7 +786,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                     {
                         case SQL_TABLE_LINEARETY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
                         case SQL_TABLE_LINEARETY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
-                        case SQL_TABLE_LINEARETY_20_OUT:    valueType = VALUE_TYPE_OUTPUT;      break;
                         default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
                     }
 
@@ -866,6 +887,33 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
             case SQL_TABLE_REPORT_HEADER:
                 {
+                    REPORT_HEADER* header = static_cast<REPORT_HEADER*> (pRecord) + readedCount;
+
+                    header->m_type = query.value(field++).toInt();
+
+                    header->m_documentTitle = query.value(field++).toString();
+                    header->m_reportTitle = query.value(field++).toString();
+                    header->m_date = query.value(field++).toString();
+                    header->m_tableTitle = query.value(field++).toString();
+                    header->m_conclusion = query.value(field++).toString();
+
+                    header->m_T = query.value(field++).toDouble();
+                    header->m_P = query.value(field++).toDouble();
+                    header->m_H = query.value(field++).toDouble();
+                    header->m_V = query.value(field++).toDouble();
+                    header->m_F = query.value(field++).toDouble();
+
+                    header->m_calibrator[CALIBRATOR_0] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_1] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_2] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_3] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_4] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_5] = query.value(field++).toString();
+
+                    header->m_linkObjectID = query.value(field++).toInt();
+                    header->m_reportFile = query.value(field++).toString();
+
+                    header->m_param = query.value(field++).toInt();
                 }
                 break;
 
@@ -1061,7 +1109,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
             case SQL_TABLE_LINEARETY_20_EL:
             case SQL_TABLE_LINEARETY_20_PH:
-            case SQL_TABLE_LINEARETY_20_OUT:
                 {
                     int valueType = VALUE_TYPE_UNKNOWN;
 
@@ -1069,7 +1116,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     {
                         case SQL_TABLE_LINEARETY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
                         case SQL_TABLE_LINEARETY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
-                        case SQL_TABLE_LINEARETY_20_OUT:    valueType = VALUE_TYPE_OUTPUT;      break;
                         default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
                     }
 
@@ -1181,6 +1227,33 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
             case SQL_TABLE_REPORT_HEADER:
                 {
+                    REPORT_HEADER* header = static_cast<REPORT_HEADER*> (pRecord) + r;
+
+                    query.bindValue(field++, header->m_type);
+
+                    query.bindValue(field++, header->m_documentTitle);
+                    query.bindValue(field++, header->m_reportTitle);
+                    query.bindValue(field++, header->m_date);
+                    query.bindValue(field++, header->m_tableTitle);
+                    query.bindValue(field++, header->m_conclusion);
+
+                    query.bindValue(field++, header->m_T);
+                    query.bindValue(field++, header->m_P);
+                    query.bindValue(field++, header->m_H);
+                    query.bindValue(field++, header->m_V);
+                    query.bindValue(field++, header->m_F);
+
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_0]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_1]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_2]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_3]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_4]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_5]);
+
+                    query.bindValue(field++, header->m_linkObjectID);
+                    query.bindValue(field++, header->m_reportFile);
+
+                    query.bindValue(field++, header->m_param);
                 }
                 break;
 

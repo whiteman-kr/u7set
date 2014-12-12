@@ -17,7 +17,15 @@
 
 // ==============================================================================================
 
-const int                   MAX_CALIBRATOR_COUNT = 6;         // max amount calibrators in calibrator base
+
+const int                   CALIBRATOR_0            = 0,
+                            CALIBRATOR_1            = 1,
+                            CALIBRATOR_2            = 2,
+                            CALIBRATOR_3            = 3,
+                            CALIBRATOR_4            = 4,
+                            CALIBRATOR_5            = 5;
+
+const int                   MAX_CALIBRATOR_COUNT    = 6;         // max amount calibrators in calibrator base
 
 // ==============================================================================================
 
