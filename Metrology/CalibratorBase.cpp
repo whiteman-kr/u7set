@@ -542,8 +542,6 @@ bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
 
     if (event->type() == QEvent::KeyPress)
     {
-        object;
-
         QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
 
         if (keyEvent->key() == Qt::Key_Return)

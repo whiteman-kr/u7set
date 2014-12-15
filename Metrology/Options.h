@@ -675,7 +675,7 @@ public:
     void                load();
     void                save();
 
-    inline Options&     operator=(const Options& from);
+    Options&            operator=(const Options& from);
 };
 
 // ==============================================================================================
