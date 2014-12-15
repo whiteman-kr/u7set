@@ -90,7 +90,7 @@ public:
     explicit            MeasureViewHeader(QObject *parent = 0);
                         ~MeasureViewHeader();
 
-    void                setMeasureType(int type) { m_measureType = type; }
+    void                setMeasureType(int type);
 
     void                init(int type);
 

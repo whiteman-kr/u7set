@@ -96,6 +96,7 @@ private:
     QAction*                m_pInitAction = nullptr;
     QAction*                m_pManageAction = nullptr;
     QAction*                m_pSettingsAction = nullptr;
+    QAction*                m_pCopyAction = nullptr;
 
     QTableWidget*           m_pCalibratorView = nullptr;
     QProgressBar*           m_pCalibratorProgress = nullptr;
@@ -124,6 +125,7 @@ public slots:
     void                    onManage();                         // Slot of calibrator menu - Manage
     void                    onSettings();                       // Slot of calibrator menu - Edit setting
     void                    onSettings(int row,int);            // Slot for edit serial port and type of calibrator
+    void                    onCopy();                           // Slot of calibrator menu - Copy serail number
     void                    onContextMenu(QPoint);              // Slot of context menu
 
     void                    onCalibratorConnected();            // Slots events from calibrator
