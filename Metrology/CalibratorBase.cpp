@@ -218,7 +218,8 @@ void CalibratorBase::setHeaderList()
         }
     }
 
-    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, static_cast<void (CalibratorBase::*)(int, int)>(&CalibratorBase::onSettings));
+    //connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, static_cast<void (CalibratorBase::*)(int, int)>(&CalibratorBase::onSettings));
+    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::onManage);
 
     // init context menu
     //
