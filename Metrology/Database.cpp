@@ -616,12 +616,18 @@ bool SqlTable::clear()
     }
 
     QSqlQuery query;
+
+    if (query.exec("BEGIN TRANSACTION") == false)
+    {
+        return false;
+    }
+
     if (query.exec(QString("DELETE FROM %1").arg(m_info.name())) == false)
     {
         return false;
     }
 
-    if (query.exec("VACUUM") == false)
+    if (query.exec("COMMIT") == false)
     {
         return false;
     }
@@ -1004,6 +1010,11 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
     QSqlQuery query;
 
+    if (query.exec("BEGIN TRANSACTION") == false)
+    {
+        return 0;
+    }
+
     for (int r = 0; r < count; r++)
     {
         if (query.prepare(key == nullptr ? request :  request + QString("%1").arg(key[r])) == false)
@@ -1270,6 +1281,11 @@ int SqlTable::write(void* pRecord, int count, int* key)
         writedCount ++;
     }
 
+    if (query.exec("COMMIT") == false)
+    {
+        return 0;
+    }
+
     return writedCount;
 }
 
@@ -1308,7 +1324,18 @@ int SqlTable::remove(int* key, int keyCount)
     }
 
     QSqlQuery query;
+
+    if (query.exec("BEGIN TRANSACTION") == false)
+    {
+        return 0;
+    }
+
     if(query.exec(request) == false)
+    {
+        return 0;
+    }
+
+    if (query.exec("COMMIT") == false)
     {
         return 0;
     }
@@ -1391,10 +1418,17 @@ bool Database::open()
     }
 
     QSqlQuery query;
+
     if (query.exec("PRAGMA foreign_keys=on") == false)
     {
-        QMessageBox::critical(nullptr, tr("Database"), tr("Error set option [foreign keys]"));
+        QMessageBox::critical(nullptr, tr("Database"), tr("Error set option of database: [foreign keys=on]"));
     }
+
+    if (query.exec("PRAGMA synchronous=normal") == false)
+    {
+        QMessageBox::critical(nullptr, tr("Database"), tr("Error set option of database: [synchronous=normal]"));
+    }
+
 
     initVersion();
     createTables();

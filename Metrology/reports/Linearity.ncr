@@ -21,11 +21,14 @@
         <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
     </options>
     <datasources>
-        <datasource id="DataSource1" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE">SELECT * FROM LinearetyMeasure</datasource>
-        <datasource id="DataSource2" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE">SELECT * FROM ReportOption INNER JOIN LinearetyMeasure ON ReportOption.LinkObjectID = LinearetyMeasure.ObjectID GROUP BY ReportID</datasource>
+        <datasource id="DataSource1" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE" connOpt="db">SELECT * FROM LinearetyMeasure</datasource>
+        <datasource id="DataSource2" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE">SELECT * FROM ReportOption 
+INNER JOIN LinearetyMeasure 
+ON ReportOption.LinkObjectID = LinearetyMeasure.ObjectID 
+GROUP BY ReportID</datasource>
     </datasources>
     <variables/>
-    <pageheader id="PH" height="52.360" autoHeight="true">
+    <pageheader id="PH" height="57.234" autoHeight="true">
         <field id="5ZY4H" zValue="0" posX="1.587" posY="1.587" width="196.850" height="6.350" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="16" fontWeight="bold" alignment="36" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.DocumentTitle</tr>
         </field>
@@ -47,65 +50,68 @@
         <field id="4ZJ7U" zValue="6" posX="1.587" posY="34.925" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="tpl" template="true" fontName="Arial" fontSize="10" alignment="1" tr="1" type="txt" ftype="tpl">
             <tr lang="en">Power frequency $D{DataSource2.Frequency} Hz</tr>
         </field>
-        <line id="BF2LX" zValue="7" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="46.037" toX="198.438" toY="46.037"/>
-        <line id="XL7BL" zValue="8" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="52.387" toX="198.438" toY="52.387"/>
-        <line id="XYEUX" zValue="9" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="52.387" toX="1.587" toY="46.037"/>
-        <line id="LK9N0" zValue="10" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="198.438" fromY="52.387" toX="198.438" toY="46.037"/>
-        <line id="XH9BV" zValue="11" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="17.462" fromY="52.387" toX="17.462" toY="46.037"/>
-        <line id="UOU92" zValue="12" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="41.275" fromY="52.387" toX="41.275" toY="46.037"/>
-        <line id="TUHHW" zValue="13" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="58.737" fromY="52.387" toX="58.737" toY="49.212"/>
-        <label id="OZZ3M" zValue="16" posX="3.175" posY="47.625" width="12.700" height="4.762" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+        <line id="BF2LX" zValue="7" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="50.800" toX="198.438" toY="50.800"/>
+        <line id="XL7BL" zValue="8" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="57.150" toX="198.438" toY="57.150"/>
+        <line id="XYEUX" zValue="9" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="57.150" toX="1.587" toY="50.800"/>
+        <line id="LK9N0" zValue="10" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="198.438" fromY="57.150" toX="198.438" toY="50.800"/>
+        <line id="XH9BV" zValue="11" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="17.462" fromY="57.150" toX="17.462" toY="50.800"/>
+        <line id="UOU92" zValue="12" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="41.275" fromY="57.150" toX="41.275" toY="50.800"/>
+        <line id="TUHHW" zValue="13" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="58.737" fromY="57.150" toX="58.737" toY="53.975"/>
+        <label id="OZZ3M" zValue="14" posX="3.175" posY="52.387" width="12.700" height="4.762" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
             <tr lang="en">Ext ID</tr>
         </label>
-        <field id="5ZY4H" zValue="17" posX="130.175" posY="15.875" width="68.263" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" tr="1" type="txt" ftype="ds">
+        <field id="5ZY4H" zValue="15" posX="130.175" posY="15.875" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.Calibrator0</tr>
         </field>
-        <field id="SUIYK" zValue="18" posX="130.175" posY="20.637" width="68.263" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
+        <field id="SUIYK" zValue="16" posX="130.175" posY="20.637" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.Calibrator1</tr>
         </field>
-        <field id="N7Q30" zValue="20" posX="130.175" posY="25.400" width="68.263" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
+        <field id="N7Q30" zValue="17" posX="130.175" posY="25.400" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.Calibrator2</tr>
         </field>
-        <field id="ROE94" zValue="21" posX="130.175" posY="30.162" width="68.263" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
+        <field id="ROE94" zValue="18" posX="130.175" posY="30.162" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.Calibrator3</tr>
         </field>
-        <field id="YXWQN" zValue="22" posX="130.175" posY="34.925" width="68.263" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
+        <field id="YXWQN" zValue="19" posX="130.175" posY="34.925" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.Calibrator4</tr>
         </field>
-        <field id="BIBIX" zValue="23" posX="130.175" posY="39.688" width="68.263" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
+        <field id="BIBIX" zValue="20" posX="130.175" posY="39.688" width="68.263" height="4.762" printWhen="$V{gpageno} == 1" resource="datasource" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.Calibrator5</tr>
         </field>
-        <line id="EUXLK" zValue="24" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="76.200" fromY="52.387" toX="76.200" toY="46.037"/>
-        <line id="9N0A0" zValue="25" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="93.662" fromY="52.387" toX="93.662" toY="49.212"/>
-        <line id="WYWZS" zValue="26" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="111.125" fromY="52.387" toX="111.125" toY="46.037"/>
-        <label id="HHWS6" zValue="27" posX="19.050" posY="47.625" width="20.637" height="4.762" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+        <line id="EUXLK" zValue="21" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="76.200" fromY="57.150" toX="76.200" toY="50.800"/>
+        <line id="9N0A0" zValue="22" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="93.662" fromY="57.150" toX="93.662" toY="53.975"/>
+        <line id="WYWZS" zValue="23" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="111.125" fromY="57.150" toX="111.125" toY="50.800"/>
+        <label id="HHWS6" zValue="24" posX="19.050" posY="52.387" width="20.637" height="4.762" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
             <tr lang="en">Name</tr>
         </label>
-        <label id="XTLLO" zValue="28" posX="42.862" posY="46.037" width="31.750" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+        <label id="XTLLO" zValue="25" posX="42.862" posY="50.800" width="31.750" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
             <tr lang="en">Nominal</tr>
         </label>
-        <label id="Z3MZS" zValue="30" posX="77.787" posY="46.037" width="31.750" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+        <label id="Z3MZS" zValue="26" posX="77.787" posY="50.800" width="31.750" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
             <tr lang="en">Measure</tr>
         </label>
-        <label id="DBXF5" zValue="33" posX="42.862" posY="49.212" width="14.287" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+        <label id="DBXF5" zValue="27" posX="42.862" posY="53.975" width="14.287" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
             <tr lang="en">Electric</tr>
         </label>
-        <label id="HP2TC" zValue="34" posX="60.325" posY="49.212" width="14.287" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+        <label id="HP2TC" zValue="28" posX="60.325" posY="53.975" width="14.287" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
             <tr lang="en">Physical</tr>
         </label>
-        <label id="EY2YX" zValue="35" posX="77.787" posY="49.212" width="14.287" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+        <label id="EY2YX" zValue="29" posX="77.787" posY="53.975" width="14.287" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
             <tr lang="en">Electric</tr>
         </label>
-        <label id="80B6Z" zValue="36" posX="95.250" posY="49.212" width="14.287" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
+        <label id="80B6Z" zValue="30" posX="95.250" posY="53.975" width="14.287" height="3.175" fontName="Arial" fontSize="8" fontWeight="bold" alignment="36" tr="1">
             <tr lang="en">Physical</tr>
         </label>
-        <line id="MNCHK" zValue="37" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="41.275" fromY="49.212" toX="111.125" toY="49.212"/>
+        <line id="MNCHK" zValue="31" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="41.275" fromY="53.975" toX="111.125" toY="53.975"/>
+        <field id="5ZY4H" typeId="131074" zValue="32" posX="1.587" posY="46.037" width="196.850" height="4.762" description="TableTitle" resource="datasource" fontName="Arial" fontSize="10" alignment="1" tr="1" type="txt" ftype="ds">
+            <tr lang="en">DataSource2.TableTitle</tr>
+        </field>
     </pageheader>
     <pagefooter id="PF" height="10.000">
         <field id="TTF91" zValue="0" posX="166.688" posY="0.000" width="31.750" height="4.762" resource="tpl" template="true" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="tpl">
             <tr lang="en">page  $V{gpageno}</tr>
         </field>
-        <field id="4ZJ7U" typeId="131074" zValue="1" posX="1.587" posY="0.000" width="31.750" height="4.762" description="Date" resource="datasource" fontName="Arial" fontSize="10" forecolor="#000000" tr="1" type="txt" ftype="ds">
+        <field id="4ZJ7U" typeId="131074" zValue="1" posX="1.587" posY="0.000" width="31.750" height="4.762" description="Date" resource="datasource" fontName="Arial" fontSize="10" alignment="1" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.Date</tr>
         </field>
     </pagefooter>
@@ -122,33 +128,33 @@
     <details>
         <detail id="Detail1" height="3.203" datasource="DataSource1">
             <items>
-                <field id="YXWQN" typeId="131074" zValue="2" posX="3.175" posY="0.000" width="12.700" height="3.175" description="ExtStrID" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
+                <field id="YXWQN" typeId="131074" zValue="0" posX="3.175" posY="0.000" width="12.700" height="3.175" description="ExtStrID" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
                     <tr lang="en">ExtStrID</tr>
                 </field>
-                <line id="PM4BE" zValue="3" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="3.175" toX="198.438" toY="3.175"/>
-                <line id="60A4E" zValue="4" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="198.438" fromY="0.000" toX="198.438" toY="3.175"/>
-                <line id="44E9E" zValue="5" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="3.175" toX="1.587" toY="0.000"/>
-                <line id="A0WYW" zValue="6" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="17.462" fromY="3.175" toX="17.462" toY="0.000"/>
-                <line id="ZSO32" zValue="7" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="41.275" fromY="3.175" toX="41.275" toY="0.000"/>
-                <line id="JTAQU" zValue="8" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="58.737" fromY="3.175" toX="58.737" toY="0.000"/>
-                <field id="BF2LX" typeId="131074" zValue="9" posX="19.050" posY="0.000" width="20.637" height="3.175" description="Name" resource="datasource" fontName="Arial" fontSize="8" alignment="1" tr="1" type="txt" ftype="ds">
+                <line id="PM4BE" zValue="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="3.175" toX="198.438" toY="3.175"/>
+                <line id="60A4E" zValue="2" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="198.438" fromY="0.000" toX="198.438" toY="3.175"/>
+                <line id="44E9E" zValue="3" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="3.175" toX="1.587" toY="0.000"/>
+                <line id="A0WYW" zValue="4" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="17.462" fromY="3.175" toX="17.462" toY="0.000"/>
+                <line id="ZSO32" zValue="5" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="41.275" fromY="3.175" toX="41.275" toY="0.000"/>
+                <line id="JTAQU" zValue="6" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="58.737" fromY="3.175" toX="58.737" toY="0.000"/>
+                <field id="BF2LX" typeId="131074" zValue="7" posX="19.050" posY="0.000" width="20.637" height="3.175" description="Name" resource="datasource" fontName="Arial" fontSize="8" alignment="1" tr="1" type="txt" ftype="ds">
                     <tr lang="en">Name</tr>
                 </field>
-                <field id="7BLPM" typeId="131074" zValue="12" posX="42.862" posY="0.000" width="14.287" height="3.175" description="NominalElectricValue" resource="tpl" fontName="Arial" fontSize="8" tr="1" type="txt" ftype="tpl">
+                <field id="7BLPM" typeId="131074" zValue="8" posX="42.862" posY="0.000" width="14.287" height="3.175" description="NominalElectricValue" resource="tpl" template="true" fontName="Arial" fontSize="8" alignment="1" tr="1" type="txt" ftype="tpl">
                     <tr lang="en">$D{NominalElectricValue} $D{DataSource1.ElectricUnit}</tr>
                 </field>
-                <field id="4BE60" typeId="131074" zValue="13" posX="60.325" posY="0.000" width="14.287" height="3.175" description="NominalPhysicalValue" resource="tpl" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="tpl">
+                <field id="4BE60" typeId="131074" zValue="9" posX="60.325" posY="0.000" width="14.287" height="3.175" description="NominalPhysicalValue" resource="tpl" template="true" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="tpl">
                     <tr lang="en">$D{NominalPhysicalValue}  $D{DataSource1.PhysicalUnit}</tr>
                 </field>
-                <field id="A4E44" typeId="131074" zValue="14" posX="77.787" posY="0.000" width="14.287" height="3.175" description="MeasureElectricValue" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
+                <field id="A4E44" typeId="131074" zValue="10" posX="77.787" posY="0.000" width="14.287" height="3.175" description="MeasureElectricValue" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
                     <tr lang="en">MeasureElectricValue</tr>
                 </field>
-                <field id="E9EXY" typeId="131074" zValue="15" posX="95.250" posY="0.000" width="14.287" height="3.175" description="MeasurePhysicalValue" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
+                <field id="E9EXY" typeId="131074" zValue="11" posX="95.250" posY="0.000" width="14.287" height="3.175" description="MeasurePhysicalValue" resource="datasource" fontName="Arial" fontSize="8" alignment="36" tr="1" type="txt" ftype="ds">
                     <tr lang="en">MeasurePhysicalValue</tr>
                 </field>
-                <line id="AQUXH" zValue="17" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="76.200" fromY="3.175" toX="76.200" toY="0.000"/>
-                <line id="9BVUO" zValue="18" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="93.662" fromY="3.175" toX="93.662" toY="0.000"/>
-                <line id="U92TU" zValue="19" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="111.125" fromY="3.175" toX="111.125" toY="0.000"/>
+                <line id="AQUXH" zValue="12" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="76.200" fromY="3.175" toX="76.200" toY="0.000"/>
+                <line id="9BVUO" zValue="13" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="93.662" fromY="3.175" toX="93.662" toY="0.000"/>
+                <line id="U92TU" zValue="14" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="111.125" fromY="3.175" toX="111.125" toY="0.000"/>
             </items>
         </detail>
     </details>
