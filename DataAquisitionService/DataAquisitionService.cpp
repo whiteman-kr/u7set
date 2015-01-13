@@ -183,8 +183,6 @@ void DataServiceMainFunctionWorker::onGetDataSourcesInfo(UdpRequest& request)
 	for(quint32 i = 0; i < count; i++)
 	{
 		ack.writeStruct(&dsInfo[i]);
-
-		qDebug() << "Src Name = " << QString(reinterpret_cast<QChar*>(dsInfo[i].name));
 	}
 
 	ackInformationRequest(ack);
@@ -193,7 +191,40 @@ void DataServiceMainFunctionWorker::onGetDataSourcesInfo(UdpRequest& request)
 
 void DataServiceMainFunctionWorker::onGetDataSourcesState(UdpRequest& request)
 {
+	quint32 count = request.readDword();
 
+	QVector<DataSourceStatistics> dsStatistics;
+
+	for(quint32 i = 0; i < count; i++)
+	{
+		quint32 sourceID = request.readDword();
+
+		if (m_dataSources.contains(sourceID))
+		{
+			DataSourceStatistics dss;
+
+			DataSource ds = m_dataSources.value(sourceID);
+
+			ds.getStatistics(dss);
+
+			dsStatistics.append(dss);
+		}
+	}
+
+	UdpRequest ack;
+
+	ack.initAck(request);
+
+	count = static_cast<quint32>(dsStatistics.count());
+
+	ack.writeDword(count);
+
+	for(quint32 i = 0; i < count; i++)
+	{
+		ack.writeStruct(&dsStatistics[i]);
+	}
+
+	ackInformationRequest(ack);
 }
 
 

@@ -78,16 +78,36 @@ void DataSource::getInfo(DataSourceInfo& dsi)
 	dsi.ID = m_id;
 	dsi.ip = m_hostAddress.toIPv4Address();
 	dsi.partCount = m_partCount;
-	dsi.copyStringToBuffer(m_name, dsi.name, DATA_SOURCE_NAME_LEN);
+	Serializable::copyStringToBuffer(m_name, dsi.name, DATA_SOURCE_NAME_LEN);
 }
 
 
 void DataSource::setInfo(const DataSourceInfo& dsi)
 {
-/*	m_id = dsi.ID;
-	m_hostAddress = dsi.ip;
-	m_port = dsi.port;
+	m_id = dsi.ID;
+	m_hostAddress = QHostAddress(dsi.ip);
 	m_partCount = dsi.partCount;
-	copyBufferToString(dsi.name, DATA_SOURCE_NAME_LEN, m_name);*/
+	Serializable::copyBufferToString(dsi.name, m_name);
+}
+
+
+void DataSource::getStatistics(DataSourceStatistics& dss)
+{
+	dss.ID = m_id;
+	dss.state = static_cast<quint32>(m_state);
+	dss.uptime = m_uptime;
+	dss.receivedDataSize = m_receivedDataSize;
+	dss.dataReceivingRate = m_dataReceivingRate;
+}
+
+
+void DataSource::setStatistics(const DataSourceStatistics& dss)
+{
+	Q_ASSERT(dss.ID == m_id);
+
+	m_state = static_cast<DataSourceState>(dss.state);
+	m_uptime = dss.uptime;
+	m_receivedDataSize = dss.receivedDataSize;
+	m_dataReceivingRate = dss.dataReceivingRate;
 }
 
