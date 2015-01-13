@@ -4,18 +4,16 @@
 
 
 const int DSC_IP = 0,
-DSC_PORT = 1,
-DSC_FRAME_COUNT = 2,
-DSC_STATE = 3,
-DSC_UPTIME = 4,
-DSC_RECEIVED = 5,
-DSC_SPEED = 6;
+DSC_FRAME_COUNT = 1,
+DSC_STATE = 2,
+DSC_UPTIME = 3,
+DSC_RECEIVED = 4,
+DSC_SPEED = 5;
 
 
 const char* const dataSourceColumnStr[] =
 {
 	"IP",
-	"Port",
 	"Frame count",
 	"State",
 	"Uptime",
@@ -83,7 +81,7 @@ DataSourcesStateModel::~DataSourcesStateModel()
 
 int DataSourcesStateModel::rowCount(const QModelIndex&) const
 {
-	return m_dataSourceDescription.count();
+	return m_dataSource.count();
 }
 
 int DataSourcesStateModel::columnCount(const QModelIndex&) const
@@ -94,29 +92,28 @@ int DataSourcesStateModel::columnCount(const QModelIndex&) const
 QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 {
 	int row = index.row();
-	if (row < 0 || row > m_dataSourceDescription.count())
+	if (row < 0 || row > m_dataSource.count())
 	{
 		return QVariant();
 	}
 	if (role == Qt::DisplayRole)
 	{
-		const DataSourceDescription& d = m_dataSourceDescription[row];
+		const DataSource& d = m_dataSource[row];
 		switch (index.column())
 		{
-			case DSC_IP: return QHostAddress(d.info.ip).toString();
-			case DSC_PORT: return d.info.port;
-			case DSC_FRAME_COUNT: return d.info.partCount;
-			case DSC_STATE: return d.state.state;
+			case DSC_IP: return d.hostAddress().toString();
+			case DSC_FRAME_COUNT: return d.partCount();
+			case DSC_STATE: return d.state();
 			case DSC_UPTIME:
 			{
-				auto time = d.state.uptime;
+				auto time = d.uptime();
 				int s = time % 60; time /= 60;
 				int m = time % 60; time /= 60;
 				int h = time % 24; time /= 24;
 				return QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 			}
-			case DSC_RECEIVED: return d.state.receivedSize;
-			case DSC_SPEED: return d.state.receiveSpeed;
+			case DSC_RECEIVED: return d.receivedDataSize();
+			case DSC_SPEED: return 0;
 			default:
 				assert(false);
 		}
@@ -133,9 +130,9 @@ QVariant DataSourcesStateModel::headerData(int section, Qt::Orientation orientat
 		{
 			return dataSourceColumnStr[section];
 		}
-		if (orientation == Qt::Vertical && section < m_dataSourceDescription.count())
+		if (orientation == Qt::Vertical && section < m_dataSource.count())
 		{
-			return m_dataSourceDescription[section].info.name;
+			return m_dataSource[section].name();
 		}
 	}
 	return QVariant();

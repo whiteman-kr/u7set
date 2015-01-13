@@ -6,16 +6,10 @@
 #include <QHostAddress>
 #include "../include/UdpSocket.h"
 #include "../include/OrderedHash.h"
+#include "../include/DataSource.h"
 
 
 class QTimer;
-
-
-struct DataSourceDescription
-{
-	DataSourceInfo info;
-	DataSourceState state;
-};
 
 
 class DataSourcesStateModel : public QAbstractTableModel
@@ -43,7 +37,7 @@ private:
 	bool m_active = false;
 	int m_currentRequestType = RQID_GET_DATA_SOURCES_IDS;
 	int m_currentDataSourceIndex = -1;
-	OrderedHash<int, DataSourceDescription> m_dataSourceDescription;
+	OrderedHash<int, DataSource> m_dataSource;
 };
 
 

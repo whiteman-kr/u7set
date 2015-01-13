@@ -18,14 +18,16 @@ SOURCES += main.cpp\
     servicetablemodel.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
-    DataSourcesStateWidget.cpp
+    DataSourcesStateWidget.cpp \
+    ../lib/DataSource.cpp
 
 HEADERS  += mainwindow.h \
     scanoptionswidget.h \
     servicetablemodel.h \
     ../include/UdpSocket.h \
     ../include/SocketIO.h \
-    DataSourcesStateWidget.h
+    DataSourcesStateWidget.h \
+    ../include/DataSource.h
 
 FORMS    +=
 
