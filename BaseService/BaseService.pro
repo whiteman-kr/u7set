@@ -33,6 +33,8 @@ HEADERS += \
 
 include(../qtservice/src/qtservice.pri)
 
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+
 unix:QMAKE_CXXFLAGS += -std=c++11
 
 

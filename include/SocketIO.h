@@ -2,6 +2,7 @@
 
 #include <QtGlobal>
 #include <QDebug>
+#include <QHostAddress>
 
 
 const int MAX_DATAGRAM_SIZE = 4096;
@@ -28,10 +29,18 @@ const quint32	SERVICE_TYPE_COUNT = sizeof(serviceTypeStr) / sizeof(const char*);
 
 
 const quint16   PORT_BASE_SERVICE = 13300,
+
 				PORT_CONFIG_SERVICE = 13310,
-				PORT_FCS_AQUISION_SERVICE = 13320,
+
+				PORT_DATA_AQUISITION_SERVICE = 13320,
+				PORT_DATA_AQUISITION_SERVICE_INFO = 13321,
+
 				PORT_FCS_TUNING_SERVICE = 13330,
+
 				PORT_ARCHIVING_SERVICE = 13340;
+
+
+const quint16	PORT_DATA_AQUISITION = 13400;
 
 
 const quint32   RQID_GET_SERVICE_INFO = 1000,
@@ -75,7 +84,7 @@ const ServiceTypeInfo serviceTypesInfo[] =
 {
 	{ STP_BASE, PORT_BASE_SERVICE, serviceTypeStr[STP_BASE] },
 	{ STP_CONFIG, PORT_CONFIG_SERVICE, serviceTypeStr[STP_CONFIG]},
-	{ STP_FSC_ACQUISITION, PORT_FCS_AQUISION_SERVICE, serviceTypeStr[STP_FSC_ACQUISITION]},
+	{ STP_FSC_ACQUISITION, PORT_DATA_AQUISITION_SERVICE, serviceTypeStr[STP_FSC_ACQUISITION]},
 	{ STP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, serviceTypeStr[STP_FSC_TUNING]},
 	{ STP_ARCHIVING, PORT_ARCHIVING_SERVICE, serviceTypeStr[STP_ARCHIVING]},
 };
@@ -153,7 +162,7 @@ struct SendFileNext
 
 #define SERIALIZE_ARRAY(variable_type, variable, len) { if (write) { memcpy(_ptr, variable, sizeof(variable_type)*len); } else { memcpy(variable, _ptr, sizeof(variable_type)*len);} _ptr += sizeof(variable_type)*len; }
 
-#define END_SERIALIZATION() if (write) { *((char*)buffer - sizeof(quint16)) = _ptr - (char*)buffer; setSize(_ptr - (char*)buffer); } else { Q_ASSERT(_ptr - (char*)buffer == size()); } return _ptr;
+#define END_SERIALIZATION() if (write) { *(buffer - sizeof(quint16)) = addSize(_ptr - buffer); } else { Q_ASSERT(_ptr - buffer == userDataSize()); _ptr = buffer + userDataSize(); } return _ptr;
 
 
 struct Serializable
@@ -174,54 +183,29 @@ struct Serializable
 
 	quint16 version() { return m_structureVersion; }
 	quint16 size() { return m_structureSize; }
+	quint16 userDataSize() { return m_structureSize - sizeof(quint16) * 2; }
+
+	static void copyStringToBuffer(const QString& str, quint16* buffer, quint32 bufferSize);
+	static void copyBufferToString(const quint16* buffer, QString& str);
 
 private:
 	quint16 m_structureVersion;
-	quint16 m_structureSize;
+	quint16 m_structureSize;			// full size of structure derived from Serializable,
+										// = sizeof(m_structureVersion & m_structureSize fields) + sizeof(user data)
 
 	char* serializeVersion(char* buffer, bool write);
 
 protected:
 	virtual char* serialize(char* buffer, bool write) = 0;
 	void setSize(quint16 size) { m_structureSize = size; }
+	quint16 addSize(quint16 size) { return (m_structureSize += size); }
 };
 
 
-// RQID_GET_DATA_SOURCES_INFO request data format
-//
-struct DataSourceInfo : public Serializable
-{
-	quint32 ID;
-	quint16 name[32];
-	quint32 ip;
-	quint32 port;
-	quint32 partCount;
-
-	DataSourceInfo() : Serializable(1) {}
-
-protected:
-	virtual char *serialize(char *buffer, bool write) override;
-};
-
-
-// RQID_GET_DATA_SOURCES_STATE request data format
-//
-struct DataSourceState : public Serializable
-{
-	quint32 ID;
-	quint32 state;
-	quint64 uptime;
-	quint64 receivedSize;
-	double receiveSpeed;
-
-	DataSourceState() : Serializable(1) {}
-
-protected:
-	virtual char *serialize(char *buffer, bool write) override;
-};
 
 
 #pragma pack(pop)
+
 
 const quint32 CRC32_INITIAL_VALUE = 0xFFFFFFFF;
 

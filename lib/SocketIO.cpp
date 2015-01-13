@@ -1,4 +1,5 @@
 #include "../include/SocketIO.h"
+#include <assert.h>
 
 /*
   Name  : CRC-32
@@ -103,12 +104,13 @@ quint32 CRC32(const char* buffer, int len)
 
 
 
-char *Serializable::serializeVersion(char *buffer, bool write)
+char* Serializable::serializeVersion(char *buffer, bool write)
 {
 	if (write)
 	{
 		*((quint16*)buffer) = m_structureVersion;
-		*((quint16*)buffer + 1) = 0;	// real structure size will be written in END_SERIALIZATION
+		*((quint16*)buffer + 1) = 0;				// real structure size will be written in END_SERIALIZATION
+		m_structureSize = sizeof(quint16) * 2;
 	}
 	else
 	{
@@ -120,29 +122,47 @@ char *Serializable::serializeVersion(char *buffer, bool write)
 }
 
 
-char* DataSourceInfo::serialize(char* buffer, bool write)
+void Serializable::copyStringToBuffer(const QString &str, quint16* buffer, quint32 bufferSize)
 {
-	BEGIN_SERIALIZATION();
+	if (buffer == nullptr)
+	{
+		assert(buffer != nullptr);
+		buffer[0] = 0;
+		return;
+	}
 
-	SERIALIZE_VAR(quint32, ID);
-	SERIALIZE_ARRAY(quint16, name, 32);
-	SERIALIZE_VAR(quint32, ip);
-	SERIALIZE_VAR(quint32, port);
-	SERIALIZE_VAR(quint32, partCount);
+	if (bufferSize <= 1)
+	{
+		assert(bufferSize > 1);
+		buffer[0] = 0;
+		return;
+	}
 
-	END_SERIALIZATION();
+	const QChar* ptr = str.constData();
+
+	quint32 i = 0;
+
+	while(!ptr->isNull() && i < bufferSize - 1)
+	{
+		buffer[i] = ptr[i].unicode();
+
+		i++;
+	}
+
+	buffer[i] = 0;
 }
 
 
-char* DataSourceState::serialize(char* buffer, bool write)
+void Serializable::copyBufferToString(const quint16* buffer, QString &str)
 {
-	BEGIN_SERIALIZATION();
+	if (buffer == nullptr)
+	{
+		assert(buffer != nullptr);
+		str.clear();
+		return;
+	}
 
-	SERIALIZE_VAR(quint32, ID);
-	SERIALIZE_VAR(quint32, state);
-	SERIALIZE_VAR(quint64, uptime);
-	SERIALIZE_VAR(quint64, receivedSize);
-	SERIALIZE_VAR(double, receiveSpeed);
-
-	END_SERIALIZATION();
+	str = QString(reinterpret_cast<const QChar*>(buffer));
 }
+
+

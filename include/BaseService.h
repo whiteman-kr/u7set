@@ -131,8 +131,8 @@ public:
 		m_baseServiceController = baseServiceController;
 	}
 
-	virtual void threadStarted() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::threadStarted"; }
-	virtual void threadFinished() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::threadFinished"; }
+	virtual void initialize() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::initialize"; }
+	virtual void shutdown() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::shutdown"; }
 
 signals:
 	void mainFunctionWork();
@@ -165,7 +165,7 @@ private:
     QMutex m_mutex;
 
     QThread m_baseWorkerThread;
-    QThread m_mainFunctionThread;
+	QThread* m_mainFunctionThread = nullptr;
 
 	MainFunctionWorker* m_mainFunctionWorker = nullptr;
 

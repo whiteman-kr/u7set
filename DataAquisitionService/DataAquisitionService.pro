@@ -24,13 +24,17 @@ SOURCES += main.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/BaseService.cpp \
 	../lib/SocketIO.cpp \
-	../lib/CircularLogger.cpp
+	../lib/CircularLogger.cpp \
+    DataAquisitionService.cpp \
+    ../lib/DataSource.cpp
 
 HEADERS += \
 	../include/SocketIO.h \
 	../include/UdpSocket.h \
 	../include/BaseService.h \
-	../include/CircularLogger.h
+	../include/CircularLogger.h \
+    DataAquisitionService.h \
+    ../include/DataSource.h
 
 include(../qtservice/src/qtservice.pri)
 

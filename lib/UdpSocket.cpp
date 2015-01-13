@@ -357,6 +357,25 @@ bool UdpRequest::writeData(const char* data, quint32 dataSize)
 }
 
 
+bool UdpRequest::writeStruct(Serializable* s)
+{
+	if (s == nullptr)
+	{
+		assert(s != nullptr);
+		return false;
+	}
+
+	m_writeDataPtr = s->serializeTo(m_writeDataPtr);
+
+	m_header->dataSize += s->size();
+	m_rawDataSize += s->size();
+
+	assert(m_rawDataSize <= MAX_DATAGRAM_SIZE);
+
+	return true;
+}
+
+
 quint32 UdpRequest::readDword()
 {
 	if (m_readDataPtr - m_data + sizeof(quint32) > m_header->dataSize)
@@ -371,6 +390,19 @@ quint32 UdpRequest::readDword()
 
 	return result;
 }
+
+
+void UdpRequest::readStruct(Serializable* s)
+{
+/*	if (m_readDataPtr - m_data + sizeof(quint32) > m_header->dataSize)
+	{
+		assert(m_readDataPtr - m_data + sizeof(quint32) <= m_header->dataSize);
+		return 0;
+	}*/
+
+	m_readDataPtr = s->serializeFrom(m_readDataPtr);
+}
+
 
 // -----------------------------------------------------------------------------
 // UdpRequestProcessor class implementation

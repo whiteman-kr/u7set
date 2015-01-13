@@ -541,7 +541,7 @@ MainFunctionWorker::~MainFunctionWorker()
 
 void MainFunctionWorker::onThreadStartedSlot()
 {
-	threadStarted();
+	initialize();
 
 	emit mainFunctionWork();
 }
@@ -549,13 +549,11 @@ void MainFunctionWorker::onThreadStartedSlot()
 
 void MainFunctionWorker::onThreadFinishedSlot()
 {
-	threadFinished();
+	shutdown();
 
 	emit mainFunctionStopped();
 
-	//deleteLater();
-
-	moveToThread(nullptr);
+	moveToThread(m_baseServiceController->thread());
 }
 
 
@@ -606,6 +604,9 @@ BaseServiceController::BaseServiceController(int serviceType, MainFunctionWorker
 	//
 	m_mainFunctionWorker->setController(this);
 
+	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionWork, this, &BaseServiceController::onMainFunctionWork);
+	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionStopped, this, &BaseServiceController::onMainFunctionStopped);
+
 	startMainFunction();
 }
 
@@ -613,8 +614,6 @@ BaseServiceController::BaseServiceController(int serviceType, MainFunctionWorker
 BaseServiceController::~BaseServiceController()
 {
 	stopMainFunction();
-
-	m_mainFunctionThread.wait();		// !!!!
 
 	m_baseWorkerThread.quit();
     m_baseWorkerThread.wait();
@@ -670,7 +669,14 @@ void BaseServiceController::stopMainFunction()
 
 	m_mainFunctionState = MainFunctionState::stops;
 
-	m_mainFunctionThread.quit();
+	m_mainFunctionThread->quit();
+	m_mainFunctionThread->wait();
+
+	delete m_mainFunctionThread;
+
+	m_mainFunctionThread = nullptr;
+
+	//m_mainFunctionWorker->moveToThread(thread());
 
 	// m_mainFunctionState = MainFunctionState::Stopped setted in testMainFunctionState
 	//
@@ -695,17 +701,18 @@ void BaseServiceController::startMainFunction()
 
 	//MainFunctionWorker* mainFunctionWorker = new MainFunctionWorker(this);
 
-	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionWork, this, &BaseServiceController::onMainFunctionWork);
-	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionStopped, this, &BaseServiceController::onMainFunctionStopped);
+	assert(m_mainFunctionThread == nullptr);
 
-	connect(&m_mainFunctionThread, &QThread::started, m_mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
-	connect(&m_mainFunctionThread, &QThread::finished, m_mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
+	m_mainFunctionThread = new QThread();
 
-	m_mainFunctionWorker->moveToThread(&m_mainFunctionThread);
+	connect(m_mainFunctionThread, &QThread::started, m_mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
+	connect(m_mainFunctionThread, &QThread::finished, m_mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
+
+	m_mainFunctionWorker->moveToThread(m_mainFunctionThread);
 
 	m_mainFunctionStartTime = QDateTime::currentMSecsSinceEpoch();
 
-	m_mainFunctionThread.start();
+	m_mainFunctionThread->start();
 
 	APP_MSG(log, QString("Main function was started."));
 
@@ -742,7 +749,7 @@ void BaseServiceController::checkMainFunctionState()
 {
 	if (m_mainFunctionState == MainFunctionState::stops)
 	{
-		if (m_mainFunctionStopped && m_mainFunctionThread.isFinished())
+		if (m_mainFunctionStopped && m_mainFunctionThread == nullptr)
 		{
 			m_mainFunctionStopped = false;
 
@@ -822,6 +829,10 @@ BaseService::BaseService(int argc, char ** argv, const QString & name, int servi
 
 BaseService::~BaseService()
 {
+	if (m_mainFunctionWorker != nullptr)
+	{
+		delete m_mainFunctionWorker;
+	}
 }
 
 
@@ -834,6 +845,8 @@ void BaseService::start()
 void BaseService::stop()
 {
 	delete m_baseServiceController;
+
+	m_mainFunctionWorker = nullptr;			// m_mainFunctionWorker already deleted in m_baseServiceController destructor
 }
 
 

@@ -92,6 +92,7 @@ public:
 
 	bool writeDword(quint32 dw);
 	bool writeData(const char* data, quint32 dataSize);
+	bool writeStruct(Serializable *s);
 
 	void initRead()
 	{
@@ -99,6 +100,7 @@ public:
 	}
 
 	quint32 readDword();
+	void readStruct(Serializable* s);
 };
 
 
