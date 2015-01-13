@@ -30,7 +30,7 @@ protected:
 };
 
 
-// RQID_GET_DATA_SOURCES_STATE request data format
+// RQID_GET_DATA_SOURCES_STATISTICS request data format
 //
 struct DataSourceStatistics : public Serializable
 {

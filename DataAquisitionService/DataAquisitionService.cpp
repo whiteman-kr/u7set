@@ -89,7 +89,7 @@ void DataServiceMainFunctionWorker::onInformationRequest(UdpRequest request)
 		onGetDataSourcesInfo(request);
 		break;
 
-	case RQID_GET_DATA_SOURCES_STATE:
+	case RQID_GET_DATA_SOURCES_STATISTICS:
 		onGetDataSourcesState(request);
 		break;
 
