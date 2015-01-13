@@ -6,13 +6,15 @@
 #include <QtConcurrent>
 #include <QFile>
 
+#include "Options.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
-ExportMeasure::ExportMeasure(MeasureView* pView) :
-    QObject(pView),
-    m_pView(pView)
+ExportMeasure::ExportMeasure(MeasureView* pMeasureView) :
+    QObject(pMeasureView),
+    m_pMeasureView(pMeasureView)
 {
-    m_pDialog = new QDialog(pView);
+    m_pDialog = new QDialog(pMeasureView);
 
     m_pDialog->setWindowFlags(Qt::Drawer);
     m_pDialog->setFixedSize(300, 70);
@@ -44,10 +46,9 @@ ExportMeasure::ExportMeasure(MeasureView* pView) :
     connect(this, &ExportMeasure::setRange, m_progress, &QProgressBar::setRange);
 
     connect(this, &ExportMeasure::exportThreadFinish, m_pDialog, &QDialog::reject);
-    connect(this, &ExportMeasure::exportThreadFinish, this, &ExportMeasure::exportThreadFinished);
+    connect(this, &ExportMeasure::exportThreadFinish, this, &ExportMeasure::exportComplited);
     connect(m_cancelButton, &QPushButton::clicked, m_pDialog, &QDialog::reject);
     connect(m_pDialog, &QDialog::rejected, this, &ExportMeasure::exportCancel);
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -65,36 +66,57 @@ void ExportMeasure::exec()
         return;
     }
 
-    if (m_pView == nullptr)
+    if (m_pMeasureView == nullptr)
     {
         return;
     }
 
-    if (m_pView->table().count() == 0)
+    if (m_pMeasureView->table().count() == 0)
     {
         QMessageBox::information(m_pDialog, EXPORT_WINDOW_TITLE, tr("Measurements is absent!"));
         return;
     }
 
-    int measureType = m_pView->measureType();
+    int measureType = m_pMeasureView->measureType();
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    QString filter = tr("CSV files (*.csv);;All Files (*.*)");
+    QString filter = tr("CSV files (*.csv);;PDF files (*.pdf)");
+
     QString fileName = QFileDialog::getSaveFileName(m_pDialog, EXPORT_WINDOW_TITLE, MeasureFileName[measureType], filter);
     if (fileName.isEmpty() == true)
     {
         return;
     }
 
-    m_pDialog->show();
+    QString fileExt = fileName.right(fileName.count() - fileName.lastIndexOf(".") - 1);
+    if (fileExt.isEmpty() == true)
+    {
+        return;
+    }
 
-    QtConcurrent::run(ExportMeasure::startExportThread, this, fileName);
+    if (fileExt == "csv")
+    {
+        m_pDialog->show();
+        QtConcurrent::run(ExportMeasure::startExportThread, this, fileName);
 
-    //QFuture<void> result = QtConcurrent::run(ExportMeasure::startExportThread, this, fileName);
-    //result.waitForFinished();
+        //QFuture<void> result = QtConcurrent::run(ExportMeasure::startExportThread, this, fileName);
+        //result.waitForFinished();
+    }
+
+    if (fileExt == "pdf")
+    {
+        int reportType = theOptions.report().reportTypeByMeasureType(measureType);
+        if (reportType != REPORT_TYPE_UNKNOWN)
+        {
+            if (ReportView::exportToPDF(reportType, fileName) == true)
+            {
+                exportComplited();
+            }
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -115,7 +137,7 @@ void ExportMeasure::startExportThread(ExportMeasure* pThis, QString fileName)
 
 bool ExportMeasure::saveFile(QString fileName)
 {
-    if (m_pView == nullptr)
+    if (m_pMeasureView == nullptr)
     {
         return false;
     }
@@ -134,21 +156,21 @@ bool ExportMeasure::saveFile(QString fileName)
         return false;
     }
 
-    int columnCount = m_pView->table().header().count();
+    int columnCount = m_pMeasureView->table().header().count();
     for(int c = 0; c < columnCount; c++)
     {
-        if(m_pView->table().columnIsVisible(c) == false)
+        if(m_pMeasureView->table().columnIsVisible(c) == false)
         {
             continue;
         }
 
-        file.write(m_pView->table().header().column(c)->title().toLocal8Bit());
+        file.write(m_pMeasureView->table().header().column(c)->title().toLocal8Bit());
         file.write(";");
     }
 
     file.write("\n");
 
-    int measureCount = m_pView->table().count();
+    int measureCount = m_pMeasureView->table().count();
 
     setRange(0, measureCount);
 
@@ -161,12 +183,12 @@ bool ExportMeasure::saveFile(QString fileName)
 
         for(int c = 0; c < columnCount; c++)
         {
-            if(m_pView->table().columnIsVisible(c) == false)
+            if(m_pMeasureView->table().columnIsVisible(c) == false)
             {
                 continue;
             }
 
-            file.write(m_pView->table().text(m, c).toLocal8Bit());
+            file.write(m_pMeasureView->table().text(m, c).toLocal8Bit());
             file.write(";");
         }
 

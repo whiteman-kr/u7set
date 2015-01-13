@@ -3808,6 +3808,13 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_childrestriction();
   inline void set_allocated_childrestriction(::Proto::wstring* childrestriction);
 
+  // optional int32 place = 5 [default = 0];
+  inline bool has_place() const;
+  inline void clear_place();
+  static const int kPlaceFieldNumber = 5;
+  inline ::google::protobuf::int32 place() const;
+  inline void set_place(::google::protobuf::int32 value);
+
   // optional bool preset = 32 [default = false];
   inline bool has_preset() const;
   inline void clear_preset();
@@ -3904,6 +3911,8 @@ class DeviceObject : public ::google::protobuf::Message {
   inline void clear_has_caption();
   inline void set_has_childrestriction();
   inline void clear_has_childrestriction();
+  inline void set_has_place();
+  inline void clear_has_place();
   inline void set_has_preset();
   inline void clear_has_preset();
   inline void set_has_presetroot();
@@ -3931,6 +3940,9 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
   ::Proto::wstring* childrestriction_;
+  ::google::protobuf::int32 place_;
+  bool preset_;
+  bool presetroot_;
   ::Proto::wstring* presetname_;
   ::Proto::DeviceRoot* root_;
   ::Proto::DeviceSystem* system_;
@@ -3939,11 +3951,9 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::DeviceModule* module_;
   ::Proto::DeviceController* controller_;
   ::Proto::DeviceDiagSignal* diagsignal_;
-  bool preset_;
-  bool presetroot_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(15 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4224,34 +4234,24 @@ class DeviceChassis : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int32 place = 1 [default = 0];
-  inline bool has_place() const;
-  inline void clear_place();
-  static const int kPlaceFieldNumber = 1;
-  inline ::google::protobuf::int32 place() const;
-  inline void set_place(::google::protobuf::int32 value);
-
-  // optional int32 type = 2 [default = 0];
+  // optional int32 type = 1 [default = 0];
   inline bool has_type() const;
   inline void clear_type();
-  static const int kTypeFieldNumber = 2;
+  static const int kTypeFieldNumber = 1;
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:Proto.DeviceChassis)
  private:
-  inline void set_has_place();
-  inline void clear_has_place();
   inline void set_has_type();
   inline void clear_has_type();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 place_;
   ::google::protobuf::int32 type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4316,17 +4316,10 @@ class DeviceModule : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int32 place = 1 [default = 0];
-  inline bool has_place() const;
-  inline void clear_place();
-  static const int kPlaceFieldNumber = 1;
-  inline ::google::protobuf::int32 place() const;
-  inline void set_place(::google::protobuf::int32 value);
-
-  // optional int32 type = 2 [default = 0];
+  // optional int32 type = 1 [default = 0];
   inline bool has_type() const;
   inline void clear_type();
-  static const int kTypeFieldNumber = 2;
+  static const int kTypeFieldNumber = 1;
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
@@ -4341,8 +4334,6 @@ class DeviceModule : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
  private:
-  inline void set_has_place();
-  inline void clear_has_place();
   inline void set_has_type();
   inline void clear_has_type();
   inline void set_has_module_configuration();
@@ -4350,12 +4341,11 @@ class DeviceModule : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 place_;
-  ::google::protobuf::int32 type_;
   ::Proto::ModuleConfiguration* module_configuration_;
+  ::google::protobuf::int32 type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4588,18 +4578,33 @@ class ModuleConfiguration : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue >*
       mutable_values();
 
+  // optional string name = 3;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 3;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
+
   // @@protoc_insertion_point(class_scope:Proto.ModuleConfiguration)
  private:
   inline void set_has_struct_description();
   inline void clear_has_struct_description();
+  inline void set_has_name();
+  inline void clear_has_name();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* struct_description_;
   ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue > values_;
+  ::std::string* name_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -8603,15 +8608,37 @@ inline void DeviceObject::set_allocated_childrestriction(::Proto::wstring* child
   }
 }
 
-// optional bool preset = 32 [default = false];
-inline bool DeviceObject::has_preset() const {
+// optional int32 place = 5 [default = 0];
+inline bool DeviceObject::has_place() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void DeviceObject::set_has_preset() {
+inline void DeviceObject::set_has_place() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void DeviceObject::clear_has_preset() {
+inline void DeviceObject::clear_has_place() {
   _has_bits_[0] &= ~0x00000010u;
+}
+inline void DeviceObject::clear_place() {
+  place_ = 0;
+  clear_has_place();
+}
+inline ::google::protobuf::int32 DeviceObject::place() const {
+  return place_;
+}
+inline void DeviceObject::set_place(::google::protobuf::int32 value) {
+  set_has_place();
+  place_ = value;
+}
+
+// optional bool preset = 32 [default = false];
+inline bool DeviceObject::has_preset() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DeviceObject::set_has_preset() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DeviceObject::clear_has_preset() {
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void DeviceObject::clear_preset() {
   preset_ = false;
@@ -8627,13 +8654,13 @@ inline void DeviceObject::set_preset(bool value) {
 
 // optional bool presetRoot = 33 [default = false];
 inline bool DeviceObject::has_presetroot() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void DeviceObject::set_has_presetroot() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void DeviceObject::clear_has_presetroot() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void DeviceObject::clear_presetroot() {
   presetroot_ = false;
@@ -8649,13 +8676,13 @@ inline void DeviceObject::set_presetroot(bool value) {
 
 // optional .Proto.wstring presetName = 34;
 inline bool DeviceObject::has_presetname() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void DeviceObject::set_has_presetname() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void DeviceObject::clear_has_presetname() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void DeviceObject::clear_presetname() {
   if (presetname_ != NULL) presetname_->::Proto::wstring::Clear();
@@ -8687,13 +8714,13 @@ inline void DeviceObject::set_allocated_presetname(::Proto::wstring* presetname)
 
 // optional .Proto.DeviceRoot Root = 100;
 inline bool DeviceObject::has_root() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void DeviceObject::set_has_root() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void DeviceObject::clear_has_root() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void DeviceObject::clear_root() {
   if (root_ != NULL) root_->::Proto::DeviceRoot::Clear();
@@ -8725,13 +8752,13 @@ inline void DeviceObject::set_allocated_root(::Proto::DeviceRoot* root) {
 
 // optional .Proto.DeviceSystem System = 101;
 inline bool DeviceObject::has_system() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void DeviceObject::set_has_system() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void DeviceObject::clear_has_system() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void DeviceObject::clear_system() {
   if (system_ != NULL) system_->::Proto::DeviceSystem::Clear();
@@ -8763,13 +8790,13 @@ inline void DeviceObject::set_allocated_system(::Proto::DeviceSystem* system) {
 
 // optional .Proto.DeviceRack Rack = 102;
 inline bool DeviceObject::has_rack() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void DeviceObject::set_has_rack() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void DeviceObject::clear_has_rack() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void DeviceObject::clear_rack() {
   if (rack_ != NULL) rack_->::Proto::DeviceRack::Clear();
@@ -8801,13 +8828,13 @@ inline void DeviceObject::set_allocated_rack(::Proto::DeviceRack* rack) {
 
 // optional .Proto.DeviceChassis Chassis = 103;
 inline bool DeviceObject::has_chassis() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void DeviceObject::set_has_chassis() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void DeviceObject::clear_has_chassis() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void DeviceObject::clear_chassis() {
   if (chassis_ != NULL) chassis_->::Proto::DeviceChassis::Clear();
@@ -8839,13 +8866,13 @@ inline void DeviceObject::set_allocated_chassis(::Proto::DeviceChassis* chassis)
 
 // optional .Proto.DeviceModule Module = 104;
 inline bool DeviceObject::has_module() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void DeviceObject::set_has_module() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void DeviceObject::clear_has_module() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void DeviceObject::clear_module() {
   if (module_ != NULL) module_->::Proto::DeviceModule::Clear();
@@ -8877,13 +8904,13 @@ inline void DeviceObject::set_allocated_module(::Proto::DeviceModule* module) {
 
 // optional .Proto.DeviceController Controller = 105;
 inline bool DeviceObject::has_controller() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00002000u) != 0;
 }
 inline void DeviceObject::set_has_controller() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00002000u;
 }
 inline void DeviceObject::clear_has_controller() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline void DeviceObject::clear_controller() {
   if (controller_ != NULL) controller_->::Proto::DeviceController::Clear();
@@ -8915,13 +8942,13 @@ inline void DeviceObject::set_allocated_controller(::Proto::DeviceController* co
 
 // optional .Proto.DeviceDiagSignal DiagSignal = 106;
 inline bool DeviceObject::has_diagsignal() const {
-  return (_has_bits_[0] & 0x00002000u) != 0;
+  return (_has_bits_[0] & 0x00004000u) != 0;
 }
 inline void DeviceObject::set_has_diagsignal() {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00004000u;
 }
 inline void DeviceObject::clear_has_diagsignal() {
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline void DeviceObject::clear_diagsignal() {
   if (diagsignal_ != NULL) diagsignal_->::Proto::DeviceDiagSignal::Clear();
@@ -8967,37 +8994,15 @@ inline void DeviceObject::set_allocated_diagsignal(::Proto::DeviceDiagSignal* di
 
 // DeviceChassis
 
-// optional int32 place = 1 [default = 0];
-inline bool DeviceChassis::has_place() const {
+// optional int32 type = 1 [default = 0];
+inline bool DeviceChassis::has_type() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void DeviceChassis::set_has_place() {
+inline void DeviceChassis::set_has_type() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void DeviceChassis::clear_has_place() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void DeviceChassis::clear_place() {
-  place_ = 0;
-  clear_has_place();
-}
-inline ::google::protobuf::int32 DeviceChassis::place() const {
-  return place_;
-}
-inline void DeviceChassis::set_place(::google::protobuf::int32 value) {
-  set_has_place();
-  place_ = value;
-}
-
-// optional int32 type = 2 [default = 0];
-inline bool DeviceChassis::has_type() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void DeviceChassis::set_has_type() {
-  _has_bits_[0] |= 0x00000002u;
-}
 inline void DeviceChassis::clear_has_type() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void DeviceChassis::clear_type() {
   type_ = 0;
@@ -9015,37 +9020,15 @@ inline void DeviceChassis::set_type(::google::protobuf::int32 value) {
 
 // DeviceModule
 
-// optional int32 place = 1 [default = 0];
-inline bool DeviceModule::has_place() const {
+// optional int32 type = 1 [default = 0];
+inline bool DeviceModule::has_type() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void DeviceModule::set_has_place() {
+inline void DeviceModule::set_has_type() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void DeviceModule::clear_has_place() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void DeviceModule::clear_place() {
-  place_ = 0;
-  clear_has_place();
-}
-inline ::google::protobuf::int32 DeviceModule::place() const {
-  return place_;
-}
-inline void DeviceModule::set_place(::google::protobuf::int32 value) {
-  set_has_place();
-  place_ = value;
-}
-
-// optional int32 type = 2 [default = 0];
-inline bool DeviceModule::has_type() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void DeviceModule::set_has_type() {
-  _has_bits_[0] |= 0x00000002u;
-}
 inline void DeviceModule::clear_has_type() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void DeviceModule::clear_type() {
   type_ = 0;
@@ -9061,13 +9044,13 @@ inline void DeviceModule::set_type(::google::protobuf::int32 value) {
 
 // optional .Proto.ModuleConfiguration module_configuration = 3;
 inline bool DeviceModule::has_module_configuration() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void DeviceModule::set_has_module_configuration() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void DeviceModule::clear_has_module_configuration() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void DeviceModule::clear_module_configuration() {
   if (module_configuration_ != NULL) module_configuration_->::Proto::ModuleConfiguration::Clear();
@@ -9202,6 +9185,76 @@ ModuleConfiguration::values() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::ModuleConfigurationValue >*
 ModuleConfiguration::mutable_values() {
   return &values_;
+}
+
+// optional string name = 3;
+inline bool ModuleConfiguration::has_name() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ModuleConfiguration::set_has_name() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ModuleConfiguration::clear_has_name() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ModuleConfiguration::clear_name() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    name_->clear();
+  }
+  clear_has_name();
+}
+inline const ::std::string& ModuleConfiguration::name() const {
+  return *name_;
+}
+inline void ModuleConfiguration::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void ModuleConfiguration::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void ModuleConfiguration::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ModuleConfiguration::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  return name_;
+}
+inline ::std::string* ModuleConfiguration::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ModuleConfiguration::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

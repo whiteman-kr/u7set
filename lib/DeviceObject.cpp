@@ -1,11 +1,22 @@
 #include "../include/DeviceObject.h"
 #include "../include/ProtoSerialization.h"
 #include <QDynamicPropertyChangeEvent>
+#include <QJSEngine>
+#include <QQmlEngine>
 
 
 namespace Hardware
 {
-	//const static wchar_t* DeviceObjectExtensions = {L".hroot"}, {L".hsystem"};
+	const wchar_t* DeviceObjectExtensions[] =
+		{
+			L".hrt",		// Root
+			L".hsm",		// System
+			L".hrk",		// Rack
+			L".hcs",		// Chassis
+			L".hmd",		// Module
+			L".hcr",		// Controller
+			L".hds"			// Diagnostics Signal
+		};
 
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
@@ -65,6 +76,8 @@ namespace Hardware
 		Proto::Write(pMutableDeviceObject->mutable_strid(), m_strId);
 		Proto::Write(pMutableDeviceObject->mutable_caption(), m_caption);
 
+		pMutableDeviceObject->set_place(m_place);
+
 		if (m_childRestriction.isEmpty() == false)
 		{
 			Proto::Write(pMutableDeviceObject->mutable_childrestriction(), m_childRestriction);
@@ -94,6 +107,7 @@ namespace Hardware
 		m_uuid = Proto::Read(deviceobject.uuid());
 		Proto::Read(deviceobject.strid(), &m_strId);
 		Proto::Read(deviceobject.caption(), &m_caption);
+		m_place = deviceobject.place();
 
 		if (deviceobject.has_childrestriction() == true)
 		{
@@ -167,16 +181,16 @@ namespace Hardware
 
 	QString DeviceObject::fileExtension() const
 	{
-		int index = static_cast<int>(deviceType());
-		assert(index >= 0 && index < sizeof(DeviceObjectExtensions) / sizeof(DeviceObjectExtensions[0]));
+		size_t index = static_cast<size_t>(deviceType());
+		assert(index < sizeof(Hardware::DeviceObjectExtensions) / sizeof(Hardware::DeviceObjectExtensions[0]));
 
-		QString result = QString::fromWCharArray(DeviceObjectExtensions[index]);
+		QString result = QString::fromWCharArray(Hardware::DeviceObjectExtensions[index]);
 		return result;
 	}
 
 	QString DeviceObject::fileExtension(DeviceType device)
 	{
-		QString result = QString::fromWCharArray(DeviceObjectExtensions[static_cast<int>(device)]);
+		QString result = QString::fromWCharArray(Hardware::DeviceObjectExtensions[static_cast<int>(device)]);
 		return result;
 	}
 
@@ -311,6 +325,17 @@ namespace Hardware
 		return boolResult;
 	}
 
+	void DeviceObject::sortChildrenByPlace()
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				return o1->m_place < o2->m_place;
+			});
+
+		return;
+	}
+
 	const QString& DeviceObject::strId() const
 	{
 		return m_strId;
@@ -354,6 +379,16 @@ namespace Hardware
 	void DeviceObject::setChildRestriction(const QString& value)
 	{
 		m_childRestriction = value;
+	}
+
+	int DeviceObject::place() const
+	{
+		return m_place;
+	}
+
+	void DeviceObject::setPlace(int value)
+	{
+		m_place = value;
 	}
 
 	bool DeviceObject::preset() const
@@ -577,7 +612,6 @@ namespace Hardware
 		//
 		Proto::DeviceChassis* chassisMessage = message->mutable_deviceobject()->mutable_chassis();
 
-		chassisMessage->set_place(m_place);
 		chassisMessage->set_type(m_type);
 
 		return true;
@@ -607,7 +641,6 @@ namespace Hardware
 
 		const Proto::DeviceChassis& chassisMessage = message.deviceobject().chassis();
 
-		m_place = chassisMessage.place();
 		m_type =  chassisMessage.type();
 
 		return true;
@@ -616,16 +649,6 @@ namespace Hardware
 	DeviceType DeviceChassis::deviceType() const
 	{
 		return m_deviceType;
-	}
-
-	int DeviceChassis::place() const
-	{
-		return m_place;
-	}
-
-	void DeviceChassis::setPlace(int value)
-	{
-		m_place = value;
 	}
 
 	int DeviceChassis::type() const
@@ -667,7 +690,6 @@ namespace Hardware
 		//
 		Proto::DeviceModule* moduleMessage = message->mutable_deviceobject()->mutable_module();
 
-		moduleMessage->set_place(m_place);
 		moduleMessage->set_type(m_type);
 
 		if (m_moduleConfiguration.hasConfiguration() == true)
@@ -675,16 +697,6 @@ namespace Hardware
 			m_moduleConfiguration.save(moduleMessage->mutable_module_configuration());
 		}
 
-/*		if (m_configurationInput.isEmpty() == false)
-		{
-			moduleMessage->set_configuration_input(m_configurationInput.toStdString());
-		}
-
-		if (m_configurationOutput.isEmpty() == false)
-		{
-			moduleMessage->set_configuration_output(m_configurationOutput.toStdString());
-		}
-*/
 		return true;
 	}
 
@@ -712,7 +724,6 @@ namespace Hardware
 
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
-		m_place = moduleMessage.place();
 		m_type =  moduleMessage.type();
 
 		if (moduleMessage.has_module_configuration() == true)
@@ -760,14 +771,10 @@ namespace Hardware
 		return false;
 	}
 
-	int DeviceModule::place() const
+	bool DeviceModule::compileConfiguration(McFirmware* dest, QString* errorString) const
 	{
-		return m_place;
-	}
-
-	void DeviceModule::setPlace(int value)
-	{
-		m_place = value;
+		bool ok = m_moduleConfiguration.compile(dest, m_strId, fileInfo().changeset(), errorString);
+		return ok;
 	}
 
 	int DeviceModule::type() const
@@ -793,6 +800,22 @@ namespace Hardware
 
 		m_moduleConfiguration.readStructure(value.toStdString().data());
 		m_moduleConfiguration.addUserPropertiesToObject(this);
+	}
+
+	QString DeviceModule::confFirmwareName() const
+	{
+		QString v(m_moduleConfiguration.name());
+		return v;
+	}
+
+	void DeviceModule::setConfFirmwareName(const QString& value)
+	{
+		m_moduleConfiguration.setName(value);
+	}
+
+	const ModuleConfiguration& DeviceModule::moduleConfiguration() const
+	{
+		return m_moduleConfiguration;
 	}
 
 	//

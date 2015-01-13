@@ -529,7 +529,7 @@ void FileView::addFile()
 	filesViewSelectionChanged(QItemSelection(), QItemSelection());*/
 }
 
-void FileView::deleteFile(std::vector<DbFileInfo> files)
+void FileView::deleteFile(std::vector<DbFileInfo> /*files*/)
 {
 	assert(false);
 }

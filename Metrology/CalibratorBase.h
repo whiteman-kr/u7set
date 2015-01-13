@@ -17,29 +17,36 @@
 
 // ==============================================================================================
 
-const int MAX_CALIBRATOR_COUNT = 6;         // max amount calibrators in calibrator base
+
+const int                   CALIBRATOR_0            = 0,
+                            CALIBRATOR_1            = 1,
+                            CALIBRATOR_2            = 2,
+                            CALIBRATOR_3            = 3,
+                            CALIBRATOR_4            = 4,
+                            CALIBRATOR_5            = 5;
+
+const int                   MAX_CALIBRATOR_COUNT    = 6;         // max amount calibrators in calibrator base
 
 // ==============================================================================================
 
-const int CALIBRATOR_COUNT_FOR_CC = 2;      // amount calibrators for measure complex cpmporator
+const int                   CALIBRATOR_COUNT_FOR_CC = 2;      // amount calibrators for measure complex cpmporator
 
 // ==============================================================================================
 
 const char* const CalibratorsColumn[] =
 {
-    QT_TRANSLATE_NOOP("CalibratorBase.h", "Serial port"),
-    QT_TRANSLATE_NOOP("CalibratorBase.h", "Type"),
-    QT_TRANSLATE_NOOP("CalibratorBase.h", "Connected"),
-    QT_TRANSLATE_NOOP("CalibratorBase.h", "Serial number"),
-    // QT_TRANSLATE_NOOP("CalibratorBase.h", "Kind"),
+                            QT_TRANSLATE_NOOP("CalibratorBase.h", "Serial port"),
+                            QT_TRANSLATE_NOOP("CalibratorBase.h", "Type"),
+                            QT_TRANSLATE_NOOP("CalibratorBase.h", "Connected"),
+                            QT_TRANSLATE_NOOP("CalibratorBase.h", "Serial number"),
 };
 
-const int   CalibratorsColumnCount  = sizeof(CalibratorsColumn)/sizeof(char*);
+const int                   CalibratorsColumnCount  = sizeof(CalibratorsColumn)/sizeof(char*);
 
-const int   CalibratorColumnPort    = 0,
-            CalibratorColumnType    = 1,
-            CalibratorColumnConnect = 2,
-            CalibratorColumnSN      = 3;
+const int                   CalibratorColumnPort    = 0,
+                            CalibratorColumnType    = 1,
+                            CalibratorColumnConnect = 2,
+                            CalibratorColumnSN      = 3;
 
 // ==============================================================================================
 
@@ -49,8 +56,8 @@ class CalibratorBase : public QObject
 
 public:
 
-    explicit CalibratorBase(QObject *parent = 0);
-            ~CalibratorBase();
+    explicit                CalibratorBase(QObject *parent = 0);
+                            ~CalibratorBase();
 
     void                    init(QWidget* parent = 0);
     void                    show();
@@ -59,11 +66,9 @@ public:
 
     CalibratorManager*      at(int index);
 
-    int                     getConnectedCalibratorsCount() { return m_connectedCalibratorsCount; }
+    int                     connectedCalibratorsCount() { return m_connectedCalibratorsCount; }
 
     void                    clear();
-
-
 
 private:
 
@@ -91,6 +96,7 @@ private:
     QAction*                m_pInitAction = nullptr;
     QAction*                m_pManageAction = nullptr;
     QAction*                m_pSettingsAction = nullptr;
+    QAction*                m_pCopyAction = nullptr;
 
     QTableWidget*           m_pCalibratorView = nullptr;
     QProgressBar*           m_pCalibratorProgress = nullptr;
@@ -119,6 +125,7 @@ public slots:
     void                    onManage();                         // Slot of calibrator menu - Manage
     void                    onSettings();                       // Slot of calibrator menu - Edit setting
     void                    onSettings(int row,int);            // Slot for edit serial port and type of calibrator
+    void                    onCopy();                           // Slot of calibrator menu - Copy serail number
     void                    onContextMenu(QPoint);              // Slot of context menu
 
     void                    onCalibratorConnected();            // Slots events from calibrator
@@ -127,7 +134,7 @@ public slots:
 
 // ==============================================================================================
 
-extern CalibratorBase theCalibratorBase;
+extern CalibratorBase       theCalibratorBase;
 
 // ==============================================================================================
 

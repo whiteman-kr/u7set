@@ -1,6 +1,11 @@
 #include "MeasureView.h"
 
+#include <QApplication>
 #include <QHeaderView>
+#include <QMessageBox>
+#include <QClipboard>
+
+#include "Database.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -18,6 +23,7 @@ MeasureTable::MeasureTable(int type, QObject*) :
      m_measureType(type)
 {
     m_header.init(type);
+    m_measureBase.load(type);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -26,7 +32,6 @@ MeasureTable::~MeasureTable()
 {
     m_measureBase.clear();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -39,6 +44,7 @@ void MeasureTable::setMeasureType(int type)
 
     m_measureType = type;
     m_header.init(type);
+    m_measureBase.load(type);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -214,13 +220,11 @@ QString MeasureTable::textLinearity(int row, int column) const
         return "";
     }
 
-    int detailValueType = VALUE_TYPE_UNKNOWN;
+    int detailValueType = VALUE_TYPE_ELECTRIC;
 
-    switch (theOptions.linearity().m_viewType)
+    if (theOptions.linearity().m_viewType == LO_VIEW_TYPE_DETAIL_PHYSICAL)
     {
-        case LO_VIEW_TYPE_DETAIL_PHYSICAL:  detailValueType = VALUE_TYPE_PHYSICAL;  break;
-        case LO_VIEW_TYPE_DETAIL_OUTPUT:    detailValueType = VALUE_TYPE_OUTPUT;    break;
-        default:                            detailValueType = VALUE_TYPE_ELECTRIC;  break;
+        detailValueType = VALUE_TYPE_PHYSICAL;
     }
 
     int errorType = theOptions.linearity().m_errorType;
@@ -229,29 +233,33 @@ QString MeasureTable::textLinearity(int row, int column) const
 
     switch(column)
     {
-        case MVC_CMN_L_INDEX:					result = QString::number(m->recordID()); break;
+        case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
+
         case MVC_CMN_L_CASE:					result = m->position().caseString(); break;
         case MVC_CMN_L_ID:                      result = theOptions.measureView().m_showExternalID ? m->extStrID() : m->strID(); break;
         case MVC_CMN_L_NAME:					result = m->name(); break;
+
         case MVC_CMN_L_CASE_NO:					result = m->position().channelString(); break;
         case MVC_CMN_L_SUBBLOCK:				result = m->position().subblockString(); break;
         case MVC_CMN_L_BLOCK:					result = m->position().blockString(); break;
         case MVC_CMN_L_ENTRY:					result = m->position().entryString(); break;
-        case MVC_CMN_L_CORRECTION:				result = QString::number(m->adjustment(), 10, m->valuePrecision(VALUE_TYPE_PHYSICAL)); break;
-        case MVC_CMN_L_EL_RANGE:				result = m->limitString(VALUE_TYPE_ELECTRIC); break;
-        case MVC_CMN_L_PH_RANGE:				result = m->limitString(VALUE_TYPE_PHYSICAL); break;
-        case MVC_CMN_L_OUT_RANGE:				result = m->limitString(VALUE_TYPE_OUTPUT); break;
+
+        case MVC_CMN_L_ADJUSTMENT:				result = QString::number(m->adjustment(), 10, m->valuePrecision(VALUE_TYPE_PHYSICAL)); break;
+
         case MVC_CMN_L_EL_NOMINAL:				result = m->nominalString(VALUE_TYPE_ELECTRIC); break;
         case MVC_CMN_L_PH_NOMINAL:				result = m->nominalString(VALUE_TYPE_PHYSICAL); break;
         case MVC_CMN_L_OUT_NOMINAL:				result = m->nominalString(VALUE_TYPE_OUTPUT); break;
+
         case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 10, 2); break;
+
         case MVC_CMN_L_EL_MEASURE:				result = m->measureString(VALUE_TYPE_ELECTRIC); break;
         case MVC_CMN_L_PH_MEASURE:				result = m->measureString(VALUE_TYPE_PHYSICAL); break;
         case MVC_CMN_L_OUT_MEASURE:				result = m->measureString(VALUE_TYPE_OUTPUT); break;
-        case MVC_CMN_L_SYSTEM_ERROR:			result = QString::number(m->additionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR), 10, 2); break;
-        case MVC_CMN_L_MSE:                     result = QString::number(m->additionalValue(ADDITIONAL_VALUE_MSE), 10, 2); break;
-        case MVC_CMN_L_LOW_BORDER:				result = QString::number(m->additionalValue(ADDITIONAL_VALUE_LOW_BORDER), 10, 2); break;
-        case MVC_CMN_L_HIGH_BORDER:             result = QString::number(m->additionalValue(ADDITIONAL_VALUE_HIGH_BORDER), 10, 2); break;
+
+        case MVC_CMN_L_EL_RANGE:				result = m->limitString(VALUE_TYPE_ELECTRIC); break;
+        case MVC_CMN_L_PH_RANGE:				result = m->limitString(VALUE_TYPE_PHYSICAL); break;
+        case MVC_CMN_L_OUT_RANGE:				result = m->limitString(VALUE_TYPE_OUTPUT); break;
+
         case MVC_CMN_L_VALUE_COUNT:             result = QString::number(m->measureArrayCount()); break;
         case MVC_CMN_L_VALUE_0:                 result = m->measureItemString(detailValueType, 0); break;
         case MVC_CMN_L_VALUE_1:                 result = m->measureItemString(detailValueType, 1); break;
@@ -273,11 +281,19 @@ QString MeasureTable::textLinearity(int row, int column) const
         case MVC_CMN_L_VALUE_17:                result = m->measureItemString(detailValueType, 17); break;
         case MVC_CMN_L_VALUE_18:                result = m->measureItemString(detailValueType, 18); break;
         case MVC_CMN_L_VALUE_19:                result = m->measureItemString(detailValueType, 19); break;
+
+        case MVC_CMN_L_SYSTEM_ERROR:			result = QString::number(m->additionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR), 10, 2); break;
+        case MVC_CMN_L_MSE:                     result = QString::number(m->additionalValue(ADDITIONAL_VALUE_MSE), 10, 2); break;
+        case MVC_CMN_L_LOW_BORDER:				result = QString::number(m->additionalValue(ADDITIONAL_VALUE_LOW_BORDER), 10, 2); break;
+        case MVC_CMN_L_HIGH_BORDER:             result = QString::number(m->additionalValue(ADDITIONAL_VALUE_HIGH_BORDER), 10, 2); break;
+
         case MVC_CMN_L_ERROR:                   result = QString::number(m->errorInput(errorType), 10, m->errorPrecision(errorType)); break;
         case MVC_CMN_L_OUT_ERROR:               result = QString::number(m->errorOutput(errorType), 10, m->errorPrecision(errorType)); break;
         case MVC_CMN_L_LIMIT_ERROR:             result = QString::number(m->errorLimit(errorType), 10, m->errorPrecision(errorType)); break;
-        case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTimeString();
-        default:                                result = ""; break;
+
+        case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTime().toString("dd-MM-yyyy hh:mm:ss"); break;
+
+        default:                                result = QString(); break;
     }
 
     return result;
@@ -357,30 +373,94 @@ QString MeasureTable::textComplexComparator(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int MeasureTable::append(MeasureItem* pMeasure)
+bool MeasureTable::append(MeasureItem* pMeasure)
 {
     if (pMeasure == nullptr)
     {
-        return -1;
+        return false;
     }
 
     if (pMeasure->measureType() != m_measureType)
     {
-        return -1;
+        return false;
     }
 
-    int indexBase = -1;
+    if (theDatabase.appendMeasure(pMeasure) == false)
+    {
+        QMessageBox::critical(nullptr, tr("Append measurements"), tr("Error aapend measurements to database"));
+        return false;
+    }
+
     int indexTable = m_measureBase.count();
 
     beginInsertRows(QModelIndex(), indexTable, indexTable);
 
-        indexBase = m_measureBase.append(pMeasure);
+        m_measureBase.append(pMeasure);
 
     endInsertRows();
 
-    return indexBase;
+    return true;
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MeasureTable::remove(const QList<int> removeIndexList)
+{
+    QVector<int> keyList;
+
+    // remove from database
+    //
+    int count = removeIndexList.count();
+    for(int index = 0; index < count; index++)
+    {
+        int removeIndex = removeIndexList.at(index);
+
+        MeasureItem* pMeasure = m_measureBase.at(removeIndex);
+        if (pMeasure == nullptr)
+        {
+            continue;
+        }
+
+        if (pMeasure->measureType() != m_measureType)
+        {
+            continue;
+        }
+
+        keyList.append(pMeasure->measureID());
+    }
+
+    if (theDatabase.removeMeasure(m_measureType, keyList) == false)
+    {
+        QMessageBox::critical(nullptr, tr("Delete measurements"), tr("Error remove measurements from database"));
+        return false;
+    }
+
+    // remove from MeasureBase
+    //
+    for(int index = count-1; index >= 0; index--)
+    {
+        int removeIndex = removeIndexList.at(index);
+
+        MeasureItem* pMeasure = m_measureBase.at(removeIndex);
+        if (pMeasure == nullptr)
+        {
+            continue;
+        }
+
+        if (pMeasure->measureType() != m_measureType)
+        {
+            continue;
+        }
+
+        beginRemoveRows(QModelIndex(), removeIndex, removeIndex);
+
+            m_measureBase.remove(removeIndex);
+
+        endRemoveRows();
+    }
+
+    return true;
+}
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -389,15 +469,12 @@ MeasureView::MeasureView(int type, QWidget *parent) :
     QTableView(parent),
     m_measureType(type)
 {
-    m_Table.setMeasureType(type);
+    m_table.setMeasureType(type);
+    setModel(&m_table);
 
-    setModel(&m_Table);
+    //setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    m_headerContextMenu = new QMenu(this);
-
-    horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &MeasureView::onHeaderContextMenu);
-    connect(horizontalHeader(), &QHeaderView::sectionResized, this, &MeasureView::onColumnResized);
+    createContextMenu();
 
     updateColumn();
 }
@@ -410,16 +487,29 @@ MeasureView::~MeasureView()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MeasureView::createContextMenu()
+{
+    // create header context menu
+    //
+    m_headerContextMenu = new QMenu(this);
+
+    horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &MeasureView::onHeaderContextMenu);
+    connect(horizontalHeader(), &QHeaderView::sectionResized, this, &MeasureView::onColumnResized);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MeasureView::updateColumn()
 {
     m_headerContextMenu->clear();
 
-    m_Table.header().updateColumnState();
+    m_table.header().updateColumnState();
 
-    int count = m_Table.header().count();
+    int count = m_table.header().count();
     for (int index = 0; index < count; index++)
     {
-        MeasureViewColumn* pColumn = m_Table.header().column(index);
+        MeasureViewColumn* pColumn = m_table.header().column(index);
         if (pColumn == nullptr)
         {
             continue;
@@ -468,12 +558,12 @@ void MeasureView::onHeaderContextAction(QAction* action)
     }
 
     int index = action->data().toInt();
-    if (index < 0 || index >= m_Table.header().count())
+    if (index < 0 || index >= m_table.header().count())
     {
         return;
     }
 
-    MeasureViewColumn* pColumn = m_Table.header().column(index);
+    MeasureViewColumn* pColumn = m_table.header().column(index);
     if (pColumn == nullptr)
     {
         return;
@@ -486,12 +576,12 @@ void MeasureView::onHeaderContextAction(QAction* action)
 
 void MeasureView::onColumnResized(int index, int, int width)
 {
-    if (index < 0 || index >= m_Table.header().count())
+    if (index < 0 || index >= m_table.header().count())
     {
         return;
     }
 
-    MeasureViewColumn* pColumn = m_Table.header().column(index);
+    MeasureViewColumn* pColumn = m_table.header().column(index);
     if (pColumn == nullptr)
     {
         return;
@@ -519,13 +609,150 @@ void MeasureView::appendMeasure(MeasureItem* pMeasure)
         return;
     }
 
-    int index = m_Table.append(pMeasure);
-    if (index == -1)
+    if (m_table.append(pMeasure) == false)
     {
         return;
     }
 
-    emit measureCountChanged(m_Table.count());
+    emit measureCountChanged(m_table.count());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureView::removeMeasure()
+{
+    int measureCount = m_table.count();
+    int columnCount = m_table.header().count();
+
+    if (measureCount == 0 || columnCount == 0)
+    {
+        return;
+    }
+
+    bool removeMeasure;
+    QList<int> removeIndexList;
+
+    for(int index = 0; index < measureCount; index++)
+    {
+        removeMeasure = false;
+
+        for(int c = 0; c < columnCount; c++)
+        {
+            if (selectionModel()->isSelected( model()->index(index, c) ) == true)
+            {
+                removeMeasure = true;
+            }
+        }
+
+        if (removeMeasure == true)
+        {
+            removeIndexList.append(index);
+        }
+    }
+
+    if (removeIndexList.count() == 0)
+    {
+        return;
+    }
+
+    if (QMessageBox::question(this, tr("Confirm delete"), "Delete selected measurements?") == QMessageBox::No)
+    {
+        return;
+    }
+
+    if (m_table.remove(removeIndexList) == false)
+    {
+        return;
+    }
+
+    emit measureCountChanged(m_table.count());
+
+    QMessageBox::information(this, tr("Delete"), tr("Deleted %1 measurement(s)").arg(removeIndexList.count()));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureView::copyMeasure()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText("");
+
+    int rowCount = m_table.count();
+    int columnCount = m_table.header().count();
+
+    if (rowCount == 0 || columnCount == 0)
+    {
+        return;
+    }
+
+    bool copyMeasure;
+
+    QString textRow;
+    QString textClipboard;
+
+    // copy header column title
+    //
+    for(int c = 0; c < columnCount; c++)
+    {
+        MeasureViewColumn* pColumn = m_table.header().column(c);
+        if (pColumn == nullptr)
+        {
+            continue;
+        }
+
+        if (pColumn->enableVisible() == false)
+        {
+            continue;
+        }
+
+        textRow.append(pColumn->title());
+        textRow.append("\t");
+    }
+
+    textRow.remove(textRow.count() - 1, 1);
+
+    textClipboard.append(textRow);
+    textClipboard.append("\n");
+
+    // copy measure
+    //
+    for(int r = 0; r < rowCount; r++)
+    {
+        copyMeasure = false;
+        textRow = "";
+
+        for(int c = 0; c < columnCount; c++)
+        {
+            MeasureViewColumn* pColumn = m_table.header().column(c);
+            if (pColumn == nullptr)
+            {
+                continue;
+            }
+
+            if (pColumn->enableVisible() == false)
+            {
+                continue;
+            }
+
+            if (selectionModel()->isSelected( model()->index(r,c) ) == true)
+            {
+                copyMeasure = true;
+            }
+
+            textRow.append(m_table.text(r, c));
+            textRow.append("\t");
+        }
+
+        textRow.remove(textRow.count() - 1, 1);
+
+        if (copyMeasure == true)
+        {
+            textClipboard.append(textRow);
+            textClipboard.append("\n");
+        }
+    }
+
+    clipboard->setText(textClipboard);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

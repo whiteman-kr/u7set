@@ -13,7 +13,7 @@ class DialogAfblEditor : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogAfblEditor(DbController* pDbController, QWidget *parent = 0);
+	explicit DialogAfblEditor(DbController* pDbController, QWidget* parent = 0);
     ~DialogAfblEditor();
 
 private slots:

@@ -9,6 +9,7 @@
 
 // Qt includes
 //
+#include <QtCore>
 #include <QtWidgets>
 #include <QDateEdit>
 #include <QDebug>
@@ -21,6 +22,10 @@
 #include <QSqlError>
 #include <QSqlDriver>
 #include <QSqlQuery>
+#include <QtEndian>
 
+// Log
+//
+#include "../include/OutputLog.h"
 
-
+extern OutputLog theLog;

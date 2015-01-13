@@ -17,6 +17,44 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+FindItem::FindItem()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+FindItem::FindItem(int row, int column, QString columnTitle, int beginPos, int endPos, QString text)
+{
+    m_row = row;
+    m_column = column;
+    m_columnTitle = columnTitle;
+
+    m_beginPos = beginPos;
+    m_endPos = endPos;
+
+    m_text = text;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+FindItem& FindItem::operator=(const FindItem& from)
+{
+    m_row = from.m_row;
+    m_column = from.m_column;
+    m_columnTitle = from.m_columnTitle;
+
+    m_beginPos = from.m_beginPos;
+    m_endPos = from.m_endPos;
+
+    m_text = from.m_text;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 FindMeasureTable::FindMeasureTable(QObject*)
 {
 }
@@ -157,7 +195,7 @@ FindItem FindMeasureTable::at(int index)
 {
     if (index < 0 || index >= count())
     {
-        return FindItem::FindItem();
+        return FindItem();
     }
 
     return m_findItemList.at(index);
@@ -262,6 +300,7 @@ void FindMeasure::createInterface()
 
     m_pView->verticalHeader()->hide();
     m_pView->setShowGrid(false);
+    m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     connect(m_pView->horizontalHeader(), &QHeaderView::sectionResized, this, &FindMeasure::onColumnResized);
 
@@ -479,7 +518,10 @@ void FindMeasure::copy()
                 textRow.append(m_table.text(r, c));
             }
 
-            textRow.append("\t");
+            if (c != FM_COLUMN_COUNT - 1)
+            {
+                textRow.append("\t");
+            }
         }
 
         if (appendRow == true)

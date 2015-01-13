@@ -12,6 +12,12 @@ Database theDatabase;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+SqlFieldBase::SqlFieldBase()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SqlFieldBase::init(int objectType, int)
 {
     switch(objectType)
@@ -20,7 +26,7 @@ int SqlFieldBase::init(int objectType, int)
 
             append("ID",                            QVariant::Int);
             append("ObjectID",						QVariant::Int);
-            append("Name",							QVariant::String, 255);
+            append("Name",							QVariant::String, 256);
             append("Version",						QVariant::Int);
 
             break;
@@ -29,7 +35,7 @@ int SqlFieldBase::init(int objectType, int)
 
             append("ObjectID",						QVariant::Int);
             append("Version",						QVariant::Int);
-            append("Event",							QVariant::String, 255);
+            append("Event",							QVariant::String, 256);
             append("Time",                          QVariant::String, 64);
 
             break;
@@ -37,15 +43,15 @@ int SqlFieldBase::init(int objectType, int)
         case SQL_TABLE_LINEARETY:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             append("Filter",						QVariant::Bool);
 
             append("StrID",                         QVariant::String, 64);
             append("ExtStrID",						QVariant::String, 64);
-            append("Name",                          QVariant::String, 255);
+            append("Name",                          QVariant::String, 256);
 
-            append("DevStrID",						QVariant::String, 255);
+            append("DevStrID",						QVariant::String, 256);
             append("CaseNo",                        QVariant::Int);
             append("CaseType",						QVariant::String, 64);
             append("Channel",						QVariant::Int);
@@ -98,10 +104,9 @@ int SqlFieldBase::init(int objectType, int)
 
         case SQL_TABLE_LINEARETY_20_EL:
         case SQL_TABLE_LINEARETY_20_PH:
-        case SQL_TABLE_LINEARETY_20_OUT:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             append(QString("MeasurementCount"),     QVariant::Int);
 
@@ -131,7 +136,7 @@ int SqlFieldBase::init(int objectType, int)
         case SQL_TABLE_LINEARETY_ADD_VAL:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             append(QString("ValueCount"),           QVariant::Int);
 
@@ -166,14 +171,29 @@ int SqlFieldBase::init(int objectType, int)
         case SQL_TABLE_COMPARATOR:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             break;
+
+        case SQL_TABLE_COMPARATOR_HYSTERESIS:
+
+            append("ObjectID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
+
+            break;
+
 
         case SQL_TABLE_COMPLEX_COMPARATOR:
 
             append("ObjectID",						QVariant::Int);
-            append("RecordID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
+
+            break;
+
+        case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
+
+            append("ObjectID",						QVariant::Int);
+            append("MeasureID",						QVariant::Int);
 
             break;
 
@@ -202,6 +222,31 @@ int SqlFieldBase::init(int objectType, int)
 
             append("ObjectID",						QVariant::Int);
             append("ReportID",						QVariant::Int);
+
+
+            append("DocumentTitle",                 QVariant::String, 256);
+            append("ReportTitle",                   QVariant::String, 256);
+            append("Date",                          QVariant::String, 32);
+            append("TableTitle",                    QVariant::String, 256);
+            append("Conclusion",                    QVariant::String, 256);
+
+            append("Temperature",                   QVariant::Double);
+            append("Pressure",                      QVariant::Double);
+            append("Humidity",                      QVariant::Double);
+            append("Voltage",                       QVariant::Double);
+            append("Frequency",                     QVariant::Double);
+
+            append("Calibrator0",                   QVariant::String, 64);
+            append("Calibrator1",                   QVariant::String, 64);
+            append("Calibrator2",                   QVariant::String, 64);
+            append("Calibrator3",                   QVariant::String, 64);
+            append("Calibrator4",                   QVariant::String, 64);
+            append("Calibrator5",                   QVariant::String, 64);
+
+            append("LinkObjectID",                  QVariant::Int);
+            append("ReportFile",                    QVariant::String, 256);
+
+            append("Param",                         QVariant::Int);
 
             break;
 
@@ -278,6 +323,84 @@ QString SqlFieldBase::extFieldName(int index)
     return result;
 }
 
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlObjectInfo::SqlObjectInfo()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SqlObjectInfo::init(int objectType)
+{
+    if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
+    {
+        return false;
+    }
+
+    m_objectType = objectType;
+    m_objectID = SqlObjectID[objectType];
+    m_name = SqlTabletName[objectType];
+    m_version = SqlTableVersion[objectType];
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SqlObjectInfo::clear()
+{
+    m_objectType = SQL_TABLE_UNKNONW;
+    m_objectID = SQL_OBJECT_ID_UNKNONW;
+    m_name.clear();
+    m_version = SQL_TABLE_VER_UNKNONW;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlObjectInfo& SqlObjectInfo::operator=(SqlObjectInfo& from)
+{
+    m_objectType = from.m_objectType;
+    m_objectID = from.m_objectID;
+    m_name = from.m_name;
+    m_version = from.m_version;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlHistoryDatabase::SqlHistoryDatabase()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlHistoryDatabase::SqlHistoryDatabase(int objectID, int version, QString event,  QString time)
+{
+    m_objectID = objectID;
+    m_version = version;
+    m_event = event;
+    m_time = time;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlHistoryDatabase& SqlHistoryDatabase::operator=(SqlHistoryDatabase& from)
+{
+    m_objectID = from.m_objectID;
+    m_version = from.m_version;
+    m_event = from.m_event;
+    m_time = from.m_time;
+
+    return *this;
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -288,7 +411,7 @@ SqlTable::SqlTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::count()
+int SqlTable::recordCount()
 {
     if (isOpen() == false)
     {
@@ -325,7 +448,7 @@ int SqlTable::lastKey()
         return SQL_INVALID_KEY;
     }
 
-    QSqlQuery query(QString("SELECT max(%1) FROM %2").arg(m_fieldBase.field(SQL_FIELD_KEY).name() ).arg(m_info.name()));
+    QSqlQuery query(QString("SELECT max(%1) FROM %2").arg(m_fieldBase.field(SQL_FIELD_KEY).name()).arg(m_info.name()));
     if (query.next() == false)
     {
         return SQL_INVALID_KEY;
@@ -416,7 +539,6 @@ bool SqlTable::open()
 void SqlTable::close()
 {
     m_fieldBase.clear();
-    m_info.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -450,9 +572,8 @@ bool SqlTable::create()
             {
                 case SQL_TABLE_LINEARETY_20_EL:
                 case SQL_TABLE_LINEARETY_20_PH:
-                case SQL_TABLE_LINEARETY_20_OUT:
                 case SQL_TABLE_LINEARETY_ADD_VAL:
-                    request.append(QString(" REFERENCES %1(RecordID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARETY]));
+                    request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARETY]));
                     break;
             }
         }
@@ -495,12 +616,18 @@ bool SqlTable::clear()
     }
 
     QSqlQuery query;
+
+    if (query.exec("BEGIN TRANSACTION") == false)
+    {
+        return false;
+    }
+
     if (query.exec(QString("DELETE FROM %1").arg(m_info.name())) == false)
     {
         return false;
     }
 
-    if (query.exec("VACUUM") == false)
+    if (query.exec("COMMIT") == false)
     {
         return false;
     }
@@ -542,6 +669,8 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
         }
     }
 
+    // exec select
+    //
     QSqlQuery query;
     if (query.exec(request) == false)
     {
@@ -595,7 +724,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                 {
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
 
-                    measure->setRecordID(query.value(field++).toInt());
+                    measure->setMeasureID(query.value(field++).toInt());
 
                     measure->setFilter(query.value(field++).toBool());
 
@@ -650,13 +779,12 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                     measure->setErrorPrecision(ERROR_TYPE_ABSOLUTE, query.value(field++).toInt());
                     measure->setErrorPrecision(ERROR_TYPE_REDUCE, query.value(field++).toInt());
 
-                    measure->setMeasureTime(query.value(field++).toDateTime());
+                    measure->setMeasureTime( QDateTime::fromString( query.value(field++).toString(), MEASURE_TIME_FORMAT));
                 }
                 break;
 
             case SQL_TABLE_LINEARETY_20_EL:
             case SQL_TABLE_LINEARETY_20_PH:
-            case SQL_TABLE_LINEARETY_20_OUT:
                 {
                     int valueType = VALUE_TYPE_UNKNOWN;
 
@@ -664,7 +792,6 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                     {
                         case SQL_TABLE_LINEARETY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
                         case SQL_TABLE_LINEARETY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
-                        case SQL_TABLE_LINEARETY_20_OUT:    valueType = VALUE_TYPE_OUTPUT;      break;
                         default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
                     }
 
@@ -675,7 +802,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
 
-                    measure->setRecordID(query.value(field++).toInt());
+                    measure->setMeasureID(query.value(field++).toInt());
 
                     measure->setMeasureArrayCount(query.value(field++).toInt());
 
@@ -706,7 +833,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                 {
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
 
-                    measure->setRecordID(query.value(field++).toInt());
+                    measure->setMeasureID(query.value(field++).toInt());
 
                     measure->setAdditionalValueCount(query.value(field++).toInt());
 
@@ -733,7 +860,18 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                 }
                 break;
 
+            case SQL_TABLE_COMPARATOR_HYSTERESIS:
+                {
+                }
+                break;
+
+
             case SQL_TABLE_COMPLEX_COMPARATOR:
+                {
+                }
+                break;
+
+            case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
                 {
                 }
                 break;
@@ -755,6 +893,33 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
             case SQL_TABLE_REPORT_HEADER:
                 {
+                    REPORT_HEADER* header = static_cast<REPORT_HEADER*> (pRecord) + readedCount;
+
+                    header->m_type = query.value(field++).toInt();
+
+                    header->m_documentTitle = query.value(field++).toString();
+                    header->m_reportTitle = query.value(field++).toString();
+                    header->m_date = query.value(field++).toString();
+                    header->m_tableTitle = query.value(field++).toString();
+                    header->m_conclusion = query.value(field++).toString();
+
+                    header->m_T = query.value(field++).toDouble();
+                    header->m_P = query.value(field++).toDouble();
+                    header->m_H = query.value(field++).toDouble();
+                    header->m_V = query.value(field++).toDouble();
+                    header->m_F = query.value(field++).toDouble();
+
+                    header->m_calibrator[CALIBRATOR_0] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_1] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_2] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_3] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_4] = query.value(field++).toString();
+                    header->m_calibrator[CALIBRATOR_5] = query.value(field++).toString();
+
+                    header->m_linkObjectID = query.value(field++).toInt();
+                    header->m_reportFile = query.value(field++).toString();
+
+                    header->m_param = query.value(field++).toInt();
                 }
                 break;
 
@@ -845,6 +1010,11 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
     QSqlQuery query;
 
+    if (query.exec("BEGIN TRANSACTION") == false)
+    {
+        return 0;
+    }
+
     for (int r = 0; r < count; r++)
     {
         if (query.prepare(key == nullptr ? request :  request + QString("%1").arg(key[r])) == false)
@@ -882,7 +1052,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 {
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
 
-                    query.bindValue(field++, measure->recordID());
+                    measure->setMeasureID( lastKey() + 1);
+
+                    query.bindValue(field++, measure->measureID());
 
                     query.bindValue(field++, measure->filter());
 
@@ -939,14 +1111,15 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_REDUCE));
 
-                    query.bindValue(field++, measure->measureTime());
+                    measure->setMeasureTime(QDateTime::currentDateTime());
+
+                    query.bindValue(field++, measure->measureTime().toString(MEASURE_TIME_FORMAT));
 
                 }
                 break;
 
             case SQL_TABLE_LINEARETY_20_EL:
             case SQL_TABLE_LINEARETY_20_PH:
-            case SQL_TABLE_LINEARETY_20_OUT:
                 {
                     int valueType = VALUE_TYPE_UNKNOWN;
 
@@ -954,7 +1127,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     {
                         case SQL_TABLE_LINEARETY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
                         case SQL_TABLE_LINEARETY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
-                        case SQL_TABLE_LINEARETY_20_OUT:    valueType = VALUE_TYPE_OUTPUT;      break;
                         default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
                     }
 
@@ -965,7 +1137,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
 
-                    query.bindValue(field++, measure->recordID());
+                    query.bindValue(field++, measure->measureID());
 
                     query.bindValue(field++, measure->measureArrayCount());
 
@@ -996,7 +1168,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 {
                     LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
 
-                    query.bindValue(field++, measure->recordID());
+                    query.bindValue(field++, measure->measureID());
 
                     query.bindValue(field++, measure->additionalValueCount());
 
@@ -1006,6 +1178,16 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MSE));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_LOW_BORDER));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_HIGH_BORDER));
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
                 }
                 break;
 
@@ -1023,7 +1205,18 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 }
                 break;
 
+            case SQL_TABLE_COMPARATOR_HYSTERESIS:
+                {
+                }
+                break;
+
+
             case SQL_TABLE_COMPLEX_COMPARATOR:
+                {
+                }
+                break;
+
+            case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:
                 {
                 }
                 break;
@@ -1045,6 +1238,33 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
             case SQL_TABLE_REPORT_HEADER:
                 {
+                    REPORT_HEADER* header = static_cast<REPORT_HEADER*> (pRecord) + r;
+
+                    query.bindValue(field++, header->m_type);
+
+                    query.bindValue(field++, header->m_documentTitle);
+                    query.bindValue(field++, header->m_reportTitle);
+                    query.bindValue(field++, header->m_date);
+                    query.bindValue(field++, header->m_tableTitle);
+                    query.bindValue(field++, header->m_conclusion);
+
+                    query.bindValue(field++, header->m_T);
+                    query.bindValue(field++, header->m_P);
+                    query.bindValue(field++, header->m_H);
+                    query.bindValue(field++, header->m_V);
+                    query.bindValue(field++, header->m_F);
+
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_0]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_1]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_2]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_3]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_4]);
+                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_5]);
+
+                    query.bindValue(field++, header->m_linkObjectID);
+                    query.bindValue(field++, header->m_reportFile);
+
+                    query.bindValue(field++, header->m_param);
                 }
                 break;
 
@@ -1059,6 +1279,11 @@ int SqlTable::write(void* pRecord, int count, int* key)
         }
 
         writedCount ++;
+    }
+
+    if (query.exec("COMMIT") == false)
+    {
+        return 0;
     }
 
     return writedCount;
@@ -1078,8 +1303,8 @@ int SqlTable::remove(int* key, int keyCount)
         return 0;
     }
 
-    int recordCount = count();
-    if (recordCount == 0)
+    int count = recordCount();
+    if (count == 0)
     {
         return 0;
     }
@@ -1099,12 +1324,34 @@ int SqlTable::remove(int* key, int keyCount)
     }
 
     QSqlQuery query;
+
+    if (query.exec("BEGIN TRANSACTION") == false)
+    {
+        return 0;
+    }
+
     if(query.exec(request) == false)
     {
         return 0;
     }
 
-    return recordCount - count();
+    if (query.exec("COMMIT") == false)
+    {
+        return 0;
+    }
+
+    return count - recordCount();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlTable& SqlTable::operator=(SqlTable& from)
+{
+    m_pDatabase = from.m_pDatabase;
+    m_info = from.m_info;
+    m_fieldBase = from.m_fieldBase;
+
+    return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1131,10 +1378,7 @@ Database::Database(QObject* parent) :
 
 Database::~Database()
 {
-    for(int type = 0; type < SQL_TABLE_COUNT; type++)
-    {
-        m_table[type].close();
-    }
+    close();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1144,7 +1388,7 @@ bool Database::open()
     QString path = theOptions.database().m_path;
     if (path.isEmpty() == true)
     {
-        QMessageBox::information(nullptr, tr("Database"), tr("Invalid path!"));
+        QMessageBox::critical(nullptr, tr("Database"), tr("Invalid path!"));
         return false;
     }
 
@@ -1169,9 +1413,22 @@ bool Database::open()
 
     if (m_database.open() == false)
     {
-        QMessageBox::information(nullptr, tr("Database"), tr("Cannot open database"));
+        QMessageBox::critical(nullptr, tr("Database"), tr("Cannot open database"));
         return false;
     }
+
+    QSqlQuery query;
+
+    if (query.exec("PRAGMA foreign_keys=on") == false)
+    {
+        QMessageBox::critical(nullptr, tr("Database"), tr("Error set option of database: [foreign keys=on]"));
+    }
+
+    if (query.exec("PRAGMA synchronous=normal") == false)
+    {
+        QMessageBox::critical(nullptr, tr("Database"), tr("Error set option of database: [synchronous=normal]"));
+    }
+
 
     initVersion();
     createTables();
@@ -1183,6 +1440,16 @@ bool Database::open()
 
 void Database::close()
 {
+    for(int type = 0; type < SQL_TABLE_COUNT; type++)
+    {
+        if (m_table[type].isOpen() == true)
+        {
+            m_table[type].close();
+        }
+
+        m_table[type].info().clear();
+    }
+
     if (m_database.isOpen() == true)
     {
         m_database.close();
@@ -1241,7 +1508,7 @@ void Database::initVersion()
     {
         if (table.open() == true)
         {
-            info.resize(table.count());
+            info.resize(table.recordCount());
 
             int count = table.read(info.data());
             for (int i = 0; i < count; i++)
@@ -1277,12 +1544,85 @@ void Database::createTables()
             {
                 if (table.create() == false)
                 {
-                    QMessageBox::information(nullptr, tr("Database"), tr("Cannot create table: %1").arg(table.info().name()));
+                    QMessageBox::critical(nullptr, tr("Database"), tr("Cannot create table: %1").arg(table.info().name()));
                 }
             }
         }
     }
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+bool Database::appendMeasure(MeasureItem* pMeasure)
+{
+    if (pMeasure == nullptr)
+    {
+        return false;
+    }
+
+    int measureType = pMeasure->measureType();
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+    {
+        return false;
+    }
+
+    bool result = false;
+
+    for (int type = 0; type < SQL_TABLE_COUNT; type++)
+    {
+        if ( SqlTableByMeasureType[type] != measureType )
+        {
+            continue;
+        }
+
+        SqlTable& table = m_table[type];
+
+        if (table.open() == true)
+        {
+            if (table.write(pMeasure) == 1)
+            {
+                result = true;
+            }
+
+            table.close();
+        }
+    }
+
+    return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool Database::removeMeasure(int measuteType, QVector<int> keyList)
+{
+    bool result = false;
+
+    for (int type = 0; type < SQL_TABLE_COUNT; type++)
+    {
+        if ( SqlTableByMeasureType[type] != measuteType )
+        {
+            continue;
+        }
+
+        SqlTable& table = m_table[type];
+
+        if (table.open() == true)
+        {
+            if (table.remove(keyList.data(), keyList.count()) == keyList.count())
+            {
+                result = true;
+            }
+
+            table.close();
+        }
+
+        break;
+    }
+
+    return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 

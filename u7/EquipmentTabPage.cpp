@@ -352,8 +352,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 		parentObject->addChild(sp);
 	}
 
-	// TODO:: sort files in parent DeviceObject !!!!!!!!!!!
-	//
+	parentObject->sortChildrenByPlace();
 
 	return;
 }
@@ -820,7 +819,7 @@ void EquipmentView::addModule()
 {
 	std::shared_ptr<Hardware::DeviceObject> module = std::make_shared<Hardware::DeviceModule>(isPresetMode());
 
-	module->setStrId("$(PARENT)_MD00");
+	module->setStrId("$(PARENT)_MD$(PLACE)");
 	module->setCaption(tr("Module"));
 
 	addDeviceObject(module);
@@ -1165,6 +1164,7 @@ void EquipmentView::refreshSelectedDevices()
 	equipmentModel()->refreshDeviceObject(selected);
 	return;
 }
+
 
 EquipmentModel* EquipmentView::equipmentModel()
 {

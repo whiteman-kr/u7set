@@ -151,7 +151,7 @@ void UdpClientSocket::setServerAddress(const QHostAddress& serverAddress)
 }
 
 
-const quint16 UdpClientSocket::port() const
+quint16 UdpClientSocket::port() const
 {
     return m_port;
 }

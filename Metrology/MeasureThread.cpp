@@ -207,7 +207,7 @@ void MeasureThread::run()
 
             // for verification the complex comparators need two calibrator
             //
-            if (theCalibratorBase.getConnectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
+            if (theCalibratorBase.connectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
             {
                 emit showMsgBox(QString("For measure accuracy complex comparator the need for at least %1 calibrators").arg(CALIBRATOR_COUNT_FOR_CC));
                 break;
@@ -313,11 +313,7 @@ void MeasureThread::measureLinearity()
             break;
         }
 
-        LinearityPoint* pPoint = theOptions.linearity().m_pointBase.at(p);
-        if (pPoint == nullptr)
-        {
-            continue;
-        }
+        LinearityPoint point = theOptions.linearity().m_pointBase[p];
 
         emit measureInfo(tr("Set point %1 / %2 ").arg(p + 1).arg(pointCount));
 
@@ -336,7 +332,7 @@ void MeasureThread::measureLinearity()
                 continue;
             }
 
-            manager->setValue( pPoint->sensorValue(POINT_SENSOR_I_0_5_MA) );
+            manager->setValue( point.sensorValue(POINT_SENSOR_I_0_5_MA) );
         }
 
         // wait ready all calibrators,
@@ -373,8 +369,6 @@ void MeasureThread::measureLinearity()
         //
         emit measureInfo(tr("Save measurements "));
 
-
-
         for (int c = 0; c < calibratorCount; c++)
         {
             CalibratorManager* manager = m_calibratorManagerList.at(c);
@@ -388,7 +382,8 @@ void MeasureThread::measureLinearity()
                 continue;
             }
 
-            emit measureComplite(new LinearetyMeasureItem);
+
+            emit measureComplite( new LinearetyMeasureItem(manager->calibrator()) );
         }
     }
 }

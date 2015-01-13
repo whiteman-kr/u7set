@@ -10,6 +10,8 @@
 namespace Hardware
 {
 	class ModuleConfigurationStruct;
+	class McFirmware;
+	struct McDataChunk;
 
 
 	// ----------------------------------------------------------------------------
@@ -29,8 +31,8 @@ namespace Hardware
 	public:
 		void readValue(QXmlStreamReader& reader);
 
-		int typeSize();     // получить размер типа в битах, или -1 если тип не найден
-		int arraySize();    // получить размер массива в []. 1 - если скобок нет, -1 при ошибке (нет закрывающей скобки или некорректное число)
+		int typeSize() const;     // получить размер типа в битах, или -1 если тип не найден
+		int arraySize() const;    // получить размер массива в []. 1 - если скобок нет, -1 при ошибке (нет закрывающей скобки или некорректное число)
 
 		// Properties
 		//
@@ -72,7 +74,7 @@ namespace Hardware
 		QString m_value;
 	};
 
-	Q_DECLARE_METATYPE(ModuleConfigurationValue*)
+    //Q_DECLARE_METATYPE(ModuleConfigurationValue*)
 
 
 	// ----------------------------------------------------------------------------
@@ -101,11 +103,6 @@ namespace Hardware
 		int size() const;
 		void setSize(int size);
 
-		int dataSize() const;
-		void setDataSize(int dataSize);
-
-		int actualSize() const;
-
 		const QVector<ModuleConfigurationValue>& values() const;
 
 		bool be() const;
@@ -114,9 +111,8 @@ namespace Hardware
 		// Data
 		//
 	private:
-		QString m_name;				// Straucture name
-		int m_dataSize = 0;			// размер структуры в байтах = размер всех данных + размер всех вложенных структур. вычисляется при построении дерева
-		int m_size = 0;				// размер структуры, указанный в xml-файле. если не указан - равен по умолчанию 0
+		QString m_name;				// Structure name
+		int m_size = -1;			// Structure size, entered by user. Optional, if initialized, should be >= actual data size.
 		bool m_be = false;			// Big Endian
 
 		QVector<ModuleConfigurationValue> m_values;
@@ -151,8 +147,8 @@ namespace Hardware
 		int frameIndex() const;
 		void setFrameIndex(int frameIndex);
 
-		const std::shared_ptr<ModuleConfigurationStruct>& data() const;
-		void setData(const std::shared_ptr<ModuleConfigurationStruct>& data);
+		//const std::shared_ptr<ModuleConfigurationStruct>& data() const;
+		//void setData(const std::shared_ptr<ModuleConfigurationStruct>& data);
 
 		// Data
 		//
@@ -160,7 +156,7 @@ namespace Hardware
 		QString m_name;
 		QString m_type;
 		int m_frameIndex = -1;
-		std::shared_ptr<ModuleConfigurationStruct> m_data;		// указатель на структуру типа Type. Заполняется после загрузки.
+		//std::shared_ptr<ModuleConfigurationStruct> m_data;		// указатель на структуру типа Type. Заполняется после загрузки.
 	};
 
 	// ----------------------------------------------------------------------------
@@ -183,6 +179,8 @@ namespace Hardware
 		bool load(const ::Proto::ModuleConfiguration& message);
 		void save(::Proto::ModuleConfiguration* message) const;
 
+		bool compile(McFirmware* dest, const QString& deviceStrId, int changeset, QString* errorString) const;
+
 		void addUserPropertiesToObject(QObject* object) const;
 		bool setUserProperty(const QString& name, const QVariant& value);
 
@@ -192,12 +190,18 @@ namespace Hardware
 
 		bool readStructure(const char* data);
 
+
 	protected:
 		void readDeclaration(QXmlStreamReader& reader);
 		void readDefinition(QXmlStreamReader& reader);
 
 		void createUserProperties(QString* errorMessage);
 		void parseUserProperties(const ModuleConfigurationStruct& structure, const QString& parentVariableName, QString* errorMessage);
+
+		bool compileVariable(const ModuleConfigurationVariable& var, McDataChunk* chunk, QString* errorString) const;
+		bool compileStructure(const ModuleConfigurationStruct& compileStruct, McDataChunk* chunk, int baseAddress, QMap<QString, int>& structSizeMap, QString* errorString) const;
+		bool countStructureSize(const ModuleConfigurationStruct& compileStruct, QMap<QString, int>& structSizeMap) const;
+		int getStructureSize(const ModuleConfigurationStruct& compileStruct, QMap<QString, int>& structSizeMap) const;
 
 		// Properties
 		//
@@ -233,11 +237,63 @@ namespace Hardware
 		int m_minFrameSize = -1;				// Flash memory frame size
 
 		QHash<QString, ModuleConfigurationStruct> m_structures;		// Paresed structures	(declarations)
-		QVector<ModuleConfigurationVariable> m_variables;				// Paresed variables	(definitions)
+		QVector<ModuleConfigurationVariable> m_variables;			// Paresed variables	(definitions)
 
-		std::string m_xmlStructDesctription;	// Unparsed XML of Structure Description;
+		std::string m_xmlStructDesctription;						// Unparsed XML of Structure Description;
 		QString m_lastError;
 
 		QHash<QString, ModuleConfigurationValue> m_userProperties;
+	};
+
+	// Compiled chunk of module configuration
+	//
+	struct McDataChunk
+	{
+		McDataChunk(const QString deviceStrId, int deviceChangeset, int frameIndex);
+
+		QString deviceStrId;
+		int deviceChangeset;
+		int frameIndex;
+		QByteArray data;
+	};
+
+	// Compiled Module Configuration Firmware
+	//
+	class McFirmware
+	{
+	public:
+		McFirmware();
+		~McFirmware();
+
+		// Public methods
+	public:
+		//bool save() const;
+		//bool load();
+
+		//bool addDataChunk();
+
+		// Properties
+		//
+	public:
+		QString name() const;
+		void setName(const QString& value);
+
+		int uartId() const;
+		void setUartId(int value);
+
+		int frameSize() const;
+		void setFrameSize(int value);
+
+		void addChunk(const McDataChunk& chunk);
+
+		// Data
+		//
+	private:
+		QString m_name;
+
+		int m_uartID = -1;						// Module UART ID, for this configuration
+		int m_frameSize = -1;					// Flash memory frame size
+
+		std::list<McDataChunk> m_data;
 	};
 }

@@ -1,5 +1,6 @@
 #pragma once
-#include "../include/DbStruct.h"
+
+class DbProgress;
 
 //
 //

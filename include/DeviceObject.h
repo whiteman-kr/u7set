@@ -1,6 +1,7 @@
 #pragma once
 #include "DbStruct.h"
 #include "QUuid"
+#include "../include/Factory.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 
@@ -24,17 +25,7 @@ namespace Hardware
 		DeviceTypeCount
 	};
 
-	const static wchar_t* DeviceObjectExtensions[] =
-		{
-			L".hrt",		// Root
-			L".hsm",		// System
-			L".hrk",		// Rack
-			L".hcs",		// Chassis
-			L".hmd",		// Module
-			L".hcr",		// Controller
-			L".hds"			// Diagnostics Signal
-		};
-
+	extern const wchar_t* DeviceObjectExtensions[];
 
 	//
 	//
@@ -50,6 +41,7 @@ namespace Hardware
 		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
 		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
 		Q_PROPERTY(QString ChildRestriction READ childRestriction WRITE setChildRestriction)
+		Q_PROPERTY(int Place READ place WRITE setPlace)
 
 	protected:
 		explicit DeviceObject(bool preset = false);
@@ -75,7 +67,7 @@ namespace Hardware
 
 	public:
 
-		// Properties
+		// Properties and Methods
 		//
 	public:
 		DeviceObject* parent();
@@ -99,9 +91,11 @@ namespace Hardware
 		void deleteAllChildren();
 
 		bool checkChild(DeviceObject* child, QString* errorMessage);
+		void sortChildrenByPlace();
 
 		// Props
 		//
+	public:
 		const QString& strId() const;
 		void setStrId(const QString& value);
 
@@ -114,6 +108,9 @@ namespace Hardware
 
 		const QString& childRestriction() const;
 		void setChildRestriction(const QString& value);
+
+		int place() const;
+		void setPlace(int value);
 
 		// Preset
 		//
@@ -138,6 +135,8 @@ namespace Hardware
 		DbFileInfo m_fileInfo;
 
 		QString m_childRestriction;			// Restriction script for child items
+
+		int m_place = 0;
 
 		// Preset Data
 		//
@@ -233,7 +232,6 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(int Place READ place WRITE setPlace)
 		Q_PROPERTY(int Type READ type WRITE setType)
 
 	public:
@@ -252,9 +250,6 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		int place() const;
-		void setPlace(int value);
-
 		int type() const;
 		void setType(int value);
 
@@ -263,7 +258,6 @@ namespace Hardware
 	private:
 		static const DeviceType m_deviceType = DeviceType::Chassis;
 
-		int m_place = 0;
 		int m_type = 0;
 	};
 
@@ -277,11 +271,10 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(int Place READ place WRITE setPlace)
 		Q_PROPERTY(int Type READ type WRITE setType)
 
-		Q_PROPERTY(QString ConfigurationStruct READ configurationStruct WRITE setConfigurationStruct)
-		//Q_PROPERTY(QString ConfigurationOutput READ configurationOutput WRITE setConfigurationOutput)
+		Q_PROPERTY(QString ConfStruct READ configurationStruct WRITE setConfigurationStruct)
+		Q_PROPERTY(QString ConfFirmwareName READ confFirmwareName WRITE setConfFirmwareName)
 
 	public:
 		explicit DeviceModule(bool preset = false);
@@ -298,24 +291,30 @@ namespace Hardware
 
 		virtual bool event(QEvent* e) override;
 
+		// Public Methods
+		//
+	public:
+		bool compileConfiguration(McFirmware* dest, QString* errorString) const;
+
 		// Properties
 		//
 	public:
-		int place() const;
-		void setPlace(int value);
-
 		int type() const;
 		void setType(int value);
 
 		QString configurationStruct() const;
 		void setConfigurationStruct(const QString& value);
 
+		QString confFirmwareName() const;
+		void setConfFirmwareName(const QString& value);
+
+		const ModuleConfiguration& moduleConfiguration() const;
+
 		// Data
 		//
 	private:
 		static const DeviceType m_deviceType = DeviceType::Module;
 
-		int m_place = 0;
 		int m_type = 0;
 
 		QString m_configurationInput;

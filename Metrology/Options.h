@@ -5,9 +5,12 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QVector>
 #include <QColor>
 #include <QFont>
+#include <QTimer>
 
+#include "CalibratorBase.h"
 #include "Measure.h"
 #include "MeasureViewHeader.h"
 
@@ -85,7 +88,7 @@ public:
 
 const char* const		MeasureViewParam[] =
 {
-                        QT_TRANSLATE_NOOP("Options.h", "Font of measurements list "),
+                        QT_TRANSLATE_NOOP("Options.h", "Font of measurements list"),
                         QT_TRANSLATE_NOOP("Options.h", "Show external ID"),
                         QT_TRANSLATE_NOOP("Options.h", "Displaying value"),
                         QT_TRANSLATE_NOOP("Options.h", "Measurement over limit error"),
@@ -203,6 +206,177 @@ public:
 
 // ==============================================================================================
 
+#define                 REPORT_OPTIONS_REG_KEY		"Options/Reports/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		ReportParam[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Path"),
+                        QT_TRANSLATE_NOOP("Options.h", "Type"),
+                        QT_TRANSLATE_NOOP("Options.h", "Document title"),
+                        QT_TRANSLATE_NOOP("Options.h", "Report title"),
+                        QT_TRANSLATE_NOOP("Options.h", "Date of measuring"),
+                        QT_TRANSLATE_NOOP("Options.h", "Table title"),
+                        QT_TRANSLATE_NOOP("Options.h", "Conclusion"),
+                        QT_TRANSLATE_NOOP("Options.h", "Environment temperature, °С"),
+                        QT_TRANSLATE_NOOP("Options.h", "Atmospheric pressure, kPa"),
+                        QT_TRANSLATE_NOOP("Options.h", "Relative humidity, %"),
+                        QT_TRANSLATE_NOOP("Options.h", "Power voltage, V"),
+                        QT_TRANSLATE_NOOP("Options.h", "Power frequency, Hz"),
+                        QT_TRANSLATE_NOOP("Options.h", "Calibrator 1"),
+                        QT_TRANSLATE_NOOP("Options.h", "Calibrator 2"),
+                        QT_TRANSLATE_NOOP("Options.h", "Calibrator 3"),
+                        QT_TRANSLATE_NOOP("Options.h", "Calibrator 4"),
+                        QT_TRANSLATE_NOOP("Options.h", "Calibrator 5"),
+                        QT_TRANSLATE_NOOP("Options.h", "Calibrator 6"),
+                        QT_TRANSLATE_NOOP("Options.h", "File name"),
+};
+
+const int				RO_PARAM_COUNT          = sizeof(ReportParam)/sizeof(char*);
+
+const int				RO_PARAM_PATH           = 0,
+                        RO_PARAM_TYPE           = 1,
+                        RO_PARAM_DOCUMENT_TITLE = 2,
+                        RO_PARAM_REPORT_TITLE   = 3,
+                        RO_PARAM_DATE			= 4,
+                        RO_PARAM_TABLE_TITLE    = 5,
+                        RO_PARAM_CONCLUSION		= 6,
+                        RO_PARAM_T				= 7,
+                        RO_PARAM_P              = 8,
+                        RO_PARAM_H				= 9,
+                        RO_PARAM_V				= 10,
+                        RO_PARAM_F				= 11,
+                        RO_PARAM_CALIBRATOR_0   = 12,
+                        RO_PARAM_CALIBRATOR_1	= 13,
+                        RO_PARAM_CALIBRATOR_2	= 14,
+                        RO_PARAM_CALIBRATOR_3	= 15,
+                        RO_PARAM_CALIBRATOR_4	= 16,
+                        RO_PARAM_CALIBRATOR_5	= 17,
+                        RO_PARAM_REPORT_FILE    = 18;
+
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const       ReportType[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity"),
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity metrological certification"),
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity detail electric"),
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity detail physical"),
+                        QT_TRANSLATE_NOOP("Options.h", "Comparators"),
+                        QT_TRANSLATE_NOOP("Options.h", "Complex comparators"),
+};
+
+const int               REPORT_TYPE_COUNT                       = sizeof(ReportType)/sizeof(char*);
+
+const int               REPORT_TYPE_UNKNOWN                     = -1,
+                        REPORT_TYPE_LINEARITY                   = 0,
+                        REPORT_TYPE_LINEARITY_CERTIFICATION     = 1,
+                        REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC   = 2,
+                        REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL   = 3,
+                        REPORT_TYPE_COMPARATOR                  = 4,
+                        REPORT_TYPE_COMPLEX_COMPARATOR          = 5;
+
+const char* const       ReportFileName[REPORT_TYPE_COUNT] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Linearity.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "LinearityCertification.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "LinearityDetailEl.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "LinearityDetailPh.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "Comparators.ncr"),
+                        QT_TRANSLATE_NOOP("Options.h", "ComplexComparators.ncr"),
+};
+
+// ==============================================================================================
+
+struct REPORT_HEADER
+{
+    int                 m_type = REPORT_TYPE_UNKNOWN;
+
+    QString             m_documentTitle;
+    QString             m_reportTitle;
+    QString             m_date;
+    QString             m_tableTitle;
+    QString             m_conclusion;
+
+    double              m_T = 0;
+    double              m_P = 0;
+    double              m_H = 0;
+    double              m_V = 0;
+    double              m_F = 0;
+
+    QString             m_calibrator[MAX_CALIBRATOR_COUNT];
+
+    int                 m_linkObjectID;
+    QString             m_reportFile;
+
+    int                 m_param = 0;
+
+    void                init(int type);
+};
+
+
+// ==============================================================================================
+
+class ReportHeaderBase : public QObject
+{
+    Q_OBJECT
+
+private:
+
+    QMutex              m_mutex;
+
+    QVector<REPORT_HEADER>	m_headerList;
+
+public:
+    explicit            ReportHeaderBase(QObject *parent = 0);
+    explicit            ReportHeaderBase(const ReportHeaderBase& from, QObject *parent = 0);
+                        ~ReportHeaderBase();
+
+    int                 count();
+    bool                isEmpty() { return count() == 0; }
+
+    void                clear();
+
+    bool                reportsIsExist();
+
+    void                load();
+    void                save();
+
+    ReportHeaderBase&   operator=(const ReportHeaderBase& from);
+    REPORT_HEADER&      operator[](int index);
+};
+
+// ==============================================================================================
+
+class ReportOption : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit            ReportOption(QObject *parent = 0);
+    explicit            ReportOption(const ReportOption& from, QObject *parent = 0);
+                        ~ReportOption();
+
+    QString             m_path;
+    int					m_type = REPORT_TYPE_LINEARITY;
+
+    ReportHeaderBase    m_headerBase;
+
+    void                init();
+
+    int                 reportTypeByMeasureType(int measureType);
+
+    void                load();
+    void                save();
+
+    ReportOption&       operator=(const ReportOption& from);
+
+};
+
+// ==============================================================================================
+
 const char* const       LinearityPointSensor[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "%"),
@@ -261,30 +435,28 @@ class LinearityPointBase : public QObject
 {
     Q_OBJECT
 
-private:
-
-    QMutex              m_mutex;
-
-    QList<LinearityPoint*>	m_pointList;                                  // list of measurement points
-
 public:
 
     explicit            LinearityPointBase(QObject *parent = 0);
     explicit            LinearityPointBase(const LinearityPointBase& from, QObject *parent = 0);
                         ~LinearityPointBase();
 
+private:
+
+    QMutex              m_mutex;
+
+    QVector<LinearityPoint>	m_pointList;                                  // list of measurement points
+
+public:
+
     int                 count();
     bool                isEmpty() { return count() == 0; }
 
-    int                 append(LinearityPoint* point);
-    int                 insert(int index, LinearityPoint* point);
-
-    bool                removeAt(int index);
-    bool                removeAt(LinearityPoint* point);
+    int                 append(LinearityPoint point);
+    int                 insert(int index, LinearityPoint point);
+    bool                remove(int index);
 
     void                clear();
-
-    LinearityPoint*     at(int index);
 
     void                swap(int i, int j);
 
@@ -294,6 +466,7 @@ public:
     void                save();
 
     LinearityPointBase& operator=(const LinearityPointBase& from);
+    LinearityPoint&     operator[](int index);
 };
 
 
@@ -358,7 +531,6 @@ const char* const       LinearityViewTypeStr[] =
                         QT_TRANSLATE_NOOP("Options.h", "Extended (show columns for metrological certification)"),
                         QT_TRANSLATE_NOOP("Options.h", "Detail electric (show all measurements at one point)"),
                         QT_TRANSLATE_NOOP("Options.h", "Detail physical (show all measurements at one point)"),
-                        QT_TRANSLATE_NOOP("Options.h", "Detail output (show all measurements at one point)"),
 };
 
 const int               LO_VIEW_TYPE_COUNT              = sizeof(LinearityViewTypeStr)/sizeof(char*);
@@ -367,9 +539,7 @@ const int               LO_VIEW_TYPE_UNKNOWN            = -1,
                         LO_VIEW_TYPE_SIMPLE             = 0,
                         LO_VIEW_TYPE_EXTENDED           = 1,
                         LO_VIEW_TYPE_DETAIL_ELRCTRIC    = 2,
-                        LO_VIEW_TYPE_DETAIL_PHYSICAL    = 3,
-                        LO_VIEW_TYPE_DETAIL_OUTPUT      = 4;
-
+                        LO_VIEW_TYPE_DETAIL_PHYSICAL    = 3;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -417,14 +587,14 @@ const char* const		BackupParam[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "On start application"),
                         QT_TRANSLATE_NOOP("Options.h", "On exit application"),
-                        QT_TRANSLATE_NOOP("Options.h", "Path for reserve copy"),
+                        QT_TRANSLATE_NOOP("Options.h", "Path"),
 };
 
-const int				BUO_PARAM_COUNT     = sizeof(BackupParam)/sizeof(char*);
+const int				BUO_PARAM_COUNT         = sizeof(BackupParam)/sizeof(char*);
 
-const int				BUO_PARAM_ON_START  = 0,
-                        BUO_PARAM_ON_EXIT   = 1,
-                        BUO_PARAM_FOLDER    = 2;
+const int				BUO_PARAM_ON_START      = 0,
+                        BUO_PARAM_ON_EXIT       = 1,
+                        BUO_PARAM_PATH          = 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -441,7 +611,7 @@ public:
     bool                m_onExit = true;
     QString				m_path;
 
-    void				createBackup();
+    bool				createBackup();
     void				createBackupOnStart();
     void				createBackupOnExit();
 
@@ -458,52 +628,55 @@ class Options : public QObject
     Q_OBJECT
 
 public:
-    explicit Options(QObject *parent = 0);
-    explicit Options(const Options& from, QObject *parent = 0);
-    ~Options();
 
-    int getChannelCount();
+    explicit            Options(QObject *parent = 0);
+    explicit            Options(const Options& from, QObject *parent = 0);
+                        ~Options();
 
-    bool m_updateColumnView[MEASURE_TYPE_COUNT];             // determined the need to update the view after changing settings
+    int                 channelCount();
+
+    bool                m_updateColumnView[MEASURE_TYPE_COUNT];             // determined the need to update the view after changing settings
 
 private:
 
-    QMutex m_mutex;
+    QMutex              m_mutex;
 
-    ToolBarOption m_toolBar;
-    TcpIpOption m_connectTcpIp;
-    MeasureViewOption m_measureView;
-    DatabaseOption m_database;
-    LinearityOption m_linearity;
-    BackupOption m_backup;
+    ToolBarOption       m_toolBar;
+    TcpIpOption         m_connectTcpIp;
+    MeasureViewOption   m_measureView;
+    DatabaseOption      m_database;
+    ReportOption        m_report;
+    LinearityOption     m_linearity;
+    BackupOption        m_backup;
 
 public:
 
-    ToolBarOption& toolBar() { return m_toolBar; }
-    void setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
+    ToolBarOption&      toolBar() { return m_toolBar; }
+    void                setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
 
-    TcpIpOption& connectTcpIp() { return m_connectTcpIp; }
-    void setConnectTcpIp(const TcpIpOption& connectTcpIp) { m_connectTcpIp = connectTcpIp; }
+    TcpIpOption&        connectTcpIp() { return m_connectTcpIp; }
+    void                setConnectTcpIp(const TcpIpOption& connectTcpIp) { m_connectTcpIp = connectTcpIp; }
 
-    MeasureViewOption& measureView() { return m_measureView; }
-    void setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
+    MeasureViewOption&  measureView() { return m_measureView; }
+    void                setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
 
-    DatabaseOption& database() { return m_database; }
-    void setDatabase(const DatabaseOption& database) { m_database = database; }
+    DatabaseOption&     database() { return m_database; }
+    void                setDatabase(const DatabaseOption& database) { m_database = database; }
 
-    LinearityOption& linearity() { return m_linearity; }
-    void setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
+    ReportOption&       report() { return m_report; }
+    void                setReport(const ReportOption& report) { m_report = report; }
 
-    BackupOption& backup() { return m_backup; }
-    void setBackup(const BackupOption& backup) { m_backup = backup; }
+    LinearityOption&    linearity() { return m_linearity; }
+    void                setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
 
+    BackupOption&       backup() { return m_backup; }
+    void                etBackup(const BackupOption& backup) { m_backup = backup; }
 
-    void load();
-    void save();
+    void                load();
+    void                save();
 
-    inline Options& operator=(const Options& from);
+    Options&            operator=(const Options& from);
 };
-
 
 // ==============================================================================================
 

@@ -1,5 +1,5 @@
-#include "stable.h"
-#include "Settings.h"
+#include "Stable.h"
+#include "settings.h"
 
 
 Settings::Settings(void) :

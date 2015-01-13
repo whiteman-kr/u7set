@@ -8,6 +8,7 @@ class DbController;
 namespace Hardware
 {
 	class DeviceObject;
+	class McFirmware;
 }
 
 class BuildWorkerThread : public QThread
@@ -17,7 +18,24 @@ class BuildWorkerThread : public QThread
 private:
 	virtual void run() override;
 
+	// Get Equipment from the prokect database
+	//
 	bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
+
+	// Expand Devices StrId
+	//
+	bool expandDeviceStrId(Hardware::DeviceObject* device);
+
+	// Generate Modules Configurations Firmwares
+	//
+	bool generateModulesConfigurations(DbController* db, const Hardware::DeviceObject *root);
+	bool generateModulesConfigurations(
+			DbController* db,
+			const Hardware::DeviceObject* parent,
+			std::map<QString, std::shared_ptr<Hardware::McFirmware>>* firmwares);
+
+	// What's the next compilation task?
+	//
 
 signals:
 	void resultReady(const QString &s);
@@ -48,6 +66,9 @@ public:
 	QString projectUserPassword() const;
 	void setProjectUserPassword(const QString& value);
 
+	bool onlyCheckedIn() const;
+	void setOnlyCheckedIn(bool value);
+
 	// Data
 	//
 private:
@@ -63,7 +84,9 @@ private:
 	QString m_projectUserName;
 	QString m_projectUserPassword;
 
-	OutputLog* m_log;		// Probably it's better to make it as shared_ptr
+	bool m_onlyCheckedIn = true;		// Don't get workcopy of checked out files, use unly checked in copy
+
+	OutputLog* m_log;					// Probably it's better to make it as shared_ptr
 };
 
 class ProjectBuilder : public QObject
@@ -77,7 +100,15 @@ public:
 	// Public methods
 	//
 public:
-	bool start(QString projectName, QString serverIp, int serverPort, QString serverUserName, QString serverPassword, QString projectUserName, QString projectUserPassword);
+	bool start(QString projectName,
+			   QString serverIp,
+			   int serverPort,
+			   QString serverUserName,
+			   QString serverPassword,
+			   QString projectUserName,
+			   QString projectUserPassword,
+			   bool onlyCheckedIn);
+
 	void stop();
 
 	bool isRunning() const;

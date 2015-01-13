@@ -21,8 +21,8 @@ class OptionsPointsDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent = 0);
-    ~OptionsPointsDialog();
+    explicit            OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent = 0);
+                        ~OptionsPointsDialog();
 
     LinearityOption     m_linearity;
 

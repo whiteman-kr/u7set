@@ -169,7 +169,7 @@ public:
     const QHostAddress& serverAddress() const;
     void setServerAddress(const QHostAddress& serverAddress);
 
-    const quint16 port() const;
+    quint16 port() const;
     void setPort(quint16 port);
 
     bool isWaitingForAck() { return m_state == waitingForAck; }

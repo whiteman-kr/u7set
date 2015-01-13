@@ -1,7 +1,9 @@
-#include "stable.h"
+#include "Stable.h"
 #include "moduleconfigurator.h"
-#include "../include/configdata.h"
+#include "../include/ConfigData.h"
 #include <QtWidgets/QApplication>
+
+OutputLog theLog;
 
 int main(int argc, char *argv[])
 {

@@ -92,6 +92,7 @@ public:
     void createMeasurePages();
     void createPanels();
     void createStatusBar();
+    void createContextMenu();
 
 
 private:
@@ -110,7 +111,6 @@ private:
 
     // menu - Edit
     //
-    QAction* m_pCutMeasureAction = nullptr;
     QAction* m_pCopyMeasureAction = nullptr;
     QAction* m_pRemoveMeasureAction = nullptr;
     QAction* m_pSelectAllMeasureAction = nullptr;
@@ -137,6 +137,8 @@ private:
     QAction* m_pAboutConnectionAction = nullptr;
     QAction* m_pAboutAppAction = nullptr;
 
+    QMenu* m_pContextMenu = nullptr;
+
 signals:
 
     void appendMeasure(MeasureItem*);
@@ -150,14 +152,13 @@ private slots:
     //
     void startMeasure();
     void stopMeasure();
-    void printMeasure() {};
+    void printMeasure();
     void exportMeasure();
 
     // menu - Edit
     //
-    void cutMeasure() {};
-    void copyMeasure() {};
-    void removeMeasure() {};
+    void copyMeasure();
+    void removeMeasure();
     void selectAllMeasure();
 
     // menu - View
@@ -196,6 +197,12 @@ private slots:
     void setMeasureKind(int index);
     void setMeasureTimeout(QString value);
     void setOutputSignalType(int index);
+
+private slots:
+
+    // Slots of contex menu
+    //
+    void onContextMenu(QPoint);
 
 private slots:
 

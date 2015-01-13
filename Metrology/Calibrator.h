@@ -109,10 +109,20 @@ const int		CALIBRATOR_CONVERT_HZ_TO_KHZ    = 0,
 
 // ----------------------------------------------------------------------------------------------
 
-const int CalibratorBaudRate[CALIBRATOR_TYPE_COUNT] =
+const int       CalibratorBaudRate[CALIBRATOR_TYPE_COUNT] =
 {
                 QSerialPort::Baud9600,
                 QSerialPort::Baud115200,
+};
+
+// ----------------------------------------------------------------------------------------------
+
+const int		CALIBRATOR_TERMINATOR_LEN = 2;
+
+const char* const CalibratorTerminator[CALIBRATOR_TYPE_COUNT] =
+{
+                "\n\r",
+                "\r\n",
 };
 
 // ==============================================================================================
@@ -222,7 +232,7 @@ private:
 
     bool        m_enableWaitResponse = false;                                           // enbale wait response from calibrator after open port
 
-    bool        m_busy;
+    bool        m_busy = false;
 
     void        empty();                                                                // erases all information on the calibrator: SerialNo, Name and etc.
 

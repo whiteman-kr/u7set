@@ -75,7 +75,6 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
     {
 
     },
-
 };
 
 
@@ -136,23 +135,48 @@ MeasureViewColumn& MeasureViewColumn::operator=(const MeasureViewColumn& from)
 MeasureViewHeader::MeasureViewHeader(QObject *parent) :
     QObject(parent)
 {
+    for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+    {
+        m_columnCount[type] = 0;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 MeasureViewHeader::~MeasureViewHeader()
 {
-    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+//    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+//    {
+//        return;
+//    }
+
+//    for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
+//    {
+//        theOptions.measureView().m_column[m_measureType][column] = m_column[m_measureType][column];
+//    }
+
+//    theOptions.measureView().save();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureViewHeader::setMeasureType(int type)
+{
+    if (type < 0 || type >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
+    m_measureType = type;
+
     for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
     {
-        theOptions.measureView().m_column[m_measureType][column] = m_column[m_measureType][column];
+        if (m_column[type][column].title().isEmpty() == true)
+        {
+            m_columnCount[type] = column;
+            break;
+        }
     }
-
-    theOptions.measureView().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -164,9 +188,7 @@ void MeasureViewHeader::init(int type)
         return;
     }
 
-    m_measureType = type;
-
-    m_columnCount[type] = 0;
+    setMeasureType(type);
 
     for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
     {
@@ -174,11 +196,6 @@ void MeasureViewHeader::init(int type)
         {
             m_column[type][column] = theOptions.measureView().m_column[type][column];
             m_column[type][column].setIndex( column );
-        }
-        else
-        {
-            m_columnCount[type] = column;
-            break;
         }
     }
 }
@@ -279,7 +296,6 @@ void MeasureViewHeader::updateColumnState()
 
                     case LO_VIEW_TYPE_DETAIL_ELRCTRIC:
                     case LO_VIEW_TYPE_DETAIL_PHYSICAL:
-                    case LO_VIEW_TYPE_DETAIL_OUTPUT:
 
                         setColumnVisible(MVC_CMN_L_PERCENT, false);
                         setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);

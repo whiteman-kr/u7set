@@ -18,67 +18,45 @@ class FindItem
 {
 public:
 
-    explicit FindItem() {}
-    explicit FindItem(int row, int column, QString columnTitle, int beginPos, int endPos, QString text)
-    {
-        m_row = row;
-        m_column = column;
-        m_columnTitle = columnTitle;
-
-        m_beginPos = beginPos;
-        m_endPos = endPos;
-
-        m_text = text;
-    }
+    explicit            FindItem();
+    explicit            FindItem(int row, int column, QString columnTitle, int beginPos, int endPos, QString text);
 
 private:
 
-    int m_row = -1;
-    int m_column = -1;
-    QString m_columnTitle;
+    int                 m_row = -1;
+    int                 m_column = -1;
+    QString             m_columnTitle;
 
-    int m_beginPos = -1;
-    int m_endPos = -1;
+    int                 m_beginPos = -1;
+    int                 m_endPos = -1;
 
-    QString m_text;
+    QString             m_text;
 
 public:
 
-    int row() const { return m_row; }
-    void setRow(int row) { m_row = row; }
+    int                 row() const { return m_row; }
+    void                setRow(int row) { m_row = row; }
 
-    int column() const { return m_column; }
-    void setColumn(int column) { m_column = column; }
+    int                 column() const { return m_column; }
+    void                setColumn(int column) { m_column = column; }
 
-    QString columnTitle() const { return m_columnTitle; }
-    void setColumnTitle(QString title) { m_columnTitle = title; }
+    QString             columnTitle() const { return m_columnTitle; }
+    void                setColumnTitle(QString title) { m_columnTitle = title; }
 
-    void setCoordinates(int row, int column) { m_row = row; m_column = column; }
+    void                setCoordinates(int row, int column) { m_row = row; m_column = column; }
 
-    int beginPos() const { return m_beginPos; }
-    void setBeginPos(int pos) { m_beginPos = pos; }
+    int                 beginPos() const { return m_beginPos; }
+    void                setBeginPos(int pos) { m_beginPos = pos; }
 
-    int endPos() const { return m_endPos; }
-    void setEndPos(int pos) { m_endPos = pos; }
+    int                 endPos() const { return m_endPos; }
+    void                setEndPos(int pos) { m_endPos = pos; }
 
-    void setPos(int beginPos, int endPos) { m_beginPos = beginPos; m_endPos = endPos; }
+    void                setPos(int beginPos, int endPos) { m_beginPos = beginPos; m_endPos = endPos; }
 
-    QString text() const { return m_text; }
-    void setText(QString text) { m_text = text; }
+    QString             text() const { return m_text; }
+    void                setText(QString text) { m_text = text; }
 
-    FindItem& operator=(const FindItem& from)
-    {
-        m_row = from.m_row;
-        m_column = from.m_column;
-        m_columnTitle = from.m_columnTitle;
-
-        m_beginPos = from.m_beginPos;
-        m_endPos = from.m_endPos;
-
-        m_text = from.m_text;
-
-        return *this;
-    }
+    FindItem&           operator=(const FindItem& from);
 };
 
 // ==============================================================================================
@@ -147,46 +125,46 @@ public:
 
 private:
 
-    QMainWindow* m_pMainWindow;
+    QMainWindow*        m_pMainWindow;
 
-    int m_measureType = MEASURE_TYPE_UNKNOWN;
+    int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 
-    static int m_columnWidth[FM_COLUMN_COUNT];
+    static int          m_columnWidth[FM_COLUMN_COUNT];
 
-    QString m_findText;
+    QString             m_findText;
 
-    QMainWindow *m_pFindWindow;
-    QLineEdit* m_findTextEdit  = nullptr;
-    QTableView* m_pView = nullptr;
-    QLabel* m_statusLabel = nullptr;
-    FindMeasureTable m_table;
+    QMainWindow*        m_pFindWindow;
+    QLineEdit*          m_findTextEdit  = nullptr;
+    QTableView*         m_pView = nullptr;
+    QLabel*             m_statusLabel = nullptr;
+    FindMeasureTable    m_table;
 
-    QMenu* m_pContextMenu = nullptr;
-    QAction* m_pCopyAction = nullptr;
-    QAction* m_pSelectAllAction = nullptr;
+    QMenu*              m_pContextMenu = nullptr;
+    QAction*            m_pCopyAction = nullptr;
+    QAction*            m_pSelectAllAction = nullptr;
 
-    void createInterface();
-    void createContextMenu();
+    void                createInterface();
+    void                createContextMenu();
 
-    void copy();
-    void selectAll();
+    void                copy();
+    void                selectAll();
 
-    void loadSettings();
-    void saveSettings();
+    void                loadSettings();
+    void                saveSettings();
 
 protected:
 
-    bool event(QEvent* e);
-    bool eventFilter(QObject* object, QEvent* e);
+    bool                event(QEvent* e);
+    bool                eventFilter(QObject* object, QEvent* e);
 
 public slots:
 
-    void find();
+    void                find();
 
-    void selectMeasureCell(QModelIndex);
+    void                selectMeasureCell(QModelIndex);
 
-    void onContextMenu(QPoint);
-    void onColumnResized(int index, int, int width);
+    void                onContextMenu(QPoint);
+    void                onColumnResized(int index, int, int width);
 };
 
 // ==============================================================================================

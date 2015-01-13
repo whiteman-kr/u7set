@@ -52,7 +52,8 @@ namespace Proto
 
 	void Write(Proto::wstring* pMessage, const QString& str)
 	{
-		assert(sizeof(wchar_t) == 2);
+        assert(sizeof(QChar) == 2);
+        //assert(sizeof(wchar_t) == 2);
 		//static_assert(sizeof(wchar_t) == 2, "wchar_t must be 16-bit.");
 
 		if (pMessage == nullptr)
@@ -61,7 +62,8 @@ namespace Proto
 			return;
 		}
 
-		pMessage->set_text(str.toStdWString().c_str(), (str.length() + 1) * sizeof(wchar_t));
+        //pMessage->set_text(str.toStdWString().c_str(), (str.length() + 1) * sizeof(wchar_t));
+        pMessage->set_text(str.data(), (str.length() + 1) * sizeof(QChar));
 	}
 }
 
