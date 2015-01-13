@@ -394,12 +394,6 @@ quint32 UdpRequest::readDword()
 
 void UdpRequest::readStruct(Serializable* s)
 {
-/*	if (m_readDataPtr - m_data + sizeof(quint32) > m_header->dataSize)
-	{
-		assert(m_readDataPtr - m_data + sizeof(quint32) <= m_header->dataSize);
-		return 0;
-	}*/
-
 	m_readDataPtr = s->serializeFrom(m_readDataPtr);
 }
 

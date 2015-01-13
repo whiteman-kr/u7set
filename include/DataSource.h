@@ -90,6 +90,9 @@ public:
 	void getInfo(DataSourceInfo& dsi);
 	void setInfo(const DataSourceInfo& dsi);
 
+	void getStatistics(DataSourceStatistics& dss);
+	void setStatistics(const DataSourceStatistics& dss);
+
 	void stop();
 	void resume();
 };
