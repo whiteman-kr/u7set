@@ -1,2 +1,6 @@
 *.user
 *.autosave
+version.h
+Makefile
+*.o
+bin_unix

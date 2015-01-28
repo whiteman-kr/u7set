@@ -11,6 +11,22 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = scm
 TEMPLATE = app
 
+# Force prebuild version control info
+#
+versionTarget.target = version.h
+versionTarget.depends = FORCE
+win32 {
+versionTarget.commands = $$PWD/../bin/release/GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro
+}
+unix{
+versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+    qmake; \
+    make; \
+    cd $$PWD; \
+    $$PWD/../bin_unix/release/GetGitProjectVersion $$PWD/ServiceControlManager.pro
+}
+PRE_TARGETDEPS += version.h
+QMAKE_EXTRA_TARGETS += versionTarget
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -27,7 +43,8 @@ HEADERS  += mainwindow.h \
     ../include/UdpSocket.h \
     ../include/SocketIO.h \
     DataSourcesStateWidget.h \
-    ../include/DataSource.h
+    ../include/DataSource.h \
+    version.h
 
 FORMS    +=
 
