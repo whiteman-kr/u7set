@@ -5,21 +5,22 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
+INCLUDEPATH += $$PWD/libgit2headers
+win32:LIBS += $$PWD/git2.lib
+
 # DESTDIR
 #
 win32 {
-        CONFIG(debug, debug|release): DESTDIR = $$PWD/../bin/debug
-        CONFIG(release, debug|release): DESTDIR = $$PWD/../bin/release
+        DESTDIR = ../
 }
 unix {
-        CONFIG(debug, debug|release): DESTDIR = $$PWD/../bin_unix/debug
-        CONFIG(release, debug|release): DESTDIR = $$PWD/../bin_unix/release
+        DESTDIR = ../bin_unix
 }
 
 #c++11 support for GCC
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
+*g++:QMAKE_CXXFLAGS += -std=c++11
 
 # libgit2
-LIBS += -lgit2
+unix:LIBS += -lgit2
 

@@ -16,14 +16,20 @@ TEMPLATE = app
 versionTarget.target = version.h
 versionTarget.depends = FORCE
 win32 {
-versionTarget.commands = $$PWD/../bin/release/GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro
+versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+    cp $$OUT_PWD/../GetGitProjectVersion.exe $$PWD/../ & \
+    nmake & \
+    chdir $$PWD & \
+    $$PWD/../GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro
 }
-unix{
+unix {
 versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
-    qmake; \
+    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+    cp $$OUT_PWD/../GetGitProjectVersion.exe $$PWD/../ & \
     make; \
     cd $$PWD; \
-    $$PWD/../bin_unix/release/GetGitProjectVersion $$PWD/ServiceControlManager.pro
+    $$PWD/../bin_unix/GetGitProjectVersion $$PWD/ServiceControlManager.pro
 }
 PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
@@ -56,7 +62,7 @@ RESOURCES += \
 
 include(../qtsingleapplication/src/qtsingleapplication.pri)
 
-unix:QMAKE_CXXFLAGS += -std=c++11
+*g++:QMAKE_CXXFLAGS += -std=c++11
 
 
 # Visual Leak Detector

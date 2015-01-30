@@ -4,8 +4,14 @@
 #include <iomanip>
 #include <vector>
 #include <cstring>
+#include <sys/stat.h>
 #include <git2/errors.h>
+#include <git2/version.h>
+#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 21
+#include <git2/global.h>
+#else
 #include <git2/threads.h>
+#endif
 #include <git2/repository.h>
 #include <git2/revwalk.h>
 #include <git2/commit.h>
@@ -18,16 +24,32 @@ using namespace std;
 ofstream versionFile;
 git_repository *repo = nullptr;
 
-inline bool fileExists(const string& fileName)
+#ifdef _WIN32
+template <typename TYPE>
+inline TYPE min(TYPE a, TYPE b)
 {
-	if (FILE *file = fopen(fileName.c_str(), "r"))
+	if (a < b)
 	{
-		fclose(file);
-		return true;
+		return a;
 	}
 	else
 	{
+		return b;
+	}
+}
+#endif
+
+inline bool fileExists(const string& fileName)
+{
+	struct stat info;
+
+	if(stat(fileName.c_str(), &info) != 0)
+	{
 		return false;
+	}
+	else
+	{
+		return true;
 	}
 }
 
@@ -51,10 +73,12 @@ bool report(int error)
 	return false;
 }
 
+#define REPORT(a) if (report(a)) cout << "while running "#a << endl;
+#define REPORT_RETURN1(a) if (report(a)) { cout << "while running "#a << endl; return 1; }
+
 void print_time(const char* const prefix, const git_time& intime)
 {
 	char sign, out[32];
-	struct tm *intm;
 	int offset, hours, minutes;
 	time_t t;
 
@@ -71,12 +95,20 @@ void print_time(const char* const prefix, const git_time& intime)
 
 	t = (time_t)intime.time + (intime.offset * 60);
 
-	intm = gmtime(&t);
+#ifdef __linux__
+	struct tm *intm;
+    intm = gmtime(&t);
 	strftime(out, sizeof(out), "%a %b %e %T %Y", intm);
-
+#elif _WIN32
+	struct tm intm;
+    gmtime_s(&intm, &t);
+	strftime(out, sizeof(out), "%a %b %d %X %Y", &intm);
+#else
+#error Unknown operating system
+#endif
 	versionFile << "#define " << prefix << "_DATE \"" << out << ' '
-		 << sign << setw(2) << setfill('0') << hours
-		 << setw(2) << minutes << "\"\n";
+				<< sign << setw(2) << setfill('0') << hours
+				<< setw(2) << minutes << "\"\n";
 }
 
 void myReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -97,9 +129,9 @@ void print_commit_info(const char* const prefix, const git_oid oid, vector<git_o
 	versionFile << "#define " << prefix << "_SHA \"" << sha << "\"\n";
 
 	git_revwalk *walker;
-	report(git_revwalk_new(&walker, repo));
+	REPORT(git_revwalk_new(&walker, repo))
 	git_revwalk_sorting(walker, GIT_SORT_TOPOLOGICAL | GIT_SORT_TIME);
-	report(git_revwalk_push(walker, &oid));
+	REPORT(git_revwalk_push(walker, &oid));
 
 	git_oid walked_oid;
 	int i = 0;
@@ -115,7 +147,7 @@ void print_commit_info(const char* const prefix, const git_oid oid, vector<git_o
 	versionFile << "#define " << prefix << "_NUMBER " << i << endl;
 
 	git_commit *commit;
-	report(git_commit_lookup(&commit, repo, &oid));
+	REPORT(git_commit_lookup(&commit, repo, &oid));
 
 	const git_signature *author = git_commit_author(commit);
 	versionFile << "#define " << prefix << "_AUTHOR \"" << author->name << " " << author->email << "\"\n";
@@ -127,12 +159,12 @@ void print_commit_info(const char* const prefix, const git_oid oid, vector<git_o
 		message.resize(message.size() - 1);
 	}
 	myReplace(message, "\n", "\"\\\n\t\"");
-	versionFile << "#define " << prefix << "_DESCRIPTION \"" << message << "\"\n\n";
+	versionFile << "#define " << prefix << "_DESCRIPTION \"" << message.c_str() << "\"\n\n";
 }
 
 int each_file_cb(const git_diff_delta *delta,
 				 float /*progress*/,
-				 void */*payload*/)
+				 void* /*payload*/)
 {
 	versionFile << "\t\"" << delta->new_file.path << "\",\n";
 	return 0;
@@ -148,6 +180,7 @@ int main(int argc, char *argv[])
 
 	string dir = argv[1];
 	//string dir = "/home/vsapronenko/GitData/u7set/u7/u7.pro";
+	//string dir = "D:/GitData/u7set/ServiceControlManager/ServiceControlManager.pro";
 	if (!fileExists(dir))
 	{
 		cout << "Project file doesn't exists" << endl;
@@ -163,7 +196,7 @@ int main(int argc, char *argv[])
 	}
 	if (slashPos == string::npos)
 	{
-		cout << "Project file is not under git control";
+		cout << "Project file is not under git control\n";
 		return 1;
 	}
 
@@ -172,32 +205,30 @@ int main(int argc, char *argv[])
 	versionFile.open(versionFileName.c_str());
 	versionFile << "// Automatically generated file\n"
 				<< "// Parameters:\n"
-				<< "// \tProjectPath: " << projectDir << "\n"
-				<< "// \tProjectFileName: " << projectFileName << "\n"
+				<< "// \tProjectPath: " << projectDir.c_str() << "\n"
+				<< "// \tProjectFileName: " << projectFileName.c_str() << "\n"
 				<< "//\n\n"
 				<< "#ifndef GIT_VERSION_FILE\n"
 				<< "#define GIT_VERSION_FILE\n\n";
 
-	report(git_threads_init());
-	report(git_repository_open(&repo, dir.c_str()));
+#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 21
+	git_libgit2_init();
+#else
+	REPORT(git_threads_init());
+#endif
+	REPORT(git_repository_open(&repo, dir.c_str()));
 
 	git_oid master_oid = {0};
 	vector<git_oid> master_history;
-	if (report(git_reference_name_to_id(&master_oid, repo, "refs/remotes/origin/master")))
-	{
-		return -1;
-	}
+	REPORT_RETURN1(git_reference_name_to_id(&master_oid, repo, "refs/remotes/origin/master"));
 	print_commit_info("SERVER_COMMIT", master_oid, &master_history);
 
 	git_oid head_oid = {0};
 	vector<git_oid> head_history;
-	if (report(git_reference_name_to_id(&head_oid, repo, "HEAD")))
-	{
-		return -1;
-	}
+	REPORT_RETURN1(git_reference_name_to_id(&head_oid, repo, "HEAD"));
 	print_commit_info("LOCAL_COMMIT", head_oid, &head_history);
 
-	uint commit_index = 0;
+	unsigned int commit_index = 0;
 	for (; commit_index < min(master_history.size(), head_history.size()); commit_index++)
 	{
 		if (memcmp(master_history[commit_index].id,head_history[commit_index].id, GIT_OID_RAWSZ) != 0)
@@ -205,7 +236,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
-	print_commit_info("LAST_COMMON_COMMIT", master_oid);
+	print_commit_info("LAST_COMMON_COMMIT", master_history[commit_index - 1]);
 
 	versionFile << "const char* const ChangedFilesList[] =\n{\n";
 
@@ -218,9 +249,21 @@ int main(int argc, char *argv[])
 			git_diff *diff = NULL;
 			if (!report(git_diff_tree_to_workdir_with_index(&diff, repo, tree, NULL)))
 			{
-				report(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, nullptr));
+				REPORT(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, nullptr));
+			}
+			else
+			{
+				cout << "while running git_diff_tree_to_workdir_with_index";
 			}
 		}
+		else
+		{
+			cout << "while running git_tree_lookup";
+		}
+	}
+	else
+	{
+		cout << "while running git_revparse_single";
 	}
 
 	versionFile << "};\n\n"
@@ -230,13 +273,17 @@ int main(int argc, char *argv[])
 	{
 		git_repository_free(repo);
 	}
+#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 21
+	git_libgit2_shutdown();
+#else
 	git_threads_shutdown();
+#endif
 
 	versionFile << "#endif\t//GIT_VERSION_FILE\n";
 
 	versionFile.close();
 
-	cout << versionFileName << " was generated\n";
+	cout << versionFileName.c_str() << " was generated\n";
 
 	return 0;
 }
