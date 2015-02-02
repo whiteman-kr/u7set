@@ -1,6 +1,8 @@
 *.user
 *.autosave
 version.h
-Makefile
+Makefile*
 *.o
+*embed.manifest
 bin_unix
+GetGitProjectVersion.exe

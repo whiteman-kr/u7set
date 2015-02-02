@@ -15,20 +15,24 @@ TEMPLATE = app
 #
 versionTarget.target = version.h
 versionTarget.depends = FORCE
+
 win32 {
-versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-    nmake & \
-    chdir $$PWD & \
-    $$PWD/../GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro
+    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+        cp $$OUT_PWD/../GetGitProjectVersion.exe $$PWD/../ & \
+        nmake & \
+        chdir $$PWD & \
+        $$PWD/../GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro
 }
+
 unix {
-versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
-    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-    make; \
-    cd $$PWD; \
-    $$PWD/../bin_unix/GetGitProjectVersion $$PWD/ServiceControlManager.pro
+    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+        make; \
+        cd $$PWD; \
+        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/ServiceControlManager.pro
 }
+
 PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 

@@ -11,10 +11,10 @@ win32:LIBS += $$PWD/git2.lib
 # DESTDIR
 #
 win32 {
-        DESTDIR = $$PWD/../
+        DESTDIR = ../
 }
 unix {
-        DESTDIR = $$PWD/../bin_unix
+        DESTDIR = ../bin_unix
 }
 
 #c++11 support for GCC

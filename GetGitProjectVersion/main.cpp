@@ -102,7 +102,11 @@ void print_time(const char* const prefix, const git_time& intime)
 #elif _WIN32
 	struct tm intm;
     gmtime_s(&intm, &t);
+<<<<<<< HEAD
 	strftime(out, sizeof(out), "%a %b %e %T %Y", &intm);
+=======
+	strftime(out, sizeof(out), "%a %b %d %X %Y", &intm);
+>>>>>>> 0db801bf274ab98f6db4bd38c9528c0b844692eb
 #else
 #error Unknown operating system
 #endif
