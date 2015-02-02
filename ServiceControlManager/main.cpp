@@ -2,6 +2,7 @@
 #include <QtSingleApplication>
 #include <QTranslator>
 #include <QSettings>
+#include "version.h"
 
 #include "../include/SocketIO.h"
 
