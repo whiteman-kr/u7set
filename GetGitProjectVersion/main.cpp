@@ -102,11 +102,7 @@ void print_time(const char* const prefix, const git_time& intime)
 #elif _WIN32
 	struct tm intm;
     gmtime_s(&intm, &t);
-<<<<<<< HEAD
-	strftime(out, sizeof(out), "%a %b %e %T %Y", &intm);
-=======
 	strftime(out, sizeof(out), "%a %b %d %X %Y", &intm);
->>>>>>> 0db801bf274ab98f6db4bd38c9528c0b844692eb
 #else
 #error Unknown operating system
 #endif
@@ -162,7 +158,7 @@ void print_commit_info(const char* const prefix, const git_oid oid, vector<git_o
 	{
 		message.resize(message.size() - 1);
 	}
-	replaceAll(message, "\n", "\"\\\n\t\"");
+	replaceAll(message, "\n", "\\n\"\\\n\t\"");
 	versionFile << "#define " << prefix << "_DESCRIPTION \"" << message.c_str() << "\"\n\n";
 }
 
@@ -267,13 +263,27 @@ int main(int argc, char *argv[])
 	int fileCount = 0;
 	REPORT(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, &fileCount));
 
-	versionFile << "};\n\n"
-				<< "const uint CHANGED_FILES_COUNT = sizeof(ChangedFilesList) / sizeof(ChangedFilesList[0]);\n\n";
+	if (fileCount == 0)
+	{
+		versionFile << "\t\" \"\n"
+					<< "};\n\n"
+					<< "const uint CHANGED_FILES_COUNT = 0;\n\n";
+	}
+	else
+	{
+		versionFile << "};\n\n"
+					<< "const uint CHANGED_FILES_COUNT = sizeof(ChangedFilesList) / sizeof(ChangedFilesList[0]);\n\n";
+	}
 
 	if (fileCount > 0)
 	{
 		versionFile << "#define BUILD_STATE = \"Local build\"\n"
-					<< "#warning Local build is used, push changes in git repository and build release\n";
+					<< "#ifdef _MSC_VER\n"
+					<< " #pragma warning ()\n"
+					<< " #pragma message (\" --- Local build is used, push changes in git repository and build release --- \")\n"
+					<< "#else\n"
+					<< " #warning  --- Local build is used, push changes in git repository and build release --- \n"
+					<< "#endif\t//_MSC_VER\n";
 	}
 	else
 	{
