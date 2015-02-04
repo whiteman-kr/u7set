@@ -169,17 +169,17 @@ void DataSourcesStateModel::setActive(bool active)
 
 void DataSourcesStateModel::onGetStateTimer()
 {
-	if (!m_active || m_currentDataRequestType != RQID_GET_DATA_SOURCES_STATE || m_clientSocket->isWaitingForAck())
+	if (!m_active || m_currentDataRequestType != RQID_GET_DATA_SOURCES_STATISTICS || m_clientSocket->isWaitingForAck())
 	{
 		return;
 	}
 
-	sendDataRequest(RQID_GET_DATA_SOURCES_STATE);
+	sendDataRequest(RQID_GET_DATA_SOURCES_STATISTICS);
 }
 
 void DataSourcesStateModel::ackTimeout()
 {
-	if (m_currentDataRequestType != RQID_GET_DATA_SOURCES_STATE)
+	if (m_currentDataRequestType != RQID_GET_DATA_SOURCES_STATISTICS)
 	{
 		sendDataRequest(m_currentDataRequestType);
 	}
@@ -224,12 +224,12 @@ void DataSourcesStateModel::ackReceived(UdpRequest udpRequest)
 				m_dataSource[m_dataSource.keyIndex(dsi.ID)].setInfo(dsi);
 			}
 		}
-		sendDataRequest(RQID_GET_DATA_SOURCES_STATE);
+		sendDataRequest(RQID_GET_DATA_SOURCES_STATISTICS);
 		emit changedSourceInfo();
 		m_periodicTimer->start(500);
 		break;
 
-	case RQID_GET_DATA_SOURCES_STATE:
+	case RQID_GET_DATA_SOURCES_STATISTICS:
 		sourceCount = udpRequest.readDword();
 
 		assert((int)sourceCount == m_dataSource.count());
