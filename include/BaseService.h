@@ -5,13 +5,10 @@
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
+#include <QCoreApplication>
 #include "../qtservice/src/qtservice.h"
 #include "../include/UdpSocket.h"
 #include "../include/CircularLogger.h"
-
-
-
-
 
 
 class BaseServiceController;
@@ -126,12 +123,16 @@ private:
 	BaseServiceController* m_baseServiceController = nullptr;
 
 public:
-
-	MainFunctionWorker(BaseServiceController* baseServiceController);
+	MainFunctionWorker();
 	virtual ~MainFunctionWorker();
 
-	virtual void threadStarted() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::threadStarted"; }
-	virtual void threadFinished() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::threadFinished"; }
+	void setController(BaseServiceController* baseServiceController)
+	{
+		m_baseServiceController = baseServiceController;
+	}
+
+	virtual void initialize() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::initialize"; }
+	virtual void shutdown() { QThread::sleep(2); qDebug() << "Called MainFunctionWorker::shutdown"; }
 
 signals:
 	void mainFunctionWork();
@@ -164,7 +165,9 @@ private:
     QMutex m_mutex;
 
     QThread m_baseWorkerThread;
-    QThread m_mainFunctionThread;
+	QThread* m_mainFunctionThread = nullptr;
+
+	MainFunctionWorker* m_mainFunctionWorker = nullptr;
 
 	bool m_mainFunctionNeedRestart;
 
@@ -208,7 +211,7 @@ private slots:
 public:
 	CircularLogger log;
 
-    BaseServiceController(int serviceType);
+	BaseServiceController(int serviceType, MainFunctionWorker* mainFunctionWorker);
     virtual ~BaseServiceController();
 
 	void getServiceInfo(ServiceInformation& serviceInfo);
@@ -216,4 +219,29 @@ public:
 	virtual void initLog();
 };
 
+
+// BaseService class
+//
+
+class BaseService : public QtService<QCoreApplication>
+{
+private:
+	MainFunctionWorker* m_mainFunctionWorker = nullptr;
+	BaseServiceController* m_baseServiceController = nullptr;
+	int m_serviceType = 0;
+
+public:
+	BaseService(int argc, char ** argv, const QString & name, int serviceType, MainFunctionWorker *mainFunctionWorker);
+	virtual ~BaseService();
+
+	void sendFile(QHostAddress address, quint16 port, QString fileName);
+
+protected:
+	void start() override;
+	void stop() override;
+};
+
+
+// BaseService class implementation
+//
 

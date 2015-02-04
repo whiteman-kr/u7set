@@ -1,5 +1,7 @@
 
 #include "../include/ModuleConfiguration.h"
+#include <QMap>
+#include <QHash>
 
 namespace Hardware
 {
@@ -9,6 +11,10 @@ namespace Hardware
 	//						ModuleConfigurationValue
 	//
 	// ----------------------------------------------------------------------------
+	const int size_8 = 1;
+	const int size_16 = 2;
+	const int size_32 = 4;
+
 	ModuleConfigurationValue::ModuleConfigurationValue()
 	{
 	}
@@ -78,6 +84,61 @@ namespace Hardware
 		}
 
 		return;
+	}
+
+	int ModuleConfigurationValue::typeSize() const
+	{
+		if (type().startsWith("bool"))
+		{
+			if (m_bit == 0)
+					return 1;
+
+			if ((m_bit % 8) == 0)
+				return m_bit / 8;
+
+			return (m_bit / 8) + 1;
+		}
+
+		if (type().startsWith("quint8"))
+			return size_8;
+
+		if (type().startsWith("quint16"))
+			return size_16;
+
+		if (type().startsWith("quint32"))
+			return size_32;
+
+		if (type().startsWith("qint8"))
+			return size_8;
+
+		if (type().startsWith("qint16"))
+			return size_16;
+
+		if (type().startsWith("qint32"))
+			return size_32;
+
+		return -1;
+	}
+
+	int ModuleConfigurationValue::arraySize() const
+	{
+		int brOpen = type().indexOf('[');
+		int brClose = type().indexOf(']');
+
+		if (brOpen == -1)
+			return 1;   // открывающей скобки нет - значит, один операнд
+
+		if (brClose == -1)
+			return -1;  // закрывающей скобки нет - ошибка
+
+		QString val = type().mid(brOpen + 1, brClose - brOpen - 1);
+
+		bool ok = false;
+		int size = val.toInt(&ok);
+		if (ok == false)
+			return -1;
+
+		return size;
 	}
 
 	const QString& ModuleConfigurationValue::name() const
@@ -173,7 +234,6 @@ namespace Hardware
 
 	ModuleConfigurationStruct::ModuleConfigurationStruct(const QString& name, int size, bool be) :
 		m_name(name),
-		m_dataSize(0),
 		m_size(size),
 		m_be(be)
 	{
@@ -258,28 +318,6 @@ namespace Hardware
 	void ModuleConfigurationStruct::setSize(int size)
 	{
 		m_size = size;
-	}
-
-	int ModuleConfigurationStruct::dataSize() const
-	{
-		return m_dataSize;
-	}
-
-	void ModuleConfigurationStruct::setDataSize(int dataSize)
-	{
-		m_dataSize = dataSize;
-	}
-
-	int ModuleConfigurationStruct::actualSize() const
-	{
-		if (m_size == 0)
-		{
-			return m_dataSize;
-		}
-		else
-		{
-			return m_size;
-		}
 	}
 
 	const QVector<ModuleConfigurationValue>& ModuleConfigurationStruct::values() const
@@ -855,16 +893,314 @@ namespace Hardware
 
 		if (foundStruct == m_structures.end())
 		{
-			*errorString = (tr("Can't find structure %1").arg(type));
+			*errorString = (tr("Can't find the structure %1.").arg(type));
 			return false;
 		}
 
-		// int structSize =
-		// compileStruct(.....);
+		// count this and included structures' sizes, place them to the map
+		//
+		QMap<QString, int> structSizeMap;
+		countStructureSize(*foundStruct, structSizeMap);
+
+		int size = getStructureSize(*foundStruct, structSizeMap);
+		if (size > 0)
+		{
+			// compile only structures with non-zero size
+			//
+			qDebug()<<tr("compiling %1, actualsize = %2").arg(foundStruct->name()).arg(size);
+
+			chunk->data.resize(size);
+			chunk->data.fill(0);
+
+			if (compileStructure(*foundStruct, chunk, 0, structSizeMap, errorString) == false)
+			{
+				return false;
+			}
+
+			QString s;
+			for(int i = 0; i < chunk->data.size(); i++)
+			{
+				s = s + QString::number((quint8)(chunk->data[i]), 16) + " ";
+			}
+			qDebug()<<s;
+		}
 
 		return true;
 	}
 
+	//----------------------------------------------------------------------------------------------------------
+	//
+	bool ModuleConfiguration::compileStructure(const ModuleConfigurationStruct& compileStruct, McDataChunk* chunk, int baseAddress, QMap<QString, int>& structSizeMap, QString* errorString) const
+	{
+		if (chunk == nullptr || errorString == nullptr)
+		{
+			assert(chunk != nullptr);
+			assert(errorString != nullptr);
+			return false;
+		}
+
+		auto dataSize = structSizeMap.find(compileStruct.name());
+		if (dataSize == structSizeMap.end())
+		{
+			assert(false);
+			*errorString = tr("Structure %1 dataSize is undefined! Compilation stopped.").arg(compileStruct.name());
+			return false;
+		}
+
+		if (compileStruct.size() != 0 && *dataSize > compileStruct.size())
+		{
+			*errorString = tr("Structure %1 size is not enough to place all data! Compilation stopped.").arg(compileStruct.name());
+			return false;
+		}
+
+		int lastAddress = baseAddress;
+
+		for (int m = 0; m < compileStruct.values().size(); m++)
+		{
+			const ModuleConfigurationValue& val = compileStruct.values()[m];
+
+			QString type = val.type();
+
+			auto foundStruct = std::find_if(m_structures.begin(), m_structures.end(),
+					  [&type](const ModuleConfigurationStruct& s)
+				{
+					return s.name() == type;
+				});
+
+			// if value is not a structure, check if it is "macro" value, and decode it
+			//
+			if (foundStruct == m_structures.end())
+			{
+				QStringList valuesList;
+
+				if (val.value().startsWith("$(") && val.value().endsWith(")"))
+				{
+					QString macroValue = val.value();
+					macroValue.remove(0, 2);
+					macroValue.remove(macroValue.length() - 1, 1);
+					macroValue = tr("Configuration\\") + macroValue;
+
+					//
+					auto userValue = m_userProperties.find(macroValue);
+					if (userValue == m_userProperties.end())
+					{
+						*errorString = tr("Structure %1, value %2 - user property %3 was not found!.").arg(compileStruct.name()).arg(val.name()).arg(macroValue);
+						return false;
+					}
+
+					valuesList = userValue->value().split(QRegExp("\\s+"));
+				}
+				else
+				{
+					// this is a simple value, not a structure
+					//
+					valuesList = val.value().split(QRegExp("\\s+"));
+				}
+
+				if (val.typeSize() == -1 || val.arraySize() == -1 || val.offset() == -1)
+				{
+					*errorString = tr("Structure %1, value %2 - typeSize, arraySize or offset can't be -1.").arg(compileStruct.name()).arg(val.name());
+					return false;
+				}
+
+				if (valuesList.count() != val.arraySize())
+				{
+					*errorString = tr("Structure %1, value %2 - array size (%3) does not match values count (%4).").arg(compileStruct.name()).arg(val.name()).arg(val.arraySize()).arg(valuesList.count());
+					return false;
+				}
+
+				QList<int> values;  // значения, переведенные из строки в число
+
+				bool ok = false;
+
+				for (int v = 0; v < val.arraySize(); v++)
+				{
+					if (valuesList[v] == "true")
+					{
+						values.append(1);
+					}
+					else
+					{
+						if (valuesList[v] == "false")
+						{
+							values.append(0);
+						}
+						else
+						{
+							values.append(valuesList[v].toInt(&ok, valuesList[v].startsWith("0x") ? 16 : 10));
+							if (ok == false)
+							{
+								*errorString = tr("Structure %1, value (%2) has incorrect format.").arg(compileStruct.name()).arg(val.arraySize()).arg(valuesList[v]);
+								return false;
+							}
+						}
+					}
+				}
+
+				int address = baseAddress + val.offset();
+
+				for (int v = 0; v < val.arraySize(); v++)
+				{
+					if (val.type() == "bool")
+					{
+						if (values[v] != 0)
+						{
+							int ofs = val.bit() / 8;
+							int bit = val.bit() % 8;
+
+							if (compileStruct.be())
+							{
+								ofs = val.boolSize() - ofs - 1;
+							}
+
+							if (ofs < 0 || ofs >= val.boolSize())
+							{
+								*errorString = tr("Structure %1, bool value %2: wrong size (%3) and bit (%4).").arg(compileStruct.name()).arg(val.name().arg(val.boolSize()).arg(val.bit()));
+								return false;
+							}
+
+							assert(chunk->data.size() < address + ofs);
+							chunk->data[address + ofs] = chunk->data[address + ofs] | (1 << bit);
+						}
+					}
+					else
+					{
+						if (address + v * val.typeSize() + val.typeSize() - 1 >= chunk->data.size())
+						{
+							assert(address + v * val.typeSize() + val.typeSize() - 1 < chunk->data.size());
+							*errorString = tr("Structure %1, value %2: address (%3) is out of range.").arg(compileStruct.name()).arg(val.name().arg(val.boolSize()).arg(address + v * 2 + 1));
+							return false;
+						}
+
+						switch (val.typeSize())
+						{
+						case size_8:
+							chunk->data[address + v] = values[v];
+							break;
+						case size_16:
+							if (compileStruct.be())
+							{
+								chunk->data[address + v * 2 + 1] = values[v] & 0xff;
+								chunk->data[address + v * 2] = (values[v] >> 8) & 0xff;
+							}
+							else
+							{
+
+								chunk->data[address + v * 2] = values[v] & 0xff;
+								chunk->data[address + v * 2 + 1] = (values[v] >> 8) & 0xff;
+							}
+							break;
+						case size_32:
+							if (compileStruct.be())
+							{
+								chunk->data[address + v * 4 + 3] = values[v] & 0xff;
+								chunk->data[address + v * 4 + 2] = (values[v] >> 8) & 0xff;
+								chunk->data[address + v * 4 + 1] = (values[v] >> 16) & 0xff;
+								chunk->data[address + v * 4] = (values[v] >> 24) & 0xff;
+							}
+							else
+							{
+								chunk->data[address + v * 4] = values[v] & 0xff;
+								chunk->data[address + v * 4 + 1] = (values[v] >> 8) & 0xff;
+								chunk->data[address + v * 4 + 2] = (values[v] >> 16) & 0xff;
+								chunk->data[address + v * 4 + 3] = (values[v] >> 24) & 0xff;
+							}
+							break;
+						default:
+							Q_ASSERT(0);
+						}
+					}
+				}
+
+				lastAddress = address + val.typeSize() * val.arraySize();
+			}
+			else
+			{
+				// this is a structure
+				//
+				if (compileStructure(*foundStruct, chunk, lastAddress, structSizeMap, errorString) == false)
+				{
+					return false;
+				}
+
+				lastAddress += getStructureSize(*foundStruct, structSizeMap);
+			}
+		}
+		return true;
+	}
+
+	bool ModuleConfiguration::countStructureSize(const ModuleConfigurationStruct& compileStruct, QMap<QString, int>& structSizeMap) const
+	{
+		// calculate structure's size recursively and place the result to the map
+		//
+		int size = 0;
+
+		for (int m = 0; m < compileStruct.values().size(); m++)
+		{
+			const ModuleConfigurationValue& val = compileStruct.values()[m];
+
+			QString type = val.type();
+
+			auto foundStruct = std::find_if(m_structures.begin(), m_structures.end(),
+					  [&type](const ModuleConfigurationStruct& s)
+				{
+					return s.name() == type;
+				});
+
+			if (foundStruct == m_structures.end())
+			{
+				// simple value
+				//
+				int typeSize = val.typeSize();
+				int arraySize = val.arraySize();
+				if (typeSize == -1 || arraySize == -1 || val.offset() == -1)
+				{
+					return false;
+				}
+				else
+				{
+					int valMaxAddress = val.offset() + typeSize * arraySize;
+					if (size < valMaxAddress)
+					{
+						size = valMaxAddress;
+					}
+				}
+			}
+			else
+			{
+				// included structure
+				//
+				if (countStructureSize(*foundStruct, structSizeMap) == false)
+				{
+					return false;
+				}
+
+				size += getStructureSize(*foundStruct, structSizeMap);
+			}
+		}
+
+		structSizeMap.insert(compileStruct.name(), size);
+
+		return true;
+	}
+
+	int ModuleConfiguration::getStructureSize(const ModuleConfigurationStruct& compileStruct, QMap<QString, int>& structSizeMap) const
+	{
+		// if the "size" parameter is present, return it. Otherwise, return the calculated size
+		//
+		if (compileStruct.size() != -1)
+		{
+			return compileStruct.size();
+		}
+
+		auto structSize = structSizeMap.find(compileStruct.name());
+		if (structSize != structSizeMap.end())
+		{
+			return *structSize;
+		}
+
+		return -1;
+	}
 
 	bool ModuleConfiguration::hasConfiguration() const
 	{

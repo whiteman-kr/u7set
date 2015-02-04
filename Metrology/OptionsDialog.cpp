@@ -254,7 +254,7 @@ PropertyPage* OptionsDialog::createPage(int page)
         case OPTION_PAGE_SETTING_MEASURE:
         case OPTION_PAGE_MEASURE_VIEW_TEXT:
         case OPTION_PAGE_SIGNAL_INFO:
-        case OPTION_PAGE_REPORT_HEADER:
+        case OPTION_PAGE_REPORT:
         case OPTION_PAGE_DATABASE:
         case OPTION_PAGE_BACKUP:                pPropertyPage = createPropertyList(page);     break;
         case OPTION_PAGE_LINEARETY_POINT:
@@ -504,12 +504,150 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
         case OPTION_PAGE_SIGNAL_INFO:
             break;
-        case OPTION_PAGE_REPORT_HEADER:
+
+        case OPTION_PAGE_REPORT:
+            {
+                QtProperty *locationGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reports"));
+
+                    item = manager->addProperty(VariantManager::folerPathTypeId(), ReportParam[RO_PARAM_PATH]);
+                    item->setValue( m_options.report().m_path );
+                    appendProperty(item, page, RO_PARAM_PATH);
+                    locationGroup->addSubProperty(item);
+
+                QtProperty *reportGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Report type for settings"));
+
+                    item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), ReportParam[RO_PARAM_TYPE]);
+                    QStringList valueTypeList;
+                    for(int t = 0; t < REPORT_TYPE_COUNT; t++)
+                    {
+                        valueTypeList.append(ReportType[t]);
+                    }
+                    item->setAttribute(QLatin1String("enumNames"), valueTypeList);
+                    item->setValue(m_options.report().m_type);
+                    appendProperty(item, page, DBO_PARAM_TYPE);
+                    reportGroup->addSubProperty(item);
+
+                QtProperty *headerGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Header"));
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_DOCUMENT_TITLE]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_DOCUMENT_TITLE);
+                    headerGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_REPORT_TITLE]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_REPORT_TITLE);
+                    headerGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_DATE]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_DATE);
+                    headerGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_TABLE_TITLE]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_TABLE_TITLE);
+                    headerGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_CONCLUSION]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_CONCLUSION);
+                    headerGroup->addSubProperty(item);
+
+                QtProperty *conditionGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Conditions of measuring"));
+
+                    item = manager->addProperty(QVariant::Double, ReportParam[RO_PARAM_T]);
+                    item->setValue(0);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    item->setAttribute(QLatin1String("decimals"), 1);
+                    appendProperty(item, page, RO_PARAM_T);
+                    conditionGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Double, ReportParam[RO_PARAM_P]);
+                    item->setValue(0);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    item->setAttribute(QLatin1String("decimals"), 1);
+                    appendProperty(item, page, RO_PARAM_P);
+                    conditionGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Double, ReportParam[RO_PARAM_H]);
+                    item->setValue(0);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    item->setAttribute(QLatin1String("decimals"), 1);
+                    appendProperty(item, page, RO_PARAM_H);
+                    conditionGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Double, ReportParam[RO_PARAM_V]);
+                    item->setValue(0);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    item->setAttribute(QLatin1String("decimals"), 1);
+                    appendProperty(item, page, RO_PARAM_V);
+                    conditionGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Double, ReportParam[RO_PARAM_F]);
+                    item->setValue(0);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    item->setAttribute(QLatin1String("decimals"), 1);
+                    appendProperty(item, page, RO_PARAM_F);
+                    conditionGroup->addSubProperty(item);
+
+                QtProperty *calibratorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Calibrators"));
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_CALIBRATOR_0]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_CALIBRATOR_0);
+                    calibratorGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_CALIBRATOR_1]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_CALIBRATOR_1);
+                    calibratorGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_CALIBRATOR_2]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_CALIBRATOR_2);
+                    calibratorGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_CALIBRATOR_3]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_CALIBRATOR_3);
+                    calibratorGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_CALIBRATOR_4]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_CALIBRATOR_4);
+                    calibratorGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_CALIBRATOR_5]);
+                    item->setValue(QString());
+                    appendProperty(item, page, RO_PARAM_CALIBRATOR_5);
+                    calibratorGroup->addSubProperty(item);
+
+                QtProperty *fileGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("File of report"));
+
+                    item = manager->addProperty(QVariant::String, ReportParam[RO_PARAM_REPORT_FILE]);
+                    item->setValue(QString());
+                    item->setAttribute(QLatin1String("readOnly"), true);
+                    appendProperty(item, page, RO_PARAM_REPORT_FILE);
+                    fileGroup->addSubProperty(item);
+
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(locationGroup);
+                editor->addProperty(reportGroup);
+                editor->addProperty(headerGroup);
+                editor->addProperty(conditionGroup);
+                editor->addProperty(calibratorGroup);
+                editor->addProperty(fileGroup);
+
+                updateReportHeaderPage();
+            }
             break;
 
         case OPTION_PAGE_DATABASE:
             {
-                QtProperty *databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Database"));
+                QtProperty *databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of Database"));
 
                     item = manager->addProperty(VariantManager::folerPathTypeId(), DatabaseParam[DBO_PARAM_PATH]);
                     item->setValue( m_options.database().m_path );
@@ -547,7 +685,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                     appendProperty(item, page, BUO_PARAM_ON_EXIT);
                     eventGroup->addSubProperty(item);
 
-                QtProperty *pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Path"));
+                QtProperty *pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reserve copy"));
 
                     item = manager->addProperty(VariantManager::folerPathTypeId(), BackupParam[BUO_PARAM_PATH]);
                     item->setValue( m_options.backup().m_path );
@@ -903,8 +1041,41 @@ void OptionsDialog::applyProperty()
 
             break;
 
-        case OPTION_PAGE_REPORT_HEADER:
+        case OPTION_PAGE_REPORT:
+            {
+                int type = m_options.report().m_type;
+                if (type < 0 || type >= m_options.report().m_headerBase.count())
+                {
+                    break;
+                }
 
+                REPORT_HEADER& header = m_options.report().m_headerBase[type];
+
+                switch(param)
+                {
+                    case RO_PARAM_PATH:                 m_options.report().m_path = value.toString();           break;
+                    case RO_PARAM_TYPE:                 m_options.report().m_type = value.toInt();
+                                                        updateReportHeaderPage();                               break;
+                    case RO_PARAM_DOCUMENT_TITLE:       header.m_documentTitle = value.toString();              break;
+                    case RO_PARAM_REPORT_TITLE:         header.m_reportTitle = value.toString();                break;
+                    case RO_PARAM_DATE:                 header.m_date = value.toString();                       break;
+                    case RO_PARAM_TABLE_TITLE:          header.m_tableTitle = value.toString();                 break;
+                    case RO_PARAM_CONCLUSION:           header.m_conclusion = value.toString();                 break;
+                    case RO_PARAM_T:                    header.m_T = value.toDouble();                          break;
+                    case RO_PARAM_P:                    header.m_P = value.toDouble();                          break;
+                    case RO_PARAM_H:                    header.m_H = value.toDouble();                          break;
+                    case RO_PARAM_V:                    header.m_V = value.toDouble();                          break;
+                    case RO_PARAM_F:                    header.m_F = value.toDouble();                          break;
+                    case RO_PARAM_CALIBRATOR_0:         header.m_calibrator[CALIBRATOR_0] = value.toString();   break;
+                    case RO_PARAM_CALIBRATOR_1:         header.m_calibrator[CALIBRATOR_1] = value.toString();   break;
+                    case RO_PARAM_CALIBRATOR_2:         header.m_calibrator[CALIBRATOR_2] = value.toString();   break;
+                    case RO_PARAM_CALIBRATOR_3:         header.m_calibrator[CALIBRATOR_3] = value.toString();   break;
+                    case RO_PARAM_CALIBRATOR_4:         header.m_calibrator[CALIBRATOR_4] = value.toString();   break;
+                    case RO_PARAM_CALIBRATOR_5:         header.m_calibrator[CALIBRATOR_5] = value.toString();   break;
+                    case RO_PARAM_REPORT_FILE:          break;
+                    default:                            assert(0);                                              break;
+                }
+            }
             break;
 
         case OPTION_PAGE_DATABASE:
@@ -1055,6 +1226,123 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
         // set options to dialog
         //
         dialog->m_header = m_options.measureView();
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::updateReportHeaderPage()
+{
+    REPORT_HEADER header;
+
+    int type = m_options.report().m_type;
+    if (type >= 0 && type < m_options.report().m_headerBase.count())
+    {
+        header = m_options.report().m_headerBase[type];
+    }
+
+    QtVariantProperty *property = nullptr;
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_DOCUMENT_TITLE );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_documentTitle );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_REPORT_TITLE );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_reportTitle );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_DATE );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_date );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_TABLE_TITLE );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_tableTitle );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CONCLUSION );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_conclusion );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_T );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_T );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_P );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_P );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_H );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_H );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_V );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_V );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_F );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_F );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_0 );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_calibrator[CALIBRATOR_0] );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_1 );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_calibrator[CALIBRATOR_1] );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_2 );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_calibrator[CALIBRATOR_2] );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_3 );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_calibrator[CALIBRATOR_3] );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_4 );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_calibrator[CALIBRATOR_4] );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_5 );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_calibrator[CALIBRATOR_5] );
+    }
+
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_REPORT_FILE );
+    if (property != nullptr)
+    {
+        property->setValue( header.m_reportFile );
     }
 }
 

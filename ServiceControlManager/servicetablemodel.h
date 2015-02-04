@@ -61,7 +61,7 @@ private:
 	QVector<HostInfo> m_hostsInfo;
 	bool m_freezeUpdate;
 
-	void setServiceState(quint32 ip, quint16 port, int state);
+	void setServiceState(quint32 ip, quint16 port, uint state);
 	QPair<int,int> getServiceState(quint32 ip, quint16 port);
 	void checkForDeletingSocket(UdpClientSocket* socket);
 };

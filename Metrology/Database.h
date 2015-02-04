@@ -37,10 +37,9 @@ const char* const		SqlTabletName[] =
                         QT_TRANSLATE_NOOP("Database.h", "History"),
 
                         QT_TRANSLATE_NOOP("Database.h", "LinearetyMeasure"),
+                        QT_TRANSLATE_NOOP("Database.h", "LinearetyMeasureAddVal"),
                         QT_TRANSLATE_NOOP("Database.h", "LinearetyMeasure20El"),
                         QT_TRANSLATE_NOOP("Database.h", "LinearetyMeasure20Ph"),
-                        QT_TRANSLATE_NOOP("Database.h", "LinearetyMeasure20Out"),
-                        QT_TRANSLATE_NOOP("Database.h", "LinearetyMeasureAddErr"),
                         QT_TRANSLATE_NOOP("Database.h", "LinearetyPoint"),
 
                         QT_TRANSLATE_NOOP("Database.h", "ComparatorMeasure"),
@@ -62,19 +61,18 @@ const int               SQL_TABLE_UNKNONW                       = -1,
                         SQL_TABLE_DATABASE_INFO                 = 0,
                         SQL_TABLE_HISTORY                       = 1,
                         SQL_TABLE_LINEARETY                     = 2,
-                        SQL_TABLE_LINEARETY_20_EL               = 3,
-                        SQL_TABLE_LINEARETY_20_PH               = 4,
-                        SQL_TABLE_LINEARETY_20_OUT              = 5,
-                        SQL_TABLE_LINEARETY_ADD_VAL             = 6,
-                        SQL_TABLE_LINEARETY_POINT               = 7,
-                        SQL_TABLE_COMPARATOR                    = 8,
-                        SQL_TABLE_COMPARATOR_HYSTERESIS         = 9,
-                        SQL_TABLE_COMPLEX_COMPARATOR            = 10,
-                        SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS = 11,
-                        SQL_TABLE_COMPLEX_COMPARATOR_POINT      = 12,
-                        SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL     = 13,
-                        SQL_TABLE_OUTPUT_SIGNAL                 = 14,
-                        SQL_TABLE_REPORT_HEADER                 = 15;
+                        SQL_TABLE_LINEARETY_ADD_VAL             = 3,
+                        SQL_TABLE_LINEARETY_20_EL               = 4,
+                        SQL_TABLE_LINEARETY_20_PH               = 5,
+                        SQL_TABLE_LINEARETY_POINT               = 6,
+                        SQL_TABLE_COMPARATOR                    = 7,
+                        SQL_TABLE_COMPARATOR_HYSTERESIS         = 8,
+                        SQL_TABLE_COMPLEX_COMPARATOR            = 9,
+                        SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS = 10,
+                        SQL_TABLE_COMPLEX_COMPARATOR_POINT      = 11,
+                        SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL     = 12,
+                        SQL_TABLE_OUTPUT_SIGNAL                 = 13,
+                        SQL_TABLE_REPORT_HEADER                 = 14;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -97,10 +95,9 @@ const int				SqlTableVersion[SQL_TABLE_COUNT] =
                         0,                  //    SQL_TABLE_HISTORY
 
                         0,                  //    SQL_TABLE_LINEARETY
+                        0,                  //    SQL_TABLE_LINEARETY_ADD_VAL
                         0,                  //    SQL_TABLE_LINEARETY_20_EL
                         0,                  //    SQL_TABLE_LINEARETY_20_PH
-                        0,                  //    SQL_TABLE_LINEARETY_20_OUT
-                        0,                  //    SQL_TABLE_LINEARETY_ADD_VAL
                         0,                  //    SQL_TABLE_LINEARETY_POINT
 
                         0,                  //    SQL_TABLE_COMPARATOR
@@ -131,10 +128,9 @@ const int               SqlObjectID[SQL_TABLE_COUNT] =
                         1,          //    SQL_TABLE_HISTORY
 
                         100,        //    SQL_TABLE_LINEARETY
-                        101,        //    SQL_TABLE_LINEARETY_20_EL
-                        102,        //    SQL_TABLE_LINEARETY_20_PH
-                        103,        //    SQL_TABLE_LINEARETY_20_OUT
-                        104,        //    SQL_TABLE_LINEARETY_ADD_VAL
+                        101,        //    SQL_TABLE_LINEARETY_ADD_VAL
+                        102,        //    SQL_TABLE_LINEARETY_20_EL
+                        103,        //    SQL_TABLE_LINEARETY_20_PH
                         110,        //    SQL_TABLE_LINEARETY_POINT
 
                         200,        //    SQL_TABLE_COMPARATOR
@@ -164,10 +160,9 @@ const int               SqlTableByMeasureType[SQL_TABLE_COUNT] =
                         MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_HISTORY                             // SQL_TABLE_CONFIG
 
                         MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY                           // SQL_TABLE_MEASURE_MAIN
+                        MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_ADD_VAL                   // SQL_TABLE_MEASURE_SUB
                         MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_20_EL                     // SQL_TABLE_MEASURE_SUB
                         MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_20_PH                     // SQL_TABLE_MEASURE_SUB
-                        MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_20_OUT                    // SQL_TABLE_MEASURE_SUB
-                        MEASURE_TYPE_LINEARITY,             //    SQL_TABLE_LINEARETY_ADD_VAL                   // SQL_TABLE_MEASURE_SUB
                         MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_LINEARETY_POINT                     // SQL_TABLE_CONFIG
 
                         MEASURE_TYPE_COMPARATOR,            //    SQL_TABLE_COMPARATOR                          // SQL_TABLE_MEASURE_MAIN

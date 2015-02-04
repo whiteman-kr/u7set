@@ -43,7 +43,7 @@ const int                       OPTION_PAGE_UNKNOWN				= -1,
                                 OPTION_PAGE_MEASURE_VIEW_TEXT	= 4,
                                 OPTION_PAGE_MEASURE_VIEW_COLUMN	= 5,
                                 OPTION_PAGE_SIGNAL_INFO			= 6,
-                                OPTION_PAGE_REPORT_HEADER		= 7,
+                                OPTION_PAGE_REPORT             = 7,
                                 OPTION_PAGE_DATABASE			= 8,
                                 OPTION_PAGE_BACKUP				= 9;
 
@@ -56,9 +56,9 @@ const char* const               OptionPageShort[OPTION_PAGE_COUNT] =
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Columns"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Reports"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Copy measurements"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
 };
 
 // ==============================================================================================
@@ -214,6 +214,7 @@ private slots:
 
     void                        updateLinearityPage(bool isDialog);
     void                        updateMeasureViewPage(bool isDialog);
+    void                        updateReportHeaderPage();
 
     void                        onOk();
     void                        onApply();

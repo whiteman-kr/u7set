@@ -7,6 +7,7 @@
 #include <QPushButton>
 
 #include "MeasureView.h"
+#include "ReportView.h"
 
 // ==============================================================================================
 
@@ -20,14 +21,14 @@ class ExportMeasure : public QObject
 
 public:
 
-    explicit        ExportMeasure(MeasureView* pView = 0);
+    explicit        ExportMeasure(MeasureView* pMeasureView = nullptr);
                     ~ExportMeasure();
 
     void            exec();
 
 private:
 
-    MeasureView*    m_pView = nullptr;
+    MeasureView*    m_pMeasureView = nullptr;
 
     QDialog*        m_pDialog = nullptr;
     QProgressBar*   m_progress = nullptr;
@@ -48,7 +49,7 @@ signals:
 public slots:
 
     void            exportCancel() { m_exportCancel = true; }
-    void            exportThreadFinished() { QMessageBox::information(m_pDialog, EXPORT_WINDOW_TITLE, tr("Export is complited!")); }
+    void            exportComplited() { QMessageBox::information(m_pDialog, EXPORT_WINDOW_TITLE, tr("Export is complited!")); }
 };
 
 // ==============================================================================================

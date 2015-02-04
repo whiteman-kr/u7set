@@ -410,7 +410,7 @@ void OptionsPointsDialog::onRemovePoint()
         return;
     }
 
-    m_linearity.m_pointBase.removeAt(index);
+    m_linearity.m_pointBase.remove(index);
 
     updateList();
 

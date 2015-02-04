@@ -1,7 +1,8 @@
 #include "CalibratorBase.h"
 
-
+#include <QApplication>
 #include <QMessageBox>
+#include <QClipboard>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -147,13 +148,16 @@ void CalibratorBase::createDialog()
         m_pSettingsAction = m_pCalibratorMenu->addAction(tr("&Settings ..."));
         m_pSettingsAction->setIcon(QIcon(":/icons/Settings.png"));
         m_pSettingsAction->setShortcut(Qt::CTRL + Qt::Key_S);
-
+        m_pCopyAction = new QAction(tr("&Copy"), m_pDialog);
+        m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+        m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
         m_pMenuBar->addMenu(m_pCalibratorMenu);
 
         connect(m_pInitAction, &QAction::triggered, this, &CalibratorBase::onInitialization);
         connect(m_pManageAction, &QAction::triggered, this, &CalibratorBase::onManage);
         connect(m_pSettingsAction, &QAction::triggered, this, static_cast<void (CalibratorBase::*)()>(&CalibratorBase::onSettings));
+        connect(m_pCopyAction, &QAction::triggered, this, &CalibratorBase::onCopy);
 
         QVBoxLayout *mainLayout = new QVBoxLayout;
         mainLayout->setMenuBar(m_pMenuBar);
@@ -214,7 +218,8 @@ void CalibratorBase::setHeaderList()
         }
     }
 
-    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, static_cast<void (CalibratorBase::*)(int, int)>(&CalibratorBase::onSettings));
+    //connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, static_cast<void (CalibratorBase::*)(int, int)>(&CalibratorBase::onSettings));
+    connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::onManage);
 
     // init context menu
     //
@@ -501,11 +506,59 @@ void CalibratorBase::onSettings(int row,int)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void CalibratorBase::onCopy()
+{
+    int index = m_pCalibratorView->currentRow();
+    if (index < 0 || index >= count())
+    {
+        QMessageBox::information(m_pDialog, m_pDialog->windowTitle(), tr("Please, select calibrator!"));
+        return;
+    }
+
+    CalibratorManager* manager = m_calibratorManagerList.at(index);
+    if (manager == nullptr)
+    {
+        return;
+    }
+
+    Calibrator* calibrator = manager->calibrator();
+    if (calibrator == nullptr)
+    {
+        return;
+    }
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(calibrator->typeString() + " " + calibrator->serialNo());
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void CalibratorBase::onContextMenu(QPoint)
 {
     QMenu *menu = new QMenu(m_pCalibratorView);
+
     menu->addAction(m_pManageAction);
     menu->addAction(m_pSettingsAction);
+
+    int index = m_pCalibratorView->currentRow();
+    if (index >= 0 && index < count())
+    {
+        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        if (manager != nullptr)
+        {
+            Calibrator* calibrator = manager->calibrator();
+            if (calibrator != nullptr)
+            {
+                if (calibrator->isConnected() == true)
+                {
+                    menu->addSeparator();
+                    menu->addAction(m_pCopyAction);
+                }
+            }
+        }
+    }
+
     menu->exec(QCursor::pos());
 }
 
@@ -542,8 +595,6 @@ bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
 
     if (event->type() == QEvent::KeyPress)
     {
-        object;
-
         QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
 
         if (keyEvent->key() == Qt::Key_Return)

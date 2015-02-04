@@ -13,10 +13,11 @@
 #include <QComboBox>
 #include <QCloseEvent>
 
-#include "Database.h"
-#include "CalibratorBase.h"
-#include "ExportMeasure.h"
 #include "OptionsDialog.h"
+#include "CalibratorBase.h"
+#include "Database.h"
+#include "ReportView.h"
+#include "ExportMeasure.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -833,7 +834,6 @@ void MainWindow::startMeasure()
         return;
     }
 
-
     m_measureThread.setMeasureType(m_measureType);
     m_measureThread.start();
 }
@@ -852,6 +852,25 @@ void MainWindow::stopMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::printMeasure()
+{
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    MeasureView* pMeasureView = m_measureView[m_measureType];
+    if (pMeasureView == nullptr)
+    {
+        return;
+    }
+
+    ReportView report;
+    report.preview(pMeasureView);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::exportMeasure()
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
@@ -859,13 +878,13 @@ void MainWindow::exportMeasure()
         return;
     }
 
-    MeasureView* pView = m_measureView[m_measureType];
-    if (pView == nullptr)
+    MeasureView* pMeasureView = m_measureView[m_measureType];
+    if (pMeasureView == nullptr)
     {
         return;
     }
 
-    ExportMeasure* dialog = new ExportMeasure(pView);
+    ExportMeasure* dialog = new ExportMeasure(pMeasureView);
     dialog->exec();
 }
 
@@ -939,7 +958,7 @@ void MainWindow::options()
 
     for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
     {
-        if (theOptions.m_updateColumnView[type] = false)
+        if (theOptions.m_updateColumnView[type] == false)
         {
             continue;
         }

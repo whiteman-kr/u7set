@@ -17,9 +17,9 @@
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
+	m_trayIcon(new QSystemTrayIcon(this)),
 	m_serviceModel(new ServiceTableModel(this)),
-	m_serviceTable(new QTableView(this)),
-	m_trayIcon(new QSystemTrayIcon(this))
+	m_serviceTable(new QTableView(this))
 {
 	qRegisterMetaType<ServiceInformation>("ServiceInformation");
 

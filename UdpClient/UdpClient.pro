@@ -20,14 +20,18 @@ SOURCES += \
         ../lib/UdpSocket.cpp \
     ../lib/BaseService.cpp \
     ../lib/SocketIO.cpp \
-    ../lib/CircularLogger.cpp
+    ../lib/CircularLogger.cpp \
+    ../lib/DataSource.cpp
 
 
 HEADERS  += mainwindow.h \
         ../include/SocketIO.h \
         ../include/UdpSocket.h \
     ../include/BaseService.h \
-    ../include/CircularLogger.h
+    ../include/CircularLogger.h \
+    ../include/DataSource.h
+
+include(../qtservice/src/qtservice.pri)
 
 FORMS    += mainwindow.ui
 

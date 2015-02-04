@@ -31,6 +31,8 @@ HEADERS  += \
     servermainwindow.h \
     ../include/CircularLogger.h
 
+include(../qtservice/src/qtservice.pri)
+
 FORMS    += \
     servermainwindow.ui
 

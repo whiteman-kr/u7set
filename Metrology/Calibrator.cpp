@@ -173,7 +173,7 @@ bool Calibrator::openPort()
 
     m_port.setPortName(m_portName);
 
-    m_port.setBaudRate( QSerialPort::Baud9600 );
+    m_port.setBaudRate( CalibratorBaudRate[m_type] );
 
     m_port.setDataBits(QSerialPort::Data8);
     m_port.setParity(QSerialPort::NoParity);
@@ -264,6 +264,14 @@ bool Calibrator::recv()
         return false;
     }
 
+    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+    {
+        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+        qDebug(m_lastError.toLocal8Bit());
+        emit error( m_lastError);
+        return false;
+    }
+
     m_lastResponse = "";
 
     QByteArray requestData;
@@ -284,7 +292,7 @@ bool Calibrator::recv()
 
         if (requestData.isEmpty() == false)
         {
-            if (requestData[requestData.count() - 1] == '\r')
+            if (memcmp(requestData.data() + requestData.count() - CALIBRATOR_TERMINATOR_LEN, CalibratorTerminator[m_type], CALIBRATOR_TERMINATOR_LEN) == 0)
             {
                 break;
             }
@@ -307,9 +315,10 @@ bool Calibrator::recv()
     }
 
     m_lastResponse = requestData;
-    m_lastResponse.remove("\n\r");
+    m_lastResponse.remove(CalibratorTerminator[m_type]);
 
-    qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", response: " + m_lastResponse.toLocal8Bit(), __FUNCTION__);
+    //qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", response: " + m_lastResponse.toLocal8Bit() + ", Timeout: %d", __FUNCTION__, m_timeout);
+    qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", Timeout: %d", __FUNCTION__, m_timeout);
 
     emit responseIsReceived(m_lastResponse);
 

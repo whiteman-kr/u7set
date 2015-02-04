@@ -2,6 +2,9 @@
 #include <QtSingleApplication>
 #include <QTranslator>
 #include <QSettings>
+#include "version.h"
+
+#include "../include/SocketIO.h"
 
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)

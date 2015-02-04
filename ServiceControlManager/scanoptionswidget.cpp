@@ -181,7 +181,7 @@ void SubnetChecker::checkNextHost()
 	{
 		readAck();
 	}
-	for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+	for (uint i = 0; i < SERVICE_TYPE_COUNT; i++)
 	{
 		QHostAddress ip(m_ip);
 		qint64 sent = m_socket->writeDatagram((char*)&m_requestHeader, sizeof(m_requestHeader),
