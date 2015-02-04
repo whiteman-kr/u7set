@@ -1,29 +1,29 @@
 #include "Stable.h"
-#include "FileView.h"
+#include "FileListView.h"
 #include "CheckInDialog.h"
 #include "../include/DbController.h"
 
 
-FilesModel::FilesModel(QObject* parent) :
+FileListModel::FileListModel(QObject* parent) :
 	QAbstractTableModel(parent)
 {
 }
 
-FilesModel::~FilesModel()
+FileListModel::~FileListModel()
 {
 }
 
-int FilesModel::rowCount(const QModelIndex& /*parent = QModelIndex()*/) const
+int FileListModel::rowCount(const QModelIndex& /*parent = QModelIndex()*/) const
 {
 	return static_cast<int>(m_files.size());
 }
 
-int FilesModel::columnCount(const QModelIndex& /*parent = QModelIndex()*/) const
+int FileListModel::columnCount(const QModelIndex& /*parent = QModelIndex()*/) const
 {
 	return ColumnCount;
 }
 
-QVariant FilesModel::data(const QModelIndex& index, int role /*= Qt::DisplayRole*/) const
+QVariant FileListModel::data(const QModelIndex& index, int role /*= Qt::DisplayRole*/) const
 {
 	unsigned int row = index.row();
 	unsigned int col = index.column();
@@ -70,7 +70,7 @@ QVariant FilesModel::data(const QModelIndex& index, int role /*= Qt::DisplayRole
 	return QVariant();
 }
 
-QVariant FilesModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant FileListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role == Qt::DisplayRole)
 	{
@@ -100,7 +100,7 @@ QVariant FilesModel::headerData(int section, Qt::Orientation orientation, int ro
 	return QVariant();
 }
 
-void FilesModel::addFile(std::shared_ptr<DbFileInfo> file)
+void FileListModel::addFile(std::shared_ptr<DbFileInfo> file)
 {
 	if (file->fileName().endsWith(m_filter, Qt::CaseInsensitive) == true)
 	{
@@ -109,7 +109,7 @@ void FilesModel::addFile(std::shared_ptr<DbFileInfo> file)
 	}
 }
 
-void FilesModel::setFiles(const std::vector<DbFileInfo> &files)
+void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
 {
 	m_files.clear();
 
@@ -127,14 +127,14 @@ void FilesModel::setFiles(const std::vector<DbFileInfo> &files)
 	return;
 }
 
-void FilesModel::clear()
+void FileListModel::clear()
 {
 	m_files.clear();
 	emit layoutChanged();
 	return;
 }
 
-std::shared_ptr<DbFileInfo> FilesModel::fileByRow(int row)
+std::shared_ptr<DbFileInfo> FileListModel::fileByRow(int row)
 {
 	if (row < 0 || row >= (int)m_files.size())
 	{
@@ -146,7 +146,7 @@ std::shared_ptr<DbFileInfo> FilesModel::fileByRow(int row)
 	return m_files[row];
 }
 
-std::shared_ptr<DbFileInfo> FilesModel::fileByFileId(int fileId)
+std::shared_ptr<DbFileInfo> FileListModel::fileByFileId(int fileId)
 {
 	if (fileId == -1)
 	{
@@ -169,7 +169,7 @@ std::shared_ptr<DbFileInfo> FilesModel::fileByFileId(int fileId)
 	}
 }
 
-int FilesModel::getFileRow(int fileId) const
+int FileListModel::getFileRow(int fileId) const
 {
 	int row = 0;
 	for (auto it = m_files.begin(); it != m_files.end(); ++it)
@@ -184,12 +184,12 @@ int FilesModel::getFileRow(int fileId) const
 	return -1;
 }
 
-QString FilesModel::filter() const
+QString FileListModel::filter() const
 {
 	return m_filter;
 }
 
-void FilesModel::setFilter(const QString& value)
+void FileListModel::setFilter(const QString& value)
 {
 	m_filter = value;
 }
@@ -200,18 +200,18 @@ void FilesModel::setFilter(const QString& value)
 //
 //
 
-FileView::FileView()
+FileListView::FileListView()
 {
 	assert(false);
 }
 
-FileView::FileView(const FileView&) :
+FileListView::FileListView(const FileListView&) :
 	QTableView()
 {
 	assert(false);
 }
 
-FileView::FileView(DbController* pDbStore, const QString& parentFileName) :
+FileListView::FileListView(DbController* pDbStore, const QString& parentFileName) :
 	m_dbController(pDbStore),
 	m_parentFileName(parentFileName)
 {
@@ -262,29 +262,29 @@ FileView::FileView(DbController* pDbStore, const QString& parentFileName) :
 
 	// --
 	//
-	connect(dbController(), &DbController::projectOpened, this, &FileView::projectOpened);
-	connect(dbController(), &DbController::projectClosed, this, &FileView::projectClosed);
+	connect(dbController(), &DbController::projectOpened, this, &FileListView::projectOpened);
+	connect(dbController(), &DbController::projectClosed, this, &FileListView::projectClosed);
 
-	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileView::filesViewSelectionChanged);
+	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileListView::filesViewSelectionChanged);
 
 	return;
 }
 
-FileView::~FileView()
+FileListView::~FileListView()
 {
 }
 
-void FileView::CreateActions()
+void FileListView::CreateActions()
 {
 	m_openFileAction = new QAction(tr("Open..."), this);
 	m_openFileAction->setStatusTip(tr("Open file for edit..."));
 	m_openFileAction->setEnabled(false);
-	connect(m_openFileAction, &QAction::triggered, this, &FileView::slot_OpenFile);
+	connect(m_openFileAction, &QAction::triggered, this, &FileListView::slot_OpenFile);
 
 	m_viewFileAction = new QAction(tr("View..."), this);
 	m_viewFileAction->setStatusTip(tr("View file..."));
 	m_viewFileAction->setEnabled(false);
-	connect(m_viewFileAction, &QAction::triggered, this, &FileView::slot_ViewFile);
+	connect(m_viewFileAction, &QAction::triggered, this, &FileListView::slot_ViewFile);
 
 	m_separatorAction0 = new QAction(this);
 	m_separatorAction0->setSeparator(true);
@@ -292,17 +292,17 @@ void FileView::CreateActions()
 	m_checkOutAction = new QAction(tr("Check Out"), this);
 	m_checkOutAction->setStatusTip(tr("Check Out for edit..."));
 	m_checkOutAction->setEnabled(false);
-	connect(m_checkOutAction, &QAction::triggered, this, &FileView::slot_CheckOut);
+	connect(m_checkOutAction, &QAction::triggered, this, &FileListView::slot_CheckOut);
 
 	m_checkInAction = new QAction(tr("Check In"), this);
 	m_checkInAction->setStatusTip(tr("Check In changes..."));
 	m_checkInAction->setEnabled(false);
-	connect(m_checkInAction, &QAction::triggered, this, &FileView::slot_CheckIn);
+	connect(m_checkInAction, &QAction::triggered, this, &FileListView::slot_CheckIn);
 
 	m_undoChangesAction = new QAction(tr("Undo Changes..."), this);
 	m_undoChangesAction->setStatusTip(tr("Undo Pending Changes..."));
 	m_undoChangesAction->setEnabled(false);
-	connect(m_undoChangesAction, &QAction::triggered, this, &FileView::slot_UndoChanges);
+	connect(m_undoChangesAction, &QAction::triggered, this, &FileListView::slot_UndoChanges);
 
 	m_separatorAction1 = new QAction(this);
 	m_separatorAction1->setSeparator(true);
@@ -310,12 +310,12 @@ void FileView::CreateActions()
 	m_addFileAction = new QAction(tr("Add File..."), this);
 	m_addFileAction->setStatusTip(tr("Add file to version control..."));
 	m_addFileAction->setEnabled(false);
-	connect(m_addFileAction, &QAction::triggered, this, &FileView::slot_AddFile);
+	connect(m_addFileAction, &QAction::triggered, this, &FileListView::slot_AddFile);
 
 	m_deleteFileAction = new QAction(tr("Delete File..."), this);
 	m_deleteFileAction ->setStatusTip(tr("Mark file as deleted..."));
 	m_deleteFileAction ->setEnabled(false);
-	connect(m_deleteFileAction , &QAction::triggered, this, &FileView::slot_DeleteFile);
+	connect(m_deleteFileAction , &QAction::triggered, this, &FileListView::slot_DeleteFile);
 
 	m_separatorAction2 = new QAction(this);
 	m_separatorAction2->setSeparator(true);
@@ -323,12 +323,12 @@ void FileView::CreateActions()
 	m_getWorkcopyAction = new QAction(tr("Get Workcopy..."), this);
 	m_getWorkcopyAction->setStatusTip(tr("Get file workcopy..."));
 	m_getWorkcopyAction->setEnabled(false);
-	connect(m_getWorkcopyAction, &QAction::triggered, this, &FileView::slot_GetWorkcopy);
+	connect(m_getWorkcopyAction, &QAction::triggered, this, &FileListView::slot_GetWorkcopy);
 
 	m_setWorkcopyAction = new QAction(tr("Set Workcopy..."), this);
 	m_setWorkcopyAction->setStatusTip(tr("Set file workcopy..."));
 	m_setWorkcopyAction->setEnabled(false);
-	connect(m_setWorkcopyAction, &QAction::triggered, this, &FileView::slot_SetWorkcopy);
+	connect(m_setWorkcopyAction, &QAction::triggered, this, &FileListView::slot_SetWorkcopy);
 
 	m_separatorAction3 = new QAction(this);
 	m_separatorAction3->setSeparator(true);
@@ -336,12 +336,12 @@ void FileView::CreateActions()
 	m_refreshFileAction = new QAction(tr("Refresh"), this);
 	m_refreshFileAction->setStatusTip(tr("Refresh file list..."));
 	m_refreshFileAction->setEnabled(false);
-	connect(m_refreshFileAction, &QAction::triggered, this, &FileView::slot_RefreshFiles);
+	connect(m_refreshFileAction, &QAction::triggered, this, &FileListView::slot_RefreshFiles);
 
 	return;
 }
 
-void FileView::setFiles(const std::vector<DbFileInfo>& files)
+void FileListView::setFiles(const std::vector<DbFileInfo>& files)
 {
 	// Save old selection
 	//
@@ -388,12 +388,12 @@ void FileView::setFiles(const std::vector<DbFileInfo>& files)
 	return;
 }
 
-void FileView::clear()
+void FileListView::clear()
 {
 	m_filesModel.clear();
 }
 
-void FileView::getSelectedFiles(std::vector<DbFileInfo>* out)
+void FileListView::getSelectedFiles(std::vector<DbFileInfo>* out)
 {
 	if (out == nullptr)
 	{
@@ -432,21 +432,21 @@ void FileView::getSelectedFiles(std::vector<DbFileInfo>* out)
 	return;
 }
 
-void FileView::openFile(std::vector<DbFileInfo> /*files*/)
+void FileListView::openFile(std::vector<DbFileInfo> /*files*/)
 {
 }
 
-void FileView::viewFile(std::vector<DbFileInfo> /*files*/)
+void FileListView::viewFile(std::vector<DbFileInfo> /*files*/)
 {
 }
 
-void FileView::checkOut(std::vector<DbFileInfo> files)
+void FileListView::checkOut(std::vector<DbFileInfo> files)
 {
 	dbController()->checkOut(files, this);
 	refreshFiles();
 }
 
-void FileView::checkIn(std::vector<DbFileInfo> files)
+void FileListView::checkIn(std::vector<DbFileInfo> files)
 {
 	CheckInDialog::checkIn(files, dbController(), this);
 
@@ -455,13 +455,13 @@ void FileView::checkIn(std::vector<DbFileInfo> files)
 	return;
 }
 
-void FileView::undoChanges(std::vector<DbFileInfo> files)
+void FileListView::undoChanges(std::vector<DbFileInfo> files)
 {
 	dbController()->undoChanges(files, this);
 	refreshFiles();
 }
 
-void FileView::addFile()
+void FileListView::addFile()
 {
 	assert(false);
 	// Add Parent ID!!!!!!!!!!!!!!!!!!!!
@@ -529,12 +529,12 @@ void FileView::addFile()
 	filesViewSelectionChanged(QItemSelection(), QItemSelection());*/
 }
 
-void FileView::deleteFile(std::vector<DbFileInfo> /*files*/)
+void FileListView::deleteFile(std::vector<DbFileInfo> /*files*/)
 {
 	assert(false);
 }
 
-void FileView::getWorkcopy(std::vector<DbFileInfo> files)
+void FileListView::getWorkcopy(std::vector<DbFileInfo> files)
 {
 	// Select destination folder
 	//
@@ -567,7 +567,7 @@ void FileView::getWorkcopy(std::vector<DbFileInfo> files)
 	return;
 }
 
-void FileView::setWorkcopy(std::vector<DbFileInfo> files)
+void FileListView::setWorkcopy(std::vector<DbFileInfo> files)
 {
 	if (files.size() != 1)
 	{
@@ -615,7 +615,7 @@ void FileView::setWorkcopy(std::vector<DbFileInfo> files)
 	return;
 }
 
-void FileView::refreshFiles()
+void FileListView::refreshFiles()
 {
 	// Get file list from the DB
 	//
@@ -630,7 +630,7 @@ void FileView::refreshFiles()
 	return;
 }
 
-void FileView::projectOpened()
+void FileListView::projectOpened()
 {
 	this->setEnabled(true);
 
@@ -649,7 +649,7 @@ void FileView::projectOpened()
 	return;
 }
 
-void FileView::projectClosed()
+void FileListView::projectClosed()
 {
 	this->setEnabled(false);
 
@@ -661,7 +661,7 @@ void FileView::projectClosed()
 	clear();
 }
 
-void FileView::slot_OpenFile()
+void FileListView::slot_OpenFile()
 {
 	std::vector<DbFileInfo> selectedFiles;
 	getSelectedFiles(&selectedFiles);
@@ -690,7 +690,7 @@ void FileView::slot_OpenFile()
 	return;
 }
 
-void FileView::slot_ViewFile()
+void FileListView::slot_ViewFile()
 {
 	std::vector<DbFileInfo> selectedFiles;
 	getSelectedFiles(&selectedFiles);
@@ -715,7 +715,7 @@ void FileView::slot_ViewFile()
 }
 
 
-void FileView::slot_CheckOut()
+void FileListView::slot_CheckOut()
 {
 	std::vector<DbFileInfo> selectedFiles;
 	getSelectedFiles(&selectedFiles);
@@ -743,7 +743,7 @@ void FileView::slot_CheckOut()
 	return;
 }
 
-void FileView::slot_CheckIn()
+void FileListView::slot_CheckIn()
 {
 	std::vector<DbFileInfo> selectedFiles;
 	getSelectedFiles(&selectedFiles);
@@ -771,7 +771,7 @@ void FileView::slot_CheckIn()
 	return;
 }
 
-void FileView::slot_UndoChanges()
+void FileListView::slot_UndoChanges()
 {
 	std::vector<DbFileInfo> selectedFiles;
 	getSelectedFiles(&selectedFiles);
@@ -799,13 +799,13 @@ void FileView::slot_UndoChanges()
 	return;
 }
 
-void FileView::slot_AddFile()
+void FileListView::slot_AddFile()
 {
 	addFile();
 	return;
 }
 
-void FileView::slot_DeleteFile()
+void FileListView::slot_DeleteFile()
 {
 	std::vector<DbFileInfo> selectedFiles;
 	getSelectedFiles(&selectedFiles);
@@ -833,7 +833,7 @@ void FileView::slot_DeleteFile()
 	return;
 }
 
-void FileView::slot_GetWorkcopy()
+void FileListView::slot_GetWorkcopy()
 {
 	// Get files workcopies form the database
 	//
@@ -863,7 +863,7 @@ void FileView::slot_GetWorkcopy()
 	return;
 }
 
-void FileView::slot_SetWorkcopy()
+void FileListView::slot_SetWorkcopy()
 {
 	std::vector<DbFileInfo> selectedFiles;
 	getSelectedFiles(&selectedFiles);
@@ -891,14 +891,14 @@ void FileView::slot_SetWorkcopy()
 	return;
 }
 
-void FileView::slot_RefreshFiles()
+void FileListView::slot_RefreshFiles()
 {
 	refreshFiles();
 
 	return;
 }
 
-void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+void FileListView::filesViewSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
 	QModelIndexList	s = selectionModel()->selectedRows();
 
@@ -981,22 +981,22 @@ void FileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, con
 
 }
 
-FilesModel& FileView::filesModel()
+FileListModel& FileListView::filesModel()
 {
 	return m_filesModel;
 }
 
-const DbFileInfo& FileView::parentFile() const
+const DbFileInfo& FileListView::parentFile() const
 {
 	return m_parentFile;
 }
 
-int FileView::parentFileId() const
+int FileListView::parentFileId() const
 {
 	return m_parentFile.fileId();
 }
 
-DbController* FileView::dbController()
+DbController* FileListView::dbController()
 {
 	return m_dbController;
 }

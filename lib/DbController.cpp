@@ -1513,6 +1513,27 @@ DbFileInfo DbController::systemFileInfo(const QString& fileName) const
 	return result;
 }
 
+DbFileInfo DbController::systemFileInfo(int fileId) const
+{
+	DbFileInfo result;
+	result.setFileId(-1);
+
+	std::vector<DbFileInfo> systemFiles = m_worker->systemFiles();
+
+	auto pos = std::find_if(systemFiles.begin(), systemFiles.end(),
+		[&fileId](const DbFileInfo& fi)
+		{
+			return fi.fileId() == fileId;
+		});
+
+	if (pos != systemFiles.end())
+	{
+		result = *pos;
+	}
+
+	return result;
+}
+
 QString DbController::lastError() const
 {
 	return m_lastError;

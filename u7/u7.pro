@@ -47,7 +47,6 @@ SOURCES +=\
     DialogSettings.cpp \
     DialogValueEdit.cpp \
     FilesTabPage.cpp \
-    FileView.cpp \
     LoginDialog.cpp \
     Main.cpp \
     MainTabPage.cpp \
@@ -89,7 +88,8 @@ SOURCES +=\
     BuildTabPage.cpp \
     ../lib/OutputLog.cpp \
     ProjectBuilder.cpp \
-    ../lib/DbProgress.cpp
+    ../lib/DbProgress.cpp \
+    FileListView.cpp
 
 
 HEADERS  += \
@@ -101,7 +101,6 @@ HEADERS  += \
     DialogSettings.h \
     DialogValueEdit.h \
     FilesTabPage.h \
-    FileView.h \
     LoginDialog.h \
     MainTabPage.h \
     MainWindow.h \
@@ -147,7 +146,8 @@ HEADERS  += \
     ../include/OutputLog.h \
     ProjectBuilder.h \
     ../include/Signal.h \
-    ../include/DbProgress.h
+    ../include/DbProgress.h \
+    FileListView.h
 
 FORMS    += \
     ChangesetDialog.ui \

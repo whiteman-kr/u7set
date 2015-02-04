@@ -577,7 +577,10 @@ message DeviceChassis
 message DeviceModule
 {
 	optional int32 type = 1 [default = 0];
-	optional ModuleConfiguration module_configuration = 3;
+
+	optional int32 ConfIndex = 2 [default = 0];
+	optional string ConfName = 3 [default = ""];
+	optional string ConfType = 4 [default = ""];
 }
 
 message DeviceController

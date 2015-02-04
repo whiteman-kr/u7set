@@ -5,11 +5,11 @@
 
 class DbController;
 
-class FilesModel : public QAbstractTableModel
+class FileListModel : public QAbstractTableModel
 {
 public:
-	FilesModel(QObject* parent = nullptr);
-	virtual ~FilesModel();
+	FileListModel(QObject* parent = nullptr);
+	virtual ~FileListModel();
 
 	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -55,16 +55,16 @@ private:
 };
 
 
-class FileView : public QTableView
+class FileListView : public QTableView
 {
 	Q_OBJECT
 private:
-	FileView();
-	FileView(const FileView&);
+	FileListView();
+	FileListView(const FileListView&);
 
 public:
-	FileView(DbController* dbstore, const QString& parentFileName);
-	virtual ~FileView();
+	FileListView(DbController* dbstore, const QString& parentFileName);
+	virtual ~FileListView();
 
 protected:
 	void CreateActions();
@@ -111,7 +111,7 @@ public slots:
 	// Public properties
 	//
 public:
-	FilesModel& filesModel();
+	FileListModel& filesModel();
 
 	const DbFileInfo& parentFile() const;
 	int parentFileId() const;
@@ -125,7 +125,7 @@ protected:
 	//
 private:
 	DbController* m_dbController;
-	FilesModel m_filesModel;
+	FileListModel m_filesModel;
 
 	QString m_parentFileName;
 	DbFileInfo m_parentFile;

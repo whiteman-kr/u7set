@@ -551,7 +551,7 @@ QtMultiUIntSpinBox::QtMultiUIntSpinBox(QWidget* parent):
 {
 	m_spinBox = new QSpinBox(parent);
 	m_spinBox->setKeyboardTracking(false);
-	m_spinBox->setRange(std::numeric_limits<quint32>::min(), std::numeric_limits<quint32>::max());
+	//m_spinBox->setRange(std::numeric_limits<quint32>::min(), std::numeric_limits<quint32>::max());
 
 	connect(m_spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 			this, &QtMultiUIntSpinBox::onValueChanged);

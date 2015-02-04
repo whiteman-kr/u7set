@@ -2,10 +2,10 @@
 
 #include "MainTabPage.h"
 #include "../include/DbStruct.h"
-#include "FileView.h"
+#include "FileListView.h"
 #include "../include/ConfigData.h"
 
-class ConfigurationFileView : public FileView
+class ConfigurationFileView : public FileListView
 {
 	Q_OBJECT
 public:

@@ -53,7 +53,87 @@ namespace Hardware
 		m_default(defaultVal),
 		m_value(value)
 	{
+	}
 
+	void DynamicProperty::saveValue(::Proto::Property* protoProperty) const
+	{
+		assert(protoProperty);
+
+		protoProperty->set_name(m_name.toStdString());
+
+		QString value;
+
+		switch (m_value.type()) {
+			case QVariant::Bool:
+				value = m_value.toBool() ? "t" : "f";
+				break;
+			case QVariant::Int:
+				value.setNum(m_value.toInt());
+				break;
+			case QVariant::UInt:
+				value.setNum(m_value.toUInt());
+				break;
+			case QVariant::String:
+				value = m_value.toString();
+				break;
+			case QVariant::Double:
+				value.setNum(m_value.toDouble());
+				break;
+			default:
+				assert(false);
+		}
+
+		protoProperty->set_value(value.toStdString());
+		return;
+	}
+
+	bool DynamicProperty::loadValue(const ::Proto::Property& protoProperty)
+	{
+		if (QString(protoProperty.name().c_str()) != m_name)
+		{
+			assert(QString(protoProperty.name().c_str()) == m_name);
+			return false;
+		}
+
+		bool ok = false;
+		QString sv(protoProperty.value().c_str());
+
+		switch (m_value.type()) {
+			case QVariant::Bool:
+				{
+					m_value = sv == "t" ? true : false;
+					ok = true;
+				}
+				break;
+			case QVariant::Int:
+				{
+					qint32 i = sv.toInt(&ok);
+					setValue(QVariant(i));
+				}
+				break;
+			case QVariant::UInt:
+				{
+					quint32 i = sv.toUInt(&ok);
+					setValue(QVariant(i));
+				}
+				break;
+			case QVariant::String:
+				{
+					m_value = sv;
+					ok = true;
+				}
+				break;
+			case QVariant::Double:
+				{
+					double i = sv.toDouble(&ok);
+					setValue(QVariant(i));
+				}
+				break;
+			default:
+				assert(false);
+		}
+
+		return ok;
 	}
 
 	QString DynamicProperty::name() const
@@ -169,6 +249,16 @@ namespace Hardware
 			pMutableDeviceObject->set_dynamic_properties_struct(m_dynamicPropertiesStruct.toStdString());
 		}
 
+		// Save dynamic properties' values
+		//
+		for (const DynamicProperty& p : m_dynamicProperties)
+		{
+			::Proto::Property* protoProp = pMutableDeviceObject->mutable_properties()->Add();
+			p.saveValue(protoProp);
+		}
+
+		// --
+		//
 		if (m_preset == true)
 		{
 			pMutableDeviceObject->set_preset(m_preset);
@@ -213,6 +303,31 @@ namespace Hardware
 		{
 			m_dynamicPropertiesStruct.clear();
 		}
+
+		// Load dynamic properties' values. They are already exists after calling parseDynamicPropertiesStruct()
+		//
+		for (const ::Proto::Property& p :  deviceobject.properties())
+		{
+			auto it = m_dynamicProperties.find(p.name().c_str());
+
+			if (it == m_dynamicProperties.end())
+			{
+				qDebug() << "ERROR: Can't find property " << p.name().c_str() << " in m_strId";
+			}
+			else
+			{
+				bool loadOk = it->loadValue(p);
+				assert(loadOk);
+
+				m_avoidEventRecursion = true;
+				this->setProperty((*it).name_c_str(), (*it).value());
+				m_avoidEventRecursion = false;
+			}
+
+		}
+
+		// --
+		//
 
 		if (deviceobject.has_preset() == true && deviceobject.preset() == true)
 		{
@@ -266,7 +381,7 @@ namespace Hardware
 
 	bool DeviceObject::event(QEvent* e)
 	{
-		if (e->type() == QEvent::DynamicPropertyChange)
+		if (e->type() == QEvent::DynamicPropertyChange && m_avoidEventRecursion == false)
 		{
 			// Configuration property was changed
 			//
@@ -288,7 +403,10 @@ namespace Hardware
 				}
 				else
 				{
+					m_avoidEventRecursion = true;
 					(*it).setValue(value);
+					this->setProperty((*it).name_c_str(), (*it).value());
+					m_avoidEventRecursion = false;
 				}
 			}
 
@@ -303,9 +421,11 @@ namespace Hardware
 	}
 
 	// Parse m_dynamicProperties and create Qt meta system dynamic properies
+	//
 	void DeviceObject::parseDynamicPropertiesStruct()
 	{
 		// Delete all previous object's dynamic properties
+		// Don't worry about old values, the are stored in m_dynamicProperties
 		//
 		QList<QByteArray> dynamicProps = dynamicPropertyNames();
 
@@ -1046,10 +1166,9 @@ namespace Hardware
 
 		moduleMessage->set_type(m_type);
 
-		if (m_moduleConfiguration.hasConfiguration() == true)
-		{
-			m_moduleConfiguration.save(moduleMessage->mutable_module_configuration());
-		}
+		moduleMessage->set_confindex(m_confIndex);
+		moduleMessage->set_confname(m_confName.toStdString());
+		moduleMessage->set_conftype(m_confType.toStdString());
 
 		return true;
 	}
@@ -1080,14 +1199,9 @@ namespace Hardware
 
 		m_type =  moduleMessage.type();
 
-		if (moduleMessage.has_module_configuration() == true)
-		{
-			m_moduleConfiguration.load(moduleMessage.module_configuration());
-
-			// Set configuration user properties to Qt meta system
-			//
-			m_moduleConfiguration.addUserPropertiesToObject(this);
-		}
+		m_confIndex = moduleMessage.confindex();
+		m_confName = moduleMessage.confname().c_str();
+		m_confType = moduleMessage.conftype().c_str();
 
 		return true;
 	}
@@ -1097,39 +1211,6 @@ namespace Hardware
 		return m_deviceType;
 	}
 
-	bool DeviceModule::event(QEvent* e)
-	{
-		if (e->type() == QEvent::DynamicPropertyChange)
-		{
-			// Configuration property was changed
-			//
-			QDynamicPropertyChangeEvent* d = dynamic_cast<QDynamicPropertyChangeEvent*>(e);
-			assert(d != nullptr);
-
-			QString propertyName = d->propertyName();
-
-			QVariant value = this->property(propertyName.toStdString().c_str());
-
-			if (value.isValid() == true)
-			{
-				m_moduleConfiguration.setUserProperty(propertyName, value);
-			}
-
-			// Accept event
-			//
-			return true;
-		}
-
-		// Event was not recognized
-		//
-		return false;
-	}
-
-	bool DeviceModule::compileConfiguration(McFirmware* dest, QString* errorString) const
-	{
-		bool ok = m_moduleConfiguration.compile(dest, m_strId, fileInfo().changeset(), errorString);
-		return ok;
-	}
 
 	int DeviceModule::type() const
 	{
@@ -1141,35 +1222,34 @@ namespace Hardware
 		m_type = value;
 	}
 
-	QString DeviceModule::configurationStruct() const
+	int DeviceModule::confIndex() const
 	{
-		QString s = QString::fromStdString(m_moduleConfiguration.structDescription());
-		return s;
+		return m_confIndex;
 	}
 
-	void DeviceModule::setConfigurationStruct(const QString& value)
+	void DeviceModule::setConfIndex(int value)
 	{
-		m_moduleConfiguration.setHasConfiguration(true);
-		m_moduleConfiguration.setStructDescription(value.toStdString());
-
-		m_moduleConfiguration.readStructure(value.toStdString().data());
-		m_moduleConfiguration.addUserPropertiesToObject(this);
+		m_confIndex = value;
 	}
 
-	QString DeviceModule::confFirmwareName() const
+	QString DeviceModule::confName() const
 	{
-		QString v(m_moduleConfiguration.name());
-		return v;
+		return m_confName;
 	}
 
-	void DeviceModule::setConfFirmwareName(const QString& value)
+	void DeviceModule::setConfName(const QString& value)
 	{
-		m_moduleConfiguration.setName(value);
+		m_confName = value;
 	}
 
-	const ModuleConfiguration& DeviceModule::moduleConfiguration() const
+	QString DeviceModule::confType() const
 	{
-		return m_moduleConfiguration;
+		return m_confType;
+	}
+
+	void DeviceModule::setConfType(const QString& value)
+	{
+		m_confType = value;
 	}
 
 	//

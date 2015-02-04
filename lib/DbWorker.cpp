@@ -680,6 +680,17 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_systemFiles.clear();
 	m_mutex.unlock();
 
+	// Root file is filling manually
+	//
+	{
+		QMutexLocker locker(&m_mutex);
+
+		DbFileInfo rfi;
+		rfi.setFileId(rootFileId());
+		rfi.setFileName(rootFileName);
+		m_systemFiles.push_back(rfi);
+	}
+
 	for (const DbFileInfo& fi : systemFiles)
 	{
 		if (fi.fileName() == AfblFileName)

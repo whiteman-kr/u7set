@@ -284,66 +284,66 @@ bool BuildWorkerThread::generateModulesConfigurations(
 			continue;
 		}
 
-		if (child->deviceType() < Hardware::DeviceType::Module)
-		{
-			generateModulesConfigurations(db, child);
-			continue;
-		}
+//		if (child->deviceType() < Hardware::DeviceType::Module)
+//		{
+//			generateModulesConfigurations(db, child);
+//			continue;
+//		}
 
-		// This is Module, if it has configuration process it.
-		//
-		assert(child->deviceType() == Hardware::DeviceType::Module);
+//		// This is Module, if it has configuration process it.
+//		//
+//		assert(child->deviceType() == Hardware::DeviceType::Module);
 
-		Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-		assert(module != nullptr);
+//		Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
+//		assert(module != nullptr);
 
-		if (module->moduleConfiguration().hasConfiguration() == false)
-		{
-			// Module does not have configuration, process the next child;
-			//
-			continue;
-		}
+//		if (module->moduleConfiguration().hasConfiguration() == false)
+//		{
+//			// Module does not have configuration, process the next child;
+//			//
+//			continue;
+//		}
 
-		// Get the firmware by it's name or create new if it does not exists
-		//
-		const Hardware::ModuleConfiguration& moduleConfiguration = module->moduleConfiguration();
+//		// Get the firmware by it's name or create new if it does not exists
+//		//
+//		const Hardware::ModuleConfiguration& moduleConfiguration = module->moduleConfiguration();
 
-		QString confFileName = module->confFirmwareName();
-		std::shared_ptr<Hardware::McFirmware> firmware;
+//		QString confFileName = module->confFirmwareName();
+//		std::shared_ptr<Hardware::McFirmware> firmware;
 
-		try
-		{
-			firmware = firmwares->at(confFileName);
-		}
-		catch(std::out_of_range)
-		{
-			firmware = std::make_shared<Hardware::McFirmware>();
+//		try
+//		{
+//			firmware = firmwares->at(confFileName);
+//		}
+//		catch(std::out_of_range)
+//		{
+//			firmware = std::make_shared<Hardware::McFirmware>();
 
-			firmware->setName(confFileName);
-			firmware->setUartId(moduleConfiguration.uartId());
+//			firmware->setName(confFileName);
+//			firmware->setUartId(moduleConfiguration.uartId());
 
-			firmwares->insert(std::make_pair(confFileName, firmware));
-		}
+//			firmwares->insert(std::make_pair(confFileName, firmware));
+//		}
 
-		QString error;
+//		QString error;
 
-		// Compile configuration to firmware
-		//
-		qDebug() << module->strId();
+//		// Compile configuration to firmware
+//		//
+//		qDebug() << module->strId();
 
-		bool ok = module->compileConfiguration(firmware.get(), &error);
+//		bool ok = module->compileConfiguration(firmware.get(), &error);
 
-		if (ok == false)
-		{
-			// Somthing went wrong.
-			//
-			m_log->writeError(error, false);
-			m_log->writeError(tr("Device StrId: %1, caption: %2, place: %3")
-							  .arg(module->strId())
-							  .arg(module->caption())
-							  .arg(module->place()), false);
-			return false;
-		}
+//		if (ok == false)
+//		{
+//			// Somthing went wrong.
+//			//
+//			m_log->writeError(error, false);
+//			m_log->writeError(tr("Device StrId: %1, caption: %2, place: %3")
+//							  .arg(module->strId())
+//							  .arg(module->caption())
+//							  .arg(module->place()), false);
+//			return false;
+//		}
 	}
 
 	return true;

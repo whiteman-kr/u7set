@@ -36,7 +36,14 @@ namespace Hardware
 	{
 	public:
 		DynamicProperty();
-		DynamicProperty(const QString& name, const QVariant& min, const QVariant& max, const QVariant& defaultVal, const QVariant& value);
+		DynamicProperty(const QString& name,
+						const QVariant& min,
+						const QVariant& max,
+						const QVariant& defaultVal,
+						const QVariant& value);
+
+		void saveValue(::Proto::Property* protoProperty) const;
+		bool loadValue(const ::Proto::Property& protoProperty);
 
 		// Properties
 		//
@@ -201,6 +208,7 @@ namespace Hardware
 		//QUuid m_presetId;
 
 	private:
+		bool m_avoidEventRecursion = false;
 		QHash<QString, DynamicProperty> m_dynamicProperties;
 	};
 
@@ -330,8 +338,9 @@ namespace Hardware
 
 		Q_PROPERTY(int Type READ type WRITE setType)
 
-		Q_PROPERTY(QString ConfStruct READ configurationStruct WRITE setConfigurationStruct)
-		Q_PROPERTY(QString ConfFirmwareName READ confFirmwareName WRITE setConfFirmwareName)
+		Q_PROPERTY(int ConfIndex READ confIndex WRITE setConfIndex)
+		Q_PROPERTY(QString ConfName READ confName WRITE setConfName)
+		Q_PROPERTY(QString ConfType READ confType WRITE setConfType)
 
 	public:
 		explicit DeviceModule(bool preset = false);
@@ -346,12 +355,9 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
-		virtual bool event(QEvent* e) override;
-
 		// Public Methods
 		//
 	public:
-		bool compileConfiguration(McFirmware* dest, QString* errorString) const;
 
 		// Properties
 		//
@@ -359,13 +365,14 @@ namespace Hardware
 		int type() const;
 		void setType(int value);
 
-		QString configurationStruct() const;
-		void setConfigurationStruct(const QString& value);
+		int confIndex() const;
+		void setConfIndex(int value);
 
-		QString confFirmwareName() const;
-		void setConfFirmwareName(const QString& value);
+		QString confName() const;
+		void setConfName(const QString& value);
 
-		const ModuleConfiguration& moduleConfiguration() const;
+		QString confType() const;
+		void setConfType(const QString& value);
 
 		// Data
 		//
@@ -374,10 +381,9 @@ namespace Hardware
 
 		int m_type = 0;
 
-		QString m_configurationInput;
-		QString m_configurationOutput;
-
-		ModuleConfiguration m_moduleConfiguration;
+		int m_confIndex = 0;
+		QString m_confName;
+		QString m_confType;
 	};
 
 

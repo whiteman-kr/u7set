@@ -800,9 +800,11 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceChassis));
   DeviceModule_descriptor_ = file->message_type(36);
-  static const int DeviceModule_offsets_[2] = {
+  static const int DeviceModule_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, type_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, module_configuration_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, confindex_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, confname_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, conftype_),
   };
   DeviceModule_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1208,21 +1210,21 @@ void protobuf_AddDesc_serialization_2eproto() {
     "DiagSignal\030j \001(\0132\027.Proto.DeviceDiagSigna"
     "l\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDevic"
     "eRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\""
-    "Y\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\0228\n\024modu"
-    "le_configuration\030\003 \001(\0132\032.Proto.ModuleCon"
-    "figuration\"\022\n\020DeviceController\"\022\n\020Device"
-    "DiagSignal\"r\n\023ModuleConfiguration\022\032\n\022str"
-    "uct_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037."
-    "Proto.ModuleConfigurationValue\022\016\n\004name\030\003"
-    " \001(\t:\000\"7\n\030ModuleConfigurationValue\022\014\n\004na"
-    "me\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004n"
-    "ame\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUnit\022\013"
-    "\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n"
-    "\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Outp"
-    "ut\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Dis"
-    "crete\020\001*N\n\014FblParamType\022\022\n\016AnalogIntegra"
-    "l\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDiscrete"
-    "Value\020\002", 5287);
+    "]\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tConf"
+    "Index\030\002 \001(\005:\0010\022\022\n\010ConfName\030\003 \001(\t:\000\022\022\n\010Co"
+    "nfType\030\004 \001(\t:\000\"\022\n\020DeviceController\"\022\n\020De"
+    "viceDiagSignal\"r\n\023ModuleConfiguration\022\032\n"
+    "\022struct_description\030\001 \001(\t\022/\n\006values\030\002 \003("
+    "\0132\037.Proto.ModuleConfigurationValue\022\016\n\004na"
+    "me\030\003 \001(\t:\000\"7\n\030ModuleConfigurationValue\022\014"
+    "\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022"
+    "\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUn"
+    "it\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020"
+    "\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006"
+    "Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n"
+    "\010Discrete\020\001*N\n\014FblParamType\022\022\n\016AnalogInt"
+    "egral\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDisc"
+    "reteValue\020\002", 5291);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -12608,9 +12610,6 @@ bool DeviceObject::IsInitialized() const {
   if (has_presetname()) {
     if (!this->presetname().IsInitialized()) return false;
   }
-  if (has_module()) {
-    if (!this->module().IsInitialized()) return false;
-  }
   return true;
 }
 
@@ -13328,7 +13327,9 @@ void DeviceChassis::Swap(DeviceChassis* other) {
 
 #ifndef _MSC_VER
 const int DeviceModule::kTypeFieldNumber;
-const int DeviceModule::kModuleConfigurationFieldNumber;
+const int DeviceModule::kConfIndexFieldNumber;
+const int DeviceModule::kConfNameFieldNumber;
+const int DeviceModule::kConfTypeFieldNumber;
 #endif  // !_MSC_VER
 
 DeviceModule::DeviceModule()
@@ -13337,7 +13338,6 @@ DeviceModule::DeviceModule()
 }
 
 void DeviceModule::InitAsDefaultInstance() {
-  module_configuration_ = const_cast< ::Proto::ModuleConfiguration*>(&::Proto::ModuleConfiguration::default_instance());
 }
 
 DeviceModule::DeviceModule(const DeviceModule& from)
@@ -13349,7 +13349,9 @@ DeviceModule::DeviceModule(const DeviceModule& from)
 void DeviceModule::SharedCtor() {
   _cached_size_ = 0;
   type_ = 0;
-  module_configuration_ = NULL;
+  confindex_ = 0;
+  confname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  conftype_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -13358,8 +13360,13 @@ DeviceModule::~DeviceModule() {
 }
 
 void DeviceModule::SharedDtor() {
+  if (confname_ != &::google::protobuf::internal::kEmptyString) {
+    delete confname_;
+  }
+  if (conftype_ != &::google::protobuf::internal::kEmptyString) {
+    delete conftype_;
+  }
   if (this != default_instance_) {
-    delete module_configuration_;
   }
 }
 
@@ -13387,8 +13394,16 @@ DeviceModule* DeviceModule::New() const {
 void DeviceModule::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     type_ = 0;
-    if (has_module_configuration()) {
-      if (module_configuration_ != NULL) module_configuration_->::Proto::ModuleConfiguration::Clear();
+    confindex_ = 0;
+    if (has_confname()) {
+      if (confname_ != &::google::protobuf::internal::kEmptyString) {
+        confname_->clear();
+      }
+    }
+    if (has_conftype()) {
+      if (conftype_ != &::google::protobuf::internal::kEmptyString) {
+        conftype_->clear();
+      }
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -13412,17 +13427,53 @@ bool DeviceModule::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_module_configuration;
+        if (input->ExpectTag(16)) goto parse_ConfIndex;
         break;
       }
 
-      // optional .Proto.ModuleConfiguration module_configuration = 3;
+      // optional int32 ConfIndex = 2 [default = 0];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_ConfIndex:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &confindex_)));
+          set_has_confindex();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_ConfName;
+        break;
+      }
+
+      // optional string ConfName = 3 [default = ""];
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_module_configuration:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_module_configuration()));
+         parse_ConfName:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_confname()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->confname().data(), this->confname().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(34)) goto parse_ConfType;
+        break;
+      }
+
+      // optional string ConfType = 4 [default = ""];
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_ConfType:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_conftype()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->conftype().data(), this->conftype().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
         }
@@ -13453,10 +13504,27 @@ void DeviceModule::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->type(), output);
   }
 
-  // optional .Proto.ModuleConfiguration module_configuration = 3;
-  if (has_module_configuration()) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, this->module_configuration(), output);
+  // optional int32 ConfIndex = 2 [default = 0];
+  if (has_confindex()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->confindex(), output);
+  }
+
+  // optional string ConfName = 3 [default = ""];
+  if (has_confname()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->confname().data(), this->confname().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      3, this->confname(), output);
+  }
+
+  // optional string ConfType = 4 [default = ""];
+  if (has_conftype()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->conftype().data(), this->conftype().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      4, this->conftype(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -13472,11 +13540,29 @@ void DeviceModule::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->type(), target);
   }
 
-  // optional .Proto.ModuleConfiguration module_configuration = 3;
-  if (has_module_configuration()) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        3, this->module_configuration(), target);
+  // optional int32 ConfIndex = 2 [default = 0];
+  if (has_confindex()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->confindex(), target);
+  }
+
+  // optional string ConfName = 3 [default = ""];
+  if (has_confname()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->confname().data(), this->confname().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->confname(), target);
+  }
+
+  // optional string ConfType = 4 [default = ""];
+  if (has_conftype()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->conftype().data(), this->conftype().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->conftype(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -13497,11 +13583,25 @@ int DeviceModule::ByteSize() const {
           this->type());
     }
 
-    // optional .Proto.ModuleConfiguration module_configuration = 3;
-    if (has_module_configuration()) {
+    // optional int32 ConfIndex = 2 [default = 0];
+    if (has_confindex()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->module_configuration());
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->confindex());
+    }
+
+    // optional string ConfName = 3 [default = ""];
+    if (has_confname()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->confname());
+    }
+
+    // optional string ConfType = 4 [default = ""];
+    if (has_conftype()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->conftype());
     }
 
   }
@@ -13534,8 +13634,14 @@ void DeviceModule::MergeFrom(const DeviceModule& from) {
     if (from.has_type()) {
       set_type(from.type());
     }
-    if (from.has_module_configuration()) {
-      mutable_module_configuration()->::Proto::ModuleConfiguration::MergeFrom(from.module_configuration());
+    if (from.has_confindex()) {
+      set_confindex(from.confindex());
+    }
+    if (from.has_confname()) {
+      set_confname(from.confname());
+    }
+    if (from.has_conftype()) {
+      set_conftype(from.conftype());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -13555,16 +13661,15 @@ void DeviceModule::CopyFrom(const DeviceModule& from) {
 
 bool DeviceModule::IsInitialized() const {
 
-  if (has_module_configuration()) {
-    if (!this->module_configuration().IsInitialized()) return false;
-  }
   return true;
 }
 
 void DeviceModule::Swap(DeviceModule* other) {
   if (other != this) {
     std::swap(type_, other->type_);
-    std::swap(module_configuration_, other->module_configuration_);
+    std::swap(confindex_, other->confindex_);
+    std::swap(confname_, other->confname_);
+    std::swap(conftype_, other->conftype_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
