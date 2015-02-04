@@ -1,0 +1,64 @@
+This is NCReport a Qt based report generator system
+
+NCReport is a lightweight, fast, multi-platform and easy to use report 
+generator tool written in C++ based on the Qt Application framework
+
+INSTALLING NCReport
+
+To install Windows binary package Just simply run the setup executable 
+file and follow the setup wizard instructions.
+To install source package, before compiling NCReport you need the 
+appropriate Qt4 or Qt5 package installed on your system.
+
+COMPILING (FOR NCREPORT LICENSE OWNERS ONLY)
+
+Extract the source package:
+
+untar/unzip ncreport2.x.x.tar.gz 
+
+after, change to NCReport directory and start to compile:
+
+Linux:
+------
+qmake -r
+make
+
+Windows/MinGW:
+--------------
+qmake -r
+nmake release
+or
+mingw32-make release
+
+MacOSX (g++):
+-------------
+qmake -r -spec macx-g++
+make
+
+REMARKS FOR BARCODE PRINTING
+
+To generate barcodes NCReport uses Zint (by Robin Stuart http://www.zint.org.uk) 
+barcode library as 3rd party component. Because of GPL license reasons the library
+is not integrated in the project but used as command line application in NCReport's
+binary directory. The zint binary files are found in NCReport binary packages or 
+can be downloaded from Zint's website.
+
+DEMOS AND EXAMPLES
+
+Once NCReport is installed, we suggest that you take a look at the demos and
+examples to see NCReport in action. Run the NCReport Example reports either by
+typing executable names on the command line or through the desktop's Start
+menu. The source code of examples are found in /src/demos directory
+The binary examples are located in /bin and the sample reports are located in
+/reports directory
+
+SUPPORTED PLATFORMS
+
+NCReport supports all of platforms that Qt4/Qt5 does, however we tested it 
+under Windows and Linux and MacOS 
+
+
+
+
+
+

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.6.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>10</leftmargin>
+        <rightmargin>10</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">SELECT ProductID, ProductName, 
+QuantityPerUnit, UnitPrice, QuantityPerUnit*UnitPrice as value
+FROM products
+WHERE ProductID&gt;2
+ORDER BY ProductID</datasource>
+    </datasources>
+    <variables>
+        <variable id="total_value" type="num" funcType="sum" scope="group" initValue="0">value</variable>
+    </variables>
+    <pageheader id="phead" height="0.000"/>
+    <pagefooter id="pfoot" height="0.000"/>
+    <details>
+        <detail id="Detail1" height="20.707" datasource="DataSource1" startsOnNewPage="false">
+            <items>
+				<!-- LABEL 1 -->
+                <rectangle id="0" zValue="0" resource="static" posX="6.085" posY="0.000" width="58.208" height="19.844" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#000000" fillStyle="no"/>
+                <field id="1" zValue="1" resource="static" posX="9.260" posY="3.175" width="18.785" height="4.498" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000" type="num" ftype="ds" arg="">ProductID</field>
+                <field id="2" zValue="2" resource="static" posX="9.260" posY="7.673" width="52.123" height="4.498" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">ProductName</field>
+                <field id="3" zValue="3" resource="static" posX="9.260" posY="12.171" width="14.287" height="4.498" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">QuantityPerUnit</field>
+                <field id="4" zValue="4" resource="static" posX="39.952" posY="12.171" width="20.902" height="4.498" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">UnitPrice</field>
+				<!-- LABEL 2 -->
+                <field id="6" zValue="10" printWhen="@SKIP_NEXT" resource="static" posX="69.056" posY="3.175" width="18.785" height="4.498" forecolor="#ffffff" ftype="ds" arg="">ProductID</field>
+                <rectangle id="5" zValue="15" resource="static" posX="65.881" posY="0.000" width="58.208" height="19.844" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#000000" fillStyle="no"/>
+                <field id="6" zValue="20" resource="static" posX="69.056" posY="3.175" width="18.785" height="4.498" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000" type="num" ftype="ds" arg="">ProductID</field>
+                <field id="8" zValue="30" resource="static" posX="69.056" posY="7.673" width="52.123" height="4.498" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">ProductName</field>
+                <field id="9" zValue="40" resource="static" posX="99.748" posY="12.171" width="20.902" height="4.498" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">UnitPrice</field>
+                <field id="10" zValue="50" resource="static" posX="69.056" posY="12.171" width="14.287" height="4.498" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">QuantityPerUnit</field>
+				<!-- LABEL 3 -->
+                <field id="6" zValue="60" printWhen="@SKIP_NEXT" resource="static" posX="128.056" posY="3.175" width="18.785" height="4.498" forecolor="#ffffff" ftype="ds" arg="">ProductID</field>
+                <rectangle id="11" zValue="70" resource="static" posX="125.677" posY="0.000" width="58.208" height="19.844" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#000000" fillStyle="no"/>
+                <field id="12" zValue="80" resource="static" posX="128.852" posY="3.175" width="18.785" height="4.498" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000" type="num" ftype="ds" arg="">ProductID</field>
+                <field id="14" zValue="90" resource="static" posX="128.852" posY="7.673" width="52.123" height="4.498" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">ProductName</field>
+                <field id="15" zValue="100" resource="static" posX="159.544" posY="12.171" width="20.902" height="4.498" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">UnitPrice</field>
+                <field id="16" zValue="110" resource="static" posX="128.852" posY="12.171" width="14.287" height="4.498" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">QuantityPerUnit</field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

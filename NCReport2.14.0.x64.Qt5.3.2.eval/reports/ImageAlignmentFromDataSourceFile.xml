@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.6" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">/tmp/american_express.png
+/tmp/administrator.png
+/tmp/alarm_bell.png
+/tmp/advertising.png</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="PH" height="13.758">
+        <label id="1727" zValue="0" posX="0.000" posY="0.000" width="169.862" height="6.615" fontName="Liberation Sans" fontSize="16" alignment="4">Image alignment demo</label>
+    </pageheader>
+    <pagefooter id="PF" height="2.117"/>
+    <details>
+        <detail id="Detail1" height="61.912" datasource="DataSource1">
+            <items>
+                <image id="15233" zValue="0" posX="0.000" posY="0.000" width="55.562" height="11.112" resource="filefromds" aspectRatio="keep" format="0">col0</image>
+                <image id="11771" zValue="1" posX="57.150" posY="0.000" width="55.562" height="11.112" resource="filefromds" aspectRatio="keep" format="0" alignment="36">col0</image>
+                <image id="12116" zValue="2" posX="114.300" posY="0.000" width="57.150" height="11.112" resource="filefromds" aspectRatio="keep" format="0" alignment="34">col0</image>
+                <image id="14678" zValue="9" posX="136.525" posY="12.700" width="12.700" height="38.100" resource="filefromds" aspectRatio="keep" format="0" alignment="36">col0</image>
+                <image id="4486" zValue="10" posX="79.375" posY="12.700" width="12.700" height="38.100" resource="filefromds" aspectRatio="keep" format="0" alignment="132">col0</image>
+                <image id="12585" zValue="11" posX="20.637" posY="12.700" width="12.700" height="38.100" resource="filefromds" aspectRatio="keep" format="0" alignment="68">col0</image>
+                <line id="" zValue="12" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="55.562" fromY="0.000" toX="55.562" toY="52.387"/>
+                <line id="" zValue="13" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="57.150" fromY="0.000" toX="57.150" toY="52.387"/>
+                <line id="" zValue="14" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="112.712" fromY="0.000" toX="112.712" toY="52.387"/>
+                <line id="3707" zValue="15" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="114.300" fromY="0.000" toX="114.300" toY="52.387"/>
+                <line id="13140" zValue="16" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="52.387" toX="169.862" toY="52.387"/>
+                <line id="" zValue="17" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="11.112" toX="169.862" toY="11.112"/>
+                <line id="2681" zValue="18" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="0.000" toX="169.862" toY="0.000"/>
+            </items>
+        </detail>
+    </details>
+</NCReport>

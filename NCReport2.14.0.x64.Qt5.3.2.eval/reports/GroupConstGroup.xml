@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.13.2" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" allowEmpty="true" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true" encoding="UTF-8">groupID	fruit	price
+1	Apple	2.50
+1	Banana	3.45
+1	Gapefruit	1.90
+1	Strawberry	5.78
+2	Melone	3.40
+2	Apple	2.50
+2	Lemon	6.32
+3	Apple	8.70
+3	Banana	9.85
+3	Strawberry	5.50</datasource>
+    </datasources>
+    <variables>
+        <variable id="total_0" type="num" funcType="sum" scope="group" initValue="0">price</variable>
+        <variable id="total_1" type="num" funcType="sum" scope="group" initValue="0">price</variable>
+    </variables>
+    <pageheader id="phead" height="10.000">
+        <label id="BUNBC" zValue="0" posX="0.000" posY="0.000" width="87.312" height="6.085" fontName="Liberation Sans" fontSize="14" fontWeight="bold" alignment="1" forecolor="#55aa00">CONSTANT GROUP</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="5.880">
+        <field id="5ZY4H" zValue="0" posX="130.440" posY="0.000" width="38.365" height="4.498" resource="tpl" template="true" fontName="Liberation Sans" fontSize="10" alignment="34" type="txt" ftype="tpl">Page $V{pageno}</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="4.498" datasource="DataSource1">
+            <items>
+                <field id="SUIYK" zValue="0" posX="0.000" posY="0.000" width="46.037" height="6.350" resource="datasource" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="ds">fruit</field>
+                <field id="1" zValue="1" posX="49.212" posY="0.000" width="36.777" height="6.350" resource="datasource" fontName="Liberation Sans" fontSize="10" alignment="2" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="true">price</field>
+                <field id="XVSB9" zValue="2" posX="88.900" posY="0.000" width="20.637" height="6.350" resource="var" fontName="Liberation Sans" fontSize="10" alignment="2" forecolor="#ff001e" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" localized="true">total_1</field>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="%CONST" resetVariables="total_0" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_Group0" height="10.848">
+                        <label id="578FD" zValue="0" posX="0.000" posY="3.175" width="31.750" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" forecolor="#aa0000">Fruit</label>
+                        <label id="9X0R2" zValue="1" posX="49.212" posY="3.175" width="36.512" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="34" forecolor="#aa0000">Price</label>
+                        <label id="HFMKP" zValue="2" posX="88.900" posY="3.175" width="20.637" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="34" forecolor="#aa0000">Sum</label>
+                        <line id="YYQQW" zValue="3" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="9.525" toX="169.862" toY="9.525"/>
+                    </groupheader>
+                    <groupfooter id="GF_Group0" height="12.965">
+                        <line id="7T7UH" zValue="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="1.587" toX="169.862" toY="1.587"/>
+                        <label id="BRPQM" zValue="1" posX="0.000" posY="3.175" width="31.750" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" forecolor="#aa0000">Footer</label>
+                        <field id="LOA6H" zValue="2" posX="88.900" posY="3.175" width="20.637" height="6.350" resource="var" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2" forecolor="#ff001e" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" localized="true">total_1</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

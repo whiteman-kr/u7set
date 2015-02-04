@@ -1,0 +1,15 @@
+****************************************************************************
+* NCReport 2.6.1
+* Release date: 04.Mar.2011
+****************************************************************************
+
+Fixed bugs
+----------
+
+- 0071358: [Report designer application] Dialogs to fix layout under MacOSX (administrator) - resolved.
+- 0071361: [Report designer application] Designer is not saving 'Details and Grouping' --> 'Page Break Condition / Starts on new page' (administrator) - resolved.
+- 0071363: [Report engine library] Group header duplication occures occassionaly (administrator) - resolved.
+- 0071362: [Report engine library] Hide repeated values in zones problem (administrator) - resolved.
+- Other minor fixes and changes
+
+

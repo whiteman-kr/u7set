@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.7.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>10</topmargin>
+        <bottommargin>10</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DS_TABLE" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">id	order_date	Ordered total	Income	Expense
+1	2011-01-01	3645.25	2250.00	1470.00
+2	2011-02-01	366.00	539.00	1500.00
+3	2011-03-01	1355.00	2074.00	3409.00
+4	2011-04-01	5020.00	2980.00	1677.00
+5	2011-05-01	1336.00	5647.00	7135.00
+6	2011-06-10	2400.00	900.00	4550.00
+7	2011-07-01	2301.00	520.00	4440.00
+8	2011-08-01	140.00	640.00	8700.00
+9	2011-09-01	5400.00	1240.00	6487.00
+10	2011-10-01	6121.00	1540.00	2331.00
+11	2011-11-01	1800.00	1223.00	8714.00
+12	2011-12-01	1401.00	5441.00	1685.00
+13	2012-01-01	2120.00	7554.00	654.00
+14	2012-02-01	3697.00	3210.00	8724.00
+15	2012-03-01	1490.00	4410.00	54968.00
+16	2012-04-01	1500.00	6497.00	7440.00
+17	2012-05-01	1505.00	2400.00	3970.00
+18	2012-06-01	7229.00	529.00	656.00
+19	2012-06-02	1593.00	5898.00	4809.00
+20	2012-06-07	6257.00	6856.00	5510.00
+21	2012-07-01	6880.00	7874.00	8730.00
+22	2012-08-01	126.00	4044.00	9840.00
+23	2012-09-01	7271.00	6735.00	1864.00
+24	2012-10-01	8814.00	8679.00	6952.00
+25	2012-11-01	8623.00	2359.00	5629.00
+26	2012-12-01	1168.00	8652.00	9959.00
+27	2013-01-01	3936.00	9507.00	5927.00
+28	2013-02-01	1012.00	6980.00	2065.00</datasource>
+        <datasource id="DS0" type="txt" openRole="begin" source="static" columnDelimiter="tab">0</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="25.665">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="1.587" width="170.127" height="7.408" fontName="Liberation Sans" fontSize="18" alignment="4" forecolor="#000000">CROSS TAB DEMO</label>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="15.875" width="169.862" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="36" forecolor="#000000">Two tables next to each other. Both 2 tables use the same data source.</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="0.000"/>
+    <details>
+        <detail id="Detail1" height="44.715" datasource="DS0" startsOnNewPage="false">
+            <items>
+                <crosstab id="0" zValue="0" resource="static" zoneID="1" posX="0.000" posY="0.000" width="165.100" height="15.875" datasource="DS_TABLE" tableSpacing="10" cellPadding="0" cellSpacing="0" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" colWidth="20" rowHeight="4" autoWidth="0" autoHeight="0" showColHeader="1" showRowHeader="1" showBottomSummary="1" showSideSummary="1" breakTable="0" columnTitleSource="order_date" hiddenColumns="id" headerColumnWidth="32">
+                    <cell ct="0" dt="0" alignment="33" fontName="Sans" fontSize="8" fillColor="#b1b1b1" fillStyle="solid" foreColor="#000000" bgMode="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="1" dt="0" alignment="34" fontName="Sans" fontSize="8" fontWeight="bold" fillColor="#b1b1b1" fillStyle="solid" foreColor="#000000" bgMode="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="2" dt="0" alignment="34" fontName="Sans" fontSize="8" fillColor="#b1b1b1" fillStyle="solid" foreColor="#000000" bgMode="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="3" dt="0" alignment="34" fontName="Sans" fontSize="8" fillColor="#000000" fillStyle="no" foreColor="#000000">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="4" dt="1" alignment="34" fontName="Sans" fontSize="8" fillColor="#000000" fillStyle="no" foreColor="#000000" formatting="1" format="f" precision="2" blankIfZero="1" localized="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="5" dt="0" alignment="34" fontName="Sans" fontSize="8" fillColor="#000000" fillStyle="no" foreColor="#000000">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                    </cell>
+                    <cell ct="6" dt="0" alignment="34" fontName="Sans" fontSize="8" fontWeight="bold" fillColor="#000000" fillStyle="no" foreColor="#000000">
+                        <text>Total</text>
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="7" dt="1" alignment="34" fontName="FreeSans" fontSize="8" fontWeight="bold" fillColor="#000000" fillStyle="no" foreColor="#000000" formatting="1" format="f" precision="2" blankIfZero="1" localized="1">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="8" dt="0" alignment="34" fontName="Sans" fontSize="8" fillColor="#000000" fillStyle="no" foreColor="#426bc1">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+                    </cell>
+                </crosstab>
+                <crosstab id="1" zValue="1" resource="static" zoneID="1" posX="0.000" posY="25.400" width="165.100" height="15.875" datasource="DS_TABLE" tableSpacing="10" cellPadding="0.5" cellSpacing="0" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" colWidth="21" rowHeight="4" autoWidth="0" autoHeight="0" showColHeader="1" showRowHeader="1" showBottomSummary="1" showSideSummary="1" breakTable="0" columnTitleSource="order_date" hiddenColumns="id" headerColumnWidth="32">
+                    <cell ct="0" dt="0" alignment="129" fontName="Sans" fontSize="8" fillColor="#b10d0d" fillStyle="solid" foreColor="#ffffff" bgMode="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="1" dt="0" alignment="130" fontName="Sans" fontSize="8" fontWeight="bold" fillColor="#b10d0d" fillStyle="solid" foreColor="#ffffff" bgMode="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="0.200"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="2" dt="0" alignment="130" fontName="Sans" fontSize="8" fillColor="#b10d0d" fillStyle="solid" foreColor="#ffffff" bgMode="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                    </cell>
+                    <cell ct="3" dt="0" alignment="130" fontName="Sans" fontSize="8" fillColor="#000000" fillStyle="no" foreColor="#000000">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="4" dt="1" alignment="130" fontName="Sans" fontSize="8" fillColor="#000000" fillStyle="no" foreColor="#000000" formatting="1" format="f" precision="2" blankIfZero="1" localized="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="5" dt="0" alignment="130" fontName="Sans" fontSize="8" fillColor="#000000" fillStyle="no" foreColor="#000000">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                    </cell>
+                    <cell ct="6" dt="0" alignment="129" fontName="Sans" fontSize="8" fillColor="#000000" fillStyle="no" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="7" dt="1" alignment="130" fontName="FreeSans" fontSize="8" fontWeight="bold" fillColor="#000000" fillStyle="no" foreColor="#000000" formatting="1" format="f" precision="2" blankIfZero="1" localized="1">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                    </cell>
+                    <cell ct="8" dt="0" alignment="130" fontName="Sans" fontSize="8" fontWeight="bold" fontItalic="true" fillColor="#000000" fillStyle="no" foreColor="#426bc1">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="1.000"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="dot" lineWidth="0.200"/>
+                    </cell>
+                </crosstab>
+            </items>
+        </detail>
+    </details>
+</NCReport>

@@ -1,0 +1,38 @@
+****************************************************************************
+* NCReport 2.5.4
+* It is a bug-fix release with some new features.
+* Release date: 28.08.2010
+****************************************************************************
+
+New features
+------------
+
+- 0071333: [General] GUI internationalization/translations work in Designer. 
+	Translation files (.qm) are loaded from /i18n subtirectory by current locale. 
+	--tr=langcode Command Line switch forces the translation
+	Russian translation has been added thanks to Filonenko Mikhail
+
+- 0071331: [General] Increase the performance of ODBC SQL data source by forward only mode
+	This option can be assigned to each of SQL data source 
+	(Not working when subqueries are used)
+
+- 0071322: [Report engine library] Html/Text item is scriptable by <% %> begin and end tags
+
+Fixed bugs
+----------
+
+- 0071325: [Report engine library] Q_OBJECT macro added to NCReportDataSource, 
+	NCReportDataSource, NCReportPreviewOutput, NCReportPrinterOutput, NCReportPreviewPageContainer, 
+	NCReportSvgOutput classes
+
+- 0071326: [Report designer application] QSettings definition was hard coded, now this can easily be customized.
+	Introduced command line options --appname=Xxxx --orgname==Yyyyy
+
+- 0071329: [General] Some strings are not represented in qt translation file - resolved.
+	Translation files are updated and ready for new translations.
+
+- 0071307: [Report engine library] Footer data (field) is missing in special cases. - resolved.
+
+- 0071330: [Report designer application] Save report to database at first time (administrator) - resolved.
+
+- Many other small internal fixes

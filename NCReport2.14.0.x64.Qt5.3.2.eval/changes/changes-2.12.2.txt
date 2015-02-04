@@ -1,0 +1,19 @@
+****************************************************************************
+* NCReport 2.12.2
+* Release date: 22.may.2014
+* Features and bugfixes are tracked at http://tracker.ncreport.org
+****************************************************************************
+
+- 0071707: [General] Qt5.3 compatibility - resolved.
+- 0071700: [Report engine library] Allow disabling of features for building with minimal Qt - resolved.
+- 0071699: [Report engine library] Break condition for group headers - resolved.
+- 0071705: [Report engine library] QAbstractItemModel data source to use Qt::FontRole for labels and fields - resolved.
+- 0071671: [General] Memory optimalizations - resolved.
+- 0071696: [Designer] Batch report mode: how I can change the numeration of pages? - resolved.
+- 0071701: [Report engine library] sub report iteration: model changes doesn't work - resolved.
+- 0071698: [Designer] NCRDTestDialogFactory-Project <--> export declarations - resolved.
+- 0071702: [Designer] tool tip in data source tree - resolved.
+- 0071697: [Designer] Designer: run report: error: no item model is defined. - resolved.
+- 0071683: [Designer] Variable assignment - resolved.
+- 0071703: [Designer] Display-/Edit-Role in customDatasource - resolved.
+- Several minor changes fixes and updates

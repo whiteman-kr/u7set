@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.5.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="data" type="txt" openRole="begin" source="static" columnDelimiter="tab">233680114523	2336501
+588741256388	0217842
+654316549872	3602913
+654316549873	5456820
+654316549874	1433647
+654316549875	9588730
+654316549876	0102214
+654316549877	4788544
+200214501479	4984654
+365542411220	2164646</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="20.846">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="169.975" height="9.621" fontName="Nimbus Roman No9 L" fontSize="20" fontUnderline="true" alignment="36" forecolor="#000000">Barcode demo</label>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="9.621" width="169.975" height="9.621" fontName="Nimbus Roman No9 L" fontSize="10" alignment="36" wordbreak="true" forecolor="#000000">This is a demonstration of barcode rendering feature with supported almost every barcode types.
+For this feature NCReport uses ZINT barcode system as 3rd party library...</label>
+        <barcode id="2" zValue="2" resource="datasource" posX="43.295" posY="1.604" width="17.639" height="4.811" barcodeType="13" code="50310218715" heightRatio="20" scale="5.00">col0</barcode>
+    </pageheader>
+    <pagefooter id="pfoot" height="4.276">
+        <field id="0" zValue="0" resource="static" posX="153.939" posY="0.000" width="16.035" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="34" forecolor="#000000" type="num" ftype="sys" arg="Page %1">pageno</field>
+        <field id="1" zValue="1" resource="static" posX="0.000" posY="0.000" width="134.697" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="33" forecolor="#000000" type="txt" ftype="sys" arg="">appinfo</field>
+    </pagefooter>
+    <reportheader id="rhead" height="44.364">
+        <label id="0" zValue="0" resource="static" posX="40.088" posY="22.449" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#000000">Code128</label>
+        <barcode id="1" zValue="1" resource="static" posX="8.018" posY="28.864" width="28.864" height="13.363" barcodeType="1" code="87654321" foreColor="#ff0000" scale="5.00"></barcode>
+        <label id="2" zValue="2" resource="static" posX="8.018" posY="22.449" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#ff0000">Code11</label>
+        <label id="3" zValue="3" resource="static" posX="41.692" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#000000">Codabar</label>
+        <label id="4" zValue="4" resource="static" posX="8.018" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#000000">Code 2of5 Industr.</label>
+        <barcode id="5" zValue="5" resource="static" posX="44.899" posY="6.414" width="22.449" height="13.363" barcodeType="18" code="D765432C" borderType="1" borderWidth="4" foreColor="#000080" scale="5.00"></barcode>
+        <barcode id="6" zValue="6" resource="static" posX="40.088" posY="28.864" width="29.398" height="13.363" barcodeType="20" code="6654125415" scale="5.00"></barcode>
+        <label id="7" zValue="7" resource="static" posX="75.366" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#000000">Code32</label>
+        <label id="8" zValue="8" resource="static" posX="107.437" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#000000">Code39</label>
+        <label id="9" zValue="9" resource="static" posX="139.508" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#000000">QR code</label>
+        <barcode id="10" zValue="10" resource="static" posX="75.366" posY="6.414" width="29.398" height="13.363" barcodeType="129" code="2355412" scale="5.00"></barcode>
+        <barcode id="11" zValue="11" resource="static" posX="107.437" posY="6.414" width="29.398" height="13.363" barcodeType="8" code="1066541" scale="10.00"></barcode>
+        <barcode id="12" zValue="12" resource="static" posX="144.318" posY="6.414" width="17.639" height="13.363" barcodeType="58" code="46887687" scale="5.00"></barcode>
+        <label id="13" zValue="13" resource="static" posX="72.159" posY="22.449" width="30.467" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#000000">Deutsche Post Identcode</label>
+        <barcode id="14" zValue="14" resource="static" posX="72.159" posY="28.864" width="30.467" height="13.363" barcodeType="22" code="1234522546" scale="5.00"></barcode>
+        <barcode id="15" zValue="15" resource="static" posX="105.833" posY="28.864" width="30.467" height="13.363" barcodeType="13" code="522364741021" foreColor="#000080" scale="5.00"></barcode>
+        <label id="16" zValue="16" resource="static" posX="105.833" posY="22.449" width="30.467" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#00007f">EAN</label>
+        <barcode id="17" zValue="17" resource="static" posX="139.508" posY="28.864" width="30.467" height="14.432" barcodeType="31" code="[12]asqfqf" foreColor="#ffffff" backColor="#008000" scale="5.00"></barcode>
+        <label id="18" zValue="18" resource="static" posX="139.508" posY="22.449" width="30.467" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" forecolor="#000000">DataBar Expanded</label>
+        <barcode id="19" zValue="19" resource="static" posX="8.018" posY="6.414" width="29.398" height="13.363" barcodeType="7" code="665418" scale="5.00"></barcode>
+    </reportheader>
+    <details>
+        <detail id="Detail1" height="25.390" datasource="data" startsOnNewPage="false">
+            <items>
+                <barcode id="0" zValue="0" resource="datasource" posX="33.674" posY="0.000" width="43.295" height="22.449" barcodeType="13" code="50310218715" scale="5.00">col0</barcode>
+                <barcode id="1" zValue="1" resource="datasource" posX="115.455" posY="0.000" width="54.520" height="22.449" barcodeType="8" code="50310218715" scale="5.00">col1</barcode>
+                <field id="2" zValue="2" resource="static" posX="0.000" posY="0.000" width="35.278" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="34" forecolor="#000000" type="txt" ftype="ds" arg="">col0</field>
+                <field id="3" zValue="3" resource="static" posX="75.366" posY="0.000" width="38.485" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="34" forecolor="#000000" type="txt" ftype="ds" arg="">col1</field>
+                <line id="4" zValue="4" resource="static" fromX="0.000" fromY="24.053" toX="169.975" toY="24.053" lineColor="#0055ff" lineStyle="solid" lineWidth="0.300"/>
+            </items>
+        </detail>
+    </details>
+</NCReport>

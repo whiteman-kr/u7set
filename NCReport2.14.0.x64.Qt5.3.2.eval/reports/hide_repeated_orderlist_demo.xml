@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.6.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="orders" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">SELECT * FROM orders
+ORDER BY OrderDate</datasource>
+    </datasources>
+    <variables>
+        <variable id="total_freight" type="num" funcType="sum" scope="group" initValue="0">freight</variable>
+    </variables>
+    <pageheader id="phead" height="23.519">
+        <label id="0" zValue="0" resource="static" posX="22.490" posY="16.140" width="20.902" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Order ID</label>
+        <label id="1" zValue="1" resource="static" posX="41.540" posY="16.140" width="25.665" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Customer ID</label>
+        <label id="2" zValue="2" resource="static" posX="150.812" posY="16.140" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" forecolor="#000000">Freight</label>
+        <label id="3" zValue="3" resource="static" posX="0.000" posY="16.140" width="22.490" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Order date</label>
+        <line id="4" zValue="4" resource="static" fromX="0.000" fromY="22.490" toX="170.127" toY="22.490" lineColor="#000000" lineStyle="dash" lineWidth="0.100"/>
+        <label id="5" zValue="5" resource="static" posX="67.204" posY="16.140" width="73.819" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Ship to</label>
+        <label id="6" zValue="6" resource="static" posX="0.000" posY="6.350" width="170.127" height="6.350" fontName="Arial" fontSize="12" fontWeight="bold" alignment="36" forecolor="#000000">Order list</label>
+        <barcode id="7" zValue="7" resource="static" posX="-3.440" posY="0.000" width="41.540" height="13.229" barcodeType="8" code="1554025503" heightRatio="50" scale="1.00"></barcode>
+    </pageheader>
+    <pagefooter id="pfoot" height="5.612">
+        <field id="0" zValue="0" resource="static" posX="150.812" posY="0.000" width="17.727" height="5.027" fontName="Arial" fontSize="10" fontItalic="true" alignment="34" forecolor="#000000" type="num" ftype="sys" arg="Page: %1">pageno</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="5.113" datasource="orders" startsOnNewPage="false">
+            <items>
+                <rectangle id="0" zValue="0" printWhen="%2" resource="static" posX="-0.529" posY="-0.265" width="170.921" height="4.762" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillColor="#e2eaff" fillStyle="solid"/>
+                <field id="1" zValue="1" resource="static" posX="22.490" posY="0.000" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000" type="num" ftype="ds" arg="">orderID</field>
+                <field id="2" zValue="2" resource="static" posX="41.540" posY="0.000" width="19.050" height="5.027" fontName="Arial" fontSize="10" alignment="33" forecolor="#00007f" type="txt" ftype="ds" arg="">customerID</field>
+                <field id="3" zValue="3" resource="static" posX="0.000" posY="0.000" width="22.490" height="5.027" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" hideRepeated="true" type="date" ftype="ds" dateFormat="" arg="">OrderDate</field>
+                <field id="4" zValue="4" resource="static" posX="67.204" posY="0.000" width="70.644" height="5.027" fontName="Arial" fontSize="10" alignment="33" forecolor="#aa0000" type="txt" ftype="ds" arg="">shipname</field>
+                <field id="5" zValue="5" resource="static" posX="147.373" posY="0.000" width="22.490" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" blankifzero="true" arg="">freight</field>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="%CONST" resetVariables="total_value" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="1.871"/>
+                    <groupfooter height="10.957">
+                        <field id="0" zValue="0" resource="static" posX="141.023" posY="3.440" width="28.840" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">total_freight</field>
+                        <label id="1" zValue="1" resource="static" posX="118.533" posY="3.440" width="24.077" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000">Total:</label>
+                        <line id="2" zValue="2" resource="static" fromX="120.121" fromY="1.323" toX="171.450" toY="1.323" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

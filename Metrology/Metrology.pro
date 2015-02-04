@@ -110,10 +110,9 @@ win32 {
 }
 
 unix {
-    CONFIG(debug, debug|release): LIBS += -L"/usr/local/NCReport/lib" -lNCReportDebug
-    else: CONFIG(release, debug|release) : LIBS += -L"/usr/local/NCReport/lib" -lNCReport
-
-    INCLUDEPATH += "/usr/local/NCReport/include"
+	CONFIG(debug, debug|release): LIBS += -L"$$PWD/../NCReport2.14.0.x64.Qt5.3.2.eval/lib" -lNCReportDebug
+	else: CONFIG(release, debug|release) : LIBS += -L"$$PWD/../NCReport2.14.0.x64.Qt5.3.2.eval/lib" -lNCReport
+	INCLUDEPATH += "$$PWD/../NCReport2.14.0.x64.Qt5.3.2.eval/include"
 }
 
 

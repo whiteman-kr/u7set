@@ -1,0 +1,28 @@
+****************************************************************************
+* NCReport 2.8.0
+* Release date: 27.Jan.2012
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+New features:
+
+- 0071400: [Report designer application] Assign zone value to multiple items  
+- 0071401: [Report designer application] White rectangle  
+- 0071420: [General] Insert Images to Html Document Mode report  
+- 0071419: [Report designer application] NCReportSource class to use everywhere instead of NCRDDocumentSourceInfo  
+- 0071413: [General] Extended HTML document printing  
+- 0071364: [Report engine library] Conditional formatting  
+- 0071406: [Report engine library] Give NCReport access to QCoreApplication::applicationName()  
+
+Fixes:
+
+- 0071398: [General] Enable to use stored procedures in data source  
+- 0071402: [Report engine library] Last group footer contains wrong field info with non SQL data source  
+- 0071407: [Report engine library] Group header page break problem  
+- 0071408: [Report designer application] Assigning a connection id twice causes NCReportDesigner to crash  
+- 0071312: [Report engine library] Variable contains value of first detail element on a new page.  
+- 0071404: [Report engine library] an empty result set causes a line to appear in the report  
+- 0071397: [Report engine library] Subqueries error out when no rows found in parent query  
+- 0071392: [Report designer application] designer end with error by open data sources of old templates  
+- 0071417: [Report engine library] Preview Window Report output: PDF/SVG/Print actions to configure
+- Many other small fixes and updates

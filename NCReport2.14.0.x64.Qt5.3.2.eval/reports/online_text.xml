@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.11.1" name="Online html text demo" type="textdoc">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <htmlOpt>{DEFAULT}</htmlOpt>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">0</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="8.436">
+        <label id="OCP3Y" zValue="0" posX="0.000" posY="0.000" width="170.127" height="7.938" fontName="Liberation Sans" fontSize="20" fontWeight="bold" alignment="4">Online HTML document printout demo</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="7.158">
+        <field id="3L88T" zValue="0" posX="147.373" posY="1.587" width="46.037" height="4.498" resource="tpl" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="tpl" arg="">Page: $V{pageno}/$V{pagecount}</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="27.609" datasource="DataSource1">
+            <items>
+                <text id="WHNAP" zValue="0" posX="0.000" posY="1.587" width="168.804" height="24.606" resource="url" useFont="false">http://qt-project.org/doc/qt-5.1/qtdoc/qtexamplesandtutorials.html</text>
+            </items>
+        </detail>
+    </details>
+</NCReport>

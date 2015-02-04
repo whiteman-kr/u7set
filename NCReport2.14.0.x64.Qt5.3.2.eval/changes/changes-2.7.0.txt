@@ -1,0 +1,24 @@
+****************************************************************************
+* NCReport 2.7.0
+* Release date: 21.Nov.2011
+****************************************************************************
+
+Qt Compatibility: >=4.5.x
+
+New features:
+
+- 0071323: [General] Cross-tab table support. NCReport now supports horizontally pulled data with summarization in any table format. 
+           Cross tables are able to dynamically grow and break to pages.
+- 0071389: [General] Ellipse item support
+- 0071348: [Report engine library] Large dynamic text break to new page is supported
+- 0071387: [Report engine library] 'Plain text' option for Html report items. This enables line break option for simple texts
+- 0071303: [Report designer application] System variables intellisense type for field property dialog. Improved working for intellisense select.
+
+Fixes:
+
+- 0071305: [Report engine library] "Detail section is too large" error fixed.
+- 0071374: [Report engine library] Image from data source refresh problem fixed.
+- 0071375: [Report engine library] NCReportDef::reset(true) caused problem when custom data source is used - fixed
+- 0071386: [Report engine library] Reprint hidden (repeated) field on new page - fixed
+- Several important internal changes and fixes
+

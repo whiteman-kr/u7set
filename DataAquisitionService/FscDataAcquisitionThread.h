@@ -3,7 +3,7 @@
 #include <QUdpSocket>
 #include <QThread>
 
-#include "..\include\SocketIO.h"
+#include "../include/SocketIO.h"
 
 
 class FscDataAcquisitionSocket : public QUdpSocket

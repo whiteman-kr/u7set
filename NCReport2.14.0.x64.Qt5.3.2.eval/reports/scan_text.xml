@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.4.0" name="Untitled" type="textdoc">
+    <options>
+        <encoding>utf8</encoding>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="items" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">select OrderID, orderitems.UnitPrice, Quantity, Itemno,
+products.productname,
+orderitems.UnitPrice*Quantity as Value
+FROM orderitems INNER JOIN products ON orderitems.productID = products.productID
+WHERE OrderID&gt;10015
+ORDER BY Itemno ASC
+LIMIT 0,1000</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="6.680">
+        <label id="" zValue="0" resource="static" posX="0.000" posY="0.000" width="169.975" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignmentH="center" alignmentV="top" forecolor="#000000">Template text with iteration demo</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="6.414">
+        <field id="" zValue="0" resource="static" posX="139.508" posY="0.000" width="14.432" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="sys">pageno</field>
+        <field id="" zValue="1" resource="static" posX="158.750" posY="0.000" width="11.225" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="num" ftype="sys">pagecount</field>
+        <label id="" zValue="2" resource="static" posX="153.939" posY="0.000" width="4.811" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="center" alignmentV="top" forecolor="#000000">/</label>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="27.260" autoHeight="true" datasource="items" startsOnNewPage="false">
+            <items>
+                <text id="" zValue="0" resource="static" template="true" autoHeight="true" posX="0.000" posY="0.000" width="168.371" height="25.657" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000">&lt;h1&gt;Template text&lt;/h1&gt;
+&lt;p&gt;This is a demonstration of template text with SCAN/ENDSCAN feature.&lt;br&gt;
+We walking through the datasource records within a html text
+&lt;/p&gt;
+&lt;hr&gt;
+&lt;table width=&quot;100%&quot;&gt;
+$SCAN{items}
+&lt;tr&gt;
+&lt;td&gt;$D{Itemno}&lt;/td&gt;&lt;td&gt;$D{productname}&lt;/td&gt;
+&lt;td align=&quot;right&quot;&gt;$D{quantity}&lt;/td&gt;&lt;td align=&quot;right&quot;&gt;$D{unitprice}&lt;/td&gt;&lt;td align=&quot;right&quot;&gt;$D{value}&lt;/td&gt;
+&lt;/tr&gt;
+$ENDSCAN{}
+&lt;/table&gt;
+&lt;hr&gt;</text>
+            </items>
+        </detail>
+    </details>
+</NCReport>

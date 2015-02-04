@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReportTestData version="1.0">
+    <data id="data1" type="spar" enabled="true">01	Two	15	FEqw qztwef zasdhgfh Gwzegquw gjasdhgqwdgug jahdgukqdwgkajshdg kuqwzdg aksjhdg kjasdg uqwzdg uasdgjasgdu zqwgd XC GUZG OIUZOIUZ Jwoiejoqwje	4901780190737
+02	Floppy disk	14.2	Text2	
+03	04646	23	Text3	
+04	CCCCC	12	Text4	
+05	YYYYYY	65	Text5	
+06	5465798	133	Text6	
+</data>
+    <data id="model1" type="model" enabled="true">12	Magnetometer	2	15.6	D522
+13	Pressostat	1	30	G267
+14	Oil pump	1	17	AA11
+15	Water pump	3	58	FG87
+16	Erling o-ring	4	49	VX1
+17	Hydraulic cup	5	39	0554
+20	Ballistic rocket	10	157.9	887
+21	Wheel	3	199.0	S199
+</data>
+    <data id="par_data" type="spar" enabled="true">C	Wheel	Q185/70	yes	25.554	199.0
+A	Magnetometer	D54/78	yes	0.778	15.6
+A	Pressostat	M542	no	2.547	30
+B	Oil pump	CT-784	yes	1.510	17
+B	Water pump	RF-800	yes	3.981	58
+B	Erling o-ring	577874	yes	2.887	49
+C	Hydraulic cup	HC55	no	0.435	39
+C	Ballistic rocket	BV01	yes	1.260	157.9
+C	Wheel	Q185/70	yes	25.554	199.0
+</data>
+    <data id="sl0" type="list" enabled="true">1	Liv Taylor	Georina, St Lous 20455	true	1974-11-10
+2	Georg Fhilip	Utah, Desert	false	1965-04-07
+3	John Dashman	asdasdasdas	true	1970-10-01
+4	Peter Moulding	New York	true	1954-12-08
+5	Jan Glow	Washington	false	1981-07-26
+6	Julianne Meredith	Tenessee	true	1984-08-16
+</data>
+</NCReportTestData>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.0" name="Untitled">
+    <options>
+        <encoding>utf8</encoding>
+        <orientation>portrait</orientation>
+        <pagesize>A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+    </options>
+    <datasources>
+        <datasource id="DS" type="sql" source="static" connection="external" connID="interbase" host="" database="c:\Program Files\Firebird\Firebird_2_1\examples\empbuild\EMPLOYEE.FDB" user="sysdba" password="masterkey" port="" driver="QIBASE">SELECT * from employee ORDER BY job_country</datasource>
+    </datasources>
+    <variables>
+        <variable id="salary_total" type="num" funcType="sum" scope="group" initValue="0">SALARY</variable>
+    </variables>
+    <pageheader height="10.156">
+        <label id="" zValue="0" resource="static" posX="0.000" posY="1.604" width="105.833" height="6.414" fontName="Arial" fontSize="16" fontWeight="bold" fontItalic="true" alignmentH="left" alignmentV="top" forecolor="#000000">Firebird employee list demo</label>
+    </pageheader>
+    <pagefooter height="5.345">
+        <field id="" zValue="0" resource="static" posX="145.922" posY="0.000" width="20.846" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="sys" arg="page: %1">pageno</field>
+        <label id="" zValue="1" resource="static" posX="0.000" posY="0.000" width="49.710" height="4.811" fontName="Arial" fontSize="7" alignmentH="left" alignmentV="top" forecolor="#000000">Sql based database report demonstration</label>
+        <field id="" zValue="2" resource="static" posX="49.710" posY="0.000" width="94.609" height="5.078" fontName="Arial" fontSize="7" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="sys">appinfo</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="5.612" datasource="DS">
+            <items>
+                <rectangle id="" zValue="0" printWhen="%2" resource="static" posX="0.000" posY="0.000" width="169.975" height="4.811" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillColor="#f5e798" fillStyle="solid"></rectangle>
+                <field id="" zValue="1" resource="static" posX="0.000" posY="0.000" width="11.225" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="num" ftype="ds">EMP_NO</field>
+                <field id="" zValue="2" resource="static" posX="12.828" posY="0.000" width="33.674" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">FIRST_NAME</field>
+                <field id="" zValue="3" resource="static" posX="48.106" posY="0.000" width="36.881" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">LAST_NAME</field>
+                <field id="" zValue="4" resource="static" posX="144.318" posY="0.000" width="22.449" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true">SALARY</field>
+                <field id="" zValue="5" resource="static" posX="86.591" posY="0.000" width="18.708" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">PHONE_EXT</field>
+                <field id="" zValue="6" resource="static" posX="107.437" posY="0.000" width="20.846" height="5.078" fontName="Arial" fontSize="10" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#000000" type="date" ftype="ds" dateFormat="yyyy.MM.dd">HIRE_DATE</field>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="JOB_COUNTRY" resetVariables="salary_total" reprintHeader="false">
+                    <groupheader height="9.621">
+                        <field id="" zValue="0" resource="static" posX="0.000" posY="1.604" width="68.952" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds" arg="Job country: %1">JOB_COUNTRY</field>
+                        <line id="" zValue="1" resource="static" fromX="0.000" fromY="8.018" toX="168.371" toY="8.018" lineColor="#000000" lineStyle="dot" lineWidth="0.100"></line>
+                    </groupheader>
+                    <groupfooter height="9.888">
+                        <line id="" zValue="0" resource="static" fromX="0.000" fromY="1.604" toX="168.371" toY="1.604" lineColor="#000000" lineStyle="dot" lineWidth="0.100"></line>
+                        <field id="" zValue="1" resource="static" posX="137.904" posY="3.207" width="28.864" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true">salary_total</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

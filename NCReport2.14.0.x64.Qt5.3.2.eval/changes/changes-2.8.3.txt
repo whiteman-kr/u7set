@@ -1,0 +1,28 @@
+****************************************************************************
+* NCReport 2.8.3
+* Release date: 31.May.2012
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+New features:
+
+- 0071435: [General] Format Variable or Datasource data within HTML or in template fields.
+- 0071440: [General] Subreport cycle based on a data source 
+- 0071414: [Designer] Make lines automatically resize to section's height 
+- 0071446: [General] Optional anchor group footer to page footer 
+- 0071451: [Designer] Group settings dialog - group order does not change 
+- 0071438: [Report engine library] Options for report footer 
+- 0071458: [Designer] Database connection password to encode. Optional
+
+Fixes:
+
+- 0071462: [Report engine library] Missing group headers and wrong page numbering 
+- 0071437: [Report engine library] Group header - Print on new page 
+- 0071452: [Report engine library] Unique Item ID of all report items 
+- 0071443: [Report engine library] runReportToQtPreview() page ranges not evaluated 
+- 0071454: [Report engine library] Crash while opening a html-file in a form 
+- 0071461: [Report engine library] Reversed order of detail headers after page break 
+- 0071450: [General] Data Source Value in Last Page is False 
+- Several fixes and code quality improvements
+- Optimalizations
+

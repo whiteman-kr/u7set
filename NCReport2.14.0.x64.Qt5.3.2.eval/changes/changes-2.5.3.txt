@@ -1,0 +1,26 @@
+****************************************************************************
+* NCReport 2.5.3
+* It is a bug-fix release with some new features.
+* Release date: 28.05.2010
+****************************************************************************
+
+New features
+------------
+
+#32 - Line item in Designer - enhancements
+#185 - Lock/unlock items in designer
+#231 - Designer: Items selection enhancements
+#235 - User roles extension for Item model datasource: col1:u{num}
+#238 - Auto open report file in designer by command line parameter at startup
+#243 - Additive aggregate functions for variables: MIN, MAX
+
+Fixed bugs
+----------
+
+#230 - Designer: geometry editor: typed positions of items are not updated - fixed
+#232 - Designer: Copy/Paste undo and redo does not work properly - fixed
+#234 - Script Evaluator - heap/memory allocation problem in some special cases - fixed
+#236 - Image keep aspect ratio by expanding: Image is rendered in unclipped area - fixed
+#237 - Designer geometry editor causes a crash after the hidden panel is shown - fixed
+#244 - Fields in group footer: sometimes the fields are already related to the next record - fixed.
+

@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <git2/errors.h>
 #include <git2/version.h>
-#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 21
+#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 22
 #include <git2/global.h>
 #else
 #include <git2/threads.h>
@@ -139,7 +139,7 @@ void print_commit_info(const char* const prefix, const git_oid oid, vector<git_o
 	{
 		if (history)
 		{
-			history->insert(history->cbegin(), walked_oid);
+			history->insert(history->begin(), walked_oid);
 		}
 		i++;
 	}
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 				<< "#ifndef GIT_VERSION_FILE\n"
 				<< "#define GIT_VERSION_FILE\n\n";
 
-#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 21
+#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 22
 	git_libgit2_init();
 #else
 	REPORT(git_threads_init());
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
 	git_oid walked_oid;
 	while (!git_revwalk_next(&walked_oid, walker))
 	{
-		head_history.insert(head_history.cbegin(), walked_oid);
+		head_history.insert(head_history.begin(), walked_oid);
 	}
 	//
 
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 	{
 		git_repository_free(repo);
 	}
-#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 21
+#if !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 22
 	git_libgit2_shutdown();
 #else
 	git_threads_shutdown();

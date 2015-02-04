@@ -1,0 +1,26 @@
+****************************************************************************
+* NCReport 2.8.1
+* Release date: 21.Feb.2012
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+New features:
+
+- 0071424: [Report engine library] Set printname in runReportToPrinter() - implemented.
+- 0071425: [Report engine library] Use a parameter inside a parameter - implemented.
+- 0071399: [Report designer application] Vertical Barcode - implemented.
+- 0071434: [Report designer application] Barcode rotation - implemented.
+- 0071431: [General] Auto sorting feature for PivotTable - implemented.
+- 0071429: [General] To Build Pivot Table in Cross-Tab - implemented.
+
+Fixes:
+
+- 0071428: [Report engine library] Only one of two details is printed - fixed.
+- 0071436: [Report designer application] Field item in Multi language mode changing the field type cause crash - fixed.
+- 0071426: [Report designer application] Designer crash during preview - fixed.
+- 0071432: [Report engine library] Total pages variable is incorrect sometimes when cross tab / privot table is in report - fixed.
+- 0071422: [Documentation] NCreport::reportSource() changed to ' const' - fixed.
+- 0071408: [Report designer application] Assigning a connection id twice causes NCReportDesigner to crash (administrator) - fixed.
+- Fixes in label/field rotation
+- Other fixes
+
