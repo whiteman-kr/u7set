@@ -26,7 +26,8 @@ SOURCES += main.cpp \
 	../lib/SocketIO.cpp \
 	../lib/CircularLogger.cpp \
     DataAquisitionService.cpp \
-    ../lib/DataSource.cpp
+    ../lib/DataSource.cpp \
+    FscDataAcquisitionThread.cpp
 
 HEADERS += \
 	../include/SocketIO.h \
@@ -34,7 +35,8 @@ HEADERS += \
 	../include/BaseService.h \
 	../include/CircularLogger.h \
     DataAquisitionService.h \
-    ../include/DataSource.h
+    ../include/DataSource.h \
+    FscDataAcquisitionThread.h
 
 include(../qtservice/src/qtservice.pri)
 

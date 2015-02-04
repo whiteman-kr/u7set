@@ -90,6 +90,93 @@ const ServiceTypeInfo serviceTypesInfo[] =
 };
 
 
+class HostAddressPort
+{
+private:
+	quint16 m_port = 0;
+	QHostAddress m_hostAddress;
+
+public:
+	HostAddressPort() {}
+
+	explicit HostAddressPort(quint32 ip4Addr, quint16 port)
+	{
+		m_hostAddress.setAddress(ip4Addr);
+		m_port = port;
+	}
+
+	explicit HostAddressPort(quint8 *ip6Addr, quint16 port)
+	{
+		m_hostAddress.setAddress(ip6Addr);
+		m_port = port;
+	}
+
+	explicit HostAddressPort(const Q_IPV6ADDR &ip6Addr, quint16 port)
+	{
+		m_hostAddress.setAddress(ip6Addr);
+		m_port = port;
+	}
+
+	explicit HostAddressPort(const sockaddr *sockaddr, quint16 port)
+	{
+		m_hostAddress.setAddress(sockaddr);
+		m_port = port;
+	}
+
+	explicit HostAddressPort(const QString &address, quint16 port)
+	{
+		m_hostAddress.setAddress(address);
+		m_port = port;
+	}
+
+	HostAddressPort(const HostAddressPort &copy)
+	{
+		m_hostAddress = copy.m_hostAddress;
+		m_port = copy.m_port;
+	}
+
+	HostAddressPort &operator=(const HostAddressPort &other)
+	{
+		m_hostAddress = other.m_hostAddress;
+		m_port = other.m_port;
+
+		return *this;
+	}
+
+	void setAddress(quint32 ip4Addr)
+	{
+		m_hostAddress.setAddress(ip4Addr);
+	}
+
+	void setAddress(quint8 *ip6Addr)
+	{
+		m_hostAddress.setAddress(ip6Addr);
+	}
+
+	void setAddress(const Q_IPV6ADDR &ip6Addr)
+	{
+		m_hostAddress.setAddress(ip6Addr);
+	}
+
+	void setAddress(const sockaddr *sockaddr)
+	{
+		m_hostAddress.setAddress(sockaddr);
+	}
+
+	bool setAddress(const QString &address)
+	{
+		m_hostAddress.setAddress(address);
+	}
+
+	void setPort(quint16 port)
+	{
+		m_port = port;
+	}
+
+	quint16 port() const { return m_port; }
+};
+
+
 #pragma pack(push, 1)
 
 
@@ -212,3 +299,4 @@ const quint32 CRC32_INITIAL_VALUE = 0xFFFFFFFF;
 quint32 CRC32(quint32 initialValue, const char* buffer, int len, bool finishCalc);
 
 quint32 CRC32(const char* buffer, int len);
+

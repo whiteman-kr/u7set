@@ -33,6 +33,14 @@ void DataServiceMainFunctionWorker::initDataSources()
 	}
 }
 
+
+void DataServiceMainFunctionWorker::initListeningPorts()
+{
+	m_fscDataAcquisitionAddressPorts.append(HostAddressPort("192.168.11.254", 2000));
+	m_fscDataAcquisitionAddressPorts.append(HostAddressPort("192.168.12.254", 2000));
+}
+
+
 void DataServiceMainFunctionWorker::runUdpThreads()
 {
 	// Information Socket Thread running
@@ -45,13 +53,34 @@ void DataServiceMainFunctionWorker::runUdpThreads()
 	connect(this, &DataServiceMainFunctionWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
 
 	m_infoSocketThread->run(serverSocket);
-
 }
 
 
 void DataServiceMainFunctionWorker::stopUdpThreads()
 {
 	delete m_infoSocketThread;
+}
+
+
+void DataServiceMainFunctionWorker::runFscDataReceivingThreads()
+{
+	for(int i = 0; i < m_fscDataAcquisitionAddressPorts.count(); i++)
+	{
+		FscDataAcquisitionThread* dataAcquisitionThread = new FscDataAcquisitionThread(m_fscDataAcquisitionAddressPorts[i]);
+
+		m_fscDataAcquisitionThreads.append(dataAcquisitionThread);
+	}
+}
+
+
+void DataServiceMainFunctionWorker::stopFscDataReceivingThreads()
+{
+	for(int i = 0; i < m_fscDataAcquisitionThreads.count(); i++)
+	{
+		delete m_fscDataAcquisitionThreads[i];
+	}
+
+	m_fscDataAcquisitionThreads.clear();
 }
 
 
@@ -62,6 +91,7 @@ void DataServiceMainFunctionWorker::initialize()
 	initDataSources();
 
 	runUdpThreads();
+	runFscDataReceivingThreads();
 
 	qDebug() << "DataServiceMainFunctionWorker initialized";
 }
@@ -71,6 +101,7 @@ void DataServiceMainFunctionWorker::shutdown()
 {
 	// Service Main Function deinitialization
 	//
+	stopFscDataReceivingThreads();
 	stopUdpThreads();
 
 	qDebug() << "DataServiceMainFunctionWorker stoped";
