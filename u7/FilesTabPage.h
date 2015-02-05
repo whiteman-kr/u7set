@@ -67,6 +67,8 @@ public:
 
 	std::shared_ptr<FileTreeModelItem> fileItemSharedPtr(QModelIndex& index);
 
+	void addFile(QModelIndex& parentIndex, std::shared_ptr<FileTreeModelItem>& file);
+
 public slots:
 	void projectOpened();
 	void projectClosed();
@@ -105,6 +107,16 @@ public:
 	explicit FileTreeView(DbController* dbc);
 	virtual ~FileTreeView();
 
+	// public slots
+	//
+public slots:
+	void addFile();
+	void deleteFile();
+	void checkOutFile();
+	void checkInFile();
+	void undoChangesFile();
+	void refreshFileTree();
+
 	// Protected props
 	//
 protected:
@@ -125,11 +137,15 @@ public:
 	FilesTabPage(DbController* dbcontroller, QWidget* parent);
 
 protected:
-	void CreateActions();
+	void createActions();
+	void setActionState();
 
 public slots:
 	void projectOpened();
 	void projectClosed();
+
+	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	void modelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 
 private slots:
 
@@ -138,6 +154,19 @@ private slots:
 private:
 	FileTreeView* m_fileView = nullptr;
 	FileTreeModel* m_fileModel = nullptr;
+
+	//
+	QAction* m_addFileAction = nullptr;
+	QAction* m_deleteFileAction = nullptr;
+	//----------------------------------
+	QAction* m_SeparatorAction1 = nullptr;
+	QAction* m_checkOutAction = nullptr;
+	QAction* m_checkInAction = nullptr;
+	QAction* m_undoChangesAction = nullptr;
+	//----------------------------------
+	QAction* m_SeparatorAction2 = nullptr;
+	QAction* m_refreshAction = nullptr;
+	//----------------------------------
 };
 
 

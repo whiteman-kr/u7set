@@ -479,6 +479,28 @@ std::shared_ptr<FileTreeModelItem> FileTreeModel::fileItemSharedPtr(QModelIndex&
 	return object;
 }
 
+void FileTreeModel::addFile(QModelIndex& parentIndex, std::shared_ptr<FileTreeModelItem>& file)
+{
+	assert(parentIndex.isValid());
+
+	FileTreeModelItem* parentFile = fileItem(parentIndex);
+
+	if (parentFile == nullptr)
+	{
+		assert(parentFile);
+		return;
+	}
+
+	beginInsertRows(parentIndex, parentFile->childrenCount(), parentFile->childrenCount());
+
+	parentFile->addChild(file);
+	parentFile->sortChildrenByFileName();
+
+	endInsertRows();
+
+	return;
+}
+
 void FileTreeModel::projectOpened()
 {
 	beginResetModel();
@@ -529,7 +551,157 @@ FileTreeView::FileTreeView(DbController* dbc) :
 
 FileTreeView::~FileTreeView()
 {
+}
 
+void FileTreeView::addFile()
+{
+	// Find parent file
+	//
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(selectedIndexList.size() == 1);
+		return;
+	}
+
+	QModelIndex parentIndex = selectedIndexList[0];
+	FileTreeModelItem* parentFile = fileTreeModel()->fileItem(parentIndex);
+
+	if (parentFile == nullptr || parentFile->fileId() == -1)
+	{
+		assert(parentFile);
+		assert(parentFile->fileId() != -1);
+		return;
+	}
+
+	// Select and read files
+	//
+	QFileDialog fd(this);
+	fd.setFileMode(QFileDialog::ExistingFiles);
+
+	if (fd.exec() == QDialog::Rejected)
+	{
+		return;
+	}
+
+	QStringList selectedFiles = fd.selectedFiles();
+
+	selectionModel()->clear();				// clear selction. New selection will be set after files added to db
+
+	// Create files vector
+	//
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	for (int i = 0; i < selectedFiles.size(); i++)
+	{
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		bool ok = file->readFromDisk(selectedFiles[i]);
+		if (ok == false)
+		{
+			QMessageBox msgBox;
+
+			msgBox.setText(tr("File %1 cannot be read.").arg(selectedFiles[i]));
+			msgBox.setInformativeText(tr("The operation is terminated."));
+
+			msgBox.exec();
+			return;
+		}
+
+		files.push_back(file);
+	}
+
+	// Add files to the DB
+	//
+	bool ok = db()->addFiles(&files, parentFile->fileId(), this);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Add files to the FileModel and select them
+	//
+//	if (isExpanded(parentIndex) == false)
+//	{
+//		expand(parentIndex);
+//	}
+//	else
+	{
+		for (const std::shared_ptr<DbFile>& f : files)
+		{
+			if (f->fileId() == -1)
+			{
+				continue;
+			}
+
+			std::shared_ptr<FileTreeModelItem> fi = std::make_shared<FileTreeModelItem>(*f);
+			fileTreeModel()->addFile(parentIndex, fi);
+		}
+	}
+
+	// Find and select
+	//
+	for (int i = 0; i < 65535; i++)
+	{
+		QModelIndex childIndex = parentIndex.child(i, 0);
+
+		if (childIndex.isValid() == false)
+		{
+			break;
+		}
+
+		FileTreeModelItem* childFile = fileTreeModel()->fileItem(childIndex);
+
+		if (childFile == nullptr)
+		{
+			assert(childFile);
+			break;
+		}
+
+		auto findResult = std::find_if(files.begin(), files.end(),
+				[childFile](const std::shared_ptr<DbFile>& f)
+				{
+					return f->fileId() == childFile->fileId();
+				}
+			);
+
+		if (findResult != files.end())
+		{
+			selectionModel()->select(childIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+		}
+	}
+
+	if (isExpanded(parentIndex) == false)
+	{
+		expand(parentIndex);
+	}
+
+	//QModelIndex md = fileTreeModel()->index(parentFile->childIndex(fi.get()), 0, selectedIndexList[0]);
+	//selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+	return;
+}
+
+void FileTreeView::deleteFile()
+{
+}
+
+void FileTreeView::checkOutFile()
+{
+}
+
+void FileTreeView::checkInFile()
+{
+}
+
+void FileTreeView::undoChangesFile()
+{
+}
+
+void FileTreeView::refreshFileTree()
+{
 }
 
 // Protected props
@@ -564,16 +736,36 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
-	// Create Actions
-	//
-	CreateActions();
-
 	//
 	// Controls
 	//
 	m_fileView = new FileTreeView(dbcontroller);
 	m_fileModel = new FileTreeModel(dbcontroller, this, this);
 	m_fileView->setModel(m_fileModel);
+
+	// Create Actions
+	//
+	createActions();
+
+
+	//
+	// Set context menu to Equipment View
+	//
+	m_fileView->setContextMenuPolicy(Qt::ActionsContextMenu);
+
+	// -----------------
+	m_fileView->addAction(m_addFileAction);
+	m_fileView->addAction(m_deleteFileAction);
+
+	// -----------------
+	m_fileView->addAction(m_SeparatorAction1);
+	m_fileView->addAction(m_checkOutAction);
+	m_fileView->addAction(m_checkInAction);
+	m_fileView->addAction(m_undoChangesAction);
+	// -----------------
+	m_fileView->addAction(m_SeparatorAction2);
+	m_fileView->addAction(m_refreshAction);
+	// -----------------
 
 	//
 	// Layouts
@@ -603,17 +795,143 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(dbController(), &DbController::projectOpened, this, &FilesTabPage::projectOpened);
 	connect(dbController(), &DbController::projectClosed, this, &FilesTabPage::projectClosed);
 
+	connect(m_fileView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &FilesTabPage::selectionChanged);
+	connect(m_fileModel, &FileTreeModel::dataChanged, this, &FilesTabPage::modelDataChanged);
+
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);
 }
 
-void FilesTabPage::CreateActions()
+void FilesTabPage::createActions()
 {
-//	m_checkOutAction = new QAction(tr("Check Out"), this);
-//	m_checkOutAction->setStatusTip(tr("Check Out for edit..."));
-//	m_checkOutAction->setEnabled(false);
-//	connect(m_checkOutAction, &QAction::triggered, this, &FilesTabPage::checkOutFiles);
+
+	m_addFileAction = new QAction(tr("Add file"), this);
+	m_addFileAction->setStatusTip(tr("Add file..."));
+	m_addFileAction->setEnabled(false);
+	connect(m_addFileAction, &QAction::triggered, m_fileView, &FileTreeView::addFile);
+
+	m_deleteFileAction = new QAction(tr("Delete file"), this);
+	m_deleteFileAction->setStatusTip(tr("Delete file..."));
+	m_deleteFileAction->setEnabled(false);
+	connect(m_deleteFileAction, &QAction::triggered, m_fileView, &FileTreeView::deleteFile);
+
+	//----------------------------------
+	m_SeparatorAction1 = new QAction(this);
+	m_SeparatorAction1->setSeparator(true);
+
+	m_checkOutAction = new QAction(tr("CheckOut"), this);
+	m_checkOutAction->setStatusTip(tr("Check out file for edit"));
+	m_checkOutAction->setEnabled(false);
+	connect(m_checkOutAction, &QAction::triggered, m_fileView, &FileTreeView::checkOutFile);
+
+	m_checkInAction = new QAction(tr("CheckIn"), this);
+	m_checkInAction->setStatusTip(tr("Check in changes"));
+	m_checkInAction->setEnabled(false);
+	connect(m_checkInAction, &QAction::triggered, m_fileView, &FileTreeView::checkInFile);
+
+	m_undoChangesAction = new QAction(tr("Undo Changes..."), this);
+	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
+	m_undoChangesAction->setEnabled(false);
+	connect(m_undoChangesAction, &QAction::triggered, m_fileView, &FileTreeView::undoChangesFile);
+
+	//----------------------------------
+	m_SeparatorAction2 = new QAction(this);
+	m_SeparatorAction2->setSeparator(true);
+
+	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction->setStatusTip(tr("Refresh object list"));
+	m_refreshAction->setEnabled(false);
+	connect(m_refreshAction, &QAction::triggered, m_fileView, &FileTreeView::refreshFileTree);
+
+	return;
+}
+
+void FilesTabPage::setActionState()
+{
+	// Disable all
+	//
+	m_addFileAction->setEnabled(false);
+	m_deleteFileAction->setEnabled(false);
+	m_checkOutAction->setEnabled(false);
+	m_checkInAction->setEnabled(false);
+	m_undoChangesAction->setEnabled(false);
+	m_refreshAction->setEnabled(false);
+
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	// Refresh
+	//
+	m_refreshAction->setEnabled(true);
+
+	// --
+	//
+	QModelIndexList selectedIndexList = m_fileView->selectionModel()->selectedRows();
+
+	// Add Action
+	//
+	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
+
+	// Delete Items action
+	//
+	m_deleteFileAction->setEnabled(false);
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const FileTreeModelItem* file = m_fileModel->fileItem(mi);
+		assert(file);
+
+		if (file->state() == VcsState::CheckedIn /*&&
+			file->action() != VcsItemAction::Deleted*/)
+		{
+			m_deleteFileAction->setEnabled(true);
+			break;
+		}
+
+		if (file->state() == VcsState::CheckedOut &&
+			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
+			&& file->action() != VcsItemAction::Deleted)
+		{
+			m_deleteFileAction->setEnabled(true);
+			break;
+		}
+	}
+
+	// CheckIn, CheckOut, Undo
+	//
+	bool canAnyBeCheckedIn = false;
+	bool canAnyBeCheckedOut = false;
+
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const FileTreeModelItem* file = m_fileModel->fileItem(mi);
+		assert(file);
+
+		if (file->state() == VcsState::CheckedOut &&
+			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+		{
+			canAnyBeCheckedIn = true;
+		}
+
+		if (file->state() == VcsState::CheckedIn)
+		{
+			canAnyBeCheckedOut = true;
+		}
+
+		// Don't need to go further
+		//
+		if (canAnyBeCheckedIn == true &&
+			canAnyBeCheckedIn == true )
+		{
+			break;
+		}
+	}
+
+	m_checkInAction->setEnabled(canAnyBeCheckedIn);
+	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
+	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 
 	return;
 }
@@ -627,5 +945,27 @@ void FilesTabPage::projectOpened()
 void FilesTabPage::projectClosed()
 {
 	this->setEnabled(false);
+	return;
+}
+
+void FilesTabPage::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+{
+	Q_UNUSED(selected);
+	Q_UNUSED(deselected);
+
+	setActionState();
+
+	return;
+}
+
+void FilesTabPage::modelDataChanged(const QModelIndex& topLeft,
+									const QModelIndex& bottomRight, const QVector<int>& roles /*= QVector<int>()*/)
+{
+	Q_UNUSED(topLeft);
+	Q_UNUSED(bottomRight);
+	Q_UNUSED(roles);
+
+	setActionState();
+
 	return;
 }
