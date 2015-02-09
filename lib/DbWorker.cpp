@@ -3661,6 +3661,11 @@ int DbWorker::db_getProjectVersion(QSqlDatabase db)
 
 bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId) const
 {
+	//qDebug() << Q_FUNC_INFO << " FileId = " << q.value(0).toInt();
+	//qDebug() << Q_FUNC_INFO << " Deleted = " << q.value(1).toBool();
+	//qDebug() << Q_FUNC_INFO << " CheckedOut = " << q.value(2).toBool();
+	//qDebug() << Q_FUNC_INFO << " Action = " << static_cast<int>(q.value(3).toInt());
+
 	assert(fileInfo);
 
 	int fileId = q.value(0).toInt();

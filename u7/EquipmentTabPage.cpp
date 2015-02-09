@@ -549,7 +549,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
 	auto mb = QMessageBox::question(
 		m_parentWidget,
 		tr("Undo Changes"),
-		tr("Do you want undo pending changes? All selected objectes changes will be lost!"));
+		tr("Do you want to undo pending changes? All selected objects' changes will be lost!"));
 
 	if (mb == QMessageBox::No)
 	{

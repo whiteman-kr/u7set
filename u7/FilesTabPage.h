@@ -11,7 +11,7 @@ class FileTreeModelItem : public DbFileInfo
 {
 public:
 	FileTreeModelItem();
-	FileTreeModelItem(const DbFileInfo& file);
+	explicit FileTreeModelItem(const DbFileInfo& file);
 	virtual ~FileTreeModelItem();
 
 	FileTreeModelItem* parent();
@@ -20,6 +20,8 @@ public:
 
 	FileTreeModelItem* child(int index) const;
 	int childIndex(FileTreeModelItem* child) const;
+
+	FileTreeModelItem* childByFileId(int fileId) const;
 
 	std::shared_ptr<FileTreeModelItem> childSharedPtr(int index);
 
@@ -68,6 +70,10 @@ public:
 	std::shared_ptr<FileTreeModelItem> fileItemSharedPtr(QModelIndex& index);
 
 	void addFile(QModelIndex& parentIndex, std::shared_ptr<FileTreeModelItem>& file);
+	void removeFile(QModelIndex index);
+	void updateFile(QModelIndex index, const DbFileInfo& file);
+
+	void refresh();
 
 public slots:
 	void projectOpened();
