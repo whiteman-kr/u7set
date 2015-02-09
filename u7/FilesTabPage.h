@@ -121,6 +121,8 @@ public slots:
 	void checkOutFile();
 	void checkInFile();
 	void undoChangesFile();
+	void getLatestVersion();
+	void setWorkcopy();
 	void refreshFileTree();
 
 	// Protected props
@@ -171,8 +173,11 @@ private:
 	QAction* m_undoChangesAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction2 = nullptr;
-	QAction* m_refreshAction = nullptr;
+	QAction* m_getLatestVersionAction = nullptr;
+	QAction* m_setWorkcopyAction = nullptr;
 	//----------------------------------
+	QAction* m_SeparatorAction3 = nullptr;
+	QAction* m_refreshAction = nullptr;
 };
 
 

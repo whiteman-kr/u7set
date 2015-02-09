@@ -1057,6 +1057,172 @@ void FileTreeView::undoChangesFile()
 	return;
 }
 
+void FileTreeView::getLatestVersion()
+{
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> files;
+	files.reserve(static_cast<size_t>(selectedIndexList.size()));
+
+	for (QModelIndex& mi : selectedIndexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid any actions to root items
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		assert(f);
+
+		files.push_back(*f);
+	}
+
+	if (files.empty() == true)
+	{
+		// Nothing to do
+		//
+		return;
+	}
+
+	// Select destination folder
+	//
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(),
+													QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (dir.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Get files from the database
+	//
+	std::vector<std::shared_ptr<DbFile>> out;
+
+	bool ok = db()->getLatestVersion(files, &out, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Save files to disk
+	//
+	for (unsigned int i = 0; i < out.size(); i++)
+	{
+		bool writeResult = out[i]->writeToDisk(dir);
+
+		if (writeResult == false)
+		{
+			QMessageBox msgBox;
+			msgBox.setText(tr("Write file error."));
+			msgBox.setInformativeText(tr("Cannot write file %1.").arg(out[i]->fileName()));
+			msgBox.exec();
+		}
+	}
+
+	return;
+}
+
+void FileTreeView::setWorkcopy()
+{
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> files;
+	files.reserve(static_cast<size_t>(selectedIndexList.size()));
+
+	for (QModelIndex& mi : selectedIndexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid any actions to root items
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		assert(f);
+
+		if (f->state() == VcsState::CheckedOut &&
+			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
+		{
+			files.push_back(*f);
+		}
+	}
+
+	if (files.size() != 1)
+	{
+		// Which file?
+		//
+		return;
+	}
+
+	auto fileInfo = files[0];
+
+	// Select file
+	//
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo);
+
+	bool readResult = file->readFromDisk(fileName);
+	if (readResult == false)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("Can't read file %1.").arg(fileName));
+		mb.exec();
+		return;
+	}
+
+	// Set file id for DbStore setWorkcopy
+	//
+	file->setFileId(fileInfo.fileId());
+	file->setFileName(fileInfo.fileName());
+
+	std::vector<std::shared_ptr<DbFile>> workcopyFiles;
+	workcopyFiles.push_back(file);
+
+	db()->setWorkcopy(workcopyFiles, this);
+
+	// Update files state
+	//
+	for (const std::shared_ptr<DbFile>& fi : workcopyFiles)
+	{
+		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
+			[&fi, this](QModelIndex& mi)
+			{
+				FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+				assert(f);
+				return f->fileId() == fi->fileId();
+			});
+
+		assert(mipos != selectedIndexList.end());
+
+		if (mipos != selectedIndexList.end())
+		{
+			fileTreeModel()->updateFile(*mipos, *fi);
+		}
+	}
+
+
+	return;
+}
+
 void FileTreeView::refreshFileTree()
 {
 	fileTreeModel()->refresh();
@@ -1122,6 +1288,10 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_fileView->addAction(m_undoChangesAction);
 	// -----------------
 	m_fileView->addAction(m_SeparatorAction2);
+	m_fileView->addAction(m_getLatestVersionAction);
+	m_fileView->addAction(m_setWorkcopyAction);
+	// -----------------
+	m_fileView->addAction(m_SeparatorAction3);
 	m_fileView->addAction(m_refreshAction);
 	// -----------------
 
@@ -1197,6 +1367,21 @@ void FilesTabPage::createActions()
 	m_SeparatorAction2 = new QAction(this);
 	m_SeparatorAction2->setSeparator(true);
 
+	m_getLatestVersionAction = new QAction(tr("Get Latest Version"), this);
+	m_getLatestVersionAction->setStatusTip(tr("Get the latest version (workcopy if cheked out)"));
+	m_getLatestVersionAction->setEnabled(false);
+	connect(m_getLatestVersionAction, &QAction::triggered, m_fileView, &FileTreeView::getLatestVersion);
+
+	m_setWorkcopyAction = new QAction(tr("Set Workcopy..."), this);
+	m_setWorkcopyAction->setStatusTip(tr("Set work copy of the file(s)..."));
+	m_setWorkcopyAction->setEnabled(false);
+	connect(m_setWorkcopyAction, &QAction::triggered, m_fileView, &FileTreeView::setWorkcopy);
+
+
+	//----------------------------------
+	m_SeparatorAction3 = new QAction(this);
+	m_SeparatorAction3->setSeparator(true);
+
 	m_refreshAction = new QAction(tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh object list"));
 	m_refreshAction->setEnabled(false);
@@ -1214,6 +1399,8 @@ void FilesTabPage::setActionState()
 	m_checkOutAction->setEnabled(false);
 	m_checkInAction->setEnabled(false);
 	m_undoChangesAction->setEnabled(false);
+	m_getLatestVersionAction->setEnabled(false);
+	m_setWorkcopyAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
@@ -1257,7 +1444,7 @@ void FilesTabPage::setActionState()
 		}
 	}
 
-	// CheckIn, CheckOut, Undo
+	// CheckIn, CheckOut, Undo, Get/set Workcopy
 	//
 	bool canAnyBeCheckedIn = false;
 	bool canAnyBeCheckedOut = false;
@@ -1290,6 +1477,9 @@ void FilesTabPage::setActionState()
 	m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
+
+	m_getLatestVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
+	m_setWorkcopyAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
 
 	return;
 }
