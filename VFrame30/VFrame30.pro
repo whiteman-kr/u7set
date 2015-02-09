@@ -38,6 +38,32 @@ CONFIG(release, debug|release) {
 }
 
 
+# Force prebuild version control info
+#
+# for creating version.h at first build
+win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
+unix:system([ -e ./version.h ] || touch ./version.h)
+# for any build
+versionTarget.target = version.h
+versionTarget.depends = FORCE
+win32 {
+    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+        nmake & \
+        chdir $$PWD & \
+        $$PWD/../GetGitProjectVersion.exe $$PWD/VFrame30.pro
+}
+unix {
+    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+        make; \
+        cd $$PWD; \
+        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/VFrame30.pro
+}
+PRE_TARGETDEPS += version.h
+QMAKE_EXTRA_TARGETS += versionTarget
+
+
 OTHER_FILES += \
     ../Proto/proto_compile.bat \
     ../Proto/serialization.proto \
@@ -84,7 +110,8 @@ HEADERS += VFrame30Lib_global.h \
     LogicScheme.h \
     DiagScheme.h \
     WiringScheme.h \
-    SchemeView.h
+    SchemeView.h \
+    version.h
 
 SOURCES += \
     VideoItem.cpp \
