@@ -552,22 +552,22 @@ public:
     explicit            LinearityOption(const LinearityOption& from, QObject *parent = 0);
                         ~LinearityOption();
 
-    LinearityPointBase  m_pointBase;                               // list of measurement points
+    LinearityPointBase  m_pointBase;                                    // list of measurement points
 
-    double              m_errorValue = 0.5;                           // permissible error is given by specified documents
-    double              m_errorCtrl = 0.1;                            // control error is given by metrologists
-    int                 m_errorType = ERROR_TYPE_REDUCE;      // type of error absolute or reduced
-    bool                m_errorCalcBySCO = false;                     // сalculate error by standard deviation
+    double              m_errorValue = 0.2;                             // permissible error is given by specified documents
+    double              m_errorCtrl = 0.1;                              // control error is given by metrologists
+    int                 m_errorType = ERROR_TYPE_REDUCE;                // type of error absolute or reduced
+    bool                m_errorCalcBySCO = false;                       // сalculate error by standard deviation
 
-    int                 m_measureTimeInPoint = 1;                     // time, in seconds, during which will be made ​​N measurements at each point
-    int                 m_measureCountInPoint = 20;                   // количество измерений в точке, согласно госту МИ 2002-89 приложение 7
+    int                 m_measureTimeInPoint = 1;                       // time, in seconds, during which will be made ​​N measurements at each point
+    int                 m_measureCountInPoint = 20;                     // количество измерений в точке, согласно госту МИ 2002-89 приложение 7
 
-    int                 m_rangeType = LO_RANGE_TYPE_MANUAL;           // type of division measure range: manual - 0 or automatic - 1
-    double              m_lowLimitRange = 0;                          // lower limit of the range for automatic division
-    double              m_highLimitRange = 100;                       // high limit of the range for automatic division
+    int                 m_rangeType = LO_RANGE_TYPE_MANUAL;             // type of division measure range: manual - 0 or automatic - 1
+    double              m_lowLimitRange = 0;                            // lower limit of the range for automatic division
+    double              m_highLimitRange = 100;                         // high limit of the range for automatic division
 
-    int                 m_viewType = LO_VIEW_TYPE_SIMPLE;             // type of measurements list extended or simple
-    bool                m_showOutputRangeColumn = false;              // show column output values
+    int                 m_viewType = LO_VIEW_TYPE_SIMPLE;               // type of measurements list extended or simple
+    bool                m_showOutputRangeColumn = false;                // show column output values
 
     void                recalcPoints(int count = -1);
 
@@ -575,6 +575,59 @@ public:
     void                save();
 
     LinearityOption&    operator=(const LinearityOption& from);
+};
+
+// ==============================================================================================
+
+#define					COMPARATOR_OPTIONS_KEY          "Options/Comparator/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		ComparatorParamName[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Limit error"),
+                        QT_TRANSLATE_NOOP("Options.h", "Control error"),
+                        QT_TRANSLATE_NOOP("Options.h", "Start value"),
+                        QT_TRANSLATE_NOOP("Options.h", "Error type"),
+                        QT_TRANSLATE_NOOP("Options.h", "Enable measure hysteresis"),
+                        QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
+                        QT_TRANSLATE_NOOP("Options.h", "Additional check on the switch сomparator"),
+};
+
+const int				CO_PARAM_COUNT				= sizeof(ComparatorParamName)/sizeof(char*);
+
+const int				CO_PARAM_ERROR				= 0,
+                        CO_PARAM_ERROR_CTRL			= 1,
+                        CO_PARAM_START_VALUE		= 2,
+                        CO_PARAM_ERROR_TYPE			= 3,
+                        CO_PARAM_ENABLE_HYSTERESIS	= 4,
+                        CO_PARAM_COMPARATOR_NO      = 5,
+                        CO_PARAM_ADDITIONAL_CHECK   = 6;
+
+// ----------------------------------------------------------------------------------------------
+
+class ComparatorOption : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit            ComparatorOption(QObject *parent = 0);
+    explicit            ComparatorOption(const ComparatorOption& from, QObject *parent = 0);
+                        ~ComparatorOption();
+
+    double				m_errorValue = 0.2;                             // permissible error is given by specified documents
+    double				m_errorCtrl = 0.1;                              // control error is given by metrologists
+    double				m_startValue = 0.1;                             // start value is given by metrologists
+    int					m_errorType = ERROR_TYPE_REDUCE;                // type of error absolute or reduced
+
+    bool				m_enableMeasureHysteresis = false;              // enable flag to measure hysteresis of сomparator
+    int					m_startComparatorNo = 0;                        // start the measurement with the сomparators under the number ...
+    bool				m_additionalCheck = true;                       // additional check on the stitch сomparator
+
+    void				load();
+    void				save();
+
+    ComparatorOption&   operator=(const ComparatorOption& from);
 };
 
 // ==============================================================================================
@@ -647,6 +700,7 @@ private:
     DatabaseOption      m_database;
     ReportOption        m_report;
     LinearityOption     m_linearity;
+    ComparatorOption    m_comparator;
     BackupOption        m_backup;
 
 public:
@@ -668,6 +722,9 @@ public:
 
     LinearityOption&    linearity() { return m_linearity; }
     void                setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
+
+    ComparatorOption&   comparator() { return m_comparator; }
+    void                setComparator(const ComparatorOption& comparator) { m_comparator = comparator; }
 
     BackupOption&       backup() { return m_backup; }
     void                etBackup(const BackupOption& backup) { m_backup = backup; }

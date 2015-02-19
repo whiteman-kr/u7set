@@ -39,11 +39,11 @@ const int                       OPTION_PAGE_UNKNOWN				= -1,
                                 OPTION_PAGE_TCP_IP              = 0,
                                 OPTION_PAGE_LINEARETY_MEASURE	= 1,
                                 OPTION_PAGE_LINEARETY_POINT		= 2,
-                                OPTION_PAGE_SETTING_MEASURE		= 3,
+                                OPTION_PAGE_COMPARATOR_MEASURE	= 3,
                                 OPTION_PAGE_MEASURE_VIEW_TEXT	= 4,
                                 OPTION_PAGE_MEASURE_VIEW_COLUMN	= 5,
                                 OPTION_PAGE_SIGNAL_INFO			= 6,
-                                OPTION_PAGE_REPORT             = 7,
+                                OPTION_PAGE_REPORT              = 7,
                                 OPTION_PAGE_DATABASE			= 8,
                                 OPTION_PAGE_BACKUP				= 9;
 

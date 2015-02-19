@@ -21,11 +21,11 @@
         <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
     </options>
     <datasources>
-        <datasource id="DataSource1" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE" connOpt="db">SELECT * FROM LinearetyMeasure</datasource>
         <datasource id="DataSource2" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE">SELECT * FROM ReportOption 
 INNER JOIN LinearetyMeasure 
 ON ReportOption.LinkObjectID = LinearetyMeasure.ObjectID 
 GROUP BY ReportID</datasource>
+        <datasource id="DataSource1" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE" connOpt="db">SELECT * FROM LinearetyMeasure</datasource>
     </datasources>
     <variables/>
     <pageheader id="PH" height="57.234" autoHeight="true">
@@ -108,10 +108,10 @@ GROUP BY ReportID</datasource>
         </field>
     </pageheader>
     <pagefooter id="PF" height="10.000">
-        <field id="TTF91" zValue="0" posX="166.688" posY="0.000" width="31.750" height="4.762" resource="tpl" template="true" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="tpl">
+        <field id="TTF91" zValue="0" posX="166.688" posY="1.587" width="31.750" height="4.762" resource="tpl" template="true" fontName="Arial" fontSize="10" alignment="34" tr="1" type="txt" ftype="tpl">
             <tr lang="en">page  $V{gpageno}</tr>
         </field>
-        <field id="4ZJ7U" typeId="131074" zValue="1" posX="1.587" posY="0.000" width="31.750" height="4.762" description="Date" resource="datasource" fontName="Arial" fontSize="10" alignment="1" tr="1" type="txt" ftype="ds">
+        <field id="4ZJ7U" typeId="131074" zValue="1" posX="1.587" posY="1.587" width="31.750" height="4.762" description="Date" resource="datasource" fontName="Arial" fontSize="10" alignment="1" tr="1" type="txt" ftype="ds">
             <tr lang="en">DataSource2.Date</tr>
         </field>
     </pagefooter>
