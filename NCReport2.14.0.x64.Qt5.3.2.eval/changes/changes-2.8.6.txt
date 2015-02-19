@@ -1,0 +1,23 @@
+****************************************************************************
+* NCReport 2.8.6
+* Release date: 30.Sep.2012
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+New features:
+
+- 0071341: [General] Image item direction: Left/Center/Right 
+- 0071491: [Designer] Enabling Parameter and Datasource evaluation in a Field's "Template arg() string" settings.
+- 0071493: [General] To extend the subquery system to Item Model data sources
+- 0071489: [Designer] testing sql-query in data source definition
+- 0071494: [General] SubReport function to extend 
+
+Fixes:
+
+- 0071311: [Report engine library] Problems with handling an image's size / right border 
+- 0071492: [General] Label/Field Font Capitalization and Letter Spacing Issue 
+- 0071487: [Designer] Designer - field name - suggestions - take over the capitalization 
+- 0071486: [Designer] no update for field name suggestions when changing delimiter in text datasource 
+- 0071485: [Designer] Designer crashes due to typing mistake in cross tab (column title source) 
+- 0071484: [Report engine library] crash on fast report closing 
+- Other small fixes
+

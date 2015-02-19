@@ -1,0 +1,56 @@
+****************************************************************************
+* NCReport 2.5.1
+* It is a bug-fix release with a new feature.
+* Release date: 22.02.2010
+****************************************************************************
+New features
+------------
+
+#206 Barcode content as parameter
+     In many cases it is very handy if one could set the content of a barcode via parameter. 
+	 For example: my application prints a documentID on each Invoice, which is the same for 
+     the whole report at this time, so it makes no sense putting it to the data source
+
+Fixed bugs
+----------
+
+#180 Fixed Image height or width keeping aspect ratio
+     Since image size not always the same size, image element can have an option to use 
+     the actual image size, and not the fixed size that defined by the desiner.
+     All items below the image will position after the actual image height, 
+     (instead of empty spcae between the image and the items below today).
+
+#204 Slow QImage printout in high resolution - fixed. 
+	 Without smooth transformation, the image printing now is very fast.
+
+#205 Qt4.3 Backward compatibility
+     NCReport should be able to compile under Qt4.3 >=
+     Some features should be backported or version dependent.
+
+#207 PrintWhen expression problem in group footer
+     For example i have test data of 9 row's grouped into 3 groups. Each group 
+     has header and footer.
+     When I try to display certain column value in header of the group, it displays 
+     the first rows (of that group) value. I figured out, that in header I have little 
+     bit different situation - if I try to display column value, it takes it from the 
+     last group row.
+     Till here everything is splendid, but the problem is, that PrintWhen expression 
+     is not working correctly in footer, 
+     because it takes not the last row of that group, but the next group first row value.
+     PrintWhen expressions are working perfectly in header.
+
+#208 Text fields in page footer are not printed sometimes
+     Text fields in page footer, which are filled by a parameter are only printed on the 
+     last page's footer, on all other pages, there is no text.
+
+#209 CUSTOM page size is ignored both in engine and designer 
+     "CUSTOM" page size is ignored (parameter is not saved).
+
+#210 connID if is empty, then "qt_sql_default_conneciton" name is not working
+     (when creating QSqlDatabase without specifying it's name).
+
+#211 Image without "keep aspect ratio" is printed in different size then its 
+     shown in preview window.
+
+#214 Status of Fields/Texts in page footer
+

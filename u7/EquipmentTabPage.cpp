@@ -354,6 +354,8 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 
 	parentObject->sortChildrenByPlace();
 
+	endInsertRows();
+
 	return;
 }
 
@@ -547,7 +549,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
 	auto mb = QMessageBox::question(
 		m_parentWidget,
 		tr("Undo Changes"),
-		tr("Do you want undo pending changes? All selected objectes changes will be lost!"));
+		tr("Do you want to undo pending changes? All selected objects' changes will be lost!"));
 
 	if (mb == QMessageBox::No)
 	{
@@ -755,6 +757,8 @@ bool EquipmentModel::isConfigurationMode() const
 EquipmentView::EquipmentView(DbController* dbcontroller) :
 	m_dbController(dbcontroller)
 {
+	assert(m_dbController);
+
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setUniformRowHeights(true);
@@ -1273,7 +1277,6 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	connect(dbController(), &DbController::projectClosed, this, &EquipmentTabPage::projectClosed);
 
 	connect(m_equipmentView->selectionModel(), & QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
-
 	connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 
 	connect(m_propertyEditor, &PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
@@ -1387,7 +1390,7 @@ void EquipmentTabPage::CreateActions()
 	m_SeparatorAction4 = new QAction(this);
 	m_SeparatorAction4->setSeparator(true);
 
-	m_moduleConfigurationAction = new QAction(tr("Module Configuration..."), this);
+	m_moduleConfigurationAction = new QAction(tr("Modules Configuration..."), this);
 	m_moduleConfigurationAction->setStatusTip(tr("Edit module configuration"));
 	m_moduleConfigurationAction->setEnabled(false);
 	connect(m_moduleConfigurationAction, &QAction::triggered, this, &EquipmentTabPage::moduleConfiguration);
@@ -1657,34 +1660,38 @@ void EquipmentTabPage::modeSwitched()
 
 void EquipmentTabPage::moduleConfiguration()
 {
-	//assert(m_propertyEditor != nullptr);
-
-	// Get objects from the selected rows
+	// Show modules configurations dialog
 	//
-	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
-
-	if (selectedIndexList.size() != 1)
-	{
-		//m_propertyEditor->clear();
-		return;
-	}
-
-	std::shared_ptr<QObject> module;
-
-	std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObjectSharedPtr(selectedIndexList[0]);
-
-	if (device.get() == nullptr || dynamic_cast<Hardware::DeviceModule*>(device.get()) == nullptr)
-	{
-		assert(device);
-		assert(dynamic_cast<Hardware::DeviceModule*>(device.get()) != nullptr);
-		return;
-	}
 
 
+//	//assert(m_propertyEditor != nullptr);
 
-	// Set objects to the PropertyEditor
-	//
-	//m_propertyEditor->setObjects(devices);
+//	// Get objects from the selected rows
+//	//
+//	QModelIndexList selectedIndexList = m_equipmentView->selectionModel()->selectedRows();
+
+//	if (selectedIndexList.size() != 1)
+//	{
+//		//m_propertyEditor->clear();
+//		return;
+//	}
+
+//	std::shared_ptr<QObject> module;
+
+//	std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObjectSharedPtr(selectedIndexList[0]);
+
+//	if (device.get() == nullptr || dynamic_cast<Hardware::DeviceModule*>(device.get()) == nullptr)
+//	{
+//		assert(device);
+//		assert(dynamic_cast<Hardware::DeviceModule*>(device.get()) != nullptr);
+//		return;
+//	}
+
+
+
+//	// Set objects to the PropertyEditor
+//	//
+//	//m_propertyEditor->setObjects(devices);
 
 	return;
 }

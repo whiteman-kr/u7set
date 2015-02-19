@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.4.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">One little lamb is going on the field
+Two
+Three
+Four
+Five
+Six</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="19.510" autoHeight="true">
+        <field zValue="0" resource="static" autoHeight="true" zoneID="3" posX="0.000" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" wordbreak="true" forecolor="#000000" type="txt" ftype="ds">col0</field>
+        <label zValue="1" resource="static" autoHeight="true" zoneID="3" posX="70.556" posY="0.000" width="99.419" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" wordbreak="true" forecolor="#000000">Fusce vulputate est sed risus feugiat faucibus. Nunc pulvinar sodales leo, a scelerisque orci aliquam ac.</label>
+        <text zValue="2" resource="static" zoneID="4" posX="0.000" posY="6.414" width="169.975" height="11.225" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000">&lt;table width=&quot;100%&quot; cellspacing=&quot;0&quot; border=&quot;0&quot;&gt;&lt;tr class=&quot;address&quot;&gt;
+&lt;td width=&quot;30%&quot; align=&quot;left&quot;&gt;Copyright &amp;copy; 2008 Nokia&lt;/td&gt;
+&lt;td width=&quot;40%&quot; align=&quot;center&quot;&gt;&lt;a href=&quot;trademarks.html&quot;&gt;Trademarks&lt;/a&gt;&lt;/td&gt;
+&lt;td width=&quot;30%&quot; align=&quot;right&quot;&gt;&lt;div align=&quot;right&quot;&gt;&lt;b&gt;Qt 4.4.3&lt;/b&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;/tr&gt;&lt;/table&gt;</text>
+    </pageheader>
+    <pagefooter id="pfoot" height="10.000">
+        <text zValue="1" resource="static" autoHeight="true" posX="0.000" posY="0.000" width="169.975" height="5.078" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;Fusce vulputate est sed risus feugiat faucibus. &lt;/span&gt;&lt;span style=&quot; font-family:'Sans Serif'; font-weight:600;&quot;&gt;Nunc pulvinar&lt;/span&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt; sodales leo, a scelerisque orci aliquam ac.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="14.432" autoHeight="true" datasource="DataSource1" startsOnNewPage="false">
+            <items>
+                <text zValue="0" resource="static" autoHeight="true" zoneID="18" posX="0.000" posY="2.405" width="148.327" height="9.621" useFont="false">&lt;h1&gt;NCReport Release Notes&lt;/h1&gt;
+&lt;h3&gt;v2.1.3&lt;/h3&gt;
+&lt;h4&gt;Release date: 10.Oct.2008&lt;/h4&gt;
+&lt;h5&gt;Bugfixes:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Replacing QPixmap to QImage in report engine made the image printing / rendering very slow and unefficient. Now it's possible to use both two by using or leaving
+USE_QIMAGE_INSTEAD_OF_QPIXMAP macro at ncreport.pro and designer.pro&lt;/li&gt;
+&lt;/ul&gt;
+</text>
+                <line zValue="1" resource="static" zoneID="17" fromX="0.000" fromY="0.802" toX="168.371" toY="0.802" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                <field zValue="2" resource="static" autoHeight="true" zoneID="18" posX="149.129" posY="3.207" width="18.708" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" wordbreak="true" forecolor="#000000" type="txt" ftype="ds">col0</field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

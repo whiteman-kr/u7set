@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.5.0 beta" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="data" type="txt" openRole="begin" source="static" columnDelimiter="tab">233680114523	2336501
+588741256388	0217842
+468443124787	2026350
+125765247805	3201408
+890234014470	0496805</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="21.380">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="169.975" height="9.621" fontName="Nimbus Roman No9 L" fontSize="20" fontUnderline="true" alignment="36" wordbreak="true" forecolor="#000000">Barcode demo</label>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="9.621" width="169.975" height="9.621" fontName="Nimbus Roman No9 L" fontSize="10" alignment="36" wordbreak="true" forecolor="#000000">This is a demonstration of barcode rendering feature with supported almost every barcode types.
+For this feature NCReport uses ZINT barcode system as 3rd party library</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="6.150">
+        <field id="0" zValue="0" resource="static" posX="153.939" posY="0.000" width="16.035" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000" type="num" ftype="sys" arg="Page %1">pageno</field>
+        <field id="1" zValue="1" resource="static" posX="0.000" posY="0.000" width="134.697" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="33" wordbreak="true" forecolor="#000000" type="txt" ftype="sys" arg="">appinfo</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="60.667" datasource="data" startsOnNewPage="false">
+            <items>
+                <barcode id="0" zValue="0" resource="datasource" posX="60.934" posY="1.604" width="105.833" height="52.917" barcodeType="13" code="50310218715" heightRatio="50">col0</barcode>
+            </items>
+        </detail>
+    </details>
+</NCReport>

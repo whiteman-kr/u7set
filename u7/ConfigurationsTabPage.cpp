@@ -12,7 +12,7 @@
 //
 //
 ConfigurationFileView::ConfigurationFileView(DbController* dbcontroller) :
-	FileView(dbcontroller, McFileName)
+	FileListView(dbcontroller, McFileName)
 {
 	filesModel().setFilter("cdf");
 

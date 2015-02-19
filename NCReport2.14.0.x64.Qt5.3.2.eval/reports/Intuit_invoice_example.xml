@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.6.0 beta" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="data" type="txt" openRole="begin" source="static" columnDelimiter="semicolon">28;Rassle Sauerkraut;1;6;45.00;38.0000;pcs;pcs;0;0
+29;Tharinger Rostbratwurst;1;6;123.00;80.0000;pcs;pcs;0;0
+30;Nord-Ost Matjeshering;2;6;25.00;22.0000;pcs;pcs;15;0
+31;Gorgonzola Telino Bla bla bla bla this is a longer text;0;2;12.00;11.0000;pcs;pcs;20;0
+32;Mascarpone Fabioli;1;6;32.00;27.0000;pcs;pcs;25;0
+33;Geitost;3;4;2.00;2.0000;pcs;pcs;20;0</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="76.691">
+        <rectangle id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="52.405" height="14.316" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#ffffff" fillStyle="no"/>
+        <line id="1" zValue="1" resource="static" fromX="0.000" fromY="4.857" toX="52.405" toY="4.857" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="2" zValue="2" resource="static" fromX="25.564" fromY="0.000" toX="25.564" toY="14.316" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <rectangle id="3" zValue="3" resource="static" posX="0.000" posY="22.240" width="77.969" height="38.090" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#ffffff" fillStyle="no"/>
+        <rectangle id="4" zValue="4" resource="static" posX="90.751" posY="22.240" width="77.969" height="38.090" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#ffffff" fillStyle="no"/>
+        <line id="5" zValue="5" resource="static" fromX="0.000" fromY="30.165" toX="77.969" toY="30.165" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="6" zValue="6" resource="static" fromX="90.751" fromY="30.165" toX="168.720" toY="30.165" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <rectangle id="7" zValue="7" resource="static" posX="0.000" posY="68.510" width="168.720" height="160.795" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#ffffff" fillStyle="no"/>
+        <line id="8" zValue="8" resource="static" fromX="0.000" fromY="74.901" toX="168.720" toY="74.901" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <label id="9" zValue="9" resource="static" posX="1.534" posY="23.774" width="18.661" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000">Bill To</label>
+        <label id="10" zValue="10" resource="static" posX="92.285" posY="23.774" width="18.661" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000">Ship To</label>
+        <label id="11" zValue="11" resource="static" posX="1.534" posY="70.044" width="9.459" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="2" forecolor="#000000">No</label>
+        <label id="12" zValue="12" resource="static" posX="17.383" posY="70.044" width="15.849" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000">Item</label>
+        <label id="13" zValue="13" resource="static" posX="38.090" posY="70.044" width="52.405" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000">Description</label>
+        <label id="14" zValue="14" resource="static" posX="108.134" posY="70.044" width="18.661" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000">Qty / kgs</label>
+        <label id="15" zValue="15" resource="static" posX="128.841" posY="70.044" width="15.849" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000">Rate</label>
+        <label id="16" zValue="16" resource="static" posX="148.013" posY="70.044" width="18.661" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000">Amount</label>
+        <line id="17" zValue="17" resource="static" fromX="15.849" fromY="68.510" toX="15.849" toY="229.050" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="18" zValue="18" resource="static" fromX="36.556" fromY="68.510" toX="36.556" toY="229.050" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="19" zValue="19" resource="static" fromX="106.600" fromY="68.510" toX="106.600" toY="229.050" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="20" zValue="20" resource="static" fromX="127.307" fromY="68.510" toX="127.307" toY="229.050" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="21" zValue="21" resource="static" fromX="144.946" fromY="68.510" toX="144.946" toY="229.050" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <label id="22" zValue="22" resource="static" posX="74.901" posY="0.000" width="95.608" height="11.248" fontName="Nimbus Roman No9 L" fontSize="24" fontWeight="bold" alignment="2" forecolor="#000000">Invoice</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="38.000">
+        <rectangle id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="168.720" height="31.955" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#000000" fillStyle="no"/>
+        <line id="1" zValue="1" resource="static" fromX="0.000" fromY="6.391" toX="168.720" toY="6.391" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="2" zValue="2" resource="static" fromX="103.533" fromY="0.000" toX="103.533" toY="31.955" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="3" zValue="3" resource="static" fromX="103.533" fromY="12.782" toX="168.720" toY="12.782" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="4" zValue="4" resource="static" fromX="103.533" fromY="19.173" toX="168.720" toY="19.173" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <line id="5" zValue="5" resource="static" fromX="103.533" fromY="25.564" toX="168.720" toY="25.564" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="5.040" autoHeight="true" datasource="data" startsOnNewPage="false">
+            <items>
+                <field id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="11.248" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" type="num" ftype="ds" arg="">col0</field>
+                <field id="1" zValue="1" resource="static" posX="17.383" posY="0.000" width="15.849" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">col0</field>
+                <field id="2" zValue="2" resource="static" autoHeight="true" posX="38.090" posY="0.000" width="66.721" height="4.857" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" wordbreak="true" forecolor="#000000" type="txt" ftype="ds" arg="">col1</field>
+                <field id="3" zValue="3" resource="static" posX="108.134" posY="0.000" width="15.849" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" type="num" ftype="ds" arg="">col4</field>
+                <field id="4" zValue="4" resource="static" posX="127.307" posY="0.000" width="14.316" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" type="num" ftype="ds" arg="">col2</field>
+                <field id="5" zValue="5" resource="static" posX="146.479" posY="0.000" width="19.173" height="5.113" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">col5</field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

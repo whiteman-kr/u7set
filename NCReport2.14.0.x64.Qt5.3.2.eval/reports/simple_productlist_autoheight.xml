@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.11.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0.2</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <htmlOpt>{DEFAULT}</htmlOpt>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">SELECT ProductID, ProductName, 
+QuantityPerUnit, UnitPrice, QuantityPerUnit*UnitPrice as value
+FROM products
+WHERE ProductID&gt;2
+ORDER BY ProductID</datasource>
+        <datasource id="plist" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">show processlist;</datasource>
+    </datasources>
+    <variables>
+        <variable id="total_value" type="num" funcType="sum" scope="group" initValue="0">value</variable>
+    </variables>
+    <pageheader id="phead" height="12.030">
+        <label id="95MQ6" zValue="0" posX="0.000" posY="3.175" width="20.902" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="1" wordbreak="true">Product ID</label>
+        <label id="1" zValue="1" posX="22.490" posY="3.175" width="32.015" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="1" wordbreak="true">Product name</label>
+        <label id="2" zValue="2" posX="96.308" posY="3.175" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="1" wordbreak="true">Unit Qty</label>
+        <label id="3" zValue="3" posX="115.358" posY="3.175" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="1" wordbreak="true">Unit price</label>
+        <label id="4" zValue="4" posX="141.023" posY="3.175" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="1" wordbreak="true">Value</label>
+        <line id="5" zValue="5" lineColor="#000000" lineStyle="dash" lineWidth="0.400" fromX="0.000" fromY="10.319" toX="168.275" toY="10.319"/>
+    </pageheader>
+    <pagefooter id="pfoot" height="9.890">
+        <line id="OHREB" zValue="0" lineColor="#000000" lineStyle="dot" lineWidth="0.100" fromX="3.175" fromY="1.587" toX="160.337" toY="1.587"/>
+        <field id="1" zValue="1" posX="137.848" posY="3.175" width="17.727" height="5.027" resource="sysvar" fontName="Arial" fontSize="10" fontItalic="true" alignment="34" wordbreak="true" type="num" ftype="sys" arg="Page: %1">pageno</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="13.900" autoHeight="true" datasource="DataSource1">
+            <items>
+                <rectangle id="FFUN5" zValue="0" posX="0.000" posY="0.000" width="166.688" height="4.762" printWhen="EVEN" autoHeight="true" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillStyle="solid" fillColor="#f0ecd8" fitTo="zone"/>
+                <field id="1" zValue="1" posX="134.673" posY="0.000" width="20.902" height="3.969" resource="datasource" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="false" arg="">Value</field>
+                <field id="2" zValue="2" posX="3.175" posY="0.000" width="12.700" height="3.969" resource="datasource" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" wordbreak="true" type="num" ftype="ds" arg="">ProductID</field>
+                <field id="3" zValue="3" posX="22.490" posY="0.000" width="41.804" height="3.969" printWhen="$D{productID}!=10" resource="datasource" autoHeight="true" fontName="Arial" fontSize="10" alignment="1" wordbreak="true" type="txt" ftype="ds" arg="">ProductName</field>
+                <field id="4" zValue="4" posX="89.694" posY="0.000" width="14.552" height="3.969" resource="datasource" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="false" arg="">QuantityPerUnit</field>
+                <field id="5" zValue="5" posX="112.183" posY="0.000" width="20.902" height="3.969" resource="datasource" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="false" arg="">UnitPrice</field>
+                <line id="7" zValue="6" zoneID="1" lineColor="#000000" lineStyle="dot" lineWidth="0.100" fromX="-3.175" fromY="7.938" toX="171.450" toY="7.938"/>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="%CONST" resetVariables="total_value" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_Group0" height="1.871"/>
+                    <groupfooter id="GF_Group0" height="9.354">
+                        <field id="2VIDV" zValue="0" posX="134.673" posY="1.587" width="20.902" height="5.027" resource="var" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" localized="true" arg="">total_value</field>
+                        <label id="1" zValue="1" posX="109.008" posY="1.587" width="24.077" height="5.027" fontName="Arial" fontSize="10" alignment="34" wordbreak="true">Total value:</label>
+                        <line id="2" zValue="2" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="107.421" fromY="0.000" toX="158.750" toY="0.000"/>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+        <detail id="D2" height="5.027" datasource="plist">
+            <items>
+                <field id="UFDHO" zValue="0" posX="0.000" posY="0.000" width="34.925" height="4.762" resource="datasource" autoHeight="true" fontName="Arial" fontSize="10" alignment="1" wordbreak="true" type="txt" ftype="ds" arg="">plist.user</field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

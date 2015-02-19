@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.5.3" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="text" type="txt" openRole="begin" source="static" columnDelimiter="tab">One	Two	Three	Vestibulum porttitor consequat leo nec tristique. Phasellus justo ligula, egestas id vulputate eu, bibendum vel mi.	490178019073
+XXXXX	YYYYYY	ZZZZZ	Text2	
+XXXXX	YYYYYY	ZZZZZ	Text3
+XXXXX	YYYYYY	ZZZZZ	There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.
+XXXXX	YYYYYY	ZZZZZ	Text5
+XXXXX	YYYYYY	ZZZZZ	Text6</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="82.315">
+        <text id="0" zValue="0" resource="static" template="true" posX="0.000" posY="16.105" width="105.833" height="44.992" useFont="false">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit.  &lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:14pt; font-weight:600; font-style:italic; color:#aa0000;&quot;&gt;$D{col0}&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; color:#000000;&quot;&gt;Column 1 value:&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; color:#aa0000;&quot;&gt; $D{col1} &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; color:#000000;&quot;&gt;|&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; color:#aa0000;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; font-style:italic; color:#000000;&quot;&gt;Column 2 value:&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; font-style:italic; color:#aa0000;&quot;&gt; $D{col2}&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Phasellus a eros in neque feugiat condimentum sed a dui. Etiam mollis purus ut nunc pharetra adipiscing viverra lectus ultricies. Suspendisse tincidunt molestie interdum. Aenean eget urna enim. Nunc dictum cursus lectus at ultrices. In posuere venenatis risus hendrerit volutpat.&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Current page: &lt;span style=&quot; font-weight:600;&quot;&gt;$V{pageno} &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="0.000" width="51.383" height="12.782" fontName="Nimbus Roman No9 L" fontSize="10" alignment="33" wordbreak="true" forecolor="#000000">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed ante dui, et dignissim turpis. </label>
+        <text id="2" zValue="2" resource="static" posX="105.833" posY="9.714" width="64.165" height="38.601" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" forecolor="#000000" sizeFix="true">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sed ante dui, et dignissim turpis. Maecenas vitae dapibus nisi. &lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vivamus vehicula volutpat nulla at malesuada. &lt;span style=&quot; font-weight:600; font-style:italic; text-decoration: underline;&quot;&gt;Praesent&lt;/span&gt; sit amet elit augue, vitae vulputate enim. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+        <text id="3" zValue="3" resource="static" posX="51.383" posY="0.000" width="117.081" height="7.925" useFont="false">&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; color:#000000;&quot;&gt;&lt;span style=&quot; font-family:'URW Gothic L'; font-size:10pt; font-weight:600; font-style:italic; text-decoration: underline;&quot;&gt;Demonstration&lt;/span&gt;&lt;span style=&quot; font-family:'URW Gothic L'; font-size:10pt; font-weight:600; font-style:italic;&quot;&gt; for &lt;/span&gt;&lt;span style=&quot; font-family:'URW Gothic L'; font-size:10pt; font-weight:600; font-style:italic; color:#ffaa7f;&quot;&gt;HTML&lt;/span&gt;&lt;span style=&quot; font-family:'URW Gothic L'; font-size:10pt; font-weight:600; font-style:italic;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-family:'URW Gothic L'; font-size:10pt; font-weight:600; font-style:italic; color:#5500ff;&quot;&gt;Rich text&lt;/span&gt;&lt;span style=&quot; font-family:'URW Gothic L'; font-size:10pt; font-weight:600; font-style:italic;&quot;&gt; in &lt;/span&gt;&lt;span style=&quot; font-family:'URW Gothic L'; font-size:10pt; font-weight:600; font-style:italic; color:#55aa00;&quot;&gt;NCReport!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+        <text id="4" zValue="4" resource="static" template="true" posX="0.000" posY="60.841" width="105.833" height="19.173" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000" sizeFix="true">&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Nimbus Roman No9 L'; font-size:10pt; font-weight:600; font-style:italic; text-decoration: underline;&quot;&gt;Text from datasource:&lt;/span&gt;&lt;span style=&quot; font-family:'Nimbus Roman No9 L'; font-size:10pt; font-weight:600; font-style:italic;&quot;&gt;  &lt;/span&gt;&lt;span style=&quot; font-family:'Nimbus Roman No9 L'; font-size:10pt; font-weight:600; font-style:italic; color:#0000ff;&quot;&gt;$D{col3}&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+        <barcode id="5" zValue="5" resource="datasource" posX="141.111" posY="48.060" width="29.398" height="16.105" barcodeType="13" code="503102187124" heightRatio="50" scale="1.00">col4</barcode>
+    </pageheader>
+    <pagefooter id="pfoot" height="49.710">
+        <text id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="169.998" height="12.782" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Phasellus a eros in neque feugiat condimentum sed a dui. Etiam mollis purus ut nunc pharetra adipiscing viverra lectus ultricies. Suspendisse tincidunt molestie interdum. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+        <text id="1" zValue="1" resource="static" template="true" posX="0.000" posY="12.782" width="169.998" height="35.278" useFont="false">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit.  &lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:14pt; font-weight:600; font-style:italic; color:#aa0000;&quot;&gt;$D{col0}&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; color:#000000;&quot;&gt;Column 1 value:&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; color:#aa0000;&quot;&gt; $D{col1} &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; color:#000000;&quot;&gt;|&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; color:#aa0000;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; font-style:italic; color:#000000;&quot;&gt;Column 2 value:&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft Sans Serif'; font-size:8pt; font-weight:600; font-style:italic; color:#aa0000;&quot;&gt; $D{col2}&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Phasellus a eros in neque feugiat condimentum sed a dui. Etiam mollis purus ut nunc pharetra adipiscing viverra lectus ultricies. Suspendisse tincidunt molestie interdum. Aenean eget urna enim. Nunc dictum cursus lectus at ultrices. In posuere venenatis risus hendrerit volutpat.&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Current page: &lt;span style=&quot; font-weight:600;&quot;&gt;$V{pageno} &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="5.080" autoHeight="true" datasource="text" startsOnNewPage="false">
+            <items>
+                <field id="0" zValue="0" description="First col" resource="static" posX="0.000" posY="0.000" width="28.887" height="4.857" fontName="Nimbus Roman No9 L" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">col0</field>
+                <field id="1" zValue="1" description="Second col" resource="static" posX="30.421" posY="0.000" width="28.887" height="4.857" fontName="Nimbus Roman No9 L" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">col1</field>
+                <field id="2" zValue="2" description="Third col" resource="static" posX="60.841" posY="0.000" width="28.887" height="4.857" fontName="Nimbus Roman No9 L" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">col2</field>
+                <text id="3" zValue="3" resource="datasource" autoHeight="true" posX="91.518" posY="0.000" width="76.946" height="4.857" useFont="false">col3</text>
+                <line id="4" zValue="4" resource="static" fromX="0.000" fromY="0.511" toX="168.464" toY="0.511" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+            </items>
+        </detail>
+    </details>
+</NCReport>

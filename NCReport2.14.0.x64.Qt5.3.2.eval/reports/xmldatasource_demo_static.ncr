@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.12.2" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="xmlds1" type="xml" openRole="begin" source="static">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE NCReport-Data&gt;
+&lt;NCReportData&gt;
+&lt;parameters&gt;
+ &lt;d type=&quot;string&quot; id=&quot;TransactionNumber&quot;&gt;02236412&lt;/d&gt;
+ &lt;d type=&quot;string&quot; id=&quot;ContactFirstName&quot;&gt;Peter&lt;/d&gt;
+ &lt;d type=&quot;string&quot; id=&quot;ContactLastName&quot;&gt;Gilmore&lt;/d&gt;
+ &lt;d type=&quot;string&quot; id=&quot;ContactEmail&quot;&gt;nobody@company.com&lt;/d&gt;
+ &lt;d type=&quot;string&quot; id=&quot;ReportDate&quot;&gt;2012-12-21 10:00:00.000&lt;/d&gt;
+ &lt;d type=&quot;string&quot; id=&quot;HeaderComments&quot;&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/d&gt;
+ &lt;d type=&quot;date&quot; id=&quot;PrintedDate&quot;&gt;2012-12-21&lt;/d&gt;
+ &lt;d type=&quot;numeric&quot; id=&quot;TotalAmount&quot;&gt;618.50&lt;/d&gt;
+ &lt;d type=&quot;numeric&quot; id=&quot;TaxAmount&quot;&gt;0&lt;/d&gt;
+&lt;/parameters&gt;
+&lt;datasources&gt;
+ &lt;datasource id=&quot;xmlds1&quot;&gt;
+  &lt;columns&gt;
+   &lt;column type=&quot;string&quot;&gt;ProductNumber&lt;/column&gt;
+   &lt;column type=&quot;string&quot;&gt;ProductName&lt;/column&gt;
+   &lt;column type=&quot;string&quot;&gt;Comments&lt;/column&gt;
+   &lt;column type=&quot;string&quot;&gt;VATNumber&lt;/column&gt;
+   &lt;column type=&quot;string&quot;&gt;Description&lt;/column&gt;
+   &lt;column type=&quot;boolean&quot;&gt;IsValid&lt;/column&gt;
+   &lt;column type=&quot;string&quot;&gt;Currency&lt;/column&gt;
+   &lt;column type=&quot;numeric&quot;&gt;NetPrice&lt;/column&gt;
+   &lt;column type=&quot;numeric&quot;&gt;Quantity&lt;/column&gt;
+   &lt;column type=&quot;string&quot;&gt;QuantityUnit&lt;/column&gt;
+  &lt;/columns&gt;
+  &lt;row&gt;
+   &lt;d&gt;CK02214&lt;/d&gt;
+   &lt;d&gt;Computer Monitor&lt;/d&gt;
+   &lt;d&gt;&lt;/d&gt;
+   &lt;d&gt;26540114&lt;/d&gt;
+   &lt;d&gt;&lt;/d&gt;
+   &lt;d&gt;1&lt;/d&gt;
+   &lt;d&gt;EUR&lt;/d&gt;
+   &lt;d&gt;290.00&lt;/d&gt;
+   &lt;d&gt;2&lt;/d&gt;
+   &lt;d&gt;pcs&lt;/d&gt;
+  &lt;/row&gt;
+  &lt;row&gt;
+   &lt;d&gt;BLKD5541&lt;/d&gt;
+   &lt;d&gt;Wireless Keyboard PC-887&lt;/d&gt;
+   &lt;d&gt;&lt;/d&gt;
+   &lt;d&gt;3221444&lt;/d&gt;
+   &lt;d&gt;&lt;/d&gt;
+   &lt;d&gt;1&lt;/d&gt;
+   &lt;d&gt;EUR&lt;/d&gt;
+   &lt;d&gt;38.50&lt;/d&gt;
+   &lt;d&gt;1&lt;/d&gt;
+   &lt;d&gt;pcs&lt;/d&gt;
+  &lt;/row&gt;
+ &lt;/datasource&gt;
+&lt;/datasources&gt;
+&lt;/NCReportData&gt;
+</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="PH" height="44.979">
+        <field id="6163" zValue="0" posX="120.650" posY="0.000" width="47.625" height="4.762" resource="param" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2" type="txt" ftype="par">TransactionNumber</field>
+        <field id="9906" zValue="1" posX="0.000" posY="0.000" width="47.625" height="4.762" resource="param" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" type="txt" ftype="par">ContactFirstName</field>
+        <field id="2681" zValue="2" posX="0.000" posY="4.762" width="47.625" height="4.762" resource="param" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" type="txt" ftype="par">ContactLastName</field>
+        <field id="6542" zValue="3" posX="0.000" posY="9.525" width="47.625" height="4.762" resource="param" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="par">ContactEmail</field>
+        <field id="10137" zValue="4" posX="120.650" posY="4.762" width="47.625" height="4.762" resource="param" fontName="Liberation Sans" fontSize="10" alignment="2" type="txt" ftype="par">ReportDate</field>
+        <field id="15679" zValue="5" posX="0.000" posY="17.462" width="169.862" height="9.525" resource="param" autoHeight="true" fontName="Liberation Sans" fontSize="10" alignment="1" wordbreak="true" type="txt" ftype="par">HeaderComments</field>
+        <barcode id="4486" zValue="6" posX="101.600" posY="0.000" width="15.875" height="14.287" resource="param" barcodeType="58" code="503102187159">TransactionNumber</barcode>
+    </pageheader>
+    <pagefooter id="PF" height="10.000">
+        <field id="14403" zValue="0" posX="120.650" posY="3.175" width="47.625" height="4.762" resource="param" fontName="Liberation Sans" fontSize="10" alignment="34" type="txt" ftype="par" arg="Printed: %1">PrintedDate</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="4.762" datasource="xmlds1">
+            <items>
+                <field id="14508" zValue="0" posX="0.000" posY="0.000" width="31.750" height="4.762" resource="datasource" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="ds">ProductNumber</field>
+                <field id="8497" zValue="1" posX="33.337" posY="0.000" width="68.263" height="4.762" resource="datasource" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="ds">ProductName</field>
+                <field id="2118" zValue="2" posX="139.700" posY="0.000" width="11.112" height="4.762" resource="datasource" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="ds">Currency</field>
+                <field id="1590" zValue="3" posX="152.400" posY="0.000" width="15.875" height="4.762" resource="datasource" fontName="Liberation Sans" fontSize="10" alignment="2" type="txt" ftype="ds">NetPrice</field>
+                <field id="9962" zValue="4" posX="120.650" posY="0.000" width="7.938" height="4.762" resource="datasource" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="ds">Quantity</field>
+                <field id="3707" zValue="5" posX="107.950" posY="0.000" width="11.112" height="4.762" resource="datasource" fontName="Liberation Sans" fontSize="10" alignment="2" type="txt" ftype="ds">QuantityUnit</field>
+            </items>
+            <groups>
+                <group id="G1" groupExp="%CONST" resetVariables="" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_G1" height="6.879">
+                        <label id="5129" zValue="0" posX="0.000" posY="0.000" width="31.750" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1">Product Number</label>
+                        <label id="4045" zValue="1" posX="33.337" posY="0.000" width="47.625" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1">Product Name</label>
+                        <label id="3027" zValue="2" posX="149.225" posY="0.000" width="17.462" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2">Net.Price</label>
+                        <label id="13318" zValue="3" posX="107.950" posY="0.000" width="33.337" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1">Quantity</label>
+                        <line id="10677" zValue="4" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="6.350" toX="169.862" toY="6.350"/>
+                    </groupheader>
+                    <groupfooter id="GF_G1" height="3.175"/>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

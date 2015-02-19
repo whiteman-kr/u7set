@@ -1,0 +1,12 @@
+****************************************************************************
+* NCReport 2.7.02
+* Release date: 14.Dec.2011
+****************************************************************************
+
+Fixes:
+
+- 0071402 Engine: Last group footer contains wrong field info with non SQL data source - fixed
+- Russian translation is updated
+- Some tiny fixes
+
+

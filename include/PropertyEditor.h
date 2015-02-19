@@ -39,7 +39,7 @@ class QtMultiFilePathEdit : public QWidget
 	Q_OBJECT
 
 public:
-	QtMultiFilePathEdit(QWidget* parent);
+	explicit QtMultiFilePathEdit(QWidget* parent);
 	void setValue(QVariant value);
 
 public slots:
@@ -67,7 +67,7 @@ class QtMultiColorEdit : public QWidget
 	Q_OBJECT
 
 public:
-	QtMultiColorEdit(QWidget* parent);
+	explicit QtMultiColorEdit(QWidget* parent);
 	void setValue(QVariant value);
 
 public slots:
@@ -91,6 +91,7 @@ private:
 
 };
 
+
 class MultiLineEdit : public QDialog
 {
 public:
@@ -105,12 +106,13 @@ private:
 	virtual void closeEvent(QCloseEvent *event);
 };
 
+
 class QtMultiCheckBox : public QWidget
 {
 	Q_OBJECT
 
 public:
-	QtMultiCheckBox(QWidget* parent);
+	explicit QtMultiCheckBox(QWidget* parent);
 	void setCheckState(Qt::CheckState state);
 
 public slots:
@@ -127,12 +129,13 @@ private:
 
 };
 
+
 class QtMultiTextEdit : public QWidget
 {
 	Q_OBJECT
 
 public:
-	QtMultiTextEdit(QWidget* parent);
+	explicit QtMultiTextEdit(QWidget* parent);
 	void setValue(QString value);
 
 public slots:
@@ -153,12 +156,13 @@ private:
 	QString m_oldValue;
 };
 
+
 class QtMultiDoubleSpinBox : public QWidget
 {
 	Q_OBJECT
 
 public:
-	QtMultiDoubleSpinBox(QWidget* parent);
+	explicit QtMultiDoubleSpinBox(QWidget* parent);
 	void setValue(double value);
 
 public slots:
@@ -175,11 +179,12 @@ private:
 	bool m_escape = false;
 };
 
-class QtMultiIntSpinBox:public QWidget
+
+class QtMultiIntSpinBox : public QWidget
 {
     Q_OBJECT
 public:
-    QtMultiIntSpinBox(QWidget* parent);
+	explicit QtMultiIntSpinBox(QWidget* parent);
     void setValue(int value);
 
 public slots:
@@ -196,12 +201,35 @@ private:
     bool m_escape = false;
 };
 
+
+class QtMultiUIntSpinBox : public QWidget
+{
+	Q_OBJECT
+public:
+	explicit QtMultiUIntSpinBox(QWidget* parent);
+	void setValue(quint32 value);
+
+public slots:
+	void onValueChanged(quint32 value);
+
+signals:
+	void valueChanged(QVariant value);
+
+private:
+	bool eventFilter(QObject* watched, QEvent* event);
+
+private:
+	QSpinBox* m_spinBox = nullptr;
+	bool m_escape = false;
+};
+
+
 class QtMultiVariantPropertyManager : public QtAbstractPropertyManager
 {
     Q_OBJECT
 
 public:
-	QtMultiVariantPropertyManager(QObject* parent);
+	explicit QtMultiVariantPropertyManager(QObject* parent);
 
 	QVariant attribute(const QtProperty* property, const QString& attribute) const;
 	bool hasAttribute(const QtProperty* property, const QString& attribute) const;
@@ -247,7 +275,7 @@ class QtMultiVariantFactory : public QtAbstractEditorFactory<QtMultiVariantPrope
     Q_OBJECT
 
 public:
-	QtMultiVariantFactory(QObject* parent);
+	explicit QtMultiVariantFactory(QObject* parent);
 
 	void connectPropertyManager (QtMultiVariantPropertyManager* manager);
 	QWidget* createEditor(QtMultiVariantPropertyManager* manager, QtProperty* property, QWidget* parent);
@@ -271,7 +299,7 @@ class PropertyEditor : public QtTreePropertyBrowser
 	Q_OBJECT
 
 public:
-	PropertyEditor(QWidget* parent);
+	explicit PropertyEditor(QWidget* parent);
 
 	void updateProperty(const QString& propertyName);
 	// Public functions

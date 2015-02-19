@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.4.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="ds" type="txt" openRole="begin" source="static" columnDelimiter="tab">Carl	Peterson	London
+Andrea	Winkler	Sweden
+Pamela	Gardner	USA
+Eva	Goodman	Israel</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="13.897">
+        <label id="" zValue="0" resource="static" posX="0.000" posY="1.604" width="169.975" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignmentH="left" alignmentV="top" forecolor="#000000" backcolor="#ffffff">Demonstration of colored background for fields and labels</label>
+        <label id="" zValue="1" resource="static" posX="0.000" posY="8.018" width="169.975" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignmentH="center" alignmentV="top" forecolor="#ffffff" backcolor="#ff0000" bgMode="fb">Red label</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="2.405"/>
+    <details>
+        <detail id="Detail1" height="6.147" datasource="ds" startsOnNewPage="false">
+            <items>
+                <field id="" zValue="0" resource="static" posX="0.000" posY="0.000" width="35.278" height="4.811" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" backcolor="#00ff00" bgMode="fb" type="txt" ftype="ds">col0</field>
+                <field id="" zValue="1" resource="static" posX="38.485" posY="0.000" width="35.278" height="4.811" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" backcolor="#00ffff" bgMode="fb" type="txt" ftype="ds">col1</field>
+                <field id="" zValue="2" resource="static" posX="76.970" posY="0.000" width="93.005" height="4.811" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" backcolor="#9dd0ff" bgMode="fb" type="txt" ftype="ds">col2</field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

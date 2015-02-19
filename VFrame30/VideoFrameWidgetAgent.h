@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <../QtScript/QScriptable>
+//#include <../QtScript/QScriptable>
 
 namespace VFrame30
 {
@@ -10,7 +10,7 @@ namespace VFrame30
 
 	// VideoFrameWiget Agent for scripts
 	//
-	class VideoFrameWidgetAgent : public QObject, protected QScriptable
+	class VideoFrameWidgetAgent : public QObject//, protected QScriptable
 	{
 		Q_OBJECT
 //		Q_PROPERTY(double zoom READ zoom WRITE setZoom)

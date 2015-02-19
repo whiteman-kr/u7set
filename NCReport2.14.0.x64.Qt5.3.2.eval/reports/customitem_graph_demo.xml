@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.7.03" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>10</topmargin>
+        <bottommargin>10</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="data" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">ID	Description	GraphData
+0	Graph 1.	140,220,84,96,117
+1	Graph 2.	57,33,79,51,80
+2	Graph 3.	90,120,83,33,10</datasource>
+    </datasources>
+    <variables>
+        <variable id="total" type="num" funcType="sum" scope="group" initValue="0">2</variable>
+    </variables>
+    <pageheader id="phead" height="28.310">
+        <barcode id="0" zValue="0" resource="datasource" posX="134.673" posY="0.000" width="33.602" height="14.552" barcodeType="13" code="">barcodeDS.col0</barcode>
+        <label id="2" zValue="2" resource="static" posX="0.000" posY="0.000" width="125.412" height="6.615" fontName="Arial" fontSize="16" fontWeight="bold" fontItalic="true" alignment="33" forecolor="#0000ff">Graph demo from data source</label>
+        <label id="4" zValue="4" resource="static" posX="0.000" posY="11.112" width="168.275" height="9.525" fontName="Arial" fontSize="10" alignment="33" wordbreak="true" forecolor="#000000">This simple report demonstrates how to use custom report item alias graph item. Graph data are fetching from data source</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="6.949">
+        <field id="0" zValue="0" resource="static" posX="150.812" posY="0.000" width="18.785" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="sys" arg="page %1">pageno</field>
+    </pagefooter>
+    <reportheader id="rhead" height="0.000"/>
+    <reportfooter id="rfoot" height="0.000"/>
+    <details>
+        <detail id="Detail1" height="36.248" datasource="data" startsOnNewPage="false">
+            <items>
+                <field id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="52.917" height="5.027" fontName="Arial" fontSize="10" alignment="33" forecolor="#00007f" type="txt" ftype="ds" arg="">Description</field>
+                <graph id="3" zValue="3" resource="datasource" classID="graph" posX="0.000" posY="6.350" width="169.862" height="28.575">GraphData</graph>
+            </items>
+        </detail>
+    </details>
+</NCReport>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="ds" type="txt" openRole="begin" source="static" columnDelimiter="semicolon" hasColumnHeader="true">key;group;code;name;price
+1;0;154874;Seven up;2.4
+2;0;254668;Coca cola;2.3
+3;0;021342;Fanta orange;2.12
+4;1;650217;Peanut butter;4.98
+5;1;022432;Chocolate Milka;1.29
+6;1;399804;Sugar;2.50
+6.2;1;541200;Melone;3.90
+7;2;164370;Bread;2.90
+8;2;021447;Roll;0.80
+9;2;784116;Croissant;0.75
+1;0;154874;Seven up;2.4
+2;0;254668;Coca cola;2.3
+3;0;021342;Fanta orange;2.12
+4;1;650217;Peanut butter;4.98
+5;1;022432;Chocolate Milka;1.29
+6;1;399804;Sugar;2.50
+7;2;164370;Bread;2.90
+8;2;021447;Roll;0.80
+9;2;784116;Croissant;0.75
+1;0;154874;Seven up;2.4
+2;0;254668;Coca cola;2.3
+3;0;021342;Fanta orange;2.12
+4;1;650217;Peanut butter;4.98
+5;1;022432;Chocolate Milka;1.29
+6;1;399804;Sugar;2.50
+7;2;164370;Bread;2.90
+8;2;021447;Roll;0.80
+9;2;784116;Croissant;0.75</datasource>
+    </datasources>
+    <variables>
+        <variable id="price_total" type="num" funcType="sum" scope="group" initValue="0">price</variable>
+    </variables>
+    <pageheader id="phead" height="15.875">
+        <rectangle id="0" zValue="0" resource="static" posX="0.000" posY="9.525" width="165.365" height="4.762" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillColor="#ffff00" fillStyle="solid"/>
+        <label id="1" zValue="1" resource="static" posX="25.665" posY="0.000" width="116.152" height="7.938" fontName="Nimbus Roman No9 L" fontSize="16" fontWeight="bold" alignment="4" forecolor="#000000">Simple grouping example</label>
+        <field id="2" zValue="2" resource="static" posX="0.000" posY="9.525" width="14.287" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">key</field>
+        <field id="3" zValue="3" resource="static" posX="17.462" posY="9.525" width="28.575" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">code</field>
+        <field id="4" zValue="4" resource="static" posX="138.112" posY="9.525" width="19.050" height="4.762" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">price</field>
+        <field id="5" zValue="5" resource="static" posX="49.212" posY="9.525" width="82.815" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">name</field>
+    </pageheader>
+    <pagefooter id="pfoot" height="11.671">
+        <rectangle id="0" zValue="0" resource="static" posX="0.000" posY="6.350" width="165.365" height="4.762" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillColor="#ffff00" fillStyle="solid"/>
+        <field id="1" zValue="1" resource="static" posX="0.000" posY="6.350" width="14.287" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">key</field>
+        <field id="2" zValue="2" resource="static" posX="17.462" posY="6.350" width="28.575" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">code</field>
+        <field id="3" zValue="3" resource="static" posX="133.615" posY="6.350" width="23.812" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">price</field>
+        <field id="4" zValue="4" resource="static" posX="49.212" posY="6.350" width="82.815" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">name</field>
+        <label id="5" zValue="5" resource="static" posX="0.000" posY="0.000" width="23.812" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000">Page footer</label>
+        <label id="6" zValue="6" printWhen="$D{key}==5" resource="static" posX="26.987" posY="0.000" width="39.952" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000">Printwhen: key=5</label>
+        <text id="7" zValue="7" resource="datasource" posX="136.790" posY="0.000" width="32.015" height="5.027" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000">key</text>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="4.244" datasource="ds" startsOnNewPage="false">
+            <items>
+                <field id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="14.287" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">key</field>
+                <field id="1" zValue="1" resource="static" posX="17.462" posY="0.000" width="28.575" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">code</field>
+                <field id="2" zValue="2" resource="static" posX="49.212" posY="0.000" width="82.815" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">name</field>
+                <field id="3" zValue="3" resource="static" posX="133.615" posY="0.000" width="23.812" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">price</field>
+            </items>
+            <groups>
+                <group id="Group1" groupExp="group" resetVariables="price_total" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="4.774">
+                        <label id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="23.812" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#005500">Group header:</label>
+                        <field id="1" zValue="1" resource="static" posX="70.115" posY="0.000" width="49.212" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#005500" type="txt" ftype="ds" arg="">name</field>
+                        <field id="2" zValue="2" resource="static" posX="36.512" posY="0.000" width="9.525" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#005500" type="txt" ftype="ds" arg="">key</field>
+                        <field id="3" zValue="3" resource="static" posX="47.890" posY="0.000" width="20.637" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#005500" type="txt" ftype="ds" arg="">code</field>
+                        <field id="4" zValue="4" resource="static" posX="23.812" posY="0.000" width="11.377" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#005500" type="txt" ftype="ds" arg="">group</field>
+                        <rectangle id="5" zValue="5" printWhen="$D{group}==0" resource="static" posX="120.915" posY="0.000" width="47.890" height="4.762" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#000000" fillStyle="no"/>
+                    </groupheader>
+                    <groupfooter height="16.000">
+                        <field id="0" zValue="0" resource="static" posX="23.812" posY="1.587" width="11.377" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#0000ff" type="txt" ftype="ds" arg="">group</field>
+                        <label id="1" zValue="1" resource="static" posX="0.000" posY="1.587" width="23.812" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#0000ff">Group footer:</label>
+                        <line id="2" zValue="2" resource="static" fromX="0.000" fromY="0.000" toX="160.867" toY="0.000" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <field id="3" zValue="3" resource="static" posX="133.615" posY="1.587" width="23.812" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">price_total</field>
+                        <field id="4" zValue="4" resource="static" posX="36.512" posY="1.587" width="9.525" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#0000ff" type="txt" ftype="ds" arg="">key</field>
+                        <field id="5" zValue="5" resource="static" posX="47.890" posY="1.587" width="20.637" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#0000ff" type="txt" ftype="ds" arg="">code</field>
+                        <field id="6" zValue="6" resource="static" posX="70.115" posY="1.587" width="49.212" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#0000ff" type="txt" ftype="ds" arg="">name</field>
+                        <rectangle id="7" zValue="7" printWhen="$D{group}==0" resource="static" posX="120.915" posY="1.587" width="47.890" height="4.762" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#000000" fillStyle="no"/>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

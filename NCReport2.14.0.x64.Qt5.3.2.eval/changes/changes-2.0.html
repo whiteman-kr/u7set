@@ -1,0 +1,131 @@
+<h2>v2.0.11</h2>
+<h4>Release date: 26.May.2008</h4>
+<ul>
+<li>Designer: Selection handling - leaved sections become unselected when a new item is selected at another section</li>
+<li>Report Error messages now contain SQL error messages</li>
+<li>Fixed the bug: External (built-in) sql database connection was not saved correctly.(designer)</li>
+<li>Fixed the bug: External (built-in) sql database connection did not work properly (driver code was saved in xml file instead of driver name )</li>
+<li>Fixed bug: Name of report was Untitled again after reloading report.</li>
+<li>Fixed the bug occured when left- and Right justify in multiple sections. Now the first selected item as 'master' item works in inter-section environment</li>
+<li>Some actions did not affect document change: Page option dialog, image dialog ... Now this is fixed</li>
+<li>Print to PDF directly in preview window -> missing icon image is fixed</li>
+<li>Designer: Qt4.4 compiled version does not enable toolbar's comboboxes. Now this bug fixed.</li>
+</ul>
+
+<h2>v2.0.10</h2>
+<h4>Release date: 19.May.2008</h4>
+<ul>
+<li>Undo/Redo system now works properly! (TODO: some features are not yet supported for undo such as Paste/Formatting)</li>
+<li>Empty rows forbidden option introduced to datasources. This option makes report engine able to forbid running report if a datasource is empty</li>
+<li>DataTime field data type now is supported</li>
+<li>Date / DateTime default format string is removed</li>
+<li>Direct print to PDF feature has been added to preview window</li>
+<li>Labels now have gray background for better size visibility</li>
+<li>Geometric editor's bug fixed: spinbox now is not restricted to max 100</li>
+<li>Save action button/menu now is enabled only when the current document is modified.</li>
+<li>Alignment system fixes: first selected item now is the 'master' item</li>
+<li>Other small bugfixes in designer</li>
+</ul>
+
+<h2>v2.0.9</h2>
+<h4>Release date: 13.May.2008</h4>
+<ul>
+<li>Images now are able to be loaded from datasource by filename by using File name from Datasource feature</li>
+<li>Implemented runReportToPreview(), runReportToPDF(), runReportToPrinter() new functions to make running reports simpler</li>
+<li>Test data editor new feature added to designer</li>
+<li>Fixed compilation problem caused by that NCReportAbstractItemRendering source files were in both directories 'designer' and 'ncreport'</li>
+<li>ncreportabstractitemrendering.cpp/.h files has been removed from 'designer' directory</li>
+<li>Documentation update: All documentations has been integrated into one by Doxygen</li>
+<li>Documentation update: A new Getting Started Guide added</li>
+<li>ncreportelements.h/cpp obsolete files has been removed from project</li>
+<li>Windows binary package is compiled with Qt4.3.4</li>
+<li>Some other small fixes</li>
+</ul>
+
+<h2>v2.0.8</h2>
+<h4>Release date: 26.Mar.2008</h4>
+<ul>
+<li>Relative include paths are added to project (.pro) files. The relative file path references has been removed from #include directives in all source files.</li>
+<li>Changes in NCReportDataSource class, dataRole parameter added to value() methods</li>
+<li>NCReportItemModelDataSource class has been extended to handling Qt::EditRole, Qt::UserRole, Qt::DecorationRole for values</li>
+<li>Designer now supports opening reports from SQL database and and saving reports to SQL database</li>
+<li>Fixed the crash occured when opening report was unsucceeded and after selecting window menu in designer</li>
+<li>IMPORTANT! Fixed the variable calculation bug in report engine that is occured after page break. The bug caused unneccessary update for variables, fields</li>
+<li>Some other small fixes</li>
+</ul>
+
+<h2>v2.0.7</h2>
+<h4>Release date: 29.Feb.2008</h4>
+<ul>
+<li>Lib export directive fixes for specied classes to avoid link error under Windows when using ncreport2.lib</li>
+<li>Examples/demos now can be compiled/linked without errors under Windows</li>
+<li>Windows binary setup package now includes the compiled demos</li>
+<li>Some project files renamed or added for full one step compilation</li>
+<li>Preview window show pageno/pages in statusbar</li>
+</ul>
+
+<h2>v2.0.6</h2>
+<ul>
+<li>Item Model datasource class now is implemented and documented</li>
+<li>Demo for using Item Modeldatasource</li>
+<li>ID handling changes for StringList datasource and Item Model datasource both in engine and designer</li>
+<li>Vertical bar and Custom delimiter character handling for Text and StringList datasources</li>
+<li>Demo reports has been renamed</li>
+<li>Some other small fixes</li>
+</ul>
+
+<h2>v2.0.5</h2>
+<ul>
+<li>Word wrapping problem for Labels and Fiels fixed.</li>
+<li>Extended the alignment feature to inter-section behaviour in Designer.</li>
+<li>$ symbol now is acceptable in SQL query text box in Designer</li>
+<li>Grid properties now apply to report header and footer when adding a new group in Designer.</li>
+<li>Field's width now is not changed after setting it's properties.</li>
+<li>Added a feature to datasources to be able to add as a parameter.</li>
+<li>Fixes in datasource dialog in Designer.</li>
+<li>Fixed the crash that occured when a new file was saved at the first time.</li>
+<li>Added setReportDef() function to NCReport for adding report definition directly.</li>
+<li>Some bugfixes in runner testform.</li>
+<li>Fixed the GROUP LEVEL bug which caused a wrong group level processing in NCReport engine.</li>
+<li>Added more example reports</li>
+<li>Added Demos for examples of using NCReport class.</li>
+<li>Documentations added or extended</li>
+<li>Northwind Sample MySQL database script fixed to Utf-8 encoded</li>
+<li>Many other small bugfixes</li>
+</ul>
+
+<h2>v2.0.4</h2>
+<ul>
+<li>Running report from designer feature added</li>
+<li>Fixes and additions in datasource dialog in designer</li>
+<li>Fixed bug caused crash in designer when unsucceded open occured.</li>
+<li>Fixed bug caused crash in designer when removed the last datasource from datasource panel</li>
+<li>Z-order of report objects now is saved correctly by designer</li>
+<li>Many other bugfixes and completions</li>
+<li>NCReport object creation code moved to main.cpp -s</li>
+<li>External object handling fixes for such as custom datasource, stringlist datasource, custom items</li>
+<li>Sample of custom datasource added to runner test application's main.cpp</li>
+<li>Sample of stringlist datasource added to runner test application's main.cpp</li>
+<li>Sample of custom graph item added to runner test application's main.cpp</li>
+<li>More sample report file attached</li>
+<li>Runner test form is redesigned</li>
+<li>ts files generated for internationalization</li>
+</ul>
+
+<h2>v2.0.3</h2>
+<ul>
+<li>internal and external SQL connection handling fixes</li>
+<li>Multiple database connection feature in designer</li>
+<li>Graph/custom item handling completions</li>
+<li>Many bugfixes</li>
+</ul>
+
+<h2>v2.0.2</h2>
+<ul>
+<li>Unpublished version</li>
+</ul>
+
+<h2>v2.0.1</h2>
+<ul>
+<li>Many fixes and completions</li>
+</ul>

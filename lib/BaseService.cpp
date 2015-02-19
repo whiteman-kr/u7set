@@ -529,10 +529,8 @@ void BaseServiceWorker::onFreeReceivedFile(quint32 fileID)
 // MainFunctionWorker class implementation
 //
 
-MainFunctionWorker::MainFunctionWorker(BaseServiceController *baseServiceController) :
-	m_baseServiceController(baseServiceController)
+MainFunctionWorker::MainFunctionWorker()
 {
-	assert(m_baseServiceController != nullptr);
 }
 
 
@@ -543,7 +541,7 @@ MainFunctionWorker::~MainFunctionWorker()
 
 void MainFunctionWorker::onThreadStartedSlot()
 {
-	threadStarted();
+	initialize();
 
 	emit mainFunctionWork();
 }
@@ -551,11 +549,11 @@ void MainFunctionWorker::onThreadStartedSlot()
 
 void MainFunctionWorker::onThreadFinishedSlot()
 {
-	threadFinished();
+	shutdown();
 
 	emit mainFunctionStopped();
 
-	deleteLater();
+	moveToThread(m_baseServiceController->thread());
 }
 
 
@@ -563,7 +561,7 @@ void MainFunctionWorker::onThreadFinishedSlot()
 //
 
 
-BaseServiceController::BaseServiceController(int serviceType) :
+BaseServiceController::BaseServiceController(int serviceType, MainFunctionWorker* mainFunctionWorker) :
     m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
     m_mainFunctionStartTime(0),
 	m_mainFunctionState(MainFunctionState::stopped),
@@ -573,7 +571,8 @@ BaseServiceController::BaseServiceController(int serviceType) :
 	m_crc(0xF0F1F2F3),
 	m_serviceType(serviceType),
 	m_mainFunctionNeedRestart(false),
-	m_mainFunctionStopped(false)
+	m_mainFunctionStopped(false),
+	m_mainFunctionWorker(mainFunctionWorker)
 {
 	assert(m_serviceType >= 0 && m_serviceType < SERVICE_TYPE_COUNT);
 
@@ -603,6 +602,11 @@ BaseServiceController::BaseServiceController(int serviceType) :
 
 	// start MainFunctionWorker
 	//
+	m_mainFunctionWorker->setController(this);
+
+	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionWork, this, &BaseServiceController::onMainFunctionWork);
+	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionStopped, this, &BaseServiceController::onMainFunctionStopped);
+
 	startMainFunction();
 }
 
@@ -611,10 +615,10 @@ BaseServiceController::~BaseServiceController()
 {
 	stopMainFunction();
 
-	m_mainFunctionThread.wait();		// !!!!
-
 	m_baseWorkerThread.quit();
     m_baseWorkerThread.wait();
+
+	delete m_mainFunctionWorker;
 
 	APP_MSG(log, QString(serviceTypeStr[m_serviceType]) + " was finished");
 }
@@ -665,7 +669,14 @@ void BaseServiceController::stopMainFunction()
 
 	m_mainFunctionState = MainFunctionState::stops;
 
-	m_mainFunctionThread.quit();
+	m_mainFunctionThread->quit();
+	m_mainFunctionThread->wait();
+
+	delete m_mainFunctionThread;
+
+	m_mainFunctionThread = nullptr;
+
+	//m_mainFunctionWorker->moveToThread(thread());
 
 	// m_mainFunctionState = MainFunctionState::Stopped setted in testMainFunctionState
 	//
@@ -688,19 +699,20 @@ void BaseServiceController::startMainFunction()
 
 	m_mainFunctionState = MainFunctionState::starts;
 
-	MainFunctionWorker* mainFunctionWorker = new MainFunctionWorker(this);
+	//MainFunctionWorker* mainFunctionWorker = new MainFunctionWorker(this);
 
-	connect(mainFunctionWorker, &MainFunctionWorker::mainFunctionWork, this, &BaseServiceController::onMainFunctionWork);
-	connect(mainFunctionWorker, &MainFunctionWorker::mainFunctionStopped, this, &BaseServiceController::onMainFunctionStopped);
+	assert(m_mainFunctionThread == nullptr);
 
-	connect(&m_mainFunctionThread, &QThread::started, mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
-	connect(&m_mainFunctionThread, &QThread::finished, mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
+	m_mainFunctionThread = new QThread();
 
-	mainFunctionWorker->moveToThread(&m_mainFunctionThread);
+	connect(m_mainFunctionThread, &QThread::started, m_mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
+	connect(m_mainFunctionThread, &QThread::finished, m_mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
+
+	m_mainFunctionWorker->moveToThread(m_mainFunctionThread);
 
 	m_mainFunctionStartTime = QDateTime::currentMSecsSinceEpoch();
 
-	m_mainFunctionThread.start();
+	m_mainFunctionThread->start();
 
 	APP_MSG(log, QString("Main function was started."));
 
@@ -737,7 +749,7 @@ void BaseServiceController::checkMainFunctionState()
 {
 	if (m_mainFunctionState == MainFunctionState::stops)
 	{
-		if (m_mainFunctionStopped && m_mainFunctionThread.isFinished())
+		if (m_mainFunctionStopped && m_mainFunctionThread == nullptr)
 		{
 			m_mainFunctionStopped = false;
 
@@ -797,3 +809,50 @@ void BaseServiceController::onFileReceived(ReceivedFile* receivedFile)
 	emit freeReceivedFile(receivedFile->ID());
 }
 
+
+// BaseService class implementation
+//
+
+BaseService::BaseService(int argc, char ** argv, const QString & name, int serviceType, MainFunctionWorker* mainFunctionWorker):
+	QtService(argc, argv, name),
+	m_serviceType(serviceType),
+	m_mainFunctionWorker(mainFunctionWorker)
+{
+	if ( !(m_serviceType >= 0 && m_serviceType < SERVICE_TYPE_COUNT))
+	{
+		assert(m_serviceType >= 0 && m_serviceType);
+
+		m_serviceType = STP_BASE;
+	}
+}
+
+
+BaseService::~BaseService()
+{
+	if (m_mainFunctionWorker != nullptr)
+	{
+		delete m_mainFunctionWorker;
+	}
+}
+
+
+void BaseService::start()
+{
+	m_baseServiceController = new BaseServiceController(m_serviceType, m_mainFunctionWorker);
+}
+
+
+void BaseService::stop()
+{
+	delete m_baseServiceController;
+
+	m_mainFunctionWorker = nullptr;			// m_mainFunctionWorker already deleted in m_baseServiceController destructor
+}
+
+
+void BaseService::sendFile(QHostAddress address, quint16 port, QString fileName)
+{
+	assert(m_baseServiceController != nullptr);
+
+	emit m_baseServiceController->sendFile(address, port, fileName);
+}

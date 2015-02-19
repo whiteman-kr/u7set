@@ -51,6 +51,7 @@ void Settings::writeUserScope() const
 
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
+
 	return;
 }
 void Settings::loadUserScope()

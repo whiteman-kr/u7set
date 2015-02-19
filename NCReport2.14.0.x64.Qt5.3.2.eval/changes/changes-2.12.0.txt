@@ -1,0 +1,18 @@
+****************************************************************************
+* NCReport 2.12.0
+* Release date: 31.mar.2014
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+- 0071663: [Designer] Extensions for customer graph element - resolved.
+- 0071688: [Report engine library] Automatically use installed version of Zint - resolved.
+- 0071689: [Report engine library] NCReportEvaluator class to make customizable - resolved.
+- 0071674: [Report engine library] Relative path to the external file - resolved.
+- 0071684: [Designer] auto completing in barcode properties window - resolved.
+- 0071505: [Report engine library] XLS output format. (HTML customized for Excel)  - resolved.
+- 0071678: [General] Text data source to set the source text encoding - resolved.
+- 0071666: [Designer] Support for dynamic/custom string element - resolved.
+- 0071664: [Report engine library] Group footer: access to first/last row of that group - resolved.
+- 0071665: [Designer] create new temporary datasources on the fly out of the provided datasources - resolved.
+- Designer user interface adjustments
+- Several other fixes, fine tuning and code clearing
