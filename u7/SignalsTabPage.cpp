@@ -860,19 +860,31 @@ void SignalsModel::addSignal()
 	QDialog signalTypeDialog;
 	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
 
+	QLineEdit* deviceIdEdit = new QLineEdit(&signalTypeDialog);
+	deviceIdEdit->setText("");
+
+	fl->addRow(tr("Device ID"), deviceIdEdit);
+
 	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
 	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
 	signalTypeCombo->setCurrentIndex(0);
 
 	fl->addRow(tr("Signal type"), signalTypeCombo);
 
-	QLineEdit* signalChannelCount = new QLineEdit(&signalTypeDialog);
-	signalChannelCount->setText("1");
+	QLineEdit* signalChannelCountEdit = new QLineEdit(&signalTypeDialog);
+	signalChannelCountEdit->setText("1");
 	QRegExp rx("[1-9]\\d{0,1}");
 	QValidator *validator = new QRegExpValidator(rx, &signalTypeDialog);
-	signalChannelCount->setValidator(validator);
+	signalChannelCountEdit->setValidator(validator);
 
-	fl->addRow(tr("Signal channel count"), signalChannelCount);
+	fl->addRow(tr("Signal channel count"), signalChannelCountEdit);
+
+	QLineEdit* signalCountEdit = new QLineEdit(&signalTypeDialog);
+	signalCountEdit->setText("1");
+	validator = new QRegExpValidator(rx, &signalTypeDialog);
+	signalCountEdit->setValidator(validator);
+
+	fl->addRow(tr("Signal count"), signalCountEdit);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
@@ -888,7 +900,8 @@ void SignalsModel::addSignal()
 		return;
 	}
 
-	int channelCount = signalChannelCount->text().toInt();
+	int channelCount = signalChannelCountEdit->text().toInt();
+	int signalCount = signalCountEdit->text().toInt();
 
 	Signal signal;
 
@@ -896,24 +909,45 @@ void SignalsModel::addSignal()
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		QVector<Signal> signalVector;
-		for (int i = 0; i < channelCount; i++)
+		for (int s = 0; s < signalCount; s++)
 		{
-			signalVector << signal;
-			if (channelCount > 1)
+			QVector<Signal> signalVector;
+			for (int i = 0; i < channelCount; i++)
 			{
-				signalVector[i].setStrID((signal.strID() + "_%1").arg(QChar('A' + i)));
+				signalVector << signal;
+				QString strID = signal.strID();
+				QString name = signal.name();
+
+				if (!deviceIdEdit->text().isEmpty())
+				{
+					strID += "_dev" + deviceIdEdit->text();
+					name += " Device " + deviceIdEdit->text();
+				}
+
+				if (signalCount > 1)
+				{
+					strID = (strID + "_sig%1").arg(s);
+					name = (name + " Signal %1").arg(s);
+				}
+
+				if (channelCount > 1)
+				{
+					strID = (strID + "_%1").arg(QChar('A' + i));
+				}
+
+				signalVector[i].setStrID(strID);
+				signalVector[i].setName(name);
 			}
-		}
-		if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
-		{
-			beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + signalVector.count() - 1);
-			for (int i = 0; i < signalVector.count(); i++)
+			if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
 			{
-				m_signalSet.append(signalVector[i].ID(), signalVector[i]);
+				beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + signalVector.count() - 1);
+				for (int i = 0; i < signalVector.count(); i++)
+				{
+					m_signalSet.append(signalVector[i].ID(), signalVector[i]);
+				}
+				endInsertRows();
+				emit cellsSizeChanged();
 			}
-			endInsertRows();
-			emit cellsSizeChanged();
 		}
 	}
 }
