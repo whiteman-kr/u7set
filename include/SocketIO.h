@@ -165,7 +165,7 @@ public:
 
 	bool setAddress(const QString &address)
 	{
-		m_hostAddress.setAddress(address);
+		return m_hostAddress.setAddress(address);
 	}
 
 	void setPort(quint16 port)
