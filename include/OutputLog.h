@@ -1,4 +1,5 @@
 #pragma once
+#include <QObject>
 
 enum OutputMessageLevel
 {
@@ -21,22 +22,24 @@ public:
 	QDateTime time;
 };
 
-class OutputLog
+class OutputLog : public QObject
 {
+	Q_OBJECT
+
 public:
 	OutputLog(void);
 	virtual ~OutputLog(void);
 
 public:
-	void clear();
+	Q_INVOKABLE void clear();
 
-	void write(const QString& str, OutputMessageLevel level, bool bold);
-	void writeMessage(const QString& str, bool bold = false);
-	void writeSuccess(const QString& str, bool bold = false);
-	void writeWarning(const QString& str, bool bold = false);
-	void writeError(const QString& str, bool bold = false);
+	Q_INVOKABLE void write(const QString& str, OutputMessageLevel level, bool bold);
+	Q_INVOKABLE void writeMessage(const QString& str, bool bold = false);
+	Q_INVOKABLE void writeSuccess(const QString& str, bool bold = false);
+	Q_INVOKABLE void writeWarning(const QString& str, bool bold = false);
+	Q_INVOKABLE void writeError(const QString& str, bool bold = false);
 
-	void writeDump(const std::vector<char>& data);
+	Q_INVOKABLE void writeDump(const std::vector<char>& data);
 
 	bool windowMessageListEmpty() const;
 	OutputLogItem popWindowMessages();

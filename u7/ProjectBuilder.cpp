@@ -1,4 +1,5 @@
 #include "ProjectBuilder.h"
+#include <QJSEngine>
 #include "../include/DbController.h"
 #include "../include/OutputLog.h"
 #include "../include/DeviceObject.h"
@@ -247,11 +248,56 @@ bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
 
 bool BuildWorkerThread::generateModulesConfigurations(DbController* db, const Hardware::DeviceObject* root)
 {
-	std::map<QString, std::shared_ptr<Hardware::McFirmware>> firmwares;
+	// !!! Read script from file, IT IS TEMPORARY, in future this script must be taken from the Project DB !!!!
+	//
+	m_log->writeWarning("Temoparary reading script from file, in future must be moved to DB!", true);
+
+	QString fileName = "LogicModuleConfiguration.js";
+	QFile scriptFile(fileName);
+
+	if (!scriptFile.open(QIODevice::ReadOnly))
+	{
+		m_log->writeError(tr("Can't read file %1").arg(fileName));
+		return false;
+	}
+
+	QTextStream stream(&scriptFile);
+	QString contents = stream.readAll();
+	scriptFile.close();
+
+	// Attach objects
+	//
+	QJSEngine jsEngine;
+
+	QJSValue jsLog = jsEngine.newQObject(m_log);
+	QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
+
+	// Run script
+	//
+	QJSValue jsEval = jsEngine.evaluate(contents, fileName);
+
+	QJSValueList args;
+	args << jsLog;
+
+	QJSValue jsResult = jsEval.call(args);
+
+	if (jsResult.isError() == true)
+	{
+		m_log->writeError(tr("Uncaught exception while generation module configuration: %1").arg(jsResult.toString()));
+		return false;
+	}
+
+	qDebug() << jsResult.toInt();
+
+	// Process results
+	//
+	return true;
+
+	/*std::map<QString, std::shared_ptr<Hardware::McFirmware>> firmwares;
 
 	bool ok = generateModulesConfigurations(db, root, &firmwares);
-
-	return ok;
+*/
+	//return ok;
 }
 
 bool BuildWorkerThread::generateModulesConfigurations(
