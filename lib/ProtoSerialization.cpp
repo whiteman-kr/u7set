@@ -1,4 +1,4 @@
-#include "Stable.h"
+//#include "Stable.h"
 #include "QUuid"
 
 #include "../include/ProtoSerialization.h"
