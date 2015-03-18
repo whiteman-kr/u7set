@@ -26,7 +26,7 @@ CONFIG += precompile_header
 
 DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 
-win32:LIBS += advapi32.lib
+#win32:LIBS += advapi32.lib
 
 HEADERS += \
 	Stable.h \
@@ -48,7 +48,6 @@ HEADERS += \
 
 SOURCES += \
 	main.cpp \
-	Stable.cpp \
 	../lib/DbStruct.cpp \
 	../lib/ConfigData.cpp \
     ../lib/DeviceObject.cpp \
@@ -74,7 +73,8 @@ PRECOMPILED_HEADER = stable.h
 
 OTHER_FILES +=
 
-win32: LIBS += -L$$PWD/ftdi/ -lftd2xx
+win32: LIBS += -L$$PWD/ftdi -lftd2xx
+#win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
 
 INCLUDEPATH += $$PWD/ftdi
 DEPENDPATH += $$PWD/ftdi
@@ -102,9 +102,10 @@ unix {
 #protobuf
 #
 win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
+        CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/debug -lprotobuf
+        CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/release -lprotobuf
 
-	INCLUDEPATH += ./../Protobuf
+        INCLUDEPATH += ./../Protobuf
 }
 unix {
 	LIBS += -lprotobuf
