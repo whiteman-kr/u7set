@@ -246,7 +246,7 @@ bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
 	return true;
 }
 
-bool BuildWorkerThread::generateModulesConfigurations(DbController* db, const Hardware::DeviceObject* root)
+bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware::DeviceObject* root)
 {
 	// !!! Read script from file, IT IS TEMPORARY, in future this script must be taken from the Project DB !!!!
 	//
@@ -272,11 +272,17 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, const Ha
 	QJSValue jsLog = jsEngine.newQObject(m_log);
 	QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
+	QJSValue jsRoot = jsEngine.newQObject(root);
+	QQmlEngine::setObjectOwnership(root, QQmlEngine::CppOwnership);
+
+
 	// Run script
 	//
 	QJSValue jsEval = jsEngine.evaluate(contents, fileName);
 
 	QJSValueList args;
+
+	args << jsRoot;
 	args << jsLog;
 
 	QJSValue jsResult = jsEval.call(args);
@@ -303,7 +309,7 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, const Ha
 bool BuildWorkerThread::generateModulesConfigurations(
 		DbController* db,
 		const Hardware::DeviceObject* parent,
-		std::map<QString, std::shared_ptr<Hardware::McFirmware>>* firmwares)
+		std::map<QString, std::shared_ptr<Hardware::McFirmwareOld>>* firmwares)
 {
 	assert(db != nullptr);
 	assert(db->isProjectOpened() == true);

@@ -41,6 +41,7 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QHash>
+#include <QMap>
 
 
 // Qt Widgets

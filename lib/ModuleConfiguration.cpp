@@ -5,6 +5,65 @@
 
 namespace Hardware
 {
+	ModuleConfFirmware::ModuleConfFirmware()
+	{
+	}
+
+	ModuleConfFirmware::~ModuleConfFirmware()
+	{
+	}
+
+	void ModuleConfFirmware::init(int uartId, int frameSize, int frameCount)
+	{
+		m_uartId = uartId;
+		m_frameSize = frameSize;
+		m_frameCount = frameCount;
+
+		m_frames.clear();
+		m_frames.resize(frameCount);
+
+		for (int i = 0; i < frameCount; i++)
+		{
+			m_frames[i].resize(frameSize);
+		}
+
+		return;
+	}
+
+	int ModuleConfFirmware::uartId() const
+	{
+		return m_uartId;
+	}
+
+	int ModuleConfFirmware::frameSize() const
+	{
+		return m_frameSize;
+	}
+
+	int ModuleConfFirmware::frameCount() const
+	{
+		return m_frameCount;
+	}
+
+
+	ModuleConfCollection::ModuleConfCollection()
+	{
+	}
+
+	ModuleConfCollection::~ModuleConfCollection()
+	{
+	}
+
+	QObject* ModuleConfCollection::jsGet(QString name, int uartId, int frameSize, int frameCount)
+	{
+		if (m_firmwares.contains(name) == true)
+		{
+			return nullptr;
+		}
+
+		return nullptr;
+	}
+
 
 	// ----------------------------------------------------------------------------
 	//
@@ -487,7 +546,7 @@ namespace Hardware
 		return;
 	}
 
-	bool ModuleConfiguration::compile(McFirmware* dest, const QString& deviceStrId, int changeset, QString* errorString) const
+	bool ModuleConfiguration::compile(McFirmwareOld* dest, const QString& deviceStrId, int changeset, QString* errorString) const
 	{
 		if (dest == nullptr || errorString == nullptr)
 		{
@@ -1276,46 +1335,46 @@ namespace Hardware
 	//
 	// McFirmware -- Compiled chunk of module configuration
 	//
-	McFirmware::McFirmware()
+	McFirmwareOld::McFirmwareOld()
 	{
 	}
 
-	McFirmware::~McFirmware()
+	McFirmwareOld::~McFirmwareOld()
 	{
 	}
 
-	QString McFirmware::name() const
+	QString McFirmwareOld::name() const
 	{
 		QString n(m_name);
 		return n;
 	}
 
-	void McFirmware::setName(const QString& value)
+	void McFirmwareOld::setName(const QString& value)
 	{
 		m_name = value;
 	}
 
-	int McFirmware::uartId() const
+	int McFirmwareOld::uartId() const
 	{
 		return m_uartID;
 	}
 
-	void McFirmware::setUartId(int value)
+	void McFirmwareOld::setUartId(int value)
 	{
 		m_uartID = value;
 	}
 
-	int McFirmware::frameSize() const
+	int McFirmwareOld::frameSize() const
 	{
 		return m_frameSize;
 	}
 
-	void McFirmware::setFrameSize(int value)
+	void McFirmwareOld::setFrameSize(int value)
 	{
 		m_frameSize = value;
 	}
 
-	void McFirmware::addChunk(const McDataChunk& chunk)
+	void McFirmwareOld::addChunk(const McDataChunk& chunk)
 	{
 		m_data.push_back(chunk);
 	}

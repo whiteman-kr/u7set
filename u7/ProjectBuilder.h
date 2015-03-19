@@ -8,7 +8,7 @@ class DbController;
 namespace Hardware
 {
 	class DeviceObject;
-	class McFirmware;
+	class McFirmwareOld;
 }
 
 class BuildWorkerThread : public QThread
@@ -28,11 +28,11 @@ private:
 
 	// Generate Modules Configurations Firmwares
 	//
-	bool generateModulesConfigurations(DbController* db, const Hardware::DeviceObject *root);
+	bool generateModulesConfigurations(DbController* db, Hardware::DeviceObject* root);
 	bool generateModulesConfigurations(
 			DbController* db,
 			const Hardware::DeviceObject* parent,
-			std::map<QString, std::shared_ptr<Hardware::McFirmware>>* firmwares);
+			std::map<QString, std::shared_ptr<Hardware::McFirmwareOld>>* firmwares);
 
 	// What's the next compilation task?
 	//

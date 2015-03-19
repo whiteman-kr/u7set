@@ -1,4 +1,5 @@
 #pragma once
+#include <QJSValue>
 #include "DbStruct.h"
 #include "QUuid"
 #include "../include/Factory.h"
@@ -130,15 +131,17 @@ namespace Hardware
 	public:
 		DeviceObject* parent();
 		virtual DeviceType deviceType() const;
+		Q_INVOKABLE int jsDeviceType() const;
 
 		QString fileExtension() const;
 		static QString fileExtension(DeviceType device);
 
 		// Children care
 		//
-		int childrenCount() const;
+		Q_INVOKABLE int childrenCount() const;
 
 		DeviceObject* child(int index) const;
+		Q_INVOKABLE QObject* jsChild(int index) const;
 
 		int childIndex(DeviceObject* child) const;
 
