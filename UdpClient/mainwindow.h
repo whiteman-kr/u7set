@@ -1,14 +1,17 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 
 #include "../include/BaseService.h"
+#include "../include/SocketIO.h"
+#include "FscDataSource.h"
 #include "ClientSocket.h"
 
 namespace Ui {
 class MainWindow;
 }
+
+
 
 class MainWindow : public QMainWindow
 {
@@ -33,6 +36,11 @@ private:
     UdpSocketThread m_clientSocketThread;
 
 	BaseServiceController* m_ServiceController = nullptr;
+
+	QVector<FscDataSource*> m_fscDataSources;
+
+	void runFscDataSources();
+	void stopFscDataSources();
 };
 
-#endif // MAINWINDOW_H
+

@@ -173,6 +173,9 @@ public:
 		m_port = port;
 	}
 
+	quint32 address32() const { return m_hostAddress.toIPv4Address(); }
+	QHostAddress address() const { return m_hostAddress; }
+
 	quint16 port() const { return m_port; }
 };
 

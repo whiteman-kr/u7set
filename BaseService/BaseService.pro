@@ -29,7 +29,8 @@ HEADERS += \
     ../include/SocketIO.h \
     ../include/UdpSocket.h \
     ../include/BaseService.h \
-    ../include/CircularLogger.h
+    ../include/CircularLogger.h \
+    ../include/FscDataFormat.h
 
 include(../qtservice/src/qtservice.pri)
 
