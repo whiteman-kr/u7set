@@ -13,8 +13,9 @@ namespace Hardware
 	{
 	}
 
-	void ModuleConfFirmware::init(int uartId, int frameSize, int frameCount)
+	void ModuleConfFirmware::init(QString name, int uartId, int frameSize, int frameCount)
 	{
+		m_name = name;
 		m_uartId = uartId;
 		m_frameSize = frameSize;
 		m_frameCount = frameCount;
@@ -28,6 +29,56 @@ namespace Hardware
 		}
 
 		return;
+	}
+
+	bool ModuleConfFirmware::setData8(int frameIndex, int offset, quint8 data)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			offset >= frameSize())
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return false;
+		}
+
+		quint8* ptr = static_cast<quint8*>(m_frames[frameIndex].data() + offset);
+		*ptr = data;
+
+		return true;
+	}
+
+	bool ModuleConfFirmware::setData16(int frameIndex, int offset, quint16 data)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			offset >= frameSize())
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return false;
+		}
+
+		quint16* ptr = reinterpret_cast<quint16*>(m_frames[frameIndex].data() + offset);
+		*ptr = data;
+
+		return true;
+	}
+
+	bool ModuleConfFirmware::setData32(int frameIndex, int offset, quint32 data)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			offset >= frameSize())
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return false;
+		}
+
+		quint32* ptr = reinterpret_cast<quint32*>(m_frames[frameIndex].data() + offset);
+		*ptr = data;
+
+		return true;
+	}
+
+	QString ModuleConfFirmware::name() const
+	{
+		return m_name;
 	}
 
 	int ModuleConfFirmware::uartId() const
@@ -56,12 +107,17 @@ namespace Hardware
 
 	QObject* ModuleConfCollection::jsGet(QString name, int uartId, int frameSize, int frameCount)
 	{
-		if (m_firmwares.contains(name) == true)
+		bool newFirmware = m_firmwares.count(name) == 0;
+
+		ModuleConfFirmware& fw = m_firmwares["name"];
+
+		if (newFirmware == true)
 		{
-			return nullptr;
+			fw.init(name, uartId, frameSize, frameCount);
 		}
 
-		return nullptr;
+		QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);
+		return &fw;
 	}
 
 

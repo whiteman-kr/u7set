@@ -7,13 +7,13 @@ var ModuleType = 4;
 var ControllerType = 5;
 var DiagSignalType = 6;
 
-function(root, log)
+function(root, confCollection, log)
 {
     log.writeMessage("Start LogicModuleConfiguration");
 
     var result = true;
 
-    result = module_lm_1(root, log);
+    result = module_lm_1(root, confCollection, log);
 
     if (result == false)
     {
@@ -26,7 +26,7 @@ function(root, log)
 }
 
 
-function module_lm_1(device, log)
+function module_lm_1(device, confCollection, log)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -36,7 +36,7 @@ function module_lm_1(device, log)
 
             // Generate Configuration
             //
-            return generate_lm_1_rev3(device, log);
+            return generate_lm_1_rev3(device, confCollection, log);
         }
         return true;
     }
@@ -44,15 +44,18 @@ function module_lm_1(device, log)
     for (var i = 0; i < device.childrenCount(); i++)
     {
         var child = device.jsChild(i);
-        module_lm_1(child, log);
+        module_lm_1(child, confCollection, log);
     }
 
     return true;
 }
 
-// Generate configuration formodule LM-1, revision 3
+// Generate configuration formodule LM-1
+// module - Hardware::DeviceModule (LM-1)
+// confCollection - Hardware::ModuleConfCollection
 //
-function generate_lm_1_rev3(module, log)
+//
+function generate_lm_1_rev3(module, confCollection, log)
 {
     // Variables
     //
@@ -62,50 +65,61 @@ function generate_lm_1_rev3(module, log)
     var frameCount = 64;                // Check it !!!!
     var uartId = 456;                   // Check it !!!!
 
-    // ---------------------------------------------------
-    // Frame 0
-    //
-    var frameIndex = 0;
+    var confFirmmware = confCollection.jsGet(confName, uartId, frameSize, frameCount);
 
-    // ---------------------------------------------------
-    // Frame 1
-    //
-    frameIndex = 1;
-
-    // CFG Registers LM
-    // Type: CFG Registers
-    // Name: Учетная запись конфигурации
+    // Generation
     //
 
-    // ---------------------------------------------------
-    // Frame 2
-    //
-    frameIndex = 2;
+    // EXAMPLES
+    // To write byte tospecific frame
+    confFirmmware.setData8(0, 8, 0x88);
+    confFirmmware.setData16(0, 9, 0x9129);
+    confFirmmware.setData32(0, 11, 0xA123456A);
 
-    // CFG Registers LM
-    // Type: LM common CFG regs
-    // Name: Общие конфигурационные регисты LM
-    //
+//    // ---------------------------------------------------
+//    // Frame 0
+//    //
+//    var frameIndex = 0;
 
-    // ---------------------------------------------------
-    // Frame 3
-    //
-    frameIndex = 3;
+//    // ---------------------------------------------------
+//    // Frame 1
+//    //
+//    frameIndex = 1;
 
-    // Opto1
-    // Type: TxRxController CFG Registers
-    // Name: Optical Channel 1
-    //
+//    // CFG Registers LM
+//    // Type: CFG Registers
+//    // Name: Учетная запись конфигурации
+//    //
 
-    // Opto2
-    // Type: TxRxController CFG Registers
-    // Name: Optical Channel 2
-    //
+//    // ---------------------------------------------------
+//    // Frame 2
+//    //
+//    frameIndex = 2;
 
-    // Opto3
-    // Type: TxRxController CFG Registers
-    // Name: Optical Channel 3
-    //
+//    // CFG Registers LM
+//    // Type: LM common CFG regs
+//    // Name: Общие конфигурационные регисты LM
+//    //
+
+//    // ---------------------------------------------------
+//    // Frame 3
+//    //
+//    frameIndex = 3;
+
+//    // Opto1
+//    // Type: TxRxController CFG Registers
+//    // Name: Optical Channel 1
+//    //
+
+//    // Opto2
+//    // Type: TxRxController CFG Registers
+//    // Name: Optical Channel 2
+//    //
+
+//    // Opto3
+//    // Type: TxRxController CFG Registers
+//    // Name: Optical Channel 3
+//    //
 
 
     return true;

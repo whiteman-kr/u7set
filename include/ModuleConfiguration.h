@@ -24,11 +24,16 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(int uartId, int frameSize, int frameCount);
+		void init(QString name, int uartId, int frameSize, int frameCount);
+
+		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
+		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
+		Q_INVOKABLE bool setData32(int frameIndex, int offset, quint32 data);
 
 		// Properties
 		//
 	public:
+		QString name() const;
 		int uartId() const;
 		int frameSize() const;
 		int frameCount() const;
@@ -36,11 +41,12 @@ namespace Hardware
 		// Data
 		//
 	private:
+		QString m_name;
 		int m_uartId = 0;
 		int m_frameSize = 0;
 		int m_frameCount = 0;
 
-		QVector<QByteArray> m_frames;
+		std::vector<std::vector<quint8>> m_frames;
 	};
 
 
@@ -64,7 +70,7 @@ namespace Hardware
 		// Data
 		//
 	private:
-		QMap<QString, ModuleConfFirmware> m_firmwares;
+		std::map<QString, ModuleConfFirmware> m_firmwares;
 	};
 
 

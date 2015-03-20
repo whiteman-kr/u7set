@@ -275,6 +275,10 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 	QJSValue jsRoot = jsEngine.newQObject(root);
 	QQmlEngine::setObjectOwnership(root, QQmlEngine::CppOwnership);
 
+	Hardware::ModuleConfCollection confCollection;
+
+	QJSValue jsConfCollection = jsEngine.newQObject(&confCollection);
+	QQmlEngine::setObjectOwnership(&confCollection, QQmlEngine::CppOwnership);
 
 	// Run script
 	//
@@ -283,6 +287,7 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 	QJSValueList args;
 
 	args << jsRoot;
+	args << jsConfCollection;
 	args << jsLog;
 
 	QJSValue jsResult = jsEval.call(args);
