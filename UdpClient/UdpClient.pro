@@ -14,6 +14,32 @@ TARGET = UdpClient
 TEMPLATE = app
 
 
+# Force prebuild version control info
+#
+# for creating version.h at first build
+win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
+unix:system([ -e ./version.h ] || touch ./version.h)
+# for any build
+versionTarget.target = version.h
+versionTarget.depends = FORCE
+win32 {
+    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+        nmake & \
+        chdir $$PWD & \
+        $$PWD/../GetGitProjectVersion.exe $$PWD/UdpClient.pro
+}
+unix {
+    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+        make; \
+        cd $$PWD; \
+        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/UdpClient.pro
+}
+PRE_TARGETDEPS += version.h
+QMAKE_EXTRA_TARGETS += versionTarget
+
+
 SOURCES += \
         mainwindow.cpp \
         clientmain.cpp \
@@ -31,8 +57,12 @@ HEADERS  += mainwindow.h \
     ../include/BaseService.h \
     ../include/CircularLogger.h \
     ../include/DataSource.h \
+<<<<<<< HEAD
     FscDataSource.h \
     ../include/FscDataFormat.h
+=======
+    version.h
+>>>>>>> 12c98157e1a81854cbb38097a968a19d07b96c29
 
 include(../qtservice/src/qtservice.pri)
 

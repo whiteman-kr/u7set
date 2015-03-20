@@ -10,8 +10,18 @@
 
 SELECT check_in(1, ARRAY(SELECT id FROM add_file(1, 'MC', 0, '')), 'Upgrade: MC system folder was added');
 
+-- These files are not used anymore, but we will kepp them, just in case
 UPDATE File SET ParentID = (SELECT FileID FROM File WHERE Name = 'MC' AND ParentID = 0 AND Deleted = FALSE)
 	WHERE Name LIKE '%.cdf' OR Name LIKE '%.cdb' OR Name LIKE '%.cdd';
+
+-- Create new ModulesConfigurations.descr file where all configurations descriptions  (for all modules)
+-- and scripts will be kept
+--
+SELECT add_file(
+	(SELECT "UserID" FROM "User" WHERE "Username"='Administrator'),
+	'ModulesConfigurations.descr',
+	(SELECT FileID FROM File WHERE Name='MC' AND ParentID=0),
+	'');
 
 
 -------------------------------------------------------------------------------

@@ -173,7 +173,7 @@ private:
 
 	bool m_mainFunctionStopped;
 
-	int m_serviceType;
+	unsigned int m_serviceType;
 
     qint64 m_serviceStartTime;
     qint64 m_mainFunctionStartTime;
@@ -211,7 +211,7 @@ private slots:
 public:
 	CircularLogger log;
 
-	BaseServiceController(int serviceType, MainFunctionWorker* mainFunctionWorker);
+	BaseServiceController(unsigned int serviceType, MainFunctionWorker* mainFunctionWorker);
     virtual ~BaseServiceController();
 
 	void getServiceInfo(ServiceInformation& serviceInfo);
@@ -228,10 +228,10 @@ class BaseService : public QtService<QCoreApplication>
 private:
 	MainFunctionWorker* m_mainFunctionWorker = nullptr;
 	BaseServiceController* m_baseServiceController = nullptr;
-	int m_serviceType = 0;
+	unsigned int m_serviceType = 0;
 
 public:
-	BaseService(int argc, char ** argv, const QString & name, int serviceType, MainFunctionWorker *mainFunctionWorker);
+	BaseService(int argc, char ** argv, const QString & name, unsigned int serviceType, MainFunctionWorker *mainFunctionWorker);
 	virtual ~BaseService();
 
 	void sendFile(QHostAddress address, quint16 port, QString fileName);

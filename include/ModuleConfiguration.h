@@ -9,8 +9,68 @@
 
 namespace Hardware
 {
+	class ModuleConfFirmware : public QObject
+	{
+		Q_OBJECT
+
+		Q_PROPERTY(int UartID READ uartId)
+		Q_PROPERTY(int FrameSize READ frameSize)
+		Q_PROPERTY(int FrameCount READ frameCount)
+
+	public:
+		ModuleConfFirmware();
+		virtual ~ModuleConfFirmware();
+
+		// Methods
+		//
+	public:
+		void init(int uartId, int frameSize, int frameCount);
+
+		// Properties
+		//
+	public:
+		int uartId() const;
+		int frameSize() const;
+		int frameCount() const;
+
+		// Data
+		//
+	private:
+		int m_uartId = 0;
+		int m_frameSize = 0;
+		int m_frameCount = 0;
+
+		QVector<QByteArray> m_frames;
+	};
+
+
+	class ModuleConfCollection : public QObject
+	{
+		Q_OBJECT
+
+	public:
+		ModuleConfCollection();
+		virtual ~ModuleConfCollection();
+
+		// Methods
+		//
+	public:
+		Q_INVOKABLE QObject* jsGet(QString name, int uartId, int frameSize, int frameCount);
+
+		// Properties
+		//
+	public:
+
+		// Data
+		//
+	private:
+		QMap<QString, ModuleConfFirmware> m_firmwares;
+	};
+
+
+
 	class ModuleConfigurationStruct;
-	class McFirmware;
+	class McFirmwareOld;
 	struct McDataChunk;
 
 
@@ -179,7 +239,7 @@ namespace Hardware
 		bool load(const ::Proto::ModuleConfiguration& message);
 		void save(::Proto::ModuleConfiguration* message) const;
 
-		bool compile(McFirmware* dest, const QString& deviceStrId, int changeset, QString* errorString) const;
+		bool compile(McFirmwareOld* dest, const QString& deviceStrId, int changeset, QString* errorString) const;
 
 		void addUserPropertiesToObject(QObject* object) const;
 		bool setUserProperty(const QString& name, const QVariant& value);
@@ -259,11 +319,11 @@ namespace Hardware
 
 	// Compiled Module Configuration Firmware
 	//
-	class McFirmware
+	class McFirmwareOld
 	{
 	public:
-		McFirmware();
-		~McFirmware();
+		McFirmwareOld();
+		~McFirmwareOld();
 
 		// Public methods
 	public:

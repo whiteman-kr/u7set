@@ -71,9 +71,9 @@ quint32 ReceivedFile::CRC32()
 //
 
 BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceController, int serviceType) :
+	m_serviceType(serviceType),
     m_baseServiceController(baseServiceController),
-	m_log(m_baseServiceController->log),
-    m_serviceType(serviceType)
+	m_log(m_baseServiceController->log)
 {
     assert(m_baseServiceController != nullptr);
 
@@ -561,20 +561,20 @@ void MainFunctionWorker::onThreadFinishedSlot()
 //
 
 
-BaseServiceController::BaseServiceController(int serviceType, MainFunctionWorker* mainFunctionWorker) :
+BaseServiceController::BaseServiceController(unsigned int serviceType, MainFunctionWorker* mainFunctionWorker) :
+	m_mainFunctionWorker(mainFunctionWorker),
+	m_mainFunctionNeedRestart(false),
+	m_mainFunctionStopped(false),
+	m_serviceType(serviceType),
     m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
     m_mainFunctionStartTime(0),
 	m_mainFunctionState(MainFunctionState::stopped),
     m_majorVersion(1),
     m_minorVersion(0),
     m_buildNo(123),
-	m_crc(0xF0F1F2F3),
-	m_serviceType(serviceType),
-	m_mainFunctionNeedRestart(false),
-	m_mainFunctionStopped(false),
-	m_mainFunctionWorker(mainFunctionWorker)
+	m_crc(0xF0F1F2F3)
 {
-	assert(m_serviceType >= 0 && m_serviceType < SERVICE_TYPE_COUNT);
+	assert(m_serviceType < SERVICE_TYPE_COUNT);
 
 	qRegisterMetaType<QHostAddress>("QHostAddress");
 	qRegisterMetaType<UdpRequest>("UdpRequest");
@@ -735,6 +735,10 @@ void BaseServiceController::restartMainFunction()
 	case MainFunctionState::stopped:
 		startMainFunction();
 		break;
+
+	case MainFunctionState::starts:
+	case MainFunctionState::stops:
+		break;
 	}
 }
 
@@ -813,14 +817,14 @@ void BaseServiceController::onFileReceived(ReceivedFile* receivedFile)
 // BaseService class implementation
 //
 
-BaseService::BaseService(int argc, char ** argv, const QString & name, int serviceType, MainFunctionWorker* mainFunctionWorker):
+BaseService::BaseService(int argc, char ** argv, const QString & name, unsigned int serviceType, MainFunctionWorker* mainFunctionWorker):
 	QtService(argc, argv, name),
-	m_serviceType(serviceType),
-	m_mainFunctionWorker(mainFunctionWorker)
+	m_mainFunctionWorker(mainFunctionWorker),
+	m_serviceType(serviceType)
 {
-	if ( !(m_serviceType >= 0 && m_serviceType < SERVICE_TYPE_COUNT))
+	if (m_serviceType >= SERVICE_TYPE_COUNT)
 	{
-		assert(m_serviceType >= 0 && m_serviceType);
+		assert(m_serviceType >= SERVICE_TYPE_COUNT);
 
 		m_serviceType = STP_BASE;
 	}

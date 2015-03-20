@@ -543,6 +543,69 @@ void QtMultiIntSpinBox::onValueChanged(int value)
 }
 
 //
+// ---------QtMultiUIntSpinBox----------
+//
+
+QtMultiUIntSpinBox::QtMultiUIntSpinBox(QWidget* parent):
+	QWidget(parent)
+{
+	m_spinBox = new QSpinBox(parent);
+	m_spinBox->setKeyboardTracking(false);
+	//m_spinBox->setRange(std::numeric_limits<quint32>::min(), std::numeric_limits<quint32>::max());
+
+	connect(m_spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+			this, &QtMultiUIntSpinBox::onValueChanged);
+
+	QHBoxLayout* lt = new QHBoxLayout;
+	lt->setContentsMargins(0, 0, 0, 0);
+	lt->addWidget(m_spinBox);
+	setLayout(lt);
+
+	m_spinBox->installEventFilter(this);
+}
+
+bool QtMultiUIntSpinBox::eventFilter(QObject* watched, QEvent* event)
+{
+	if (m_spinBox == nullptr)
+	{
+		Q_ASSERT(m_spinBox);
+		return false;
+	}
+
+	if (watched == m_spinBox && event->type() == QEvent::KeyPress)
+	{
+		QKeyEvent* ke = static_cast<QKeyEvent*>(event);
+		if (ke->key() == Qt::Key_Escape)
+		{
+			m_escape = true;
+		}
+	}
+
+	return QWidget::eventFilter(watched, event);
+}
+
+void QtMultiUIntSpinBox::setValue(quint32 value)
+{
+	if (m_spinBox == nullptr)
+	{
+		Q_ASSERT(m_spinBox);
+		return;
+	}
+
+	m_spinBox->blockSignals(true);
+	m_spinBox->setValue(value);
+	m_spinBox->blockSignals(false);
+}
+
+void QtMultiUIntSpinBox::onValueChanged(quint32 value)
+{
+	if (m_escape == false)
+	{
+		emit valueChanged(value);
+	}
+}
+
+//
 // ---------QtMultiCheckBox----------
 //
 static QIcon drawCheckBox(int state)
@@ -725,6 +788,16 @@ QWidget* QtMultiVariantFactory::createEditor(QtMultiVariantPropertyManager* mana
 
 					connect(m_editor, &QtMultiIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
 					connect(m_editor, &QtMultiIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+				}
+				break;
+			case QVariant::UInt:
+				{
+					QtMultiUIntSpinBox* m_editor = new QtMultiUIntSpinBox(parent);
+					editor = m_editor;
+					m_editor->setValue(manager->value(property).toUInt());
+
+					connect(m_editor, &QtMultiUIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+					connect(m_editor, &QtMultiUIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
 				}
 				break;
 			case QVariant::Double:
@@ -1087,6 +1160,13 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 				}
 				break;
 
+			case QVariant::UInt:
+				{
+					quint32 val = value(property).toUInt();
+					return QString::number(val);
+				}
+				break;
+
 			case QVariant::Double:
 				{
 					double val = value(property).toDouble();
@@ -1435,6 +1515,18 @@ QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QSt
 					else
 					{
 						m_propertyVariantManager->setValue(subProperty, (int)0);
+					}
+					break;
+
+				case QVariant::UInt:
+					subProperty = m_propertyVariantManager->addProperty(fullName);
+					if (sameValue == true)
+					{
+						m_propertyVariantManager->setValue(subProperty, value.toUInt());
+					}
+					else
+					{
+						m_propertyVariantManager->setValue(subProperty, (quint32)0);
 					}
 					break;
 

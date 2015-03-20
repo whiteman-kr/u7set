@@ -987,7 +987,7 @@ void LinearityOption::load()
 
     m_pointBase.load();
 
-    m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.5).toDouble();
+    m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
     m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
     m_errorType  = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), ERROR_TYPE_REDUCE).toInt();
     m_errorCalcBySCO  = s.value( QString("%1ErrorCalcByMSE ").arg(LINEARITY_OPTIONS_KEY), false).toBool();
@@ -1047,6 +1047,78 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 
     m_viewType = from.m_viewType;
     m_showOutputRangeColumn = from.m_showOutputRangeColumn;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorOption::ComparatorOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorOption::ComparatorOption(const ComparatorOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+ComparatorOption::~ComparatorOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorOption::load()
+{
+    QSettings s;
+
+    m_errorValue = s.value( QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
+    m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
+    m_startValue = s.value( QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
+    m_errorType = s.value( QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), ERROR_TYPE_REDUCE).toInt();
+
+    m_enableMeasureHysteresis = s.value( QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
+    m_startComparatorNo = s.value( QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
+    m_additionalCheck = s.value( QString("%1AdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), m_errorValue);
+    s.setValue( QString("%1ErrorCtrl").arg(COMPARATOR_OPTIONS_KEY), m_errorCtrl);
+    s.setValue( QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), m_startValue);
+    s.setValue( QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
+
+    s.setValue( QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
+    s.setValue( QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorNo);
+    s.setValue( QString("%1AdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), m_additionalCheck);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
+{
+    m_errorValue = from.m_errorValue;
+    m_errorCtrl = from.m_errorCtrl;
+    m_startValue = from.m_startValue;
+    m_errorType = from.m_errorType;
+
+    m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
+    m_startComparatorNo = from.m_startComparatorNo;
+    m_additionalCheck = from.m_additionalCheck;
 
     return *this;
 }
@@ -1203,6 +1275,8 @@ void Options::load()
 
     m_linearity.load();
 
+    m_comparator.load();
+
     m_backup.load();
 }
 
@@ -1216,6 +1290,7 @@ void Options::save()
     m_database.save();
     m_report.save();
     m_linearity.save();
+    m_comparator.save();
     m_backup.save();
 }
 
@@ -1236,6 +1311,7 @@ Options& Options::operator=(const Options& from)
         m_database = from.m_database;
         m_report = from.m_report;
         m_linearity = from.m_linearity;
+        m_comparator = from.m_comparator;
         m_backup = from.m_backup;
 
     m_mutex.unlock();

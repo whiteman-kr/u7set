@@ -200,7 +200,9 @@ public:
 	int dvsFileId() const;		// Diaginostics Video Schemes
 
 	std::vector<DbFileInfo> systemFiles() const;
+
 	DbFileInfo systemFileInfo(const QString& fileName) const;
+	DbFileInfo systemFileInfo(int fileId) const;
 
 	QString lastError() const;
 

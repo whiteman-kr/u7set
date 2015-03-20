@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include "FileView.h"
+#include "FileListView.h"
 #include "../include/DbController.h"
 #include "EditSchemeWidget.h"
 
@@ -10,7 +10,7 @@
 // VideoFrameFileView
 //
 //
-class SchemeFileView : public FileView
+class SchemeFileView : public FileListView
 {
 	Q_OBJECT
 public:

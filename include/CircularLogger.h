@@ -51,8 +51,8 @@ private:
 	int m_endFileNumber = -1;
 	int m_fileCount;
 	int m_fileSizeLimit;	// in megabytes
-	quint64 m_beginFileID = -1;
-	quint64 m_endFileID = -1;
+	qint64 m_beginFileID = -1;
+	qint64 m_endFileID = -1;
 };
 
 class CircularLogger : public QObject

@@ -1,4 +1,5 @@
 #pragma once
+#include <QJSValue>
 #include "DbStruct.h"
 #include "QUuid"
 #include "../include/Factory.h"
@@ -7,6 +8,8 @@
 
 namespace Hardware
 {
+	extern const wchar_t* DeviceObjectExtensions[];
+
 	void Init();
 	void Shutdwon();
 
@@ -25,7 +28,51 @@ namespace Hardware
 		DeviceTypeCount
 	};
 
-	extern const wchar_t* DeviceObjectExtensions[];
+	//
+	//
+	// DynamicProperty
+	//
+	//
+	class DynamicProperty
+	{
+	public:
+		DynamicProperty();
+		DynamicProperty(const QString& name,
+						const QVariant& min,
+						const QVariant& max,
+						const QVariant& defaultVal,
+						const QVariant& value);
+
+		void saveValue(::Proto::Property* protoProperty) const;
+		bool loadValue(const ::Proto::Property& protoProperty);
+
+		// Properties
+		//
+	public:
+		QString name() const;
+		const char* name_c_str() const;
+		void setName(const QString& value);
+
+		QVariant min() const;
+		QVariant max() const;
+		QVariant defaultValue() const;
+
+		QVariant value() const;
+		void setValue(QVariant v);
+
+		// Data
+		//
+	private:
+		QString m_name;
+		QByteArray m_c_str_name;
+
+		QVariant m_min;
+		QVariant m_max;
+		QVariant m_default;
+
+		QVariant m_value;
+	};
+
 
 	//
 	//
@@ -42,6 +89,7 @@ namespace Hardware
 		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
 		Q_PROPERTY(QString ChildRestriction READ childRestriction WRITE setChildRestriction)
 		Q_PROPERTY(int Place READ place WRITE setPlace)
+		Q_PROPERTY(QString DynamicProperties READ dynamicProperties WRITE setDynamicProperties)
 
 	protected:
 		explicit DeviceObject(bool preset = false);
@@ -65,22 +113,35 @@ namespace Hardware
 		//
 		static DeviceObject* CreateObject(const Proto::Envelope& message);
 
+		// Public methods
+		//
 	public:
+		virtual bool event(QEvent* e) override;
 
-		// Properties and Methods
+		// Protected methods
+		//
+	protected:
+
+		// Parse m_dynamicProperties and create Qt meta system dynamic properies
+		void parseDynamicPropertiesStruct();
+
+
+		// Properties, etc
 		//
 	public:
 		DeviceObject* parent();
 		virtual DeviceType deviceType() const;
+		Q_INVOKABLE int jsDeviceType() const;
 
 		QString fileExtension() const;
 		static QString fileExtension(DeviceType device);
 
 		// Children care
 		//
-		int childrenCount() const;
+		Q_INVOKABLE int childrenCount() const;
 
 		DeviceObject* child(int index) const;
+		Q_INVOKABLE QObject* jsChild(int index) const;
 
 		int childIndex(DeviceObject* child) const;
 
@@ -109,6 +170,9 @@ namespace Hardware
 		const QString& childRestriction() const;
 		void setChildRestriction(const QString& value);
 
+		const QString& dynamicProperties() const;
+		void setDynamicProperties(const QString& value);
+
 		int place() const;
 		void setPlace(int value);
 
@@ -135,6 +199,7 @@ namespace Hardware
 		DbFileInfo m_fileInfo;
 
 		QString m_childRestriction;			// Restriction script for child items
+		QString m_dynamicPropertiesStruct;	// Desctription of the Object's dynamic properties
 
 		int m_place = 0;
 
@@ -145,6 +210,9 @@ namespace Hardware
 		QString m_presetName;				// PresetName, if it is preset
 		//QUuid m_presetId;
 
+	private:
+		bool m_avoidEventRecursion = false;
+		QHash<QString, DynamicProperty> m_dynamicProperties;
 	};
 
 
@@ -273,8 +341,9 @@ namespace Hardware
 
 		Q_PROPERTY(int Type READ type WRITE setType)
 
-		Q_PROPERTY(QString ConfStruct READ configurationStruct WRITE setConfigurationStruct)
-		Q_PROPERTY(QString ConfFirmwareName READ confFirmwareName WRITE setConfFirmwareName)
+		Q_PROPERTY(int ConfIndex READ confIndex WRITE setConfIndex)
+		Q_PROPERTY(QString ConfName READ confName WRITE setConfName)
+		Q_PROPERTY(QString ConfType READ confType WRITE setConfType)
 
 	public:
 		explicit DeviceModule(bool preset = false);
@@ -289,12 +358,9 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
-		virtual bool event(QEvent* e) override;
-
 		// Public Methods
 		//
 	public:
-		bool compileConfiguration(McFirmware* dest, QString* errorString) const;
 
 		// Properties
 		//
@@ -302,13 +368,14 @@ namespace Hardware
 		int type() const;
 		void setType(int value);
 
-		QString configurationStruct() const;
-		void setConfigurationStruct(const QString& value);
+		int confIndex() const;
+		void setConfIndex(int value);
 
-		QString confFirmwareName() const;
-		void setConfFirmwareName(const QString& value);
+		QString confName() const;
+		void setConfName(const QString& value);
 
-		const ModuleConfiguration& moduleConfiguration() const;
+		QString confType() const;
+		void setConfType(const QString& value);
 
 		// Data
 		//
@@ -317,10 +384,9 @@ namespace Hardware
 
 		int m_type = 0;
 
-		QString m_configurationInput;
-		QString m_configurationOutput;
-
-		ModuleConfiguration m_moduleConfiguration;
+		int m_confIndex = 0;
+		QString m_confName;
+		QString m_confType;
 	};
 
 

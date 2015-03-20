@@ -1,0 +1,12 @@
+****************************************************************************
+* NCReport 2.7.01
+* Release date: 06.Dec.2011
+****************************************************************************
+
+Qt Compatibility: >=4.5.x
+
+Fixes:
+
+- 0071398 Enable to use stored procedures in data source. CALL ... etc functions are allowed SQL statements now.
+- 0071392: designer ends with error/crash by open data sources of old report. The problem was related only to Windows version.
+- Minor fixes in Cross-tab function

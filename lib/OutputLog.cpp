@@ -1,4 +1,4 @@
-#include "Stable.h"
+//#include "Stable.h"
 #include "../include/OutputLog.h"
 
 
@@ -68,7 +68,7 @@ void OutputLog::writeError(const QString& str, bool bold)
 	return write(str, Error, bold);
 }
 
-void OutputLog::writeDump(const std::vector<uint8_t>& /*data*/)
+void OutputLog::writeDump(const std::vector<char>& /*data*/)
 {
 //	QString dataString;
 	

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STABLE_H
+#define STABLE_H
 
 // VFrame30 Library
 //
@@ -69,3 +70,4 @@
 	#pragma warning(disable : 4482)
 #endif
 
+#endif // STABLE_H

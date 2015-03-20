@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.7.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="cds0" type="custom" openRole="begin" source="static">cds0</datasource>
+        <datasource id="cds1" type="custom" openRole="begin" source="static">cds1</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="22.984">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="4.762" width="121.973" height="7.938" fontName="Arial" fontSize="18" fontWeight="bold" fontItalic="true" alignment="33" forecolor="#5500ff">Custom datasource demonstration</label>
+        <line id="1" zValue="1" resource="static" fromX="0.000" fromY="14.552" toX="166.688" toY="14.552" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <label id="2" zValue="2" resource="static" posX="1.587" posY="16.140" width="9.525" height="5.027" fontName="Arial" fontSize="10" fontItalic="true" alignment="33" forecolor="#000000">ID.</label>
+        <label id="3" zValue="3" resource="static" posX="19.315" posY="16.140" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontItalic="true" alignment="33" forecolor="#000000">Name</label>
+        <label id="4" zValue="4" resource="static" posX="64.029" posY="16.140" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontItalic="true" alignment="33" forecolor="#000000">Address</label>
+        <label id="5" zValue="5" resource="static" posX="125.148" posY="16.140" width="11.112" height="5.027" fontName="Arial" fontSize="10" fontItalic="true" alignment="33" forecolor="#000000">Valid</label>
+        <label id="6" zValue="6" resource="static" posX="141.023" posY="16.140" width="27.252" height="5.027" fontName="Arial" fontSize="10" fontItalic="true" alignment="33" forecolor="#ff0000">Date of order</label>
+        <line id="7" zValue="7" resource="static" fromX="0.000" fromY="20.902" toX="166.688" toY="20.902" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+    </pageheader>
+    <pagefooter id="pfoot" height="9.087">
+        <line id="0" zValue="0" resource="static" fromX="0.000" fromY="3.175" toX="166.688" toY="3.175" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="3.175" width="33.602" height="6.350" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000">Page footer</label>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="5.345" datasource="cds0" startsOnNewPage="false">
+            <items>
+                <field id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="17.727" height="5.027" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="0" fillchar=" " localized="true" arg="">id</field>
+                <field id="1" zValue="1" resource="static" posX="19.315" posY="0.000" width="43.392" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">name</field>
+                <field id="2" zValue="2" resource="static" posX="64.029" posY="0.000" width="59.267" height="5.027" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">address</field>
+                <field id="3" zValue="3" resource="static" posX="125.148" posY="0.000" width="14.552" height="5.027" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" type="bool" ftype="ds" arg="">valid</field>
+                <field id="4" zValue="4" resource="static" posX="141.023" posY="0.000" width="24.077" height="5.027" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">date</field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

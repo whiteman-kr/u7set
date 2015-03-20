@@ -1,0 +1,35 @@
+****************************************************************************
+* NCReport 2.9.0
+* Release date: 31.Marc.2013
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+New features:
+
+- 0071547: [General] Qt5 Compatibility 
+- 0071544: [General] Direct TABLE printing of QTableView / QAbstractItemModel 
+- 0071528: [Designer] buttons for vertical alignment 
+- 0071529: [General] Now it is possible to use a parameter in order to tell the report which file should be used as data source
+- 0071523: [Report engine library] Batch report with different parameter sets 
+- 0071545: [Report engine library] Parameterized report definition XML 
+- 0071546: [Report engine library] Preview system to handle different paper sizes in one report (or batch report) 
+- Shadow build now is supported
+
+Fixes:
+
+- 0071527: [Designer] keep vertical alignment 
+- 0071444: [Report engine library] Improve Build Environment to better support shadow builds and static builds 
+- 0071502: [Designer] Alignment to be improve in test data editor 
+- 0071531: [Report engine library] Problem with the report API solved 
+- 0071535: [Report engine library] Script expression can not handle text with multiple lines - fixed.
+- 0071543: [Report engine library] Wrong page orientation in page preview in order to batch report mode 
+- 0071538: [Designer] Can't open a form again after saving bc 'Parse error'.
+- 0071522: [Report engine library] NCreport console: parameters that contain commas [,] are not sent to engine properly
+- 0071524: [Report engine library] Report opened in continuous mode is not at the start.
+- 0071525: [General] Ability to hide Close button and disable Esc close in NCReportPreviewOutput
+
+- Many other fixes
+
+
+
+
+

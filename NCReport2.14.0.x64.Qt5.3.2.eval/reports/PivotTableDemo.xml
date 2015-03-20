@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.11.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <htmlOpt>{DEFAULT}</htmlOpt>
+        <doublePass>true</doublePass>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">Country	Year	Amount
+GER	2009	1870
+GER	2009	1110
+GER	2010	4500
+GER	2011	3200
+GER	2012	5650
+USA	2011	2800
+USA	2012	3700
+JAP	2009	1980
+JAP	2010	2450
+JAP	2011	2630
+JAP	2012	3000
+FRA	2009	4800
+FRA	2011	3600
+FRA	2012	2570
+AUS	2010	3640
+AUS	2011	5900
+AUS	2012	6300
+AUT	2011	4870</datasource>
+    </datasources>
+    <variables>
+        <variable id="country_total" type="num" funcType="sum" scope="group" initValue="0">Amount</variable>
+    </variables>
+    <pageheader id="phead" height="12.700">
+        <label id="9J1UG" zValue="0" posX="0.000" posY="0.000" width="96.837" height="6.615" fontName="Arial" fontSize="16" fontWeight="bold" alignment="1">Income report by countries</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="10.000">
+        <field id="ZVZG2" zValue="0" posX="122.237" posY="0.000" width="47.625" height="4.762" resource="tpl" fontName="Arial" fontSize="10" alignment="2" type="txt" ftype="tpl" arg="">Page $V{pageno}/$V{pagecount}
+</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="4.762" datasource="DataSource1">
+            <items>
+                <field id="Z47U7" zValue="0" posX="0.000" posY="0.000" width="30.162" height="4.762" resource="datasource" fontName="Arial" fontSize="10" type="txt" ftype="ds" arg="">Country</field>
+                <field id="1" zValue="1" posX="34.925" posY="0.000" width="22.225" height="4.762" resource="datasource" fontName="Arial" fontSize="10" type="txt" ftype="ds" arg="">Year</field>
+                <field id="2" zValue="2" posX="60.325" posY="0.000" width="30.162" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="0" localized="true" arg="">Amount</field>
+            </items>
+            <groups>
+                <group id="g0" groupExp="Country" resetVariables="country_total" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_g0" height="5.556">
+                        <label id="OV8DD" zValue="0" posX="0.000" posY="0.000" width="31.750" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold">Country</label>
+                        <label id="1" zValue="1" posX="34.925" posY="0.000" width="22.225" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold">Year</label>
+                        <label id="2" zValue="2" posX="60.325" posY="0.000" width="30.162" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2">Income</label>
+                        <line id="3" zValue="3" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="4.762" toX="93.662" toY="4.762"/>
+                    </groupheader>
+                    <groupfooter id="GF_g0" height="8.467">
+                        <line id="DR05A" zValue="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="74.612" fromY="0.000" toX="93.662" toY="0.000"/>
+                        <field id="1" zValue="1" posX="60.325" posY="0.000" width="30.162" height="4.762" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="0" localized="true" arg="">country_total</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+        <detail id="DetailPivotTable" height="29.633" datasource="DataSource1">
+            <items>
+                <crosstab id="S69W2" zValue="0" posX="0.000" posY="1.587" width="58.208" height="26.458" datasource="DataSource1" tableSpacing="7" cellPadding="0.5" cellSpacing="0" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" colWidth="20" rowHeight="5" showColHeader="1" showRowHeader="1" showBottomSummary="1" showSideSummary="1" breakTable="0" isPivot="1" ptAgg="1" ptRow="Year" ptColumn="Country" ptValue="Amount">
+                    <cell ct="0" dt="0" alignment="129" fontName="Sans" fontSize="9" fillStyle="solid" fillColor="#474747" foreColor="#ffffff" bgMode="1">
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="1" dt="0" alignment="130" fontName="Sans" fontSize="9" fillStyle="solid" fillColor="#474747" foreColor="#ffffff" bgMode="1">
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="2" dt="0" alignment="130" fontName="Sans" fontSize="9" fillStyle="solid" fillColor="#474747" foreColor="#ffffff" bgMode="1">
+                        <text>Total</text>
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="3" dt="0" alignment="129" fontName="Sans" fontSize="9" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="4" dt="1" alignment="130" fontName="Sans" fontSize="9" fillStyle="no" fillColor="#000000" foreColor="#000000" formatting="1" format="f" precision="0" blankIfZero="1" localized="1">
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="5" dt="1" alignment="130" fontName="Sans" fontSize="9" fontWeight="bold" fillStyle="no" fillColor="#000000" foreColor="#000000" formatting="1" format="f" precision="0" localized="1">
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="6" dt="0" alignment="129" fontName="Sans" fontSize="9" fontWeight="bold" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <text>Total</text>
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="7" dt="1" alignment="130" fontName="Sans" fontSize="9" fontWeight="bold" fillStyle="no" fillColor="#000000" foreColor="#000000" formatting="1" format="f" precision="0" localized="1">
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="8" dt="1" alignment="130" fontName="Sans" fontSize="9" fontWeight="bold" fillStyle="no" fillColor="#000000" foreColor="#000000" formatting="1" format="f" precision="0" localized="1">
+                        <border pos="0" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#919191" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                </crosstab>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="%CONST" resetVariables="" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_Group0" height="7.938">
+                        <label id="5E4B5" zValue="0" posX="0.000" posY="0.000" width="44.450" height="6.615" fontName="Arial" fontSize="12" fontWeight="bold" alignment="1">Summarized:</label>
+                    </groupheader>
+                    <groupfooter id="GF_Group0" height="4.000"/>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

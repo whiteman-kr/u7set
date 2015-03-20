@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.5.0 beta" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0.2</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="northwind-sqlite" host="" database="../testdata/northwind.db" user="" password="" port="" driver="QSQLITE">SELECT ProductID, ProductName, 
+QuantityPerUnit, UnitPrice, QuantityPerUnit*UnitPrice as value
+FROM products
+WHERE ProductID&gt;2
+ORDER BY ProductID</datasource>
+    </datasources>
+    <variables>
+        <variable id="total_value" type="num" funcType="sum" scope="group" initValue="0">value</variable>
+    </variables>
+    <pageheader id="phead" height="12.030">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="3.207" width="20.846" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" wordbreak="true" forecolor="#000000">Product ID</label>
+        <label id="1" zValue="1" resource="static" posX="22.449" posY="3.207" width="32.071" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" wordbreak="true" forecolor="#000000">Product name</label>
+        <label id="2" zValue="2" resource="static" posX="96.212" posY="3.207" width="18.708" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" wordbreak="true" forecolor="#000000">Unit Qty</label>
+        <label id="3" zValue="3" resource="static" posX="115.455" posY="3.207" width="18.708" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" wordbreak="true" forecolor="#000000">Unit price</label>
+        <label id="4" zValue="4" resource="static" posX="141.111" posY="3.207" width="18.708" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" wordbreak="true" forecolor="#000000">Value</label>
+        <line id="5" zValue="5" resource="static" fromX="0.000" fromY="10.423" toX="168.371" toY="10.423" lineColor="#000000" lineStyle="dash" lineWidth="0.400"/>
+    </pageheader>
+    <pagefooter id="pfoot" height="9.890">
+        <line id="0" zValue="0" resource="static" fromX="3.207" fromY="1.604" toX="160.354" toY="1.604" lineColor="#000000" lineStyle="dot" lineWidth="0.100"/>
+        <field id="1" zValue="1" resource="static" posX="137.904" posY="3.207" width="17.639" height="5.078" fontName="Arial" fontSize="10" fontItalic="true" alignment="34" wordbreak="true" forecolor="#000000" type="num" ftype="sys" arg="Page: %1">pageno</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="20.846" autoHeight="true" datasource="DataSource1" startsOnNewPage="false">
+            <items>
+                <rectangle id="0" zValue="0" printWhen="EVEN" resource="static" autoHeight="true" posX="0.000" posY="0.000" width="166.768" height="4.811" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillColor="#f0ecd8" fillStyle="solid" fitTo="none"/>
+                <field id="1" zValue="1" resource="static" posX="134.697" posY="0.000" width="20.846" height="4.009" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">Value</field>
+                <field id="2" zValue="2" resource="static" posX="3.207" posY="0.000" width="12.828" height="4.009" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" wordbreak="true" forecolor="#000000" type="num" ftype="ds" arg="">ProductID</field>
+                <field id="3" zValue="3" printWhen="$D{productID}&gt;10" resource="static" autoHeight="true" posX="22.449" posY="0.000" width="64.141" height="4.009" fontName="Arial" fontSize="10" alignment="33" wordbreak="true" forecolor="#000000" type="txt" ftype="ds" arg="">ProductName</field>
+                <field id="4" zValue="4" resource="static" posX="89.798" posY="0.000" width="14.432" height="4.009" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">QuantityPerUnit</field>
+                <field id="5" zValue="5" resource="static" posX="112.247" posY="0.000" width="20.846" height="4.009" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">UnitPrice</field>
+                <line id="6" zValue="6" resource="static" zoneID="1" fromX="0.000" fromY="10.423" toX="165.966" toY="10.423" lineColor="#000000" lineStyle="dash" lineWidth="0.100"/>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="0" resetVariables="total_value" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="1.871"/>
+                    <groupfooter height="9.354">
+                        <field id="0" zValue="0" resource="static" posX="134.697" posY="1.604" width="20.846" height="5.078" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">total_value</field>
+                        <label id="1" zValue="1" resource="static" posX="109.040" posY="1.604" width="24.053" height="5.078" fontName="Arial" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000">Total value:</label>
+                        <line id="2" zValue="2" resource="static" fromX="107.437" fromY="0.000" toX="158.750" toY="0.000" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

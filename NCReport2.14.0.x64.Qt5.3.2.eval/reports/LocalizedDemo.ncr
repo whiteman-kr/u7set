@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.13.2" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>00,de,fr,en,he,zh,ar</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Ubuntu</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" allowEmpty="true" type="txt" openRole="begin" source="static" columnDelimiter="semicolon" hasColumnHeader="true" encoding="UTF-8">id;name;cat;inventory;price1;price2;unit;vat;has;date
+47;Zaanse koeken;0;6;9.00;8.0000;pcs;0;0;2014-01-23
+48;Chocolade;0;2;12.00;11.0000;pcs;25;0;2014-01-24
+49;Maxilaku;0;7;20.00;18.0000;pcs;15;0;2014-01-25
+50;Valkoinen suklaa;0;4;16478.00;14.0000;pcs;30;0;2014-01-27</datasource>
+        <datasource id="DataSource2" allowEmpty="true" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true" encoding="UTF-8">number
+25406</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="PH" height="6.090">
+        <label id="XVSB9" zValue="0" posX="0.000" posY="0.000" width="65.087" height="5.027" fontName="Ubuntu" fontSize="12" fontWeight="bold" alignment="1" tr="1">
+            <tr lang="de">Lokalisierung Demo</tr>
+            <tr>Localization Demo</tr>
+            <tr lang="fr">Localisation Démo</tr>
+        </label>
+    </pageheader>
+    <pagefooter id="PF" height="10.000"/>
+    <reportheader id="RH" height="14.820">
+        <text id="PQM57" zValue="0" posX="0.000" posY="0.000" width="138.112" height="14.287" resource="file" template="true" useFont="true" fontName="Ubuntu" fontSize="10" forecolor="#000000">htmlfiles/text_$V{lang}.html</text>
+        <field id="F_NUM" typeId="131074" zValue="1" posX="138.112" posY="0.000" width="31.750" height="4.762" description="price1" printWhen="true" resource="datasource" fontName="Ubuntu" fontSize="10" alignment="34" tr="1" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="true">
+            <tr>DataSource2.number</tr>
+        </field>
+    </reportheader>
+    <reportfooter id="RF" height="7.938">
+        <label id="QW0DH" zValue="0" posX="0.000" posY="1.587" width="31.750" height="4.762" fontName="Ubuntu" fontSize="10" fontItalic="true" alignment="1" tr="1">
+            <tr lang="zh">You welcome!</tr>
+        </label>
+    </reportfooter>
+    <details>
+        <detail id="Detail1" height="5.292" datasource="DataSource1">
+            <items>
+                <field id="R2HFM" typeId="131074" zValue="0" posX="0.000" posY="0.000" width="12.700" height="4.762" description="id" resource="datasource" fontName="Ubuntu" fontSize="10" alignment="1" tr="1" type="txt" ftype="ds">
+                    <tr>id</tr>
+                </field>
+                <field id="KPYYQ" typeId="131074" zValue="1" posX="14.287" posY="0.000" width="55.562" height="4.762" description="name" resource="datasource" fontName="Ubuntu" fontSize="10" alignment="1" tr="1" type="txt" ftype="ds">
+                    <tr>name</tr>
+                </field>
+                <field id="price" typeId="131074" zValue="2" posX="138.112" posY="0.000" width="31.750" height="4.762" description="price1" resource="datasource" fontName="Ubuntu" fontSize="10" alignment="34" tr="1" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="true">
+                    <tr>price1</tr>
+                </field>
+                <field id="4B61F" typeId="131074" zValue="3" posX="101.600" posY="0.000" width="31.750" height="4.762" description="date" resource="datasource" fontName="Ubuntu" fontSize="10" alignment="1" tr="1" type="date" ftype="ds" dateFormat="">
+                    <tr>date</tr>
+                </field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

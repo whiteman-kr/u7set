@@ -1,0 +1,10 @@
+****************************************************************************
+* NCReport 2.13.1
+* Release date: 01.Dec.2014
+* Features and bugfixes are tracked at http://tracker.ncreport.org
+****************************************************************************
+
+- 0071737: [Report engine library] Image relative path issue Batch report mode (administrator) - resolved.
+- 0071740: [Designer] Running report in batch mode Designer support (administrator) - resolved.
+- 0071739: [Report engine library] Data source relation issues (administrator) - resolved.
+- Several small fixes

@@ -1,0 +1,14 @@
+****************************************************************************
+* NCReport 2.10.1
+* Release date: 17.Sep.2013
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+Fixes:
+
+- 0071555: [Designer] Other datasource name is not active in "Custom" datasource - resolved.
+- 0071594: [Report engine library] SVG output: row height problem when auto row height is on. - resolved.
+- 0071579: [Report engine library] Preview Window to enable using print without print dialog - resolved.
+- 0071566: [Report engine library] Regression: Rendering reports with report footer will fail with "Report footer is too large". - resolved.
+- 0071596: [Designer] UTF16 Report encoding to remove from Designer - closed.
+- Some other minor fixes

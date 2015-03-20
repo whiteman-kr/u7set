@@ -102,7 +102,7 @@ class EquipmentView : public QTreeView
 
 public:
 	EquipmentView() = delete;
-	EquipmentView(DbController* dbcontroller);
+	explicit EquipmentView(DbController* dbcontroller);
 	virtual ~EquipmentView();
 
 	bool isPresetMode() const;

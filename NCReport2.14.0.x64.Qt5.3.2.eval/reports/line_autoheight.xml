@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.2" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">1	5	Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+2	5	Duis euismod ornare diam, non varius tortor posuere sed.
+3	5	Nunc vehicula neque lacinia diam
+4	5	Maecenas gravida bibendum sem eget sodales. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla interdum eleifend tristique.</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="10.000" autoHeight="true"/>
+    <pagefooter id="pfoot" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="17.200" autoHeight="true" datasource="DataSource1">
+            <items>
+                <rectangle id="7219" zValue="0" posX="88.900" posY="0.000" width="0.000" height="10.054" autoHeight="true" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillStyle="no" fillColor="#000000" fitTo="section"/>
+                <field id="1728" zValue="1" posX="90.487" posY="1.587" width="28.575" height="4.762" autoHeight="true" fontName="Liberation Sans" fontSize="10" alignment="33" wordbreak="true" forecolor="#000000" type="txt" ftype="ds" arg="">col2</field>
+                <line id="5133" zValue="2" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="0.000" toX="169.862" toY="0.000"/>
+                <rectangle id="3123" zValue="3" posX="120.650" posY="0.000" width="0.000" height="10.054" autoHeight="true" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillStyle="no" fillColor="#000000" fitTo="section"/>
+                <rectangle id="6238" zValue="4" posX="169.862" posY="0.000" width="0.000" height="10.054" autoHeight="true" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillStyle="no" fillColor="#000000" fitTo="section"/>
+                <rectangle id="6374" zValue="5" posX="0.000" posY="0.000" width="0.000" height="10.054" autoHeight="true" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillStyle="no" fillColor="#000000" fitTo="section"/>
+                <field id="4518" zValue="6" posX="1.587" posY="1.587" width="28.575" height="4.762" autoHeight="true" fontName="Liberation Sans" fontSize="10" alignment="33" wordbreak="true" forecolor="#000000" type="txt" ftype="ds" arg="">col0</field>
+                <line id="1219" zValue="7" autoHeight="true" lineColor="#00aa7f" lineStyle="dash" lineWidth="0.450" fitTo="section" fromX="138.112" fromY="0.000" toX="138.112" toY="7.938"/>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="%CONST" resetVariables="" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="5.027"/>
+                    <groupfooter height="2.910">
+                        <line id="1704" zValue="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="0.000" toX="169.862" toY="0.000"/>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

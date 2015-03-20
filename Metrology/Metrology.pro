@@ -13,6 +13,33 @@ TEMPLATE = app
 
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
+
+# Force prebuild version control info
+#
+# for creating version.h at first build
+win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
+unix:system([ -e ./version.h ] || touch ./version.h)
+# for any build
+versionTarget.target = version.h
+versionTarget.depends = FORCE
+win32 {
+    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+        nmake & \
+        chdir $$PWD & \
+        $$PWD/../GetGitProjectVersion.exe $$PWD/Metrology.pro
+}
+unix {
+    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+        make; \
+        cd $$PWD; \
+        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/Metrology.pro
+}
+PRE_TARGETDEPS += version.h
+QMAKE_EXTRA_TARGETS += versionTarget
+
+
 SOURCES += \
     MainWindow.cpp \
     Measure.cpp \
@@ -55,7 +82,8 @@ HEADERS  += \
     FindMeasure.h \
     FolderPropertyManager.h \
     Database.h \
-    ReportView.h
+    ReportView.h \
+    version.h
 
 
 FORMS    +=
@@ -110,10 +138,9 @@ win32 {
 }
 
 unix {
-    CONFIG(debug, debug|release): LIBS += -L"/usr/local/NCReport/lib" -lNCReportDebug
-    else: CONFIG(release, debug|release) : LIBS += -L"/usr/local/NCReport/lib" -lNCReport
-
-    INCLUDEPATH += "/usr/local/NCReport/include"
+	CONFIG(debug, debug|release): LIBS += -L"$$PWD/../NCReport2.14.0.x64.Qt5.3.2.eval/lib" -lNCReportDebug
+	else: CONFIG(release, debug|release) : LIBS += -L"$$PWD/../NCReport2.14.0.x64.Qt5.3.2.eval/lib" -lNCReport
+	INCLUDEPATH += "$$PWD/../NCReport2.14.0.x64.Qt5.3.2.eval/include"
 }
 
 

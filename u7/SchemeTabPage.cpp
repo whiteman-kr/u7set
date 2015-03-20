@@ -10,7 +10,7 @@
 //
 //
 SchemeFileView::SchemeFileView(DbController* dbcontroller, const QString& parentFileName) :
-	FileView(dbcontroller, parentFileName)
+	FileListView(dbcontroller, parentFileName)
 {
 	filesModel().setFilter("vfr");
 	return;

@@ -26,16 +26,10 @@ CONFIG += precompile_header
 
 DEFINES += QT_DLL QT_WIDGETS_LIB QT_NETWORK_LIB QT_SQL_LIB QT_XML_LIB
 
-win32:LIBS += advapi32.lib
+#win32:LIBS += advapi32.lib
 
-HEADERS += crc.h \
-	settings.h \
+HEADERS += \
 	Stable.h \
-	configurator.h \
-	applicationtabpage.h \
-	diagtabpage.h \
-	moduleconfigurator.h \
-	settingsform.h \
 	ftdi/ftd2xx.h \
 	../include/DbStruct.h \
 	../include/ConfigData.h \
@@ -43,24 +37,31 @@ HEADERS += crc.h \
     ../include/OutputLog.h \
     ../Proto/serialization.pb.h \
     ../include/ModuleConfiguration.h \
-    ../include/ProtoSerialization.h
+    ../include/ProtoSerialization.h \
+    Settings.h \
+    ApplicationTabPage.h \
+    Configurator.h \
+    Crc.h \
+    DiagTabPage.h \
+    ModuleConfigurator.h \
+    SettingsForm.h
 
-SOURCES += applicationtabpage.cpp \
-	configurator.cpp \
-	crc.cpp \
-	diagtabpage.cpp \
+SOURCES += \
 	main.cpp \
-	moduleconfigurator.cpp \
-	settings.cpp \
-	settingsform.cpp \
-	Stable.cpp \
 	../lib/DbStruct.cpp \
 	../lib/ConfigData.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/OutputLog.cpp \
     ../Proto/serialization.pb.cc \
     ../lib/ModuleConfiguration.cpp \
-    ../lib/ProtoSerialization.cpp
+    ../lib/ProtoSerialization.cpp \
+    Settings.cpp \
+    ApplicationTabPage.cpp \
+    Configurator.cpp \
+    Crc.cpp \
+    DiagTabPage.cpp \
+    ModuleConfigurator.cpp \
+    SettingsForm.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui \
@@ -72,7 +73,8 @@ PRECOMPILED_HEADER = stable.h
 
 OTHER_FILES +=
 
-win32: LIBS += -L$$PWD/ftdi/ -lftd2xx
+win32: LIBS += -L$$PWD/ftdi -lftd2xx
+#win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
 
 INCLUDEPATH += $$PWD/ftdi
 DEPENDPATH += $$PWD/ftdi
@@ -100,10 +102,12 @@ unix {
 #protobuf
 #
 win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
+        CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/debug -lprotobuf
+        CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/release -lprotobuf
 
-	INCLUDEPATH += ./../Protobuf
+        INCLUDEPATH += ./../Protobuf
 }
 unix {
 	LIBS += -lprotobuf
 }
+
