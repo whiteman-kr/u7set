@@ -31,15 +31,17 @@ private:
 	char m_rawData[MAX_DATAGRAM_SIZE];
 	quint32 m_rawDataSize = sizeof(RequestHeader);
 
-	RequestHeader* m_header = reinterpret_cast<RequestHeader*>(m_rawData);
-	char* m_data = m_rawData + sizeof(RequestHeader);
-
-	char* m_writeDataPtr = m_data;			// pointer for write request data
-	char* m_readDataPtr = m_data;			// pointer for read request data
+	unsigned int m_writeDataIndex = 0;
+	unsigned int m_readDataIndex = 0;
 
 private:
 	char* rawData() { return m_rawData; }				// return pointer on request header
-	char* data() { return m_data; }						// return pointer on request data after header
+	RequestHeader* header() { return reinterpret_cast<RequestHeader*>(m_rawData); }
+	char* data() { return m_rawData + sizeof(RequestHeader); }						// return pointer on request data after header
+
+	char* writeDataPtr() { return m_rawData + sizeof(RequestHeader) + m_writeDataIndex; }	// pointer for write request data
+	char* readDataPtr() { return m_rawData + sizeof(RequestHeader) + m_readDataIndex; }	// pointer for read request data
+
 
 	void setRawDataSize(quint32 rawDataSize) { m_rawDataSize = rawDataSize; }
 
@@ -50,6 +52,8 @@ public:
 	UdpRequest();
 	UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize);
 
+	UdpRequest& operator = (const UdpRequest& request);
+
 	QHostAddress address() const { return m_address; }
 	void setAddress(const QHostAddress& address) { m_address = address; }
 
@@ -57,27 +61,28 @@ public:
 	void setPort(quint16 port) { m_port = port; }
 
 	const char* rawData() const { return m_rawData; }							// return pointer on request header
-	const char* data() const { return m_data; }									// return pointer on request data after header
+	const RequestHeader* header() const { return reinterpret_cast<const RequestHeader*>(m_rawData); }
+	const char* data() const { return m_rawData + sizeof(RequestHeader); }									// return pointer on request data after header
 
 	quint32 rawDataSize() const { return m_rawDataSize; }						// full request length with header
 	quint32 dataSize() const { return m_rawDataSize - sizeof(RequestHeader); }	// request length without header
 
-	quint32 ID() const { return m_header->id; }
-	void setID(quint32 id) { m_header->id = id; }
+	quint32 ID() const { return header()->id; }
+	void setID(quint32 id) { header()->id = id; }
 
-	quint32 clientID() const { return m_header->clientID; }
-	void setClientID(quint32 clientID) { m_header->clientID = clientID; }
+	quint32 clientID() const { return header()->clientID; }
+	void setClientID(quint32 clientID) { header()->clientID = clientID; }
 
-	quint32 version() const { return m_header->version; }
-	void setVersion(quint32 version) { m_header->version = version; }
+	quint32 version() const { return header()->version; }
+	void setVersion(quint32 version) { header()->version = version; }
 
-	quint32 no() const { return m_header->no; }
-	void setNo(quint32 no) { m_header->no = no; }
+	quint32 no() const { return header()->no; }
+	void setNo(quint32 no) { header()->no = no; }
 
-	quint32 errorCode() const { return m_header->errorCode; }
-	void setErrorCode(quint32 errorCode) { m_header->errorCode = errorCode; }
+	quint32 errorCode() const { return header()->errorCode; }
+	void setErrorCode(quint32 errorCode) { header()->errorCode = errorCode; }
 
-	quint32 headerDataSize() const { return m_header->dataSize; }
+	quint32 headerDataSize() const { return header()->dataSize; }
 
 	bool isEmpty() const { return m_rawDataSize < sizeof(RequestHeader); }
 
@@ -85,8 +90,8 @@ public:
 
 	void initWrite()
 	{
-		m_writeDataPtr = m_data;
-		m_header->dataSize = 0;
+		m_writeDataIndex = 0;
+		header()->dataSize = 0;
 		m_rawDataSize = sizeof(RequestHeader);
 	}
 
@@ -96,7 +101,7 @@ public:
 
 	void initRead()
 	{
-		m_readDataPtr = m_data;
+		m_readDataIndex = 0;
 	}
 
 	quint32 readDword();

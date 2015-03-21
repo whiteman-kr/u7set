@@ -130,6 +130,7 @@ void UdpClientSocket::onSocketReadyRead()
     }
     else
     {
+		assert(m_ack.data() == m_ack.readDataPtr());
 		emit ackReceived(m_ack);
     }
 }
@@ -180,6 +181,7 @@ void UdpClientSocket::sendRequest(UdpRequest request)
 	m_request.setAddress(m_serverAddress);
 	m_request.setPort(m_port);
 
+	assert(request.ID() != 0);
 	m_request.setID(request.ID());
 
 	m_request.setClientID(m_clientID);
@@ -268,7 +270,7 @@ UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, cha
     m_address(senderAddress),
 	m_port(senderPort)
 {
-	memset(m_header, sizeof(RequestHeader), 0);
+	memset(header(), sizeof(RequestHeader), 0);
 
     if (receivedData != nullptr && (receivedDataSize >= sizeof(RequestHeader) && receivedDataSize <= MAX_DATAGRAM_SIZE))
     {
@@ -279,13 +281,38 @@ UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, cha
     else
     {
         assert(false);
-    }
+	}
+}
+
+UdpRequest&UdpRequest::operator =(const UdpRequest& request)
+{
+	m_address = request.address();
+	m_port = request.port();
+	m_rawDataSize = request.rawDataSize();
+
+	if (m_rawDataSize < sizeof(RequestHeader))
+	{
+		assert(m_rawDataSize >= sizeof(RequestHeader));
+		m_rawDataSize = sizeof(RequestHeader);
+	}
+	if (m_rawDataSize > sizeof(m_rawData))
+	{
+		assert(m_rawDataSize > sizeof(m_rawData));
+		m_rawDataSize = sizeof(m_rawData);
+	}
+
+	memcpy(m_rawData, request.rawData(), m_rawDataSize);
+
+	m_readDataIndex = request.m_readDataIndex;
+	m_writeDataIndex = request.m_writeDataIndex;
+	
+	return *this;
 }
 
 
 UdpRequest::UdpRequest()
 {
-	memset(m_header, sizeof(RequestHeader), 0);
+	memset(header(), sizeof(RequestHeader), 0);
 }
 
 
@@ -296,7 +323,7 @@ void UdpRequest::initAck(const UdpRequest& request)
     m_address = request.m_address;
     m_port = request.m_port;
 
-	memset(m_header, sizeof(RequestHeader), 0);
+	memset(header(), sizeof(RequestHeader), 0);
 
 	// copy request header
 	//
@@ -304,10 +331,10 @@ void UdpRequest::initAck(const UdpRequest& request)
 
 	m_rawDataSize = sizeof(RequestHeader);
 
-	m_header->errorCode = RQERROR_OK;
-	m_header->dataSize = 0;
+	header()->errorCode = RQERROR_OK;
+	header()->dataSize = 0;
 
-	m_writeDataPtr = m_data;		// initWrite
+	m_writeDataIndex = 0;		// initWrite
 }
 
 
@@ -319,11 +346,11 @@ bool UdpRequest::writeDword(quint32 dw)
         return false;
     }
 
-	*reinterpret_cast<quint32*>(m_writeDataPtr) = dw;
+	*reinterpret_cast<quint32*>(writeDataPtr()) = dw;
 
-	m_writeDataPtr += sizeof(quint32);
+	m_writeDataIndex += sizeof(quint32);
 
-	m_header->dataSize += sizeof(quint32);
+	header()->dataSize += sizeof(quint32);
 
 	m_rawDataSize += sizeof(quint32);
 
@@ -345,11 +372,11 @@ bool UdpRequest::writeData(const char* data, quint32 dataSize)
         return false;
     }
 
-	memcpy(m_writeDataPtr, data, dataSize);
+	memcpy(writeDataPtr(), data, dataSize);
 
-	m_writeDataPtr += dataSize;
+	m_writeDataIndex += dataSize;
 
-	m_header->dataSize += dataSize;
+	header()->dataSize += dataSize;
 
 	m_rawDataSize += dataSize;
 
@@ -365,9 +392,9 @@ bool UdpRequest::writeStruct(Serializable* s)
 		return false;
 	}
 
-	m_writeDataPtr = s->serializeTo(m_writeDataPtr);
+	m_writeDataIndex = s->serializeTo(writeDataPtr()) - data();
 
-	m_header->dataSize += s->size();
+	header()->dataSize += s->size();
 	m_rawDataSize += s->size();
 
 	assert(m_rawDataSize <= MAX_DATAGRAM_SIZE);
@@ -378,15 +405,15 @@ bool UdpRequest::writeStruct(Serializable* s)
 
 quint32 UdpRequest::readDword()
 {
-	if (m_readDataPtr - m_data + sizeof(quint32) > m_header->dataSize)
+	if (readDataPtr() - data() + sizeof(quint32) > header()->dataSize)
 	{
-		assert(m_readDataPtr - m_data + sizeof(quint32) <= m_header->dataSize);
+		assert(readDataPtr() - data() + sizeof(quint32) <= header()->dataSize);
 		return 0;
 	}
 
-	quint32 result = *reinterpret_cast<quint32*>(m_readDataPtr);
+	quint32 result = *reinterpret_cast<quint32*>(readDataPtr());
 
-	m_readDataPtr += sizeof(quint32);
+	m_readDataIndex += sizeof(quint32);
 
 	return result;
 }
@@ -394,7 +421,7 @@ quint32 UdpRequest::readDword()
 
 void UdpRequest::readStruct(Serializable* s)
 {
-	m_readDataPtr = s->serializeFrom(m_readDataPtr);
+	m_readDataIndex = s->serializeFrom(readDataPtr()) - data();
 }
 
 
