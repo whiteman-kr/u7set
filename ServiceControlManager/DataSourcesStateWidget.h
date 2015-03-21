@@ -9,8 +9,13 @@
 #include "../include/DataSource.h"
 
 
+const quint32   SS_MF_UNDEFINED = 10,
+SS_MF_UNAVAILABLE = 11;
+
+
 class QTimer;
 class QTableView;
+class QLabel;
 
 
 class DataSourcesStateModel : public QAbstractTableModel
@@ -64,11 +69,20 @@ public slots:
 	void checkVisibility();
 	void updateSourceInfo();
 	void updateSourceState();
+	void updateServiceState();
+	void askServiceState();
+
+	void serviceAckReceived(const UdpRequest udpRequest);
+	void serviceNotFound();
 
 private:
 	QTimer* m_timer = nullptr;
 	DataSourcesStateModel* m_model = nullptr;
 	QTableView* m_view = nullptr;
+	QLabel* m_stateLabel = nullptr;
+	UdpClientSocket* m_clientSocket = nullptr;
+
+	ServiceInformation serviceState;
 };
 
 

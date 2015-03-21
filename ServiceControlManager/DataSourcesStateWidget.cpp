@@ -1,6 +1,7 @@
 #include "DataSourcesStateWidget.h"
 #include <QTableView>
 #include <QVBoxLayout>
+#include <QLabel>
 
 
 const int DSC_NAME = 0,
@@ -32,20 +33,36 @@ DataSourcesStateWidget::DataSourcesStateWidget(quint32 ip, int portIndex, QWidge
 	QHostAddress host = QHostAddress(ip);
 	setWindowTitle(QString(serviceTypesInfo[portIndex].name) + " - " + host.toString());
 
+	serviceState.mainFunctionState = SS_MF_UNDEFINED;
+
+	m_stateLabel = new QLabel(this);
+
 	m_model = new DataSourcesStateModel(host, this);
 	m_view = new QTableView(this);
 	m_view->setModel(m_model);
+
+	m_view->resizeColumnsToContents();
 
 	connect(m_model, &DataSourcesStateModel::changedSourceInfo, this, &DataSourcesStateWidget::updateSourceInfo);
 	connect(m_model, &DataSourcesStateModel::changedSourceState, this, &DataSourcesStateWidget::updateSourceState);
 
 	QVBoxLayout* vl = new QVBoxLayout;
+
+	vl->addWidget(m_stateLabel);
 	vl->addWidget(m_view);
 	setLayout(vl);
 
 	m_timer = new QTimer(this);
 	connect(m_timer, &QTimer::timeout, this, &DataSourcesStateWidget::checkVisibility);
 	m_timer->start(5);
+
+	QTimer* timer = new QTimer(this);
+	connect(timer, &QTimer::timeout, this, &DataSourcesStateWidget::askServiceState);
+	timer->start(500);
+
+	m_clientSocket = new UdpClientSocket(QHostAddress(ip), serviceTypesInfo[portIndex].port);
+	connect(m_clientSocket, &UdpClientSocket::ackTimeout, this, &DataSourcesStateWidget::serviceNotFound);
+	connect(m_clientSocket, &UdpClientSocket::ackReceived, this, &DataSourcesStateWidget::serviceAckReceived);
 }
 
 DataSourcesStateWidget::~DataSourcesStateWidget()
@@ -78,6 +95,75 @@ void DataSourcesStateWidget::updateSourceState()
 	m_view->resizeColumnToContents(DSC_UPTIME);
 	m_view->resizeColumnToContents(DSC_RECEIVED);
 	m_view->resizeColumnToContents(DSC_SPEED);
+}
+
+void DataSourcesStateWidget::updateServiceState()
+{
+	QString str = serviceTypeStr[STP_FSC_ACQUISITION];
+	str += QString(" v%1.%2.%3(0x%4)\n")
+			.arg(serviceState.majorVersion)
+			.arg(serviceState.minorVersion)
+			.arg(serviceState.buildNo)
+			.arg(serviceState.crc, 0, 16, QChar('0'));
+	if (serviceState.mainFunctionState != SS_MF_UNDEFINED && serviceState.mainFunctionState != SS_MF_UNAVAILABLE)
+	{
+		quint32 time = serviceState.uptime;
+		int s = time % 60; time /= 60;
+		int m = time % 60; time /= 60;
+		int h = time % 24; time /= 24;
+		str += tr("Uptime") + QString(" (%1d %2:%3:%4)\n").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+	}
+	switch(serviceState.mainFunctionState)
+	{
+		case SS_MF_WORK:
+		{
+			quint32 time = serviceState.mainFunctionUptime;
+			int s = time % 60; time /= 60;
+			int m = time % 60; time /= 60;
+			int h = time % 24; time /= 24;
+			str += tr("Running") + QString(" (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+		} break;
+		case SS_MF_STOPPED: str += tr("Stopped"); break;
+		case SS_MF_UNAVAILABLE: str += tr("Unavailable"); break;
+		case SS_MF_UNDEFINED: str += tr("Undefined"); break;
+		case SS_MF_STARTS: str += tr("Starts"); break;
+		case SS_MF_STOPS: str += tr("Stops"); break;
+		default: str += tr("Unknown state"); break;
+	}
+
+	m_stateLabel->setText(str);
+}
+
+void DataSourcesStateWidget::askServiceState()
+{
+	m_clientSocket->sendShortRequest(RQID_GET_SERVICE_INFO);
+}
+
+void DataSourcesStateWidget::serviceAckReceived(const UdpRequest udpRequest)
+{
+	switch (udpRequest.ID())
+	{
+		case RQID_GET_SERVICE_INFO:
+		{
+			serviceState = *(ServiceInformation*)udpRequest.data();
+			updateServiceState();
+		}
+		case RQID_SERVICE_MF_START:
+		case RQID_SERVICE_MF_STOP:
+		case RQID_SERVICE_MF_RESTART:
+			break;
+		default:
+			qDebug() << "Unknown packet ID";
+	}
+}
+
+void DataSourcesStateWidget::serviceNotFound()
+{
+	if (serviceState.mainFunctionState != SS_MF_UNAVAILABLE)
+	{
+		serviceState.mainFunctionState = SS_MF_UNAVAILABLE;
+		updateServiceState();
+	}
 }
 
 
@@ -156,7 +242,7 @@ QVariant DataSourcesStateModel::headerData(int section, Qt::Orientation orientat
 		}
 		if (orientation == Qt::Vertical && section < m_dataSource.count())
 		{
-			return m_dataSource[section].name();
+			return m_dataSource[section].ID();
 		}
 	}
 	return QVariant();
@@ -187,7 +273,6 @@ void DataSourcesStateModel::ackTimeout()
 
 void DataSourcesStateModel::ackReceived(UdpRequest udpRequest)
 {
-	UdpRequest getInfoRequest;
 	quint32 sourceCount = 0;
 
 	switch (udpRequest.ID())
@@ -272,5 +357,6 @@ void DataSourcesStateModel::sendDataRequest(int requestType)
 		}
 	}
 
+	assert(getInfoRequest.ID() != 0);
 	dataClientSendRequest(getInfoRequest);
 }
