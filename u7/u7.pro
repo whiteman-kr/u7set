@@ -321,3 +321,6 @@ win32 {
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
 
+DISTFILES += \
+    LogicModuleConfiguration.js
+

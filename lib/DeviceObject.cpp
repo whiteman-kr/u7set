@@ -639,6 +639,12 @@ namespace Hardware
 		return DeviceType::Root;
 	}
 
+	int DeviceObject::jsDeviceType() const
+	{
+		return static_cast<int>(deviceType());
+	}
+
+
 	QString DeviceObject::fileExtension() const
 	{
 		size_t index = static_cast<size_t>(deviceType());
@@ -662,6 +668,13 @@ namespace Hardware
 	DeviceObject* DeviceObject::child(int index) const
 	{
 		return m_children.at(index).get();
+	}
+
+	QObject* DeviceObject::jsChild(int index) const
+	{
+		QObject* c = m_children.at(index).get();
+		QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+		return c;
 	}
 
 	int DeviceObject::childIndex(DeviceObject* child) const

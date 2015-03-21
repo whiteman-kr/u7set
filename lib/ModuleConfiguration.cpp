@@ -5,6 +5,121 @@
 
 namespace Hardware
 {
+	ModuleConfFirmware::ModuleConfFirmware()
+	{
+	}
+
+	ModuleConfFirmware::~ModuleConfFirmware()
+	{
+	}
+
+	void ModuleConfFirmware::init(QString name, int uartId, int frameSize, int frameCount)
+	{
+		m_name = name;
+		m_uartId = uartId;
+		m_frameSize = frameSize;
+		m_frameCount = frameCount;
+
+		m_frames.clear();
+		m_frames.resize(frameCount);
+
+		for (int i = 0; i < frameCount; i++)
+		{
+			m_frames[i].resize(frameSize);
+		}
+
+		return;
+	}
+
+	bool ModuleConfFirmware::setData8(int frameIndex, int offset, quint8 data)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			offset >= frameSize())
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return false;
+		}
+
+		quint8* ptr = static_cast<quint8*>(m_frames[frameIndex].data() + offset);
+		*ptr = data;
+
+		return true;
+	}
+
+	bool ModuleConfFirmware::setData16(int frameIndex, int offset, quint16 data)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			offset >= frameSize())
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return false;
+		}
+
+		quint16* ptr = reinterpret_cast<quint16*>(m_frames[frameIndex].data() + offset);
+		*ptr = data;
+
+		return true;
+	}
+
+	bool ModuleConfFirmware::setData32(int frameIndex, int offset, quint32 data)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			offset >= frameSize())
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return false;
+		}
+
+		quint32* ptr = reinterpret_cast<quint32*>(m_frames[frameIndex].data() + offset);
+		*ptr = data;
+
+		return true;
+	}
+
+	QString ModuleConfFirmware::name() const
+	{
+		return m_name;
+	}
+
+	int ModuleConfFirmware::uartId() const
+	{
+		return m_uartId;
+	}
+
+	int ModuleConfFirmware::frameSize() const
+	{
+		return m_frameSize;
+	}
+
+	int ModuleConfFirmware::frameCount() const
+	{
+		return m_frameCount;
+	}
+
+
+	ModuleConfCollection::ModuleConfCollection()
+	{
+	}
+
+	ModuleConfCollection::~ModuleConfCollection()
+	{
+	}
+
+	QObject* ModuleConfCollection::jsGet(QString name, int uartId, int frameSize, int frameCount)
+	{
+		bool newFirmware = m_firmwares.count(name) == 0;
+
+		ModuleConfFirmware& fw = m_firmwares["name"];
+
+		if (newFirmware == true)
+		{
+			fw.init(name, uartId, frameSize, frameCount);
+		}
+
+		QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);
+		return &fw;
+	}
+
 
 	// ----------------------------------------------------------------------------
 	//
@@ -487,7 +602,7 @@ namespace Hardware
 		return;
 	}
 
-	bool ModuleConfiguration::compile(McFirmware* dest, const QString& deviceStrId, int changeset, QString* errorString) const
+	bool ModuleConfiguration::compile(McFirmwareOld* dest, const QString& deviceStrId, int changeset, QString* errorString) const
 	{
 		if (dest == nullptr || errorString == nullptr)
 		{
@@ -1276,46 +1391,46 @@ namespace Hardware
 	//
 	// McFirmware -- Compiled chunk of module configuration
 	//
-	McFirmware::McFirmware()
+	McFirmwareOld::McFirmwareOld()
 	{
 	}
 
-	McFirmware::~McFirmware()
+	McFirmwareOld::~McFirmwareOld()
 	{
 	}
 
-	QString McFirmware::name() const
+	QString McFirmwareOld::name() const
 	{
 		QString n(m_name);
 		return n;
 	}
 
-	void McFirmware::setName(const QString& value)
+	void McFirmwareOld::setName(const QString& value)
 	{
 		m_name = value;
 	}
 
-	int McFirmware::uartId() const
+	int McFirmwareOld::uartId() const
 	{
 		return m_uartID;
 	}
 
-	void McFirmware::setUartId(int value)
+	void McFirmwareOld::setUartId(int value)
 	{
 		m_uartID = value;
 	}
 
-	int McFirmware::frameSize() const
+	int McFirmwareOld::frameSize() const
 	{
 		return m_frameSize;
 	}
 
-	void McFirmware::setFrameSize(int value)
+	void McFirmwareOld::setFrameSize(int value)
 	{
 		m_frameSize = value;
 	}
 
-	void McFirmware::addChunk(const McDataChunk& chunk)
+	void McFirmwareOld::addChunk(const McDataChunk& chunk)
 	{
 		m_data.push_back(chunk);
 	}

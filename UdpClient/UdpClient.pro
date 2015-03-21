@@ -47,7 +47,8 @@ SOURCES += \
     ../lib/BaseService.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
-    ../lib/DataSource.cpp
+    ../lib/DataSource.cpp \
+    FscDataSource.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -56,6 +57,8 @@ HEADERS  += mainwindow.h \
     ../include/BaseService.h \
     ../include/CircularLogger.h \
     ../include/DataSource.h \
+	FscDataSource.h \
+	../include/FscDataFormat.h \
     version.h
 
 include(../qtservice/src/qtservice.pri)

@@ -17,13 +17,34 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_clientSocketThread.run(m_clientSocket);
 
 	m_ServiceController = new BaseServiceController(STP_CONFIG, new MainFunctionWorker());
+
+	runFscDataSources();
 }
+
 
 MainWindow::~MainWindow()
 {
+	stopFscDataSources();
 	delete ui;
-
 	delete m_ServiceController;
+}
+
+
+void MainWindow::runFscDataSources()
+{
+	m_fscDataSources.append(new FscDataSource(HostAddressPort("192.168.11.254", PORT_DATA_AQUISITION), QHostAddress("192,168.11.1"), 10, 3));
+	m_fscDataSources.append(new FscDataSource(HostAddressPort("192.168.11.254", PORT_DATA_AQUISITION), QHostAddress("192,168.11.2"), 10, 2));
+}
+
+
+void MainWindow::stopFscDataSources()
+{
+	foreach(FscDataSource* source, m_fscDataSources)
+	{
+		delete source;
+	}
+
+	m_fscDataSources.clear();
 }
 
 

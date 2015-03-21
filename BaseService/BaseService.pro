@@ -56,6 +56,7 @@ HEADERS += \
     ../include/UdpSocket.h \
     ../include/BaseService.h \
     ../include/CircularLogger.h \
+	../include/FscDataFormat.h \
     version.h
 
 include(../qtservice/src/qtservice.pri)
