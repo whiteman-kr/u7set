@@ -24,15 +24,20 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(QString name, int uartId, int frameSize, int frameCount);
+        void init(QString type, QString name, int uartId, int frameSize, int frameCount);
+        bool save(QString projectName, QString userName);
 
 		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
 		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
 		Q_INVOKABLE bool setData32(int frameIndex, int offset, quint32 data);
+        bool setData64(int frameIndex, int offset, quint64 data);
+
+        Q_INVOKABLE bool storeCrc64(int frameIndex, int start, int count, int offset);
 
 		// Properties
 		//
 	public:
+        QString type() const;
 		QString name() const;
 		int uartId() const;
 		int frameSize() const;
@@ -41,10 +46,10 @@ namespace Hardware
 		// Data
 		//
 	private:
+        QString m_type;
 		QString m_name;
 		int m_uartId = 0;
 		int m_frameSize = 0;
-		int m_frameCount = 0;
 
 		std::vector<std::vector<quint8>> m_frames;
 	};
@@ -61,7 +66,9 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		Q_INVOKABLE QObject* jsGet(QString name, int uartId, int frameSize, int frameCount);
+        Q_INVOKABLE QObject* jsGet(QString type, QString name, int uartId, int frameSize, int frameCount);
+
+        bool save(QString projectName, QString userName);
 
 		// Properties
 		//
@@ -97,8 +104,8 @@ namespace Hardware
 	public:
 		void readValue(QXmlStreamReader& reader);
 
-		int typeSize() const;     // получить размер типа в битах, или -1 если тип не найден
-		int arraySize() const;    // получить размер массива в []. 1 - если скобок нет, -1 при ошибке (нет закрывающей скобки или некорректное число)
+		int typeSize() const;  
+		int arraySize() const; 
 
 		// Properties
 		//
@@ -134,8 +141,8 @@ namespace Hardware
 		QString m_type;
 		int m_offset = -1;
 		int m_bit = -1;
-		int m_boolSize = -1;				// количество байт, в которых размещается bool
-		bool m_userProperty = false;		// This property must be set by user
+		int m_boolSize = -1;		
+		bool m_userProperty = false;
 		QString m_defaultValue;
 		QString m_value;
 	};
@@ -222,7 +229,7 @@ namespace Hardware
 		QString m_name;
 		QString m_type;
 		int m_frameIndex = -1;
-		//std::shared_ptr<ModuleConfigurationStruct> m_data;		// указатель на структуру типа Type. Заполняется после загрузки.
+		//std::shared_ptr<ModuleConfigurationStruct> m_data;		
 	};
 
 	// ----------------------------------------------------------------------------
