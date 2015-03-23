@@ -41,10 +41,10 @@ HEADERS += \
     Settings.h \
     ApplicationTabPage.h \
     Configurator.h \
-    Crc.h \
     DiagTabPage.h \
     ModuleConfigurator.h \
-    SettingsForm.h
+    SettingsForm.h \
+    ../include/Crc.h
 
 SOURCES += \
 	main.cpp \
@@ -58,10 +58,10 @@ SOURCES += \
     Settings.cpp \
     ApplicationTabPage.cpp \
     Configurator.cpp \
-    Crc.cpp \
     DiagTabPage.cpp \
     ModuleConfigurator.cpp \
-    SettingsForm.cpp
+    SettingsForm.cpp \
+    ../lib/Crc.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui \
