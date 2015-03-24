@@ -35,6 +35,17 @@ namespace Hardware
 		DeviceTypeCount
 	};
 
+
+	// Software Module Type Identifiers
+	//
+	enum class SoftwareType
+	{
+		Monitor = 9000,
+		ConfigurationService = 9001,
+		DataAcquisitionService = 9002,
+		DataArchivingService = 9003,
+	};
+
 	//
 	//
 	// DynamicProperty

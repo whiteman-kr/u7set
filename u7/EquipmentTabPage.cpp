@@ -961,7 +961,7 @@ void EquipmentView::addPresetSoftware()
 	}
 	else
 	{
-		choosePreset(Hardware::DeviceType::Workstation);
+		choosePreset(Hardware::DeviceType::Software);
 	}
 }
 
