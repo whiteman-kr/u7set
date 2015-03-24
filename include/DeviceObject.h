@@ -27,10 +27,10 @@ namespace Hardware
 
 		Workstation,
 		Software,
-		Monitor = Software,
-		ConfigurationService = Software,
-		DataAcquisitionService = Software,
-		DataArchivingService = Software,
+//		Monitor = Software,
+//		ConfigurationService = Software,
+//		DataAcquisitionService = Software,
+//		DataArchivingService = Software,
 
 		DeviceTypeCount
 	};

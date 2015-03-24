@@ -705,6 +705,13 @@ namespace Hardware
 
 	void DeviceObject::addChild(std::shared_ptr<DeviceObject> child)
 	{
+		if (child->deviceType() == DeviceType::Software &&
+			deviceType() != DeviceType::Workstation)
+		{
+			assert(false);
+			return;
+		}
+
 		if (deviceType() >= child->deviceType())
 		{
 			assert(deviceType() < child->deviceType());
