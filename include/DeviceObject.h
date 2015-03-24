@@ -25,6 +25,13 @@ namespace Hardware
 		Controller,
 		DiagSignal,
 
+		Workstation,
+		Software,
+		Monitor = Software,
+		ConfigurationService = Software,
+		DataAcquisitionService = Software,
+		DataArchivingService = Software,
+
 		DeviceTypeCount
 	};
 
@@ -439,6 +446,91 @@ namespace Hardware
 
 	private:
 		static const DeviceType m_deviceType = DeviceType::DiagSignal;
+	};
+
+	//
+	//
+	// Workstation
+	//
+	//
+	class Workstation : public DeviceObject
+	{
+		Q_OBJECT
+
+		Q_PROPERTY(int Type READ type WRITE setType)
+
+	public:
+		explicit Workstation(bool preset = false);
+		virtual ~Workstation();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	public:
+		virtual DeviceType deviceType() const override;
+
+		// Public Methods
+		//
+	public:
+
+		// Properties
+		//
+	public:
+		int type() const;
+		void setType(int value);
+
+		// Data
+		//
+	private:
+		static const DeviceType m_deviceType = DeviceType::Workstation;
+
+		int m_type = 0;
+	};
+
+
+	//
+	//
+	// Software
+	//
+	//
+	class Software : public DeviceObject
+	{
+		Q_OBJECT
+
+		Q_PROPERTY(int Type READ type WRITE setType)
+
+	public:
+		explicit Software(bool preset = false);
+		virtual ~Software();
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	public:
+		virtual DeviceType deviceType() const override;
+
+		// Public Methods
+		//
+	public:
+
+		// Properties
+		//
+	public:
+		int type() const;
+		void setType(int value);
+
+		// Data
+		//
+	private:
+		static const DeviceType m_deviceType = DeviceType::Software;
+
+		int m_type = 0;
 	};
 
 

@@ -137,6 +137,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* DeviceDiagSignal_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   DeviceDiagSignal_reflection_ = NULL;
+const ::google::protobuf::Descriptor* Workstation_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  Workstation_reflection_ = NULL;
+const ::google::protobuf::Descriptor* Software_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  Software_reflection_ = NULL;
 const ::google::protobuf::Descriptor* ModuleConfiguration_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ModuleConfiguration_reflection_ = NULL;
@@ -712,7 +718,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(VideoItemFblElement));
   DeviceObject_descriptor_ = file->message_type(31);
-  static const int DeviceObject_offsets_[17] = {
+  static const int DeviceObject_offsets_[19] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, strid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, caption_),
@@ -730,6 +736,8 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, module_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, controller_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, diagsignal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, workstation_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, software_),
   };
   DeviceObject_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -845,7 +853,37 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceDiagSignal));
-  ModuleConfiguration_descriptor_ = file->message_type(39);
+  Workstation_descriptor_ = file->message_type(39);
+  static const int Workstation_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Workstation, type_),
+  };
+  Workstation_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      Workstation_descriptor_,
+      Workstation::default_instance_,
+      Workstation_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Workstation, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Workstation, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(Workstation));
+  Software_descriptor_ = file->message_type(40);
+  static const int Software_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Software, type_),
+  };
+  Software_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      Software_descriptor_,
+      Software::default_instance_,
+      Software_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Software, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Software, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(Software));
+  ModuleConfiguration_descriptor_ = file->message_type(41);
   static const int ModuleConfiguration_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, struct_description_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, values_),
@@ -862,7 +900,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfiguration));
-  ModuleConfigurationValue_descriptor_ = file->message_type(40);
+  ModuleConfigurationValue_descriptor_ = file->message_type(42);
   static const int ModuleConfigurationValue_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, value_),
@@ -878,7 +916,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfigurationValue));
-  Property_descriptor_ = file->message_type(41);
+  Property_descriptor_ = file->message_type(43);
   static const int Property_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, value_),
@@ -989,6 +1027,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DeviceDiagSignal_descriptor_, &DeviceDiagSignal::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    Workstation_descriptor_, &Workstation::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    Software_descriptor_, &Software::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ModuleConfiguration_descriptor_, &ModuleConfiguration::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ModuleConfigurationValue_descriptor_, &ModuleConfigurationValue::default_instance());
@@ -1077,6 +1119,10 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete DeviceController_reflection_;
   delete DeviceDiagSignal::default_instance_;
   delete DeviceDiagSignal_reflection_;
+  delete Workstation::default_instance_;
+  delete Workstation_reflection_;
+  delete Software::default_instance_;
+  delete Software_reflection_;
   delete ModuleConfiguration::default_instance_;
   delete ModuleConfiguration_reflection_;
   delete ModuleConfigurationValue::default_instance_;
@@ -1193,7 +1239,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ItemOutputSignal\"\017\n\rVideoItemLink\"[\n\023Vid"
     "eoItemFblElement\022\034\n\007afbGuid\030\001 \002(\0132\013.Prot"
     "o.Uuid\022&\n\006params\030\002 \003(\0132\026.Proto.FblElemen"
-    "tParam\"\320\004\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013."
+    "tParam\"\234\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013."
     "Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstrin"
     "g\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022(\n\020ch"
     "ildRestriction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005"
@@ -1208,23 +1254,26 @@ void protobuf_AddDesc_serialization_2eproto() {
     "dule\030h \001(\0132\023.Proto.DeviceModule\022+\n\nContr"
     "oller\030i \001(\0132\027.Proto.DeviceController\022+\n\n"
     "DiagSignal\030j \001(\0132\027.Proto.DeviceDiagSigna"
-    "l\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDevic"
-    "eRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\""
-    "]\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tConf"
-    "Index\030\002 \001(\005:\0010\022\022\n\010ConfName\030\003 \001(\t:\000\022\022\n\010Co"
-    "nfType\030\004 \001(\t:\000\"\022\n\020DeviceController\"\022\n\020De"
-    "viceDiagSignal\"r\n\023ModuleConfiguration\022\032\n"
-    "\022struct_description\030\001 \001(\t\022/\n\006values\030\002 \003("
-    "\0132\037.Proto.ModuleConfigurationValue\022\016\n\004na"
-    "me\030\003 \001(\t:\000\"7\n\030ModuleConfigurationValue\022\014"
-    "\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022"
-    "\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUn"
-    "it\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020"
-    "\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006"
-    "Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n"
-    "\010Discrete\020\001*N\n\014FblParamType\022\022\n\016AnalogInt"
-    "egral\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDisc"
-    "reteValue\020\002", 5291);
+    "l\022\'\n\013Workstation\030k \001(\0132\022.Proto.Workstati"
+    "on\022!\n\010Software\030l \001(\0132\017.Proto.Software\"\014\n"
+    "\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRac"
+    "k\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"]\n\014D"
+    "eviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tConfInde"
+    "x\030\002 \001(\005:\0010\022\022\n\010ConfName\030\003 \001(\t:\000\022\022\n\010ConfTy"
+    "pe\030\004 \001(\t:\000\"\022\n\020DeviceController\"\022\n\020Device"
+    "DiagSignal\"\036\n\013Workstation\022\017\n\004type\030\001 \001(\005:"
+    "\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023Modul"
+    "eConfiguration\022\032\n\022struct_description\030\001 \001"
+    "(\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleConfigu"
+    "rationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleCon"
+    "figurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002"
+    " \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030"
+    "\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n\nMill"
+    "imeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrecti"
+    "on\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalTy"
+    "pe\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014FblParam"
+    "Type\022\022\n\016AnalogIntegral\020\000\022\027\n\023AnalogFloati"
+    "ngPoint\020\001\022\021\n\rDiscreteValue\020\002", 5428);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -1266,6 +1315,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   DeviceModule::default_instance_ = new DeviceModule();
   DeviceController::default_instance_ = new DeviceController();
   DeviceDiagSignal::default_instance_ = new DeviceDiagSignal();
+  Workstation::default_instance_ = new Workstation();
+  Software::default_instance_ = new Software();
   ModuleConfiguration::default_instance_ = new ModuleConfiguration();
   ModuleConfigurationValue::default_instance_ = new ModuleConfigurationValue();
   Property::default_instance_ = new Property();
@@ -1308,6 +1359,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   DeviceModule::default_instance_->InitAsDefaultInstance();
   DeviceController::default_instance_->InitAsDefaultInstance();
   DeviceDiagSignal::default_instance_->InitAsDefaultInstance();
+  Workstation::default_instance_->InitAsDefaultInstance();
+  Software::default_instance_->InitAsDefaultInstance();
   ModuleConfiguration::default_instance_->InitAsDefaultInstance();
   ModuleConfigurationValue::default_instance_->InitAsDefaultInstance();
   Property::default_instance_->InitAsDefaultInstance();
@@ -11715,6 +11768,8 @@ const int DeviceObject::kChassisFieldNumber;
 const int DeviceObject::kModuleFieldNumber;
 const int DeviceObject::kControllerFieldNumber;
 const int DeviceObject::kDiagSignalFieldNumber;
+const int DeviceObject::kWorkstationFieldNumber;
+const int DeviceObject::kSoftwareFieldNumber;
 #endif  // !_MSC_VER
 
 DeviceObject::DeviceObject()
@@ -11735,6 +11790,8 @@ void DeviceObject::InitAsDefaultInstance() {
   module_ = const_cast< ::Proto::DeviceModule*>(&::Proto::DeviceModule::default_instance());
   controller_ = const_cast< ::Proto::DeviceController*>(&::Proto::DeviceController::default_instance());
   diagsignal_ = const_cast< ::Proto::DeviceDiagSignal*>(&::Proto::DeviceDiagSignal::default_instance());
+  workstation_ = const_cast< ::Proto::Workstation*>(&::Proto::Workstation::default_instance());
+  software_ = const_cast< ::Proto::Software*>(&::Proto::Software::default_instance());
 }
 
 DeviceObject::DeviceObject(const DeviceObject& from)
@@ -11761,6 +11818,8 @@ void DeviceObject::SharedCtor() {
   module_ = NULL;
   controller_ = NULL;
   diagsignal_ = NULL;
+  workstation_ = NULL;
+  software_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -11785,6 +11844,8 @@ void DeviceObject::SharedDtor() {
     delete module_;
     delete controller_;
     delete diagsignal_;
+    delete workstation_;
+    delete software_;
   }
 }
 
@@ -11858,6 +11919,12 @@ void DeviceObject::Clear() {
   if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (has_diagsignal()) {
       if (diagsignal_ != NULL) diagsignal_->::Proto::DeviceDiagSignal::Clear();
+    }
+    if (has_workstation()) {
+      if (workstation_ != NULL) workstation_->::Proto::Workstation::Clear();
+    }
+    if (has_software()) {
+      if (software_ != NULL) software_->::Proto::Software::Clear();
     }
   }
   properties_.Clear();
@@ -12114,6 +12181,34 @@ bool DeviceObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(858)) goto parse_Workstation;
+        break;
+      }
+
+      // optional .Proto.Workstation Workstation = 107;
+      case 107: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_Workstation:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_workstation()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(866)) goto parse_Software;
+        break;
+      }
+
+      // optional .Proto.Software Software = 108;
+      case 108: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_Software:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_software()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -12236,6 +12331,18 @@ void DeviceObject::SerializeWithCachedSizes(
   if (has_diagsignal()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       106, this->diagsignal(), output);
+  }
+
+  // optional .Proto.Workstation Workstation = 107;
+  if (has_workstation()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      107, this->workstation(), output);
+  }
+
+  // optional .Proto.Software Software = 108;
+  if (has_software()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      108, this->software(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -12362,6 +12469,20 @@ void DeviceObject::SerializeWithCachedSizes(
         106, this->diagsignal(), target);
   }
 
+  // optional .Proto.Workstation Workstation = 107;
+  if (has_workstation()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        107, this->workstation(), target);
+  }
+
+  // optional .Proto.Software Software = 108;
+  if (has_software()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        108, this->software(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -12485,6 +12606,20 @@ int DeviceObject::ByteSize() const {
           this->diagsignal());
     }
 
+    // optional .Proto.Workstation Workstation = 107;
+    if (has_workstation()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->workstation());
+    }
+
+    // optional .Proto.Software Software = 108;
+    if (has_software()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->software());
+    }
+
   }
   // repeated .Proto.Property properties = 7;
   total_size += 1 * this->properties_size();
@@ -12573,6 +12708,12 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     if (from.has_diagsignal()) {
       mutable_diagsignal()->::Proto::DeviceDiagSignal::MergeFrom(from.diagsignal());
     }
+    if (from.has_workstation()) {
+      mutable_workstation()->::Proto::Workstation::MergeFrom(from.workstation());
+    }
+    if (from.has_software()) {
+      mutable_software()->::Proto::Software::MergeFrom(from.software());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -12632,6 +12773,8 @@ void DeviceObject::Swap(DeviceObject* other) {
     std::swap(module_, other->module_);
     std::swap(controller_, other->controller_);
     std::swap(diagsignal_, other->diagsignal_);
+    std::swap(workstation_, other->workstation_);
+    std::swap(software_, other->software_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -13993,6 +14136,422 @@ void DeviceDiagSignal::Swap(DeviceDiagSignal* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = DeviceDiagSignal_descriptor_;
   metadata.reflection = DeviceDiagSignal_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int Workstation::kTypeFieldNumber;
+#endif  // !_MSC_VER
+
+Workstation::Workstation()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void Workstation::InitAsDefaultInstance() {
+}
+
+Workstation::Workstation(const Workstation& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void Workstation::SharedCtor() {
+  _cached_size_ = 0;
+  type_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+Workstation::~Workstation() {
+  SharedDtor();
+}
+
+void Workstation::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void Workstation::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* Workstation::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return Workstation_descriptor_;
+}
+
+const Workstation& Workstation::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+Workstation* Workstation::default_instance_ = NULL;
+
+Workstation* Workstation::New() const {
+  return new Workstation;
+}
+
+void Workstation::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    type_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool Workstation::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 type = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &type_)));
+          set_has_type();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void Workstation::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 type = 1 [default = 0];
+  if (has_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->type(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* Workstation::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 type = 1 [default = 0];
+  if (has_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->type(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int Workstation::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 type = 1 [default = 0];
+    if (has_type()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->type());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void Workstation::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const Workstation* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const Workstation*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void Workstation::MergeFrom(const Workstation& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_type()) {
+      set_type(from.type());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void Workstation::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void Workstation::CopyFrom(const Workstation& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Workstation::IsInitialized() const {
+
+  return true;
+}
+
+void Workstation::Swap(Workstation* other) {
+  if (other != this) {
+    std::swap(type_, other->type_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata Workstation::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = Workstation_descriptor_;
+  metadata.reflection = Workstation_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int Software::kTypeFieldNumber;
+#endif  // !_MSC_VER
+
+Software::Software()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void Software::InitAsDefaultInstance() {
+}
+
+Software::Software(const Software& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void Software::SharedCtor() {
+  _cached_size_ = 0;
+  type_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+Software::~Software() {
+  SharedDtor();
+}
+
+void Software::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void Software::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* Software::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return Software_descriptor_;
+}
+
+const Software& Software::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+Software* Software::default_instance_ = NULL;
+
+Software* Software::New() const {
+  return new Software;
+}
+
+void Software::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    type_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool Software::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 type = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &type_)));
+          set_has_type();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void Software::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 type = 1 [default = 0];
+  if (has_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->type(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* Software::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 type = 1 [default = 0];
+  if (has_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->type(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int Software::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 type = 1 [default = 0];
+    if (has_type()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->type());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void Software::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const Software* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const Software*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void Software::MergeFrom(const Software& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_type()) {
+      set_type(from.type());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void Software::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void Software::CopyFrom(const Software& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Software::IsInitialized() const {
+
+  return true;
+}
+
+void Software::Swap(Software* other) {
+  if (other != this) {
+    std::swap(type_, other->type_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata Software::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = Software_descriptor_;
+  metadata.reflection = Software_reflection_;
   return metadata;
 }
 
