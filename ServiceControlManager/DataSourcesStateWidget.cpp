@@ -1,7 +1,9 @@
 #include "DataSourcesStateWidget.h"
 #include <QTableView>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 
 
 const int DSC_NAME = 0,
@@ -37,6 +39,21 @@ DataSourcesStateWidget::DataSourcesStateWidget(quint32 ip, int portIndex, QWidge
 
 	m_stateLabel = new QLabel(this);
 
+	QHBoxLayout* hl = new QHBoxLayout;
+	hl->addWidget(m_stateLabel);
+
+	startServiceButton = new QPushButton(tr("Start service"), this);
+	connect(startServiceButton, &QPushButton::clicked, this, &DataSourcesStateWidget::startService);
+	hl->addWidget(startServiceButton);
+
+	stopServiceButton = new QPushButton(tr("Stop service"), this);
+	connect(stopServiceButton, &QPushButton::clicked, this, &DataSourcesStateWidget::stopService);
+	hl->addWidget(stopServiceButton);
+
+	restartServiceButton = new QPushButton(tr("Restart service"), this);
+	connect(restartServiceButton, &QPushButton::clicked, this, &DataSourcesStateWidget::restartService);
+	hl->addWidget(restartServiceButton);
+
 	m_model = new DataSourcesStateModel(host, this);
 	m_view = new QTableView(this);
 	m_view->setModel(m_model);
@@ -48,7 +65,7 @@ DataSourcesStateWidget::DataSourcesStateWidget(quint32 ip, int portIndex, QWidge
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
-	vl->addWidget(m_stateLabel);
+	vl->addLayout(hl);
 	vl->addWidget(m_view);
 	setLayout(vl);
 
@@ -63,6 +80,8 @@ DataSourcesStateWidget::DataSourcesStateWidget(quint32 ip, int portIndex, QWidge
 	m_clientSocket = new UdpClientSocket(QHostAddress(ip), serviceTypesInfo[portIndex].port);
 	connect(m_clientSocket, &UdpClientSocket::ackTimeout, this, &DataSourcesStateWidget::serviceNotFound);
 	connect(m_clientSocket, &UdpClientSocket::ackReceived, this, &DataSourcesStateWidget::serviceAckReceived);
+
+	updateServiceState();
 }
 
 DataSourcesStateWidget::~DataSourcesStateWidget()
@@ -113,7 +132,7 @@ void DataSourcesStateWidget::updateServiceState()
 		int h = time % 24; time /= 24;
 		str += tr("Uptime") + QString(" (%1d %2:%3:%4)\n").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 	}
-	switch(serviceState.mainFunctionState)
+	switch (serviceState.mainFunctionState)
 	{
 		case SS_MF_WORK:
 		{
@@ -130,6 +149,30 @@ void DataSourcesStateWidget::updateServiceState()
 		case SS_MF_STOPS: str += tr("Stops"); break;
 		default: str += tr("Unknown state"); break;
 	}
+	switch (serviceState.mainFunctionState)
+	{
+		case SS_MF_WORK:
+			startServiceButton->setEnabled(false);
+			stopServiceButton->setEnabled(true);
+			restartServiceButton->setEnabled(true);
+			break;
+		case SS_MF_STOPPED:
+			startServiceButton->setEnabled(true);
+			stopServiceButton->setEnabled(false);
+			restartServiceButton->setEnabled(true);
+			break;
+		case SS_MF_UNAVAILABLE:
+		case SS_MF_UNDEFINED:
+		case SS_MF_STARTS:
+		case SS_MF_STOPS:
+			startServiceButton->setEnabled(false);
+			stopServiceButton->setEnabled(false);
+			restartServiceButton->setEnabled(false);
+			break;
+		default:
+			assert(false);
+			break;
+	}
 
 	m_stateLabel->setText(str);
 }
@@ -137,6 +180,21 @@ void DataSourcesStateWidget::updateServiceState()
 void DataSourcesStateWidget::askServiceState()
 {
 	m_clientSocket->sendShortRequest(RQID_GET_SERVICE_INFO);
+}
+
+void DataSourcesStateWidget::startService()
+{
+	sendCommand(RQID_SERVICE_MF_START);
+}
+
+void DataSourcesStateWidget::stopService()
+{
+	sendCommand(RQID_SERVICE_MF_STOP);
+}
+
+void DataSourcesStateWidget::restartService()
+{
+	sendCommand(RQID_SERVICE_MF_RESTART);
 }
 
 void DataSourcesStateWidget::serviceAckReceived(const UdpRequest udpRequest)
@@ -164,6 +222,17 @@ void DataSourcesStateWidget::serviceNotFound()
 		serviceState.mainFunctionState = SS_MF_UNAVAILABLE;
 		updateServiceState();
 	}
+}
+
+void DataSourcesStateWidget::sendCommand(int command)
+{
+	int state = serviceState.mainFunctionState;
+	if (!(state == SS_MF_WORK && (command == RQID_SERVICE_MF_STOP || command == RQID_SERVICE_MF_RESTART)) &&
+		!(state == SS_MF_STOPPED && (command == RQID_SERVICE_MF_START || command == RQID_SERVICE_MF_RESTART)))
+	{
+		return;
+	}
+	m_clientSocket->sendShortRequest(command);
 }
 
 
@@ -265,10 +334,10 @@ void DataSourcesStateModel::onGetStateTimer()
 
 void DataSourcesStateModel::ackTimeout()
 {
-	if (m_currentDataRequestType != RQID_GET_DATA_SOURCES_STATISTICS)
-	{
-		sendDataRequest(m_currentDataRequestType);
-	}
+	beginResetModel();
+	m_dataSource.clear();
+	endResetModel();
+	sendDataRequest(RQID_GET_DATA_SOURCES_IDS);
 }
 
 void DataSourcesStateModel::ackReceived(UdpRequest udpRequest)
