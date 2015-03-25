@@ -196,6 +196,7 @@ public:
 	int alFileId() const;		// Application Logic
 	int hcFileId() const;		// Hardware Configuration
 	int hpFileId() const;		// Hadware Presets
+	int mcFileId() const;		// Module Configuration
 	int wvsFileId() const;		// Workflow Video Schemes
 	int dvsFileId() const;		// Diaginostics Video Schemes
 

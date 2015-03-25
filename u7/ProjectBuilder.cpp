@@ -248,22 +248,55 @@ bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
 
 bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware::DeviceObject* root)
 {
-	// !!! Read script from file, IT IS TEMPORARY, in future this script must be taken from the Project DB !!!!
-	//
-	m_log->writeWarning("Temoparary reading script from file, in future must be moved to DB!", true);
-
-	QString fileName = "LogicModuleConfiguration.js";
-	QFile scriptFile(fileName);
-
-	if (!scriptFile.open(QIODevice::ReadOnly))
+	if (db == nullptr || root == nullptr)
 	{
-		m_log->writeError(tr("Can't read file %1").arg(fileName));
+		assert(db);
+		assert(root);
+		m_log->writeError(tr("Fatal error, input parammeter is nullptr!"), true);
 		return false;
 	}
 
-	QTextStream stream(&scriptFile);
-	QString contents = stream.readAll();
-	scriptFile.close();
+	// Get script file from the project databse
+	//
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = db->getFileList(&fileList, db->mcFileId(), "ModulesConfigurations.descr", nullptr);
+
+	if (ok == false || fileList.size() != 1)
+	{
+		m_log->writeError(tr("Can't get file list and find Module Configuration description file"), true);
+		return false;
+	}
+
+	std::shared_ptr<DbFile> scriptFile;
+
+	ok = db->getLatestVersion(fileList[0], &scriptFile, nullptr);
+
+	if (ok == false || scriptFile == false)
+	{
+		m_log->writeError(tr("Can't get Module Configuration description file"), true);
+		return false;
+	}
+
+	QString contents = QString::fromLocal8Bit(scriptFile->data());
+
+
+//	// !!! Read script from file, IT IS TEMPORARY, in future this script must be taken from the Project DB !!!!
+//	//
+//	m_log->writeWarning("Temoparary reading script from file, in future must be moved to DB!", true);
+
+//	QString fileName = "LogicModuleConfiguration.js";
+//	QFile scriptFile(fileName);
+
+//	if (!scriptFile.open(QIODevice::ReadOnly))
+//	{
+//		m_log->writeError(tr("Can't read file %1").arg(fileName));
+//		return false;
+//	}
+
+//	QTextStream stream(&scriptFile);
+//	QString contents = stream.readAll();
+//	scriptFile.close();
 
 	// Attach objects
 	//
@@ -282,7 +315,7 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 
 	// Run script
 	//
-	QJSValue jsEval = jsEngine.evaluate(contents, fileName);
+	QJSValue jsEval = jsEngine.evaluate(contents, "ModulesConfigurations.descr");
     if (jsEval.isError() == true)
     {
         m_log->writeError(tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()));
@@ -317,108 +350,6 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
         m_log->writeError(tr("Failed to save module configuration binary files!"));
         return false;
     }
-
-
-	return true;
-
-	/*std::map<QString, std::shared_ptr<Hardware::McFirmware>> firmwares;
-
-	bool ok = generateModulesConfigurations(db, root, &firmwares);
-*/
-	//return ok;
-}
-
-bool BuildWorkerThread::generateModulesConfigurations(
-		DbController* db,
-		const Hardware::DeviceObject* parent,
-		std::map<QString, std::shared_ptr<Hardware::McFirmwareOld>>* firmwares)
-{
-	assert(db != nullptr);
-	assert(db->isProjectOpened() == true);
-	assert(parent != nullptr);
-	assert(parent->deviceType() < Hardware::DeviceType::Module);
-	assert(firmwares != nullptr);
-
-	if (QThread::currentThread()->isInterruptionRequested() == true)
-	{
-		return false;
-	}
-
-	if (parent->deviceType() == Hardware::DeviceType::System)
-	{
-		m_log->writeMessage(tr("System %1...").arg(parent->caption()));
-	}
-
-	for (int i = 0; i < parent->childrenCount(); i++)
-	{
-		Hardware::DeviceObject* child = parent->child(i);
-
-		if (child->deviceType() > Hardware::DeviceType::Module)
-		{
-			continue;
-		}
-
-//		if (child->deviceType() < Hardware::DeviceType::Module)
-//		{
-//			generateModulesConfigurations(db, child);
-//			continue;
-//		}
-
-//		// This is Module, if it has configuration process it.
-//		//
-//		assert(child->deviceType() == Hardware::DeviceType::Module);
-
-//		Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-//		assert(module != nullptr);
-
-//		if (module->moduleConfiguration().hasConfiguration() == false)
-//		{
-//			// Module does not have configuration, process the next child;
-//			//
-//			continue;
-//		}
-
-//		// Get the firmware by it's name or create new if it does not exists
-//		//
-//		const Hardware::ModuleConfiguration& moduleConfiguration = module->moduleConfiguration();
-
-//		QString confFileName = module->confFirmwareName();
-//		std::shared_ptr<Hardware::McFirmware> firmware;
-
-//		try
-//		{
-//			firmware = firmwares->at(confFileName);
-//		}
-//		catch(std::out_of_range)
-//		{
-//			firmware = std::make_shared<Hardware::McFirmware>();
-
-//			firmware->setName(confFileName);
-//			firmware->setUartId(moduleConfiguration.uartId());
-
-//			firmwares->insert(std::make_pair(confFileName, firmware));
-//		}
-
-//		QString error;
-
-//		// Compile configuration to firmware
-//		//
-//		qDebug() << module->strId();
-
-//		bool ok = module->compileConfiguration(firmware.get(), &error);
-
-//		if (ok == false)
-//		{
-//			// Somthing went wrong.
-//			//
-//			m_log->writeError(error, false);
-//			m_log->writeError(tr("Device StrId: %1, caption: %2, place: %3")
-//							  .arg(module->strId())
-//							  .arg(module->caption())
-//							  .arg(module->place()), false);
-//			return false;
-//		}
-	}
 
 	return true;
 }
