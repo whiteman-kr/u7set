@@ -148,6 +148,8 @@ namespace Hardware
 		//
 	public:
 		DeviceObject* parent();
+        Q_INVOKABLE QObject* jsParent() const;
+
 		virtual DeviceType deviceType() const;
 		Q_INVOKABLE int jsDeviceType() const;
 

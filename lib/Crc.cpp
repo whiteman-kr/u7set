@@ -1,5 +1,5 @@
-#include "Stable.h"
-#include "Crc.h"
+#include <QtEndian>
+#include "../include/Crc.h"
 
 // Using normal poly 0x000000000000001B
 

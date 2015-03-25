@@ -1,7 +1,9 @@
 
 #include "../include/ModuleConfiguration.h"
+#include "../include/Crc.h"
 #include <QMap>
 #include <QHash>
+#include <QQmlEngine>
 
 namespace Hardware
 {
@@ -13,12 +15,12 @@ namespace Hardware
 	{
 	}
 
-	void ModuleConfFirmware::init(QString name, int uartId, int frameSize, int frameCount)
+    void ModuleConfFirmware::init(QString type, QString name, int uartId, int frameSize, int frameCount)
 	{
+        m_type = type;
 		m_name = name;
 		m_uartId = uartId;
 		m_frameSize = frameSize;
-		m_frameCount = frameCount;
 
 		m_frames.clear();
 		m_frames.resize(frameCount);
@@ -30,6 +32,54 @@ namespace Hardware
 
 		return;
 	}
+
+    bool ModuleConfFirmware::save(QString projectName, QString userName)
+    {
+        QJsonObject jObject;
+
+        for (int i = 0; i < frameCount(); i++)
+        {
+            std::vector<quint8>& frame = m_frames[i];
+
+            QJsonObject jFrame;
+
+            QJsonArray array;
+            for (int j = 0; j < frame.size(); j++)
+                array.push_back(QJsonValue(frame[j]));
+
+            jFrame.insert("data", array);
+            jFrame.insert("frameIndex", i);
+
+            jObject.insert("z_frame_" + QString().number(i), jFrame);
+        }
+
+        jObject.insert("userName", userName);
+        jObject.insert("projectName", projectName);
+        jObject.insert("type", type());
+        jObject.insert("name", name());
+        jObject.insert("uartId", uartId());
+        jObject.insert("frameSize", frameSize());
+        jObject.insert("framesCount", frameCount());
+
+        QByteArray data;
+        data = QJsonDocument(jObject).toJson();
+
+        QFile file(type() + tr("_") + name() + tr(".mcb"));
+        if (file.open(QIODevice::WriteOnly)  == false)
+        {
+            return false;
+        }
+
+        bool result = true;
+
+        if (file.write(data) == -1)
+        {
+            result = false;
+        }
+
+        file.close();
+        return result;
+    }
 
 	bool ModuleConfFirmware::setData8(int frameIndex, int offset, quint8 data)
 	{
@@ -76,7 +126,44 @@ namespace Hardware
 		return true;
 	}
 
-	QString ModuleConfFirmware::name() const
+    bool ModuleConfFirmware::setData64(int frameIndex, int offset, quint64 data)
+    {
+        if (frameIndex >= static_cast<int>(m_frames.size()) ||
+            offset >= frameSize())
+        {
+            qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+            return false;
+        }
+
+        quint64* ptr = reinterpret_cast<quint64*>(m_frames[frameIndex].data() + offset);
+        *ptr = data;
+
+        return true;
+    }
+
+    bool ModuleConfFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
+    {
+        if (frameIndex >= static_cast<int>(m_frames.size()) ||
+            offset >= frameSize() || start + count >= frameSize())
+        {
+            qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+            return false;
+        }
+
+        quint64 result = Crc::crc64(m_frames[frameIndex].data() + start, count);
+        setData64(frameIndex, offset, result);
+
+        qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
+
+        return true;
+    }
+
+    QString ModuleConfFirmware::type() const
+    {
+        return m_type;
+    }
+
+    QString ModuleConfFirmware::name() const
 	{
 		return m_name;
 	}
@@ -93,7 +180,7 @@ namespace Hardware
 
 	int ModuleConfFirmware::frameCount() const
 	{
-		return m_frameCount;
+        return static_cast<int>(m_frames.size());
 	}
 
 
@@ -105,7 +192,7 @@ namespace Hardware
 	{
 	}
 
-	QObject* ModuleConfCollection::jsGet(QString name, int uartId, int frameSize, int frameCount)
+    QObject* ModuleConfCollection::jsGet(QString type, QString name, int uartId, int frameSize, int frameCount)
 	{
 		bool newFirmware = m_firmwares.count(name) == 0;
 
@@ -113,12 +200,25 @@ namespace Hardware
 
 		if (newFirmware == true)
 		{
-			fw.init(name, uartId, frameSize, frameCount);
+            fw.init(type, name, uartId, frameSize, frameCount);
 		}
 
 		QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);
 		return &fw;
 	}
+
+    bool ModuleConfCollection::save(QString projectName, QString userName)
+    {
+        for (auto i = m_firmwares.begin(); i != m_firmwares.end(); i++)
+        {
+            ModuleConfFirmware& f = i->second;
+            if (f.save(projectName, userName) == false)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
 
 	// ----------------------------------------------------------------------------
@@ -241,10 +341,10 @@ namespace Hardware
 		int brClose = type().indexOf(']');
 
 		if (brOpen == -1)
-			return 1;   // открывающей скобки нет - значит, один операнд
+			return 1;
 
 		if (brClose == -1)
-			return -1;  // закрывающей скобки нет - ошибка
+			return -1;
 
 		QString val = type().mid(brOpen + 1, brClose - brOpen - 1);
 
@@ -1124,7 +1224,7 @@ namespace Hardware
 					return false;
 				}
 
-				QList<int> values;  // значения, переведенные из строки в число
+				QList<int> values;  
 
 				bool ok = false;
 

@@ -283,6 +283,11 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 	// Run script
 	//
 	QJSValue jsEval = jsEngine.evaluate(contents, fileName);
+    if (jsEval.isError() == true)
+    {
+        m_log->writeError(tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()));
+        return false;
+    }
 
 	QJSValueList args;
 
@@ -294,14 +299,26 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 
 	if (jsResult.isError() == true)
 	{
-		m_log->writeError(tr("Uncaught exception while generation module configuration: %1").arg(jsResult.toString()));
+        m_log->writeError(tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()));
 		return false;
 	}
 
-	qDebug() << jsResult.toInt();
+    if (jsResult.toBool() == false)
+    {
+        m_log->writeError(tr("Module configuration generating failed!"));
+        return false;
+    }
+    qDebug() << jsResult.toInt();
 
-	// Process results
+    // Save confCollection items to binary files
 	//
+    if (confCollection.save(projectName(), projectUserName()) == false)
+    {
+        m_log->writeError(tr("Failed to save module configuration binary files!"));
+        return false;
+    }
+
+
 	return true;
 
 	/*std::map<QString, std::shared_ptr<Hardware::McFirmware>> firmwares;

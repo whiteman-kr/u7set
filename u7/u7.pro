@@ -116,7 +116,8 @@ SOURCES +=\
     ../lib/OutputLog.cpp \
     ProjectBuilder.cpp \
     ../lib/DbProgress.cpp \
-    FileListView.cpp
+    FileListView.cpp \
+    ../lib/Crc.cpp
 
 
 HEADERS  += \
@@ -175,7 +176,8 @@ HEADERS  += \
     ../include/Signal.h \
     ../include/DbProgress.h \
     FileListView.h \
-    version.h
+    version.h \
+    ../include/Crc.h
 
 FORMS    += \
     ChangesetDialog.ui \

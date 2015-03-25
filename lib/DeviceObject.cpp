@@ -637,7 +637,14 @@ namespace Hardware
 		return m_parent;
 	}
 
-	DeviceType DeviceObject::deviceType() const
+    QObject* DeviceObject::jsParent() const
+    {
+        QObject* c = m_parent;
+        QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+        return c;
+    }
+
+    DeviceType DeviceObject::deviceType() const
 	{
 		assert(false);
 		return DeviceType::Root;
