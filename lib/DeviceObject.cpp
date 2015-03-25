@@ -15,7 +15,9 @@ namespace Hardware
 			L".hcs",		// Chassis
 			L".hmd",		// Module
 			L".hcr",		// Controller
-			L".hds"			// Diagnostics Signal
+			L".hds",		// Diagnostics Signal
+			L".hws",		// Workstation
+			L".hsw",		// Software
 		};
 
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
@@ -29,6 +31,8 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceDiagSignal>();
+		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
+		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 	}
 
 	void Shutdwon()
@@ -708,9 +712,31 @@ namespace Hardware
 
 	void DeviceObject::addChild(std::shared_ptr<DeviceObject> child)
 	{
+		if (child->deviceType() == DeviceType::Software &&
+			deviceType() != DeviceType::Workstation &&
+			deviceType() != DeviceType::Root)
+		{
+			assert(false);
+			return;
+		}
+
 		if (deviceType() >= child->deviceType())
 		{
 			assert(deviceType() < child->deviceType());
+			return;
+		}
+
+		if (child->deviceType() == DeviceType::Workstation && deviceType() > DeviceType::Chassis)
+		{
+			assert(false);
+			return;
+		}
+
+		if (child->deviceType() == DeviceType::Software &&
+			deviceType() != DeviceType::Workstation &&
+			deviceType() != DeviceType::Root)
+		{
+			assert(false);
 			return;
 		}
 
@@ -1416,4 +1442,165 @@ namespace Hardware
 		return m_deviceType;
 	}
 
+
+	//
+	//
+	// Workstation
+	//
+	//
+	Workstation::Workstation(bool preset /*= false*/) :
+		DeviceObject(preset)
+	{
+
+	}
+
+	Workstation::~Workstation()
+	{
+	}
+
+	bool Workstation::SaveData(Proto::Envelope* message) const
+	{
+		bool result = DeviceObject::SaveData(message);
+		if (result == false || message->has_deviceobject() == false)
+		{
+			assert(result);
+			assert(message->has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		Proto::Workstation* workstationMessage = message->mutable_deviceobject()->mutable_workstation();
+
+		workstationMessage->set_type(m_type);
+
+		return true;
+	}
+
+	bool Workstation::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
+
+		bool result = DeviceObject::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.deviceobject().has_workstation() == false)
+		{
+			assert(message.deviceobject().has_workstation());
+			return false;
+		}
+
+		const Proto::Workstation& workstationMessage = message.deviceobject().workstation();
+
+		m_type =  workstationMessage.type();
+
+		return true;
+	}
+
+	DeviceType Workstation::deviceType() const
+	{
+		return m_deviceType;
+	}
+
+
+	int Workstation::type() const
+	{
+		return m_type;
+	}
+
+	void Workstation::setType(int value)
+	{
+		m_type = value;
+	}
+
+
+
+	//
+	//
+	// Software
+	//
+	//
+	Software::Software(bool preset /*= false*/) :
+		DeviceObject(preset)
+	{
+
+	}
+
+	Software::~Software()
+	{
+	}
+
+	bool Software::SaveData(Proto::Envelope* message) const
+	{
+		bool result = DeviceObject::SaveData(message);
+		if (result == false || message->has_deviceobject() == false)
+		{
+			assert(result);
+			assert(message->has_deviceobject());
+			return false;
+		}
+
+		// --
+		//
+		Proto::Software* softwareMessage = message->mutable_deviceobject()->mutable_software();
+
+		softwareMessage->set_type(m_type);
+
+		return true;
+	}
+
+	bool Software::LoadData(const Proto::Envelope& message)
+	{
+		if (message.has_deviceobject() == false)
+		{
+			assert(message.has_deviceobject());
+			return false;
+		}
+
+		bool result = DeviceObject::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.deviceobject().has_software() == false)
+		{
+			assert(message.deviceobject().has_software());
+			return false;
+		}
+
+		const Proto::Software& softwareMessage = message.deviceobject().software();
+
+		m_type =  softwareMessage.type();
+
+		return true;
+	}
+
+	DeviceType Software::deviceType() const
+	{
+		return m_deviceType;
+	}
+
+
+	int Software::type() const
+	{
+		return m_type;
+	}
+
+	void Software::setType(int value)
+	{
+		m_type = value;
+	}
 }
+

@@ -114,10 +114,14 @@ public slots:
 	void addChassis();
 	void addModule();
 	void addController();
+	void addWorkstation();
+	void addSoftware();
 
 	void addPresetRack();
 	void addPresetChassis();
 	void addPresetModule();
+	void addPresetWorkstation();
+	void addPresetSoftware();
 
 	void choosePreset(Hardware::DeviceType type);
 
@@ -177,7 +181,7 @@ public slots:
 	void setActionState();
 	void modeSwitched();
 
-	void moduleConfiguration();
+	//void moduleConfiguration();
 
 	void setProperties();
 
@@ -192,12 +196,17 @@ private:
 		QAction* m_addRackAction = nullptr;
 		QAction* m_addChassisAction = nullptr;
 		QAction* m_addModuleAction = nullptr;
+		QAction* m_addWorkstationAction = nullptr;
+		QAction* m_addSoftwareAction = nullptr;
+
 	//----------------------------------
 	QMenu* m_addPresetMenu = nullptr;
 	QAction* m_addPresetAction = nullptr;
 		QAction* m_addPresetRackAction = nullptr;
 		QAction* m_addPresetChassisAction = nullptr;
 		QAction* m_addPresetModuleAction = nullptr;
+		QAction* m_addPresetWorkstationAction = nullptr;
+		QAction* m_addPresetSoftwareAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction1 = nullptr;
 	QAction* m_deleteObjectAction = nullptr;
@@ -211,8 +220,6 @@ private:
 	QAction* m_SeparatorAction3 = nullptr;
 	QAction* m_switchMode = nullptr;
 	QAction* m_SeparatorAction4 = nullptr;
-	QAction* m_moduleConfigurationAction = nullptr;
-
 
 	//--
 	//

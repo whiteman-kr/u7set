@@ -73,6 +73,8 @@ class DeviceChassis;
 class DeviceModule;
 class DeviceController;
 class DeviceDiagSignal;
+class Workstation;
+class Software;
 class ModuleConfiguration;
 class ModuleConfigurationValue;
 class Property;
@@ -3926,6 +3928,24 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::DeviceDiagSignal* release_diagsignal();
   inline void set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal);
 
+  // optional .Proto.Workstation Workstation = 107;
+  inline bool has_workstation() const;
+  inline void clear_workstation();
+  static const int kWorkstationFieldNumber = 107;
+  inline const ::Proto::Workstation& workstation() const;
+  inline ::Proto::Workstation* mutable_workstation();
+  inline ::Proto::Workstation* release_workstation();
+  inline void set_allocated_workstation(::Proto::Workstation* workstation);
+
+  // optional .Proto.Software Software = 108;
+  inline bool has_software() const;
+  inline void clear_software();
+  static const int kSoftwareFieldNumber = 108;
+  inline const ::Proto::Software& software() const;
+  inline ::Proto::Software* mutable_software();
+  inline ::Proto::Software* release_software();
+  inline void set_allocated_software(::Proto::Software* software);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceObject)
  private:
   inline void set_has_uuid();
@@ -3960,6 +3980,10 @@ class DeviceObject : public ::google::protobuf::Message {
   inline void clear_has_controller();
   inline void set_has_diagsignal();
   inline void clear_has_diagsignal();
+  inline void set_has_workstation();
+  inline void clear_has_workstation();
+  inline void set_has_software();
+  inline void clear_has_software();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3980,9 +4004,11 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::DeviceModule* module_;
   ::Proto::DeviceController* controller_;
   ::Proto::DeviceDiagSignal* diagsignal_;
+  ::Proto::Workstation* workstation_;
+  ::Proto::Software* software_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(19 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4554,6 +4580,170 @@ class DeviceDiagSignal : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static DeviceDiagSignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Workstation : public ::google::protobuf::Message {
+ public:
+  Workstation();
+  virtual ~Workstation();
+
+  Workstation(const Workstation& from);
+
+  inline Workstation& operator=(const Workstation& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Workstation& default_instance();
+
+  void Swap(Workstation* other);
+
+  // implements Message ----------------------------------------------
+
+  Workstation* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Workstation& from);
+  void MergeFrom(const Workstation& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 type = 1 [default = 0];
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.Workstation)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 type_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static Workstation* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Software : public ::google::protobuf::Message {
+ public:
+  Software();
+  virtual ~Software();
+
+  Software(const Software& from);
+
+  inline Software& operator=(const Software& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Software& default_instance();
+
+  void Swap(Software* other);
+
+  // implements Message ----------------------------------------------
+
+  Software* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Software& from);
+  void MergeFrom(const Software& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 type = 1 [default = 0];
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.Software)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 type_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static Software* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -9232,6 +9422,82 @@ inline void DeviceObject::set_allocated_diagsignal(::Proto::DeviceDiagSignal* di
   }
 }
 
+// optional .Proto.Workstation Workstation = 107;
+inline bool DeviceObject::has_workstation() const {
+  return (_has_bits_[0] & 0x00020000u) != 0;
+}
+inline void DeviceObject::set_has_workstation() {
+  _has_bits_[0] |= 0x00020000u;
+}
+inline void DeviceObject::clear_has_workstation() {
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline void DeviceObject::clear_workstation() {
+  if (workstation_ != NULL) workstation_->::Proto::Workstation::Clear();
+  clear_has_workstation();
+}
+inline const ::Proto::Workstation& DeviceObject::workstation() const {
+  return workstation_ != NULL ? *workstation_ : *default_instance_->workstation_;
+}
+inline ::Proto::Workstation* DeviceObject::mutable_workstation() {
+  set_has_workstation();
+  if (workstation_ == NULL) workstation_ = new ::Proto::Workstation;
+  return workstation_;
+}
+inline ::Proto::Workstation* DeviceObject::release_workstation() {
+  clear_has_workstation();
+  ::Proto::Workstation* temp = workstation_;
+  workstation_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_workstation(::Proto::Workstation* workstation) {
+  delete workstation_;
+  workstation_ = workstation;
+  if (workstation) {
+    set_has_workstation();
+  } else {
+    clear_has_workstation();
+  }
+}
+
+// optional .Proto.Software Software = 108;
+inline bool DeviceObject::has_software() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void DeviceObject::set_has_software() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void DeviceObject::clear_has_software() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void DeviceObject::clear_software() {
+  if (software_ != NULL) software_->::Proto::Software::Clear();
+  clear_has_software();
+}
+inline const ::Proto::Software& DeviceObject::software() const {
+  return software_ != NULL ? *software_ : *default_instance_->software_;
+}
+inline ::Proto::Software* DeviceObject::mutable_software() {
+  set_has_software();
+  if (software_ == NULL) software_ = new ::Proto::Software;
+  return software_;
+}
+inline ::Proto::Software* DeviceObject::release_software() {
+  clear_has_software();
+  ::Proto::Software* temp = software_;
+  software_ = NULL;
+  return temp;
+}
+inline void DeviceObject::set_allocated_software(::Proto::Software* software) {
+  delete software_;
+  software_ = software;
+  if (software) {
+    set_has_software();
+  } else {
+    clear_has_software();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // DeviceRoot
@@ -9465,6 +9731,58 @@ inline void DeviceModule::set_allocated_conftype(::std::string* conftype) {
 // -------------------------------------------------------------------
 
 // DeviceDiagSignal
+
+// -------------------------------------------------------------------
+
+// Workstation
+
+// optional int32 type = 1 [default = 0];
+inline bool Workstation::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Workstation::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Workstation::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Workstation::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 Workstation::type() const {
+  return type_;
+}
+inline void Workstation::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// Software
+
+// optional int32 type = 1 [default = 0];
+inline bool Software::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Software::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Software::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Software::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 Software::type() const {
+  return type_;
+}
+inline void Software::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
 
 // -------------------------------------------------------------------
 

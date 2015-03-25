@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "Configurator.h"
-#include "Crc.h"
+#include "../include/Crc.h"
 
 #ifdef Q_OS_WIN32
 #include "./ftdi/ftd2xx.h"
