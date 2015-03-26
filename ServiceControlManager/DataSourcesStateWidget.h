@@ -16,6 +16,7 @@ SS_MF_UNAVAILABLE = 11;
 class QTimer;
 class QTableView;
 class QLabel;
+class QPushButton;
 
 
 class DataSourcesStateModel : public QAbstractTableModel
@@ -72,10 +73,20 @@ public slots:
 	void updateServiceState();
 	void askServiceState();
 
+	void startService();
+	void stopService();
+	void restartService();
+
 	void serviceAckReceived(const UdpRequest udpRequest);
 	void serviceNotFound();
 
 private:
+	void sendCommand(int command);
+
+	QPushButton* startServiceButton;
+	QPushButton* stopServiceButton;
+	QPushButton* restartServiceButton;
+
 	QTimer* m_timer = nullptr;
 	DataSourcesStateModel* m_model = nullptr;
 	QTableView* m_view = nullptr;
