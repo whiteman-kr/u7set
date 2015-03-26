@@ -62,8 +62,10 @@ public:
 	QString projectUserPassword() const;
 	void setProjectUserPassword(const QString& value);
 
-	bool onlyCheckedIn() const;
-	void setOnlyCheckedIn(bool value);
+	bool debug() const;
+	void setDebug(bool value);
+
+	bool release() const;
 
 	// Data
 	//
@@ -80,7 +82,7 @@ private:
 	QString m_projectUserName;
 	QString m_projectUserPassword;
 
-	bool m_onlyCheckedIn = true;		// Don't get workcopy of checked out files, use unly checked in copy
+	bool m_debug = false;				// if true then don't get workcopy of checked out files, use unly checked in copy
 
 	OutputLog* m_log;					// Probably it's better to make it as shared_ptr
 };
@@ -103,7 +105,7 @@ public:
 			   QString serverPassword,
 			   QString projectUserName,
 			   QString projectUserPassword,
-			   bool onlyCheckedIn);
+			   bool debug);
 
 	void stop();
 
@@ -119,6 +121,11 @@ signals:
 	//
 protected slots:
 	void handleResults(QString result);
+
+	// Properties
+	//
+private:
+	bool debug() const;
 
 	// Data
 	//

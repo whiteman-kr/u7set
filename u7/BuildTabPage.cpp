@@ -16,11 +16,6 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
-	m_tasks.push_back(BuildTask(tr("Equipment configuration"), true));
-	m_tasks.push_back(BuildTask(tr("Application logic"), true));
-	m_tasks.push_back(BuildTask(tr("Signal database"), true));
-
-
 	//
 	// Controls
 	//
@@ -29,10 +24,12 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	CreateActions();
 
-	// Left Side Widget
+	// Right Side Widget
 	//
-	m_leftSideWidget = new QWidget();
+	m_rightSideWidget = new QWidget();
 
+	// Output windows
+	//
 	m_outputWidget = new QTextEdit();
 	m_outputWidget->setReadOnly(true);
 	m_outputWidget->document()->setUndoRedoEnabled(false);
@@ -41,26 +38,34 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_buildButton = new QPushButton(tr("Build..."));
 	m_cancelButton = new QPushButton(tr("Cancel"));
 
-	QGridLayout* leftWidgetLayout = new QGridLayout();
+	QGridLayout* rightWidgetLayout = new QGridLayout();
 
-	leftWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 3);
-	leftWidgetLayout->addWidget(m_buildButton, 1, 1);
-	leftWidgetLayout->addWidget(m_cancelButton, 1, 2);
+	rightWidgetLayout->addWidget(m_outputWidget, 0, 0, 1, 3);
+	rightWidgetLayout->addWidget(m_buildButton, 1, 1);
+	rightWidgetLayout->addWidget(m_cancelButton, 1, 2);
 
-	leftWidgetLayout->setColumnStretch(0, 1);
+	rightWidgetLayout->setColumnStretch(0, 1);
 
-	m_leftSideWidget->setLayout(leftWidgetLayout);
+	m_rightSideWidget->setLayout(rightWidgetLayout);
 
-	// Right Side
+	// Left Side
 	//
-	m_taskTable = new QTableWidget(m_vsplitter);
+	m_settingsWidget = new QWidget(m_vsplitter);
+	QVBoxLayout* settingsWidgetLayout = new QVBoxLayout();
+
+	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
+	m_debugCheckBox->setChecked(true);
+
+	settingsWidgetLayout->addWidget(m_debugCheckBox);
+
+	m_settingsWidget->setLayout(settingsWidgetLayout);
 
 	// V Splitter
 	//
 	m_vsplitter = new QSplitter(this);
 
-	m_vsplitter->addWidget(m_taskTable);
-	m_vsplitter->addWidget(m_leftSideWidget);
+	m_vsplitter->addWidget(m_settingsWidget);
+	m_vsplitter->addWidget(m_rightSideWidget);
 
 	m_vsplitter->setStretchFactor(0, 2);
 	m_vsplitter->setStretchFactor(1, 1);
@@ -75,39 +80,6 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	pMainLayout->addWidget(m_vsplitter);
 
 	setLayout(pMainLayout);
-
-	// Fill task table
-	//
-	m_taskTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_taskTable->setSelectionMode(QAbstractItemView::SingleSelection);
-	m_taskTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-	m_taskTable->setShowGrid(false);
-
-	m_taskTable->verticalHeader()->hide();
-	m_taskTable->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_taskTable->fontMetrics().height() * 2.0));	// 1.4
-
-	m_taskTable->horizontalHeader()->setHighlightSections(false);
-
-	m_taskTable->setColumnCount(1);
-
-	QStringList headers;
-	headers.push_back(tr("Build task"));
-
-	m_taskTable->setHorizontalHeaderLabels(headers);
-	m_taskTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-
-	m_taskTable->setRowCount(static_cast<int>(m_tasks.size()));
-	for (size_t i = 0; i < m_tasks.size(); i++)
-	{
-		QTableWidgetItem* ti = new QTableWidgetItem(m_tasks[i].name);
-
-		ti->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-		ti->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
-		ti->setCheckState(m_tasks[i].build ? Qt::Checked : Qt::Unchecked);
-
-		m_taskTable->setItem(static_cast<int>(i), 0, ti);
-	}
 
 	// --
 	//
@@ -230,31 +202,10 @@ void BuildTabPage::projectClosed()
 
 void BuildTabPage::build()
 {
-	assert(m_taskTable);
-	assert(static_cast<size_t>(m_taskTable->rowCount()) == m_tasks.size());
-
 	m_outputLog.clear();
 	m_outputWidget->clear();
 
-	std::vector<BuildTask> buildTask;
-
-	for (size_t i = 0; i < m_tasks.size(); i++)
-	{
-		bool checked = m_taskTable->item(static_cast<int>(i), 0)->checkState() == Qt::Checked;
-		m_tasks[i].build = checked;
-
-		if (checked == true)
-		{
-			buildTask.push_back(m_tasks[i]);
-		}
-	}
-
-	if (buildTask.empty() == true)
-	{
-		m_outputLog.writeError(tr("Nothing to build"));
-		m_outputLog.writeMessage(tr("Select build task."));
-		return;
-	}
+	bool debug = m_debugCheckBox->isChecked();
 
 	m_builder.start(
 		db()->currentProject().projectName(),
@@ -264,7 +215,7 @@ void BuildTabPage::build()
 		db()->serverPassword(),
 		db()->currentUser().username(),
 		db()->currentUser().password(),
-		false);
+		debug);
 
 	return;
 }

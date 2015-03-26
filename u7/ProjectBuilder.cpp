@@ -12,15 +12,19 @@ void BuildWorkerThread::run()
 	QThread::currentThread()->setTerminationEnabled(true);
 
 	qDebug() << "Building started";
-	m_log->writeMessage("Building started");
 
-	if (onlyCheckedIn() == false)
+	if (debug() == true)
 	{
+		m_log->writeWarning(tr("DEBUG Building started"), true);
 		m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true);
 	}
+	else
+	{
+		m_log->writeMessage(tr("RELEASE Building started"), true);
+	}
 
-	QString str;
 	bool ok = false;
+	QString str;
 
 	// Create database controller and open project
 	//
@@ -48,6 +52,32 @@ void BuildWorkerThread::run()
 
 	do
 	{
+		int lastChangesetId = 0;
+		ok = db.lastChangesetId(&lastChangesetId);
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("lastChangesetId Error."), true);
+			break;
+		}
+
+		bool isAnyCheckedOut = false;
+		ok = db.isAnyCheckedOut(&isAnyCheckedOut);
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("isAnyCheckedOut Error."), true);
+			QThread::currentThread()->requestInterruption();
+			break;
+		}
+
+		if (release() == true && isAnyCheckedOut == true)
+		{
+			m_log->writeError(tr("There are some checked out objects. Please check in all objects before building release version."), true);
+			QThread::currentThread()->requestInterruption();
+			break;
+		}
+
 		//
 		// Get Equipment from the database
 		//
@@ -68,6 +98,7 @@ void BuildWorkerThread::run()
 		if (ok == false)
 		{
 			m_log->writeError(tr("Error"), true);
+			QThread::currentThread()->requestInterruption();
 			break;
 		}
 		else
@@ -101,6 +132,7 @@ void BuildWorkerThread::run()
 		if (ok == false)
 		{
 			m_log->writeError(tr("Error"), true);
+			QThread::currentThread()->requestInterruption();
 			break;
 		}
 		else
@@ -155,20 +187,24 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	std::vector<DbFileInfo> files;
 
-	bool ok = false;
-
-	if (onlyCheckedIn() == true)
-	{
-		assert(false);
-	}
-	else
-	{
-		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
-	}
+	bool ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
 
 	if (ok == false)
 	{
 		return false;
+	}
+
+	if (debug() == true)
+	{
+		for (const auto& f : files)
+		{
+			if (f.state() != VcsState::CheckedIn)
+			{
+				m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()));
+
+				break;
+			}
+		}
 	}
 
 	parent->deleteAllChildren();
@@ -177,7 +213,7 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 	{
 		std::shared_ptr<DbFile> file;
 
-		if (onlyCheckedIn() == true)
+		if (debug() == true)
 		{
 			assert(false);
 		}
@@ -279,24 +315,6 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 	}
 
 	QString contents = QString::fromLocal8Bit(scriptFile->data());
-
-
-//	// !!! Read script from file, IT IS TEMPORARY, in future this script must be taken from the Project DB !!!!
-//	//
-//	m_log->writeWarning("Temoparary reading script from file, in future must be moved to DB!", true);
-
-//	QString fileName = "LogicModuleConfiguration.js";
-//	QFile scriptFile(fileName);
-
-//	if (!scriptFile.open(QIODevice::ReadOnly))
-//	{
-//		m_log->writeError(tr("Can't read file %1").arg(fileName));
-//		return false;
-//	}
-
-//	QTextStream stream(&scriptFile);
-//	QString contents = stream.readAll();
-//	scriptFile.close();
 
 	// Attach objects
 	//
@@ -444,16 +462,21 @@ void BuildWorkerThread::setProjectUserPassword(const QString& value)
 	m_projectUserPassword = value;
 }
 
-bool BuildWorkerThread::onlyCheckedIn() const
+bool BuildWorkerThread::debug() const
 {
-	return m_onlyCheckedIn;
-
+	return m_debug;
 }
 
-void BuildWorkerThread::setOnlyCheckedIn(bool value)
+void BuildWorkerThread::setDebug(bool value)
 {
-	m_onlyCheckedIn = value;
+	m_debug = value;
 }
+
+bool BuildWorkerThread::release() const
+{
+	return !m_debug;
+}
+
 
 ProjectBuilder::ProjectBuilder(OutputLog* log) :
 	m_log(log)
@@ -495,7 +518,7 @@ bool ProjectBuilder::start(QString projectName,
 						   QString serverPassword,
 						   QString projectUserName,
 						   QString projectUserPassword,
-						   bool onlyCheckedIn)
+						   bool debug)
 {
 	assert(m_thread != nullptr);
 
@@ -515,11 +538,12 @@ bool ProjectBuilder::start(QString projectName,
 	m_thread->setServerPassword(serverPassword);
 	m_thread->setProjectUserName(projectUserName);
 	m_thread->setProjectUserPassword(projectUserPassword);
-	m_thread->setOnlyCheckedIn(onlyCheckedIn);
+	m_thread->setDebug(debug);
 
 	// Ready? Go!
 	//
 	m_thread->start();
+
 	return true;
 }
 
@@ -537,4 +561,5 @@ bool ProjectBuilder::isRunning() const
 void ProjectBuilder::handleResults(QString /*result*/)
 {
 }
+
 

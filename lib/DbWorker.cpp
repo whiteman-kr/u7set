@@ -3531,6 +3531,81 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 	}
 }
 
+void DbWorker::slot_isAnyCheckedOut(bool* checkedOut)
+{
+	AUTO_COMPLETE
+
+	if (checkedOut == nullptr)
+	{
+		assert(checkedOut != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not opened."));
+		return;
+	}
+
+	QString request = "SELECT * FROM is_any_checked_out();";
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return;
+	}
+
+	q.next();
+	*checkedOut = q.value(0).toBool();
+
+	return;
+}
+
+void DbWorker::slot_lastChangesetId(int* lastChangesetId)
+{
+	AUTO_COMPLETE
+
+	if (lastChangesetId == nullptr)
+	{
+		assert(lastChangesetId != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not opened."));
+		return;
+	}
+
+	QString request = "SELECT * FROM get_last_changeset();";
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return;
+	}
+
+	q.next();
+	*lastChangesetId = q.value(0).toInt();
+
+	return;
+}
 
 bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 {

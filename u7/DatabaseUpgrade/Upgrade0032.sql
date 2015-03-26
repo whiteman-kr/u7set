@@ -61,6 +61,31 @@ END
 $BODY$
 LANGUAGE plpgsql;
 
+
+-------------------------------------------------------------------------------
+--
+--		is_any_checked_out
+--
+-------------------------------------------------------------------------------
+CREATE FUNCTION is_any_checked_out() RETURNS boolean AS
+$BODY$
+        SELECT count(*) > 0 FROM CheckOut;
+$BODY$
+LANGUAGE sql;
+
+
+-------------------------------------------------------------------------------
+--
+--		get_last_changeset
+--
+-------------------------------------------------------------------------------
+CREATE FUNCTION get_last_changeset() RETURNS integer AS
+$BODY$
+        SELECT max(changesetid) FROM Changeset;
+$BODY$
+LANGUAGE sql;
+
+
 -------------------------------------------------------------------------------
 --
 --		create Workstation preset

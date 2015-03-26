@@ -104,6 +104,11 @@ public:
 
 	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
 
+	// Version Control
+	//
+	bool isAnyCheckedOut(bool* result);
+	bool lastChangesetId(int* result);
+
 signals:
 	void signal_getProjectList(std::vector<DbProject>* out);
 	void signal_createProject(QString projectName, QString administratorPassword);
@@ -154,6 +159,11 @@ signals:
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
+
+	// Version Control
+	//
+	void signal_isAnyCheckedOut(bool* checkedOut);
+	void signal_lastChangesetId(int* lastChangesetId);
 
 	//
 	// Service functions

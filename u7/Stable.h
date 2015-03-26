@@ -57,6 +57,7 @@
 #include <QStatusBar>
 #include <QLabel>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QScrollArea>
 #include <QScrollBar>
 
