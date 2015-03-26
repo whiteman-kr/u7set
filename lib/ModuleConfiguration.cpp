@@ -81,6 +81,143 @@ namespace Hardware
         return result;
     }
 
+    bool ModuleConfFirmware::load(QString fileName)
+    {
+        m_frames.clear();
+
+        QFile file(fileName);
+        if (file.open(QIODevice::ReadOnly)  == false)
+        {
+            return false;
+        }
+
+        QByteArray data;
+        data = file.readAll();
+
+        file.close();
+
+        QJsonDocument document = QJsonDocument::fromJson(data);
+
+        if (document.isEmpty() == true || document.isNull() == true || document.isObject() == false)
+        {
+            return false;
+        }
+
+        QJsonObject jConfig = document.object();
+
+        /*int configNo = 0;
+        QJsonValue jConfigVal = object.value("config" + QString::number(configNo));
+        if (jConfigVal.isUndefined() == true || jConfigVal.isObject() == false)
+        {
+            return false;
+        }*/
+
+        //QJsonObject jConfig = jConfigVal.toObject();
+
+        if (jConfig.value("type").isUndefined() == true)
+        {
+            return false;
+        }
+        m_type = jConfig.value("type").toString();
+
+        if (jConfig.value("name").isUndefined() == true)
+        {
+            return false;
+        }
+        m_name = jConfig.value("name").toString();
+
+        /*if (jConfig.value("version").isUndefined() == true)
+        {
+            return false;
+        }
+        m_version = (int)jConfig.value("version").toDouble();*/
+
+        if (jConfig.value("uartId").isUndefined() == true)
+        {
+            return false;
+        }
+        m_uartId = (int)jConfig.value("uartId").toDouble();
+
+        if (jConfig.value("frameSize").isUndefined() == true)
+        {
+            return false;
+        }
+        m_frameSize = (int)jConfig.value("frameSize").toDouble();
+
+        /*if (jConfig.value("changeset").isUndefined() == true)
+        {
+            return false;
+        }
+        m_changeset = (int)jConfig.value("changeset").toDouble();*/
+
+        /*if (jConfig.value("fileName").isUndefined() == true)
+        {
+            return false;
+        }
+        m_fileName = jConfig.value("fileName").toString();*/
+
+        if (jConfig.value("framesCount").isUndefined() == true)
+        {
+            return false;
+        }
+        int framesCount = (int)jConfig.value("framesCount").toDouble();
+
+        for (int v = 0; v < framesCount; v++)
+        {
+            //ConfigDataItem item;
+
+            QJsonValue jFrameVal = jConfig.value("z_frame_" + QString::number(v));
+            if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
+            {
+                assert(false);
+
+                m_frames.clear();
+                return false;
+            }
+
+            QJsonObject jFrame = jFrameVal.toObject();
+
+            if (jFrame.value("frameIndex").isUndefined() == true)
+            {
+                assert(false);
+
+                m_frames.clear();
+                return false;
+            }
+
+            //item.m_index = (int)jFrame.value("frameIndex").toDouble();
+
+            if (jFrame.value("data").isUndefined() == true || jFrame.value("data").isArray() == false)
+            {
+                assert(false);
+
+                m_frames.clear();
+                return false;
+            }
+
+            std::vector<quint8> frame;
+
+            QJsonArray array = jFrame.value("data").toArray();
+            for (int i = 0; i < array.size(); i++)
+            {
+                //int v = array[i].toInt();
+                //int v = array[i].toInt();
+                frame.push_back((int)array[i].toInt());
+            }
+
+
+            m_frames.push_back(frame);
+        }
+
+        return true;
+
+    }
+
+    bool ModuleConfFirmware::isEmpty() const
+    {
+        return m_frames.size() == 0;
+    }
+
 	bool ModuleConfFirmware::setData8(int frameIndex, int offset, quint8 data)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
