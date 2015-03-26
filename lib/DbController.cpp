@@ -1477,6 +1477,11 @@ int DbController::hpFileId() const
 	return m_worker->hpFileId();
 }
 
+int DbController::mcFileId() const
+{
+	return m_worker->mcFileId();
+}
+
 int DbController::wvsFileId() const
 {
 	return m_worker->wvsFileId();
