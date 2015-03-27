@@ -448,7 +448,7 @@ void ModuleConfigurator::enableControls()
 	m_pClearLogButton->setEnabled(true);
 }
 
-void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vector<char> data)
+void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vector<quint8> data)
 {
 	// Read diag info, like factory no, crc, etc
 	//

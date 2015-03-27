@@ -39,7 +39,7 @@ public:
 	Q_INVOKABLE void writeWarning(const QString& str, bool bold = false);
 	Q_INVOKABLE void writeError(const QString& str, bool bold = false);
 
-	Q_INVOKABLE void writeDump(const std::vector<char>& data);
+    Q_INVOKABLE void writeDump(const std::vector<quint8> &data);
 
 	bool windowMessageListEmpty() const;
 	OutputLogItem popWindowMessages();

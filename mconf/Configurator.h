@@ -43,6 +43,16 @@ struct Uuid
 	uint8_t data4[8];
 
 	QUuid toQUuid() const;
+
+    Uuid& operator = (const QUuid& uuid)
+    {
+        data1 = uuid.data1;
+        data2 = uuid.data2;
+        data3 = uuid.data3;
+        for (int i = 0; i < 8; i++)
+            data4[i] = uuid.data4[i];
+        return *this;
+    }
 };
 #pragma pack(pop)
 
@@ -193,7 +203,7 @@ protected:
 	bool openConnection();
 	bool closeConnection();
 
-	bool send(int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<char>& requestData, CONF_HEADER* pReceivedHeader, std::vector<char>* replyData);
+    bool send(int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<quint8>& requestData, CONF_HEADER* pReceivedHeader, std::vector<quint8>* replyData);
 
 //	HANDLE openConnection();
 //	bool closeConnection(HANDLE hDevice);
@@ -215,7 +225,7 @@ public slots:
 signals:
 	void communicationStarted();
 	void communicationFinished();
-    void communicationReadFinished(int protocolVersion, std::vector<char> data);
+    void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
 	// Properties
 	//
@@ -233,9 +243,10 @@ private:
 	bool m_showDebugInfo = false;
 	uint32_t m_configuratorfactoryNo = 0;
 
-    QSerialPort *serialPort;
+    QSerialPort *m_serialPort;
 
 	mutable QMutex mutex;			// m_device
 };
+
 
 #endif // CONFIGURATOR_H
