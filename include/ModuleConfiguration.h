@@ -26,6 +26,8 @@ namespace Hardware
 	public:
         void init(QString type, QString name, int uartId, int frameSize, int frameCount);
         bool save(QString projectName, QString userName);
+        bool load(QString fileName);
+        bool isEmpty() const;
 
 		Q_INVOKABLE bool setData8(int frameIndex, int offset, quint8 data);
 		Q_INVOKABLE bool setData16(int frameIndex, int offset, quint16 data);
@@ -54,8 +56,9 @@ namespace Hardware
 		std::vector<std::vector<quint8>> m_frames;
 	};
 
+    //Q_DECLARE_METATYPE(Hardware::ModuleConfFirmware);
 
-	class ModuleConfCollection : public QObject
+    class ModuleConfCollection : public QObject
 	{
 		Q_OBJECT
 
@@ -370,3 +373,4 @@ namespace Hardware
 		std::list<McDataChunk> m_data;
 	};
 }
+

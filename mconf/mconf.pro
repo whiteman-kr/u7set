@@ -32,7 +32,6 @@ HEADERS += \
 	Stable.h \
 	ftdi/ftd2xx.h \
 	../include/DbStruct.h \
-	../include/ConfigData.h \
     ../include/DeviceObject.h \
     ../include/OutputLog.h \
     ../Proto/serialization.pb.h \
@@ -49,7 +48,6 @@ HEADERS += \
 SOURCES += \
 	main.cpp \
 	../lib/DbStruct.cpp \
-	../lib/ConfigData.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/OutputLog.cpp \
     ../Proto/serialization.pb.cc \

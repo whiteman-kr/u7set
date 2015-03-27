@@ -17,12 +17,12 @@ ApplicationTabPage::~ApplicationTabPage()
 
 bool ApplicationTabPage::isFileLoaded() const
 {
-	return m_reader.isLoaded();
+    return m_confFirmware.isEmpty() == false;
 }
 
-const ConfigDataReader& ApplicationTabPage::configuration() const
+Hardware::ModuleConfFirmware *ApplicationTabPage::configuration()
 {
-	return m_reader;
+    return &m_confFirmware;
 }
 
 void ApplicationTabPage::openFileClicked()
@@ -33,7 +33,7 @@ void ApplicationTabPage::openFileClicked()
 
 	fd.setAcceptMode(QFileDialog::AcceptOpen);
 	fd.setFileMode(QFileDialog::ExistingFile);
-	fd.setNameFilter("Conf Binary Files (*.cdb);; All Files (*.*)");
+    fd.setNameFilter("Module Conf Binary Files (*.mcb);; All Files (*.*)");
 	
 	if (fd.exec() == QDialog::Rejected)
 	{
@@ -55,7 +55,7 @@ void ApplicationTabPage::openFileClicked()
 		return;
 	}
 
-	bool result = m_reader.load(fileName);
+    bool result = m_confFirmware.load(fileName);
 
 	if (result == false)
 	{
@@ -67,16 +67,15 @@ void ApplicationTabPage::openFileClicked()
 	}
 
 	ui.fileNameEdit->setText(fileName);
-	ui.UartIdEdit->setText(QString::number(m_reader.uartID(), 16));
+    ui.UartIdEdit->setText(QString::number(m_confFirmware.uartId(), 16));
 	
 	theLog.writeMessage(tr("File %1 was loaded.").arg(fileName));
 
-	theLog.writeMessage(tr("Name: %1").arg(m_reader.name()));
-	theLog.writeMessage(tr("Changeset: %1").arg(m_reader.changeset()));
-	theLog.writeMessage(tr("Template: %1").arg(m_reader.fileName()));
-	theLog.writeMessage(tr("UartID: %1h").arg(QString::number(m_reader.uartID(), 16)));
-	theLog.writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_reader.minFrameSize())));
-	theLog.writeMessage(tr("FrameCount: %1").arg(QString::number(m_reader.framesCount())));
+    theLog.writeMessage(tr("Name: %1").arg(m_confFirmware.name()));
+    //theLog.writeMessage(tr("Changeset: %1").arg(m_confFirmware.changeset()));
+    theLog.writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
+    theLog.writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
+    theLog.writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
 
 	return;
 }

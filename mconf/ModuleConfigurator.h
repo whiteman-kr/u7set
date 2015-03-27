@@ -3,7 +3,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_moduleconfigurator.h"
-#include "../include/ConfigData.h"
+#include "../include/ModuleConfiguration.h"
 #include "../include/OutputLog.h"
 #include "Settings.h"
 
@@ -11,6 +11,8 @@ class QLineEdit;
 class QPushButton;
 class QTextEdit;
 class Configurator;
+
+using namespace Hardware;
 
 class ModuleConfigurator : public QMainWindow
 {
@@ -36,14 +38,14 @@ private slots:
 	void disableControls();
 	void enableControls();
 
-	void communicationReadFinished(int protocolVersion, std::vector<uint8_t> data);
+    void communicationReadFinished(int protocolVersion, std::vector<char> data);
 
 signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo);
 	
 	void readConfiguration(int);
 	void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2);
-	void writeConfData(ConfigDataReader conf);
+    void writeConfData(ModuleConfFirmware* conf);
 	void eraseFlashMemory(int);
 	
 private:

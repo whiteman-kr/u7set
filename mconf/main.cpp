@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "ModuleConfigurator.h"
-#include "../include/ConfigData.h"
+//#include "../include/ConfigData.h"
 #include <QtWidgets/QApplication>
 
 OutputLog theLog;
@@ -13,7 +13,8 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationDomain("radiy.com");
 	QCoreApplication::setApplicationName("ModuleConfigurator");
 
-	qRegisterMetaType<ConfigDataReader>();
+    //qRegisterMetaType<ModuleConfFirmware>();
+    qRegisterMetaType<std::vector<char>>();
 
 	ModuleConfigurator w;
 	w.show();
