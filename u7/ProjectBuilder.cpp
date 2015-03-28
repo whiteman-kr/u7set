@@ -21,6 +21,9 @@ void BuildWorkerThread::run()
 	else
 	{
 		m_log->writeMessage(tr("RELEASE Building started"), true);
+		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		m_log->writeError(tr("RELEASE BUILD IS UNDER CONSTRACTION!"), true);
+		return;
 	}
 
 	bool ok = false;
@@ -187,24 +190,26 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	std::vector<DbFileInfo> files;
 
-	bool ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+	bool ok = false;
+
+	// Get file list with checked out files,
+	// if this is release build, specific copies will be fetched later
+	//
+	ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
 
 	if (ok == false)
 	{
+		m_log->writeError(tr("Cannot get equipment file list"));
 		return false;
 	}
 
-	if (debug() == true)
+	if (release() == true)
 	{
-		for (const auto& f : files)
-		{
-			if (f.state() != VcsState::CheckedIn)
-			{
-				m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()));
-
-				break;
-			}
-		}
+		// filter some files, which are not checkedin?
+		assert(false);
+	}
+	else
+	{
 	}
 
 	parent->deleteAllChildren();
@@ -213,7 +218,7 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 	{
 		std::shared_ptr<DbFile> file;
 
-		if (debug() == true)
+		if (release() == true)
 		{
 			assert(false);
 		}
@@ -224,6 +229,7 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 		if (file == false || ok == false)
 		{
+			m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()));
 			return false;
 		}
 
@@ -294,9 +300,17 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 
 	// Get script file from the project databse
 	//
+	bool ok = false;
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = db->getFileList(&fileList, db->mcFileId(), "ModulesConfigurations.descr", nullptr);
+	if (release() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		ok = db->getFileList(&fileList, db->mcFileId(), "ModulesConfigurations.descr", nullptr);
+	}
 
 	if (ok == false || fileList.size() != 1)
 	{
@@ -306,7 +320,14 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 
 	std::shared_ptr<DbFile> scriptFile;
 
-	ok = db->getLatestVersion(fileList[0], &scriptFile, nullptr);
+	if (release() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		ok = db->getLatestVersion(fileList[0], &scriptFile, nullptr);
+	}
 
 	if (ok == false || scriptFile == false)
 	{
@@ -363,11 +384,18 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 
     // Save confCollection items to binary files
 	//
-    if (confCollection.save(projectName(), projectUserName()) == false)
-    {
-        m_log->writeError(tr("Failed to save module configuration binary files!"));
-        return false;
-    }
+	if (release() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		if (confCollection.save(projectName(), projectUserName()) == false)
+		{
+			m_log->writeError(tr("Failed to save module configuration binary files!"));
+			return false;
+		}
+	}
 
 	return true;
 }
