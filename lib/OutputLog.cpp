@@ -38,12 +38,33 @@ void OutputLog::clear()
 
 void OutputLog::write(const QString& str, OutputMessageLevel level, bool bold)
 {
+#ifdef _DEBUG
+	QString strLevel;
+	switch (level)
+	{
+	case OutputMessageLevel::Message:
+		strLevel = "Message";
+		break;
+	case OutputMessageLevel::Success:
+		strLevel = "Success";
+		break;
+	case OutputMessageLevel::Warning:
+		strLevel = "Warning";
+		break;
+	case OutputMessageLevel::Error:
+		strLevel = "Error";
+		break;
+	default:
+		assert(false);
+	}
+	qDebug() << QString("%1: %2").arg(strLevel).arg(str);
+#endif
+
 	QMutexLocker locker(&mutex);
 
 	QDateTime time = QDateTime::currentDateTime();
 
 	windowMessageList.push_back(OutputLogItem(str, level, bold, time));
-	//fileMessageList.push_back(OutputLogItem(str, level, time));
 	
 	return;
 }

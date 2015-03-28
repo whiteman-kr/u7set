@@ -450,8 +450,21 @@ bool BuildWorkerThread::applicationLogic(DbController* db)
 		return true;
 	}
 
-	// --
+	// Compile application logic
 	//
+	m_log->writeMessage(tr("Compiling..."));
+
+	for (std::shared_ptr<VFrame30::LogicScheme> scheme : schemes)
+	{
+		m_log->writeMessage(scheme->caption());
+
+		ok = compileApplicationLogicScheme(scheme.get());
+
+		if (ok == false)
+		{
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -534,6 +547,61 @@ bool BuildWorkerThread::loadApplicationLogicFiles(DbController* db, std::vector<
 
 	return true;
 }
+
+bool BuildWorkerThread::compileApplicationLogicScheme(VFrame30::LogicScheme* logicScheme)
+{
+	if (logicScheme == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	// --
+	logicScheme->BuildFblConnectionMap();
+
+	// Find layer for compilation
+	//
+	bool layerFound = false;
+	bool ok = false;
+
+	for (std::shared_ptr<VFrame30::SchemeLayer> l : logicScheme->Layers)
+	{
+		if (l->compile() == true)
+		{
+			layerFound = true;
+			ok = compileApplicationLogiclayer(logicScheme, l.get());
+
+			if (ok == false)
+			{
+				return false;
+			}
+		}
+	}
+
+	if (layerFound == false)
+	{
+		m_log->writeError(tr("There is no compile layer in the scheme."));
+		return false;
+	}
+
+	return true;
+}
+
+bool BuildWorkerThread::compileApplicationLogiclayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer)
+{
+	if (logicScheme == nullptr || layer == nullptr)
+	{
+		assert(logicScheme);
+		assert(layer);
+		return false;
+	}
+
+
+
+	return true;
+}
+
+
 
 QString BuildWorkerThread::projectName() const
 {

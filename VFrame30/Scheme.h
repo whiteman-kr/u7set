@@ -81,7 +81,7 @@ namespace VFrame30
 		void setUnit(SchemeUnit value);
 
 		const Afbl::AfbElementCollection& afbCollection() const;
-		void setAfbCollection(const std::vector<std::shared_ptr<Afbl::AfbElement> >& elements);
+		void setAfbCollection(const std::vector<std::shared_ptr<Afbl::AfbElement>>& elements);
 		
 	public:
 		std::vector<std::shared_ptr<SchemeLayer>> Layers;

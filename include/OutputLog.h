@@ -1,7 +1,7 @@
 #pragma once
 #include <QObject>
 
-enum OutputMessageLevel
+enum class OutputMessageLevel
 {
 	Message,
 	Success,
