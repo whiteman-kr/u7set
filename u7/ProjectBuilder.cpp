@@ -3,6 +3,7 @@
 #include "../include/DbController.h"
 #include "../include/OutputLog.h"
 #include "../include/DeviceObject.h"
+#include "../VFrame30/LogicScheme.h"
 
 #include <QThread>
 
@@ -85,7 +86,7 @@ void BuildWorkerThread::run()
 		// Get Equipment from the database
 		//
 		m_log->writeMessage("");
-		m_log->writeMessage(tr("Getting equipment"));
+		m_log->writeMessage(tr("Getting equipment"), true);
 
 		Hardware::DeviceRoot deviceRoot;
 		int rootFileId = db.hcFileId();
@@ -106,14 +107,14 @@ void BuildWorkerThread::run()
 		}
 		else
 		{
-			m_log->writeMessage(tr("Ok"));
+			m_log->writeSuccess(tr("Ok"), true);
 		}
 
 		//
 		// Expand Devices StrId
 		//
 		m_log->writeMessage("");
-		m_log->writeMessage(tr("Expanding devices StrIds"));
+		m_log->writeMessage(tr("Expanding devices StrIds"), true);
 
 		expandDeviceStrId(&deviceRoot);
 
@@ -123,7 +124,7 @@ void BuildWorkerThread::run()
 		// Generate Module Confuiguration Binary File
 		//
 		m_log->writeMessage("");
-		m_log->writeMessage(tr("Generating modules configurations"));
+		m_log->writeMessage(tr("Generating modules configurations"), true);
 
 		ok = generateModulesConfigurations(&db, &deviceRoot);
 
@@ -140,9 +141,33 @@ void BuildWorkerThread::run()
 		}
 		else
 		{
-			m_log->writeMessage(tr("Ok"));
+			m_log->writeSuccess(tr("Ok"), true);
 		}
 
+
+		//
+		// Compile application logic
+		//
+		m_log->writeMessage("");
+		m_log->writeMessage(tr("Application Ligic compilation"), true);
+
+		ok = applicationLogic(&db);
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			break;
+		}
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("Error"), true);
+			QThread::currentThread()->requestInterruption();
+			break;
+		}
+		else
+		{
+			m_log->writeSuccess(tr("Ok"), true);
+		}
 	}
 	while (false);
 
@@ -395,6 +420,116 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 			m_log->writeError(tr("Failed to save module configuration binary files!"));
 			return false;
 		}
+	}
+
+	return true;
+}
+
+bool BuildWorkerThread::applicationLogic(DbController* db)
+{
+	if (db == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	// Get Application Logic
+	//
+	std::vector<std::shared_ptr<VFrame30::LogicScheme>> schemes;
+
+	bool ok = loadApplicationLogicFiles(db, &schemes);
+
+	if (ok == false)
+	{
+		return ok;
+	}
+
+	if (schemes.empty() == true)
+	{
+		m_log->writeMessage(tr("There is no appliction logic files in the project."));
+		return true;
+	}
+
+	// --
+	//
+
+	return true;
+}
+
+bool BuildWorkerThread::loadApplicationLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	out->clear();
+
+	// Get application logic file list from the DB
+	//
+	bool ok = false;
+	std::vector<DbFileInfo> applicationLogicFileList;
+
+	if (release() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		ok = db->getFileList(&applicationLogicFileList, db->alFileId(), "%.als", nullptr);
+	}
+
+	if (ok == false)
+	{
+		m_log->writeError(tr("Cannot get application logic file list."));
+		return false;
+	}
+
+	if (applicationLogicFileList.empty() == true)
+	{
+		return true;		// it is not a error
+	}
+
+	out->reserve(applicationLogicFileList.size());
+
+	// Get file data and read it
+	//
+	for (DbFileInfo& fi : applicationLogicFileList)
+	{
+		m_log->writeMessage(tr("Loading %1").arg(fi.fileName()));
+
+		std::shared_ptr<DbFile> file;
+
+		if (release() == true)
+		{
+			assert(false);			// get specific files
+		}
+		else
+		{
+			ok = db->getLatestVersion(fi, &file, false);
+		}
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("Cannot get application logic file instances."), true);
+			return false;
+		}
+
+		// Read Appliaction logic files
+		//
+		std::shared_ptr<VFrame30::LogicScheme> ls(dynamic_cast<VFrame30::LogicScheme*>(VFrame30::Scheme::Create(file.get()->data())));
+
+		if (ls == nullptr)
+		{
+			assert(ls != nullptr);
+			m_log->writeError(tr("File loading error."), true);
+			return false;
+		}
+
+		// Add LogicScheme to result
+		//
+		out->push_back(ls);
 	}
 
 	return true;

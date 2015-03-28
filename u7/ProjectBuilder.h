@@ -11,6 +11,11 @@ namespace Hardware
 	class McFirmwareOld;
 }
 
+namespace VFrame30
+{
+	class LogicScheme;
+}
+
 class BuildWorkerThread : public QThread
 {
 	Q_OBJECT
@@ -29,6 +34,11 @@ private:
 	// Generate Modules Configurations Firmwares
 	//
 	bool generateModulesConfigurations(DbController* db, Hardware::DeviceObject* root);
+
+	// Compile Application Logic
+	//
+	bool applicationLogic(DbController* db);
+	bool loadApplicationLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out);
 
 	// What's the next compilation task?
 	//
