@@ -130,16 +130,16 @@ void BuildTabPage::writeOutputLog(const OutputLogItem& logItem)
 	QString color;
 	switch (logItem.level)
 	{
-	case Message:
+	case OutputMessageLevel::Message:
 		color = "black";
 		break;
-	case Success:
+	case OutputMessageLevel::Success:
 		color = "green";
 		break;
-	case Warning:
+	case OutputMessageLevel::Warning:
 		color = "orange";
 		break;
-	case Error:
+	case OutputMessageLevel::Error:
 		color = "red";
 		break;
 
