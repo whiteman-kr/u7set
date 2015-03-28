@@ -38,7 +38,7 @@ private slots:
 	void disableControls();
 	void enableControls();
 
-    void communicationReadFinished(int protocolVersion, std::vector<char> data);
+    void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
 signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo);

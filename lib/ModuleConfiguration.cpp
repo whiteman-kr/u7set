@@ -295,6 +295,18 @@ namespace Hardware
         return true;
     }
 
+    std::vector<quint8> ModuleConfFirmware::frame(int frameIndex)
+    {
+        if (frameIndex < 0 || frameIndex >= frameCount())
+        {
+            Q_ASSERT(false);
+            return std::vector<quint8>();
+        }
+
+        return m_frames[frameIndex];
+    }
+
+
     QString ModuleConfFirmware::type() const
     {
         return m_type;

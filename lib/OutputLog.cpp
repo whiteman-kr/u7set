@@ -89,26 +89,26 @@ void OutputLog::writeError(const QString& str, bool bold)
 	return write(str, Error, bold);
 }
 
-void OutputLog::writeDump(const std::vector<char>& /*data*/)
+void OutputLog::writeDump(const std::vector<quint8>& data)
 {
-//	QString dataString;
+    QString dataString;
 	
-//	for (unsigned int i = 0 ; i < data.size(); i++)
-//	{
-//		if (i % 32 == 0 && i != 0)
-//		{
-//			theLog.writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
-//			dataString.clear();
-//		}
+    for (unsigned int i = 0 ; i < data.size(); i++)
+    {
+        if (i % 32 == 0 && i != 0)
+        {
+            theLog.writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
+            dataString.clear();
+        }
 
-//		dataString += (i %16 ? " " : " ' ")  + QString().setNum(data[i], 16).rightJustified(2, '0');
+        dataString += (i %16 ? " " : " ' ")  + QString().setNum(data[i], 16).rightJustified(2, '0');
 
-//		if (i == data.size() - 1 && i % 32 > 0)	// last iteration
-//		{
-//			theLog.writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
-//			dataString.clear();
-//		}
-//	}
+        if (i == data.size() - 1 && i % 32 > 0)	// last iteration
+        {
+            theLog.writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
+            dataString.clear();
+        }
+    }
 }
 
 bool OutputLog::windowMessageListEmpty() const

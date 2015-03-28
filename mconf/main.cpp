@@ -5,6 +5,8 @@
 
 OutputLog theLog;
 
+Q_DECLARE_METATYPE(std::vector<quint8>)
+
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
@@ -13,8 +15,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationDomain("radiy.com");
 	QCoreApplication::setApplicationName("ModuleConfigurator");
 
-    //qRegisterMetaType<ModuleConfFirmware>();
-    qRegisterMetaType<std::vector<char>>();
+    qRegisterMetaType<std::vector<quint8>>();
 
 	ModuleConfigurator w;
 	w.show();
@@ -22,3 +23,4 @@ int main(int argc, char *argv[])
 	
 	return result;
 }
+
