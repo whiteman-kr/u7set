@@ -117,7 +117,8 @@ SOURCES +=\
     ProjectBuilder.cpp \
     ../lib/DbProgress.cpp \
     FileListView.cpp \
-    ../lib/Crc.cpp
+    ../lib/Crc.cpp \
+    DialogFileEditor.cpp
 
 
 HEADERS  += \
@@ -177,7 +178,8 @@ HEADERS  += \
     ../include/DbProgress.h \
     FileListView.h \
     version.h \
-    ../include/Crc.h
+    ../include/Crc.h \
+    DialogFileEditor.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -192,7 +194,8 @@ FORMS    += \
     DialogAfblEditor.ui \
     DialogAfbProperties.ui \
     SchemeItemPropertiesDialog.ui \
-    SchemePropertiesDialog.ui
+    SchemePropertiesDialog.ui \
+    DialogFileEditor.ui
 
 RESOURCES += \
 	Resources.qrc
