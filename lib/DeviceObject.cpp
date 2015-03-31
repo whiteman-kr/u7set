@@ -433,10 +433,12 @@ namespace Hardware
 		//
 		QList<QByteArray> dynamicProps = dynamicPropertyNames();
 
+		m_avoidEventRecursion = true;
 		for (const QByteArray& p : dynamicProps)
 		{
 			setProperty(QString(p).toStdString().c_str(), QVariant());
 		}
+		m_avoidEventRecursion = false;
 
 		// Parse struct (rows, divided by semicolon) and create new properties
 		//
@@ -469,6 +471,11 @@ namespace Hardware
 
 		for (const QString& r : rows)
 		{
+			if (r.isEmpty() == true)
+			{
+				continue;
+			}
+
 			QStringList columns = r.split(';');
 
 			if (columns.count() != 5)
@@ -615,7 +622,11 @@ namespace Hardware
 
 			if (it != m_dynamicProperties.end() && (*it).value().type() == p.value().type())
 			{
-				p.setValue((*it).value().type());
+				p.setValue((*it).value());
+			}
+			else
+			{
+				p.setValue(p.defaultValue());		// Completely new property
 			}
 		}
 
@@ -623,10 +634,12 @@ namespace Hardware
 		//
 		m_dynamicProperties.clear();
 
+		m_avoidEventRecursion = true;
 		for (DynamicProperty& p : parsedProperties)
 		{
 			this->setProperty(p.name_c_str(), p.value());
 		}
+		m_avoidEventRecursion = false;
 
 		m_dynamicProperties.swap(parsedProperties);
 		return;
