@@ -10,6 +10,24 @@ function(root, confCollection, log, signalSet)
 {
     log.writeMessage("Start LogicModuleConfiguration");
 
+
+
+    var signal = signalSet.getSignalByDeviceStrID("DEV001");
+
+    if (signal == null)    
+    {
+        log.writeMessage("Object not found!");
+    }
+    else
+    {
+        log.writeMessage("Object found! Caption = " + signal.name());
+    }
+
+
+
+
+
+
     var result = true;
 
     result = module_lm_1(root, confCollection, log);
@@ -110,9 +128,9 @@ function generate_lm_1_rev3(module, confCollection, log)
 
     // EXAMPLES                  
     // To write byte to specific frame
-    setData8(confFirmware, log, 0, 1016, 0x88);
-    setData16(confFirmware, log, 0, 1015, 0x9129);
-    setData32(confFirmware, log, 0, 1013, 0xA123456A);
+    setData8(confFirmware, log, 0, 1015, 0x88);
+    setData16(confFirmware, log, 0, 1014, 0x9129);
+    setData32(confFirmware, log, 0, 1012, 0xA123456A);
 
     // Create I/O Modules configuration (Frames 2..15)
     //
@@ -169,7 +187,7 @@ function generate_lm_1_rev3(module, confCollection, log)
         setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 40);           //Quantity of words
         ptr += 2;
         //reserved
-        ptr += 1008;
+        ptr += /*1008*/1000;
         storeCrc64(confFirmware, log, txRxOptoStartFrame + i, 0, ptr, ptr);  //CRC-64
         ptr += 8;
     }
@@ -185,7 +203,7 @@ function generate_lm_1_rev3(module, confCollection, log)
         //setData16(confFirmware, log, lanStartFrame + i, ptr, 10);      //LAN configuration
         ptr += 62;
         //reserved
-        ptr += 954;
+        ptr += /*954*/946;
         storeCrc64(confFirmware, log, lanStartFrame + i, 0, ptr, ptr);   //CRC-64
         ptr += 8;
     }
