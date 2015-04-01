@@ -1,6 +1,8 @@
 #ifndef PROJECTBUILDER_H
 #define PROJECTBUILDER_H
 
+#include "../include/Signal.h"
+
 class QThread;
 class OutputLog;
 class DbController;
@@ -87,6 +89,31 @@ private:
 	bool m_onlyCheckedIn = true;		// Don't get workcopy of checked out files, use unly checked in copy
 
 	OutputLog* m_log;					// Probably it's better to make it as shared_ptr
+};
+
+class SignalSetObject : public QObject
+{
+	Q_OBJECT
+
+	friend BuildWorkerThread;
+
+private:
+	SignalSet m_signalSet;
+
+	SignalSet* getSignalSet() { return &m_signalSet; }
+
+public:
+	Q_INVOKABLE Signal getSignalByDeviceStrID(QString deviceStrID)
+	{
+		for (int i = 0; i < m_signalSet.count(); i++)
+		{
+			if (m_signalSet[i].deviceStrID() == deviceStrID)
+			{
+				return m_signalSet[i];
+			}
+		}
+		return Signal();
+	}
 };
 
 class ProjectBuilder : public QObject

@@ -7,7 +7,7 @@ var ModuleType = 4;
 var ControllerType = 5;
 var DiagSignalType = 6;
 
-function(root, confCollection, log)
+function(root, confCollection, log, signalSet)
 {
     log.writeMessage("Start LogicModuleConfiguration");
 

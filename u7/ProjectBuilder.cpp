@@ -272,6 +272,11 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 	QJSValue jsLog = jsEngine.newQObject(m_log);
 	QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
+	SignalSetObject signalSetObject;
+	db->getSignals(signalSetObject.getSignalSet(), nullptr);
+	QJSValue jsSignalSet = jsEngine.newQObject(&signalSetObject);
+	QQmlEngine::setObjectOwnership(&signalSetObject, QQmlEngine::CppOwnership);
+
 	QJSValue jsRoot = jsEngine.newQObject(root);
 	QQmlEngine::setObjectOwnership(root, QQmlEngine::CppOwnership);
 
@@ -294,6 +299,7 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 	args << jsRoot;
 	args << jsConfCollection;
 	args << jsLog;
+	args << jsSignalSet;
 
 	QJSValue jsResult = jsEval.call(args);
 
