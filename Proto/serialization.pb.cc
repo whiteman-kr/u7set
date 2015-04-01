@@ -134,9 +134,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* DeviceController_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   DeviceController_reflection_ = NULL;
-const ::google::protobuf::Descriptor* DeviceDiagSignal_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* DeviceSignal_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  DeviceDiagSignal_reflection_ = NULL;
+  DeviceSignal_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Workstation_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Workstation_reflection_ = NULL;
@@ -735,7 +735,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, chassis_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, module_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, controller_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, diagsignal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, signal_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, workstation_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, software_),
   };
@@ -839,20 +839,21 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceController));
-  DeviceDiagSignal_descriptor_ = file->message_type(38);
-  static const int DeviceDiagSignal_offsets_[1] = {
+  DeviceSignal_descriptor_ = file->message_type(38);
+  static const int DeviceSignal_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, type_),
   };
-  DeviceDiagSignal_reflection_ =
+  DeviceSignal_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      DeviceDiagSignal_descriptor_,
-      DeviceDiagSignal::default_instance_,
-      DeviceDiagSignal_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceDiagSignal, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceDiagSignal, _unknown_fields_),
+      DeviceSignal_descriptor_,
+      DeviceSignal::default_instance_,
+      DeviceSignal_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(DeviceDiagSignal));
+      sizeof(DeviceSignal));
   Workstation_descriptor_ = file->message_type(39);
   static const int Workstation_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Workstation, type_),
@@ -1025,7 +1026,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DeviceController_descriptor_, &DeviceController::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    DeviceDiagSignal_descriptor_, &DeviceDiagSignal::default_instance());
+    DeviceSignal_descriptor_, &DeviceSignal::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Workstation_descriptor_, &Workstation::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1117,8 +1118,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete DeviceModule_reflection_;
   delete DeviceController::default_instance_;
   delete DeviceController_reflection_;
-  delete DeviceDiagSignal::default_instance_;
-  delete DeviceDiagSignal_reflection_;
+  delete DeviceSignal::default_instance_;
+  delete DeviceSignal_reflection_;
   delete Workstation::default_instance_;
   delete Workstation_reflection_;
   delete Software::default_instance_;
@@ -1239,7 +1240,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ItemOutputSignal\"\017\n\rVideoItemLink\"[\n\023Vid"
     "eoItemFblElement\022\034\n\007afbGuid\030\001 \002(\0132\013.Prot"
     "o.Uuid\022&\n\006params\030\002 \003(\0132\026.Proto.FblElemen"
-    "tParam\"\234\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013."
+    "tParam\"\224\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013."
     "Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstrin"
     "g\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022(\n\020ch"
     "ildRestriction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005"
@@ -1252,28 +1253,28 @@ void protobuf_AddDesc_serialization_2eproto() {
     "em\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007C"
     "hassis\030g \001(\0132\024.Proto.DeviceChassis\022#\n\006Mo"
     "dule\030h \001(\0132\023.Proto.DeviceModule\022+\n\nContr"
-    "oller\030i \001(\0132\027.Proto.DeviceController\022+\n\n"
-    "DiagSignal\030j \001(\0132\027.Proto.DeviceDiagSigna"
-    "l\022\'\n\013Workstation\030k \001(\0132\022.Proto.Workstati"
-    "on\022!\n\010Software\030l \001(\0132\017.Proto.Software\"\014\n"
-    "\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRac"
-    "k\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"]\n\014D"
-    "eviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tConfInde"
-    "x\030\002 \001(\005:\0010\022\022\n\010ConfName\030\003 \001(\t:\000\022\022\n\010ConfTy"
-    "pe\030\004 \001(\t:\000\"\022\n\020DeviceController\"\022\n\020Device"
-    "DiagSignal\"\036\n\013Workstation\022\017\n\004type\030\001 \001(\005:"
-    "\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023Modul"
-    "eConfiguration\022\032\n\022struct_description\030\001 \001"
-    "(\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleConfigu"
-    "rationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleCon"
-    "figurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002"
-    " \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030"
-    "\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n\nMill"
-    "imeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrecti"
-    "on\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalTy"
-    "pe\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014FblParam"
-    "Type\022\022\n\016AnalogIntegral\020\000\022\027\n\023AnalogFloati"
-    "ngPoint\020\001\022\021\n\rDiscreteValue\020\002", 5428);
+    "oller\030i \001(\0132\027.Proto.DeviceController\022#\n\006"
+    "Signal\030j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Wor"
+    "kstation\030k \001(\0132\022.Proto.Workstation\022!\n\010So"
+    "ftware\030l \001(\0132\017.Proto.Software\"\014\n\nDeviceR"
+    "oot\"\016\n\014DeviceSystem\"\014\n\nDeviceRack\" \n\rDev"
+    "iceChassis\022\017\n\004type\030\001 \001(\005:\0010\"]\n\014DeviceMod"
+    "ule\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tConfIndex\030\002 \001(\005:"
+    "\0010\022\022\n\010ConfName\030\003 \001(\t:\000\022\022\n\010ConfType\030\004 \001(\t"
+    ":\000\"\022\n\020DeviceController\"\037\n\014DeviceSignal\022\017"
+    "\n\004type\030\001 \001(\005:\0010\"\036\n\013Workstation\022\017\n\004type\030\001"
+    " \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023"
+    "ModuleConfiguration\022\032\n\022struct_descriptio"
+    "n\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleCo"
+    "nfigurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030Modu"
+    "leConfigurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005va"
+    "lue\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005v"
+    "alue\030\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n"
+    "\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDir"
+    "rection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSig"
+    "nalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014Fbl"
+    "ParamType\022\022\n\016AnalogIntegral\020\000\022\027\n\023AnalogF"
+    "loatingPoint\020\001\022\021\n\rDiscreteValue\020\002", 5433);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -1314,7 +1315,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   DeviceChassis::default_instance_ = new DeviceChassis();
   DeviceModule::default_instance_ = new DeviceModule();
   DeviceController::default_instance_ = new DeviceController();
-  DeviceDiagSignal::default_instance_ = new DeviceDiagSignal();
+  DeviceSignal::default_instance_ = new DeviceSignal();
   Workstation::default_instance_ = new Workstation();
   Software::default_instance_ = new Software();
   ModuleConfiguration::default_instance_ = new ModuleConfiguration();
@@ -1358,7 +1359,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   DeviceChassis::default_instance_->InitAsDefaultInstance();
   DeviceModule::default_instance_->InitAsDefaultInstance();
   DeviceController::default_instance_->InitAsDefaultInstance();
-  DeviceDiagSignal::default_instance_->InitAsDefaultInstance();
+  DeviceSignal::default_instance_->InitAsDefaultInstance();
   Workstation::default_instance_->InitAsDefaultInstance();
   Software::default_instance_->InitAsDefaultInstance();
   ModuleConfiguration::default_instance_->InitAsDefaultInstance();
@@ -11767,7 +11768,7 @@ const int DeviceObject::kRackFieldNumber;
 const int DeviceObject::kChassisFieldNumber;
 const int DeviceObject::kModuleFieldNumber;
 const int DeviceObject::kControllerFieldNumber;
-const int DeviceObject::kDiagSignalFieldNumber;
+const int DeviceObject::kSignalFieldNumber;
 const int DeviceObject::kWorkstationFieldNumber;
 const int DeviceObject::kSoftwareFieldNumber;
 #endif  // !_MSC_VER
@@ -11789,7 +11790,7 @@ void DeviceObject::InitAsDefaultInstance() {
   chassis_ = const_cast< ::Proto::DeviceChassis*>(&::Proto::DeviceChassis::default_instance());
   module_ = const_cast< ::Proto::DeviceModule*>(&::Proto::DeviceModule::default_instance());
   controller_ = const_cast< ::Proto::DeviceController*>(&::Proto::DeviceController::default_instance());
-  diagsignal_ = const_cast< ::Proto::DeviceDiagSignal*>(&::Proto::DeviceDiagSignal::default_instance());
+  signal_ = const_cast< ::Proto::DeviceSignal*>(&::Proto::DeviceSignal::default_instance());
   workstation_ = const_cast< ::Proto::Workstation*>(&::Proto::Workstation::default_instance());
   software_ = const_cast< ::Proto::Software*>(&::Proto::Software::default_instance());
 }
@@ -11817,7 +11818,7 @@ void DeviceObject::SharedCtor() {
   chassis_ = NULL;
   module_ = NULL;
   controller_ = NULL;
-  diagsignal_ = NULL;
+  signal_ = NULL;
   workstation_ = NULL;
   software_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -11843,7 +11844,7 @@ void DeviceObject::SharedDtor() {
     delete chassis_;
     delete module_;
     delete controller_;
-    delete diagsignal_;
+    delete signal_;
     delete workstation_;
     delete software_;
   }
@@ -11917,8 +11918,8 @@ void DeviceObject::Clear() {
     }
   }
   if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    if (has_diagsignal()) {
-      if (diagsignal_ != NULL) diagsignal_->::Proto::DeviceDiagSignal::Clear();
+    if (has_signal()) {
+      if (signal_ != NULL) signal_->::Proto::DeviceSignal::Clear();
     }
     if (has_workstation()) {
       if (workstation_ != NULL) workstation_->::Proto::Workstation::Clear();
@@ -12167,17 +12168,17 @@ bool DeviceObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(850)) goto parse_DiagSignal;
+        if (input->ExpectTag(850)) goto parse_Signal;
         break;
       }
 
-      // optional .Proto.DeviceDiagSignal DiagSignal = 106;
+      // optional .Proto.DeviceSignal Signal = 106;
       case 106: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_DiagSignal:
+         parse_Signal:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_diagsignal()));
+               input, mutable_signal()));
         } else {
           goto handle_uninterpreted;
         }
@@ -12327,10 +12328,10 @@ void DeviceObject::SerializeWithCachedSizes(
       105, this->controller(), output);
   }
 
-  // optional .Proto.DeviceDiagSignal DiagSignal = 106;
-  if (has_diagsignal()) {
+  // optional .Proto.DeviceSignal Signal = 106;
+  if (has_signal()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      106, this->diagsignal(), output);
+      106, this->signal(), output);
   }
 
   // optional .Proto.Workstation Workstation = 107;
@@ -12462,11 +12463,11 @@ void DeviceObject::SerializeWithCachedSizes(
         105, this->controller(), target);
   }
 
-  // optional .Proto.DeviceDiagSignal DiagSignal = 106;
-  if (has_diagsignal()) {
+  // optional .Proto.DeviceSignal Signal = 106;
+  if (has_signal()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        106, this->diagsignal(), target);
+        106, this->signal(), target);
   }
 
   // optional .Proto.Workstation Workstation = 107;
@@ -12599,11 +12600,11 @@ int DeviceObject::ByteSize() const {
 
   }
   if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    // optional .Proto.DeviceDiagSignal DiagSignal = 106;
-    if (has_diagsignal()) {
+    // optional .Proto.DeviceSignal Signal = 106;
+    if (has_signal()) {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->diagsignal());
+          this->signal());
     }
 
     // optional .Proto.Workstation Workstation = 107;
@@ -12705,8 +12706,8 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
     }
   }
   if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    if (from.has_diagsignal()) {
-      mutable_diagsignal()->::Proto::DeviceDiagSignal::MergeFrom(from.diagsignal());
+    if (from.has_signal()) {
+      mutable_signal()->::Proto::DeviceSignal::MergeFrom(from.signal());
     }
     if (from.has_workstation()) {
       mutable_workstation()->::Proto::Workstation::MergeFrom(from.workstation());
@@ -12772,7 +12773,7 @@ void DeviceObject::Swap(DeviceObject* other) {
     std::swap(chassis_, other->chassis_);
     std::swap(module_, other->module_);
     std::swap(controller_, other->controller_);
-    std::swap(diagsignal_, other->diagsignal_);
+    std::swap(signal_, other->signal_);
     std::swap(workstation_, other->workstation_);
     std::swap(software_, other->software_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
@@ -13987,88 +13988,124 @@ void DeviceController::Swap(DeviceController* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int DeviceSignal::kTypeFieldNumber;
 #endif  // !_MSC_VER
 
-DeviceDiagSignal::DeviceDiagSignal()
+DeviceSignal::DeviceSignal()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void DeviceDiagSignal::InitAsDefaultInstance() {
+void DeviceSignal::InitAsDefaultInstance() {
 }
 
-DeviceDiagSignal::DeviceDiagSignal(const DeviceDiagSignal& from)
+DeviceSignal::DeviceSignal(const DeviceSignal& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void DeviceDiagSignal::SharedCtor() {
+void DeviceSignal::SharedCtor() {
   _cached_size_ = 0;
+  type_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-DeviceDiagSignal::~DeviceDiagSignal() {
+DeviceSignal::~DeviceSignal() {
   SharedDtor();
 }
 
-void DeviceDiagSignal::SharedDtor() {
+void DeviceSignal::SharedDtor() {
   if (this != default_instance_) {
   }
 }
 
-void DeviceDiagSignal::SetCachedSize(int size) const {
+void DeviceSignal::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* DeviceDiagSignal::descriptor() {
+const ::google::protobuf::Descriptor* DeviceSignal::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return DeviceDiagSignal_descriptor_;
+  return DeviceSignal_descriptor_;
 }
 
-const DeviceDiagSignal& DeviceDiagSignal::default_instance() {
+const DeviceSignal& DeviceSignal::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
   return *default_instance_;
 }
 
-DeviceDiagSignal* DeviceDiagSignal::default_instance_ = NULL;
+DeviceSignal* DeviceSignal::default_instance_ = NULL;
 
-DeviceDiagSignal* DeviceDiagSignal::New() const {
-  return new DeviceDiagSignal;
+DeviceSignal* DeviceSignal::New() const {
+  return new DeviceSignal;
 }
 
-void DeviceDiagSignal::Clear() {
+void DeviceSignal::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    type_ = 0;
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
-bool DeviceDiagSignal::MergePartialFromCodedStream(
+bool DeviceSignal::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 type = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &type_)));
+          set_has_type();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
     }
-    DO_(::google::protobuf::internal::WireFormat::SkipField(
-          input, tag, mutable_unknown_fields()));
   }
   return true;
 #undef DO_
 }
 
-void DeviceDiagSignal::SerializeWithCachedSizes(
+void DeviceSignal::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 type = 1 [default = 0];
+  if (has_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->type(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
 }
 
-::google::protobuf::uint8* DeviceDiagSignal::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* DeviceSignal::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // optional int32 type = 1 [default = 0];
+  if (has_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->type(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -14076,9 +14113,18 @@ void DeviceDiagSignal::SerializeWithCachedSizes(
   return target;
 }
 
-int DeviceDiagSignal::ByteSize() const {
+int DeviceSignal::ByteSize() const {
   int total_size = 0;
 
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 type = 1 [default = 0];
+    if (has_type()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->type());
+    }
+
+  }
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -14090,10 +14136,10 @@ int DeviceDiagSignal::ByteSize() const {
   return total_size;
 }
 
-void DeviceDiagSignal::MergeFrom(const ::google::protobuf::Message& from) {
+void DeviceSignal::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const DeviceDiagSignal* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const DeviceDiagSignal*>(
+  const DeviceSignal* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const DeviceSignal*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -14102,40 +14148,47 @@ void DeviceDiagSignal::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void DeviceDiagSignal::MergeFrom(const DeviceDiagSignal& from) {
+void DeviceSignal::MergeFrom(const DeviceSignal& from) {
   GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_type()) {
+      set_type(from.type());
+    }
+  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void DeviceDiagSignal::CopyFrom(const ::google::protobuf::Message& from) {
+void DeviceSignal::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceDiagSignal::CopyFrom(const DeviceDiagSignal& from) {
+void DeviceSignal::CopyFrom(const DeviceSignal& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceDiagSignal::IsInitialized() const {
+bool DeviceSignal::IsInitialized() const {
 
   return true;
 }
 
-void DeviceDiagSignal::Swap(DeviceDiagSignal* other) {
+void DeviceSignal::Swap(DeviceSignal* other) {
   if (other != this) {
+    std::swap(type_, other->type_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
 }
 
-::google::protobuf::Metadata DeviceDiagSignal::GetMetadata() const {
+::google::protobuf::Metadata DeviceSignal::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = DeviceDiagSignal_descriptor_;
-  metadata.reflection = DeviceDiagSignal_reflection_;
+  metadata.descriptor = DeviceSignal_descriptor_;
+  metadata.reflection = DeviceSignal_reflection_;
   return metadata;
 }
 

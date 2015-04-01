@@ -114,6 +114,7 @@ public slots:
 	void addChassis();
 	void addModule();
 	void addController();
+	void addSignal();
 	void addWorkstation();
 	void addSoftware();
 
@@ -196,6 +197,7 @@ private:
 		QAction* m_addRackAction = nullptr;
 		QAction* m_addChassisAction = nullptr;
 		QAction* m_addModuleAction = nullptr;
+		QAction* m_addSignalAction = nullptr;
 		QAction* m_addWorkstationAction = nullptr;
 		QAction* m_addSoftwareAction = nullptr;
 

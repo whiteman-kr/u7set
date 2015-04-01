@@ -72,7 +72,7 @@ class DeviceRack;
 class DeviceChassis;
 class DeviceModule;
 class DeviceController;
-class DeviceDiagSignal;
+class DeviceSignal;
 class Workstation;
 class Software;
 class ModuleConfiguration;
@@ -3919,14 +3919,14 @@ class DeviceObject : public ::google::protobuf::Message {
   inline ::Proto::DeviceController* release_controller();
   inline void set_allocated_controller(::Proto::DeviceController* controller);
 
-  // optional .Proto.DeviceDiagSignal DiagSignal = 106;
-  inline bool has_diagsignal() const;
-  inline void clear_diagsignal();
-  static const int kDiagSignalFieldNumber = 106;
-  inline const ::Proto::DeviceDiagSignal& diagsignal() const;
-  inline ::Proto::DeviceDiagSignal* mutable_diagsignal();
-  inline ::Proto::DeviceDiagSignal* release_diagsignal();
-  inline void set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal);
+  // optional .Proto.DeviceSignal Signal = 106;
+  inline bool has_signal() const;
+  inline void clear_signal();
+  static const int kSignalFieldNumber = 106;
+  inline const ::Proto::DeviceSignal& signal() const;
+  inline ::Proto::DeviceSignal* mutable_signal();
+  inline ::Proto::DeviceSignal* release_signal();
+  inline void set_allocated_signal(::Proto::DeviceSignal* signal);
 
   // optional .Proto.Workstation Workstation = 107;
   inline bool has_workstation() const;
@@ -3978,8 +3978,8 @@ class DeviceObject : public ::google::protobuf::Message {
   inline void clear_has_module();
   inline void set_has_controller();
   inline void clear_has_controller();
-  inline void set_has_diagsignal();
-  inline void clear_has_diagsignal();
+  inline void set_has_signal();
+  inline void clear_has_signal();
   inline void set_has_workstation();
   inline void clear_has_workstation();
   inline void set_has_software();
@@ -4003,7 +4003,7 @@ class DeviceObject : public ::google::protobuf::Message {
   ::Proto::DeviceChassis* chassis_;
   ::Proto::DeviceModule* module_;
   ::Proto::DeviceController* controller_;
-  ::Proto::DeviceDiagSignal* diagsignal_;
+  ::Proto::DeviceSignal* signal_;
   ::Proto::Workstation* workstation_;
   ::Proto::Software* software_;
 
@@ -4511,14 +4511,14 @@ class DeviceController : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class DeviceDiagSignal : public ::google::protobuf::Message {
+class DeviceSignal : public ::google::protobuf::Message {
  public:
-  DeviceDiagSignal();
-  virtual ~DeviceDiagSignal();
+  DeviceSignal();
+  virtual ~DeviceSignal();
 
-  DeviceDiagSignal(const DeviceDiagSignal& from);
+  DeviceSignal(const DeviceSignal& from);
 
-  inline DeviceDiagSignal& operator=(const DeviceDiagSignal& from) {
+  inline DeviceSignal& operator=(const DeviceSignal& from) {
     CopyFrom(from);
     return *this;
   }
@@ -4532,17 +4532,17 @@ class DeviceDiagSignal : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const DeviceDiagSignal& default_instance();
+  static const DeviceSignal& default_instance();
 
-  void Swap(DeviceDiagSignal* other);
+  void Swap(DeviceSignal* other);
 
   // implements Message ----------------------------------------------
 
-  DeviceDiagSignal* New() const;
+  DeviceSignal* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const DeviceDiagSignal& from);
-  void MergeFrom(const DeviceDiagSignal& from);
+  void CopyFrom(const DeviceSignal& from);
+  void MergeFrom(const DeviceSignal& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -4565,21 +4565,31 @@ class DeviceDiagSignal : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceDiagSignal)
+  // optional int32 type = 1 [default = 0];
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
  private:
+  inline void set_has_type();
+  inline void clear_has_type();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::google::protobuf::int32 type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[1];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static DeviceDiagSignal* default_instance_;
+  static DeviceSignal* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -9384,41 +9394,41 @@ inline void DeviceObject::set_allocated_controller(::Proto::DeviceController* co
   }
 }
 
-// optional .Proto.DeviceDiagSignal DiagSignal = 106;
-inline bool DeviceObject::has_diagsignal() const {
+// optional .Proto.DeviceSignal Signal = 106;
+inline bool DeviceObject::has_signal() const {
   return (_has_bits_[0] & 0x00010000u) != 0;
 }
-inline void DeviceObject::set_has_diagsignal() {
+inline void DeviceObject::set_has_signal() {
   _has_bits_[0] |= 0x00010000u;
 }
-inline void DeviceObject::clear_has_diagsignal() {
+inline void DeviceObject::clear_has_signal() {
   _has_bits_[0] &= ~0x00010000u;
 }
-inline void DeviceObject::clear_diagsignal() {
-  if (diagsignal_ != NULL) diagsignal_->::Proto::DeviceDiagSignal::Clear();
-  clear_has_diagsignal();
+inline void DeviceObject::clear_signal() {
+  if (signal_ != NULL) signal_->::Proto::DeviceSignal::Clear();
+  clear_has_signal();
 }
-inline const ::Proto::DeviceDiagSignal& DeviceObject::diagsignal() const {
-  return diagsignal_ != NULL ? *diagsignal_ : *default_instance_->diagsignal_;
+inline const ::Proto::DeviceSignal& DeviceObject::signal() const {
+  return signal_ != NULL ? *signal_ : *default_instance_->signal_;
 }
-inline ::Proto::DeviceDiagSignal* DeviceObject::mutable_diagsignal() {
-  set_has_diagsignal();
-  if (diagsignal_ == NULL) diagsignal_ = new ::Proto::DeviceDiagSignal;
-  return diagsignal_;
+inline ::Proto::DeviceSignal* DeviceObject::mutable_signal() {
+  set_has_signal();
+  if (signal_ == NULL) signal_ = new ::Proto::DeviceSignal;
+  return signal_;
 }
-inline ::Proto::DeviceDiagSignal* DeviceObject::release_diagsignal() {
-  clear_has_diagsignal();
-  ::Proto::DeviceDiagSignal* temp = diagsignal_;
-  diagsignal_ = NULL;
+inline ::Proto::DeviceSignal* DeviceObject::release_signal() {
+  clear_has_signal();
+  ::Proto::DeviceSignal* temp = signal_;
+  signal_ = NULL;
   return temp;
 }
-inline void DeviceObject::set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal) {
-  delete diagsignal_;
-  diagsignal_ = diagsignal;
-  if (diagsignal) {
-    set_has_diagsignal();
+inline void DeviceObject::set_allocated_signal(::Proto::DeviceSignal* signal) {
+  delete signal_;
+  signal_ = signal;
+  if (signal) {
+    set_has_signal();
   } else {
-    clear_has_diagsignal();
+    clear_has_signal();
   }
 }
 
@@ -9730,7 +9740,29 @@ inline void DeviceModule::set_allocated_conftype(::std::string* conftype) {
 
 // -------------------------------------------------------------------
 
-// DeviceDiagSignal
+// DeviceSignal
+
+// optional int32 type = 1 [default = 0];
+inline bool DeviceSignal::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void DeviceSignal::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void DeviceSignal::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void DeviceSignal::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 DeviceSignal::type() const {
+  return type_;
+}
+inline void DeviceSignal::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
 
 // -------------------------------------------------------------------
 
