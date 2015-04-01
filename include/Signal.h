@@ -102,8 +102,10 @@ typedef OrderedHash<int, QString> DataFormatList;
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
-class Signal
+class Signal : public QObject
 {
+	Q_OBJECT
+
 private:
 	// Signal fields from database
 	//
@@ -169,6 +171,16 @@ private:
 	void setInstanceAction(InstanceAction action) { m_instanceAction = action; }
 
 public:
+	Signal();
+
+	Signal(const Signal& signal)
+		:QObject()
+	{
+		*this = signal;
+	}
+
+	Signal& operator = (const Signal& signal);
+
 	int ID() const { return m_ID; }
 	int signalGroupID() const { return m_signalGroupID; }
 	int signalInstanceID() const { return m_signalInstanceID; }

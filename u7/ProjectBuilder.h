@@ -115,16 +115,16 @@ private:
 	SignalSet* getSignalSet() { return &m_signalSet; }
 
 public:
-	Q_INVOKABLE Signal getSignalByDeviceStrID(QString deviceStrID)
+	Q_INVOKABLE Signal* getSignalByDeviceStrID(QString deviceStrID)
 	{
 		for (int i = 0; i < m_signalSet.count(); i++)
 		{
 			if (m_signalSet[i].deviceStrID() == deviceStrID)
 			{
-				return m_signalSet[i];
+				return &m_signalSet[i];
 			}
 		}
-		return Signal();
+		return nullptr;
 	}
 };
 
