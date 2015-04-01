@@ -226,20 +226,23 @@ OTHER_FILES += \
 	DatabaseUpgrade/Upgrade0019.sql \
 	DatabaseUpgrade/Upgrade0020.sql \
 	DatabaseUpgrade/Upgrade0021.sql \
-    DatabaseUpgrade/Upgrade0022.sql \
-    DatabaseUpgrade/Upgrade0023.sql \
-    DatabaseUpgrade/Upgrade0024.sql \
-	DatabaseUpgrade/Upgrade0025.sql \
-    DatabaseUpgrade/Upgrade0026.sql \
-    DatabaseUpgrade/Upgrade0027.sql \
-    DatabaseUpgrade/Upgrade0028.sql \
-    DatabaseUpgrade/Upgrade0029.sql \
-    DatabaseUpgrade/Upgrade0030.sql \
-    DatabaseUpgrade/Upgrade0031.sql \
-	DatabaseUpgrade/Upgrade0032.sql \
-    Tools/afbschema.xsd \
-    ../Proto/proto_compile.sh
+        DatabaseUpgrade/Upgrade0022.sql \
+        DatabaseUpgrade/Upgrade0023.sql \
+        DatabaseUpgrade/Upgrade0024.sql \
+        DatabaseUpgrade/Upgrade0025.sql \
+        DatabaseUpgrade/Upgrade0026.sql \
+        DatabaseUpgrade/Upgrade0027.sql \
+        DatabaseUpgrade/Upgrade0028.sql \
+        DatabaseUpgrade/Upgrade0029.sql \
+        DatabaseUpgrade/Upgrade0030.sql \
+        DatabaseUpgrade/Upgrade0031.sql \
+        DatabaseUpgrade/Upgrade0032.sql \
+        DatabaseUpgrade/Upgrade0033.sql \
+        Tools/afbschema.xsd \
+        ../Proto/proto_compile.sh
 
+DISTFILES += \
+    LogicModuleConfiguration.js
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
@@ -326,6 +329,4 @@ win32 {
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
 
-DISTFILES += \
-    LogicModuleConfiguration.js
 
