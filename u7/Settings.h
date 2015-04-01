@@ -73,6 +73,11 @@ public:
     QPoint m_abflPropertiesWindowPos;
     QByteArray m_abflPropertiesWindowGeometry;
 
+    // Text Editor options
+    //
+    QPoint m_DialogTextEditorWindowPos;
+    QByteArray m_DialogTextEditorWindowGeometry;
+
 	// Property Editor Options
 	//
 	QPoint m_multiLinePropertyEditorWindowPos;

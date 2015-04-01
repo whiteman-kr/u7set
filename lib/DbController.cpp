@@ -65,6 +65,9 @@ DbController::DbController() :
 	connect(this, &DbController::signal_undoSignalChanges, m_worker, &DbWorker::slot_undoSignalChanges);
 	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
 
+	connect(this, &DbController::signal_isAnyCheckedOut, m_worker, &DbWorker::slot_isAnyCheckedOut);
+	connect(this, &DbController::signal_lastChangesetId, m_worker, &DbWorker::slot_lastChangesetId);
+
 	m_thread.start();
 }
 
@@ -1301,6 +1304,54 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 	return ok;
 }
 
+bool DbController::isAnyCheckedOut(bool* result)
+{
+	if (result == nullptr)
+	{
+		assert(result != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_isAnyCheckedOut(result);
+
+	ok = waitForComplete(nullptr, tr("Is Any Checked Out?"));
+
+	return ok;
+}
+
+bool DbController::lastChangesetId(int* result)
+{
+	if (result == nullptr)
+	{
+		assert(result != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_lastChangesetId(result);
+
+	ok = waitForComplete(nullptr, tr("Getting last ChangesetId"));
+
+	return ok;
+
+}
 
 bool DbController::getUserList(std::vector<DbUser>* out, QWidget* parentWidget)
 {
@@ -1475,6 +1526,11 @@ int DbController::hcFileId() const
 int DbController::hpFileId() const
 {
 	return m_worker->hpFileId();
+}
+
+int DbController::mcFileId() const
+{
+	return m_worker->mcFileId();
 }
 
 int DbController::wvsFileId() const

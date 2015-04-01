@@ -3,7 +3,9 @@
 
 #include <QWidget>
 #include "ui_applicationtabpage.h"
-#include "../include/ConfigData.h"
+#include "../include/ModuleConfiguration.h"
+
+using namespace Hardware;
 
 class ApplicationTabPage : public QWidget
 {
@@ -14,14 +16,15 @@ public:
 	~ApplicationTabPage();
 
 	bool isFileLoaded() const;
-	const ConfigDataReader& configuration() const;
+    Hardware::ModuleConfFirmware* configuration();
 
 protected slots:
 	void openFileClicked();
 
 private:
 	Ui::ApplicationTabPage ui;
-	ConfigDataReader m_reader;
+    //ConfigDataReader m_reader;
+    ModuleConfFirmware m_confFirmware;
 };
 
 #endif // APPLICATIONTABPAGE_H

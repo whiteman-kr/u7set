@@ -32,7 +32,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	m_pLog->document()->setUndoRedoEnabled(false);
 	m_pLog->document()->setMaximumBlockCount(600);
 	
-	
+
 	// Read data from module button
 	//
 	m_pReadButton = new QPushButton(tr("&Read"));
@@ -448,7 +448,7 @@ void ModuleConfigurator::enableControls()
 	m_pClearLogButton->setEnabled(true);
 }
 
-void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vector<uint8_t> data)
+void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vector<quint8> data)
 {
 	// Read diag info, like factory no, crc, etc
 	//

@@ -1,4 +1,5 @@
 #include "FilesTabPage.h"
+#include "DialogFileEditor.h"
 #include "CheckInDialog.h"
 #include "../include/DbController.h"
 
@@ -787,6 +788,73 @@ void FileTreeView::addFile()
 	return;
 }
 
+void FileTreeView::editFile()
+{
+    QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+    if (selectedIndexList.isEmpty() == true)
+    {
+        return;
+    }
+
+    std::vector<DbFileInfo> files;
+    files.reserve(static_cast<size_t>(selectedIndexList.size()));
+
+    for (QModelIndex& mi : selectedIndexList)
+    {
+        if (mi.parent().isValid() == false)
+        {
+            // Forbid any actions to root items
+            //
+            continue;
+        }
+
+        FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+        assert(f);
+
+        if (f->state() == VcsState::CheckedOut &&
+            (db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
+        {
+            files.push_back(*f);
+        }
+    }
+
+    if (files.size() != 1)
+    {
+        // Which file?
+        //
+        return;
+    }
+
+    auto fileInfo = files[0];
+
+
+    std::shared_ptr<DbFile> f;
+    if (db()->getLatestVersion(fileInfo, &f, this) == false)
+    {
+        QMessageBox::critical(this, "Error", "Get latest version error!");
+        return;
+    }
+
+    QByteArray data;
+    f->swapData(data);
+
+    DialogFileEditor d(fileInfo.fileName(), &data, db(), false);
+    if (d.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
+    f->swapData(data);
+
+    if (db()->setWorkcopy(f, this) == false)
+    {
+        QMessageBox::critical(this, "Error", "Set work copy error!");
+        return;
+    }
+
+}
+
 void FileTreeView::deleteFile()
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
@@ -1260,6 +1328,9 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
+    m_editableExtensions << tr("afb");
+    m_editableExtensions << tr("descr");
+
 	//
 	// Controls
 	//
@@ -1279,6 +1350,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// -----------------
 	m_fileView->addAction(m_addFileAction);
+    m_fileView->addAction(m_editFileAction);
 	m_fileView->addAction(m_deleteFileAction);
 
 	// -----------------
@@ -1339,7 +1411,12 @@ void FilesTabPage::createActions()
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, m_fileView, &FileTreeView::addFile);
 
-	m_deleteFileAction = new QAction(tr("Delete file"), this);
+    m_editFileAction = new QAction(tr("Edit file"), this);
+    m_editFileAction->setStatusTip(tr("Edit file..."));
+    m_editFileAction->setEnabled(false);
+    connect(m_editFileAction, &QAction::triggered, m_fileView, &FileTreeView::editFile);
+
+    m_deleteFileAction = new QAction(tr("Delete file"), this);
 	m_deleteFileAction->setStatusTip(tr("Delete file..."));
 	m_deleteFileAction->setEnabled(false);
 	connect(m_deleteFileAction, &QAction::triggered, m_fileView, &FileTreeView::deleteFile);
@@ -1395,6 +1472,7 @@ void FilesTabPage::setActionState()
 	// Disable all
 	//
 	m_addFileAction->setEnabled(false);
+    m_editFileAction->setEnabled(false);
 	m_deleteFileAction->setEnabled(false);
 	m_checkOutAction->setEnabled(false);
 	m_checkInAction->setEnabled(false);
@@ -1480,6 +1558,23 @@ void FilesTabPage::setActionState()
 
 	m_getLatestVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
 	m_setWorkcopyAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
+
+    // Enable edit only files with several extensions!
+    //
+    bool editableExtension = false;
+    for (const QModelIndex& mi : selectedIndexList)
+    {
+        const FileTreeModelItem* file = m_fileModel->fileItem(mi);
+        assert(file);
+
+        QString ext = QFileInfo(file->fileName()).suffix();
+        if (m_editableExtensions.contains(ext))
+        {
+            editableExtension = true;
+            break;
+        }
+    }
+    m_editFileAction->setEnabled(editableExtension && canAnyBeCheckedIn && selectedIndexList.size() == 1);
 
 	return;
 }

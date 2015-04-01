@@ -12,6 +12,8 @@
 #include <memory>
 #include <vector>
 #include <list>
+#include <map>
+#include <set>
 #include <algorithm>
 #include <functional>
 #include <type_traits>
@@ -57,6 +59,7 @@
 #include <QStatusBar>
 #include <QLabel>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QScrollArea>
 #include <QScrollBar>
 

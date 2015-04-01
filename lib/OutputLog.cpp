@@ -3,7 +3,7 @@
 
 
 OutputLogItem::OutputLogItem() :
-	level(Message),
+	level(OutputMessageLevel::Message),
 	bold(false)
 {		
 }
@@ -38,56 +38,77 @@ void OutputLog::clear()
 
 void OutputLog::write(const QString& str, OutputMessageLevel level, bool bold)
 {
+#ifdef _DEBUG
+	QString strLevel;
+	switch (level)
+	{
+	case OutputMessageLevel::Message:
+		strLevel = "Message";
+		break;
+	case OutputMessageLevel::Success:
+		strLevel = "Success";
+		break;
+	case OutputMessageLevel::Warning:
+		strLevel = "Warning";
+		break;
+	case OutputMessageLevel::Error:
+		strLevel = "Error";
+		break;
+	default:
+		assert(false);
+	}
+	qDebug() << QString("%1: %2").arg(strLevel).arg(str);
+#endif
+
 	QMutexLocker locker(&mutex);
 
 	QDateTime time = QDateTime::currentDateTime();
 
 	windowMessageList.push_back(OutputLogItem(str, level, bold, time));
-	//fileMessageList.push_back(OutputLogItem(str, level, time));
 	
 	return;
 }
 
 void OutputLog::writeMessage(const QString& str, bool bold)
 {
-	return write(str, Message, bold);
+	return write(str, OutputMessageLevel::Message, bold);
 }
 
 void OutputLog::writeSuccess(const QString& str, bool bold)
 {
-	return write(str, Success, bold);
+	return write(str, OutputMessageLevel::Success, bold);
 }
 
 void OutputLog::writeWarning(const QString& str, bool bold)
 {
-	return write(str, Warning, bold);
+	return write(str, OutputMessageLevel::Warning, bold);
 }
 
 void OutputLog::writeError(const QString& str, bool bold)
 {
-	return write(str, Error, bold);
+	return write(str, OutputMessageLevel::Error, bold);
 }
 
-void OutputLog::writeDump(const std::vector<char>& /*data*/)
+void OutputLog::writeDump(const std::vector<quint8>& data)
 {
-//	QString dataString;
+	QString dataString;
 	
-//	for (unsigned int i = 0 ; i < data.size(); i++)
-//	{
-//		if (i % 32 == 0 && i != 0)
-//		{
-//			theLog.writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
-//			dataString.clear();
-//		}
+	for (unsigned int i = 0 ; i < data.size(); i++)
+	{
+		if (i % 32 == 0 && i != 0)
+		{
+			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
+			dataString.clear();
+		}
 
-//		dataString += (i %16 ? " " : " ' ")  + QString().setNum(data[i], 16).rightJustified(2, '0');
+		dataString += (i %16 ? " " : " ' ")  + QString().setNum(data[i], 16).rightJustified(2, '0');
 
-//		if (i == data.size() - 1 && i % 32 > 0)	// last iteration
-//		{
-//			theLog.writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
-//			dataString.clear();
-//		}
-//	}
+		if (i == data.size() - 1 && i % 32 > 0)	// last iteration
+		{
+			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
+			dataString.clear();
+		}
+	}
 }
 
 bool OutputLog::windowMessageListEmpty() const

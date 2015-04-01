@@ -4,7 +4,12 @@
 #include "../include/OutputLog.h"
 #include "../include/DeviceObject.h"
 
+#include "../VFrame30/LogicScheme.h"
+#include "../VFrame30/VideoItemLink.h"
+#include "../VFrame30/HorzVertLinks.h"
+
 #include <QThread>
+#include <QUuid>
 
 
 void BuildWorkerThread::run()
@@ -12,15 +17,22 @@ void BuildWorkerThread::run()
 	QThread::currentThread()->setTerminationEnabled(true);
 
 	qDebug() << "Building started";
-	m_log->writeMessage("Building started");
 
-	if (onlyCheckedIn() == false)
+	if (debug() == true)
 	{
+		m_log->writeWarning(tr("DEBUG Building started"), true);
 		m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true);
 	}
+	else
+	{
+		m_log->writeMessage(tr("RELEASE Building started"), true);
+		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		m_log->writeError(tr("RELEASE BUILD IS UNDER CONSTRACTION!"), true);
+		return;
+	}
 
-	QString str;
 	bool ok = false;
+	QString str;
 
 	// Create database controller and open project
 	//
@@ -48,11 +60,37 @@ void BuildWorkerThread::run()
 
 	do
 	{
+		int lastChangesetId = 0;
+		ok = db.lastChangesetId(&lastChangesetId);
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("lastChangesetId Error."), true);
+			break;
+		}
+
+		bool isAnyCheckedOut = false;
+		ok = db.isAnyCheckedOut(&isAnyCheckedOut);
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("isAnyCheckedOut Error."), true);
+			QThread::currentThread()->requestInterruption();
+			break;
+		}
+
+		if (release() == true && isAnyCheckedOut == true)
+		{
+			m_log->writeError(tr("There are some checked out objects. Please check in all objects before building release version."), true);
+			QThread::currentThread()->requestInterruption();
+			break;
+		}
+
 		//
 		// Get Equipment from the database
 		//
 		m_log->writeMessage("");
-		m_log->writeMessage(tr("Getting equipment"));
+		m_log->writeMessage(tr("Getting equipment"), true);
 
 		Hardware::DeviceRoot deviceRoot;
 		int rootFileId = db.hcFileId();
@@ -68,28 +106,29 @@ void BuildWorkerThread::run()
 		if (ok == false)
 		{
 			m_log->writeError(tr("Error"), true);
+			QThread::currentThread()->requestInterruption();
 			break;
 		}
 		else
 		{
-			m_log->writeMessage(tr("Ok"));
+			m_log->writeSuccess(tr("Ok"), true);
 		}
 
 		//
 		// Expand Devices StrId
 		//
 		m_log->writeMessage("");
-		m_log->writeMessage(tr("Expanding devices StrIds"));
+		m_log->writeMessage(tr("Expanding devices StrIds"), true);
 
 		expandDeviceStrId(&deviceRoot);
 
-		m_log->writeMessage(tr("Ok"));
+		m_log->writeSuccess(tr("Ok"), true);
 
 		//
 		// Generate Module Confuiguration Binary File
 		//
 		m_log->writeMessage("");
-		m_log->writeMessage(tr("Generating modules configurations"));
+		m_log->writeMessage(tr("Generating modules configurations"), true);
 
 		ok = generateModulesConfigurations(&db, &deviceRoot);
 
@@ -101,13 +140,38 @@ void BuildWorkerThread::run()
 		if (ok == false)
 		{
 			m_log->writeError(tr("Error"), true);
+			QThread::currentThread()->requestInterruption();
 			break;
 		}
 		else
 		{
-			m_log->writeMessage(tr("Ok"));
+			m_log->writeSuccess(tr("Ok"), true);
 		}
 
+
+		//
+		// Compile application logic
+		//
+		m_log->writeMessage("");
+		m_log->writeMessage(tr("Application Ligic compilation"), true);
+
+		ok = applicationLogic(&db);
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			break;
+		}
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("Error"), true);
+			QThread::currentThread()->requestInterruption();
+			break;
+		}
+		else
+		{
+			m_log->writeSuccess(tr("Ok"), true);
+		}
 	}
 	while (false);
 
@@ -157,18 +221,24 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 	bool ok = false;
 
-	if (onlyCheckedIn() == true)
+	// Get file list with checked out files,
+	// if this is release build, specific copies will be fetched later
+	//
+	ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+
+	if (ok == false)
 	{
+		m_log->writeError(tr("Cannot get equipment file list"));
+		return false;
+	}
+
+	if (release() == true)
+	{
+		// filter some files, which are not checkedin?
 		assert(false);
 	}
 	else
 	{
-		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
-	}
-
-	if (ok == false)
-	{
-		return false;
 	}
 
 	parent->deleteAllChildren();
@@ -177,7 +247,7 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 	{
 		std::shared_ptr<DbFile> file;
 
-		if (onlyCheckedIn() == true)
+		if (release() == true)
 		{
 			assert(false);
 		}
@@ -188,6 +258,7 @@ bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* p
 
 		if (file == false || ok == false)
 		{
+			m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()));
 			return false;
 		}
 
@@ -248,22 +319,52 @@ bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
 
 bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware::DeviceObject* root)
 {
-	// !!! Read script from file, IT IS TEMPORARY, in future this script must be taken from the Project DB !!!!
-	//
-	m_log->writeWarning("Temoparary reading script from file, in future must be moved to DB!", true);
-
-	QString fileName = "LogicModuleConfiguration.js";
-	QFile scriptFile(fileName);
-
-	if (!scriptFile.open(QIODevice::ReadOnly))
+	if (db == nullptr || root == nullptr)
 	{
-		m_log->writeError(tr("Can't read file %1").arg(fileName));
+		assert(db);
+		assert(root);
+		m_log->writeError(tr("Fatal error, input parammeter is nullptr!"), true);
 		return false;
 	}
 
-	QTextStream stream(&scriptFile);
-	QString contents = stream.readAll();
-	scriptFile.close();
+	// Get script file from the project databse
+	//
+	bool ok = false;
+	std::vector<DbFileInfo> fileList;
+
+	if (release() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		ok = db->getFileList(&fileList, db->mcFileId(), "ModulesConfigurations.descr", nullptr);
+	}
+
+	if (ok == false || fileList.size() != 1)
+	{
+		m_log->writeError(tr("Can't get file list and find Module Configuration description file"), true);
+		return false;
+	}
+
+	std::shared_ptr<DbFile> scriptFile;
+
+	if (release() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		ok = db->getLatestVersion(fileList[0], &scriptFile, nullptr);
+	}
+
+	if (ok == false || scriptFile == false)
+	{
+		m_log->writeError(tr("Can't get Module Configuration description file"), true);
+		return false;
+	}
+
+	QString contents = QString::fromLocal8Bit(scriptFile->data());
 
 	// Attach objects
 	//
@@ -287,7 +388,7 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 
 	// Run script
 	//
-	QJSValue jsEval = jsEngine.evaluate(contents, fileName);
+	QJSValue jsEval = jsEngine.evaluate(contents, "ModulesConfigurations.descr");
     if (jsEval.isError() == true)
     {
         m_log->writeError(tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()));
@@ -318,116 +419,309 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 
     // Save confCollection items to binary files
 	//
-    if (confCollection.save(projectName(), projectUserName()) == false)
-    {
-        m_log->writeError(tr("Failed to save module configuration binary files!"));
-        return false;
-    }
-
+	if (release() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		if (confCollection.save(projectName(), projectUserName()) == false)
+		{
+			m_log->writeError(tr("Failed to save module configuration binary files!"));
+			return false;
+		}
+	}
 
 	return true;
-
-	/*std::map<QString, std::shared_ptr<Hardware::McFirmware>> firmwares;
-
-	bool ok = generateModulesConfigurations(db, root, &firmwares);
-*/
-	//return ok;
 }
 
-bool BuildWorkerThread::generateModulesConfigurations(
-		DbController* db,
-		const Hardware::DeviceObject* parent,
-		std::map<QString, std::shared_ptr<Hardware::McFirmwareOld>>* firmwares)
+bool BuildWorkerThread::applicationLogic(DbController* db)
 {
-	assert(db != nullptr);
-	assert(db->isProjectOpened() == true);
-	assert(parent != nullptr);
-	assert(parent->deviceType() < Hardware::DeviceType::Module);
-	assert(firmwares != nullptr);
-
-	if (QThread::currentThread()->isInterruptionRequested() == true)
+	if (db == nullptr)
 	{
+		assert(false);
 		return false;
 	}
 
-	if (parent->deviceType() == Hardware::DeviceType::System)
+	// Get Application Logic
+	//
+	std::vector<std::shared_ptr<VFrame30::LogicScheme>> schemes;
+
+	bool ok = loadApplicationLogicFiles(db, &schemes);
+
+	if (ok == false)
 	{
-		m_log->writeMessage(tr("System %1...").arg(parent->caption()));
+		return ok;
 	}
 
-	for (int i = 0; i < parent->childrenCount(); i++)
+	if (schemes.empty() == true)
 	{
-		Hardware::DeviceObject* child = parent->child(i);
+		m_log->writeMessage(tr("There is no appliction logic files in the project."));
+		return true;
+	}
 
-		if (child->deviceType() > Hardware::DeviceType::Module)
+	// Compile application logic
+	//
+	m_log->writeMessage(tr("Compiling..."));
+
+	for (std::shared_ptr<VFrame30::LogicScheme> scheme : schemes)
+	{
+		m_log->writeMessage(scheme->caption());
+
+		ok = compileApplicationLogicScheme(scheme.get());
+
+		if (ok == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool BuildWorkerThread::loadApplicationLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	out->clear();
+
+	// Get application logic file list from the DB
+	//
+	bool ok = false;
+	std::vector<DbFileInfo> applicationLogicFileList;
+
+	if (release() == true)
+	{
+		assert(false);
+	}
+	else
+	{
+		ok = db->getFileList(&applicationLogicFileList, db->alFileId(), "%.als", nullptr);
+	}
+
+	if (ok == false)
+	{
+		m_log->writeError(tr("Cannot get application logic file list."));
+		return false;
+	}
+
+	if (applicationLogicFileList.empty() == true)
+	{
+		return true;		// it is not a error
+	}
+
+	out->reserve(applicationLogicFileList.size());
+
+	// Get file data and read it
+	//
+	for (DbFileInfo& fi : applicationLogicFileList)
+	{
+		m_log->writeMessage(tr("Loading %1").arg(fi.fileName()));
+
+		std::shared_ptr<DbFile> file;
+
+		if (release() == true)
+		{
+			assert(false);			// get specific files
+		}
+		else
+		{
+			ok = db->getLatestVersion(fi, &file, false);
+		}
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("Cannot get application logic file instances."), true);
+			return false;
+		}
+
+		// Read Appliaction logic files
+		//
+		std::shared_ptr<VFrame30::LogicScheme> ls(dynamic_cast<VFrame30::LogicScheme*>(VFrame30::Scheme::Create(file.get()->data())));
+
+		if (ls == nullptr)
+		{
+			assert(ls != nullptr);
+			m_log->writeError(tr("File loading error."), true);
+			return false;
+		}
+
+		// Add LogicScheme to result
+		//
+		out->push_back(ls);
+	}
+
+	return true;
+}
+
+bool BuildWorkerThread::compileApplicationLogicScheme(VFrame30::LogicScheme* logicScheme)
+{
+	if (logicScheme == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	// --
+	logicScheme->BuildFblConnectionMap();
+
+	// Find layer for compilation
+	//
+	bool layerFound = false;
+	bool ok = false;
+
+	for (std::shared_ptr<VFrame30::SchemeLayer> l : logicScheme->Layers)
+	{
+		qDebug() << Q_FUNC_INFO << " WARNING!!!! Compiling ALL layers, in future compile just l->compile() LAYER!!!!";
+
+		//if (l->compile() == true)
+		{
+			layerFound = true;
+			ok = compileApplicationLogiclayer(logicScheme, l.get());
+
+			if (ok == false)
+			{
+				return false;
+			}
+		}
+	}
+
+	if (layerFound == false)
+	{
+		m_log->writeError(tr("There is no compile layer in the scheme."));
+		return false;
+	}
+
+	return true;
+}
+
+bool BuildWorkerThread::compileApplicationLogiclayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer)
+{
+	if (logicScheme == nullptr || layer == nullptr)
+	{
+		assert(logicScheme);
+		assert(layer);
+		return false;
+	}
+
+	// Enum all links and get all horzlinks è vertlinks
+	//
+	VFrame30::CHorzVertLinks horzVertLinks;
+
+	for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
+	{
+		VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
+
+		if (link != nullptr)
+		{
+			const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+
+			if (pointList.size() < 2)
+			{
+				assert(pointList.size() >= 2);
+				continue;
+			}
+
+			// Decompose link on different parts and put them to horzlinks and vertlinks
+			//
+			horzVertLinks.AddLinks(pointList, link->guid());
+		}
+	}
+
+	// Enum all vert and horz links and compose branches
+	//
+	std::list<std::set<QUuid>> branches;	// This list contains full branches
+
+	for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
+	{
+		VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
+
+		if (link == nullptr)
 		{
 			continue;
 		}
 
-//		if (child->deviceType() < Hardware::DeviceType::Module)
+		const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+
+		if (pointList.size() < 2)
+		{
+			assert(pointList.size() >= 2);
+			continue;
+		}
+
+		// Check if end points on some link
+		//
+		std::list<QUuid> videoItemsUnderFrontPoint = horzVertLinks.getVideoItemsUnderPoint(pointList.front(), link->guid());
+		std::list<QUuid> videoItemsUnderBackPoint = horzVertLinks.getVideoItemsUnderPoint(pointList.back(), link->guid());
+
+		// Find item branch, if branch does not exists, make a new brach
+		//
+		auto foundBranch = std::find_if(branches.begin(), branches.end(),
+			[link](const std::set<QUuid>& b)
+			{
+				auto foundBranch = b.find(link->guid());
+				return foundBranch != b.end();
+			});
+
+		if (foundBranch == branches.end())
+		{
+			std::set<QUuid> newBranch;
+			newBranch.insert(link->guid());
+
+			branches.push_front(newBranch);
+
+			foundBranch = branches.begin();
+		}
+
+		// Add to foundBranch everything from  videoItemsUnderFrontPoint, videoItemsUnderBackPoint
+		//
+		for (QUuid& q : videoItemsUnderFrontPoint)
+		{
+			foundBranch->insert(q);
+		}
+
+		for (QUuid& q : videoItemsUnderBackPoint)
+		{
+			foundBranch->insert(q);
+		}
+	}
+
+	// branches can contain same items,
+	// all such branches must be united
+	//
+
+	// Brutforce algorithm
+	//
+//	for (auto& b = branches.begin(); b != branches.end(); ++b)
+//	{
+
+
+//		qDebug() << "--";
+//		for (const QUuid& q : b)
 //		{
-//			generateModulesConfigurations(db, child);
-//			continue;
+//			qDebug() << q;
 //		}
+//	}
 
-//		// This is Module, if it has configuration process it.
-//		//
-//		assert(child->deviceType() == Hardware::DeviceType::Module);
-
-//		Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
-//		assert(module != nullptr);
-
-//		if (module->moduleConfiguration().hasConfiguration() == false)
-//		{
-//			// Module does not have configuration, process the next child;
-//			//
-//			continue;
-//		}
-
-//		// Get the firmware by it's name or create new if it does not exists
-//		//
-//		const Hardware::ModuleConfiguration& moduleConfiguration = module->moduleConfiguration();
-
-//		QString confFileName = module->confFirmwareName();
-//		std::shared_ptr<Hardware::McFirmware> firmware;
-
-//		try
-//		{
-//			firmware = firmwares->at(confFileName);
-//		}
-//		catch(std::out_of_range)
-//		{
-//			firmware = std::make_shared<Hardware::McFirmware>();
-
-//			firmware->setName(confFileName);
-//			firmware->setUartId(moduleConfiguration.uartId());
-
-//			firmwares->insert(std::make_pair(confFileName, firmware));
-//		}
-
-//		QString error;
-
-//		// Compile configuration to firmware
-//		//
-//		qDebug() << module->strId();
-
-//		bool ok = module->compileConfiguration(firmware.get(), &error);
-
-//		if (ok == false)
-//		{
-//			// Somthing went wrong.
-//			//
-//			m_log->writeError(error, false);
-//			m_log->writeError(tr("Device StrId: %1, caption: %2, place: %3")
-//							  .arg(module->strId())
-//							  .arg(module->caption())
-//							  .arg(module->place()), false);
-//			return false;
-//		}
+	// DEBUG
+	//
+	for (std::set<QUuid>& b : branches)
+	{
+		qDebug() << "--";
+		for (const QUuid& q : b)
+		{
+			qDebug() << q;
+		}
 	}
 
 	return true;
 }
+
+
 
 QString BuildWorkerThread::projectName() const
 {
@@ -519,16 +813,21 @@ void BuildWorkerThread::setProjectUserPassword(const QString& value)
 	m_projectUserPassword = value;
 }
 
-bool BuildWorkerThread::onlyCheckedIn() const
+bool BuildWorkerThread::debug() const
 {
-	return m_onlyCheckedIn;
-
+	return m_debug;
 }
 
-void BuildWorkerThread::setOnlyCheckedIn(bool value)
+void BuildWorkerThread::setDebug(bool value)
 {
-	m_onlyCheckedIn = value;
+	m_debug = value;
 }
+
+bool BuildWorkerThread::release() const
+{
+	return !m_debug;
+}
+
 
 ProjectBuilder::ProjectBuilder(OutputLog* log) :
 	m_log(log)
@@ -570,7 +869,7 @@ bool ProjectBuilder::start(QString projectName,
 						   QString serverPassword,
 						   QString projectUserName,
 						   QString projectUserPassword,
-						   bool onlyCheckedIn)
+						   bool debug)
 {
 	assert(m_thread != nullptr);
 
@@ -590,11 +889,12 @@ bool ProjectBuilder::start(QString projectName,
 	m_thread->setServerPassword(serverPassword);
 	m_thread->setProjectUserName(projectUserName);
 	m_thread->setProjectUserPassword(projectUserPassword);
-	m_thread->setOnlyCheckedIn(onlyCheckedIn);
+	m_thread->setDebug(debug);
 
 	// Ready? Go!
 	//
 	m_thread->start();
+
 	return true;
 }
 
@@ -612,4 +912,5 @@ bool ProjectBuilder::isRunning() const
 void ProjectBuilder::handleResults(QString /*result*/)
 {
 }
+
 

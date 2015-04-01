@@ -127,6 +127,11 @@ public slots:
 
 	void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
+	// Version Control
+	//
+	void slot_isAnyCheckedOut(bool* checkedOut);
+	void slot_lastChangesetId(int* lastChangesetId);
+
 	// Service
 	//
 	bool db_getUserData(QSqlDatabase db, int userId, DbUser* user);

@@ -1,9 +1,11 @@
 #include "Stable.h"
 #include "ModuleConfigurator.h"
-#include "../include/ConfigData.h"
+//#include "../include/ConfigData.h"
 #include <QtWidgets/QApplication>
 
 OutputLog theLog;
+
+Q_DECLARE_METATYPE(std::vector<quint8>)
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +15,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationDomain("radiy.com");
 	QCoreApplication::setApplicationName("ModuleConfigurator");
 
-	qRegisterMetaType<ConfigDataReader>();
+    qRegisterMetaType<std::vector<quint8>>();
 
 	ModuleConfigurator w;
 	w.show();
@@ -21,3 +23,4 @@ int main(int argc, char *argv[])
 	
 	return result;
 }
+

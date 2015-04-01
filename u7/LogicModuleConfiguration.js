@@ -1,4 +1,3 @@
-
 var RootType = 0;
 var SystemType = 1;
 var RackType = 2;
@@ -23,6 +22,42 @@ function(root, confCollection, log, signalSet)
     log.writeMessage("Finish LogicModuleConfiguration");
 
     return result;
+}
+
+function setData8(confFirmware, log, frameIndex, offset, data)
+{
+    if (confFirmware.setData8(frameIndex, offset, data) == false)
+    {
+        log.writeMessage("Error: SetData8, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
+        return false;
+    }
+}
+
+function setData16(confFirmware, log, frameIndex, offset, data)
+{
+    if (confFirmware.setData16(frameIndex, offset, data) == false)
+    {
+        log.writeMessage("Error: SetData16, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
+        return false;
+    }
+}
+
+function setData32(confFirmware, log, frameIndex, offset, data)
+{
+    if (confFirmware.setData32(frameIndex, offset, data) == false)
+    {
+        log.writeMessage("Error: SetData32, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
+        return false;
+    }
+}
+
+function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
+{
+    if (confFirmware.storeCrc64(frameIndex, start, count, offset) == false)
+    {
+        log.writeMessage("Error: StoreCrc64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
+        return false;
+    }
 }
 
 
@@ -64,20 +99,20 @@ function generate_lm_1_rev3(module, confCollection, log)
     //
     var confName = module.ConfName;
     var confIndex = module.ConfIndex;
-    var frameSize = 1024;
+    var frameSize = 1016;
     var frameCount = 22;                // Check it !!!!
     var uartId = 456;                   // Check it !!!!
 
-    var confFirmmware = confCollection.jsGet("LM-1", confName, uartId, frameSize, frameCount);
+    var confFirmware = confCollection.jsGet("LM-1", confName, uartId, frameSize, frameCount);
 
     // Generation
     //
 
     // EXAMPLES                  
     // To write byte to specific frame
-    //confFirmmware.setData8(0, 8, 0x88);
-    //confFirmmware.setData16(0, 9, 0x9129);
-    //confFirmmware.setData32(0, 11, 0xA123456A);
+    setData8(confFirmware, log, 0, 1016, 0x88);
+    setData16(confFirmware, log, 0, 1015, 0x9129);
+    setData32(confFirmware, log, 0, 1013, 0xA123456A);
 
     // Create I/O Modules configuration (Frames 2..15)
     //
@@ -100,19 +135,19 @@ function generate_lm_1_rev3(module, confCollection, log)
             
             if (ioModule.ConfType == "AIM")
             {
-                generate_aim(confFirmmware, ioModule, frame, log);
+                generate_aim(confFirmware, ioModule, frame, log);
             }
             if (ioModule.ConfType == "AIFM")
             {
-                generate_aifm(confFirmmware, ioModule, frame, log);
+                generate_aifm(confFirmware, ioModule, frame, log);
             }
             if (ioModule.ConfType == "AOM")
             {
-                generate_aom(confFirmmware, ioModule, frame, log);
+                generate_aom(confFirmware, ioModule, frame, log);
             }
             if (ioModule.ConfType == "OCM")
             {
-                generate_ocm(confFirmmware, ioModule, frame, log);
+                generate_ocm(confFirmware, ioModule, frame, log);
             }
         }
     }
@@ -125,17 +160,17 @@ function generate_lm_1_rev3(module, confCollection, log)
     for (var i = 0; i < txRxOptoCount; i++)
     {
         var ptr = 0;
-        confFirmmware.setData16(txRxOptoStartFrame + i, ptr, 10);       //Start address
+        setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 10);       //Start address
         ptr += 2;
-        confFirmmware.setData16(txRxOptoStartFrame + i, ptr, 20);           //Quantity of words
+        setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 20);           //Quantity of words
         ptr += 2;
-        confFirmmware.setData16(txRxOptoStartFrame + i, ptr, 30);           //Tx ID
+        setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 30);           //Tx ID
         ptr += 2;
-        confFirmmware.setData16(txRxOptoStartFrame + i, ptr, 40);           //Quantity of words
+        setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 40);           //Quantity of words
         ptr += 2;
         //reserved
         ptr += 1008;
-        confFirmmware.storeCrc64(txRxOptoStartFrame + i, 0, ptr, ptr);  //CRC-64
+        storeCrc64(confFirmware, log, txRxOptoStartFrame + i, 0, ptr, ptr);  //CRC-64
         ptr += 8;
     }
     
@@ -147,11 +182,11 @@ function generate_lm_1_rev3(module, confCollection, log)
     for (var i = 0; i < lanCount; i++)
     {
         var ptr = 0;
-        //confFirmmware.setData16(lanStartFrame + i, ptr, 10);      //LAN configuration
+        //setData16(confFirmware, log, lanStartFrame + i, ptr, 10);      //LAN configuration
         ptr += 62;
         //reserved
         ptr += 954;
-        confFirmmware.storeCrc64(lanStartFrame + i, 0, ptr, ptr);   //CRC-64
+        storeCrc64(confFirmware, log, lanStartFrame + i, 0, ptr, ptr);   //CRC-64
         ptr += 8;
     }
 
@@ -163,9 +198,9 @@ function generate_lm_1_rev3(module, confCollection, log)
 // frame - Number of frame to generate
 //
 //
-function generate_aim(confFirmmware, module, frame, log)
+function generate_aim(confFirmware, module, frame, log)
 {
-    log.writeMessage("AIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
 
     var ptr = 0;
 
@@ -174,7 +209,7 @@ function generate_aim(confFirmmware, module, frame, log)
     // i/o module data... 640 bytes
     ptr += 640;
     
-    confFirmmware.storeCrc64(frame, 0, ptr, ptr);   //CRC-64
+    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
     ptr += 8;
 
     //  Flags word
@@ -191,13 +226,13 @@ function generate_aim(confFirmmware, module, frame, log)
     if (dataReceiveEnableFlag == true)
         flags |= 4;
     
-    generate_txRxConfig(confFirmmware, frame, ptr, flags, log);
+    generate_txRxConfig(confFirmware, frame, ptr, flags, log);
     ptr += 12;
     
     //reserved
     ptr += 356;
 
-    confFirmmware.storeCrc64(frame, 0, ptr, ptr);   //CRC-64
+    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
     ptr += 8;
     
     return true;
@@ -208,9 +243,9 @@ function generate_aim(confFirmmware, module, frame, log)
 // frame - Number of frame to generate
 //
 //
-function generate_aifm(confFirmmware, module, frame, log)
+function generate_aifm(confFirmware, module, frame, log)
 {
-    log.writeMessage("AIFM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AIFM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
     return true;
 
 }
@@ -220,9 +255,9 @@ function generate_aifm(confFirmmware, module, frame, log)
 // frame - Number of frame to generate
 //
 //
-function generate_aom(confFirmmware, module, frame, log)
+function generate_aom(confFirmware, module, frame, log)
 {
-    log.writeMessage("AOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
     return true;
 
 }
@@ -232,26 +267,26 @@ function generate_aom(confFirmmware, module, frame, log)
 // frame - Number of frame to generate
 //
 //
-function generate_ocm(confFirmmware, module, frame, log)
+function generate_ocm(confFirmware, module, frame, log)
 {
-    log.writeMessage("AIFM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE OCM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
     return true;
 
 }
 
-function generate_txRxConfig(confFirmmware, frame, offset, flags, log)
+function generate_txRxConfig(confFirmware, frame, offset, flags, log)
 {
     // TxRx Block's configuration structure
     //
     var ptr = offset;
     
-    confFirmmware.setData16(frame, ptr, flags);     // Flags word
+    setData16(confFirmware, log, frame, ptr, flags);     // Flags word
     ptr += 2;
-    confFirmmware.setData16(frame, ptr, 24);        // Configuration words quantity
+    setData16(confFirmware, log, frame, ptr, 24);        // Configuration words quantity
     ptr += 2;
-    confFirmmware.setData16(frame, ptr, 24);        // Data words quantity
+    setData16(confFirmware, log, frame, ptr, 24);        // Data words quantity
     ptr += 2;
-    confFirmmware.setData16(frame, ptr, 24);        // Tx ID
+    setData16(confFirmware, log, frame, ptr, 24);        // Tx ID
     ptr += 2;
     
     return true;

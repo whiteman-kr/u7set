@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QSerialPort>
-#include "../include/ConfigData.h"
+#include "../include/ModuleConfiguration.h"
 
 class OutputLog;
 
@@ -43,6 +43,16 @@ struct Uuid
 	uint8_t data4[8];
 
 	QUuid toQUuid() const;
+
+    Uuid& operator = (const QUuid& uuid)
+    {
+        data1 = uuid.data1;
+        data2 = uuid.data2;
+        data3 = uuid.data3;
+        for (int i = 0; i < 8; i++)
+            data4[i] = uuid.data4[i];
+        return *this;
+    }
 };
 #pragma pack(pop)
 
@@ -53,7 +63,7 @@ struct Uuid
 struct CONF_HEADER_V1
 {
 	uint16_t version;				// Protocol version
-	uint16_t moduleUartId;			// Radiy’s ID of UART Interface ID Code
+    uint16_t moduleUartId;			// Radiys ID of UART Interface ID Code
 	uint16_t opcode;				// Command, set to ConfigureCommand::Nop
 	uint16_t flags;					// State flags
 	uint16_t frameIndex;			// Frame index
@@ -83,7 +93,7 @@ typedef CONF_HEADER_V1 CONF_HEADER;	// Current version (ProtocolMaxVersion) Head
 #pragma pack(push, 1)
 struct CONF_SERVICE_DATA_V1
 {
-	uint16_t m_moduleId;				// Radiy’s ID of UART Interface ID Code
+    uint16_t m_moduleId;				// Radiys ID of UART Interface ID Code
 	uint16_t m_diagVersion;					// Diagnostics version (NOT THIS STRUCT VERSION, STRUCT VERSION DEFINED TROUGH CONF_HEADER_V1::version)
 	uint32_t m_factoryNo;				// Factory No
 	uint16_t m_manufactureYear;			// Manufacturing date
@@ -176,6 +186,7 @@ struct CONF_IDENTIFICATION_DATA_V1
 
 typedef CONF_IDENTIFICATION_DATA_V1 CONF_IDENTIFICATION_DATA;	// Current version
 
+using namespace Hardware;
 
 //
 //	Configurator
@@ -192,7 +203,7 @@ protected:
 	bool openConnection();
 	bool closeConnection();
 
-	bool send(int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<char>& requestData, CONF_HEADER* pReceivedHeader, std::vector<char>* replyData);
+    bool send(int moduleUartId, ConfigureCommand opcode, uint16_t frameIndex, uint16_t blockSize, const std::vector<quint8>& requestData, CONF_HEADER* pReceivedHeader, std::vector<quint8>* replyData);
 
 //	HANDLE openConnection();
 //	bool closeConnection(HANDLE hDevice);
@@ -206,7 +217,7 @@ public slots:
 	void readConfiguration(int param);
 	void readConfigurationWorker(int param);
 	void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2);
-	void writeConfData(ConfigDataReader conf);
+    void writeConfData(ModuleConfFirmware* conf);
 	void eraseFlashMemory(int param);
 
 	// Signals
@@ -214,7 +225,7 @@ public slots:
 signals:
 	void communicationStarted();
 	void communicationFinished();
-	void communicationReadFinished(int protocolVersion, std::vector<uint8_t> data);
+    void communicationReadFinished(int protocolVersion, std::vector<quint8> data);
 
 	// Properties
 	//
@@ -232,9 +243,10 @@ private:
 	bool m_showDebugInfo = false;
 	uint32_t m_configuratorfactoryNo = 0;
 
-	QSerialPort serialPort;
+    QSerialPort *m_serialPort;
 
 	mutable QMutex mutex;			// m_device
 };
+
 
 #endif // CONFIGURATOR_H

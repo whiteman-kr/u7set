@@ -6,7 +6,7 @@ namespace VFrame30
 {
 	// Используется для сохранения декомпозированных Link'ов, в BuildFblConnectionMap
 	//
-	class CHorzVertLinks
+	class VFRAME30LIBSHARED_EXPORT CHorzVertLinks
 	{
 	public:
 		void AddLinks(const std::list<VideoItemPoint>& pointList, const QUuid& VideoItemGuid);
@@ -14,6 +14,10 @@ namespace VFrame30
 		// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 		//
 		bool IsPointOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid);
+
+		// Вернуть UUid элементов под точкой
+		//
+		std::list<QUuid> getVideoItemsUnderPoint(VideoItemPoint pt, QUuid VideoItemGuid);
 
 	public:
 		struct LINKS
