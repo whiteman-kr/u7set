@@ -221,7 +221,7 @@ namespace Hardware
 	bool ModuleConfFirmware::setData8(int frameIndex, int offset, quint8 data)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-			offset >= frameSize())
+            offset > frameSize() - sizeof(data))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -236,7 +236,7 @@ namespace Hardware
 	bool ModuleConfFirmware::setData16(int frameIndex, int offset, quint16 data)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-			offset >= frameSize())
+            offset > frameSize() - sizeof(data))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -251,7 +251,7 @@ namespace Hardware
 	bool ModuleConfFirmware::setData32(int frameIndex, int offset, quint32 data)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
-			offset >= frameSize())
+            offset > frameSize() - sizeof(data))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return false;
@@ -266,7 +266,7 @@ namespace Hardware
     bool ModuleConfFirmware::setData64(int frameIndex, int offset, quint64 data)
     {
         if (frameIndex >= static_cast<int>(m_frames.size()) ||
-            offset >= frameSize())
+            offset > frameSize() - sizeof(data))
         {
             qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
             return false;
@@ -281,7 +281,7 @@ namespace Hardware
     bool ModuleConfFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
     {
         if (frameIndex >= static_cast<int>(m_frames.size()) ||
-            offset >= frameSize() || start + count >= frameSize())
+            offset > frameSize() - sizeof(quint64) || start + count >= frameSize())
         {
             qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
             return false;
@@ -290,7 +290,7 @@ namespace Hardware
         quint64 result = Crc::crc64(m_frames[frameIndex].data() + start, count);
         setData64(frameIndex, offset, result);
 
-        qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
+        //qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
 
         return true;
     }
@@ -356,7 +356,7 @@ namespace Hardware
 		return &fw;
 	}
 
-    bool ModuleConfCollection::save(QString projectName, QString userName)
+    bool ModuleConfCollection:: save(QString projectName, QString userName)
     {
         for (auto i = m_firmwares.begin(); i != m_firmwares.end(); i++)
         {

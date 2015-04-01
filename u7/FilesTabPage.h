@@ -117,6 +117,7 @@ public:
 	//
 public slots:
 	void addFile();
+    void editFile();
 	void deleteFile();
 	void checkOutFile();
 	void checkInFile();
@@ -163,9 +164,12 @@ private:
 	FileTreeView* m_fileView = nullptr;
 	FileTreeModel* m_fileModel = nullptr;
 
+    QStringList m_editableExtensions;
+
 	//
 	QAction* m_addFileAction = nullptr;
-	QAction* m_deleteFileAction = nullptr;
+    QAction* m_editFileAction = nullptr;
+    QAction* m_deleteFileAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction1 = nullptr;
 	QAction* m_checkOutAction = nullptr;
