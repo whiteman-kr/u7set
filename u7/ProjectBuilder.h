@@ -148,4 +148,5 @@ private:
 	OutputLog* m_log = nullptr;
 };
 
+
 #endif // PROJECTBUILDER_H

@@ -3,9 +3,13 @@
 #include "../include/DbController.h"
 #include "../include/OutputLog.h"
 #include "../include/DeviceObject.h"
+
 #include "../VFrame30/LogicScheme.h"
+#include "../VFrame30/VideoItemLink.h"
+#include "../VFrame30/HorzVertLinks.h"
 
 #include <QThread>
+#include <QUuid>
 
 
 void BuildWorkerThread::run()
@@ -118,7 +122,7 @@ void BuildWorkerThread::run()
 
 		expandDeviceStrId(&deviceRoot);
 
-		m_log->writeMessage(tr("Ok"));
+		m_log->writeSuccess(tr("Ok"), true);
 
 		//
 		// Generate Module Confuiguration Binary File
@@ -566,7 +570,9 @@ bool BuildWorkerThread::compileApplicationLogicScheme(VFrame30::LogicScheme* log
 
 	for (std::shared_ptr<VFrame30::SchemeLayer> l : logicScheme->Layers)
 	{
-		if (l->compile() == true)
+		qDebug() << Q_FUNC_INFO << " WARNING!!!! Compiling ALL layers, in future compile just l->compile() LAYER!!!!";
+
+		//if (l->compile() == true)
 		{
 			layerFound = true;
 			ok = compileApplicationLogiclayer(logicScheme, l.get());
@@ -596,7 +602,115 @@ bool BuildWorkerThread::compileApplicationLogiclayer(VFrame30::LogicScheme* logi
 		return false;
 	}
 
+	// Enum all links and get all horzlinks è vertlinks
+	//
+	VFrame30::CHorzVertLinks horzVertLinks;
 
+	for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
+	{
+		VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
+
+		if (link != nullptr)
+		{
+			const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+
+			if (pointList.size() < 2)
+			{
+				assert(pointList.size() >= 2);
+				continue;
+			}
+
+			// Decompose link on different parts and put them to horzlinks and vertlinks
+			//
+			horzVertLinks.AddLinks(pointList, link->guid());
+		}
+	}
+
+	// Enum all vert and horz links and compose branches
+	//
+	std::list<std::set<QUuid>> branches;	// This list contains full branches
+
+	for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
+	{
+		VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
+
+		if (link == nullptr)
+		{
+			continue;
+		}
+
+		const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+
+		if (pointList.size() < 2)
+		{
+			assert(pointList.size() >= 2);
+			continue;
+		}
+
+		// Check if end points on some link
+		//
+		std::list<QUuid> videoItemsUnderFrontPoint = horzVertLinks.getVideoItemsUnderPoint(pointList.front(), link->guid());
+		std::list<QUuid> videoItemsUnderBackPoint = horzVertLinks.getVideoItemsUnderPoint(pointList.back(), link->guid());
+
+		// Find item branch, if branch does not exists, make a new brach
+		//
+		auto foundBranch = std::find_if(branches.begin(), branches.end(),
+			[link](const std::set<QUuid>& b)
+			{
+				auto foundBranch = b.find(link->guid());
+				return foundBranch != b.end();
+			});
+
+		if (foundBranch == branches.end())
+		{
+			std::set<QUuid> newBranch;
+			newBranch.insert(link->guid());
+
+			branches.push_front(newBranch);
+
+			foundBranch = branches.begin();
+		}
+
+		// Add to foundBranch everything from  videoItemsUnderFrontPoint, videoItemsUnderBackPoint
+		//
+		for (QUuid& q : videoItemsUnderFrontPoint)
+		{
+			foundBranch->insert(q);
+		}
+
+		for (QUuid& q : videoItemsUnderBackPoint)
+		{
+			foundBranch->insert(q);
+		}
+	}
+
+	// branches can contain same items,
+	// all such branches must be united
+	//
+
+	// Brutforce algorithm
+	//
+//	for (auto& b = branches.begin(); b != branches.end(); ++b)
+//	{
+
+
+//		qDebug() << "--";
+//		for (const QUuid& q : b)
+//		{
+//			qDebug() << q;
+//		}
+//	}
+
+	// DEBUG
+	//
+	for (std::set<QUuid>& b : branches)
+	{
+		qDebug() << "--";
+		for (const QUuid& q : b)
+		{
+			qDebug() << q;
+		}
+	}
 
 	return true;
 }
