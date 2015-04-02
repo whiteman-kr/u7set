@@ -30,7 +30,7 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceChassis>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceDiagSignal>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSignal>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 	}
@@ -449,8 +449,8 @@ namespace Hardware
 		 Example:
 		 Server\IP;		string;		0;			0;			192.168.75.254
 		 Server\Port;	uint32_t;	1;			65535;		2345
-		 .
-		 .
+
+
 
 		 name: property name, can be devided by symbol '\'
 		 type: property type, can by one of
@@ -1388,16 +1388,16 @@ namespace Hardware
 	// DeviceDiagSignal
 	//
 	//
-	DeviceDiagSignal::DeviceDiagSignal(bool preset /*= false*/) :
+	DeviceSignal::DeviceSignal(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
 	}
 
-	DeviceDiagSignal::~DeviceDiagSignal()
+	DeviceSignal::~DeviceSignal()
 	{
 	}
 
-	bool DeviceDiagSignal::SaveData(Proto::Envelope* message) const
+	bool DeviceSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = DeviceObject::SaveData(message);
 		if (result == false || message->has_deviceobject() == false)
@@ -1409,17 +1409,15 @@ namespace Hardware
 
 		// --
 		//
-		Proto::DeviceDiagSignal* signalMessage =
-				message->mutable_deviceobject()->mutable_diagsignal();
+		Proto::DeviceSignal* signalMessage =
+				message->mutable_deviceobject()->mutable_signal();
 
-		Q_UNUSED(signalMessage);
-		//signalMessage->set_startxdocpt(m_startXDocPt);
-		//signalMessage->set_startydocpt(m_startYDocPt);
+		signalMessage->set_type(static_cast<int>(m_type));
 
 		return true;
 	}
 
-	bool DeviceDiagSignal::LoadData(const Proto::Envelope& message)
+	bool DeviceSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_deviceobject() == false)
 		{
@@ -1435,26 +1433,33 @@ namespace Hardware
 
 		// --
 		//
-		if (message.deviceobject().has_diagsignal() == false)
+		if (message.deviceobject().has_signal() == false)
 		{
-			assert(message.deviceobject().has_diagsignal());
+			assert(message.deviceobject().has_signal());
 			return false;
 		}
 
-		const Proto::DeviceDiagSignal& signalMessage = message.deviceobject().diagsignal();
+		const Proto::DeviceSignal& signalMessage = message.deviceobject().signal();
 
-		Q_UNUSED(signalMessage);
-		//x = signalMessage.startxdocpt();
-		//y = signalMessage.startydocpt();
+		m_type = static_cast<SignalType>(signalMessage.type());
 
 		return true;
 	}
 
-	DeviceType DeviceDiagSignal::deviceType() const
+	DeviceType DeviceSignal::deviceType() const
 	{
 		return m_deviceType;
 	}
 
+	DeviceSignal::SignalType DeviceSignal::type() const
+	{
+		return m_type;
+	}
+
+	void DeviceSignal::setType(DeviceSignal::SignalType value)
+	{
+		m_type = value;
+	}
 
 	//
 	//

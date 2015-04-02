@@ -260,7 +260,7 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 		return true;	// seems that we already got file list for this object
 	}
 
-	if (object->deviceType() == Hardware::DeviceType::DiagSignal)
+	if (object->deviceType() == Hardware::DeviceType::Signal)
 	{
 		return false;	// DeviceType::DiagSignal cannot have children
 	}
@@ -291,7 +291,7 @@ bool EquipmentModel::canFetchMore(const QModelIndex& parent) const
 		return false;	// seems that we already got file list for this object
 	}
 
-	if (object->deviceType() == Hardware::DeviceType::DiagSignal)
+	if (object->deviceType() == Hardware::DeviceType::Signal)
 	{
 		return false;	// DeviceType::DiagSignal cannot have children
 	}
@@ -841,6 +841,17 @@ void EquipmentView::addController()
 	return;
 }
 
+void EquipmentView::addSignal()
+{
+	std::shared_ptr<Hardware::DeviceObject> signal = std::make_shared<Hardware::DeviceSignal>(isPresetMode());
+
+	signal->setStrId("$(PARENT)_SIGNAL");
+	signal->setCaption(tr("Signal"));
+
+	addDeviceObject(signal);
+	return;
+}
+
 void EquipmentView::addWorkstation()
 {
 	std::shared_ptr<Hardware::DeviceObject> workstation = std::make_shared<Hardware::Workstation>(isPresetMode());
@@ -1293,6 +1304,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 		m_addObjectMenu->addAction(m_addRackAction);
 		m_addObjectMenu->addAction(m_addChassisAction);
 		m_addObjectMenu->addAction(m_addModuleAction);
+		m_addObjectMenu->addAction(m_addSignalAction);
 		m_addObjectMenu->addAction(m_addWorkstationAction);
 		m_addObjectMenu->addAction(m_addSoftwareAction);
 
@@ -1398,6 +1410,12 @@ void EquipmentTabPage::CreateActions()
 		m_addModuleAction->setStatusTip(tr("Add module to the configuration..."));
 		m_addModuleAction->setEnabled(false);
 		connect(m_addModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addModule);
+
+		m_addSignalAction = new QAction(tr("Signal"), this);
+		m_addSignalAction->setStatusTip(tr("Add signal to the configuration..."));
+		m_addSignalAction->setEnabled(false);
+		connect(m_addSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSignal);
+
 
 		m_addWorkstationAction = new QAction(tr("Workstation"), this);
 		m_addWorkstationAction->setStatusTip(tr("Add workstation to the configuration..."));
@@ -1545,6 +1563,8 @@ void EquipmentTabPage::setActionState()
 	m_addRackAction->setEnabled(false);
 	m_addChassisAction->setEnabled(false);
 	m_addModuleAction->setEnabled(false);
+	m_addSignalAction->setEnabled(false);
+
 	m_addWorkstationAction->setEnabled(false);
 	m_addSoftwareAction->setEnabled(false);
 
@@ -1663,6 +1683,7 @@ void EquipmentTabPage::setActionState()
 				m_addRackAction->setEnabled(true);
 				m_addChassisAction->setEnabled(true);
 				m_addModuleAction->setEnabled(true);
+				m_addSignalAction->setEnabled(true);
 				m_addWorkstationAction->setEnabled(true);
 
 				m_addPresetRackAction->setEnabled(true);
@@ -1677,6 +1698,7 @@ void EquipmentTabPage::setActionState()
 					m_addRackAction->setEnabled(true);
 					m_addChassisAction->setEnabled(true);
 					m_addModuleAction->setEnabled(true);
+					m_addSignalAction->setEnabled(true);
 					m_addWorkstationAction->setEnabled(true);
 				}
 				else
@@ -1684,6 +1706,7 @@ void EquipmentTabPage::setActionState()
 					m_addRackAction->setEnabled(selectedObject->presetRoot() == false);
 					m_addChassisAction->setEnabled(true);
 					m_addModuleAction->setEnabled(true);
+					m_addSignalAction->setEnabled(true);
 					m_addWorkstationAction->setEnabled(true);
 				}
 
@@ -1698,12 +1721,14 @@ void EquipmentTabPage::setActionState()
 				{
 					m_addChassisAction->setEnabled(true);
 					m_addModuleAction->setEnabled(true);
+					m_addSignalAction->setEnabled(true);
 					m_addWorkstationAction->setEnabled(true);
 				}
 				else
 				{
 					m_addChassisAction->setEnabled(selectedObject->presetRoot() == false);
 					m_addModuleAction->setEnabled(true);
+					m_addSignalAction->setEnabled(true);
 					m_addWorkstationAction->setEnabled(true);
 				}
 
@@ -1722,6 +1747,8 @@ void EquipmentTabPage::setActionState()
 					m_addModuleAction->setEnabled(selectedObject->presetRoot() == false);
 				}
 
+				m_addSignalAction->setEnabled(true);
+
 				m_addPresetModuleAction->setEnabled(true);
 				break;
 
@@ -1730,11 +1757,13 @@ void EquipmentTabPage::setActionState()
 				{
 					m_addWorkstationAction->setEnabled(true);
 					m_addSoftwareAction->setEnabled(true);
+					m_addSignalAction->setEnabled(true);
 				}
 				else
 				{
 					m_addWorkstationAction->setEnabled(selectedObject->presetRoot() == false);
 					m_addSoftwareAction->setEnabled(true);
+					m_addSignalAction->setEnabled(true);
 				}
 
 				m_addPresetWorkstationAction->setEnabled(true);
@@ -1751,7 +1780,21 @@ void EquipmentTabPage::setActionState()
 					m_addSoftwareAction->setEnabled(selectedObject->presetRoot() == false);
 				}
 
+				m_addSignalAction->setEnabled(true);
+
 				m_addPresetSoftwareAction->setEnabled(true);
+				break;
+
+			case Hardware::DeviceType::Signal:
+				if (isConfigurationMode() == true)
+				{
+					m_addSignalAction->setEnabled(true);
+				}
+				else
+				{
+					m_addSignalAction->setEnabled(selectedObject->presetRoot() == false);
+				}
+
 				break;
 
 			default:

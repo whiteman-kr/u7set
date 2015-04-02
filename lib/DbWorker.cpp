@@ -40,6 +40,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Signal API, adding ObjectState to results", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0030.sql"},
 	{"File API, adding get_file_info", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0031.sql"},
 	{"Add MC system file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0032.sql"},
+	{"Add presets to equipment configuration", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0033.sql"},
+
 };
 
 

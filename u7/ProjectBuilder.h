@@ -1,6 +1,8 @@
 #ifndef PROJECTBUILDER_H
 #define PROJECTBUILDER_H
 
+#include "../include/Signal.h"
+
 class QThread;
 class OutputLog;
 class DbController;
@@ -99,6 +101,18 @@ private:
 	bool m_debug = false;				// if true then don't get workcopy of checked out files, use unly checked in copy
 
 	OutputLog* m_log;					// Probably it's better to make it as shared_ptr
+};
+
+class SignalSetObject : public QObject
+{
+	Q_OBJECT
+
+private:
+	SignalSet m_signalSet;
+
+public:
+	void loadSignalsFromDb(DbController* db);
+	Q_INVOKABLE QObject* getSignalByDeviceStrID(const QString& deviceStrID);
 };
 
 class ProjectBuilder : public QObject

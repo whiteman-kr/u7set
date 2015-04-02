@@ -373,6 +373,11 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 	QJSValue jsLog = jsEngine.newQObject(m_log);
 	QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
+	SignalSetObject signalSetObject;
+	signalSetObject.loadSignalsFromDb(db);
+	QJSValue jsSignalSet = jsEngine.newQObject(&signalSetObject);
+	QQmlEngine::setObjectOwnership(&signalSetObject, QQmlEngine::CppOwnership);
+
 	QJSValue jsRoot = jsEngine.newQObject(root);
 	QQmlEngine::setObjectOwnership(root, QQmlEngine::CppOwnership);
 
@@ -395,6 +400,7 @@ bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware
 	args << jsRoot;
 	args << jsConfCollection;
 	args << jsLog;
+	args << jsSignalSet;
 
 	QJSValue jsResult = jsEval.call(args);
 
@@ -524,7 +530,7 @@ bool BuildWorkerThread::loadApplicationLogicFiles(DbController* db, std::vector<
 		}
 		else
 		{
-			ok = db->getLatestVersion(fi, &file, false);
+			ok = db->getLatestVersion(fi, &file, nullptr);
 		}
 
 		if (ok == false)
@@ -602,7 +608,7 @@ bool BuildWorkerThread::compileApplicationLogiclayer(VFrame30::LogicScheme* logi
 		return false;
 	}
 
-	// Enum all links and get all horzlinks è vertlinks
+	// Enum all links and get all horzlinks and vertlinks
 	//
 	VFrame30::CHorzVertLinks horzVertLinks;
 
@@ -823,6 +829,26 @@ bool BuildWorkerThread::release() const
 }
 
 
+void SignalSetObject::loadSignalsFromDb(DbController* db)
+{
+	db->getSignals(&m_signalSet, nullptr);
+}
+
+QObject* SignalSetObject::getSignalByDeviceStrID(const QString& deviceStrID)
+{
+	for (int i = 0; i < m_signalSet.count(); i++)
+	{
+		if (m_signalSet[i].deviceStrID() == deviceStrID)
+		{
+			QObject* c = &m_signalSet[i];
+			QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+			return c;
+		}
+	}
+	return nullptr;
+}
+
+
 ProjectBuilder::ProjectBuilder(OutputLog* log) :
 	m_log(log)
 {
@@ -906,5 +932,4 @@ bool ProjectBuilder::isRunning() const
 void ProjectBuilder::handleResults(QString /*result*/)
 {
 }
-
 

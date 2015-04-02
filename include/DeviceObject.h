@@ -23,14 +23,11 @@ namespace Hardware
 		Chassis,
 		Module,
 		Controller,
-		DiagSignal,
 
 		Workstation,
 		Software,
-//		Monitor = Software,
-//		ConfigurationService = Software,
-//		DataAcquisitionService = Software,
-//		DataArchivingService = Software,
+
+		Signal,
 
 		DeviceTypeCount
 	};
@@ -441,12 +438,30 @@ namespace Hardware
 	// DeviceDiagSignal
 	//
 	//
-	class DeviceDiagSignal : public DeviceObject
+	class DeviceSignal : public DeviceObject
 	{
 		Q_OBJECT
+
+		Q_PROPERTY(SignalType Type READ type WRITE setType)
+
+		Q_ENUMS(SignalType)
+
+		// SignalType
+		//
 	public:
-		explicit DeviceDiagSignal(bool preset = false);
-		virtual ~DeviceDiagSignal();
+		enum SignalType
+		{
+			DiagDiscrete,
+			DiagAnalog,
+			InputDiscrete,
+			InputAnalog,
+			OutputDiscrete,
+			OutputAnalog,
+		};
+
+	public:
+		explicit DeviceSignal(bool preset = false);
+		virtual ~DeviceSignal();
 
 		// Serialization
 		//
@@ -457,8 +472,18 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
+		// Properties
+		//
+	public:
+		DeviceSignal::SignalType type() const;
+		void setType(DeviceSignal::SignalType value);
+
+		// Data
+		//
 	private:
-		static const DeviceType m_deviceType = DeviceType::DiagSignal;
+		static const DeviceType m_deviceType = DeviceType::Signal;
+
+		SignalType m_type = SignalType::DiagDiscrete;
 	};
 
 	//
