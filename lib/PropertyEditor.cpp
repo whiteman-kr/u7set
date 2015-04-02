@@ -36,6 +36,11 @@ int FilePathPropertyType::filePathTypeId()
 	return qMetaTypeId<FilePathPropertyType>();
 }
 
+int EnumPropertyType::enumTypeId()
+{
+    return qMetaTypeId<EnumPropertyType>();
+}
+
 //
 // ------------ QtMultiFilePathEdit ------------
 //
@@ -130,6 +135,51 @@ void QtMultiFilePathEdit::onEditingFinished()
 	}
 }
 
+// ------------ QtMultiEnumEdit ------------
+//
+QtMultiEnumEdit::QtMultiEnumEdit(QWidget* parent):
+    QWidget(parent)
+{
+    m_combo = new QComboBox(parent);
+
+    connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChanged(int)));
+
+    QHBoxLayout* lt = new QHBoxLayout;
+    lt->setContentsMargins(0, 0, 0, 0);
+    lt->setSpacing(0);
+    lt->addWidget(m_combo);
+
+    setLayout(lt);
+}
+
+void QtMultiEnumEdit::setValue(QVariant value)
+{
+    if (m_combo == nullptr)
+    {
+        Q_ASSERT(m_combo);
+        return;
+    }
+
+    m_oldValue = value;
+
+    EnumPropertyType e = value.value<EnumPropertyType>();
+
+    m_combo->clear();
+    m_combo->addItems(e.items);
+    m_combo->setCurrentIndex(e.value);
+}
+
+void QtMultiEnumEdit::indexChanged(int index)
+{
+    EnumPropertyType e = m_oldValue.value<EnumPropertyType>();
+
+    if (e.value != index)
+    {
+        e.value = index;
+        m_oldValue = QVariant::fromValue(e);
+        emit valueChanged(QVariant::fromValue(e));
+    }
+}
 
 
 //
@@ -273,11 +323,11 @@ MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text):
 {
 	setWindowTitle("Text Editor");
 
-	if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
+    if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
 	{
 		move(theSettings.m_multiLinePropertyEditorWindowPos);
 		restoreGeometry(theSettings.m_multiLinePropertyEditorGeometry);
-	}
+    }
 
 	QString value = text;
 
@@ -315,8 +365,8 @@ QString MultiLineEdit::text()
 void MultiLineEdit::closeEvent(QCloseEvent *event)
 {
 	Q_UNUSED(event);
-	theSettings.m_multiLinePropertyEditorWindowPos = pos();
-	theSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
+    theSettings.m_multiLinePropertyEditorWindowPos = pos();
+    theSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
 }
 
 void MultiLineEdit::accept()
@@ -767,94 +817,106 @@ QWidget* QtMultiVariantFactory::createEditor(QtMultiVariantPropertyManager* mana
 
 	QWidget* editor = nullptr;
 
-	if (manager->value(property).userType() == FilePathPropertyType::filePathTypeId())
-	{
-		QtMultiFilePathEdit* m_editor = new QtMultiFilePathEdit(parent);
-		editor = m_editor;
-		m_editor->setValue(manager->value(property));
+    if (manager->value(property).userType() == FilePathPropertyType::filePathTypeId())
+    {
+        QtMultiFilePathEdit* m_editor = new QtMultiFilePathEdit(parent);
+        editor = m_editor;
+        m_editor->setValue(manager->value(property));
 
-		connect(m_editor, &QtMultiFilePathEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-		connect(m_editor, &QtMultiFilePathEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-	}
-	else
-	{
-		switch(manager->value(property).userType())
-		{
-			case QVariant::Int:
-				{
-					QtMultiIntSpinBox* m_editor = new QtMultiIntSpinBox(parent);
-					editor = m_editor;
-					m_editor->setValue(manager->value(property).toInt());
+        connect(m_editor, &QtMultiFilePathEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+        connect(m_editor, &QtMultiFilePathEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+    }
+    else
+    {
+        if (manager->value(property).userType() == EnumPropertyType::enumTypeId())
+        {
+            QtMultiEnumEdit* m_editor = new QtMultiEnumEdit(parent);
+            editor = m_editor;
+            m_editor->setValue(manager->value(property));
 
-					connect(m_editor, &QtMultiIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-					connect(m_editor, &QtMultiIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-				}
-				break;
-			case QVariant::UInt:
-				{
-					QtMultiUIntSpinBox* m_editor = new QtMultiUIntSpinBox(parent);
-					editor = m_editor;
-					m_editor->setValue(manager->value(property).toUInt());
+            connect(m_editor, &QtMultiEnumEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+            connect(m_editor, &QtMultiEnumEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+        }
+        else
+        {
+            switch(manager->value(property).userType())
+            {
+            case QVariant::Int:
+            {
+                QtMultiIntSpinBox* m_editor = new QtMultiIntSpinBox(parent);
+                editor = m_editor;
+                m_editor->setValue(manager->value(property).toInt());
 
-					connect(m_editor, &QtMultiUIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-					connect(m_editor, &QtMultiUIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-				}
-				break;
-			case QVariant::Double:
-				{
-					QtMultiDoubleSpinBox* m_editor = new QtMultiDoubleSpinBox(parent);
-					editor = m_editor;
-					m_editor->setValue(manager->value(property).toDouble());
+                connect(m_editor, &QtMultiIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+                connect(m_editor, &QtMultiIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+            }
+                break;
+            case QVariant::UInt:
+            {
+                QtMultiUIntSpinBox* m_editor = new QtMultiUIntSpinBox(parent);
+                editor = m_editor;
+                m_editor->setValue(manager->value(property).toUInt());
 
-					connect(m_editor, &QtMultiDoubleSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-					connect(m_editor, &QtMultiDoubleSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-				}
-				break;
-			case QVariant::Bool:
-				{
-					QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
-					editor = m_editor;
+                connect(m_editor, &QtMultiUIntSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+                connect(m_editor, &QtMultiUIntSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+            }
+                break;
+            case QVariant::Double:
+            {
+                QtMultiDoubleSpinBox* m_editor = new QtMultiDoubleSpinBox(parent);
+                editor = m_editor;
+                m_editor->setValue(manager->value(property).toDouble());
 
-					if (manager->sameValue(property) == true)
-					{
-						m_editor->setCheckState(manager->value(property).toBool() == true ? Qt::Checked : Qt::Unchecked);
-					}
-					else
-					{
-						m_editor->setCheckState(Qt::PartiallyChecked);
-					}
+                connect(m_editor, &QtMultiDoubleSpinBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+                connect(m_editor, &QtMultiDoubleSpinBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+            }
+                break;
+            case QVariant::Bool:
+            {
+                QtMultiCheckBox* m_editor = new QtMultiCheckBox(parent);
+                editor = m_editor;
 
-					connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-					connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-				}
-				break;
+                if (manager->sameValue(property) == true)
+                {
+                    m_editor->setCheckState(manager->value(property).toBool() == true ? Qt::Checked : Qt::Unchecked);
+                }
+                else
+                {
+                    m_editor->setCheckState(Qt::PartiallyChecked);
+                }
 
-			case QVariant::String:
-				{
-					QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent);
-					editor = m_editor;
-					m_editor->setValue(manager->value(property).toString());
+                connect(m_editor, &QtMultiCheckBox::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+                connect(m_editor, &QtMultiCheckBox::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+            }
+                break;
 
-					connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-					connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-				}
-				break;
+            case QVariant::String:
+            {
+                QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent);
+                editor = m_editor;
+                m_editor->setValue(manager->value(property).toString());
 
-			case QVariant::Color:
-				{
-					QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
-					editor = m_editor;
-					m_editor->setValue(manager->value(property));
+                connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+                connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+            }
+                break;
 
-					connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
-					connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
-				}
-				break;
+            case QVariant::Color:
+            {
+                QtMultiColorEdit* m_editor = new QtMultiColorEdit(parent);
+                editor = m_editor;
+                m_editor->setValue(manager->value(property));
 
-			default:
-				Q_ASSERT(false);
-		}
-	}
+                connect(m_editor, &QtMultiColorEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+                connect(m_editor, &QtMultiColorEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+            }
+                break;
+
+            default:
+                Q_ASSERT(false);
+            }
+        }
+    }
 
 	if (editor == nullptr)
 	{
@@ -1151,7 +1213,13 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
 			return f.filePath;
 		}
 
-		switch (type)
+        if (type == EnumPropertyType::enumTypeId())
+        {
+            EnumPropertyType e = value(property).value<EnumPropertyType>();
+            return e.items[e.value];
+        }
+
+        switch (type)
 		{
 			case QVariant::Int:
 				{
@@ -1315,13 +1383,29 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 static PropertyItem pi;
 
 			pi.object = *pobject;
-			pi.value = object->property(name);
-			pi.type = pi.value.userType();
 
-			//if (pi.type == QVariant::UserType)
-				//pi.type = pi.value.userType();
+            if (metaProperty.isEnumType())
+            {
+                // Fill enum's keys and set special value
+                //
+                EnumPropertyType ept;
+                ept.value = object->property(name).toInt();
+                for (int i = 0; i < metaProperty.enumerator().keyCount(); i++)
+                {
+                    ept.items.push_back(metaProperty.enumerator().valueToKey(i));
+                }
+                pi.value = QVariant::fromValue(ept);
 
-			propertyItems.insertMulti(name, pi);
+            }
+            else
+            {
+                // Set the real value
+                //
+                pi.value = object->property(name);
+            }
+            pi.type = pi.value.userType();
+
+            propertyItems.insertMulti(name, pi);
 
 			if (propertyNames.indexOf(name) == -1)
 			{
@@ -1338,11 +1422,8 @@ static PropertyItem pi;
 static PropertyItem pi;
 
 			pi.object = *pobject;
-			pi.value = object->property(name);
-			pi.type = pi.value.userType();
-
-			//if (pi.type == QVariant::UserType)
-				//pi.type = pi.value.userType();
+            pi.value = object->property(name);
+            pi.type = pi.value.userType();
 
 			propertyItems.insertMulti(name, pi);
 
@@ -1395,10 +1476,23 @@ static QVariant value;
 					break;
 				}
 
-				if (pi.value != value)
-				{
-					sameValue = false;
-				}
+                if (pi.type == EnumPropertyType::enumTypeId())
+                {
+                    EnumPropertyType v1 = pi.value.value<EnumPropertyType>();
+                    EnumPropertyType v2 = value.value<EnumPropertyType>();
+
+                    if (v1.value != v2.value)
+                    {
+                        sameValue = false;
+                    }
+                }
+                else
+                {
+                    if (pi.value != value)
+                    {
+                        sameValue = false;
+                    }
+                }
 			}
 		}
 
@@ -1502,87 +1596,108 @@ QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QSt
 			}
 		}
 		else
-		{
+        {
+            if (type == EnumPropertyType::enumTypeId())
+            {
+                subProperty = m_propertyVariantManager->addProperty(fullName);
+                if (sameValue == true)
+                {
+                    m_propertyVariantManager->setValue(subProperty, value);
+                }
+                else
+                {
+                    EnumPropertyType e;
 
-			switch (type)
-			{
-				case QVariant::Int:
-					subProperty = m_propertyVariantManager->addProperty(fullName);
-					if (sameValue == true)
-					{
-						m_propertyVariantManager->setValue(subProperty, value.toInt());
-					}
-					else
-					{
-						m_propertyVariantManager->setValue(subProperty, (int)0);
-					}
-					break;
+                    EnumPropertyType v = value.value<EnumPropertyType>();
+                    for (int i = 0; i < v.items.count(); i++)
+                        e.items.push_back(v.items[i]);
 
-				case QVariant::UInt:
-					subProperty = m_propertyVariantManager->addProperty(fullName);
-					if (sameValue == true)
-					{
-						m_propertyVariantManager->setValue(subProperty, value.toUInt());
-					}
-					else
-					{
-						m_propertyVariantManager->setValue(subProperty, (quint32)0);
-					}
-					break;
+                    m_propertyVariantManager->setValue(subProperty, QVariant::fromValue(e));
+                }
+            }
+            else
+            {
 
-				case QVariant::String:
-					subProperty = m_propertyVariantManager->addProperty(fullName);
-					if (sameValue == true)
-					{
-						m_propertyVariantManager->setValue(subProperty, value.toString());
-					}
-					else
-					{
-						m_propertyVariantManager->setValue(subProperty, QString());
-					}
-					break;
+                switch (type)
+                {
+                case QVariant::Int:
+                    subProperty = m_propertyVariantManager->addProperty(fullName);
+                    if (sameValue == true)
+                    {
+                        m_propertyVariantManager->setValue(subProperty, value.toInt());
+                    }
+                    else
+                    {
+                        m_propertyVariantManager->setValue(subProperty, (int)0);
+                    }
+                    break;
 
-				case QVariant::Double:
-					subProperty = m_propertyVariantManager->addProperty(fullName);
-					if (sameValue == true)
-					{
-						m_propertyVariantManager->setValue(subProperty, value.toDouble());
-					}
-					else
-					{
-						m_propertyVariantManager->setValue(subProperty, (double)0);
-					}
-					break;
+                case QVariant::UInt:
+                    subProperty = m_propertyVariantManager->addProperty(fullName);
+                    if (sameValue == true)
+                    {
+                        m_propertyVariantManager->setValue(subProperty, value.toUInt());
+                    }
+                    else
+                    {
+                        m_propertyVariantManager->setValue(subProperty, (quint32)0);
+                    }
+                    break;
 
-				case QVariant::Bool:
-					subProperty = m_propertyVariantManager->addProperty(fullName);
-					if (sameValue == true)
-					{
-						m_propertyVariantManager->setValue(subProperty, value.toBool());
-					}
-					else
-					{
-						m_propertyVariantManager->setValue(subProperty, false);
-					}
-					break;
+                case QVariant::String:
+                    subProperty = m_propertyVariantManager->addProperty(fullName);
+                    if (sameValue == true)
+                    {
+                        m_propertyVariantManager->setValue(subProperty, value.toString());
+                    }
+                    else
+                    {
+                        m_propertyVariantManager->setValue(subProperty, QString());
+                    }
+                    break;
 
-				case QVariant::Color:
-					subProperty = m_propertyVariantManager->addProperty(fullName);
-					if (sameValue == true)
-					{
-						m_propertyVariantManager->setValue(subProperty, value);
-					}
-					else
-					{
-						m_propertyVariantManager->setValue(subProperty, QColor(Qt::black));
-					}
-					break;
+                case QVariant::Double:
+                    subProperty = m_propertyVariantManager->addProperty(fullName);
+                    if (sameValue == true)
+                    {
+                        m_propertyVariantManager->setValue(subProperty, value.toDouble());
+                    }
+                    else
+                    {
+                        m_propertyVariantManager->setValue(subProperty, (double)0);
+                    }
+                    break;
 
-				default:
-					Q_ASSERT(false);
-					return nullptr;
-			}
-		}
+                case QVariant::Bool:
+                    subProperty = m_propertyVariantManager->addProperty(fullName);
+                    if (sameValue == true)
+                    {
+                        m_propertyVariantManager->setValue(subProperty, value.toBool());
+                    }
+                    else
+                    {
+                        m_propertyVariantManager->setValue(subProperty, false);
+                    }
+                    break;
+
+                case QVariant::Color:
+                    subProperty = m_propertyVariantManager->addProperty(fullName);
+                    if (sameValue == true)
+                    {
+                        m_propertyVariantManager->setValue(subProperty, value);
+                    }
+                    else
+                    {
+                        m_propertyVariantManager->setValue(subProperty, QColor(Qt::black));
+                    }
+                    break;
+
+                default:
+                    Q_ASSERT(false);
+                    return nullptr;
+                }
+            }
+        }
 
 		m_propertyVariantManager->setAttribute(subProperty, "@propertyEditor@sameValue", sameValue);
 
@@ -1680,10 +1795,10 @@ void PropertyEditor::clearProperties()
 void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)
 {
 	valueChanged(property, value);
-	updateProperty(property->propertyName());
+    //updateProperty(property->propertyName());
 }
 
-void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
+void PropertyEditor::valueChanged(QtProperty* property, QVariant newValue)
 {
 	// Set the new property value in all objects
 	//
@@ -1701,6 +1816,16 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 	for (auto i = objects.begin(); i != objects.end(); i++)
 	{
 		QObject* pObject = i->get();
+
+        QVariant value = newValue;
+
+        if (value.userType() == EnumPropertyType::enumTypeId())
+        {
+            //QVariant v = pObject->property(property->propertyName().toStdString().c_str());
+            EnumPropertyType e = value.value<EnumPropertyType>();
+            int x = e.value;
+            value = x;
+        }
 
 		// Do not set property, if it has same value
 		if (pObject->property(property->propertyName().toStdString().c_str()) == value)

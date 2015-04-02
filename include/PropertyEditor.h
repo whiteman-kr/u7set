@@ -13,6 +13,8 @@
 #include <QTextEdit>
 #include <QDialog>
 #include <QSet>
+#include <QComboBox>
+#include <QStringList>
 
 class QtTreePropertyBrowser;
 class QtProperty;
@@ -30,8 +32,20 @@ struct FilePathPropertyType
 
 	static int filePathTypeId();
 };
-
 Q_DECLARE_METATYPE(FilePathPropertyType)
+
+struct EnumPropertyType
+{
+    EnumPropertyType()
+    {
+    }
+
+    QStringList items;
+    int value;
+
+    static int enumTypeId();
+};
+Q_DECLARE_METATYPE(EnumPropertyType)
 
 
 class QtMultiFilePathEdit : public QWidget
@@ -61,7 +75,31 @@ private:
 
 };
 
+class QtMultiEnumEdit : public QWidget
+{
+    Q_OBJECT
 
+public:
+    explicit QtMultiEnumEdit(QWidget* parent);
+    void setValue(QVariant value);
+
+public slots:
+    void indexChanged(int index);
+
+signals:
+    void valueChanged(QVariant value);
+
+//private slots:
+    //void onButtonPressed();
+
+//private:
+    //bool eventFilter(QObject* watched, QEvent* event);
+
+private:
+    QComboBox* m_combo = nullptr;
+    QVariant m_oldValue;
+
+};
 class QtMultiColorEdit : public QWidget
 {
 	Q_OBJECT
@@ -309,7 +347,7 @@ public:
 	void clearProperties();
 
 protected:
-	virtual void valueChanged(QtProperty* property, QVariant value);
+    virtual void valueChanged(QtProperty* property, QVariant newValue);
 
 protected slots:
 	void updateProperties();

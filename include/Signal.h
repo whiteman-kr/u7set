@@ -102,8 +102,10 @@ typedef OrderedHash<int, QString> DataFormatList;
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
-class Signal
+class Signal : public QObject
 {
+	Q_OBJECT
+
 private:
 	// Signal fields from database
 	//
@@ -169,6 +171,16 @@ private:
 	void setInstanceAction(InstanceAction action) { m_instanceAction = action; }
 
 public:
+	Signal();
+
+	Signal(const Signal& signal)
+		:QObject()
+	{
+		*this = signal;
+	}
+
+	Signal& operator = (const Signal& signal);
+
 	int ID() const { return m_ID; }
 	int signalGroupID() const { return m_signalGroupID; }
 	int signalInstanceID() const { return m_signalInstanceID; }
@@ -182,91 +194,91 @@ public:
 	QDateTime instanceCreated() const { return m_instanceCreated; }
 	InstanceAction instanceAction() const { return m_instanceAction; }
 
-	QString strID() const { return m_strID; }
+    Q_INVOKABLE QString strID() const { return m_strID; }
 	void setStrID(const QString& strID) { m_strID = strID; }
 
-	QString extStrID() const { return m_extStrID; }
+    Q_INVOKABLE QString extStrID() const { return m_extStrID; }
 	void setExtStrID(const QString& extStrID) { m_extStrID = extStrID; }
 
-	QString name() const { return m_name; }
+    Q_INVOKABLE QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
 
-	int dataFormat() const { return m_dataFormat; }
+    Q_INVOKABLE int dataFormat() const { return m_dataFormat; }
 	void setDataFormat(int dataFormat) { m_dataFormat = dataFormat; }
 
-	int dataSize() const { return m_dataSize; }
+    Q_INVOKABLE int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
 
-	int lowADC() const { return m_lowADC; }
+    Q_INVOKABLE int lowADC() const { return m_lowADC; }
 	void setLowADC(int lowADC) { m_lowADC = lowADC; }
 
-	int highADC() const { return m_highADC; }
+    Q_INVOKABLE int highADC() const { return m_highADC; }
 	void setHighADC(int highADC) { m_highADC = highADC;}
 
-	double lowLimit() const { return m_lowLimit; }
+    Q_INVOKABLE double lowLimit() const { return m_lowLimit; }
 	void setLowLimit(double lowLimit) { m_lowLimit = lowLimit; }
 
-	double highLimit() const { return m_highLimit; }
+    Q_INVOKABLE double highLimit() const { return m_highLimit; }
 	void setHighLimit(double highLimit) { m_highLimit = highLimit; }
 
-	int unitID() const { return m_unitID; }
+    Q_INVOKABLE int unitID() const { return m_unitID; }
 	void setUnitID(int unitID) { m_unitID = unitID; }
 
-	double adjustment() const { return m_adjustment; }
+    Q_INVOKABLE double adjustment() const { return m_adjustment; }
 	void setAdjustment(double adjustment) { m_adjustment = adjustment; }
 
-	double dropLimit() const { return m_dropLimit; }
+    Q_INVOKABLE double dropLimit() const { return m_dropLimit; }
 	void setDropLimit(double dropLimit) { m_dropLimit = dropLimit; }
 
-	double excessLimit() const { return m_excessLimit; }
+    Q_INVOKABLE double excessLimit() const { return m_excessLimit; }
 	void setExcessLimit(double excessLimit) { m_excessLimit = excessLimit; }
 
-	double unbalanceLimit() const { return m_unbalanceLimit; }
+    Q_INVOKABLE double unbalanceLimit() const { return m_unbalanceLimit; }
 	void setUnbalanceLimit(double unbalanceLimit) { m_unbalanceLimit = unbalanceLimit; }
 
-	double inputLowLimit() const { return m_inputLowLimit; }
+    Q_INVOKABLE double inputLowLimit() const { return m_inputLowLimit; }
 	void setInputLowLimit(double inputLowLimit) { m_inputLowLimit = inputLowLimit; }
 
-	double inputHighLimit() const { return m_inputHighLimit; }
+    Q_INVOKABLE double inputHighLimit() const { return m_inputHighLimit; }
 	void setInputHighLimit(double inputHighLimit) { m_inputHighLimit = inputHighLimit; }
 
-	int inputUnitID() const { return m_inputUnitID; }
+    Q_INVOKABLE int inputUnitID() const { return m_inputUnitID; }
 	void setInputUnitID(int inputUnitID) { m_inputUnitID = inputUnitID; }
 
-	int inputSensorID() const { return m_inputSensorID; }
+    Q_INVOKABLE int inputSensorID() const { return m_inputSensorID; }
 	void setInputSensorID(int inputSensorID) { m_inputSensorID = inputSensorID; }
 
-	double outputLowLimit() const { return m_outputLowLimit; }
+    Q_INVOKABLE double outputLowLimit() const { return m_outputLowLimit; }
 	void setOutputLowLimit(double outputLowLimit) { m_outputLowLimit = outputLowLimit; }
 
-	double outputHighLimit() const { return m_outputHighLimit; }
+    Q_INVOKABLE double outputHighLimit() const { return m_outputHighLimit; }
 	void setOutputHighLimit(double outputHighLimit) { m_outputHighLimit = outputHighLimit; }
 
-	int outputUnitID() const { return m_outputUnitID; }
+    Q_INVOKABLE int outputUnitID() const { return m_outputUnitID; }
 	void setOutputUnitID(int outputUnitID) { m_outputUnitID = outputUnitID; }
 
-	int outputSensorID() const { return m_outputSensorID; }
+    Q_INVOKABLE int outputSensorID() const { return m_outputSensorID; }
 	void setOutputSensorID(int outputSensorID) { m_outputSensorID = outputSensorID; }
 
-	bool acquire() const { return m_acquire; }
+    Q_INVOKABLE bool acquire() const { return m_acquire; }
 	void setAcquire(bool acquire) { m_acquire = acquire; }
 
-	bool calculated() const { return m_calculated; }
+    Q_INVOKABLE bool calculated() const { return m_calculated; }
 	void setCalculated(bool calculated) { m_calculated = calculated; }
 
-	int normalState() const { return m_normalState; }
+    Q_INVOKABLE int normalState() const { return m_normalState; }
 	void setNormalState	(int normalState) { m_normalState = normalState; }
 
-	int decimalPlaces() const { return m_decimalPlaces; }
+    Q_INVOKABLE int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
 
-	double aperture() const { return m_aperture; }
+    Q_INVOKABLE double aperture() const { return m_aperture; }
 	void setAperture(double aperture) { m_aperture = aperture; }
 
-	SignalInOutType inOutType() const { return m_inOutType; }
+    Q_INVOKABLE SignalInOutType inOutType() const { return m_inOutType; }
 	void setInOutType(SignalInOutType inOutType) { m_inOutType = inOutType; }
 
-	QString deviceStrID() const { return m_deviceStrID; }
+    Q_INVOKABLE QString deviceStrID() const { return m_deviceStrID; }
 	void setDeviceStrID(const QString& deviceStrID) { m_deviceStrID = deviceStrID; }
 
 	friend class DbWorker;
