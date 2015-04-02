@@ -581,7 +581,7 @@ bool BuildWorkerThread::compileApplicationLogicScheme(VFrame30::LogicScheme* log
 		//if (l->compile() == true)
 		{
 			layerFound = true;
-			ok = compileApplicationLogiclayer(logicScheme, l.get());
+			ok = compileApplicationLogicLayer(logicScheme, l.get());
 
 			if (ok == false)
 			{
@@ -599,7 +599,7 @@ bool BuildWorkerThread::compileApplicationLogicScheme(VFrame30::LogicScheme* log
 	return true;
 }
 
-bool BuildWorkerThread::compileApplicationLogiclayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer)
+bool BuildWorkerThread::compileApplicationLogicLayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer)
 {
 	if (logicScheme == nullptr || layer == nullptr)
 	{
@@ -690,25 +690,11 @@ bool BuildWorkerThread::compileApplicationLogiclayer(VFrame30::LogicScheme* logi
 		}
 	}
 
-	// branches can contain same items,
-	// all such branches must be united
-	//
-
-	// Brutforce algorithm
-	//
-//	for (auto& b = branches.begin(); b != branches.end(); ++b)
-//	{
-
-
-//		qDebug() << "--";
-//		for (const QUuid& q : b)
-//		{
-//			qDebug() << q;
-//		}
-//	}
-
 	// DEBUG
 	//
+	qDebug() << "";
+	qDebug() << "Branches before joining";
+
 	for (std::set<QUuid>& b : branches)
 	{
 		qDebug() << "--";
@@ -717,6 +703,76 @@ bool BuildWorkerThread::compileApplicationLogiclayer(VFrame30::LogicScheme* logi
 			qDebug() << q;
 		}
 	}
+
+	qDebug() << "";
+
+
+	// branches can contain same items,
+	// all such branches must be united
+	//
+	bool wasJoining = false;	// if branch was joinedto other branch, then process currentBranch one more time
+
+	for (auto& currentBranch = branches.begin();
+		 currentBranch != branches.end();
+		 wasJoining ? void() : ++currentBranch)
+	{
+		wasJoining = false;
+
+		// currentBranch is std::set<QUuid>
+		//
+
+		// Take each id from the currentBranch,
+		// try to find such branch where this id is present,
+		// and join this branch to currentBranch
+		//
+		for (auto& id = currentBranch->begin(); id != currentBranch->end(); ++id)
+		{
+			auto subBranch = currentBranch;
+			++subBranch;
+			for (; subBranch != branches.end();)
+			{
+				if (std::find(subBranch->begin(), subBranch->end(), *id) != subBranch->end())
+				{
+					// Join found branch to currentBranch
+					//
+					for (auto& subBranchId : *subBranch)
+					{
+						currentBranch->insert(subBranchId);
+					}
+
+					// Delete subBrach, make tmp to delete it after interator increment
+					//
+					auto tmp = subBranch;
+					++subBranch;
+
+					branches.erase(tmp);
+
+					wasJoining = true;
+					continue;
+				}
+
+				++subBranch;
+			}
+		}
+
+	}
+
+	// DEBUG
+	//
+	qDebug() << "";
+	qDebug() << "Branches after joining";
+
+	for (std::set<QUuid>& b : branches)
+	{
+		qDebug() << "--";
+		for (const QUuid& q : b)
+		{
+			qDebug() << q;
+		}
+	}
+
+	qDebug() << "";
+
 
 	return true;
 }

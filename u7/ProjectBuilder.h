@@ -44,7 +44,7 @@ private:
 	bool loadApplicationLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out);
 
 	bool compileApplicationLogicScheme(VFrame30::LogicScheme* logicScheme);
-	bool compileApplicationLogiclayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer);
+	bool compileApplicationLogicLayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer);
 
 	// What's the next compilation task?
 	//
