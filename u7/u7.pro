@@ -174,7 +174,6 @@ HEADERS  += \
     BuildTabPage.h \
     ../include/OutputLog.h \
     ProjectBuilder.h \
-    ../include/Signal.h \
     ../include/DbProgress.h \
     FileListView.h \
     version.h \
