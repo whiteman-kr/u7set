@@ -41,7 +41,7 @@
               <xs:element name="Params">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element maxOccurs="unbounded" name="AfbElementParam">
+                    <xs:element minOccurs = "0" maxOccurs="unbounded" name="AfbElementParam">
                       <xs:complexType>
                         <xs:sequence>
                           <xs:element name="Value">

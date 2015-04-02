@@ -1329,6 +1329,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	assert(dbcontroller != nullptr);
 
     m_editableExtensions << tr("afb");
+    m_editableExtensions << tr("xsd");
     m_editableExtensions << tr("descr");
 
 	//
