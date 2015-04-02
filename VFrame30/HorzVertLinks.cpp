@@ -20,12 +20,6 @@ namespace VFrame30
 			VideoItemPoint pt1 = *prevpoint;
 			VideoItemPoint pt2 = *linkpoint;
 
-//			pt1.X = CUtils::Round(pt1.X, 5);
-//			pt1.Y = CUtils::Round(pt1.Y, 5);
-
-//			pt2.X = CUtils::Round(pt2.X, 5);
-//			pt2.Y = CUtils::Round(pt2.Y, 5);
-
 			if (std::abs(pt1.X - pt2.X) < 0.000001)	// is it verical line?
 			{
 				LINKS l(std::min(pt1.Y, pt2.Y), std::max(pt1.Y, pt2.Y), VideoItemGuid);

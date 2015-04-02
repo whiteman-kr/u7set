@@ -47,21 +47,25 @@ namespace VFrame30
 
 		bool operator == (const VideoItemPoint& pt) const
 		{
-			return std::abs(pt.X - X) < 0.00001 && std::abs(pt.Y - Y) < 0.00001;
+			return std::abs(pt.X - X) < 0.000001 && std::abs(pt.Y - Y) < 0.000001;
 		}
 		bool operator < (const VideoItemPoint& pt) const
 		{
 			if (operator==(pt) == true)
+			{
 				return false;
+			}
+
+			if (std::abs(pt.Y - Y) < 0.000001)
+			{
+				return X < pt.X;
+			}
 
 			if (Y < pt.Y)
 				return true;
 
 			if (Y > pt.Y)
 				return false;
-
-			if (X < pt.X)
-				return true;
 
 			return false;
 		}

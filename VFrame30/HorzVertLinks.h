@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include "VideoItem.h"
 
 namespace VFrame30
@@ -44,9 +45,14 @@ namespace VFrame30
 		public:
 			bool operator () (double v1, double v2)
 			{
-				//v1 = CUtils::Round(v1, 5);
-				//v2 = CUtils::Round(v2, 5);
-				return v1 < v2;
+				if (std::abs(v1 - v2) <= 0.000001)
+				{
+					return false;
+				}
+				else
+				{
+					return v1 < v2;
+				}
 			}
 		};
 
