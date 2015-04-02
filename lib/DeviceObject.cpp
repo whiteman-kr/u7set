@@ -449,8 +449,8 @@ namespace Hardware
 		 Example:
 		 Server\IP;		string;		0;			0;			192.168.75.254
 		 Server\Port;	uint32_t;	1;			65535;		2345
-		 .
-		 .
+
+
 
 		 name: property name, can be devided by symbol '\'
 		 type: property type, can by one of
