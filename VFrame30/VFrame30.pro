@@ -152,7 +152,7 @@ SOURCES += \
     SchemeView.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
-#CONFIG(debug, debug|release): DEFINES += DEBUG
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

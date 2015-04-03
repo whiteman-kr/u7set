@@ -6,3 +6,4 @@ Makefile*
 *embed.manifest
 bin_unix
 GetGitProjectVersion.exe
+.~lock.*#

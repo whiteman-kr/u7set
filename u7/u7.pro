@@ -174,7 +174,6 @@ HEADERS  += \
     BuildTabPage.h \
     ../include/OutputLog.h \
     ProjectBuilder.h \
-    ../include/Signal.h \
     ../include/DbProgress.h \
     FileListView.h \
     version.h \
@@ -243,6 +242,8 @@ OTHER_FILES += \
 
 DISTFILES += \
     LogicModuleConfiguration.js
+
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
