@@ -243,6 +243,8 @@ OTHER_FILES += \
 DISTFILES += \
     LogicModuleConfiguration.js
 
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
