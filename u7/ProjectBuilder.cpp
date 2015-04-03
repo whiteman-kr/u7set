@@ -712,9 +712,9 @@ bool BuildWorkerThread::compileApplicationLogicLayer(VFrame30::LogicScheme* logi
 	//
 	bool wasJoining = false;	// if branch was joinedto other branch, then process currentBranch one more time
 
-	for (auto& currentBranch = branches.begin();
+    for (auto currentBranch = branches.begin();
 		 currentBranch != branches.end();
-		 wasJoining ? void() : ++currentBranch)
+         std::advance(currentBranch, wasJoining ? 0 : 1))
 	{
 		wasJoining = false;
 
@@ -725,7 +725,7 @@ bool BuildWorkerThread::compileApplicationLogicLayer(VFrame30::LogicScheme* logi
 		// try to find such branch where this id is present,
 		// and join this branch to currentBranch
 		//
-		for (auto& id = currentBranch->begin(); id != currentBranch->end(); ++id)
+        for (auto id = currentBranch->begin(); id != currentBranch->end(); ++id)
 		{
 			auto subBranch = currentBranch;
 			++subBranch;

@@ -117,7 +117,7 @@ function generate_lm_1_rev3(module, confCollection, log)
     //
     var confName = module.ConfName;
     var confIndex = module.ConfIndex;
-    var frameSize = 1016;
+    var frameSize = 1024;
     var frameCount = 22;                // Check it !!!!
     var uartId = 456;                   // Check it !!!!
 
@@ -187,7 +187,7 @@ function generate_lm_1_rev3(module, confCollection, log)
         setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 40);           //Quantity of words
         ptr += 2;
         //reserved
-        ptr += /*1008*/1000;
+        ptr += 1008;
         storeCrc64(confFirmware, log, txRxOptoStartFrame + i, 0, ptr, ptr);  //CRC-64
         ptr += 8;
     }
@@ -203,7 +203,7 @@ function generate_lm_1_rev3(module, confCollection, log)
         //setData16(confFirmware, log, lanStartFrame + i, ptr, 10);      //LAN configuration
         ptr += 62;
         //reserved
-        ptr += /*954*/946;
+        ptr += 954;
         storeCrc64(confFirmware, log, lanStartFrame + i, 0, ptr, ptr);   //CRC-64
         ptr += 8;
     }
