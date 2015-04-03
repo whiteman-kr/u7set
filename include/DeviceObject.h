@@ -475,8 +475,9 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		DeviceSignal::SignalType type() const;
-		void setType(DeviceSignal::SignalType value);
+        DeviceSignal::SignalType type() const;
+        Q_INVOKABLE int jsType() const;
+        void setType(DeviceSignal::SignalType value);
 
 		// Data
 		//

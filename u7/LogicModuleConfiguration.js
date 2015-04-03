@@ -4,7 +4,18 @@ var RackType = 2;
 var ChassisType = 3;
 var ModuleType = 4;
 var ControllerType = 5;
-var DiagSignalType = 6;
+var WorkstationType = 6;
+var SoftwareType = 7;
+var SignalType = 8;
+
+
+var DiagDiscrete = 0;
+var DiagAnalog = 1;
+var InputDiscrete = 2;
+var InputAnalog = 3;
+var OutputDiscrete = 4;
+var OutputAnalog = 5;
+
 
 function(root, confCollection, log, signalSet)
 {
@@ -30,7 +41,7 @@ function(root, confCollection, log, signalSet)
 
     var result = true;
 
-    result = module_lm_1(root, confCollection, log);
+    result = module_lm_1(root, confCollection, log, signalSet);
 
     if (result == false)
     {
@@ -79,7 +90,7 @@ function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
 }
 
 
-function module_lm_1(device, confCollection, log)
+function module_lm_1(device, confCollection, log, signalSet)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -89,7 +100,7 @@ function module_lm_1(device, confCollection, log)
 
             // Generate Configuration
             //
-            return generate_lm_1_rev3(device, confCollection, log);
+            return generate_lm_1_rev3(device, confCollection, log, signalSet);
         }
         return true;
     }
@@ -97,7 +108,7 @@ function module_lm_1(device, confCollection, log)
     for (var i = 0; i < device.childrenCount(); i++)
     {
         var child = device.jsChild(i);
-        if (module_lm_1(child, confCollection, log) == false)
+        if (module_lm_1(child, confCollection, log, signalSet) == false)
         {
             return false;
         }
@@ -111,7 +122,7 @@ function module_lm_1(device, confCollection, log)
 // confCollection - Hardware::ModuleConfCollection
 //
 //
-function generate_lm_1_rev3(module, confCollection, log)
+function generate_lm_1_rev3(module, confCollection, log, signalSet)
 {
     // Variables
     //
@@ -153,7 +164,7 @@ function generate_lm_1_rev3(module, confCollection, log)
             
             if (ioModule.ConfType == "AIM")
             {
-                generate_aim(confFirmware, ioModule, frame, log);
+                generate_aim(confFirmware, ioModule, frame, log, signalSet);
             }
             if (ioModule.ConfType == "AIFM")
             {
@@ -216,19 +227,91 @@ function generate_lm_1_rev3(module, confCollection, log)
 // frame - Number of frame to generate
 //
 //
-function generate_aim(confFirmware, module, frame, log)
+function generate_aim(confFirmware, module, frame, log, signalSet)
 {
     log.writeMessage("MODULE AIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
 
     var ptr = 0;
-
-    // I/O Module configuration
-    //
-    // i/o module data... 640 bytes
-    ptr += 640;
     
+    var AIFMSignalMaxCount = 32;
+    var AIFMSignalCount = 0;
+    
+    //
+    // WARNING!!! "Signal" object has no Place property now. So adding only existing signals in order!!!
+    //
+
+    // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
+    //
+    for (var i = 0; i < module.childrenCount(); i++)
+    {
+        var signalObject = module.jsChild(i);
+        if (signalObject.jsDeviceType() != SignalType)
+        {
+            continue;
+        }
+        if (signalObject.jsType() != InputAnalog)
+        {
+           continue;
+        }
+        
+        log.writeMessage("AIM InputSignal: " + signalObject.StrID);
+        
+        var signal = signalSet.getSignalByDeviceStrID(signalObject.StrID);
+
+        if (signal == null)    
+        {
+            log.writeMessage("Signal " + signalObject.StrID + " was not found in the signal database!");
+            continue;
+        }
+        
+        setData16(confFirmware, log, frame, ptr, /*signal.ftA*/0);          // InA Filtering time constant
+        ptr += 2;
+        setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
+        ptr += 2;
+        setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
+        ptr += 2;
+        setData16(confFirmware, log, frame, ptr, /*signal.maxDiff*/0);      // InA MaxDiff
+        ptr += 2;
+        setData16(confFirmware, log, frame, ptr, /*signal.ftA*/0);          // InA Filtering time constant
+        ptr += 2;
+        setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
+        ptr += 2;
+        setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
+        ptr += 2;
+        setData16(confFirmware, log, frame, ptr, /*signal.maxDiff*/0);      // InA MaxDiff
+        ptr += 2;
+        
+        AIFMSignalCount++;
+        if (AIFMSignalCount >= AIFMSignalMaxCount)
+        {
+            break;
+        }
+    }
+    
+    // Offset for non-existing signals
+    ptr += (AIFMSignalMaxCount - AIFMSignalCount) * 16;
+    
+    // crc
     storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
     ptr += 8;
+    
+    // reserved
+    ptr += 120;
+    
+    // assert if we not on the correct place
+    //
+    if (ptr != 640)
+    {
+        log.writeMessage("WARNING!!! PTR != 640!!! " + ptr);
+        ptr = 640;
+    }
+   
+    // final crc
+    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+    ptr += 8;
+    
+    // ------------------------------------------ TX/RX Config (12 bytes) ---------------------------------
+    //
 
     //  Flags word
     //

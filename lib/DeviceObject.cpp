@@ -1456,7 +1456,13 @@ namespace Hardware
 		return m_type;
 	}
 
-	void DeviceSignal::setType(DeviceSignal::SignalType value)
+    int DeviceSignal::jsType() const
+    {
+        return static_cast<int>(type());
+    }
+
+
+    void DeviceSignal::setType(DeviceSignal::SignalType value)
 	{
 		m_type = value;
 	}
