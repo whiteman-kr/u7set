@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <functional>
 #include <type_traits>
+#include <limits>
 
 
 // Qt includes
@@ -30,6 +31,7 @@
 #include <QMutexLocker>
 #include <QDateTime>
 #include <QPoint>
+#include <QUuid>
 #include <QSettings>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>

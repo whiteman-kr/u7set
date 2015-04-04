@@ -89,8 +89,8 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::build);
 	connect(m_cancelButton, &QAbstractButton::clicked, this, &BuildTabPage::cancel);
 
-	connect(&m_builder, &ProjectBuilder::buildStarted, this, &BuildTabPage::buildStarted);
-	connect(&m_builder, &ProjectBuilder::buildFinished, this, &BuildTabPage::buildFinished);
+	connect(&m_builder, &Builder::Builder::buildStarted, this, &BuildTabPage::buildStarted);
+	connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildFinished);
 
 	// Output Log
 	//

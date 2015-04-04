@@ -1,6 +1,6 @@
 #pragma once
 #include "MainTabPage.h"
-#include "ProjectBuilder.h"
+#include "./Builder/Builder.h"
 #include "../include/DeviceObject.h"
 #include "../include/OutputLog.h"
 
@@ -62,7 +62,7 @@ private:
 	OutputLog m_outputLog;
 	int m_logTimerId = -1;
 
-	ProjectBuilder m_builder;				// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
+	Builder::Builder m_builder;				// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
 };
 
 

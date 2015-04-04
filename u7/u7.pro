@@ -114,11 +114,12 @@ SOURCES +=\
     ../lib/ModuleConfiguration.cpp \
     BuildTabPage.cpp \
     ../lib/OutputLog.cpp \
-    ProjectBuilder.cpp \
     ../lib/DbProgress.cpp \
     FileListView.cpp \
     ../lib/Crc.cpp \
-    DialogFileEditor.cpp
+    DialogFileEditor.cpp \
+    Builder/Builder.cpp \
+    Builder/ApplicationLogicBuilder.cpp
 
 
 HEADERS  += \
@@ -173,12 +174,13 @@ HEADERS  += \
     ../include/ModuleConfiguration.h \
     BuildTabPage.h \
     ../include/OutputLog.h \
-    ProjectBuilder.h \
     ../include/DbProgress.h \
     FileListView.h \
     version.h \
     ../include/Crc.h \
-    DialogFileEditor.h
+    DialogFileEditor.h \
+    Builder/Builder.h \
+    Builder/ApplicationLogicBuilder.h
 
 FORMS    += \
     ChangesetDialog.ui \
