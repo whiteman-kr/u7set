@@ -391,8 +391,19 @@ namespace VFrame30
 
 	void FblItem::ClearAssociatedConnections()
 	{
-		std::for_each(m_inputPoints.begin(), m_inputPoints.end(), [](CFblConnectionPoint& pin){pin.ClearAssociattdIOs();});
-		std::for_each(m_outputPoints.begin(), m_outputPoints.end(), [](CFblConnectionPoint& pin){pin.ClearAssociattdIOs();});
+		std::for_each(m_inputPoints.begin(), m_inputPoints.end(),
+			[](CFblConnectionPoint& pin)
+			{
+				pin.ClearAssociattdIOs();
+			});
+
+		std::for_each(m_outputPoints.begin(), m_outputPoints.end(),
+			[](CFblConnectionPoint& pin)
+			{
+				pin.ClearAssociattdIOs();
+			});
+
+		return;
 	}
 
 	void FblItem::SetConnectionsPos()

@@ -6,10 +6,25 @@
 
 #include "../../VFrame30/LogicScheme.h"
 #include "../../VFrame30/VideoItemLink.h"
+#include "../../VFrame30/VideoItemFblElement.h"
 #include "../../VFrame30/HorzVertLinks.h"
+
 
 namespace Builder
 {
+
+	BranchLink::BranchLink(const VFrame30::VideoItemPoint& point1, const VFrame30::VideoItemPoint& point2) :
+		pt1(point1),
+		pt2(point2)
+	{
+	}
+
+	// ------------------------------------------------------------------------
+	//
+	//		ApplicationLogicBuilder
+	//
+	// ------------------------------------------------------------------------
+
 
 	ApplicationLogicBuilder::ApplicationLogicBuilder(DbController* db, OutputLog* log,
 		int changesetId, bool debug) :
@@ -153,9 +168,6 @@ namespace Builder
 			return false;
 		}
 
-		// --
-		logicScheme->BuildFblConnectionMap();
-
 		// Find layer for compilation
 		//
 		bool layerFound = false;
@@ -195,6 +207,49 @@ namespace Builder
 			return false;
 		}
 
+		// Find all branches - connected links
+		//
+		BranchContainer branchContainer;
+
+		bool result = findBranches(logicScheme, layer, &branchContainer);
+
+		if (result == false)
+		{
+			log()->writeError(tr("Finding branches error."));
+			return false;
+		}
+
+		// Set connections between scheme items
+		//
+		result = setConnections(layer, branchContainer);
+
+		if (result == false)
+		{
+			log()->writeError("setConnections function error.");
+			return false;
+		}
+
+		return true;
+	}
+
+	// Function connects all links, and compose them into branches
+	//
+	bool ApplicationLogicBuilder::findBranches(VFrame30::LogicScheme* logicScheme,
+						   VFrame30::SchemeLayer* layer,
+						   BranchContainer* branchContainer) const
+	{
+		if (logicScheme == nullptr ||
+			layer == nullptr ||
+			branchContainer == nullptr)
+		{
+			assert(logicScheme);
+			assert(layer);
+			assert(branchContainer);
+			return false;
+		}
+
+		std::list<std::set<QUuid>> branches;
+
 		// Enum all links and get all horzlinks and vertlinks
 		//
 		VFrame30::CHorzVertLinks horzVertLinks;
@@ -221,8 +276,6 @@ namespace Builder
 
 		// Enum all vert and horz links and compose branches
 		//
-		std::list<std::set<QUuid>> branches;	// This list contains full branches
-
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
 			VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
@@ -277,23 +330,6 @@ namespace Builder
 			}
 		}
 
-		// DEBUG
-		//
-		qDebug() << "";
-		qDebug() << "Branches before joining";
-
-		for (std::set<QUuid>& b : branches)
-		{
-			qDebug() << "--";
-			for (const QUuid& q : b)
-			{
-				qDebug() << q;
-			}
-		}
-
-		qDebug() << "";
-
-
 		// branches can contain same items,
 		// all such branches must be united
 		//
@@ -341,25 +377,117 @@ namespace Builder
 					++subBranch;
 				}
 			}
+		}
 
+		// For all links in branches get its end points
+		//
+
+		branchContainer->branches.reserve(branches.size());
+
+		for (const std::set<QUuid>& b : branches)
+		{
+			Branch newBranch;
+
+			for (QUuid id : b)
+			{
+				// Get VideoItemLink by this id,
+				// save it's and points to newBranch
+				//
+				std::shared_ptr<VFrame30::VideoItem> videoItem = layer->getItemById(id);
+				VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(videoItem.get());
+
+				if (videoItem == false ||
+					link == nullptr)
+				{
+					assert(videoItem);
+					assert(link);
+
+					log()->writeError(tr("Internal error, expected VFrame30::VideoItemLink"));
+					return false;
+				}
+
+				const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+
+				if (pointList.size() < 2)
+				{
+					assert(pointList.size() >= 2);
+					return false;
+				}
+
+				VFrame30::VideoItemPoint pt1 = pointList.front();
+				VFrame30::VideoItemPoint pt2 = pointList.back();
+
+				newBranch.links[id] = BranchLink(pt1, pt2);
+			}
+
+			branchContainer->branches.push_back(newBranch);
 		}
 
 		// DEBUG
-		//
-		qDebug() << "";
-		qDebug() << "Branches after joining";
-
-		for (std::set<QUuid>& b : branches)
+		for (Branch& eb : branchContainer->branches)
 		{
-			qDebug() << "--";
-			for (const QUuid& q : b)
+			qDebug() << "-----";
+			for (auto& bl : eb.links)
 			{
-				qDebug() << q;
+				qDebug() << bl.first << "--" <<
+							bl.second.pt1.X <<
+							"-" <<
+							bl.second.pt1.Y <<
+							"    " <<
+							bl.second.pt2.X <<
+							"-" <<
+							bl.second.pt2.Y;
 			}
 		}
+		// END OF DEBUG
 
-		qDebug() << "";
+		return true;
+	}
 
+	bool ApplicationLogicBuilder::setConnections(VFrame30::SchemeLayer* layer,
+						const BranchContainer& branchContainer) const
+	{
+		if (layer == nullptr)
+		{
+			assert(layer);
+			return false;
+		}
+
+
+		for (auto& item : layer->Items)
+		{
+			VFrame30::VideoItemFblElement* vifbl = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
+
+			if(vifbl != nullptr)
+			{
+				std::shared_ptr<VFrame30::VideoItemFblElement> fblElement =
+						std::dynamic_pointer_cast<VFrame30::VideoItemFblElement>(item);
+
+				// VideoItem has inputs and outputs
+				// Get coordinates for each input/output and
+				// find branche with point on the pin
+				//
+				fblElement->ClearAssociatedConnections();
+				fblElement->SetConnectionsPos();
+
+				const std::list<VFrame30::CFblConnectionPoint>& inputs = fblElement->inputs();
+				const std::list<VFrame30::CFblConnectionPoint>& outputs = fblElement->outputs();
+
+				for (const VFrame30::CFblConnectionPoint& in : inputs)
+				{
+					VFrame30::VideoItemPoint pinPos = in.point();
+
+					qDebug() << "input  " << pinPos.X << " -" << pinPos.Y;
+				}
+
+				for (const VFrame30::CFblConnectionPoint& out : outputs)
+				{
+					VFrame30::VideoItemPoint pinPos = out.point();
+
+					qDebug() << "output  " << pinPos.X << " -" << pinPos.Y;
+				}
+			}
+		}
 
 		return true;
 	}
@@ -370,7 +498,7 @@ namespace Builder
 		return m_db;
 	}
 
-	OutputLog* ApplicationLogicBuilder::log()
+	OutputLog* ApplicationLogicBuilder::log() const
 	{
 		return m_log;
 	}

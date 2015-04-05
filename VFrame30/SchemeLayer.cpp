@@ -127,9 +127,27 @@ namespace VFrame30
 		return pLayer;
 	}
 
-
 	// Methods
 	//
+
+	std::shared_ptr<VideoItem> SchemeLayer::getItemById(QUuid id) const
+	{
+		auto foundItem = std::find_if(Items.begin(), Items.end(),
+			[&](const std::shared_ptr<VideoItem>& vi)
+			{
+				return vi->guid() == id;
+			});
+
+		if (foundItem != Items.end())
+		{
+			return *foundItem;
+		}
+		else
+		{
+			return std::shared_ptr<VideoItem>();
+		}
+	}
+
 	void SchemeLayer::ConnectionMapPosInc(VideoItemPoint pinPos)
 	{
 		auto mapitem = connectionMap.find(pinPos);

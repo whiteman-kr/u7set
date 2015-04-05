@@ -36,6 +36,8 @@ namespace VFrame30
 		//
 	public:
 
+		std::shared_ptr<VideoItem> getItemById(QUuid id) const;
+
 		// ≈сли в connectionMap есть pinPos, то инкрементировать значение, иначе добавить новую запись со сзначением 1
 		//
 		void ConnectionMapPosInc(VideoItemPoint pinPos);

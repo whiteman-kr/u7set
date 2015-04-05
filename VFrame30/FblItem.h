@@ -15,7 +15,7 @@ namespace VFrame30
 
 	// CFblConnectionPoint
 	//
-	class CFblConnectionPoint
+	class VFRAME30LIBSHARED_EXPORT CFblConnectionPoint
 	{
 	private:
 		CFblConnectionPoint();

@@ -187,7 +187,6 @@ namespace VFrame30
 	void Scheme::Print()
 	{
 		assert(false);
-		//::MessageBox(NULL, GetStrID().c_str(), _T("Print"), MB_OK);
 	}
 
 	void Scheme::MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
