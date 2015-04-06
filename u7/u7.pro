@@ -119,7 +119,8 @@ SOURCES +=\
     ../lib/Crc.cpp \
     DialogFileEditor.cpp \
     Builder/Builder.cpp \
-    Builder/ApplicationLogicBuilder.cpp
+    Builder/ApplicationLogicBuilder.cpp \
+    SchemeLayersDialog.cpp
 
 
 HEADERS  += \
@@ -180,7 +181,8 @@ HEADERS  += \
     ../include/Crc.h \
     DialogFileEditor.h \
     Builder/Builder.h \
-    Builder/ApplicationLogicBuilder.h
+    Builder/ApplicationLogicBuilder.h \
+    SchemeLayersDialog.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -196,7 +198,8 @@ FORMS    += \
     DialogAfbProperties.ui \
     SchemeItemPropertiesDialog.ui \
     SchemePropertiesDialog.ui \
-    DialogFileEditor.ui
+    DialogFileEditor.ui \
+    SchemeLayersDialog.ui
 
 RESOURCES += \
 	Resources.qrc
