@@ -19,6 +19,51 @@ namespace Builder
 	{
 	}
 
+	// Function finds branch with a point on it.
+	// Returns branch index or -1 if a brach was not found
+	//
+	size_t BranchContainer::getBranchByPinPos(VFrame30::VideoItemPoint pt) const
+	{
+		for (size_t i = 0; i < branches.size(); i++)
+		{
+			const Branch& branch = branches[i];
+
+			auto link = std::find_if(branch.links.cbegin(), branch.links.cend(),
+				[&pt](const std::pair<QUuid, BranchLink>& link)
+				{
+					return link.second.pt1 == pt || link.second.pt2 == pt;
+				});
+
+			if (link != branch.links.end())
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	size_t BranchContainer::getBranchByPinGuid(const QUuid& guid) const
+	{
+		for (size_t i = 0; i < branches.size(); i++)
+		{
+			const Branch& branch = branches[i];
+
+			if (branch.outputPin == guid)
+			{
+				return i;
+			}
+
+			if (branch.inputPins.find(guid) != branch.inputPins.end())
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+
 	// ------------------------------------------------------------------------
 	//
 	//		ApplicationLogicBuilder
@@ -219,15 +264,18 @@ namespace Builder
 			return false;
 		}
 
-		// Set connections between scheme items
+		// Set pins' guids to branches
 		//
-		result = setConnections(layer, branchContainer);
+		result = setBranchConnectionToPin(logicScheme, layer, &branchContainer);
 
 		if (result == false)
 		{
 			log()->writeError("setConnections function error.");
 			return false;
 		}
+
+		// Associate pins' connections
+		//
 
 		return true;
 	}
@@ -444,15 +492,20 @@ namespace Builder
 		return true;
 	}
 
-	bool ApplicationLogicBuilder::setConnections(VFrame30::SchemeLayer* layer,
-						const BranchContainer& branchContainer) const
+	bool ApplicationLogicBuilder::setBranchConnectionToPin(VFrame30::LogicScheme* scheme, VFrame30::SchemeLayer* layer,
+						BranchContainer* branchContainer) const
 	{
-		if (layer == nullptr)
+		if (scheme == nullptr ||
+			layer == nullptr ||
+			branchContainer == nullptr)
 		{
+			assert(scheme);
 			assert(layer);
+			assert(branchContainer);
 			return false;
 		}
 
+		bool result = true;
 
 		for (auto& item : layer->Items)
 		{
@@ -470,26 +523,187 @@ namespace Builder
 				fblElement->ClearAssociatedConnections();
 				fblElement->SetConnectionsPos();
 
-				const std::list<VFrame30::CFblConnectionPoint>& inputs = fblElement->inputs();
-				const std::list<VFrame30::CFblConnectionPoint>& outputs = fblElement->outputs();
+				std::list<VFrame30::CFblConnectionPoint>* inputs = fblElement->mutableInputs();
+				std::list<VFrame30::CFblConnectionPoint>* outputs = fblElement->mutableOutputs();
 
-				for (const VFrame30::CFblConnectionPoint& in : inputs)
+				for (VFrame30::CFblConnectionPoint& in : *inputs)
 				{
 					VFrame30::VideoItemPoint pinPos = in.point();
 
 					qDebug() << "input  " << pinPos.X << " -" << pinPos.Y;
+
+					size_t branchIndex = branchContainer->getBranchByPinPos(pinPos);
+
+					if (branchIndex == -1)
+					{
+						// Pin is not connectext to any link, this is error
+						//
+						std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+
+						log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
+							.arg(scheme->caption())
+							.arg(layer->name())
+							.arg(afb->caption()));
+
+						result = false;
+						continue;
+					}
+
+					// Branch was found for current pin
+					//
+					branchContainer->branches[branchIndex].inputPins.insert(in.guid());
 				}
 
-				for (const VFrame30::CFblConnectionPoint& out : outputs)
+				for (const VFrame30::CFblConnectionPoint& out : *outputs)
 				{
 					VFrame30::VideoItemPoint pinPos = out.point();
 
 					qDebug() << "output  " << pinPos.X << " -" << pinPos.Y;
+
+					size_t branchIndex = branchContainer->getBranchByPinPos(pinPos);
+
+					if (branchIndex == -1)
+					{
+						// Pin is not connectext to any link, this is error
+						//
+						std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+
+						log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
+							.arg(scheme->caption())
+							.arg(layer->name())
+							.arg(afb->caption()));
+
+						result = false;
+						continue;
+					}
+
+					// Branch was found for current pin
+					//
+
+					if (branchContainer->branches[branchIndex].outputPin.isNull() == false)
+					{
+						log()->writeError(tr("LogicScheme %1 (layer %2): Branch has multiple outputs.")
+							.arg(scheme->caption())
+							.arg(layer->name()));
+
+						result = false;
+						continue;
+					}
+					else
+					{
+						branchContainer->branches[branchIndex].outputPin = out.guid();
+					}
 				}
 			}
 		}
 
-		return true;
+		return result;
+	}
+
+
+	bool ApplicationLogicBuilder::setPinConnections(VFrame30::LogicScheme* scheme, VFrame30::SchemeLayer* layer,
+						   BranchContainer* branchContainer)
+	{
+		if (scheme == nullptr ||
+			layer == nullptr ||
+			branchContainer == nullptr)
+		{
+			assert(scheme);
+			assert(layer);
+			assert(branchContainer);
+			return false;
+		}
+
+		bool result = true;
+
+		for (auto& item : layer->Items)
+		{
+			VFrame30::VideoItemFblElement* vifbl = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
+
+			if(vifbl != nullptr)
+			{
+				std::shared_ptr<VFrame30::VideoItemFblElement> fblElement =
+						std::dynamic_pointer_cast<VFrame30::VideoItemFblElement>(item);
+
+				// VideoItem has inputs and outputs
+				// Get coordinates for each input/output and
+				// find branche with point on the pin
+				//
+				fblElement->ClearAssociatedConnections();
+				fblElement->SetConnectionsPos();
+
+				std::list<VFrame30::CFblConnectionPoint>* inputs = fblElement->mutableInputs();
+				std::list<VFrame30::CFblConnectionPoint>* outputs = fblElement->mutableOutputs();
+
+				for (VFrame30::CFblConnectionPoint& in : *inputs)
+				{
+					size_t branchIndex = branchContainer->getBranchByPinGuid(in.guid());
+
+					if (branchIndex == -1)
+					{
+						// Pin is not connectext to any link, this is error
+						//
+						assert(false);
+
+						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
+							.arg(Q_FUNC_INFO));
+
+						result = false;
+						return result;
+					}
+
+					// Branch was found for current pin
+					//
+					const Branch& branch = branchContainer->branches[branchIndex];
+
+					if (branch.outputPin.isNull() == true)
+					{
+						assert(branch.outputPin.isNull() == false);
+
+						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, output pin in brach suppose to be initialized, %1.")
+							.arg(Q_FUNC_INFO));
+
+						result = false;
+						return result;
+					}
+
+					// Set sourche pin guid for this pin
+					//
+					in.AddAssociattedIOs(branch.outputPin);
+				}
+
+				for (VFrame30::CFblConnectionPoint& out : *outputs)
+				{
+					size_t branchIndex = branchContainer->getBranchByPinGuid(out.guid());
+
+					if (branchIndex == -1)
+					{
+						// Pin is not connectext to any link, this is error
+						//
+						assert(false);
+
+						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
+							.arg(Q_FUNC_INFO));
+
+						result = false;
+						return result;
+					}
+
+					// Branch was found for current pin
+					//
+					const Branch& branch = branchContainer->branches[branchIndex];
+
+					// Set destination pins guid for this pin
+					//
+					for (const QUuid& dstid : branch.inputPins)
+					{
+						out.AddAssociattedIOs(dstid);
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 
 

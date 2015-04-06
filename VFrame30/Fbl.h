@@ -200,7 +200,7 @@ private:
 		const QString& strID() const;
 		void setStrID(const QString& strID);
 
-		const QString& caption() const;
+		QString caption() const;
 		void setCaption(const QString& caption);
 
 		unsigned int opcode() const;

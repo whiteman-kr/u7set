@@ -983,7 +983,7 @@ namespace Afbl
 
 	// Caption
 	//
-	const QString& AfbElement::caption() const
+	QString AfbElement::caption() const
 	{
 		return m_caption;
 	}

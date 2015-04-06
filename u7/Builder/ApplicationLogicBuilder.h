@@ -41,12 +41,17 @@ namespace Builder
 
 	struct Branch
 	{
-		std::map<QUuid, BranchLink> links;
+		QUuid outputPin;						// Output pin for this branch, can be the only
+		std::set<QUuid> inputPins;				// Input pins for this branch
+		std::map<QUuid, BranchLink> links;		// Links for this branch
 	};
 
 	struct BranchContainer
 	{
 		std::vector<Branch> branches;
+
+		size_t getBranchByPinPos(VFrame30::VideoItemPoint pt) const;
+		size_t getBranchByPinGuid(const QUuid& guid) const;
 	};
 
 
@@ -72,11 +77,14 @@ namespace Builder
 		bool compileApplicationLogicLayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer);
 
 		bool findBranches(VFrame30::LogicScheme* logicScheme,
-			VFrame30::SchemeLayer* layer,
-			BranchContainer* branchContainer) const;
+						  VFrame30::SchemeLayer* layer,
+						  BranchContainer* branchContainer) const;
 
-		bool setConnections(VFrame30::SchemeLayer* layer,
-			const BranchContainer& branches) const;
+		bool setBranchConnectionToPin(VFrame30::LogicScheme* scheme, VFrame30::SchemeLayer* layer,
+									  BranchContainer* branchContainer) const;
+
+		bool setPinConnections(VFrame30::LogicScheme* scheme, VFrame30::SchemeLayer* layer,
+							   BranchContainer* branchContainer);
 
 	protected:
 		DbController* db();
