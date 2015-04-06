@@ -387,6 +387,7 @@ namespace Builder
 			if (fblElement)
 			{
 				std::shared_ptr<Afbl::AfbElement> afb = logicScheme->afbCollection().get(fblElement->afbGuid());
+
 				qDebug() << afb->caption();
 
 				const std::list<VFrame30::CFblConnectionPoint>& inputs = fblElement->inputs();
@@ -419,17 +420,50 @@ namespace Builder
 
 					qDebug() << str;
 				}
-
 			}
 
 			if (inputElement)
 			{
-				assert(false);		// Not done yet;
+				const std::list<VFrame30::CFblConnectionPoint>& inputs = inputElement->inputs();
+				const std::list<VFrame30::CFblConnectionPoint>& outputs = inputElement->outputs();
+
+				assert(inputs.empty() == true);
+				assert(outputs.size() == 1);
+				assert(outputs.front().associatedIOs().size() > 0);
+
+				qDebug() << "Input Element: " << inputElement->signalStrIds();
+
+				for (const VFrame30::CFblConnectionPoint& out : outputs)
+				{
+					QString str = QString("\tOutput %1, associated pins: ").arg(out.guid().toString());
+
+					const std::list<QUuid>& assIos = out.associatedIOs();	// AssIos ))))
+
+					for (auto apid : assIos)
+					{
+						str.append(QString(" %1,").arg(apid.toString()));
+					}
+
+					qDebug() << str;
+				}
 			}
 
 			if (outputElement)
 			{
-				assert(false);		// Not done yet;
+				const std::list<VFrame30::CFblConnectionPoint>& inputs = outputElement->inputs();
+				const std::list<VFrame30::CFblConnectionPoint>& outputs = outputElement->outputs();
+
+				assert(inputs.size() == 1);
+				assert(inputs.front().associatedIOs().size() == 1);
+				assert(outputs.empty() == true);
+
+				qDebug() << "Output Element: " << outputElement->signalStrIds();
+
+				QString str = QString("\tInputPin %1, associated pin: %2")
+							  .arg(inputs.front().guid().toString())
+							  .arg(inputs.front().associatedIOs().front().toString());
+
+				qDebug() << str;
 			}
 		}
 
@@ -674,22 +708,27 @@ namespace Builder
 
 		for (auto& item : layer->Items)
 		{
-			VFrame30::VideoItemFblElement* vifbl = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
-
-			if(vifbl != nullptr)
+			if (dynamic_cast<VFrame30::FblItemLine*>(item.get()) != nullptr)
 			{
-				std::shared_ptr<VFrame30::VideoItemFblElement> fblElement =
-						std::dynamic_pointer_cast<VFrame30::VideoItemFblElement>(item);
+				// This is link, it is already processed by composing branches
+				//
+				continue;
+			}
 
+			std::shared_ptr<VFrame30::FblItem> fblItem =
+					std::dynamic_pointer_cast<VFrame30::FblItem>(item);
+
+			if(fblItem != nullptr)
+			{
 				// VideoItem has inputs and outputs
 				// Get coordinates for each input/output and
 				// find branche with point on the pin
 				//
-				fblElement->ClearAssociatedConnections();
-				fblElement->SetConnectionsPos();
+				fblItem->ClearAssociatedConnections();
+				fblItem->SetConnectionsPos();
 
-				std::list<VFrame30::CFblConnectionPoint>* inputs = fblElement->mutableInputs();
-				std::list<VFrame30::CFblConnectionPoint>* outputs = fblElement->mutableOutputs();
+				std::list<VFrame30::CFblConnectionPoint>* inputs = fblItem->mutableInputs();
+				std::list<VFrame30::CFblConnectionPoint>* outputs = fblItem->mutableOutputs();
 
 				for (VFrame30::CFblConnectionPoint& in : *inputs)
 				{
@@ -703,15 +742,44 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+						VFrame30::VideoItemInputSignal* inputSignal = dynamic_cast<VFrame30::VideoItemInputSignal*>(item.get());
+						VFrame30::VideoItemOutputSignal* outputSignal = dynamic_cast<VFrame30::VideoItemOutputSignal*>(item.get());
+						VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
 
-						log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
-							.arg(scheme->caption())
-							.arg(layer->name())
-							.arg(afb->caption()));
+						if (inputSignal != nullptr)
+						{
+							log()->writeError(tr("LogicScheme %1 (layer %2): InputSignal element has unconnected pin.")
+								.arg(scheme->caption())
+								.arg(layer->name()));
 
-						result = false;
-						continue;
+							result = false;
+							continue;
+						}
+
+						if (outputSignal != nullptr)
+						{
+							log()->writeError(tr("LogicScheme %1 (layer %2): OutputSignal element has unconnected pin.")
+								.arg(scheme->caption())
+								.arg(layer->name()));
+
+							result = false;
+							continue;
+						}
+
+						if (fblElement != nullptr)
+						{
+							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+
+							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
+								.arg(scheme->caption())
+								.arg(layer->name())
+								.arg(afb->caption()));
+
+							result = false;
+							continue;
+						}
+
+						assert(false);		// What the item is it?
 					}
 
 					// Branch was found for current pin
@@ -731,15 +799,44 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+						VFrame30::VideoItemInputSignal* inputSignal = dynamic_cast<VFrame30::VideoItemInputSignal*>(item.get());
+						VFrame30::VideoItemOutputSignal* outputSignal = dynamic_cast<VFrame30::VideoItemOutputSignal*>(item.get());
+						VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
 
-						log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
-							.arg(scheme->caption())
-							.arg(layer->name())
-							.arg(afb->caption()));
+						if (inputSignal != nullptr)
+						{
+							log()->writeError(tr("LogicScheme %1 (layer %2): InputSignal element has unconnected pin.")
+								.arg(scheme->caption())
+								.arg(layer->name()));
 
-						result = false;
-						continue;
+							result = false;
+							continue;
+						}
+
+						if (outputSignal != nullptr)
+						{
+							log()->writeError(tr("LogicScheme %1 (layer %2): OutputSignal element has unconnected pin.")
+								.arg(scheme->caption())
+								.arg(layer->name()));
+
+							result = false;
+							continue;
+						}
+
+						if (fblElement != nullptr)
+						{
+							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+
+							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
+								.arg(scheme->caption())
+								.arg(layer->name())
+								.arg(afb->caption()));
+
+							result = false;
+							continue;
+						}
+
+						assert(false);		// What the item is it?
 					}
 
 					// Branch was found for current pin
@@ -783,12 +880,12 @@ namespace Builder
 
 		for (auto& item : layer->Items)
 		{
-			VFrame30::VideoItemFblElement* vifbl = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
+			VFrame30::FblItemRect* fblirect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 
-			if(vifbl != nullptr)
+			if(fblirect != nullptr)
 			{
-				std::shared_ptr<VFrame30::VideoItemFblElement> fblElement =
-						std::dynamic_pointer_cast<VFrame30::VideoItemFblElement>(item);
+				std::shared_ptr<VFrame30::FblItemRect> fblElement =
+						std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
 
 				// VideoItem has inputs and outputs
 				// Get coordinates for each input/output and

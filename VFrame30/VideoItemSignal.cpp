@@ -189,9 +189,7 @@ namespace VFrame30
 
 	VideoItemInputSignal::~VideoItemInputSignal(void)
 	{
-#ifdef _DEBUG
 		assert(outputsCount() == 1);
-#endif 
 	}
 
 	// Serialization
@@ -264,9 +262,7 @@ namespace VFrame30
 
 	VideoItemOutputSignal::~VideoItemOutputSignal(void)
 	{
-#ifdef _DEBUG
 		assert(inputsCount() == 1);
-#endif
 	}
 
 	// Serialization
