@@ -1264,15 +1264,22 @@ void Configurator::writeConfData(ModuleConfFirmware *conf)
                     //uint16_t frameIndex = static_cast<uint16_t>(frames[i]);
                     uint16_t frameIndex = i;
 
+					if (frameIndex == IdentificationFrameIndex)
+					{
+						// Skip identifiaction frame
+						//
+						continue;
+					}
+
                     theLog.writeMessage(tr("Writing block %1").arg(frameIndex));
 
-                    if (frameIndex == IdentificationFrameIndex || frameIndex >= blockCount)
+					if (frameIndex >= blockCount)
                     {
                         throw tr("Wrong FrameIndex %1").arg(frameIndex);
                     }
 
                     std::vector<quint8> frameData = conf->frame(i);
-                    //frameData.resize(blockSize, 0);
+					frameData.resize(blockSize, 0);
 
                     // Set Crc to databuffer
                     //

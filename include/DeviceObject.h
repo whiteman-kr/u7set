@@ -191,6 +191,7 @@ namespace Hardware
 		void setDynamicProperties(const QString& value);
 
 		int place() const;
+		Q_INVOKABLE int jsPlace() const;
 		void setPlace(int value);
 
 		// Preset
