@@ -28,11 +28,20 @@ unix:system([ -e ./version.h ] || touch ./version.h)
 versionTarget.target = version.h
 versionTarget.depends = FORCE
 win32 {
-    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-        nmake & \
-        chdir $$PWD & \
-        $$PWD/../GetGitProjectVersion.exe $$PWD/DataAquisitionService.pro
+        contains(QMAKE_TARGET.arch, x86_64){
+            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake & \
+            chdir $$PWD & \
+            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/DataAquisitionService.pro
+        }
+        else{
+            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake & \
+            chdir $$PWD & \
+            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/DataAquisitionService.pro
+        }
 }
 unix {
     versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
@@ -71,7 +80,7 @@ unix:QMAKE_CXXFLAGS += -std=c++11
 # Visual Leak Detector
 #
 win32 {
-		contains(QMAKE_TARGET.arch, x86_64) {
+                contains(QMAKE_TARGET.arch, x86_64) {
 				LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
 				LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
 		} else {

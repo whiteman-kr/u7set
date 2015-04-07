@@ -20,11 +20,20 @@ unix:system([ -e ./version.h ] || touch ./version.h)
 versionTarget.target = version.h
 versionTarget.depends = FORCE
 win32 {
-    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-        nmake & \
-        chdir $$PWD & \
-        $$PWD/../GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro
+        contains(QMAKE_TARGET.arch, x86_64){
+            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake & \
+            chdir $$PWD & \
+            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro
+        }
+        else{
+            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake & \
+            chdir $$PWD & \
+            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro
+        }
 }
 unix {
     versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
