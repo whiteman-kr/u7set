@@ -63,6 +63,7 @@ private:
 	QtProperty* m_outputLowLimitProperty;
 	QtProperty* m_outputHighLimitProperty;
 	QtProperty* m_outputUnitProperty;
+	QtProperty* m_outputRangeModeProperty;
 	QtProperty* m_outputSensorProperty;
 
 	QtProperty* m_acquireProperty;
