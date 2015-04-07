@@ -47,6 +47,9 @@ public:
 	bool windowMessageListEmpty() const;
 	OutputLogItem popWindowMessages();
 
+	void startStrLogging();
+	QString finishStrLogging();
+
 	// Signals
 	//
 signals:
@@ -68,6 +71,9 @@ public:
 private:
 	std::list<OutputLogItem> windowMessageList;		// List buffer for writing messages to main window Log Widget
 	std::list<OutputLogItem> fileMessageList;		// List buffer for writing messages to log file
+
+	bool m_strLogging = false;
+	QString m_strFullLog;
 
 	int m_errorCount = 0;
 	int m_warningCount = 0;

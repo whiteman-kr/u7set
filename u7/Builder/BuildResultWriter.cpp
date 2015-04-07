@@ -38,11 +38,6 @@ namespace Builder
 			return m_runBuild;
 		}
 
-
-		m_log->resetErrorCount();
-		m_log->resetWarningCount();
-
-
 		if (m_dbController->buildStart(QHostInfo::localHostName(), m_release, m_changesetID, &m_buildNo, nullptr) == false)
 		{
 			msg = tr(__FUNCTION__": Build start error.");
@@ -54,6 +49,11 @@ namespace Builder
 			m_runBuild = false;
 			return m_runBuild;
 		}
+
+		m_log->resetErrorCount();
+		m_log->resetWarningCount();
+
+		m_log->startStrLogging();
 
 		msg = QString(tr("%1 building #%2 was started. User - %3, host - %4, changeset - %5."))
 				.arg(m_release ? "RELEASE" : "DEBUG")
@@ -118,6 +118,8 @@ namespace Builder
 				m_log->writeSuccess(msg, true);
 			}
 		}
+
+		buildLogStr = m_log->finishStrLogging();
 
 		m_dbController->buildFinish(m_buildNo, errors, warnings, buildLogStr,  nullptr);
 

@@ -1,4 +1,3 @@
-//#include "Stable.h"
 #include "../include/OutputLog.h"
 
 
@@ -38,33 +37,44 @@ void OutputLog::clear()
 
 void OutputLog::write(const QString& str, OutputMessageLevel level, bool bold)
 {
-#ifdef _DEBUG
+	QDateTime time = QDateTime::currentDateTime();
+
+	// Get string level
+	//
 	QString strLevel;
+
 	switch (level)
 	{
 	case OutputMessageLevel::Message:
-		strLevel = "Message";
+		strLevel = "MSG";
 		break;
 	case OutputMessageLevel::Success:
-		strLevel = "Success";
+		strLevel = "SCS";
 		break;
 	case OutputMessageLevel::Warning:
-		strLevel = "Warning";
+		strLevel = "WRN";
 		break;
 	case OutputMessageLevel::Error:
-		strLevel = "Error";
+		strLevel = "ERR";
 		break;
 	default:
 		assert(false);
 	}
-	qDebug() << QString("%1: %2").arg(strLevel).arg(str);
-#endif
+
+	// Set full string
+	//
+	QString message = QString("\n%1 %2: %3").arg(time.toString()).arg(strLevel).arg(str);
+
+	qDebug() << message;
 
 	QMutexLocker locker(&mutex);
 
-	QDateTime time = QDateTime::currentDateTime();
-
 	windowMessageList.push_back(OutputLogItem(str, level, bold, time));
+
+	if (m_strLogging == true)
+	{
+		 m_strFullLog.append(message);
+	}
 	
 	return;
 }
@@ -143,16 +153,39 @@ OutputLogItem OutputLog::popWindowMessages()
 	return logItem;
 }
 
+void OutputLog::startStrLogging()
+{
+	QMutexLocker locker(&mutex);
+	m_strLogging = true;
+
+	m_strFullLog.clear();
+
+	return;
+}
+
+QString OutputLog::finishStrLogging()
+{
+	QMutexLocker locker(&mutex);
+	m_strLogging = false;
+
+	QString tmp;
+	std::swap(tmp, m_strFullLog);
+
+	return tmp;
+}
+
 int OutputLog::errorCount() const
 {
+	QMutexLocker locker(&mutex);
 	return m_errorCount;
 }
 
 void OutputLog::setErrorCount(int value)
 {
+	QMutexLocker locker(&mutex);
 	int oldValue = m_errorCount;
-
 	m_errorCount = value;
+	locker.unlock();
 
 	emit errorCountChanged(oldValue, value);
 
@@ -167,14 +200,16 @@ void OutputLog::resetErrorCount()
 
 int OutputLog::warningCount() const
 {
+	QMutexLocker locker(&mutex);
 	return m_warningCount;
 }
 
 void OutputLog::setWarningCount(int value)
 {
+	QMutexLocker locker(&mutex);
 	int oldValue = m_warningCount;
-
 	m_warningCount = value;
+	locker.unlock();
 
 	emit warningCountChanged(oldValue, value);
 
