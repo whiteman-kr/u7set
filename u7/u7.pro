@@ -48,11 +48,20 @@ unix:system([ -e ./version.h ] || touch ./version.h)
 versionTarget.target = version.h
 versionTarget.depends = FORCE
 win32 {
-    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-        nmake & \
-        chdir $$PWD & \
-        $$PWD/../GetGitProjectVersion.exe $$PWD/u7.pro
+        contains(QMAKE_TARGET.arch, x86_64){
+            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake & \
+            chdir $$PWD & \
+            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/u7.pro
+        }
+        else{
+            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake & \
+            chdir $$PWD & \
+            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/u7.pro
+        }
 }
 unix {
     versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
@@ -119,7 +128,10 @@ SOURCES +=\
     ../lib/Crc.cpp \
     DialogFileEditor.cpp \
     Builder/Builder.cpp \
-    Builder/ApplicationLogicBuilder.cpp
+    Builder/ApplicationLogicBuilder.cpp \
+	Builder/BuildResultWriter.cpp \
+	SchemeLayersDialog.cpp
+
 
 
 HEADERS  += \
@@ -180,7 +192,10 @@ HEADERS  += \
     ../include/Crc.h \
     DialogFileEditor.h \
     Builder/Builder.h \
-    Builder/ApplicationLogicBuilder.h
+    Builder/ApplicationLogicBuilder.h \
+	Builder/BuildResultWriter.h \
+    SchemeLayersDialog.h
+
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -196,7 +211,8 @@ FORMS    += \
     DialogAfbProperties.ui \
     SchemeItemPropertiesDialog.ui \
     SchemePropertiesDialog.ui \
-    DialogFileEditor.ui
+    DialogFileEditor.ui \
+    SchemeLayersDialog.ui
 
 RESOURCES += \
 	Resources.qrc
@@ -240,7 +256,8 @@ OTHER_FILES += \
         DatabaseUpgrade/Upgrade0032.sql \
         DatabaseUpgrade/Upgrade0033.sql \
         Tools/afbschema.xsd \
-        ../Proto/proto_compile.sh
+        ../Proto/proto_compile.sh \
+    DatabaseUpgrade/Upgrade0034.sql
 
 DISTFILES += \
     LogicModuleConfiguration.js

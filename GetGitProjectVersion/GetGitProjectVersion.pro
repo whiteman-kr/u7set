@@ -5,13 +5,36 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
-win32:INCLUDEPATH += $$PWD/libgit2headers
-win32:LIBS += $$PWD/git2.lib
+
+# libgit2
+#
+win32{
+        contains(QMAKE_TARGET.arch, x86_64){
+                LIBS += $$PWD/../bin_Win64/git2.lib
+        }
+        else{
+                LIBS += $$PWD/../bin_Win32/git2.lib
+        }
+
+        INCLUDEPATH += $$PWD/libgit2headers
+}
+
+
+#win32:INCLUDEPATH += $$PWD/libgit2headers
+#win32:LIBS += $$PWD/git2.lib
 
 # DESTDIR
 #
 win32 {
         DESTDIR = ../
+
+        contains(QMAKE_TARGET.arch, x86_64){
+                DESTDIR = ../bin_Win64/
+        }
+        else{
+                DESTDIR = ../bin_Win32/
+        }
+
 }
 unix {
         DESTDIR = ../bin_unix

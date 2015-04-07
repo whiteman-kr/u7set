@@ -127,6 +127,11 @@ public slots:
 
 	void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
+	// Build management
+	//
+	void slot_buildStart(QString workstation, bool release, int changeset, int* buildID);
+	void slot_buildFinish(int buildID, int errors, int warnings, QString buildLog);
+
 	// Version Control
 	//
 	void slot_isAnyCheckedOut(bool* checkedOut);

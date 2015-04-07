@@ -2,6 +2,7 @@
 #include "EditEngine/EditEngine.h"
 #include "EditSchemeWidget.h"
 #include "SchemePropertiesDialog.h"
+#include "SchemeLayersDialog.h"
 #include "SchemeItemPropertiesDialog.h"
 #include "../VFrame30/VideoItemLine.h"
 #include "../VFrame30/VideoItemRect.h"
@@ -1661,6 +1662,15 @@ void EditSchemeWidget::createActions()
 	m_separatorAction0 = new QAction(this);
 	m_separatorAction0->setSeparator(true);
 
+
+	// Edit->Properties
+	//
+	m_layersAction = new QAction(tr("Layers..."), this);
+	m_layersAction->setEnabled(true);
+	//m_layersAction->setMenuRole(QAction::NoRole);
+	//m_layersAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Enter));
+	connect(m_layersAction, &QAction::triggered, this, &EditSchemeWidget::layers);
+	addAction(m_layersAction);
 
 	//
 	// Create Sub Menus
@@ -3680,6 +3690,7 @@ void EditSchemeWidget::contextMenu(const QPoint& pos)
 	actions << m_editAction;
 
 	actions << m_separatorAction0;
+	actions << m_layersAction;
 	actions << m_propertiesAction;
 
 	menu.exec(actions, mapToGlobal(pos), 0, this);
@@ -3809,6 +3820,17 @@ void EditSchemeWidget::properties()
 
 	m_itemsPropertiesDialog->setObjects(schemeView()->selectedItems());
 	m_itemsPropertiesDialog->show();
+	return;
+}
+
+void EditSchemeWidget::layers()
+{
+	SchemeLayersDialog schemeLayersDialog(schemeView(), this);
+	if (schemeLayersDialog.exec() == QDialog::Accepted)
+	{
+
+	}
+	update();
 	return;
 }
 

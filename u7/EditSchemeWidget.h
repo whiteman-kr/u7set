@@ -62,6 +62,7 @@ enum VideoItemAction
 
 class EditSchemeWidget;
 class SchemePropertiesDialog;
+class SchemeLayersDialog;
 class SchemeItemPropertiesDialog;
 
 namespace EditEngine
@@ -294,6 +295,7 @@ protected slots:
 
 	void schemeProperties();
 	void properties();
+	void layers();
 	void selectionChanged();
 
 	void addFblElement();
@@ -472,6 +474,7 @@ private:
 	// Properties
 	//
 	QAction* m_separatorAction0;
+	QAction* m_layersAction;
 	//QMenu* m_propertiesMenu;
 	//QAction* m_propertiesAction;
 
