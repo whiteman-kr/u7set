@@ -173,17 +173,17 @@ namespace Builder
 
 		if (schemes.empty() == true)
 		{
-			m_log->writeMessage(tr("There is no appliction logic files in the project."));
+			m_log->writeMessage(tr("There is no appliction logic files in the project."), false);
 			return true;
 		}
 
 		// Compile application logic
 		//
-		m_log->writeMessage(tr("Compiling..."));
+		m_log->writeMessage(tr("Compiling..."), false);
 
 		for (std::shared_ptr<VFrame30::LogicScheme> scheme : schemes)
 		{
-			m_log->writeMessage(scheme->caption());
+			m_log->writeMessage(scheme->caption(), false);
 
 			ok = compileApplicationLogicScheme(scheme);
 
@@ -222,7 +222,7 @@ namespace Builder
 
 		if (ok == false)
 		{
-			m_log->writeError(tr("Cannot get application logic file list."));
+			m_log->writeError(tr("Cannot get application logic file list."), false, true);
 			return false;
 		}
 
@@ -237,7 +237,7 @@ namespace Builder
 		//
 		for (DbFileInfo& fi : applicationLogicFileList)
 		{
-			m_log->writeMessage(tr("Loading %1").arg(fi.fileName()));
+			m_log->writeMessage(tr("Loading %1").arg(fi.fileName()), false);
 
 			std::shared_ptr<DbFile> file;
 
@@ -252,7 +252,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Cannot get application logic file instances."), true);
+				m_log->writeError(tr("Cannot get application logic file instances."), true, true);
 				return false;
 			}
 
@@ -263,7 +263,7 @@ namespace Builder
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
-				m_log->writeError(tr("File loading error."), true);
+				m_log->writeError(tr("File loading error."), true, true);
 				return false;
 			}
 
@@ -292,7 +292,7 @@ namespace Builder
 		{
 			qDebug() << Q_FUNC_INFO << " WARNING!!!! Compiling ALL layers, in future compile just l->compile() LAYER!!!!";
 
-			//if (l->compile() == true)
+			if (l->compile() == true)
 			{
 				layerFound = true;
 				ok = compileApplicationLogicLayer(logicScheme, l);
@@ -310,7 +310,7 @@ namespace Builder
 
 		if (layerFound == false)
 		{
-			m_log->writeError(tr("There is no compile layer in the scheme."));
+			m_log->writeError(tr("There is no compile layer in the scheme."), false, true);
 			return false;
 		}
 
@@ -335,7 +335,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			log()->writeError(tr("Finding branches error."));
+			log()->writeError(tr("Finding branches error."), false, false);
 			return false;
 		}
 
@@ -345,7 +345,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			log()->writeError("setBranchConnectionToPin function error.");
+			log()->writeError("setBranchConnectionToPin function error.", false, false);
 			return false;
 		}
 
@@ -361,7 +361,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			log()->writeError(tr("Internal error: Cannot set data to ApplicationLogicData."));
+			log()->writeError(tr("Internal error: Cannot set data to ApplicationLogicData."), false, true);
 			return false;
 		}
 
@@ -649,7 +649,7 @@ namespace Builder
 					assert(videoItem);
 					assert(link);
 
-					log()->writeError(tr("Internal error, expected VFrame30::VideoItemLink"));
+					log()->writeError(tr(__FUNCTION__"Internal error, expected VFrame30::VideoItemLink"), false, true);
 					return false;
 				}
 
@@ -658,6 +658,7 @@ namespace Builder
 				if (pointList.size() < 2)
 				{
 					assert(pointList.size() >= 2);
+					log()->writeError(tr(__FUNCTION__"Internal error, Link has less the two points"), false, true);
 					return false;
 				}
 
@@ -750,7 +751,8 @@ namespace Builder
 						{
 							log()->writeError(tr("LogicScheme %1 (layer %2): InputSignal element has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(layer->name()));
+								.arg(layer->name()),
+								false, true);
 
 							result = false;
 							continue;
@@ -760,7 +762,8 @@ namespace Builder
 						{
 							log()->writeError(tr("LogicScheme %1 (layer %2): OutputSignal element has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(layer->name()));
+								.arg(layer->name()),
+								false, true);
 
 							result = false;
 							continue;
@@ -773,7 +776,8 @@ namespace Builder
 							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
 								.arg(scheme->caption())
 								.arg(layer->name())
-								.arg(afb->caption()));
+								.arg(afb->caption()),
+								false, true);
 
 							result = false;
 							continue;
@@ -807,7 +811,8 @@ namespace Builder
 						{
 							log()->writeError(tr("LogicScheme %1 (layer %2): InputSignal element has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(layer->name()));
+								.arg(layer->name())
+								, false, true);
 
 							result = false;
 							continue;
@@ -817,7 +822,8 @@ namespace Builder
 						{
 							log()->writeError(tr("LogicScheme %1 (layer %2): OutputSignal element has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(layer->name()));
+								.arg(layer->name())
+								, false, true);
 
 							result = false;
 							continue;
@@ -830,7 +836,8 @@ namespace Builder
 							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
 								.arg(scheme->caption())
 								.arg(layer->name())
-								.arg(afb->caption()));
+								.arg(afb->caption())
+								, false, true);
 
 							result = false;
 							continue;
@@ -846,7 +853,8 @@ namespace Builder
 					{
 						log()->writeError(tr("LogicScheme %1 (layer %2): Branch has multiple outputs.")
 							.arg(scheme->caption())
-							.arg(layer->name()));
+							.arg(layer->name())
+							, false, true);
 
 						result = false;
 						continue;
@@ -908,7 +916,7 @@ namespace Builder
 						assert(false);
 
 						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
-							.arg(Q_FUNC_INFO));
+							.arg(__FUNCTION__), false, true);
 
 						result = false;
 						return result;
@@ -923,7 +931,7 @@ namespace Builder
 						assert(branch.outputPin.isNull() == false);
 
 						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, output pin in brach suppose to be initialized, %1.")
-							.arg(Q_FUNC_INFO));
+							.arg(__FUNCTION__), false, true);
 
 						result = false;
 						return result;
@@ -945,7 +953,7 @@ namespace Builder
 						assert(false);
 
 						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
-							.arg(Q_FUNC_INFO));
+							.arg(__FUNCTION__), false, true);
 
 						result = false;
 						return result;

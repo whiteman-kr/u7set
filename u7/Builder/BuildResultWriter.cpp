@@ -11,7 +11,7 @@ namespace Builder
 	{
 	}
 
-	bool BuildResultWriter::start(DbController *db, OutputLog *log, bool release, int changesetID)
+	bool BuildResultWriter::start(DbController* db, OutputLog* log, bool release, int changesetID)
 	{
 		m_dbController = db;
 		m_log = log;
@@ -25,11 +25,11 @@ namespace Builder
 			assert(m_dbController != nullptr);
 			assert(m_log != nullptr);
 
-			msg = tr("Invalid build params. Build aborted.");
+			msg = tr(__FUNCTION__": Invalid build params. Build aborted.");
 
 			if (m_log != nullptr)
 			{
-				log->writeError(msg, true);
+				log->writeError(msg, true, true);
 			}
 
 			qDebug() << msg;
@@ -38,11 +38,16 @@ namespace Builder
 			return m_runBuild;
 		}
 
+
+		m_log->resetErrorCount();
+		m_log->resetWarningCount();
+
+
 		if (m_dbController->buildStart(QHostInfo::localHostName(), m_release, m_changesetID, &m_buildNo, nullptr) == false)
 		{
-			msg = tr("Build start error.");
+			msg = tr(__FUNCTION__": Build start error.");
 
-			log->writeError(msg, true);
+			log->writeError(msg, true, true);
 
 			qDebug() << msg;
 
@@ -61,14 +66,14 @@ namespace Builder
 
 		if (m_release == true)
 		{
-			m_log->writeError(tr("RELEASE BUILD IS UNDER CONSTRACTION!"), true);
+			m_log->writeError(tr("RELEASE BUILD IS UNDER CONSTRACTION!"), true, false);
 
 			m_runBuild = false;
 			return m_runBuild;
 		}
 		else
 		{
-			m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true);
+			m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true, true);
 		}
 
 		createBuildDirectory();
@@ -90,8 +95,8 @@ namespace Builder
 		}
 
 #pragma message("Load correct Errors, Warnings counters & Build Log")
-		int errors = 1;
-		int warnings = 0;
+		int errors = m_log->errorCount();
+		int warnings = m_log->warningCount();
 		QString buildLogStr = "Build Log Str";
 
 		QString msg = QString(tr("%1 building #%2 was finished. Errors - %3. Warnings - %4."))
@@ -100,13 +105,13 @@ namespace Builder
 
 		if (errors)
 		{
-			m_log->writeError(msg, true);
+			m_log->writeError(msg, true, false);
 		}
 		else
 		{
 			if (warnings)
 			{
-				m_log->writeWarning(msg, true);
+				m_log->writeWarning(msg, true, false);
 			}
 			else
 			{

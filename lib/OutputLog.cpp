@@ -79,13 +79,23 @@ void OutputLog::writeSuccess(const QString& str, bool bold)
 	return write(str, OutputMessageLevel::Success, bold);
 }
 
-void OutputLog::writeWarning(const QString& str, bool bold)
+void OutputLog::writeWarning(const QString& str, bool bold, bool incWrnCounter)
 {
+	if (incWrnCounter == true)
+	{
+		setWarningCount(warningCount() + 1);
+	}
+
 	return write(str, OutputMessageLevel::Warning, bold);
 }
 
-void OutputLog::writeError(const QString& str, bool bold)
+void OutputLog::writeError(const QString& str, bool bold, bool incErrCounter)
 {
+	if (incErrCounter)
+	{
+		setErrorCount(errorCount() + 1);
+	}
+
 	return write(str, OutputMessageLevel::Error, bold);
 }
 
@@ -97,7 +107,7 @@ void OutputLog::writeDump(const std::vector<quint8>& data)
 	{
 		if (i % 32 == 0 && i != 0)
 		{
-			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
+			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString, false);
 			dataString.clear();
 		}
 
@@ -105,7 +115,7 @@ void OutputLog::writeDump(const std::vector<quint8>& data)
 
 		if (i == data.size() - 1 && i % 32 > 0)	// last iteration
 		{
-			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
+			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString, false);
 			dataString.clear();
 		}
 	}
@@ -132,3 +142,48 @@ OutputLogItem OutputLog::popWindowMessages()
 
 	return logItem;
 }
+
+int OutputLog::errorCount() const
+{
+	return m_errorCount;
+}
+
+void OutputLog::setErrorCount(int value)
+{
+	int oldValue = m_errorCount;
+
+	m_errorCount = value;
+
+	emit errorCountChanged(oldValue, value);
+
+	return;
+}
+
+void OutputLog::resetErrorCount()
+{
+	return setErrorCount(0);
+}
+
+
+int OutputLog::warningCount() const
+{
+	return m_warningCount;
+}
+
+void OutputLog::setWarningCount(int value)
+{
+	int oldValue = m_warningCount;
+
+	m_warningCount = value;
+
+	emit warningCountChanged(oldValue, value);
+
+	return;
+}
+
+void OutputLog::resetWarningCount()
+{
+	return setWarningCount(0);
+}
+
+
