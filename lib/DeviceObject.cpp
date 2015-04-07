@@ -919,6 +919,12 @@ namespace Hardware
 		return m_place;
 	}
 
+	int DeviceObject::jsPlace() const
+	{
+		return place();
+
+	}
+
 	void DeviceObject::setPlace(int value)
 	{
 		m_place = value;

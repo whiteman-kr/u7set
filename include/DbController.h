@@ -104,6 +104,11 @@ public:
 
 	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
 
+	// Build management
+	//
+	bool buildStart(QString workstation, bool release, int changeset, int* buildID, QWidget *parentWidget);
+	bool buildFinish(int buildID, int errors, int warnings, QString buildLog, QWidget* parentWidget);
+
 	// Version Control
 	//
 	bool isAnyCheckedOut(bool* result);
@@ -159,6 +164,11 @@ signals:
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
+
+	// Build management
+	//
+	void signal_buildStart(QString workstation, bool release, int changeset, int* buildID);
+	void signal_buildFinish(int buildID, int errors, int warnings, QString buildLog);
 
 	// Version Control
 	//

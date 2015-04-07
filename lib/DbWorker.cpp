@@ -41,7 +41,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"File API, adding get_file_info", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0031.sql"},
 	{"Add MC system file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0032.sql"},
 	{"Add presets to equipment configuration", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0033.sql"},
-
+	{"Add Build table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0034.sql"},
 };
 
 
@@ -3532,6 +3532,81 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 		objectState->append(os);
 	}
 }
+
+
+// Build management
+//
+
+void DbWorker::slot_buildStart(QString workstation, bool release, int changeset, int* buildID)
+{
+	AUTO_COMPLETE
+
+	if (buildID == nullptr)
+	{
+		assert(buildID != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM build_start(%1, '%2', cast(%3 as boolean), %4)")
+		.arg(currentUser().userId()).arg(workstation).arg(release).arg(changeset);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return;
+	}
+
+	q.next();
+	*buildID = q.value(0).toInt();
+
+	return;
+}
+
+
+void DbWorker::slot_buildFinish(int buildID, int errors, int warnings, QString buildLog)
+{
+	AUTO_COMPLETE
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Database connection is not opened."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM build_finish(%1, %2, %3, '%4')")
+		.arg(buildID).arg(errors).arg(warnings).arg(buildLog);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(q.lastError().text());
+		return;
+	}
+
+	return;
+}
+
 
 void DbWorker::slot_isAnyCheckedOut(bool* checkedOut)
 {

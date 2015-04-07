@@ -21,24 +21,6 @@ function(root, confCollection, log, signalSet)
 {
     log.writeMessage("Start LogicModuleConfiguration");
 
-
-
-    var signal = signalSet.getSignalByDeviceStrID("DEV001");
-
-    if (signal == null)    
-    {
-        log.writeMessage("Object not found!");
-    }
-    else
-    {
-        log.writeMessage("Object found! Caption = " + signal.name());
-    }
-
-
-
-
-
-
     var result = true;
 
     result = module_lm_1(root, confCollection, log, signalSet);
@@ -128,7 +110,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
     //
     var confName = module.ConfName;
     var confIndex = module.ConfIndex;
-    var frameSize = 1024;
+    var frameSize = 1016;
     var frameCount = 22;                // Check it !!!!
     var uartId = 456;                   // Check it !!!!
 
@@ -139,9 +121,9 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
 
     // EXAMPLES                  
     // To write byte to specific frame
-    setData8(confFirmware, log, 0, 1015, 0x88);
-    setData16(confFirmware, log, 0, 1014, 0x9129);
-    setData32(confFirmware, log, 0, 1012, 0xA123456A);
+    //setData8(confFirmware, log, 0, 1015, 0x88);
+    //setData16(confFirmware, log, 0, 1014, 0x9129);
+    //setData32(confFirmware, log, 0, 1012, 0xA123456A);
 
     // Create I/O Modules configuration (Frames 2..15)
     //
@@ -180,7 +162,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
             }
         }
     }
-    
+    /*
     // Create TxRx Blocks (Opto) configuration
     //
     var txRxOptoCount = 3;
@@ -218,8 +200,32 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
         storeCrc64(confFirmware, log, lanStartFrame + i, 0, ptr, ptr);   //CRC-64
         ptr += 8;
     }
-
+*/
     return true;
+}
+
+function truncate_to_int(x)
+{
+    if(x > 0)
+    {
+         return Math.floor(x);
+    }
+    else
+    {
+         return Math.ceil(x);
+    }
+ }
+ 
+ function valToADC(val, lowLimit, highLimit, lowADC, highADC)
+{
+	if ((highLimit - lowLimit) == 0)
+	{
+		return 0;		// to exclude division by zero
+	}
+
+	var res = (highADC-lowADC) * (val-lowLimit) / (highLimit - lowLimit) + lowADC;
+
+    return Math.round(res);
 }
 
 // Generate configuration for module AIM
@@ -233,8 +239,12 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 
     var ptr = 0;
     
-    var AIFMSignalMaxCount = 32;
-    var AIFMSignalCount = 0;
+    var AIMSignalMaxCount = 32;
+    
+    var defaultTf = valToADC(50, 0, 65535, 0, 0xffff);
+    var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
+    var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
+    var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
     
     //
     // WARNING!!! "Signal" object has no Place property now. So adding only existing signals in order!!!
@@ -242,54 +252,82 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
-    for (var i = 0; i < module.childrenCount(); i++)
+    for (var i = 0; i < AIMSignalMaxCount; i++)
     {
-        var signalObject = module.jsChild(i);
-        if (signalObject.jsDeviceType() != SignalType)
+        // find a signal with Place = i
+        //
+        var signal = null;
+        
+        for (var j = 0; j < module.childrenCount(); j++)
         {
-            continue;
-        }
-        if (signalObject.jsType() != InputAnalog)
-        {
-           continue;
+            var s = module.jsChild(j);
+            
+            if (s.jsDeviceType() != SignalType)
+            {
+                continue;
+            }
+            if (s.jsType() != InputAnalog)
+            {
+                continue;
+            }
+            if (s.jsPlace() == i)
+            {
+                log.writeMessage("AIM InputSignal: " + s.StrID);
+                
+                signal = signalSet.getSignalByDeviceStrID(s.StrID);
+                if (signal == null)    
+                {
+                    log.writeMessage("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.");
+                }
+                break;
+            }
         }
         
-        log.writeMessage("AIM InputSignal: " + signalObject.StrID);
-        
-        var signal = signalSet.getSignalByDeviceStrID(signalObject.StrID);
+        if (signal == null)
+        {
+            // Generate default values, there is no signal on this place
+            //
+            log.writeMessage("Default place" + i + ": tf = " + defaultTf + ", hi = " + defaultHighBound + ", lo = " + defaultLowBound + ", diff = " + defaultMaxDiff);
+            
+            setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultHighBound);         // InA High bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultLowBound);          // InA Low Bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultHighBound);         // InA High bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultLowBound);          // InA Low Bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
+            ptr += 2;
+        }
+        else
+        {
+            log.writeMessage("Place" + i + ": tf = " + defaultTf + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + defaultMaxDiff);
 
-        if (signal == null)    
-        {
-            log.writeMessage("Signal " + signalObject.StrID + " was not found in the signal database!");
-            continue;
-        }
-        
-        setData16(confFirmware, log, frame, ptr, /*signal.ftA*/0);          // InA Filtering time constant
-        ptr += 2;
-        setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
-        ptr += 2;
-        setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
-        ptr += 2;
-        setData16(confFirmware, log, frame, ptr, /*signal.maxDiff*/0);      // InA MaxDiff
-        ptr += 2;
-        setData16(confFirmware, log, frame, ptr, /*signal.ftA*/0);          // InA Filtering time constant
-        ptr += 2;
-        setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
-        ptr += 2;
-        setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
-        ptr += 2;
-        setData16(confFirmware, log, frame, ptr, /*signal.maxDiff*/0);      // InA MaxDiff
-        ptr += 2;
-        
-        AIFMSignalCount++;
-        if (AIFMSignalCount >= AIFMSignalMaxCount)
-        {
-            break;
+            setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
+            ptr += 2;
         }
     }
-    
-    // Offset for non-existing signals
-    ptr += (AIFMSignalMaxCount - AIFMSignalCount) * 16;
     
     // crc
     storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
@@ -333,9 +371,9 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     //reserved
     ptr += 356;
 
-    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
-    ptr += 8;
-    
+    //storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64, calculated by mconf
+    //ptr += 8;
+  
     return true;
 }
 

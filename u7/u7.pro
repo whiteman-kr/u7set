@@ -129,7 +129,9 @@ SOURCES +=\
     DialogFileEditor.cpp \
     Builder/Builder.cpp \
     Builder/ApplicationLogicBuilder.cpp \
-    SchemeLayersDialog.cpp
+	Builder/BuildResultWriter.cpp \
+	SchemeLayersDialog.cpp
+
 
 
 HEADERS  += \
@@ -191,7 +193,9 @@ HEADERS  += \
     DialogFileEditor.h \
     Builder/Builder.h \
     Builder/ApplicationLogicBuilder.h \
+	Builder/BuildResultWriter.h \
     SchemeLayersDialog.h
+
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -252,7 +256,8 @@ OTHER_FILES += \
         DatabaseUpgrade/Upgrade0032.sql \
         DatabaseUpgrade/Upgrade0033.sql \
         Tools/afbschema.xsd \
-        ../Proto/proto_compile.sh
+        ../Proto/proto_compile.sh \
+    DatabaseUpgrade/Upgrade0034.sql
 
 DISTFILES += \
     LogicModuleConfiguration.js
