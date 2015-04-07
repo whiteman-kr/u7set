@@ -27,7 +27,7 @@ win32 {
         qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
         nmake & \
         chdir $$PWD & \
-        $$PWD/../GetGitProjectVersion.exe $$PWD/Metrology.pro
+        $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/Metrology.pro
 }
 unix {
     versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
@@ -60,7 +60,8 @@ SOURCES += \
     FindMeasure.cpp \
     FolderPropertyManager.cpp \
     Database.cpp \
-    ReportView.cpp
+    ReportView.cpp \
+    Conversion.cpp
 
 
 HEADERS  += \
@@ -83,7 +84,8 @@ HEADERS  += \
     FolderPropertyManager.h \
     Database.h \
     ReportView.h \
-    version.h
+    version.h \
+    Conversion.h
 
 
 FORMS    +=
@@ -123,7 +125,6 @@ win32{
         INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
 
-
 # NCReport
 #
 win32 {
@@ -142,6 +143,9 @@ unix {
 	else: CONFIG(release, debug|release) : LIBS += -L"$$PWD/../NCReport2.14.0.x64.Qt5.3.2.eval/lib" -lNCReport
 	INCLUDEPATH += "$$PWD/../NCReport2.14.0.x64.Qt5.3.2.eval/include"
 }
+
+
+
 
 
 
