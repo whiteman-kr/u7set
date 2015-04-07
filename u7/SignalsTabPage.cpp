@@ -766,12 +766,6 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 void SignalsModel::loadSignals()
 {
-	int id = 0;
-	m_dbController->buildStart("COMP1", false, 12, &id, m_parentWindow);
-	QThread::currentThread()->sleep(1);
-	m_dbController->buildFinish(id, 0, 1, "buuuuuuiiilllllldddddd llllllllooooooog", m_parentWindow);
-
-
 	bool signalsCleared = false;
 	if (m_signalSet.count() != 0)
 	{

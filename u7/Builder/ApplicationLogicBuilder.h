@@ -20,6 +20,7 @@ namespace VFrame30
 	class LogicScheme;
 	class SchemeLayer;
 	class VideoItemFblElement;
+	class FblItemRect;
 }
 
 namespace Afbl
@@ -57,6 +58,40 @@ namespace Builder
 
 	// ------------------------------------------------------------------------
 	//
+	//		ApplicationLogicData
+	//
+	// ------------------------------------------------------------------------
+	class ApplicationLogicData
+	{
+	public:
+		ApplicationLogicData();
+
+		// Public methods
+		//
+	public:
+		bool setData(std::shared_ptr<VFrame30::LogicScheme> scheme,
+					 std::shared_ptr<VFrame30::SchemeLayer> layer);
+
+		// Propertie
+		//
+	public:
+		const std::shared_ptr<VFrame30::LogicScheme> scheme() const;
+		std::shared_ptr<VFrame30::LogicScheme> scheme();
+
+		const std::shared_ptr<VFrame30::SchemeLayer> layer() const;
+		std::shared_ptr<VFrame30::SchemeLayer> layer();
+
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> afbItems() const;
+
+	private:
+		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
+		std::shared_ptr<VFrame30::SchemeLayer> m_layer;
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_afbItems;
+	};
+
+
+	// ------------------------------------------------------------------------
+	//
 	//		ApplicationLogicBuilder
 	//
 	// ------------------------------------------------------------------------
@@ -73,20 +108,25 @@ namespace Builder
 
 	protected:
 		bool loadApplicationLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out);
-		bool compileApplicationLogicScheme(VFrame30::LogicScheme* logicScheme);
-		bool compileApplicationLogicLayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer);
 
-		bool findBranches(VFrame30::LogicScheme* logicScheme,
-						  VFrame30::SchemeLayer* layer,
+		bool compileApplicationLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme);
+
+		bool compileApplicationLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+										  std::shared_ptr<VFrame30::SchemeLayer> layer);
+
+		bool findBranches(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+						  std::shared_ptr<VFrame30::SchemeLayer> layer,
 						  BranchContainer* branchContainer) const;
 
-		bool setBranchConnectionToPin(VFrame30::LogicScheme* scheme, VFrame30::SchemeLayer* layer,
+		bool setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme,
+									  std::shared_ptr<VFrame30::SchemeLayer> layer,
 									  BranchContainer* branchContainer) const;
 
-		bool setPinConnections(VFrame30::LogicScheme* scheme, VFrame30::SchemeLayer* layer,
+		bool setPinConnections(std::shared_ptr<VFrame30::LogicScheme> scheme,
+							   std::shared_ptr<VFrame30::SchemeLayer> layer,
 							   BranchContainer* branchContainer);
 
-	protected:
+	private:
 		DbController* db();
 		OutputLog* log() const;
 		int changesetId() const;

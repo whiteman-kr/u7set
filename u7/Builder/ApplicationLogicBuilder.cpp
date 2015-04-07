@@ -6,7 +6,9 @@
 
 #include "../../VFrame30/LogicScheme.h"
 #include "../../VFrame30/VideoItemLink.h"
+#include "../../VFrame30/FblItemRect.h"
 #include "../../VFrame30/VideoItemFblElement.h"
+#include "../../VFrame30/VideoItemSignal.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
 
@@ -18,6 +20,7 @@ namespace Builder
 		pt2(point2)
 	{
 	}
+
 
 	// Function finds branch with a point on it.
 	// Returns branch index or -1 if a brach was not found
@@ -61,6 +64,73 @@ namespace Builder
 		}
 
 		return -1;
+	}
+
+
+	// ------------------------------------------------------------------------
+	//
+	//		ApplicationLogicData
+	//
+	// ------------------------------------------------------------------------
+	ApplicationLogicData::ApplicationLogicData()
+	{
+	}
+
+	bool ApplicationLogicData::setData(std::shared_ptr<VFrame30::LogicScheme> scheme,
+									 std::shared_ptr<VFrame30::SchemeLayer> layer)
+	{
+		if (!scheme ||
+			!layer)
+		{
+			assert(scheme);
+			assert(layer);
+			return false;
+		}
+
+		m_scheme = scheme;
+		m_layer = layer;
+
+		bool result = true;
+
+		for (std::shared_ptr<VFrame30::VideoItem> item : layer->Items)
+		{
+			std::shared_ptr<VFrame30::FblItemRect> fblItemRect = std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
+
+			if (fblItemRect == false)
+			{
+				continue;
+			}
+
+			m_afbItems.push_back(fblItemRect);
+		}
+
+		return result;
+	}
+
+
+	const std::shared_ptr<VFrame30::LogicScheme> ApplicationLogicData::scheme() const
+	{
+		return m_scheme;
+	}
+
+	std::shared_ptr<VFrame30::LogicScheme> ApplicationLogicData::scheme()
+	{
+		return m_scheme;
+	}
+
+	const std::shared_ptr<VFrame30::SchemeLayer> ApplicationLogicData::layer() const
+	{
+		return m_layer;
+	}
+
+	std::shared_ptr<VFrame30::SchemeLayer> ApplicationLogicData::layer()
+	{
+		return m_layer;
+	}
+
+	std::list<std::shared_ptr<VFrame30::FblItemRect>> ApplicationLogicData::afbItems() const
+	{
+		return m_afbItems;
 	}
 
 
@@ -115,7 +185,7 @@ namespace Builder
 		{
 			m_log->writeMessage(scheme->caption());
 
-			ok = compileApplicationLogicScheme(scheme.get());
+			ok = compileApplicationLogicScheme(scheme);
 
 			if (ok == false)
 			{
@@ -205,9 +275,9 @@ namespace Builder
 		return true;
 	}
 
-	bool ApplicationLogicBuilder::compileApplicationLogicScheme(VFrame30::LogicScheme* logicScheme)
+	bool ApplicationLogicBuilder::compileApplicationLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme)
 	{
-		if (logicScheme == nullptr)
+		if (logicScheme.get() == nullptr)
 		{
 			assert(false);
 			return false;
@@ -225,12 +295,16 @@ namespace Builder
 			//if (l->compile() == true)
 			{
 				layerFound = true;
-				ok = compileApplicationLogicLayer(logicScheme, l.get());
+				ok = compileApplicationLogicLayer(logicScheme, l);
 
 				if (ok == false)
 				{
 					return false;
 				}
+
+				// We can compile only one layer
+				//
+				break;
 			}
 		}
 
@@ -243,9 +317,10 @@ namespace Builder
 		return true;
 	}
 
-	bool ApplicationLogicBuilder::compileApplicationLogicLayer(VFrame30::LogicScheme* logicScheme, VFrame30::SchemeLayer* layer)
+	bool ApplicationLogicBuilder::compileApplicationLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+															   std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
-		if (logicScheme == nullptr || layer == nullptr)
+		if (logicScheme == false || layer == false)
 		{
 			assert(logicScheme);
 			assert(layer);
@@ -270,24 +345,148 @@ namespace Builder
 
 		if (result == false)
 		{
-			log()->writeError("setConnections function error.");
+			log()->writeError("setBranchConnectionToPin function error.");
 			return false;
 		}
 
-		// Associate pins' connections
+		// Associates input/outputs
 		//
+		result = setPinConnections(logicScheme, layer, &branchContainer);
+
+		// Generate afb list, and set it to some container
+		//
+		ApplicationLogicData data;
+
+		result = data.setData(logicScheme, layer);
+
+		if (result == false)
+		{
+			log()->writeError(tr("Internal error: Cannot set data to ApplicationLogicData."));
+			return false;
+		}
+
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		//
+		// DEBUG
+		//
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> items = data.afbItems();
+
+		qDebug() << "";
+		qDebug() << tr("Application Functional Blocks list, Scheme: %1, Layer %2").arg(logicScheme->caption()).arg(layer->name());
+
+		for (std::shared_ptr<VFrame30::FblItemRect> i : items)
+		{
+			qDebug() << "";
+
+			std::shared_ptr<VFrame30::VideoItemFblElement> fblElement = std::dynamic_pointer_cast<VFrame30::VideoItemFblElement>(i);
+			std::shared_ptr<VFrame30::VideoItemInputSignal> inputElement = std::dynamic_pointer_cast<VFrame30::VideoItemInputSignal>(i);
+			std::shared_ptr<VFrame30::VideoItemOutputSignal> outputElement = std::dynamic_pointer_cast<VFrame30::VideoItemOutputSignal>(i);
+
+			if (fblElement)
+			{
+				std::shared_ptr<Afbl::AfbElement> afb = logicScheme->afbCollection().get(fblElement->afbGuid());
+
+				qDebug() << afb->caption();
+
+				const std::list<VFrame30::CFblConnectionPoint>& inputs = fblElement->inputs();
+				const std::list<VFrame30::CFblConnectionPoint>& outputs = fblElement->outputs();
+
+				for (const VFrame30::CFblConnectionPoint& in : inputs)
+				{
+					QString str = QString("\tInput %1, associated pins: ").arg(in.guid().toString());
+
+					const std::list<QUuid>& assIos = in.associatedIOs();	// AssIos ))))
+
+					for (auto apid : assIos)
+					{
+						str.append(QString(" %1,").arg(apid.toString()));
+					}
+
+					qDebug() << str;
+				}
+
+				for (const VFrame30::CFblConnectionPoint& out : outputs)
+				{
+					QString str = QString("\tOutput %1, associated pins: ").arg(out.guid().toString());
+
+					const std::list<QUuid>& assIos = out.associatedIOs();	// AssIos ))))
+
+					for (auto apid : assIos)
+					{
+						str.append(QString(" %1,").arg(apid.toString()));
+					}
+
+					qDebug() << str;
+				}
+			}
+
+			if (inputElement)
+			{
+				const std::list<VFrame30::CFblConnectionPoint>& inputs = inputElement->inputs();
+				const std::list<VFrame30::CFblConnectionPoint>& outputs = inputElement->outputs();
+
+				assert(inputs.empty() == true);
+				assert(outputs.size() == 1);
+				assert(outputs.front().associatedIOs().size() > 0);
+
+				qDebug() << "Input Element: " << inputElement->signalStrIds();
+
+				for (const VFrame30::CFblConnectionPoint& out : outputs)
+				{
+					QString str = QString("\tOutput %1, associated pins: ").arg(out.guid().toString());
+
+					const std::list<QUuid>& assIos = out.associatedIOs();	// AssIos ))))
+
+					for (auto apid : assIos)
+					{
+						str.append(QString(" %1,").arg(apid.toString()));
+					}
+
+					qDebug() << str;
+				}
+			}
+
+			if (outputElement)
+			{
+				const std::list<VFrame30::CFblConnectionPoint>& inputs = outputElement->inputs();
+				const std::list<VFrame30::CFblConnectionPoint>& outputs = outputElement->outputs();
+
+				assert(inputs.size() == 1);
+				assert(inputs.front().associatedIOs().size() == 1);
+				assert(outputs.empty() == true);
+
+				qDebug() << "Output Element: " << outputElement->signalStrIds();
+
+				QString str = QString("\tInputPin %1, associated pin: %2")
+							  .arg(inputs.front().guid().toString())
+							  .arg(inputs.front().associatedIOs().front().toString());
+
+				qDebug() << str;
+			}
+		}
+
+		qDebug() << "";
+
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		//
+		// END OF DEBUG
+		//
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 		return true;
 	}
 
 	// Function connects all links, and compose them into branches
 	//
-	bool ApplicationLogicBuilder::findBranches(VFrame30::LogicScheme* logicScheme,
-						   VFrame30::SchemeLayer* layer,
-						   BranchContainer* branchContainer) const
+	bool ApplicationLogicBuilder::findBranches(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+											   std::shared_ptr<VFrame30::SchemeLayer> layer,
+											   BranchContainer* branchContainer) const
 	{
-		if (logicScheme == nullptr ||
-			layer == nullptr ||
+		if (logicScheme.get() == nullptr ||
+			layer.get() == nullptr ||
 			branchContainer == nullptr)
 		{
 			assert(logicScheme);
@@ -492,11 +691,11 @@ namespace Builder
 		return true;
 	}
 
-	bool ApplicationLogicBuilder::setBranchConnectionToPin(VFrame30::LogicScheme* scheme, VFrame30::SchemeLayer* layer,
+	bool ApplicationLogicBuilder::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme, std::shared_ptr<VFrame30::SchemeLayer> layer,
 						BranchContainer* branchContainer) const
 	{
-		if (scheme == nullptr ||
-			layer == nullptr ||
+		if (scheme.get() == nullptr ||
+			layer.get() == nullptr ||
 			branchContainer == nullptr)
 		{
 			assert(scheme);
@@ -509,22 +708,27 @@ namespace Builder
 
 		for (auto& item : layer->Items)
 		{
-			VFrame30::VideoItemFblElement* vifbl = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
-
-			if(vifbl != nullptr)
+			if (dynamic_cast<VFrame30::FblItemLine*>(item.get()) != nullptr)
 			{
-				std::shared_ptr<VFrame30::VideoItemFblElement> fblElement =
-						std::dynamic_pointer_cast<VFrame30::VideoItemFblElement>(item);
+				// This is link, it is already processed by composing branches
+				//
+				continue;
+			}
 
+			std::shared_ptr<VFrame30::FblItem> fblItem =
+					std::dynamic_pointer_cast<VFrame30::FblItem>(item);
+
+			if(fblItem != nullptr)
+			{
 				// VideoItem has inputs and outputs
 				// Get coordinates for each input/output and
 				// find branche with point on the pin
 				//
-				fblElement->ClearAssociatedConnections();
-				fblElement->SetConnectionsPos();
+				fblItem->ClearAssociatedConnections();
+				fblItem->SetConnectionsPos();
 
-				std::list<VFrame30::CFblConnectionPoint>* inputs = fblElement->mutableInputs();
-				std::list<VFrame30::CFblConnectionPoint>* outputs = fblElement->mutableOutputs();
+				std::list<VFrame30::CFblConnectionPoint>* inputs = fblItem->mutableInputs();
+				std::list<VFrame30::CFblConnectionPoint>* outputs = fblItem->mutableOutputs();
 
 				for (VFrame30::CFblConnectionPoint& in : *inputs)
 				{
@@ -538,15 +742,44 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+						VFrame30::VideoItemInputSignal* inputSignal = dynamic_cast<VFrame30::VideoItemInputSignal*>(item.get());
+						VFrame30::VideoItemOutputSignal* outputSignal = dynamic_cast<VFrame30::VideoItemOutputSignal*>(item.get());
+						VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
 
-						log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
-							.arg(scheme->caption())
-							.arg(layer->name())
-							.arg(afb->caption()));
+						if (inputSignal != nullptr)
+						{
+							log()->writeError(tr("LogicScheme %1 (layer %2): InputSignal element has unconnected pin.")
+								.arg(scheme->caption())
+								.arg(layer->name()));
 
-						result = false;
-						continue;
+							result = false;
+							continue;
+						}
+
+						if (outputSignal != nullptr)
+						{
+							log()->writeError(tr("LogicScheme %1 (layer %2): OutputSignal element has unconnected pin.")
+								.arg(scheme->caption())
+								.arg(layer->name()));
+
+							result = false;
+							continue;
+						}
+
+						if (fblElement != nullptr)
+						{
+							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+
+							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
+								.arg(scheme->caption())
+								.arg(layer->name())
+								.arg(afb->caption()));
+
+							result = false;
+							continue;
+						}
+
+						assert(false);		// What the item is it?
 					}
 
 					// Branch was found for current pin
@@ -566,15 +799,44 @@ namespace Builder
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+						VFrame30::VideoItemInputSignal* inputSignal = dynamic_cast<VFrame30::VideoItemInputSignal*>(item.get());
+						VFrame30::VideoItemOutputSignal* outputSignal = dynamic_cast<VFrame30::VideoItemOutputSignal*>(item.get());
+						VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
 
-						log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
-							.arg(scheme->caption())
-							.arg(layer->name())
-							.arg(afb->caption()));
+						if (inputSignal != nullptr)
+						{
+							log()->writeError(tr("LogicScheme %1 (layer %2): InputSignal element has unconnected pin.")
+								.arg(scheme->caption())
+								.arg(layer->name()));
 
-						result = false;
-						continue;
+							result = false;
+							continue;
+						}
+
+						if (outputSignal != nullptr)
+						{
+							log()->writeError(tr("LogicScheme %1 (layer %2): OutputSignal element has unconnected pin.")
+								.arg(scheme->caption())
+								.arg(layer->name()));
+
+							result = false;
+							continue;
+						}
+
+						if (fblElement != nullptr)
+						{
+							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+
+							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
+								.arg(scheme->caption())
+								.arg(layer->name())
+								.arg(afb->caption()));
+
+							result = false;
+							continue;
+						}
+
+						assert(false);		// What the item is it?
 					}
 
 					// Branch was found for current pin
@@ -601,11 +863,11 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicBuilder::setPinConnections(VFrame30::LogicScheme* scheme, VFrame30::SchemeLayer* layer,
+	bool ApplicationLogicBuilder::setPinConnections(std::shared_ptr<VFrame30::LogicScheme> scheme, std::shared_ptr<VFrame30::SchemeLayer> layer,
 						   BranchContainer* branchContainer)
 	{
-		if (scheme == nullptr ||
-			layer == nullptr ||
+		if (scheme.get() == nullptr ||
+			layer.get() == nullptr ||
 			branchContainer == nullptr)
 		{
 			assert(scheme);
@@ -618,12 +880,12 @@ namespace Builder
 
 		for (auto& item : layer->Items)
 		{
-			VFrame30::VideoItemFblElement* vifbl = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
+			VFrame30::FblItemRect* fblirect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 
-			if(vifbl != nullptr)
+			if(fblirect != nullptr)
 			{
-				std::shared_ptr<VFrame30::VideoItemFblElement> fblElement =
-						std::dynamic_pointer_cast<VFrame30::VideoItemFblElement>(item);
+				std::shared_ptr<VFrame30::FblItemRect> fblElement =
+						std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
 
 				// VideoItem has inputs and outputs
 				// Get coordinates for each input/output and

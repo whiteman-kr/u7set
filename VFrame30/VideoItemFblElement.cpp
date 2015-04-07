@@ -215,7 +215,7 @@ namespace VFrame30
 		for (QByteArray& p : dynamicProperties)
 		{
 			QString name(p);
-			setProperty(name.toStdString().c_str(), QVariant());		// Delete property be setting invalid QVariant()
+			setProperty(name.toStdString().c_str(), QVariant());		// Delete property by setting invalid QVariant()
 		}
 
 		// Set new Param Propereties
