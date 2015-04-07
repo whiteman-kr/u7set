@@ -154,7 +154,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
             }
             if (ioModule.ConfType == "AOM")
             {
-                generate_aom(confFirmware, ioModule, frame, log);
+                generate_aom(confFirmware, ioModule, frame, log, signalSet);
             }
             if (ioModule.ConfType == "OCM")
             {
@@ -245,10 +245,6 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
     var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
     var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
-    
-    //
-    // WARNING!!! "Signal" object has no Place property now. So adding only existing signals in order!!!
-    //
 
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
@@ -335,23 +331,15 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     
     // reserved
     ptr += 120;
-    
-    // assert if we not on the correct place
-    //
-    if (ptr != 640)
-    {
-        log.writeMessage("WARNING!!! PTR != 640!!! " + ptr);
-        ptr = 640;
-    }
    
     // final crc
     storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
     ptr += 8;
     
-    // ------------------------------------------ TX/RX Config (12 bytes) ---------------------------------
-    //
+    //reserved
+    ptr += 360;
 
-    //  Flags word
+    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
     //
     var configEnableFlag = true;
     var dataEnableFlag = true;
@@ -366,14 +354,16 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         flags |= 4;
     
     generate_txRxConfig(confFirmware, frame, ptr, flags, log);
-    ptr += 12;
+    ptr += 8;
     
-    //reserved
-    ptr += 356;
-
-    //storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64, calculated by mconf
-    //ptr += 8;
-  
+    // assert if we not on the correct place
+    //
+    if (ptr != 1016)
+    {
+        log.writeMessage("WARNING!!! PTR != 1016!!! " + ptr);
+        ptr = 1016;
+    }
+    
     return true;
 }
 
@@ -394,9 +384,115 @@ function generate_aifm(confFirmware, module, frame, log)
 // frame - Number of frame to generate
 //
 //
-function generate_aom(confFirmware, module, frame, log)
+function generate_aom(confFirmware, module, frame, log, signalSet)
 {
     log.writeMessage("MODULE AOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+
+    var ptr = 0;
+    
+    var AOMWordCount = 4;                       // total words count
+    var AOMSignalsInWordCount = 8;              // signals in a word count
+    
+    var Mode_05V = 0;
+    var Mode_420mA = 1;
+    var Mode_10V = 2;
+    var Mode_05mA = 3;
+
+    // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
+    //
+    var place = 0;
+    
+    for (var w = 0; w < AOMWordCount; w++)
+    {
+        var data = 0;
+        
+        for (var c = 0; c < AOMSignalsInWordCount; c++)
+        {
+            // find a signal with Place = place
+            //
+            var signal = null;
+            
+            for (var j = 0; j < module.childrenCount(); j++)
+            {
+                var s = module.jsChild(j);
+                
+                if (s.jsDeviceType() != SignalType)
+                {
+                    continue;
+                }
+                if (s.jsType() != OutputAnalog)
+                {
+                    continue;
+                }
+                if (s.jsPlace() == place)
+                {
+                    log.writeMessage("AOM OutputSignal: " + s.StrID);
+                    
+                    signal = signalSet.getSignalByDeviceStrID(s.StrID);
+                    if (signal == null)    
+                    {
+                        log.writeMessage("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.");
+                    }
+                    break;
+                }
+            }
+            
+            place++;
+        
+            var mode = Mode_05V;    //default
+            mode = Mode_420mA;   //test
+            
+            if (signal != null)
+            {
+                // fill in from database...
+            }
+            
+            var bit = c * 2;
+            data |= (mode << bit);
+            
+        }
+        
+        log.writeMessage("Place" + place + ": Word = " + w + " = " + data);
+        setData16(confFirmware, log, frame, ptr + w * 2, data);          // InA Filtering time constant
+    }
+    
+    ptr += 120;
+    
+    // crc
+    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+    ptr += 8;    
+
+    // reserved
+    ptr += 880;
+    
+    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
+    //
+
+    //  Flags word
+    //
+    var configEnableFlag = true;
+    var dataEnableFlag = true;
+    var dataReceiveEnableFlag = true;
+    
+    var flags = 0;
+    if (configEnableFlag == true)
+        flags |= 1;
+    if (dataEnableFlag == true)
+        flags |= 2;
+    if (dataReceiveEnableFlag == true)
+        flags |= 4;
+    
+    generate_txRxConfig(confFirmware, frame, ptr, flags, log);
+    ptr += 8;
+
+    // assert if we not on the correct place
+    //
+    if (ptr != 1016)
+    {
+        log.writeMessage("WARNING!!! PTR != 1016!!! " + ptr);
+        ptr = 1016;
+    }
+
     return true;
 
 }
