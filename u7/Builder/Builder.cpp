@@ -21,20 +21,9 @@ namespace Builder
 	{
 		QThread::currentThread()->setTerminationEnabled(true);
 
-		qDebug() << "Building started";
-
-		if (debug() == true)
-		{
-			m_log->writeWarning(tr("DEBUG Building started"), true);
-			m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true);
-		}
-		else
-		{
-			m_log->writeMessage(tr("RELEASE Building started"), true);
-			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			m_log->writeError(tr("RELEASE BUILD IS UNDER CONSTRACTION!"), true);
-			return;
-		}
+		// moved to m_buildWriter.start
+		//
+		//qDebug() << "Building started";
 
 		bool ok = false;
 		QString str;
@@ -62,6 +51,9 @@ namespace Builder
 		{
 			m_log->writeMessage(tr("Opening project %1: ok").arg(projectName()), true);
 		}
+
+#pragma message("Load correct ChangesetID")
+		m_buildWriter.start(&db, m_log, release(), 0 /* Load correct ChangesetID */);
 
 		do
 		{
@@ -180,9 +172,13 @@ namespace Builder
 		}
 		while (false);
 
+		m_buildWriter.finish();
+
+		//moved to m_buildWriter.finish
+		//
 		// Closing project and saying bye-bye!
 		//
-		ok = db.closeProject(nullptr);
+		/*ok = db.closeProject(nullptr);
 
 		if (QThread::currentThread()->isInterruptionRequested() == true)
 		{
@@ -201,7 +197,9 @@ namespace Builder
 			qDebug() << str;
 
 			emit resultReady(QString("Cool, we've done!"));
-		}
+		}*/
+
+		emit resultReady(QString("Cool, we've done!"));
 
 		return;
 	}

@@ -2,6 +2,7 @@
 #define BUILDER_H
 
 #include "../include/Signal.h"
+#include "../Builder/BuildResultWriter.h"
 
 
 // Forware declarations
@@ -109,6 +110,7 @@ namespace Builder
 		bool m_debug = false;				// if true then don't get workcopy of checked out files, use unly checked in copy
 
 		OutputLog* m_log;					// Probably it's better to make it as shared_ptr
+		BuildResultWriter m_buildWriter;
 	};
 
 	// ------------------------------------------------------------------------
