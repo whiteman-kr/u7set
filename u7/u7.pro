@@ -119,7 +119,8 @@ SOURCES +=\
     ../lib/Crc.cpp \
     DialogFileEditor.cpp \
     Builder/Builder.cpp \
-    Builder/ApplicationLogicBuilder.cpp
+    Builder/ApplicationLogicBuilder.cpp \
+    Builder/BuildResultWriter.cpp
 
 
 HEADERS  += \
@@ -180,7 +181,8 @@ HEADERS  += \
     ../include/Crc.h \
     DialogFileEditor.h \
     Builder/Builder.h \
-    Builder/ApplicationLogicBuilder.h
+    Builder/ApplicationLogicBuilder.h \
+    Builder/BuildResultWriter.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -240,7 +242,8 @@ OTHER_FILES += \
         DatabaseUpgrade/Upgrade0032.sql \
         DatabaseUpgrade/Upgrade0033.sql \
         Tools/afbschema.xsd \
-        ../Proto/proto_compile.sh
+        ../Proto/proto_compile.sh \
+    DatabaseUpgrade/Upgrade0034.sql
 
 DISTFILES += \
     LogicModuleConfiguration.js

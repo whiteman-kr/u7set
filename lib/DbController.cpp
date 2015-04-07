@@ -65,6 +65,9 @@ DbController::DbController() :
 	connect(this, &DbController::signal_undoSignalChanges, m_worker, &DbWorker::slot_undoSignalChanges);
 	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
 
+	connect(this, &DbController::signal_buildStart, m_worker, &DbWorker::slot_buildStart);
+	connect(this, &DbController::signal_buildFinish, m_worker, &DbWorker::slot_buildFinish);
+
 	connect(this, &DbController::signal_isAnyCheckedOut, m_worker, &DbWorker::slot_isAnyCheckedOut);
 	connect(this, &DbController::signal_lastChangesetId, m_worker, &DbWorker::slot_lastChangesetId);
 
@@ -1303,6 +1306,51 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 
 	return ok;
 }
+
+
+bool DbController::buildStart(QString workstation, bool release, int changeset, int* buildID, QWidget* parentWidget)
+{
+	if (buildID == nullptr)
+	{
+		assert(buildID != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_buildStart(workstation, release, changeset, buildID);
+
+	ok = waitForComplete(parentWidget, tr("Build started"));
+
+	return ok;
+}
+
+
+bool DbController::buildFinish(int buildID, int errors, int warnings, QString buildLog, QWidget *parentWidget)
+{
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_buildFinish(buildID, errors, warnings, buildLog);
+
+	ok = waitForComplete(parentWidget, tr("Build started"));
+
+	return ok;
+}
+
 
 bool DbController::isAnyCheckedOut(bool* result)
 {
