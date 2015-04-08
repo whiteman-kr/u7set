@@ -327,9 +327,14 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		m_signal.setOutputUnitID(NO_UNIT_ID);
 	}
 	sensorIndex = m_enumManager->value(m_outputSensorProperty);
-	if (sensorIndex > 0 && sensorIndex < SENSOR_TYPE_COUNT)
+	if (sensorIndex >= 0 && sensorIndex < SENSOR_TYPE_COUNT)
 	{
 		m_signal.setOutputSensorID(sensorIndex);
+	}
+	int outputRangeModeIndex = m_enumManager->value(m_outputRangeModeProperty);
+	if (outputRangeModeIndex >= 0 && outputRangeModeIndex < OUTPUT_RANGE_MODE_COUNT)
+	{
+		m_signal.setOutputRangeMode(OutputRangeMode(outputRangeModeIndex));
 	}
 
 	m_signal.setAcquire(m_boolManager->value(m_acquireProperty));

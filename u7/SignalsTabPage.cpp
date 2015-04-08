@@ -40,11 +40,12 @@ SC_INPUT_SENSOR = 23,
 SC_OUTPUT_LOW_LIMIT = 24,
 SC_OUTPUT_HIGH_LIMIT = 25,
 SC_OUTPUT_UNIT = 26,
-SC_OUTPUT_SENSOR = 27,
-SC_CALCULATED = 28,
-SC_DECIMAL_PLACES = 29,
-SC_APERTURE = 30,
-SC_LAST_CHANGE_USER = 31;
+SC_OUTPUT_RANGE_MODE = 27,
+SC_OUTPUT_SENSOR = 28,
+SC_CALCULATED = 29,
+SC_DECIMAL_PLACES = 30,
+SC_APERTURE = 31,
+SC_LAST_CHANGE_USER = 32;
 
 
 const char* Columns[] =
@@ -76,6 +77,7 @@ const char* Columns[] =
 	"Output low Limit",
 	"Output high Limit",
 	"Output unit",
+	"Output range mode",
 	"Output sensor",
 	"Calculated",
 	"Decimal places",
@@ -201,6 +203,15 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 			}
 			return cb;
 		}
+		case SC_OUTPUT_RANGE_MODE:
+		{
+			QComboBox* cb = new QComboBox(parent);
+			for (int i = 0; i < OUTPUT_RANGE_MODE_COUNT; i++)
+			{
+				cb->addItem(OutputRangeModeStr[i]);
+			}
+			return cb;
+		}
 		case SC_ACQUIRE:
 		case SC_CALCULATED:
 		{
@@ -269,6 +280,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_OUTPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(m_signalSet[row].outputUnitID())); break;
 		case SC_INPUT_SENSOR: if (cb) cb->setCurrentIndex(m_signalSet[row].inputSensorID()); break;
 		case SC_OUTPUT_SENSOR: if (cb) cb->setCurrentIndex(m_signalSet[row].outputSensorID()); break;
+		case SC_OUTPUT_RANGE_MODE: if (cb) cb->setCurrentIndex(m_signalSet[row].outputRangeMode()); break;
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(m_signalSet[row].acquire()); break;
 		case SC_CALCULATED: if (cb) cb->setCurrentIndex(m_signalSet[row].calculated()); break;
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(m_signalSet[row].inOutType()); break;
@@ -325,6 +337,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_INPUT_SENSOR: if (cb) s.setInputSensorID(cb->currentIndex()); break;
 		case SC_OUTPUT_SENSOR: if (cb) s.setOutputSensorID(cb->currentIndex()); break;
+		case SC_OUTPUT_RANGE_MODE: if (cb) s.setOutputRangeMode(OutputRangeMode(cb->currentIndex())); break;
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_CALCULATED: if (cb) s.setCalculated(cb->currentIndex() == 0 ? false : true); break;
 		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(SignalInOutType(cb->currentIndex())); break;
@@ -413,6 +426,18 @@ QString SignalsModel::getSensorStr(int sensorID) const
 	else
 	{
 		return tr("Unknown sensor");
+	}
+}
+
+QString SignalsModel::getOutputRangeModeStr(int outputRangeMode) const
+{
+	if (outputRangeMode >= 0 && outputRangeMode < OUTPUT_RANGE_MODE_COUNT)
+	{
+		return OutputRangeModeStr[outputRangeMode];
+	}
+	else
+	{
+		return tr("Unknown output range mode");
 	}
 }
 
@@ -578,6 +603,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_OUTPUT_HIGH_LIMIT: return signal.outputHighLimit();
 				case SC_OUTPUT_UNIT: return getUnitStr(signal.outputUnitID());
 				case SC_OUTPUT_SENSOR: return getSensorStr(signal.outputSensorID());
+				case SC_OUTPUT_RANGE_MODE: return getOutputRangeModeStr(signal.outputRangeMode());
 
 				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
 				case SC_CALCULATED: return signal.calculated() ? tr("Yes") : tr("No");
@@ -636,6 +662,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_OUTPUT_HIGH_LIMIT:
 				case SC_OUTPUT_UNIT:
 				case SC_OUTPUT_SENSOR:
+				case SC_OUTPUT_RANGE_MODE:
 
 				case SC_CALCULATED:
 				case SC_NORMAL_STATE:
@@ -728,6 +755,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_OUTPUT_HIGH_LIMIT: signal.setOutputHighLimit(value.toDouble()); break;
 			case SC_OUTPUT_UNIT: signal.setOutputUnitID(value.toInt()); break;
 			case SC_OUTPUT_SENSOR: signal.setOutputSensorID(value.toInt()); break;
+			case SC_OUTPUT_RANGE_MODE: signal.setOutputRangeMode(OutputRangeMode(value.toInt())); break;
 			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
 			case SC_CALCULATED: signal.setCalculated(value.toBool()); break;
 			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
