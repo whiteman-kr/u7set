@@ -326,7 +326,7 @@ namespace Builder
 		{
 			assert(db);
 			assert(root);
-			m_log->writeError(tr(__FUNCTION__": Fatal error, input parammeter is nullptr!"), true,true);
+			m_log->writeError(tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__), true,true);
 			return false;
 		}
 
