@@ -260,7 +260,8 @@ OTHER_FILES += \
         Tools/afbschema.xsd \
         ../Proto/proto_compile.sh \
     DatabaseUpgrade/Upgrade0034.sql \
-    DatabaseUpgrade/Upgrade0035.sql
+    DatabaseUpgrade/Upgrade0035.sql \
+    month-report.txt
 
 DISTFILES += \
     LogicModuleConfiguration.js
