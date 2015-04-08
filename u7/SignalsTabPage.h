@@ -113,6 +113,7 @@ private:
 
 	QString getUnitStr(int unitID) const;
 	QString getSensorStr(int sensorID) const;
+	QString getOutputRangeModeStr(int outputRangeMode) const;
 	QString getUserStr(int userID) const;
 
 	const QPixmap lock = QPixmap(":/Images/Images/lock.png");

@@ -649,7 +649,7 @@ namespace Builder
 					assert(videoItem);
 					assert(link);
 
-					log()->writeError(tr(__FUNCTION__"Internal error, expected VFrame30::VideoItemLink"), false, true);
+					log()->writeError(tr("%1Internal error, expected VFrame30::VideoItemLink").arg(__FUNCTION__), false, true);
 					return false;
 				}
 
@@ -658,7 +658,7 @@ namespace Builder
 				if (pointList.size() < 2)
 				{
 					assert(pointList.size() >= 2);
-					log()->writeError(tr(__FUNCTION__"Internal error, Link has less the two points"), false, true);
+					log()->writeError(tr("%1Internal error, Link has less the two points").arg(__FUNCTION__), false, true);
 					return false;
 				}
 

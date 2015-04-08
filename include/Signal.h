@@ -45,7 +45,7 @@ enum OutputRangeMode
 	plus0_plus5_V = 0,
 	plus4_plus20_mA = 1,
 	minus10_plus10_V = 2,
-	plus0_plus5_mA = 4,
+	plus0_plus5_mA = 3,
 };
 
 

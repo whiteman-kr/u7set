@@ -23,7 +23,7 @@ namespace Builder
 			assert(m_dbController != nullptr);
 			assert(m_log != nullptr);
 
-			msg = tr(__FUNCTION__": Invalid build params. Build aborted.");
+			msg = tr("%1: Invalid build params. Build aborted.").arg(__FUNCTION__);
 
 			if (m_log != nullptr)
 			{
@@ -38,7 +38,7 @@ namespace Builder
 
 		if (m_dbController->buildStart(QHostInfo::localHostName(), m_release, m_changesetID, &m_buildNo, nullptr) == false)
 		{
-			msg = tr(__FUNCTION__": Build start error.");
+			msg = tr("%1: Build start error.").arg(__FUNCTION__);
 
 			log->writeError(msg, true, true);
 

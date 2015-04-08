@@ -1,5 +1,6 @@
 #include "Builder.h"
 #include "ApplicationLogicBuilder.h"
+#include "ConfigurationBuilder.h"
 
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
@@ -84,16 +85,12 @@ namespace Builder
 			}
 
 			//
-			// Get Equipment from the database
+			// Compile Module configuration
 			//
 			m_log->writeMessage("", false);
-			m_log->writeMessage(tr("Getting equipment"), true);
+			m_log->writeMessage(tr("Module configurations compilation"), true);
 
-			Hardware::DeviceRoot deviceRoot;
-			int rootFileId = db.hcFileId();
-			deviceRoot.fileInfo().setFileId(rootFileId);
-
-			ok = getEquipment(&db, &deviceRoot);
+			ok = modulesConfiguration(&db, lastChangesetId);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -110,41 +107,6 @@ namespace Builder
 			{
 				m_log->writeSuccess(tr("Ok"), true);
 			}
-
-			//
-			// Expand Devices StrId
-			//
-			m_log->writeMessage("", false);
-			m_log->writeMessage(tr("Expanding devices StrIds"), true);
-
-			expandDeviceStrId(&deviceRoot);
-
-			m_log->writeSuccess(tr("Ok"), true);
-
-			//
-			// Generate Module Confuiguration Binary File
-			//
-			m_log->writeMessage("", false);
-			m_log->writeMessage(tr("Generating modules configurations"), true);
-
-			ok = generateModulesConfigurations(&db, &deviceRoot);
-
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			if (ok == false)
-			{
-				m_log->writeError(tr("Error"), true, false);
-				QThread::currentThread()->requestInterruption();
-				break;
-			}
-			else
-			{
-				m_log->writeSuccess(tr("Ok"), true);
-			}
-
 
 			//
 			// Compile application logic
@@ -204,238 +166,20 @@ namespace Builder
 		return;
 	}
 
-	bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* parent)
+	bool BuildWorkerThread::modulesConfiguration(DbController* db, int changesetId)
 	{
-		assert(db != nullptr);
-		assert(db->isProjectOpened() == true);
-		assert(parent != nullptr);
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			return false;
-		}
-
-		if (parent->deviceType() == Hardware::DeviceType::System)
-		{
-			m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()), false);
-		}
-
-		std::vector<DbFileInfo> files;
-
-		bool ok = false;
-
-		// Get file list with checked out files,
-		// if this is release build, specific copies will be fetched later
-		//
-		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
-
-		if (ok == false)
-		{
-			m_log->writeError(tr("Cannot get equipment file list"), false, true);
-			return false;
-		}
-
-		if (release() == true)
-		{
-			// filter some files, which are not checkedin?
-			assert(false);
-		}
-		else
-		{
-		}
-
-		parent->deleteAllChildren();
-
-		for (auto& fi : files)
-		{
-			std::shared_ptr<DbFile> file;
-
-			if (release() == true)
-			{
-				assert(false);
-			}
-			else
-			{
-				ok = db->getLatestVersion(fi, &file, nullptr);
-			}
-
-			if (file == false || ok == false)
-			{
-				m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()), false, true);
-				return false;
-			}
-
-			Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
-
-			if (object == nullptr)
-			{
-				return false;
-			}
-			else
-			{
-				assert(object);
-			}
-
-			object->setFileInfo(fi);
-
-			std::shared_ptr<Hardware::DeviceObject> sp(object);
-
-			parent->addChild(sp);
-		}
-
-		files.clear();
-
-		for (int i = 0 ; i < parent->childrenCount(); i++)
-		{
-			std::shared_ptr<Hardware::DeviceObject> child = parent->childSharedPtr(i);
-
-			ok = getEquipment(db, child.get());
-
-			if (ok == false)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
-	{
-		if (device->parent() != nullptr)
-		{
-			QString strId = device->strId();
-
-			strId.replace(QString("$(PARENT)"), device->parent()->strId(), Qt::CaseInsensitive);
-			strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
-
-			device->setStrId(strId);
-		}
-
-		for (int i = 0; i < device->childrenCount(); i++)
-		{
-			expandDeviceStrId(device->child(i));
-		}
-
-		return true;
-	}
-
-	bool BuildWorkerThread::generateModulesConfigurations(DbController* db, Hardware::DeviceObject* root)
-	{
-		if (db == nullptr || root == nullptr)
-		{
-			assert(db);
-			assert(root);
-			m_log->writeError(tr(__FUNCTION__": Fatal error, input parammeter is nullptr!"), true,true);
-			return false;
-		}
-
-		// Get script file from the project databse
-		//
-		bool ok = false;
-		std::vector<DbFileInfo> fileList;
-
-		if (release() == true)
+		if (db == nullptr)
 		{
 			assert(false);
-		}
-		else
-		{
-			ok = db->getFileList(&fileList, db->mcFileId(), "ModulesConfigurations.descr", nullptr);
-		}
-
-		if (ok == false || fileList.size() != 1)
-		{
-			m_log->writeError(tr("Can't get file list and find Module Configuration description file"), false, true);
 			return false;
 		}
 
-		std::shared_ptr<DbFile> scriptFile;
+		ConfigurationBuilder cfgBuilder = {db, m_log, changesetId, debug(), projectName(), projectUserName()};
 
-		if (release() == true)
-		{
-			assert(false);
-		}
-		else
-		{
-			ok = db->getLatestVersion(fileList[0], &scriptFile, nullptr);
-		}
+		bool result = cfgBuilder.build();
 
-		if (ok == false || scriptFile == false)
-		{
-			m_log->writeError(tr("Can't get Module Configuration description file"), false, true);
-			return false;
-		}
+		return result;
 
-		QString contents = QString::fromLocal8Bit(scriptFile->data());
-
-		// Attach objects
-		//
-		QJSEngine jsEngine;
-
-		QJSValue jsLog = jsEngine.newQObject(m_log);
-		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
-
-		SignalSetObject signalSetObject;
-		signalSetObject.loadSignalsFromDb(db);
-		QJSValue jsSignalSet = jsEngine.newQObject(&signalSetObject);
-		QQmlEngine::setObjectOwnership(&signalSetObject, QQmlEngine::CppOwnership);
-
-		QJSValue jsRoot = jsEngine.newQObject(root);
-		QQmlEngine::setObjectOwnership(root, QQmlEngine::CppOwnership);
-
-		Hardware::ModuleConfCollection confCollection;
-
-		QJSValue jsConfCollection = jsEngine.newQObject(&confCollection);
-		QQmlEngine::setObjectOwnership(&confCollection, QQmlEngine::CppOwnership);
-
-		// Run script
-		//
-		QJSValue jsEval = jsEngine.evaluate(contents, "ModulesConfigurations.descr");
-		if (jsEval.isError() == true)
-		{
-			m_log->writeError(tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()), false, true);
-			return false;
-		}
-
-		QJSValueList args;
-
-		args << jsRoot;
-		args << jsConfCollection;
-		args << jsLog;
-		args << jsSignalSet;
-
-		QJSValue jsResult = jsEval.call(args);
-
-		if (jsResult.isError() == true)
-		{
-			m_log->writeError(tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()), false, true);
-			return false;
-		}
-
-		if (jsResult.toBool() == false)
-		{
-			m_log->writeError(tr("Module configuration generating failed!"), false, false);
-			return false;
-		}
-		qDebug() << jsResult.toInt();
-
-		// Save confCollection items to binary files
-		//
-		if (release() == true)
-		{
-			assert(false);
-		}
-		else
-		{
-			if (confCollection.save(projectName(), projectUserName()) == false)
-			{
-				m_log->writeError(tr("Failed to save module configuration binary files!"), false, true);
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	bool BuildWorkerThread::applicationLogic(DbController* db, int changesetId)
