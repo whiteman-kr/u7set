@@ -13,7 +13,6 @@ Signal::Signal() :
 	m_type(SignalType::analog),
 	m_deleted(false),
 	m_instanceAction(InstanceAction::added),
-
 	m_dataFormat(static_cast<int>(DataFormatType::binary_LE_unsigned)),
 	m_lowADC(0),
 	m_highADC(0),
@@ -31,6 +30,7 @@ Signal::Signal() :
 	m_outputLowLimit(0),
 	m_outputHighLimit(0),
 	m_outputUnitID(NO_UNIT_ID),
+	m_outputRangeMode(OutputRangeMode::plus4_plus20_mA),
 	m_outputSensorID(0),
 	m_acquire(true),
 	m_calculated(false),
@@ -77,6 +77,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_outputLowLimit = signal.outputLowLimit();
 	m_outputHighLimit = signal.outputHighLimit();
 	m_outputUnitID = signal.outputUnitID();
+	m_outputRangeMode = signal.outputRangeMode();
 	m_outputSensorID = signal.outputSensorID();
 	m_acquire = signal.acquire();
 	m_calculated = signal.calculated();

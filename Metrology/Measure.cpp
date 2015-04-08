@@ -1,6 +1,7 @@
 #include "Measure.h"
 
 #include "Options.h"
+#include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -186,8 +187,12 @@ LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator)
 
     // nominal
     //
-    setNominal(VALUE_TYPE_ELECTRIC, pCalibrator->sourceValue());
-    setNominal(VALUE_TYPE_PHYSICAL, rand());
+
+    double electric = pCalibrator->sourceValue();
+    double physical = conversion(electric, CT_ELECTRIC_TO_PHYSICAL, INPUT_UNIT_OHM, OHM_PT_50_W_1391);
+
+    setNominal(VALUE_TYPE_ELECTRIC, electric);
+    setNominal(VALUE_TYPE_PHYSICAL, physical);
     setNominal(VALUE_TYPE_OUTPUT, 0);
 
     setPercent(0);
