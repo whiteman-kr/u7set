@@ -9,9 +9,13 @@ ALTER TABLE signalinstance ADD COLUMN outputrangemode integer;
 ALTER TABLE signalinstance ALTER COLUMN outputrangemode SET NOT NULL;
 ALTER TABLE signalinstance ALTER COLUMN outputrangemode SET DEFAULT 1;
 
+
 DROP FUNCTION get_latest_signal(integer, integer);
 DROP FUNCTION set_signal_workcopy(integer, signaldata);
+DROP FUNCTION checkout_signals(user_id integer, signal_ids integer[]);
+
 DROP TYPE signaldata;
+
 
 CREATE TYPE signaldata AS
    (signalid integer,
@@ -230,3 +234,162 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
+
+
+CREATE OR REPLACE FUNCTION checkout_signals(user_id integer, signal_ids integer[])
+  RETURNS SETOF objectstate AS
+$BODY$
+DECLARE
+	alreadyCheckedOut integer;
+	signal_id integer;
+	chOutInstanceID integer;
+	os objectstate;
+	chOutUserID integer;
+	signalDeleted boolean;
+	sgID integer;
+BEGIN
+	FOREACH signal_id IN ARRAY signal_ids
+	LOOP
+		SELECT SignalID, CheckedOutInstanceID, UserID, Deleted INTO sgID, chOutInstanceID, chOutUserID, signalDeleted FROM Signal WHERE SignalID = signal_id;
+
+		IF sgID IS NULL THEN
+
+			os.ID = signal_id;
+			os.deleted = FALSE;
+			os.checkedout = FALSE;
+			os.action = 0;
+			os.userID = 0;
+			os.errCode = 4;					-- ERR_SIGNAL_NOT_FOUND
+			RETURN NEXT os;
+
+			CONTINUE;
+		END IF;
+
+		IF signalDeleted THEN
+			-- signal deleted, can't check out
+
+			os.ID = signal_id;
+			os.deleted = TRUE;
+			os.checkedout = FALSE;
+			os.action = 0;
+			os.userID = 0;
+			os.errCode = 3;					-- ERR_SIGNAL_DELETED
+			RETURN NEXT os;
+
+		ELSE
+			IF chOutInstanceID IS NOT NULL THEN
+				-- signal already checked Out
+
+				os.ID = signal_id;
+				os.deleted = FALSE;
+				os.checkedout = TRUE;
+				os.action = 0;
+				os.userID = chOutUserID;
+				os.errCode = 2;					-- ERR_SIGNAL_ALREADY_CHECKED_OUT
+				RETURN NEXT os;
+
+			ELSE
+				-- add record to the CheckOut table
+				INSERT INTO CheckOut (UserID, SignalID) VALUES (user_id, signal_id);
+
+				-- make new signal workcopy in SignalInstance
+				INSERT INTO
+					SignalInstance (
+						SignalID,
+						Action,
+						StrId,
+						ExtStrId,
+						Name,
+						DataFormatID,
+						DataSize,
+						LowADC,
+						HighADC,
+						LowLimit,
+						HighLimit,
+						UnitID,
+						Adjustment,
+						DropLimit,
+						ExcessLimit,
+						UnbalanceLimit,
+						InputLowLimit,
+						InputHighLimit,
+						InputUnitID,
+						InputSensorID,
+						OutputLowLimit,
+						OutputHighLimit,
+						OutputUnitID,
+						OutputSensorID,
+						Acquire,
+						Calculated,
+						NormalState,
+						DecimalPlaces,
+						Aperture,
+						InOutType,
+						DeviceStrID,
+						OutputRangeMode )
+					SELECT
+						SI.SignalID,
+						2,							-- Action Edit
+						StrId,
+						ExtStrId,
+						Name,
+						DataFormatID,
+						DataSize,
+						LowADC,
+						HighADC,
+						LowLimit,
+						HighLimit,
+						UnitID,
+						Adjustment,
+						DropLimit,
+						ExcessLimit,
+						UnbalanceLimit,
+						InputLowLimit,
+						InputHighLimit,
+						InputUnitID,
+						InputSensorID,
+						OutputLowLimit,
+						OutputHighLimit,
+						OutputUnitID,
+						OutputSensorID,
+						Acquire,
+						Calculated,
+						NormalState,
+						DecimalPlaces,
+						Aperture,
+						InOutType,
+						DeviceStrID,
+						OutputRangeMode
+					FROM
+						Signal AS S,
+						SignalInstance AS SI
+					WHERE
+						S.SignalID = signal_id AND
+						SI.SignalID = signal_id AND
+						SI.SignalInstanceID = S.CheckedInInstanceID
+					RETURNING SignalInstanceID INTO chOutInstanceID;
+
+				UPDATE Signal
+				SET
+					CheckedOutInstanceID = chOutInstanceID,
+					UserId = user_id
+				WHERE
+					SignalID = signal_id;
+
+				os.ID = signal_id;
+				os.deleted = FALSE;
+				os.checkedout = TRUE;
+				os.action = 2;
+				os.userID = user_id;
+				os.errCode = 0;					-- ERR_SIGNAL_OK
+				RETURN NEXT os;
+
+			END IF;
+		END IF;
+	END LOOP;
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100
+  ROWS 1000;
+
