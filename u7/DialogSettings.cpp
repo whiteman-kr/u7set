@@ -102,10 +102,10 @@ void DialogSettings::on_cancel_clicked()
 
 void DialogSettings::on_browseOutputPath_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+	QString dir = QDir().toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("Open Directory"),
 													m_settings.buildOutputPath(),
 													QFileDialog::ShowDirsOnly
-													| QFileDialog::DontResolveSymlinks);
+													| QFileDialog::DontResolveSymlinks));
 
 	ui->editOutputPath->setText(dir);
 }
