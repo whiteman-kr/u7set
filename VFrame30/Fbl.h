@@ -120,6 +120,9 @@ private:
 		const QString& caption() const;
 		void setCaption(const QString& caption);
 
+		const bool visible() const;
+		void setVisible(bool visible);
+
 		AfbParamType type() const;
 		void setType(AfbParamType type);
 
@@ -139,6 +142,7 @@ private:
 		//
 	private:
 		QString m_caption;				// Наименование параметра
+		bool m_visible;
 		AfbParamType m_type;			// Тип данных параметра
 
 		AfbParamValue m_value;			// Значение параметра

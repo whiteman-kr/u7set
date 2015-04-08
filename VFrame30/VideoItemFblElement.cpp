@@ -117,6 +117,11 @@ namespace VFrame30
 		{
 			const Afbl::AfbElementParam& param = params[i];
 
+			if (param.visible() == false)
+			{
+				continue;
+			}
+
 			QString paramStr = QString("%1 = %2")
 				.arg(param.caption())
 				.arg(property(param.caption().toStdString().c_str()).toString());

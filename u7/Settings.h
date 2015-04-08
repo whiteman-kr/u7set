@@ -33,6 +33,9 @@ public:
 	const QString& serverPassword() const;
 	void setServerPassword(const QString& value);
 
+	const QString& buildOutputPath() const;
+	void setBuildOutputPath(const QString& value);
+
 	// Data
 	//
 public:
@@ -90,6 +93,7 @@ private:
 	int m_serverPort = 0;
 	QString m_serverUsername;
 	QString m_serverPassword;
+	QString m_buildOutputPath;
 };
 
 extern Settings theSettings;

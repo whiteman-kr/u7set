@@ -7,7 +7,9 @@ Settings::Settings() :
 	m_serverIpAddress("127.0.0.1"),
 	m_serverPort(0),
 	m_serverUsername("u7"),
-	m_serverPassword("P2ssw0rd")
+	m_serverPassword("P2ssw0rd"),
+	m_buildOutputPath(QStandardPaths::writableLocation(QStandardPaths::DataLocation))
+
 {
 }
 
@@ -96,6 +98,7 @@ void Settings::writeSystemScope() const
 	s.setValue("m_serverPort", m_serverPort);
 	s.setValue("m_serverUsername", m_serverUsername);
 	s.setValue("m_serverPassword", m_serverPassword);
+	s.setValue("m_buildOutputPath", m_buildOutputPath);
 
 	return;
 }
@@ -107,6 +110,7 @@ void Settings::loadSystemScope()
 	m_serverPort = s.value("m_serverPort", 5432).toInt();
 	m_serverUsername = s.value("m_serverUsername", "u7").toString();
 	m_serverPassword = s.value("m_serverPassword", "P2ssw0rd").toString();
+	m_buildOutputPath = s.value("m_buildOutputPath", m_buildOutputPath).toString();
 
 	return;
 }
@@ -147,3 +151,14 @@ void Settings::setServerPassword(const QString& value)
 	m_serverPassword = value;
 }
 
+
+const QString& Settings::buildOutputPath() const
+{
+	return m_buildOutputPath;
+}
+
+void Settings::setBuildOutputPath(const QString& value)
+{
+	m_buildOutputPath = value;
+
+}
