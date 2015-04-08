@@ -107,11 +107,30 @@ namespace VFrame30
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
 
-		// Draw Afb element name
+		// Draw Afb element name and params
 		//
-		p->setPen(textColor());
+		QString text = afb->caption();
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), afb->caption(), r);
+		const std::vector<Afbl::AfbElementParam>& params = afb->params();
+
+		for (size_t i = 0; i < params.size(); i++)
+		{
+			const Afbl::AfbElementParam& param = params[i];
+
+			if (param.visible() == false)
+			{
+				continue;
+			}
+
+			QString paramStr = QString("%1 = %2")
+				.arg(param.caption())
+				.arg(property(param.caption().toStdString().c_str()).toString());
+
+			text.append(QString("\n%1").arg(paramStr));
+		}
+
+		p->setPen(textColor());
+		DrawHelper::DrawText(p, m_font, itemUnit(), text, r);
 
 		return;
 	}

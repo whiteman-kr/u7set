@@ -32,7 +32,7 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
     QString s(*pData);
 
     ui->m_text->setPlainText(s);
-    ui->m_text->setFont(QFont("Courier", 14));
+	ui->m_text->setFont(QFont("Courier", 10));
 
     if (readOnly == true)
     {

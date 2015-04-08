@@ -338,7 +338,8 @@ namespace Afbl
 	//
 	//
 
-	AfbElementParam::AfbElementParam(void)
+	AfbElementParam::AfbElementParam(void):
+		m_visible(true)
 	{
 	}
 
@@ -360,6 +361,7 @@ namespace Afbl
 	bool AfbElementParam::SaveData(Proto::FblElementParam* message) const
 	{
 		Proto::Write(message->mutable_caption(), m_caption);
+		message->set_visible(visible());
 		message->set_type(static_cast<Proto::FblParamType>(m_type));
 
 		m_value.SaveData(message->mutable_value());
@@ -375,6 +377,7 @@ namespace Afbl
 	{
 		Proto::Read(message.caption(), &m_caption);
 		m_type = static_cast<AfbParamType>(message.type());
+		m_visible = message.visible();
 
 		m_value.LoadData(message.value());
 		m_defaultValue.LoadData(message.defaultvalue());
@@ -406,6 +409,15 @@ namespace Afbl
 		else
 		{
 			xmlReader->raiseError(QObject::tr("AfbElementParam - No Caption found"));
+		}
+
+		if (xmlReader->attributes().hasAttribute("Visible"))
+		{
+			setVisible(xmlReader->attributes().value("Visible").toInt() == 0 ? false : true);
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElementParam - No Visible found"));
 		}
 
 		if (xmlReader->attributes().hasAttribute("Type"))
@@ -461,6 +473,7 @@ namespace Afbl
 
 		xmlWriter->writeStartElement("AfbElementParam");
 		xmlWriter->writeAttribute("Caption", caption());
+		xmlWriter->writeAttribute("Visible", visible() ? "1" : "0");
 
 		switch (type())
 		{
@@ -514,6 +527,16 @@ namespace Afbl
 	void AfbElementParam::setCaption(const QString& caption)
 	{
 		m_caption = caption;
+	}
+
+	const bool AfbElementParam::visible() const
+	{
+		return m_visible;
+	}
+
+	void AfbElementParam::setVisible(bool visible)
+	{
+		m_visible = visible;
 	}
 
 	// Type

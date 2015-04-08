@@ -1,4 +1,3 @@
-//#include "Stable.h"
 #include "../include/OutputLog.h"
 
 
@@ -38,33 +37,44 @@ void OutputLog::clear()
 
 void OutputLog::write(const QString& str, OutputMessageLevel level, bool bold)
 {
-#ifdef _DEBUG
+	QDateTime time = QDateTime::currentDateTime();
+
+	// Get string level
+	//
 	QString strLevel;
+
 	switch (level)
 	{
 	case OutputMessageLevel::Message:
-		strLevel = "Message";
+		strLevel = "MSG";
 		break;
 	case OutputMessageLevel::Success:
-		strLevel = "Success";
+		strLevel = "SCS";
 		break;
 	case OutputMessageLevel::Warning:
-		strLevel = "Warning";
+		strLevel = "WRN";
 		break;
 	case OutputMessageLevel::Error:
-		strLevel = "Error";
+		strLevel = "ERR";
 		break;
 	default:
 		assert(false);
 	}
-	qDebug() << QString("%1: %2").arg(strLevel).arg(str);
-#endif
+
+	// Set full string
+	//
+	QString message = QString("\n%1 %2: %3").arg(time.toString()).arg(strLevel).arg(str);
+
+	qDebug() << message;
 
 	QMutexLocker locker(&mutex);
 
-	QDateTime time = QDateTime::currentDateTime();
-
 	windowMessageList.push_back(OutputLogItem(str, level, bold, time));
+
+	if (m_strLogging == true)
+	{
+		 m_strFullLog.append(message);
+	}
 	
 	return;
 }
@@ -79,13 +89,23 @@ void OutputLog::writeSuccess(const QString& str, bool bold)
 	return write(str, OutputMessageLevel::Success, bold);
 }
 
-void OutputLog::writeWarning(const QString& str, bool bold)
+void OutputLog::writeWarning(const QString& str, bool bold, bool incWrnCounter)
 {
+	if (incWrnCounter == true)
+	{
+		setWarningCount(warningCount() + 1);
+	}
+
 	return write(str, OutputMessageLevel::Warning, bold);
 }
 
-void OutputLog::writeError(const QString& str, bool bold)
+void OutputLog::writeError(const QString& str, bool bold, bool incErrCounter)
 {
+	if (incErrCounter)
+	{
+		setErrorCount(errorCount() + 1);
+	}
+
 	return write(str, OutputMessageLevel::Error, bold);
 }
 
@@ -97,7 +117,7 @@ void OutputLog::writeDump(const std::vector<quint8>& data)
 	{
 		if (i % 32 == 0 && i != 0)
 		{
-			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
+			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString, false);
 			dataString.clear();
 		}
 
@@ -105,7 +125,7 @@ void OutputLog::writeDump(const std::vector<quint8>& data)
 
 		if (i == data.size() - 1 && i % 32 > 0)	// last iteration
 		{
-			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
+			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString, false);
 			dataString.clear();
 		}
 	}
@@ -132,3 +152,73 @@ OutputLogItem OutputLog::popWindowMessages()
 
 	return logItem;
 }
+
+void OutputLog::startStrLogging()
+{
+	QMutexLocker locker(&mutex);
+	m_strLogging = true;
+
+	m_strFullLog.clear();
+
+	return;
+}
+
+QString OutputLog::finishStrLogging()
+{
+	QMutexLocker locker(&mutex);
+	m_strLogging = false;
+
+	QString tmp;
+	std::swap(tmp, m_strFullLog);
+
+	return tmp;
+}
+
+int OutputLog::errorCount() const
+{
+	QMutexLocker locker(&mutex);
+	return m_errorCount;
+}
+
+void OutputLog::setErrorCount(int value)
+{
+	QMutexLocker locker(&mutex);
+	int oldValue = m_errorCount;
+	m_errorCount = value;
+	locker.unlock();
+
+	emit errorCountChanged(oldValue, value);
+
+	return;
+}
+
+void OutputLog::resetErrorCount()
+{
+	return setErrorCount(0);
+}
+
+
+int OutputLog::warningCount() const
+{
+	QMutexLocker locker(&mutex);
+	return m_warningCount;
+}
+
+void OutputLog::setWarningCount(int value)
+{
+	QMutexLocker locker(&mutex);
+	int oldValue = m_warningCount;
+	m_warningCount = value;
+	locker.unlock();
+
+	emit warningCountChanged(oldValue, value);
+
+	return;
+}
+
+void OutputLog::resetWarningCount()
+{
+	return setWarningCount(0);
+}
+
+

@@ -321,6 +321,8 @@ namespace Hardware
 			else
 			{
 				bool loadOk = it->loadValue(p);
+
+				Q_UNUSED(loadOk);
 				assert(loadOk);
 
 				m_avoidEventRecursion = true;
