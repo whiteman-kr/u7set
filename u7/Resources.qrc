@@ -34,6 +34,7 @@
         <file>DatabaseUpgrade/Upgrade0032.sql</file>
         <file>DatabaseUpgrade/Upgrade0033.sql</file>
         <file>DatabaseUpgrade/Upgrade0034.sql</file>
+        <file>DatabaseUpgrade/Upgrade0035.sql</file>
     </qresource>
     <qresource prefix="/"/>
     <qresource prefix="/Images">

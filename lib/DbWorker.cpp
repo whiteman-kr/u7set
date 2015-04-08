@@ -42,6 +42,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Add MC system file", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0032.sql"},
 	{"Add presets to equipment configuration", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0033.sql"},
 	{"Add Build table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0034.sql"},
+	{"Add OutputRangeMode column to SignalInstance table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0035.sql"},
 };
 
 
@@ -2975,6 +2976,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setAperture(q.value("aperture").toDouble());
 	s.setInOutType(static_cast<SignalInOutType>(q.value("inouttype").toInt()));
 	s.setDeviceStrID(q.value("devicestrid").toString());
+	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value("outputrangemode").toInt()));		// since version 35 of database
 }
 
 
@@ -2985,7 +2987,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"\"%41\")'")
+			"\"%41\",%42)'")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
@@ -3026,7 +3028,8 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.decimalPlaces())
 	.arg(s.aperture())
 	.arg(s.inOutType())
-	.arg(s.deviceStrID());
+	.arg(s.deviceStrID())
+	.arg(s.outputRangeMode());			// since version 35 of database
 
 	qDebug() << str;
 

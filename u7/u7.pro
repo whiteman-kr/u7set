@@ -259,7 +259,8 @@ OTHER_FILES += \
         DatabaseUpgrade/Upgrade0033.sql \
         Tools/afbschema.xsd \
         ../Proto/proto_compile.sh \
-    DatabaseUpgrade/Upgrade0034.sql
+    DatabaseUpgrade/Upgrade0034.sql \
+    DatabaseUpgrade/Upgrade0035.sql
 
 DISTFILES += \
     LogicModuleConfiguration.js
