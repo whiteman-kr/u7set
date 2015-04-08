@@ -146,7 +146,7 @@ private:
 	QString m_extStrID;
 	QString m_name;
 	int m_dataFormat = static_cast<int>(DataFormatType::binary_LE_unsigned);
-	int m_dataSize;
+	int m_dataSize = 16;
 	int m_lowADC = 0;
 	int m_highADC = 0;
 	double m_lowLimit = 0;
@@ -172,6 +172,8 @@ private:
 	double m_aperture = 0;
 	SignalInOutType m_inOutType = SignalInOutType::internal;
 	QString m_deviceStrID;
+	double m_filteringTime = 0.05;
+	double m_maxDifference = 0.5;
 
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -304,6 +306,13 @@ public:
 
     Q_INVOKABLE QString deviceStrID() const { return m_deviceStrID; }
 	void setDeviceStrID(const QString& deviceStrID) { m_deviceStrID = deviceStrID; }
+
+	Q_INVOKABLE double filteringTime() const { return m_filteringTime; }
+	void setFilteringTime(double filteringTime) { m_filteringTime = filteringTime; }
+
+	Q_INVOKABLE double maxDifference() const { return m_maxDifference; }
+	void setMaxDifference(double maxDifference) { m_maxDifference = maxDifference; }
+
 
 	friend class DbWorker;
 };

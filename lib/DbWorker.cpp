@@ -2977,6 +2977,8 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setInOutType(static_cast<SignalInOutType>(q.value("inouttype").toInt()));
 	s.setDeviceStrID(q.value("devicestrid").toString());
 	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value("outputrangemode").toInt()));		// since version 35 of database
+	s.setFilteringTime(q.value("filteringtime").toDouble());									//
+	s.setMaxDifference(q.value("maxdifference").toDouble());									//
 }
 
 
@@ -2987,7 +2989,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"\"%41\",%42)'")
+			"\"%41\",%42,%43,%44)'")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
@@ -3009,19 +3011,19 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.highADC())
 	.arg(s.lowLimit())
 	.arg(s.highLimit())
-	.arg(s.unitID())// ? "NULL" : QString("%1").arg(s.unitID()))
+	.arg(s.unitID())
 	.arg(s.adjustment())
 	.arg(s.dropLimit())
 	.arg(s.excessLimit())
 	.arg(s.unbalanceLimit())
 	.arg(s.inputLowLimit())
 	.arg(s.inputHighLimit())
-	.arg(s.inputUnitID())// ? "NULL" : QString("%1").arg(s.inputUnitID()))
-	.arg(s.inputSensorID())// ? "NULL" : QString("%1").arg(s.inputSensorID()))
+	.arg(s.inputUnitID())
+	.arg(s.inputSensorID())
 	.arg(s.outputLowLimit())
 	.arg(s.outputHighLimit())
-	.arg(s.outputUnitID())// ? "NULL" : QString("%1").arg(s.outputUnitID()))
-	.arg(s.outputSensorID())//? "NULL" : QString("%1").arg(s.outputSensorID()))
+	.arg(s.outputUnitID())
+	.arg(s.outputSensorID())
 	.arg(s.acquire() ? "TRUE" : "FALSE")
 	.arg(s.calculated() ? "TRUE" : "FALSE")
 	.arg(s.normalState())
@@ -3029,7 +3031,9 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.aperture())
 	.arg(s.inOutType())
 	.arg(s.deviceStrID())
-	.arg(s.outputRangeMode());			// since version 35 of database
+	.arg(s.outputRangeMode())			// since version 35 of database
+	.arg(s.filteringTime())				//
+	.arg(s.maxDifference());			//
 
 	qDebug() << str;
 

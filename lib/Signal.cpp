@@ -2,42 +2,7 @@
 
 
 Signal::Signal() :
-	QObject(),
-	m_ID(0),
-	m_signalGroupID(0),
-	m_signalInstanceID(0),
-	m_changesetID(0),
-	m_checkedOut(false),
-	m_userID(0),
-	m_channel(1),
-	m_type(SignalType::analog),
-	m_deleted(false),
-	m_instanceAction(InstanceAction::added),
-	m_dataFormat(static_cast<int>(DataFormatType::binary_LE_unsigned)),
-	m_lowADC(0),
-	m_highADC(0),
-	m_lowLimit(0),
-	m_highLimit(0),
-	m_unitID(NO_UNIT_ID),
-	m_adjustment(0),
-	m_dropLimit(0),
-	m_excessLimit(0),
-	m_unbalanceLimit(0),
-	m_inputLowLimit(0),
-	m_inputHighLimit(0),
-	m_inputUnitID(NO_UNIT_ID),
-	m_inputSensorID(0),
-	m_outputLowLimit(0),
-	m_outputHighLimit(0),
-	m_outputUnitID(NO_UNIT_ID),
-	m_outputRangeMode(OutputRangeMode::plus4_plus20_mA),
-	m_outputSensorID(0),
-	m_acquire(true),
-	m_calculated(false),
-	m_normalState(0),
-	m_decimalPlaces(2),
-	m_aperture(0),
-	m_inOutType(SignalInOutType::internal)
+	QObject()
 {
 }
 
@@ -86,6 +51,8 @@ Signal& Signal::operator =(const Signal& signal)
 	m_aperture = signal.aperture();
 	m_inOutType = signal.inOutType();
 	m_deviceStrID = signal.deviceStrID();
+	m_filteringTime = signal.filteringTime();
+	m_maxDifference = signal.maxDifference();
 
 	return *this;
 }

@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
 --
--- Add column OutputRangeMode to SignalInstance table
+-- Add column OutputRangeMode, FilteringTime, MaxDifference to SignalInstance table
 -- Modification of the dependent types & stored procedures
 --
 ------------------------------------------------------------------------------
@@ -8,6 +8,14 @@
 ALTER TABLE signalinstance ADD COLUMN outputrangemode integer;
 ALTER TABLE signalinstance ALTER COLUMN outputrangemode SET NOT NULL;
 ALTER TABLE signalinstance ALTER COLUMN outputrangemode SET DEFAULT 1;
+
+ALTER TABLE signalinstance ADD COLUMN filteringtime double precision;
+ALTER TABLE signalinstance ALTER COLUMN filteringtime SET NOT NULL;
+ALTER TABLE signalinstance ALTER COLUMN filteringtime SET DEFAULT 0.05;
+
+ALTER TABLE signalinstance ADD COLUMN maxdifference double precision;
+ALTER TABLE signalinstance ALTER COLUMN maxdifference SET NOT NULL;
+ALTER TABLE signalinstance ALTER COLUMN maxdifference SET DEFAULT 0.5;
 
 
 DROP FUNCTION get_latest_signal(integer, integer);
@@ -59,7 +67,9 @@ CREATE TYPE signaldata AS
 	aperture double precision,
 	inouttype integer,
 	devicestrid text,
-	outputrangemode integer);
+	outputrangemode integer,
+	filteringtime double precision,
+	maxdifference double precision);
 
 
 CREATE OR REPLACE FUNCTION get_latest_signal(user_id integer, signal_id integer)
@@ -133,7 +143,9 @@ BEGIN
 		SI.Aperture,
 		SI.InOutType,
 		SI.DeviceStrID,
-		SI.OutputRangeMode
+		SI.OutputRangeMode,
+		SI.FilteringTime,
+		SI.MaxDifference
 	INTO
 		signal_data
 	FROM Signal AS S, SignalInstance AS SI
@@ -201,7 +213,9 @@ BEGIN
 			Aperture = sd.Aperture,
 			InOutType = sd.InOutType,
 			DeviceStrID = sd.DeviceStrID,
-			OutputRangeMode = sd.OutputRangeMode
+			OutputRangeMode = sd.OutputRangeMode,
+			FilteringTime = sd.FilteringTime,
+			MaxDifference = sd.MaxDifference
 		WHERE
 			SignalInstanceID = chOutInstanceID;
 
@@ -326,7 +340,9 @@ BEGIN
 						Aperture,
 						InOutType,
 						DeviceStrID,
-						OutputRangeMode )
+						OutputRangeMode,
+						FilteringTime,
+						MaxDifference )
 					SELECT
 						SI.SignalID,
 						2,							-- Action Edit
@@ -359,7 +375,9 @@ BEGIN
 						Aperture,
 						InOutType,
 						DeviceStrID,
-						OutputRangeMode
+						OutputRangeMode,
+						FilteringTime,
+						MaxDifference
 					FROM
 						Signal AS S,
 						SignalInstance AS SI
