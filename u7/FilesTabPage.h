@@ -123,6 +123,7 @@ public slots:
 	void checkInFile();
 	void undoChangesFile();
 	void getLatestVersion();
+	void getLatestTreeVersion();
 	void setWorkcopy();
 	void refreshFileTree();
 
@@ -178,6 +179,7 @@ private:
 	//----------------------------------
 	QAction* m_SeparatorAction2 = nullptr;
 	QAction* m_getLatestVersionAction = nullptr;
+	QAction* m_getLatestTreeVersionAction = nullptr;
 	QAction* m_setWorkcopyAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction3 = nullptr;

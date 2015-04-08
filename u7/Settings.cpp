@@ -1,5 +1,6 @@
 #include "Settings.h"
 #include "QStandardPaths"
+#include "QDir"
 
 Settings theSettings;
 
@@ -8,7 +9,7 @@ Settings::Settings() :
 	m_serverPort(0),
 	m_serverUsername("u7"),
 	m_serverPassword("P2ssw0rd"),
-	m_buildOutputPath(QStandardPaths::writableLocation(QStandardPaths::DataLocation))
+	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation)))
 
 {
 }

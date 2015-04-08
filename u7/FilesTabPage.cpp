@@ -2,6 +2,7 @@
 #include "DialogFileEditor.h"
 #include "CheckInDialog.h"
 #include "../include/DbController.h"
+#include <QDir>
 
 //
 //
@@ -1161,8 +1162,8 @@ void FileTreeView::getLatestVersion()
 
 	// Select destination folder
 	//
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(),
-													QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QDir().toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(),
+													QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
 
 	if (dir.isEmpty() == true)
 	{
@@ -1191,6 +1192,99 @@ void FileTreeView::getLatestVersion()
 			msgBox.setText(tr("Write file error."));
 			msgBox.setInformativeText(tr("Cannot write file %1.").arg(out[i]->fileName()));
 			msgBox.exec();
+		}
+	}
+
+	return;
+}
+
+void FileTreeView::getLatestTreeVersion()
+{
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> files;
+	files.reserve(static_cast<size_t>(selectedIndexList.size()));
+
+	for (QModelIndex& mi : selectedIndexList)
+	{
+		if (mi.parent().isValid() == false)
+		{
+			// Forbid any actions to root items
+			//
+			continue;
+		}
+
+		FileTreeModelItem* f = fileTreeModel()->fileItem(mi);
+		assert(f);
+
+		files.push_back(*f);
+	}
+
+	if (files.empty() == true)
+	{
+		// Nothing to do
+		//
+		return;
+	}
+
+	// Select destination folder
+	//
+	QString dir = QDir().toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(),
+													QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+
+	if (dir.isEmpty() == true)
+	{
+		return;
+	}
+
+	for (auto f : files)
+	{
+		// Get files from the database
+		//
+		std::list<std::shared_ptr<DbFile>> outList;
+		bool ok = db()->getLatestTreeVersion(f, &outList, this);
+		if (ok == false)
+		{
+			return;
+		}
+
+		std::vector<std::shared_ptr<DbFile>> out;
+		for (auto o : outList)
+		{
+			out.push_back(o);
+		}
+
+		QString dirFiles = dir + QDir().separator() + f.fileName() + ".files";
+		QDir().mkdir(dirFiles);
+
+		// Save files to disk
+		//
+		for (unsigned int i = 0; i < out.size(); i++)
+		{
+			bool writeResult = false;
+
+			if (i == 0)
+			{
+				writeResult = out[i]->writeToDisk(dir);
+			}
+			else
+			{
+				writeResult = out[i]->writeToDisk(dirFiles);
+			}
+
+			if (writeResult == false)
+			{
+				QMessageBox msgBox;
+				msgBox.setText(tr("Write file error."));
+				msgBox.setInformativeText(tr("Cannot write file %1.").arg(out[i]->fileName()));
+				msgBox.exec();
+				break;
+			}
 		}
 	}
 
@@ -1362,6 +1456,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	// -----------------
 	m_fileView->addAction(m_SeparatorAction2);
 	m_fileView->addAction(m_getLatestVersionAction);
+	m_fileView->addAction(m_getLatestTreeVersionAction);
 	m_fileView->addAction(m_setWorkcopyAction);
 	// -----------------
 	m_fileView->addAction(m_SeparatorAction3);
@@ -1450,6 +1545,11 @@ void FilesTabPage::createActions()
 	m_getLatestVersionAction->setEnabled(false);
 	connect(m_getLatestVersionAction, &QAction::triggered, m_fileView, &FileTreeView::getLatestVersion);
 
+	m_getLatestTreeVersionAction = new QAction(tr("Get Latest Tree Version"), this);
+	m_getLatestTreeVersionAction->setStatusTip(tr("Get the latest tree version (workcopy if cheked out)"));
+	m_getLatestTreeVersionAction->setEnabled(false);
+	connect(m_getLatestTreeVersionAction, &QAction::triggered, m_fileView, &FileTreeView::getLatestTreeVersion);
+
 	m_setWorkcopyAction = new QAction(tr("Set Workcopy..."), this);
 	m_setWorkcopyAction->setStatusTip(tr("Set work copy of the file(s)..."));
 	m_setWorkcopyAction->setEnabled(false);
@@ -1479,6 +1579,7 @@ void FilesTabPage::setActionState()
 	m_checkInAction->setEnabled(false);
 	m_undoChangesAction->setEnabled(false);
 	m_getLatestVersionAction->setEnabled(false);
+	m_getLatestTreeVersionAction->setEnabled(false);
 	m_setWorkcopyAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
 
@@ -1558,6 +1659,7 @@ void FilesTabPage::setActionState()
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 
 	m_getLatestVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
+	m_getLatestTreeVersionAction->setEnabled(selectedIndexList.isEmpty() == false);
 	m_setWorkcopyAction->setEnabled(canAnyBeCheckedIn && selectedIndexList.size() == 1);
 
     // Enable edit only files with several extensions!
