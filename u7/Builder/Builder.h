@@ -39,17 +39,9 @@ namespace Builder
 	private:
 		virtual void run() override;
 
-		// Get Equipment from the prokect database
-		//
-		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
-
-		// Expand Devices StrId
-		//
-		bool expandDeviceStrId(Hardware::DeviceObject* device);
-
 		// Generate Modules Configurations Firmwares
 		//
-		bool generateModulesConfigurations(DbController* db, Hardware::DeviceObject* root);
+		bool modulesConfiguration(DbController* db, int changesetId);
 
 		// Compile Application Logic
 		//
