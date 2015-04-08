@@ -1,3 +1,5 @@
 April, 2015
 
 - Начали ведение этого файла
+
+- Добавлены новые поля в сигналы: OutputRangeMode, FilteringTime, MaxDifference
