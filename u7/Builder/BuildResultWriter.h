@@ -13,8 +13,13 @@ namespace Builder
 		Q_OBJECT
 
 	private:
-		QString m_userName;
-		QString m_projectStrID;
+		QString msg;
+
+		QString m_buildDirectory;
+		QString m_fullBuildPath;
+
+		QFile m_buildXML;
+
 		bool m_release = false;
 		int m_changesetID = 0;
 		int m_buildNo = -1;
@@ -25,6 +30,8 @@ namespace Builder
 
 	private:
 		bool createBuildDirectory();
+		bool createBuildXML();
+		bool closeBuildXML();
 
 	public:
 		explicit BuildResultWriter(QObject *parent = 0);

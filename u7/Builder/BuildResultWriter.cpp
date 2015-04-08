@@ -2,7 +2,7 @@
 #include "../include/DbController.h"
 #include <QHostInfo>
 #include <QStandardPaths>
-
+#include <QDir>
 
 namespace Builder
 {
@@ -17,8 +17,6 @@ namespace Builder
 		m_log = log;
 		m_release = release;
 		m_changesetID = changesetID;
-
-		QString msg;
 
 		if (m_dbController == nullptr || m_log == nullptr)
 		{
@@ -71,7 +69,16 @@ namespace Builder
 			m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true);
 		}
 
-		createBuildDirectory();
+		if (createBuildDirectory() == false)
+		{
+			return false;
+		}
+
+		if (createBuildXML() == false)
+		{
+			return false;
+		}
+
 
 		return true;
 	}
@@ -89,12 +96,14 @@ namespace Builder
 			return false;
 		}
 
+		closeBuildXML();
+
 #pragma message("Load correct Errors, Warnings counters & Build Log")
-		int errors = 1;
+		int errors = 0;
 		int warnings = 0;
 		QString buildLogStr = "Build Log Str";
 
-		QString msg = QString(tr("%1 building #%2 was finished. Errors - %3. Warnings - %4."))
+		msg = QString(tr("%1 building #%2 was finished. Errors - %3. Warnings - %4."))
 				.arg(m_release ? "RELEASE" : "DEBUG")
 				.arg(m_buildNo).arg(errors).arg(warnings);
 
@@ -126,8 +135,62 @@ namespace Builder
 	{
 		QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
 
+		m_buildDirectory = QString("%1-%2-%3")
+				.arg(m_dbController->currentProject().projectName())
+				.arg(m_release ? "release" : "debug").arg(m_buildNo);
+
+		m_fullBuildPath = appDataPath + "/" + m_buildDirectory;
+
+		if (QDir().mkdir(m_fullBuildPath) == false)
+		{
+			msg = tr("Can't create build directory: ") + m_fullBuildPath;
+			m_log->writeError(msg, true);
+
+			qDebug() << msg;
+
+			m_runBuild = false;
+			return false;
+		}
+
+		msg = tr("Build directory was created: ") + m_fullBuildPath;
+
+		m_log->writeMessage(msg);
+
+		qDebug() << msg;
+
+		return true;
+	}
 
 
+	bool BuildResultWriter::createBuildXML()
+	{
+		m_buildXML.setFileName(m_fullBuildPath + "/build.xml");
+
+		if (m_buildXML.open(QIODevice::ReadWrite | QIODevice::Text) == false)
+		{
+			msg = tr("Can't create file: build.xml");
+			m_log->writeError(msg, true);
+
+			qDebug() << msg;
+
+			m_runBuild = false;
+			return false;
+
+		}
+
+		msg = tr("File was created: build.xml");
+
+		m_log->writeMessage(msg);
+
+		qDebug() << msg;
+
+
+		return true;
+	}
+
+
+	bool BuildResultWriter::closeBuildXML()
+	{
 		return true;
 	}
 }
