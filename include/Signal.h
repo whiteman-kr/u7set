@@ -40,6 +40,15 @@ enum InstanceAction
 };
 
 
+enum OutputRangeMode
+{
+	plus0_plus5_V = 0,
+	plus4_plus20_mA = 1,
+	minus10_plus10_V = 2,
+	plus0_plus5_mA = 4,
+};
+
+
 const char* const InOutTypeStr[] =
 {
 	"Input",
@@ -75,6 +84,17 @@ const char* const SensorTypeStr[] =
 };
 
 const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
+
+
+const char* const OutputRangeModeStr[] =
+{
+	"0..5 V",
+	"4..20 mA",
+	"-10..10 V",
+	"0..5 mA",
+};
+
+const int OUTPUT_RANGE_MODE_COUNT = sizeof(OutputRangeModeStr) / sizeof(OutputRangeModeStr[0]);
 
 
 const int NO_UNIT_ID = 1;
@@ -143,6 +163,7 @@ private:
 	double m_outputLowLimit = 0;
 	double m_outputHighLimit = 0;
 	int m_outputUnitID = NO_UNIT_ID;
+	OutputRangeMode m_outputRangeMode = OutputRangeMode::plus4_plus20_mA;
 	int m_outputSensorID = 0;
 	bool m_acquire = true;
 	bool m_calculated = false;
@@ -256,6 +277,9 @@ public:
 
     Q_INVOKABLE int outputUnitID() const { return m_outputUnitID; }
 	void setOutputUnitID(int outputUnitID) { m_outputUnitID = outputUnitID; }
+
+	Q_INVOKABLE OutputRangeMode outputRangeMode() const { return m_outputRangeMode; }
+	void setOutputRangeMode(OutputRangeMode outputRangeMode) { m_outputRangeMode = outputRangeMode; }
 
     Q_INVOKABLE int outputSensorID() const { return m_outputSensorID; }
 	void setOutputSensorID(int outputSensorID) { m_outputSensorID = outputSensorID; }

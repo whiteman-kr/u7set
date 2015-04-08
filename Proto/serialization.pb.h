@@ -1380,6 +1380,13 @@ class FblElementParam : public ::google::protobuf::Message {
   inline ::Proto::FblParamValue* release_highlimit();
   inline void set_allocated_highlimit(::Proto::FblParamValue* highlimit);
 
+  // required bool visible = 7;
+  inline bool has_visible() const;
+  inline void clear_visible();
+  static const int kVisibleFieldNumber = 7;
+  inline bool visible() const;
+  inline void set_visible(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElementParam)
  private:
   inline void set_has_caption();
@@ -1394,18 +1401,21 @@ class FblElementParam : public ::google::protobuf::Message {
   inline void clear_has_lowlimit();
   inline void set_has_highlimit();
   inline void clear_has_highlimit();
+  inline void set_has_visible();
+  inline void clear_has_visible();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::wstring* caption_;
   ::Proto::FblParamValue* value_;
   ::Proto::FblParamValue* defaultvalue_;
+  int type_;
+  bool visible_;
   ::Proto::FblParamValue* lowlimit_;
   ::Proto::FblParamValue* highlimit_;
-  int type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6477,6 +6487,28 @@ inline void FblElementParam::set_allocated_highlimit(::Proto::FblParamValue* hig
   } else {
     clear_has_highlimit();
   }
+}
+
+// required bool visible = 7;
+inline bool FblElementParam::has_visible() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void FblElementParam::set_has_visible() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void FblElementParam::clear_has_visible() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void FblElementParam::clear_visible() {
+  visible_ = false;
+  clear_has_visible();
+}
+inline bool FblElementParam::visible() const {
+  return visible_;
+}
+inline void FblElementParam::set_visible(bool value) {
+  set_has_visible();
+  visible_ = value;
 }
 
 // -------------------------------------------------------------------

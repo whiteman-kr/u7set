@@ -158,6 +158,16 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	m_enumManager->setValue(m_outputUnitProperty, unitInfo.keyIndex(signal.outputUnitID()));
 	m_outputTreeProperty->addSubProperty(m_outputUnitProperty);
 
+	QStringList outputRangeModeNames;
+	for (int i = 0; i < OUTPUT_RANGE_MODE_COUNT; i++)
+	{
+		outputRangeModeNames << OutputRangeModeStr[i];
+	}
+	m_outputRangeModeProperty = m_enumManager->addProperty(tr("Output range mode"));
+	m_enumManager->setEnumNames(m_outputRangeModeProperty, outputRangeModeNames);
+	m_enumManager->setValue(m_outputRangeModeProperty, signal.outputRangeMode());
+	m_outputTreeProperty->addSubProperty(m_outputRangeModeProperty);
+
 	m_outputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
 	m_enumManager->setEnumNames(m_outputSensorProperty, sensorNames);
 	m_enumManager->setValue(m_outputSensorProperty, signal.outputSensorID());

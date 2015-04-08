@@ -77,7 +77,7 @@ DialogAfbProperties::DialogAfbProperties(const QString &caption, QByteArray* pDa
     QString s(*pData);
 
     ui->m_text->setPlainText(s);
-    ui->m_text->setFont(QFont("Courier", 14));
+    ui->m_text->setFont(QFont("Courier", 10));
 
     if (caption.right(4) == ".afb")
     {

@@ -1,6 +1,8 @@
 #include "DialogSettings.h"
 #include "ui_DialogSettings.h"
 
+#include <QFileDialog>
+
 DialogSettings::DialogSettings(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::DialogSettings)
@@ -31,6 +33,7 @@ void DialogSettings::setSettings(const Settings& value)
 	ui->editPort->setText(QString().setNum(m_settings.serverPort()));
 	ui->editUsername->setText(m_settings.serverUsername());
 	ui->editPassword->setText(m_settings.serverPassword());
+	ui->editOutputPath->setText(m_settings.buildOutputPath());
 
 	return;
 }
@@ -77,12 +80,15 @@ void DialogSettings::on_ok_clicked()
 	//
 	QString serverPassword = ui->editPassword->text();
 
+	QString buildOutputPath = ui->editOutputPath->text();
+
 	// --
 	//
 	m_settings.setServerIpAddress(serverIpAddress);
 	m_settings.setServerPort(serverPort);
 	m_settings.setServerUsername(serverUsername);
 	m_settings.setServerPassword(serverPassword);
+	m_settings.setBuildOutputPath(buildOutputPath);
 
 	accept();
 	return;
@@ -92,4 +98,14 @@ void DialogSettings::on_cancel_clicked()
 {
 	reject();
 	return;
+}
+
+void DialogSettings::on_browseOutputPath_clicked()
+{
+	QString dir = QDir().toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+													m_settings.buildOutputPath(),
+													QFileDialog::ShowDirsOnly
+													| QFileDialog::DontResolveSymlinks));
+
+	ui->editOutputPath->setText(dir);
 }

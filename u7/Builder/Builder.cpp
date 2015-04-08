@@ -43,8 +43,8 @@ namespace Builder
 
 		if (ok == false)
 		{
-			m_log->writeError(db.lastError());
-			m_log->writeError(tr("Opening project %1: error").arg(projectName()), true);
+			m_log->writeError(db.lastError(), false, true);
+			m_log->writeError(tr("Opening project %1: error").arg(projectName()), true, false);
 			return;
 		}
 		else
@@ -62,7 +62,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("lastChangesetId Error."), true);
+				m_log->writeError(tr("lastChangesetId Error."), true, true);
 				break;
 			}
 
@@ -71,14 +71,14 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("isAnyCheckedOut Error."), true);
+				m_log->writeError(tr("isAnyCheckedOut Error."), true, true);
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
 
 			if (release() == true && isAnyCheckedOut == true)
 			{
-				m_log->writeError(tr("There are some checked out objects. Please check in all objects before building release version."), true);
+				m_log->writeError(tr("There are some checked out objects. Please check in all objects before building release version."), true, true);
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -86,7 +86,7 @@ namespace Builder
 			//
 			// Get Equipment from the database
 			//
-			m_log->writeMessage("");
+			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Getting equipment"), true);
 
 			Hardware::DeviceRoot deviceRoot;
@@ -102,7 +102,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Error"), true);
+				m_log->writeError(tr("Error"), true, false);
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -114,7 +114,7 @@ namespace Builder
 			//
 			// Expand Devices StrId
 			//
-			m_log->writeMessage("");
+			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Expanding devices StrIds"), true);
 
 			expandDeviceStrId(&deviceRoot);
@@ -124,7 +124,7 @@ namespace Builder
 			//
 			// Generate Module Confuiguration Binary File
 			//
-			m_log->writeMessage("");
+			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Generating modules configurations"), true);
 
 			ok = generateModulesConfigurations(&db, &deviceRoot);
@@ -136,7 +136,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Error"), true);
+				m_log->writeError(tr("Error"), true, false);
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -149,7 +149,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			m_log->writeMessage("");
+			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Application Logic compilation"), true);
 
 			ok = applicationLogic(&db, lastChangesetId);
@@ -161,7 +161,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Error"), true);
+				m_log->writeError(tr("Error"), true, false);
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -217,7 +217,7 @@ namespace Builder
 
 		if (parent->deviceType() == Hardware::DeviceType::System)
 		{
-			m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()));
+			m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()), false);
 		}
 
 		std::vector<DbFileInfo> files;
@@ -231,7 +231,7 @@ namespace Builder
 
 		if (ok == false)
 		{
-			m_log->writeError(tr("Cannot get equipment file list"));
+			m_log->writeError(tr("Cannot get equipment file list"), false, true);
 			return false;
 		}
 
@@ -261,7 +261,7 @@ namespace Builder
 
 			if (file == false || ok == false)
 			{
-				m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()));
+				m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()), false, true);
 				return false;
 			}
 
@@ -326,7 +326,7 @@ namespace Builder
 		{
 			assert(db);
 			assert(root);
-			m_log->writeError(tr("Fatal error, input parammeter is nullptr!"), true);
+			m_log->writeError(tr(__FUNCTION__": Fatal error, input parammeter is nullptr!"), true,true);
 			return false;
 		}
 
@@ -346,7 +346,7 @@ namespace Builder
 
 		if (ok == false || fileList.size() != 1)
 		{
-			m_log->writeError(tr("Can't get file list and find Module Configuration description file"), true);
+			m_log->writeError(tr("Can't get file list and find Module Configuration description file"), false, true);
 			return false;
 		}
 
@@ -363,7 +363,7 @@ namespace Builder
 
 		if (ok == false || scriptFile == false)
 		{
-			m_log->writeError(tr("Can't get Module Configuration description file"), true);
+			m_log->writeError(tr("Can't get Module Configuration description file"), false, true);
 			return false;
 		}
 
@@ -394,7 +394,7 @@ namespace Builder
 		QJSValue jsEval = jsEngine.evaluate(contents, "ModulesConfigurations.descr");
 		if (jsEval.isError() == true)
 		{
-			m_log->writeError(tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()));
+			m_log->writeError(tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()), false, true);
 			return false;
 		}
 
@@ -409,13 +409,13 @@ namespace Builder
 
 		if (jsResult.isError() == true)
 		{
-			m_log->writeError(tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()));
+			m_log->writeError(tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()), false, true);
 			return false;
 		}
 
 		if (jsResult.toBool() == false)
 		{
-			m_log->writeError(tr("Module configuration generating failed!"));
+			m_log->writeError(tr("Module configuration generating failed!"), false, false);
 			return false;
 		}
 		qDebug() << jsResult.toInt();
@@ -430,7 +430,7 @@ namespace Builder
 		{
 			if (confCollection.save(projectName(), projectUserName()) == false)
 			{
-				m_log->writeError(tr("Failed to save module configuration binary files!"));
+				m_log->writeError(tr("Failed to save module configuration binary files!"), false, true);
 				return false;
 			}
 		}

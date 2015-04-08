@@ -23,6 +23,8 @@ private slots:
 
 	void on_cancel_clicked();
 
+	void on_browseOutputPath_clicked();
+
 private:
 	Ui::DialogSettings *ui;
 	Settings m_settings;

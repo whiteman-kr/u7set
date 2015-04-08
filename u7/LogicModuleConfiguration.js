@@ -19,7 +19,7 @@ var OutputAnalog = 5;
 
 function(root, confCollection, log, signalSet)
 {
-    log.writeMessage("Start LogicModuleConfiguration");
+    log.writeMessage("Start LogicModuleConfiguration", false);
 
     var result = true;
 
@@ -30,7 +30,7 @@ function(root, confCollection, log, signalSet)
         return false;
     }
 
-    log.writeMessage("Finish LogicModuleConfiguration");
+    log.writeMessage("Finish LogicModuleConfiguration", false);
 
     return result;
 }
@@ -39,7 +39,7 @@ function setData8(confFirmware, log, frameIndex, offset, data)
 {
     if (confFirmware.setData8(frameIndex, offset, data) == false)
     {
-        log.writeMessage("Error: SetData8, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
+        log.writeError("Error: SetData8, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
         return false;
     }
 }
@@ -48,7 +48,7 @@ function setData16(confFirmware, log, frameIndex, offset, data)
 {
     if (confFirmware.setData16(frameIndex, offset, data) == false)
     {
-        log.writeMessage("Error: SetData16, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
+        log.writeError("Error: SetData16, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
         return false;
     }
 }
@@ -57,7 +57,7 @@ function setData32(confFirmware, log, frameIndex, offset, data)
 {
     if (confFirmware.setData32(frameIndex, offset, data) == false)
     {
-        log.writeMessage("Error: SetData32, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
+        log.writeError("Error: SetData32, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
         return false;
     }
 }
@@ -66,7 +66,7 @@ function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
 {
     if (confFirmware.storeCrc64(frameIndex, start, count, offset) == false)
     {
-        log.writeMessage("Error: StoreCrc64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
+        log.writeError("Error: StoreCrc64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
         return false;
     }
 }
@@ -78,7 +78,7 @@ function module_lm_1(device, confCollection, log, signalSet)
     {
         if (device.ConfType == "LM-1")
         {
-            log.writeMessage("MODULE LM-1: " + device.StrID);
+            log.writeMessage("MODULE LM-1: " + device.StrID, false);
 
             // Generate Configuration
             //
@@ -140,7 +140,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
             var frame = ioModulesStartFrame + ioModule.Place - 1;
             if (frame < ioModulesStartFrame || frame >= ioModulesStartFrame + ioModulesMaxCount)
             {
-                log.writeMessage("Wrong I/O module place: " + ioModule.StrID + ", place: " + ioModule.Place + ", expected 1..14.");
+                log.writeError("Wrong I/O module place: " + ioModule.StrID + ", place: " + ioModule.Place + ", expected 1..14.", false, true);
                 return false;
             }
             
@@ -235,7 +235,7 @@ function truncate_to_int(x)
 //
 function generate_aim(confFirmware, module, frame, log, signalSet)
 {
-    log.writeMessage("MODULE AIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
 
     var ptr = 0;
     
@@ -268,12 +268,12 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             }
             if (s.jsPlace() == i)
             {
-                log.writeMessage("AIM InputSignal: " + s.StrID);
+                log.writeMessage("AIM InputSignal: " + s.StrID, false);
                 
                 signal = signalSet.getSignalByDeviceStrID(s.StrID);
                 if (signal == null)    
                 {
-                    log.writeMessage("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.");
+                    log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.", false, true);
                 }
                 break;
             }
@@ -283,7 +283,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         {
             // Generate default values, there is no signal on this place
             //
-            log.writeMessage("Default place" + i + ": tf = " + defaultTf + ", hi = " + defaultHighBound + ", lo = " + defaultLowBound + ", diff = " + defaultMaxDiff);
+            log.writeMessage("Default place" + i + ": tf = " + defaultTf + ", hi = " + defaultHighBound + ", lo = " + defaultLowBound + ", diff = " + defaultMaxDiff, false);
             
             setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
             ptr += 2;
@@ -304,7 +304,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         }
         else
         {
-            log.writeMessage("Place" + i + ": tf = " + defaultTf + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + defaultMaxDiff);
+            log.writeMessage("Place" + i + ": tf = " + defaultTf + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + defaultMaxDiff, false);
 
             setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
             ptr += 2;
@@ -360,7 +360,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     //
     if (ptr != 1016)
     {
-        log.writeMessage("WARNING!!! PTR != 1016!!! " + ptr);
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr, false, true);
         ptr = 1016;
     }
     
@@ -374,7 +374,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 //
 function generate_aifm(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE AIFM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AIFM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
     return true;
 
 }
@@ -386,7 +386,7 @@ function generate_aifm(confFirmware, module, frame, log)
 //
 function generate_aom(confFirmware, module, frame, log, signalSet)
 {
-    log.writeMessage("MODULE AOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
 
     var ptr = 0;
     
@@ -426,12 +426,12 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
                 }
                 if (s.jsPlace() == place)
                 {
-                    log.writeMessage("AOM OutputSignal: " + s.StrID);
+                    log.writeMessage("AOM OutputSignal: " + s.StrID, false);
                     
                     signal = signalSet.getSignalByDeviceStrID(s.StrID);
                     if (signal == null)    
                     {
-                        log.writeMessage("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.");
+                        log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.", false, true);
                     }
                     break;
                 }
@@ -452,7 +452,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
             
         }
         
-        log.writeMessage("Place" + place + ": Word = " + w + " = " + data);
+        log.writeMessage("Place" + place + ": Word = " + w + " = " + data, false);
         setData16(confFirmware, log, frame, ptr + w * 2, data);          // InA Filtering time constant
     }
     
@@ -489,7 +489,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     //
     if (ptr != 1016)
     {
-        log.writeMessage("WARNING!!! PTR != 1016!!! " + ptr);
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr, false, true);
         ptr = 1016;
     }
 
@@ -504,7 +504,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 //
 function generate_ocm(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE OCM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE OCM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
     return true;
 
 }

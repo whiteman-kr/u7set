@@ -198,6 +198,7 @@ message FblElementParam
 	required FblParamValue defaultvalue = 4;
 	required FblParamValue lowlimit = 5;
 	required FblParamValue highlimit = 6;
+	required bool visible = 7;
 }
 
 
