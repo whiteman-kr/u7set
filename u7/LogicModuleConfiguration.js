@@ -18,6 +18,10 @@ var OutputAnalog = 5;
 
 var aimTxId = 0x1200;
 var aomTxId = 0x1300;
+var dimTxId = 0x1400;
+var domTxId = 0x1500;
+var aifmTxId = 0x1600;
+var ocmTxId = 0x1700;
 
 var Mode_05V = 0;
 var Mode_420mA = 1;
@@ -142,7 +146,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
     for (var i = 0; i < parent.childrenCount(); i++)
     {
         var ioModule = parent.jsChild(i);
-        if (ioModule.ConfType == "AIM" || ioModule.ConfType == "AIFM" || ioModule.ConfType == "AOM" || ioModule.ConfType == "OCM")
+        if (ioModule.ConfType == "AIM" || ioModule.ConfType == "AIFM" || ioModule.ConfType == "AOM" || ioModule.ConfType == "OCM" || ioModule.ConfType == "DIM"|| ioModule.ConfType == "DOM")
         {
             var frame = ioModulesStartFrame + ioModule.Place - 1;
             if (frame < ioModulesStartFrame || frame >= ioModulesStartFrame + ioModulesMaxCount)
@@ -161,11 +165,19 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
             }
             if (ioModule.ConfType == "AOM")
             {
-                generate_aom(confFirmware, ioModule, frame, log, signalSet);
+                //generate_aom(confFirmware, ioModule, frame, log, signalSet);
             }
             if (ioModule.ConfType == "OCM")
             {
                 generate_ocm(confFirmware, ioModule, frame, log);
+            }
+            if (ioModule.ConfType == "DIM")
+            {
+                generate_dim(confFirmware, ioModule, frame, log);
+            }
+            if (ioModule.ConfType == "DOM")
+            {
+                generate_dom(confFirmware, ioModule, frame, log);
             }
         }
     }
@@ -521,6 +533,101 @@ function generate_ocm(confFirmware, module, frame, log)
 
 }
 
+// Generate configuration for module DIM
+// module - Hardware::DeviceModule (LM-1)
+// frame - Number of frame to generate
+//
+//
+function generate_dim(confFirmware, module, frame, log)
+{
+    log.writeMessage("MODULE DIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
+
+    var ptr = 120;
+    
+    // crc
+    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+    ptr += 8;    
+
+    // reserved
+    ptr += 880;
+    
+    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
+    //
+    var dataTransmittingEnableFlag = false;
+    var dataReceiveEnableFlag = true;
+    
+    var flags = 0;
+    if (dataTransmittingEnableFlag == true)
+        flags |= 1;
+    if (dataReceiveEnableFlag == true)
+        flags |= 2;
+    
+    var configFramesQuantity = 1;
+    var dataFramesQuantity = 0;
+    var txId = dimTxId;
+    
+    generate_txRxConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    ptr += 8;
+
+    // assert if we not on the correct place
+    //
+    if (ptr != 1016)
+    {
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr, false, true);
+        ptr = 1016;
+    }
+
+    return true;
+
+}
+
+// Generate configuration for module DOM
+// module - Hardware::DeviceModule (LM-1)
+// frame - Number of frame to generate
+//
+//
+function generate_dom(confFirmware, module, frame, log)
+{
+    log.writeMessage("MODULE DOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
+
+    var ptr = 120;
+    
+    // crc
+    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+    ptr += 8;    
+
+    // reserved
+    ptr += 880;
+    
+    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
+    //
+    var dataTransmittingEnableFlag = true;
+    var dataReceiveEnableFlag = true;
+    
+    var flags = 0;
+    if (dataTransmittingEnableFlag == true)
+        flags |= 1;
+    if (dataReceiveEnableFlag == true)
+        flags |= 2;
+    
+    var configFramesQuantity = 1;
+    var dataFramesQuantity = 1;
+    var txId = domTxId;
+    
+    generate_txRxConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    ptr += 8;
+
+    // assert if we not on the correct place
+    //
+    if (ptr != 1016)
+    {
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr, false, true);
+        ptr = 1016;
+    }
+
+    return true;
+
+}
 function generate_txRxConfig(confFirmware, frame, offset, log, flags, configFrames, dataFrames, txId)
 {
     // TxRx Block's configuration structure
