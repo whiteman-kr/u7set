@@ -5,18 +5,11 @@
 --
 ------------------------------------------------------------------------------
 
-ALTER TABLE signalinstance ADD COLUMN outputrangemode integer;
-ALTER TABLE signalinstance ALTER COLUMN outputrangemode SET NOT NULL;
-ALTER TABLE signalinstance ALTER COLUMN outputrangemode SET DEFAULT 1;
+ALTER TABLE signalinstance ADD COLUMN outputrangemode integer NOT NULL DEFAULT 1;
 
-ALTER TABLE signalinstance ADD COLUMN filteringtime double precision;
-ALTER TABLE signalinstance ALTER COLUMN filteringtime SET NOT NULL;
-ALTER TABLE signalinstance ALTER COLUMN filteringtime SET DEFAULT 0.05;
+ALTER TABLE signalinstance ADD COLUMN filteringtime double precision NOT NULL DEFAULT 0.05;
 
-ALTER TABLE signalinstance ADD COLUMN maxdifference double precision;
-ALTER TABLE signalinstance ALTER COLUMN maxdifference SET NOT NULL;
-ALTER TABLE signalinstance ALTER COLUMN maxdifference SET DEFAULT 0.5;
-
+ALTER TABLE signalinstance ADD COLUMN maxdifference double precision NOT NULL DEFAULT 0.5;
 
 DROP FUNCTION get_latest_signal(integer, integer);
 DROP FUNCTION set_signal_workcopy(integer, signaldata);
