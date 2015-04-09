@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QObject>
+#include <QFile>
+
 #include "../include/OutputLog.h"
 
 
@@ -16,7 +18,7 @@ namespace Builder
 		QString msg;
 
 		QString m_buildDirectory;
-		QString m_fullBuildPath;
+		QString m_buildFullPath;
 
 		QFile m_buildXML;
 
@@ -29,6 +31,11 @@ namespace Builder
 		bool m_runBuild = true;
 
 	private:
+		bool createDirectory(QString dir);			// create full path directory
+		bool createSubdirectory(QString subDir);		// create subDirectory in build directory
+
+		bool createFile(QString subDir, QString fileName, QFile& file, bool textMode);
+
 		bool createBuildDirectory();
 		bool createBuildXML();
 		bool closeBuildXML();

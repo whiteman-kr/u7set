@@ -71,7 +71,7 @@ namespace Builder
 		}
 		else
 		{
-			m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), true, true);
+			m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"), false, false);
 		}
 
 		if (createBuildDirectory() == false)
@@ -138,6 +138,54 @@ namespace Builder
 	}
 
 
+	// create full path directory
+	//
+	bool BuildResultWriter::createDirectory(QString dir)
+	{
+		if (QDir().mkpath(dir) == false)
+		{
+			msg = tr("Can't create directory: ") + dir;
+			m_log->writeError(msg, true, true);
+
+			qDebug() << msg;
+			return false;
+		}
+
+		msg = tr("Directory was created: ") + dir;
+
+		m_log->writeMessage(msg, false);
+
+		qDebug() << msg;
+		return true;
+
+	}
+
+
+	// create subdirectory in build directory
+	//
+	bool BuildResultWriter::createSubdirectory(QString subDir)
+	{
+		QString fullPath = m_buildFullPath + "/" + subDir;
+
+		if (QDir().mkpath(fullPath) == false)
+		{
+			msg = tr("Can't create subdirectory: ") + subDir;
+			m_log->writeError(msg, true, true);
+
+			qDebug() << msg;
+			return false;
+		}
+
+		msg = tr("Subdirectory was created: ") + subDir;
+
+		m_log->writeMessage(msg, false);
+
+		qDebug() << msg;
+		return true;
+	}
+
+
+
 	bool BuildResultWriter::createBuildDirectory()
 	{
 		QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
@@ -146,11 +194,42 @@ namespace Builder
 				.arg(m_dbController->currentProject().projectName())
 				.arg(m_release ? "release" : "debug").arg(m_buildNo);
 
-		m_fullBuildPath = appDataPath + "/" + m_buildDirectory;
+		m_buildFullPath = appDataPath + "/" + m_buildDirectory;
 
-		if (QDir().mkdir(m_fullBuildPath) == false)
+		if (createDirectory(m_buildFullPath) == false)
 		{
-			msg = tr("Can't create build directory: ") + m_fullBuildPath;
+			m_runBuild = false;
+			return false;
+		}
+		return true;
+	}
+
+
+	bool BuildResultWriter::createFile(QString subDir, QString fileName, QFile& file, bool textMode)
+	{
+		/*if (subDir.isEmpty())
+		{
+			file.setFileName(m_fullBuildPath +  "/") + fileName;
+		}
+		else
+		{
+			if (createSubdirectory(subDir) == false)
+			{
+				return false;
+			}
+			file.setFileName(m_fullBuildPath + "/" + subDir + "/" + fileName);
+		}
+
+		if (file.open(QIODevice::ReadWrite | QIODevice::Text) == false)
+		{
+			if (subDir.isEmpty())
+			{
+				msg = tr("Can't create file: ") + fileName;
+			}
+			else
+			{
+				msg = tr("Can't create file: ") + subDir + "/" + fileName;
+			}
 			m_log->writeError(msg, true, true);
 
 			qDebug() << msg;
@@ -159,19 +238,20 @@ namespace Builder
 			return false;
 		}
 
-		msg = tr("Build directory was created: ") + m_fullBuildPath;
+		msg = tr("File was created: build.xml");
 
 		m_log->writeMessage(msg, false);
 
 		qDebug() << msg;
+*/
 
 		return true;
-	}
 
+	}
 
 	bool BuildResultWriter::createBuildXML()
 	{
-		m_buildXML.setFileName(m_fullBuildPath + "/build.xml");
+		m_buildXML.setFileName(m_buildFullPath + "/build.xml");
 
 		if (m_buildXML.open(QIODevice::ReadWrite | QIODevice::Text) == false)
 		{
