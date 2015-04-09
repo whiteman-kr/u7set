@@ -195,6 +195,14 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	m_doubleManager->setValue(m_apertureProperty, signal.aperture());
 	signalProperty->addSubProperty(m_apertureProperty);
 
+	m_filteringTimeProperty = m_doubleManager->addProperty(tr("Filtering time"));
+	m_doubleManager->setValue(m_filteringTimeProperty, signal.filteringTime());
+	signalProperty->addSubProperty(m_filteringTimeProperty);
+
+	m_maxDifferenceProperty = m_doubleManager->addProperty(tr("Max difference"));
+	m_doubleManager->setValue(m_maxDifferenceProperty, signal.maxDifference());
+	signalProperty->addSubProperty(m_maxDifferenceProperty);
+
 	QStringList inOutStringList;
 	for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
 	{
@@ -342,6 +350,8 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	m_signal.setNormalState(m_intManager->value(m_normalStateProperty));
 	m_signal.setDecimalPlaces(m_intManager->value(m_decimalPlacesProperty));
 	m_signal.setAperture(m_doubleManager->value(m_apertureProperty));
+	m_signal.setFilteringTime(m_doubleManager->value(m_filteringTimeProperty));
+	m_signal.setMaxDifference(m_doubleManager->value(m_maxDifferenceProperty));
 	int inOutTypeIndex = m_enumManager->value(m_inOutTypeProperty);
 	if (inOutTypeIndex > 0 && inOutTypeIndex < IN_OUT_TYPE_COUNT)
 	{
