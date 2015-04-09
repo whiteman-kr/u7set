@@ -280,7 +280,8 @@ public:
     Q_INVOKABLE int outputUnitID() const { return m_outputUnitID; }
 	void setOutputUnitID(int outputUnitID) { m_outputUnitID = outputUnitID; }
 
-	Q_INVOKABLE OutputRangeMode outputRangeMode() const { return m_outputRangeMode; }
+	OutputRangeMode outputRangeMode() const { return m_outputRangeMode; }
+	Q_INVOKABLE int jsOutputRangeMode() const { return static_cast<int>(outputRangeMode());}
 	void setOutputRangeMode(OutputRangeMode outputRangeMode) { m_outputRangeMode = outputRangeMode; }
 
     Q_INVOKABLE int outputSensorID() const { return m_outputSensorID; }
