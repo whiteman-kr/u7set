@@ -45,7 +45,9 @@ SC_OUTPUT_SENSOR = 28,
 SC_CALCULATED = 29,
 SC_DECIMAL_PLACES = 30,
 SC_APERTURE = 31,
-SC_LAST_CHANGE_USER = 32;
+SC_FILTERING_TIME = 32,
+SC_MAX_DIFFERENCE = 33,
+SC_LAST_CHANGE_USER = 34;
 
 
 const char* Columns[] =
@@ -82,6 +84,8 @@ const char* Columns[] =
 	"Calculated",
 	"Decimal places",
 	"Aperture",
+	"Filtering time",
+	"Max difference",
 	"Last change user",
 };
 
@@ -167,6 +171,8 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_OUTPUT_LOW_LIMIT:
 		case SC_OUTPUT_HIGH_LIMIT:
 		case SC_APERTURE:
+		case SC_FILTERING_TIME:
+		case SC_MAX_DIFFERENCE:
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			le->setValidator(new QDoubleValidator(le));
@@ -272,6 +278,8 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_OUTPUT_LOW_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].outputLowLimit())); break;
 		case SC_OUTPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].outputHighLimit())); break;
 		case SC_APERTURE: if (le) le->setText(QString("%1").arg(m_signalSet[row].aperture())); break;
+		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(m_signalSet[row].filteringTime())); break;
+		case SC_MAX_DIFFERENCE: if (le) le->setText(QString("%1").arg(m_signalSet[row].maxDifference())); break;
 		// ComboBox
 		//
 		case SC_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(m_signalSet[row].dataFormat())); break;
@@ -329,6 +337,8 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_OUTPUT_LOW_LIMIT: if (le) s.setOutputLowLimit(le->text().toDouble()); break;
 		case SC_OUTPUT_HIGH_LIMIT: if (le) s.setOutputHighLimit(le->text().toDouble()); break;
 		case SC_APERTURE: if (le) s.setAperture(le->text().toDouble()); break;
+		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
+		case SC_MAX_DIFFERENCE: if (le) s.setMaxDifference(le->text().toDouble()); break;
 		// ComboBox
 		//
 		case SC_DATA_FORMAT: if (cb) s.setDataFormat(m_dataFormatInfo.key(cb->currentIndex())); break;
@@ -610,6 +620,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_NORMAL_STATE: return signal.normalState();
 				case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 				case SC_APERTURE: return signal.aperture();
+				case SC_FILTERING_TIME: return signal.filteringTime();
+				case SC_MAX_DIFFERENCE: return signal.maxDifference();
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
@@ -668,6 +680,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_NORMAL_STATE:
 				case SC_DECIMAL_PLACES:
 				case SC_APERTURE:
+				case SC_FILTERING_TIME:
+				case SC_MAX_DIFFERENCE:
 					return QVariant();
 
 				default:
@@ -761,6 +775,8 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
+			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
+			case SC_MAX_DIFFERENCE: signal.setMaxDifference(value.toDouble()); break;
 			case SC_IN_OUT_TYPE: signal.setInOutType(SignalInOutType(value.toInt())); break;
 			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
@@ -1342,14 +1358,14 @@ void SignalsTabPage::changeSignalTypeFilter(int signalType, bool checked)
 	switch(signalType)
 	{
 		case ST_DISCRETE:
-			for (int i = SC_LOW_ADC; i <= SC_APERTURE; i++)
+			for (int i = SC_LOW_ADC; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, true);
 			}
 			break;
 		case ST_ANALOG:
 		case ST_ANY:
-			for (int i = SC_LOW_ADC; i <= SC_APERTURE; i++)
+			for (int i = SC_LOW_ADC; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, false);
 			}
