@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QFile>
+#include <QXmlStreamWriter>
 
 #include "../include/OutputLog.h"
 
@@ -19,12 +20,16 @@ namespace Builder
 
 		QString m_buildDirectory;
 		QString m_buildFullPath;
+		QString m_separator;
 
-		QFile m_buildXML;
+		QFile m_buildXMLFile;
+		QXmlStreamWriter m_buildXML;
 
 		bool m_release = false;
 		int m_changesetID = 0;
 		int m_buildNo = -1;
+		QString m_workstation;
+
 		OutputLog* m_log = nullptr;
 		DbController* m_dbController = nullptr;
 
