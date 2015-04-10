@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QHash>
 #include <QQmlEngine>
+#include <QtEndian>
 
 namespace Hardware
 {
@@ -242,8 +243,10 @@ namespace Hardware
 			return false;
 		}
 
+		quint16 dataBE= qToBigEndian(data);
+
 		quint16* ptr = reinterpret_cast<quint16*>(m_frames[frameIndex].data() + offset);
-		*ptr = data;
+		*ptr = dataBE;
 
 		return true;
 	}
@@ -257,8 +260,10 @@ namespace Hardware
 			return false;
 		}
 
+		quint32 dataBE = qToBigEndian(data);
+
 		quint32* ptr = reinterpret_cast<quint32*>(m_frames[frameIndex].data() + offset);
-		*ptr = data;
+		*ptr = dataBE;
 
 		return true;
 	}
@@ -272,8 +277,10 @@ namespace Hardware
             return false;
         }
 
+		quint64 dataBE = qToBigEndian(data);
+
         quint64* ptr = reinterpret_cast<quint64*>(m_frames[frameIndex].data() + offset);
-        *ptr = data;
+		*ptr = dataBE;
 
         return true;
     }

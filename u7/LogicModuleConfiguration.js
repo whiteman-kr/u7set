@@ -165,7 +165,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
             }
             if (ioModule.ConfType == "AOM")
             {
-                //generate_aom(confFirmware, ioModule, frame, log, signalSet);
+                generate_aom(confFirmware, ioModule, frame, log, signalSet);
             }
             if (ioModule.ConfType == "OCM")
             {
