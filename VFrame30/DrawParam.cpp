@@ -87,7 +87,7 @@ namespace VFrame30
 								
 			painter->scale(1.0 / dpiX, 1.0 / dpiY);
 
-			// Фонт инфо требуется для вычисления соотношения между Point и Pixels
+			// FontInfo is required to claculate point to pixels ratio
 			//
 			QFontInfo fi(f);
 			qreal pointsize = fi.pointSizeF();

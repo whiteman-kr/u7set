@@ -1,4 +1,5 @@
 #include <functional>
+#include <QDateTime>
 #include "../include/DbWorker.h"
 #include "../include/DeviceObject.h"
 #include "../include/DbProgress.h"
@@ -885,7 +886,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password)
 		}
 	}
 
-	// Rename project from the template u7_[projectname] to u7deleted_[projectname]
+	// Rename project from the template u7_[projectname] to u7deleted_[projectname]_[datetime]
 	//
 	std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
 		{
@@ -913,8 +914,13 @@ void DbWorker::slot_deleteProject(QString projectName, QString password)
 			return;
 		}
 
+		QString strTime = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
+
 		QSqlQuery query(db);
-		QString createDatabaseSql = QString("ALTER DATABASE %1 RENAME TO u7deleted_%2;").arg(databaseName).arg(projectName.toLower());
+		QString createDatabaseSql = QString("ALTER DATABASE %1 RENAME TO u7deleted_%2_%3;")
+									.arg(databaseName)
+									.arg(projectName.toLower())
+									.arg(strTime);
 
 		bool result = query.exec(createDatabaseSql);
 
@@ -1007,7 +1013,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 		}
 	}
 
-	// Copy project from the template u7_[projectname] to u7upgrade[oldversion]_[projectname]
+	// Copy project from the template u7_[projectname] to u7upgrade[oldversion]_[projectname]_[datetime]
 	//
 	{
 		std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
@@ -1035,11 +1041,14 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 			return;
 		}
 
+		QString strTime = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
+
 		QSqlQuery query(db);
 		QString copyDatabaseSql =
-			QString("CREATE DATABASE u7upgrade%1_%2 WITH TEMPLATE %3 OWNER %4;")
+			QString("CREATE DATABASE u7upgrade%1_%2_%3 WITH TEMPLATE %4 OWNER %5;")
 				.arg(projectVersion)
 				.arg(projectName.toLower())
+				.arg(strTime)
 				.arg(databaseName)
 				.arg(serverUsername());
 

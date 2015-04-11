@@ -57,14 +57,14 @@ namespace VFrame30
 
 		bool HasConnection() const;
 
-		const QUuid& signalGuid() const;
-		void setSignalGuid(const QUuid& guid);
+//		const QUuid& signalGuid() const;
+//		void setSignalGuid(const QUuid& guid);
 
-		const QString& signalStrID() const;
-		void setSignalStrID(const QString& strid);
+//		const QString& signalStrID() const;
+//		void setSignalStrID(const QString& strid);
 
-		const QString& signalCaption() const;
-		void setSignalCaption(const QString& caption);
+//		const QString& signalCaption() const;
+//		void setSignalCaption(const QString& caption);
 
 		// Data
 		//
@@ -74,11 +74,11 @@ namespace VFrame30
 		ConnectionDirrection m_dirrection;
 		std::list<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
 		
-		QUuid m_signalGuid;					// Guid сигнала ассоциаированного с данной точкой, может быть GUID_NULL
-		QString m_signalStrID;				// Строковый ИД сигнала ассоциаированного с данной точкой,
+		//QUuid m_signalGuid;				// Guid сигнала ассоциаированного с данной точкой, может быть GUID_NULL
+		//QString m_signalStrID;			// Строковый ИД сигнала ассоциаированного с данной точкой,
 											// может быть пустой строкой, используется для кэширования, 
 											// не использовать для логики, только для пунктов меню, отрисовки и т.п.
-		QString m_signalCaption;			// Наименование сигнала ассоциаированного с данной точкой,
+		//QString m_signalCaption;			// Наименование сигнала ассоциаированного с данной точкой,
 											// может быть пустой строкой, используется для кэширования, 
 											// не использовать для логики, только для пунктов меню, отрисовки и т.п.
 	};

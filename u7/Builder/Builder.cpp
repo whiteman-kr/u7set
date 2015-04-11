@@ -22,10 +22,6 @@ namespace Builder
 	{
 		QThread::currentThread()->setTerminationEnabled(true);
 
-		// moved to m_buildWriter.start
-		//
-		//qDebug() << "Building started";
-
 		bool ok = false;
 		QString str;
 
@@ -136,31 +132,6 @@ namespace Builder
 
 		m_buildWriter.finish();
 
-		//moved to m_buildWriter.finish
-		//
-		// Closing project and saying bye-bye!
-		//
-		/*ok = db.closeProject(nullptr);
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			str = tr("Building project %1: canceled").arg(projectName());
-
-			m_log->writeMessage("");
-			m_log->writeError(str, true);
-			qDebug() << str;
-		}
-		else
-		{
-			str = tr("Building project %1: ok").arg(projectName());
-
-			m_log->writeMessage("");
-			m_log->writeSuccess(str, true);
-			qDebug() << str;
-
-			emit resultReady(QString("Cool, we've done!"));
-		}*/
-
 		emit resultReady(QString("Cool, we've done!"));
 
 		return;
@@ -196,7 +167,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 
 

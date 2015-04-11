@@ -25,7 +25,7 @@ namespace Builder
 	// Function finds branch with a point on it.
 	// Returns branch index or -1 if a brach was not found
 	//
-	size_t BranchContainer::getBranchByPinPos(VFrame30::VideoItemPoint pt) const
+	int BranchContainer::getBranchByPinPos(VFrame30::VideoItemPoint pt) const
 	{
 		for (size_t i = 0; i < branches.size(); i++)
 		{
@@ -39,14 +39,14 @@ namespace Builder
 
 			if (link != branch.links.end())
 			{
-				return i;
+				return static_cast<int>(i);
 			}
 		}
 
 		return -1;
 	}
 
-	size_t BranchContainer::getBranchByPinGuid(const QUuid& guid) const
+	int BranchContainer::getBranchByPinGuid(const QUuid& guid) const
 	{
 		for (size_t i = 0; i < branches.size(); i++)
 		{
@@ -54,12 +54,12 @@ namespace Builder
 
 			if (branch.outputPin == guid)
 			{
-				return i;
+				return static_cast<int>(i);
 			}
 
 			if (branch.inputPins.find(guid) != branch.inputPins.end())
 			{
-				return i;
+				return static_cast<int>(i);
 			}
 		}
 
@@ -96,7 +96,7 @@ namespace Builder
 		{
 			std::shared_ptr<VFrame30::FblItemRect> fblItemRect = std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
 
-			if (fblItemRect == false)
+			if (fblItemRect == nullptr)
 			{
 				continue;
 			}
@@ -320,7 +320,7 @@ namespace Builder
 	bool ApplicationLogicBuilder::compileApplicationLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 															   std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
-		if (logicScheme == false || layer == false)
+		if (logicScheme == nullptr || layer == nullptr)
 		{
 			assert(logicScheme);
 			assert(layer);
@@ -643,7 +643,7 @@ namespace Builder
 				std::shared_ptr<VFrame30::VideoItem> videoItem = layer->getItemById(id);
 				VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(videoItem.get());
 
-				if (videoItem == false ||
+				if (videoItem == nullptr ||
 					link == nullptr)
 				{
 					assert(videoItem);
@@ -737,7 +737,7 @@ namespace Builder
 
 					qDebug() << "input  " << pinPos.X << " -" << pinPos.Y;
 
-					size_t branchIndex = branchContainer->getBranchByPinPos(pinPos);
+					int branchIndex = branchContainer->getBranchByPinPos(pinPos);
 
 					if (branchIndex == -1)
 					{
@@ -797,7 +797,7 @@ namespace Builder
 
 					qDebug() << "output  " << pinPos.X << " -" << pinPos.Y;
 
-					size_t branchIndex = branchContainer->getBranchByPinPos(pinPos);
+					int branchIndex = branchContainer->getBranchByPinPos(pinPos);
 
 					if (branchIndex == -1)
 					{
@@ -907,7 +907,7 @@ namespace Builder
 
 				for (VFrame30::CFblConnectionPoint& in : *inputs)
 				{
-					size_t branchIndex = branchContainer->getBranchByPinGuid(in.guid());
+					int branchIndex = branchContainer->getBranchByPinGuid(in.guid());
 
 					if (branchIndex == -1)
 					{
@@ -944,7 +944,7 @@ namespace Builder
 
 				for (VFrame30::CFblConnectionPoint& out : *outputs)
 				{
-					size_t branchIndex = branchContainer->getBranchByPinGuid(out.guid());
+					int branchIndex = branchContainer->getBranchByPinGuid(out.guid());
 
 					if (branchIndex == -1)
 					{

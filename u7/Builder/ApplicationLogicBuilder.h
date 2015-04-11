@@ -51,8 +51,8 @@ namespace Builder
 	{
 		std::vector<Branch> branches;
 
-		size_t getBranchByPinPos(VFrame30::VideoItemPoint pt) const;
-		size_t getBranchByPinGuid(const QUuid& guid) const;
+		int getBranchByPinPos(VFrame30::VideoItemPoint pt) const;
+		int getBranchByPinGuid(const QUuid& guid) const;
 	};
 
 
