@@ -529,7 +529,7 @@ namespace Afbl
 		m_caption = caption;
 	}
 
-	const bool AfbElementParam::visible() const
+	bool AfbElementParam::visible() const
 	{
 		return m_visible;
 	}

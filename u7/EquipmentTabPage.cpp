@@ -333,7 +333,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 		std::shared_ptr<DbFile> file;
 
 		dbController()->getLatestVersion(fi, &file, m_parentWidget);
-		if (file == false)
+		if (file == nullptr)
 		{
 			continue;
 		}

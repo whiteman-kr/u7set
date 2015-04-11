@@ -120,7 +120,7 @@ private:
 		const QString& caption() const;
 		void setCaption(const QString& caption);
 
-		const bool visible() const;
+		bool visible() const;
 		void setVisible(bool visible);
 
 		AfbParamType type() const;
