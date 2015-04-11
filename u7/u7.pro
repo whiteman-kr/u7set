@@ -264,7 +264,8 @@ OTHER_FILES += \
     month-report.txt
 
 DISTFILES += \
-    LogicModuleConfiguration.js
+    LogicModuleConfiguration.js \
+    DatabaseUpgrade/Upgrade0036.sql
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
