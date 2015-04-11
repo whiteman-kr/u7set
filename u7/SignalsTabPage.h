@@ -14,6 +14,7 @@ class QToolBar;
 class QPlainTextEdit;
 class QSplitter;
 class SignalsProxyModel;
+class QComboBox;
 
 
 const int ST_ANALOG = SignalType::analog,
@@ -236,7 +237,7 @@ public slots:
 	void saveSelection();
 	void restoreSelection();
 
-	void changeSignalTypeFilter(int signalType, bool checked);
+	void changeSignalTypeFilter(int selectedType);
 
 	// Data
 	//
@@ -244,6 +245,7 @@ private:
 	SignalsModel* m_signalsModel = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
+	QComboBox* m_signalTypeFilterCombo = nullptr;
 
 	QList<int> selectedRowsSignalID;
 	int focusedCellSignalID = -1;

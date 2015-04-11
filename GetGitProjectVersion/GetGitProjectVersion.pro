@@ -42,7 +42,7 @@ unix {
 
 #c++11 support for GCC
 #
-*g++:QMAKE_CXXFLAGS += -std=c++11
+gcc:QMAKE_CXXFLAGS += -std=c++11
 
 # libgit2
 unix:LIBS += -lgit2

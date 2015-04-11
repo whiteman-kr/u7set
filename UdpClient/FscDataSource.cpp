@@ -4,12 +4,12 @@
 
 FscDataSourceWorker::FscDataSourceWorker(HostAddressPort hostAddressPort, QHostAddress sourceAddress, quint32 interval, quint32 partCount, QObject *parent) :
 	QObject(parent),
+	m_socket(this),
+	m_timer(this),
 	m_hostAddressPort(hostAddressPort),
 	m_sourceAddress(sourceAddress),
 	m_interval(interval),
-	m_partCount(partCount),
-	m_timer(this),
-	m_socket(this)
+	m_partCount(partCount)
 {
 	if (m_interval < 10)
 	{

@@ -43,5 +43,8 @@
         <file>Images/lock.png</file>
         <file>Images/pencil.png</file>
         <file>Images/plus.png</file>
+        <file>Images/update.png</file>
+        <file>Images/undo.png</file>
+        <file>Images/changes.png</file>
     </qresource>
 </RCC>
