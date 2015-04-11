@@ -12,6 +12,7 @@
 #include <QPlainTextEdit>
 #include <QRadioButton>
 #include <QButtonGroup>
+#include <QToolButton>
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -994,6 +995,8 @@ void SignalsModel::addSignal()
 			}
 		}
 	}
+
+	emit setCheckedoutSignalActionsVisibility(true);
 }
 
 bool SignalsModel::editSignal(int row)
@@ -1069,30 +1072,13 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
-	QWidget* widget = new QWidget(this);
-	QVBoxLayout* vbl = new QVBoxLayout;
-	vbl->setSpacing(0);
-	vbl->setContentsMargins(0,0,0,0);
-	QButtonGroup* bg = new QButtonGroup(this);
-	bg->setExclusive(true);
-
-	QRadioButton* rb = new QRadioButton(tr("Analog signals"), this);
-	vbl->addWidget(rb);
-	bg->addButton(rb, ST_ANALOG);
-
-	rb = new QRadioButton(tr("Discrete signals"), this);
-	vbl->addWidget(rb);
-	bg->addButton(rb, ST_DISCRETE);
-
-	rb = new QRadioButton(tr("All signals"), this);
-	rb->setChecked(true);
-	vbl->addWidget(rb);
-	bg->addButton(rb, ST_ANY);
-
-	widget->setLayout(vbl);
+	m_signalTypeFilterCombo = new QComboBox(this);
+	m_signalTypeFilterCombo->addItem(tr("All signals"), ST_ANY);
+	m_signalTypeFilterCombo->addItem(tr("Analog signals"), ST_ANALOG);
+	m_signalTypeFilterCombo->addItem(tr("Discrete signals"), ST_DISCRETE);
 
 	QToolBar* toolBar = new QToolBar(this);
-	toolBar->addWidget(widget);
+	toolBar->addWidget(m_signalTypeFilterCombo);
 
 	// Property View
 	//
@@ -1118,7 +1104,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeRowsToContents);
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
 	connect(delegate, &SignalsDelegate::closeEditor, m_signalsModel, &SignalsModel::loadSignals);
-	connect(bg, static_cast<void(QButtonGroup::*)(int,bool)>(&QButtonGroup::buttonToggled), this, &SignalsTabPage::changeSignalTypeFilter);
+	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
 
@@ -1159,34 +1145,34 @@ SignalsTabPage::~SignalsTabPage()
 
 void SignalsTabPage::CreateActions(QToolBar *toolBar)
 {
-	QAction* action = new QAction(tr("Refresh signal list"), this);
+	QAction* action = new QAction(QIcon(":/Images/Images/update.png"), tr("Refresh signal list"), this);
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::loadSignals);
 	toolBar->addAction(action);
 
-	action = new QAction(tr("Create signal"), this);
+	action = new QAction(QIcon(":/Images/Images/plus.png"), tr("Create signal"), this);
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(tr("Edit signal"), this);
+	action = new QAction(QIcon(":/Images/Images/pencil.png"), tr("Edit signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
 	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(tr("Delete signal"), this);
+	action = new QAction(QIcon(":/Images/Images/cross.png"), tr("Delete signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
 	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(tr("Undo signal changes"), this);
+	action = new QAction(QIcon(":/Images/Images/undo.png"), tr("Undo signal changes"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::undoSignalChanges);
 	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(tr("Show pending changes..."), this);
+	action = new QAction(QIcon(":/Images/Images/changes.png"), tr("Show pending changes..."), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::showPendingChanges);
 	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
 	m_signalsView->addAction(action);
@@ -1344,18 +1330,14 @@ void SignalsTabPage::restoreSelection()
 	m_signalsView->verticalScrollBar()->setValue(verticalScrollPosition);
 }
 
-void SignalsTabPage::changeSignalTypeFilter(int signalType, bool checked)
+void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 {
-	if (!checked)
-	{
-		return;
-	}
-
 	saveSelection();
-	m_signalsProxyModel->setSignalTypeFilter(signalType);
+	int singalType = m_signalTypeFilterCombo->itemData(selectedType, Qt::UserRole).toInt();
+	m_signalsProxyModel->setSignalTypeFilter(singalType);
 	restoreSelection();
 
-	switch(signalType)
+	switch(singalType)
 	{
 		case ST_DISCRETE:
 			for (int i = SC_LOW_ADC; i < SC_LAST_CHANGE_USER; i++)
@@ -1493,7 +1475,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelInde
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	m_signalsView->horizontalHeader()->setHighlightSections(false);
 
-	QAction* undoAction = new QAction(tr("Undo signal changes"), this);
+	QAction* undoAction = new QAction(QIcon(":/Images/Images/undo.png"), tr("Undo signal changes"), this);
 	connect(undoAction, &QAction::triggered, this, &CheckinSignalsDialog::openUndoDialog);
 	m_signalsView->addAction(undoAction);
 
