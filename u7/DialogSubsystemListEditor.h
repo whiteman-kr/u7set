@@ -40,7 +40,7 @@ private slots:
 private:
 	Ui::DialogSubsystemListEditor *ui;
 
-	const QString m_fileName = "SubsystemsList.descr";
+	const QString m_fileName = "SubsystemsList.xml";
 
 	DbController* db();
 	DbController* m_dbController;

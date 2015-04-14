@@ -38,14 +38,14 @@
          <item>
           <widget class="QPushButton" name="m_add">
            <property name="text">
-            <string>PushButton</string>
+            <string>Add</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="m_remove">
            <property name="text">
-            <string>PushButton</string>
+            <string>Remove</string>
            </property>
           </widget>
          </item>
