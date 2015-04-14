@@ -24,7 +24,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-        void init(QString type, QString name, int uartId, int frameSize, int frameCount);
+		void init(QString type, QString name, int uartId, int frameSize, int frameCount);
         bool save(QString projectName, QString userName);
         bool load(QString fileName);
         bool isEmpty() const;

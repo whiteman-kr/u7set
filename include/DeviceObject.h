@@ -45,6 +45,68 @@ namespace Hardware
 
 	//
 	//
+	// Subsystem
+	//
+	//
+	class Subsystem : public QObject
+	{
+		Q_OBJECT
+		Q_PROPERTY(int Index READ index WRITE setIndex)
+		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
+		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
+
+	public:
+		Subsystem();
+		Subsystem(int index, const QString& strId, const QString& caption);
+
+		bool save(QXmlStreamWriter& writer);
+		bool load(QXmlStreamReader& reader);
+
+		// Properties
+		//
+	public:
+		const QString& strId() const;
+		void setStrId(const QString& value);
+
+		const QString& caption() const;
+		void setCaption(const QString& value);
+
+		int index() const;
+		void setIndex(int value);
+
+	private:
+		int m_index;
+		QString m_strId;
+		QString m_caption;
+
+	};
+
+	//
+	//
+	// SubsystemStorage
+	//
+	//
+	class SubsystemStorage
+	{
+	public:
+
+		SubsystemStorage();
+
+		void add(std::shared_ptr<Subsystem> subsystem);
+		int count() const;
+		std::shared_ptr<Subsystem> get(int index) const;
+		void clear();
+
+		bool load(const QByteArray& data, QString &errorCode);
+		bool save(QByteArray& data);
+
+	private:
+		std::vector<std::shared_ptr<Subsystem>> m_subsystems;
+
+	};
+
+	//
+	//
 	// DynamicProperty
 	//
 	//
@@ -360,7 +422,7 @@ namespace Hardware
 		Q_PROPERTY(int Type READ type WRITE setType)
 
 		Q_PROPERTY(int ConfIndex READ confIndex WRITE setConfIndex)
-		Q_PROPERTY(QString ConfName READ confName WRITE setConfName)
+		Q_PROPERTY(QString SubsysID READ subSysID WRITE setSubSysID)
 		Q_PROPERTY(QString ConfType READ confType WRITE setConfType)
 
 	public:
@@ -389,8 +451,8 @@ namespace Hardware
 		int confIndex() const;
 		void setConfIndex(int value);
 
-		QString confName() const;
-		void setConfName(const QString& value);
+		QString subSysID() const;
+		void setSubSysID(const QString& value);
 
 		QString confType() const;
 		void setConfType(const QString& value);
@@ -403,7 +465,7 @@ namespace Hardware
 		int m_type = 0;
 
 		int m_confIndex = 0;
-		QString m_confName;
+		QString m_subSysID;
 		QString m_confType;
 	};
 

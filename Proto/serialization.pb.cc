@@ -812,7 +812,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   static const int DeviceModule_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, confindex_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, confname_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, subsysid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, conftype_),
   };
   DeviceModule_reflection_ =
@@ -1261,7 +1261,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ftware\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\n"
     "DeviceRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001("
     "\005:\0010\"]\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\024\n"
-    "\tConfIndex\030\002 \001(\005:\0010\022\022\n\010ConfName\030\003 \001(\t:\000\022"
+    "\tConfIndex\030\002 \001(\005:\0010\022\022\n\010SubsysID\030\003 \001(\t:\000\022"
     "\022\n\010ConfType\030\004 \001(\t:\000\"\022\n\020DeviceController\""
     "\037\n\014DeviceSignal\022\017\n\004type\030\001 \001(\005:\0010\"\036\n\013Work"
     "station\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004"
@@ -13512,7 +13512,7 @@ void DeviceChassis::Swap(DeviceChassis* other) {
 #ifndef _MSC_VER
 const int DeviceModule::kTypeFieldNumber;
 const int DeviceModule::kConfIndexFieldNumber;
-const int DeviceModule::kConfNameFieldNumber;
+const int DeviceModule::kSubsysIDFieldNumber;
 const int DeviceModule::kConfTypeFieldNumber;
 #endif  // !_MSC_VER
 
@@ -13534,7 +13534,7 @@ void DeviceModule::SharedCtor() {
   _cached_size_ = 0;
   type_ = 0;
   confindex_ = 0;
-  confname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  subsysid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   conftype_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -13544,8 +13544,8 @@ DeviceModule::~DeviceModule() {
 }
 
 void DeviceModule::SharedDtor() {
-  if (confname_ != &::google::protobuf::internal::kEmptyString) {
-    delete confname_;
+  if (subsysid_ != &::google::protobuf::internal::kEmptyString) {
+    delete subsysid_;
   }
   if (conftype_ != &::google::protobuf::internal::kEmptyString) {
     delete conftype_;
@@ -13579,9 +13579,9 @@ void DeviceModule::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     type_ = 0;
     confindex_ = 0;
-    if (has_confname()) {
-      if (confname_ != &::google::protobuf::internal::kEmptyString) {
-        confname_->clear();
+    if (has_subsysid()) {
+      if (subsysid_ != &::google::protobuf::internal::kEmptyString) {
+        subsysid_->clear();
       }
     }
     if (has_conftype()) {
@@ -13627,19 +13627,19 @@ bool DeviceModule::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_ConfName;
+        if (input->ExpectTag(26)) goto parse_SubsysID;
         break;
       }
 
-      // optional string ConfName = 3 [default = ""];
+      // optional string SubsysID = 3 [default = ""];
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_ConfName:
+         parse_SubsysID:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_confname()));
+                input, this->mutable_subsysid()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->confname().data(), this->confname().length(),
+            this->subsysid().data(), this->subsysid().length(),
             ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
@@ -13693,13 +13693,13 @@ void DeviceModule::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->confindex(), output);
   }
 
-  // optional string ConfName = 3 [default = ""];
-  if (has_confname()) {
+  // optional string SubsysID = 3 [default = ""];
+  if (has_subsysid()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->confname().data(), this->confname().length(),
+      this->subsysid().data(), this->subsysid().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      3, this->confname(), output);
+      3, this->subsysid(), output);
   }
 
   // optional string ConfType = 4 [default = ""];
@@ -13729,14 +13729,14 @@ void DeviceModule::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->confindex(), target);
   }
 
-  // optional string ConfName = 3 [default = ""];
-  if (has_confname()) {
+  // optional string SubsysID = 3 [default = ""];
+  if (has_subsysid()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->confname().data(), this->confname().length(),
+      this->subsysid().data(), this->subsysid().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->confname(), target);
+        3, this->subsysid(), target);
   }
 
   // optional string ConfType = 4 [default = ""];
@@ -13774,11 +13774,11 @@ int DeviceModule::ByteSize() const {
           this->confindex());
     }
 
-    // optional string ConfName = 3 [default = ""];
-    if (has_confname()) {
+    // optional string SubsysID = 3 [default = ""];
+    if (has_subsysid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->confname());
+          this->subsysid());
     }
 
     // optional string ConfType = 4 [default = ""];
@@ -13821,8 +13821,8 @@ void DeviceModule::MergeFrom(const DeviceModule& from) {
     if (from.has_confindex()) {
       set_confindex(from.confindex());
     }
-    if (from.has_confname()) {
-      set_confname(from.confname());
+    if (from.has_subsysid()) {
+      set_subsysid(from.subsysid());
     }
     if (from.has_conftype()) {
       set_conftype(from.conftype());
@@ -13852,7 +13852,7 @@ void DeviceModule::Swap(DeviceModule* other) {
   if (other != this) {
     std::swap(type_, other->type_);
     std::swap(confindex_, other->confindex_);
-    std::swap(confname_, other->confname_);
+    std::swap(subsysid_, other->subsysid_);
     std::swap(conftype_, other->conftype_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);

@@ -4395,17 +4395,17 @@ class DeviceModule : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 confindex() const;
   inline void set_confindex(::google::protobuf::int32 value);
 
-  // optional string ConfName = 3 [default = ""];
-  inline bool has_confname() const;
-  inline void clear_confname();
-  static const int kConfNameFieldNumber = 3;
-  inline const ::std::string& confname() const;
-  inline void set_confname(const ::std::string& value);
-  inline void set_confname(const char* value);
-  inline void set_confname(const char* value, size_t size);
-  inline ::std::string* mutable_confname();
-  inline ::std::string* release_confname();
-  inline void set_allocated_confname(::std::string* confname);
+  // optional string SubsysID = 3 [default = ""];
+  inline bool has_subsysid() const;
+  inline void clear_subsysid();
+  static const int kSubsysIDFieldNumber = 3;
+  inline const ::std::string& subsysid() const;
+  inline void set_subsysid(const ::std::string& value);
+  inline void set_subsysid(const char* value);
+  inline void set_subsysid(const char* value, size_t size);
+  inline ::std::string* mutable_subsysid();
+  inline ::std::string* release_subsysid();
+  inline void set_allocated_subsysid(::std::string* subsysid);
 
   // optional string ConfType = 4 [default = ""];
   inline bool has_conftype() const;
@@ -4425,8 +4425,8 @@ class DeviceModule : public ::google::protobuf::Message {
   inline void clear_has_type();
   inline void set_has_confindex();
   inline void clear_has_confindex();
-  inline void set_has_confname();
-  inline void clear_has_confname();
+  inline void set_has_subsysid();
+  inline void clear_has_subsysid();
   inline void set_has_conftype();
   inline void clear_has_conftype();
 
@@ -4434,7 +4434,7 @@ class DeviceModule : public ::google::protobuf::Message {
 
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 confindex_;
-  ::std::string* confname_;
+  ::std::string* subsysid_;
   ::std::string* conftype_;
 
   mutable int _cached_size_;
@@ -9626,73 +9626,73 @@ inline void DeviceModule::set_confindex(::google::protobuf::int32 value) {
   confindex_ = value;
 }
 
-// optional string ConfName = 3 [default = ""];
-inline bool DeviceModule::has_confname() const {
+// optional string SubsysID = 3 [default = ""];
+inline bool DeviceModule::has_subsysid() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void DeviceModule::set_has_confname() {
+inline void DeviceModule::set_has_subsysid() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void DeviceModule::clear_has_confname() {
+inline void DeviceModule::clear_has_subsysid() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void DeviceModule::clear_confname() {
-  if (confname_ != &::google::protobuf::internal::kEmptyString) {
-    confname_->clear();
+inline void DeviceModule::clear_subsysid() {
+  if (subsysid_ != &::google::protobuf::internal::kEmptyString) {
+    subsysid_->clear();
   }
-  clear_has_confname();
+  clear_has_subsysid();
 }
-inline const ::std::string& DeviceModule::confname() const {
-  return *confname_;
+inline const ::std::string& DeviceModule::subsysid() const {
+  return *subsysid_;
 }
-inline void DeviceModule::set_confname(const ::std::string& value) {
-  set_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
-    confname_ = new ::std::string;
+inline void DeviceModule::set_subsysid(const ::std::string& value) {
+  set_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
+    subsysid_ = new ::std::string;
   }
-  confname_->assign(value);
+  subsysid_->assign(value);
 }
-inline void DeviceModule::set_confname(const char* value) {
-  set_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
-    confname_ = new ::std::string;
+inline void DeviceModule::set_subsysid(const char* value) {
+  set_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
+    subsysid_ = new ::std::string;
   }
-  confname_->assign(value);
+  subsysid_->assign(value);
 }
-inline void DeviceModule::set_confname(const char* value, size_t size) {
-  set_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
-    confname_ = new ::std::string;
+inline void DeviceModule::set_subsysid(const char* value, size_t size) {
+  set_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
+    subsysid_ = new ::std::string;
   }
-  confname_->assign(reinterpret_cast<const char*>(value), size);
+  subsysid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DeviceModule::mutable_confname() {
-  set_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
-    confname_ = new ::std::string;
+inline ::std::string* DeviceModule::mutable_subsysid() {
+  set_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
+    subsysid_ = new ::std::string;
   }
-  return confname_;
+  return subsysid_;
 }
-inline ::std::string* DeviceModule::release_confname() {
-  clear_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DeviceModule::release_subsysid() {
+  clear_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = confname_;
-    confname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = subsysid_;
+    subsysid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DeviceModule::set_allocated_confname(::std::string* confname) {
-  if (confname_ != &::google::protobuf::internal::kEmptyString) {
-    delete confname_;
+inline void DeviceModule::set_allocated_subsysid(::std::string* subsysid) {
+  if (subsysid_ != &::google::protobuf::internal::kEmptyString) {
+    delete subsysid_;
   }
-  if (confname) {
-    set_has_confname();
-    confname_ = confname;
+  if (subsysid) {
+    set_has_subsysid();
+    subsysid_ = subsysid;
   } else {
-    clear_has_confname();
-    confname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_subsysid();
+    subsysid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

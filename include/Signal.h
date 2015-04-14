@@ -115,6 +115,32 @@ struct DataFormat
 };
 
 
+// signal address struct
+//
+// offset	- signal offset in memory in 16-bit words
+// bitNo	- discrete signal offset in memory in bits 0..15,
+//			  for analog signals always 0
+//
+//
+class Address16
+{
+private:
+	int m_offset = -1;
+	int m_bitNo = -1;
+
+public:
+	Address16() {};
+
+	void setOffset(int offset) { m_offset = offset; }
+	void setBitNo(int bitNo) { m_bitNo = bitNo; }
+
+	int offset() const { return m_offset; }
+	int bitNo() const { return m_bitNo; }
+
+	void reset() { 	m_offset = -1; m_bitNo = -1; }
+};
+
+
 typedef OrderedHash<int, QString> UnitList;
 
 typedef OrderedHash<int, QString> DataFormatList;
@@ -175,6 +201,9 @@ private:
 	double m_filteringTime = 0.05;
 	double m_maxDifference = 0.5;
 
+	Address16 m_ramAddr;				// signal address in LM RAM
+	Address16 m_acqAddr;				// signal address in FSC data packet (acquisition address)
+
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
 	//
@@ -216,6 +245,9 @@ public:
 	bool deleted() const { return m_deleted; }
 	QDateTime instanceCreated() const { return m_instanceCreated; }
 	InstanceAction instanceAction() const { return m_instanceAction; }
+
+	Address16& ramAddr() { return m_ramAddr; }
+	Address16& acqAddr() { return m_acqAddr; }
 
     Q_INVOKABLE QString strID() const { return m_strID; }
 	void setStrID(const QString& strID) { m_strID = strID; }

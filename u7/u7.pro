@@ -131,7 +131,8 @@ SOURCES +=\
     Builder/ApplicationLogicBuilder.cpp \
 	Builder/BuildResultWriter.cpp \
 	SchemeLayersDialog.cpp \
-    Builder/ConfigurationBuilder.cpp
+    Builder/ConfigurationBuilder.cpp \
+    DialogSubsystemListEditor.cpp
 
 
 
@@ -196,7 +197,8 @@ HEADERS  += \
     Builder/ApplicationLogicBuilder.h \
 	Builder/BuildResultWriter.h \
     SchemeLayersDialog.h \
-    Builder/ConfigurationBuilder.h
+    Builder/ConfigurationBuilder.h \
+    DialogSubsystemListEditor.h
 
 
 FORMS    += \
@@ -214,7 +216,8 @@ FORMS    += \
     SchemeItemPropertiesDialog.ui \
     SchemePropertiesDialog.ui \
     DialogFileEditor.ui \
-    SchemeLayersDialog.ui
+    SchemeLayersDialog.ui \
+    DialogSubsystemListEditor.ui
 
 RESOURCES += \
 	Resources.qrc
