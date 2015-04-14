@@ -26,77 +26,76 @@ const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
                         "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
                         "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
 
-bool conv (QTextStream& out,QString InputFile, QString& parentFile)
+bool conv (QTextStream& out, const QString& inputFileName, const QString& parentFile)
 {
-    QString inputFileName = InputFile;
+	// Read file
+	//
+	QFile inputFile(inputFileName);
 
-        // Read file
-        //
-        QFile inputFile(inputFileName);
+	bool ok = inputFile.open(QIODevice::ReadOnly);
+	if (ok == false)
+	{
+		std::cout << "Cannot read input file" << inputFileName.toStdString();
+		return false;
+	}
 
-        bool ok = inputFile.open(QIODevice::ReadOnly);
-        if (ok == false)
-        {
-            std::cout << "Cannot read input file" << inputFileName.toStdString();
-            return false;
-        }
+	QByteArray data = inputFile.readAll();
 
-        QByteArray data = inputFile.readAll();
+	inputFile.close();
 
-        inputFile.close();
+	// Convert to PostgreSQL string
+	//
+	QString str;
+	str.reserve(data.size() * 2 + 256);
+	str.append("E'\\\\x");
 
-        // Convert to PostgreSQL string
-        //
-        QString str;
-        str.reserve(data.size() * 2 + 256);
-        str.append("E'\\\\x");
+	QString hex(rawhex);
+	const QChar* hexptr = hex.data();
 
-        QString hex(rawhex);
-        const QChar* hexptr = hex.data();
+	int fileSize = data.size();
+	const char* dataptr = data.constData();
 
-        int fileSize = data.size();
-        const char* dataptr = data.constData();
+	for (int i = 0; i < fileSize; i++)
+	{
+		unsigned int asbyte = static_cast<uint8_t>(*dataptr) & 0xFF;
+		str.append(hexptr + asbyte*2, 2);
 
-        for (int i = 0; i < fileSize; i++)
-        {
-            unsigned int asbyte = static_cast<uint8_t>(*dataptr) & 0xFF;
-            str.append(hexptr + asbyte*2, 2);
+		dataptr ++;
+	}
 
-            dataptr ++;
-        }
+	str.append("'");
 
-        str.append("'");
-
-        // Write result to file
-        //
-        out << "SELECT * FROM add_or_update_file(1, \'" << parentFile << "\', \'" << InputFile <<"\', \'Update: Adding file " << InputFile << "\', " << str << ");\n\n\n";
-        //out << str <<"\n\n";
-        return true;
+	// Write result to file
+	//
+	out << "SELECT * FROM add_or_update_file(1, \'" << parentFile << "\', \'" << inputFileName <<"\', \'Update: Adding file " << inputFileName << "\', " << str << ");\n\n\n";
+	//out << str <<"\n\n";
+	return true;
 }
-
-
-
-
 
 int main(int argc, char *argv[])
 {
-    if (argc != 4)
-        {
-            std::cout << "Parameters error, usage: files2 inputfile outputfile parentfile";
-            return 1;
-        }
+	if (argc != 4)
+	{
+		std::cout << "Parameters error, usage: files2 inputfile outputfile parentfile";
+		return 1;
+	}
 
     QString inputFileName = QString::fromLocal8Bit(argv[1]);
     QString outputFileName = QString::fromLocal8Bit(argv[2]);
     QString parentFileName = QString::fromLocal8Bit(argv[3]);
-    QFile outputFile(outputFileName);                        //creating file
+
+	QFile outputFile(outputFileName);                        //creating file
 
     QString userName;                                            //setting user
     userName = qgetenv("USER"); // get the user name in Linux
-    if(userName.isEmpty()) {
-    userName = qgetenv("USERNAME"); // get the name in Windows
+
+	if(userName.isEmpty())
+	{
+		userName = qgetenv("USERNAME"); // get the name in Windows
     }
-    if(userName.isEmpty())  {
+
+	if(userName.isEmpty())
+	{
         userName = "Can't get username";
     }
     if (outputFile.open(QIODevice::WriteOnly | QIODevice::Text) == false)
@@ -115,7 +114,7 @@ int main(int argc, char *argv[])
     out << "--\n";
     out << "---------------------------------------------------------------------------\n\n";
 
-    if (!conv(out, inputFileName, parentFileName))                     //working with single file
+	if (conv(out, inputFileName, parentFileName) == false)                     //working with single file
     {
         outputFile.close();
         return 1;
@@ -131,7 +130,7 @@ int main(int argc, char *argv[])
         foreach (QString file, listOfFiles)                         //working with files inside dir
         {
             QString fileFromDir = dirName + QDir::separator() + file;   //making a path to file in dir
-            if (!conv(out, fileFromDir, parentFileNameFiles))
+			if (conv(out, fileFromDir, parentFileNameFiles) == false)
             {
                 outputFile.close();
                 return 1;
