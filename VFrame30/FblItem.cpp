@@ -14,7 +14,7 @@ namespace VFrame30
 		m_point.Y = 0;
 
 		m_dirrection = ConnectionDirrection::Input;
-		m_signalGuid = QUuid();
+		//m_signalGuid = QUuid();
 	}
 
 	CFblConnectionPoint::CFblConnectionPoint(double x, double y, ConnectionDirrection dirrection, const QUuid& guid)
@@ -24,7 +24,7 @@ namespace VFrame30
 		m_dirrection = dirrection;
 		m_guid = guid;
 
-		m_signalGuid = QUuid();
+//		m_signalGuid = QUuid();
 	}
 
 	CFblConnectionPoint::CFblConnectionPoint(const Proto::FblConnectionPoint& cpm)
@@ -38,20 +38,20 @@ namespace VFrame30
 		cpm->set_dirrection(static_cast<Proto::ConnectionDirrection>(dirrection()));
 		Proto::Write(cpm->mutable_uuid(), m_guid);
 
-		if (m_signalGuid.isNull() == false)  // != GUI_NULL
-		{
-			Proto::Write(cpm->mutable_signaluuid(), m_signalGuid);
-		}
+//		if (m_signalGuid.isNull() == false)  // != GUI_NULL
+//		{
+//			Proto::Write(cpm->mutable_signaluuid(), m_signalGuid);
+//		}
 
-		if (m_signalStrID.isEmpty() == false)
-		{
-			Proto::Write(cpm->mutable_signalstrid(), m_signalStrID);
-		}
+//		if (m_signalStrID.isEmpty() == false)
+//		{
+//			Proto::Write(cpm->mutable_signalstrid(), m_signalStrID);
+//		}
 
-		if (m_signalCaption.isEmpty() == false)
-		{
-			Proto::Write(cpm->mutable_signalcaption(), m_signalCaption);
-		}
+//		if (m_signalCaption.isEmpty() == false)
+//		{
+//			Proto::Write(cpm->mutable_signalcaption(), m_signalCaption);
+//		}
 
 		return true;
 	}
@@ -62,32 +62,32 @@ namespace VFrame30
 		m_dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
 		m_guid = Proto::Read(cpm.uuid());
 
-		if (cpm.has_signaluuid() == true)
-		{
-			m_signalGuid = Proto::Read(cpm.signaluuid());
-		}
-		else
-		{
-			m_signalGuid = QUuid();
-		}
+//		if (cpm.has_signaluuid() == true)
+//		{
+//			m_signalGuid = Proto::Read(cpm.signaluuid());
+//		}
+//		else
+//		{
+//			m_signalGuid = QUuid();
+//		}
 
-		if (cpm.has_signalstrid() == true)
-		{
-			Proto::Read(cpm.signalstrid(), &m_signalStrID);
-		}
-		else
-		{
-			m_signalStrID.clear();
-		}
+//		if (cpm.has_signalstrid() == true)
+//		{
+//			Proto::Read(cpm.signalstrid(), &m_signalStrID);
+//		}
+//		else
+//		{
+//			m_signalStrID.clear();
+//		}
 
-		if (cpm.has_signalcaption() == true)
-		{
-			Proto::Read(cpm.signalcaption(), &m_signalCaption);
-		}
-		else
-		{
-			m_signalCaption.clear();
-		}
+//		if (cpm.has_signalcaption() == true)
+//		{
+//			Proto::Read(cpm.signalcaption(), &m_signalCaption);
+//		}
+//		else
+//		{
+//			m_signalCaption.clear();
+//		}
 
 		return true;
 	}
@@ -168,35 +168,35 @@ namespace VFrame30
 		return !m_associatedIOs.empty();
 	}
 
-	const QUuid& CFblConnectionPoint::signalGuid() const
-	{
-		return m_signalGuid;
-	}
+//	const QUuid& CFblConnectionPoint::signalGuid() const
+//	{
+//		return m_signalGuid;
+//	}
 
-	void CFblConnectionPoint::setSignalGuid(const QUuid& guid)
-	{
-		m_signalGuid = guid;
-	}
+//	void CFblConnectionPoint::setSignalGuid(const QUuid& guid)
+//	{
+//		m_signalGuid = guid;
+//	}
 
-	const QString& CFblConnectionPoint::signalStrID() const
-	{
-		return m_signalStrID;
-	}
+//	const QString& CFblConnectionPoint::signalStrID() const
+//	{
+//		return m_signalStrID;
+//	}
 
-	void CFblConnectionPoint::setSignalStrID(const QString& strid)
-	{
-		m_signalStrID = strid;
-	}
+//	void CFblConnectionPoint::setSignalStrID(const QString& strid)
+//	{
+//		m_signalStrID = strid;
+//	}
 
-	const QString& CFblConnectionPoint::signalCaption() const
-	{
-		return m_signalCaption;
-	}
+//	const QString& CFblConnectionPoint::signalCaption() const
+//	{
+//		return m_signalCaption;
+//	}
 
-	void CFblConnectionPoint::setSignalCaption(const QString& caption)
-	{
-		m_signalCaption = caption;
-	}
+//	void CFblConnectionPoint::setSignalCaption(const QString& caption)
+//	{
+//		m_signalCaption = caption;
+//	}
 
 
 	//

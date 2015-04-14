@@ -44,6 +44,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Add presets to equipment configuration", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0033.sql"},
 	{"Add Build table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0034.sql"},
 	{"Add OutputRangeMode column to SignalInstance table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0035.sql"},
+	{"Add get_file_id dunctions", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0036.sql"},
 };
 
 

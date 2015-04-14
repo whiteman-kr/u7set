@@ -35,6 +35,7 @@
         <file>DatabaseUpgrade/Upgrade0033.sql</file>
         <file>DatabaseUpgrade/Upgrade0034.sql</file>
         <file>DatabaseUpgrade/Upgrade0035.sql</file>
+        <file>DatabaseUpgrade/Upgrade0036.sql</file>
     </qresource>
     <qresource prefix="/"/>
     <qresource prefix="/Images">
@@ -42,5 +43,8 @@
         <file>Images/lock.png</file>
         <file>Images/pencil.png</file>
         <file>Images/plus.png</file>
+        <file>Images/update.png</file>
+        <file>Images/undo.png</file>
+        <file>Images/changes.png</file>
     </qresource>
 </RCC>
