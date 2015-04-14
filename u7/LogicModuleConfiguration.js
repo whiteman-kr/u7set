@@ -119,13 +119,13 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
 {
     // Variables
     //
-    var confName = module.ConfName;
+    var subSysID = module.SubsysID;
     var confIndex = module.ConfIndex;
     var frameSize = 1016;
     var frameCount = 22;                // Check it !!!!
     var uartId = 456;                   // Check it !!!!
 
-    var confFirmware = confCollection.jsGet("LM-1", confName, uartId, frameSize, frameCount);
+    var confFirmware = confCollection.jsGet("LM-1", subSysID, uartId, frameSize, frameCount);
 
     // Generation
     //
