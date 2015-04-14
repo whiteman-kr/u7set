@@ -1,18 +1,17 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-03-24T23:00:37
+# Project created by QtCreator 2015-04-09T10:35:55
 #
 #-------------------------------------------------
 
 QT       += core
+QT       += network
 
 QT       -= gui
 
 TARGET = file2pgsql
-
 CONFIG   += console
 CONFIG   -= app_bundle
-CONFIG   += static
 
 TEMPLATE = app
 
