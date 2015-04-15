@@ -16,7 +16,7 @@ namespace Hardware
 	{
 	}
 
-    void ModuleConfFirmware::init(QString type, QString name, int uartId, int frameSize, int frameCount)
+	void ModuleConfFirmware::init(QString type, QString name, int uartId, int frameSize, int frameCount)
 	{
         m_type = type;
 		m_name = name;
