@@ -4,13 +4,13 @@
 #include "../include/Signal.h"
 #include "../Builder/BuildResultWriter.h"
 
-
 // Forware declarations
 //
 
 class QThread;
 class OutputLog;
 class DbController;
+
 
 namespace Builder
 {
@@ -57,9 +57,13 @@ namespace Builder
 		//
 		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSetObject* signalSetObject, int changesetId, BuildResultWriter* buildWriter);
 
+		// Build Application Logic
+		//
+		bool buildApplicationLogic(DbController* db, int changesetId);
+
 		// Compile Application Logic
 		//
-		bool applicationLogic(DbController* db, int changesetId);
+		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?
 		//
@@ -115,8 +119,7 @@ namespace Builder
 
 		bool m_debug = false;				// if true then don't get workcopy of checked out files, use unly checked in copy
 
-		OutputLog* m_log;					// Probably it's better to make it as shared_ptr
-		BuildResultWriter m_buildWriter;
+		OutputLog* m_log = nullptr;					// Probably it's better to make it as shared_ptr
 	};
 
 	// ------------------------------------------------------------------------

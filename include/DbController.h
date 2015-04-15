@@ -104,6 +104,9 @@ public:
 
 	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
 
+	bool autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals, QWidget* parentWidget);
+	bool autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals, QWidget* parentWidget);
+
 	// Build management
 	//
 	bool buildStart(QString workstation, bool release, int changeset, int* buildID, QWidget *parentWidget);
@@ -164,6 +167,10 @@ signals:
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
+
+	void signal_autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals);
+	void signal_autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals);
+
 
 	// Build management
 	//

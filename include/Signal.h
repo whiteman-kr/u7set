@@ -5,6 +5,8 @@
 #include <QMultiHash>
 #include "../include/DbStruct.h"
 #include "../include/OrderedHash.h"
+#include "../include/DeviceObject.h"
+
 
 
 enum SignalType
@@ -230,6 +232,8 @@ public:
 	{
 		*this = signal;
 	}
+
+	Signal(const Hardware::DeviceSignal& deviceSignal);
 
 	Signal& operator = (const Signal& signal);
 

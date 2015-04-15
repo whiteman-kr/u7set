@@ -1,6 +1,10 @@
 #include "ApplicationLogicCode.h"
 
-
-ApplicationLogicCode::ApplicationLogicCode()
+namespace Builder
 {
+
+	ApplicationLogicCode::ApplicationLogicCode()
+	{
+	}
+
 }

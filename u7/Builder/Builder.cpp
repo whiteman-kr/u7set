@@ -10,6 +10,8 @@
 #include "../../VFrame30/VideoItemLink.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
+#include "../Builder/ApplicationLogicCompiler.h"
+
 namespace Builder
 {
 	// ------------------------------------------------------------------------
@@ -49,8 +51,10 @@ namespace Builder
 			m_log->writeMessage(tr("Opening project %1: ok").arg(projectName()), true);
 		}
 
-#pragma message("Load correct ChangesetID")
-		m_buildWriter.start(&db, m_log, release(), 0 /* Load correct ChangesetID */);
+		BuildResultWriter buildWriter;
+
+#pragma message("################################ Load correct ChangesetID")
+		buildWriter.start(&db, m_log, release(), 0 /* Load correct ChangesetID */);
 
 		do
 		{
@@ -130,7 +134,7 @@ namespace Builder
 			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Module configurations compilation"), true);
 
-			ok = modulesConfiguration(&db, &deviceRoot, &signalSetObject, lastChangesetId, &m_buildWriter);
+			ok = modulesConfiguration(&db, &deviceRoot, &signalSetObject, lastChangesetId, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -146,35 +150,31 @@ namespace Builder
 			else
 			{
 				m_log->writeSuccess(tr("Ok"), true);
+			}
+
+			//
+			// Build application logic
+			//
+			buildApplicationLogic(&db, lastChangesetId);
+
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
 			}
 
 			//
 			// Compile application logic
 			//
-			m_log->writeMessage("", false);
-			m_log->writeMessage(tr("Application Logic compilation"), true);
-
-			ok = applicationLogic(&db, lastChangesetId);
+			compileApplicationLogic(&deviceRoot, &SignalSet(), &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
 				break;
 			}
-
-			if (ok == false)
-			{
-				m_log->writeError(tr("Error"), true, false);
-				QThread::currentThread()->requestInterruption();
-				break;
-			}
-			else
-			{
-				m_log->writeSuccess(tr("Ok"), true);
-			}
 		}
 		while (false);
 
-		m_buildWriter.finish();
+		buildWriter.finish();
 
 		emit resultReady(QString("Cool, we've done!"));
 
@@ -313,7 +313,7 @@ namespace Builder
 
 	}
 
-	bool BuildWorkerThread::applicationLogic(DbController* db, int changesetId)
+	bool BuildWorkerThread::buildApplicationLogic(DbController* db, int changesetId)
 	{
 		if (db == nullptr)
 		{
@@ -321,13 +321,48 @@ namespace Builder
 			return false;
 		}
 
+		m_log->writeMessage("", false);
+		m_log->writeMessage(tr("Application Logic building"), true);
+
 		ApplicationLogicBuilder alBuilder = {db, m_log, changesetId, debug()};
 
 		bool result = alBuilder.build();
 
+		if (result == false)
+		{
+			m_log->writeError(tr("Error"), true, false);
+			QThread::currentThread()->requestInterruption();
+		}
+		else
+		{
+			m_log->writeSuccess(tr("Ok"), true);
+		}
+
 		return result;
 	}
 
+
+	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter)
+	{
+		m_log->writeMessage("", false);
+		m_log->writeMessage(tr("Application Logic compilation"), true);
+
+		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, buildResultWriter, m_log);
+
+		bool result = appLogicCompiler.run();
+
+		if (result == false)
+		{
+			m_log->writeError(tr("Error"), true, false);
+			QThread::currentThread()->requestInterruption();
+		}
+		else
+		{
+			m_log->writeSuccess(tr("Ok"), true);
+		}
+
+		return result;
+	}
 
 
 	QString BuildWorkerThread::projectName() const
