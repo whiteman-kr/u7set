@@ -44,6 +44,8 @@ namespace Builder
 		{
 			m_log->writeMessage(QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()), false);
 		}
+
+		return true;
 	}
 
 
