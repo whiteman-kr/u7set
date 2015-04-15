@@ -131,7 +131,9 @@ SOURCES +=\
     Builder/ApplicationLogicBuilder.cpp \
 	Builder/BuildResultWriter.cpp \
 	SchemeLayersDialog.cpp \
-    Builder/ConfigurationBuilder.cpp
+    Builder/ConfigurationBuilder.cpp \
+    Builder/ApplicationLogicCode.cpp \
+    Builder/ApplicationLogicCompiler.cpp
 
 
 
@@ -196,7 +198,9 @@ HEADERS  += \
     Builder/ApplicationLogicBuilder.h \
 	Builder/BuildResultWriter.h \
     SchemeLayersDialog.h \
-    Builder/ConfigurationBuilder.h
+    Builder/ConfigurationBuilder.h \
+    Builder/ApplicationLogicCode.h \
+    Builder/ApplicationLogicCompiler.h
 
 
 FORMS    += \
