@@ -8,6 +8,13 @@ var WorkstationType = 6;
 var SoftwareType = 7;
 var SignalType = 8;
 
+var	ModuleTypeLm = 1;
+var	ModuleTypeAim = 2;
+var	ModuleTypeAom = 3;
+var	ModuleTypeDim = 4;
+var	ModuleTypeDom = 5;
+var	ModuleTypeAifm = 6;
+var	ModuleTypeOcm = 7;
 
 var DiagDiscrete = 0;
 var DiagAnalog = 1;

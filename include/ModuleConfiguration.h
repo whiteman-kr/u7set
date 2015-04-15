@@ -24,8 +24,8 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(QString type, QString name, int uartId, int frameSize, int frameCount);
-        bool save(QString projectName, QString userName);
+		void init(QString type, QString name, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
+		bool save(QByteArray &dest) const;
         bool load(QString fileName);
         bool isEmpty() const;
 
@@ -47,6 +47,7 @@ namespace Hardware
 		int uartId() const;
 		int frameSize() const;
 		int frameCount() const;
+		int changesetId() const;
 
 		// Data
 		//
@@ -55,6 +56,10 @@ namespace Hardware
 		QString m_name;
 		int m_uartId = 0;
 		int m_frameSize = 0;
+		int m_changesetId = 0;
+
+		QString m_projectName;
+		QString m_userName;
 
         std::vector<std::vector<quint8>> m_frames;
     };
@@ -66,7 +71,7 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		ModuleConfCollection();
+		ModuleConfCollection(const QString& projectName, const QString& userName, int changesetId);
 		virtual ~ModuleConfCollection();
 
 		// Methods
@@ -74,16 +79,21 @@ namespace Hardware
 	public:
         Q_INVOKABLE QObject* jsGet(QString type, QString name, int uartId, int frameSize, int frameCount);
 
-        bool save(QString projectName, QString userName);
-
 		// Properties
 		//
 	public:
 
 		// Data
 		//
+	public:
+		const std::map<QString, ModuleConfFirmware>& firmwares() const;
+
 	private:
 		std::map<QString, ModuleConfFirmware> m_firmwares;
+
+		QString m_projectName;
+		QString m_userName;
+		int m_changesetId;
 	};
 
 

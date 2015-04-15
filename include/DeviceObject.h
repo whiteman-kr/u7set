@@ -418,12 +418,27 @@ namespace Hardware
 	class DeviceModule : public DeviceObject
 	{
 		Q_OBJECT
+		Q_ENUMS(ModuleType)
 
-		Q_PROPERTY(int Type READ type WRITE setType)
+		Q_PROPERTY(ModuleType Type READ type WRITE setType)
 
 		Q_PROPERTY(int ConfIndex READ confIndex WRITE setConfIndex)
 		Q_PROPERTY(QString SubsysID READ subSysID WRITE setSubSysID)
 		Q_PROPERTY(QString ConfType READ confType WRITE setConfType)
+
+	public:
+		enum ModuleType
+		{
+			Lm = 1,
+			Aim = 2,
+			Aom = 3,
+			Dim = 4,
+			Dom = 5,
+			Aifm = 6,
+			Ocm = 7,
+
+			ModuleTypeCount
+		};
 
 	public:
 		explicit DeviceModule(bool preset = false);
@@ -445,8 +460,8 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		int type() const;
-		void setType(int value);
+		ModuleType type() const;
+		void setType(ModuleType value);
 
 		int confIndex() const;
 		void setConfIndex(int value);
@@ -462,7 +477,8 @@ namespace Hardware
 	private:
 		static const DeviceType m_deviceType = DeviceType::Module;
 
-		int m_type = 0;
+		//int m_type = 0;
+		ModuleType m_type = ModuleType::Lm;
 
 		int m_confIndex = 0;
 		QString m_subSysID;

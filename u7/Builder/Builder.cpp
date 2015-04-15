@@ -81,12 +81,56 @@ namespace Builder
 			}
 
 			//
+			// Get Equipment from the database
+			//
+			m_log->writeMessage("", false);
+			m_log->writeMessage(tr("Getting equipment"), true);
+
+			Hardware::DeviceRoot deviceRoot;
+			int rootFileId = db.hcFileId();
+			deviceRoot.fileInfo().setFileId(rootFileId);
+
+			bool ok = getEquipment(&db, &deviceRoot);
+
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			if (ok == false)
+			{
+				m_log->writeError(tr("Error"), true, false);
+				QThread::currentThread()->requestInterruption();
+				break;
+			}
+			else
+			{
+				m_log->writeSuccess(tr("Ok"), true);
+			}
+
+			//
+			// Expand Devices StrId
+			//
+			m_log->writeMessage("", false);
+			m_log->writeMessage(tr("Expanding devices StrIds"), true);
+
+			expandDeviceStrId(&deviceRoot);
+
+			m_log->writeSuccess(tr("Ok"), true);
+
+			//
+			// Get signals from the database
+			//
+			SignalSetObject signalSetObject;
+			signalSetObject.loadSignalsFromDb(&db);
+
+			//
 			// Compile Module configuration
 			//
 			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Module configurations compilation"), true);
 
-			ok = modulesConfiguration(&db, lastChangesetId);
+			ok = modulesConfiguration(&db, &deviceRoot, &signalSetObject, lastChangesetId, &m_buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -137,7 +181,123 @@ namespace Builder
 		return;
 	}
 
-	bool BuildWorkerThread::modulesConfiguration(DbController* db, int changesetId)
+	bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* parent)
+	{
+		assert(db != nullptr);
+		assert(db->isProjectOpened() == true);
+		assert(parent != nullptr);
+
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return false;
+		}
+
+		if (parent->deviceType() == Hardware::DeviceType::System)
+		{
+			m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()), false);
+		}
+
+		std::vector<DbFileInfo> files;
+
+		bool ok = false;
+
+		// Get file list with checked out files,
+		// if this is release build, specific copies will be fetched later
+		//
+		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+
+		if (ok == false)
+		{
+			m_log->writeError(tr("Cannot get equipment file list"), false, true);
+			return false;
+		}
+
+		if (release() == true)
+		{
+			// filter some files, which are not checkedin?
+			assert(false);
+		}
+		else
+		{
+		}
+
+		parent->deleteAllChildren();
+
+		for (auto& fi : files)
+		{
+			std::shared_ptr<DbFile> file;
+
+			if (release() == true)
+			{
+				assert(false);
+			}
+			else
+			{
+				ok = db->getLatestVersion(fi, &file, nullptr);
+			}
+
+			if (file == false || ok == false)
+			{
+				m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()), false, true);
+				return false;
+			}
+
+			Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
+
+			if (object == nullptr)
+			{
+				return false;
+			}
+			else
+			{
+				assert(object);
+			}
+
+			object->setFileInfo(fi);
+
+			std::shared_ptr<Hardware::DeviceObject> sp(object);
+
+			parent->addChild(sp);
+		}
+
+		files.clear();
+
+		for (int i = 0 ; i < parent->childrenCount(); i++)
+		{
+			std::shared_ptr<Hardware::DeviceObject> child = parent->childSharedPtr(i);
+
+			ok = getEquipment(db, child.get());
+
+			if (ok == false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
+	{
+		if (device->parent() != nullptr)
+		{
+			QString strId = device->strId();
+
+			strId.replace(QString("$(PARENT)"), device->parent()->strId(), Qt::CaseInsensitive);
+			strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+
+			device->setStrId(strId);
+		}
+
+		for (int i = 0; i < device->childrenCount(); i++)
+		{
+			expandDeviceStrId(device->child(i));
+		}
+
+		return true;
+	}
+
+	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSetObject* signalSetObject, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr)
 		{
@@ -145,7 +305,7 @@ namespace Builder
 			return false;
 		}
 
-		ConfigurationBuilder cfgBuilder = {db, m_log, changesetId, debug(), projectName(), projectUserName()};
+		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSetObject, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = cfgBuilder.build();
 

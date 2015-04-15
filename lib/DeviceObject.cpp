@@ -1420,7 +1420,7 @@ namespace Hardware
 		//
 		Proto::DeviceModule* moduleMessage = message->mutable_deviceobject()->mutable_module();
 
-		moduleMessage->set_type(m_type);
+		moduleMessage->set_type(static_cast<int>(m_type));
 
 		moduleMessage->set_confindex(m_confIndex);
 		moduleMessage->set_subsysid(m_subSysID.toStdString());
@@ -1453,7 +1453,7 @@ namespace Hardware
 
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
-		m_type =  moduleMessage.type();
+		m_type =  static_cast<Hardware::DeviceModule::ModuleType>(moduleMessage.type());
 
 		m_confIndex = moduleMessage.confindex();
 		m_subSysID = moduleMessage.subsysid().c_str();
@@ -1468,12 +1468,12 @@ namespace Hardware
 	}
 
 
-	int DeviceModule::type() const
+	Hardware::DeviceModule::ModuleType DeviceModule::type() const
 	{
 		return m_type;
 	}
 
-	void DeviceModule::setType(int value)
+	void DeviceModule::setType(Hardware::DeviceModule::ModuleType value)
 	{
 		m_type = value;
 	}
