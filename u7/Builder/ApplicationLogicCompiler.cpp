@@ -34,7 +34,21 @@ namespace Builder
 
 		m_signals->resetAddresses();
 
-		findLMs(m_equipment);
+		findLMs();
+
+
+		return true;
+	}
+
+
+	// find all logic modules (LMs) in project
+	// fills m_lm vector
+	//
+	void ApplicationLogicCompiler::findLMs()
+	{
+		m_lm.clear();
+
+		findLM(m_equipment);
 
 		if (m_lm.count() == 0)
 		{
@@ -44,21 +58,18 @@ namespace Builder
 		{
 			m_log->writeMessage(QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()), false);
 		}
-
-		return true;
 	}
 
 
-	// find all logic modules (LMs) in project
-	// fills m_lm vector
+	// find logic modules (LMs), recursive
 	//
-	void ApplicationLogicCompiler::findLMs(Hardware::DeviceObject* startFromDevice)
+	void ApplicationLogicCompiler::findLM(Hardware::DeviceObject* startFromDevice)
 	{
 		if (startFromDevice == nullptr)
 		{
 			assert(startFromDevice != nullptr);
 
-			msg = QString(tr("DeviceObject null pointer!")).arg(__FUNCTION__);
+			msg = QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
 
 			m_log->writeError(msg, false, true);
 
@@ -66,15 +77,40 @@ namespace Builder
 			return;
 		}
 
+		if (startFromDevice->deviceType() == Hardware::DeviceType::Signal)
+		{
+			return;
+		}
+
 		if (startFromDevice->deviceType() == Hardware::DeviceType::Module)
 		{
 			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
 
-			if (module->type() == 1 )
+#pragma message("########################################## Set correct LM ID from enum")
+			if (module->type() == 1)
 			{
-				m_lm.append(startFromDevice);
-				return;
+				Hardware::DeviceObject* parent = startFromDevice->parent();
+
+				if (parent != nullptr)
+				{
+					if (parent->deviceType() == Hardware::DeviceType::Chassis)
+					{
+						// LM must be installed in the chassis
+						//
+						m_lm.append(startFromDevice);
+					}
+					else
+					{
+						msg = QString(tr("LM %1 is not installed in the chassis")).arg(module->strId());
+
+						m_log->writeWarning(msg, false, true);
+
+						qDebug() << msg;
+					}
+				}
 			}
+
+			return;
 		}
 
 		int childrenCount = startFromDevice->childrenCount();
@@ -83,7 +119,7 @@ namespace Builder
 		{
 			Hardware::DeviceObject* device = startFromDevice->child(i);
 
-			findLMs(device);
+			findLM(device);
 		}
 	}
 }

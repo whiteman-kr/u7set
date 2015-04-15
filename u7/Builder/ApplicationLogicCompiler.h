@@ -25,7 +25,8 @@ namespace Builder
 		QString msg;
 
 	private:
-		void findLMs(Hardware::DeviceObject* startFromDevice);
+		void findLMs();
+		void findLM(Hardware::DeviceObject* startFromDevice);
 
 	public:
 		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter, OutputLog* log);
