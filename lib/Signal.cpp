@@ -130,3 +130,14 @@ QVector<int> SignalSet::getChannelSignalsID(int signalGroupID)
 
 	return channelSignalsID;
 }
+
+
+void SignalSet::resetAddresses()
+{
+	int signalCount = count();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		(*this)[i].resetAddresses();
+	}
+}

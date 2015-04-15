@@ -249,6 +249,9 @@ public:
 	Address16& ramAddr() { return m_ramAddr; }
 	Address16& acqAddr() { return m_acqAddr; }
 
+	void resetAddresses() { m_ramAddr.reset(); m_acqAddr.reset(); }
+
+
     Q_INVOKABLE QString strID() const { return m_strID; }
 	void setStrID(const QString& strID) { m_strID = strID; }
 
@@ -368,6 +371,8 @@ public:
 
 	QVector<int> getChannelSignalsID(const Signal& signal);
 	QVector<int> getChannelSignalsID(int signalGroupID);
+
+	void resetAddresses();
 };
 
 

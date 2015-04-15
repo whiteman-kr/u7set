@@ -132,9 +132,9 @@ SOURCES +=\
 	Builder/BuildResultWriter.cpp \
 	SchemeLayersDialog.cpp \
     Builder/ConfigurationBuilder.cpp \
+    Builder/ApplicationLogicCode.cpp \
+	Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp
-
-
 
 HEADERS  += \
     CentralWidget.h \
@@ -198,8 +198,9 @@ HEADERS  += \
 	Builder/BuildResultWriter.h \
     SchemeLayersDialog.h \
     Builder/ConfigurationBuilder.h \
+    Builder/ApplicationLogicCode.h \
+	Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h
-
 
 FORMS    += \
     ChangesetDialog.ui \
