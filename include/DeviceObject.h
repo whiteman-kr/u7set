@@ -429,13 +429,13 @@ namespace Hardware
 	public:
 		enum ModuleType
 		{
-			Lm = 1,
-			Aim = 2,
-			Aom = 3,
-			Dim = 4,
-			Dom = 5,
-			Aifm = 6,
-			Ocm = 7,
+			LM = 1,
+			AIM = 2,
+			AOM = 3,
+			DIM = 4,
+			DOM = 5,
+			AIFM = 6,
+			OCM = 7,
 
 			ModuleTypeCount
 		};
@@ -478,7 +478,7 @@ namespace Hardware
 		static const DeviceType m_deviceType = DeviceType::Module;
 
 		//int m_type = 0;
-		ModuleType m_type = ModuleType::Lm;
+		ModuleType m_type = ModuleType::LM;
 
 		int m_confIndex = 0;
 		QString m_subSysID;

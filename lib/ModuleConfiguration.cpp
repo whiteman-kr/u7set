@@ -16,10 +16,10 @@ namespace Hardware
 	{
 	}
 
-	void ModuleConfFirmware::init(QString type, QString name, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
+	void ModuleConfFirmware::init(QString type, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
 	{
         m_type = type;
-		m_name = name;
+		m_subsysId = subsysId;
 		m_uartId = uartId;
 		m_frameSize = frameSize;
 		m_projectName = projectName;
@@ -60,7 +60,7 @@ namespace Hardware
 		jObject.insert("userName", m_userName);
 		jObject.insert("projectName", m_projectName);
         jObject.insert("type", type());
-        jObject.insert("name", name());
+		jObject.insert("subsysId", subsysId());
         jObject.insert("uartId", uartId());
         jObject.insert("frameSize", frameSize());
         jObject.insert("framesCount", frameCount());
@@ -122,11 +122,11 @@ namespace Hardware
         }
         m_type = jConfig.value("type").toString();
 
-        if (jConfig.value("name").isUndefined() == true)
+		if (jConfig.value("subsysId").isUndefined() == true)
         {
             return false;
         }
-        m_name = jConfig.value("name").toString();
+		m_subsysId = jConfig.value("subsysId").toString();
 
         /*if (jConfig.value("version").isUndefined() == true)
         {
@@ -320,9 +320,9 @@ namespace Hardware
         return m_type;
     }
 
-    QString ModuleConfFirmware::name() const
+	QString ModuleConfFirmware::subsysId() const
 	{
-		return m_name;
+		return m_subsysId;
 	}
 
 	int ModuleConfFirmware::uartId() const
@@ -351,15 +351,15 @@ namespace Hardware
 	{
 	}
 
-    QObject* ModuleConfCollection::jsGet(QString type, QString name, int uartId, int frameSize, int frameCount)
+	QObject* ModuleConfCollection::jsGet(QString type, QString subsysId, int uartId, int frameSize, int frameCount)
 	{
-		bool newFirmware = m_firmwares.count(name) == 0;
+		bool newFirmware = m_firmwares.count(subsysId) == 0;
 
-		ModuleConfFirmware& fw = m_firmwares["name"];
+		ModuleConfFirmware& fw = m_firmwares["subsysId"];
 
 		if (newFirmware == true)
 		{
-			fw.init(type, name, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
+			fw.init(type, subsysId, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
 		}
 
 		QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);

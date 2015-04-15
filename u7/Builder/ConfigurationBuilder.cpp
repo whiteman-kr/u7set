@@ -152,11 +152,11 @@ namespace Builder
 				QByteArray data;
 				f.save(data);
 
-				/*if (m_buildWriter->addFile(f.name(), f.type(), data) == false)
+				if (m_buildWriter->addFile(f.subsysId(), f.type() + ".mcb", data) == false)
 				{
-					m_log->writeError(tr("Failed to save module configuration output file for") + f.name() + "!", false, true);
+					m_log->writeError(tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.type() + "!", false, true);
 					return false;
-				}*/
+				}
 			}
 		}
 
