@@ -152,7 +152,21 @@ namespace Builder
 				QByteArray data;
 				f.save(data);
 
-				if (m_buildWriter->addFile(f.subsysId(), f.type() + ".mcb", data) == false)
+				QString path = f.subsysId();
+				QString fileName = f.type();
+
+				if (path.isEmpty())
+				{
+					m_log->writeError(tr("Failed to save module configuration output file, subsystemId is empty."), true, true);
+					return false;
+				}
+				if (fileName.isEmpty())
+				{
+					m_log->writeError(tr("Failed to save module configuration output file, module type string is empty."), true, true);
+					return false;
+				}
+
+				if (m_buildWriter->addFile(path, fileName, data) == false)
 				{
 					m_log->writeError(tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.type() + "!", false, true);
 					return false;
