@@ -16,12 +16,15 @@ namespace Hardware
 	{
 	}
 
-	void ModuleConfFirmware::init(QString type, QString name, int uartId, int frameSize, int frameCount)
+	void ModuleConfFirmware::init(QString type, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
 	{
         m_type = type;
-		m_name = name;
+		m_subsysId = subsysId;
 		m_uartId = uartId;
 		m_frameSize = frameSize;
+		m_projectName = projectName;
+		m_userName = userName;
+		m_changesetId = changesetId;
 
 		m_frames.clear();
 		m_frames.resize(frameCount);
@@ -34,13 +37,13 @@ namespace Hardware
 		return;
 	}
 
-    bool ModuleConfFirmware::save(QString projectName, QString userName)
+	bool ModuleConfFirmware::save(QByteArray& dest) const
     {
         QJsonObject jObject;
 
         for (int i = 0; i < frameCount(); i++)
         {
-            std::vector<quint8>& frame = m_frames[i];
+			const std::vector<quint8>& frame = m_frames[i];
 
             QJsonObject jFrame;
 
@@ -54,32 +57,18 @@ namespace Hardware
             jObject.insert("z_frame_" + QString().number(i), jFrame);
         }
 
-        jObject.insert("userName", userName);
-        jObject.insert("projectName", projectName);
+		jObject.insert("userName", m_userName);
+		jObject.insert("projectName", m_projectName);
         jObject.insert("type", type());
-        jObject.insert("name", name());
+		jObject.insert("subsysId", subsysId());
         jObject.insert("uartId", uartId());
         jObject.insert("frameSize", frameSize());
         jObject.insert("framesCount", frameCount());
+		jObject.insert("changesetId", m_changesetId);
 
-        QByteArray data;
-        data = QJsonDocument(jObject).toJson();
+		dest = QJsonDocument(jObject).toJson();
 
-        QFile file(type() + tr("_") + name() + tr(".mcb"));
-        if (file.open(QIODevice::WriteOnly)  == false)
-        {
-            return false;
-        }
-
-        bool result = true;
-
-        if (file.write(data) == -1)
-        {
-            result = false;
-        }
-
-        file.close();
-        return result;
+		return true;
     }
 
     bool ModuleConfFirmware::load(QString fileName)
@@ -115,17 +104,29 @@ namespace Hardware
 
         //QJsonObject jConfig = jConfigVal.toObject();
 
-        if (jConfig.value("type").isUndefined() == true)
+		if (jConfig.value("projectName").isUndefined() == true)
+		{
+			return false;
+		}
+		m_projectName = jConfig.value("projectName").toString();
+
+		if (jConfig.value("userName").isUndefined() == true)
+		{
+			return false;
+		}
+		m_userName = jConfig.value("userName").toString();
+
+		if (jConfig.value("type").isUndefined() == true)
         {
             return false;
         }
         m_type = jConfig.value("type").toString();
 
-        if (jConfig.value("name").isUndefined() == true)
+		if (jConfig.value("subsysId").isUndefined() == true)
         {
             return false;
         }
-        m_name = jConfig.value("name").toString();
+		m_subsysId = jConfig.value("subsysId").toString();
 
         /*if (jConfig.value("version").isUndefined() == true)
         {
@@ -145,11 +146,11 @@ namespace Hardware
         }
         m_frameSize = (int)jConfig.value("frameSize").toDouble();
 
-        /*if (jConfig.value("changeset").isUndefined() == true)
+		if (jConfig.value("changesetId").isUndefined() == true)
         {
             return false;
         }
-        m_changeset = (int)jConfig.value("changeset").toDouble();*/
+		m_changesetId = (int)jConfig.value("changesetId").toDouble();
 
         /*if (jConfig.value("fileName").isUndefined() == true)
         {
@@ -319,9 +320,9 @@ namespace Hardware
         return m_type;
     }
 
-    QString ModuleConfFirmware::name() const
+	QString ModuleConfFirmware::subsysId() const
 	{
-		return m_name;
+		return m_subsysId;
 	}
 
 	int ModuleConfFirmware::uartId() const
@@ -339,8 +340,10 @@ namespace Hardware
         return static_cast<int>(m_frames.size());
 	}
 
-
-	ModuleConfCollection::ModuleConfCollection()
+	ModuleConfCollection::ModuleConfCollection(const QString &projectName, const QString &userName, int changesetId):
+		m_projectName(projectName),
+		m_userName(userName),
+		m_changesetId(changesetId)
 	{
 	}
 
@@ -348,33 +351,25 @@ namespace Hardware
 	{
 	}
 
-    QObject* ModuleConfCollection::jsGet(QString type, QString name, int uartId, int frameSize, int frameCount)
+	QObject* ModuleConfCollection::jsGet(QString type, QString subsysId, int uartId, int frameSize, int frameCount)
 	{
-		bool newFirmware = m_firmwares.count(name) == 0;
+		bool newFirmware = m_firmwares.count(subsysId) == 0;
 
-		ModuleConfFirmware& fw = m_firmwares["name"];
+		ModuleConfFirmware& fw = m_firmwares["subsysId"];
 
 		if (newFirmware == true)
 		{
-            fw.init(type, name, uartId, frameSize, frameCount);
+			fw.init(type, subsysId, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
 		}
 
 		QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);
 		return &fw;
 	}
 
-    bool ModuleConfCollection:: save(QString projectName, QString userName)
-    {
-        for (auto i = m_firmwares.begin(); i != m_firmwares.end(); i++)
-        {
-            ModuleConfFirmware& f = i->second;
-            if (f.save(projectName, userName) == false)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
+	const std::map<QString, ModuleConfFirmware>& ModuleConfCollection::firmwares() const
+	{
+		return m_firmwares;
+	}
 
 
 	// ----------------------------------------------------------------------------

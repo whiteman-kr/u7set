@@ -12,9 +12,15 @@ class QThread;
 class OutputLog;
 class DbController;
 
+namespace Builder
+{
+	class SignalSetObject;
+}
+
 namespace Hardware
 {
 	class DeviceObject;
+	class DeviceRoot;
 	class McFirmwareOld;
 }
 
@@ -39,9 +45,17 @@ namespace Builder
 	private:
 		virtual void run() override;
 
+		// Get Equipment from the prokect database
+		//
+		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
+
+		// Expand Devices StrId
+		//
+		bool expandDeviceStrId(Hardware::DeviceObject* device);
+
 		// Generate Modules Configurations Firmwares
 		//
-		bool modulesConfiguration(DbController* db, int changesetId);
+		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSetObject* signalSetObject, int changesetId, BuildResultWriter* buildWriter);
 
 		// Compile Application Logic
 		//

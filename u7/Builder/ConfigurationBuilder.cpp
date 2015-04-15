@@ -4,22 +4,25 @@
 #include "../../include/OutputLog.h"
 #include "../../include/DeviceObject.h"
 
-#include "Builder.h"
-
 namespace Builder
 {
 
-	ConfigurationBuilder::ConfigurationBuilder(DbController* db, OutputLog* log,
-		int changesetId, bool debug, QString projectName, QString userName) :
+	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSetObject* signalSetObject, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
 		m_db(db),
+		m_deviceRoot(deviceRoot),
+		m_signalSetObject(signalSetObject),
 		m_log(log),
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_projectName(projectName),
-		m_userName(userName)
+		m_userName(userName),
+		m_buildWriter(buildWriter)
 	{
 		assert(m_db);
+		assert(m_deviceRoot);
+		assert(m_signalSetObject);
 		assert(m_log);
+		assert(m_buildWriter);
 
 		return;
 	}
@@ -39,48 +42,12 @@ namespace Builder
 		}
 
 		//
-		// Get Equipment from the database
-		//
-		m_log->writeMessage("", false);
-		m_log->writeMessage(tr("Getting equipment"), true);
-
-		Hardware::DeviceRoot deviceRoot;
-		int rootFileId = db()->hcFileId();
-		deviceRoot.fileInfo().setFileId(rootFileId);
-
-		bool ok = getEquipment(db(), &deviceRoot);
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			return false;
-		}
-
-		if (ok == false)
-		{
-			m_log->writeError(tr("Error"), true, false);
-			QThread::currentThread()->requestInterruption();
-			return false;
-		}
-		else
-		{
-			m_log->writeSuccess(tr("Ok"), true);
-		}
-
-		//
-		// Expand Devices StrId
-		//
-		m_log->writeMessage("", false);
-		m_log->writeMessage(tr("Expanding devices StrIds"), true);
-
-		expandDeviceStrId(&deviceRoot);
-
-		m_log->writeSuccess(tr("Ok"), true);
-
-		//
 		// Generate Module Confuiguration Binary File
 		//
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Generating modules configurations"), true);
+
+		bool ok = false;
 
 
 		// Get script file from the project databse
@@ -128,15 +95,13 @@ namespace Builder
 		QJSValue jsLog = jsEngine.newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
-		SignalSetObject signalSetObject;
-		signalSetObject.loadSignalsFromDb(db());
-		QJSValue jsSignalSet = jsEngine.newQObject(&signalSetObject);
-		QQmlEngine::setObjectOwnership(&signalSetObject, QQmlEngine::CppOwnership);
+		QJSValue jsSignalSet = jsEngine.newQObject(m_signalSetObject);
+		QQmlEngine::setObjectOwnership(m_signalSetObject, QQmlEngine::CppOwnership);
 
-		QJSValue jsRoot = jsEngine.newQObject(&deviceRoot);
-		QQmlEngine::setObjectOwnership(&deviceRoot, QQmlEngine::CppOwnership);
+		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
+		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
 
-		Hardware::ModuleConfCollection confCollection;
+		Hardware::ModuleConfCollection confCollection(m_projectName, m_userName, m_changesetId);
 
 		QJSValue jsConfCollection = jsEngine.newQObject(&confCollection);
 		QQmlEngine::setObjectOwnership(&confCollection, QQmlEngine::CppOwnership);
@@ -180,131 +145,38 @@ namespace Builder
 		}
 		else
 		{
-			if (confCollection.save(m_projectName, m_userName) == false)
+			for (auto i = confCollection.firmwares().begin(); i != confCollection.firmwares().end(); i++)
 			{
-				m_log->writeError(tr("Failed to save module configuration binary files!"), false, true);
-				return false;
+				const Hardware::ModuleConfFirmware& f = i->second;
+
+				QByteArray data;
+				f.save(data);
+
+				QString path = f.subsysId();
+				QString fileName = f.type();
+
+				if (path.isEmpty())
+				{
+					m_log->writeError(tr("Failed to save module configuration output file, subsystemId is empty."), true, true);
+					return false;
+				}
+				if (fileName.isEmpty())
+				{
+					m_log->writeError(tr("Failed to save module configuration output file, module type string is empty."), true, true);
+					return false;
+				}
+
+				if (m_buildWriter->addFile(path, fileName, data) == false)
+				{
+					m_log->writeError(tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.type() + "!", false, true);
+					return false;
+				}
 			}
 		}
 
 		return true;
 	}
 
-	bool ConfigurationBuilder::getEquipment(DbController* db, Hardware::DeviceObject* parent)
-	{
-		assert(db != nullptr);
-		assert(db->isProjectOpened() == true);
-		assert(parent != nullptr);
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			return false;
-		}
-
-		if (parent->deviceType() == Hardware::DeviceType::System)
-		{
-			m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()), false);
-		}
-
-		std::vector<DbFileInfo> files;
-
-		bool ok = false;
-
-		// Get file list with checked out files,
-		// if this is release build, specific copies will be fetched later
-		//
-		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
-
-		if (ok == false)
-		{
-			m_log->writeError(tr("Cannot get equipment file list"), false, true);
-			return false;
-		}
-
-		if (release() == true)
-		{
-			// filter some files, which are not checkedin?
-			assert(false);
-		}
-		else
-		{
-		}
-
-		parent->deleteAllChildren();
-
-		for (auto& fi : files)
-		{
-			std::shared_ptr<DbFile> file;
-
-			if (release() == true)
-			{
-				assert(false);
-			}
-			else
-			{
-				ok = db->getLatestVersion(fi, &file, nullptr);
-			}
-
-			if (file == false || ok == false)
-			{
-				m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()), false, true);
-				return false;
-			}
-
-			Hardware::DeviceObject* object = Hardware::DeviceObject::Create(file->data());
-
-			if (object == nullptr)
-			{
-				return false;
-			}
-			else
-			{
-				assert(object);
-			}
-
-			object->setFileInfo(fi);
-
-			std::shared_ptr<Hardware::DeviceObject> sp(object);
-
-			parent->addChild(sp);
-		}
-
-		files.clear();
-
-		for (int i = 0 ; i < parent->childrenCount(); i++)
-		{
-			std::shared_ptr<Hardware::DeviceObject> child = parent->childSharedPtr(i);
-
-			ok = getEquipment(db, child.get());
-
-			if (ok == false)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	bool ConfigurationBuilder::expandDeviceStrId(Hardware::DeviceObject* device)
-	{
-		if (device->parent() != nullptr)
-		{
-			QString strId = device->strId();
-
-			strId.replace(QString("$(PARENT)"), device->parent()->strId(), Qt::CaseInsensitive);
-			strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
-
-			device->setStrId(strId);
-		}
-
-		for (int i = 0; i < device->childrenCount(); i++)
-		{
-			expandDeviceStrId(device->child(i));
-		}
-
-		return true;
-	}
 
 	DbController* ConfigurationBuilder::db()
 	{
