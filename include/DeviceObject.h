@@ -420,24 +420,23 @@ namespace Hardware
 		Q_OBJECT
 		Q_ENUMS(ModuleType)
 
-		Q_PROPERTY(ModuleType Type READ type WRITE setType)
+		Q_PROPERTY(FamilyType ModuleFamily READ moduleFamily WRITE setModuleFamily)
+		Q_PROPERTY(int ModuleVersion READ moduleVersion WRITE setModuleVersion)
 
-		Q_PROPERTY(int ConfIndex READ confIndex WRITE setConfIndex)
+		Q_PROPERTY(int Channel READ channel WRITE setChannel)
 		Q_PROPERTY(QString SubsysID READ subSysID WRITE setSubSysID)
 		Q_PROPERTY(QString ConfType READ confType WRITE setConfType)
 
 	public:
-		enum ModuleType
-		{
-			LM = 1,
-			AIM = 2,
-			AOM = 3,
-			DIM = 4,
-			DOM = 5,
-			AIFM = 6,
-			OCM = 7,
-
-			ModuleTypeCount
+		enum FamilyType		// WARNING!!! Only high byte can be used as it is a part of the type
+		{					// (high byte is module family, low byte is module version)
+			LM = 0x1100,
+			AIM = 0x1200,
+			AOM = 0x1300,
+			DIM = 0x1400,
+			DOM = 0x1500,
+			AIFM = 0x1600,
+			OCM = 0x1700
 		};
 
 	public:
@@ -460,11 +459,14 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		ModuleType type() const;
-		void setType(ModuleType value);
+		FamilyType moduleFamily() const;
+		void setModuleFamily(FamilyType value);
 
-		int confIndex() const;
-		void setConfIndex(int value);
+		int moduleVersion() const;
+		void setModuleVersion(int value);
+
+		int channel() const;
+		void setChannel(int value);
 
 		QString subSysID() const;
 		void setSubSysID(const QString& value);
@@ -477,10 +479,9 @@ namespace Hardware
 	private:
 		static const DeviceType m_deviceType = DeviceType::Module;
 
-		//int m_type = 0;
-		ModuleType m_type = ModuleType::LM;
+		uint16_t m_type = 0;	// high byte is family type, low byte is module version
 
-		int m_confIndex = 0;
+		int m_channel = 0;		// 1 - base channel, 0 - means channel not set or not required
 		QString m_subSysID;
 		QString m_confType;
 	};

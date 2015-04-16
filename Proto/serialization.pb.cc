@@ -811,7 +811,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   DeviceModule_descriptor_ = file->message_type(36);
   static const int DeviceModule_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, type_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, confindex_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, channel_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, subsysid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, conftype_),
   };
@@ -1260,23 +1260,23 @@ void protobuf_AddDesc_serialization_2eproto() {
     "Workstation\022!\n\010Software\030l \001(\0132\017.Proto.So"
     "ftware\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\n"
     "DeviceRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001("
-    "\005:\0010\"]\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\024\n"
-    "\tConfIndex\030\002 \001(\005:\0010\022\022\n\010SubsysID\030\003 \001(\t:\000\022"
-    "\022\n\010ConfType\030\004 \001(\t:\000\"\022\n\020DeviceController\""
-    "\037\n\014DeviceSignal\022\017\n\004type\030\001 \001(\005:\0010\"\036\n\013Work"
-    "station\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004"
-    "type\030\001 \001(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022"
-    "struct_description\030\001 \001(\t\022/\n\006values\030\002 \003(\013"
-    "2\037.Proto.ModuleConfigurationValue\022\016\n\004nam"
-    "e\030\003 \001(\t:\000\"7\n\030ModuleConfigurationValue\022\014\n"
-    "\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014"
-    "\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUni"
-    "t\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002"
-    "*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006O"
-    "utput\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010"
-    "Discrete\020\001*N\n\014FblParamType\022\022\n\016AnalogInte"
-    "gral\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDiscr"
-    "eteValue\020\002", 5450);
+    "\005:\0010\"[\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\022\n"
+    "\007Channel\030\002 \001(\005:\0010\022\022\n\010SubsysID\030\003 \001(\t:\000\022\022\n"
+    "\010ConfType\030\004 \001(\t:\000\"\022\n\020DeviceController\"\037\n"
+    "\014DeviceSignal\022\017\n\004type\030\001 \001(\005:\0010\"\036\n\013Workst"
+    "ation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004ty"
+    "pe\030\001 \001(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022st"
+    "ruct_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037"
+    ".Proto.ModuleConfigurationValue\022\016\n\004name\030"
+    "\003 \001(\t:\000\"7\n\030ModuleConfigurationValue\022\014\n\004n"
+    "ame\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004"
+    "name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUnit\022"
+    "\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-"
+    "\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Out"
+    "put\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Di"
+    "screte\020\001*N\n\014FblParamType\022\022\n\016AnalogIntegr"
+    "al\020\000\022\027\n\023AnalogFloatingPoint\020\001\022\021\n\rDiscret"
+    "eValue\020\002", 5448);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -13511,7 +13511,7 @@ void DeviceChassis::Swap(DeviceChassis* other) {
 
 #ifndef _MSC_VER
 const int DeviceModule::kTypeFieldNumber;
-const int DeviceModule::kConfIndexFieldNumber;
+const int DeviceModule::kChannelFieldNumber;
 const int DeviceModule::kSubsysIDFieldNumber;
 const int DeviceModule::kConfTypeFieldNumber;
 #endif  // !_MSC_VER
@@ -13533,7 +13533,7 @@ DeviceModule::DeviceModule(const DeviceModule& from)
 void DeviceModule::SharedCtor() {
   _cached_size_ = 0;
   type_ = 0;
-  confindex_ = 0;
+  channel_ = 0;
   subsysid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   conftype_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -13578,7 +13578,7 @@ DeviceModule* DeviceModule::New() const {
 void DeviceModule::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     type_ = 0;
-    confindex_ = 0;
+    channel_ = 0;
     if (has_subsysid()) {
       if (subsysid_ != &::google::protobuf::internal::kEmptyString) {
         subsysid_->clear();
@@ -13611,19 +13611,19 @@ bool DeviceModule::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_ConfIndex;
+        if (input->ExpectTag(16)) goto parse_Channel;
         break;
       }
 
-      // optional int32 ConfIndex = 2 [default = 0];
+      // optional int32 Channel = 2 [default = 0];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_ConfIndex:
+         parse_Channel:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &confindex_)));
-          set_has_confindex();
+                 input, &channel_)));
+          set_has_channel();
         } else {
           goto handle_uninterpreted;
         }
@@ -13688,9 +13688,9 @@ void DeviceModule::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->type(), output);
   }
 
-  // optional int32 ConfIndex = 2 [default = 0];
-  if (has_confindex()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->confindex(), output);
+  // optional int32 Channel = 2 [default = 0];
+  if (has_channel()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->channel(), output);
   }
 
   // optional string SubsysID = 3 [default = ""];
@@ -13724,9 +13724,9 @@ void DeviceModule::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->type(), target);
   }
 
-  // optional int32 ConfIndex = 2 [default = 0];
-  if (has_confindex()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->confindex(), target);
+  // optional int32 Channel = 2 [default = 0];
+  if (has_channel()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->channel(), target);
   }
 
   // optional string SubsysID = 3 [default = ""];
@@ -13767,11 +13767,11 @@ int DeviceModule::ByteSize() const {
           this->type());
     }
 
-    // optional int32 ConfIndex = 2 [default = 0];
-    if (has_confindex()) {
+    // optional int32 Channel = 2 [default = 0];
+    if (has_channel()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->confindex());
+          this->channel());
     }
 
     // optional string SubsysID = 3 [default = ""];
@@ -13818,8 +13818,8 @@ void DeviceModule::MergeFrom(const DeviceModule& from) {
     if (from.has_type()) {
       set_type(from.type());
     }
-    if (from.has_confindex()) {
-      set_confindex(from.confindex());
+    if (from.has_channel()) {
+      set_channel(from.channel());
     }
     if (from.has_subsysid()) {
       set_subsysid(from.subsysid());
@@ -13851,7 +13851,7 @@ bool DeviceModule::IsInitialized() const {
 void DeviceModule::Swap(DeviceModule* other) {
   if (other != this) {
     std::swap(type_, other->type_);
-    std::swap(confindex_, other->confindex_);
+    std::swap(channel_, other->channel_);
     std::swap(subsysid_, other->subsysid_);
     std::swap(conftype_, other->conftype_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);

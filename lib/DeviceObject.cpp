@@ -1422,7 +1422,7 @@ namespace Hardware
 
 		moduleMessage->set_type(static_cast<int>(m_type));
 
-		moduleMessage->set_confindex(m_confIndex);
+		moduleMessage->set_channel(m_channel);
 		moduleMessage->set_subsysid(m_subSysID.toStdString());
 		moduleMessage->set_conftype(m_confType.toStdString());
 
@@ -1453,9 +1453,9 @@ namespace Hardware
 
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
-		m_type =  static_cast<Hardware::DeviceModule::ModuleType>(moduleMessage.type());
+		m_type =  static_cast<decltype(m_type)>(moduleMessage.type());
 
-		m_confIndex = moduleMessage.confindex();
+		m_channel = moduleMessage.channel();
 		m_subSysID = moduleMessage.subsysid().c_str();
 		m_confType = moduleMessage.conftype().c_str();
 
@@ -1468,24 +1468,44 @@ namespace Hardware
 	}
 
 
-	Hardware::DeviceModule::ModuleType DeviceModule::type() const
+	DeviceModule::FamilyType DeviceModule::moduleFamily() const
 	{
-		return m_type;
+		return static_cast<DeviceModule::FamilyType>(m_type & 0xFF00);
 	}
 
-	void DeviceModule::setType(Hardware::DeviceModule::ModuleType value)
+	void DeviceModule::setModuleFamily(DeviceModule::FamilyType value)
 	{
-		m_type = value;
+		decltype(m_type) tmp = static_cast<decltype(m_type)>(value);
+
+		assert((tmp & 0x00FF) == 0);
+
+		tmp &= 0xFF00;
+
+		m_type = (m_type & 0x00FF) | tmp;
 	}
 
-	int DeviceModule::confIndex() const
+	int DeviceModule::moduleVersion() const
 	{
-		return m_confIndex;
+		return static_cast<int>(m_type) & 0xFF;
 	}
 
-	void DeviceModule::setConfIndex(int value)
+	void DeviceModule::setModuleVersion(int value)
 	{
-		m_confIndex = value;
+		decltype(m_type) tmp = static_cast<decltype(m_type)>(value);
+
+		assert((tmp & 0xFF00) == 0);
+
+		m_type = (m_type & 0xFF00) | tmp;
+	}
+
+	int DeviceModule::channel() const
+	{
+		return m_channel;
+	}
+
+	void DeviceModule::setChannel(int value)
+	{
+		m_channel = value;
 	}
 
 	QString DeviceModule::subSysID() const
