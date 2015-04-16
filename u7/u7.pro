@@ -265,11 +265,12 @@ OTHER_FILES += \
         ../Proto/proto_compile.sh \
     DatabaseUpgrade/Upgrade0034.sql \
     DatabaseUpgrade/Upgrade0035.sql \
-    month-report.txt
+	DatabaseUpgrade/Upgrade0036.sql \
+	DatabaseUpgrade/Upgrade0037.sql \
+	month-report.txt
 
 DISTFILES += \
-    LogicModuleConfiguration.js \
-    DatabaseUpgrade/Upgrade0036.sql
+	LogicModuleConfiguration.js
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

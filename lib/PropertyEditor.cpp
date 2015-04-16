@@ -1421,20 +1421,20 @@ static PropertyItem pi;
 
 		// Sort dynamic properties by name
 		//
-		/*QStringList dynamicPropSortedNames;
+		QStringList dynamicPropSortedNames;
 		for (auto name : dynamicPropNames)
 		{
 			dynamicPropSortedNames.append(name);
 		}
-		dynamicPropSortedNames.sort();*/
+		dynamicPropSortedNames.sort();
 
-		for (auto name : dynamicPropNames)
+		for (auto name : dynamicPropSortedNames)
 		{
 
 static PropertyItem pi;
 
 			pi.object = *pobject;
-			pi.value = object->property(name);
+			pi.value = object->property(name.toStdString().c_str());
 			pi.type = pi.value.userType();
 
 			propertyItems.insertMulti(name, pi);
