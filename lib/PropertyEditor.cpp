@@ -601,7 +601,8 @@ QtMultiUIntSpinBox::QtMultiUIntSpinBox(QWidget* parent):
 {
 	m_spinBox = new QSpinBox(parent);
 	m_spinBox->setKeyboardTracking(false);
-	//m_spinBox->setRange(std::numeric_limits<quint32>::min(), std::numeric_limits<quint32>::max());
+	// warning! a problem that QSpinBox::setRange needs "ints", and we have uint type...
+	m_spinBox->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 
 	connect(m_spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 			this, &QtMultiUIntSpinBox::onValueChanged);
@@ -1416,14 +1417,25 @@ static PropertyItem pi;
 		//Add dynamic properties added by SetProperty
 		//
 		QList<QByteArray> dynamicPropNames = object->dynamicPropertyNames();
+
+
+		// Sort dynamic properties by name
+		//
+		/*QStringList dynamicPropSortedNames;
+		for (auto name : dynamicPropNames)
+		{
+			dynamicPropSortedNames.append(name);
+		}
+		dynamicPropSortedNames.sort();*/
+
 		for (auto name : dynamicPropNames)
 		{
 
 static PropertyItem pi;
 
 			pi.object = *pobject;
-            pi.value = object->property(name);
-            pi.type = pi.value.userType();
+			pi.value = object->property(name);
+			pi.type = pi.value.userType();
 
 			propertyItems.insertMulti(name, pi);
 

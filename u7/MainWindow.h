@@ -53,6 +53,7 @@ protected slots:
 
 	void runConfigurator();
     void runAfblEditor();
+	void runSubsystemListEditor();
     void showAbout();
 	void debug();
 
@@ -76,6 +77,7 @@ private:
 
 	QAction* m_pConfiguratorAction;
     QAction* m_pAfblEditorAction;
+	QAction* m_pSubsystemListEditorAction;
     QAction* m_pAboutAction;
 	QAction* m_pDebugAction;
 

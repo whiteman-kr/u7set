@@ -4,7 +4,6 @@
 #include "../include/Signal.h"
 #include "../Builder/BuildResultWriter.h"
 
-
 // Forware declarations
 //
 
@@ -12,9 +11,16 @@ class QThread;
 class OutputLog;
 class DbController;
 
+
+namespace Builder
+{
+	class SignalSetObject;
+}
+
 namespace Hardware
 {
 	class DeviceObject;
+	class DeviceRoot;
 	class McFirmwareOld;
 }
 
@@ -39,13 +45,25 @@ namespace Builder
 	private:
 		virtual void run() override;
 
+		// Get Equipment from the prokect database
+		//
+		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
+
+		// Expand Devices StrId
+		//
+		bool expandDeviceStrId(Hardware::DeviceObject* device);
+
 		// Generate Modules Configurations Firmwares
 		//
-		bool modulesConfiguration(DbController* db, int changesetId);
+		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSetObject* signalSetObject, int changesetId, BuildResultWriter* buildWriter);
+
+		// Build Application Logic
+		//
+		bool buildApplicationLogic(DbController* db, int changesetId);
 
 		// Compile Application Logic
 		//
-		bool applicationLogic(DbController* db, int changesetId);
+		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?
 		//
@@ -101,8 +119,7 @@ namespace Builder
 
 		bool m_debug = false;				// if true then don't get workcopy of checked out files, use unly checked in copy
 
-		OutputLog* m_log;					// Probably it's better to make it as shared_ptr
-		BuildResultWriter m_buildWriter;
+		OutputLog* m_log = nullptr;					// Probably it's better to make it as shared_ptr
 	};
 
 	// ------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 #include <QDynamicPropertyChangeEvent>
 #include <QJSEngine>
 #include <QQmlEngine>
+#include <QXmlStreamWriter>
 
 
 namespace Hardware
@@ -39,6 +40,194 @@ namespace Hardware
 	{
 	}
 
+
+	//
+	//
+	// Subsystem
+	//
+	//
+	Subsystem::Subsystem():
+		m_index(-1)
+	{
+
+	}
+
+	Subsystem::Subsystem(int index, const QString& strId, const QString& caption):
+		m_index(index),
+		m_strId(strId),
+		m_caption(caption)
+	{
+
+	}
+
+	bool Subsystem::save(QXmlStreamWriter& writer)
+	{
+		writer.writeAttribute("Index", QString::number(index()));
+		writer.writeAttribute("StrID", strId());
+		writer.writeAttribute("Caption", caption());
+		return true;
+	}
+
+
+	bool Subsystem::load(QXmlStreamReader& reader)
+	{
+		if (reader.attributes().hasAttribute("Index"))
+		{
+			setIndex(reader.attributes().value("Index").toInt());
+		}
+		else
+		{
+			reader.raiseError(QObject::tr("Subsystem - No Index found"));
+		}
+
+		if (reader.attributes().hasAttribute("StrID"))
+		{
+			setStrId(reader.attributes().value("StrID").toString());
+		}
+		else
+		{
+			reader.raiseError(QObject::tr("Subsystem - No StrID found"));
+		}
+
+		if (reader.attributes().hasAttribute("Caption"))
+		{
+			setCaption(reader.attributes().value("Caption").toString());
+		}
+		else
+		{
+			reader.raiseError(QObject::tr("Subsystem - No Caption found"));
+		}
+
+		QXmlStreamReader::TokenType endToken = reader.readNext();
+		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
+
+		return true;
+	}
+
+
+	const QString& Subsystem::strId() const
+	{
+		return m_strId;
+	}
+
+	void Subsystem::setStrId(const QString& value)
+	{
+		m_strId = value;
+	}
+
+	const QString& Subsystem::caption() const
+	{
+		return m_caption;
+	}
+
+	void Subsystem::setCaption(const QString& value)
+	{
+		m_caption = value;
+	}
+
+	int Subsystem::index() const
+	{
+		return m_index;
+	}
+
+	void Subsystem::setIndex(int value)
+	{
+		m_index = value;
+	}
+
+	//
+	//
+	// SubsystemStorage
+	//
+	//
+	SubsystemStorage::SubsystemStorage()
+	{
+
+	}
+
+	void SubsystemStorage::add(std::shared_ptr<Subsystem> subsystem)
+	{
+		m_subsystems.push_back(subsystem);
+	}
+
+	int SubsystemStorage::count() const
+	{
+		return static_cast<int>(m_subsystems.size());
+	}
+
+	std::shared_ptr<Subsystem> SubsystemStorage::get(int index) const
+	{
+		if (index < 0 || index >= count())
+		{
+			assert(false);
+			return std::make_shared<Subsystem>();
+		}
+		return m_subsystems[index];
+	}
+
+	void SubsystemStorage::clear()
+	{
+		m_subsystems.clear();
+	}
+
+	bool SubsystemStorage::load(const QByteArray& data, QString& errorCode)
+	{
+		QXmlStreamReader reader(data);
+
+		if (reader.readNextStartElement() == false)
+		{
+			return !reader.hasError();
+		}
+
+		if (reader.name() != "Subsystems")
+		{
+			reader.raiseError(QObject::tr("The file is not an Subsystems file."));
+			errorCode = reader.errorString();
+			return !reader.hasError();
+		}
+
+		// Read signals
+		//
+		while (reader.readNextStartElement())
+		{
+			if (reader.name() == "Subsystem")
+			{
+				std::shared_ptr<Hardware::Subsystem> s = std::make_shared<Hardware::Subsystem>();
+
+				if (s->load(reader) == true)
+				{
+					m_subsystems.push_back(s);
+				}
+			}
+			else
+			{
+				reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
+				errorCode = reader.errorString();
+				reader.skipCurrentElement();
+			}
+		}
+		return !reader.hasError();
+	}
+
+	bool SubsystemStorage::save(QByteArray& data)
+	{
+		QXmlStreamWriter writer(&data);
+
+		writer.setAutoFormatting(true);
+		writer.writeStartDocument();
+
+		writer.writeStartElement("Subsystems");
+		for (auto s : m_subsystems)
+		{
+			writer.writeStartElement("Subsystem");
+			s->save(writer);
+			writer.writeEndElement();
+		}
+		writer.writeEndElement();
+
+		writer.writeEndDocument();
+		return true;
+	}
 
 	//
 	//
@@ -1231,10 +1420,10 @@ namespace Hardware
 		//
 		Proto::DeviceModule* moduleMessage = message->mutable_deviceobject()->mutable_module();
 
-		moduleMessage->set_type(m_type);
+		moduleMessage->set_type(static_cast<int>(m_type));
 
 		moduleMessage->set_confindex(m_confIndex);
-		moduleMessage->set_confname(m_confName.toStdString());
+		moduleMessage->set_subsysid(m_subSysID.toStdString());
 		moduleMessage->set_conftype(m_confType.toStdString());
 
 		return true;
@@ -1264,10 +1453,10 @@ namespace Hardware
 
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
-		m_type =  moduleMessage.type();
+		m_type =  static_cast<Hardware::DeviceModule::ModuleType>(moduleMessage.type());
 
 		m_confIndex = moduleMessage.confindex();
-		m_confName = moduleMessage.confname().c_str();
+		m_subSysID = moduleMessage.subsysid().c_str();
 		m_confType = moduleMessage.conftype().c_str();
 
 		return true;
@@ -1279,12 +1468,12 @@ namespace Hardware
 	}
 
 
-	int DeviceModule::type() const
+	Hardware::DeviceModule::ModuleType DeviceModule::type() const
 	{
 		return m_type;
 	}
 
-	void DeviceModule::setType(int value)
+	void DeviceModule::setType(Hardware::DeviceModule::ModuleType value)
 	{
 		m_type = value;
 	}
@@ -1299,14 +1488,14 @@ namespace Hardware
 		m_confIndex = value;
 	}
 
-	QString DeviceModule::confName() const
+	QString DeviceModule::subSysID() const
 	{
-		return m_confName;
+		return m_subSysID;
 	}
 
-	void DeviceModule::setConfName(const QString& value)
+	void DeviceModule::setSubSysID(const QString& value)
 	{
-		m_confName = value;
+		m_subSysID = value;
 	}
 
 	QString DeviceModule::confType() const

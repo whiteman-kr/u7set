@@ -58,7 +58,7 @@ private:
 //
 
 DialogAfbProperties::DialogAfbProperties(const QString &caption, QByteArray* pData, DbController *pDbController, bool readOnly, QWidget *parent) :
-    QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
     ui(new Ui::DialogAfbProperties),
     m_pData(pData),
     m_pDbController(pDbController),

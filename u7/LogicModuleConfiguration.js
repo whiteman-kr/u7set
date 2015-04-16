@@ -8,6 +8,13 @@ var WorkstationType = 6;
 var SoftwareType = 7;
 var SignalType = 8;
 
+var	ModuleTypeLm = 1;
+var	ModuleTypeAim = 2;
+var	ModuleTypeAom = 3;
+var	ModuleTypeDim = 4;
+var	ModuleTypeDom = 5;
+var	ModuleTypeAifm = 6;
+var	ModuleTypeOcm = 7;
 
 var DiagDiscrete = 0;
 var DiagAnalog = 1;
@@ -87,7 +94,7 @@ function module_lm_1(device, confCollection, log, signalSet)
 {
     if (device.jsDeviceType() == ModuleType)
     {
-        if (device.ConfType == "LM-1")
+        if (device.Type == ModuleTypeLm)
         {
             log.writeMessage("MODULE LM-1: " + device.StrID, false);
 
@@ -119,13 +126,13 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
 {
     // Variables
     //
-    var confName = module.ConfName;
+    var subSysID = module.SubsysID;
     var confIndex = module.ConfIndex;
     var frameSize = 1016;
     var frameCount = 22;                // Check it !!!!
     var uartId = 456;                   // Check it !!!!
 
-    var confFirmware = confCollection.jsGet("LM-1", confName, uartId, frameSize, frameCount);
+    var confFirmware = confCollection.jsGet("LM-1", subSysID, uartId, frameSize, frameCount);
 
     // Generation
     //
@@ -146,7 +153,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
     for (var i = 0; i < parent.childrenCount(); i++)
     {
         var ioModule = parent.jsChild(i);
-        if (ioModule.ConfType == "AIM" || ioModule.ConfType == "AIFM" || ioModule.ConfType == "AOM" || ioModule.ConfType == "OCM" || ioModule.ConfType == "DIM"|| ioModule.ConfType == "DOM")
+        if (ioModule.Type == ModuleTypeAim || ioModule.Type == ModuleTypeAifm || ioModule.Type == ModuleTypeAom || ioModule.Type == ModuleTypeOcm || ioModule.Type == ModuleTypeDim || ioModule.Type == ModuleTypeDom)
         {
             var frame = ioModulesStartFrame + ioModule.Place - 1;
             if (frame < ioModulesStartFrame || frame >= ioModulesStartFrame + ioModulesMaxCount)
@@ -155,27 +162,27 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
                 return false;
             }
             
-            if (ioModule.ConfType == "AIM")
+            if (ioModule.Type == ModuleTypeAim)
             {
                 generate_aim(confFirmware, ioModule, frame, log, signalSet);
             }
-            if (ioModule.ConfType == "AIFM")
+            if (ioModule.Type == ModuleTypeAifm)
             {
                 generate_aifm(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.ConfType == "AOM")
+            if (ioModule.Type == ModuleTypeAom)
             {
                 generate_aom(confFirmware, ioModule, frame, log, signalSet);
             }
-            if (ioModule.ConfType == "OCM")
+            if (ioModule.Type == ModuleTypeOcm)
             {
                 generate_ocm(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.ConfType == "DIM")
+            if (ioModule.Type == ModuleTypeDim)
             {
                 generate_dim(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.ConfType == "DOM")
+            if (ioModule.Type == ModuleTypeDom)
             {
                 generate_dom(confFirmware, ioModule, frame, log);
             }

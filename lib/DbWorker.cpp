@@ -3551,6 +3551,32 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 }
 
 
+void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals)
+{
+	AUTO_COMPLETE
+
+	for(int i = 0; i < deviceSignals.size(); i++)
+	{
+		const Hardware::DeviceSignal& deviceSignal = deviceSignals[i];
+
+		if (deviceSignal.type() == Hardware::DeviceSignal::SignalType::DiagDiscrete ||
+			deviceSignal.type() == Hardware::DeviceSignal::SignalType::DiagAnalog)
+		{
+			continue;
+		}
+
+		Signal signal(deviceSignal);
+	}
+}
+
+
+void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals)
+{
+
+}
+
+
+
 // Build management
 //
 

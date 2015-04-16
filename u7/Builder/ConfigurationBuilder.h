@@ -1,6 +1,8 @@
 #ifndef CONFIGURATIONBUILDER_H
 #define CONFIGURATIONBUILDER_H
 
+#include "Builder.h"
+
 // Forware delcarations
 //
 class QThread;
@@ -10,6 +12,7 @@ class DbController;
 namespace Hardware
 {
 	class DeviceObject;
+	class DeviceRoot;
 	class McFirmwareOld;
 }
 
@@ -22,19 +25,12 @@ namespace Builder
 		Q_OBJECT
 	public:
 		ConfigurationBuilder() = delete;
-		ConfigurationBuilder(DbController* db, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName);
+		ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSetObject* signalSetObject, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
 		virtual ~ConfigurationBuilder();
 
 		bool build();
 
 	protected:
-		// Get Equipment from the prokect database
-		//
-		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
-
-		// Expand Devices StrId
-		//
-		bool expandDeviceStrId(Hardware::DeviceObject* device);
 
 
 	private:
@@ -46,7 +42,11 @@ namespace Builder
 
 	private:
 		DbController* m_db = nullptr;
+		Hardware::DeviceRoot* m_deviceRoot = nullptr;
+		SignalSetObject* m_signalSetObject = nullptr;
 		mutable OutputLog* m_log = nullptr;
+		BuildResultWriter* m_buildWriter = nullptr;
+
 		int m_changesetId = 0;
 		int m_debug = false;
 		QString m_projectName;

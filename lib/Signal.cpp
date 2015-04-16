@@ -6,6 +6,69 @@ Signal::Signal() :
 {
 }
 
+
+Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
+{
+	Hardware::DeviceSignal::SignalType deviceSignalType = deviceSignal.type();
+
+	if (deviceSignalType == Hardware::DeviceSignal::SignalType::InputAnalog ||
+		deviceSignalType == Hardware::DeviceSignal::SignalType::OutputAnalog)
+	{
+		m_type = SignalType::analog;
+	}
+	else
+	{
+		if (deviceSignalType == Hardware::DeviceSignal::SignalType::InputDiscrete ||
+			deviceSignalType == Hardware::DeviceSignal::SignalType::OutputDiscrete)
+		{
+			m_type = SignalType::discrete;
+		}
+		else
+		{
+			assert(false);			// invalid deviceSignalType
+		}
+	}
+
+	m_strID = QString("#%1").arg(deviceSignal.strId());
+	m_extStrID = deviceSignal.strId();
+	m_name = QString("Signal #%1").arg(deviceSignal.strId());
+
+
+	/*
+	m_dataFormat = signal.dataFormat();
+	m_dataSize = signal.dataSize();
+
+	m_lowADC = signal.lowADC();
+	m_highADC = signal.highADC();
+	m_lowLimit = signal.lowLimit();
+	m_highLimit = signal.highLimit();
+	m_unitID = signal.unitID();
+	m_adjustment = signal.adjustment();
+	m_dropLimit = signal.dropLimit();
+	m_excessLimit = signal.excessLimit();
+	m_unbalanceLimit = signal.unbalanceLimit();
+	m_inputLowLimit = signal.inputLowLimit();
+	m_inputHighLimit = signal.inputHighLimit();
+	m_inputUnitID = signal.inputUnitID();
+	m_inputSensorID = signal.inputSensorID();
+	m_outputLowLimit = signal.outputLowLimit();
+	m_outputHighLimit = signal.outputHighLimit();
+	m_outputUnitID = signal.outputUnitID();
+	m_outputRangeMode = signal.outputRangeMode();
+	m_outputSensorID = signal.outputSensorID();
+	m_acquire = signal.acquire();
+	m_calculated = signal.calculated();
+	m_normalState = signal.normalState();
+	m_decimalPlaces = signal.decimalPlaces();
+	m_aperture = signal.aperture();
+	m_inOutType = signal.inOutType();
+	m_deviceStrID = signal.deviceStrID();
+	m_filteringTime = signal.filteringTime();
+	m_maxDifference = signal.maxDifference();*/
+
+}
+
+
 Signal& Signal::operator =(const Signal& signal)
 {
 	m_ID = signal.ID();
@@ -129,4 +192,15 @@ QVector<int> SignalSet::getChannelSignalsID(int signalGroupID)
 	}
 
 	return channelSignalsID;
+}
+
+
+void SignalSet::resetAddresses()
+{
+	int signalCount = count();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		(*this)[i].resetAddresses();
+	}
 }
