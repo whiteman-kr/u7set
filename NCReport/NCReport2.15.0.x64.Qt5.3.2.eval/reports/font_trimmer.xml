@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.5.2b" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">0000</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="77.237">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="169.998" height="5.113" fontName="Times New Roman" fontSize="8" alignment="1" forecolor="#000000">This is a text for testing font size: 8 point</label>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="7.925" width="169.998" height="5.113" fontName="Times New Roman" fontSize="10" alignment="1" forecolor="#000000">This is a text for testing font size: 10 point</label>
+        <label id="2" zValue="2" resource="static" posX="0.000" posY="16.105" width="169.998" height="5.113" fontName="Times New Roman" fontSize="12" alignment="1" forecolor="#000000">This is a text for testing font size: 12 point</label>
+        <label id="3" zValue="3" resource="static" posX="0.000" posY="24.030" width="169.998" height="6.391" fontName="Times New Roman" fontSize="14" alignment="1" forecolor="#000000">This is a text for testing font size: 14 point</label>
+        <label id="4" zValue="4" resource="static" posX="0.000" posY="33.744" width="169.998" height="6.391" fontName="Times New Roman" fontSize="16" alignment="1" forecolor="#000000">This is a text for testing font size: 16 point</label>
+        <label id="5" zValue="5" resource="static" posX="0.000" posY="43.202" width="169.998" height="7.925" fontName="Times New Roman" fontSize="18" alignment="1" forecolor="#000000">This is a text for testing font size: 18 point</label>
+        <label id="6" zValue="6" resource="static" posX="0.000" posY="54.450" width="169.998" height="7.925" fontName="Times New Roman" fontSize="20" alignment="1" forecolor="#000000">This is a text for testing font size: 20 point</label>
+        <label id="7" zValue="7" resource="static" posX="0.000" posY="65.698" width="169.998" height="9.714" fontName="Times New Roman" fontSize="22" alignment="1" forecolor="#000000">This is a text for testing font size: 22 point</label>
+        <rectangle id="8" zValue="8" resource="static" posX="0.000" posY="0.000" width="84.871" height="76.946" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#ffffff" fillStyle="no"/>
+        <rectangle id="9" zValue="9" resource="static" posX="84.360" posY="0.000" width="84.871" height="76.946" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#ffffff" fillStyle="no"/>
+    </pageheader>
+    <pagefooter id="pfoot" height="1.604"/>
+    <details>
+        <detail id="Detail1" height="1.336" datasource="DataSource1" startsOnNewPage="false">
+            <items/>
+        </detail>
+    </details>
+</NCReport>

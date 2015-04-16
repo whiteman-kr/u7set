@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.2.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <orientation>portrait</orientation>
+        <pagesize>A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+    </options>
+    <datasources>
+        <datasource id="text" type="txt" source="static" columnDelimiter="tab">One	Two	Three</datasource>
+    </datasources>
+    <variables></variables>
+    <pageheader id="phead" height="33.670">
+        <text id="" zValue="0" resource="static" posX="28.864" posY="9.621" width="76.970" height="21.380" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000" sizeFix="true">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Roman No9 L'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; color:#000000;&quot;&gt;&lt;span style=&quot; font-weight:600; color:#005500;&quot;&gt;Html&lt;/span&gt;&lt;span style=&quot; color:#005500;&quot;&gt; text oijoijoij &lt;/span&gt;&lt;span style=&quot; font-style:italic; color:#5500ff;&quot;&gt;iozoiziziuziu&lt;/span&gt;&lt;span style=&quot; color:#005500;&quot;&gt; iuziuz&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; color:#005500;&quot;&gt;&lt;span style=&quot; font-weight:600; font-style:italic; color:#000000;&quot;&gt;1 ewrg zgguerzzz&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; font-weight:600; font-style:italic; color:#000000;&quot;&gt;2 Iwoie nhsdfjhwiufh ieuh hiuhiuhwe iuherwerpiii&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; font-weight:600; font-style:italic; color:#000000;&quot;&gt;3 kkkdfjoi&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; color:#000000;&quot;&gt;4 kjhsdifh ihewirfh iweuhrijdfhiwuefh &lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; color:#005500;&quot;&gt;5 wkfksdjcj hiwufhxcjvhkjwhfiueh&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; color:#005500;&quot;&gt;&lt;span style=&quot; color:#0055ff;&quot;&gt;6 oiewosijo joweij&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; color:#005500;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+        <label id="" zValue="1" resource="static" posX="0.000" posY="0.000" width="51.313" height="16.035" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" wordbreak="true" forecolor="#000000">Text label IUHwie hqiwueh idhk asdh kiqwuhd iauhdk asjdhiqwudh iaudhkasjdh </label>
+        <text id="" zValue="2" resource="static" posX="104.230" posY="8.018" width="64.141" height="24.053" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Roman No9 L'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; color:#000000;&quot;&gt;&lt;span style=&quot; font-family:'Trebuchet MS';&quot;&gt;Gqwe wh iweiu hlk ashdlk ahdiluqhwd lkajsdh liuqwhd lkjashdluihiiuhiuhdf jsdf kjhkjsdfjhkjhsdf kjh&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Trebuchet MS'; font-size:9pt; color:#000000;&quot;&gt;&lt;span style=&quot; font-weight:600; font-style:italic; text-decoration: underline;&quot;&gt;sdf wouehfi uhiuhwer iuhsdf f&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+        <field id="" zValue="3" description="First col" resource="static" posX="0.000" posY="16.035" width="28.864" height="12.828" fontName="Nimbus Roman No9 L" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">col0</field>
+    </pageheader>
+    <pagefooter id="pfoot" height="14.699">
+        <text id="" zValue="0" resource="static" posX="0.000" posY="0.000" width="169.975" height="12.828" useFont="true" fontName="Nimbus Roman No9 L" fontSize="10" forecolor="#000000">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Nimbus Roman No9 L'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt; color:#000000;&quot;&gt;&lt;span style=&quot; font-family:'Trebuchet MS';&quot;&gt;Gqwe wh iweiu hlk ashdlk ahdiluqhwd lkajsdh liuqwhd lkjashdluihiiuhiuhdf jsdf kjhkjsdfjhkjhsdf kjh&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Trebuchet MS'; font-size:9pt; color:#000000;&quot;&gt;&lt;span style=&quot; font-weight:600; font-style:italic; text-decoration: underline;&quot;&gt;sdf wouehfi uhiuhwer iuhsdf f&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="19.777" autoHeight="true" datasource="text" startsOnNewPage="false">
+            <items>
+                <text id="" zValue="0" resource="static" autoHeight="true" posX="0.000" posY="0.000" width="168.371" height="17.639" useFont="false">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;title&gt;NCReport: Alphabetical List&lt;/title&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:18px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; color:#000000;&quot;&gt;&lt;span style=&quot; font-family:'Arial'; font-size:xx-large; font-weight:600;&quot;&gt;NCReport Class Index&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;#letter_B&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;B&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;#letter_N&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;N&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;#letter_T&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;T&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;/p&gt;
+&lt;table border=&quot;0&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;&quot; align=&quot;center&quot; width=&quot;95%&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;table border=&quot;0&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a name=&quot;letter_B&quot;&gt;&lt;/a&gt;  B  &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDRuler.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDRuler&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportLabelData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportLabelData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classBarcodes.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Barcodes&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDRunnerDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDRunnerDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportLabelItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportLabelItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;table border=&quot;0&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a name=&quot;letter_N&quot;&gt;&lt;/a&gt;  N  &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDSectionScene.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDSectionScene&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportLineData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportLineData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCColorCombo.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCColorCombo&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDSectionTitle.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDSectionTitle&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportLineItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportLineItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCIconFactory.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCIconFactory&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDShapePropDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDShapePropDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportOutput.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportOutput&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCIconFactoryBase.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCIconFactoryBase&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDShapePropertyManager.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDShapePropertyManager&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportPageOption.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportPageOption&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDBarcodePropDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDBarcodePropDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDSqlEditorHighlighter.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDSqlEditorHighlighter&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportParameter.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportParameter&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;structNCRDConnection.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDConnection&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDSqlTextEdit.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDSqlTextEdit&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportPdfOutput.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportPdfOutput&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDConnectionDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDConnectionDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDStandardPointerItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDStandardPointerItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportPreviewOutput.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportPreviewOutput&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDCustomDataSource.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDCustomDataSource&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDTextPropertyManager.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDTextPropertyManager&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportPreviewPage.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportPreviewPage&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDataSourceDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDataSourceDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDVariableDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDVariableDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportPreviewPageContainer.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportPreviewPageContainer&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDataSourceItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDataSourceItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDXMLCopyReader.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDXMLCopyReader&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportPreviewWindow.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportPreviewWindow&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDataSourceItemDelegate.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDataSourceItemDelegate&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDXMLCopyWriter.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDXMLCopyWriter&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportPrinterOutput.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportPrinterOutput&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDataSourceTypeDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDataSourceTypeDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDXMLDefReader.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDXMLDefReader&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportRectData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportRectData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDef.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDef&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDXMLDefWriter.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDXMLDefWriter&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportRectItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportRectItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDesignArea.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDesignArea&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReport.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReport&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportScale.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportScale&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;structNCRDDesignAreaData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDesignAreaData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportAbstractItemRendering.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportAbstractItemRendering&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportSection.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportSection&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDesignSection.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDesignSection&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportBarcodeData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportBarcodeData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportSectionData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportSectionData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDetailDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDetailDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportBarcodeItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportBarcodeItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportShapeData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportShapeData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDetailItemDelegate.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDetailItemDelegate&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportShapeItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportShapeItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDocument.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDocument&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportDataSource.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportDataSource&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportSource.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportSource&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDDocumentSourceInfo.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDDocumentSourceInfo&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportDef.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportDef&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportSQLDataSource.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportSQLDataSource&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDFieldPropDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDFieldPropDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportDirector.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportDirector&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportStringListDataSource.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportStringListDataSource&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDGraphPropDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDGraphPropDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportError.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportError&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportTXTDataSource.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportTXTDataSource&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDGroupDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDGroupDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportEvaluator.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportEvaluator&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportVariable.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportVariable&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDImagePropDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDImagePropDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportFieldData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportFieldData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportXMLDefReader.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportXMLDefReader&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDLabelPropDialog.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDLabelPropDialog&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportFieldItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportFieldItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportXMLImfReader.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportXMLImfReader&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDMainWindow.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDMainWindow&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportGraphData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportGraphData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportXMLReader.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportXMLReader&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportGraphItem.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportGraphItem&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCReportXMLWriter.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCReportXMLWriter&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRTestForm.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRTestForm&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;table border=&quot;0&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a name=&quot;letter_T&quot;&gt;&lt;/a&gt;  T  &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;structTestData.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;TestData&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classTestDataSource.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;TestDataSource&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classTestItemRendering.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;TestItemRendering&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;classNCRDResizerBar.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NCRDResizerBar&lt;/span&gt;&lt;/a&gt;   &lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; color:#000000;&quot;&gt;&lt;a href=&quot;#letter_B&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;B&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;#letter_N&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;N&lt;/span&gt;&lt;/a&gt; | &lt;a href=&quot;#letter_T&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;T&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial'; font-style:italic; color:#000000;&quot;&gt;&lt;span style=&quot; font-size:small;&quot;&gt;Generated on Mon Jun 9 12:48:05 2008 for NCReport by  1.4.7 &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+            </items>
+        </detail>
+    </details>
+</NCReport>

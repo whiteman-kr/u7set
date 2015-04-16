@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.15.0" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Ubuntu</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" allowEmpty="true" type="txt" openRole="begin" source="static" columnDelimiter="comma" encoding="UTF-8">0,0,0,0,0,0,0,0,0,0,0,0,56
+0,0,0,0,0,0,0,0,0,0,0,0,192
+0,0,0,0,0,0,0,0,0,0,0,0,184
+0,0,0,0,0,0,0,0,0,0,0,0,123
+0,0,0,0,0,0,0,0,0,0,0,0,141
+0,0,0,0,0,0,0,0,0,0,0,0,220
+0,0,0,0,0,0,0,0,0,0,0,0,38
+0,0,0,0,0,0,0,0,0,0,0,0,114</datasource>
+    </datasources>
+    <variables>
+        <variable id="var_total" type="num" funcType="sum" scope="report" initValue="0">&lt;% if ($D{DataSource1.col12}&lt;=180) $D{DataSource1.col12}; else 0; %&gt;</variable>
+    </variables>
+    <scripts/>
+    <pageheader id="PH" height="10.000">
+        <label id="UHBRP" zValue="0" posX="0.000" posY="0.000" width="77.787" height="6.350" fontName="Ubuntu" fontSize="14">Group by expression test</label>
+    </pageheader>
+    <pagefooter id="PF" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="5.821" datasource="DataSource1">
+            <items>
+                <field id="VSB9B" typeId="131074" zValue="0" posX="0.000" posY="0.000" width="31.750" height="4.762" resource="datasource" fontName="Ubuntu" fontSize="10" alignment="34" type="txt" ftype="ds">col12</field>
+                <field id="UNBCE" typeId="131074" zValue="1" posX="33.337" posY="0.000" width="31.750" height="4.762" resource="exp" fontName="Ubuntu" fontSize="10" alignment="34" type="txt" ftype="exp">if ($D{DataSource1.col12} &lt;= 180)
+    $D{DataSource1.col12}
+else
+    0;</field>
+            </items>
+            <groups>
+                <group id="gr" groupExp="%CONST" resetVariables="" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_gr" height="4.000"/>
+                    <groupfooter id="GF_gr" height="8.202">
+                        <field id="9KF7T" typeId="131074" zValue="0" posX="33.337" posY="1.587" width="31.750" height="4.762" resource="var" fontName="Ubuntu" fontSize="10" fontWeight="bold" alignment="34" type="txt" ftype="var">var_total</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

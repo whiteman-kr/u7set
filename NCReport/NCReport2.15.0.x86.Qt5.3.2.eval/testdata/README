@@ -1,0 +1,2 @@
+defaulttestdata.xml is used by Designer application for storing test data.
+If want to use sample test data, please just copy this file to /bin directory before starting NCReportDesigner.

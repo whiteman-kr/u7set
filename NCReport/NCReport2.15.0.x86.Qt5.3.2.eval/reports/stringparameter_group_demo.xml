@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.0" name="Untitled">
+    <options>
+        <encoding>utf8</encoding>
+        <orientation>portrait</orientation>
+        <pagesize>A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+    </options>
+    <datasources>
+        <datasource id="ds" type="txt" source="parameter" columnDelimiter="tab">data1</datasource>
+    </datasources>
+    <variables>
+        <variable id="var0" type="num" funcType="sum" scope="group" initValue="0">4</variable>
+        <variable id="var1" type="num" funcType="sum" scope="group" initValue="0">4</variable>
+    </variables>
+    <pageheader height="22.984">
+        <rectangle id="" zValue="-14" resource="static" posX="0.000" posY="4.811" width="166.768" height="8.018" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillColor="#aaffff" fillStyle="solid"></rectangle>
+        <label id="" zValue="-8" resource="static" posX="1.604" posY="4.811" width="161.957" height="8.018" fontName="Arial" fontSize="18" fontWeight="bold" fontItalic="true" alignmentH="left" alignmentV="top" forecolor="#0055ff">QString parameter datasource + Grouping demo</label>
+        <line id="" zValue="1" resource="static" fromX="0.000" fromY="20.846" toX="166.768" toY="20.846" lineColor="#000000" lineStyle="solid" lineWidth="0.100"></line>
+        <line id="" zValue="1" resource="static" fromX="0.000" fromY="14.432" toX="166.768" toY="14.432" lineColor="#000000" lineStyle="solid" lineWidth="0.100"></line>
+        <label id="" zValue="2" resource="static" posX="1.604" posY="16.035" width="9.621" height="5.078" fontName="Arial" fontSize="10" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#000000">ID.</label>
+        <label id="" zValue="3" resource="static" posX="19.242" posY="16.035" width="18.708" height="5.078" fontName="Arial" fontSize="10" fontItalic="true" alignmentH="left" alignmentV="top" forecolor="#000000">Name</label>
+        <label id="" zValue="4" resource="static" posX="120.265" posY="16.035" width="18.708" height="5.078" fontName="Arial" fontSize="10" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#000000">Price</label>
+        <label id="" zValue="4" resource="static" posX="144.318" posY="16.035" width="18.708" height="5.078" fontName="Arial" fontSize="10" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#000000">Value</label>
+    </pageheader>
+    <pagefooter height="9.087">
+        <label id="" zValue="0" resource="static" posX="0.000" posY="3.207" width="33.674" height="6.414" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000">Page footer</label>
+        <line id="" zValue="1" resource="static" fromX="0.000" fromY="3.207" toX="166.768" toY="3.207" lineColor="#000000" lineStyle="dashdot" lineWidth="0.100"></line>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="5.612" datasource="ds">
+            <items>
+                <field id="" zValue="1" resource="static" posX="0.000" posY="0.000" width="11.225" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="0" fillchar=" " localized="true">0</field>
+                <field id="" zValue="3" resource="static" posX="117.058" posY="0.000" width="22.449" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false">2</field>
+                <field id="" zValue="3" resource="static" posX="141.111" posY="0.000" width="22.449" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true">4</field>
+                <field id="" zValue="4" resource="static" posX="19.242" posY="0.000" width="96.212" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">1</field>
+            </items>
+            <groups>
+                <group id="g0" groupExp="5" resetVariables="var0" reprintHeader="false">
+                    <groupheader height="5.612">
+                        <label id="" zValue="0" resource="static" posX="0.000" posY="0.000" width="41.692" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000">Group header g0</label>
+                    </groupheader>
+                    <groupfooter height="8.018">
+                        <label id="" zValue="0" resource="static" posX="113.851" posY="1.604" width="25.657" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#aa0000">Total (g0):</label>
+                        <line id="" zValue="1" resource="static" fromX="0.000" fromY="0.000" toX="166.768" toY="0.000" lineColor="#aa0000" lineStyle="solid" lineWidth="0.100"></line>
+                        <field id="" zValue="3" resource="static" posX="141.111" posY="1.604" width="22.449" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#aa0000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true">var0</field>
+                    </groupfooter>
+                </group>
+                <group id="g1" groupExp="3" resetVariables="var1" reprintHeader="false">
+                    <groupheader height="6.147">
+                        <label id="" zValue="0" resource="static" posX="0.000" posY="0.000" width="41.692" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000">Group header g1</label>
+                    </groupheader>
+                    <groupfooter height="8.285">
+                        <label id="" zValue="0" resource="static" posX="113.851" posY="1.604" width="25.657" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#000000">Subtotal (g1):</label>
+                        <line id="" zValue="1" resource="static" fromX="0.000" fromY="0.000" toX="166.768" toY="0.000" lineColor="#000000" lineStyle="solid" lineWidth="0.100"></line>
+                        <field id="" zValue="3" resource="static" posX="141.111" posY="1.604" width="22.449" height="5.078" fontName="Arial" fontSize="10" fontWeight="bold" fontItalic="true" alignmentH="right" alignmentV="top" forecolor="#0000ff" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true">var1</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

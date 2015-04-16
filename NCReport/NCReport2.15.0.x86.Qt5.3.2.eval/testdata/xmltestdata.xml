@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE NCReport-Data>
+<NCReportData>
+<parameters>
+ <d type="string" id="TransactionNumber">02236412</d>
+ <d type="string" id="ContactFirstName">Peter</d>
+ <d type="string" id="ContactLastName">Gilmore</d>
+ <d type="string" id="ContactEmail">nobody@company.com</d>
+ <d type="string" id="ReportDate">2012-12-21 10:00:00.000</d>
+ <d type="string" id="HeaderComments">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</d>
+ <d type="date" id="PrintedDate">2012-12-21</d>
+ <d type="numeric" id="TotalAmount">618.50</d>
+ <d type="numeric" id="TaxAmount">0</d>
+</parameters>
+<datasources>
+ <datasource id="xmlds1">
+  <columns>
+   <column type="string">ProductNumber</column>
+   <column type="string">ProductName</column>
+   <column type="string">Comments</column>
+   <column type="string">VATNumber</column>
+   <column type="string">Description</column>
+   <column type="boolean">IsValid</column>
+   <column type="string">Currency</column>
+   <column type="numeric">NetPrice</column>
+   <column type="numeric">Quantity</column>
+   <column type="string">QuantityUnit</column>
+  </columns>
+  <row>
+   <d>CK02214</d>
+   <d>Computer Monitor</d>
+   <d></d>
+   <d>26540114</d>
+   <d></d>
+   <d>1</d>
+   <d>EUR</d>
+   <d>290.00</d>
+   <d>2</d>
+   <d>pcs</d>
+  </row>
+  <row>
+   <d>BLKD5541</d>
+   <d>Wireless Keyboard PC-887</d>
+   <d></d>
+   <d>3221444</d>
+   <d></d>
+   <d>1</d>
+   <d>EUR</d>
+   <d>38.50</d>
+   <d>1</d>
+   <d>pcs</d>
+  </row>
+ </datasource>
+</datasources>
+</NCReportData>

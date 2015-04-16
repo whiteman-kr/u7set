@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.15.0" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Ubuntu</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" allowEmpty="true" type="txt" openRole="begin" source="static" columnDelimiter="comma" encoding="UTF-8">alfa,a
+beta,a
+gamma,a
+delta,b
+si,b
+omicron,b
+pi,b
+ro,c
+sigma,c</datasource>
+    </datasources>
+    <variables>
+        <variable id="index" type="num" funcType="count" scope="group" initValue="0">col0</variable>
+    </variables>
+    <scripts/>
+    <pageheader id="PH" height="11.112">
+        <label id="VSB9B" zValue="0" posX="0.000" posY="1.587" width="66.675" height="4.762" fontName="Ubuntu" fontSize="10" fontWeight="bold" forecolor="#000000">Variable - Row index example</label>
+    </pageheader>
+    <pagefooter id="PF" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="5.292" datasource="DataSource1">
+            <items>
+                <field id="UNBCE" zValue="0" posX="12.700" posY="0.000" width="25.400" height="4.762" resource="datasource" fontName="Ubuntu" fontSize="10" forecolor="#000000" type="txt" ftype="ds">col0</field>
+                <field id="39KF7" typeId="131074" zValue="1" posX="0.000" posY="0.000" width="11.112" height="4.762" resource="var" fontName="Ubuntu" fontSize="10" forecolor="#000000" type="txt" ftype="var">index</field>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="col1" resetVariables="index" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="4.000"/>
+                    <groupfooter height="4.000"/>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

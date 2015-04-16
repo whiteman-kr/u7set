@@ -1,0 +1,66 @@
+****************************************************************************
+* NCReport 2.5.2
+* It is a bug-fix release with a new feature.
+* Release date: 18.03.2010
+****************************************************************************
+
+New features
+------------
+
+#215 - Performance optimalization 
+    Large and complex reports should be faster by optimal field and dynamic item evaluation
+	Fields and dynamic items are updated much more efficient than earlier.
+
+#218 - Orphaned group headers at the bottom of page
+    To avoid an 'orphaned' group header at the bottom of page by
+    a new feature of sections is introduced: 'Break tolerance'
+    This is as a value of keeping space to the end of page is still toleranced until pagebreak
+    Reccomended approx 18mm-25mm
+
+#221 - Enable to set printer quality (High/Screen resolution)
+    QPrinter::HighResolution | QPrinter::ScreenResolution modes in printer based outputs
+	Usage: report->setReportQuality( QPrinter::PrintMode ) 
+	or 
+	output = new NCReportPrinterOutput( QPrinter::PrintMode )
+
+Fixed bugs
+----------
+
+#216 - Unwanted reprint group header
+    Sometimes group headers are unneccessarily repeated after page break.
+    This matter is when multiple group levels.
+
+#217 - Report Preview an Printout layout synchronization / trim
+    printed High resolution reports are sometimes smaller then in preview mode.
+    This because font scalings are a bit different in screen or/and print resolution.
+    They should be closer to each other.
+
+
+#219 - Unnecessarily variable update when a special case
+    In multi detail mode the second or x. detail the group totals were sometimes
+    unneccessarily updated.
+
+#220 - Total page count in double pass mode sometimes fails
+    Total page count (double pass mode) sometimes calculates wrong value for very long reports
+    with dynamic texts. This because of High and Screen resolution difference.
+
+#178, #222 - Multiple details - empty data situation
+	The bug was still existed in previous version but now is fixed. When multiple details 
+	are existed and one or more is related to an empty datas source, the detail is skipped.
+
+#224 - Print's only default number of copies
+	Changing number of printing copies in showing QPrintDialog not responding to QPrinter.
+	(maybe is occured on some printers)
+
+#225 - Field update on group footer and page footer when subqueries are used.
+	If subqueries are used, the footer (group/page) is taken from next detail 
+	record and it shouldn't.
+
+#226 - Parameter editor in designer: Removed parameters are reloaded again
+	Removed parameters are reloaded again after restarting the Designer application.
+
+#227 - Groupheader is one page late in some cases
+	A bug that was formerly fixed is back. When working with groupheaders, 
+	the headers are one page too late
+
+

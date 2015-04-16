@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.12.0" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="images" type="txt" openRole="begin" source="static" columnDelimiter="tab" encoding="UTF-8">NociSoft Logo	http://www.nocisoft.com/files/nocisoft/images/nslogo_v7.png
+Qt Logo	http://www.nocisoft.com/files/nocisoft/footlogos/logo01.png</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="PH" height="6.085">
+        <label id="5ZY4H" zValue="0" posX="0.000" posY="0.000" width="169.862" height="4.762" fontName="Arial" fontSize="10" fontWeight="bold" forecolor="#000000">Images by URL</label>
+    </pageheader>
+    <pagefooter id="PF" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="10.000" datasource="images">
+            <items>
+                <field id="SUIYK" typeId="131074" zValue="0" posX="0.000" posY="0.000" width="31.750" height="4.762" description="col0" resource="datasource" fontName="Arial" fontSize="10" forecolor="#000000" type="txt" ftype="ds">col0</field>
+                <field id="HTPFP" typeId="131074" zValue="1" posX="33.337" posY="0.000" width="114.300" height="4.762" description="col1" resource="datasource" fontName="Arial" fontSize="10" forecolor="#000000" type="txt" ftype="ds">col1</field>
+                <image id="N7Q30" zValue="2" posX="149.225" posY="0.000" width="20.637" height="9.525" resource="urlfromds" aspectRatio="keep" format="0">col1</image>
+            </items>
+        </detail>
+    </details>
+</NCReport>

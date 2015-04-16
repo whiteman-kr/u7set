@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.2" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0.2</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">SELECT ProductID, ProductName, CategoryID,
+QuantityPerUnit, UnitPrice, QuantityPerUnit*UnitPrice as value
+FROM products
+WHERE ProductID&gt;2
+ORDER BY CategoryID,ProductName</datasource>
+    </datasources>
+    <variables>
+        <variable id="total_value" type="num" funcType="sum" scope="group" initValue="0">value</variable>
+        <variable id="total" type="num" funcType="sum" scope="report" initValue="0">value</variable>
+    </variables>
+    <pageheader id="phead" height="10.319">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="93.662" height="7.408" fontName="Arial" fontSize="18" fontWeight="bold" alignment="1" forecolor="#000000">Product list - grouped</label>
+        <field id="1" zValue="1" resource="static" posX="128.588" posY="0.000" width="26.987" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">total</field>
+        <label id="2" zValue="2" resource="static" posX="103.188" posY="0.000" width="24.077" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000">Total:</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="13.494">
+        <field id="0" zValue="0" resource="static" posX="0.000" posY="7.938" width="17.727" height="5.027" fontName="Arial" fontSize="10" fontItalic="true" alignment="34" forecolor="#000000" type="num" ftype="sys" arg="Page: %1">pageno</field>
+        <field id="1" zValue="1" resource="static" posX="134.938" posY="7.938" width="20.637" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">total</field>
+        <label id="2" zValue="2" resource="static" posX="109.537" posY="7.938" width="24.077" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000">Page total:</label>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="4.498" printWhen="&quot;$D{ProductName}&quot; &gt; &quot;&quot;" autoHeight="true" datasource="DataSource1" startsOnNewPage="false">
+            <items>
+                <rectangle id="0" zValue="0" printWhen="EVEN" resource="static" autoHeight="true" posX="0.000" posY="0.000" width="166.688" height="4.762" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillColor="#dbf0cf" fillStyle="solid" fitTo="none"/>
+                <field id="1" zValue="1" resource="static" posX="134.673" posY="0.000" width="20.902" height="3.969" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">Value</field>
+                <field id="2" zValue="2" resource="static" posX="3.175" posY="0.000" width="12.700" height="3.969" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" forecolor="#000000" type="num" ftype="ds" arg="">ProductID</field>
+                <field id="3" zValue="3" resource="static" posX="22.490" posY="0.000" width="68.263" height="4.762" fontName="Arial" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">ProductName</field>
+                <field id="4" zValue="4" resource="static" posX="93.662" posY="0.000" width="14.552" height="3.969" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">QuantityPerUnit</field>
+                <field id="5" zValue="5" resource="static" posX="112.183" posY="0.000" width="20.902" height="3.969" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="false" arg="">UnitPrice</field>
+            </items>
+            <groups>
+                <group id="G0" groupExp="0" resetVariables="" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="0.000"/>
+                    <groupfooter height="9.354">
+                        <field id="0" zValue="0" resource="static" posX="134.673" posY="1.587" width="20.902" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">total</field>
+                        <label id="1" zValue="1" resource="static" posX="109.008" posY="1.587" width="24.077" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000">Total</label>
+                        <line id="2" zValue="2" resource="static" fromX="107.421" fromY="0.000" toX="158.750" toY="0.000" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </groupfooter>
+                </group>
+                <group id="Cat" groupExp="CategoryID" resetVariables="total_value" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="10.319">
+                        <line id="0" zValue="0" resource="static" fromX="0.000" fromY="8.731" toX="168.275" toY="8.731" lineColor="#000000" lineStyle="dash" lineWidth="0.400"/>
+                        <label id="1" zValue="1" resource="static" posX="22.225" posY="1.587" width="32.015" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Product name</label>
+                        <label id="2" zValue="2" resource="static" posX="0.000" posY="1.587" width="20.902" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Product ID</label>
+                        <label id="3" zValue="3" resource="static" posX="115.887" posY="1.587" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Unit price</label>
+                        <label id="4" zValue="4" resource="static" posX="141.287" posY="1.587" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Value</label>
+                        <label id="5" zValue="5" resource="static" posX="96.837" posY="1.587" width="18.785" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" alignment="33" forecolor="#000000">Unit Qty</label>
+                    </groupheader>
+                    <groupfooter height="10.319">
+                        <label id="0" zValue="0" resource="static" posX="109.537" posY="1.587" width="24.077" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000">Total value:</label>
+                        <field id="1" zValue="1" resource="static" posX="134.938" posY="1.587" width="20.902" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">total_value</field>
+                        <line id="2" zValue="2" resource="static" fromX="107.421" fromY="0.000" toX="158.750" toY="0.000" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <image id="3" zValue="3" resource="static" posX="0.000" posY="-1.587" width="15.875" height="12.700" aspectRatio="keep" format="0">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</image>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

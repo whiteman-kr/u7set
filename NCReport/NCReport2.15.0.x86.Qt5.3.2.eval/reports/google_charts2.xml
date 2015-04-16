@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.2" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">0</datasource>
+        <datasource id="DataSource2" type="txt" openRole="begin" source="static" columnDelimiter="tab">http://chart.apis.google.com/chart?chxl=0:|Jan|Feb|Mar|Jun|Jul|Aug|1:|100|50|0|2:|100|75|50|25|0&amp;chxs=0,00AA00,14,0.5,l,676767&amp;chxt=x,r,y&amp;chs=400x200&amp;cht=lc&amp;chco=FF0000,0000FF&amp;chd=s:DJGPMeGPVPYbekb,3483ghhasdfsdf&amp;chg=20,25&amp;chls=1,6,3|3,3,4</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="98.690">
+        <image id="0" zValue="0" resource="urlfromds" posX="0.000" posY="7.938" width="168.275" height="87.312" aspectRatio="keep" transformMode="smooth" format="0">DataSource2.col0</image>
+        <label id="1" zValue="1" resource="static" posX="1.587" posY="1.587" width="44.450" height="6.085" fontName="Liberation Sans" fontSize="10" alignment="1" forecolor="#000000">Google Online Charts:</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="0.000"/>
+    <details>
+        <detail id="Detail1" height="0.000" datasource="DataSource1" startsOnNewPage="false">
+            <items/>
+        </detail>
+    </details>
+</NCReport>

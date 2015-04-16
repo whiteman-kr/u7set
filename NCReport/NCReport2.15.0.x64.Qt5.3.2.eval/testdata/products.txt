@@ -1,0 +1,78 @@
+ProductID;ProductName;SupplierID;CategoryID;QuantityPerUnit;UnitPrice;UnitsInStock;UnitsOnOrder;ReorderLevel;Discontinued
+1;Chai;0;6;18.00;16.0000;pcs;pcs;10;0
+2;Chang;0;2;19.00;17.0000;pcs;pcs;25;0
+3;Aniseed Syrup;0;5;10.00;9.0000;pcs;pcs;25;0
+4;Chef Anton's Cajun Seasoning;0;4;22.00;20.0000;pcs;pcs;0;0
+5;Chef Anton's Gumbo Mixj;0;2;21.00;19.0000;pcs;pcs;0;0
+6;Grandma's Boysenberry Spread;0;7;25.00;21.0000;pcs;pcs;25;0
+7;Uncle Bob's Organic Dried Pears;0;5;30.00;25.0000;pcs;pcs;10;0
+8;Northwoods Cranberry Sauce;0;2;40.00;34.0000;pcs;pcs;0;0
+9;Mishi Kobe Niku;0;4;97.00;72.0000;pcs;pcs;0;0
+10;Ikusa;0;6;31.00;26.0000;pcs;pcs;0;0
+11;Queso Cabrales;0;2;21.00;19.0000;pcs;pcs;30;0
+12;Queso Manchego La Pastora;0;6;38.00;32.0000;pcs;pcs;0;0
+13;Konbu;0;6;6.00;5.0000;pcs;pcs;5;0
+14;Tofu;0;7;23.00;21.0000;pcs;pcs;0;0
+15;Genen Shouyu;0;6;15.00;14.0000;pcs;pcs;5;0
+16;Pavlova;0;4;17.00;15.0000;pcs;pcs;10;0
+17;Alice Mutton;0;6;39.00;33.0000;pcs;pcs;0;0
+18;Carnarvon Tigers;0;2;62.00;46.0000;pcs;pcs;0;0
+19;Teatime Chocolate Biscuits;0;5;9.00;8.0000;pcs;pcs;5;0
+20;Sir Rodney's Marmalade;0;5;81.00;60.0000;pcs;pcs;0;0
+21;Sir Rodney's Scones;0;2;10.00;9.0000;pcs;pcs;5;0
+22;Gustaf's Knackebrad;0;1;21.00;19.0000;pcs;pcs;25;0
+23;Tunnbrad;0;6;9.00;8.0000;pcs;pcs;25;0
+24;Guarana Fantastica;0;4;4.00;4.0000;pcs;pcs;0;0
+25;NuNuCa Nua-Nougat-Creme;0;2;14.00;12.0000;pcs;pcs;30;0
+26;Gumbar Gummibarchen;0;2;31.00;26.0000;pcs;pcs;0;0
+27;Schoggi Schokolade;0;2;43.00;37.0000;pcs;pcs;30;0
+28;Rassle Sauerkraut;0;6;45.00;38.0000;pcs;pcs;0;0
+29;Tharinger Rostbratwurst;0;6;123.00;80.0000;pcs;pcs;0;0
+30;Nord-Ost Matjeshering;0;6;25.00;22.0000;pcs;pcs;15;0
+31;Gorgonzola Telino;0;2;12.00;11.0000;pcs;pcs;20;0
+32;Mascarpone Fabioli;0;6;32.00;27.0000;pcs;pcs;25;0
+33;Geitost;0;4;2.00;2.0000;pcs;pcs;20;0
+34;Sasquatch Ale;0;6;14.00;12.0000;pcs;pcs;15;0
+35;Steeleye Stout;0;5;18.00;16.0000;pcs;pcs;15;0
+36;Inlagd Sill;0;5;19.00;17.0000;pcs;pcs;20;0
+37;Gravad lax;0;7;26.00;22.0000;pcs;pcs;25;0
+38;Cate de Blaye;0;6;263.00;131.0000;pcs;pcs;15;0
+39;Chartreuse verte;0;2;18.00;16.0000;pcs;pcs;5;0
+40;Boston Crab Meat;0;2;18.00;16.0000;pcs;pcs;30;0
+41;Jack's New England Clam Chowder;0;6;9.00;8.0000;pcs;pcs;10;0
+42;Singaporean Hokkien Fried Mee;0;2;14.00;12.0000;pcs;pcs;0;0
+43;Ipoh Coffee;0;5;46.00;39.0000;pcs;pcs;25;0
+44;Gula Malacca;0;4;19.00;17.0000;pcs;pcs;15;0
+45;Rogede sild;0;2;9.00;8.0000;pcs;pcs;15;0
+46;Spegesild;0;4;12.00;10.0000;pcs;pcs;0;0
+47;Zaanse koeken;0;6;9.00;8.0000;pcs;pcs;0;0
+48;Chocolade;0;2;12.00;11.0000;pcs;pcs;25;0
+49;Maxilaku;0;7;20.00;18.0000;pcs;pcs;15;0
+50;Valkoinen suklaa;0;4;16.00;14.0000;pcs;pcs;30;0
+51;Manjimup Dried Apples;0;1;53.00;45.0000;pcs;pcs;10;0
+52;Filo Mix;0;7;7.00;6.0000;pcs;pcs;25;0
+53;Perth;0;2;32.00;27.0000;pcs;pcs;0;0
+54;Tourtiare;0;7;7.00;6.0000;pcs;pcs;10;0
+55;Pata chinois;0;7;24.00;21.0000;pcs;pcs;20;0
+56;Gnocchi di nonna Alice;0;8;38.00;32.0000;pcs;pcs;30;0
+57;Ravioli Angelo;0;3;19.00;17.0000;pcs;pcs;20;0
+58;Escargots de Bourgogne;0;3;13.00;12.0000;pcs;pcs;20;0
+59;Raclette Courdavault;0;4;55.00;46.0000;pcs;pcs;0;0
+60;Camembert Pierrot;0;3;34.00;28.0000;pcs;pcs;0;0
+61;Sirop d'arable;0;3;28.00;24.0000;pcs;pcs;25;0
+62;Tarte au sucre;0;3;49.00;41.0000;pcs;pcs;0;0
+63;Vegie-spread;0;7;43.00;37.0000;pcs;pcs;5;0
+64;Wimmers gute Semmelknadel;0;5;33.00;28.0000;pcs;pcs;30;0
+65;Louisiana Fiery Hot Pepper Sauce;0;3;21.00;19.0000;pcs;pcs;0;0
+66;Louisiana Hot Spiced Okra;0;4;17.00;15.0000;pcs;pcs;20;0
+67;Laughing Lumberjack Lager;0;5;14.00;12.0000;pcs;pcs;10;0
+68;Scottish Longbreads;0;4;12.00;11.0000;pcs;pcs;15;0
+69;Gudbrandsdalsost;0;3;36.00;30.0000;pcs;pcs;15;0
+70;Outback Lager;0;3;15.00;13.0000;pcs;pcs;30;0
+71;Flotemysost;0;3;21.00;19.0000;pcs;pcs;0;0
+72;Mozzarella di Giovanni;0;7;34.00;29.0000;pcs;pcs;0;0
+73;Rad Kaviar;0;5;15.00;13.0000;pcs;pcs;5;0
+74;Longlife Tofu;0;2;10.00;9.0000;pcs;pcs;5;0
+75;Rhanbrau Klosterbier;0;2;7.00;7.0000;pcs;pcs;25;0
+76;Lakkalikaari;0;2;18.00;16.0000;pcs;pcs;20;0
+77;Original Frankfurter grane Soae;0;4;13.00;11.0000;pcs;pcs;15;0

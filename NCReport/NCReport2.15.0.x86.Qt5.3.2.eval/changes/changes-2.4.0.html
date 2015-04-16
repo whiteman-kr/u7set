@@ -1,0 +1,72 @@
+<h2>v2.4.0</h2>
+<h3>Release date: 1.Sep.2009</h3>
+
+<h4>New features:</h4>
+<ul>
+<li><p>[156] - Enhanced BARCODE rendering & more supported barcodes
+    Support of the following barcodes, thanks to Zint project 
+    (http://www.zint.org.uk) as a 3rdparty library:</p>
+	<p>
+    Australia Post Standard Customer, Australia Post Reply-Paid, 
+    Australia Post Routing Code, Australia Post Redirect Code,
+    Aztec Code, Aztec Runes, Channel Code, Code 11, Code 128,
+    Code 16k, Code 2 of 5 Data Logic, Code 2 of 5 IATA, 
+    Code 2 of 5 Industrial, Code 2 of 5 Interleaved,
+    Code 2 of 5 Matrix, Code 32 (Italian Pharmacode),
+    Code 39, Code 39 Extended, Code 49, Code 93, Codabar, Codablock-F, 
+    Databar, Databar Expanded, Databar Expanded Stacked,
+    Databar Limited, Databar Stacked, Databar Stacked Omnidirectional,
+    Data Matrix, Deutsche Post Identcode, Deutsche Post Leitcode,
+    Dutch Post KIX, EAN-14, European Article Number (EAN),
+    FIM, Flattermarken, ITF-14, International Standard Book Number (ISBN),
+    Japanese Postal Barcode, Korean Postal Barcode, LOGMARS,
+    Maxicode, MicroPDF417, MSI Plessey, NVE-18, PDF417,
+    Pharmacode, Pharmacode 2-track, Pharma Zentralnummer (PZN),
+    PLANET, Postnet, Royal Mail 4-state Barcode, Telepen,
+    Telepen Numeric, UK Plessey, UPC-A, UPC-E, USPS One Code</p></li>
+<li>[150] - Enhanced movement of report items in Designer
+    Ctrl->[Arrow Key] moves an item by 5* amount than regular Arrow Keys.</li>
+<li>[175] - Backround color for fields and labels 
+    Backround color for fields and labels.
+    There are 2 mode to be introduced: Transparent / FillColor
+    in FillColor mode the background color of item is rendered.</li>
+<li>[158] - Selectable color for fields and labels 
+    This feature equals the issue [175]</li>
+<li>[163] - Scanning/iterating throught a datasorce within a template (html) text 
+    <code>$SCAN{datasourceID}</code> / <code>$ENDSCAN{}</code> tokens can be used in template texts</li>
+<li>[166] - Determine the Number of pages by double pass report feature.
+    Determines the number of pages by double pass running method for pagecount 
+    system variable.</li>
+<li>[168] - SVG Output Menu/Toolbar in <code>NCReportPrintPreview</code> main form
+    It enables a one-click SVG output from preview window</li>
+<li>[169] - Base64 encoded image support 
+    Both static and dynamic images now can be stored in Base64 encoded format.</li>
+<li> [172] - Suppressing repeated values
+    This new feature of fields allows to set hiding repeated values in the detail band.</li>
+<li>[173] - Enables using custom NCReportOutput output class 
+    Custom NCReportOutput output class can now be subclassed easier.
+    by the <code>renderItem( NCReportItem* item, const QPointF& mPos )</code> virtual method</li>
+<li>[174] - SVG image rendering support 
+    Image items now able to render/save/store SVG graphics (with more ability 
+    than before)</li>
+</ul>
+
+<h4>Fixed bugs:</h4>
+<ul>
+<li>[165] - Group header unneccessary duplication when multiple datails 
+    Fixed bug that caused unneccessarily duplication Group header when multiple datails 
+    were in the report.</li>
+<li>[167] - Printer output may produce an empty page 
+    Fixed the problem that occassionaly produced an empty page and report is not printed.</li>
+<li>[171] - Subquery system problem with empty dataset 
+    Fixed a bug when subquery resulted empty dataset and breaked the report
+</li>
+<li>[176] - Designer's Line item - 'point line' bug 
+    Fixed the undeletable, 'Zero or sizeless' line bug
+    This occured when with the Line item the mouse is clicked only but not dragged 
+    and released.</li>
+<li>Some corrections in designer's GUI dialogs</li>
+<li>Many other small fixes</li>
+</ul>
+
+

@@ -1,0 +1,29 @@
+****************************************************************************
+* NCReport 2.6.2
+* Release date: 04.Jul.2011
+****************************************************************************
+
+New features:
+
+- 0071367: [Report engine library] Expressions in variables  - resolved.
+- 0071369: [Report engine library] Ability to specify connection options for sql database connections  - resolved.
+- 0071368: [Report designer application] Vertical alignment of fields  - resolved.
+- 0071371: [Report engine library] Use different define to control debug output  - resolved.
+- 0071373: [Report designer application] How to set character space  - resolved.
+- 0071379: [General] Letter capitalization for labels and fields - resolved.
+- 0071380: [Report designer application] Custom data source implementation in Designer - resolved.
+- 0071348, 0071305: [General] HTML texts are able to break to the next page or multiple pages. 
+           This is a limited feature. It works properly only when 1 zone is defined and for normal html richtext.
+- 0071382: [General] Image can be added as parameter
+
+
+Fixes:
+
+- 0071375: [Report engine library] NCReportDef::reset(true) causes problem when custom data source is used  - resolved.
+- 0071348: [Report engine library] Large dynamic text results in error if section does not fit on the current page  - resolved.
+- 0071305: [Report engine library] Detail section is too large error!  - resolved.
+- 0071374: [Report engine library] Image from data source refresh problem (File name from data source)  - resolved.
+- 0071376: [Report engine library] Parsing problem when using :d suffix in item model data source  - resolved.
+- 0071381: [General] Aspect ratio problem of SVG image items - fixed.
+- reorganizations in project files ( /preview folder removed)
+- Lots of other small fixes and improvements

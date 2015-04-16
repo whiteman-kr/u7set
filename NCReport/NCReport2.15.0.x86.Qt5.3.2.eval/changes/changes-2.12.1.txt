@@ -1,0 +1,14 @@
+****************************************************************************
+* NCReport 2.12.1
+* Release date: 15.apr.2014
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+- 0071590: [Report engine library] E-mail function to extend to the command line client (administrator) - resolved.
+- 0071669: [Report engine library] Make SSL support in mail function optional (administrator) - resolved.
+- 0071677: [Designer] Set Default width and text of the Field Item in Design mode (administrator) - resolved.
+- 0071695: [Report engine library] Fix @SKIP_NEXT issue (administrator) - resolved.
+- 0071691: [Designer] Default font style of the report (bold, italic, underline, strikethrough) to store (administrator) - resolved.
+- 0071692: [Report engine library] Image with 'URL from data source' not updated (administrator) - resolved.
+- 0071693: [Designer] designer crash when removing header/footer section (administrator) - resolved.
+- Several small adjusments and fixes

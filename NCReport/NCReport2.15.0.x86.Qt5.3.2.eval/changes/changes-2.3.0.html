@@ -1,0 +1,69 @@
+<h2>v2.3.0</h2>
+<h3>Release date: 30.Jun.2009</h3>
+
+<h4>New features:</h4>
+<ul>
+
+<li>
+[80] - Subquery system for SQL Datasources. This enables grouping with subqueries and makes unneccessary to apply
+big joined queries for data grouping.
+</li>
+<li>
+[74] - Enable positioning to data row/record of a datasource:
+datasource.column[recno]
+i.e.
+ds.name,2 or $D{ds.name,2}
+</li>
+<li>
+[75] - Qt4.4 Print preview dialog output
+Introducing a new output class: NCReportQtPreviewOutput.
+This class uses QPrintPreviewDialog as report output
+</li>
+<li>
+[82] - Printing only page ranges (page filtering): Now the printing of the range of pages is enabled (i.e. print only page 2-3)
+</li>
+<li>
+[135] - NCReport Project files were restructured. For better integration now ncreport.pri designer.pri and preview.pri 
+</li>
+<li>
+[143] - Rectangle now can enlarge to its zone and not only to the section. This is a goal of Odd/Even rectangles.
+</li>
+<li>
+[149] - Making possible to use QProgressBar while report is running. A progress signals are emitted when 
+data rows and pages are progressed
+</li>
+<li>
+[153] - Datasource column name completions at field dialog
+</li>
+<li>
+[154] - Print Preview Output enhancements: Better quality printing / PDF 
+from preview now is available. To do this, the NCReport* object have to be added to preview main form.
+If the object is set then the preview will re-run the report to printer instead of printing preview pages in lesser quality.
+</li>
+<li>
+[155] - SVG output: Report output to SVG file(s) Multiple files for multiple pages
+</li>
+<li>
+[159] - User documentation renewal. User Guide has made in PDF book format
+</li>
+<li>
+[160] - Enable handling custom page size
+</li>
+</ul>
+
+<h4>Fixed bugs:</h4>
+<ul>
+<li>
+[157] - Group header printing fixes: At least one more detail row should have space in a page, otherwise a page break occurs.
+</li>
+<li>
+[161] - NCReportItem minor bug: NCReportItem.cpp line 191. mSize might be set incorrectly (width() is used twice, not width() and height()).
+</li>
+<li>
+[164] - Detail row double paint when automatic height of detail is on
+</li>
+<li>
+Lots of other small fixes and corrections everywhere.
+</li>
+</ul>
+

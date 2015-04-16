@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.6.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">0</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="167.697">
+        <image id="0" zValue="0" resource="url" posX="3.068" posY="6.135" width="81.292" height="36.812" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?chs=600x300&amp;cht=p3&amp;chco=7777CC|76A4FB|3399CC|3366CC&amp;chd=s:Uf9a&amp;chdl=January|February|March|April</image>
+        <image id="1" zValue="1" resource="url" posX="96.630" posY="1.534" width="72.089" height="39.879" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?chs=500x200&amp;chd=t:60,40&amp;cht=p3&amp;chl=Hello|World</image>
+        <image id="2" zValue="2" resource="url" posX="107.367" posY="41.413" width="56.751" height="36.812" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?cht=bvg&amp;chs=250x150&amp;chd=s:Monkeys&amp;chxt=x,y&amp;chxs=0,ff0000,12,0,lt|1,0000ff,10,1,lt</image>
+        <image id="3" zValue="3" resource="url" posX="108.901" posY="82.826" width="53.684" height="32.210" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?chxr=0,0,46&amp;chxt=y&amp;chs=400x225&amp;cht=lc&amp;chco=3D7930&amp;chd=s:Xhiugtqi&amp;chg=14.3,-1,1,1&amp;chls=2,4,0&amp;chm=B,C5D4B5BB,0,0,0</image>
+        <image id="4" zValue="4" resource="url" posX="7.669" posY="58.285" width="70.556" height="35.278" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?chxr=0,0,46&amp;chxt=x&amp;chbh=a&amp;chs=500x225&amp;cht=bhs&amp;chco=3D7930&amp;chd=s:Xhiugtqi&amp;chg=14.3,-1,1,1&amp;chm=B,C5D4B5BB,0,0,0</image>
+        <image id="5" zValue="5" resource="url" posX="4.601" posY="101.232" width="56.751" height="29.143" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?chxl=0:|Jan|Feb|Mar|Jun|Jul|Aug|1:|100|50|0|2:|100|75|50|25|0&amp;chxs=0,00AA00,14,0.5,l,676767&amp;chxt=x,r,y&amp;chs=400x200&amp;cht=lc&amp;chco=FF0000,0000FF&amp;chd=s:DJGPMeGPVPYbekb,3483ghhasdfsdf&amp;chg=20,25&amp;chls=1,6,3|3,3,4</image>
+        <image id="6" zValue="6" resource="url" posX="65.954" posY="113.502" width="53.684" height="50.616" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?chxl=0:|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec&amp;chxt=x,y&amp;chs=300x300&amp;cht=r&amp;chco=FF0000&amp;chd=t:63,64,67,73,77,81,85,86,85,81,74,67,63&amp;chls=2,4,0&amp;chm=B,FF000080,0,0,0</image>
+        <label id="7" zValue="7" resource="static" posX="1.534" posY="1.534" width="44.481" height="6.135" fontName="Liberation Sans" fontSize="10" alignment="1" forecolor="#000000">Google Online Charts:</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="15.338">
+        <image id="0" zValue="0" resource="url" posX="87.428" posY="0.000" width="12.271" height="13.804" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?cht=r&amp;chco=000000&amp;chd=t:0|0|0|0|0|0|0|0|0&amp;chs=450x450&amp;chfd=0,x,0,100,1,x|1,y,0,100,1,1.5*y|2,z,0,100,1,2*z|3,z,0,100,1,3*z|4,z,0,100,1,4*z|5,z,0,100,1,5*z|6,z,0,100,1,5.9*z|7,z,0,100,1,7*z|8,z,0,100,1,8*z&amp;chm=b,000000,0,1,0|b,333333,1,2,0|b,555555,2,3,0|b,777777,3,4,0|b,999999,4,5,0|b,BBBBBB,5,6,0|b,DDDDDD,6,7,0|b,FFFFFF,7,8,0|o,000000,8,,7</image>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="0.000" datasource="DataSource1" startsOnNewPage="false">
+            <items/>
+        </detail>
+    </details>
+</NCReport>

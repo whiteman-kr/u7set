@@ -1,0 +1,17 @@
+****************************************************************************
+* NCReport 2.12.3
+* Release date: 07.July.2014
+* Features and bugfixes are tracked at http://tracker.ncreport.org
+****************************************************************************
+
+- 0071722: [General] HTTP location type for Text and Xml datasources (administrator) - resolved.
+- 0071721: [Report engine library] QDoubleSpinBox mapping issue within the NCRDWidgetMapper (administrator) - resolved.
+- 0071714: [General] Markdown library to integrate (administrator) - resolved.
+- 0071711: [Report engine library] Mac specific options: to fix directives for Qt5 (administrator) - resolved.
+- 0071698: [Designer] NCRDTestDialogFactory-Project <--> export declarations (administrator) - resolved.
+- 0071712: [Designer] Parameter dialog: load parameters from file (administrator) - resolved.
+- 0071713: [Report engine library] Table view item to consider the header font (administrator) - resolved.
+- 0071719: [General] Storing custom options in report xml file (administrator) - resolved.
+- 0071715: [Designer] Access to the dialog's QWidgetMapper objects (administrator) - resolved.
+- 0071710: [Report engine library] Disabled SVG feature causes an compilation error (administrator) - resolved.
+- Several minor fixes

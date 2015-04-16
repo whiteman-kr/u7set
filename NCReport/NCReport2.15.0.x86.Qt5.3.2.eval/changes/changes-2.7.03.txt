@@ -1,0 +1,13 @@
+****************************************************************************
+* NCReport 2.7.03
+* Release date: 28.Dec.2011
+****************************************************************************
+
+Fixes:
+
+- 0071407 Engine: Group header page break problems - fixed algorythm
+- 0071397 Engine: Subqueries error out when no rows found in parent query when using type safe SQL engine (postgreSQL)
+- Debug/Release compile fix in ncreport.pro
+- Minor fixes
+
+

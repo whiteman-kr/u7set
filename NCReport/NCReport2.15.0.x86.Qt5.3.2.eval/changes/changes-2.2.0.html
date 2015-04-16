@@ -1,0 +1,32 @@
+<h2>v2.2.0</h2>
+<h3>Release date: 19.dec.2008</h3>
+
+<h4>New features:</h4>
+<ul>
+<li>"Zone" feature for sections</li>
+<li>Dynamic (automatic) height option of Texts, Fields and Labels</li>
+<li>Automatic height option of both report sections</li>
+<li>"Remove if blank" feature of report sections</li>
+<li>printWhen expression for sections</li>
+<li>In designer the Text/Html item edit now enables using pure html.</li>
+<li>There are some new and updated dialogs in designer</li>
+</ul>
+
+<p class="notes">Remark to Zones:<br>
+All items can have a specified Zone ID. Items with the same zone id, just like a group,
+represent a zone as a ribbon inside the section. When the section's automatic height option is enabled,
+the report engine will process the rendering of zones in order by zone id, one after another.
+If a content of a zone is empty in case the "print when" expression of all items in the zone returns false,
+the zone won't be printed and the section is 'shrunken'. The rendering order of zones match to the order 
+of zone IDs.</p>
+
+<h4>Bugfixes:</h4>
+<ul>
+<li>Dynamically expanded HTML/Text items might have zero height now. It is important for text items who have a datasource in detail section for to realize an empty line when no data are fetched from datasource</li>
+<li>Designer: fixed the unrefreshed detail section title bug</li>
+<li>Designer: Section property dialog introduced.</li>
+<li>In designer the HTML/Text property dialog now saves the printWhen option and the template text</li>
+<li>Invalid parameters and variables now don't shown as '#data#' in report, but as empty string instead.</li>
+<li>Test data editor / Designer: Fixed the crash occured when the last test data table was removed</li>
+<li>Many small fixes and optimalizations</li>
+</ul>

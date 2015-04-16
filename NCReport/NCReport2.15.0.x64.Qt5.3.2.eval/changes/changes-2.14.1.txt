@@ -1,0 +1,10 @@
+****************************************************************************
+* NCReport 2.14.1
+* Release date: 19.Feb.2015
+* Features and bugfixes are tracked at http://tracker.ncreport.org
+****************************************************************************
+
+- 0071763: [General] Minor internal fixes (administrator) - resolved.
+- 0071754: [Report engine library] Some adjustments in NCReportPreviewWindow class for easy customization (administrator) - resolved.
+- 0071762: [Designer] Copy the edited report source xml to clipboard in designer (administrator) - resolved.
+- 0071755: [Report engine library] Data source scope check of variables - it was turned off (administrator) - resolved.

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.11.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>10</topmargin>
+        <bottommargin>10</bottommargin>
+        <leftmargin>10</leftmargin>
+        <rightmargin>10</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <htmlOpt>{DEFAULT}</htmlOpt>
+    </options>
+    <datasources>
+        <datasource id="prod" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">select products.*,
+products.unitprice*1.2 as unitprice2,
+products.unitprice*1.5 as unitprice3,
+products.unitprice*1.7 as unitprice4,
+products.unitprice*75 as value,
+categories.categoryname 
+FROM products, categories
+WHERE products.categoryID = categories.categoryID
+AND products.productname LIKE '%'
+ORDER BY categoryname,productname</datasource>
+        <datasource id="company" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">select 'Useful Company Ltd.' as name, 
+'00000 Nowhere, Something str. 55.' as fulladdress,
+'Taxcode: 00000000-0-00' as taxcode,
+'Account no.: 00000000-00000000-00000000' as account,
+'Phone: 555-8740-14' as phone,
+'Fax: 555-8741-15' as fax,
+'E-mail: info@usefulcompany.com' as mail</datasource>
+        <datasource id="group" type="sql" openRole="group" source="static" connection="internal" parentID="g1" connID="northwind">select sum(products.unitprice*75) as total
+FROM products 
+WHERE products.categoryID = $D{prod.categoryID}</datasource>
+    </datasources>
+    <variables>
+        <variable id="sum0" type="num" funcType="sum" scope="group" initValue="0">value</variable>
+        <variable id="sum1" type="num" funcType="sum" scope="group" initValue="0">value</variable>
+        <variable id="cnt1" type="num" funcType="count" scope="report" initValue="0">productID</variable>
+        <variable id="min" type="num" funcType="min" scope="group" initValue="1.79769e+308">value</variable>
+        <variable id="max" type="num" funcType="max" scope="group" initValue="0">value</variable>
+        <variable id="avg" type="num" funcType="average" scope="group" initValue="0">value</variable>
+    </variables>
+    <pageheader id="phead" height="21.380">
+        <rectangle id="TFT00" zValue="0" posX="0.000" posY="14.023" width="189.177" height="5.821" lineColor="#000000" lineStyle="solid" lineWidth="0.000" fillStyle="solid" fillColor="#ffaa00"/>
+        <label id="1" zValue="1" posX="47.625" posY="15.346" width="18.785" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" forecolor="#ffffff">Product no.</label>
+        <field id="2" zValue="2" posX="109.008" posY="7.938" width="79.640" height="5.027" resource="datasource" fontName="Arial" fontSize="8" alignment="34" type="txt" ftype="ds" arg="">company.fulladdress</field>
+        <field id="3" zValue="3" posX="109.008" posY="3.175" width="79.640" height="5.027" resource="datasource" fontName="Arial" fontSize="8" alignment="34" type="txt" ftype="ds" arg="">company.name</field>
+        <label id="4" zValue="4" posX="12.171" posY="15.346" width="21.960" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" forecolor="#ffffff">Product name</label>
+        <label id="5" zValue="5" posX="168.804" posY="15.346" width="20.108" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" forecolor="#ffffff">Value</label>
+        <label id="6" zValue="6" posX="148.696" posY="15.346" width="20.108" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" forecolor="#ffffff">Price III.</label>
+        <label id="7" zValue="7" posX="127.265" posY="15.346" width="20.108" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" forecolor="#ffffff">Price II.</label>
+        <label id="8" zValue="8" posX="107.421" posY="15.346" width="20.108" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" forecolor="#ffffff">List price</label>
+        <label id="9" zValue="9" posX="1.587" posY="15.346" width="4.498" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" forecolor="#ffffff">No.</label>
+        <label id="10" zValue="10" posX="0.000" posY="0.000" width="102.658" height="6.350" fontName="Arial" fontSize="14" fontWeight="bold">Group and variable demo </label>
+        <field id="11" zValue="11" posX="0.000" posY="9.525" width="15.346" height="4.762" resource="sysvar" fontName="Arial" fontSize="8" alignment="1" type="txt" ftype="sys" arg="Page %1">pageno</field>
+    </pageheader>
+    <pagefooter id="pfoot" height="10.992">
+        <label id="C8VKX" zValue="0" posX="0.000" posY="0.265" width="59.267" height="6.350" fontName="Arial" fontSize="12" fontWeight="bold" forecolor="#0000ff">This is the page footer .....</label>
+        <line id="1" zValue="1" lineColor="#ff0000" lineStyle="dashdot" lineWidth="0.800" fromX="0.000" fromY="0.000" toX="189.971" toY="0.000"/>
+        <field id="2" zValue="2" posX="0.000" posY="6.085" width="174.890" height="4.498" resource="sysvar" fontName="Arial" fontSize="6" type="txt" ftype="sys" arg="">appinfo</field>
+        <field id="3" zValue="3" posX="175.154" posY="6.350" width="14.817" height="5.292" resource="sysvar" fontName="Arial" fontSize="8" alignment="34" type="txt" ftype="sys" arg="Page %1">pageno</field>
+    </pagefooter>
+    <reportheader id="rhead" height="7.669">
+        <label id="ZYRCE" zValue="0" posX="0.000" posY="0.000" width="76.729" height="7.673" fontName="Arial" fontSize="12" fontWeight="bold" wordbreak="true" forecolor="#ffaa00">This is the report header .....</label>
+    </reportheader>
+    <reportfooter id="rfoot" height="6.680">
+        <label id="6BBX4" zValue="0" posX="0.000" posY="0.000" width="115.623" height="6.350" fontName="Arial" fontSize="10" fontWeight="bold" forecolor="#0000ff">This is the report footer .....</label>
+    </reportfooter>
+    <details>
+        <detail id="0" height="5.345" datasource="prod">
+            <items>
+                <rectangle id="2NF0O" zValue="0" posX="0.000" posY="0.000" width="189.971" height="4.762" printWhen="%2" lineColor="#000000" lineStyle="nopen" lineWidth="0.000" fillStyle="solid" fillColor="#eeeeee"/>
+                <field id="1" zValue="1" posX="0.000" posY="0.000" width="7.938" height="4.762" resource="var" fontName="Arial" fontSize="10" alignment="2" type="num" ftype="var" arg="">cnt1</field>
+                <field id="2" zValue="2" posX="11.377" posY="0.000" width="23.019" height="4.762" resource="datasource" fontName="Arial" fontSize="10" type="txt" ftype="ds" arg="">productID</field>
+                <field id="3" zValue="3" posX="168.010" posY="0.000" width="20.108" height="4.762" printWhen="$D{value}&gt;10" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">value</field>
+                <field id="4" zValue="4" posX="107.685" posY="0.000" width="20.108" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="8" format="f" precision="2" localized="true" arg="">unitprice</field>
+                <field id="5" zValue="5" posX="127.794" posY="0.000" width="20.108" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="8" format="f" precision="0" localized="true" arg="">unitprice2</field>
+                <field id="6" zValue="6" posX="148.696" posY="0.000" width="18.521" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="8" format="f" precision="1" localized="true" arg="">unitprice3</field>
+                <field id="7" zValue="7" posX="34.925" posY="0.000" width="61.383" height="4.762" resource="datasource" fontName="Arial" fontSize="10" wordbreak="true" type="txt" ftype="ds" arg="">productname</field>
+            </items>
+            <groups>
+                <group id="g0" groupExp="prod.supplierid" resetVariables="sum0" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_g0" height="6.681">
+                        <label id="05M9I" zValue="0" posX="166.952" posY="0.000" width="19.050" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#0000ff">GROUP g0</label>
+                        <field id="1" zValue="1" posX="0.000" posY="0.000" width="104.246" height="4.762" resource="exp" fontName="Arial" fontSize="10" fontWeight="bold" type="txt" ftype="exp" arg="">&quot;$D{categoryname}&quot;+&quot; &quot;+&quot;+additional string&quot;</field>
+                    </groupheader>
+                    <groupfooter id="GF_g0" height="9.354">
+                        <label id="SGNW7" zValue="0" posX="0.000" posY="0.000" width="33.867" height="4.762" fontName="Arial" fontSize="8" forecolor="#0000ff">G1 GROUP FOOTER</label>
+                        <line id="1" zValue="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="119.856" fromY="1.058" toX="189.971" toY="1.058"/>
+                        <label id="2" zValue="2" posX="120.121" posY="1.587" width="40.217" height="4.762" fontName="Arial" fontSize="10" forecolor="#ff00ff">Total g0 grp value:</label>
+                        <field id="3" zValue="3" posX="166.952" posY="1.587" width="20.902" height="4.762" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">sum0</field>
+                    </groupfooter>
+                </group>
+                <group id="g1" groupExp="prod.categoryID" resetVariables="avg,max,min,sum1" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_g1" height="5.880">
+                        <rectangle id="C0IWN" zValue="0" posX="0.000" posY="0.000" width="189.971" height="4.762" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillStyle="solid" fillColor="#dcdcdc"/>
+                        <label id="1" zValue="1" posX="166.952" posY="0.000" width="19.050" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#0000ff">GROUP g1</label>
+                        <field id="2" zValue="2" posX="0.000" posY="0.000" width="130.175" height="4.762" resource="datasource" fontName="Arial" fontSize="10" fontWeight="bold" forecolor="#ff0000" type="txt" ftype="ds" arg="">categoryname</field>
+                    </groupheader>
+                    <groupfooter id="GF_g1" height="20.962">
+                        <label id="44PEU" zValue="0" posX="0.000" posY="1.058" width="30.162" height="4.762" fontName="Arial" fontSize="8" forecolor="#0000ff">G2 GROUP FOOTER</label>
+                        <line id="1" zValue="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="119.856" fromY="1.058" toX="189.971" toY="1.058"/>
+                        <field id="2" zValue="2" posX="79.640" posY="1.587" width="35.190" height="4.498" resource="datasource" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="ds" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">group.total</field>
+                        <label id="3" zValue="3" posX="30.692" posY="1.587" width="64.294" height="4.762" fontName="Arial" fontSize="10" fontWeight="bold" forecolor="#0000ff">SQL Calculated Total g1 group value:</label>
+                        <field id="4" zValue="4" posX="167.217" posY="15.346" width="20.902" height="4.762" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">max</field>
+                        <field id="5" zValue="5" posX="167.217" posY="10.848" width="20.902" height="4.762" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">min</field>
+                        <label id="6" zValue="6" posX="122.767" posY="1.587" width="32.279" height="4.762" fontName="Arial" fontSize="10" forecolor="#0000ff">Total g1 group value:</label>
+                        <label id="7" zValue="7" posX="122.767" posY="6.085" width="32.279" height="4.762" fontName="Arial" fontSize="10" forecolor="#0000ff">AVG</label>
+                        <label id="8" zValue="8" posX="122.767" posY="10.848" width="32.279" height="4.762" fontName="Arial" fontSize="10" forecolor="#0000ff">MIN</label>
+                        <label id="9" zValue="9" posX="122.767" posY="15.346" width="32.279" height="4.762" fontName="Arial" fontSize="10" forecolor="#0000ff">MAX</label>
+                        <field id="10" zValue="10" posX="167.217" posY="6.085" width="20.902" height="4.762" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">avg</field>
+                        <field id="11" zValue="11" posX="167.217" posY="1.587" width="20.902" height="4.762" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">sum1</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

@@ -1,0 +1,27 @@
+****************************************************************************
+* NCReport 2.10.0
+* Release date: 15.Aug.2013
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+New features:
+
+- 0071554: [General] Native HTML Output with CSS 
+- 0071552: [General] setDefaultOutputFileName in NCReportPreviewWindow
+- 0071550: [Report engine library] Function to return whether data source has rows
+- 0071549: [General] Optionally (auto) adjust/pin report objects to right
+- 0071551: [General] Follow and save encoding setting of report XML file
+- 0071349: [Report engine library] Email support
+- 0071411: [Report engine library] Overriding a SQL data source
+- 0071563: [Designer] Allowed to edit Report Item ID in setting dialogs
+
+Fixes:
+
+- 0071561: [General] Variable page reset scope to get worked
+- 0071548: [Report engine library] IMAGE by parameter not displayed if hosted by XML datasource
+- Designer adjustments
+- Lot of fixes and improvements
+
+
+
+
+

@@ -1,0 +1,22 @@
+****************************************************************************
+* NCReport 2.8.5
+* Release date: 21.Aug.2012
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+New features:
+
+- 0071474, 0071479: [General] Joined/Successive Image output 
+- 0071475: [Report engine library] Auto height rectangle or line to be continued after page broken text printouts 
+- 0071319: [Report engine library] Real HTML/XML/CSV/TEXT report output by a template 
+
+Fixes:
+
+- 0071483: [Designer] Designer crashes when the last added data source is deleted in a new Report 
+- 0071478: [Report engine library] Image output enhancements and fixes 
+- 0071476: [Report engine library] Page break text issues in multi zone details 
+- 0071477: [Report engine library] SUM/COUNT Variables in group header - to show correct values 
+- 0071481: [Report engine library] Variable custom initial value - not considered 
+- 0071482: [Report engine library] SUM variable not counting correctly with groups 
+- Many other little fixes
+- Optimalizations
+

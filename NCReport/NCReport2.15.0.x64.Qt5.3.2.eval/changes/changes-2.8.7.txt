@@ -1,0 +1,20 @@
+****************************************************************************
+* NCReport 2.8.7
+* Release date: 30.Nov.2012
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+New features:
+
+- 0071515: [Report engine library] Add access to datasource to NCReportAbstractItemRendering
+- 0071499: [Designer] Add French translation to source package (administrator)
+- 0071521: [General] Fixed character width option of Fields at the specified alignment
+
+Fixes:
+
+- 0071514: [Designer] Beside .xml extension .ncr extension became as default report file extension.
+- 0071510: [Designer] Multiple item selection may change the format options - fixed.
+- 0071508: [Designer] Some translated texts prevent correct work of the designer - fixed
+- 0071511: [Report engine library] Text Item with plain text option: Not correct in text document printout mode (administrator) - resolved.
+- 0071520: [Designer] Formatting Multiple selected items issue
+- Many small fixes
+

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">45	23	#421405	1	10
+18	5	#cccccc	1	12
+79	54	#421405	0	12
+18	10	#0000ff	0	8
+33	12	#00ff00	0	10
+67	51	#ff0000	1	8
+36	11	#000000	0	14
+14	6	cornflowerblue	1	10
+24	32	darkgoldenrod	0	10
+58	54	blueviolet	0	10
+66	11	darkolivegreen	0	10
+165	67	mediumpurple	1	10
+399	98	orangered	0	10
+170	63	peachpuff	0	10</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="21.431">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="84.137" height="6.350" fontName="Liberation Sans" fontSize="12" fontWeight="bold" alignment="1" forecolor="#000000">Conditional text formatting demo</label>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="7.938" width="139.700" height="12.700" fontName="Liberation Sans" fontSize="10" alignment="33" wordbreak="true" forecolor="#000000">Fields and Labels can dynamically change their format by data source values, parameters or script expressions</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="10.583"/>
+    <details>
+        <detail id="Detail1" height="6.350" datasource="DataSource1" startsOnNewPage="false">
+            <items>
+                <label id="0" zValue="0" resource="static" posX="100.012" posY="0.000" width="36.512" height="6.350" fontName="Liberation Sans" fontSize="10" alignment="33" forecolor="#000000" bgMode="fb" backcolor="#ffffff" cf="1">
+                    <tr>Text label</tr>
+                    <cf>color:$D{col2}
+font-italic:$D{col3}
+font-bold:{if($D{col3}==0) true; else false;}
+font-strikeout:$D{col3}
+font-size:$D{col4}
+font-underline:{$D{col3}==1}</cf>
+                </label>
+                <label id="1" zValue="1" resource="static" posX="138.112" posY="0.000" width="31.750" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="33" forecolor="#000000" bgMode="fb" backcolor="#ffffff" cf="1">
+                    <tr>Lorem ipsum </tr>
+                    <cf>font-bold:{if($D{col1}&gt;20) true; else false;}
+</cf>
+                </label>
+                <field id="2" zValue="2" resource="static" posX="0.000" posY="0.000" width="9.525" height="6.350" fontName="Liberation Sans" fontSize="10" alignment="33" forecolor="#000000" cf="1" type="txt" ftype="ds" arg="">
+                    <tr>col0</tr>
+                    <cf>font-size:12</cf>
+                </field>
+                <field id="3" zValue="3" resource="static" posX="12.700" posY="0.000" width="9.525" height="6.350" fontName="Liberation Sans" fontSize="10" alignment="33" forecolor="#000000" type="txt" ftype="ds" arg="">col1</field>
+                <field id="4" zValue="4" resource="static" posX="23.812" posY="0.000" width="36.512" height="6.350" fontName="Liberation Sans" fontSize="10" alignment="33" forecolor="#000000" bgMode="fb" backcolor="#ffffff" cf="1" type="txt" ftype="ds" arg="">
+                    <tr>col2</tr>
+                    <cf>color:$D{col2}
+background-color:{if($D{col3}) &quot;yellow&quot;; else &quot;white&quot;;}
+font-size:12
+font-bold:true
+
+</cf>
+                </field>
+                <field id="5" zValue="5" resource="static" posX="65.087" posY="0.000" width="15.875" height="6.350" fontName="Liberation Sans" fontSize="10" alignment="33" forecolor="#000000" cf="1" type="txt" ftype="ds" arg="">
+                    <tr>col3</tr>
+                    <cf>font-size:$D{col4}</cf>
+                </field>
+                <field id="6" zValue="6" resource="static" posX="82.550" posY="0.000" width="15.875" height="6.350" fontName="Liberation Sans" fontSize="10" alignment="33" forecolor="#000000" cf="1" type="txt" ftype="ds" arg="">
+                    <tr>col4</tr>
+                    <cf>color:$D{col2}</cf>
+                </field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

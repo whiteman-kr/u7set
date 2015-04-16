@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.4" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>10</topmargin>
+        <bottommargin>10</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="sqldata" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="northwind" host="localhost" database="northwind" user="northuser" password="northwind" port="" driver="QMYSQL">SELECT id, category,  
+GROUP_CONCAT(value) AS valuelist
+FROM chart5
+GROUP BY category;</datasource>
+    </datasources>
+    <variables>
+        <variable id="total" type="num" funcType="sum" scope="group" initValue="0">2</variable>
+    </variables>
+    <pageheader id="phead" height="28.310">
+        <barcode id="0" zValue="0" posX="134.673" posY="0.000" width="33.602" height="14.552" resource="datasource" barcodeType="13" code="">barcodeDS.col0</barcode>
+        <label id="2" zValue="1" posX="0.000" posY="0.000" width="125.412" height="6.615" fontName="Arial" fontSize="16" fontWeight="bold" fontItalic="true" alignment="1" forecolor="#0000ff">Graph demo from data source</label>
+        <label id="4" zValue="2" posX="0.000" posY="11.112" width="168.275" height="9.525" fontName="Arial" fontSize="10" alignment="1" wordbreak="true">This simple report demonstrates how to use custom report item alias graph item. Graph data are fetching from data source</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="6.949">
+        <field id="0" zValue="0" posX="150.812" posY="0.000" width="18.785" height="5.027" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="sys" arg="page %1">pageno</field>
+    </pagefooter>
+    <reportheader id="rhead" height="0.000"/>
+    <reportfooter id="rfoot" height="0.000"/>
+    <details>
+        <detail id="Detail1" height="69.850" datasource="sqldata">
+            <items>
+                <field id="0" zValue="0" posX="0.000" posY="0.000" width="52.917" height="5.027" fontName="Arial" fontSize="10" forecolor="#00007f" type="txt" ftype="ds" arg="">category</field>
+                <graph id="3" zValue="1" posX="0.000" posY="6.350" width="79.375" height="61.912" resource="datasource" classID="graph01">valuelist</graph>
+            </items>
+        </detail>
+    </details>
+</NCReport>

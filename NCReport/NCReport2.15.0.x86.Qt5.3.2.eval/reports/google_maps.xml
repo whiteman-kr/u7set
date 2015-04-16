@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.5.4" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">0</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="158.239">
+        <image id="0" zValue="0" resource="url" posX="29.143" posY="3.068" width="105.833" height="56.751" aspectRatio="keep" format="bin">http://chart.apis.google.com/chart?chf=bg,s,EAF7FE&amp;chs=440x220&amp;cht=t&amp;chco=F5F5F5,EDF0D4,6C9642,13390A&amp;chld=AKALARAZCACOCTDEFLGAHIIAIDILINKSKYLAMAMDMEMIMNMOMSMTNCNDNENHNJNMNVNYOHOKORPARISCSDTNTXUTVAVTWAWIWVWY&amp;chd=s:BfBBABKDCBBBAKDECSAQDBDGLLAAESJDEHGQBGCACFBBDPBH9A&amp;chtm=usa</image>
+        <image id="1" zValue="1" resource="url" posX="35.278" posY="59.819" width="108.901" height="96.630" aspectRatio="keep" format="bin">http://maps.google.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&amp;zoom=14&amp;size=512x512&amp;maptype=roadmap
+&amp;markers=color:blue|label:S|40.702147,-74.015794&amp;markers=color:green|label:G|40.711614,-74.012318
+&amp;markers=color:red|color:red|label:C|40.718217,-73.998284&amp;sensor=false</image>
+    </pageheader>
+    <pagefooter id="pfoot" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="10.000" datasource="DataSource1" startsOnNewPage="false">
+            <items/>
+        </detail>
+    </details>
+</NCReport>

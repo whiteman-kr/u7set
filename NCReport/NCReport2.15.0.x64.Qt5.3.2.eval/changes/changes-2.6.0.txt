@@ -1,0 +1,96 @@
+****************************************************************************
+* NCReport 2.6.0
+* Release date: 01.Dec.2010
+****************************************************************************
+
+New features
+------------
+
+- 0071334: [General] Images and texts could be loaded from URL (online items) - implemented.
+		   Image and Text report items can load now online contents. This is very useful for online charting, graphs
+		   (i.e. Google charts) or any online services to be used in NCReport.
+		   (see google_charts.xml, google_maps.xml examples)
+
+- 0071337: [General] Report preview enhancements.
+		   Scroll between pages in preview as in usual document viewer (eg Adobe Reader).
+		   Possible to switch Single/Double/Continous modes.
+		   Save & restore last zooming and view mode.
+		   Zooming fixes.
+
+- 0071344: [Report designer application] Default Printer and resolution setting for Designer - resolved.
+
+- 0071321: [Report engine library] More report outputs: Html - implemented.
+		   This is a new output that generates limited Html file with absolute item positions. Works for simple reports.
+
+- 0071302: [General] Text rotation - implemented.
+		   Labels and fields can be rotated. Rotation angle is in degrees between 0-360
+
+- 0071351: [Report designer application] Direct Group setting context menu from a group header or footer - implemented.
+		   Group settings dialog is reachable by one click from the context menu of a section or a report item.
+
+- 0071340: [Report engine library] specify the printer to print on - implemented.
+		   When calling ncreport.exe with the –print switch, -n, --printer <printername>  switch also usable for naming printer
+
+- 0071315: [General] Field Type "UserInput" - implemented.
+		   QVariant NCReport::getParameter(...) method has been added. With this, Parameter is requested from the user
+		   (by a dialog pop-up) before printing
+
+- 0071352: [General] Record skip trick for step to next record within a section. This is good for label printing.
+		   If you type @SKIP_NEXT keyword as an report item's printWhen expression, item won't be printed but affects next record
+		   skip at the current data source. Be careful if you use this trick! Be sure, that the order of report items are in
+		   ID+ZOrder (this can be arranged by a text editor: see simple_label_demo.xml)
+
+
+Fixed bugs
+----------
+
+- 0071339: [Report designer application] window size is 400 x 400 pixels when a new installation startup - fixed.
+		   Application starts in full screen mode by default
+
+- 0071338: [Report designer application] Label fields are resized after closing the properties dialog - fixed.
+
+- 0071301: [General] Dynamic rectangle height calculation - resolved.
+		   LABEL_HEIGHT_TRIM_MARGIN_MM and TEXT_HEIGHT_TRIM_MARGIN_MM trimmer constants were added for trimming the height of dynamic texts.
+		   They are set to 1.0mm by default.
+
+- 0071335: [Report designer application] Set width/height the same don't set the height/width correctly - fixed.
+
+- 0071342: [Report engine library] printout on windows 7 is squeezed - fixed.
+
+- 0071345: [Report engine library] NCReport engine crash when details datasource is not selected - fixed.
+
+- 0071346: [Report engine library] NCReportEvaluator not exported - resolved.
+		   Class now is exported.
+
+- 0071347: [Report engine library] When a subquery results empty dataset the report running hangs up - resolved.
+
+- Many other fixes and improvements
+
+New source files
+----------------
+
+/ncreport
+
+ncreporthttpclient.h 
+ncreporthtmloutput.h
+ncreporthttpclient.cpp
+ncreporthtmloutput.cpp
+
+/designer
+
+ncrditemsourcepanel.h 
+ncrdpanelbuttons.h
+
+ncrditemsourcepanel.cpp 
+ncrdpanelbuttons.cpp
+
+ncrditemsourcepanel.ui 
+panelbuttons.ui
+
+/images
+
+page_single.png
+page_continous.png
+page_double.png
+
+
