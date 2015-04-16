@@ -418,7 +418,7 @@ namespace Hardware
 	class DeviceModule : public DeviceObject
 	{
 		Q_OBJECT
-		Q_ENUMS(ModuleType)
+		Q_ENUMS(FamilyType)
 
 		Q_PROPERTY(FamilyType ModuleFamily READ moduleFamily WRITE setModuleFamily)
 		Q_PROPERTY(int ModuleVersion READ moduleVersion WRITE setModuleVersion)
@@ -430,6 +430,7 @@ namespace Hardware
 	public:
 		enum FamilyType		// WARNING!!! Only high byte can be used as it is a part of the type
 		{					// (high byte is module family, low byte is module version)
+			OTHER = 0x0000,
 			LM = 0x1100,
 			AIM = 0x1200,
 			AOM = 0x1300,
