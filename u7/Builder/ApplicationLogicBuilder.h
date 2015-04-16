@@ -12,6 +12,7 @@ class DbController;
 namespace Hardware
 {
 	class DeviceObject;
+	class DeviceModule;
 	class McFirmwareOld;
 }
 
@@ -58,6 +59,46 @@ namespace Builder
 
 	// ------------------------------------------------------------------------
 	//
+	//		ApplicationLogicBranch
+	//
+	// ------------------------------------------------------------------------
+	class ApplicationLogicBranch
+	{
+	public:
+		ApplicationLogicBranch();
+
+		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items() const;
+		std::list<std::shared_ptr<VFrame30::FblItemRect>>& items();
+
+	private:
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
+	};
+
+	// ------------------------------------------------------------------------
+	//
+	//		ApplicationLogicModule
+	//
+	// ------------------------------------------------------------------------
+	class ApplicationLogicModule
+	{
+	public:
+		ApplicationLogicModule() = delete;
+		ApplicationLogicModule(QString moduleStrId);
+
+		bool addBranch(std::list<std::shared_ptr<VFrame30::VideoItem>>& items);
+
+	public:
+		QString moduleStrId() const;
+		void setModuleStrId(QString value);
+
+	private:
+		QString m_moduleStrId;
+		std::list<std::shared_ptr<ApplicationLogicBranch>> m_branches;
+	};
+
+
+	// ------------------------------------------------------------------------
+	//
 	//		ApplicationLogicData
 	//
 	// ------------------------------------------------------------------------
@@ -69,24 +110,25 @@ namespace Builder
 		// Public methods
 		//
 	public:
-		bool setData(std::shared_ptr<VFrame30::LogicScheme> scheme,
-					 std::shared_ptr<VFrame30::SchemeLayer> layer);
+		bool addData(std::shared_ptr<VFrame30::LogicScheme> scheme,
+					   std::shared_ptr<VFrame30::SchemeLayer> layer);
 
 		// Propertie
 		//
 	public:
-		const std::shared_ptr<VFrame30::LogicScheme> scheme() const;
-		std::shared_ptr<VFrame30::LogicScheme> scheme();
+//		const std::shared_ptr<VFrame30::LogicScheme> scheme() const;
+//		std::shared_ptr<VFrame30::LogicScheme> scheme();
 
-		const std::shared_ptr<VFrame30::SchemeLayer> layer() const;
-		std::shared_ptr<VFrame30::SchemeLayer> layer();
+//		const std::shared_ptr<VFrame30::SchemeLayer> layer() const;
+//		std::shared_ptr<VFrame30::SchemeLayer> layer();
 
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> afbItems() const;
+//		std::list<std::shared_ptr<VFrame30::FblItemRect>> afbItems() const;
 
 	private:
-		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
-		std::shared_ptr<VFrame30::SchemeLayer> m_layer;
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_afbItems;
+		//std::shared_ptr<VFrame30::LogicScheme> m_scheme;
+		//std::shared_ptr<VFrame30::SchemeLayer> m_layer;
+		//std::list<std::shared_ptr<VFrame30::FblItemRect>> m_afbItems;
+		std::list<std::shared_ptr<ApplicationLogicModule>> m_modules;
 	};
 
 
@@ -130,14 +172,20 @@ namespace Builder
 		DbController* db();
 		OutputLog* log() const;
 		int changesetId() const;
+
 		bool debug() const;
 		bool release() const;
+
+		const ApplicationLogicData& applicationData() const;
+		ApplicationLogicData& applicationData();
 
 	private:
 		DbController* m_db = nullptr;
 		mutable OutputLog* m_log = nullptr;
 		int m_changesetId = 0;
 		int m_debug = false;
+
+		ApplicationLogicData m_applicationData;
 	};
 
 
