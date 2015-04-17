@@ -200,7 +200,8 @@ HEADERS  += \
     Builder/ConfigurationBuilder.h \
     Builder/ApplicationLogicCode.h \
 	Builder/ApplicationLogicCompiler.h \
-    DialogSubsystemListEditor.h
+    DialogSubsystemListEditor.h \
+    ../include/Types.h
 
 FORMS    += \
     ChangesetDialog.ui \

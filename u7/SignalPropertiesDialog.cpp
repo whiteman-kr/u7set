@@ -61,7 +61,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 
 	m_dataSizeProperty = m_intManager->addProperty(tr("Data size"));
 	m_intManager->setRange(m_dataSizeProperty, 1, 100);
-	if (signalType == SignalType::analog)
+	if (signalType == SignalType::Analog)
 	{
 		m_intManager->setValue(m_dataSizeProperty, signal.dataSize());
 	}
