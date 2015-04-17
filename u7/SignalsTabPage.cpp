@@ -153,7 +153,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_DATA_SIZE:
 		{
-			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].type() == SignalType::discrete)
+			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].type() == SignalType::Discrete)
 			{
 				return nullptr;
 			}
@@ -573,7 +573,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		if (signal.type() == SignalType::analog)
+		if (signal.type() == SignalType::Analog)
 		{
 			switch (col)
 			{
@@ -705,9 +705,9 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 			{
 				switch (signal.instanceAction())
 				{
-					case InstanceAction::added: return plus;
-					case InstanceAction::modified: return pencil;
-					case InstanceAction::deleted: return cross;
+					case InstanceAction::Added: return plus;
+					case InstanceAction::Modified: return pencil;
+					case InstanceAction::Deleted: return cross;
 					default:
 						assert(false);
 						return QVariant();

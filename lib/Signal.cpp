@@ -14,14 +14,14 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	if (deviceSignalType == Hardware::DeviceSignal::SignalType::InputAnalog ||
 		deviceSignalType == Hardware::DeviceSignal::SignalType::OutputAnalog)
 	{
-		m_type = SignalType::analog;
+		m_type = SignalType::Analog;
 	}
 	else
 	{
 		if (deviceSignalType == Hardware::DeviceSignal::SignalType::InputDiscrete ||
 			deviceSignalType == Hardware::DeviceSignal::SignalType::OutputDiscrete)
 		{
-			m_type = SignalType::discrete;
+			m_type = SignalType::Discrete;
 		}
 		else
 		{
