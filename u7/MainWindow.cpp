@@ -13,6 +13,7 @@
 #include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
 #include "DialogAfblEditor.h"
+#include "DialogSubsystemListEditor.h"
 #include "BuildTabPage.h"
 
 #include "../VFrame30/VFrame30.h"
@@ -157,7 +158,12 @@ void MainWindow::createActions()
 	m_pAfblEditorAction->setEnabled(false);
     connect(m_pAfblEditorAction, &QAction::triggered, this, &MainWindow::runAfblEditor);
 
-    m_pAboutAction = new QAction(tr("About..."), this);
+	m_pSubsystemListEditorAction = new QAction(tr("Subsystem List Editor..."), this);
+	m_pSubsystemListEditorAction->setStatusTip(tr("Run Subsystem List Editor"));
+	m_pSubsystemListEditorAction->setEnabled(false);
+	connect(m_pSubsystemListEditorAction, &QAction::triggered, this, &MainWindow::runSubsystemListEditor);
+
+	m_pAboutAction = new QAction(tr("About..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_pAboutAction, &QAction::triggered, this, &MainWindow::showAbout);
@@ -191,6 +197,7 @@ void MainWindow::createMenus()
 
 	pToolsMenu->addAction(m_pConfiguratorAction);
     pToolsMenu->addAction(m_pAfblEditorAction);
+	pToolsMenu->addAction(m_pSubsystemListEditorAction);
     pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_pSettingsAction);
 
@@ -296,6 +303,17 @@ void MainWindow::runAfblEditor()
     d.exec();
 }
 
+void MainWindow::runSubsystemListEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogSubsystemListEditor d(dbController(), this);
+	d.exec();
+}
+
 void MainWindow::showAbout()
 {
 
@@ -374,6 +392,7 @@ void MainWindow::projectOpened(DbProject project)
 
 	m_pUsersAction->setEnabled(true);
 	m_pAfblEditorAction->setEnabled(true);
+	m_pSubsystemListEditorAction->setEnabled(true);
 
 	// Tab Pages, enable all tab pages
 	//
@@ -397,6 +416,7 @@ void MainWindow::projectClosed()
 
 	m_pUsersAction->setEnabled(false);
 	m_pAfblEditorAction->setEnabled(false);
+	m_pSubsystemListEditorAction->setEnabled(false);
 
 	// Tab Pages, disable all tab pages except the first.
 	//

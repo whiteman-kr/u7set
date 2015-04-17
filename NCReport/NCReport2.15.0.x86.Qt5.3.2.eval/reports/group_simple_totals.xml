@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.6.0 beta" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">groupID	fruit	price
+1	Apple	2.50
+1	Banana	3.45
+1	Gapefruit	1.90
+1	Strawberry	5.78
+2	Melone	3.40
+2	Apple	2.50
+2	Lemon	6.32
+3	Apple	8.70
+3	Banana	9.85
+3	Strawberry	5.50</datasource>
+    </datasources>
+    <variables>
+        <variable id="total_0" type="num" funcType="sum" scope="group" initValue="0">price</variable>
+        <variable id="total_1" type="num" funcType="sum" scope="group" initValue="0">price</variable>
+    </variables>
+    <pageheader id="phead" height="10.000"/>
+    <pagefooter id="pfoot" height="5.880">
+        <field id="0" zValue="0" resource="static" posX="130.374" posY="0.000" width="38.345" height="4.601" fontName="Liberation Sans" fontSize="10" alignment="2" forecolor="#000000" type="txt" ftype="tpl" arg="">Page $V{pageno}</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="7.158" datasource="DataSource1" startsOnNewPage="false">
+            <items>
+                <field id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="46.014" height="4.601" fontName="Liberation Sans" fontSize="10" alignment="1" forecolor="#000000" type="txt" ftype="ds" arg="">fruit</field>
+                <field id="1" zValue="1" resource="static" posX="49.082" posY="0.000" width="36.812" height="4.601" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">price</field>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="%CONST" resetVariables="total_0" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="0.000"/>
+                    <groupfooter height="8.180">
+                        <label id="0" zValue="0" resource="static" posX="0.000" posY="1.534" width="46.014" height="4.601" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" forecolor="#aa0000">Total:</label>
+                        <field id="1" zValue="1" resource="static" posX="49.082" posY="1.534" width="36.812" height="4.601" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2" forecolor="#aa0000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">total_0</field>
+                    </groupfooter>
+                </group>
+                <group id="Group1" groupExp="groupID" resetVariables="total_1" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="9.714">
+                        <label id="0" zValue="0" resource="static" posX="0.000" posY="1.534" width="46.014" height="4.601" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000">Fruit name</label>
+                        <line id="1" zValue="1" resource="static" fromX="0.000" fromY="7.669" toX="87.428" toY="7.669" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <label id="2" zValue="3" resource="static" posX="49.082" posY="1.534" width="36.812" height="4.601" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2" forecolor="#55aa00">Price total</label>
+                    </groupheader>
+                    <groupfooter height="6.647">
+                        <field id="0" zValue="0" resource="static" posX="49.082" posY="0.000" width="36.812" height="4.601" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2" forecolor="#0000ff" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="">total_1</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

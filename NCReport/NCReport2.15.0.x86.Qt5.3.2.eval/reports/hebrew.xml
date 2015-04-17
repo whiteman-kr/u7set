@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.10.1" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">מזל תאומים: אחת מהמומחיות המובילות בעולם לתאומים תגיע להרצאה מיוחדת במכון ללימודים מתקדמים
+המכון ללימודים מתקדמים באוניברסיטה העברית יארח ביום שלישי להרצאה מיוחדת את פרופ</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="PH" height="158.750">
+        <label id="5ZY4H" zValue="0" posX="0.000" posY="0.000" width="169.862" height="5.821" fontName="Arial" fontSize="14" fontWeight="bold" alignment="34">האוניברסיטה העברית בירושלים</label>
+        <label id="PN7Q3" zValue="1" posX="0.000" posY="12.700" width="169.862" height="84.137" autoHeight="true" fontName="Arial" fontSize="14" alignment="34" wordbreak="true">מאז פתיחתה, ב-1925, מהווה המחקר יעוד מרכזי של האוניברסיטה העברית, שהוקמה כאוניברסיטת מחקר קלאסית – בה חברי סגל ההוראה הם חוקרים פעילים, ברמה בינ&quot;ל, בתחומים בהם הם מלמדים.
+
+האוניברסיטה חותרת בהתמדה לשמור על מעמדה המחקרי המוביל בישראל ולהצדיק את המוניטין המחקרי הגבוה של חוקריה גם במישור הבינ&quot;ל.
+
+במסגרת זו, האוניברסיטה מחוייבת לקיים פעילות מחקרית המיועדת להגדיל את הידע האנושי, הן במדעים הניסויים והן במדעים העיוניים ולהעמיד ידע זה לתועלת החברה, בארץ ובעולם.
+
+כדי למלא את שליחותה הנ&quot;ל, קבעה הנהלת האוניברסיטה מדיניות מו&quot;פ ברורה והיא מעדכנת אותה מעת לעת. </label>
+        <line id="ROE94" zValue="2" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="106.362" toX="169.862" toY="106.362"/>
+        <text id="5ZY4H" zValue="3" posX="0.000" posY="106.362" width="169.862" height="31.750" useFont="true" fontName="Arial" fontSize="14" forecolor="#000000">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Morbi venenatis, nunc quis lobortis consectetur, neque tellus tempus nibh, sed lobortis metus orci nec mi. Fusce tempor neque condimentum lorem adipiscing, at rutrum sem fringilla. Donec in nibh auctor, fermentum augue quis, fermentum ligula. Interdum et&lt;span style=&quot; font-weight:600;&quot;&gt; malesuada fames ac ante ipsum primis&lt;/span&gt; in faucibus.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+        <text id="5ZY4H" zValue="4" posX="0.000" posY="139.700" width="169.862" height="12.700" useFont="true" fontName="Arial" fontSize="14" forecolor="#000000">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:16pt; color:#ff5500;&quot;&gt;Morbi venenatis, nunc quis lobortis consectetur, neque tellus&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; tempus nibh&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</text>
+    </pageheader>
+    <pagefooter id="PF" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="6.350" autoHeight="true" datasource="DataSource1">
+            <items>
+                <field id="SUIYK" zValue="0" posX="0.000" posY="1.587" width="169.862" height="4.762" autoHeight="true" fontName="Arial" fontSize="14" alignment="34" wordbreak="true" type="txt" ftype="ds" arg="">col0</field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

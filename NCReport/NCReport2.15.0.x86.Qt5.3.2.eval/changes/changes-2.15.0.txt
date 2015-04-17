@@ -1,0 +1,11 @@
+****************************************************************************
+* NCReport 2.15.0
+* Release date: 21.Mar.2015
+* Features and bugfixes are tracked at http://tracker.ncreport.org
+****************************************************************************
+
+- 0071761: [General] To make Field settings dialog customisable for managing custom options. (administrator) - resolved.
+- 0071766: [General] Minor internal fixes (administrator) - resolved.
+- 0071765: [Report engine library] Image: concatenate filename (administrator) - resolved.
+- 0071756: [General] User defined functions to store script expressions in reports for re-using (administrator) - resolved.
+- 0071759: [General] Built-in alternate background color for detail sections (administrator) - resolved.

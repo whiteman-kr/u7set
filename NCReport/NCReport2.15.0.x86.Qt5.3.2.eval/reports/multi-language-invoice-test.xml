@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.11.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>en,de,hu</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>10</topmargin>
+        <bottommargin>10</bottommargin>
+        <leftmargin>10</leftmargin>
+        <rightmargin>10</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <htmlOpt>{DEFAULT}</htmlOpt>
+    </options>
+    <datasources>
+        <datasource id="ds" type="txt" openRole="begin" source="static" columnDelimiter="tab">One	Eins	Egy	1
+Two	Zwei	Kettő	2
+Three	Drei	Három	3
+Four	Vier	Négy	4
+Five	Funf	Öt	5</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="35.278">
+        <rectangle id="TRAOS" zValue="0" posX="0.000" posY="22.490" width="189.177" height="11.112" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillStyle="no" fillColor="#ffffff"/>
+        <label id="1" zValue="1" posX="0.000" posY="24.077" width="189.177" height="9.525" fontName="Arial" fontSize="22" fontWeight="bold" alignment="36" forecolor="#ff0000" tr="1">
+            <tr lang="de">R e i c h n u n g</tr>
+            <tr lang="en">I n v o i c e</tr>
+            <tr lang="hu">S z á m l a</tr>
+        </label>
+        <label id="2" zValue="2" posX="0.000" posY="3.175" width="64.029" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" tr="1">
+            <tr lang="en">Labels and fields</tr>
+            <tr lang="hu">Címkék és mezők</tr>
+        </label>
+        <barcode id="3" zValue="3" posX="158.750" posY="0.000" width="30.427" height="16.140" barcodeType="13" code="50310218715"></barcode>
+        <label id="4" zValue="4" posX="65.617" posY="3.175" width="64.029" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" tr="1">
+            <tr lang="en">One language label (English only)</tr>
+        </label>
+        <field id="5" zValue="5" posX="46.567" posY="9.525" width="102.658" height="4.762" resource="datasource" fontName="Nimbus Roman No9 L" fontSize="10" tr="1" type="txt" ftype="ds" arg="">
+            <tr lang="de">col1</tr>
+            <tr lang="en">col0</tr>
+            <tr lang="hu">col2</tr>
+        </field>
+        <label id="6" zValue="6" posX="0.000" posY="9.525" width="43.392" height="5.027" fontName="Nimbus Roman No9 L" fontSize="10" tr="1">
+            <tr lang="de">Sprache abhängig Bereich:</tr>
+            <tr lang="en">Language dependent field:</tr>
+            <tr lang="hu">Nyelvfüggő adatmező:</tr>
+        </label>
+    </pageheader>
+    <pagefooter id="pfoot" height="6.410">
+        <field id="V0BZ6" zValue="0" posX="155.575" posY="0.000" width="33.602" height="5.027" resource="tpl" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" tr="1" type="txt" ftype="tpl" arg="">
+            <tr lang="de">Seite: $V{pagenum}</tr>
+            <tr lang="en">Page: $V{pagenum}</tr>
+            <tr lang="hu">$V{pagenum}. oldal</tr>
+        </field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="5.078" datasource="ds">
+            <items>
+                <field id="TIPXS" zValue="0" posX="43.392" posY="0.000" width="40.217" height="30.427" resource="exp" fontName="Nimbus Roman No9 L" fontSize="10" tr="1" type="txt" ftype="exp" arg="">
+                    <tr lang="en">x=2;
+v1=&quot;greather1&quot;;
+v2=&quot;$D{col0}&quot;;
+if ( x&lt;1 )
+  v1;
+else
+  v2;
+
+</tr>
+                </field>
+                <field id="1" zValue="1" posX="11.112" posY="0.000" width="11.112" height="5.027" resource="datasource" fontName="Nimbus Roman No9 L" fontSize="10" tr="1" type="txt" ftype="ds" arg="">
+                    <tr lang="de">col1</tr>
+                    <tr lang="en">col0</tr>
+                    <tr lang="hu">col2</tr>
+                </field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

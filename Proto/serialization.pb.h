@@ -4388,24 +4388,24 @@ class DeviceModule : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
-  // optional int32 ConfIndex = 2 [default = 0];
-  inline bool has_confindex() const;
-  inline void clear_confindex();
-  static const int kConfIndexFieldNumber = 2;
-  inline ::google::protobuf::int32 confindex() const;
-  inline void set_confindex(::google::protobuf::int32 value);
+  // optional int32 Channel = 2 [default = 0];
+  inline bool has_channel() const;
+  inline void clear_channel();
+  static const int kChannelFieldNumber = 2;
+  inline ::google::protobuf::int32 channel() const;
+  inline void set_channel(::google::protobuf::int32 value);
 
-  // optional string ConfName = 3 [default = ""];
-  inline bool has_confname() const;
-  inline void clear_confname();
-  static const int kConfNameFieldNumber = 3;
-  inline const ::std::string& confname() const;
-  inline void set_confname(const ::std::string& value);
-  inline void set_confname(const char* value);
-  inline void set_confname(const char* value, size_t size);
-  inline ::std::string* mutable_confname();
-  inline ::std::string* release_confname();
-  inline void set_allocated_confname(::std::string* confname);
+  // optional string SubsysID = 3 [default = ""];
+  inline bool has_subsysid() const;
+  inline void clear_subsysid();
+  static const int kSubsysIDFieldNumber = 3;
+  inline const ::std::string& subsysid() const;
+  inline void set_subsysid(const ::std::string& value);
+  inline void set_subsysid(const char* value);
+  inline void set_subsysid(const char* value, size_t size);
+  inline ::std::string* mutable_subsysid();
+  inline ::std::string* release_subsysid();
+  inline void set_allocated_subsysid(::std::string* subsysid);
 
   // optional string ConfType = 4 [default = ""];
   inline bool has_conftype() const;
@@ -4423,18 +4423,18 @@ class DeviceModule : public ::google::protobuf::Message {
  private:
   inline void set_has_type();
   inline void clear_has_type();
-  inline void set_has_confindex();
-  inline void clear_has_confindex();
-  inline void set_has_confname();
-  inline void clear_has_confname();
+  inline void set_has_channel();
+  inline void clear_has_channel();
+  inline void set_has_subsysid();
+  inline void clear_has_subsysid();
   inline void set_has_conftype();
   inline void clear_has_conftype();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 type_;
-  ::google::protobuf::int32 confindex_;
-  ::std::string* confname_;
+  ::google::protobuf::int32 channel_;
+  ::std::string* subsysid_;
   ::std::string* conftype_;
 
   mutable int _cached_size_;
@@ -4582,17 +4582,87 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
+  // optional int32 byteOrder = 2 [default = 0];
+  inline bool has_byteorder() const;
+  inline void clear_byteorder();
+  static const int kByteOrderFieldNumber = 2;
+  inline ::google::protobuf::int32 byteorder() const;
+  inline void set_byteorder(::google::protobuf::int32 value);
+
+  // optional int32 format = 3 [default = 0];
+  inline bool has_format() const;
+  inline void clear_format();
+  static const int kFormatFieldNumber = 3;
+  inline ::google::protobuf::int32 format() const;
+  inline void set_format(::google::protobuf::int32 value);
+
+  // optional int32 size = 4 [default = 0];
+  inline bool has_size() const;
+  inline void clear_size();
+  static const int kSizeFieldNumber = 4;
+  inline ::google::protobuf::int32 size() const;
+  inline void set_size(::google::protobuf::int32 value);
+
+  // optional int32 validityOffset = 5 [default = 0];
+  inline bool has_validityoffset() const;
+  inline void clear_validityoffset();
+  static const int kValidityOffsetFieldNumber = 5;
+  inline ::google::protobuf::int32 validityoffset() const;
+  inline void set_validityoffset(::google::protobuf::int32 value);
+
+  // optional int32 validityBit = 6 [default = 0];
+  inline bool has_validitybit() const;
+  inline void clear_validitybit();
+  static const int kValidityBitFieldNumber = 6;
+  inline ::google::protobuf::int32 validitybit() const;
+  inline void set_validitybit(::google::protobuf::int32 value);
+
+  // optional int32 valueOffset = 7 [default = 0];
+  inline bool has_valueoffset() const;
+  inline void clear_valueoffset();
+  static const int kValueOffsetFieldNumber = 7;
+  inline ::google::protobuf::int32 valueoffset() const;
+  inline void set_valueoffset(::google::protobuf::int32 value);
+
+  // optional int32 valueBit = 8 [default = 0];
+  inline bool has_valuebit() const;
+  inline void clear_valuebit();
+  static const int kValueBitFieldNumber = 8;
+  inline ::google::protobuf::int32 valuebit() const;
+  inline void set_valuebit(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
  private:
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_byteorder();
+  inline void clear_has_byteorder();
+  inline void set_has_format();
+  inline void clear_has_format();
+  inline void set_has_size();
+  inline void clear_has_size();
+  inline void set_has_validityoffset();
+  inline void clear_has_validityoffset();
+  inline void set_has_validitybit();
+  inline void clear_has_validitybit();
+  inline void set_has_valueoffset();
+  inline void clear_has_valueoffset();
+  inline void set_has_valuebit();
+  inline void clear_has_valuebit();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 byteorder_;
+  ::google::protobuf::int32 format_;
+  ::google::protobuf::int32 size_;
+  ::google::protobuf::int32 validityoffset_;
+  ::google::protobuf::int32 validitybit_;
+  ::google::protobuf::int32 valueoffset_;
+  ::google::protobuf::int32 valuebit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9604,95 +9674,95 @@ inline void DeviceModule::set_type(::google::protobuf::int32 value) {
   type_ = value;
 }
 
-// optional int32 ConfIndex = 2 [default = 0];
-inline bool DeviceModule::has_confindex() const {
+// optional int32 Channel = 2 [default = 0];
+inline bool DeviceModule::has_channel() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void DeviceModule::set_has_confindex() {
+inline void DeviceModule::set_has_channel() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void DeviceModule::clear_has_confindex() {
+inline void DeviceModule::clear_has_channel() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void DeviceModule::clear_confindex() {
-  confindex_ = 0;
-  clear_has_confindex();
+inline void DeviceModule::clear_channel() {
+  channel_ = 0;
+  clear_has_channel();
 }
-inline ::google::protobuf::int32 DeviceModule::confindex() const {
-  return confindex_;
+inline ::google::protobuf::int32 DeviceModule::channel() const {
+  return channel_;
 }
-inline void DeviceModule::set_confindex(::google::protobuf::int32 value) {
-  set_has_confindex();
-  confindex_ = value;
+inline void DeviceModule::set_channel(::google::protobuf::int32 value) {
+  set_has_channel();
+  channel_ = value;
 }
 
-// optional string ConfName = 3 [default = ""];
-inline bool DeviceModule::has_confname() const {
+// optional string SubsysID = 3 [default = ""];
+inline bool DeviceModule::has_subsysid() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void DeviceModule::set_has_confname() {
+inline void DeviceModule::set_has_subsysid() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void DeviceModule::clear_has_confname() {
+inline void DeviceModule::clear_has_subsysid() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void DeviceModule::clear_confname() {
-  if (confname_ != &::google::protobuf::internal::kEmptyString) {
-    confname_->clear();
+inline void DeviceModule::clear_subsysid() {
+  if (subsysid_ != &::google::protobuf::internal::kEmptyString) {
+    subsysid_->clear();
   }
-  clear_has_confname();
+  clear_has_subsysid();
 }
-inline const ::std::string& DeviceModule::confname() const {
-  return *confname_;
+inline const ::std::string& DeviceModule::subsysid() const {
+  return *subsysid_;
 }
-inline void DeviceModule::set_confname(const ::std::string& value) {
-  set_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
-    confname_ = new ::std::string;
+inline void DeviceModule::set_subsysid(const ::std::string& value) {
+  set_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
+    subsysid_ = new ::std::string;
   }
-  confname_->assign(value);
+  subsysid_->assign(value);
 }
-inline void DeviceModule::set_confname(const char* value) {
-  set_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
-    confname_ = new ::std::string;
+inline void DeviceModule::set_subsysid(const char* value) {
+  set_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
+    subsysid_ = new ::std::string;
   }
-  confname_->assign(value);
+  subsysid_->assign(value);
 }
-inline void DeviceModule::set_confname(const char* value, size_t size) {
-  set_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
-    confname_ = new ::std::string;
+inline void DeviceModule::set_subsysid(const char* value, size_t size) {
+  set_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
+    subsysid_ = new ::std::string;
   }
-  confname_->assign(reinterpret_cast<const char*>(value), size);
+  subsysid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DeviceModule::mutable_confname() {
-  set_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
-    confname_ = new ::std::string;
+inline ::std::string* DeviceModule::mutable_subsysid() {
+  set_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
+    subsysid_ = new ::std::string;
   }
-  return confname_;
+  return subsysid_;
 }
-inline ::std::string* DeviceModule::release_confname() {
-  clear_has_confname();
-  if (confname_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DeviceModule::release_subsysid() {
+  clear_has_subsysid();
+  if (subsysid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = confname_;
-    confname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = subsysid_;
+    subsysid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DeviceModule::set_allocated_confname(::std::string* confname) {
-  if (confname_ != &::google::protobuf::internal::kEmptyString) {
-    delete confname_;
+inline void DeviceModule::set_allocated_subsysid(::std::string* subsysid) {
+  if (subsysid_ != &::google::protobuf::internal::kEmptyString) {
+    delete subsysid_;
   }
-  if (confname) {
-    set_has_confname();
-    confname_ = confname;
+  if (subsysid) {
+    set_has_subsysid();
+    subsysid_ = subsysid;
   } else {
-    clear_has_confname();
-    confname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_subsysid();
+    subsysid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
@@ -9794,6 +9864,160 @@ inline ::google::protobuf::int32 DeviceSignal::type() const {
 inline void DeviceSignal::set_type(::google::protobuf::int32 value) {
   set_has_type();
   type_ = value;
+}
+
+// optional int32 byteOrder = 2 [default = 0];
+inline bool DeviceSignal::has_byteorder() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void DeviceSignal::set_has_byteorder() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void DeviceSignal::clear_has_byteorder() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void DeviceSignal::clear_byteorder() {
+  byteorder_ = 0;
+  clear_has_byteorder();
+}
+inline ::google::protobuf::int32 DeviceSignal::byteorder() const {
+  return byteorder_;
+}
+inline void DeviceSignal::set_byteorder(::google::protobuf::int32 value) {
+  set_has_byteorder();
+  byteorder_ = value;
+}
+
+// optional int32 format = 3 [default = 0];
+inline bool DeviceSignal::has_format() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void DeviceSignal::set_has_format() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void DeviceSignal::clear_has_format() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void DeviceSignal::clear_format() {
+  format_ = 0;
+  clear_has_format();
+}
+inline ::google::protobuf::int32 DeviceSignal::format() const {
+  return format_;
+}
+inline void DeviceSignal::set_format(::google::protobuf::int32 value) {
+  set_has_format();
+  format_ = value;
+}
+
+// optional int32 size = 4 [default = 0];
+inline bool DeviceSignal::has_size() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DeviceSignal::set_has_size() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DeviceSignal::clear_has_size() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DeviceSignal::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+inline ::google::protobuf::int32 DeviceSignal::size() const {
+  return size_;
+}
+inline void DeviceSignal::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
+}
+
+// optional int32 validityOffset = 5 [default = 0];
+inline bool DeviceSignal::has_validityoffset() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DeviceSignal::set_has_validityoffset() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DeviceSignal::clear_has_validityoffset() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DeviceSignal::clear_validityoffset() {
+  validityoffset_ = 0;
+  clear_has_validityoffset();
+}
+inline ::google::protobuf::int32 DeviceSignal::validityoffset() const {
+  return validityoffset_;
+}
+inline void DeviceSignal::set_validityoffset(::google::protobuf::int32 value) {
+  set_has_validityoffset();
+  validityoffset_ = value;
+}
+
+// optional int32 validityBit = 6 [default = 0];
+inline bool DeviceSignal::has_validitybit() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DeviceSignal::set_has_validitybit() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DeviceSignal::clear_has_validitybit() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DeviceSignal::clear_validitybit() {
+  validitybit_ = 0;
+  clear_has_validitybit();
+}
+inline ::google::protobuf::int32 DeviceSignal::validitybit() const {
+  return validitybit_;
+}
+inline void DeviceSignal::set_validitybit(::google::protobuf::int32 value) {
+  set_has_validitybit();
+  validitybit_ = value;
+}
+
+// optional int32 valueOffset = 7 [default = 0];
+inline bool DeviceSignal::has_valueoffset() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void DeviceSignal::set_has_valueoffset() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void DeviceSignal::clear_has_valueoffset() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void DeviceSignal::clear_valueoffset() {
+  valueoffset_ = 0;
+  clear_has_valueoffset();
+}
+inline ::google::protobuf::int32 DeviceSignal::valueoffset() const {
+  return valueoffset_;
+}
+inline void DeviceSignal::set_valueoffset(::google::protobuf::int32 value) {
+  set_has_valueoffset();
+  valueoffset_ = value;
+}
+
+// optional int32 valueBit = 8 [default = 0];
+inline bool DeviceSignal::has_valuebit() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void DeviceSignal::set_has_valuebit() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void DeviceSignal::clear_has_valuebit() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void DeviceSignal::clear_valuebit() {
+  valuebit_ = 0;
+  clear_has_valuebit();
+}
+inline ::google::protobuf::int32 DeviceSignal::valuebit() const {
+  return valuebit_;
+}
+inline void DeviceSignal::set_valuebit(::google::protobuf::int32 value) {
+  set_has_valuebit();
+  valuebit_ = value;
 }
 
 // -------------------------------------------------------------------

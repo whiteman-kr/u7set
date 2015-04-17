@@ -1,0 +1,22 @@
+****************************************************************************
+* NCReport 2.8.4
+* Release date: 04.Jul.2012
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+New features:
+
+- 0071439: [Report engine library] PreviewMainWindow: exec() Introduced. This function keeps application event loop while preview.
+
+Fixes:
+
+- 0071411: [Report engine library] Overriding a SQL data source (administrator)
+- 0071468: [Report engine library] Software does not check sql.next for errors (administrator)
+- 0071467: [Report engine library] Unify Preview + PDF + Print output look under MacOS (administrator)
+- 0071464: [Report engine library] Different return values for runReport() (administrator)
+- 0071466: [Report engine library] Great Performance tuning for large data reports (administrator)
+- 0071465: [Report engine library] Preview Main Window to show the same page when view type is changed (administrator)
+- Some other fixes
+- Optimalizations
+
+
+

@@ -66,7 +66,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 
 	m_dataSizeProperty = m_intManager->addProperty(tr("Data size"));
 	m_intManager->setRange(m_dataSizeProperty, 1, 100);
-	if (signalType == SignalType::analog)
+	if (signalType == SignalType::Analog)
 	{
 		m_intManager->setValue(m_dataSizeProperty, signal.dataSize());
 		m_intManager->setReadOnly(m_dataSizeProperty, readOnly);
@@ -326,7 +326,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
 	if (dataFormatIndex > 0 && dataFormatIndex < m_dataFormatInfo.count())
 	{
-		m_signal.setDataFormat(m_dataFormatInfo.key(dataFormatIndex));
+		m_signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(dataFormatIndex)));
 	}
 	m_signal.setDataSize(m_intManager->value(m_dataSizeProperty));
 	m_signal.setLowADC(m_intManager->value(m_lowAdcProperty));

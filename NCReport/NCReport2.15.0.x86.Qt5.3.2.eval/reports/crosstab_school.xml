@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.6" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>10</topmargin>
+        <bottommargin>10</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="class1" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">NAME	AGE
+Tom	8
+John	9
+Jennifer	8
+Paul	8
+Jane	9</datasource>
+        <datasource id="class2" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">NAME	AGE
+Aliya	7
+Lucy	7
+</datasource>
+        <datasource id="class3" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">NAME	AGE
+Alex	8
+Peter	8
+Justine	7
+Francis	7
+Margaret	8
+Eve	9
+John	7
+Andrea	8
+Jeremy	7
+Kim	8</datasource>
+        <datasource id="DS0" type="txt" openRole="begin" source="static" columnDelimiter="tab">0</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="20.000">
+        <label id="0" zValue="0" posX="0.000" posY="1.587" width="170.127" height="7.673" fontName="Arial" fontSize="18" fontWeight="bold" alignment="4">CLASS TABLES</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="2.910"/>
+    <details>
+        <detail id="Detail_Class1" height="18.521" datasource="DS0">
+            <items>
+                <label id="" zValue="1" posX="0.000" posY="0.000" width="17.462" height="14.023" fontName="Arial" fontSize="10" alignment="132">CLASS1</label>
+                <rectangle id="" zValue="2" posX="0.000" posY="0.000" width="19.050" height="14.023" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillStyle="no" fillColor="#ffffff"/>
+                <crosstab id="" zValue="10" posX="19.050" posY="0.000" width="123.825" height="17.462" datasource="class1" tableSpacing="0" cellPadding="1" cellSpacing="0" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" colWidth="20" rowHeight="7" showColHeader="0" showRowHeader="1" showBottomSummary="0" showSideSummary="0" breakTable="0" isPivot="1" ptAgg="1">
+                    <cell ct="0" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="1" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="2" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="3" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="4" dt="0" alignment="132" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="5" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="6" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="7" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="8" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                </crosstab>
+            </items>
+        </detail>
+        <detail id="Detail_Class2" height="19.335" datasource="DS0">
+            <items>
+                <rectangle id="1037" zValue="2" posX="0.000" posY="0.000" width="19.050" height="14.023" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillStyle="no" fillColor="#ffffff"/>
+                <label id="2332" zValue="3" posX="0.000" posY="0.000" width="17.462" height="14.023" fontName="Arial" fontSize="10" alignment="132">CLASS2</label>
+                <crosstab id="3334" zValue="4" posX="19.050" posY="0.000" width="123.825" height="17.462" datasource="class2" tableSpacing="0" cellPadding="1" cellSpacing="0" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" colWidth="20" rowHeight="7" showColHeader="0" showRowHeader="1" showBottomSummary="0" showSideSummary="0" breakTable="0" isPivot="1" ptAgg="1">
+                    <cell ct="0" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="1" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="2" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="3" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="4" dt="0" alignment="132" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="5" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="6" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="7" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="8" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                </crosstab>
+            </items>
+        </detail>
+        <detail id="Detail_Class3" height="18.521" datasource="DS0">
+            <items>
+                <rectangle id="3511" zValue="2" posX="0.000" posY="0.000" width="19.050" height="14.023" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fillStyle="no" fillColor="#ffffff"/>
+                <label id="5447" zValue="3" posX="0.000" posY="0.000" width="17.462" height="14.023" fontName="Arial" fontSize="10" alignment="132">CLASS3</label>
+                <crosstab id="5342" zValue="4" posX="19.050" posY="0.000" width="123.825" height="17.462" datasource="class3" tableSpacing="0" cellPadding="1" cellSpacing="0" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" colWidth="20" rowHeight="7" showColHeader="0" showRowHeader="1" showBottomSummary="0" showSideSummary="0" breakTable="0" isPivot="1" ptAgg="1">
+                    <cell ct="0" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="1" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="2" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="3" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="4" dt="0" alignment="132" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="5" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="6" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="7" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="8" dt="0" alignment="129" fontName="MS Shell Dlg 2" fontSize="8" fillStyle="no" fillColor="#000000" foreColor="#000000">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                </crosstab>
+            </items>
+        </detail>
+    </details>
+</NCReport>

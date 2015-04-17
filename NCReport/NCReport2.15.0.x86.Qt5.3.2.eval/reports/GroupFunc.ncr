@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.13.2" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Ubuntu</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" allowEmpty="true" type="txt" openRole="begin" source="static" columnDelimiter="tab" encoding="UTF-8">1654	2014-08-01
+2554	2014-08-05
+159	2014-08-06
+677	2014-08-18
+4520	2014-09-03
+1280	2014-09-12
+3002	2014-10-08
+969	2014-11-06</datasource>
+    </datasources>
+    <variables>
+        <variable id="total" type="num" funcType="sum" scope="group" initValue="0">col0</variable>
+    </variables>
+    <pageheader id="PH" height="7.938">
+        <label id="PQM57" zValue="0" posX="0.000" posY="0.000" width="61.912" height="5.027" fontName="Ubuntu" fontSize="12" fontWeight="bold" alignment="1">Sales grouped by month</label>
+        <field id="VSB9B" zValue="1" posX="87.312" posY="0.000" width="82.550" height="4.762" resource="param" fontName="Ubuntu" fontSize="10" alignment="34" forecolor="#000000" type="txt" ftype="par">username</field>
+    </pageheader>
+    <pagefooter id="PF" height="9.525"/>
+    <details>
+        <detail id="Detail1" height="5.292" datasource="DataSource1">
+            <items>
+                <field id="VSB9B" typeId="131074" zValue="0" posX="34.925" posY="0.000" width="31.750" height="4.762" description="col0" resource="datasource" fontName="Ubuntu" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="true">col0</field>
+                <field id="UNBCE" typeId="131074" zValue="1" posX="0.000" posY="0.000" width="31.750" height="4.762" description="col1" resource="datasource" fontName="Ubuntu" fontSize="10" alignment="1" type="txt" ftype="ds">col1</field>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="$MONTH{col1}" resetVariables="total" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_Group0" height="5.821">
+                        <label id="7UHBR" zValue="0" posX="0.000" posY="0.000" width="12.700" height="4.762" fontName="Ubuntu" fontSize="10" alignment="1">Month:</label>
+                        <field id="8FD9X" zValue="1" posX="12.700" posY="0.000" width="31.750" height="4.762" resource="datasource" fontName="Ubuntu" fontSize="10" fontWeight="bold" alignment="1" type="date" ftype="ds" dateFormat="MMMM">col1</field>
+                    </groupheader>
+                    <groupfooter id="GF_Group0" height="8.467">
+                        <field id="0R2HF" zValue="0" posX="34.925" posY="3.175" width="31.750" height="4.762" resource="var" fontName="Ubuntu" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" localized="true">total</field>
+                        <line id="KPYYQ" zValue="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="68.263" fromY="1.587" toX="-1.587" toY="1.587"/>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

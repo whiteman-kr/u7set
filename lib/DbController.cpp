@@ -64,6 +64,8 @@ DbController::DbController() :
 	connect(this, &DbController::signal_deleteSignal, m_worker, &DbWorker::slot_deleteSignal);
 	connect(this, &DbController::signal_undoSignalChanges, m_worker, &DbWorker::slot_undoSignalChanges);
 	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
+	connect(this, &DbController::signal_autoAddSignals, m_worker, &DbWorker::slot_autoAddSignals);
+	connect(this, &DbController::signal_autoDeleteSignals, m_worker, &DbWorker::slot_autoDeleteSignals);
 
 	connect(this, &DbController::signal_buildStart, m_worker, &DbWorker::slot_buildStart);
 	connect(this, &DbController::signal_buildFinish, m_worker, &DbWorker::slot_buildFinish);
@@ -1303,6 +1305,45 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 	emit signal_checkinSignals(signalIDs, comment, objectState);
 
 	ok = waitForComplete(parentWidget, tr("Checkin signals"));
+
+	return ok;
+}
+
+
+
+bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals, QWidget* parentWidget)
+{
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_autoAddSignals(deviceSignals);
+
+	ok = waitForComplete(parentWidget, tr("Auto add signals"));
+
+	return ok;
+}
+
+
+bool DbController::autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals, QWidget* parentWidget)
+{
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_autoDeleteSignals(deviceSignals);
+
+	ok = waitForComplete(parentWidget, tr("Auto delete signals"));
 
 	return ok;
 }

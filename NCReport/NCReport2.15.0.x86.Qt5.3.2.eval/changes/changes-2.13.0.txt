@@ -1,0 +1,47 @@
+****************************************************************************
+* NCReport 2.13.0
+* Release date: 01.Oct.2014
+* Features and bugfixes are tracked at http://tracker.ncreport.org
+****************************************************************************
+
+- 0071667: [Designer] Editor widget to choose data source fields/create templates: New Expression builder dialog
+- 0071726: [Designer] Display input dialog for parameter: 
+            In Designer, if an existing parameter has '?' value then it is requested by a 
+            QInputDialog before running the report from designer. 
+- 0071734: [Report engine library] Field Alignment issue: 
+            in Item model data sources using model based appearance roles now is optional 
+- 0071733: [Designer] virtual function for customizing Designer dialogs: 
+            virtual void customizeDialog( QDialog* dialog ); method introduced for all designer dialogs 
+- 0071729: [Designer] NCRDXMLDefReader export 
+- 0071730: [General] Table view item: 
+            optional hide rows and columns. Designer has hide rows and hide columns input 
+            where you can set comma separated list of row or column indexes.
+- 0071731: [Report engine library] Barcode: QR code 
+- 0071723: [Report engine library] rotate PDF +/- 90°: PDF, PRINTER outputs can be rotated: 90, -90, 270, 180 degrees 
+- 0071732: [Report engine library] make formal parameter 'const' 
+- 0071725: [General] New data source relation system: 
+            DATA RELATIONS now is much better supported general feature. 
+            It is useful for SQL and Item Model data sources
+            WARNING!
+            The reports that apply the old subquery/relation system must be modified in this version:
+            
+            - The detail's data source must be the root parent data source
+            - All fields and expressions must have its data source identifier i.e: datasource.column
+
+            To use the new data source relation system follow these rules:
+
+            - A data source relation can be defined by simply set "child data source" and 
+              giving the parent data source id. (as usual)
+            - 1 parent can have only 1 child (1 to many relation)
+            - You can specify the primary key column index. If a primary key column is defined 
+              for the parent data source, you can use {PK} or {ID} expression in the child data 
+              source query. (This is useful only in SQL data sources)
+            - If you assign a data source relation to a detail section always set the root parent 
+              data source to the detail. In earlier version we had to set the last child data source, 
+              but it is outdated in 2.13.
+            - Use dataSourceUpdateRequest(const QString& dataSourceID, const QString& foreignKeyValue); 
+              signal to handle data source updates.
+            - Use !$D{datasource.isEmpty()} print when expression of a detail section to hide the empty children data
+
+- 0071724: [General] Screen/Font DPI problem when Windows Desktop set to 125%, 150% enlarged view - fixed.
+- 0000000: Several other fixes and updates

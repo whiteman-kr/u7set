@@ -18,9 +18,9 @@ class QComboBox;
 class SignalsTabPage;
 
 
-const int ST_ANALOG = SignalType::analog,
-ST_DISCRETE = SignalType::discrete,
-ST_ANY = 0xff;
+const int	ST_ANALOG = SignalType::Analog,
+			ST_DISCRETE = SignalType::Discrete,
+			ST_ANY = 0xff;
 
 
 class SignalsDelegate : public QStyledItemDelegate

@@ -582,8 +582,8 @@ message DeviceModule
 {
 	optional int32 type = 1 [default = 0];
 
-	optional int32 ConfIndex = 2 [default = 0];
-	optional string ConfName = 3 [default = ""];
+    optional int32 Channel = 2 [default = 0];
+	optional string SubsysID = 3 [default = ""];
 	optional string ConfType = 4 [default = ""];
 }
 
@@ -594,6 +594,13 @@ message DeviceController
 message DeviceSignal
 {
         optional int32 type = 1 [default = 0];
+        optional int32 byteOrder = 2 [default = 0];
+        optional int32 format = 3 [default = 0];
+        optional int32 size = 4 [default = 0];
+        optional int32 validityOffset = 5 [default = 0];
+        optional int32 validityBit = 6 [default = 0];
+        optional int32 valueOffset = 7 [default = 0];
+        optional int32 valueBit = 8 [default = 0];
 }
 
 message Workstation

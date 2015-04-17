@@ -131,9 +131,10 @@ SOURCES +=\
     Builder/ApplicationLogicBuilder.cpp \
 	Builder/BuildResultWriter.cpp \
 	SchemeLayersDialog.cpp \
-    Builder/ConfigurationBuilder.cpp
-
-
+    Builder/ConfigurationBuilder.cpp \
+    Builder/ApplicationLogicCode.cpp \
+	Builder/ApplicationLogicCompiler.cpp \
+    DialogSubsystemListEditor.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -196,8 +197,11 @@ HEADERS  += \
     Builder/ApplicationLogicBuilder.h \
 	Builder/BuildResultWriter.h \
     SchemeLayersDialog.h \
-    Builder/ConfigurationBuilder.h
-
+    Builder/ConfigurationBuilder.h \
+    Builder/ApplicationLogicCode.h \
+	Builder/ApplicationLogicCompiler.h \
+    DialogSubsystemListEditor.h \
+    ../include/Types.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -214,7 +218,8 @@ FORMS    += \
     SchemeItemPropertiesDialog.ui \
     SchemePropertiesDialog.ui \
     DialogFileEditor.ui \
-    SchemeLayersDialog.ui
+    SchemeLayersDialog.ui \
+    DialogSubsystemListEditor.ui
 
 RESOURCES += \
 	Resources.qrc
@@ -261,11 +266,12 @@ OTHER_FILES += \
         ../Proto/proto_compile.sh \
     DatabaseUpgrade/Upgrade0034.sql \
     DatabaseUpgrade/Upgrade0035.sql \
-    month-report.txt
+	DatabaseUpgrade/Upgrade0036.sql \
+	DatabaseUpgrade/Upgrade0037.sql \
+	month-report.txt
 
 DISTFILES += \
-    LogicModuleConfiguration.js \
-    DatabaseUpgrade/Upgrade0036.sql
+	LogicModuleConfiguration.js
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

@@ -121,6 +121,7 @@ public slots:
 	void addPresetRack();
 	void addPresetChassis();
 	void addPresetModule();
+	void addPresetController();
 	void addPresetWorkstation();
 	void addPresetSoftware();
 
@@ -197,6 +198,7 @@ private:
 		QAction* m_addRackAction = nullptr;
 		QAction* m_addChassisAction = nullptr;
 		QAction* m_addModuleAction = nullptr;
+		QAction* m_addControllerAction = nullptr;
 		QAction* m_addSignalAction = nullptr;
 		QAction* m_addWorkstationAction = nullptr;
 		QAction* m_addSoftwareAction = nullptr;
@@ -207,6 +209,7 @@ private:
 		QAction* m_addPresetRackAction = nullptr;
 		QAction* m_addPresetChassisAction = nullptr;
 		QAction* m_addPresetModuleAction = nullptr;
+		QAction* m_addPresetControllerAction = nullptr;
 		QAction* m_addPresetWorkstationAction = nullptr;
 		QAction* m_addPresetSoftwareAction = nullptr;
 	//----------------------------------

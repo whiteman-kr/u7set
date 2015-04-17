@@ -153,7 +153,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_DATA_SIZE:
 		{
-			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].type() == SignalType::discrete)
+			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].type() == SignalType::Discrete)
 			{
 				return nullptr;
 			}
@@ -342,7 +342,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_MAX_DIFFERENCE: if (le) s.setMaxDifference(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setDataFormat(m_dataFormatInfo.key(cb->currentIndex())); break;
+		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
@@ -622,7 +622,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		if (signal.type() == SignalType::analog)
+		if (signal.type() == SignalType::Analog)
 		{
 			switch (col)
 			{
@@ -754,9 +754,9 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 			{
 				switch (signal.instanceAction())
 				{
-					case InstanceAction::added: return plus;
-					case InstanceAction::modified: return pencil;
-					case InstanceAction::deleted: return cross;
+					case InstanceAction::Added: return plus;
+					case InstanceAction::Modified: return pencil;
+					case InstanceAction::Deleted: return cross;
 					default:
 						assert(false);
 						return QVariant();
@@ -800,7 +800,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setStrID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
 			case SC_NAME: signal.setName(value.toString()); break;
-			case SC_DATA_FORMAT: signal.setDataFormat(value.toInt()); break;
+			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<DataFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;

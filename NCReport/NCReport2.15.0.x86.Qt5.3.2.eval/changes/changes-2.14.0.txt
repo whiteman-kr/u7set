@@ -1,0 +1,16 @@
+****************************************************************************
+* NCReport 2.14.0
+* Release date: 16.Jan.2015
+* Features and bugfixes are tracked at http://tracker.ncreport.org
+****************************************************************************
+
+- 0071750: [Designer] additional function parameters in NCRDGraphItemDialogFactory (administrator) - resolved.
+- 0071752: [General] Minor internal fixes, updates, adjustments (administrator) - resolved.
+- 0071664: [Report engine library] Group footer: access to first/last row of that group (administrator) - resolved.
+- 0071751: [General] Data trimming in groups to make optional (administrator) - resolved.
+- 0071726: [Designer] Display input dialog for parameter (administrator) - resolved.
+- 0071743: [General] Grouping by internal date functions: day, week, month, year (administrator) - resolved.
+- 0071746: [General] Page filter support both with page range and list of pages for all report outputs. (administrator) - resolved.
+- 0071735: [General] Language based localization (administrator) - resolved.
+- 0071747: [Report engine library] QLocale settings to consider when the current language is set. (administrator) - resolved.
+- 0071736: [General] Language dependent HTML template for Text item (administrator) - resolved.

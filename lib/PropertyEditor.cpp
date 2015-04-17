@@ -152,6 +152,22 @@ QtMultiEnumEdit::QtMultiEnumEdit(QWidget* parent):
     setLayout(lt);
 }
 
+void QtMultiEnumEdit::setItems(QVariant value)
+{
+	if (m_combo == nullptr)
+	{
+		Q_ASSERT(m_combo);
+		return;
+	}
+
+	EnumPropertyType e = value.value<EnumPropertyType>();
+
+	for (std::pair<QString, int>& i : e.items)
+	{
+		m_combo->addItem(i.first, i.second);
+	}
+}
+
 void QtMultiEnumEdit::setValue(QVariant value)
 {
     if (m_combo == nullptr)
@@ -160,23 +176,39 @@ void QtMultiEnumEdit::setValue(QVariant value)
         return;
     }
 
-    m_oldValue = value;
+	m_oldValue = value;
 
     EnumPropertyType e = value.value<EnumPropertyType>();
 
-    m_combo->clear();
-    m_combo->addItems(e.items);
-    m_combo->setCurrentIndex(e.value);
+	// select an item with a value
+	//
+
+	bool found =  false;
+	for (int i = 0; i < m_combo->count(); i++)
+	{
+		if (m_combo->itemData(i).toInt() == e.value)
+		{
+			m_combo->setCurrentIndex(i);
+			found = true;
+			break;
+		}
+	}
+	if (found == false)
+	{
+		m_combo->setCurrentIndex(-1);
+	}
 }
 
 void QtMultiEnumEdit::indexChanged(int index)
 {
     EnumPropertyType e = m_oldValue.value<EnumPropertyType>();
 
-    if (e.value != index)
+	int value = m_combo->itemData(index).toInt();
+
+	if (e.value != value)
     {
-        e.value = index;
-        m_oldValue = QVariant::fromValue(e);
+		e.value = value;
+		m_oldValue = QVariant::fromValue(e);
         emit valueChanged(QVariant::fromValue(e));
     }
 }
@@ -601,7 +633,8 @@ QtMultiUIntSpinBox::QtMultiUIntSpinBox(QWidget* parent):
 {
 	m_spinBox = new QSpinBox(parent);
 	m_spinBox->setKeyboardTracking(false);
-	//m_spinBox->setRange(std::numeric_limits<quint32>::min(), std::numeric_limits<quint32>::max());
+	// warning! a problem that QSpinBox::setRange needs "ints", and we have uint type...
+	m_spinBox->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 
 	connect(m_spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 			this, &QtMultiUIntSpinBox::onValueChanged);
@@ -832,6 +865,7 @@ QWidget* QtMultiVariantFactory::createEditor(QtMultiVariantPropertyManager* mana
         {
             QtMultiEnumEdit* m_editor = new QtMultiEnumEdit(parent);
             editor = m_editor;
+			m_editor->setItems(manager->value(property));
             m_editor->setValue(manager->value(property));
 
             connect(m_editor, &QtMultiEnumEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
@@ -1216,7 +1250,14 @@ QString QtMultiVariantPropertyManager::valueText(const QtProperty* property) con
         if (type == EnumPropertyType::enumTypeId())
         {
             EnumPropertyType e = value(property).value<EnumPropertyType>();
-            return e.items[e.value];
+			for (std::pair<QString, int>& i : e.items)
+			{
+				if (i.second == e.value)
+				{
+					return i.first;
+				}
+			}
+			return QString();
         }
 
         switch (type)
@@ -1392,7 +1433,7 @@ static PropertyItem pi;
                 ept.value = object->property(name).toInt();
                 for (int i = 0; i < metaProperty.enumerator().keyCount(); i++)
                 {
-                    ept.items.push_back(metaProperty.enumerator().valueToKey(i));
+					ept.items.push_back(std::make_pair(metaProperty.enumerator().key(i), metaProperty.enumerator().value(i)));
                 }
                 pi.value = QVariant::fromValue(ept);
 
@@ -1416,14 +1457,25 @@ static PropertyItem pi;
 		//Add dynamic properties added by SetProperty
 		//
 		QList<QByteArray> dynamicPropNames = object->dynamicPropertyNames();
+
+
+		// Sort dynamic properties by name
+		//
+		QStringList dynamicPropSortedNames;
 		for (auto name : dynamicPropNames)
+		{
+			dynamicPropSortedNames.append(name);
+		}
+		dynamicPropSortedNames.sort();
+
+		for (auto name : dynamicPropSortedNames)
 		{
 
 static PropertyItem pi;
 
 			pi.object = *pobject;
-            pi.value = object->property(name);
-            pi.type = pi.value.userType();
+			pi.value = object->property(name.toStdString().c_str());
+			pi.type = pi.value.userType();
 
 			propertyItems.insertMulti(name, pi);
 
@@ -1609,8 +1661,10 @@ QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QSt
                     EnumPropertyType e;
 
                     EnumPropertyType v = value.value<EnumPropertyType>();
-                    for (int i = 0; i < v.items.count(); i++)
+					for (int i = 0; i < v.items.size(); i++)
+					{
                         e.items.push_back(v.items[i]);
+					}
 
                     m_propertyVariantManager->setValue(subProperty, QVariant::fromValue(e));
                 }

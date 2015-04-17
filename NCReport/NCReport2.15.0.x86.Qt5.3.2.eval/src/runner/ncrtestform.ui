@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NCRTestFormUI</class>
+ <widget class="QWidget" name="NCRTestFormUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>575</width>
+    <height>312</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>NCReport tester</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabReport">
+      <attribute name="title">
+       <string>Report</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QGroupBox" name="gbFile">
+         <property name="title">
+          <string>Report file(s)</string>
+         </property>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="margin">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="leFile"/>
+          </item>
+          <item>
+           <widget class="QToolButton" name="btnSelFile">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QGroupBox" name="gbOutput">
+           <property name="title">
+            <string>Output to</string>
+           </property>
+           <layout class="QVBoxLayout" name="layyyy_2">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <property name="margin">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QRadioButton" name="rbPreview">
+              <property name="text">
+               <string>Preview</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbQtPreview">
+              <property name="text">
+               <string>Qt preview</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbPrinter">
+              <property name="text">
+               <string>Printer</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbPdf">
+              <property name="text">
+               <string>PDF file</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbSvg">
+              <property name="text">
+               <string>SVG file(s)</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="gbRunMode">
+           <property name="title">
+            <string>Batch mode</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QRadioButton" name="rbSingle">
+              <property name="text">
+               <string>Off (Single report)</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbBatch">
+              <property name="text">
+               <string>On (Multiple reports)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabConnect">
+      <attribute name="title">
+       <string>SQL Connection</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QGroupBox" name="gbConn">
+         <property name="title">
+          <string>Database connection</string>
+         </property>
+         <layout class="QGridLayout">
+          <property name="margin">
+           <number>6</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <item row="0" column="0" colspan="3">
+           <widget class="QCheckBox" name="cbUseDBConnect">
+            <property name="text">
+             <string>Use database connection</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Connection ID</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QLineEdit" name="leConnID"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Database driver</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="2">
+           <widget class="QComboBox" name="comboDriver">
+            <item>
+             <property name="text">
+              <string>QDB2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>QIBASE</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>QMYSQL</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>QOCI</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>QODBC</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>QPSQL</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>QSQLITE2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>QSQLITE</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>QTDS</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Host name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1" colspan="2">
+           <widget class="QLineEdit" name="leHost"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Database</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1" colspan="2">
+           <widget class="QLineEdit" name="leDB"/>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Username</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1" colspan="2">
+           <widget class="QLineEdit" name="leUser"/>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Password</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1" colspan="2">
+           <widget class="QLineEdit" name="lePassw">
+            <property name="echoMode">
+             <enum>QLineEdit::Password</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabParam">
+      <attribute name="title">
+       <string>Parameters</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="spacing">
+        <number>3</number>
+       </property>
+       <property name="margin">
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QGroupBox" name="gbParams">
+         <property name="title">
+          <string>Report parameters</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="margin">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QTableWidget" name="tableParams">
+            <column>
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Value</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="btnAdd">
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnRemove">
+              <property name="text">
+               <string>Remove</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="spc">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>leFile</tabstop>
+  <tabstop>btnSelFile</tabstop>
+  <tabstop>rbPreview</tabstop>
+  <tabstop>rbQtPreview</tabstop>
+  <tabstop>rbPrinter</tabstop>
+  <tabstop>rbPdf</tabstop>
+  <tabstop>rbSvg</tabstop>
+  <tabstop>rbSingle</tabstop>
+  <tabstop>rbBatch</tabstop>
+  <tabstop>btnAdd</tabstop>
+  <tabstop>btnRemove</tabstop>
+  <tabstop>cbUseDBConnect</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>leConnID</tabstop>
+  <tabstop>comboDriver</tabstop>
+  <tabstop>leHost</tabstop>
+  <tabstop>leDB</tabstop>
+  <tabstop>leUser</tabstop>
+  <tabstop>lePassw</tabstop>
+  <tabstop>tableParams</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,16 @@
+****************************************************************************
+* NCReport 2.11.0
+* Release date: 01.Okt.2013
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+New features:
+- 0071605: [Report engine library] Preview system update for better memory footprint - implemented.
+- 0071536: [Designer] Data Source Manager Tree to support easy review, edit and drag+drop of fields for data source values, parameters and variables - implemented.
+
+Fixes:
+
+- 0071604: [Report engine library] Qt5:Preview window + debug mode: Sometimes assert when preview rendering - resolved.
+- 0071603: [Report engine library] Qt5: Preview Window: Thin lines/rectangles in preview are sometimes not shown when 100% view - resolved.
+- 0071609: [Report engine library] Variables in the 2nd,3rd ... data source to reset - resolved.
+- Other small fixes and adjusments

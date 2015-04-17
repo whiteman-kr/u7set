@@ -1,0 +1,32 @@
+<h2>v2.5.0</h2>
+<h3>Release date: 22.Jan.2010</h3>
+
+<h4>New features:</h4>
+<ul>
+<li>[79] Multi language support. This version supports multi language international reports within one report file.
+This is valid for label a field items</li>
+<li>[77] Now it's possible to set order of Detail sections in Designer. It was possible only by directly edited in XML file earlier.</li>
+<li>[191] Barcodes can be rendered without code/text</li>
+<li>[194] Designer's main window changes and improvements</li>
+<li>[195] Code quality improvements and many class/code reorganisations were done.</li>
+<li>[196] Data column header for text data source. The first row of text data can be used as named columns. This is optional.</li>
+<li>[198] Zint barcode library detachment. Barcode system was rewritten because of GPL license limitations. The Zint library is not integrated
+into the project anymore. NCReport uses the Zint command line binary program only.</li>
+<li>[199] Designer: Label and Field dialog changes and a new completer is added. Dialogs are re-designed to multi language support. Ctrl+ENTER
+keypress accepts and close the dialog.</li>
+<li>[200] The same datasource can be assigned to more detail sections</li>
+<li>[201] You can use %HOME% and %TEMP% tokens datasource and image file paths as home and temporary directory on current system.</li>
+<li>Many other improvements</li>
+</ul>
+
+<h4>Fixed bugs:</h4>
+<ul>
+<li>[178] If there are two or more details in a report and one of them has no data, other details now are rendered.</li>
+<li>[190] In batch mode the variant page properties (page size) are supported for Printer output and Preview output</li>
+<li>[192] Escape sequence error when using expressions with datasource field is fixed</li>
+<li>[193] Fields were already updated to next data row on page footer in some cases when page break was occured. It's fixed for fields.</li>
+<li>[197] Image property dialog now supports all image formats.</li>
+<li>[201] Fixes in console mode: -l as language switch and database connection is not required anymore.</li>
+<li>Many many other fixes</li>
+</ul>
+

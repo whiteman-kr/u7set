@@ -3,6 +3,7 @@
 #include <QDynamicPropertyChangeEvent>
 #include <QJSEngine>
 #include <QQmlEngine>
+#include <QXmlStreamWriter>
 
 
 namespace Hardware
@@ -39,6 +40,194 @@ namespace Hardware
 	{
 	}
 
+
+	//
+	//
+	// Subsystem
+	//
+	//
+	Subsystem::Subsystem():
+		m_index(-1)
+	{
+
+	}
+
+	Subsystem::Subsystem(int index, const QString& strId, const QString& caption):
+		m_index(index),
+		m_strId(strId),
+		m_caption(caption)
+	{
+
+	}
+
+	bool Subsystem::save(QXmlStreamWriter& writer)
+	{
+		writer.writeAttribute("Index", QString::number(index()));
+		writer.writeAttribute("StrID", strId());
+		writer.writeAttribute("Caption", caption());
+		return true;
+	}
+
+
+	bool Subsystem::load(QXmlStreamReader& reader)
+	{
+		if (reader.attributes().hasAttribute("Index"))
+		{
+			setIndex(reader.attributes().value("Index").toInt());
+		}
+		else
+		{
+			reader.raiseError(QObject::tr("Subsystem - No Index found"));
+		}
+
+		if (reader.attributes().hasAttribute("StrID"))
+		{
+			setStrId(reader.attributes().value("StrID").toString());
+		}
+		else
+		{
+			reader.raiseError(QObject::tr("Subsystem - No StrID found"));
+		}
+
+		if (reader.attributes().hasAttribute("Caption"))
+		{
+			setCaption(reader.attributes().value("Caption").toString());
+		}
+		else
+		{
+			reader.raiseError(QObject::tr("Subsystem - No Caption found"));
+		}
+
+		QXmlStreamReader::TokenType endToken = reader.readNext();
+		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
+
+		return true;
+	}
+
+
+	const QString& Subsystem::strId() const
+	{
+		return m_strId;
+	}
+
+	void Subsystem::setStrId(const QString& value)
+	{
+		m_strId = value;
+	}
+
+	const QString& Subsystem::caption() const
+	{
+		return m_caption;
+	}
+
+	void Subsystem::setCaption(const QString& value)
+	{
+		m_caption = value;
+	}
+
+	int Subsystem::index() const
+	{
+		return m_index;
+	}
+
+	void Subsystem::setIndex(int value)
+	{
+		m_index = value;
+	}
+
+	//
+	//
+	// SubsystemStorage
+	//
+	//
+	SubsystemStorage::SubsystemStorage()
+	{
+
+	}
+
+	void SubsystemStorage::add(std::shared_ptr<Subsystem> subsystem)
+	{
+		m_subsystems.push_back(subsystem);
+	}
+
+	int SubsystemStorage::count() const
+	{
+		return static_cast<int>(m_subsystems.size());
+	}
+
+	std::shared_ptr<Subsystem> SubsystemStorage::get(int index) const
+	{
+		if (index < 0 || index >= count())
+		{
+			assert(false);
+			return std::make_shared<Subsystem>();
+		}
+		return m_subsystems[index];
+	}
+
+	void SubsystemStorage::clear()
+	{
+		m_subsystems.clear();
+	}
+
+	bool SubsystemStorage::load(const QByteArray& data, QString& errorCode)
+	{
+		QXmlStreamReader reader(data);
+
+		if (reader.readNextStartElement() == false)
+		{
+			return !reader.hasError();
+		}
+
+		if (reader.name() != "Subsystems")
+		{
+			reader.raiseError(QObject::tr("The file is not an Subsystems file."));
+			errorCode = reader.errorString();
+			return !reader.hasError();
+		}
+
+		// Read signals
+		//
+		while (reader.readNextStartElement())
+		{
+			if (reader.name() == "Subsystem")
+			{
+				std::shared_ptr<Hardware::Subsystem> s = std::make_shared<Hardware::Subsystem>();
+
+				if (s->load(reader) == true)
+				{
+					m_subsystems.push_back(s);
+				}
+			}
+			else
+			{
+				reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
+				errorCode = reader.errorString();
+				reader.skipCurrentElement();
+			}
+		}
+		return !reader.hasError();
+	}
+
+	bool SubsystemStorage::save(QByteArray& data)
+	{
+		QXmlStreamWriter writer(&data);
+
+		writer.setAutoFormatting(true);
+		writer.writeStartDocument();
+
+		writer.writeStartElement("Subsystems");
+		for (auto s : m_subsystems)
+		{
+			writer.writeStartElement("Subsystem");
+			s->save(writer);
+			writer.writeEndElement();
+		}
+		writer.writeEndElement();
+
+		writer.writeEndDocument();
+		return true;
+	}
 
 	//
 	//
@@ -1231,10 +1420,10 @@ namespace Hardware
 		//
 		Proto::DeviceModule* moduleMessage = message->mutable_deviceobject()->mutable_module();
 
-		moduleMessage->set_type(m_type);
+		moduleMessage->set_type(static_cast<int>(m_type));
 
-		moduleMessage->set_confindex(m_confIndex);
-		moduleMessage->set_confname(m_confName.toStdString());
+		moduleMessage->set_channel(m_channel);
+		moduleMessage->set_subsysid(m_subSysID.toStdString());
 		moduleMessage->set_conftype(m_confType.toStdString());
 
 		return true;
@@ -1264,10 +1453,10 @@ namespace Hardware
 
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
-		m_type =  moduleMessage.type();
+		m_type =  static_cast<decltype(m_type)>(moduleMessage.type());
 
-		m_confIndex = moduleMessage.confindex();
-		m_confName = moduleMessage.confname().c_str();
+		m_channel = moduleMessage.channel();
+		m_subSysID = moduleMessage.subsysid().c_str();
 		m_confType = moduleMessage.conftype().c_str();
 
 		return true;
@@ -1279,34 +1468,54 @@ namespace Hardware
 	}
 
 
-	int DeviceModule::type() const
+	DeviceModule::FamilyType DeviceModule::moduleFamily() const
 	{
-		return m_type;
+		return static_cast<DeviceModule::FamilyType>(m_type & 0xFF00);
 	}
 
-	void DeviceModule::setType(int value)
+	void DeviceModule::setModuleFamily(DeviceModule::FamilyType value)
 	{
-		m_type = value;
+		decltype(m_type) tmp = static_cast<decltype(m_type)>(value);
+
+		assert((tmp & 0x00FF) == 0);
+
+		tmp &= 0xFF00;
+
+		m_type = (m_type & 0x00FF) | tmp;
 	}
 
-	int DeviceModule::confIndex() const
+	int DeviceModule::moduleVersion() const
 	{
-		return m_confIndex;
+		return static_cast<int>(m_type) & 0xFF;
 	}
 
-	void DeviceModule::setConfIndex(int value)
+	void DeviceModule::setModuleVersion(int value)
 	{
-		m_confIndex = value;
+		decltype(m_type) tmp = static_cast<decltype(m_type)>(value);
+
+		assert((tmp & 0xFF00) == 0);
+
+		m_type = (m_type & 0xFF00) | tmp;
 	}
 
-	QString DeviceModule::confName() const
+	int DeviceModule::channel() const
 	{
-		return m_confName;
+		return m_channel;
 	}
 
-	void DeviceModule::setConfName(const QString& value)
+	void DeviceModule::setChannel(int value)
 	{
-		m_confName = value;
+		m_channel = value;
+	}
+
+	QString DeviceModule::subSysID() const
+	{
+		return m_subSysID;
+	}
+
+	void DeviceModule::setSubSysID(const QString& value)
+	{
+		m_subSysID = value;
 	}
 
 	QString DeviceModule::confType() const
@@ -1421,6 +1630,16 @@ namespace Hardware
 				message->mutable_deviceobject()->mutable_signal();
 
 		signalMessage->set_type(static_cast<int>(m_type));
+		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
+		signalMessage->set_format(static_cast<int>(m_format));
+
+		signalMessage->set_size(static_cast<int>(m_size));
+
+		signalMessage->set_validityoffset(static_cast<int>(m_validityOffset));
+		signalMessage->set_validitybit(static_cast<int>(m_validityBit));
+
+		signalMessage->set_valueoffset(static_cast<int>(m_valueOffset));
+		signalMessage->set_valuebit(static_cast<int>(m_valueBit));
 
 		return true;
 	}
@@ -1450,6 +1669,16 @@ namespace Hardware
 		const Proto::DeviceSignal& signalMessage = message.deviceobject().signal();
 
 		m_type = static_cast<SignalType>(signalMessage.type());
+		m_byteOrder = static_cast<ByteOrder>(signalMessage.byteorder());
+		m_format = static_cast<DataFormat>(signalMessage.format());
+
+		m_size = signalMessage.size();
+
+		m_validityOffset = signalMessage.validityoffset();
+		m_validityBit = signalMessage.validitybit();
+
+		m_valueOffset = signalMessage.valueoffset();
+		m_valueBit = signalMessage.valuebit();
 
 		return true;
 	}
@@ -1473,6 +1702,76 @@ namespace Hardware
     void DeviceSignal::setType(DeviceSignal::SignalType value)
 	{
 		m_type = value;
+	}
+
+	ByteOrder DeviceSignal::byteOrder() const
+	{
+		return m_byteOrder;
+	}
+
+	void DeviceSignal::setByteOrder(ByteOrder value)
+	{
+		m_byteOrder = value;
+	}
+
+	DataFormat DeviceSignal::format() const
+	{
+		return m_format;
+	}
+
+	void DeviceSignal::setFormat(DataFormat value)
+	{
+		m_format = value;
+	}
+
+	int DeviceSignal::size() const
+	{
+		return m_size;
+	}
+
+	void DeviceSignal::setSize(int value)
+	{
+		m_size = value;
+	}
+
+	int DeviceSignal::validityOffset() const
+	{
+		return m_validityOffset;
+	}
+
+	void DeviceSignal::setValidityOffset(int value)
+	{
+		m_validityOffset = value;
+	}
+
+	int DeviceSignal::validityBit() const
+	{
+		return m_validityBit;
+	}
+
+	void DeviceSignal::setValidityBit(int value)
+	{
+		m_validityBit = value;
+	}
+
+	int DeviceSignal::valueOffset() const
+	{
+		return m_valueOffset;
+	}
+
+	void DeviceSignal::setValueOffset(int value)
+	{
+		m_valueOffset = value;
+	}
+
+	int DeviceSignal::valueBit() const
+	{
+		return m_valueBit;
+	}
+
+	void DeviceSignal::setValueBit(int value)
+	{
+		m_valueBit = value;
 	}
 
 	//

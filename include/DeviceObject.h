@@ -3,6 +3,7 @@
 #include "DbStruct.h"
 #include "QUuid"
 #include "../include/Factory.h"
+#include "../include/types.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 
@@ -41,6 +42,68 @@ namespace Hardware
 		ConfigurationService = 9001,
 		DataAcquisitionService = 9002,
 		DataArchivingService = 9003,
+	};
+
+	//
+	//
+	// Subsystem
+	//
+	//
+	class Subsystem : public QObject
+	{
+		Q_OBJECT
+		Q_PROPERTY(int Index READ index WRITE setIndex)
+		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
+		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
+
+	public:
+		Subsystem();
+		Subsystem(int index, const QString& strId, const QString& caption);
+
+		bool save(QXmlStreamWriter& writer);
+		bool load(QXmlStreamReader& reader);
+
+		// Properties
+		//
+	public:
+		const QString& strId() const;
+		void setStrId(const QString& value);
+
+		const QString& caption() const;
+		void setCaption(const QString& value);
+
+		int index() const;
+		void setIndex(int value);
+
+	private:
+		int m_index;
+		QString m_strId;
+		QString m_caption;
+
+	};
+
+	//
+	//
+	// SubsystemStorage
+	//
+	//
+	class SubsystemStorage
+	{
+	public:
+
+		SubsystemStorage();
+
+		void add(std::shared_ptr<Subsystem> subsystem);
+		int count() const;
+		std::shared_ptr<Subsystem> get(int index) const;
+		void clear();
+
+		bool load(const QByteArray& data, QString &errorCode);
+		bool save(QByteArray& data);
+
+	private:
+		std::vector<std::shared_ptr<Subsystem>> m_subsystems;
+
 	};
 
 	//
@@ -356,12 +419,27 @@ namespace Hardware
 	class DeviceModule : public DeviceObject
 	{
 		Q_OBJECT
+		Q_ENUMS(FamilyType)
 
-		Q_PROPERTY(int Type READ type WRITE setType)
+		Q_PROPERTY(FamilyType ModuleFamily READ moduleFamily WRITE setModuleFamily)
+		Q_PROPERTY(int ModuleVersion READ moduleVersion WRITE setModuleVersion)
 
-		Q_PROPERTY(int ConfIndex READ confIndex WRITE setConfIndex)
-		Q_PROPERTY(QString ConfName READ confName WRITE setConfName)
+		Q_PROPERTY(int Channel READ channel WRITE setChannel)
+		Q_PROPERTY(QString SubsysID READ subSysID WRITE setSubSysID)
 		Q_PROPERTY(QString ConfType READ confType WRITE setConfType)
+
+	public:
+		enum FamilyType		// WARNING!!! Only high byte can be used as it is a part of the type
+		{					// (high byte is module family, low byte is module version)
+			OTHER = 0x0000,
+			LM = 0x1100,
+			AIM = 0x1200,
+			AOM = 0x1300,
+			DIM = 0x1400,
+			DOM = 0x1500,
+			AIFM = 0x1600,
+			OCM = 0x1700
+		};
 
 	public:
 		explicit DeviceModule(bool preset = false);
@@ -383,14 +461,17 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		int type() const;
-		void setType(int value);
+		FamilyType moduleFamily() const;
+		void setModuleFamily(FamilyType value);
 
-		int confIndex() const;
-		void setConfIndex(int value);
+		int moduleVersion() const;
+		void setModuleVersion(int value);
 
-		QString confName() const;
-		void setConfName(const QString& value);
+		int channel() const;
+		void setChannel(int value);
+
+		QString subSysID() const;
+		void setSubSysID(const QString& value);
 
 		QString confType() const;
 		void setConfType(const QString& value);
@@ -400,10 +481,10 @@ namespace Hardware
 	private:
 		static const DeviceType m_deviceType = DeviceType::Module;
 
-		int m_type = 0;
+		uint16_t m_type = 0;	// high byte is family type, low byte is module version
 
-		int m_confIndex = 0;
-		QString m_confName;
+		int m_channel = 0;		// 1 - base channel, 0 - means channel not set or not required
+		QString m_subSysID;
 		QString m_confType;
 	};
 
@@ -444,8 +525,20 @@ namespace Hardware
 		Q_OBJECT
 
 		Q_PROPERTY(SignalType Type READ type WRITE setType)
+		Q_PROPERTY(ByteOrder ByteOrder READ byteOrder WRITE setByteOrder)
+		Q_PROPERTY(DataFormat Format READ format WRITE setFormat)
+
+		Q_PROPERTY(int Size READ size WRITE setSize)
+
+		Q_PROPERTY(int ValidityOffset READ validityOffset WRITE setValidityOffset)
+		Q_PROPERTY(int ValidityBit READ validityBit WRITE setValidityBit)
+
+		Q_PROPERTY(int ValueOffset READ valueOffset WRITE setValueOffset)
+		Q_PROPERTY(int ValueBit READ valueBit WRITE setValueBit)
 
 		Q_ENUMS(SignalType)
+		Q_ENUMS(ByteOrder)
+		Q_ENUMS(DataFormat)
 
 		// SignalType
 		//
@@ -480,12 +573,42 @@ namespace Hardware
         Q_INVOKABLE int jsType() const;
         void setType(DeviceSignal::SignalType value);
 
+		ByteOrder byteOrder() const;
+		void setByteOrder(ByteOrder value);
+
+		DataFormat format() const;
+		void setFormat(DataFormat value);
+
+		int size() const;
+		void setSize(int value);
+
+		int validityOffset() const;
+		void setValidityOffset(int value);
+
+		int validityBit() const;
+		void setValidityBit(int value);
+
+		int valueOffset() const;
+		void setValueOffset(int value);
+
+		int valueBit() const;
+		void setValueBit(int value);
+
 		// Data
 		//
 	private:
 		static const DeviceType m_deviceType = DeviceType::Signal;
 
 		SignalType m_type = SignalType::DiagDiscrete;
+		ByteOrder m_byteOrder = ByteOrder::LittleEdndian;
+		DataFormat m_format = DataFormat::UnsignedInt;
+
+		int m_size = 0;
+		int m_validityOffset = -1;
+		int m_validityBit = -1;
+		int m_valueOffset = 0;
+		int m_valueBit = 0;
+
 	};
 
 	//

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.14.0" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <fontstyle></fontstyle>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+        <subReportOnNewPage>true</subReportOnNewPage>
+    </options>
+    <datasources>
+        <datasource id="base" allowEmpty="true" type="sql" openRole="sub" source="static" connection="internal" parentID="" connID="northwind">select  CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax
+from customers
+limit 0,10</datasource>
+        <datasource id="orders1" allowEmpty="true" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">select OrderID, CustomerID, EmployeeID, OrderDate, RequiredDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry
+from orders where customerID='$D{base.customerID}'
+limit 3</datasource>
+        <datasource id="orders2" allowEmpty="true" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">select OrderID, CustomerID, EmployeeID, OrderDate, RequiredDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry,
+(select sum(Quantity*UnitPrice) from orderitems where orderitems.orderID=orders.orderID) as ordertotal
+from orders where customerID='$D{base.customerID}'
+limit 10</datasource>
+    </datasources>
+    <variables>
+        <variable id="total" type="num" funcType="sum" scope="group" initValue="0">orders2.ordertotal</variable>
+    </variables>
+    <pageheader id="PH" height="27.252">
+        <label id="5ZY4H" zValue="0" posX="0.000" posY="0.000" width="111.125" height="5.027" fontName="Arial" fontSize="12" fontWeight="bold" alignment="1">Sub Report Iteration Test</label>
+        <field id="IYKHT" zValue="1" posX="0.000" posY="11.112" width="87.312" height="4.762" resource="datasource" fontName="Arial" fontSize="10" fontWeight="bold" alignment="1" type="txt" ftype="ds">base.CompanyName</field>
+        <field id="SUIYK" typeId="131074" zValue="2" posX="0.000" posY="15.875" width="100.012" height="4.762" description="Address" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">base.Address</field>
+        <field id="HTPFP" typeId="131074" zValue="3" posX="0.000" posY="20.637" width="65.087" height="4.762" description="City" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">base.City</field>
+    </pageheader>
+    <pagefooter id="PF" height="6.879">
+        <field id="5ZY4H" zValue="0" posX="138.112" posY="1.587" width="31.750" height="4.762" resource="sysvar" fontName="Arial" fontSize="10" alignment="34" forecolor="#000000" type="txt" ftype="sys" arg="Page: %1">pageno</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="5.556" datasource="orders1">
+            <items>
+                <field id="PN7Q3" zValue="0" posX="0.000" posY="0.000" width="31.750" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">OrderID</field>
+                <field id="Q30RO" typeId="131074" zValue="1" posX="33.337" posY="0.000" width="19.050" height="4.762" description="EmployeeID" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">EmployeeID</field>
+                <field id="E94YX" typeId="131074" zValue="2" posX="53.975" posY="0.000" width="25.400" height="4.762" description="OrderDate" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">OrderDate</field>
+                <field id="WQNBI" typeId="131074" zValue="3" posX="80.962" posY="0.000" width="23.812" height="4.762" description="RequiredDate" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">RequiredDate</field>
+            </items>
+            <groups>
+                <group id="g_o1" groupExp="%CONST" resetVariables="" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="9.525">
+                        <line id="SNWAX" zValue="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="7.938" toX="169.862" toY="7.938"/>
+                        <label id="0A4E4" zValue="1" posX="0.000" posY="3.175" width="31.750" height="4.762" fontName="Arial" fontSize="10" forecolor="#000000">Order ID</label>
+                        <label id="4E9EX" zValue="2" posX="33.337" posY="3.175" width="19.579" height="4.762" fontName="Arial" fontSize="10">Emp. ID</label>
+                        <label id="YEUXL" zValue="3" posX="80.962" posY="3.175" width="30.162" height="4.762" fontName="Arial" fontSize="10">Required date</label>
+                        <label id="K9N0A" zValue="4" posX="55.562" posY="3.175" width="19.579" height="4.762" fontName="Arial" fontSize="10" alignment="1">Order Date</label>
+                    </groupheader>
+                    <groupfooter height="4.000">
+                        <line id="L7BLP" zValue="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="0.000" toX="169.862" toY="0.000"/>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+        <detail id="Detail2" height="5.292" datasource="orders2">
+            <items>
+                <field id="IX4ZJ" typeId="131074" zValue="0" posX="0.000" posY="0.000" width="19.050" height="4.762" description="OrderID" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">OrderID</field>
+                <field id="7UBF2" typeId="131074" zValue="1" posX="20.637" posY="0.000" width="22.225" height="4.762" description="OrderDate" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">OrderDate</field>
+                <field id="LXKL7" typeId="131074" zValue="2" posX="76.200" posY="0.000" width="31.750" height="4.762" description="ordertotal" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="true">ordertotal</field>
+            </items>
+            <groups>
+                <group id="g_o2" groupExp="%CONST" resetVariables="total" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="8.467">
+                        <label id="0WYWZ" zValue="0" posX="20.637" posY="3.175" width="19.579" height="4.762" fontName="Arial" fontSize="10" alignment="1">Order Date</label>
+                        <label id="SO32J" zValue="1" posX="0.000" posY="3.175" width="19.050" height="4.762" fontName="Arial" fontSize="10" alignment="1">Order ID</label>
+                        <label id="TAQUX" zValue="2" posX="76.200" posY="3.175" width="30.162" height="4.762" fontName="Arial" fontSize="10" alignment="34">Order Total</label>
+                    </groupheader>
+                    <groupfooter height="6.879">
+                        <field id="M4BE6" typeId="131074" zValue="0" posX="76.200" posY="1.587" width="31.750" height="4.762" description="ordertotal" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="2" localized="true" arg="Total: %1">total</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

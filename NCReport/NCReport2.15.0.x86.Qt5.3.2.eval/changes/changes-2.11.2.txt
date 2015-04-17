@@ -1,0 +1,14 @@
+****************************************************************************
+* NCReport 2.11.2
+* Release date: 06.feb.2014
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+- 0071656: [Report engine library] PDF output is not selectable under MacOSX (administrator) - resolved.
+- 0071648: [Report engine library] Printing a range of pages of batch report does not work (administrator) - resolved.
+- 0071655: [Report engine library] Fix secure SSL mode in LMailSender class (administrator) - resolved.
+- 0071647: [Designer] General Custom/Graph Item Dialog using user defined dialog class (administrator) - resolved.
+- 0071650: [Report engine library] Html output: QTextStream no device message in command line client (administrator) - resolved.
+- 0071649: [General] HTML output improvements: Head options (administrator) - resolved.
+- 0071645: [Designer] Drag&Drop Label As Field - parse problem (administrator) - resolved.
+- Several minor fixes an fine tuning
