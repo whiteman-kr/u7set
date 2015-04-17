@@ -334,7 +334,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	m_signal.setExtStrID(extStrID);
 	m_signal.setName(name);
 	int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
-	if (dataFormatIndex > 0 && dataFormatIndex < m_dataFormatInfo.count())
+	if (dataFormatIndex >= 0 && dataFormatIndex < m_dataFormatInfo.count())
 	{
 		m_signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(dataFormatIndex)));
 	}
@@ -344,7 +344,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	m_signal.setLowLimit(m_doubleManager->value(m_lowLimitProperty));
 	m_signal.setHighLimit(m_doubleManager->value(m_highLimitProperty));
 	int unitIndex = m_enumManager->value(m_unitProperty);
-	if (unitIndex > 0 && unitIndex < m_unitInfo.count())
+	if (unitIndex >= 0 && unitIndex < m_unitInfo.count())
 	{
 		m_signal.setUnitID(m_unitInfo.key(unitIndex));
 	}
@@ -361,7 +361,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	m_signal.setInputLowLimit(m_doubleManager->value(m_inputLowLimitProperty));
 	m_signal.setInputHighLimit(m_doubleManager->value(m_inputHighLimitProperty));
 	unitIndex = m_enumManager->value(m_inputUnitProperty);
-	if (unitIndex > 0 && unitIndex < m_unitInfo.count())
+	if (unitIndex >= 0 && unitIndex < m_unitInfo.count())
 	{
 		m_signal.setInputUnitID(m_unitInfo.key(unitIndex));
 	}
@@ -370,7 +370,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		m_signal.setInputUnitID(NO_UNIT_ID);
 	}
 	int sensorIndex = m_enumManager->value(m_inputSensorProperty);
-	if (sensorIndex > 0 && sensorIndex < SENSOR_TYPE_COUNT)
+	if (sensorIndex >= 0 && sensorIndex < SENSOR_TYPE_COUNT)
 	{
 		m_signal.setInputSensorID(sensorIndex);
 	}
@@ -380,7 +380,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	m_signal.setOutputLowLimit(m_doubleManager->value(m_outputLowLimitProperty));
 	m_signal.setOutputHighLimit(m_doubleManager->value(m_outputHighLimitProperty));
 	unitIndex = m_enumManager->value(m_outputUnitProperty);
-	if (unitIndex > 0 && unitIndex < m_unitInfo.count())
+	if (unitIndex >= 0 && unitIndex < m_unitInfo.count())
 	{
 		m_signal.setOutputUnitID(m_unitInfo.key(unitIndex));
 	}
@@ -407,12 +407,12 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	m_signal.setFilteringTime(m_doubleManager->value(m_filteringTimeProperty));
 	m_signal.setMaxDifference(m_doubleManager->value(m_maxDifferenceProperty));
 	int inOutTypeIndex = m_enumManager->value(m_inOutTypeProperty);
-	if (inOutTypeIndex > 0 && inOutTypeIndex < IN_OUT_TYPE_COUNT)
+	if (inOutTypeIndex >= 0 && inOutTypeIndex < IN_OUT_TYPE_COUNT)
 	{
 		m_signal.setInOutType(SignalInOutType(inOutTypeIndex));
 	}
 	int byteOrderIndex = m_enumManager->value(m_byteOrderProperty);
-	if (byteOrderIndex > 0 && byteOrderIndex < BYTE_ORDER_COUNT)
+	if (byteOrderIndex >= 0 && byteOrderIndex < BYTE_ORDER_COUNT)
 	{
 		m_signal.setByteOrder(ByteOrder(byteOrderIndex));
 	}
