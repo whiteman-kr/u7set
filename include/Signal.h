@@ -27,10 +27,15 @@ enum SignalInOutType
 
 enum DataFormatType
 {
-	binary_LE_unsigned = 1,
-	binary_LE_signed = 2,
-	binary_BE_unsigned = 3,
-	binary_BE_signed = 4,
+	unsignedInt = 0,
+	signedInt = 1,
+};
+
+
+enum ByteOrder
+{
+	LE = 0,		// little endian
+	BE = 1		// big endian
 };
 
 
@@ -173,12 +178,12 @@ private:
 	QString m_strID;
 	QString m_extStrID;
 	QString m_name;
-	int m_dataFormat = static_cast<int>(DataFormatType::binary_LE_unsigned);
+	int m_dataFormat = static_cast<int>(DataFormatType::signedInt);
 	int m_dataSize = 16;
 	int m_lowADC = 0;
-	int m_highADC = 0;
+	int m_highADC = 0xFFFF;
 	double m_lowLimit = 0;
-	double m_highLimit = 0;
+	double m_highLimit = 100;
 	int m_unitID = NO_UNIT_ID;
 	double m_adjustment = 0;
 	double m_dropLimit = 0;
@@ -202,6 +207,7 @@ private:
 	QString m_deviceStrID;
 	double m_filteringTime = 0.05;
 	double m_maxDifference = 0.5;
+	int m_byteOrder = static_cast<int>(ByteOrder::BE);
 
 	Address16 m_ramAddr;				// signal address in LM RAM
 	Address16 m_acqAddr;				// signal address in FSC data packet (acquisition address)
@@ -352,6 +358,9 @@ public:
 
 	Q_INVOKABLE double maxDifference() const { return m_maxDifference; }
 	void setMaxDifference(double maxDifference) { m_maxDifference = maxDifference; }
+
+	Q_INVOKABLE int byteOrder() const { return m_byteOrder; }
+	void setByteOrder(int byteOrder) { m_byteOrder = byteOrder; }
 
 
 	friend class DbWorker;
