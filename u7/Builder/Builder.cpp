@@ -90,11 +90,12 @@ namespace Builder
 			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Getting equipment"), true);
 
-			Hardware::DeviceRoot deviceRoot;
-			int rootFileId = db.hcFileId();
-			deviceRoot.fileInfo().setFileId(rootFileId);
+			std::shared_ptr<Hardware::DeviceObject> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
 
-			bool ok = getEquipment(&db, &deviceRoot);
+			int rootFileId = db.hcFileId();
+			deviceRoot->fileInfo().setFileId(rootFileId);
+
+			bool ok = getEquipment(&db, deviceRoot.get());
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -118,9 +119,14 @@ namespace Builder
 			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Expanding devices StrIds"), true);
 
-			expandDeviceStrId(&deviceRoot);
+			expandDeviceStrId(deviceRoot.get());
 
 			m_log->writeSuccess(tr("Ok"), true);
+
+			Hardware::EquipmentSet equipmentSet(deviceRoot);
+
+			auto aaa = equipmentSet.deviceObject(QString("SYSTEMID1_RACKID2_SIGNAL1"));
+			auto aaa1 = equipmentSet.deviceObjectSharedPointer("SYSTEMID1_RACKID2_SIGNAL1");
 
 			//
 			// Get signals from the database
@@ -134,7 +140,7 @@ namespace Builder
 			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Module configurations compilation"), true);
 
-			ok = modulesConfiguration(&db, &deviceRoot, &signalSetObject, lastChangesetId, &buildWriter);
+			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSetObject, lastChangesetId, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -165,7 +171,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(&deviceRoot, &SignalSet(), &buildWriter);
+			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &SignalSet(), &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -297,9 +303,12 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSetObject* signalSetObject, int changesetId, BuildResultWriter* buildWriter)
+	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSetObject* signalSetObject, int changesetId, BuildResultWriter* buildWriter)
 	{
-		if (db == nullptr)
+		if (db == nullptr ||
+			deviceRoot == nullptr ||
+			signalSetObject == nullptr ||
+			buildWriter == nullptr)
 		{
 			assert(false);
 			return false;

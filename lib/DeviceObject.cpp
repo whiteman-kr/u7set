@@ -1843,5 +1843,84 @@ namespace Hardware
 	{
 		m_type = value;
 	}
+
+
+	//
+	//
+	// EquipmentSet
+	//
+	//
+	EquipmentSet::EquipmentSet(std::shared_ptr<DeviceObject> root)
+	{
+		set(root);
+	}
+
+	void EquipmentSet::set(std::shared_ptr<DeviceObject> root)
+	{
+		if (root == nullptr)
+		{
+			assert(root);
+			return;
+		}
+
+		m_root = root;
+
+		// fill map for fast access
+		//
+		m_deviceTable.clear();
+
+		m_deviceTable.insert(m_root->strId(), m_root);
+		addDeviceChildrenToHashTable(m_root);
+
+		for (auto it : m_deviceTable)
+		{
+			qDebug() << it->strId();
+		}
+
+		return;
+	}
+
+	DeviceObject* EquipmentSet::deviceObject(const QString& strId)
+	{
+		auto it = m_deviceTable.find(strId);
+
+		if (it != m_deviceTable.end())
+		{
+			return it.value().get();
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	std::shared_ptr<DeviceObject> EquipmentSet::deviceObjectSharedPointer(const QString& strId)
+	{
+		auto it = m_deviceTable.find(strId);
+
+		if (it != m_deviceTable.end())
+		{
+			return it.value();
+		}
+		else
+		{
+			return std::shared_ptr<DeviceObject>();
+		}
+	}
+
+
+	void EquipmentSet::addDeviceChildrenToHashTable(std::shared_ptr<DeviceObject> parent)
+	{
+		for (int i = 0; i < parent->childrenCount(); i++)
+		{
+			std::shared_ptr<DeviceObject> child = parent->childSharedPtr(i);
+			m_deviceTable.insert(child->strId(), child);
+
+			addDeviceChildrenToHashTable(child);
+		}
+
+		return;
+	}
+
 }
 
