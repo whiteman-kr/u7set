@@ -10,7 +10,7 @@
 
 #ifdef _WIN32
 #include <git2/global.h>
-#elif !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 22
+#elif !LIBGIT2_VER_MAJOR && LIBGIT2_VER_MINOR > 21
 #include <git2/global.h>
 #else
 #include <git2/threads.h>

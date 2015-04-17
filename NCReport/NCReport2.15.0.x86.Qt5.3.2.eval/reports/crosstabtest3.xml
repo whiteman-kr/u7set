@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.7.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>10</topmargin>
+        <bottommargin>10</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DS_TABLE" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">id	Day	Breakfast	Lunch	Dinner
+1	Mon	true	false	true
+2	Tue	true	true	true
+3	Wed	false	true	false
+4	Thu	true	true	false
+4	Fri	0	0	1</datasource>
+        <datasource id="DS0" type="txt" openRole="begin" source="static" columnDelimiter="tab">0</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="27.781">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="1.587" width="170.127" height="7.408" fontName="Liberation Sans" fontSize="18" alignment="4" forecolor="#000000">CROSS TAB DEMO</label>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="17.462" width="169.862" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="4" forecolor="#000000">Table with boolean data</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="0.000"/>
+    <details>
+        <detail id="Detail1" height="16.933" datasource="DS0" startsOnNewPage="false">
+            <items>
+                <crosstab id="0" zValue="0" resource="static" posX="22.225" posY="0.000" width="124.883" height="15.875" datasource="DS_TABLE" tableSpacing="7" cellPadding="0.5" cellSpacing="0" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" colWidth="17" rowHeight="7" autoWidth="0" autoHeight="0" showColHeader="1" showRowHeader="1" showBottomSummary="0" showSideSummary="0" breakTable="0" columnTitleSource="Day" hiddenColumns="id" headerColumnWidth="28">
+                    <cell ct="0" dt="0" alignment="130" fontName="Arial" fontSize="10" fontWeight="bold" fontItalic="true" fillColor="#ffffff" fillStyle="solid" foreColor="#ffffff" bgMode="1">
+                        <border pos="0" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="1" dt="0" alignment="132" fontName="Arial" fontSize="10" fontWeight="bold" fillColor="#0055ff" fillStyle="solid" foreColor="#ffffff" bgMode="1">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="2" dt="0" alignment="130" fontName="Liberation Sans" fontSize="10" fontWeight="bold" fillColor="#ffcc00" fillStyle="solid" foreColor="#000000" bgMode="1">
+                        <text>Subtotal:</text>
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="3" dt="0" alignment="130" fontName="Liberation Sans" fontSize="10" fontWeight="bold" fillColor="#000000" fillStyle="no" foreColor="#0055ff">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="4" dt="4" alignment="130" fontName="Liberation Sans" fontSize="9" fillColor="#000000" fillStyle="no" foreColor="#000000">
+                        <text>.</text>
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="5" dt="1" alignment="130" fontName="Liberation Sans" fontSize="10" fontWeight="bold" fillColor="#000000" fillStyle="no" foreColor="#000000" formatting="1" format="f" precision="0" localized="1">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="6" dt="0" alignment="130" fontName="Liberation Sans" fontSize="10" fontWeight="bold" fillColor="#000000" fillStyle="no" foreColor="#000000">
+                        <text>Total:</text>
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="7" dt="1" alignment="130" fontName="Liberation Sans" fontSize="10" fillColor="#000000" fillStyle="no" formatString="$ %1" foreColor="#0000ff" formatting="1" format="f" precision="2">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                    <cell ct="8" dt="1" alignment="130" fontName="Liberation Sans" fontSize="10" fontWeight="bold" fillColor="#0000ff" fillStyle="solid" formatString="$ %1" foreColor="#fafafa" formatting="1" format="f" precision="0" localized="1" bgMode="1">
+                        <border pos="0" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="1" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="2" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                        <border pos="3" enabled="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </cell>
+                </crosstab>
+            </items>
+        </detail>
+    </details>
+</NCReport>

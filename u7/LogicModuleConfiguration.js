@@ -8,13 +8,14 @@ var WorkstationType = 6;
 var SoftwareType = 7;
 var SignalType = 8;
 
-var	ModuleTypeLm = 1;
-var	ModuleTypeAim = 2;
-var	ModuleTypeAom = 3;
-var	ModuleTypeDim = 4;
-var	ModuleTypeDom = 5;
-var	ModuleTypeAifm = 6;
-var	ModuleTypeOcm = 7;
+var FamilyOTHER = 0x0000;
+var FamilyLM = 0x1100;
+var FamilyAIM = 0x1200;
+var FamilyAOM = 0x1300;
+var FamilyDIM = 0x1400;
+var FamilyDOM = 0x1500;
+var FamilyAIFM = 0x1600;
+var FamilyOCM = 0x1700;
 
 var DiagDiscrete = 0;
 var DiagAnalog = 1;
@@ -94,7 +95,7 @@ function module_lm_1(device, confCollection, log, signalSet)
 {
     if (device.jsDeviceType() == ModuleType)
     {
-        if (device.Type == ModuleTypeLm)
+        if (device.ModuleFamily == FamilyLM)
         {
             log.writeMessage("MODULE LM-1: " + device.StrID, false);
 
@@ -127,7 +128,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
     // Variables
     //
     var subSysID = module.SubsysID;
-    var confIndex = module.ConfIndex;
+    //var confIndex = module.ConfIndex;
     var frameSize = 1016;
     var frameCount = 22;                // Check it !!!!
     var uartId = 456;                   // Check it !!!!
@@ -153,7 +154,9 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
     for (var i = 0; i < parent.childrenCount(); i++)
     {
         var ioModule = parent.jsChild(i);
-        if (ioModule.Type == ModuleTypeAim || ioModule.Type == ModuleTypeAifm || ioModule.Type == ModuleTypeAom || ioModule.Type == ModuleTypeOcm || ioModule.Type == ModuleTypeDim || ioModule.Type == ModuleTypeDom)
+        if (ioModule.ModuleFamily == FamilyAIM || ioModule.ModuleFamily == FamilyAIFM || 
+            ioModule.ModuleFamily == FamilyAOM || ioModule.ModuleFamily == FamilyOCM ||
+            ioModule.ModuleFamily == FamilyDIM || ioModule.ModuleFamily == FamilyDOM)
         {
             var frame = ioModulesStartFrame + ioModule.Place - 1;
             if (frame < ioModulesStartFrame || frame >= ioModulesStartFrame + ioModulesMaxCount)
@@ -162,27 +165,27 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
                 return false;
             }
             
-            if (ioModule.Type == ModuleTypeAim)
+            if (ioModule.ModuleFamily == FamilyAIM)
             {
                 generate_aim(confFirmware, ioModule, frame, log, signalSet);
             }
-            if (ioModule.Type == ModuleTypeAifm)
+            if (ioModule.ModuleFamily == FamilyAIFM)
             {
                 generate_aifm(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.Type == ModuleTypeAom)
+            if (ioModule.ModuleFamily == FamilyAOM)
             {
                 generate_aom(confFirmware, ioModule, frame, log, signalSet);
             }
-            if (ioModule.Type == ModuleTypeOcm)
+            if (ioModule.ModuleFamily == FamilyOCM)
             {
                 generate_ocm(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.Type == ModuleTypeDim)
+            if (ioModule.ModuleFamily == FamilyDIM)
             {
                 generate_dim(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.Type == ModuleTypeDom)
+            if (ioModule.ModuleFamily == FamilyDOM)
             {
                 generate_dom(confFirmware, ioModule, frame, log);
             }

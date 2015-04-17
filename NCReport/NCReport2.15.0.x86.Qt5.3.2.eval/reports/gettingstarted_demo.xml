@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.3.0b" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="270.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="prodlist" type="list" openRole="begin" source="static" columnDelimiter="tab" listID="prod"></datasource>
+    </datasources>
+    <variables>
+        <variable id="var0" type="num" funcType="sum" scope="group" initValue="0">col4</variable>
+    </variables>
+    <pageheader id="phead" height="15.234">
+        <label id="" zValue="0" resource="static" posX="0.000" posY="8.018" width="18.708" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000">Category</label>
+        <label id="" zValue="1" resource="static" posX="16.035" posY="8.018" width="72.159" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000">Product name</label>
+        <label id="" zValue="2" resource="static" posX="107.437" posY="8.018" width="18.708" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000">Available</label>
+        <label id="" zValue="3" resource="static" posX="126.679" posY="8.018" width="18.708" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000">Weight</label>
+        <label id="" zValue="4" resource="static" posX="147.525" posY="8.018" width="18.708" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000">Price</label>
+        <line id="" zValue="5" resource="static" fromX="0.000" fromY="12.828" toX="168.371" toY="12.828" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+        <label id="" zValue="6" resource="static" posX="80.177" posY="8.018" width="24.053" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000">Product code</label>
+        <label id="" zValue="7" resource="static" posX="0.000" posY="1.604" width="89.798" height="6.414" fontName="Arial" fontSize="14" fontWeight="bold" alignmentH="left" alignmentV="top" forecolor="#000000">Product list example by category</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="7.216">
+        <field id="" zValue="0" resource="static" posX="149.129" posY="0.000" width="18.708" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="sys" arg="Page: %1">pageno</field>
+        <field id="" zValue="1" resource="static" posX="0.000" posY="0.000" width="147.525" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="sys">appinfo</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="4.500" datasource="prodlist" startsOnNewPage="false">
+            <items>
+                <field id="" zValue="0" resource="static" posX="0.000" posY="0.000" width="12.828" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">col0</field>
+                <field id="" zValue="1" resource="static" posX="16.035" posY="0.000" width="62.538" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">col1</field>
+                <field id="" zValue="2" resource="static" posX="107.437" posY="0.000" width="14.432" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">col3</field>
+                <field id="" zValue="3" resource="static" posX="126.679" posY="0.000" width="19.242" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="3" fillchar=" " localized="false">col4</field>
+                <field id="" zValue="4" resource="static" posX="149.129" posY="0.000" width="18.708" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" fillchar=" " localized="true" arg="$%1">col5</field>
+                <field id="" zValue="5" resource="static" posX="80.177" posY="0.000" width="24.053" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">col2</field>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="col0" resetVariables="var0" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="6.414">
+                        <label id="" zValue="0" resource="static" posX="0.000" posY="0.000" width="30.467" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000">Product category:</label>
+                        <field id="" zValue="1" resource="static" posX="28.864" posY="0.000" width="18.708" height="5.078" fontName="Arial" fontSize="10" alignmentH="left" alignmentV="top" forecolor="#000000" type="txt" ftype="ds">col0</field>
+                    </groupheader>
+                    <groupfooter height="9.087">
+                        <field id="" zValue="0" resource="static" posX="125.076" posY="1.604" width="20.846" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000" type="num" ftype="var" formatting="true" numwidth="0" format="f" precision="3" fillchar=" " localized="false">var0</field>
+                        <label id="" zValue="1" resource="static" posX="89.798" posY="1.604" width="33.674" height="5.078" fontName="Arial" fontSize="10" alignmentH="right" alignmentV="top" forecolor="#000000">Weight total:</label>
+                        <line id="" zValue="2" resource="static" fromX="102.626" fromY="0.000" toX="168.371" toY="0.000" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

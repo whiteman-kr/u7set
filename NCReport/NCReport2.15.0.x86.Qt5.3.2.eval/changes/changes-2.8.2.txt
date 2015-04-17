@@ -1,0 +1,8 @@
+****************************************************************************
+* NCReport 2.8.2
+* Release date: 30.Apr.2012
+* Features and bugfixes are tracked at http://bugtracker.nocisoft.com
+****************************************************************************
+
+Internal release for customization
+

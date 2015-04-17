@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.11.1" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>10</topmargin>
+        <bottommargin>10</bottommargin>
+        <leftmargin>10</leftmargin>
+        <rightmargin>10</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <htmlOpt>{DEFAULT}</htmlOpt>
+    </options>
+    <datasources>
+        <datasource id="prod" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">select products.*,
+products.unitprice*1.2 as unitprice2,
+products.unitprice*1.5 as unitprice3,
+products.unitprice*1.7 as unitprice4,
+products.unitprice*75 as value,
+categories.categoryname 
+FROM products, categories
+WHERE products.categoryID = categories.categoryID
+AND products.productname LIKE '%'
+ORDER BY categoryname,productname</datasource>
+        <datasource id="company" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">select 'Useful Company Ltd.' as name, 
+			'10100 Nowhere, Something str. 55.' as fulladdress,
+			'Taxcode: 00000000-0-00' as taxcode,
+			'Account no.: 00000000-00000000-00000000' as account,
+			'Phone: 555-8740-14' as phone,
+			'Fax: 555-8741-15' as fax,
+			'E-mail: info@usefulcompany.com' as mail</datasource>
+        <datasource id="xds" type="sql" openRole="begin" source="static" connection="internal" parentID="" connID="northwind">select products.*,
+			products.unitprice*1.2 as unitprice2,
+			products.unitprice*1.5 as unitprice3,
+			products.unitprice*1.7 as unitprice4,
+			products.unitprice*75 as value,
+			categories.categoryname 
+			FROM products, categories
+			WHERE products.categoryID = categories.categoryID
+			AND products.productname LIKE 'S%'
+			ORDER BY categoryname,productname</datasource>
+    </datasources>
+    <variables>
+        <variable id="sum0" type="num" funcType="sum" scope="group" initValue="0">value</variable>
+        <variable id="sum1" type="num" funcType="sum" scope="group" initValue="0">value</variable>
+        <variable id="cnt1" type="num" funcType="count" scope="report" initValue="0">productID</variable>
+    </variables>
+    <pageheader id="phead" height="21.380">
+        <line id="4FHYX" zValue="0" lineColor="#0000ff" lineStyle="solid" lineWidth="0.000" fromX="0.000" fromY="7.938" toX="65.881" toY="7.938"/>
+        <line id="1" zValue="1" lineColor="#0000ff" lineStyle="solid" lineWidth="0.000" fromX="0.000" fromY="6.350" toX="65.881" toY="6.350"/>
+        <label id="2" zValue="2" posX="0.000" posY="0.000" width="78.581" height="6.350" fontName="Arial" fontSize="14" fontWeight="bold" forecolor="#0000ff">Grouped product list demo</label>
+        <rectangle id="3" zValue="3" posX="0.000" posY="14.023" width="189.177" height="5.821" lineColor="#0000ff" lineStyle="solid" lineWidth="0.000" fillStyle="solid" fillColor="#78beff"/>
+        <field id="4" zValue="4" posX="109.008" posY="3.175" width="79.904" height="5.027" resource="datasource" fontName="Arial" fontSize="8" alignment="34" type="txt" ftype="ds" arg="">company.name</field>
+        <field id="5" zValue="5" posX="109.008" posY="7.938" width="79.904" height="5.027" resource="datasource" fontName="Arial" fontSize="8" alignment="34" type="txt" ftype="ds" arg="">company.fulladdress</field>
+        <label id="6" zValue="6" posX="1.058" posY="14.817" width="4.498" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" forecolor="#ffffff">No.</label>
+        <label id="7" zValue="7" posX="6.879" posY="14.817" width="18.785" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" forecolor="#ffffff">Product no.</label>
+        <label id="8" zValue="8" posX="30.956" posY="14.817" width="21.960" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" forecolor="#ffffff">Product name</label>
+        <label id="9" zValue="9" posX="107.421" posY="14.817" width="20.108" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" forecolor="#ffffff">List price</label>
+        <label id="10" zValue="10" posX="127.529" posY="14.817" width="20.108" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" forecolor="#ffffff">Price II.</label>
+        <label id="11" zValue="11" posX="147.373" posY="14.817" width="20.108" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" forecolor="#ffffff">Price III.</label>
+        <label id="12" zValue="12" posX="167.481" posY="14.817" width="20.108" height="5.292" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" forecolor="#ffffff">Value</label>
+        <field id="13" zValue="13" posX="0.000" posY="9.525" width="14.817" height="4.762" resource="sysvar" fontName="Arial" fontSize="8" alignment="34" type="txt" ftype="sys" arg="Page %1">pageno</field>
+    </pageheader>
+    <pagefooter id="pfoot" height="10.690">
+        <field id="D0M92" zValue="0" posX="61.119" posY="1.587" width="128.323" height="3.175" resource="param" fontName="Arial" fontSize="8" alignment="34" wordbreak="true" forecolor="#c0c0c0" type="txt" ftype="par" arg="Filter: %1">prodFilt</field>
+        <label id="1" zValue="1" posX="0.000" posY="0.265" width="59.531" height="6.350" fontName="Arial" fontSize="12" fontWeight="bold" forecolor="#0000ff">This is the page footer .....</label>
+        <line id="2" zValue="2" lineColor="#ff0000" lineStyle="dashdot" lineWidth="0.800" fromX="0.000" fromY="0.000" toX="189.971" toY="0.000"/>
+        <field id="3" zValue="3" posX="0.000" posY="6.350" width="180.181" height="3.969" resource="sysvar" fontName="Arial" fontSize="6" type="txt" ftype="sys" arg="">appinfo</field>
+        <field id="4" zValue="4" posX="175.154" posY="6.350" width="14.817" height="5.292" resource="sysvar" fontName="Arial" fontSize="8" alignment="34" type="txt" ftype="sys" arg="Page %1">pageno</field>
+    </pagefooter>
+    <reportheader id="rhead" height="13.360">
+        <barcode id="O2BF1" zValue="0" posX="72.231" posY="0.000" width="32.015" height="11.112" barcodeType="13" code="">5997361500322</barcode>
+        <image id="1" zValue="1" posX="0.000" posY="0.000" width="12.700" height="11.112" aspectRatio="keep" transformMode="smooth" format="0" alignment="1">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</image>
+        <label id="2" zValue="2" posX="51.065" posY="3.175" width="20.902" height="5.027" fontName="Arial" fontSize="10" fontWeight="bold" fontItalic="true">A barcode:</label>
+        <label id="3" zValue="3" posX="14.287" posY="0.000" width="36.777" height="12.700" fontName="Arial" fontSize="12" fontWeight="bold" wordbreak="true" forecolor="#aaaa00">This is the report header .....</label>
+    </reportheader>
+    <reportfooter id="rfoot" height="6.680">
+        <label id="QR0BV" zValue="0" posX="0.000" posY="0.000" width="115.623" height="6.350" fontName="Arial" fontSize="10" fontWeight="bold" forecolor="#0000ff">This is the report footer .....</label>
+        <field id="1" zValue="1" posX="51.065" posY="0.000" width="119.856" height="5.027" resource="exp" fontName="Arial" fontSize="8" type="num" ftype="exp" arg="Expression value: %L1">154*885+(2^8-8)</field>
+    </reportfooter>
+    <details>
+        <detail id="0" height="5.345" datasource="prod">
+            <items>
+                <rectangle id="FLP88" zValue="0" posX="0.000" posY="0.000" width="189.971" height="4.762" printWhen="%2" lineColor="#000000" lineStyle="nopen" lineWidth="0.000" fillStyle="solid" fillColor="#eeeeee"/>
+                <field id="1" zValue="1" posX="0.000" posY="0.000" width="7.938" height="4.762" resource="var" fontName="Arial" fontSize="10" alignment="2" type="num" ftype="var" arg="">cnt1</field>
+                <field id="2" zValue="2" posX="11.112" posY="0.000" width="23.019" height="4.762" resource="datasource" fontName="Arial" fontSize="10" type="txt" ftype="ds" arg="">productID</field>
+                <field id="3" zValue="3" posX="34.925" posY="0.000" width="60.325" height="4.762" resource="datasource" fontName="Arial" fontSize="10" wordbreak="true" type="txt" ftype="ds" arg="">productname</field>
+                <field id="4" zValue="4" posX="107.685" posY="0.000" width="20.108" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="8" format="f" precision="2" localized="true" arg="">unitprice</field>
+                <field id="5" zValue="5" posX="127.794" posY="0.000" width="20.108" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="8" format="f" precision="0" localized="true" arg="">unitprice2</field>
+                <field id="6" zValue="6" posX="147.637" posY="0.000" width="20.108" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="8" format="f" precision="1" localized="true" arg="">unitprice3</field>
+                <field id="7" zValue="7" posX="168.010" posY="0.000" width="20.108" height="4.762" printWhen="$D{value}&gt;10" resource="datasource" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">value</field>
+            </items>
+            <groups>
+                <group id="g0" groupExp="prod.supplierid" resetVariables="sum0" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_g0" height="6.681">
+                        <label id="X529E" zValue="0" posX="166.952" posY="0.000" width="19.050" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#0000ff">GROUP g0</label>
+                        <field id="1" zValue="1" posX="0.000" posY="0.000" width="104.246" height="4.762" resource="exp" fontName="Arial" fontSize="10" fontWeight="bold" type="txt" ftype="exp" arg="">&quot;$D{categoryname}&quot;+&quot; &quot;+&quot;+additional string&quot;</field>
+                    </groupheader>
+                    <groupfooter id="GF_g0" height="9.354">
+                        <label id="YT2X6" zValue="0" posX="0.000" posY="0.000" width="33.602" height="4.762" fontName="Arial" fontSize="8" forecolor="#0000ff">G1 GROUP FOOTER</label>
+                        <line id="1" zValue="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="119.856" fromY="1.058" toX="189.971" toY="1.058"/>
+                        <label id="2" zValue="2" posX="120.121" posY="1.587" width="39.952" height="4.762" fontName="Arial" fontSize="10" forecolor="#ff00ff">Total g0 grp value:</label>
+                        <field id="3" zValue="3" posX="166.952" posY="1.587" width="20.902" height="4.762" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">sum0</field>
+                    </groupfooter>
+                </group>
+                <group id="g1" groupExp="prod.categoryID" resetVariables="sum1" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_g1" height="5.880">
+                        <rectangle id="GPZD3" zValue="0" posX="0.000" posY="0.000" width="189.971" height="4.762" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillStyle="solid" fillColor="#ccccff"/>
+                        <label id="1" zValue="1" posX="166.952" posY="0.000" width="19.050" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#0000ff">GROUP g1</label>
+                        <field id="2" zValue="2" posX="0.000" posY="0.000" width="130.175" height="4.762" resource="datasource" fontName="Arial" fontSize="10" fontWeight="bold" forecolor="#ff0000" type="txt" ftype="ds" arg="">categoryname</field>
+                    </groupheader>
+                    <groupfooter id="GF_g1" height="8.018">
+                        <field id="XPXMC" zValue="0" posX="166.952" posY="1.587" width="20.902" height="4.762" resource="var" fontName="Arial" fontSize="10" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="">sum1</field>
+                        <label id="1" zValue="1" posX="0.000" posY="1.058" width="30.162" height="4.762" fontName="Arial" fontSize="8" forecolor="#0000ff">G2 GROUP FOOTER</label>
+                        <line id="2" zValue="2" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="119.856" fromY="1.058" toX="189.971" toY="1.058"/>
+                        <label id="3" zValue="3" posX="119.856" posY="1.058" width="32.015" height="4.762" fontName="Arial" fontSize="10" forecolor="#0000ff">Total g1 group value:</label>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+        <detail id="1" height="4.009" datasource="xds">
+            <items>
+                <field id="3KXF3" zValue="0" posX="7.938" posY="0.000" width="23.019" height="4.762" resource="datasource" fontName="Arial" fontSize="8" type="txt" ftype="ds" arg="">productID</field>
+                <field id="1" zValue="1" posX="32.544" posY="0.000" width="70.908" height="7.938" resource="datasource" fontName="Arial" fontSize="8" wordbreak="true" type="txt" ftype="ds" arg="">productname</field>
+                <field id="2" zValue="2" posX="166.952" posY="0.000" width="20.902" height="4.762" printWhen="$D{value}&gt;10" resource="datasource" fontName="Arial" fontSize="8" alignment="34" type="num" ftype="ds" formatting="true" numwidth="10" format="f" precision="1" localized="false" arg="%L1 Ft">value</field>
+            </items>
+            <groups>
+                <group id="xds_group" groupExp="xds.categoryID" resetVariables="cnt1,sum1" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader id="GH_xds_group" height="5.345">
+                        <rectangle id="36F8K" zValue="0" posX="0.000" posY="0.000" width="189.971" height="4.762" lineColor="#000000" lineStyle="nopen" lineWidth="0.100" fillStyle="solid" fillColor="#deca82"/>
+                        <label id="1" zValue="1" posX="152.135" posY="0.000" width="35.190" height="5.027" fontName="Arial" fontSize="10" alignment="34" forecolor="#0000ff">GROUP xds_group</label>
+                        <field id="2" zValue="2" posX="0.000" posY="0.000" width="56.356" height="5.821" resource="datasource" fontName="Arial" fontSize="10" fontWeight="bold" forecolor="#ffffff" type="txt" ftype="ds" arg="">categoryname</field>
+                    </groupheader>
+                    <groupfooter id="GF_xds_group" height="6.513">
+                        <label id="2ATA4" zValue="0" posX="0.000" posY="1.058" width="49.742" height="4.762" fontName="Arial" fontSize="8" forecolor="#0000ff">xds_group GROUP FOOTER</label>
+                        <line id="1" zValue="1" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="119.856" fromY="1.058" toX="189.971" toY="1.058"/>
+                        <label id="2" zValue="2" posX="119.856" posY="1.058" width="39.952" height="4.762" fontName="Arial" fontSize="8" forecolor="#ff00ff">Total xds_group grp value:</label>
+                        <field id="3" zValue="3" posX="167.481" posY="1.058" width="20.108" height="4.762" resource="var" fontName="Arial" fontSize="8" fontWeight="bold" alignment="34" type="num" ftype="var" formatting="true" numwidth="10" format="f" precision="1" localized="true" arg="%L1 Ft">sum1</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

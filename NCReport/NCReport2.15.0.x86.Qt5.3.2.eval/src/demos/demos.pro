@@ -1,0 +1,2 @@
+SUBDIRS += CustomDataSource CustomItem ItemModelDataSource StringListDataSource StringParameterDataSource SimpleDemoApp GraphDemo SqlGraphDemo ItemModelRelationDemo
+TEMPLATE = subdirs

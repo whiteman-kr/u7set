@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.5.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="data" type="txt" openRole="begin" source="static" columnDelimiter="tab">233680114523	2336501
+588741256388	0217842
+654316549872	3602913
+654316549873	5456820
+654316549874	1433647
+654316549875	9588730
+654316549876	0102214
+654316549877	4788544
+200214501479	4984654
+365542411220	2164646</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="21.380">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="169.975" height="9.621" fontName="Nimbus Roman No9 L" fontSize="20" fontUnderline="true" alignment="36" wordbreak="true" forecolor="#000000">Barcode demo</label>
+        <label id="1" zValue="1" resource="static" posX="0.000" posY="9.621" width="169.975" height="9.621" fontName="Nimbus Roman No9 L" fontSize="10" alignment="36" wordbreak="true" forecolor="#000000">This is a demonstration of barcode rendering feature with supported almost every barcode types.
+For this feature NCReport uses ZINT barcode system as 3rd party library</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="6.150">
+        <field id="0" zValue="0" resource="static" posX="153.939" posY="0.000" width="16.035" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000" type="num" ftype="sys" arg="Page %1">pageno</field>
+        <field id="1" zValue="1" resource="static" posX="0.000" posY="0.000" width="134.697" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="33" wordbreak="true" forecolor="#000000" type="txt" ftype="sys" arg="">appinfo</field>
+    </pagefooter>
+    <reportheader id="rhead" height="206.856">
+        <barcode id="0" zValue="0" resource="static" posX="64.141" posY="4.811" width="12.828" height="14.432" barcodeType="128" code="43" heightRatio="50"></barcode>
+        <barcode id="1" zValue="1" resource="static" posX="0.000" posY="6.414" width="28.864" height="8.018" barcodeType="63" code="12335997" heightRatio="50" borderType="1" borderWidth="1"></barcode>
+        <barcode id="2" zValue="2" resource="static" posX="35.278" posY="4.811" width="16.035" height="16.035" barcodeType="92" code="50310218715" heightRatio="50"></barcode>
+        <label id="3" zValue="3" resource="static" posX="0.000" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Australia Post 4-State</label>
+        <label id="4" zValue="4" resource="static" posX="28.864" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Aztec Code</label>
+        <label id="5" zValue="5" resource="static" posX="57.727" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Aztec Runes</label>
+        <label id="6" zValue="6" resource="static" posX="0.000" posY="200.442" width="78.573" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="33" wordbreak="true" forecolor="#000000">Dynamic barcodes from datasource:</label>
+        <label id="7" zValue="7" resource="static" posX="28.864" posY="24.053" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Code128</label>
+        <barcode id="8" zValue="8" resource="static" posX="3.207" posY="28.864" width="22.449" height="16.035" barcodeType="1" code="87654321" heightRatio="50" foreColor="#ff0000"></barcode>
+        <label id="9" zValue="9" resource="static" posX="0.000" posY="24.053" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#ff0000">Code11</label>
+        <label id="10" zValue="10" resource="static" posX="115.455" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Codabar</label>
+        <label id="11" zValue="11" resource="static" posX="86.591" posY="0.000" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Code 2of5 Industr.</label>
+        <barcode id="12" zValue="12" resource="static" posX="118.662" posY="4.811" width="22.449" height="16.035" barcodeType="18" code="D765432C" heightRatio="40" backColor="#fffec4"></barcode>
+        <barcode id="13" zValue="13" resource="static" posX="0.000" posY="75.366" width="28.864" height="16.035" barcodeType="81" code="[99]1684654" heightRatio="50"></barcode>
+        <label id="14" zValue="14" resource="static" posX="28.864" posY="70.556" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Databar Limited</label>
+        <label id="15" zValue="15" resource="static" posX="57.727" posY="70.556" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Databar Stacked</label>
+        <label id="16" zValue="16" resource="static" posX="0.000" posY="70.556" width="30.467" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">DataBar Expanded Stck.</label>
+        <barcode id="17" zValue="17" resource="static" posX="30.467" posY="75.366" width="25.657" height="16.035" barcodeType="30" code="50310218715" heightRatio="50"></barcode>
+        <barcode id="18" zValue="18" resource="static" posX="32.071" posY="28.864" width="22.449" height="17.639" barcodeType="20" code="6654125415" heightRatio="50"></barcode>
+        <label id="19" zValue="19" resource="static" posX="86.591" posY="24.053" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Code32</label>
+        <label id="20" zValue="20" resource="static" posX="115.455" posY="24.053" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Code39</label>
+        <label id="21" zValue="21" resource="static" posX="144.318" posY="24.053" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Code39+</label>
+        <barcode id="22" zValue="22" resource="static" posX="88.194" posY="28.864" width="25.657" height="16.035" barcodeType="129" code="2355412" heightRatio="50"></barcode>
+        <barcode id="23" zValue="23" resource="static" posX="117.058" posY="28.864" width="25.657" height="16.035" barcodeType="8" code="CODE39" heightRatio="50"></barcode>
+        <barcode id="24" zValue="24" resource="static" posX="145.922" posY="28.864" width="25.657" height="16.035" barcodeType="9" code="CODE39" heightRatio="50"></barcode>
+        <label id="25" zValue="25" resource="static" posX="0.000" posY="46.503" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Code93</label>
+        <label id="26" zValue="26" resource="static" posX="28.864" posY="46.503" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Code 2 of 5 DL</label>
+        <barcode id="27" zValue="27" resource="static" posX="33.674" posY="51.313" width="17.639" height="20.846" barcodeType="6" code="01654" heightRatio="50"></barcode>
+        <label id="28" zValue="28" resource="static" posX="57.727" posY="46.503" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Data matrix</label>
+        <barcode id="29" zValue="29" resource="static" posX="64.141" posY="51.313" width="17.639" height="16.035" barcodeType="71" code="1234522546" heightRatio="50"></barcode>
+        <label id="30" zValue="30" resource="static" posX="86.591" posY="46.503" width="30.467" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Deutsche Post Identcode</label>
+        <barcode id="31" zValue="31" resource="static" posX="88.194" posY="51.313" width="25.657" height="13.363" barcodeType="22" code="1234522546" heightRatio="50"></barcode>
+        <barcode id="32" zValue="32" resource="static" posX="117.058" posY="51.313" width="27.260" height="16.035" barcodeType="13" code="522364741021" heightRatio="50" foreColor="#000080"></barcode>
+        <label id="33" zValue="33" resource="static" posX="115.455" posY="46.503" width="30.467" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#00007f">EAN</label>
+        <barcode id="34" zValue="34" resource="static" posX="145.922" posY="51.313" width="24.053" height="9.621" barcodeType="31" code="[12]asqfqf" heightRatio="50"></barcode>
+        <label id="35" zValue="35" resource="static" posX="145.922" posY="46.503" width="30.467" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">DataBar Expanded</label>
+        <barcode id="36" zValue="36" resource="static" posX="59.331" posY="76.970" width="27.260" height="9.621" barcodeType="79" code="50310218715" heightRatio="50"></barcode>
+        <label id="37" zValue="37" resource="static" posX="86.591" posY="70.556" width="30.467" height="8.018" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Databar Stacked Omnidirectional</label>
+        <barcode id="38" zValue="38" resource="static" posX="94.609" posY="78.573" width="17.639" height="14.432" barcodeType="80" code="50310218715" heightRatio="50"></barcode>
+        <label id="39" zValue="39" resource="static" posX="117.058" posY="70.556" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Deutshe Post Leitcode</label>
+        <barcode id="40" zValue="40" resource="static" posX="117.058" posY="75.366" width="29.398" height="14.432" barcodeType="21" code="50310218715" heightRatio="50"></barcode>
+        <label id="41" zValue="41" resource="static" posX="145.922" posY="70.556" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">KIX</label>
+        <barcode id="42" zValue="42" resource="static" posX="147.525" posY="75.366" width="29.398" height="6.414" barcodeType="90" code="503102" heightRatio="50"></barcode>
+        <label id="43" zValue="43" resource="static" posX="0.000" posY="94.609" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">EAN-14</label>
+        <barcode id="44" zValue="44" resource="static" posX="0.000" posY="99.419" width="28.864" height="14.432" barcodeType="72" code="5211445236512" heightRatio="50"></barcode>
+        <label id="45" zValue="45" resource="static" posX="28.864" posY="94.609" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Flattermarken</label>
+        <barcode id="46" zValue="46" resource="static" posX="32.071" posY="99.419" width="25.657" height="14.432" barcodeType="28" code="23166848" heightRatio="50"></barcode>
+        <barcode id="47" zValue="47" resource="static" posX="86.591" posY="99.419" width="28.864" height="16.035" barcodeType="69" code="521144523" heightRatio="50"></barcode>
+        <label id="48" zValue="48" resource="static" posX="86.591" posY="94.609" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">ISBN</label>
+        <barcode id="49" zValue="49" resource="static" posX="115.455" posY="99.419" width="28.864" height="4.811" barcodeType="76" code="5211445236512" heightRatio="50"></barcode>
+        <label id="50" zValue="50" resource="static" posX="115.455" posY="94.609" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Japanese Postal Code</label>
+        <barcode id="51" zValue="51" resource="static" posX="144.318" posY="99.419" width="24.053" height="11.225" barcodeType="77" code="511324" heightRatio="50"></barcode>
+        <label id="52" zValue="52" resource="static" posX="144.318" posY="94.609" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Korean Postal Code</label>
+        <barcode id="53" zValue="53" resource="static" posX="0.000" posY="123.472" width="28.864" height="14.432" barcodeType="50" code="5211445236512" heightRatio="50"></barcode>
+        <label id="54" zValue="54" resource="static" posX="0.000" posY="118.662" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Logmarks</label>
+        <barcode id="55" zValue="55" resource="static" posX="33.674" posY="123.472" width="22.449" height="19.242" barcodeType="58" code="04654654" heightRatio="50"></barcode>
+        <label id="56" zValue="56" resource="static" posX="28.864" posY="118.662" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">QR code</label>
+        <label id="57" zValue="57" resource="static" posX="57.727" posY="118.662" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">MicroPDF417</label>
+        <barcode id="58" zValue="58" resource="static" posX="57.727" posY="123.472" width="28.864" height="8.018" barcodeType="84" code="5211445236512" heightRatio="50"></barcode>
+        <barcode id="59" zValue="59" resource="static" posX="88.194" posY="123.472" width="25.657" height="16.035" barcodeType="47" code="1698796878" heightRatio="50"></barcode>
+        <label id="60" zValue="60" resource="static" posX="86.591" posY="118.662" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">MSI Plessy</label>
+        <barcode id="61" zValue="61" resource="static" posX="117.058" posY="123.472" width="25.657" height="16.035" barcodeType="75" code="2254004" heightRatio="50"></barcode>
+        <label id="62" zValue="62" resource="static" posX="115.455" posY="118.662" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">NVE-18</label>
+        <barcode id="63" zValue="63" resource="static" posX="144.318" posY="123.472" width="24.053" height="11.225" barcodeType="84" code="123456" heightRatio="50"></barcode>
+        <label id="64" zValue="64" resource="static" posX="144.318" posY="118.662" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">PDF-417</label>
+        <barcode id="65" zValue="65" resource="static" posX="1.604" posY="155.543" width="25.657" height="17.639" barcodeType="51" code="16546" heightRatio="50"></barcode>
+        <label id="66" zValue="66" resource="static" posX="0.000" posY="150.732" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Pharmacode</label>
+        <barcode id="67" zValue="67" resource="static" posX="38.485" posY="155.543" width="11.225" height="17.639" barcodeType="53" code="1698791" heightRatio="50"></barcode>
+        <label id="68" zValue="68" resource="static" posX="28.864" posY="150.732" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Pharmacode 2 track</label>
+        <barcode id="69" zValue="69" resource="static" posX="57.727" posY="161.957" width="28.864" height="12.828" barcodeType="52" code="987654" heightRatio="50"></barcode>
+        <label id="70" zValue="70" resource="static" autoHeight="true" posX="57.727" posY="150.732" width="28.864" height="11.225" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Pharma Zentralnummer (PZN)</label>
+        <barcode id="71" zValue="71" resource="static" posX="86.591" posY="157.146" width="28.864" height="9.621" barcodeType="82" code="21654647879" heightRatio="50"></barcode>
+        <label id="72" zValue="72" resource="static" posX="86.591" posY="150.732" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Planet</label>
+        <barcode id="73" zValue="73" resource="static" posX="117.058" posY="157.146" width="24.053" height="4.811" barcodeType="40" code="1698796878" heightRatio="50"></barcode>
+        <label id="74" zValue="74" resource="static" posX="115.455" posY="150.732" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Postnet</label>
+        <barcode id="75" zValue="75" resource="static" posX="144.318" posY="157.146" width="27.260" height="6.414" barcodeType="70" code="2264550" heightRatio="50"></barcode>
+        <label id="76" zValue="76" resource="static" posX="144.318" posY="150.732" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Royal Mail 4 State</label>
+        <barcode id="77" zValue="77" resource="static" posX="1.604" posY="179.596" width="25.657" height="16.035" barcodeType="32" code="33540221"></barcode>
+        <label id="78" zValue="78" resource="static" posX="0.000" posY="174.785" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Telepen</label>
+        <barcode id="79" zValue="79" resource="static" posX="30.467" posY="179.596" width="25.657" height="16.035" barcodeType="87" code="2213354" heightRatio="50"></barcode>
+        <label id="80" zValue="80" resource="static" posX="28.864" posY="174.785" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">Telepen Numeric</label>
+        <barcode id="81" zValue="81" resource="static" posX="59.331" posY="179.596" width="25.657" height="8.018" barcodeType="86" code="1698796878" heightRatio="50"></barcode>
+        <label id="82" zValue="82" resource="static" posX="57.727" posY="174.785" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">UK Plessey</label>
+        <barcode id="83" zValue="83" resource="static" posX="88.194" posY="179.596" width="25.657" height="16.035" barcodeType="34" code="1698796878" heightRatio="50"></barcode>
+        <label id="84" zValue="84" resource="static" posX="86.591" posY="174.785" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">UPC-A + Composite</label>
+        <barcode id="85" zValue="85" resource="static" posX="115.455" posY="179.596" width="27.260" height="22.449" barcodeType="37" code="2246548" heightRatio="50"></barcode>
+        <label id="86" zValue="86" resource="static" posX="115.455" posY="174.785" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">UPC-E</label>
+        <barcode id="87" zValue="87" resource="static" posX="144.318" posY="181.199" width="27.260" height="8.018" barcodeType="85" code="21501156502145236520" heightRatio="50"></barcode>
+        <label id="88" zValue="88" resource="static" posX="144.318" posY="174.785" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">USPS One Code</label>
+        <barcode id="89" zValue="89" resource="static" posX="86.591" posY="4.811" width="25.657" height="13.363" barcodeType="7" code="665418" heightRatio="50" whiteSpace="5"></barcode>
+        <barcode id="90" zValue="90" resource="static" posX="0.000" posY="52.917" width="28.864" height="17.639" barcodeType="25" code="AEEIUZWE"></barcode>
+        <barcode id="91" zValue="91" resource="static" posX="142.715" posY="4.811" width="27.260" height="16.035" barcodeType="69" code="9780123456472"></barcode>
+        <label id="92" zValue="92" resource="static" posX="144.318" posY="0.000" width="24.053" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">ISBN</label>
+        <label id="93" zValue="93" resource="static" posX="57.727" posY="24.053" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">GS1 Databar 14</label>
+        <barcode id="94" zValue="94" resource="static" posX="59.331" posY="28.864" width="25.657" height="17.639" barcodeType="29" code="6654125415" heightRatio="50"></barcode>
+        <barcode id="95" zValue="95" resource="static" posX="59.331" posY="99.419" width="25.657" height="14.432" barcodeType="98" code="23166848" heightRatio="50"></barcode>
+        <label id="96" zValue="96" resource="static" posX="57.727" posY="94.609" width="28.864" height="5.078" fontName="Nimbus Roman No9 L" fontSize="8" alignment="36" wordbreak="true" forecolor="#000000">HIBC Code 128</label>
+    </reportheader>
+    <details>
+        <detail id="Detail1" height="20.044" datasource="data" startsOnNewPage="false">
+            <items>
+                <barcode id="0" zValue="0" resource="datasource" posX="36.881" posY="0.000" width="36.881" height="17.639" barcodeType="13" code="50310218715" heightRatio="50">col0</barcode>
+                <barcode id="1" zValue="1" resource="datasource" posX="123.472" posY="0.000" width="46.503" height="16.035" barcodeType="8" code="50310218715" heightRatio="50">col1</barcode>
+                <field id="2" zValue="2" resource="static" posX="0.000" posY="0.000" width="35.278" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000" type="txt" ftype="ds" arg="">col0</field>
+                <field id="3" zValue="3" resource="static" posX="75.366" posY="0.000" width="38.485" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="34" wordbreak="true" forecolor="#000000" type="txt" ftype="ds" arg="">col1</field>
+                <line id="4" zValue="4" resource="static" fromX="0.000" fromY="19.242" toX="169.975" toY="19.242" lineColor="#0055ff" lineStyle="solid" lineWidth="0.300"/>
+            </items>
+        </detail>
+    </details>
+</NCReport>

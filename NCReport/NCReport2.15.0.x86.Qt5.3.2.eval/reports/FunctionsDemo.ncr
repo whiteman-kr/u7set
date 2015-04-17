@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.12.0" name="Untitled" type="report">
+    <options>
+        <encoding>UTF-8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Arial</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+        <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
+    </options>
+    <datasources>
+        <datasource id="sds" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true" encoding="UTF-8">id	name	code
+1	MARIE SETTLER	233652140214
+2	KIM FERNANDEZ	325479021441
+3	JULIA MAYER	458874021399</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="PH" height="17.198">
+        <field id="4ZJ7U" zValue="0" posX="0.000" posY="9.525" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">sds.rowCount()</field>
+        <field id="BF2LX" zValue="1" posX="50.800" posY="9.525" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">sds.isEmpty()</field>
+        <field id="KL7TS" zValue="2" posX="76.200" posY="9.525" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">sds.isValid()</field>
+        <field id="NWAXL" zValue="3" posX="25.400" posY="9.525" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">sds.isAvailable()</field>
+        <line id="5ZY4H" zValue="4" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="15.875" toX="169.862" toY="15.875"/>
+        <label id="WWCTS" zValue="5" posX="0.000" posY="0.000" width="68.263" height="5.821" fontName="Arial" fontSize="14" fontWeight="bold">Report Functions Demo</label>
+    </pageheader>
+    <pagefooter id="PF" height="7.673">
+        <field id="5ZY4H" zValue="0" posX="122.237" posY="0.000" width="47.625" height="4.762" resource="sysvar" fontName="Arial" fontSize="10" alignment="34" type="num" ftype="sys">pageno</field>
+    </pagefooter>
+    <details>
+        <detail id="Detail1" height="46.831" datasource="sds">
+            <items>
+                <field id="5ZY4H" zValue="0" posX="0.000" posY="0.000" width="14.287" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">id</field>
+                <field id="SUIYK" zValue="1" posX="15.875" posY="0.000" width="47.625" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">name</field>
+                <field id="HTPFP" zValue="2" posX="65.087" posY="0.000" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">name.mid(2,3)</field>
+                <field id="5ZY4H" zValue="3" posX="90.487" posY="0.000" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">name.left(5)</field>
+                <field id="SUIYK" zValue="4" posX="115.887" posY="0.000" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">name.right(5)</field>
+                <field id="TPFPN" zValue="5" posX="0.000" posY="6.350" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">rowCount()</field>
+                <field id="5ZY4H" zValue="6" posX="25.400" posY="6.350" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">isAvailable()</field>
+                <field id="SUIYK" zValue="7" posX="50.800" posY="6.350" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">isEmpty()</field>
+                <field id="HTPFP" zValue="8" posX="76.200" posY="6.350" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">isValid()</field>
+                <field id="N7Q30" zValue="9" posX="0.000" posY="11.112" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">sds.rowCount()</field>
+                <field id="ROE94" zValue="10" posX="25.400" posY="11.112" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">sds.isAvailable()</field>
+                <field id="YXWQN" zValue="11" posX="50.800" posY="11.112" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">sds.isEmpty()</field>
+                <field id="BIBIX" zValue="12" posX="76.200" posY="11.112" width="23.812" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" type="txt" ftype="ds">sds.isValid()</field>
+                <field id="SUIYK" zValue="13" posX="141.287" posY="0.000" width="28.575" height="4.762" resource="datasource" fontName="Arial" fontSize="10" alignment="1" forecolor="#aa0000" type="txt" ftype="ds">sds.name.right(5)</field>
+                <barcode id="5ZY4H" zValue="14" posX="3.175" posY="17.462" width="50.800" height="28.575" resource="tpl" template="true" barcodeType="13" code="503102187159">$D{code.left(5)}5555555</barcode>
+                <barcode id="5ZY4H" zValue="15" posX="58.737" posY="17.462" width="50.800" height="28.575" resource="exp" template="true" barcodeType="13" code="503102187159">$D{code.left(5)}+58771+33366</barcode>
+            </items>
+        </detail>
+    </details>
+</NCReport>

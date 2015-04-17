@@ -40,8 +40,8 @@ struct EnumPropertyType
     {
     }
 
-    QStringList items;
-    int value;
+	std::vector<std::pair<QString, int>> items;
+	int value = -1;
 
     static int enumTypeId();
 };
@@ -81,7 +81,8 @@ class QtMultiEnumEdit : public QWidget
 
 public:
     explicit QtMultiEnumEdit(QWidget* parent);
-    void setValue(QVariant value);
+	void setItems(QVariant value);
+	void setValue(QVariant value);
 
 public slots:
     void indexChanged(int index);

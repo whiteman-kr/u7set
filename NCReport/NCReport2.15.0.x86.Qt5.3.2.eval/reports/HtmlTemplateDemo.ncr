@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.7" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="ds" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">firstname	lastname	amount
+Charlie	Morton	1520
+Peter	Caddy	870
+April	Fredericson	1970
+Julie	Miller	995</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="PH" height="7.938">
+        <label id="15233" zValue="0" posX="0.000" posY="0.000" width="149.225" height="6.350" fontName="Liberation Sans" fontSize="14" fontWeight="bold" alignment="1">List of savings</label>
+    </pageheader>
+    <pagefooter id="PF" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="4.498" datasource="ds">
+            <items>
+                <field id="15233" zValue="0" posX="0.000" posY="0.000" width="47.625" height="4.762" fontName="Liberation Sans" fontSize="10" type="txt" ftype="ds" arg="" numChars="20">firstname</field>
+                <field id="11771" zValue="1" posX="49.212" posY="0.000" width="63.500" height="4.762" fontName="FreeMono" fontSize="10" alignment="34" type="txt" ftype="ds" arg="" numChars="20">lastname</field>
+                <field id="12116" zValue="2" posX="120.650" posY="0.000" width="47.625" height="4.762" fontName="FreeMono" fontSize="10" alignment="34" type="num" ftype="ds" formatting="true" numwidth="0" format="f" precision="2" localized="true" arg="" numChars="20">amount</field>
+            </items>
+            <groups>
+                <group id="Group0" groupExp="%CONST" resetVariables="" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="8.731">
+                        <label id="14678" zValue="0" posX="0.000" posY="1.587" width="47.625" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1">Firstname</label>
+                        <label id="15431" zValue="1" posX="49.212" posY="1.587" width="47.625" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1">Lastname</label>
+                        <label id="6791" zValue="2" posX="123.825" posY="1.587" width="44.450" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="2">Amount</label>
+                        <line id="10376" zValue="3" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="0.000" fromY="7.938" toX="169.862" toY="7.938"/>
+                    </groupheader>
+                    <groupfooter height="4.000"/>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

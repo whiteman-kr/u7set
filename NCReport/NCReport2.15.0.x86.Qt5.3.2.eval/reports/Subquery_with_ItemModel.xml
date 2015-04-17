@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.8.6" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="ds_master" type="model" openRole="sub" source="static" modelID="master" parentID=""></datasource>
+        <datasource id="ds_detail1" type="model" openRole="begin" source="static" modelID="detail1" parentID="">$D{ds_master.orderid}</datasource>
+        <datasource id="ds_detail2" type="model" openRole="begin" source="static" modelID="detail2" parentID="">$D{ds_master.orderid}</datasource>
+    </datasources>
+    <variables>
+        <variable id="qty" type="num" funcType="sum" scope="group" initValue="0">Quantity</variable>
+    </variables>
+    <pageheader id="PH" height="3.440"/>
+    <pagefooter id="PF" height="5.560"/>
+    <reportheader id="RH" height="11.910">
+        <field id="13791" zValue="0" posX="65.087" posY="0.000" width="34.925" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" forecolor="#aa0000" type="txt" ftype="ds" arg="">ds_master.orderid</field>
+        <field id="12769" zValue="1" posX="0.000" posY="6.350" width="47.625" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" forecolor="#aa0000" type="txt" ftype="ds" arg="">ds_master.customerid</field>
+        <field id="15431" zValue="2" posX="49.212" posY="6.350" width="38.100" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1" forecolor="#aa0000" type="txt" ftype="ds" arg="">ds_master.freight</field>
+        <label id="6791" zValue="3" posX="0.000" posY="0.000" width="63.500" height="5.027" fontName="Liberation Sans" fontSize="12" letterSpacing="5" capital="1" alignment="1" forecolor="#aa0000">purchase order</label>
+    </reportheader>
+    <reportfooter id="RF" height="0.000"/>
+    <details>
+        <detail id="Detail1" height="5.027" datasource="ds_detail1">
+            <items>
+                <field id="3707" zValue="0" posX="1.587" posY="0.000" width="17.462" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="34" type="txt" ftype="ds" arg="">OrderID</field>
+                <field id="1727" zValue="1" posX="73.025" posY="0.000" width="23.812" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="34" type="txt" ftype="ds" arg="">UnitPrice</field>
+                <field id="14678" zValue="2" posX="22.225" posY="0.000" width="47.625" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="ds" arg="">ProductName</field>
+                <field id="15233" zValue="3" posX="100.012" posY="0.000" width="26.987" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="34" type="txt" ftype="ds" arg="">Quantity</field>
+            </items>
+            <groups>
+                <group id="GD1" groupExp="%CONST" resetVariables="qty" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="7.938">
+                        <label id="11771" zValue="0" posX="1.587" posY="1.587" width="17.462" height="4.762" fontName="Georgia" fontSize="10" fontWeight="bold" alignment="2">Number</label>
+                        <label id="12116" zValue="1" posX="22.225" posY="1.587" width="47.625" height="4.762" fontName="Georgia" fontSize="10" fontWeight="bold" alignment="2">Productname</label>
+                        <label id="13791" zValue="2" posX="74.612" posY="1.587" width="22.225" height="4.762" fontName="Georgia" fontSize="10" fontWeight="bold" alignment="2">Price</label>
+                        <label id="12769" zValue="3" posX="101.600" posY="1.587" width="25.400" height="4.762" fontName="Georgia" fontSize="10" fontWeight="bold" alignment="2">Quantity</label>
+                        <line id="1727" zValue="4" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="6.350" toX="134.938" toY="6.350"/>
+                    </groupheader>
+                    <groupfooter height="7.144">
+                        <line id="12769" zValue="0" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="0.000" toX="134.938" toY="0.000"/>
+                        <field id="1727" zValue="1" posX="100.012" posY="0.000" width="26.987" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="34" type="txt" ftype="var" arg="">qty</field>
+                    </groupfooter>
+                </group>
+            </groups>
+        </detail>
+        <detail id="Detail2" height="4.762" datasource="ds_detail2">
+            <items>
+                <field id="2681" zValue="0" posX="3.175" posY="0.000" width="15.875" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="34" type="txt" ftype="ds" arg="">OrderID</field>
+                <field id="12515" zValue="1" posX="22.225" posY="0.000" width="47.625" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="1" type="txt" ftype="ds" arg="">expdate</field>
+                <field id="6542" zValue="2" posX="73.025" posY="0.000" width="26.987" height="4.762" fontName="Liberation Sans" fontSize="10" alignment="34" type="txt" ftype="ds" arg="">amount</field>
+            </items>
+            <groups>
+                <group id="GD2" groupExp="%CONST" resetVariables="" reprintHeader="false" startsOnNewPage="false">
+                    <groupheader height="7.673">
+                        <label id="15103" zValue="0" posX="1.587" posY="1.587" width="17.462" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1">Number</label>
+                        <label id="1392" zValue="1" posX="22.225" posY="1.587" width="47.625" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1">Expiry Date</label>
+                        <line id="11663" zValue="2" lineColor="#000000" lineStyle="solid" lineWidth="0.100" fromX="1.587" fromY="6.350" toX="101.600" toY="6.350"/>
+                        <label id="8965" zValue="3" posX="74.612" posY="1.587" width="22.225" height="4.762" fontName="Liberation Sans" fontSize="10" fontWeight="bold" alignment="1">Amount</label>
+                    </groupheader>
+                    <groupfooter height="4.000"/>
+                </group>
+            </groups>
+        </detail>
+    </details>
+</NCReport>

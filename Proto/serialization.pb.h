@@ -4388,12 +4388,12 @@ class DeviceModule : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
-  // optional int32 ConfIndex = 2 [default = 0];
-  inline bool has_confindex() const;
-  inline void clear_confindex();
-  static const int kConfIndexFieldNumber = 2;
-  inline ::google::protobuf::int32 confindex() const;
-  inline void set_confindex(::google::protobuf::int32 value);
+  // optional int32 Channel = 2 [default = 0];
+  inline bool has_channel() const;
+  inline void clear_channel();
+  static const int kChannelFieldNumber = 2;
+  inline ::google::protobuf::int32 channel() const;
+  inline void set_channel(::google::protobuf::int32 value);
 
   // optional string SubsysID = 3 [default = ""];
   inline bool has_subsysid() const;
@@ -4423,8 +4423,8 @@ class DeviceModule : public ::google::protobuf::Message {
  private:
   inline void set_has_type();
   inline void clear_has_type();
-  inline void set_has_confindex();
-  inline void clear_has_confindex();
+  inline void set_has_channel();
+  inline void clear_has_channel();
   inline void set_has_subsysid();
   inline void clear_has_subsysid();
   inline void set_has_conftype();
@@ -4433,7 +4433,7 @@ class DeviceModule : public ::google::protobuf::Message {
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 type_;
-  ::google::protobuf::int32 confindex_;
+  ::google::protobuf::int32 channel_;
   ::std::string* subsysid_;
   ::std::string* conftype_;
 
@@ -9604,26 +9604,26 @@ inline void DeviceModule::set_type(::google::protobuf::int32 value) {
   type_ = value;
 }
 
-// optional int32 ConfIndex = 2 [default = 0];
-inline bool DeviceModule::has_confindex() const {
+// optional int32 Channel = 2 [default = 0];
+inline bool DeviceModule::has_channel() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void DeviceModule::set_has_confindex() {
+inline void DeviceModule::set_has_channel() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void DeviceModule::clear_has_confindex() {
+inline void DeviceModule::clear_has_channel() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void DeviceModule::clear_confindex() {
-  confindex_ = 0;
-  clear_has_confindex();
+inline void DeviceModule::clear_channel() {
+  channel_ = 0;
+  clear_has_channel();
 }
-inline ::google::protobuf::int32 DeviceModule::confindex() const {
-  return confindex_;
+inline ::google::protobuf::int32 DeviceModule::channel() const {
+  return channel_;
 }
-inline void DeviceModule::set_confindex(::google::protobuf::int32 value) {
-  set_has_confindex();
-  confindex_ = value;
+inline void DeviceModule::set_channel(::google::protobuf::int32 value) {
+  set_has_channel();
+  channel_ = value;
 }
 
 // optional string SubsysID = 3 [default = ""];

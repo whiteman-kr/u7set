@@ -936,6 +936,26 @@ void EquipmentView::addPresetModule()
 	}
 }
 
+void EquipmentView::addPresetController()
+{
+	if (isPresetMode() == true)
+	{
+		std::shared_ptr<Hardware::DeviceObject> controller = std::make_shared<Hardware::DeviceController>(true);
+
+		controller->setStrId("$(PARENT)_CRRLXXX");
+		controller->setCaption(tr("Controller"));
+
+		controller->setPresetRoot(true);
+		controller->setPresetName("PRESET_NAME");
+
+		addDeviceObject(controller);
+	}
+	else
+	{
+		choosePreset(Hardware::DeviceType::Controller);
+	}
+}
+
 void EquipmentView::addPresetWorkstation()
 {
 	if (isPresetMode() == true)
@@ -1304,6 +1324,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 		m_addObjectMenu->addAction(m_addRackAction);
 		m_addObjectMenu->addAction(m_addChassisAction);
 		m_addObjectMenu->addAction(m_addModuleAction);
+		m_addObjectMenu->addAction(m_addControllerAction);
 		m_addObjectMenu->addAction(m_addSignalAction);
 		m_addObjectMenu->addAction(m_addWorkstationAction);
 		m_addObjectMenu->addAction(m_addSoftwareAction);
@@ -1314,6 +1335,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 		m_addPresetMenu->addAction(m_addPresetRackAction);
 		m_addPresetMenu->addAction(m_addPresetChassisAction);
 		m_addPresetMenu->addAction(m_addPresetModuleAction);
+		m_addPresetMenu->addAction(m_addPresetControllerAction);
 		m_addPresetMenu->addAction(m_addPresetWorkstationAction);
 		m_addPresetMenu->addAction(m_addPresetSoftwareAction);
 
@@ -1411,6 +1433,11 @@ void EquipmentTabPage::CreateActions()
 		m_addModuleAction->setEnabled(false);
 		connect(m_addModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addModule);
 
+		m_addControllerAction = new QAction(tr("Controller"), this);
+		m_addControllerAction->setStatusTip(tr("Add controller to the configuration..."));
+		m_addControllerAction->setEnabled(false);
+		connect(m_addControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addController);
+
 		m_addSignalAction = new QAction(tr("Signal"), this);
 		m_addSignalAction->setStatusTip(tr("Add signal to the configuration..."));
 		m_addSignalAction->setEnabled(false);
@@ -1449,6 +1476,11 @@ void EquipmentTabPage::CreateActions()
 		m_addPresetModuleAction->setStatusTip(tr("Add module to the preset..."));
 		m_addPresetModuleAction->setEnabled(false);
 		connect(m_addPresetModuleAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetModule);
+
+		m_addPresetControllerAction = new QAction(tr("Preset Controller"), this);
+		m_addPresetControllerAction->setStatusTip(tr("Add controller to the preset..."));
+		m_addPresetControllerAction->setEnabled(false);
+		connect(m_addPresetControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetController);
 
 		m_addPresetWorkstationAction = new QAction(tr("Preset Worksation"), this);
 		m_addPresetWorkstationAction->setStatusTip(tr("Add workstation to the preset..."));
@@ -1557,12 +1589,33 @@ void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/, const QM
 
 void EquipmentTabPage::setActionState()
 {
+	assert(m_addSystemAction);
+	assert(m_addSystemAction);
+	assert(m_addChassisAction);
+	assert(m_addModuleAction);
+	assert(m_addControllerAction);
+	assert(m_addSignalAction);
+	assert(m_addWorkstationAction);
+	assert(m_addSoftwareAction);
+	assert(m_deleteObjectAction);
+	assert(m_checkOutAction);
+	assert(m_checkInAction);
+	assert(m_undoChangesAction);
+	assert(m_refreshAction);
+	assert(m_addPresetRackAction);
+	assert(m_addPresetChassisAction);
+	assert(m_addPresetModuleAction);
+	assert(m_addPresetControllerAction);
+	assert(m_addPresetWorkstationAction);
+	assert(m_addPresetSoftwareAction);
+
 	// Disable all
 	//
 	m_addSystemAction->setEnabled(false);
 	m_addRackAction->setEnabled(false);
 	m_addChassisAction->setEnabled(false);
 	m_addModuleAction->setEnabled(false);
+	m_addControllerAction->setEnabled(false);
 	m_addSignalAction->setEnabled(false);
 
 	m_addWorkstationAction->setEnabled(false);
@@ -1577,6 +1630,7 @@ void EquipmentTabPage::setActionState()
 	m_addPresetRackAction->setEnabled(false);
 	m_addPresetChassisAction->setEnabled(false);
 	m_addPresetModuleAction->setEnabled(false);
+	m_addPresetControllerAction->setEnabled(false);
 	m_addPresetWorkstationAction->setEnabled(false);
 	m_addPresetSoftwareAction->setEnabled(false);
 
@@ -1683,12 +1737,14 @@ void EquipmentTabPage::setActionState()
 				m_addRackAction->setEnabled(true);
 				m_addChassisAction->setEnabled(true);
 				m_addModuleAction->setEnabled(true);
+				m_addControllerAction->setEnabled(true);
 				m_addSignalAction->setEnabled(true);
 				m_addWorkstationAction->setEnabled(true);
 
 				m_addPresetRackAction->setEnabled(true);
 				m_addPresetChassisAction->setEnabled(true);
 				m_addPresetModuleAction->setEnabled(true);
+				m_addPresetControllerAction->setEnabled(true);
 				m_addPresetWorkstationAction->setEnabled(true);
 				break;
 
@@ -1698,6 +1754,7 @@ void EquipmentTabPage::setActionState()
 					m_addRackAction->setEnabled(true);
 					m_addChassisAction->setEnabled(true);
 					m_addModuleAction->setEnabled(true);
+					m_addControllerAction->setEnabled(true);
 					m_addSignalAction->setEnabled(true);
 					m_addWorkstationAction->setEnabled(true);
 				}
@@ -1706,6 +1763,7 @@ void EquipmentTabPage::setActionState()
 					m_addRackAction->setEnabled(selectedObject->presetRoot() == false);
 					m_addChassisAction->setEnabled(true);
 					m_addModuleAction->setEnabled(true);
+					m_addControllerAction->setEnabled(true);
 					m_addSignalAction->setEnabled(true);
 					m_addWorkstationAction->setEnabled(true);
 				}
@@ -1713,6 +1771,7 @@ void EquipmentTabPage::setActionState()
 				m_addPresetRackAction->setEnabled(true);
 				m_addPresetChassisAction->setEnabled(true);
 				m_addPresetModuleAction->setEnabled(true);
+				m_addPresetControllerAction->setEnabled(true);
 				m_addPresetWorkstationAction->setEnabled(true);
 				break;
 
@@ -1721,6 +1780,7 @@ void EquipmentTabPage::setActionState()
 				{
 					m_addChassisAction->setEnabled(true);
 					m_addModuleAction->setEnabled(true);
+					m_addControllerAction->setEnabled(true);
 					m_addSignalAction->setEnabled(true);
 					m_addWorkstationAction->setEnabled(true);
 				}
@@ -1728,12 +1788,14 @@ void EquipmentTabPage::setActionState()
 				{
 					m_addChassisAction->setEnabled(selectedObject->presetRoot() == false);
 					m_addModuleAction->setEnabled(true);
+					m_addControllerAction->setEnabled(true);
 					m_addSignalAction->setEnabled(true);
 					m_addWorkstationAction->setEnabled(true);
 				}
 
 				m_addPresetChassisAction->setEnabled(true);
 				m_addPresetModuleAction->setEnabled(true);
+				m_addPresetControllerAction->setEnabled(true);
 				m_addPresetWorkstationAction->setEnabled(true);
 				break;
 
@@ -1747,9 +1809,26 @@ void EquipmentTabPage::setActionState()
 					m_addModuleAction->setEnabled(selectedObject->presetRoot() == false);
 				}
 
+				m_addControllerAction->setEnabled(true);
 				m_addSignalAction->setEnabled(true);
 
 				m_addPresetModuleAction->setEnabled(true);
+				m_addPresetControllerAction->setEnabled(true);
+				break;
+
+			case Hardware::DeviceType::Controller:
+				if (isConfigurationMode() == true)
+				{
+					m_addControllerAction->setEnabled(true);
+				}
+				else
+				{
+					m_addControllerAction->setEnabled(selectedObject->presetRoot() == false);
+				}
+
+				m_addSignalAction->setEnabled(true);
+
+				m_addPresetControllerAction->setEnabled(true);
 				break;
 
 			case Hardware::DeviceType::Workstation:
@@ -1812,6 +1891,7 @@ void EquipmentTabPage::setActionState()
 		m_addPresetRackAction->setEnabled(true);
 		m_addPresetChassisAction->setEnabled(true);
 		m_addPresetModuleAction->setEnabled(true);
+		m_addPresetControllerAction->setEnabled(true);
 		m_addPresetWorkstationAction->setEnabled(true);
 		m_addPresetSoftwareAction->setEnabled(true);
 	}

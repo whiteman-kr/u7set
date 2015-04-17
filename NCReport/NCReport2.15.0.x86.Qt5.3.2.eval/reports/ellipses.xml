@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.6.99.5" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>00</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Liberation Sans</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+        <zoneBreak>false</zoneBreak>
+    </options>
+    <datasources>
+        <datasource id="DataSource1" type="txt" openRole="begin" source="static" columnDelimiter="tab">0</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="74.083">
+        <line id="0" zValue="0" resource="static" fromX="3.175" fromY="12.700" toX="120.650" toY="12.700" lineColor="#000000" lineStyle="dash" lineWidth="0.750"/>
+        <ellipse id="1" zValue="1" resource="static" posX="1.587" posY="1.587" width="25.400" height="25.400" lineColor="#000000" lineStyle="dash" lineWidth="0.750" fillColor="#aa0000" fillStyle="solid"/>
+        <line id="2" zValue="2" resource="static" fromX="31.750" fromY="53.975" toX="31.750" toY="1.587" lineColor="#000000" lineStyle="dash" lineWidth="0.750"/>
+        <ellipse id="3" zValue="3" resource="static" posX="19.050" posY="30.162" width="25.400" height="25.400" lineColor="#000000" lineStyle="dash" lineWidth="0.750" fillColor="#55aa00" fillStyle="solid"/>
+        <ellipse id="4" zValue="4" resource="static" posX="39.688" posY="1.587" width="25.400" height="25.400" lineColor="#000000" lineStyle="dash" lineWidth="0.750" fillColor="#0000ff" fillStyle="solid"/>
+        <line id="5" zValue="5" resource="static" fromX="120.650" fromY="12.700" toX="120.650" toY="53.975" lineColor="#000000" lineStyle="dash" lineWidth="0.750"/>
+        <ellipse id="6" zValue="6" resource="static" posX="77.787" posY="1.587" width="25.400" height="25.400" lineColor="#000000" lineStyle="dash" lineWidth="0.750" fillColor="#ff5500" fillStyle="solid"/>
+        <ellipse id="7" zValue="7" resource="static" posX="107.950" posY="30.162" width="25.400" height="25.400" lineColor="#000000" lineStyle="dash" lineWidth="0.750" fillColor="#aa55ff" fillStyle="solid"/>
+        <label id="8" zValue="8" resource="static" posX="6.350" posY="11.112" width="15.875" height="7.938" fontName="Liberation Sans" fontSize="12" fontWeight="bold" alignment="4" forecolor="#ffffff">Unit 1</label>
+        <label id="9" zValue="9" resource="static" posX="44.450" posY="11.112" width="15.875" height="7.938" fontName="Liberation Sans" fontSize="12" fontWeight="bold" alignment="36" forecolor="#ffffff">Unit 2</label>
+        <label id="10" zValue="10" resource="static" posX="82.550" posY="11.112" width="15.875" height="7.938" fontName="Liberation Sans" fontSize="12" fontWeight="bold" alignment="36" forecolor="#ffffff">Unit 3</label>
+        <label id="11" zValue="11" resource="static" posX="23.812" posY="39.688" width="15.875" height="7.938" fontName="Liberation Sans" fontSize="12" fontWeight="bold" alignment="36" forecolor="#ffffff">Unit 4</label>
+        <label id="12" zValue="12" resource="static" posX="112.712" posY="39.688" width="15.875" height="7.938" fontName="Liberation Sans" fontSize="12" fontWeight="bold" alignment="36" forecolor="#ffffff">Unit 5</label>
+        <ellipse id="13" zValue="13" resource="static" posX="52.387" posY="47.625" width="46.037" height="17.462" lineColor="#000000" lineStyle="dash" lineWidth="0.750" fillColor="#ffaa00" fillStyle="solid"/>
+        <label id="14" zValue="14" resource="static" posX="63.500" posY="53.975" width="23.812" height="7.938" fontName="Liberation Sans" fontSize="12" fontWeight="bold" alignment="36" forecolor="#ffffff">Hello world!</label>
+    </pageheader>
+    <pagefooter id="pfoot" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="10.000" datasource="DataSource1" startsOnNewPage="false">
+            <items/>
+        </detail>
+    </details>
+</NCReport>

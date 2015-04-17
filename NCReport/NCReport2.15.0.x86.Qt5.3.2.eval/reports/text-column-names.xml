@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NCReport version="2.5.0" name="Untitled" type="report">
+    <options>
+        <encoding>utf8</encoding>
+        <language>de</language>
+        <langrole>0</langrole>
+        <orientation>portrait</orientation>
+        <pagesize width="210.000" height="297.000">A4</pagesize>
+        <topmargin>15</topmargin>
+        <bottommargin>15</bottommargin>
+        <leftmargin>20</leftmargin>
+        <rightmargin>20</rightmargin>
+        <fontname>Nimbus Roman No9 L</fontname>
+        <fontsize>10</fontsize>
+        <backcolor>#ffffff</backcolor>
+        <columns>0</columns>
+        <columnspace>0</columnspace>
+        <zoneSpacing>0</zoneSpacing>
+    </options>
+    <datasources>
+        <datasource id="txt" type="txt" openRole="begin" source="static" columnDelimiter="tab" hasColumnHeader="true">name	city	address
+Ron Howard	New York	1052 Palm Road 2.
+Stephan Eastwood	Dallas TX	Revance str 11.
+Jennifer Connery	Los Angeles	Lincoln bvd 342</datasource>
+    </datasources>
+    <variables/>
+    <pageheader id="phead" height="16.035">
+        <label id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="96.212" height="6.414" fontName="Lucida Sans Typewriter" fontSize="14" fontWeight="bold" alignment="1" forecolor="#000000" tr="true">
+            <tr lang="de">List of customers</tr>
+        </label>
+        <field id="1" zValue="1" resource="static" posX="121.869" posY="0.000" width="48.106" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="2" forecolor="#000000" tr="true" type="txt" ftype="ds" arg="">
+            <tr lang="de">name</tr>
+        </field>
+        <line id="2" zValue="2" resource="static" fromX="0.000" fromY="14.432" toX="168.371" toY="14.432" lineColor="#000000" lineStyle="solid" lineWidth="0.100"/>
+    </pageheader>
+    <pagefooter id="pfoot" height="10.000"/>
+    <details>
+        <detail id="Detail1" height="6.147" datasource="txt" startsOnNewPage="false">
+            <items>
+                <field id="0" zValue="0" resource="static" posX="0.000" posY="0.000" width="56.124" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" fontWeight="bold" alignment="1" forecolor="#000000" tr="true" type="txt" ftype="ds" arg="">
+                    <tr lang="de">name</tr>
+                </field>
+                <field id="1" zValue="1" resource="static" posX="97.816" posY="0.000" width="70.556" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" tr="true" type="txt" ftype="ds" arg="">
+                    <tr lang="de">address</tr>
+                </field>
+                <field id="2" zValue="2" resource="static" posX="57.727" posY="0.000" width="38.485" height="5.078" fontName="Nimbus Roman No9 L" fontSize="10" alignment="1" forecolor="#000000" tr="true" type="txt" ftype="ds" arg="">
+                    <tr lang="de">city</tr>
+                </field>
+            </items>
+        </detail>
+    </details>
+</NCReport>

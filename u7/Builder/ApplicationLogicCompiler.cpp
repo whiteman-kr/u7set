@@ -87,7 +87,7 @@ namespace Builder
 			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
 
 #pragma message("########################################## Set correct LM ID from enum")
-			if (module->type() == 1)
+			if (module->moduleFamily() == Hardware::DeviceModule::LM)
 			{
 				Hardware::DeviceObject* parent = startFromDevice->parent();
 
