@@ -1630,6 +1630,16 @@ namespace Hardware
 				message->mutable_deviceobject()->mutable_signal();
 
 		signalMessage->set_type(static_cast<int>(m_type));
+		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
+		signalMessage->set_format(static_cast<int>(m_format));
+
+		signalMessage->set_size(static_cast<int>(m_size));
+
+		signalMessage->set_validityoffset(static_cast<int>(m_validityOffset));
+		signalMessage->set_validitybit(static_cast<int>(m_validityBit));
+
+		signalMessage->set_valueoffset(static_cast<int>(m_valueOffset));
+		signalMessage->set_valuebit(static_cast<int>(m_valueBit));
 
 		return true;
 	}
@@ -1659,6 +1669,16 @@ namespace Hardware
 		const Proto::DeviceSignal& signalMessage = message.deviceobject().signal();
 
 		m_type = static_cast<SignalType>(signalMessage.type());
+		m_byteOrder = static_cast<ByteOrder>(signalMessage.byteorder());
+		m_format = static_cast<DataFormat>(signalMessage.format());
+
+		m_size = signalMessage.size();
+
+		m_validityOffset = signalMessage.validityoffset();
+		m_validityBit = signalMessage.validitybit();
+
+		m_valueOffset = signalMessage.valueoffset();
+		m_valueBit = signalMessage.valuebit();
 
 		return true;
 	}
@@ -1682,6 +1702,76 @@ namespace Hardware
     void DeviceSignal::setType(DeviceSignal::SignalType value)
 	{
 		m_type = value;
+	}
+
+	ByteOrder DeviceSignal::byteOrder() const
+	{
+		return m_byteOrder;
+	}
+
+	void DeviceSignal::setByteOrder(ByteOrder value)
+	{
+		m_byteOrder = value;
+	}
+
+	DataFormat DeviceSignal::format() const
+	{
+		return m_format;
+	}
+
+	void DeviceSignal::setFormat(DataFormat value)
+	{
+		m_format = value;
+	}
+
+	int DeviceSignal::size() const
+	{
+		return m_size;
+	}
+
+	void DeviceSignal::setSize(int value)
+	{
+		m_size = value;
+	}
+
+	int DeviceSignal::validityOffset() const
+	{
+		return m_validityOffset;
+	}
+
+	void DeviceSignal::setValidityOffset(int value)
+	{
+		m_validityOffset = value;
+	}
+
+	int DeviceSignal::validityBit() const
+	{
+		return m_validityBit;
+	}
+
+	void DeviceSignal::setValidityBit(int value)
+	{
+		m_validityBit = value;
+	}
+
+	int DeviceSignal::valueOffset() const
+	{
+		return m_valueOffset;
+	}
+
+	void DeviceSignal::setValueOffset(int value)
+	{
+		m_valueOffset = value;
+	}
+
+	int DeviceSignal::valueBit() const
+	{
+		return m_valueBit;
+	}
+
+	void DeviceSignal::setValueBit(int value)
+	{
+		m_valueBit = value;
 	}
 
 	//
