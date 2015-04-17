@@ -9,13 +9,13 @@ var SoftwareType = 7;
 var SignalType = 8;
 
 var FamilyOTHER = 0x0000;
-var FamilyLM = 0x1100;
-var FamilyAIM = 0x1200;
-var FamilyAOM = 0x1300;
-var FamilyDIM = 0x1400;
-var FamilyDOM = 0x1500;
-var FamilyAIFM = 0x1600;
-var FamilyOCM = 0x1700;
+var FamilyLM = 0x0100;
+var FamilyAIM = 0x0200;
+var FamilyAOM = 0x0300;
+var FamilyDIM = 0x0400;
+var FamilyDOM = 0x0500;
+var FamilyAIFM = 0x0600;
+var FamilyOCM = 0x0700;
 
 var DiagDiscrete = 0;
 var DiagAnalog = 1;
