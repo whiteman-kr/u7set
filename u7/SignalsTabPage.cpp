@@ -395,7 +395,7 @@ bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QSt
 }
 
 
-SignalsModel::SignalsModel(DbController* dbController, QWidget *parent) :
+SignalsModel::SignalsModel(DbController* dbController, SignalsTabPage* parent) :
 	QAbstractTableModel(parent),
 	m_parentWindow(parent),
 	m_dbController(dbController)
@@ -509,6 +509,55 @@ bool SignalsModel::checkoutSignal(int index)
 		return false;
 	}
 	showErrors(objectStates);
+	foreach (const ObjectState& objectState, objectStates)
+	{
+		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+				&& objectState.userId != dbController()->currentUser().userId())
+		{
+			return false;
+		}
+	}
+	emit setCheckedoutSignalActionsVisibility(true);
+	return true;
+}
+
+bool SignalsModel::checkoutSignal(int index, QString& message)
+{
+	Signal& s = m_signalSet[index];
+	if (s.checkedOut())
+	{
+		if (s.userID() == dbController()->currentUser().userId())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	QVector<int> signalsIDs;
+	if (m_signalSet[index].signalGroupID() != 0)
+	{
+		signalsIDs = m_signalSet.getChannelSignalsID(m_signalSet[index].signalGroupID());
+	}
+	else
+	{
+		signalsIDs << m_signalSet.key(index);
+	}
+	QVector<ObjectState> objectStates;
+	dbController()->checkoutSignals(&signalsIDs, &objectStates, parrentWindow());
+	if (objectStates.count() == 0)
+	{
+		return false;
+	}
+	foreach (const ObjectState& objectState, objectStates)
+	{
+		if (objectState.errCode != ERR_SIGNAL_OK)
+		{
+			message += errorMessage(objectState) + "\n";
+		}
+	}
 	foreach (const ObjectState& objectState, objectStates)
 	{
 		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
@@ -950,7 +999,7 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
-	SignalPropertiesDialog dlg(signal, SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, m_parentWindow);
+	SignalPropertiesDialog dlg(signal, SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, false, nullptr, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -999,17 +1048,24 @@ void SignalsModel::addSignal()
 	emit setCheckedoutSignalActionsVisibility(true);
 }
 
+void SignalsModel::showError(QString message)
+{
+	QMessageBox::critical(m_parentWindow, tr("Error"), message);
+}
+
 bool SignalsModel::editSignal(int row)
 {
-	if (!checkoutSignal(row))
-	{
-		return false;
-	}
-
 	loadSignal(row);
 
 	Signal signal = m_signalSet[row];
-	SignalPropertiesDialog dlg(signal, signal.type(), m_dataFormatInfo, m_unitInfo, m_parentWindow);
+	int readOnly = false;
+	if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId())
+	{
+		readOnly = true;
+	}
+	SignalPropertiesDialog dlg(signal, signal.type(), m_dataFormatInfo, m_unitInfo, readOnly, this, m_parentWindow);
+
+	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1024,6 +1080,7 @@ bool SignalsModel::editSignal(int row)
 		return true;
 	}
 
+	loadSignal(row);	//Signal could be checked out but not changed
 	return false;
 }
 
@@ -1356,6 +1413,11 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 			assert(false);
 	}
 	m_signalsView->resizeColumnsToContents();
+}
+
+void SignalsTabPage::showError(QString message)
+{
+	QMessageBox::warning(this, "Error", message);
 }
 
 
