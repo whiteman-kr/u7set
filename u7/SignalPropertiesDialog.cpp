@@ -282,7 +282,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
 	if (dataFormatIndex > 0 && dataFormatIndex < m_dataFormatInfo.count())
 	{
-		m_signal.setDataFormat(m_dataFormatInfo.key(dataFormatIndex));
+		m_signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(dataFormatIndex)));
 	}
 	m_signal.setDataSize(m_intManager->value(m_dataSizeProperty));
 	m_signal.setLowADC(m_intManager->value(m_lowAdcProperty));

@@ -2961,7 +2961,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setStrID(q.value("strid").toString());
 	s.setExtStrID(q.value("extstrid").toString());
 	s.setName(q.value("name").toString());
-	s.setDataFormat(q.value("dataformatid").toInt());
+	s.setDataFormat(static_cast<DataFormat>(q.value("dataformatid").toInt()));
 	s.setDataSize(q.value("datasize").toInt());
 	s.setLowADC(q.value("lowadc").toInt());
 	s.setHighADC(q.value("highadc").toInt());
@@ -2990,6 +2990,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value("outputrangemode").toInt()));		// since version 35 of database
 	s.setFilteringTime(q.value("filteringtime").toDouble());									//
 	s.setMaxDifference(q.value("maxdifference").toDouble());									//
+	s.setByteOrder(static_cast<ByteOrder>(q.value("byteorder").toInt()));						//
 }
 
 
@@ -3000,7 +3001,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 			"%11,%12,\"%13\",\"%14\",\"%15\",%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"\"%41\",%42,%43,%44)'")
+			"\"%41\",%42,%43,%44,%45)'")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
@@ -3044,7 +3045,8 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.deviceStrID())
 	.arg(s.outputRangeMode())			// since version 35 of database
 	.arg(s.filteringTime())				//
-	.arg(s.maxDifference());			//
+	.arg(s.maxDifference())				//
+	.arg(s.byteOrder());				//
 
 	qDebug() << str;
 

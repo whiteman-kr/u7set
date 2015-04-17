@@ -342,7 +342,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_MAX_DIFFERENCE: if (le) s.setMaxDifference(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setDataFormat(m_dataFormatInfo.key(cb->currentIndex())); break;
+		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
@@ -751,7 +751,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setStrID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
 			case SC_NAME: signal.setName(value.toString()); break;
-			case SC_DATA_FORMAT: signal.setDataFormat(value.toInt()); break;
+			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<DataFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
