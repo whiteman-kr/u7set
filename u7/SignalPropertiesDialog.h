@@ -78,6 +78,7 @@ private:
 	QtProperty* m_filteringTimeProperty;
 	QtProperty* m_maxDifferenceProperty;
 	QtProperty* m_inOutTypeProperty;
+	QtProperty* m_byteOrderProperty;
 	QtProperty* m_deviceIDProperty;
 };
 

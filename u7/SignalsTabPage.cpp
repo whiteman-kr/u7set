@@ -48,7 +48,8 @@ SC_DECIMAL_PLACES = 30,
 SC_APERTURE = 31,
 SC_FILTERING_TIME = 32,
 SC_MAX_DIFFERENCE = 33,
-SC_LAST_CHANGE_USER = 34;
+SC_BYTE_ORDER = 34,
+SC_LAST_CHANGE_USER = 35;
 
 
 const char* Columns[] =
@@ -87,6 +88,7 @@ const char* Columns[] =
 	"Aperture",
 	"Filtering time",
 	"Max difference",
+	"Byte order",
 	"Last change user",
 };
 
@@ -235,6 +237,15 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 			}
 			return cb;
 		}
+		case SC_BYTE_ORDER:
+		{
+			QComboBox* cb = new QComboBox(parent);
+			for (int i = 0; i < BYTE_ORDER_COUNT; i++)
+			{
+				cb->addItem(ByteOrderStr[i]);
+			}
+			return cb;
+		}
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		default:
@@ -293,6 +304,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(m_signalSet[row].acquire()); break;
 		case SC_CALCULATED: if (cb) cb->setCurrentIndex(m_signalSet[row].calculated()); break;
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(m_signalSet[row].inOutType()); break;
+		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(m_signalSet[row].byteOrder()); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		case SC_TYPE:
@@ -352,6 +364,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_CALCULATED: if (cb) s.setCalculated(cb->currentIndex() == 0 ? false : true); break;
 		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(SignalInOutType(cb->currentIndex())); break;
+		case SC_BYTE_ORDER: if (cb) s.setByteOrder(ByteOrder(cb->currentIndex())); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		case SC_TYPE:
@@ -673,6 +686,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_FILTERING_TIME: return signal.filteringTime();
 				case SC_MAX_DIFFERENCE: return signal.maxDifference();
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_BYTE_ORDER: return (signal.byteOrder() < BYTE_ORDER_COUNT) ? ByteOrderStr[signal.byteOrder()] : tr("Unknown byte order");
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 				default:
@@ -702,6 +716,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DATA_SIZE: return signal.dataSize();
 				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_BYTE_ORDER: return (signal.byteOrder() < BYTE_ORDER_COUNT) ? ByteOrderStr[signal.byteOrder()] : tr("Unknown byte order");
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 				case SC_LOW_ADC:
@@ -828,6 +843,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
 			case SC_MAX_DIFFERENCE: signal.setMaxDifference(value.toDouble()); break;
 			case SC_IN_OUT_TYPE: signal.setInOutType(SignalInOutType(value.toInt())); break;
+			case SC_BYTE_ORDER: signal.setByteOrder(ByteOrder(value.toInt())); break;
 			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
 			case SC_CHANNEL:

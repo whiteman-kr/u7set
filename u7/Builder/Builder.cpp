@@ -165,7 +165,8 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(&deviceRoot, &SignalSet(), &buildWriter);
+			SignalSet signalSet;
+			compileApplicationLogic(&deviceRoot, &signalSet, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{

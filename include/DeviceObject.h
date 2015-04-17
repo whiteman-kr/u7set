@@ -3,7 +3,7 @@
 #include "DbStruct.h"
 #include "QUuid"
 #include "../include/Factory.h"
-#include "../include/types.h"
+#include "../include/Types.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 
