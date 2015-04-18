@@ -11,6 +11,9 @@ ALTER TABLE signalinstance ADD COLUMN filteringtime double precision NOT NULL DE
 
 ALTER TABLE signalinstance ADD COLUMN maxdifference double precision NOT NULL DEFAULT 0.5;
 
+ALTER TABLE signalinstance ADD COLUMN byteorder integer NOT NULL DEFAULT 1;
+
+
 DROP FUNCTION get_latest_signal(integer, integer);
 DROP FUNCTION set_signal_workcopy(integer, signaldata);
 DROP FUNCTION checkout_signals(user_id integer, signal_ids integer[]);
@@ -62,7 +65,8 @@ CREATE TYPE signaldata AS
 	devicestrid text,
 	outputrangemode integer,
 	filteringtime double precision,
-	maxdifference double precision);
+	maxdifference double precision,
+	byteorder integer);
 
 
 CREATE OR REPLACE FUNCTION get_latest_signal(user_id integer, signal_id integer)
@@ -138,7 +142,8 @@ BEGIN
 		SI.DeviceStrID,
 		SI.OutputRangeMode,
 		SI.FilteringTime,
-		SI.MaxDifference
+		SI.MaxDifference,
+		SI.ByteOrder
 	INTO
 		signal_data
 	FROM Signal AS S, SignalInstance AS SI
@@ -208,7 +213,8 @@ BEGIN
 			DeviceStrID = sd.DeviceStrID,
 			OutputRangeMode = sd.OutputRangeMode,
 			FilteringTime = sd.FilteringTime,
-			MaxDifference = sd.MaxDifference
+			MaxDifference = sd.MaxDifference,
+			ByteOrder = sd.ByteOrder
 		WHERE
 			SignalInstanceID = chOutInstanceID;
 
@@ -335,7 +341,8 @@ BEGIN
 						DeviceStrID,
 						OutputRangeMode,
 						FilteringTime,
-						MaxDifference )
+						MaxDifference,
+						ByteOrder )
 					SELECT
 						SI.SignalID,
 						2,							-- Action Edit
@@ -370,7 +377,8 @@ BEGIN
 						DeviceStrID,
 						OutputRangeMode,
 						FilteringTime,
-						MaxDifference
+						MaxDifference,
+						ByteOrder
 					FROM
 						Signal AS S,
 						SignalInstance AS SI

@@ -15,11 +15,12 @@ class QPlainTextEdit;
 class QSplitter;
 class SignalsProxyModel;
 class QComboBox;
+class SignalsTabPage;
 
 
-const int ST_ANALOG = SignalType::analog,
-ST_DISCRETE = SignalType::discrete,
-ST_ANY = 0xff;
+const int	ST_ANALOG = SignalType::Analog,
+			ST_DISCRETE = SignalType::Discrete,
+			ST_ANY = 0xff;
 
 
 class SignalsDelegate : public QStyledItemDelegate
@@ -56,7 +57,7 @@ class SignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	SignalsModel(DbController* dbController, QWidget* parent = 0);
+	SignalsModel(DbController* dbController, SignalsTabPage* parent = 0);
 	virtual ~SignalsModel();
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
@@ -81,11 +82,12 @@ public:
 
 	DbController* dbController();
 	const DbController* dbController() const;
-	QWidget* parrentWindow() { return m_parentWindow; }
+	SignalsTabPage* parrentWindow() { return m_parentWindow; }
 	QString errorMessage(const ObjectState& state) const;
 	void showError(const ObjectState& state) const;
 	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
+	bool checkoutSignal(int index, QString& message);
 	bool editSignal(int row);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
 	void deleteSignal(int signalID);
@@ -100,6 +102,7 @@ public slots:
 	void loadSignals();
 	void loadSignal(int row);
 	void addSignal();
+	void showError(QString message);
 
 private:
 	// Data
@@ -109,7 +112,7 @@ private:
 	UnitList m_unitInfo;
 	QMap<int, QString> m_usernameMap;
 
-	QWidget* m_parentWindow;
+	SignalsTabPage* m_parentWindow;
 	DbController* m_dbController;
 
 	QString getUnitStr(int unitID) const;
@@ -238,6 +241,8 @@ public slots:
 	void restoreSelection();
 
 	void changeSignalTypeFilter(int selectedType);
+
+	void showError(QString message);
 
 	// Data
 	//

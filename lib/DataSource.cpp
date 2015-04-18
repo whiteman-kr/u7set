@@ -37,7 +37,8 @@ DataSource::DataSource(quint32 id, QString name, QHostAddress hostAddress, quint
 }
 
 
-DataSource::DataSource(const DataSource& ds)
+DataSource::DataSource(const DataSource& ds) :
+	QObject()
 {
 	this->operator =(ds);
 }

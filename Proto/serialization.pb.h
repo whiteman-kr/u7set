@@ -4582,17 +4582,87 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
+  // optional int32 byteOrder = 2 [default = 0];
+  inline bool has_byteorder() const;
+  inline void clear_byteorder();
+  static const int kByteOrderFieldNumber = 2;
+  inline ::google::protobuf::int32 byteorder() const;
+  inline void set_byteorder(::google::protobuf::int32 value);
+
+  // optional int32 format = 3 [default = 0];
+  inline bool has_format() const;
+  inline void clear_format();
+  static const int kFormatFieldNumber = 3;
+  inline ::google::protobuf::int32 format() const;
+  inline void set_format(::google::protobuf::int32 value);
+
+  // optional int32 size = 4 [default = 0];
+  inline bool has_size() const;
+  inline void clear_size();
+  static const int kSizeFieldNumber = 4;
+  inline ::google::protobuf::int32 size() const;
+  inline void set_size(::google::protobuf::int32 value);
+
+  // optional int32 validityOffset = 5 [default = 0];
+  inline bool has_validityoffset() const;
+  inline void clear_validityoffset();
+  static const int kValidityOffsetFieldNumber = 5;
+  inline ::google::protobuf::int32 validityoffset() const;
+  inline void set_validityoffset(::google::protobuf::int32 value);
+
+  // optional int32 validityBit = 6 [default = 0];
+  inline bool has_validitybit() const;
+  inline void clear_validitybit();
+  static const int kValidityBitFieldNumber = 6;
+  inline ::google::protobuf::int32 validitybit() const;
+  inline void set_validitybit(::google::protobuf::int32 value);
+
+  // optional int32 valueOffset = 7 [default = 0];
+  inline bool has_valueoffset() const;
+  inline void clear_valueoffset();
+  static const int kValueOffsetFieldNumber = 7;
+  inline ::google::protobuf::int32 valueoffset() const;
+  inline void set_valueoffset(::google::protobuf::int32 value);
+
+  // optional int32 valueBit = 8 [default = 0];
+  inline bool has_valuebit() const;
+  inline void clear_valuebit();
+  static const int kValueBitFieldNumber = 8;
+  inline ::google::protobuf::int32 valuebit() const;
+  inline void set_valuebit(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
  private:
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_byteorder();
+  inline void clear_has_byteorder();
+  inline void set_has_format();
+  inline void clear_has_format();
+  inline void set_has_size();
+  inline void clear_has_size();
+  inline void set_has_validityoffset();
+  inline void clear_has_validityoffset();
+  inline void set_has_validitybit();
+  inline void clear_has_validitybit();
+  inline void set_has_valueoffset();
+  inline void clear_has_valueoffset();
+  inline void set_has_valuebit();
+  inline void clear_has_valuebit();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 byteorder_;
+  ::google::protobuf::int32 format_;
+  ::google::protobuf::int32 size_;
+  ::google::protobuf::int32 validityoffset_;
+  ::google::protobuf::int32 validitybit_;
+  ::google::protobuf::int32 valueoffset_;
+  ::google::protobuf::int32 valuebit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9794,6 +9864,160 @@ inline ::google::protobuf::int32 DeviceSignal::type() const {
 inline void DeviceSignal::set_type(::google::protobuf::int32 value) {
   set_has_type();
   type_ = value;
+}
+
+// optional int32 byteOrder = 2 [default = 0];
+inline bool DeviceSignal::has_byteorder() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void DeviceSignal::set_has_byteorder() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void DeviceSignal::clear_has_byteorder() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void DeviceSignal::clear_byteorder() {
+  byteorder_ = 0;
+  clear_has_byteorder();
+}
+inline ::google::protobuf::int32 DeviceSignal::byteorder() const {
+  return byteorder_;
+}
+inline void DeviceSignal::set_byteorder(::google::protobuf::int32 value) {
+  set_has_byteorder();
+  byteorder_ = value;
+}
+
+// optional int32 format = 3 [default = 0];
+inline bool DeviceSignal::has_format() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void DeviceSignal::set_has_format() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void DeviceSignal::clear_has_format() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void DeviceSignal::clear_format() {
+  format_ = 0;
+  clear_has_format();
+}
+inline ::google::protobuf::int32 DeviceSignal::format() const {
+  return format_;
+}
+inline void DeviceSignal::set_format(::google::protobuf::int32 value) {
+  set_has_format();
+  format_ = value;
+}
+
+// optional int32 size = 4 [default = 0];
+inline bool DeviceSignal::has_size() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void DeviceSignal::set_has_size() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void DeviceSignal::clear_has_size() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void DeviceSignal::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+inline ::google::protobuf::int32 DeviceSignal::size() const {
+  return size_;
+}
+inline void DeviceSignal::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
+}
+
+// optional int32 validityOffset = 5 [default = 0];
+inline bool DeviceSignal::has_validityoffset() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DeviceSignal::set_has_validityoffset() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DeviceSignal::clear_has_validityoffset() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DeviceSignal::clear_validityoffset() {
+  validityoffset_ = 0;
+  clear_has_validityoffset();
+}
+inline ::google::protobuf::int32 DeviceSignal::validityoffset() const {
+  return validityoffset_;
+}
+inline void DeviceSignal::set_validityoffset(::google::protobuf::int32 value) {
+  set_has_validityoffset();
+  validityoffset_ = value;
+}
+
+// optional int32 validityBit = 6 [default = 0];
+inline bool DeviceSignal::has_validitybit() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DeviceSignal::set_has_validitybit() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DeviceSignal::clear_has_validitybit() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DeviceSignal::clear_validitybit() {
+  validitybit_ = 0;
+  clear_has_validitybit();
+}
+inline ::google::protobuf::int32 DeviceSignal::validitybit() const {
+  return validitybit_;
+}
+inline void DeviceSignal::set_validitybit(::google::protobuf::int32 value) {
+  set_has_validitybit();
+  validitybit_ = value;
+}
+
+// optional int32 valueOffset = 7 [default = 0];
+inline bool DeviceSignal::has_valueoffset() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void DeviceSignal::set_has_valueoffset() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void DeviceSignal::clear_has_valueoffset() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void DeviceSignal::clear_valueoffset() {
+  valueoffset_ = 0;
+  clear_has_valueoffset();
+}
+inline ::google::protobuf::int32 DeviceSignal::valueoffset() const {
+  return valueoffset_;
+}
+inline void DeviceSignal::set_valueoffset(::google::protobuf::int32 value) {
+  set_has_valueoffset();
+  valueoffset_ = value;
+}
+
+// optional int32 valueBit = 8 [default = 0];
+inline bool DeviceSignal::has_valuebit() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void DeviceSignal::set_has_valuebit() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void DeviceSignal::clear_has_valuebit() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void DeviceSignal::clear_valuebit() {
+  valuebit_ = 0;
+  clear_has_valuebit();
+}
+inline ::google::protobuf::int32 DeviceSignal::valuebit() const {
+  return valuebit_;
+}
+inline void DeviceSignal::set_valuebit(::google::protobuf::int32 value) {
+  set_has_valuebit();
+  valuebit_ = value;
 }
 
 // -------------------------------------------------------------------

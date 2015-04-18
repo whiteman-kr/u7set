@@ -125,8 +125,8 @@ namespace Builder
 
 			Hardware::EquipmentSet equipmentSet(deviceRoot);
 
-			auto aaa = equipmentSet.deviceObject(QString("SYSTEMID1_RACKID2_SIGNAL1"));
-			auto aaa1 = equipmentSet.deviceObjectSharedPointer("SYSTEMID1_RACKID2_SIGNAL1");
+			//auto aaa = equipmentSet.deviceObject(QString("SYSTEMID1_RACKID2_SIGNAL1"));
+			//auto aaa1 = equipmentSet.deviceObjectSharedPointer("SYSTEMID1_RACKID2_SIGNAL1");
 
 			//
 			// Get signals from the database
@@ -171,7 +171,8 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &SignalSet(), &buildWriter);
+			SignalSet signalSet;
+			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{

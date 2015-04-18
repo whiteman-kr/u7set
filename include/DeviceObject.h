@@ -4,6 +4,7 @@
 #include "DbStruct.h"
 #include "QUuid"
 #include "../include/Factory.h"
+#include "../include/Types.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 
@@ -525,8 +526,20 @@ namespace Hardware
 		Q_OBJECT
 
 		Q_PROPERTY(SignalType Type READ type WRITE setType)
+		Q_PROPERTY(ByteOrder ByteOrder READ byteOrder WRITE setByteOrder)
+		Q_PROPERTY(DataFormat Format READ format WRITE setFormat)
+
+		Q_PROPERTY(int Size READ size WRITE setSize)
+
+		Q_PROPERTY(int ValidityOffset READ validityOffset WRITE setValidityOffset)
+		Q_PROPERTY(int ValidityBit READ validityBit WRITE setValidityBit)
+
+		Q_PROPERTY(int ValueOffset READ valueOffset WRITE setValueOffset)
+		Q_PROPERTY(int ValueBit READ valueBit WRITE setValueBit)
 
 		Q_ENUMS(SignalType)
+		Q_ENUMS(ByteOrder)
+		Q_ENUMS(DataFormat)
 
 		// SignalType
 		//
@@ -561,12 +574,42 @@ namespace Hardware
         Q_INVOKABLE int jsType() const;
         void setType(DeviceSignal::SignalType value);
 
+		ByteOrder byteOrder() const;
+		void setByteOrder(ByteOrder value);
+
+		DataFormat format() const;
+		void setFormat(DataFormat value);
+
+		int size() const;
+		void setSize(int value);
+
+		int validityOffset() const;
+		void setValidityOffset(int value);
+
+		int validityBit() const;
+		void setValidityBit(int value);
+
+		int valueOffset() const;
+		void setValueOffset(int value);
+
+		int valueBit() const;
+		void setValueBit(int value);
+
 		// Data
 		//
 	private:
 		static const DeviceType m_deviceType = DeviceType::Signal;
 
 		SignalType m_type = SignalType::DiagDiscrete;
+		ByteOrder m_byteOrder = ByteOrder::LittleEdndian;
+		DataFormat m_format = DataFormat::UnsignedInt;
+
+		int m_size = 0;
+		int m_validityOffset = -1;
+		int m_validityBit = -1;
+		int m_valueOffset = 0;
+		int m_valueBit = 0;
+
 	};
 
 	//

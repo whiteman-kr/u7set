@@ -3,51 +3,38 @@
 
 #include <QString>
 #include <QMultiHash>
+#include "../include/Types.h"
 #include "../include/DbStruct.h"
 #include "../include/OrderedHash.h"
 #include "../include/DeviceObject.h"
 
 
 
-enum SignalType
-{
-	analog = 0,
-	discrete = 1
-};
-
 Q_DECLARE_METATYPE(SignalType);
+
 
 enum SignalInOutType
 {
-	input = 0,
-	output = 1,
-	internal = 2
-};
-
-
-enum DataFormatType
-{
-	binary_LE_unsigned = 1,
-	binary_LE_signed = 2,
-	binary_BE_unsigned = 3,
-	binary_BE_signed = 4,
+	Input = 0,
+	Output = 1,
+	Internal = 2
 };
 
 
 enum InstanceAction
 {
-	added = 1,
-	modified = 2,
-	deleted = 3
+	Added = 1,
+	Modified = 2,
+	Deleted = 3
 };
 
 
 enum OutputRangeMode
 {
-	plus0_plus5_V = 0,
-	plus4_plus20_mA = 1,
-	minus10_plus10_V = 2,
-	plus0_plus5_mA = 3,
+	Plus0_Plus5_V = 0,
+	Plus4_Plus20_mA = 1,
+	Minus10_Plus10_V = 2,
+	Plus0_Plus5_mA = 3,
 };
 
 
@@ -88,6 +75,15 @@ const char* const SensorTypeStr[] =
 const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 
+const char* const ByteOrderStr[] =
+{
+	"Little Edndian",
+	"BigEndian",
+};
+
+const int BYTE_ORDER_COUNT = sizeof(ByteOrderStr) / sizeof(ByteOrderStr[0]);
+
+
 const char* const OutputRangeModeStr[] =
 {
 	"0..5 V",
@@ -110,7 +106,7 @@ struct Unit
 };
 
 
-struct DataFormat
+struct DataFormatPair
 {
 	int ID;
 	QString name;
@@ -164,21 +160,21 @@ private:
 	bool m_checkedOut = false;
 	int m_userID = 0;
 	int m_channel = 1;
-	SignalType m_type = SignalType::analog;
+	SignalType m_type = SignalType::Analog;
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
-	InstanceAction m_instanceAction = InstanceAction::added;
+	InstanceAction m_instanceAction = InstanceAction::Added;
 
 	QString m_strID;
 	QString m_extStrID;
 	QString m_name;
-	int m_dataFormat = static_cast<int>(DataFormatType::binary_LE_unsigned);
+	DataFormat m_dataFormat = DataFormat::SignedInt;
 	int m_dataSize = 16;
 	int m_lowADC = 0;
-	int m_highADC = 0;
+	int m_highADC = 0xFFFF;
 	double m_lowLimit = 0;
-	double m_highLimit = 0;
+	double m_highLimit = 100;
 	int m_unitID = NO_UNIT_ID;
 	double m_adjustment = 0;
 	double m_dropLimit = 0;
@@ -191,17 +187,18 @@ private:
 	double m_outputLowLimit = 0;
 	double m_outputHighLimit = 0;
 	int m_outputUnitID = NO_UNIT_ID;
-	OutputRangeMode m_outputRangeMode = OutputRangeMode::plus4_plus20_mA;
+	OutputRangeMode m_outputRangeMode = OutputRangeMode::Plus4_Plus20_mA;
 	int m_outputSensorID = 0;
 	bool m_acquire = true;
 	bool m_calculated = false;
 	int m_normalState = 0;
 	int m_decimalPlaces = 2;
 	double m_aperture = 0;
-	SignalInOutType m_inOutType = SignalInOutType::internal;
+	SignalInOutType m_inOutType = SignalInOutType::Internal;
 	QString m_deviceStrID;
 	double m_filteringTime = 0.05;
 	double m_maxDifference = 0.5;
+	ByteOrder m_byteOrder = ByteOrder::BigEndian;
 
 	Address16 m_ramAddr;				// signal address in LM RAM
 	Address16 m_acqAddr;				// signal address in FSC data packet (acquisition address)
@@ -265,8 +262,8 @@ public:
     Q_INVOKABLE QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
 
-    Q_INVOKABLE int dataFormat() const { return m_dataFormat; }
-	void setDataFormat(int dataFormat) { m_dataFormat = dataFormat; }
+	Q_INVOKABLE DataFormat dataFormat() const { return m_dataFormat; }
+	void setDataFormat(DataFormat dataFormat) { m_dataFormat = dataFormat; }
 
     Q_INVOKABLE int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
@@ -352,6 +349,9 @@ public:
 
 	Q_INVOKABLE double maxDifference() const { return m_maxDifference; }
 	void setMaxDifference(double maxDifference) { m_maxDifference = maxDifference; }
+
+	Q_INVOKABLE ByteOrder byteOrder() const { return m_byteOrder; }
+	void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 
 	friend class DbWorker;
