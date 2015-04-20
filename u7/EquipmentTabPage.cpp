@@ -1971,19 +1971,36 @@ void EquipmentTabPage::setProperties()
 		return;
 	}
 
-	QList<std::shared_ptr<QObject>> devices;
+	QList<std::shared_ptr<QObject>> checkedInList;
+	QList<std::shared_ptr<QObject>> checkedOutList;
 
 	for (QModelIndex& mi : selectedIndexList)
 	{
-		auto device = m_equipmentModel->deviceObjectSharedPtr(mi);
+		std::shared_ptr<Hardware::DeviceObject> device = m_equipmentModel->deviceObjectSharedPtr(mi);
 		assert(device);
 
-		devices << device;
+		if (device->fileInfo().state() == VcsState::CheckedOut)
+		{
+			checkedOutList << device;
+		}
+		else
+		{
+			checkedInList << device;
+		}
 	}
 
 	// Set objects to the PropertyEditor
 	//
-	m_propertyEditor->setObjects(devices);
+	if (checkedOutList.isEmpty() == false)
+	{
+		m_propertyEditor->setEnabled(true);
+		m_propertyEditor->setObjects(checkedOutList);
+	}
+	else
+	{
+		m_propertyEditor->setEnabled(false);
+		m_propertyEditor->setObjects(checkedInList);
+	}
 
 	return;
 }

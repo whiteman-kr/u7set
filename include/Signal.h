@@ -75,6 +75,15 @@ const char* const SensorTypeStr[] =
 const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 
+const char* const ByteOrderStr[] =
+{
+	"Little Edndian",
+	"BigEndian",
+};
+
+const int BYTE_ORDER_COUNT = sizeof(ByteOrderStr) / sizeof(ByteOrderStr[0]);
+
+
 const char* const OutputRangeModeStr[] =
 {
 	"0..5 V",

@@ -1258,7 +1258,7 @@ void DbWorker::slot_createUser(DbUser user)
 					  .arg(user.username())
 					  .arg(user.firstName())
 					  .arg(user.lastName())
-					  .arg(user.password())
+					  .arg(user.newPassword())
 					  .arg(user.isAdminstrator() ? "true" : "false")
 					  .arg(user.isReadonly() ? "true" : "false")
 					  .arg(user.isDisabled() ? "true" : "false");

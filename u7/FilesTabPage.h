@@ -127,6 +127,10 @@ public slots:
 	void setWorkcopy();
 	void refreshFileTree();
 
+private:
+	bool getLatestFileVersionRecursive(const DbFileInfo& f, const QString &dir);
+
+
 	// Protected props
 	//
 protected:
