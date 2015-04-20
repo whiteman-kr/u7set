@@ -174,6 +174,8 @@ namespace Builder
 
 		closeBuildXML();
 
+		m_log->writeMessage("", false);
+
 		int errors = m_log->errorCount();
 		int warnings = m_log->warningCount();
 #pragma message("Load correct Build Log Str")

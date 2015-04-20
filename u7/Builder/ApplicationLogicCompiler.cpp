@@ -41,9 +41,7 @@ namespace Builder
 
 		findLMs();
 
-		compileModulesLogics();
-
-		return true;
+		return compileModulesLogics();
 	}
 
 
@@ -92,8 +90,7 @@ namespace Builder
 		{
 			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
 
-#pragma message("########################################## Set correct LM ID from enum")
-			if (module->moduleFamily() == Hardware::DeviceModule::LM)
+			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 			{
 				Hardware::DeviceObject* parent = startFromDevice->parent();
 
@@ -162,6 +159,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::run()
 	{
+		m_log->writeMessage("", false);
+
 		msg = QString(tr("Compilation for LM %1 was started...")).arg(m_lm->strId());
 
 		m_log->writeMessage(msg, false);
@@ -180,6 +179,18 @@ namespace Builder
 
 		result &= copyInOutSignals();
 
+
+		if (result == true)
+		{
+			msg = QString(tr("Compilation for LM %1 was successfully finished")).arg(m_lm->strId());
+			m_log->writeSuccess(msg, false);
+		}
+		else
+		{
+			msg = QString(tr("Compilation for LM %1 was finished with errors")).arg(m_lm->strId());
+			m_log->writeError(msg, false, false);
+		}
+
 		return result;
 	}
 
@@ -188,7 +199,7 @@ namespace Builder
 	{
 		int addr = 0;
 
-		if (getIntProperty("WrAppLogicW", addr) == false )
+		if (getIntProperty("MemorySettings\\WrAppLogicW", addr) == false )
 		{
 			return false;
 		}
@@ -205,12 +216,12 @@ namespace Builder
 		int rdDiagData = 0;
 		int diagDataSize = 0;
 
-		if (getIntProperty("RdDiagData", rdDiagData) == false )
+		if (getIntProperty("MemorySettings\\RdDiagData", rdDiagData) == false )
 		{
 			return false;;
 		}
 
-		if (getIntProperty("DiagDataSize", diagDataSize) == false )
+		if (getIntProperty("MemorySettings\\DiagDataSize", diagDataSize) == false )
 		{
 			return false;;
 		}
@@ -246,6 +257,13 @@ namespace Builder
 		{
 			assert(propertyName != nullptr);
 			return false;
+		}
+
+		QList<QByteArray> bb = module->dynamicPropertyNames();
+
+		for(auto i:bb)
+		{
+			qDebug() << i;
 		}
 
 		QVariant val = module->property(propertyName);

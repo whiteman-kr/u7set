@@ -363,12 +363,12 @@ namespace Builder
 
 		if (result == false)
 		{
-			m_log->writeError(tr("Error"), true, false);
+			m_log->writeError(tr("Application Logic compilation was finished with errors"), true, false);
 			QThread::currentThread()->requestInterruption();
 		}
 		else
 		{
-			m_log->writeSuccess(tr("Ok"), true);
+			m_log->writeSuccess(tr("Application Logic compilation was succesfully finished"), true);
 		}
 
 		return result;
