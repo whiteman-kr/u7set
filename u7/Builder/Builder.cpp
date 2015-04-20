@@ -130,6 +130,11 @@ namespace Builder
 
 			SignalSet signalSet;
 
+			if (loadSignals(&db, &signalSet) == false)
+			{
+				break;
+			}
+
 			//
 			// Compile Module configuration
 			//
@@ -295,6 +300,33 @@ namespace Builder
 		{
 			expandDeviceStrId(device->child(i));
 		}
+
+		return true;
+	}
+
+
+	bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet)
+	{
+		if (db == nullptr ||
+			signalSet == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_log->writeEmptyLine();
+
+		m_log->writeMessage(tr("Loading application logic signals"), true);
+
+		bool result = db->getSignals(signalSet, nullptr);
+
+		if (result == false)
+		{
+			m_log->writeError(tr("Error"), true, true);
+			return false;
+		}
+
+		m_log->writeSuccess(tr("Ok"), true);
 
 		return true;
 	}
