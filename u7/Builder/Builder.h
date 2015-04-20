@@ -55,7 +55,7 @@ namespace Builder
 
 		// Generate Modules Configurations Firmwares
 		//
-		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSetObject* signalSetObject, int changesetId, BuildResultWriter* buildWriter);
+		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, int changesetId, BuildResultWriter* buildWriter);
 
 		// Build Application Logic
 		//
@@ -122,23 +122,6 @@ namespace Builder
 		OutputLog* m_log = nullptr;					// Probably it's better to make it as shared_ptr
 	};
 
-	// ------------------------------------------------------------------------
-	//
-	//		SignalSetObject
-	//
-	// ------------------------------------------------------------------------
-
-	class SignalSetObject : public QObject
-	{
-		Q_OBJECT
-
-	private:
-		SignalSet m_signalSet;
-
-	public:
-		void loadSignalsFromDb(DbController* db);
-		Q_INVOKABLE QObject* getSignalByDeviceStrID(const QString& deviceStrID);
-	};
 
 	// ------------------------------------------------------------------------
 	//

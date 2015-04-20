@@ -2389,14 +2389,14 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	// Init automitic varaiables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
-		{
-			this->m_progress->setCompleted(true);			// set complete flag on return
-		});
+	{
+		this->m_progress->setCompleted(true);			// set complete flag on return
+	});
 
 	// Check parameters
 	//
 	if (files == nullptr ||
-		files->empty() == true)
+			files->empty() == true)
 	{
 		assert(files != nullptr);
 		assert(files->empty() != true);
@@ -2413,7 +2413,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	}
 
 	QString request = QString("SELECT * FROM undo_changes(%1, ARRAY[")
-		.arg(currentUser().userId());
+			.arg(currentUser().userId());
 
 	// Iterate through files
 	//
@@ -2470,9 +2470,9 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	// Init automitic varaiables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
-		{
-			this->m_progress->setCompleted(true);			// set complete flag on return
-		});
+	{
+		this->m_progress->setCompleted(true);			// set complete flag on return
+	});
 
 	// Check parameters
 	//
@@ -2495,8 +2495,8 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	// request
 	//
 	QString request = QString("SELECT * FROM file_has_children(%1, %2)")
-		.arg(currentUser().userId())
-		.arg(fileInfo->fileId());
+			.arg(currentUser().userId())
+			.arg(fileInfo->fileId());
 
 	QSqlQuery q(db);
 
@@ -2525,9 +2525,9 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 	// Init automitic varaiables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
-		{
-			this->m_progress->setCompleted(true);			// set complete flag on return
-		});
+	{
+		this->m_progress->setCompleted(true);			// set complete flag on return
+	});
 
 	// Check parameters
 	//
@@ -2549,7 +2549,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo* file, std::vector<DbChangesetInfo
 	// request
 	//
 	QString request = QString("SELECT * FROM get_file_history(%1)")
-		.arg(file->fileId());
+			.arg(file->fileId());
 
 	QSqlQuery q(db);
 
@@ -2581,9 +2581,9 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	// Init automitic varaiables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
-		{
-			this->m_progress->setCompleted(true);			// set complete flag on return
-		});
+	{
+		this->m_progress->setCompleted(true);   // set complete flag on return
+	});
 
 	// Check parameters
 	//
@@ -2607,160 +2607,96 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	int nesting = 0;
 
 	std::function<bool(Hardware::DeviceObject*, int)> addDevice =
-		[&addDevice, &db, device, this, &nesting]
-		(Hardware::DeviceObject* current, int parentId)
-		{
-			if (nesting >= static_cast<int>(Hardware::DeviceType::DeviceTypeCount) ||
+			[&addDevice, &db, device, this, &nesting]
+			(Hardware::DeviceObject* current, int parentId)
+	{
+		if (nesting >= static_cast<int>(Hardware::DeviceType::DeviceTypeCount) ||
 				current == nullptr ||
 				parentId == -1)
-			{
-				assert(nesting < static_cast<int>(Hardware::DeviceType::DeviceTypeCount));
-				assert(current != nullptr);
-				assert(parentId == -1);
-				return false;
-			}
+		{
+			assert(nesting < static_cast<int>(Hardware::DeviceType::DeviceTypeCount));
+			assert(current != nullptr);
+			assert(parentId == -1);
+			return false;
+		}
 
-			nesting ++;
+		nesting ++;
 
-			// request
-			// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
-			//
-			QByteArray data;
-			bool result = current->Save(data);
-			if (result == false)
-			{
-				assert(result);
-				emitError(tr("Argument errors."));
-				return false;
-			}
+		// request
+		// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
+		//
+		QByteArray data;
+		bool result = current->Save(data);
+		if (result == false)
+		{
+			assert(result);
+			nesting --;
+			emitError(tr("Argument errors."));
+			return false;
+		}
 
-			QString strData;
-			DbFile::convertToDatabaseString(data, &strData);
+		QString strData;
+		DbFile::convertToDatabaseString(data, &strData);
 
-			QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
+		QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
 				.arg(currentUser().userId())
 				.arg(strData)
 				.arg(parentId)
 				.arg(current->fileExtension());
 
-			strData.clear();
+		strData.clear();
 
-			QSqlQuery q(db);
-			result = q.exec(request);
+		QSqlQuery q(db);
+		result = q.exec(request);
 
+		if (result == false)
+		{
+			nesting --;
+			emitError(tr("Can't add device. Error: ") +  q.lastError().text());
+			return false;
+		}
+
+		if (q.next() == false)
+		{
+			nesting --;
+			emitError(tr("Can't get result."));
+			return false;
+		}
+
+		DbFileInfo fi;
+		fi.setParentId(parentId);
+
+		db_updateFileState(q, &fi, false);
+		current->setFileInfo(fi);
+
+		// Call it for all children
+		//
+		for (int i = 0; i < current->childrenCount(); i++)
+		{
+			result = addDevice(current->child(i), current->fileInfo().fileId());
 			if (result == false)
 			{
-				emitError(tr("Can't add device. Error: ") +  q.lastError().text());
+				nesting --;
 				return false;
 			}
+		}
 
-			if (q.next() == false)
-			{
-				emitError(tr("Can't get result."));
-				return false;
-			}
-
-			DbFileInfo fi;
-			fi.setParentId(parentId);
-
-			db_updateFileState(q, &fi, false);
-			current->setFileInfo(fi);
-
-			// Call it for all children
-			//
-			for (int i = 0; i < current->childrenCount(); i++)
-			{
-				result = addDevice(current->child(i), current->fileInfo().fileId());
-				if (result == false)
-				{
-					return false;
-				}
-			}
-
-			return true;
-		};
+		nesting --;
+		return true;
+	};
 
 	// Start
 	//
 	bool ok = addDevice(device, parentId);
+	assert(nesting == 0);
 
 	if (ok == false)
 	{
 		return;
 	}
 
-	/*while (current != nullptr)
-	{
-		// Write to the DB
-		//
-
-		// Update id
-		//
-
-		// Switch current
-		//
-		if (current->childrenCount() > 0)
-		{
-			// switch to the first child
-			//
-			current = current->child(0);
-		}
-		else
-		{
-			// switch to the next child in the parent
-			//
-			int nextIndex = current->parent->childIndex(current) + 1;
-			if (nextIndex < current->parent->childerenCount())
-			{
-				// next child exists, switch to it
-				//
-				current = current->parent->child[nextIndex];
-			}
-			else
-			{
-				// there are no any children anumore, switch to next parents child
-				//
-			}
-		}
-	}*/
-
-	// request
-	// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
-	//
-//	QString data;
-//	device->convertToDatabaseString(&data);
-
-//	QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
-//		.arg(currentUser().userId())
-//		.arg(data)
-//		.arg(parentId)
-//		.arg(fileExtension);
-
-//	data.clear();
-
-//	QSqlQuery q(db);
-//	bool result = q.exec(request);
-
-//	if (result == false)
-//	{
-//		emitError(tr("Can't add system. Error: ") +  q.lastError().text());
-//		return;
-//	}
-
-//	if (q.next() == false)
-//	{
-//		emitError(tr("Can't get FileID"));
-//		return;
-//	}
-
-//	device->setFileId(q.value(0).toInt());
-//	device->setParentId(parentId);
-
-//	db_updateFileState(q, device);
-
 	return;
 }
-
 
 void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 {

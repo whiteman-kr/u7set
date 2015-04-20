@@ -20,12 +20,31 @@ namespace Hardware
 namespace Builder
 {
 
+	// ------------------------------------------------------------------------
+	//
+	//		JsSignalSet
+	//
+	// ------------------------------------------------------------------------
+
+	class JsSignalSet : public QObject
+	{
+		Q_OBJECT
+
+	private:
+		SignalSet *m_signalSet = nullptr;
+
+	public:
+		JsSignalSet(SignalSet* signalSet);
+		Q_INVOKABLE QObject* getSignalByDeviceStrID(const QString& deviceStrID);
+	};
+
+
 	class ConfigurationBuilder : QObject
 	{
 		Q_OBJECT
 	public:
 		ConfigurationBuilder() = delete;
-		ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSetObject* signalSetObject, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
+		ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
 		virtual ~ConfigurationBuilder();
 
 		bool build();
@@ -43,7 +62,7 @@ namespace Builder
 	private:
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
-		SignalSetObject* m_signalSetObject = nullptr;
+		SignalSet* m_signalSet = nullptr;
 		mutable OutputLog* m_log = nullptr;
 		BuildResultWriter* m_buildWriter = nullptr;
 
