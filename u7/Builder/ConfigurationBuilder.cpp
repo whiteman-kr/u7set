@@ -7,10 +7,51 @@
 namespace Builder
 {
 
-	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSetObject* signalSetObject, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
+	// ------------------------------------------------------------------------
+	//
+	//		JsSignalSet
+	//
+	// ------------------------------------------------------------------------
+
+	JsSignalSet::JsSignalSet(SignalSet* signalSet):
+		m_signalSet(signalSet)
+	{
+		if (m_signalSet == nullptr)
+		{
+			assert(m_signalSet);
+		}
+	}
+
+	QObject* JsSignalSet::getSignalByDeviceStrID(const QString& deviceStrID)
+	{
+		if (m_signalSet == nullptr)
+		{
+			assert(m_signalSet);
+			return nullptr;
+		}
+
+		for (int i = 0; i < m_signalSet->count(); i++)
+		{
+			if ((*m_signalSet)[i].deviceStrID() == deviceStrID)
+			{
+				QObject* c = &(*m_signalSet)[i];
+				QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+				return c;
+			}
+		}
+		return nullptr;
+	}
+
+	// ------------------------------------------------------------------------
+	//
+	//		ConfigurationBuilder
+	//
+	// ------------------------------------------------------------------------
+
+	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
-		m_signalSetObject(signalSetObject),
+		m_signalSet(signalSet),
 		m_log(log),
 		m_changesetId(changesetId),
 		m_debug(debug),
@@ -20,7 +61,7 @@ namespace Builder
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
-		assert(m_signalSetObject);
+		assert(m_signalSet);
 		assert(m_log);
 		assert(m_buildWriter);
 
@@ -92,11 +133,13 @@ namespace Builder
 		//
 		QJSEngine jsEngine;
 
+		JsSignalSet jsSignalSet(m_signalSet);
+
 		QJSValue jsLog = jsEngine.newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
-		QJSValue jsSignalSet = jsEngine.newQObject(m_signalSetObject);
-		QQmlEngine::setObjectOwnership(m_signalSetObject, QQmlEngine::CppOwnership);
+		QJSValue jsSignalSetObject = jsEngine.newQObject(&jsSignalSet);
+		QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
 
 		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
@@ -120,7 +163,7 @@ namespace Builder
 		args << jsRoot;
 		args << jsConfCollection;
 		args << jsLog;
-		args << jsSignalSet;
+		args << jsSignalSetObject;
 
 		QJSValue jsResult = jsEval.call(args);
 
