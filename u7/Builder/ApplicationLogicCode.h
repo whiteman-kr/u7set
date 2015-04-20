@@ -41,11 +41,20 @@ namespace Builder
 		4,		//	RDFBB
 	};
 
+	const int COMMAND_LEN_COUNT = sizeof(CommandLen) / sizeof(const int);
+
+
+	const quint16	MAX_FB_TYPE = 64 - 1,
+					MAX_FB_INSTANCE = 1024 - 1,
+					MAX_FB_PARAM_NO = 64 - 1,
+					MAX_BIT_NO_16 = 16 - 1;
+
+
+	class CommandCode
+	{
+	private:
 
 #pragma pack(push, 1)
-
-	struct CommandCode
-	{
 		union
 		{
 			struct
@@ -55,10 +64,10 @@ namespace Builder
 				quint16 fbType : 6;
 			} opCode;
 
-			quint16 word1;
+			quint16 word1 = 0;
 		};
 
-		quint16 word2;
+		quint16 word2 = 0;
 
 		union
 		{
@@ -69,37 +78,66 @@ namespace Builder
 
 			} param;
 
-			quint16 word3;
+			quint16 word3 = 0;
 		};
 
-		quint16 word4;
-	};
-
+		quint16 word4 = 0;
 #pragma pack(pop)
+
+	public:
+		CommandCode()
+		{
+			setNoCommand();
+		}
+
+		void setNoCommand() { opCode.code = CommandCodes::NoCommand; }
+
+		void setOpCode(CommandCodes code);
+		CommandCodes getOpCode() { return static_cast<CommandCodes>(opCode.code); }
+
+		void setFbType(quint16 fbType);
+		void setFbInstance(quint16 fbInstance);
+		void setFbParamNo(quint16 fbParamNo);
+
+		void setWord2(quint16 value) { word2 = value; }
+		void setWord3(quint16 value) { word3 = value; }
+		void setWord4(quint16 value) { word4 = value; }
+
+		void setBitNo(quint16 bitNo);
+
+		int getSizeW();
+	};
 
 
 	class Command
 	{
 	private:
-		QByteArray m_rawCode;
 		QString m_asmCode;
-		int address = -1;
+		int m_address = -1;
+
+		CommandCode m_code;
+		QString m_comment;
 
 	public:
 		Command() {}
 
-		void NOP();
-		void START();
-		void STOP();
-		void MOV(quint16 addrFrom, quint16 addrTo);
-		void MOVMEM(quint16 addrFrom, quint16 addrTo, quint16 sizeW);
-		void MOVC(quint16 contVal, quint16 addrTo);
-		void MOVBC(quint16 constBit, quint16 addrTo, quint16 bitNo);
-		void WRFB(quint16 addrFrom, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
-		void RDFB(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo);
-		void WRFBC(quint16 constVal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
-		void WRFBB(quint16 addrFrom, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
-		//4,		//	RDFBB
+		void nop();
+		void start();
+		void stop();
+		void mov(quint16 addrFrom, quint16 addrTo);
+		void movMem(quint16 addrFrom, quint16 addrTo, quint16 sizeW);
+		void movConst(quint16 constVal, quint16 addrTo);
+		void movBitConst(quint16 constBit, quint16 addrTo, quint16 bitNo);
+		void writeFuncBlock(quint16 addrFrom, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		void readFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo);
+		void writeFuncBlockConst(quint16 constVal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		void writeFuncBlockBit(quint16 addrFrom, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		void readFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo, quint16 bitNo);
+
+		void setAddress(int address) { m_address = address; }
+		void setComment(const QString& comment) { m_comment = comment; }
+
+		int getSizeW() { return m_code.getSizeW(); }
 	};
 
 
@@ -109,8 +147,14 @@ namespace Builder
 	private:
 		QVector<Command> m_commands;
 
+		int m_commandAddress = 0;
+
 	public:
 		ApplicationLogicCode();
+
+		void append(Command &cmd);
+
+		void clear();
 	};
 
 

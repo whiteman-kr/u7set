@@ -11,8 +11,6 @@
 
 namespace Builder
 {
-	const char* const REG_DATA_ADDRESS = "WrAppLogicW";
-
 	class AddrW
 	{
 	private:

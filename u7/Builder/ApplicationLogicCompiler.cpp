@@ -2,6 +2,13 @@
 
 namespace Builder
 {
+
+	const char* REG_DATA_ADDRESS = "WrAppLogicW";
+
+	const char* MEM_DIAG_DATA = "MemorySettings\\RdDiagData";
+	const char* MEM_DIAG_DATA_SIZE = "MemorySettings\\DiagDataSize";
+
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	ApplicationLogicCompiler class implementation
@@ -159,7 +166,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::run()
 	{
-		m_log->writeMessage("", false);
+		m_log->writeEmptyLine();
 
 		msg = QString(tr("Compilation for LM %1 was started...")).arg(m_lm->strId());
 
@@ -178,7 +185,6 @@ namespace Builder
 		// 2. Copy values of all input & output signals to the registration
 
 		result &= copyInOutSignals();
-
 
 		if (result == true)
 		{
@@ -213,28 +219,43 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyDiagData()
 	{
-		int rdDiagData = 0;
+		int diagData = 0;
 		int diagDataSize = 0;
 
-		if (getIntProperty("MemorySettings\\RdDiagData", rdDiagData) == false )
+		if (getIntProperty(MEM_DIAG_DATA, diagData) == false )
 		{
 			return false;;
 		}
 
-		if (getIntProperty("MemorySettings\\DiagDataSize", diagDataSize) == false )
+		if (getIntProperty(MEM_DIAG_DATA_SIZE, diagDataSize) == false )
 		{
 			return false;;
 		}
 
+		Command cmd;
 
-		//m_code.addComand();
+		cmd.movMem(diagData, m_regDataAddress.address(), diagDataSize);
+		cmd.setComment("Move LM diagnostics data to registration");
 
+		m_code.append(cmd);
 
 		return true;
 	}
 
+
 	bool ModuleLogicCompiler::copyInOutSignals()
 	{
+		Hardware::DeviceObject* chassis = m_lm->parent();
+
+		if (chassis->deviceType() != Hardware::DeviceType::Chassis)
+		{
+			msg = QString(tr("Module %1 must be installed in the chassis!")).arg(m_lm->strId());
+			m_log->writeError(msg, false, true);
+			return false;
+		}
+
+
+
 		return true;
 	}
 
