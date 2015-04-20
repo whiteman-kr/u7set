@@ -12,24 +12,28 @@ class QtIntPropertyManager;
 class QtDoublePropertyManager;
 class QtBoolPropertyManager;
 class QtTreePropertyBrowser;
+class SignalsModel;
 enum SignalType;
 
 class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(Signal& signal, SignalType signalType, DataFormatList& dataFormatInfo, UnitList& unitInfo, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(Signal& signal, SignalType signalType, DataFormatList& dataFormatInfo, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
 
 signals:
+	void onError(QString message);
 
 public slots:
 	void checkAndSaveSignal();
 	void saveDialogSettings();
+	void checkoutSignal();
 
 private:
 	Signal& m_signal;
 	DataFormatList& m_dataFormatInfo;
 	UnitList& m_unitInfo;
+	SignalsModel* m_signalsModel;
 
 	QtStringPropertyManager* m_stringManager;
 	QtEnumPropertyManager* m_enumManager;
@@ -74,6 +78,7 @@ private:
 	QtProperty* m_filteringTimeProperty;
 	QtProperty* m_maxDifferenceProperty;
 	QtProperty* m_inOutTypeProperty;
+	QtProperty* m_byteOrderProperty;
 	QtProperty* m_deviceIDProperty;
 };
 

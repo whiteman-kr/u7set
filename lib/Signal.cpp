@@ -116,6 +116,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_deviceStrID = signal.deviceStrID();
 	m_filteringTime = signal.filteringTime();
 	m_maxDifference = signal.maxDifference();
+	m_byteOrder = signal.byteOrder();
 
 	return *this;
 }

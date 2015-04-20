@@ -1,9 +1,10 @@
 #pragma once
+#include <unordered_map>
 #include <QJSValue>
 #include "DbStruct.h"
 #include "QUuid"
 #include "../include/Factory.h"
-//#include "../include/types.h"
+#include "../include/Types.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 
@@ -709,6 +710,31 @@ namespace Hardware
 		int m_type = 0;
 	};
 
+
+	//
+	//
+	// EquipmentSet
+	//
+	//
+	class EquipmentSet
+	{
+	public:
+		EquipmentSet() = default;
+		EquipmentSet(std::shared_ptr<DeviceObject> root);
+
+	public:
+		void set(std::shared_ptr<DeviceObject> root);
+
+		DeviceObject* deviceObject(const QString& strId);
+		std::shared_ptr<DeviceObject> deviceObjectSharedPointer(const QString& strId);
+
+	private:
+		void addDeviceChildrenToHashTable(std::shared_ptr<DeviceObject> parent);
+
+	private:
+		std::shared_ptr<DeviceObject> m_root;
+		QHash<QString, std::shared_ptr<DeviceObject>> m_deviceTable;
+	};
 
 	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 }

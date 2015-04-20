@@ -48,7 +48,8 @@ SC_DECIMAL_PLACES = 30,
 SC_APERTURE = 31,
 SC_FILTERING_TIME = 32,
 SC_MAX_DIFFERENCE = 33,
-SC_LAST_CHANGE_USER = 34;
+SC_BYTE_ORDER = 34,
+SC_LAST_CHANGE_USER = 35;
 
 
 const char* Columns[] =
@@ -87,6 +88,7 @@ const char* Columns[] =
 	"Aperture",
 	"Filtering time",
 	"Max difference",
+	"Byte order",
 	"Last change user",
 };
 
@@ -235,6 +237,15 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 			}
 			return cb;
 		}
+		case SC_BYTE_ORDER:
+		{
+			QComboBox* cb = new QComboBox(parent);
+			for (int i = 0; i < BYTE_ORDER_COUNT; i++)
+			{
+				cb->addItem(ByteOrderStr[i]);
+			}
+			return cb;
+		}
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		default:
@@ -293,6 +304,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(m_signalSet[row].acquire()); break;
 		case SC_CALCULATED: if (cb) cb->setCurrentIndex(m_signalSet[row].calculated()); break;
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(m_signalSet[row].inOutType()); break;
+		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(m_signalSet[row].byteOrder()); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		case SC_TYPE:
@@ -342,7 +354,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_MAX_DIFFERENCE: if (le) s.setMaxDifference(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setDataFormat(m_dataFormatInfo.key(cb->currentIndex())); break;
+		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
@@ -352,6 +364,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_CALCULATED: if (cb) s.setCalculated(cb->currentIndex() == 0 ? false : true); break;
 		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(SignalInOutType(cb->currentIndex())); break;
+		case SC_BYTE_ORDER: if (cb) s.setByteOrder(ByteOrder(cb->currentIndex())); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		case SC_TYPE:
@@ -395,7 +408,7 @@ bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QSt
 }
 
 
-SignalsModel::SignalsModel(DbController* dbController, QWidget *parent) :
+SignalsModel::SignalsModel(DbController* dbController, SignalsTabPage* parent) :
 	QAbstractTableModel(parent),
 	m_parentWindow(parent),
 	m_dbController(dbController)
@@ -521,6 +534,55 @@ bool SignalsModel::checkoutSignal(int index)
 	return true;
 }
 
+bool SignalsModel::checkoutSignal(int index, QString& message)
+{
+	Signal& s = m_signalSet[index];
+	if (s.checkedOut())
+	{
+		if (s.userID() == dbController()->currentUser().userId())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	QVector<int> signalsIDs;
+	if (m_signalSet[index].signalGroupID() != 0)
+	{
+		signalsIDs = m_signalSet.getChannelSignalsID(m_signalSet[index].signalGroupID());
+	}
+	else
+	{
+		signalsIDs << m_signalSet.key(index);
+	}
+	QVector<ObjectState> objectStates;
+	dbController()->checkoutSignals(&signalsIDs, &objectStates, parrentWindow());
+	if (objectStates.count() == 0)
+	{
+		return false;
+	}
+	foreach (const ObjectState& objectState, objectStates)
+	{
+		if (objectState.errCode != ERR_SIGNAL_OK)
+		{
+			message += errorMessage(objectState) + "\n";
+		}
+	}
+	foreach (const ObjectState& objectState, objectStates)
+	{
+		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
+				&& objectState.userId != dbController()->currentUser().userId())
+		{
+			return false;
+		}
+	}
+	emit setCheckedoutSignalActionsVisibility(true);
+	return true;
+}
+
 QString SignalsModel::errorMessage(const ObjectState& state) const
 {
 	switch(state.errCode)
@@ -624,6 +686,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_FILTERING_TIME: return signal.filteringTime();
 				case SC_MAX_DIFFERENCE: return signal.maxDifference();
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_BYTE_ORDER: return (signal.byteOrder() < BYTE_ORDER_COUNT) ? ByteOrderStr[signal.byteOrder()] : tr("Unknown byte order");
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 				default:
@@ -653,6 +716,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DATA_SIZE: return signal.dataSize();
 				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
+				case SC_BYTE_ORDER: return (signal.byteOrder() < BYTE_ORDER_COUNT) ? ByteOrderStr[signal.byteOrder()] : tr("Unknown byte order");
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 				case SC_LOW_ADC:
@@ -751,7 +815,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setStrID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
 			case SC_NAME: signal.setName(value.toString()); break;
-			case SC_DATA_FORMAT: signal.setDataFormat(value.toInt()); break;
+			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<DataFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
@@ -779,6 +843,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
 			case SC_MAX_DIFFERENCE: signal.setMaxDifference(value.toDouble()); break;
 			case SC_IN_OUT_TYPE: signal.setInOutType(SignalInOutType(value.toInt())); break;
+			case SC_BYTE_ORDER: signal.setByteOrder(ByteOrder(value.toInt())); break;
 			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
 			case SC_CHANNEL:
@@ -950,7 +1015,7 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
-	SignalPropertiesDialog dlg(signal, SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, m_parentWindow);
+	SignalPropertiesDialog dlg(signal, SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, false, nullptr, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -999,17 +1064,24 @@ void SignalsModel::addSignal()
 	emit setCheckedoutSignalActionsVisibility(true);
 }
 
+void SignalsModel::showError(QString message)
+{
+	QMessageBox::critical(m_parentWindow, tr("Error"), message);
+}
+
 bool SignalsModel::editSignal(int row)
 {
-	if (!checkoutSignal(row))
-	{
-		return false;
-	}
-
 	loadSignal(row);
 
 	Signal signal = m_signalSet[row];
-	SignalPropertiesDialog dlg(signal, signal.type(), m_dataFormatInfo, m_unitInfo, m_parentWindow);
+	int readOnly = false;
+	if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId())
+	{
+		readOnly = true;
+	}
+	SignalPropertiesDialog dlg(signal, signal.type(), m_dataFormatInfo, m_unitInfo, readOnly, this, m_parentWindow);
+
+	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1024,6 +1096,7 @@ bool SignalsModel::editSignal(int row)
 		return true;
 	}
 
+	loadSignal(row);	//Signal could be checked out but not changed
 	return false;
 }
 
@@ -1356,6 +1429,11 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 			assert(false);
 	}
 	m_signalsView->resizeColumnsToContents();
+}
+
+void SignalsTabPage::showError(QString message)
+{
+	QMessageBox::warning(this, "Error", message);
 }
 
 

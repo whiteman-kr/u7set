@@ -75,6 +75,15 @@ const char* const SensorTypeStr[] =
 const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 
+const char* const ByteOrderStr[] =
+{
+	"Little Edndian",
+	"BigEndian",
+};
+
+const int BYTE_ORDER_COUNT = sizeof(ByteOrderStr) / sizeof(ByteOrderStr[0]);
+
+
 const char* const OutputRangeModeStr[] =
 {
 	"0..5 V",
@@ -160,7 +169,7 @@ private:
 	QString m_strID;
 	QString m_extStrID;
 	QString m_name;
-	int m_dataFormat = static_cast<int>(DataFormat::SignedInt);
+	DataFormat m_dataFormat = DataFormat::SignedInt;
 	int m_dataSize = 16;
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
@@ -189,7 +198,7 @@ private:
 	QString m_deviceStrID;
 	double m_filteringTime = 0.05;
 	double m_maxDifference = 0.5;
-	int m_byteOrder = static_cast<int>(ByteOrder::BigEndian);
+	ByteOrder m_byteOrder = ByteOrder::BigEndian;
 
 	Address16 m_ramAddr;				// signal address in LM RAM
 	Address16 m_acqAddr;				// signal address in FSC data packet (acquisition address)
@@ -253,8 +262,8 @@ public:
     Q_INVOKABLE QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
 
-    Q_INVOKABLE int dataFormat() const { return m_dataFormat; }
-	void setDataFormat(int dataFormat) { m_dataFormat = dataFormat; }
+	Q_INVOKABLE DataFormat dataFormat() const { return m_dataFormat; }
+	void setDataFormat(DataFormat dataFormat) { m_dataFormat = dataFormat; }
 
     Q_INVOKABLE int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
@@ -341,8 +350,8 @@ public:
 	Q_INVOKABLE double maxDifference() const { return m_maxDifference; }
 	void setMaxDifference(double maxDifference) { m_maxDifference = maxDifference; }
 
-	Q_INVOKABLE int byteOrder() const { return m_byteOrder; }
-	void setByteOrder(int byteOrder) { m_byteOrder = byteOrder; }
+	Q_INVOKABLE ByteOrder byteOrder() const { return m_byteOrder; }
+	void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 
 	friend class DbWorker;

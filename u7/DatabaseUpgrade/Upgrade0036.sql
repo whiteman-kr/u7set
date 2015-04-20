@@ -5,6 +5,7 @@
 -- get_file_id(user_id integer, parent_id integer, file_name text)
 -- get_file_id(user_id integer, full_file_name text)
 -- add_or_update_file(user_id integer, full_parent_file_name text, file_name text, checkin_comment text, file_data bytea)
+-- is_admin (RPCT-93) - fixed: function can return NULL fro non existing user
 --
 ------------------------------------------------------------------------------
 
@@ -169,3 +170,24 @@ BEGIN
 END
 $BODY$
 LANGUAGE plpgsql;
+
+--
+-- is_admin (RPCT-93) - fixed: function can return NULL fro non existing user
+--
+CREATE OR REPLACE FUNCTION is_admin(user_id integer)
+RETURNS boolean AS
+$BODY$
+DECLARE
+    result boolean;
+BEGIN
+    result = (SELECT ("Administrator" = TRUE AND "Disabled" = FALSE) AS administrator
+        FROM "User" WHERE "UserID" = user_id);
+
+    IF (result is NULL) THEN
+        result = FALSE;
+    END IF;
+
+    return result;
+END;
+$BODY$
+  LANGUAGE plpgsql;
