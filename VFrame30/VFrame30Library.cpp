@@ -18,7 +18,7 @@
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
 
     #ifdef Q_DEBUG
-    #include <vld.h>		// Enable Visula Leak Detector
+	//#include <vld.h>		// Enable Visula Leak Detector
     #endif
 	// vld.h includes windows.h wich redefine min/max stl functions
 

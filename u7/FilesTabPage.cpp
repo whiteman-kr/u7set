@@ -3,6 +3,7 @@
 #include "CheckInDialog.h"
 #include "../include/DbController.h"
 #include <QDir>
+#include <QMessageBox>
 
 //
 //
@@ -1246,50 +1247,68 @@ void FileTreeView::getLatestTreeVersion()
 	{
 		// Get files from the database
 		//
-		std::list<std::shared_ptr<DbFile>> outList;
-		bool ok = db()->getLatestTreeVersion(f, &outList, this);
-		if (ok == false)
+
+		if (getLatestFileVersionRecursive(f, dir) == false)
 		{
-			return;
-		}
-
-		std::vector<std::shared_ptr<DbFile>> out;
-		for (auto o : outList)
-		{
-			out.push_back(o);
-		}
-
-		QString dirFiles = dir + QDir().separator() + f.fileName() + ".files";
-		QDir().mkdir(dirFiles);
-
-		// Save files to disk
-		//
-		for (unsigned int i = 0; i < out.size(); i++)
-		{
-			bool writeResult = false;
-
-			if (i == 0)
-			{
-				writeResult = out[i]->writeToDisk(dir);
-			}
-			else
-			{
-				writeResult = out[i]->writeToDisk(dirFiles);
-			}
-
-			if (writeResult == false)
-			{
-				QMessageBox msgBox;
-				msgBox.setText(tr("Write file error."));
-				msgBox.setInformativeText(tr("Cannot write file %1.").arg(out[i]->fileName()));
-				msgBox.exec();
-				break;
-			}
+			break;
 		}
 	}
 
 	return;
 }
+
+bool FileTreeView::getLatestFileVersionRecursive(const DbFileInfo& f, const QString& dir)
+{
+	std::shared_ptr<DbFile> out;
+
+	bool ok = db()->getLatestVersion(f, &out, this);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, "Error", "Can't get the latest version of " + f.fileName());
+		return false;
+	}
+
+	if (out->writeToDisk(dir) == false)
+	{
+		QMessageBox::critical(this, "Error", "Can't write file " + f.fileName() + " to disk");
+		return false;
+	}
+
+	std::vector<DbFileInfo> childFiles;
+
+	if (db()->getFileList(&childFiles, f.fileId(), this) == false)
+	{
+		QMessageBox::critical(this, "Error", "Can't get child files list of the file " + f.fileName());
+		return false;
+	}
+
+	if (childFiles.empty() == true)
+	{
+		return true;
+	}
+
+	QString dirFiles = dir + QDir::separator() + f.fileName() + ".files";
+	if (QDir().exists(dirFiles) == false)
+	{
+		if (QDir().mkdir(dirFiles) == false)
+		{
+			QMessageBox::critical(this, "Error", "Can't create the directory " + dirFiles);
+			return false;
+		}
+	}
+
+	for (DbFileInfo& child : childFiles)
+	{
+		if (getLatestFileVersionRecursive(child, dirFiles) == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
 
 void FileTreeView::setWorkcopy()
 {
