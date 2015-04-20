@@ -1704,22 +1704,22 @@ namespace Hardware
 		m_type = value;
 	}
 
-	ByteOrder DeviceSignal::byteOrder() const
+	DeviceSignal::ByteOrder DeviceSignal::byteOrder() const
 	{
 		return m_byteOrder;
 	}
 
-	void DeviceSignal::setByteOrder(ByteOrder value)
+	void DeviceSignal::setByteOrder(DeviceSignal::ByteOrder value)
 	{
 		m_byteOrder = value;
 	}
 
-	DataFormat DeviceSignal::format() const
+	DeviceSignal::DataFormat DeviceSignal::format() const
 	{
 		return m_format;
 	}
 
-	void DeviceSignal::setFormat(DataFormat value)
+	void DeviceSignal::setFormat(DeviceSignal::DataFormat value)
 	{
 		m_format = value;
 	}

@@ -3,7 +3,7 @@
 #include "DbStruct.h"
 #include "QUuid"
 #include "../include/Factory.h"
-#include "../include/types.h"
+//#include "../include/types.h"
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 
@@ -432,13 +432,13 @@ namespace Hardware
 		enum FamilyType		// WARNING!!! Only high byte can be used as it is a part of the type
 		{					// (high byte is module family, low byte is module version)
 			OTHER = 0x0000,
-			LM = 0x1100,
-			AIM = 0x1200,
-			AOM = 0x1300,
-			DIM = 0x1400,
-			DOM = 0x1500,
-			AIFM = 0x1600,
-			OCM = 0x1700
+			LM = 0x0100,
+			AIM = 0x0200,
+			AOM = 0x0300,
+			DIM = 0x0400,
+			DOM = 0x0500,
+			AIFM = 0x0600,
+			OCM = 0x0700
 		};
 
 	public:
@@ -551,6 +551,19 @@ namespace Hardware
 			InputAnalog,
 			OutputDiscrete,
 			OutputAnalog,
+		};
+
+		enum DataFormat
+		{
+			UnsignedInt = 0,
+			SignedInt = 1,
+		};
+
+
+		enum ByteOrder
+		{
+			LittleEdndian = 0,		// little endian
+			BigEndian = 1			// big endian
 		};
 
 	public:

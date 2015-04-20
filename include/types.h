@@ -19,3 +19,5 @@ enum ByteOrder
 	LittleEdndian = 0,		// little endian
 	BigEndian = 1			// big endian
 };
+
+
