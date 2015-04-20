@@ -3556,19 +3556,52 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals)
 {
-	AUTO_COMPLETE
+	QVector<Signal> newSignals;
 
+	// add analog signals
+	//
 	for(int i = 0; i < deviceSignals.size(); i++)
 	{
 		const Hardware::DeviceSignal& deviceSignal = deviceSignals[i];
 
-		if (deviceSignal.type() == Hardware::DeviceSignal::SignalType::DiagDiscrete ||
-			deviceSignal.type() == Hardware::DeviceSignal::SignalType::DiagAnalog)
+		if (deviceSignal.type() != Hardware::DeviceSignal::SignalType::InputAnalog &&
+			deviceSignal.type() != Hardware::DeviceSignal::SignalType::OutputAnalog)
 		{
 			continue;
 		}
 
 		Signal signal(deviceSignal);
+
+		newSignals.append(signal);
+	}
+
+	if (newSignals.count() > 0)
+	{
+		slot_addSignal(SignalType::Analog, &newSignals);
+	}
+
+	newSignals.clear();
+
+	// add discrete signals
+	//
+	for(int i = 0; i < deviceSignals.size(); i++)
+	{
+		const Hardware::DeviceSignal& deviceSignal = deviceSignals[i];
+
+		if (deviceSignal.type() != Hardware::DeviceSignal::SignalType::InputDiscrete &&
+			deviceSignal.type() != Hardware::DeviceSignal::SignalType::OutputDiscrete)
+		{
+			continue;
+		}
+
+		Signal signal(deviceSignal);
+
+		newSignals.append(signal);
+	}
+
+	if (newSignals.count() > 0)
+	{
+		slot_addSignal(SignalType::Discrete, &newSignals);
 	}
 }
 

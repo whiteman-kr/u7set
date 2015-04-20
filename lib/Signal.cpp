@@ -33,39 +33,17 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	m_extStrID = deviceSignal.strId();
 	m_name = QString("Signal #%1").arg(deviceSignal.strId());
 
+	if (m_type = SignalType::Analog)
+	{
+		m_dataFormat = DataFormat::SignedInt;
+	}
+	else
+	{
+		m_dataFormat = DataFormat::UnsignedInt;
+	}
 
-	/*
-	m_dataFormat = signal.dataFormat();
-	m_dataSize = signal.dataSize();
-
-	m_lowADC = signal.lowADC();
-	m_highADC = signal.highADC();
-	m_lowLimit = signal.lowLimit();
-	m_highLimit = signal.highLimit();
-	m_unitID = signal.unitID();
-	m_adjustment = signal.adjustment();
-	m_dropLimit = signal.dropLimit();
-	m_excessLimit = signal.excessLimit();
-	m_unbalanceLimit = signal.unbalanceLimit();
-	m_inputLowLimit = signal.inputLowLimit();
-	m_inputHighLimit = signal.inputHighLimit();
-	m_inputUnitID = signal.inputUnitID();
-	m_inputSensorID = signal.inputSensorID();
-	m_outputLowLimit = signal.outputLowLimit();
-	m_outputHighLimit = signal.outputHighLimit();
-	m_outputUnitID = signal.outputUnitID();
-	m_outputRangeMode = signal.outputRangeMode();
-	m_outputSensorID = signal.outputSensorID();
-	m_acquire = signal.acquire();
-	m_calculated = signal.calculated();
-	m_normalState = signal.normalState();
-	m_decimalPlaces = signal.decimalPlaces();
-	m_aperture = signal.aperture();
-	m_inOutType = signal.inOutType();
-	m_deviceStrID = signal.deviceStrID();
-	m_filteringTime = signal.filteringTime();
-	m_maxDifference = signal.maxDifference();*/
-
+#pragma message("################################## uncomment this line")
+	//m_dataSize = deviceSignal.dataSize();
 }
 
 
