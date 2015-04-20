@@ -166,9 +166,11 @@ namespace Builder
 
 		m_log->writeMessage(msg, false);
 
-		m_readDataAddress.setBase(getIntProperty(REG_DATA_ADDRESS));
-
 		bool result = true;
+
+		// 0. Initialization
+
+		result &= init();
 
 		// 1. Copy DiagDataController memory to the registration
 
@@ -182,8 +184,41 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::init()
+	{
+		int addr = 0;
+
+		if (getIntProperty("WrAppLogicW", addr) == false )
+		{
+			return false;
+		}
+
+		m_regDataAddress.reset();
+		m_regDataAddress.setBase(addr);
+
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::copyDiagData()
 	{
+		int rdDiagData = 0;
+		int diagDataSize = 0;
+
+		if (getIntProperty("RdDiagData", rdDiagData) == false )
+		{
+			return false;;
+		}
+
+		if (getIntProperty("DiagDataSize", diagDataSize) == false )
+		{
+			return false;;
+		}
+
+
+		//m_code.addComand();
+
+
 		return true;
 	}
 
@@ -193,34 +228,37 @@ namespace Builder
 	}
 
 
-	int ModuleLogicCompiler::getIntProperty(const char* propertyName)
+	bool ModuleLogicCompiler::getIntProperty(const char* propertyName, int& value)
 	{
-		return getIntProperty(m_lm, propertyName);
+		return getIntProperty(m_lm, propertyName, value);
 	}
 
-	int ModuleLogicCompiler::getIntProperty(Hardware::DeviceModule* module, const char* propertyName)
+
+	bool ModuleLogicCompiler::getIntProperty(Hardware::DeviceModule* module, const char* propertyName, int &value)
 	{
 		if (module == nullptr)
 		{
 			assert(module != nullptr);
-			return 0;
+			return false;
 		}
 
 		if (propertyName == nullptr)
 		{
 			assert(propertyName != nullptr);
-			return 0;
+			return false;
 		}
 
-		QVariant value = module->property(propertyName);
+		QVariant val = module->property(propertyName);
 
-		if (value.isValid() == false)
+		if (val.isValid() == false)
 		{
 			m_log->writeError(QString(tr("Property %1 is not found in module %2")).arg(propertyName).arg(module->strId()), false, true);
-			return 0;
+			return false;
 		}
 
-		return value.toInt();
+		value = val.toInt();
+
+		return true;
 	}
 
 }

@@ -6,6 +6,7 @@
 #include "../include/DeviceObject.h"
 #include "../include/Signal.h"
 #include "../Builder/BuildResultWriter.h"
+#include "../Builder/ApplicationLogicCode.h"
 
 
 namespace Builder
@@ -76,17 +77,21 @@ namespace Builder
 
 		Hardware::DeviceModule* m_lm = nullptr;
 
-		AddrW m_readDataAddress;
+		AddrW m_regDataAddress;
+
+		ApplicationLogicCode m_code;
 
 		QString msg;
 
 	private:
+		bool getIntProperty(Hardware::DeviceModule* module, const char* propertyName, int &value);
+		bool getIntProperty(const char* propertyName, int &value);
+
+		// module logic compilations steps
+		//
+		bool init();
 		bool copyDiagData();
 		bool copyInOutSignals();
-
-
-		int getIntProperty(Hardware::DeviceModule* module, const char* propertyName);
-		int getIntProperty(const char* propertyName);
 
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);

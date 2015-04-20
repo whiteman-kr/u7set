@@ -52,7 +52,7 @@ namespace Builder
 			{
 				quint16 CRC5 : 5;
 				quint16 code : 5;
-				quint16 funcBlockN : 6;
+				quint16 fbType : 6;
 			} opCode;
 
 			quint16 word1;
@@ -64,8 +64,8 @@ namespace Builder
 		{
 			struct
 			{
-				quint16 implementation : 10;
-				quint16 no : 6;
+				quint16 fbInstance : 10;
+				quint16 fbParamNo : 6;
 
 			} param;
 
@@ -78,7 +78,7 @@ namespace Builder
 #pragma pack(pop)
 
 
-	class ApplicationLogicCommand
+	class Command
 	{
 	private:
 		QByteArray m_rawCode;
@@ -86,7 +86,20 @@ namespace Builder
 		int address = -1;
 
 	public:
-		ApplicationLogicCommand() {}
+		Command() {}
+
+		void NOP();
+		void START();
+		void STOP();
+		void MOV(quint16 addrFrom, quint16 addrTo);
+		void MOVMEM(quint16 addrFrom, quint16 addrTo, quint16 sizeW);
+		void MOVC(quint16 contVal, quint16 addrTo);
+		void MOVBC(quint16 constBit, quint16 addrTo, quint16 bitNo);
+		void WRFB(quint16 addrFrom, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		void RDFB(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo);
+		void WRFBC(quint16 constVal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		void WRFBB(quint16 addrFrom, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		//4,		//	RDFBB
 	};
 
 
@@ -94,7 +107,7 @@ namespace Builder
 	{
 		Q_OBJECT
 	private:
-		QVector<ApplicationLogicCommand> m_commands;
+		QVector<Command> m_commands;
 
 	public:
 		ApplicationLogicCode();
