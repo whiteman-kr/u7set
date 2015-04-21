@@ -575,6 +575,23 @@ namespace Hardware
 		return pDeviceObject;
 	}
 
+	void DeviceObject::expandStrId()
+	{
+		if (parent() != nullptr)
+		{
+			m_strId.replace(QString("$(PARENT)"), parent()->strId(), Qt::CaseInsensitive);
+		}
+
+		m_strId.replace(QString("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+
+		for (int i = 0; i < childrenCount(); i++)
+		{
+			child(i)->expandStrId();
+		}
+
+		return;
+	}
+
 	bool DeviceObject::event(QEvent* e)
 	{
 		if (e->type() == QEvent::DynamicPropertyChange && m_avoidEventRecursion == false)
@@ -1561,7 +1578,7 @@ namespace Hardware
 		m_confType = value;
 	}
 
-	bool DeviceModule::isIOModule()
+	bool DeviceModule::isIOModule() const
 	{
 		FamilyType family = moduleFamily();
 

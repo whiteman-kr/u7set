@@ -196,6 +196,8 @@ namespace Hardware
 		// Public methods
 		//
 	public:
+		void expandStrId();
+
 		virtual bool event(QEvent* e) override;
 
 		// Protected methods
@@ -237,8 +239,9 @@ namespace Hardware
 		void sortChildrenByPlace();
 
 		std::vector<DeviceObject*> findChildObjectsByMask(const QString& mask);
-		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*> &list);
+		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list);
 		Q_INVOKABLE QObject* jsFindChildObjectByMask(const QString& mask);
+
 
 
 		// Props
@@ -483,7 +486,7 @@ namespace Hardware
 		QString confType() const;
 		void setConfType(const QString& value);
 
-		bool isIOModule();
+		bool isIOModule() const;
 
 		// Data
 		//

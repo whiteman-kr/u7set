@@ -1311,8 +1311,14 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 
 
 
-bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals, QWidget* parentWidget)
+bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, QWidget* parentWidget)
 {
+	if (deviceSignals == nullptr)
+	{
+		assert(deviceSignals != nullptr);
+		return false;
+	}
+
 	// Init progress and check availability
 	//
 	bool ok = initOperation();
@@ -1330,8 +1336,14 @@ bool DbController::autoAddSignals(const std::vector<Hardware::DeviceSignal>& dev
 }
 
 
-bool DbController::autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals, QWidget* parentWidget)
+bool DbController::autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, QWidget* parentWidget)
 {
+	if (deviceSignals == nullptr)
+	{
+		assert(deviceSignals != nullptr);
+		return false;
+	}
+
 	// Init progress and check availability
 	//
 	bool ok = initOperation();

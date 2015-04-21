@@ -127,8 +127,8 @@ public slots:
 
 	void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
-	void slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals);
-	void slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals);
+	void slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
+	void slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
 
 
 	// Build management

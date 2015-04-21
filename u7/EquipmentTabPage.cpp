@@ -779,7 +779,7 @@ bool EquipmentView::isConfigurationMode() const
 	return equipmentModel()->isConfigurationMode();
 }
 
-DbController* EquipmentView::dbController()
+DbController* EquipmentView::db()
 {
 	return m_dbController;
 }
@@ -1009,9 +1009,9 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = dbController()->getFileList(
+	bool ok = db()->getFileList(
 				&fileList,
-				dbController()->hpFileId(),
+				db()->hpFileId(),
 				Hardware::DeviceObject::fileExtension(type),
 				this);
 
@@ -1025,7 +1025,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 	std::vector<std::shared_ptr<DbFile>> files;
 	files.reserve(fileList.size());
 
-	ok = dbController()->getLatestVersion(fileList, &files, this);
+	ok = db()->getLatestVersion(fileList, &files, this);
 
 	if (ok == false || files.empty() == true)
 	{
@@ -1071,13 +1071,13 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 {
 	assert(fileInfo.fileId() != -1);
 	assert(fileInfo.parentId() != -1);
-	assert(fileInfo.parentId() == dbController()->hpFileId());
+	assert(fileInfo.parentId() == db()->hpFileId());
 
 	// Read all preset tree and add it to the hardware configuration
 	//
 	std::shared_ptr<Hardware::DeviceObject> device;
 
-	bool ok = dbController()->getDeviceTreeLatestVersion(fileInfo, &device, this);
+	bool ok = db()->getDeviceTreeLatestVersion(fileInfo, &device, this);
 	if (ok == false)
 	{
 		return;
@@ -1185,7 +1185,7 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 	//
 	assert(parentObject != nullptr);
 
-	bool result = dbController()->addDeviceObject(object.get(), parentObject->fileInfo().fileId(), this);
+	bool result = db()->addDeviceObject(object.get(), parentObject->fileInfo().fileId(), this);
 
 	if (result == false)
 	{
@@ -1204,6 +1204,137 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 
 	return;
 }
+
+void EquipmentView::addInOutsToSignals()
+{
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(false);	// how did we get here?
+		return;
+	}
+
+	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
+	assert(device);
+
+	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
+
+	if (module == nullptr || module->isIOModule() == false)
+	{
+		assert(module);
+		return;
+	}
+
+	// Get module from the DB as here it can be not fully loaded
+	//
+	std::shared_ptr<Hardware::DeviceObject> dbModule;
+	bool ok = db()->getDeviceTreeLatestVersion(module->fileInfo(), &dbModule, this);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Get all hardware inputs outputs from the module
+	//
+	std::vector<Hardware::DeviceSignal*> inOuts;
+
+	std::function<void(Hardware::DeviceObject*)> getInOuts =
+		[&inOuts, &getInOuts](Hardware::DeviceObject* device)
+		{
+			if (device->deviceType() == Hardware::DeviceType::Signal)
+			{
+				Hardware::DeviceSignal* signal = dynamic_cast<Hardware::DeviceSignal*>(device);
+				assert(signal);
+
+				if (signal->type() == Hardware::DeviceSignal::SignalType::InputDiscrete ||
+					signal->type() == Hardware::DeviceSignal::SignalType::OutputDiscrete ||
+					signal->type() == Hardware::DeviceSignal::SignalType::InputAnalog ||
+					signal->type() == Hardware::DeviceSignal::SignalType::OutputAnalog)
+				{
+					inOuts.push_back(signal);
+				}
+
+				return;
+			}
+
+			for (int i = 0; i < device->childrenCount(); i++)
+			{
+				getInOuts(device->child(i));
+			}
+		};
+
+	getInOuts(dbModule.get());
+
+	if (inOuts.empty() == true)
+	{
+		return;
+	}
+
+	// Expand StrID for signals,
+	// track aprents from the module, and children from the dbModuke
+	//
+	std::list<std::shared_ptr<Hardware::DeviceObject>> equipmentDevices;
+
+	Hardware::DeviceObject* equipmentDevice = module;
+	while (equipmentDevice != nullptr)
+	{
+		if (equipmentDevice != module)
+		{
+			QByteArray bytes;
+
+			equipmentDevice->Save(bytes);	// save and restore to keep equpment version after expanding strid
+
+			Hardware::DeviceObject* newObject = Hardware::DeviceObject::Create(bytes);
+			std::shared_ptr<Hardware::DeviceObject> newObjectSp(newObject);
+
+			equipmentDevices.push_front(newObjectSp);
+		}
+
+		equipmentDevice = equipmentDevice->parent();
+	}
+
+	if (equipmentDevices.empty() != true)
+	{
+		auto it = equipmentDevices.begin();
+
+		do
+		{
+			std::shared_ptr<Hardware::DeviceObject> parent = *it;
+
+			++ it;
+
+			if (it != equipmentDevices.end())
+			{
+				parent->addChild(*it);
+			}
+			else
+			{
+				parent->addChild(dbModule);
+			}
+		}
+		while(it != equipmentDevices.end());
+
+		equipmentDevices.front()->expandStrId();
+	}
+
+	dbModule->expandStrId();	// StrIds in getInOuts will be updated also
+
+	// Add signals to the project DB
+	//
+
+	std::sort(std::begin(inOuts), std::end(inOuts),
+		[](Hardware::DeviceObject* a, Hardware::DeviceObject* b)
+		{
+			return a->strId() < b->strId();
+		});
+
+	db()->autoAddSignals(&inOuts, this);
+
+	return;
+}
+
 
 void EquipmentView::deleteSelectedDevices()
 {
@@ -1338,6 +1469,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 		m_addPresetMenu->addAction(m_addPresetControllerAction);
 		m_addPresetMenu->addAction(m_addPresetWorkstationAction);
 		m_addPresetMenu->addAction(m_addPresetSoftwareAction);
+
+	m_equipmentView->addAction(m_inOutsToSignals);
 
 	// -----------------
 	m_equipmentView->addAction(m_SeparatorAction1);
@@ -1492,6 +1625,12 @@ void EquipmentTabPage::CreateActions()
 		m_addPresetSoftwareAction->setEnabled(false);
 		connect(m_addPresetSoftwareAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetSoftware);
 
+	m_inOutsToSignals = new QAction(tr("Inputs/Outs to signals"), this);
+	m_inOutsToSignals->setStatusTip(tr("Add intputs/outputs to signals..."));
+	m_inOutsToSignals->setEnabled(false);
+	m_inOutsToSignals->setVisible(false);
+	connect(m_inOutsToSignals, &QAction::triggered, m_equipmentView, &EquipmentView::addInOutsToSignals);
+
 	//-----------------------------------
 	m_SeparatorAction1 = new QAction(this);
 	m_SeparatorAction1->setSeparator(true);
@@ -1608,6 +1747,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_addPresetControllerAction);
 	assert(m_addPresetWorkstationAction);
 	assert(m_addPresetSoftwareAction);
+	assert(m_inOutsToSignals);
 
 	// Disable all
 	//
@@ -1634,6 +1774,9 @@ void EquipmentTabPage::setActionState()
 	m_addPresetWorkstationAction->setEnabled(false);
 	m_addPresetSoftwareAction->setEnabled(false);
 
+	m_inOutsToSignals->setEnabled(false);
+	m_inOutsToSignals->setVisible(false);
+
 
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -1645,6 +1788,22 @@ void EquipmentTabPage::setActionState()
 	// Refresh
 	//
 	m_refreshAction->setEnabled(true);
+
+	// Add inputs/outputs to signals
+	//
+	if (selectedIndexList.size() == 1)
+	{
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.front());
+		assert(device);
+
+		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
+
+		if (module != nullptr && module->isIOModule() == true)
+		{
+			m_inOutsToSignals->setEnabled(true);
+			m_inOutsToSignals->setVisible(true);
+		}
+	}
 
 	// Delete Items action
 	//

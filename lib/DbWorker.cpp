@@ -3490,23 +3490,30 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 }
 
 
-void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals)
+void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
 {
+	if (deviceSignals == nullptr)
+	{
+		assert(deviceSignals != nullptr);
+		return;
+	}
+
 	QVector<Signal> newSignals;
 
 	// add analog signals
 	//
-	for(int i = 0; i < deviceSignals.size(); i++)
+	for(int i = 0; i < deviceSignals->size(); i++)
 	{
-		const Hardware::DeviceSignal& deviceSignal = deviceSignals[i];
+		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
+		assert(deviceSignal);
 
-		if (deviceSignal.type() != Hardware::DeviceSignal::SignalType::InputAnalog &&
-			deviceSignal.type() != Hardware::DeviceSignal::SignalType::OutputAnalog)
+		if (deviceSignal->type() != Hardware::DeviceSignal::SignalType::InputAnalog &&
+			deviceSignal->type() != Hardware::DeviceSignal::SignalType::OutputAnalog)
 		{
 			continue;
 		}
 
-		Signal signal(deviceSignal);
+		Signal signal(*deviceSignal);
 
 		newSignals.append(signal);
 	}
@@ -3520,17 +3527,18 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& de
 
 	// add discrete signals
 	//
-	for(int i = 0; i < deviceSignals.size(); i++)
+	for(int i = 0; i < deviceSignals->size(); i++)
 	{
-		const Hardware::DeviceSignal& deviceSignal = deviceSignals[i];
+		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
+		assert(deviceSignal);
 
-		if (deviceSignal.type() != Hardware::DeviceSignal::SignalType::InputDiscrete &&
-			deviceSignal.type() != Hardware::DeviceSignal::SignalType::OutputDiscrete)
+		if (deviceSignal->type() != Hardware::DeviceSignal::SignalType::InputDiscrete &&
+			deviceSignal->type() != Hardware::DeviceSignal::SignalType::OutputDiscrete)
 		{
 			continue;
 		}
 
-		Signal signal(deviceSignal);
+		Signal signal(*deviceSignal);
 
 		newSignals.append(signal);
 	}
@@ -3542,7 +3550,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& de
 }
 
 
-void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals)
+void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
 {
 
 }

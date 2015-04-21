@@ -286,20 +286,13 @@ namespace Builder
 
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
 	{
-		if (device->parent() != nullptr)
+		if (device == nullptr)
 		{
-			QString strId = device->strId();
-
-			strId.replace(QString("$(PARENT)"), device->parent()->strId(), Qt::CaseInsensitive);
-			strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
-
-			device->setStrId(strId);
+			assert(device != nullptr);
+			return false;
 		}
 
-		for (int i = 0; i < device->childrenCount(); i++)
-		{
-			expandDeviceStrId(device->child(i));
-		}
+		device->expandStrId();
 
 		return true;
 	}

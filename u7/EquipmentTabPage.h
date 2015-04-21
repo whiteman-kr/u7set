@@ -130,6 +130,8 @@ public slots:
 	void addPresetToConfiguration(const DbFileInfo& fileInfo);
 	void addDeviceObject(std::shared_ptr<Hardware::DeviceObject> object);
 
+	void addInOutsToSignals();
+
 	void deleteSelectedDevices();
 	void checkInSelectedDevices();
 	void checkOutSelectedDevices();
@@ -142,7 +144,7 @@ public slots:
 protected:
 	EquipmentModel* equipmentModel();
 	EquipmentModel* equipmentModel() const;
-	DbController* dbController();
+	DbController* db();
 
 	// Data
 	//
@@ -212,6 +214,8 @@ private:
 		QAction* m_addPresetControllerAction = nullptr;
 		QAction* m_addPresetWorkstationAction = nullptr;
 		QAction* m_addPresetSoftwareAction = nullptr;
+
+	QAction* m_inOutsToSignals = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction1 = nullptr;
 	QAction* m_deleteObjectAction = nullptr;
