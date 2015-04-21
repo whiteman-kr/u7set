@@ -1,12 +1,11 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-04-09T10:35:55
+# Project created by QtCreator 2015-04-19T13:14:18
 #
 #-------------------------------------------------
 
 QT       += core
 QT       += network
-
 QT       -= gui
 
 TARGET = file2pgsql
