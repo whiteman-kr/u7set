@@ -268,7 +268,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 
     var ptr = 0;
     
-    var AIMSignalMaxCount = 32;
+    var AIMSignalMaxCount = 64;
     
     var defaultTf = valToADC(50, 0, 65535, 0, 0xffff);
     var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
@@ -322,14 +322,6 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             ptr += 2;
             setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
             ptr += 2;
-            setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, defaultHighBound);         // InA High bound
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, defaultLowBound);          // InA Low Bound
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
-            ptr += 2;
         }
         else
         {
@@ -339,14 +331,6 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 
             log.writeMessage("Place" + i + ": tf = " + filternigTime + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + maxDifference, false);
 
-            setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, maxDifference);      // InA MaxDiff
-            ptr += 2;
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
             ptr += 2;
             setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound

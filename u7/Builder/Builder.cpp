@@ -128,11 +128,12 @@ namespace Builder
 			//auto aaa = equipmentSet.deviceObject(QString("SYSTEMID1_RACKID2_SIGNAL1"));
 			//auto aaa1 = equipmentSet.deviceObjectSharedPointer("SYSTEMID1_RACKID2_SIGNAL1");
 
-			//
-			// Get signals from the database
-			//
-			SignalSetObject signalSetObject;
-			signalSetObject.loadSignalsFromDb(&db);
+			SignalSet signalSet;
+
+			if (loadSignals(&db, &signalSet) == false)
+			{
+				break;
+			}
 
 			//
 			// Compile Module configuration
@@ -140,7 +141,7 @@ namespace Builder
 			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Module configurations compilation"), true);
 
-			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSetObject, lastChangesetId, &buildWriter);
+			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, lastChangesetId, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -171,7 +172,6 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			SignalSet signalSet;
 			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -304,18 +304,45 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSetObject* signalSetObject, int changesetId, BuildResultWriter* buildWriter)
+
+	bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet)
+	{
+		if (db == nullptr ||
+			signalSet == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_log->writeEmptyLine();
+
+		m_log->writeMessage(tr("Loading application logic signals"), true);
+
+		bool result = db->getSignals(signalSet, nullptr);
+
+		if (result == false)
+		{
+			m_log->writeError(tr("Error"), true, true);
+			return false;
+		}
+
+		m_log->writeSuccess(tr("Ok"), true);
+
+		return true;
+	}
+
+	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr ||
 			deviceRoot == nullptr ||
-			signalSetObject == nullptr ||
+			signalSet == nullptr ||
 			buildWriter == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSetObject, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = cfgBuilder.build();
 
@@ -363,12 +390,12 @@ namespace Builder
 
 		if (result == false)
 		{
-			m_log->writeError(tr("Error"), true, false);
+			m_log->writeError(tr("Application Logic compilation was finished with errors"), true, false);
 			QThread::currentThread()->requestInterruption();
 		}
 		else
 		{
-			m_log->writeSuccess(tr("Ok"), true);
+			m_log->writeSuccess(tr("Application Logic compilation was succesfully finished"), true);
 		}
 
 		return result;
@@ -478,31 +505,6 @@ namespace Builder
 	bool BuildWorkerThread::release() const
 	{
 		return !m_debug;
-	}
-
-	// ------------------------------------------------------------------------
-	//
-	//		SignalSetObject
-	//
-	// ------------------------------------------------------------------------
-
-	void SignalSetObject::loadSignalsFromDb(DbController* db)
-	{
-		db->getSignals(&m_signalSet, nullptr);
-	}
-
-	QObject* SignalSetObject::getSignalByDeviceStrID(const QString& deviceStrID)
-	{
-		for (int i = 0; i < m_signalSet.count(); i++)
-		{
-			if (m_signalSet[i].deviceStrID() == deviceStrID)
-			{
-				QObject* c = &m_signalSet[i];
-				QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
-				return c;
-			}
-		}
-		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------

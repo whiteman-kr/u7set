@@ -2,6 +2,18 @@
 
 namespace Builder
 {
+
+	const char* REG_DATA_ADDRESS = "WrAppLogicW";
+
+	const char* MEM_DIAG_DATA = "MemorySettings\\RdDiagData";
+	const char* MEM_DIAG_DATA_SIZE = "MemorySettings\\DiagDataSize";
+
+
+	// ---------------------------------------------------------------------------------
+	//
+	//	ApplicationLogicCompiler class implementation
+	//
+
 	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter, OutputLog *log) :
 		m_equipment(equipment),
 		m_signals(signalSet),
@@ -36,8 +48,7 @@ namespace Builder
 
 		findLMs();
 
-
-		return true;
+		return compileModulesLogics();
 	}
 
 
@@ -86,8 +97,7 @@ namespace Builder
 		{
 			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
 
-#pragma message("########################################## Set correct LM ID from enum")
-			if (module->moduleFamily() == Hardware::DeviceModule::LM)
+			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 			{
 				Hardware::DeviceObject* parent = startFromDevice->parent();
 
@@ -97,7 +107,7 @@ namespace Builder
 					{
 						// LM must be installed in the chassis
 						//
-						m_lm.append(startFromDevice);
+						m_lm.append(reinterpret_cast<Hardware::DeviceModule*>(startFromDevice));
 					}
 					else
 					{
@@ -122,4 +132,172 @@ namespace Builder
 			findLM(device);
 		}
 	}
+
+
+	bool ApplicationLogicCompiler::compileModulesLogics()
+	{
+		bool result = true;
+
+		for(int i = 0; i < m_lm.count(); i++)
+		{
+			ModuleLogicCompiler moduleLogicCompiler(*this, m_lm[i]);
+
+			result &= moduleLogicCompiler.run();
+		}
+
+		return result;
+	}
+
+
+	// ---------------------------------------------------------------------------------
+	//
+	//	ModuleLogicCompiler class implementation
+	//
+
+	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm)
+	{
+		m_equipment = appLogicCompiler.m_equipment;
+		m_signals = appLogicCompiler.m_signals;
+		m_resultWriter = appLogicCompiler.m_resultWriter;
+		m_log = appLogicCompiler.m_log;
+		m_lm = lm;
+	}
+
+
+	bool ModuleLogicCompiler::run()
+	{
+		m_log->writeEmptyLine();
+
+		msg = QString(tr("Compilation for LM %1 was started...")).arg(m_lm->strId());
+
+		m_log->writeMessage(msg, false);
+
+		bool result = true;
+
+		// 0. Initialization
+
+		result &= init();
+
+		// 1. Copy DiagDataController memory to the registration
+
+		result &= copyDiagData();
+
+		// 2. Copy values of all input & output signals to the registration
+
+		result &= copyInOutSignals();
+
+		if (result == true)
+		{
+			msg = QString(tr("Compilation for LM %1 was successfully finished")).arg(m_lm->strId());
+			m_log->writeSuccess(msg, false);
+		}
+		else
+		{
+			msg = QString(tr("Compilation for LM %1 was finished with errors")).arg(m_lm->strId());
+			m_log->writeError(msg, false, false);
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::init()
+	{
+		int addr = 0;
+
+		if (getIntProperty("MemorySettings\\WrAppLogicW", addr) == false )
+		{
+			return false;
+		}
+
+		m_regDataAddress.reset();
+		m_regDataAddress.setBase(addr);
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::copyDiagData()
+	{
+		int diagData = 0;
+		int diagDataSize = 0;
+
+		if (getIntProperty(MEM_DIAG_DATA, diagData) == false )
+		{
+			return false;;
+		}
+
+		if (getIntProperty(MEM_DIAG_DATA_SIZE, diagDataSize) == false )
+		{
+			return false;;
+		}
+
+		Command cmd;
+
+		cmd.movMem(diagData, m_regDataAddress.address(), diagDataSize);
+		cmd.setComment("Move LM diagnostics data to registration");
+
+		m_code.append(cmd);
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::copyInOutSignals()
+	{
+		Hardware::DeviceObject* chassis = m_lm->parent();
+
+		if (chassis->deviceType() != Hardware::DeviceType::Chassis)
+		{
+			msg = QString(tr("Module %1 must be installed in the chassis!")).arg(m_lm->strId());
+			m_log->writeError(msg, false, true);
+			return false;
+		}
+
+
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::getIntProperty(const char* propertyName, int& value)
+	{
+		return getIntProperty(m_lm, propertyName, value);
+	}
+
+
+	bool ModuleLogicCompiler::getIntProperty(Hardware::DeviceModule* module, const char* propertyName, int &value)
+	{
+		if (module == nullptr)
+		{
+			assert(module != nullptr);
+			return false;
+		}
+
+		if (propertyName == nullptr)
+		{
+			assert(propertyName != nullptr);
+			return false;
+		}
+
+		QList<QByteArray> bb = module->dynamicPropertyNames();
+
+		for(auto i:bb)
+		{
+			qDebug() << i;
+		}
+
+		QVariant val = module->property(propertyName);
+
+		if (val.isValid() == false)
+		{
+			m_log->writeError(QString(tr("Property %1 is not found in module %2")).arg(propertyName).arg(module->strId()), false, true);
+			return false;
+		}
+
+		value = val.toInt();
+
+		return true;
+	}
+
 }
