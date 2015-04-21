@@ -13,6 +13,7 @@
 #include "MeasureView.h"
 #include "MeasureThread.h"
 #include "FindMeasure.h"
+#include "Calculator.h"
 
 // ==============================================================================================
 
@@ -74,6 +75,8 @@ public:
 
     MeasureThread       m_measureThread;
 
+    Calculator*         m_pCalculator = nullptr;
+
     void                loadSettings();
     void                saveSettings();
 
@@ -118,7 +121,7 @@ private:
     // menu - View
     //
     QAction* m_pShowReportsAction = nullptr;
-    QAction* m_pShowCalculateAction = nullptr;
+    QAction* m_pShowCalculatorAction = nullptr;
 
     // menu - Tools
     //
@@ -164,7 +167,7 @@ private slots:
     // menu - View
     //
     void showReports() {};
-    void showCalculate() {};
+    void showCalculator();
 
     // menu - Tools
     //
@@ -183,14 +186,10 @@ private slots:
     void aboutConnection() {};
     void aboutApp() {};
 
-private slots:
-
     // Slots of tab -- page measure type
     //
     void setMeasureType(int type);
     void measureCountChanged(int count);
-
-private slots:
 
     // Slots of control panels
     //
@@ -198,19 +197,13 @@ private slots:
     void setMeasureTimeout(QString value);
     void setOutputSignalType(int index);
 
-private slots:
-
     // Slots of contex menu
     //
     void onContextMenu(QPoint);
 
-private slots:
-
     // Slots of calibrator base
     //
     void calibratorConnectedChanged(int);
-
-private slots:
 
     // Slots of measure thread
     //

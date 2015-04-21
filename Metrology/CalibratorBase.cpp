@@ -131,7 +131,8 @@ void CalibratorBase::createDialog()
 {
     m_pDialog = new QDialog(m_parentWidget);
     m_pDialog->setWindowFlags(Qt::Drawer);
-    m_pDialog->setFixedSize(500, 200);
+    m_pDialog->setFixedSize(510, 200);
+    m_pDialog->setWindowIcon(QIcon(":/icons/Calibrators.png"));
     m_pDialog->setWindowTitle(tr("Calibrators initialization"));
     m_pDialog->installEventFilter(this);
 
@@ -429,6 +430,7 @@ void CalibratorBase::onSettings(int row,int)
     QDialog* dialog = new QDialog(m_pDialog);
     dialog->setWindowFlags(Qt::Drawer);
     dialog->setFixedSize(200, 120);
+    m_pDialog->setWindowIcon(QIcon(":/icons/Settings.png"));
     dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->index() + 1));
 
         // serial port

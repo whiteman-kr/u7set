@@ -57,7 +57,7 @@ SOURCES += \
     OptionsDialog.cpp \
     Options.cpp \
     OptionsPointsDialog.cpp \
-    Main.cpp \
+    main.cpp \
     MeasureThread.cpp \
     CalibratorManager.cpp \
     MeasureViewHeader.cpp \
@@ -70,7 +70,8 @@ SOURCES += \
     FolderPropertyManager.cpp \
     Database.cpp \
     ReportView.cpp \
-    Conversion.cpp
+    Conversion.cpp \
+    Calculator.cpp
 
 
 HEADERS  += \
@@ -94,7 +95,8 @@ HEADERS  += \
     Database.h \
     ReportView.h \
     version.h \
-    Conversion.h
+    Conversion.h \
+    Calculator.h
 
 
 FORMS    +=

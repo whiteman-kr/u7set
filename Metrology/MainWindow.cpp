@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_measureThread.init(this);
 
     measureThreadStoped();
+
+    m_pCalculator = new Calculator(this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -132,11 +134,11 @@ void  MainWindow::createActions()
     m_pShowReportsAction->setToolTip(tr("Preview the report on the measurements"));
     connect(m_pShowReportsAction, &QAction::triggered, this, &MainWindow::showReports);
 
-    m_pShowCalculateAction = new QAction(tr("Metrological &calculator ..."), this);
-    m_pShowCalculateAction->setShortcut(Qt::ALT + Qt::Key_C);
-    m_pShowCalculateAction->setIcon(QIcon(":/icons/Calculator.png"));
-    m_pShowCalculateAction->setToolTip(tr("Calculator for converting metrological quantities"));
-    connect(m_pShowCalculateAction, &QAction::triggered, this, &MainWindow::showCalculate);
+    m_pShowCalculatorAction = new QAction(tr("Metrological &calculator ..."), this);
+    m_pShowCalculatorAction->setShortcut(Qt::ALT + Qt::Key_C);
+    m_pShowCalculatorAction->setIcon(QIcon(":/icons/Calculator.png"));
+    m_pShowCalculatorAction->setToolTip(tr("Calculator for converting metrological quantities"));
+    connect(m_pShowCalculatorAction, &QAction::triggered, this, &MainWindow::showCalculator);
 
     // Tools
     //
@@ -281,7 +283,7 @@ void MainWindow::createMenu()
     m_pViewMenu->addMenu(m_pViewPanelMenu);
     m_pViewMenu->addAction(m_pShowReportsAction);
     m_pViewMenu->addSeparator();
-    m_pViewMenu->addAction(m_pShowCalculateAction);
+    m_pViewMenu->addAction(m_pShowCalculatorAction);
 
 
     m_pSettingMenu = pMenuBar->addMenu(tr("&Tools"));
@@ -944,6 +946,18 @@ void MainWindow::selectAllMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::showCalculator()
+{
+    if (m_pCalculator == nullptr)
+    {
+        return;
+    }
+
+    m_pCalculator->show();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::calibrators()
 {
     theCalibratorBase.show();
@@ -1138,6 +1152,11 @@ void MainWindow::saveSettings()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
+    if (m_pCalculator != nullptr)
+    {
+        delete m_pCalculator;
+    }
+
     if (m_measureThread.isRunning() == true)
     {
         QMessageBox::critical(this, windowTitle(), m_statusMeasureThreadState->text());
