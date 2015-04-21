@@ -54,7 +54,7 @@ void CalibratorManager::createDialog()
     //
     m_pDialog = new QDialog(m_parentWidget);
 
-    QGroupBox* valueGroup = new QGroupBox;
+    QGroupBox* valueGroup = new QGroupBox(tr("Display"));
     QVBoxLayout *valueLayout = new QVBoxLayout;
 
     m_pMeasureLabel = new QLabel(tr("Measure"), m_pDialog);
@@ -72,7 +72,7 @@ void CalibratorManager::createDialog()
 
     m_pValueEdit = new QLineEdit(m_pDialog);
 
-    QGroupBox* buttonGroup = new QGroupBox;
+    QGroupBox* buttonGroup = new QGroupBox(tr("Control"));
     QVBoxLayout *buttonLayout = new QVBoxLayout;
 
     m_pSetValueButton = new QPushButton(tr("set value"), m_pDialog);
@@ -110,6 +110,7 @@ void CalibratorManager::createDialog()
     mainLayout->addLayout(unitLayout);
     mainLayout->addWidget(m_pErrorsButton);
     mainLayout->addWidget(m_pRemoteControlCheck);
+    mainLayout->addStretch();
 
     m_pErrorDialog = new QDialog(m_pDialog);
 
@@ -130,7 +131,8 @@ void CalibratorManager::initDialog()
     // init elements of interface
     //
     m_pDialog->setWindowFlags(Qt::Drawer);
-    m_pDialog->setFixedSize(190, 350);
+    m_pDialog->setFixedWidth(190);
+    m_pDialog->setWindowIcon(QIcon(":/icons/Manage.png"));
 
     QFont* font = new QFont("Arial", 16, 2);
 

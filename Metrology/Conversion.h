@@ -37,9 +37,9 @@ const char* const InputSensorStr[] =
             QT_TRANSLATE_NOOP("Conversion.h", "Pt21"),
             QT_TRANSLATE_NOOP("Conversion.h", "Cu23"),
 	
-            QT_TRANSLATE_NOOP("Conversion.h", "K (ТХА)"),
+            QT_TRANSLATE_NOOP("Conversion.h", "K (TXA)"),
             QT_TRANSLATE_NOOP("Conversion.h", "L (TXK)"),
-            QT_TRANSLATE_NOOP("Conversion.h", "N (ТНН)"),
+            QT_TRANSLATE_NOOP("Conversion.h", "N (THH)"),
 };
 
 const int	INPUT_SENSOR_COUNT = sizeof(InputSensorStr) / sizeof(const char*);

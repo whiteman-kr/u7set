@@ -342,7 +342,7 @@ void REPORT_HEADER::init(int type)
         case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: objectID = SqlObjectID[SQL_TABLE_LINEARETY_20_PH];      break;
         case REPORT_TYPE_COMPARATOR:                objectID = SqlObjectID[SQL_TABLE_COMPARATOR];           break;
         case REPORT_TYPE_COMPLEX_COMPARATOR:        objectID = SqlObjectID[SQL_TABLE_COMPLEX_COMPARATOR];   break;
-        default:                                    objectID = SqlObjectID[SQL_TABLE_UNKNONW];              break;
+        default:                                    assert(0);                                              break;
     }
 
     m_linkObjectID = objectID;
