@@ -1561,6 +1561,17 @@ namespace Hardware
 		m_confType = value;
 	}
 
+	bool DeviceModule::isIOModule()
+	{
+		FamilyType family = moduleFamily();
+
+		return	family == FamilyType::AIM ||
+				family == FamilyType::AOM ||
+				family == FamilyType::DIM ||
+				family == FamilyType::DOM ||
+				family == FamilyType::AIFM;
+	}
+
 	//
 	//
 	// DeviceController

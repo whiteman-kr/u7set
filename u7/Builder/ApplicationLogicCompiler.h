@@ -74,6 +74,7 @@ namespace Builder
 		OutputLog* m_log = nullptr;
 
 		Hardware::DeviceModule* m_lm = nullptr;
+		Hardware::DeviceChassis* m_chassis = nullptr;
 
 		AddrW m_regDataAddress;
 
@@ -82,8 +83,10 @@ namespace Builder
 		QString msg;
 
 	private:
-		bool getIntProperty(Hardware::DeviceModule* module, const char* propertyName, int &value);
-		bool getIntProperty(const char* propertyName, int &value);
+		bool getDeviceIntProperty(Hardware::DeviceObject* device, const char* propertyName, int &value);
+		bool getLMIntProperty(const char* propertyName, int &value);
+
+		Hardware::DeviceModule* getModuleOnPlace(int place);
 
 		// module logic compilations steps
 		//

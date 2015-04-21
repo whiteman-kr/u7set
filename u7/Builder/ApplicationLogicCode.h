@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include "../include/Types.h"
 
 namespace Builder
 {
@@ -24,7 +25,9 @@ namespace Builder
 		Count
 	};
 
-	const int CommandLen[static_cast<int>(CommandCodes::Count)] =
+	const int COMMAND_COUNT = static_cast<int>(CommandCodes::Count);
+
+	const int CommandLen[COMMAND_COUNT] =
 	{
 		0,		//	NoCommand
 		1,		//	NOP
@@ -41,14 +44,27 @@ namespace Builder
 		4,		//	RDFBB
 	};
 
-	const int COMMAND_LEN_COUNT = sizeof(CommandLen) / sizeof(const int);
-
+	const char* const CommandStr[COMMAND_COUNT] =
+	{
+		"NO_CMD",
+		"NOP",
+		"START",
+		"STOP",
+		"MOV",
+		"MOVMEM",
+		"MOVC",
+		"MOVBC",
+		"WRFB",
+		"RDFB",
+		"WRFBC",
+		"WRFBB",
+		"RDFBB",
+	};
 
 	const quint16	MAX_FB_TYPE = 64 - 1,
 					MAX_FB_INSTANCE = 1024 - 1,
 					MAX_FB_PARAM_NO = 64 - 1,
 					MAX_BIT_NO_16 = 16 - 1;
-
 
 	class CommandCode
 	{
@@ -82,6 +98,7 @@ namespace Builder
 		};
 
 		quint16 word4 = 0;
+
 #pragma pack(pop)
 
 	public:
@@ -96,27 +113,78 @@ namespace Builder
 		CommandCodes getOpCode() { return static_cast<CommandCodes>(opCode.code); }
 
 		void setFbType(quint16 fbType);
+		quint16 getFbType() { return opCode.fbType; }
+		QString getFbTypeStr();
+
 		void setFbInstance(quint16 fbInstance);
+		quint16 getFbInstance() { return param.fbInstance; }
+		int getFbInstanceInt() { return int(param.fbInstance); }
+
 		void setFbParamNo(quint16 fbParamNo);
+		quint16 getFbParamNo() { return param.fbParamNo; }
+		int getFbParamNoInt() { return int(param.fbParamNo); }
 
 		void setWord2(quint16 value) { word2 = value; }
+		quint16 getWord2() { return word2; }
+
 		void setWord3(quint16 value) { word3 = value; }
+		quint16 getWord3() { return word3; }
+
 		void setWord4(quint16 value) { word4 = value; }
+		quint16 getWord4() { return word4; }
 
 		void setBitNo(quint16 bitNo);
+
+		quint16 getWord(int index);
 
 		int getSizeW();
 	};
 
 
-	class Command
+	class CodeItem
 	{
 	private:
-		QString m_asmCode;
+		QString m_comment;
+
+	public:
+		virtual QString toString() = 0;
+		virtual int getSizeW() { return 0; }
+
+		virtual bool isCommand() = 0;
+		virtual bool isComment() = 0;
+
+		void setComment(const QString& comment) { m_comment = comment; }
+		QString getComment() { return m_comment; }
+
+		bool commentIsEmpty() { return m_comment.isEmpty(); }
+	};
+
+
+	class Comment : public CodeItem
+	{
+	public:
+		Comment() {}
+		Comment(const QString& comment) { setComment(comment); }
+
+		QString toString() override;
+
+		bool isCommand() override { return false; }
+		bool isComment() override { return true; }
+	};
+
+
+	class Command : public CodeItem
+	{
+	private:
 		int m_address = -1;
 
 		CommandCode m_code;
-		QString m_comment;
+
+		QByteArray m_rawCode;
+
+		QString getCodeWordStr(int wordNo);
+
+		QString getMnemoCode();
 
 	public:
 		Command() {}
@@ -135,9 +203,14 @@ namespace Builder
 		void readFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo, quint16 bitNo);
 
 		void setAddress(int address) { m_address = address; }
-		void setComment(const QString& comment) { m_comment = comment; }
 
-		int getSizeW() { return m_code.getSizeW(); }
+		QString toString() override;
+		int getSizeW() override { return m_code.getSizeW(); }
+
+		bool isCommand() override { return true; }
+		bool isComment() override { return false; }
+
+		void generateRawCode();
 	};
 
 
@@ -145,16 +218,24 @@ namespace Builder
 	{
 		Q_OBJECT
 	private:
-		QVector<Command> m_commands;
+		QVector<CodeItem*> m_codeItems;
 
 		int m_commandAddress = 0;
 
+		ByteOrder m_byteOrder = ByteOrder::BigEndian;
+
 	public:
 		ApplicationLogicCode();
+		~ApplicationLogicCode();
 
-		void append(Command &cmd);
+		void append(const Command &cmd);
+		void append(const Comment &cmt);
 
 		void clear();
+
+		void toString();
+
+		void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 	};
 
 

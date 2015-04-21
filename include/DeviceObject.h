@@ -483,6 +483,8 @@ namespace Hardware
 		QString confType() const;
 		void setConfType(const QString& value);
 
+		bool isIOModule();
+
 		// Data
 		//
 	private:

@@ -72,17 +72,60 @@ namespace Builder
 	}
 
 
+	quint16 CommandCode::getWord(int index)
+	{
+		switch(index)
+		{
+		case 0:
+			return word1;
+
+		case 1:
+			return word2;
+
+		case 2:
+			return word3;
+
+		case 3:
+			return word4;
+
+		default:
+			assert(false);
+		}
+
+		return 0;
+	}
+
+
 	int CommandCode::getSizeW()
 	{
 		int cmdCode = static_cast<int>(opCode.code);
 
-		if (cmdCode > COMMAND_LEN_COUNT)
+		if (cmdCode > COMMAND_COUNT)
 		{
 			assert(false);
 			return 0;
 		}
 
 		return CommandLen[cmdCode];
+	}
+
+
+	QString CommandCode::getFbTypeStr()
+	{
+		return QString("FB%1").arg(getFbType());
+	}
+
+
+	QString Comment::toString()
+	{
+		QString comment = getComment();
+
+		if (comment.isEmpty())
+		{
+			return "";
+		}
+
+		return QString("\t-- %1").arg(getComment());
 	}
 
 
@@ -190,25 +233,214 @@ namespace Builder
 	}
 
 
+	void Command::generateRawCode()
+	{
+		m_rawCode.clear();
+
+		int cmdSizeW = getSizeW();
+
+		m_rawCode.resize(cmdSizeW * 2);
+
+		for(int i = 0; i < cmdSizeW; i++)
+		{
+			quint16 cmdWord = m_code.getWord(i);
+
+			m_rawCode[i * 2] = cmdWord & 0x00FF;
+			m_rawCode[i * 2 + 1] = (cmdWord & 0xFF00) >> 8;
+
+/*			if (byteOrder == ByteOrder::LittleEdndian)
+			{
+				m_rawCode[i * 2] = cmdWord & 0x00FF;
+				m_rawCode[i * 2 + 1] = (cmdWord & 0xFF00) >> 8;
+			}
+			else
+			{
+				m_rawCode[i * 2] = (cmdWord & 0xFF00) >> 8;
+				m_rawCode[i * 2 + 1] = cmdWord & 0x00FF;;
+			}*/
+		}
+	}
+
+
+	QString Command::getCodeWordStr(int wordNo)
+	{
+		QString str;
+
+		if (m_rawCode.count() < (wordNo + 1) * 2)
+		{
+			assert(false);
+			return str;
+		}
+
+		unsigned int word = m_rawCode[wordNo * 2 + 1] & 0x00FF;
+
+		word <<= 8;
+
+		word |= m_rawCode[wordNo * 2] & 0x00FF;
+
+		word &= 0xFFFF;
+
+		str.sprintf("%04X", word);
+
+		return str;
+	}
+
+
+	QString Command::getMnemoCode()
+	{
+		QString mnemoCode;
+
+		CommandCodes opCode = m_code.getOpCode();
+
+		switch(opCode)
+		{
+		case NoCommand:
+		case NOP:
+		case START:
+		case STOP:
+			mnemoCode = CommandStr[opCode];
+			break;
+
+		case MOV:
+			mnemoCode.sprintf("%s\t0x%04X, 0x%04X", CommandStr[opCode], m_code.getWord2(), m_code.getWord3());
+			break;
+
+		case MOVMEM:
+			mnemoCode.sprintf("%s\t0x%04X, 0x%04X, %d", CommandStr[opCode], m_code.getWord2(), m_code.getWord3(), m_code.getWord4());
+			break;
+
+		case MOVC:
+			mnemoCode.sprintf("%s\t#0x%04X, 0x%04X", CommandStr[opCode], m_code.getWord3(), m_code.getWord2());
+			break;
+
+		case MOVBC:
+			mnemoCode.sprintf("%s\t#%d, 0x%04X[%d]", CommandStr[opCode], m_code.getWord3(), m_code.getWord2(), m_code.getWord4());
+			break;
+
+		case WRFB:
+			mnemoCode.sprintf("%s\t0x%04X, %s.%d[%d]", CommandStr[opCode], m_code.getWord2(),
+							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+			break;
+
+		case RDFB:
+		case WRFBC:
+		case WRFBB:
+		case RDFBB:
+			mnemoCode = "NotImplemented!!!";
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return mnemoCode;
+	}
+
+	QString Command::toString()
+	{
+		QString cmdStr;
+
+		cmdStr.sprintf("%04X\t", m_address);
+
+		for(int w = 0; w < getSizeW(); w++)
+		{
+			QString codeWordStr = getCodeWordStr(w);
+
+			cmdStr += QString("%1 ").arg(codeWordStr);
+		}
+
+		int tabLen = 32 - cmdStr.length();
+
+		int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+
+		for(int i = 0; i < tabCount; i++)
+		{
+			cmdStr += "\t";
+		}
+
+		QString mnemoCode = getMnemoCode();
+
+		cmdStr += mnemoCode;
+
+		if (!commentIsEmpty())
+		{
+			tabLen = 56 - cmdStr.length();
+
+			tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+
+			for(int i = 0; i < tabCount; i++)
+			{
+				cmdStr += "\t";
+			}
+
+			cmdStr += QString("-- %1").arg(getComment());
+		}
+
+		return cmdStr;
+	}
+
+
 
 	ApplicationLogicCode::ApplicationLogicCode()
 	{
 	}
 
 
+	ApplicationLogicCode::~ApplicationLogicCode()
+	{
+		for(auto codeItem : m_codeItems)
+		{
+			delete codeItem;
+		}
+
+		m_codeItems.clear();
+	}
+
+
 	void ApplicationLogicCode::clear()
 	{
-		m_commands.clear();
+		m_codeItems.clear();
 		m_commandAddress = 0;
 	}
 
 
-	void ApplicationLogicCode::append(Command& cmd)
+	void ApplicationLogicCode::append(const Command& cmd)
 	{
-		cmd.setAddress(m_commandAddress);
+		Command* newCommand = new Command(cmd);
 
-		m_commandAddress += cmd.getSizeW();
+		newCommand->setAddress(m_commandAddress);
 
-		m_commands.append(cmd);
+		newCommand->generateRawCode();
+
+		m_commandAddress += newCommand->getSizeW();
+
+		m_codeItems.append(newCommand);
+	}
+
+
+	void ApplicationLogicCode::append(const Comment& cmt)
+	{
+		Comment* newComment = new Comment(cmt);
+
+		m_codeItems.append(newComment);
+	}
+
+
+	void ApplicationLogicCode::toString()
+	{
+		int count = m_codeItems.count();
+
+		for(int i = 0; i < count; i++)
+		{
+			if (m_codeItems[i] == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			QString str = m_codeItems[i]->toString();
+
+			qDebug() << str;
+		}
 	}
 }
