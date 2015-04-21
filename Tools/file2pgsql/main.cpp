@@ -26,22 +26,22 @@ const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
                              "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
                              "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
 
-bool conv (QTextStream& out, QString& inputFileName, QString& parentFile)
+bool conv (const QString& inputFilePath, const QString& parentFile, QTextStream& out)
 {
     // Read file
     //
-    QFile inputFile(inputFileName);
+	QFile input(inputFilePath);
 
-    bool ok = inputFile.open(QIODevice::ReadOnly);
+	bool ok = input.open(QIODevice::ReadOnly);
     if (ok == false)
     {
-        std::cout << "Cannot read input file" << inputFileName.toStdString();
+		std::cout << "Cannot read input file" << inputFilePath.toStdString();
         return false;
     }
 
-    QByteArray data = inputFile.readAll();
+	QByteArray data = input.readAll();
 
-    inputFile.close();
+	input.close();
 
     // Convert to PostgreSQL string
     //
@@ -65,35 +65,39 @@ bool conv (QTextStream& out, QString& inputFileName, QString& parentFile)
 
     str.append("'");
 
+	QFileInfo fi(inputFilePath);
+	QString inputFileName = fi.fileName();
+
     // Write result to file
     //
-    while (parentFile.contains(".files"))
-    {
-        parentFile.remove(".files");
-    }
-    while (inputFileName.contains(".files"))
-    {
-        inputFileName.remove(".files");
-    }
-    out << "SELECT * FROM add_or_update_file(1, \'" << parentFile << "\', \'" << inputFileName <<"\', \'Update: Adding file " << inputFileName << "\', " << str << ");\n\n\n";
+
+	out << "SELECT * FROM add_or_update_file(1, \'" << parentFile << "\', \'" << inputFileName <<"\', \'Update: Adding file " << inputFileName << "\', " << str << ");\n\n\n";
     //out << str <<"\n\n";
     return true;
 }
 
 
-int find_files(QDir dir, QString parentFileNameFiles, QString dirName, QTextStream& out)
+int find_files(const QString& dirName, const QString& parentFile, QTextStream& out)
 {
+	QDir dir(dirName);
+
     QStringList listOfFiles = dir.entryList(QStringList("*.*"), QDir::Files | QDir::NoDotAndDotDot);
+
     foreach (QString file, listOfFiles)                         //working with files inside dir
     {
         QString fileFromDir = dirName + QDir::separator() + file;   //making a path to file in dir
-        if (conv(out, fileFromDir, parentFileNameFiles) == false)
+
+		if (conv(fileFromDir, parentFile, out) == false)
         {
             return 1;
         }
-        QDir checkDir(dirName+QDir::separator()+file+".files");
-        if (checkDir.exists()){
-            find_files (checkDir, parentFileNameFiles, dirName+QDir::separator()+file+".files", out);}
+
+		QDir checkDir(dirName + QDir::separator() + file + ".files");
+
+		if (checkDir.exists())
+		{
+			find_files (dirName + QDir::separator() + file + ".files", parentFile + "/" + file, out);
+		}
     }
     return 0;
 }
@@ -108,7 +112,7 @@ int main(int argc, char *argv[])
 
     QString inputFileName = QString::fromLocal8Bit(argv[1]);
     QString outputFileName = QString::fromLocal8Bit(argv[2]);
-    QString parentFileName = QString::fromLocal8Bit(argv[3]);
+	QString parentFolder = QString::fromLocal8Bit(argv[3]);
 
     QFile outputFile(outputFileName);                        //creating file
 
@@ -140,17 +144,16 @@ int main(int argc, char *argv[])
     out << "--\n";
     out << "---------------------------------------------------------------------------\n\n";
 
-    if (conv(out, inputFileName, parentFileName) == false)                     //working with single file
+	if (conv(inputFileName, parentFolder, out) == false)                     //working with single file
     {
         outputFile.close();
         return 1;
     }
 
     QString dirName = inputFileName + ".files";
-    QString parentFileNameFiles = parentFileName + QDir::separator() + inputFileName + ".files";
-    QDir dir(dirName);
+	QString parentFile = parentFolder + "/" + inputFileName;
 
-    if (find_files(dir, parentFileNameFiles, dirName, out) != 0)
+	if (find_files(dirName, parentFile, out) != 0)
     {
         return 1;
     }
