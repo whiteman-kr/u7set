@@ -274,6 +274,12 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
     var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
     var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
+    
+    var inController = module.jsFindChildObjectByMask("*_*_*_*_CTRLIN");
+    if (inController == null)
+    {
+        log.writeWarning("WARNING: no input controller found in " + module.StrID + "! Using default values.", false, true);
+    }
 
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
@@ -283,28 +289,31 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         //
         var signal = null;
         
-        for (var j = 0; j < module.childrenCount(); j++)
+        if (inController != null)
         {
-            var s = module.jsChild(j);
-            
-            if (s.jsDeviceType() != SignalType)
+            for (var j = 0; j < inController.childrenCount(); j++)
             {
-                continue;
-            }
-            if (s.jsType() != InputAnalog)
-            {
-                continue;
-            }
-            if (s.jsPlace() == i)
-            {
-                log.writeMessage("AIM InputSignal: " + s.StrID, false);
+                var s = inController.jsChild(j);
                 
-                signal = signalSet.getSignalByDeviceStrID(s.StrID);
-                if (signal == null)    
+                if (s.jsDeviceType() != SignalType)
                 {
-                    log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.", false, true);
+                    continue;
                 }
-                break;
+                if (s.jsType() != InputAnalog)
+                {
+                    continue;
+                }
+                if (s.jsPlace() == i)
+                {
+                    //log.writeMessage("AIM InputSignal: " + s.StrID, false);
+                    
+                    signal = signalSet.getSignalByDeviceStrID(s.StrID);
+                    if (signal == null)    
+                    {
+                        log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.", false, true);
+                    }
+                    break;
+                }
             }
         }
         
@@ -312,7 +321,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         {
             // Generate default values, there is no signal on this place
             //
-            log.writeMessage("Default place" + i + ": tf = " + defaultTf + ", hi = " + defaultHighBound + ", lo = " + defaultLowBound + ", diff = " + defaultMaxDiff, false);
+            //log.writeMessage("Default place" + i + ": tf = " + defaultTf + ", hi = " + defaultHighBound + ", lo = " + defaultLowBound + ", diff = " + defaultMaxDiff, false);
             
             setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
             ptr += 2;

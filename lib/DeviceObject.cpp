@@ -1,5 +1,6 @@
 #include "../include/DeviceObject.h"
 #include "../include/ProtoSerialization.h"
+#include "../include/SignalMask.h"
 #include <QDynamicPropertyChangeEvent>
 #include <QJSEngine>
 #include <QQmlEngine>
@@ -1044,6 +1045,38 @@ namespace Hardware
 			});
 
 		return;
+	}
+
+	std::vector<DeviceObject*> DeviceObject::findChildObjectsByMask(const QString& mask)
+	{
+		std::vector<DeviceObject*> list;
+		findChildObjectsByMask(mask, list);
+		return list;
+	}
+
+	void DeviceObject::findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list)
+	{
+		for (auto c : m_children)
+		{
+			if (processDiagSignalMask(mask, c->strId()) == true)
+			{
+				list.push_back(c.get());
+			}
+			c->findChildObjectsByMask(mask, list);
+		}
+	}
+
+	QObject* DeviceObject::jsFindChildObjectByMask(const QString& mask)
+	{
+		std::vector<DeviceObject*> list = findChildObjectsByMask(mask);
+		if (list.empty() == true)
+		{
+			return nullptr;
+		}
+
+		QObject* c = list.at(0);
+		QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+		return c;
 	}
 
 	const QString& DeviceObject::strId() const
