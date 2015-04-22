@@ -31,9 +31,20 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	m_strID = QString("#%1").arg(deviceSignal.strId());
 	m_extStrID = deviceSignal.strId();
-	m_name = QString("Signal #%1").arg(deviceSignal.strId());
 
-	if (m_type = SignalType::Analog)
+	QString deviceSignalStrID = deviceSignal.strId();
+
+	int pos = deviceSignalStrID.lastIndexOf(QChar('_'));
+
+	if (pos != -1)
+	{
+		deviceSignalStrID = deviceSignalStrID.mid(pos + 1);
+	}
+
+	m_name = QString("Signal #%1").arg(deviceSignalStrID);
+	m_deviceStrID = deviceSignal.strId();
+
+	if (m_type == SignalType::Analog)
 	{
 		m_dataFormat = DataFormat::SignedInt;
 	}
