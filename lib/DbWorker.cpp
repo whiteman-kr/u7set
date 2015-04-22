@@ -3494,7 +3494,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& de
 {
 	AUTO_COMPLETE
 
-	for(int i = 0; i < deviceSignals.size(); i++)
+	for(size_t i = 0; i < deviceSignals.size(); i++)
 	{
 		const Hardware::DeviceSignal& deviceSignal = deviceSignals[i];
 

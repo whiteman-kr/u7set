@@ -1661,7 +1661,7 @@ QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QSt
                     EnumPropertyType e;
 
                     EnumPropertyType v = value.value<EnumPropertyType>();
-					for (int i = 0; i < v.items.size(); i++)
+					for (size_t i = 0; i < v.items.size(); i++)
 					{
                         e.items.push_back(v.items[i]);
 					}
