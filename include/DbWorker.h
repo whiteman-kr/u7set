@@ -116,6 +116,8 @@ public slots:
 	void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_addSignal(SignalType signalType, QVector<Signal>* newSignal);
 
+	void addSignal(SignalType signalType, QVector<Signal>* newSignal);
+
 	void slot_getUnits(UnitList* units);
 	void slot_getDataFormats(DataFormatList* dataFormats);
 

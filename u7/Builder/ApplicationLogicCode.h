@@ -147,6 +147,8 @@ namespace Builder
 		QString m_comment;
 
 	public:
+		virtual ~CodeItem();
+
 		virtual QString toString() = 0;
 		virtual int getSizeW() { return 0; }
 
