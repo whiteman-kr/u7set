@@ -3506,7 +3506,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 		return;
 	}
 
-	int signalCount = deviceSignals->size();
+	int signalCount = int(deviceSignals->size());
 
 	for(int i = 0; i < signalCount; i++)
 	{
