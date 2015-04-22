@@ -33,6 +33,8 @@ public:
 	const VALUE& operator[](int index) const;
 
 	QList<VALUE> toList() const;
+
+	void reserve(int n);
 };
 
 
@@ -179,4 +181,13 @@ template <typename KEY, typename VALUE>
 QList<VALUE> OrderedHash<KEY, VALUE>::toList() const
 {
 	return m_valueVector.toList();
+}
+
+
+template <typename KEY, typename VALUE>
+void OrderedHash<KEY, VALUE>::reserve(int n)
+{
+	m_valueVector.reserve(1000);
+	m_valueVector.reserve(1000);
+	m_hash.reserve(1000);
 }

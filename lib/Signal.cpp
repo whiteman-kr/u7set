@@ -185,6 +185,13 @@ QVector<int> SignalSet::getChannelSignalsID(int signalGroupID)
 }
 
 
+void SignalSet::reserve(int n)
+{
+	OrderedHash<int, Signal>::reserve(n);
+	m_groupSignals.reserve(n);
+}
+
+
 void SignalSet::resetAddresses()
 {
 	int signalCount = count();

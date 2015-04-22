@@ -224,8 +224,8 @@ private:
 public:
 	Signal();
 
-	Signal(const Signal& signal)
-		:QObject()
+	Signal(const Signal& signal) :
+		QObject()
 	{
 		*this = signal;
 	}
@@ -375,6 +375,8 @@ public:
 
 	QVector<int> getChannelSignalsID(const Signal& signal);
 	QVector<int> getChannelSignalsID(int signalGroupID);
+
+	void reserve(int n);
 
 	void resetAddresses();
 };

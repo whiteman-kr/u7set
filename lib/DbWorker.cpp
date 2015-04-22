@@ -46,6 +46,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Add OutputRangeMode column to SignalInstance table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0035.sql"},
 	{"Add get_file_id dunctions", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0036.sql"},
 	{"Add module presets", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0037.sql"},
+	{"Add get_last_signals function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0038.sql"},
 };
 
 
@@ -2751,6 +2752,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 {
 	AUTO_COMPLETE
 
+
 	// Check parameters
 	//
 	if (signalSet == nullptr)
@@ -2769,8 +2771,10 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 		return;
 	}
 
-	QString request = QString("SELECT * FROM get_signals_ids(%1, %2)")
-		.arg(currentUser().userId()).arg("false");
+	signalSet->reserve(10000);
+
+	QString request = QString("SELECT * FROM get_latest_signals_all(%1)")
+		.arg(currentUser().userId());
 
 	QSqlQuery q(db);
 
@@ -2778,55 +2782,18 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 	if (result == false)
 	{
-		emitError(tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
+		emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
 		return;
 	}
 
-	QVector<int> signalsIDs;
-
 	while(q.next() != false)
 	{
-		signalsIDs.append(q.value(0).toInt());
+		Signal s;
+
+		getSignalData(q, s);
+
+		signalSet->append(s.ID(), s);
 	}
-
-	int signalCount = signalsIDs.count();
-
-	for(int i = 0; i < signalCount; i++)
-	{
-		int signalID = signalsIDs[i];
-
-		// request
-		//
-		QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
-			.arg(currentUser().userId()).arg(signalID);
-		QSqlQuery q(db);
-
-		bool result = q.exec(request);
-
-		if (result == false)
-		{
-			emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
-			return;
-		}
-
-		while(q.next() != false)
-		{
-			Signal s;
-
-			getSignalData(q, s);
-
-			signalSet->append(s.ID(), s);
-		}
-
-		int percent = (i * 100) / signalCount;
-
-		if (m_progress != nullptr && (percent % 10) == 0)
-		{
-			m_progress->setValue(percent);
-		}
-	}
-
-	m_progress->setValue(100);
 
 	return;
 }
@@ -3510,6 +3477,8 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 
 	for(int i = 0; i < signalCount; i++)
 	{
+		m_progress->setValue((i * 100) / signalCount);
+
 		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
 		assert(deviceSignal);
 
@@ -3529,6 +3498,8 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 			addSignal(signal.type(), &newSignals);
 		}
 	}
+
+	m_progress->setValue(100);
 }
 
 
