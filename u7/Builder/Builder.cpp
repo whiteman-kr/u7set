@@ -130,6 +130,11 @@ namespace Builder
 
 			SignalSet signalSet;
 
+			if (loadSignals(&db, &signalSet) == false)
+			{
+				break;
+			}
+
 			//
 			// Compile Module configuration
 			//
@@ -281,20 +286,40 @@ namespace Builder
 
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
 	{
-		if (device->parent() != nullptr)
+		if (device == nullptr)
 		{
-			QString strId = device->strId();
-
-			strId.replace(QString("$(PARENT)"), device->parent()->strId(), Qt::CaseInsensitive);
-			strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
-
-			device->setStrId(strId);
+			assert(device != nullptr);
+			return false;
 		}
 
-		for (int i = 0; i < device->childrenCount(); i++)
+		device->expandStrId();
+
+		return true;
+	}
+
+
+	bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet)
+	{
+		if (db == nullptr ||
+			signalSet == nullptr)
 		{
-			expandDeviceStrId(device->child(i));
+			assert(false);
+			return false;
 		}
+
+		m_log->writeEmptyLine();
+
+		m_log->writeMessage(tr("Loading application logic signals"), true);
+
+		bool result = db->getSignals(signalSet, nullptr);
+
+		if (result == false)
+		{
+			m_log->writeError(tr("Error"), true, true);
+			return false;
+		}
+
+		m_log->writeSuccess(tr("Ok"), true);
 
 		return true;
 	}
@@ -358,12 +383,12 @@ namespace Builder
 
 		if (result == false)
 		{
-			m_log->writeError(tr("Error"), true, false);
+			m_log->writeError(tr("Application Logic compilation was finished with errors"), true, false);
 			QThread::currentThread()->requestInterruption();
 		}
 		else
 		{
-			m_log->writeSuccess(tr("Ok"), true);
+			m_log->writeSuccess(tr("Application Logic compilation was succesfully finished"), true);
 		}
 
 		return result;

@@ -79,13 +79,15 @@ namespace Builder
 	//		ApplicationLogicModule
 	//
 	// ------------------------------------------------------------------------
-	class ApplicationLogicModule
+	class ApplicationLogicModule : QObject
 	{
+		Q_OBJECT
+
 	public:
 		ApplicationLogicModule() = delete;
 		ApplicationLogicModule(QString moduleStrId);
 
-		bool addBranch(std::list<std::shared_ptr<VFrame30::VideoItem>>& items);
+		bool addBranch(std::list<std::shared_ptr<VFrame30::VideoItem>>& items, OutputLog* log);
 
 	public:
 		QString moduleStrId() const;
@@ -111,7 +113,8 @@ namespace Builder
 		//
 	public:
 		bool addData(std::shared_ptr<VFrame30::LogicScheme> scheme,
-					   std::shared_ptr<VFrame30::SchemeLayer> layer);
+			std::shared_ptr<VFrame30::SchemeLayer> layer,
+			OutputLog* log);
 
 		// Propertie
 		//

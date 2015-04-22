@@ -38,6 +38,7 @@ public:
 
 	Q_INVOKABLE void write(const QString& str, OutputMessageLevel level, bool bold);
 	Q_INVOKABLE void writeMessage(const QString& str, bool bold);
+	Q_INVOKABLE void writeEmptyLine();
 	Q_INVOKABLE void writeSuccess(const QString& str, bool bold);
 	Q_INVOKABLE void writeWarning(const QString& str, bool bold, bool incWrnCounter);
 	Q_INVOKABLE void writeError(const QString& str, bool bold, bool incErrCounter);

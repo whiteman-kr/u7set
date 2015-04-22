@@ -15,6 +15,8 @@ namespace Hardware
 	void Init();
 	void Shutdwon();
 
+	class DeviceObject;
+
 	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
 	//
 	enum class DeviceType
@@ -152,7 +154,6 @@ namespace Hardware
 		QVariant m_value;
 	};
 
-
 	//
 	//
 	// DeviceObject
@@ -195,6 +196,8 @@ namespace Hardware
 		// Public methods
 		//
 	public:
+		void expandStrId();
+
 		virtual bool event(QEvent* e) override;
 
 		// Protected methods
@@ -234,6 +237,12 @@ namespace Hardware
 
 		bool checkChild(DeviceObject* child, QString* errorMessage);
 		void sortChildrenByPlace();
+
+		std::vector<DeviceObject*> findChildObjectsByMask(const QString& mask);
+		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list);
+		Q_INVOKABLE QObject* jsFindChildObjectByMask(const QString& mask);
+
+
 
 		// Props
 		//
@@ -476,6 +485,8 @@ namespace Hardware
 
 		QString confType() const;
 		void setConfType(const QString& value);
+
+		bool isIOModule() const;
 
 		// Data
 		//

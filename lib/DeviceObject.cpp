@@ -1,5 +1,6 @@
 #include "../include/DeviceObject.h"
 #include "../include/ProtoSerialization.h"
+#include "../include/SignalMask.h"
 #include <QDynamicPropertyChangeEvent>
 #include <QJSEngine>
 #include <QQmlEngine>
@@ -574,6 +575,23 @@ namespace Hardware
 		return pDeviceObject;
 	}
 
+	void DeviceObject::expandStrId()
+	{
+		if (parent() != nullptr)
+		{
+			m_strId.replace(QString("$(PARENT)"), parent()->strId(), Qt::CaseInsensitive);
+		}
+
+		m_strId.replace(QString("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+
+		for (int i = 0; i < childrenCount(); i++)
+		{
+			child(i)->expandStrId();
+		}
+
+		return;
+	}
+
 	bool DeviceObject::event(QEvent* e)
 	{
 		if (e->type() == QEvent::DynamicPropertyChange && m_avoidEventRecursion == false)
@@ -1044,6 +1062,38 @@ namespace Hardware
 			});
 
 		return;
+	}
+
+	std::vector<DeviceObject*> DeviceObject::findChildObjectsByMask(const QString& mask)
+	{
+		std::vector<DeviceObject*> list;
+		findChildObjectsByMask(mask, list);
+		return list;
+	}
+
+	void DeviceObject::findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list)
+	{
+		for (auto c : m_children)
+		{
+			if (processDiagSignalMask(mask, c->strId()) == true)
+			{
+				list.push_back(c.get());
+			}
+			c->findChildObjectsByMask(mask, list);
+		}
+	}
+
+	QObject* DeviceObject::jsFindChildObjectByMask(const QString& mask)
+	{
+		std::vector<DeviceObject*> list = findChildObjectsByMask(mask);
+		if (list.empty() == true)
+		{
+			return nullptr;
+		}
+
+		QObject* c = list.at(0);
+		QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+		return c;
 	}
 
 	const QString& DeviceObject::strId() const
@@ -1526,6 +1576,17 @@ namespace Hardware
 	void DeviceModule::setConfType(const QString& value)
 	{
 		m_confType = value;
+	}
+
+	bool DeviceModule::isIOModule() const
+	{
+		FamilyType family = moduleFamily();
+
+		return	family == FamilyType::AIM ||
+				family == FamilyType::AOM ||
+				family == FamilyType::DIM ||
+				family == FamilyType::DOM ||
+				family == FamilyType::AIFM;
 	}
 
 	//

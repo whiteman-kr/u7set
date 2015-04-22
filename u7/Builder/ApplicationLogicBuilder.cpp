@@ -96,14 +96,25 @@ namespace Builder
 	{
 	}
 
-	bool ApplicationLogicModule::addBranch(std::list<std::shared_ptr<VFrame30::VideoItem>>& items)
+	bool ApplicationLogicModule::addBranch(std::list<std::shared_ptr<VFrame30::VideoItem>>& items, OutputLog* log)
 	{
+		if (log == nullptr)
+		{
+			assert(log);
+			return false;
+		}
+
+		if (items.empty() == true)
+		{
+			log->writeError(tr("Branch is empty"), false, true);
+			return false;
+		}
+
 		// Create new branch and add it it branch list
 		//
 		auto branch = std::make_shared<ApplicationLogicBranch>();
 
 		m_branches.push_back(branch);
-
 
 		// Add items
 		//
@@ -121,6 +132,33 @@ namespace Builder
 
 		// Set items in execution order
 		//
+
+		// GetItem without inputs, and start from it
+		//
+		auto first = std::find_if(std::begin(items), std::end(items),
+			[](const std::shared_ptr<VFrame30::VideoItem>& item)
+			{
+				VFrame30::FblItem* fblItem = dynamic_cast<VFrame30::FblItem*>(item.get());
+				assert(fblItem);
+				return fblItem->inputsCount() > 0;
+			});
+
+		if (first == std::end(items))
+		{
+			// Imposible set exucution order for branch, there is no first item,
+			// firts item can be item without inputs
+			//
+			log->writeError(tr("Imposible set exucution order for branch, there is no first item, firts item can be item without inputs"), false, true);
+			return false;
+		}
+
+		// Go trough all other items and set them in execution order
+		//
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> ordered;
+
+		//ordered.push_back(*first);
+		//items.
+
 
 		return true;
 	}
@@ -146,13 +184,16 @@ namespace Builder
 	}
 
 	bool ApplicationLogicData::addData(std::shared_ptr<VFrame30::LogicScheme> scheme,
-									 std::shared_ptr<VFrame30::SchemeLayer> layer)
+		std::shared_ptr<VFrame30::SchemeLayer> layer,
+		OutputLog* log)
 	{
-		if (!scheme ||
-			!layer)
+		if (scheme == nullptr ||
+			layer == nullptr ||
+			log == nullptr)
 		{
 			assert(scheme);
 			assert(layer);
+			assert(log);
 			return false;
 		}
 
@@ -184,7 +225,7 @@ namespace Builder
 
 		// add new branch to module
 		//
-		bool result = module->addBranch(layer->Items);
+		bool result = module->addBranch(layer->Items, log);
 
 		return result;
 	}
@@ -437,7 +478,7 @@ namespace Builder
 
 		// Generate afb list, and set it to some container
 		//
-		result = applicationData().addData(logicScheme, layer);
+		result = applicationData().addData(logicScheme, layer, m_log);
 
 		if (result == false)
 		{

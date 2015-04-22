@@ -81,10 +81,8 @@ WITH (
 -- Initialize table DataFormat
 
 INSERT INTO DataFormat (Name) VALUES
-('Binary LE unsigned'),
-('Binary LE signed'),
-('Binary BE unsigned'),
-('Binary BE signed');
+('Unsigned Int'),
+('Signed Int');
 
 -- Create table SignalGroup
 

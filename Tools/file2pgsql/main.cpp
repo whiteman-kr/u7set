@@ -10,92 +10,122 @@
 using namespace std;
 
 const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
-                        "101112131415161718191a1b1c1d1e1f"
-                        "202122232425262728292a2b2c2d2e2f"
-                        "303132333435363738393a3b3c3d3e3f"
-                        "404142434445464748494a4b4c4d4e4f"
-                        "505152535455565758595a5b5c5d5e5f"
-                        "606162636465666768696a6b6c6d6e6f"
-                        "707172737475767778797a7b7c7d7e7f"
-                        "808182838485868788898a8b8c8d8e8f"
-                        "909192939495969798999a9b9c9d9e9f"
-                        "a0a1a2a3a4a5a6a7a8a9aaabacadaeaf"
-                        "b0b1b2b3b4b5b6b7b8b9babbbcbdbebf"
-                        "c0c1c2c3c4c5c6c7c8c9cacbcccdcecf"
-                        "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
-                        "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
-                        "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
+                             "101112131415161718191a1b1c1d1e1f"
+                             "202122232425262728292a2b2c2d2e2f"
+                             "303132333435363738393a3b3c3d3e3f"
+                             "404142434445464748494a4b4c4d4e4f"
+                             "505152535455565758595a5b5c5d5e5f"
+                             "606162636465666768696a6b6c6d6e6f"
+                             "707172737475767778797a7b7c7d7e7f"
+                             "808182838485868788898a8b8c8d8e8f"
+                             "909192939495969798999a9b9c9d9e9f"
+                             "a0a1a2a3a4a5a6a7a8a9aaabacadaeaf"
+                             "b0b1b2b3b4b5b6b7b8b9babbbcbdbebf"
+                             "c0c1c2c3c4c5c6c7c8c9cacbcccdcecf"
+                             "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
+                             "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
+                             "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
 
-bool conv (QTextStream& out, const QString& inputFileName, const QString& parentFile)
+bool conv (const QString& inputFilePath, const QString& parentFile, QTextStream& out)
 {
-	// Read file
-	//
-	QFile inputFile(inputFileName);
+    // Read file
+    //
+	QFile input(inputFilePath);
 
-	bool ok = inputFile.open(QIODevice::ReadOnly);
-	if (ok == false)
-	{
-		std::cout << "Cannot read input file" << inputFileName.toStdString();
-		return false;
-	}
+	bool ok = input.open(QIODevice::ReadOnly);
+    if (ok == false)
+    {
+		std::cout << "Cannot read input file" << inputFilePath.toStdString();
+        return false;
+    }
 
-	QByteArray data = inputFile.readAll();
+	QByteArray data = input.readAll();
 
-	inputFile.close();
+	input.close();
 
-	// Convert to PostgreSQL string
-	//
-	QString str;
-	str.reserve(data.size() * 2 + 256);
-	str.append("E'\\\\x");
+    // Convert to PostgreSQL string
+    //
+    QString str;
+    str.reserve(data.size() * 2 + 256);
+    str.append("E'\\\\x");
 
-	QString hex(rawhex);
-	const QChar* hexptr = hex.data();
+    QString hex(rawhex);
+    const QChar* hexptr = hex.data();
 
-	int fileSize = data.size();
-	const char* dataptr = data.constData();
+    int fileSize = data.size();
+    const char* dataptr = data.constData();
 
-	for (int i = 0; i < fileSize; i++)
-	{
-		unsigned int asbyte = static_cast<uint8_t>(*dataptr) & 0xFF;
-		str.append(hexptr + asbyte*2, 2);
+    for (int i = 0; i < fileSize; i++)
+    {
+        unsigned int asbyte = static_cast<uint8_t>(*dataptr) & 0xFF;
+        str.append(hexptr + asbyte*2, 2);
 
-		dataptr ++;
-	}
+        dataptr ++;
+    }
 
-	str.append("'");
+    str.append("'");
 
-	// Write result to file
-	//
+	QFileInfo fi(inputFilePath);
+	QString inputFileName = fi.fileName();
+
+    // Write result to file
+    //
+
 	out << "SELECT * FROM add_or_update_file(1, \'" << parentFile << "\', \'" << inputFileName <<"\', \'Update: Adding file " << inputFileName << "\', " << str << ");\n\n\n";
-	//out << str <<"\n\n";
-	return true;
+    //out << str <<"\n\n";
+    return true;
+}
+
+
+int find_files(const QString& dirName, const QString& parentFile, QTextStream& out)
+{
+	QDir dir(dirName);
+
+    QStringList listOfFiles = dir.entryList(QStringList("*.*"), QDir::Files | QDir::NoDotAndDotDot);
+
+    foreach (QString file, listOfFiles)                         //working with files inside dir
+    {
+        QString fileFromDir = dirName + QDir::separator() + file;   //making a path to file in dir
+
+		if (conv(fileFromDir, parentFile, out) == false)
+        {
+            return 1;
+        }
+
+		QDir checkDir(dirName + QDir::separator() + file + ".files");
+
+		if (checkDir.exists())
+		{
+			find_files (dirName + QDir::separator() + file + ".files", parentFile + "/" + file, out);
+		}
+    }
+    return 0;
 }
 
 int main(int argc, char *argv[])
 {
-	if (argc != 4)
-	{
-		std::cout << "Parameters error, usage: files2 inputfile outputfile parentfile";
-		return 1;
-	}
+    if (argc != 4)
+    {
+        std::cout << "Parameters error, usage: files2 inputfile outputfile parentfile";
+        return 1;
+    }
 
     QString inputFileName = QString::fromLocal8Bit(argv[1]);
     QString outputFileName = QString::fromLocal8Bit(argv[2]);
-    QString parentFileName = QString::fromLocal8Bit(argv[3]);
+	QString parentFolder = QString::fromLocal8Bit(argv[3]);
 
-	QFile outputFile(outputFileName);                        //creating file
+    QFile outputFile(outputFileName);                        //creating file
 
     QString userName;                                            //setting user
     userName = qgetenv("USER"); // get the user name in Linux
 
-	if(userName.isEmpty())
-	{
-		userName = qgetenv("USERNAME"); // get the name in Windows
+    if(userName.isEmpty())
+    {
+        userName = qgetenv("USERNAME"); // get the name in Windows
     }
 
-	if(userName.isEmpty())
-	{
+    if(userName.isEmpty())
+    {
         userName = "Can't get username";
     }
     if (outputFile.open(QIODevice::WriteOnly | QIODevice::Text) == false)
@@ -114,29 +144,20 @@ int main(int argc, char *argv[])
     out << "--\n";
     out << "---------------------------------------------------------------------------\n\n";
 
-	if (conv(out, inputFileName, parentFileName) == false)                     //working with single file
+	if (conv(inputFileName, parentFolder, out) == false)                     //working with single file
     {
         outputFile.close();
         return 1;
     }
 
     QString dirName = inputFileName + ".files";
-    QString parentFileNameFiles = parentFileName + QDir::separator() + inputFileName + ".files";
-    QDir dir(dirName);
+	QString parentFile = parentFolder + "/" + inputFileName;
 
-    if (dir.exists())                                               //checking dir with name of file +".files"
+	if (find_files(dirName, parentFile, out) != 0)
     {
-        QStringList listOfFiles = dir.entryList(QStringList("*.*"), QDir::Files | QDir::NoDotAndDotDot);
-        foreach (QString file, listOfFiles)                         //working with files inside dir
-        {
-            QString fileFromDir = dirName + QDir::separator() + file;   //making a path to file in dir
-			if (conv(out, fileFromDir, parentFileNameFiles) == false)
-            {
-                outputFile.close();
-                return 1;
-            }
-        }
+        return 1;
     }
+
     outputFile.close();
     return 0;
 }

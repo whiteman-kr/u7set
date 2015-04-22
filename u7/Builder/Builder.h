@@ -53,6 +53,10 @@ namespace Builder
 		//
 		bool expandDeviceStrId(Hardware::DeviceObject* device);
 
+		// Load Application Logic signals
+		//
+		bool loadSignals(DbController *db, SignalSet* signalSet);
+
 		// Generate Modules Configurations Firmwares
 		//
 		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, int changesetId, BuildResultWriter* buildWriter);

@@ -2820,7 +2820,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 		int percent = (i * 100) / signalCount;
 
-		if (m_progress != nullptr)
+		if (m_progress != nullptr && (percent % 10) == 0)
 		{
 			m_progress->setValue(percent);
 		}
@@ -3005,6 +3005,12 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 {
 	AUTO_COMPLETE
 
+	addSignal(signalType, newSignal);
+}
+
+
+void DbWorker::addSignal(SignalType signalType, QVector<Signal>* newSignal)
+{
 	if (newSignal == nullptr)
 	{
 		assert(newSignal != nullptr);
@@ -3490,26 +3496,43 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 }
 
 
-void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals)
+void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
 {
 	AUTO_COMPLETE
 
-	for(size_t i = 0; i < deviceSignals.size(); i++)
+	if (deviceSignals == nullptr)
 	{
-		const Hardware::DeviceSignal& deviceSignal = deviceSignals[i];
+		assert(deviceSignals != nullptr);
+		return;
+	}
 
-		if (deviceSignal.type() == Hardware::DeviceSignal::SignalType::DiagDiscrete ||
-			deviceSignal.type() == Hardware::DeviceSignal::SignalType::DiagAnalog)
+	int signalCount = int(deviceSignals->size());
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
+		assert(deviceSignal);
+
+		Hardware::DeviceSignal::SignalType signalType = deviceSignal->type();
+
+		if (signalType == Hardware::DeviceSignal::SignalType::InputAnalog ||
+			signalType == Hardware::DeviceSignal::SignalType::OutputAnalog ||
+			signalType == Hardware::DeviceSignal::SignalType::InputDiscrete ||
+			signalType == Hardware::DeviceSignal::SignalType::OutputDiscrete)
 		{
-			continue;
-		}
+			Signal signal(*deviceSignal);
 
-		Signal signal(deviceSignal);
+			QVector<Signal> newSignals;
+
+			newSignals.append(signal);
+
+			addSignal(signal.type(), &newSignals);
+		}
 	}
 }
 
 
-void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals)
+void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
 {
 
 }

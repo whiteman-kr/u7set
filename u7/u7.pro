@@ -134,7 +134,8 @@ SOURCES +=\
     Builder/ConfigurationBuilder.cpp \
     Builder/ApplicationLogicCode.cpp \
 	Builder/ApplicationLogicCompiler.cpp \
-    DialogSubsystemListEditor.cpp
+    DialogSubsystemListEditor.cpp \
+    ../lib/SignalMask.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -201,7 +202,8 @@ HEADERS  += \
     Builder/ApplicationLogicCode.h \
 	Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h \
-    ../include/Types.h
+    ../include/Types.h \
+    ../include/SignalMask.h
 
 FORMS    += \
     ChangesetDialog.ui \

@@ -174,6 +174,8 @@ namespace Builder
 
 		closeBuildXML();
 
+		m_log->writeEmptyLine();
+
 		int errors = m_log->errorCount();
 		int warnings = m_log->warningCount();
 #pragma message("Load correct Build Log Str")
@@ -417,17 +419,6 @@ namespace Builder
 
 		m_buildXML.writeAttribute("user", m_dbController->currentUser().username());
 		m_buildXML.writeAttribute("workstation", m_workstation);
-
-		/*
-		  test code - delete!
-
-		  QByteArray data("sdferglkfl;gkd;flgkd;flgkd;lfk;");
-
-		addFile("", "qqq.www", data);
-		addFile("case1", "qqq.www", data);
-
-		addFile("case2", "qqq.www", data);
-		addFile("case2", "qqq.www", data);*/
 
 		return true;
 	}

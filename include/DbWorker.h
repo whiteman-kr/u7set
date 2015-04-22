@@ -116,6 +116,8 @@ public slots:
 	void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_addSignal(SignalType signalType, QVector<Signal>* newSignal);
 
+	void addSignal(SignalType signalType, QVector<Signal>* newSignal);
+
 	void slot_getUnits(UnitList* units);
 	void slot_getDataFormats(DataFormatList* dataFormats);
 
@@ -127,8 +129,8 @@ public slots:
 
 	void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
-	void slot_autoAddSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals);
-	void slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal>& deviceSignals);
+	void slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
+	void slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals);
 
 
 	// Build management

@@ -84,6 +84,11 @@ void OutputLog::writeMessage(const QString& str, bool bold)
 	return write(str, OutputMessageLevel::Message, bold);
 }
 
+void OutputLog::writeEmptyLine()
+{
+	return write("", OutputMessageLevel::Message, false);
+}
+
 void OutputLog::writeSuccess(const QString& str, bool bold)
 {
 	return write(str, OutputMessageLevel::Success, bold);
