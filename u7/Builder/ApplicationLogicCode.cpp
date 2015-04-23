@@ -116,6 +116,11 @@ namespace Builder
 	}
 
 
+	CodeItem::~CodeItem()
+	{
+	}
+
+
 	QString Comment::toString()
 	{
 		QString comment = getComment();
