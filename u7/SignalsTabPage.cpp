@@ -1048,12 +1048,24 @@ void SignalsModel::addSignal()
 				signalVector[i].setStrID(strID);
 				signalVector[i].setName(name);
 			}
+
 			if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
 			{
 				beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + signalVector.count() - 1);
+
 				for (int i = 0; i < signalVector.count(); i++)
 				{
-					m_signalSet.append(signalVector[i].ID(), signalVector[i]);
+					// WhiteMan
+					//
+
+					Signal* newSignal = new Signal;
+
+					*newSignal = signalVector[i];
+
+					//
+					// WhiteMan
+
+					m_signalSet.append(newSignal->ID(), newSignal);
 				}
 				endInsertRows();
 				emit cellsSizeChanged();

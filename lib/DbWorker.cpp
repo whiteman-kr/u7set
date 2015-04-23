@@ -2808,6 +2808,8 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 	int n = 0;
 
+//	OrderedHash<int, Signal*> set;
+
 	while(q.next() != false)
 	{
 		n++;
@@ -2821,7 +2823,9 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 
 		getSignalData(q, *s);
 
-		//signalSet->append(s.ID(), s);
+		signalSet->append(s->ID(), s);
+
+		//set.append(s->ID(), s);
 	}
 
 	quint64 finish = QDateTime::currentMSecsSinceEpoch();
