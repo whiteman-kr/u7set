@@ -53,11 +53,11 @@ namespace Builder
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
 		m_log(log),
+		m_buildWriter(buildWriter),
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_projectName(projectName),
-		m_userName(userName),
-		m_buildWriter(buildWriter)
+		m_userName(userName)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);

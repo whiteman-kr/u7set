@@ -270,7 +270,7 @@ UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, cha
     m_address(senderAddress),
 	m_port(senderPort)
 {
-	memset(header(), sizeof(RequestHeader), 0);
+	memset(header(), 0, sizeof(RequestHeader));
 
     if (receivedData != nullptr && (receivedDataSize >= sizeof(RequestHeader) && receivedDataSize <= MAX_DATAGRAM_SIZE))
     {
@@ -312,7 +312,7 @@ UdpRequest&UdpRequest::operator =(const UdpRequest& request)
 
 UdpRequest::UdpRequest()
 {
-	memset(header(), sizeof(RequestHeader), 0);
+	memset(header(), 0, sizeof(RequestHeader));
 }
 
 
@@ -323,7 +323,7 @@ void UdpRequest::initAck(const UdpRequest& request)
     m_address = request.m_address;
     m_port = request.m_port;
 
-	memset(header(), sizeof(RequestHeader), 0);
+	memset(header(), 0, sizeof(RequestHeader));
 
 	// copy request header
 	//

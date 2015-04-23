@@ -224,8 +224,8 @@ private:
 public:
 	Signal();
 
-	Signal(const Signal& signal)
-		:QObject()
+	Signal(const Signal& signal) :
+		QObject()
 	{
 		*this = signal;
 	}
@@ -358,7 +358,10 @@ public:
 };
 
 
-class SignalSet : public OrderedHash<int, Signal>
+typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
+
+
+class SignalSet : public SignalPtrOrderedHash
 {
 private:
 	QMultiHash<int, int> m_groupSignals;
@@ -369,12 +372,14 @@ public:
 
 	virtual void clear() override;
 
-	virtual void append(const int& signalID, const Signal& signal);
+	virtual void append(const int& signalID, Signal* signal);
 	virtual void remove(const int& signalID);
 	virtual void removeAt(const int index);
 
 	QVector<int> getChannelSignalsID(const Signal& signal);
 	QVector<int> getChannelSignalsID(int signalGroupID);
+
+	void reserve(int n);
 
 	void resetAddresses();
 };

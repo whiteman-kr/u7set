@@ -31,9 +31,20 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	m_strID = QString("#%1").arg(deviceSignal.strId());
 	m_extStrID = deviceSignal.strId();
-	m_name = QString("Signal #%1").arg(deviceSignal.strId());
 
-	if (m_type = SignalType::Analog)
+	QString deviceSignalStrID = deviceSignal.strId();
+
+	int pos = deviceSignalStrID.lastIndexOf(QChar('_'));
+
+	if (pos != -1)
+	{
+		deviceSignalStrID = deviceSignalStrID.mid(pos + 1);
+	}
+
+	m_name = QString("Signal #%1").arg(deviceSignalStrID);
+	m_deviceStrID = deviceSignal.strId();
+
+	if (m_type == SignalType::Analog)
 	{
 		m_dataFormat = DataFormat::SignedInt;
 	}
@@ -114,17 +125,17 @@ SignalSet::~SignalSet()
 
 void SignalSet::clear()
 {
-	OrderedHash<int, Signal>::clear();
+	SignalPtrOrderedHash::clear();
 
 	m_groupSignals.clear();
 }
 
 
-void SignalSet::append(const int& signalID, const Signal& signal)
+void SignalSet::append(const int& signalID, Signal *signal)
 {
-	OrderedHash<int, Signal>::append(signalID, signal);
+	SignalPtrOrderedHash::append(signalID, signal);
 
-	m_groupSignals.insert(signal.signalGroupID(), signalID);
+	m_groupSignals.insert(signal->signalGroupID(), signalID);
 }
 
 
@@ -132,7 +143,7 @@ void SignalSet::remove(const int& signalID)
 {
 	Signal signal = value(signalID);
 
-	OrderedHash<int, Signal>::remove(signalID);
+	SignalPtrOrderedHash::remove(signalID);
 
 	m_groupSignals.remove(signal.signalGroupID(), signalID);
 }
@@ -140,12 +151,12 @@ void SignalSet::remove(const int& signalID)
 
 void SignalSet::removeAt(const int index)
 {
-	const Signal& signal = OrderedHash<int, Signal>::operator [](index);
+	const Signal& signal = SignalPtrOrderedHash::operator [](index);
 
 	int signalGroupID = signal.signalGroupID();
 	int signalID = signal.ID();
 
-	OrderedHash<int, Signal>::removeAt(index);
+	SignalPtrOrderedHash::removeAt(index);
 
 	m_groupSignals.remove(signalGroupID, signalID);
 }
@@ -171,6 +182,13 @@ QVector<int> SignalSet::getChannelSignalsID(int signalGroupID)
 	}
 
 	return channelSignalsID;
+}
+
+
+void SignalSet::reserve(int n)
+{
+	SignalPtrOrderedHash::reserve(n);
+	m_groupSignals.reserve(n);
 }
 
 

@@ -53,7 +53,7 @@ namespace Hardware
             QJsonObject jFrame;
 
             QJsonArray array;
-            for (int j = 0; j < frame.size(); j++)
+			for (size_t j = 0; j < frame.size(); j++)
                 array.push_back(QJsonValue(frame[j]));
 
             jFrame.insert("data", array);

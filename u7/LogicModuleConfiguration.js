@@ -287,35 +287,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     {
         // find a signal with Place = i
         //
-        var signal = null;
-        
-        if (inController != null)
-        {
-            for (var j = 0; j < inController.childrenCount(); j++)
-            {
-                var s = inController.jsChild(j);
-                
-                if (s.jsDeviceType() != SignalType)
-                {
-                    continue;
-                }
-                if (s.jsType() != InputAnalog)
-                {
-                    continue;
-                }
-                if (s.jsPlace() == i)
-                {
-                    //log.writeMessage("AIM InputSignal: " + s.StrID, false);
-                    
-                    signal = signalSet.getSignalByDeviceStrID(s.StrID);
-                    if (signal == null)    
-                    {
-                        log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.", false, true);
-                    }
-                    break;
-                }
-            }
-        }
+        var signal = findSignalByPlace(inController, i, InputAnalog, signalSet, log);
         
         if (signal == null)
         {
@@ -420,6 +392,12 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     var AOMWordCount = 4;                       // total words count
     var AOMSignalsInWordCount = 8;              // signals in a word count
     
+    var outController = module.jsFindChildObjectByMask("*_*_*_*_CTRLOUT");
+    if (outController == null)
+    {
+        log.writeWarning("WARNING: no output controller found in " + module.StrID + "! Using default values.", false, true);
+    }
+
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
     var place = 0;
@@ -430,55 +408,29 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
         
         for (var c = 0; c < AOMSignalsInWordCount; c++)
         {
-            // find a signal with Place = place
-            //
-            var signal = null;
-            
-            for (var j = 0; j < module.childrenCount(); j++)
+            var mode = Mode_05V;    //default
+
+            if (outController != null)
             {
-                var s = module.jsChild(j);
-                
-                if (s.jsDeviceType() != SignalType)
+                var signal = findSignalByPlace(outController, place, OutputAnalog, signalSet, log);
+                if (signal != null)
                 {
-                    continue;
-                }
-                if (s.jsType() != OutputAnalog)
-                {
-                    continue;
-                }
-                if (s.jsPlace() == place)
-                {
-                    log.writeMessage("AOM OutputSignal: " + s.StrID, false);
-                    
-                    signal = signalSet.getSignalByDeviceStrID(s.StrID);
-                    if (signal == null)    
+                    var outputRangeMode = signal.jsOutputRangeMode();
+                    if (outputRangeMode < 0 || outputRangeMode > Mode_05mA)
                     {
-                        log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database! Using default.", false, true);
+                        log.writeError("ERROR: Signal " + s.StrID + " - wrong outputRangeMode()! Using default.", false, true);
                     }
-                    break;
+                    else
+                    {
+                        mode = outputRangeMode;
+                    }
                 }
             }
             
             place++;
-        
-            var mode = Mode_05V;    //default
-           
-            if (signal != null)
-            {
-                var outputRangeMode = signal.jsOutputRangeMode();
-                if (outputRangeMode < 0 || outputRangeMode > Mode_05mA)
-                {
-                    log.writeError("ERROR: Signal " + s.StrID + " - wrong outputRangeMode()! Using default.", false, true);
-                }
-                else
-                {
-                    mode = outputRangeMode;
-                }
-            }
             
             var bit = c * 2;
             data |= (mode << bit);
-            
         }
         
         log.writeMessage("Place" + place + ": Word = " + w + " = " + data, false);
@@ -522,6 +474,40 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 
     return true;
 
+}
+
+function findSignalByPlace(parent, place, type, signalSet, log)
+{
+    if (parent == null)
+    {
+        return null;
+    }
+
+    for (var j = 0; j < parent.childrenCount(); j++)
+    {
+        var s = parent.jsChild(j);
+                    
+        if (s.jsDeviceType() != SignalType)
+        {
+            continue;
+        }
+        if (s.jsType() != type)
+        {
+            continue;
+        }
+        if (s.jsPlace() == place)
+        {
+            signal = signalSet.getSignalByDeviceStrID(s.StrID);
+            if (signal == null)    
+            {
+                log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database!", false, true);
+            }
+            return signal;
+        }
+    }
+    
+    log.writeWarning("WARNING: Parent " + parent.StrID + ", no signal with place " + place + " was not found!", false, true);
+    return null;
 }
 
 // Generate configuration for module OCM

@@ -270,7 +270,8 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0035.sql \
 	DatabaseUpgrade/Upgrade0036.sql \
 	DatabaseUpgrade/Upgrade0037.sql \
-	month-report.txt
+	month-report.txt \
+    DatabaseUpgrade/Upgrade0038.sql
 
 DISTFILES += \
 	LogicModuleConfiguration.js

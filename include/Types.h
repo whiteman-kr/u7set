@@ -9,15 +9,15 @@ enum SignalType
 
 enum DataFormat
 {
-	UnsignedInt = 0,
-	SignedInt = 1,
+	UnsignedInt = 1,
+	SignedInt = 2,
 };
 
 
 enum ByteOrder
 {
-	LittleEdndian = 0,		// little endian
-	BigEndian = 1			// big endian
+	LittleEndian = 1,
+	BigEndian = 2
 };
 
 

@@ -34,6 +34,8 @@ public:
 	const VALUE& operator[](int index) const;
 
 	QList<VALUE> toList() const;
+
+	void reserve(int n);
 };
 
 
@@ -181,3 +183,233 @@ QList<VALUE> OrderedHash<KEY, VALUE>::toList() const
 {
 	return m_valueVector.toList();
 }
+
+
+template <typename KEY, typename VALUE>
+void OrderedHash<KEY, VALUE>::reserve(int n)
+{
+	m_valueVector.reserve(n);
+	m_valueVector.reserve(n);
+	m_hash.reserve(n);
+}
+
+
+// -------------------------------------------------------------------------------------------------
+// Класс PtrOrderedHash
+
+
+template <typename KEY, typename VALUE>
+class PtrOrderedHash
+{
+private:
+	QVector<VALUE*> m_valueVector;
+	QVector<KEY> m_keyVector;
+	QHash<KEY, int> m_hash;
+
+	void recalcHash();
+
+public:
+	PtrOrderedHash();
+	~PtrOrderedHash();
+
+	virtual void clear();
+
+	bool isEmpty() const;
+	int count() const;
+	bool contains(const KEY& key) const;
+
+	virtual void append(const KEY& key, VALUE* value);
+	virtual void remove(const KEY& key);
+	virtual void removeAt(const int index);
+
+	const VALUE value(const KEY& key) const;
+
+	const KEY key(const int index) const;
+	int keyIndex(const KEY& key) const;
+
+	VALUE& operator[](int index);
+	const VALUE& operator[](int index) const;
+
+	QList<VALUE*> toList() const;
+
+	void reserve(int n);
+};
+
+
+template <typename KEY, typename VALUE>
+void PtrOrderedHash<KEY, VALUE>::recalcHash()
+{
+	m_hash.clear();
+
+	for (int i = 0; i < m_keyVector.count(); i++)
+	{
+		m_hash[m_keyVector[i]] = i;
+	}
+}
+
+
+template <typename KEY, typename VALUE>
+PtrOrderedHash<KEY, VALUE>::PtrOrderedHash()
+{
+}
+
+template <typename KEY, typename VALUE>
+PtrOrderedHash<KEY, VALUE>::~PtrOrderedHash()
+{
+	clear();
+}
+
+
+
+template <typename KEY, typename VALUE>
+void PtrOrderedHash<KEY, VALUE>::clear()
+{
+	for(auto value : m_valueVector)
+	{
+		delete value;
+	}
+
+	m_valueVector.clear();
+	m_keyVector.clear();
+	m_hash.clear();
+}
+
+
+template <typename KEY, typename VALUE>
+bool PtrOrderedHash<KEY, VALUE>::isEmpty() const
+{
+	return m_valueVector.isEmpty();
+}
+
+
+template <typename KEY, typename VALUE>
+int PtrOrderedHash<KEY, VALUE>::count() const
+{
+	return m_valueVector.count();
+}
+
+
+template <typename KEY, typename VALUE>
+bool PtrOrderedHash<KEY, VALUE>::contains(const KEY& key) const
+{
+	return m_hash.contains(key);
+}
+
+
+template <typename KEY, typename VALUE>
+void PtrOrderedHash<KEY, VALUE>::append(const KEY& key, VALUE* value)
+{
+	if (m_hash.contains(key))
+	{
+		int valueIndex = m_hash[key];
+
+		m_valueVector[valueIndex] = value;
+		m_keyVector[valueIndex] = key;
+	}
+	else
+	{
+		int newValueIndex = m_valueVector.count();
+
+		m_valueVector.append(value);
+		m_keyVector.append(key);
+		m_hash.insert(key, newValueIndex);
+	}
+}
+
+
+template <typename KEY, typename VALUE>
+void PtrOrderedHash<KEY, VALUE>::remove(const KEY &key)
+{
+	int index = m_hash[key];
+
+	m_hash.remove(key);
+
+	VALUE* value = m_valueVector[index];
+	delete value;
+
+	m_valueVector.remove(index);
+
+	m_keyVector.remove(index);
+
+	recalcHash();
+}
+
+
+template <typename KEY, typename VALUE>
+void PtrOrderedHash<KEY, VALUE>::removeAt(const int index)
+{
+	m_hash.remove(m_keyVector[index]);
+
+	VALUE* value = m_valueVector[index];
+	delete value;
+
+	m_valueVector.removeAt(index);
+
+	m_keyVector.removeAt(index);
+
+	recalcHash();
+}
+
+
+template <typename KEY, typename VALUE>
+const VALUE PtrOrderedHash<KEY, VALUE>::value(const KEY& key) const
+{
+	if (m_hash.contains(key))
+	{
+		int valueIndex = m_hash[key];
+		return *m_valueVector[valueIndex];
+	}
+
+	assert(false);
+
+	return VALUE();
+}
+
+
+template <typename KEY, typename VALUE>
+const KEY PtrOrderedHash<KEY, VALUE>::key(const int index) const
+{
+	return m_keyVector[index];
+}
+
+
+template <typename KEY, typename VALUE>
+int PtrOrderedHash<KEY, VALUE>::keyIndex(const KEY &key) const
+{
+	if (m_hash.contains(key))
+	{
+		return m_hash[key];
+	}
+	return -1;
+}
+
+
+template <typename KEY, typename VALUE>
+VALUE& PtrOrderedHash<KEY, VALUE>::operator[](int index)
+{
+	return *m_valueVector[index];
+}
+
+
+template <typename KEY, typename VALUE>
+const VALUE& PtrOrderedHash<KEY, VALUE>::operator[](int index) const
+{
+	return *m_valueVector[index];
+}
+
+
+template <typename KEY, typename VALUE>
+QList<VALUE*> PtrOrderedHash<KEY, VALUE>::toList() const
+{
+	return m_valueVector.toList();
+}
+
+
+template <typename KEY, typename VALUE>
+void PtrOrderedHash<KEY, VALUE>::reserve(int n)
+{
+	m_valueVector.reserve(n);
+	m_valueVector.reserve(n);
+	m_hash.reserve(n);
+}
+

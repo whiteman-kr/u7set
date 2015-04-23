@@ -46,6 +46,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Add OutputRangeMode column to SignalInstance table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0035.sql"},
 	{"Add get_file_id dunctions", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0036.sql"},
 	{"Add module presets", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0037.sql"},
+	{"Add get_last_signals function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0038.sql"},
 };
 
 
@@ -2751,6 +2752,7 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 {
 	AUTO_COMPLETE
 
+
 	// Check parameters
 	//
 	if (signalSet == nullptr)
@@ -2769,62 +2771,66 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 		return;
 	}
 
-	QString request = QString("SELECT * FROM get_signals_ids(%1, %2)")
-		.arg(currentUser().userId()).arg("false");
+	int signalCount = 0;
+
+	QString request = QString("SELECT * FROM get_signal_count(%1)")
+		.arg(currentUser().userId());
 
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
 
+	if (result != false && q.next() != false)
+	{
+		signalCount = q.value(0).toInt();
+	}
+
+	int dProgress = 0;
+
+	if (signalCount != 0)
+	{
+		dProgress = signalCount / 20;
+	}
+
+	request = QString("SELECT * FROM get_latest_signals_all(%1)")
+		.arg(currentUser().userId());
+
+
+	quint64 start = QDateTime::currentMSecsSinceEpoch();
+
+	result = q.exec(request);
+
 	if (result == false)
 	{
-		emitError(tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
+		emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
 		return;
 	}
 
-	QVector<int> signalsIDs;
+	int n = 0;
+
+//	OrderedHash<int, Signal*> set;
 
 	while(q.next() != false)
 	{
-		signalsIDs.append(q.value(0).toInt());
+		n++;
+
+		if (dProgress != 0 && (n % dProgress) == 0)
+		{
+			m_progress->setValue((n / dProgress) * 5);
+		}
+
+		Signal* s = new Signal;
+
+		getSignalData(q, *s);
+
+		signalSet->append(s->ID(), s);
+
+		//set.append(s->ID(), s);
 	}
 
-	int signalCount = signalsIDs.count();
+	quint64 finish = QDateTime::currentMSecsSinceEpoch();
 
-	for(int i = 0; i < signalCount; i++)
-	{
-		int signalID = signalsIDs[i];
-
-		// request
-		//
-		QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
-			.arg(currentUser().userId()).arg(signalID);
-		QSqlQuery q(db);
-
-		bool result = q.exec(request);
-
-		if (result == false)
-		{
-			emitError(tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
-			return;
-		}
-
-		while(q.next() != false)
-		{
-			Signal s;
-
-			getSignalData(q, s);
-
-			signalSet->append(s.ID(), s);
-		}
-
-		int percent = (i * 100) / signalCount;
-
-		if (m_progress != nullptr)
-		{
-			m_progress->setValue(percent);
-		}
-	}
+	qDebug() << (finish - start);
 
 	m_progress->setValue(100);
 
@@ -2882,7 +2888,53 @@ void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
 
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 {
-	s.setID(q.value("signalid").toInt());
+	s.setID(q.value(0).toInt());
+	s.setSignalGroupID(q.value(1).toInt());
+	s.setSignalInstanceID(q.value(2).toInt());
+	s.setChangesetID(q.value(3).toInt());
+	s.setCheckedOut(q.value(4).toBool());
+	s.setUserID(q.value(5).toInt());
+	s.setChannel(q.value(6).toInt());
+	s.setType(static_cast<SignalType>(q.value(7).toInt()));
+	s.setCreated(q.value(8).toString());
+	s.setDeleted(q.value(9).toBool());
+	s.setInstanceCreated(q.value(10).toString());
+	s.setInstanceAction(static_cast<InstanceAction>(q.value(11).toInt()));
+	s.setStrID(q.value(12).toString());
+	s.setExtStrID(q.value(13).toString());
+	s.setName(q.value(14).toString());
+	s.setDataFormat(static_cast<DataFormat>(q.value(15).toInt()));
+	s.setDataSize(q.value(16).toInt());
+	s.setLowADC(q.value(17).toInt());
+	s.setHighADC(q.value(18).toInt());
+	s.setLowLimit(q.value(19).toDouble());
+	s.setHighLimit(q.value(20).toDouble());
+	s.setUnitID(q.value(21).toInt());
+	s.setAdjustment(q.value(22).toDouble());
+	s.setDropLimit(q.value(23).toDouble());
+	s.setExcessLimit(q.value(24).toDouble());
+	s.setUnbalanceLimit(q.value(25).toDouble());
+	s.setInputLowLimit(q.value(26).toDouble());
+	s.setInputHighLimit(q.value(27).toDouble());
+	s.setInputUnitID(q.value(28).toInt());
+	s.setInputSensorID(q.value(29).toInt());
+	s.setOutputLowLimit(q.value(30).toDouble());
+	s.setOutputHighLimit(q.value(31).toDouble());
+	s.setOutputUnitID(q.value(32).toInt());
+	s.setOutputSensorID(q.value(33).toInt());
+	s.setAcquire(q.value(34).toBool());
+	s.setCalculated(q.value(35).toBool());
+	s.setNormalState(q.value(36).toInt());
+	s.setDecimalPlaces(q.value(37).toInt());
+	s.setAperture(q.value(38).toDouble());
+	s.setInOutType(static_cast<SignalInOutType>(q.value(39).toInt()));
+	s.setDeviceStrID(q.value(40).toString());
+	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value(41).toInt()));		// since version 35 of database
+	s.setFilteringTime(q.value(42).toDouble());										//
+	s.setMaxDifference(q.value(43).toDouble());										//
+	s.setByteOrder(static_cast<ByteOrder>(q.value(44).toInt()));					//
+
+/*	s.setID(q.value("signalid").toInt());
 	s.setSignalGroupID(q.value("signalgroupid").toInt());
 	s.setSignalInstanceID(q.value("signalinstanceid").toInt());
 	s.setChangesetID(q.value("changesetid").toInt());
@@ -2926,7 +2978,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value("outputrangemode").toInt()));		// since version 35 of database
 	s.setFilteringTime(q.value("filteringtime").toDouble());									//
 	s.setMaxDifference(q.value("maxdifference").toDouble());									//
-	s.setByteOrder(static_cast<ByteOrder>(q.value("byteorder").toInt()));						//
+	s.setByteOrder(static_cast<ByteOrder>(q.value("byteorder").toInt()));		*/				//
 }
 
 
@@ -3005,6 +3057,12 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 {
 	AUTO_COMPLETE
 
+	addSignal(signalType, newSignal);
+}
+
+
+void DbWorker::addSignal(SignalType signalType, QVector<Signal>* newSignal)
+{
 	if (newSignal == nullptr)
 	{
 		assert(newSignal != nullptr);
@@ -3492,61 +3550,44 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
 {
+	AUTO_COMPLETE
+
 	if (deviceSignals == nullptr)
 	{
 		assert(deviceSignals != nullptr);
 		return;
 	}
 
-	QVector<Signal> newSignals;
+	int signalCount = int(deviceSignals->size());
 
-	// add analog signals
-	//
-	for(int i = 0; i < deviceSignals->size(); i++)
+	for(int i = 0; i < signalCount; i++)
 	{
+		if ((i % 5) == 0)
+		{
+			m_progress->setValue((i * 100) / signalCount);
+		}
+
 		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
 		assert(deviceSignal);
 
-		if (deviceSignal->type() != Hardware::DeviceSignal::SignalType::InputAnalog &&
-			deviceSignal->type() != Hardware::DeviceSignal::SignalType::OutputAnalog)
+		Hardware::DeviceSignal::SignalType signalType = deviceSignal->type();
+
+		if (signalType == Hardware::DeviceSignal::SignalType::InputAnalog ||
+			signalType == Hardware::DeviceSignal::SignalType::OutputAnalog ||
+			signalType == Hardware::DeviceSignal::SignalType::InputDiscrete ||
+			signalType == Hardware::DeviceSignal::SignalType::OutputDiscrete)
 		{
-			continue;
+			Signal signal(*deviceSignal);
+
+			QVector<Signal> newSignals;
+
+			newSignals.append(signal);
+
+			addSignal(signal.type(), &newSignals);
 		}
-
-		Signal signal(*deviceSignal);
-
-		newSignals.append(signal);
 	}
 
-	if (newSignals.count() > 0)
-	{
-		slot_addSignal(SignalType::Analog, &newSignals);
-	}
-
-	newSignals.clear();
-
-	// add discrete signals
-	//
-	for(int i = 0; i < deviceSignals->size(); i++)
-	{
-		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
-		assert(deviceSignal);
-
-		if (deviceSignal->type() != Hardware::DeviceSignal::SignalType::InputDiscrete &&
-			deviceSignal->type() != Hardware::DeviceSignal::SignalType::OutputDiscrete)
-		{
-			continue;
-		}
-
-		Signal signal(*deviceSignal);
-
-		newSignals.append(signal);
-	}
-
-	if (newSignals.count() > 0)
-	{
-		slot_addSignal(SignalType::Discrete, &newSignals);
-	}
+	m_progress->setValue(100);
 }
 
 
