@@ -112,7 +112,16 @@ namespace Builder
 
 	QString CommandCode::getFbTypeStr()
 	{
-		return QString("FB%1").arg(getFbType());
+		int fbType = getFbType();
+
+		if (fbType < FB_TYPE_STR_COUNT)
+		{
+			return FbTypeStr[fbType];
+		}
+
+		assert(false);			// need add string in FbTypeStr array
+
+		return QString("FB%1").arg(fbType);
 	}
 
 
@@ -237,6 +246,15 @@ namespace Builder
 		m_code.setBitNo(bitNo);
 	}
 
+	void Command::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue)
+	{
+		m_code.setOpCode(CommandCodes::RDFBTS);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord2(testValue);
+	}
+
 
 	void Command::generateRawCode()
 	{
@@ -328,12 +346,28 @@ namespace Builder
 			break;
 
 		case RDFB:
-		case WRFBC:
-		case WRFBB:
-		case RDFBB:
-			mnemoCode = "NotImplemented!!!";
+			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
+							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
 			break;
 
+		case WRFBC:
+			mnemoCode.sprintf("%s\t#0x%04X, %s.%d[%d]", CommandStr[opCode], m_code.getWord2(),
+							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+			break;
+
+		case WRFBB:
+			mnemoCode.sprintf("%s\t0x%04X[%d], %s.%d[%d]", CommandStr[opCode], m_code.getWord2(), m_code.getWord4(),
+							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+			break;
+
+		case RDFBB:
+			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X[%d]", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
+							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2(), m_code.getWord4());
+			break;
+
+		case RDFBTS:
+			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
+							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
 		default:
 			assert(false);
 		}

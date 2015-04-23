@@ -21,6 +21,7 @@ namespace Builder
 		WRFBC = 10,
 		WRFBB = 11,
 		RDFBB = 12,
+		RDFBTS = 13,
 
 		Count
 	};
@@ -42,6 +43,7 @@ namespace Builder
 		3,		//	WRFBC
 		4,		//	WRFBB
 		4,		//	RDFBB
+		3,		//	RDFBTS
 	};
 
 	const char* const CommandStr[COMMAND_COUNT] =
@@ -59,7 +61,43 @@ namespace Builder
 		"WRFBC",
 		"WRFBB",
 		"RDFBB",
+		"RDFBTS",
 	};
+
+	const char* const FbTypeStr[] =
+	{
+		"???",
+		"AND",
+		"OR",
+		"XOR",
+		"NOT",
+		"TCT",
+		"SR/RS",
+		"CTUD",
+		"MAJ",
+		"SRSST",
+		"BCOD",
+		"BDEC",
+		"BCOMP",
+		"LAG",
+		"MID",
+		"ADD",
+		"SCAL",
+		"LINFUN",
+		"SQRT",
+		"SIN",
+		"COS",
+		"DIV",
+		"MULT",
+		"ABS",
+		"LN",
+		"LIM",
+		"MIN/MAX",
+		"PID",
+	};
+
+	const int FB_TYPE_STR_COUNT = sizeof(FbTypeStr) / sizeof(const char*);
+
 
 	const quint16	MAX_FB_TYPE = 64 - 1,
 					MAX_FB_INSTANCE = 1024 - 1,
@@ -203,6 +241,7 @@ namespace Builder
 		void writeFuncBlockConst(quint16 constVal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
 		void writeFuncBlockBit(quint16 addrFrom, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
 		void readFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo, quint16 bitNo);
+		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue);
 
 		void setAddress(int address) { m_address = address; }
 
