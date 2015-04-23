@@ -2771,14 +2771,34 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 		return;
 	}
 
-	signalSet->reserve(10000);
+	int signalCount = 0;
 
-	QString request = QString("SELECT * FROM get_latest_signals_all(%1)")
+	QString request = QString("SELECT * FROM get_signal_count(%1)")
 		.arg(currentUser().userId());
 
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
+
+	if (result != false && q.next() != false)
+	{
+		signalCount = q.value(0).toInt();
+	}
+
+	int dProgress = 0;
+
+	if (signalCount != 0)
+	{
+		dProgress = signalCount / 20;
+	}
+
+	request = QString("SELECT * FROM get_latest_signals_all(%1)")
+		.arg(currentUser().userId());
+
+
+	quint64 start = QDateTime::currentMSecsSinceEpoch();
+
+	result = q.exec(request);
 
 	if (result == false)
 	{
@@ -2786,14 +2806,29 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 		return;
 	}
 
+	int n = 0;
+
 	while(q.next() != false)
 	{
-		Signal s;
+		n++;
 
-		getSignalData(q, s);
+		if (dProgress != 0 && (n % dProgress) == 0)
+		{
+			m_progress->setValue((n / dProgress) * 5);
+		}
 
-		signalSet->append(s.ID(), s);
+		Signal* s = new Signal;
+
+		getSignalData(q, *s);
+
+		//signalSet->append(s.ID(), s);
 	}
+
+	quint64 finish = QDateTime::currentMSecsSinceEpoch();
+
+	qDebug() << (finish - start);
+
+	m_progress->setValue(100);
 
 	return;
 }
@@ -2849,7 +2884,53 @@ void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
 
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 {
-	s.setID(q.value("signalid").toInt());
+	s.setID(q.value(0).toInt());
+	s.setSignalGroupID(q.value(1).toInt());
+	s.setSignalInstanceID(q.value(2).toInt());
+	s.setChangesetID(q.value(3).toInt());
+	s.setCheckedOut(q.value(4).toBool());
+	s.setUserID(q.value(5).toInt());
+	s.setChannel(q.value(6).toInt());
+	s.setType(static_cast<SignalType>(q.value(7).toInt()));
+	s.setCreated(q.value(8).toString());
+	s.setDeleted(q.value(9).toBool());
+	s.setInstanceCreated(q.value(10).toString());
+	s.setInstanceAction(static_cast<InstanceAction>(q.value(11).toInt()));
+	s.setStrID(q.value(12).toString());
+	s.setExtStrID(q.value(13).toString());
+	s.setName(q.value(14).toString());
+	s.setDataFormat(static_cast<DataFormat>(q.value(15).toInt()));
+	s.setDataSize(q.value(16).toInt());
+	s.setLowADC(q.value(17).toInt());
+	s.setHighADC(q.value(18).toInt());
+	s.setLowLimit(q.value(19).toDouble());
+	s.setHighLimit(q.value(20).toDouble());
+	s.setUnitID(q.value(21).toInt());
+	s.setAdjustment(q.value(22).toDouble());
+	s.setDropLimit(q.value(23).toDouble());
+	s.setExcessLimit(q.value(24).toDouble());
+	s.setUnbalanceLimit(q.value(25).toDouble());
+	s.setInputLowLimit(q.value(26).toDouble());
+	s.setInputHighLimit(q.value(27).toDouble());
+	s.setInputUnitID(q.value(28).toInt());
+	s.setInputSensorID(q.value(29).toInt());
+	s.setOutputLowLimit(q.value(30).toDouble());
+	s.setOutputHighLimit(q.value(31).toDouble());
+	s.setOutputUnitID(q.value(32).toInt());
+	s.setOutputSensorID(q.value(33).toInt());
+	s.setAcquire(q.value(34).toBool());
+	s.setCalculated(q.value(35).toBool());
+	s.setNormalState(q.value(36).toInt());
+	s.setDecimalPlaces(q.value(37).toInt());
+	s.setAperture(q.value(38).toDouble());
+	s.setInOutType(static_cast<SignalInOutType>(q.value(39).toInt()));
+	s.setDeviceStrID(q.value(40).toString());
+	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value(41).toInt()));		// since version 35 of database
+	s.setFilteringTime(q.value(42).toDouble());										//
+	s.setMaxDifference(q.value(43).toDouble());										//
+	s.setByteOrder(static_cast<ByteOrder>(q.value(44).toInt()));					//
+
+/*	s.setID(q.value("signalid").toInt());
 	s.setSignalGroupID(q.value("signalgroupid").toInt());
 	s.setSignalInstanceID(q.value("signalinstanceid").toInt());
 	s.setChangesetID(q.value("changesetid").toInt());
@@ -2893,7 +2974,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value("outputrangemode").toInt()));		// since version 35 of database
 	s.setFilteringTime(q.value("filteringtime").toDouble());									//
 	s.setMaxDifference(q.value("maxdifference").toDouble());									//
-	s.setByteOrder(static_cast<ByteOrder>(q.value("byteorder").toInt()));						//
+	s.setByteOrder(static_cast<ByteOrder>(q.value("byteorder").toInt()));		*/				//
 }
 
 
@@ -3477,7 +3558,10 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 
 	for(int i = 0; i < signalCount; i++)
 	{
-		m_progress->setValue((i * 100) / signalCount);
+		if ((i % 5) == 0)
+		{
+			m_progress->setValue((i * 100) / signalCount);
+		}
 
 		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
 		assert(deviceSignal);
