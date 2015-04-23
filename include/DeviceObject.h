@@ -1,8 +1,8 @@
 #pragma once
 #include <unordered_map>
 #include <QJSValue>
-#include "DbStruct.h"
-#include "QUuid"
+#include <QtCore/QUuid>
+#include "../include/DbStruct.h"
 #include "../include/Factory.h"
 #include "../include/Types.h"
 #include "../include/ProtoSerialization.h"

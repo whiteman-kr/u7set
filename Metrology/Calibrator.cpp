@@ -72,7 +72,7 @@ bool Calibrator::open()
     if (m_portName.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Error description: Don't defined port name").arg(__FUNCTION__);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -80,7 +80,7 @@ bool Calibrator::open()
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -107,7 +107,7 @@ bool Calibrator::getIDN()
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -135,7 +135,7 @@ bool Calibrator::getIDN()
     if (m_name.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration name").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -151,7 +151,7 @@ bool Calibrator::getIDN()
     if (m_serialNo.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration serial number").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -166,7 +166,7 @@ bool Calibrator::openPort()
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -183,7 +183,7 @@ bool Calibrator::openPort()
     if (m_port.open(QIODevice::ReadWrite) == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: %3 (%4)").arg(__FUNCTION__).arg(m_portName).arg(m_port.errorString()).arg(m_port.error());
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -200,7 +200,7 @@ bool Calibrator::send(QString cmd)
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -208,7 +208,7 @@ bool Calibrator::send(QString cmd)
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -216,7 +216,7 @@ bool Calibrator::send(QString cmd)
     if (cmd.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -238,7 +238,7 @@ bool Calibrator::send(QString cmd)
     if (writtenBytes != cmdData.count())
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Command is sent is not fully").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -259,7 +259,7 @@ bool Calibrator::recv()
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -267,7 +267,7 @@ bool Calibrator::recv()
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -306,7 +306,7 @@ bool Calibrator::recv()
     if (m_timeout == CALIBRATOR_TIMEOUT && requestData.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Calibrator don't sent a response").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
 
         close();
@@ -332,7 +332,7 @@ bool Calibrator::setUnit(int mode, int unit)
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -340,7 +340,7 @@ bool Calibrator::setUnit(int mode, int unit)
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -348,7 +348,7 @@ bool Calibrator::setUnit(int mode, int unit)
     if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit()); emit error( m_lastError);
+        qDebug("%s", qPrintable(m_lastError)); emit error( m_lastError);
         return false;
     }
 
@@ -357,7 +357,7 @@ bool Calibrator::setUnit(int mode, int unit)
     if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -479,7 +479,7 @@ bool Calibrator::setValue(double value)
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -487,7 +487,7 @@ bool Calibrator::setValue(double value)
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -495,7 +495,7 @@ bool Calibrator::setValue(double value)
     if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -503,7 +503,7 @@ bool Calibrator::setValue(double value)
     if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -523,7 +523,7 @@ bool Calibrator::setValue(double value)
     if (cmdSetValue.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -542,7 +542,7 @@ bool Calibrator::stepDown()
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -550,7 +550,7 @@ bool Calibrator::stepDown()
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -558,7 +558,7 @@ bool Calibrator::stepDown()
     if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -566,7 +566,7 @@ bool Calibrator::stepDown()
     if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -592,7 +592,7 @@ bool Calibrator::stepDown()
     if (cmdKeyDown.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -611,7 +611,7 @@ bool Calibrator::stepUp()
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -619,7 +619,7 @@ bool Calibrator::stepUp()
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -627,7 +627,7 @@ bool Calibrator::stepUp()
     if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -635,7 +635,7 @@ bool Calibrator::stepUp()
     if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -661,7 +661,7 @@ bool Calibrator::stepUp()
     if (cmdKeyUp.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -680,7 +680,7 @@ bool Calibrator::step(int stepType)
     if (stepType < 0 || stepType >= CALIBRATOR_STEP_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined step type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -705,7 +705,7 @@ double Calibrator::getValue()
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return 0;
     }
@@ -713,7 +713,7 @@ double Calibrator::getValue()
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return 0;
     }
@@ -730,7 +730,7 @@ double Calibrator::getValue()
     if (cmdGetValue.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return 0;
     }
@@ -770,7 +770,7 @@ bool Calibrator::beep()
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -787,7 +787,7 @@ bool Calibrator::reset(int resetType)
     if (m_port.isOpen() == false)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -795,7 +795,7 @@ bool Calibrator::reset(int resetType)
     if (resetType < 0 || resetType >= CALIBRATOR_RESET_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined reset type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -828,7 +828,7 @@ bool Calibrator::reset(int resetType)
     if (cmd.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -846,7 +846,7 @@ bool Calibrator::setRemoteControl(bool enable)
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return false;
     }
@@ -874,7 +874,7 @@ void Calibrator::parseResponse()
     if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
         return;
     }
@@ -882,7 +882,7 @@ void Calibrator::parseResponse()
     if (m_lastResponse.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty response").arg(__FUNCTION__).arg(m_portName);
-        qDebug(m_lastError.toLocal8Bit());
+        qDebug("%s", qPrintable(m_lastError));
         emit error( m_lastError);
 
         m_measureValue = 0;

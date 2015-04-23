@@ -1,5 +1,10 @@
 #pragma once
+
 #include "../include/ProtoSerialization.h"
+
+#include <QHash>
+#include <QString>
+#include <QXmlStreamReader>
 
 // ----------------------------------------------------------------------------
 //
