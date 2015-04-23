@@ -1,6 +1,8 @@
 #include <QtEndian>
 #include "../include/Crc.h"
 
+#include <assert.h>
+
 // Using normal poly 0x000000000000001B
 
 uint64_t Crc::crc64(const void* src, uint64_t size) 

@@ -5,6 +5,7 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QXmlStreamWriter>
+#include <QDebug>
 
 
 namespace Hardware
@@ -423,7 +424,7 @@ namespace Hardware
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// Îáÿçàòåëüíîå ïîëå, õø èìåíè êëàññà, ïî íåìó âîññòàíàâëèâàåòñÿ êëàññ.
+		message->set_classnamehash(classnamehash);	// ÐžÐ±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ð¾Ðµ Ð¿Ð¾Ð»Ðµ, Ñ…Ñˆ Ð¸Ð¼ÐµÐ½Ð¸ ÐºÐ»Ð°ÑÑÐ°, Ð¿Ð¾ Ð½ÐµÐ¼Ñƒ Ð²Ð¾ÑÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÑ‚ÑÑ ÐºÐ»Ð°ÑÑ.
 
 		Proto::DeviceObject* pMutableDeviceObject = message->mutable_deviceobject();
 

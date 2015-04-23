@@ -214,6 +214,19 @@ void CalibratorManager::initDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void CalibratorManager::show()
+{
+    if (m_pDialog == nullptr)
+    {
+        return;
+    }
+
+    m_pDialog->show();
+    m_pDialog->move(m_parentWidget->geometry().center() - m_pDialog->rect().center());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void CalibratorManager::enableInterface(bool enable)
 {
     if (m_pCalibrator == nullptr)
@@ -528,7 +541,18 @@ void CalibratorManager::onModeUnitList(int)
 
 void CalibratorManager::onErrorList()
 {
+    if (m_pDialog == nullptr)
+    {
+        return;
+    }
+
+    if (m_pErrorDialog == nullptr)
+    {
+        return;
+    }
+
     m_pErrorDialog->show();
+    m_pErrorDialog->move(m_pDialog->geometry().center() - m_pErrorDialog->rect().center());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
