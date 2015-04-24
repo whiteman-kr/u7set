@@ -80,11 +80,19 @@ namespace Afbl
 		AfbSignalType type() const;
 		void setType(AfbSignalType type);
 
+        int index() const;
+        void setIndex(int value);
+
+        int size() const;
+        void setSize(int value);
+
 		// Data
 		//
 private:
 		QString m_caption;
 		AfbSignalType m_type;
+        int m_index;
+        int m_size;
 	};
 
 
@@ -138,7 +146,13 @@ private:
 		const AfbParamValue& highLimit() const;
 		void setHighLimit(const AfbParamValue& highLimit);
 						
-		// Data
+        int index() const;
+        void setIndex(int value);
+
+        int size() const;
+        void setSize(int value);
+
+        // Data
 		//
 	private:
 		QString m_caption;				// Наименование параметра
@@ -150,7 +164,10 @@ private:
 
 		AfbParamValue m_lowLimit;		// Нижний предел параметра
 		AfbParamValue m_highLimit;		// Верхний предел параметра
-	};
+
+        int m_index;
+        int m_size;
+    };
 	
 
 	//
@@ -210,14 +227,17 @@ private:
 		unsigned int opcode() const;
 		void setOpcode(unsigned int value);
 
-		const std::vector<AfbElementSignal>& inputSignals() const;
+        const std::vector<AfbElementSignal>& inputSignals() const;
 		void setInputSignals(const std::vector<AfbElementSignal>& inputsignals);
 
 		const std::vector<AfbElementSignal>& outputSignals() const;
 		void setOutputSignals(const std::vector<AfbElementSignal>& outputsignals);
 
 		const std::vector<AfbElementParam>& params() const;
-		void setParams(const std::vector<AfbElementParam>& params);
+		void setParams(const std::vector<AfbElementParam>& constParams);
+
+		const std::vector<AfbElementParam>& constParams() const;
+		void setConstParams(const std::vector<AfbElementParam>& constParams);
 
 	private:
 		QUuid m_guid;
@@ -229,6 +249,7 @@ private:
 		std::vector<AfbElementSignal> m_outputSignals;
 
 		std::vector<AfbElementParam> m_params;
+		std::vector<AfbElementParam> m_constParams;
 	};
 
 	//

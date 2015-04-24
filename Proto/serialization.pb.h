@@ -1111,6 +1111,20 @@ class FblElement : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 opcode() const;
   inline void set_opcode(::google::protobuf::uint32 value);
 
+  // required int32 inputCount = 5;
+  inline bool has_inputcount() const;
+  inline void clear_inputcount();
+  static const int kInputCountFieldNumber = 5;
+  inline ::google::protobuf::int32 inputcount() const;
+  inline void set_inputcount(::google::protobuf::int32 value);
+
+  // required int32 outputCount = 6;
+  inline bool has_outputcount() const;
+  inline void clear_outputcount();
+  static const int kOutputCountFieldNumber = 6;
+  inline ::google::protobuf::int32 outputcount() const;
+  inline void set_outputcount(::google::protobuf::int32 value);
+
   // repeated .Proto.FblElementSignal inputSignals = 11;
   inline int inputsignals_size() const;
   inline void clear_inputsignals();
@@ -1157,19 +1171,25 @@ class FblElement : public ::google::protobuf::Message {
   inline void clear_has_caption();
   inline void set_has_opcode();
   inline void clear_has_opcode();
+  inline void set_has_inputcount();
+  inline void clear_has_inputcount();
+  inline void set_has_outputcount();
+  inline void clear_has_outputcount();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::Uuid* uuid_;
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
+  ::google::protobuf::uint32 opcode_;
+  ::google::protobuf::int32 inputcount_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > inputsignals_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > outputsignals_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
-  ::google::protobuf::uint32 opcode_;
+  ::google::protobuf::int32 outputcount_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1250,20 +1270,40 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline ::Proto::FblSignalType type() const;
   inline void set_type(::Proto::FblSignalType value);
 
+  // required int32 index = 3;
+  inline bool has_index() const;
+  inline void clear_index();
+  static const int kIndexFieldNumber = 3;
+  inline ::google::protobuf::int32 index() const;
+  inline void set_index(::google::protobuf::int32 value);
+
+  // required int32 size = 4;
+  inline bool has_size() const;
+  inline void clear_size();
+  static const int kSizeFieldNumber = 4;
+  inline ::google::protobuf::int32 size() const;
+  inline void set_size(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElementSignal)
  private:
   inline void set_has_caption();
   inline void clear_has_caption();
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_index();
+  inline void clear_has_index();
+  inline void set_has_size();
+  inline void clear_has_size();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::wstring* caption_;
   int type_;
+  ::google::protobuf::int32 index_;
+  ::google::protobuf::int32 size_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1387,6 +1427,20 @@ class FblElementParam : public ::google::protobuf::Message {
   inline bool visible() const;
   inline void set_visible(bool value);
 
+  // required int32 index = 8;
+  inline bool has_index() const;
+  inline void clear_index();
+  static const int kIndexFieldNumber = 8;
+  inline ::google::protobuf::int32 index() const;
+  inline void set_index(::google::protobuf::int32 value);
+
+  // required int32 size = 9;
+  inline bool has_size() const;
+  inline void clear_size();
+  static const int kSizeFieldNumber = 9;
+  inline ::google::protobuf::int32 size() const;
+  inline void set_size(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElementParam)
  private:
   inline void set_has_caption();
@@ -1403,6 +1457,10 @@ class FblElementParam : public ::google::protobuf::Message {
   inline void clear_has_highlimit();
   inline void set_has_visible();
   inline void clear_has_visible();
+  inline void set_has_index();
+  inline void clear_has_index();
+  inline void set_has_size();
+  inline void clear_has_size();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1413,9 +1471,11 @@ class FblElementParam : public ::google::protobuf::Message {
   bool visible_;
   ::Proto::FblParamValue* lowlimit_;
   ::Proto::FblParamValue* highlimit_;
+  ::google::protobuf::int32 index_;
+  ::google::protobuf::int32 size_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6202,6 +6262,50 @@ inline void FblElement::set_opcode(::google::protobuf::uint32 value) {
   opcode_ = value;
 }
 
+// required int32 inputCount = 5;
+inline bool FblElement::has_inputcount() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void FblElement::set_has_inputcount() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void FblElement::clear_has_inputcount() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void FblElement::clear_inputcount() {
+  inputcount_ = 0;
+  clear_has_inputcount();
+}
+inline ::google::protobuf::int32 FblElement::inputcount() const {
+  return inputcount_;
+}
+inline void FblElement::set_inputcount(::google::protobuf::int32 value) {
+  set_has_inputcount();
+  inputcount_ = value;
+}
+
+// required int32 outputCount = 6;
+inline bool FblElement::has_outputcount() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void FblElement::set_has_outputcount() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void FblElement::clear_has_outputcount() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void FblElement::clear_outputcount() {
+  outputcount_ = 0;
+  clear_has_outputcount();
+}
+inline ::google::protobuf::int32 FblElement::outputcount() const {
+  return outputcount_;
+}
+inline void FblElement::set_outputcount(::google::protobuf::int32 value) {
+  set_has_outputcount();
+  outputcount_ = value;
+}
+
 // repeated .Proto.FblElementSignal inputSignals = 11;
 inline int FblElement::inputsignals_size() const {
   return inputsignals_.size();
@@ -6340,6 +6444,50 @@ inline void FblElementSignal::set_type(::Proto::FblSignalType value) {
   assert(::Proto::FblSignalType_IsValid(value));
   set_has_type();
   type_ = value;
+}
+
+// required int32 index = 3;
+inline bool FblElementSignal::has_index() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void FblElementSignal::set_has_index() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void FblElementSignal::clear_has_index() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void FblElementSignal::clear_index() {
+  index_ = 0;
+  clear_has_index();
+}
+inline ::google::protobuf::int32 FblElementSignal::index() const {
+  return index_;
+}
+inline void FblElementSignal::set_index(::google::protobuf::int32 value) {
+  set_has_index();
+  index_ = value;
+}
+
+// required int32 size = 4;
+inline bool FblElementSignal::has_size() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void FblElementSignal::set_has_size() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void FblElementSignal::clear_has_size() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void FblElementSignal::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+inline ::google::protobuf::int32 FblElementSignal::size() const {
+  return size_;
+}
+inline void FblElementSignal::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -6579,6 +6727,50 @@ inline bool FblElementParam::visible() const {
 inline void FblElementParam::set_visible(bool value) {
   set_has_visible();
   visible_ = value;
+}
+
+// required int32 index = 8;
+inline bool FblElementParam::has_index() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void FblElementParam::set_has_index() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void FblElementParam::clear_has_index() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void FblElementParam::clear_index() {
+  index_ = 0;
+  clear_has_index();
+}
+inline ::google::protobuf::int32 FblElementParam::index() const {
+  return index_;
+}
+inline void FblElementParam::set_index(::google::protobuf::int32 value) {
+  set_has_index();
+  index_ = value;
+}
+
+// required int32 size = 9;
+inline bool FblElementParam::has_size() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void FblElementParam::set_has_size() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void FblElementParam::clear_has_size() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void FblElementParam::clear_size() {
+  size_ = 0;
+  clear_has_size();
+}
+inline ::google::protobuf::int32 FblElementParam::size() const {
+  return size_;
+}
+inline void FblElementParam::set_size(::google::protobuf::int32 value) {
+  set_has_size();
+  size_ = value;
 }
 
 // -------------------------------------------------------------------

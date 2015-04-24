@@ -53,7 +53,7 @@ bool ReportView::preview(MeasureView* pMeasureView)
         return false;
     }
 
-    QString reportPath = theOptions.report().m_path + "/" + reportFileName;
+    QString reportPath = theOptions.report().m_path + QDir::separator() + reportFileName;
 
     // create report
     //

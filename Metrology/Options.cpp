@@ -411,7 +411,7 @@ bool ReportHeaderBase::reportsIsExist()
     {
         REPORT_HEADER header = m_headerList[r];
 
-        QString path = theOptions.report().m_path + "/" + header.m_reportFile;
+        QString path = theOptions.report().m_path + QDir::separator() + header.m_reportFile;
         if (QFile::exists(path) == false)
         {
             dontExistReports.append("- " + header.m_reportFile + "\n");
@@ -1150,8 +1150,8 @@ BackupOption::~BackupOption()
 
 bool BackupOption::createBackup()
 {
-    QString sourcePath = theOptions.database().m_path + "/" + DATABASE_NAME;
-    QString destPath = m_path + "/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + DATABASE_NAME;
+    QString sourcePath = theOptions.database().m_path + QDir::separator() + DATABASE_NAME;
+    QString destPath = m_path + QDir::separator() + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + DATABASE_NAME;
 
     if (QFile::copy(sourcePath, destPath) == false)
     {
@@ -1186,7 +1186,7 @@ void BackupOption::createBackupOnExit()
 void BackupOption::load()
 {
     QTemporaryDir tmpDir;
-    QString path = tmpDir.path().left( tmpDir.path().lastIndexOf("/", -1) );
+    QString path = tmpDir.path().left( tmpDir.path().lastIndexOf(QDir::separator(), -1) );
 
     QSettings s;
 
