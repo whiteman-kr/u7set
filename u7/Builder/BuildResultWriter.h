@@ -32,6 +32,7 @@ namespace Builder
 
 	class BuildSubdirectory
 	{
+	private:
 		QString	m_name;
 		QVector<BuildFile*> m_file;
 
@@ -40,7 +41,8 @@ namespace Builder
 		~BuildSubdirectory();
 
 		int addFile(QString fileName);
-		void setFileInfo(int fileIndex, qint64 size, const QString& md5);
+
+		void setFileInfo(int fileIndex, const QFile& file);
 
 		int fileCount() const { return m_file.count(); }
 
@@ -87,6 +89,8 @@ namespace Builder
 
 		bool writeFilesSection();
 
+		BuildSubdirectory* getBuildSubdirectory(QString subDir);
+
 	public:
 		explicit BuildResultWriter(QObject *parent = 0);
 
@@ -94,6 +98,7 @@ namespace Builder
 		bool finish();
 
 		bool addFile(QString subDir, QString fileName, QByteArray& data);
+		bool addFile(QString subDir, QString fileName, QStringList stringList);
 
 	signals:
 

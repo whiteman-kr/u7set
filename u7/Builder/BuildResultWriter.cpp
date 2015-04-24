@@ -50,13 +50,20 @@ namespace Builder
 	}
 
 
-	void BuildSubdirectory::setFileInfo(int fileIndex, qint64 size, const QString& md5)
+	void BuildSubdirectory::setFileInfo(int fileIndex, const QFile& file)
 	{
 		if (fileIndex < 0 || fileIndex >= m_file.count())
 		{
 			assert(false);
 			return;
 		}
+
+		QFileInfo fi(file);
+
+		qint64 fileSize = fi.size();
+
+		QString md5 = QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
+
 
 		m_file[fileIndex]->setInfo(size, md5);
 	}
@@ -338,10 +345,8 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(QString subDir, QString fileName, QByteArray& data)
+	BuildSubdirectory* BuildResultWriter::getBuildSubdirectory(QString subDir)
 	{
-		assert(!fileName.isEmpty());
-
 		BuildSubdirectory* buildSubdirectory = nullptr;
 
 		if (m_subdirectory.contains(subDir))
@@ -354,14 +359,24 @@ namespace Builder
 			m_subdirectory.insert(subDir, buildSubdirectory);
 		}
 
+		return buildSubdirectory;
+	}
+
+
+	bool BuildResultWriter::addFile(QString subDir, QString fileName, QByteArray& data)
+	{
+		assert(!fileName.isEmpty());
+
+		BuildSubdirectory* buildSubdirectory = getBuildSubdirectory(subDir);
+
 		int fileIndex = buildSubdirectory->addFile(fileName);
 
 		if (fileIndex == -1)
 		{
-
 			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
 
 			m_log->writeError(msg, true, true);
+
 			return false;
 		}
 
@@ -376,17 +391,44 @@ namespace Builder
 
 		file.close();
 
-		QFileInfo fi(file);
+		buildSubdirectory->setFileInfo(fileIndex, file);
 
-		qint64 fileSize = fi.size();
+		return true;
+	}
 
-		QString md5 = QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
 
-		buildSubdirectory->setFileInfo(fileIndex, fileSize, md5);
+	bool BuildResultWriter::addFile(QString subDir, QString fileName, QStringList stringList)
+	{
+		assert(!fileName.isEmpty());
 
-		/*msg = tr("File was written: ") + formatFileName(subDir, fileName);
+		BuildSubdirectory* buildSubdirectory = getBuildSubdirectory(subDir);
 
-		m_log->writeMessage(msg, false);*/
+		int fileIndex = buildSubdirectory->addFile(fileName);
+
+		if (fileIndex == -1)
+		{
+			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
+
+			m_log->writeError(msg, true, true);
+
+			return false;
+		}
+
+		QFile file;
+
+		if (createFile(subDir, fileName, file, true) == false)
+		{
+			return false;
+		}
+
+		for(auto string : stringList)
+		{
+			file.write(string);
+		}
+
+		file.close();
+
+		buildSubdirectory->setFileInfo(fileIndex, file);
 
 		return true;
 	}
