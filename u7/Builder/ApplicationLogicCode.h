@@ -188,10 +188,13 @@ namespace Builder
 		virtual ~CodeItem();
 
 		virtual QString toString() = 0;
-		virtual int getSizeW() { return 0; }
+		virtual int getSizeW()= 0;
 
 		virtual bool isCommand() = 0;
 		virtual bool isComment() = 0;
+
+		virtual void generateBinCode(ByteOrder byteOrder) = 0;
+		virtual QByteArray getBinCode() = 0;
 
 		void setComment(const QString& comment) { m_comment = comment; }
 		QString getComment() { return m_comment; }
@@ -207,6 +210,10 @@ namespace Builder
 		Comment(const QString& comment) { setComment(comment); }
 
 		QString toString() override;
+		int getSizeW() override { return 0; }
+
+		void generateBinCode(ByteOrder) override {}
+		QByteArray getBinCode() override { return QByteArray(); }
 
 		bool isCommand() override { return false; }
 		bool isComment() override { return true; }
@@ -251,7 +258,8 @@ namespace Builder
 		bool isCommand() override { return true; }
 		bool isComment() override { return false; }
 
-		QByteArray getBinCode(ByteOrder byteOrder);
+		void generateBinCode(ByteOrder byteOrder) override;
+		QByteArray getBinCode() override { return m_binCode; }
 	};
 
 
@@ -274,8 +282,10 @@ namespace Builder
 
 		void clear();
 
-		void toStringList(QStringList& asmCode);
-		void toByteArray(QByteArray& byteArray);
+		void generateBinCode();
+
+		void getAsmCode(QStringList& asmCode);
+		void getBinCode(QByteArray& byteArray);
 
 		void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 	};

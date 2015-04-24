@@ -245,17 +245,21 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeResult()
 	{
-		QStringList asmCode;
+		bool result = true;
 
-		m_code.toStringList(asmCode);
-
-		bool result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.asm").arg(m_lm->caption()), asmCode);
+		m_code.generateBinCode();
 
 		QByteArray binCode;
 
-		m_code.toByteArray(binCode);
+		m_code.getBinCode(binCode);
 
 		result &= m_resultWriter->addFile(m_lm->subSysID(), QString("%1.alc").arg(m_lm->caption()), binCode);
+
+		QStringList asmCode;
+
+		m_code.getAsmCode(asmCode);
+
+		result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.asm").arg(m_lm->caption()), asmCode);
 
 		return result;
 	}

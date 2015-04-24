@@ -256,13 +256,13 @@ namespace Builder
 	}
 
 
-	QByteArray Command::getBinCode(ByteOrder byteOrder)
+	void Command::generateBinCode(ByteOrder byteOrder)
 	{
-		QByteArray binCode;
+		m_binCode.clear();
 
 		int cmdSizeW = getSizeW();
 
-		binCode.resize(cmdSizeW * sizeof(quint16));
+		m_binCode.resize(cmdSizeW * sizeof(quint16));
 
 		for(int i = 0; i < cmdSizeW; i++)
 		{
@@ -272,19 +272,17 @@ namespace Builder
 			{
 				// Little Endian byte order
 				//
-				binCode[i * 2] = cmdWord & 0x00FF;
-				binCode[i * 2 + 1] = (cmdWord & 0xFF00) >> 8;
+				m_binCode[i * 2] = cmdWord & 0x00FF;
+				m_binCode[i * 2 + 1] = (cmdWord & 0xFF00) >> 8;
 			}
 			else
 			{
 				// Big Endian byte order
 				//
-				binCode[i * 2] = (cmdWord & 0xFF00) >> 8;
-				binCode[i * 2 + 1] = cmdWord & 0x00FF;
+				m_binCode[i * 2] = (cmdWord & 0xFF00) >> 8;
+				m_binCode[i * 2 + 1] = cmdWord & 0x00FF;
 			}
 		}
-
-		return binCode;
 	}
 
 
@@ -298,15 +296,13 @@ namespace Builder
 			return str;
 		}
 
-		unsigned int word = m_binCode[wordNo * 2 + 1] & 0x00FF;
+		unsigned int lowByte = m_binCode[wordNo * 2];
+		unsigned int highByte = m_binCode[wordNo * 2 + 1];
 
-		word <<= 8;
+		lowByte &= 0x00FF;
+		highByte &= 0x00FF;
 
-		word |= m_binCode[wordNo * 2] & 0x00FF;
-
-		word &= 0xFFFF;
-
-		str.sprintf("%04X", word);
+		str.sprintf("%02X%02X", lowByte, highByte);
 
 		return str;
 	}
@@ -468,7 +464,22 @@ namespace Builder
 	}
 
 
-	void ApplicationLogicCode::toStringList(QStringList& asmCode)
+	void ApplicationLogicCode::generateBinCode()
+	{
+		for(CodeItem* codeItem : m_codeItems)
+		{
+			if (codeItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			codeItem->generateBinCode(m_byteOrder);
+		}
+	}
+
+
+	void ApplicationLogicCode::getAsmCode(QStringList& asmCode)
 	{
 		asmCode.clear();
 
@@ -489,7 +500,7 @@ namespace Builder
 	}
 
 
-	void ApplicationLogicCode::toByteArray(QByteArray& byteArray)
+	void ApplicationLogicCode::getBinCode(QByteArray& byteArray)
 	{
 		byteArray.clear();
 
@@ -500,11 +511,6 @@ namespace Builder
 			if (codeItem == nullptr)
 			{
 				assert(false);
-				continue;
-			}
-
-			if (codeItem->isComment())
-			{
 				continue;
 			}
 
@@ -521,12 +527,7 @@ namespace Builder
 				continue;
 			}
 
-			if (codeItem->isComment())
-			{
-				continue;
-			}
-
-
+			byteArray.append(codeItem->getBinCode());
 		}
 	}
 }
