@@ -89,18 +89,18 @@ public:
 	bool checkoutSignal(int index);
 	bool checkoutSignal(int index, QString& message);
 	bool editSignal(int row);
+	void saveSignal(Signal& signal);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
 	void deleteSignal(int signalID);
 
 signals:
-	void cellsSizeChanged();
 	void setCheckedoutSignalActionsVisibility(bool state);
 	void aboutToClearSignals();
 	void signalsRestored();
 
 public slots:
 	void loadSignals();
-	void loadSignal(int row);
+	void loadSignal(int row, bool updateView = true);
 	void addSignal();
 	void showError(QString message);
 
@@ -234,6 +234,8 @@ public slots:
 
 	void undoSignalChanges();
 	void showPendingChanges();
+
+	void updateCellsSize(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
 	void changeSignalActionsVisibility();
 

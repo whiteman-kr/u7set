@@ -117,7 +117,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		return nullptr;
 	}
 
-	m_model->loadSignal(row);
+	m_model->loadSignal(row, false);
 
 	switch (col)
 	{
@@ -376,12 +376,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 			return;
 	}
 
-	ObjectState state;
-	m_model->dbController()->setSignalWorkcopy(&s, &state, m_model->parrentWindow());
-	if (state.errCode != ERR_SIGNAL_OK)
-	{
-		m_model->showError(state);
-	}
+	m_model->saveSignal(s);
 }
 
 void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
@@ -913,16 +908,19 @@ void SignalsModel::loadSignals()
 			emit signalsRestored();
 		}
 
-		emit cellsSizeChanged();
+		emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
 	}
 
 	changeCheckedoutSignalActionsVisibility();
 }
 
-void SignalsModel::loadSignal(int row)
+void SignalsModel::loadSignal(int row, bool updateView)
 {
 	dbController()->getLatestSignal(key(row), &m_signalSet[row], parrentWindow());
-	emit cellsSizeChanged();
+	if (updateView)
+	{
+		emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+	}
 }
 
 void SignalsModel::clearSignals()
@@ -936,8 +934,6 @@ void SignalsModel::clearSignals()
 
 	m_dataFormatInfo.clear();
 	m_unitInfo.clear();
-
-	emit cellsSizeChanged();
 }
 
 QVector<int> SignalsModel::getSameChannelSignals(int row)
@@ -1076,7 +1072,7 @@ void SignalsModel::addSignal()
 				m_signalSet.append(s->ID(), s);
 			}
 			endInsertRows();
-			emit cellsSizeChanged();
+			emit dataChanged(createIndex(m_signalSet.count() - resultSignalVector.count(), 0), createIndex(m_signalSet.count() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
 		}
 	}
 
@@ -1090,7 +1086,7 @@ void SignalsModel::showError(QString message)
 
 bool SignalsModel::editSignal(int row)
 {
-	loadSignal(row);
+	loadSignal(row, false);
 
 	Signal signal = m_signalSet[row];
 	int readOnly = false;
@@ -1098,6 +1094,7 @@ bool SignalsModel::editSignal(int row)
 	{
 		readOnly = true;
 	}
+
 	SignalPropertiesDialog dlg(signal, signal.type(), m_dataFormatInfo, m_unitInfo, readOnly, this, m_parentWindow);
 
 	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
@@ -1117,6 +1114,18 @@ bool SignalsModel::editSignal(int row)
 
 	loadSignal(row);	//Signal could be checked out but not changed
 	return false;
+}
+
+void SignalsModel::saveSignal(Signal& signal)
+{
+	ObjectState state;
+	dbController()->setSignalWorkcopy(&signal, &state, parrentWindow());
+	if (state.errCode != ERR_SIGNAL_OK)
+	{
+		showError(state);
+	}
+	int row = m_signalSet.keyIndex(signal.ID());
+	emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1));
 }
 
 void SignalsModel::deleteSignalGroups(const QSet<int>& signalGroupIDs)
@@ -1188,14 +1197,8 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
-	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeColumnsToContents);
-	connect(m_signalsModel, &SignalsModel::dataChanged, m_signalsView, &QTableView::resizeRowsToContents);
-	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeColumnsToContents);
-	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, m_signalsView, &QTableView::resizeRowsToContents);
-	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeColumnsToContents);
-	connect(m_signalsView->itemDelegate(), &SignalsDelegate::closeEditor, m_signalsView, &QTableView::resizeRowsToContents);
+	connect(m_signalsModel, &SignalsModel::dataChanged, this, &SignalsTabPage::updateCellsSize);
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
-	connect(delegate, &SignalsDelegate::closeEditor, m_signalsModel, &SignalsModel::loadSignals);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
@@ -1362,6 +1365,19 @@ void SignalsTabPage::showPendingChanges()
 	}
 
 	m_signalsModel->loadSignals();
+}
+
+void SignalsTabPage::updateCellsSize(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+	for (int row = topLeft.row(); row <= bottomRight.row(); row++)
+	{
+		m_signalsView->resizeRowToContents(row);
+	}
+
+	for (int column = topLeft.column(); column <= bottomRight.column(); column++)
+	{
+		m_signalsView->resizeColumnToContents(column);
+	}
 }
 
 void SignalsTabPage::changeSignalActionsVisibility()
