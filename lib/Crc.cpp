@@ -2,23 +2,24 @@
 
 #include <assert.h>
 #include <QtEndian>
+#include <vector>
 
 // Using normal poly 0x000000000000001B
 
-qint64 Crc::crc64(const void* src, qint64 size)
+quint64 Crc::crc64(const void* src, qint64 size)
 {
 	return Crc::crc64Normal(src, size);
 	//return Crc::crc64Reverse(src, size);
 }
 
-qint64 Crc::setDataBlockCrc(uint16_t frameIndex, void* datablock, int blockSize)
+quint64 Crc::setDataBlockCrc(quint16 frameIndex, void* datablock, int blockSize)
 {
 // !!! ATTENTION !!!
 // HEADER CRC IS CALCULATED BY NORMAL POLY, BUT STORED IN BIG-ENDIAN
 //
 //#pragma message (__FUNCTION__" !!! ATTENTION !!! HEADER CRC IS CALCULATED BY NORMAL POLY, BUT STORED IN BIG-ENDIAN. SUPPOSED TO BE REMOVED IN THE FUTURE.")
 
-	std::vector<uint8_t> buffer;
+	std::vector<quint8> buffer;
 	buffer.resize(blockSize + sizeof(decltype(frameIndex)), 0);
 	
 	*reinterpret_cast<decltype(frameIndex)*>(buffer.data()) = qToBigEndian(frameIndex);
@@ -39,7 +40,7 @@ qint64 Crc::setDataBlockCrc(uint16_t frameIndex, void* datablock, int blockSize)
 	return crc;
 }
 
-qint64 Crc::crc64Normal(const void* src, qint64 size)
+quint64 Crc::crc64Normal(const void* src, qint64 size)
 {
 	const unsigned char* p = static_cast<const unsigned char*>(src);
 	unsigned long long crc = 0xFFFFFFFFFFFFFFFF;
@@ -57,7 +58,7 @@ qint64 Crc::crc64Normal(const void* src, qint64 size)
 	return crc;
 }
 
-qint64 Crc::crc64Reverse(const void* src, qint64 size)
+quint64 Crc::crc64Reverse(const void* src, qint64 size)
 {
 	const unsigned char* p = static_cast<const unsigned char*>(src);
 	unsigned long long crc = 0xFFFFFFFFFFFFFFFF;
