@@ -274,7 +274,7 @@ namespace Builder
 
 		void clear();
 
-		void toString();
+		void toStringList(QStringList& asmCode);
 
 		void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 	};

@@ -465,21 +465,23 @@ namespace Builder
 	}
 
 
-	void ApplicationLogicCode::toString()
+	void ApplicationLogicCode::toStringList(QStringList& asmCode)
 	{
-		int count = m_codeItems.count();
+		asmCode.clear();
 
-		for(int i = 0; i < count; i++)
+		for(auto codeItem : m_codeItems)
 		{
-			if (m_codeItems[i] == nullptr)
+			if (codeItem == nullptr)
 			{
 				assert(false);
 				continue;
 			}
 
-			QString str = m_codeItems[i]->toString();
+			QString str = codeItem->toString();
 
 			qDebug() << str;
+
+			asmCode.append(str);
 		}
 	}
 }

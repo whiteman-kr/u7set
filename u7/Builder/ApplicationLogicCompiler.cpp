@@ -237,9 +237,19 @@ namespace Builder
 			m_log->writeError(msg, false, false);
 		}
 
-		m_code.toString();
+		writeResult();
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::writeResult()
+	{
+		QStringList asmCode;
+
+		m_code.toStringList(asmCode);
+
+		m_resultWriter->addFile("", QString("%1.asm").arg(m_lm->objectName()), asmCode);
 	}
 
 
