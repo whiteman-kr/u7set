@@ -1402,7 +1402,7 @@ bool Database::open()
                 return false;
             }
 
-            m_database.setDatabaseName(path + "\\" + DATABASE_NAME );
+            m_database.setDatabaseName(path + QDir::separator() + DATABASE_NAME);
 
             break;
 

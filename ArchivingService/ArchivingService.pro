@@ -54,3 +54,5 @@ SOURCES += main.cpp
 
 HEADERS += \
     version.h
+
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG

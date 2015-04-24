@@ -1,5 +1,7 @@
 #include "MainWindow.h"
 
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QSettings>
 #include <QMessageBox>
 #include <QMenuBar>
@@ -60,6 +62,7 @@ bool MainWindow::createInterface()
 {
     setWindowIcon(QIcon(":/icons/Metrology.ico"));
     setWindowTitle(tr("Metrology"));
+    move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
     createActions();
     createMenu();

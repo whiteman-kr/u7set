@@ -283,12 +283,14 @@ int main(int argc, char *argv[])
 	if (fileCount > 0)
 	{
 		versionFile << "#define BUILD_STATE = \"Local build\"\n"
+					<< "#ifndef Q_DEBUG\n"
 					<< "#ifdef _MSC_VER\n"
 					<< " #pragma warning ()\n"
 					<< " #pragma message (\" --- Local build is used, push changes in git repository and build release --- \")\n"
 					<< "#else\n"
 					<< " #warning  --- Local build is used, push changes in git repository and build release --- \n"
-					<< "#endif\t//_MSC_VER\n";
+					<< "#endif\t//_MSC_VER\n"
+					<< "#endif\t//NDEBUG\n";
 	}
 	else
 	{

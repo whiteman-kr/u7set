@@ -74,6 +74,8 @@ FORMS    += \
 
 unix:QMAKE_CXXFLAGS += -std=c++11
 
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
 
 # Visual Leak Detector
 #
