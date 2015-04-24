@@ -315,7 +315,7 @@ namespace Afbl
         }
         else
         {
-            setIndex(0);
+			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Index found"));
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
@@ -324,7 +324,7 @@ namespace Afbl
         }
         else
         {
-            setSize(0);
+			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Size found"));
         }
 
         QXmlStreamReader::TokenType endToken = xmlReader->readNext();
@@ -488,7 +488,7 @@ namespace Afbl
         }
         else
         {
-            setIndex(0);
+			xmlReader->raiseError(QObject::tr("AfbElementParam - No Index found"));
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
@@ -497,7 +497,7 @@ namespace Afbl
         }
         else
         {
-            setSize(0);
+			xmlReader->raiseError(QObject::tr("AfbElementParam - No Size found"));
         }
 
         // Read values
@@ -792,6 +792,7 @@ namespace Afbl
 		std::vector<AfbElementSignal> inputSignals;
 		std::vector<AfbElementSignal> outputSignals;
 		std::vector<AfbElementParam> params;
+		std::vector<AfbElementParam> constParams;
 
 		while (xmlReader->readNextStartElement())
 		{
@@ -850,6 +851,27 @@ namespace Afbl
 				continue;
 			}
 
+			if (xmlReader->name() == "ConstParams")
+			{
+				// Read params
+				//
+				while (xmlReader->readNextStartElement())
+				{
+					if (xmlReader->name() == "AfbElementParam")
+					{
+						AfbElementParam afbParam;
+						afbParam.loadFromXml(xmlReader);
+						constParams.push_back(afbParam);
+					}
+					else
+					{
+						xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
+						xmlReader->skipCurrentElement();
+					}
+				}
+				continue;
+			}
+
 			xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
 			xmlReader->skipCurrentElement();
 		}
@@ -857,6 +879,7 @@ namespace Afbl
 		setInputSignals(inputSignals);
 		setOutputSignals(outputSignals);
 		setParams(params);
+		setConstParams(constParams);
 
 		return !xmlReader->error();
 
@@ -923,6 +946,13 @@ namespace Afbl
 			s.saveToXml(xmlWriter);
 		}
 		xmlWriter->writeEndElement(); //"Params"
+
+		xmlWriter->writeStartElement("ConstParams");
+		for (auto s : constParams())
+		{
+			s.saveToXml(xmlWriter);
+		}
+		xmlWriter->writeEndElement(); //"ConstParams"
 
 		xmlWriter->writeEndElement(); //"AfbElement"
 
@@ -1152,6 +1182,16 @@ namespace Afbl
 		m_params = params;
 	}
 
+	// ConstParams
+	//
+	const std::vector<AfbElementParam>& AfbElement::constParams() const
+	{
+		return m_constParams;
+	}
+	void AfbElement::setConstParams(const std::vector<AfbElementParam>& constParams)
+	{
+		m_constParams = constParams;
+	}
 
 	//
 	//

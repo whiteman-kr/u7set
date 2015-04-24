@@ -234,7 +234,10 @@ private:
 		void setOutputSignals(const std::vector<AfbElementSignal>& outputsignals);
 
 		const std::vector<AfbElementParam>& params() const;
-		void setParams(const std::vector<AfbElementParam>& params);
+		void setParams(const std::vector<AfbElementParam>& constParams);
+
+		const std::vector<AfbElementParam>& constParams() const;
+		void setConstParams(const std::vector<AfbElementParam>& constParams);
 
 	private:
 		QUuid m_guid;
@@ -242,13 +245,11 @@ private:
 		QString m_caption;
 		unsigned int m_opcode;
 
-        int m_inputCount;
-        int m_outputCount;
-
 		std::vector<AfbElementSignal> m_inputSignals;
 		std::vector<AfbElementSignal> m_outputSignals;
 
 		std::vector<AfbElementParam> m_params;
+		std::vector<AfbElementParam> m_constParams;
 	};
 
 	//
