@@ -175,13 +175,16 @@ void DialogAfblEditor::on_m_add_clicked()
 	std::vector<AfbElementParam> afbParams;
 	afbParams.push_back(param1);
 	afbParams.push_back(param2);
-	afbParams.push_back(param3);
+
+	std::vector<AfbElementParam> afbConstParams;
+	afbConstParams.push_back(param3);
 
 	//
 
 	afb.setInputSignals(afbSignals);
 	afb.setOutputSignals(afbSignals);
 	afb.setParams(afbParams);
+	afb.setConstParams(afbConstParams);
 
 	// Store and add to the database
 

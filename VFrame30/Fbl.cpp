@@ -219,6 +219,8 @@ namespace Afbl
 	AfbElementSignal::AfbElementSignal(void)
 	{
 		m_type = AfbSignalType::Analog;
+        m_index = 0;
+        m_size = 0;
 	}
 
 	AfbElementSignal::~AfbElementSignal(void)
@@ -232,6 +234,8 @@ namespace Afbl
 		assert(false);
 		return false;
 
+        //message->set_index(index());
+        //message->set_size(size());
 //		Proto::Write(message->mutable_caption(), m_caption);
 //		message->set_type(static_cast<Proto::FblSignalType>(m_type));
 //		return true;
@@ -258,6 +262,8 @@ namespace Afbl
 		xmlWriter->writeStartElement("AfbElementSignal");
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Type", type() == AfbSignalType::Analog ? "Analog" : "Discrete");
+        xmlWriter->writeAttribute("Index", QString::number(index()));
+        xmlWriter->writeAttribute("Size", QString::number(size()));
 		xmlWriter->writeEndElement();
 
 		return true;
@@ -303,7 +309,25 @@ namespace Afbl
 			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Type found"));
 		}
 
-		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
+        if (xmlReader->attributes().hasAttribute("Index"))
+        {
+            setIndex(xmlReader->attributes().value("Index").toInt());
+        }
+        else
+        {
+			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Index found"));
+        }
+
+        if (xmlReader->attributes().hasAttribute("Size"))
+        {
+            setSize(xmlReader->attributes().value("Size").toInt());
+        }
+        else
+        {
+			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Size found"));
+        }
+
+        QXmlStreamReader::TokenType endToken = xmlReader->readNext();
 		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
 
 		return !xmlReader->hasError();
@@ -332,15 +356,38 @@ namespace Afbl
 		m_type = type;
 	}
 
-	//
+    int AfbElementSignal::index() const
+    {
+        return m_index;
+    }
+
+    void AfbElementSignal::setIndex(int value)
+    {
+        m_index = value;
+    }
+
+    int AfbElementSignal::size() const
+    {
+        return m_size;
+    }
+
+    void AfbElementSignal::setSize(int value)
+    {
+        m_size = value;
+    }
+
+
+    //
 	//
 	//							CFblElementParam		
 	//
 	//
 
 	AfbElementParam::AfbElementParam(void):
-		m_visible(true)
-	{
+        m_visible(true),
+        m_index(0),
+        m_size(0)
+    {
 	}
 
 	AfbElementParam::~AfbElementParam(void)
@@ -370,6 +417,9 @@ namespace Afbl
 		m_lowLimit.SaveData(message->mutable_lowlimit());
 		m_highLimit.SaveData(message->mutable_highlimit());
 
+        message->set_index(index());
+        message->set_size(size());
+
 		return true;
 	}
 
@@ -384,6 +434,9 @@ namespace Afbl
 
 		m_lowLimit.LoadData(message.lowlimit());
 		m_highLimit.LoadData(message.highlimit());
+
+        setIndex(message.index());
+        setSize(message.size());
 
 		return true;
 	}
@@ -429,7 +482,25 @@ namespace Afbl
 			xmlReader->raiseError(QObject::tr("AfbElementParam - No Type found"));
 		}
 
-		// Read values
+        if (xmlReader->attributes().hasAttribute("Index"))
+        {
+            setIndex(xmlReader->attributes().value("Index").toInt());
+        }
+        else
+        {
+			xmlReader->raiseError(QObject::tr("AfbElementParam - No Index found"));
+        }
+
+        if (xmlReader->attributes().hasAttribute("Size"))
+        {
+            setSize(xmlReader->attributes().value("Size").toInt());
+        }
+        else
+        {
+			xmlReader->raiseError(QObject::tr("AfbElementParam - No Size found"));
+        }
+
+        // Read values
 		//
 		while (xmlReader->readNextStartElement())
 		{
@@ -474,6 +545,8 @@ namespace Afbl
 		xmlWriter->writeStartElement("AfbElementParam");
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Visible", visible() ? "1" : "0");
+        xmlWriter->writeAttribute("Index", QString::number(index()));
+        xmlWriter->writeAttribute("Size", QString::number(size()));
 
 		switch (type())
 		{
@@ -593,7 +666,27 @@ namespace Afbl
 		m_highLimit = highLimit;
 	}
 
-	//
+    int AfbElementParam::index() const
+    {
+        return m_index;
+    }
+
+    void AfbElementParam::setIndex(int value)
+    {
+        m_index = value;
+    }
+
+    int AfbElementParam::size() const
+    {
+        return m_size;
+    }
+
+    void AfbElementParam::setSize(int value)
+    {
+        m_size = value;
+    }
+
+    //
 	//
 	//							FblElement		
 	//
@@ -699,6 +792,7 @@ namespace Afbl
 		std::vector<AfbElementSignal> inputSignals;
 		std::vector<AfbElementSignal> outputSignals;
 		std::vector<AfbElementParam> params;
+		std::vector<AfbElementParam> constParams;
 
 		while (xmlReader->readNextStartElement())
 		{
@@ -757,6 +851,27 @@ namespace Afbl
 				continue;
 			}
 
+			if (xmlReader->name() == "ConstParams")
+			{
+				// Read params
+				//
+				while (xmlReader->readNextStartElement())
+				{
+					if (xmlReader->name() == "AfbElementParam")
+					{
+						AfbElementParam afbParam;
+						afbParam.loadFromXml(xmlReader);
+						constParams.push_back(afbParam);
+					}
+					else
+					{
+						xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
+						xmlReader->skipCurrentElement();
+					}
+				}
+				continue;
+			}
+
 			xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
 			xmlReader->skipCurrentElement();
 		}
@@ -764,6 +879,7 @@ namespace Afbl
 		setInputSignals(inputSignals);
 		setOutputSignals(outputSignals);
 		setParams(params);
+		setConstParams(constParams);
 
 		return !xmlReader->error();
 
@@ -830,6 +946,13 @@ namespace Afbl
 			s.saveToXml(xmlWriter);
 		}
 		xmlWriter->writeEndElement(); //"Params"
+
+		xmlWriter->writeStartElement("ConstParams");
+		for (auto s : constParams())
+		{
+			s.saveToXml(xmlWriter);
+		}
+		xmlWriter->writeEndElement(); //"ConstParams"
 
 		xmlWriter->writeEndElement(); //"AfbElement"
 
@@ -1059,6 +1182,16 @@ namespace Afbl
 		m_params = params;
 	}
 
+	// ConstParams
+	//
+	const std::vector<AfbElementParam>& AfbElement::constParams() const
+	{
+		return m_constParams;
+	}
+	void AfbElement::setConstParams(const std::vector<AfbElementParam>& constParams)
+	{
+		m_constParams = constParams;
+	}
 
 	//
 	//
