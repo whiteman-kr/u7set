@@ -75,6 +75,8 @@ include(../qtsingleapplication/src/qtsingleapplication.pri)
 
 gcc:QMAKE_CXXFLAGS += -std=c++11
 
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
 
 # Visual Leak Detector
 #

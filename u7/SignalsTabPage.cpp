@@ -264,47 +264,50 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 	}
 	QLineEdit* le = dynamic_cast<QLineEdit*>(editor);
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
+
+	Signal& s = m_signalSet[row];
+
 	switch (col)
 	{
 		// LineEdit
 		//
-		case SC_STR_ID: if (le) le->setText(m_signalSet[row].strID()); break;
-		case SC_EXT_STR_ID: if (le) le->setText(m_signalSet[row].extStrID()); break;
-		case SC_NAME: if (le) le->setText(m_signalSet[row].name()); break;
-		case SC_DEVICE_STR_ID: if (le) le->setText(m_signalSet[row].deviceStrID()); break;
+		case SC_STR_ID: if (le) le->setText(s.strID()); break;
+		case SC_EXT_STR_ID: if (le) le->setText(s.extStrID()); break;
+		case SC_NAME: if (le) le->setText(s.name()); break;
+		case SC_DEVICE_STR_ID: if (le) le->setText(s.deviceStrID()); break;
 
-		case SC_DATA_SIZE: if (le) le->setText(QString::number(m_signalSet[row].dataSize())); break;
-		case SC_LOW_ADC: if (le) le->setText(QString::number(m_signalSet[row].lowADC())); break;
-		case SC_HIGH_ADC: if (le) le->setText(QString::number(m_signalSet[row].highADC())); break;
-		case SC_NORMAL_STATE: if (le) le->setText(QString::number(m_signalSet[row].normalState())); break;
-		case SC_DECIMAL_PLACES: if (le) le->setText(QString::number(m_signalSet[row].decimalPlaces())); break;
+		case SC_DATA_SIZE: if (le) le->setText(QString::number(s.dataSize())); break;
+		case SC_LOW_ADC: if (le) le->setText(QString::number(s.lowADC())); break;
+		case SC_HIGH_ADC: if (le) le->setText(QString::number(s.highADC())); break;
+		case SC_NORMAL_STATE: if (le) le->setText(QString::number(s.normalState())); break;
+		case SC_DECIMAL_PLACES: if (le) le->setText(QString::number(s.decimalPlaces())); break;
 
-		case SC_LOW_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].lowLimit())); break;
-		case SC_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].highLimit())); break;
-		case SC_ADJUSTMENT: if (le) le->setText(QString("%1").arg(m_signalSet[row].adjustment())); break;
-		case SC_DROP_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].dropLimit())); break;
-		case SC_EXCESS_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].excessLimit())); break;
-		case SC_UNBALANCE_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].unbalanceLimit())); break;
-		case SC_INPUT_LOW_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].inputLowLimit())); break;
-		case SC_INPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].inputHighLimit())); break;
-		case SC_OUTPUT_LOW_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].outputLowLimit())); break;
-		case SC_OUTPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(m_signalSet[row].outputHighLimit())); break;
-		case SC_APERTURE: if (le) le->setText(QString("%1").arg(m_signalSet[row].aperture())); break;
-		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(m_signalSet[row].filteringTime())); break;
-		case SC_MAX_DIFFERENCE: if (le) le->setText(QString("%1").arg(m_signalSet[row].maxDifference())); break;
+		case SC_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.lowLimit())); break;
+		case SC_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.highLimit())); break;
+		case SC_ADJUSTMENT: if (le) le->setText(QString("%1").arg(s.adjustment())); break;
+		case SC_DROP_LIMIT: if (le) le->setText(QString("%1").arg(s.dropLimit())); break;
+		case SC_EXCESS_LIMIT: if (le) le->setText(QString("%1").arg(s.excessLimit())); break;
+		case SC_UNBALANCE_LIMIT: if (le) le->setText(QString("%1").arg(s.unbalanceLimit())); break;
+		case SC_INPUT_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.inputLowLimit())); break;
+		case SC_INPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.inputHighLimit())); break;
+		case SC_OUTPUT_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.outputLowLimit())); break;
+		case SC_OUTPUT_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.outputHighLimit())); break;
+		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.aperture())); break;
+		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(s.filteringTime())); break;
+		case SC_MAX_DIFFERENCE: if (le) le->setText(QString("%1").arg(s.maxDifference())); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(m_signalSet[row].dataFormat())); break;
-		case SC_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(m_signalSet[row].unitID())); break;
-		case SC_INPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(m_signalSet[row].inputUnitID())); break;
-		case SC_OUTPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(m_signalSet[row].outputUnitID())); break;
-		case SC_INPUT_SENSOR: if (cb) cb->setCurrentIndex(m_signalSet[row].inputSensorID()); break;
-		case SC_OUTPUT_SENSOR: if (cb) cb->setCurrentIndex(m_signalSet[row].outputSensorID()); break;
-		case SC_OUTPUT_RANGE_MODE: if (cb) cb->setCurrentIndex(m_signalSet[row].outputRangeMode()); break;
-		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(m_signalSet[row].acquire()); break;
-		case SC_CALCULATED: if (cb) cb->setCurrentIndex(m_signalSet[row].calculated()); break;
-		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(m_signalSet[row].inOutType()); break;
-		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(m_signalSet[row].byteOrder()); break;
+		case SC_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.dataFormat())); break;
+		case SC_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.unitID())); break;
+		case SC_INPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.inputUnitID())); break;
+		case SC_OUTPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.outputUnitID())); break;
+		case SC_INPUT_SENSOR: if (cb) cb->setCurrentIndex(s.inputSensorID()); break;
+		case SC_OUTPUT_SENSOR: if (cb) cb->setCurrentIndex(s.outputSensorID()); break;
+		case SC_OUTPUT_RANGE_MODE: if (cb) cb->setCurrentIndex(s.outputRangeMode()); break;
+		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
+		case SC_CALCULATED: if (cb) cb->setCurrentIndex(s.calculated()); break;
+		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(s.inOutType()); break;
+		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(s.byteOrder()); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		case SC_TYPE:
@@ -983,15 +986,16 @@ void SignalsModel::addSignal()
 
 	QLineEdit* signalChannelCountEdit = new QLineEdit(&signalTypeDialog);
 	signalChannelCountEdit->setText("1");
-	QRegExp rx("[1-9]\\d{0,1}");
-	QValidator *validator = new QRegExpValidator(rx, &signalTypeDialog);
+	QRegExp channelRegExp("[1-6]");
+	QValidator *validator = new QRegExpValidator(channelRegExp, &signalTypeDialog);
 	signalChannelCountEdit->setValidator(validator);
 
 	fl->addRow(tr("Signal channel count"), signalChannelCountEdit);
 
 	QLineEdit* signalCountEdit = new QLineEdit(&signalTypeDialog);
 	signalCountEdit->setText("1");
-	validator = new QRegExpValidator(rx, &signalTypeDialog);
+	QRegExp countRegExp("[1-9]\\d{0,3}");
+	validator = new QRegExpValidator(countRegExp, &signalTypeDialog);
 	signalCountEdit->setValidator(validator);
 
 	fl->addRow(tr("Signal count"), signalCountEdit);
@@ -1019,6 +1023,8 @@ void SignalsModel::addSignal()
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
+		QVector<Signal*> resultSignalVector;
+		resultSignalVector.reserve(signalCount * channelCount);
 		for (int s = 0; s < signalCount; s++)
 		{
 			QVector<Signal> signalVector;
@@ -1051,25 +1057,26 @@ void SignalsModel::addSignal()
 
 			if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
 			{
-				beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + signalVector.count() - 1);
-
 				for (int i = 0; i < signalVector.count(); i++)
 				{
-					// WhiteMan
-					//
-
 					Signal* newSignal = new Signal;
 
 					*newSignal = signalVector[i];
 
-					//
-					// WhiteMan
-
-					m_signalSet.append(newSignal->ID(), newSignal);
-				}
-				endInsertRows();
-				emit cellsSizeChanged();
+					resultSignalVector.append(newSignal);
+				};
 			}
+		}
+		if (!resultSignalVector.isEmpty())
+		{
+			beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + resultSignalVector.count() - 1);
+			for (int i = 0; i < resultSignalVector.count(); i++)
+			{
+				Signal* s = resultSignalVector[i];
+				m_signalSet.append(s->ID(), s);
+			}
+			endInsertRows();
+			emit cellsSizeChanged();
 		}
 	}
 
