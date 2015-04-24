@@ -237,7 +237,7 @@ namespace Builder
 			m_log->writeError(msg, false, false);
 		}
 
-		writeResult();
+		result &= writeResult();
 
 		return result;
 	}
@@ -249,7 +249,15 @@ namespace Builder
 
 		m_code.toStringList(asmCode);
 
-		m_resultWriter->addFile("", QString("%1.asm").arg(m_lm->objectName()), asmCode);
+		bool result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.asm").arg(m_lm->caption()), asmCode);
+
+		QByteArray binCode;
+
+		m_code.toByteArray(binCode);
+
+		result &= m_resultWriter->addFile(m_lm->subSysID(), QString("%1.alc").arg(m_lm->caption()), binCode);
+
+		return result;
 	}
 
 

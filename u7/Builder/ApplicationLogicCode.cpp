@@ -256,32 +256,35 @@ namespace Builder
 	}
 
 
-	void Command::generateRawCode()
+	QByteArray Command::getBinCode(ByteOrder byteOrder)
 	{
-		m_rawCode.clear();
+		QByteArray binCode;
 
 		int cmdSizeW = getSizeW();
 
-		m_rawCode.resize(cmdSizeW * 2);
+		binCode.resize(cmdSizeW * sizeof(quint16));
 
 		for(int i = 0; i < cmdSizeW; i++)
 		{
 			quint16 cmdWord = m_code.getWord(i);
 
-			m_rawCode[i * 2] = cmdWord & 0x00FF;
-			m_rawCode[i * 2 + 1] = (cmdWord & 0xFF00) >> 8;
-
-/*			if (byteOrder == ByteOrder::LittleEdndian)
+			if (byteOrder == ByteOrder::LittleEndian)
 			{
-				m_rawCode[i * 2] = cmdWord & 0x00FF;
-				m_rawCode[i * 2 + 1] = (cmdWord & 0xFF00) >> 8;
+				// Little Endian byte order
+				//
+				binCode[i * 2] = cmdWord & 0x00FF;
+				binCode[i * 2 + 1] = (cmdWord & 0xFF00) >> 8;
 			}
 			else
 			{
-				m_rawCode[i * 2] = (cmdWord & 0xFF00) >> 8;
-				m_rawCode[i * 2 + 1] = cmdWord & 0x00FF;;
-			}*/
+				// Big Endian byte order
+				//
+				binCode[i * 2] = (cmdWord & 0xFF00) >> 8;
+				binCode[i * 2 + 1] = cmdWord & 0x00FF;
+			}
 		}
+
+		return binCode;
 	}
 
 
@@ -289,17 +292,17 @@ namespace Builder
 	{
 		QString str;
 
-		if (m_rawCode.count() < (wordNo + 1) * 2)
+		if (m_binCode.count() < (wordNo + 1) * 2)
 		{
 			assert(false);
 			return str;
 		}
 
-		unsigned int word = m_rawCode[wordNo * 2 + 1] & 0x00FF;
+		unsigned int word = m_binCode[wordNo * 2 + 1] & 0x00FF;
 
 		word <<= 8;
 
-		word |= m_rawCode[wordNo * 2] & 0x00FF;
+		word |= m_binCode[wordNo * 2] & 0x00FF;
 
 		word &= 0xFFFF;
 
@@ -449,7 +452,7 @@ namespace Builder
 
 		newCommand->setAddress(m_commandAddress);
 
-		newCommand->generateRawCode();
+		//newCommand->generateRawCode();
 
 		m_commandAddress += newCommand->getSizeW();
 
@@ -482,6 +485,48 @@ namespace Builder
 			qDebug() << str;
 
 			asmCode.append(str);
+		}
+	}
+
+
+	void ApplicationLogicCode::toByteArray(QByteArray& byteArray)
+	{
+		byteArray.clear();
+
+		int codeSizeW = 0;
+
+		for(CodeItem* codeItem : m_codeItems)
+		{
+			if (codeItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (codeItem->isComment())
+			{
+				continue;
+			}
+
+			codeSizeW += codeItem->getSizeW();
+		}
+
+		byteArray.reserve(codeSizeW * sizeof(quint16));
+
+		for(CodeItem* codeItem : m_codeItems)
+		{
+			if (codeItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (codeItem->isComment())
+			{
+				continue;
+			}
+
+
 		}
 	}
 }

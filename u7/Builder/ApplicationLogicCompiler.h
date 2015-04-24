@@ -94,6 +94,8 @@ namespace Builder
 		bool copyDiagData();
 		bool copyInOutSignals();
 
+		bool writeResult();
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
 

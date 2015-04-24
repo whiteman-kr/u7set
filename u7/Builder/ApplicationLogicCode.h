@@ -220,7 +220,7 @@ namespace Builder
 
 		CommandCode m_code;
 
-		QByteArray m_rawCode;
+		QByteArray m_binCode;
 
 		QString getCodeWordStr(int wordNo);
 
@@ -251,7 +251,7 @@ namespace Builder
 		bool isCommand() override { return true; }
 		bool isComment() override { return false; }
 
-		void generateRawCode();
+		QByteArray getBinCode(ByteOrder byteOrder);
 	};
 
 
@@ -275,6 +275,7 @@ namespace Builder
 		void clear();
 
 		void toStringList(QStringList& asmCode);
+		void toByteArray(QByteArray& byteArray);
 
 		void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 	};

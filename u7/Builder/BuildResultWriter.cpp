@@ -50,7 +50,7 @@ namespace Builder
 	}
 
 
-	void BuildSubdirectory::setFileInfo(int fileIndex, const QFile& file)
+	void BuildSubdirectory::setFileInfo(int fileIndex, const QFile& file, const QByteArray& data)
 	{
 		if (fileIndex < 0 || fileIndex >= m_file.count())
 		{
@@ -64,8 +64,7 @@ namespace Builder
 
 		QString md5 = QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
 
-
-		m_file[fileIndex]->setInfo(size, md5);
+		m_file[fileIndex]->setInfo(fileSize, md5);
 	}
 
 
@@ -391,7 +390,7 @@ namespace Builder
 
 		file.close();
 
-		buildSubdirectory->setFileInfo(fileIndex, file);
+		buildSubdirectory->setFileInfo(fileIndex, file, data);
 
 		return true;
 	}
@@ -416,19 +415,32 @@ namespace Builder
 
 		QFile file;
 
-		if (createFile(subDir, fileName, file, true) == false)
+		if (createFile(subDir, fileName, file, false) == false)
 		{
 			return false;
 		}
 
+		QTextStream textStream(&file);
+
 		for(auto string : stringList)
 		{
-			file.write(string);
+			textStream << string << "\n";
+		}
+
+		textStream.flush();
+
+		file.seek(0);
+
+		QByteArray data = file.read(MAX_FILE_SIZE);
+
+		if (data.count() == MAX_FILE_SIZE)
+		{
+			assert(false);		// possible need increase MAX_FILE_SIZE
 		}
 
 		file.close();
 
-		buildSubdirectory->setFileInfo(fileIndex, file);
+		buildSubdirectory->setFileInfo(fileIndex, file, data);
 
 		return true;
 	}

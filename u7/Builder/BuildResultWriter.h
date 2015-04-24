@@ -13,6 +13,9 @@ class DbController;
 
 namespace Builder
 {
+
+	const int MAX_FILE_SIZE = 1024 * 1024 * 10;			// 10 MBytes
+
 	class BuildFile
 	{
 	private:
@@ -42,12 +45,13 @@ namespace Builder
 
 		int addFile(QString fileName);
 
-		void setFileInfo(int fileIndex, const QFile& file);
+		void setFileInfo(int fileIndex, const QFile& file, const QByteArray& data);
 
 		int fileCount() const { return m_file.count(); }
 
 		BuildFile* file(int index);
 	};
+
 
 	class BuildResultWriter : public QObject
 	{
