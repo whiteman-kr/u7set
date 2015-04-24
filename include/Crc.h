@@ -1,5 +1,5 @@
-#ifndef SIGNAL_H
-#define SIGNAL_H
+#ifndef CRC_H
+#define CRC_H
 
 #include <QtGlobal>
 
@@ -18,4 +18,4 @@ private:
     static qint64 crc64Reverse(const void* src, qint64 l);
 };
 
-#endif // SIGNAL_H
+#endif // CRC_H
