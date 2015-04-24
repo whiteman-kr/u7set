@@ -14,6 +14,17 @@ TEMPLATE = app
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 
+# DESTDIR
+#
+win32 {
+	CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+	CONFIG(release, debug|release): DESTDIR = ../bin/release
+}
+unix {
+	CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+}
+
 # Force prebuild version control info
 #
 # for creating version.h at first build
@@ -185,15 +196,11 @@ unix {
 #protobuf
 #
 win32 {
-        LIBS += -L$$DESTDIR -lprotobuf
+		LIBS += -L$$DESTDIR -lprotobuf
 
-        INCLUDEPATH += ./../Protobuf
+		INCLUDEPATH += ./../Protobuf
 }
 unix {
-        LIBS += -lprotobuf
+		LIBS += -lprotobuf
 }
-
-
-
-
 
