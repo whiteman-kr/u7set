@@ -431,9 +431,9 @@ void CalibratorBase::onSettings(int row,int)
     QDialog* dialog = new QDialog(m_pDialog);
     dialog->setWindowFlags(Qt::Drawer);
     dialog->setFixedSize(200, 120);
-    dialog->move(m_pDialog->geometry().center() - dialog->rect().center());
     m_pDialog->setWindowIcon(QIcon(":/icons/Settings.png"));
     dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->index() + 1));
+    dialog->move(m_pDialog->geometry().center() - dialog->rect().center());
 
         // serial port
         //

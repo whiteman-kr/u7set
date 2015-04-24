@@ -1,5 +1,7 @@
 #include "OptionsDialog.h"
 
+#include <QApplication>
+#include <QDesktopWidget>
 #include <assert.h>
 #include <QSettings>
 #include <QVBoxLayout>
@@ -118,8 +120,9 @@ OptionsDialog::~OptionsDialog()
 
 void OptionsDialog::createInterface()
 {
-    setWindowIcon(QIcon::fromTheme("empty", QIcon(":/icons/Options.png")));
+    setWindowIcon(QIcon(":/icons/Options.png"));
     setMinimumSize(850, 400);
+    move(QApplication::desktop()->availableGeometry().center() - rect().center());
     loadSettings();
 
     // create interface

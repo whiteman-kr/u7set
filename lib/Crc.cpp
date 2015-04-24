@@ -1,17 +1,17 @@
-#include <QtEndian>
 #include "../include/Crc.h"
 
 #include <assert.h>
+#include <QtEndian>
 
 // Using normal poly 0x000000000000001B
 
-uint64_t Crc::crc64(const void* src, uint64_t size) 
+qint64 Crc::crc64(const void* src, qint64 size)
 {
 	return Crc::crc64Normal(src, size);
 	//return Crc::crc64Reverse(src, size);
 }
 
-uint64_t Crc::setDataBlockCrc(uint16_t frameIndex, void* datablock, int blockSize)
+qint64 Crc::setDataBlockCrc(uint16_t frameIndex, void* datablock, int blockSize)
 {
 // !!! ATTENTION !!!
 // HEADER CRC IS CALCULATED BY NORMAL POLY, BUT STORED IN BIG-ENDIAN
@@ -25,21 +25,21 @@ uint64_t Crc::setDataBlockCrc(uint16_t frameIndex, void* datablock, int blockSiz
 	memcpy(buffer.data() + sizeof(decltype(frameIndex)), datablock, blockSize);
 
 	quint64 crc = Crc::crc64(buffer.data(), buffer.size() - sizeof(crc));
-	*reinterpret_cast<uint64_t*>(buffer.data() + buffer.size() - sizeof(crc)) = qToBigEndian(crc);						// CONVERT CRC HERE
+    *reinterpret_cast<qint64*>(buffer.data() + buffer.size() - sizeof(crc)) = qToBigEndian(crc);						// CONVERT CRC HERE
 
 	// Check calculated data CRC
 	//
-	uint64_t checkCrc = Crc::crc64(buffer.data(), buffer.size());
+    qint64 checkCrc = Crc::crc64(buffer.data(), buffer.size());
 	assert(checkCrc == 0ULL);
 	
 	// Set crc as the last bytes in datablock
 	//
-	*reinterpret_cast<uint64_t*>(static_cast<char*>(datablock) + blockSize - sizeof(crc)) = qToBigEndian(crc);		// CONVERT CRC HERE
+    *reinterpret_cast<qint64*>(static_cast<char*>(datablock) + blockSize - sizeof(crc)) = qToBigEndian(crc);		// CONVERT CRC HERE
 	
 	return crc;
 }
 
-uint64_t Crc::crc64Normal(const void* src, uint64_t size) 
+qint64 Crc::crc64Normal(const void* src, qint64 size)
 {
 	const unsigned char* p = static_cast<const unsigned char*>(src);
 	unsigned long long crc = 0xFFFFFFFFFFFFFFFF;
@@ -57,7 +57,7 @@ uint64_t Crc::crc64Normal(const void* src, uint64_t size)
 	return crc;
 }
 
-uint64_t Crc::crc64Reverse(const void* src, uint64_t size) 
+qint64 Crc::crc64Reverse(const void* src, qint64 size)
 {
 	const unsigned char* p = static_cast<const unsigned char*>(src);
 	unsigned long long crc = 0xFFFFFFFFFFFFFFFF;
