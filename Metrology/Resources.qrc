@@ -28,5 +28,7 @@
         <file>icons/Save.png</file>
         <file>icons/Search.png</file>
         <file>icons/Preview.png</file>
+        <file>icons/clbCalys75.png</file>
+        <file>icons/clbTRXII.png</file>
     </qresource>
 </RCC>

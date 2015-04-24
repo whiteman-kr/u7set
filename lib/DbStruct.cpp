@@ -1,5 +1,12 @@
 #include "../include/DbStruct.h"
 
+#include <QObject>
+#include <QFile>
+#include <QFileInfo>
+#include <QIODevice>
+#include <QDebug>
+#include <assert.h>
+
 const char* const rootFileName = "$root$";		// root file name
 const char* const AfblFileName = "AFBL";		// Application Functional Block Library
 const char* const AlFileName = "AL";			// Application Logic Schemes

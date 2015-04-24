@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui qml network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport concurrent sql printsupport
 
@@ -71,7 +71,14 @@ SOURCES += \
     Database.cpp \
     ReportView.cpp \
     Conversion.cpp \
-    Calculator.cpp
+    Calculator.cpp \
+    ../lib/Crc.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/ModuleConfiguration.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/Signal.cpp \
+    ../lib/SignalMask.cpp
 
 
 HEADERS  += \
@@ -96,7 +103,18 @@ HEADERS  += \
     ReportView.h \
     version.h \
     Conversion.h \
-    Calculator.h
+    Calculator.h \
+    ../include/Signal.h \
+    ../include/CUtils.h \
+    ../include/Crc.h \
+    ../include/Factory.h \
+    ../include/DeviceObject.h \
+    ../include/DbStruct.h \
+    ../include/ModuleConfiguration.h \
+    ../include/ProtoSerialization.h \
+    ../include/SignalMask.h \
+    ../include/Types.h \
+    ../include/OrderedHash.h
 
 
 FORMS    +=
@@ -164,8 +182,16 @@ unix {
         }
 }
 
+#protobuf
+#
+win32 {
+        LIBS += -L$$DESTDIR -lprotobuf
 
-
+        INCLUDEPATH += ./../Protobuf
+}
+unix {
+        LIBS += -lprotobuf
+}
 
 
 

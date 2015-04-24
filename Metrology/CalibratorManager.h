@@ -22,7 +22,7 @@ public:
     explicit        CalibratorManager(Calibrator* pCalibrator, QWidget* parent);
                     ~CalibratorManager();
 
-    void            show()                          { if (m_pDialog != nullptr) m_pDialog->show(); }
+    void            show();
 
     int             index()                         { return m_index;   }
     void            setIndex(int index)             { m_index = index;  }

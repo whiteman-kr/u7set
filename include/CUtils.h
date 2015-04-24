@@ -1,9 +1,11 @@
 #pragma once
 
+#include "../include/CUtils.h"
+
 #include "TypesAndEnums.h"
 
+#include <QApplication>
 #include <assert.h>
-#include "../include/CUtils.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -14,27 +16,27 @@
 #pragma warning(pop)
 #endif
 
-// Перевести миллиметры в дюймы
+// РџРµСЂРµРІРµСЃС‚Рё РјРёР»Р»РёРјРµС‚СЂС‹ РІ РґСЋР№РјС‹
 //
 #define mm2in(mmVal) (mmVal / 25.4)
 
-// Перевести дюймы в миллиметры
+// РџРµСЂРµРІРµСЃС‚Рё РґСЋР№РјС‹ РІ РјРёР»Р»РёРјРµС‚СЂС‹
 //
 #define in2mm(inVal) (inVal * 25.4)
 
-// Ассерт при наступлении условия
+// РђСЃСЃРµСЂС‚ РїСЂРё РЅР°СЃС‚СѓРїР»РµРЅРёРё СѓСЃР»РѕРІРёСЏ
 //
 #define ASSERT_IF(expr) std::assert(!(expr))
 
 class CUtils
 {
 public:
-	// Количество знаков после запятой для округления для дюймов
+	// РљРѕР»РёС‡РµСЃС‚РІРѕ Р·РЅР°РєРѕРІ РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ РґР»СЏ РґСЋР№РјРѕРІ
 	static const int InchesRoundDigits = 4;
-	// Количество знаков после запятой для округления для миллиметров
+	// РљРѕР»РёС‡РµСЃС‚РІРѕ Р·РЅР°РєРѕРІ РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ РґР»СЏ РјРёР»Р»РёРјРµС‚СЂРѕРІ
 	static const int MillimetresRoundDigits = 2;
 
-	// Получить DpiX для дисплея, инициализируется на первом вызове
+	// РџРѕР»СѓС‡РёС‚СЊ DpiX РґР»СЏ РґРёСЃРїР»РµСЏ, РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚СЃСЏ РЅР° РїРµСЂРІРѕРј РІС‹Р·РѕРІРµ
 	static int DpiX()
 	{
 		static int dpiX = -1;
@@ -45,7 +47,7 @@ public:
 		return dpiX;
 	}
 
-	// Получить DpiY для дисплея
+	// РџРѕР»СѓС‡РёС‚СЊ DpiY РґР»СЏ РґРёСЃРїР»РµСЏ
 	static int DpiY()
 	{
 		static int dpiY = -1;
@@ -59,10 +61,10 @@ public:
 	// Math functions
 	//
 
-	// Округление, числа до указанного количсетва знаков дробной части.
-	// mode указывает, округлять отбрасыыанием дробной части, или AwayFromZero, т.е. 1.5 -> 2.0
+	// РћРєСЂСѓРіР»РµРЅРёРµ, С‡РёСЃР»Р° РґРѕ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РєРѕР»РёС‡СЃРµС‚РІР° Р·РЅР°РєРѕРІ РґСЂРѕР±РЅРѕР№ С‡Р°СЃС‚Рё.
+	// mode СѓРєР°Р·С‹РІР°РµС‚, РѕРєСЂСѓРіР»СЏС‚СЊ РѕС‚Р±СЂР°СЃС‹С‹Р°РЅРёРµРј РґСЂРѕР±РЅРѕР№ С‡Р°СЃС‚Рё, РёР»Рё AwayFromZero, С‚.Рµ. 1.5 -> 2.0
 	//
-	static double Round(double value, int digits, VFrame30::MidpointRounding mode)	// Округление, числа до указанного количсетва знаков дробной части.
+	static double Round(double value, int digits, VFrame30::MidpointRounding mode)	// РћРєСЂСѓРіР»РµРЅРёРµ, С‡РёСЃР»Р° РґРѕ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РєРѕР»РёС‡СЃРµС‚РІР° Р·РЅР°РєРѕРІ РґСЂРѕР±РЅРѕР№ С‡Р°СЃС‚Рё.
 	{
 		if (mode == VFrame30::MidpointRounding::ToFloor)
 		{
@@ -81,21 +83,21 @@ public:
 		}
 	}
 
-	// Округление, числа до указанного количсетва знаков дробной части.
+	// РћРєСЂСѓРіР»РµРЅРёРµ, С‡РёСЃР»Р° РґРѕ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РєРѕР»РёС‡СЃРµС‚РІР° Р·РЅР°РєРѕРІ РґСЂРѕР±РЅРѕР№ С‡Р°СЃС‚Рё.
 	static double Round(double value, int digits)
 	{
-		// Округление, числа до указанного количсетва знаков дробной части.
-		// 2.224 (2 зн.) -> 2.22, 2.5352 (2 зн) -> 2.54, 3.8 (0 зн.) -> 4
+		// РћРєСЂСѓРіР»РµРЅРёРµ, С‡РёСЃР»Р° РґРѕ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РєРѕР»РёС‡СЃРµС‚РІР° Р·РЅР°РєРѕРІ РґСЂРѕР±РЅРѕР№ С‡Р°СЃС‚Рё.
+		// 2.224 (2 Р·РЅ.) -> 2.22, 2.5352 (2 Р·РЅ) -> 2.54, 3.8 (0 Р·РЅ.) -> 4
 		//
-		// value - значение для округления
-		// digits - количество чисел дробной части в возвращаемом значении
+		// value - Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ
+		// digits - РєРѕР»РёС‡РµСЃС‚РІРѕ С‡РёСЃРµР» РґСЂРѕР±РЅРѕР№ С‡Р°СЃС‚Рё РІ РІРѕР·РІСЂР°С‰Р°РµРјРѕРј Р·РЅР°С‡РµРЅРёРё
 		//
 		double intpart = 0.0;
 		double fractpart = modf(value, &intpart);
 
 		if(digits != 0)
 		{
-			int bal = 0;		// Остаток от деления
+			int bal = 0;		// РћСЃС‚Р°С‚РѕРє РѕС‚ РґРµР»РµРЅРёСЏ
 			double temp = pow(10.0, digits + 1);
 			long long tempfract = (long long)(fractpart * temp);
 
@@ -153,14 +155,14 @@ public:
 
 	}
 
-	// Округление, до целого.
+	// РћРєСЂСѓРіР»РµРЅРёРµ, РґРѕ С†РµР»РѕРіРѕ.
 	static double Round(double value)
 	{
-		// Округление, до целого.
+		// РћРєСЂСѓРіР»РµРЅРёРµ, РґРѕ С†РµР»РѕРіРѕ.
 		// 2.2 -> 2, 2.5 -> 3, 3.8 -> 4
 		//
 
-		// value - значение для округления
+		// value - Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ
 		//
 		double intval = 0.0;
 		double fract = modf(value, &intval);
@@ -189,13 +191,13 @@ public:
 		}
 	}
 
-	// По сути floor, используется для приведения координат при SchemeUnit::Display
+	// РџРѕ СЃСѓС‚Рё floor, РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РїСЂРёРІРµРґРµРЅРёСЏ РєРѕРѕСЂРґРёРЅР°С‚ РїСЂРё SchemeUnit::Display
 	static double RoundDisplayPoint(double value)
 	{
 		return floor(value);
 	}
 
-	// Округлить значение в зависимости от типа региональной метрики
+	// РћРєСЂСѓРіР»РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° СЂРµРіРёРѕРЅР°Р»СЊРЅРѕР№ РјРµС‚СЂРёРєРё
 	static double RoundPoint(double p, VFrame30::SchemeUnit unit)
 	{
 		switch (unit)
@@ -373,7 +375,7 @@ public:
 	{
 		QPointF result;
 
-		// SnapToGrid для Xin
+		// SnapToGrid РґР»СЏ Xin
 		//
 		double restX = pt.x() - floor(pt.x() / gridSize) * gridSize;
 
@@ -386,7 +388,7 @@ public:
 			result.setX(floor(pt.x() / gridSize) * gridSize + gridSize);
 		}
 
-		// SnapToGrid для YXin
+		// SnapToGrid РґР»СЏ YXin
 		//
 		double restY = pt.y() - floor(pt.y() / gridSize) * gridSize;
 
@@ -407,7 +409,7 @@ public:
 	{
 		QPointF result;
 
-		// SnapToGrid для Xin
+		// SnapToGrid РґР»СЏ Xin
 		//
 		double restX = x - floor(x / gridSize) * gridSize;
 
@@ -420,7 +422,7 @@ public:
 			result.setX(floor(x / gridSize) * gridSize + gridSize);
 		}
 
-		// SnapToGrid для YXin
+		// SnapToGrid РґР»СЏ YXin
 		//
 		double restY = y - floor(y / gridSize) * gridSize;
 
@@ -451,9 +453,9 @@ public:
 	}
 
 	/// <summary>
-	/// Опредение пересечения двух отрезков
+	/// РћРїСЂРµРґРµРЅРёРµ РїРµСЂРµСЃРµС‡РµРЅРёСЏ РґРІСѓС… РѕС‚СЂРµР·РєРѕРІ
 	/// </summary>
-	/// <returns>true - отрезки пересекаются</returns>
+	/// <returns>true - РѕС‚СЂРµР·РєРё РїРµСЂРµСЃРµРєР°СЋС‚СЃСЏ</returns>
 	static bool IsLineIntersected(double ax1, double ay1, double ax2, double ay2, double bx1, double by1, double bx2, double by2)
 	{
 		double v1 = (bx2 - bx1) * (ay1 - by1) - (by2 - by1) * (ax1 - bx1);
@@ -465,7 +467,7 @@ public:
 
 
 	/// <summary>
-	/// Определение, пересекает ли линия указанный прямоугольник
+	/// РћРїСЂРµРґРµР»РµРЅРёРµ, РїРµСЂРµСЃРµРєР°РµС‚ Р»Рё Р»РёРЅРёСЏ СѓРєР°Р·Р°РЅРЅС‹Р№ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє
 	/// </summary>
 	static bool IsLineIntersectRect(double ax1, double ay1, double ax2, double ay2, const QRectF& intersectRectangle)
 	{
@@ -508,10 +510,10 @@ public:
 
 
 	/// <summary>
-	/// Вычисление хэш кода имени класса
+	/// Р’С‹С‡РёСЃР»РµРЅРёРµ С…СЌС€ РєРѕРґР° РёРјРµРЅРё РєР»Р°СЃСЃР°
 	/// </summary>
 	/// <remarks>
-	/// Сохраняется в сериализуемом файле, не изменять способ вычисления
+	/// РЎРѕС…СЂР°РЅСЏРµС‚СЃСЏ РІ СЃРµСЂРёР°Р»РёР·СѓРµРјРѕРј С„Р°Р№Р»Рµ, РЅРµ РёР·РјРµРЅСЏС‚СЊ СЃРїРѕСЃРѕР± РІС‹С‡РёСЃР»РµРЅРёСЏ
 	/// </remarks>
 	static quint32 GetClassHashCode(const std::string& className)
 	{
