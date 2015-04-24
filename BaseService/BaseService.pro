@@ -74,6 +74,8 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
 unix:QMAKE_CXXFLAGS += -std=c++11
 
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
 
 # Visual Leak Detector
 #

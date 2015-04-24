@@ -75,6 +75,8 @@ FORMS    += \
 unix:QMAKE_CXXFLAGS += -std=c++11
 
 
+
+
 # Visual Leak Detector
 #
 win32 {
