@@ -185,6 +185,7 @@
             <xs:attribute name="StrId" type="xs:string" use="required" />
             <xs:attribute name="Caption" type="xs:string" use="required" />
             <xs:attribute name="OpCode" type="xs:unsignedByte" use="required" />
+            <xs:attribute name="hasRam" type="xs:unsignedByte" use="required" />
           </xs:complexType>
         </xs:element>
       </xs:sequence>

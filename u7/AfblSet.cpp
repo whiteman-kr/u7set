@@ -35,9 +35,16 @@ bool AfblSet::loadFromDatabase(DbController* db, OutputLog* log, QWidget* parent
 		f->swapData(data);
 
 		AfbElement e;
-		if (e.loadFromXml(data) == false)
+		QXmlStreamReader reader(data);
+
+		if (e.loadFromXml(&reader) == false)
 		{
 			log->writeError("Reading contents of the file " + fi.fileName() + " failed!", true, true);
+			QString errorString = reader.errorString();
+			if (reader.errorString().isEmpty() == false)
+			{
+				log->writeError("XML error: " + errorString, false, false);
+			}
 			return false;
 		}
 		items.push_back(e);

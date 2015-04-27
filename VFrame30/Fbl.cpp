@@ -704,6 +704,7 @@ namespace Afbl
 	void AfbElement::Init(void)
 	{
 		m_opcode = 0;
+		m_hasRam = false;
 		m_guid = QUuid::createUuid();
 	}
 
@@ -787,6 +788,15 @@ namespace Afbl
 		else
 		{
 			xmlReader->raiseError(QObject::tr("AfbElement - No OpCode found"));
+		}
+
+		if (xmlReader->attributes().hasAttribute("hasRam"))
+		{
+			setHasRam(xmlReader->attributes().value("hasRam") == "0" ? false : true);
+		}
+		else
+		{
+			xmlReader->raiseError(QObject::tr("AfbElement - No hasRam found"));
 		}
 
 		std::vector<AfbElementSignal> inputSignals;
@@ -925,6 +935,7 @@ namespace Afbl
 		xmlWriter->writeAttribute("StrId", strID());
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("OpCode", QString::number(opcode()));
+		xmlWriter->writeAttribute("hasRam", hasRam() ? "1" : "0");
 
 		xmlWriter->writeStartElement("InputSignals");
 		for (auto s : inputSignals())
@@ -1147,6 +1158,16 @@ namespace Afbl
 	void AfbElement::setOpcode(unsigned int value)
 	{
 		m_opcode = value;
+	}
+
+	bool AfbElement::hasRam() const
+	{
+		return m_hasRam;
+	}
+
+	void AfbElement::setHasRam(bool value)
+	{
+		m_hasRam = value;
 	}
 
 	// InputSignals
