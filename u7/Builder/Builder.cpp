@@ -1,6 +1,7 @@
 #include "Builder.h"
 #include "ApplicationLogicBuilder.h"
 #include "ConfigurationBuilder.h"
+#include "AfblSet.h"
 
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
@@ -134,6 +135,17 @@ namespace Builder
 			{
 				break;
 			}
+
+			m_log->writeMessage("", false);
+			m_log->writeMessage(tr("Loading AFB elements"), true);
+
+			AfblSet afblSet;
+
+			if (afblSet.loadFromDatabase(&db, m_log, nullptr) == false)
+			{
+				break;
+			}
+			m_log->writeMessage(QString::number(afblSet.items.size()) + tr(" elements loaded."), false);
 
 			//
 			// Compile Module configuration
