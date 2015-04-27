@@ -3,6 +3,7 @@
 
 #include "../include/Signal.h"
 #include "../Builder/BuildResultWriter.h"
+#include "AfblSet.h"
 
 // Forware declarations
 //
@@ -67,7 +68,7 @@ namespace Builder
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter);
+		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?
 		//

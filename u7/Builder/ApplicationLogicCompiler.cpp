@@ -29,9 +29,10 @@ namespace Builder
 	//	ApplicationLogicCompiler class implementation
 	//
 
-	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter, OutputLog *log) :
+	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, BuildResultWriter* buildResultWriter, OutputLog *log) :
 		m_equipment(equipment),
 		m_signals(signalSet),
+		m_afbl(afblSet),
 		m_resultWriter(buildResultWriter),
 		m_log(log)
 	{
@@ -48,6 +49,7 @@ namespace Builder
 
 		if (m_equipment == nullptr ||
 			m_signals == nullptr ||
+			m_afbl == nullptr ||
 			m_resultWriter == nullptr)
 		{
 			msg = tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__);
@@ -173,6 +175,7 @@ namespace Builder
 	{
 		m_equipment = appLogicCompiler.m_equipment;
 		m_signals = appLogicCompiler.m_signals;
+		m_afbl = appLogicCompiler.m_afbl;
 		m_resultWriter = appLogicCompiler.m_resultWriter;
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
@@ -189,42 +192,25 @@ namespace Builder
 
 		bool result = true;
 
-		// 0. Initialization
+		// Initialization
 
 		result &= init();
 
-		// 1. Copy DiagDataController memory to the registration
+		// Functionals Block's initialization
+
+		result &= afbInitialization();
+
+		// Copy DiagDataController memory to the registration
 
 		result &= copyDiagData();
 
-		// 2. Copy values of all input & output signals to the registration
+		// Copy values of all input & output signals to the registration
 
 		result &= copyInOutSignals();
 
-		Command cmd;
+		// Generate Application Logic code
 
-		cmd.nop();
-		m_code.append(cmd);
-
-		cmd.mov(12, 23);
-		m_code.append(cmd);
-
-
-		cmd.movConst(222, 23);
-		m_code.append(cmd);
-
-		cmd.movBitConst(1, 33, 3);
-		m_code.append(cmd);
-
-
-		cmd.writeFuncBlock(3333, 3, 1, 2);
-		m_code.append(cmd);
-
-
-		cmd.stop();
-		cmd.setComment("End of programm");
-
-		m_code.append(cmd);
+		result &= generateApplicationLogicCode();
 
 		if (result == true)
 		{
@@ -292,8 +278,76 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::afbInitialization()
+	{
+		m_code.comment("Functional Blocks initialization code");
+		m_code.newLine();
+
+		bool result = true;
+
+		result &= getUsedAfbs();
+
+		AlgFbParamArray param;
+
+		AlgFbParam p;
+
+		p.caption = "param1";
+		p.index = 1;
+		p.size = 16;
+		p.value = 2;
+
+		param.append(p);
+
+		p.caption = "param2";
+		p.index = 2;
+		p.size = 1;
+		p.value = 1;
+
+		param.append(p);
+
+		generateAfbInitialization(1, 1, param);
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::getUsedAfbs()
+	{
+		// get all Afbs from algorithms
+		//
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params)
+	{
+		m_code.newLine();
+
+		Command command;
+
+		for(AlgFbParam param : params)
+		{
+			command.writeFuncBlockConst(fbType, fbInstance, param.index, param.value);
+
+			QString commentStr;
+
+			commentStr.sprintf("%s <= #0x%04X", param.caption.toUtf8().data(), param.value);
+
+			command.setComment(commentStr);
+
+			m_code.append(command);
+		}
+
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::copyDiagData()
 	{
+		m_code.newLine();
+		m_code.comment("Copy LM diagnostics data to registration");
+		m_code.newLine();
+
 		int diagData = 0;
 		int diagDataSize = 0;
 
@@ -310,7 +364,6 @@ namespace Builder
 		Command cmd;
 
 		cmd.movMem(diagData, m_regDataAddress.address(), diagDataSize);
-		cmd.setComment(tr("Move LM diagnostics data to registration"));
 
 		m_code.append(cmd);
 
@@ -323,6 +376,10 @@ namespace Builder
 	bool ModuleLogicCompiler::copyInOutSignals()
 	{
 		bool result = true;
+
+		m_code.newLine();
+		m_code.comment("Copy input/output signals to registration");
+		m_code.newLine();
 
 		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLCE; place++)
 		{
@@ -367,6 +424,24 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::generateApplicationLogicCode()
+	{
+		m_code.newLine();
+		m_code.comment("Start of Application Logic code");
+		m_code.newLine();
+
+		Command cmd;
+
+		cmd.stop();
+
+		cmd.setComment("End of application logic code");
+
+		m_code.append(cmd);
+
+		return true;
 	}
 
 

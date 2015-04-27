@@ -1,7 +1,6 @@
 #include "Builder.h"
 #include "ApplicationLogicBuilder.h"
 #include "ConfigurationBuilder.h"
-#include "AfblSet.h"
 
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
@@ -184,7 +183,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &buildWriter);
+			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afblSet, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -384,12 +383,12 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter)
+	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, BuildResultWriter* buildResultWriter)
 	{
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Application Logic compilation"), true);
 
-		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, afblSet, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 

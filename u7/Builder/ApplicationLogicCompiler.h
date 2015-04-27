@@ -7,6 +7,8 @@
 #include "../include/Signal.h"
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
+#include "AfblSet.h"
+
 
 
 namespace Builder
@@ -40,6 +42,7 @@ namespace Builder
 	private:
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
+		AfblSet* m_afbl = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
 
@@ -55,13 +58,47 @@ namespace Builder
 
 
 	public:
-		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter, OutputLog* log);
+		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, BuildResultWriter* buildResultWriter, OutputLog* log);
 
 		bool run();
 
 		friend class ModuleLogicCompiler;
 	};
 
+
+
+	/*class AlgFbItem : public FbItem
+	{
+	private:
+		int m_instance = 0;
+
+	public:
+		int getInstance() const { return m_instance; }
+		void setInstance(int i) { m_instance = i; }
+	};
+
+
+	class AlgFbItems
+	{
+	private:
+		QHash<QString, QVector<AlgFbItem>> m_algAfb;
+
+	public:
+		append(QString afbStrID);
+	};*/
+
+
+	class AlgFbParam
+	{
+	public:
+		QString caption;
+		int index = 0;
+		int size = 16;
+		quint16 value = 0;
+	};
+
+
+	typedef QVector<AlgFbParam> AlgFbParamArray;
 
 	class ModuleLogicCompiler : public QObject
 	{
@@ -70,6 +107,7 @@ namespace Builder
 	private:
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
+		AfblSet* m_afbl = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
 
@@ -91,8 +129,15 @@ namespace Builder
 		// module logic compilations steps
 		//
 		bool init();
+
+		bool afbInitialization();
+		bool getUsedAfbs();
+		bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
+
 		bool copyDiagData();
 		bool copyInOutSignals();
+
+		bool generateApplicationLogicCode();
 
 		bool writeResult();
 
