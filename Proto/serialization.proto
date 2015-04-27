@@ -166,8 +166,8 @@ message FblElement
 	required wstring strID = 2;
 	required wstring caption = 3;
 	required uint32 opcode = 4;
-        required int32 inputCount = 5;
-        required int32 outputCount = 6;
+        optional int32 inputCount = 5 [default = 0];
+        optional int32 outputCount = 6 [default = 0];
 
 
 	repeated FblElementSignal inputSignals = 11;
@@ -185,8 +185,8 @@ message FblElementSignal
 {
 	required wstring caption = 1;
 	required FblSignalType type = 2;
-        required int32 index = 3;
-        required int32 size = 4;
+        optional int32 index = 3 [default = 0];
+        optional int32 size = 4 [default = 0];
 }
 
 
@@ -204,8 +204,8 @@ message FblElementParam
 	required FblParamValue lowlimit = 5;
 	required FblParamValue highlimit = 6;
 	required bool visible = 7;
-        required int32 index = 8;
-        required int32 size = 9;
+        optional int32 index = 8 [default = 0];
+        optional int32 size = 9 [default = 0];
 }
 
 

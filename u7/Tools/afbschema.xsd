@@ -13,6 +13,8 @@
                       <xs:complexType>
                         <xs:attribute name="Caption" type="xs:string" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
+                        <xs:attribute name="Index" type="xs:decimal" use="required" />
+                        <xs:attribute name="Size" type="xs:decimal" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -29,6 +31,8 @@
                       <xs:complexType>
                         <xs:attribute name="Caption" type="xs:string" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
+                        <xs:attribute name="Index" type="xs:decimal" use="required" />
+                        <xs:attribute name="Size" type="xs:decimal" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -94,12 +98,84 @@
                           </xs:element>
                         </xs:sequence>
                         <xs:attribute name="Caption" type="xs:string" use="required" />
+                        <xs:attribute name="Visible" type="xs:decimal" use="required" />
                         <xs:attribute name="Type" type="xs:string" use="required" />
+                        <xs:attribute name="Index" type="xs:decimal" use="required" />
+                        <xs:attribute name="Size" type="xs:decimal" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
                 </xs:complexType>
 				<xs:unique name = "ParamsUnique">
+					 <xs:selector xpath="AfbElementParam"/>  
+				        <xs:field xpath="@Caption"/>  
+				</xs:unique>
+              </xs:element>
+              <xs:element name="ConstParams">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element minOccurs = "0" maxOccurs="unbounded" name="AfbElementParam">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Value">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="AfbParamValue">
+                                  <xs:complexType>
+                                    <xs:attribute name="Type" type="xs:string" use="required" />
+                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element minOccurs = "0" name="Default">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="AfbParamValue">
+                                  <xs:complexType>
+                                    <xs:attribute name="Type" type="xs:string" use="required" />
+                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element minOccurs = "0" name="LowLimit">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="AfbParamValue">
+                                  <xs:complexType>
+                                    <xs:attribute name="Type" type="xs:string" use="required" />
+                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element minOccurs = "0" name="HighLimit">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="AfbParamValue">
+                                  <xs:complexType>
+                                    <xs:attribute name="Type" type="xs:string" use="required" />
+                                    <xs:attribute name="Value" type="xs:decimal" use="required" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="Caption" type="xs:string" use="required" />
+                        <xs:attribute name="Visible" type="xs:decimal" use="required" />
+                        <xs:attribute name="Type" type="xs:string" use="required" />
+                        <xs:attribute name="Index" type="xs:decimal" use="required" />
+                        <xs:attribute name="Size" type="xs:decimal" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+				<xs:unique name = "ConstParamsUnique">
 					 <xs:selector xpath="AfbElementParam"/>  
 				        <xs:field xpath="@Caption"/>  
 				</xs:unique>

@@ -1111,14 +1111,14 @@ class FblElement : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 opcode() const;
   inline void set_opcode(::google::protobuf::uint32 value);
 
-  // required int32 inputCount = 5;
+  // optional int32 inputCount = 5 [default = 0];
   inline bool has_inputcount() const;
   inline void clear_inputcount();
   static const int kInputCountFieldNumber = 5;
   inline ::google::protobuf::int32 inputcount() const;
   inline void set_inputcount(::google::protobuf::int32 value);
 
-  // required int32 outputCount = 6;
+  // optional int32 outputCount = 6 [default = 0];
   inline bool has_outputcount() const;
   inline void clear_outputcount();
   static const int kOutputCountFieldNumber = 6;
@@ -1270,14 +1270,14 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline ::Proto::FblSignalType type() const;
   inline void set_type(::Proto::FblSignalType value);
 
-  // required int32 index = 3;
+  // optional int32 index = 3 [default = 0];
   inline bool has_index() const;
   inline void clear_index();
   static const int kIndexFieldNumber = 3;
   inline ::google::protobuf::int32 index() const;
   inline void set_index(::google::protobuf::int32 value);
 
-  // required int32 size = 4;
+  // optional int32 size = 4 [default = 0];
   inline bool has_size() const;
   inline void clear_size();
   static const int kSizeFieldNumber = 4;
@@ -1427,14 +1427,14 @@ class FblElementParam : public ::google::protobuf::Message {
   inline bool visible() const;
   inline void set_visible(bool value);
 
-  // required int32 index = 8;
+  // optional int32 index = 8 [default = 0];
   inline bool has_index() const;
   inline void clear_index();
   static const int kIndexFieldNumber = 8;
   inline ::google::protobuf::int32 index() const;
   inline void set_index(::google::protobuf::int32 value);
 
-  // required int32 size = 9;
+  // optional int32 size = 9 [default = 0];
   inline bool has_size() const;
   inline void clear_size();
   static const int kSizeFieldNumber = 9;
@@ -6262,7 +6262,7 @@ inline void FblElement::set_opcode(::google::protobuf::uint32 value) {
   opcode_ = value;
 }
 
-// required int32 inputCount = 5;
+// optional int32 inputCount = 5 [default = 0];
 inline bool FblElement::has_inputcount() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -6284,7 +6284,7 @@ inline void FblElement::set_inputcount(::google::protobuf::int32 value) {
   inputcount_ = value;
 }
 
-// required int32 outputCount = 6;
+// optional int32 outputCount = 6 [default = 0];
 inline bool FblElement::has_outputcount() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -6446,7 +6446,7 @@ inline void FblElementSignal::set_type(::Proto::FblSignalType value) {
   type_ = value;
 }
 
-// required int32 index = 3;
+// optional int32 index = 3 [default = 0];
 inline bool FblElementSignal::has_index() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -6468,7 +6468,7 @@ inline void FblElementSignal::set_index(::google::protobuf::int32 value) {
   index_ = value;
 }
 
-// required int32 size = 4;
+// optional int32 size = 4 [default = 0];
 inline bool FblElementSignal::has_size() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -6729,7 +6729,7 @@ inline void FblElementParam::set_visible(bool value) {
   visible_ = value;
 }
 
-// required int32 index = 8;
+// optional int32 index = 8 [default = 0];
 inline bool FblElementParam::has_index() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
@@ -6751,7 +6751,7 @@ inline void FblElementParam::set_index(::google::protobuf::int32 value) {
   index_ = value;
 }
 
-// required int32 size = 9;
+// optional int32 size = 9 [default = 0];
 inline bool FblElementParam::has_size() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
