@@ -315,7 +315,7 @@ namespace Afbl
         }
         else
         {
-			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Index found"));
+			//xmlReader->raiseError(QObject::tr("AfbElementSignal - No Index found"));
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
@@ -324,10 +324,10 @@ namespace Afbl
         }
         else
         {
-			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Size found"));
+			//xmlReader->raiseError(QObject::tr("AfbElementSignal - No Size found"));
         }
 
-        QXmlStreamReader::TokenType endToken = xmlReader->readNext();
+		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
 		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
 
 		return !xmlReader->hasError();
@@ -488,7 +488,7 @@ namespace Afbl
         }
         else
         {
-			xmlReader->raiseError(QObject::tr("AfbElementParam - No Index found"));
+			//xmlReader->raiseError(QObject::tr("AfbElementParam - No Index found"));
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
@@ -497,7 +497,7 @@ namespace Afbl
         }
         else
         {
-			xmlReader->raiseError(QObject::tr("AfbElementParam - No Size found"));
+			//xmlReader->raiseError(QObject::tr("AfbElementParam - No Size found"));
         }
 
         // Read values
@@ -796,7 +796,7 @@ namespace Afbl
 		}
 		else
 		{
-			xmlReader->raiseError(QObject::tr("AfbElement - No hasRam found"));
+			//xmlReader->raiseError(QObject::tr("AfbElement - No hasRam found"));
 		}
 
 		std::vector<AfbElementSignal> inputSignals;
