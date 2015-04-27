@@ -166,9 +166,6 @@ message FblElement
 	required wstring strID = 2;
 	required wstring caption = 3;
 	required uint32 opcode = 4;
-        optional int32 inputCount = 5 [default = 0];
-        optional int32 outputCount = 6 [default = 0];
-
 
 	repeated FblElementSignal inputSignals = 11;
 	repeated FblElementSignal outputSignals = 12;
