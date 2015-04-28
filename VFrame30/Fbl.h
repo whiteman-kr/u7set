@@ -183,8 +183,6 @@ private:
 		AfbElement(void);
 		virtual ~AfbElement(void);
 
-		void Init(void);
-
 		// Serialization
 		//
 		friend Proto::ObjectSerialization<AfbElement>;
