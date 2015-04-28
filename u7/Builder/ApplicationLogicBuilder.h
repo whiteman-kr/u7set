@@ -32,25 +32,26 @@ namespace Afbl
 namespace Builder
 {
 
-	struct BranchLink
+	struct Link
 	{
-		BranchLink() = default;
-		BranchLink(const VFrame30::VideoItemPoint& point1, const VFrame30::VideoItemPoint& point2);
+		Link() = default;
+		Link(const VFrame30::VideoItemPoint& point1, const VFrame30::VideoItemPoint& point2);
 
 		VFrame30::VideoItemPoint pt1;
 		VFrame30::VideoItemPoint pt2;
 	};
 
-	struct Branch
+	struct Bush
 	{
 		QUuid outputPin;						// Output pin for this branch, can be the only
 		std::set<QUuid> inputPins;				// Input pins for this branch
-		std::map<QUuid, BranchLink> links;		// Links for this branch
+		std::map<QUuid, Link> links;			// Links for this branch
+		std::set<std::shared_ptr<VFrame30::FblItemRect>> fblItems;
 	};
 
-	struct BranchContainer
+	struct BushContainer
 	{
-		std::vector<Branch> branches;
+		std::vector<Bush> bushes;
 
 		int getBranchByPinPos(VFrame30::VideoItemPoint pt) const;
 		int getBranchByPinGuid(const QUuid& guid) const;
@@ -62,17 +63,17 @@ namespace Builder
 	//		ApplicationLogicBranch
 	//
 	// ------------------------------------------------------------------------
-	class ApplicationLogicBranch
-	{
-	public:
-		ApplicationLogicBranch();
+//	class ApplicationLogicBranch
+//	{
+//	public:
+//		ApplicationLogicBranch();
 
-		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items() const;
-		std::list<std::shared_ptr<VFrame30::FblItemRect>>& items();
+//		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items() const;
+//		std::list<std::shared_ptr<VFrame30::FblItemRect>>& items();
 
-	private:
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
-	};
+//	private:
+//		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
+//	};
 
 	// ------------------------------------------------------------------------
 	//
@@ -87,15 +88,35 @@ namespace Builder
 		ApplicationLogicModule() = delete;
 		ApplicationLogicModule(QString moduleStrId);
 
-		bool addBranch(std::list<std::shared_ptr<VFrame30::VideoItem>>& items, OutputLog* log);
+		bool addBranch(const BushContainer& bushContainer, OutputLog* log);
+
+	private:
+		template<typename Iter>
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> getItemsWithInput(
+			Iter begin,
+			Iter end,
+			const QUuid& inputGuid);
+
+		template<typename Iter>
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> getItemsWithInput(
+			Iter begin,
+			Iter end,
+			const std::list<QUuid>& inputGuids);
+
 
 	public:
 		QString moduleStrId() const;
 		void setModuleStrId(QString value);
 
+		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items() const;
+		std::list<std::shared_ptr<VFrame30::FblItemRect>>& items();
+
 	private:
 		QString m_moduleStrId;
-		std::list<std::shared_ptr<ApplicationLogicBranch>> m_branches;
+
+		//std::list<std::shared_ptr<ApplicationLogicBranch>> m_branches;
+
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
 	};
 
 
@@ -112,7 +133,8 @@ namespace Builder
 		// Public methods
 		//
 	public:
-		bool addData(std::shared_ptr<VFrame30::LogicScheme> scheme,
+		bool addData(const BushContainer& bushContainer,
+			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
 			OutputLog* log);
 
@@ -159,17 +181,17 @@ namespace Builder
 		bool compileApplicationLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 										  std::shared_ptr<VFrame30::SchemeLayer> layer);
 
-		bool findBranches(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
-						  std::shared_ptr<VFrame30::SchemeLayer> layer,
-						  BranchContainer* branchContainer) const;
+		bool findBushes(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+						std::shared_ptr<VFrame30::SchemeLayer> layer,
+						BushContainer* bushContainer) const;
 
 		bool setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme,
 									  std::shared_ptr<VFrame30::SchemeLayer> layer,
-									  BranchContainer* branchContainer) const;
+									  BushContainer* branchContainer) const;
 
 		bool setPinConnections(std::shared_ptr<VFrame30::LogicScheme> scheme,
 							   std::shared_ptr<VFrame30::SchemeLayer> layer,
-							   BranchContainer* branchContainer);
+							   BushContainer* branchContainer);
 
 	private:
 		DbController* db();

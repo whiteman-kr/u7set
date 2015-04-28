@@ -15,7 +15,7 @@
 namespace Builder
 {
 
-	BranchLink::BranchLink(const VFrame30::VideoItemPoint& point1, const VFrame30::VideoItemPoint& point2) :
+	Link::Link(const VFrame30::VideoItemPoint& point1, const VFrame30::VideoItemPoint& point2) :
 		pt1(point1),
 		pt2(point2)
 	{
@@ -25,14 +25,14 @@ namespace Builder
 	// Function finds branch with a point on it.
 	// Returns branch index or -1 if a brach was not found
 	//
-	int BranchContainer::getBranchByPinPos(VFrame30::VideoItemPoint pt) const
+	int BushContainer::getBranchByPinPos(VFrame30::VideoItemPoint pt) const
 	{
-		for (size_t i = 0; i < branches.size(); i++)
+		for (size_t i = 0; i < bushes.size(); i++)
 		{
-			const Branch& branch = branches[i];
+			const Bush& branch = bushes[i];
 
 			auto link = std::find_if(branch.links.cbegin(), branch.links.cend(),
-				[&pt](const std::pair<QUuid, BranchLink>& link)
+				[&pt](const std::pair<QUuid, Link>& link)
 				{
 					return link.second.pt1 == pt || link.second.pt2 == pt;
 				});
@@ -46,11 +46,11 @@ namespace Builder
 		return -1;
 	}
 
-	int BranchContainer::getBranchByPinGuid(const QUuid& guid) const
+	int BushContainer::getBranchByPinGuid(const QUuid& guid) const
 	{
-		for (size_t i = 0; i < branches.size(); i++)
+		for (size_t i = 0; i < bushes.size(); i++)
 		{
-			const Branch& branch = branches[i];
+			const Bush& branch = bushes[i];
 
 			if (branch.outputPin == guid)
 			{
@@ -71,19 +71,19 @@ namespace Builder
 	//		ApplicationLogicBranch
 	//
 	// ------------------------------------------------------------------------
-	ApplicationLogicBranch::ApplicationLogicBranch()
-	{
-	}
+//	ApplicationLogicBranch::ApplicationLogicBranch()
+//	{
+//	}
 
-	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items() const
-	{
-		return m_items;
-	}
+//	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items() const
+//	{
+//		return m_items;
+//	}
 
-	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items()
-	{
-		return m_items;
-	}
+//	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items()
+//	{
+//		return m_items;
+//	}
 
 
 	// ------------------------------------------------------------------------
@@ -96,72 +96,334 @@ namespace Builder
 	{
 	}
 
-	bool ApplicationLogicModule::addBranch(std::list<std::shared_ptr<VFrame30::VideoItem>>& items, OutputLog* log)
+	struct ChangeOrder
 	{
+		struct HistoryItem
+		{
+			std::shared_ptr<VFrame30::FblItemRect> ChangeItem;
+			int count;
+		};
+
+		std::shared_ptr<VFrame30::FblItemRect> item;
+		std::list<HistoryItem> history;
+
+		int getChangeCount(const std::shared_ptr<VFrame30::FblItemRect>& forItem)
+		{
+			auto it = std::find_if(history.begin(), history.end(),
+				[&forItem](const HistoryItem& hi)
+				{
+					return hi.ChangeItem == forItem;
+				});
+
+			if (it == history.end())
+			{
+				return 0;
+			}
+			else
+			{
+				return it->count;
+			}
+		}
+
+		void incChangeCount(const std::shared_ptr<VFrame30::FblItemRect>& forItem)
+		{
+			auto it = std::find_if(history.begin(), history.end(),
+				[&forItem](const HistoryItem& hi)
+				{
+					return hi.ChangeItem == forItem;
+				});
+
+			if (it == history.end())
+			{
+				HistoryItem hi = {forItem, 1};
+				history.push_back(hi);
+			}
+			else
+			{
+				it->count++;
+			}
+		}
+	};
+
+
+	bool ApplicationLogicModule::addBranch(const BushContainer& bushContainer, OutputLog* log)
+	{
+		if (bushContainer.bushes.empty() == true)
+		{
+			return false;
+		}
+
 		if (log == nullptr)
 		{
 			assert(log);
 			return false;
 		}
 
-		if (items.empty() == true)
+		bool result = true;
+
+		// Go throuhg all bushes and make branches from them
+		//
+
+		// Get a COPY of the list, as the items will be moved to orderedList during algorithm work
+		// Do not get reference!
+		//
+		std::set<std::shared_ptr<VFrame30::FblItemRect>> constFblItems;
+		std::set<std::shared_ptr<VFrame30::FblItemRect>> fblItems;
+
+		for (const Bush& bush : bushContainer.bushes)
 		{
-			log->writeError(tr("Branch is empty"), false, true);
-			return false;
+			for (const std::shared_ptr<VFrame30::FblItemRect>& f : bush.fblItems)
+			{
+				constFblItems.insert(f);
+				fblItems.insert(f);
+			}
 		}
 
-		// Create new branch and add it it branch list
+		// Add FblElement to branch in execution order
 		//
-		auto branch = std::make_shared<ApplicationLogicBranch>();
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> orderedList;
 
-		m_branches.push_back(branch);
-
-		// Add items
+		// Add all inputs and outputs
+		// Warning:	Can be optimized by removing items from fblItems on the same
+		//			loop
 		//
-		for (std::shared_ptr<VFrame30::VideoItem> item : items)
+		bool hasItemsWithouInputs = false;
+
+		for (const std::shared_ptr<VFrame30::FblItemRect>& item : fblItems)
 		{
-			std::shared_ptr<VFrame30::FblItemRect> fblItemRect = std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
-
-			if (fblItemRect == nullptr)
+			if (item->inputsCount() == 0)
 			{
+				orderedList.push_front(item);	// items without inputs must be at the begining of the list
+				hasItemsWithouInputs = true;
 				continue;
 			}
 
-			branch->items().push_back(fblItemRect);
+			if (item->outputsCount() == 0)
+			{
+				orderedList.push_back(item);	// items without outputs must be at the end of the list
+				continue;
+			}
 		}
 
-		// Set items in execution order
-		//
-
-		// GetItem without inputs, and start from it
-		//
-		auto first = std::find_if(std::begin(items), std::end(items),
-			[](const std::shared_ptr<VFrame30::VideoItem>& item)
-			{
-				VFrame30::FblItem* fblItem = dynamic_cast<VFrame30::FblItem*>(item.get());
-				assert(fblItem);
-				return fblItem->inputsCount() > 0;
-			});
-
-		if (first == std::end(items))
+		for (const std::shared_ptr<VFrame30::FblItemRect>& orderedItem : orderedList)
 		{
+			fblItems.erase(orderedItem);
+		}
+
+		if (hasItemsWithouInputs == false)
+		{
+			assert(hasItemsWithouInputs == true);
+
 			// Imposible set exucution order for branch, there is no first item,
 			// firts item can be item without inputs
 			//
-			log->writeError(tr("Imposible set exucution order for branch, there is no first item, firts item can be item without inputs"), false, true);
-			return false;
+			log->writeError(tr("Imposible to set execution order for branch, there is no first item, it can be item without inputs"), false, true);
+
+			result = false;
+			return result;
 		}
 
-		// Go trough all other items and set them in execution order
+		std::list<ChangeOrder> changeOrderHistory;
+
+		// Set other items
 		//
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> ordered;
+		for (auto currentIt = orderedList.begin(); currentIt != orderedList.end(); ++currentIt)
+		{
+			const std::shared_ptr<VFrame30::FblItemRect>& currentItem = *currentIt;
 
-		//ordered.push_back(*first);
-		//items.
+			// Get dependant items
+			//
+			std::set<std::shared_ptr<VFrame30::FblItemRect>> dependantItems;
 
+			const std::list<VFrame30::CFblConnectionPoint>& outputs = currentItem->outputs();
 
-		return true;
+			for (const VFrame30::CFblConnectionPoint& out : outputs)
+			{
+				auto deps = getItemsWithInput(constFblItems.begin(), constFblItems.end(), out.guid());
+
+				dependantItems.insert(deps.begin(), deps.end());
+			}
+
+			if (dependantItems.empty() == true)
+			{
+				// This item does not have influence on orderList, probably it is in the end and has no outputs
+				//
+				continue;
+			}
+
+			// Check dependencies
+			//
+			for (std::shared_ptr<VFrame30::FblItemRect> dep : dependantItems)
+			{
+				if (dep == currentItem)
+				{
+					// Loop for the same item, skip this dependance
+					//
+					continue;
+				}
+
+				// Check if dependant item is below current, if so, thats ok, don't do anything
+				//
+				auto dependantisBelow = std::find(currentIt, orderedList.end(), dep);
+
+				if (dependantisBelow != orderedList.end())
+				{
+					// Dependant item already in orderedList, and it is under currentItem
+					//
+					continue;	// Process other dependtants, do not break!
+				}
+
+				// Check if the dependant above currentItem
+				//
+				auto dependantIsAbove = std::find(orderedList.begin(), currentIt, dep);
+
+				if (dependantIsAbove != currentIt)
+				{
+					// Save hostory, if this is the third switch item, then skip it
+					//
+					auto histForCurrentItem = std::find_if(
+												  changeOrderHistory.begin(),
+												  changeOrderHistory.end(),
+												  [&currentItem](const ChangeOrder& co)
+					{
+						return co.item == currentItem;
+					});
+
+					if (histForCurrentItem == changeOrderHistory.end())
+					{
+						ChangeOrder co;
+						co.item = currentItem;
+						co.incChangeCount(*dependantIsAbove);
+
+						changeOrderHistory.push_back(co);
+					}
+					else
+					{
+						int switchCounter = histForCurrentItem->getChangeCount(*dependantIsAbove);
+
+						if (switchCounter == 2)
+						{
+							continue;
+						}
+						else
+						{
+							histForCurrentItem->incChangeCount(*dependantIsAbove);
+						}
+					}
+
+					// Dependant item is above currentItem, so let's move currentItem right before dependand one
+					// in orderedList
+					//
+					auto tempIter = currentIt;
+
+					currentIt = orderedList.insert(dependantIsAbove, currentItem);	// Upate currrentIt, it is important and part of the algorithm!
+
+					orderedList.erase(tempIter);
+
+					continue;	// Process other dependtants, do not break!
+				}
+
+				// Obviusly dependant item not in orderedList yet, add it right after currentItem
+				//
+				assert(std::find(orderedList.begin(), orderedList.end(), dep) == orderedList.end());
+
+				orderedList.insert(std::next(currentIt), dep);
+				fblItems.erase(dep);
+
+				// process other dependtants, do not break!
+			}
+		}
+
+		if (fblItems.empty() == false)
+		{
+			assert(fblItems.empty() == true);
+			log->writeError(tr("Internal error, not all items were proceded. %s").arg(Q_FUNC_INFO), false, true);
+
+			result = false;
+		}
+		else
+		{
+			std::swap(items(), orderedList);
+		}
+
+		return result;
 	}
+
+	template<typename Iter>
+	std::list<std::shared_ptr<VFrame30::FblItemRect>> ApplicationLogicModule::getItemsWithInput(
+		Iter begin,
+		Iter end,
+		const QUuid& guid)
+	{
+		std::set<std::shared_ptr<VFrame30::FblItemRect>> result;	// set removes duplicats
+
+		for (auto item = begin; item != end; ++item)
+		{
+			const std::list<VFrame30::CFblConnectionPoint>& inputs = item->get()->inputs();
+
+			for (auto in : inputs)
+			{
+				const std::list<QUuid>& associatedOutputs = in.associatedIOs();
+
+				auto foundAssociated = std::find(associatedOutputs.begin(), associatedOutputs.end(), guid);
+
+				if (foundAssociated != associatedOutputs.end())
+				{
+					result.insert(*item);
+					break;
+				}
+			}
+		}
+
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> resultList;
+		resultList.assign(result.begin(), result.end());
+
+		return resultList;
+	}
+
+
+	template<typename Iter>
+	std::list<std::shared_ptr<VFrame30::FblItemRect>> ApplicationLogicModule::getItemsWithInput(
+		Iter begin,
+		Iter end,
+		const std::list<QUuid>& guids)
+	{
+		std::set<std::shared_ptr<VFrame30::FblItemRect>> result;	// set removes duplicats
+
+		for (auto item = begin; item != end; ++item)
+		{
+			const std::list<VFrame30::CFblConnectionPoint>& inputs = item->get()->inputs();
+
+			for (auto in : inputs)
+			{
+				size_t inResultSize = result.size();
+
+				const std::list<QUuid>& associatedOutputs = in.associatedIOs();
+
+				for (const QUuid& id : guids)
+				{
+					auto foundAssociated = std::find(associatedOutputs.begin(), associatedOutputs.end(), id);
+
+					if (foundAssociated != associatedOutputs.end())
+					{
+						result.insert(*item);
+						break;
+					}
+				}
+
+				if (inResultSize != result.size())
+				{
+					break;
+				}
+			}
+		}
+
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> resultList;
+		resultList.assign(result.begin(), result.end());
+
+		return resultList;
+	}
+
 
 	QString ApplicationLogicModule::moduleStrId() const
 	{
@@ -173,6 +435,17 @@ namespace Builder
 		m_moduleStrId = value;
 	}
 
+	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicModule::items() const
+	{
+		return m_items;
+	}
+
+	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicModule::items()
+	{
+		return m_items;
+	}
+
+
 
 	// ------------------------------------------------------------------------
 	//
@@ -183,10 +456,17 @@ namespace Builder
 	{
 	}
 
-	bool ApplicationLogicData::addData(std::shared_ptr<VFrame30::LogicScheme> scheme,
-		std::shared_ptr<VFrame30::SchemeLayer> layer,
-		OutputLog* log)
+	bool ApplicationLogicData::addData(
+			const BushContainer& bushContainer,
+			std::shared_ptr<VFrame30::LogicScheme> scheme,
+			std::shared_ptr<VFrame30::SchemeLayer> layer,
+			OutputLog* log)
 	{
+		if (bushContainer.bushes.empty() == true)
+		{
+			return false;
+		}
+
 		if (scheme == nullptr ||
 			layer == nullptr ||
 			log == nullptr)
@@ -225,7 +505,7 @@ namespace Builder
 
 		// add new branch to module
 		//
-		bool result = module->addBranch(layer->Items, log);
+		bool result = module->addBranch(bushContainer, log);
 
 		return result;
 	}
@@ -440,8 +720,9 @@ namespace Builder
 		return true;
 	}
 
-	bool ApplicationLogicBuilder::compileApplicationLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
-															   std::shared_ptr<VFrame30::SchemeLayer> layer)
+	bool ApplicationLogicBuilder::compileApplicationLogicLayer(
+		std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+		std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
 		if (logicScheme == nullptr || layer == nullptr)
 		{
@@ -452,19 +733,19 @@ namespace Builder
 
 		// Find all branches - connected links
 		//
-		BranchContainer branchContainer;
+		BushContainer bushContainer;
 
-		bool result = findBranches(logicScheme, layer, &branchContainer);
+		bool result = findBushes(logicScheme, layer, &bushContainer);
 
 		if (result == false)
 		{
-			log()->writeError(tr("Finding branches error."), false, false);
+			log()->writeError(tr("Finding bushes error."), false, false);
 			return false;
 		}
 
-		// Set pins' guids to branches
+		// Set pins' guids to bushes
 		//
-		result = setBranchConnectionToPin(logicScheme, layer, &branchContainer);
+		result = setBranchConnectionToPin(logicScheme, layer, &bushContainer);
 
 		if (result == false)
 		{
@@ -474,11 +755,11 @@ namespace Builder
 
 		// Associates input/outputs
 		//
-		result = setPinConnections(logicScheme, layer, &branchContainer);
+		result = setPinConnections(logicScheme, layer, &bushContainer);
 
 		// Generate afb list, and set it to some container
 		//
-		result = applicationData().addData(logicScheme, layer, m_log);
+		result = applicationData().addData(bushContainer, logicScheme, layer, m_log);
 
 		if (result == false)
 		{
@@ -600,23 +881,24 @@ namespace Builder
 		return true;
 	}
 
-	// Function connects all links, and compose them into branches
+	// Function connects all links, and compose them into bushes
 	//
-	bool ApplicationLogicBuilder::findBranches(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
-											   std::shared_ptr<VFrame30::SchemeLayer> layer,
-											   BranchContainer* branchContainer) const
+	bool ApplicationLogicBuilder::findBushes(
+		std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+		std::shared_ptr<VFrame30::SchemeLayer> layer,
+		BushContainer* bushContainer) const
 	{
 		if (logicScheme.get() == nullptr ||
 			layer.get() == nullptr ||
-			branchContainer == nullptr)
+			bushContainer == nullptr)
 		{
 			assert(logicScheme);
 			assert(layer);
-			assert(branchContainer);
+			assert(bushContainer);
 			return false;
 		}
 
-		std::list<std::set<QUuid>> branches;
+		std::list<std::set<QUuid>> bushes;
 
 		// Enum all links and get all horzlinks and vertlinks
 		//
@@ -642,7 +924,7 @@ namespace Builder
 			}
 		}
 
-		// Enum all vert and horz links and compose branches
+		// Enum all vert and horz links and compose bushes
 		//
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
@@ -668,21 +950,21 @@ namespace Builder
 
 			// Find item branch, if branch does not exists, make a new brach
 			//
-			auto foundBranch = std::find_if(branches.begin(), branches.end(),
+			auto foundBranch = std::find_if(bushes.begin(), bushes.end(),
 											[link](const std::set<QUuid>& b)
 			{
 				auto foundBranch = b.find(link->guid());
 				return foundBranch != b.end();
 			});
 
-			if (foundBranch == branches.end())
+			if (foundBranch == bushes.end())
 			{
 				std::set<QUuid> newBranch;
 				newBranch.insert(link->guid());
 
-				branches.push_front(newBranch);
+				bushes.push_front(newBranch);
 
-				foundBranch = branches.begin();
+				foundBranch = bushes.begin();
 			}
 
 			// Add to foundBranch everything from  videoItemsUnderFrontPoint, videoItemsUnderBackPoint
@@ -703,8 +985,8 @@ namespace Builder
 		//
 		bool wasJoining = false;	// if branch was joinedto other branch, then process currentBranch one more time
 
-		for (auto currentBranch = branches.begin();
-			 currentBranch != branches.end();
+		for (auto currentBranch = bushes.begin();
+			 currentBranch != bushes.end();
 			 std::advance(currentBranch, wasJoining ? 0 : 1))
 		{
 			wasJoining = false;
@@ -720,7 +1002,7 @@ namespace Builder
 			{
 				auto subBranch = currentBranch;
 				++subBranch;
-				for (; subBranch != branches.end();)
+				for (; subBranch != bushes.end();)
 				{
 					if (std::find(subBranch->begin(), subBranch->end(), *id) != subBranch->end())
 					{
@@ -736,7 +1018,7 @@ namespace Builder
 						auto tmp = subBranch;
 						++subBranch;
 
-						branches.erase(tmp);
+						bushes.erase(tmp);
 
 						wasJoining = true;
 						continue;
@@ -750,11 +1032,11 @@ namespace Builder
 		// For all links in branches get its end points
 		//
 
-		branchContainer->branches.reserve(branches.size());
+		bushContainer->bushes.reserve(bushes.size());
 
-		for (const std::set<QUuid>& b : branches)
+		for (const std::set<QUuid>& b : bushes)
 		{
-			Branch newBranch;
+			Bush newBranch;
 
 			for (QUuid id : b)
 			{
@@ -786,14 +1068,14 @@ namespace Builder
 				VFrame30::VideoItemPoint pt1 = pointList.front();
 				VFrame30::VideoItemPoint pt2 = pointList.back();
 
-				newBranch.links[id] = BranchLink(pt1, pt2);
+				newBranch.links[id] = Link(pt1, pt2);
 			}
 
-			branchContainer->branches.push_back(newBranch);
+			bushContainer->bushes.push_back(newBranch);
 		}
 
 		// DEBUG
-		for (Branch& eb : branchContainer->branches)
+		for (Bush& eb : bushContainer->bushes)
 		{
 			qDebug() << "-----";
 			for (auto& bl : eb.links)
@@ -814,7 +1096,7 @@ namespace Builder
 	}
 
 	bool ApplicationLogicBuilder::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme, std::shared_ptr<VFrame30::SchemeLayer> layer,
-						BranchContainer* branchContainer) const
+						BushContainer* branchContainer) const
 	{
 		if (scheme.get() == nullptr ||
 			layer.get() == nullptr ||
@@ -909,7 +1191,7 @@ namespace Builder
 
 					// Branch was found for current pin
 					//
-					branchContainer->branches[branchIndex].inputPins.insert(in.guid());
+					branchContainer->bushes[branchIndex].inputPins.insert(in.guid());
 				}
 
 				for (const VFrame30::CFblConnectionPoint& out : *outputs)
@@ -970,7 +1252,7 @@ namespace Builder
 					// Branch was found for current pin
 					//
 
-					if (branchContainer->branches[branchIndex].outputPin.isNull() == false)
+					if (branchContainer->bushes[branchIndex].outputPin.isNull() == false)
 					{
 						log()->writeError(tr("LogicScheme %1 (layer %2): Branch has multiple outputs.")
 							.arg(scheme->caption())
@@ -982,7 +1264,7 @@ namespace Builder
 					}
 					else
 					{
-						branchContainer->branches[branchIndex].outputPin = out.guid();
+						branchContainer->bushes[branchIndex].outputPin = out.guid();
 					}
 				}
 			}
@@ -992,8 +1274,10 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicBuilder::setPinConnections(std::shared_ptr<VFrame30::LogicScheme> scheme, std::shared_ptr<VFrame30::SchemeLayer> layer,
-						   BranchContainer* branchContainer)
+	bool ApplicationLogicBuilder::setPinConnections(
+		std::shared_ptr<VFrame30::LogicScheme> scheme,
+		std::shared_ptr<VFrame30::SchemeLayer> layer,
+		BushContainer* branchContainer)
 	{
 		if (scheme.get() == nullptr ||
 			layer.get() == nullptr ||
@@ -1045,11 +1329,13 @@ namespace Builder
 
 					// Branch was found for current pin
 					//
-					const Branch& branch = branchContainer->branches[branchIndex];
+					Bush& bush = branchContainer->bushes[branchIndex];
 
-					if (branch.outputPin.isNull() == true)
+					bush.fblItems.insert(fblElement);
+
+					if (bush.outputPin.isNull() == true)
 					{
-						assert(branch.outputPin.isNull() == false);
+						assert(bush.outputPin.isNull() == false);
 
 						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, output pin in brach suppose to be initialized, %1.")
 							.arg(__FUNCTION__), false, true);
@@ -1060,7 +1346,7 @@ namespace Builder
 
 					// Set sourche pin guid for this pin
 					//
-					in.AddAssociattedIOs(branch.outputPin);
+					in.AddAssociattedIOs(bush.outputPin);
 				}
 
 				for (VFrame30::CFblConnectionPoint& out : *outputs)
@@ -1078,15 +1364,17 @@ namespace Builder
 
 						result = false;
 						return result;
-					}
+					}				
 
 					// Branch was found for current pin
 					//
-					const Branch& branch = branchContainer->branches[branchIndex];
+					Bush& bush = branchContainer->bushes[branchIndex];
+
+					bush.fblItems.insert(fblElement);
 
 					// Set destination pins guid for this pin
 					//
-					for (const QUuid& dstid : branch.inputPins)
+					for (const QUuid& dstid : bush.inputPins)
 					{
 						out.AddAssociattedIOs(dstid);
 					}

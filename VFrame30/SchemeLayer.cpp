@@ -130,7 +130,7 @@ namespace VFrame30
 	// Methods
 	//
 
-	std::shared_ptr<VideoItem> SchemeLayer::getItemById(QUuid id) const
+	std::shared_ptr<VideoItem> SchemeLayer::getItemById(const QUuid& id) const
 	{
 		auto foundItem = std::find_if(Items.begin(), Items.end(),
 			[&](const std::shared_ptr<VideoItem>& vi)
