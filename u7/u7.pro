@@ -136,7 +136,8 @@ SOURCES +=\
 	Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
     ../lib/SignalMask.cpp \
-    AfblSet.cpp
+    AfblSet.cpp \
+    Builder/Algorithm.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -205,7 +206,8 @@ HEADERS  += \
     DialogSubsystemListEditor.h \
     ../include/Types.h \
     ../include/SignalMask.h \
-    AfblSet.h
+    AfblSet.h \
+    Builder/Algorithm.h
 
 FORMS    += \
     ChangesetDialog.ui \

@@ -7,6 +7,7 @@
 #include "../include/Signal.h"
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
+#include "../Builder/Algorithm.h"
 #include "AfblSet.h"
 
 
@@ -67,35 +68,14 @@ namespace Builder
 
 
 
-	/*class AlgFbItem : public FbItem
-	{
-	private:
-		int m_instance = 0;
-
-	public:
-		int getInstance() const { return m_instance; }
-		void setInstance(int i) { m_instance = i; }
-	};
-
-
-	class AlgFbItems
-	{
-	private:
-		QHash<QString, QVector<AlgFbItem>> m_algAfb;
-
-	public:
-		append(QString afbStrID);
-	};*/
-
-
-	class AlgFbParam
+/*	class AlgFbParam
 	{
 	public:
 		QString caption;
 		int index = 0;
 		int size = 16;
 		quint16 value = 0;
-	};
+	};*/
 
 
 	typedef QVector<AlgFbParam> AlgFbParamArray;

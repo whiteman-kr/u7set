@@ -283,11 +283,16 @@ namespace Builder
 		m_code.comment("Functional Blocks initialization code");
 		m_code.newLine();
 
+		for(AfbElement afbElement : m_afbl->items)
+		{
+			AlgFb fb(afbElement);
+		}
+
 		bool result = true;
 
 		result &= getUsedAfbs();
 
-		AlgFbParamArray param;
+		/*AlgFbParamArray param;
 
 		AlgFbParam p;
 
@@ -305,7 +310,7 @@ namespace Builder
 
 		param.append(p);
 
-		generateAfbInitialization(1, 1, param);
+		generateAfbInitialization(1, 1, param);*/
 
 		return result;
 	}
@@ -325,7 +330,7 @@ namespace Builder
 
 		Command command;
 
-		for(AlgFbParam param : params)
+		/*for(AlgFbParam param : params)
 		{
 			command.writeFuncBlockConst(fbType, fbInstance, param.index, param.value);
 
@@ -336,7 +341,7 @@ namespace Builder
 			command.setComment(commentStr);
 
 			m_code.append(command);
-		}
+		}*/
 
 		return true;
 	}
