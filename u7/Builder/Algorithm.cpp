@@ -247,7 +247,7 @@ namespace Builder
 
 	AlgFb::AlgFb(const Afbl::AfbElement& afbElement)
 	{
-fwefiwjefijwoefji
+//fwefiwjefijwoefji
 	}
 
 
