@@ -1,8 +1,5 @@
-#include "../include/Crc.h"
-
-#include <assert.h>
 #include <QtEndian>
-#include <vector>
+#include "../include/Crc.h"
 
 // Using normal poly 0x000000000000001B
 

@@ -125,7 +125,8 @@ HEADERS  += \
     ../include/ProtoSerialization.h \
     ../include/SignalMask.h \
     ../include/Types.h \
-    ../include/OrderedHash.h
+    ../include/OrderedHash.h \
+    Stable.h
 
 
 FORMS    +=
@@ -145,11 +146,27 @@ OTHER_FILES += \
     reports/LinearityDetailEl.ncr \
     reports/LinearityDetailPh.ncr
 
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 unix:QMAKE_CXXFLAGS += -std=c++11
 
-CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+#
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
+#protobuf
+#
+win32 {
+                LIBS += -L$$DESTDIR -lprotobuf
+
+                INCLUDEPATH += ./../Protobuf
+}
+unix {
+                LIBS += -lprotobuf
+}
 
 # Visual Leak Detector
 #
@@ -193,14 +210,5 @@ unix {
         }
 }
 
-#protobuf
-#
-win32 {
-		LIBS += -L$$DESTDIR -lprotobuf
 
-		INCLUDEPATH += ./../Protobuf
-}
-unix {
-		LIBS += -lprotobuf
-}
 

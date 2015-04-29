@@ -5,11 +5,6 @@
 #include <QHash>
 #include <QQmlEngine>
 #include <QtEndian>
-#include <QFile>
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QDebug>
 
 namespace Hardware
 {

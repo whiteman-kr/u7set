@@ -5,7 +5,6 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QXmlStreamWriter>
-#include <QDebug>
 
 
 namespace Hardware

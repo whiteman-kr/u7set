@@ -1,7 +1,4 @@
-#ifndef CRC_H
-#define CRC_H
-
-#include <QtGlobal>
+#pragma once
 
 class Crc
 {
@@ -17,5 +14,3 @@ private:
 	static quint64 crc64Normal(const void* src, qint64 l);
 	static quint64 crc64Reverse(const void* src, qint64 l);
 };
-
-#endif // CRC_H
