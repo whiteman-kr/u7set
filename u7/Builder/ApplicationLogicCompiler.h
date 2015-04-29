@@ -5,8 +5,12 @@
 
 #include "../include/DeviceObject.h"
 #include "../include/Signal.h"
+#include "../Builder/ApplicationLogicBuilder.h"
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
+#include "AfblSet.h"
+
+
 
 
 namespace Builder
@@ -40,6 +44,8 @@ namespace Builder
 	private:
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
+		AfblSet* m_afbl = nullptr;
+		ApplicationLogicData* m_appLogicData = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
 
@@ -55,13 +61,26 @@ namespace Builder
 
 
 	public:
-		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter, OutputLog* log);
+		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog* log);
 
 		bool run();
 
 		friend class ModuleLogicCompiler;
 	};
 
+
+
+/*	class AlgFbParam
+	{
+	public:
+		QString caption;
+		int index = 0;
+		int size = 16;
+		quint16 value = 0;
+	};*/
+
+
+//	typedef QVector<AlgFbParam> AlgFbParamArray;
 
 	class ModuleLogicCompiler : public QObject
 	{
@@ -70,6 +89,9 @@ namespace Builder
 	private:
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
+		AfblSet* m_afbl = nullptr;
+		ApplicationLogicData* m_appLogicData = nullptr;
+		ApplicationLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
 
@@ -91,8 +113,15 @@ namespace Builder
 		// module logic compilations steps
 		//
 		bool init();
+
+		bool afbInitialization();
+		bool getUsedAfbs();
+		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
+
 		bool copyDiagData();
 		bool copyInOutSignals();
+
+		bool generateApplicationLogicCode();
 
 		bool writeResult();
 

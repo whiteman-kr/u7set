@@ -1,7 +1,6 @@
 #include "Builder.h"
 #include "ApplicationLogicBuilder.h"
 #include "ConfigurationBuilder.h"
-#include "AfblSet.h"
 
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
@@ -174,7 +173,9 @@ namespace Builder
 			//
 			// Build application logic
 			//
-			buildApplicationLogic(&db, lastChangesetId);
+			ApplicationLogicData appLogicData;
+
+			buildApplicationLogic(&db, &appLogicData, lastChangesetId);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -184,7 +185,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &buildWriter);
+			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afblSet, &appLogicData, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -355,9 +356,9 @@ namespace Builder
 
 	}
 
-	bool BuildWorkerThread::buildApplicationLogic(DbController* db, int changesetId)
+	bool BuildWorkerThread::buildApplicationLogic(DbController* db, ApplicationLogicData* appLogicData, int changesetId)
 	{
-		if (db == nullptr)
+		if (db == nullptr || appLogicData == nullptr)
 		{
 			assert(false);
 			return false;
@@ -366,7 +367,7 @@ namespace Builder
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Application Logic building"), true);
 
-		ApplicationLogicBuilder alBuilder = {db, m_log, changesetId, debug()};
+		ApplicationLogicBuilder alBuilder = {db, m_log, appLogicData, changesetId, debug()};
 
 		bool result = alBuilder.build();
 
@@ -384,12 +385,12 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter)
+	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter)
 	{
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Application Logic compilation"), true);
 
-		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, afblSet, appLogicData, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 

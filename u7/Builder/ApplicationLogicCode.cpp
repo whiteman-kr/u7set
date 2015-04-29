@@ -161,7 +161,7 @@ namespace Builder
 	}
 
 
-	void Command::mov(quint16 addrFrom, quint16 addrTo)
+	void Command::mov(quint16 addrTo, quint16 addrFrom)
 	{
 		m_code.setOpCode(CommandCodes::MOV);
 		m_code.setWord2(addrFrom);
@@ -169,7 +169,7 @@ namespace Builder
 	}
 
 
-	void Command::movMem(quint16 addrFrom, quint16 addrTo, quint16 sizeW)
+	void Command::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
 	{
 		m_code.setOpCode(CommandCodes::MOVMEM);
 		m_code.setWord2(addrFrom);
@@ -178,7 +178,7 @@ namespace Builder
 	}
 
 
-	void Command::movConst(quint16 constVal, quint16 addrTo)
+	void Command::movConst(quint16 addrTo, quint16 constVal)
 	{
 		m_code.setOpCode(CommandCodes::MOVC);
 		m_code.setWord2(addrTo);
@@ -186,7 +186,7 @@ namespace Builder
 	}
 
 
-	void Command::movBitConst(quint16 constBit, quint16 addrTo, quint16 bitNo)
+	void Command::movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit)
 	{
 		m_code.setOpCode(CommandCodes::MOVBC);
 		m_code.setWord2(addrTo);
@@ -195,7 +195,7 @@ namespace Builder
 	}
 
 
-	void Command::writeFuncBlock(quint16 addrFrom, quint16 fbType, quint16 fbInstance, quint16 fbParamNo)
+	void Command::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom)
 	{
 		m_code.setOpCode(CommandCodes::WRFB);
 		m_code.setFbType(fbType);
@@ -205,7 +205,7 @@ namespace Builder
 	}
 
 
-	void Command::readFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo)
+	void Command::readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo)
 	{
 		m_code.setOpCode(CommandCodes::RDFB);
 		m_code.setFbType(fbType);
@@ -215,7 +215,7 @@ namespace Builder
 	}
 
 
-	void Command::writeFuncBlockConst(quint16 constVal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo)
+	void Command::writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal)
 	{
 		m_code.setOpCode(CommandCodes::WRFBC);
 		m_code.setFbType(fbType);
@@ -225,7 +225,7 @@ namespace Builder
 	}
 
 
-	void Command::writeFuncBlockBit(quint16 addrFrom, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo)
+	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo)
 	{
 		m_code.setOpCode(CommandCodes::WRFBB);
 		m_code.setFbType(fbType);
@@ -236,7 +236,7 @@ namespace Builder
 	}
 
 
-	void Command::readFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo, quint16 bitNo)
+	void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo)
 	{
 		m_code.setOpCode(CommandCodes::RDFBB);
 		m_code.setFbType(fbType);
@@ -324,48 +324,48 @@ namespace Builder
 			break;
 
 		case MOV:
-			mnemoCode.sprintf("%s\t0x%04X, 0x%04X", CommandStr[opCode], m_code.getWord2(), m_code.getWord3());
+			mnemoCode.sprintf("%s\t0x%04X, 0x%04X", CommandStr[opCode], m_code.getWord3(), m_code.getWord2());
 			break;
 
 		case MOVMEM:
-			mnemoCode.sprintf("%s\t0x%04X, 0x%04X, %d", CommandStr[opCode], m_code.getWord2(), m_code.getWord3(), m_code.getWord4());
+			mnemoCode.sprintf("%s\t0x%04X, 0x%04X, %d", CommandStr[opCode], m_code.getWord3(), m_code.getWord2(), m_code.getWord4());
 			break;
 
 		case MOVC:
-			mnemoCode.sprintf("%s\t#0x%04X, 0x%04X", CommandStr[opCode], m_code.getWord3(), m_code.getWord2());
+			mnemoCode.sprintf("%s\t0x%04X, #0x%04X", CommandStr[opCode], m_code.getWord2(), m_code.getWord3());
 			break;
 
 		case MOVBC:
-			mnemoCode.sprintf("%s\t#%d, 0x%04X[%d]", CommandStr[opCode], m_code.getWord3(), m_code.getWord2(), m_code.getWord4());
+			mnemoCode.sprintf("%s\t0x%04X[%d], #%d", CommandStr[opCode], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
 			break;
 
 		case WRFB:
-			mnemoCode.sprintf("%s\t0x%04X, %s.%d[%d]", CommandStr[opCode], m_code.getWord2(),
-							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X", CommandStr[opCode],
+							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
 			break;
 
 		case RDFB:
-			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
-							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
+			mnemoCode.sprintf("%s\t0x%04X, %s.%d[%d]", CommandStr[opCode], m_code.getWord2(), m_code.getFbTypeStr().toUtf8().data(),
+							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
 			break;
 
 		case WRFBC:
-			mnemoCode.sprintf("%s\t#0x%04X, %s.%d[%d]", CommandStr[opCode], m_code.getWord2(),
-							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+			mnemoCode.sprintf("%s\t%s.%d[%d], #0x%04X", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
+							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
 			break;
 
 		case WRFBB:
-			mnemoCode.sprintf("%s\t0x%04X[%d], %s.%d[%d]", CommandStr[opCode], m_code.getWord2(), m_code.getWord4(),
-							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
-			break;
-
-		case RDFBB:
 			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X[%d]", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2(), m_code.getWord4());
 			break;
 
+		case RDFBB:
+			mnemoCode.sprintf("%s\t0x%04X[%d], %s.%d[%d]", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
+							  m_code.getWord2(), m_code.getWord4(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+			break;
+
 		case RDFBTS:
-			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
+			mnemoCode.sprintf("%s\t%s.%d[%d], #0x%04X", CommandStr[opCode], m_code.getFbTypeStr().toUtf8().data(),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
 		default:
 			assert(false);
@@ -402,7 +402,7 @@ namespace Builder
 
 		if (!commentIsEmpty())
 		{
-			tabLen = 56 - cmdStr.length();
+			tabLen = 72 - 32 - (mnemoCode.length() - 1 + ((mnemoCode.length() - 1) % 8));
 
 			tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 
@@ -463,6 +463,23 @@ namespace Builder
 		m_codeItems.append(newComment);
 	}
 
+
+	void ApplicationLogicCode::comment(QString commentStr)
+	{
+		Comment* newComment = new Comment();
+
+		newComment->setComment(commentStr);
+
+		m_codeItems.append(newComment);
+	}
+
+
+	void ApplicationLogicCode::newLine()
+	{
+		Comment* newComment = new Comment();
+
+		m_codeItems.append(newComment);
+	}
 
 	void ApplicationLogicCode::generateBinCode()
 	{
