@@ -255,7 +255,7 @@ namespace Builder
 				ok = db->getLatestVersion(fi, &file, nullptr);
 			}
 
-			if (file == false || ok == false)
+			if (file == nullptr || ok == false)
 			{
 				m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()), false, true);
 				return false;
