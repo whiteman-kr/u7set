@@ -285,6 +285,14 @@ void DatabaseOption::load()
 
     m_path = s.value( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
     m_type = s.value( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
+
+    thepDatabase = new Database;
+    if (thepDatabase == nullptr)
+    {
+        return;
+    }
+
+    thepDatabase->open();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -435,12 +443,17 @@ bool ReportHeaderBase::reportsIsExist()
 
 void ReportHeaderBase::load()
 {
-    if (theDatabase.isOpen() == false)
+    if (thepDatabase == nullptr)
     {
         return;
     }
 
-    SqlTable* pTable = theDatabase.openTable(SQL_TABLE_REPORT_HEADER);
+    if (thepDatabase->isOpen() == false)
+    {
+        return;
+    }
+
+    SqlTable* pTable = thepDatabase->openTable(SQL_TABLE_REPORT_HEADER);
     if (pTable == nullptr)
     {
         return;
@@ -482,12 +495,17 @@ void ReportHeaderBase::load()
 
 void ReportHeaderBase::save()
 {
-    if (theDatabase.isOpen() == false)
+    if (thepDatabase == nullptr)
     {
         return;
     }
 
-    SqlTable* pTable = theDatabase.openTable(SQL_TABLE_REPORT_HEADER);
+    if (thepDatabase->isOpen() == false)
+    {
+        return;
+    }
+
+    SqlTable* pTable = thepDatabase->openTable(SQL_TABLE_REPORT_HEADER);
     if (pTable == nullptr)
     {
         return;
@@ -822,12 +840,17 @@ QString LinearityPointBase::text()
 
 void LinearityPointBase::load()
 {
-    if (theDatabase.isOpen() == false)
+    if (thepDatabase == nullptr)
     {
         return;
     }
 
-    SqlTable* pTable = theDatabase.openTable(SQL_TABLE_LINEARETY_POINT);
+    if (thepDatabase->isOpen() == false)
+    {
+        return;
+    }
+
+    SqlTable* pTable = thepDatabase->openTable(SQL_TABLE_LINEARETY_POINT);
     if (pTable == nullptr)
     {
         return;
@@ -861,12 +884,17 @@ void LinearityPointBase::load()
 
 void LinearityPointBase::save()
 {
-    if (theDatabase.isOpen() == false)
+    if (thepDatabase == nullptr)
     {
         return;
     }
 
-    SqlTable* pTable = theDatabase.openTable(SQL_TABLE_LINEARETY_POINT);
+    if (thepDatabase->isOpen() == false)
+    {
+        return;
+    }
+
+    SqlTable* pTable = thepDatabase->openTable(SQL_TABLE_LINEARETY_POINT);
     if (pTable == nullptr)
     {
         return;
@@ -1268,7 +1296,6 @@ void Options::load()
     m_measureView.load();
 
     m_database.load();
-    theDatabase.open();
 
     m_report.load();
     m_report.init();
