@@ -29,10 +29,12 @@ namespace Builder
 	//	ApplicationLogicCompiler class implementation
 	//
 
-	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, BuildResultWriter* buildResultWriter, OutputLog *log) :
+	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet,
+													   ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog *log) :
 		m_equipment(equipment),
 		m_signals(signalSet),
 		m_afbl(afblSet),
+		m_appLogicData(appLogicData),
 		m_resultWriter(buildResultWriter),
 		m_log(log)
 	{
@@ -50,6 +52,7 @@ namespace Builder
 		if (m_equipment == nullptr ||
 			m_signals == nullptr ||
 			m_afbl == nullptr ||
+			m_appLogicData == nullptr ||
 			m_resultWriter == nullptr)
 		{
 			msg = tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__);
@@ -176,6 +179,7 @@ namespace Builder
 		m_equipment = appLogicCompiler.m_equipment;
 		m_signals = appLogicCompiler.m_signals;
 		m_afbl = appLogicCompiler.m_afbl;
+		m_appLogicData = appLogicCompiler.m_appLogicData;
 		m_resultWriter = appLogicCompiler.m_resultWriter;
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
@@ -212,6 +216,9 @@ namespace Builder
 
 		result &= generateApplicationLogicCode();
 
+
+		result &= writeResult();
+
 		if (result == true)
 		{
 			msg = QString(tr("Compilation for LM %1 was successfully finished")).arg(m_lm->strId());
@@ -222,8 +229,6 @@ namespace Builder
 			msg = QString(tr("Compilation for LM %1 was finished with errors")).arg(m_lm->strId());
 			m_log->writeError(msg, false, false);
 		}
-
-		result &= writeResult();
 
 		return result;
 	}
@@ -274,6 +279,16 @@ namespace Builder
 		m_regDataAddress.reset();
 		m_regDataAddress.setBase(addr);
 
+		std::shared_ptr<ApplicationLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->strId());
+
+		m_moduleLogic = appLogicModule.get();
+
+		if (m_moduleLogic == nullptr)
+		{
+			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
+			m_log->writeWarning(msg, false, true);
+		}
+
 		return true;
 	}
 
@@ -283,10 +298,10 @@ namespace Builder
 		m_code.comment("Functional Blocks initialization code");
 		m_code.newLine();
 
-		for(AfbElement afbElement : m_afbl->items)
+/*		for(AfbElement afbElement : m_afbl->items)
 		{
 			AlgFb fb(afbElement);
-		}
+		}*/
 
 		bool result = true;
 
@@ -324,13 +339,13 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params)
+	/*bool ModuleLogicCompiler::generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params)
 	{
 		m_code.newLine();
 
 		Command command;
 
-		/*for(AlgFbParam param : params)
+		for(AlgFbParam param : params)
 		{
 			command.writeFuncBlockConst(fbType, fbInstance, param.index, param.value);
 
@@ -341,10 +356,10 @@ namespace Builder
 			command.setComment(commentStr);
 
 			m_code.append(command);
-		}*/
+		}
 
 		return true;
-	}
+	}*/
 
 
 	bool ModuleLogicCompiler::copyDiagData()

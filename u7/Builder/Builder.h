@@ -16,6 +16,7 @@ class DbController;
 namespace Builder
 {
 	class SignalSetObject;
+	class ApplicationLogicData;
 }
 
 namespace Hardware
@@ -64,11 +65,11 @@ namespace Builder
 
 		// Build Application Logic
 		//
-		bool buildApplicationLogic(DbController* db, int changesetId);
+		bool buildApplicationLogic(DbController* db, ApplicationLogicData* appLogicData, int changesetId);
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, BuildResultWriter* buildResultWriter);
+		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?
 		//
