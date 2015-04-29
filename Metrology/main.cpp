@@ -1,6 +1,7 @@
 #include <QApplication>
 #include "MainWindow.h"
 #include "Options.h"
+#include "Stable.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 

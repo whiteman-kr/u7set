@@ -1,10 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <QString>
-#include <QDateTime>
-#include <QMetaType>
-
 // signal management error codes
 // returns in ObjectState.errCode field
 //
