@@ -2,6 +2,10 @@
 #include "FblItemRect.h"
 #include "SchemeLayer.h"
 
+#include "VideoItemSignal.h"
+#include "VideoItemFblElement.h"
+
+
 namespace VFrame30
 {
 	FblItemRect::FblItemRect(void)
@@ -394,6 +398,54 @@ namespace VFrame30
 	bool FblItemRect::IsFblItem() const
 	{
 		return true;
+	}
+
+	bool FblItemRect::isInputSignalElement() const
+	{
+		const VFrame30::VideoItemInputSignal* ptr = dynamic_cast<const VFrame30::VideoItemInputSignal*>(this);
+		return ptr != nullptr;
+	}
+
+	bool FblItemRect::isOutputSignalElement() const
+	{
+		const VFrame30::VideoItemOutputSignal* ptr = dynamic_cast<const VFrame30::VideoItemOutputSignal*>(this);
+		return ptr != nullptr;
+	}
+
+	bool FblItemRect::isFblElement() const
+	{
+		const VFrame30::VideoItemFblElement* ptr = dynamic_cast<const VFrame30::VideoItemFblElement*>(this);
+		return ptr != nullptr;
+	}
+
+	VFrame30::VideoItemInputSignal* FblItemRect::toInputSignalElement()
+	{
+		return dynamic_cast<VFrame30::VideoItemInputSignal*>(this);
+	}
+
+	const VFrame30::VideoItemInputSignal* FblItemRect::toInputSignalElement() const
+	{
+		return dynamic_cast<const VFrame30::VideoItemInputSignal*>(this);
+	}
+
+	VFrame30::VideoItemOutputSignal* FblItemRect::toOutputSignalElement()
+	{
+		return dynamic_cast<VFrame30::VideoItemOutputSignal*>(this);
+	}
+
+	const VFrame30::VideoItemOutputSignal* FblItemRect::toOutputSignalElement() const
+	{
+		return dynamic_cast<const VFrame30::VideoItemOutputSignal*>(this);
+	}
+
+	VFrame30::VideoItemFblElement* FblItemRect::toFblElement()
+	{
+		return dynamic_cast<VFrame30::VideoItemFblElement*>(this);
+	}
+
+	const VFrame30::VideoItemFblElement* FblItemRect::toFblElement() const
+	{
+		return dynamic_cast<const VFrame30::VideoItemFblElement*>(this);
 	}
 	
 	// Weight propertie

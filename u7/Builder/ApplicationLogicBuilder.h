@@ -75,6 +75,36 @@ namespace Builder
 //		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
 //	};
 
+	class ApplicationLogicScheme
+	{
+	public:
+		ApplicationLogicScheme() = default;
+
+	public:
+		void setData(
+			std::shared_ptr<VFrame30::LogicScheme>& scheme,
+			const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items);
+
+		std::shared_ptr<VFrame30::FblItemRect> getItemByGuid(const QUuid& itemGuid) const;
+
+		std::shared_ptr<Afbl::AfbElement> getItemsFbl(const std::shared_ptr<VFrame30::FblItemRect>& item) const;
+
+		// Properties
+		//
+	public:
+		const std::shared_ptr<VFrame30::LogicScheme>& scheme() const;
+		std::shared_ptr<VFrame30::LogicScheme> scheme();
+
+		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items() const;
+		std::list<std::shared_ptr<VFrame30::FblItemRect>>& items();
+
+		// Data
+		//
+	private:
+		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
+		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
+	};
+
 	// ------------------------------------------------------------------------
 	//
 	//		ApplicationLogicModule
@@ -88,7 +118,10 @@ namespace Builder
 		ApplicationLogicModule() = delete;
 		ApplicationLogicModule(QString moduleStrId);
 
-		bool addBranch(const BushContainer& bushContainer, OutputLog* log);
+		bool addBranch(
+			std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+			const BushContainer& bushContainer,
+			OutputLog* log);
 
 	private:
 		template<typename Iter>
@@ -108,15 +141,12 @@ namespace Builder
 		QString moduleStrId() const;
 		void setModuleStrId(QString value);
 
-		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items() const;
-		std::list<std::shared_ptr<VFrame30::FblItemRect>>& items();
+		const std::list<ApplicationLogicScheme>& appSchemes() const;
+		std::list<ApplicationLogicScheme>& appSchemes();
 
 	private:
 		QString m_moduleStrId;
-
-		//std::list<std::shared_ptr<ApplicationLogicBranch>> m_branches;
-
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
+		std::list<ApplicationLogicScheme> m_schemes;
 	};
 
 

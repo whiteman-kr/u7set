@@ -85,6 +85,72 @@ namespace Builder
 //		return m_items;
 //	}
 
+	void ApplicationLogicScheme::setData(
+		std::shared_ptr<VFrame30::LogicScheme>& scheme,
+		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items)
+	{
+		m_scheme = scheme;
+		m_items = items;
+	}
+
+	std::shared_ptr<VFrame30::FblItemRect> ApplicationLogicScheme::getItemByGuid(const QUuid& itemGuid) const
+	{
+		auto it = std::find_if(m_items.begin(), m_items.end(),
+			[&itemGuid](const std::shared_ptr<VFrame30::FblItemRect>& i)
+			{
+				return i->guid() == itemGuid;
+			});
+
+		if (it != m_items.end())
+		{
+			return *it;
+		}
+		else
+		{
+			return std::shared_ptr<VFrame30::FblItemRect>{};
+		}
+	}
+
+	std::shared_ptr<Afbl::AfbElement> ApplicationLogicScheme::getItemsFbl(const std::shared_ptr<VFrame30::FblItemRect>& item) const
+	{
+		if (m_scheme == nullptr)
+		{
+			assert(m_scheme);
+			return std::shared_ptr<Afbl::AfbElement>{};
+		}
+
+		VFrame30::VideoItemFblElement* schemeItemFblElement = item->toFblElement();
+
+		if (schemeItemFblElement == nullptr)
+		{
+			assert(schemeItemFblElement);
+			return std::shared_ptr<Afbl::AfbElement>{};
+		}
+
+		auto result = m_scheme->afbCollection().get(schemeItemFblElement->afbGuid());
+		return result;
+	}
+
+	const std::shared_ptr<VFrame30::LogicScheme>& ApplicationLogicScheme::scheme() const
+	{
+		return m_scheme;
+	}
+
+	std::shared_ptr<VFrame30::LogicScheme> ApplicationLogicScheme::scheme()
+	{
+		return m_scheme;
+	}
+
+	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicScheme::items() const
+	{
+		return m_items;
+	}
+
+	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicScheme::items()
+	{
+		return m_items;
+	}
+
 
 	// ------------------------------------------------------------------------
 	//
@@ -146,10 +212,14 @@ namespace Builder
 	};
 
 
-	bool ApplicationLogicModule::addBranch(const BushContainer& bushContainer, OutputLog* log)
+	bool ApplicationLogicModule::addBranch(
+		std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+		const BushContainer& bushContainer,
+		OutputLog* log)
 	{
-		if (bushContainer.bushes.empty() == true)
+		if (logicScheme == nullptr)
 		{
+			assert(logicScheme);
 			return false;
 		}
 
@@ -157,6 +227,12 @@ namespace Builder
 		{
 			assert(log);
 			return false;
+		}
+
+		if (bushContainer.bushes.empty() == true)
+		{
+			log->writeWarning(QObject::tr("Logic scheme does no contains any correct links."), false, true);
+			return true;
 		}
 
 		bool result = true;
@@ -343,7 +419,35 @@ namespace Builder
 		}
 		else
 		{
-			std::swap(items(), orderedList);
+			// -- debug
+			qDebug() << "";
+			qDebug() << "ORDERED LIST FOR SCHEME " << logicScheme->strID();
+			qDebug() << "";
+
+			for (const std::shared_ptr<VFrame30::FblItemRect>& item : orderedList)
+			{
+				if (item->isInputSignalElement())
+				{
+					qDebug() << "Input " << item->toInputSignalElement()->signalStrIds();
+				}
+
+				if (item->isOutputSignalElement())
+				{
+					qDebug() << "Output " << item->toOutputSignalElement()->signalStrIds();
+				}
+
+				if (item->isFblElement())
+				{
+					qDebug() << "Fbl " << logicScheme->afbCollection().get(item->toFblElement()->afbGuid())->caption();
+				}
+			}
+
+			// -- end of debug
+
+			ApplicationLogicScheme appScheme;
+			appScheme.setData(logicScheme, orderedList);
+
+			m_schemes.push_back(appScheme);
 		}
 
 		return result;
@@ -435,15 +539,26 @@ namespace Builder
 		m_moduleStrId = value;
 	}
 
-	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicModule::items() const
+//	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicModule::items() const
+//	{
+//		return m_items;
+//	}
+
+//	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicModule::items()
+//	{
+//		return m_items;
+//	}
+
+	const std::list<ApplicationLogicScheme>& ApplicationLogicModule::appSchemes() const
 	{
-		return m_items;
+		return m_schemes;
 	}
 
-	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicModule::items()
+	std::list<ApplicationLogicScheme>& ApplicationLogicModule::appSchemes()
 	{
-		return m_items;
+		return m_schemes;
 	}
+
 
 
 
@@ -464,7 +579,9 @@ namespace Builder
 	{
 		if (bushContainer.bushes.empty() == true)
 		{
-			return false;
+			// It is not error, just algorithm does not contain any fbl elements
+			//
+			return true;
 		}
 
 		if (scheme == nullptr ||
@@ -505,7 +622,7 @@ namespace Builder
 
 		// add new branch to module
 		//
-		bool result = module->addBranch(bushContainer, log);
+		bool result = module->addBranch(scheme, bushContainer, log);
 
 		return result;
 	}
@@ -1290,6 +1407,7 @@ namespace Builder
 		}
 
 		bool result = true;
+		int hasFblItems = false;
 
 		for (auto& item : layer->Items)
 		{
@@ -1297,6 +1415,8 @@ namespace Builder
 
 			if(fblirect != nullptr)
 			{
+				hasFblItems = true;
+
 				std::shared_ptr<VFrame30::FblItemRect> fblElement =
 						std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
 
@@ -1380,6 +1500,12 @@ namespace Builder
 					}
 				}
 			}
+		}
+
+		if (hasFblItems == false)
+		{
+			log()->writeWarning("Empty logic scheme, functional blocks were not found.", false, true);
+			return true;
 		}
 
 		return result;
