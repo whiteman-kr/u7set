@@ -103,7 +103,7 @@ public:
 
 private:
 
-    static              MeasureViewColumn m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
+    static MeasureViewColumn    m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 
