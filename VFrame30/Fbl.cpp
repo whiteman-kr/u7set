@@ -97,10 +97,6 @@ namespace Afbl
 				}
 			}
 		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbParamValue - No Type found"));
-		}
 
 		if (xmlReader->attributes().hasAttribute("Value"))
 		{
@@ -124,10 +120,6 @@ namespace Afbl
 				default:
 					Q_ASSERT(false);
 			}
-		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbParamValue - No Value found"));
 		}
 
 		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
@@ -216,11 +208,11 @@ namespace Afbl
 	//							CFblElementSignal		
 	//
 	//
-	AfbElementSignal::AfbElementSignal(void)
+	AfbElementSignal::AfbElementSignal(void):
+		m_type(AfbSignalType::Analog),
+		m_index(0),
+		m_size(0)
 	{
-		m_type = AfbSignalType::Analog;
-        m_index = 0;
-        m_size = 0;
 	}
 
 	AfbElementSignal::~AfbElementSignal(void)
@@ -287,10 +279,6 @@ namespace Afbl
 		{
 			setCaption(xmlReader->attributes().value("Caption").toString());
 		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Caption found"));
-		}
 
 		if (xmlReader->attributes().hasAttribute("Type"))
 		{
@@ -304,30 +292,18 @@ namespace Afbl
 			}
 
 		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Type found"));
-		}
 
         if (xmlReader->attributes().hasAttribute("Index"))
         {
             setIndex(xmlReader->attributes().value("Index").toInt());
-        }
-        else
-        {
-			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Index found"));
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
         {
             setSize(xmlReader->attributes().value("Size").toInt());
         }
-        else
-        {
-			xmlReader->raiseError(QObject::tr("AfbElementSignal - No Size found"));
-        }
 
-        QXmlStreamReader::TokenType endToken = xmlReader->readNext();
+		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
 		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
 
 		return !xmlReader->hasError();
@@ -459,45 +435,25 @@ namespace Afbl
 		{
 			setCaption(xmlReader->attributes().value("Caption").toString());
 		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbElementParam - No Caption found"));
-		}
 
 		if (xmlReader->attributes().hasAttribute("Visible"))
 		{
 			setVisible(xmlReader->attributes().value("Visible").toInt() == 0 ? false : true);
-		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbElementParam - No Visible found"));
 		}
 
 		if (xmlReader->attributes().hasAttribute("Type"))
 		{
 			setType((AfbParamType)xmlReader->attributes().value("Type").toInt());
 		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbElementParam - No Type found"));
-		}
 
         if (xmlReader->attributes().hasAttribute("Index"))
         {
             setIndex(xmlReader->attributes().value("Index").toInt());
         }
-        else
-        {
-			xmlReader->raiseError(QObject::tr("AfbElementParam - No Index found"));
-        }
 
         if (xmlReader->attributes().hasAttribute("Size"))
         {
             setSize(xmlReader->attributes().value("Size").toInt());
-        }
-        else
-        {
-			xmlReader->raiseError(QObject::tr("AfbElementParam - No Size found"));
         }
 
         // Read values
@@ -692,19 +648,15 @@ namespace Afbl
 	//
 	//
 
-	AfbElement::AfbElement(void)
+	AfbElement::AfbElement(void):
+		m_guid(QUuid::createUuid()),
+		m_opcode(0),
+		m_hasRam(false)
 	{
-		Init();
 	}
 
 	AfbElement::~AfbElement(void)
 	{
-	}
-
-	void AfbElement::Init(void)
-	{
-		m_opcode = 0;
-		m_guid = QUuid::createUuid();
 	}
 
 	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data)
@@ -757,36 +709,25 @@ namespace Afbl
 		{
 			setGuid(QUuid(xmlReader->attributes().value("Guid").toString()));
 		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbElement - No Guid found"));
-		}
 
 		if (xmlReader->attributes().hasAttribute("StrId"))
 		{
 			setStrID(xmlReader->attributes().value("StrId").toString());
-		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbElement - No StrId found"));
 		}
 
 		if (xmlReader->attributes().hasAttribute("Caption"))
 		{
 			setCaption(xmlReader->attributes().value("Caption").toString());
 		}
-		else
-		{
-			xmlReader->raiseError(QObject::tr("AfbElement - No Caption found"));
-		}
 
 		if (xmlReader->attributes().hasAttribute("OpCode"))
 		{
 			setOpcode(xmlReader->attributes().value("OpCode").toInt());
 		}
-		else
+
+		if (xmlReader->attributes().hasAttribute("hasRam"))
 		{
-			xmlReader->raiseError(QObject::tr("AfbElement - No OpCode found"));
+			setHasRam(xmlReader->attributes().value("hasRam") == "0" ? false : true);
 		}
 
 		std::vector<AfbElementSignal> inputSignals;
@@ -881,7 +822,7 @@ namespace Afbl
 		setParams(params);
 		setConstParams(constParams);
 
-		return !xmlReader->error();
+		return !xmlReader->hasError();
 
 	}
 
@@ -925,6 +866,7 @@ namespace Afbl
 		xmlWriter->writeAttribute("StrId", strID());
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("OpCode", QString::number(opcode()));
+		xmlWriter->writeAttribute("hasRam", hasRam() ? "1" : "0");
 
 		xmlWriter->writeStartElement("InputSignals");
 		for (auto s : inputSignals())
@@ -1147,6 +1089,16 @@ namespace Afbl
 	void AfbElement::setOpcode(unsigned int value)
 	{
 		m_opcode = value;
+	}
+
+	bool AfbElement::hasRam() const
+	{
+		return m_hasRam;
+	}
+
+	void AfbElement::setHasRam(bool value)
+	{
+		m_hasRam = value;
 	}
 
 	// InputSignals

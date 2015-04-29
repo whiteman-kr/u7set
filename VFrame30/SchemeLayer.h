@@ -24,8 +24,7 @@ namespace VFrame30
 		friend Proto::ObjectSerialization<SchemeLayer>;
 
 	private:
-		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
-		// и должне прочитаться
+		// Use this func only while serialization, cause during obejcet creation it isnotfully initialized
 		static SchemeLayer* CreateObject(const Proto::Envelope& message);
 
 	protected:
@@ -36,10 +35,9 @@ namespace VFrame30
 		//
 	public:
 
-		std::shared_ptr<VideoItem> getItemById(QUuid id) const;
+		std::shared_ptr<VideoItem> getItemById(const QUuid& id) const;
 
-		// Если в connectionMap есть pinPos, то инкрементировать значение, иначе добавить новую запись со сзначением 1
-		//
+		// If in the connectioMap there is a pinPos, then increment value, if not then add new record with value 1
 		void ConnectionMapPosInc(VideoItemPoint pinPos);
 		int GetPinPosConnectinCount(VideoItemPoint pinPos, SchemeUnit unit) const;
 
@@ -67,13 +65,12 @@ namespace VFrame30
 		// Data
 		//
 	public:
-		// Элементы слоя 
-		//
+
+		// Layer items
 		std::list<std::shared_ptr<VideoItem>> Items;
 
-		// Таблица координат всех пинов, значением является количество координат лежащих на точке
-		//
-		std::map<VideoItemPoint, int> connectionMap;		// Ключ - координата пина, значение - количество пинов в координте
+		// Key is pin position, value is count of pins on the point
+		std::map<VideoItemPoint, int> connectionMap;
 
 	private:
 		QUuid m_guid;

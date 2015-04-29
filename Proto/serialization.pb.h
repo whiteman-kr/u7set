@@ -1111,20 +1111,6 @@ class FblElement : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 opcode() const;
   inline void set_opcode(::google::protobuf::uint32 value);
 
-  // optional int32 inputCount = 5 [default = 0];
-  inline bool has_inputcount() const;
-  inline void clear_inputcount();
-  static const int kInputCountFieldNumber = 5;
-  inline ::google::protobuf::int32 inputcount() const;
-  inline void set_inputcount(::google::protobuf::int32 value);
-
-  // optional int32 outputCount = 6 [default = 0];
-  inline bool has_outputcount() const;
-  inline void clear_outputcount();
-  static const int kOutputCountFieldNumber = 6;
-  inline ::google::protobuf::int32 outputcount() const;
-  inline void set_outputcount(::google::protobuf::int32 value);
-
   // repeated .Proto.FblElementSignal inputSignals = 11;
   inline int inputsignals_size() const;
   inline void clear_inputsignals();
@@ -1171,25 +1157,19 @@ class FblElement : public ::google::protobuf::Message {
   inline void clear_has_caption();
   inline void set_has_opcode();
   inline void clear_has_opcode();
-  inline void set_has_inputcount();
-  inline void clear_has_inputcount();
-  inline void set_has_outputcount();
-  inline void clear_has_outputcount();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::Uuid* uuid_;
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
-  ::google::protobuf::uint32 opcode_;
-  ::google::protobuf::int32 inputcount_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > inputsignals_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > outputsignals_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
-  ::google::protobuf::int32 outputcount_;
+  ::google::protobuf::uint32 opcode_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6260,50 +6240,6 @@ inline ::google::protobuf::uint32 FblElement::opcode() const {
 inline void FblElement::set_opcode(::google::protobuf::uint32 value) {
   set_has_opcode();
   opcode_ = value;
-}
-
-// optional int32 inputCount = 5 [default = 0];
-inline bool FblElement::has_inputcount() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void FblElement::set_has_inputcount() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void FblElement::clear_has_inputcount() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void FblElement::clear_inputcount() {
-  inputcount_ = 0;
-  clear_has_inputcount();
-}
-inline ::google::protobuf::int32 FblElement::inputcount() const {
-  return inputcount_;
-}
-inline void FblElement::set_inputcount(::google::protobuf::int32 value) {
-  set_has_inputcount();
-  inputcount_ = value;
-}
-
-// optional int32 outputCount = 6 [default = 0];
-inline bool FblElement::has_outputcount() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void FblElement::set_has_outputcount() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void FblElement::clear_has_outputcount() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void FblElement::clear_outputcount() {
-  outputcount_ = 0;
-  clear_has_outputcount();
-}
-inline ::google::protobuf::int32 FblElement::outputcount() const {
-  return outputcount_;
-}
-inline void FblElement::set_outputcount(::google::protobuf::int32 value) {
-  set_has_outputcount();
-  outputcount_ = value;
 }
 
 // repeated .Proto.FblElementSignal inputSignals = 11;

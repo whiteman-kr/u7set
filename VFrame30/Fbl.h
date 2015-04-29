@@ -183,8 +183,6 @@ private:
 		AfbElement(void);
 		virtual ~AfbElement(void);
 
-		void Init(void);
-
 		// Serialization
 		//
 		friend Proto::ObjectSerialization<AfbElement>;
@@ -227,6 +225,9 @@ private:
 		unsigned int opcode() const;
 		void setOpcode(unsigned int value);
 
+		bool hasRam() const;
+		void setHasRam(bool value);
+
         const std::vector<AfbElementSignal>& inputSignals() const;
 		void setInputSignals(const std::vector<AfbElementSignal>& inputsignals);
 
@@ -244,6 +245,7 @@ private:
 		QString m_strID;
 		QString m_caption;
 		unsigned int m_opcode;
+		bool m_hasRam;
 
 		std::vector<AfbElementSignal> m_inputSignals;
 		std::vector<AfbElementSignal> m_outputSignals;
