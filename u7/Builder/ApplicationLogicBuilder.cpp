@@ -571,6 +571,22 @@ namespace Builder
 	{
 	}
 
+
+	std::shared_ptr<ApplicationLogicModule> ApplicationLogicData::getModuleLogicData(QString moduleStrID)
+	{
+		for(std::shared_ptr<ApplicationLogicModule> modulePtr : m_modules)
+		{
+			if (modulePtr->moduleStrId() == moduleStrID)
+			{
+				return modulePtr;
+			}
+		}
+
+		std::shared_ptr<ApplicationLogicModule> nullPtr(nullptr);
+		return nullPtr;
+	}
+
+
 	bool ApplicationLogicData::addData(
 			const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
@@ -661,12 +677,13 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 
-	ApplicationLogicBuilder::ApplicationLogicBuilder(DbController* db, OutputLog* log,
+	ApplicationLogicBuilder::ApplicationLogicBuilder(DbController* db, OutputLog* log, ApplicationLogicData *appLogicData,
 		int changesetId, bool debug) :
 		m_db(db),
 		m_log(log),
 		m_changesetId(changesetId),
-		m_debug(debug)
+		m_debug(debug),
+		m_applicationData(appLogicData)
 	{
 		assert(m_db);
 		assert(m_log);
@@ -876,7 +893,7 @@ namespace Builder
 
 		// Generate afb list, and set it to some container
 		//
-		result = applicationData().addData(bushContainer, logicScheme, layer, m_log);
+		result = applicationData()->addData(bushContainer, logicScheme, layer, m_log);
 
 		if (result == false)
 		{
@@ -1537,12 +1554,12 @@ namespace Builder
 		return !debug();
 	}
 
-	const ApplicationLogicData& ApplicationLogicBuilder::applicationData() const
+	const ApplicationLogicData* ApplicationLogicBuilder::applicationData() const
 	{
 		return m_applicationData;
 	}
 
-	ApplicationLogicData& ApplicationLogicBuilder::applicationData()
+	ApplicationLogicData* ApplicationLogicBuilder::applicationData()
 	{
 		return m_applicationData;
 	}

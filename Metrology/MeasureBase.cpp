@@ -21,6 +21,11 @@ int MeasureBase::load(int measureType)
         return -1;
     }
 
+    if (thepDatabase == nullptr)
+    {
+        return -1;
+    }
+
     m_measureType = measureType;
 
     struct tableData
@@ -38,7 +43,7 @@ int MeasureBase::load(int measureType)
     {
         if (SqlTableByMeasureType[objectType] == measureType)
         {
-            SqlTable* table = theDatabase.openTable(objectType);
+            SqlTable* table = thepDatabase->openTable(objectType);
             if (table != nullptr)
             {
                 tableData data;
@@ -200,7 +205,7 @@ int MeasureBase::load(int measureType)
 
         // remove unnecessary measurement from sub table
         //
-        SqlTable* table = theDatabase.openTable(subTable.objectType);
+        SqlTable* table = thepDatabase->openTable(subTable.objectType);
         if (table != nullptr)
         {
             table->remove(removeKeyList.data(), removeKeyList.count());

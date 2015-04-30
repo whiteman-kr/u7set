@@ -2,10 +2,6 @@
 
 #include "../include/ProtoSerialization.h"
 
-#include <QHash>
-#include <QString>
-#include <QXmlStreamReader>
-
 // ----------------------------------------------------------------------------
 //
 //						Module Configuration

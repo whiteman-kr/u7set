@@ -121,7 +121,7 @@ namespace Builder
 			ok = db()->getLatestVersion(fileList[0], &scriptFile, nullptr);
 		}
 
-		if (ok == false || scriptFile == false)
+		if (ok == false || scriptFile == nullptr)
 		{
 			m_log->writeError(tr("Can't get Module Configuration description file"), false, true);
 			return false;

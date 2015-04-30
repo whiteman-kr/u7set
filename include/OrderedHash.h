@@ -1,7 +1,5 @@
 #pragma once
 
-#include <assert.h>
-
 template <typename KEY, typename VALUE>
 class OrderedHash
 {

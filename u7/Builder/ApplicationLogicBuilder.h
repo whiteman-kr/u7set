@@ -160,6 +160,8 @@ namespace Builder
 	public:
 		ApplicationLogicData();
 
+		std::shared_ptr<ApplicationLogicModule> getModuleLogicData(QString moduleStrID);
+
 		// Public methods
 		//
 	public:
@@ -198,7 +200,7 @@ namespace Builder
 
 	public:
 		ApplicationLogicBuilder() = delete;
-		ApplicationLogicBuilder(DbController* db, OutputLog* log, int changesetId, bool debug);
+		ApplicationLogicBuilder(DbController* db, OutputLog* log, ApplicationLogicData* appLogicData, int changesetId, bool debug);
 		virtual ~ApplicationLogicBuilder();
 
 		bool build();
@@ -231,8 +233,8 @@ namespace Builder
 		bool debug() const;
 		bool release() const;
 
-		const ApplicationLogicData& applicationData() const;
-		ApplicationLogicData& applicationData();
+		const ApplicationLogicData *applicationData() const;
+		ApplicationLogicData* applicationData();
 
 	private:
 		DbController* m_db = nullptr;
@@ -240,7 +242,7 @@ namespace Builder
 		int m_changesetId = 0;
 		int m_debug = false;
 
-		ApplicationLogicData m_applicationData;
+		ApplicationLogicData* m_applicationData = nullptr;
 	};
 
 

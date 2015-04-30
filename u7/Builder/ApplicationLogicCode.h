@@ -99,9 +99,15 @@ namespace Builder
 	const int FB_TYPE_STR_COUNT = sizeof(FbTypeStr) / sizeof(const char*);
 
 
-	const quint16	MAX_FB_TYPE = 64 - 1,
+	const quint16	MIN_FB_TYPE = 1,
+					MAX_FB_TYPE = 64 - 1,
+
+					MIN_FB_INSTANCE = 1,
 					MAX_FB_INSTANCE = 1024 - 1,
+
+					MIN_FB_PARAM_NO = 0,
 					MAX_FB_PARAM_NO = 64 - 1,
+
 					MAX_BIT_NO_16 = 16 - 1;
 
 	class CommandCode
@@ -239,15 +245,15 @@ namespace Builder
 		void nop();
 		void start();
 		void stop();
-		void mov(quint16 addrFrom, quint16 addrTo);
-		void movMem(quint16 addrFrom, quint16 addrTo, quint16 sizeW);
-		void movConst(quint16 constVal, quint16 addrTo);
-		void movBitConst(quint16 constBit, quint16 addrTo, quint16 bitNo);
-		void writeFuncBlock(quint16 addrFrom, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
-		void readFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo);
-		void writeFuncBlockConst(quint16 constVal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
-		void writeFuncBlockBit(quint16 addrFrom, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
-		void readFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrTo, quint16 bitNo);
+		void mov(quint16 addrTo, quint16 addrFrom);
+		void movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW);
+		void movConst(quint16 addrTo, quint16 constVal);
+		void movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit);
+		void writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom);
+		void readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		void writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal);
+		void writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo);
+		void readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
 		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue);
 
 		void setAddress(int address) { m_address = address; }
@@ -279,6 +285,8 @@ namespace Builder
 
 		void append(const Command &cmd);
 		void append(const Comment &cmt);
+		void comment(QString commentStr);
+		void newLine();
 
 		void clear();
 
