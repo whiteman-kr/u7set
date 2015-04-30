@@ -298,6 +298,22 @@ namespace Builder
 		m_code.comment("Functional Blocks initialization code");
 		m_code.newLine();
 
+		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& logicItems = m_moduleLogic->items();
+
+		for(std::shared_ptr<VFrame30::FblItemRect> logicItem : logicItems)
+		{
+			FbElement* fbElement = dynamic_cast<FbElement*>(logicItem.get());
+
+			if (fbElement == nullptr)
+			{
+				continue;
+			}
+
+			int a = 0;
+
+			a++;
+		}
+
 /*		for(AfbElement afbElement : m_afbl->items)
 		{
 			AlgFb fb(afbElement);

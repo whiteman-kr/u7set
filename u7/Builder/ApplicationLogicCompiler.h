@@ -9,6 +9,7 @@
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
 #include "AfblSet.h"
+#include "../VFrame30/Fb"
 
 
 
