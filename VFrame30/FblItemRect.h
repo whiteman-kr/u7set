@@ -64,6 +64,7 @@ namespace VFrame30
 
 		bool isInputSignalElement() const;
 		bool isOutputSignalElement() const;
+		bool isSignalElement() const;
 		bool isFblElement() const;
 
 		VFrame30::VideoItemInputSignal* toInputSignalElement();

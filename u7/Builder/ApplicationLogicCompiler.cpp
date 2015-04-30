@@ -288,6 +288,75 @@ namespace Builder
 			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
 			m_log->writeWarning(msg, false, true);
 		}
+		else
+		{
+			createAppSignalsMap();
+		}
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::createAppSignalsMap()
+	{
+		if (m_moduleLogic == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_signalStrIdMap.clear();
+
+		int count = m_signals->count();
+
+		m_signalStrIdMap.reserve(count);
+
+		for(int i = 0; i < count; i++)
+		{
+			const Signal& signal = (*m_signals)[i];
+			m_signalStrIdMap.insert(signal.strID(), signal.ID());
+		}
+
+
+		m_appSignals.clear();
+
+		for(const ApplicationLogicScheme& appLogicScheme : m_moduleLogic->appSchemes())
+		{
+			for(const std::shared_ptr<VFrame30::FblItemRect>& logicItem : appLogicScheme.items())
+			{
+				if (logicItem->isSignalElement())
+				{
+					// find real signal
+					//
+
+					VFrame30::VideoItemSignal* viSignal = dynamic_cast<VFrame30::VideoItemSignal*>(logicItem.get());
+
+					if (viSignal ==  nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					QString signalStrID = viSignal->signalStrIds();
+
+					if (signalStrID[0] != '#')
+					{
+						signalStrID = "#" + signalStrID;
+					}
+
+					if (!m_signalStrIdMap.contains(signalStrID))
+					{
+						msg = QString(tr("Signal with ID = %1 not found in Application Signals")).arg(signalStrID);
+
+						m_log->writeError(msg, false, true);
+					}
+
+					ApplicationSignal appSignal(signalStrID);
+
+					m_appSignals.insert(signalStrID, appSignal);
+				}
+			}
+		}
 
 		return true;
 	}
@@ -298,7 +367,7 @@ namespace Builder
 		m_code.comment("Functional Blocks initialization code");
 		m_code.newLine();
 
-		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& logicItems = m_moduleLogic->items();
+		/*const std::list<std::shared_ptr<VFrame30::FblItemRect>>& logicItems = m_moduleLogic->items();
 
 		for(std::shared_ptr<VFrame30::FblItemRect> logicItem : logicItems)
 		{
@@ -312,7 +381,7 @@ namespace Builder
 			int a = 0;
 
 			a++;
-		}
+		}*/
 
 /*		for(AfbElement afbElement : m_afbl->items)
 		{
