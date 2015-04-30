@@ -5,6 +5,13 @@
 
 namespace VFrame30
 {
+	class VideoItemInputSignal;
+	class VideoItemOutputSignal;
+	class VideoItemFblElement;
+}
+
+namespace VFrame30
+{
 	class VFRAME30LIBSHARED_EXPORT FblItemRect : public PosRectImpl, public FblItem
 	{
 		Q_OBJECT
@@ -49,10 +56,24 @@ namespace VFrame30
 		///</summary>
 		VideoItemPoint CalcPointPos(const QRectF& fblItemRect, const CFblConnectionPoint& connection, int pinCount, int index) const;
 
+
 		// Properties and Data
 		//
 	public:
 		virtual bool IsFblItem() const override;
+
+		bool isInputSignalElement() const;
+		bool isOutputSignalElement() const;
+		bool isFblElement() const;
+
+		VFrame30::VideoItemInputSignal* toInputSignalElement();
+		const VFrame30::VideoItemInputSignal* toInputSignalElement() const;
+
+		VFrame30::VideoItemOutputSignal* toOutputSignalElement();
+		const VFrame30::VideoItemOutputSignal* toOutputSignalElement() const;
+
+		VideoItemFblElement* toFblElement();
+		const VFrame30::VideoItemFblElement* toFblElement() const;
 
 		double weight() const;
 		void setWeight(double weight);
