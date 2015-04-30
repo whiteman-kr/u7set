@@ -385,7 +385,12 @@ bool MeasureTable::append(MeasureItem* pMeasure)
         return false;
     }
 
-    if (theDatabase.appendMeasure(pMeasure) == false)
+    if (thepDatabase == nullptr)
+    {
+        return false;
+    }
+
+    if (thepDatabase->appendMeasure(pMeasure) == false)
     {
         QMessageBox::critical(nullptr, tr("Append measurements"), tr("Error aapend measurements to database"));
         return false;
@@ -406,6 +411,11 @@ bool MeasureTable::append(MeasureItem* pMeasure)
 
 bool MeasureTable::remove(const QList<int> removeIndexList)
 {
+    if (thepDatabase == nullptr)
+    {
+        return false;
+    }
+
     QVector<int> keyList;
 
     // remove from database
@@ -429,7 +439,7 @@ bool MeasureTable::remove(const QList<int> removeIndexList)
         keyList.append(pMeasure->measureID());
     }
 
-    if (theDatabase.removeMeasure(m_measureType, keyList) == false)
+    if (thepDatabase->removeMeasure(m_measureType, keyList) == false)
     {
         QMessageBox::critical(nullptr, tr("Delete measurements"), tr("Error remove measurements from database"));
         return false;
