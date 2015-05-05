@@ -235,9 +235,11 @@ private:
 		void setOutputSignals(const std::vector<AfbElementSignal>& outputsignals);
 
 		const std::vector<AfbElementParam>& params() const;
+		int paramsCount() const;
 		void setParams(const std::vector<AfbElementParam>& constParams);
 
 		const std::vector<AfbElementParam>& constParams() const;
+		int constParamsCount() const;
 		void setConstParams(const std::vector<AfbElementParam>& constParams);
 
 	private:

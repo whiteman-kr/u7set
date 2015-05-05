@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QTranslator>
+#include <QUuid>
 
 #include "../include/DeviceObject.h"
 #include "../include/Signal.h"
@@ -11,7 +12,8 @@
 #include "AfblSet.h"
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/VideoItemSignal.h"
-
+#include "../VFrame30/VideoItemFblElement.h"
+#include "../VFrame30/FblItem.h"
 
 
 namespace Builder
@@ -70,27 +72,84 @@ namespace Builder
 	};
 
 
+	typedef VFrame30::FblItemRect LogicItem;
+	typedef VFrame30::VideoItemSignal LogicSignal;
+	typedef VFrame30::VideoItemFblElement LogicFb;
+	typedef VFrame30::CFblConnectionPoint LogicPin;
 
-/*	class AlgFbParam
+
+	// Functional Block Library element
+	//
+
+	class Fbl
 	{
+	private:
+		AfbElement* m_afbElement = nullptr;
+		bool m_singleInstance = true;
+		quint16 m_currentInstance = 0;
+
 	public:
-		QString caption;
-		int index = 0;
-		int size = 16;
-		quint16 value = 0;
-	};*/
+		Fbl(AfbElement* afbElement);
 
+		quint16 addInstance();
 
-//	typedef QVector<AlgFbParam> AlgFbParamArray;
+		const AfbElement& afbElement() const { return *m_afbElement; }
 
-	class AppFbMap
-	{
-	public:
+		bool isSingleInstance() const { return m_singleInstance; }
 
+		QUuid guid() const { return m_afbElement->guid(); }
+		QString strID() const { return m_afbElement->strID(); }
 	};
 
 
-	class ApplicationSignal
+	class FblsMap : public QHash<QUuid, Fbl*>
+	{
+	public:
+		~FblsMap() { clear(); }
+
+		int addInstance(LogicFb* logicFb);
+
+		void insert(AfbElement* afbElement);
+		void clear();
+	};
+
+
+	// Application Functional Block
+	// represent all FB items in application logic schemes
+	//
+
+	class AppFb
+	{
+	private:
+		LogicFb* m_logicFb;
+		quint16 m_instance = -1;
+
+	public:
+		AppFb(LogicFb* logicFb, int instance) : m_logicFb(logicFb), m_instance(instance) {}
+
+		QUuid afbGuid() const { return m_logicFb->afbGuid(); }
+		quint16 instance() const { return m_instance; }
+	};
+
+
+	class AppFbsMap : public QHash<QUuid, AppFb*>
+	{
+	private:
+		QVector<AppFb*> m_appFbs;
+
+	public:
+		~AppFbsMap() { clear(); }
+
+		void insert(LogicFb* logicFb, int instance);
+		void clear();
+	};
+
+
+	// Application Signal
+	// represent all signal in application logic schemes, and signals, which createad in compiling time
+	//
+
+	class AppSignal
 	{
 	private:
 		QString m_strID;
@@ -98,8 +157,10 @@ namespace Builder
 		bool m_calculated = false;
 		SignalType m_signalType;
 
+		bool m_shadowSignal = false;
+
 	public:
-		ApplicationSignal(const QString& strID) : m_strID(strID) {}
+		AppSignal(const QString& strID, bool isShadowSignal) : m_strID(strID), m_shadowSignal(isShadowSignal) {}
 
 		void setStrID(QString strID) { m_strID = strID; }
 		QString strID() const { return m_strID; }
@@ -114,11 +175,25 @@ namespace Builder
 		void signalType(SignalType signalType) { m_signalType = signalType; }
 		SignalType signalType() const { return m_signalType; }
 
-		bool isGhostSignal() { return m_signal == nullptr; }
+		bool isShadowSignal() { return m_shadowSignal; }
 	};
 
 
-	typedef QHash<QString, ApplicationSignal> ApplicationSignalsMap;
+	class AppSignalsMap : public QHash<QUuid, AppSignal*>
+	{
+	private:
+		QHash<QString, AppSignal*> m_signalStrIdMap;
+		QVector<AppSignal*> m_appSignals;
+
+	public:
+		~AppSignalsMap();
+
+		void insert(QUuid guid, const QString& signalStrID, bool isShadowSignal);
+		void clear();
+
+		void bindRealSignals(SignalSet* signalSet);
+	};
+
 
 
 	class ModuleLogicCompiler : public QObject
@@ -146,9 +221,15 @@ namespace Builder
 
 		ApplicationLogicCode m_code;
 
-		ApplicationSignalsMap m_appSignals;
+		FblsMap m_fbls;
 
-		QHash<QString, int> m_signalStrIdMap;
+		AppSignalsMap m_appSignals;
+		AppFbsMap m_appFbs;
+
+		// service maps
+		//
+		QHash<QUuid, LogicItem*> m_logicItems;			// item GUID -> item ptr
+		QHash<QUuid, LogicItem*> m_itemsPins;			// pin GUID -> parent item ptr
 
 		QString msg;
 
@@ -168,12 +249,17 @@ namespace Builder
 		bool getUsedAfbs();
 		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
 
+
+		void buildServiceMaps();
+
 		bool copyDiagData();
 		bool copyInOutSignals();
 
 		bool generateApplicationLogicCode();
 
 		bool writeResult();
+
+		void cleanup();
 
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);

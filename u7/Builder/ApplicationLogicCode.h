@@ -102,6 +102,7 @@ namespace Builder
 	const quint16	MIN_FB_TYPE = 1,
 					MAX_FB_TYPE = 64 - 1,
 
+					SINGLE_INSTANCE = 1,
 					MIN_FB_INSTANCE = 1,
 					MAX_FB_INSTANCE = 1024 - 1,
 

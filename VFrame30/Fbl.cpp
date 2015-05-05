@@ -1129,6 +1129,12 @@ namespace Afbl
 	{
 		return m_params;
 	}
+
+	int AfbElement::paramsCount() const
+	{
+		return static_cast<int>(m_params.size());
+	}
+
 	void AfbElement::setParams(const std::vector<AfbElementParam>& params)
 	{
 		m_params = params;
@@ -1140,6 +1146,12 @@ namespace Afbl
 	{
 		return m_constParams;
 	}
+
+	int AfbElement::constParamsCount() const
+	{
+		return static_cast<int>(m_constParams.size());
+	}
+
 	void AfbElement::setConstParams(const std::vector<AfbElementParam>& constParams)
 	{
 		m_constParams = constParams;
