@@ -41,35 +41,25 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 	ui->m_list->setColumnCount(3);
 	QStringList l;
 	l << tr("Index");
+	l << tr("Key");
 	l << tr("StrID");
 	l << tr("Caption");
 	ui->m_list->setHeaderLabels(l);
 	ui->m_list->setColumnWidth(0, 50);
-	ui->m_list->setColumnWidth(1, 100);
-	ui->m_list->setColumnWidth(2, 150);
+	ui->m_list->setColumnWidth(1, 50);
+	ui->m_list->setColumnWidth(2, 100);
+	ui->m_list->setColumnWidth(3, 150);
 
 	EditorDelegate *d = new EditorDelegate(this);
 	ui->m_list->setItemDelegate(d);
-
-	// Get file from the project databse
-	//
-
-	std::shared_ptr<DbFile> file = openFile(m_fileName);
-	if (file == nullptr)
-	{
-		return;
-	}
-
-	QByteArray data;
-	file->swapData(data);
 
 	QString errorCode;
 
 	Hardware::SubsystemStorage subsystems;
 
-	if (subsystems.load(data, errorCode) == false)
+	if (subsystems.load(db(), errorCode) == false)
 	{
-		QMessageBox::critical(this, QString("Error"), tr("Can't load the subsystems list file ") + m_fileName + "!\r\n" + errorCode);
+		QMessageBox::critical(this, QString("Error"), tr("Can't load subsystems!"));
 		return;
 	}
 
@@ -82,7 +72,10 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 			break;
 		}
 
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(subsystem->index()) << subsystem->strId() << subsystem->caption());
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(subsystem->index()) <<
+													QString::number(subsystem->key()) <<
+													subsystem->strId() <<
+													subsystem->caption());
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
 		item->setData(0, Qt::UserRole, i);
 		ui->m_list->insertTopLevelItem(i, item);
@@ -93,44 +86,6 @@ DialogSubsystemListEditor::~DialogSubsystemListEditor()
 {
 	delete ui;
 }
-
-std::shared_ptr<DbFile> DialogSubsystemListEditor::openFile(const QString& fileName)
-{
-	std::vector<DbFileInfo> fileList;
-
-	bool ok = db()->getFileList(&fileList, db()->mcFileId(), fileName, nullptr);
-
-	if (ok == false || fileList.size() != 1)
-	{
-		return nullptr;
-	}
-
-	std::shared_ptr<DbFile> result = nullptr;
-
-	ok = db()->getLatestVersion(fileList[0], &result, nullptr);
-
-	if (ok == false || result == nullptr)
-	{
-		return nullptr;
-	}
-
-	return result;
-}
-
-std::shared_ptr<DbFile> DialogSubsystemListEditor::createFile(const QString& fileName)
-{
-	std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
-	pf->setFileName(fileName);
-
-	if (db()->addFile(pf, db()->mcFileId(), this) == false)
-	{
-		QMessageBox::critical(this, "Error", "Error adding file " + m_fileName + " to the database!");
-		return nullptr;
-	}
-
-	return pf;
-}
-
 
 void DialogSubsystemListEditor::on_m_add_clicked()
 {
@@ -146,7 +101,7 @@ void DialogSubsystemListEditor::on_m_add_clicked()
 		index = items[0]->data(0, Qt::UserRole).toInt() + 1;
 	}
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "0" << "StrID" << "Caption");
+	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "0" << "0" << "StrID" << "Caption");
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
 	ui->m_list->insertTopLevelItem(index, item);
 
@@ -208,41 +163,19 @@ void DialogSubsystemListEditor::on_DialogSubsystemListEditor_accepted()
 		}
 
 		int index = item->data(0, Qt::UserRole).toInt();
-		QString strId = item->text(1);
-		QString caption = item->text(2);
+		int key = item->text(1).toInt();
+		QString strId = item->text(2);
+		QString caption = item->text(3);
 
-		std::shared_ptr<Hardware::Subsystem> subsystem = std::make_shared<Hardware::Subsystem>(index, strId, caption);
+		std::shared_ptr<Hardware::Subsystem> subsystem = std::make_shared<Hardware::Subsystem>(index, key, strId, caption);
 		subsystems.add(subsystem);
 	}
 
 	// save to db
 	//
-	QByteArray data;
-	if (subsystems.save(data) == false)
+	if (subsystems.save(db()) == false)
 	{
-		QMessageBox::critical(this, QString("Error"), tr("Can't save subsystems to a QByteArray."));
-		return;
-	}
-
-	std::shared_ptr<DbFile> file = openFile(m_fileName);
-	if (file == nullptr)
-	{
-		// try to create a file
-		//
-		file = createFile(m_fileName);
-
-		if (file == nullptr)
-		{
-			QMessageBox::critical(this, QString("Error"), tr("Can't create a file ") + m_fileName + "!");
-			return;
-		}
-	}
-
-	file->swapData(data);
-
-	if (db()->setWorkcopy(file, this) == false)
-	{
-		QMessageBox::critical(this, "Error", "Set work copy error!");
+		QMessageBox::critical(this, QString("Error"), tr("Can't save subsystems."));
 		return;
 	}
 }

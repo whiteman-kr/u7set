@@ -286,7 +286,44 @@ namespace Hardware
         return true;
     }
 
-    bool ModuleConfFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
+	quint8 ModuleConfFirmware::data8(int frameIndex, int offset)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			(uint) offset > frameSize() - sizeof(quint8))
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return 0;
+		}
+
+		return static_cast<quint8>(*(m_frames[frameIndex].data() + offset));
+
+	}
+
+	quint16 ModuleConfFirmware::data16(int frameIndex, int offset)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			(uint) offset > frameSize() - sizeof(quint16))
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return 0;
+		}
+
+		return qToLittleEndian(static_cast<quint16>(*(m_frames[frameIndex].data() + offset)));
+	}
+
+	quint32 ModuleConfFirmware::data32(int frameIndex, int offset)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			(uint) offset > frameSize() - sizeof(quint32))
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return 0;
+		}
+
+		return qToLittleEndian(static_cast<quint32>(*(m_frames[frameIndex].data() + offset)));
+	}
+
+	bool ModuleConfFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
     {
         if (frameIndex >= static_cast<int>(m_frames.size()) ||
             (uint) offset > frameSize() - sizeof(quint64) || start + count >= frameSize())
@@ -355,7 +392,7 @@ namespace Hardware
 	{
 		bool newFirmware = m_firmwares.count(subsysId) == 0;
 
-		ModuleConfFirmware& fw = m_firmwares["subsysId"];
+		ModuleConfFirmware& fw = m_firmwares[subsysId];
 
 		if (newFirmware == true)
 		{
