@@ -305,7 +305,7 @@ namespace Builder
 		//
 		for (auto currentIt = orderedList.begin(); currentIt != orderedList.end(); ++currentIt)
 		{
-			const std::shared_ptr<VFrame30::FblItemRect>& currentItem = *currentIt;
+			std::shared_ptr<VFrame30::FblItemRect> currentItem = *currentIt;
 
 			// Get dependant items
 			//
