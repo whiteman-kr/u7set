@@ -24,15 +24,15 @@ namespace VFrame30
 		// Создать входные и выходные сигналы в VFrame30::FblEtem
 		//
 		const std::vector<Afbl::AfbElementSignal>& inputSignals = fblElement.inputSignals();
-		for (auto s = inputSignals.begin(); s != inputSignals.end(); ++s)
+		for (const Afbl::AfbElementSignal& s : inputSignals)
 		{
-			AddInput();
+			addInput(s);
 		}
 
 		const std::vector<Afbl::AfbElementSignal>& outputSignals = fblElement.outputSignals();
-		for (auto s = outputSignals.begin(); s != outputSignals.end(); ++s)
+		for (const Afbl::AfbElementSignal& s : outputSignals)
 		{
-			AddOutput();
+			addOutput(s);
 		}
 
 		// Проинициализировать паремтры значением по умолчанию and add Afb properties to class meta object

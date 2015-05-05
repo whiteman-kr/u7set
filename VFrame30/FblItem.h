@@ -21,7 +21,7 @@ namespace VFrame30
 		CFblConnectionPoint();
 
 	public:
-		CFblConnectionPoint(double x, double y, ConnectionDirrection dirrection, const QUuid& guid);
+		CFblConnectionPoint(double x, double y, ConnectionDirrection dirrection, const QUuid& guid, int operandIndex);
 		CFblConnectionPoint(const Proto::FblConnectionPoint& cpm);
 
 		// Other
@@ -57,6 +57,9 @@ namespace VFrame30
 
 		bool HasConnection() const;
 
+		int afbOperandIndex() const;
+		void setAfbOperandIndex(int value);
+
 //		const QUuid& signalGuid() const;
 //		void setSignalGuid(const QUuid& guid);
 
@@ -72,6 +75,8 @@ namespace VFrame30
 		QUuid m_guid;
 		VideoItemPoint m_point;
 		ConnectionDirrection m_dirrection;
+		int m_afbOperandIndex = 0;
+
 		std::list<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
 		
 		//QUuid m_signalGuid;				// Guid сигнала ассоциаированного с данной точкой, может быть GUID_NULL
@@ -123,8 +128,11 @@ namespace VFrame30
 		int outputsCount() const;
 
 	protected:
-		void AddInput();
-		void AddOutput();
+		void addInput();
+		void addInput(const Afbl::AfbElementSignal& s);
+
+		void addOutput();
+		void addOutput(const Afbl::AfbElementSignal& s);
 
 		// ¬ычислить координаты точки
 		//

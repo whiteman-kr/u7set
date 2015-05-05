@@ -536,7 +536,7 @@ namespace Builder
 					}
 
 
-					cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.index(), paramValue);
+					cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
 
 					cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
 
@@ -580,7 +580,7 @@ namespace Builder
 					}
 
 
-					cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.index(), paramValue);
+					cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
 
 					cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
 

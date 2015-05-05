@@ -210,7 +210,7 @@ namespace Afbl
 	//
 	AfbElementSignal::AfbElementSignal(void):
 		m_type(AfbSignalType::Analog),
-		m_index(0),
+		m_operandIndex(0),
 		m_size(0)
 	{
 	}
@@ -254,7 +254,7 @@ namespace Afbl
 		xmlWriter->writeStartElement("AfbElementSignal");
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Type", type() == AfbSignalType::Analog ? "Analog" : "Discrete");
-        xmlWriter->writeAttribute("Index", QString::number(index()));
+        xmlWriter->writeAttribute("Index", QString::number(operandIndex()));
         xmlWriter->writeAttribute("Size", QString::number(size()));
 		xmlWriter->writeEndElement();
 
@@ -295,7 +295,7 @@ namespace Afbl
 
         if (xmlReader->attributes().hasAttribute("Index"))
         {
-            setIndex(xmlReader->attributes().value("Index").toInt());
+            setOperandIndex(xmlReader->attributes().value("Index").toInt());
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
@@ -332,14 +332,14 @@ namespace Afbl
 		m_type = type;
 	}
 
-    int AfbElementSignal::index() const
+    int AfbElementSignal::operandIndex() const
     {
-        return m_index;
+        return m_operandIndex;
     }
 
-    void AfbElementSignal::setIndex(int value)
+    void AfbElementSignal::setOperandIndex(int value)
     {
-        m_index = value;
+        m_operandIndex = value;
     }
 
     int AfbElementSignal::size() const
@@ -361,7 +361,7 @@ namespace Afbl
 
 	AfbElementParam::AfbElementParam(void):
         m_visible(true),
-        m_index(0),
+		m_operandIndex(0),
         m_size(0)
     {
 	}
@@ -393,7 +393,7 @@ namespace Afbl
 		m_lowLimit.SaveData(message->mutable_lowlimit());
 		m_highLimit.SaveData(message->mutable_highlimit());
 
-        message->set_index(index());
+		message->set_operandindex(operandIndex());
         message->set_size(size());
 
 		return true;
@@ -411,8 +411,8 @@ namespace Afbl
 		m_lowLimit.LoadData(message.lowlimit());
 		m_highLimit.LoadData(message.highlimit());
 
-        setIndex(message.index());
-        setSize(message.size());
+		m_operandIndex = message.operandindex();
+		m_size = message.size();
 
 		return true;
 	}
@@ -448,7 +448,7 @@ namespace Afbl
 
         if (xmlReader->attributes().hasAttribute("Index"))
         {
-            setIndex(xmlReader->attributes().value("Index").toInt());
+			setOperandIndex(xmlReader->attributes().value("Index").toInt());
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
@@ -501,7 +501,7 @@ namespace Afbl
 		xmlWriter->writeStartElement("AfbElementParam");
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Visible", visible() ? "1" : "0");
-        xmlWriter->writeAttribute("Index", QString::number(index()));
+		xmlWriter->writeAttribute("Index", QString::number(operandIndex()));
         xmlWriter->writeAttribute("Size", QString::number(size()));
 
 		switch (type())
@@ -622,14 +622,14 @@ namespace Afbl
 		m_highLimit = highLimit;
 	}
 
-    int AfbElementParam::index() const
+	int AfbElementParam::operandIndex() const
     {
-        return m_index;
+		return m_operandIndex;
     }
 
-    void AfbElementParam::setIndex(int value)
+	void AfbElementParam::setOperandIndex(int value)
     {
-        m_index = value;
+		m_operandIndex = value;
     }
 
     int AfbElementParam::size() const
