@@ -315,20 +315,20 @@ namespace Builder
 
 		for(const ApplicationLogicScheme& appLogicScheme : m_moduleLogic->appSchemes())
 		{
-			for(const std::shared_ptr<VFrame30::FblItemRect> logicItem : appLogicScheme.items())
+			for(const AppLogicItem& logicItem : appLogicScheme.items())
 			{
 				// build QHash<QUuid, LogicItem*> m_logicItems
 				// item GUID -> item ptr
 				//
-				if (m_logicItems.contains(logicItem->guid()))
+				if (m_logicItems.contains(logicItem.m_fblItem->guid()))
 				{
 					assert(false);	// guid already in map!
 					continue;
 				}
 
-				VFrame30::FblItemRect* pItem = logicItem.get();
+				VFrame30::FblItemRect* pItem = logicItem.m_fblItem.get();
 
-				m_logicItems.insert(logicItem->guid(), pItem);
+				m_logicItems.insert(logicItem.m_afbElement->guid(), pItem);
 
 				// build QHash<QUuid, LogicItem*> m_itemsPins;
 				// pin GUID -> parent item ptr

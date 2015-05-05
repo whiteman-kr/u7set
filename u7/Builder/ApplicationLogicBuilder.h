@@ -75,6 +75,23 @@ namespace Builder
 //		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
 //	};
 
+	struct AppLogicItem
+	{
+		// Data
+		//
+		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
+		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
+		std::shared_ptr<Afbl::AfbElement> m_afbElement;
+
+		// Methods
+		//
+		AppLogicItem() = default;
+		AppLogicItem(const AppLogicItem&) = default;
+		AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
+				  std::shared_ptr<VFrame30::LogicScheme> scheme,
+				  std::shared_ptr<Afbl::AfbElement> afbElement);
+	};
+
 	class ApplicationLogicScheme
 	{
 	public:
@@ -95,14 +112,14 @@ namespace Builder
 		const std::shared_ptr<VFrame30::LogicScheme>& scheme() const;
 		std::shared_ptr<VFrame30::LogicScheme> scheme();
 
-		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items() const;
-		std::list<std::shared_ptr<VFrame30::FblItemRect>>& items();
+		const std::list<AppLogicItem>& items() const;
+		std::list<AppLogicItem>& items();
 
 		// Data
 		//
 	private:
 		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
+		std::list<AppLogicItem> m_items;
 	};
 
 	// ------------------------------------------------------------------------
