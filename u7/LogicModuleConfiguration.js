@@ -36,13 +36,13 @@ var Mode_420mA = 1;
 var Mode_10V = 2;
 var Mode_05mA = 3;
 
-function(root, confCollection, log, signalSet)
+function(root, confCollection, log, signalSet, subsystemStorage)
 {
     log.writeMessage("Start LogicModuleConfiguration", false);
 
     var result = true;
 
-    result = module_lm_1(root, confCollection, log, signalSet);
+    result = module_lm_1(root, confCollection, log, signalSet, subsystemStorage);
 
     if (result == false)
     {
@@ -91,7 +91,7 @@ function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
 }
 
 
-function module_lm_1(device, confCollection, log, signalSet)
+function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -101,7 +101,7 @@ function module_lm_1(device, confCollection, log, signalSet)
 
             // Generate Configuration
             //
-            return generate_lm_1_rev3(device, confCollection, log, signalSet);
+            return generate_lm_1_rev3(device, confCollection, log, signalSet, subsystemStorage);
         }
         return true;
     }
@@ -109,7 +109,7 @@ function module_lm_1(device, confCollection, log, signalSet)
     for (var i = 0; i < device.childrenCount(); i++)
     {
         var child = device.jsChild(i);
-        if (module_lm_1(child, confCollection, log, signalSet) == false)
+        if (module_lm_1(child, confCollection, log, signalSet, subsystemStorage) == false)
         {
             return false;
         }
@@ -123,31 +123,90 @@ function module_lm_1(device, confCollection, log, signalSet)
 // confCollection - Hardware::ModuleConfCollection
 //
 //
-function generate_lm_1_rev3(module, confCollection, log, signalSet)
+function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemStorage)
 {
     // Variables
     //
     var subSysID = module.SubsysID;
-    //var confIndex = module.ConfIndex;
+    var channel = module.Channel;
+    
+    // Constants
+    //
     var frameSize = 1016;
-    var frameCount = 22;                // Check it !!!!
+    var frameCount = 78;                // Check it !!!!
     var uartId = 456;                   // Check it !!!!
+    
+    var maxChannel = 4;                 // Can be changed!
+    var configStartFrames = 2;
+    var configFrameCount = 19;          // number of frames in each configuration
+    var ioModulesMaxCount = 14;
+    
+    if (channel < 1 || channel > maxChannel)
+    {
+        log.writeError("Wrong LM-1 channel (should be 1 - " + maxChannel + "): " + module.StrID + ", channel: " + channel, false, true);
+        return false;
+    }
 
     var confFirmware = confCollection.jsGet("LM-1", subSysID, uartId, frameSize, frameCount);
 
-    // Generation
+    // Configuration storage format
     //
-
-    // EXAMPLES                  
-    // To write byte to specific frame
-    //setData8(confFirmware, log, 0, 1015, 0x88);
-    //setData16(confFirmware, log, 0, 1014, 0x9129);
-    //setData32(confFirmware, log, 0, 1012, 0xA123456A);
-
-    // Create I/O Modules configuration (Frames 2..15)
+    var frameStorageConfig = 1;
+    var ptr = 0;
+    
+    setData16(confFirmware, log, frameStorageConfig, ptr, 0xca70);     //CFG_Marker
+    ptr += 2;
+    
+    setData16(confFirmware, log, frameStorageConfig, ptr, 0x0001);     //CFG_Version
+    ptr += 2;
+    
+    var ssKey = subsystemStorage.jsGetSsKey(subSysID);
+    if (ssKey == -1)
+    {
+        log.writeError("Subsystem key for " + subSysID + " was not found!", false, true);
+        return false;
+    }
+    setData16(confFirmware, log, frameStorageConfig, ptr, ssKey << 6);     //0000SSKEYY000000b
+    ptr += 2;
+    
+    // reserved
+    ptr += 8;
+    
+    // write channelCount, if old value is less than current. If it is the same, output an error.
     //
-    var ioModulesStartFrame = 2;
-    var ioModulesMaxCount = 14;
+    var oldChannelCount = confFirmware.data16(frameStorageConfig, ptr);
+    
+    if (oldChannelCount == channel)
+    {
+        log.writeError("LM-1 channel is not unique: " + module.StrID + ", channel: " + channel, false, true);
+        return false;
+    }
+    
+    if (oldChannelCount < channel)
+    {
+        setData16(confFirmware, log, frameStorageConfig, ptr, channel);
+    }
+    ptr += 2;
+    
+    var configIndexOffset = ptr + (channel - 1) * 2;
+    var configFrame = configStartFrames + configFrameCount * (channel - 1);
+    
+    setData16(confFirmware, log, frameStorageConfig, configIndexOffset, configFrame);
+
+    // Service information
+    //
+    var frameServiceConfig = configFrame;
+    ptr = 0;
+    setData16(confFirmware, log, frameServiceConfig, ptr, 0x0001/**/);   //CFG_Ch_Vers
+    ptr += 2;
+    setData16(confFirmware, log, frameServiceConfig, ptr, 0/**/);   //CFG_Ch_Dtype
+    ptr += 2;
+    //setData16(confFirmware, log, frameServiceConfig, ptr, /**/);   //CFG_Ch_ID
+    ptr += 8;
+    
+    // I/O Modules configuration
+    //
+    var frameIOConfig = configFrame + 1;
 
     var parent = module.jsParent();
 
@@ -158,12 +217,12 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet)
             ioModule.ModuleFamily == FamilyAOM || ioModule.ModuleFamily == FamilyOCM ||
             ioModule.ModuleFamily == FamilyDIM || ioModule.ModuleFamily == FamilyDOM)
         {
-            var frame = ioModulesStartFrame + ioModule.Place - 1;
-            if (frame < ioModulesStartFrame || frame >= ioModulesStartFrame + ioModulesMaxCount)
+            if (ioModule.Place < 1 || ioModule.Place > ioModulesMaxCount)
             {
                 log.writeError("Wrong I/O module place: " + ioModule.StrID + ", place: " + ioModule.Place + ", expected 1..14.", false, true);
                 return false;
             }
+            var frame = frameIOConfig + (ioModule.Place - 1);
             
             if (ioModule.ModuleFamily == FamilyAIM)
             {
