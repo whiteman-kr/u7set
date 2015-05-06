@@ -184,7 +184,7 @@ namespace VFrame30
 	VideoItemInputSignal::VideoItemInputSignal(SchemeUnit unit) :
 		VideoItemSignal(unit)
 	{
-		AddOutput();
+		addOutput();
 	}
 
 	VideoItemInputSignal::~VideoItemInputSignal(void)
@@ -257,7 +257,7 @@ namespace VFrame30
 	VideoItemOutputSignal::VideoItemOutputSignal(SchemeUnit unit) :
 		VideoItemSignal(unit)
 	{
-		AddInput();
+		addInput();
 	}
 
 	VideoItemOutputSignal::~VideoItemOutputSignal(void)

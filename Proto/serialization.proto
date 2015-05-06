@@ -182,8 +182,8 @@ message FblElementSignal
 {
 	required wstring caption = 1;
 	required FblSignalType type = 2;
-        optional int32 index = 3 [default = 0];
-        optional int32 size = 4 [default = 0];
+	optional int32 operandIndex = 3 [default = 0];
+	optional int32 size = 4 [default = 0];
 }
 
 
@@ -201,8 +201,8 @@ message FblElementParam
 	required FblParamValue lowlimit = 5;
 	required FblParamValue highlimit = 6;
 	required bool visible = 7;
-        optional int32 index = 8 [default = 0];
-        optional int32 size = 9 [default = 0];
+	optional int32 operandIndex = 8 [default = 0];
+	optional int32 size = 9 [default = 0];
 }
 
 
@@ -430,6 +430,7 @@ message FblConnectionPoint
 	required VideoItemPoint point = 1;
 	required ConnectionDirrection dirrection = 2;
 	required Uuid uuid = 3;
+	optional int32 operandIndex = 4 [default = -1];		// -1 is not used, for links etc...
 	
 	optional Uuid signalUuid = 10;
 	optional wstring signalStrID = 11;
@@ -559,9 +560,9 @@ message DeviceObject
 	optional DeviceChassis Chassis = 103;
 	optional DeviceModule Module = 104;
 	optional DeviceController Controller = 105;
-        optional DeviceSignal Signal = 106;
-        optional Workstation Workstation = 107;
-        optional Software Software = 108;
+	optional DeviceSignal Signal = 106;
+	optional Workstation Workstation = 107;
+	optional Software Software = 108;
 
 }
 

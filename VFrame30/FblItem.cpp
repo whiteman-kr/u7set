@@ -17,12 +17,13 @@ namespace VFrame30
 		//m_signalGuid = QUuid();
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(double x, double y, ConnectionDirrection dirrection, const QUuid& guid)
+	CFblConnectionPoint::CFblConnectionPoint(double x, double y, ConnectionDirrection dirrection, const QUuid& guid, int operandIndex)
 	{
 		m_point.X = x;
 		m_point.Y = y;
 		m_dirrection = dirrection;
 		m_guid = guid;
+		m_afbOperandIndex = operandIndex;
 
 //		m_signalGuid = QUuid();
 	}
@@ -35,8 +36,12 @@ namespace VFrame30
 	bool CFblConnectionPoint::SaveData(Proto::FblConnectionPoint* cpm) const
 	{
 		m_point.SaveData(cpm->mutable_point());
+
 		cpm->set_dirrection(static_cast<Proto::ConnectionDirrection>(dirrection()));
+
 		Proto::Write(cpm->mutable_uuid(), m_guid);
+
+		cpm->set_operandindex(m_afbOperandIndex);
 
 //		if (m_signalGuid.isNull() == false)  // != GUI_NULL
 //		{
@@ -61,6 +66,7 @@ namespace VFrame30
 		m_point.LoadData(cpm.point());
 		m_dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
 		m_guid = Proto::Read(cpm.uuid());
+		m_afbOperandIndex = cpm.operandindex();
 
 //		if (cpm.has_signaluuid() == true)
 //		{
@@ -166,6 +172,16 @@ namespace VFrame30
 	{
 		assert(!(IsInput() && m_associatedIOs.size() > 1));
 		return !m_associatedIOs.empty();
+	}
+
+	int CFblConnectionPoint::afbOperandIndex() const
+	{
+		return m_afbOperandIndex;
+	}
+
+	void CFblConnectionPoint::setAfbOperandIndex(int value)
+	{
+		m_afbOperandIndex = value;
 	}
 
 //	const QUuid& CFblConnectionPoint::signalGuid() const
@@ -377,15 +393,27 @@ namespace VFrame30
 		return static_cast<int>(m_outputPoints.size());
 	}
 
-	void FblItem::AddInput()
+	void FblItem::addInput()
 	{
-		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Input, QUuid::createUuid());
+		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Input, QUuid::createUuid(), -1);
 		m_inputPoints.push_back(cp);
 	}
 
-	void FblItem::AddOutput()
+	void FblItem::addInput(const Afbl::AfbElementSignal& s)
 	{
-		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Output, QUuid::createUuid());
+		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Input, QUuid::createUuid(), s.operandIndex());
+		m_inputPoints.push_back(cp);
+	}
+
+	void FblItem::addOutput()
+	{
+		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Output, QUuid::createUuid(), -1);
+		m_outputPoints.push_back(cp);
+	}
+
+	void FblItem::addOutput(const Afbl::AfbElementSignal& s)
+	{
+		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Output, QUuid::createUuid(), s.operandIndex());
 		m_outputPoints.push_back(cp);
 	}
 

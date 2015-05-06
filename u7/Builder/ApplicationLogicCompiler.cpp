@@ -230,6 +230,8 @@ namespace Builder
 			m_log->writeError(msg, false, false);
 		}
 
+		cleanup();
+
 		return result;
 	}
 
@@ -290,10 +292,75 @@ namespace Builder
 		}
 		else
 		{
+			buildServiceMaps();
+
 			createAppSignalsMap();
 		}
 
 		return true;
+	}
+
+
+	void ModuleLogicCompiler::buildServiceMaps()
+	{
+		m_fbls.clear();
+
+		for(AfbElement& afbl : m_afbl->items)
+		{
+			m_fbls.insert(&afbl);
+		}
+
+		m_logicItems.clear();
+		m_itemsPins.clear();
+
+		for(const ApplicationLogicScheme& appLogicScheme : m_moduleLogic->appSchemes())
+		{
+			for(const AppLogicItem& logicItem : appLogicScheme.items())
+			{
+				// build QHash<QUuid, LogicItem*> m_logicItems
+				// item GUID -> item ptr
+				//
+				if (m_logicItems.contains(logicItem.m_fblItem->guid()))
+				{
+					assert(false);	// guid already in map!
+					continue;
+				}
+
+				VFrame30::FblItemRect* pItem = logicItem.m_fblItem.get();
+
+				m_logicItems.insert(logicItem.m_afbElement->guid(), pItem);
+
+				// build QHash<QUuid, LogicItem*> m_itemsPins;
+				// pin GUID -> parent item ptr
+				//
+
+				// add input pins
+				//
+				for(LogicPin input : pItem->inputs())
+				{
+					if (m_itemsPins.contains(input.guid()))
+					{
+						assert(false);	// guid already in map!
+						continue;
+					}
+
+					m_itemsPins.insert(input.guid(), pItem);
+				}
+
+				// add output pins
+				//
+				for(LogicPin output : pItem->outputs())
+				{
+					if (m_itemsPins.contains(output.guid()))
+					{
+						assert(false);	// guid already in map!
+						continue;
+					}
+
+					m_itemsPins.insert(output.guid(), pItem);
+				}
+			}
+		}
 	}
 
 
@@ -305,55 +372,97 @@ namespace Builder
 			return false;
 		}
 
-		m_signalStrIdMap.clear();
-
-		int count = m_signals->count();
-
-		m_signalStrIdMap.reserve(count);
-
-		for(int i = 0; i < count; i++)
-		{
-			const Signal& signal = (*m_signals)[i];
-			m_signalStrIdMap.insert(signal.strID(), signal.ID());
-		}
-
-
 		m_appSignals.clear();
 
-		for(const ApplicationLogicScheme& appLogicScheme : m_moduleLogic->appSchemes())
+		// find signals in algorithms
+		// build map: signal GUID -> ApplicationSignal
+		//
+
+		QHashIterator<QUuid, LogicItem*> iterator(m_logicItems);
+
+		while(iterator.hasNext())
 		{
-			for(const std::shared_ptr<VFrame30::FblItemRect>& logicItem : appLogicScheme.items())
+			iterator.next();
+
+			LogicItem* item = iterator.value();
+
+			if (!item->isSignalElement())
 			{
-				if (logicItem->isSignalElement())
+				continue;
+			}
+
+			assert (item->guid() == iterator.key());
+
+			LogicSignal* signal = dynamic_cast<LogicSignal*>(item);
+
+			if (signal ==  nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			m_appSignals.insert(signal->guid(), signal->signalStrIds(), false);
+		}
+
+		// find fbl's outputs, which connected to signals
+		// build map: output GUID -> signal GUID
+		//
+
+		iterator = m_logicItems;
+
+		while(iterator.hasNext())
+		{
+			iterator.next();
+
+			LogicItem* item = iterator.value();
+
+			if (!item->isFblElement())
+			{
+				continue;
+			}
+
+			LogicFb* fb = item->toFblElement();
+
+			// get Functional Block instance !!!
+			//
+			int instance = m_fbls.addInstance(fb);
+
+			m_appFbs.insert(fb, instance);
+
+			for(LogicPin output : fb->outputs())
+			{
+				bool connectedToFbl = false;
+				bool connectedToSignal = false;
+
+				for(QUuid connectedPinUuid : output.associatedIOs())
 				{
-					// find real signal
+					if (!m_itemsPins.contains(connectedPinUuid))
+					{
+						assert(false);		// pin not found!!!
+					}
+					else
+					{
+						LogicItem* item = m_itemsPins[connectedPinUuid];
+
+						if (item->isFblElement())
+						{
+							connectedToFbl = true;
+						}
+						else
+						{
+							if (item->isSignalElement())
+							{
+								connectedToSignal = true;
+							}
+						}
+					}
+				}
+
+				if (connectedToFbl && !connectedToSignal)
+				{
+					// create shadow signal with Uuid of this output pin
 					//
-
-					VFrame30::VideoItemSignal* viSignal = dynamic_cast<VFrame30::VideoItemSignal*>(logicItem.get());
-
-					if (viSignal ==  nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					QString signalStrID = viSignal->signalStrIds();
-
-					if (signalStrID[0] != '#')
-					{
-						signalStrID = "#" + signalStrID;
-					}
-
-					if (!m_signalStrIdMap.contains(signalStrID))
-					{
-						msg = QString(tr("Signal with ID = %1 not found in Application Signals")).arg(signalStrID);
-
-						m_log->writeError(msg, false, true);
-					}
-
-					ApplicationSignal appSignal(signalStrID);
-
-					m_appSignals.insert(signalStrID, appSignal);
+					m_appSignals.insert(output.guid(), output.guid().toString(), true);
 				}
 			}
 		}
@@ -364,8 +473,122 @@ namespace Builder
 
 	bool ModuleLogicCompiler::afbInitialization()
 	{
-		m_code.comment("Functional Blocks initialization code");
 		m_code.newLine();
+		m_code.comment("Functional Blocks initialization code");
+
+
+		for(Fbl* fbl : m_fbls)
+		{
+			for(AppFb* appFb : m_appFbs)
+			{
+				if (appFb->afbGuid() != fbl->guid())
+				{
+					continue;
+				}
+
+				const AfbElement& afb = fbl->afbElement();
+
+				quint16 fbOpcode = afb.opcode();
+				quint16 fbInstance = SINGLE_INSTANCE;
+
+				if (fbl->isSingleInstance())
+				{
+					msg = QString(tr("Initalization of %1 single instance")).arg(fbl->strID());
+				}
+				else
+				{
+					fbInstance = appFb->instance();
+
+					msg = QString(tr("Initalization of %1 instance %2")).arg(fbl->strID()).arg(fbInstance);
+				}
+
+				m_code.newLine();
+				m_code.comment(msg);
+				m_code.newLine();
+
+				// iniitalization of constant params
+				//
+				for(AfbElementParam afbParam : afb.constParams())
+				{
+					Command cmd;
+
+					quint16 paramValue = 0;
+
+					const AfbParamValue& apv = afbParam.value();
+
+					switch(afbParam.type())
+					{
+					case AnalogIntegral:
+						paramValue = apv.IntegralValue;
+#pragma message("###################################### Need calculate value!!!!!!!!! ####################")
+						break;
+
+					case AnalogFloatingPoint:
+						assert(false);				// not implemented
+						break;
+
+					case DiscreteValue:
+						paramValue = apv.Discrete;
+						break;
+
+					default:
+						assert(false);
+					}
+
+
+					cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
+
+					cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
+
+					m_code.append(cmd);
+				}
+
+				if (fbl->isSingleInstance())
+				{
+					break;
+				}
+
+				m_code.newLine();
+
+				// iniitalization of variable params
+				//
+				for(AfbElementParam afbParam : afb.params())
+				{
+					Command cmd;
+
+					quint16 paramValue = 0;
+
+					const AfbParamValue& apv = afbParam.value();
+
+					switch(afbParam.type())
+					{
+					case AnalogIntegral:
+						paramValue = apv.IntegralValue;
+#pragma message("###################################### Need calculate value!!!!!!!!! ####################")
+						break;
+
+					case AnalogFloatingPoint:
+						assert(false);				// not implemented
+						break;
+
+					case DiscreteValue:
+						paramValue = apv.Discrete;
+						break;
+
+					default:
+						assert(false);
+					}
+
+
+					cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
+
+					cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
+
+					m_code.append(cmd);
+				}
+
+			}
+		}
 
 		/*const std::list<std::shared_ptr<VFrame30::FblItemRect>>& logicItems = m_moduleLogic->items();
 
@@ -623,4 +846,211 @@ namespace Builder
 		return nullptr;
 	}
 
+
+	void ModuleLogicCompiler::cleanup()
+	{
+	}
+
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// Fbl class implementation
+	//
+
+	Fbl::Fbl(AfbElement* afbElement) :
+		m_afbElement(afbElement)
+	{
+		if (m_afbElement == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		if (afbElement->paramsCount() > 0)
+		{
+			m_singleInstance = false;
+		}
+	}
+
+
+	quint16 Fbl::addInstance()
+	{
+		if (m_singleInstance)
+		{
+			return 1;
+		}
+
+		m_currentInstance++;
+
+		if (m_currentInstance > MAX_FB_INSTANCE)
+		{
+			assert(false);			// reach max instance
+		}
+
+		return m_currentInstance;
+	}
+
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// FblsMap class implementation
+	//
+
+	void FblsMap::insert(AfbElement* afbElement)
+	{
+		if (afbElement == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		if (contains(afbElement->guid()))
+		{
+			assert(false);	// 	repeated guid
+			return;
+		}
+
+		Fbl* fbl = new Fbl(afbElement);
+
+		QHash<QUuid, Fbl*>::insert(fbl->guid(), fbl);
+	}
+
+
+	int FblsMap::addInstance(LogicFb* logicFb)
+	{
+		if (logicFb == nullptr)
+		{
+			assert(false);
+			return 1;
+		}
+
+		if (!contains(logicFb->afbGuid()))
+		{
+			assert(false);			// unknown FBL guid
+			return 0;
+		}
+
+		Fbl* fbl = QHash<QUuid, Fbl*>::value(logicFb->afbGuid());
+
+		return fbl->addInstance();
+	}
+
+
+	void FblsMap::clear()
+	{
+		for(Fbl* fbl : *this)
+		{
+			delete fbl;
+		}
+	}
+
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// AppFbsMap class implementation
+	//
+
+	void AppFbsMap::insert(LogicFb* logicFb, int instance)
+	{
+		if (logicFb == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		AppFb* appFb = new AppFb(logicFb, instance);
+
+		m_appFbs.append(appFb);
+
+		QHash<QUuid, AppFb*>::insert(logicFb->guid(), appFb);
+
+	}
+
+
+	void AppFbsMap::clear()
+	{
+		for(AppFb* appFb : m_appFbs)
+		{
+			delete appFb;
+		}
+
+		m_appFbs.clear();
+
+		QHash<QUuid, AppFb*>::clear();
+	}
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// AppSignalsMap class implementation
+	//
+
+	AppSignalsMap::~AppSignalsMap()
+	{
+		clear();
+	}
+
+
+	void AppSignalsMap::insert(QUuid guid, const QString& signalStrID, bool isShadowSignal)
+	{
+		QString strID = signalStrID;
+
+		if (strID[0] != '#')
+		{
+			strID = "#" + strID;
+		}
+
+		AppSignal* appSignal = nullptr;
+
+		if (m_signalStrIdMap.contains(strID))
+		{
+			appSignal = m_signalStrIdMap[strID];
+
+			qDebug() << "Bind appSignal = " << strID;
+		}
+		else
+		{
+			appSignal = new AppSignal(strID, isShadowSignal);
+
+			m_appSignals.append(appSignal);
+
+			m_signalStrIdMap.insert(strID, appSignal);
+
+			qDebug() << "Create appSignal = " << strID;
+		}
+
+		QHash<QUuid, AppSignal*>::insert(guid, appSignal);
+
+		assert(appSignal != nullptr);
+	}
+
+
+	void AppSignalsMap::clear()
+	{
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			delete appSignal;
+		}
+
+		m_appSignals.clear();
+
+		QHash<QUuid, AppSignal*>::clear();
+
+		m_signalStrIdMap.clear();
+	}
+
+
+	void AppSignalsMap::bindRealSignals(SignalSet* signalSet)
+	{
+		// bind real signals to siganls in Signal Set
+		//
+		/*if (!m_signalStrIdMap.contains(signalStrID))
+		{
+			msg = QString(tr("Signal with ID = %1 not found in Application Signals")).arg(signalStrID);
+
+			m_log->writeError(msg, false, true);
+		}*/
+	}
 }
+
+
+

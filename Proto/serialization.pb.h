@@ -1250,12 +1250,12 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline ::Proto::FblSignalType type() const;
   inline void set_type(::Proto::FblSignalType value);
 
-  // optional int32 index = 3 [default = 0];
-  inline bool has_index() const;
-  inline void clear_index();
-  static const int kIndexFieldNumber = 3;
-  inline ::google::protobuf::int32 index() const;
-  inline void set_index(::google::protobuf::int32 value);
+  // optional int32 operandIndex = 3 [default = 0];
+  inline bool has_operandindex() const;
+  inline void clear_operandindex();
+  static const int kOperandIndexFieldNumber = 3;
+  inline ::google::protobuf::int32 operandindex() const;
+  inline void set_operandindex(::google::protobuf::int32 value);
 
   // optional int32 size = 4 [default = 0];
   inline bool has_size() const;
@@ -1270,8 +1270,8 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline void clear_has_caption();
   inline void set_has_type();
   inline void clear_has_type();
-  inline void set_has_index();
-  inline void clear_has_index();
+  inline void set_has_operandindex();
+  inline void clear_has_operandindex();
   inline void set_has_size();
   inline void clear_has_size();
 
@@ -1279,7 +1279,7 @@ class FblElementSignal : public ::google::protobuf::Message {
 
   ::Proto::wstring* caption_;
   int type_;
-  ::google::protobuf::int32 index_;
+  ::google::protobuf::int32 operandindex_;
   ::google::protobuf::int32 size_;
 
   mutable int _cached_size_;
@@ -1407,12 +1407,12 @@ class FblElementParam : public ::google::protobuf::Message {
   inline bool visible() const;
   inline void set_visible(bool value);
 
-  // optional int32 index = 8 [default = 0];
-  inline bool has_index() const;
-  inline void clear_index();
-  static const int kIndexFieldNumber = 8;
-  inline ::google::protobuf::int32 index() const;
-  inline void set_index(::google::protobuf::int32 value);
+  // optional int32 operandIndex = 8 [default = 0];
+  inline bool has_operandindex() const;
+  inline void clear_operandindex();
+  static const int kOperandIndexFieldNumber = 8;
+  inline ::google::protobuf::int32 operandindex() const;
+  inline void set_operandindex(::google::protobuf::int32 value);
 
   // optional int32 size = 9 [default = 0];
   inline bool has_size() const;
@@ -1437,8 +1437,8 @@ class FblElementParam : public ::google::protobuf::Message {
   inline void clear_has_highlimit();
   inline void set_has_visible();
   inline void clear_has_visible();
-  inline void set_has_index();
-  inline void clear_has_index();
+  inline void set_has_operandindex();
+  inline void clear_has_operandindex();
   inline void set_has_size();
   inline void clear_has_size();
 
@@ -1451,7 +1451,7 @@ class FblElementParam : public ::google::protobuf::Message {
   bool visible_;
   ::Proto::FblParamValue* lowlimit_;
   ::Proto::FblParamValue* highlimit_;
-  ::google::protobuf::int32 index_;
+  ::google::protobuf::int32 operandindex_;
   ::google::protobuf::int32 size_;
 
   mutable int _cached_size_;
@@ -3009,6 +3009,13 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline ::Proto::Uuid* release_uuid();
   inline void set_allocated_uuid(::Proto::Uuid* uuid);
 
+  // optional int32 operandIndex = 4 [default = -1];
+  inline bool has_operandindex() const;
+  inline void clear_operandindex();
+  static const int kOperandIndexFieldNumber = 4;
+  inline ::google::protobuf::int32 operandindex() const;
+  inline void set_operandindex(::google::protobuf::int32 value);
+
   // optional .Proto.Uuid signalUuid = 10;
   inline bool has_signaluuid() const;
   inline void clear_signaluuid();
@@ -3044,6 +3051,8 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline void clear_has_dirrection();
   inline void set_has_uuid();
   inline void clear_has_uuid();
+  inline void set_has_operandindex();
+  inline void clear_has_operandindex();
   inline void set_has_signaluuid();
   inline void clear_has_signaluuid();
   inline void set_has_signalstrid();
@@ -3055,13 +3064,14 @@ class FblConnectionPoint : public ::google::protobuf::Message {
 
   ::Proto::VideoItemPoint* point_;
   ::Proto::Uuid* uuid_;
+  int dirrection_;
+  ::google::protobuf::int32 operandindex_;
   ::Proto::Uuid* signaluuid_;
   ::Proto::wstring* signalstrid_;
   ::Proto::wstring* signalcaption_;
-  int dirrection_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6382,26 +6392,26 @@ inline void FblElementSignal::set_type(::Proto::FblSignalType value) {
   type_ = value;
 }
 
-// optional int32 index = 3 [default = 0];
-inline bool FblElementSignal::has_index() const {
+// optional int32 operandIndex = 3 [default = 0];
+inline bool FblElementSignal::has_operandindex() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void FblElementSignal::set_has_index() {
+inline void FblElementSignal::set_has_operandindex() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void FblElementSignal::clear_has_index() {
+inline void FblElementSignal::clear_has_operandindex() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void FblElementSignal::clear_index() {
-  index_ = 0;
-  clear_has_index();
+inline void FblElementSignal::clear_operandindex() {
+  operandindex_ = 0;
+  clear_has_operandindex();
 }
-inline ::google::protobuf::int32 FblElementSignal::index() const {
-  return index_;
+inline ::google::protobuf::int32 FblElementSignal::operandindex() const {
+  return operandindex_;
 }
-inline void FblElementSignal::set_index(::google::protobuf::int32 value) {
-  set_has_index();
-  index_ = value;
+inline void FblElementSignal::set_operandindex(::google::protobuf::int32 value) {
+  set_has_operandindex();
+  operandindex_ = value;
 }
 
 // optional int32 size = 4 [default = 0];
@@ -6665,26 +6675,26 @@ inline void FblElementParam::set_visible(bool value) {
   visible_ = value;
 }
 
-// optional int32 index = 8 [default = 0];
-inline bool FblElementParam::has_index() const {
+// optional int32 operandIndex = 8 [default = 0];
+inline bool FblElementParam::has_operandindex() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void FblElementParam::set_has_index() {
+inline void FblElementParam::set_has_operandindex() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void FblElementParam::clear_has_index() {
+inline void FblElementParam::clear_has_operandindex() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void FblElementParam::clear_index() {
-  index_ = 0;
-  clear_has_index();
+inline void FblElementParam::clear_operandindex() {
+  operandindex_ = 0;
+  clear_has_operandindex();
 }
-inline ::google::protobuf::int32 FblElementParam::index() const {
-  return index_;
+inline ::google::protobuf::int32 FblElementParam::operandindex() const {
+  return operandindex_;
 }
-inline void FblElementParam::set_index(::google::protobuf::int32 value) {
-  set_has_index();
-  index_ = value;
+inline void FblElementParam::set_operandindex(::google::protobuf::int32 value) {
+  set_has_operandindex();
+  operandindex_ = value;
 }
 
 // optional int32 size = 9 [default = 0];
@@ -8612,15 +8622,37 @@ inline void FblConnectionPoint::set_allocated_uuid(::Proto::Uuid* uuid) {
   }
 }
 
-// optional .Proto.Uuid signalUuid = 10;
-inline bool FblConnectionPoint::has_signaluuid() const {
+// optional int32 operandIndex = 4 [default = -1];
+inline bool FblConnectionPoint::has_operandindex() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void FblConnectionPoint::set_has_signaluuid() {
+inline void FblConnectionPoint::set_has_operandindex() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void FblConnectionPoint::clear_has_signaluuid() {
+inline void FblConnectionPoint::clear_has_operandindex() {
   _has_bits_[0] &= ~0x00000008u;
+}
+inline void FblConnectionPoint::clear_operandindex() {
+  operandindex_ = -1;
+  clear_has_operandindex();
+}
+inline ::google::protobuf::int32 FblConnectionPoint::operandindex() const {
+  return operandindex_;
+}
+inline void FblConnectionPoint::set_operandindex(::google::protobuf::int32 value) {
+  set_has_operandindex();
+  operandindex_ = value;
+}
+
+// optional .Proto.Uuid signalUuid = 10;
+inline bool FblConnectionPoint::has_signaluuid() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void FblConnectionPoint::set_has_signaluuid() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void FblConnectionPoint::clear_has_signaluuid() {
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void FblConnectionPoint::clear_signaluuid() {
   if (signaluuid_ != NULL) signaluuid_->::Proto::Uuid::Clear();
@@ -8652,13 +8684,13 @@ inline void FblConnectionPoint::set_allocated_signaluuid(::Proto::Uuid* signaluu
 
 // optional .Proto.wstring signalStrID = 11;
 inline bool FblConnectionPoint::has_signalstrid() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void FblConnectionPoint::set_has_signalstrid() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void FblConnectionPoint::clear_has_signalstrid() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void FblConnectionPoint::clear_signalstrid() {
   if (signalstrid_ != NULL) signalstrid_->::Proto::wstring::Clear();
@@ -8690,13 +8722,13 @@ inline void FblConnectionPoint::set_allocated_signalstrid(::Proto::wstring* sign
 
 // optional .Proto.wstring signalCaption = 12;
 inline bool FblConnectionPoint::has_signalcaption() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void FblConnectionPoint::set_has_signalcaption() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void FblConnectionPoint::clear_has_signalcaption() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void FblConnectionPoint::clear_signalcaption() {
   if (signalcaption_ != NULL) signalcaption_->::Proto::wstring::Clear();
