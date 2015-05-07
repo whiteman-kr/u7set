@@ -13,6 +13,7 @@
 #include <QRadioButton>
 #include <QButtonGroup>
 #include <QToolButton>
+#include <QTimer>
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
@@ -908,7 +909,7 @@ void SignalsModel::loadSignals()
 			emit signalsRestored();
 		}
 
-		emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+		emit cellsSizeChanged();
 	}
 
 	changeCheckedoutSignalActionsVisibility();
@@ -1169,7 +1170,8 @@ const DbController *SignalsModel::dbController() const
 //
 //
 SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
-	MainTabPage(dbcontroller, parent)
+	MainTabPage(dbcontroller, parent),
+	m_scrollTimer(new QTimer(this))
 {
 	assert(dbcontroller != nullptr);
 
@@ -1187,17 +1189,21 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsProxyModel = new SignalsProxyModel(m_signalsModel, this);
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsProxyModel);
-	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
+	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	m_signalsView->horizontalHeader()->setHighlightSections(false);
+	connect(m_signalsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::saveScrollPosition);
+	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::saveScrollPosition);
+	connect(m_scrollTimer, &QTimer::timeout, this, &SignalsTabPage::checkScrollPosition);
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
 	connect(m_signalsModel, &SignalsModel::dataChanged, this, &SignalsTabPage::updateCellsSize);
+	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, this, &SignalsTabPage::updateCellsSize);
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
@@ -1206,12 +1212,15 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_signalsModel, &SignalsModel::aboutToClearSignals, this, &SignalsTabPage::saveSelection);
 	connect(m_signalsModel, &SignalsModel::signalsRestored, this, &SignalsTabPage::restoreSelection);
 
-	m_signalsView->resizeColumnsToContents();
-	m_signalsView->resizeRowsToContents();
-
 	// Create Actions
 	//
 	CreateActions(toolBar);
+
+	m_autoResizeToContents = new QCheckBox(tr("Autoresize to contents"));
+	m_autoResizeToContents->setChecked(true);
+	connect(m_autoResizeToContents, &QCheckBox::clicked, this, &SignalsTabPage::updateCellsSize);
+
+	toolBar->addWidget(m_autoResizeToContents);
 
 	//
 	// Layouts
@@ -1367,16 +1376,62 @@ void SignalsTabPage::showPendingChanges()
 	m_signalsModel->loadSignals();
 }
 
-void SignalsTabPage::updateCellsSize(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+void SignalsTabPage::updateCellsSize()
 {
-	for (int row = topLeft.row(); row <= bottomRight.row(); row++)
+	if (m_autoResizeToContents->isChecked())
 	{
-		m_signalsView->resizeRowToContents(row);
-	}
+		QModelIndex topLeft = m_signalsView->indexAt(m_signalsView->rect().topLeft());
+		QModelIndex bottomRight = m_signalsView->indexAt(m_signalsView->rect().bottomRight());
 
-	for (int column = topLeft.column(); column <= bottomRight.column(); column++)
+		for (int column = topLeft.column(); column <= bottomRight.column(); column++)
+		{
+			m_signalsView->resizeColumnToContents(column);
+		}
+
+		for (int row = topLeft.row(); row <= bottomRight.row(); row++)
+		{
+			m_signalsView->resizeRowToContents(row);
+		}
+
+		QModelIndex newBottomRight = m_signalsView->indexAt(m_signalsView->rect().bottomRight());
+		while (bottomRight.row() < newBottomRight.row())
+		{
+			for (int row = bottomRight.row(); row <= newBottomRight.row(); row++)
+			{
+				m_signalsView->resizeRowToContents(row);
+			}
+			bottomRight = newBottomRight;
+			newBottomRight = m_signalsView->indexAt(m_signalsView->rect().bottomRight());
+		}
+	}
+}
+
+void SignalsTabPage::saveScrollPosition()
+{
+	if (!m_autoResizeToContents->isChecked())
 	{
-		m_signalsView->resizeColumnToContents(column);
+		return;
+	}
+	m_lastVerticalScrollPosition = m_signalsView->verticalScrollBar()->value();
+	m_lastHorizontalScrollPosition = m_signalsView->horizontalScrollBar()->value();
+	if (m_scrollTimer->isActive())
+	{
+		m_scrollTimer->stop();
+	}
+	m_scrollTimer->start(1000);
+}
+
+void SignalsTabPage::checkScrollPosition()
+{
+	if (!m_autoResizeToContents->isChecked())
+	{
+		return;
+	}
+	if (m_lastVerticalScrollPosition == m_signalsView->verticalScrollBar()->value() &&
+			m_lastHorizontalScrollPosition == m_signalsView->horizontalScrollBar()->value())
+	{
+		updateCellsSize();
+		m_scrollTimer->stop();
 	}
 }
 
@@ -1406,36 +1461,36 @@ void SignalsTabPage::saveSelection()
 {
 	// Save signal id list of selected rows and signal id with column number of focused cell
 	//
-	selectedRowsSignalID.clear();
+	m_selectedRowsSignalID.clear();
     QModelIndexList selectedList = m_signalsView->selectionModel()->selectedRows(0);
 	foreach (const QModelIndex& index, selectedList)
 	{
 		int row = m_signalsProxyModel->mapToSource(index).row();
-		selectedRowsSignalID.append(m_signalsModel->key(row));
+		m_selectedRowsSignalID.append(m_signalsModel->key(row));
 	}
 	QModelIndex index = m_signalsView->currentIndex();
 	if (index.isValid())
 	{
 		int row = m_signalsProxyModel->mapToSource(index).row();
-		focusedCellSignalID = m_signalsModel->key(row);
-		focusedCellColumn = index.column();
+		m_focusedCellSignalID = m_signalsModel->key(row);
+		m_focusedCellColumn = index.column();
 	}
-	horizontalScrollPosition = m_signalsView->horizontalScrollBar()->value();
-	verticalScrollPosition = m_signalsView->verticalScrollBar()->value();
+	m_lastHorizontalScrollPosition = m_signalsView->horizontalScrollBar()->value();
+	m_lastVerticalScrollPosition = m_signalsView->verticalScrollBar()->value();
 }
 
 void SignalsTabPage::restoreSelection()
 {
-	foreach (int id, selectedRowsSignalID)
+	foreach (int id, m_selectedRowsSignalID)
 	{
         QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(id), 0);
         QModelIndex proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
 		m_signalsView->selectRow(proxyIndex.row());
 	}
-    QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(focusedCellSignalID), focusedCellColumn);
+	QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(m_focusedCellSignalID), m_focusedCellColumn);
 	m_signalsView->setCurrentIndex(m_signalsProxyModel->mapFromSource(sourceIndex));
-	m_signalsView->horizontalScrollBar()->setValue(horizontalScrollPosition);
-	m_signalsView->verticalScrollBar()->setValue(verticalScrollPosition);
+	m_signalsView->horizontalScrollBar()->setValue(m_lastHorizontalScrollPosition);
+	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
 }
 
 void SignalsTabPage::changeSignalTypeFilter(int selectedType)

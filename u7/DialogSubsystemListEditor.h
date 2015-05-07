@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QItemDelegate>
 #include "../include/DbController.h"
-#include "../include/DeviceObject.h"
+#include "Subsystem.h"
 
 namespace Ui {
 class DialogSubsystemListEditor;
@@ -29,8 +29,6 @@ public:
 
 private:
 	void fillList();
-	std::shared_ptr<DbFile> openFile(const QString& fileName);
-	std::shared_ptr<DbFile> createFile(const QString& fileName);
 
 private slots:
 	void on_m_add_clicked();
@@ -40,7 +38,6 @@ private slots:
 private:
 	Ui::DialogSubsystemListEditor *ui;
 
-	const QString m_fileName = "SubsystemsList.xml";
 
 	DbController* db();
 	DbController* m_dbController;

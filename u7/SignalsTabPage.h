@@ -16,6 +16,8 @@ class QSplitter;
 class SignalsProxyModel;
 class QComboBox;
 class SignalsTabPage;
+class QTimer;
+class QCheckBox;
 
 
 const int	ST_ANALOG = SignalType::Analog,
@@ -97,6 +99,7 @@ signals:
 	void setCheckedoutSignalActionsVisibility(bool state);
 	void aboutToClearSignals();
 	void signalsRestored();
+	void cellsSizeChanged();
 
 public slots:
 	void loadSignals();
@@ -235,7 +238,9 @@ public slots:
 	void undoSignalChanges();
 	void showPendingChanges();
 
-	void updateCellsSize(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+	void updateCellsSize();
+	void saveScrollPosition();
+	void checkScrollPosition();
 
 	void changeSignalActionsVisibility();
 
@@ -253,12 +258,14 @@ private:
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
+	QCheckBox* m_autoResizeToContents = nullptr;
+	int m_lastVerticalScrollPosition = -1;
+	int m_lastHorizontalScrollPosition = -1;
+	QTimer* m_scrollTimer = nullptr;
 
-	QList<int> selectedRowsSignalID;
-	int focusedCellSignalID = -1;
-	int focusedCellColumn = -1;
-	int horizontalScrollPosition;
-	int verticalScrollPosition;
+	QList<int> m_selectedRowsSignalID;
+	int m_focusedCellSignalID = -1;
+	int m_focusedCellColumn = -1;
 };
 
 

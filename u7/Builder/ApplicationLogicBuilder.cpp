@@ -66,6 +66,7 @@ namespace Builder
 		return -1;
 	}
 
+
 	// ------------------------------------------------------------------------
 	//
 	//		ApplicationLogicBranch
@@ -85,25 +86,59 @@ namespace Builder
 //		return m_items;
 //	}
 
+	AppLogicItem::AppLogicItem(
+		std::shared_ptr<VFrame30::FblItemRect> fblItem,
+		std::shared_ptr<VFrame30::LogicScheme> scheme,
+		std::shared_ptr<Afbl::AfbElement> afbElement) :
+		m_fblItem(fblItem),
+		m_scheme(scheme),
+		m_afbElement(afbElement)
+	{
+		assert(fblItem);
+		assert(scheme);
+		//assert(afbElement);	afbElement can be empty for diferent from VFrame30::VideoItemFblElement items
+	}
+
+
+
 	void ApplicationLogicScheme::setData(
 		std::shared_ptr<VFrame30::LogicScheme>& scheme,
 		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items)
 	{
 		m_scheme = scheme;
-		m_items = items;
+
+		for (const std::shared_ptr<VFrame30::FblItemRect>& fblItem : items)
+		{
+			std::shared_ptr<Afbl::AfbElement> afbElement;
+
+			const VFrame30::VideoItemFblElement* vifble = fblItem->toFblElement();
+
+			if (vifble != nullptr)
+			{
+				afbElement = scheme->afbCollection().get(vifble->afbGuid());
+			}
+			else
+			{
+				// afbElement can be empty for diferent from VFrame30::VideoItemFblElement items
+			}
+
+			AppLogicItem li(fblItem, scheme, afbElement);
+
+			m_items.push_back(li);
+		}
 	}
 
 	std::shared_ptr<VFrame30::FblItemRect> ApplicationLogicScheme::getItemByGuid(const QUuid& itemGuid) const
 	{
 		auto it = std::find_if(m_items.begin(), m_items.end(),
-			[&itemGuid](const std::shared_ptr<VFrame30::FblItemRect>& i)
+			[&itemGuid](const AppLogicItem& li)
 			{
-				return i->guid() == itemGuid;
+				return li.m_fblItem->guid() == itemGuid;
 			});
 
 		if (it != m_items.end())
 		{
-			return *it;
+			return it->m_fblItem;
 		}
 		else
 		{
@@ -141,12 +176,12 @@ namespace Builder
 		return m_scheme;
 	}
 
-	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicScheme::items() const
+	const std::list<AppLogicItem>& ApplicationLogicScheme::items() const
 	{
 		return m_items;
 	}
 
-	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicScheme::items()
+	std::list<AppLogicItem>& ApplicationLogicScheme::items()
 	{
 		return m_items;
 	}
@@ -305,7 +340,7 @@ namespace Builder
 		//
 		for (auto currentIt = orderedList.begin(); currentIt != orderedList.end(); ++currentIt)
 		{
-			const std::shared_ptr<VFrame30::FblItemRect>& currentItem = *currentIt;
+			std::shared_ptr<VFrame30::FblItemRect> currentItem = *currentIt;
 
 			// Get dependant items
 			//

@@ -4,7 +4,6 @@
 #include <QDynamicPropertyChangeEvent>
 #include <QJSEngine>
 #include <QQmlEngine>
-#include <QXmlStreamWriter>
 
 
 namespace Hardware
@@ -17,9 +16,9 @@ namespace Hardware
 			L".hcs",		// Chassis
 			L".hmd",		// Module
 			L".hcr",		// Controller
-			L".hds",		// Diagnostics Signal
 			L".hws",		// Workstation
 			L".hsw",		// Software
+			L".hds",		// Diagnostics Signal
 		};
 
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
@@ -39,195 +38,6 @@ namespace Hardware
 
 	void Shutdwon()
 	{
-	}
-
-
-	//
-	//
-	// Subsystem
-	//
-	//
-	Subsystem::Subsystem():
-		m_index(-1)
-	{
-
-	}
-
-	Subsystem::Subsystem(int index, const QString& strId, const QString& caption):
-		m_index(index),
-		m_strId(strId),
-		m_caption(caption)
-	{
-
-	}
-
-	bool Subsystem::save(QXmlStreamWriter& writer)
-	{
-		writer.writeAttribute("Index", QString::number(index()));
-		writer.writeAttribute("StrID", strId());
-		writer.writeAttribute("Caption", caption());
-		return true;
-	}
-
-
-	bool Subsystem::load(QXmlStreamReader& reader)
-	{
-		if (reader.attributes().hasAttribute("Index"))
-		{
-			setIndex(reader.attributes().value("Index").toInt());
-		}
-		else
-		{
-			reader.raiseError(QObject::tr("Subsystem - No Index found"));
-		}
-
-		if (reader.attributes().hasAttribute("StrID"))
-		{
-			setStrId(reader.attributes().value("StrID").toString());
-		}
-		else
-		{
-			reader.raiseError(QObject::tr("Subsystem - No StrID found"));
-		}
-
-		if (reader.attributes().hasAttribute("Caption"))
-		{
-			setCaption(reader.attributes().value("Caption").toString());
-		}
-		else
-		{
-			reader.raiseError(QObject::tr("Subsystem - No Caption found"));
-		}
-
-		QXmlStreamReader::TokenType endToken = reader.readNext();
-		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
-
-		return true;
-	}
-
-
-	const QString& Subsystem::strId() const
-	{
-		return m_strId;
-	}
-
-	void Subsystem::setStrId(const QString& value)
-	{
-		m_strId = value;
-	}
-
-	const QString& Subsystem::caption() const
-	{
-		return m_caption;
-	}
-
-	void Subsystem::setCaption(const QString& value)
-	{
-		m_caption = value;
-	}
-
-	int Subsystem::index() const
-	{
-		return m_index;
-	}
-
-	void Subsystem::setIndex(int value)
-	{
-		m_index = value;
-	}
-
-	//
-	//
-	// SubsystemStorage
-	//
-	//
-	SubsystemStorage::SubsystemStorage()
-	{
-
-	}
-
-	void SubsystemStorage::add(std::shared_ptr<Subsystem> subsystem)
-	{
-		m_subsystems.push_back(subsystem);
-	}
-
-	int SubsystemStorage::count() const
-	{
-		return static_cast<int>(m_subsystems.size());
-	}
-
-	std::shared_ptr<Subsystem> SubsystemStorage::get(int index) const
-	{
-		if (index < 0 || index >= count())
-		{
-			assert(false);
-			return std::make_shared<Subsystem>();
-		}
-		return m_subsystems[index];
-	}
-
-	void SubsystemStorage::clear()
-	{
-		m_subsystems.clear();
-	}
-
-	bool SubsystemStorage::load(const QByteArray& data, QString& errorCode)
-	{
-		QXmlStreamReader reader(data);
-
-		if (reader.readNextStartElement() == false)
-		{
-			return !reader.hasError();
-		}
-
-		if (reader.name() != "Subsystems")
-		{
-			reader.raiseError(QObject::tr("The file is not an Subsystems file."));
-			errorCode = reader.errorString();
-			return !reader.hasError();
-		}
-
-		// Read signals
-		//
-		while (reader.readNextStartElement())
-		{
-			if (reader.name() == "Subsystem")
-			{
-				std::shared_ptr<Hardware::Subsystem> s = std::make_shared<Hardware::Subsystem>();
-
-				if (s->load(reader) == true)
-				{
-					m_subsystems.push_back(s);
-				}
-			}
-			else
-			{
-				reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-				errorCode = reader.errorString();
-				reader.skipCurrentElement();
-			}
-		}
-		return !reader.hasError();
-	}
-
-	bool SubsystemStorage::save(QByteArray& data)
-	{
-		QXmlStreamWriter writer(&data);
-
-		writer.setAutoFormatting(true);
-		writer.writeStartDocument();
-
-		writer.writeStartElement("Subsystems");
-		for (auto s : m_subsystems)
-		{
-			writer.writeStartElement("Subsystem");
-			s->save(writer);
-			writer.writeEndElement();
-		}
-		writer.writeEndElement();
-
-		writer.writeEndDocument();
-		return true;
 	}
 
 	//
@@ -1746,7 +1556,7 @@ namespace Hardware
 
 	DeviceType DeviceSignal::deviceType() const
 	{
-		return m_deviceType;
+		return DeviceSignal::m_deviceType;
 	}
 
 	DeviceSignal::SignalType DeviceSignal::type() const

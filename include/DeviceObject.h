@@ -9,6 +9,8 @@
 #include "../include/ProtoSerialization.h"
 #include "../include/ModuleConfiguration.h"
 
+class DbController;
+
 namespace Hardware
 {
 	extern const wchar_t* DeviceObjectExtensions[];
@@ -46,68 +48,6 @@ namespace Hardware
 		ConfigurationService = 9001,
 		DataAcquisitionService = 9002,
 		DataArchivingService = 9003,
-	};
-
-	//
-	//
-	// Subsystem
-	//
-	//
-	class Subsystem : public QObject
-	{
-		Q_OBJECT
-		Q_PROPERTY(int Index READ index WRITE setIndex)
-		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
-		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
-
-	public:
-		Subsystem();
-		Subsystem(int index, const QString& strId, const QString& caption);
-
-		bool save(QXmlStreamWriter& writer);
-		bool load(QXmlStreamReader& reader);
-
-		// Properties
-		//
-	public:
-		const QString& strId() const;
-		void setStrId(const QString& value);
-
-		const QString& caption() const;
-		void setCaption(const QString& value);
-
-		int index() const;
-		void setIndex(int value);
-
-	private:
-		int m_index;
-		QString m_strId;
-		QString m_caption;
-
-	};
-
-	//
-	//
-	// SubsystemStorage
-	//
-	//
-	class SubsystemStorage
-	{
-	public:
-
-		SubsystemStorage();
-
-		void add(std::shared_ptr<Subsystem> subsystem);
-		int count() const;
-		std::shared_ptr<Subsystem> get(int index) const;
-		void clear();
-
-		bool load(const QByteArray& data, QString &errorCode);
-		bool save(QByteArray& data);
-
-	private:
-		std::vector<std::shared_ptr<Subsystem>> m_subsystems;
-
 	};
 
 	//

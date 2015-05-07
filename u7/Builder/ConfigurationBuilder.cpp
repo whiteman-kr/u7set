@@ -3,6 +3,7 @@
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
 #include "../../include/DeviceObject.h"
+#include "Subsystem.h"
 
 namespace Builder
 {
@@ -135,6 +136,19 @@ namespace Builder
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
+		Hardware::SubsystemStorage subsystems;
+
+		QString errorCode;
+		if (subsystems.load(db(), errorCode) == false)
+		{
+			m_log->writeError(tr("Can't load subsystems file"), false, true);
+			if (errorCode.isEmpty() == false)
+			{
+				m_log->writeError(errorCode, false, false);
+			}
+			return false;
+		}
+
 		QJSValue jsLog = jsEngine.newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
@@ -148,6 +162,9 @@ namespace Builder
 
 		QJSValue jsConfCollection = jsEngine.newQObject(&confCollection);
 		QQmlEngine::setObjectOwnership(&confCollection, QQmlEngine::CppOwnership);
+
+		QJSValue jsSubsystemStorage = jsEngine.newQObject(&subsystems);
+		QQmlEngine::setObjectOwnership(&subsystems, QQmlEngine::CppOwnership);
 
 		// Run script
 		//
@@ -164,6 +181,7 @@ namespace Builder
 		args << jsConfCollection;
 		args << jsLog;
 		args << jsSignalSetObject;
+		args << jsSubsystemStorage;
 
 		QJSValue jsResult = jsEval.call(args);
 
@@ -209,7 +227,7 @@ namespace Builder
 					return false;
 				}
 
-				if (m_buildWriter->addFile(path, fileName, data) == false)
+				if (m_buildWriter->addFile(path, fileName + ".mcb", data) == false)
 				{
 					m_log->writeError(tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.type() + "!", false, true);
 					return false;
