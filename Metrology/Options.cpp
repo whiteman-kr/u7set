@@ -279,20 +279,43 @@ DatabaseOption::~DatabaseOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool DatabaseOption::create()
+{
+    remove();
+
+    thePtrDB = new Database;
+    if (thePtrDB == nullptr)
+    {
+        return false;
+    }
+
+    if (thePtrDB->open() == false)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void DatabaseOption::remove()
+{
+    if (thePtrDB != nullptr)
+    {
+        thePtrDB->close();
+        delete thePtrDB;
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void DatabaseOption::load()
 {
     QSettings s;
 
     m_path = s.value( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
     m_type = s.value( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
-
-    thePtrDB = new Database;
-    if (thePtrDB == nullptr)
-    {
-        return;
-    }
-
-    thePtrDB->open();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -962,6 +985,7 @@ void Options::load()
     m_measureView.load();
 
     m_database.load();
+    m_database.create();
 
     m_report.load();
 
@@ -970,6 +994,7 @@ void Options::load()
     m_comparator.load();
 
     m_backup.load();
+    m_backup.createBackupOnStart();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -984,6 +1009,15 @@ void Options::save()
     m_linearity.save();
     m_comparator.save();
     m_backup.save();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void Options::unload()
+{
+    m_backup.createBackupOnExit();
+
+    m_database.remove();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

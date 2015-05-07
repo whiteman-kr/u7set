@@ -199,6 +199,9 @@ public:
     QString             m_path;
     int					m_type;
 
+    bool                create();
+    void                remove();
+
     void                load();
     void                save();
 
@@ -687,6 +690,7 @@ public:
 
     void                load();
     void                save();
+    void                unload();
 
     Options&            operator=(const Options& from);
 };
