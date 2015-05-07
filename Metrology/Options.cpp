@@ -286,13 +286,13 @@ void DatabaseOption::load()
     m_path = s.value( QString("%1Path").arg(DATABASE_OPTIONS_REG_KEY), QDir::currentPath()).toString();
     m_type = s.value( QString("%1Type").arg(DATABASE_OPTIONS_REG_KEY), DATABASE_TYPE_SQLITE).toInt();
 
-    thepDatabase = new Database;
-    if (thepDatabase == nullptr)
+    thePtrDB = new Database;
+    if (thePtrDB == nullptr)
     {
         return;
     }
 
-    thepDatabase->open();
+    thePtrDB->open();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -362,17 +362,8 @@ void REPORT_HEADER::init(int type)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ReportHeaderBase::ReportHeaderBase(QObject *parent) :
-    QObject(parent)
+ReportHeaderBase::ReportHeaderBase()
 {
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ReportHeaderBase::ReportHeaderBase(const ReportHeaderBase& from, QObject *parent) :
-    QObject(parent)
-{
-    *this = from;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -384,32 +375,6 @@ ReportHeaderBase::~ReportHeaderBase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int ReportHeaderBase::count()
-{
-    int count = 0;
-
-    m_mutex.lock();
-
-        count = m_headerList.count();
-
-    m_mutex.unlock();
-
-    return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ReportHeaderBase::clear()
-{
-    m_mutex.lock();
-
-        m_headerList.clear();
-
-    m_mutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 bool ReportHeaderBase::reportsIsExist()
 {
     QString dontExistReports;
@@ -417,7 +382,7 @@ bool ReportHeaderBase::reportsIsExist()
     int reportCount = count();
     for (int r = 0; r < reportCount; r++)
     {
-        REPORT_HEADER header = m_headerList[r];
+        REPORT_HEADER header = at(r);
 
         QString path = theOptions.report().m_path + QDir::separator() + header.m_reportFile;
         if (QFile::exists(path) == false)
@@ -431,9 +396,9 @@ bool ReportHeaderBase::reportsIsExist()
         return true;
     }
 
-    dontExistReports.insert(0, "The application can not detect the following reports, functions of the application will be limited.\n\n");
+    dontExistReports.insert(0, QT_TRANSLATE_NOOP("Options.cpp", "The application can not detect the following reports, functions of the application will be limited.\n\n"));
 
-    QMessageBox::information(nullptr, tr("Reports"), dontExistReports);
+    QMessageBox::information(nullptr, QT_TRANSLATE_NOOP("Options.cpp", "Reports"), dontExistReports);
 
     return false;
 
@@ -441,114 +406,16 @@ bool ReportHeaderBase::reportsIsExist()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ReportHeaderBase::load()
+void ReportHeaderBase::initEmptyData(QVector<REPORT_HEADER> &data)
 {
-    if (thepDatabase == nullptr)
+    for(int type = 0; type < REPORT_TYPE_COUNT; type++)
     {
-        return;
+        REPORT_HEADER header;
+
+        header.init(type);
+
+        data.append(header);
     }
-
-    if (thepDatabase->isOpen() == false)
-    {
-        return;
-    }
-
-    SqlTable* pTable = thepDatabase->openTable(SQL_TABLE_REPORT_HEADER);
-    if (pTable == nullptr)
-    {
-        return;
-    }
-
-    m_mutex.lock();
-
-        int recordCount = pTable->recordCount();
-        if (recordCount == REPORT_TYPE_COUNT)
-        {
-            m_headerList.resize(recordCount);
-            pTable->read(m_headerList.data());
-        }
-        else
-        {
-            for(int type = 0; type < REPORT_TYPE_COUNT; type++)
-            {
-                REPORT_HEADER header;
-
-                header.init(type);
-                m_headerList.append(header);
-            }
-
-            if (pTable->clear() == true)
-            {
-                pTable->write(m_headerList.data(), m_headerList.count());
-            }
-
-        }
-
-    m_mutex.unlock();
-
-    pTable->close();
-
-    reportsIsExist();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ReportHeaderBase::save()
-{
-    if (thepDatabase == nullptr)
-    {
-        return;
-    }
-
-    if (thepDatabase->isOpen() == false)
-    {
-        return;
-    }
-
-    SqlTable* pTable = thepDatabase->openTable(SQL_TABLE_REPORT_HEADER);
-    if (pTable == nullptr)
-    {
-        return;
-    }
-
-    if (pTable->clear() == true)
-    {
-        m_mutex.lock();
-
-            pTable->write(m_headerList.data(), m_headerList.count());
-
-        m_mutex.unlock();
-    }
-
-    pTable->close();
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ReportHeaderBase& ReportHeaderBase::operator=(const ReportHeaderBase& from)
-{
-    clear();
-
-    m_mutex.lock();
-
-        m_headerList = from.m_headerList;
-
-    m_mutex.unlock();
-
-    return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-REPORT_HEADER& ReportHeaderBase::operator[](int index)
-{
-    if (index < 0 || index >= count())
-    {
-        assert(0);
-    }
-
-    return m_headerList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -572,13 +439,6 @@ ReportOption::ReportOption(const ReportOption& from, QObject *parent) :
 
 ReportOption::~ReportOption()
 {
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ReportOption::init()
-{
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -621,10 +481,12 @@ void ReportOption::load()
 {
     QSettings s;
 
+    m_headerBase.loadData(SQL_TABLE_REPORT_HEADER);
+
     m_path = s.value( QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), QDir::currentPath() + "/reports").toString();
     m_type = s.value( QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), REPORT_TYPE_LINEARITY).toInt();
 
-    m_headerBase.load();
+    m_headerBase.reportsIsExist();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -636,7 +498,7 @@ void ReportOption::save()
     s.setValue( QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), m_path );
     s.setValue( QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), m_type );
 
-    m_headerBase.save();
+    m_headerBase.saveData(SQL_TABLE_REPORT_HEADER);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -692,17 +554,8 @@ double LinearityPoint::sensorValue(int sensor)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityPointBase::LinearityPointBase(QObject *parent) :
-    QObject(parent)
+LinearityPointBase::LinearityPointBase()
 {
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-LinearityPointBase::LinearityPointBase(const LinearityPointBase& from, QObject *parent) :
-    QObject(parent)
-{
-    *this = from;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -714,236 +567,49 @@ LinearityPointBase::~LinearityPointBase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int LinearityPointBase::count()
-{
-    int count = 0;
-
-    m_mutex.lock();
-
-        count = m_pointList.count();
-
-    m_mutex.unlock();
-
-    return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int LinearityPointBase::append(LinearityPoint point)
-{
-    int index = -1;
-
-    m_mutex.lock();
-
-        m_pointList.append(point);
-        index = m_pointList.count() - 1;
-
-    m_mutex.unlock();
-
-    return index;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int LinearityPointBase::insert(int index, LinearityPoint point)
-{
-    if (index < 0 || index > count())
-    {
-        return -1;
-    }
-
-    m_mutex.lock();
-
-        m_pointList.insert(index, point);
-
-    m_mutex.unlock();
-
-    return index;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool LinearityPointBase::remove(int index)
-{
-    if (index < 0 || index >= count())
-    {
-        return false;
-    }
-
-    m_mutex.lock();
-
-        m_pointList.removeAt(index);
-
-    m_mutex.unlock();
-
-    return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void LinearityPointBase::clear()
-{
-    m_mutex.lock();
-
-        m_pointList.clear();
-
-    m_mutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void LinearityPointBase::swap(int i, int j)
-{
-    m_mutex.lock();
-
-        LinearityPoint point    = m_pointList[j];
-        m_pointList[j]          = m_pointList[i];
-        m_pointList[i]          = point;
-
-    m_mutex.unlock();
-
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QString LinearityPointBase::text()
 {
     QString result;
 
-    m_mutex.lock();
+    if (isEmpty() == true)
+    {
+        result = QT_TRANSLATE_NOOP("Options.cpp", "The measurement points are not set");
+    }
+    else
+    {
+        int pointCount = count();
+        for(int index = 0; index < pointCount; index++)
+        {
+            LinearityPoint point = at(index);
+            result.append(QString("%1%").arg(QString::number(point.percent(), 10, 1)));
 
-        if (m_pointList.isEmpty() == true)
-        {
-            result = tr("The measurement points are not set");
-        }
-        else
-        {
-            int count = m_pointList.count();
-            for(int index = 0; index < count; index++)
+            if (index != pointCount - 1 )
             {
-                LinearityPoint point = m_pointList.at(index);
-                result.append(QString("%1%").arg(QString::number(point.percent(), 10, 1)));
-
-                if (index != count - 1 )
-                {
-                    result.append(QString(", "));
-                }
+                result.append(QString(", "));
             }
         }
+    }
 
-    m_mutex.unlock();
 
     return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityPointBase::load()
+void LinearityPointBase::initEmptyData(QVector<LinearityPoint> &data)
 {
-    if (thepDatabase == nullptr)
+    const int valueCount = 7;
+    double value[valueCount] = {2, 20, 40, 50, 60, 80, 98};
+
+    for(int index = 0; index < valueCount; index++)
     {
-        return;
+        LinearityPoint point;
+
+        point.setPercent( value[index] );
+        point.setPointID(index);
+
+        data.append( point );
     }
-
-    if (thepDatabase->isOpen() == false)
-    {
-        return;
-    }
-
-    SqlTable* pTable = thepDatabase->openTable(SQL_TABLE_LINEARETY_POINT);
-    if (pTable == nullptr)
-    {
-        return;
-    }
-
-    m_mutex.lock();
-
-        int recordCount = pTable->recordCount();
-        if (recordCount != 0)
-        {
-            m_pointList.resize(recordCount);
-            pTable->read(m_pointList.data());
-        }
-        else
-        {
-            const int valueCount = 7;
-            double value[valueCount] = {2, 20, 40, 50, 60, 80, 98};
-
-            for(int index = 0; index < valueCount; index++)
-            {
-                m_pointList.append( LinearityPoint( value[index] ) );
-            }
-        }
-
-    m_mutex.unlock();
-
-    pTable->close();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void LinearityPointBase::save()
-{
-    if (thepDatabase == nullptr)
-    {
-        return;
-    }
-
-    if (thepDatabase->isOpen() == false)
-    {
-        return;
-    }
-
-    SqlTable* pTable = thepDatabase->openTable(SQL_TABLE_LINEARETY_POINT);
-    if (pTable == nullptr)
-    {
-        return;
-    }
-
-    if (pTable->clear() == true)
-    {
-        m_mutex.lock();
-
-            int count = m_pointList.count();
-            for(int index = 0; index < count; index++)
-            {
-                m_pointList[index].setPointID(index);
-            }
-
-            pTable->write(m_pointList.data(), m_pointList.count());
-
-        m_mutex.unlock();
-    }
-
-    pTable->close();
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-LinearityPointBase& LinearityPointBase::operator=(const LinearityPointBase& from)
-{
-    clear();
-
-    m_mutex.lock();
-
-        m_pointList = from.m_pointList;
-
-    m_mutex.unlock();
-
-    return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-LinearityPoint& LinearityPointBase::operator[](int index)
-{
-    if (index < 0 || index >= count())
-    {
-        assert(0);
-    }
-
-    return m_pointList[index];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1013,7 +679,7 @@ void LinearityOption::load()
 {
     QSettings s;
 
-    m_pointBase.load();
+    m_pointBase.loadData(SQL_TABLE_LINEARETY_POINT);
 
     m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
     m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
@@ -1037,8 +703,6 @@ void LinearityOption::save()
 {
     QSettings s;
 
-    m_pointBase.save();
-
     s.setValue( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), m_errorValue);
     s.setValue( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), m_errorCtrl);
     s.setValue( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
@@ -1053,6 +717,8 @@ void LinearityOption::save()
 
     s.setValue( QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
     s.setValue( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
+
+    m_pointBase.saveData(SQL_TABLE_LINEARETY_POINT);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1298,7 +964,6 @@ void Options::load()
     m_database.load();
 
     m_report.load();
-    m_report.init();
 
     m_linearity.load();
 

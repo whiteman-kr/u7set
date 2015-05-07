@@ -13,6 +13,7 @@
 #include "CalibratorBase.h"
 #include "Measure.h"
 #include "MeasureViewHeader.h"
+#include "ObjectVector.h"
 
 // ==============================================================================================
 
@@ -319,33 +320,16 @@ struct REPORT_HEADER
 
 // ==============================================================================================
 
-class ReportHeaderBase : public QObject
+class ReportHeaderBase : public ObjectVector<REPORT_HEADER>
 {
-    Q_OBJECT
-
-private:
-
-    QMutex              m_mutex;
-
-    QVector<REPORT_HEADER>	m_headerList;
-
 public:
-    explicit            ReportHeaderBase(QObject *parent = 0);
-    explicit            ReportHeaderBase(const ReportHeaderBase& from, QObject *parent = 0);
+
+    explicit            ReportHeaderBase();
                         ~ReportHeaderBase();
-
-    int                 count();
-    bool                isEmpty() { return count() == 0; }
-
-    void                clear();
 
     bool                reportsIsExist();
 
-    void                load();
-    void                save();
-
-    ReportHeaderBase&   operator=(const ReportHeaderBase& from);
-    REPORT_HEADER&      operator[](int index);
+    virtual void        initEmptyData(QVector<REPORT_HEADER> &data);
 };
 
 // ==============================================================================================
@@ -363,8 +347,6 @@ public:
     int					m_type = REPORT_TYPE_LINEARITY;
 
     ReportHeaderBase    m_headerBase;
-
-    void                init();
 
     int                 reportTypeByMeasureType(int measureType);
 
@@ -420,10 +402,10 @@ private:
 
 public:
 
-    int                 pointID() { return m_pointID; }
+    int                 pointID() const { return m_pointID; }
     void                setPointID(int id) { m_pointID = id; }
 
-    double              percent() {return m_percentValue; }
+    double              percent() const {return m_percentValue; }
     void                setPercent(double value);
 
     double              sensorValue(int sensor);
@@ -431,44 +413,18 @@ public:
 
 // ==============================================================================================
 
-class LinearityPointBase : public QObject
+class LinearityPointBase : public ObjectVector<LinearityPoint>
 {
-    Q_OBJECT
 
 public:
 
-    explicit            LinearityPointBase(QObject *parent = 0);
-    explicit            LinearityPointBase(const LinearityPointBase& from, QObject *parent = 0);
+    explicit            LinearityPointBase();
                         ~LinearityPointBase();
-
-private:
-
-    QMutex              m_mutex;
-
-    QVector<LinearityPoint>	m_pointList;                                  // list of measurement points
-
-public:
-
-    int                 count();
-    bool                isEmpty() { return count() == 0; }
-
-    int                 append(LinearityPoint point);
-    int                 insert(int index, LinearityPoint point);
-    bool                remove(int index);
-
-    void                clear();
-
-    void                swap(int i, int j);
 
     QString             text();
 
-    void                load();
-    void                save();
-
-    LinearityPointBase& operator=(const LinearityPointBase& from);
-    LinearityPoint&     operator[](int index);
+    virtual void        initEmptyData(QVector<LinearityPoint> &data);
 };
-
 
 // ==============================================================================================
 

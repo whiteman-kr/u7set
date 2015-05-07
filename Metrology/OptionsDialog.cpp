@@ -1122,7 +1122,7 @@ void OptionsDialog::applyProperty()
                     break;
                 }
 
-                REPORT_HEADER& header = m_options.report().m_headerBase[type];
+                REPORT_HEADER header = m_options.report().m_headerBase.at(type);
 
                 switch(param)
                 {
@@ -1148,6 +1148,8 @@ void OptionsDialog::applyProperty()
                     case RO_PARAM_REPORT_FILE:          break;
                     default:                            assert(0);                                              break;
                 }
+
+                m_options.report().m_headerBase.set(type, header);
             }
             break;
 
@@ -1311,7 +1313,7 @@ void OptionsDialog::updateReportHeaderPage()
     int type = m_options.report().m_type;
     if (type >= 0 && type < m_options.report().m_headerBase.count())
     {
-        header = m_options.report().m_headerBase[type];
+        header = m_options.report().m_headerBase.at(type);
     }
 
     QtVariantProperty *property = nullptr;

@@ -4,8 +4,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureBase::MeasureBase(QObject *parent) :
-    QObject(parent)
+MeasureBase::MeasureBase()
 {
 }
 
@@ -21,7 +20,7 @@ int MeasureBase::load(int measureType)
         return -1;
     }
 
-    if (thepDatabase == nullptr)
+    if (thePtrDB == nullptr)
     {
         return -1;
     }
@@ -43,7 +42,7 @@ int MeasureBase::load(int measureType)
     {
         if (SqlTableByMeasureType[objectType] == measureType)
         {
-            SqlTable* table = thepDatabase->openTable(objectType);
+            SqlTable* table = thePtrDB->openTable(objectType);
             if (table != nullptr)
             {
                 tableData data;
@@ -82,7 +81,7 @@ int MeasureBase::load(int measureType)
     }
 
     // get main table, afterwards from sub tables update data in main table
-    // addpend data-measurement in MeasureBase
+    // append data-measurement in MeasureBase
     //
 
     tableData mainTable = tableList[SQL_TABLE_MEASURE_MAIN];
@@ -128,37 +127,33 @@ int MeasureBase::load(int measureType)
 
     // append measuremets to MeasureBase from updated main table
     //
-    m_mutex.lock();
-
-        for(int index = 0; index < mainTable.count; index++)
+    for(int index = 0; index < mainTable.count; index++)
+    {
+        MeasureItem* pMeasureTable = mainTable.pMeasureItem->at(index);
+        if (pMeasureTable == nullptr)
         {
-            MeasureItem* pMeasureTable = mainTable.pMeasureItem->at(index);
-            if (pMeasureTable == nullptr)
-            {
-                continue;
-            }
-
-            MeasureItem* pMeasureAppend = nullptr;
-
-            switch(measureType)
-            {
-                case MEASURE_TYPE_LINEARITY:            pMeasureAppend  = new LinearetyMeasureItem;         break;
-                case MEASURE_TYPE_COMPARATOR:           pMeasureAppend  = new ComparatorMeasureItem;        break;
-                case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasureAppend  = new ComplexComparatorMeasureItem; break;
-                default:                                assert(0);                                          break;
-            }
-
-            if (pMeasureAppend == nullptr)
-            {
-                continue;
-            }
-
-            *pMeasureAppend = *pMeasureTable;
-
-            m_measureList.append(pMeasureAppend);
+            continue;
         }
 
-    m_mutex.unlock();
+        MeasureItem* pMeasureAppend = nullptr;
+
+        switch(measureType)
+        {
+            case MEASURE_TYPE_LINEARITY:            pMeasureAppend  = new LinearetyMeasureItem;         break;
+            case MEASURE_TYPE_COMPARATOR:           pMeasureAppend  = new ComparatorMeasureItem;        break;
+            case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasureAppend  = new ComplexComparatorMeasureItem; break;
+            default:                                assert(0);                                          break;
+        }
+
+        if (pMeasureAppend == nullptr)
+        {
+            continue;
+        }
+
+        *pMeasureAppend = *pMeasureTable;
+
+        append(pMeasureAppend);
+    }
 
     // if measurement is nonexistentin in main table, but exist in sub table,
     // need remove this measurement in sub table
@@ -205,7 +200,7 @@ int MeasureBase::load(int measureType)
 
         // remove unnecessary measurement from sub table
         //
-        SqlTable* table = thepDatabase->openTable(subTable.objectType);
+        SqlTable* table = thePtrDB->openTable(subTable.objectType);
         if (table != nullptr)
         {
             table->remove(removeKeyList.data(), removeKeyList.count());
@@ -235,110 +230,6 @@ int MeasureBase::load(int measureType)
 
 
     return count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int MeasureBase::count() const
-{
-    int count = 0;
-
-    m_mutex.lock();
-
-        count = m_measureList.count();
-
-    m_mutex.unlock();
-
-    return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int MeasureBase::append(MeasureItem* pMeasure)
-{
-    if (pMeasure == nullptr)
-    {
-        return -1;
-    }
-
-    int type = pMeasure->measureType();
-    if (type < 0 || type >= MEASURE_TYPE_COUNT)
-    {
-        return -1;
-    }
-
-    m_mutex.lock();
-
-        m_measureList.append(pMeasure);
-
-    m_mutex.unlock();
-
-    return count();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-MeasureItem* MeasureBase::at(int index) const
-{
-    if (index < 0 || index >= count())
-    {
-        return nullptr;
-    }
-
-    MeasureItem* pMeasure = nullptr;
-
-    m_mutex.lock();
-
-        pMeasure = m_measureList.at(index);
-
-    m_mutex.unlock();
-
-    return pMeasure;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool MeasureBase::remove(int index)
-{
-    if (index < 0 || index >= count())
-    {
-        return false;
-    }
-
-    m_mutex.lock();
-
-        MeasureItem* pMeasure = m_measureList.at(index);
-        if (pMeasure != nullptr)
-        {
-            delete pMeasure;
-        }
-
-        m_measureList.removeAt(index);
-
-    m_mutex.unlock();
-
-    return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureBase::clear()
-{
-    m_mutex.lock();
-
-        int count = m_measureList.count();
-        for(int m = 0; m < count; m++)
-        {
-            MeasureItem* pMeasure = m_measureList.at(m) ;
-            if (pMeasure != nullptr)
-            {
-                delete pMeasure;
-            }
-        }
-
-        m_measureList.clear();
-
-    m_mutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

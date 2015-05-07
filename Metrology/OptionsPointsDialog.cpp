@@ -231,11 +231,12 @@ void OptionsPointsDialog::updateList()
     //
     for(int index = 0; index < rowCount; index++ )
     {
-        verticalHeaderLabels.append(QString("%1").arg(index + 1));
-        m_pointList->setRowHeight(index, 18);
+        LinearityPoint point = m_linearity.m_pointBase.at(index);
 
-        //LinearityPoint* point = m_linearity.m_pointBase.at(index);
-        LinearityPoint point = m_linearity.m_pointBase[index];
+        point.setPointID(index);
+
+        verticalHeaderLabels.append(QString("%1").arg( point.pointID() + 1 ));
+        m_pointList->setRowHeight(index, 18);
 
         for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
         {
@@ -248,6 +249,8 @@ void OptionsPointsDialog::updateList()
                 cell->setTextColor( Qt::darkGray  );
             }
         }
+
+        m_linearity.m_pointBase.set(index, point);
     }
 
     m_pointList->setVerticalHeaderLabels(verticalHeaderLabels);
@@ -358,7 +361,10 @@ void OptionsPointsDialog::cellChanged(int row, int column)
     }
 
     QString value = m_pointList->item(row, column)->text();
-    m_linearity.m_pointBase[index].setPercent( value.toDouble() );
+
+    LinearityPoint point = m_linearity.m_pointBase.at(index);
+    point.setPercent( value.toDouble() );
+    m_linearity.m_pointBase.set(index, point);
 
     updateList();
 

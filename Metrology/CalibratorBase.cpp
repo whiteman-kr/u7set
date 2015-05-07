@@ -67,8 +67,10 @@ void CalibratorBase::createCalibrators()
         manager->setIndex(index);
         manager->loadSettings();
 
-        m_calibratorManagerList.append(manager);
-
+        if (m_calibratorManagerVector.append(manager) == -1)
+        {
+            continue;
+        }
 
         QThread *pThread = new QThread;
         if (pThread != nullptr)
@@ -95,10 +97,10 @@ void CalibratorBase::removeCalibrators()
 {
     emit calibratorClose();
 
-    int count = m_calibratorManagerList.count();
+    int count = m_calibratorManagerVector.count();
     for(int index = 0; index < count; index++)
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        CalibratorManager* manager = m_calibratorManagerVector.at(index);
         if (manager == nullptr)
         {
             continue;
@@ -117,11 +119,9 @@ void CalibratorBase::removeCalibrators()
                 pThread->deleteLater();
             }
         }
-
-        delete manager;
     }
 
-    m_calibratorManagerList.clear();
+    m_calibratorManagerVector.clear();
 
 }
 
@@ -219,7 +219,6 @@ void CalibratorBase::setHeaderList()
         }
     }
 
-    //connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, static_cast<void (CalibratorBase::*)(int, int)>(&CalibratorBase::onSettings));
     connect(m_pCalibratorView, &QTableWidget::cellDoubleClicked, this, &CalibratorBase::onManage);
 
     // init context menu
@@ -239,10 +238,10 @@ void CalibratorBase::setHeaderList()
 
 void CalibratorBase::updateList()
 {
-    int count = m_calibratorManagerList.count();
+    int count = m_calibratorManagerVector.count();
     for(int index = 0; index < count; index++ )
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        CalibratorManager* manager = m_calibratorManagerVector.at(index);
         if (manager == nullptr)
         {
             continue;
@@ -269,10 +268,10 @@ void CalibratorBase::updateConnectedCalibrators()
 {
     m_connectedCalibratorsCount = 0;
 
-    int count = m_calibratorManagerList.count();
+    int count = m_calibratorManagerVector.count();
     for(int index = 0; index < count; index++ )
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        CalibratorManager* manager = m_calibratorManagerVector.at(index);
         if (manager == nullptr)
         {
             continue;
@@ -302,12 +301,12 @@ void CalibratorBase::show()
 
 CalibratorManager* CalibratorBase::at(int index)
 {
-    if (index < 0 || index >= m_calibratorManagerList.count())
+    if (index < 0 || index >= m_calibratorManagerVector.count())
     {
         return nullptr;
     }
 
-    return m_calibratorManagerList.at(index);
+    return m_calibratorManagerVector.at(index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -381,7 +380,7 @@ void CalibratorBase::onManage()
         return;
     }
 
-    CalibratorManager* manager = m_calibratorManagerList.at(index);
+    CalibratorManager* manager = m_calibratorManagerVector.at(index);
     if (manager == nullptr)
     {
         return;
@@ -414,7 +413,7 @@ void CalibratorBase::onSettings(int row,int)
         return;
     }
 
-    CalibratorManager* manager = m_calibratorManagerList.at(index);
+    CalibratorManager* manager = m_calibratorManagerVector.at(index);
     if (manager == nullptr)
     {
         return;
@@ -520,7 +519,7 @@ void CalibratorBase::onCopy()
         return;
     }
 
-    CalibratorManager* manager = m_calibratorManagerList.at(index);
+    CalibratorManager* manager = m_calibratorManagerVector.at(index);
     if (manager == nullptr)
     {
         return;
@@ -549,7 +548,7 @@ void CalibratorBase::onContextMenu(QPoint)
     int index = m_pCalibratorView->currentRow();
     if (index >= 0 && index < count())
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        CalibratorManager* manager = m_calibratorManagerVector.at(index);
         if (manager != nullptr)
         {
             Calibrator* calibrator = manager->calibrator();
