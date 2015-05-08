@@ -26,6 +26,25 @@ namespace Builder
 		Count
 	};
 
+
+	const CommandCodes AllCommandCodes[] =
+	{
+		NOP,
+		START,
+		STOP,
+		MOV,
+		MOVMEM,
+		MOVC,
+		MOVBC,
+		WRFB,
+		RDFB,
+		WRFBC,
+		WRFBB,
+		RDFBB,
+		RDFBTS,
+	};
+
+
 	const int COMMAND_COUNT = static_cast<int>(CommandCodes::Count);
 
 	const int CommandLen[COMMAND_COUNT] =
@@ -102,7 +121,6 @@ namespace Builder
 	const quint16	MIN_FB_TYPE = 1,
 					MAX_FB_TYPE = 64 - 1,
 
-					SINGLE_INSTANCE = 1,
 					MIN_FB_INSTANCE = 1,
 					MAX_FB_INSTANCE = 1024 - 1,
 

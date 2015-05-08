@@ -423,6 +423,16 @@ namespace VFrame30
 		return isInputSignalElement() || isOutputSignalElement();
 	}
 
+	VFrame30::VideoItemSignal* FblItemRect::toSignalElement()
+	{
+		return dynamic_cast<VFrame30::VideoItemSignal*>(this);
+	}
+
+	const VFrame30::VideoItemSignal* FblItemRect::toSignalElement() const
+	{
+		return dynamic_cast<const VFrame30::VideoItemSignal*>(this);
+	}
+
 	VFrame30::VideoItemInputSignal* FblItemRect::toInputSignalElement()
 	{
 		return dynamic_cast<VFrame30::VideoItemInputSignal*>(this);

@@ -193,7 +193,8 @@ void OrderedHash<KEY, VALUE>::reserve(int n)
 
 
 // -------------------------------------------------------------------------------------------------
-// Класс PtrOrderedHash
+// PtrOrderedHash class
+//
 
 
 template <typename KEY, typename VALUE>
@@ -411,3 +412,17 @@ void PtrOrderedHash<KEY, VALUE>::reserve(int n)
 	m_hash.reserve(n);
 }
 
+
+// -------------------------------------------------------------------------------------------------
+// PtrOrderedHash class
+//
+
+template <typename KEY, typename VALUE>
+class OrderedMap : public QVector<VALUE>
+{
+private:
+	QHash<KEY, VALUE> m_map;
+
+public:
+	bool contains(const KEY& key) const { return m_map.contains(key); }
+};

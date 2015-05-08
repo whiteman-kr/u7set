@@ -77,6 +77,8 @@ namespace Builder
 	typedef VFrame30::VideoItemFblElement LogicFb;
 	typedef VFrame30::CFblConnectionPoint LogicPin;
 
+	class AppItem;
+
 
 	// Functional Block Library element
 	//
@@ -85,62 +87,97 @@ namespace Builder
 	{
 	private:
 		AfbElement* m_afbElement = nullptr;
-		bool m_singleInstance = true;
 		quint16 m_currentInstance = 0;
+
+		static QHash<CommandCodes, int> m_commandCodesInstance;		// CommandCodes -> current instance
+		static QHash<QString, int> m_nonRamFblInstance;				// Non RAM Fbl StrID -> instance
 
 	public:
 		Fbl(AfbElement* afbElement);
 
 		quint16 addInstance();
 
-		const AfbElement& afbElement() const { return *m_afbElement; }
+		bool hasRam() const { return m_afbElement->hasRam(); }
 
-		bool isSingleInstance() const { return m_singleInstance; }
+		const AfbElement& afbElement() const { return *m_afbElement; }
 
 		QUuid guid() const { return m_afbElement->guid(); }
 		QString strID() const { return m_afbElement->strID(); }
 	};
 
 
-	class FblsMap : public QHash<QUuid, Fbl*>
+	class FblsMap : public QVector<Fbl*>
 	{
+	private:
+		QHash<QUuid, Fbl*> m_map;
+
 	public:
 		~FblsMap() { clear(); }
 
-		int addInstance(LogicFb* logicFb);
+		int addInstance(AppItem *appItem);
 
 		void insert(AfbElement* afbElement);
 		void clear();
 	};
 
 
-	// Application Functional Block
-	// represent all FB items in application logic schemes
+	// Base class for AppFb & AppSignal
+	// contains pointer to AppLogicItem
 	//
 
-	class AppFb
+	class AppItem
 	{
-	private:
-		LogicFb* m_logicFb;
-		quint16 m_instance = -1;
+	protected:
+		const VFrame30::FblItemRect* m_fblItem = nullptr;
+		const VFrame30::LogicScheme* m_scheme = nullptr;
+		const Afbl::AfbElement* m_afbElement = nullptr;
 
 	public:
-		AppFb(LogicFb* logicFb, int instance) : m_logicFb(logicFb), m_instance(instance) {}
+		AppItem(const AppItem& appItem);
+		AppItem(const AppLogicItem* appLogicItem);
 
-		QUuid afbGuid() const { return m_logicFb->afbGuid(); }
-		quint16 instance() const { return m_instance; }
+		QUuid guid() const { return m_fblItem->guid(); }
+		QUuid afbGuid() const { return m_afbElement->guid(); }
+
+		QString strID() { return m_fblItem->toSignalElement()->signalStrIds(); }
+
+		bool isSignal() const { return m_fblItem->isSignalElement(); }
+		bool isFb() const { return m_fblItem->isFblElement(); }
+
+		const LogicItem& logic() const { return *m_fblItem; }
+
+		const std::list<LogicPin>& inputs() const { return m_fblItem->inputs(); }
+		const std::list<LogicPin>& outputs() const { return m_fblItem->outputs(); }
 	};
 
 
-	class AppFbsMap : public QHash<QUuid, AppFb*>
+	// Application Functional Block
+	// represent all FB items in application logic schemes
+	//
+	class AppFb : public AppItem
 	{
 	private:
-		QVector<AppFb*> m_appFbs;
+		const LogicFb* m_logicFb = nullptr;
+		quint16 m_instance = -1;
+
+	public:
+		AppFb(AppItem* appItem, int instance);
+
+		quint16 instance() const { return m_instance; }
+
+		const LogicFb& logicFb() const { return *m_logicFb; }
+	};
+
+
+	class AppFbsMap : public QVector<AppFb*>
+	{
+	private:
+		 QHash<QUuid, AppFb*> m_map;
 
 	public:
 		~AppFbsMap() { clear(); }
 
-		void insert(LogicFb* logicFb, int instance);
+		void insert(AppItem* appItem, int instance);
 		void clear();
 	};
 
@@ -152,15 +189,18 @@ namespace Builder
 	class AppSignal
 	{
 	private:
+		AppItem* m_appItem = nullptr;
+
+		QUuid m_guid;
 		QString m_strID;
 		Signal* m_signal = nullptr;
 		bool m_calculated = false;
 		SignalType m_signalType;
 
-		bool m_shadowSignal = false;
-
 	public:
-		AppSignal(const QString& strID, bool isShadowSignal) : m_strID(strID), m_shadowSignal(isShadowSignal) {}
+		AppSignal(const QUuid& guid, const QString& strID, AppItem* appItem);
+
+		AppItem& appItem() const;
 
 		void setStrID(QString strID) { m_strID = strID; }
 		QString strID() const { return m_strID; }
@@ -175,7 +215,7 @@ namespace Builder
 		void signalType(SignalType signalType) { m_signalType = signalType; }
 		SignalType signalType() const { return m_signalType; }
 
-		bool isShadowSignal() { return m_shadowSignal; }
+		bool isShadowSignal() { return m_appItem == nullptr; }
 	};
 
 
@@ -185,10 +225,13 @@ namespace Builder
 		QHash<QString, AppSignal*> m_signalStrIdMap;
 		QVector<AppSignal*> m_appSignals;
 
+		void insert(const QUuid& guid, const QString& strID, AppItem* appItem);
+
 	public:
 		~AppSignalsMap();
 
-		void insert(QUuid guid, const QString& signalStrID, bool isShadowSignal);
+		void insert(AppItem* appItem);
+		void insert(const QUuid& ouPinGuid);
 		void clear();
 
 		void bindRealSignals(SignalSet* signalSet);
@@ -228,8 +271,8 @@ namespace Builder
 
 		// service maps
 		//
-		QHash<QUuid, LogicItem*> m_logicItems;			// item GUID -> item ptr
-		QHash<QUuid, LogicItem*> m_itemsPins;			// pin GUID -> parent item ptr
+		QHash<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
+		QHash<QUuid, AppItem*> m_pinParent;			// pin GUID -> parent item ptr
 
 		QString msg;
 
