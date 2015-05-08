@@ -72,10 +72,10 @@ void MeasureThread::calibratorDisconnected()
 
     int calibratorDisconnectedCount = 0;
 
-    int calibratorCount = m_calibratorManagerList.count();
+    int calibratorCount = m_calibratorManagerVector.count();
     for(int c = 0; c < calibratorCount; c ++)
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(c);
+        CalibratorManager* manager = m_calibratorManagerVector.at(c);
         if (manager == nullptr)
         {
             continue;
@@ -160,7 +160,7 @@ void MeasureThread::run()
 
     m_cmdStopMeasure = false;
 
-    m_calibratorManagerList.clear();
+    m_calibratorManagerVector.clear();
 
     int calibratorCount = theCalibratorBase.count();
     if (calibratorCount == 0)
@@ -177,8 +177,8 @@ void MeasureThread::run()
         case MEASURE_TYPE_COMPARATOR:
 
             // create list of calibrators for measure
-            // if m_measureKind == MEASURE_KIND_ONE (measure in one channel) then append first connected calibrator
-            // if m_measureKind == MEASURE_KIND_MULTI (measure in all channels) then append all calibrators
+            // if m_measureKind == MEASURE_KIND_ONE (measure in the one channel) then append first connected calibrator
+            // if m_measureKind == MEASURE_KIND_MULTI (measure all channels) then append all calibrators
             //
             for(int c = 0; c < calibratorCount; c ++)
             {
@@ -193,7 +193,7 @@ void MeasureThread::run()
                     continue;
                 }
 
-                m_calibratorManagerList.append(manager);
+                m_calibratorManagerVector.append(manager);
 
                 if (theOptions.toolBar().m_measureKind == MEASURE_KIND_ONE)
                 {
@@ -228,9 +228,9 @@ void MeasureThread::run()
                     continue;
                 }
 
-                m_calibratorManagerList.append(manager);
+                m_calibratorManagerVector.append(manager);
 
-                if (m_calibratorManagerList.count() == CALIBRATOR_COUNT_FOR_CC)
+                if (m_calibratorManagerVector.count() == CALIBRATOR_COUNT_FOR_CC)
                 {
                     break;
                 }
@@ -246,10 +246,10 @@ void MeasureThread::run()
     // select calibrator mode and calibrator unit
     // depend from analog signal
     //
-    calibratorCount = m_calibratorManagerList.count();
+    calibratorCount = m_calibratorManagerVector.count();
     for (int c = calibratorCount - 1; c >= 0; c--)
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(c);
+        CalibratorManager* manager = m_calibratorManagerVector.at(c);
         if (manager == nullptr)
         {
             continue;
@@ -265,14 +265,14 @@ void MeasureThread::run()
         if (prepareCalibrator(manager, CALIBRATOR_MODE_MEASURE, CALIBRATOR_UNIT_MA) == false)
         {
             emit showMsgBox(QString("Calibrator: %1 - can't set measure mode.\nThis is calibrator will be excluded from the measurement process.").arg(manager->portName()));
-            m_calibratorManagerList.removeAt(c);
+            m_calibratorManagerVector.remove(c, false);
             continue;
         }
 
         if (prepareCalibrator(manager, CALIBRATOR_MODE_SOURCE, CALIBRATOR_UNIT_LOW_OHM) == false)
         {
             emit showMsgBox(QString("Calibrator: %1 - can't set source mode.\nThis is calibrator will be excluded from the measurement process.").arg(manager->portName()));
-            m_calibratorManagerList.removeAt(c);
+            m_calibratorManagerVector.remove(c, false);
             continue;
         }
     }
@@ -292,7 +292,7 @@ void MeasureThread::run()
 
 void MeasureThread::measureLinearity()
 {
-    int calibratorCount = m_calibratorManagerList.count();
+    int calibratorCount = m_calibratorManagerVector.count();
     if (calibratorCount == 0)
     {
         emit showMsgBox("The measurement process don't have calibrators for measure");
@@ -313,7 +313,7 @@ void MeasureThread::measureLinearity()
             break;
         }
 
-        LinearityPoint point = theOptions.linearity().m_pointBase[p];
+        LinearityPoint point = theOptions.linearity().m_pointBase.at(p);
 
         emit measureInfo(tr("Set point %1 / %2 ").arg(p + 1).arg(pointCount));
 
@@ -321,7 +321,7 @@ void MeasureThread::measureLinearity()
         //
         for (int c = 0; c < calibratorCount; c++)
         {
-            CalibratorManager* manager = m_calibratorManagerList.at(c);
+            CalibratorManager* manager = m_calibratorManagerVector.at(c);
             if (manager == nullptr)
             {
                 continue;
@@ -343,7 +343,7 @@ void MeasureThread::measureLinearity()
 
         for (int c = 0; c < calibratorCount; c++)
         {
-            CalibratorManager* manager = m_calibratorManagerList.at(c);
+            CalibratorManager* manager = m_calibratorManagerVector.at(c);
             if (manager == nullptr)
             {
                 continue;
@@ -371,7 +371,7 @@ void MeasureThread::measureLinearity()
 
         for (int c = 0; c < calibratorCount; c++)
         {
-            CalibratorManager* manager = m_calibratorManagerList.at(c);
+            CalibratorManager* manager = m_calibratorManagerVector.at(c);
             if (manager == nullptr)
             {
                 continue;
@@ -392,7 +392,7 @@ void MeasureThread::measureLinearity()
 
 void MeasureThread::measureComprators()
 {
-    int calibratorCount = m_calibratorManagerList.count();
+    int calibratorCount = m_calibratorManagerVector.count();
     if (calibratorCount == 0)
     {
         emit showMsgBox(tr("The measurement process don't have calibrators for measure"));
@@ -408,7 +408,7 @@ void MeasureThread::measureComprators()
 
 void MeasureThread::measureComplexComprators()
 {
-    int calibratorCount = m_calibratorManagerList.count();
+    int calibratorCount = m_calibratorManagerVector.count();
     if (calibratorCount < CALIBRATOR_COUNT_FOR_CC)
     {
         emit showMsgBox(tr("The measurement process don't have enough calibrators for measure"));
@@ -428,7 +428,7 @@ void MeasureThread::finish()
     setMeasureType(MEASURE_TYPE_UNKNOWN);
     m_cmdStopMeasure = true;
 
-    m_calibratorManagerList.clear();
+    m_calibratorManagerVector.clear(false);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

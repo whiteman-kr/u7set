@@ -16,9 +16,9 @@ namespace Hardware
 			L".hcs",		// Chassis
 			L".hmd",		// Module
 			L".hcr",		// Controller
-			L".hds",		// Diagnostics Signal
 			L".hws",		// Workstation
 			L".hsw",		// Software
+			L".hds",		// Diagnostics Signal
 		};
 
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
@@ -1556,7 +1556,7 @@ namespace Hardware
 
 	DeviceType DeviceSignal::deviceType() const
 	{
-		return m_deviceType;
+		return DeviceSignal::m_deviceType;
 	}
 
 	DeviceSignal::SignalType DeviceSignal::type() const

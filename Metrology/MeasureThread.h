@@ -32,7 +32,7 @@ private:
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
     bool                    m_cmdStopMeasure = true;
 
-    CalibratorManagerList   m_calibratorManagerList;
+    CalibratorManagerVector m_calibratorManagerVector;
 
     void                    waitMeasureTimeout();
 

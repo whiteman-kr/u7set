@@ -126,7 +126,8 @@ HEADERS  += \
     ../include/SignalMask.h \
     ../include/Types.h \
     ../include/OrderedHash.h \
-    Stable.h
+    Stable.h \
+    ObjectVector.h
 
 
 FORMS    +=

@@ -1,7 +1,9 @@
 #include <QApplication>
-#include "MainWindow.h"
 
+#include "MainWindow.h"
 #include "Options.h"
+
+#include "../include/ProtoSerialization.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -31,11 +33,11 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    theOptions.backup().createBackupOnStart();
-
     int result = a.exec();
 
-    theOptions.backup().createBackupOnExit();
+    theOptions.unload();
+
+    google::protobuf::ShutdownProtobufLibrary();
 
     return result;
 }

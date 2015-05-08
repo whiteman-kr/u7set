@@ -11,6 +11,7 @@
 #include <QMutex>
 
 #include "Calibrator.h"
+#include "ObjectVector.h"
 
 // ==============================================================================================
 
@@ -111,24 +112,7 @@ private slots:
 
 // ==============================================================================================
 
-class CalibratorManagerList
-{
-private:
-
-    QMutex                      m_mutex;
-
-    QList<CalibratorManager*>   m_list;
-
-public:
-
-    int                         count();
-
-    int                         append(CalibratorManager* pManager);
-    CalibratorManager*          at(int index);
-    bool                        removeAt(int index);
-
-    void                        clear();
-};
+typedef PtrObjectVector<CalibratorManager> CalibratorManagerVector;
 
 // ==============================================================================================
 
