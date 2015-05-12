@@ -1,5 +1,9 @@
 #pragma once
 
+#include <QVector>
+#include <QHash>
+
+
 template <typename KEY, typename VALUE>
 class OrderedHash
 {
@@ -414,15 +418,42 @@ void PtrOrderedHash<KEY, VALUE>::reserve(int n)
 
 
 // -------------------------------------------------------------------------------------------------
-// PtrOrderedHash class
+// HashedVector class
 //
+// work only with unique keys
 
 template <typename KEY, typename VALUE>
-class OrderedMap : public QVector<VALUE>
+class HashedVector : private QVector<VALUE>
 {
 private:
 	QHash<KEY, VALUE> m_map;
 
 public:
 	bool contains(const KEY& key) const { return m_map.contains(key); }
+	void insert(const KEY& key, const VALUE& value);
+
+	iterator begin() { return QVector<VALUE>::begin(); }
+	const_iterator begin() const { return QVector<VALUE>::begin(); }
+
+	iterator end() { return QVector<VALUE>::end(); }
+	const_iterator end() const { return QVector<VALUE>::end(); }
+
+	VALUE& operator[](const KEY& key) { return m_map[key]; }
+	const VALUE	operator[](const KEY& key) const { return m_map[key]; }
+
+	void clear() { m_map.clear(); QVector<VALUE>::clear(); }
 };
+
+
+template <typename KEY, typename VALUE>
+void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
+{
+	if (contains(key))
+	{
+		assert(false);		// duplicate key
+		return;
+	}
+
+	append(value);
+	m_map.insert(key, value);
+}
