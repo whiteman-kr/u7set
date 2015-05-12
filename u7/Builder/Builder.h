@@ -71,6 +71,10 @@ namespace Builder
 		//
 		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
 
+		// Compile Data Aquisition Service configuration
+		//
+		bool compileDataAquisitionServiceConfiguration(SignalSet* signalSet, DataFormatList& dataFormatInfo, UnitList& unitInfo, BuildResultWriter* buildResultWriter);
+
 		// What's the next compilation task?
 		//
 
