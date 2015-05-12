@@ -201,7 +201,7 @@ namespace Builder
 			db.getDataFormats(&dataFormatInfo, nullptr);
 			db.getUnits(&unitInfo, nullptr);
 
-			compileDataAquisitionServiceConfiguration(&signalSet, dataFormatInfo, unitInfo, &buildWriter);
+			compileDataAquisitionServiceConfiguration(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, dataFormatInfo, unitInfo, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -311,6 +311,40 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	void BuildWorkerThread::equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren)
+	{
+		if (currentDevice == nullptr)
+		{
+			assert(currentDevice != nullptr);
+
+			QString msg = QString(QObject::tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
+
+			m_log->writeError(msg, false, true);
+
+			qDebug() << msg;
+			return;
+		}
+
+		if (processBeforeChildren != nullptr)
+		{
+			processBeforeChildren(currentDevice);
+		}
+
+		int childrenCount = currentDevice->childrenCount();
+
+		for(int i = 0; i < childrenCount; i++)
+		{
+			Hardware::DeviceObject* device = currentDevice->child(i);
+
+			equipmentWalker(device, processBeforeChildren, processAfterChildren);
+		}
+
+		if (processAfterChildren != nullptr)
+		{
+			processAfterChildren(currentDevice);
+		}
 	}
 
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
@@ -423,23 +457,59 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::compileDataAquisitionServiceConfiguration(SignalSet* signalSet, DataFormatList &dataFormatInfo, UnitList &unitInfo, BuildResultWriter* buildResultWriter)
+	bool BuildWorkerThread::compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, DataFormatList &dataFormatInfo, UnitList &unitInfo, BuildResultWriter* buildResultWriter)
 	{
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Data Aquisition Service configuration compilation"), true);
 
-		if (signalSet->count() > 0)
+		if (deviceRoot != nullptr)
 		{
-			QXmlStreamWriter configurationWriter;
+			QXmlStreamWriter equipmentWriter;
 			QBuffer buffer;
 			buffer.open(QIODevice::WriteOnly);
-			configurationWriter.setDevice(&buffer);
-			configurationWriter.setAutoFormatting(true);
-			configurationWriter.writeStartDocument();
-			configurationWriter.writeStartElement("configuration");
+			equipmentWriter.setDevice(&buffer);
+			equipmentWriter.setAutoFormatting(true);
+			equipmentWriter.writeStartDocument();
 
-			configurationWriter.writeStartElement("applicationSignals");
-			configurationWriter.writeAttribute("count", QString::number(signalSet->count()));
+			equipmentWalker(deviceRoot, [&equipmentWriter](Hardware::DeviceObject* currentDevice)
+			{
+				if (currentDevice == nullptr)
+				{
+					return;
+				}
+				const QMetaObject* metaObject = currentDevice->metaObject();
+				equipmentWriter.writeStartElement(metaObject->className());
+
+				for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i)
+				{
+					const QMetaProperty& property = metaObject->property(i);
+					if (property.isValid())
+					{
+						const char* name = property.name();
+						equipmentWriter.writeAttribute(name, currentDevice->property(name).toString());
+					}
+				}
+			}, [&equipmentWriter](Hardware::DeviceObject*)
+			{
+				equipmentWriter.writeEndElement();
+			});
+
+			equipmentWriter.writeEndDocument();
+			buffer.close();
+			buildResultWriter->addFile("DataAquisitionService", "equipment.xml", buffer.buffer());
+		}
+
+		if (signalSet->count() > 0)
+		{
+			QXmlStreamWriter applicationSignalsWriter;
+			QBuffer buffer;
+			buffer.open(QIODevice::WriteOnly);
+			applicationSignalsWriter.setDevice(&buffer);
+			applicationSignalsWriter.setAutoFormatting(true);
+			applicationSignalsWriter.writeStartDocument();
+
+			applicationSignalsWriter.writeStartElement("applicationSignals");
+			applicationSignalsWriter.writeAttribute("count", QString::number(signalSet->count()));
 
 			for (int i = 0; i < signalSet->count(); i++)
 			{
@@ -496,56 +566,54 @@ namespace Builder
 					continue;
 				}
 
-				configurationWriter.writeStartElement("signal");
+				applicationSignalsWriter.writeStartElement("signal");
 
-				configurationWriter.writeAttribute("ID", QString::number(signal.ID()));
-				configurationWriter.writeAttribute("signalGroupID", QString::number(signal.signalGroupID()));
-				configurationWriter.writeAttribute("signalInstanceID", QString::number(signal.signalInstanceID()));
-				configurationWriter.writeAttribute("channel", QString::number(signal.channel()));
-				configurationWriter.writeAttribute("type", signal.type() == SignalType::Analog ? tr("Analog") : tr("Discrete"));
-				configurationWriter.writeAttribute("strID", signal.strID());
-				configurationWriter.writeAttribute("extStrID", signal.extStrID());
-				configurationWriter.writeAttribute("name", signal.name());
-				configurationWriter.writeAttribute("dataFormat", dataFormatInfo.value(signal.dataFormat()));
-				configurationWriter.writeAttribute("dataSize", QString::number(signal.dataSize()));
-				configurationWriter.writeAttribute("lowADC", QString::number(signal.lowADC()));
-				configurationWriter.writeAttribute("highADC", QString::number(signal.highADC()));
-				configurationWriter.writeAttribute("lowLimit", QString::number(signal.lowLimit()));
-				configurationWriter.writeAttribute("highLimit", QString::number(signal.highLimit()));
-				configurationWriter.writeAttribute("unitID", unitInfo.value(signal.unitID()));
-				configurationWriter.writeAttribute("adjustment", QString::number(signal.adjustment()));
-				configurationWriter.writeAttribute("dropLimit", QString::number(signal.dropLimit()));
-				configurationWriter.writeAttribute("excessLimit", QString::number(signal.excessLimit()));
-				configurationWriter.writeAttribute("unbalanceLimit", QString::number(signal.unbalanceLimit()));
-				configurationWriter.writeAttribute("inputLowLimit", QString::number(signal.inputLowLimit()));
-				configurationWriter.writeAttribute("inputHighLimit", QString::number(signal.inputHighLimit()));
-				configurationWriter.writeAttribute("inputUnitID", unitInfo.value(signal.inputUnitID()));
-				configurationWriter.writeAttribute("inputSensorID", SensorTypeStr[signal.inputSensorID()]);
-				configurationWriter.writeAttribute("outputLowLimit", QString::number(signal.outputLowLimit()));
-				configurationWriter.writeAttribute("outputHighLimit", QString::number(signal.outputHighLimit()));
-				configurationWriter.writeAttribute("outputUnitID", unitInfo.value(signal.outputUnitID()));
-				configurationWriter.writeAttribute("outputRangeMode", OutputRangeModeStr[signal.outputRangeMode()]);
-				configurationWriter.writeAttribute("outputSensorID", SensorTypeStr[signal.outputSensorID()]);
-				configurationWriter.writeAttribute("acquire", signal.acquire() ? tr("true") : tr("false"));
-				configurationWriter.writeAttribute("calculated", signal.calculated() ? tr("true") : tr("false"));
-				configurationWriter.writeAttribute("normalState", QString::number(signal.normalState()));
-				configurationWriter.writeAttribute("decimalPlaces", QString::number(signal.decimalPlaces()));
-				configurationWriter.writeAttribute("aperture", QString::number(signal.aperture()));
-				configurationWriter.writeAttribute("inOutType", InOutTypeStr[signal.inOutType()]);
-				configurationWriter.writeAttribute("deviceStrID", signal.deviceStrID());
-				configurationWriter.writeAttribute("filteringTime", QString::number(signal.filteringTime()));
-				configurationWriter.writeAttribute("maxDifference", QString::number(signal.maxDifference()));
-				configurationWriter.writeAttribute("byteOrder", ByteOrderStr[signal.byteOrder()]);
+				applicationSignalsWriter.writeAttribute("ID", QString::number(signal.ID()));
+				applicationSignalsWriter.writeAttribute("signalGroupID", QString::number(signal.signalGroupID()));
+				applicationSignalsWriter.writeAttribute("signalInstanceID", QString::number(signal.signalInstanceID()));
+				applicationSignalsWriter.writeAttribute("channel", QString::number(signal.channel()));
+				applicationSignalsWriter.writeAttribute("type", signal.type() == SignalType::Analog ? tr("Analog") : tr("Discrete"));
+				applicationSignalsWriter.writeAttribute("strID", signal.strID());
+				applicationSignalsWriter.writeAttribute("extStrID", signal.extStrID());
+				applicationSignalsWriter.writeAttribute("name", signal.name());
+				applicationSignalsWriter.writeAttribute("dataFormat", dataFormatInfo.value(signal.dataFormat()));
+				applicationSignalsWriter.writeAttribute("dataSize", QString::number(signal.dataSize()));
+				applicationSignalsWriter.writeAttribute("lowADC", QString::number(signal.lowADC()));
+				applicationSignalsWriter.writeAttribute("highADC", QString::number(signal.highADC()));
+				applicationSignalsWriter.writeAttribute("lowLimit", QString::number(signal.lowLimit()));
+				applicationSignalsWriter.writeAttribute("highLimit", QString::number(signal.highLimit()));
+				applicationSignalsWriter.writeAttribute("unitID", unitInfo.value(signal.unitID()));
+				applicationSignalsWriter.writeAttribute("adjustment", QString::number(signal.adjustment()));
+				applicationSignalsWriter.writeAttribute("dropLimit", QString::number(signal.dropLimit()));
+				applicationSignalsWriter.writeAttribute("excessLimit", QString::number(signal.excessLimit()));
+				applicationSignalsWriter.writeAttribute("unbalanceLimit", QString::number(signal.unbalanceLimit()));
+				applicationSignalsWriter.writeAttribute("inputLowLimit", QString::number(signal.inputLowLimit()));
+				applicationSignalsWriter.writeAttribute("inputHighLimit", QString::number(signal.inputHighLimit()));
+				applicationSignalsWriter.writeAttribute("inputUnitID", unitInfo.value(signal.inputUnitID()));
+				applicationSignalsWriter.writeAttribute("inputSensorID", SensorTypeStr[signal.inputSensorID()]);
+				applicationSignalsWriter.writeAttribute("outputLowLimit", QString::number(signal.outputLowLimit()));
+				applicationSignalsWriter.writeAttribute("outputHighLimit", QString::number(signal.outputHighLimit()));
+				applicationSignalsWriter.writeAttribute("outputUnitID", unitInfo.value(signal.outputUnitID()));
+				applicationSignalsWriter.writeAttribute("outputRangeMode", OutputRangeModeStr[signal.outputRangeMode()]);
+				applicationSignalsWriter.writeAttribute("outputSensorID", SensorTypeStr[signal.outputSensorID()]);
+				applicationSignalsWriter.writeAttribute("acquire", signal.acquire() ? tr("true") : tr("false"));
+				applicationSignalsWriter.writeAttribute("calculated", signal.calculated() ? tr("true") : tr("false"));
+				applicationSignalsWriter.writeAttribute("normalState", QString::number(signal.normalState()));
+				applicationSignalsWriter.writeAttribute("decimalPlaces", QString::number(signal.decimalPlaces()));
+				applicationSignalsWriter.writeAttribute("aperture", QString::number(signal.aperture()));
+				applicationSignalsWriter.writeAttribute("inOutType", InOutTypeStr[signal.inOutType()]);
+				applicationSignalsWriter.writeAttribute("deviceStrID", signal.deviceStrID());
+				applicationSignalsWriter.writeAttribute("filteringTime", QString::number(signal.filteringTime()));
+				applicationSignalsWriter.writeAttribute("maxDifference", QString::number(signal.maxDifference()));
+				applicationSignalsWriter.writeAttribute("byteOrder", ByteOrderStr[signal.byteOrder()]);
 
-				configurationWriter.writeEndElement();	// signal
+				applicationSignalsWriter.writeEndElement();	// signal
 			}
 
-			configurationWriter.writeEndElement();	// applicationSignals
-
-			configurationWriter.writeEndElement();	// configuration
-			configurationWriter.writeEndDocument();
+			applicationSignalsWriter.writeEndElement();	// applicationSignals
+			applicationSignalsWriter.writeEndDocument();
 			buffer.close();
-			buildResultWriter->addFile("DataAquisitionService", "configuration.xml", buffer.buffer());
+			buildResultWriter->addFile("DataAquisitionService", "applicationSignals.xml", buffer.buffer());
 		}
 		else
 		{
