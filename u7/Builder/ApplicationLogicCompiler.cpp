@@ -377,20 +377,12 @@ namespace Builder
 		// build map: signal GUID -> ApplicationSignal
 		//
 
-		QHashIterator<QUuid, AppItem*> iterator(m_appItems);
-
-		while(iterator.hasNext())
+		for(AppItem* item : m_appItems)
 		{
-			iterator.next();
-
-			AppItem* item = iterator.value();
-
 			if (!item->isSignal())
 			{
 				continue;
 			}
-
-			assert (item->guid() == iterator.key());
 
 			m_appSignals.insert(item);
 		}
@@ -399,14 +391,8 @@ namespace Builder
 		// build map: output GUID -> signal GUID
 		//
 
-		iterator = m_appItems;
-
-		while(iterator.hasNext())
+		for(AppItem* item : m_appItems)
 		{
-			iterator.next();
-
-			AppItem* item = iterator.value();
-
 			if (!item->isFb())
 			{
 				continue;
@@ -854,13 +840,24 @@ namespace Builder
 	// Fbl class implementation
 	//
 
-	QHash<CommandCodes, int> Fbl::m_commandCodesInstance;		// CommandCodes -> current instance
-	QHash<QString, int> Fbl::m_nonRamFblInstance;				// Non RAM Fbl StrID -> instance
+	int Fbl::m_refCount = 0;
+	CommandCodesInstanceMap* Fbl::m_commandCodesInstance = nullptr;		// CommandCodes -> current instance
+	NonRamFblInstanceMap* Fbl::m_nonRamFblInstance = nullptr;			// Non RAM Fbl StrID -> instance
 
 
 	Fbl::Fbl(AfbElement* afbElement) :
 		m_afbElement(afbElement)
 	{
+		if (m_refCount == 0)
+		{
+			// first instance of Fbl class create maps
+			//
+			m_commandCodesInstance = new CommandCodesInstanceMap;
+			m_nonRamFblInstance = new NonRamFblInstanceMap;
+		}
+
+		m_refCount++;
+
 		if (m_afbElement == nullptr)
 		{
 			assert(false);
@@ -868,9 +865,25 @@ namespace Builder
 		}
 	}
 
+	Fbl::~Fbl()
+	{
+		m_refCount--;
+
+		if (m_refCount == 0)
+		{
+			// last instance of of Fbl class delete maps
+			//of Fbl class create maps
+			delete m_commandCodesInstance;
+			delete m_nonRamFblInstance;
+		}
+	}
+
 
 	quint16 Fbl::addInstance()
 	{
+		assert(m_commandCodesInstance != nullptr);
+		assert(m_nonRamFblInstance != nullptr);
+
 		if (m_afbElement->hasRam())
 		{
 			m_currentInstance++;
@@ -884,31 +897,31 @@ namespace Builder
 		{
 			// Calculate non-RAM Fbl instance
 			//
-			if (m_commandCodesInstance.isEmpty())
+			if (m_commandCodesInstance->isEmpty())
 			{
 				// load all CommandCodes in map
 				//
 				for(int i = 0; i < sizeof(AllCommandCodes)/sizeof(CommandCodes); i++)
 				{
-					m_commandCodesInstance.insert(AllCommandCodes[i], 0);
+					m_commandCodesInstance->insert(AllCommandCodes[i], 0);
 				}
 			}
 
-			if (m_nonRamFblInstance.contains(m_afbElement->strID()))
+			if (m_nonRamFblInstance->contains(m_afbElement->strID()))
 			{
-				m_currentInstance = m_nonRamFblInstance.value(m_afbElement->strID());
+				m_currentInstance = m_nonRamFblInstance->value(m_afbElement->strID());
 			}
 			else
 			{
 				CommandCodes opcode = static_cast<CommandCodes>(m_afbElement->opcode());
 
-				if (m_commandCodesInstance.contains(opcode))
+				if (m_commandCodesInstance->contains(opcode))
 				{
-					int opcodeInstance = m_commandCodesInstance[opcode];
+					int opcodeInstance = (*m_commandCodesInstance)[opcode];
 
 					opcodeInstance++;
 
-					m_commandCodesInstance[opcode] = opcodeInstance;
+					(*m_commandCodesInstance)[opcode] = opcodeInstance;
 
 					m_currentInstance = opcodeInstance;
 				}

@@ -80,9 +80,13 @@ namespace Builder
 
 	class AppItem;
 
+	class ModuleLogicCompiler;
 
 	// Functional Block Library element
 	//
+
+	typedef QHash<CommandCodes, int> CommandCodesInstanceMap;
+	typedef QHash<QString, int> NonRamFblInstanceMap;
 
 	class Fbl
 	{
@@ -90,11 +94,15 @@ namespace Builder
 		AfbElement* m_afbElement = nullptr;
 		quint16 m_currentInstance = 0;
 
-		static QHash<CommandCodes, int> m_commandCodesInstance;		// CommandCodes -> current instance
-		static QHash<QString, int> m_nonRamFblInstance;				// Non RAM Fbl StrID -> instance
+		// dynamically created maps
+		//
+		static int m_refCount;
+		static CommandCodesInstanceMap* m_commandCodesInstance;		// CommandCodes -> current instance
+		static NonRamFblInstanceMap* m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
 
 	public:
 		Fbl(AfbElement* afbElement);
+		~Fbl();
 
 		quint16 addInstance();
 
@@ -268,7 +276,7 @@ namespace Builder
 
 		// service maps
 		//
-		QHash<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
+		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
 		QHash<QUuid, AppItem*> m_pinParent;			// pin GUID -> parent item ptr
 
 		QString msg;
