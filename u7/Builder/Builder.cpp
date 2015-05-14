@@ -478,7 +478,16 @@ namespace Builder
 					return;
 				}
 				const QMetaObject* metaObject = currentDevice->metaObject();
-				equipmentWriter.writeStartElement(metaObject->className());
+				QString name = metaObject->className();
+				int position = name.lastIndexOf(QChar(':'));
+				if (position == -1)
+				{
+					equipmentWriter.writeStartElement(name);
+				}
+				else
+				{
+					equipmentWriter.writeStartElement(name.mid(position + 1));
+				}
 
 				for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i)
 				{
