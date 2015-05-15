@@ -6,6 +6,7 @@
 
 #include "../include/DeviceObject.h"
 #include "../include/Signal.h"
+#include "../include/OrderedHash.h"
 #include "../Builder/ApplicationLogicBuilder.h"
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
@@ -106,11 +107,8 @@ namespace Builder
 	};
 
 
-	class FblsMap : public QVector<Fbl*>
+	class FblsMap : public HashedVector<QUuid, Fbl*>
 	{
-	private:
-		QHash<QUuid, Fbl*> m_map;
-
 	public:
 		~FblsMap() { clear(); }
 
@@ -144,10 +142,13 @@ namespace Builder
 		bool isSignal() const { return m_fblItem->isSignalElement(); }
 		bool isFb() const { return m_fblItem->isFblElement(); }
 
-		const LogicItem& logic() const { return *m_fblItem; }
+		bool afbInitialized() const { return m_afbElement != nullptr; }
 
 		const std::list<LogicPin>& inputs() const { return m_fblItem->inputs(); }
 		const std::list<LogicPin>& outputs() const { return m_fblItem->outputs(); }
+
+		const Afbl::AfbElement& afb() const { return *m_afbElement; }
+		//const LogicItem& logic() const { return *m_fblItem; }
 	};
 
 
@@ -169,11 +170,8 @@ namespace Builder
 	};
 
 
-	class AppFbsMap : public QVector<AppFb*>
+	class AppFbsMap : public HashedVector<QUuid, AppFb*>
 	{
-	private:
-		 QHash<QUuid, AppFb*> m_map;
-
 	public:
 		~AppFbsMap() { clear(); }
 
@@ -219,11 +217,10 @@ namespace Builder
 	};
 
 
-	class AppSignalsMap : public QHash<QUuid, AppSignal*>
+	class AppSignalsMap : public HashedVector<QUuid, AppSignal*>
 	{
 	private:
 		QHash<QString, AppSignal*> m_signalStrIdMap;
-		QVector<AppSignal*> m_appSignals;
 
 		void insert(const QUuid& guid, const QString& strID, AppItem* appItem);
 
@@ -289,6 +286,9 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool afbInitialization();
+		bool initializeAppFbConstParams(AppFb* appFb);
+		bool initializeAppFbVariableParams(AppFb* appFb);
+
 		bool getUsedAfbs();
 		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
 

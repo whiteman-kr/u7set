@@ -412,6 +412,12 @@ namespace Builder
 				continue;
 			}
 
+			if (!item->afbInitialized())
+			{
+				assert(false);
+				continue;
+			}
+
 			// get Functional Block instance !!!
 			//
 			int instance = m_fbls.addInstance(item);
@@ -462,9 +468,10 @@ namespace Builder
 
 	bool ModuleLogicCompiler::afbInitialization()
 	{
+		bool result = true;
+
 		m_code.newLine();
 		m_code.comment("Functional Blocks initialization code");
-
 
 		for(Fbl* fbl : m_fbls)
 		{
@@ -475,153 +482,152 @@ namespace Builder
 					continue;
 				}
 
-				const AfbElement& afb = fbl->afbElement();
+				result &= initializeAppFbConstParams(appFb);
 
-				//appFb->logicFb().
-
-				quint16 fbOpcode = afb.opcode();
-				quint16 fbInstance = appFb->instance();
-
-				m_code.newLine();
-				m_code.comment(QString(tr("Initalization of %1 instance %2")).arg(fbl->strID()).arg(fbInstance));
-				m_code.newLine();
-
-				// iniitalization of constant params
-				//
-				for(AfbElementParam afbParam : afb.constParams())
+				if (!appFb->afb().hasRam())
 				{
-					Command cmd;
-
-					quint16 paramValue = 0;
-
-					const AfbParamValue& apv = afbParam.value();
-
-					switch(afbParam.type())
-					{
-					case AnalogIntegral:
-						paramValue = apv.IntegralValue;
-#pragma message("###################################### Need calculate value!!!!!!!!! ####################")
-						break;
-
-					case AnalogFloatingPoint:
-						assert(false);				// not implemented
-						break;
-
-					case DiscreteValue:
-						paramValue = apv.Discrete;
-						break;
-
-					default:
-						assert(false);
-					}
-
-
-					cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
-
-					cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
-
-					m_code.append(cmd);
-				}
-
-				if (!fbl->hasRam())
-				{
+					// FB without RAM initialize once for all instances
+					//
 					break;
 				}
 
-				if (afb.params().size() == 0)
-				{
-					continue;
-				}
-
-				m_code.newLine();
-
-				// iniitalization of variable params
+				// initialize for each instance of FB with RAM
 				//
-				for(AfbElementParam afbParam : afb.params())
-				{
-					Command cmd;
-
-					quint16 paramValue = 0;
-
-					const AfbParamValue& apv = afbParam.value();
-
-					switch(afbParam.type())
-					{
-					case AnalogIntegral:
-						paramValue = apv.IntegralValue;
-#pragma message("###################################### Need calculate value!!!!!!!!! ####################")
-						break;
-
-					case AnalogFloatingPoint:
-						assert(false);				// not implemented
-						break;
-
-					case DiscreteValue:
-						paramValue = apv.Discrete;
-						break;
-
-					default:
-						assert(false);
-					}
-
-
-					cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
-
-					cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
-
-					m_code.append(cmd);
-				}
-
+				result &= initializeAppFbVariableParams(appFb);
 			}
 		}
 
-		/*const std::list<std::shared_ptr<VFrame30::FblItemRect>>& logicItems = m_moduleLogic->items();
+		return result;
+	}
 
-		for(std::shared_ptr<VFrame30::FblItemRect> logicItem : logicItems)
-		{
-			FbElement* fbElement = dynamic_cast<FbElement*>(logicItem.get());
 
-			if (fbElement == nullptr)
-			{
-				continue;
-			}
 
-			int a = 0;
 
-			a++;
-		}*/
-
-/*		for(AfbElement afbElement : m_afbl->items)
-		{
-			AlgFb fb(afbElement);
-		}*/
-
+	bool ModuleLogicCompiler::initializeAppFbConstParams(AppFb* appFb)
+	{
 		bool result = true;
 
-		result &= getUsedAfbs();
+		if (appFb == nullptr)
+		{
+			assert(false);
+			return false;
+		}
 
-		/*AlgFbParamArray param;
+		const AfbElement& afb = appFb->afb();
 
-		AlgFbParam p;
+		const LogicFb& logicFb = appFb->logicFb();
 
-		p.caption = "param1";
-		p.index = 1;
-		p.size = 16;
-		p.value = 2;
+		quint16 fbInstance = appFb->instance();
+		quint16 fbOpcode = afb.opcode();
 
-		param.append(p);
+		qDebug() << logicFb.dynamicPropertyNames();
 
-		p.caption = "param2";
-		p.index = 2;
-		p.size = 1;
-		p.value = 1;
+		m_code.newLine();
+		m_code.comment(QString(tr("Initalization of %1 instance %2")).arg(afb.strID()).arg(fbInstance));
+		m_code.newLine();
 
-		param.append(p);
+		// iniitalization of constant params
+		//
+		for(AfbElementParam afbParam : afb.constParams())
+		{
+			Command cmd;
 
-		generateAfbInitialization(1, 1, param);*/
+			quint16 paramValue = 0;
+
+			const AfbParamValue& apv = afbParam.value();
+
+			switch(afbParam.type())
+			{
+			case AnalogIntegral:
+				paramValue = apv.IntegralValue;
+#pragma message("###################################### Need calculate value!!!!!!!!! ####################")
+				break;
+
+			case AnalogFloatingPoint:
+				assert(false);				// not implemented
+				break;
+
+			case DiscreteValue:
+				paramValue = apv.Discrete;
+				break;
+
+			default:
+				assert(false);
+			}
+
+
+			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
+
+			cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
+
+			m_code.append(cmd);
+		}
 
 		return result;
 	}
+
+
+	bool ModuleLogicCompiler::initializeAppFbVariableParams(AppFb* appFb)
+	{
+		bool result = true;
+
+		if (appFb == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		const AfbElement& afb = appFb->afb();
+
+		const LogicFb& logicFb = appFb->logicFb();
+
+		quint16 fbInstance = appFb->instance();
+		quint16 fbOpcode = afb.opcode();
+
+
+		m_code.newLine();
+
+		// iniitalization of variable params
+		//
+		for(AfbElementParam afbParam : afb.params())
+		{
+			Command cmd;
+
+			quint16 paramValue = 0;
+
+			QVariant value = logicFb.property(afbParam.caption().toUtf8().constData());
+
+			switch(afbParam.type())
+			{
+			case AnalogIntegral:
+				paramValue = value.toInt();
+#pragma message("###################################### Need calculate value!!!!!!!!! ####################")
+				break;
+
+			case AnalogFloatingPoint:
+				assert(false);				// not implemented
+				break;
+
+			case DiscreteValue:
+				paramValue = value.toInt();
+				break;
+
+			default:
+				assert(false);
+			}
+
+
+			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
+
+			cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
+
+			m_code.append(cmd);
+		}
+
+		return result;
+	}
+
+
 
 
 	bool ModuleLogicCompiler::getUsedAfbs()
@@ -930,7 +936,7 @@ namespace Builder
 			return;
 		}
 
-		if (m_map.contains(afbElement->guid()))
+		if (contains(afbElement->guid()))
 		{
 			assert(false);	// 	repeated guid
 			return;
@@ -938,9 +944,7 @@ namespace Builder
 
 		Fbl* fbl = new Fbl(afbElement);
 
-		append(fbl);
-
-		m_map.insert(fbl->guid(), fbl);
+		HashedVector<QUuid, Fbl*>::insert(fbl->guid(), fbl);
 	}
 
 
@@ -952,13 +956,13 @@ namespace Builder
 			return 1;
 		}
 
-		if (!m_map.contains(appItem->afbGuid()))
+		if (!contains(appItem->afbGuid()))
 		{
 			assert(false);			// unknown FBL guid
 			return 0;
 		}
 
-		Fbl* fbl = m_map[appItem->afbGuid()];
+		Fbl* fbl = (*this)[appItem->afbGuid()];
 
 		return fbl->addInstance();
 	}
@@ -970,6 +974,8 @@ namespace Builder
 		{
 			delete fbl;
 		}
+
+		HashedVector<QUuid, Fbl*>::clear();
 	}
 
 
@@ -1035,9 +1041,7 @@ namespace Builder
 
 		AppFb* appFb = new AppFb(appItem, instance);
 
-		append(appFb);
-
-		m_map.insert(appFb->guid(), appFb);
+		HashedVector<QUuid, AppFb*>::insert(appFb->guid(), appFb);
 	}
 
 
@@ -1048,9 +1052,7 @@ namespace Builder
 			delete appFb;
 		}
 
-		QVector<AppFb*>::clear();
-
-		m_map.clear();
+		HashedVector<QUuid, AppFb*>::clear();
 	}
 
 
@@ -1129,31 +1131,26 @@ namespace Builder
 		{
 			appSignal = new AppSignal(guid, strID, appItem);
 
-			m_appSignals.append(appSignal);
-
 			m_signalStrIdMap.insert(strID, appSignal);
 
 			qDebug() << "Create appSignal = " << strID;
 		}
-
-		QHash<QUuid, AppSignal*>::insert(guid, appSignal);
-
 		assert(appSignal != nullptr);
+
+		HashedVector<QUuid, AppSignal*>::insert(guid, appSignal);
 	}
 
 
 	void AppSignalsMap::clear()
 	{
-		for(AppSignal* appSignal : m_appSignals)
+		for(AppSignal* appSignal : m_signalStrIdMap)
 		{
 			delete appSignal;
 		}
 
-		m_appSignals.clear();
-
-		QHash<QUuid, AppSignal*>::clear();
-
 		m_signalStrIdMap.clear();
+
+		HashedVector<QUuid, AppSignal*>::clear();
 	}
 
 

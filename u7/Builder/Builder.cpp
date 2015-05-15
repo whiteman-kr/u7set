@@ -478,7 +478,16 @@ namespace Builder
 					return;
 				}
 				const QMetaObject* metaObject = currentDevice->metaObject();
-				equipmentWriter.writeStartElement(metaObject->className());
+				QString name = metaObject->className();
+				int position = name.lastIndexOf(QChar(':'));
+				if (position == -1)
+				{
+					equipmentWriter.writeStartElement(name);
+				}
+				else
+				{
+					equipmentWriter.writeStartElement(name.mid(position + 1));
+				}
 
 				const std::string& className = metaObject->className();
 				equipmentWriter.writeAttribute("classNameHash", QString::number(CUtils::GetClassHashCode(className), 16));
