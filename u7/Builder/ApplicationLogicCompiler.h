@@ -77,16 +77,19 @@ namespace Builder
 	typedef VFrame30::VideoItemSignal LogicSignal;
 	typedef VFrame30::VideoItemFblElement LogicFb;
 	typedef VFrame30::CFblConnectionPoint LogicPin;
+	typedef Afbl::AfbElementSignal AfbSignal;
+
 
 	class AppItem;
-
 	class ModuleLogicCompiler;
+
 
 	// Functional Block Library element
 	//
 
 	typedef QHash<CommandCodes, int> CommandCodesInstanceMap;
 	typedef QHash<QString, int> NonRamFblInstanceMap;
+
 
 	class Fbl
 	{
@@ -117,6 +120,19 @@ namespace Builder
 
 	class FblsMap : public HashedVector<QUuid, Fbl*>
 	{
+	private:
+
+		struct GuidIndex
+		{
+			QUuid guid;			// AfbElement guid()
+			int index;			// AfbElementSignal or AfbElementParam index
+
+			operator QString() const { return QString("%1:%2").arg(guid.toString()).arg(index); }
+		};
+
+		QHash<QString, AfbElementSignal*> m_fblsSignals;
+		QHash<QString, AfbElementParam*> m_fblsParams;
+
 	public:
 		~FblsMap() { clear(); }
 
@@ -124,6 +140,8 @@ namespace Builder
 
 		void insert(AfbElement* afbElement);
 		void clear();
+
+		const AfbSignal* getFblSignal(const QUuid& afbElemetGuid, int signalIndex);
 	};
 
 
@@ -145,7 +163,7 @@ namespace Builder
 		QUuid guid() const { return m_fblItem->guid(); }
 		QUuid afbGuid() const { return m_afbElement->guid(); }
 
-		QString strID() { return m_fblItem->toSignalElement()->signalStrIds(); }
+		QString strID() const { return m_fblItem->toSignalElement()->signalStrIds(); }
 
 		bool isSignal() const { return m_fblItem->isSignalElement(); }
 		bool isFb() const { return m_fblItem->isFblElement(); }
@@ -157,6 +175,8 @@ namespace Builder
 
 		const Afbl::AfbElement& afb() const { return *m_afbElement; }
 		//const LogicItem& logic() const { return *m_fblItem; }
+
+		const LogicSignal& signal() { return *m_fblItem->toSignalElement(); }
 	};
 
 
@@ -195,18 +215,19 @@ namespace Builder
 	class AppSignal
 	{
 	private:
-		AppItem* m_appItem = nullptr;
+		const AppItem* m_appItem = nullptr;
+		const Signal* m_signal = nullptr;
 
 		QUuid m_guid;
 		QString m_strID;
-		Signal* m_signal = nullptr;
+
 		bool m_calculated = false;
 		SignalType m_signalType;
 
 	public:
-		AppSignal(const QUuid& guid, const QString& strID, AppItem* appItem);
+		AppSignal(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem);
 
-		AppItem& appItem() const;
+		const AppItem &appItem() const;
 
 		void setStrID(QString strID) { m_strID = strID; }
 		QString strID() const { return m_strID; }
@@ -215,7 +236,7 @@ namespace Builder
 		bool isCalculated() const { return m_calculated; }
 
 		void setSignal(Signal* signal) { m_signal = signal; }
-		Signal* signal() const { return m_signal; }
+		const Signal* signal() { return m_signal; }
 
 
 		void signalType(SignalType signalType) { m_signalType = signalType; }
@@ -225,18 +246,24 @@ namespace Builder
 	};
 
 
-	class AppSignalsMap : public HashedVector<QUuid, AppSignal*>
+	class AppSignalsMap : public QObject, HashedVector<QUuid, AppSignal*>
 	{
+		Q_OBJECT
+
 	private:
 		QHash<QString, AppSignal*> m_signalStrIdMap;
 
-		void insert(const QUuid& guid, const QString& strID, AppItem* appItem);
+		void insert(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem);
+
+		ModuleLogicCompiler& m_compiler;
 
 	public:
+		AppSignalsMap(ModuleLogicCompiler& compiler);
 		~AppSignalsMap();
 
-		void insert(AppItem* appItem);
-		void insert(const QUuid& ouPinGuid);
+		void insert(const AppItem* appItem);
+		void insert(const AppItem* appItem, const LogicPin& outputPin);
+
 		void clear();
 
 		void bindRealSignals(SignalSet* signalSet);
@@ -277,7 +304,9 @@ namespace Builder
 		// service maps
 		//
 		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
-		QHash<QUuid, AppItem*> m_pinParent;			// pin GUID -> parent item ptr
+		QHash<QUuid, AppItem*> m_pinParent;					// pin GUID -> parent item ptr
+		QHash<QUuid, AppItem*> m_pinTypes;					// pin GUID -> parent item ptr
+		QHash<QString, Signal*> m_signalsStrID;				// signals StrID to Signal ptr
 
 		QString msg;
 
@@ -314,6 +343,13 @@ namespace Builder
 
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
+
+		const SignalSet& signalSet() { return *m_signals; }
+		const Signal* getSignal(const QString& strID);
+
+		OutputLog& log() { return *m_log; }
+
+		const AfbSignal* getFblSignal(const QUuid& afbElemetGuid, int signalIndex) { return m_fbls.getFblSignal(afbElemetGuid, signalIndex); }
 
 		bool run();
 	};
