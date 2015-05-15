@@ -432,11 +432,11 @@ public:
 	bool contains(const KEY& key) const { return m_map.contains(key); }
 	void insert(const KEY& key, const VALUE& value);
 
-	iterator begin() { return QVector<VALUE>::begin(); }
-	const_iterator begin() const { return QVector<VALUE>::begin(); }
+	typename QVector<VALUE>::iterator begin() { return QVector<VALUE>::begin(); }
+	typename QVector<VALUE>::const_iterator begin() const { return QVector<VALUE>::begin(); }
 
-	iterator end() { return QVector<VALUE>::end(); }
-	const_iterator end() const { return QVector<VALUE>::end(); }
+	typename QVector<VALUE>::iterator end() { return QVector<VALUE>::end(); }
+	typename QVector<VALUE>::const_iterator end() const { return QVector<VALUE>::end(); }
 
 	VALUE& operator[](const KEY& key) { return m_map[key]; }
 	const VALUE	operator[](const KEY& key) const { return m_map[key]; }
@@ -454,6 +454,6 @@ void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 		return;
 	}
 
-	append(value);
+	this->append(value);
 	m_map.insert(key, value);
 }

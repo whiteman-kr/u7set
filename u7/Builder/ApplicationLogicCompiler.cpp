@@ -888,7 +888,7 @@ namespace Builder
 			{
 				// load all CommandCodes in map
 				//
-				for(int i = 0; i < sizeof(AllCommandCodes)/sizeof(CommandCodes); i++)
+				for(unsigned int i = 0; i < sizeof(AllCommandCodes)/sizeof(CommandCodes); i++)
 				{
 					m_commandCodesInstance.insert(AllCommandCodes[i], 0);
 				}
@@ -1062,9 +1062,9 @@ namespace Builder
 	//
 
 	AppSignal::AppSignal(const QUuid& guid, const QString& strID, AppItem* appItem) :
+		m_appItem(appItem),
 		m_guid(guid),
-		m_strID(strID),
-		m_appItem(appItem)
+		m_strID(strID)
 	{
 	}
 
