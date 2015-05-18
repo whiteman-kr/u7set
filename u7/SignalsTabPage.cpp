@@ -1033,7 +1033,6 @@ void SignalsModel::addSignal()
 
 				if (!deviceIdEdit->text().isEmpty())
 				{
-					strID += "_dev" + deviceIdEdit->text();
 					name += " Device " + deviceIdEdit->text();
 				}
 
@@ -1048,7 +1047,7 @@ void SignalsModel::addSignal()
 					strID = (strID + "_%1").arg(QChar('A' + i));
 				}
 
-				signalVector[i].setStrID(strID);
+				signalVector[i].setStrID(strID.toUpper());
 				signalVector[i].setName(name);
 			}
 
@@ -1074,6 +1073,7 @@ void SignalsModel::addSignal()
 			}
 			endInsertRows();
 			emit dataChanged(createIndex(m_signalSet.count() - resultSignalVector.count(), 0), createIndex(m_signalSet.count() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+			emit signalActivated(m_signalSet.count() - resultSignalVector.count());
 		}
 	}
 
@@ -1110,6 +1110,7 @@ bool SignalsModel::editSignal(int row)
 		}
 
 		loadSignal(row);
+		emit signalActivated(row);
 		return true;
 	}
 
@@ -1204,6 +1205,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(m_signalsModel, &SignalsModel::dataChanged, this, &SignalsTabPage::updateCellsSize);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, this, &SignalsTabPage::updateCellsSize);
+	connect(m_signalsModel, &SignalsModel::signalActivated, m_signalsView, &QTableView::selectRow);
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
