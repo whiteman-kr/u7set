@@ -489,6 +489,15 @@ namespace Builder
 					equipmentWriter.writeStartElement(name.mid(position + 1));
 				}
 
+				const std::string& className = metaObject->className();
+				equipmentWriter.writeAttribute("classNameHash", QString::number(CUtils::GetClassHashCode(className), 16));
+
+				equipmentWriter.writeAttribute("StrID", currentDevice->strId());
+				equipmentWriter.writeAttribute("Caption", currentDevice->caption());
+				equipmentWriter.writeAttribute("ChildRestriction", currentDevice->childRestriction());
+				equipmentWriter.writeAttribute("Place", QString::number(currentDevice->place()));
+				equipmentWriter.writeAttribute("DynamicProperties", currentDevice->dynamicProperties());
+
 				for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i)
 				{
 					const QMetaProperty& property = metaObject->property(i);
@@ -518,7 +527,6 @@ namespace Builder
 			applicationSignalsWriter.writeStartDocument();
 
 			applicationSignalsWriter.writeStartElement("applicationSignals");
-			applicationSignalsWriter.writeAttribute("count", QString::number(signalSet->count()));
 
 			for (int i = 0; i < signalSet->count(); i++)
 			{

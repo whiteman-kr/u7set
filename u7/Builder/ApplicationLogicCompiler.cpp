@@ -930,7 +930,7 @@ namespace Builder
 			{
 				// load all CommandCodes in map
 				//
-				for(int i = 0; i < sizeof(AllCommandCodes)/sizeof(CommandCodes); i++)
+				for(unsigned int i = 0; i < sizeof(AllCommandCodes)/sizeof(CommandCodes); i++)
 				{
 					m_commandCodesInstance->insert(AllCommandCodes[i], 0);
 				}
