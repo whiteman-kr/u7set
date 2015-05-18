@@ -77,7 +77,7 @@ namespace Builder
 
 		// Compile Data Aquisition Service configuration
 		//
-		bool compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, DataFormatList& dataFormatInfo, UnitList& unitInfo, BuildResultWriter* buildResultWriter);
+		bool compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, UnitList& unitInfo, BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?
 		//

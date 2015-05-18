@@ -47,6 +47,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Add get_file_id dunctions", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0036.sql"},
 	{"Add module presets", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0037.sql"},
 	{"Add get_last_signals function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0038.sql"},
+	{"Delete DataFormat table and remove corresponding constraints", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0039.sql"},
 };
 
 
@@ -2997,7 +2998,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.checkedOut())
 	.arg(s.userID())
 	.arg(s.channel())
-	.arg(s.type())
+	.arg(TO_INT(s.type()))
 	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
 	.arg(s.deleted())
 	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
@@ -3005,7 +3006,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.strID())
 	.arg(s.extStrID())
 	.arg(s.name())
-	.arg(s.dataFormat())
+	.arg(TO_INT(s.dataFormat()))
 	.arg(s.dataSize())
 	.arg(s.lowADC())
 	.arg(s.highADC())
@@ -3034,7 +3035,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.outputRangeMode())			// since version 35 of database
 	.arg(s.filteringTime())				//
 	.arg(s.maxDifference())				//
-	.arg(s.byteOrder());				//
+	.arg(TO_INT(s.byteOrder()));				//
 
 	qDebug() << str;
 
@@ -3197,52 +3198,6 @@ void DbWorker::slot_getUnits(UnitList *units)
 		QString unitNameEn = q.value("unit_en").toString();
 
 		units->append(unitID, unitNameEn);
-	}
-}
-
-void DbWorker::slot_getDataFormats(DataFormatList *dataFormats)
-{
-	AUTO_COMPLETE
-
-	// Check parameters
-	//
-	if (dataFormats == nullptr)
-	{
-		assert(dataFormats != nullptr);
-		return;
-	}
-
-	dataFormats->clear();
-
-	// Operation
-	//
-	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
-
-	if (db.isOpen() == false)
-	{
-		emitError(tr("Cannot get data formats. Database connection is not opened."));
-		return;
-	}
-
-	// request
-	//
-	QString request = QString("SELECT * FROM get_data_formats()");
-	QSqlQuery q(db);
-
-	bool result = q.exec(request);
-
-	if (result == false)
-	{
-		emitError(tr("Can't get data formats! Error: ") +  q.lastError().text());
-		return;
-	}
-
-	while(q.next() != false)
-	{
-		int dataFormatID = q.value("dataformatid").toInt();
-		QString dataFormatName = q.value("name").toString();
-
-		dataFormats->append(dataFormatID, dataFormatName);
 	}
 }
 
@@ -3559,6 +3514,17 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 	}
 
 	int signalCount = int(deviceSignals->size());
+
+	for(int i = 0; i < signalCount - 1; i++)
+	{
+		for(int j = i+1; j < signalCount; j++)
+		{
+			if (deviceSignals->at(i)->strId() == deviceSignals->at(j)->strId())
+			{
+				assert(false);
+			}
+		}
+	}
 
 	for(int i = 0; i < signalCount; i++)
 	{

@@ -1258,6 +1258,8 @@ namespace Builder
 			QString msg = QString(tr("Signal identifier is not found: %1")).arg(strID);
 
 			m_compiler.log().writeError(msg, false, true);
+
+			return;
 		}
 
 		insert(appItem->guid(), strID, s->type(), s, appItem);
@@ -1276,9 +1278,22 @@ namespace Builder
 
 		const AfbSignal* s = m_compiler.getFblSignal(appItem->afb().guid(), outputPin.afbOperandIndex());
 
+		if (s == nullptr)
+		{
+			// signal identifier is not found
+
+			QString msg = QString(tr("Signal identifier is not found: %1")).arg(outputPin.guid().toString());
+
+			m_compiler.log().writeError(msg, false, true);
+
+			return;
+		}
+
 		SignalType signalType = SignalType::Discrete;
 
 		Afbl::AfbSignalType st = s->type();
+
+		int v = static_cast<int>(st);
 
 		switch(st)
 		{

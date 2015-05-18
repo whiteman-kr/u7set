@@ -61,7 +61,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 
 	m_dataFormatProperty = m_enumManager->addProperty(tr("Data format"));
 	m_enumManager->setEnumNames(m_dataFormatProperty, dataFormatInfo.toList());
-	m_enumManager->setValue(m_dataFormatProperty, dataFormatInfo.keyIndex(signal.dataFormat()));
+	m_enumManager->setValue(m_dataFormatProperty, dataFormatInfo.keyIndex(signal.dataFormatInt()));
 	signalProperty->addSubProperty(m_dataFormatProperty);
 
 	m_dataSizeProperty = m_intManager->addProperty(tr("Data size"));
@@ -237,13 +237,15 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	signalProperty->addSubProperty(m_inOutTypeProperty);
 
 	QStringList byteOrderStringList;
-	for (int i = 0; i < BYTE_ORDER_COUNT; i++)
+
+	for (int i = 0; i < TO_INT(ByteOrder::Count); i++)
 	{
 		byteOrderStringList << ByteOrderStr[i];
 	}
+
 	m_byteOrderProperty = m_enumManager->addProperty(tr("Byte order"));
 	m_enumManager->setEnumNames(m_byteOrderProperty, byteOrderStringList);
-	m_enumManager->setValue(m_byteOrderProperty, signal.byteOrder());
+	m_enumManager->setValue(m_byteOrderProperty, signal.byteOrderInt());
 	signalProperty->addSubProperty(m_byteOrderProperty);
 
 	m_deviceIDProperty = m_stringManager->addProperty(tr("Device ID"));
@@ -412,7 +414,8 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		m_signal.setInOutType(SignalInOutType(inOutTypeIndex));
 	}
 	int byteOrderIndex = m_enumManager->value(m_byteOrderProperty);
-	if (byteOrderIndex >= 0 && byteOrderIndex < BYTE_ORDER_COUNT)
+
+	if (byteOrderIndex >= 0 && byteOrderIndex < TO_INT(ByteOrder::Count))
 	{
 		m_signal.setByteOrder(ByteOrder(byteOrderIndex));
 	}
