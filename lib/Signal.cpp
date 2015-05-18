@@ -1,6 +1,15 @@
 #include "../include/Signal.h"
 
 
+DataFormatList::DataFormatList()
+{
+	for(int i = 0; i < ENUM_COUNT(DataFormat); i++)
+	{
+		append(i, DataFormatStr[i]);
+	}
+}
+
+
 Signal::Signal() :
 	QObject()
 {

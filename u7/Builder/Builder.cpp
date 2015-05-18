@@ -196,12 +196,10 @@ namespace Builder
 			//
 			// Compile Data Aquisition Service configuration
 			//
-			DataFormatList dataFormatInfo;
 			UnitList unitInfo;
-			db.getDataFormats(&dataFormatInfo, nullptr);
 			db.getUnits(&unitInfo, nullptr);
 
-			compileDataAquisitionServiceConfiguration(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, dataFormatInfo, unitInfo, &buildWriter);
+			compileDataAquisitionServiceConfiguration(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, unitInfo, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -457,8 +455,10 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, DataFormatList &dataFormatInfo, UnitList &unitInfo, BuildResultWriter* buildResultWriter)
+	bool BuildWorkerThread::compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, UnitList &unitInfo, BuildResultWriter* buildResultWriter)
 	{
+		DataFormatList dataFormatInfo;
+
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Data Aquisition Service configuration compilation"), true);
 
@@ -532,7 +532,7 @@ namespace Builder
 			{
 				Signal& signal = (*signalSet)[i];
 				bool hasWrongField = false;
-				if (!dataFormatInfo.contains(signal.dataFormat()))
+				if (!dataFormatInfo.contains(signal.dataFormatInt()))
 				{
 					m_log->writeWarning(QString("Signal %1 has wrong dataFormat field").arg(signal.strID()), true, true);
 					hasWrongField = true;
@@ -572,7 +572,7 @@ namespace Builder
 					m_log->writeWarning(QString("Signal %1 has wrong inOutType field").arg(signal.strID()), true, true);
 					hasWrongField = true;
 				}
-				if (signal.byteOrder() < 0 || signal.byteOrder() >= BYTE_ORDER_COUNT)
+				if (signal.byteOrderInt() < 0 || signal.byteOrderInt() >= ENUM_COUNT(ByteOrder))
 				{
 					m_log->writeWarning(QString("Signal %1 has wrong byteOrder field").arg(signal.strID()), true, true);
 					hasWrongField = true;
@@ -593,7 +593,7 @@ namespace Builder
 				applicationSignalsWriter.writeAttribute("strID", signal.strID());
 				applicationSignalsWriter.writeAttribute("extStrID", signal.extStrID());
 				applicationSignalsWriter.writeAttribute("name", signal.name());
-				applicationSignalsWriter.writeAttribute("dataFormat", dataFormatInfo.value(signal.dataFormat()));
+				applicationSignalsWriter.writeAttribute("dataFormat", dataFormatInfo.value(signal.dataFormatInt()));
 				applicationSignalsWriter.writeAttribute("dataSize", QString::number(signal.dataSize()));
 				applicationSignalsWriter.writeAttribute("lowADC", QString::number(signal.lowADC()));
 				applicationSignalsWriter.writeAttribute("highADC", QString::number(signal.highADC()));
@@ -622,7 +622,7 @@ namespace Builder
 				applicationSignalsWriter.writeAttribute("deviceStrID", signal.deviceStrID());
 				applicationSignalsWriter.writeAttribute("filteringTime", QString::number(signal.filteringTime()));
 				applicationSignalsWriter.writeAttribute("maxDifference", QString::number(signal.maxDifference()));
-				applicationSignalsWriter.writeAttribute("byteOrder", ByteOrderStr[signal.byteOrder()]);
+				applicationSignalsWriter.writeAttribute("byteOrder", ByteOrderStr[signal.byteOrderInt()]);
 
 				applicationSignalsWriter.writeEndElement();	// signal
 			}

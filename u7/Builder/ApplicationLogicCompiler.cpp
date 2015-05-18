@@ -173,7 +173,8 @@ namespace Builder
 	//	ModuleLogicCompiler class implementation
 	//
 
-	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm)
+	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
+		m_appSignals(*this)
 	{
 		m_equipment = appLogicCompiler.m_equipment;
 		m_signals = appLogicCompiler.m_signals;
@@ -182,6 +183,17 @@ namespace Builder
 		m_resultWriter = appLogicCompiler.m_resultWriter;
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
+	}
+
+
+	const Signal* ModuleLogicCompiler::getSignal(const QString& strID)
+	{
+		if (m_signalsStrID.contains(strID))
+		{
+			return m_signalsStrID.value(strID);
+		}
+
+		return nullptr;
 	}
 
 
@@ -302,6 +314,23 @@ namespace Builder
 
 	void ModuleLogicCompiler::buildServiceMaps()
 	{
+		int count = m_signals->count();
+
+		for(int i = 0; i < count; i++)
+		{
+			Signal* s = &(*m_signals)[i];
+
+			if (m_signalsStrID.contains(s->strID()))
+			{
+				msg = QString(tr("Duplicate signal identifier: %1")).arg(s->strID());
+				m_log->writeWarning(msg, false, true);
+			}
+			else
+			{
+				m_signalsStrID.insert(s->strID(), s);
+			}
+		}
+
 		m_fbls.clear();
 
 		for(AfbElement& afbl : m_afbl->items)
@@ -377,20 +406,12 @@ namespace Builder
 		// build map: signal GUID -> ApplicationSignal
 		//
 
-		QHashIterator<QUuid, AppItem*> iterator(m_appItems);
-
-		while(iterator.hasNext())
+		for(AppItem* item : m_appItems)
 		{
-			iterator.next();
-
-			AppItem* item = iterator.value();
-
 			if (!item->isSignal())
 			{
 				continue;
 			}
-
-			assert (item->guid() == iterator.key());
 
 			m_appSignals.insert(item);
 		}
@@ -399,14 +420,8 @@ namespace Builder
 		// build map: output GUID -> signal GUID
 		//
 
-		iterator = m_appItems;
-
-		while(iterator.hasNext())
+		for(AppItem* item : m_appItems)
 		{
-			iterator.next();
-
-			AppItem* item = iterator.value();
-
 			if (!item->isFb())
 			{
 				continue;
@@ -457,7 +472,7 @@ namespace Builder
 				{
 					// create shadow signal with Uuid of this output pin
 					//
-					m_appSignals.insert(output.guid());
+					m_appSignals.insert(item, output);
 				}
 			}
 		}
@@ -854,13 +869,24 @@ namespace Builder
 	// Fbl class implementation
 	//
 
-	QHash<CommandCodes, int> Fbl::m_commandCodesInstance;		// CommandCodes -> current instance
-	QHash<QString, int> Fbl::m_nonRamFblInstance;				// Non RAM Fbl StrID -> instance
+	int Fbl::m_refCount = 0;
+	CommandCodesInstanceMap* Fbl::m_commandCodesInstance = nullptr;		// CommandCodes -> current instance
+	NonRamFblInstanceMap* Fbl::m_nonRamFblInstance = nullptr;			// Non RAM Fbl StrID -> instance
 
 
 	Fbl::Fbl(AfbElement* afbElement) :
 		m_afbElement(afbElement)
 	{
+		if (m_refCount == 0)
+		{
+			// first instance of Fbl class create maps
+			//
+			m_commandCodesInstance = new CommandCodesInstanceMap;
+			m_nonRamFblInstance = new NonRamFblInstanceMap;
+		}
+
+		m_refCount++;
+
 		if (m_afbElement == nullptr)
 		{
 			assert(false);
@@ -868,9 +894,25 @@ namespace Builder
 		}
 	}
 
+	Fbl::~Fbl()
+	{
+		m_refCount--;
+
+		if (m_refCount == 0)
+		{
+			// last instance of of Fbl class delete maps
+			//of Fbl class create maps
+			delete m_commandCodesInstance;
+			delete m_nonRamFblInstance;
+		}
+	}
+
 
 	quint16 Fbl::addInstance()
 	{
+		assert(m_commandCodesInstance != nullptr);
+		assert(m_nonRamFblInstance != nullptr);
+
 		if (m_afbElement->hasRam())
 		{
 			m_currentInstance++;
@@ -884,31 +926,31 @@ namespace Builder
 		{
 			// Calculate non-RAM Fbl instance
 			//
-			if (m_commandCodesInstance.isEmpty())
+			if (m_commandCodesInstance->isEmpty())
 			{
 				// load all CommandCodes in map
 				//
 				for(unsigned int i = 0; i < sizeof(AllCommandCodes)/sizeof(CommandCodes); i++)
 				{
-					m_commandCodesInstance.insert(AllCommandCodes[i], 0);
+					m_commandCodesInstance->insert(AllCommandCodes[i], 0);
 				}
 			}
 
-			if (m_nonRamFblInstance.contains(m_afbElement->strID()))
+			if (m_nonRamFblInstance->contains(m_afbElement->strID()))
 			{
-				m_currentInstance = m_nonRamFblInstance.value(m_afbElement->strID());
+				m_currentInstance = m_nonRamFblInstance->value(m_afbElement->strID());
 			}
 			else
 			{
 				CommandCodes opcode = static_cast<CommandCodes>(m_afbElement->opcode());
 
-				if (m_commandCodesInstance.contains(opcode))
+				if (m_commandCodesInstance->contains(opcode))
 				{
-					int opcodeInstance = m_commandCodesInstance[opcode];
+					int opcodeInstance = (*m_commandCodesInstance)[opcode];
 
 					opcodeInstance++;
 
-					m_commandCodesInstance[opcode] = opcodeInstance;
+					(*m_commandCodesInstance)[opcode] = opcodeInstance;
 
 					m_currentInstance = opcodeInstance;
 				}
@@ -945,6 +987,100 @@ namespace Builder
 		Fbl* fbl = new Fbl(afbElement);
 
 		HashedVector<QUuid, Fbl*>::insert(fbl->guid(), fbl);
+
+		// add AfbElement in/out signals to m_fblsSignals map
+		//
+
+		std::vector<AfbElementSignal> inputSignals = afbElement->inputSignals();
+
+		for(AfbElementSignal signal : inputSignals)
+		{
+			GuidIndex gi;
+
+			gi.guid = afbElement->guid();
+			gi.index = signal.operandIndex();
+
+			if (m_fblsSignals.contains(gi))
+			{
+				assert(false);
+				continue;
+			}
+
+			m_fblsSignals.insert(gi, &signal);
+		}
+
+		std::vector<AfbElementSignal> outputSignals = afbElement->outputSignals();
+
+		for(AfbElementSignal signal : outputSignals)
+		{
+			GuidIndex gi;
+
+			gi.guid = afbElement->guid();
+			gi.index = signal.operandIndex();
+
+			if (m_fblsSignals.contains(gi))
+			{
+				assert(false);
+				continue;
+			}
+
+			m_fblsSignals.insert(gi, &signal);
+		}
+
+		// add AfbElement params to m_fblsParams map
+		//
+
+		std::vector<AfbElementParam> params = afbElement->params();
+
+		for(AfbElementParam param : params)
+		{
+			GuidIndex gi;
+
+			gi.guid = afbElement->guid();
+			gi.index = param.operandIndex();
+
+			if (m_fblsParams.contains(gi))
+			{
+				assert(false);
+				continue;
+			}
+
+			m_fblsParams.insert(gi, &param);
+		}
+
+		std::vector<AfbElementParam> constParams = afbElement->constParams();
+
+		for(AfbElementParam param : constParams)
+		{
+			GuidIndex gi;
+
+			gi.guid = afbElement->guid();
+			gi.index = param.operandIndex();
+
+			if (m_fblsParams.contains(gi))
+			{
+				assert(false);
+				continue;
+			}
+
+			m_fblsParams.insert(gi, &param);
+		}
+	}
+
+
+	const AfbSignal *FblsMap::getFblSignal(const QUuid& afbElemetGuid, int signalIndex)
+	{
+		GuidIndex gi;
+
+		gi.guid = afbElemetGuid;
+		gi.index = signalIndex;
+
+		if (m_fblsSignals.contains(gi))
+		{
+			return m_fblsSignals.value(gi);
+		}
+
+		return nullptr;
 	}
 
 
@@ -1061,15 +1197,17 @@ namespace Builder
 	// AppSignal class implementation
 	//
 
-	AppSignal::AppSignal(const QUuid& guid, const QString& strID, AppItem* appItem) :
-		m_appItem(appItem),
+	AppSignal::AppSignal(const QUuid& guid, const QString& strID, SignalType signalType, const Signal *signal, const AppItem *appItem) :
 		m_guid(guid),
-		m_strID(strID)
+		m_strID(strID),
+		m_signalType(signalType),
+		m_signal(signal),
+		m_appItem(appItem)
 	{
 	}
 
 
-	AppItem& AppSignal::appItem() const
+	const AppItem& AppSignal::appItem() const
 	{
 		assert(m_appItem != nullptr);
 
@@ -1082,6 +1220,12 @@ namespace Builder
 	// AppSignalsMap class implementation
 	//
 
+	AppSignalsMap::AppSignalsMap(ModuleLogicCompiler& compiler) :
+		m_compiler(compiler)
+	{
+	}
+
+
 	AppSignalsMap::~AppSignalsMap()
 	{
 		clear();
@@ -1090,7 +1234,7 @@ namespace Builder
 
 	// insert signal from application logic scheme
 	//
-	void AppSignalsMap::insert(AppItem* appItem)
+	void AppSignalsMap::insert(const AppItem* appItem)
 	{
 		if (!appItem->isSignal())
 		{
@@ -1105,19 +1249,73 @@ namespace Builder
 			strID = "#" + strID;
 		}
 
-		insert(appItem->guid(), strID, appItem);
+		const Signal* s = m_compiler.getSignal(strID);
+
+		if (s == nullptr)
+		{
+			// signal identifier is not found
+
+			QString msg = QString(tr("Signal identifier is not found: %1")).arg(strID);
+
+			m_compiler.log().writeError(msg, false, true);
+
+			return;
+		}
+
+		insert(appItem->guid(), strID, s->type(), s, appItem);
 	}
 
 
-	// insert "shadow" signal bindet to FB output pin
+	// insert "shadow" signal bound to FB output pin
 	//
-	void AppSignalsMap::insert(const QUuid& outPinGuid)
+	void AppSignalsMap::insert(const AppItem* appItem, const LogicPin& outputPin)
 	{
-		insert(outPinGuid, QString("#%1").arg(outPinGuid.toString()), nullptr);
+		if (!appItem->isFb())
+		{
+			assert(false);
+			return;
+		}
+
+		const AfbSignal* s = m_compiler.getFblSignal(appItem->afb().guid(), outputPin.afbOperandIndex());
+
+		if (s == nullptr)
+		{
+			// signal identifier is not found
+
+			QString msg = QString(tr("Signal identifier is not found: %1")).arg(outputPin.guid().toString());
+
+			m_compiler.log().writeError(msg, false, true);
+
+			return;
+		}
+
+		SignalType signalType = SignalType::Discrete;
+
+		Afbl::AfbSignalType st = s->type();
+
+		int v = static_cast<int>(st);
+
+		switch(st)
+		{
+		case Afbl::AfbSignalType::Analog:
+			signalType = SignalType::Analog;
+			break;
+
+		case Afbl::AfbSignalType::Discrete:
+			signalType = SignalType::Discrete;
+			break;
+
+		default:
+			assert(false);
+		}
+
+		QUuid outPinGuid = outputPin.guid();
+
+		insert(outPinGuid, QString("#%1").arg(outPinGuid.toString()), signalType, nullptr, nullptr);
 	}
 
 
-	void AppSignalsMap::insert(const QUuid& guid, const QString& strID, AppItem* appItem)
+	void AppSignalsMap::insert(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem)
 	{
 		AppSignal* appSignal = nullptr;
 
@@ -1129,7 +1327,7 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(guid, strID, appItem);
+			appSignal = new AppSignal(guid, strID, signalType, signal, appItem);
 
 			m_signalStrIdMap.insert(strID, appSignal);
 

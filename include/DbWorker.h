@@ -119,7 +119,6 @@ public slots:
 	void addSignal(SignalType signalType, QVector<Signal>* newSignal);
 
 	void slot_getUnits(UnitList* units);
-	void slot_getDataFormats(DataFormatList* dataFormats);
 
 	void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState);

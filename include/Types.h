@@ -1,23 +1,48 @@
 #pragma once
 
-enum SignalType
+enum class SignalType
 {
-	Analog = 0,
-	Discrete = 1
+	Analog,
+	Discrete,
+
+	Count
 };
 
 
-enum DataFormat
+enum class DataFormat
 {
-	UnsignedInt = 1,
-	SignedInt = 2,
+	UnsignedInt,
+	SignedInt,
+
+	Count
 };
 
 
-enum ByteOrder
+const char* const DataFormatStr[] =
 {
-	LittleEndian = 1,
-	BigEndian = 2
+	"Unsignaed Int",
+	"Signed Int",
 };
+
+
+enum class ByteOrder
+{
+	LittleEndian,
+	BigEndian,
+
+	Count
+};
+
+
+const char* const ByteOrderStr[] =
+{
+	"Little Endian",
+	"Big Endian",
+};
+
+
+#define TO_INT(enumValue) (static_cast<int>(enumValue))
+#define ENUM_COUNT(enumName) (static_cast<int>(enumName##::Count))
+
 
 

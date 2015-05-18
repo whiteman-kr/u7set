@@ -241,7 +241,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_BYTE_ORDER:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			for (int i = 0; i < BYTE_ORDER_COUNT; i++)
+			for (int i = 0; i < TO_INT(ByteOrder::Count); i++)
 			{
 				cb->addItem(ByteOrderStr[i]);
 			}
@@ -298,7 +298,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_MAX_DIFFERENCE: if (le) le->setText(QString("%1").arg(s.maxDifference())); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.dataFormat())); break;
+		case SC_DATA_FORMAT: if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.dataFormatInt())); break;
 		case SC_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.unitID())); break;
 		case SC_INPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.inputUnitID())); break;
 		case SC_OUTPUT_UNIT: if (cb) cb->setCurrentIndex(m_unitInfo.keyIndex(s.outputUnitID())); break;
@@ -308,7 +308,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
 		case SC_CALCULATED: if (cb) cb->setCurrentIndex(s.calculated()); break;
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(s.inOutType()); break;
-		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(s.byteOrder()); break;
+		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(s.byteOrderInt()); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		case SC_TYPE:
@@ -418,6 +418,7 @@ SignalsModel::~SignalsModel()
 {
 
 }
+
 
 int SignalsModel::rowCount(const QModelIndex &) const
 {
@@ -645,9 +646,9 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_CHANNEL: return signal.channel();
 				case SC_TYPE: return QChar('A');
 				case SC_DATA_FORMAT:
-					if (m_dataFormatInfo.contains(signal.dataFormat()))
+					if (m_dataFormatInfo.contains(signal.dataFormatInt()))
 					{
-						return m_dataFormatInfo.value(signal.dataFormat());
+						return m_dataFormatInfo.value(signal.dataFormatInt());
 					}
 					else
 					{
@@ -685,7 +686,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_FILTERING_TIME: return signal.filteringTime();
 				case SC_MAX_DIFFERENCE: return signal.maxDifference();
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
-				case SC_BYTE_ORDER: return (signal.byteOrder() < BYTE_ORDER_COUNT) ? ByteOrderStr[signal.byteOrder()] : tr("Unknown byte order");
+				case SC_BYTE_ORDER: return (signal.byteOrderInt() < ENUM_COUNT(ByteOrder)) ? ByteOrderStr[signal.byteOrderInt()] : tr("Unknown byte order");
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 				default:
@@ -703,9 +704,9 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_CHANNEL: return signal.channel();
 				case SC_TYPE: return QChar('D');
 				case SC_DATA_FORMAT:
-					if (m_dataFormatInfo.contains(signal.dataFormat()))
+					if (m_dataFormatInfo.contains(signal.dataFormatInt()))
 					{
-						return m_dataFormatInfo.value(signal.dataFormat());
+						return m_dataFormatInfo.value(signal.dataFormatInt());
 					}
 					else
 					{
@@ -715,7 +716,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DATA_SIZE: return signal.dataSize();
 				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
-				case SC_BYTE_ORDER: return (signal.byteOrder() < BYTE_ORDER_COUNT) ? ByteOrderStr[signal.byteOrder()] : tr("Unknown byte order");
+				case SC_BYTE_ORDER: return (signal.byteOrderInt() < ENUM_COUNT(ByteOrder)) ? ByteOrderStr[signal.byteOrderInt()] : tr("Unknown byte order");
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 				case SC_LOW_ADC:
@@ -891,7 +892,6 @@ void SignalsModel::loadSignals()
 		m_usernameMap[list[i].userId()] = list[i].username();
 	}
 
-	dbController()->getDataFormats(&m_dataFormatInfo, m_parentWindow);
 	dbController()->getUnits(&m_unitInfo, m_parentWindow);
 
 	if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
@@ -1888,7 +1888,7 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 
 bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
 {
-	return m_signalType == ST_ANY || m_signalType == m_sourceModel->signal(source_row).type();
+	return m_signalType == ST_ANY || m_signalType == m_sourceModel->signal(source_row).typeInt();
 }
 
 void SignalsProxyModel::setSignalTypeFilter(int signalType)
