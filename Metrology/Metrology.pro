@@ -89,7 +89,8 @@ SOURCES += \
     ../lib/ModuleConfiguration.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
-    ../lib/SignalMask.cpp
+    ../lib/SignalMask.cpp \
+    MeasureSignalBase.cpp
 
 
 HEADERS  += \
@@ -127,7 +128,8 @@ HEADERS  += \
     ../include/Types.h \
     ../include/OrderedHash.h \
     Stable.h \
-    ObjectVector.h
+    ObjectVector.h \
+    MeasureSignalBase.h
 
 
 FORMS    +=
