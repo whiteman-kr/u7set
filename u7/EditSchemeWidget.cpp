@@ -122,13 +122,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	// Draw newItem outline
 	//
-	if (m_newItem)
-	{
-		std::vector<std::shared_ptr<VFrame30::VideoItem>> outlines;
-		outlines.push_back(m_newItem);
-
-		VFrame30::VideoItem::DrawOutline(&drawParam, outlines);
-	}
+	drawNewItemOutline(&p, &drawParam);
 
 	// Draw selection bar
 	//
@@ -153,6 +147,95 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 	// --
 	//
 	p.end();
+
+	return;
+}
+
+void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam)
+{
+	if (m_newItem == nullptr)
+	{
+		return;
+	}
+
+	if (drawParam == nullptr)
+	{
+		assert(drawParam != nullptr);
+		return;
+	}
+
+	std::vector<std::shared_ptr<VFrame30::VideoItem>> outlines;
+	outlines.push_back(m_newItem);
+
+	VFrame30::VideoItem::DrawOutline(drawParam, outlines);
+
+	// Draw ruller for newItem
+	//
+	VFrame30::VideoItemPoint rullerPoint;
+	bool posInterfaceFound = false;
+
+	if (dynamic_cast<VFrame30::IVideoItemPosLine*>(m_newItem.get()) != nullptr)
+	{
+		if (mouseState() != MouseState::AddSchemePosLineEndPoint)
+		{
+			return;
+		}
+
+		posInterfaceFound = true;
+		VFrame30::IVideoItemPosLine* pos = dynamic_cast<VFrame30::IVideoItemPosLine*>(m_newItem.get());
+
+		rullerPoint.X = pos->endXDocPt();
+		rullerPoint.Y = pos->endYDocPt();
+	}
+
+	if (dynamic_cast<VFrame30::IVideoItemPosRect*>(m_newItem.get()) != nullptr)
+	{
+		if (mouseState() != MouseState::AddSchemePosRectEndPoint)
+		{
+			return;
+		}
+
+		posInterfaceFound = true;
+
+		rullerPoint.X = m_addRectEndPoint.x();
+		rullerPoint.Y = m_addRectEndPoint.y();
+	}
+
+	if (dynamic_cast<VFrame30::IVideoItemPosConnection*>(m_newItem.get()) != nullptr)
+	{
+		if (mouseState() != MouseState::AddSchemePosConnectionStartPoint &&
+			mouseState() != MouseState::AddSchemePosConnectionNextPoint)
+		{
+			return;
+		}
+
+		posInterfaceFound = true;
+		VFrame30::IVideoItemPosConnection* pos = dynamic_cast<VFrame30::IVideoItemPosConnection*>(m_newItem.get());
+
+		const std::list<VFrame30::VideoItemPoint>& extPoints = pos->GetExtensionPoints();
+
+		rullerPoint.X = extPoints.back().X;
+		rullerPoint.Y = extPoints.back().Y;
+	}
+
+	if (posInterfaceFound == false)
+	{
+		assert(posInterfaceFound == true);
+		return;
+	}
+
+	QPen outlinePen(Qt::blue);
+	outlinePen.setWidth(0);
+
+	QPainter::RenderHints oldrenderhints = p->renderHints();
+	p->setRenderHint(QPainter::Antialiasing, false);
+
+	p->setPen(outlinePen);
+
+	p->drawLine(QPointF(rullerPoint.X, 0.0), QPointF(rullerPoint.X, scheme()->docHeight()));
+	p->drawLine(QPointF(0.0, rullerPoint.Y), QPointF(scheme()->docWidth(), rullerPoint.Y));
+
+	p->setRenderHints(oldrenderhints);
 
 	return;
 }
@@ -249,7 +332,7 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	//
 	QPainter* p = drawParam->painter();
 
-	QPen outlinePen(Qt::black);
+	QPen outlinePen(Qt::blue);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -372,7 +455,7 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	QRectF rullerRect(m_addRectStartPoint, m_addRectEndPoint);
 
-	QPen outlinePen(Qt::black);
+	QPen outlinePen(Qt::blue);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -483,7 +566,7 @@ void EditSchemeView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 	//
 	QPainter* p = drawParam->painter();
 
-	QPen outlinePen(Qt::black);
+	QPen outlinePen(Qt::blue);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -788,7 +871,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	//
 	QPainter* p = drawParam->painter();
 
-	QPen outlinePen(Qt::black);
+	QPen outlinePen(Qt::blue);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
