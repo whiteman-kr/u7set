@@ -115,18 +115,23 @@ class Address16
 {
 private:
 	int m_offset = -1;
-	int m_bitNo = -1;
+	int m_bit = -1;
 
 public:
 	Address16() {};
 
+	void set(int offset, int bit) { m_offset = offset; m_bit = bit; }
 	void setOffset(int offset) { m_offset = offset; }
-	void setBitNo(int bitNo) { m_bitNo = bitNo; }
+	void setBit(int bit) { m_bit = bit; }
 
 	int offset() const { return m_offset; }
-	int bitNo() const { return m_bitNo; }
+	int bit() const { return m_bit; }
 
-	void reset() { 	m_offset = -1; m_bitNo = -1; }
+	void reset() { 	m_offset = -1; m_bit = -1; }
+
+	bool isValid() const { return m_offset != -1 && m_bit != -1; }
+
+	QString toString() const { return QString("%1:%2").arg(m_offset).arg(m_bit); }
 };
 
 
@@ -197,7 +202,7 @@ private:
 	ByteOrder m_byteOrder = ByteOrder::BigEndian;
 
 	Address16 m_ramAddr;				// signal address in LM RAM
-	Address16 m_acqAddr;				// signal address in FSC data packet (acquisition address)
+	Address16 m_regAddr;				// signal address in FSC data packet (registration address)
 
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -247,10 +252,12 @@ public:
 	InstanceAction instanceAction() const { return m_instanceAction; }
 
 	Address16& ramAddr() { return m_ramAddr; }
-	Address16& acqAddr() { return m_acqAddr; }
+	Address16& regAddr() { return m_regAddr; }
 
-	void resetAddresses() { m_ramAddr.reset(); m_acqAddr.reset(); }
+	const Address16& ramAddr() const { return m_ramAddr; }
+	const Address16& regAddr() const { return m_regAddr; }
 
+	void resetAddresses() { m_ramAddr.reset(); m_regAddr.reset(); }
 
     Q_INVOKABLE QString strID() const { return m_strID; }
 	void setStrID(const QString& strID) { m_strID = strID; }

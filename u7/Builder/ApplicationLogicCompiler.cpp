@@ -16,6 +16,15 @@ namespace Builder
 	const char	*IO_MODULE_DATA_SIZE = "IODataSize";
 
 
+	// Signals properties
+	//
+	const char	*VALUE_OFFSET = "ValueOffset",
+				*VALUE_BIT = "ValueBit";
+
+
+	const int ERR_VALUE = -1;
+
+
 	const int	LM1_PLACE = 0,
 				LM2_PLACE = 15,
 
@@ -223,6 +232,10 @@ namespace Builder
 
 		result &= copyInOutSignals();
 
+		// Calculate addresses of all application's signals
+
+		result &= calculateSignalsAddresses();
+
 		// Generate Application Logic code
 
 		result &= generateApplicationLogicCode();
@@ -328,6 +341,11 @@ namespace Builder
 			else
 			{
 				m_signalsStrID.insert(s->strID(), s);
+			}
+
+			if (!s->deviceStrID().isEmpty())
+			{
+				m_deviceBoundSignals.insertMulti(s->deviceStrID(), s);
 			}
 		}
 
@@ -516,8 +534,6 @@ namespace Builder
 	}
 
 
-
-
 	bool ModuleLogicCompiler::initializeAppFbConstParams(AppFb* appFb)
 	{
 		bool result = true;
@@ -643,16 +659,6 @@ namespace Builder
 	}
 
 
-
-
-	bool ModuleLogicCompiler::getUsedAfbs()
-	{
-		// get all Afbs from algorithms
-		//
-		return true;
-	}
-
-
 	/*bool ModuleLogicCompiler::generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params)
 	{
 		m_code.newLine();
@@ -719,17 +725,19 @@ namespace Builder
 		{
 			Hardware::DeviceModule* module = getModuleOnPlace(place);
 
+			int ioDataSize = ERR_VALUE;
+			int ioModuleData = ERR_VALUE;
+
 			if (module == nullptr || module->isIOModule() == false)
 			{
 				Comment c(QString(tr("No I/O module installed on place %1")).arg(place));
 
 				m_code.append(c);
+
+				continue;
 			}
 			else
 			{
-				int ioDataSize = -1;
-				int ioModuleData = -1;
-
 				result &= getDeviceIntProperty(module, IO_MODULE_DATA_SIZE, ioDataSize);
 
 				QString propertyName(LM_IO_MODULE_DATA);
@@ -737,7 +745,7 @@ namespace Builder
 
 				result &= getLMIntProperty(propertyName.toUtf8().data(), ioModuleData);
 
-				if (ioDataSize == -1 || ioModuleData == -1)
+				if (ioDataSize == ERR_VALUE || ioModuleData == ERR_VALUE)
 				{
 					continue;
 				}
@@ -752,12 +760,86 @@ namespace Builder
 					m_code.append(cmd);
 
 					m_regDataAddress.addWord(ioDataSize);
-
 				}
 			}
+
+			// calculate addresses of signals bound to module In/Out
+			//
+
+			std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module->getAllSignals();
+
+			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+			{
+				if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+				{
+					continue;
+				}
+
+				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+
+				if (boundSignals.count() > 1)
+				{
+					m_log->writeWarning(QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()), false, true);
+				}
+
+				for(Signal* appSignal : boundSignals)
+				{
+					if (appSignal == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					int offset = ERR_VALUE;
+					int bit = ERR_VALUE;
+
+					getDeviceIntProperty(deviceSignal.get(), VALUE_OFFSET, offset);
+					getDeviceIntProperty(deviceSignal.get(), VALUE_BIT, bit);
+
+					if (offset != ERR_VALUE && bit != ERR_VALUE)
+					{
+						appSignal->ramAddr().set(ioModuleData + offset, bit);
+					}
+					else
+					{
+						m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(appSignal->strID()), false, true);
+					}
+				}
+			}
+
 		}
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::calculateSignalsAddresses()
+	{
+		int analogSignalsMemSize = 0;
+
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			if (appSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			const Signal* s = appSignal->signal();
+
+			if (s != nullptr && s->ramAddr().isValid())
+			{
+				appSignal->ramAddr() = s->ramAddr();
+				continue;
+			}
+		}
+
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			qDebug() << appSignal->strID() << " " << appSignal->ramAddr().toString();
+		}
+
+		return true;
 	}
 
 
@@ -797,13 +879,6 @@ namespace Builder
 		{
 			assert(propertyName != nullptr);
 			return false;
-		}
-
-		QList<QByteArray> bb = device->dynamicPropertyNames();
-
-		for(auto i:bb)
-		{
-			qDebug() << i;
 		}
 
 		QVariant val = device->property(propertyName);
@@ -1326,8 +1401,6 @@ namespace Builder
 		SignalType signalType = SignalType::Discrete;
 
 		Afbl::AfbSignalType st = s->type();
-
-		int v = static_cast<int>(st);
 
 		switch(st)
 		{

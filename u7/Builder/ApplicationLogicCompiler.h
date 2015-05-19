@@ -222,8 +222,10 @@ namespace Builder
 		QUuid m_guid;
 		QString m_strID;
 
-		bool m_calculated = false;
 		SignalType m_signalType;
+
+		Address16 m_ramAddr;
+		bool m_calculated = false;
 
 	public:
 		AppSignal(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem);
@@ -244,10 +246,12 @@ namespace Builder
 		SignalType signalType() const { return m_signalType; }
 
 		bool isShadowSignal() { return m_appItem == nullptr; }
+
+		Address16& ramAddr() { return m_ramAddr; }
 	};
 
 
-	class AppSignalsMap : public QObject, HashedVector<QUuid, AppSignal*>
+	class AppSignalsMap : public QObject, public HashedVector<QUuid, AppSignal*>
 	{
 		Q_OBJECT
 
@@ -307,7 +311,8 @@ namespace Builder
 		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
 		QHash<QUuid, AppItem*> m_pinParent;					// pin GUID -> parent item ptr
 		QHash<QUuid, AppItem*> m_pinTypes;					// pin GUID -> parent item ptr
-		QHash<QString, Signal*> m_signalsStrID;				// signals StrID to Signal ptr
+		QHash<QString, Signal*> m_signalsStrID;				// signals StrID -> Signal ptr
+		QHash<QString, Signal*> m_deviceBoundSignals;			// device signal strID -> Signal ptr
 
 		QString msg;
 
@@ -335,6 +340,7 @@ namespace Builder
 
 		bool copyDiagData();
 		bool copyInOutSignals();
+		bool calculateSignalsAddresses();
 
 		bool generateApplicationLogicCode();
 
