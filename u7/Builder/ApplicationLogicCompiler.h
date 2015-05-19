@@ -87,35 +87,33 @@ namespace Builder
 	// Functional Block Library element
 	//
 
-	typedef QHash<CommandCodes, int> CommandCodesInstanceMap;
-	typedef QHash<QString, int> NonRamFblInstanceMap;
-
-
 	class Fbl
 	{
 	private:
 		AfbElement* m_afbElement = nullptr;
-		quint16 m_currentInstance = 0;
-
-		// dynamically created maps
-		//
-		static int m_refCount;
-		static CommandCodesInstanceMap* m_commandCodesInstance;		// CommandCodes -> current instance
-		static NonRamFblInstanceMap* m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
+		int m_instance = 0;					// for Fbls with RAM
 
 	public:
 		Fbl(AfbElement* afbElement);
 		~Fbl();
 
-		quint16 addInstance();
+		//quint16 addInstance();
 
 		bool hasRam() const { return m_afbElement->hasRam(); }
+
+		int incInstance() { return (++m_instance); }
+		int instance() const { return m_instance; }
 
 		const AfbElement& afbElement() const { return *m_afbElement; }
 
 		QUuid guid() const { return m_afbElement->guid(); }
 		QString strID() const { return m_afbElement->strID(); }
+		int opcode() const { return m_afbElement->opcode(); }
 	};
+
+
+	typedef QHash<int, int> FblInstanceMap;
+	typedef QHash<QString, int> NonRamFblInstanceMap;
 
 
 	class FblsMap : public HashedVector<QUuid, Fbl*>
@@ -129,6 +127,9 @@ namespace Builder
 
 			operator QString() const { return QString("%1:%2").arg(guid.toString()).arg(index); }
 		};
+
+		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
+		NonRamFblInstanceMap m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
 
 		QHash<QString, AfbElementSignal*> m_fblsSignals;
 		QHash<QString, AfbElementParam*> m_fblsParams;

@@ -869,24 +869,9 @@ namespace Builder
 	// Fbl class implementation
 	//
 
-	int Fbl::m_refCount = 0;
-	CommandCodesInstanceMap* Fbl::m_commandCodesInstance = nullptr;		// CommandCodes -> current instance
-	NonRamFblInstanceMap* Fbl::m_nonRamFblInstance = nullptr;			// Non RAM Fbl StrID -> instance
-
-
 	Fbl::Fbl(AfbElement* afbElement) :
 		m_afbElement(afbElement)
 	{
-		if (m_refCount == 0)
-		{
-			// first instance of Fbl class create maps
-			//
-			m_commandCodesInstance = new CommandCodesInstanceMap;
-			m_nonRamFblInstance = new NonRamFblInstanceMap;
-		}
-
-		m_refCount++;
-
 		if (m_afbElement == nullptr)
 		{
 			assert(false);
@@ -896,21 +881,12 @@ namespace Builder
 
 	Fbl::~Fbl()
 	{
-		m_refCount--;
-
-		if (m_refCount == 0)
-		{
-			// last instance of of Fbl class delete maps
-			//of Fbl class create maps
-			delete m_commandCodesInstance;
-			delete m_nonRamFblInstance;
-		}
 	}
 
 
-	quint16 Fbl::addInstance()
+/*	quint16 Fbl::addInstance()
 	{
-		assert(m_commandCodesInstance != nullptr);
+		assert(m_fblInstance != nullptr);
 		assert(m_nonRamFblInstance != nullptr);
 
 		if (m_afbElement->hasRam())
@@ -926,13 +902,13 @@ namespace Builder
 		{
 			// Calculate non-RAM Fbl instance
 			//
-			if (m_commandCodesInstance->isEmpty())
+			if (m_fblInstance->isEmpty())
 			{
 				// load all CommandCodes in map
 				//
 				for(unsigned int i = 0; i < sizeof(AllCommandCodes)/sizeof(CommandCodes); i++)
 				{
-					m_commandCodesInstance->insert(AllCommandCodes[i], 0);
+					m_fblInstance->insert(AllCommandCodes[i], 0);
 				}
 			}
 
@@ -944,13 +920,13 @@ namespace Builder
 			{
 				CommandCodes opcode = static_cast<CommandCodes>(m_afbElement->opcode());
 
-				if (m_commandCodesInstance->contains(opcode))
+				if (m_fblInstance->contains(opcode))
 				{
 					int opcodeInstance = (*m_commandCodesInstance)[opcode];
 
 					opcodeInstance++;
 
-					(*m_commandCodesInstance)[opcode] = opcodeInstance;
+					(*m_fblInstance)[opcode] = opcodeInstance;
 
 					m_currentInstance = opcodeInstance;
 				}
@@ -962,7 +938,7 @@ namespace Builder
 		}
 
 		return m_currentInstance;
-	}
+	}*/
 
 
 	// ---------------------------------------------------------------------------------------
@@ -987,6 +963,13 @@ namespace Builder
 		Fbl* fbl = new Fbl(afbElement);
 
 		HashedVector<QUuid, Fbl*>::insert(fbl->guid(), fbl);
+
+		// initialize map Fbl opCode -> current instance
+		//
+		if (!m_fblInstance.contains(afbElement->opcode()))
+		{
+			m_fblInstance.insert(afbElement->opcode(), 0);
+		}
 
 		// add AfbElement in/out signals to m_fblsSignals map
 		//
@@ -1068,22 +1051,6 @@ namespace Builder
 	}
 
 
-	const AfbSignal *FblsMap::getFblSignal(const QUuid& afbElemetGuid, int signalIndex)
-	{
-		GuidIndex gi;
-
-		gi.guid = afbElemetGuid;
-		gi.index = signalIndex;
-
-		if (m_fblsSignals.contains(gi))
-		{
-			return m_fblsSignals.value(gi);
-		}
-
-		return nullptr;
-	}
-
-
 	int FblsMap::addInstance(AppItem* appItem)
 	{
 		if (appItem == nullptr)
@@ -1100,7 +1067,74 @@ namespace Builder
 
 		Fbl* fbl = (*this)[appItem->afbGuid()];
 
-		return fbl->addInstance();
+		if (fbl == nullptr)
+		{
+			assert(false);
+			return 0;
+		}
+
+		int instance = 0;
+
+		if (fbl->hasRam())
+		{
+			instance = fbl->incInstance();
+		}
+		else
+		{
+			// Calculate non-RAM Fbl instance
+			//
+			if (m_nonRamFblInstance.contains(fbl->strID()))
+			{
+				instance = m_nonRamFblInstance.value(fbl->strID());
+			}
+			else
+			{
+				int fblOpcode = fbl->opcode();
+
+				if (m_fblInstance.contains(fblOpcode))
+				{
+					instance = m_fblInstance[fblOpcode];
+
+					instance++;
+
+					m_fblInstance[fblOpcode] = instance;
+
+					m_nonRamFblInstance.insert(fbl->strID(), instance);
+				}
+				else
+				{
+					assert(false);		// unknown opcode
+				}
+			}
+		}
+
+		if (instance == 0)
+		{
+			assert(false);				// invalid instance number
+		}
+
+		if (instance > MAX_FB_INSTANCE)
+		{
+			assert(false);				// reached the max instance number
+		}
+
+		return instance;
+	}
+
+
+	const AfbSignal *FblsMap::getFblSignal(const QUuid& afbElemetGuid, int signalIndex)
+	{
+		GuidIndex gi;
+
+		gi.guid = afbElemetGuid;
+		gi.index = signalIndex;
+
+		if (m_fblsSignals.contains(gi))
+		{
+			return m_fblsSignals.value(gi);
+		}
+
+		return nullptr;
 	}
 
 

@@ -6,7 +6,7 @@
 namespace Builder
 {
 
-	enum CommandCodes
+	enum class CommandCodes
 	{
 		NoCommand = 0,
 		NOP = 1,
@@ -22,6 +22,7 @@ namespace Builder
 		WRFBB = 11,
 		RDFBB = 12,
 		RDFBTS = 13,
+		SETMEM = 14,
 
 		Count
 	};
@@ -29,19 +30,20 @@ namespace Builder
 
 	const CommandCodes AllCommandCodes[] =
 	{
-		NOP,
-		START,
-		STOP,
-		MOV,
-		MOVMEM,
-		MOVC,
-		MOVBC,
-		WRFB,
-		RDFB,
-		WRFBC,
-		WRFBB,
-		RDFBB,
-		RDFBTS,
+		CommandCodes::NOP,
+		CommandCodes::START,
+		CommandCodes::STOP,
+		CommandCodes::MOV,
+		CommandCodes::MOVMEM,
+		CommandCodes::MOVC,
+		CommandCodes::MOVBC,
+		CommandCodes::WRFB,
+		CommandCodes::RDFB,
+		CommandCodes::WRFBC,
+		CommandCodes::WRFBB,
+		CommandCodes::RDFBB,
+		CommandCodes::RDFBTS,
+		CommandCodes::SETMEM
 	};
 
 
@@ -63,6 +65,7 @@ namespace Builder
 		4,		//	WRFBB
 		4,		//	RDFBB
 		3,		//	RDFBTS
+		4,		//	SETMEM
 	};
 
 	const char* const CommandStr[COMMAND_COUNT] =
@@ -81,6 +84,7 @@ namespace Builder
 		"WRFBB",
 		"RDFBB",
 		"RDFBTS",
+		"SETMEM",
 	};
 
 	const char* const FbTypeStr[] =
@@ -170,9 +174,10 @@ namespace Builder
 			setNoCommand();
 		}
 
-		void setNoCommand() { opCode.code = CommandCodes::NoCommand; }
+		void setNoCommand() { opCode.code = static_cast<int>(CommandCodes::NoCommand); }
 
 		void setOpCode(CommandCodes code);
+		int getOpCodeInt() { return opCode.code; }
 		CommandCodes getOpCode() { return static_cast<CommandCodes>(opCode.code); }
 
 		void setFbType(quint16 fbType);
@@ -274,6 +279,7 @@ namespace Builder
 		void writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo);
 		void readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
 		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue);
+		void setMem(quint16 addr, quint16 sizeW, quint16 constValue);
 
 		void setAddress(int address) { m_address = address; }
 
