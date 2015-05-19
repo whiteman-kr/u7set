@@ -2622,8 +2622,8 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosLineEndPoint(QMouseEvent* event)
 	itemPos->setEndXDocPt(docPoint.x());
 	itemPos->setEndYDocPt(docPoint.y());
 
-	if (abs(itemPos->startXDocPt() - itemPos->endXDocPt()) < 0.000001 &&
-		abs(itemPos->startYDocPt() - itemPos->endYDocPt()) < 0.000001)
+	if (std::abs(itemPos->startXDocPt() - itemPos->endXDocPt()) < 0.000001 &&
+		std::abs(itemPos->startYDocPt() - itemPos->endYDocPt()) < 0.000001)
 	{
 		// The line is empty
 		//
@@ -2661,8 +2661,8 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosRectEndPoint(QMouseEvent* event)
 	QPointF sp = schemeView()->m_addRectStartPoint;
 	QPointF ep = schemeView()->m_addRectEndPoint;
 
-	itemPos->setWidthDocPt(abs(sp.x() - ep.x()));
-	itemPos->setHeightDocPt(abs(sp.y() - ep.y()));
+	itemPos->setWidthDocPt(std::abs(sp.x() - ep.x()));
+	itemPos->setHeightDocPt(std::abs(sp.y() - ep.y()));
 	itemPos->setLeftDocPt(std::min(sp.x(), ep.x()));
 	itemPos->setTopDocPt(std::min(sp.y(), ep.y()));
 
