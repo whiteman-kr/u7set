@@ -75,9 +75,9 @@ namespace VFrame30
 	private:
 		QUuid m_guid;
 		QString m_name;
-		bool m_compile;
-		bool m_show;
-		bool m_print;
+		bool m_compile = false;
+		bool m_show = true;
+		bool m_print = true;
 	};
 
 #ifdef VFRAME30LIB_LIBRARY
