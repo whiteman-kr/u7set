@@ -13,7 +13,7 @@ class QtDoublePropertyManager;
 class QtBoolPropertyManager;
 class QtTreePropertyBrowser;
 class SignalsModel;
-enum SignalType;
+enum class SignalType;
 
 class SignalPropertiesDialog : public QDialog
 {

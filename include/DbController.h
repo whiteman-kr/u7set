@@ -94,7 +94,6 @@ public:
 	bool addSignal(SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 
 	bool getUnits(UnitList* units, QWidget* parentWidget);
-	bool getDataFormats(DataFormatList* dataFormats, QWidget* parentWidget);
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);

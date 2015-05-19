@@ -75,15 +75,6 @@ const char* const SensorTypeStr[] =
 const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 
-const char* const ByteOrderStr[] =
-{
-	"Little Edndian",
-	"BigEndian",
-};
-
-const int BYTE_ORDER_COUNT = sizeof(ByteOrderStr) / sizeof(ByteOrderStr[0]);
-
-
 const char* const OutputRangeModeStr[] =
 {
 	"0..5 V",
@@ -141,7 +132,12 @@ public:
 
 typedef OrderedHash<int, QString> UnitList;
 
-typedef OrderedHash<int, QString> DataFormatList;
+
+class DataFormatList : public OrderedHash<int, QString>
+{
+public:
+	DataFormatList();
+};
 
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
@@ -241,7 +237,10 @@ public:
 	bool checkedOut() const { return m_checkedOut; }
 	int userID() const { return m_userID; }
 	int channel() const { return m_channel; }
+
+	int typeInt() const { return TO_INT(m_type); }
 	SignalType type() const { return m_type; }
+
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
 	QDateTime instanceCreated() const { return m_instanceCreated; }
@@ -263,6 +262,7 @@ public:
 	void setName(const QString& name) { m_name = name; }
 
 	Q_INVOKABLE DataFormat dataFormat() const { return m_dataFormat; }
+	Q_INVOKABLE int dataFormatInt() const { return TO_INT(m_dataFormat); }
 	void setDataFormat(DataFormat dataFormat) { m_dataFormat = dataFormat; }
 
     Q_INVOKABLE int dataSize() const { return m_dataSize; }
@@ -351,6 +351,7 @@ public:
 	void setMaxDifference(double maxDifference) { m_maxDifference = maxDifference; }
 
 	Q_INVOKABLE ByteOrder byteOrder() const { return m_byteOrder; }
+	Q_INVOKABLE int byteOrderInt() const { return TO_INT(m_byteOrder); }
 	void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 
