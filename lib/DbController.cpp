@@ -58,7 +58,6 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_getUnits, m_worker, &DbWorker::slot_getUnits);
-	connect(this, &DbController::signal_getDataFormats, m_worker, &DbWorker::slot_getDataFormats);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
 	connect(this, &DbController::signal_deleteSignal, m_worker, &DbWorker::slot_deleteSignal);
@@ -1139,31 +1138,6 @@ bool DbController::getUnits(UnitList *units, QWidget* parentWidget)
 
 	return ok;
 
-}
-
-
-bool DbController::getDataFormats(DataFormatList *dataFormats, QWidget* parentWidget)
-{
-	if (dataFormats == nullptr)
-	{
-		assert(dataFormats != nullptr);
-		return false;
-	}
-
-	// Init progress and check availability
-	//
-	bool ok = initOperation();
-
-	if (ok == false)
-	{
-		return false;
-	}
-
-	emit signal_getDataFormats(dataFormats);
-
-	ok = waitForComplete(parentWidget, tr("Reading data formats"));
-
-	return ok;
 }
 
 

@@ -270,9 +270,13 @@ namespace Builder
 
 		QString appDataPath = QDir::toNativeSeparators(theSettings.buildOutputPath());
 
+		QString buildNoStr;
+
+		buildNoStr.sprintf("%06d", m_buildNo);
+
 		m_buildDirectory = QString("%1-%2-%3")
 				.arg(m_dbController->currentProject().projectName())
-				.arg(m_release ? "release" : "debug").arg(m_buildNo);
+				.arg(m_release ? "release" : "debug").arg(buildNoStr);
 
 		m_buildFullPath = appDataPath + m_separator + m_buildDirectory;
 

@@ -47,9 +47,13 @@ namespace Builder
 	private:
 		virtual void run() override;
 
-		// Get Equipment from the prokect database
+		// Get Equipment from the project database
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
+
+		// Walk through equipment tree
+		//
+		void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren);
 
 		// Expand Devices StrId
 		//
@@ -70,6 +74,10 @@ namespace Builder
 		// Compile Application Logic
 		//
 		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
+
+		// Compile Data Aquisition Service configuration
+		//
+		bool compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, UnitList& unitInfo, BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?
 		//

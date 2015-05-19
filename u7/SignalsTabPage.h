@@ -20,8 +20,8 @@ class QTimer;
 class QCheckBox;
 
 
-const int	ST_ANALOG = SignalType::Analog,
-			ST_DISCRETE = SignalType::Discrete,
+const int	ST_ANALOG = TO_INT(SignalType::Analog),
+			ST_DISCRETE = TO_INT(SignalType::Discrete),
 			ST_ANY = 0xff;
 
 
