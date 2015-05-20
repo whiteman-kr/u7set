@@ -284,6 +284,14 @@ DISTFILES += \
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
+win32 {
+	#CONFIG(debug, debug|release): DEFINES += _CRTDBG_MAP_ALLOC
+	#CONFIG(debug, debug|release): DEFINES += "DBG_NEW=new(_NORMAL_BLOCK,__FILE__,__LINE__)"
+	#CONFIG(debug, debug|release): DEFINES += "new=DBG_NEW"
+}
+
+
+
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
