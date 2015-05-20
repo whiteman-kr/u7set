@@ -42,7 +42,7 @@ const char* const ByteOrderStr[] =
 
 
 #define TO_INT(enumValue) (static_cast<int>(enumValue))
-#define ENUM_COUNT(enumName) (static_cast<int>(enumName##::Count))
+#define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
 
 
 
