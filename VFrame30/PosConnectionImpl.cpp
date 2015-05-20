@@ -300,7 +300,7 @@ namespace VFrame30
 			b = std::max(b, pt->Y);
 		}
 
-		QRectF result(l, t, abs(r - l), abs(b - t));
+		QRectF result(l, t, std::abs(r - l), std::abs(b - t));
 		return result;
 	}
 	

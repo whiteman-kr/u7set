@@ -22,10 +22,10 @@ namespace VFrame30
 
 		// Функции
 		//
-		VideoItemPoint()
+		VideoItemPoint() :
+			X(0),
+			Y(0)
 		{
-			this->X = 0;
-			this->Y = 0;
 		}
 
 		explicit VideoItemPoint(const Proto::VideoItemPoint& vip)
@@ -33,22 +33,23 @@ namespace VFrame30
 			LoadData(vip);
 		}
 
-		explicit VideoItemPoint(QPointF point)
+		explicit VideoItemPoint(QPointF point) :
+			X(point.x()),
+			Y(point.y())
 		{
-			this->X = point.x();
-			this->Y = point.y();
 		}
 
-		VideoItemPoint(double x, double y)
+		VideoItemPoint(double x, double y) :
+			X(x),
+			Y(y)
 		{
-			this->X = x;
-			this->Y = y;
 		}
 
 		bool operator == (const VideoItemPoint& pt) const
 		{
 			return std::abs(pt.X - X) < 0.000001 && std::abs(pt.Y - Y) < 0.000001;
 		}
+
 		bool operator < (const VideoItemPoint& pt) const
 		{
 			if (operator==(pt) == true)
@@ -252,7 +253,24 @@ namespace VFrame30
 		QString m_clickScript;		// Qt script on mouse left button click
 	};
 
-#ifdef VFRAME30LIB_LIBRARY
+#ifdef VFRAME30LIB_LIBRARY	// ------------------------------------------------------------------------
+	//
+	//		ApplicationLogicBranch
+	//
+	// ------------------------------------------------------------------------
+//	ApplicationLogicBranch::ApplicationLogicBranch()
+//	{
+//	}
+
+//	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items() const
+//	{
+//		return m_items;
+//	}
+
+//	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items()
+//	{
+//		return m_items;
+//	}
 	extern Factory<VFrame30::VideoItem> VideoItemFactory;
 #endif
 }

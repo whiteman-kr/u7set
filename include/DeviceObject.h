@@ -95,6 +95,11 @@ namespace Hardware
 		QVariant m_value;
 	};
 
+
+	// Forward declarations
+	//
+	class DeviceSignal;
+
 	//
 	//
 	// DeviceObject
@@ -139,6 +144,9 @@ namespace Hardware
 	public:
 		void expandStrId();
 
+		// Get all signals, including signals from child items
+		std::vector<std::shared_ptr<DeviceSignal>> getAllSignals() const;
+
 		virtual bool event(QEvent* e) override;
 
 		// Protected methods
@@ -148,6 +156,8 @@ namespace Hardware
 		// Parse m_dynamicProperties and create Qt meta system dynamic properies
 		void parseDynamicPropertiesStruct();
 
+		// Get all signals, including signals from child items
+		void getAllSignalsRecursive(std::vector<std::shared_ptr<DeviceSignal>>* deviceSignals) const;
 
 		// Properties, etc
 		//
