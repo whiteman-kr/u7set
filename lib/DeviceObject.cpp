@@ -402,6 +402,18 @@ namespace Hardware
 		return;
 	}
 
+	// Get all signals, including signals from child items
+	//
+	std::vector<std::shared_ptr<DeviceSignal>> DeviceObject::getAllSignals() const
+	{
+		std::vector<std::shared_ptr<DeviceSignal>> deviceSignals;
+		deviceSignals.reserve(128);
+
+		getAllSignalsRecursive(&deviceSignals);
+
+		return deviceSignals;
+	}
+
 	bool DeviceObject::event(QEvent* e)
 	{
 		if (e->type() == QEvent::DynamicPropertyChange && m_avoidEventRecursion == false)
@@ -661,6 +673,32 @@ namespace Hardware
 		m_avoidEventRecursion = false;
 
 		m_dynamicProperties.swap(parsedProperties);
+		return;
+	}
+
+	// Get all signals, including signals from child items
+	//
+	void DeviceObject::getAllSignalsRecursive(std::vector<std::shared_ptr<DeviceSignal>>* deviceSignals) const
+	{
+		if (deviceSignals == nullptr)
+		{
+			assert(deviceSignals);
+			return;
+		}
+
+		for (const std::shared_ptr<DeviceObject>& child : m_children)
+		{
+			if (child->deviceType() == DeviceType::Signal)
+			{
+				deviceSignals->push_back(std::dynamic_pointer_cast<DeviceSignal>(child));
+				assert(dynamic_cast<DeviceSignal*>(deviceSignals->back().get()) != nullptr);
+			}
+			else
+			{
+				child->getAllSignalsRecursive(deviceSignals);
+			}
+		}
+
 		return;
 	}
 

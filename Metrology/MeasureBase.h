@@ -18,11 +18,6 @@ public:
 private:
 
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
-
-signals:
-
-public slots:
-
 };
 
 // ==============================================================================================

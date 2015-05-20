@@ -91,7 +91,7 @@ protected:
 	virtual void paintEvent(QPaintEvent*) override;
 
 	void drawSelection(QPainter* p);
-	void drawNewItemOutline(QPainter* p);
+	void drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam);
 	void drawSelectionArea(QPainter* p);
 	void drawMovingItems(VFrame30::CDrawParam* drawParam);
 	void drawRectSizing(VFrame30::CDrawParam* drawParam);
