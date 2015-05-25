@@ -136,7 +136,6 @@ SOURCES +=\
 	Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
     ../lib/SignalMask.cpp \
-    AfblSet.cpp \
     Subsystem.cpp
 
 HEADERS  += \
@@ -206,7 +205,6 @@ HEADERS  += \
     DialogSubsystemListEditor.h \
     ../include/Types.h \
     ../include/SignalMask.h \
-    AfblSet.h \
     Subsystem.h
 
 FORMS    += \
