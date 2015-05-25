@@ -37,7 +37,7 @@ namespace Builder
 	//	ApplicationLogicCompiler class implementation
 	//
 
-	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet,
+	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection *afblSet,
 													   ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog *log) :
 		m_equipment(equipment),
 		m_signals(signalSet),
@@ -364,9 +364,9 @@ namespace Builder
 
 		m_fbls.clear();
 
-		for(AfbElement& afbl : m_afbl->items)
+		for(std::shared_ptr<Afbl::AfbElement> afbl : m_afbl->elements())
 		{
-			m_fbls.insert(&afbl);
+			m_fbls.insert(afbl);
 		}
 
 		m_appItems.clear();
@@ -383,7 +383,7 @@ namespace Builder
 				continue;
 			}
 
-			AppItem* appItem = new AppItem(&logicItem);
+			AppItem* appItem = new AppItem(logicItem);
 
 			m_appItems.insert(appItem->guid(), appItem);
 
@@ -556,7 +556,7 @@ namespace Builder
 			return false;
 		}
 
-		const AfbElement& afb = appFb->afb();
+		const Afbl::AfbElement& afb = appFb->afb();
 
 		const LogicFb& logicFb = appFb->logicFb();
 
@@ -571,26 +571,26 @@ namespace Builder
 
 		// iniitalization of constant params
 		//
-		for(AfbElementParam afbParam : afb.constParams())
+		for(Afbl::AfbElementParam afbParam : afb.constParams())
 		{
 			Command cmd;
 
 			quint16 paramValue = 0;
 
-			const AfbParamValue& apv = afbParam.value();
+			const Afbl::AfbParamValue& apv = afbParam.value();
 
 			switch(afbParam.type())
 			{
-			case AnalogIntegral:
+			case Afbl::AnalogIntegral:
 				paramValue = apv.IntegralValue;
 #pragma message("###################################### Need calculate value!!!!!!!!! ####################")
 				break;
 
-			case AnalogFloatingPoint:
+			case Afbl::AnalogFloatingPoint:
 				assert(false);				// not implemented
 				break;
 
-			case DiscreteValue:
+			case Afbl::DiscreteValue:
 				paramValue = apv.Discrete;
 				break;
 
@@ -620,7 +620,7 @@ namespace Builder
 			return false;
 		}
 
-		const AfbElement& afb = appFb->afb();
+		const Afbl::AfbElement& afb = appFb->afb();
 
 		const LogicFb& logicFb = appFb->logicFb();
 
@@ -632,7 +632,7 @@ namespace Builder
 
 		// iniitalization of variable params
 		//
-		for(AfbElementParam afbParam : afb.params())
+		for(Afbl::AfbElementParam afbParam : afb.params())
 		{
 			Command cmd;
 
@@ -642,16 +642,16 @@ namespace Builder
 
 			switch(afbParam.type())
 			{
-			case AnalogIntegral:
+			case Afbl::AnalogIntegral:
 				paramValue = value.toInt();
 #pragma message("###################################### Need calculate value!!!!!!!!! ####################")
 				break;
 
-			case AnalogFloatingPoint:
+			case Afbl::AnalogFloatingPoint:
 				assert(false);				// not implemented
 				break;
 
-			case DiscreteValue:
+			case Afbl::DiscreteValue:
 				paramValue = value.toInt();
 				break;
 
@@ -1022,7 +1022,7 @@ namespace Builder
 	// Fbl class implementation
 	//
 
-	Fbl::Fbl(AfbElement* afbElement) :
+	Fbl::Fbl(std::shared_ptr<Afbl::AfbElement> afbElement) :
 		m_afbElement(afbElement)
 	{
 		if (m_afbElement == nullptr)
@@ -1099,7 +1099,7 @@ namespace Builder
 	// FblsMap class implementation
 	//
 
-	void FblsMap::insert(AfbElement* afbElement)
+	void FblsMap::insert(std::shared_ptr<Afbl::AfbElement> afbElement)
 	{
 		if (afbElement == nullptr)
 		{
@@ -1127,9 +1127,9 @@ namespace Builder
 		// add AfbElement in/out signals to m_fblsSignals map
 		//
 
-		std::vector<AfbElementSignal> inputSignals = afbElement->inputSignals();
+		std::vector<Afbl::AfbElementSignal> inputSignals = afbElement->inputSignals();
 
-		for(AfbElementSignal signal : inputSignals)
+		for(Afbl::AfbElementSignal signal : inputSignals)
 		{
 			GuidIndex gi;
 
@@ -1145,9 +1145,9 @@ namespace Builder
 			m_fblsSignals.insert(gi, &signal);
 		}
 
-		std::vector<AfbElementSignal> outputSignals = afbElement->outputSignals();
+		std::vector<Afbl::AfbElementSignal> outputSignals = afbElement->outputSignals();
 
-		for(AfbElementSignal signal : outputSignals)
+		for(Afbl::AfbElementSignal signal : outputSignals)
 		{
 			GuidIndex gi;
 
@@ -1166,9 +1166,9 @@ namespace Builder
 		// add AfbElement params to m_fblsParams map
 		//
 
-		std::vector<AfbElementParam> params = afbElement->params();
+		std::vector<Afbl::AfbElementParam> params = afbElement->params();
 
-		for(AfbElementParam param : params)
+		for(Afbl::AfbElementParam param : params)
 		{
 			GuidIndex gi;
 
@@ -1184,9 +1184,9 @@ namespace Builder
 			m_fblsParams.insert(gi, &param);
 		}
 
-		std::vector<AfbElementParam> constParams = afbElement->constParams();
+		std::vector<Afbl::AfbElementParam> constParams = afbElement->constParams();
 
-		for(AfbElementParam param : constParams)
+		for(Afbl::AfbElementParam param : constParams)
 		{
 			GuidIndex gi;
 
@@ -1307,25 +1307,15 @@ namespace Builder
 	// AppItem class implementation
 	//
 
-	AppItem::AppItem(const AppLogicItem* appLogicItem)
+	AppItem::AppItem(const Builder::AppLogicItem &appLogicItem) :
+		m_appLogicItem(appLogicItem)
 	{
-		if (appLogicItem == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		m_fblItem = appLogicItem->m_fblItem.get();
-		m_scheme = appLogicItem->m_scheme.get();
-		m_afbElement = appLogicItem->m_afbElement.get();
 	}
 
 
 	AppItem::AppItem(const AppItem& appItem)
 	{
-		m_fblItem = appItem.m_fblItem;
-		m_scheme = appItem.m_scheme;
-		m_afbElement = appItem.m_afbElement;
+		m_appLogicItem = appItem.m_appLogicItem;
 	}
 
 
@@ -1338,15 +1328,6 @@ namespace Builder
 		AppItem(*appItem),
 		m_instance(instance)
 	{
-		assert(m_fblItem != nullptr);
-
-		if (m_fblItem == nullptr || !m_fblItem->isFblElement())
-		{
-			assert(false);
-			return;
-		}
-
-		m_logicFb = m_fblItem->toFblElement();
 	}
 
 	// ---------------------------------------------------------------------------------------

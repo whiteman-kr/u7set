@@ -10,10 +10,10 @@
 #include "../Builder/ApplicationLogicBuilder.h"
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
-#include "AfblSet.h"
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/VideoItemSignal.h"
 #include "../VFrame30/VideoItemFblElement.h"
+#include "../VFrame30/FblItem.h"
 #include "../VFrame30/FblItem.h"
 
 
@@ -48,7 +48,7 @@ namespace Builder
 	private:
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
-		AfblSet* m_afbl = nullptr;
+		Afbl::AfbElementCollection* m_afbl = nullptr;
 		ApplicationLogicData* m_appLogicData = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
@@ -65,7 +65,7 @@ namespace Builder
 
 
 	public:
-		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog* log);
+		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog* log);
 
 		bool run();
 
@@ -73,7 +73,7 @@ namespace Builder
 	};
 
 
-	typedef VFrame30::FblItemRect LogicItem;
+	typedef std::shared_ptr<VFrame30::FblItemRect> LogicItem;
 	typedef VFrame30::VideoItemSignal LogicSignal;
 	typedef VFrame30::VideoItemFblElement LogicFb;
 	typedef VFrame30::CFblConnectionPoint LogicPin;
@@ -90,11 +90,11 @@ namespace Builder
 	class Fbl
 	{
 	private:
-		AfbElement* m_afbElement = nullptr;
+		std::shared_ptr<Afbl::AfbElement> m_afbElement;
 		int m_instance = 0;					// for Fbls with RAM
 
 	public:
-		Fbl(AfbElement* afbElement);
+		Fbl(std::shared_ptr<Afbl::AfbElement> afbElement);
 		~Fbl();
 
 		//quint16 addInstance();
@@ -104,7 +104,7 @@ namespace Builder
 		int incInstance() { return (++m_instance); }
 		int instance() const { return m_instance; }
 
-		const AfbElement& afbElement() const { return *m_afbElement; }
+		const Afbl::AfbElement& afbElement() const { return *m_afbElement; }
 
 		QUuid guid() const { return m_afbElement->guid(); }
 		QString strID() const { return m_afbElement->strID(); }
@@ -131,15 +131,15 @@ namespace Builder
 		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
 		NonRamFblInstanceMap m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
 
-		QHash<QString, AfbElementSignal*> m_fblsSignals;
-		QHash<QString, AfbElementParam*> m_fblsParams;
+		QHash<QString, Afbl::AfbElementSignal*> m_fblsSignals;
+		QHash<QString, Afbl::AfbElementParam*> m_fblsParams;
 
 	public:
 		~FblsMap() { clear(); }
 
 		int addInstance(AppItem *appItem);
 
-		void insert(AfbElement* afbElement);
+		void insert(std::shared_ptr<Afbl::AfbElement> afbElement);
 		void clear();
 
 		const AfbSignal* getFblSignal(const QUuid& afbElemetGuid, int signalIndex);
@@ -153,31 +153,30 @@ namespace Builder
 	class AppItem
 	{
 	protected:
-		const VFrame30::FblItemRect* m_fblItem = nullptr;
-		const VFrame30::LogicScheme* m_scheme = nullptr;
-		const Afbl::AfbElement* m_afbElement = nullptr;
+		AppLogicItem m_appLogicItem;
 
 	public:
 		AppItem(const AppItem& appItem);
-		AppItem(const AppLogicItem* appLogicItem);
+		AppItem(const AppLogicItem& appLogicItem);
 
-		QUuid guid() const { return m_fblItem->guid(); }
-		QUuid afbGuid() const { return m_afbElement->guid(); }
+		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
+		QUuid afbGuid() const { return m_appLogicItem.m_afbElement->guid(); }
 
-		QString strID() const { return m_fblItem->toSignalElement()->signalStrIds(); }
+		QString strID() const { return m_appLogicItem.m_fblItem->toSignalElement()->signalStrIds(); }
 
-		bool isSignal() const { return m_fblItem->isSignalElement(); }
-		bool isFb() const { return m_fblItem->isFblElement(); }
+		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
+		bool isFb() const { return m_appLogicItem.m_fblItem->isFblElement(); }
 
-		bool afbInitialized() const { return m_afbElement != nullptr; }
+		bool afbInitialized() const { return m_appLogicItem.m_afbElement != nullptr; }
 
-		const std::list<LogicPin>& inputs() const { return m_fblItem->inputs(); }
-		const std::list<LogicPin>& outputs() const { return m_fblItem->outputs(); }
+		const std::list<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
+		const std::list<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
 
-		const Afbl::AfbElement& afb() const { return *m_afbElement; }
+		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toFblElement(); }
+		const Afbl::AfbElement& afb() const { return *m_appLogicItem.m_afbElement; }
 		//const LogicItem& logic() const { return *m_fblItem; }
 
-		const LogicSignal& signal() { return *m_fblItem->toSignalElement(); }
+		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 	};
 
 
@@ -187,15 +186,12 @@ namespace Builder
 	class AppFb : public AppItem
 	{
 	private:
-		const LogicFb* m_logicFb = nullptr;
 		quint16 m_instance = -1;
 
 	public:
 		AppFb(AppItem* appItem, int instance);
 
 		quint16 instance() const { return m_instance; }
-
-		const LogicFb& logicFb() const { return *m_logicFb; }
 	};
 
 
@@ -274,7 +270,7 @@ namespace Builder
 
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
-		AfblSet* m_afbl = nullptr;
+		Afbl::AfbElementCollection* m_afbl = nullptr;
 		ApplicationLogicData* m_appLogicData = nullptr;
 		ApplicationLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
