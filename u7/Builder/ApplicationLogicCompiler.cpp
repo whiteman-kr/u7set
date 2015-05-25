@@ -192,6 +192,16 @@ namespace Builder
 		m_resultWriter = appLogicCompiler.m_resultWriter;
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
+
+
+		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
+		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
+		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::AIM, "AIM");
+		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::AOM, "AOM");
+		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::DIM, "DIM");
+		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::DOM, "DOM");
+		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::AIFM, "AIFM");
+		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OCM, "OCM");
 	}
 
 
@@ -217,29 +227,33 @@ namespace Builder
 		bool result = true;
 
 		// Initialization
-
+		//
 		result &= init();
 
 		// Functionals Block's initialization
-
+		//
 		result &= afbInitialization();
 
-		// Copy DiagDataController memory to the registration
+		// Calculate addresses of input & output application's signals
+		//
+		result &= calculateInOutSignalsAddresses();
 
-		result &= copyDiagData();
-
-		// Copy values of all input & output signals to the registration
-
-		result &= copyInOutSignals();
 
 		// Calculate addresses of all application's signals
-
+		//
 		result &= calculateSignalsAddresses();
 
 		// Generate Application Logic code
 
 		result &= generateApplicationLogicCode();
 
+		// Copy DiagDataController memory to the registration
+
+		result &= copyDiagDataToRegistration();
+
+		// Copy values of all input & output signals to the registration
+
+		result &= copyInOutSignalsToRegistration();
 
 		result &= writeResult();
 
@@ -501,6 +515,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::afbInitialization()
 	{
+		m_log->writeMessage(QString(tr("Generation of AFB initialization code...")), false);
+
 		bool result = true;
 
 		m_code.newLine();
@@ -682,7 +698,7 @@ namespace Builder
 	}*/
 
 
-	bool ModuleLogicCompiler::copyDiagData()
+	bool ModuleLogicCompiler::copyDiagDataToRegistration()
 	{
 		m_code.newLine();
 		m_code.comment("Copy LM diagnostics data to registration");
@@ -713,13 +729,11 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyInOutSignals()
+	bool ModuleLogicCompiler::calculateInOutSignalsAddresses()
 	{
-		bool result = true;
+		m_log->writeMessage(QString(tr("Input & Output signals sddresses calculation...")), false);
 
-		m_code.newLine();
-		m_code.comment("Copy input/output signals to registration");
-		m_code.newLine();
+		bool result = true;
 
 		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLCE; place++)
 		{
@@ -730,37 +744,19 @@ namespace Builder
 
 			if (module == nullptr || module->isIOModule() == false)
 			{
-				Comment c(QString(tr("No I/O module installed on place %1")).arg(place));
-
-				m_code.append(c);
-
 				continue;
 			}
-			else
+
+			result &= getDeviceIntProperty(module, IO_MODULE_DATA_SIZE, ioDataSize);
+
+			QString propertyName(LM_IO_MODULE_DATA);
+			propertyName += QString().sprintf("%02d", place);
+
+			result &= getLMIntProperty(propertyName.toUtf8().data(), ioModuleData);
+
+			if (ioDataSize == ERR_VALUE || ioModuleData == ERR_VALUE)
 			{
-				result &= getDeviceIntProperty(module, IO_MODULE_DATA_SIZE, ioDataSize);
-
-				QString propertyName(LM_IO_MODULE_DATA);
-				propertyName += QString().sprintf("%02d", place);
-
-				result &= getLMIntProperty(propertyName.toUtf8().data(), ioModuleData);
-
-				if (ioDataSize == ERR_VALUE || ioModuleData == ERR_VALUE)
-				{
-					continue;
-				}
-				else
-				{
-					Command cmd;
-
-					cmd.movMem(ioModuleData, m_regDataAddress.address(), ioDataSize);
-
-					cmd.setComment(QString(tr("Move I/O module data (place %1) to registration")).arg(place));
-
-					m_code.append(cmd);
-
-					m_regDataAddress.addWord(ioDataSize);
-				}
+				continue;
 			}
 
 			// calculate addresses of signals bound to module In/Out
@@ -813,9 +809,73 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::copyInOutSignalsToRegistration()
+	{
+		bool result = true;
+
+		m_code.newLine();
+		m_code.comment("Copy input/output signals to registration");
+		m_code.newLine();
+
+		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLCE; place++)
+		{
+			Hardware::DeviceModule* module = getModuleOnPlace(place);
+
+			int ioDataSize = ERR_VALUE;
+			int ioModuleData = ERR_VALUE;
+
+			if (module == nullptr || module->isIOModule() == false)
+			{
+				Comment c(QString(tr("No in/out modules installed on place %1")).arg(place));
+
+				m_code.append(c);
+
+				continue;
+			}
+			else
+			{
+				result &= getDeviceIntProperty(module, IO_MODULE_DATA_SIZE, ioDataSize);
+
+				QString propertyName(LM_IO_MODULE_DATA);
+				propertyName += QString().sprintf("%02d", place);
+
+				result &= getLMIntProperty(propertyName.toUtf8().data(), ioModuleData);
+
+				if (ioDataSize == ERR_VALUE || ioModuleData == ERR_VALUE)
+				{
+					continue;
+				}
+				else
+				{
+					QString moduleFamilyStr = "UNKNOWN";
+
+					if (m_moduleFamilyTypeStr.contains(module->moduleFamily()))
+					{
+						moduleFamilyStr	= m_moduleFamilyTypeStr[module->moduleFamily()];
+					}
+
+					Command cmd;
+
+					cmd.movMem(ioModuleData, m_regDataAddress.address(), ioDataSize);
+
+					cmd.setComment(QString(tr("Move %1 module data (place %2) to registration")).arg(moduleFamilyStr).arg(place));
+
+					m_code.append(cmd);
+
+					m_regDataAddress.addWord(ioDataSize);
+				}
+			}
+		}
+
+		return result;
+	}
+
+
+
 	bool ModuleLogicCompiler::calculateSignalsAddresses()
 	{
-		int analogSignalsMemSize = 0;
+		/*int analogSignalsMemSizeW = 0;
+		int discreteSignalsMemSizeBit = 0;
 
 		for(AppSignal* appSignal : m_appSignals)
 		{
@@ -825,19 +885,41 @@ namespace Builder
 				continue;
 			}
 
-			const Signal* s = appSignal->signal();
-
-			if (s != nullptr && s->ramAddr().isValid())
+			if (m_signals->contains(appSignal->ID()))
 			{
-				appSignal->ramAddr() = s->ramAddr();
-				continue;
+				// is real signal
+				//
+				appSignal->ramAddr() = m_signals->value(appSignal->ID()).ramAddr();
+
+				if (appSignal->ramAddr().isValid())
+				{
+					// is real signal with address calculated in copyInOutSignals() procedure
+					//
+					continue;
+				}
+			}
+
+			int signalSizeBit = appSignal->size();
+
+			if (appSignal->isAnalog())
+			{
+				// analog signal
+				//
+
+				analogSignalsMemSizeW += signalSizeBit / 16 + (signalSizeBit % 16 ? 1 : 0);
+			}
+			else
+			{
+				// discrete signal
+				//
+				discreteSignalsMemSizeBit += signalSizeBit;
 			}
 		}
 
 		for(AppSignal* appSignal : m_appSignals)
 		{
 			qDebug() << appSignal->strID() << " " << appSignal->ramAddr().toString();
-		}
+		}*/
 
 		return true;
 	}
@@ -1306,13 +1388,31 @@ namespace Builder
 	// AppSignal class implementation
 	//
 
-	AppSignal::AppSignal(const QUuid& guid, const QString& strID, SignalType signalType, const Signal *signal, const AppItem *appItem) :
-		m_guid(guid),
-		m_strID(strID),
-		m_signalType(signalType),
-		m_signal(signal),
+
+	AppSignal::AppSignal(const Signal *signal, const AppItem *appItem) :
 		m_appItem(appItem)
 	{
+		// construct AppSignal based on real signal
+		//
+		if (signal == nullptr)
+		{
+			assert(false);
+		}
+
+		*dynamic_cast<Signal*>(this) = *signal;
+
+		m_isShadowSignal = false;
+	}
+
+
+	AppSignal::AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem *appItem) :
+		m_guid(guid),
+		m_appItem(appItem)
+	{
+		// construct shadow AppSignal based on OutputPin
+		//
+
+		m_isShadowSignal = true;
 	}
 
 
@@ -1322,6 +1422,7 @@ namespace Builder
 
 		return *m_appItem;
 	}
+
 
 
 	// ---------------------------------------------------------------------------------------
@@ -1434,7 +1535,9 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(guid, strID, signalType, signal, appItem);
+			// ###############################################################
+			// appSignal = new AppSignal(guid, strID, signalType, signal, appItem);
+			// ###############################################################
 
 			m_signalStrIdMap.insert(strID, appSignal);
 

@@ -1428,13 +1428,24 @@ namespace Hardware
 
 	bool DeviceModule::isIOModule() const
 	{
+		return isInputModule() || isOutputModule();
+	}
+
+	bool DeviceModule::isInputModule() const
+	{
 		FamilyType family = moduleFamily();
 
 		return	family == FamilyType::AIM ||
-				family == FamilyType::AOM ||
 				family == FamilyType::DIM ||
-				family == FamilyType::DOM ||
 				family == FamilyType::AIFM;
+	}
+
+	bool DeviceModule::isOutputModule() const
+	{
+		FamilyType family = moduleFamily();
+
+		return	family == FamilyType::AOM ||
+				family == FamilyType::DOM;
 	}
 
 	//

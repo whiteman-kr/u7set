@@ -438,6 +438,8 @@ namespace Hardware
 		void setConfType(const QString& value);
 
 		bool isIOModule() const;
+		bool isInputModule() const;
+		bool isOutputModule() const;
 
 		// Data
 		//

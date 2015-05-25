@@ -246,6 +246,9 @@ public:
 	int typeInt() const { return TO_INT(m_type); }
 	SignalType type() const { return m_type; }
 
+	bool isAnalog() const { return m_type == SignalType::Analog; }
+	bool isDiscrete() const { return m_type == SignalType::Discrete; }
+
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
 	QDateTime instanceCreated() const { return m_instanceCreated; }

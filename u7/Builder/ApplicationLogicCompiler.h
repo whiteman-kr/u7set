@@ -213,41 +213,28 @@ namespace Builder
 	// represent all signal in application logic schemes, and signals, which createad in compiling time
 	//
 
-	class AppSignal
+	class AppSignal : public Signal
 	{
 	private:
 		const AppItem* m_appItem = nullptr;
-		const Signal* m_signal = nullptr;
 
 		QUuid m_guid;
-		QString m_strID;
+		bool m_isShadowSignal = false;
 
-		SignalType m_signalType;
-
-		Address16 m_ramAddr;
 		bool m_calculated = false;
 
 	public:
-		AppSignal(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem);
+		AppSignal(const Signal* signal, const AppItem* appItem);
+		AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem* appItem);
 
 		const AppItem &appItem() const;
-
-		void setStrID(QString strID) { m_strID = strID; }
-		QString strID() const { return m_strID; }
 
 		void setCalculated() { m_calculated = true; }
 		bool isCalculated() const { return m_calculated; }
 
-		void setSignal(Signal* signal) { m_signal = signal; }
-		const Signal* signal() { return m_signal; }
-
-
-		void signalType(SignalType signalType) { m_signalType = signalType; }
-		SignalType signalType() const { return m_signalType; }
 
 		bool isShadowSignal() { return m_appItem == nullptr; }
 
-		Address16& ramAddr() { return m_ramAddr; }
 	};
 
 
@@ -314,6 +301,8 @@ namespace Builder
 		QHash<QString, Signal*> m_signalsStrID;				// signals StrID -> Signal ptr
 		QHash<QString, Signal*> m_deviceBoundSignals;			// device signal strID -> Signal ptr
 
+		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
+
 		QString msg;
 
 	private:
@@ -338,8 +327,10 @@ namespace Builder
 
 		void buildServiceMaps();
 
-		bool copyDiagData();
-		bool copyInOutSignals();
+		bool copyDiagDataToRegistration();
+		bool copyInOutSignalsToRegistration();
+
+		bool calculateInOutSignalsAddresses();
 		bool calculateSignalsAddresses();
 
 		bool generateApplicationLogicCode();
