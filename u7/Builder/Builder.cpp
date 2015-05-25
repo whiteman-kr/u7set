@@ -126,6 +126,10 @@ namespace Builder
 
 			Hardware::EquipmentSet equipmentSet(deviceRoot);
 
+			//
+			// SignalSet
+			//
+
 			//auto aaa = equipmentSet.deviceObject(QString("SYSTEMID1_RACKID2_SIGNAL1"));
 			//auto aaa1 = equipmentSet.deviceObjectSharedPointer("SYSTEMID1_RACKID2_SIGNAL1");
 
@@ -136,16 +140,28 @@ namespace Builder
 				break;
 			}
 
+			//
+			// Loading AFB elements
+			//
 			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Loading AFB elements"), true);
 
-			AfblSet afblSet;
+			Afbl::AfbElementCollection afbCollection;
 
-			if (afblSet.loadFromDatabase(&db, m_log, nullptr) == false)
+			ok = loadAfbl(&db, &afbCollection);
+
+			if (ok == false)
 			{
+				m_log->writeError(tr("Error"), true, false);
+				QThread::currentThread()->requestInterruption();
 				break;
 			}
-			m_log->writeMessage(QString::number(afblSet.items.size()) + tr(" elements loaded."), false);
+			else
+			{
+				m_log->writeSuccess(tr("Ok"), true);
+			}
+
+			m_log->writeMessage(tr("%1 elements loaded.").arg(afbCollection.elements().size()), false);
 
 			//
 			// Compile Module configuration
@@ -176,7 +192,7 @@ namespace Builder
 			//
 			ApplicationLogicData appLogicData;
 
-			buildApplicationLogic(&db, &appLogicData, lastChangesetId);
+			buildApplicationLogic(&db, &appLogicData, &afbCollection, lastChangesetId);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -186,7 +202,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afblSet, &appLogicData, &buildWriter);
+			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afbCollection, &appLogicData, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -385,6 +401,69 @@ namespace Builder
 		return true;
 	}
 
+	bool BuildWorkerThread::loadAfbl(DbController* db, Afbl::AfbElementCollection* afbCollection)
+	{
+		if (db == nullptr ||
+			afbCollection == nullptr)
+		{
+			assert(db);
+			assert(afbCollection);
+			return false;
+		}
+
+		bool result = true;
+
+		// Get file list from the DB
+		//
+		std::vector<DbFileInfo> files;
+
+		if (db->getFileList(&files, db->afblFileId(), "afb", nullptr) == false)
+		{
+			m_log->writeError(QObject::tr("Cannot get application functional block file list."), false, true);
+			return false;
+		}
+
+		// Get files from the DB
+		//
+		std::vector<std::shared_ptr<Afbl::AfbElement>> afbs;
+		afbs.reserve(files.size());
+
+		for (DbFileInfo& fi : files)
+		{
+			std::shared_ptr<DbFile> f;
+
+			if (db->getLatestVersion(fi, &f, nullptr) == false)
+			{
+				m_log->writeError(QObject::tr("Getting the latest version of the file %1 failed.").arg(fi.fileName()), false, true);
+				result = false;
+				continue;
+			}
+
+			std::shared_ptr<Afbl::AfbElement> e = std::make_shared<Afbl::AfbElement>();
+
+			QXmlStreamReader reader(f->data());
+
+			if (e->loadFromXml(&reader) == false)
+			{
+				m_log->writeError(QObject::tr("Reading contents of the file %1 failed.").arg(fi.fileName()), false, true);
+
+				if (reader.errorString().isEmpty() == false)
+				{
+					m_log->writeError("XML error: " + reader.errorString(), false, false);
+				}
+
+				result = false;
+				continue;
+			}
+
+			afbs.push_back(e);
+		}
+
+		afbCollection->setElements(afbs);
+
+		return result;
+	}
+
 	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr ||
@@ -404,18 +483,25 @@ namespace Builder
 
 	}
 
-	bool BuildWorkerThread::buildApplicationLogic(DbController* db, ApplicationLogicData* appLogicData, int changesetId)
+	bool BuildWorkerThread::buildApplicationLogic(DbController* db,
+												  ApplicationLogicData* appLogicData,
+												  Afbl::AfbElementCollection* afbCollection,
+												  int changesetId)
 	{
-		if (db == nullptr || appLogicData == nullptr)
+		if (db == nullptr ||
+			appLogicData == nullptr ||
+			afbCollection == nullptr)
 		{
-			assert(false);
+			assert(db);
+			assert(appLogicData);
+			assert(afbCollection);
 			return false;
 		}
 
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Application Logic building"), true);
 
-		ApplicationLogicBuilder alBuilder = {db, m_log, appLogicData, changesetId, debug()};
+		ApplicationLogicBuilder alBuilder = {db, m_log, appLogicData, afbCollection, changesetId, debug()};
 
 		bool result = alBuilder.build();
 
@@ -433,12 +519,16 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter)
+	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment,
+													SignalSet* signalSet,
+													Afbl::AfbElementCollection* afbCollection,
+													ApplicationLogicData* appLogicData,
+													BuildResultWriter* buildResultWriter)
 	{
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Application Logic compilation"), true);
 
-		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, afblSet, appLogicData, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 

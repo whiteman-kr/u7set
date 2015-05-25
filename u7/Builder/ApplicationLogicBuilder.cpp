@@ -11,6 +11,8 @@
 #include "../../VFrame30/VideoItemSignal.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
+#include "../../VFrame30/Fbl.h"
+
 
 namespace Builder
 {
@@ -169,19 +171,17 @@ namespace Builder
 	{
 	}
 
-	bool ApplicationLogicModule::addBranch(
-		std::shared_ptr<VFrame30::LogicScheme> logicScheme,
-		const BushContainer& bushContainer,
-		OutputLog* log)
+	bool ApplicationLogicModule::addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+			const BushContainer& bushContainer,
+			Afbl::AfbElementCollection* afbCollection,
+			OutputLog* log)
 	{
-		if (logicScheme == nullptr)
+		if (logicScheme == nullptr ||
+			log == nullptr ||
+			afbCollection)
 		{
 			assert(logicScheme);
-			return false;
-		}
-
-		if (log == nullptr)
-		{
+			assert(afbCollection);
 			assert(log);
 			return false;
 		}
@@ -204,7 +204,7 @@ namespace Builder
 
 				if (f->isFblElement())
 				{
-					afbElement = logicScheme->afbCollection().get(f->toFblElement()->afbGuid());
+					afbElement = afbCollection->get(f->toFblElement()->afbGuid());
 
 					if (afbElement == nullptr)
 					{
@@ -683,6 +683,7 @@ namespace Builder
 			const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
+			Afbl::AfbElementCollection* afbCollection,
 			OutputLog* log)
 	{
 		if (bushContainer.bushes.empty() == true)
@@ -730,7 +731,7 @@ namespace Builder
 
 		// add new branch to module
 		//
-		bool result = module->addBranch(scheme, bushContainer, log);
+		bool result = module->addBranch(scheme, bushContainer, afbCollection,log);
 
 		return result;
 	}
@@ -780,16 +781,23 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 
-	ApplicationLogicBuilder::ApplicationLogicBuilder(DbController* db, OutputLog* log, ApplicationLogicData *appLogicData,
-		int changesetId, bool debug) :
+	ApplicationLogicBuilder::ApplicationLogicBuilder(DbController* db,
+													 OutputLog* log,
+													 ApplicationLogicData* appLogicData,
+													 Afbl::AfbElementCollection* afbCollection,
+													 int changesetId,
+													 bool debug) :
 		m_db(db),
 		m_log(log),
 		m_changesetId(changesetId),
 		m_debug(debug),
-		m_applicationData(appLogicData)
+		m_applicationData(appLogicData),
+		m_afbCollection(afbCollection)
 	{
 		assert(m_db);
 		assert(m_log);
+		assert(m_applicationData);
+		assert(afbCollection);
 
 		return;
 	}
@@ -1008,7 +1016,7 @@ namespace Builder
 
 		// Generate afb list, and set it to some container
 		//
-		result = applicationData()->addData(bushContainer, logicScheme, layer, m_log);
+		result = applicationData()->addData(bushContainer, logicScheme, layer, m_afbCollection, m_log);
 
 		if (result == false)
 		{

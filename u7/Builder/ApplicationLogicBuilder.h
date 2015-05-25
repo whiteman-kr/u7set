@@ -27,6 +27,7 @@ namespace VFrame30
 namespace Afbl
 {
 	class AfbElement;
+	class AfbElementCollection;
 }
 
 namespace Builder
@@ -102,11 +103,10 @@ namespace Builder
 		ApplicationLogicModule() = delete;
 		ApplicationLogicModule(QString moduleStrId);
 
-		bool addBranch(
-			std::shared_ptr<VFrame30::LogicScheme> logicScheme,
-			const BushContainer& bushContainer,
-			OutputLog* log);
-
+		bool addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+					   const BushContainer& bushContainer,
+					   Afbl::AfbElementCollection* afbCollection,
+					   OutputLog* log);
 
 		bool orderItems(OutputLog* log);
 
@@ -160,6 +160,7 @@ namespace Builder
 		bool addData(const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
+			Afbl::AfbElementCollection* afbCollection,
 			OutputLog* log);
 
 		bool orderItems(OutputLog* log);
@@ -186,7 +187,13 @@ namespace Builder
 
 	public:
 		ApplicationLogicBuilder() = delete;
-		ApplicationLogicBuilder(DbController* db, OutputLog* log, ApplicationLogicData* appLogicData, int changesetId, bool debug);
+		ApplicationLogicBuilder(DbController* db,
+								OutputLog* log,
+								ApplicationLogicData* appLogicData,
+								Afbl::AfbElementCollection* afbCollection,
+								int changesetId,
+								bool debug);
+
 		virtual ~ApplicationLogicBuilder();
 
 		bool build();
@@ -229,8 +236,8 @@ namespace Builder
 		int m_debug = false;
 
 		ApplicationLogicData* m_applicationData = nullptr;
+		Afbl::AfbElementCollection* m_afbCollection = nullptr;
 	};
-
 
 }
 

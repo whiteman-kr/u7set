@@ -279,7 +279,6 @@ private:
 		// Methods
 		//
 	public:
-
 		void setElements(const std::vector<std::shared_ptr<AfbElement>>& elements);
 
 		const std::vector<std::shared_ptr<AfbElement>>& elements() const;
