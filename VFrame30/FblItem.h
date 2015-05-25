@@ -127,7 +127,6 @@ namespace VFrame30
 		int inputsCount() const;
 		int outputsCount() const;
 
-	protected:
 		void addInput();
 		void addInput(const Afbl::AfbElementSignal& s);
 

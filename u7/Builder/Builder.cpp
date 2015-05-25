@@ -458,7 +458,6 @@ namespace Builder
 	bool BuildWorkerThread::compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, UnitList &unitInfo, BuildResultWriter* buildResultWriter)
 	{
 		DataFormatList dataFormatInfo;
-
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Data Aquisition Service configuration compilation"), true);
 
@@ -526,6 +525,23 @@ namespace Builder
 			applicationSignalsWriter.setAutoFormatting(true);
 			applicationSignalsWriter.writeStartDocument();
 
+			// Writing units
+			applicationSignalsWriter.writeStartElement("units");
+			applicationSignalsWriter.writeAttribute("count", QString::number(unitInfo.count()));
+
+			for (int i = 0; i < unitInfo.count(); i++)
+			{
+				applicationSignalsWriter.writeStartElement("unit");
+
+				applicationSignalsWriter.writeAttribute("ID", QString::number(unitInfo.key(i)));
+				applicationSignalsWriter.writeAttribute("name", unitInfo[i]);
+
+				applicationSignalsWriter.writeEndElement();
+			}
+
+			applicationSignalsWriter.writeEndElement();
+
+			// Writing signals
 			applicationSignalsWriter.writeStartElement("applicationSignals");
 
 			for (int i = 0; i < signalSet->count(); i++)

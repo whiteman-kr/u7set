@@ -69,22 +69,9 @@ namespace Builder
 
 	// ------------------------------------------------------------------------
 	//
-	//		ApplicationLogicBranch
+	//		AppLogicItem
 	//
 	// ------------------------------------------------------------------------
-//	ApplicationLogicBranch::ApplicationLogicBranch()
-//	{
-//	}
-
-//	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items() const
-//	{
-//		return m_items;
-//	}
-
-//	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items()
-//	{
-//		return m_items;
-//	}
 
 	AppLogicItem::AppLogicItem(
 		std::shared_ptr<VFrame30::FblItemRect> fblItem,
@@ -99,121 +86,45 @@ namespace Builder
 		//assert(afbElement);	afbElement can be empty for diferent from VFrame30::VideoItemFblElement items
 	}
 
-
-
-	void ApplicationLogicScheme::setData(
-		std::shared_ptr<VFrame30::LogicScheme>& scheme,
-		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items)
+	bool AppLogicItem::operator < (const AppLogicItem& li) const
 	{
-		m_scheme = scheme;
-
-		for (const std::shared_ptr<VFrame30::FblItemRect>& fblItem : items)
-		{
-			std::shared_ptr<Afbl::AfbElement> afbElement;
-
-			const VFrame30::VideoItemFblElement* vifble = fblItem->toFblElement();
-
-			if (vifble != nullptr)
-			{
-				afbElement = scheme->afbCollection().get(vifble->afbGuid());
-			}
-			else
-			{
-				// afbElement can be empty for diferent from VFrame30::VideoItemFblElement items
-			}
-
-			AppLogicItem li(fblItem, scheme, afbElement);
-
-			m_items.push_back(li);
-		}
+		return this->m_fblItem.get() < li.m_fblItem.get();
 	}
 
-	std::shared_ptr<VFrame30::FblItemRect> ApplicationLogicScheme::getItemByGuid(const QUuid& itemGuid) const
+	bool AppLogicItem::operator == (const AppLogicItem& li) const
 	{
-		auto it = std::find_if(m_items.begin(), m_items.end(),
-			[&itemGuid](const AppLogicItem& li)
-			{
-				return li.m_fblItem->guid() == itemGuid;
-			});
+		bool result = this->m_fblItem.get() == li.m_fblItem.get();
 
-		if (it != m_items.end())
+		if (result == true)
 		{
-			return it->m_fblItem;
-		}
-		else
-		{
-			return std::shared_ptr<VFrame30::FblItemRect>{};
-		}
-	}
-
-	std::shared_ptr<Afbl::AfbElement> ApplicationLogicScheme::getItemsFbl(const std::shared_ptr<VFrame30::FblItemRect>& item) const
-	{
-		if (m_scheme == nullptr)
-		{
-			assert(m_scheme);
-			return std::shared_ptr<Afbl::AfbElement>{};
+			assert(this->m_scheme == li.m_scheme);
+			assert(this->m_afbElement == li.m_afbElement);
 		}
 
-		VFrame30::VideoItemFblElement* schemeItemFblElement = item->toFblElement();
-
-		if (schemeItemFblElement == nullptr)
-		{
-			assert(schemeItemFblElement);
-			return std::shared_ptr<Afbl::AfbElement>{};
-		}
-
-		auto result = m_scheme->afbCollection().get(schemeItemFblElement->afbGuid());
 		return result;
 	}
 
-	const std::shared_ptr<VFrame30::LogicScheme>& ApplicationLogicScheme::scheme() const
-	{
-		return m_scheme;
-	}
 
-	std::shared_ptr<VFrame30::LogicScheme> ApplicationLogicScheme::scheme()
-	{
-		return m_scheme;
-	}
-
-	const std::list<AppLogicItem>& ApplicationLogicScheme::items() const
-	{
-		return m_items;
-	}
-
-	std::list<AppLogicItem>& ApplicationLogicScheme::items()
-	{
-		return m_items;
-	}
-
-
-	// ------------------------------------------------------------------------
 	//
-	//		ApplicationLogicModule
+	// ChangeOrder struct -- used only in ApplicationLogicModule::orderItems
 	//
-	// ------------------------------------------------------------------------
-	ApplicationLogicModule::ApplicationLogicModule(QString moduleStrId) :
-		m_moduleStrId(moduleStrId)
-	{
-	}
-
 	struct ChangeOrder
 	{
 		struct HistoryItem
 		{
-			std::shared_ptr<VFrame30::FblItemRect> ChangeItem;
+			AppLogicItem ChangeItem;
 			int count;
 		};
 
-		std::shared_ptr<VFrame30::FblItemRect> item;
+		AppLogicItem item;
 		std::list<HistoryItem> history;
 
-		int getChangeCount(const std::shared_ptr<VFrame30::FblItemRect>& forItem)
+		int getChangeCount(const AppLogicItem& forItem)
 		{
 			auto it = std::find_if(history.begin(), history.end(),
 				[&forItem](const HistoryItem& hi)
 				{
-					return hi.ChangeItem == forItem;
+					return hi.ChangeItem.m_fblItem == forItem.m_fblItem;
 				});
 
 			if (it == history.end())
@@ -226,17 +137,17 @@ namespace Builder
 			}
 		}
 
-		void incChangeCount(const std::shared_ptr<VFrame30::FblItemRect>& forItem)
+		void incChangeCount(const AppLogicItem& forItem)
 		{
 			auto it = std::find_if(history.begin(), history.end(),
 				[&forItem](const HistoryItem& hi)
 				{
-					return hi.ChangeItem == forItem;
+					return hi.ChangeItem.m_fblItem == forItem.m_fblItem;
 				});
 
 			if (it == history.end())
 			{
-				HistoryItem hi = {forItem, 1};
+				HistoryItem hi{forItem, 1};
 				history.push_back(hi);
 			}
 			else
@@ -246,6 +157,17 @@ namespace Builder
 		}
 	};
 
+
+
+	// ------------------------------------------------------------------------
+	//
+	//		ApplicationLogicModule
+	//
+	// ------------------------------------------------------------------------
+	ApplicationLogicModule::ApplicationLogicModule(QString moduleStrId) :
+		m_moduleStrId(moduleStrId)
+	{
+	}
 
 	bool ApplicationLogicModule::addBranch(
 		std::shared_ptr<VFrame30::LogicScheme> logicScheme,
@@ -272,27 +194,74 @@ namespace Builder
 
 		bool result = true;
 
-		// Go throuhg all bushes and make branches from them
+		// Save all items to accumulator, they will be ordered in orderItems()
+		//
+		for (const Bush& bush : bushContainer.bushes)
+		{
+			for (const std::shared_ptr<VFrame30::FblItemRect>& f : bush.fblItems)
+			{
+				std::shared_ptr<Afbl::AfbElement> afbElement;
+
+				if (f->isFblElement())
+				{
+					afbElement = logicScheme->afbCollection().get(f->toFblElement()->afbGuid());
+
+					if (afbElement == nullptr)
+					{
+						assert(afbElement != nullptr);
+						log->writeError(QObject::tr("Fbl element does not have Afb description, element: %1").
+										arg(f->guid().toString()), false, true);
+
+						return false;
+					}
+				}
+
+				AppLogicItem li{f, logicScheme, afbElement};
+
+				m_fblItemsAcc.insert(li);
+			}
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicModule::orderItems(OutputLog* log)
+	{
+		if (log == nullptr)
+		{
+			assert(log);
+			return false;
+		}
+
+		bool result = true;
+
+		// The last preparation - connect VideoItemInputSignal to VideoItemOutputSignal.
+		// Get all signals and put it to hash tables.
+		//
+		result = setInputOutputsElementsConnection(log);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		// The end of the last preparation
 		//
 
 		// Get a COPY of the list, as the items will be moved to orderedList during algorithm work
 		// Do not get reference!
 		//
-		std::set<std::shared_ptr<VFrame30::FblItemRect>> constFblItems;
-		std::set<std::shared_ptr<VFrame30::FblItemRect>> fblItems;
+		std::set<AppLogicItem> constFblItems;
+		std::set<AppLogicItem> fblItems;
 
-		for (const Bush& bush : bushContainer.bushes)
-		{
-			for (const std::shared_ptr<VFrame30::FblItemRect>& f : bush.fblItems)
-			{
-				constFblItems.insert(f);
-				fblItems.insert(f);
-			}
-		}
+		constFblItems = m_fblItemsAcc;
+		fblItems = m_fblItemsAcc;
+
+		m_fblItemsAcc.clear();					// Don't need it anymore, release items
 
 		// Add FblElement to branch in execution order
 		//
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> orderedList;
+		std::list<AppLogicItem> orderedList;
 
 		// Add all inputs and outputs
 		// Warning:	Can be optimized by removing items from fblItems on the same
@@ -300,23 +269,23 @@ namespace Builder
 		//
 		bool hasItemsWithouInputs = false;
 
-		for (const std::shared_ptr<VFrame30::FblItemRect>& item : fblItems)
+		for (const AppLogicItem& item : fblItems)
 		{
-			if (item->inputsCount() == 0)
+			if (item.m_fblItem->inputsCount() == 0)
 			{
 				orderedList.push_front(item);	// items without inputs must be at the begining of the list
 				hasItemsWithouInputs = true;
 				continue;
 			}
 
-			if (item->outputsCount() == 0)
+			if (item.m_fblItem->outputsCount() == 0)
 			{
 				orderedList.push_back(item);	// items without outputs must be at the end of the list
 				continue;
 			}
 		}
 
-		for (const std::shared_ptr<VFrame30::FblItemRect>& orderedItem : orderedList)
+		for (const AppLogicItem& orderedItem : orderedList)
 		{
 			fblItems.erase(orderedItem);
 		}
@@ -340,13 +309,13 @@ namespace Builder
 		//
 		for (auto currentIt = orderedList.begin(); currentIt != orderedList.end(); ++currentIt)
 		{
-			std::shared_ptr<VFrame30::FblItemRect> currentItem = *currentIt;
+			AppLogicItem currentItem = *currentIt;		// NOT REFERENCE, ITEM CAN BE MOVED LATER
 
 			// Get dependant items
 			//
-			std::set<std::shared_ptr<VFrame30::FblItemRect>> dependantItems;
+			std::set<AppLogicItem> dependantItems;
 
-			const std::list<VFrame30::CFblConnectionPoint>& outputs = currentItem->outputs();
+			const std::list<VFrame30::CFblConnectionPoint>& outputs = currentItem.m_fblItem->outputs();
 
 			for (const VFrame30::CFblConnectionPoint& out : outputs)
 			{
@@ -364,7 +333,7 @@ namespace Builder
 
 			// Check dependencies
 			//
-			for (std::shared_ptr<VFrame30::FblItemRect> dep : dependantItems)
+			for (AppLogicItem dep : dependantItems)
 			{
 				if (dep == currentItem)
 				{
@@ -456,49 +425,149 @@ namespace Builder
 		{
 			// -- debug
 			qDebug() << "";
-			qDebug() << "ORDERED LIST FOR SCHEME " << logicScheme->strID();
+			qDebug() << "ORDERED LIST FOR MODULE " << m_moduleStrId;
 			qDebug() << "";
 
-			for (const std::shared_ptr<VFrame30::FblItemRect>& item : orderedList)
+			for (const AppLogicItem& item : orderedList)
 			{
-				if (item->isInputSignalElement())
+				if (item.m_fblItem->isInputSignalElement())
 				{
-					qDebug() << "Input " << item->toInputSignalElement()->signalStrIds();
+					qDebug() << "Input " << item.m_fblItem->toInputSignalElement()->signalStrIds();
 				}
 
-				if (item->isOutputSignalElement())
+				if (item.m_fblItem->isOutputSignalElement())
 				{
-					qDebug() << "Output " << item->toOutputSignalElement()->signalStrIds();
+					qDebug() << "Output " << item.m_fblItem->toOutputSignalElement()->signalStrIds();
 				}
 
-				if (item->isFblElement())
+				if (item.m_fblItem->isFblElement())
 				{
-					qDebug() << "Fbl " << logicScheme->afbCollection().get(item->toFblElement()->afbGuid())->caption();
+					qDebug() << "Fbl " << item.m_afbElement->caption();
 				}
 			}
 
 			// -- end of debug
 
-			ApplicationLogicScheme appScheme;
-			appScheme.setData(logicScheme, orderedList);
+			// ApplicationLogicScheme appScheme;
+			// appScheme.setData(logicScheme, orderedList);
 
-			m_schemes.push_back(appScheme);
+			// m_schemes.push_back(appScheme);
+
 		}
 
 		return result;
 	}
 
+	bool ApplicationLogicModule::setInputOutputsElementsConnection(OutputLog* log)
+	{
+		// Set connection between VideoItemInputSignal/VideoItemOutputSignal by StrIds
+		//
+		if (log == nullptr)
+		{
+			assert(log);
+			return false;
+		}
+
+		QHash<QString, AppLogicItem> signalInputItems;
+		QHash<QString, AppLogicItem> signalOutputItems;
+
+		for (AppLogicItem li : m_fblItemsAcc)
+		{
+			if (li.m_fblItem->isInputSignalElement())
+			{
+				VFrame30::VideoItemSignal* signalElement = li.m_fblItem->toSignalElement();
+				assert(signalElement);
+
+				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
+				//
+				QString signalStrId = signalElement->signalStrIds();
+
+				signalInputItems.insert(signalStrId, li);
+				continue;
+			}
+
+			if (li.m_fblItem->isOutputSignalElement())
+			{
+				VFrame30::VideoItemSignal* signalElement = li.m_fblItem->toSignalElement();
+				assert(signalElement);
+
+				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
+				//
+				QString signalStrId = signalElement->signalStrIds();
+
+				if (signalOutputItems.contains(signalStrId) == true)
+				{
+					log->writeError(QObject::tr("Ouput element has duplicate StrId, element1: %1, element2:%2, StrId: %2")
+									.arg(signalElement->guid().toString())
+									.arg(signalOutputItems[signalStrId].m_fblItem->guid().toString())
+									.arg(signalStrId)
+									, false, true);
+
+					continue;
+				}
+
+				signalOutputItems.insert(signalStrId, li);
+				continue;
+			}
+		}
+
+		// Continue the last preparation, look for same strIds in inputs/outputs
+		//
+		for (auto lit = signalInputItems.begin(); lit != signalInputItems.end(); ++lit)
+		{
+			QString inputStrId = lit.key();
+
+			auto outputIt = signalOutputItems.find(inputStrId);
+
+			if (outputIt == signalOutputItems.end())
+			{
+				// This input does not have pair with output, do not process it
+				//
+				continue;
+			}
+
+			AppLogicItem& inputLogicItem = lit.value();
+			AppLogicItem& outputLogicItem = outputIt.value();
+
+			// Add input pin to input element
+			//
+			assert(inputLogicItem.m_fblItem->inputsCount() == 0);
+			inputLogicItem.m_fblItem->addInput();
+
+			// if output element does not have fake output pin then add it
+			//
+			if (outputLogicItem.m_fblItem->outputsCount() == 0)
+			{
+				outputLogicItem.m_fblItem->addOutput();
+			}
+
+			// Associate items to each other
+			//
+
+			assert(inputLogicItem.m_fblItem->inputsCount() == 1);		// Check fake input
+			assert(outputLogicItem.m_fblItem->outputsCount() == 1);		// Check fake output
+
+			QUuid inputGuid = inputLogicItem.m_fblItem->inputs().front().guid();
+			QUuid outputGuid = outputLogicItem.m_fblItem->outputs().front().guid();
+
+			inputLogicItem.m_fblItem->mutableInputs()->front().AddAssociattedIOs(outputGuid);
+			outputLogicItem.m_fblItem->mutableOutputs()->front().AddAssociattedIOs(inputGuid);
+		}
+
+		return true;
+	}
+
 	template<typename Iter>
-	std::list<std::shared_ptr<VFrame30::FblItemRect>> ApplicationLogicModule::getItemsWithInput(
+	std::list<AppLogicItem> ApplicationLogicModule::getItemsWithInput(
 		Iter begin,
 		Iter end,
 		const QUuid& guid)
 	{
-		std::set<std::shared_ptr<VFrame30::FblItemRect>> result;	// set removes duplicats
+		std::set<AppLogicItem> result;	// set removes duplicats
 
 		for (auto item = begin; item != end; ++item)
 		{
-			const std::list<VFrame30::CFblConnectionPoint>& inputs = item->get()->inputs();
+			const std::list<VFrame30::CFblConnectionPoint>& inputs = item->m_fblItem->inputs();
 
 			for (auto in : inputs)
 			{
@@ -514,54 +583,54 @@ namespace Builder
 			}
 		}
 
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> resultList;
+		std::list<AppLogicItem> resultList;
 		resultList.assign(result.begin(), result.end());
 
 		return resultList;
 	}
 
 
-	template<typename Iter>
-	std::list<std::shared_ptr<VFrame30::FblItemRect>> ApplicationLogicModule::getItemsWithInput(
-		Iter begin,
-		Iter end,
-		const std::list<QUuid>& guids)
-	{
-		std::set<std::shared_ptr<VFrame30::FblItemRect>> result;	// set removes duplicats
+//	template<typename Iter>
+//	std::list<std::shared_ptr<VFrame30::FblItemRect>> ApplicationLogicModule::getItemsWithInput(
+//		Iter begin,
+//		Iter end,
+//		const std::list<QUuid>& guids)
+//	{
+//		std::set<std::shared_ptr<VFrame30::FblItemRect>> result;	// set removes duplicats
 
-		for (auto item = begin; item != end; ++item)
-		{
-			const std::list<VFrame30::CFblConnectionPoint>& inputs = item->get()->inputs();
+//		for (auto item = begin; item != end; ++item)
+//		{
+//			const std::list<VFrame30::CFblConnectionPoint>& inputs = item->get()->inputs();
 
-			for (auto in : inputs)
-			{
-				size_t inResultSize = result.size();
+//			for (auto in : inputs)
+//			{
+//				size_t inResultSize = result.size();
 
-				const std::list<QUuid>& associatedOutputs = in.associatedIOs();
+//				const std::list<QUuid>& associatedOutputs = in.associatedIOs();
 
-				for (const QUuid& id : guids)
-				{
-					auto foundAssociated = std::find(associatedOutputs.begin(), associatedOutputs.end(), id);
+//				for (const QUuid& id : guids)
+//				{
+//					auto foundAssociated = std::find(associatedOutputs.begin(), associatedOutputs.end(), id);
 
-					if (foundAssociated != associatedOutputs.end())
-					{
-						result.insert(*item);
-						break;
-					}
-				}
+//					if (foundAssociated != associatedOutputs.end())
+//					{
+//						result.insert(*item);
+//						break;
+//					}
+//				}
 
-				if (inResultSize != result.size())
-				{
-					break;
-				}
-			}
-		}
+//				if (inResultSize != result.size())
+//				{
+//					break;
+//				}
+//			}
+//		}
 
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> resultList;
-		resultList.assign(result.begin(), result.end());
+//		std::list<std::shared_ptr<VFrame30::FblItemRect>> resultList;
+//		resultList.assign(result.begin(), result.end());
 
-		return resultList;
-	}
+//		return resultList;
+//	}
 
 
 	QString ApplicationLogicModule::moduleStrId() const
@@ -574,27 +643,15 @@ namespace Builder
 		m_moduleStrId = value;
 	}
 
-//	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicModule::items() const
-//	{
-//		return m_items;
-//	}
-
-//	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicModule::items()
-//	{
-//		return m_items;
-//	}
-
-	const std::list<ApplicationLogicScheme>& ApplicationLogicModule::appSchemes() const
+	const std::list<AppLogicItem>& ApplicationLogicModule::items() const
 	{
-		return m_schemes;
+		return m_items;
 	}
 
-	std::list<ApplicationLogicScheme>& ApplicationLogicModule::appSchemes()
+	std::list<AppLogicItem>& ApplicationLogicModule::items()
 	{
-		return m_schemes;
+		return m_items;
 	}
-
-
 
 
 	// ------------------------------------------------------------------------
@@ -679,30 +736,41 @@ namespace Builder
 	}
 
 
-//	const std::shared_ptr<VFrame30::LogicScheme> ApplicationLogicData::scheme() const
-//	{
-//		return m_scheme;
-//	}
+	bool ApplicationLogicData::orderItems(OutputLog* log)
+	{
+		if (log == nullptr)
+		{
+			assert(nullptr);
+			return false;
+		}
 
-//	std::shared_ptr<VFrame30::LogicScheme> ApplicationLogicData::scheme()
-//	{
-//		return m_scheme;
-//	}
+		bool ok = true;
+		bool result = true;
 
-//	const std::shared_ptr<VFrame30::SchemeLayer> ApplicationLogicData::layer() const
-//	{
-//		return m_layer;
-//	}
+		for (std::shared_ptr<ApplicationLogicModule> m : m_modules)
+		{
+			log->writeMessage(QObject::tr("Module: %1").arg(m->moduleStrId()), false);
 
-//	std::shared_ptr<VFrame30::SchemeLayer> ApplicationLogicData::layer()
-//	{
-//		return m_layer;
-//	}
+			ok = m->orderItems(log);
 
-//	std::list<std::shared_ptr<VFrame30::FblItemRect>> ApplicationLogicData::afbItems() const
-//	{
-//		return m_afbItems;
-//	}
+			if (ok == false)
+			{
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
+	const std::list<std::shared_ptr<ApplicationLogicModule>>& ApplicationLogicData::modules() const
+	{
+		return m_modules;
+	}
+
+	std::list<std::shared_ptr<ApplicationLogicModule>>& ApplicationLogicData::modules()
+	{
+		return m_modules;
+	}
 
 
 	// ------------------------------------------------------------------------
@@ -751,7 +819,9 @@ namespace Builder
 
 		// Compile application logic
 		//
-		m_log->writeMessage(tr("Compiling..."), false);
+		m_log->writeMessage(tr("Parsing schemes..."), false);
+
+		bool result = true;
 
 		for (std::shared_ptr<VFrame30::LogicScheme> scheme : schemes)
 		{
@@ -761,11 +831,23 @@ namespace Builder
 
 			if (ok == false)
 			{
-				return false;
+				result = false;
 			}
 		}
 
-		return true;
+		// The result is set of ApplicationLogicModule (m_modules), but items are not ordered yet
+		// Order itmes in all modules
+		//
+		m_log->writeMessage(tr("Ordering items..."), false);
+
+		ok = m_applicationData->orderItems(m_log);
+
+		if (ok == false)
+		{
+			result = false;
+		}
+
+		return result;
 	}
 
 	bool ApplicationLogicBuilder::loadApplicationLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out)
@@ -862,8 +944,6 @@ namespace Builder
 
 		for (std::shared_ptr<VFrame30::SchemeLayer> l : logicScheme->Layers)
 		{
-			qDebug() << Q_FUNC_INFO << " WARNING!!!! Compiling ALL layers, in future compile just l->compile() LAYER!!!!";
-
 			if (l->compile() == true)
 			{
 				layerFound = true;
@@ -935,117 +1015,6 @@ namespace Builder
 			log()->writeError(tr("Internal error: Cannot set data to ApplicationLogicData."), false, true);
 			return false;
 		}
-
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//
-		// DEBUG
-		//
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-//		std::list<std::shared_ptr<VFrame30::FblItemRect>> items = data.afbItems();
-
-//		qDebug() << "";
-//		qDebug() << tr("Application Functional Blocks list, Scheme: %1, Layer %2").arg(logicScheme->caption()).arg(layer->name());
-
-//		for (std::shared_ptr<VFrame30::FblItemRect> i : items)
-//		{
-//			qDebug() << "";
-
-//			std::shared_ptr<VFrame30::VideoItemFblElement> fblElement = std::dynamic_pointer_cast<VFrame30::VideoItemFblElement>(i);
-//			std::shared_ptr<VFrame30::VideoItemInputSignal> inputElement = std::dynamic_pointer_cast<VFrame30::VideoItemInputSignal>(i);
-//			std::shared_ptr<VFrame30::VideoItemOutputSignal> outputElement = std::dynamic_pointer_cast<VFrame30::VideoItemOutputSignal>(i);
-
-//			if (fblElement)
-//			{
-//				std::shared_ptr<Afbl::AfbElement> afb = logicScheme->afbCollection().get(fblElement->afbGuid());
-
-//				qDebug() << afb->caption();
-
-//				const std::list<VFrame30::CFblConnectionPoint>& inputs = fblElement->inputs();
-//				const std::list<VFrame30::CFblConnectionPoint>& outputs = fblElement->outputs();
-
-//				for (const VFrame30::CFblConnectionPoint& in : inputs)
-//				{
-//					QString str = QString("\tInput %1, associated pins: ").arg(in.guid().toString());
-
-//					const std::list<QUuid>& assIos = in.associatedIOs();	// AssIos ))))
-
-//					for (auto apid : assIos)
-//					{
-//						str.append(QString(" %1,").arg(apid.toString()));
-//					}
-
-//					qDebug() << str;
-//				}
-
-//				for (const VFrame30::CFblConnectionPoint& out : outputs)
-//				{
-//					QString str = QString("\tOutput %1, associated pins: ").arg(out.guid().toString());
-
-//					const std::list<QUuid>& assIos = out.associatedIOs();	// AssIos ))))
-
-//					for (auto apid : assIos)
-//					{
-//						str.append(QString(" %1,").arg(apid.toString()));
-//					}
-
-//					qDebug() << str;
-//				}
-//			}
-
-//			if (inputElement)
-//			{
-//				const std::list<VFrame30::CFblConnectionPoint>& inputs = inputElement->inputs();
-//				const std::list<VFrame30::CFblConnectionPoint>& outputs = inputElement->outputs();
-
-//				assert(inputs.empty() == true);
-//				assert(outputs.size() == 1);
-//				assert(outputs.front().associatedIOs().size() > 0);
-
-//				qDebug() << "Input Element: " << inputElement->signalStrIds();
-
-//				for (const VFrame30::CFblConnectionPoint& out : outputs)
-//				{
-//					QString str = QString("\tOutput %1, associated pins: ").arg(out.guid().toString());
-
-//					const std::list<QUuid>& assIos = out.associatedIOs();	// AssIos ))))
-
-//					for (auto apid : assIos)
-//					{
-//						str.append(QString(" %1,").arg(apid.toString()));
-//					}
-
-//					qDebug() << str;
-//				}
-//			}
-
-//			if (outputElement)
-//			{
-//				const std::list<VFrame30::CFblConnectionPoint>& inputs = outputElement->inputs();
-//				const std::list<VFrame30::CFblConnectionPoint>& outputs = outputElement->outputs();
-
-//				assert(inputs.size() == 1);
-//				assert(inputs.front().associatedIOs().size() == 1);
-//				assert(outputs.empty() == true);
-
-//				qDebug() << "Output Element: " << outputElement->signalStrIds();
-
-//				QString str = QString("\tInputPin %1, associated pin: %2")
-//							  .arg(inputs.front().guid().toString())
-//							  .arg(inputs.front().associatedIOs().front().toString());
-
-//				qDebug() << str;
-//			}
-//		}
-
-//		qDebug() << "";
-
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//
-		// END OF DEBUG
-		//
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 		return true;
 	}
@@ -1243,23 +1212,23 @@ namespace Builder
 			bushContainer->bushes.push_back(newBranch);
 		}
 
-		// DEBUG
-		for (Bush& eb : bushContainer->bushes)
-		{
-			qDebug() << "-----";
-			for (auto& bl : eb.links)
-			{
-				qDebug() << bl.first << "--" <<
-							bl.second.pt1.X <<
-							"-" <<
-							bl.second.pt1.Y <<
-							"    " <<
-							bl.second.pt2.X <<
-							"-" <<
-							bl.second.pt2.Y;
-			}
-		}
-		// END OF DEBUG
+//		// DEBUG
+//		for (Bush& eb : bushContainer->bushes)
+//		{
+//			qDebug() << "-----";
+//			for (auto& bl : eb.links)
+//			{
+//				qDebug() << bl.first << "--" <<
+//							bl.second.pt1.X <<
+//							"-" <<
+//							bl.second.pt1.Y <<
+//							"    " <<
+//							bl.second.pt2.X <<
+//							"-" <<
+//							bl.second.pt2.Y;
+//			}
+//		}
+//		// END OF DEBUG
 
 		return true;
 	}

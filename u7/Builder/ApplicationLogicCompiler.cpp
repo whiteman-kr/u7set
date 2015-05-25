@@ -373,52 +373,49 @@ namespace Builder
 		m_appItems.clear();
 		m_pinParent.clear();
 
-		for(const ApplicationLogicScheme& appLogicScheme : m_moduleLogic->appSchemes())
+		for(const AppLogicItem& logicItem : m_moduleLogic->items())
 		{
-			for(const AppLogicItem& logicItem : appLogicScheme.items())
+			// build QHash<QUuid, AppItem*> m_appItems
+			// item GUID -> item ptr
+			//
+			if (m_appItems.contains(logicItem.m_fblItem->guid()))
 			{
-				// build QHash<QUuid, AppItem*> m_appItems
-				// item GUID -> item ptr
-				//
-				if (m_appItems.contains(logicItem.m_fblItem->guid()))
+				assert(false);	// guid already in map!
+				continue;
+			}
+
+			AppItem* appItem = new AppItem(&logicItem);
+
+			m_appItems.insert(appItem->guid(), appItem);
+
+			// build QHash<QUuid, LogicItem*> m_itemsPins;
+			// pin GUID -> parent item ptr
+			//
+
+			// add input pins
+			//
+			for(LogicPin input : appItem->inputs())
+			{
+				if (m_pinParent.contains(input.guid()))
 				{
 					assert(false);	// guid already in map!
 					continue;
 				}
 
-				AppItem* appItem = new AppItem(&logicItem);
+				m_pinParent.insert(input.guid(), appItem);
+			}
 
-				m_appItems.insert(appItem->guid(), appItem);
-
-				// build QHash<QUuid, LogicItem*> m_itemsPins;
-				// pin GUID -> parent item ptr
-				//
-
-				// add input pins
-				//
-				for(LogicPin input : appItem->inputs())
+			// add output pins
+			//
+			for(LogicPin output : appItem->outputs())
+			{
+				if (m_pinParent.contains(output.guid()))
 				{
-					if (m_pinParent.contains(input.guid()))
-					{
-						assert(false);	// guid already in map!
-						continue;
-					}
-
-					m_pinParent.insert(input.guid(), appItem);
+					assert(false);	// guid already in map!
+					continue;
 				}
 
-				// add output pins
-				//
-				for(LogicPin output : appItem->outputs())
-				{
-					if (m_pinParent.contains(output.guid()))
-					{
-						assert(false);	// guid already in map!
-						continue;
-					}
-
-					m_pinParent.insert(output.guid(), appItem);
-				}
+				m_pinParent.insert(output.guid(), appItem);
 			}
 		}
 	}

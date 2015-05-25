@@ -15,21 +15,6 @@
 #include "VideoItemFblElement.h"
 #include "VideoItemSignal.h"
 
-#if defined(Q_OS_WIN) && defined(_MSC_VER)
-
-    #ifdef Q_DEBUG
-	//#include <vld.h>		// Enable Visula Leak Detector
-    #endif
-	// vld.h includes windows.h wich redefine min/max stl functions
-
-    #ifdef min
-		#undef min
-	#endif
-	#ifdef max
-		#undef max
-	#endif
-#endif
-
 namespace VFrame30
 {
 	VFrame30Library::VFrame30Library()

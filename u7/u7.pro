@@ -284,6 +284,14 @@ DISTFILES += \
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
+win32 {
+	#CONFIG(debug, debug|release): DEFINES += _CRTDBG_MAP_ALLOC
+	#CONFIG(debug, debug|release): DEFINES += "DBG_NEW=new(_NORMAL_BLOCK,__FILE__,__LINE__)"
+	#CONFIG(debug, debug|release): DEFINES += "new=DBG_NEW"
+}
+
+
+
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
@@ -353,20 +361,4 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 	#CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
 	#CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
 #}
-
-# Visual Leak Detector
-#
-win32 {
-	contains(QMAKE_TARGET.arch, x86_64) {
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	} else {
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
-	}
-
-	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
-	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
-}
-
 

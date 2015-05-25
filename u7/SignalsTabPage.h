@@ -100,6 +100,7 @@ signals:
 	void aboutToClearSignals();
 	void signalsRestored();
 	void cellsSizeChanged();
+	void signalActivated(int row);
 
 public slots:
 	void loadSignals();
