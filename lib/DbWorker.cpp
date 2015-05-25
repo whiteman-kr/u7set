@@ -3515,17 +3515,6 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 
 	int signalCount = int(deviceSignals->size());
 
-	/*for(int i = 0; i < signalCount - 1; i++)
-	{
-		for(int j = i+1; j < signalCount; j++)
-		{
-			if (deviceSignals->at(i)->strId() == deviceSignals->at(j)->strId())
-			{
-				assert(false);
-			}
-		}
-	}*/
-
 	for(int i = 0; i < signalCount; i++)
 	{
 		if ((i % 5) == 0)
@@ -3534,14 +3523,14 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 		}
 
 		const Hardware::DeviceSignal* deviceSignal = deviceSignals->at(i);
-		assert(deviceSignal);
 
-		Hardware::DeviceSignal::SignalType signalType = deviceSignal->type();
+		if (deviceSignal == nullptr)
+		{
+			assert(false);
+			continue;
+		}
 
-		if (signalType == Hardware::DeviceSignal::SignalType::InputAnalog ||
-			signalType == Hardware::DeviceSignal::SignalType::OutputAnalog ||
-			signalType == Hardware::DeviceSignal::SignalType::InputDiscrete ||
-			signalType == Hardware::DeviceSignal::SignalType::OutputDiscrete)
+		if (deviceSignal->isInputSignal() || deviceSignal->isOutputSignal())
 		{
 			Signal signal(*deviceSignal);
 

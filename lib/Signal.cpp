@@ -18,23 +18,41 @@ Signal::Signal() :
 
 Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 {
-	Hardware::DeviceSignal::SignalType deviceSignalType = deviceSignal.type();
+	if (deviceSignal.isDiagSignal())
+	{
+		assert(false);
+		return;
+	}
 
-	if (deviceSignalType == Hardware::DeviceSignal::SignalType::InputAnalog ||
-		deviceSignalType == Hardware::DeviceSignal::SignalType::OutputAnalog)
+	if (deviceSignal.isAnalogSignal())
 	{
 		m_type = SignalType::Analog;
 	}
 	else
 	{
-		if (deviceSignalType == Hardware::DeviceSignal::SignalType::InputDiscrete ||
-			deviceSignalType == Hardware::DeviceSignal::SignalType::OutputDiscrete)
+		if (deviceSignal.isDiscreteSignal())
 		{
 			m_type = SignalType::Discrete;
 		}
 		else
 		{
 			assert(false);			// invalid deviceSignalType
+		}
+	}
+
+	if (deviceSignal.isInputSignal())
+	{
+		m_inOutType = SignalInOutType::Input;
+	}
+	else
+	{
+		if (deviceSignal.isOutputSignal())
+		{
+			m_inOutType = SignalInOutType::Output;
+		}
+		else
+		{
+			m_inOutType = SignalInOutType::Internal;
 		}
 	}
 

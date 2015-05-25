@@ -920,6 +920,8 @@ namespace Builder
 		return true;
 	}
 
+	//bool initializeOutputModulesMemory
+
 
 	bool ModuleLogicCompiler::generateApplicationLogicCode()
 	{

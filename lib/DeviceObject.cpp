@@ -1709,6 +1709,20 @@ namespace Hardware
 		return m_type == SignalType::DiagAnalog || m_type == SignalType::DiagDiscrete;
 	}
 
+	bool DeviceSignal::isAnalogSignal() const
+	{
+		return	m_type == SignalType::InputAnalog ||
+				m_type == SignalType::OutputAnalog ||
+				m_type == SignalType::DiagAnalog;
+	}
+
+	bool DeviceSignal::isDiscreteSignal() const
+	{
+		return	m_type == SignalType::InputDiscrete ||
+				m_type == SignalType::OutputDiscrete ||
+				m_type == SignalType::DiagDiscrete;
+	}
+
 
 	//
 	//

@@ -576,6 +576,9 @@ namespace Hardware
 		bool isOutputSignal() const;
 		bool isDiagSignal() const;
 
+		bool isAnalogSignal() const;
+		bool isDiscreteSignal() const;
+
 		// Data
 		//
 	private:
