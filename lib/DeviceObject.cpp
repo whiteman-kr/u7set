@@ -1694,6 +1694,22 @@ namespace Hardware
 		m_valueBit = value;
 	}
 
+	bool DeviceSignal::isInputSignal() const
+	{
+		return m_type == SignalType::InputAnalog || m_type == SignalType::InputDiscrete;
+	}
+
+	bool DeviceSignal::isOutputSignal() const
+	{
+		return m_type == SignalType::OutputAnalog || m_type == SignalType::OutputDiscrete;
+	}
+
+	bool DeviceSignal::isDiagSignal() const
+	{
+		return m_type == SignalType::DiagAnalog || m_type == SignalType::DiagDiscrete;
+	}
+
+
 	//
 	//
 	// Workstation

@@ -572,6 +572,10 @@ namespace Hardware
 		int valueBit() const;
 		void setValueBit(int value);
 
+		bool isInputSignal() const;
+		bool isOutputSignal() const;
+		bool isDiagSignal() const;
+
 		// Data
 		//
 	private:
