@@ -42,6 +42,10 @@ namespace VFrame30
 	public:
 		bool setAfbParam(const QString& name, QVariant value);
 
+		// Set Afb element parameters
+		//
+		bool setAfbElementParams(Afbl::AfbElement* afbElement) const;
+
 	protected:
 		void addQtDynamicParamProperties();
 

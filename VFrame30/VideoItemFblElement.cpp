@@ -226,6 +226,32 @@ namespace VFrame30
 		return true;
 	}
 
+	bool VideoItemFblElement::setAfbElementParams(Afbl::AfbElement* afbElement) const
+	{
+		if (afbElement == nullptr)
+		{
+			assert(afbElement);
+			return false;
+		}
+
+		for (Afbl::AfbElementParam& param : afbElement->params())
+		{
+			QVariant propValue = property(param.caption().toStdString().c_str());
+
+			if (propValue.isValid() == false)
+			{
+				// Was not found
+				//
+				assert(propValue.isValid() == true);
+				return false;
+			}
+
+			param.setValue(Afbl::AfbParamValue::fromQVariant(propValue));
+		}
+
+		return true;
+	}
+
 	void VideoItemFblElement::addQtDynamicParamProperties()
 	{
 		// Clear all dynamic properties
