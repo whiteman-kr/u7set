@@ -178,7 +178,7 @@ namespace Builder
 	{
 		if (logicScheme == nullptr ||
 			log == nullptr ||
-			afbCollection)
+			afbCollection == nullptr)
 		{
 			assert(logicScheme);
 			assert(afbCollection);
