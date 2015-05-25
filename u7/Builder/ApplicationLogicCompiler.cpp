@@ -238,7 +238,6 @@ namespace Builder
 		//
 		result &= calculateInOutSignalsAddresses();
 
-
 		// Calculate addresses of all application's signals
 		//
 		result &= calculateSignalsAddresses();
@@ -1532,9 +1531,10 @@ namespace Builder
 		}
 		else
 		{
-			// ###############################################################
+			// ###############################################
 			// appSignal = new AppSignal(guid, strID, signalType, signal, appItem);
-			// ###############################################################
+			// ###############################################
+
 
 			m_signalStrIdMap.insert(strID, appSignal);
 
