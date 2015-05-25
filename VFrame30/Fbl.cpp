@@ -186,16 +186,17 @@ namespace Afbl
 
 	AfbParamValue AfbParamValue::fromQVariant(QVariant value)
 	{
+		assert(value.isValid() == true);
+		assert(value.isNull() == false);
+
 		switch (value.type())
 		{
-			case QMetaType::Int:
-			case QMetaType::UInt:
-			case QMetaType::Long:
-			case QMetaType::LongLong:
+			case QVariant::Int:
+			case QVariant::UInt:
 				return AfbParamValue(static_cast<int32_t>(value.toInt()));
-			case QMetaType::Double:
+			case QVariant::Double:
 				return AfbParamValue(value.toDouble());
-			case QMetaType::Bool:
+			case QVariant::Bool:
 				return AfbParamValue(value.toBool());
 			default:
 				assert(false);
@@ -1126,6 +1127,11 @@ namespace Afbl
 	// Params
 	//
 	const std::vector<AfbElementParam>& AfbElement::params() const
+	{
+		return m_params;
+	}
+
+	std::vector<AfbElementParam>& AfbElement::params()
 	{
 		return m_params;
 	}

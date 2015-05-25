@@ -75,17 +75,30 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	AppLogicItem::AppLogicItem(
-		std::shared_ptr<VFrame30::FblItemRect> fblItem,
-		std::shared_ptr<VFrame30::LogicScheme> scheme,
-		std::shared_ptr<Afbl::AfbElement> afbElement) :
+	AppLogicItem::AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
+							   std::shared_ptr<VFrame30::LogicScheme> scheme,
+							   std::shared_ptr<Afbl::AfbElement> afbElement) :
 		m_fblItem(fblItem),
-		m_scheme(scheme),
-		m_afbElement(afbElement)
+		m_scheme(scheme)
 	{
-		assert(fblItem);
-		assert(scheme);
-		//assert(afbElement);	afbElement can be empty for diferent from VFrame30::VideoItemFblElement items
+		assert(m_fblItem);
+		assert(m_scheme);
+
+		if (m_fblItem->isFblElement() == true)
+		{
+			if (afbElement != nullptr)
+			{
+				m_afbElement = (*afbElement.get());
+
+				m_fblItem->toFblElement()->setAfbElementParams(&m_afbElement);
+			}
+			else
+			{
+				assert(afbElement != nullptr);
+			}
+		}
+
+		return;
 	}
 
 	bool AppLogicItem::operator < (const AppLogicItem& li) const
@@ -95,12 +108,16 @@ namespace Builder
 
 	bool AppLogicItem::operator == (const AppLogicItem& li) const
 	{
-		bool result = this->m_fblItem.get() == li.m_fblItem.get();
+		if (this == &li)
+		{
+			return true;
+		}
+
+		bool result = this->m_fblItem == li.m_fblItem;
 
 		if (result == true)
 		{
 			assert(this->m_scheme == li.m_scheme);
-			assert(this->m_afbElement == li.m_afbElement);
 		}
 
 		return result;
@@ -442,7 +459,7 @@ namespace Builder
 
 				if (item.m_fblItem->isFblElement())
 				{
-					qDebug() << "Fbl " << item.m_afbElement->caption();
+					qDebug() << "Fbl " << item.m_afbElement.caption();
 				}
 			}
 

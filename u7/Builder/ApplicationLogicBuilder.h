@@ -2,6 +2,7 @@
 #define APPLOGICBUILDER_H
 
 #include "../../VFrame30/VideoItem.h"
+#include "../../VFrame30/Fbl.h"
 
 // Forware delcarations
 //
@@ -71,7 +72,7 @@ namespace Builder
 		//
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
-		std::shared_ptr<Afbl::AfbElement> m_afbElement;
+		Afbl::AfbElement m_afbElement;							// Specific instance with initialized Params
 
 		// Methods
 		//
