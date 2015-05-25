@@ -362,11 +362,11 @@ namespace Builder
 			}
 		}
 
-		m_fbls.clear();
+		m_afbs.clear();
 
-		for(std::shared_ptr<Afbl::AfbElement> afbl : m_afbl->elements())
+		for(std::shared_ptr<LogicAfb> afbl : m_afbl->elements())
 		{
-			m_fbls.insert(afbl);
+			m_afbs.insert(afbl);
 		}
 
 		m_appItems.clear();
@@ -444,8 +444,8 @@ namespace Builder
 			m_appSignals.insert(item);
 		}
 
-		// find fbl's outputs, which connected to signals
-		// build map: output GUID -> signal GUID
+		// find fbl's outputs, which NOT connected to signals
+		// create and add to m_appSignals map 'shadow' signals
 		//
 
 		for(AppItem* item : m_appItems)
@@ -455,15 +455,9 @@ namespace Builder
 				continue;
 			}
 
-			if (!item->afbInitialized())
-			{
-				assert(false);
-				continue;
-			}
-
 			// get Functional Block instance !!!
 			//
-			int instance = m_fbls.addInstance(item);
+			int instance = m_afbs.addInstance(item);
 
 			m_appFbs.insert(item, instance);
 
@@ -518,7 +512,7 @@ namespace Builder
 		m_code.newLine();
 		m_code.comment("Functional Blocks initialization code");
 
-		for(Fbl* fbl : m_fbls)
+		for(Afb* fbl : m_afbs)
 		{
 			for(AppFb* appFb : m_appFbs)
 			{
@@ -727,7 +721,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calculateInOutSignalsAddresses()
 	{
-		m_log->writeMessage(QString(tr("Input & Output signals sddresses calculation...")), false);
+		m_log->writeMessage(QString(tr("Input & Output signals addresses calculation...")), false);
 
 		bool result = true;
 
@@ -1024,17 +1018,17 @@ namespace Builder
 	// Fbl class implementation
 	//
 
-	Fbl::Fbl(std::shared_ptr<Afbl::AfbElement> afbElement) :
-		m_afbElement(afbElement)
+	Afb::Afb(std::shared_ptr<LogicAfb> afb) :
+		m_afb(afb)
 	{
-		if (m_afbElement == nullptr)
+		if (m_afb == nullptr)
 		{
 			assert(false);
 			return;
 		}
 	}
 
-	Fbl::~Fbl()
+	Afb::~Afb()
 	{
 	}
 
@@ -1101,112 +1095,112 @@ namespace Builder
 	// FblsMap class implementation
 	//
 
-	void FblsMap::insert(std::shared_ptr<Afbl::AfbElement> afbElement)
+	void AfbMap::insert(std::shared_ptr<LogicAfb> logicAfb)
 	{
-		if (afbElement == nullptr)
+		if (logicAfb == nullptr)
 		{
 			assert(false);
 			return;
 		}
 
-		if (contains(afbElement->guid()))
+		if (contains(logicAfb->guid()))
 		{
 			assert(false);	// 	repeated guid
 			return;
 		}
 
-		Fbl* fbl = new Fbl(afbElement);
+		Afb* afb = new Afb(logicAfb);
 
-		HashedVector<QUuid, Fbl*>::insert(fbl->guid(), fbl);
+		HashedVector<QUuid, Afb*>::insert(afb->guid(), afb);
 
 		// initialize map Fbl opCode -> current instance
 		//
-		if (!m_fblInstance.contains(afbElement->opcode()))
+		if (!m_fblInstance.contains(logicAfb->opcode()))
 		{
-			m_fblInstance.insert(afbElement->opcode(), 0);
+			m_fblInstance.insert(logicAfb->opcode(), 0);
 		}
 
 		// add AfbElement in/out signals to m_fblsSignals map
 		//
 
-		std::vector<Afbl::AfbElementSignal> inputSignals = afbElement->inputSignals();
+		std::vector<LogicAfbSignal> inputSignals = logicAfb->inputSignals();
 
-		for(Afbl::AfbElementSignal signal : inputSignals)
+		for(LogicAfbSignal signal : inputSignals)
 		{
 			GuidIndex gi;
 
-			gi.guid = afbElement->guid();
+			gi.guid = logicAfb->guid();
 			gi.index = signal.operandIndex();
 
-			if (m_fblsSignals.contains(gi))
+			if (m_afbSignals.contains(gi))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_fblsSignals.insert(gi, &signal);
+			m_afbSignals.insert(gi, &signal);
 		}
 
-		std::vector<Afbl::AfbElementSignal> outputSignals = afbElement->outputSignals();
+		std::vector<LogicAfbSignal> outputSignals = logicAfb->outputSignals();
 
-		for(Afbl::AfbElementSignal signal : outputSignals)
+		for(LogicAfbSignal signal : outputSignals)
 		{
 			GuidIndex gi;
 
-			gi.guid = afbElement->guid();
+			gi.guid = logicAfb->guid();
 			gi.index = signal.operandIndex();
 
-			if (m_fblsSignals.contains(gi))
+			if (m_afbSignals.contains(gi))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_fblsSignals.insert(gi, &signal);
+			m_afbSignals.insert(gi, &signal);
 		}
 
 		// add AfbElement params to m_fblsParams map
 		//
 
-		std::vector<Afbl::AfbElementParam> params = afbElement->params();
+		std::vector<LogicAfbParam> params = logicAfb->params();
 
-		for(Afbl::AfbElementParam param : params)
+		for(LogicAfbParam param : params)
 		{
 			GuidIndex gi;
 
-			gi.guid = afbElement->guid();
+			gi.guid = logicAfb->guid();
 			gi.index = param.operandIndex();
 
-			if (m_fblsParams.contains(gi))
+			if (m_afbParams.contains(gi))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_fblsParams.insert(gi, &param);
+			m_afbParams.insert(gi, &param);
 		}
 
-		std::vector<Afbl::AfbElementParam> constParams = afbElement->constParams();
+		std::vector<LogicAfbParam> constParams = logicAfb->constParams();
 
-		for(Afbl::AfbElementParam param : constParams)
+		for(LogicAfbParam param : constParams)
 		{
 			GuidIndex gi;
 
-			gi.guid = afbElement->guid();
+			gi.guid = logicAfb->guid();
 			gi.index = param.operandIndex();
 
-			if (m_fblsParams.contains(gi))
+			if (m_afbParams.contains(gi))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_fblsParams.insert(gi, &param);
+			m_afbParams.insert(gi, &param);
 		}
 	}
 
 
-	int FblsMap::addInstance(AppItem* appItem)
+	int AfbMap::addInstance(AppItem* appItem)
 	{
 		if (appItem == nullptr)
 		{
@@ -1220,7 +1214,7 @@ namespace Builder
 			return 0;
 		}
 
-		Fbl* fbl = (*this)[appItem->afbGuid()];
+		Afb* fbl = (*this)[appItem->afbGuid()];
 
 		if (fbl == nullptr)
 		{
@@ -1277,30 +1271,30 @@ namespace Builder
 	}
 
 
-	const AfbSignal *FblsMap::getFblSignal(const QUuid& afbElemetGuid, int signalIndex)
+	const LogicAfbSignal* AfbMap::getAfbSignal(const QUuid& afbGuid, int signalIndex)
 	{
 		GuidIndex gi;
 
-		gi.guid = afbElemetGuid;
+		gi.guid = afbGuid;
 		gi.index = signalIndex;
 
-		if (m_fblsSignals.contains(gi))
+		if (m_afbSignals.contains(gi))
 		{
-			return m_fblsSignals.value(gi);
+			return m_afbSignals.value(gi);
 		}
 
 		return nullptr;
 	}
 
 
-	void FblsMap::clear()
+	void AfbMap::clear()
 	{
-		for(Fbl* fbl : *this)
+		for(Afb* fbl : *this)
 		{
 			delete fbl;
 		}
 
-		HashedVector<QUuid, Fbl*>::clear();
+		HashedVector<QUuid, Afb*>::clear();
 	}
 
 
@@ -1337,7 +1331,7 @@ namespace Builder
 	// AppFbsMap class implementation
 	//
 
-	void AppFbsMap::insert(AppItem *appItem, int instance)
+	void AppFbMap::insert(AppItem *appItem, int instance)
 	{
 		if (appItem == nullptr)
 		{
@@ -1351,7 +1345,7 @@ namespace Builder
 	}
 
 
-	void AppFbsMap::clear()
+	void AppFbMap::clear()
 	{
 		for(AppFb* appFb : *this)
 		{
@@ -1390,6 +1384,9 @@ namespace Builder
 	{
 		// construct shadow AppSignal based on OutputPin
 		//
+		setType(signalType);
+		setDataSize(dataSize);
+		setInOutType(SignalInOutType::Internal);
 
 		m_isShadowSignal = true;
 	}
@@ -1409,13 +1406,13 @@ namespace Builder
 	// AppSignalsMap class implementation
 	//
 
-	AppSignalsMap::AppSignalsMap(ModuleLogicCompiler& compiler) :
+	AppSignalMap::AppSignalMap(ModuleLogicCompiler& compiler) :
 		m_compiler(compiler)
 	{
 	}
 
 
-	AppSignalsMap::~AppSignalsMap()
+	AppSignalMap::~AppSignalMap()
 	{
 		clear();
 	}
@@ -1423,7 +1420,7 @@ namespace Builder
 
 	// insert signal from application logic scheme
 	//
-	void AppSignalsMap::insert(const AppItem* appItem)
+	void AppSignalMap::insert(const AppItem* appItem)
 	{
 		if (!appItem->isSignal())
 		{
@@ -1451,13 +1448,32 @@ namespace Builder
 			return;
 		}
 
-		insert(appItem->guid(), strID, s->type(), s, appItem);
+		AppSignal* appSignal = nullptr;
+
+		if (m_signalStrIdMap.contains(strID))
+		{
+			appSignal = m_signalStrIdMap[strID];
+
+			qDebug() << "Bind appSignal = " << strID;
+		}
+		else
+		{
+			appSignal = new AppSignal(s, appItem);
+
+			m_signalStrIdMap.insert(strID, appSignal);
+
+			qDebug() << "Create appSignal = " << strID;
+		}
+
+		assert(appSignal != nullptr);
+
+		HashedVector<QUuid, AppSignal*>::insert(appItem->guid(), appSignal);
 	}
 
 
 	// insert "shadow" signal bound to FB output pin
 	//
-	void AppSignalsMap::insert(const AppItem* appItem, const LogicPin& outputPin)
+	void AppSignalMap::insert(const AppItem* appItem, const LogicPin& outputPin)
 	{
 		if (!appItem->isFb())
 		{
@@ -1465,7 +1481,7 @@ namespace Builder
 			return;
 		}
 
-		const AfbSignal* s = m_compiler.getFblSignal(appItem->afb().guid(), outputPin.afbOperandIndex());
+		const LogicAfbSignal* s = m_compiler.getAfbSignal(appItem->afb().guid(), outputPin.afbOperandIndex());
 
 		if (s == nullptr)
 		{
@@ -1498,38 +1514,34 @@ namespace Builder
 
 		QUuid outPinGuid = outputPin.guid();
 
-		insert(outPinGuid, QString("#%1").arg(outPinGuid.toString()), signalType, nullptr, nullptr);
-	}
+		QString outPinGuidStr = outPinGuid.toString();
 
-
-	void AppSignalsMap::insert(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem)
-	{
 		AppSignal* appSignal = nullptr;
 
-		if (m_signalStrIdMap.contains(strID))
+		if (m_signalStrIdMap.contains(outPinGuidStr))
 		{
-			appSignal = m_signalStrIdMap[strID];
+			assert(false);			// duplicate pin GUID
 
-			qDebug() << "Bind appSignal = " << strID;
+			appSignal = m_signalStrIdMap[outPinGuidStr];
+
+			qDebug() << "Bind appSignal = " << outPinGuidStr;
 		}
 		else
 		{
-			// ###############################################
-			// appSignal = new AppSignal(guid, strID, signalType, signal, appItem);
-			// ###############################################
+			appSignal = new AppSignal(outPinGuid, signalType, s->size(), appItem);
 
+			m_signalStrIdMap.insert(outPinGuidStr, appSignal);
 
-			m_signalStrIdMap.insert(strID, appSignal);
-
-			qDebug() << "Create appSignal = " << strID;
+			qDebug() << "Create appSignal = " << outPinGuidStr;
 		}
+
 		assert(appSignal != nullptr);
 
-		HashedVector<QUuid, AppSignal*>::insert(guid, appSignal);
+		HashedVector<QUuid, AppSignal*>::insert(appItem->guid(), appSignal);
 	}
 
 
-	void AppSignalsMap::clear()
+	void AppSignalMap::clear()
 	{
 		for(AppSignal* appSignal : m_signalStrIdMap)
 		{
@@ -1541,18 +1553,6 @@ namespace Builder
 		HashedVector<QUuid, AppSignal*>::clear();
 	}
 
-
-	void AppSignalsMap::bindRealSignals(SignalSet* signalSet)
-	{
-		// bind real signals to siganls in Signal Set
-		//
-		/*if (!m_signalStrIdMap.contains(signalStrID))
-		{
-			msg = QString(tr("Signal with ID = %1 not found in Application Signals")).arg(signalStrID);
-
-			m_log->writeError(msg, false, true);
-		}*/
-	}
 }
 
 

@@ -73,11 +73,16 @@ namespace Builder
 	};
 
 
+	// typedefs Logic* for types defined outside ApplicationLogicCompiler
+	//
+
 	typedef std::shared_ptr<VFrame30::FblItemRect> LogicItem;
 	typedef VFrame30::VideoItemSignal LogicSignal;
 	typedef VFrame30::VideoItemFblElement LogicFb;
 	typedef VFrame30::CFblConnectionPoint LogicPin;
-	typedef Afbl::AfbElementSignal AfbSignal;
+	typedef Afbl::AfbElement LogicAfb;
+	typedef Afbl::AfbElementSignal LogicAfbSignal;
+	typedef Afbl::AfbElementParam LogicAfbParam;
 
 
 	class AppItem;
@@ -87,28 +92,28 @@ namespace Builder
 	// Functional Block Library element
 	//
 
-	class Fbl
+	class Afb
 	{
 	private:
-		std::shared_ptr<Afbl::AfbElement> m_afbElement;
+		std::shared_ptr<LogicAfb> m_afb;
 		int m_instance = 0;					// for Fbls with RAM
 
 	public:
-		Fbl(std::shared_ptr<Afbl::AfbElement> afbElement);
-		~Fbl();
+		Afb(std::shared_ptr<LogicAfb> afb);
+		~Afb();
 
 		//quint16 addInstance();
 
-		bool hasRam() const { return m_afbElement->hasRam(); }
+		bool hasRam() const { return m_afb->hasRam(); }
 
 		int incInstance() { return (++m_instance); }
 		int instance() const { return m_instance; }
 
-		const Afbl::AfbElement& afbElement() const { return *m_afbElement; }
+		const LogicAfb& afb() const { return *m_afb; }
 
-		QUuid guid() const { return m_afbElement->guid(); }
-		QString strID() const { return m_afbElement->strID(); }
-		int opcode() const { return m_afbElement->opcode(); }
+		QUuid guid() const { return m_afb->guid(); }
+		QString strID() const { return m_afb->strID(); }
+		int opcode() const { return m_afb->opcode(); }
 	};
 
 
@@ -116,7 +121,7 @@ namespace Builder
 	typedef QHash<QString, int> NonRamFblInstanceMap;
 
 
-	class FblsMap : public HashedVector<QUuid, Fbl*>
+	class AfbMap: public HashedVector<QUuid, Afb*>
 	{
 	private:
 
@@ -131,18 +136,18 @@ namespace Builder
 		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
 		NonRamFblInstanceMap m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
 
-		QHash<QString, Afbl::AfbElementSignal*> m_fblsSignals;
-		QHash<QString, Afbl::AfbElementParam*> m_fblsParams;
+		QHash<QString, LogicAfbSignal*> m_afbSignals;
+		QHash<QString, LogicAfbParam*> m_afbParams;
 
 	public:
-		~FblsMap() { clear(); }
+		~AfbMap() { clear(); }
 
 		int addInstance(AppItem *appItem);
 
-		void insert(std::shared_ptr<Afbl::AfbElement> afbElement);
+		void insert(std::shared_ptr<LogicAfb> logicAfb);
 		void clear();
 
-		const AfbSignal* getFblSignal(const QUuid& afbElemetGuid, int signalIndex);
+		const LogicAfbSignal* getAfbSignal(const QUuid& afbGuid, int signalIndex);
 	};
 
 
@@ -160,20 +165,18 @@ namespace Builder
 		AppItem(const AppLogicItem& appLogicItem);
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
-		QUuid afbGuid() const { return m_appLogicItem.m_afbElement->guid(); }
+		QUuid afbGuid() const { return m_appLogicItem.m_afbElement.guid(); }
 
 		QString strID() const { return m_appLogicItem.m_fblItem->toSignalElement()->signalStrIds(); }
 
 		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
 		bool isFb() const { return m_appLogicItem.m_fblItem->isFblElement(); }
 
-		bool afbInitialized() const { return m_appLogicItem.m_afbElement != nullptr; }
-
 		const std::list<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
 		const std::list<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toFblElement(); }
-		const Afbl::AfbElement& afb() const { return *m_appLogicItem.m_afbElement; }
+		const Afbl::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 		//const LogicItem& logic() const { return *m_fblItem; }
 
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
@@ -195,10 +198,10 @@ namespace Builder
 	};
 
 
-	class AppFbsMap : public HashedVector<QUuid, AppFb*>
+	class AppFbMap: public HashedVector<QUuid, AppFb*>
 	{
 	public:
-		~AppFbsMap() { clear(); }
+		~AppFbMap() { clear(); }
 
 		void insert(AppItem* appItem, int instance);
 		void clear();
@@ -212,9 +215,10 @@ namespace Builder
 	class AppSignal : public Signal
 	{
 	private:
-		const AppItem* m_appItem = nullptr;
-
+		const AppItem* m_appItem = nullptr;					// application signals pointer (for real signals)
+															// application sunctional block pointer (for shadow signals)
 		QUuid m_guid;
+
 		bool m_isShadowSignal = false;
 
 		bool m_calculated = false;
@@ -234,7 +238,7 @@ namespace Builder
 	};
 
 
-	class AppSignalsMap : public QObject, public HashedVector<QUuid, AppSignal*>
+	class AppSignalMap: public QObject, public HashedVector<QUuid, AppSignal*>
 	{
 		Q_OBJECT
 
@@ -246,15 +250,13 @@ namespace Builder
 		ModuleLogicCompiler& m_compiler;
 
 	public:
-		AppSignalsMap(ModuleLogicCompiler& compiler);
-		~AppSignalsMap();
+		AppSignalMap(ModuleLogicCompiler& compiler);
+		~AppSignalMap();
 
 		void insert(const AppItem* appItem);
 		void insert(const AppItem* appItem, const LogicPin& outputPin);
 
 		void clear();
-
-		void bindRealSignals(SignalSet* signalSet);
 	};
 
 
@@ -284,16 +286,16 @@ namespace Builder
 
 		ApplicationLogicCode m_code;
 
-		FblsMap m_fbls;
+		AfbMap m_afbs;
 
-		AppSignalsMap m_appSignals;
-		AppFbsMap m_appFbs;
+		AppSignalMap m_appSignals;
+		AppFbMap m_appFbs;
 
 		// service maps
 		//
 		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
 		QHash<QUuid, AppItem*> m_pinParent;					// pin GUID -> parent item ptr
-		QHash<QUuid, AppItem*> m_pinTypes;					// pin GUID -> parent item ptr
+		//QHash<QUuid, AppItem*> m_pinTypes;					// pin GUID -> parent item ptr
 		QHash<QString, Signal*> m_signalsStrID;				// signals StrID -> Signal ptr
 		QHash<QString, Signal*> m_deviceBoundSignals;			// device signal strID -> Signal ptr
 
@@ -343,7 +345,7 @@ namespace Builder
 
 		OutputLog& log() { return *m_log; }
 
-		const AfbSignal* getFblSignal(const QUuid& afbElemetGuid, int signalIndex) { return m_fbls.getFblSignal(afbElemetGuid, signalIndex); }
+		const LogicAfbSignal* getAfbSignal(const QUuid& afbGuid, int signalIndex) { return m_afbs.getAfbSignal(afbGuid, signalIndex); }
 
 		bool run();
 	};

@@ -214,7 +214,6 @@ private:
 	void setCheckedOut(int checkedOut) { m_checkedOut = checkedOut; }
 	void setUserID(int userID) { m_userID = userID; }
 	void setChannel(int channel) { m_channel = channel; }
-	void setType(SignalType type) { m_type = type; }
 	void setCreated(const QDateTime& created) { m_created = created; }
 	void setCreated(const QString& createdStr) { m_created = QDateTime::fromString(createdStr, DATE_TIME_FORMAT_STR); }
 	void setDeleted(bool deleted) { m_deleted = deleted; }
@@ -245,6 +244,7 @@ public:
 
 	int typeInt() const { return TO_INT(m_type); }
 	SignalType type() const { return m_type; }
+	void setType(SignalType type) { m_type = type; }
 
 	bool isAnalog() const { return m_type == SignalType::Analog; }
 	bool isDiscrete() const { return m_type == SignalType::Discrete; }
