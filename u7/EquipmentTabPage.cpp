@@ -352,7 +352,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 		parentObject->addChild(sp);
 	}
 
-	parentObject->sortChildrenByPlace();
+	parentObject->sortChildren();
 
 	endInsertRows();
 
@@ -600,17 +600,31 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
 	return;
 }
 
-void EquipmentModel::refreshDeviceObject(QModelIndexList& /*rowList*/)
+void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 {
-	// Now implemented just root refresh
-	// TODO refresh for selected rows
-	//
+	if (rowList.isEmpty() == true)
+	{
+		// Refresh all model
+		//
+		beginResetModel();
+		m_root->deleteAllChildren();
+		endResetModel();
+		return;
+	}
 
-	// read all childer for HC file
+	// Refresh selected indexes
 	//
-	beginResetModel();
-	m_root->deleteAllChildren();
-	endResetModel();
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		beginRemoveRows(index, 0, d->childrenCount() - 1);
+		d->deleteAllChildren();
+		endRemoveRows();
+
+		emit dataChanged(index, index);
+	}
 
 	return;
 }
@@ -1393,12 +1407,6 @@ void EquipmentView::undoChangesSelectedDevices()
 void EquipmentView::refreshSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
-
-	if (selected.empty())
-	{
-		return;
-	}
-
 	equipmentModel()->refreshDeviceObject(selected);
 	return;
 }

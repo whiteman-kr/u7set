@@ -187,7 +187,7 @@ namespace Hardware
 		void deleteAllChildren();
 
 		bool checkChild(DeviceObject* child, QString* errorMessage);
-		void sortChildrenByPlace();
+		void sortChildren();
 
 		std::vector<DeviceObject*> findChildObjectsByMask(const QString& mask);
 		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list);
@@ -243,7 +243,7 @@ namespace Hardware
 		QString m_childRestriction;			// Restriction script for child items
 		QString m_dynamicPropertiesStruct;	// Desctription of the Object's dynamic properties
 
-		int m_place = 0;
+		int m_place = -1;
 
 		// Preset Data
 		//

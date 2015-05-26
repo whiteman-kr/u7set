@@ -901,12 +901,24 @@ namespace Hardware
 		return boolResult;
 	}
 
-	void DeviceObject::sortChildrenByPlace()
+	void DeviceObject::sortChildren()
 	{
 		std::sort(std::begin(m_children), std::end(m_children),
 			[](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
 			{
-				return o1->m_place < o2->m_place;
+				if (o1->m_place < o2->m_place)
+				{
+					return true;
+				}
+				else
+				{
+					if (o1->m_place == o2->m_place)
+					{
+						return o1->m_strId < o2->m_strId;
+					}
+				}
+
+				return false;
 			});
 
 		return;

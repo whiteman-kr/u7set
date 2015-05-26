@@ -172,7 +172,7 @@ private:
 
 	//
 	//
-	//	FblElement	- Прототип FBL элемента
+	//	FblElement	- Application Functioanl Block Description
 	//
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbElement :
@@ -201,8 +201,8 @@ private:
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	private:
-		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
-		// и должне прочитаться
+		// Use this func only in serialization, as while object creation is not fully initialized  and must be read
+		//
 		static AfbElement* CreateObject(const Proto::Envelope& message);
 
 		// Methods
