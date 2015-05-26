@@ -46,12 +46,15 @@ public:
 	void checkInDeviceObject(QModelIndexList& rowList);
 	void checkOutDeviceObject(QModelIndexList& rowList);
 	void undoChangesDeviceObject(QModelIndexList& rowList);
+
 	void refreshDeviceObject(QModelIndexList& rowList);
+	void updateDeviceObject(QModelIndexList& rowList);
 
 	Hardware::DeviceObject* deviceObject(QModelIndex& index);
 	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
 
 	std::shared_ptr<Hardware::DeviceObject> deviceObjectSharedPtr(QModelIndex& index);
+
 
 public slots:
 	void projectOpened();
@@ -81,6 +84,7 @@ private:
 	{
 		ObjectNameColumn,
 		ObjectStrIdColumn,
+		ObjectPlaceColumn,
 		ObjectStateColumn,
 		ObjectUserColumn,
 
@@ -137,6 +141,8 @@ public slots:
 	void checkOutSelectedDevices();
 	void undoChangesSelectedDevices();
 	void refreshSelectedDevices();
+
+	void updateSelectedDevices();
 
 
 	// Properties

@@ -159,6 +159,17 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				v.setValue<QString>(device->strId());
 				break;
 
+			case ObjectPlaceColumn:
+				if (device->place() >= 0)
+				{
+					v.setValue<int>(device->place());
+				}
+				else
+				{
+					v.setValue<QString>("");
+				}
+				break;
+
 			case ObjectStateColumn:
 				{
 					if (device->fileInfo().state() == VcsState::CheckedOut)
@@ -230,6 +241,9 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 
 			case ObjectStrIdColumn:
 				return QObject::tr("StrId");
+
+				case ObjectPlaceColumn:
+					return QObject::tr("Place");
 
 			case ObjectStateColumn:
 				return QObject::tr("State");
@@ -624,6 +638,25 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 		endRemoveRows();
 
 		emit dataChanged(index, index);
+	}
+
+	return;
+}
+
+void EquipmentModel::updateDeviceObject(QModelIndexList& rowList)
+{
+	if (rowList.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Update selected indexes
+	//
+	for (QModelIndex& i : rowList)
+	{
+		QModelIndex bottomRight = index(i.row(), columnCount() - 1, i.parent());
+
+		emit dataChanged(i, bottomRight);
 	}
 
 	return;
@@ -1408,6 +1441,13 @@ void EquipmentView::refreshSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
 	equipmentModel()->refreshDeviceObject(selected);
+	return;
+}
+
+void EquipmentView::updateSelectedDevices()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+	equipmentModel()->updateDeviceObject(selected);
 	return;
 }
 
@@ -2211,6 +2251,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<QObject>> objects
 	{
 		// Refresh selected items
 		//
+		m_equipmentView->updateSelectedDevices();
 	}
 
 	return;
