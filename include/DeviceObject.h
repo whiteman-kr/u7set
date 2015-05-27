@@ -187,7 +187,12 @@ namespace Hardware
 		void deleteAllChildren();
 
 		bool checkChild(DeviceObject* child, QString* errorMessage);
-		void sortChildren();
+
+		void sortByPlace(Qt::SortOrder order);
+		void sortByStrId(Qt::SortOrder order);
+		void sortByCaption(Qt::SortOrder order);
+		void sortByState(Qt::SortOrder order);
+		void sortByUser(Qt::SortOrder order);
 
 		std::vector<DeviceObject*> findChildObjectsByMask(const QString& mask);
 		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list);

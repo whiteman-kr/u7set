@@ -37,6 +37,9 @@ public:
 	virtual bool canFetchMore(const QModelIndex& parent) const override;
 	virtual void fetchMore(const QModelIndex& parent) override;
 
+	void sortDeviceObject(Hardware::DeviceObject* object, int column, Qt::SortOrder order);
+	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
 	// --
 	//
 public:
@@ -92,6 +95,9 @@ private:
 		//
 		ColumnCount
 	};
+
+	int m_sortColumn = 0 ;
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
 
@@ -143,7 +149,6 @@ public slots:
 	void refreshSelectedDevices();
 
 	void updateSelectedDevices();
-
 
 	// Properties
 	//

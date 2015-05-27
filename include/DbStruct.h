@@ -46,10 +46,12 @@ private:
 
 	friend bool operator== (const VcsState& s1, const VcsState& s2);
 	friend bool operator!= (const VcsState& s1, const VcsState& s2);
+	friend bool operator< (const VcsState& s1, const VcsState& s2);
 };
 
 bool operator== (const VcsState& s1, const VcsState& s2);
 bool operator!= (const VcsState& s1, const VcsState& s2);
+bool operator<  (const VcsState& s1, const VcsState& s2);
 
 //
 //

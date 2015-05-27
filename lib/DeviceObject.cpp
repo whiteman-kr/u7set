@@ -901,24 +901,141 @@ namespace Hardware
 		return boolResult;
 	}
 
-	void DeviceObject::sortChildren()
+	void DeviceObject::sortByPlace(Qt::SortOrder order)
 	{
 		std::sort(std::begin(m_children), std::end(m_children),
-			[](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
 			{
-				if (o1->m_place < o2->m_place)
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_place < ref2->m_place)
 				{
 					return true;
 				}
 				else
 				{
-					if (o1->m_place == o2->m_place)
+					if (ref1->m_place == ref2->m_place)
 					{
-						return o1->m_strId < o2->m_strId;
+						return ref1->m_strId < ref2->m_strId;
+					}
+					else
+					{
+						return false;
 					}
 				}
+			});
 
-				return false;
+		return;
+	}
+
+	void DeviceObject::sortByStrId(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_strId < ref2->m_strId)
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_strId == ref2->m_strId)
+					{
+						return ref1->m_place < ref2->m_place;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			});
+
+		return;
+	}
+
+	void DeviceObject::sortByCaption(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_caption < ref2->m_caption)
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_caption == ref2->m_caption)
+					{
+						return ref1->m_place < ref2->m_place;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			});
+
+		return;
+	}
+
+	void DeviceObject::sortByState(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_fileInfo.state() < ref2->m_fileInfo.state())
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_fileInfo.state() == ref2->m_fileInfo.state())
+					{
+						return ref1->m_strId < ref2->m_strId;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			});
+
+		return;
+	}
+
+	void DeviceObject::sortByUser(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_fileInfo.userId() < ref2->m_fileInfo.userId())
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_fileInfo.userId() == ref2->m_fileInfo.userId())
+					{
+						return ref1->m_strId < ref2->m_strId;
+					}
+					else
+					{
+						return false;
+					}
+				}
 			});
 
 		return;
