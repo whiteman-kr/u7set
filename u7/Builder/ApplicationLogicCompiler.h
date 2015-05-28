@@ -275,7 +275,7 @@ namespace Builder
 
 		struct Module
 		{
-			Hardware::DeviceModule* module = nullptr;
+			Hardware::DeviceModule* device = nullptr;
 
 			int txDataSize = 0;
 			int rxDataSize = 0;
@@ -287,7 +287,7 @@ namespace Builder
 			int appLogicDataSize = 0;
 			int appLogicDataSizeWithReserve = 0;
 
-			bool isInstalled() { return module != nullptr; }
+			bool isInstalled() { return device != nullptr; }
 		};
 
 		// input parameters

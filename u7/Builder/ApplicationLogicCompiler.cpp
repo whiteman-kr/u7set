@@ -204,43 +204,81 @@ namespace Builder
 
 	bool ModuleLogicCompiler::run()
 	{
+		Hardware::DeviceObject* parent = m_lm->parent();
+
+		if (parent->deviceType() != Hardware::DeviceType::Chassis)
+		{
+			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->strId());
+			m_log->writeError(msg, false, true);
+			return false;
+		}
+
+		m_chassis = dynamic_cast<Hardware::DeviceChassis*>(parent);
+
+		if (m_chassis == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		std::shared_ptr<ApplicationLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->strId());
+
+		m_moduleLogic = appLogicModule.get();
+
+		if (m_moduleLogic == nullptr)
+		{
+			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
+			m_log->writeWarning(msg, false, true);
+
+			return true;
+		}
+
 		m_log->writeEmptyLine();
 
 		msg = QString(tr("Compilation for LM %1 was started...")).arg(m_lm->strId());
 
 		m_log->writeMessage(msg, false);
 
-		bool result = true;
+		bool result = false;
 
-		// Initialization
-		//
-		result &= init();
+		do
+		{
+			// Initialization
+			//
+			if (!init()) break;
 
-		// Calculate addresses of input & output application's signals
-		//
-		result &= calculateInOutSignalsAddresses();
+			// Calculate addresses of input & output application's signals
+			//
+			if (!calculateInOutSignalsAddresses()) break;
 
-		// Functionals Block's initialization
-		//
-		result &= afbInitialization();
+			// Functionals Block's initialization
+			//
+			if (!afbInitialization()) break;
 
-		// Calculate addresses of all application's signals
-		//
-		result &= calculateSignalsAddresses();
+			// Calculate addresses of all application's signals
+			//
+			if (!calculateSignalsAddresses()) break;
 
-		// Generate Application Logic code
+			// Generate Application Logic code
+			//
+			if (!generateApplicationLogicCode()) break;
 
-		result &= generateApplicationLogicCode();
+			// Copy DiagDataController memory to the registration
+			//
+			if (!copyDiagDataToRegistration()) break;
 
-		// Copy DiagDataController memory to the registration
+			// Copy values of all input & output signals to the registration
+			//
+			if (!copyInOutSignalsToRegistration()) break;
 
-		result &= copyDiagDataToRegistration();
+			// Write compilation results
+			//
+			if (!writeResult()) break;
 
-		// Copy values of all input & output signals to the registration
+			result = true;
+		}
+		while(false);
 
-		result &= copyInOutSignalsToRegistration();
-
-		result &= writeResult();
 
 		if (result == true)
 		{
@@ -283,36 +321,21 @@ namespace Builder
 
 	bool ModuleLogicCompiler::init()
 	{
-		Hardware::DeviceObject* parent = m_lm->parent();
+		bool result = false;
 
-		if (parent->deviceType() != Hardware::DeviceType::Chassis)
+		do
 		{
-			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->strId());
-			m_log->writeError(msg, false, true);
-			return false;
+			if (!loadLMSettings()) break;
+
+			if (!loadModulesSettings()) break;
+
+			if (!buildServiceMaps()) break;
+
+			if (!createAppSignalsMap()) break;
+
+			result = true;
 		}
-
-		m_chassis = reinterpret_cast<Hardware::DeviceChassis*>(parent);
-
-		std::shared_ptr<ApplicationLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->strId());
-
-		m_moduleLogic = appLogicModule.get();
-
-		if (m_moduleLogic == nullptr)
-		{
-			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
-			m_log->writeWarning(msg, false, true);
-
-			return true;
-		}
-
-		bool result = true;
-
-		result &= loadLMSettings();
-
-		result &= buildServiceMaps();
-
-		result &= createAppSignalsMap();
+		while(false);
 
 		return result;
 	}
@@ -365,11 +388,11 @@ namespace Builder
 		{
 			Module m;
 
-			Hardware::DeviceModule* module = getModuleOnPlace(place);
+			Hardware::DeviceModule* device = getModuleOnPlace(place);
 
-			if (module != nullptr)
+			if (device != nullptr)
 			{
-				m.module = module;
+				m.device = device;
 
 				PropertyNameVar moduleSettings[] =
 				{
@@ -386,7 +409,7 @@ namespace Builder
 
 				for(int i = 0; i < sizeof(moduleSettings)/sizeof(PropertyNameVar); i++)
 				{
-					result &= getDeviceIntProperty(module, QString(moduleSettings[i].name), moduleSettings[i].var);
+					result &= getDeviceIntProperty(device, QString(moduleSettings[i].name), moduleSettings[i].var);
 				}
 			}
 
@@ -778,59 +801,62 @@ namespace Builder
 
 		int moduleDataOffset = m_moduleDataOffset;
 
-		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++, moduleDataOffset += m_moduleDataSize)
+		for(Module& module : m_modules)
 		{
-			Hardware::DeviceModule* module = getModuleOnPlace(place);
-
-			if (module == nullptr || module->isIOModule() == false)
+			if (module.isInstalled())
 			{
-				continue;
-			}
-
-			// calculate addresses of signals bound to module In/Out
-			//
-
-			std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module->getAllSignals();
-
-			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
-			{
-				if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+				if (module.device == nullptr)
 				{
-					continue;
+					assert(false);
+					return false;
 				}
 
-				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+				// calculate addresses of signals bound to module In/Out
+				//
 
-				if (boundSignals.count() > 1)
-				{
-					m_log->writeWarning(QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()), false, true);
-				}
+				std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
 
-				for(Signal* appSignal : boundSignals)
+				for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 				{
-					if (appSignal == nullptr)
+					if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
 					{
-						assert(false);
 						continue;
 					}
 
-					int signalOffset = ERR_VALUE;
-					int bit = ERR_VALUE;
+					QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
 
-					getDeviceIntProperty(deviceSignal.get(), QString(VALUE_OFFSET), &signalOffset);
-					getDeviceIntProperty(deviceSignal.get(), QString(VALUE_BIT), &bit);
-
-					if (signalOffset != ERR_VALUE && bit != ERR_VALUE)
+					if (boundSignals.count() > 1)
 					{
-						appSignal->ramAddr().set(moduleDataOffset + signalOffset, bit);
+						m_log->writeWarning(QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()), false, true);
 					}
-					else
+
+					for(Signal* appSignal : boundSignals)
 					{
-						m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(appSignal->strID()), false, true);
+						if (appSignal == nullptr)
+						{
+							assert(false);
+							continue;
+						}
+
+						int signalOffset = ERR_VALUE;
+						int bit = ERR_VALUE;
+
+						getDeviceIntProperty(deviceSignal.get(), QString(VALUE_OFFSET), &signalOffset);
+						getDeviceIntProperty(deviceSignal.get(), QString(VALUE_BIT), &bit);
+
+						if (signalOffset != ERR_VALUE && bit != ERR_VALUE)
+						{
+							appSignal->ramAddr().set(moduleDataOffset + signalOffset, bit);
+						}
+						else
+						{
+							m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(appSignal->strID()), false, true);
+						}
 					}
 				}
 			}
 
+			moduleDataOffset += m_moduleDataSize;
 		}
 
 		return result;
