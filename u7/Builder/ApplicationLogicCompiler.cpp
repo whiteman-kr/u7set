@@ -5,11 +5,11 @@ namespace Builder
 
 	// LM's memory settings
 	//
-	const char	*LM_REG_DATA_ADDRESS = "MemorySettings\\AppLogicW",
+	const char	*LM_ADDR_APP_LOGIC_W = "MemorySettings\\AppLogicW",
+				*LM_ADDR_APP_LOGIC_B = "MemorySettings\\AppLogicB",
 				*LM_DIAG_DATA = "MemorySettings\\DiagData",
 				*LM_DIAG_DATA_SIZE = "MemorySettings\\DiagDataSize",
 				*LM_IO_MODULE_DATA = "MemorySettings\\Module";		// + 2 character module place, like "02"
-
 
 	// IO modules settings
 	//
@@ -193,7 +193,6 @@ namespace Builder
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
 
-
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::AIM, "AIM");
@@ -230,13 +229,13 @@ namespace Builder
 		//
 		result &= init();
 
-		// Functionals Block's initialization
-		//
-		result &= afbInitialization();
-
 		// Calculate addresses of input & output application's signals
 		//
 		result &= calculateInOutSignalsAddresses();
+
+		// Functionals Block's initialization
+		//
+		result &= afbInitialization();
 
 		// Calculate addresses of all application's signals
 		//
@@ -308,16 +307,6 @@ namespace Builder
 
 		m_chassis = reinterpret_cast<Hardware::DeviceChassis*>(parent);
 
-		int addr = 0;
-
-		if (getLMIntProperty(LM_REG_DATA_ADDRESS, addr) == false )
-		{
-			return false;
-		}
-
-		m_regDataAddress.reset();
-		m_regDataAddress.setBase(addr);
-
 		std::shared_ptr<ApplicationLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->strId());
 
 		m_moduleLogic = appLogicModule.get();
@@ -326,19 +315,69 @@ namespace Builder
 		{
 			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
 			m_log->writeWarning(msg, false, true);
-		}
-		else
-		{
-			buildServiceMaps();
 
-			createAppSignalsMap();
+			return true;
 		}
+
+		bool result = true;
+
+		result &= initMemoryAddressedAndSizes();
+
+		result &= buildServiceMaps();
+
+		result &= createAppSignalsMap();
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::initMemoryAddressedAndSizes()
+	{
+		/*if (!getLMIntProperty(LM_ADDR_APP_LOGIC_B, &m_addrAppLogicBit))
+		{
+			return false;
+		}
+
+		if (!getLMIntProperty(LM_SIZE_APP_LOGIC_B, &m_sizeAppLogicBit))
+		{
+			return false;
+		}
+
+		if (!getLMIntProperty(LM_ADDR_APP_LOGIC_W, &m_addrAppLogicW))
+		{
+			return false;
+		}
+
+		if (!getLMIntProperty(LM_SIZE_APP_LOGIC_W, &m_sizeAppLogicW))
+		{
+			return false;
+		}
+
+		int m_addrLMDiagData = 0;			// address of LM's diagnostics data
+		int m_sizeLMDiagData = 0;			// size of LM's diagnostics data
+
+		int m_addrRegData = 0;				// address of registration data
+
+		int m_sizeIOModulesRegData = 0;		// size of IO modules data in registration buffer
+		int m_sizeAnalogSignals = 0;		// size of memory allocated to analog signals
+		int m_sizeDiscreteSignals = 0;		// size of memory allocated to discrete signals, in bits
+
+
+		int addr = 0;
+
+		if (getLMIntProperty(LM_REG_DATA_ADDRESS, addr) == false )
+		{
+			return false;
+		}
+
+		m_regDataAddress.reset();
+		m_regDataAddress.setBase(addr);*/
 
 		return true;
 	}
 
 
-	void ModuleLogicCompiler::buildServiceMaps()
+	bool ModuleLogicCompiler::buildServiceMaps()
 	{
 		int count = m_signals->count();
 
@@ -417,6 +456,8 @@ namespace Builder
 				m_pinParent.insert(output.guid(), appItem);
 			}
 		}
+
+		return true;
 	}
 
 

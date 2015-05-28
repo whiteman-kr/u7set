@@ -260,7 +260,6 @@ namespace Builder
 	};
 
 
-
 	class ModuleLogicCompiler : public QObject
 	{
 		Q_OBJECT
@@ -279,6 +278,24 @@ namespace Builder
 		OutputLog* m_log = nullptr;
 		Hardware::DeviceModule* m_lm = nullptr;
 		Hardware::DeviceChassis* m_chassis = nullptr;
+
+		// memory addresses and sizes
+		//
+
+		int m_addrAppLogicBit = 0;			// address of bit-addressed application logic memory
+		int m_sizeAppLogicBit = 0;			// size of bit-addressed application logic memory, in bits
+
+		int m_addrAppLogicW = 0;			// address of word-addressed application logic memory
+		int m_sizeAppLogicW = 0;			// size of word-addressed application logic memory
+
+		int m_addrLMDiagData = 0;			// address of LM's diagnostics data
+		int m_sizeLMDiagData = 0;			// size of LM's diagnostics data
+
+		int m_addrRegData = 0;				// address of registration data
+
+		int m_sizeIOModulesRegData = 0;		// size of IO modules data in registration buffer
+		int m_sizeAnalogSignals = 0;		// size of memory allocated to analog signals
+		int m_sizeDiscreteSignals = 0;		// size of memory allocated to discrete signals, in bits
 
 		//
 
@@ -313,6 +330,8 @@ namespace Builder
 		//
 		bool init();
 
+		bool initMemoryAddressedAndSizes();
+		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
 		bool afbInitialization();
@@ -321,9 +340,6 @@ namespace Builder
 
 		bool getUsedAfbs();
 		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
-
-
-		void buildServiceMaps();
 
 		bool copyDiagDataToRegistration();
 		bool copyInOutSignalsToRegistration();
