@@ -54,11 +54,9 @@ public:
 	template<typename VideoFrameType>
 	static SchemesTabPage* create(const QString& fileExt, DbController* dbcontroller, const QString& parentFileName, QWidget* parent);
 
-protected:
-
-	// Events
-	//
-protected:
+signals:
+	void buildStarted();
+	void buildFinished();
 
 public slots:
 	void projectOpened();
@@ -179,7 +177,10 @@ protected slots:
 	void checkInFile();
 	void checkOutFile();
 	void undoChangesFile();
+public:
 	bool saveWorkcopy();
+
+protected:
 	void getCurrentWorkcopy();				// Save current videoframe to a file
 	void setCurrentWorkcopy();				// Load a videoframe from a file
 

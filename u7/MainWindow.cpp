@@ -62,23 +62,26 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
 //	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 
-	getCentralWidget()->addTabPage(
-		SchemesTabPage::create<VFrame30::LogicScheme>("als", dbController(), AlFileName, nullptr),
-		tr("Application Logic"));
+	SchemesTabPage* logicScheme = SchemesTabPage::create<VFrame30::LogicScheme>("als", dbController(), AlFileName, nullptr);
+	SchemesTabPage* workflowScheme = SchemesTabPage::create<VFrame30::WorkflowScheme>("wvs", dbController(), WvsFileName, nullptr);
+	SchemesTabPage* diagScheme = SchemesTabPage::create<VFrame30::DiagScheme>("dvs", dbController(), DvsFileName, nullptr);
 
-	getCentralWidget()->addTabPage(
-		SchemesTabPage::create<VFrame30::WorkflowScheme>("wvs", dbController(), WvsFileName, nullptr),
-		tr("Workflow Schemes"));
+	getCentralWidget()->addTabPage(logicScheme, tr("Application Logic"));
+	getCentralWidget()->addTabPage(workflowScheme, tr("Workflow Schemes"));
+	getCentralWidget()->addTabPage(diagScheme, tr("Diag Schemes"));
 
-	getCentralWidget()->addTabPage(
-		SchemesTabPage::create<VFrame30::DiagScheme>("dvs", dbController(), DvsFileName, nullptr),
-		tr("Diag Schemes"));
+	BuildTabPage* buildTabPage = new BuildTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(buildTabPage, tr("Build"));
 
-//	getCentralWidget()->addTabPage(
-//		VideoFrameTabPage::create<VFrame30::WiringScheme>("ws", dbController(), dbcontroller()->alFileId(), nullptr),
-//		tr("Wiring"));
+	// Connect BuildStarted and BuildFinished signals to SchemesTabPage
+	//
+	connect(buildTabPage, &BuildTabPage::buildStarted, logicScheme, &SchemesTabPage::buildStarted);
+	connect(buildTabPage, &BuildTabPage::buildFinished, logicScheme, &SchemesTabPage::buildFinished);
+	connect(buildTabPage, &BuildTabPage::buildStarted, workflowScheme, &SchemesTabPage::buildStarted);
+	connect(buildTabPage, &BuildTabPage::buildFinished, workflowScheme, &SchemesTabPage::buildFinished);
+	connect(buildTabPage, &BuildTabPage::buildStarted, diagScheme, &SchemesTabPage::buildStarted);
+	connect(buildTabPage, &BuildTabPage::buildFinished, diagScheme, &SchemesTabPage::buildFinished);
 
-	getCentralWidget()->addTabPage(new BuildTabPage(dbController(), nullptr), tr("Build"));
 
 	// --
 	//
