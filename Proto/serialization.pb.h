@@ -3738,15 +3738,6 @@ class VideoItemFblElement : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.Uuid afbGuid = 1;
-  inline bool has_afbguid() const;
-  inline void clear_afbguid();
-  static const int kAfbGuidFieldNumber = 1;
-  inline const ::Proto::Uuid& afbguid() const;
-  inline ::Proto::Uuid* mutable_afbguid();
-  inline ::Proto::Uuid* release_afbguid();
-  inline void set_allocated_afbguid(::Proto::Uuid* afbguid);
-
   // repeated .Proto.FblElementParam params = 2;
   inline int params_size() const;
   inline void clear_params();
@@ -3759,15 +3750,24 @@ class VideoItemFblElement : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
       mutable_params();
 
+  // optional .Proto.wstring afbStrid = 3;
+  inline bool has_afbstrid() const;
+  inline void clear_afbstrid();
+  static const int kAfbStridFieldNumber = 3;
+  inline const ::Proto::wstring& afbstrid() const;
+  inline ::Proto::wstring* mutable_afbstrid();
+  inline ::Proto::wstring* release_afbstrid();
+  inline void set_allocated_afbstrid(::Proto::wstring* afbstrid);
+
   // @@protoc_insertion_point(class_scope:Proto.VideoItemFblElement)
  private:
-  inline void set_has_afbguid();
-  inline void clear_has_afbguid();
+  inline void set_has_afbstrid();
+  inline void clear_has_afbstrid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::Uuid* afbguid_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
+  ::Proto::wstring* afbstrid_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
@@ -9010,44 +9010,6 @@ VideoItemSignal::mutable_signalstrids() {
 
 // VideoItemFblElement
 
-// required .Proto.Uuid afbGuid = 1;
-inline bool VideoItemFblElement::has_afbguid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void VideoItemFblElement::set_has_afbguid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void VideoItemFblElement::clear_has_afbguid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void VideoItemFblElement::clear_afbguid() {
-  if (afbguid_ != NULL) afbguid_->::Proto::Uuid::Clear();
-  clear_has_afbguid();
-}
-inline const ::Proto::Uuid& VideoItemFblElement::afbguid() const {
-  return afbguid_ != NULL ? *afbguid_ : *default_instance_->afbguid_;
-}
-inline ::Proto::Uuid* VideoItemFblElement::mutable_afbguid() {
-  set_has_afbguid();
-  if (afbguid_ == NULL) afbguid_ = new ::Proto::Uuid;
-  return afbguid_;
-}
-inline ::Proto::Uuid* VideoItemFblElement::release_afbguid() {
-  clear_has_afbguid();
-  ::Proto::Uuid* temp = afbguid_;
-  afbguid_ = NULL;
-  return temp;
-}
-inline void VideoItemFblElement::set_allocated_afbguid(::Proto::Uuid* afbguid) {
-  delete afbguid_;
-  afbguid_ = afbguid;
-  if (afbguid) {
-    set_has_afbguid();
-  } else {
-    clear_has_afbguid();
-  }
-}
-
 // repeated .Proto.FblElementParam params = 2;
 inline int VideoItemFblElement::params_size() const {
   return params_.size();
@@ -9071,6 +9033,44 @@ VideoItemFblElement::params() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
 VideoItemFblElement::mutable_params() {
   return &params_;
+}
+
+// optional .Proto.wstring afbStrid = 3;
+inline bool VideoItemFblElement::has_afbstrid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void VideoItemFblElement::set_has_afbstrid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void VideoItemFblElement::clear_has_afbstrid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void VideoItemFblElement::clear_afbstrid() {
+  if (afbstrid_ != NULL) afbstrid_->::Proto::wstring::Clear();
+  clear_has_afbstrid();
+}
+inline const ::Proto::wstring& VideoItemFblElement::afbstrid() const {
+  return afbstrid_ != NULL ? *afbstrid_ : *default_instance_->afbstrid_;
+}
+inline ::Proto::wstring* VideoItemFblElement::mutable_afbstrid() {
+  set_has_afbstrid();
+  if (afbstrid_ == NULL) afbstrid_ = new ::Proto::wstring;
+  return afbstrid_;
+}
+inline ::Proto::wstring* VideoItemFblElement::release_afbstrid() {
+  clear_has_afbstrid();
+  ::Proto::wstring* temp = afbstrid_;
+  afbstrid_ = NULL;
+  return temp;
+}
+inline void VideoItemFblElement::set_allocated_afbstrid(::Proto::wstring* afbstrid) {
+  delete afbstrid_;
+  afbstrid_ = afbstrid;
+  if (afbstrid) {
+    set_has_afbstrid();
+  } else {
+    clear_has_afbstrid();
+  }
 }
 
 // -------------------------------------------------------------------

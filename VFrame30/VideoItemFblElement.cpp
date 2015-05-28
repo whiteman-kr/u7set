@@ -18,7 +18,7 @@ namespace VFrame30
 
 	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement) :
 		FblItemRect(unit),
-		m_afbGuid(fblElement.guid()),
+		m_afbStrID(fblElement.strID()),
 		m_params(fblElement.params())
 	{
 		// Создать входные и выходные сигналы в VFrame30::FblEtem
@@ -51,7 +51,7 @@ namespace VFrame30
 
 	void VideoItemFblElement::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const
 	{
-		std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(afbGuid());
+		std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(afbStrID());
 		if (afb.get() == nullptr)
 		{
 			// Such AfbItem was not found
@@ -151,7 +151,7 @@ namespace VFrame30
 		//
 		Proto::VideoItemFblElement* vifble = message->mutable_videoitem()->mutable_videoitemfblelement();
 
-		Proto::Write(vifble->mutable_afbguid(), m_afbGuid);
+		Proto::Write(vifble->mutable_afbstrid(), m_afbStrID);
 
 		for (const Afbl::AfbElementParam& p : m_params)
 		{
@@ -188,7 +188,7 @@ namespace VFrame30
 		
 		const Proto::VideoItemFblElement& vifble = message.videoitem().videoitemfblelement();
 		
-		m_afbGuid = Proto::Read(vifble.afbguid());
+		Proto::Read(vifble.afbstrid(), &m_afbStrID);
 
 		m_params.clear();
 		m_params.reserve(vifble.params_size());
@@ -272,9 +272,9 @@ namespace VFrame30
 		}
 	}
 
-	const QUuid& VideoItemFblElement::afbGuid() const
+	const QString& VideoItemFblElement::afbStrID() const
 	{
-		return m_afbGuid;
+		return m_afbStrID;
 	}
 
 	const std::vector<Afbl::AfbElementParam>& VideoItemFblElement::params() const

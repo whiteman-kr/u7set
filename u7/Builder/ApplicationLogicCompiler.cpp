@@ -5,11 +5,11 @@ namespace Builder
 
 	// LM's memory settings
 	//
-	const char	*LM_REG_DATA_ADDRESS = "MemorySettings\\AppLogicW",
+	const char	*LM_ADDR_APP_LOGIC_W = "MemorySettings\\AppLogicW",
+				*LM_ADDR_APP_LOGIC_B = "MemorySettings\\AppLogicB",
 				*LM_DIAG_DATA = "MemorySettings\\DiagData",
 				*LM_DIAG_DATA_SIZE = "MemorySettings\\DiagDataSize",
 				*LM_IO_MODULE_DATA = "MemorySettings\\Module";		// + 2 character module place, like "02"
-
 
 	// IO modules settings
 	//
@@ -193,7 +193,6 @@ namespace Builder
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
 
-
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::AIM, "AIM");
@@ -230,13 +229,13 @@ namespace Builder
 		//
 		result &= init();
 
-		// Functionals Block's initialization
-		//
-		result &= afbInitialization();
-
 		// Calculate addresses of input & output application's signals
 		//
 		result &= calculateInOutSignalsAddresses();
+
+		// Functionals Block's initialization
+		//
+		result &= afbInitialization();
 
 		// Calculate addresses of all application's signals
 		//
@@ -308,16 +307,6 @@ namespace Builder
 
 		m_chassis = reinterpret_cast<Hardware::DeviceChassis*>(parent);
 
-		int addr = 0;
-
-		if (getLMIntProperty(LM_REG_DATA_ADDRESS, addr) == false )
-		{
-			return false;
-		}
-
-		m_regDataAddress.reset();
-		m_regDataAddress.setBase(addr);
-
 		std::shared_ptr<ApplicationLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->strId());
 
 		m_moduleLogic = appLogicModule.get();
@@ -326,19 +315,69 @@ namespace Builder
 		{
 			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
 			m_log->writeWarning(msg, false, true);
-		}
-		else
-		{
-			buildServiceMaps();
 
-			createAppSignalsMap();
+			return true;
 		}
+
+		bool result = true;
+
+		result &= initMemoryAddressedAndSizes();
+
+		result &= buildServiceMaps();
+
+		result &= createAppSignalsMap();
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::initMemoryAddressedAndSizes()
+	{
+		/*if (!getLMIntProperty(LM_ADDR_APP_LOGIC_B, &m_addrAppLogicBit))
+		{
+			return false;
+		}
+
+		if (!getLMIntProperty(LM_SIZE_APP_LOGIC_B, &m_sizeAppLogicBit))
+		{
+			return false;
+		}
+
+		if (!getLMIntProperty(LM_ADDR_APP_LOGIC_W, &m_addrAppLogicW))
+		{
+			return false;
+		}
+
+		if (!getLMIntProperty(LM_SIZE_APP_LOGIC_W, &m_sizeAppLogicW))
+		{
+			return false;
+		}
+
+		int m_addrLMDiagData = 0;			// address of LM's diagnostics data
+		int m_sizeLMDiagData = 0;			// size of LM's diagnostics data
+
+		int m_addrRegData = 0;				// address of registration data
+
+		int m_sizeIOModulesRegData = 0;		// size of IO modules data in registration buffer
+		int m_sizeAnalogSignals = 0;		// size of memory allocated to analog signals
+		int m_sizeDiscreteSignals = 0;		// size of memory allocated to discrete signals, in bits
+
+
+		int addr = 0;
+
+		if (getLMIntProperty(LM_REG_DATA_ADDRESS, addr) == false )
+		{
+			return false;
+		}
+
+		m_regDataAddress.reset();
+		m_regDataAddress.setBase(addr);*/
 
 		return true;
 	}
 
 
-	void ModuleLogicCompiler::buildServiceMaps()
+	bool ModuleLogicCompiler::buildServiceMaps()
 	{
 		int count = m_signals->count();
 
@@ -417,6 +456,8 @@ namespace Builder
 				m_pinParent.insert(output.guid(), appItem);
 			}
 		}
+
+		return true;
 	}
 
 
@@ -516,7 +557,7 @@ namespace Builder
 		{
 			for(AppFb* appFb : m_appFbs)
 			{
-				if (appFb->afbGuid() != fbl->guid())
+				if (appFb->afbStrID() != fbl->strID())
 				{
 					continue;
 				}
@@ -1103,7 +1144,7 @@ namespace Builder
 			return;
 		}
 
-		if (contains(logicAfb->guid()))
+		if (contains(logicAfb->strID()))
 		{
 			assert(false);	// 	repeated guid
 			return;
@@ -1111,7 +1152,7 @@ namespace Builder
 
 		Afb* afb = new Afb(logicAfb);
 
-		HashedVector<QUuid, Afb*>::insert(afb->guid(), afb);
+		HashedVector<QString, Afb*>::insert(afb->strID(), afb);
 
 		// initialize map Fbl opCode -> current instance
 		//
@@ -1127,36 +1168,36 @@ namespace Builder
 
 		for(LogicAfbSignal signal : inputSignals)
 		{
-			GuidIndex gi;
+			StrIDIndex si;
 
-			gi.guid = logicAfb->guid();
-			gi.index = signal.operandIndex();
+			si.strID = logicAfb->strID();
+			si.index = signal.operandIndex();
 
-			if (m_afbSignals.contains(gi))
+			if (m_afbSignals.contains(si))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_afbSignals.insert(gi, &signal);
+			m_afbSignals.insert(si, &signal);
 		}
 
 		std::vector<LogicAfbSignal> outputSignals = logicAfb->outputSignals();
 
 		for(LogicAfbSignal signal : outputSignals)
 		{
-			GuidIndex gi;
+			StrIDIndex si;
 
-			gi.guid = logicAfb->guid();
-			gi.index = signal.operandIndex();
+			si.strID = logicAfb->strID();
+			si.index = signal.operandIndex();
 
-			if (m_afbSignals.contains(gi))
+			if (m_afbSignals.contains(si))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_afbSignals.insert(gi, &signal);
+			m_afbSignals.insert(si, &signal);
 		}
 
 		// add AfbElement params to m_fblsParams map
@@ -1166,36 +1207,36 @@ namespace Builder
 
 		for(LogicAfbParam param : params)
 		{
-			GuidIndex gi;
+			StrIDIndex si;
 
-			gi.guid = logicAfb->guid();
-			gi.index = param.operandIndex();
+			si.strID = logicAfb->strID();
+			si.index = param.operandIndex();
 
-			if (m_afbParams.contains(gi))
+			if (m_afbParams.contains(si))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_afbParams.insert(gi, &param);
+			m_afbParams.insert(si, &param);
 		}
 
 		std::vector<LogicAfbParam> constParams = logicAfb->constParams();
 
 		for(LogicAfbParam param : constParams)
 		{
-			GuidIndex gi;
+			StrIDIndex si;
 
-			gi.guid = logicAfb->guid();
-			gi.index = param.operandIndex();
+			si.strID = logicAfb->strID();
+			si.index = param.operandIndex();
 
-			if (m_afbParams.contains(gi))
+			if (m_afbParams.contains(si))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_afbParams.insert(gi, &param);
+			m_afbParams.insert(si, &param);
 		}
 	}
 
@@ -1208,13 +1249,13 @@ namespace Builder
 			return 1;
 		}
 
-		if (!contains(appItem->afbGuid()))
+		if (!contains(appItem->afbStrID()))
 		{
 			assert(false);			// unknown FBL guid
 			return 0;
 		}
 
-		Afb* fbl = (*this)[appItem->afbGuid()];
+		Afb* fbl = (*this)[appItem->afbStrID()];
 
 		if (fbl == nullptr)
 		{
@@ -1271,16 +1312,16 @@ namespace Builder
 	}
 
 
-	const LogicAfbSignal* AfbMap::getAfbSignal(const QUuid& afbGuid, int signalIndex)
+	const LogicAfbSignal* AfbMap::getAfbSignal(const QString& afbStrID, int signalIndex)
 	{
-		GuidIndex gi;
+		StrIDIndex si;
 
-		gi.guid = afbGuid;
-		gi.index = signalIndex;
+		si.strID = afbStrID;
+		si.index = signalIndex;
 
-		if (m_afbSignals.contains(gi))
+		if (m_afbSignals.contains(si))
 		{
-			return m_afbSignals.value(gi);
+			return m_afbSignals.value(si);
 		}
 
 		return nullptr;
@@ -1294,7 +1335,7 @@ namespace Builder
 			delete fbl;
 		}
 
-		HashedVector<QUuid, Afb*>::clear();
+		HashedVector<QString, Afb*>::clear();
 	}
 
 
@@ -1481,7 +1522,7 @@ namespace Builder
 			return;
 		}
 
-		const LogicAfbSignal* s = m_compiler.getAfbSignal(appItem->afb().guid(), outputPin.afbOperandIndex());
+		const LogicAfbSignal* s = m_compiler.getAfbSignal(appItem->afb().strID(), outputPin.afbOperandIndex());
 
 		if (s == nullptr)
 		{

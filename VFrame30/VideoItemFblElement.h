@@ -52,12 +52,12 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		const QUuid& afbGuid() const;
+		const QString& afbStrID() const;
 
 		const std::vector<Afbl::AfbElementParam>& params() const;
 
 	private:
-		QUuid m_afbGuid;
+		QString m_afbStrID;
 		std::vector<Afbl::AfbElementParam> m_params;
 	};
 

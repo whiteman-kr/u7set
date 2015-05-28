@@ -525,8 +525,8 @@ message VideoItemLink
 //
 message VideoItemFblElement
 {
-	required Uuid afbGuid = 1;
 	repeated FblElementParam params = 2;
+	optional wstring afbStrid = 3;
 }
 
 
