@@ -159,9 +159,9 @@ SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbc
 class EditSchemeTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
-private:
-	EditSchemeTabPage();		// Deleted
+
 public:
+	EditSchemeTabPage() = delete;
 	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
 	virtual ~EditSchemeTabPage();
 
