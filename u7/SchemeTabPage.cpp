@@ -81,6 +81,36 @@ void SchemesTabPage::projectOpened()
 
 void SchemesTabPage::projectClosed()
 {
+	// Close all opened documents
+	//
+	assert(m_tabWidget);
+
+	QWidget* controlTab = nullptr;
+	std::list<QWidget*> tabsToDelete;
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		QWidget* tabPage = m_tabWidget->widget(i);
+
+		if (dynamic_cast<SchemeControlTabPage*>(tabPage) != nullptr)
+		{
+			controlTab = tabPage;
+		}
+		else
+		{
+			tabsToDelete.push_back(tabPage);
+		}
+	}
+
+	m_tabWidget->clear();
+
+	m_tabWidget->addTab(controlTab, tr("Control"));
+
+	for (auto widget : tabsToDelete)
+	{
+		delete widget;
+	}
+
 	this->setEnabled(false);
 }
 

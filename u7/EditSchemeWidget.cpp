@@ -1694,7 +1694,10 @@ void EditSchemeWidget::createActions()
 	m_propertiesAction = new QAction(tr("Properties..."), this);
 	m_propertiesAction->setEnabled(true);
 	m_propertiesAction->setMenuRole(QAction::NoRole);
-	m_propertiesAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Enter));
+	m_propertiesAction->setShortcut(QKeySequence(tr("Alt+Return")));
+	// Shortcuts Alt+Return and Alt+Numeric Enter are different,
+	// Look for real call of EditSchemeWidget::properties in keyPressEvent!!!!
+	//
 	connect(m_propertiesAction, &QAction::triggered, this, &EditSchemeWidget::properties);
 	addAction(m_propertiesAction);
 
@@ -1809,6 +1812,23 @@ void EditSchemeWidget::createActions()
 		m_viewMenu->addAction(m_snapToGridAction);
 
 	return;
+}
+
+void EditSchemeWidget::keyPressEvent(QKeyEvent* e)
+{
+	QScrollArea::keyPressEvent(e);
+
+	// Show properties dialog
+	//
+	if ((e->modifiers().testFlag(Qt::AltModifier) == true &&		// Alt + numeric keypad Enter
+		e->modifiers().testFlag(Qt::KeypadModifier) == true &&
+		e->key() == Qt::Key_Enter) ||
+		(e->modifiers().testFlag(Qt::AltModifier) == true &&		// Alt + Enter
+		e->key() == Qt::Key_Return))
+	{
+		properties();
+	}
+
 }
 
 // Set corresponding to the current situation and user actions context menu

@@ -196,6 +196,8 @@ public:
 protected:
 	void createActions();
 
+	virtual void keyPressEvent(QKeyEvent* event) override;
+
 	// Set corresponding to the current situation and user actions context menu
 	//
 	void setCorrespondingContextMenu();
