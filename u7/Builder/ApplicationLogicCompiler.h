@@ -111,7 +111,6 @@ namespace Builder
 
 		const LogicAfb& afb() const { return *m_afb; }
 
-		QUuid guid() const { return m_afb->guid(); }
 		QString strID() const { return m_afb->strID(); }
 		int opcode() const { return m_afb->opcode(); }
 	};
@@ -121,16 +120,16 @@ namespace Builder
 	typedef QHash<QString, int> NonRamFblInstanceMap;
 
 
-	class AfbMap: public HashedVector<QUuid, Afb*>
+	class AfbMap: public HashedVector<QString, Afb*>
 	{
 	private:
 
-		struct GuidIndex
+		struct StrIDIndex
 		{
-			QUuid guid;			// AfbElement guid()
+			QString strID;		// AfbElement strID()
 			int index;			// AfbElementSignal or AfbElementParam index
 
-			operator QString() const { return QString("%1:%2").arg(guid.toString()).arg(index); }
+			operator QString() const { return QString("%1:%2").arg(strID).arg(index); }
 		};
 
 		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
@@ -147,7 +146,7 @@ namespace Builder
 		void insert(std::shared_ptr<LogicAfb> logicAfb);
 		void clear();
 
-		const LogicAfbSignal* getAfbSignal(const QUuid& afbGuid, int signalIndex);
+		const LogicAfbSignal* getAfbSignal(const QString &afbStrID, int signalIndex);
 	};
 
 
@@ -165,7 +164,7 @@ namespace Builder
 		AppItem(const AppLogicItem& appLogicItem);
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
-		QUuid afbGuid() const { return m_appLogicItem.m_afbElement.guid(); }
+		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
 
 		QString strID() const { return m_appLogicItem.m_fblItem->toSignalElement()->signalStrIds(); }
 
@@ -361,7 +360,7 @@ namespace Builder
 
 		OutputLog& log() { return *m_log; }
 
-		const LogicAfbSignal* getAfbSignal(const QUuid& afbGuid, int signalIndex) { return m_afbs.getAfbSignal(afbGuid, signalIndex); }
+		const LogicAfbSignal* getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
 
 		bool run();
 	};

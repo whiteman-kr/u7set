@@ -557,7 +557,7 @@ namespace Builder
 		{
 			for(AppFb* appFb : m_appFbs)
 			{
-				if (appFb->afbGuid() != fbl->guid())
+				if (appFb->afbStrID() != fbl->strID())
 				{
 					continue;
 				}
@@ -1144,7 +1144,7 @@ namespace Builder
 			return;
 		}
 
-		if (contains(logicAfb->guid()))
+		if (contains(logicAfb->strID()))
 		{
 			assert(false);	// 	repeated guid
 			return;
@@ -1152,7 +1152,7 @@ namespace Builder
 
 		Afb* afb = new Afb(logicAfb);
 
-		HashedVector<QUuid, Afb*>::insert(afb->guid(), afb);
+		HashedVector<QString, Afb*>::insert(afb->strID(), afb);
 
 		// initialize map Fbl opCode -> current instance
 		//
@@ -1168,36 +1168,36 @@ namespace Builder
 
 		for(LogicAfbSignal signal : inputSignals)
 		{
-			GuidIndex gi;
+			StrIDIndex si;
 
-			gi.guid = logicAfb->guid();
-			gi.index = signal.operandIndex();
+			si.strID = logicAfb->strID();
+			si.index = signal.operandIndex();
 
-			if (m_afbSignals.contains(gi))
+			if (m_afbSignals.contains(si))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_afbSignals.insert(gi, &signal);
+			m_afbSignals.insert(si, &signal);
 		}
 
 		std::vector<LogicAfbSignal> outputSignals = logicAfb->outputSignals();
 
 		for(LogicAfbSignal signal : outputSignals)
 		{
-			GuidIndex gi;
+			StrIDIndex si;
 
-			gi.guid = logicAfb->guid();
-			gi.index = signal.operandIndex();
+			si.strID = logicAfb->strID();
+			si.index = signal.operandIndex();
 
-			if (m_afbSignals.contains(gi))
+			if (m_afbSignals.contains(si))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_afbSignals.insert(gi, &signal);
+			m_afbSignals.insert(si, &signal);
 		}
 
 		// add AfbElement params to m_fblsParams map
@@ -1207,36 +1207,36 @@ namespace Builder
 
 		for(LogicAfbParam param : params)
 		{
-			GuidIndex gi;
+			StrIDIndex si;
 
-			gi.guid = logicAfb->guid();
-			gi.index = param.operandIndex();
+			si.strID = logicAfb->strID();
+			si.index = param.operandIndex();
 
-			if (m_afbParams.contains(gi))
+			if (m_afbParams.contains(si))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_afbParams.insert(gi, &param);
+			m_afbParams.insert(si, &param);
 		}
 
 		std::vector<LogicAfbParam> constParams = logicAfb->constParams();
 
 		for(LogicAfbParam param : constParams)
 		{
-			GuidIndex gi;
+			StrIDIndex si;
 
-			gi.guid = logicAfb->guid();
-			gi.index = param.operandIndex();
+			si.strID = logicAfb->strID();
+			si.index = param.operandIndex();
 
-			if (m_afbParams.contains(gi))
+			if (m_afbParams.contains(si))
 			{
 				assert(false);
 				continue;
 			}
 
-			m_afbParams.insert(gi, &param);
+			m_afbParams.insert(si, &param);
 		}
 	}
 
@@ -1249,13 +1249,13 @@ namespace Builder
 			return 1;
 		}
 
-		if (!contains(appItem->afbGuid()))
+		if (!contains(appItem->afbStrID()))
 		{
 			assert(false);			// unknown FBL guid
 			return 0;
 		}
 
-		Afb* fbl = (*this)[appItem->afbGuid()];
+		Afb* fbl = (*this)[appItem->afbStrID()];
 
 		if (fbl == nullptr)
 		{
@@ -1312,16 +1312,16 @@ namespace Builder
 	}
 
 
-	const LogicAfbSignal* AfbMap::getAfbSignal(const QUuid& afbGuid, int signalIndex)
+	const LogicAfbSignal* AfbMap::getAfbSignal(const QString& afbStrID, int signalIndex)
 	{
-		GuidIndex gi;
+		StrIDIndex si;
 
-		gi.guid = afbGuid;
-		gi.index = signalIndex;
+		si.strID = afbStrID;
+		si.index = signalIndex;
 
-		if (m_afbSignals.contains(gi))
+		if (m_afbSignals.contains(si))
 		{
-			return m_afbSignals.value(gi);
+			return m_afbSignals.value(si);
 		}
 
 		return nullptr;
@@ -1335,7 +1335,7 @@ namespace Builder
 			delete fbl;
 		}
 
-		HashedVector<QUuid, Afb*>::clear();
+		HashedVector<QString, Afb*>::clear();
 	}
 
 
@@ -1522,7 +1522,7 @@ namespace Builder
 			return;
 		}
 
-		const LogicAfbSignal* s = m_compiler.getAfbSignal(appItem->afb().guid(), outputPin.afbOperandIndex());
+		const LogicAfbSignal* s = m_compiler.getAfbSignal(appItem->afb().strID(), outputPin.afbOperandIndex());
 
 		if (s == nullptr)
 		{
