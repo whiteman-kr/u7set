@@ -369,6 +369,19 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	connect(editTabPage, &EditSchemeTabPage::vcsFileStateChanged, this, &SchemeControlTabPage::refreshFiles);
 
+	assert(tabWidget->parent());
+
+	SchemesTabPage* schemesTabPage = dynamic_cast<SchemesTabPage*>(tabWidget->parent());
+	if (schemesTabPage == nullptr)
+	{
+		assert(dynamic_cast<SchemesTabPage*>(tabWidget->parent()));
+		return;
+	}
+
+	connect(schemesTabPage, &SchemesTabPage::buildStarted, editTabPage, &EditSchemeTabPage::saveWorkcopy);
+
+	// --
+	//
 	editTabPage->setReadOnly(false);
 
 	tabWidget->addTab(editTabPage, editTabPage->windowTitle());

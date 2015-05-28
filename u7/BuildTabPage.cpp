@@ -9,12 +9,16 @@
 // BuildTabPage
 //
 //
+BuildTabPage* BuildTabPage::m_this = nullptr;
+
 
 BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent),
 	m_builder(&m_outputLog)
 {
 	assert(dbcontroller != nullptr);
+
+	BuildTabPage::m_this = this;
 
 	//
 	// Controls
@@ -89,6 +93,9 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::build);
 	connect(m_cancelButton, &QAbstractButton::clicked, this, &BuildTabPage::cancel);
 
+	connect(&m_builder, &Builder::Builder::buildStarted, this, &BuildTabPage::buildWasStarted);
+	connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildWasFinished);
+
 	connect(&m_builder, &Builder::Builder::buildStarted, this, &BuildTabPage::buildStarted);
 	connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildFinished);
 
@@ -103,8 +110,16 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 BuildTabPage::~BuildTabPage()
 {
+	BuildTabPage::m_this = nullptr;
+
 	theSettings.m_buildTabPageSplitterState = m_vsplitter->saveState();
 	theSettings.writeUserScope();
+}
+
+BuildTabPage* BuildTabPage::instance()
+{
+	assert(m_this);
+	return m_this;
 }
 
 void BuildTabPage::CreateActions()
@@ -225,13 +240,13 @@ void BuildTabPage::cancel()
 	m_builder.stop();
 }
 
-void BuildTabPage::buildStarted()
+void BuildTabPage::buildWasStarted()
 {
 	m_buildButton->setEnabled(false);
 	m_cancelButton->setEnabled(true);
 }
 
-void BuildTabPage::buildFinished()
+void BuildTabPage::buildWasFinished()
 {
 	m_buildButton->setEnabled(true);
 	m_cancelButton->setEnabled(false);
