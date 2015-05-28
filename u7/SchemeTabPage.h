@@ -24,12 +24,14 @@ public:
 	virtual void viewFile(std::vector<DbFileInfo> files) override;
 	virtual void addFile() override;
 	virtual void deleteFile(std::vector<DbFileInfo> files) override;
+	virtual void checkIn(std::vector<DbFileInfo> files) override;
 
 signals:
 	void openFileSignal(std::vector<DbFileInfo> files);
 	void viewFileSignal(std::vector<DbFileInfo> files);
 	void addFileSignal();
 	void deleteFileSignal(std::vector<DbFileInfo> files);
+	void checkInSignal(std::vector<DbFileInfo> files);
 
 	// Data
 	//
@@ -102,6 +104,8 @@ protected slots:
     void addFile();
     void deleteFile(std::vector<DbFileInfo> files);
 
+	void checkIn(std::vector<DbFileInfo> files);
+
     void openFiles(std::vector<DbFileInfo> files);
     void viewFiles(std::vector<DbFileInfo> files);
 
@@ -163,9 +167,12 @@ public:
 	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
 	virtual ~EditSchemeTabPage();
 
+	// Public methods
+public:
+	void setPageTitle();
+
 protected:
 	void CreateActions();
-	void setPageTitle();
 
 signals:
 	void vcsFileStateChanged();
@@ -177,6 +184,7 @@ protected slots:
 	void checkInFile();
 	void checkOutFile();
 	void undoChangesFile();
+
 public:
 	bool saveWorkcopy();
 
