@@ -3,19 +3,6 @@
 namespace Builder
 {
 
-	// LM's memory settings
-	//
-	const char	*LM_ADDR_APP_LOGIC_W = "MemorySettings\\AppLogicW",
-				*LM_ADDR_APP_LOGIC_B = "MemorySettings\\AppLogicB",
-				*LM_DIAG_DATA = "MemorySettings\\DiagData",
-				*LM_DIAG_DATA_SIZE = "MemorySettings\\DiagDataSize",
-				*LM_IO_MODULE_DATA = "MemorySettings\\Module";		// + 2 character module place, like "02"
-
-	// IO modules settings
-	//
-	const char	*IO_MODULE_DATA_SIZE = "IODataSize";
-
-
 	// Signals properties
 	//
 	const char	*VALUE_OFFSET = "ValueOffset",
@@ -29,7 +16,7 @@ namespace Builder
 				LM2_PLACE = 15,
 
 				FIRST_MODULE_PLACE = 1,
-				LAST_MODULE_PLCE = 14;
+				LAST_MODULE_PLACE = 14;
 
 
 	// ---------------------------------------------------------------------------------
@@ -321,7 +308,7 @@ namespace Builder
 
 		bool result = true;
 
-		result &= initMemoryAddressedAndSizes();
+		result &= loadLMSettings();
 
 		result &= buildServiceMaps();
 
@@ -331,49 +318,82 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::initMemoryAddressedAndSizes()
+	bool ModuleLogicCompiler::loadLMSettings()
 	{
-		/*if (!getLMIntProperty(LM_ADDR_APP_LOGIC_B, &m_addrAppLogicBit))
+		bool result = true;
+
+		PropertyNameVar memSettings[] =
 		{
-			return false;
-		}
+			{	"ModuleDataOffset", &m_moduleDataOffset },
+			{	"ModuleDataSize", &m_moduleDataSize },
 
-		if (!getLMIntProperty(LM_SIZE_APP_LOGIC_B, &m_sizeAppLogicBit))
+			{	"OptoInterfaceDataOffset", &m_optoInterfaceDataOffset },
+			{	"OptoInterfaceDataSize", &m_optoInterfaceDataSize },
+
+			{	"AppLogicBitDataOffset", &m_appLogicBitDataOffset },
+			{	"AppLogicBitDataSize", &m_appLogicBitDataSize },
+
+			{	"TuningDataOffset", &m_tuningDataOffset },
+			{	"TuningDataSize", &m_tuningDataSize },
+
+			{	"AppLogicWordDataOffset", &m_appLogicWordDataOffset },
+			{	"AppLogicWordDataSize", &m_appLogicWordDataSize },
+
+			{	"LMDiagDataOffset", &m_appLogicWordDataSize },
+			{	"LMDiagDataSize", &m_LMDiagDataSize },
+
+			{	"LMIntOutDataOffset", &m_LMIntOutDataOffset },
+			{	"LMIntOutDataSize", &m_LMIntOutDataSize }
+		};
+
+		for(int i = 0; i < sizeof(memSettings)/sizeof(PropertyNameVar); i++)
 		{
-			return false;
+			result &= getLMIntProperty(QString("MemorySettings\\%1").arg(memSettings[i].name), memSettings[i].var);
 		}
-
-		if (!getLMIntProperty(LM_ADDR_APP_LOGIC_W, &m_addrAppLogicW))
-		{
-			return false;
-		}
-
-		if (!getLMIntProperty(LM_SIZE_APP_LOGIC_W, &m_sizeAppLogicW))
-		{
-			return false;
-		}
-
-		int m_addrLMDiagData = 0;			// address of LM's diagnostics data
-		int m_sizeLMDiagData = 0;			// size of LM's diagnostics data
-
-		int m_addrRegData = 0;				// address of registration data
-
-		int m_sizeIOModulesRegData = 0;		// size of IO modules data in registration buffer
-		int m_sizeAnalogSignals = 0;		// size of memory allocated to analog signals
-		int m_sizeDiscreteSignals = 0;		// size of memory allocated to discrete signals, in bits
-
-
-		int addr = 0;
-
-		if (getLMIntProperty(LM_REG_DATA_ADDRESS, addr) == false )
-		{
-			return false;
-		}
-
-		m_regDataAddress.reset();
-		m_regDataAddress.setBase(addr);*/
 
 		return true;
+	}
+
+
+	bool ModuleLogicCompiler::loadModulesSettings()
+	{
+		bool result = true;
+
+		m_modules.clear();
+
+		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
+		{
+			Module m;
+
+			Hardware::DeviceModule* module = getModuleOnPlace(place);
+
+			if (module != nullptr)
+			{
+				m.module = module;
+
+				PropertyNameVar moduleSettings[] =
+				{
+					{	"TxDataSize", &m.txDataSize },
+					{	"RxDataSize", &m.rxDataSize },
+
+					{	"DiagDataOffset", &m.diagDataOffset },
+					{	"DiagDataSize", &m.diagDataSize },
+
+					{	"AppLogicDataOffset", &m.appLogicDataOffset },
+					{	"AppLogicDataSize", &m.appLogicDataSize },
+					{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve }
+				};
+
+				for(int i = 0; i < sizeof(moduleSettings)/sizeof(PropertyNameVar); i++)
+				{
+					result &= getDeviceIntProperty(module, QString(moduleSettings[i].name), moduleSettings[i].var);
+				}
+			}
+
+			m_modules.append(m);
+		}
+
+		return result;
 	}
 
 
@@ -738,16 +758,6 @@ namespace Builder
 		int diagData = 0;
 		int diagDataSize = 0;
 
-		if (getLMIntProperty(LM_DIAG_DATA, diagData) == false )
-		{
-			return false;;
-		}
-
-		if (getLMIntProperty(LM_DIAG_DATA_SIZE, diagDataSize) == false )
-		{
-			return false;;
-		}
-
 		Command cmd;
 
 		cmd.movMem(diagData, m_regDataAddress.address(), diagDataSize);
@@ -766,26 +776,13 @@ namespace Builder
 
 		bool result = true;
 
-		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLCE; place++)
+		int moduleDataOffset = m_moduleDataOffset;
+
+		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++, moduleDataOffset += m_moduleDataSize)
 		{
 			Hardware::DeviceModule* module = getModuleOnPlace(place);
 
-			int ioDataSize = ERR_VALUE;
-			int ioModuleData = ERR_VALUE;
-
 			if (module == nullptr || module->isIOModule() == false)
-			{
-				continue;
-			}
-
-			result &= getDeviceIntProperty(module, IO_MODULE_DATA_SIZE, ioDataSize);
-
-			QString propertyName(LM_IO_MODULE_DATA);
-			propertyName += QString().sprintf("%02d", place);
-
-			result &= getLMIntProperty(propertyName.toUtf8().data(), ioModuleData);
-
-			if (ioDataSize == ERR_VALUE || ioModuleData == ERR_VALUE)
 			{
 				continue;
 			}
@@ -817,15 +814,15 @@ namespace Builder
 						continue;
 					}
 
-					int offset = ERR_VALUE;
+					int signalOffset = ERR_VALUE;
 					int bit = ERR_VALUE;
 
-					getDeviceIntProperty(deviceSignal.get(), VALUE_OFFSET, offset);
-					getDeviceIntProperty(deviceSignal.get(), VALUE_BIT, bit);
+					getDeviceIntProperty(deviceSignal.get(), QString(VALUE_OFFSET), &signalOffset);
+					getDeviceIntProperty(deviceSignal.get(), QString(VALUE_BIT), &bit);
 
-					if (offset != ERR_VALUE && bit != ERR_VALUE)
+					if (signalOffset != ERR_VALUE && bit != ERR_VALUE)
 					{
-						appSignal->ramAddr().set(ioModuleData + offset, bit);
+						appSignal->ramAddr().set(moduleDataOffset + signalOffset, bit);
 					}
 					else
 					{
@@ -844,16 +841,15 @@ namespace Builder
 	{
 		bool result = true;
 
-		m_code.newLine();
+		/*m_code.newLine();
 		m_code.comment("Copy input/output signals to registration");
 		m_code.newLine();
 
-		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLCE; place++)
+		int moduleDataOffset = m_moduleDataOffset;
+
+		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++, moduleDataOffset += m_moduleDataSize)
 		{
 			Hardware::DeviceModule* module = getModuleOnPlace(place);
-
-			int ioDataSize = ERR_VALUE;
-			int ioModuleData = ERR_VALUE;
 
 			if (module == nullptr || module->isIOModule() == false)
 			{
@@ -863,40 +859,38 @@ namespace Builder
 
 				continue;
 			}
+
+			result &= getDeviceIntProperty(module, IO_MODULE_DATA_SIZE, ioDataSize);
+
+			QString propertyName(LM_IO_MODULE_DATA);
+			propertyName += QString().sprintf("%02d", place);
+
+			result &= getLMIntProperty(propertyName.toUtf8().data(), ioModuleData);
+
+			if (ioDataSize == ERR_VALUE || ioModuleData == ERR_VALUE)
+			{
+				continue;
+			}
 			else
 			{
-				result &= getDeviceIntProperty(module, IO_MODULE_DATA_SIZE, ioDataSize);
+				QString moduleFamilyStr = "UNKNOWN";
 
-				QString propertyName(LM_IO_MODULE_DATA);
-				propertyName += QString().sprintf("%02d", place);
-
-				result &= getLMIntProperty(propertyName.toUtf8().data(), ioModuleData);
-
-				if (ioDataSize == ERR_VALUE || ioModuleData == ERR_VALUE)
+				if (m_moduleFamilyTypeStr.contains(module->moduleFamily()))
 				{
-					continue;
+					moduleFamilyStr	= m_moduleFamilyTypeStr[module->moduleFamily()];
 				}
-				else
-				{
-					QString moduleFamilyStr = "UNKNOWN";
 
-					if (m_moduleFamilyTypeStr.contains(module->moduleFamily()))
-					{
-						moduleFamilyStr	= m_moduleFamilyTypeStr[module->moduleFamily()];
-					}
+				Command cmd;
 
-					Command cmd;
+				cmd.movMem(ioModuleData, m_regDataAddress.address(), ioDataSize);
 
-					cmd.movMem(ioModuleData, m_regDataAddress.address(), ioDataSize);
+				cmd.setComment(QString(tr("Move %1 module data (place %2) to registration")).arg(moduleFamilyStr).arg(place));
 
-					cmd.setComment(QString(tr("Move %1 module data (place %2) to registration")).arg(moduleFamilyStr).arg(place));
+				m_code.append(cmd);
 
-					m_code.append(cmd);
-
-					m_regDataAddress.addWord(ioDataSize);
-				}
+				m_regDataAddress.addWord(ioDataSize);
 			}
-		}
+		}*/
 
 		return result;
 	}
@@ -976,27 +970,27 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::getLMIntProperty(const char* propertyName, int& value)
+	bool ModuleLogicCompiler::getLMIntProperty(const QString& propertyName, int *value)
 	{
 		return getDeviceIntProperty(m_lm, propertyName, value);
 	}
 
 
-	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const char* propertyName, int &value)
+	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString& propertyName, int *value)
 	{
 		if (device == nullptr)
 		{
-			assert(device != nullptr);
+			assert(false);
 			return false;
 		}
 
-		if (propertyName == nullptr)
+		if (value == nullptr)
 		{
-			assert(propertyName != nullptr);
+			assert(false);
 			return false;
 		}
 
-		QVariant val = device->property(propertyName);
+		QVariant val = device->property(propertyName.toStdString().c_str());
 
 		if (val.isValid() == false)
 		{
@@ -1004,7 +998,7 @@ namespace Builder
 			return false;
 		}
 
-		value = val.toInt();
+		*value = val.toInt();
 
 		return true;
 	}
@@ -1036,7 +1030,14 @@ namespace Builder
 				continue;
 			}
 
-			return reinterpret_cast<Hardware::DeviceModule*>(device);
+			Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
+
+			if (module == nullptr)
+			{
+				assert(false);
+			}
+
+			return module;
 		}
 
 		return nullptr;

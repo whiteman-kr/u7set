@@ -265,6 +265,31 @@ namespace Builder
 
 	private:
 
+		struct PropertyNameVar
+		{
+			const char* name = nullptr;
+			int* var = nullptr;
+
+			PropertyNameVar(const char* n, int* v) : name(n), var(v) {}
+		};
+
+		struct Module
+		{
+			Hardware::DeviceModule* module = nullptr;
+
+			int txDataSize = 0;
+			int rxDataSize = 0;
+
+			int diagDataOffset = 0;
+			int diagDataSize = 0;
+
+			int appLogicDataOffset = 0;
+			int appLogicDataSize = 0;
+			int appLogicDataSizeWithReserve = 0;
+
+			bool isInstalled() { return module != nullptr; }
+		};
+
 		// input parameters
 		//
 
@@ -281,20 +306,28 @@ namespace Builder
 		// memory addresses and sizes
 		//
 
-		int m_addrAppLogicBit = 0;			// address of bit-addressed application logic memory
-		int m_sizeAppLogicBit = 0;			// size of bit-addressed application logic memory, in bits
+		int	m_moduleDataOffset = 0;
+		int m_moduleDataSize = 0;
 
-		int m_addrAppLogicW = 0;			// address of word-addressed application logic memory
-		int m_sizeAppLogicW = 0;			// size of word-addressed application logic memory
+		int m_optoInterfaceDataOffset = 0;
+		int m_optoInterfaceDataSize = 0;
 
-		int m_addrLMDiagData = 0;			// address of LM's diagnostics data
-		int m_sizeLMDiagData = 0;			// size of LM's diagnostics data
+		int m_appLogicBitDataOffset = 0;
+		int	m_appLogicBitDataSize = 0;
 
-		int m_addrRegData = 0;				// address of registration data
+		int m_tuningDataOffset = 0;
+		int m_tuningDataSize = 0;
 
-		int m_sizeIOModulesRegData = 0;		// size of IO modules data in registration buffer
-		int m_sizeAnalogSignals = 0;		// size of memory allocated to analog signals
-		int m_sizeDiscreteSignals = 0;		// size of memory allocated to discrete signals, in bits
+		int m_appLogicWordDataOffset = 0;
+		int m_appLogicWordDataSize = 0;
+
+		int m_LMDiagDataOffset = 0;
+		int m_LMDiagDataSize = 0;
+
+		int m_LMIntOutDataOffset = 0;
+		int m_LMIntOutDataSize = 0;
+
+		QVector<Module> m_modules;
 
 		//
 
@@ -320,8 +353,8 @@ namespace Builder
 		QString msg;
 
 	private:
-		bool getDeviceIntProperty(Hardware::DeviceObject* device, const char* propertyName, int &value);
-		bool getLMIntProperty(const char* propertyName, int &value);
+		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& propertyName, int* value);
+		bool getLMIntProperty(const QString& propertyName, int* value);
 
 		Hardware::DeviceModule* getModuleOnPlace(int place);
 
@@ -329,7 +362,9 @@ namespace Builder
 		//
 		bool init();
 
-		bool initMemoryAddressedAndSizes();
+		bool loadLMSettings();
+		bool loadModulesSettings();
+
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
