@@ -221,7 +221,7 @@ namespace Builder
 
 				if (f->isFblElement())
 				{
-					afbElement = afbCollection->get(f->toFblElement()->afbGuid());
+					afbElement = afbCollection->get(f->toFblElement()->afbStrID());
 
 					if (afbElement == nullptr)
 					{
@@ -1339,7 +1339,7 @@ namespace Builder
 
 						if (fblElement != nullptr)
 						{
-							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
 
 							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
 								.arg(scheme->caption())
@@ -1399,7 +1399,7 @@ namespace Builder
 
 						if (fblElement != nullptr)
 						{
-							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbGuid());
+							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
 
 							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
 								.arg(scheme->caption())
