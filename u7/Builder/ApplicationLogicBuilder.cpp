@@ -226,8 +226,10 @@ namespace Builder
 					if (afbElement == nullptr)
 					{
 						assert(afbElement != nullptr);
-						log->writeError(QObject::tr("Fbl element does not have Afb description, element: %1").
-										arg(f->guid().toString()), false, true);
+						log->writeError(QObject::tr("Fbl element does not have Afb description, scheme: %1, element: %2")
+										.arg(logicScheme->strID())
+										.arg(f->guid().toString()),
+										false, true);
 
 						return false;
 					}

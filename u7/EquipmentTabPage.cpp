@@ -159,6 +159,17 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				v.setValue<QString>(device->strId());
 				break;
 
+			case ObjectPlaceColumn:
+				if (device->place() >= 0)
+				{
+					v.setValue<int>(device->place());
+				}
+				else
+				{
+					v.setValue<QString>("");
+				}
+				break;
+
 			case ObjectStateColumn:
 				{
 					if (device->fileInfo().state() == VcsState::CheckedOut)
@@ -230,6 +241,9 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 
 			case ObjectStrIdColumn:
 				return QObject::tr("StrId");
+
+				case ObjectPlaceColumn:
+					return QObject::tr("Place");
 
 			case ObjectStateColumn:
 				return QObject::tr("State");
@@ -352,9 +366,93 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 		parentObject->addChild(sp);
 	}
 
-	parentObject->sortChildrenByPlace();
+	sortDeviceObject(parentObject, m_sortColumn, m_sortOrder);
 
 	endInsertRows();
+
+	return;
+}
+
+void EquipmentModel::sortDeviceObject(Hardware::DeviceObject* object, int column, Qt::SortOrder order)
+{
+	if (object == nullptr)
+	{
+		assert(object);
+		return;
+	}
+
+	switch (column)
+	{
+	case ObjectNameColumn:
+		object->sortByCaption(order);
+		break;
+	case ObjectStrIdColumn:
+		object->sortByStrId(order);
+		break;
+	case ObjectPlaceColumn:
+		object->sortByPlace(order);
+		break;
+	case ObjectStateColumn:
+		object->sortByState(order);
+		break;
+	case ObjectUserColumn:
+		object->sortByUser(order);
+		break;
+	default:
+		assert(false);
+	}
+
+	int childCont = object->childrenCount();
+
+	for (int i = 0; i < childCont; i++)
+	{
+		Hardware::DeviceObject* child = object->child(i);
+
+		if (child->deviceType() != Hardware::DeviceType::Signal)
+		{
+			sortDeviceObject(child, column, order);
+		}
+	}
+
+	return;
+}
+
+void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*/)
+{
+	qDebug() << "Sort column: " << column << ", order: " << static_cast<int>(order);
+
+	m_sortColumn = column;
+	m_sortOrder = order;
+
+	emit layoutAboutToBeChanged();
+	QModelIndexList pers = persistentIndexList();
+
+	// Sort
+	//
+	QModelIndex rootIndex = index(0, 0, QModelIndex());
+	Hardware::DeviceObject* parent = deviceObject(rootIndex);
+
+	sortDeviceObject(parent, column, order);
+
+	// Move pers indexes
+	//
+	for (QModelIndex& oldIndex : pers)
+	{
+		Hardware::DeviceObject* device = deviceObject(oldIndex);
+		assert(device);
+
+		Hardware::DeviceObject* parentDevice = device->parent();
+		assert(parentDevice);
+
+		QModelIndex newIndex = index(parentDevice->childIndex(device), oldIndex.column(), oldIndex.parent());
+
+		if (oldIndex != newIndex)
+		{
+			changePersistentIndex(oldIndex, newIndex);
+		}
+	}
+
+	emit layoutChanged();
 
 	return;
 }
@@ -600,17 +698,95 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
 	return;
 }
 
-void EquipmentModel::refreshDeviceObject(QModelIndexList& /*rowList*/)
+void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 {
-	// Now implemented just root refresh
-	// TODO refresh for selected rows
+	if (rowList.isEmpty() == true)
+	{
+		// Refresh all model
+		//
+		beginResetModel();
+		m_root->deleteAllChildren();
+		endResetModel();
+		return;
+	}
+
+	// Refresh selected indexes
+	//
+	for (QModelIndex& index : rowList)
+	{
+		Hardware::DeviceObject* d = deviceObject(index);
+		assert(d);
+
+		beginRemoveRows(index, 0, d->childrenCount() - 1);
+		d->deleteAllChildren();
+		endRemoveRows();
+
+		emit dataChanged(index, index);
+	}
+
+	return;
+}
+
+void EquipmentModel::updateDeviceObject(QModelIndexList& rowList)
+{
+	if (rowList.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Update data
+	//
+	for (QModelIndex& i : rowList)
+	{
+		QModelIndex bottomRight = index(i.row(), columnCount() - 1, i.parent());
+
+		emit dataChanged(i, bottomRight);
+	}
+
+	// Sort items
+	//
+	emit layoutAboutToBeChanged();
+
+	QModelIndexList pers = persistentIndexList();
+
+	// --
+	//
+	std::set<Hardware::DeviceObject*> updatedParents;
+
+	for (QModelIndex& i : rowList)
+	{
+		QModelIndex parentIndex = i.parent();
+
+		Hardware::DeviceObject* parentDevice = deviceObject(parentIndex);
+		assert(parentDevice);
+
+		if (updatedParents.count(parentDevice) == 0)
+		{
+			updatedParents.insert(parentDevice);
+			sortDeviceObject(parentDevice, m_sortColumn, m_sortOrder);
+		}
+	}
+
+	// --
 	//
 
-	// read all childer for HC file
-	//
-	beginResetModel();
-	m_root->deleteAllChildren();
-	endResetModel();
+	for (QModelIndex& oldIndex : pers)
+	{
+		Hardware::DeviceObject* device = deviceObject(oldIndex);
+		assert(device);
+
+		Hardware::DeviceObject* parentDevice = device->parent();
+		assert(parentDevice);
+
+		QModelIndex newIndex = index(parentDevice->childIndex(device), oldIndex.column(), oldIndex.parent());
+
+		if (oldIndex != newIndex)
+		{
+			changePersistentIndex(oldIndex, newIndex);
+		}
+	}
+
+	emit layoutChanged();
 
 	return;
 }
@@ -626,6 +802,23 @@ Hardware::DeviceObject* EquipmentModel::deviceObject(QModelIndex& index)
 	else
 	{
 		object = static_cast<Hardware::DeviceObject*>(index.internalPointer());
+	}
+
+	assert(object != nullptr);
+	return object;
+}
+
+const Hardware::DeviceObject* EquipmentModel::deviceObject(const QModelIndex& index) const
+{
+	const Hardware::DeviceObject* object = nullptr;
+
+	if (index.isValid() == false)
+	{
+		object = m_root.get();
+	}
+	else
+	{
+		object = static_cast<const Hardware::DeviceObject*>(index.internalPointer());
 	}
 
 	assert(object != nullptr);
@@ -665,23 +858,6 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentModel::deviceObjectSharedPtr(QM
 	}
 
 	std::shared_ptr<Hardware::DeviceObject> object = rawPtr->parent()->childSharedPtr(childIndex);
-
-	assert(object != nullptr);
-	return object;
-}
-
-const Hardware::DeviceObject* EquipmentModel::deviceObject(const QModelIndex& index) const
-{
-	const Hardware::DeviceObject* object = nullptr;
-
-	if (index.isValid() == false)
-	{
-		object = m_root.get();
-	}
-	else
-	{
-		object = static_cast<const Hardware::DeviceObject*>(index.internalPointer());
-	}
 
 	assert(object != nullptr);
 	return object;
@@ -759,10 +935,15 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 {
 	assert(m_dbController);
 
-	setSelectionBehavior(QAbstractItemView::SelectRows);
+	setSortingEnabled(true);
+
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
+	setSelectionBehavior(QAbstractItemView::SelectRows);
+
 	setUniformRowHeights(true);
 	setIndentation(10);
+
+	return;
 }
 
 EquipmentView::~EquipmentView()
@@ -1393,16 +1574,18 @@ void EquipmentView::undoChangesSelectedDevices()
 void EquipmentView::refreshSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
-
-	if (selected.empty())
-	{
-		return;
-	}
-
 	equipmentModel()->refreshDeviceObject(selected);
 	return;
 }
 
+void EquipmentView::updateSelectedDevices()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	equipmentModel()->updateDeviceObject(selected);
+
+	return;
+}
 
 EquipmentModel* EquipmentView::equipmentModel()
 {
@@ -1417,7 +1600,6 @@ EquipmentModel* EquipmentView::equipmentModel() const
 	assert(result);
 	return result;
 }
-
 
 //
 //
@@ -2203,6 +2385,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<QObject>> objects
 	{
 		// Refresh selected items
 		//
+		m_equipmentView->updateSelectedDevices();
 	}
 
 	return;

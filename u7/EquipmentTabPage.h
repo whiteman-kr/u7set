@@ -37,6 +37,9 @@ public:
 	virtual bool canFetchMore(const QModelIndex& parent) const override;
 	virtual void fetchMore(const QModelIndex& parent) override;
 
+	void sortDeviceObject(Hardware::DeviceObject* object, int column, Qt::SortOrder order);
+	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
 	// --
 	//
 public:
@@ -46,12 +49,15 @@ public:
 	void checkInDeviceObject(QModelIndexList& rowList);
 	void checkOutDeviceObject(QModelIndexList& rowList);
 	void undoChangesDeviceObject(QModelIndexList& rowList);
+
 	void refreshDeviceObject(QModelIndexList& rowList);
+	void updateDeviceObject(QModelIndexList& rowList);
 
 	Hardware::DeviceObject* deviceObject(QModelIndex& index);
 	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
 
 	std::shared_ptr<Hardware::DeviceObject> deviceObjectSharedPtr(QModelIndex& index);
+
 
 public slots:
 	void projectOpened();
@@ -81,6 +87,7 @@ private:
 	{
 		ObjectNameColumn,
 		ObjectStrIdColumn,
+		ObjectPlaceColumn,
 		ObjectStateColumn,
 		ObjectUserColumn,
 
@@ -88,6 +95,9 @@ private:
 		//
 		ColumnCount
 	};
+
+	int m_sortColumn = 0 ;
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
 
@@ -138,6 +148,7 @@ public slots:
 	void undoChangesSelectedDevices();
 	void refreshSelectedDevices();
 
+	void updateSelectedDevices();
 
 	// Properties
 	//
