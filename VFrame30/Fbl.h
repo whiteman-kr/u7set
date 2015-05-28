@@ -213,9 +213,6 @@ private:
 	// Properties and Datas
 	//
 	public:
-		const QUuid& guid() const;
-		void setGuid(const QUuid& QUuid);
-
 		const QString& strID() const;
 		void setStrID(const QString& strID);
 
@@ -245,7 +242,6 @@ private:
 		void setConstParams(const std::vector<AfbElementParam>& constParams);
 
 	private:
-		QUuid m_guid;
 		QString m_strID;
 		QString m_caption;
 		unsigned int m_opcode;
@@ -286,7 +282,7 @@ private:
 		const std::vector<std::shared_ptr<AfbElement>>& elements() const;
 		std::vector<std::shared_ptr<AfbElement>>* mutable_elements();
 
-		std::shared_ptr<AfbElement> get(const QUuid& QUuid) const;
+		std::shared_ptr<AfbElement> get(const QString& strID) const;
 
 		// Properties and Datas
 		//

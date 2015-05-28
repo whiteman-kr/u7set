@@ -255,7 +255,7 @@ namespace Afbl
 		xmlWriter->writeStartElement("AfbElementSignal");
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Type", type() == AfbSignalType::Analog ? "Analog" : "Discrete");
-        xmlWriter->writeAttribute("Index", QString::number(operandIndex()));
+		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
         xmlWriter->writeAttribute("Size", QString::number(size()));
 		xmlWriter->writeEndElement();
 
@@ -294,9 +294,9 @@ namespace Afbl
 
 		}
 
-        if (xmlReader->attributes().hasAttribute("Index"))
+		if (xmlReader->attributes().hasAttribute("OpIndex"))
         {
-            setOperandIndex(xmlReader->attributes().value("Index").toInt());
+			setOperandIndex(xmlReader->attributes().value("OpIndex").toInt());
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
@@ -447,9 +447,9 @@ namespace Afbl
 			setType((AfbParamType)xmlReader->attributes().value("Type").toInt());
 		}
 
-        if (xmlReader->attributes().hasAttribute("Index"))
+		if (xmlReader->attributes().hasAttribute("OpIndex"))
         {
-			setOperandIndex(xmlReader->attributes().value("Index").toInt());
+			setOperandIndex(xmlReader->attributes().value("OpIndex").toInt());
         }
 
         if (xmlReader->attributes().hasAttribute("Size"))
@@ -502,7 +502,7 @@ namespace Afbl
 		xmlWriter->writeStartElement("AfbElementParam");
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Visible", visible() ? "1" : "0");
-		xmlWriter->writeAttribute("Index", QString::number(operandIndex()));
+		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
         xmlWriter->writeAttribute("Size", QString::number(size()));
 
 		switch (type())
@@ -650,7 +650,6 @@ namespace Afbl
 	//
 
 	AfbElement::AfbElement(void):
-		m_guid(QUuid::createUuid()),
 		m_opcode(0),
 		m_hasRam(false)
 	{
@@ -703,12 +702,6 @@ namespace Afbl
 		{
 			xmlReader->raiseError(QObject::tr("AfbElement expected."));
 			return !xmlReader->hasError();
-		}
-
-		if (xmlReader->attributes().hasAttribute("Guid"))
-
-		{
-			setGuid(QUuid(xmlReader->attributes().value("Guid").toString()));
 		}
 
 		if (xmlReader->attributes().hasAttribute("StrId"))
@@ -863,7 +856,6 @@ namespace Afbl
 		xmlWriter->writeStartElement("ApplicationFunctionalBlocks");
 
 		xmlWriter->writeStartElement("AfbElement");
-		xmlWriter->writeAttribute("Guid", guid().toString());
 		xmlWriter->writeAttribute("StrId", strID());
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("OpCode", QString::number(opcode()));
@@ -1047,18 +1039,6 @@ namespace Afbl
 	// Properties and Data
 	//
 
-	// Guid
-	//
-	const QUuid& AfbElement::guid() const
-	{
-		return m_guid;
-	}
-	void AfbElement::setGuid(const QUuid& guid)
-	{
-		m_guid = guid;
-		return;
-	}
-
 	// StrID
 	//
 	const QString& AfbElement::strID() const
@@ -1223,12 +1203,12 @@ namespace Afbl
 		return &m_elements;
 	}
 
-	std::shared_ptr<AfbElement> AfbElementCollection::get(const QUuid& guid) const
+	std::shared_ptr<AfbElement> AfbElementCollection::get(const QString& strID) const
 	{
 		auto result = std::find_if(m_elements.begin(), m_elements.end(),
-			[&guid](const std::shared_ptr<AfbElement>& fblelement)
+			[&strID](const std::shared_ptr<AfbElement>& fblelement)
 			{
-				return fblelement->guid() == guid;
+				return fblelement->strID() == strID;
 			});
 		
 		return result == m_elements.end() ? std::shared_ptr<AfbElement>() : *result;

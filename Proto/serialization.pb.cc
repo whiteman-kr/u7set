@@ -709,8 +709,8 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(VideoItemLink));
   VideoItemFblElement_descriptor_ = file->message_type(30);
   static const int VideoItemFblElement_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemFblElement, afbguid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemFblElement, params_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemFblElement, afbstrid_),
   };
   VideoItemFblElement_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1254,47 +1254,47 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\n\017VideoItemSignal\022$\n\014signalStrIDs\030\001 \003(\0132"
     "\016.Proto.wstring\"\026\n\024VideoItemInputSignal\""
     "\027\n\025VideoItemOutputSignal\"\017\n\rVideoItemLin"
-    "k\"[\n\023VideoItemFblElement\022\034\n\007afbGuid\030\001 \002("
-    "\0132\013.Proto.Uuid\022&\n\006params\030\002 \003(\0132\026.Proto.F"
-    "blElementParam\"\224\005\n\014DeviceObject\022\031\n\004uuid\030"
-    "\001 \002(\0132\013.Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Prot"
-    "o.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstri"
-    "ng\022(\n\020childRestriction\030\004 \001(\0132\016.Proto.wst"
-    "ring\022\020\n\005place\030\005 \001(\005:\0010\022!\n\031dynamic_proper"
-    "ties_struct\030\006 \001(\t\022#\n\nproperties\030\007 \003(\0132\017."
-    "Proto.Property\022\025\n\006preset\030  \001(\010:\005false\022\031\n"
-    "\npresetRoot\030! \001(\010:\005false\022\"\n\npresetName\030\""
-    " \001(\0132\016.Proto.wstring\022\037\n\004Root\030d \001(\0132\021.Pro"
-    "to.DeviceRoot\022#\n\006System\030e \001(\0132\023.Proto.De"
-    "viceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceR"
-    "ack\022%\n\007Chassis\030g \001(\0132\024.Proto.DeviceChass"
-    "is\022#\n\006Module\030h \001(\0132\023.Proto.DeviceModule\022"
-    "+\n\nController\030i \001(\0132\027.Proto.DeviceContro"
-    "ller\022#\n\006Signal\030j \001(\0132\023.Proto.DeviceSigna"
-    "l\022\'\n\013Workstation\030k \001(\0132\022.Proto.Workstati"
-    "on\022!\n\010Software\030l \001(\0132\017.Proto.Software\"\014\n"
-    "\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRac"
-    "k\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"[\n\014D"
-    "eviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\022\n\007Channel\030"
-    "\002 \001(\005:\0010\022\022\n\010SubsysID\030\003 \001(\t:\000\022\022\n\010ConfType"
-    "\030\004 \001(\t:\000\"\022\n\020DeviceController\"\271\001\n\014DeviceS"
-    "ignal\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001("
-    "\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010"
-    "\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013validityB"
-    "it\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010v"
-    "alueBit\030\010 \001(\005:\0010\"\036\n\013Workstation\022\017\n\004type\030"
-    "\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n"
-    "\023ModuleConfiguration\022\032\n\022struct_descripti"
-    "on\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleC"
-    "onfigurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030Mod"
-    "uleConfigurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005v"
-    "alue\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005"
-    "value\030\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016"
-    "\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDi"
-    "rrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSi"
-    "gnalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014Fb"
-    "lParamType\022\022\n\016AnalogIntegral\020\000\022\027\n\023Analog"
-    "FloatingPoint\020\001\022\021\n\rDiscreteValue\020\002", 5714);
+    "k\"_\n\023VideoItemFblElement\022&\n\006params\030\002 \003(\013"
+    "2\026.Proto.FblElementParam\022 \n\010afbStrid\030\003 \001"
+    "(\0132\016.Proto.wstring\"\224\005\n\014DeviceObject\022\031\n\004u"
+    "uid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016."
+    "Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.w"
+    "string\022(\n\020childRestriction\030\004 \001(\0132\016.Proto"
+    ".wstring\022\020\n\005place\030\005 \001(\005:\0010\022!\n\031dynamic_pr"
+    "operties_struct\030\006 \001(\t\022#\n\nproperties\030\007 \003("
+    "\0132\017.Proto.Property\022\025\n\006preset\030  \001(\010:\005fals"
+    "e\022\031\n\npresetRoot\030! \001(\010:\005false\022\"\n\npresetNa"
+    "me\030\" \001(\0132\016.Proto.wstring\022\037\n\004Root\030d \001(\0132\021"
+    ".Proto.DeviceRoot\022#\n\006System\030e \001(\0132\023.Prot"
+    "o.DeviceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.Dev"
+    "iceRack\022%\n\007Chassis\030g \001(\0132\024.Proto.DeviceC"
+    "hassis\022#\n\006Module\030h \001(\0132\023.Proto.DeviceMod"
+    "ule\022+\n\nController\030i \001(\0132\027.Proto.DeviceCo"
+    "ntroller\022#\n\006Signal\030j \001(\0132\023.Proto.DeviceS"
+    "ignal\022\'\n\013Workstation\030k \001(\0132\022.Proto.Works"
+    "tation\022!\n\010Software\030l \001(\0132\017.Proto.Softwar"
+    "e\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDevic"
+    "eRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\""
+    "[\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\022\n\007Chan"
+    "nel\030\002 \001(\005:\0010\022\022\n\010SubsysID\030\003 \001(\t:\000\022\022\n\010Conf"
+    "Type\030\004 \001(\t:\000\"\022\n\020DeviceController\"\271\001\n\014Dev"
+    "iceSignal\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030"
+    "\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001("
+    "\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013valid"
+    "ityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022"
+    "\023\n\010valueBit\030\010 \001(\005:\0010\"\036\n\013Workstation\022\017\n\004t"
+    "ype\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\001"
+    "0\"r\n\023ModuleConfiguration\022\032\n\022struct_descr"
+    "iption\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.Mod"
+    "uleConfigurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n"
+    "\030ModuleConfigurationValue\022\014\n\004name\030\001 \002(\t\022"
+    "\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t"
+    "\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display"
+    "\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connecti"
+    "onDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rF"
+    "blSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N"
+    "\n\014FblParamType\022\022\n\016AnalogIntegral\020\000\022\027\n\023An"
+    "alogFloatingPoint\020\001\022\021\n\rDiscreteValue\020\002", 5718);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -11756,8 +11756,8 @@ void VideoItemLink::Swap(VideoItemLink* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int VideoItemFblElement::kAfbGuidFieldNumber;
 const int VideoItemFblElement::kParamsFieldNumber;
+const int VideoItemFblElement::kAfbStridFieldNumber;
 #endif  // !_MSC_VER
 
 VideoItemFblElement::VideoItemFblElement()
@@ -11766,7 +11766,7 @@ VideoItemFblElement::VideoItemFblElement()
 }
 
 void VideoItemFblElement::InitAsDefaultInstance() {
-  afbguid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
+  afbstrid_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
 }
 
 VideoItemFblElement::VideoItemFblElement(const VideoItemFblElement& from)
@@ -11777,7 +11777,7 @@ VideoItemFblElement::VideoItemFblElement(const VideoItemFblElement& from)
 
 void VideoItemFblElement::SharedCtor() {
   _cached_size_ = 0;
-  afbguid_ = NULL;
+  afbstrid_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -11787,7 +11787,7 @@ VideoItemFblElement::~VideoItemFblElement() {
 
 void VideoItemFblElement::SharedDtor() {
   if (this != default_instance_) {
-    delete afbguid_;
+    delete afbstrid_;
   }
 }
 
@@ -11813,9 +11813,9 @@ VideoItemFblElement* VideoItemFblElement::New() const {
 }
 
 void VideoItemFblElement::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_afbguid()) {
-      if (afbguid_ != NULL) afbguid_->::Proto::Uuid::Clear();
+  if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
+    if (has_afbstrid()) {
+      if (afbstrid_ != NULL) afbstrid_->::Proto::wstring::Clear();
     }
   }
   params_.Clear();
@@ -11829,19 +11829,6 @@ bool VideoItemFblElement::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required .Proto.Uuid afbGuid = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_afbguid()));
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(18)) goto parse_params;
-        break;
-      }
-
       // repeated .Proto.FblElementParam params = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
@@ -11853,6 +11840,20 @@ bool VideoItemFblElement::MergePartialFromCodedStream(
           goto handle_uninterpreted;
         }
         if (input->ExpectTag(18)) goto parse_params;
+        if (input->ExpectTag(26)) goto parse_afbStrid;
+        break;
+      }
+
+      // optional .Proto.wstring afbStrid = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_afbStrid:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_afbstrid()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -11875,16 +11876,16 @@ bool VideoItemFblElement::MergePartialFromCodedStream(
 
 void VideoItemFblElement::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required .Proto.Uuid afbGuid = 1;
-  if (has_afbguid()) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->afbguid(), output);
-  }
-
   // repeated .Proto.FblElementParam params = 2;
   for (int i = 0; i < this->params_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       2, this->params(i), output);
+  }
+
+  // optional .Proto.wstring afbStrid = 3;
+  if (has_afbstrid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      3, this->afbstrid(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -11895,18 +11896,18 @@ void VideoItemFblElement::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* VideoItemFblElement::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required .Proto.Uuid afbGuid = 1;
-  if (has_afbguid()) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        1, this->afbguid(), target);
-  }
-
   // repeated .Proto.FblElementParam params = 2;
   for (int i = 0; i < this->params_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         2, this->params(i), target);
+  }
+
+  // optional .Proto.wstring afbStrid = 3;
+  if (has_afbstrid()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        3, this->afbstrid(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -11919,12 +11920,12 @@ void VideoItemFblElement::SerializeWithCachedSizes(
 int VideoItemFblElement::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required .Proto.Uuid afbGuid = 1;
-    if (has_afbguid()) {
+  if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
+    // optional .Proto.wstring afbStrid = 3;
+    if (has_afbstrid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->afbguid());
+          this->afbstrid());
     }
 
   }
@@ -11962,9 +11963,9 @@ void VideoItemFblElement::MergeFrom(const ::google::protobuf::Message& from) {
 void VideoItemFblElement::MergeFrom(const VideoItemFblElement& from) {
   GOOGLE_CHECK_NE(&from, this);
   params_.MergeFrom(from.params_);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_afbguid()) {
-      mutable_afbguid()->::Proto::Uuid::MergeFrom(from.afbguid());
+  if (from._has_bits_[1 / 32] & (0xffu << (1 % 32))) {
+    if (from.has_afbstrid()) {
+      mutable_afbstrid()->::Proto::wstring::MergeFrom(from.afbstrid());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -11983,21 +11984,20 @@ void VideoItemFblElement::CopyFrom(const VideoItemFblElement& from) {
 }
 
 bool VideoItemFblElement::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
-  if (has_afbguid()) {
-    if (!this->afbguid().IsInitialized()) return false;
-  }
   for (int i = 0; i < params_size(); i++) {
     if (!this->params(i).IsInitialized()) return false;
+  }
+  if (has_afbstrid()) {
+    if (!this->afbstrid().IsInitialized()) return false;
   }
   return true;
 }
 
 void VideoItemFblElement::Swap(VideoItemFblElement* other) {
   if (other != this) {
-    std::swap(afbguid_, other->afbguid_);
     params_.Swap(&other->params_);
+    std::swap(afbstrid_, other->afbstrid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
