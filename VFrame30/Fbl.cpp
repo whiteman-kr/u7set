@@ -320,7 +320,7 @@ namespace Afbl
 					}
 					case DiscreteValue:
 					{
-						val = str == "true" ? true : false;
+						val = str == "1" ? true : false;
 						break;
 					}
 				default:
@@ -394,10 +394,20 @@ namespace Afbl
 				Q_ASSERT(false);
 		}
 
-		xmlWriter->writeTextElement("Value", value().toString());
-		xmlWriter->writeTextElement("Default", defaultValue().toString());
-		xmlWriter->writeTextElement("LowLimit", lowLimit().toString());
-		xmlWriter->writeTextElement("HighLimit", highLimit().toString());
+		if (type() == DiscreteValue)
+		{
+			xmlWriter->writeTextElement("Value", value() == true ? "1" : "0");
+			xmlWriter->writeTextElement("Default", defaultValue() == true ? "1" : "0");
+			xmlWriter->writeTextElement("LowLimit", lowLimit() == true ? "1" : "0");
+			xmlWriter->writeTextElement("HighLimit", highLimit() == true ? "1" : "0");
+		}
+		else
+		{
+			xmlWriter->writeTextElement("Value", value().toString());
+			xmlWriter->writeTextElement("Default", defaultValue().toString());
+			xmlWriter->writeTextElement("LowLimit", lowLimit().toString());
+			xmlWriter->writeTextElement("HighLimit", highLimit().toString());
+		}
 
 		xmlWriter->writeStartElement("Script");
 		xmlWriter->writeTextElement("Changed", changedScript());
