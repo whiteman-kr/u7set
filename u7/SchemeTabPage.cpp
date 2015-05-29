@@ -37,6 +37,11 @@ void SchemeFileView::addFile()
 	emit addFileSignal();
 }
 
+void SchemeFileView::checkIn(std::vector<DbFileInfo> files)
+{
+	emit checkInSignal(files);
+}
+
 void SchemeFileView::deleteFile(std::vector<DbFileInfo> files)
 {
 	emit deleteFileSignal(files);
@@ -151,6 +156,7 @@ SchemeControlTabPage::SchemeControlTabPage(const QString& fileExt,
 	connect(m_filesView, &SchemeFileView::viewFileSignal, this, &SchemeControlTabPage::viewFiles);
 	connect(m_filesView, &SchemeFileView::addFileSignal, this, &SchemeControlTabPage::addFile);
 	connect(m_filesView, &SchemeFileView::deleteFileSignal, this, &SchemeControlTabPage::deleteFile);
+	connect(m_filesView, &SchemeFileView::checkInSignal, this, &SchemeControlTabPage::checkIn);
 
 	return;
 }
@@ -275,6 +281,90 @@ void SchemeControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 	dbcontroller()->deleteFiles(&v, this);
 
 	refreshFiles();
+
+	return;
+}
+
+void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
+{
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget != nullptr);
+		return;
+	}
+
+	// Save file if it is open
+	//
+	for (int i = 0; i < tabWidget->count(); i++)
+	{
+		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		if (tb == nullptr)
+		{
+			// It can be control tab page
+			//
+			continue;
+		}
+
+		for (const DbFileInfo& fi : files)
+		{
+			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false && tb->modified() == true)
+			{
+				tb->saveWorkcopy();
+				break;
+			}
+		}
+	}
+
+	// Check in file
+	//
+	bool ok = CheckInDialog::checkIn(files, dbcontroller(), this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	refreshFiles();
+
+	// Refresh fileInfo from the Db
+	//
+	std::vector<int> fileIds;
+	fileIds.reserve(files.size());
+
+	for (const DbFileInfo& fi : files)
+	{
+		fileIds.push_back(fi.fileId());
+	}
+
+	dbcontroller()->getFileInfo(&fileIds, &files, this);
+
+	// Set readonly to file if it is open
+	//
+	for (int i = 0; i < tabWidget->count(); i++)
+	{
+		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		if (tb == nullptr)
+		{
+			// It can be control tab page
+			//
+			continue;
+		}
+
+		for (const DbFileInfo& fi : files)
+		{
+			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false)
+			{
+				tb->setReadOnly(true);
+				tb->setFileInfo(fi);
+				break;
+			}
+		}
+	}
 
 	return;
 }
@@ -527,10 +617,6 @@ EditSchemeTabPage::~EditSchemeTabPage()
 {
 }
 
-void EditSchemeTabPage::CreateActions()
-{
-}
-
 void EditSchemeTabPage::setPageTitle()
 {
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
@@ -573,6 +659,10 @@ void EditSchemeTabPage::setPageTitle()
 			return;
 		}
 	}
+}
+
+void EditSchemeTabPage::CreateActions()
+{
 }
 
 void EditSchemeTabPage::closeTab()
@@ -883,6 +973,8 @@ void EditSchemeTabPage::setFileInfo(const DbFileInfo& fi)
 {
 	assert(m_videoFrameWidget);
 	m_videoFrameWidget->setFileInfo(fi);
+
+	setPageTitle();
 }
 
 bool EditSchemeTabPage::readOnly() const
