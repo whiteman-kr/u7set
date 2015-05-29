@@ -354,8 +354,11 @@ namespace Builder
 		QString msg;
 
 	private:
-		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& propertyName, int* value);
-		bool getLMIntProperty(const QString& propertyName, int* value);
+		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);
+		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int* value);
+
+		bool getLMIntProperty(const QString& section, const QString& name, int* value);
+		bool getLMIntProperty(const QString& name, int* value);
 
 		Hardware::DeviceModule* getModuleOnPlace(int place);
 

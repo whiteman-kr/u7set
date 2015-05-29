@@ -8,6 +8,8 @@ namespace Builder
 	const char	*VALUE_OFFSET = "ValueOffset",
 				*VALUE_BIT = "ValueBit";
 
+	const char* SECTION_MEMORY_SETTINGS = "MemorySettings";
+
 
 	const int ERR_VALUE = -1;
 
@@ -371,7 +373,7 @@ namespace Builder
 
 		for(int i = 0; i < sizeof(memSettings)/sizeof(PropertyNameVar); i++)
 		{
-			result &= getLMIntProperty(QString("MemorySettings\\%1").arg(memSettings[i].name), memSettings[i].var);
+			result &= getLMIntProperty(SECTION_MEMORY_SETTINGS, memSettings[i].name, memSettings[i].var);
 		}
 
 		return true;
@@ -415,7 +417,7 @@ namespace Builder
 
 			for(int i = 0; i < sizeof(moduleSettings)/sizeof(PropertyNameVar); i++)
 			{
-				result &= getDeviceIntProperty(device, QString(moduleSettings[i].name), moduleSettings[i].var);
+				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSettings[i].name, moduleSettings[i].var);
 			}
 
 			m_modules.append(m);
@@ -1001,13 +1003,25 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::getLMIntProperty(const QString& propertyName, int *value)
+	bool ModuleLogicCompiler::getLMIntProperty(const QString &section, const QString& name, int *value)
 	{
-		return getDeviceIntProperty(m_lm, propertyName, value);
+		return getDeviceIntProperty(m_lm, section, name, value);
 	}
 
 
-	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString& propertyName, int *value)
+	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
+	{
+		return getDeviceIntProperty(m_lm, name, value);
+	}
+
+
+	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int *value)
+	{
+		return getDeviceIntProperty(m_lm, QString(""), name, value);
+	}
+
+
+	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString &section, const QString& name, int *value)
 	{
 		if (device == nullptr)
 		{
@@ -1021,7 +1035,18 @@ namespace Builder
 			return false;
 		}
 
-		QVariant val = device->property(propertyName.toStdString().c_str());
+		QString propertyName;
+
+		if (!section.isEmpty())
+		{
+			propertyName = QString("%1\\%2").arg(section).arg(name);
+		}
+		else
+		{
+			propertyName = name;
+		}
+
+		QVariant val = device->property(C_STR(propertyName));
 
 		if (val.isValid() == false)
 		{

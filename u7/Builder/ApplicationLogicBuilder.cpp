@@ -311,12 +311,10 @@ namespace Builder
 
 		if (hasItemsWithouInputs == false)
 		{
-			assert(hasItemsWithouInputs == true);
-
 			// Imposible set exucution order for branch, there is no first item,
 			// firts item can be item without inputs
 			//
-			log->writeError(tr("Imposible to set execution order for branch, there is no first item, it can be item without inputs"), false, true);
+			log->writeError(tr("There is no start point for the logic scheme branch"), false, true);
 
 			result = false;
 			return result;
