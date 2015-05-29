@@ -384,33 +384,38 @@ namespace Builder
 
 		m_modules.clear();
 
+		// build Module structures array
+		//
 		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
 		{
 			Module m;
 
 			Hardware::DeviceModule* device = getModuleOnPlace(place);
 
-			if (device != nullptr)
+			if (device == nullptr)
 			{
-				m.device = device;
+				continue;
+			}
 
-				PropertyNameVar moduleSettings[] =
-				{
-					{	"TxDataSize", &m.txDataSize },
-					{	"RxDataSize", &m.rxDataSize },
+			m.device = device;
+			m.place = place;
 
-					{	"DiagDataOffset", &m.diagDataOffset },
-					{	"DiagDataSize", &m.diagDataSize },
+			PropertyNameVar moduleSettings[] =
+			{
+				{	"TxDataSize", &m.txDataSize },
+				{	"RxDataSize", &m.rxDataSize },
 
-					{	"AppLogicDataOffset", &m.appLogicDataOffset },
-					{	"AppLogicDataSize", &m.appLogicDataSize },
-					{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve }
-				};
+				{	"DiagDataOffset", &m.diagDataOffset },
+				{	"DiagDataSize", &m.diagDataSize },
 
-				for(int i = 0; i < sizeof(moduleSettings)/sizeof(PropertyNameVar); i++)
-				{
-					result &= getDeviceIntProperty(device, QString(moduleSettings[i].name), moduleSettings[i].var);
-				}
+				{	"AppLogicDataOffset", &m.appLogicDataOffset },
+				{	"AppLogicDataSize", &m.appLogicDataSize },
+				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve }
+			};
+
+			for(int i = 0; i < sizeof(moduleSettings)/sizeof(PropertyNameVar); i++)
+			{
+				result &= getDeviceIntProperty(device, QString(moduleSettings[i].name), moduleSettings[i].var);
 			}
 
 			m_modules.append(m);
