@@ -386,6 +386,8 @@ namespace Builder
 
 		m_modules.clear();
 
+		int moduleProcessingDataOffset = m_appLogicWordDataOffset + m_LMDiagDataSize;
+
 		// build Module structures array
 		//
 		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
@@ -420,8 +422,17 @@ namespace Builder
 				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSettings[i].name, moduleSettings[i].var);
 			}
 
+			m.moduleDataOffset = m_moduleDataOffset + m_moduleDataSize * place;
+			m.appDataOffset = m.moduleDataOffset + m.appLogicDataOffset;
+			m.processingDataOffset = moduleProcessingDataOffset;
+
+			moduleProcessingDataOffset += m.appLogicDataSize;
+
 			m_modules.append(m);
 		}
+
+		m_internalAnalogSignalsOffset = m_appLogicWordDataOffset + m_LMDiagDataSize + moduleProcessingDataOffset;
+		m_internalDiscreteSignalsOffset = m_appLogicBitDataOffset;
 
 		return result;
 	}
@@ -813,64 +824,57 @@ namespace Builder
 
 		bool result = true;
 
-		int moduleDataOffset = m_moduleDataOffset;
-
-		for(Module& module : m_modules)
+		for(const Module& module : m_modules)
 		{
-			if (module.isInstalled())
+			if (module.device == nullptr)
 			{
-				if (module.device == nullptr)
+				assert(false);
+				return false;
+			}
+
+			// calculate addresses of signals bound to module In/Out
+			//
+
+			std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
+
+			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+			{
+				if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
 				{
-					assert(false);
-					return false;
+					continue;
 				}
 
-				// calculate addresses of signals bound to module In/Out
-				//
+				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
 
-				std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
-
-				for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+				if (boundSignals.count() > 1)
 				{
-					if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+					m_log->writeWarning(QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()), false, true);
+				}
+
+				for(Signal* appSignal : boundSignals)
+				{
+					if (appSignal == nullptr)
 					{
+						assert(false);
 						continue;
 					}
 
-					QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+					int signalOffset = ERR_VALUE;
+					int bit = ERR_VALUE;
 
-					if (boundSignals.count() > 1)
+					getDeviceIntProperty(deviceSignal.get(), QString(VALUE_OFFSET), &signalOffset);
+					getDeviceIntProperty(deviceSignal.get(), QString(VALUE_BIT), &bit);
+
+					if (signalOffset != ERR_VALUE && bit != ERR_VALUE)
 					{
-						m_log->writeWarning(QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()), false, true);
+						appSignal->ramAddr().set(module.appDataOffset + signalOffset, bit);
 					}
-
-					for(Signal* appSignal : boundSignals)
+					else
 					{
-						if (appSignal == nullptr)
-						{
-							assert(false);
-							continue;
-						}
-
-						int signalOffset = ERR_VALUE;
-						int bit = ERR_VALUE;
-
-						getDeviceIntProperty(deviceSignal.get(), QString(VALUE_OFFSET), &signalOffset);
-						getDeviceIntProperty(deviceSignal.get(), QString(VALUE_BIT), &bit);
-
-						if (signalOffset != ERR_VALUE && bit != ERR_VALUE)
-						{
-							appSignal->ramAddr().set(moduleDataOffset + signalOffset, bit);
-						}
-						else
-						{
-							m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(appSignal->strID()), false, true);
-						}
+						m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(appSignal->strID()), false, true);
 					}
 				}
 			}
-
-			moduleDataOffset += m_moduleDataSize;
 		}
 
 		return result;
