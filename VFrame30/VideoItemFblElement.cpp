@@ -267,6 +267,11 @@ namespace VFrame30
 		//
 		for (Afbl::AfbElementParam& p : m_params)
 		{
+			if (p.user() == false)
+			{
+				continue;
+			}
+
 			QVariant value = p.value();
 			setProperty(p.caption().toStdString().c_str(), value);
 		}

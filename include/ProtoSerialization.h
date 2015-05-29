@@ -293,7 +293,7 @@ namespace Proto
 
 	// Read/write qvariant message
 	//
-	void Read(const Proto::qvariant& message, QVariant* dst);
+	const QVariant Read(const Proto::qvariant& message);
 	void Write(Proto::qvariant* pMessage, const QVariant& value);
 }
 
