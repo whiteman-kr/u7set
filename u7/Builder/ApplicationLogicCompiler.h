@@ -277,6 +277,8 @@ namespace Builder
 		{
 			Hardware::DeviceModule* device = nullptr;
 
+			int place = 0;
+
 			int txDataSize = 0;
 			int rxDataSize = 0;
 
@@ -303,9 +305,8 @@ namespace Builder
 		Hardware::DeviceModule* m_lm = nullptr;
 		Hardware::DeviceChassis* m_chassis = nullptr;
 
-		// memory addresses and sizes
+		// LM's and modules settings
 		//
-
 		int	m_moduleDataOffset = 0;
 		int m_moduleDataSize = 0;
 
@@ -353,8 +354,11 @@ namespace Builder
 		QString msg;
 
 	private:
-		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& propertyName, int* value);
-		bool getLMIntProperty(const QString& propertyName, int* value);
+		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);
+		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int* value);
+
+		bool getLMIntProperty(const QString& section, const QString& name, int* value);
+		bool getLMIntProperty(const QString& name, int* value);
 
 		Hardware::DeviceModule* getModuleOnPlace(int place);
 
@@ -369,8 +373,8 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool afbInitialization();
-		bool initializeAppFbConstParams(AppFb* appFb);
-		bool initializeAppFbVariableParams(AppFb* appFb);
+		bool initAppFbParams(AppFb* appFb, bool instantiator);
+		//bool initAppFbVariableParams(AppFb* appFb);
 
 		bool getUsedAfbs();
 		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);

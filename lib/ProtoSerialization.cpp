@@ -65,6 +65,70 @@ namespace Proto
         //pMessage->set_text(str.toStdWString().c_str(), (str.length() + 1) * sizeof(wchar_t));
         pMessage->set_text(str.data(), (str.length() + 1) * sizeof(QChar));
 	}
+
+	// Read/write wstring message
+	//
+	void Read(const Proto::qvariant& message, QVariant* dst)
+	{
+		switch (message.type())
+		{
+		case QVariant::Int:
+		{
+			*dst = QVariant(message.intvalue());
+			break;
+		}
+		case QVariant::UInt:
+		{
+			*dst = QVariant(message.uintvalue());
+			break;
+		}
+		case QVariant::Double:
+		{
+			*dst = QVariant(message.doublevalue());
+			break;
+		}
+		case QVariant::Bool:
+		{
+			*dst = QVariant(message.boolvalue());
+			break;
+		}
+		default:
+			assert(false);
+		}
+
+		return;
+	}
+
+	void Write(Proto::qvariant* pMessage, const QVariant& value)
+	{
+		pMessage->set_type(value.type());
+
+		switch (value.type())
+		{
+		case QVariant::Int:
+		{
+			pMessage->set_intvalue(value.toInt());
+			break;
+		}
+		case QVariant::UInt:
+		{
+			pMessage->set_uintvalue(value.toUInt());
+			break;
+		}
+		case QVariant::Double:
+		{
+			pMessage->set_doublevalue(value.toDouble());
+			break;
+		}
+		case QVariant::Bool:
+		{
+			pMessage->set_boolvalue(value.toBool());
+			break;
+		}
+		default:
+			assert(false);
+		}
+	}
 }
 
 

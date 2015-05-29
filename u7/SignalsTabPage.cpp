@@ -933,7 +933,6 @@ void SignalsModel::clearSignals()
 		endRemoveRows();
 	}
 
-	m_dataFormatInfo.clear();
 	m_unitInfo.clear();
 }
 

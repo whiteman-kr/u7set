@@ -35,6 +35,7 @@ void protobuf_AssignDesc_serialization_2eproto();
 void protobuf_ShutdownFile_serialization_2eproto();
 
 class Uuid;
+class qvariant;
 class wstring;
 class FontParam;
 class VideoItemPoint;
@@ -45,7 +46,6 @@ class AfbElementXml;
 class FblElement;
 class FblElementSignal;
 class FblElementParam;
-class FblParamValue;
 class VideoFrame;
 class LogicScheme;
 class VideoLayer;
@@ -243,6 +243,128 @@ class Uuid : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Uuid* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class qvariant : public ::google::protobuf::Message {
+ public:
+  qvariant();
+  virtual ~qvariant();
+
+  qvariant(const qvariant& from);
+
+  inline qvariant& operator=(const qvariant& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const qvariant& default_instance();
+
+  void Swap(qvariant* other);
+
+  // implements Message ----------------------------------------------
+
+  qvariant* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const qvariant& from);
+  void MergeFrom(const qvariant& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 type = 1;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional int32 intValue = 2;
+  inline bool has_intvalue() const;
+  inline void clear_intvalue();
+  static const int kIntValueFieldNumber = 2;
+  inline ::google::protobuf::int32 intvalue() const;
+  inline void set_intvalue(::google::protobuf::int32 value);
+
+  // optional uint32 uintValue = 3;
+  inline bool has_uintvalue() const;
+  inline void clear_uintvalue();
+  static const int kUintValueFieldNumber = 3;
+  inline ::google::protobuf::uint32 uintvalue() const;
+  inline void set_uintvalue(::google::protobuf::uint32 value);
+
+  // optional double doubleValue = 4;
+  inline bool has_doublevalue() const;
+  inline void clear_doublevalue();
+  static const int kDoubleValueFieldNumber = 4;
+  inline double doublevalue() const;
+  inline void set_doublevalue(double value);
+
+  // optional bool boolValue = 5;
+  inline bool has_boolvalue() const;
+  inline void clear_boolvalue();
+  static const int kBoolValueFieldNumber = 5;
+  inline bool boolvalue() const;
+  inline void set_boolvalue(bool value);
+
+  // @@protoc_insertion_point(class_scope:Proto.qvariant)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_intvalue();
+  inline void clear_has_intvalue();
+  inline void set_has_uintvalue();
+  inline void clear_has_uintvalue();
+  inline void set_has_doublevalue();
+  inline void clear_has_doublevalue();
+  inline void set_has_boolvalue();
+  inline void clear_has_boolvalue();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 intvalue_;
+  double doublevalue_;
+  ::google::protobuf::uint32 uintvalue_;
+  bool boolvalue_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static qvariant* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1364,42 +1486,6 @@ class FblElementParam : public ::google::protobuf::Message {
   inline ::Proto::FblParamType type() const;
   inline void set_type(::Proto::FblParamType value);
 
-  // required .Proto.FblParamValue value = 3;
-  inline bool has_value() const;
-  inline void clear_value();
-  static const int kValueFieldNumber = 3;
-  inline const ::Proto::FblParamValue& value() const;
-  inline ::Proto::FblParamValue* mutable_value();
-  inline ::Proto::FblParamValue* release_value();
-  inline void set_allocated_value(::Proto::FblParamValue* value);
-
-  // required .Proto.FblParamValue defaultvalue = 4;
-  inline bool has_defaultvalue() const;
-  inline void clear_defaultvalue();
-  static const int kDefaultvalueFieldNumber = 4;
-  inline const ::Proto::FblParamValue& defaultvalue() const;
-  inline ::Proto::FblParamValue* mutable_defaultvalue();
-  inline ::Proto::FblParamValue* release_defaultvalue();
-  inline void set_allocated_defaultvalue(::Proto::FblParamValue* defaultvalue);
-
-  // required .Proto.FblParamValue lowlimit = 5;
-  inline bool has_lowlimit() const;
-  inline void clear_lowlimit();
-  static const int kLowlimitFieldNumber = 5;
-  inline const ::Proto::FblParamValue& lowlimit() const;
-  inline ::Proto::FblParamValue* mutable_lowlimit();
-  inline ::Proto::FblParamValue* release_lowlimit();
-  inline void set_allocated_lowlimit(::Proto::FblParamValue* lowlimit);
-
-  // required .Proto.FblParamValue highlimit = 6;
-  inline bool has_highlimit() const;
-  inline void clear_highlimit();
-  static const int kHighlimitFieldNumber = 6;
-  inline const ::Proto::FblParamValue& highlimit() const;
-  inline ::Proto::FblParamValue* mutable_highlimit();
-  inline ::Proto::FblParamValue* release_highlimit();
-  inline void set_allocated_highlimit(::Proto::FblParamValue* highlimit);
-
   // required bool visible = 7;
   inline bool has_visible() const;
   inline void clear_visible();
@@ -1421,12 +1507,83 @@ class FblElementParam : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 size() const;
   inline void set_size(::google::protobuf::int32 value);
 
+  // optional bool instantiator = 10 [default = false];
+  inline bool has_instantiator() const;
+  inline void clear_instantiator();
+  static const int kInstantiatorFieldNumber = 10;
+  inline bool instantiator() const;
+  inline void set_instantiator(bool value);
+
+  // optional bool user = 11 [default = false];
+  inline bool has_user() const;
+  inline void clear_user();
+  static const int kUserFieldNumber = 11;
+  inline bool user() const;
+  inline void set_user(bool value);
+
+  // optional .Proto.wstring changedScript = 12;
+  inline bool has_changedscript() const;
+  inline void clear_changedscript();
+  static const int kChangedScriptFieldNumber = 12;
+  inline const ::Proto::wstring& changedscript() const;
+  inline ::Proto::wstring* mutable_changedscript();
+  inline ::Proto::wstring* release_changedscript();
+  inline void set_allocated_changedscript(::Proto::wstring* changedscript);
+
+  // optional .Proto.qvariant value = 13;
+  inline bool has_value() const;
+  inline void clear_value();
+  static const int kValueFieldNumber = 13;
+  inline const ::Proto::qvariant& value() const;
+  inline ::Proto::qvariant* mutable_value();
+  inline ::Proto::qvariant* release_value();
+  inline void set_allocated_value(::Proto::qvariant* value);
+
+  // optional .Proto.qvariant defaultvalue = 14;
+  inline bool has_defaultvalue() const;
+  inline void clear_defaultvalue();
+  static const int kDefaultvalueFieldNumber = 14;
+  inline const ::Proto::qvariant& defaultvalue() const;
+  inline ::Proto::qvariant* mutable_defaultvalue();
+  inline ::Proto::qvariant* release_defaultvalue();
+  inline void set_allocated_defaultvalue(::Proto::qvariant* defaultvalue);
+
+  // optional .Proto.qvariant lowlimit = 15;
+  inline bool has_lowlimit() const;
+  inline void clear_lowlimit();
+  static const int kLowlimitFieldNumber = 15;
+  inline const ::Proto::qvariant& lowlimit() const;
+  inline ::Proto::qvariant* mutable_lowlimit();
+  inline ::Proto::qvariant* release_lowlimit();
+  inline void set_allocated_lowlimit(::Proto::qvariant* lowlimit);
+
+  // optional .Proto.qvariant highlimit = 16;
+  inline bool has_highlimit() const;
+  inline void clear_highlimit();
+  static const int kHighlimitFieldNumber = 16;
+  inline const ::Proto::qvariant& highlimit() const;
+  inline ::Proto::qvariant* mutable_highlimit();
+  inline ::Proto::qvariant* release_highlimit();
+  inline void set_allocated_highlimit(::Proto::qvariant* highlimit);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElementParam)
  private:
   inline void set_has_caption();
   inline void clear_has_caption();
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_visible();
+  inline void clear_has_visible();
+  inline void set_has_operandindex();
+  inline void clear_has_operandindex();
+  inline void set_has_size();
+  inline void clear_has_size();
+  inline void set_has_instantiator();
+  inline void clear_has_instantiator();
+  inline void set_has_user();
+  inline void clear_has_user();
+  inline void set_has_changedscript();
+  inline void clear_has_changedscript();
   inline void set_has_value();
   inline void clear_has_value();
   inline void set_has_defaultvalue();
@@ -1435,27 +1592,24 @@ class FblElementParam : public ::google::protobuf::Message {
   inline void clear_has_lowlimit();
   inline void set_has_highlimit();
   inline void clear_has_highlimit();
-  inline void set_has_visible();
-  inline void clear_has_visible();
-  inline void set_has_operandindex();
-  inline void clear_has_operandindex();
-  inline void set_has_size();
-  inline void clear_has_size();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::wstring* caption_;
-  ::Proto::FblParamValue* value_;
-  ::Proto::FblParamValue* defaultvalue_;
   int type_;
-  bool visible_;
-  ::Proto::FblParamValue* lowlimit_;
-  ::Proto::FblParamValue* highlimit_;
   ::google::protobuf::int32 operandindex_;
   ::google::protobuf::int32 size_;
+  bool visible_;
+  bool instantiator_;
+  bool user_;
+  ::Proto::wstring* changedscript_;
+  ::Proto::qvariant* value_;
+  ::Proto::qvariant* defaultvalue_;
+  ::Proto::qvariant* lowlimit_;
+  ::Proto::qvariant* highlimit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1463,118 +1617,6 @@ class FblElementParam : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static FblElementParam* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class FblParamValue : public ::google::protobuf::Message {
- public:
-  FblParamValue();
-  virtual ~FblParamValue();
-
-  FblParamValue(const FblParamValue& from);
-
-  inline FblParamValue& operator=(const FblParamValue& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const FblParamValue& default_instance();
-
-  void Swap(FblParamValue* other);
-
-  // implements Message ----------------------------------------------
-
-  FblParamValue* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const FblParamValue& from);
-  void MergeFrom(const FblParamValue& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // required int32 integralvalue = 1;
-  inline bool has_integralvalue() const;
-  inline void clear_integralvalue();
-  static const int kIntegralvalueFieldNumber = 1;
-  inline ::google::protobuf::int32 integralvalue() const;
-  inline void set_integralvalue(::google::protobuf::int32 value);
-
-  // required double floatingpoint = 2;
-  inline bool has_floatingpoint() const;
-  inline void clear_floatingpoint();
-  static const int kFloatingpointFieldNumber = 2;
-  inline double floatingpoint() const;
-  inline void set_floatingpoint(double value);
-
-  // required bool discrete = 3;
-  inline bool has_discrete() const;
-  inline void clear_discrete();
-  static const int kDiscreteFieldNumber = 3;
-  inline bool discrete() const;
-  inline void set_discrete(bool value);
-
-  // required int32 type = 4;
-  inline bool has_type() const;
-  inline void clear_type();
-  static const int kTypeFieldNumber = 4;
-  inline ::google::protobuf::int32 type() const;
-  inline void set_type(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:Proto.FblParamValue)
- private:
-  inline void set_has_integralvalue();
-  inline void clear_has_integralvalue();
-  inline void set_has_floatingpoint();
-  inline void clear_has_floatingpoint();
-  inline void set_has_discrete();
-  inline void clear_has_discrete();
-  inline void set_has_type();
-  inline void clear_has_type();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  double floatingpoint_;
-  ::google::protobuf::int32 integralvalue_;
-  bool discrete_;
-  ::google::protobuf::int32 type_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
-
-  friend void  protobuf_AddDesc_serialization_2eproto();
-  friend void protobuf_AssignDesc_serialization_2eproto();
-  friend void protobuf_ShutdownFile_serialization_2eproto();
-
-  void InitAsDefaultInstance();
-  static FblParamValue* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -5283,6 +5325,120 @@ inline void Uuid::set_allocated_uuid(::std::string* uuid) {
 
 // -------------------------------------------------------------------
 
+// qvariant
+
+// required int32 type = 1;
+inline bool qvariant::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void qvariant::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void qvariant::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void qvariant::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 qvariant::type() const {
+  return type_;
+}
+inline void qvariant::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional int32 intValue = 2;
+inline bool qvariant::has_intvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void qvariant::set_has_intvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void qvariant::clear_has_intvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void qvariant::clear_intvalue() {
+  intvalue_ = 0;
+  clear_has_intvalue();
+}
+inline ::google::protobuf::int32 qvariant::intvalue() const {
+  return intvalue_;
+}
+inline void qvariant::set_intvalue(::google::protobuf::int32 value) {
+  set_has_intvalue();
+  intvalue_ = value;
+}
+
+// optional uint32 uintValue = 3;
+inline bool qvariant::has_uintvalue() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void qvariant::set_has_uintvalue() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void qvariant::clear_has_uintvalue() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void qvariant::clear_uintvalue() {
+  uintvalue_ = 0u;
+  clear_has_uintvalue();
+}
+inline ::google::protobuf::uint32 qvariant::uintvalue() const {
+  return uintvalue_;
+}
+inline void qvariant::set_uintvalue(::google::protobuf::uint32 value) {
+  set_has_uintvalue();
+  uintvalue_ = value;
+}
+
+// optional double doubleValue = 4;
+inline bool qvariant::has_doublevalue() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void qvariant::set_has_doublevalue() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void qvariant::clear_has_doublevalue() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void qvariant::clear_doublevalue() {
+  doublevalue_ = 0;
+  clear_has_doublevalue();
+}
+inline double qvariant::doublevalue() const {
+  return doublevalue_;
+}
+inline void qvariant::set_doublevalue(double value) {
+  set_has_doublevalue();
+  doublevalue_ = value;
+}
+
+// optional bool boolValue = 5;
+inline bool qvariant::has_boolvalue() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void qvariant::set_has_boolvalue() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void qvariant::clear_has_boolvalue() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void qvariant::clear_boolvalue() {
+  boolvalue_ = false;
+  clear_has_boolvalue();
+}
+inline bool qvariant::boolvalue() const {
+  return boolvalue_;
+}
+inline void qvariant::set_boolvalue(bool value) {
+  set_has_boolvalue();
+  boolvalue_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // wstring
 
 // required bytes text = 1;
@@ -6501,167 +6657,15 @@ inline void FblElementParam::set_type(::Proto::FblParamType value) {
   type_ = value;
 }
 
-// required .Proto.FblParamValue value = 3;
-inline bool FblElementParam::has_value() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void FblElementParam::set_has_value() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void FblElementParam::clear_has_value() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void FblElementParam::clear_value() {
-  if (value_ != NULL) value_->::Proto::FblParamValue::Clear();
-  clear_has_value();
-}
-inline const ::Proto::FblParamValue& FblElementParam::value() const {
-  return value_ != NULL ? *value_ : *default_instance_->value_;
-}
-inline ::Proto::FblParamValue* FblElementParam::mutable_value() {
-  set_has_value();
-  if (value_ == NULL) value_ = new ::Proto::FblParamValue;
-  return value_;
-}
-inline ::Proto::FblParamValue* FblElementParam::release_value() {
-  clear_has_value();
-  ::Proto::FblParamValue* temp = value_;
-  value_ = NULL;
-  return temp;
-}
-inline void FblElementParam::set_allocated_value(::Proto::FblParamValue* value) {
-  delete value_;
-  value_ = value;
-  if (value) {
-    set_has_value();
-  } else {
-    clear_has_value();
-  }
-}
-
-// required .Proto.FblParamValue defaultvalue = 4;
-inline bool FblElementParam::has_defaultvalue() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void FblElementParam::set_has_defaultvalue() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void FblElementParam::clear_has_defaultvalue() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void FblElementParam::clear_defaultvalue() {
-  if (defaultvalue_ != NULL) defaultvalue_->::Proto::FblParamValue::Clear();
-  clear_has_defaultvalue();
-}
-inline const ::Proto::FblParamValue& FblElementParam::defaultvalue() const {
-  return defaultvalue_ != NULL ? *defaultvalue_ : *default_instance_->defaultvalue_;
-}
-inline ::Proto::FblParamValue* FblElementParam::mutable_defaultvalue() {
-  set_has_defaultvalue();
-  if (defaultvalue_ == NULL) defaultvalue_ = new ::Proto::FblParamValue;
-  return defaultvalue_;
-}
-inline ::Proto::FblParamValue* FblElementParam::release_defaultvalue() {
-  clear_has_defaultvalue();
-  ::Proto::FblParamValue* temp = defaultvalue_;
-  defaultvalue_ = NULL;
-  return temp;
-}
-inline void FblElementParam::set_allocated_defaultvalue(::Proto::FblParamValue* defaultvalue) {
-  delete defaultvalue_;
-  defaultvalue_ = defaultvalue;
-  if (defaultvalue) {
-    set_has_defaultvalue();
-  } else {
-    clear_has_defaultvalue();
-  }
-}
-
-// required .Proto.FblParamValue lowlimit = 5;
-inline bool FblElementParam::has_lowlimit() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void FblElementParam::set_has_lowlimit() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void FblElementParam::clear_has_lowlimit() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void FblElementParam::clear_lowlimit() {
-  if (lowlimit_ != NULL) lowlimit_->::Proto::FblParamValue::Clear();
-  clear_has_lowlimit();
-}
-inline const ::Proto::FblParamValue& FblElementParam::lowlimit() const {
-  return lowlimit_ != NULL ? *lowlimit_ : *default_instance_->lowlimit_;
-}
-inline ::Proto::FblParamValue* FblElementParam::mutable_lowlimit() {
-  set_has_lowlimit();
-  if (lowlimit_ == NULL) lowlimit_ = new ::Proto::FblParamValue;
-  return lowlimit_;
-}
-inline ::Proto::FblParamValue* FblElementParam::release_lowlimit() {
-  clear_has_lowlimit();
-  ::Proto::FblParamValue* temp = lowlimit_;
-  lowlimit_ = NULL;
-  return temp;
-}
-inline void FblElementParam::set_allocated_lowlimit(::Proto::FblParamValue* lowlimit) {
-  delete lowlimit_;
-  lowlimit_ = lowlimit;
-  if (lowlimit) {
-    set_has_lowlimit();
-  } else {
-    clear_has_lowlimit();
-  }
-}
-
-// required .Proto.FblParamValue highlimit = 6;
-inline bool FblElementParam::has_highlimit() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void FblElementParam::set_has_highlimit() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void FblElementParam::clear_has_highlimit() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void FblElementParam::clear_highlimit() {
-  if (highlimit_ != NULL) highlimit_->::Proto::FblParamValue::Clear();
-  clear_has_highlimit();
-}
-inline const ::Proto::FblParamValue& FblElementParam::highlimit() const {
-  return highlimit_ != NULL ? *highlimit_ : *default_instance_->highlimit_;
-}
-inline ::Proto::FblParamValue* FblElementParam::mutable_highlimit() {
-  set_has_highlimit();
-  if (highlimit_ == NULL) highlimit_ = new ::Proto::FblParamValue;
-  return highlimit_;
-}
-inline ::Proto::FblParamValue* FblElementParam::release_highlimit() {
-  clear_has_highlimit();
-  ::Proto::FblParamValue* temp = highlimit_;
-  highlimit_ = NULL;
-  return temp;
-}
-inline void FblElementParam::set_allocated_highlimit(::Proto::FblParamValue* highlimit) {
-  delete highlimit_;
-  highlimit_ = highlimit;
-  if (highlimit) {
-    set_has_highlimit();
-  } else {
-    clear_has_highlimit();
-  }
-}
-
 // required bool visible = 7;
 inline bool FblElementParam::has_visible() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void FblElementParam::set_has_visible() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void FblElementParam::clear_has_visible() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void FblElementParam::clear_visible() {
   visible_ = false;
@@ -6677,13 +6681,13 @@ inline void FblElementParam::set_visible(bool value) {
 
 // optional int32 operandIndex = 8 [default = 0];
 inline bool FblElementParam::has_operandindex() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void FblElementParam::set_has_operandindex() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void FblElementParam::clear_has_operandindex() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void FblElementParam::clear_operandindex() {
   operandindex_ = 0;
@@ -6699,13 +6703,13 @@ inline void FblElementParam::set_operandindex(::google::protobuf::int32 value) {
 
 // optional int32 size = 9 [default = 0];
 inline bool FblElementParam::has_size() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void FblElementParam::set_has_size() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void FblElementParam::clear_has_size() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void FblElementParam::clear_size() {
   size_ = 0;
@@ -6719,96 +6723,238 @@ inline void FblElementParam::set_size(::google::protobuf::int32 value) {
   size_ = value;
 }
 
-// -------------------------------------------------------------------
-
-// FblParamValue
-
-// required int32 integralvalue = 1;
-inline bool FblParamValue::has_integralvalue() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
+// optional bool instantiator = 10 [default = false];
+inline bool FblElementParam::has_instantiator() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void FblParamValue::set_has_integralvalue() {
-  _has_bits_[0] |= 0x00000001u;
+inline void FblElementParam::set_has_instantiator() {
+  _has_bits_[0] |= 0x00000020u;
 }
-inline void FblParamValue::clear_has_integralvalue() {
-  _has_bits_[0] &= ~0x00000001u;
+inline void FblElementParam::clear_has_instantiator() {
+  _has_bits_[0] &= ~0x00000020u;
 }
-inline void FblParamValue::clear_integralvalue() {
-  integralvalue_ = 0;
-  clear_has_integralvalue();
+inline void FblElementParam::clear_instantiator() {
+  instantiator_ = false;
+  clear_has_instantiator();
 }
-inline ::google::protobuf::int32 FblParamValue::integralvalue() const {
-  return integralvalue_;
+inline bool FblElementParam::instantiator() const {
+  return instantiator_;
 }
-inline void FblParamValue::set_integralvalue(::google::protobuf::int32 value) {
-  set_has_integralvalue();
-  integralvalue_ = value;
+inline void FblElementParam::set_instantiator(bool value) {
+  set_has_instantiator();
+  instantiator_ = value;
 }
 
-// required double floatingpoint = 2;
-inline bool FblParamValue::has_floatingpoint() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+// optional bool user = 11 [default = false];
+inline bool FblElementParam::has_user() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void FblParamValue::set_has_floatingpoint() {
-  _has_bits_[0] |= 0x00000002u;
+inline void FblElementParam::set_has_user() {
+  _has_bits_[0] |= 0x00000040u;
 }
-inline void FblParamValue::clear_has_floatingpoint() {
-  _has_bits_[0] &= ~0x00000002u;
+inline void FblElementParam::clear_has_user() {
+  _has_bits_[0] &= ~0x00000040u;
 }
-inline void FblParamValue::clear_floatingpoint() {
-  floatingpoint_ = 0;
-  clear_has_floatingpoint();
+inline void FblElementParam::clear_user() {
+  user_ = false;
+  clear_has_user();
 }
-inline double FblParamValue::floatingpoint() const {
-  return floatingpoint_;
+inline bool FblElementParam::user() const {
+  return user_;
 }
-inline void FblParamValue::set_floatingpoint(double value) {
-  set_has_floatingpoint();
-  floatingpoint_ = value;
-}
-
-// required bool discrete = 3;
-inline bool FblParamValue::has_discrete() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void FblParamValue::set_has_discrete() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void FblParamValue::clear_has_discrete() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void FblParamValue::clear_discrete() {
-  discrete_ = false;
-  clear_has_discrete();
-}
-inline bool FblParamValue::discrete() const {
-  return discrete_;
-}
-inline void FblParamValue::set_discrete(bool value) {
-  set_has_discrete();
-  discrete_ = value;
+inline void FblElementParam::set_user(bool value) {
+  set_has_user();
+  user_ = value;
 }
 
-// required int32 type = 4;
-inline bool FblParamValue::has_type() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+// optional .Proto.wstring changedScript = 12;
+inline bool FblElementParam::has_changedscript() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void FblParamValue::set_has_type() {
-  _has_bits_[0] |= 0x00000008u;
+inline void FblElementParam::set_has_changedscript() {
+  _has_bits_[0] |= 0x00000080u;
 }
-inline void FblParamValue::clear_has_type() {
-  _has_bits_[0] &= ~0x00000008u;
+inline void FblElementParam::clear_has_changedscript() {
+  _has_bits_[0] &= ~0x00000080u;
 }
-inline void FblParamValue::clear_type() {
-  type_ = 0;
-  clear_has_type();
+inline void FblElementParam::clear_changedscript() {
+  if (changedscript_ != NULL) changedscript_->::Proto::wstring::Clear();
+  clear_has_changedscript();
 }
-inline ::google::protobuf::int32 FblParamValue::type() const {
-  return type_;
+inline const ::Proto::wstring& FblElementParam::changedscript() const {
+  return changedscript_ != NULL ? *changedscript_ : *default_instance_->changedscript_;
 }
-inline void FblParamValue::set_type(::google::protobuf::int32 value) {
-  set_has_type();
-  type_ = value;
+inline ::Proto::wstring* FblElementParam::mutable_changedscript() {
+  set_has_changedscript();
+  if (changedscript_ == NULL) changedscript_ = new ::Proto::wstring;
+  return changedscript_;
+}
+inline ::Proto::wstring* FblElementParam::release_changedscript() {
+  clear_has_changedscript();
+  ::Proto::wstring* temp = changedscript_;
+  changedscript_ = NULL;
+  return temp;
+}
+inline void FblElementParam::set_allocated_changedscript(::Proto::wstring* changedscript) {
+  delete changedscript_;
+  changedscript_ = changedscript;
+  if (changedscript) {
+    set_has_changedscript();
+  } else {
+    clear_has_changedscript();
+  }
+}
+
+// optional .Proto.qvariant value = 13;
+inline bool FblElementParam::has_value() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void FblElementParam::set_has_value() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void FblElementParam::clear_has_value() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void FblElementParam::clear_value() {
+  if (value_ != NULL) value_->::Proto::qvariant::Clear();
+  clear_has_value();
+}
+inline const ::Proto::qvariant& FblElementParam::value() const {
+  return value_ != NULL ? *value_ : *default_instance_->value_;
+}
+inline ::Proto::qvariant* FblElementParam::mutable_value() {
+  set_has_value();
+  if (value_ == NULL) value_ = new ::Proto::qvariant;
+  return value_;
+}
+inline ::Proto::qvariant* FblElementParam::release_value() {
+  clear_has_value();
+  ::Proto::qvariant* temp = value_;
+  value_ = NULL;
+  return temp;
+}
+inline void FblElementParam::set_allocated_value(::Proto::qvariant* value) {
+  delete value_;
+  value_ = value;
+  if (value) {
+    set_has_value();
+  } else {
+    clear_has_value();
+  }
+}
+
+// optional .Proto.qvariant defaultvalue = 14;
+inline bool FblElementParam::has_defaultvalue() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void FblElementParam::set_has_defaultvalue() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void FblElementParam::clear_has_defaultvalue() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void FblElementParam::clear_defaultvalue() {
+  if (defaultvalue_ != NULL) defaultvalue_->::Proto::qvariant::Clear();
+  clear_has_defaultvalue();
+}
+inline const ::Proto::qvariant& FblElementParam::defaultvalue() const {
+  return defaultvalue_ != NULL ? *defaultvalue_ : *default_instance_->defaultvalue_;
+}
+inline ::Proto::qvariant* FblElementParam::mutable_defaultvalue() {
+  set_has_defaultvalue();
+  if (defaultvalue_ == NULL) defaultvalue_ = new ::Proto::qvariant;
+  return defaultvalue_;
+}
+inline ::Proto::qvariant* FblElementParam::release_defaultvalue() {
+  clear_has_defaultvalue();
+  ::Proto::qvariant* temp = defaultvalue_;
+  defaultvalue_ = NULL;
+  return temp;
+}
+inline void FblElementParam::set_allocated_defaultvalue(::Proto::qvariant* defaultvalue) {
+  delete defaultvalue_;
+  defaultvalue_ = defaultvalue;
+  if (defaultvalue) {
+    set_has_defaultvalue();
+  } else {
+    clear_has_defaultvalue();
+  }
+}
+
+// optional .Proto.qvariant lowlimit = 15;
+inline bool FblElementParam::has_lowlimit() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void FblElementParam::set_has_lowlimit() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void FblElementParam::clear_has_lowlimit() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void FblElementParam::clear_lowlimit() {
+  if (lowlimit_ != NULL) lowlimit_->::Proto::qvariant::Clear();
+  clear_has_lowlimit();
+}
+inline const ::Proto::qvariant& FblElementParam::lowlimit() const {
+  return lowlimit_ != NULL ? *lowlimit_ : *default_instance_->lowlimit_;
+}
+inline ::Proto::qvariant* FblElementParam::mutable_lowlimit() {
+  set_has_lowlimit();
+  if (lowlimit_ == NULL) lowlimit_ = new ::Proto::qvariant;
+  return lowlimit_;
+}
+inline ::Proto::qvariant* FblElementParam::release_lowlimit() {
+  clear_has_lowlimit();
+  ::Proto::qvariant* temp = lowlimit_;
+  lowlimit_ = NULL;
+  return temp;
+}
+inline void FblElementParam::set_allocated_lowlimit(::Proto::qvariant* lowlimit) {
+  delete lowlimit_;
+  lowlimit_ = lowlimit;
+  if (lowlimit) {
+    set_has_lowlimit();
+  } else {
+    clear_has_lowlimit();
+  }
+}
+
+// optional .Proto.qvariant highlimit = 16;
+inline bool FblElementParam::has_highlimit() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void FblElementParam::set_has_highlimit() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void FblElementParam::clear_has_highlimit() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void FblElementParam::clear_highlimit() {
+  if (highlimit_ != NULL) highlimit_->::Proto::qvariant::Clear();
+  clear_has_highlimit();
+}
+inline const ::Proto::qvariant& FblElementParam::highlimit() const {
+  return highlimit_ != NULL ? *highlimit_ : *default_instance_->highlimit_;
+}
+inline ::Proto::qvariant* FblElementParam::mutable_highlimit() {
+  set_has_highlimit();
+  if (highlimit_ == NULL) highlimit_ = new ::Proto::qvariant;
+  return highlimit_;
+}
+inline ::Proto::qvariant* FblElementParam::release_highlimit() {
+  clear_has_highlimit();
+  ::Proto::qvariant* temp = highlimit_;
+  highlimit_ = NULL;
+  return temp;
+}
+inline void FblElementParam::set_allocated_highlimit(::Proto::qvariant* highlimit) {
+  delete highlimit_;
+  highlimit_ = highlimit;
+  if (highlimit) {
+    set_has_highlimit();
+  } else {
+    clear_has_highlimit();
+  }
 }
 
 // -------------------------------------------------------------------

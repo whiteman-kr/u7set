@@ -23,6 +23,9 @@ namespace {
 const ::google::protobuf::Descriptor* Uuid_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Uuid_reflection_ = NULL;
+const ::google::protobuf::Descriptor* qvariant_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  qvariant_reflection_ = NULL;
 const ::google::protobuf::Descriptor* wstring_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   wstring_reflection_ = NULL;
@@ -53,9 +56,6 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* FblElementParam_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   FblElementParam_reflection_ = NULL;
-const ::google::protobuf::Descriptor* FblParamValue_descriptor_ = NULL;
-const ::google::protobuf::internal::GeneratedMessageReflection*
-  FblParamValue_reflection_ = NULL;
 const ::google::protobuf::Descriptor* VideoFrame_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   VideoFrame_reflection_ = NULL;
@@ -181,7 +181,26 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Uuid));
-  wstring_descriptor_ = file->message_type(1);
+  qvariant_descriptor_ = file->message_type(1);
+  static const int qvariant_offsets_[5] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(qvariant, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(qvariant, intvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(qvariant, uintvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(qvariant, doublevalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(qvariant, boolvalue_),
+  };
+  qvariant_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      qvariant_descriptor_,
+      qvariant::default_instance_,
+      qvariant_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(qvariant, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(qvariant, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(qvariant));
+  wstring_descriptor_ = file->message_type(2);
   static const int wstring_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(wstring, text_),
   };
@@ -196,7 +215,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(wstring));
-  FontParam_descriptor_ = file->message_type(2);
+  FontParam_descriptor_ = file->message_type(3);
   static const int FontParam_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FontParam, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FontParam, size_),
@@ -214,7 +233,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FontParam));
-  VideoItemPoint_descriptor_ = file->message_type(3);
+  VideoItemPoint_descriptor_ = file->message_type(4);
   static const int VideoItemPoint_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemPoint, x_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItemPoint, y_),
@@ -230,7 +249,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(VideoItemPoint));
-  Envelope_descriptor_ = file->message_type(4);
+  Envelope_descriptor_ = file->message_type(5);
   static const int Envelope_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, classnamehash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, videoitem_),
@@ -251,7 +270,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Envelope));
-  Configuration_descriptor_ = file->message_type(5);
+  Configuration_descriptor_ = file->message_type(6);
   static const int Configuration_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Configuration, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Configuration, strid_),
@@ -272,7 +291,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Configuration));
-  AfbElementCollection_descriptor_ = file->message_type(6);
+  AfbElementCollection_descriptor_ = file->message_type(7);
   static const int AfbElementCollection_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbElementCollection, elements_),
   };
@@ -287,7 +306,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AfbElementCollection));
-  AfbElementXml_descriptor_ = file->message_type(7);
+  AfbElementXml_descriptor_ = file->message_type(8);
   static const int AfbElementXml_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbElementXml, data_),
   };
@@ -302,7 +321,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AfbElementXml));
-  FblElement_descriptor_ = file->message_type(8);
+  FblElement_descriptor_ = file->message_type(9);
   static const int FblElement_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElement, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElement, strid_),
@@ -323,7 +342,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblElement));
-  FblElementSignal_descriptor_ = file->message_type(9);
+  FblElementSignal_descriptor_ = file->message_type(10);
   static const int FblElementSignal_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementSignal, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementSignal, type_),
@@ -341,17 +360,20 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblElementSignal));
-  FblElementParam_descriptor_ = file->message_type(10);
-  static const int FblElementParam_offsets_[9] = {
+  FblElementParam_descriptor_ = file->message_type(11);
+  static const int FblElementParam_offsets_[12] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, visible_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, operandindex_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, size_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, instantiator_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, user_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, changedscript_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, value_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, defaultvalue_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, lowlimit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, highlimit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, visible_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, operandindex_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblElementParam, size_),
   };
   FblElementParam_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -364,24 +386,6 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblElementParam));
-  FblParamValue_descriptor_ = file->message_type(11);
-  static const int FblParamValue_offsets_[4] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblParamValue, integralvalue_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblParamValue, floatingpoint_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblParamValue, discrete_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblParamValue, type_),
-  };
-  FblParamValue_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
-      FblParamValue_descriptor_,
-      FblParamValue::default_instance_,
-      FblParamValue_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblParamValue, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblParamValue, _unknown_fields_),
-      -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(FblParamValue));
   VideoFrame_descriptor_ = file->message_type(12);
   static const int VideoFrame_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoFrame, uuid_),
@@ -965,6 +969,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Uuid_descriptor_, &Uuid::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    qvariant_descriptor_, &qvariant::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     wstring_descriptor_, &wstring::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FontParam_descriptor_, &FontParam::default_instance());
@@ -984,8 +990,6 @@ void protobuf_RegisterTypes(const ::std::string&) {
     FblElementSignal_descriptor_, &FblElementSignal::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FblElementParam_descriptor_, &FblElementParam::default_instance());
-  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    FblParamValue_descriptor_, &FblParamValue::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     VideoFrame_descriptor_, &VideoFrame::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1057,6 +1061,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void protobuf_ShutdownFile_serialization_2eproto() {
   delete Uuid::default_instance_;
   delete Uuid_reflection_;
+  delete qvariant::default_instance_;
+  delete qvariant_reflection_;
   delete wstring::default_instance_;
   delete wstring_reflection_;
   delete FontParam::default_instance_;
@@ -1077,8 +1083,6 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete FblElementSignal_reflection_;
   delete FblElementParam::default_instance_;
   delete FblElementParam_reflection_;
-  delete FblParamValue::default_instance_;
-  delete FblParamValue_reflection_;
   delete VideoFrame::default_instance_;
   delete VideoFrame_reflection_;
   delete LogicScheme::default_instance_;
@@ -1153,151 +1157,154 @@ void protobuf_AddDesc_serialization_2eproto() {
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\023serialization.proto\022\005Proto\"\024\n\004Uuid\022\014\n\004"
-    "uuid\030\001 \002(\014\"\027\n\007wstring\022\014\n\004text\030\001 \002(\014\"U\n\tF"
-    "ontParam\022\034\n\004name\030\001 \002(\0132\016.Proto.wstring\022\014"
-    "\n\004size\030\002 \002(\001\022\014\n\004bold\030\003 \002(\010\022\016\n\006italic\030\004 \002"
-    "(\010\"&\n\016VideoItemPoint\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002"
-    "(\001\"\223\002\n\010Envelope\022\025\n\rclassnamehash\030\001 \002(\r\022#"
-    "\n\tvideoitem\030\006 \001(\0132\020.Proto.VideoItem\022)\n\014d"
-    "eviceobject\030\007 \001(\0132\023.Proto.DeviceObject\022%"
-    "\n\nvideoframe\030d \001(\0132\021.Proto.VideoFrame\022%\n"
-    "\nvideolayer\030e \001(\0132\021.Proto.VideoLayer\022%\n\n"
-    "fblelement\030f \001(\0132\021.Proto.FblElement\022+\n\rc"
-    "onfiguration\030g \001(\0132\024.Proto.Configuration"
-    "\"\371\001\n\rConfiguration\022\031\n\004uuid\030\001 \002(\0132\013.Proto"
-    ".Uuid\022\035\n\005strID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007"
-    "caption\030\003 \002(\0132\016.Proto.wstring\022!\n\tvariabl"
-    "es\030\004 \002(\0132\016.Proto.wstring\022\037\n\007globals\030\005 \002("
-    "\0132\016.Proto.wstring\022#\n\016videoFramesIDs\030d \003("
-    "\0132\013.Proto.Uuid\022$\n\013videoFrames\030e \003(\0132\017.Pr"
-    "oto.Envelope\">\n\024AfbElementCollection\022&\n\010"
-    "elements\030\001 \003(\0132\024.Proto.AfbElementXml\"\035\n\r"
-    "AfbElementXml\022\014\n\004data\030\001 \002(\014\"\376\001\n\nFblEleme"
-    "nt\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002"
-    " \002(\0132\016.Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016."
-    "Proto.wstring\022\016\n\006opcode\030\004 \002(\r\022-\n\014inputSi"
-    "gnals\030\013 \003(\0132\027.Proto.FblElementSignal\022.\n\r"
-    "outputSignals\030\014 \003(\0132\027.Proto.FblElementSi"
-    "gnal\022&\n\006params\030\r \003(\0132\026.Proto.FblElementP"
-    "aram\"\201\001\n\020FblElementSignal\022\037\n\007caption\030\001 \002"
-    "(\0132\016.Proto.wstring\022\"\n\004type\030\002 \002(\0162\024.Proto"
-    ".FblSignalType\022\027\n\014operandIndex\030\003 \001(\005:\0010\022"
-    "\017\n\004size\030\004 \001(\005:\0010\"\262\002\n\017FblElementParam\022\037\n\007"
-    "caption\030\001 \002(\0132\016.Proto.wstring\022!\n\004type\030\002 "
-    "\002(\0162\023.Proto.FblParamType\022#\n\005value\030\003 \002(\0132"
-    "\024.Proto.FblParamValue\022*\n\014defaultvalue\030\004 "
-    "\002(\0132\024.Proto.FblParamValue\022&\n\010lowlimit\030\005 "
-    "\002(\0132\024.Proto.FblParamValue\022\'\n\thighlimit\030\006"
-    " \002(\0132\024.Proto.FblParamValue\022\017\n\007visible\030\007 "
-    "\002(\010\022\027\n\014operandIndex\030\010 \001(\005:\0010\022\017\n\004size\030\t \001"
-    "(\005:\0010\"]\n\rFblParamValue\022\025\n\rintegralvalue\030"
-    "\001 \002(\005\022\025\n\rfloatingpoint\030\002 \002(\001\022\020\n\010discrete"
-    "\030\003 \002(\010\022\014\n\004type\030\004 \002(\005\"\237\002\n\nVideoFrame\022\031\n\004u"
-    "uid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016."
-    "Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.w"
-    "string\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n"
-    "\004unit\030\006 \002(\0162\021.Proto.SchemeUnit\022\037\n\006layers"
-    "\030d \003(\0132\017.Proto.Envelope\022)\n\004afbs\030e \002(\0132\033."
-    "Proto.AfbElementCollection\022*\n\rlogics_sch"
-    "eme\030\310\001 \001(\0132\022.Proto.LogicScheme\"6\n\013LogicS"
-    "cheme\022\'\n\017hardware_strids\030\001 \003(\0132\016.Proto.w"
-    "string\"\223\001\n\nVideoLayer\022\031\n\004uuid\030\001 \002(\0132\013.Pr"
-    "oto.Uuid\022\034\n\004name\030\002 \002(\0132\016.Proto.wstring\022\017"
-    "\n\007compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005"
-    " \002(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.Envelope\"\226\006\n"
-    "\tVideoItem\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n"
-    "\010isStatic\030\002 \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010ite"
-    "mUnit\030\004 \002(\0162\021.Proto.SchemeUnit\022\032\n\013accept"
-    "Click\030\005 \001(\010:\005false\022#\n\013clickScript\030\006 \001(\0132"
-    "\016.Proto.wstring\022\'\n\013PosRectImpl\030\n \001(\0132\022.P"
-    "roto.PosRectImpl\022\'\n\013PosLineImpl\030\013 \001(\0132\022."
-    "Proto.PosLineImpl\0223\n\021PosConnectionImpl\030\014"
-    " \001(\0132\030.Proto.PosConnectionImpl\022\037\n\007FblIte"
-    "m\030j \001(\0132\016.Proto.FblItem\022\'\n\013FblItemRect\030k"
-    " \001(\0132\022.Proto.FblItemRect\022\'\n\013FblItemLine\030"
-    "l \001(\0132\022.Proto.FblItemLine\022\"\n\004Rect\030t \001(\0132"
-    "\024.Proto.VideoItemRect\022\"\n\004Line\030u \001(\0132\024.Pr"
-    "oto.VideoItemLine\0226\n\016ConnectionLine\030v \001("
-    "\0132\036.Proto.VideoItemConnectionLine\022&\n\006Sig"
-    "nal\030| \001(\0132\026.Proto.VideoItemSignal\0220\n\013Inp"
-    "utSignal\030} \001(\0132\033.Proto.VideoItemInputSig"
-    "nal\0222\n\014OutputSignal\030~ \001(\0132\034.Proto.VideoI"
-    "temOutputSignal\022\"\n\004Link\030\177 \001(\0132\024.Proto.Vi"
-    "deoItemLink\0228\n\023VideoItemFblElement\030\200\001 \001("
-    "\0132\032.Proto.VideoItemFblElement\"[\n\013PosRect"
-    "Impl\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002("
-    "\001\022\022\n\nwidthDocPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002"
-    "(\001\"]\n\013PosLineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023"
-    "\n\013startYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021"
-    "\n\tendYDocPt\030\004 \002(\001\":\n\021PosConnectionImpl\022%"
-    "\n\006points\030\001 \003(\0132\025.Proto.VideoItemPoint\"\274\001"
-    "\n\rVideoItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineC"
-    "olor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 "
-    "\002(\0132\016.Proto.wstring\022\021\n\ttextColor\030\005 \002(\r\022\036"
-    "\n\004font\030\006 \002(\0132\020.Proto.FontParam\022\014\n\004fill\030\007"
-    " \002(\010\022\026\n\010drawrect\030\010 \001(\010:\004true\"2\n\rVideoIte"
-    "mLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r"
-    "\"<\n\027VideoItemConnectionLine\022\016\n\006weight\030\001 "
-    "\002(\001\022\021\n\tlineColor\030\002 \002(\r\"\215\002\n\022FblConnection"
-    "Point\022$\n\005point\030\001 \002(\0132\025.Proto.VideoItemPo"
-    "int\022/\n\ndirrection\030\002 \002(\0162\033.Proto.Connecti"
-    "onDirrection\022\031\n\004uuid\030\003 \002(\0132\013.Proto.Uuid\022"
-    "\030\n\014operandIndex\030\004 \001(\005:\002-1\022\037\n\nsignalUuid\030"
-    "\n \001(\0132\013.Proto.Uuid\022#\n\013signalStrID\030\013 \001(\0132"
-    "\016.Proto.wstring\022%\n\rsignalCaption\030\014 \001(\0132\016"
-    ".Proto.wstring\"4\n\007FblItem\022)\n\006points\030\001 \003("
-    "\0132\031.Proto.FblConnectionPoint\"v\n\013FblItemR"
-    "ect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021"
-    "\n\tfillColor\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004"
-    "font\030\005 \002(\0132\020.Proto.FontParam\"0\n\013FblItemL"
-    "ine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"7"
-    "\n\017VideoItemSignal\022$\n\014signalStrIDs\030\001 \003(\0132"
-    "\016.Proto.wstring\"\026\n\024VideoItemInputSignal\""
-    "\027\n\025VideoItemOutputSignal\"\017\n\rVideoItemLin"
-    "k\"_\n\023VideoItemFblElement\022&\n\006params\030\002 \003(\013"
-    "2\026.Proto.FblElementParam\022 \n\010afbStrid\030\003 \001"
-    "(\0132\016.Proto.wstring\"\224\005\n\014DeviceObject\022\031\n\004u"
-    "uid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016."
-    "Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.w"
-    "string\022(\n\020childRestriction\030\004 \001(\0132\016.Proto"
-    ".wstring\022\020\n\005place\030\005 \001(\005:\0010\022!\n\031dynamic_pr"
-    "operties_struct\030\006 \001(\t\022#\n\nproperties\030\007 \003("
-    "\0132\017.Proto.Property\022\025\n\006preset\030  \001(\010:\005fals"
-    "e\022\031\n\npresetRoot\030! \001(\010:\005false\022\"\n\npresetNa"
-    "me\030\" \001(\0132\016.Proto.wstring\022\037\n\004Root\030d \001(\0132\021"
-    ".Proto.DeviceRoot\022#\n\006System\030e \001(\0132\023.Prot"
-    "o.DeviceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.Dev"
-    "iceRack\022%\n\007Chassis\030g \001(\0132\024.Proto.DeviceC"
-    "hassis\022#\n\006Module\030h \001(\0132\023.Proto.DeviceMod"
-    "ule\022+\n\nController\030i \001(\0132\027.Proto.DeviceCo"
-    "ntroller\022#\n\006Signal\030j \001(\0132\023.Proto.DeviceS"
-    "ignal\022\'\n\013Workstation\030k \001(\0132\022.Proto.Works"
-    "tation\022!\n\010Software\030l \001(\0132\017.Proto.Softwar"
-    "e\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDevic"
-    "eRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\""
-    "[\n\014DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\022\n\007Chan"
-    "nel\030\002 \001(\005:\0010\022\022\n\010SubsysID\030\003 \001(\t:\000\022\022\n\010Conf"
-    "Type\030\004 \001(\t:\000\"\022\n\020DeviceController\"\271\001\n\014Dev"
-    "iceSignal\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030"
-    "\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001("
-    "\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013valid"
-    "ityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022"
-    "\023\n\010valueBit\030\010 \001(\005:\0010\"\036\n\013Workstation\022\017\n\004t"
-    "ype\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\001"
-    "0\"r\n\023ModuleConfiguration\022\032\n\022struct_descr"
-    "iption\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.Mod"
-    "uleConfigurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n"
-    "\030ModuleConfigurationValue\022\014\n\004name\030\001 \002(\t\022"
-    "\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t"
-    "\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display"
-    "\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connecti"
-    "onDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rF"
-    "blSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N"
-    "\n\014FblParamType\022\022\n\016AnalogIntegral\020\000\022\027\n\023An"
-    "alogFloatingPoint\020\001\022\021\n\rDiscreteValue\020\002", 5718);
+    "uuid\030\001 \002(\014\"e\n\010qvariant\022\014\n\004type\030\001 \002(\005\022\020\n\010"
+    "intValue\030\002 \001(\005\022\021\n\tuintValue\030\003 \001(\r\022\023\n\013dou"
+    "bleValue\030\004 \001(\001\022\021\n\tboolValue\030\005 \001(\010\"\027\n\007wst"
+    "ring\022\014\n\004text\030\001 \002(\014\"U\n\tFontParam\022\034\n\004name\030"
+    "\001 \002(\0132\016.Proto.wstring\022\014\n\004size\030\002 \002(\001\022\014\n\004b"
+    "old\030\003 \002(\010\022\016\n\006italic\030\004 \002(\010\"&\n\016VideoItemPo"
+    "int\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\"\223\002\n\010Envelope\022\025"
+    "\n\rclassnamehash\030\001 \002(\r\022#\n\tvideoitem\030\006 \001(\013"
+    "2\020.Proto.VideoItem\022)\n\014deviceobject\030\007 \001(\013"
+    "2\023.Proto.DeviceObject\022%\n\nvideoframe\030d \001("
+    "\0132\021.Proto.VideoFrame\022%\n\nvideolayer\030e \001(\013"
+    "2\021.Proto.VideoLayer\022%\n\nfblelement\030f \001(\0132"
+    "\021.Proto.FblElement\022+\n\rconfiguration\030g \001("
+    "\0132\024.Proto.Configuration\"\371\001\n\rConfiguratio"
+    "n\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 "
+    "\002(\0132\016.Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.P"
+    "roto.wstring\022!\n\tvariables\030\004 \002(\0132\016.Proto."
+    "wstring\022\037\n\007globals\030\005 \002(\0132\016.Proto.wstring"
+    "\022#\n\016videoFramesIDs\030d \003(\0132\013.Proto.Uuid\022$\n"
+    "\013videoFrames\030e \003(\0132\017.Proto.Envelope\">\n\024A"
+    "fbElementCollection\022&\n\010elements\030\001 \003(\0132\024."
+    "Proto.AfbElementXml\"\035\n\rAfbElementXml\022\014\n\004"
+    "data\030\001 \002(\014\"\376\001\n\nFblElement\022\031\n\004uuid\030\001 \002(\0132"
+    "\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Proto.wstr"
+    "ing\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022\016\n\006"
+    "opcode\030\004 \002(\r\022-\n\014inputSignals\030\013 \003(\0132\027.Pro"
+    "to.FblElementSignal\022.\n\routputSignals\030\014 \003"
+    "(\0132\027.Proto.FblElementSignal\022&\n\006params\030\r "
+    "\003(\0132\026.Proto.FblElementParam\"\201\001\n\020FblEleme"
+    "ntSignal\022\037\n\007caption\030\001 \002(\0132\016.Proto.wstrin"
+    "g\022\"\n\004type\030\002 \002(\0162\024.Proto.FblSignalType\022\027\n"
+    "\014operandIndex\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\""
+    "\367\002\n\017FblElementParam\022\037\n\007caption\030\001 \002(\0132\016.P"
+    "roto.wstring\022!\n\004type\030\002 \002(\0162\023.Proto.FblPa"
+    "ramType\022\017\n\007visible\030\007 \002(\010\022\027\n\014operandIndex"
+    "\030\010 \001(\005:\0010\022\017\n\004size\030\t \001(\005:\0010\022\033\n\014instantiat"
+    "or\030\n \001(\010:\005false\022\023\n\004user\030\013 \001(\010:\005false\022%\n\r"
+    "changedScript\030\014 \001(\0132\016.Proto.wstring\022\036\n\005v"
+    "alue\030\r \001(\0132\017.Proto.qvariant\022%\n\014defaultva"
+    "lue\030\016 \001(\0132\017.Proto.qvariant\022!\n\010lowlimit\030\017"
+    " \001(\0132\017.Proto.qvariant\022\"\n\thighlimit\030\020 \001(\013"
+    "2\017.Proto.qvariant\"\237\002\n\nVideoFrame\022\031\n\004uuid"
+    "\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Pro"
+    "to.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstr"
+    "ing\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004un"
+    "it\030\006 \002(\0162\021.Proto.SchemeUnit\022\037\n\006layers\030d "
+    "\003(\0132\017.Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Pro"
+    "to.AfbElementCollection\022*\n\rlogics_scheme"
+    "\030\310\001 \001(\0132\022.Proto.LogicScheme\"6\n\013LogicSche"
+    "me\022\'\n\017hardware_strids\030\001 \003(\0132\016.Proto.wstr"
+    "ing\"\223\001\n\nVideoLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto"
+    ".Uuid\022\034\n\004name\030\002 \002(\0132\016.Proto.wstring\022\017\n\007c"
+    "ompile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002("
+    "\010\022\036\n\005items\030\017 \003(\0132\017.Proto.Envelope\"\226\006\n\tVi"
+    "deoItem\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010is"
+    "Static\030\002 \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUn"
+    "it\030\004 \002(\0162\021.Proto.SchemeUnit\022\032\n\013acceptCli"
+    "ck\030\005 \001(\010:\005false\022#\n\013clickScript\030\006 \001(\0132\016.P"
+    "roto.wstring\022\'\n\013PosRectImpl\030\n \001(\0132\022.Prot"
+    "o.PosRectImpl\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Pro"
+    "to.PosLineImpl\0223\n\021PosConnectionImpl\030\014 \001("
+    "\0132\030.Proto.PosConnectionImpl\022\037\n\007FblItem\030j"
+    " \001(\0132\016.Proto.FblItem\022\'\n\013FblItemRect\030k \001("
+    "\0132\022.Proto.FblItemRect\022\'\n\013FblItemLine\030l \001"
+    "(\0132\022.Proto.FblItemLine\022\"\n\004Rect\030t \001(\0132\024.P"
+    "roto.VideoItemRect\022\"\n\004Line\030u \001(\0132\024.Proto"
+    ".VideoItemLine\0226\n\016ConnectionLine\030v \001(\0132\036"
+    ".Proto.VideoItemConnectionLine\022&\n\006Signal"
+    "\030| \001(\0132\026.Proto.VideoItemSignal\0220\n\013InputS"
+    "ignal\030} \001(\0132\033.Proto.VideoItemInputSignal"
+    "\0222\n\014OutputSignal\030~ \001(\0132\034.Proto.VideoItem"
+    "OutputSignal\022\"\n\004Link\030\177 \001(\0132\024.Proto.Video"
+    "ItemLink\0228\n\023VideoItemFblElement\030\200\001 \001(\0132\032"
+    ".Proto.VideoItemFblElement\"[\n\013PosRectImp"
+    "l\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022"
+    "\n\nwidthDocPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\""
+    "]\n\013PosLineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013s"
+    "tartYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\te"
+    "ndYDocPt\030\004 \002(\001\":\n\021PosConnectionImpl\022%\n\006p"
+    "oints\030\001 \003(\0132\025.Proto.VideoItemPoint\"\274\001\n\rV"
+    "ideoItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColo"
+    "r\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\013"
+    "2\016.Proto.wstring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004f"
+    "ont\030\006 \002(\0132\020.Proto.FontParam\022\014\n\004fill\030\007 \002("
+    "\010\022\026\n\010drawrect\030\010 \001(\010:\004true\"2\n\rVideoItemLi"
+    "ne\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"<\n"
+    "\027VideoItemConnectionLine\022\016\n\006weight\030\001 \002(\001"
+    "\022\021\n\tlineColor\030\002 \002(\r\"\215\002\n\022FblConnectionPoi"
+    "nt\022$\n\005point\030\001 \002(\0132\025.Proto.VideoItemPoint"
+    "\022/\n\ndirrection\030\002 \002(\0162\033.Proto.ConnectionD"
+    "irrection\022\031\n\004uuid\030\003 \002(\0132\013.Proto.Uuid\022\030\n\014"
+    "operandIndex\030\004 \001(\005:\002-1\022\037\n\nsignalUuid\030\n \001"
+    "(\0132\013.Proto.Uuid\022#\n\013signalStrID\030\013 \001(\0132\016.P"
+    "roto.wstring\022%\n\rsignalCaption\030\014 \001(\0132\016.Pr"
+    "oto.wstring\"4\n\007FblItem\022)\n\006points\030\001 \003(\0132\031"
+    ".Proto.FblConnectionPoint\"v\n\013FblItemRect"
+    "\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tf"
+    "illColor\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004fon"
+    "t\030\005 \002(\0132\020.Proto.FontParam\"0\n\013FblItemLine"
+    "\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"7\n\017V"
+    "ideoItemSignal\022$\n\014signalStrIDs\030\001 \003(\0132\016.P"
+    "roto.wstring\"\026\n\024VideoItemInputSignal\"\027\n\025"
+    "VideoItemOutputSignal\"\017\n\rVideoItemLink\"_"
+    "\n\023VideoItemFblElement\022&\n\006params\030\002 \003(\0132\026."
+    "Proto.FblElementParam\022 \n\010afbStrid\030\003 \001(\0132"
+    "\016.Proto.wstring\"\224\005\n\014DeviceObject\022\031\n\004uuid"
+    "\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Pro"
+    "to.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstr"
+    "ing\022(\n\020childRestriction\030\004 \001(\0132\016.Proto.ws"
+    "tring\022\020\n\005place\030\005 \001(\005:\0010\022!\n\031dynamic_prope"
+    "rties_struct\030\006 \001(\t\022#\n\nproperties\030\007 \003(\0132\017"
+    ".Proto.Property\022\025\n\006preset\030  \001(\010:\005false\022\031"
+    "\n\npresetRoot\030! \001(\010:\005false\022\"\n\npresetName\030"
+    "\" \001(\0132\016.Proto.wstring\022\037\n\004Root\030d \001(\0132\021.Pr"
+    "oto.DeviceRoot\022#\n\006System\030e \001(\0132\023.Proto.D"
+    "eviceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.Device"
+    "Rack\022%\n\007Chassis\030g \001(\0132\024.Proto.DeviceChas"
+    "sis\022#\n\006Module\030h \001(\0132\023.Proto.DeviceModule"
+    "\022+\n\nController\030i \001(\0132\027.Proto.DeviceContr"
+    "oller\022#\n\006Signal\030j \001(\0132\023.Proto.DeviceSign"
+    "al\022\'\n\013Workstation\030k \001(\0132\022.Proto.Workstat"
+    "ion\022!\n\010Software\030l \001(\0132\017.Proto.Software\"\014"
+    "\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRa"
+    "ck\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"[\n\014"
+    "DeviceModule\022\017\n\004type\030\001 \001(\005:\0010\022\022\n\007Channel"
+    "\030\002 \001(\005:\0010\022\022\n\010SubsysID\030\003 \001(\t:\000\022\022\n\010ConfTyp"
+    "e\030\004 \001(\t:\000\"\022\n\020DeviceController\"\271\001\n\014Device"
+    "Signal\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001"
+    "(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\001"
+    "0\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013validity"
+    "Bit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010"
+    "valueBit\030\010 \001(\005:\0010\"\036\n\013Workstation\022\017\n\004type"
+    "\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r"
+    "\n\023ModuleConfiguration\022\032\n\022struct_descript"
+    "ion\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.Module"
+    "ConfigurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030Mo"
+    "duleConfigurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005"
+    "value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n"
+    "\005value\030\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display\020\000\022"
+    "\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionD"
+    "irrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblS"
+    "ignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014F"
+    "blParamType\022\022\n\016AnalogIntegral\020\000\022\027\n\023Analo"
+    "gFloatingPoint\020\001\022\021\n\rDiscreteValue\020\002", 5795);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
+  qvariant::default_instance_ = new qvariant();
   wstring::default_instance_ = new wstring();
   FontParam::default_instance_ = new FontParam();
   VideoItemPoint::default_instance_ = new VideoItemPoint();
@@ -1308,7 +1315,6 @@ void protobuf_AddDesc_serialization_2eproto() {
   FblElement::default_instance_ = new FblElement();
   FblElementSignal::default_instance_ = new FblElementSignal();
   FblElementParam::default_instance_ = new FblElementParam();
-  FblParamValue::default_instance_ = new FblParamValue();
   VideoFrame::default_instance_ = new VideoFrame();
   LogicScheme::default_instance_ = new LogicScheme();
   VideoLayer::default_instance_ = new VideoLayer();
@@ -1342,6 +1348,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   ModuleConfigurationValue::default_instance_ = new ModuleConfigurationValue();
   Property::default_instance_ = new Property();
   Uuid::default_instance_->InitAsDefaultInstance();
+  qvariant::default_instance_->InitAsDefaultInstance();
   wstring::default_instance_->InitAsDefaultInstance();
   FontParam::default_instance_->InitAsDefaultInstance();
   VideoItemPoint::default_instance_->InitAsDefaultInstance();
@@ -1352,7 +1359,6 @@ void protobuf_AddDesc_serialization_2eproto() {
   FblElement::default_instance_->InitAsDefaultInstance();
   FblElementSignal::default_instance_->InitAsDefaultInstance();
   FblElementParam::default_instance_->InitAsDefaultInstance();
-  FblParamValue::default_instance_->InitAsDefaultInstance();
   VideoFrame::default_instance_->InitAsDefaultInstance();
   LogicScheme::default_instance_->InitAsDefaultInstance();
   VideoLayer::default_instance_->InitAsDefaultInstance();
@@ -1666,6 +1672,371 @@ void Uuid::Swap(Uuid* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = Uuid_descriptor_;
   metadata.reflection = Uuid_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int qvariant::kTypeFieldNumber;
+const int qvariant::kIntValueFieldNumber;
+const int qvariant::kUintValueFieldNumber;
+const int qvariant::kDoubleValueFieldNumber;
+const int qvariant::kBoolValueFieldNumber;
+#endif  // !_MSC_VER
+
+qvariant::qvariant()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void qvariant::InitAsDefaultInstance() {
+}
+
+qvariant::qvariant(const qvariant& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void qvariant::SharedCtor() {
+  _cached_size_ = 0;
+  type_ = 0;
+  intvalue_ = 0;
+  uintvalue_ = 0u;
+  doublevalue_ = 0;
+  boolvalue_ = false;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+qvariant::~qvariant() {
+  SharedDtor();
+}
+
+void qvariant::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void qvariant::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* qvariant::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return qvariant_descriptor_;
+}
+
+const qvariant& qvariant::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+qvariant* qvariant::default_instance_ = NULL;
+
+qvariant* qvariant::New() const {
+  return new qvariant;
+}
+
+void qvariant::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    type_ = 0;
+    intvalue_ = 0;
+    uintvalue_ = 0u;
+    doublevalue_ = 0;
+    boolvalue_ = false;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool qvariant::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required int32 type = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &type_)));
+          set_has_type();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_intValue;
+        break;
+      }
+
+      // optional int32 intValue = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_intValue:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &intvalue_)));
+          set_has_intvalue();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_uintValue;
+        break;
+      }
+
+      // optional uint32 uintValue = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_uintValue:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &uintvalue_)));
+          set_has_uintvalue();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(33)) goto parse_doubleValue;
+        break;
+      }
+
+      // optional double doubleValue = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_doubleValue:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &doublevalue_)));
+          set_has_doublevalue();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_boolValue;
+        break;
+      }
+
+      // optional bool boolValue = 5;
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_boolValue:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &boolvalue_)));
+          set_has_boolvalue();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void qvariant::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required int32 type = 1;
+  if (has_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->type(), output);
+  }
+
+  // optional int32 intValue = 2;
+  if (has_intvalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->intvalue(), output);
+  }
+
+  // optional uint32 uintValue = 3;
+  if (has_uintvalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->uintvalue(), output);
+  }
+
+  // optional double doubleValue = 4;
+  if (has_doublevalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(4, this->doublevalue(), output);
+  }
+
+  // optional bool boolValue = 5;
+  if (has_boolvalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->boolvalue(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* qvariant::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required int32 type = 1;
+  if (has_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->type(), target);
+  }
+
+  // optional int32 intValue = 2;
+  if (has_intvalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->intvalue(), target);
+  }
+
+  // optional uint32 uintValue = 3;
+  if (has_uintvalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->uintvalue(), target);
+  }
+
+  // optional double doubleValue = 4;
+  if (has_doublevalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(4, this->doublevalue(), target);
+  }
+
+  // optional bool boolValue = 5;
+  if (has_boolvalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->boolvalue(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int qvariant::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required int32 type = 1;
+    if (has_type()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->type());
+    }
+
+    // optional int32 intValue = 2;
+    if (has_intvalue()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->intvalue());
+    }
+
+    // optional uint32 uintValue = 3;
+    if (has_uintvalue()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->uintvalue());
+    }
+
+    // optional double doubleValue = 4;
+    if (has_doublevalue()) {
+      total_size += 1 + 8;
+    }
+
+    // optional bool boolValue = 5;
+    if (has_boolvalue()) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void qvariant::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const qvariant* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const qvariant*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void qvariant::MergeFrom(const qvariant& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_type()) {
+      set_type(from.type());
+    }
+    if (from.has_intvalue()) {
+      set_intvalue(from.intvalue());
+    }
+    if (from.has_uintvalue()) {
+      set_uintvalue(from.uintvalue());
+    }
+    if (from.has_doublevalue()) {
+      set_doublevalue(from.doublevalue());
+    }
+    if (from.has_boolvalue()) {
+      set_boolvalue(from.boolvalue());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void qvariant::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void qvariant::CopyFrom(const qvariant& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool qvariant::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+
+  return true;
+}
+
+void qvariant::Swap(qvariant* other) {
+  if (other != this) {
+    std::swap(type_, other->type_);
+    std::swap(intvalue_, other->intvalue_);
+    std::swap(uintvalue_, other->uintvalue_);
+    std::swap(doublevalue_, other->doublevalue_);
+    std::swap(boolvalue_, other->boolvalue_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata qvariant::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = qvariant_descriptor_;
+  metadata.reflection = qvariant_reflection_;
   return metadata;
 }
 
@@ -4708,13 +5079,16 @@ void FblElementSignal::Swap(FblElementSignal* other) {
 #ifndef _MSC_VER
 const int FblElementParam::kCaptionFieldNumber;
 const int FblElementParam::kTypeFieldNumber;
+const int FblElementParam::kVisibleFieldNumber;
+const int FblElementParam::kOperandIndexFieldNumber;
+const int FblElementParam::kSizeFieldNumber;
+const int FblElementParam::kInstantiatorFieldNumber;
+const int FblElementParam::kUserFieldNumber;
+const int FblElementParam::kChangedScriptFieldNumber;
 const int FblElementParam::kValueFieldNumber;
 const int FblElementParam::kDefaultvalueFieldNumber;
 const int FblElementParam::kLowlimitFieldNumber;
 const int FblElementParam::kHighlimitFieldNumber;
-const int FblElementParam::kVisibleFieldNumber;
-const int FblElementParam::kOperandIndexFieldNumber;
-const int FblElementParam::kSizeFieldNumber;
 #endif  // !_MSC_VER
 
 FblElementParam::FblElementParam()
@@ -4724,10 +5098,11 @@ FblElementParam::FblElementParam()
 
 void FblElementParam::InitAsDefaultInstance() {
   caption_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
-  value_ = const_cast< ::Proto::FblParamValue*>(&::Proto::FblParamValue::default_instance());
-  defaultvalue_ = const_cast< ::Proto::FblParamValue*>(&::Proto::FblParamValue::default_instance());
-  lowlimit_ = const_cast< ::Proto::FblParamValue*>(&::Proto::FblParamValue::default_instance());
-  highlimit_ = const_cast< ::Proto::FblParamValue*>(&::Proto::FblParamValue::default_instance());
+  changedscript_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
+  value_ = const_cast< ::Proto::qvariant*>(&::Proto::qvariant::default_instance());
+  defaultvalue_ = const_cast< ::Proto::qvariant*>(&::Proto::qvariant::default_instance());
+  lowlimit_ = const_cast< ::Proto::qvariant*>(&::Proto::qvariant::default_instance());
+  highlimit_ = const_cast< ::Proto::qvariant*>(&::Proto::qvariant::default_instance());
 }
 
 FblElementParam::FblElementParam(const FblElementParam& from)
@@ -4740,13 +5115,16 @@ void FblElementParam::SharedCtor() {
   _cached_size_ = 0;
   caption_ = NULL;
   type_ = 0;
+  visible_ = false;
+  operandindex_ = 0;
+  size_ = 0;
+  instantiator_ = false;
+  user_ = false;
+  changedscript_ = NULL;
   value_ = NULL;
   defaultvalue_ = NULL;
   lowlimit_ = NULL;
   highlimit_ = NULL;
-  visible_ = false;
-  operandindex_ = 0;
-  size_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -4757,6 +5135,7 @@ FblElementParam::~FblElementParam() {
 void FblElementParam::SharedDtor() {
   if (this != default_instance_) {
     delete caption_;
+    delete changedscript_;
     delete value_;
     delete defaultvalue_;
     delete lowlimit_;
@@ -4791,23 +5170,28 @@ void FblElementParam::Clear() {
       if (caption_ != NULL) caption_->::Proto::wstring::Clear();
     }
     type_ = 0;
-    if (has_value()) {
-      if (value_ != NULL) value_->::Proto::FblParamValue::Clear();
-    }
-    if (has_defaultvalue()) {
-      if (defaultvalue_ != NULL) defaultvalue_->::Proto::FblParamValue::Clear();
-    }
-    if (has_lowlimit()) {
-      if (lowlimit_ != NULL) lowlimit_->::Proto::FblParamValue::Clear();
-    }
-    if (has_highlimit()) {
-      if (highlimit_ != NULL) highlimit_->::Proto::FblParamValue::Clear();
-    }
     visible_ = false;
     operandindex_ = 0;
+    size_ = 0;
+    instantiator_ = false;
+    user_ = false;
+    if (has_changedscript()) {
+      if (changedscript_ != NULL) changedscript_->::Proto::wstring::Clear();
+    }
   }
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
-    size_ = 0;
+    if (has_value()) {
+      if (value_ != NULL) value_->::Proto::qvariant::Clear();
+    }
+    if (has_defaultvalue()) {
+      if (defaultvalue_ != NULL) defaultvalue_->::Proto::qvariant::Clear();
+    }
+    if (has_lowlimit()) {
+      if (lowlimit_ != NULL) lowlimit_->::Proto::qvariant::Clear();
+    }
+    if (has_highlimit()) {
+      if (highlimit_ != NULL) highlimit_->::Proto::qvariant::Clear();
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -4846,62 +5230,6 @@ bool FblElementParam::MergePartialFromCodedStream(
           } else {
             mutable_unknown_fields()->AddVarint(2, value);
           }
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(26)) goto parse_value;
-        break;
-      }
-
-      // required .Proto.FblParamValue value = 3;
-      case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_value:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_value()));
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(34)) goto parse_defaultvalue;
-        break;
-      }
-
-      // required .Proto.FblParamValue defaultvalue = 4;
-      case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_defaultvalue:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_defaultvalue()));
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(42)) goto parse_lowlimit;
-        break;
-      }
-
-      // required .Proto.FblParamValue lowlimit = 5;
-      case 5: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_lowlimit:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_lowlimit()));
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(50)) goto parse_highlimit;
-        break;
-      }
-
-      // required .Proto.FblParamValue highlimit = 6;
-      case 6: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_highlimit:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_highlimit()));
         } else {
           goto handle_uninterpreted;
         }
@@ -4953,6 +5281,108 @@ bool FblElementParam::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(80)) goto parse_instantiator;
+        break;
+      }
+
+      // optional bool instantiator = 10 [default = false];
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_instantiator:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &instantiator_)));
+          set_has_instantiator();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(88)) goto parse_user;
+        break;
+      }
+
+      // optional bool user = 11 [default = false];
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_user:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &user_)));
+          set_has_user();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(98)) goto parse_changedScript;
+        break;
+      }
+
+      // optional .Proto.wstring changedScript = 12;
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_changedScript:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_changedscript()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(106)) goto parse_value;
+        break;
+      }
+
+      // optional .Proto.qvariant value = 13;
+      case 13: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_value:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_value()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(114)) goto parse_defaultvalue;
+        break;
+      }
+
+      // optional .Proto.qvariant defaultvalue = 14;
+      case 14: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_defaultvalue:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_defaultvalue()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(122)) goto parse_lowlimit;
+        break;
+      }
+
+      // optional .Proto.qvariant lowlimit = 15;
+      case 15: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_lowlimit:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_lowlimit()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(130)) goto parse_highlimit;
+        break;
+      }
+
+      // optional .Proto.qvariant highlimit = 16;
+      case 16: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_highlimit:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_highlimit()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -4987,30 +5417,6 @@ void FblElementParam::SerializeWithCachedSizes(
       2, this->type(), output);
   }
 
-  // required .Proto.FblParamValue value = 3;
-  if (has_value()) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, this->value(), output);
-  }
-
-  // required .Proto.FblParamValue defaultvalue = 4;
-  if (has_defaultvalue()) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      4, this->defaultvalue(), output);
-  }
-
-  // required .Proto.FblParamValue lowlimit = 5;
-  if (has_lowlimit()) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      5, this->lowlimit(), output);
-  }
-
-  // required .Proto.FblParamValue highlimit = 6;
-  if (has_highlimit()) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      6, this->highlimit(), output);
-  }
-
   // required bool visible = 7;
   if (has_visible()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->visible(), output);
@@ -5024,6 +5430,46 @@ void FblElementParam::SerializeWithCachedSizes(
   // optional int32 size = 9 [default = 0];
   if (has_size()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->size(), output);
+  }
+
+  // optional bool instantiator = 10 [default = false];
+  if (has_instantiator()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->instantiator(), output);
+  }
+
+  // optional bool user = 11 [default = false];
+  if (has_user()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(11, this->user(), output);
+  }
+
+  // optional .Proto.wstring changedScript = 12;
+  if (has_changedscript()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      12, this->changedscript(), output);
+  }
+
+  // optional .Proto.qvariant value = 13;
+  if (has_value()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      13, this->value(), output);
+  }
+
+  // optional .Proto.qvariant defaultvalue = 14;
+  if (has_defaultvalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      14, this->defaultvalue(), output);
+  }
+
+  // optional .Proto.qvariant lowlimit = 15;
+  if (has_lowlimit()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      15, this->lowlimit(), output);
+  }
+
+  // optional .Proto.qvariant highlimit = 16;
+  if (has_highlimit()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      16, this->highlimit(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -5047,34 +5493,6 @@ void FblElementParam::SerializeWithCachedSizes(
       2, this->type(), target);
   }
 
-  // required .Proto.FblParamValue value = 3;
-  if (has_value()) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        3, this->value(), target);
-  }
-
-  // required .Proto.FblParamValue defaultvalue = 4;
-  if (has_defaultvalue()) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        4, this->defaultvalue(), target);
-  }
-
-  // required .Proto.FblParamValue lowlimit = 5;
-  if (has_lowlimit()) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        5, this->lowlimit(), target);
-  }
-
-  // required .Proto.FblParamValue highlimit = 6;
-  if (has_highlimit()) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        6, this->highlimit(), target);
-  }
-
   // required bool visible = 7;
   if (has_visible()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->visible(), target);
@@ -5088,6 +5506,51 @@ void FblElementParam::SerializeWithCachedSizes(
   // optional int32 size = 9 [default = 0];
   if (has_size()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->size(), target);
+  }
+
+  // optional bool instantiator = 10 [default = false];
+  if (has_instantiator()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->instantiator(), target);
+  }
+
+  // optional bool user = 11 [default = false];
+  if (has_user()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(11, this->user(), target);
+  }
+
+  // optional .Proto.wstring changedScript = 12;
+  if (has_changedscript()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        12, this->changedscript(), target);
+  }
+
+  // optional .Proto.qvariant value = 13;
+  if (has_value()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        13, this->value(), target);
+  }
+
+  // optional .Proto.qvariant defaultvalue = 14;
+  if (has_defaultvalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        14, this->defaultvalue(), target);
+  }
+
+  // optional .Proto.qvariant lowlimit = 15;
+  if (has_lowlimit()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        15, this->lowlimit(), target);
+  }
+
+  // optional .Proto.qvariant highlimit = 16;
+  if (has_highlimit()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        16, this->highlimit(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -5114,34 +5577,6 @@ int FblElementParam::ByteSize() const {
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
     }
 
-    // required .Proto.FblParamValue value = 3;
-    if (has_value()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->value());
-    }
-
-    // required .Proto.FblParamValue defaultvalue = 4;
-    if (has_defaultvalue()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->defaultvalue());
-    }
-
-    // required .Proto.FblParamValue lowlimit = 5;
-    if (has_lowlimit()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->lowlimit());
-    }
-
-    // required .Proto.FblParamValue highlimit = 6;
-    if (has_highlimit()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->highlimit());
-    }
-
     // required bool visible = 7;
     if (has_visible()) {
       total_size += 1 + 1;
@@ -5154,13 +5589,58 @@ int FblElementParam::ByteSize() const {
           this->operandindex());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional int32 size = 9 [default = 0];
     if (has_size()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->size());
+    }
+
+    // optional bool instantiator = 10 [default = false];
+    if (has_instantiator()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool user = 11 [default = false];
+    if (has_user()) {
+      total_size += 1 + 1;
+    }
+
+    // optional .Proto.wstring changedScript = 12;
+    if (has_changedscript()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->changedscript());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional .Proto.qvariant value = 13;
+    if (has_value()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->value());
+    }
+
+    // optional .Proto.qvariant defaultvalue = 14;
+    if (has_defaultvalue()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->defaultvalue());
+    }
+
+    // optional .Proto.qvariant lowlimit = 15;
+    if (has_lowlimit()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->lowlimit());
+    }
+
+    // optional .Proto.qvariant highlimit = 16;
+    if (has_highlimit()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->highlimit());
     }
 
   }
@@ -5196,28 +5676,37 @@ void FblElementParam::MergeFrom(const FblElementParam& from) {
     if (from.has_type()) {
       set_type(from.type());
     }
-    if (from.has_value()) {
-      mutable_value()->::Proto::FblParamValue::MergeFrom(from.value());
-    }
-    if (from.has_defaultvalue()) {
-      mutable_defaultvalue()->::Proto::FblParamValue::MergeFrom(from.defaultvalue());
-    }
-    if (from.has_lowlimit()) {
-      mutable_lowlimit()->::Proto::FblParamValue::MergeFrom(from.lowlimit());
-    }
-    if (from.has_highlimit()) {
-      mutable_highlimit()->::Proto::FblParamValue::MergeFrom(from.highlimit());
-    }
     if (from.has_visible()) {
       set_visible(from.visible());
     }
     if (from.has_operandindex()) {
       set_operandindex(from.operandindex());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_size()) {
       set_size(from.size());
+    }
+    if (from.has_instantiator()) {
+      set_instantiator(from.instantiator());
+    }
+    if (from.has_user()) {
+      set_user(from.user());
+    }
+    if (from.has_changedscript()) {
+      mutable_changedscript()->::Proto::wstring::MergeFrom(from.changedscript());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_value()) {
+      mutable_value()->::Proto::qvariant::MergeFrom(from.value());
+    }
+    if (from.has_defaultvalue()) {
+      mutable_defaultvalue()->::Proto::qvariant::MergeFrom(from.defaultvalue());
+    }
+    if (from.has_lowlimit()) {
+      mutable_lowlimit()->::Proto::qvariant::MergeFrom(from.lowlimit());
+    }
+    if (from.has_highlimit()) {
+      mutable_highlimit()->::Proto::qvariant::MergeFrom(from.highlimit());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -5236,10 +5725,13 @@ void FblElementParam::CopyFrom(const FblElementParam& from) {
 }
 
 bool FblElementParam::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000007f) != 0x0000007f) return false;
+  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
 
   if (has_caption()) {
     if (!this->caption().IsInitialized()) return false;
+  }
+  if (has_changedscript()) {
+    if (!this->changedscript().IsInitialized()) return false;
   }
   if (has_value()) {
     if (!this->value().IsInitialized()) return false;
@@ -5260,13 +5752,16 @@ void FblElementParam::Swap(FblElementParam* other) {
   if (other != this) {
     std::swap(caption_, other->caption_);
     std::swap(type_, other->type_);
+    std::swap(visible_, other->visible_);
+    std::swap(operandindex_, other->operandindex_);
+    std::swap(size_, other->size_);
+    std::swap(instantiator_, other->instantiator_);
+    std::swap(user_, other->user_);
+    std::swap(changedscript_, other->changedscript_);
     std::swap(value_, other->value_);
     std::swap(defaultvalue_, other->defaultvalue_);
     std::swap(lowlimit_, other->lowlimit_);
     std::swap(highlimit_, other->highlimit_);
-    std::swap(visible_, other->visible_);
-    std::swap(operandindex_, other->operandindex_);
-    std::swap(size_, other->size_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -5278,331 +5773,6 @@ void FblElementParam::Swap(FblElementParam* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = FblElementParam_descriptor_;
   metadata.reflection = FblElementParam_reflection_;
-  return metadata;
-}
-
-
-// ===================================================================
-
-#ifndef _MSC_VER
-const int FblParamValue::kIntegralvalueFieldNumber;
-const int FblParamValue::kFloatingpointFieldNumber;
-const int FblParamValue::kDiscreteFieldNumber;
-const int FblParamValue::kTypeFieldNumber;
-#endif  // !_MSC_VER
-
-FblParamValue::FblParamValue()
-  : ::google::protobuf::Message() {
-  SharedCtor();
-}
-
-void FblParamValue::InitAsDefaultInstance() {
-}
-
-FblParamValue::FblParamValue(const FblParamValue& from)
-  : ::google::protobuf::Message() {
-  SharedCtor();
-  MergeFrom(from);
-}
-
-void FblParamValue::SharedCtor() {
-  _cached_size_ = 0;
-  integralvalue_ = 0;
-  floatingpoint_ = 0;
-  discrete_ = false;
-  type_ = 0;
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-}
-
-FblParamValue::~FblParamValue() {
-  SharedDtor();
-}
-
-void FblParamValue::SharedDtor() {
-  if (this != default_instance_) {
-  }
-}
-
-void FblParamValue::SetCachedSize(int size) const {
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-}
-const ::google::protobuf::Descriptor* FblParamValue::descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return FblParamValue_descriptor_;
-}
-
-const FblParamValue& FblParamValue::default_instance() {
-  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
-  return *default_instance_;
-}
-
-FblParamValue* FblParamValue::default_instance_ = NULL;
-
-FblParamValue* FblParamValue::New() const {
-  return new FblParamValue;
-}
-
-void FblParamValue::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    integralvalue_ = 0;
-    floatingpoint_ = 0;
-    discrete_ = false;
-    type_ = 0;
-  }
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
-}
-
-bool FblParamValue::MergePartialFromCodedStream(
-    ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
-  ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required int32 integralvalue = 1;
-      case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &integralvalue_)));
-          set_has_integralvalue();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(17)) goto parse_floatingpoint;
-        break;
-      }
-
-      // required double floatingpoint = 2;
-      case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_floatingpoint:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &floatingpoint_)));
-          set_has_floatingpoint();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(24)) goto parse_discrete;
-        break;
-      }
-
-      // required bool discrete = 3;
-      case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_discrete:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &discrete_)));
-          set_has_discrete();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(32)) goto parse_type;
-        break;
-      }
-
-      // required int32 type = 4;
-      case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_type:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &type_)));
-          set_has_type();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectAtEnd()) return true;
-        break;
-      }
-
-      default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
-        }
-        DO_(::google::protobuf::internal::WireFormat::SkipField(
-              input, tag, mutable_unknown_fields()));
-        break;
-      }
-    }
-  }
-  return true;
-#undef DO_
-}
-
-void FblParamValue::SerializeWithCachedSizes(
-    ::google::protobuf::io::CodedOutputStream* output) const {
-  // required int32 integralvalue = 1;
-  if (has_integralvalue()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->integralvalue(), output);
-  }
-
-  // required double floatingpoint = 2;
-  if (has_floatingpoint()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(2, this->floatingpoint(), output);
-  }
-
-  // required bool discrete = 3;
-  if (has_discrete()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->discrete(), output);
-  }
-
-  // required int32 type = 4;
-  if (has_type()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->type(), output);
-  }
-
-  if (!unknown_fields().empty()) {
-    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
-        unknown_fields(), output);
-  }
-}
-
-::google::protobuf::uint8* FblParamValue::SerializeWithCachedSizesToArray(
-    ::google::protobuf::uint8* target) const {
-  // required int32 integralvalue = 1;
-  if (has_integralvalue()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->integralvalue(), target);
-  }
-
-  // required double floatingpoint = 2;
-  if (has_floatingpoint()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(2, this->floatingpoint(), target);
-  }
-
-  // required bool discrete = 3;
-  if (has_discrete()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->discrete(), target);
-  }
-
-  // required int32 type = 4;
-  if (has_type()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->type(), target);
-  }
-
-  if (!unknown_fields().empty()) {
-    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
-        unknown_fields(), target);
-  }
-  return target;
-}
-
-int FblParamValue::ByteSize() const {
-  int total_size = 0;
-
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required int32 integralvalue = 1;
-    if (has_integralvalue()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->integralvalue());
-    }
-
-    // required double floatingpoint = 2;
-    if (has_floatingpoint()) {
-      total_size += 1 + 8;
-    }
-
-    // required bool discrete = 3;
-    if (has_discrete()) {
-      total_size += 1 + 1;
-    }
-
-    // required int32 type = 4;
-    if (has_type()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->type());
-    }
-
-  }
-  if (!unknown_fields().empty()) {
-    total_size +=
-      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
-        unknown_fields());
-  }
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = total_size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-  return total_size;
-}
-
-void FblParamValue::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  const FblParamValue* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const FblParamValue*>(
-      &from);
-  if (source == NULL) {
-    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
-  } else {
-    MergeFrom(*source);
-  }
-}
-
-void FblParamValue::MergeFrom(const FblParamValue& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_integralvalue()) {
-      set_integralvalue(from.integralvalue());
-    }
-    if (from.has_floatingpoint()) {
-      set_floatingpoint(from.floatingpoint());
-    }
-    if (from.has_discrete()) {
-      set_discrete(from.discrete());
-    }
-    if (from.has_type()) {
-      set_type(from.type());
-    }
-  }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
-}
-
-void FblParamValue::CopyFrom(const ::google::protobuf::Message& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-void FblParamValue::CopyFrom(const FblParamValue& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool FblParamValue::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000000f) != 0x0000000f) return false;
-
-  return true;
-}
-
-void FblParamValue::Swap(FblParamValue* other) {
-  if (other != this) {
-    std::swap(integralvalue_, other->integralvalue_);
-    std::swap(floatingpoint_, other->floatingpoint_);
-    std::swap(discrete_, other->discrete_);
-    std::swap(type_, other->type_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
-}
-
-::google::protobuf::Metadata FblParamValue::GetMetadata() const {
-  protobuf_AssignDescriptorsOnce();
-  ::google::protobuf::Metadata metadata;
-  metadata.descriptor = FblParamValue_descriptor_;
-  metadata.reflection = FblParamValue_reflection_;
   return metadata;
 }
 

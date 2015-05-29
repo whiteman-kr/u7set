@@ -20,7 +20,7 @@ enum class DataFormat
 
 const char* const DataFormatStr[] =
 {
-	"Unsignaed Int",
+	"Unsigned Int",
 	"Signed Int",
 };
 
@@ -43,6 +43,8 @@ const char* const ByteOrderStr[] =
 
 #define TO_INT(enumValue) (static_cast<int>(enumValue))
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
+
+#define C_STR(qstring) qstring.toStdString().c_str()
 
 
 

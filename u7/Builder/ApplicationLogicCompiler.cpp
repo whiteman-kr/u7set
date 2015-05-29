@@ -8,6 +8,8 @@ namespace Builder
 	const char	*VALUE_OFFSET = "ValueOffset",
 				*VALUE_BIT = "ValueBit";
 
+	const char* SECTION_MEMORY_SETTINGS = "MemorySettings";
+
 
 	const int ERR_VALUE = -1;
 
@@ -371,7 +373,7 @@ namespace Builder
 
 		for(int i = 0; i < sizeof(memSettings)/sizeof(PropertyNameVar); i++)
 		{
-			result &= getLMIntProperty(QString("MemorySettings\\%1").arg(memSettings[i].name), memSettings[i].var);
+			result &= getLMIntProperty(SECTION_MEMORY_SETTINGS, memSettings[i].name, memSettings[i].var);
 		}
 
 		return true;
@@ -384,33 +386,38 @@ namespace Builder
 
 		m_modules.clear();
 
+		// build Module structures array
+		//
 		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
 		{
 			Module m;
 
 			Hardware::DeviceModule* device = getModuleOnPlace(place);
 
-			if (device != nullptr)
+			if (device == nullptr)
 			{
-				m.device = device;
+				continue;
+			}
 
-				PropertyNameVar moduleSettings[] =
-				{
-					{	"TxDataSize", &m.txDataSize },
-					{	"RxDataSize", &m.rxDataSize },
+			m.device = device;
+			m.place = place;
 
-					{	"DiagDataOffset", &m.diagDataOffset },
-					{	"DiagDataSize", &m.diagDataSize },
+			PropertyNameVar moduleSettings[] =
+			{
+				{	"TxDataSize", &m.txDataSize },
+				{	"RxDataSize", &m.rxDataSize },
 
-					{	"AppLogicDataOffset", &m.appLogicDataOffset },
-					{	"AppLogicDataSize", &m.appLogicDataSize },
-					{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve }
-				};
+				{	"DiagDataOffset", &m.diagDataOffset },
+				{	"DiagDataSize", &m.diagDataSize },
 
-				for(int i = 0; i < sizeof(moduleSettings)/sizeof(PropertyNameVar); i++)
-				{
-					result &= getDeviceIntProperty(device, QString(moduleSettings[i].name), moduleSettings[i].var);
-				}
+				{	"AppLogicDataOffset", &m.appLogicDataOffset },
+				{	"AppLogicDataSize", &m.appLogicDataSize },
+				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve }
+			};
+
+			for(int i = 0; i < sizeof(moduleSettings)/sizeof(PropertyNameVar); i++)
+			{
+				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSettings[i].name, moduleSettings[i].var);
 			}
 
 			m_modules.append(m);
@@ -605,7 +612,9 @@ namespace Builder
 					continue;
 				}
 
-				result &= initializeAppFbConstParams(appFb);
+				// initialize instantiator params only
+				//
+				result &= initAppFbParams(appFb, true);
 
 				if (!appFb->afb().hasRam())
 				{
@@ -616,7 +625,7 @@ namespace Builder
 
 				// initialize for each instance of FB with RAM
 				//
-				result &= initializeAppFbVariableParams(appFb);
+				result &= initAppFbParams(appFb, false);
 			}
 		}
 
@@ -624,7 +633,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::initializeAppFbConstParams(AppFb* appFb)
+	bool ModuleLogicCompiler::initAppFbParams(AppFb* appFb, bool instantiator)
 	{
 		bool result = true;
 
@@ -649,18 +658,23 @@ namespace Builder
 
 		// iniitalization of constant params
 		//
-		for(Afbl::AfbElementParam afbParam : afb.constParams())
+		for(Afbl::AfbElementParam afbParam : afb.params())
 		{
+			if (afbParam.instantiator() != instantiator)
+			{
+				continue;
+			}
+
 			Command cmd;
 
 			quint16 paramValue = 0;
 
-			const Afbl::AfbParamValue& apv = afbParam.value();
+			QVariant qv = afbParam.value();
 
 			switch(afbParam.type())
 			{
 			case Afbl::AnalogIntegral:
-				paramValue = apv.IntegralValue;
+				paramValue = qv.toInt();
 #pragma message("###################################### Need calculate value!!!!!!!!! ####################")
 				break;
 
@@ -669,7 +683,7 @@ namespace Builder
 				break;
 
 			case Afbl::DiscreteValue:
-				paramValue = apv.Discrete;
+				paramValue = qv.toInt();
 				break;
 
 			default:
@@ -687,7 +701,7 @@ namespace Builder
 		return result;
 	}
 
-
+/*
 	bool ModuleLogicCompiler::initializeAppFbVariableParams(AppFb* appFb)
 	{
 		bool result = true;
@@ -746,7 +760,7 @@ namespace Builder
 		}
 
 		return result;
-	}
+	}*/
 
 
 	/*bool ModuleLogicCompiler::generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params)
@@ -996,13 +1010,25 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::getLMIntProperty(const QString& propertyName, int *value)
+	bool ModuleLogicCompiler::getLMIntProperty(const QString &section, const QString& name, int *value)
 	{
-		return getDeviceIntProperty(m_lm, propertyName, value);
+		return getDeviceIntProperty(m_lm, section, name, value);
 	}
 
 
-	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString& propertyName, int *value)
+	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
+	{
+		return getDeviceIntProperty(m_lm, QString(""), name, value);
+	}
+
+
+	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int *value)
+	{
+		return getDeviceIntProperty(device, QString(""), name, value);
+	}
+
+
+	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString &section, const QString& name, int *value)
 	{
 		if (device == nullptr)
 		{
@@ -1016,7 +1042,18 @@ namespace Builder
 			return false;
 		}
 
-		QVariant val = device->property(propertyName.toStdString().c_str());
+		QString propertyName;
+
+		if (!section.isEmpty())
+		{
+			propertyName = QString("%1\\%2").arg(section).arg(name);
+		}
+		else
+		{
+			propertyName = name;
+		}
+
+		QVariant val = device->property(C_STR(propertyName));
 
 		if (val.isValid() == false)
 		{
@@ -1233,24 +1270,6 @@ namespace Builder
 		std::vector<LogicAfbParam> params = logicAfb->params();
 
 		for(LogicAfbParam param : params)
-		{
-			StrIDIndex si;
-
-			si.strID = logicAfb->strID();
-			si.index = param.operandIndex();
-
-			if (m_afbParams.contains(si))
-			{
-				assert(false);
-				continue;
-			}
-
-			m_afbParams.insert(si, &param);
-		}
-
-		std::vector<LogicAfbParam> constParams = logicAfb->constParams();
-
-		for(LogicAfbParam param : constParams)
 		{
 			StrIDIndex si;
 

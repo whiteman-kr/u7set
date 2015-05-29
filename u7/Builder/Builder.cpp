@@ -532,6 +532,8 @@ namespace Builder
 
 		bool result = appLogicCompiler.run();
 
+		m_log->writeEmptyLine();
+
 		if (result == false)
 		{
 			m_log->writeError(tr("Application Logic compilation was finished with errors"), true, false);

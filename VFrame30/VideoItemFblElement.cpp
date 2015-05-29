@@ -221,7 +221,7 @@ namespace VFrame30
 			return false;
 		}
 
-		found->setValue(Afbl::AfbParamValue::fromQVariant(value));
+		found->setValue(value);
 
 		return true;
 	}
@@ -246,7 +246,7 @@ namespace VFrame30
 				return false;
 			}
 
-			param.setValue(Afbl::AfbParamValue::fromQVariant(propValue));
+			param.setValue(propValue);
 		}
 
 		return true;
@@ -267,7 +267,7 @@ namespace VFrame30
 		//
 		for (Afbl::AfbElementParam& p : m_params)
 		{
-			QVariant value = p.value().toQVariant();
+			QVariant value = p.value();
 			setProperty(p.caption().toStdString().c_str(), value);
 		}
 	}
