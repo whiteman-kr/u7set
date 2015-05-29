@@ -22,35 +22,6 @@ namespace Afbl
 		DiscreteValue
 	};
 
-	// Значение параметра элемента
-	//
-	struct VFRAME30LIBSHARED_EXPORT AfbParamValue
-	{
-		int32_t IntegralValue;
-		double FloatingPoint;
-		bool Discrete;
-		AfbParamType Type;				// Param data type
-
-		// Serialization
-		//
-	public:
-
-		AfbParamValue();
-		explicit AfbParamValue(int32_t value);
-		explicit AfbParamValue(double value);
-		explicit AfbParamValue(bool value);
-
-		bool SaveData(Proto::FblParamValue* message) const;
-		bool LoadData(const Proto::FblParamValue& message);
-
-		bool loadFromXml(QXmlStreamReader* xmlReader);
-		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
-
-		QVariant toQVariant() const;
-		static AfbParamValue fromQVariant(QVariant value);
-	};
-
-		
 	//
 	//
 	//	CFblElementSignal	- Сигнал FBL элемента
@@ -110,7 +81,7 @@ private:
 		// Methods
 		//
 	public:
-		void update(const AfbParamType& type, const AfbParamValue& lowLimit, const AfbParamValue& highLimit);
+		void update(const AfbParamType& type, const QVariant& lowLimit, const QVariant& highLimit);
 
 		// Serialization
 		//
@@ -134,17 +105,17 @@ private:
 		AfbParamType type() const;
 		void setType(AfbParamType type);
 
-		const AfbParamValue& value() const;
-		void setValue(const AfbParamValue& value);
+		const QVariant& value() const;
+		void setValue(const QVariant& value);
 
-		const AfbParamValue& defaultValue() const;
-		void setDefaultValue(const AfbParamValue& defaultValue);
+		const QVariant& defaultValue() const;
+		void setDefaultValue(const QVariant& defaultValue);
 
-		const AfbParamValue& lowLimit() const;
-		void setLowLimit(const AfbParamValue& lowLimit);
+		const QVariant& lowLimit() const;
+		void setLowLimit(const QVariant& lowLimit);
 
-		const AfbParamValue& highLimit() const;
-		void setHighLimit(const AfbParamValue& highLimit);
+		const QVariant& highLimit() const;
+		void setHighLimit(const QVariant& highLimit);
 						
 		int operandIndex() const;
 		void setOperandIndex(int value);
@@ -152,18 +123,30 @@ private:
         int size() const;
         void setSize(int value);
 
+		bool instantiator() const;
+		void setInstantiator(bool value);
+
+		bool user() const;
+		void setUser(bool value);
+
+		QString changedScript() const;
+		void setChangedScript(const QString& value);
+
         // Data
 		//
 	private:
 		QString m_caption;				// Наименование параметра
 		bool m_visible;
 		AfbParamType m_type;			// Тип данных параметра
+		bool m_instantiator;
+		bool m_user;
+		QString m_changedScript;
 
-		AfbParamValue m_value;			// Значение параметра
-		AfbParamValue m_defaultValue;	// Значение по умолчанию
+		QVariant m_value;			// Значение параметра
+		QVariant m_defaultValue;	// Значение по умолчанию
 
-		AfbParamValue m_lowLimit;		// Нижний предел параметра
-		AfbParamValue m_highLimit;		// Верхний предел параметра
+		QVariant m_lowLimit;		// Нижний предел параметра
+		QVariant m_highLimit;		// Верхний предел параметра
 
 		int m_operandIndex;
         int m_size;
@@ -225,7 +208,13 @@ private:
 		bool hasRam() const;
 		void setHasRam(bool value);
 
-        const std::vector<AfbElementSignal>& inputSignals() const;
+		QString libraryScript() const;
+		void setLibraryScript(const QString& value);
+
+		QString afterCreationScript() const;
+		void setAfterCreationScript(const QString& value);
+
+		const std::vector<AfbElementSignal>& inputSignals() const;
 		void setInputSignals(const std::vector<AfbElementSignal>& inputsignals);
 
 		const std::vector<AfbElementSignal>& outputSignals() const;
@@ -235,11 +224,8 @@ private:
 		std::vector<AfbElementParam>& params();
 
 		int paramsCount() const;
-		void setParams(const std::vector<AfbElementParam>& constParams);
+		void setParams(const std::vector<AfbElementParam>& params);
 
-		const std::vector<AfbElementParam>& constParams() const;
-		int constParamsCount() const;
-		void setConstParams(const std::vector<AfbElementParam>& constParams);
 
 	private:
 		QString m_strID;
@@ -247,11 +233,13 @@ private:
 		unsigned int m_opcode;
 		bool m_hasRam;
 
+		QString m_libraryScript;
+		QString m_afterCreationScript;
+
 		std::vector<AfbElementSignal> m_inputSignals;
 		std::vector<AfbElementSignal> m_outputSignals;
 
 		std::vector<AfbElementParam> m_params;
-		std::vector<AfbElementParam> m_constParams;
 	};
 
 	//
