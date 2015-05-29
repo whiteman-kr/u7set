@@ -68,35 +68,35 @@ namespace Proto
 
 	// Read/write wstring message
 	//
-	void Read(const Proto::qvariant& message, QVariant* dst)
+	const QVariant Read(const Proto::qvariant& message)
 	{
-		switch (message.type())
+		switch (static_cast<QVariant::Type>(message.type()))
 		{
 		case QVariant::Int:
 		{
-			*dst = QVariant(message.intvalue());
+			return QVariant(message.intvalue());
 			break;
 		}
 		case QVariant::UInt:
 		{
-			*dst = QVariant(message.uintvalue());
+			return QVariant(message.uintvalue());
 			break;
 		}
 		case QVariant::Double:
 		{
-			*dst = QVariant(message.doublevalue());
+			return QVariant(message.doublevalue());
 			break;
 		}
 		case QVariant::Bool:
 		{
-			*dst = QVariant(message.boolvalue());
+			return QVariant(message.boolvalue());
 			break;
 		}
 		default:
 			assert(false);
 		}
 
-		return;
+		return QVariant();
 	}
 
 	void Write(Proto::qvariant* pMessage, const QVariant& value)

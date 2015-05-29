@@ -216,10 +216,10 @@ namespace Afbl
 		m_type = static_cast<AfbParamType>(message.type());
 		m_visible = message.visible();
 
-		Proto::Read(message.value(), &m_value);
-		Proto::Read(message.defaultvalue(), &m_defaultValue);
-		Proto::Read(message.lowlimit(), &m_lowLimit);
-		Proto::Read(message.highlimit(), &m_highLimit);
+		m_value = Proto::Read(message.value());
+		m_defaultValue = Proto::Read(message.defaultvalue());
+		m_lowLimit = Proto::Read(message.lowlimit());
+		m_highLimit = Proto::Read(message.highlimit());
 
 		m_operandIndex = message.operandindex();
 		m_size = message.size();
@@ -618,23 +618,24 @@ namespace Afbl
 		{
 			if (xmlReader->name() == "Properties")
 			{
-				if (xmlReader->attributes().hasAttribute("Caption"))
+				while (xmlReader->readNextStartElement())
 				{
-					setCaption(xmlReader->attributes().value("Caption").toString());
+					if (xmlReader->name() == "Caption")
+					{
+						setCaption(xmlReader->readElementText());
+					}
+
+					if (xmlReader->name() == "OpCode")
+					{
+						setOpcode(xmlReader->readElementText().toInt());
+					}
+
+					if (xmlReader->name() == "hasRam")
+					{
+						setHasRam(xmlReader->readElementText() == "true" ? true : false);
+					}
 				}
 
-				if (xmlReader->attributes().hasAttribute("OpCode"))
-				{
-					setOpcode(xmlReader->attributes().value("OpCode").toInt());
-				}
-
-				if (xmlReader->attributes().hasAttribute("hasRam"))
-				{
-					setHasRam(xmlReader->attributes().value("hasRam") == "true" ? true : false);
-				}
-
-				QXmlStreamReader::TokenType endToken = xmlReader->readNext();
-				assert(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
 				continue;
 			}
 
@@ -770,9 +771,9 @@ namespace Afbl
 
 
 		xmlWriter->writeStartElement("Properties");
-		xmlWriter->writeAttribute("Caption", caption());
-		xmlWriter->writeAttribute("OpCode", QString::number(opcode()));
-		xmlWriter->writeAttribute("hasRam", hasRam() ? "true" : "false");
+		xmlWriter->writeTextElement("Caption", caption());
+		xmlWriter->writeTextElement("OpCode", QString::number(opcode()));
+		xmlWriter->writeTextElement("hasRam", hasRam() ? "true" : "false");
 		xmlWriter->writeEndElement();
 
 		xmlWriter->writeStartElement("InputSignals");
