@@ -14,7 +14,9 @@ SUBDIRS += qtservice \
     Metrology \
     ConfigurationService \
     ArchivingService \
-    DataAquisitionService
-SUBDIRS += VFrame30
-SUBDIRS += u7
+    DataAquisitionService \
+	VFrame30 \
+	u7 \
+    Monitor
+
 
