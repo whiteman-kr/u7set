@@ -2539,7 +2539,6 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 				}
 
 				VFrame30::VideoItem* newItemRawPtr = VFrame30::VideoItem::Create(data);
-
 				if (newItemRawPtr == nullptr)
 				{
 					assert(newItemRawPtr != nullptr);
@@ -2548,12 +2547,12 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 				std::shared_ptr<VFrame30::VideoItem> newItem(newItemRawPtr);
 
+				newItem->setGuid(QUuid::createUuid());
 				newItem->MoveItem(xdif, ydif);
 
 				newItems.push_back(newItem);
 				return;
-			}
-			);
+			});
 
 		m_editEngine->runAddItem(newItems, schemeView()->activeLayer());
 	}
