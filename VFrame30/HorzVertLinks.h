@@ -16,6 +16,10 @@ namespace VFrame30
 		//
 		bool IsPointOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid);
 
+		// Определить, лежит ли чточка на одном из отрезков vertlinks или на концах horzlinks
+		//
+		bool IsPinOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid);
+
 		// Вернуть UUid элементов под точкой
 		//
 		std::list<QUuid> getVideoItemsUnderPoint(VideoItemPoint pt, QUuid VideoItemGuid);
@@ -37,6 +41,11 @@ namespace VFrame30
 			bool IsValInRange(double val)
 			{
 				return val >= Pos1 && val <= Pos2;
+			}
+
+			bool IsValOnEndPoints(double val)
+			{
+				return std::abs(val - Pos1) <= 0.000001 || std::abs(val - Pos2)  <= 0.000001;
 			}
 		};
 

@@ -411,7 +411,7 @@ namespace VFrame30
 
 					// проверить, не лежит ли пин на соединительной линии
 					//
-					if (horzVertLinks.IsPointOnLink(pinPos, item->get()->guid()) == true)
+					if (horzVertLinks.IsPinOnLink(pinPos, item->get()->guid()) == true)
 					{
 						pLayer->ConnectionMapPosInc(pinPos);
 					}
@@ -426,7 +426,7 @@ namespace VFrame30
 
 					// проверить, не лежит ли пин на соединительной линии
 					//
-					if (horzVertLinks.IsPointOnLink(pinPos, item->get()->guid()) == true)
+					if (horzVertLinks.IsPinOnLink(pinPos, item->get()->guid()) == true)
 					{
 						pLayer->ConnectionMapPosInc(pinPos);
 					}

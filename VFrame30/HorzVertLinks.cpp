@@ -81,6 +81,47 @@ namespace VFrame30
 		return false;
 	}
 
+	// ќпределить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
+	//
+	bool CHorzVertLinks::IsPinOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid)
+	{
+		// есть ли така€ точка в вертикальных отрезках?
+		//
+		auto vertline = vertlinks.find(pt.X);
+		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
+		{
+			if (vertline->second.IsValInRange(pt.Y) == true &&
+				VideoItemGuid != vertline->second.VideoItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+			{
+				return true;
+			}
+
+			++ vertline;
+		}
+
+		// есть ли така€ точка в горизонтальных отрезках?
+		//
+
+		// ѕока здесь не ищем, если расскооментировать, то пины обычных элементов будут цепл€тьс€ за √ќ–»«ќЌ“јЋ№Ќџ≈
+		// линии, что некрасиво при продлении пина дальше соед. линии,
+		// [_]--x-0---- примерно такой рисунок получитс€
+		//
+
+		auto horzline = horzlinks.find(pt.Y);
+		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
+		{
+			if (horzline->second.IsValOnEndPoints(pt.X) == true &&
+				VideoItemGuid != horzline->second.VideoItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+			{
+				return true;
+			}
+
+			++ horzline;
+		}
+
+		return false;
+	}
+
 	std::list<QUuid> CHorzVertLinks::getVideoItemsUnderPoint(VideoItemPoint pt, QUuid VideoItemGuid)
 	{
 		std::list<QUuid> items;
