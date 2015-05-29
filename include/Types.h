@@ -20,7 +20,7 @@ enum class DataFormat
 
 const char* const DataFormatStr[] =
 {
-	"Unsignaed Int",
+	"Unsigned Int",
 	"Signed Int",
 };
 
