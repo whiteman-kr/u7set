@@ -171,7 +171,9 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 	// Draw ruller for newItem
 	//
+	bool drawRullers = false;
 	VFrame30::VideoItemPoint rullerPoint;
+
 	bool posInterfaceFound = false;
 
 	if (dynamic_cast<VFrame30::IVideoItemPosLine*>(m_newItem.get()) != nullptr)
@@ -182,8 +184,10 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		}
 
 		posInterfaceFound = true;
+
 		VFrame30::IVideoItemPosLine* pos = dynamic_cast<VFrame30::IVideoItemPosLine*>(m_newItem.get());
 
+		drawRullers = true;
 		rullerPoint.X = pos->endXDocPt();
 		rullerPoint.Y = pos->endYDocPt();
 	}
@@ -197,6 +201,7 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 		posInterfaceFound = true;
 
+		drawRullers = true;
 		rullerPoint.X = m_addRectEndPoint.x();
 		rullerPoint.Y = m_addRectEndPoint.y();
 	}
@@ -214,8 +219,12 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 		const std::list<VFrame30::VideoItemPoint>& extPoints = pos->GetExtensionPoints();
 
-		rullerPoint.X = extPoints.back().X;
-		rullerPoint.Y = extPoints.back().Y;
+		if (extPoints.empty() == false)
+		{
+			drawRullers = true;
+			rullerPoint.X = extPoints.back().X;
+			rullerPoint.Y = extPoints.back().Y;
+		}
 	}
 
 	if (posInterfaceFound == false)
@@ -224,18 +233,21 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		return;
 	}
 
-	QPen outlinePen(Qt::blue);
-	outlinePen.setWidth(0);
+	if (drawRullers == true)
+	{
+		QPen outlinePen(Qt::blue);
+		outlinePen.setWidth(0);
 
-	QPainter::RenderHints oldrenderhints = p->renderHints();
-	p->setRenderHint(QPainter::Antialiasing, false);
+		QPainter::RenderHints oldrenderhints = p->renderHints();
+		p->setRenderHint(QPainter::Antialiasing, false);
 
-	p->setPen(outlinePen);
+		p->setPen(outlinePen);
 
-	p->drawLine(QPointF(rullerPoint.X, 0.0), QPointF(rullerPoint.X, scheme()->docHeight()));
-	p->drawLine(QPointF(0.0, rullerPoint.Y), QPointF(scheme()->docWidth(), rullerPoint.Y));
+		p->drawLine(QPointF(rullerPoint.X, 0.0), QPointF(rullerPoint.X, scheme()->docHeight()));
+		p->drawLine(QPointF(0.0, rullerPoint.Y), QPointF(scheme()->docWidth(), rullerPoint.Y));
 
-	p->setRenderHints(oldrenderhints);
+		p->setRenderHints(oldrenderhints);
+	}
 
 	return;
 }
