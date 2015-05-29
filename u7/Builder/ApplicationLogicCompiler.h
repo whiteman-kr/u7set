@@ -373,8 +373,8 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool afbInitialization();
-		bool initializeAppFbConstParams(AppFb* appFb);
-		bool initializeAppFbVariableParams(AppFb* appFb);
+		bool initAppFbParams(AppFb* appFb, bool instantiator);
+		//bool initAppFbVariableParams(AppFb* appFb);
 
 		bool getUsedAfbs();
 		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);

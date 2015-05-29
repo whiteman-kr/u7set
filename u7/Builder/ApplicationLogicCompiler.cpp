@@ -612,7 +612,9 @@ namespace Builder
 					continue;
 				}
 
-				result &= initializeAppFbConstParams(appFb);
+				// initialize instantiator params only
+				//
+				result &= initAppFbParams(appFb, true);
 
 				if (!appFb->afb().hasRam())
 				{
@@ -623,7 +625,7 @@ namespace Builder
 
 				// initialize for each instance of FB with RAM
 				//
-				result &= initializeAppFbVariableParams(appFb);
+				result &= initAppFbParams(appFb, false);
 			}
 		}
 
@@ -631,7 +633,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::initializeAppFbConstParams(AppFb* appFb)
+	bool ModuleLogicCompiler::initAppFbParams(AppFb* appFb, bool instantiator)
 	{
 		bool result = true;
 
@@ -656,18 +658,23 @@ namespace Builder
 
 		// iniitalization of constant params
 		//
-		for(Afbl::AfbElementParam afbParam : afb.constParams())
+		for(Afbl::AfbElementParam afbParam : afb.params())
 		{
+			if (afbParam.instantiator() != instantiator)
+			{
+				continue;
+			}
+
 			Command cmd;
 
 			quint16 paramValue = 0;
 
-			const Afbl::AfbParamValue& apv = afbParam.value();
+			QVariant qv = afbParam.value();
 
 			switch(afbParam.type())
 			{
 			case Afbl::AnalogIntegral:
-				paramValue = apv.IntegralValue;
+				paramValue = qv.toInt();
 #pragma message("###################################### Need calculate value!!!!!!!!! ####################")
 				break;
 
@@ -676,7 +683,7 @@ namespace Builder
 				break;
 
 			case Afbl::DiscreteValue:
-				paramValue = apv.Discrete;
+				paramValue = qv.toInt();
 				break;
 
 			default:
@@ -694,7 +701,7 @@ namespace Builder
 		return result;
 	}
 
-
+/*
 	bool ModuleLogicCompiler::initializeAppFbVariableParams(AppFb* appFb)
 	{
 		bool result = true;
@@ -753,7 +760,7 @@ namespace Builder
 		}
 
 		return result;
-	}
+	}*/
 
 
 	/*bool ModuleLogicCompiler::generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params)
@@ -1011,13 +1018,13 @@ namespace Builder
 
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
 	{
-		return getDeviceIntProperty(m_lm, name, value);
+		return getDeviceIntProperty(m_lm, QString(""), name, value);
 	}
 
 
 	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int *value)
 	{
-		return getDeviceIntProperty(m_lm, QString(""), name, value);
+		return getDeviceIntProperty(device, QString(""), name, value);
 	}
 
 
@@ -1263,24 +1270,6 @@ namespace Builder
 		std::vector<LogicAfbParam> params = logicAfb->params();
 
 		for(LogicAfbParam param : params)
-		{
-			StrIDIndex si;
-
-			si.strID = logicAfb->strID();
-			si.index = param.operandIndex();
-
-			if (m_afbParams.contains(si))
-			{
-				assert(false);
-				continue;
-			}
-
-			m_afbParams.insert(si, &param);
-		}
-
-		std::vector<LogicAfbParam> constParams = logicAfb->constParams();
-
-		for(LogicAfbParam param : constParams)
 		{
 			StrIDIndex si;
 
