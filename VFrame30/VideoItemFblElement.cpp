@@ -236,6 +236,11 @@ namespace VFrame30
 
 		for (Afbl::AfbElementParam& param : afbElement->params())
 		{
+			if (param.user() == false)
+			{
+				continue;
+			}
+
 			QVariant propValue = property(param.caption().toStdString().c_str());
 
 			if (propValue.isValid() == false)
