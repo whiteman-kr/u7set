@@ -18,6 +18,20 @@ message Uuid
 	required bytes uuid = 1;
 }
 
+//
+//
+// QVariant
+//
+//
+message qvariant
+{
+	required int32 type = 1;
+	optional int32 intValue = 2;
+	optional uint32 uintValue = 3;
+	optional double doubleValue = 4;
+	optional bool boolValue = 5;
+}
+
 
 //
 //
@@ -196,28 +210,18 @@ message FblElementParam
 {
 	required wstring caption = 1;
 	required FblParamType type = 2;
-	required FblParamValue value = 3;
-	required FblParamValue defaultvalue = 4;
-	required FblParamValue lowlimit = 5;
-	required FblParamValue highlimit = 6;
 	required bool visible = 7;
 	optional int32 operandIndex = 8 [default = 0];
 	optional int32 size = 9 [default = 0];
+	optional bool instantiator = 10 [default = false];
+	optional bool user = 11 [default = false];
+	optional wstring changedScript = 12;
+	optional qvariant value = 13;
+	optional qvariant defaultvalue = 14;
+	optional qvariant lowlimit = 15;
+	optional qvariant highlimit = 16;
 }
 
-
-//
-//
-// Afbl::FblParamValue
-//
-//
-message FblParamValue
-{
-	required int32 integralvalue = 1;
-	required double floatingpoint = 2;
-	required bool discrete = 3;
-	required int32 type = 4;
-}
 
 
 //
