@@ -19,7 +19,8 @@ SOURCES += main.cpp \
 	MonitorCentralWidget.cpp \
 	Settings.cpp \
     ../lib/SocketIO.cpp \
-    DialogSettings.cpp
+    DialogSettings.cpp \
+    WorkflowSchemeView.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -27,7 +28,8 @@ HEADERS  += \
 	Stable.h \
 	Settings.h \
     ../include/SocketIO.h \
-    DialogSettings.h
+    DialogSettings.h \
+    WorkflowSchemeView.h
 
 FORMS    += \
     DialogSettings.ui
@@ -58,3 +60,20 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 #c++11 support for GCC
 #
 unix:QMAKE_CXXFLAGS += -std=c++11
+
+
+# VFrame30 library
+# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+}
+
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
+

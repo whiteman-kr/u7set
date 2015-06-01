@@ -19,11 +19,13 @@ namespace VFrame30
 {
 	VFrame30Library::VFrame30Library()
 	{
-
+		qDebug() << Q_FUNC_INFO;
 	}
 
 	bool VFrame30Library::Init()
 	{
+		qDebug() << Q_FUNC_INFO;
+
 		// Registering VideoFrames
 		//
 		VideoFrameFactory.Register<DiagScheme>();
@@ -52,6 +54,8 @@ namespace VFrame30
 
 	bool VFrame30Library::Shutdown()
 	{
+		qDebug() << Q_FUNC_INFO;
+
 		google::protobuf::ShutdownProtobufLibrary();
 		return true;
 	}

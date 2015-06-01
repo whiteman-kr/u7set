@@ -2,10 +2,13 @@
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
+#include "WorkflowSchemeView.h"
 
 MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	QMainWindow(parent)
 {
+	qDebug() << Q_FUNC_INFO;
+
 	// --
 	//
 	setCentralWidget(new MonitorCentralWidget());
@@ -201,6 +204,24 @@ void MonitorMainWindow::showAbout()
 void MonitorMainWindow::debug()
 {
 #ifdef Q_DEBUG
+
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+													"./",
+													tr("Workflow schemes (*.wfs);; All files (*.*)"));
+
+	if (fileName.isNull() == true)
+	{
+		return;
+	}
+
+	QFileInfo fileInfo(fileName);
+
+
+	QTabWidget* tabWidget = monitorCentralWidget();
+
+	WorkflowSchemeView* schemeView = new WorkflowSchemeView();
+
+	tabWidget->addTab(schemeView, "Debug tab: " + fileInfo.fileName());
 
 #endif	// Q_DEBUG
 }
