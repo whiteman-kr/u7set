@@ -73,16 +73,7 @@ public:
 	bool isPresetMode() const;
 	bool isConfigurationMode() const;
 
-	// Data
-	//
-private:
-	DbController* m_dbController;
-	QWidget* m_parentWidget;
-
-	std::shared_ptr<Hardware::DeviceObject> m_root;
-	std::shared_ptr<Hardware::DeviceObject> m_configuration;
-	std::shared_ptr<Hardware::DeviceObject> m_preset;
-
+public:
 	enum Columns
 	{
 		ObjectNameColumn,
@@ -96,7 +87,17 @@ private:
 		ColumnCount
 	};
 
-	int m_sortColumn = 0 ;
+	// Data
+	//
+private:
+	DbController* m_dbController;
+	QWidget* m_parentWidget;
+
+	std::shared_ptr<Hardware::DeviceObject> m_root;
+	std::shared_ptr<Hardware::DeviceObject> m_configuration;
+	std::shared_ptr<Hardware::DeviceObject> m_preset;
+
+	int m_sortColumn = ObjectPlaceColumn ;
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
