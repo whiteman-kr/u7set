@@ -333,52 +333,52 @@ namespace Builder
 			break;
 
 		case CommandCodes::MOV:
-			mnemoCode.sprintf("%s\t0x%04X, 0x%04X", CommandStr[opCodeInt], m_code.getWord3(), m_code.getWord2());
+			mnemoCode.sprintf("%s     %d, %d", CommandStr[opCodeInt], m_code.getWord3(), m_code.getWord2());
 			break;
 
 		case CommandCodes::MOVMEM:
-			mnemoCode.sprintf("%s\t0x%04X, 0x%04X, %d", CommandStr[opCodeInt], m_code.getWord3(), m_code.getWord2(), m_code.getWord4());
+			mnemoCode.sprintf("%s  %d, %d, %d", CommandStr[opCodeInt], m_code.getWord3(), m_code.getWord2(), m_code.getWord4());
 			break;
 
 		case CommandCodes::MOVC:
-			mnemoCode.sprintf("%s\t0x%04X, #0x%04X", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3());
+			mnemoCode.sprintf("%s    %d, #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3());
 			break;
 
 		case CommandCodes::MOVBC:
-			mnemoCode.sprintf("%s\t0x%04X[%d], #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
+			mnemoCode.sprintf("%s   %d[%d], #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
 			break;
 
 		case CommandCodes::WRFB:
-			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X", CommandStr[opCodeInt],
+			mnemoCode.sprintf("%s    %s.%d[%d], 0x%04X", CommandStr[opCodeInt],
 							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
 			break;
 
 		case CommandCodes::RDFB:
-			mnemoCode.sprintf("%s\t0x%04X, %s.%d[%d]", CommandStr[opCodeInt], m_code.getWord2(), m_code.getFbTypeStr().toUtf8().data(),
+			mnemoCode.sprintf("%s    %d, %s.%d[%d]", CommandStr[opCodeInt], m_code.getWord2(), m_code.getFbTypeStr().toUtf8().data(),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
 			break;
 
 		case CommandCodes::WRFBC:
-			mnemoCode.sprintf("%s\t%s.%d[%d], #0x%04X", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
+			mnemoCode.sprintf("%s   %s.%d[%d], #%d", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
 			break;
 
 		case CommandCodes::WRFBB:
-			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X[%d]", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
+			mnemoCode.sprintf("%s   %s.%d[%d], %d[%d]", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2(), m_code.getWord4());
 			break;
 
 		case CommandCodes::RDFBB:
-			mnemoCode.sprintf("%s\t0x%04X[%d], %s.%d[%d]", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(),
+			mnemoCode.sprintf("%s   %d[%d], %s.%d[%d]", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(),
 							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
 			break;
 
 		case CommandCodes::RDFBTS:
-			mnemoCode.sprintf("%s\t%s.%d[%d], #0x%04X", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
+			mnemoCode.sprintf("%s  %s.%d[%d], #%d", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
 
 		case CommandCodes::SETMEM:
-			mnemoCode.sprintf("%s\t0x%04X, %d, #0x%04X", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
+			mnemoCode.sprintf("%s  %d, %d, #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
 			break;
 
 		default:
@@ -416,7 +416,7 @@ namespace Builder
 
 		if (!commentIsEmpty())
 		{
-			tabLen = 72 - 32 - (mnemoCode.length() - 1 + ((mnemoCode.length() - 1) % 8));
+			tabLen = 64 - 32 - mnemoCode.length();
 
 			tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 

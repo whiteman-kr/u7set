@@ -292,9 +292,17 @@ namespace Builder
 
 			// calculated fields
 			//
-			int moduleDataOffset = 0;			// offset of data received from module or transmitted to module in LM's memory
-			int appDataOffset = 0;				// offset of module application data in LM's memory
-			int processingDataOffset = 0;		// offset of module application data for processing (in registration buffer)
+			int rxTxDataOffset = 0;				// offset of data received from module or transmitted to module in LM's memory
+												// depends of module place in the chassis
+
+			int moduleAppDataOffset = 0;		// offset of module application data in LM's memory
+												// moduleAppDataOffset == rxTxDataOffset + appLogicDataOffset
+
+			int appDataOffset = 0;				// offset of module application data for processing (in registration buffer)
+
+			bool isInputModule();
+			bool isOutputModue();
+			Hardware::DeviceModule::FamilyType familyType();
 		};
 
 		// input parameters
@@ -339,9 +347,9 @@ namespace Builder
 		int m_internalAnalogSignalsOffset = 0;				// offset of internal analog signals (in registration buffer)
 		int m_internalAnalogSignalsSize = 0;				// size of internal analog signals (in words)
 
-		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit addressed memory)
+		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit-addressed memory)
 		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
-
+		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals
 
 		QVector<Module> m_modules;
 
@@ -377,24 +385,38 @@ namespace Builder
 
 		Hardware::DeviceModule* getModuleOnPlace(int place);
 
+		QString getModuleFamilyTypeStr(Hardware::DeviceModule::FamilyType familyType);
+
 		// module logic compilations steps
 		//
-		bool init();
-
 		bool loadLMSettings();
 		bool loadModulesSettings();
+
+		bool prepareAppLogicGeneration();
+
+		bool initAfbs();
+
+		bool copyLMDiagDataToRegBuf();
+		bool copyInModulesAppLogicDataToRegBuf();
+		bool initOutModulesAppLogicDataInRegBuf();
+
+		bool copyDiscreteSignalsToRegBuf();
+		bool copyOutModulesAppLogicDataToModulesMemory();
+
+		bool finishLMCode();
+
 
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
-		bool afbInitialization();
+
 		bool initAppFbParams(AppFb* appFb, bool instantiator);
 		//bool initAppFbVariableParams(AppFb* appFb);
 
 		bool getUsedAfbs();
 		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
 
-		bool copyDiagDataToRegistration();
+
 		bool copyInOutSignalsToRegistration();
 
 		bool calculateInOutSignalsAddresses();
