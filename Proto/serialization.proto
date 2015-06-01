@@ -26,10 +26,10 @@ message Uuid
 message qvariant
 {
 	required int32 type = 1;
-	optional int32 intValue = 2;
-	optional uint32 uintValue = 3;
-	optional double doubleValue = 4;
-	optional bool boolValue = 5;
+	optional int32 intValue = 2 [default = 0];
+	optional uint32 uintValue = 3 [default = 0];
+	optional double doubleValue = 4 [default = 0];
+	optional bool boolValue = 5 [default = 0];
 }
 
 

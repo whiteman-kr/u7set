@@ -276,11 +276,12 @@ namespace Builder
 		struct Module
 		{
 			Hardware::DeviceModule* device = nullptr;
-
 			int place = 0;
 
-			int txDataSize = 0;
-			int rxDataSize = 0;
+			// properties loaded from Hardware::DeviceModule::dynamicProperties
+			//
+			int txDataSize = 0;					// size of data transmitted to LM
+			int rxDataSize = 0;					// size of data received from LM
 
 			int diagDataOffset = 0;
 			int diagDataSize = 0;
@@ -289,7 +290,11 @@ namespace Builder
 			int appLogicDataSize = 0;
 			int appLogicDataSizeWithReserve = 0;
 
-			bool isInstalled() { return device != nullptr; }
+			// calculated fields
+			//
+			int moduleDataOffset = 0;			// offset of data received from module or transmitted to module in LM's memory
+			int appDataOffset = 0;				// offset of module application data in LM's memory
+			int processingDataOffset = 0;		// offset of module application data for processing (in registration buffer)
 		};
 
 		// input parameters
@@ -328,6 +333,16 @@ namespace Builder
 		int m_LMIntOutDataOffset = 0;
 		int m_LMIntOutDataSize = 0;
 
+		// LM's calculated memory offsets and sizes
+		//
+
+		int m_internalAnalogSignalsOffset = 0;				// offset of internal analog signals (in registration buffer)
+		int m_internalAnalogSignalsSize = 0;				// size of internal analog signals (in words)
+
+		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit addressed memory)
+		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
+
+
 		QVector<Module> m_modules;
 
 		//
@@ -345,9 +360,9 @@ namespace Builder
 		//
 		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
 		QHash<QUuid, AppItem*> m_pinParent;					// pin GUID -> parent item ptr
-		//QHash<QUuid, AppItem*> m_pinTypes;					// pin GUID -> parent item ptr
+		//QHash<QUuid, AppItem*> m_pinTypes;				// pin GUID -> parent item ptr
 		QHash<QString, Signal*> m_signalsStrID;				// signals StrID -> Signal ptr
-		QHash<QString, Signal*> m_deviceBoundSignals;			// device signal strID -> Signal ptr
+		QHash<QString, Signal*> m_deviceBoundSignals;		// device signal strID -> Signal ptr
 
 		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
 
