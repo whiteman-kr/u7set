@@ -59,7 +59,8 @@ SOURCES += \
     DiagTabPage.cpp \
     ModuleConfigurator.cpp \
     SettingsForm.cpp \
-    ../lib/Crc.cpp
+    ../lib/Crc.cpp \
+    ../lib/SignalMask.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui \

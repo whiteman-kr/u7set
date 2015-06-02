@@ -69,13 +69,13 @@ void ApplicationTabPage::openFileClicked()
 	ui.fileNameEdit->setText(fileName);
     ui.UartIdEdit->setText(QString::number(m_confFirmware.uartId(), 16));
 	
-	theLog.writeMessage(tr("File %1 was loaded.").arg(fileName));
+	theLog.writeMessage(tr("File %1 was loaded.").arg(fileName), true);
 
-    theLog.writeMessage(tr("Name: %1").arg(m_confFirmware.name()));
+	theLog.writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()), false);
     //theLog.writeMessage(tr("Changeset: %1").arg(m_confFirmware.changeset()));
-    theLog.writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
-    theLog.writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
-    theLog.writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
+	theLog.writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)), false);
+	theLog.writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_confFirmware.frameSize())), false);
+	theLog.writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())), false);
 
 	return;
 }
