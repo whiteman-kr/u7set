@@ -158,7 +158,6 @@ namespace VFrame30
 		double height = CUtils::snapToGrid(fblItemRect.height(), minFblGridSize);
 
 		double pinVertGap = height / static_cast<double>(pinCount + 1);
-		double pinVertGapNotSnapped = pinVertGap;
 		pinVertGap = CUtils::snapToGrid(pinVertGap, minFblGridSize);
 
 		double y = fblItemRect.top() + pinVertGap * static_cast<double>(index + 1);
