@@ -344,8 +344,15 @@ namespace Builder
 		// LM's calculated memory offsets and sizes
 		//
 
+		int m_registeredInternalAnalogSignalsOffset = 0;	// offset of internal analog signals (in registration buffer)
+		int m_registeredInternalAnalogSignalsSize = 0;		// size of internal analog signals (in words)
+
 		int m_internalAnalogSignalsOffset = 0;				// offset of internal analog signals (in registration buffer)
 		int m_internalAnalogSignalsSize = 0;				// size of internal analog signals (in words)
+
+		int m_registeredInternalDiscreteSignalsOffset = 0;	// offset of internal discrete signals (in bit-addressed memory)
+		int m_registeredInternalDiscreteSignalsSize = 0;	// size of internal discrete signals (in words)
+		int m_registeredInternalDiscreteSignalsCount = 0;	// count of nternal discrete signals
 
 		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit-addressed memory)
 		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)

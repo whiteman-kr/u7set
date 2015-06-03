@@ -2,6 +2,9 @@
 
 namespace Builder
 {
+
+
+
 	void CommandCode::setOpCode(CommandCodes code)
 	{
 		if (code >= CommandCodes::Count)

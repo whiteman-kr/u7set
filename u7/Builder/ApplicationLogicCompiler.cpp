@@ -368,11 +368,17 @@ namespace Builder
 			m_modules.append(m);
 		}
 
-		m_internalAnalogSignalsOffset = moduleAppDataOffset;
-		m_internalAnalogSignalsSize = 0;		// the actual size will be calculated later
+		m_registeredInternalAnalogSignalsOffset = moduleAppDataOffset;
+		m_registeredInternalAnalogSignalsSize = 0;			// the actual size will be calculated later
 
-		m_internalDiscreteSignalsOffset = m_appLogicBitDataOffset;
-		m_internalDiscreteSignalsSize = 0;		// the actual size will be calculated later
+		m_internalAnalogSignalsOffset = m_registeredInternalAnalogSignalsOffset;		// the actual offset will be calculated later
+		m_internalAnalogSignalsSize = 0;												// the actual size will be calculated later
+
+		m_registeredInternalDiscreteSignalsOffset = m_appLogicBitDataOffset;
+		m_registeredInternalDiscreteSignalsSize = 0;		// the actual size will be calculated later
+
+		m_internalDiscreteSignalsOffset = m_registeredInternalDiscreteSignalsOffset;	// the actual offset will be calculated later
+		m_internalDiscreteSignalsSize = 0;												// the actual size will be calculated later
 
 		return result;
 	}
@@ -535,7 +541,7 @@ namespace Builder
 	bool ModuleLogicCompiler::finishLMCode()
 	{
 		m_code.newLine();
-		m_code.comment("End of LM's program");
+		m_code.comment("End of program");
 		m_code.newLine();
 
 		Command cmd;
@@ -612,9 +618,6 @@ namespace Builder
 
 		return true;
 	}
-
-
-
 
 
 	bool ModuleLogicCompiler::buildServiceMaps()

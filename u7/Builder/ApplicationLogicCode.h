@@ -142,9 +142,9 @@ namespace Builder
 		{
 			struct
 			{
-				quint16 CRC5 : 5;
-				quint16 code : 5;
 				quint16 fbType : 6;
+				quint16 code : 5;
+				quint16 CRC5 : 5;
 			} opCode;
 
 			quint16 word1 = 0;
