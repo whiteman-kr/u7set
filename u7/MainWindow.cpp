@@ -8,7 +8,6 @@
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
-#include "ConfigurationsTabPage.h"
 #include "SchemeTabPage.h"
 #include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
@@ -131,7 +130,7 @@ void MainWindow::createActions()
 {
 	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
-	m_pExitAction->setShortcut(QKeySequence::Close);
+	m_pExitAction->setShortcut(QKeySequence::Quit);
 	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MainWindow::exit);

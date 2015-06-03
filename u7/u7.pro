@@ -77,11 +77,9 @@ QMAKE_EXTRA_TARGETS += versionTarget
 SOURCES +=\
     CentralWidget.cpp \
     ChangesetDialog.cpp \
-    ConfigurationsTabPage.cpp \
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
     DialogSettings.cpp \
-    DialogValueEdit.cpp \
     FilesTabPage.cpp \
     LoginDialog.cpp \
     Main.cpp \
@@ -90,7 +88,6 @@ SOURCES +=\
     PasswordService.cpp \
     Settings.cpp \
     UserManagementDialog.cpp \
-    ../lib/ConfigData.cpp \
     ../lib/DbStruct.cpp \
 	../lib/DeviceObject.cpp \
 	../lib/DbController.cpp \
@@ -141,11 +138,9 @@ SOURCES +=\
 HEADERS  += \
     CentralWidget.h \
     ChangesetDialog.h \
-    ConfigurationsTabPage.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogSettings.h \
-    DialogValueEdit.h \
     FilesTabPage.h \
     LoginDialog.h \
     MainTabPage.h \
@@ -154,7 +149,6 @@ HEADERS  += \
     Settings.h \
     Stable.h \
     UserManagementDialog.h \
-    ../include/ConfigData.h \
     ../include/DbStruct.h \
 	../include/DeviceObject.h \
 	../include/DbController.h \
@@ -212,7 +206,6 @@ FORMS    += \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
-    DialogValueEdit.ui \
     LoginDialog.ui \
     UserManagementDialog.ui \
     VideoFramePropertiesDialog.ui \

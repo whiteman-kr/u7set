@@ -1501,10 +1501,9 @@ namespace Builder
 
 					if (bush.outputPin.isNull() == true)
 					{
-						assert(bush.outputPin.isNull() == false);
-
-						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, output pin in brach suppose to be initialized, %1.")
-							.arg(__FUNCTION__), false, true);
+						log()->writeError(
+							tr("LogicScheme %1: There is no input pin for branch.").arg(scheme->caption()),
+							false, true);
 
 						result = false;
 						return result;

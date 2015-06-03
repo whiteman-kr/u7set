@@ -943,6 +943,8 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 	setUniformRowHeights(true);
 	setIndentation(10);
 
+	sortByColumn(EquipmentModel::Columns::ObjectPlaceColumn, Qt::SortOrder::AscendingOrder);
+
 	return;
 }
 

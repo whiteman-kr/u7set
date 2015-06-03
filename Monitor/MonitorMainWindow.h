@@ -1,22 +1,81 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MONITORMAINWINDOW_H
+#define MONITORMAINWINDOW_H
 
-#include <QMainWindow>
 
-namespace Ui {
-	class MainWindow;
-}
+class MonitorCentralWidget;
+
 
 class MonitorMainWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	explicit MonitorMainWindow(QWidget *parent = 0);
+	explicit MonitorMainWindow(QWidget* parent = nullptr);
 	~MonitorMainWindow();
 
+	// Events
+	//
+protected:
+	virtual void closeEvent(QCloseEvent*) override;
+
+	// Public methods
+	//
+public:
+
+	// Protected methods
+	//
+protected:
+	void saveWindowState();
+	void restoreWindowState();
+
+	// Private methods
+	//
 private:
-	Ui::MainWindow *ui;
+	void createActions();
+	void createMenus();
+	void createToolBars();
+	void createStatusBar();
+
+	MonitorCentralWidget* monitorCentralWidget();
+
+	// Commands
+	//
+protected slots:
+	void exit();
+
+	void showLog();
+	void showSettings();
+
+	void showAbout();
+	void debug();
+
+	// Properties
+	//
+protected:
+
+	// Data
+	//
+private:
+
+	// File menu
+	//
+	QAction* m_pExitAction = nullptr;
+
+	// Tools menu
+	//
+	QAction* m_pSettingsAction = nullptr;
+
+	// ? menu
+	//
+	QAction* m_pDebugAction = nullptr;
+	QAction* m_pLogAction = nullptr;
+	QAction* m_pAboutAction = nullptr;
+
+	// Controls
+	//
+	QLabel* m_pStatusBarInfo = nullptr;
+	QLabel* m_pStatusBarConnectionStatistics = nullptr;
+	QLabel* m_pStatusBarConnectionState = nullptr;
 };
 
-#endif // MAINWINDOW_H
+#endif // MONITORMAINWINDOW_H
