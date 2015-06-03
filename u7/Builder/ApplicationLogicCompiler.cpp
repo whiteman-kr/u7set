@@ -575,10 +575,6 @@ namespace Builder
 		return result;
 	}
 
-
-
-
-
 	bool ModuleLogicCompiler::generateApplicationLogicCode()
 	{
 		bool result = false;
@@ -1719,6 +1715,9 @@ namespace Builder
 			m_signalStrIdMap.insert(strID, appSignal);
 
 			qDebug() << "Create appSignal = " << strID;
+
+			incCounters(appSignal);
+
 		}
 
 		assert(appSignal != nullptr);
@@ -1797,6 +1796,40 @@ namespace Builder
 	}
 
 
+	void AppSignalMap::incCounters(const AppSignal* appSignal)
+	{
+		if (appSignal->isInternal())
+		{
+			if (appSignal->isAnalog())
+			{
+				// analog signal
+				//
+				if (appSignal->isRegistered())
+				{
+					m_registeredAnalogSignalCount++;
+				}
+				else
+				{
+					m_notRegisteredAnalogSignalCount++;
+				}
+			}
+			else
+			{
+				// discrete signal
+				//
+				if (appSignal->isRegistered())
+				{
+					m_registeredDiscreteSignalCount++;
+				}
+				else
+				{
+					m_notRegisteredDiscreteSignalCount++;
+				}
+			}
+		}
+	}
+
+
 	void AppSignalMap::clear()
 	{
 		for(AppSignal* appSignal : m_signalStrIdMap)
@@ -1807,6 +1840,12 @@ namespace Builder
 		m_signalStrIdMap.clear();
 
 		HashedVector<QUuid, AppSignal*>::clear();
+
+		m_registeredAnalogSignalCount = 0;
+		m_registeredDiscreteSignalCount = 0;
+
+		m_notRegisteredAnalogSignalCount = 0;
+		m_notRegisteredDiscreteSignalCount = 0;
 	}
 
 

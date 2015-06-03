@@ -244,9 +244,17 @@ namespace Builder
 	private:
 		QHash<QString, AppSignal*> m_signalStrIdMap;
 
-		void insert(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem);
-
 		ModuleLogicCompiler& m_compiler;
+
+		// counters for Internal signals only
+		//
+		int m_registeredAnalogSignalCount = 0;
+		int m_registeredDiscreteSignalCount = 0;
+
+		int m_notRegisteredAnalogSignalCount = 0;
+		int m_notRegisteredDiscreteSignalCount = 0;
+
+		void incCounters(const AppSignal* appSignal);
 
 	public:
 		AppSignalMap(ModuleLogicCompiler& compiler);
