@@ -174,14 +174,6 @@ void SchemeControlTabPage::CreateActions()
 {
 }
 
-void projectOpened()
-{
-}
-
-void projectClosed()
-{
-}
-
 void SchemeControlTabPage::addFile()
 {
 	// Choose Configuration file name

@@ -47,6 +47,7 @@ namespace VFrame30
 		bool setAfbElementParams(Afbl::AfbElement* afbElement) const;
 
 	protected:
+		virtual bool event(QEvent* e) override;
 		void addQtDynamicParamProperties();
 
 		// Properties and Data

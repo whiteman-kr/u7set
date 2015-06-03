@@ -132,7 +132,6 @@ SOURCES +=\
     Builder/ApplicationLogicCode.cpp \
 	Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
-    ../lib/SignalMask.cpp \
     Subsystem.cpp
 
 HEADERS  += \
@@ -198,7 +197,6 @@ HEADERS  += \
 	Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h \
     ../include/Types.h \
-    ../include/SignalMask.h \
     Subsystem.h
 
 FORMS    += \
