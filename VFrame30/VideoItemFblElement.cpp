@@ -257,6 +257,59 @@ namespace VFrame30
 		return true;
 	}
 
+	bool VideoItemFblElement::event(QEvent* e)
+	{
+		if (e->type() == QEvent::DynamicPropertyChange)
+		{
+			// Configuration property was changed
+			//
+			QDynamicPropertyChangeEvent* d = dynamic_cast<QDynamicPropertyChangeEvent*>(e);
+			assert(d != nullptr);
+
+			QString propertyName = d->propertyName();
+			QVariant newValue = this->property(propertyName.toStdString().c_str());
+
+			if (newValue.isValid() == true)
+			{
+				auto it = std::find_if(m_params.begin(), m_params.end(),
+					[&propertyName](const Afbl::AfbElementParam& param)
+					{
+						return param.caption() == propertyName;
+					});
+
+				if (it == m_params.end())
+				{
+					// can't find property,
+					// probably it is adding it to the qt meta system now?
+					//
+				}
+				else
+				{
+					if (it->value() != newValue)
+					{
+						qDebug() << tr("Param %1 was changed from %2 to %3").
+									arg(propertyName).
+									arg(it->value().toString()).
+									arg(newValue.toString());
+
+						(*it).setValue(newValue);
+
+						// Call script here
+						//
+					}
+				}
+			}
+
+			// Accept event
+			//
+			return true;
+		}
+
+		// Event was not recognized
+		//
+		return false;
+	}
+
 	void VideoItemFblElement::addQtDynamicParamProperties()
 	{
 		// Clear all dynamic properties

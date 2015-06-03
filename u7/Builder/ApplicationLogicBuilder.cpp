@@ -277,6 +277,7 @@ namespace Builder
 		fblItems = m_fblItemsAcc;
 
 		m_fblItemsAcc.clear();					// Don't need it anymore, release items
+		m_items.clear();
 
 		// Add FblElement to branch in execution order
 		//
@@ -464,6 +465,11 @@ namespace Builder
 			}
 
 			// -- end of debug
+
+			// Set complete data
+			//
+
+			std::swap(m_items, orderedList);
 
 			// ApplicationLogicScheme appScheme;
 			// appScheme.setData(logicScheme, orderedList);

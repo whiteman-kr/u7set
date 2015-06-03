@@ -1,6 +1,5 @@
 #include "../include/DeviceObject.h"
 #include "../include/ProtoSerialization.h"
-#include "../include/SignalMask.h"
 #include <QDynamicPropertyChangeEvent>
 #include <QJSEngine>
 #include <QQmlEngine>
@@ -1052,7 +1051,7 @@ namespace Hardware
 	{
 		for (auto c : m_children)
 		{
-			if (processDiagSignalMask(mask, c->strId()) == true)
+			if (CUtils::processDiagSignalMask(mask, c->strId()) == true)
 			{
 				list.push_back(c.get());
 			}

@@ -6,7 +6,7 @@
 TARGET = VFrame30
 
 TEMPLATE = lib
-QT += script widgets
+QT += widgets qml script
 
 win32:LIBS += -lGdi32
 
@@ -120,7 +120,9 @@ HEADERS += VFrame30Lib_global.h \
     DiagScheme.h \
     WiringScheme.h \
     SchemeView.h \
-    version.h
+    version.h \
+    ../include/DeviceObject.h \
+    ../include/DbStruct.h
 
 SOURCES += \
     VideoItem.cpp \
@@ -158,7 +160,9 @@ SOURCES += \
     LogicScheme.cpp \
     DiagScheme.cpp \
     WiringScheme.cpp \
-    SchemeView.cpp
+    SchemeView.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/DbStruct.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
