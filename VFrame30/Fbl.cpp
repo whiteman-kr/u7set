@@ -164,10 +164,10 @@ namespace Afbl
 	AfbElementParam::AfbElementParam(void):
         m_visible(true),
 		m_type(AfbParamType::AnalogIntegral),
-		m_operandIndex(0),
-		m_size(0),
 		m_instantiator(false),
-		m_user(false)
+		m_user(false),
+		m_operandIndex(0),
+		m_size(0)
 
     {
 		m_value = 0;
