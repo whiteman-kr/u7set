@@ -369,7 +369,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             var filternigTime = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
             var maxDifference = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
 
-            log.writeMessage("Place" + i + ": tf = " + filternigTime + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + maxDifference, false);
+            //log.writeMessage("Place" + i + ": tf = " + filternigTime + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + maxDifference, false);
 
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
             ptr += 2;
@@ -492,7 +492,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
             data |= (mode << bit);
         }
         
-        log.writeMessage("Place" + place + ": Word = " + w + " = " + data, false);
+        //log.writeMessage("Place" + place + ": Word = " + w + " = " + data, false);
         setData16(confFirmware, log, frame, ptr + w * 2, data);          // InA Filtering time constant
     }
     
