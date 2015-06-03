@@ -164,14 +164,6 @@ namespace VFrame30
 		double y = fblItemRect.top() + pinVertGap * static_cast<double>(index + 1);
 		y = CUtils::snapToGrid(y ,minFblGridSize);
 
-		qDebug() << "FblItemRect::CalcPointPos "
-				 << metaObject()->className()
-				 << QString(" height: %1").arg(QString::number(height, 'g', 18))
-				 << QString(" minFblGridSize: %1").arg(QString::number(minFblGridSize, 'g', 18))
-				 << QString(" pinVertGap: %1").arg(QString::number(pinVertGap, 'g', 18))
-				 << QString(" pinVertGapNotSnapped: %1").arg(QString::number(pinVertGapNotSnapped, 'g', 18))
-				 << QString(" xy: %1 ,%2").arg(x).arg(y);
-
 		return VideoItemPoint(x, y);
 	}
 	
