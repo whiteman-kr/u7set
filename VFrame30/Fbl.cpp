@@ -114,6 +114,10 @@ namespace Afbl
 
 	// Caption
 	//
+	QString AfbElementSignal::jsCaption()
+	{
+		return caption();
+	}
 	const QString& AfbElementSignal::caption() const
 	{
 		return m_caption;
@@ -128,6 +132,10 @@ namespace Afbl
 	AfbSignalType AfbElementSignal::type() const
 	{
 		return m_type;
+	}
+	int AfbElementSignal::jsType() const
+	{
+		return static_cast<int>(m_type);
 	}
 	void AfbElementSignal::setType(AfbSignalType type)
 	{
@@ -812,6 +820,25 @@ namespace Afbl
 
 
 		return true;
+	}
+
+	QObject* AfbElement::getAfbSignalByOpIndex(int opIndex)
+	{
+		for (AfbElementSignal& s : m_inputSignals)
+		{
+			if (s.operandIndex() == opIndex)
+			{
+				return &s;
+			}
+		}
+		for (AfbElementSignal& s : m_outputSignals)
+		{
+			if (s.operandIndex() == opIndex)
+			{
+				return &s;
+			}
+		}
+		return nullptr;
 	}
 
 	// Serialization

@@ -27,12 +27,32 @@ namespace Afbl
 	//	CFblElementSignal	- Сигнал FBL элемента
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbElementSignal
+	class VFRAME30LIBSHARED_EXPORT AfbElementSignal : public QObject
 	{
+		Q_OBJECT
 	public:
 		AfbElementSignal(void);
 		virtual ~AfbElementSignal(void);
 
+		AfbElementSignal(const AfbElementSignal& that)
+		{
+			*this = that;
+		}
+
+		AfbElementSignal& operator=(const AfbElementSignal& that)
+		{
+			if (this == &that)
+			{
+				return *this;
+			}
+
+			m_caption = that.m_caption;
+			m_type = that.m_type;
+			m_operandIndex = that.m_operandIndex;
+			m_size = that.m_size;
+
+			return *this;
+		}
 		// Serialization
 		//
 	public:
@@ -46,15 +66,17 @@ namespace Afbl
 		//
 	public:
 		const QString& caption() const;
+		Q_INVOKABLE QString jsCaption();
 		void setCaption(const QString& caption);
 
 		AfbSignalType type() const;
+		Q_INVOKABLE int jsType() const;
 		void setType(AfbSignalType type);
 
-		int operandIndex() const;
+		Q_INVOKABLE int operandIndex() const;
 		void setOperandIndex(int value);
 
-        int size() const;
+		Q_INVOKABLE int size() const;
         void setSize(int value);
 
 		// Data
@@ -159,12 +181,42 @@ private:
 	//
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbElement :
+		public QObject,
 		public Proto::ObjectSerialization<AfbElement>,
 		public VFrame30::DebugInstCounter<AfbElement>
 	{
+		Q_OBJECT
 	public:
+
 		AfbElement(void);
 		virtual ~AfbElement(void);
+
+		AfbElement(const AfbElement& that)
+		{
+			*this = that;
+		}
+
+		AfbElement& operator=(const AfbElement& that)
+		{
+			if (this == &that)
+			{
+				return *this;
+			}
+
+			m_strID = that.m_strID;
+			m_caption = that.m_caption;
+			m_opcode = that.m_opcode;
+			m_hasRam = that.m_hasRam;
+
+			m_libraryScript = that.m_libraryScript;
+			m_afterCreationScript = that.m_afterCreationScript;
+
+			m_inputSignals = that.m_inputSignals;
+			m_outputSignals = that.m_outputSignals;
+			m_params = that.m_params;
+
+			return *this;
+		}
 
 		// Serialization
 		//
@@ -178,6 +230,8 @@ private:
 		bool saveToXml(Proto::AfbElementXml* dst) const;
 		bool saveToXml(QByteArray* dst) const;
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+
+		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;

@@ -43,6 +43,13 @@ namespace VFrame30
 		}
 
 		addQtDynamicParamProperties();
+
+		QString afterCreationScript = fblElement.afterCreationScript();
+		if (afterCreationScript.isEmpty() == false)
+		{
+			executeScript(afterCreationScript, fblElement);
+		}
+
 	}
 
 	VideoItemFblElement::~VideoItemFblElement(void)
@@ -208,8 +215,15 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemFblElement::setAfbParam(const QString& name, QVariant value)
+	bool VideoItemFblElement::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Scheme> scheme)
 	{
+		if (name.isEmpty() == true || scheme == nullptr)
+		{
+			assert(name.isEmpty() != true);
+			assert(scheme != nullptr);
+			return false;
+		}
+
 		auto found = std::find_if(m_params.begin(), m_params.end(), [&name](const Afbl::AfbElementParam& p)
 			{
 				return p.caption() == name;
@@ -232,7 +246,18 @@ namespace VFrame30
 
 			// Call script here
 			//
+			std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(afbStrID());
+			if (afb == nullptr)
+			{
+				assert(afb != nullptr);
+				return false;
+			}
 
+			QString changedScript = found->changedScript();
+			if (changedScript.isEmpty() == false)
+			{
+				executeScript(changedScript, *afb);
+			}
 		}
 
 		return true;
@@ -292,6 +317,102 @@ namespace VFrame30
 			QVariant value = p.value();
 			setProperty(p.caption().toStdString().c_str(), value);
 		}
+	}
+
+	bool VideoItemFblElement::executeScript(const QString& script, const Afbl::AfbElement& afb)
+	{
+		if (script.isEmpty() == true)
+		{
+			return true;
+		}
+
+		QString exeScript = afb.libraryScript() + script;
+
+
+		exeScript.replace(QString("&lt;"), QString("<"));
+		exeScript.replace(QString("&gt;"), QString(">"));
+		exeScript.replace(QString("&amp;"), QString("&"));
+
+		QJSEngine jsEngine;
+
+		Afbl::AfbElement jsAfb = afb;
+
+		QJSValue jsElement = jsEngine.newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+		QJSValue jsAfbElement = jsEngine.newQObject(&jsAfb);
+		QQmlEngine::setObjectOwnership(&jsAfb, QQmlEngine::CppOwnership);
+
+		// Run script
+		//
+		QJSValue jsEval = jsEngine.evaluate(exeScript);
+		if (jsEval.isError() == true)
+		{
+			qDebug()<<tr("Script evaluation failed: %1").arg(jsEval.toString());
+			assert(false);
+			return false;
+		}
+
+		QJSValueList args;
+
+		args << jsElement;
+		args << jsAfbElement;
+
+		QJSValue jsResult = jsEval.call(args);
+
+		if (jsResult.isError() == true)
+		{
+			qDebug()<<tr("Script execution failed: %1").arg(jsResult.toString());
+			assert(false);
+			return false;
+		}
+
+		return true;
+
+	}
+
+	int VideoItemFblElement::getParamIntValue(const QString& name)
+	{
+		for (Afbl::AfbElementParam& p : m_params)
+		{
+			if (p.caption() == name)
+			{
+				if (p.type() == Afbl::AnalogIntegral && p.value().isValid() == true)
+				{
+					return p.value().toInt();
+				}
+				else
+				{
+					return -1;
+				}
+			}
+		}
+		return -1;
+	}
+
+	void VideoItemFblElement::addInputSignal(const QString& /*strId*/, int /*type*/, int opIndex, int /*size*/)
+	{
+		//qDebug()<<strId;
+		//qDebug()<<type;
+		//qDebug()<<opIndex;
+		//qDebug()<<size;
+
+		addInput(opIndex);
+	}
+
+	void VideoItemFblElement::addOutputSignal(int opIndex)
+	{
+		addOutput(opIndex);
+	}
+
+	void VideoItemFblElement::removeInputSignals()
+	{
+		removeAllInputs();
+	}
+
+	void VideoItemFblElement::removeOutputSignals()
+	{
+		removeAllOutputs();
 	}
 
 	const QString& VideoItemFblElement::afbStrID() const

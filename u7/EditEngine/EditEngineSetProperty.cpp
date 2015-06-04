@@ -19,6 +19,9 @@ namespace EditEngine
 		assert(items.empty() == false);
 		assert(value.isValid() == true);
 
+		m_scheme = videoFrameView->scheme();
+		assert(m_scheme != nullptr);
+
 		for (auto& i : items)
 		{
 			assert(i);
@@ -70,7 +73,7 @@ namespace EditEngine
 					continue;
 				}
 
-				fblElement->setAfbParam(r.propertyName, r.newValue);
+				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
 			}
 
 			sel.push_back(r.item);
@@ -113,7 +116,7 @@ namespace EditEngine
 					continue;
 				}
 
-				fblElement->setAfbParam(r.propertyName, r.newValue);
+				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
 
 			}
 
