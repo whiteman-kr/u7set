@@ -37,10 +37,14 @@ namespace Builder
 	struct Link
 	{
 		Link() = default;
-		Link(const VFrame30::VideoItemPoint& point1, const VFrame30::VideoItemPoint& point2);
+		Link(const std::list<VFrame30::VideoItemPoint>& points);
 
-		VFrame30::VideoItemPoint pt1;
-		VFrame30::VideoItemPoint pt2;
+		VFrame30::VideoItemPoint ptBegin() const;
+		VFrame30::VideoItemPoint ptEnd() const;
+
+		bool isPinOnLink(VFrame30::VideoItemPoint pt) const;
+
+		std::list<VFrame30::VideoItemPoint> m_points;
 	};
 
 	struct Bush

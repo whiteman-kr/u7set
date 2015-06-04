@@ -121,7 +121,6 @@ HEADERS += VFrame30Lib_global.h \
     WiringScheme.h \
     SchemeView.h \
     version.h \
-    ../include/DeviceObject.h \
     ../include/DbStruct.h
 
 SOURCES += \
@@ -161,7 +160,6 @@ SOURCES += \
     DiagScheme.cpp \
     WiringScheme.cpp \
     SchemeView.cpp \
-    ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
