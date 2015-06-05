@@ -188,7 +188,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     }
     ptr += 2;
     
-    var configIndexOffset = ptr + (channel - 1) * 2;
+    var configIndexOffset = ptr + (channel - 1) * (2/*offset*/ + 4/*reserved*/);
     var configFrame = configStartFrames + configFrameCount * (channel - 1);
     
     setData16(confFirmware, log, frameStorageConfig, configIndexOffset, configFrame);
