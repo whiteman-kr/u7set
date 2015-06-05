@@ -376,7 +376,7 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(QString subDir, QString fileName, QByteArray& data)
+	bool BuildResultWriter::addFile(QString subDir, QString fileName, const QByteArray &data)
 	{
 		assert(!fileName.isEmpty());
 
@@ -410,7 +410,7 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(QString subDir, QString fileName, QStringList stringList)
+	bool BuildResultWriter::addFile(QString subDir, QString fileName, const QStringList& stringList)
 	{
 		assert(!fileName.isEmpty());
 

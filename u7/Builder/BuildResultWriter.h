@@ -101,8 +101,8 @@ namespace Builder
 		bool start(DbController *db, OutputLog *log, bool release, int changesetID);
 		bool finish();
 
-		bool addFile(QString subDir, QString fileName, QByteArray& data);
-		bool addFile(QString subDir, QString fileName, QStringList stringList);
+		bool addFile(QString subDir, QString fileName, const QByteArray& data);
+		bool addFile(QString subDir, QString fileName, const QStringList &stringList);
 
 	signals:
 

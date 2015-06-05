@@ -428,6 +428,8 @@ namespace Builder
 
 			if (!createAppSignalsMap()) break;
 
+			if (!calculateInOutSignalsAddresses()) break;
+
 			result = true;
 		}
 		while(false);
@@ -772,13 +774,21 @@ namespace Builder
 				{
 					// input connected to disrete signal
 					//
-					quint16 ramAddrOffset = appSignal->ramAddr().offset();
-					quint16 ramAddrBit = appSignal->ramAddr().bit();
+					int ramAddrOffset = appSignal->ramAddr().offset();
+					int ramAddrBit = appSignal->ramAddr().bit();
 
-					ramAddrOffset = 0;
-					ramAddrBit = 0;
-
-					cmd.writeFuncBlockBit(fbType,fbInstance, fbParamNo, ramAddrOffset, ramAddrBit);
+					if (ramAddrOffset == -1 || ramAddrBit == -1)
+					{
+#pragma message("################################################# delete!!! #########################")
+					/*ramAddrOffset = 0;
+					ramAddrBit = 0;*/
+						cmd.writeFuncBlockBit(fbType,fbInstance, fbParamNo, 0, 0);
+#pragma message("################################################# delete!!! #########################")
+					}
+					else
+					{
+						cmd.writeFuncBlockBit(fbType,fbInstance, fbParamNo, ramAddrOffset, ramAddrBit);
+					}
 				}
 
 				cmd.setComment(QString(tr("<= %1")).arg(appSignal->strID()));
@@ -794,7 +804,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 
 	bool ModuleLogicCompiler::copyDiscreteSignalsToRegBuf()
@@ -893,34 +902,79 @@ namespace Builder
 
 		result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.asm").arg(m_lm->caption()), asmCode);
 
+		//
+
+		writeLMCodeTestFile();
+
+		//
+
 		return result;
+	}
+
+
+	void ModuleLogicCompiler::writeLMCodeTestFile()
+	{
+		ApplicationLogicCode m_testCode;
+
+		Command cmd;
+
+		cmd.nop();
+		m_testCode.append(cmd);
+
+		cmd.start(1, 1);
+		m_testCode.append(cmd);
+
+		cmd.mov(200, 400);
+		m_testCode.append(cmd);
+
+		cmd.movMem(300, 100, 50);
+		m_testCode.append(cmd);
+
+		cmd.movConst(50, 123);
+		m_testCode.append(cmd);
+
+		cmd.movBitConst(51, 2, 1);
+		m_testCode.append(cmd);
+
+		cmd.writeFuncBlock(1, 3, 4, 10);
+		m_testCode.append(cmd);
+
+		cmd.readFuncBlock(77, 1, 4, 5);
+		m_testCode.append(cmd);
+
+		cmd.writeFuncBlockConst(1, 2, 3, 55);
+		m_testCode.append(cmd);
+
+		cmd.writeFuncBlockBit(1, 2, 3, 12, 7);
+		m_testCode.append(cmd);
+
+		cmd.readFuncBlockBit(88, 9, 1, 3, 4);
+		m_testCode.append(cmd);
+
+		cmd.readFuncBlockTest(1, 2, 3, 1);
+		m_testCode.append(cmd);
+
+		cmd.setMem(500, 10, 22);
+		m_testCode.append(cmd);
+
+		cmd.moveBit(20, 1, 30, 2);
+		m_testCode.append(cmd);
+
+		cmd.stop();
+		m_testCode.append(cmd);
+
+		m_testCode.generateBinCode();
+
+		QStringList mifCode;
+
+		m_testCode.getMifCode(mifCode);
+
+		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);
 	}
 
 
 	bool ModuleLogicCompiler::buildServiceMaps()
 	{
-		int count = m_signals->count();
-
-		for(int i = 0; i < count; i++)
-		{
-			Signal* s = &(*m_signals)[i];
-
-			if (m_signalsStrID.contains(s->strID()))
-			{
-				msg = QString(tr("Duplicate signal identifier: %1")).arg(s->strID());
-				m_log->writeWarning(msg, false, true);
-			}
-			else
-			{
-				m_signalsStrID.insert(s->strID(), s);
-			}
-
-			if (!s->deviceStrID().isEmpty())
-			{
-				m_deviceBoundSignals.insertMulti(s->deviceStrID(), s);
-			}
-		}
-
 		m_afbs.clear();
 
 		for(std::shared_ptr<LogicAfb> afbl : m_afbl->elements())
@@ -987,6 +1041,28 @@ namespace Builder
 		{
 			assert(false);
 			return false;
+		}
+
+		int count = m_signals->count();
+
+		for(int i = 0; i < count; i++)
+		{
+			Signal* s = &(*m_signals)[i];
+
+			if (m_signalsStrID.contains(s->strID()))
+			{
+				msg = QString(tr("Duplicate signal identifier: %1")).arg(s->strID());
+				m_log->writeWarning(msg, false, true);
+			}
+			else
+			{
+				m_signalsStrID.insert(s->strID(), s);
+			}
+
+			if (!s->deviceStrID().isEmpty())
+			{
+				m_deviceBoundSignals.insertMulti(s->deviceStrID(), s);
+			}
 		}
 
 		m_appSignals.clear();
@@ -1071,10 +1147,6 @@ namespace Builder
 	}
 
 
-
-
-
-
 	bool ModuleLogicCompiler::calculateInOutSignalsAddresses()
 	{
 		m_log->writeMessage(QString(tr("Input & Output signals addresses calculation...")), false);
@@ -1101,6 +1173,8 @@ namespace Builder
 					continue;
 				}
 
+				//qDebug() << "Device signal: " << deviceSignal->strId();
+
 				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
 
 				if (boundSignals.count() > 1)
@@ -1108,13 +1182,21 @@ namespace Builder
 					m_log->writeWarning(QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()), false, true);
 				}
 
-				for(Signal* appSignal : boundSignals)
+				for(Signal* signal : boundSignals)
 				{
-					if (appSignal == nullptr)
+					if (signal == nullptr)
 					{
 						assert(false);
 						continue;
 					}
+
+					if (signal->strID() == "#SYSTEMID_RACKID_CHASSISID_MD03_CTRLIN_INH25B")
+					{
+						int a = 0;
+						a++;
+					}
+
+					qDebug() << "Bound signal: " << signal->strID();
 
 					int signalOffset = ERR_VALUE;
 					int bit = ERR_VALUE;
@@ -1124,11 +1206,24 @@ namespace Builder
 
 					if (signalOffset != ERR_VALUE && bit != ERR_VALUE)
 					{
-						appSignal->ramAddr().set(module.moduleAppDataOffset + signalOffset, bit);
+						// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
+						//
+						signal->ramAddr().set(module.moduleAppDataOffset + signalOffset, bit);
+
+						// set same ramAddr for corresponding signals in m_appSignals map
+						//
+						AppSignal* appSignal = m_appSignals.getByStrID(signal->strID());
+
+						if (appSignal != nullptr)
+						{
+							// not all device-bound signals must be in m_appSignals map
+							//
+							appSignal->ramAddr().set(module.appDataOffset + signalOffset, bit);
+						}
 					}
 					else
 					{
-						m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(appSignal->strID()), false, true);
+						m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(signal->strID()), false, true);
 					}
 				}
 			}
@@ -1678,6 +1773,7 @@ namespace Builder
 	{
 		// construct shadow AppSignal based on OutputPin
 		//
+		setStrID(QString("#%1").arg(guid.toString()));
 		setType(signalType);
 		setDataSize(dataSize);
 		setInOutType(SignalInOutType::Internal);
@@ -1727,6 +1823,12 @@ namespace Builder
 		if (strID[0] != '#')
 		{
 			strID = "#" + strID;
+		}
+
+		if (strID == "#SYSTEMID_RACKID_CHASSISID_MD03_CTRLIN_INH25B")
+		{
+			int a = 0;
+			a++;
 		}
 
 		const Signal* s = m_compiler.getSignal(strID);
@@ -1810,25 +1912,25 @@ namespace Builder
 
 		QUuid outPinGuid = outputPin.guid();
 
-		QString outPinGuidStr = outPinGuid.toString();
+		QString strID = QString("#%1").arg(outPinGuid.toString());
 
 		AppSignal* appSignal = nullptr;
 
-		if (m_signalStrIdMap.contains(outPinGuidStr))
+		if (m_signalStrIdMap.contains(strID))
 		{
 			assert(false);			// duplicate pin GUID
 
-			appSignal = m_signalStrIdMap[outPinGuidStr];
+			appSignal = m_signalStrIdMap[strID];
 
-			qDebug() << "Bind appSignal = " << outPinGuidStr;
+			qDebug() << "Bind appSignal = " << strID;
 		}
 		else
 		{
 			appSignal = new AppSignal(outPinGuid, signalType, s.size(), appItem);
 
-			m_signalStrIdMap.insert(outPinGuidStr, appSignal);
+			m_signalStrIdMap.insert(strID, appSignal);
 
-			qDebug() << "Create appSignal = " << outPinGuidStr;
+			qDebug() << "Create appSignal = " << strID;
 
 			incCounters(appSignal);
 		}
@@ -1870,6 +1972,17 @@ namespace Builder
 				}
 			}
 		}
+	}
+
+
+	AppSignal* AppSignalMap::getByStrID(const QString& strID)
+	{
+		if (m_signalStrIdMap.contains(strID))
+		{
+			return m_signalStrIdMap[strID];
+		}
+
+		return nullptr;
 	}
 
 

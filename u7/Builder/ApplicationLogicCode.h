@@ -55,7 +55,7 @@ namespace Builder
 	{
 		0,		//	NoCommand
 		1,		//	NOP
-		1,		//	START
+		2,		//	START
 		1,		//  STOP
 		3,		//	MOV
 		4,		//	MOVMEM
@@ -89,6 +89,41 @@ namespace Builder
 		"RDFBTS",
 		"SETMEM",
 		"MOVB",
+	};
+
+
+	enum class FbType
+	{
+		UNKNOWN = 0,
+		AND,
+		OR,
+		XOR,
+		NOT,
+		TCT,
+		SR_RS,
+		CTUD,
+		MAJ,
+		SRSST,
+		BCOD,
+		BDEC,
+		BCOMP,
+		LAG,
+		MID,
+		ADD,
+		SCAL,
+		LINFUN,
+		SQRT,
+		SIN,
+		COS,
+		DIV,
+		MULT,
+		ABS,
+		LN,
+		LIM,
+		MIN_MAX,
+		PID,
+
+		Count
 	};
 
 	const char* const FbTypeStr[] =

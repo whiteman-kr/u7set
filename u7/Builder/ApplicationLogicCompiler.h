@@ -266,6 +266,8 @@ namespace Builder
 		void insert(const AppItem* appItem);
 		void insert(const AppItem* appItem, const LogicPin& outputPin);
 
+		AppSignal* getByStrID(const QString& strID);
+
 		void clear();
 	};
 
@@ -385,7 +387,6 @@ namespace Builder
 		//
 		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
 		QHash<QUuid, AppItem*> m_pinParent;					// pin GUID -> parent item ptr
-		//QHash<QUuid, AppItem*> m_pinTypes;				// pin GUID -> parent item ptr
 		QHash<QString, Signal*> m_signalsStrID;				// signals StrID -> Signal ptr
 		QHash<QString, Signal*> m_deviceBoundSignals;		// device signal strID -> Signal ptr
 		QHash<QUuid, QUuid> m_outPinSignal;					// output pin GUID -> signal GUID
@@ -428,7 +429,6 @@ namespace Builder
 
 		bool finishLMCode();
 
-
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
@@ -448,6 +448,8 @@ namespace Builder
 		bool generateApplicationLogicCode();
 
 		bool writeResult();
+
+		void writeLMCodeTestFile();
 
 		void cleanup();
 

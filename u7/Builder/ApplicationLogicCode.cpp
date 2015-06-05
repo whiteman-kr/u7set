@@ -3,8 +3,6 @@
 namespace Builder
 {
 
-
-
 	void CommandCode::setOpCode(CommandCodes code)
 	{
 		if (code >= CommandCodes::Count)
@@ -391,11 +389,11 @@ namespace Builder
 			break;
 
 		case CommandCodes::MOVBC:
-			mnemoCode.sprintf("%s   %d[%d], #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3(), m_code.getWord4());
+			mnemoCode.sprintf("%s   %d[%d], #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
 			break;
 
 		case CommandCodes::WRFB:
-			mnemoCode.sprintf("%s    %s.%d[%d], 0x%04X", CommandStr[opCodeInt],
+			mnemoCode.sprintf("%s    %s.%d[%d], %d", CommandStr[opCodeInt],
 							  C_STR(m_code.getFbTypeStr()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
 			break;
 
@@ -422,6 +420,7 @@ namespace Builder
 		case CommandCodes::RDFBTS:
 			mnemoCode.sprintf("%s  %s.%d[%d], #%d", CommandStr[opCodeInt], C_STR(m_code.getFbTypeStr()),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
+			break;
 
 		case CommandCodes::SETMEM:
 			mnemoCode.sprintf("%s  %d, #%d, %d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3(), m_code.getWord4());
@@ -452,7 +451,7 @@ namespace Builder
 			cmdStr += QString("%1 ").arg(codeWordStr);
 		}
 
-		int tabLen = 32 - cmdStr.length();
+		int tabLen = 32 - (cmdStr.length() - 1 + 4);
 
 		int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 
@@ -657,7 +656,7 @@ namespace Builder
 		}
 
 		mifCode.append(QString("WIDTH = %1;").arg(width));
-		mifCode.append(QString("DEPTH = %1;").arg(depth));
+		mifCode.append(QString("DEPTH = %1;").arg(depth + 1));
 
 		mifCode.append("");
 
@@ -669,6 +668,9 @@ namespace Builder
 		mifCode.append("CONTENT");
 		mifCode.append("BEGIN");
 
+		QString codeStr;
+		QString str;
+
 		for(CodeItem* codeItem : m_codeItems)
 		{
 			if (codeItem == nullptr)
@@ -679,6 +681,17 @@ namespace Builder
 
 			if (codeItem->isComment())
 			{
+				if (codeItem->getComment().isEmpty())
+				{
+					str.clear();
+				}
+				else
+				{
+					str = QString("\t-- %1").arg(codeItem->getComment());
+				}
+
+				mifCode.append(str);
+
 				continue;
 			}
 
@@ -688,10 +701,9 @@ namespace Builder
 
 			assert((binCode.count() % 2) == 0);
 
-			QString codeStr;
-			QString str;
+			int bytesCount = binCode.count();
 
-			for(int i = 0; i < binCode.count(); i++)
+			for(int i = 0; i < bytesCount; i++)
 			{
 				if (i == 0)
 				{
@@ -705,7 +717,14 @@ namespace Builder
 
 				if ((i % 2) == 1)
 				{
-					str.sprintf("%02X ", b);
+					if (i == bytesCount-1)
+					{
+						str.sprintf("%02X;", b);
+					}
+					else
+					{
+						str.sprintf("%02X ", b);
+					}
 				}
 				else
 				{
