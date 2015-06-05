@@ -34,25 +34,10 @@ namespace Afbl
 		AfbElementSignal(void);
 		virtual ~AfbElementSignal(void);
 
-		AfbElementSignal(const AfbElementSignal& that)
-		{
-			*this = that;
-		}
+		AfbElementSignal(const AfbElementSignal& that);
 
-		AfbElementSignal& operator=(const AfbElementSignal& that)
-		{
-			if (this == &that)
-			{
-				return *this;
-			}
+		AfbElementSignal& operator=(const AfbElementSignal& that);
 
-			m_caption = that.m_caption;
-			m_type = that.m_type;
-			m_operandIndex = that.m_operandIndex;
-			m_size = that.m_size;
-
-			return *this;
-		}
 		// Serialization
 		//
 	public:
@@ -191,32 +176,9 @@ private:
 		AfbElement(void);
 		virtual ~AfbElement(void);
 
-		AfbElement(const AfbElement& that)
-		{
-			*this = that;
-		}
+		AfbElement(const AfbElement& that);
 
-		AfbElement& operator=(const AfbElement& that)
-		{
-			if (this == &that)
-			{
-				return *this;
-			}
-
-			m_strID = that.m_strID;
-			m_caption = that.m_caption;
-			m_opcode = that.m_opcode;
-			m_hasRam = that.m_hasRam;
-
-			m_libraryScript = that.m_libraryScript;
-			m_afterCreationScript = that.m_afterCreationScript;
-
-			m_inputSignals = that.m_inputSignals;
-			m_outputSignals = that.m_outputSignals;
-			m_params = that.m_params;
-
-			return *this;
-		}
+		AfbElement& operator=(const AfbElement& that);
 
 		// Serialization
 		//

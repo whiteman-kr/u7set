@@ -383,6 +383,8 @@ namespace VFrame30
 				}
 				else
 				{
+					qDebug()<<"ERROR: VideoItemFblElement::getParamIntValue, parameter "<<name<<" is not integer or is not valid!";
+					assert(false);
 					return -1;
 				}
 			}
@@ -392,15 +394,10 @@ namespace VFrame30
 
 	void VideoItemFblElement::addInputSignal(const QString& /*strId*/, int /*type*/, int opIndex, int /*size*/)
 	{
-		//qDebug()<<strId;
-		//qDebug()<<type;
-		//qDebug()<<opIndex;
-		//qDebug()<<size;
-
 		addInput(opIndex);
 	}
 
-	void VideoItemFblElement::addOutputSignal(int opIndex)
+	void VideoItemFblElement::addOutputSignal(const QString& /*strId*/, int /*type*/, int opIndex, int /*size*/)
 	{
 		addOutput(opIndex);
 	}

@@ -52,7 +52,7 @@ namespace VFrame30
 		Q_INVOKABLE int getParamIntValue(const QString& name);
 
 		Q_INVOKABLE void addInputSignal(const QString& strId, int type, int opIndex, int size);
-		Q_INVOKABLE void addOutputSignal(int opIndex);
+		Q_INVOKABLE void addOutputSignal(const QString& strId, int type, int opIndex, int size);
 
 		Q_INVOKABLE void removeInputSignals();
 		Q_INVOKABLE void removeOutputSignals();

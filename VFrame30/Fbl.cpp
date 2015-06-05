@@ -21,7 +21,27 @@ namespace Afbl
 	{
 	}
 
-	// Serialization
+	AfbElementSignal::AfbElementSignal(const AfbElementSignal& that)
+	{
+		*this = that;
+	}
+
+	AfbElementSignal& AfbElementSignal::operator=(const AfbElementSignal& that)
+	{
+		if (this == &that)
+		{
+			return *this;
+		}
+
+		m_caption = that.m_caption;
+		m_type = that.m_type;
+		m_operandIndex = that.m_operandIndex;
+		m_size = that.m_size;
+
+		return *this;
+	}
+
+// Serialization
 	//
 	bool AfbElementSignal::SaveData(Proto::FblElementSignal* /*message*/) const
 	{
@@ -566,6 +586,33 @@ namespace Afbl
 
 	AfbElement::~AfbElement(void)
 	{
+	}
+
+	AfbElement::AfbElement(const AfbElement& that)
+	{
+		*this = that;
+	}
+
+	AfbElement& AfbElement::operator=(const AfbElement& that)
+	{
+		if (this == &that)
+		{
+			return *this;
+		}
+
+		m_strID = that.m_strID;
+		m_caption = that.m_caption;
+		m_opcode = that.m_opcode;
+		m_hasRam = that.m_hasRam;
+
+		m_libraryScript = that.m_libraryScript;
+		m_afterCreationScript = that.m_afterCreationScript;
+
+		m_inputSignals = that.m_inputSignals;
+		m_outputSignals = that.m_outputSignals;
+		m_params = that.m_params;
+
+		return *this;
 	}
 
 	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data)
