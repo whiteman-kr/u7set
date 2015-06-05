@@ -21,7 +21,27 @@ namespace Afbl
 	{
 	}
 
-	// Serialization
+	AfbElementSignal::AfbElementSignal(const AfbElementSignal& that)
+	{
+		*this = that;
+	}
+
+	AfbElementSignal& AfbElementSignal::operator=(const AfbElementSignal& that)
+	{
+		if (this == &that)
+		{
+			return *this;
+		}
+
+		m_caption = that.m_caption;
+		m_type = that.m_type;
+		m_operandIndex = that.m_operandIndex;
+		m_size = that.m_size;
+
+		return *this;
+	}
+
+// Serialization
 	//
 	bool AfbElementSignal::SaveData(Proto::FblElementSignal* /*message*/) const
 	{
@@ -114,6 +134,10 @@ namespace Afbl
 
 	// Caption
 	//
+	QString AfbElementSignal::jsCaption()
+	{
+		return caption();
+	}
 	const QString& AfbElementSignal::caption() const
 	{
 		return m_caption;
@@ -128,6 +152,10 @@ namespace Afbl
 	AfbSignalType AfbElementSignal::type() const
 	{
 		return m_type;
+	}
+	int AfbElementSignal::jsType() const
+	{
+		return static_cast<int>(m_type);
 	}
 	void AfbElementSignal::setType(AfbSignalType type)
 	{
@@ -164,10 +192,10 @@ namespace Afbl
 	AfbElementParam::AfbElementParam(void):
         m_visible(true),
 		m_type(AfbParamType::AnalogIntegral),
-		m_operandIndex(0),
-		m_size(0),
 		m_instantiator(false),
-		m_user(false)
+		m_user(false),
+		m_operandIndex(0),
+		m_size(0)
 
     {
 		m_value = 0;
@@ -560,6 +588,33 @@ namespace Afbl
 	{
 	}
 
+	AfbElement::AfbElement(const AfbElement& that)
+	{
+		*this = that;
+	}
+
+	AfbElement& AfbElement::operator=(const AfbElement& that)
+	{
+		if (this == &that)
+		{
+			return *this;
+		}
+
+		m_strID = that.m_strID;
+		m_caption = that.m_caption;
+		m_opcode = that.m_opcode;
+		m_hasRam = that.m_hasRam;
+
+		m_libraryScript = that.m_libraryScript;
+		m_afterCreationScript = that.m_afterCreationScript;
+
+		m_inputSignals = that.m_inputSignals;
+		m_outputSignals = that.m_outputSignals;
+		m_params = that.m_params;
+
+		return *this;
+	}
+
 	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data)
 	{
 		QByteArray ba(data.data().data(), static_cast<int>(data.data().size()));
@@ -812,6 +867,25 @@ namespace Afbl
 
 
 		return true;
+	}
+
+	QObject* AfbElement::getAfbSignalByOpIndex(int opIndex)
+	{
+		for (AfbElementSignal& s : m_inputSignals)
+		{
+			if (s.operandIndex() == opIndex)
+			{
+				return &s;
+			}
+		}
+		for (AfbElementSignal& s : m_outputSignals)
+		{
+			if (s.operandIndex() == opIndex)
+			{
+				return &s;
+			}
+		}
+		return nullptr;
 	}
 
 	// Serialization

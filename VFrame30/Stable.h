@@ -55,6 +55,8 @@
 #include <QRect>
 #include <QMutex>
 #include <QtScript/QtScript>
+#include <QJSEngine>
+#include <QQmlEngine>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

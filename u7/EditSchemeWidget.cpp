@@ -3997,7 +3997,7 @@ void EditSchemeWidget::addFblElement()
 	//
 	QMenu* menu = new QMenu(this);
 
-	for (std::shared_ptr<Afbl::AfbElement>& afb : elements)
+	for (std::shared_ptr<Afbl::AfbElement> afb : elements)
 	{
 		QAction* a = new QAction(afb->caption(), this);
 

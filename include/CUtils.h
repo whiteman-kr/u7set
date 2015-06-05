@@ -444,11 +444,11 @@ public:
 
 		if (rest <= gridSize / 2)
 		{
-			return floor(value / gridSize) * gridSize;
+			return std::floor(value / gridSize) * gridSize;
 		}
 		else
 		{
-			return floor(value / gridSize) * gridSize + gridSize;
+			return std::floor(value / gridSize) * gridSize + gridSize;
 		}
 	}
 
@@ -572,7 +572,7 @@ public:
 
 			QChar m = mask.at(maskPos);
 
-			if (m == '~')				// если в маске встретили тильду - вернуть ТРУ
+			if (m == '~')				// если в маске встретили тильду - вернуть Т� У
 			{
 				return true;
 			}

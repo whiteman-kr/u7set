@@ -17,10 +17,44 @@
 namespace Builder
 {
 
-	Link::Link(const VFrame30::VideoItemPoint& point1, const VFrame30::VideoItemPoint& point2) :
-		pt1(point1),
-		pt2(point2)
+	Link::Link(const std::list<VFrame30::VideoItemPoint>& points) :
+		m_points(points)
 	{
+		assert(points.size() >= 2);
+	}
+
+	VFrame30::VideoItemPoint Link::ptBegin() const
+	{
+		if (m_points.empty() == true)
+		{
+			assert(m_points.empty() == false);
+			return VFrame30::VideoItemPoint();
+		}
+
+		return m_points.front();
+	}
+
+	VFrame30::VideoItemPoint Link::ptEnd() const
+	{
+		if (m_points.empty() == true)
+		{
+			assert(m_points.empty() == false);
+			return VFrame30::VideoItemPoint();
+		}
+
+		return m_points.back();
+	}
+
+	bool Link::isPinOnLink(VFrame30::VideoItemPoint pt) const
+	{
+		VFrame30::CHorzVertLinks hvl;
+
+		QUuid fakeId = QUuid::createUuid();
+		hvl.AddLinks(m_points, fakeId);
+
+		bool result = hvl.IsPinOnLink(pt, QUuid::createUuid());	// Must be othe Quuid, as if it the same return value always false
+
+		return result;
 	}
 
 
@@ -36,7 +70,12 @@ namespace Builder
 			auto link = std::find_if(branch.links.cbegin(), branch.links.cend(),
 				[&pt](const std::pair<QUuid, Link>& link)
 				{
-					return link.second.pt1 == pt || link.second.pt2 == pt;
+					if (link.second.ptBegin() == pt || link.second.ptEnd() == pt)
+					{
+						return true;
+					}
+
+					return link.second.isPinOnLink(pt);
 				});
 
 			if (link != branch.links.end())
@@ -1234,10 +1273,7 @@ namespace Builder
 					return false;
 				}
 
-				VFrame30::VideoItemPoint pt1 = pointList.front();
-				VFrame30::VideoItemPoint pt2 = pointList.back();
-
-				newBranch.links[id] = Link(pt1, pt2);
+				newBranch.links[id] = Link(pointList);
 			}
 
 			bushContainer->bushes.push_back(newBranch);
@@ -1307,7 +1343,7 @@ namespace Builder
 				{
 					VFrame30::VideoItemPoint pinPos = in.point();
 
-					qDebug() << "input  " << pinPos.X << " -" << pinPos.Y;
+					//qDebug() << "input  " << pinPos.X << " -" << pinPos.Y;
 
 					int branchIndex = branchContainer->getBranchByPinPos(pinPos);
 
@@ -1321,9 +1357,9 @@ namespace Builder
 
 						if (inputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1 (layer %2): InputSignal element has unconnected pin.")
+							log()->writeError(tr("LogicScheme %1: Input %2 has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(layer->name()),
+								.arg(inputSignal->signalStrIds()),
 								false, true);
 
 							result = false;
@@ -1332,9 +1368,9 @@ namespace Builder
 
 						if (outputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1 (layer %2): OutputSignal element has unconnected pin.")
+							log()->writeError(tr("LogicScheme %1: Output %2 has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(layer->name()),
+								.arg(outputSignal->signalStrIds()),
 								false, true);
 
 							result = false;
@@ -1345,9 +1381,8 @@ namespace Builder
 						{
 							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
 
-							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
+							log()->writeError(tr("LogicScheme %1: Item '%2' has unconnected pins.")
 								.arg(scheme->caption())
-								.arg(layer->name())
 								.arg(afb->caption()),
 								false, true);
 
@@ -1367,7 +1402,7 @@ namespace Builder
 				{
 					VFrame30::VideoItemPoint pinPos = out.point();
 
-					qDebug() << "output  " << pinPos.X << " -" << pinPos.Y;
+					//qDebug() << "output  " << pinPos.X << " -" << pinPos.Y;
 
 					int branchIndex = branchContainer->getBranchByPinPos(pinPos);
 
@@ -1381,10 +1416,10 @@ namespace Builder
 
 						if (inputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1 (layer %2): InputSignal element has unconnected pin.")
+							log()->writeError(tr("LogicScheme %1: Input %2 has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(layer->name())
-								, false, true);
+								.arg(inputSignal->signalStrIds()),
+								false, true);
 
 							result = false;
 							continue;
@@ -1392,10 +1427,10 @@ namespace Builder
 
 						if (outputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1 (layer %2): OutputSignal element has unconnected pin.")
+							log()->writeError(tr("LogicScheme %1: Output %2 has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(layer->name())
-								, false, true);
+								.arg(outputSignal->signalStrIds()),
+								false, true);
 
 							result = false;
 							continue;
@@ -1405,11 +1440,10 @@ namespace Builder
 						{
 							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
 
-							log()->writeError(tr("LogicScheme %1 (layer %2): Item '%3' has unconnected pins.")
+							log()->writeError(tr("LogicScheme %1: Item '%2' has unconnected pins.")
 								.arg(scheme->caption())
-								.arg(layer->name())
-								.arg(afb->caption())
-								, false, true);
+								.arg(afb->caption()),
+								false, true);
 
 							result = false;
 							continue;

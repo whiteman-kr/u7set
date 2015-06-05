@@ -155,7 +155,7 @@ namespace VFrame30
 
 		// вертикальное расстояние между пинами
 		//
-		double height = fblItemRect.height();
+		double height = CUtils::snapToGrid(fblItemRect.height(), minFblGridSize);
 
 		double pinVertGap = height / static_cast<double>(pinCount + 1);
 		pinVertGap = CUtils::snapToGrid(pinVertGap, minFblGridSize);

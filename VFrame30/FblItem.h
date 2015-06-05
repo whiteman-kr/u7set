@@ -129,9 +129,14 @@ namespace VFrame30
 
 		void addInput();
 		void addInput(const Afbl::AfbElementSignal& s);
+		void addInput(int opIndex);
 
 		void addOutput();
 		void addOutput(const Afbl::AfbElementSignal& s);
+		void addOutput(int opIndex);
+
+		void removeAllInputs();
+		void removeAllOutputs();
 
 		// Вычислить координаты точки
 		//

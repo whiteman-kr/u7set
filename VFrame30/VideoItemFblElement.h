@@ -40,16 +40,22 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-		bool setAfbParam(const QString& name, QVariant value);
+		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Scheme> scheme);
 
 		// Set Afb element parameters
 		//
 		bool setAfbElementParams(Afbl::AfbElement* afbElement) const;
 
 	protected:
-		virtual bool event(QEvent* e) override;
 		void addQtDynamicParamProperties();
+		bool executeScript(const QString& script, const Afbl::AfbElement& afb);
+		Q_INVOKABLE int getParamIntValue(const QString& name);
 
+		Q_INVOKABLE void addInputSignal(const QString& strId, int type, int opIndex, int size);
+		Q_INVOKABLE void addOutputSignal(const QString& strId, int type, int opIndex, int size);
+
+		Q_INVOKABLE void removeInputSignals();
+		Q_INVOKABLE void removeOutputSignals();
 		// Properties and Data
 		//
 	public:
