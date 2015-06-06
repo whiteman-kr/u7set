@@ -2,6 +2,7 @@
 
 namespace Builder
 {
+
 	void CommandCode::setOpCode(CommandCodes code)
 	{
 		if (code >= CommandCodes::Count)
@@ -72,6 +73,34 @@ namespace Builder
 	}
 
 
+	void CommandCode::setBitNo1(quint16 bitNo)
+	{
+		if (bitNo > MAX_BIT_NO_16)
+		{
+			assert(false);
+			setNoCommand();
+		}
+		else
+		{
+			this->bitNo.b1 = bitNo;
+		}
+	}
+
+
+	void CommandCode::setBitNo2(quint16 bitNo)
+	{
+		if (bitNo > MAX_BIT_NO_16)
+		{
+			assert(false);
+			setNoCommand();
+		}
+		else
+		{
+			this->bitNo.b2 = bitNo;
+		}
+	}
+
+
 	quint16 CommandCode::getWord(int index)
 	{
 		switch(index)
@@ -96,7 +125,7 @@ namespace Builder
 	}
 
 
-	int CommandCode::getSizeW()
+	int CommandCode::sizeW()
 	{
 		int cmdCode = static_cast<int>(opCode.code);
 
@@ -149,9 +178,11 @@ namespace Builder
 	}
 
 
-	void Command::start()
+	void Command::start(quint16 fbType, quint16 fbInstance)
 	{
 		m_code.setOpCode(CommandCodes::START);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
 
 	}
 
@@ -164,16 +195,16 @@ namespace Builder
 	void Command::mov(quint16 addrTo, quint16 addrFrom)
 	{
 		m_code.setOpCode(CommandCodes::MOV);
-		m_code.setWord2(addrFrom);
-		m_code.setWord3(addrTo);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
 	}
 
 
 	void Command::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
 	{
 		m_code.setOpCode(CommandCodes::MOVMEM);
-		m_code.setWord2(addrFrom);
-		m_code.setWord3(addrTo);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
 		m_code.setWord4(sizeW);
 	}
 
@@ -201,7 +232,7 @@ namespace Builder
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord2(addrFrom);
+		m_code.setWord3(addrFrom);
 	}
 
 
@@ -211,7 +242,7 @@ namespace Builder
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord2(addrTo);
+		m_code.setWord3(addrTo);
 	}
 
 
@@ -221,7 +252,7 @@ namespace Builder
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord2(constVal);
+		m_code.setWord3(constVal);
 	}
 
 
@@ -231,7 +262,7 @@ namespace Builder
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord2(addrFrom);
+		m_code.setWord3(addrFrom);
 		m_code.setBitNo(bitNo);
 	}
 
@@ -242,7 +273,7 @@ namespace Builder
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord2(addrTo);
+		m_code.setWord3(addrTo);
 		m_code.setBitNo(bitNo);
 	}
 
@@ -252,7 +283,7 @@ namespace Builder
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
-		m_code.setWord2(testValue);
+		m_code.setWord3(testValue);
 	}
 
 
@@ -265,11 +296,21 @@ namespace Builder
 	}
 
 
+	void Command::moveBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask)
+	{
+		m_code.setOpCode(CommandCodes::MOVB);
+		m_code.setWord2(addrTo);
+		m_code.setBitNo2(addrToMask);
+		m_code.setWord3(addrFrom);
+		m_code.setBitNo1(addrFromMask);
+	}
+
+
 	void Command::generateBinCode(ByteOrder byteOrder)
 	{
 		m_binCode.clear();
 
-		int cmdSizeW = getSizeW();
+		int cmdSizeW = sizeW();
 
 		m_binCode.resize(cmdSizeW * sizeof(quint16));
 
@@ -327,59 +368,68 @@ namespace Builder
 		{
 		case CommandCodes::NoCommand:
 		case CommandCodes::NOP:
-		case CommandCodes::START:
 		case CommandCodes::STOP:
 			mnemoCode = CommandStr[opCodeInt];
 			break;
 
+		case CommandCodes::START:
+			mnemoCode.sprintf("%s   %s.%d", CommandStr[opCodeInt], C_STR(m_code.getFbTypeStr()), m_code.getFbInstanceInt());
+			break;
+
 		case CommandCodes::MOV:
-			mnemoCode.sprintf("%s\t0x%04X, 0x%04X", CommandStr[opCodeInt], m_code.getWord3(), m_code.getWord2());
+			mnemoCode.sprintf("%s     %d, %d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3());
 			break;
 
 		case CommandCodes::MOVMEM:
-			mnemoCode.sprintf("%s\t0x%04X, 0x%04X, %d", CommandStr[opCodeInt], m_code.getWord3(), m_code.getWord2(), m_code.getWord4());
+			mnemoCode.sprintf("%s  %d, %d, %d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3(), m_code.getWord4());
 			break;
 
 		case CommandCodes::MOVC:
-			mnemoCode.sprintf("%s\t0x%04X, #0x%04X", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3());
+			mnemoCode.sprintf("%s    %d, #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3());
 			break;
 
 		case CommandCodes::MOVBC:
-			mnemoCode.sprintf("%s\t0x%04X[%d], #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
+			mnemoCode.sprintf("%s   %d[%d], #%d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
 			break;
 
 		case CommandCodes::WRFB:
-			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X", CommandStr[opCodeInt],
-							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
+			mnemoCode.sprintf("%s    %s.%d[%d], %d", CommandStr[opCodeInt],
+							  C_STR(m_code.getFbTypeStr()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
 			break;
 
 		case CommandCodes::RDFB:
-			mnemoCode.sprintf("%s\t0x%04X, %s.%d[%d]", CommandStr[opCodeInt], m_code.getWord2(), m_code.getFbTypeStr().toUtf8().data(),
+			mnemoCode.sprintf("%s    %d, %s.%d[%d]", CommandStr[opCodeInt], m_code.getWord3(), C_STR(m_code.getFbTypeStr()),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
 			break;
 
 		case CommandCodes::WRFBC:
-			mnemoCode.sprintf("%s\t%s.%d[%d], #0x%04X", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
-							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
+			mnemoCode.sprintf("%s   %s.%d[%d], #%d", CommandStr[opCodeInt], C_STR(m_code.getFbTypeStr()),
+							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
 			break;
 
 		case CommandCodes::WRFBB:
-			mnemoCode.sprintf("%s\t%s.%d[%d], 0x%04X[%d]", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
-							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2(), m_code.getWord4());
+			mnemoCode.sprintf("%s   %s.%d[%d], %d[%d]", CommandStr[opCodeInt], C_STR(m_code.getFbTypeStr()),
+							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3(), m_code.getWord4());
 			break;
 
 		case CommandCodes::RDFBB:
-			mnemoCode.sprintf("%s\t0x%04X[%d], %s.%d[%d]", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(),
-							  m_code.getFbTypeStr().toUtf8().data(), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+			mnemoCode.sprintf("%s   %d[%d], %s.%d[%d]", CommandStr[opCodeInt], m_code.getWord3(), m_code.getWord4(),
+							  C_STR(m_code.getFbTypeStr()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
 			break;
 
 		case CommandCodes::RDFBTS:
-			mnemoCode.sprintf("%s\t%s.%d[%d], #0x%04X", CommandStr[opCodeInt], m_code.getFbTypeStr().toUtf8().data(),
-							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord2());
+			mnemoCode.sprintf("%s  %s.%d[%d], #%d", CommandStr[opCodeInt], C_STR(m_code.getFbTypeStr()),
+							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
+			break;
 
 		case CommandCodes::SETMEM:
-			mnemoCode.sprintf("%s\t0x%04X, %d, #0x%04X", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
+			mnemoCode.sprintf("%s  %d, #%d, %d", CommandStr[opCodeInt], m_code.getWord2(), m_code.getWord3(), m_code.getWord4());
 			break;
+
+		case CommandCodes::MOVB:
+			mnemoCode.sprintf("%s    %d[%d], %d[%d]", CommandStr[opCodeInt], m_code.getWord2(), m_code.getBitNo2(), m_code.getWord3(), m_code.getBitNo1());
+			break;
+
 
 		default:
 			assert(false);
@@ -394,14 +444,14 @@ namespace Builder
 
 		cmdStr.sprintf("%04X\t", m_address);
 
-		for(int w = 0; w < getSizeW(); w++)
+		for(int w = 0; w < sizeW(); w++)
 		{
 			QString codeWordStr = getCodeWordStr(w);
 
 			cmdStr += QString("%1 ").arg(codeWordStr);
 		}
 
-		int tabLen = 32 - cmdStr.length();
+		int tabLen = 32 - (cmdStr.length() - 1 + 4);
 
 		int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 
@@ -416,7 +466,7 @@ namespace Builder
 
 		if (!commentIsEmpty())
 		{
-			tabLen = 72 - 32 - (mnemoCode.length() - 1 + ((mnemoCode.length() - 1) % 8));
+			tabLen = 64 - 32 - mnemoCode.length();
 
 			tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 
@@ -464,7 +514,7 @@ namespace Builder
 
 		//newCommand->generateRawCode();
 
-		m_commandAddress += newCommand->getSizeW();
+		m_commandAddress += newCommand->sizeW();
 
 		m_codeItems.append(newCommand);
 	}
@@ -545,7 +595,7 @@ namespace Builder
 				continue;
 			}
 
-			codeSizeW += codeItem->getSizeW();
+			codeSizeW += codeItem->sizeW();
 		}
 
 		byteArray.reserve(codeSizeW * sizeof(quint16));
@@ -561,4 +611,145 @@ namespace Builder
 			byteArray.append(codeItem->getBinCode());
 		}
 	}
+
+
+	void ApplicationLogicCode::getMifCode(QStringList& mifCode)
+	{
+		mifCode.clear();
+
+		if (m_codeItems.count() < 1)
+		{
+			return;
+		}
+
+		int width = 16;
+		int depth = 0;
+
+		// find last command for compute address depth
+		//
+		for(int i = m_codeItems.count() - 1; i >= 0; i--)
+		{
+			CodeItem* codeItem = m_codeItems[i];
+
+			if (codeItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (codeItem->isComment())
+			{
+				continue;
+			}
+
+			Command* command = dynamic_cast<Command*>(codeItem);
+
+			if (command == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			depth = command->address() + command->sizeW() - 1;
+
+			break;
+		}
+
+		mifCode.append(QString("WIDTH = %1;").arg(width));
+		mifCode.append(QString("DEPTH = %1;").arg(depth + 1));
+
+		mifCode.append("");
+
+		mifCode.append("ADDRESS_RADIX = HEX;");
+		mifCode.append("DATA_RADIX = HEX;");
+
+		mifCode.append("");
+
+		mifCode.append("CONTENT");
+		mifCode.append("BEGIN");
+
+		QString codeStr;
+		QString str;
+
+		for(CodeItem* codeItem : m_codeItems)
+		{
+			if (codeItem == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (codeItem->isComment())
+			{
+				if (codeItem->getComment().isEmpty())
+				{
+					str.clear();
+				}
+				else
+				{
+					str = QString("\t-- %1").arg(codeItem->getComment());
+				}
+
+				mifCode.append(str);
+
+				continue;
+			}
+
+			Command* command = dynamic_cast<Command*>(codeItem);
+
+			const QByteArray& binCode = command->getBinCode();
+
+			assert((binCode.count() % 2) == 0);
+
+			int bytesCount = binCode.count();
+
+			for(int i = 0; i < bytesCount; i++)
+			{
+				if (i == 0)
+				{
+					str.sprintf("\t%04X : ", command->address());
+					codeStr = str;
+				}
+
+				unsigned int b = binCode[i];
+
+				b &= 0xFF;
+
+				if ((i % 2) == 1)
+				{
+					if (i == bytesCount-1)
+					{
+						str.sprintf("%02X;", b);
+					}
+					else
+					{
+						str.sprintf("%02X ", b);
+					}
+				}
+				else
+				{
+					str.sprintf("%02X", b);
+				}
+
+				codeStr += str;
+			}
+
+			int tabLen = 40 - (codeStr.length() - 1 + 8);
+			int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+
+			for(int i = 0; i < tabCount; i++)
+			{
+				codeStr += "\t";
+			}
+
+			str = QString("-- %1").arg(command->getMnemoCode());
+
+			codeStr += str;
+
+			mifCode.append(codeStr);
+		}
+
+		mifCode.append("END;");
+	}
+
 }

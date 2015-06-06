@@ -135,7 +135,7 @@ namespace Builder
 		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
 		NonRamFblInstanceMap m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
 
-		QHash<QString, LogicAfbSignal*> m_afbSignals;
+		QHash<QString, LogicAfbSignal> m_afbSignals;
 		QHash<QString, LogicAfbParam*> m_afbParams;
 
 	public:
@@ -146,7 +146,7 @@ namespace Builder
 		void insert(std::shared_ptr<LogicAfb> logicAfb);
 		void clear();
 
-		const LogicAfbSignal* getAfbSignal(const QString &afbStrID, int signalIndex);
+		const LogicAfbSignal getAfbSignal(const QString &afbStrID, int signalIndex);
 	};
 
 
@@ -171,6 +171,8 @@ namespace Builder
 		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
 		bool isFb() const { return m_appLogicItem.m_fblItem->isFblElement(); }
 
+		bool hasRam() const { return afb().hasRam(); }
+
 		const std::list<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
 		const std::list<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
 
@@ -194,6 +196,7 @@ namespace Builder
 		AppFb(AppItem* appItem, int instance);
 
 		quint16 instance() const { return m_instance; }
+		quint16 opcode() const { return afb().opcode(); }		// return FB type
 	};
 
 
@@ -220,7 +223,7 @@ namespace Builder
 
 		bool m_isShadowSignal = false;
 
-		bool m_calculated = false;
+		bool m_computed = false;
 
 	public:
 		AppSignal(const Signal* signal, const AppItem* appItem);
@@ -228,8 +231,8 @@ namespace Builder
 
 		const AppItem &appItem() const;
 
-		void setCalculated() { m_calculated = true; }
-		bool isCalculated() const { return m_calculated; }
+		void setComputed() { m_computed = true; }
+		bool isComputed() const { return m_computed; }
 
 
 		bool isShadowSignal() { return m_appItem == nullptr; }
@@ -244,9 +247,17 @@ namespace Builder
 	private:
 		QHash<QString, AppSignal*> m_signalStrIdMap;
 
-		void insert(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem);
-
 		ModuleLogicCompiler& m_compiler;
+
+		// counters for Internal signals only
+		//
+		int m_registeredAnalogSignalCount = 0;
+		int m_registeredDiscreteSignalCount = 0;
+
+		int m_notRegisteredAnalogSignalCount = 0;
+		int m_notRegisteredDiscreteSignalCount = 0;
+
+		void incCounters(const AppSignal* appSignal);
 
 	public:
 		AppSignalMap(ModuleLogicCompiler& compiler);
@@ -255,9 +266,10 @@ namespace Builder
 		void insert(const AppItem* appItem);
 		void insert(const AppItem* appItem, const LogicPin& outputPin);
 
+		AppSignal* getByStrID(const QString& strID);
+
 		void clear();
 	};
-
 
 	class ModuleLogicCompiler : public QObject
 	{
@@ -292,9 +304,17 @@ namespace Builder
 
 			// calculated fields
 			//
-			int moduleDataOffset = 0;			// offset of data received from module or transmitted to module in LM's memory
-			int appDataOffset = 0;				// offset of module application data in LM's memory
-			int processingDataOffset = 0;		// offset of module application data for processing (in registration buffer)
+			int rxTxDataOffset = 0;				// offset of data received from module or transmitted to module in LM's memory
+												// depends of module place in the chassis
+
+			int moduleAppDataOffset = 0;		// offset of module application data in LM's memory
+												// moduleAppDataOffset == rxTxDataOffset + appLogicDataOffset
+
+			int appDataOffset = 0;				// offset of module application data for processing (in registration buffer)
+
+			bool isInputModule();
+			bool isOutputModue();
+			Hardware::DeviceModule::FamilyType familyType();
 		};
 
 		// input parameters
@@ -336,12 +356,19 @@ namespace Builder
 		// LM's calculated memory offsets and sizes
 		//
 
+		int m_registeredInternalAnalogSignalsOffset = 0;	// offset of internal analog signals (in registration buffer)
+		int m_registeredInternalAnalogSignalsSize = 0;		// size of internal analog signals (in words)
+
 		int m_internalAnalogSignalsOffset = 0;				// offset of internal analog signals (in registration buffer)
 		int m_internalAnalogSignalsSize = 0;				// size of internal analog signals (in words)
 
-		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit addressed memory)
-		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
+		int m_registeredInternalDiscreteSignalsOffset = 0;	// offset of internal discrete signals (in bit-addressed memory)
+		int m_registeredInternalDiscreteSignalsSize = 0;	// size of internal discrete signals (in words)
+		int m_registeredInternalDiscreteSignalsCount = 0;	// count of nternal discrete signals
 
+		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit-addressed memory)
+		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
+		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals
 
 		QVector<Module> m_modules;
 
@@ -360,9 +387,9 @@ namespace Builder
 		//
 		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
 		QHash<QUuid, AppItem*> m_pinParent;					// pin GUID -> parent item ptr
-		//QHash<QUuid, AppItem*> m_pinTypes;				// pin GUID -> parent item ptr
 		QHash<QString, Signal*> m_signalsStrID;				// signals StrID -> Signal ptr
 		QHash<QString, Signal*> m_deviceBoundSignals;		// device signal strID -> Signal ptr
+		QHash<QUuid, QUuid> m_outPinSignal;					// output pin GUID -> signal GUID
 
 		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
 
@@ -377,24 +404,42 @@ namespace Builder
 
 		Hardware::DeviceModule* getModuleOnPlace(int place);
 
+		QString getModuleFamilyTypeStr(Hardware::DeviceModule::FamilyType familyType);
+
 		// module logic compilations steps
 		//
-		bool init();
-
 		bool loadLMSettings();
 		bool loadModulesSettings();
+
+		bool prepareAppLogicGeneration();
+
+		bool initAfbs();
+
+		bool copyLMDiagDataToRegBuf();
+		bool copyInModulesAppLogicDataToRegBuf();
+		bool initOutModulesAppLogicDataInRegBuf();
+
+		bool generateAppLogicCode();
+		bool generateFbCode(const AppFb *appFb);
+		bool writeFbInputSignals(const AppFb *appFb);
+		bool readFbOutputSignals(const AppFb *appFb);
+
+		bool copyDiscreteSignalsToRegBuf();
+		bool copyOutModulesAppLogicDataToModulesMemory();
+
+		bool finishLMCode();
 
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
-		bool afbInitialization();
-		bool initAppFbParams(AppFb* appFb, bool instantiator);
+
+		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
 		//bool initAppFbVariableParams(AppFb* appFb);
 
 		bool getUsedAfbs();
 		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
 
-		bool copyDiagDataToRegistration();
+
 		bool copyInOutSignalsToRegistration();
 
 		bool calculateInOutSignalsAddresses();
@@ -403,6 +448,8 @@ namespace Builder
 		bool generateApplicationLogicCode();
 
 		bool writeResult();
+
+		void writeLMCodeTestFile();
 
 		void cleanup();
 
@@ -414,7 +461,7 @@ namespace Builder
 
 		OutputLog& log() { return *m_log; }
 
-		const LogicAfbSignal* getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
+		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
 
 		bool run();
 	};

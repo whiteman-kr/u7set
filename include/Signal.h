@@ -252,6 +252,12 @@ public:
 	bool isAnalog() const { return m_type == SignalType::Analog; }
 	bool isDiscrete() const { return m_type == SignalType::Discrete; }
 
+	bool isInput() const { return m_inOutType == SignalInOutType::Input; }
+	bool isOutput() const { return m_inOutType == SignalInOutType::Output; }
+	bool isInternal() const { return m_inOutType == SignalInOutType::Internal; }
+
+	bool isRegistered() const { return acquire(); }
+
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
 	QDateTime instanceCreated() const { return m_instanceCreated; }
