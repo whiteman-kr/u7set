@@ -12,6 +12,8 @@ QT       += network
 
 QT		 += widgets
 
+QT  += qml
+
 TARGET = DataSrv
 CONFIG   += console
 CONFIG   -= app_bundle
@@ -61,9 +63,14 @@ SOURCES += main.cpp \
 	../lib/CircularLogger.cpp \
     DataAquisitionService.cpp \
     ../lib/DataSource.cpp \
-    FscDataAcquisitionThread.cpp
+    FscDataAcquisitionThread.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/Signal.cpp
 
 HEADERS += \
+        Stable.h \
 	../include/SocketIO.h \
 	../include/UdpSocket.h \
 	../include/BaseService.h \
@@ -71,11 +78,29 @@ HEADERS += \
     DataAquisitionService.h \
     ../include/DataSource.h \
     FscDataAcquisitionThread.h \
-    version.h
+    version.h \
+    ../include/DeviceObject.h \
+    ../include/DbStruct.h \
+    ../include/ProtoSerialization.h \
+    ../include/Signal.h
 
 include(../qtservice/src/qtservice.pri)
 
-unix:QMAKE_CXXFLAGS += -std=c++11
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
+gcc:QMAKE_CXXFLAGS += -std=c++11
+
+#protobuf
+#
+win32 {
+        LIBS += -L$$DESTDIR -lprotobuf
+
+        INCLUDEPATH += ./../Protobuf
+}
+unix {
+        LIBS += -lprotobuf
+}
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

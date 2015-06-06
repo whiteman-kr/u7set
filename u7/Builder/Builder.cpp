@@ -587,6 +587,7 @@ namespace Builder
 				equipmentWriter.writeAttribute("Caption", currentDevice->caption());
 				equipmentWriter.writeAttribute("ChildRestriction", currentDevice->childRestriction());
 				equipmentWriter.writeAttribute("Place", QString::number(currentDevice->place()));
+				equipmentWriter.writeAttribute("ChildrenCount", QString::number(currentDevice->childrenCount()));
 				equipmentWriter.writeAttribute("DynamicProperties", currentDevice->dynamicProperties());
 
 				for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i)
@@ -616,6 +617,7 @@ namespace Builder
 			applicationSignalsWriter.setDevice(&buffer);
 			applicationSignalsWriter.setAutoFormatting(true);
 			applicationSignalsWriter.writeStartDocument();
+			applicationSignalsWriter.writeStartElement("configuration");
 
 			// Writing units
 			applicationSignalsWriter.writeStartElement("units");
@@ -697,7 +699,7 @@ namespace Builder
 				applicationSignalsWriter.writeAttribute("signalGroupID", QString::number(signal.signalGroupID()));
 				applicationSignalsWriter.writeAttribute("signalInstanceID", QString::number(signal.signalInstanceID()));
 				applicationSignalsWriter.writeAttribute("channel", QString::number(signal.channel()));
-				applicationSignalsWriter.writeAttribute("type", signal.type() == SignalType::Analog ? tr("Analog") : tr("Discrete"));
+				applicationSignalsWriter.writeAttribute("type", signal.type() == SignalType::Analog ? "Analog" : "Discrete");
 				applicationSignalsWriter.writeAttribute("strID", signal.strID());
 				applicationSignalsWriter.writeAttribute("extStrID", signal.extStrID());
 				applicationSignalsWriter.writeAttribute("name", signal.name());
@@ -721,8 +723,8 @@ namespace Builder
 				applicationSignalsWriter.writeAttribute("outputUnitID", unitInfo.value(signal.outputUnitID()));
 				applicationSignalsWriter.writeAttribute("outputRangeMode", OutputRangeModeStr[signal.outputRangeMode()]);
 				applicationSignalsWriter.writeAttribute("outputSensorID", SensorTypeStr[signal.outputSensorID()]);
-				applicationSignalsWriter.writeAttribute("acquire", signal.acquire() ? tr("true") : tr("false"));
-				applicationSignalsWriter.writeAttribute("calculated", signal.calculated() ? tr("true") : tr("false"));
+				applicationSignalsWriter.writeAttribute("acquire", signal.acquire() ? "true" : "false");
+				applicationSignalsWriter.writeAttribute("calculated", signal.calculated() ? "true" : "false");
 				applicationSignalsWriter.writeAttribute("normalState", QString::number(signal.normalState()));
 				applicationSignalsWriter.writeAttribute("decimalPlaces", QString::number(signal.decimalPlaces()));
 				applicationSignalsWriter.writeAttribute("aperture", QString::number(signal.aperture()));
@@ -731,11 +733,14 @@ namespace Builder
 				applicationSignalsWriter.writeAttribute("filteringTime", QString::number(signal.filteringTime()));
 				applicationSignalsWriter.writeAttribute("maxDifference", QString::number(signal.maxDifference()));
 				applicationSignalsWriter.writeAttribute("byteOrder", ByteOrderStr[signal.byteOrderInt()]);
+				applicationSignalsWriter.writeAttribute("ramAddr", signal.ramAddr().toString());
+				applicationSignalsWriter.writeAttribute("regAddr", signal.regAddr().toString());
 
 				applicationSignalsWriter.writeEndElement();	// signal
 			}
 
 			applicationSignalsWriter.writeEndElement();	// applicationSignals
+			applicationSignalsWriter.writeEndElement();	// configuration
 			applicationSignalsWriter.writeEndDocument();
 			buffer.close();
 			buildResultWriter->addFile("DataAquisitionService", "applicationSignals.xml", buffer.buffer());

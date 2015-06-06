@@ -45,14 +45,14 @@ unix {
 PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
+SOURCES += mainwindow.cpp \
     scanoptionswidget.cpp \
     servicetablemodel.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
     DataSourcesStateWidget.cpp \
-    ../lib/DataSource.cpp
+    ../lib/DataSource.cpp \
+    main.cpp
 
 HEADERS  += mainwindow.h \
     scanoptionswidget.h \

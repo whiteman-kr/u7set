@@ -1,4 +1,6 @@
 #include "DataAquisitionService.h"
+#include <QXmlStreamReader>
+#include "../include/DeviceObject.h"
 
 // DataAquisitionService class implementation
 //
@@ -38,6 +40,159 @@ void DataServiceMainFunctionWorker::initListeningPorts()
 {
 	m_fscDataAcquisitionAddressPorts.append(HostAddressPort("192.168.11.254", 2000));
 	m_fscDataAcquisitionAddressPorts.append(HostAddressPort("192.168.12.254", 2000));
+}
+
+void DataServiceMainFunctionWorker::readConfigurationFiles()
+{
+	readEquipmentConfig();
+	readApplicationSignalsConfig();
+}
+
+void DataServiceMainFunctionWorker::readEquipmentConfig()
+{
+	QXmlStreamReader equipmentReader;
+	QFile file("equipment.xml");
+
+	Hardware::DeviceObject* pCurrentDevice;
+
+	if (file.open(QIODevice::ReadOnly))
+	{
+		equipmentReader.setDevice(&file);
+		Hardware::Init();
+
+		while (!equipmentReader.atEnd())
+		{
+			QXmlStreamReader::TokenType token = equipmentReader.readNext();
+
+			switch (token)
+			{
+			case QXmlStreamReader::StartElement:
+			{
+				const QXmlStreamAttributes& attr = equipmentReader.attributes();
+				const QString classNameHash = attr.value("classNameHash").toString();
+				if (classNameHash.isEmpty())
+				{
+					qDebug() << "Attribute classNameHash of DeviceObject not found";
+					continue;
+				}
+				bool ok = false;
+				quint32 hash = classNameHash.toUInt(&ok, 16);
+				if (!ok)
+				{
+					qDebug() << QString("Could not interpret hash %s").arg(classNameHash);
+					continue;
+				}
+				std::shared_ptr<Hardware::DeviceObject> pDeviceObject(Hardware::DeviceObjectFactory.Create(hash));
+				if (pDeviceObject == nullptr)
+				{
+					qDebug() << QString("Unknown element %s found").arg(equipmentReader.name().toString());
+					continue;
+				}
+
+				if (typeid(*pDeviceObject) == typeid(Hardware::DeviceRoot))
+				{
+					pCurrentDevice = pDeviceObject.get();
+					pDeviceRoot = std::dynamic_pointer_cast<Hardware::DeviceRoot>(pDeviceObject);
+					continue;
+				}
+
+				if (pCurrentDevice == nullptr)
+				{
+					qDebug() << "DeviceRoot should be the root xml element";
+					return;
+				}
+
+				const QMetaObject* metaObject = pDeviceObject->metaObject();
+				for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i)
+				{
+					const QMetaProperty& property = metaObject->property(i);
+					if (property.isValid())
+					{
+						const char* name = property.name();
+						pDeviceObject->property(name).fromValue(attr.value(name).toString());
+					}
+				}
+
+				pDeviceObject->setStrId(attr.value("StrID").toString());
+				pDeviceObject->setCaption(attr.value("Caption").toString());
+				pDeviceObject->setChildRestriction(attr.value("ChildRestriction").toString());
+				pDeviceObject->setPlace(attr.value("Place").toInt());
+				int childrenCount = attr.value("ChildrenCount").toInt();
+				pDeviceObject->setDynamicProperties(attr.value("DynamicProperties").toString());
+
+				pCurrentDevice->addChild(pDeviceObject);
+				if (childrenCount > 0)
+				{
+					pCurrentDevice = pDeviceObject.get();
+				}
+				break;
+			}
+			case QXmlStreamReader::EndElement:
+				if (typeid(*pCurrentDevice) != typeid(Hardware::DeviceRoot))
+				{
+					if (pCurrentDevice->parent() == nullptr)
+					{
+						assert(false);
+						break;
+					}
+					pCurrentDevice = pCurrentDevice->parent();
+				}
+				else
+				{
+					return;	// Closing root element, nothing to read left
+				}
+				break;
+			default:
+				continue;
+			}
+		}
+		if (equipmentReader.hasError())
+		{
+			qDebug() << "Parse equipment.xml error";
+		}
+	}
+}
+
+void DataServiceMainFunctionWorker::readApplicationSignalsConfig()
+{
+	QXmlStreamReader applicationSignalsReader;
+	QFile file("applicationSignals.xml");
+
+	if (file.open(QIODevice::ReadOnly))
+	{
+		DataFormatList dataFormatInfo;
+		applicationSignalsReader.setDevice(&file);
+
+		while (!applicationSignalsReader.atEnd())
+		{
+			QXmlStreamReader::TokenType token = applicationSignalsReader.readNext();
+
+			switch (token)
+			{
+			case QXmlStreamReader::StartElement:
+			{
+				const QXmlStreamAttributes& attr = applicationSignalsReader.attributes();
+				if (applicationSignalsReader.name() == "unit")
+				{
+					m_unitInfo.append(attr.value("ID").toInt(), attr.value("name").toString());
+				}
+				if (applicationSignalsReader.name() == "signal")
+				{
+					Signal* pSignal = new Signal;
+					pSignal->serializeFields(attr, dataFormatInfo, m_unitInfo);
+					m_signalSet.append(pSignal->ID(), pSignal);
+				}
+				break;
+			}
+			default:
+				continue;
+			}
+		}
+		if (applicationSignalsReader.hasError())
+		{
+			qDebug() << "Parse equipment.xml error";
+		}
+	}
 }
 
 
@@ -89,6 +244,7 @@ void DataServiceMainFunctionWorker::initialize()
 	// Service Main Function initialization
 	//
 	initDataSources();
+	readConfigurationFiles();
 
 	runUdpThreads();
 	runFscDataReceivingThreads();

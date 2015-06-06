@@ -2,8 +2,13 @@
 
 #include "../include/BaseService.h"
 #include "../include/DataSource.h"
+#include "../include/Signal.h"
 
 #include "FscDataAcquisitionThread.h"
+
+namespace Hardware {
+	class DeviceRoot;
+}
 
 
 class DataServiceMainFunctionWorker : public MainFunctionWorker
@@ -18,8 +23,15 @@ private:
 
 	UdpSocketThread* m_infoSocketThread = nullptr;
 
+	std::shared_ptr<Hardware::DeviceRoot> pDeviceRoot;
+	SignalSet m_signalSet;
+	UnitList m_unitInfo;
+
 	void initDataSources();
 	void initListeningPorts();
+	void readConfigurationFiles();
+	void readEquipmentConfig();
+	void readApplicationSignalsConfig();
 
 	void runUdpThreads();
 	void stopUdpThreads();

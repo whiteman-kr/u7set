@@ -9,6 +9,8 @@
 #include "../include/DeviceObject.h"
 
 
+class QXmlStreamAttributes;
+
 
 Q_DECLARE_METATYPE(SignalType);
 
@@ -132,6 +134,7 @@ public:
 	bool isValid() const { return m_offset != -1 && m_bit != -1; }
 
 	QString toString() const { return QString("%1:%2").arg(m_offset).arg(m_bit); }
+	void fromString(QString str);
 };
 
 
@@ -261,6 +264,24 @@ public:
 	const Address16& regAddr() const { return m_regAddr; }
 
 	void resetAddresses() { m_ramAddr.reset(); m_regAddr.reset(); }
+
+	void setRamAddr(const Address16& ramAddr) { m_ramAddr = ramAddr; }
+	void setRegAddr(const Address16& regAddr) { m_regAddr = regAddr; }
+
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(double));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalType));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(OutputRangeMode));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalInOutType));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(ByteOrder));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(DataFormat));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(int));
+	void serializeSensorField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
+
+	void serializeFields(const QXmlStreamAttributes& attr, DataFormatList& dataFormatInfo, UnitList& unitInfo);
 
     Q_INVOKABLE QString strID() const { return m_strID; }
 	void setStrID(const QString& strID) { m_strID = strID; }
