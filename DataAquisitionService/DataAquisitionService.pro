@@ -21,6 +21,18 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
+# DESTDIR
+#
+win32 {
+	CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+	CONFIG(release, debug|release): DESTDIR = ../bin/release
+}
+unix {
+	CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+}
+
+
 # Force prebuild version control info
 #
 # for creating version.h at first build
