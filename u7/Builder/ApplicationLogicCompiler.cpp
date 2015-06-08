@@ -286,7 +286,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		PropertyNameVar memSettings[] =
+		const PropertyNameVar memSettings[] =
 		{
 			{	"ModuleDataOffset", &m_moduleDataOffset },
 			{	"ModuleDataSize", &m_moduleDataSize },
@@ -310,9 +310,9 @@ namespace Builder
 			{	"LMIntOutDataSize", &m_LMIntOutDataSize }
 		};
 
-		for(int i = 0; i < sizeof(memSettings)/sizeof(PropertyNameVar); i++)
+		for(PropertyNameVar memSetting : memSettings)
 		{
-			result &= getLMIntProperty(SECTION_MEMORY_SETTINGS, memSettings[i].name, memSettings[i].var);
+			result &= getLMIntProperty(SECTION_MEMORY_SETTINGS, memSetting.name, memSetting.var);
 		}
 
 		if (result)
@@ -354,7 +354,7 @@ namespace Builder
 			m.device = device;
 			m.place = place;
 
-			PropertyNameVar moduleSettings[] =
+			const PropertyNameVar moduleSettings[] =
 			{
 				{	"TxDataSize", &m.txDataSize },
 				{	"RxDataSize", &m.rxDataSize },
@@ -367,9 +367,9 @@ namespace Builder
 				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve }
 			};
 
-			for(int i = 0; i < sizeof(moduleSettings)/sizeof(PropertyNameVar); i++)
+			for(PropertyNameVar moduleSetting : moduleSettings)
 			{
-				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSettings[i].name, moduleSettings[i].var);
+				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSetting.name,moduleSetting.var);
 			}
 
 			m.rxTxDataOffset = m_moduleDataOffset + m_moduleDataSize * placeIndex;
@@ -1768,8 +1768,8 @@ namespace Builder
 
 
 	AppSignal::AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem *appItem) :
-		m_guid(guid),
-		m_appItem(appItem)
+		m_appItem(appItem),
+		m_guid(guid)
 	{
 		// construct shadow AppSignal based on OutputPin
 		//
