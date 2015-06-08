@@ -5,25 +5,25 @@
 namespace VFrame30
 {
 	//SchemeUnit CSettings::m_regionalUnit = SchemeUnit::Inch;
-	SchemeUnit CSettings::m_regionalUnit = SchemeUnit::Millimeter;
+	SchemeUnit Settings::m_regionalUnit = SchemeUnit::Millimeter;
 
-	// ћинимальный грид, дл€ схем, используетс€ дл€ позиционировани€ (выравнивание€) пинов в Fbl едементах
+	// The min grid size for schemes for Fbl pins positioning
 	//
-	const double CSettings::m_minFblGridSizeIn = 0.02;
-	const double CSettings::m_minFblGridSizeMm = mm2in(0.5);
-	const double CSettings::m_minFblGridSizePx = 5;	
+	const double Settings::m_minFblGridSizeIn = 0.02;
+	const double Settings::m_minFblGridSizeMm = mm2in(0.5);
+	const double Settings::m_minFblGridSizePx = 5;	
 
-	SchemeUnit CSettings::regionalUnit(void)
+	SchemeUnit Settings::regionalUnit(void)
 	{
 		return m_regionalUnit;
 	}
 
-	void CSettings::setRegionalUnit(SchemeUnit value)
+	void Settings::setRegionalUnit(SchemeUnit value)
 	{
 		m_regionalUnit = value;
 	}
 
-	double CSettings::minFblGridSize(SchemeUnit unit)
+	double Settings::minFblGridSize(SchemeUnit unit)
 	{
 		switch (unit)
 		{

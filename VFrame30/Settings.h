@@ -4,10 +4,10 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT CSettings
+	class VFRAME30LIBSHARED_EXPORT Settings
 	{
-		CSettings(void);
-		~CSettings(void);
+		Settings(void);
+		~Settings(void);
 
 	public:
 		static SchemeUnit regionalUnit(void);

@@ -8,6 +8,9 @@ namespace VFrame30
 {
 	class CDrawParam;
 	class VideoFrameWidgetAgent;
+	class SchemeLayer;
+	class VideoItem;
+
 	
 	class VFRAME30LIBSHARED_EXPORT Scheme :
 		public QObject,

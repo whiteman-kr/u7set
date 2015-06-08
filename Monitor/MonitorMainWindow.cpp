@@ -207,7 +207,7 @@ void MonitorMainWindow::debug()
 
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
 													"./",
-													tr("Workflow schemes (*.wfs);; All files (*.*)"));
+													tr("Workflow schemes (*.wvs);; All files (*.*)"));
 
 	if (fileName.isNull() == true)
 	{
