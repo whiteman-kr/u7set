@@ -103,6 +103,10 @@ PRECOMPILED_HEADER = Stable.h
 
 gcc:QMAKE_CXXFLAGS += -std=c++11
 
+# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+#
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+
 #protobuf
 #
 win32 {
