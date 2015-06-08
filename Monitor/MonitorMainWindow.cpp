@@ -207,7 +207,7 @@ void MonitorMainWindow::debug()
 
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
 													"./",
-													tr("Workflow schemes (*.wfs);; All files (*.*)"));
+													tr("Workflow schemes (*.wvs);; All files (*.*)"));
 
 	if (fileName.isNull() == true)
 	{
@@ -216,10 +216,22 @@ void MonitorMainWindow::debug()
 
 	QFileInfo fileInfo(fileName);
 
+	// Load scheme
+	//
+	std::shared_ptr<VFrame30::Scheme> scheme = std::shared_ptr<VFrame30::Scheme>(VFrame30::Scheme::Create(fileName.toStdWString().c_str()));
 
+	if (scheme == nullptr)
+	{
+		QMessageBox::critical(this, "Monitor", "Cannot load file");
+		return;
+	}
+
+	// Create tab
+	//
 	QTabWidget* tabWidget = monitorCentralWidget();
 
 	WorkflowSchemeView* schemeView = new WorkflowSchemeView();
+	schemeView->setScheme(scheme, true);
 
 	tabWidget->addTab(schemeView, "Debug tab: " + fileInfo.fileName());
 

@@ -167,8 +167,7 @@ private:
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbElement :
 		public QObject,
-		public Proto::ObjectSerialization<AfbElement>,
-		public VFrame30::DebugInstCounter<AfbElement>
+		public Proto::ObjectSerialization<AfbElement>
 	{
 		Q_OBJECT
 	public:

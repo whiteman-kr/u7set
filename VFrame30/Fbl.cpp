@@ -21,7 +21,7 @@ namespace Afbl
 	{
 	}
 
-	AfbElementSignal::AfbElementSignal(const AfbElementSignal& that)
+	AfbElementSignal::AfbElementSignal(const AfbElementSignal& that) : QObject()
 	{
 		*this = that;
 	}
@@ -589,6 +589,8 @@ namespace Afbl
 	}
 
 	AfbElement::AfbElement(const AfbElement& that)
+		: QObject()
+
 	{
 		*this = that;
 	}

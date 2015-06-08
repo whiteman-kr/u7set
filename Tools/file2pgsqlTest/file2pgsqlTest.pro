@@ -1,22 +1,19 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-04-19T13:14:18
+# Project created by QtCreator 2015-06-08T16:19:06
 #
 #-------------------------------------------------
 
-QT       += core
-QT       += network
+QT       += network testlib
+
 QT       -= gui
 
-TARGET = file2pgsql
+TARGET = tst_File2pgsqlTestTest
 CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
 
-SOURCES += main.cpp \
-    Convertor.cpp
-
-HEADERS += \
-    Convertor.h
+SOURCES += tst_File2pgsqlTestTest.cpp
+DEFINES += SRCDIR=\\\"$$PWD/\\\"

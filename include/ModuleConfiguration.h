@@ -40,6 +40,7 @@ namespace Hardware
 		Q_INVOKABLE quint32 data32(int frameIndex, int offset);
 
 		Q_INVOKABLE bool storeCrc64(int frameIndex, int start, int count, int offset);
+		Q_INVOKABLE bool storeHash64(int frameIndex, int offset, quint16 data);
 
         std::vector<quint8> frame(int frameIndex);
 

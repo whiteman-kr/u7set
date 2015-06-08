@@ -1,6 +1,7 @@
 
 #include "../include/ModuleConfiguration.h"
 #include "../include/Crc.h"
+#include "../include/CUtils.h"
 #include <QMap>
 #include <QHash>
 #include <QQmlEngine>
@@ -339,6 +340,23 @@ namespace Hardware
 
         return true;
     }
+
+	bool ModuleConfFirmware::storeHash64(int frameIndex, int offset, quint16 data)
+	{
+		if (frameIndex >= static_cast<int>(m_frames.size()) ||
+			(uint) offset > frameSize() - sizeof(quint64))
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return false;
+		}
+
+		quint64 result = CUtils::calcHash(&data, sizeof(data));
+		setData64(frameIndex, offset, result);
+
+		//qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
+
+		return true;
+	}
 
     std::vector<quint8> ModuleConfFirmware::frame(int frameIndex)
     {

@@ -98,7 +98,6 @@ SOURCES +=\
 	../lib/Signal.cpp \
 	../lib/PropertyEditor.cpp \
     EquipmentTabPage.cpp \
-    VideoFramePropertiesDialog.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
     DialogAfblEditor.cpp \
@@ -132,7 +131,8 @@ SOURCES +=\
     Builder/ApplicationLogicCode.cpp \
 	Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
-    Subsystem.cpp
+    Subsystem.cpp \
+    CreateSchemeDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -161,7 +161,6 @@ HEADERS  += \
 	../include/OrderedHash.h \
 	../include/PropertyEditor.h \
     EquipmentTabPage.h \
-    VideoFramePropertiesDialog.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
     DialogAfblEditor.h \
@@ -197,7 +196,8 @@ HEADERS  += \
 	Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h \
     ../include/Types.h \
-    Subsystem.h
+    Subsystem.h \
+    CreateSchemeDialog.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -206,7 +206,6 @@ FORMS    += \
     DialogSettings.ui \
     LoginDialog.ui \
     UserManagementDialog.ui \
-    VideoFramePropertiesDialog.ui \
     CheckInDialog.ui \
     DialogAfblEditor.ui \
     DialogAfbProperties.ui \
@@ -214,7 +213,8 @@ FORMS    += \
     SchemePropertiesDialog.ui \
     DialogFileEditor.ui \
     SchemeLayersDialog.ui \
-    DialogSubsystemListEditor.ui
+    DialogSubsystemListEditor.ui \
+    CreateSchemeDialog.ui
 
 RESOURCES += \
 	Resources.qrc

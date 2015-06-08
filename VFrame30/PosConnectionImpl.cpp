@@ -395,8 +395,8 @@ namespace VFrame30
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			val = CUtils::RoundPoint(val, Settings::regionalUnit());
 		}
 
 		return val;
@@ -428,8 +428,8 @@ namespace VFrame30
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			val = CUtils::RoundPoint(val, Settings::regionalUnit());
 		}
 
 		return val;
@@ -465,8 +465,8 @@ namespace VFrame30
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			val = CUtils::RoundPoint(val, Settings::regionalUnit());
 		}
 
 		return val;
@@ -502,8 +502,8 @@ namespace VFrame30
 		}
 		else
 		{
-			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			val = CUtils::RoundPoint(val, CSettings::regionalUnit());
+			val = CUtils::ConvertPoint(val, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			val = CUtils::RoundPoint(val, Settings::regionalUnit());
 		}
 
 		return val;

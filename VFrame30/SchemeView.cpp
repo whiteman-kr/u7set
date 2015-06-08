@@ -9,41 +9,39 @@ namespace VFrame30
 		init();
 	}
 
-	SchemeView::SchemeView(std::shared_ptr<Scheme> &videoFrame, QWidget* parent /*= 0*/) :
-		QWidget(parent)
+	SchemeView::SchemeView(std::shared_ptr<Scheme>& scheme, QWidget* parent /*= 0*/) :
+		QWidget(parent),
+		m_scheme(scheme)
 	{
-		this->m_videoFrame = videoFrame;
 		init();
 	}
 
 	void SchemeView::init()
 	{
 		setMouseTracking(true);
-
-		m_zoom = 100;
 	}
 
 	std::shared_ptr<Scheme>& SchemeView::scheme()
 	{
-		return m_videoFrame;
+		return m_scheme;
 	}
 
 	std::shared_ptr<Scheme> SchemeView::scheme() const
 	{
-		return m_videoFrame;
+		return m_scheme;
 	}
 
-	void SchemeView::setVideoFrame(std::shared_ptr<Scheme>& videoFrame, bool repaint)
+	void SchemeView::setScheme(std::shared_ptr<Scheme>& scheme, bool repaint)
 	{
-		assert(videoFrame.get() != nullptr);
-		m_videoFrame = videoFrame;
+		assert(scheme.get() != nullptr);
+		m_scheme = scheme;
 
 		setZoom(zoom(), repaint);		// Adhust sliders, widget etc.
 	}
 
 	void SchemeView::mouseMoveEvent(QMouseEvent* event)
 	{
-		// Если прижата какая либо кнопка, отдать управление дальше (VideoFrameWidget?)
+		// If any contrtol key is pressed, pass control further (VideoFrameWidget?)
 		//
 		if (event->buttons().testFlag(Qt::LeftButton) == true ||
 			event->buttons().testFlag(Qt::RightButton) == true ||
@@ -55,15 +53,15 @@ namespace VFrame30
 			return;
 		}
 
-		// Eсли курсор над элементом у которого установлен acceptClick, то заменить курор на руку
-		//
-		std::shared_ptr<Scheme>& vf = scheme();
-		if (vf.get() == nullptr)
+		if (scheme() == nullptr)
 		{
-			assert(vf.get() != nullptr);
+			// Scheme is not loaded
+			//
 			return;
 		}
 
+		// If the mouse cursor is over SchmeItem with acceptClick then set HandCursor
+		//
 		QPointF docPoint;
 
 		bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
@@ -76,7 +74,7 @@ namespace VFrame30
 		double x = docPoint.x();
 		double y = docPoint.y();
 		
-		for (auto layer = vf->Layers.crbegin(); layer != vf->Layers.crend(); layer++)
+		for (auto layer = scheme()->Layers.crbegin(); layer != scheme()->Layers.crend(); layer++)
 		{
 			const SchemeLayer* pLayer = layer->get();
 
@@ -147,7 +145,7 @@ namespace VFrame30
 		//
 		painter->resetTransform();
 
-		if (m_videoFrame->unit() == SchemeUnit::Inch)
+		if (m_scheme->unit() == SchemeUnit::Inch)
 		{
 			painter->translate(startX + 0.5, startY + 0.5);
 			painter->scale(

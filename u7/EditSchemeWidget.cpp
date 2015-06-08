@@ -3875,16 +3875,16 @@ void EditSchemeWidget::editEngineStateChanged(bool canUndo, bool canRedo)
 	return;
 }
 
-void EditSchemeWidget::zoomIn()
-{
-	setZoom(zoom() + 10);
-	return;
-}
-
 void EditSchemeWidget::modifiedChangedSlot(bool modified)
 {
 	m_fileSaveAction->setEnabled(modified);
 	emit modifiedChanged(modified);
+	return;
+}
+
+void EditSchemeWidget::zoomIn()
+{
+	setZoom(zoom() + 10);
 	return;
 }
 

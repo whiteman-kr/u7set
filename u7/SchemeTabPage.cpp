@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "SchemeTabPage.h"
-#include "VideoFramePropertiesDialog.h"
+#include "CreateSchemeDialog.h"
 #include "ChangesetDialog.h"
 #include "CheckInDialog.h"
 
@@ -203,24 +203,34 @@ void SchemeControlTabPage::addFile()
 
 	// Create new videoframe and add it to the vcs
 	//
-	std::shared_ptr<VFrame30::Scheme> vf(m_createVideoFrameFunc());
+	std::shared_ptr<VFrame30::Scheme> scheme(m_createVideoFrameFunc());
 
-	vf->setGuid(QUuid::createUuid());
+	scheme->setGuid(QUuid::createUuid());
 
-	vf->setStrID("STRID");
-	vf->setCaption("Caption");
+	scheme->setStrID("#STRID");
+	scheme->setCaption("Caption");
 
-	vf->setDocWidth(vf->unit() == VFrame30::SchemeUnit::Display ? 1280 : (420 / 25.4));
-	vf->setDocHeight(vf->unit() == VFrame30::SchemeUnit::Display ? 1024 : (297 / 25.4));
+	if (scheme->unit() == VFrame30::SchemeUnit::Display)
+	{
+		scheme->setDocWidth(1280);
+		scheme->setDocHeight(1024);
+	}
+	else
+	{
+		// A3 Landscape
+		//
+		scheme->setDocWidth(420.0 / 25.4);
+		scheme->setDocHeight(297.0 / 25.4);
+	}
 
-	VideoFramePropertiesDialog propertiesDialog(vf, this);
+	CreateSchemeDialog propertiesDialog(scheme, this);
 	if (propertiesDialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
 	QByteArray data;
-	vf->Save(data);
+	scheme->Save(data);
 
 	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
 	vfFile->setFileName(fileName);

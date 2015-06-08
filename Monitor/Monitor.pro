@@ -11,6 +11,32 @@ TEMPLATE = app
 
 INCLUDEPATH += $$PWD
 
+# DESTDIR
+#
+win32 {
+	CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+	CONFIG(release, debug|release): DESTDIR = ../bin/release
+}
+unix {
+	CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+}
+
+CONFIG(debug, debug|release) {
+	OBJECTS_DIR = debug
+	MOC_DIR = debug/moc
+	RCC_DIR = debug/rcc
+	UI_DIR = debug/ui
+}
+
+CONFIG(release, debug|release) {
+	OBJECTS_DIR = release
+	MOC_DIR = release/moc
+	RCC_DIR = release/rcc
+	UI_DIR = release/ui
+}
+
+
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
@@ -20,7 +46,8 @@ SOURCES += main.cpp \
 	Settings.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
-    WorkflowSchemeView.cpp
+    WorkflowSchemeView.cpp \
+    WorkflowSchemeWidget.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -29,7 +56,8 @@ HEADERS  += \
 	Settings.h \
     ../include/SocketIO.h \
     DialogSettings.h \
-    WorkflowSchemeView.h
+    WorkflowSchemeView.h \
+    WorkflowSchemeWidget.h
 
 FORMS    += \
     DialogSettings.ui
@@ -77,3 +105,17 @@ unix {
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
 
+# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+#
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+
+#protobuf
+#
+win32 {
+	LIBS += -L$$DESTDIR -lprotobuf
+
+	INCLUDEPATH += ./../Protobuf
+}
+unix {
+	LIBS += -lprotobuf
+}

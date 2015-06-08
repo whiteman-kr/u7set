@@ -322,8 +322,8 @@ namespace VFrame30
 		else
 		{
 			double pt = leftDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
+			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 	void PosRectImpl::setLeft(double value) 
@@ -334,7 +334,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
 			setLeftDocPt(pt);
 		}
 	}
@@ -348,8 +348,8 @@ namespace VFrame30
 		else
 		{
 			double pt = topDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
+			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
 	void PosRectImpl::setTop(double value) 
@@ -361,7 +361,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
 			setTopDocPt(pt);
 		}
 	}
@@ -375,8 +375,8 @@ namespace VFrame30
 		else
 		{
 			double pt = widthDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
+			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 	void PosRectImpl::setWidth(double value) 
@@ -392,7 +392,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Horz);
 			setWidthDocPt(pt);
 		}
 	}
@@ -406,8 +406,8 @@ namespace VFrame30
 		else
 		{
 			double pt = heightDocPt();
-			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Vert);
-			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
+			pt = CUtils::ConvertPoint(pt, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
 	void PosRectImpl::setHeight(double value) 
@@ -423,7 +423,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, CSettings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
+			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemeUnit::Inch, ConvertDirection::Vert);
 			setHeightDocPt(pt);
 		}
 	}

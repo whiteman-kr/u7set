@@ -90,6 +90,14 @@ function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
     }
 }
 
+function storeHash64(confFirmware, log, frameIndex, offset, data)
+{
+    if (confFirmware.storeHash64(frameIndex, offset, data) == false)
+    {
+        log.writeError("Error: storeHash64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
+        return false;
+    }
+}
 
 function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
 {
@@ -160,13 +168,15 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     setData16(confFirmware, log, frameStorageConfig, ptr, 0x0001);     //CFG_Version
     ptr += 2;
     
-    var ssKey = subsystemStorage.jsGetSsKey(subSysID);
-    if (ssKey == -1)
+    var ssKeyValue = subsystemStorage.jsGetSsKey(subSysID);
+    if (ssKeyValue == -1)
     {
         log.writeError("Subsystem key for " + subSysID + " was not found!", false, true);
         return false;
     }
-    setData16(confFirmware, log, frameStorageConfig, ptr, ssKey << 6);     //0000SSKEYY000000b
+    
+    var ssKey = ssKeyValue << 6;             //0000SSKEYY000000b
+    setData16(confFirmware, log, frameStorageConfig, ptr, ssKey);
     ptr += 2;
     
     // reserved
@@ -197,11 +207,11 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     //
     var frameServiceConfig = configFrame;
     ptr = 0;
-    setData16(confFirmware, log, frameServiceConfig, ptr, 0x0001/**/);   //CFG_Ch_Vers
+    setData16(confFirmware, log, frameServiceConfig, ptr, 0x0001);   //CFG_Ch_Vers
     ptr += 2;
-    setData16(confFirmware, log, frameServiceConfig, ptr, 0/**/);   //CFG_Ch_Dtype
+    setData16(confFirmware, log, frameServiceConfig, ptr, 0x0102/**/);   //CFG_Ch_Dtype == UARTID?
     ptr += 2;
-    //setData16(confFirmware, log, frameServiceConfig, ptr, /**/);   //CFG_Ch_ID
+    storeHash64(confFirmware, log, frameServiceConfig, ptr, ssKey);   //ssKey's HASH-64
     ptr += 8;
     
     // I/O Modules configuration
