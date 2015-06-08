@@ -7,6 +7,9 @@ namespace Builder
 									result = false; \
 									break;
 
+#define ASSERT_RETURN_FALSE			assert(false); \
+									return false;
+
 	// Signals properties
 	//
 	const char	*VALUE_OFFSET = "ValueOffset",
@@ -369,7 +372,7 @@ namespace Builder
 
 			for(PropertyNameVar moduleSetting : moduleSettings)
 			{
-				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSetting.name,moduleSetting.var);
+				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSetting.name, moduleSetting.var);
 			}
 
 			m.rxTxDataOffset = m_moduleDataOffset + m_moduleDataSize * placeIndex;
@@ -382,16 +385,20 @@ namespace Builder
 		}
 
 		m_registeredInternalAnalogSignalsOffset = moduleAppDataOffset;
-		m_registeredInternalAnalogSignalsSize = 0;			// the actual size will be calculated later
-
-		m_internalAnalogSignalsOffset = m_registeredInternalAnalogSignalsOffset;		// the actual offset will be calculated later
-		m_internalAnalogSignalsSize = 0;												// the actual size will be calculated later
-
 		m_registeredInternalDiscreteSignalsOffset = m_appLogicBitDataOffset;
-		m_registeredInternalDiscreteSignalsSize = 0;		// the actual size will be calculated later
 
-		m_internalDiscreteSignalsOffset = m_registeredInternalDiscreteSignalsOffset;	// the actual offset will be calculated later
-		m_internalDiscreteSignalsSize = 0;												// the actual size will be calculated later
+		// the actual values of:
+		//
+		// m_registeredInternalAnalogSignalsSize
+		// m_internalAnalogSignalsOffset
+		// m_internalAnalogSignalsSize
+		// m_registeredInternalDiscreteSignalsSize
+		// m_internalDiscreteSignalsOffset
+		// m_internalDiscreteSignalsSize
+		// m_regBufferInternalDiscreteSignalsOffset
+		// m_regBufferInternalDiscreteSignalsSize
+		//
+		// will be calculated later in calculateInternalSignalsAddresses function
 
 		if (result)
 		{
@@ -429,6 +436,8 @@ namespace Builder
 			if (!createAppSignalsMap()) break;
 
 			if (!calculateInOutSignalsAddresses()) break;
+
+			if (!calculateInternalSignalsAddresses()) break;
 
 			result = true;
 		}
@@ -676,7 +685,7 @@ namespace Builder
 
 			m_code.append(cmd);
 
-			//if (!readFbOutputSignals(appFb)) break;
+			if (!readFbOutputSignals(appFb)) break;
 
 			result = true;
 		}
@@ -699,6 +708,8 @@ namespace Builder
 			{
 				ASSERT_RESULT_FALSE_BREAK
 			}
+
+			quint16 fbParamNo = inPin.afbOperandIndex();
 
 			int connectedPinsCount = 1;
 
@@ -761,39 +772,41 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
+				if (!appSignal->isComputed())
+				{
+					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(appSignal->strID()), false, true);
+
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
 				Command cmd;
 
-				quint16 fbParamNo = inPin.afbOperandIndex();
+				int ramAddrOffset = appSignal->ramAddr().offset();
+				int ramAddrBit = appSignal->ramAddr().bit();
 
-				if (appSignal->isAnalog())
+				if (ramAddrOffset == -1 || ramAddrBit == -1)
 				{
-					// input connected to analog signal
-					//
+					assert(false);		// signal ramAddr is not calculated!!!
 				}
 				else
 				{
-					// input connected to disrete signal
-					//
-					int ramAddrOffset = appSignal->ramAddr().offset();
-					int ramAddrBit = appSignal->ramAddr().bit();
-
-					if (ramAddrOffset == -1 || ramAddrBit == -1)
+					if (appSignal->isAnalog())
 					{
-#pragma message("################################################# delete!!! #########################")
-					/*ramAddrOffset = 0;
-					ramAddrBit = 0;*/
-						cmd.writeFuncBlockBit(fbType,fbInstance, fbParamNo, 0, 0);
-#pragma message("################################################# delete!!! #########################")
+						// input connected to analog signal
+						//
+						cmd.writeFuncBlock(fbType, fbInstance, fbParamNo, ramAddrOffset);
 					}
 					else
 					{
-						cmd.writeFuncBlockBit(fbType,fbInstance, fbParamNo, ramAddrOffset, ramAddrBit);
+						// input connected to discrete signal
+						//
+						cmd.writeFuncBlockBit(fbType, fbInstance, fbParamNo, ramAddrOffset, ramAddrBit);
 					}
+
+					cmd.setComment(QString(tr("<= %1")).arg(appSignal->strID()));
+
+					m_code.append(cmd);
 				}
-
-				cmd.setComment(QString(tr("<= %1")).arg(appSignal->strID()));
-
-				m_code.append(cmd);
 			}
 
 			if (result == false)
@@ -806,9 +819,128 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::readFbOutputSignals(const AppFb* appFb)
+	{
+		bool result = true;
+
+		quint16 fbType = appFb->opcode();
+		quint16 fbInstance = appFb->instance();
+
+		for(LogicPin outPin : appFb->outputs())
+		{
+			if (outPin.dirrection() != VFrame30::ConnectionDirrection::Output)
+			{
+				ASSERT_RESULT_FALSE_BREAK
+			}
+
+			quint16 fbParamNo = outPin.afbOperandIndex();
+
+			int connectedSignals = 0;
+
+			for(QUuid connectedPinGuid : outPin.associatedIOs())
+			{
+				if (!m_pinParent.contains(connectedPinGuid))
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				AppItem* connectedPinParent = m_pinParent[connectedPinGuid];
+
+				if (connectedPinParent == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				if (connectedPinParent->isFb())
+				{
+					continue;
+				}
+
+				assert(connectedPinParent->isSignal());
+
+				QUuid signalGuid;
+
+				// output connected to real signal
+				//
+				signalGuid = connectedPinParent->guid();
+
+				connectedSignals++;
+
+				result &= generateReadFuncBlockToSignalCode(fbType, fbInstance, fbParamNo, signalGuid);
+			}
+
+			if (connectedSignals == 0)
+			{
+				// output pin is not connected to signal
+				// save FB output value to shadow signal with GUID == outPin.guid()
+				//
+				result &= generateReadFuncBlockToSignalCode(fbType, fbInstance, fbParamNo, outPin.guid());
+			}
+
+			if (result == false)
+			{
+				break;
+			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid)
+	{
+		if (!m_appSignals.contains(signalGuid))
+		{
+			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()), false, true);
+
+			ASSERT_RETURN_FALSE
+		}
+
+		AppSignal* appSignal = m_appSignals[signalGuid];
+
+		if (appSignal == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		Command cmd;
+
+		int ramAddrOffset = appSignal->ramAddr().offset();
+		int ramAddrBit = appSignal->ramAddr().bit();
+
+		if (ramAddrOffset == -1 || ramAddrBit == -1)
+		{
+			ASSERT_RETURN_FALSE		// signal ramAddr is not calculated!!!
+		}
+		else
+		{
+			if (appSignal->isAnalog())
+			{
+				// input connected to analog signal
+				//
+				cmd.readFuncBlock(ramAddrOffset, fbType, fbInstance, fbParamNo);
+			}
+			else
+			{
+				// input connected to discrete signal
+				//
+				cmd.readFuncBlockBit(ramAddrOffset, ramAddrBit, fbType, fbInstance, fbParamNo);
+			}
+
+			cmd.setComment(QString(tr("=> %1")).arg(appSignal->strID()));
+
+			m_code.append(cmd);
+		}
+
+		appSignal->setComputed();
+
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::copyDiscreteSignalsToRegBuf()
 	{
-		if (m_internalDiscreteSignalsSize == 0)
+		if (m_registeredInternalDiscreteSignalsSize == 0)
 		{
 			return true;
 		}
@@ -819,8 +951,8 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(m_internalAnalogSignalsOffset + m_internalAnalogSignalsSize,
-				   m_internalDiscreteSignalsOffset, m_internalDiscreteSignalsSize);
+		cmd.movMem(m_regBufferInternalDiscreteSignalsOffset,
+				   m_registeredInternalDiscreteSignalsOffset, m_registeredInternalDiscreteSignalsSize);
 
 		m_code.append(cmd);
 
@@ -1173,8 +1305,6 @@ namespace Builder
 					continue;
 				}
 
-				//qDebug() << "Device signal: " << deviceSignal->strId();
-
 				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
 
 				if (boundSignals.count() > 1)
@@ -1190,14 +1320,6 @@ namespace Builder
 						continue;
 					}
 
-					if (signal->strID() == "#SYSTEMID_RACKID_CHASSISID_MD03_CTRLIN_INH25B")
-					{
-						int a = 0;
-						a++;
-					}
-
-					qDebug() << "Bound signal: " << signal->strID();
-
 					int signalOffset = ERR_VALUE;
 					int bit = ERR_VALUE;
 
@@ -1208,9 +1330,12 @@ namespace Builder
 					{
 						// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 						//
-						signal->ramAddr().set(module.moduleAppDataOffset + signalOffset, bit);
+						Address16 ramRegAddr(module.appDataOffset + signalOffset, bit);
 
-						// set same ramAddr for corresponding signals in m_appSignals map
+						signal->ramAddr() = ramRegAddr;
+						signal->regAddr() = ramRegAddr;
+
+						// set same ramAddr & regAddr for corresponding signals in m_appSignals map
 						//
 						AppSignal* appSignal = m_appSignals.getByStrID(signal->strID());
 
@@ -1218,7 +1343,8 @@ namespace Builder
 						{
 							// not all device-bound signals must be in m_appSignals map
 							//
-							appSignal->ramAddr().set(module.appDataOffset + signalOffset, bit);
+							appSignal->ramAddr() = ramRegAddr;
+							appSignal->regAddr() = ramRegAddr;
 						}
 					}
 					else
@@ -1233,61 +1359,172 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::calculateSignalsAddresses()
+	bool ModuleLogicCompiler::calculateInternalSignalsAddresses()
 	{
-		/*int analogSignalsMemSizeW = 0;
-		int discreteSignalsMemSizeBit = 0;
+		m_log->writeMessage(QString(tr("Internal signals addresses calculation...")), false);
 
+		bool result = true;
+
+		m_registeredInternalAnalogSignalsSize = 0;
+		m_internalAnalogSignalsSize = 0;
+
+		m_registeredInternalDiscreteSignalsSize = 0;
+		m_registeredInternalDiscreteSignalsCount = 0;
+
+		m_internalDiscreteSignalsSize = 0;
+		m_internalDiscreteSignalsCount = 0;
+
+		m_regBufferInternalDiscreteSignalsOffset = 0;
+		m_regBufferInternalDiscreteSignalsSize = 0;
+
+		// calculate internal analog & discrete signals sizes
+		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
 			if (appSignal == nullptr)
 			{
-				assert(false);
+				ASSERT_RESULT_FALSE_BREAK
+			}
+
+			if (!appSignal->isInternal())
+			{
 				continue;
 			}
-
-			if (m_signals->contains(appSignal->ID()))
-			{
-				// is real signal
-				//
-				appSignal->ramAddr() = m_signals->value(appSignal->ID()).ramAddr();
-
-				if (appSignal->ramAddr().isValid())
-				{
-					// is real signal with address calculated in copyInOutSignals() procedure
-					//
-					continue;
-				}
-			}
-
-			int signalSizeBit = appSignal->size();
 
 			if (appSignal->isAnalog())
 			{
 				// analog signal
 				//
-
-				analogSignalsMemSizeW += signalSizeBit / 16 + (signalSizeBit % 16 ? 1 : 0);
+				if (appSignal->isRegistered())
+				{
+					m_registeredInternalAnalogSignalsSize += appSignal->sizeInWords();
+				}
+				else
+				{
+					m_internalAnalogSignalsSize += appSignal->sizeInWords();
+				}
 			}
 			else
 			{
 				// discrete signal
 				//
-				discreteSignalsMemSizeBit += signalSizeBit;
+				if (appSignal->isRegistered())
+				{
+					m_registeredInternalDiscreteSignalsCount++;
+				}
+				else
+				{
+					m_internalDiscreteSignalsCount++;
+				}
 			}
 		}
 
+		// size of registered internal discrete signals in words
+		//
+		m_registeredInternalDiscreteSignalsSize = m_registeredInternalDiscreteSignalsCount / 16 +
+				(m_registeredInternalDiscreteSignalsCount % 16 ? 1 : 0);
+
+		// size of internal discrete signals in words
+		//
+		m_internalDiscreteSignalsSize = m_internalDiscreteSignalsCount / 16 +
+				(m_internalDiscreteSignalsCount % 16 ? 1 : 0);
+
+		m_internalDiscreteSignalsOffset = m_registeredInternalDiscreteSignalsOffset + m_registeredInternalDiscreteSignalsSize;
+
+		m_regBufferInternalDiscreteSignalsOffset = m_registeredInternalAnalogSignalsOffset + m_registeredInternalAnalogSignalsSize;
+		m_regBufferInternalDiscreteSignalsSize = m_registeredInternalDiscreteSignalsSize;
+
+		m_internalAnalogSignalsOffset = m_registeredInternalAnalogSignalsOffset +
+										m_registeredInternalAnalogSignalsSize +
+										m_registeredInternalDiscreteSignalsSize;
+
+
+		// calculate internal analog & discrete signals addresses
+		//
+
+		Address16 regInternalAnalog(m_registeredInternalAnalogSignalsOffset, 0);
+		Address16 internalAnalog(m_internalAnalogSignalsOffset, 0);
+
+		Address16 regInternalDiscrete(m_registeredInternalDiscreteSignalsOffset, 0);
+		Address16 regBufferInternalDiscrete(m_regBufferInternalDiscreteSignalsOffset, 0);
+		Address16 internalDiscrete(m_internalDiscreteSignalsOffset, 0);
+
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			qDebug() << appSignal->strID() << " " << appSignal->ramAddr().toString();
-		}*/
+			if (appSignal == nullptr)
+			{
+				ASSERT_RESULT_FALSE_BREAK
+			}
 
-		return true;
+			if (!appSignal->isInternal())
+			{
+				continue;
+			}
+
+			Address16 ramAddr;
+			Address16 regAddr;
+
+			if (appSignal->isAnalog())
+			{
+				// analog signal
+				//
+				if (appSignal->isRegistered())
+				{
+					ramAddr = regInternalAnalog;
+					regAddr = regInternalAnalog;
+
+					regInternalAnalog.addWord(appSignal->sizeInWords());
+				}
+				else
+				{
+					ramAddr = internalAnalog;
+
+					internalAnalog.addWord(appSignal->sizeInWords());
+				}
+			}
+			else
+			{
+				// discrete signal
+				//
+				if (appSignal->isRegistered())
+				{
+					ramAddr = regInternalDiscrete;
+					regAddr = regBufferInternalDiscrete;
+
+					regInternalDiscrete.addBit();
+					regBufferInternalDiscrete.addBit();
+				}
+				else
+				{
+					ramAddr = internalDiscrete;
+
+					internalDiscrete.addBit();
+				}
+			}
+
+			appSignal->ramAddr() = ramAddr;
+			appSignal->regAddr() = regAddr;
+
+			if (!appSignal->isShadowSignal())
+			{
+				// set same ramAddr & regAddr for corresponding signals in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
+				//
+				int index = m_signals->keyIndex(appSignal->ID());
+
+				if (index == -1)
+				{
+					assert(false);
+				}
+				else
+				{
+					(*m_signals)[index].regAddr() = regAddr;
+					(*m_signals)[index].ramAddr() = ramAddr;
+				}
+			}
+		}
+
+		return result;
 	}
-
-	//bool initializeOutputModulesMemory
-
-
 
 
 	bool ModuleLogicCompiler::getLMIntProperty(const QString &section, const QString& name, int *value)
