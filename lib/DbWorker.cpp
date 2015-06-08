@@ -3546,7 +3546,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 }
 
 
-void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
+void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* /*deviceSignals*/)
 {
 
 }
