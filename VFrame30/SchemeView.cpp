@@ -19,8 +19,6 @@ namespace VFrame30
 	void SchemeView::init()
 	{
 		setMouseTracking(true);
-
-		m_zoom = 100;
 	}
 
 	std::shared_ptr<Scheme>& SchemeView::scheme()

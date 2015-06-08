@@ -46,7 +46,8 @@ SOURCES += main.cpp \
 	Settings.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
-    WorkflowSchemeView.cpp
+    WorkflowSchemeView.cpp \
+    WorkflowSchemeWidget.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -55,7 +56,8 @@ HEADERS  += \
 	Settings.h \
     ../include/SocketIO.h \
     DialogSettings.h \
-    WorkflowSchemeView.h
+    WorkflowSchemeView.h \
+    WorkflowSchemeWidget.h
 
 FORMS    += \
     DialogSettings.ui

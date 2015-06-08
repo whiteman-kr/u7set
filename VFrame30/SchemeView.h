@@ -46,7 +46,7 @@ namespace VFrame30
 		//
 	private:
 		std::shared_ptr<VFrame30::Scheme> m_scheme;
-		double m_zoom;
+		double m_zoom = 100.0;
 	};
 }
 
