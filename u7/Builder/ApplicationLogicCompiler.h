@@ -423,7 +423,8 @@ namespace Builder
 		bool initOutModulesAppLogicDataInRegBuf();
 
 		bool generateAppLogicCode();
-		bool generateFbCode(const AppFb *appFb);
+		bool generateAppSignalCode(const AppItem* appItem);
+		bool generateFbCode(const AppItem *appItem);
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
 		bool generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid);

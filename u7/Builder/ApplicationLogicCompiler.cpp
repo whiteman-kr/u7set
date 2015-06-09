@@ -10,6 +10,14 @@ namespace Builder
 #define ASSERT_RETURN_FALSE			assert(false); \
 									return false;
 
+#define TEST_PTR_RETURN_FALSE(ptr)	if (ptr == nullptr) \
+									{	\
+										assert(false);	\
+										return false; \
+									}
+
+
+
 	// Signals properties
 	//
 	const char	*VALUE_OFFSET = "ValueOffset",
@@ -635,31 +643,19 @@ namespace Builder
 
 		for(AppItem* appItem : m_appItems)
 		{
-			if (appItem == nullptr)
-			{
-				assert(false);
-				return false;
-			}
+			TEST_PTR_RETURN_FALSE(appItem)
 
 			if (appItem->isSignal())
 			{
 				// appItem is signal
 				//
+				result &= generateAppSignalCode(appItem);
 			}
 			else
 			{
-				// appItem is functional block
+				// appItem is FB
 				//
-
-				if (m_appFbs.contains(appItem->guid()))
-				{
-					result &= generateFbCode(m_appFbs[appItem->guid()]);
-				}
-				else
-				{
-					assert(false);			// FB with appItem->guid() was not found!
-					result = false;
-				}
+				result &= generateFbCode(appItem);
 			}
 		}
 
@@ -667,8 +663,174 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::generateFbCode(const AppFb* appFb)
+	bool ModuleLogicCompiler::generateAppSignalCode(const AppItem* appItem)
 	{
+		if (!m_appSignals.contains(appItem->guid()))
+		{
+			assert(false);
+			return false;
+		}
+
+		AppSignal* appSignal = m_appSignals[appItem->guid()];
+
+		TEST_PTR_RETURN_FALSE(appSignal)
+
+		bool result = true;
+
+		if (appSignal->isComputed())
+		{
+			return true;				// signal already computed
+		}
+
+		int inPinsCount = 1;
+
+		for(LogicPin inPin : appItem->inputs())
+		{
+			if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
+			{
+				ASSERT_RESULT_FALSE_BREAK
+			}
+
+			if (inPinsCount > 1)
+			{
+				ASSERT_RESULT_FALSE_BREAK
+			}
+
+			inPinsCount++;
+
+			int connectedPinsCount = 1;
+
+			for(QUuid connectedPinGuid : inPin.associatedIOs())
+			{
+				if (connectedPinsCount > 1)
+				{
+					m_log->writeError(QString(tr("More than one pin is connected to the input")), false, true);
+
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				connectedPinsCount++;
+
+				if (!m_pinParent.contains(connectedPinGuid))
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				AppItem* connectedPinParent = m_pinParent[connectedPinGuid];
+
+				if (connectedPinParent == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				QUuid srcSignalGuid;
+
+				if (connectedPinParent->isSignal())
+				{
+					// input connected to real signal
+					//
+					srcSignalGuid = connectedPinParent->guid();
+				}
+				else
+				{
+					// connectedPinParent is FB
+					//
+					if (!m_outPinSignal.contains(connectedPinGuid))
+					{
+						m_log->writeError(QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()), false, true);
+
+						ASSERT_RESULT_FALSE_BREAK
+					}
+
+					srcSignalGuid = m_outPinSignal[connectedPinGuid];
+				}
+
+				if (!m_appSignals.contains(srcSignalGuid))
+				{
+					m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()), false, true);
+
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				AppSignal* srcAppSignal = m_appSignals[srcSignalGuid];
+
+				if (srcAppSignal == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				if (!srcAppSignal->isComputed())
+				{
+					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(srcAppSignal->strID()), false, true);
+
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				if (appSignal->isAnalog() != srcAppSignal->isAnalog() ||
+					appSignal->dataSize() != srcAppSignal->dataSize())
+				{
+					m_log->writeError(QString(tr("Signals is not compatible: %1 & %2")).arg(srcAppSignal->strID()).arg(appSignal->strID()), false, true);
+
+					ASSERT_RESULT_FALSE_BREAK;
+				}
+
+				Command cmd;
+
+				int srcRamAddrOffset = srcAppSignal->ramAddr().offset();
+				int srcRamAddrBit = srcAppSignal->ramAddr().bit();
+
+				int destRamAddrOffset = appSignal->ramAddr().offset();
+				int destRamAddrBit = appSignal->ramAddr().bit();
+
+				if (srcRamAddrOffset == -1 || srcRamAddrBit == -1 ||
+					destRamAddrOffset == -1 || destRamAddrBit == -1)
+				{
+					assert(false);		// signal ramAddr is not calculated!!!
+				}
+				else
+				{
+					if (appSignal->isAnalog())
+					{
+						// move value of analog signal
+						//
+						cmd.mov(destRamAddrOffset, srcRamAddrOffset);
+					}
+					else
+					{
+						// move value of discrete signal
+						//
+						cmd.moveBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
+					}
+
+					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal->strID()).arg(srcAppSignal->strID()));
+
+					m_code.newLine();
+					m_code.append(cmd);
+				}
+			}
+
+			if (result == false)
+			{
+				break;
+			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::generateFbCode(const AppItem* appItem)
+	{
+		if (!m_appFbs.contains(appItem->guid()))
+		{
+			assert(false);
+			return false;
+		}
+
+		const AppFb* appFb = m_appFbs[appItem->guid()];
+
+		TEST_PTR_RETURN_FALSE(appFb)
+
 		bool result = false;
 
 		m_code.newLine();
