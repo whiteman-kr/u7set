@@ -55,10 +55,6 @@ namespace Builder
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
-		// Walk through equipment tree
-		//
-		void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren);
-
 		// Expand Devices StrId
 		//
 		bool expandDeviceStrId(Hardware::DeviceObject* device);

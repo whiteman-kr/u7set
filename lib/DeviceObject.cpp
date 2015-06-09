@@ -33,6 +33,8 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSignal>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
+
+		QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
 	}
 
 	void Shutdwon()
@@ -2088,6 +2090,43 @@ namespace Hardware
 		}
 
 		return;
+	}
+
+	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren, std::function<void (DeviceObject*)> processAfterChildren)
+	{
+		if (currentDevice == nullptr)
+		{
+			assert(currentDevice != nullptr);
+
+			QString msg = QString(QObject::tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
+
+			qDebug() << msg;
+			return;
+		}
+
+		if (processBeforeChildren != nullptr)
+		{
+			processBeforeChildren(currentDevice);
+		}
+
+		int childrenCount = currentDevice->childrenCount();
+
+		for(int i = 0; i < childrenCount; i++)
+		{
+			Hardware::DeviceObject* device = currentDevice->child(i);
+
+			equipmentWalker(device, processBeforeChildren, processAfterChildren);
+		}
+
+		if (processAfterChildren != nullptr)
+		{
+			processAfterChildren(currentDevice);
+		}
+	}
+
+	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren)
+	{
+		equipmentWalker(currentDevice, processBeforeChildren, nullptr);
 	}
 
 }
