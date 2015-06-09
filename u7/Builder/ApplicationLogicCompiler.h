@@ -235,7 +235,7 @@ namespace Builder
 		bool isComputed() const { return m_computed; }
 
 
-		bool isShadowSignal() { return m_appItem == nullptr; }
+		bool isShadowSignal() { return m_isShadowSignal; }
 
 	};
 
@@ -366,6 +366,9 @@ namespace Builder
 		int m_registeredInternalDiscreteSignalsSize = 0;	// size of internal discrete signals (in words)
 		int m_registeredInternalDiscreteSignalsCount = 0;	// count of nternal discrete signals
 
+		int m_regBufferInternalDiscreteSignalsOffset = 0;	// offset of internal discrete signals (in registration buffer)
+		int m_regBufferInternalDiscreteSignalsSize = 0;		// size of internal discrete signals (in words)
+
 		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit-addressed memory)
 		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
 		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals
@@ -423,6 +426,7 @@ namespace Builder
 		bool generateFbCode(const AppFb *appFb);
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
+		bool generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid);
 
 		bool copyDiscreteSignalsToRegBuf();
 		bool copyOutModulesAppLogicDataToModulesMemory();
@@ -443,7 +447,7 @@ namespace Builder
 		bool copyInOutSignalsToRegistration();
 
 		bool calculateInOutSignalsAddresses();
-		bool calculateSignalsAddresses();
+		bool calculateInternalSignalsAddresses();
 
 		bool generateApplicationLogicCode();
 

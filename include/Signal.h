@@ -120,11 +120,23 @@ private:
 	int m_bit = -1;
 
 public:
-	Address16() {};
+	Address16() {}
+	Address16(int offset, int bit) : m_offset(offset), m_bit(bit) {}
 
 	void set(int offset, int bit) { m_offset = offset; m_bit = bit; }
 	void setOffset(int offset) { m_offset = offset; }
 	void setBit(int bit) { m_bit = bit; }
+
+	void addWord(int wordCount) { m_offset += wordCount; }
+	void addBit(int bitCount)
+	{
+		int totalBitCount = m_offset * 16 + m_bit + bitCount;
+
+		m_offset = totalBitCount / 16;
+		m_bit = totalBitCount % 16;
+	}
+
+	void addBit() { addBit(1); }
 
 	int offset() const { return m_offset; }
 	int bit() const { return m_bit; }
@@ -257,6 +269,8 @@ public:
 	bool isInternal() const { return m_inOutType == SignalInOutType::Internal; }
 
 	bool isRegistered() const { return acquire(); }
+
+	int sizeInWords() const { return (m_dataSize / 16 + (m_dataSize % 16 ? 1 : 0)); }
 
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
