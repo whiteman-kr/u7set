@@ -142,7 +142,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     //
     var frameSize = 1016;
     var frameCount = 78;                // Check it !!!!
-    var uartId = 456;                   // Check it !!!!
+    var uartId = 0x0102;                   // Check it !!!!
     
     var maxChannel = 4;                 // Can be changed!
     var configStartFrames = 2;
@@ -209,7 +209,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     ptr = 0;
     setData16(confFirmware, log, frameServiceConfig, ptr, 0x0001);   //CFG_Ch_Vers
     ptr += 2;
-    setData16(confFirmware, log, frameServiceConfig, ptr, 0x0102/**/);   //CFG_Ch_Dtype == UARTID?
+    setData16(confFirmware, log, frameServiceConfig, ptr, uartId);   //CFG_Ch_Dtype == UARTID?
     ptr += 2;
     storeHash64(confFirmware, log, frameServiceConfig, ptr, ssKey);   //ssKey's HASH-64
     ptr += 8;
