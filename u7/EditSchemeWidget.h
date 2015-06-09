@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../VFrame30/BaseSchemeWidget.h"
 #include "../VFrame30/SchemeView.h"
 #include "../VFrame30/VideoItem.h"
 #include "../VFrame30/FblItem.h"
@@ -12,7 +13,7 @@
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemeUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
 
-enum MouseState
+enum class MouseState
 {
 	None,								// No state
 	Scrolling,							// Scrolling with middle mouse button
@@ -39,9 +40,9 @@ enum MouseState
 	MovingConnectionLinePoint			// Moving point ISchemePosConnectionLine
 };
 
-// Possible action on CVideoItem
+// Possible action on SchemeItem
 //
-enum VideoItemAction
+enum class VideoItemAction
 {
 	NoAction,							// No Action
 	MoveItem,							// Move Item
@@ -182,7 +183,7 @@ protected:
 // EditVideoFrameWidget
 //
 //
-class EditSchemeWidget : public QScrollArea
+class EditSchemeWidget : public VFrame30::BaseSchemeWidget
 {
 	Q_OBJECT
 
@@ -206,7 +207,6 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
-	virtual void wheelEvent(QWheelEvent* event);
 
 	// Mouse Left Button Down
 	//
@@ -251,12 +251,9 @@ protected:
 	//
 public:
 	QPointF widgetPointToDocument(const QPoint& widgetPoint, bool snapToGrid) const;
-
 	QPointF snapToGrid(QPointF pt) const;
 
 protected:
-	bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
-
 	void addItem(std::shared_ptr<VFrame30::VideoItem> newItem);
 
 	void setMouseCursor(QPoint mousePos);
@@ -290,9 +287,6 @@ protected slots:
 
 	void modifiedChangedSlot(bool modified);
 
-	void zoomIn();
-	void zoomOut();
-	void zoom100();
 	void selectAll();
 
 	void schemeProperties();
@@ -308,22 +302,15 @@ public:
 	DbController* dbcontroller();
 	DbController* db();
 
-	std::shared_ptr<VFrame30::Scheme>& scheme();
-	std::shared_ptr<VFrame30::Scheme>& scheme() const;
-	void setScheme(std::shared_ptr<VFrame30::Scheme>& scheme);
-
 	std::shared_ptr<VFrame30::SchemeLayer> activeLayer();
 
 	const std::vector<std::shared_ptr<VFrame30::VideoItem>>& selectedItems() const;
 
-	EditSchemeView* schemeView();
-	const EditSchemeView* schemeView() const;
+	EditSchemeView* editSchemeView();
+	const EditSchemeView* editSchemeView() const;
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
-
-	double zoom() const;
-	void setZoom(double value, int horzScrollValue = -1, int vertScrollValue = -1);
 
 	const DbFileInfo& fileInfo() const;
 	void setFileInfo(const DbFileInfo& fi);
@@ -348,13 +335,6 @@ private:
 
 	bool m_snapToGrid = true;
 
-	// Interface data
-	//
-	QPoint mousePos;			// Keeps mouse pos during different actions like scrolling etc
-	int horzScrollBarValue;		// Horizintal scroll bar value in mousePressEvent -- midButton
-	int vertScrollBarValue;		// Vertical scroll bar value in mousePressEvent -- midButton
-
-	EditSchemeView* m_videoFrameView = nullptr;
 	EditEngine::EditEngine* m_editEngine = nullptr;
 
 	SchemePropertiesDialog* m_schemePropertiesDialog = nullptr;
