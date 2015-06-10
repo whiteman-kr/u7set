@@ -2,7 +2,8 @@
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "WorkflowSchemeView.h"
+#include "WorkflowSchemeWidget.h"
+#include "../VFrame30/Scheme.h"
 
 MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -230,10 +231,9 @@ void MonitorMainWindow::debug()
 	//
 	QTabWidget* tabWidget = monitorCentralWidget();
 
-	WorkflowSchemeView* schemeView = new WorkflowSchemeView();
-	schemeView->setScheme(scheme, true);
 
-	tabWidget->addTab(schemeView, "Debug tab: " + fileInfo.fileName());
+	WorkflowSchemeWidget* schemeWidget = new WorkflowSchemeWidget(scheme);
+	tabWidget->addTab(schemeWidget, "Debug tab: " + fileInfo.fileName());
 
 #endif	// Q_DEBUG
 }

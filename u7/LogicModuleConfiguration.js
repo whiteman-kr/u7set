@@ -17,12 +17,13 @@ var FamilyDOM = 0x0500;
 var FamilyAIFM = 0x0600;
 var FamilyOCM = 0x0700;
 
-var DiagDiscrete = 0;
-var DiagAnalog = 1;
-var InputDiscrete = 2;
-var InputAnalog = 3;
-var OutputDiscrete = 4;
-var OutputAnalog = 5;
+var Analog = 0;
+var Discrete = 1;
+
+var Input = 0;
+var Output = 1;
+var Validity = 2;
+var Diagnostics = 3;
 
 var aimTxId = 0x1200;
 var aomTxId = 0x1300;
@@ -140,8 +141,15 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     // Constants
     //
-    var frameSize = 1016;
-    var frameCount = 78;                // Check it !!!!
+    var frameSize = module.jsPropertyInt("FlashMemory\\ConfigFrameSize");
+    var frameCount = module.jsPropertyInt("FlashMemory\\ConfigFrameCount");
+    
+    if (frameSize == 0 || frameCount == 0)
+    {
+        log.writeError("Wrong LM-1 frameSize or frameCount: frameSize = " + frameSize + ", frameCount: " + frameCount, false, true);
+        return false;
+    }
+    
     var uartId = 0x0102;                   // Check it !!!!
     
     var maxChannel = 4;                 // Can be changed!
@@ -356,7 +364,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     {
         // find a signal with Place = i
         //
-        var signal = findSignalByPlace(inController, i, InputAnalog, signalSet, log);
+        var signal = findSignalByPlace(inController, i, Analog, Input, signalSet, log);
         
         if (signal == null)
         {
@@ -481,7 +489,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 
             if (outController != null)
             {
-                var signal = findSignalByPlace(outController, place, OutputAnalog, signalSet, log);
+                var signal = findSignalByPlace(outController, place, Analog, Output, signalSet, log);
                 if (signal != null)
                 {
                     var outputRangeMode = signal.jsOutputRangeMode();
@@ -545,7 +553,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 
 }
 
-function findSignalByPlace(parent, place, type, signalSet, log)
+function findSignalByPlace(parent, place, type, func, signalSet, log)
 {
     if (parent == null)
     {
@@ -561,6 +569,10 @@ function findSignalByPlace(parent, place, type, signalSet, log)
             continue;
         }
         if (s.jsType() != type)
+        {
+            continue;
+        }
+        if (s.jsFunction() != func)
         {
             continue;
         }
