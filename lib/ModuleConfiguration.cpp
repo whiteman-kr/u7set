@@ -327,7 +327,7 @@ namespace Hardware
 	bool ModuleConfFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
     {
         if (frameIndex >= static_cast<int>(m_frames.size()) ||
-			offset > (int)(frameSize() - sizeof(quint64) || start + count >= frameSize()))
+			offset > (int)(frameSize() - sizeof(quint64)) || start + count >= frameSize())
         {
             qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
             return false;

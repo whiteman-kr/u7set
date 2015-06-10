@@ -719,11 +719,14 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
 
-		beginRemoveRows(index, 0, d->childrenCount() - 1);
-		d->deleteAllChildren();
-		endRemoveRows();
+		if (d->childrenCount() > 0)
+		{
+			beginRemoveRows(index, 0, d->childrenCount() - 1);
+			d->deleteAllChildren();
+			endRemoveRows();
 
-		emit dataChanged(index, index);
+			emit dataChanged(index, index);
+		}
 	}
 
 	return;

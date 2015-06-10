@@ -713,6 +713,18 @@ namespace Hardware
         return c;
     }
 
+	int DeviceObject::jsPropertyInt(QString name) const
+	{
+		QVariant v = property(name.toStdString().c_str());
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return 0;
+		}
+
+		return v.toInt();
+	}
+
     DeviceType DeviceObject::deviceType() const
 	{
 		assert(false);
@@ -1677,7 +1689,7 @@ namespace Hardware
 		Proto::DeviceSignal* signalMessage = message->mutable_deviceobject()->mutable_signal();
 
 		signalMessage->set_type(static_cast<int>(m_type));
-		signalMessage->set_format(static_cast<int>(m_type));
+		signalMessage->set_function(static_cast<int>(m_function));
 
 		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
 		signalMessage->set_format(static_cast<int>(m_format));
