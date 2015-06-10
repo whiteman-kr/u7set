@@ -1212,7 +1212,7 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.nop();
+		/*cmd.nop();
 		m_testCode.append(cmd);
 
 		cmd.start(1, 1);
@@ -1252,7 +1252,21 @@ namespace Builder
 		m_testCode.append(cmd);
 
 		cmd.moveBit(20, 1, 30, 2);
+		m_testCode.append(cmd);*/
+
+		cmd.movConst(49906, 1);
 		m_testCode.append(cmd);
+
+		cmd.movConst(49907, 2);
+		m_testCode.append(cmd);
+
+		cmd.movConst(49908, 3);
+		m_testCode.append(cmd);
+
+		cmd.movMem(49916, 49906, 3);
+
+		m_testCode.append(cmd);
+
 
 		cmd.stop();
 		m_testCode.append(cmd);
