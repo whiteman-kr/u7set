@@ -296,16 +296,47 @@ void SchemeControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	std::vector<std::shared_ptr<DbFileInfo>> v;
+	std::vector<std::shared_ptr<DbFileInfo>> deleteFiles;
 
 	for(const auto& f : files)
 	{
-		v.push_back(std::make_shared<DbFileInfo>(f));
+		deleteFiles.push_back(std::make_shared<DbFileInfo>(f));
 	}
 
-	db()->deleteFiles(&v, this);
+	db()->deleteFiles(&deleteFiles, this);
 
 	refreshFiles();
+
+	// Update open tab pages
+	//
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget != nullptr);
+		return;
+	}
+
+	for (int i = 0; i < tabWidget->count(); i++)
+	{
+		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		if (tb == nullptr)
+		{
+			// It can be control tab page
+			//
+			continue;
+		}
+
+		for (std::shared_ptr<DbFileInfo> fi: deleteFiles)
+		{
+			if (tb->fileInfo().fileId() == fi->fileId() && tb->readOnly() == false)
+			{
+				tb->setReadOnly(true);
+				tb->setFileInfo(*(fi.get()));
+				tb->setPageTitle();
+				break;
+			}
+		}
+	}
 
 	return;
 }
@@ -453,7 +484,7 @@ void SchemeControlTabPage::undoChanges(std::vector<DbFileInfo> files)
 			continue;
 		}
 
-		for (const DbFileInfo& fi : files)
+		for (const DbFileInfo& fi : undoFiles)
 		{
 			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false)
 			{
