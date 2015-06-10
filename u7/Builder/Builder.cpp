@@ -327,40 +327,6 @@ namespace Builder
 		return true;
 	}
 
-	void BuildWorkerThread::equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren)
-	{
-		if (currentDevice == nullptr)
-		{
-			assert(currentDevice != nullptr);
-
-			QString msg = QString(QObject::tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
-
-			m_log->writeError(msg, false, true);
-
-			qDebug() << msg;
-			return;
-		}
-
-		if (processBeforeChildren != nullptr)
-		{
-			processBeforeChildren(currentDevice);
-		}
-
-		int childrenCount = currentDevice->childrenCount();
-
-		for(int i = 0; i < childrenCount; i++)
-		{
-			Hardware::DeviceObject* device = currentDevice->child(i);
-
-			equipmentWalker(device, processBeforeChildren, processAfterChildren);
-		}
-
-		if (processAfterChildren != nullptr)
-		{
-			processAfterChildren(currentDevice);
-		}
-	}
-
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
 	{
 		if (device == nullptr)

@@ -726,7 +726,6 @@ namespace Hardware
 
 	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
-
 	namespace Obsolete
 	{
 		enum SignalType
@@ -739,5 +738,11 @@ namespace Hardware
 			OutputAnalog,
 		};
 	}
+
+	// Walk through equipment tree
+	//
+	void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren);
+	void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren);
 }
 
+Q_DECLARE_METATYPE(Hardware::DeviceModule::FamilyType)

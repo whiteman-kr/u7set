@@ -23,7 +23,7 @@ private:
 
 	UdpSocketThread* m_infoSocketThread = nullptr;
 
-	std::shared_ptr<Hardware::DeviceRoot> pDeviceRoot;
+	std::shared_ptr<Hardware::DeviceRoot> m_deviceRoot;
 	SignalSet m_signalSet;
 	UnitList m_unitInfo;
 
