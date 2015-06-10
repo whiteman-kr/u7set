@@ -495,6 +495,7 @@ namespace Hardware
 		Q_OBJECT
 
 		Q_PROPERTY(SignalType Type READ type WRITE setType)
+		Q_PROPERTY(SignalFunction Function READ function WRITE setFunction)
 		Q_PROPERTY(ByteOrder ByteOrder READ byteOrder WRITE setByteOrder)
 		Q_PROPERTY(DataFormat Format READ format WRITE setFormat)
 
@@ -507,20 +508,23 @@ namespace Hardware
 		Q_PROPERTY(int ValueBit READ valueBit WRITE setValueBit)
 
 		Q_ENUMS(SignalType)
+		Q_ENUMS(SignalFunction)
 		Q_ENUMS(ByteOrder)
 		Q_ENUMS(DataFormat)
 
-		// SignalType
-		//
 	public:
 		enum SignalType
 		{
-			DiagDiscrete,
-			DiagAnalog,
-			InputDiscrete,
-			InputAnalog,
-			OutputDiscrete,
-			OutputAnalog,
+			Analog,
+			Discrete
+		};
+
+		enum SignalFunction
+		{
+			Input,					// physical input, application logic signal
+			Output,					// physical output, application logic signal
+			Validity,				// input/output validity, application logic signal
+			Diagnostics				// Diagnostics signal
 		};
 
 		enum DataFormat
@@ -552,9 +556,14 @@ namespace Hardware
 		// Properties
 		//
 	public:
-        DeviceSignal::SignalType type() const;
+
+		DeviceSignal::SignalType type() const;
         Q_INVOKABLE int jsType() const;
         void setType(DeviceSignal::SignalType value);
+
+		DeviceSignal::SignalFunction function() const;
+		Q_INVOKABLE int jsFunction() const;
+		void setFunction(DeviceSignal::SignalFunction value);
 
 		ByteOrder byteOrder() const;
 		void setByteOrder(ByteOrder value);
@@ -589,7 +598,9 @@ namespace Hardware
 	private:
 		static const DeviceType m_deviceType = DeviceType::Signal;
 
-		SignalType m_type = SignalType::DiagDiscrete;
+		SignalType m_type = SignalType::Discrete;
+		SignalFunction m_function = SignalFunction::Input;
+
 		ByteOrder m_byteOrder = ByteOrder::LittleEdndian;
 		DataFormat m_format = DataFormat::UnsignedInt;
 
@@ -686,7 +697,6 @@ namespace Hardware
 		int m_type = 0;
 	};
 
-
 	//
 	//
 	// EquipmentSet
@@ -713,4 +723,19 @@ namespace Hardware
 	};
 
 	extern Factory<Hardware::DeviceObject> DeviceObjectFactory;
+
+
+	namespace Obsolete
+	{
+		enum SignalType
+		{
+			DiagDiscrete,
+			DiagAnalog,
+			InputDiscrete,
+			InputAnalog,
+			OutputDiscrete,
+			OutputAnalog,
+		};
+	}
 }
+

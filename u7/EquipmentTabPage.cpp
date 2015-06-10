@@ -429,10 +429,12 @@ void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder
 
 	// Sort
 	//
-	QModelIndex rootIndex = index(0, 0, QModelIndex());
-	Hardware::DeviceObject* parent = deviceObject(rootIndex);
+	//QModelIndex rootIndex = index(0, 0, QModelIndex());
+	//Hardware::DeviceObject* parent = deviceObject(rootIndex);
 
-	sortDeviceObject(parent, column, order);
+	//sortDeviceObject(parent, column, order);
+	sortDeviceObject(m_configuration.get(), column, order);
+	sortDeviceObject(m_preset.get(), column, order);
 
 	// Move pers indexes
 	//
@@ -1431,10 +1433,9 @@ void EquipmentView::addInOutsToSignals()
 				Hardware::DeviceSignal* signal = dynamic_cast<Hardware::DeviceSignal*>(device);
 				assert(signal);
 
-				if (signal->type() == Hardware::DeviceSignal::SignalType::InputDiscrete ||
-					signal->type() == Hardware::DeviceSignal::SignalType::OutputDiscrete ||
-					signal->type() == Hardware::DeviceSignal::SignalType::InputAnalog ||
-					signal->type() == Hardware::DeviceSignal::SignalType::OutputAnalog)
+				if (signal->function() == Hardware::DeviceSignal::SignalFunction::Input ||
+					signal->function() == Hardware::DeviceSignal::SignalFunction::Output ||
+					signal->function() == Hardware::DeviceSignal::SignalFunction::Validity)
 				{
 					inOuts.push_back(signal);
 				}
