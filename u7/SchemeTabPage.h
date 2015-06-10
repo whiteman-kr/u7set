@@ -24,6 +24,7 @@ public:
 	virtual void viewFile(std::vector<DbFileInfo> files) override;
 	virtual void addFile() override;
 	virtual void checkIn(std::vector<DbFileInfo> files) override;
+	virtual void undoChanges(std::vector<DbFileInfo> files) override;
 	virtual void deleteFile(std::vector<DbFileInfo> files) override;
 	virtual void fileDoubleClicked(DbFileInfo file) override;
 
@@ -33,8 +34,7 @@ signals:
 	void addFileSignal();
 	void deleteFileSignal(std::vector<DbFileInfo> files);
 	void checkInSignal(std::vector<DbFileInfo> files);
-
-
+	void undoChangesSignal(std::vector<DbFileInfo> files);
 
 	// Data
 	//
@@ -108,6 +108,7 @@ protected slots:
     void deleteFile(std::vector<DbFileInfo> files);
 
 	void checkIn(std::vector<DbFileInfo> files);
+	void undoChanges(std::vector<DbFileInfo> files);
 
     void openFiles(std::vector<DbFileInfo> files);
     void viewFiles(std::vector<DbFileInfo> files);

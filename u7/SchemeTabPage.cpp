@@ -42,6 +42,11 @@ void SchemeFileView::checkIn(std::vector<DbFileInfo> files)
 	emit checkInSignal(files);
 }
 
+void SchemeFileView::undoChanges(std::vector<DbFileInfo> files)
+{
+	emit undoChangesSignal(files);
+}
+
 void SchemeFileView::deleteFile(std::vector<DbFileInfo> files)
 {
 	emit deleteFileSignal(files);
@@ -174,6 +179,7 @@ SchemeControlTabPage::SchemeControlTabPage(const QString& fileExt,
 	connect(m_filesView, &SchemeFileView::addFileSignal, this, &SchemeControlTabPage::addFile);
 	connect(m_filesView, &SchemeFileView::deleteFileSignal, this, &SchemeControlTabPage::deleteFile);
 	connect(m_filesView, &SchemeFileView::checkInSignal, this, &SchemeControlTabPage::checkIn);
+	connect(m_filesView, &SchemeFileView::undoChangesSignal, this, &SchemeControlTabPage::undoChanges);
 
 	return;
 }
@@ -386,6 +392,80 @@ void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
 	}
 
 	return;
+}
+
+void SchemeControlTabPage::undoChanges(std::vector<DbFileInfo> files)
+{
+	// 1 Ask user to confirm operation
+	// 2 Undo changes to database
+	// 3 Set frame to readonly mode
+	//
+
+	std::vector<DbFileInfo> undoFiles;
+
+	for (const DbFileInfo& fi : files)
+	{
+		if (fi.state() == VcsState::CheckedOut &&
+			fi.userId() == db()->currentUser().userId())
+		{
+			undoFiles.push_back(fi);
+		}
+	}
+
+	if (undoFiles.empty() == true)
+	{
+		// Nothing to undo
+		//
+		return;
+	}
+
+	QMessageBox mb(this);
+	mb.setText(tr("This operation will undo all pending changes for the document and will revert it to the prior state!"));
+	mb.setInformativeText(tr("Do you want to undo pending changes?"));
+	mb.setIcon(QMessageBox::Question);
+	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+	if (mb.exec() != QMessageBox::Ok)
+	{
+		return;
+	}
+
+	// Undo changes in DB
+	//
+	db()->undoChanges(undoFiles, this);
+
+	// Update open tab pages
+	//
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget != nullptr);
+		return;
+	}
+
+	for (int i = 0; i < tabWidget->count(); i++)
+	{
+		EditSchemeTabPage* tb = dynamic_cast<EditSchemeTabPage*>(tabWidget->widget(i));
+		if (tb == nullptr)
+		{
+			// It can be control tab page
+			//
+			continue;
+		}
+
+		for (const DbFileInfo& fi : files)
+		{
+			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false)
+			{
+				tb->setReadOnly(true);
+				tb->setFileInfo(fi);
+				tb->setPageTitle();
+				break;
+			}
+		}
+	}
+
+	refreshFiles();
 }
 
 void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
