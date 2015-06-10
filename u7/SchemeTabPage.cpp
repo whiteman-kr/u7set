@@ -47,6 +47,23 @@ void SchemeFileView::deleteFile(std::vector<DbFileInfo> files)
 	emit deleteFileSignal(files);
 }
 
+void SchemeFileView::fileDoubleClicked(DbFileInfo file)
+{
+	std::vector<DbFileInfo> v;
+	v.push_back(file);
+
+	if (file.state() == VcsState::CheckedOut)
+	{
+		openFile(v);
+	}
+	else
+	{
+		viewFile(v);
+	}
+
+	return;
+}
+
 
 
 //

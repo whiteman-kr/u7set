@@ -87,6 +87,7 @@ public:
 	virtual void getWorkcopy(std::vector<DbFileInfo> files);
 	virtual void setWorkcopy(std::vector<DbFileInfo> files);
 	virtual void refreshFiles();
+	virtual void fileDoubleClicked(DbFileInfo file);
 
 	// Protected slots
 	//
@@ -104,6 +105,7 @@ protected slots:
 	void slot_GetWorkcopy();
 	void slot_SetWorkcopy();
 	void slot_RefreshFiles();
+	void slot_doubleClicked(const QModelIndex& index);
 
 public slots:
 	void filesViewSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
