@@ -86,7 +86,7 @@ class SchemeControlTabPage : public QWidget, public HasDbController
 public:
     SchemeControlTabPage(
         const QString& fileExt,
-        DbController* dbcontroller,
+		DbController* db,
         const QString& parentFileName,
         std::function<VFrame30::Scheme*()> createVideoFrameFunc);
 
@@ -167,7 +167,7 @@ class EditSchemeTabPage : public QWidget, public HasDbController
 
 public:
 	EditSchemeTabPage() = delete;
-	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
+	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* db);
 	virtual ~EditSchemeTabPage();
 
 	// Public methods

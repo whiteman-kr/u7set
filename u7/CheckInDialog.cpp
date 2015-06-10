@@ -60,7 +60,7 @@ void CheckInDialog::on_checkInButton_clicked()
 		return;
 	}
 
-	bool result = dbcontroller()->checkIn(m_files, comment, this);
+	bool result = db()->checkIn(m_files, comment, this);
 	if (result == true)
 	{
 		accept();

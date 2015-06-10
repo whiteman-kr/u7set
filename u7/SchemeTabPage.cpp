@@ -256,7 +256,7 @@ void SchemeControlTabPage::addFile()
 	std::vector<std::shared_ptr<DbFile>> addFilesList;
 	addFilesList.push_back(vfFile);
 
-	dbcontroller()->addFiles(&addFilesList, parentFile().fileId(), this);
+	db()->addFiles(&addFilesList, parentFile().fileId(), this);
 
 	// Add file to the FileModel and select them
 	//
@@ -297,7 +297,7 @@ void SchemeControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 		v.push_back(std::make_shared<DbFileInfo>(f));
 	}
 
-	dbcontroller()->deleteFiles(&v, this);
+	db()->deleteFiles(&v, this);
 
 	refreshFiles();
 
@@ -342,7 +342,7 @@ void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
 
 	// Check in file
 	//
-	bool ok = CheckInDialog::checkIn(files, dbcontroller(), this);
+	bool ok = CheckInDialog::checkIn(files, db(), this);
 	if (ok == false)
 	{
 		return;
@@ -360,7 +360,7 @@ void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
 		fileIds.push_back(fi.fileId());
 	}
 
-	dbcontroller()->getFileInfo(&fileIds, &files, this);
+	db()->getFileInfo(&fileIds, &files, this);
 
 	// Set readonly to file if it is open
 	//
@@ -407,7 +407,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	}
 
 	if (file.state() == VcsState::CheckedOut &&
-		file.userId() != dbcontroller()->currentUser().userId())
+		file.userId() != db()->currentUser().userId())
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("File %1 already checked out by user %2.").arg(file.fileName()).arg(file.userId()));
@@ -415,7 +415,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	assert(file.state() == VcsState::CheckedOut && file.userId() == dbcontroller()->currentUser().userId());
+	assert(file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId());
 
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
@@ -453,7 +453,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	bool result = dbcontroller()->getWorkcopy(files, &out, this);
+	bool result = db()->getWorkcopy(files, &out, this);
 	if (result == false || out.size() != files.size())
 	{
 		QMessageBox::critical(this, tr("Error"), "Can't get file from the database.");
@@ -474,7 +474,7 @@ void SchemeControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	DbFileInfo fi(*(out.front().get()));
 
-	EditSchemeTabPage* editTabPage = new EditSchemeTabPage(vf, fi, dbcontroller());
+	EditSchemeTabPage* editTabPage = new EditSchemeTabPage(vf, fi, db());
 
 	connect(editTabPage, &EditSchemeTabPage::vcsFileStateChanged, this, &SchemeControlTabPage::refreshFiles);
 
@@ -520,7 +520,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<DbChangesetInfo> fileHistory;
 
-	dbcontroller()->getFileHistory(file, &fileHistory, this);
+	db()->getFileHistory(file, &fileHistory, this);
 
 	// Show chageset dialog
 	//
@@ -535,7 +535,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	bool result = dbcontroller()->getSpecificCopy(files, changesetId, &out, this);
+	bool result = db()->getSpecificCopy(files, changesetId, &out, this);
 	if (result == false || out.size() != files.size())
 	{
 		return;
@@ -574,7 +574,7 @@ void SchemeControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	// Create TabPage and add it to the TabControl
 	//
 
-	EditSchemeTabPage* editTabPage = new EditSchemeTabPage(vf, fi, dbcontroller());
+	EditSchemeTabPage* editTabPage = new EditSchemeTabPage(vf, fi, db());
 	editTabPage->setReadOnly(true);
 
 	tabWidget->addTab(editTabPage, tabPageTitle);
@@ -647,15 +647,20 @@ void EditSchemeTabPage::setPageTitle()
 
 	QString newTitle;
 
-	if (readOnly() == true || fileInfo().userId() != dbcontroller()->currentUser().userId())
+	if (readOnly() == true || fileInfo().userId() != db()->currentUser().userId())
 	{
-		if (fileInfo().changeset() != -1)
+		if (fileInfo().changeset() == -1 || fileInfo().changeset() == 0)
 		{
-			newTitle = QString("%1: %2 ReadOnly").arg(m_videoFrameWidget->scheme()->strID()).arg(fileInfo().changeset());
+			newTitle = QString("%1: ReadOnly").arg(m_videoFrameWidget->scheme()->strID());
 		}
 		else
 		{
-			newTitle = QString("%1: ReadOnly").arg(m_videoFrameWidget->scheme()->strID());
+			newTitle = QString("%1: %2 ReadOnly").arg(m_videoFrameWidget->scheme()->strID()).arg(fileInfo().changeset());
+		}
+
+		if (fileInfo().deleted() == true)
+		{
+			newTitle += QString(", deleted");
 		}
 	}
 	else
@@ -738,7 +743,7 @@ void EditSchemeTabPage::checkInFile()
 {
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		(fileInfo().userId() != dbcontroller()->currentUser().userId() && dbcontroller()->currentUser().isAdminstrator() == false))
+		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 	{
 		return;
 	}
@@ -758,7 +763,7 @@ void EditSchemeTabPage::checkInFile()
 	std::vector<DbFileInfo> files;
 	files.push_back(fileInfo());
 
-	bool checkInResult = CheckInDialog::checkIn(files, dbcontroller(), this);
+	bool checkInResult = CheckInDialog::checkIn(files, db(), this);
 	if (checkInResult == false)
 	{
 		return;
@@ -767,7 +772,7 @@ void EditSchemeTabPage::checkInFile()
 	emit vcsFileStateChanged();
 
 	DbFileInfo fi;
-	dbcontroller()->getFileInfo(fileInfo().fileId(), &fi, this);
+	db()->getFileInfo(fileInfo().fileId(), &fi, this);
 
 	setFileInfo(fi);
 
@@ -789,7 +794,7 @@ void EditSchemeTabPage::checkOutFile()
 	std::vector<DbFileInfo> files;
 	files.push_back(fileInfo());
 
-	bool result = dbcontroller()->checkOut(files, this);
+	bool result = db()->checkOut(files, this);
 	if (result == false)
 	{
 		return;
@@ -799,7 +804,7 @@ void EditSchemeTabPage::checkOutFile()
 	//
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	result = dbcontroller()->getWorkcopy(files, &out, this);
+	result = db()->getWorkcopy(files, &out, this);
 	if (result == false || out.size() != files.size())
 	{
 		return;
@@ -827,15 +832,11 @@ void EditSchemeTabPage::undoChangesFile()
 	// 2 Undo changes to database
 	// 3 Set frame to readonly mode
 	//
-
-	assert(false);
-
-	/*
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().user() != dbcontroller()->currentUser())
+		fileInfo().userId() != db()->currentUser().userId())
 	{
-		assert(fileInfo().user() == dbcontroller()->currentUser());
+		assert(fileInfo().userId() == db()->currentUser().userId());
 		return;
 	}
 
@@ -847,16 +848,12 @@ void EditSchemeTabPage::undoChangesFile()
 
 	if (mb.exec() == QMessageBox::Ok)
 	{
-		std::vector<DbFileInfo> files;
-		files.push_back(fileInfo());
+		DbFileInfo fi = fileInfo();
 
-		bool result = dbcontroller()->undoChanges(files, this);
+		bool result = db()->undoChanges(fi, this);
 
 		if (result == true)
 		{
-			DbFileInfo fi;
-			dbcontroller()->getFileInfo(fileInfo().fileId(), &fi);
-
 			setFileInfo(fi);
 
 			setReadOnly(true);
@@ -870,7 +867,7 @@ void EditSchemeTabPage::undoChangesFile()
 	}
 
 	emit vcsFileStateChanged();
-	return;*/
+	return;
 }
 
 bool EditSchemeTabPage::saveWorkcopy()
@@ -878,9 +875,9 @@ bool EditSchemeTabPage::saveWorkcopy()
 	if (readOnly() == true ||
 		modified() == false ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		fileInfo().userId() != dbcontroller()->currentUser().userId())
+		fileInfo().userId() != db()->currentUser().userId())
 	{
-		assert(fileInfo().userId() == dbcontroller()->currentUser().userId());
+		assert(fileInfo().userId() == db()->currentUser().userId());
 		return false;
 	}
 
@@ -897,7 +894,7 @@ bool EditSchemeTabPage::saveWorkcopy()
 	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo());
 	file->swapData(data);
 
-	bool result = dbcontroller()->setWorkcopy(file, this);
+	bool result = db()->setWorkcopy(file, this);
 	if (result == true)
 	{
 		resetModified();
@@ -943,9 +940,9 @@ void EditSchemeTabPage::setCurrentWorkcopy()
 {
 	if (readOnly() == true ||
 		fileInfo().state() != VcsState::CheckedOut ||
-		(fileInfo().userId() != dbcontroller()->currentUser().userId() && dbcontroller()->currentUser().isAdminstrator() == false))
+		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 	{
-		assert(fileInfo().userId() == dbcontroller()->currentUser().userId());
+		assert(fileInfo().userId() == db()->currentUser().userId());
 		return;
 	}
 

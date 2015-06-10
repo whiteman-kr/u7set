@@ -22,12 +22,44 @@ namespace VFrame30
 		m_schemeView->setZoom(100);
 		setWidget(m_schemeView);
 
+		// --
+		//
+		createActions();
+
 		return;
 	}
 
 	BaseSchemeWidget::~BaseSchemeWidget()
 	{
 
+	}
+
+	void BaseSchemeWidget::createActions()
+	{
+		// View->ZoomIn
+		//
+		m_zoomInAction = new QAction(tr("Zoom In"), this);
+		m_zoomInAction->setEnabled(true);
+		m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
+		m_zoomInAction->setShortcutContext(Qt::ShortcutContext::WindowShortcut);
+		connect(m_zoomInAction, &QAction::triggered, this, &BaseSchemeWidget::zoomIn);
+		addAction(m_zoomInAction);
+
+		// View->ZoomOut
+		//
+		m_zoomOutAction = new QAction(tr("Zoom Out"), this);
+		m_zoomOutAction->setEnabled(true);
+		m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+		connect(m_zoomOutAction, &QAction::triggered, this, &BaseSchemeWidget::zoomOut);
+		addAction(m_zoomOutAction);
+
+		// View->Zoom100
+		//
+		m_zoom100Action = new QAction(tr("Zoom 100%"), this);
+		m_zoom100Action->setEnabled(true);
+		m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+		connect(m_zoom100Action, &QAction::triggered, this, &BaseSchemeWidget::zoom100);
+		addAction(m_zoom100Action);
 	}
 
 	void BaseSchemeWidget::wheelEvent(QWheelEvent* event)

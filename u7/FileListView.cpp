@@ -636,7 +636,7 @@ void FileListView::refreshFiles()
 	return;
 }
 
-void FileListView::fileDoubleClicked(DbFileInfo file)
+void FileListView::fileDoubleClicked(DbFileInfo /*file*/)
 {
 }
 

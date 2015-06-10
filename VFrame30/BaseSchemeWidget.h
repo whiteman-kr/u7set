@@ -16,6 +16,8 @@ namespace VFrame30
 		virtual ~BaseSchemeWidget();
 
 	protected:
+		void createActions();
+
 		virtual void wheelEvent(QWheelEvent* event) override;
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
@@ -48,6 +50,11 @@ namespace VFrame30
 
 		// Data
 		//
+	protected:
+		QAction* m_zoomInAction = nullptr;
+		QAction* m_zoomOutAction = nullptr;
+		QAction* m_zoom100Action = nullptr;
+
 	private:
 		SchemeView* m_schemeView = nullptr;
 
