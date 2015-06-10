@@ -591,6 +591,7 @@ namespace Hardware
 		bool isInputSignal() const;
 		bool isOutputSignal() const;
 		bool isDiagSignal() const;
+		bool isValiditySignal() const;
 
 		bool isAnalogSignal() const;
 		bool isDiscreteSignal() const;

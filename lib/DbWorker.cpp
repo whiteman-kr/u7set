@@ -3530,7 +3530,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 			continue;
 		}
 
-		if (deviceSignal->isInputSignal() || deviceSignal->isOutputSignal() /*|| deviceSignal->isValiditySignal()*/)
+		if (deviceSignal->isInputSignal() || deviceSignal->isOutputSignal() || deviceSignal->isValiditySignal())
 		{
 			Signal signal(*deviceSignal);
 

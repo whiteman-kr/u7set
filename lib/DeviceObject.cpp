@@ -1908,6 +1908,11 @@ namespace Hardware
 		return m_function == SignalFunction::Diagnostics;
 	}
 
+	bool DeviceSignal::isValiditySignal() const
+	{
+		return m_function == SignalFunction::Validity;
+	}
+
 	bool DeviceSignal::isAnalogSignal() const
 	{
 		return	m_type == SignalType::Analog;
