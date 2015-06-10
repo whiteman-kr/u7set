@@ -307,28 +307,28 @@ class qvariant : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 type() const;
   inline void set_type(::google::protobuf::int32 value);
 
-  // optional int32 intValue = 2;
+  // optional int32 intValue = 2 [default = 0];
   inline bool has_intvalue() const;
   inline void clear_intvalue();
   static const int kIntValueFieldNumber = 2;
   inline ::google::protobuf::int32 intvalue() const;
   inline void set_intvalue(::google::protobuf::int32 value);
 
-  // optional uint32 uintValue = 3;
+  // optional uint32 uintValue = 3 [default = 0];
   inline bool has_uintvalue() const;
   inline void clear_uintvalue();
   static const int kUintValueFieldNumber = 3;
   inline ::google::protobuf::uint32 uintvalue() const;
   inline void set_uintvalue(::google::protobuf::uint32 value);
 
-  // optional double doubleValue = 4;
+  // optional double doubleValue = 4 [default = 0];
   inline bool has_doublevalue() const;
   inline void clear_doublevalue();
   static const int kDoubleValueFieldNumber = 4;
   inline double doublevalue() const;
   inline void set_doublevalue(double value);
 
-  // optional bool boolValue = 5;
+  // optional bool boolValue = 5 [default = false];
   inline bool has_boolvalue() const;
   inline void clear_boolvalue();
   static const int kBoolValueFieldNumber = 5;
@@ -4667,12 +4667,12 @@ class DeviceSignal : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int32 type = 1 [default = 0];
-  inline bool has_type() const;
-  inline void clear_type();
-  static const int kTypeFieldNumber = 1;
-  inline ::google::protobuf::int32 type() const;
-  inline void set_type(::google::protobuf::int32 value);
+  // optional int32 obsoletetype = 1 [default = 0];
+  inline bool has_obsoletetype() const;
+  inline void clear_obsoletetype();
+  static const int kObsoletetypeFieldNumber = 1;
+  inline ::google::protobuf::int32 obsoletetype() const;
+  inline void set_obsoletetype(::google::protobuf::int32 value);
 
   // optional int32 byteOrder = 2 [default = 0];
   inline bool has_byteorder() const;
@@ -4723,10 +4723,24 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 valuebit() const;
   inline void set_valuebit(::google::protobuf::int32 value);
 
+  // optional int32 type = 9 [default = 0];
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 9;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional int32 function = 10 [default = 0];
+  inline bool has_function() const;
+  inline void clear_function();
+  static const int kFunctionFieldNumber = 10;
+  inline ::google::protobuf::int32 function() const;
+  inline void set_function(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
  private:
-  inline void set_has_type();
-  inline void clear_has_type();
+  inline void set_has_obsoletetype();
+  inline void clear_has_obsoletetype();
   inline void set_has_byteorder();
   inline void clear_has_byteorder();
   inline void set_has_format();
@@ -4741,10 +4755,14 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline void clear_has_valueoffset();
   inline void set_has_valuebit();
   inline void clear_has_valuebit();
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_function();
+  inline void clear_has_function();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 obsoletetype_;
   ::google::protobuf::int32 byteorder_;
   ::google::protobuf::int32 format_;
   ::google::protobuf::int32 size_;
@@ -4752,9 +4770,11 @@ class DeviceSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 validitybit_;
   ::google::protobuf::int32 valueoffset_;
   ::google::protobuf::int32 valuebit_;
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 function_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5349,7 +5369,7 @@ inline void qvariant::set_type(::google::protobuf::int32 value) {
   type_ = value;
 }
 
-// optional int32 intValue = 2;
+// optional int32 intValue = 2 [default = 0];
 inline bool qvariant::has_intvalue() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -5371,7 +5391,7 @@ inline void qvariant::set_intvalue(::google::protobuf::int32 value) {
   intvalue_ = value;
 }
 
-// optional uint32 uintValue = 3;
+// optional uint32 uintValue = 3 [default = 0];
 inline bool qvariant::has_uintvalue() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -5393,7 +5413,7 @@ inline void qvariant::set_uintvalue(::google::protobuf::uint32 value) {
   uintvalue_ = value;
 }
 
-// optional double doubleValue = 4;
+// optional double doubleValue = 4 [default = 0];
 inline bool qvariant::has_doublevalue() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -5415,7 +5435,7 @@ inline void qvariant::set_doublevalue(double value) {
   doublevalue_ = value;
 }
 
-// optional bool boolValue = 5;
+// optional bool boolValue = 5 [default = false];
 inline bool qvariant::has_boolvalue() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -10150,26 +10170,26 @@ inline void DeviceModule::set_allocated_conftype(::std::string* conftype) {
 
 // DeviceSignal
 
-// optional int32 type = 1 [default = 0];
-inline bool DeviceSignal::has_type() const {
+// optional int32 obsoletetype = 1 [default = 0];
+inline bool DeviceSignal::has_obsoletetype() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void DeviceSignal::set_has_type() {
+inline void DeviceSignal::set_has_obsoletetype() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void DeviceSignal::clear_has_type() {
+inline void DeviceSignal::clear_has_obsoletetype() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void DeviceSignal::clear_type() {
-  type_ = 0;
-  clear_has_type();
+inline void DeviceSignal::clear_obsoletetype() {
+  obsoletetype_ = 0;
+  clear_has_obsoletetype();
 }
-inline ::google::protobuf::int32 DeviceSignal::type() const {
-  return type_;
+inline ::google::protobuf::int32 DeviceSignal::obsoletetype() const {
+  return obsoletetype_;
 }
-inline void DeviceSignal::set_type(::google::protobuf::int32 value) {
-  set_has_type();
-  type_ = value;
+inline void DeviceSignal::set_obsoletetype(::google::protobuf::int32 value) {
+  set_has_obsoletetype();
+  obsoletetype_ = value;
 }
 
 // optional int32 byteOrder = 2 [default = 0];
@@ -10324,6 +10344,50 @@ inline ::google::protobuf::int32 DeviceSignal::valuebit() const {
 inline void DeviceSignal::set_valuebit(::google::protobuf::int32 value) {
   set_has_valuebit();
   valuebit_ = value;
+}
+
+// optional int32 type = 9 [default = 0];
+inline bool DeviceSignal::has_type() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void DeviceSignal::set_has_type() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void DeviceSignal::clear_has_type() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void DeviceSignal::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 DeviceSignal::type() const {
+  return type_;
+}
+inline void DeviceSignal::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional int32 function = 10 [default = 0];
+inline bool DeviceSignal::has_function() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void DeviceSignal::set_has_function() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void DeviceSignal::clear_has_function() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void DeviceSignal::clear_function() {
+  function_ = 0;
+  clear_has_function();
+}
+inline ::google::protobuf::int32 DeviceSignal::function() const {
+  return function_;
+}
+inline void DeviceSignal::set_function(::google::protobuf::int32 value) {
+  set_has_function();
+  function_ = value;
 }
 
 // -------------------------------------------------------------------

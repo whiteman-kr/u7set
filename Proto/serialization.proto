@@ -29,7 +29,7 @@ message qvariant
 	optional int32 intValue = 2 [default = 0];
 	optional uint32 uintValue = 3 [default = 0];
 	optional double doubleValue = 4 [default = 0];
-	optional bool boolValue = 5 [default = 0];
+	optional bool boolValue = 5 [default = false];
 }
 
 
@@ -602,14 +602,17 @@ message DeviceController
 
 message DeviceSignal
 {
-        optional int32 type = 1 [default = 0];
+		optional int32 obsoletetype = 1 [default = 0];			// old type format, not used anymore, RPCT-345
+
         optional int32 byteOrder = 2 [default = 0];
         optional int32 format = 3 [default = 0];
         optional int32 size = 4 [default = 0];
         optional int32 validityOffset = 5 [default = 0];
         optional int32 validityBit = 6 [default = 0];
         optional int32 valueOffset = 7 [default = 0];
-        optional int32 valueBit = 8 [default = 0];
+		optional int32 valueBit = 8 [default = 0];
+		optional int32 type = 9 [default = 0];					// RPCT-345
+		optional int32 function = 10 [default = 0];				// RPCT-345
 }
 
 message Workstation

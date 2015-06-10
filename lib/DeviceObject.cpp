@@ -1676,10 +1676,11 @@ namespace Hardware
 
 		// --
 		//
-		Proto::DeviceSignal* signalMessage =
-				message->mutable_deviceobject()->mutable_signal();
+		Proto::DeviceSignal* signalMessage = message->mutable_deviceobject()->mutable_signal();
 
 		signalMessage->set_type(static_cast<int>(m_type));
+		signalMessage->set_format(static_cast<int>(m_type));
+
 		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
 		signalMessage->set_format(static_cast<int>(m_format));
 
@@ -1718,7 +1719,49 @@ namespace Hardware
 
 		const Proto::DeviceSignal& signalMessage = message.deviceobject().signal();
 
-		m_type = static_cast<SignalType>(signalMessage.type());
+		if (signalMessage.has_obsoletetype() == true)
+		{
+			assert(signalMessage.has_type() == false);
+			assert(signalMessage.has_function() == false);
+
+			Obsolete::SignalType obsoleteType = static_cast<Obsolete::SignalType>(signalMessage.obsoletetype());
+
+			switch (obsoleteType)
+			{
+				case Obsolete::SignalType::DiagDiscrete:
+					m_type = SignalType::Discrete;
+					m_function = SignalFunction::Diagnostics;
+					break;
+				case Obsolete::SignalType::DiagAnalog:
+					m_type = SignalType::Analog;
+					m_function = SignalFunction::Diagnostics;
+					break;
+				case Obsolete::SignalType::InputDiscrete:
+					m_type = SignalType::Discrete;
+					m_function = SignalFunction::Input;
+					break;
+				case Obsolete::SignalType::InputAnalog:
+					m_type = SignalType::Analog;
+					m_function = SignalFunction::Input;
+					break;
+				case Obsolete::SignalType::OutputDiscrete:
+					m_type = SignalType::Discrete;
+					m_function = SignalFunction::Output;
+					break;
+				case Obsolete::SignalType::OutputAnalog:
+					m_type = SignalType::Analog;
+					m_function = SignalFunction::Output;
+					break;
+				default:
+					assert(false);
+			}
+		}
+		else
+		{
+			m_type = static_cast<SignalType>(signalMessage.type());
+			m_function = static_cast<SignalFunction>(signalMessage.function());
+		}
+
 		m_byteOrder = static_cast<ByteOrder>(signalMessage.byteorder());
 		m_format = static_cast<DataFormat>(signalMessage.format());
 
@@ -1748,10 +1791,24 @@ namespace Hardware
         return static_cast<int>(type());
     }
 
-
     void DeviceSignal::setType(DeviceSignal::SignalType value)
 	{
 		m_type = value;
+	}
+
+	DeviceSignal::SignalFunction DeviceSignal::function() const
+	{
+		return m_function;
+	}
+
+	int DeviceSignal::jsFunction() const
+	{
+		return static_cast<int>(function());
+	}
+
+	void DeviceSignal::setFunction(DeviceSignal::SignalFunction value)
+	{
+		m_function = value;
 	}
 
 	DeviceSignal::ByteOrder DeviceSignal::byteOrder() const
@@ -1826,31 +1883,27 @@ namespace Hardware
 
 	bool DeviceSignal::isInputSignal() const
 	{
-		return m_type == SignalType::InputAnalog || m_type == SignalType::InputDiscrete;
+		return m_function == SignalFunction::Input;
 	}
 
 	bool DeviceSignal::isOutputSignal() const
 	{
-		return m_type == SignalType::OutputAnalog || m_type == SignalType::OutputDiscrete;
+		return m_function == SignalFunction::Output;
 	}
 
 	bool DeviceSignal::isDiagSignal() const
 	{
-		return m_type == SignalType::DiagAnalog || m_type == SignalType::DiagDiscrete;
+		return m_function == SignalFunction::Diagnostics;
 	}
 
 	bool DeviceSignal::isAnalogSignal() const
 	{
-		return	m_type == SignalType::InputAnalog ||
-				m_type == SignalType::OutputAnalog ||
-				m_type == SignalType::DiagAnalog;
+		return	m_type == SignalType::Analog;
 	}
 
 	bool DeviceSignal::isDiscreteSignal() const
 	{
-		return	m_type == SignalType::InputDiscrete ||
-				m_type == SignalType::OutputDiscrete ||
-				m_type == SignalType::DiagDiscrete;
+		return	m_type == SignalType::Discrete;
 	}
 
 
