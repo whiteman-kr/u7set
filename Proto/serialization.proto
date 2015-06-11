@@ -176,10 +176,11 @@ message AfbElementXml
 //
 message FblElement
 {
-	required Uuid uuid = 1;
 	required wstring strID = 2;
 	required wstring caption = 3;
 	required uint32 opcode = 4;
+	optional bool hasRam = 5 [default = false];
+	optional bool requiredStart = 6 [default = true];
 
 	repeated FblElementSignal inputSignals = 11;
 	repeated FblElementSignal outputSignals = 12;

@@ -1199,15 +1199,6 @@ class FblElement : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.Uuid uuid = 1;
-  inline bool has_uuid() const;
-  inline void clear_uuid();
-  static const int kUuidFieldNumber = 1;
-  inline const ::Proto::Uuid& uuid() const;
-  inline ::Proto::Uuid* mutable_uuid();
-  inline ::Proto::Uuid* release_uuid();
-  inline void set_allocated_uuid(::Proto::Uuid* uuid);
-
   // required .Proto.wstring strID = 2;
   inline bool has_strid() const;
   inline void clear_strid();
@@ -1232,6 +1223,20 @@ class FblElement : public ::google::protobuf::Message {
   static const int kOpcodeFieldNumber = 4;
   inline ::google::protobuf::uint32 opcode() const;
   inline void set_opcode(::google::protobuf::uint32 value);
+
+  // optional bool hasRam = 5 [default = false];
+  inline bool has_hasram() const;
+  inline void clear_hasram();
+  static const int kHasRamFieldNumber = 5;
+  inline bool hasram() const;
+  inline void set_hasram(bool value);
+
+  // optional bool requiredStart = 6 [default = true];
+  inline bool has_requiredstart() const;
+  inline void clear_requiredstart();
+  static const int kRequiredStartFieldNumber = 6;
+  inline bool requiredstart() const;
+  inline void set_requiredstart(bool value);
 
   // repeated .Proto.FblElementSignal inputSignals = 11;
   inline int inputsignals_size() const;
@@ -1271,27 +1276,30 @@ class FblElement : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Proto.FblElement)
  private:
-  inline void set_has_uuid();
-  inline void clear_has_uuid();
   inline void set_has_strid();
   inline void clear_has_strid();
   inline void set_has_caption();
   inline void clear_has_caption();
   inline void set_has_opcode();
   inline void clear_has_opcode();
+  inline void set_has_hasram();
+  inline void clear_has_hasram();
+  inline void set_has_requiredstart();
+  inline void clear_has_requiredstart();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::Uuid* uuid_;
   ::Proto::wstring* strid_;
   ::Proto::wstring* caption_;
+  ::google::protobuf::uint32 opcode_;
+  bool hasram_;
+  bool requiredstart_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > inputsignals_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > outputsignals_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
-  ::google::protobuf::uint32 opcode_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6292,53 +6300,15 @@ inline void AfbElementXml::set_allocated_data(::std::string* data) {
 
 // FblElement
 
-// required .Proto.Uuid uuid = 1;
-inline bool FblElement::has_uuid() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void FblElement::set_has_uuid() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void FblElement::clear_has_uuid() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void FblElement::clear_uuid() {
-  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
-  clear_has_uuid();
-}
-inline const ::Proto::Uuid& FblElement::uuid() const {
-  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
-}
-inline ::Proto::Uuid* FblElement::mutable_uuid() {
-  set_has_uuid();
-  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
-  return uuid_;
-}
-inline ::Proto::Uuid* FblElement::release_uuid() {
-  clear_has_uuid();
-  ::Proto::Uuid* temp = uuid_;
-  uuid_ = NULL;
-  return temp;
-}
-inline void FblElement::set_allocated_uuid(::Proto::Uuid* uuid) {
-  delete uuid_;
-  uuid_ = uuid;
-  if (uuid) {
-    set_has_uuid();
-  } else {
-    clear_has_uuid();
-  }
-}
-
 // required .Proto.wstring strID = 2;
 inline bool FblElement::has_strid() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
 inline void FblElement::set_has_strid() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
 }
 inline void FblElement::clear_has_strid() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void FblElement::clear_strid() {
   if (strid_ != NULL) strid_->::Proto::wstring::Clear();
@@ -6370,13 +6340,13 @@ inline void FblElement::set_allocated_strid(::Proto::wstring* strid) {
 
 // required .Proto.wstring caption = 3;
 inline bool FblElement::has_caption() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void FblElement::set_has_caption() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void FblElement::clear_has_caption() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void FblElement::clear_caption() {
   if (caption_ != NULL) caption_->::Proto::wstring::Clear();
@@ -6408,13 +6378,13 @@ inline void FblElement::set_allocated_caption(::Proto::wstring* caption) {
 
 // required uint32 opcode = 4;
 inline bool FblElement::has_opcode() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void FblElement::set_has_opcode() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void FblElement::clear_has_opcode() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void FblElement::clear_opcode() {
   opcode_ = 0u;
@@ -6426,6 +6396,50 @@ inline ::google::protobuf::uint32 FblElement::opcode() const {
 inline void FblElement::set_opcode(::google::protobuf::uint32 value) {
   set_has_opcode();
   opcode_ = value;
+}
+
+// optional bool hasRam = 5 [default = false];
+inline bool FblElement::has_hasram() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void FblElement::set_has_hasram() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void FblElement::clear_has_hasram() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void FblElement::clear_hasram() {
+  hasram_ = false;
+  clear_has_hasram();
+}
+inline bool FblElement::hasram() const {
+  return hasram_;
+}
+inline void FblElement::set_hasram(bool value) {
+  set_has_hasram();
+  hasram_ = value;
+}
+
+// optional bool requiredStart = 6 [default = true];
+inline bool FblElement::has_requiredstart() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void FblElement::set_has_requiredstart() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void FblElement::clear_has_requiredstart() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void FblElement::clear_requiredstart() {
+  requiredstart_ = true;
+  clear_has_requiredstart();
+}
+inline bool FblElement::requiredstart() const {
+  return requiredstart_;
+}
+inline void FblElement::set_requiredstart(bool value) {
+  set_has_requiredstart();
+  requiredstart_ = value;
 }
 
 // repeated .Proto.FblElementSignal inputSignals = 11;
