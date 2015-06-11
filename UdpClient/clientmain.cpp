@@ -13,12 +13,14 @@
     #endif
 #endif
 
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
 	//qRegisterMetaType<QHostAddress>("QHostAddress");
+
+	//qRegisterMetaType<QByteArrayRef>();
+	//Q_DECLARE_METATYPE(QByteArrayRef);
 
     MainWindow w;
     w.show();

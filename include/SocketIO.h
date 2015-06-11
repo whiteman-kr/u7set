@@ -101,8 +101,8 @@ const ServiceTypeInfo serviceTypesInfo[] =
 class HostAddressPort
 {
 private:
-	quint16 m_port = 0;
 	QHostAddress m_hostAddress;
+	quint16 m_port = 0;
 
 public:
 	HostAddressPort() {}

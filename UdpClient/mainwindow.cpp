@@ -29,6 +29,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+	m_protoUdpClientThread->quit();
+	delete m_protoUdpClientThread;
+
 	stopFscDataSources();
 	delete ui;
 	delete m_ServiceController;
@@ -55,11 +58,17 @@ void MainWindow::stopFscDataSources()
 
 void MainWindow::on_pushButton_clicked()
 {
-	UdpRequest request;
+	/*UdpRequest request;
 
 	request.setID(RQID_GET_DATA_SOURCES_IDS);
 
-	emit clientSendRequest(request);
+	emit clientSendRequest(request);*/
+
+	QByteArray qq;
+
+	qq.resize(100);
+
+	m_protoUdpClientThread->sendRequest(22, qq);
 }
 
 void MainWindow::on_sendFileButton_clicked()

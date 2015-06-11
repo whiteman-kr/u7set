@@ -7,6 +7,7 @@
 #include <QUuid>
 #include <QUdpSocket>
 #include <cassert>
+#include "../include/SocketIO.h"
 
 
 #pragma pack(push, 1)
@@ -67,13 +68,19 @@ union ProtoUdpFrame
 #pragma pack(pop)
 
 
+// -------------------------------------------------------------------------------------
+//
+// ProtoUdpSocket class declaration
+//
+// -------------------------------------------------------------------------------------
+
+
 class ProtoUdpSocket : public QObject
 {
 	Q_OBJECT
-/*private:
-	static bool metaTypesRegistered;*/
 
 protected:
+	HostAddressPort m_serverAddress;
 
 	QUdpSocket m_socket;
 	QTimer m_timer;
@@ -93,11 +100,11 @@ protected:
 	void copyDataToFrame(ProtoUdpFrame& protoUdpFrame, const QByteArray& data);
 
 public:
-	ProtoUdpSocket() {}
-	~ProtoUdpSocket() {}
+	ProtoUdpSocket();
+	~ProtoUdpSocket();
 
 public slots:
-	void onThreadStarted() {};
+	void onThreadStarted() {}
 	void onThreadFinished() { deleteLater(); }
 };
 
@@ -128,65 +135,122 @@ struct ProtoUdpClientStatus
 };
 
 
+// -------------------------------------------------------------------------------------
+//
+// ProtoUdpClient class declaration
+//
+// -------------------------------------------------------------------------------------
+
+
 class ProtoUdpClient : public ProtoUdpSocket
 {
+	Q_OBJECT
+
 private:
+	HostAddressPort m_firstServerAddress;
+	HostAddressPort m_secondServerAddress;
+	bool m_communicateWithFirstServer = true;
+
 	ProtoUdpClientStatus m_status;
 
 	quint32 m_clientID = 0;
 
 	int m_retryCount = 0;
 
-	QHostAddress m_serverAddress;
-	quint16 m_serverPort = 0;
-
 	quint32 m_requestID = 0;
 
+	void continueSendRequest();
 	void sendRequestFrame();
 
-	void onTimerTimeout();
-	void onSocketReadyRead();
+	void calcRequestSendingProgress();
+	void setRequestSendingProgress(int progress) { m_status.requestSendingProgress = progress; }
+
+	void calcReplyReceivingProgress();
+	void setReplyReceivingProgress(int progress) { m_status.replayReceivingProgress = progress; }
 
 	ProtoUdpClientState state() { return m_status.state; }
 	void setState(ProtoUdpClientState state) { m_status.state = state; }
 
 	void setError(ProtoUdpError error) { m_status.error = error; }
 
+private slots:
+	void onTimerTimeout();
+	void onSocketReadyRead();
+
+	void onRestartCommunication();
+
 public:
-	ProtoUdpClient(const QHostAddress& serverAddress, quint16 serverPort);
+	ProtoUdpClient(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress);
 	~ProtoUdpClient();
 
-	QHostAddress serverAddress() const { return m_serverAddress; }
-	void setServerAddress(const QHostAddress& address) { m_serverAddress = address; }
+	void setServersAddresses(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress);
 
-	quint16 serverPort() const { return m_serverPort; }
-	void setServerPort(quint16 port) { m_serverPort = port; }
+	void switchServer();
+	void switchToFirstServer();
+	void switchToSecondServer();
 
 	bool isReadyToSendRequest() { return state() == ProtoUdpClientState::ReadyToSendRequest; }
-	bool sendRequest(quint32 requestID, QByteArray requestData);
+	void sendRequest(quint32 requestID, QByteArray& requestData);
+
+public slots:
+	void onStartSendRequest();
+
+signals:
+	void startSendRequest();
+	void restartCommunication();
 };
 
 
-
-class ProtoUdpServer : public ProtoUdpSocket
-{
-
-};
+// -------------------------------------------------------------------------------------
+//
+// ProtoUdpClientThread class declaration
+//
+// -------------------------------------------------------------------------------------
 
 
 class ProtoUdpClientThread : public QObject
 {
 	Q_OBJECT
 
+private:
+	QThread m_thread;
+	ProtoUdpClient* m_protoUdpClient = nullptr;
+
 public:
-	ProtoUdpClientThread(const QHostAddress& serverAddress, quint16 serverPort);
+	ProtoUdpClientThread(const HostAddressPort& serverAddress);
+	ProtoUdpClientThread(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress);
 	~ProtoUdpClientThread();
 
 	void run();
 	void quit() { m_thread.quit(); }
 
-private:
-	QThread m_thread;
-	ProtoUdpClient* m_protoUdpClient = nullptr;
+	void sendRequest(quint32 requestID, QByteArray& requestData);
 };
+
+
+// -------------------------------------------------------------------------------------
+//
+// ProtoUdpServer class declaration
+//
+// -------------------------------------------------------------------------------------
+
+
+class ProtoUdpServer : public ProtoUdpSocket
+{
+	Q_OBJECT
+
+private:
+
+public:
+	ProtoUdpServer(const QHostAddress& serverAddress, quint16 serverPort);
+	~ProtoUdpServer();
+};
+
+// -------------------------------------------------------------------------------------
+//
+// ProtoUdpServerThread class declaration
+//
+// -------------------------------------------------------------------------------------
+
+
 

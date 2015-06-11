@@ -1,10 +1,23 @@
 #include "..\include\ProtoUdpSocket.h"
 
+
 // -------------------------------------------------------------------------------------
 //
 // ProtoUdpSocket class implementation
 //
 // -------------------------------------------------------------------------------------
+
+
+ProtoUdpSocket::ProtoUdpSocket() :
+	m_socket(this),
+	m_timer(this)
+{
+}
+
+
+ProtoUdpSocket::~ProtoUdpSocket()
+{
+}
 
 
 quint32 ProtoUdpSocket::getTotalFramesNumber(quint32 dataSize)
@@ -52,16 +65,21 @@ void ProtoUdpSocket::copyDataToFrame(ProtoUdpFrame& protoUdpFrame, const QByteAr
 // -------------------------------------------------------------------------------------
 
 
-ProtoUdpClient::ProtoUdpClient(const QHostAddress& serverAddress, quint16 serverPort) :
-	m_serverAddress(serverAddress),
-	m_serverPort(serverPort)
+ProtoUdpClient::ProtoUdpClient(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress) :
+	m_firstServerAddress(firstServerAddress),
+	m_secondServerAddress(secondServerAddress)
 {
+	m_serverAddress = firstServerAddress;
+	m_communicateWithFirstServer = true;
+
 	m_clientID = qHash(QUuid::createUuid());
 
 	m_socket.bind();
 
 	connect(&m_timer, &QTimer::timeout, this, &ProtoUdpClient::onTimerTimeout);
 	connect(&m_socket, &QUdpSocket::readyRead, this, &ProtoUdpClient::onSocketReadyRead);
+
+	connect(this, &ProtoUdpClient::startSendRequest, this, &ProtoUdpClient::onStartSendRequest);
 }
 
 
@@ -70,10 +88,21 @@ ProtoUdpClient::~ProtoUdpClient()
 }
 
 
-bool ProtoUdpClient::sendRequest(quint32 requestID, QByteArray requestData)
+void ProtoUdpClient::setServersAddresses(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress)
 {
-	bool result = true;
+	m_sync.lock();
 
+	m_firstServerAddress = firstServerAddress;
+	m_secondServerAddress = secondServerAddress;
+
+	emit restartCommunication();
+
+	m_sync.unlock();
+}
+
+
+void ProtoUdpClient::sendRequest(quint32 requestID, QByteArray& requestData)
+{
 	m_sync.lock();
 
 	if (state() == ProtoUdpClientState::ReadyToSendRequest)
@@ -82,28 +111,20 @@ bool ProtoUdpClient::sendRequest(quint32 requestID, QByteArray requestData)
 
 		m_requestID = requestID;
 
-
-		copyDataToFrame(m_requestFrame, m_requestData);
-
-		sendRequestFrame();
-
-		setState(ProtoUdpClientState::ReadyToSendRequest);
+		emit startSendRequest();
 	}
 	else
 	{
 		// m_clientState != ClientState::ReadyToSendRequest
 		//
 		assert(false);
-		result = false;
 	}
 
 	m_sync.unlock();
-
-	return result;
 }
 
 
-void ProtoUdpClient::sendRequestFrame()
+void ProtoUdpClient::onStartSendRequest()
 {
 	m_requestFrame.header.type = ProtoUdpFrameHeader::Type::Request;
 	m_requestFrame.header.clientID = m_clientID;
@@ -112,7 +133,46 @@ void ProtoUdpClient::sendRequestFrame()
 	m_requestFrame.header.frameNumber = 0;
 	m_requestFrame.header.errorCode = 0;
 
-	qint64 senBytesCount = m_socket.writeDatagram(reinterpret_cast<const char*>(&m_requestFrame), sizeof(m_requestFrame), m_serverAddress, m_serverPort);
+	copyDataToFrame(m_requestFrame, m_requestData);
+
+	setState(ProtoUdpClientState::RequestSending);
+	setError(ProtoUdpError::Ok);
+
+	calcRequestSendingProgress();
+	setReplyReceivingProgress(0);
+
+	sendRequestFrame();
+}
+
+
+void ProtoUdpClient::continueSendRequest()
+{
+	m_requestFrame.header.frameNumber++;
+
+	copyDataToFrame(m_requestFrame, m_requestData);
+
+	sendRequestFrame();
+}
+
+
+void ProtoUdpClient::calcRequestSendingProgress()
+{
+	quint32 sentDataSize = (m_requestFrame.header.frameNumber + 1) * PROTO_UDP_FRAME_DATA_SIZE;
+
+	if (sentDataSize >= m_requestFrame.header.totalDataSize)
+	{
+		setRequestSendingProgress(100);
+	}
+	else
+	{
+		setRequestSendingProgress(static_cast<int>(double(sentDataSize * 100) / double(m_requestFrame.header.totalDataSize)));
+	}
+}
+
+
+void ProtoUdpClient::sendRequestFrame()
+{
+	qint64 senBytesCount = m_socket.writeDatagram(reinterpret_cast<const char*>(&m_requestFrame), sizeof(m_requestFrame), m_serverAddress.address(), m_serverAddress.port());
 
 	assert(senBytesCount == sizeof(m_requestFrame));
 
@@ -135,10 +195,14 @@ void ProtoUdpClient::onTimerTimeout()
 		}
 		else
 		{
+			m_timer.stop();
+
 			m_requestFrame.header.clear();
 
 			setError(ProtoUdpError::NoReplayFromServer);
 			setState(ProtoUdpClientState::ReadyToSendRequest);
+
+			qDebug() << "NoReplayFromServer";
 		}
 
 		break;
@@ -162,29 +226,59 @@ void ProtoUdpClient::onSocketReadyRead()
 //
 // -------------------------------------------------------------------------------------
 
- ProtoUdpClientThread::ProtoUdpClientThread(const QHostAddress& serverAddress, quint16 serverPort)
- {
-	  m_protoUdpClient = new ProtoUdpClient(serverAddress, serverPort);
- }
+
+ProtoUdpClientThread::ProtoUdpClientThread(const HostAddressPort& serverAddress)
+{
+	m_protoUdpClient = new ProtoUdpClient(serverAddress, serverAddress);
+}
 
 
- void ProtoUdpClientThread::run()
- {
-	 m_protoUdpClient->moveToThread(&m_thread);
-
-	 connect(&m_thread, &QThread::started, m_protoUdpClient, &ProtoUdpClient::onThreadStarted);
-	 connect(&m_thread, &QThread::finished, m_protoUdpClient, &ProtoUdpClient::onThreadFinished);
-
-	 m_thread.start();
- }
+ProtoUdpClientThread::ProtoUdpClientThread(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress)
+{
+	m_protoUdpClient = new ProtoUdpClient(firstServerAddress, secondServerAddress);
+}
 
 
- ProtoUdpClientThread::~ProtoUdpClientThread()
- {
-	 m_thread.quit();
-	 m_thread.wait();
- }
+void ProtoUdpClientThread::run()
+{
+	m_protoUdpClient->moveToThread(&m_thread);
+
+	connect(&m_thread, &QThread::started, m_protoUdpClient, &ProtoUdpClient::onThreadStarted);
+	connect(&m_thread, &QThread::finished, m_protoUdpClient, &ProtoUdpClient::onThreadFinished);
+
+	m_thread.start();
+}
 
 
+ProtoUdpClientThread::~ProtoUdpClientThread()
+{
+	m_thread.quit();
+	m_thread.wait();
+}
+
+
+void ProtoUdpClientThread::sendRequest(quint32 requestID, QByteArray& requestData)
+{
+	m_protoUdpClient->sendRequest(requestID, requestData);
+}
+
+
+// -------------------------------------------------------------------------------------
+//
+// ProtoUdpServer class implementation
+//
+// -------------------------------------------------------------------------------------
+
+
+ProtoUdpServer::ProtoUdpServer(const QHostAddress& serverAddress, quint16 serverPort)
+{
+
+}
+
+
+ProtoUdpServer::~ProtoUdpServer()
+{
+
+}
 
 
