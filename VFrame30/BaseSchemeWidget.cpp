@@ -139,6 +139,7 @@ namespace VFrame30
 
 		// Event was not accepted
 		//
+		event->setAccepted(false);
 		return;
 	}
 
@@ -158,6 +159,7 @@ namespace VFrame30
 
 		// Event was not accepted
 		//
+		event->setAccepted(false);
 		return;
 	}
 
