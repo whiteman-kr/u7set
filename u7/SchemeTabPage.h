@@ -23,8 +23,10 @@ public:
 	virtual void openFile(std::vector<DbFileInfo> files) override;
 	virtual void viewFile(std::vector<DbFileInfo> files) override;
 	virtual void addFile() override;
-	virtual void deleteFile(std::vector<DbFileInfo> files) override;
 	virtual void checkIn(std::vector<DbFileInfo> files) override;
+	virtual void undoChanges(std::vector<DbFileInfo> files) override;
+	virtual void deleteFile(std::vector<DbFileInfo> files) override;
+	virtual void fileDoubleClicked(DbFileInfo file) override;
 
 signals:
 	void openFileSignal(std::vector<DbFileInfo> files);
@@ -32,6 +34,7 @@ signals:
 	void addFileSignal();
 	void deleteFileSignal(std::vector<DbFileInfo> files);
 	void checkInSignal(std::vector<DbFileInfo> files);
+	void undoChangesSignal(std::vector<DbFileInfo> files);
 
 	// Data
 	//
@@ -83,7 +86,7 @@ class SchemeControlTabPage : public QWidget, public HasDbController
 public:
     SchemeControlTabPage(
         const QString& fileExt,
-        DbController* dbcontroller,
+		DbController* db,
         const QString& parentFileName,
         std::function<VFrame30::Scheme*()> createVideoFrameFunc);
 
@@ -105,6 +108,7 @@ protected slots:
     void deleteFile(std::vector<DbFileInfo> files);
 
 	void checkIn(std::vector<DbFileInfo> files);
+	void undoChanges(std::vector<DbFileInfo> files);
 
     void openFiles(std::vector<DbFileInfo> files);
     void viewFiles(std::vector<DbFileInfo> files);
@@ -164,7 +168,7 @@ class EditSchemeTabPage : public QWidget, public HasDbController
 
 public:
 	EditSchemeTabPage() = delete;
-	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller);
+	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* db);
 	virtual ~EditSchemeTabPage();
 
 	// Public methods

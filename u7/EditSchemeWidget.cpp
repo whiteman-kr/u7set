@@ -1704,29 +1704,30 @@ void EditSchemeWidget::createActions()
 	m_viewAction = new QAction(tr("View"), this);
 	m_viewAction->setEnabled(true);
 
-	// View->ZoomIn
+	// View->ZoomIn, creating of these actions was moved to VFrame30::BaseSchemeWidget
 	//
-	m_zoomInAction = new QAction(tr("Zoom In"), this);
-	m_zoomInAction->setEnabled(true);
-	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
-	connect(m_zoomInAction, &QAction::triggered, this, &EditSchemeWidget::zoomIn);
-	addAction(m_zoomInAction);
+//	m_zoomInAction = new QAction(tr("Zoom In"), this);
+//	m_zoomInAction->setEnabled(true);
+//	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
+//	m_zoomInAction->setShortcutContext(Qt::ShortcutContext::WindowShortcut);
+//	connect(m_zoomInAction, &QAction::triggered, this, &EditSchemeWidget::zoomIn);
+//	addAction(m_zoomInAction);
 
-	// View->ZoomOut
-	//
-	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
-	m_zoomOutAction->setEnabled(true);
-	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
-	connect(m_zoomOutAction, &QAction::triggered, this, &EditSchemeWidget::zoomOut);
-	addAction(m_zoomOutAction);
+//	// View->ZoomOut
+//	//
+//	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
+//	m_zoomOutAction->setEnabled(true);
+//	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+//	connect(m_zoomOutAction, &QAction::triggered, this, &EditSchemeWidget::zoomOut);
+//	addAction(m_zoomOutAction);
 
-	// View->Zoom100
-	//
-	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
-	m_zoom100Action->setEnabled(true);
-	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
-	connect(m_zoom100Action, &QAction::triggered, this, &EditSchemeWidget::zoom100);
-	addAction(m_zoom100Action);
+//	// View->Zoom100
+//	//
+//	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
+//	m_zoom100Action->setEnabled(true);
+//	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+//	connect(m_zoom100Action, &QAction::triggered, this, &EditSchemeWidget::zoom100);
+//	addAction(m_zoom100Action);
 
 	// ------------------------------------
 	//

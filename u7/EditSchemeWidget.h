@@ -446,9 +446,9 @@ private:
 	//
 	QMenu* m_viewMenu;
 	QAction* m_viewAction;
-		QAction* m_zoomInAction;
-		QAction* m_zoomOutAction;
-		QAction* m_zoom100Action;
+		//QAction* m_zoomInAction;		These actions were moved to VFrame30::BaseSchemeWidget
+		//QAction* m_zoomOutAction;
+		//QAction* m_zoom100Action;
 		// ------------------------------
 		QAction* m_viewSeparatorAction0;
 		QAction* m_snapToGridAction;

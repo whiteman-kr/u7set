@@ -104,6 +104,7 @@ void FileListModel::addFile(std::shared_ptr<DbFileInfo> file)
 {
 	if (file->fileName().endsWith(m_filter, Qt::CaseInsensitive) == true)
 	{
+		emit layoutAboutToBeChanged();
 		m_files.push_back(file);
 		emit layoutChanged();
 	}
@@ -111,6 +112,8 @@ void FileListModel::addFile(std::shared_ptr<DbFileInfo> file)
 
 void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
 {
+	emit layoutAboutToBeChanged();
+
 	m_files.clear();
 
 	for (auto f = files.begin(); f != files.end(); ++f)
@@ -129,6 +132,7 @@ void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
 
 void FileListModel::clear()
 {
+	emit layoutAboutToBeChanged();
 	m_files.clear();
 	emit layoutChanged();
 	return;
@@ -266,6 +270,8 @@ FileListView::FileListView(DbController* pDbStore, const QString& parentFileName
 	connect(dbController(), &DbController::projectClosed, this, &FileListView::projectClosed);
 
 	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &FileListView::filesViewSelectionChanged);
+
+	connect(this, &QTableView::doubleClicked, this, &FileListView::slot_doubleClicked);
 
 	return;
 }
@@ -630,6 +636,11 @@ void FileListView::refreshFiles()
 	return;
 }
 
+void FileListView::fileDoubleClicked(DbFileInfo /*file*/)
+{
+}
+
+
 void FileListView::projectOpened()
 {
 	this->setEnabled(true);
@@ -894,6 +905,25 @@ void FileListView::slot_SetWorkcopy()
 void FileListView::slot_RefreshFiles()
 {
 	refreshFiles();
+
+	return;
+}
+
+void FileListView::slot_doubleClicked(const QModelIndex& index)
+{
+	if (index.isValid() == true)
+	{
+		std::shared_ptr<DbFileInfo> file = m_filesModel.fileByRow(index.row());
+
+		if (file.get() != nullptr)
+		{
+			fileDoubleClicked(*(file.get()));
+		}
+		else
+		{
+			assert(file.get() != nullptr);
+		}
+	}
 
 	return;
 }
