@@ -1676,13 +1676,13 @@ HasDbController::HasDbController()
 }
 
 HasDbController::HasDbController(DbController* dbcontroller) :
-	m_dbController(dbcontroller)
+	m_db(dbcontroller)
 {
 	assert(dbcontroller);
 }
 
-DbController* HasDbController::dbcontroller()
+DbController* HasDbController::db()
 {
-	return m_dbController;
+	return m_db;
 }
 

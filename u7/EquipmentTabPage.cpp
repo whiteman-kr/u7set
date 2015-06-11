@@ -429,10 +429,6 @@ void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder
 
 	// Sort
 	//
-	//QModelIndex rootIndex = index(0, 0, QModelIndex());
-	//Hardware::DeviceObject* parent = deviceObject(rootIndex);
-
-	//sortDeviceObject(parent, column, order);
 	sortDeviceObject(m_configuration.get(), column, order);
 	sortDeviceObject(m_preset.get(), column, order);
 

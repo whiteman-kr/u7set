@@ -57,6 +57,7 @@
 #include <QtScript/QtScript>
 #include <QJSEngine>
 #include <QQmlEngine>
+#include <QAction>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
