@@ -33,6 +33,8 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSignal>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
+
+		QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
 	}
 
 	void Shutdwon()
@@ -712,6 +714,18 @@ namespace Hardware
         QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
         return c;
     }
+
+	int DeviceObject::jsPropertyInt(QString name) const
+	{
+		QVariant v = property(name.toStdString().c_str());
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return 0;
+		}
+
+		return v.toInt();
+	}
 
     DeviceType DeviceObject::deviceType() const
 	{
@@ -1677,7 +1691,7 @@ namespace Hardware
 		Proto::DeviceSignal* signalMessage = message->mutable_deviceobject()->mutable_signal();
 
 		signalMessage->set_type(static_cast<int>(m_type));
-		signalMessage->set_format(static_cast<int>(m_type));
+		signalMessage->set_function(static_cast<int>(m_function));
 
 		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
 		signalMessage->set_format(static_cast<int>(m_format));
@@ -2141,6 +2155,43 @@ namespace Hardware
 		}
 
 		return;
+	}
+
+	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren, std::function<void (DeviceObject*)> processAfterChildren)
+	{
+		if (currentDevice == nullptr)
+		{
+			assert(currentDevice != nullptr);
+
+			QString msg = QString(QObject::tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
+
+			qDebug() << msg;
+			return;
+		}
+
+		if (processBeforeChildren != nullptr)
+		{
+			processBeforeChildren(currentDevice);
+		}
+
+		int childrenCount = currentDevice->childrenCount();
+
+		for(int i = 0; i < childrenCount; i++)
+		{
+			Hardware::DeviceObject* device = currentDevice->child(i);
+
+			equipmentWalker(device, processBeforeChildren, processAfterChildren);
+		}
+
+		if (processAfterChildren != nullptr)
+		{
+			processAfterChildren(currentDevice);
+		}
+	}
+
+	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren)
+	{
+		equipmentWalker(currentDevice, processBeforeChildren, nullptr);
 	}
 
 }

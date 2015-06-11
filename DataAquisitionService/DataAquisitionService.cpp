@@ -1,6 +1,7 @@
 #include "DataAquisitionService.h"
 #include <QXmlStreamReader>
 #include "../include/DeviceObject.h"
+#include <QMetaProperty>
 
 // DataAquisitionService class implementation
 //
@@ -24,15 +25,41 @@ void DataServiceMainFunctionWorker::initDataSources()
 {
 	m_dataSources.clear();
 
-	// test data sources creation
-	//
-	for(int i = 1; i <= 15; i++)
+	if (m_deviceRoot == nullptr)
 	{
-		DataSource ds(i, QString("Data Source %1").arg(i),
-					  QHostAddress(QString("192.168.14.%1").arg(70+ i)), 1);
-
-		m_dataSources.insert(i, ds);
+		return;
 	}
+
+	Hardware::equipmentWalker(m_deviceRoot.get(), [this](Hardware::DeviceObject* currentDevice)
+	{
+		if (currentDevice == nullptr)
+		{
+			return;
+		}
+		if (typeid(*currentDevice) != typeid(Hardware::DeviceModule))
+		{
+			return;
+		}
+		Hardware::DeviceModule* currentModule = dynamic_cast<Hardware::DeviceModule*>(currentDevice);
+		if (currentModule == nullptr)
+		{
+			return;
+		}
+		if (currentModule->moduleFamily() != Hardware::DeviceModule::LM)
+		{
+			return;
+		}
+		if (currentModule->property("Network\\RegServerIP").isValid())
+		{
+			int key = m_dataSources.count() + 1;
+			QString ipStr = currentModule->property("Network\\RegServerIP").toString();
+			QHostAddress ha(ipStr);
+			quint32 ip = ha.toIPv4Address();
+			DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
+			m_dataSources.insert(key, ds);
+
+		}
+	});
 }
 
 
@@ -92,7 +119,7 @@ void DataServiceMainFunctionWorker::readEquipmentConfig()
 				if (typeid(*pDeviceObject) == typeid(Hardware::DeviceRoot))
 				{
 					pCurrentDevice = pDeviceObject.get();
-					pDeviceRoot = std::dynamic_pointer_cast<Hardware::DeviceRoot>(pDeviceObject);
+					m_deviceRoot = std::dynamic_pointer_cast<Hardware::DeviceRoot>(pDeviceObject);
 					continue;
 				}
 
@@ -109,7 +136,21 @@ void DataServiceMainFunctionWorker::readEquipmentConfig()
 					if (property.isValid())
 					{
 						const char* name = property.name();
-						pDeviceObject->property(name).fromValue(attr.value(name).toString());
+						if (property.type() == QVariant::UserType)
+						{
+							if (property.userType() == qMetaTypeId<Hardware::DeviceModule::FamilyType>())
+							{
+								pDeviceObject->setProperty(name, QVariant::fromValue(Hardware::DeviceModule::FamilyType(attr.value(name).toInt())));
+							}
+							else
+							{
+								assert(false);
+							}
+						}
+						else
+						{
+							pDeviceObject->setProperty(name, QVariant::fromValue(attr.value(name).toString()));
+						}
 					}
 				}
 
@@ -243,8 +284,8 @@ void DataServiceMainFunctionWorker::initialize()
 {
 	// Service Main Function initialization
 	//
-	initDataSources();
 	readConfigurationFiles();
+	initDataSources();
 
 	runUdpThreads();
 	runFscDataReceivingThreads();
