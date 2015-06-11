@@ -9,16 +9,21 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	UdpClientSocket* m_clientSocket = new UdpClientSocket(QHostAddress("127.0.0.1"), PORT_DATA_AQUISITION_SERVICE_INFO);
+	/*UdpClientSocket* m_clientSocket = new UdpClientSocket(QHostAddress("127.0.0.1"), PORT_DATA_AQUISITION_SERVICE_INFO);
 
 	connect(this, &MainWindow::clientSendRequest, m_clientSocket, &UdpClientSocket::sendRequest);
 	connect(m_clientSocket, &UdpClientSocket::ackReceived, this, &MainWindow::onAckReceived);
 
 	m_clientSocketThread.run(m_clientSocket);
 
-	m_ServiceController = new BaseServiceController(STP_CONFIG, new MainFunctionWorker());
+	m_ServiceController = new BaseServiceController(STP_CONFIG, new MainFunctionWorker());*/
 
-	runFscDataSources();
+	m_protoUdpClientThread = new ProtoUdpClientThread(QHostAddress("192.168.75.85"), PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST);
+
+	m_protoUdpClientThread->run();
+
+
+//	runFscDataSources();
 }
 
 

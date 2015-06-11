@@ -7,13 +7,19 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	m_ServiceController = new BaseServiceController(STP_BASE, new MainFunctionWorker());
+	m_protoUdpClientThread = new ProtoUdpClientThread(QHostAddress("192.168.75.85"), PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST);
+
+	m_protoUdpClientThread->run();
 }
 
 ServerMainWindow::~ServerMainWindow()
 {
+	m_protoUdpClientThread->quit();
+
+	delete m_protoUdpClientThread;
+
 	delete ui;
 
-	delete m_ServiceController;
+	//delete m_ServiceController;
 }
 
