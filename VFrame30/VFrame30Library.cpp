@@ -14,6 +14,7 @@
 #include "VideoItemLink.h"
 #include "VideoItemFblElement.h"
 #include "VideoItemSignal.h"
+#include "SchemeItemConst.h"
 
 namespace VFrame30
 {
@@ -48,6 +49,7 @@ namespace VFrame30
 		VideoItemFactory.Register<VideoItemFblElement>();
 		VideoItemFactory.Register<VideoItemInputSignal>();
 		VideoItemFactory.Register<VideoItemOutputSignal>();
+		VideoItemFactory.Register<SchemeItemConst>();
 
 		return true;
 	}

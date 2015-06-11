@@ -65,6 +65,7 @@ class VideoItemInputSignal;
 class VideoItemOutputSignal;
 class VideoItemLink;
 class VideoItemFblElement;
+class SchemeItemConst;
 class DeviceObject;
 class DeviceRoot;
 class DeviceSystem;
@@ -2245,6 +2246,15 @@ class VideoItem : public ::google::protobuf::Message {
   inline ::Proto::VideoItemFblElement* release_videoitemfblelement();
   inline void set_allocated_videoitemfblelement(::Proto::VideoItemFblElement* videoitemfblelement);
 
+  // optional .Proto.SchemeItemConst ConstItem = 129;
+  inline bool has_constitem() const;
+  inline void clear_constitem();
+  static const int kConstItemFieldNumber = 129;
+  inline const ::Proto::SchemeItemConst& constitem() const;
+  inline ::Proto::SchemeItemConst* mutable_constitem();
+  inline ::Proto::SchemeItemConst* release_constitem();
+  inline void set_allocated_constitem(::Proto::SchemeItemConst* constitem);
+
   // @@protoc_insertion_point(class_scope:Proto.VideoItem)
  private:
   inline void set_has_uuid();
@@ -2287,6 +2297,8 @@ class VideoItem : public ::google::protobuf::Message {
   inline void clear_has_link();
   inline void set_has_videoitemfblelement();
   inline void clear_has_videoitemfblelement();
+  inline void set_has_constitem();
+  inline void clear_has_constitem();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2310,9 +2322,10 @@ class VideoItem : public ::google::protobuf::Message {
   ::Proto::VideoItemOutputSignal* outputsignal_;
   ::Proto::VideoItemLink* link_;
   ::Proto::VideoItemFblElement* videoitemfblelement_;
+  ::Proto::SchemeItemConst* constitem_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(20 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(21 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -3820,6 +3833,108 @@ class VideoItemFblElement : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static VideoItemFblElement* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemeItemConst : public ::google::protobuf::Message {
+ public:
+  SchemeItemConst();
+  virtual ~SchemeItemConst();
+
+  SchemeItemConst(const SchemeItemConst& from);
+
+  inline SchemeItemConst& operator=(const SchemeItemConst& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemeItemConst& default_instance();
+
+  void Swap(SchemeItemConst* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemeItemConst* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemeItemConst& from);
+  void MergeFrom(const SchemeItemConst& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 type = 1 [default = 0];
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional int32 intValue = 2 [default = 0];
+  inline bool has_intvalue() const;
+  inline void clear_intvalue();
+  static const int kIntValueFieldNumber = 2;
+  inline ::google::protobuf::int32 intvalue() const;
+  inline void set_intvalue(::google::protobuf::int32 value);
+
+  // optional double doubleValue = 3 [default = 0];
+  inline bool has_doublevalue() const;
+  inline void clear_doublevalue();
+  static const int kDoubleValueFieldNumber = 3;
+  inline double doublevalue() const;
+  inline void set_doublevalue(double value);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemConst)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_intvalue();
+  inline void clear_has_intvalue();
+  inline void set_has_doublevalue();
+  inline void clear_has_doublevalue();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 intvalue_;
+  double doublevalue_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemeItemConst* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -8164,6 +8279,44 @@ inline void VideoItem::set_allocated_videoitemfblelement(::Proto::VideoItemFblEl
   }
 }
 
+// optional .Proto.SchemeItemConst ConstItem = 129;
+inline bool VideoItem::has_constitem() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void VideoItem::set_has_constitem() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void VideoItem::clear_has_constitem() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void VideoItem::clear_constitem() {
+  if (constitem_ != NULL) constitem_->::Proto::SchemeItemConst::Clear();
+  clear_has_constitem();
+}
+inline const ::Proto::SchemeItemConst& VideoItem::constitem() const {
+  return constitem_ != NULL ? *constitem_ : *default_instance_->constitem_;
+}
+inline ::Proto::SchemeItemConst* VideoItem::mutable_constitem() {
+  set_has_constitem();
+  if (constitem_ == NULL) constitem_ = new ::Proto::SchemeItemConst;
+  return constitem_;
+}
+inline ::Proto::SchemeItemConst* VideoItem::release_constitem() {
+  clear_has_constitem();
+  ::Proto::SchemeItemConst* temp = constitem_;
+  constitem_ = NULL;
+  return temp;
+}
+inline void VideoItem::set_allocated_constitem(::Proto::SchemeItemConst* constitem) {
+  delete constitem_;
+  constitem_ = constitem;
+  if (constitem) {
+    set_has_constitem();
+  } else {
+    clear_has_constitem();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // PosRectImpl
@@ -9237,6 +9390,76 @@ inline void VideoItemFblElement::set_allocated_afbstrid(::Proto::wstring* afbstr
   } else {
     clear_has_afbstrid();
   }
+}
+
+// -------------------------------------------------------------------
+
+// SchemeItemConst
+
+// optional int32 type = 1 [default = 0];
+inline bool SchemeItemConst::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemeItemConst::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemeItemConst::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemeItemConst::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 SchemeItemConst::type() const {
+  return type_;
+}
+inline void SchemeItemConst::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional int32 intValue = 2 [default = 0];
+inline bool SchemeItemConst::has_intvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemeItemConst::set_has_intvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemeItemConst::clear_has_intvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemeItemConst::clear_intvalue() {
+  intvalue_ = 0;
+  clear_has_intvalue();
+}
+inline ::google::protobuf::int32 SchemeItemConst::intvalue() const {
+  return intvalue_;
+}
+inline void SchemeItemConst::set_intvalue(::google::protobuf::int32 value) {
+  set_has_intvalue();
+  intvalue_ = value;
+}
+
+// optional double doubleValue = 3 [default = 0];
+inline bool SchemeItemConst::has_doublevalue() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemeItemConst::set_has_doublevalue() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemeItemConst::clear_has_doublevalue() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemeItemConst::clear_doublevalue() {
+  doublevalue_ = 0;
+  clear_has_doublevalue();
+}
+inline double SchemeItemConst::doublevalue() const {
+  return doublevalue_;
+}
+inline void SchemeItemConst::set_doublevalue(double value) {
+  set_has_doublevalue();
+  doublevalue_ = value;
 }
 
 // -------------------------------------------------------------------

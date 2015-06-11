@@ -1421,7 +1421,7 @@ void PropertyEditor::setObjects(QList<std::shared_ptr<QObject> >& objects)
 				continue;
 			}
 
-static PropertyItem pi;
+			PropertyItem pi;
 
 			pi.object = *pobject;
 

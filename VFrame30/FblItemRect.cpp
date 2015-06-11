@@ -3,6 +3,7 @@
 #include "SchemeLayer.h"
 
 #include "VideoItemSignal.h"
+#include "SchemeItemConst.h"
 #include "VideoItemFblElement.h"
 
 
@@ -412,6 +413,12 @@ namespace VFrame30
 		return ptr != nullptr;
 	}
 
+	bool FblItemRect::isConstElement() const
+	{
+		const VFrame30::SchemeItemConst* ptr = dynamic_cast<const VFrame30::SchemeItemConst*>(this);
+		return ptr != nullptr;
+	}
+
 	bool FblItemRect::isFblElement() const
 	{
 		const VFrame30::VideoItemFblElement* ptr = dynamic_cast<const VFrame30::VideoItemFblElement*>(this);
@@ -451,6 +458,16 @@ namespace VFrame30
 	const VFrame30::VideoItemOutputSignal* FblItemRect::toOutputSignalElement() const
 	{
 		return dynamic_cast<const VFrame30::VideoItemOutputSignal*>(this);
+	}
+
+	VFrame30::SchemeItemConst* FblItemRect::toSchemeItemConst()
+	{
+		return dynamic_cast<VFrame30::SchemeItemConst*>(this);
+	}
+
+	const VFrame30::SchemeItemConst* FblItemRect::toSchemeItemConst() const
+	{
+		return dynamic_cast<const VFrame30::SchemeItemConst*>(this);
 	}
 
 	VFrame30::VideoItemFblElement* FblItemRect::toFblElement()

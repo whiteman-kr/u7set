@@ -10,6 +10,7 @@
 #include "../VFrame30/VideoItemSignal.h"
 #include "../VFrame30/VideoItemFblElement.h"
 #include "../VFrame30/VideoItemLink.h"
+#include "../VFrame30/SchemeItemConst.h"
 
 
 const EditSchemeWidget::MouseStateCursor EditSchemeWidget::m_mouseStateCursor[] =
@@ -1591,6 +1592,14 @@ void EditSchemeWidget::createActions()
 				addItem(std::make_shared<VFrame30::VideoItemOutputSignal>(scheme()->unit()));
 			});
 
+	m_addConstantAction = new QAction(tr("Constant"), this);
+	m_addConstantAction->setEnabled(true);
+	connect(m_addConstantAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemeItemConst>(scheme()->unit()));
+			});
+
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
 	m_addFblElementAction->setEnabled(true);
 	connect(m_addFblElementAction, &QAction::triggered, this, &EditSchemeWidget::addFblElement);
@@ -1782,6 +1791,7 @@ void EditSchemeWidget::createActions()
 		m_addMenu->addAction(m_addSeparatorAction0);
 		m_addMenu->addAction(m_addInputSignalAction);
 		m_addMenu->addAction(m_addOutputSignalAction);
+		m_addMenu->addAction(m_addConstantAction);
 		m_addMenu->addAction(m_addFblElementAction);
 		m_addMenu->addAction(m_addLinkAction);
 

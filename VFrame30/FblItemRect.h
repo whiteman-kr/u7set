@@ -8,6 +8,7 @@ namespace VFrame30
 	class VideoItemSignal;
 	class VideoItemInputSignal;
 	class VideoItemOutputSignal;
+	class SchemeItemConst;
 	class VideoItemFblElement;
 }
 
@@ -66,6 +67,7 @@ namespace VFrame30
 		bool isInputSignalElement() const;
 		bool isOutputSignalElement() const;
 		bool isSignalElement() const;
+		bool isConstElement() const;
 		bool isFblElement() const;
 
 		VFrame30::VideoItemSignal *toSignalElement();
@@ -76,6 +78,9 @@ namespace VFrame30
 
 		VFrame30::VideoItemOutputSignal* toOutputSignalElement();
 		const VFrame30::VideoItemOutputSignal* toOutputSignalElement() const;
+
+		VFrame30::SchemeItemConst* toSchemeItemConst();
+		const VFrame30::SchemeItemConst* toSchemeItemConst() const;
 
 		VideoItemFblElement* toFblElement();
 		const VFrame30::VideoItemFblElement* toFblElement() const;
