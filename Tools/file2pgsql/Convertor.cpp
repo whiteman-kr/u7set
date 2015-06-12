@@ -3,8 +3,6 @@
 #include <QFile>
 #include <iostream>
 #include <stdint.h>
-#include <QDateTime>
-#include <QHostInfo>
 
 
 
@@ -25,26 +23,31 @@ const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
 							 "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
 							 "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
 
-
-bool Convertor::start(const QString& inputFilePath, const QString& parentFile, QTextStream& out)
+QString Convertor::start(const QString& inputFilePath, const QString& parentFile)
 {
-	if (Convertor::convert(inputFilePath, parentFile, out) == false)				// working with single file
+	QString query = "";
+	QString convertResult = Convertor::convert(inputFilePath, parentFile, query);
+
+	if (convertResult.indexOf("ERROR") != -1)
 	{
-		return 1;
+		// working with single file
+		return "ERROR";
 	}
 
 	QString dirName = inputFilePath + ".files";
 	QString parent = parentFile + "/" + inputFilePath;
+	QString filePathes = "";
 
-	if (Convertor::findFiles(dirName, parent, out) != 0)
+	if (Convertor::findFiles(dirName, parent, query, filePathes).indexOf("ERROR") != -1)
 	{
-		return 1;
+		std::cout << "ERROR in recursive file search" << std::endl;
+		return "ERROR";
 	}
 
-	return 0;
+	return query;
 }
 
-bool Convertor::convert(const QString& inputFilePath, const QString& parentFile, QTextStream& out)
+QString Convertor::convert(const QString& inputFilePath, const QString& parentFile, QString& query)
 {
 	// Read file
 	//
@@ -53,8 +56,8 @@ bool Convertor::convert(const QString& inputFilePath, const QString& parentFile,
 	bool ok = input.open(QIODevice::ReadOnly);
 	if (ok == false)
 	{
-		std::cout << "Cannot read input file" << inputFilePath.toStdString();
-		return false;
+		std::cout << "Cannot read input file" << inputFilePath.toStdString() << std::endl;
+		return "ERROR: Cannot read input file";
 	}
 
 	QByteArray data = input.readAll();
@@ -88,33 +91,51 @@ bool Convertor::convert(const QString& inputFilePath, const QString& parentFile,
 
 	// Write result to file
 	//
-
-	out << "SELECT * FROM add_or_update_file(1, \'" << parentFile << "\', \'" << inputFileName <<"\', \'Update: Adding file " << inputFileName << "\', " << str << ");\n\n\n";
+	query += "SELECT * FROM add_or_update_file(1, \'" + parentFile + "\', \'" + inputFileName + "\', \'Update: Adding file " + inputFileName + "\', " + str + ");\n\n\n";
 	//out << str <<"\n\n";
-	return true;
+	return query;
 }
 
-int Convertor::findFiles(const QString& dirName, const QString& parentFile, QTextStream& out)
+QString Convertor::findFiles(const QString& dirName, const QString& parentFile, QString& query, QString& filePathes)
 {
 	QDir dir(dirName);
 
 	QStringList listOfFiles = dir.entryList(QStringList("*.*"), QDir::Files | QDir::NoDotAndDotDot);
 
-	foreach (QString file, listOfFiles)                         //working with files inside dir
+	for (QString file : listOfFiles)
 	{
+		// working with files inside dir
+
 		QString fileFromDir = dirName + QDir::separator() + file;   //making a path to file in dir
-
-		if (convert(fileFromDir, parentFile, out) == false)
+		QFileInfo fileFromDirFile (fileFromDir);
+		if (convert(fileFromDir, parentFile, query).indexOf("ERROR") != -1)
 		{
-			return 1;
-		}
 
+			return "ERROR";
+		}
+		filePathes += fileFromDirFile.filePath();
+		filePathes += QDir::separator();
+		filePathes += QDir::separator();
 		QDir checkDir(dirName + QDir::separator() + file + ".files");
 
 		if (checkDir.exists())
 		{
-			findFiles(dirName + QDir::separator() + file + ".files", parentFile + "/" + file, out);
+			if (findFiles(dirName + QDir::separator() + file + ".files", parentFile + "/" + file, query, filePathes) == "ERROR")
+				return "ERROR";
 		}
 	}
-	return 0;
+	return filePathes;
+}
+
+bool Convertor::writeToFile(QString &outputFileName, QString query)
+{
+	QFile outputFile(outputFileName);											// creating file
+	if (outputFile.open(QIODevice::WriteOnly | QIODevice::Text) == false)
+	{
+		std::cout << "Cannot open output file for writing" << std::endl;
+		return false;
+	}
+	QTextStream out(&outputFile);
+	out << query;
+	return true;
 }

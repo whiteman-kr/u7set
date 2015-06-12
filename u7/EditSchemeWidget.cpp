@@ -10,6 +10,7 @@
 #include "../VFrame30/VideoItemSignal.h"
 #include "../VFrame30/VideoItemFblElement.h"
 #include "../VFrame30/VideoItemLink.h"
+#include "../VFrame30/SchemeItemConst.h"
 
 
 const EditSchemeWidget::MouseStateCursor EditSchemeWidget::m_mouseStateCursor[] =
@@ -1591,6 +1592,14 @@ void EditSchemeWidget::createActions()
 				addItem(std::make_shared<VFrame30::VideoItemOutputSignal>(scheme()->unit()));
 			});
 
+	m_addConstantAction = new QAction(tr("Constant"), this);
+	m_addConstantAction->setEnabled(true);
+	connect(m_addConstantAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemeItemConst>(scheme()->unit()));
+			});
+
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
 	m_addFblElementAction->setEnabled(true);
 	connect(m_addFblElementAction, &QAction::triggered, this, &EditSchemeWidget::addFblElement);
@@ -1704,29 +1713,30 @@ void EditSchemeWidget::createActions()
 	m_viewAction = new QAction(tr("View"), this);
 	m_viewAction->setEnabled(true);
 
-	// View->ZoomIn
+	// View->ZoomIn, creating of these actions was moved to VFrame30::BaseSchemeWidget
 	//
-	m_zoomInAction = new QAction(tr("Zoom In"), this);
-	m_zoomInAction->setEnabled(true);
-	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
-	connect(m_zoomInAction, &QAction::triggered, this, &EditSchemeWidget::zoomIn);
-	addAction(m_zoomInAction);
+//	m_zoomInAction = new QAction(tr("Zoom In"), this);
+//	m_zoomInAction->setEnabled(true);
+//	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
+//	m_zoomInAction->setShortcutContext(Qt::ShortcutContext::WindowShortcut);
+//	connect(m_zoomInAction, &QAction::triggered, this, &EditSchemeWidget::zoomIn);
+//	addAction(m_zoomInAction);
 
-	// View->ZoomOut
-	//
-	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
-	m_zoomOutAction->setEnabled(true);
-	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
-	connect(m_zoomOutAction, &QAction::triggered, this, &EditSchemeWidget::zoomOut);
-	addAction(m_zoomOutAction);
+//	// View->ZoomOut
+//	//
+//	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
+//	m_zoomOutAction->setEnabled(true);
+//	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+//	connect(m_zoomOutAction, &QAction::triggered, this, &EditSchemeWidget::zoomOut);
+//	addAction(m_zoomOutAction);
 
-	// View->Zoom100
-	//
-	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
-	m_zoom100Action->setEnabled(true);
-	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
-	connect(m_zoom100Action, &QAction::triggered, this, &EditSchemeWidget::zoom100);
-	addAction(m_zoom100Action);
+//	// View->Zoom100
+//	//
+//	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
+//	m_zoom100Action->setEnabled(true);
+//	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+//	connect(m_zoom100Action, &QAction::triggered, this, &EditSchemeWidget::zoom100);
+//	addAction(m_zoom100Action);
 
 	// ------------------------------------
 	//
@@ -1781,6 +1791,7 @@ void EditSchemeWidget::createActions()
 		m_addMenu->addAction(m_addSeparatorAction0);
 		m_addMenu->addAction(m_addInputSignalAction);
 		m_addMenu->addAction(m_addOutputSignalAction);
+		m_addMenu->addAction(m_addConstantAction);
 		m_addMenu->addAction(m_addFblElementAction);
 		m_addMenu->addAction(m_addLinkAction);
 

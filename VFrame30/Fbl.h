@@ -223,6 +223,9 @@ private:
 		bool hasRam() const;
 		void setHasRam(bool value);
 
+		bool requiredStart() const;
+		void setRequiredStart(bool value);
+
 		QString libraryScript() const;
 		void setLibraryScript(const QString& value);
 
@@ -247,6 +250,7 @@ private:
 		QString m_caption;
 		unsigned int m_opcode;
 		bool m_hasRam;
+		bool m_requiredStart;
 
 		QString m_libraryScript;
 		QString m_afterCreationScript;

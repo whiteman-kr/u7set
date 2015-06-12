@@ -41,8 +41,12 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 
-		bool result = QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
-		assert(result);
+		QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
+		QMetaType::registerConverter<int, Hardware::DeviceModule::FamilyType>(IntToEnum<Hardware::DeviceModule::FamilyType>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalType>(IntToEnum<Hardware::DeviceSignal::SignalType>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalFunction>(IntToEnum<Hardware::DeviceSignal::SignalFunction>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::ByteOrder>(IntToEnum<Hardware::DeviceSignal::ByteOrder>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::DataFormat>(IntToEnum<Hardware::DeviceSignal::DataFormat>);
 	}
 
 	void Shutdwon()
@@ -722,6 +726,18 @@ namespace Hardware
         QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
         return c;
     }
+
+	int DeviceObject::jsPropertyInt(QString name) const
+	{
+		QVariant v = property(name.toStdString().c_str());
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return 0;
+		}
+
+		return v.toInt();
+	}
 
     DeviceType DeviceObject::deviceType() const
 	{
@@ -1687,7 +1703,7 @@ namespace Hardware
 		Proto::DeviceSignal* signalMessage = message->mutable_deviceobject()->mutable_signal();
 
 		signalMessage->set_type(static_cast<int>(m_type));
-		signalMessage->set_format(static_cast<int>(m_type));
+		signalMessage->set_function(static_cast<int>(m_function));
 
 		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
 		signalMessage->set_format(static_cast<int>(m_format));

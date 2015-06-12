@@ -580,7 +580,8 @@ namespace Afbl
 
 	AfbElement::AfbElement(void):
 		m_opcode(0),
-		m_hasRam(false)
+		m_hasRam(false),
+		m_requiredStart(true)
 	{
 	}
 
@@ -606,6 +607,7 @@ namespace Afbl
 		m_caption = that.m_caption;
 		m_opcode = that.m_opcode;
 		m_hasRam = that.m_hasRam;
+		m_requiredStart = that.m_requiredStart;
 
 		m_libraryScript = that.m_libraryScript;
 		m_afterCreationScript = that.m_afterCreationScript;
@@ -690,6 +692,11 @@ namespace Afbl
 					if (xmlReader->name() == "hasRam")
 					{
 						setHasRam(xmlReader->readElementText() == "true" ? true : false);
+					}
+
+					if (xmlReader->name() == "requiredStart")
+					{
+						setRequiredStart(xmlReader->readElementText() == "true" ? true : false);
 					}
 				}
 
@@ -831,6 +838,7 @@ namespace Afbl
 		xmlWriter->writeTextElement("Caption", caption());
 		xmlWriter->writeTextElement("OpCode", QString::number(opcode()));
 		xmlWriter->writeTextElement("hasRam", hasRam() ? "true" : "false");
+		xmlWriter->writeTextElement("requiredStart", requiredStart() ? "true" : "false");
 		xmlWriter->writeEndElement();
 
 		xmlWriter->writeStartElement("InputSignals");
@@ -1072,6 +1080,17 @@ namespace Afbl
 	{
 		m_hasRam = value;
 	}
+
+	bool AfbElement::requiredStart() const
+	{
+		return m_requiredStart;
+	}
+
+	void AfbElement::setRequiredStart(bool value)
+	{
+		m_requiredStart = value;
+	}
+
 
 	QString AfbElement::libraryScript() const
 	{

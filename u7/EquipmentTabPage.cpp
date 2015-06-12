@@ -429,10 +429,6 @@ void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder
 
 	// Sort
 	//
-	//QModelIndex rootIndex = index(0, 0, QModelIndex());
-	//Hardware::DeviceObject* parent = deviceObject(rootIndex);
-
-	//sortDeviceObject(parent, column, order);
 	sortDeviceObject(m_configuration.get(), column, order);
 	sortDeviceObject(m_preset.get(), column, order);
 
@@ -719,11 +715,14 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
 
-		beginRemoveRows(index, 0, d->childrenCount() - 1);
-		d->deleteAllChildren();
-		endRemoveRows();
+		if (d->childrenCount() > 0)
+		{
+			beginRemoveRows(index, 0, d->childrenCount() - 1);
+			d->deleteAllChildren();
+			endRemoveRows();
 
-		emit dataChanged(index, index);
+			emit dataChanged(index, index);
+		}
 	}
 
 	return;

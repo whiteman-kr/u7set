@@ -105,7 +105,7 @@ namespace VFrame30
 
 		painter->setFont(f);
 
-		painter->drawText(rc, str);
+		painter->drawText(rc, Qt::AlignLeft, str);
 
 		painter->restore();
 		return;

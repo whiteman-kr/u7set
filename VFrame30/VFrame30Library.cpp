@@ -14,6 +14,8 @@
 #include "VideoItemLink.h"
 #include "VideoItemFblElement.h"
 #include "VideoItemSignal.h"
+#include "SchemeItemConst.h"
+#include "../include/Types.h"
 
 namespace VFrame30
 {
@@ -48,6 +50,9 @@ namespace VFrame30
 		VideoItemFactory.Register<VideoItemFblElement>();
 		VideoItemFactory.Register<VideoItemInputSignal>();
 		VideoItemFactory.Register<VideoItemOutputSignal>();
+		VideoItemFactory.Register<SchemeItemConst>();
+
+		QMetaType::registerConverter<int, VFrame30::SchemeItemConst::ConstType>(IntToEnum<VFrame30::SchemeItemConst::ConstType>);
 
 		return true;
 	}

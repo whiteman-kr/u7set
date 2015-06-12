@@ -255,16 +255,16 @@ class HasDbController
 private:
 	HasDbController();
 public:
-	explicit HasDbController(DbController* dbcontroller);
+	explicit HasDbController(DbController* db);
 
 	// Properties
 	//
 protected:
-	DbController* dbcontroller();
+	DbController* db();
 
 	// Data
 	//
 private:
-	DbController* m_dbController;
+	DbController* m_db;
 };
 

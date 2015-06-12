@@ -7,12 +7,10 @@
 class Convertor
 {
 public:
-
-	static bool start(const QString& inputFilePath, const QString& parentFile, QTextStream& out);
-
-protected:
-	static bool convert(const QString& inputFilePath, const QString& parentFile, QTextStream& out);
-	static int findFiles(const QString& dirName, const QString& parentFile, QTextStream& out);
+	static QString start(const QString& inputFilePath, const QString& parentFile);
+	static QString convert(const QString& inputFilePath, const QString& parentFile, QString& query);
+	static QString findFiles(const QString& dirName, const QString& parentFile, QString& out, QString& filePathes);
+	static bool writeToFile(QString& outputFileName, QString query);
 };
 
 #endif // CONVERTOR_H
