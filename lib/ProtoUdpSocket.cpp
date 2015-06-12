@@ -214,7 +214,14 @@ void ProtoUdpClient::onTimerTimeout()
 	m_sync.unlock();
 }
 
+
 void ProtoUdpClient::onSocketReadyRead()
+{
+
+}
+
+
+void ProtoUdpClient::onRestartCommunication()
 {
 
 }

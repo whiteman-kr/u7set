@@ -7,7 +7,7 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	m_protoUdpClientThread = new ProtoUdpClientThread(QHostAddress("192.168.75.85"), PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST);
+	m_protoUdpClientThread = new ProtoUdpClientThread(HostAddressPort("192.168.75.85", PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
 
 	m_protoUdpClientThread->run();
 }
