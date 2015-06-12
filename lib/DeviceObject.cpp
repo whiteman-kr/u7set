@@ -24,6 +24,13 @@ namespace Hardware
 
 	void Init()
 	{
+		static bool firstRun = false;
+		if (firstRun)
+		{
+			assert(false);
+		}
+		firstRun = true;
+
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
@@ -34,7 +41,8 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 
-		QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
+		bool result = QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
+		assert(result);
 	}
 
 	void Shutdwon()

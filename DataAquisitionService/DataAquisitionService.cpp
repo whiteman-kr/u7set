@@ -136,21 +136,9 @@ void DataServiceMainFunctionWorker::readEquipmentConfig()
 					if (property.isValid())
 					{
 						const char* name = property.name();
-						if (property.type() == QVariant::UserType)
-						{
-							if (property.userType() == qMetaTypeId<Hardware::DeviceModule::FamilyType>())
-							{
-								pDeviceObject->setProperty(name, QVariant::fromValue(Hardware::DeviceModule::FamilyType(attr.value(name).toInt())));
-							}
-							else
-							{
-								assert(false);
-							}
-						}
-						else
-						{
-							pDeviceObject->setProperty(name, QVariant::fromValue(attr.value(name).toString()));
-						}
+						QVariant tmp = QVariant::fromValue(attr.value(name).toString());
+						assert(tmp.convert(pDeviceObject->property(name).userType()));
+						pDeviceObject->setProperty(name, tmp);
 					}
 				}
 
