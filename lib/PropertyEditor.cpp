@@ -142,7 +142,7 @@ QtMultiEnumEdit::QtMultiEnumEdit(QWidget* parent):
 {
     m_combo = new QComboBox(parent);
 
-    connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChanged(int)));
+	connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChanged(int)));
 
     QHBoxLayout* lt = new QHBoxLayout;
     lt->setContentsMargins(0, 0, 0, 0);
@@ -160,12 +160,19 @@ void QtMultiEnumEdit::setItems(QVariant value)
 		return;
 	}
 
+	m_oldValue = value;
+
 	EnumPropertyType e = value.value<EnumPropertyType>();
+
+	m_combo->blockSignals(true);
 
 	for (std::pair<QString, int>& i : e.items)
 	{
 		m_combo->addItem(i.first, i.second);
 	}
+
+	m_combo->blockSignals(false);
+
 }
 
 void QtMultiEnumEdit::setValue(QVariant value)
@@ -178,7 +185,7 @@ void QtMultiEnumEdit::setValue(QVariant value)
 
 	m_oldValue = value;
 
-    EnumPropertyType e = value.value<EnumPropertyType>();
+	EnumPropertyType e = value.value<EnumPropertyType>();
 
 	// select an item with a value
 	//
@@ -201,7 +208,7 @@ void QtMultiEnumEdit::setValue(QVariant value)
 
 void QtMultiEnumEdit::indexChanged(int index)
 {
-    EnumPropertyType e = m_oldValue.value<EnumPropertyType>();
+	EnumPropertyType e = m_oldValue.value<EnumPropertyType>();
 
 	int value = m_combo->itemData(index).toInt();
 
@@ -209,7 +216,25 @@ void QtMultiEnumEdit::indexChanged(int index)
     {
 		e.value = value;
 		m_oldValue = QVariant::fromValue(e);
-        emit valueChanged(QVariant::fromValue(e));
+
+		/*QVariant v = value;
+		bool result = v.convert(e.typeVariant.userType());
+		if (result == false)
+		{
+			assert(false);
+		}*/
+
+		/*QObject o;
+		o.setProperty("Fake", e.typeValue);
+		o.setProperty("Fake", value);
+
+		qDebug()<<value;
+
+		QVariant v = o.property("Fake");*/
+
+		//QVariant iValue = value;
+
+		emit valueChanged(m_oldValue);
     }
 }
 
@@ -1431,6 +1456,7 @@ static PropertyItem pi;
                 //
                 EnumPropertyType ept;
                 ept.value = object->property(name).toInt();
+				ept.typeVariant = object->property(name);
                 for (int i = 0; i < metaProperty.enumerator().keyCount(); i++)
                 {
 					ept.items.push_back(std::make_pair(metaProperty.enumerator().key(i), metaProperty.enumerator().value(i)));
@@ -1848,11 +1874,33 @@ void PropertyEditor::clearProperties()
 
 void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)
 {
-	valueChanged(property, value);
-    //updateProperty(property->propertyName());
+
+	// If the value has internal enumerated type, convert it to a native type
+	// using previously saved old value with its type
+	//
+	QVariant newValue = value;
+
+	if (newValue.userType() == EnumPropertyType::enumTypeId())
+	{
+		EnumPropertyType e = newValue.value<EnumPropertyType>();
+
+		newValue = e.value;
+
+		int oldType = e.typeVariant.userType();
+
+		bool result = newValue.convert(oldType);
+		if (result == false)
+		{
+			assert(false);	//maybe call QMetaType::registerConverter<int, enumname>(IntToEnum<enumname>);
+
+			return;
+		}
+	}
+
+	valueChanged(property, newValue);
 }
 
-void PropertyEditor::valueChanged(QtProperty* property, QVariant newValue)
+void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
 {
 	// Set the new property value in all objects
 	//
@@ -1871,15 +1919,11 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant newValue)
 	{
 		QObject* pObject = i->get();
 
-        QVariant value = newValue;
-
-        if (value.userType() == EnumPropertyType::enumTypeId())
+		if (value.userType() == EnumPropertyType::enumTypeId())
         {
-            //QVariant v = pObject->property(property->propertyName().toStdString().c_str());
-            EnumPropertyType e = value.value<EnumPropertyType>();
-            int x = e.value;
-            value = x;
-        }
+			assert(false);
+			continue;
+		}
 
 		// Do not set property, if it has same value
 		if (pObject->property(property->propertyName().toStdString().c_str()) == value)
@@ -1887,9 +1931,13 @@ void PropertyEditor::valueChanged(QtProperty* property, QVariant newValue)
 			continue;
 		}
 
+		QVariant oldValue = pObject->property(property->propertyName().toStdString().c_str());
+
 		pObject->setProperty(property->propertyName().toStdString().c_str(), value);
 
-		if (pObject->property(property->propertyName().toStdString().c_str()) != value && errorString.isEmpty() == true)
+		QVariant newValue = pObject->property(property->propertyName().toStdString().c_str());
+
+		if (oldValue == newValue && errorString.isEmpty() == true)
 		{
 			errorString = QString("Property: %1 - incorrect input value")
 						  .arg(property->propertyName());
