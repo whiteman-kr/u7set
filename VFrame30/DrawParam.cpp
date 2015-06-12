@@ -4,14 +4,10 @@
 
 namespace VFrame30
 {
-	CDrawParam::CDrawParam()
-	{
-		assert(false);
-	}
-
-	CDrawParam::CDrawParam(QPainter* painter) :
+	CDrawParam::CDrawParam(QPainter* painter, double gridSize, int pinGridStep) :
 		m_painter(painter),
-		m_controlBarSize(0)
+		m_gridSize(gridSize),
+		m_pinGridStep(pinGridStep)
 	{
 		assert(m_painter != nullptr);
 	}
@@ -39,6 +35,27 @@ namespace VFrame30
 	{
 		m_controlBarSize = value;
 	}
+
+	double CDrawParam::gridSize() const
+	{
+		return m_gridSize;
+	}
+
+	void CDrawParam::setGridSize(double value)
+	{
+		m_gridSize = value;
+	}
+
+	int CDrawParam::pinGridStep() const
+	{
+		return m_pinGridStep;
+	}
+
+	void CDrawParam::setPinGridStep(int value)
+	{
+		m_pinGridStep = value;
+	}
+
 
 	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemeUnit unit, const QString& str, const QRectF& rect)
 	{

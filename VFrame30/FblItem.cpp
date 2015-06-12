@@ -456,15 +456,15 @@ namespace VFrame30
 		return;
 	}
 
-	void FblItem::SetConnectionsPos()
+	void FblItem::SetConnectionsPos(double /*gridSize*/, int /*pinGridStep*/)
 	{
-		assert(false);	// должно быть реализовано у наследников, CFblItemLine, CFblItemRect
+		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return;
 	}
 
-	bool FblItem::GetConnectionPointPos(const QUuid&, VideoItemPoint*) const
+	bool FblItem::GetConnectionPointPos(const QUuid&, VideoItemPoint*, double /*gridSize*/, int /*pinGridStep*/) const
 	{
-		assert(false);	// должно быть реализовано у наследников, CFblItemLine, CFblItemRect
+		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return false;
 	}
 

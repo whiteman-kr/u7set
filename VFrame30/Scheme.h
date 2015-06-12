@@ -83,6 +83,12 @@ namespace VFrame30
 		SchemeUnit unit() const;
 		void setUnit(SchemeUnit value);
 
+		double gridSize() const;
+		void setGridSize(double value);
+
+		int pinGridStep() const;
+		void setPinGridStep(int value);
+
 		const Afbl::AfbElementCollection& afbCollection() const;
 		void setAfbCollection(const std::vector<std::shared_ptr<Afbl::AfbElement>>& elements);
 		
@@ -98,6 +104,9 @@ namespace VFrame30
 		double m_height;			// pixels or inches, depends on m_unit
 
 		SchemeUnit m_unit;			// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
+
+		double m_gridSize = 1.0;	// Grid size for this scheme, depends on SchemeUnit
+		int m_pinGridStep = 2;		// Grid multiplier to determine vertical distance between pins
 
 		Afbl::AfbElementCollection m_afbCollection;
 	};

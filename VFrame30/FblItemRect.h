@@ -50,13 +50,17 @@ namespace VFrame30
 
 		// Вычислить координаты точки
 		//
-		virtual void SetConnectionsPos() override;
-		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult) const override;
+		virtual void SetConnectionsPos(double gridSize, int pinGridStep) override;
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const override;
 
 		///<summary> 
 		/// Вычисление координат точки, для прямоугольного Fbl элемента
 		///</summary>
-		VideoItemPoint CalcPointPos(const QRectF& fblItemRect, const CFblConnectionPoint& connection, int pinCount, int index) const;
+		VideoItemPoint CalcPointPos(const QRectF& fblItemRect,
+									const CFblConnectionPoint& connection,
+									int pinCount,
+									int index,
+									double gridSize, int pinGridStep) const;
 
 
 		// Properties and Data

@@ -20,10 +20,9 @@ namespace VFrame30
 {
 	class VFRAME30LIBSHARED_EXPORT CDrawParam
 	{
-	private:
-		CDrawParam(void);
 	public:
-		explicit CDrawParam(QPainter* painter);
+		CDrawParam(void) = delete;
+		CDrawParam(QPainter* painter, double gridSize, int pinGridStep);
 		virtual ~CDrawParam(void);
 
 	public:
@@ -41,9 +40,18 @@ namespace VFrame30
 		double controlBarSize() const;
 		void setControlBarSize(double value);
 
+		double gridSize() const;
+		void setGridSize(double value);
+
+		int pinGridStep() const;
+		void setPinGridStep(int value);
+
 	private:
-		QPainter* m_painter;
-		double m_controlBarSize;
+		QPainter* m_painter = nullptr;
+
+		double m_controlBarSize = 0.0;
+		double m_gridSize = 0.0;
+		int m_pinGridStep = 0;
 	};
 
 	class VFRAME30LIBSHARED_EXPORT DrawHelper

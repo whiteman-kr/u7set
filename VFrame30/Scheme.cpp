@@ -397,7 +397,7 @@ namespace VFrame30
 
 				// ¬ычисление и сохранение координат пинов дл€ обычного Fbl элементы
 				//
-				pFblItem->SetConnectionsPos();
+				pFblItem->SetConnectionsPos(gridSize(), pinGridStep());
 
 				// Ќайти в connectionMap такую координату и если она есть до увеличить счетчик пинов,
 				// если нет, то создать запись в списке
@@ -511,6 +511,26 @@ namespace VFrame30
 	void Scheme::setUnit(SchemeUnit value)
 	{
 		m_unit = value;
+	}
+
+	double Scheme::gridSize() const
+	{
+		return m_gridSize;
+	}
+
+	void Scheme::setGridSize(double value)
+	{
+		m_gridSize = value;
+	}
+
+	int Scheme::pinGridStep() const
+	{
+		return m_pinGridStep;
+	}
+
+	void Scheme::setPinGridStep(int value)
+	{
+		m_pinGridStep = value;
 	}
 
 	const Afbl::AfbElementCollection& Scheme::afbCollection() const

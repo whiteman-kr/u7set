@@ -97,7 +97,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p);
+	VFrame30::CDrawParam drawParam(&p, scheme()->gridSize(), scheme()->pinGridStep());
 
 	// Calc size
 	//
@@ -927,7 +927,7 @@ void EditSchemeView::drawGrid(QPainter* p)
 	double frameWidth = scheme()->docWidth();
 	double frameHeight = scheme()->docHeight();
 
-	double gridSize = unit == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
+	double gridSize = scheme()->gridSize();
 
 	double scale = zoom() / 100.0;
 
@@ -3367,7 +3367,8 @@ QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool 
 
 QPointF EditSchemeWidget::snapToGrid(QPointF pt) const
 {
-	double gridSize = scheme()->unit() == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
+	double gridSize = scheme()->gridSize();
+
 	QPointF result = CUtils::snapToGrid(pt, gridSize);
 	return result;
 }

@@ -46,7 +46,7 @@ namespace VFrame30
 
 	// ¬ычислить координаты точки
 	//
-	void FblItemRect::SetConnectionsPos()
+	void FblItemRect::SetConnectionsPos(double gridSize, int pinGridStep)
 	{
 		QRectF ir(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 
@@ -61,7 +61,7 @@ namespace VFrame30
 			{
 				assert(input->IsInput());
 
-				VideoItemPoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex);
+				VideoItemPoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
 				input->setPoint(calculatedPoint);
 
 				inputIndex ++;
@@ -79,7 +79,7 @@ namespace VFrame30
 			{
 				assert(output->IsOutput());
 
-				VideoItemPoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex);
+				VideoItemPoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
 				output->setPoint(calculatedPoint);
 
 				outputIndex ++;
@@ -89,7 +89,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult) const
+	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const
 	{
 		if (pResult == nullptr)
 		{
@@ -111,7 +111,7 @@ namespace VFrame30
 
 			if (pt->guid() == connectionPointGuid)
 			{
-				*pResult = CalcPointPos(ir, *pt, inputCount, index);
+				*pResult = CalcPointPos(ir, *pt, inputCount, index, gridSize, pinGridStep);
 				return true;
 			}
 
@@ -130,7 +130,7 @@ namespace VFrame30
 
 			if (pt->guid() == connectionPointGuid)
 			{
-				*pResult = CalcPointPos(ir, *pt, outputCount, index);
+				*pResult = CalcPointPos(ir, *pt, outputCount, index, gridSize, pinGridStep);
 				return true;
 			}
 
@@ -143,7 +143,13 @@ namespace VFrame30
 		return false;
 	}
 
-	VideoItemPoint FblItemRect::CalcPointPos(const QRectF& fblItemRect, const CFblConnectionPoint& connection, int pinCount, int index) const
+	VideoItemPoint FblItemRect::CalcPointPos(
+			const QRectF& fblItemRect,
+			const CFblConnectionPoint& connection,
+			int pinCount,
+			int index,
+			double gridSize,
+			int pinGridStep) const
 	{
 		if (pinCount == 0)
 		{
@@ -152,17 +158,16 @@ namespace VFrame30
 		}
 
 		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
-		double minFblGridSize = Settings::minFblGridSize(Settings::regionalUnit());
 
 		// вертикальное рассто€ние между пинами
 		//
-		double height = CUtils::snapToGrid(fblItemRect.height(), minFblGridSize);
+		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double halfpinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
 
-		double pinVertGap = height / static_cast<double>(pinCount + 1);
-		pinVertGap = CUtils::snapToGrid(pinVertGap, minFblGridSize);
+		double top = CUtils::snapToGrid(fblItemRect.top(), gridSize);
 
-		double y = fblItemRect.top() + pinVertGap * static_cast<double>(index + 1);
-		y = CUtils::snapToGrid(y ,minFblGridSize);
+		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
+		y = CUtils::snapToGrid(y, gridSize);
 
 		return VideoItemPoint(x, y);
 	}
@@ -323,7 +328,7 @@ namespace VFrame30
 			// ќпределение координат пина
 			//
 			VideoItemPoint vip;
-			GetConnectionPointPos(input->guid(), &vip);
+			GetConnectionPointPos(input->guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
@@ -360,7 +365,7 @@ namespace VFrame30
 			// ќпределение координат пина
 			//
 			VideoItemPoint vip;
-			GetConnectionPointPos(output->guid(), &vip);
+			GetConnectionPointPos(output->guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 

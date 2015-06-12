@@ -142,8 +142,8 @@ namespace VFrame30
 		//
 	public:
 		void ClearAssociatedConnections();
-		virtual void SetConnectionsPos();
-		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult) const;
+		virtual void SetConnectionsPos(double gridSize, int pinGridStep);
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const;
 
 		// Properties
 		//

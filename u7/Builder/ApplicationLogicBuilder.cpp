@@ -572,7 +572,7 @@ namespace Builder
 
 				if (signalOutputItems.contains(signalStrId) == true)
 				{
-					log->writeError(QObject::tr("Ouput element has duplicate StrId, element1: %1, element2:%2, StrId: %2")
+					log->writeError(QObject::tr("Ouput element has duplicate StrId, element1: %1, element2:%2, StrId: %3")
 									.arg(signalElement->guid().toString())
 									.arg(signalOutputItems[signalStrId].m_fblItem->guid().toString())
 									.arg(signalStrId)
@@ -1347,7 +1347,7 @@ namespace Builder
 				// find branche with point on the pin
 				//
 				fblItem->ClearAssociatedConnections();
-				fblItem->SetConnectionsPos();
+				fblItem->SetConnectionsPos(scheme->gridSize(), scheme->pinGridStep());
 
 				std::list<VFrame30::CFblConnectionPoint>* inputs = fblItem->mutableInputs();
 				std::list<VFrame30::CFblConnectionPoint>* outputs = fblItem->mutableOutputs();
@@ -1548,7 +1548,7 @@ namespace Builder
 				// find branche with point on the pin
 				//
 				fblElement->ClearAssociatedConnections();
-				fblElement->SetConnectionsPos();
+				fblElement->SetConnectionsPos(scheme->gridSize(), scheme->pinGridStep());
 
 				std::list<VFrame30::CFblConnectionPoint>* inputs = fblElement->mutableInputs();
 				std::list<VFrame30::CFblConnectionPoint>* outputs = fblElement->mutableOutputs();
