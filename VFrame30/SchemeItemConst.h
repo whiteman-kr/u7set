@@ -70,6 +70,8 @@ namespace VFrame30
 		double m_doubleValue = 0.0;
 	};
 
-
 }
+
+Q_DECLARE_METATYPE(VFrame30::SchemeItemConst::ConstType)
+
 #endif // SCHEMEITEMCONST_H

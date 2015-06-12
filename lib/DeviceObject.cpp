@@ -20,12 +20,6 @@ namespace Hardware
 			L".hds",		// Diagnostics Signal
 		};
 
-	template <typename EnumType>
-	EnumType IntToEnum(int value)
-	{
-		return static_cast<EnumType>(value);
-	}
-
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
 	void Init()
