@@ -6,7 +6,7 @@
 namespace VFrame30
 {
 
-	class SchemeItemConst : public FblItemRect
+	class VFRAME30LIBSHARED_EXPORT SchemeItemConst : public FblItemRect
 	{
 		Q_OBJECT
 
