@@ -20,6 +20,12 @@ namespace Hardware
 			L".hds",		// Diagnostics Signal
 		};
 
+	template <typename EnumType>
+	EnumType IntToEnum(int value)
+	{
+		return static_cast<EnumType>(value);
+	}
+
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
 	void Init()
@@ -35,6 +41,11 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 
 		QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
+		QMetaType::registerConverter<int, Hardware::DeviceModule::FamilyType>(IntToEnum<Hardware::DeviceModule::FamilyType>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalType>(IntToEnum<Hardware::DeviceSignal::SignalType>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalFunction>(IntToEnum<Hardware::DeviceSignal::SignalFunction>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::ByteOrder>(IntToEnum<Hardware::DeviceSignal::ByteOrder>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::DataFormat>(IntToEnum<Hardware::DeviceSignal::DataFormat>);
 	}
 
 	void Shutdwon()

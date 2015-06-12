@@ -97,17 +97,17 @@ enum ConnectionDirrection
 //------------------------------------------------------------------------------------------
 //
 //
-//		Envelope - универсальная структура, хранит любой корневой тип
+//		Envelope - General struct, keeps any base type
 //
 //
 //------------------------------------------------------------------------------------------
 message Envelope
 {
-	// Класс, для сериализации
+	// C++ Class for serizalization
 	//
 	required uint32 classnamehash = 1;				// Hash from classname, the way of getting the hash is always same
 
-	// возможные типы для хранения
+	// Possible types for storing
 	//
 	optional VideoItem videoitem = 6;				// VFrame30::CVideoItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
@@ -227,7 +227,7 @@ message FblElementParam
 
 //
 //
-// FblSignalType - тип сигнала в FblElement
+// FblSignalType
 //
 //
 enum FblSignalType
@@ -238,14 +238,14 @@ enum FblSignalType
 
 //
 //
-// FblParamType	- Тип параметра для FblElement
+// FblParamType
 //
 //
 enum FblParamType
 {
-	AnalogIntegral = 0;			// Аналоговый целочисленный (32bit signed int)
-	AnalogFloatingPoint = 1;	// Аналоговый с плавающей запятой (double, 64bit)
-	DiscreteValue = 2;			// Дискретный (c++ bool)
+	AnalogIntegral = 0;			// 32bit signed int
+	AnalogFloatingPoint = 1;	// double, 64bit
+	DiscreteValue = 2;			// bool, c++
 }
 
 
@@ -265,7 +265,7 @@ message VideoFrame
 	required double height = 5;
 	required SchemeUnit unit = 6;
 
-	repeated Envelope layers = 100;				// Список слоев
+	repeated Envelope layers = 100;				// Layer list
 	required AfbElementCollection afbs = 101;	// Application Fuynctional Block stored as XML
 
 	// Derived from VideoFrame
@@ -328,21 +328,22 @@ message VideoItem
 
 	// --
 	//
-	optional FblItem FblItem = 106;							// 
+	optional FblItem FblItem = 106;								//
 	optional FblItemRect FblItemRect = 107;						// +PosRectImpl, FblItem
 	optional FblItemLine FblItemLine = 108;						// +PosConnectionImpl, FblItem
 	
 	// Наслдедуемые от PosRectImpl, PosLineImpl, PosConnectionImpl
 	//
-	optional VideoItemRect Rect = 116;						// +PosRectImpl
-	optional VideoItemLine Line = 117;						// +PosLineImpl
-	optional VideoItemConnectionLine ConnectionLine = 118;				// +PosConnectionImpl
+	optional VideoItemRect Rect = 116;							// +PosRectImpl
+	optional VideoItemLine Line = 117;							// +PosLineImpl
+	optional VideoItemConnectionLine ConnectionLine = 118;		// +PosConnectionImpl
 	
 	optional VideoItemSignal Signal = 124;						// +FblItemRect
 	optional VideoItemInputSignal InputSignal = 125;			// +Signal
 	optional VideoItemOutputSignal OutputSignal = 126;			// +Signal
 	optional VideoItemLink Link = 127;							// +FblItemLine
-	optional VideoItemFblElement VideoItemFblElement = 128;	// +FblItemRect
+	optional VideoItemFblElement VideoItemFblElement = 128;		// +FblItemRect
+	optional SchemeItemConst ConstItem = 129;					// +FblItemRect
 }
 
 
@@ -502,7 +503,6 @@ message VideoItemInputSignal
 }
 
 
-
 //
 //
 // VideoItemOutputSignal
@@ -534,6 +534,17 @@ message VideoItemFblElement
 	optional wstring afbStrid = 3;
 }
 
+//
+//
+// SchemeItemConst
+//
+//
+message SchemeItemConst
+{
+	optional int32 type = 1 [default = 0];
+	optional int32 intValue = 2 [default = 0];
+	optional double doubleValue = 3 [default = 0.0];
+}
 
 //------------------------------------------------------------------------------------------
 //

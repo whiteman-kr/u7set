@@ -747,3 +747,8 @@ namespace Hardware
 }
 
 Q_DECLARE_METATYPE(Hardware::DeviceModule::FamilyType)
+Q_DECLARE_METATYPE(Hardware::DeviceSignal::SignalType)
+Q_DECLARE_METATYPE(Hardware::DeviceSignal::SignalFunction)
+Q_DECLARE_METATYPE(Hardware::DeviceSignal::ByteOrder)
+Q_DECLARE_METATYPE(Hardware::DeviceSignal::DataFormat)
+

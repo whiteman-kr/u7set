@@ -42,6 +42,7 @@ struct EnumPropertyType
 
 	std::vector<std::pair<QString, int>> items;
 	int value = -1;
+	QVariant typeVariant;
 
     static int enumTypeId();
 };
@@ -98,7 +99,7 @@ signals:
 
 private:
     QComboBox* m_combo = nullptr;
-    QVariant m_oldValue;
+	QVariant m_oldValue;
 
 };
 class QtMultiColorEdit : public QWidget
@@ -348,7 +349,7 @@ public:
 	void clearProperties();
 
 protected:
-    virtual void valueChanged(QtProperty* property, QVariant newValue);
+	virtual void valueChanged(QtProperty* property, QVariant value);
 
 protected slots:
 	void updateProperties();

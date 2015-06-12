@@ -331,7 +331,7 @@ public:
 	//
 private:
 	DbFileInfo m_fileInfo;
-	DbController* m_dbcontroller;
+	DbController* m_dbcontroller = nullptr;
 
 	bool m_snapToGrid = true;
 
@@ -381,84 +381,85 @@ private:
 	// Actions
 	//
 private:
-	QAction* m_escapeAction;
+	QAction* m_escapeAction = nullptr;
 
 	//	Contexet Menu
 	//
 private:
 	// File
 	//
-	QMenu* m_fileMenu;
-	QAction* m_fileAction;
-		QAction* m_fileCheckOutAction;
-		QAction* m_fileCheckInAction;
-		QAction* m_fileUndoChangesAction;
+	QMenu* m_fileMenu = nullptr;
+	QAction* m_fileAction = nullptr;
+		QAction* m_fileCheckOutAction = nullptr;
+		QAction* m_fileCheckInAction = nullptr;
+		QAction* m_fileUndoChangesAction = nullptr;
 		// ------------------------------
-		QAction* m_fileSeparatorAction0;
-		QAction* m_fileSaveAction;
-		QAction* m_fileSeparatorAction1;
+		QAction* m_fileSeparatorAction0 = nullptr;
+		QAction* m_fileSaveAction = nullptr;
+		QAction* m_fileSeparatorAction1 = nullptr;
 		// ------------------------------
-		QAction* m_fileGetWorkcopyAction;
-		QAction* m_fileSetWorkcopyAction;
+		QAction* m_fileGetWorkcopyAction = nullptr;
+		QAction* m_fileSetWorkcopyAction = nullptr;
 		// ------------------------------
-		QAction* m_fileSeparatorAction2;
-		QAction* m_filePropertiesAction;
+		QAction* m_fileSeparatorAction2 = nullptr;
+		QAction* m_filePropertiesAction = nullptr;
 		// ------------------------------
-		QAction* m_fileSeparatorAction3;
-		QAction* m_fileCloseAction;
+		QAction* m_fileSeparatorAction3 = nullptr;
+		QAction* m_fileCloseAction = nullptr;
 
 	// Add Item
 	//
-	QMenu* m_addMenu;
-	QAction* m_addAction;
-		QAction* m_addLineAction;
-		QAction* m_addConnectionLineAction;
-		QAction* m_addRectAction;
+	QMenu* m_addMenu = nullptr;
+	QAction* m_addAction = nullptr;
+		QAction* m_addLineAction = nullptr;
+		QAction* m_addConnectionLineAction = nullptr;
+		QAction* m_addRectAction = nullptr;
 		// ------------------------------
-		QAction* m_addSeparatorAction0;
-		QAction* m_addInputSignalAction;
-		QAction* m_addOutputSignalAction;
-		QAction* m_addFblElementAction;
-		QAction* m_addLinkAction;
+		QAction* m_addSeparatorAction0 = nullptr;
+		QAction* m_addInputSignalAction = nullptr;
+		QAction* m_addOutputSignalAction = nullptr;
+		QAction* m_addConstantAction = nullptr;
+		QAction* m_addFblElementAction = nullptr;
+		QAction* m_addLinkAction = nullptr;
 
 	// Edit
 	//
-	QMenu* m_editMenu;
-	QAction* m_editAction;
-		QAction* m_undoAction;
-		QAction* m_redoAction;
+	QMenu* m_editMenu = nullptr;
+	QAction* m_editAction = nullptr;
+		QAction* m_undoAction = nullptr;
+		QAction* m_redoAction = nullptr;
 		// ------------------------------
-		QAction* m_editSeparatorAction0;
-		QAction* m_selectAllAction;
+		QAction* m_editSeparatorAction0 = nullptr;
+		QAction* m_selectAllAction = nullptr;
 		// ------------------------------
-		QAction* m_editSeparatorAction1;
-		QAction* m_editCutAction;
-		QAction* m_editCopyAction;
-		QAction* m_editPasteAction;
+		QAction* m_editSeparatorAction1 = nullptr;
+		QAction* m_editCutAction = nullptr;
+		QAction* m_editCopyAction = nullptr;
+		QAction* m_editPasteAction = nullptr;
 		// ------------------------------
-		QAction* m_editSeparatorAction2;
-		QAction* m_deleteAction;
+		QAction* m_editSeparatorAction2 = nullptr;
+		QAction* m_deleteAction = nullptr;
 		// ------------------------------
-		QAction* m_editSeparatorAction3;
-		QAction* m_propertiesAction;
+		QAction* m_editSeparatorAction3 = nullptr;
+		QAction* m_propertiesAction = nullptr;
 
 	// View
 	//
-	QMenu* m_viewMenu;
-	QAction* m_viewAction;
-		//QAction* m_zoomInAction;		These actions were moved to VFrame30::BaseSchemeWidget
-		//QAction* m_zoomOutAction;
-		//QAction* m_zoom100Action;
+	QMenu* m_viewMenu = nullptr;
+	QAction* m_viewAction = nullptr;
+		//QAction* m_zoomInAction = nullptr;		These actions were moved to VFrame30::BaseSchemeWidget
+		//QAction* m_zoomOutAction = nullptr;
+		//QAction* m_zoom100Action = nullptr;
 		// ------------------------------
-		QAction* m_viewSeparatorAction0;
-		QAction* m_snapToGridAction;
+		QAction* m_viewSeparatorAction0 = nullptr;
+		QAction* m_snapToGridAction = nullptr;
 
 	// Properties
 	//
-	QAction* m_separatorAction0;
-	QAction* m_layersAction;
-	//QMenu* m_propertiesMenu;
-	//QAction* m_propertiesAction;
+	QAction* m_separatorAction0 = nullptr;
+	QAction* m_layersAction = nullptr;
+	//QMenu* m_propertiesMenu = nullptr;
+	//QAction* m_propertiesAction = nullptr;
 
 	// --
 	// End of ConextMenu
