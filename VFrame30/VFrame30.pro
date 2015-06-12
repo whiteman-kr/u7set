@@ -122,7 +122,8 @@ HEADERS += VFrame30Lib_global.h \
     SchemeView.h \
     version.h \
     ../include/DbStruct.h \
-    BaseSchemeWidget.h
+    BaseSchemeWidget.h \
+    SchemeItemConst.h
 
 SOURCES += \
     VideoItem.cpp \
@@ -162,7 +163,8 @@ SOURCES += \
     WiringScheme.cpp \
     SchemeView.cpp \
     ../lib/DbStruct.cpp \
-    BaseSchemeWidget.cpp
+    BaseSchemeWidget.cpp \
+    SchemeItemConst.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
