@@ -185,6 +185,7 @@ namespace VFrame30
 		VideoItemSignal(unit)
 	{
 		addOutput();
+		setSignalStrIds("#IN_STRID");
 	}
 
 	VideoItemInputSignal::~VideoItemInputSignal(void)
@@ -258,6 +259,7 @@ namespace VFrame30
 		VideoItemSignal(unit)
 	{
 		addInput();
+		setSignalStrIds("#OUT_STRID");
 	}
 
 	VideoItemOutputSignal::~VideoItemOutputSignal(void)

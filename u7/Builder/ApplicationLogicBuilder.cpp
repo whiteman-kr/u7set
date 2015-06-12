@@ -491,17 +491,29 @@ namespace Builder
 				if (item.m_fblItem->isInputSignalElement())
 				{
 					qDebug() << "Input " << item.m_fblItem->toInputSignalElement()->signalStrIds();
+					continue;
 				}
 
 				if (item.m_fblItem->isOutputSignalElement())
 				{
 					qDebug() << "Output " << item.m_fblItem->toOutputSignalElement()->signalStrIds();
+					continue;
 				}
+
+				if (item.m_fblItem->isConstElement())
+				{
+					qDebug() << "Constant " << item.m_fblItem->toSchemeItemConst()->valueToString();
+					continue;
+				}
+
 
 				if (item.m_fblItem->isFblElement())
 				{
 					qDebug() << "Fbl " << item.m_afbElement.caption();
+					continue;
 				}
+
+				qDebug() << "ERROR, UNKWNOW element " << item.m_fblItem->metaObject()->className();
 			}
 
 			// -- end of debug
