@@ -67,11 +67,11 @@ namespace VFrame30
 			return;
 		}
 
-		// Нарисовать прямоугольник и пины
+		// Draw rect and pins
 		//
 		FblItemRect::Draw(drawParam, scheme, pLayer);
 
-		//--
+		// Draw other
 		//
 		QPainter* p = drawParam->painter();
 
@@ -137,7 +137,7 @@ namespace VFrame30
 		}
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r);
+		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
 
 		return;
 	}
@@ -392,14 +392,14 @@ namespace VFrame30
 		return -1;
 	}
 
-	void VideoItemFblElement::addInputSignal(const QString& /*strId*/, int /*type*/, int opIndex, int /*size*/)
+	void VideoItemFblElement::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
 	{
-		addInput(opIndex);
+		addInput(opIndex, caption);
 	}
 
-	void VideoItemFblElement::addOutputSignal(const QString& /*strId*/, int /*type*/, int opIndex, int /*size*/)
+	void VideoItemFblElement::addOutputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
 	{
-		addOutput(opIndex);
+		addOutput(opIndex, caption);
 	}
 
 	void VideoItemFblElement::removeInputSignals()

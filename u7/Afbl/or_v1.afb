@@ -87,6 +87,8 @@ function createInputSignals(videoItemFblElement, afbElement)
 		opIndex++;
 	}
 
+	videoItemFblElement.adjustHeight();
+
 	return true;
 }
 	</Library>

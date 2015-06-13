@@ -44,134 +44,7 @@ namespace VFrame30
 	{
 	}
 
-	// Вычислить координаты точки
 	//
-	void FblItemRect::SetConnectionsPos(double gridSize, int pinGridStep)
-	{
-		QRectF ir(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		// посчет кооринат входов
-		//
-		{
-			auto inputs = mutableInputs();
-			int inputCount = static_cast<int>(inputs->size());
-			int inputIndex = 0;
-
-			for (auto input = inputs->begin(); input != inputs->end(); ++input)
-			{
-				assert(input->IsInput());
-
-				VideoItemPoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
-				input->setPoint(calculatedPoint);
-
-				inputIndex ++;
-			}
-		}
-
-		// посчет кооринат выходов
-		//
-		{
-			auto outputs = mutableOutputs();
-			int outputCount = static_cast<int>(outputs->size());
-			int outputIndex = 0;
-
-			for (auto output = outputs->begin(); output != outputs->end(); ++output)
-			{
-				assert(output->IsOutput());
-
-				VideoItemPoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
-				output->setPoint(calculatedPoint);
-
-				outputIndex ++;
-			}
-		}
-				
-		return;
-	}
-
-	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const
-	{
-		if (pResult == nullptr)
-		{
-			assert(pResult);
-			return false;
-		}
-
-		QRectF ir(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		// Искать точку во входах
-		//
-		const std::list<CFblConnectionPoint>& inputPoints = inputs();
-		int inputCount = inputsCount();
-		int index = 0;
-
-		for (auto pt = inputPoints.cbegin(); pt != inputPoints.cend(); ++pt)
-		{
-			assert(pt->dirrection() == ConnectionDirrection::Input);
-
-			if (pt->guid() == connectionPointGuid)
-			{
-				*pResult = CalcPointPos(ir, *pt, inputCount, index, gridSize, pinGridStep);
-				return true;
-			}
-
-			index ++;
-		}
-
-		// Искать точку в выходах
-		//
-		const std::list<CFblConnectionPoint>& outputPoints = outputs();
-		int outputCount = outputsCount();
-		index = 0;
-
-		for (auto pt = outputPoints.cbegin(); pt != outputPoints.cend(); ++pt)
-		{
-			assert(pt->dirrection() == ConnectionDirrection::Output);
-
-			if (pt->guid() == connectionPointGuid)
-			{
-				*pResult = CalcPointPos(ir, *pt, outputCount, index, gridSize, pinGridStep);
-				return true;
-			}
-
-			index ++;
-		}
-		
-		// Точка не найдена
-		//
-		assert(false);
-		return false;
-	}
-
-	VideoItemPoint FblItemRect::CalcPointPos(
-			const QRectF& fblItemRect,
-			const CFblConnectionPoint& connection,
-			int pinCount,
-			int index,
-			double gridSize,
-			int pinGridStep) const
-	{
-		if (pinCount == 0)
-		{
-			assert(pinCount != 0);
-			return VideoItemPoint(0, 0);
-		}
-
-		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
-
-		// вертикальное расстояние между пинами
-		//
-		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-		double halfpinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
-
-		double top = CUtils::snapToGrid(fblItemRect.top(), gridSize);
-
-		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
-		y = CUtils::snapToGrid(y, gridSize);
-
-		return VideoItemPoint(x, y);
-	}
-	
 	// Serialization
 	//
 	bool FblItemRect::SaveData(Proto::Envelope* message) const
@@ -227,7 +100,7 @@ namespace VFrame30
 		{
 			return false;
 		}
-		
+
 		if (message.videoitem().has_fblitemrect() == false)
 		{
 			assert(message.videoitem().has_fblitemrect());
@@ -244,6 +117,140 @@ namespace VFrame30
 		m_font.LoadData(itemMessage.font());
 
 		return true;
+	}
+
+
+	// Get pin position
+	//
+	void FblItemRect::SetConnectionsPos(double gridSize, int pinGridStep)
+	{
+		QRectF ir(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		// Inputs
+		//
+		{
+			auto inputs = mutableInputs();
+			int inputCount = static_cast<int>(inputs->size());
+			int inputIndex = 0;
+
+			for (auto input = inputs->begin(); input != inputs->end(); ++input)
+			{
+				assert(input->IsInput());
+
+				VideoItemPoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
+				input->setPoint(calculatedPoint);
+
+				inputIndex ++;
+			}
+		}
+
+		// Outputs
+		//
+		{
+			auto outputs = mutableOutputs();
+			int outputCount = static_cast<int>(outputs->size());
+			int outputIndex = 0;
+
+			for (auto output = outputs->begin(); output != outputs->end(); ++output)
+			{
+				assert(output->IsOutput());
+
+				VideoItemPoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
+				output->setPoint(calculatedPoint);
+
+				outputIndex ++;
+			}
+		}
+				
+		return;
+	}
+
+	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const
+	{
+		if (pResult == nullptr)
+		{
+			assert(pResult);
+			return false;
+		}
+
+		QRectF ir(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		// Look for point in inputs
+		//
+		const std::list<CFblConnectionPoint>& inputPoints = inputs();
+		int inputCount = inputsCount();
+		int index = 0;
+
+		for (auto pt = inputPoints.cbegin(); pt != inputPoints.cend(); ++pt)
+		{
+			assert(pt->dirrection() == ConnectionDirrection::Input);
+
+			if (pt->guid() == connectionPointGuid)
+			{
+				*pResult = CalcPointPos(ir, *pt, inputCount, index, gridSize, pinGridStep);
+				return true;
+			}
+
+			index ++;
+		}
+
+		// Look for point in outputs
+		//
+		const std::list<CFblConnectionPoint>& outputPoints = outputs();
+		int outputCount = outputsCount();
+		index = 0;
+
+		for (auto pt = outputPoints.cbegin(); pt != outputPoints.cend(); ++pt)
+		{
+			assert(pt->dirrection() == ConnectionDirrection::Output);
+
+			if (pt->guid() == connectionPointGuid)
+			{
+				*pResult = CalcPointPos(ir, *pt, outputCount, index, gridSize, pinGridStep);
+				return true;
+			}
+
+			index ++;
+		}
+		
+		// The point is not found
+		//
+		assert(false);
+		return false;
+	}
+
+	VideoItemPoint FblItemRect::CalcPointPos(
+			const QRectF& fblItemRect,
+			const CFblConnectionPoint& connection,
+			int pinCount,
+			int index,
+			double gridSize,
+			int pinGridStep) const
+	{
+		if (pinCount == 0)
+		{
+			assert(pinCount != 0);
+			return VideoItemPoint(0, 0);
+		}
+
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// Calc
+		//
+		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
+
+		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double halfpinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
+
+		double top = CUtils::snapToGrid(fblItemRect.top(), gridSize);
+
+		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
+		y = CUtils::snapToGrid(y, gridSize);
+
+		return VideoItemPoint(x, y);
 	}
 
 
@@ -284,7 +291,7 @@ namespace VFrame30
 			dpiX = pPaintDevice->logicalDpiX();
 		}
 		
-		// Подправить прямоугольник с учетом входов выходов
+		// Correct rect width
 		//
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
@@ -298,7 +305,7 @@ namespace VFrame30
 			r.setRight(r.right() - pinWidth);
 		}
 
-		// Рисолвание прямоугольника
+		// Draw main rect
 		//
 		p->fillRect(r, fillColor());
 
@@ -309,30 +316,30 @@ namespace VFrame30
 
 		p->drawRect(r);
 		
-		// Пины входов/выходов
+		// Draw in/outs
 		//
 		if (inputsCount() == 0 && outputsCount() == 0)
 		{
 			return;
 		}
 
-		// Рисование входных пинов
+		// Draw input pins
 		//
 		const std::list<CFblConnectionPoint>& inputPins = inputs();
 
 		QPen redPen(QColor(0xE0B00000));
 		redPen.setWidthF(m_weight);		// Don't use getter!
 		
-		for (auto input = inputPins.cbegin(); input != inputPins.cend(); ++input)
+		for (const CFblConnectionPoint& input : inputPins)
 		{
-			// Определение координат пина
+			// Get pin position
 			//
 			VideoItemPoint vip;
-			GetConnectionPointPos(input->guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
+			GetConnectionPointPos(input.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
-			// Рисование пина
+			// Drawing pin
 			//
 			QPointF pt1(vip.X, vip.Y);
 			QPointF pt2(vip.X + pinWidth, vip.Y);
@@ -349,27 +356,45 @@ namespace VFrame30
 			}
 			else
 			{
-				// рисование красного креста
+				// Draw red cross error mark
 				//
 				p->setPen(redPen);
 				DrawPinCross(p, pt1.x(), pt1.y(), pinWidth);
 			}
+
+			// Draw pin text
+			//
+			QRectF pinTextRect;
+			pinTextRect.setLeft(vip.X - pinWidth * 3);
+			pinTextRect.setTop(vip.Y - m_font.drawSize() * 1.2);
+			pinTextRect.setWidth(pinWidth * 3.8);
+			pinTextRect.setHeight(m_font.drawSize() * 1.2);
+
+			FontParam font = m_font;
+			font.setDrawSize(m_font.drawSize() * 0.75);
+
+			DrawHelper::DrawText(p,
+								 font,
+								 itemUnit(),
+								 input.caption(),
+								 pinTextRect,
+								 Qt::TextDontClip | Qt::AlignVCenter | Qt::AlignRight);
 		}
 
-		// рисование выходных пинов
+		// Drawing output pins
 		//
 		const std::list<CFblConnectionPoint>& outputPins = outputs();
 
-		for (auto output = outputPins.cbegin(); output != outputPins.cend(); ++output)
+		for (const CFblConnectionPoint& output : outputPins)
 		{
-			// Определение координат пина
+			// Get pin position
 			//
 			VideoItemPoint vip;
-			GetConnectionPointPos(output->guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
+			GetConnectionPointPos(output.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
-			// Рисование пина
+			// Draw pin
 			//
 			QPointF pt1(vip.X, vip.Y);
 			QPointF pt2(vip.X - pinWidth, vip.Y);
@@ -386,16 +411,89 @@ namespace VFrame30
 			}
 			else
 			{
-				// рисование красного креста
+				// Draw red cross error mark
 				//
 				p->setPen(redPen);
 				DrawPinCross(p, pt1.x(), pt1.y(), pinWidth);
 			}
+
+			// Draw pin text
+			//
+			QRectF pinTextRect;
+			pinTextRect.setLeft(pt2.x() + pinWidth * 0.2);
+			pinTextRect.setTop(vip.Y - m_font.drawSize() * 1.2);
+			pinTextRect.setWidth(pinWidth * 4.0);
+			pinTextRect.setHeight(m_font.drawSize() * 1.2);
+
+			FontParam font = m_font;
+			font.setDrawSize(m_font.drawSize() * 0.75);
+
+			DrawHelper::DrawText(p,
+								 font,
+								 itemUnit(),
+								 output.caption(),
+								 pinTextRect,
+								 Qt::TextDontClip | Qt::AlignVCenter | Qt::AlignLeft);
 		}
 		
 		return;
 	}
 
+
+	Q_INVOKABLE void FblItemRect::adjustHeight()
+	{
+		// Here m_gridSize and m_pingGridStep are cached copies from Scheme, they set in CalcPointPos
+		//
+		if (m_cachedGridSize < 0 || m_cachedPinGridStep == 0)
+		{
+			// Can't do anything, required variables are not set
+			//
+			qDebug() << Q_FUNC_INFO << " Variables m_gridSize and m_pingGridStep were not initiazized, cannot perform operation";
+			return;
+		}
+
+		double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
+
+		if (heightDocPt() < minHeight)
+		{
+			setHeightDocPt(minHeight);
+		}
+
+		return;
+	}
+
+	double FblItemRect::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// --
+		//
+		int pinCount = std::max(inputsCount(), outputsCount());
+		if (pinCount == 0)
+		{
+			pinCount = 1;
+		}
+
+		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+
+		return minHeight;
+	}
+
+	double FblItemRect::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// --
+		//
+		return m_cachedGridSize * 10;
+	}
 
 	// Properties and Data
 	//

@@ -58,7 +58,9 @@ namespace VFrame30
 
 		double size(SchemeUnit unit) const;
 		void setSize(double value, SchemeUnit unit);
+
 		double drawSize() const;
+		void setDrawSize(double value);
 
 		bool bold() const;
 		void setBold(bool value);

@@ -454,8 +454,12 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	itemPos->setLeftDocPt(std::min(x1, x2));
 	itemPos->setTopDocPt(std::min(y1, y2));
-	itemPos->setWidthDocPt(std::abs(x2 - x1));
-	itemPos->setHeightDocPt(std::abs(y2 - y1));
+
+	double width = std::max(std::abs(x2 - x1), itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep()));
+	double height = std::max(std::abs(y2 - y1), itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep()));
+
+	itemPos->setWidthDocPt(width);
+	itemPos->setHeightDocPt(height);
 
 	// Save result for drawing rullers
 	//

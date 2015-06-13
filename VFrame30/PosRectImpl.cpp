@@ -104,6 +104,16 @@ namespace VFrame30
 		m_heightDocPt = val;
 	}
 
+	double PosRectImpl::minimumPossibleHeightDocPt(double /*gridSize*/, int /*pinGridStep*/) const
+	{
+		return 0;
+	}
+
+	double PosRectImpl::minimumPossibleWidthDocPt(double /*gridSize*/, int /*pinGridStep*/) const
+	{
+		return 0;
+	}
+
 	// Рисование элемента при его создании изменении
 	//
 	void PosRectImpl::DrawOutline(CDrawParam* drawParam) const

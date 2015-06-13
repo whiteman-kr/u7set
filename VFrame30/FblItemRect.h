@@ -62,6 +62,13 @@ namespace VFrame30
 									int index,
 									double gridSize, int pinGridStep) const;
 
+		// Other public methods
+		//
+	public:
+		Q_INVOKABLE void adjustHeight();
+
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const;
 
 		// Properties and Data
 		//
@@ -104,6 +111,13 @@ namespace VFrame30
 		DECLARE_FONT_PROPERTIES(Font);
 		
 	protected:
+		// m_gridSize and m_pingGridStep are cached values from Scheme, they set in CalcPointPos.
+		// We need these variables in case we call functions and do not have scheme pointer.
+		// This is not good, it is subject to change.
+		//
+		mutable double m_cachedGridSize = -1;			// -1 means it is not iniotialized
+		mutable double m_cachedPinGridStep = 0;
+
 		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
 		QRgb m_lineColor;
 		QRgb m_fillColor;
