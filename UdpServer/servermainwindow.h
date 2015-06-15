@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include "../include/BaseService.h"
-#include "../include/ProtoUdpSocket.h"
+#include "../include/ProtoUdp.h"
 
 namespace Ui {
 class ServerMainWindow;
@@ -22,7 +22,7 @@ private:
 
 	BaseServiceController* m_ServiceController = nullptr;
 
-	ProtoUdpClientThread* m_protoUdpClientThread = nullptr;
+	ProtoUdp::ServerThread* m_protoUdpServerThread = nullptr;
 };
 
 #endif // SERVERMAINWINDOW_H

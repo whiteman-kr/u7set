@@ -6,7 +6,7 @@
 #include "../include/SocketIO.h"
 #include "FscDataSource.h"
 #include "ClientSocket.h"
-#include "../include/ProtoUdpSocket.h"
+#include "../include/ProtoUdp.h"
 
 namespace Ui {
 class MainWindow;
@@ -43,7 +43,7 @@ private:
 	void runFscDataSources();
 	void stopFscDataSources();
 
-	ProtoUdpClientThread* m_protoUdpClientThread = nullptr;
+	ProtoUdp::ClientThread* m_protoUdpClientThread = nullptr;
 };
 
 

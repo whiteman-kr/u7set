@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	m_ServiceController = new BaseServiceController(STP_CONFIG, new MainFunctionWorker());*/
 
-//	m_protoUdpClientThread = new ProtoUdpClientThread(QHostAddress("192.168.75.85"), PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST);
+	m_protoUdpClientThread = new ProtoUdp::ClientThread(HostAddressPort("192.168.75.85", PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
 
 	m_protoUdpClientThread->run();
 

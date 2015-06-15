@@ -58,7 +58,7 @@ SOURCES += \
     ../lib/CircularLogger.cpp \
     ../lib/DataSource.cpp \
     FscDataSource.cpp \
-    ../lib/ProtoUdpSocket.cpp
+    ../lib/ProtoUdp.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -70,7 +70,7 @@ HEADERS  += mainwindow.h \
 	FscDataSource.h \
 	../include/FscDataFormat.h \
     version.h \
-    ../include/ProtoUdpSocket.h
+    ../include/ProtoUdp.h
 
 include(../qtservice/src/qtservice.pri)
 

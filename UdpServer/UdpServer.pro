@@ -57,7 +57,7 @@ SOURCES +=\
     servermainwindow.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
-    ../lib/ProtoUdpSocket.cpp
+	../lib/ProtoUdp.cpp
 
 HEADERS  += \
     ../include/SocketIO.h \
@@ -67,7 +67,7 @@ HEADERS  += \
     servermainwindow.h \
     ../include/CircularLogger.h \
     version.h \
-    ../include/ProtoUdpSocket.h
+	../include/ProtoUdp.h
 
 include(../qtservice/src/qtservice.pri)
 
