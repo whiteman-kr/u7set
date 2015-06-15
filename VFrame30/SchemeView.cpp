@@ -112,7 +112,7 @@ namespace VFrame30
 		// --
 		//
 		QPainter p(this);
-		CDrawParam drawParam(&p);
+		CDrawParam drawParam(&p, scheme()->gridSize(), scheme()->pinGridStep());
 
 		// Calc size
 		//

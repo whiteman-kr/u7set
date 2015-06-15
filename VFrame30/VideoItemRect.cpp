@@ -181,7 +181,7 @@ namespace VFrame30
 		if (m_text.isEmpty() == false)
 		{
 			p->setPen(textColor());
-			DrawHelper::DrawText(p, m_font, itemUnit(), m_text, r);
+			DrawHelper::DrawText(p, m_font, itemUnit(), m_text, r, Qt::AlignLeft | Qt::AlignTop);
 		}
 
 		return;

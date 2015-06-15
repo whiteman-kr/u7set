@@ -97,7 +97,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p);
+	VFrame30::CDrawParam drawParam(&p, scheme()->gridSize(), scheme()->pinGridStep());
 
 	// Calc size
 	//
@@ -454,8 +454,12 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	itemPos->setLeftDocPt(std::min(x1, x2));
 	itemPos->setTopDocPt(std::min(y1, y2));
-	itemPos->setWidthDocPt(std::abs(x2 - x1));
-	itemPos->setHeightDocPt(std::abs(y2 - y1));
+
+	double width = std::max(std::abs(x2 - x1), itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep()));
+	double height = std::max(std::abs(y2 - y1), itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep()));
+
+	itemPos->setWidthDocPt(width);
+	itemPos->setHeightDocPt(height);
 
 	// Save result for drawing rullers
 	//
@@ -927,7 +931,7 @@ void EditSchemeView::drawGrid(QPainter* p)
 	double frameWidth = scheme()->docWidth();
 	double frameHeight = scheme()->docHeight();
 
-	double gridSize = unit == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
+	double gridSize = scheme()->gridSize();
 
 	double scale = zoom() / 100.0;
 
@@ -3367,7 +3371,8 @@ QPointF EditSchemeWidget::widgetPointToDocument(const QPoint& widgetPoint, bool 
 
 QPointF EditSchemeWidget::snapToGrid(QPointF pt) const
 {
-	double gridSize = scheme()->unit() == VFrame30::SchemeUnit::Display ? GridSizeDisplay : GridSizeMm;
+	double gridSize = scheme()->gridSize();
+
 	QPointF result = CUtils::snapToGrid(pt, gridSize);
 	return result;
 }

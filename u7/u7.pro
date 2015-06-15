@@ -269,7 +269,19 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0039.sql
 
 DISTFILES += \
-	LogicModuleConfiguration.js
+	LogicModuleConfiguration.js \
+    Afbl/_convert_all.bat \
+    Afbl/bcomp_great_v1.afb \
+    Afbl/bcomp_less_v1.afb \
+    Afbl/bcomp_ne_v1.afb \
+    Afbl/delay_on_v1.afb \
+    Afbl/not_v1.afb \
+    Afbl/maj_v1.afb \
+    Afbl/or_v1.afb \
+    Afbl/xor_v1.afb \
+    Afbl/and_v1.afb \
+    Afbl/bcomp_eq_v1.afb \
+    Afbl/_afbl_all.sql
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

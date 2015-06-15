@@ -6,26 +6,29 @@ namespace VFrame30
 	//
 	// CFblConnectionPoint
 	//
-	CFblConnectionPoint::CFblConnectionPoint()
+	CFblConnectionPoint::CFblConnectionPoint(
+			ConnectionDirrection dirrection,
+			const QUuid& guid,
+			int operandIndex,
+			QString caption) :
+		m_guid(guid),
+		m_point(0, 0),
+		m_dirrection(dirrection),
+		m_afbOperandIndex(operandIndex),
+		m_caption(caption)
 	{
-		m_guid = QUuid::createUuid();
-
-		m_point.X = 0;
-		m_point.Y = 0;
-
-		m_dirrection = ConnectionDirrection::Input;
-		//m_signalGuid = QUuid();
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(double x, double y, ConnectionDirrection dirrection, const QUuid& guid, int operandIndex)
+	CFblConnectionPoint::CFblConnectionPoint(
+			ConnectionDirrection dirrection,
+			const QUuid& guid,
+			const Afbl::AfbElementSignal& afbSignal) :
+		m_guid(guid),
+		m_point(0, 0),
+		m_dirrection(dirrection),
+		m_afbOperandIndex(afbSignal.operandIndex()),
+		m_caption(afbSignal.caption())
 	{
-		m_point.X = x;
-		m_point.Y = y;
-		m_dirrection = dirrection;
-		m_guid = guid;
-		m_afbOperandIndex = operandIndex;
-
-//		m_signalGuid = QUuid();
 	}
 
 	CFblConnectionPoint::CFblConnectionPoint(const Proto::FblConnectionPoint& cpm)
@@ -35,65 +38,24 @@ namespace VFrame30
 
 	bool CFblConnectionPoint::SaveData(Proto::FblConnectionPoint* cpm) const
 	{
-		m_point.SaveData(cpm->mutable_point());
+		//m_point.SaveData(cpm->mutable_point());	// Pin pos will be calculated before drawing or compilation
 
 		cpm->set_dirrection(static_cast<Proto::ConnectionDirrection>(dirrection()));
-
 		Proto::Write(cpm->mutable_uuid(), m_guid);
-
 		cpm->set_operandindex(m_afbOperandIndex);
-
-//		if (m_signalGuid.isNull() == false)  // != GUI_NULL
-//		{
-//			Proto::Write(cpm->mutable_signaluuid(), m_signalGuid);
-//		}
-
-//		if (m_signalStrID.isEmpty() == false)
-//		{
-//			Proto::Write(cpm->mutable_signalstrid(), m_signalStrID);
-//		}
-
-//		if (m_signalCaption.isEmpty() == false)
-//		{
-//			Proto::Write(cpm->mutable_signalcaption(), m_signalCaption);
-//		}
+		cpm->set_caption(m_caption.toStdString());
 
 		return true;
 	}
 
 	bool CFblConnectionPoint::LoadData(const Proto::FblConnectionPoint& cpm)
 	{
-		m_point.LoadData(cpm.point());
+		//m_point.LoadData(cpm.point());	// Pin pos will be calculated before drawing or compilation
+
 		m_dirrection = static_cast<ConnectionDirrection>(cpm.dirrection());
 		m_guid = Proto::Read(cpm.uuid());
 		m_afbOperandIndex = cpm.operandindex();
-
-//		if (cpm.has_signaluuid() == true)
-//		{
-//			m_signalGuid = Proto::Read(cpm.signaluuid());
-//		}
-//		else
-//		{
-//			m_signalGuid = QUuid();
-//		}
-
-//		if (cpm.has_signalstrid() == true)
-//		{
-//			Proto::Read(cpm.signalstrid(), &m_signalStrID);
-//		}
-//		else
-//		{
-//			m_signalStrID.clear();
-//		}
-
-//		if (cpm.has_signalcaption() == true)
-//		{
-//			Proto::Read(cpm.signalcaption(), &m_signalCaption);
-//		}
-//		else
-//		{
-//			m_signalCaption.clear();
-//		}
+		m_caption = QString::fromStdString(cpm.caption());
 
 		return true;
 	}
@@ -184,35 +146,15 @@ namespace VFrame30
 		m_afbOperandIndex = value;
 	}
 
-//	const QUuid& CFblConnectionPoint::signalGuid() const
-//	{
-//		return m_signalGuid;
-//	}
+	QString CFblConnectionPoint::caption() const
+	{
+		return m_caption;
+	}
 
-//	void CFblConnectionPoint::setSignalGuid(const QUuid& guid)
-//	{
-//		m_signalGuid = guid;
-//	}
-
-//	const QString& CFblConnectionPoint::signalStrID() const
-//	{
-//		return m_signalStrID;
-//	}
-
-//	void CFblConnectionPoint::setSignalStrID(const QString& strid)
-//	{
-//		m_signalStrID = strid;
-//	}
-
-//	const QString& CFblConnectionPoint::signalCaption() const
-//	{
-//		return m_signalCaption;
-//	}
-
-//	void CFblConnectionPoint::setSignalCaption(const QString& caption)
-//	{
-//		m_signalCaption = caption;
-//	}
+	void CFblConnectionPoint::setCaption(QString caption)
+	{
+		m_caption = caption;
+	}
 
 
 	//
@@ -300,7 +242,7 @@ namespace VFrame30
 	//
 	void FblItem::DrawPinCross(QPainter* p, double x, double y, double pinWidth) const
 	{
-		double crossSize = pinWidth / 3;
+		double crossSize = pinWidth / 4.0;
 
 		QPointF cross_pt1(x - crossSize, y - crossSize);
 		QPointF cross_pt2(x + crossSize, y - crossSize);
@@ -313,7 +255,7 @@ namespace VFrame30
 
 	void FblItem::DrawPinJoint(QPainter* p, double x, double y, double pinWidth) const
 	{
-		double radius = static_cast<double>(pinWidth) / 8.0;
+		double radius = static_cast<double>(pinWidth) / 9.0;
 
 		p->drawEllipse(QPointF(x, y), radius, radius);
 	}
@@ -395,19 +337,19 @@ namespace VFrame30
 
 	void FblItem::addInput()
 	{
-		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Input, QUuid::createUuid(), -1);
+		CFblConnectionPoint cp(ConnectionDirrection::Input, QUuid::createUuid(), -1, "");
 		m_inputPoints.push_back(cp);
 	}
 
 	void FblItem::addInput(const Afbl::AfbElementSignal& s)
 	{
-		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Input, QUuid::createUuid(), s.operandIndex());
+		CFblConnectionPoint cp(ConnectionDirrection::Input, QUuid::createUuid(), s);
 		m_inputPoints.push_back(cp);
 	}
 
-	void FblItem::addInput(int opIndex)
+	void FblItem::addInput(int opIndex, QString caption)
 	{
-		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Input, QUuid::createUuid(), opIndex);
+		CFblConnectionPoint cp(ConnectionDirrection::Input, QUuid::createUuid(), opIndex, caption);
 		m_inputPoints.push_back(cp);
 	}
 
@@ -423,19 +365,19 @@ namespace VFrame30
 
 	void FblItem::addOutput()
 	{
-		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Output, QUuid::createUuid(), -1);
+		CFblConnectionPoint cp(ConnectionDirrection::Output, QUuid::createUuid(), -1, "");
 		m_outputPoints.push_back(cp);
 	}
 
 	void FblItem::addOutput(const Afbl::AfbElementSignal& s)
 	{
-		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Output, QUuid::createUuid(), s.operandIndex());
+		CFblConnectionPoint cp(ConnectionDirrection::Output, QUuid::createUuid(), s);
 		m_outputPoints.push_back(cp);
 	}
 
-	void FblItem::addOutput(int opIndex)
+	void FblItem::addOutput(int opIndex, QString caption)
 	{
-		CFblConnectionPoint cp(0, 0, ConnectionDirrection::Output, QUuid::createUuid(), opIndex);
+		CFblConnectionPoint cp(ConnectionDirrection::Output, QUuid::createUuid(), opIndex, caption);
 		m_outputPoints.push_back(cp);
 	}
 
@@ -456,15 +398,15 @@ namespace VFrame30
 		return;
 	}
 
-	void FblItem::SetConnectionsPos()
+	void FblItem::SetConnectionsPos(double /*gridSize*/, int /*pinGridStep*/)
 	{
-		assert(false);	// должно быть реализовано у наследников, CFblItemLine, CFblItemRect
+		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return;
 	}
 
-	bool FblItem::GetConnectionPointPos(const QUuid&, VideoItemPoint*) const
+	bool FblItem::GetConnectionPointPos(const QUuid&, VideoItemPoint*, double /*gridSize*/, int /*pinGridStep*/) const
 	{
-		assert(false);	// должно быть реализовано у наследников, CFblItemLine, CFblItemRect
+		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return false;
 	}
 

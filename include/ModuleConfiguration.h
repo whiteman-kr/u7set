@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../include/ProtoSerialization.h"
+#include "../include/DeviceObject.h"
 
 // ----------------------------------------------------------------------------
 //
@@ -10,7 +11,7 @@
 
 namespace Hardware
 {
-	class ModuleConfFirmware : public QObject
+	class ModuleFirmware : public QObject
 	{
 		Q_OBJECT
 
@@ -19,8 +20,8 @@ namespace Hardware
 		Q_PROPERTY(int FrameCount READ frameCount)
 
 	public:
-		ModuleConfFirmware();
-		virtual ~ModuleConfFirmware();
+		ModuleFirmware();
+		virtual ~ModuleFirmware();
 
 		// Methods
 		//
@@ -44,6 +45,7 @@ namespace Hardware
 
         std::vector<quint8> frame(int frameIndex);
 
+		bool setChannelData(int channel, const QByteArray& data);
 
 		// Properties
 		//
@@ -68,15 +70,17 @@ namespace Hardware
 		QString m_userName;
 
         std::vector<std::vector<quint8>> m_frames;
+
+		std::map<int, QByteArray> m_channelData;
     };
 
-    class ModuleConfCollection : public QObject
+	class ModuleFirmwareCollection : public QObject
 	{
 		Q_OBJECT
 
 	public:
-		ModuleConfCollection(const QString& projectName, const QString& userName, int changesetId);
-		virtual ~ModuleConfCollection();
+		ModuleFirmwareCollection(const QString& projectName, const QString& userName, int changesetId);
+		virtual ~ModuleFirmwareCollection();
 
 		// Methods
 		//
@@ -90,10 +94,10 @@ namespace Hardware
 		// Data
 		//
 	public:
-		const std::map<QString, ModuleConfFirmware>& firmwares() const;
+		const std::map<QString, ModuleFirmware>& firmwares() const;
 
 	private:
-		std::map<QString, ModuleConfFirmware> m_firmwares;
+		std::map<QString, ModuleFirmware> m_firmwares;
 
 		QString m_projectName;
 		QString m_userName;

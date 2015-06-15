@@ -46,5 +46,10 @@ const char* const ByteOrderStr[] =
 
 #define C_STR(qstring) qstring.toStdString().c_str()
 
+template <typename EnumType>
+EnumType IntToEnum(int value)
+{
+	return static_cast<EnumType>(value);
+}
 
 

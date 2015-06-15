@@ -433,14 +433,14 @@ message VideoItemConnectionLine
 //
 message FblConnectionPoint
 {
-	required VideoItemPoint point = 1;
-	required ConnectionDirrection dirrection = 2;
-	required Uuid uuid = 3;
+	optional VideoItemPoint point = 1;					// Can be removed in future, not used anymore
+	optional ConnectionDirrection dirrection = 2;
+	optional Uuid uuid = 3;
 	optional int32 operandIndex = 4 [default = -1];		// -1 is not used, for links etc...
+	optional string caption = 5 [default = ""];
 	
-	optional Uuid signalUuid = 10;
-	optional wstring signalStrID = 11;
-	optional wstring signalCaption = 12;
+	//optional Uuid signalUuid = 10;
+	//optional wstring signalStrID = 11;
 }
 
 

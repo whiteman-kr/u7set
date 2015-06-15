@@ -119,7 +119,7 @@ namespace VFrame30
 
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r);
+		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);
 
 		return;
 	}

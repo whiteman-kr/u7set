@@ -7,6 +7,9 @@ namespace VFrame30
 	{
 		setUnit(SchemeUnit::Inch);
 
+		setGridSize(Settings::defaultGridSize(unit()));
+		setPinGridStep(4);
+
 		setDocWidth(mm2in(420));
 		setDocHeight(mm2in(297));
 

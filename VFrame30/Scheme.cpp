@@ -34,7 +34,7 @@ namespace VFrame30
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// Обязательное поле, хэш имени класса, по нему восстанавливается класс.
+		message->set_classnamehash(classnamehash);	// Required field, class name hash code, by it instance is created
 		
 		Proto::VideoFrame* pMutableVideoFrame = message->mutable_videoframe();
 
@@ -46,7 +46,7 @@ namespace VFrame30
 		pMutableVideoFrame->set_height(m_height);
 		pMutableVideoFrame->set_unit(static_cast<Proto::SchemeUnit>(m_unit));
 
-		// Сохранить Layers
+		// Save Layers
 		//
 		bool saveLayersResult = true;
 
@@ -113,7 +113,7 @@ namespace VFrame30
 
 	Scheme* Scheme::CreateObject(const Proto::Envelope& message)
 	{
-		// Эта функция может создавать только один экземпляр
+		// This function can create only one instance
 		//
 		if (message.has_videoframe() == false)
 		{
@@ -143,7 +143,7 @@ namespace VFrame30
 			return;
 		}
 
-		// очистить клиентскую область, фоновым (серым) цветом
+		// Cleare client area by "grey" color
 		//
 		QPainter* p = drawParam->painter();
 		//p->fill(0xB0, 0xB0, 0xB0);	-- Очистка происходит в CDrawParam::BeginPaint
@@ -153,10 +153,7 @@ namespace VFrame30
 		QRectF pageRect(0.0, 0.0, static_cast<qreal>(docWidth()), static_cast<qreal>(docHeight()));
 		p->fillRect(pageRect, Qt::white);
 
-		// Рисование элементов по видимым слоям
-		//
-
-		// Цикл по слоям и их элементам
+		// Draw items by layers which has Show flag
 		//
 		double clipX = static_cast<double>(clipRect.left());
 		double clipY = static_cast<double>(clipRect.top());
@@ -397,7 +394,7 @@ namespace VFrame30
 
 				// Вычисление и сохранение координат пинов для обычного Fbl элементы
 				//
-				pFblItem->SetConnectionsPos();
+				pFblItem->SetConnectionsPos(gridSize(), pinGridStep());
 
 				// Найти в connectionMap такую координату и если она есть до увеличить счетчик пинов,
 				// если нет, то создать запись в списке
@@ -511,6 +508,26 @@ namespace VFrame30
 	void Scheme::setUnit(SchemeUnit value)
 	{
 		m_unit = value;
+	}
+
+	double Scheme::gridSize() const
+	{
+		return m_gridSize;
+	}
+
+	void Scheme::setGridSize(double value)
+	{
+		m_gridSize = value;
+	}
+
+	int Scheme::pinGridStep() const
+	{
+		return m_pinGridStep;
+	}
+
+	void Scheme::setPinGridStep(int value)
+	{
+		m_pinGridStep = value;
 	}
 
 	const Afbl::AfbElementCollection& Scheme::afbCollection() const

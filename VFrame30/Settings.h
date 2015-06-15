@@ -13,16 +13,16 @@ namespace VFrame30
 		static SchemeUnit regionalUnit(void);
 		static void setRegionalUnit(SchemeUnit value);
 
-		static double minFblGridSize(SchemeUnit unit);
+		static double defaultGridSize(SchemeUnit unit);
 		
 	private:
 		static SchemeUnit m_regionalUnit;
 
 		// ћинимальный грид, дл€ схем, используетс€ дл€ позиционировани€ (выравнивание€) пинов в Fbl едементах
 		//
-		static const double m_minFblGridSizeIn;
-		static const double m_minFblGridSizeMm;
-		static const double m_minFblGridSizePx;
+		static const double m_defaultGridSizeIn;
+		static const double m_defaultGridSizeMm;
+		static const double m_defaultGridSizePx;
 	};
 }
 

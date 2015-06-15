@@ -67,6 +67,11 @@ namespace VFrame30
 		return m_size;
 	}
 
+	void FontParam::setDrawSize(double value)
+	{
+		m_size = value;
+	}
+
 	bool FontParam::bold() const
 	{
 		return m_bold;

@@ -3047,7 +3047,7 @@ class FblConnectionPoint : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.VideoItemPoint point = 1;
+  // optional .Proto.VideoItemPoint point = 1;
   inline bool has_point() const;
   inline void clear_point();
   static const int kPointFieldNumber = 1;
@@ -3056,14 +3056,14 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline ::Proto::VideoItemPoint* release_point();
   inline void set_allocated_point(::Proto::VideoItemPoint* point);
 
-  // required .Proto.ConnectionDirrection dirrection = 2;
+  // optional .Proto.ConnectionDirrection dirrection = 2;
   inline bool has_dirrection() const;
   inline void clear_dirrection();
   static const int kDirrectionFieldNumber = 2;
   inline ::Proto::ConnectionDirrection dirrection() const;
   inline void set_dirrection(::Proto::ConnectionDirrection value);
 
-  // required .Proto.Uuid uuid = 3;
+  // optional .Proto.Uuid uuid = 3;
   inline bool has_uuid() const;
   inline void clear_uuid();
   static const int kUuidFieldNumber = 3;
@@ -3079,32 +3079,17 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 operandindex() const;
   inline void set_operandindex(::google::protobuf::int32 value);
 
-  // optional .Proto.Uuid signalUuid = 10;
-  inline bool has_signaluuid() const;
-  inline void clear_signaluuid();
-  static const int kSignalUuidFieldNumber = 10;
-  inline const ::Proto::Uuid& signaluuid() const;
-  inline ::Proto::Uuid* mutable_signaluuid();
-  inline ::Proto::Uuid* release_signaluuid();
-  inline void set_allocated_signaluuid(::Proto::Uuid* signaluuid);
-
-  // optional .Proto.wstring signalStrID = 11;
-  inline bool has_signalstrid() const;
-  inline void clear_signalstrid();
-  static const int kSignalStrIDFieldNumber = 11;
-  inline const ::Proto::wstring& signalstrid() const;
-  inline ::Proto::wstring* mutable_signalstrid();
-  inline ::Proto::wstring* release_signalstrid();
-  inline void set_allocated_signalstrid(::Proto::wstring* signalstrid);
-
-  // optional .Proto.wstring signalCaption = 12;
-  inline bool has_signalcaption() const;
-  inline void clear_signalcaption();
-  static const int kSignalCaptionFieldNumber = 12;
-  inline const ::Proto::wstring& signalcaption() const;
-  inline ::Proto::wstring* mutable_signalcaption();
-  inline ::Proto::wstring* release_signalcaption();
-  inline void set_allocated_signalcaption(::Proto::wstring* signalcaption);
+  // optional string caption = 5 [default = ""];
+  inline bool has_caption() const;
+  inline void clear_caption();
+  static const int kCaptionFieldNumber = 5;
+  inline const ::std::string& caption() const;
+  inline void set_caption(const ::std::string& value);
+  inline void set_caption(const char* value);
+  inline void set_caption(const char* value, size_t size);
+  inline ::std::string* mutable_caption();
+  inline ::std::string* release_caption();
+  inline void set_allocated_caption(::std::string* caption);
 
   // @@protoc_insertion_point(class_scope:Proto.FblConnectionPoint)
  private:
@@ -3116,12 +3101,8 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline void clear_has_uuid();
   inline void set_has_operandindex();
   inline void clear_has_operandindex();
-  inline void set_has_signaluuid();
-  inline void clear_has_signaluuid();
-  inline void set_has_signalstrid();
-  inline void clear_has_signalstrid();
-  inline void set_has_signalcaption();
-  inline void clear_has_signalcaption();
+  inline void set_has_caption();
+  inline void clear_has_caption();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3129,12 +3110,10 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   ::Proto::Uuid* uuid_;
   int dirrection_;
   ::google::protobuf::int32 operandindex_;
-  ::Proto::Uuid* signaluuid_;
-  ::Proto::wstring* signalstrid_;
-  ::Proto::wstring* signalcaption_;
+  ::std::string* caption_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -8856,7 +8835,7 @@ inline void VideoItemConnectionLine::set_linecolor(::google::protobuf::uint32 va
 
 // FblConnectionPoint
 
-// required .Proto.VideoItemPoint point = 1;
+// optional .Proto.VideoItemPoint point = 1;
 inline bool FblConnectionPoint::has_point() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -8894,7 +8873,7 @@ inline void FblConnectionPoint::set_allocated_point(::Proto::VideoItemPoint* poi
   }
 }
 
-// required .Proto.ConnectionDirrection dirrection = 2;
+// optional .Proto.ConnectionDirrection dirrection = 2;
 inline bool FblConnectionPoint::has_dirrection() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -8917,7 +8896,7 @@ inline void FblConnectionPoint::set_dirrection(::Proto::ConnectionDirrection val
   dirrection_ = value;
 }
 
-// required .Proto.Uuid uuid = 3;
+// optional .Proto.Uuid uuid = 3;
 inline bool FblConnectionPoint::has_uuid() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -8977,117 +8956,73 @@ inline void FblConnectionPoint::set_operandindex(::google::protobuf::int32 value
   operandindex_ = value;
 }
 
-// optional .Proto.Uuid signalUuid = 10;
-inline bool FblConnectionPoint::has_signaluuid() const {
+// optional string caption = 5 [default = ""];
+inline bool FblConnectionPoint::has_caption() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void FblConnectionPoint::set_has_signaluuid() {
+inline void FblConnectionPoint::set_has_caption() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void FblConnectionPoint::clear_has_signaluuid() {
+inline void FblConnectionPoint::clear_has_caption() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void FblConnectionPoint::clear_signaluuid() {
-  if (signaluuid_ != NULL) signaluuid_->::Proto::Uuid::Clear();
-  clear_has_signaluuid();
+inline void FblConnectionPoint::clear_caption() {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    caption_->clear();
+  }
+  clear_has_caption();
 }
-inline const ::Proto::Uuid& FblConnectionPoint::signaluuid() const {
-  return signaluuid_ != NULL ? *signaluuid_ : *default_instance_->signaluuid_;
+inline const ::std::string& FblConnectionPoint::caption() const {
+  return *caption_;
 }
-inline ::Proto::Uuid* FblConnectionPoint::mutable_signaluuid() {
-  set_has_signaluuid();
-  if (signaluuid_ == NULL) signaluuid_ = new ::Proto::Uuid;
-  return signaluuid_;
+inline void FblConnectionPoint::set_caption(const ::std::string& value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
 }
-inline ::Proto::Uuid* FblConnectionPoint::release_signaluuid() {
-  clear_has_signaluuid();
-  ::Proto::Uuid* temp = signaluuid_;
-  signaluuid_ = NULL;
-  return temp;
+inline void FblConnectionPoint::set_caption(const char* value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
 }
-inline void FblConnectionPoint::set_allocated_signaluuid(::Proto::Uuid* signaluuid) {
-  delete signaluuid_;
-  signaluuid_ = signaluuid;
-  if (signaluuid) {
-    set_has_signaluuid();
+inline void FblConnectionPoint::set_caption(const char* value, size_t size) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* FblConnectionPoint::mutable_caption() {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  return caption_;
+}
+inline ::std::string* FblConnectionPoint::release_caption() {
+  clear_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
   } else {
-    clear_has_signaluuid();
+    ::std::string* temp = caption_;
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
   }
 }
-
-// optional .Proto.wstring signalStrID = 11;
-inline bool FblConnectionPoint::has_signalstrid() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void FblConnectionPoint::set_has_signalstrid() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void FblConnectionPoint::clear_has_signalstrid() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void FblConnectionPoint::clear_signalstrid() {
-  if (signalstrid_ != NULL) signalstrid_->::Proto::wstring::Clear();
-  clear_has_signalstrid();
-}
-inline const ::Proto::wstring& FblConnectionPoint::signalstrid() const {
-  return signalstrid_ != NULL ? *signalstrid_ : *default_instance_->signalstrid_;
-}
-inline ::Proto::wstring* FblConnectionPoint::mutable_signalstrid() {
-  set_has_signalstrid();
-  if (signalstrid_ == NULL) signalstrid_ = new ::Proto::wstring;
-  return signalstrid_;
-}
-inline ::Proto::wstring* FblConnectionPoint::release_signalstrid() {
-  clear_has_signalstrid();
-  ::Proto::wstring* temp = signalstrid_;
-  signalstrid_ = NULL;
-  return temp;
-}
-inline void FblConnectionPoint::set_allocated_signalstrid(::Proto::wstring* signalstrid) {
-  delete signalstrid_;
-  signalstrid_ = signalstrid;
-  if (signalstrid) {
-    set_has_signalstrid();
-  } else {
-    clear_has_signalstrid();
+inline void FblConnectionPoint::set_allocated_caption(::std::string* caption) {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    delete caption_;
   }
-}
-
-// optional .Proto.wstring signalCaption = 12;
-inline bool FblConnectionPoint::has_signalcaption() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
-}
-inline void FblConnectionPoint::set_has_signalcaption() {
-  _has_bits_[0] |= 0x00000040u;
-}
-inline void FblConnectionPoint::clear_has_signalcaption() {
-  _has_bits_[0] &= ~0x00000040u;
-}
-inline void FblConnectionPoint::clear_signalcaption() {
-  if (signalcaption_ != NULL) signalcaption_->::Proto::wstring::Clear();
-  clear_has_signalcaption();
-}
-inline const ::Proto::wstring& FblConnectionPoint::signalcaption() const {
-  return signalcaption_ != NULL ? *signalcaption_ : *default_instance_->signalcaption_;
-}
-inline ::Proto::wstring* FblConnectionPoint::mutable_signalcaption() {
-  set_has_signalcaption();
-  if (signalcaption_ == NULL) signalcaption_ = new ::Proto::wstring;
-  return signalcaption_;
-}
-inline ::Proto::wstring* FblConnectionPoint::release_signalcaption() {
-  clear_has_signalcaption();
-  ::Proto::wstring* temp = signalcaption_;
-  signalcaption_ = NULL;
-  return temp;
-}
-inline void FblConnectionPoint::set_allocated_signalcaption(::Proto::wstring* signalcaption) {
-  delete signalcaption_;
-  signalcaption_ = signalcaption;
-  if (signalcaption) {
-    set_has_signalcaption();
+  if (caption) {
+    set_has_caption();
+    caption_ = caption;
   } else {
-    clear_has_signalcaption();
+    clear_has_caption();
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

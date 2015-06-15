@@ -6,8 +6,9 @@
 #include "../VFrame30/FblItem.h"
 #include "../include/DbController.h"
 
-#define GridSizeDisplay				5
-#define GridSizeMm					mm2in(0.5)
+//#define GridSizeDisplay				5
+//#define GridSizeMm					mm2in(1.0)
+//#define GridSizeIn					0.04
 
 #define ControlBarSizeDisplay		10
 #define ControlBarMm				mm2in(2.4)
