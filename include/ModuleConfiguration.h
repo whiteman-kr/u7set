@@ -26,7 +26,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(QString type, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
+		void init(QString caption, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
 		bool save(QByteArray &dest) const;
         bool load(QString fileName);
         bool isEmpty() const;
@@ -50,7 +50,7 @@ namespace Hardware
 		// Properties
 		//
 	public:
-        QString type() const;
+		QString caption() const;
 		QString subsysId() const;
 		int uartId() const;
 		int frameSize() const;
@@ -60,7 +60,7 @@ namespace Hardware
 		// Data
 		//
     private:
-        QString m_type;
+		QString m_caption;
 		QString m_subsysId;
 		int m_uartId = 0;
 		int m_frameSize = 0;
@@ -85,7 +85,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		Q_INVOKABLE QObject* jsGet(QString type, QString subsysId, int uartId, int frameSize, int frameCount);
+		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int uartId, int frameSize, int frameCount);
 
 		// Properties
 		//

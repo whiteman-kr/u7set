@@ -17,9 +17,9 @@ namespace Hardware
 	{
 	}
 
-	void ModuleFirmware::init(QString type, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
+	void ModuleFirmware::init(QString caption, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
 	{
-        m_type = type;
+		m_caption = caption;
 		m_subsysId = subsysId;
 		m_uartId = uartId;
 		m_frameSize = frameSize;
@@ -62,7 +62,7 @@ namespace Hardware
 
 		jObject.insert("userName", m_userName);
 		jObject.insert("projectName", m_projectName);
-        jObject.insert("type", type());
+		jObject.insert("caption", caption());
 		jObject.insert("subsysId", subsysId());
         jObject.insert("uartId", uartId());
         jObject.insert("frameSize", frameSize());
@@ -119,11 +119,11 @@ namespace Hardware
 		}
 		m_userName = jConfig.value("userName").toString();
 
-		if (jConfig.value("type").isUndefined() == true)
+		if (jConfig.value("caption").isUndefined() == true)
         {
             return false;
         }
-        m_type = jConfig.value("type").toString();
+		m_caption = jConfig.value("caption").toString();
 
 		if (jConfig.value("subsysId").isUndefined() == true)
         {
@@ -387,9 +387,9 @@ namespace Hardware
 	}
 
 
-	QString ModuleFirmware::type() const
+	QString ModuleFirmware::caption() const
     {
-        return m_type;
+		return m_caption;
     }
 
 	QString ModuleFirmware::subsysId() const
@@ -423,7 +423,7 @@ namespace Hardware
 	{
 	}
 
-	QObject* ModuleFirmwareCollection::jsGet(QString type, QString subsysId, int uartId, int frameSize, int frameCount)
+	QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int uartId, int frameSize, int frameCount)
 	{
 		bool newFirmware = m_firmwares.count(subsysId) == 0;
 
@@ -431,7 +431,7 @@ namespace Hardware
 
 		if (newFirmware == true)
 		{
-			fw.init(type, subsysId, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
+			fw.init(caption, subsysId, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
 		}
 
 		QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);

@@ -214,7 +214,7 @@ namespace Builder
 				f.save(data);
 
 				QString path = f.subsysId();
-				QString fileName = f.type();
+				QString fileName = f.caption();
 
 				if (path.isEmpty())
 				{
@@ -229,7 +229,7 @@ namespace Builder
 
 				if (m_buildWriter->addFile(path, fileName + ".mcb", data) == false)
 				{
-					m_log->writeError(tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.type() + "!", false, true);
+					m_log->writeError(tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.caption() + "!", false, true);
 					return false;
 				}
 			}
