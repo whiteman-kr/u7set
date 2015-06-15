@@ -17,12 +17,13 @@ var FamilyDOM = 0x0500;
 var FamilyAIFM = 0x0600;
 var FamilyOCM = 0x0700;
 
-var DiagDiscrete = 0;
-var DiagAnalog = 1;
-var InputDiscrete = 2;
-var InputAnalog = 3;
-var OutputDiscrete = 4;
-var OutputAnalog = 5;
+var Analog = 0;
+var Discrete = 1;
+
+var Input = 0;
+var Output = 1;
+var Validity = 2;
+var Diagnostics = 3;
 
 var aimTxId = 0x1200;
 var aomTxId = 0x1300;
@@ -90,6 +91,14 @@ function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
     }
 }
 
+function storeHash64(confFirmware, log, frameIndex, offset, data)
+{
+    if (confFirmware.storeHash64(frameIndex, offset, data) == false)
+    {
+        log.writeError("Error: storeHash64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
+        return false;
+    }
+}
 
 function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
 {
@@ -132,9 +141,16 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     // Constants
     //
-    var frameSize = 1016;
-    var frameCount = 78;                // Check it !!!!
-    var uartId = 456;                   // Check it !!!!
+    var frameSize = module.jsPropertyInt("FlashMemory\\ConfigFrameSize");
+    var frameCount = module.jsPropertyInt("FlashMemory\\ConfigFrameCount");
+    
+    if (frameSize == 0 || frameCount == 0)
+    {
+        log.writeError("Wrong LM-1 frameSize or frameCount: frameSize = " + frameSize + ", frameCount: " + frameCount, false, true);
+        return false;
+    }
+    
+    var uartId = 0x0102;                   // Check it !!!!
     
     var maxChannel = 4;                 // Can be changed!
     var configStartFrames = 2;
@@ -160,13 +176,15 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     setData16(confFirmware, log, frameStorageConfig, ptr, 0x0001);     //CFG_Version
     ptr += 2;
     
-    var ssKey = subsystemStorage.jsGetSsKey(subSysID);
-    if (ssKey == -1)
+    var ssKeyValue = subsystemStorage.jsGetSsKey(subSysID);
+    if (ssKeyValue == -1)
     {
         log.writeError("Subsystem key for " + subSysID + " was not found!", false, true);
         return false;
     }
-    setData16(confFirmware, log, frameStorageConfig, ptr, ssKey << 6);     //0000SSKEYY000000b
+    
+    var ssKey = ssKeyValue << 6;             //0000SSKEYY000000b
+    setData16(confFirmware, log, frameStorageConfig, ptr, ssKey);
     ptr += 2;
     
     // reserved
@@ -188,7 +206,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     }
     ptr += 2;
     
-    var configIndexOffset = ptr + (channel - 1) * 2;
+    var configIndexOffset = ptr + (channel - 1) * (2/*offset*/ + 4/*reserved*/);
     var configFrame = configStartFrames + configFrameCount * (channel - 1);
     
     setData16(confFirmware, log, frameStorageConfig, configIndexOffset, configFrame);
@@ -197,11 +215,11 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     //
     var frameServiceConfig = configFrame;
     ptr = 0;
-    setData16(confFirmware, log, frameServiceConfig, ptr, 0x0001/**/);   //CFG_Ch_Vers
+    setData16(confFirmware, log, frameServiceConfig, ptr, 0x0001);   //CFG_Ch_Vers
     ptr += 2;
-    setData16(confFirmware, log, frameServiceConfig, ptr, 0/**/);   //CFG_Ch_Dtype
+    setData16(confFirmware, log, frameServiceConfig, ptr, uartId);   //CFG_Ch_Dtype == UARTID?
     ptr += 2;
-    //setData16(confFirmware, log, frameServiceConfig, ptr, /**/);   //CFG_Ch_ID
+    storeHash64(confFirmware, log, frameServiceConfig, ptr, ssKey);   //ssKey's HASH-64
     ptr += 8;
     
     // I/O Modules configuration
@@ -346,7 +364,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     {
         // find a signal with Place = i
         //
-        var signal = findSignalByPlace(inController, i, InputAnalog, signalSet, log);
+        var signal = findSignalByPlace(inController, i, Analog, Input, signalSet, log);
         
         if (signal == null)
         {
@@ -369,7 +387,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             var filternigTime = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
             var maxDifference = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
 
-            log.writeMessage("Place" + i + ": tf = " + filternigTime + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + maxDifference, false);
+            //log.writeMessage("Place" + i + ": tf = " + filternigTime + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + maxDifference, false);
 
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
             ptr += 2;
@@ -471,7 +489,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 
             if (outController != null)
             {
-                var signal = findSignalByPlace(outController, place, OutputAnalog, signalSet, log);
+                var signal = findSignalByPlace(outController, place, Analog, Output, signalSet, log);
                 if (signal != null)
                 {
                     var outputRangeMode = signal.jsOutputRangeMode();
@@ -492,7 +510,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
             data |= (mode << bit);
         }
         
-        log.writeMessage("Place" + place + ": Word = " + w + " = " + data, false);
+        //log.writeMessage("Place" + place + ": Word = " + w + " = " + data, false);
         setData16(confFirmware, log, frame, ptr + w * 2, data);          // InA Filtering time constant
     }
     
@@ -535,7 +553,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
 
 }
 
-function findSignalByPlace(parent, place, type, signalSet, log)
+function findSignalByPlace(parent, place, type, func, signalSet, log)
 {
     if (parent == null)
     {
@@ -551,6 +569,10 @@ function findSignalByPlace(parent, place, type, signalSet, log)
             continue;
         }
         if (s.jsType() != type)
+        {
+            continue;
+        }
+        if (s.jsFunction() != func)
         {
             continue;
         }

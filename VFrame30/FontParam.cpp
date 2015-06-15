@@ -44,8 +44,8 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_size, SchemeUnit::Inch, CSettings::regionalUnit(), ConvertDirection::Horz);
-			return CUtils::RoundPoint(pt, CSettings::regionalUnit());
+			double pt = CUtils::ConvertPoint(m_size, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
 	void FontParam::setSize(double value, SchemeUnit unit)
@@ -65,6 +65,11 @@ namespace VFrame30
 	double FontParam::drawSize() const
 	{
 		return m_size;
+	}
+
+	void FontParam::setDrawSize(double value)
+	{
+		m_size = value;
 	}
 
 	bool FontParam::bold() const

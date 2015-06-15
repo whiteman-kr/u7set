@@ -9,6 +9,8 @@
 #include "../include/DeviceObject.h"
 
 
+class QXmlStreamAttributes;
+
 
 Q_DECLARE_METATYPE(SignalType);
 
@@ -115,18 +117,36 @@ class Address16
 {
 private:
 	int m_offset = -1;
-	int m_bitNo = -1;
+	int m_bit = -1;
 
 public:
-	Address16() {};
+	Address16() {}
+	Address16(int offset, int bit) : m_offset(offset), m_bit(bit) {}
 
+	void set(int offset, int bit) { m_offset = offset; m_bit = bit; }
 	void setOffset(int offset) { m_offset = offset; }
-	void setBitNo(int bitNo) { m_bitNo = bitNo; }
+	void setBit(int bit) { m_bit = bit; }
+
+	void addWord(int wordCount) { m_offset += wordCount; }
+	void addBit(int bitCount)
+	{
+		int totalBitCount = m_offset * 16 + m_bit + bitCount;
+
+		m_offset = totalBitCount / 16;
+		m_bit = totalBitCount % 16;
+	}
+
+	void addBit() { addBit(1); }
 
 	int offset() const { return m_offset; }
-	int bitNo() const { return m_bitNo; }
+	int bit() const { return m_bit; }
 
-	void reset() { 	m_offset = -1; m_bitNo = -1; }
+	void reset() { 	m_offset = -1; m_bit = -1; }
+
+	bool isValid() const { return m_offset != -1 && m_bit != -1; }
+
+	QString toString() const { return QString("%1:%2").arg(m_offset).arg(m_bit); }
+	void fromString(QString str);
 };
 
 
@@ -197,7 +217,7 @@ private:
 	ByteOrder m_byteOrder = ByteOrder::BigEndian;
 
 	Address16 m_ramAddr;				// signal address in LM RAM
-	Address16 m_acqAddr;				// signal address in FSC data packet (acquisition address)
+	Address16 m_regAddr;				// signal address in FSC data packet (registration address)
 
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -209,7 +229,6 @@ private:
 	void setCheckedOut(int checkedOut) { m_checkedOut = checkedOut; }
 	void setUserID(int userID) { m_userID = userID; }
 	void setChannel(int channel) { m_channel = channel; }
-	void setType(SignalType type) { m_type = type; }
 	void setCreated(const QDateTime& created) { m_created = created; }
 	void setCreated(const QString& createdStr) { m_created = QDateTime::fromString(createdStr, DATE_TIME_FORMAT_STR); }
 	void setDeleted(bool deleted) { m_deleted = deleted; }
@@ -240,6 +259,18 @@ public:
 
 	int typeInt() const { return TO_INT(m_type); }
 	SignalType type() const { return m_type; }
+	void setType(SignalType type) { m_type = type; }
+
+	bool isAnalog() const { return m_type == SignalType::Analog; }
+	bool isDiscrete() const { return m_type == SignalType::Discrete; }
+
+	bool isInput() const { return m_inOutType == SignalInOutType::Input; }
+	bool isOutput() const { return m_inOutType == SignalInOutType::Output; }
+	bool isInternal() const { return m_inOutType == SignalInOutType::Internal; }
+
+	bool isRegistered() const { return acquire(); }
+
+	int sizeInWords() const { return (m_dataSize / 16 + (m_dataSize % 16 ? 1 : 0)); }
 
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
@@ -247,10 +278,30 @@ public:
 	InstanceAction instanceAction() const { return m_instanceAction; }
 
 	Address16& ramAddr() { return m_ramAddr; }
-	Address16& acqAddr() { return m_acqAddr; }
+	Address16& regAddr() { return m_regAddr; }
 
-	void resetAddresses() { m_ramAddr.reset(); m_acqAddr.reset(); }
+	const Address16& ramAddr() const { return m_ramAddr; }
+	const Address16& regAddr() const { return m_regAddr; }
 
+	void resetAddresses() { m_ramAddr.reset(); m_regAddr.reset(); }
+
+	void setRamAddr(const Address16& ramAddr) { m_ramAddr = ramAddr; }
+	void setRegAddr(const Address16& regAddr) { m_regAddr = regAddr; }
+
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(double));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalType));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(OutputRangeMode));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalInOutType));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(ByteOrder));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(DataFormat));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(int));
+	void serializeSensorField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
+
+	void serializeFields(const QXmlStreamAttributes& attr, DataFormatList& dataFormatInfo, UnitList& unitInfo);
 
     Q_INVOKABLE QString strID() const { return m_strID; }
 	void setStrID(const QString& strID) { m_strID = strID; }

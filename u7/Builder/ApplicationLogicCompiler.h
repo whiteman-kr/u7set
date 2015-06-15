@@ -10,10 +10,10 @@
 #include "../Builder/ApplicationLogicBuilder.h"
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
-#include "AfblSet.h"
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/VideoItemSignal.h"
 #include "../VFrame30/VideoItemFblElement.h"
+#include "../VFrame30/FblItem.h"
 #include "../VFrame30/FblItem.h"
 
 
@@ -48,7 +48,7 @@ namespace Builder
 	private:
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
-		AfblSet* m_afbl = nullptr;
+		Afbl::AfbElementCollection* m_afbl = nullptr;
 		ApplicationLogicData* m_appLogicData = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
@@ -65,7 +65,7 @@ namespace Builder
 
 
 	public:
-		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog* log);
+		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog* log);
 
 		bool run();
 
@@ -73,11 +73,16 @@ namespace Builder
 	};
 
 
-	typedef VFrame30::FblItemRect LogicItem;
+	// typedefs Logic* for types defined outside ApplicationLogicCompiler
+	//
+
+	typedef std::shared_ptr<VFrame30::FblItemRect> LogicItem;
 	typedef VFrame30::VideoItemSignal LogicSignal;
 	typedef VFrame30::VideoItemFblElement LogicFb;
 	typedef VFrame30::CFblConnectionPoint LogicPin;
-	typedef Afbl::AfbElementSignal AfbSignal;
+	typedef Afbl::AfbElement LogicAfb;
+	typedef Afbl::AfbElementSignal LogicAfbSignal;
+	typedef Afbl::AfbElementParam LogicAfbParam;
 
 
 	class AppItem;
@@ -87,61 +92,61 @@ namespace Builder
 	// Functional Block Library element
 	//
 
-	typedef QHash<CommandCodes, int> CommandCodesInstanceMap;
-	typedef QHash<QString, int> NonRamFblInstanceMap;
-
-
-	class Fbl
+	class Afb
 	{
 	private:
-		AfbElement* m_afbElement = nullptr;
-		quint16 m_currentInstance = 0;
-
-		// dynamically created maps
-		//
-		static int m_refCount;
-		static CommandCodesInstanceMap* m_commandCodesInstance;		// CommandCodes -> current instance
-		static NonRamFblInstanceMap* m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
+		std::shared_ptr<LogicAfb> m_afb;
+		int m_instance = 0;					// for Fbls with RAM
 
 	public:
-		Fbl(AfbElement* afbElement);
-		~Fbl();
+		Afb(std::shared_ptr<LogicAfb> afb);
+		~Afb();
 
-		quint16 addInstance();
+		//quint16 addInstance();
 
-		bool hasRam() const { return m_afbElement->hasRam(); }
+		bool hasRam() const { return m_afb->hasRam(); }
 
-		const AfbElement& afbElement() const { return *m_afbElement; }
+		int incInstance() { return (++m_instance); }
+		int instance() const { return m_instance; }
 
-		QUuid guid() const { return m_afbElement->guid(); }
-		QString strID() const { return m_afbElement->strID(); }
+		const LogicAfb& afb() const { return *m_afb; }
+
+		QString strID() const { return m_afb->strID(); }
+		int opcode() const { return m_afb->opcode(); }
 	};
 
 
-	class FblsMap : public HashedVector<QUuid, Fbl*>
+	typedef QHash<int, int> FblInstanceMap;
+	typedef QHash<QString, int> NonRamFblInstanceMap;
+
+
+	class AfbMap: public HashedVector<QString, Afb*>
 	{
 	private:
 
-		struct GuidIndex
+		struct StrIDIndex
 		{
-			QUuid guid;			// AfbElement guid()
+			QString strID;		// AfbElement strID()
 			int index;			// AfbElementSignal or AfbElementParam index
 
-			operator QString() const { return QString("%1:%2").arg(guid.toString()).arg(index); }
+			operator QString() const { return QString("%1:%2").arg(strID).arg(index); }
 		};
 
-		QHash<QString, AfbElementSignal*> m_fblsSignals;
-		QHash<QString, AfbElementParam*> m_fblsParams;
+		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
+		NonRamFblInstanceMap m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
+
+		QHash<QString, LogicAfbSignal> m_afbSignals;
+		QHash<QString, LogicAfbParam*> m_afbParams;
 
 	public:
-		~FblsMap() { clear(); }
+		~AfbMap() { clear(); }
 
 		int addInstance(AppItem *appItem);
 
-		void insert(AfbElement* afbElement);
+		void insert(std::shared_ptr<LogicAfb> logicAfb);
 		void clear();
 
-		const AfbSignal* getFblSignal(const QUuid& afbElemetGuid, int signalIndex);
+		const LogicAfbSignal getAfbSignal(const QString &afbStrID, int signalIndex);
 	};
 
 
@@ -152,31 +157,30 @@ namespace Builder
 	class AppItem
 	{
 	protected:
-		const VFrame30::FblItemRect* m_fblItem = nullptr;
-		const VFrame30::LogicScheme* m_scheme = nullptr;
-		const Afbl::AfbElement* m_afbElement = nullptr;
+		AppLogicItem m_appLogicItem;
 
 	public:
 		AppItem(const AppItem& appItem);
-		AppItem(const AppLogicItem* appLogicItem);
+		AppItem(const AppLogicItem& appLogicItem);
 
-		QUuid guid() const { return m_fblItem->guid(); }
-		QUuid afbGuid() const { return m_afbElement->guid(); }
+		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
+		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
 
-		QString strID() const { return m_fblItem->toSignalElement()->signalStrIds(); }
+		QString strID() const { return m_appLogicItem.m_fblItem->toSignalElement()->signalStrIds(); }
 
-		bool isSignal() const { return m_fblItem->isSignalElement(); }
-		bool isFb() const { return m_fblItem->isFblElement(); }
+		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
+		bool isFb() const { return m_appLogicItem.m_fblItem->isFblElement(); }
 
-		bool afbInitialized() const { return m_afbElement != nullptr; }
+		bool hasRam() const { return afb().hasRam(); }
 
-		const std::list<LogicPin>& inputs() const { return m_fblItem->inputs(); }
-		const std::list<LogicPin>& outputs() const { return m_fblItem->outputs(); }
+		const std::list<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
+		const std::list<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
 
-		const Afbl::AfbElement& afb() const { return *m_afbElement; }
+		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toFblElement(); }
+		const Afbl::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 		//const LogicItem& logic() const { return *m_fblItem; }
 
-		const LogicSignal& signal() { return *m_fblItem->toSignalElement(); }
+		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 	};
 
 
@@ -186,22 +190,20 @@ namespace Builder
 	class AppFb : public AppItem
 	{
 	private:
-		const LogicFb* m_logicFb = nullptr;
 		quint16 m_instance = -1;
 
 	public:
 		AppFb(AppItem* appItem, int instance);
 
 		quint16 instance() const { return m_instance; }
-
-		const LogicFb& logicFb() const { return *m_logicFb; }
+		quint16 opcode() const { return afb().opcode(); }		// return FB type
 	};
 
 
-	class AppFbsMap : public HashedVector<QUuid, AppFb*>
+	class AppFbMap: public HashedVector<QUuid, AppFb*>
 	{
 	public:
-		~AppFbsMap() { clear(); }
+		~AppFbMap() { clear(); }
 
 		void insert(AppItem* appItem, int instance);
 		void clear();
@@ -212,64 +214,62 @@ namespace Builder
 	// represent all signal in application logic schemes, and signals, which createad in compiling time
 	//
 
-	class AppSignal
+	class AppSignal : public Signal
 	{
 	private:
-		const AppItem* m_appItem = nullptr;
-		const Signal* m_signal = nullptr;
-
+		const AppItem* m_appItem = nullptr;					// application signals pointer (for real signals)
+															// application sunctional block pointer (for shadow signals)
 		QUuid m_guid;
-		QString m_strID;
 
-		bool m_calculated = false;
-		SignalType m_signalType;
+		bool m_isShadowSignal = false;
+
+		bool m_computed = false;
 
 	public:
-		AppSignal(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem);
+		AppSignal(const Signal* signal, const AppItem* appItem);
+		AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem* appItem);
 
 		const AppItem &appItem() const;
 
-		void setStrID(QString strID) { m_strID = strID; }
-		QString strID() const { return m_strID; }
-
-		void setCalculated() { m_calculated = true; }
-		bool isCalculated() const { return m_calculated; }
-
-		void setSignal(Signal* signal) { m_signal = signal; }
-		const Signal* signal() { return m_signal; }
+		void setComputed() { m_computed = true; }
+		bool isComputed() const { return m_computed; }
 
 
-		void signalType(SignalType signalType) { m_signalType = signalType; }
-		SignalType signalType() const { return m_signalType; }
+		bool isShadowSignal() { return m_isShadowSignal; }
 
-		bool isShadowSignal() { return m_appItem == nullptr; }
 	};
 
 
-	class AppSignalsMap : public QObject, HashedVector<QUuid, AppSignal*>
+	class AppSignalMap: public QObject, public HashedVector<QUuid, AppSignal*>
 	{
 		Q_OBJECT
 
 	private:
 		QHash<QString, AppSignal*> m_signalStrIdMap;
 
-		void insert(const QUuid& guid, const QString& strID, SignalType signalType, const Signal* signal, const AppItem* appItem);
-
 		ModuleLogicCompiler& m_compiler;
 
+		// counters for Internal signals only
+		//
+		int m_registeredAnalogSignalCount = 0;
+		int m_registeredDiscreteSignalCount = 0;
+
+		int m_notRegisteredAnalogSignalCount = 0;
+		int m_notRegisteredDiscreteSignalCount = 0;
+
+		void incCounters(const AppSignal* appSignal);
+
 	public:
-		AppSignalsMap(ModuleLogicCompiler& compiler);
-		~AppSignalsMap();
+		AppSignalMap(ModuleLogicCompiler& compiler);
+		~AppSignalMap();
 
 		void insert(const AppItem* appItem);
 		void insert(const AppItem* appItem, const LogicPin& outputPin);
 
+		AppSignal* getByStrID(const QString& strID);
+
 		void clear();
-
-		void bindRealSignals(SignalSet* signalSet);
 	};
-
-
 
 	class ModuleLogicCompiler : public QObject
 	{
@@ -277,12 +277,52 @@ namespace Builder
 
 	private:
 
+		struct PropertyNameVar
+		{
+			const char* name = nullptr;
+			int* var = nullptr;
+
+			PropertyNameVar(const char* n, int* v) : name(n), var(v) {}
+		};
+
+		struct Module
+		{
+			Hardware::DeviceModule* device = nullptr;
+			int place = 0;
+
+			// properties loaded from Hardware::DeviceModule::dynamicProperties
+			//
+			int txDataSize = 0;					// size of data transmitted to LM
+			int rxDataSize = 0;					// size of data received from LM
+
+			int diagDataOffset = 0;
+			int diagDataSize = 0;
+
+			int appLogicDataOffset = 0;
+			int appLogicDataSize = 0;
+			int appLogicDataSizeWithReserve = 0;
+
+			// calculated fields
+			//
+			int rxTxDataOffset = 0;				// offset of data received from module or transmitted to module in LM's memory
+												// depends of module place in the chassis
+
+			int moduleAppDataOffset = 0;		// offset of module application data in LM's memory
+												// moduleAppDataOffset == rxTxDataOffset + appLogicDataOffset
+
+			int appDataOffset = 0;				// offset of module application data for processing (in registration buffer)
+
+			bool isInputModule();
+			bool isOutputModue();
+			Hardware::DeviceModule::FamilyType familyType();
+		};
+
 		// input parameters
 		//
 
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
-		AfblSet* m_afbl = nullptr;
+		Afbl::AfbElementCollection* m_afbl = nullptr;
 		ApplicationLogicData* m_appLogicData = nullptr;
 		ApplicationLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
@@ -290,54 +330,130 @@ namespace Builder
 		Hardware::DeviceModule* m_lm = nullptr;
 		Hardware::DeviceChassis* m_chassis = nullptr;
 
+		// LM's and modules settings
+		//
+		int	m_moduleDataOffset = 0;
+		int m_moduleDataSize = 0;
+
+		int m_optoInterfaceDataOffset = 0;
+		int m_optoInterfaceDataSize = 0;
+
+		int m_appLogicBitDataOffset = 0;
+		int	m_appLogicBitDataSize = 0;
+
+		int m_tuningDataOffset = 0;
+		int m_tuningDataSize = 0;
+
+		int m_appLogicWordDataOffset = 0;
+		int m_appLogicWordDataSize = 0;
+
+		int m_LMDiagDataOffset = 0;
+		int m_LMDiagDataSize = 0;
+
+		int m_LMIntOutDataOffset = 0;
+		int m_LMIntOutDataSize = 0;
+
+		// LM's calculated memory offsets and sizes
+		//
+
+		int m_registeredInternalAnalogSignalsOffset = 0;	// offset of internal analog signals (in registration buffer)
+		int m_registeredInternalAnalogSignalsSize = 0;		// size of internal analog signals (in words)
+
+		int m_internalAnalogSignalsOffset = 0;				// offset of internal analog signals (in registration buffer)
+		int m_internalAnalogSignalsSize = 0;				// size of internal analog signals (in words)
+
+		int m_registeredInternalDiscreteSignalsOffset = 0;	// offset of internal discrete signals (in bit-addressed memory)
+		int m_registeredInternalDiscreteSignalsSize = 0;	// size of internal discrete signals (in words)
+		int m_registeredInternalDiscreteSignalsCount = 0;	// count of nternal discrete signals
+
+		int m_regBufferInternalDiscreteSignalsOffset = 0;	// offset of internal discrete signals (in registration buffer)
+		int m_regBufferInternalDiscreteSignalsSize = 0;		// size of internal discrete signals (in words)
+
+		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit-addressed memory)
+		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
+		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals
+
+		QVector<Module> m_modules;
+
 		//
 
 		AddrW m_regDataAddress;
 
 		ApplicationLogicCode m_code;
 
-		FblsMap m_fbls;
+		AfbMap m_afbs;
 
-		AppSignalsMap m_appSignals;
-		AppFbsMap m_appFbs;
+		AppSignalMap m_appSignals;
+		AppFbMap m_appFbs;
 
 		// service maps
 		//
 		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
 		QHash<QUuid, AppItem*> m_pinParent;					// pin GUID -> parent item ptr
-		QHash<QUuid, AppItem*> m_pinTypes;					// pin GUID -> parent item ptr
-		QHash<QString, Signal*> m_signalsStrID;				// signals StrID to Signal ptr
+		QHash<QString, Signal*> m_signalsStrID;				// signals StrID -> Signal ptr
+		QHash<QString, Signal*> m_deviceBoundSignals;		// device signal strID -> Signal ptr
+		QHash<QUuid, QUuid> m_outPinSignal;					// output pin GUID -> signal GUID
+
+		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
 
 		QString msg;
 
 	private:
-		bool getDeviceIntProperty(Hardware::DeviceObject* device, const char* propertyName, int &value);
-		bool getLMIntProperty(const char* propertyName, int &value);
+		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);
+		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int* value);
+
+		bool getLMIntProperty(const QString& section, const QString& name, int* value);
+		bool getLMIntProperty(const QString& name, int* value);
 
 		Hardware::DeviceModule* getModuleOnPlace(int place);
 
+		QString getModuleFamilyTypeStr(Hardware::DeviceModule::FamilyType familyType);
+
 		// module logic compilations steps
 		//
-		bool init();
+		bool loadLMSettings();
+		bool loadModulesSettings();
 
+		bool prepareAppLogicGeneration();
+
+		bool initAfbs();
+
+		bool copyLMDiagDataToRegBuf();
+		bool copyInModulesAppLogicDataToRegBuf();
+		bool initOutModulesAppLogicDataInRegBuf();
+
+		bool generateAppLogicCode();
+		bool generateFbCode(const AppFb *appFb);
+		bool writeFbInputSignals(const AppFb *appFb);
+		bool readFbOutputSignals(const AppFb *appFb);
+		bool generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid);
+
+		bool copyDiscreteSignalsToRegBuf();
+		bool copyOutModulesAppLogicDataToModulesMemory();
+
+		bool finishLMCode();
+
+		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
-		bool afbInitialization();
-		bool initializeAppFbConstParams(AppFb* appFb);
-		bool initializeAppFbVariableParams(AppFb* appFb);
+
+		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
+		//bool initAppFbVariableParams(AppFb* appFb);
 
 		bool getUsedAfbs();
 		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
 
 
-		void buildServiceMaps();
+		bool copyInOutSignalsToRegistration();
 
-		bool copyDiagData();
-		bool copyInOutSignals();
+		bool calculateInOutSignalsAddresses();
+		bool calculateInternalSignalsAddresses();
 
 		bool generateApplicationLogicCode();
 
 		bool writeResult();
+
+		void writeLMCodeTestFile();
 
 		void cleanup();
 
@@ -349,7 +465,7 @@ namespace Builder
 
 		OutputLog& log() { return *m_log; }
 
-		const AfbSignal* getFblSignal(const QUuid& afbElemetGuid, int signalIndex) { return m_fbls.getFblSignal(afbElemetGuid, signalIndex); }
+		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
 
 		bool run();
 	};

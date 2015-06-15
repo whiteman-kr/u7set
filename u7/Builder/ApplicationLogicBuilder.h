@@ -2,6 +2,7 @@
 #define APPLOGICBUILDER_H
 
 #include "../../VFrame30/VideoItem.h"
+#include "../../VFrame30/Fbl.h"
 
 // Forware delcarations
 //
@@ -27,6 +28,7 @@ namespace VFrame30
 namespace Afbl
 {
 	class AfbElement;
+	class AfbElementCollection;
 }
 
 namespace Builder
@@ -35,10 +37,14 @@ namespace Builder
 	struct Link
 	{
 		Link() = default;
-		Link(const VFrame30::VideoItemPoint& point1, const VFrame30::VideoItemPoint& point2);
+		Link(const std::list<VFrame30::VideoItemPoint>& points);
 
-		VFrame30::VideoItemPoint pt1;
-		VFrame30::VideoItemPoint pt2;
+		VFrame30::VideoItemPoint ptBegin() const;
+		VFrame30::VideoItemPoint ptEnd() const;
+
+		bool isPinOnLink(VFrame30::VideoItemPoint pt) const;
+
+		std::list<VFrame30::VideoItemPoint> m_points;
 	};
 
 	struct Bush
@@ -60,20 +66,9 @@ namespace Builder
 
 	// ------------------------------------------------------------------------
 	//
-	//		ApplicationLogicBranch
+	//		AppLogicItem
 	//
 	// ------------------------------------------------------------------------
-//	class ApplicationLogicBranch
-//	{
-//	public:
-//		ApplicationLogicBranch();
-
-//		const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items() const;
-//		std::list<std::shared_ptr<VFrame30::FblItemRect>>& items();
-
-//	private:
-//		std::list<std::shared_ptr<VFrame30::FblItemRect>> m_items;
-//	};
 
 	struct AppLogicItem
 	{
@@ -81,7 +76,7 @@ namespace Builder
 		//
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
-		std::shared_ptr<Afbl::AfbElement> m_afbElement;
+		Afbl::AfbElement m_afbElement;							// Specific instance with initialized Params
 
 		// Methods
 		//
@@ -90,37 +85,15 @@ namespace Builder
 		AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
 				  std::shared_ptr<VFrame30::LogicScheme> scheme,
 				  std::shared_ptr<Afbl::AfbElement> afbElement);
+
+
+		// Items can be kept in set, it is just comparing m_fblItem pointres
+		//
+		bool operator < (const AppLogicItem& li) const;
+		bool operator == (const AppLogicItem& li) const;
+
 	};
 
-	class ApplicationLogicScheme
-	{
-	public:
-		ApplicationLogicScheme() = default;
-
-	public:
-		void setData(
-			std::shared_ptr<VFrame30::LogicScheme>& scheme,
-			const std::list<std::shared_ptr<VFrame30::FblItemRect>>& items);
-
-		std::shared_ptr<VFrame30::FblItemRect> getItemByGuid(const QUuid& itemGuid) const;
-
-		std::shared_ptr<Afbl::AfbElement> getItemsFbl(const std::shared_ptr<VFrame30::FblItemRect>& item) const;
-
-		// Properties
-		//
-	public:
-		const std::shared_ptr<VFrame30::LogicScheme>& scheme() const;
-		std::shared_ptr<VFrame30::LogicScheme> scheme();
-
-		const std::list<AppLogicItem>& items() const;
-		std::list<AppLogicItem>& items();
-
-		// Data
-		//
-	private:
-		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
-		std::list<AppLogicItem> m_items;
-	};
 
 	// ------------------------------------------------------------------------
 	//
@@ -135,35 +108,42 @@ namespace Builder
 		ApplicationLogicModule() = delete;
 		ApplicationLogicModule(QString moduleStrId);
 
-		bool addBranch(
-			std::shared_ptr<VFrame30::LogicScheme> logicScheme,
-			const BushContainer& bushContainer,
-			OutputLog* log);
+		bool addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+					   const BushContainer& bushContainer,
+					   Afbl::AfbElementCollection* afbCollection,
+					   OutputLog* log);
+
+		bool orderItems(OutputLog* log);
 
 	private:
+		// Set connection between VideoItemInputSignal/VideoItemOutputSignal by StrIds
+		//
+		bool setInputOutputsElementsConnection(OutputLog* log);
+
 		template<typename Iter>
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> getItemsWithInput(
+		std::list<AppLogicItem> getItemsWithInput(
 			Iter begin,
 			Iter end,
 			const QUuid& inputGuid);
 
-		template<typename Iter>
-		std::list<std::shared_ptr<VFrame30::FblItemRect>> getItemsWithInput(
-			Iter begin,
-			Iter end,
-			const std::list<QUuid>& inputGuids);
+//		template<typename Iter>
+//		std::list<std::shared_ptr<VFrame30::FblItemRect>> getItemsWithInput(
+//			Iter begin,
+//			Iter end,
+//			const std::list<QUuid>& inputGuids);
 
 
 	public:
 		QString moduleStrId() const;
 		void setModuleStrId(QString value);
 
-		const std::list<ApplicationLogicScheme>& appSchemes() const;
-		std::list<ApplicationLogicScheme>& appSchemes();
+		const std::list<AppLogicItem>& items() const;
+		std::list<AppLogicItem>& items();
 
 	private:
 		QString m_moduleStrId;
-		std::list<ApplicationLogicScheme> m_schemes;
+		std::list<AppLogicItem> m_items;		// Ordered items
+		std::set<AppLogicItem> m_fblItemsAcc;	// Temporary buffer, filled in addBranch, cleared in orderItems
 	};
 
 
@@ -185,23 +165,18 @@ namespace Builder
 		bool addData(const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
+			Afbl::AfbElementCollection* afbCollection,
 			OutputLog* log);
 
-		// Propertie
+		bool orderItems(OutputLog* log);
+
+		// Properties
 		//
 	public:
-//		const std::shared_ptr<VFrame30::LogicScheme> scheme() const;
-//		std::shared_ptr<VFrame30::LogicScheme> scheme();
-
-//		const std::shared_ptr<VFrame30::SchemeLayer> layer() const;
-//		std::shared_ptr<VFrame30::SchemeLayer> layer();
-
-//		std::list<std::shared_ptr<VFrame30::FblItemRect>> afbItems() const;
+		const std::list<std::shared_ptr<ApplicationLogicModule>>& modules() const;
+		std::list<std::shared_ptr<ApplicationLogicModule>>& modules();
 
 	private:
-		//std::shared_ptr<VFrame30::LogicScheme> m_scheme;
-		//std::shared_ptr<VFrame30::SchemeLayer> m_layer;
-		//std::list<std::shared_ptr<VFrame30::FblItemRect>> m_afbItems;
 		std::list<std::shared_ptr<ApplicationLogicModule>> m_modules;
 	};
 
@@ -217,7 +192,13 @@ namespace Builder
 
 	public:
 		ApplicationLogicBuilder() = delete;
-		ApplicationLogicBuilder(DbController* db, OutputLog* log, ApplicationLogicData* appLogicData, int changesetId, bool debug);
+		ApplicationLogicBuilder(DbController* db,
+								OutputLog* log,
+								ApplicationLogicData* appLogicData,
+								Afbl::AfbElementCollection* afbCollection,
+								int changesetId,
+								bool debug);
+
 		virtual ~ApplicationLogicBuilder();
 
 		bool build();
@@ -260,8 +241,8 @@ namespace Builder
 		int m_debug = false;
 
 		ApplicationLogicData* m_applicationData = nullptr;
+		Afbl::AfbElementCollection* m_afbCollection = nullptr;
 	};
-
 
 }
 

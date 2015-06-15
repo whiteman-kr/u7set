@@ -444,11 +444,11 @@ public:
 
 		if (rest <= gridSize / 2)
 		{
-			return floor(value / gridSize) * gridSize;
+			return std::floor(value / gridSize) * gridSize;
 		}
 		else
 		{
-			return floor(value / gridSize) * gridSize + gridSize;
+			return std::floor(value / gridSize) * gridSize + gridSize;
 		}
 	}
 
@@ -537,6 +537,107 @@ public:
 			nHash += (nHash<<5) + *ptr++;
 
 		return nHash;
+	}
+
+
+	static bool processDiagSignalMask(const QString& mask, const QString& str)
+	{
+		if (mask.isEmpty())
+		{
+			return true;
+		}
+
+		int maskLen = mask.length();
+		int strLen = str.length();
+
+		int maskPos = 0;	// текущая позиция маски
+		int strPos = 0;		// текущая позиция строки
+
+		while(true)
+		{
+			if (strPos == strLen && maskPos == maskLen)		// дошли до конца строки и маски строки совпали
+			{
+				return true;
+			}
+
+			if (strPos == strLen)		// дошли до конца строки строки не совпали
+			{
+				return false;
+			}
+
+			if (maskPos == maskLen)		// дошли до конца маски - строки не совпали
+			{
+				return false;
+			}
+
+			QChar m = mask.at(maskPos);
+
+			if (m == '~')				// если в маске встретили тильду - вернуть Т� У
+			{
+				return true;
+			}
+
+			if (m == '?')				// ? - пропустить символ и начать сначала
+			{
+				maskPos++;
+				strPos++;
+				continue;
+			}
+
+			if (m == '*')				//* - пропустить все до первого символа "_"
+			{
+				while (str.at(strPos) != '_')
+				{
+					strPos++;
+
+					if (strPos == strLen)		// дошли до конца строки - строки совпали
+					{
+						if (maskPos == maskLen - 1)
+						{
+							return true;		//строки совпали если это последняя звездочка
+						}
+						else
+						{
+							return false;
+						}
+					}
+				}
+
+				maskPos++;
+				continue;
+			}
+
+			if (str.at(strPos) != m)			// очередные символы не совпали
+			{
+				return false;
+			}
+
+			strPos++;
+			maskPos++;
+		}
+
+		return true;
+	}
+
+	#define UNDEFINED_HASH	0x0000000000000000l
+
+	static quint64 calcHash(const void* src, qint64 l)
+	{
+		if (src == nullptr)
+		{
+			assert(src);
+			return UNDEFINED_HASH;
+		}
+
+		quint64 nHash = 0;
+
+		register quint8* p = (quint8*)src;
+
+		while (l--)
+			nHash += (nHash<<5) + *p++;
+
+		return nHash;
+
 	}
 
 };

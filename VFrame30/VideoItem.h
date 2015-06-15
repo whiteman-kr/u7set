@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../include/ProtoSerialization.h"
-#include "FontParam.h"
 #include "DrawParam.h"
 #include "DebugInstCounter.h"
 #include "../include/TypesAndEnums.h"
@@ -253,24 +252,7 @@ namespace VFrame30
 		QString m_clickScript;		// Qt script on mouse left button click
 	};
 
-#ifdef VFRAME30LIB_LIBRARY	// ------------------------------------------------------------------------
-	//
-	//		ApplicationLogicBranch
-	//
-	// ------------------------------------------------------------------------
-//	ApplicationLogicBranch::ApplicationLogicBranch()
-//	{
-//	}
-
-//	const std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items() const
-//	{
-//		return m_items;
-//	}
-
-//	std::list<std::shared_ptr<VFrame30::FblItemRect>>& ApplicationLogicBranch::items()
-//	{
-//		return m_items;
-//	}
+#ifdef VFRAME30LIB_LIBRARY
 	extern Factory<VFrame30::VideoItem> VideoItemFactory;
 #endif
 }

@@ -51,6 +51,11 @@ bool operator!= (const VcsState& s1, const VcsState& s2)
 	return s1.m_state != s2.m_state;
 }
 
+bool operator< (const VcsState& s1, const VcsState& s2)
+{
+	return s1.m_state < s2.m_state;
+}
+
 //
 //
 // VcsItemAction

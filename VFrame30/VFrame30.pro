@@ -6,7 +6,7 @@
 TARGET = VFrame30
 
 TEMPLATE = lib
-QT += script widgets
+QT += widgets qml script
 
 win32:LIBS += -lGdi32
 
@@ -120,7 +120,10 @@ HEADERS += VFrame30Lib_global.h \
     DiagScheme.h \
     WiringScheme.h \
     SchemeView.h \
-    version.h
+    version.h \
+    ../include/DbStruct.h \
+    BaseSchemeWidget.h \
+    SchemeItemConst.h
 
 SOURCES += \
     VideoItem.cpp \
@@ -158,7 +161,10 @@ SOURCES += \
     LogicScheme.cpp \
     DiagScheme.cpp \
     WiringScheme.cpp \
-    SchemeView.cpp
+    SchemeView.cpp \
+    ../lib/DbStruct.cpp \
+    BaseSchemeWidget.cpp \
+    SchemeItemConst.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
@@ -195,19 +201,4 @@ unix {
 #!include(protobuf.pri) {
 #	error("Couldn't find the protobuf.pri file!")
 #}
-
-# Visual Leak Detector
-#
-win32 {
-	contains(QMAKE_TARGET.arch, x86_64) {
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	} else {
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
-	}
-
-	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
-	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
-}
 

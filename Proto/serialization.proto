@@ -18,6 +18,20 @@ message Uuid
 	required bytes uuid = 1;
 }
 
+//
+//
+// QVariant
+//
+//
+message qvariant
+{
+	required int32 type = 1;
+	optional int32 intValue = 2 [default = 0];
+	optional uint32 uintValue = 3 [default = 0];
+	optional double doubleValue = 4 [default = 0];
+	optional bool boolValue = 5 [default = false];
+}
+
 
 //
 //
@@ -83,17 +97,17 @@ enum ConnectionDirrection
 //------------------------------------------------------------------------------------------
 //
 //
-//		Envelope - универсальная структура, хранит любой корневой тип
+//		Envelope - General struct, keeps any base type
 //
 //
 //------------------------------------------------------------------------------------------
 message Envelope
 {
-	// Класс, для сериализации
+	// C++ Class for serizalization
 	//
 	required uint32 classnamehash = 1;				// Hash from classname, the way of getting the hash is always same
 
-	// возможные типы для хранения
+	// Possible types for storing
 	//
 	optional VideoItem videoitem = 6;				// VFrame30::CVideoItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
@@ -162,10 +176,11 @@ message AfbElementXml
 //
 message FblElement
 {
-	required Uuid uuid = 1;
 	required wstring strID = 2;
 	required wstring caption = 3;
 	required uint32 opcode = 4;
+	optional bool hasRam = 5 [default = false];
+	optional bool requiredStart = 6 [default = true];
 
 	repeated FblElementSignal inputSignals = 11;
 	repeated FblElementSignal outputSignals = 12;
@@ -196,33 +211,23 @@ message FblElementParam
 {
 	required wstring caption = 1;
 	required FblParamType type = 2;
-	required FblParamValue value = 3;
-	required FblParamValue defaultvalue = 4;
-	required FblParamValue lowlimit = 5;
-	required FblParamValue highlimit = 6;
 	required bool visible = 7;
 	optional int32 operandIndex = 8 [default = 0];
 	optional int32 size = 9 [default = 0];
+	optional bool instantiator = 10 [default = false];
+	optional bool user = 11 [default = false];
+	optional wstring changedScript = 12;
+	optional qvariant value = 13;
+	optional qvariant defaultvalue = 14;
+	optional qvariant lowlimit = 15;
+	optional qvariant highlimit = 16;
 }
 
 
-//
-//
-// Afbl::FblParamValue
-//
-//
-message FblParamValue
-{
-	required int32 integralvalue = 1;
-	required double floatingpoint = 2;
-	required bool discrete = 3;
-	required int32 type = 4;
-}
-
 
 //
 //
-// FblSignalType - тип сигнала в FblElement
+// FblSignalType
 //
 //
 enum FblSignalType
@@ -233,14 +238,14 @@ enum FblSignalType
 
 //
 //
-// FblParamType	- Тип параметра для FblElement
+// FblParamType
 //
 //
 enum FblParamType
 {
-	AnalogIntegral = 0;			// Аналоговый целочисленный (32bit signed int)
-	AnalogFloatingPoint = 1;	// Аналоговый с плавающей запятой (double, 64bit)
-	DiscreteValue = 2;			// Дискретный (c++ bool)
+	AnalogIntegral = 0;			// 32bit signed int
+	AnalogFloatingPoint = 1;	// double, 64bit
+	DiscreteValue = 2;			// bool, c++
 }
 
 
@@ -260,7 +265,7 @@ message VideoFrame
 	required double height = 5;
 	required SchemeUnit unit = 6;
 
-	repeated Envelope layers = 100;				// Список слоев
+	repeated Envelope layers = 100;				// Layer list
 	required AfbElementCollection afbs = 101;	// Application Fuynctional Block stored as XML
 
 	// Derived from VideoFrame
@@ -323,21 +328,22 @@ message VideoItem
 
 	// --
 	//
-	optional FblItem FblItem = 106;							// 
+	optional FblItem FblItem = 106;								//
 	optional FblItemRect FblItemRect = 107;						// +PosRectImpl, FblItem
 	optional FblItemLine FblItemLine = 108;						// +PosConnectionImpl, FblItem
 	
 	// Наслдедуемые от PosRectImpl, PosLineImpl, PosConnectionImpl
 	//
-	optional VideoItemRect Rect = 116;						// +PosRectImpl
-	optional VideoItemLine Line = 117;						// +PosLineImpl
-	optional VideoItemConnectionLine ConnectionLine = 118;				// +PosConnectionImpl
+	optional VideoItemRect Rect = 116;							// +PosRectImpl
+	optional VideoItemLine Line = 117;							// +PosLineImpl
+	optional VideoItemConnectionLine ConnectionLine = 118;		// +PosConnectionImpl
 	
 	optional VideoItemSignal Signal = 124;						// +FblItemRect
 	optional VideoItemInputSignal InputSignal = 125;			// +Signal
 	optional VideoItemOutputSignal OutputSignal = 126;			// +Signal
 	optional VideoItemLink Link = 127;							// +FblItemLine
-	optional VideoItemFblElement VideoItemFblElement = 128;	// +FblItemRect
+	optional VideoItemFblElement VideoItemFblElement = 128;		// +FblItemRect
+	optional SchemeItemConst ConstItem = 129;					// +FblItemRect
 }
 
 
@@ -427,14 +433,14 @@ message VideoItemConnectionLine
 //
 message FblConnectionPoint
 {
-	required VideoItemPoint point = 1;
-	required ConnectionDirrection dirrection = 2;
-	required Uuid uuid = 3;
+	optional VideoItemPoint point = 1;					// Can be removed in future, not used anymore
+	optional ConnectionDirrection dirrection = 2;
+	optional Uuid uuid = 3;
 	optional int32 operandIndex = 4 [default = -1];		// -1 is not used, for links etc...
+	optional string caption = 5 [default = ""];
 	
-	optional Uuid signalUuid = 10;
-	optional wstring signalStrID = 11;
-	optional wstring signalCaption = 12;
+	//optional Uuid signalUuid = 10;
+	//optional wstring signalStrID = 11;
 }
 
 
@@ -497,7 +503,6 @@ message VideoItemInputSignal
 }
 
 
-
 //
 //
 // VideoItemOutputSignal
@@ -525,10 +530,21 @@ message VideoItemLink
 //
 message VideoItemFblElement
 {
-	required Uuid afbGuid = 1;
 	repeated FblElementParam params = 2;
+	optional wstring afbStrid = 3;
 }
 
+//
+//
+// SchemeItemConst
+//
+//
+message SchemeItemConst
+{
+	optional int32 type = 1 [default = 0];
+	optional int32 intValue = 2 [default = 0];
+	optional double doubleValue = 3 [default = 0.0];
+}
 
 //------------------------------------------------------------------------------------------
 //
@@ -598,14 +614,17 @@ message DeviceController
 
 message DeviceSignal
 {
-        optional int32 type = 1 [default = 0];
+		optional int32 obsoletetype = 1 [default = 0];			// old type format, not used anymore, RPCT-345
+
         optional int32 byteOrder = 2 [default = 0];
         optional int32 format = 3 [default = 0];
         optional int32 size = 4 [default = 0];
         optional int32 validityOffset = 5 [default = 0];
         optional int32 validityBit = 6 [default = 0];
         optional int32 valueOffset = 7 [default = 0];
-        optional int32 valueBit = 8 [default = 0];
+		optional int32 valueBit = 8 [default = 0];
+		optional int32 type = 9 [default = 0];					// RPCT-345
+		optional int32 function = 10 [default = 0];				// RPCT-345
 }
 
 message Workstation

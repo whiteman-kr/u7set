@@ -12,11 +12,11 @@ class CheckInDialog : protected QDialog, protected HasDbController
 	Q_OBJECT
 private:
 	CheckInDialog();				// deleted
-	CheckInDialog(const std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent);
+	CheckInDialog(const std::vector<DbFileInfo>& files, DbController* db, QWidget* parent);
 	~CheckInDialog();
 
 public:
-	static bool checkIn(std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent);
+	static bool checkIn(std::vector<DbFileInfo>& files, DbController* db, QWidget* parent);
 	
 private slots:
 	void on_checkInButton_clicked();

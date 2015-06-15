@@ -166,13 +166,13 @@ namespace VFrame30
 
 	// Вычислить координаты точки
 	//
-	void VideoItemLink::SetConnectionsPos()
+	void VideoItemLink::SetConnectionsPos(double /*gridSize*/, int /*pinGridStep*/)
 	{
 		return;
 	}
 
 	//bool CVideoItemLink::GetConnectionPointPos(const GUID& connectionPointGuid, VideoItemPoint* pResult) const
-	bool VideoItemLink::GetConnectionPointPos(const QUuid&, VideoItemPoint*) const
+	bool VideoItemLink::GetConnectionPointPos(const QUuid&, VideoItemPoint*, double, int) const
 	{
 		return false;
 	}

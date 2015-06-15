@@ -158,7 +158,7 @@ namespace Builder
 		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
 
-		Hardware::ModuleConfCollection confCollection(m_projectName, m_userName, m_changesetId);
+		Hardware::ModuleFirmwareCollection confCollection(m_projectName, m_userName, m_changesetId);
 
 		QJSValue jsConfCollection = jsEngine.newQObject(&confCollection);
 		QQmlEngine::setObjectOwnership(&confCollection, QQmlEngine::CppOwnership);
@@ -208,7 +208,7 @@ namespace Builder
 		{
 			for (auto i = confCollection.firmwares().begin(); i != confCollection.firmwares().end(); i++)
 			{
-				const Hardware::ModuleConfFirmware& f = i->second;
+				const Hardware::ModuleFirmware& f = i->second;
 
 				QByteArray data;
 				f.save(data);

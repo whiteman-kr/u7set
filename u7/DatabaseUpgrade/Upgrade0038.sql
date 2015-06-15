@@ -144,6 +144,7 @@ BEGIN
 	FROM Signal AS S, SignalInstance AS SI
 	WHERE
 		SI.SignalID = S.SignalID AND
+		S.Deleted != TRUE AND
 		SI.SignalInstanceID IN (
 
 			SELECT

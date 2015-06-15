@@ -12,11 +12,25 @@ QT       += network
 
 QT		 += widgets
 
+QT  += qml
+
 TARGET = DataSrv
 CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
+
+
+# DESTDIR
+#
+win32 {
+	CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+	CONFIG(release, debug|release): DESTDIR = ../bin/release
+}
+unix {
+	CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+}
 
 
 # Force prebuild version control info
@@ -61,9 +75,14 @@ SOURCES += main.cpp \
 	../lib/CircularLogger.cpp \
     DataAquisitionService.cpp \
     ../lib/DataSource.cpp \
-    FscDataAcquisitionThread.cpp
+    FscDataAcquisitionThread.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/Signal.cpp
 
 HEADERS += \
+        Stable.h \
 	../include/SocketIO.h \
 	../include/UdpSocket.h \
 	../include/BaseService.h \
@@ -71,11 +90,33 @@ HEADERS += \
     DataAquisitionService.h \
     ../include/DataSource.h \
     FscDataAcquisitionThread.h \
-    version.h
+    version.h \
+    ../include/DeviceObject.h \
+    ../include/DbStruct.h \
+    ../include/ProtoSerialization.h \
+    ../include/Signal.h
 
 include(../qtservice/src/qtservice.pri)
 
-unix:QMAKE_CXXFLAGS += -std=c++11
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
+gcc:QMAKE_CXXFLAGS += -std=c++11
+
+# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
+#
+win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+
+#protobuf
+#
+win32 {
+        LIBS += -L$$DESTDIR -lprotobuf
+
+        INCLUDEPATH += ./../Protobuf
+}
+unix {
+        LIBS += -lprotobuf
+}
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

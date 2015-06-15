@@ -46,10 +46,12 @@ private:
 
 	friend bool operator== (const VcsState& s1, const VcsState& s2);
 	friend bool operator!= (const VcsState& s1, const VcsState& s2);
+	friend bool operator< (const VcsState& s1, const VcsState& s2);
 };
 
 bool operator== (const VcsState& s1, const VcsState& s2);
 bool operator!= (const VcsState& s1, const VcsState& s2);
+bool operator<  (const VcsState& s1, const VcsState& s2);
 
 //
 //
@@ -261,7 +263,7 @@ protected:
 	int m_size = 0;
 	bool m_deleted = false;		// File was deleted from database, from all tables, such FileInfo does not exist anymore
 
-	int m_changeset = -1;
+	int m_changeset = 0;
 	QDateTime m_created;
 	QDateTime m_lastCheckIn;
 

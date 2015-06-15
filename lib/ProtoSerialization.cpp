@@ -23,6 +23,24 @@
 
 namespace Proto
 {
+	bool ParseFromIstream(::google::protobuf::Message& message, std::fstream& stream)
+	{
+		bool result = message.ParseFromIstream(&stream);
+		return result;
+	}
+
+	bool ParseFromString(::google::protobuf::Message& message, const char* str)
+	{
+		bool result = message.ParseFromString(str);
+		return result;
+	}
+
+	bool ParseFromArray(::google::protobuf::Message& message, const QByteArray& data)
+	{
+		bool result = message.ParseFromArray(data.data(), data.size());
+		return result;
+	}
+
 
 	// Функции для сериализации данных
 	//
@@ -64,6 +82,70 @@ namespace Proto
 
         //pMessage->set_text(str.toStdWString().c_str(), (str.length() + 1) * sizeof(wchar_t));
         pMessage->set_text(str.data(), (str.length() + 1) * sizeof(QChar));
+	}
+
+	// Read/write wstring message
+	//
+	const QVariant Read(const Proto::qvariant& message)
+	{
+		switch (static_cast<QVariant::Type>(message.type()))
+		{
+		case QVariant::Int:
+		{
+			return QVariant(message.intvalue());
+			break;
+		}
+		case QVariant::UInt:
+		{
+			return QVariant(message.uintvalue());
+			break;
+		}
+		case QVariant::Double:
+		{
+			return QVariant(message.doublevalue());
+			break;
+		}
+		case QVariant::Bool:
+		{
+			return QVariant(message.boolvalue());
+			break;
+		}
+		default:
+			assert(false);
+		}
+
+		return QVariant();
+	}
+
+	void Write(Proto::qvariant* pMessage, const QVariant& value)
+	{
+		pMessage->set_type(value.type());
+
+		switch (value.type())
+		{
+		case QVariant::Int:
+		{
+			pMessage->set_intvalue(value.toInt());
+			break;
+		}
+		case QVariant::UInt:
+		{
+			pMessage->set_uintvalue(value.toUInt());
+			break;
+		}
+		case QVariant::Double:
+		{
+			pMessage->set_doublevalue(value.toDouble());
+			break;
+		}
+		case QVariant::Bool:
+		{
+			pMessage->set_boolvalue(value.toBool());
+			break;
+		}
+		default:
+			assert(false);
+		}
 	}
 }
 

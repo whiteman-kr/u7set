@@ -7,7 +7,6 @@
 class DbController;
 class QCheckBox;
 
-
 //
 //
 // BuildTabPage
@@ -21,10 +20,19 @@ public:
 	BuildTabPage(DbController* dbcontroller, QWidget* parent);
 	virtual ~BuildTabPage();
 
+	// Public methods
+	//
+public:
+	static BuildTabPage* instance();
+
 protected:
 	void CreateActions();
 
 	void writeOutputLog(const OutputLogItem& logItem);
+
+signals:
+	void buildStarted();
+	void buildFinished();
 
 	// Events
 	//
@@ -40,12 +48,14 @@ protected slots:
 	void build();
 	void cancel();
 
-	void buildStarted();
-	void buildFinished();
+	void buildWasStarted();
+	void buildWasFinished();
 
 	// Data
 	//
 private:
+	static BuildTabPage* m_this;
+
 	//QTableWidget* m_taskTable = nullptr;
 
 	QWidget* m_rightSideWidget = nullptr;

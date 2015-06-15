@@ -17,11 +17,16 @@ namespace VFrame30
 	//
 	class VFRAME30LIBSHARED_EXPORT CFblConnectionPoint
 	{
-	private:
-		CFblConnectionPoint();
-
 	public:
-		CFblConnectionPoint(double x, double y, ConnectionDirrection dirrection, const QUuid& guid, int operandIndex);
+		CFblConnectionPoint() = delete;
+
+		CFblConnectionPoint(ConnectionDirrection dirrection,
+							const QUuid& guid,
+							int operandIndex,
+							QString caption);
+
+		CFblConnectionPoint(ConnectionDirrection dirrection, const QUuid& guid, const Afbl::AfbElementSignal& afbSignal);
+
 		CFblConnectionPoint(const Proto::FblConnectionPoint& cpm);
 
 		// Other
@@ -60,14 +65,8 @@ namespace VFrame30
 		int afbOperandIndex() const;
 		void setAfbOperandIndex(int value);
 
-//		const QUuid& signalGuid() const;
-//		void setSignalGuid(const QUuid& guid);
-
-//		const QString& signalStrID() const;
-//		void setSignalStrID(const QString& strid);
-
-//		const QString& signalCaption() const;
-//		void setSignalCaption(const QString& caption);
+		QString caption() const;
+		void setCaption(QString caption);
 
 		// Data
 		//
@@ -79,13 +78,7 @@ namespace VFrame30
 
 		std::list<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
 		
-		//QUuid m_signalGuid;				// Guid сигнала ассоциаированного с данной точкой, может быть GUID_NULL
-		//QString m_signalStrID;			// Строковый ИД сигнала ассоциаированного с данной точкой,
-											// может быть пустой строкой, используется для кэширования, 
-											// не использовать для логики, только для пунктов меню, отрисовки и т.п.
-		//QString m_signalCaption;			// Наименование сигнала ассоциаированного с данной точкой,
-											// может быть пустой строкой, используется для кэширования, 
-											// не использовать для логики, только для пунктов меню, отрисовки и т.п.
+		QString m_caption;					// Pin caption
 	};
 
 	// CFblItem
@@ -127,19 +120,23 @@ namespace VFrame30
 		int inputsCount() const;
 		int outputsCount() const;
 
-	protected:
 		void addInput();
 		void addInput(const Afbl::AfbElementSignal& s);
+		void addInput(int opIndex, QString caption);
 
 		void addOutput();
 		void addOutput(const Afbl::AfbElementSignal& s);
+		void addOutput(int opIndex, QString caption);
+
+		void removeAllInputs();
+		void removeAllOutputs();
 
 		// Вычислить координаты точки
 		//
 	public:
 		void ClearAssociatedConnections();
-		virtual void SetConnectionsPos();
-		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult) const;
+		virtual void SetConnectionsPos(double gridSize, int pinGridStep);
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const;
 
 		// Properties
 		//

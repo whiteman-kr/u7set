@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#bcomp_great_v1">
+        <Properties>
+            <Caption>bcomp_great_v1</Caption>
+            <OpCode>12</OpCode>
+            <hasRam>true</hasRam>
+            <requiredStart>true</requiredStart>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal Caption="i_data" Type="Analog" OpIndex = "1" Size = "16"/>
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal Caption="o_result" Type="Discrete" OpIndex = "7" Size = "1"/>
+        </OutputSignals>
+        <Params>
+            <AfbElementParam Caption="i_sp" Visible="true" OpIndex="2" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+                <Value>50</Value>
+                <Default>50</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>100</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam Caption="i_hys" Visible="true" OpIndex="3" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+                <Value>50</Value>
+                <Default>50</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>100</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam Caption="i_conf" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
+                <Value>2</Value>
+                <Default>2</Default>
+                <LowLimit>1</LowLimit>
+                <HighLimit>4</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed>
+		</Changed>
+                </Script>
+            </AfbElementParam>
+        </Params>
+        <CommonScript>
+            <Library></Library>
+            <AfterCreation></AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>

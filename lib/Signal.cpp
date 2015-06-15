@@ -1,4 +1,5 @@
 #include "../include/Signal.h"
+#include <QXmlStreamAttributes>
 
 
 DataFormatList::DataFormatList()
@@ -18,23 +19,41 @@ Signal::Signal() :
 
 Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 {
-	Hardware::DeviceSignal::SignalType deviceSignalType = deviceSignal.type();
+	if (deviceSignal.isDiagSignal())
+	{
+		assert(false);
+		return;
+	}
 
-	if (deviceSignalType == Hardware::DeviceSignal::SignalType::InputAnalog ||
-		deviceSignalType == Hardware::DeviceSignal::SignalType::OutputAnalog)
+	if (deviceSignal.isAnalogSignal())
 	{
 		m_type = SignalType::Analog;
 	}
 	else
 	{
-		if (deviceSignalType == Hardware::DeviceSignal::SignalType::InputDiscrete ||
-			deviceSignalType == Hardware::DeviceSignal::SignalType::OutputDiscrete)
+		if (deviceSignal.isDiscreteSignal())
 		{
 			m_type = SignalType::Discrete;
 		}
 		else
 		{
 			assert(false);			// invalid deviceSignalType
+		}
+	}
+
+	if (deviceSignal.isInputSignal())
+	{
+		m_inOutType = SignalInOutType::Input;
+	}
+	else
+	{
+		if (deviceSignal.isOutputSignal())
+		{
+			m_inOutType = SignalInOutType::Output;
+		}
+		else
+		{
+			m_inOutType = SignalInOutType::Internal;
 		}
 	}
 
@@ -117,6 +136,256 @@ Signal& Signal::operator =(const Signal& signal)
 	m_byteOrder = signal.byteOrder();
 
 	return *this;
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	if (strValue == "true")
+	{
+		(this->*setter)(true);
+		return;
+	}
+	if (strValue == "false")
+	{
+		(this->*setter)(false);
+		return;
+	}
+	assert(false);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	bool ok = false;
+	int intValue = strValue.toInt(&ok);
+	if (!ok)
+	{
+		assert(false);
+		return;
+	}
+	(this->*setter)(intValue);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(double))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	bool ok = false;
+	double doubleValue = strValue.toDouble(&ok);
+	if (!ok)
+	{
+		assert(false);
+		return;
+	}
+	(this->*setter)(doubleValue);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	(this->*setter)(strValue.toString());
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalType))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	if (strValue == "Analog")
+	{
+		(this->*setter)(SignalType::Analog);
+		return;
+	}
+	if (strValue == "Discrete")
+	{
+		(this->*setter)(SignalType::Discrete);
+		return;
+	}
+	assert(false);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(OutputRangeMode))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	for (int i = 0; i < OUTPUT_RANGE_MODE_COUNT; i++)
+	{
+		if (strValue == OutputRangeModeStr[i])
+		{
+			(this->*setter)(OutputRangeMode(i));
+			return;
+		}
+	}
+	assert(false);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalInOutType))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
+	{
+		if (strValue == InOutTypeStr[i])
+		{
+			(this->*setter)(SignalInOutType(i));
+			return;
+		}
+	}
+	assert(false);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(ByteOrder))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	for (int i = 0; i < ENUM_COUNT(ByteOrder); i++)
+	{
+		if (strValue == ByteOrderStr[i])
+		{
+			(this->*setter)(ByteOrder(i));
+			return;
+		}
+	}
+	assert(false);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	Address16 address;
+	address.fromString(strValue.toString());
+	(this->*setter)(address);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(DataFormat))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	for (int i = 0; i < dataFormatInfo.count(); i++)
+	{
+		if (strValue == dataFormatInfo[i])
+		{
+			(this->*setter)(static_cast<DataFormat>(dataFormatInfo.key(i)));
+			return;
+		}
+	}
+	assert(false);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(int))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	for (int i = 0; i < unitInfo.count(); i++)
+	{
+		if (strValue == unitInfo[i])
+		{
+			(this->*setter)(unitInfo.key(i));
+			return;
+		}
+	}
+	assert(false);
+}
+
+void Signal::serializeSensorField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+	for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
+	{
+		if (strValue == SensorTypeStr[i])
+		{
+			(this->*setter)(i);
+			return;
+		}
+	}
+	assert(false);
+}
+
+void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& dataFormatInfo, UnitList &unitInfo)
+{
+	serializeField(attr, "ID", &Signal::setID);
+	serializeField(attr, "signalGroupID", &Signal::setSignalGroupID);
+	serializeField(attr, "signalInstanceID", &Signal::setSignalInstanceID);
+	serializeField(attr, "channel", &Signal::setChannel);
+	serializeField(attr, "type", &Signal::setType);
+	serializeField(attr, "strID", &Signal::setStrID);
+	serializeField(attr, "extStrID", &Signal::setExtStrID);
+	serializeField(attr, "name", &Signal::setName);
+	serializeField(attr, "dataFormat", dataFormatInfo, &Signal::setDataFormat);
+	serializeField(attr, "dataSize", &Signal::setDataSize);
+	serializeField(attr, "lowADC", &Signal::setLowADC);
+	serializeField(attr, "highADC", &Signal::setHighADC);
+	serializeField(attr, "lowLimit", &Signal::setLowLimit);
+	serializeField(attr, "highLimit", &Signal::setHighLimit);
+	serializeField(attr, "unitID", unitInfo, &Signal::setUnitID);
+	serializeField(attr, "adjustment", &Signal::setAdjustment);
+	serializeField(attr, "dropLimit", &Signal::setDropLimit);
+	serializeField(attr, "excessLimit", &Signal::setExcessLimit);
+	serializeField(attr, "unbalanceLimit", &Signal::setUnbalanceLimit);
+	serializeField(attr, "inputLowLimit", &Signal::setInputLowLimit);
+	serializeField(attr, "inputHighLimit", &Signal::setInputHighLimit);
+	serializeField(attr, "inputUnitID", unitInfo, &Signal::setInputUnitID);
+	serializeSensorField(attr, "inputSensorID", &Signal::setInputSensorID);
+	serializeField(attr, "outputLowLimit", &Signal::setOutputLowLimit);
+	serializeField(attr, "outputHighLimit", &Signal::setOutputHighLimit);
+	serializeField(attr, "outputUnitID", unitInfo, &Signal::setOutputUnitID);
+	serializeField(attr, "outputRangeMode", &Signal::setOutputRangeMode);
+	serializeSensorField(attr, "outputSensorID", &Signal::setOutputSensorID);
+	serializeField(attr, "acquire", &Signal::setAcquire);
+	serializeField(attr, "calculated", &Signal::setCalculated);
+	serializeField(attr, "normalState", &Signal::setNormalState);
+	serializeField(attr, "decimalPlaces", &Signal::setDecimalPlaces);
+	serializeField(attr, "aperture", &Signal::setAperture);
+	serializeField(attr, "inOutType", &Signal::setInOutType);
+	serializeField(attr, "deviceStrID", &Signal::setDeviceStrID);
+	serializeField(attr, "filteringTime", &Signal::setFilteringTime);
+	serializeField(attr, "maxDifference", &Signal::setMaxDifference);
+	serializeField(attr, "byteOrder", &Signal::setByteOrder);
+	serializeField(attr, "ramAddr", &Signal::setRamAddr);
+	serializeField(attr, "regAddr", &Signal::setRegAddr);
 }
 
 
@@ -209,4 +478,12 @@ void SignalSet::resetAddresses()
 	{
 		(*this)[i].resetAddresses();
 	}
+}
+
+
+void Address16::fromString(QString str)
+{
+	const QStringList& list = str.split(":");
+	m_offset = list[0].toInt();
+	m_bit = list[1].toInt();
 }

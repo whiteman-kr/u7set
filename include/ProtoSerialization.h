@@ -25,6 +25,11 @@
 
 namespace Proto
 {
+	bool ParseFromIstream(::google::protobuf::Message& message, std::fstream& stream);
+	bool ParseFromString(::google::protobuf::Message& message, const char* str);
+	bool ParseFromArray(::google::protobuf::Message& message, const QByteArray& data);
+
+
 	// Шаблон и реализация необходимых фукнций сериализации
 	// у VFrameType должны быть реализованы функции CreateObject, SaveData, LoadData
 	//
@@ -158,7 +163,7 @@ namespace Proto
 
 			Proto::Envelope message;
 
-			bool result = message.ParseFromIstream(&stream);
+			bool result = ParseFromIstream(message, stream);
 			if (result == false)
 			{
 				return false;
@@ -170,7 +175,7 @@ namespace Proto
 		{
 			Proto::Envelope message;
 
-			bool result = message.ParseFromString(data.data());
+			bool result = ParseFromString(message, data.data());
 			if (result == false)
 			{
 				return false;
@@ -182,7 +187,7 @@ namespace Proto
 		{
 			Proto::Envelope message;
 
-			bool result = message.ParseFromArray(data.data(), data.size());
+			bool result = ParseFromArray(message, data);
 			if (result == false)
 			{
 				return false;
@@ -225,7 +230,7 @@ namespace Proto
 
 			Proto::Envelope message;
 
-			bool result = message.ParseFromIstream(&stream);
+			bool result = ParseFromIstream(message, stream);
 			if (result == false)
 			{
 				return nullptr;
@@ -240,7 +245,7 @@ namespace Proto
 		{
 			Proto::Envelope message;
 
-			bool result = message.ParseFromString(data.data());
+			bool result = ParseFromString(message, data.data());
 			if (result == false)
 			{
 				return nullptr;
@@ -255,7 +260,7 @@ namespace Proto
 		{
 			Proto::Envelope message;
 
-			bool result = message.ParseFromArray(data.constData(), data.size());
+			bool result = ParseFromArray(message, data);
 			if (result == false)
 			{
 				return nullptr;
@@ -290,6 +295,11 @@ namespace Proto
 	//
 	void Read(const Proto::wstring& message, QString* dst);
 	void Write(Proto::wstring* pMessage, const QString& str);
+
+	// Read/write qvariant message
+	//
+	const QVariant Read(const Proto::qvariant& message);
+	void Write(Proto::qvariant* pMessage, const QVariant& value);
 }
 
 

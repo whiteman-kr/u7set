@@ -5,38 +5,41 @@
 namespace VFrame30
 {
 	//SchemeUnit CSettings::m_regionalUnit = SchemeUnit::Inch;
-	SchemeUnit CSettings::m_regionalUnit = SchemeUnit::Millimeter;
+	SchemeUnit Settings::m_regionalUnit = SchemeUnit::Millimeter;
 
-	// ћинимальный грид, дл€ схем, используетс€ дл€ позиционировани€ (выравнивание€) пинов в Fbl едементах
+	// The min grid size for schemes for Fbl pins positioning
 	//
-	const double CSettings::m_minFblGridSizeIn = 0.02;
-	const double CSettings::m_minFblGridSizeMm = mm2in(0.5);
-	const double CSettings::m_minFblGridSizePx = 5;	
+	const double Settings::m_defaultGridSizeIn = 0.03125;	// 1/32in
+	const double Settings::m_defaultGridSizeMm = mm2in(1);	// 1mm
+	const double Settings::m_defaultGridSizePx = 5;
 
-	SchemeUnit CSettings::regionalUnit(void)
+	SchemeUnit Settings::regionalUnit(void)
 	{
 		return m_regionalUnit;
 	}
 
-	void CSettings::setRegionalUnit(SchemeUnit value)
+	void Settings::setRegionalUnit(SchemeUnit value)
 	{
 		m_regionalUnit = value;
 	}
 
-	double CSettings::minFblGridSize(SchemeUnit unit)
+	double Settings::defaultGridSize(SchemeUnit unit)
 	{
-		switch (unit)
+		if (unit == SchemeUnit::Display)
 		{
-		case SchemeUnit::Inch:
-			return m_minFblGridSizeIn;
-		case SchemeUnit::Millimeter:
-			return m_minFblGridSizeMm;
-		case SchemeUnit::Display:
-			return m_minFblGridSizePx;
-		default:
-			assert(false);
+			return m_defaultGridSizePx;
 		}
 
-		return m_minFblGridSizeIn;
+		assert(regionalUnit() == SchemeUnit::Inch || regionalUnit() == SchemeUnit::Millimeter);
+
+		switch (regionalUnit())
+		{
+		case SchemeUnit::Inch:
+			return m_defaultGridSizeIn;
+		case SchemeUnit::Millimeter:
+			return m_defaultGridSizeMm;
+		default:
+			return m_defaultGridSizeIn;
+		}
 	}
 }

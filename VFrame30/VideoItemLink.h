@@ -36,8 +36,8 @@ namespace VFrame30
 
 		// Вычислить координаты точки
 		//
-		virtual void SetConnectionsPos() override;
-		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult) const override;
+		virtual void SetConnectionsPos(double gridSize, int pinGridStep) override;
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const override;
 
 		// Properties and Data
 	public:

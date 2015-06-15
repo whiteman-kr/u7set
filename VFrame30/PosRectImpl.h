@@ -26,6 +26,9 @@ namespace VFrame30
 
 		virtual double heightDocPt() const = 0;
 		virtual void setHeightDocPt(double value) = 0;
+
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const = 0;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const = 0;
 	};
 
 
@@ -58,6 +61,9 @@ namespace VFrame30
 
 		virtual void SetWidthInDocPt(double val) override;
 		virtual void SetHeightInDocPt(double val) override;
+
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 		// Draw Functions
 		//

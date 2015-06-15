@@ -221,6 +221,11 @@ namespace Builder
 	//
 	bool BuildResultWriter::createDirectory(QString dir)
 	{
+		if (QDir().exists(dir))
+		{
+			return true;
+		}
+
 		if (QDir().mkpath(dir) == false)
 		{
 			msg = tr("Can't create directory: ") + dir;
@@ -235,8 +240,8 @@ namespace Builder
 		m_log->writeMessage(msg, false);
 
 		qDebug() << msg;
-		return true;
 
+		return true;
 	}
 
 
@@ -245,6 +250,11 @@ namespace Builder
 	bool BuildResultWriter::createSubdirectory(QString subDir)
 	{
 		QString fullPath = m_buildFullPath + m_separator + subDir;
+
+		if (QDir().exists(fullPath))
+		{
+			return true;
+		}
 
 		if (QDir().mkpath(fullPath) == false)
 		{
@@ -366,7 +376,7 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(QString subDir, QString fileName, QByteArray& data)
+	bool BuildResultWriter::addFile(QString subDir, QString fileName, const QByteArray &data)
 	{
 		assert(!fileName.isEmpty());
 
@@ -400,7 +410,7 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(QString subDir, QString fileName, QStringList stringList)
+	bool BuildResultWriter::addFile(QString subDir, QString fileName, const QStringList& stringList)
 	{
 		assert(!fileName.isEmpty());
 

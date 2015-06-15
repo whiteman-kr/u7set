@@ -89,7 +89,6 @@ SOURCES += \
     ../lib/ModuleConfiguration.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
-    ../lib/SignalMask.cpp \
     MeasureSignalBase.cpp
 
 
@@ -124,7 +123,6 @@ HEADERS  += \
     ../include/DbStruct.h \
     ../include/ModuleConfiguration.h \
     ../include/ProtoSerialization.h \
-    ../include/SignalMask.h \
     ../include/Types.h \
     ../include/OrderedHash.h \
     Stable.h \

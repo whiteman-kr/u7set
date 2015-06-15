@@ -1,18 +1,20 @@
 #pragma once
 
+#include "../VFrame30/BaseSchemeWidget.h"
 #include "../VFrame30/SchemeView.h"
 #include "../VFrame30/VideoItem.h"
 #include "../VFrame30/FblItem.h"
 #include "../include/DbController.h"
 
-#define GridSizeDisplay				5
-#define GridSizeMm					mm2in(0.5)
+//#define GridSizeDisplay				5
+//#define GridSizeMm					mm2in(1.0)
+//#define GridSizeIn					0.04
 
 #define ControlBarSizeDisplay		10
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemeUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
 
-enum MouseState
+enum class MouseState
 {
 	None,								// No state
 	Scrolling,							// Scrolling with middle mouse button
@@ -39,9 +41,9 @@ enum MouseState
 	MovingConnectionLinePoint			// Moving point ISchemePosConnectionLine
 };
 
-// Possible action on CVideoItem
+// Possible action on SchemeItem
 //
-enum VideoItemAction
+enum class VideoItemAction
 {
 	NoAction,							// No Action
 	MoveItem,							// Move Item
@@ -182,7 +184,7 @@ protected:
 // EditVideoFrameWidget
 //
 //
-class EditSchemeWidget : public QScrollArea
+class EditSchemeWidget : public VFrame30::BaseSchemeWidget
 {
 	Q_OBJECT
 
@@ -196,6 +198,8 @@ public:
 protected:
 	void createActions();
 
+	virtual void keyPressEvent(QKeyEvent* event) override;
+
 	// Set corresponding to the current situation and user actions context menu
 	//
 	void setCorrespondingContextMenu();
@@ -204,7 +208,6 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
-	virtual void wheelEvent(QWheelEvent* event);
 
 	// Mouse Left Button Down
 	//
@@ -249,12 +252,9 @@ protected:
 	//
 public:
 	QPointF widgetPointToDocument(const QPoint& widgetPoint, bool snapToGrid) const;
-
 	QPointF snapToGrid(QPointF pt) const;
 
 protected:
-	bool MousePosToDocPoint(const QPoint& mousePos, QPointF* pDestDocPos, int dpiX = 0, int dpiY = 0);
-
 	void addItem(std::shared_ptr<VFrame30::VideoItem> newItem);
 
 	void setMouseCursor(QPoint mousePos);
@@ -288,9 +288,6 @@ protected slots:
 
 	void modifiedChangedSlot(bool modified);
 
-	void zoomIn();
-	void zoomOut();
-	void zoom100();
 	void selectAll();
 
 	void schemeProperties();
@@ -306,22 +303,15 @@ public:
 	DbController* dbcontroller();
 	DbController* db();
 
-	std::shared_ptr<VFrame30::Scheme>& scheme();
-	std::shared_ptr<VFrame30::Scheme>& scheme() const;
-	void setScheme(std::shared_ptr<VFrame30::Scheme>& scheme);
-
 	std::shared_ptr<VFrame30::SchemeLayer> activeLayer();
 
 	const std::vector<std::shared_ptr<VFrame30::VideoItem>>& selectedItems() const;
 
-	EditSchemeView* schemeView();
-	const EditSchemeView* schemeView() const;
+	EditSchemeView* editSchemeView();
+	const EditSchemeView* editSchemeView() const;
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
-
-	double zoom() const;
-	void setZoom(double value, int horzScrollValue = -1, int vertScrollValue = -1);
 
 	const DbFileInfo& fileInfo() const;
 	void setFileInfo(const DbFileInfo& fi);
@@ -342,17 +332,10 @@ public:
 	//
 private:
 	DbFileInfo m_fileInfo;
-	DbController* m_dbcontroller;
+	DbController* m_dbcontroller = nullptr;
 
 	bool m_snapToGrid = true;
 
-	// Interface data
-	//
-	QPoint mousePos;			// Keeps mouse pos during different actions like scrolling etc
-	int horzScrollBarValue;		// Horizintal scroll bar value in mousePressEvent -- midButton
-	int vertScrollBarValue;		// Vertical scroll bar value in mousePressEvent -- midButton
-
-	EditSchemeView* m_videoFrameView = nullptr;
 	EditEngine::EditEngine* m_editEngine = nullptr;
 
 	SchemePropertiesDialog* m_schemePropertiesDialog = nullptr;
@@ -399,84 +382,85 @@ private:
 	// Actions
 	//
 private:
-	QAction* m_escapeAction;
+	QAction* m_escapeAction = nullptr;
 
 	//	Contexet Menu
 	//
 private:
 	// File
 	//
-	QMenu* m_fileMenu;
-	QAction* m_fileAction;
-		QAction* m_fileCheckOutAction;
-		QAction* m_fileCheckInAction;
-		QAction* m_fileUndoChangesAction;
+	QMenu* m_fileMenu = nullptr;
+	QAction* m_fileAction = nullptr;
+		QAction* m_fileCheckOutAction = nullptr;
+		QAction* m_fileCheckInAction = nullptr;
+		QAction* m_fileUndoChangesAction = nullptr;
 		// ------------------------------
-		QAction* m_fileSeparatorAction0;
-		QAction* m_fileSaveAction;
-		QAction* m_fileSeparatorAction1;
+		QAction* m_fileSeparatorAction0 = nullptr;
+		QAction* m_fileSaveAction = nullptr;
+		QAction* m_fileSeparatorAction1 = nullptr;
 		// ------------------------------
-		QAction* m_fileGetWorkcopyAction;
-		QAction* m_fileSetWorkcopyAction;
+		QAction* m_fileGetWorkcopyAction = nullptr;
+		QAction* m_fileSetWorkcopyAction = nullptr;
 		// ------------------------------
-		QAction* m_fileSeparatorAction2;
-		QAction* m_filePropertiesAction;
+		QAction* m_fileSeparatorAction2 = nullptr;
+		QAction* m_filePropertiesAction = nullptr;
 		// ------------------------------
-		QAction* m_fileSeparatorAction3;
-		QAction* m_fileCloseAction;
+		QAction* m_fileSeparatorAction3 = nullptr;
+		QAction* m_fileCloseAction = nullptr;
 
 	// Add Item
 	//
-	QMenu* m_addMenu;
-	QAction* m_addAction;
-		QAction* m_addLineAction;
-		QAction* m_addConnectionLineAction;
-		QAction* m_addRectAction;
+	QMenu* m_addMenu = nullptr;
+	QAction* m_addAction = nullptr;
+		QAction* m_addLineAction = nullptr;
+		QAction* m_addConnectionLineAction = nullptr;
+		QAction* m_addRectAction = nullptr;
 		// ------------------------------
-		QAction* m_addSeparatorAction0;
-		QAction* m_addInputSignalAction;
-		QAction* m_addOutputSignalAction;
-		QAction* m_addFblElementAction;
-		QAction* m_addLinkAction;
+		QAction* m_addSeparatorAction0 = nullptr;
+		QAction* m_addInputSignalAction = nullptr;
+		QAction* m_addOutputSignalAction = nullptr;
+		QAction* m_addConstantAction = nullptr;
+		QAction* m_addFblElementAction = nullptr;
+		QAction* m_addLinkAction = nullptr;
 
 	// Edit
 	//
-	QMenu* m_editMenu;
-	QAction* m_editAction;
-		QAction* m_undoAction;
-		QAction* m_redoAction;
+	QMenu* m_editMenu = nullptr;
+	QAction* m_editAction = nullptr;
+		QAction* m_undoAction = nullptr;
+		QAction* m_redoAction = nullptr;
 		// ------------------------------
-		QAction* m_editSeparatorAction0;
-		QAction* m_selectAllAction;
+		QAction* m_editSeparatorAction0 = nullptr;
+		QAction* m_selectAllAction = nullptr;
 		// ------------------------------
-		QAction* m_editSeparatorAction1;
-		QAction* m_editCutAction;
-		QAction* m_editCopyAction;
-		QAction* m_editPasteAction;
+		QAction* m_editSeparatorAction1 = nullptr;
+		QAction* m_editCutAction = nullptr;
+		QAction* m_editCopyAction = nullptr;
+		QAction* m_editPasteAction = nullptr;
 		// ------------------------------
-		QAction* m_editSeparatorAction2;
-		QAction* m_deleteAction;
+		QAction* m_editSeparatorAction2 = nullptr;
+		QAction* m_deleteAction = nullptr;
 		// ------------------------------
-		QAction* m_editSeparatorAction3;
-		QAction* m_propertiesAction;
+		QAction* m_editSeparatorAction3 = nullptr;
+		QAction* m_propertiesAction = nullptr;
 
 	// View
 	//
-	QMenu* m_viewMenu;
-	QAction* m_viewAction;
-		QAction* m_zoomInAction;
-		QAction* m_zoomOutAction;
-		QAction* m_zoom100Action;
+	QMenu* m_viewMenu = nullptr;
+	QAction* m_viewAction = nullptr;
+		//QAction* m_zoomInAction = nullptr;		These actions were moved to VFrame30::BaseSchemeWidget
+		//QAction* m_zoomOutAction = nullptr;
+		//QAction* m_zoom100Action = nullptr;
 		// ------------------------------
-		QAction* m_viewSeparatorAction0;
-		QAction* m_snapToGridAction;
+		QAction* m_viewSeparatorAction0 = nullptr;
+		QAction* m_snapToGridAction = nullptr;
 
 	// Properties
 	//
-	QAction* m_separatorAction0;
-	QAction* m_layersAction;
-	//QMenu* m_propertiesMenu;
-	//QAction* m_propertiesAction;
+	QAction* m_separatorAction0 = nullptr;
+	QAction* m_layersAction = nullptr;
+	//QMenu* m_propertiesMenu = nullptr;
+	//QAction* m_propertiesAction = nullptr;
 
 	// --
 	// End of ConextMenu

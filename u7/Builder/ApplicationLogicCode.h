@@ -6,7 +6,7 @@
 namespace Builder
 {
 
-	enum CommandCodes
+	enum class CommandCodes
 	{
 		NoCommand = 0,
 		NOP = 1,
@@ -22,6 +22,8 @@ namespace Builder
 		WRFBB = 11,
 		RDFBB = 12,
 		RDFBTS = 13,
+		SETMEM = 14,
+		MOVB = 15,
 
 		Count
 	};
@@ -29,19 +31,21 @@ namespace Builder
 
 	const CommandCodes AllCommandCodes[] =
 	{
-		NOP,
-		START,
-		STOP,
-		MOV,
-		MOVMEM,
-		MOVC,
-		MOVBC,
-		WRFB,
-		RDFB,
-		WRFBC,
-		WRFBB,
-		RDFBB,
-		RDFBTS,
+		CommandCodes::NOP,
+		CommandCodes::START,
+		CommandCodes::STOP,
+		CommandCodes::MOV,
+		CommandCodes::MOVMEM,
+		CommandCodes::MOVC,
+		CommandCodes::MOVBC,
+		CommandCodes::WRFB,
+		CommandCodes::RDFB,
+		CommandCodes::WRFBC,
+		CommandCodes::WRFBB,
+		CommandCodes::RDFBB,
+		CommandCodes::RDFBTS,
+		CommandCodes::SETMEM,
+		CommandCodes::MOVB,
 	};
 
 
@@ -51,7 +55,7 @@ namespace Builder
 	{
 		0,		//	NoCommand
 		1,		//	NOP
-		1,		//	START
+		2,		//	START
 		1,		//  STOP
 		3,		//	MOV
 		4,		//	MOVMEM
@@ -63,6 +67,8 @@ namespace Builder
 		4,		//	WRFBB
 		4,		//	RDFBB
 		3,		//	RDFBTS
+		4,		//	SETMEM
+		4,		//	MOVB
 	};
 
 	const char* const CommandStr[COMMAND_COUNT] =
@@ -81,6 +87,43 @@ namespace Builder
 		"WRFBB",
 		"RDFBB",
 		"RDFBTS",
+		"SETMEM",
+		"MOVB",
+	};
+
+
+	enum class FbType
+	{
+		UNKNOWN = 0,
+		AND,
+		OR,
+		XOR,
+		NOT,
+		TCT,
+		SR_RS,
+		CTUD,
+		MAJ,
+		SRSST,
+		BCOD,
+		BDEC,
+		BCOMP,
+		LAG,
+		MID,
+		ADD,
+		SCAL,
+		LINFUN,
+		SQRT,
+		SIN,
+		COS,
+		DIV,
+		MULT,
+		ABS,
+		LN,
+		LIM,
+		MIN_MAX,
+		PID,
+
+		Count
 	};
 
 	const char* const FbTypeStr[] =
@@ -138,29 +181,37 @@ namespace Builder
 		{
 			struct
 			{
-				quint16 CRC5 : 5;
-				quint16 code : 5;
 				quint16 fbType : 6;
+				quint16 code : 5;
+				quint16 CRC5 : 5;
 			} opCode;
 
 			quint16 word1 = 0;
 		};
 
-		quint16 word2 = 0;
+		union
+		{
+			struct
+			{
+				quint16 fbParamNo : 6;
+				quint16 fbInstance : 10;
+			} param;
+
+			quint16 word2 = 0;
+		};
+
+		quint16 word3 = 0;
 
 		union
 		{
 			struct
 			{
-				quint16 fbInstance : 10;
-				quint16 fbParamNo : 6;
+				quint8 b1;
+				quint8 b2;
+			} bitNo;
 
-			} param;
-
-			quint16 word3 = 0;
+			quint16 word4 = 0;
 		};
-
-		quint16 word4 = 0;
 
 #pragma pack(pop)
 
@@ -170,9 +221,10 @@ namespace Builder
 			setNoCommand();
 		}
 
-		void setNoCommand() { opCode.code = CommandCodes::NoCommand; }
+		void setNoCommand() { opCode.code = static_cast<int>(CommandCodes::NoCommand); }
 
 		void setOpCode(CommandCodes code);
+		int getOpCodeInt() { return opCode.code; }
 		CommandCodes getOpCode() { return static_cast<CommandCodes>(opCode.code); }
 
 		void setFbType(quint16 fbType);
@@ -198,9 +250,15 @@ namespace Builder
 
 		void setBitNo(quint16 bitNo);
 
+		void setBitNo1(quint16 bitNo);
+		quint16 getBitNo1() const { return bitNo.b1; }
+
+		void setBitNo2(quint16 bitNo);
+		quint16 getBitNo2() const { return bitNo.b2; }
+
 		quint16 getWord(int index);
 
-		int getSizeW();
+		int sizeW();
 	};
 
 
@@ -209,17 +267,20 @@ namespace Builder
 	private:
 		QString m_comment;
 
+	protected:
+		QByteArray m_binCode;
+
 	public:
 		virtual ~CodeItem();
 
 		virtual QString toString() = 0;
-		virtual int getSizeW()= 0;
+		virtual int sizeW()= 0;
 
 		virtual bool isCommand() = 0;
 		virtual bool isComment() = 0;
 
 		virtual void generateBinCode(ByteOrder byteOrder) = 0;
-		virtual QByteArray getBinCode() = 0;
+		virtual const QByteArray& getBinCode() { return m_binCode; }
 
 		void setComment(const QString& comment) { m_comment = comment; }
 		QString getComment() { return m_comment; }
@@ -235,10 +296,9 @@ namespace Builder
 		Comment(const QString& comment) { setComment(comment); }
 
 		QString toString() override;
-		int getSizeW() override { return 0; }
+		int sizeW() override { return 0; }
 
 		void generateBinCode(ByteOrder) override {}
-		QByteArray getBinCode() override { return QByteArray(); }
 
 		bool isCommand() override { return false; }
 		bool isComment() override { return true; }
@@ -252,17 +312,13 @@ namespace Builder
 
 		CommandCode m_code;
 
-		QByteArray m_binCode;
-
 		QString getCodeWordStr(int wordNo);
-
-		QString getMnemoCode();
 
 	public:
 		Command() {}
 
 		void nop();
-		void start();
+		void start(quint16 fbType, quint16 fbInstance);
 		void stop();
 		void mov(quint16 addrTo, quint16 addrFrom);
 		void movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW);
@@ -274,17 +330,22 @@ namespace Builder
 		void writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo);
 		void readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
 		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue);
+		void setMem(quint16 addr, quint16 sizeW, quint16 constValue);
+		void moveBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask);
 
 		void setAddress(int address) { m_address = address; }
 
 		QString toString() override;
-		int getSizeW() override { return m_code.getSizeW(); }
+		int sizeW() override { return m_code.sizeW(); }
 
 		bool isCommand() override { return true; }
 		bool isComment() override { return false; }
 
 		void generateBinCode(ByteOrder byteOrder) override;
-		QByteArray getBinCode() override { return m_binCode; }
+
+		QString getMnemoCode();
+
+		int address() const { return m_address; }
 	};
 
 
@@ -313,6 +374,7 @@ namespace Builder
 
 		void getAsmCode(QStringList& asmCode);
 		void getBinCode(QByteArray& byteArray);
+		void getMifCode(QStringList& mifCode);
 
 		void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 	};

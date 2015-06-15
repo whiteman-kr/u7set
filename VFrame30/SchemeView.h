@@ -29,7 +29,7 @@ namespace VFrame30
 		std::shared_ptr<Scheme>& scheme();
 		std::shared_ptr<Scheme> scheme() const;
 
-		void setVideoFrame(std::shared_ptr<Scheme>& scheme, bool repaint);
+		void setScheme(std::shared_ptr<Scheme>& scheme, bool repaint);
 		
 		// Events
 		//
@@ -45,8 +45,8 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		std::shared_ptr<VFrame30::Scheme> m_videoFrame;
-		double m_zoom;
+		std::shared_ptr<VFrame30::Scheme> m_scheme;
+		double m_zoom = 100.0;
 	};
 }
 

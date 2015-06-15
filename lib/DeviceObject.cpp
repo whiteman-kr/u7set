@@ -1,6 +1,5 @@
 #include "../include/DeviceObject.h"
 #include "../include/ProtoSerialization.h"
-#include "../include/SignalMask.h"
 #include <QDynamicPropertyChangeEvent>
 #include <QJSEngine>
 #include <QQmlEngine>
@@ -25,6 +24,13 @@ namespace Hardware
 
 	void Init()
 	{
+		static bool firstRun = false;
+		if (firstRun)
+		{
+			assert(false);
+		}
+		firstRun = true;
+
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
@@ -34,6 +40,13 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSignal>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
+
+		QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
+		QMetaType::registerConverter<int, Hardware::DeviceModule::FamilyType>(IntToEnum<Hardware::DeviceModule::FamilyType>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalType>(IntToEnum<Hardware::DeviceSignal::SignalType>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalFunction>(IntToEnum<Hardware::DeviceSignal::SignalFunction>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::ByteOrder>(IntToEnum<Hardware::DeviceSignal::ByteOrder>);
+		QMetaType::registerConverter<int, Hardware::DeviceSignal::DataFormat>(IntToEnum<Hardware::DeviceSignal::DataFormat>);
 	}
 
 	void Shutdwon()
@@ -714,6 +727,18 @@ namespace Hardware
         return c;
     }
 
+	int DeviceObject::jsPropertyInt(QString name) const
+	{
+		QVariant v = property(name.toStdString().c_str());
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return 0;
+		}
+
+		return v.toInt();
+	}
+
     DeviceType DeviceObject::deviceType() const
 	{
 		assert(false);
@@ -901,12 +926,141 @@ namespace Hardware
 		return boolResult;
 	}
 
-	void DeviceObject::sortChildrenByPlace()
+	void DeviceObject::sortByPlace(Qt::SortOrder order)
 	{
 		std::sort(std::begin(m_children), std::end(m_children),
-			[](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
 			{
-				return o1->m_place < o2->m_place;
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_place < ref2->m_place)
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_place == ref2->m_place)
+					{
+						return ref1->m_strId < ref2->m_strId;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			});
+
+		return;
+	}
+
+	void DeviceObject::sortByStrId(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_strId < ref2->m_strId)
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_strId == ref2->m_strId)
+					{
+						return ref1->m_place < ref2->m_place;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			});
+
+		return;
+	}
+
+	void DeviceObject::sortByCaption(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_caption < ref2->m_caption)
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_caption == ref2->m_caption)
+					{
+						return ref1->m_place < ref2->m_place;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			});
+
+		return;
+	}
+
+	void DeviceObject::sortByState(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_fileInfo.state() < ref2->m_fileInfo.state())
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_fileInfo.state() == ref2->m_fileInfo.state())
+					{
+						return ref1->m_strId < ref2->m_strId;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			});
+
+		return;
+	}
+
+	void DeviceObject::sortByUser(Qt::SortOrder order)
+	{
+		std::sort(std::begin(m_children), std::end(m_children),
+			[order](const std::shared_ptr<DeviceObject>& o1, const std::shared_ptr<DeviceObject>& o2)
+			{
+				const std::shared_ptr<DeviceObject>& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+				const std::shared_ptr<DeviceObject>& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+
+				if (ref1->m_fileInfo.userId() < ref2->m_fileInfo.userId())
+				{
+					return true;
+				}
+				else
+				{
+					if (ref1->m_fileInfo.userId() == ref2->m_fileInfo.userId())
+					{
+						return ref1->m_strId < ref2->m_strId;
+					}
+					else
+					{
+						return false;
+					}
+				}
 			});
 
 		return;
@@ -923,7 +1077,7 @@ namespace Hardware
 	{
 		for (auto c : m_children)
 		{
-			if (processDiagSignalMask(mask, c->strId()) == true)
+			if (CUtils::processDiagSignalMask(mask, c->strId()) == true)
 			{
 				list.push_back(c.get());
 			}
@@ -1428,13 +1582,24 @@ namespace Hardware
 
 	bool DeviceModule::isIOModule() const
 	{
+		return isInputModule() || isOutputModule();
+	}
+
+	bool DeviceModule::isInputModule() const
+	{
 		FamilyType family = moduleFamily();
 
 		return	family == FamilyType::AIM ||
-				family == FamilyType::AOM ||
 				family == FamilyType::DIM ||
-				family == FamilyType::DOM ||
 				family == FamilyType::AIFM;
+	}
+
+	bool DeviceModule::isOutputModule() const
+	{
+		FamilyType family = moduleFamily();
+
+		return	family == FamilyType::AOM ||
+				family == FamilyType::DOM;
 	}
 
 	//
@@ -1535,10 +1700,11 @@ namespace Hardware
 
 		// --
 		//
-		Proto::DeviceSignal* signalMessage =
-				message->mutable_deviceobject()->mutable_signal();
+		Proto::DeviceSignal* signalMessage = message->mutable_deviceobject()->mutable_signal();
 
 		signalMessage->set_type(static_cast<int>(m_type));
+		signalMessage->set_function(static_cast<int>(m_function));
+
 		signalMessage->set_byteorder(static_cast<int>(m_byteOrder));
 		signalMessage->set_format(static_cast<int>(m_format));
 
@@ -1577,7 +1743,49 @@ namespace Hardware
 
 		const Proto::DeviceSignal& signalMessage = message.deviceobject().signal();
 
-		m_type = static_cast<SignalType>(signalMessage.type());
+		if (signalMessage.has_obsoletetype() == true)
+		{
+			assert(signalMessage.has_type() == false);
+			assert(signalMessage.has_function() == false);
+
+			Obsolete::SignalType obsoleteType = static_cast<Obsolete::SignalType>(signalMessage.obsoletetype());
+
+			switch (obsoleteType)
+			{
+				case Obsolete::SignalType::DiagDiscrete:
+					m_type = SignalType::Discrete;
+					m_function = SignalFunction::Diagnostics;
+					break;
+				case Obsolete::SignalType::DiagAnalog:
+					m_type = SignalType::Analog;
+					m_function = SignalFunction::Diagnostics;
+					break;
+				case Obsolete::SignalType::InputDiscrete:
+					m_type = SignalType::Discrete;
+					m_function = SignalFunction::Input;
+					break;
+				case Obsolete::SignalType::InputAnalog:
+					m_type = SignalType::Analog;
+					m_function = SignalFunction::Input;
+					break;
+				case Obsolete::SignalType::OutputDiscrete:
+					m_type = SignalType::Discrete;
+					m_function = SignalFunction::Output;
+					break;
+				case Obsolete::SignalType::OutputAnalog:
+					m_type = SignalType::Analog;
+					m_function = SignalFunction::Output;
+					break;
+				default:
+					assert(false);
+			}
+		}
+		else
+		{
+			m_type = static_cast<SignalType>(signalMessage.type());
+			m_function = static_cast<SignalFunction>(signalMessage.function());
+		}
+
 		m_byteOrder = static_cast<ByteOrder>(signalMessage.byteorder());
 		m_format = static_cast<DataFormat>(signalMessage.format());
 
@@ -1607,10 +1815,24 @@ namespace Hardware
         return static_cast<int>(type());
     }
 
-
     void DeviceSignal::setType(DeviceSignal::SignalType value)
 	{
 		m_type = value;
+	}
+
+	DeviceSignal::SignalFunction DeviceSignal::function() const
+	{
+		return m_function;
+	}
+
+	int DeviceSignal::jsFunction() const
+	{
+		return static_cast<int>(function());
+	}
+
+	void DeviceSignal::setFunction(DeviceSignal::SignalFunction value)
+	{
+		m_function = value;
 	}
 
 	DeviceSignal::ByteOrder DeviceSignal::byteOrder() const
@@ -1682,6 +1904,32 @@ namespace Hardware
 	{
 		m_valueBit = value;
 	}
+
+	bool DeviceSignal::isInputSignal() const
+	{
+		return m_function == SignalFunction::Input;
+	}
+
+	bool DeviceSignal::isOutputSignal() const
+	{
+		return m_function == SignalFunction::Output;
+	}
+
+	bool DeviceSignal::isDiagSignal() const
+	{
+		return m_function == SignalFunction::Diagnostics;
+	}
+
+	bool DeviceSignal::isAnalogSignal() const
+	{
+		return	m_type == SignalType::Analog;
+	}
+
+	bool DeviceSignal::isDiscreteSignal() const
+	{
+		return	m_type == SignalType::Discrete;
+	}
+
 
 	//
 	//
@@ -1919,6 +2167,43 @@ namespace Hardware
 		}
 
 		return;
+	}
+
+	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren, std::function<void (DeviceObject*)> processAfterChildren)
+	{
+		if (currentDevice == nullptr)
+		{
+			assert(currentDevice != nullptr);
+
+			QString msg = QString(QObject::tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
+
+			qDebug() << msg;
+			return;
+		}
+
+		if (processBeforeChildren != nullptr)
+		{
+			processBeforeChildren(currentDevice);
+		}
+
+		int childrenCount = currentDevice->childrenCount();
+
+		for(int i = 0; i < childrenCount; i++)
+		{
+			Hardware::DeviceObject* device = currentDevice->child(i);
+
+			equipmentWalker(device, processBeforeChildren, processAfterChildren);
+		}
+
+		if (processAfterChildren != nullptr)
+		{
+			processAfterChildren(currentDevice);
+		}
+	}
+
+	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren)
+	{
+		equipmentWalker(currentDevice, processBeforeChildren, nullptr);
 	}
 
 }

@@ -3,7 +3,6 @@
 
 #include "../include/Signal.h"
 #include "../Builder/BuildResultWriter.h"
-#include "AfblSet.h"
 
 // Forware declarations
 //
@@ -32,6 +31,11 @@ namespace VFrame30
 	class SchemeLayer;
 }
 
+namespace Afbl
+{
+	class AfbElementCollection;
+}
+
 namespace Builder
 {
 	// ------------------------------------------------------------------------
@@ -51,10 +55,6 @@ namespace Builder
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
-		// Walk through equipment tree
-		//
-		void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren);
-
 		// Expand Devices StrId
 		//
 		bool expandDeviceStrId(Hardware::DeviceObject* device);
@@ -63,17 +63,21 @@ namespace Builder
 		//
 		bool loadSignals(DbController *db, SignalSet* signalSet);
 
+		// Load Application Functional Block Library
+		//
+		bool loadAfbl(DbController *db, Afbl::AfbElementCollection* afbCollection);
+
 		// Generate Modules Configurations Firmwares
 		//
 		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, int changesetId, BuildResultWriter* buildWriter);
 
 		// Build Application Logic
 		//
-		bool buildApplicationLogic(DbController* db, ApplicationLogicData* appLogicData, int changesetId);
+		bool buildApplicationLogic(DbController* db, ApplicationLogicData* appLogicData, Afbl::AfbElementCollection* afbCollection, int changesetId);
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, AfblSet* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
+		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afbCollection, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
 
 		// Compile Data Aquisition Service configuration
 		//

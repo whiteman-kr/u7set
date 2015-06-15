@@ -77,11 +77,9 @@ QMAKE_EXTRA_TARGETS += versionTarget
 SOURCES +=\
     CentralWidget.cpp \
     ChangesetDialog.cpp \
-    ConfigurationsTabPage.cpp \
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
     DialogSettings.cpp \
-    DialogValueEdit.cpp \
     FilesTabPage.cpp \
     LoginDialog.cpp \
     Main.cpp \
@@ -90,7 +88,6 @@ SOURCES +=\
     PasswordService.cpp \
     Settings.cpp \
     UserManagementDialog.cpp \
-    ../lib/ConfigData.cpp \
     ../lib/DbStruct.cpp \
 	../lib/DeviceObject.cpp \
 	../lib/DbController.cpp \
@@ -101,7 +98,6 @@ SOURCES +=\
 	../lib/Signal.cpp \
 	../lib/PropertyEditor.cpp \
     EquipmentTabPage.cpp \
-    VideoFramePropertiesDialog.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
     DialogAfblEditor.cpp \
@@ -135,18 +131,15 @@ SOURCES +=\
     Builder/ApplicationLogicCode.cpp \
 	Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
-    ../lib/SignalMask.cpp \
-    AfblSet.cpp \
-    Subsystem.cpp
+    Subsystem.cpp \
+    CreateSchemeDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
     ChangesetDialog.h \
-    ConfigurationsTabPage.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogSettings.h \
-    DialogValueEdit.h \
     FilesTabPage.h \
     LoginDialog.h \
     MainTabPage.h \
@@ -155,7 +148,6 @@ HEADERS  += \
     Settings.h \
     Stable.h \
     UserManagementDialog.h \
-    ../include/ConfigData.h \
     ../include/DbStruct.h \
 	../include/DeviceObject.h \
 	../include/DbController.h \
@@ -169,7 +161,6 @@ HEADERS  += \
 	../include/OrderedHash.h \
 	../include/PropertyEditor.h \
     EquipmentTabPage.h \
-    VideoFramePropertiesDialog.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
     DialogAfblEditor.h \
@@ -205,19 +196,16 @@ HEADERS  += \
 	Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h \
     ../include/Types.h \
-    ../include/SignalMask.h \
-    AfblSet.h \
-    Subsystem.h
+    Subsystem.h \
+    CreateSchemeDialog.h
 
 FORMS    += \
     ChangesetDialog.ui \
     CreateProjectDialog.ui \
     CreateUserDialogDialog.ui \
     DialogSettings.ui \
-    DialogValueEdit.ui \
     LoginDialog.ui \
     UserManagementDialog.ui \
-    VideoFramePropertiesDialog.ui \
     CheckInDialog.ui \
     DialogAfblEditor.ui \
     DialogAfbProperties.ui \
@@ -225,7 +213,8 @@ FORMS    += \
     SchemePropertiesDialog.ui \
     DialogFileEditor.ui \
     SchemeLayersDialog.ui \
-    DialogSubsystemListEditor.ui
+    DialogSubsystemListEditor.ui \
+    CreateSchemeDialog.ui
 
 RESOURCES += \
 	Resources.qrc
@@ -280,7 +269,19 @@ OTHER_FILES += \
     DatabaseUpgrade/Upgrade0039.sql
 
 DISTFILES += \
-	LogicModuleConfiguration.js
+	LogicModuleConfiguration.js \
+    Afbl/_convert_all.bat \
+    Afbl/bcomp_great_v1.afb \
+    Afbl/bcomp_less_v1.afb \
+    Afbl/bcomp_ne_v1.afb \
+    Afbl/delay_on_v1.afb \
+    Afbl/not_v1.afb \
+    Afbl/maj_v1.afb \
+    Afbl/or_v1.afb \
+    Afbl/xor_v1.afb \
+    Afbl/and_v1.afb \
+    Afbl/bcomp_eq_v1.afb \
+    Afbl/_afbl_all.sql
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
@@ -361,20 +362,4 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 	#CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
 	#CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
 #}
-
-# Visual Leak Detector
-#
-win32 {
-	contains(QMAKE_TARGET.arch, x86_64) {
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	} else {
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
-	}
-
-	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
-	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
-}
-
 

@@ -73,7 +73,7 @@ namespace VFrame30
 		//
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), signalStrIds(), r);
+		DrawHelper::DrawText(p, m_font, itemUnit(), signalStrIds(), r, Qt::AlignLeft | Qt::AlignTop);
 
 		return;
 	}
@@ -185,6 +185,7 @@ namespace VFrame30
 		VideoItemSignal(unit)
 	{
 		addOutput();
+		setSignalStrIds("#IN_STRID");
 	}
 
 	VideoItemInputSignal::~VideoItemInputSignal(void)
@@ -258,6 +259,7 @@ namespace VFrame30
 		VideoItemSignal(unit)
 	{
 		addInput();
+		setSignalStrIds("#OUT_STRID");
 	}
 
 	VideoItemOutputSignal::~VideoItemOutputSignal(void)

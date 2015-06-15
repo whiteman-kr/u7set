@@ -18,7 +18,7 @@ namespace VFrame30
 
 	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement) :
 		FblItemRect(unit),
-		m_afbGuid(fblElement.guid()),
+		m_afbStrID(fblElement.strID()),
 		m_params(fblElement.params())
 	{
 		// Создать входные и выходные сигналы в VFrame30::FblEtem
@@ -43,6 +43,13 @@ namespace VFrame30
 		}
 
 		addQtDynamicParamProperties();
+
+		QString afterCreationScript = fblElement.afterCreationScript();
+		if (afterCreationScript.isEmpty() == false)
+		{
+			executeScript(afterCreationScript, fblElement);
+		}
+
 	}
 
 	VideoItemFblElement::~VideoItemFblElement(void)
@@ -51,7 +58,7 @@ namespace VFrame30
 
 	void VideoItemFblElement::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const
 	{
-		std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(afbGuid());
+		std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(afbStrID());
 		if (afb.get() == nullptr)
 		{
 			// Such AfbItem was not found
@@ -60,11 +67,11 @@ namespace VFrame30
 			return;
 		}
 
-		// Нарисовать прямоугольник и пины
+		// Draw rect and pins
 		//
 		FblItemRect::Draw(drawParam, scheme, pLayer);
 
-		//--
+		// Draw other
 		//
 		QPainter* p = drawParam->painter();
 
@@ -130,7 +137,7 @@ namespace VFrame30
 		}
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r);
+		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
 
 		return;
 	}
@@ -151,7 +158,7 @@ namespace VFrame30
 		//
 		Proto::VideoItemFblElement* vifble = message->mutable_videoitem()->mutable_videoitemfblelement();
 
-		Proto::Write(vifble->mutable_afbguid(), m_afbGuid);
+		Proto::Write(vifble->mutable_afbstrid(), m_afbStrID);
 
 		for (const Afbl::AfbElementParam& p : m_params)
 		{
@@ -188,7 +195,7 @@ namespace VFrame30
 		
 		const Proto::VideoItemFblElement& vifble = message.videoitem().videoitemfblelement();
 		
-		m_afbGuid = Proto::Read(vifble.afbguid());
+		Proto::Read(vifble.afbstrid(), &m_afbStrID);
 
 		m_params.clear();
 		m_params.reserve(vifble.params_size());
@@ -208,8 +215,15 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemFblElement::setAfbParam(const QString& name, QVariant value)
+	bool VideoItemFblElement::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Scheme> scheme)
 	{
+		if (name.isEmpty() == true || scheme == nullptr)
+		{
+			assert(name.isEmpty() != true);
+			assert(scheme != nullptr);
+			return false;
+		}
+
 		auto found = std::find_if(m_params.begin(), m_params.end(), [&name](const Afbl::AfbElementParam& p)
 			{
 				return p.caption() == name;
@@ -221,7 +235,61 @@ namespace VFrame30
 			return false;
 		}
 
-		found->setValue(Afbl::AfbParamValue::fromQVariant(value));
+		if (found->value() != value)
+		{
+			qDebug() << tr("Param %1 was changed from %2 to %3").
+						arg(name).
+						arg(found->value().toString()).
+						arg(value.toString());
+
+			found->setValue(value);
+
+			// Call script here
+			//
+			std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(afbStrID());
+			if (afb == nullptr)
+			{
+				assert(afb != nullptr);
+				return false;
+			}
+
+			QString changedScript = found->changedScript();
+			if (changedScript.isEmpty() == false)
+			{
+				executeScript(changedScript, *afb);
+			}
+		}
+
+		return true;
+	}
+
+	bool VideoItemFblElement::setAfbElementParams(Afbl::AfbElement* afbElement) const
+	{
+		if (afbElement == nullptr)
+		{
+			assert(afbElement);
+			return false;
+		}
+
+		for (Afbl::AfbElementParam& param : afbElement->params())
+		{
+			if (param.user() == false)
+			{
+				continue;
+			}
+
+			QVariant propValue = property(param.caption().toStdString().c_str());
+
+			if (propValue.isValid() == false)
+			{
+				// Was not found
+				//
+				assert(propValue.isValid() == true);
+				return false;
+			}
+
+			param.setValue(propValue);
+		}
 
 		return true;
 	}
@@ -241,14 +309,112 @@ namespace VFrame30
 		//
 		for (Afbl::AfbElementParam& p : m_params)
 		{
-			QVariant value = p.value().toQVariant();
+			if (p.user() == false)
+			{
+				continue;
+			}
+
+			QVariant value = p.value();
 			setProperty(p.caption().toStdString().c_str(), value);
 		}
 	}
 
-	const QUuid& VideoItemFblElement::afbGuid() const
+	bool VideoItemFblElement::executeScript(const QString& script, const Afbl::AfbElement& afb)
 	{
-		return m_afbGuid;
+		if (script.isEmpty() == true)
+		{
+			return true;
+		}
+
+		QString exeScript = afb.libraryScript() + script;
+
+
+		exeScript.replace(QString("&lt;"), QString("<"));
+		exeScript.replace(QString("&gt;"), QString(">"));
+		exeScript.replace(QString("&amp;"), QString("&"));
+
+		QJSEngine jsEngine;
+
+		Afbl::AfbElement jsAfb = afb;
+
+		QJSValue jsElement = jsEngine.newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+		QJSValue jsAfbElement = jsEngine.newQObject(&jsAfb);
+		QQmlEngine::setObjectOwnership(&jsAfb, QQmlEngine::CppOwnership);
+
+		// Run script
+		//
+		QJSValue jsEval = jsEngine.evaluate(exeScript);
+		if (jsEval.isError() == true)
+		{
+			qDebug()<<tr("Script evaluation failed: %1").arg(jsEval.toString());
+			assert(false);
+			return false;
+		}
+
+		QJSValueList args;
+
+		args << jsElement;
+		args << jsAfbElement;
+
+		QJSValue jsResult = jsEval.call(args);
+
+		if (jsResult.isError() == true)
+		{
+			qDebug()<<tr("Script execution failed: %1").arg(jsResult.toString());
+			assert(false);
+			return false;
+		}
+
+		return true;
+
+	}
+
+	int VideoItemFblElement::getParamIntValue(const QString& name)
+	{
+		for (Afbl::AfbElementParam& p : m_params)
+		{
+			if (p.caption() == name)
+			{
+				if (p.type() == Afbl::AnalogIntegral && p.value().isValid() == true)
+				{
+					return p.value().toInt();
+				}
+				else
+				{
+					qDebug()<<"ERROR: VideoItemFblElement::getParamIntValue, parameter "<<name<<" is not integer or is not valid!";
+					assert(false);
+					return -1;
+				}
+			}
+		}
+		return -1;
+	}
+
+	void VideoItemFblElement::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
+	{
+		addInput(opIndex, caption);
+	}
+
+	void VideoItemFblElement::addOutputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
+	{
+		addOutput(opIndex, caption);
+	}
+
+	void VideoItemFblElement::removeInputSignals()
+	{
+		removeAllInputs();
+	}
+
+	void VideoItemFblElement::removeOutputSignals()
+	{
+		removeAllOutputs();
+	}
+
+	const QString& VideoItemFblElement::afbStrID() const
+	{
+		return m_afbStrID;
 	}
 
 	const std::vector<Afbl::AfbElementParam>& VideoItemFblElement::params() const

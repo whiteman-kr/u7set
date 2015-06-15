@@ -138,7 +138,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// --
 	//
-	theLog.writeMessage(tr("Programm is started"));
+	theLog.writeMessage(tr("Programm is started"), true);
 	return;
 }
 
@@ -277,7 +277,7 @@ void ModuleConfigurator::configureClicked()
 
 			// --
 			//
-			theLog.writeMessage("");
+			theLog.writeMessage("", false);
 			theLog.writeMessage(tr("Writing configuration..."), true);
 
 			// send write in commuinication thread...
@@ -310,7 +310,7 @@ void ModuleConfigurator::configureClicked()
 	}
 	catch(QString message)
 	{
-		theLog.writeError(message);
+		theLog.writeError(message, false, true);
 		return;
 	}
 
@@ -327,7 +327,7 @@ void ModuleConfigurator::readClicked()
 		{
 			//DiagTabPage* page = dynamic_cast<DiagTabPage*>(m_tabWidget->currentWidget());
 
-			theLog.writeMessage("");
+			theLog.writeMessage("", false);
 			theLog.writeMessage(tr("Reading configuration..."), true);
 
 			// Read
@@ -340,7 +340,7 @@ void ModuleConfigurator::readClicked()
 	}
 	catch(QString message)
 	{
-		theLog.writeError(message);
+		theLog.writeError(message, false, true);
 		return;
 	}
 
@@ -369,7 +369,7 @@ void ModuleConfigurator::eraseClicked()
 	{
 		// --
 		//
-		theLog.writeMessage("");
+		theLog.writeMessage("", false);
 		theLog.writeMessage(tr("Erasing flash memory..."), true);
 		
 		// Read
@@ -380,7 +380,7 @@ void ModuleConfigurator::eraseClicked()
 	}
 	catch(QString message)
 	{
-		theLog.writeError(message);
+		theLog.writeError(message, false, true);
 		return;
 	}
 	
