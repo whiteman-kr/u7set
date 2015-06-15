@@ -91,6 +91,30 @@ namespace Builder
 	}
 
 
+	QString	BuildResultWriter::projectName() const
+	{
+		if (m_dbController == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return m_dbController->currentProject().projectName();
+	}
+
+
+	QString BuildResultWriter::userName() const
+	{
+		if (m_dbController == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return m_dbController->currentUser().username();
+	}
+
+
 	bool BuildResultWriter::start(DbController* db, OutputLog* log, bool release, int changesetID)
 	{
 		m_dbController = db;

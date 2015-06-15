@@ -371,7 +371,7 @@ namespace Hardware
         return m_frames[frameIndex];
     }
 
-	bool ModuleFirmware::setChannelData(int channel, const QByteArray& data)
+	bool ModuleFirmware::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& data, QString* errorMsg)
 	{
 		auto it = m_channelData.find(channel);
 		if (it != m_channelData.end())

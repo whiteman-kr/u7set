@@ -104,6 +104,10 @@ namespace Builder
 		bool addFile(QString subDir, QString fileName, const QByteArray& data);
 		bool addFile(QString subDir, QString fileName, const QStringList &stringList);
 
+		QString projectName() const;
+		QString userName() const;
+		int changesetID() const { return m_changesetID; }
+
 	signals:
 
 	public slots:

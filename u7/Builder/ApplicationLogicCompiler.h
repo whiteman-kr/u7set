@@ -7,6 +7,7 @@
 #include "../include/DeviceObject.h"
 #include "../include/Signal.h"
 #include "../include/OrderedHash.h"
+#include "../include/ModuleConfiguration.h"
 #include "../Builder/ApplicationLogicBuilder.h"
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
@@ -55,6 +56,8 @@ namespace Builder
 
 		QVector<Hardware::DeviceModule*> m_lm;
 
+		QHash<QString, Hardware::ModuleFirmware*> m_subsystemModuleFirmware;
+
 		QString msg;
 
 	private:
@@ -62,7 +65,8 @@ namespace Builder
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool compileModulesLogics();
-
+		bool writeModuleLogicCompilerResult(QString subsysId, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
+		bool saveModulesLogicsFiles();
 
 	public:
 		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog* log);
@@ -320,6 +324,7 @@ namespace Builder
 		// input parameters
 		//
 
+		ApplicationLogicCompiler& m_appLogicCompiler;
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
 		Afbl::AfbElementCollection* m_afbl = nullptr;
@@ -347,11 +352,14 @@ namespace Builder
 		int m_appLogicWordDataOffset = 0;
 		int m_appLogicWordDataSize = 0;
 
-		int m_LMDiagDataOffset = 0;
-		int m_LMDiagDataSize = 0;
+		int m_lmDiagDataOffset = 0;
+		int m_lmDiagDataSize = 0;
 
-		int m_LMIntOutDataOffset = 0;
-		int m_LMIntOutDataSize = 0;
+		int m_lmIntOutDataOffset = 0;
+		int m_lmIntOutDataSize = 0;
+
+		int m_lmAppLogicFrameSize = 0;
+		int m_lmAppLogicFrameCount = 0;
 
 		// LM's calculated memory offsets and sizes
 		//

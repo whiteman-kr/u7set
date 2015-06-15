@@ -45,7 +45,7 @@ namespace Hardware
 
         std::vector<quint8> frame(int frameIndex);
 
-		bool setChannelData(int channel, const QByteArray& data);
+		bool setChannelData(int channel, int frameSize, int frameCount, const QByteArray& data, QString* errorMsg);
 
 		// Properties
 		//

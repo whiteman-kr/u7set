@@ -24,6 +24,7 @@ namespace Builder
 				*VALUE_BIT = "ValueBit";
 
 	const char* SECTION_MEMORY_SETTINGS = "MemorySettings";
+	const char* SECTION_FLASH_MEMORY = "FlashMemory";
 
 
 	const int ERR_VALUE = -1;
@@ -177,6 +178,79 @@ namespace Builder
 			result &= moduleLogicCompiler.run();
 		}
 
+		saveModulesLogicsFiles();
+
+		return result;
+	}
+
+
+	bool ApplicationLogicCompiler::writeModuleLogicCompilerResult(QString subsysId, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	{
+		if (m_resultWriter == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		bool result = true;
+
+		Hardware::ModuleFirmware* moduleFirmware = nullptr;
+
+		if (m_subsystemModuleFirmware.contains(subsysId))
+		{
+			moduleFirmware = m_subsystemModuleFirmware[subsysId];
+		}
+		else
+		{
+			moduleFirmware = new Hardware::ModuleFirmware();
+
+			m_subsystemModuleFirmware.insert(subsysId, moduleFirmware);
+
+			moduleFirmware->init(lmCaption, subsysId, 0x0101, frameSize, frameCount,
+								 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
+		}
+
+		QString errorMsg;
+
+		if (!moduleFirmware->setChannelData(channel, frameSize, frameCount, appLogicBinCode, &errorMsg))
+		{
+			m_log->writeError(errorMsg, false, true);
+
+			result = false;
+		}
+
+		return result;
+	}
+
+
+	bool ApplicationLogicCompiler::saveModulesLogicsFiles()
+	{
+		bool result = true;
+
+		for(Hardware::ModuleFirmware* moduleFirmware : m_subsystemModuleFirmware)
+		{
+			if (moduleFirmware == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			QByteArray moduleFirmwareFileData;
+
+			moduleFirmware->save(moduleFirmwareFileData);
+
+			result &= m_resultWriter->addFile(moduleFirmware->subsysId(), moduleFirmware->type() + ".alb", moduleFirmwareFileData);
+		}
+
+		for(Hardware::ModuleFirmware* moduleFirmware : m_subsystemModuleFirmware)
+		{
+			if (moduleFirmware != nullptr)
+			{
+				delete moduleFirmware;
+			}
+		}
+
+		m_subsystemModuleFirmware.clear();
+
 		return result;
 	}
 
@@ -187,6 +261,7 @@ namespace Builder
 	//
 
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
+		m_appLogicCompiler(appLogicCompiler),
 		m_appSignals(*this)
 	{
 		m_equipment = appLogicCompiler.m_equipment;
@@ -314,17 +389,20 @@ namespace Builder
 			{	"AppLogicWordDataOffset", &m_appLogicWordDataOffset },
 			{	"AppLogicWordDataSize", &m_appLogicWordDataSize },
 
-			{	"LMDiagDataOffset", &m_LMDiagDataOffset },
-			{	"LMDiagDataSize", &m_LMDiagDataSize },
+			{	"LMDiagDataOffset", &m_lmDiagDataOffset },
+			{	"LMDiagDataSize", &m_lmDiagDataSize },
 
-			{	"LMIntOutDataOffset", &m_LMIntOutDataOffset },
-			{	"LMIntOutDataSize", &m_LMIntOutDataSize }
+			{	"LMIntOutDataOffset", &m_lmIntOutDataOffset },
+			{	"LMIntOutDataSize", &m_lmIntOutDataSize }
 		};
 
 		for(PropertyNameVar memSetting : memSettings)
 		{
 			result &= getLMIntProperty(SECTION_MEMORY_SETTINGS, memSetting.name, memSetting.var);
 		}
+
+		result &= getLMIntProperty(SECTION_FLASH_MEMORY, "AppLogicFrameSize", &m_lmAppLogicFrameSize);
+		result &= getLMIntProperty(SECTION_FLASH_MEMORY, "AppLogicFrameCount", &m_lmAppLogicFrameCount);
 
 		if (result)
 		{
@@ -345,7 +423,7 @@ namespace Builder
 
 		m_modules.clear();
 
-		int moduleAppDataOffset = m_appLogicWordDataOffset + m_LMDiagDataSize;
+		int moduleAppDataOffset = m_appLogicWordDataOffset + m_lmDiagDataSize;
 
 		// build Module structures array
 		//
@@ -572,7 +650,7 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(m_appLogicWordDataOffset, m_LMDiagDataOffset, m_LMDiagDataSize);
+		cmd.movMem(m_appLogicWordDataOffset, m_lmDiagDataOffset, m_lmDiagDataSize);
 
 		m_code.append(cmd);
 
@@ -1178,11 +1256,14 @@ namespace Builder
 
 		m_code.generateBinCode();
 
-		/*QByteArray binCode;
+		QByteArray binCode;
 
 		m_code.getBinCode(binCode);
 
-		result &= m_resultWriter->addFile(m_lm->subSysID(), QString("%1.alc").arg(m_lm->caption()), binCode);*/
+		result &= m_resultWriter->addFile(m_lm->subSysID(), QString("%1.alc").arg(m_lm->caption()), binCode);
+
+		m_appLogicCompiler.writeModuleLogicCompilerResult(m_lm->subSysID(), m_lm->caption(), m_lm->channel(),
+														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, binCode);
 
 		QStringList mifCode;
 
