@@ -34,15 +34,15 @@ namespace VFrame30
 		 
 		for (auto vf = m_videoFramesIDs.begin(); vf != m_videoFramesIDs.end(); ++vf)
 		{
-			Proto::Uuid* pGuid = pMutableConfiguration->add_videoframesids();
+			Proto::Uuid* pGuid = pMutableConfiguration->add_schemesids();
 			Proto::Write(pGuid, *vf);
 		}
 
 		bool saveFrameResult = true;
 
-		for (auto vf = m_videoFrames.begin(); vf != m_videoFrames.end(); ++vf)
+		for (auto vf = m_schemes.begin(); vf != m_schemes.end(); ++vf)
 		{
-			Proto::Envelope* pVideoFrame = pMutableConfiguration->add_videoframes();
+			Proto::Envelope* pVideoFrame = pMutableConfiguration->add_schemes();
 			saveFrameResult &= vf->get()->Save(pVideoFrame);
 		}
 				
@@ -66,26 +66,26 @@ namespace VFrame30
 		Proto::Read(configuration.globals(), &m_globals);
 
 		m_videoFramesIDs.clear();
-		for (int i = 0; i < configuration.videoframesids().size(); i++)
+		for (int i = 0; i < configuration.schemesids().size(); i++)
 		{
-			const QUuid& videoFrameGuid = Proto::Read(configuration.videoframesids(i));
-			m_videoFramesIDs.push_back(videoFrameGuid);
+			const QUuid& schemeGuid = Proto::Read(configuration.schemesids(i));
+			m_videoFramesIDs.push_back(schemeGuid);
 
-			assert(videoFrameGuid.isNull() == false);
+			assert(schemeGuid.isNull() == false);
 		}
 
-		m_videoFrames.clear();
-		for (int i = 0; i < configuration.videoframes().size(); i++)
+		m_schemes.clear();
+		for (int i = 0; i < configuration.schemes().size(); i++)
 		{
-			Scheme* pVideoFrame = Scheme::Create(configuration.videoframes(i));
+			Scheme* scheme = Scheme::Create(configuration.schemes(i));
 
-			if (pVideoFrame == nullptr)
+			if (scheme == nullptr)
 			{
-				assert(pVideoFrame != nullptr);
+				assert(scheme != nullptr);
 				continue;
 			}
 
-			m_videoFrames.push_back(std::shared_ptr<Scheme>(pVideoFrame));
+			m_schemes.push_back(std::shared_ptr<Scheme>(scheme));
 		}
 
 		return true;
@@ -181,12 +181,12 @@ namespace VFrame30
 
 	const std::vector<std::shared_ptr<Scheme>>& Configuration::videoFrames() const
 	{
-		return m_videoFrames;
+		return m_schemes;
 	}
 
 	std::vector<std::shared_ptr<Scheme>>* Configuration::mutableVideoFrames()
 	{
-		return &m_videoFrames;
+		return &m_schemes;
 	}
 
 }

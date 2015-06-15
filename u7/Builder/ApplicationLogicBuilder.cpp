@@ -1004,9 +1004,17 @@ namespace Builder
 				return false;
 			}
 
-			// Add LogicScheme to result
-			//
-			out->push_back(ls);
+			if (ls->excludeFromBuild() == true)
+			{
+				m_log->writeWarning(tr("Scheme %1 excluded from build.").arg(ls->strID()), false, false);
+				continue;
+			}
+			else
+			{
+				// Add LogicScheme to result
+				//
+				out->push_back(ls);
+			}
 		}
 
 		return true;

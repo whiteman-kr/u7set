@@ -28,16 +28,16 @@ namespace VFrame30
 	{
 		bool result = Scheme::SaveData(message);
 
-		if (result == false || message->has_videoframe() == false)
+		if (result == false || message->has_scheme() == false)
 		{
 			assert(result);
-			assert(message->has_videoframe());
+			assert(message->has_scheme());
 			return false;
 		}
 
 		// --
 		//
-		Proto::LogicScheme* ls = message->mutable_videoframe()->mutable_logics_scheme();
+		Proto::LogicScheme* ls = message->mutable_scheme()->mutable_logics_scheme();
 
 		for (const QString& strId : m_hardwareStrIds)
 		{
@@ -50,9 +50,9 @@ namespace VFrame30
 
 	bool LogicScheme::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoframe() == false)
+		if (message.has_scheme() == false)
 		{
-			assert(message.has_videoframe());
+			assert(message.has_scheme());
 			return false;
 		}
 
@@ -66,13 +66,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoframe().has_logics_scheme() == false)
+		if (message.scheme().has_logics_scheme() == false)
 		{
-			assert(message.videoframe().has_logics_scheme());
+			assert(message.scheme().has_logics_scheme());
 			return false;
 		}
 
-		const Proto::LogicScheme& ls = message.videoframe().logics_scheme();
+		const Proto::LogicScheme& ls = message.scheme().logics_scheme();
 
 		m_hardwareStrIds.clear();
 		m_hardwareStrIds.reserve(ls.hardware_strids_size());

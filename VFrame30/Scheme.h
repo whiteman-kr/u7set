@@ -18,6 +18,8 @@ namespace VFrame30
 		public DebugInstCounter<Scheme>
 	{
 		Q_OBJECT
+
+		Q_PROPERTY(bool ExcludeFromBuild READ excludeFromBuild WRITE setExcludeFromBuild)
 	
 	protected:
 		Scheme(void);
@@ -89,6 +91,9 @@ namespace VFrame30
 		int pinGridStep() const;
 		void setPinGridStep(int value);
 
+		bool excludeFromBuild() const;
+		void setExcludeFromBuild(bool value);
+
 		const Afbl::AfbElementCollection& afbCollection() const;
 		void setAfbCollection(const std::vector<std::shared_ptr<Afbl::AfbElement>>& elements);
 		
@@ -107,6 +112,8 @@ namespace VFrame30
 
 		double m_gridSize = 1.0;	// Grid size for this scheme, depends on SchemeUnit
 		int m_pinGridStep = 2;		// Grid multiplier to determine vertical distance between pins
+
+		bool m_excludeFromBuild = false;	// Exclude Scheme from build or any other processing
 
 		Afbl::AfbElementCollection m_afbCollection;
 	};
