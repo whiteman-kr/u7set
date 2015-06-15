@@ -57,7 +57,7 @@ namespace VFrame30
 	}
 
 
-	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemeUnit unit, const QString& str, const QRectF& rect, int flags, bool Antialiasing)
+	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemeUnit unit, const QString& str, const QRectF& rect, int flags)
 	{
 		if (painter == nullptr)
 		{

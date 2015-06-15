@@ -20,7 +20,7 @@ namespace VFrame30
 		m_textColor(qRgb(0x00, 0x00, 0xC0))
 	{
 		setItemUnit(unit);
-		m_font.setName("Arial");
+		m_font.setName("Sans");
 
 		switch (itemUnit())
 		{
