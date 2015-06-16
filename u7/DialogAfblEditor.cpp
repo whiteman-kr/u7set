@@ -1,6 +1,6 @@
 #include "DialogAfblEditor.h"
 #include "ui_DialogAfblEditor.h"
-#include "DialogAfbProperties.h"
+#include "DialogFileEditor.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
 #include <QInputDialog>
@@ -239,7 +239,7 @@ void DialogAfblEditor::on_m_view_clicked()
     QByteArray data;
     f->swapData(data);
 
-    DialogAfbProperties d(pFi->fileName(), &data, m_pDbController, true);
+	DialogFileEditor d(pFi->fileName(), &data, m_pDbController, true);
     d.exec();
 
     return;
@@ -274,7 +274,7 @@ void DialogAfblEditor::on_m_edit_clicked()
     QByteArray data;
     f->swapData(data);
 
-    DialogAfbProperties d(pFi->fileName(), &data, m_pDbController, false);
+	DialogFileEditor d(pFi->fileName(), &data, m_pDbController, false);
     if (d.exec() != QDialog::Accepted)
     {
         return;
