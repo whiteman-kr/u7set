@@ -128,6 +128,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	//
 
 	AfbElementSignal signal;
+	signal.setOpName("SignalName");
 	signal.setCaption("SignalCaption");
 	signal.setType(AfbSignalType::Analog);
 
@@ -143,6 +144,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	//
 
 	AfbElementParam param1;
+	param1.setOpName("ParamName");
 	param1.setCaption("Param1Caption");
 	param1.setType(AfbParamType::AnalogIntegral);
 	param1.setValue(0);
@@ -154,6 +156,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	//
 
 	AfbElementParam param2;
+	param2.setOpName("ParamName");
 	param2.setCaption("Param2Caption");
 	param2.setType(AfbParamType::AnalogFloatingPoint);
 	param2.setValue(1.5);
@@ -165,6 +168,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	//
 
 	AfbElementParam param3;
+	param3.setOpName("ParamName");
 	param3.setCaption("Param3Caption");
 	param3.setType(AfbParamType::DiscreteValue);
 	param3.setValue(false);

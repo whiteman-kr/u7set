@@ -1395,6 +1395,15 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 size() const;
   inline void set_size(::google::protobuf::int32 value);
 
+  // optional .Proto.wstring opName = 5;
+  inline bool has_opname() const;
+  inline void clear_opname();
+  static const int kOpNameFieldNumber = 5;
+  inline const ::Proto::wstring& opname() const;
+  inline ::Proto::wstring* mutable_opname();
+  inline ::Proto::wstring* release_opname();
+  inline void set_allocated_opname(::Proto::wstring* opname);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElementSignal)
  private:
   inline void set_has_caption();
@@ -1405,16 +1414,19 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline void clear_has_operandindex();
   inline void set_has_size();
   inline void clear_has_size();
+  inline void set_has_opname();
+  inline void clear_has_opname();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::wstring* caption_;
   int type_;
   ::google::protobuf::int32 operandindex_;
+  ::Proto::wstring* opname_;
   ::google::protobuf::int32 size_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1575,6 +1587,15 @@ class FblElementParam : public ::google::protobuf::Message {
   inline ::Proto::qvariant* release_highlimit();
   inline void set_allocated_highlimit(::Proto::qvariant* highlimit);
 
+  // optional .Proto.wstring opName = 17;
+  inline bool has_opname() const;
+  inline void clear_opname();
+  static const int kOpNameFieldNumber = 17;
+  inline const ::Proto::wstring& opname() const;
+  inline ::Proto::wstring* mutable_opname();
+  inline ::Proto::wstring* release_opname();
+  inline void set_allocated_opname(::Proto::wstring* opname);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElementParam)
  private:
   inline void set_has_caption();
@@ -1601,6 +1622,8 @@ class FblElementParam : public ::google::protobuf::Message {
   inline void clear_has_lowlimit();
   inline void set_has_highlimit();
   inline void clear_has_highlimit();
+  inline void set_has_opname();
+  inline void clear_has_opname();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1616,9 +1639,10 @@ class FblElementParam : public ::google::protobuf::Message {
   ::Proto::qvariant* defaultvalue_;
   ::Proto::qvariant* lowlimit_;
   ::Proto::qvariant* highlimit_;
+  ::Proto::wstring* opname_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6720,6 +6744,44 @@ inline void FblElementSignal::set_size(::google::protobuf::int32 value) {
   size_ = value;
 }
 
+// optional .Proto.wstring opName = 5;
+inline bool FblElementSignal::has_opname() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void FblElementSignal::set_has_opname() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void FblElementSignal::clear_has_opname() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void FblElementSignal::clear_opname() {
+  if (opname_ != NULL) opname_->::Proto::wstring::Clear();
+  clear_has_opname();
+}
+inline const ::Proto::wstring& FblElementSignal::opname() const {
+  return opname_ != NULL ? *opname_ : *default_instance_->opname_;
+}
+inline ::Proto::wstring* FblElementSignal::mutable_opname() {
+  set_has_opname();
+  if (opname_ == NULL) opname_ = new ::Proto::wstring;
+  return opname_;
+}
+inline ::Proto::wstring* FblElementSignal::release_opname() {
+  clear_has_opname();
+  ::Proto::wstring* temp = opname_;
+  opname_ = NULL;
+  return temp;
+}
+inline void FblElementSignal::set_allocated_opname(::Proto::wstring* opname) {
+  delete opname_;
+  opname_ = opname;
+  if (opname) {
+    set_has_opname();
+  } else {
+    clear_has_opname();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // FblElementParam
@@ -7082,6 +7144,44 @@ inline void FblElementParam::set_allocated_highlimit(::Proto::qvariant* highlimi
     set_has_highlimit();
   } else {
     clear_has_highlimit();
+  }
+}
+
+// optional .Proto.wstring opName = 17;
+inline bool FblElementParam::has_opname() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void FblElementParam::set_has_opname() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void FblElementParam::clear_has_opname() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void FblElementParam::clear_opname() {
+  if (opname_ != NULL) opname_->::Proto::wstring::Clear();
+  clear_has_opname();
+}
+inline const ::Proto::wstring& FblElementParam::opname() const {
+  return opname_ != NULL ? *opname_ : *default_instance_->opname_;
+}
+inline ::Proto::wstring* FblElementParam::mutable_opname() {
+  set_has_opname();
+  if (opname_ == NULL) opname_ = new ::Proto::wstring;
+  return opname_;
+}
+inline ::Proto::wstring* FblElementParam::release_opname() {
+  clear_has_opname();
+  ::Proto::wstring* temp = opname_;
+  opname_ = NULL;
+  return temp;
+}
+inline void FblElementParam::set_allocated_opname(::Proto::wstring* opname) {
+  delete opname_;
+  opname_ = opname;
+  if (opname) {
+    set_has_opname();
+  } else {
+    clear_has_opname();
   }
 }
 

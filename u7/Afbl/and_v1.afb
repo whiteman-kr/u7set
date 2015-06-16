@@ -4,32 +4,32 @@
         <Properties>
             <Caption>and_v1</Caption>
             <OpCode>1</OpCode>
-            <hasRam>false</hasRam>
-            <requiredStart>true</requiredStart>
+            <HasRam>false</HasRam>
+            <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
-            <AfbElementSignal Caption="i_1_oprd" Type="Discrete" OpIndex = "2" Size = "1"/>
-            <AfbElementSignal Caption="i_2_oprd" Type="Discrete" OpIndex = "3" Size = "1"/>
-            <AfbElementSignal Caption="i_3_oprd" Type="Discrete" OpIndex = "4" Size = "1"/>
-            <AfbElementSignal Caption="i_4_oprd" Type="Discrete" OpIndex = "5" Size = "1"/>
-            <AfbElementSignal Caption="i_5_oprd" Type="Discrete" OpIndex = "6" Size = "1"/>
-            <AfbElementSignal Caption="i_6_oprd" Type="Discrete" OpIndex = "7" Size = "1"/>
-            <AfbElementSignal Caption="i_7_oprd" Type="Discrete" OpIndex = "8" Size = "1"/>
-            <AfbElementSignal Caption="i_8_oprd" Type="Discrete" OpIndex = "9" Size = "1"/>
-            <AfbElementSignal Caption="i_9_oprd" Type="Discrete" OpIndex = "10" Size = "1"/>
-            <AfbElementSignal Caption="i_10_oprd" Type="Discrete" OpIndex = "11" Size = "1"/>
-            <AfbElementSignal Caption="i_11_oprd" Type="Discrete" OpIndex = "12" Size = "1"/>
-            <AfbElementSignal Caption="i_12_oprd" Type="Discrete" OpIndex = "13" Size = "1"/>
-            <AfbElementSignal Caption="i_13_oprd" Type="Discrete" OpIndex = "14" Size = "1"/>
-            <AfbElementSignal Caption="i_14_oprd" Type="Discrete" OpIndex = "15" Size = "1"/>
-            <AfbElementSignal Caption="i_15_oprd" Type="Discrete" OpIndex = "16" Size = "1"/>
-            <AfbElementSignal Caption="i_16_oprd" Type="Discrete" OpIndex = "17" Size = "1"/>
+            <AfbElementSignal OpName="i_1_oprd" Caption="in 1" Type="Discrete" OpIndex = "2" Size = "1"/>
+            <AfbElementSignal OpName="i_2_oprd" Caption="in 2" Type="Discrete" OpIndex = "3" Size = "1"/>
+            <AfbElementSignal OpName="i_3_oprd" Caption="in 3" Type="Discrete" OpIndex = "4" Size = "1"/>
+            <AfbElementSignal OpName="i_4_oprd" Caption="in 4" Type="Discrete" OpIndex = "5" Size = "1"/>
+            <AfbElementSignal OpName="i_5_oprd" Caption="in 5" Type="Discrete" OpIndex = "6" Size = "1"/>
+            <AfbElementSignal OpName="i_6_oprd" Caption="in 6" Type="Discrete" OpIndex = "7" Size = "1"/>
+            <AfbElementSignal OpName="i_7_oprd" Caption="in 7" Type="Discrete" OpIndex = "8" Size = "1"/>
+            <AfbElementSignal OpName="i_8_oprd" Caption="in 8" Type="Discrete" OpIndex = "9" Size = "1"/>
+            <AfbElementSignal OpName="i_9_oprd" Caption="in 9" Type="Discrete" OpIndex = "10" Size = "1"/>
+            <AfbElementSignal OpName="i_10_oprd" Caption="in 10" Type="Discrete" OpIndex = "11" Size = "1"/>
+            <AfbElementSignal OpName="i_11_oprd" Caption="in 11" Type="Discrete" OpIndex = "12" Size = "1"/>
+            <AfbElementSignal OpName="i_12_oprd" Caption="in 12" Type="Discrete" OpIndex = "13" Size = "1"/>
+            <AfbElementSignal OpName="i_13_oprd" Caption="in 13" Type="Discrete" OpIndex = "14" Size = "1"/>
+            <AfbElementSignal OpName="i_14_oprd" Caption="in 14" Type="Discrete" OpIndex = "15" Size = "1"/>
+            <AfbElementSignal OpName="i_15_oprd" Caption="in 15" Type="Discrete" OpIndex = "16" Size = "1"/>
+            <AfbElementSignal OpName="i_16_oprd" Caption="in 16" Type="Discrete" OpIndex = "17" Size = "1"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal Caption="o_result" Type="Discrete" OpIndex = "19" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex = "19" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam Caption="i_oprd_quant" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_oprd_quant" Caption = "oprd quant" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="AnalogIntegral">
                 <Value>2</Value>
                 <Default>2</Default>
                 <LowLimit>2</LowLimit>
@@ -43,13 +43,13 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam Caption="i_bus_width" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_bus_width" Caption = "bus width" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
                 <Value>1</Value>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>0</LowLimit>
@@ -66,7 +66,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 {
 	videoItemFblElement.removeInputSignals();
 
-	var count = videoItemFblElement.getParamIntValue("i_oprd_quant");
+	var count = videoItemFblElement.getParamIntValue("oprd quant");
 	if (count == -1)
 	{
 		return false;

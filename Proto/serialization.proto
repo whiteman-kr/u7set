@@ -199,6 +199,7 @@ message FblElementSignal
 	required FblSignalType type = 2;
 	optional int32 operandIndex = 3 [default = 0];
 	optional int32 size = 4 [default = 0];
+	optional wstring opName = 5;
 }
 
 
@@ -221,6 +222,7 @@ message FblElementParam
 	optional qvariant defaultvalue = 14;
 	optional qvariant lowlimit = 15;
 	optional qvariant highlimit = 16;
+	optional wstring opName = 17;
 }
 
 

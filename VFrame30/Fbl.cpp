@@ -33,6 +33,7 @@ namespace Afbl
 			return *this;
 		}
 
+		m_opName = that.m_opName;
 		m_caption = that.m_caption;
 		m_type = that.m_type;
 		m_operandIndex = that.m_operandIndex;
@@ -74,6 +75,7 @@ namespace Afbl
 		}
 
 		xmlWriter->writeStartElement("AfbElementSignal");
+		xmlWriter->writeAttribute("OpName", opName());
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Type", type() == AfbSignalType::Analog ? "Analog" : "Discrete");
 		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
@@ -95,6 +97,11 @@ namespace Afbl
 		{
 			xmlReader->raiseError(QObject::tr("AfbElementSignal expected."));
 			return !xmlReader->hasError();
+		}
+
+		if (xmlReader->attributes().hasAttribute("OpName"))
+		{
+			setOpName(xmlReader->attributes().value("OpName").toString());
 		}
 
 		if (xmlReader->attributes().hasAttribute("Caption"))
@@ -130,6 +137,17 @@ namespace Afbl
 
 		return !xmlReader->hasError();
 
+	}
+
+	const QString& AfbElementSignal::opName() const
+	{
+		return m_opName;
+
+	}
+
+	void AfbElementSignal::setOpName(const QString& value)
+	{
+		m_opName = value;
 	}
 
 	// Caption
@@ -220,6 +238,7 @@ namespace Afbl
 
 	bool AfbElementParam::SaveData(Proto::FblElementParam* message) const
 	{
+		Proto::Write(message->mutable_opname(), m_opName);
 		Proto::Write(message->mutable_caption(), m_caption);
 		message->set_visible(visible());
 		message->set_type(static_cast<Proto::FblParamType>(m_type));
@@ -240,6 +259,7 @@ namespace Afbl
 
 	bool AfbElementParam::LoadData(const Proto::FblElementParam& message)
 	{
+		Proto::Read(message.opname(), &m_opName);
 		Proto::Read(message.caption(), &m_caption);
 		m_type = static_cast<AfbParamType>(message.type());
 		m_visible = message.visible();
@@ -270,6 +290,11 @@ namespace Afbl
 		{
 			xmlReader->raiseError(QObject::tr("AfbElementParam expected."));
 			return !xmlReader->hasError();
+		}
+
+		if (xmlReader->attributes().hasAttribute("OpName"))
+		{
+			setOpName(xmlReader->attributes().value("OpName").toString());
 		}
 
 		if (xmlReader->attributes().hasAttribute("Caption"))
@@ -394,6 +419,7 @@ namespace Afbl
 		}
 
 		xmlWriter->writeStartElement("AfbElementParam");
+		xmlWriter->writeAttribute("OpName", opName());
 		xmlWriter->writeAttribute("Caption", caption());
 		xmlWriter->writeAttribute("Visible", visible() ? "true" : "false");
 		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
@@ -456,6 +482,16 @@ namespace Afbl
 	void AfbElementParam::setCaption(const QString& caption)
 	{
 		m_caption = caption;
+	}
+
+	const QString& AfbElementParam::opName() const
+	{
+		return m_opName;
+	}
+
+	void AfbElementParam::setOpName(const QString& value)
+	{
+		m_opName = value;
 	}
 
 	bool AfbElementParam::visible() const
@@ -689,12 +725,12 @@ namespace Afbl
 						setOpcode(xmlReader->readElementText().toInt());
 					}
 
-					if (xmlReader->name() == "hasRam")
+					if (xmlReader->name() == "HasRam")
 					{
 						setHasRam(xmlReader->readElementText() == "true" ? true : false);
 					}
 
-					if (xmlReader->name() == "requiredStart")
+					if (xmlReader->name() == "RequiredStart")
 					{
 						setRequiredStart(xmlReader->readElementText() == "true" ? true : false);
 					}
@@ -837,8 +873,8 @@ namespace Afbl
 		xmlWriter->writeStartElement("Properties");
 		xmlWriter->writeTextElement("Caption", caption());
 		xmlWriter->writeTextElement("OpCode", QString::number(opcode()));
-		xmlWriter->writeTextElement("hasRam", hasRam() ? "true" : "false");
-		xmlWriter->writeTextElement("requiredStart", requiredStart() ? "true" : "false");
+		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
+		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
 		xmlWriter->writeEndElement();
 
 		xmlWriter->writeStartElement("InputSignals");
