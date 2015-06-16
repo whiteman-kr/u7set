@@ -65,8 +65,14 @@ void OutputLog::write(const QString& str, OutputMessageLevel level, bool bold)
 	//
 	QString message = QString("\n%1 %2: %3").arg(time.toString()).arg(strLevel).arg(str);
 
-	qDebug() << message;
+	// Trace
+	//
+	QString debugString = message;
+	debugString.remove(0, 1);	// remove '\n' from the message;
+	qDebug() << debugString;
 
+	// Add data ato queue
+	//
 	QMutexLocker locker(&mutex);
 
 	windowMessageList.push_back(OutputLogItem(str, level, bold, time));

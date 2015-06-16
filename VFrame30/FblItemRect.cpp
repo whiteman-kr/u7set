@@ -492,7 +492,7 @@ namespace VFrame30
 
 		// --
 		//
-		return m_cachedGridSize * 10;
+		return m_cachedGridSize * 16;
 	}
 
 	// Properties and Data

@@ -1374,12 +1374,12 @@ namespace Builder
 						//
 						VFrame30::VideoItemInputSignal* inputSignal = dynamic_cast<VFrame30::VideoItemInputSignal*>(item.get());
 						VFrame30::VideoItemOutputSignal* outputSignal = dynamic_cast<VFrame30::VideoItemOutputSignal*>(item.get());
-						VFrame30::SchemeItemConst* schemeItem = dynamic_cast<VFrame30::SchemeItemConst*>(item.get());
+						VFrame30::SchemeItemConst* schemeItemConst = dynamic_cast<VFrame30::SchemeItemConst*>(item.get());
 						VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
 
 						if (inputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Input %2 has unconnected pin.")
+							log()->writeError(tr("LogicScheme %1: Input %2 has unconnected pin")
 								.arg(scheme->caption())
 								.arg(inputSignal->signalStrIds()),
 								false, true);
@@ -1390,7 +1390,7 @@ namespace Builder
 
 						if (outputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Output %2 has unconnected pin.")
+							log()->writeError(tr("LogicScheme %1: Output %2 has unconnected pin")
 								.arg(scheme->caption())
 								.arg(outputSignal->signalStrIds()),
 								false, true);
@@ -1399,11 +1399,11 @@ namespace Builder
 							continue;
 						}
 
-						if (schemeItem != nullptr)
+						if (schemeItemConst != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Constant element %2 has unconnected pin.")
+							log()->writeError(tr("LogicScheme %1: Constant element %2 has unconnected pin")
 								.arg(scheme->caption())
-								.arg(schemeItem->valueToString()),
+								.arg(schemeItemConst->valueToString()),
 								false, true);
 
 							result = false;
@@ -1414,9 +1414,10 @@ namespace Builder
 						{
 							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
 
-							log()->writeError(tr("LogicScheme %1: Item '%2' has unconnected pins.")
+							log()->writeError(tr("LogicScheme %1: Item '%2', pin '%3' is unconnected")
 								.arg(scheme->caption())
-								.arg(afb->caption()),
+								.arg(afb->caption())
+								.arg(in.caption()),
 								false, true);
 
 							result = false;
@@ -1445,7 +1446,7 @@ namespace Builder
 						//
 						VFrame30::VideoItemInputSignal* inputSignal = dynamic_cast<VFrame30::VideoItemInputSignal*>(item.get());
 						VFrame30::VideoItemOutputSignal* outputSignal = dynamic_cast<VFrame30::VideoItemOutputSignal*>(item.get());
-						VFrame30::SchemeItemConst* schemeItem = dynamic_cast<VFrame30::SchemeItemConst*>(item.get());
+						VFrame30::SchemeItemConst* schemeItemConst = dynamic_cast<VFrame30::SchemeItemConst*>(item.get());
 						VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
 
 						if (inputSignal != nullptr)
@@ -1470,11 +1471,11 @@ namespace Builder
 							continue;
 						}
 
-						if (schemeItem != nullptr)
+						if (schemeItemConst != nullptr)
 						{
 							log()->writeError(tr("LogicScheme %1: Constant element %2 has unconnected pin.")
 								.arg(scheme->caption())
-								.arg(schemeItem->valueToString()),
+								.arg(schemeItemConst->valueToString()),
 								false, true);
 
 							result = false;
@@ -1485,9 +1486,10 @@ namespace Builder
 						{
 							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
 
-							log()->writeError(tr("LogicScheme %1: Item '%2' has unconnected pins.")
+							log()->writeError(tr("LogicScheme %1: Item '%2', pin '%3' is unconnected")
 								.arg(scheme->caption())
-								.arg(afb->caption()),
+								.arg(afb->caption())
+								.arg(out.caption()),
 								false, true);
 
 							result = false;
