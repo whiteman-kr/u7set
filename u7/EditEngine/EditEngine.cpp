@@ -227,18 +227,18 @@ namespace EditEngine
 		return;
 	}
 
-	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items)
+	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items, bool snapToGrid)
 	{
-		addCommand(std::make_shared<MoveItemCommand>(m_videoFrameView, xdiff, ydiff, items, m_hScrollBar, m_vScrollBar), true);
+		addCommand(std::make_shared<MoveItemCommand>(m_videoFrameView, xdiff, ydiff, items, snapToGrid, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::VideoItem>& item)
+	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::VideoItem>& item, bool snapToGrid)
 	{
 		std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
 		items.push_back(item);
 
-		runMoveItem(xdiff, ydiff, items);
+		runMoveItem(xdiff, ydiff, items, snapToGrid);
 		return;
 	}
 

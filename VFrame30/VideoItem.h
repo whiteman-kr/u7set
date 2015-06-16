@@ -154,6 +154,8 @@ namespace VFrame30
 	public:
 		virtual void MoveItem(double horzOffsetDocPt, double vertOffsetDocPt);
 
+		virtual void snapToGrid(double gridSize);
+
 		virtual double GetWidthInDocPt() const;
 		virtual double GetHeightInDocPt() const;
 

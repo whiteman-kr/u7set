@@ -2505,7 +2505,7 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	{
 		// Move items
 		//
-		m_editEngine->runMoveItem(xdif, ydif, selectedItems());
+		m_editEngine->runMoveItem(xdif, ydif, selectedItems(), snapToGrid());
 	}
 	else
 	{

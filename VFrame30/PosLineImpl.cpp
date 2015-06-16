@@ -89,6 +89,19 @@ namespace VFrame30
 		setEndYDocPt(endYDocPt() + vertOffsetDocPt);
 	}
 
+	void PosLineImpl::snapToGrid(double gridSize)
+	{
+		QPointF sp = CUtils::snapToGrid(QPointF(startXDocPt(), startYDocPt()), gridSize);
+		QPointF ep = CUtils::snapToGrid(QPointF(endXDocPt(), endYDocPt()), gridSize);
+
+		setStartXDocPt(sp.x());
+		setStartYDocPt(sp.y());
+		setEndXDocPt(ep.x());
+		setEndYDocPt(ep.y());
+
+		return;
+	}
+
 	double PosLineImpl::GetWidthInDocPt() const
 	{
 		double val = std::abs(m_startXDocPt - m_endXDocPt);

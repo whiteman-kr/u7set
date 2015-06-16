@@ -109,6 +109,11 @@ namespace VFrame30
 		assert(false);	// Implement in child classes
 	}
 
+	void VideoItem::snapToGrid(double gridSize)
+	{
+		assert(false);
+	}
+
 	double VideoItem::GetWidthInDocPt() const
 	{
 		assert(false);	// Implement in child classes
