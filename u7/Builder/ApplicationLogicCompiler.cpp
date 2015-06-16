@@ -239,7 +239,7 @@ namespace Builder
 
 			moduleFirmware->save(moduleFirmwareFileData);
 
-			result &= m_resultWriter->addFile(moduleFirmware->subsysId(), moduleFirmware->type() + ".alb", moduleFirmwareFileData);
+			result &= m_resultWriter->addFile(moduleFirmware->subsysId(), moduleFirmware->caption() + ".alb", moduleFirmwareFileData);
 		}
 
 		for(Hardware::ModuleFirmware* moduleFirmware : m_subsystemModuleFirmware)

@@ -57,7 +57,7 @@ namespace VFrame30
 		void setType(SchemeItemConst::ConstType value);
 
 		bool isIntegral() const;
-		bool isDouble() const;
+		bool isFloat() const;
 
 		int intValue() const;
 		void setIntValue(int intValue);
