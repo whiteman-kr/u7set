@@ -3925,12 +3925,12 @@ class SchemeItemConst : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 intvalue() const;
   inline void set_intvalue(::google::protobuf::int32 value);
 
-  // optional double doubleValue = 3 [default = 0];
-  inline bool has_doublevalue() const;
-  inline void clear_doublevalue();
-  static const int kDoubleValueFieldNumber = 3;
-  inline double doublevalue() const;
-  inline void set_doublevalue(double value);
+  // optional double floatValue = 3 [default = 0];
+  inline bool has_floatvalue() const;
+  inline void clear_floatvalue();
+  static const int kFloatValueFieldNumber = 3;
+  inline double floatvalue() const;
+  inline void set_floatvalue(double value);
 
   // @@protoc_insertion_point(class_scope:Proto.SchemeItemConst)
  private:
@@ -3938,14 +3938,14 @@ class SchemeItemConst : public ::google::protobuf::Message {
   inline void clear_has_type();
   inline void set_has_intvalue();
   inline void clear_has_intvalue();
-  inline void set_has_doublevalue();
-  inline void clear_has_doublevalue();
+  inline void set_has_floatvalue();
+  inline void clear_has_floatvalue();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 intvalue_;
-  double doublevalue_;
+  double floatvalue_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
@@ -9521,26 +9521,26 @@ inline void SchemeItemConst::set_intvalue(::google::protobuf::int32 value) {
   intvalue_ = value;
 }
 
-// optional double doubleValue = 3 [default = 0];
-inline bool SchemeItemConst::has_doublevalue() const {
+// optional double floatValue = 3 [default = 0];
+inline bool SchemeItemConst::has_floatvalue() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void SchemeItemConst::set_has_doublevalue() {
+inline void SchemeItemConst::set_has_floatvalue() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void SchemeItemConst::clear_has_doublevalue() {
+inline void SchemeItemConst::clear_has_floatvalue() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void SchemeItemConst::clear_doublevalue() {
-  doublevalue_ = 0;
-  clear_has_doublevalue();
+inline void SchemeItemConst::clear_floatvalue() {
+  floatvalue_ = 0;
+  clear_has_floatvalue();
 }
-inline double SchemeItemConst::doublevalue() const {
-  return doublevalue_;
+inline double SchemeItemConst::floatvalue() const {
+  return floatvalue_;
 }
-inline void SchemeItemConst::set_doublevalue(double value) {
-  set_has_doublevalue();
-  doublevalue_ = value;
+inline void SchemeItemConst::set_floatvalue(double value) {
+  set_has_floatvalue();
+  floatvalue_ = value;
 }
 
 // -------------------------------------------------------------------
