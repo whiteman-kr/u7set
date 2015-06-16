@@ -17,10 +17,11 @@ namespace Hardware
 	{
 	}
 
-	void ModuleFirmware::init(QString caption, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
+	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
 	{
 		m_caption = caption;
 		m_subsysId = subsysId;
+		m_ssKey = ssKey;
 		m_uartId = uartId;
 		m_frameSize = frameSize;
 		m_projectName = projectName;
@@ -40,8 +41,13 @@ namespace Hardware
 		return;
 	}
 
-	bool ModuleFirmware::save(QByteArray& dest) const
+	bool ModuleFirmware::save(QByteArray& dest, QString* errorMsg)
     {
+		if (storeChannelData(errorMsg) == false)
+		{
+			return false;
+		}
+
         QJsonObject jObject;
 
         for (int i = 0; i < frameCount(); i++)
@@ -373,15 +379,158 @@ namespace Hardware
 
 	bool ModuleFirmware::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& data, QString* errorMsg)
 	{
+		if (this->frameSize() != frameSize)
+		{
+			if (errorMsg != nullptr)
+			{
+				*errorMsg = QString("ModuleFirmware::setChannelData error - channel ") + QString::number(channel) + QString(" wrong frameSize!");
+			}
+			assert(false);
+			return false;
+		}
+
+		if (this->frameCount() != frameCount)
+		{
+			if(errorMsg != nullptr)
+			{
+				*errorMsg = "ModuleFirmware::setChannelData error - channel " + QString::number(channel) + " wrong frameCount!";
+			}
+			assert(false);
+			return false;
+		}
+
 		auto it = m_channelData.find(channel);
 		if (it != m_channelData.end())
 		{
-			qDebug()<<"Error - channel "<<channel<<" already exists!";
+			if (errorMsg != nullptr)
+			{
+				*errorMsg = "ModuleFirmware::setChannelData error - channel " + QString::number(channel) + " already exists!";
+			}
 			assert(false);
 			return false;
 		}
 
 		m_channelData[channel] = data;
+
+		return true;
+	}
+
+	bool ModuleFirmware::storeChannelData(QString* errorMsg)
+	{
+		const int storageConfigFrame = 1;
+		const int startDataFrame = 2;
+
+		if (frameCount() < 3)
+		{
+			if (errorMsg != nullptr)
+			{
+				*errorMsg = QString("ModuleFirmware::storeChannelData failed: At least 3 frames needed.");
+			}
+			assert(false);
+			return false;
+		}
+
+		// sort channel data by growing channel number
+		//
+		std::vector<int> channelNumbers;
+		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
+		{
+			int channel = it->first;
+			channelNumbers.push_back(channel);
+		}
+		std::sort(channelNumbers.begin(), channelNumbers.end());
+
+		// place channel data to frames
+		//
+		std::vector<int> channelStartFrame;
+
+		int frame = startDataFrame;
+
+		for (int c = 0; c < channelNumbers.size(); c++)
+		{
+			int channel = channelNumbers[c];
+
+			if (frame >= frameCount())
+			{
+				if (errorMsg != nullptr)
+				{
+					*errorMsg = QString("ModuleFirmware::storeChannelData failed: data is too big. Channel = ") +
+							QString::number(channel) + ", frame = " + QString::number(frame);
+				}
+				assert(false);
+				return false;
+			}
+
+			channelStartFrame.push_back(frame);
+
+			// channel service information
+			//
+			quint8* ptr = m_frames[frame].data();
+
+			*(quint16*)ptr = qToBigEndian((quint16)0x0001);		//Channel configuration version
+			ptr += sizeof(quint16);
+
+			*(quint16*)ptr = qToBigEndian((quint16)uartId());	//Data type (configuration)
+			ptr += sizeof(quint16);
+
+			*(quint64*)ptr = qToBigEndian(CUtils::calcHash(&m_ssKey, sizeof(m_ssKey)));
+			ptr += sizeof(quint64);
+
+			frame++;
+
+			// channel data
+			//
+
+			QByteArray& data = m_channelData[channel];
+
+			// store channel data in frames
+			//
+			int index = 0;
+			for (int i = 0; i < data.size(); i++)
+			{
+				if (index >= frameSize())
+				{
+					// data is bigger than frame - switch to the next frame
+					//
+					frame++;
+					index = 0;
+				}
+
+				m_frames[frame][index++] = data[i];
+			}
+
+			//switch to the next frame
+			//
+			frame++;
+		}
+
+
+		// fill storage config frame
+		//
+		quint8* ptr = m_frames[storageConfigFrame].data();
+
+		*(quint16*)ptr = qToBigEndian((quint16)0xCA70);	// Configuration reference mark
+		ptr += sizeof(quint16);
+
+		*(quint16*)ptr = qToBigEndian((quint16)0x0001);	// Configuration structure version
+		ptr += sizeof(quint16);
+
+		*(quint16*)ptr = qToBigEndian((quint16)m_ssKey);	// Subsystem key
+		ptr += sizeof(quint16);
+
+		ptr += sizeof(quint64);	//reserved
+
+		*(quint16*)ptr = qToBigEndian((quint16)channelNumbers.size());	// Configuration channels quantity
+		ptr += sizeof(quint16);
+
+		for (int i = 0; i < channelStartFrame.size(); i++)	// Start frames
+		{
+			*(quint16*)ptr = qToBigEndian((quint16)channelStartFrame[i]);
+			ptr += sizeof(quint16);
+
+			//reserved
+			ptr += sizeof(quint32);
+		}
 
 		return true;
 	}
@@ -400,6 +549,11 @@ namespace Hardware
 	int ModuleFirmware::uartId() const
 	{
 		return m_uartId;
+	}
+
+	quint16 ModuleFirmware::ssKey() const
+	{
+		return m_ssKey;
 	}
 
 	int ModuleFirmware::frameSize() const
@@ -423,7 +577,7 @@ namespace Hardware
 	{
 	}
 
-	QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int uartId, int frameSize, int frameCount)
+	QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount)
 	{
 		bool newFirmware = m_firmwares.count(subsysId) == 0;
 
@@ -431,14 +585,14 @@ namespace Hardware
 
 		if (newFirmware == true)
 		{
-			fw.init(caption, subsysId, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
+			fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
 		}
 
 		QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);
 		return &fw;
 	}
 
-	const std::map<QString, ModuleFirmware>& ModuleFirmwareCollection::firmwares() const
+	std::map<QString, ModuleFirmware>& ModuleFirmwareCollection::firmwares()
 	{
 		return m_firmwares;
 	}
