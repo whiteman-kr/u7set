@@ -2348,6 +2348,8 @@ void EditSchemeWidget::mouseLeftDown_AddSchemePosRectStartPoint(QMouseEvent* eve
 
 	setMouseState(MouseState::AddSchemePosRectEndPoint);
 
+	editSchemeView()->update();
+
 	return;
 }
 
