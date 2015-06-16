@@ -96,7 +96,8 @@ namespace Builder
 		BuildSubdirectory* getBuildSubdirectory(QString subDir);
 
 	public:
-		explicit BuildResultWriter(QObject *parent = 0);
+		BuildResultWriter(QObject *parent = 0);
+		~BuildResultWriter();
 
 		bool start(DbController *db, OutputLog *log, bool release, int changesetID);
 		bool finish();

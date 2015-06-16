@@ -23,9 +23,9 @@ namespace Builder
 
 	BuildSubdirectory::~BuildSubdirectory()
 	{
-		for(int i = 0; i < m_file.count(); i++)
+		for(BuildFile* file : m_file)
 		{
-			delete m_file[i];
+			delete file;
 		}
 
 		m_file.clear();
@@ -88,6 +88,17 @@ namespace Builder
 		QObject(parent),
 		m_separator(QDir::separator())
 	{
+	}
+
+
+	BuildResultWriter::~BuildResultWriter()
+	{
+		for(BuildSubdirectory* subDir : m_subdirectory)
+		{
+			delete subDir;
+		}
+
+		m_subdirectory.clear();
 	}
 
 

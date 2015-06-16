@@ -154,6 +154,16 @@ namespace VFrame30
 		m_type = value;
 	}
 
+		bool SchemeItemConst::isIntegral() const
+	{
+		return m_type == SchemeItemConst::ConstType::IntegralType;
+	}
+
+	bool SchemeItemConst::isDouble() const
+	{
+		return m_type == SchemeItemConst::ConstType::DoubleType;
+	}
+
 	int SchemeItemConst::intValue() const
 	{
 		return m_intValue;

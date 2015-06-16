@@ -341,6 +341,8 @@ namespace Builder
 		bool isCommand() override { return true; }
 		bool isComment() override { return false; }
 
+		bool isValidCommand() { return m_code.getOpCode() != CommandCodes::NoCommand; }
+
 		void generateBinCode(ByteOrder byteOrder) override;
 
 		QString getMnemoCode();

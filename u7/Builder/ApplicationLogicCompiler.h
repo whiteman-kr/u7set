@@ -14,6 +14,7 @@
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/VideoItemSignal.h"
 #include "../VFrame30/VideoItemFblElement.h"
+#include "../VFrame30/SchemeItemConst.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/FblItem.h"
 
@@ -84,6 +85,7 @@ namespace Builder
 	typedef VFrame30::VideoItemSignal LogicSignal;
 	typedef VFrame30::VideoItemFblElement LogicFb;
 	typedef VFrame30::CFblConnectionPoint LogicPin;
+	typedef VFrame30::SchemeItemConst LogicConst;
 	typedef Afbl::AfbElement LogicAfb;
 	typedef Afbl::AfbElementSignal LogicAfbSignal;
 	typedef Afbl::AfbElementParam LogicAfbParam;
@@ -174,6 +176,7 @@ namespace Builder
 
 		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
 		bool isFb() const { return m_appLogicItem.m_fblItem->isFblElement(); }
+		bool isConst() const { return m_appLogicItem.m_fblItem->isConstElement(); }
 
 		bool hasRam() const { return afb().hasRam(); }
 
@@ -181,6 +184,7 @@ namespace Builder
 		const std::list<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toFblElement(); }
+		const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemeItemConst(); }
 		const Afbl::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 		//const LogicItem& logic() const { return *m_fblItem; }
 
@@ -436,6 +440,9 @@ namespace Builder
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
 		bool generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid);
+
+		bool generateWriteConstToFbCode(const AppFb *appFb, const LogicPin &inPin, const LogicConst& constItem);
+		void generateWriteSignalToFbCode(AppSignal* appSignal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
 
 		bool copyDiscreteSignalsToRegBuf();
 		bool copyOutModulesAppLogicDataToModulesMemory();

@@ -41,7 +41,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 		}
 	}
 
-	if (deviceSignal.isInputSignal())
+	if (deviceSignal.isInputSignal() || deviceSignal.isValiditySignal())
 	{
 		m_inOutType = SignalInOutType::Input;
 	}
