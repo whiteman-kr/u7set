@@ -437,12 +437,17 @@ namespace Builder
 		bool generateAppLogicCode();
 		bool generateAppSignalCode(const AppItem* appItem);
 		bool generateFbCode(const AppItem *appItem);
+
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
 		bool generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid);
 
-		bool generateWriteConstToFbCode(const AppFb *appFb, const LogicPin &inPin, const LogicConst& constItem);
-		void generateWriteSignalToFbCode(AppSignal* appSignal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		bool generateWriteConstToSignalCode(const AppSignal& appSignal, const LogicConst& constItem);
+		bool generateWriteSignalToSignalCode(const AppSignal& appSignal, const AppSignal& srcSignal);
+
+		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
+		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
+
 
 		bool copyDiscreteSignalsToRegBuf();
 		bool copyOutModulesAppLogicDataToModulesMemory();
