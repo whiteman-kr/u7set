@@ -56,16 +56,11 @@ namespace ProtoUdp
 	const int RETRY_COUNT = 2;
 
 
-	union Frame
+	struct Frame
 	{
-		struct
-		{
-			FrameHeader header;
+		FrameHeader header;
 
-			char data[FRAME_DATA_SIZE];
-		};
-
-		char rawData[DATAGRAM_SIZE];
+		char data[FRAME_DATA_SIZE];
 	};
 
 
