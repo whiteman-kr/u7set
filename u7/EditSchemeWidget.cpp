@@ -165,6 +165,8 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		return;
 	}
 
+	// Draw
+	//
 	std::vector<std::shared_ptr<VFrame30::VideoItem>> outlines;
 	outlines.push_back(m_newItem);
 
@@ -201,10 +203,12 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		}
 
 		posInterfaceFound = true;
+		VFrame30::IVideoItemPosRect* itemPos = dynamic_cast<VFrame30::IVideoItemPosRect*>(m_newItem.get());
 
 		drawRullers = true;
-		rullerPoint.X = m_addRectEndPoint.x();
-		rullerPoint.Y = m_addRectEndPoint.y();
+
+		rullerPoint.X = itemPos->leftDocPt() + itemPos->widthDocPt();
+		rullerPoint.Y = itemPos->topDocPt() + itemPos->heightDocPt();
 	}
 
 	if (dynamic_cast<VFrame30::IVideoItemPosConnection*>(m_newItem.get()) != nullptr)
@@ -417,35 +421,86 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 	double x2 = x1 + itemPos->widthDocPt();
 	double y2 = y1 + itemPos->heightDocPt();
 
+	double minWidth = itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+	double minHeight = itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+
 	switch (mouseState())
 	{
 	case MouseState::SizingTopLeft:
 		x1 += xdif;
 		y1 += ydif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
 		break;
 	case MouseState::SizingTop:
 		y1 += ydif;
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
 		break;
 	case MouseState::SizingTopRight:
 		x2 += xdif;
 		y1 += ydif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
 		break;
 	case MouseState::SizingRight:
 		x2 += xdif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
 		break;
 	case MouseState::SizingBottomRight:
 		x2 += xdif;
 		y2 += ydif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
 		break;
 	case MouseState::SizingBottom:
 		y2 += ydif;
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
 		break;
 	case MouseState::SizingBottomLeft:
 		x1 += xdif;
 		y2 += ydif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
 		break;
 	case MouseState::SizingLeft:
 		x1 += xdif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
 		break;
 	default:
 		assert(false);
@@ -1973,11 +2028,11 @@ void EditSchemeWidget::mouseMoveEvent(QMouseEvent* event)
 		return;
 	}
 
-	for (auto msa = m_mouseMoveStateAction.begin(); msa != m_mouseMoveStateAction.end(); ++msa)
+	for (const MouseStateAction& msa : m_mouseMoveStateAction)
 	{
-		if (msa->mouseState == mouseState())
+		if (msa.mouseState == mouseState())
 		{
-			msa->action(event);
+			msa.action(event);
 
 			setMouseCursor(event->pos());
 			event->accept();
@@ -2278,11 +2333,18 @@ void EditSchemeWidget::mouseLeftDown_AddSchemePosRectStartPoint(QMouseEvent* eve
 
 	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
 
-	editSchemeView()->m_addRectStartPoint = docPoint;
-	editSchemeView()->m_addRectEndPoint = docPoint;
-
 	itemPos->setLeftDocPt(docPoint.x());
 	itemPos->setTopDocPt(docPoint.y());
+
+	double minWidth = itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+	double minHeight = itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+
+	itemPos->setWidthDocPt(minWidth);
+	itemPos->setHeightDocPt(minHeight);
+
+	editSchemeView()->m_addRectStartPoint = docPoint;
+	editSchemeView()->m_addRectEndPoint.setX(itemPos->leftDocPt() + itemPos->widthDocPt());
+	editSchemeView()->m_addRectEndPoint.setX(itemPos->topDocPt() + itemPos->heightDocPt());
 
 	setMouseState(MouseState::AddSchemePosRectEndPoint);
 
@@ -2536,35 +2598,86 @@ void EditSchemeWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	double x2 = x1 + itemPos->widthDocPt();
 	double y2 = y1 + itemPos->heightDocPt();
 
+	double minWidth = itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+	double minHeight = itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+
 	switch (mouseState())
 	{
 	case MouseState::SizingTopLeft:
 		x1 += xdif;
 		y1 += ydif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
 		break;
 	case MouseState::SizingTop:
 		y1 += ydif;
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
 		break;
 	case MouseState::SizingTopRight:
 		x2 += xdif;
 		y1 += ydif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y1
+		{
+			y1 = y2 - minHeight;
+		}
 		break;
 	case MouseState::SizingRight:
 		x2 += xdif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
 		break;
 	case MouseState::SizingBottomRight:
 		x2 += xdif;
 		y2 += ydif;
+		if (x2 - x1 < minWidth)		// x2
+		{
+			x2 = x1 + minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
 		break;
 	case MouseState::SizingBottom:
 		y2 += ydif;
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
 		break;
 	case MouseState::SizingBottomLeft:
 		x1 += xdif;
 		y2 += ydif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
+		if (y2 - y1 < minHeight)	// y2
+		{
+			y2 = y1 + minHeight;
+		}
 		break;
 	case MouseState::SizingLeft:
 		x1 += xdif;
+		if (x2 - x1 < minWidth)		// x1
+		{
+			x1 = x2 - minWidth;
+		}
 		break;
 	default:
 		assert(false);
@@ -2700,10 +2813,22 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosRectEndPoint(QMouseEvent* event)
 	QPointF sp = editSchemeView()->m_addRectStartPoint;
 	QPointF ep = editSchemeView()->m_addRectEndPoint;
 
-	itemPos->setWidthDocPt(std::abs(sp.x() - ep.x()));
-	itemPos->setHeightDocPt(std::abs(sp.y() - ep.y()));
-	itemPos->setLeftDocPt(std::min(sp.x(), ep.x()));
-	itemPos->setTopDocPt(std::min(sp.y(), ep.y()));
+	itemPos->setLeftDocPt(sp.x());
+	itemPos->setTopDocPt(sp.y());
+	itemPos->setWidthDocPt(ep.x() - sp.x());
+	itemPos->setHeightDocPt(ep.y() - sp.y());
+
+	double minWidth = itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+	double minHeight = itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+
+	if (itemPos->widthDocPt() < minWidth)
+	{
+		itemPos->setWidthDocPt(minWidth);
+	}
+	if (itemPos->heightDocPt() < minHeight)
+	{
+		itemPos->setHeightDocPt(minHeight);
+	}
 
 	if (itemPos->widthDocPt() < 0.000001 && itemPos->heightDocPt() < 0.000001)
 	{
@@ -3095,11 +3220,30 @@ void EditSchemeWidget::mouseMove_AddSchemePosRectEndPoint(QMouseEvent* event)
 	QPointF sp = editSchemeView()->m_addRectStartPoint;
 	QPointF ep = editSchemeView()->m_addRectEndPoint;
 
-	itemPos->setWidthDocPt(std::abs(sp.x() - ep.x()));
-	itemPos->setHeightDocPt(std::abs(sp.y() - ep.y()));
-	itemPos->setLeftDocPt(std::min(sp.x(), ep.x()));
-	itemPos->setTopDocPt(std::min(sp.y(), ep.y()));
+	itemPos->setLeftDocPt(sp.x());
+	itemPos->setTopDocPt(sp.y());
 
+
+	itemPos->setWidthDocPt(ep.x() - sp.x());
+	itemPos->setHeightDocPt(ep.y() - sp.y());
+
+	double minWidth = itemPos->minimumPossibleWidthDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+	double minHeight = itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep());
+
+	if (itemPos->widthDocPt() < minWidth)
+	{
+		itemPos->setWidthDocPt(minWidth);
+	}
+	if (itemPos->heightDocPt() < minHeight)
+	{
+		itemPos->setHeightDocPt(minHeight);
+	}
+
+	editSchemeView()->m_addRectEndPoint.setX(itemPos->leftDocPt() + itemPos->widthDocPt());
+	editSchemeView()->m_addRectEndPoint.setY(itemPos->topDocPt() + itemPos->heightDocPt());
+
+	// --
+	//
 	editSchemeView()->update();
 
 	return;
@@ -3403,6 +3547,9 @@ void EditSchemeWidget::addItem(std::shared_ptr<VFrame30::VideoItem> newItem)
 	{
 		posInterfaceFound = true;
 		setMouseState(MouseState::AddSchemePosRectStartPoint);
+
+		VFrame30::IVideoItemPosRect* itemPos = dynamic_cast<VFrame30::IVideoItemPosRect*>(newItem.get());
+		itemPos->minimumPossibleHeightDocPt(scheme()->gridSize(), scheme()->pinGridStep());		// chachedGridSize and pinStep will be initialized here
 	}
 
 	// Äîáàâëÿåòñÿ ýëåìåíò ñ ðàñïîëîæåíèåì ISchemePosConnection
@@ -3438,13 +3585,13 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 		{
 			QCursor cursor(m_mouseStateCursor[i].cursorShape);
 			setCursor(cursor);
+
 			return;
 		}
 	}
 
 	// ÅÑËÈ ÂÈÑÍÅÒ ÃÄÅ ÒÎ ÇÄÅÑÜ, ÒÎ ÒÛ ÄÎÁÀÂÈË ÊÀÊÎÅÒÎ ÄÅÉÑÒÂÈÅ È ÍÅ ÄÎÁÀÂÈË ÇÀÏÈÑÜ Â mouseStateToCursor!!!!!!!
 	//
-
 	int movingEdgePointIndex = -1;
 
 	// ×àñòíûå ñëó÷àè óñòàíîâêè êóðñîðà
@@ -3477,7 +3624,7 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 
 			if (possibleAction != VideoItemAction::NoAction)
 			{
-				// Èçìåíåííèå ðàçìåðà äîïóñòèìî òîëüêî äëÿ îäíîãî âûäåëåííîãî îáúåêòà
+				// Changing size, is possible for only one selected object
 				//
 				if (editSchemeView()->selectedItems().size() == 1)
 				{
@@ -3490,6 +3637,7 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 
 					if (findResult != std::end(m_sizeActionToMouseCursor))
 					{
+						//qDebug() << Q_FUNC_INFO << static_cast<int>(findResult->cursorShape);
 						setCursor(findResult->cursorShape);
 						return;
 					}

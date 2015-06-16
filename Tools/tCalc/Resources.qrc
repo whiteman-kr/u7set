@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/hdpi.png</file>
+        <file>icons/ldpi.png</file>
+        <file>icons/mdpi.png</file>
+    </qresource>
+</RCC>

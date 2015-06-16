@@ -36,15 +36,16 @@ namespace VFrame30
 
 		message->set_classnamehash(classnamehash);	// Required field, class name hash code, by it instance is created
 		
-		Proto::VideoFrame* pMutableVideoFrame = message->mutable_videoframe();
+		Proto::Scheme* mutableScheme = message->mutable_scheme();
 
-		Proto::Write(pMutableVideoFrame->mutable_uuid(), m_guid);
-		Proto::Write(pMutableVideoFrame->mutable_strid(), m_strID);
-		Proto::Write(pMutableVideoFrame->mutable_caption(), m_caption);
+		Proto::Write(mutableScheme->mutable_uuid(), m_guid);
+		Proto::Write(mutableScheme->mutable_strid(), m_strID);
+		Proto::Write(mutableScheme->mutable_caption(), m_caption);
 
-		pMutableVideoFrame->set_width(m_width);
-		pMutableVideoFrame->set_height(m_height);
-		pMutableVideoFrame->set_unit(static_cast<Proto::SchemeUnit>(m_unit));
+		mutableScheme->set_width(m_width);
+		mutableScheme->set_height(m_height);
+		mutableScheme->set_unit(static_cast<Proto::SchemeUnit>(m_unit));
+		mutableScheme->set_excludefrombuild(m_excludeFromBuild);
 
 		// Save Layers
 		//
@@ -52,41 +53,42 @@ namespace VFrame30
 
 		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
 		{
-			Proto::Envelope* pLayerMessage = pMutableVideoFrame->add_layers();
+			Proto::Envelope* pLayerMessage = mutableScheme->add_layers();
 			saveLayersResult &= layer->get()->Save(pLayerMessage);
 		}
 
 		// Save Afb Collection
 		//
-		m_afbCollection.SaveData(pMutableVideoFrame->mutable_afbs());
+		m_afbCollection.SaveData(mutableScheme->mutable_afbs());
 
 		return saveLayersResult;
 	}
 
 	bool Scheme::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoframe() == false)
+		if (message.has_scheme() == false)
 		{
-			assert(message.has_videoframe());
+			assert(message.has_scheme());
 			return false;
 		}
 
-		const Proto::VideoFrame& videoframe = message.videoframe();
+		const Proto::Scheme& scheme = message.scheme();
 
-		m_guid = Proto::Read(videoframe.uuid());
-		Proto::Read(videoframe.strid(), &m_strID);
-		Proto::Read(videoframe.caption(), &m_caption);
-		m_width = videoframe.width();
-		m_height = videoframe.height();
-		m_unit = static_cast<SchemeUnit>(videoframe.unit());
+		m_guid = Proto::Read(scheme.uuid());
+		Proto::Read(scheme.strid(), &m_strID);
+		Proto::Read(scheme.caption(), &m_caption);
+		m_width = scheme.width();
+		m_height = scheme.height();
+		m_unit = static_cast<SchemeUnit>(scheme.unit());
+		m_excludeFromBuild = scheme.excludefrombuild();
 
 		// Прочитать Layers
 		//
 		Layers.clear();
 
-		for (int i = 0; i < videoframe.layers().size(); i++)
+		for (int i = 0; i < scheme.layers().size(); i++)
 		{
-			SchemeLayer* pLayer = SchemeLayer::Create(videoframe.layers(i));
+			SchemeLayer* pLayer = SchemeLayer::Create(scheme.layers(i));
 			
 			if (pLayer == nullptr)
 			{
@@ -97,16 +99,16 @@ namespace VFrame30
 			Layers.push_back(std::shared_ptr<SchemeLayer>(pLayer));
 		}
 
-		if (videoframe.layers().size() != (int)Layers.size())
+		if (scheme.layers().size() != (int)Layers.size())
 		{
-			assert(videoframe.layers().size() == (int)Layers.size());
+			assert(scheme.layers().size() == (int)Layers.size());
 			Layers.clear();
 			return false;
 		}
 
 		// Load Afb Collection
 		//
-		m_afbCollection.LoadData(videoframe.afbs());
+		m_afbCollection.LoadData(scheme.afbs());
 
 		return true;
 	}
@@ -115,9 +117,9 @@ namespace VFrame30
 	{
 		// This function can create only one instance
 		//
-		if (message.has_videoframe() == false)
+		if (message.has_scheme() == false)
 		{
-			assert(message.has_videoframe());
+			assert(message.has_scheme());
 			return nullptr;
 		}
 
@@ -528,6 +530,16 @@ namespace VFrame30
 	void Scheme::setPinGridStep(int value)
 	{
 		m_pinGridStep = value;
+	}
+
+	bool Scheme::excludeFromBuild() const
+	{
+		return m_excludeFromBuild;
+	}
+
+	void Scheme::setExcludeFromBuild(bool value)
+	{
+		m_excludeFromBuild = value;
 	}
 
 	const Afbl::AfbElementCollection& Scheme::afbCollection() const

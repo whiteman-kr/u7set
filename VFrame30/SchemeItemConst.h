@@ -12,7 +12,7 @@ namespace VFrame30
 
 		Q_PROPERTY(ConstType Type READ type WRITE setType)
 		Q_PROPERTY(int IntegralValue READ intValue WRITE setIntValue)
-		Q_PROPERTY(int DoubleValue READ doubleValue WRITE setDoubleValue)
+		Q_PROPERTY(int FloatValue READ floatValue WRITE setFloatValue)
 
 		Q_ENUMS(ConstType)
 
@@ -26,7 +26,7 @@ namespace VFrame30
 		enum ConstType
 		{
 			IntegralType,
-			DoubleType
+			FloatType
 		};
 
 	public:
@@ -62,15 +62,15 @@ namespace VFrame30
 		int intValue() const;
 		void setIntValue(int intValue);
 
-		double doubleValue() const;
-		void setDoubleValue(double doubleValue);
+		double floatValue() const;
+		void setFloatValue(double floatValue);
 
 		// Data
 		//
 	private:
 		ConstType m_type = ConstType::IntegralType;
 		int m_intValue = 0;
-		double m_doubleValue = 0.0;
+		double m_floatValue = 0.0;
 	};
 
 }

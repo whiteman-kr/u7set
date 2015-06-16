@@ -4,17 +4,17 @@
         <Properties>
             <Caption>not_v1</Caption>
             <OpCode>4</OpCode>
-            <hasRam>false</hasRam>
-            <requiredStart>true</requiredStart>
+            <HasRam>false</HasRam>
+            <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
-            <AfbElementSignal Caption="i_oprd" Type="Discrete" OpIndex = "0" Size = "1"/>
+            <AfbElementSignal OpName="i_oprd" Caption = "in" Type="Discrete" OpIndex = "0" Size = "1"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal Caption="o_result" Type="Discrete" OpIndex = "2" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "2" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>0</LowLimit>

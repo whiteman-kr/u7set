@@ -209,7 +209,7 @@ namespace Hardware
 		return !reader.hasError();
 	}
 
-	bool SubsystemStorage::save(DbController *db)
+	bool SubsystemStorage::save(DbController *db, const QString& comment)
 	{
 		if (db == nullptr)
 		{
@@ -269,9 +269,22 @@ namespace Hardware
 			return false;
 		}
 
+		if (file->state() != VcsState::CheckedOut)
+		{
+			if (db->checkOut(fileList[0], nullptr) == false)
+			{
+				return false;
+			}
+		}
+
 		file->swapData(data);
 
 		if (db->setWorkcopy(file, nullptr) == false)
+		{
+			return false;
+		}
+
+		if (db->checkIn(fileList[0], comment, nullptr) == false)
 		{
 			return false;
 		}

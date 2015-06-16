@@ -63,7 +63,7 @@ namespace VFrame30
 		QString m_globals;											// Global scripts functions
 		
 		std::vector<QUuid> m_videoFramesIDs;						// The list of VideoFrame's ID's
-		std::vector<std::shared_ptr<Scheme>> m_videoFrames;	// The list of VideoFrame's
+		std::vector<std::shared_ptr<Scheme>> m_schemes;	// The list of VideoFrame's
 	};
 
 

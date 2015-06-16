@@ -111,7 +111,7 @@ message Envelope
 	//
 	optional VideoItem videoitem = 6;				// VFrame30::CVideoItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
-	optional VideoFrame videoframe = 100;			// VFrame30::CVideoFrame
+	optional Scheme scheme = 100;					// VFrame30::Scheme
 	optional VideoLayer videolayer = 101;			// VFrame30::CVideoLayer
 	optional FblElement fblelement = 102;			// Fbl::FblElement
 	optional Configuration configuration = 103;		// VFrame30::Configuration
@@ -133,8 +133,8 @@ message Configuration
 	required wstring variables = 4;
 	required wstring globals = 5; 
 	
-	repeated Uuid videoFramesIDs = 100;
-	repeated Envelope videoFrames = 101;
+	repeated Uuid schemesIDs = 100;
+	repeated Envelope schemes = 101;
 }
 
 
@@ -199,6 +199,7 @@ message FblElementSignal
 	required FblSignalType type = 2;
 	optional int32 operandIndex = 3 [default = 0];
 	optional int32 size = 4 [default = 0];
+	optional wstring opName = 5;
 }
 
 
@@ -221,6 +222,7 @@ message FblElementParam
 	optional qvariant defaultvalue = 14;
 	optional qvariant lowlimit = 15;
 	optional qvariant highlimit = 16;
+	optional wstring opName = 17;
 }
 
 
@@ -252,11 +254,11 @@ enum FblParamType
 //------------------------------------------------------------------------------------------
 //
 //
-//			VFrame30::CVideoFrame
+//			VFrame30::Scheme
 //
 //
 //------------------------------------------------------------------------------------------
-message VideoFrame
+message Scheme
 {
 	required Uuid uuid = 1;
 	required wstring strID = 2;
@@ -264,11 +266,12 @@ message VideoFrame
 	required double width = 4;
 	required double height = 5;
 	required SchemeUnit unit = 6;
+	optional bool excludeFromBuild = 7 [default = false];
 
 	repeated Envelope layers = 100;				// Layer list
 	required AfbElementCollection afbs = 101;	// Application Fuynctional Block stored as XML
 
-	// Derived from VideoFrame
+	// Derived from Scheme
 	//
 	optional LogicScheme logics_scheme = 200;
 }
@@ -543,7 +546,7 @@ message SchemeItemConst
 {
 	optional int32 type = 1 [default = 0];
 	optional int32 intValue = 2 [default = 0];
-	optional double doubleValue = 3 [default = 0.0];
+	optional double floatValue = 3 [default = 0.0];
 }
 
 //------------------------------------------------------------------------------------------

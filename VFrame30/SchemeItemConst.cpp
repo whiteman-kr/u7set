@@ -36,7 +36,7 @@ namespace VFrame30
 
 		constitem->set_type(m_type);
 		constitem->set_intvalue(m_intValue);
-		constitem->set_doublevalue(m_doubleValue);
+		constitem->set_floatvalue(m_floatValue);
 
 		return true;
 	}
@@ -61,7 +61,7 @@ namespace VFrame30
 
 		m_type = static_cast<ConstType>(constitem.type());
 		m_intValue = constitem.intvalue();
-		m_doubleValue = constitem.doublevalue();
+		m_floatValue = constitem.floatvalue();
 
 		return true;
 	}
@@ -133,8 +133,8 @@ namespace VFrame30
 			case ConstType::IntegralType:
 				text = QString::number(intValue());
 				break;
-			case ConstType::DoubleType:
-				text = QString::number(doubleValue(), 'g', 4);
+			case ConstType::FloatType:
+				text = QString::number(floatValue(), 'g', 4);
 				break;
 			default:
 				assert(false);
@@ -173,14 +173,14 @@ namespace VFrame30
 	{
 		m_intValue = intValue;
 	}
-	double SchemeItemConst::doubleValue() const
+	double SchemeItemConst::floatValue() const
 	{
-		return m_doubleValue;
+		return m_floatValue;
 	}
 
-	void SchemeItemConst::setDoubleValue(double doubleValue)
+	void SchemeItemConst::setFloatValue(double doubleValue)
 	{
-		m_doubleValue = doubleValue;
+		m_floatValue = doubleValue;
 	}
 
 }

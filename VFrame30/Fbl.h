@@ -50,6 +50,9 @@ namespace Afbl
 		// Properties
 		//
 	public:
+		const QString& opName() const;
+		void setOpName(const QString& value);
+
 		const QString& caption() const;
 		Q_INVOKABLE QString jsCaption();
 		void setCaption(const QString& caption);
@@ -67,6 +70,7 @@ namespace Afbl
 		// Data
 		//
 private:
+		QString m_opName;
 		QString m_caption;
 		AfbSignalType m_type;
 		int m_operandIndex;
@@ -106,6 +110,9 @@ private:
 		const QString& caption() const;
 		void setCaption(const QString& caption);
 
+		const QString& opName() const;
+		void setOpName(const QString& value);
+
 		bool visible() const;
 		void setVisible(bool visible);
 
@@ -142,6 +149,7 @@ private:
         // Data
 		//
 	private:
+		QString m_opName;				// Наименование параметра
 		QString m_caption;				// Наименование параметра
 		bool m_visible;
 		AfbParamType m_type;			// Тип данных параметра

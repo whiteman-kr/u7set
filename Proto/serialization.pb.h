@@ -46,7 +46,7 @@ class AfbElementXml;
 class FblElement;
 class FblElementSignal;
 class FblElementParam;
-class VideoFrame;
+class Scheme;
 class LogicScheme;
 class VideoLayer;
 class VideoItem;
@@ -741,14 +741,14 @@ class Envelope : public ::google::protobuf::Message {
   inline ::Proto::DeviceObject* release_deviceobject();
   inline void set_allocated_deviceobject(::Proto::DeviceObject* deviceobject);
 
-  // optional .Proto.VideoFrame videoframe = 100;
-  inline bool has_videoframe() const;
-  inline void clear_videoframe();
-  static const int kVideoframeFieldNumber = 100;
-  inline const ::Proto::VideoFrame& videoframe() const;
-  inline ::Proto::VideoFrame* mutable_videoframe();
-  inline ::Proto::VideoFrame* release_videoframe();
-  inline void set_allocated_videoframe(::Proto::VideoFrame* videoframe);
+  // optional .Proto.Scheme scheme = 100;
+  inline bool has_scheme() const;
+  inline void clear_scheme();
+  static const int kSchemeFieldNumber = 100;
+  inline const ::Proto::Scheme& scheme() const;
+  inline ::Proto::Scheme* mutable_scheme();
+  inline ::Proto::Scheme* release_scheme();
+  inline void set_allocated_scheme(::Proto::Scheme* scheme);
 
   // optional .Proto.VideoLayer videolayer = 101;
   inline bool has_videolayer() const;
@@ -785,8 +785,8 @@ class Envelope : public ::google::protobuf::Message {
   inline void clear_has_videoitem();
   inline void set_has_deviceobject();
   inline void clear_has_deviceobject();
-  inline void set_has_videoframe();
-  inline void clear_has_videoframe();
+  inline void set_has_scheme();
+  inline void clear_has_scheme();
   inline void set_has_videolayer();
   inline void clear_has_videolayer();
   inline void set_has_fblelement();
@@ -798,7 +798,7 @@ class Envelope : public ::google::protobuf::Message {
 
   ::Proto::VideoItem* videoitem_;
   ::Proto::DeviceObject* deviceobject_;
-  ::Proto::VideoFrame* videoframe_;
+  ::Proto::Scheme* scheme_;
   ::Proto::VideoLayer* videolayer_;
   ::Proto::FblElement* fblelement_;
   ::Proto::Configuration* configuration_;
@@ -915,29 +915,29 @@ class Configuration : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_globals();
   inline void set_allocated_globals(::Proto::wstring* globals);
 
-  // repeated .Proto.Uuid videoFramesIDs = 100;
-  inline int videoframesids_size() const;
-  inline void clear_videoframesids();
-  static const int kVideoFramesIDsFieldNumber = 100;
-  inline const ::Proto::Uuid& videoframesids(int index) const;
-  inline ::Proto::Uuid* mutable_videoframesids(int index);
-  inline ::Proto::Uuid* add_videoframesids();
+  // repeated .Proto.Uuid schemesIDs = 100;
+  inline int schemesids_size() const;
+  inline void clear_schemesids();
+  static const int kSchemesIDsFieldNumber = 100;
+  inline const ::Proto::Uuid& schemesids(int index) const;
+  inline ::Proto::Uuid* mutable_schemesids(int index);
+  inline ::Proto::Uuid* add_schemesids();
   inline const ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >&
-      videoframesids() const;
+      schemesids() const;
   inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
-      mutable_videoframesids();
+      mutable_schemesids();
 
-  // repeated .Proto.Envelope videoFrames = 101;
-  inline int videoframes_size() const;
-  inline void clear_videoframes();
-  static const int kVideoFramesFieldNumber = 101;
-  inline const ::Proto::Envelope& videoframes(int index) const;
-  inline ::Proto::Envelope* mutable_videoframes(int index);
-  inline ::Proto::Envelope* add_videoframes();
+  // repeated .Proto.Envelope schemes = 101;
+  inline int schemes_size() const;
+  inline void clear_schemes();
+  static const int kSchemesFieldNumber = 101;
+  inline const ::Proto::Envelope& schemes(int index) const;
+  inline ::Proto::Envelope* mutable_schemes(int index);
+  inline ::Proto::Envelope* add_schemes();
   inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
-      videoframes() const;
+      schemes() const;
   inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
-      mutable_videoframes();
+      mutable_schemes();
 
   // @@protoc_insertion_point(class_scope:Proto.Configuration)
  private:
@@ -959,8 +959,8 @@ class Configuration : public ::google::protobuf::Message {
   ::Proto::wstring* caption_;
   ::Proto::wstring* variables_;
   ::Proto::wstring* globals_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > videoframesids_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > videoframes_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > schemesids_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > schemes_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
@@ -1395,6 +1395,15 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 size() const;
   inline void set_size(::google::protobuf::int32 value);
 
+  // optional .Proto.wstring opName = 5;
+  inline bool has_opname() const;
+  inline void clear_opname();
+  static const int kOpNameFieldNumber = 5;
+  inline const ::Proto::wstring& opname() const;
+  inline ::Proto::wstring* mutable_opname();
+  inline ::Proto::wstring* release_opname();
+  inline void set_allocated_opname(::Proto::wstring* opname);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElementSignal)
  private:
   inline void set_has_caption();
@@ -1405,16 +1414,19 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline void clear_has_operandindex();
   inline void set_has_size();
   inline void clear_has_size();
+  inline void set_has_opname();
+  inline void clear_has_opname();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::wstring* caption_;
   int type_;
   ::google::protobuf::int32 operandindex_;
+  ::Proto::wstring* opname_;
   ::google::protobuf::int32 size_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1575,6 +1587,15 @@ class FblElementParam : public ::google::protobuf::Message {
   inline ::Proto::qvariant* release_highlimit();
   inline void set_allocated_highlimit(::Proto::qvariant* highlimit);
 
+  // optional .Proto.wstring opName = 17;
+  inline bool has_opname() const;
+  inline void clear_opname();
+  static const int kOpNameFieldNumber = 17;
+  inline const ::Proto::wstring& opname() const;
+  inline ::Proto::wstring* mutable_opname();
+  inline ::Proto::wstring* release_opname();
+  inline void set_allocated_opname(::Proto::wstring* opname);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElementParam)
  private:
   inline void set_has_caption();
@@ -1601,6 +1622,8 @@ class FblElementParam : public ::google::protobuf::Message {
   inline void clear_has_lowlimit();
   inline void set_has_highlimit();
   inline void clear_has_highlimit();
+  inline void set_has_opname();
+  inline void clear_has_opname();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1616,9 +1639,10 @@ class FblElementParam : public ::google::protobuf::Message {
   ::Proto::qvariant* defaultvalue_;
   ::Proto::qvariant* lowlimit_;
   ::Proto::qvariant* highlimit_;
+  ::Proto::wstring* opname_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1629,14 +1653,14 @@ class FblElementParam : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class VideoFrame : public ::google::protobuf::Message {
+class Scheme : public ::google::protobuf::Message {
  public:
-  VideoFrame();
-  virtual ~VideoFrame();
+  Scheme();
+  virtual ~Scheme();
 
-  VideoFrame(const VideoFrame& from);
+  Scheme(const Scheme& from);
 
-  inline VideoFrame& operator=(const VideoFrame& from) {
+  inline Scheme& operator=(const Scheme& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1650,17 +1674,17 @@ class VideoFrame : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoFrame& default_instance();
+  static const Scheme& default_instance();
 
-  void Swap(VideoFrame* other);
+  void Swap(Scheme* other);
 
   // implements Message ----------------------------------------------
 
-  VideoFrame* New() const;
+  Scheme* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoFrame& from);
-  void MergeFrom(const VideoFrame& from);
+  void CopyFrom(const Scheme& from);
+  void MergeFrom(const Scheme& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1731,6 +1755,13 @@ class VideoFrame : public ::google::protobuf::Message {
   inline ::Proto::SchemeUnit unit() const;
   inline void set_unit(::Proto::SchemeUnit value);
 
+  // optional bool excludeFromBuild = 7 [default = false];
+  inline bool has_excludefrombuild() const;
+  inline void clear_excludefrombuild();
+  static const int kExcludeFromBuildFieldNumber = 7;
+  inline bool excludefrombuild() const;
+  inline void set_excludefrombuild(bool value);
+
   // repeated .Proto.Envelope layers = 100;
   inline int layers_size() const;
   inline void clear_layers();
@@ -1761,7 +1792,7 @@ class VideoFrame : public ::google::protobuf::Message {
   inline ::Proto::LogicScheme* release_logics_scheme();
   inline void set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoFrame)
+  // @@protoc_insertion_point(class_scope:Proto.Scheme)
  private:
   inline void set_has_uuid();
   inline void clear_has_uuid();
@@ -1775,6 +1806,8 @@ class VideoFrame : public ::google::protobuf::Message {
   inline void clear_has_height();
   inline void set_has_unit();
   inline void clear_has_unit();
+  inline void set_has_excludefrombuild();
+  inline void clear_has_excludefrombuild();
   inline void set_has_afbs();
   inline void clear_has_afbs();
   inline void set_has_logics_scheme();
@@ -1787,20 +1820,21 @@ class VideoFrame : public ::google::protobuf::Message {
   ::Proto::wstring* caption_;
   double width_;
   double height_;
+  int unit_;
+  bool excludefrombuild_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > layers_;
   ::Proto::AfbElementCollection* afbs_;
   ::Proto::LogicScheme* logics_scheme_;
-  int unit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoFrame* default_instance_;
+  static Scheme* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -5891,41 +5925,41 @@ inline void Envelope::set_allocated_deviceobject(::Proto::DeviceObject* deviceob
   }
 }
 
-// optional .Proto.VideoFrame videoframe = 100;
-inline bool Envelope::has_videoframe() const {
+// optional .Proto.Scheme scheme = 100;
+inline bool Envelope::has_scheme() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void Envelope::set_has_videoframe() {
+inline void Envelope::set_has_scheme() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void Envelope::clear_has_videoframe() {
+inline void Envelope::clear_has_scheme() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void Envelope::clear_videoframe() {
-  if (videoframe_ != NULL) videoframe_->::Proto::VideoFrame::Clear();
-  clear_has_videoframe();
+inline void Envelope::clear_scheme() {
+  if (scheme_ != NULL) scheme_->::Proto::Scheme::Clear();
+  clear_has_scheme();
 }
-inline const ::Proto::VideoFrame& Envelope::videoframe() const {
-  return videoframe_ != NULL ? *videoframe_ : *default_instance_->videoframe_;
+inline const ::Proto::Scheme& Envelope::scheme() const {
+  return scheme_ != NULL ? *scheme_ : *default_instance_->scheme_;
 }
-inline ::Proto::VideoFrame* Envelope::mutable_videoframe() {
-  set_has_videoframe();
-  if (videoframe_ == NULL) videoframe_ = new ::Proto::VideoFrame;
-  return videoframe_;
+inline ::Proto::Scheme* Envelope::mutable_scheme() {
+  set_has_scheme();
+  if (scheme_ == NULL) scheme_ = new ::Proto::Scheme;
+  return scheme_;
 }
-inline ::Proto::VideoFrame* Envelope::release_videoframe() {
-  clear_has_videoframe();
-  ::Proto::VideoFrame* temp = videoframe_;
-  videoframe_ = NULL;
+inline ::Proto::Scheme* Envelope::release_scheme() {
+  clear_has_scheme();
+  ::Proto::Scheme* temp = scheme_;
+  scheme_ = NULL;
   return temp;
 }
-inline void Envelope::set_allocated_videoframe(::Proto::VideoFrame* videoframe) {
-  delete videoframe_;
-  videoframe_ = videoframe;
-  if (videoframe) {
-    set_has_videoframe();
+inline void Envelope::set_allocated_scheme(::Proto::Scheme* scheme) {
+  delete scheme_;
+  scheme_ = scheme;
+  if (scheme) {
+    set_has_scheme();
   } else {
-    clear_has_videoframe();
+    clear_has_scheme();
   }
 }
 
@@ -6237,54 +6271,54 @@ inline void Configuration::set_allocated_globals(::Proto::wstring* globals) {
   }
 }
 
-// repeated .Proto.Uuid videoFramesIDs = 100;
-inline int Configuration::videoframesids_size() const {
-  return videoframesids_.size();
+// repeated .Proto.Uuid schemesIDs = 100;
+inline int Configuration::schemesids_size() const {
+  return schemesids_.size();
 }
-inline void Configuration::clear_videoframesids() {
-  videoframesids_.Clear();
+inline void Configuration::clear_schemesids() {
+  schemesids_.Clear();
 }
-inline const ::Proto::Uuid& Configuration::videoframesids(int index) const {
-  return videoframesids_.Get(index);
+inline const ::Proto::Uuid& Configuration::schemesids(int index) const {
+  return schemesids_.Get(index);
 }
-inline ::Proto::Uuid* Configuration::mutable_videoframesids(int index) {
-  return videoframesids_.Mutable(index);
+inline ::Proto::Uuid* Configuration::mutable_schemesids(int index) {
+  return schemesids_.Mutable(index);
 }
-inline ::Proto::Uuid* Configuration::add_videoframesids() {
-  return videoframesids_.Add();
+inline ::Proto::Uuid* Configuration::add_schemesids() {
+  return schemesids_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >&
-Configuration::videoframesids() const {
-  return videoframesids_;
+Configuration::schemesids() const {
+  return schemesids_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
-Configuration::mutable_videoframesids() {
-  return &videoframesids_;
+Configuration::mutable_schemesids() {
+  return &schemesids_;
 }
 
-// repeated .Proto.Envelope videoFrames = 101;
-inline int Configuration::videoframes_size() const {
-  return videoframes_.size();
+// repeated .Proto.Envelope schemes = 101;
+inline int Configuration::schemes_size() const {
+  return schemes_.size();
 }
-inline void Configuration::clear_videoframes() {
-  videoframes_.Clear();
+inline void Configuration::clear_schemes() {
+  schemes_.Clear();
 }
-inline const ::Proto::Envelope& Configuration::videoframes(int index) const {
-  return videoframes_.Get(index);
+inline const ::Proto::Envelope& Configuration::schemes(int index) const {
+  return schemes_.Get(index);
 }
-inline ::Proto::Envelope* Configuration::mutable_videoframes(int index) {
-  return videoframes_.Mutable(index);
+inline ::Proto::Envelope* Configuration::mutable_schemes(int index) {
+  return schemes_.Mutable(index);
 }
-inline ::Proto::Envelope* Configuration::add_videoframes() {
-  return videoframes_.Add();
+inline ::Proto::Envelope* Configuration::add_schemes() {
+  return schemes_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
-Configuration::videoframes() const {
-  return videoframes_;
+Configuration::schemes() const {
+  return schemes_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
-Configuration::mutable_videoframes() {
-  return &videoframes_;
+Configuration::mutable_schemes() {
+  return &schemes_;
 }
 
 // -------------------------------------------------------------------
@@ -6720,6 +6754,44 @@ inline void FblElementSignal::set_size(::google::protobuf::int32 value) {
   size_ = value;
 }
 
+// optional .Proto.wstring opName = 5;
+inline bool FblElementSignal::has_opname() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void FblElementSignal::set_has_opname() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void FblElementSignal::clear_has_opname() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void FblElementSignal::clear_opname() {
+  if (opname_ != NULL) opname_->::Proto::wstring::Clear();
+  clear_has_opname();
+}
+inline const ::Proto::wstring& FblElementSignal::opname() const {
+  return opname_ != NULL ? *opname_ : *default_instance_->opname_;
+}
+inline ::Proto::wstring* FblElementSignal::mutable_opname() {
+  set_has_opname();
+  if (opname_ == NULL) opname_ = new ::Proto::wstring;
+  return opname_;
+}
+inline ::Proto::wstring* FblElementSignal::release_opname() {
+  clear_has_opname();
+  ::Proto::wstring* temp = opname_;
+  opname_ = NULL;
+  return temp;
+}
+inline void FblElementSignal::set_allocated_opname(::Proto::wstring* opname) {
+  delete opname_;
+  opname_ = opname;
+  if (opname) {
+    set_has_opname();
+  } else {
+    clear_has_opname();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // FblElementParam
@@ -7085,39 +7157,77 @@ inline void FblElementParam::set_allocated_highlimit(::Proto::qvariant* highlimi
   }
 }
 
+// optional .Proto.wstring opName = 17;
+inline bool FblElementParam::has_opname() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void FblElementParam::set_has_opname() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void FblElementParam::clear_has_opname() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void FblElementParam::clear_opname() {
+  if (opname_ != NULL) opname_->::Proto::wstring::Clear();
+  clear_has_opname();
+}
+inline const ::Proto::wstring& FblElementParam::opname() const {
+  return opname_ != NULL ? *opname_ : *default_instance_->opname_;
+}
+inline ::Proto::wstring* FblElementParam::mutable_opname() {
+  set_has_opname();
+  if (opname_ == NULL) opname_ = new ::Proto::wstring;
+  return opname_;
+}
+inline ::Proto::wstring* FblElementParam::release_opname() {
+  clear_has_opname();
+  ::Proto::wstring* temp = opname_;
+  opname_ = NULL;
+  return temp;
+}
+inline void FblElementParam::set_allocated_opname(::Proto::wstring* opname) {
+  delete opname_;
+  opname_ = opname;
+  if (opname) {
+    set_has_opname();
+  } else {
+    clear_has_opname();
+  }
+}
+
 // -------------------------------------------------------------------
 
-// VideoFrame
+// Scheme
 
 // required .Proto.Uuid uuid = 1;
-inline bool VideoFrame::has_uuid() const {
+inline bool Scheme::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoFrame::set_has_uuid() {
+inline void Scheme::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoFrame::clear_has_uuid() {
+inline void Scheme::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoFrame::clear_uuid() {
+inline void Scheme::clear_uuid() {
   if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
   clear_has_uuid();
 }
-inline const ::Proto::Uuid& VideoFrame::uuid() const {
+inline const ::Proto::Uuid& Scheme::uuid() const {
   return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Uuid* VideoFrame::mutable_uuid() {
+inline ::Proto::Uuid* Scheme::mutable_uuid() {
   set_has_uuid();
   if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
   return uuid_;
 }
-inline ::Proto::Uuid* VideoFrame::release_uuid() {
+inline ::Proto::Uuid* Scheme::release_uuid() {
   clear_has_uuid();
   ::Proto::Uuid* temp = uuid_;
   uuid_ = NULL;
   return temp;
 }
-inline void VideoFrame::set_allocated_uuid(::Proto::Uuid* uuid) {
+inline void Scheme::set_allocated_uuid(::Proto::Uuid* uuid) {
   delete uuid_;
   uuid_ = uuid;
   if (uuid) {
@@ -7128,34 +7238,34 @@ inline void VideoFrame::set_allocated_uuid(::Proto::Uuid* uuid) {
 }
 
 // required .Proto.wstring strID = 2;
-inline bool VideoFrame::has_strid() const {
+inline bool Scheme::has_strid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoFrame::set_has_strid() {
+inline void Scheme::set_has_strid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoFrame::clear_has_strid() {
+inline void Scheme::clear_has_strid() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoFrame::clear_strid() {
+inline void Scheme::clear_strid() {
   if (strid_ != NULL) strid_->::Proto::wstring::Clear();
   clear_has_strid();
 }
-inline const ::Proto::wstring& VideoFrame::strid() const {
+inline const ::Proto::wstring& Scheme::strid() const {
   return strid_ != NULL ? *strid_ : *default_instance_->strid_;
 }
-inline ::Proto::wstring* VideoFrame::mutable_strid() {
+inline ::Proto::wstring* Scheme::mutable_strid() {
   set_has_strid();
   if (strid_ == NULL) strid_ = new ::Proto::wstring;
   return strid_;
 }
-inline ::Proto::wstring* VideoFrame::release_strid() {
+inline ::Proto::wstring* Scheme::release_strid() {
   clear_has_strid();
   ::Proto::wstring* temp = strid_;
   strid_ = NULL;
   return temp;
 }
-inline void VideoFrame::set_allocated_strid(::Proto::wstring* strid) {
+inline void Scheme::set_allocated_strid(::Proto::wstring* strid) {
   delete strid_;
   strid_ = strid;
   if (strid) {
@@ -7166,34 +7276,34 @@ inline void VideoFrame::set_allocated_strid(::Proto::wstring* strid) {
 }
 
 // required .Proto.wstring caption = 3;
-inline bool VideoFrame::has_caption() const {
+inline bool Scheme::has_caption() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void VideoFrame::set_has_caption() {
+inline void Scheme::set_has_caption() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void VideoFrame::clear_has_caption() {
+inline void Scheme::clear_has_caption() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void VideoFrame::clear_caption() {
+inline void Scheme::clear_caption() {
   if (caption_ != NULL) caption_->::Proto::wstring::Clear();
   clear_has_caption();
 }
-inline const ::Proto::wstring& VideoFrame::caption() const {
+inline const ::Proto::wstring& Scheme::caption() const {
   return caption_ != NULL ? *caption_ : *default_instance_->caption_;
 }
-inline ::Proto::wstring* VideoFrame::mutable_caption() {
+inline ::Proto::wstring* Scheme::mutable_caption() {
   set_has_caption();
   if (caption_ == NULL) caption_ = new ::Proto::wstring;
   return caption_;
 }
-inline ::Proto::wstring* VideoFrame::release_caption() {
+inline ::Proto::wstring* Scheme::release_caption() {
   clear_has_caption();
   ::Proto::wstring* temp = caption_;
   caption_ = NULL;
   return temp;
 }
-inline void VideoFrame::set_allocated_caption(::Proto::wstring* caption) {
+inline void Scheme::set_allocated_caption(::Proto::wstring* caption) {
   delete caption_;
   caption_ = caption;
   if (caption) {
@@ -7204,126 +7314,148 @@ inline void VideoFrame::set_allocated_caption(::Proto::wstring* caption) {
 }
 
 // required double width = 4;
-inline bool VideoFrame::has_width() const {
+inline bool Scheme::has_width() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void VideoFrame::set_has_width() {
+inline void Scheme::set_has_width() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void VideoFrame::clear_has_width() {
+inline void Scheme::clear_has_width() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void VideoFrame::clear_width() {
+inline void Scheme::clear_width() {
   width_ = 0;
   clear_has_width();
 }
-inline double VideoFrame::width() const {
+inline double Scheme::width() const {
   return width_;
 }
-inline void VideoFrame::set_width(double value) {
+inline void Scheme::set_width(double value) {
   set_has_width();
   width_ = value;
 }
 
 // required double height = 5;
-inline bool VideoFrame::has_height() const {
+inline bool Scheme::has_height() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void VideoFrame::set_has_height() {
+inline void Scheme::set_has_height() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void VideoFrame::clear_has_height() {
+inline void Scheme::clear_has_height() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void VideoFrame::clear_height() {
+inline void Scheme::clear_height() {
   height_ = 0;
   clear_has_height();
 }
-inline double VideoFrame::height() const {
+inline double Scheme::height() const {
   return height_;
 }
-inline void VideoFrame::set_height(double value) {
+inline void Scheme::set_height(double value) {
   set_has_height();
   height_ = value;
 }
 
 // required .Proto.SchemeUnit unit = 6;
-inline bool VideoFrame::has_unit() const {
+inline bool Scheme::has_unit() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void VideoFrame::set_has_unit() {
+inline void Scheme::set_has_unit() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void VideoFrame::clear_has_unit() {
+inline void Scheme::clear_has_unit() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void VideoFrame::clear_unit() {
+inline void Scheme::clear_unit() {
   unit_ = 0;
   clear_has_unit();
 }
-inline ::Proto::SchemeUnit VideoFrame::unit() const {
+inline ::Proto::SchemeUnit Scheme::unit() const {
   return static_cast< ::Proto::SchemeUnit >(unit_);
 }
-inline void VideoFrame::set_unit(::Proto::SchemeUnit value) {
+inline void Scheme::set_unit(::Proto::SchemeUnit value) {
   assert(::Proto::SchemeUnit_IsValid(value));
   set_has_unit();
   unit_ = value;
 }
 
+// optional bool excludeFromBuild = 7 [default = false];
+inline bool Scheme::has_excludefrombuild() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void Scheme::set_has_excludefrombuild() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void Scheme::clear_has_excludefrombuild() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void Scheme::clear_excludefrombuild() {
+  excludefrombuild_ = false;
+  clear_has_excludefrombuild();
+}
+inline bool Scheme::excludefrombuild() const {
+  return excludefrombuild_;
+}
+inline void Scheme::set_excludefrombuild(bool value) {
+  set_has_excludefrombuild();
+  excludefrombuild_ = value;
+}
+
 // repeated .Proto.Envelope layers = 100;
-inline int VideoFrame::layers_size() const {
+inline int Scheme::layers_size() const {
   return layers_.size();
 }
-inline void VideoFrame::clear_layers() {
+inline void Scheme::clear_layers() {
   layers_.Clear();
 }
-inline const ::Proto::Envelope& VideoFrame::layers(int index) const {
+inline const ::Proto::Envelope& Scheme::layers(int index) const {
   return layers_.Get(index);
 }
-inline ::Proto::Envelope* VideoFrame::mutable_layers(int index) {
+inline ::Proto::Envelope* Scheme::mutable_layers(int index) {
   return layers_.Mutable(index);
 }
-inline ::Proto::Envelope* VideoFrame::add_layers() {
+inline ::Proto::Envelope* Scheme::add_layers() {
   return layers_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
-VideoFrame::layers() const {
+Scheme::layers() const {
   return layers_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
-VideoFrame::mutable_layers() {
+Scheme::mutable_layers() {
   return &layers_;
 }
 
 // required .Proto.AfbElementCollection afbs = 101;
-inline bool VideoFrame::has_afbs() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+inline bool Scheme::has_afbs() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void VideoFrame::set_has_afbs() {
-  _has_bits_[0] |= 0x00000080u;
+inline void Scheme::set_has_afbs() {
+  _has_bits_[0] |= 0x00000100u;
 }
-inline void VideoFrame::clear_has_afbs() {
-  _has_bits_[0] &= ~0x00000080u;
+inline void Scheme::clear_has_afbs() {
+  _has_bits_[0] &= ~0x00000100u;
 }
-inline void VideoFrame::clear_afbs() {
+inline void Scheme::clear_afbs() {
   if (afbs_ != NULL) afbs_->::Proto::AfbElementCollection::Clear();
   clear_has_afbs();
 }
-inline const ::Proto::AfbElementCollection& VideoFrame::afbs() const {
+inline const ::Proto::AfbElementCollection& Scheme::afbs() const {
   return afbs_ != NULL ? *afbs_ : *default_instance_->afbs_;
 }
-inline ::Proto::AfbElementCollection* VideoFrame::mutable_afbs() {
+inline ::Proto::AfbElementCollection* Scheme::mutable_afbs() {
   set_has_afbs();
   if (afbs_ == NULL) afbs_ = new ::Proto::AfbElementCollection;
   return afbs_;
 }
-inline ::Proto::AfbElementCollection* VideoFrame::release_afbs() {
+inline ::Proto::AfbElementCollection* Scheme::release_afbs() {
   clear_has_afbs();
   ::Proto::AfbElementCollection* temp = afbs_;
   afbs_ = NULL;
   return temp;
 }
-inline void VideoFrame::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
+inline void Scheme::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
   delete afbs_;
   afbs_ = afbs;
   if (afbs) {
@@ -7334,34 +7466,34 @@ inline void VideoFrame::set_allocated_afbs(::Proto::AfbElementCollection* afbs) 
 }
 
 // optional .Proto.LogicScheme logics_scheme = 200;
-inline bool VideoFrame::has_logics_scheme() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+inline bool Scheme::has_logics_scheme() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void VideoFrame::set_has_logics_scheme() {
-  _has_bits_[0] |= 0x00000100u;
+inline void Scheme::set_has_logics_scheme() {
+  _has_bits_[0] |= 0x00000200u;
 }
-inline void VideoFrame::clear_has_logics_scheme() {
-  _has_bits_[0] &= ~0x00000100u;
+inline void Scheme::clear_has_logics_scheme() {
+  _has_bits_[0] &= ~0x00000200u;
 }
-inline void VideoFrame::clear_logics_scheme() {
+inline void Scheme::clear_logics_scheme() {
   if (logics_scheme_ != NULL) logics_scheme_->::Proto::LogicScheme::Clear();
   clear_has_logics_scheme();
 }
-inline const ::Proto::LogicScheme& VideoFrame::logics_scheme() const {
+inline const ::Proto::LogicScheme& Scheme::logics_scheme() const {
   return logics_scheme_ != NULL ? *logics_scheme_ : *default_instance_->logics_scheme_;
 }
-inline ::Proto::LogicScheme* VideoFrame::mutable_logics_scheme() {
+inline ::Proto::LogicScheme* Scheme::mutable_logics_scheme() {
   set_has_logics_scheme();
   if (logics_scheme_ == NULL) logics_scheme_ = new ::Proto::LogicScheme;
   return logics_scheme_;
 }
-inline ::Proto::LogicScheme* VideoFrame::release_logics_scheme() {
+inline ::Proto::LogicScheme* Scheme::release_logics_scheme() {
   clear_has_logics_scheme();
   ::Proto::LogicScheme* temp = logics_scheme_;
   logics_scheme_ = NULL;
   return temp;
 }
-inline void VideoFrame::set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme) {
+inline void Scheme::set_allocated_logics_scheme(::Proto::LogicScheme* logics_scheme) {
   delete logics_scheme_;
   logics_scheme_ = logics_scheme;
   if (logics_scheme) {

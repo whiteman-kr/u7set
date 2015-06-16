@@ -1,6 +1,6 @@
 #include "DialogAfblEditor.h"
 #include "ui_DialogAfblEditor.h"
-#include "DialogAfbProperties.h"
+#include "DialogFileEditor.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
 #include <QInputDialog>
@@ -128,6 +128,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	//
 
 	AfbElementSignal signal;
+	signal.setOpName("SignalName");
 	signal.setCaption("SignalCaption");
 	signal.setType(AfbSignalType::Analog);
 
@@ -143,6 +144,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	//
 
 	AfbElementParam param1;
+	param1.setOpName("ParamName");
 	param1.setCaption("Param1Caption");
 	param1.setType(AfbParamType::AnalogIntegral);
 	param1.setValue(0);
@@ -154,6 +156,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	//
 
 	AfbElementParam param2;
+	param2.setOpName("ParamName");
 	param2.setCaption("Param2Caption");
 	param2.setType(AfbParamType::AnalogFloatingPoint);
 	param2.setValue(1.5);
@@ -165,6 +168,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	//
 
 	AfbElementParam param3;
+	param3.setOpName("ParamName");
 	param3.setCaption("Param3Caption");
 	param3.setType(AfbParamType::DiscreteValue);
 	param3.setValue(false);
@@ -239,7 +243,7 @@ void DialogAfblEditor::on_m_view_clicked()
     QByteArray data;
     f->swapData(data);
 
-    DialogAfbProperties d(pFi->fileName(), &data, m_pDbController, true);
+	DialogFileEditor d(pFi->fileName(), &data, m_pDbController, true);
     d.exec();
 
     return;
@@ -274,7 +278,7 @@ void DialogAfblEditor::on_m_edit_clicked()
     QByteArray data;
     f->swapData(data);
 
-    DialogAfbProperties d(pFi->fileName(), &data, m_pDbController, false);
+	DialogFileEditor d(pFi->fileName(), &data, m_pDbController, false);
     if (d.exec() != QDialog::Accepted)
     {
         return;

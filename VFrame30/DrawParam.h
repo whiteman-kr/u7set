@@ -62,8 +62,7 @@ namespace VFrame30
 							 SchemeUnit unit,
 							 const QString& str,
 							 const QRectF& rect,
-							 int flags,
-							 bool Antialiasing = false);
+							 int flags);
 		//static void DrawText(QPainter* p, const FontParam& font, SchemeUnit unit, const QString& str, QPointF point, int flags);
 	};
 }

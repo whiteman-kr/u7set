@@ -67,25 +67,7 @@ namespace VFrame30
 			return;
 		}
 
-		// Draw rect and pins
-		//
-		FblItemRect::Draw(drawParam, scheme, pLayer);
-
-		// Draw other
-		//
 		QPainter* p = drawParam->painter();
-
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001);
-		}
 
 		int dpiX = 96;
 		QPaintDevice* pPaintDevice = p->device();
@@ -100,7 +82,25 @@ namespace VFrame30
 		}
 
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
-		
+
+		// Draw rect and pins
+		//
+		FblItemRect::Draw(drawParam, scheme, pLayer);
+
+		// Draw other
+		//
+		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		if (std::abs(r.left() - r.right()) < 0.000001)
+		{
+			r.setRight(r.left() + 0.000001);
+		}
+
+		if (std::abs(r.bottom() - r.top()) < 0.000001)
+		{
+			r.setBottom(r.top() + 0.000001);
+		}
+
 		if (inputsCount() > 0)
 		{
 			r.setLeft(r.left() + pinWidth);
@@ -114,9 +114,18 @@ namespace VFrame30
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
 
-		// Draw Afb element name and params
+		// Draw caption
 		//
 		QString text = afb->caption();
+
+		p->setPen(textColor());
+		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
+
+		// Draw params
+		//
+		text.clear();
+		r.setTop(topDocPt() + m_font.drawSize() * 1.4);
+		r.setHeight(heightDocPt() - m_font.drawSize() * 1.4);
 
 		const std::vector<Afbl::AfbElementParam>& params = afb->params();
 
@@ -133,11 +142,28 @@ namespace VFrame30
 				.arg(param.caption())
 				.arg(property(param.caption().toStdString().c_str()).toString());
 
-			text.append(QString("\n%1").arg(paramStr));
+			if (text.isEmpty() == true)
+			{
+				text = paramStr;
+			}
+			else
+			{
+				text.append(QString("\n%1").arg(paramStr));
+			}
 		}
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
+		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
+
+		// Draw line under caption
+		//
+//		QPen captionLinePen(lineColor());
+//		captionLinePen.setWidthF(0.0);		// Don't use getter!
+
+//		p->setPen(captionLinePen);
+
+//		p->drawLine(QPointF(r.left(), topDocPt() + m_font.drawSize() * 1.5),
+//					QPointF(r.left() + r.width(), topDocPt() + m_font.drawSize() * 1.5));
 
 		return;
 	}
