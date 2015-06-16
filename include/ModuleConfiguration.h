@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../include/ProtoSerialization.h"
+#include "../include/DeviceObject.h"
 
 // ----------------------------------------------------------------------------
 //
@@ -10,7 +11,7 @@
 
 namespace Hardware
 {
-	class ModuleConfFirmware : public QObject
+	class ModuleFirmware : public QObject
 	{
 		Q_OBJECT
 
@@ -19,13 +20,13 @@ namespace Hardware
 		Q_PROPERTY(int FrameCount READ frameCount)
 
 	public:
-		ModuleConfFirmware();
-		virtual ~ModuleConfFirmware();
+		ModuleFirmware();
+		virtual ~ModuleFirmware();
 
 		// Methods
 		//
 	public:
-		void init(QString type, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
+		void init(QString caption, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
 		bool save(QByteArray &dest) const;
         bool load(QString fileName);
         bool isEmpty() const;
@@ -44,11 +45,12 @@ namespace Hardware
 
         std::vector<quint8> frame(int frameIndex);
 
+		bool setChannelData(int channel, const QByteArray& data);
 
 		// Properties
 		//
 	public:
-        QString type() const;
+		QString caption() const;
 		QString subsysId() const;
 		int uartId() const;
 		int frameSize() const;
@@ -58,7 +60,7 @@ namespace Hardware
 		// Data
 		//
     private:
-        QString m_type;
+		QString m_caption;
 		QString m_subsysId;
 		int m_uartId = 0;
 		int m_frameSize = 0;
@@ -68,20 +70,22 @@ namespace Hardware
 		QString m_userName;
 
         std::vector<std::vector<quint8>> m_frames;
+
+		std::map<int, QByteArray> m_channelData;
     };
 
-    class ModuleConfCollection : public QObject
+	class ModuleFirmwareCollection : public QObject
 	{
 		Q_OBJECT
 
 	public:
-		ModuleConfCollection(const QString& projectName, const QString& userName, int changesetId);
-		virtual ~ModuleConfCollection();
+		ModuleFirmwareCollection(const QString& projectName, const QString& userName, int changesetId);
+		virtual ~ModuleFirmwareCollection();
 
 		// Methods
 		//
 	public:
-		Q_INVOKABLE QObject* jsGet(QString type, QString subsysId, int uartId, int frameSize, int frameCount);
+		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int uartId, int frameSize, int frameCount);
 
 		// Properties
 		//
@@ -90,10 +94,10 @@ namespace Hardware
 		// Data
 		//
 	public:
-		const std::map<QString, ModuleConfFirmware>& firmwares() const;
+		const std::map<QString, ModuleFirmware>& firmwares() const;
 
 	private:
-		std::map<QString, ModuleConfFirmware> m_firmwares;
+		std::map<QString, ModuleFirmware> m_firmwares;
 
 		QString m_projectName;
 		QString m_userName;

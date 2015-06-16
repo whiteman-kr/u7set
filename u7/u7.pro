@@ -101,7 +101,6 @@ SOURCES +=\
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
     DialogAfblEditor.cpp \
-    DialogAfbProperties.cpp \
     xmlsyntaxhighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
@@ -164,7 +163,6 @@ HEADERS  += \
     CheckInDialog.h \
     ProjectsTabPage.h \
     DialogAfblEditor.h \
-    DialogAfbProperties.h \
     xmlsyntaxhighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
@@ -208,7 +206,6 @@ FORMS    += \
     UserManagementDialog.ui \
     CheckInDialog.ui \
     DialogAfblEditor.ui \
-    DialogAfbProperties.ui \
     SchemeItemPropertiesDialog.ui \
     SchemePropertiesDialog.ui \
     DialogFileEditor.ui \

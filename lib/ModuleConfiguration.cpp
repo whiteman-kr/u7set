@@ -9,17 +9,17 @@
 
 namespace Hardware
 {
-	ModuleConfFirmware::ModuleConfFirmware()
+	ModuleFirmware::ModuleFirmware()
 	{
 	}
 
-	ModuleConfFirmware::~ModuleConfFirmware()
+	ModuleFirmware::~ModuleFirmware()
 	{
 	}
 
-	void ModuleConfFirmware::init(QString type, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
+	void ModuleFirmware::init(QString caption, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId)
 	{
-        m_type = type;
+		m_caption = caption;
 		m_subsysId = subsysId;
 		m_uartId = uartId;
 		m_frameSize = frameSize;
@@ -35,10 +35,12 @@ namespace Hardware
 			m_frames[i].resize(frameSize);
 		}
 
+		m_channelData.clear();
+
 		return;
 	}
 
-	bool ModuleConfFirmware::save(QByteArray& dest) const
+	bool ModuleFirmware::save(QByteArray& dest) const
     {
         QJsonObject jObject;
 
@@ -60,7 +62,7 @@ namespace Hardware
 
 		jObject.insert("userName", m_userName);
 		jObject.insert("projectName", m_projectName);
-        jObject.insert("type", type());
+		jObject.insert("caption", caption());
 		jObject.insert("subsysId", subsysId());
         jObject.insert("uartId", uartId());
         jObject.insert("frameSize", frameSize());
@@ -72,7 +74,7 @@ namespace Hardware
 		return true;
     }
 
-    bool ModuleConfFirmware::load(QString fileName)
+	bool ModuleFirmware::load(QString fileName)
     {
         m_frames.clear();
 
@@ -117,11 +119,11 @@ namespace Hardware
 		}
 		m_userName = jConfig.value("userName").toString();
 
-		if (jConfig.value("type").isUndefined() == true)
+		if (jConfig.value("caption").isUndefined() == true)
         {
             return false;
         }
-        m_type = jConfig.value("type").toString();
+		m_caption = jConfig.value("caption").toString();
 
 		if (jConfig.value("subsysId").isUndefined() == true)
         {
@@ -216,12 +218,12 @@ namespace Hardware
 
     }
 
-    bool ModuleConfFirmware::isEmpty() const
+	bool ModuleFirmware::isEmpty() const
     {
         return m_frames.size() == 0;
     }
 
-	bool ModuleConfFirmware::setData8(int frameIndex, int offset, quint8 data)
+	bool ModuleFirmware::setData8(int frameIndex, int offset, quint8 data)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(data)))
@@ -236,7 +238,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool ModuleConfFirmware::setData16(int frameIndex, int offset, quint16 data)
+	bool ModuleFirmware::setData16(int frameIndex, int offset, quint16 data)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(data)))
@@ -253,7 +255,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool ModuleConfFirmware::setData32(int frameIndex, int offset, quint32 data)
+	bool ModuleFirmware::setData32(int frameIndex, int offset, quint32 data)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(data)))
@@ -270,7 +272,7 @@ namespace Hardware
 		return true;
 	}
 
-    bool ModuleConfFirmware::setData64(int frameIndex, int offset, quint64 data)
+	bool ModuleFirmware::setData64(int frameIndex, int offset, quint64 data)
     {
         if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(data)))
@@ -287,7 +289,7 @@ namespace Hardware
         return true;
     }
 
-	quint8 ModuleConfFirmware::data8(int frameIndex, int offset)
+	quint8 ModuleFirmware::data8(int frameIndex, int offset)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(quint8)))
@@ -300,7 +302,7 @@ namespace Hardware
 
 	}
 
-	quint16 ModuleConfFirmware::data16(int frameIndex, int offset)
+	quint16 ModuleFirmware::data16(int frameIndex, int offset)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(quint16)))
@@ -312,7 +314,7 @@ namespace Hardware
 		return qToLittleEndian(static_cast<quint16>(*(m_frames[frameIndex].data() + offset)));
 	}
 
-	quint32 ModuleConfFirmware::data32(int frameIndex, int offset)
+	quint32 ModuleFirmware::data32(int frameIndex, int offset)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(quint32)))
@@ -324,7 +326,7 @@ namespace Hardware
 		return qToLittleEndian(static_cast<quint32>(*(m_frames[frameIndex].data() + offset)));
 	}
 
-	bool ModuleConfFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
+	bool ModuleFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
     {
         if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(quint64)) || start + count >= frameSize())
@@ -341,7 +343,7 @@ namespace Hardware
         return true;
     }
 
-	bool ModuleConfFirmware::storeHash64(int frameIndex, int offset, quint16 data)
+	bool ModuleFirmware::storeHash64(int frameIndex, int offset, quint16 data)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(quint64)))
@@ -358,7 +360,7 @@ namespace Hardware
 		return true;
 	}
 
-    std::vector<quint8> ModuleConfFirmware::frame(int frameIndex)
+	std::vector<quint8> ModuleFirmware::frame(int frameIndex)
     {
         if (frameIndex < 0 || frameIndex >= frameCount())
         {
@@ -369,59 +371,74 @@ namespace Hardware
         return m_frames[frameIndex];
     }
 
+	bool ModuleFirmware::setChannelData(int channel, const QByteArray& data)
+	{
+		auto it = m_channelData.find(channel);
+		if (it != m_channelData.end())
+		{
+			qDebug()<<"Error - channel "<<channel<<" already exists!";
+			assert(false);
+			return false;
+		}
 
-    QString ModuleConfFirmware::type() const
+		m_channelData[channel] = data;
+
+		return true;
+	}
+
+
+	QString ModuleFirmware::caption() const
     {
-        return m_type;
+		return m_caption;
     }
 
-	QString ModuleConfFirmware::subsysId() const
+	QString ModuleFirmware::subsysId() const
 	{
 		return m_subsysId;
 	}
 
-	int ModuleConfFirmware::uartId() const
+	int ModuleFirmware::uartId() const
 	{
 		return m_uartId;
 	}
 
-	int ModuleConfFirmware::frameSize() const
+	int ModuleFirmware::frameSize() const
 	{
 		return m_frameSize;
 	}
 
-	int ModuleConfFirmware::frameCount() const
+	int ModuleFirmware::frameCount() const
 	{
         return static_cast<int>(m_frames.size());
 	}
 
-	ModuleConfCollection::ModuleConfCollection(const QString &projectName, const QString &userName, int changesetId):
+	ModuleFirmwareCollection::ModuleFirmwareCollection(const QString &projectName, const QString &userName, int changesetId):
 		m_projectName(projectName),
 		m_userName(userName),
 		m_changesetId(changesetId)
 	{
 	}
 
-	ModuleConfCollection::~ModuleConfCollection()
+	ModuleFirmwareCollection::~ModuleFirmwareCollection()
 	{
 	}
 
-	QObject* ModuleConfCollection::jsGet(QString type, QString subsysId, int uartId, int frameSize, int frameCount)
+	QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int uartId, int frameSize, int frameCount)
 	{
 		bool newFirmware = m_firmwares.count(subsysId) == 0;
 
-		ModuleConfFirmware& fw = m_firmwares[subsysId];
+		ModuleFirmware& fw = m_firmwares[subsysId];
 
 		if (newFirmware == true)
 		{
-			fw.init(type, subsysId, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
+			fw.init(caption, subsysId, uartId, frameSize, frameCount, m_projectName, m_userName, m_changesetId);
 		}
 
 		QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);
 		return &fw;
 	}
 
-	const std::map<QString, ModuleConfFirmware>& ModuleConfCollection::firmwares() const
+	const std::map<QString, ModuleFirmware>& ModuleFirmwareCollection::firmwares() const
 	{
 		return m_firmwares;
 	}

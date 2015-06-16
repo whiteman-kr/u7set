@@ -17,6 +17,8 @@ class EditorDelegate: public QItemDelegate
 public:
 	EditorDelegate(QObject *parent);
 	QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+private:
 };
 
 class DialogSubsystemListEditor : public QDialog
@@ -28,15 +30,24 @@ public:
 	~DialogSubsystemListEditor();
 
 private:
-	void fillList();
+	bool askForSaveChanged();
+	bool saveChanges();
+
+protected:
+	virtual void closeEvent(QCloseEvent* e);
 
 private slots:
 	void on_m_add_clicked();
 	void on_m_remove_clicked();
-	void on_DialogSubsystemListEditor_accepted();
+	void on_buttonOk_clicked();
+	void on_buttonCancel_clicked();
+	void on_m_list_itemChanged(QTreeWidgetItem *item, int column);
 
 private:
 	Ui::DialogSubsystemListEditor *ui;
+
+	bool m_modified = false;
+	EditorDelegate* m_editorDelegate = nullptr;
 
 
 	DbController* db();
