@@ -7,6 +7,7 @@
 #include <QUuid>
 #include <QHash>
 #include <QUdpSocket>
+#include <QMutex>
 #include <cassert>
 #include "../include/SocketIO.h"
 
