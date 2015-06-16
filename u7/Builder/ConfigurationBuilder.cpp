@@ -3,7 +3,6 @@
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
 #include "../../include/DeviceObject.h"
-#include "Subsystem.h"
 
 namespace Builder
 {
@@ -49,10 +48,11 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
+	ConfigurationBuilder::ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
+		m_subsystems(subsystems),
 		m_log(log),
 		m_buildWriter(buildWriter),
 		m_changesetId(changesetId),
@@ -63,6 +63,7 @@ namespace Builder
 		assert(m_db);
 		assert(m_deviceRoot);
 		assert(m_signalSet);
+		assert(m_subsystems);
 		assert(m_log);
 		assert(m_buildWriter);
 
@@ -136,18 +137,13 @@ namespace Builder
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
-		Hardware::SubsystemStorage subsystems;
+		Hardware::ModuleFirmwareCollection confCollection(m_projectName, m_userName, m_changesetId);
 
-		QString errorCode;
-		if (subsystems.load(db(), errorCode) == false)
-		{
-			m_log->writeError(tr("Can't load subsystems file"), false, true);
-			if (errorCode.isEmpty() == false)
-			{
-				m_log->writeError(errorCode, false, false);
-			}
-			return false;
-		}
+		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
+		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
+
+		QJSValue jsConfCollection = jsEngine.newQObject(&confCollection);
+		QQmlEngine::setObjectOwnership(&confCollection, QQmlEngine::CppOwnership);
 
 		QJSValue jsLog = jsEngine.newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
@@ -155,16 +151,9 @@ namespace Builder
 		QJSValue jsSignalSetObject = jsEngine.newQObject(&jsSignalSet);
 		QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
 
-		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
-		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
+		QJSValue jsSubsystems = jsEngine.newQObject(m_subsystems);
+		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
 
-		Hardware::ModuleFirmwareCollection confCollection(m_projectName, m_userName, m_changesetId);
-
-		QJSValue jsConfCollection = jsEngine.newQObject(&confCollection);
-		QQmlEngine::setObjectOwnership(&confCollection, QQmlEngine::CppOwnership);
-
-		QJSValue jsSubsystemStorage = jsEngine.newQObject(&subsystems);
-		QQmlEngine::setObjectOwnership(&subsystems, QQmlEngine::CppOwnership);
 
 		// Run script
 		//
@@ -181,7 +170,7 @@ namespace Builder
 		args << jsConfCollection;
 		args << jsLog;
 		args << jsSignalSetObject;
-		args << jsSubsystemStorage;
+		args << jsSubsystems;
 
 		QJSValue jsResult = jsEval.call(args);
 
@@ -208,10 +197,16 @@ namespace Builder
 		{
 			for (auto i = confCollection.firmwares().begin(); i != confCollection.firmwares().end(); i++)
 			{
-				const Hardware::ModuleFirmware& f = i->second;
+				Hardware::ModuleFirmware& f = i->second;
 
 				QByteArray data;
-				f.save(data);
+
+				QString errorMsg;
+				if (f.save(data, &errorMsg) == false)
+				{
+					m_log->writeError(errorMsg, true, true);
+					return false;
+				}
 
 				QString path = f.subsysId();
 				QString fileName = f.caption();

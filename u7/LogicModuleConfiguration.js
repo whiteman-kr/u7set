@@ -152,6 +152,13 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     var uartId = 0x0102;                   // Check it !!!!
     
+    var ssKeyValue = subsystemStorage.ssKey(subSysID);
+    if (ssKeyValue == -1)
+    {
+        log.writeError("Subsystem key for " + subSysID + " was not found!", false, true);
+        return false;
+    }
+
     var maxChannel = 4;                 // Can be changed!
     var configStartFrames = 2;
     var configFrameCount = 19;          // number of frames in each configuration
@@ -163,7 +170,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
         return false;
     }
 
-    var confFirmware = confCollection.jsGet("LM-1", subSysID, uartId, frameSize, frameCount);
+    var confFirmware = confCollection.jsGet("LM-1", subSysID, ssKeyValue, uartId, frameSize, frameCount);
 
     // Configuration storage format
     //
@@ -176,12 +183,6 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     setData16(confFirmware, log, frameStorageConfig, ptr, 0x0001);     //CFG_Version
     ptr += 2;
     
-    var ssKeyValue = subsystemStorage.jsGetSsKey(subSysID);
-    if (ssKeyValue == -1)
-    {
-        log.writeError("Subsystem key for " + subSysID + " was not found!", false, true);
-        return false;
-    }
     
     var ssKey = ssKeyValue << 6;             //0000SSKEYY000000b
     setData16(confFirmware, log, frameStorageConfig, ptr, ssKey);

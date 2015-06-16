@@ -44,7 +44,7 @@ namespace Builder
 		Q_OBJECT
 	public:
 		ConfigurationBuilder() = delete;
-		ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
+		ConfigurationBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems, OutputLog* log, int changesetId, bool debug, QString projectName, QString userName, BuildResultWriter* buildWriter);
 		virtual ~ConfigurationBuilder();
 
 		bool build();
@@ -63,6 +63,7 @@ namespace Builder
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 		SignalSet* m_signalSet = nullptr;
+		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		mutable OutputLog* m_log = nullptr;
 		BuildResultWriter* m_buildWriter = nullptr;
 

@@ -292,7 +292,7 @@ namespace Hardware
 		return true;
 	}
 
-	int SubsystemStorage::jsGetSsKey(QString subsysId)
+	int SubsystemStorage::ssKey(QString subsysId)
 	{
 		for (auto s : m_subsystems)
 		{

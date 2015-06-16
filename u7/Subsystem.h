@@ -68,7 +68,7 @@ namespace Hardware
 		bool load(DbController* db, QString &errorCode);
 		bool save(DbController* db, const QString &comment);
 
-		Q_INVOKABLE int jsGetSsKey(QString subsysId);
+		Q_INVOKABLE int ssKey(QString subsysId);
 
 
 	private:
