@@ -903,7 +903,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateWriteConstToSignalCode(const AppSignal& appSignal, const LogicConst& constItem)
 	{
-		bool result = false;
+		bool result = true;
 	/*
 		quint16 ramAddrOffset = appSignal.ramAddr().offset();
 		quint16 ramAddrBit = appSignal.ramAddr().bit();
