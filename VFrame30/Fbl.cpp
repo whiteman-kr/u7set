@@ -93,7 +93,7 @@ namespace Afbl
 			return false;
 		}
 
-		if (xmlReader->name() != "AfbElementSignal")
+		if (QString::compare(xmlReader->name().toString(), "AfbElementSignal", Qt::CaseInsensitive) != 0)
 		{
 			xmlReader->raiseError(QObject::tr("AfbElementSignal expected."));
 			return !xmlReader->hasError();
@@ -111,7 +111,7 @@ namespace Afbl
 
 		if (xmlReader->attributes().hasAttribute("Type"))
 		{
-			if (xmlReader->attributes().value("Type").toString() == "Analog")
+			if (QString::compare(xmlReader->attributes().value("Type").toString(), "Analog", Qt::CaseInsensitive) == 0)
 			{
 				setType(AfbSignalType::Analog);
 			}
@@ -338,11 +338,11 @@ namespace Afbl
 		{
 			QString valueName = xmlReader->name().toString();
 
-			if (valueName == "Script")
+			if (QString::compare(valueName, "Script", Qt::CaseInsensitive) == 0)
 			{
 				while (xmlReader->readNextStartElement())
 				{
-					if (xmlReader->name() == "Changed")
+					if (QString::compare(xmlReader->name().toString(), "Changed", Qt::CaseInsensitive) == 0)
 					{
 						setChangedScript(xmlReader->readElementText());
 					}
@@ -354,7 +354,10 @@ namespace Afbl
 			}
 
 
-			if (valueName == "Value" || valueName == "Default" || valueName == "LowLimit" || valueName == "HighLimit")
+			if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0
+					|| QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0
+					|| QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0
+					|| QString::compare(valueName, "HighLimit", Qt::CaseInsensitive) == 0)
 			{
 				QString str = xmlReader->readElementText();
 				QVariant val;
@@ -386,19 +389,19 @@ namespace Afbl
 				}
 				else
 				{
-					if (valueName == "Value")
+					if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0)
 					{
 						setValue(val);
 					}
-					if (valueName == "Default")
+					if (QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0)
 					{
 						setDefaultValue(val);
 					}
-					if (valueName == "LowLimit")
+					if (QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0)
 					{
 						setLowLimit(val);
 					}
-					if (valueName == "HighLimit")
+					if (QString::compare(valueName, "HighLimit", Qt::CaseInsensitive) == 0)
 					{
 						setHighLimit(val);
 					}
@@ -682,7 +685,7 @@ namespace Afbl
 			return !xmlReader->hasError();
 		}
 
-		if (xmlReader->name() != "ApplicationFunctionalBlocks")
+		if (QString::compare(xmlReader->name().toString(), "ApplicationFunctionalBlocks", Qt::CaseInsensitive) != 0)
 		{
 			xmlReader->raiseError(QObject::tr("The file is not an ApplicationFunctionalBlocks file."));
 			return !xmlReader->hasError();
@@ -694,7 +697,7 @@ namespace Afbl
 		}
 
 
-		if (xmlReader->name() != "AfbElement")
+		if (QString::compare(xmlReader->name().toString(), "AfbElement", Qt::CaseInsensitive) != 0)
 		{
 			xmlReader->raiseError(QObject::tr("AfbElement expected."));
 			return !xmlReader->hasError();
@@ -711,26 +714,26 @@ namespace Afbl
 
 		while (xmlReader->readNextStartElement())
 		{
-			if (xmlReader->name() == "Properties")
+			if (QString::compare(xmlReader->name().toString(), "Properties", Qt::CaseInsensitive) == 0)
 			{
 				while (xmlReader->readNextStartElement())
 				{
-					if (xmlReader->name() == "Caption")
+					if (QString::compare(xmlReader->name().toString(), "Caption", Qt::CaseInsensitive) == 0)
 					{
 						setCaption(xmlReader->readElementText());
 					}
 
-					if (xmlReader->name() == "OpCode")
+					if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
 					{
 						setOpcode(xmlReader->readElementText().toInt());
 					}
 
-					if (xmlReader->name() == "HasRam")
+					if (QString::compare(xmlReader->name().toString(), "HasRam", Qt::CaseInsensitive) == 0)
 					{
 						setHasRam(xmlReader->readElementText() == "true" ? true : false);
 					}
 
-					if (xmlReader->name() == "RequiredStart")
+					if (QString::compare(xmlReader->name().toString(), "RequiredStart", Qt::CaseInsensitive) == 0)
 					{
 						setRequiredStart(xmlReader->readElementText() == "true" ? true : false);
 					}
@@ -741,17 +744,25 @@ namespace Afbl
 
 			// Input or output signals
 			//
-			if (xmlReader->name() == "OutputSignals" || xmlReader->name() == "InputSignals")
+			if (QString::compare(xmlReader->name().toString(), "OutputSignals", Qt::CaseInsensitive) == 0
+					|| 	QString::compare(xmlReader->name().toString(), "InputSignals", Qt::CaseInsensitive) == 0)
 			{
 				enum LoadSignalType {InputSignal, OutputSignal} loadSignalType;
-				loadSignalType = xmlReader->name() == "OutputSignals" ? LoadSignalType::OutputSignal
-															: LoadSignalType::InputSignal;
+
+				if (QString::compare(xmlReader->name().toString(), "OutputSignals", Qt::CaseInsensitive) == 0)
+				{
+					loadSignalType = LoadSignalType::OutputSignal;
+				}
+				else
+				{
+					loadSignalType = LoadSignalType::InputSignal;
+				}
 
 				// Read signals
 				//
 				while (xmlReader->readNextStartElement())
 				{
-					if (xmlReader->name() == "AfbElementSignal")
+					if (QString::compare(xmlReader->name().toString(), "AfbElementSignal", Qt::CaseInsensitive) == 0)
 					{
 						AfbElementSignal afbSignal;
 						afbSignal.loadFromXml(xmlReader);
@@ -773,13 +784,13 @@ namespace Afbl
 				continue;
 			}
 
-			if (xmlReader->name() == "Params")
+			if (QString::compare(xmlReader->name().toString(), "Params", Qt::CaseInsensitive) == 0)
 			{
 				// Read params
 				//
 				while (xmlReader->readNextStartElement())
 				{
-					if (xmlReader->name() == "AfbElementParam")
+					if (QString::compare(xmlReader->name().toString(), "AfbElementParam", Qt::CaseInsensitive) == 0)
 					{
 						AfbElementParam afbParam;
 						afbParam.loadFromXml(xmlReader);
@@ -794,19 +805,19 @@ namespace Afbl
 				continue;
 			}
 
-			if (xmlReader->name() == "CommonScript")
+			if (QString::compare(xmlReader->name().toString(), "CommonScript", Qt::CaseInsensitive) == 0)
 			{
 				// Read params
 				//
 				while (xmlReader->readNextStartElement())
 				{
-					if (xmlReader->name() == "Library")
+					if (QString::compare(xmlReader->name().toString(), "Library", Qt::CaseInsensitive) == 0)
 					{
 						setLibraryScript(xmlReader->readElementText());
 					}
 					else
 					{
-						if (xmlReader->name() == "AfterCreation")
+						if (QString::compare(xmlReader->name().toString(), "AfterCreation", Qt::CaseInsensitive) == 0)
 						{
 							setAfterCreationScript(xmlReader->readElementText());
 						}
