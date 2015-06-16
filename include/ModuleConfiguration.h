@@ -16,6 +16,7 @@ namespace Hardware
 		Q_OBJECT
 
 		Q_PROPERTY(int UartID READ uartId)
+		Q_PROPERTY(int SSKey READ ssKey)
 		Q_PROPERTY(int FrameSize READ frameSize)
 		Q_PROPERTY(int FrameCount READ frameCount)
 
@@ -26,8 +27,8 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		void init(QString caption, QString subsysId, int uartId, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
-		bool save(QByteArray &dest) const;
+		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName, const QString &userName, int changesetId);
+		bool save(QByteArray &dest, QString *errorMsg);
         bool load(QString fileName);
         bool isEmpty() const;
 
@@ -46,12 +47,14 @@ namespace Hardware
         std::vector<quint8> frame(int frameIndex);
 
 		bool setChannelData(int channel, int frameSize, int frameCount, const QByteArray& data, QString* errorMsg);
+		bool storeChannelData(QString *errorMsg);
 
 		// Properties
 		//
 	public:
 		QString caption() const;
 		QString subsysId() const;
+		quint16 ssKey() const;
 		int uartId() const;
 		int frameSize() const;
 		int frameCount() const;
@@ -62,6 +65,7 @@ namespace Hardware
     private:
 		QString m_caption;
 		QString m_subsysId;
+		quint16 m_ssKey = 0;
 		int m_uartId = 0;
 		int m_frameSize = 0;
 		int m_changesetId = 0;
@@ -85,7 +89,7 @@ namespace Hardware
 		// Methods
 		//
 	public:
-		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int uartId, int frameSize, int frameCount);
+		Q_INVOKABLE QObject* jsGet(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount);
 
 		// Properties
 		//
@@ -94,7 +98,7 @@ namespace Hardware
 		// Data
 		//
 	public:
-		const std::map<QString, ModuleFirmware>& firmwares() const;
+		std::map<QString, ModuleFirmware> &firmwares();
 
 	private:
 		std::map<QString, ModuleFirmware> m_firmwares;

@@ -206,7 +206,7 @@ namespace Builder
 
 			m_subsystemModuleFirmware.insert(subsysId, moduleFirmware);
 
-			moduleFirmware->init(lmCaption, subsysId, 0x0101, frameSize, frameCount,
+			moduleFirmware->init(lmCaption, subsysId, 10/*ssKey*/, 0x0101, frameSize, frameCount,
 								 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
 		}
 
@@ -237,7 +237,13 @@ namespace Builder
 
 			QByteArray moduleFirmwareFileData;
 
-			moduleFirmware->save(moduleFirmwareFileData);
+			QString errorMsg;
+
+			if (!moduleFirmware->save(moduleFirmwareFileData, &errorMsg))
+			{
+				m_log->writeError(errorMsg, false, true);
+				result = false;
+			}
 
 			result &= m_resultWriter->addFile(moduleFirmware->subsysId(), moduleFirmware->caption() + ".alb", moduleFirmwareFileData);
 		}
