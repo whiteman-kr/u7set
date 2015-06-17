@@ -2536,7 +2536,8 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 				std::shared_ptr<VFrame30::VideoItem> newItem(newItemRawPtr);
 
-				newItem->setGuid(QUuid::createUuid());
+				newItem->setNewGuid();
+
 				newItem->MoveItem(xdif, ydif);
 
 				newItems.push_back(newItem);

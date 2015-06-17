@@ -254,7 +254,7 @@ namespace VFrame30
 	{
 		QRectF itemRect(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 		QRectF detRect(x, y, width, height);
-		return itemRect.intersects(detRect);
+		return itemRect.intersects(detRect) | detRect.contains(itemRect.topLeft());	// contains for the empty rect (width or height is 0)
 	}
 
 	QRectF PosRectImpl::boundingRectInDocPt() const

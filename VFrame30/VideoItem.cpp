@@ -109,7 +109,7 @@ namespace VFrame30
 		assert(false);	// Implement in child classes
 	}
 
-	void VideoItem::snapToGrid(double gridSize)
+	void VideoItem::snapToGrid(double /*gridSize*/)
 	{
 		assert(false);
 	}
@@ -302,6 +302,14 @@ namespace VFrame30
 	void VideoItem::setGuid(const QUuid& guid)
 	{
 		m_guid = guid;
+		return;
+	}
+
+	void VideoItem::setNewGuid()
+	{
+		QUuid uuid = QUuid::createUuid();
+		setGuid(uuid);
+
 		return;
 	}
 
