@@ -174,7 +174,7 @@ namespace Builder
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
 		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
 
-		QString strID() const { return m_appLogicItem.m_fblItem->toSignalElement()->signalStrIds(); }
+		QString strID() const;
 
 		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
 		bool isFb() const { return m_appLogicItem.m_fblItem->isFblElement(); }
@@ -207,6 +207,9 @@ namespace Builder
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().opcode(); }		// return FB type
+
+		LogicAfbParam getAfbParamByIndex(int index) const;
+		LogicAfbSignal getAfbSignalByIndex(int index) const;
 	};
 
 
@@ -273,8 +276,8 @@ namespace Builder
 		AppSignalMap(ModuleLogicCompiler& compiler);
 		~AppSignalMap();
 
-		void insert(const AppItem* appItem);
-		void insert(const AppItem* appItem, const LogicPin& outputPin);
+		bool insert(const AppItem* appItem);
+		bool insert(const AppItem* appItem, const LogicPin& outputPin);
 
 		AppSignal* getByStrID(const QString& strID);
 
@@ -446,12 +449,11 @@ namespace Builder
 
 		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
-		bool generateWriteConstToSignalCode(const AppSignal& appSignal, const LogicConst& constItem);
-		bool generateWriteSignalToSignalCode(const AppSignal& appSignal, const AppSignal& srcSignal);
+		bool generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem);
+		bool generateWriteSignalToSignalCode(AppSignal &appSignal, const AppSignal& srcSignal);
 
 		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
 		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
-
 
 		bool copyDiscreteSignalsToRegBuf();
 		bool copyOutModulesAppLogicDataToModulesMemory();
@@ -466,8 +468,7 @@ namespace Builder
 		//bool initAppFbVariableParams(AppFb* appFb);
 
 		bool getUsedAfbs();
-		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
-
+		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
 
 		bool copyInOutSignalsToRegistration();
 

@@ -67,6 +67,9 @@ namespace Afbl
 		Q_INVOKABLE int size() const;
         void setSize(int value);
 
+		bool isAnalog() const;
+		bool isDiscrete() const;
+
 		// Data
 		//
 private:

@@ -200,6 +200,15 @@ namespace Afbl
         m_size = value;
     }
 
+	bool AfbElementSignal::isAnalog() const
+	{
+		return m_type == AfbSignalType::Analog;
+	}
+
+	bool AfbElementSignal::isDiscrete() const
+	{
+		return m_type == AfbSignalType::Discrete;
+	}
 
     //
 	//

@@ -7,6 +7,9 @@ namespace Builder
 									result = false; \
 									break;
 
+#define RESULT_FALSE_BREAK			result = false; \
+									break;
+
 #define ASSERT_RETURN_FALSE			assert(false); \
 									return false;
 
@@ -789,7 +792,7 @@ namespace Builder
 	{
 		if (!m_appSignals.contains(appItem->guid()))
 		{
-			assert(false);
+			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(appItem->guid().toString()), false, true);
 			return false;
 		}
 
@@ -891,15 +894,7 @@ namespace Builder
 				{
 					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(srcAppSignal->strID()), false, true);
 
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				if (appSignal->isAnalog() != srcAppSignal->isAnalog() ||
-					appSignal->dataSize() != srcAppSignal->dataSize())
-				{
-					m_log->writeError(QString(tr("Signals is not compatible: %1 & %2")).arg(srcAppSignal->strID()).arg(appSignal->strID()), false, true);
-
-					ASSERT_RESULT_FALSE_BREAK;
+					RESULT_FALSE_BREAK
 				}
 
 				result &= generateWriteSignalToSignalCode(*appSignal, *srcAppSignal);
@@ -911,14 +906,17 @@ namespace Builder
 			}
 		}
 
+		if(!appSignal->isComputed())
+		{
+			m_log->writeError(QString(tr("Signal value undefined: %1")).arg(appSignal->strID()), false, true);
+		}
+
 		return result;
 	}
 
 
-	bool ModuleLogicCompiler::generateWriteConstToSignalCode(const AppSignal& appSignal, const LogicConst& constItem)
+	bool ModuleLogicCompiler::generateWriteConstToSignalCode(AppSignal &appSignal, const LogicConst& constItem)
 	{
-		bool result = true;
-
 		quint16 ramAddrOffset = appSignal.ramAddr().offset();
 		quint16 ramAddrBit = appSignal.ramAddr().bit();
 
@@ -933,7 +931,8 @@ namespace Builder
 			if (!constItem.isIntegral())
 			{
 				m_log->writeError(QString(tr("Floating point constant connected to discrete signal: ")).arg(appSignal.strID()), false, true);
-				result = false;
+
+				return false;
 			}
 			else
 			{
@@ -950,7 +949,8 @@ namespace Builder
 			if (!constItem.isIntegral())
 			{
 				m_log->writeError(QString(tr("Floating point constant connected to integral analog signal")), false, true);
-				result = false;
+
+				return false;
 			}
 			else
 			{
@@ -962,8 +962,8 @@ namespace Builder
 			break;
 
 		default:
-			result = false;
 			assert(false);
+			return false;
 		}
 
 		if (cmd.isValidCommand())
@@ -972,12 +972,55 @@ namespace Builder
 			m_code.append(cmd);
 		}
 
-		return result;
+		appSignal.setComputed();
+
+		return true;
 	}
 
 
-	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(const AppSignal& appSignal, const AppSignal& srcSignal)
+	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(AppSignal& appSignal, const AppSignal& srcSignal)
 	{
+		if (appSignal.isAnalog())
+		{
+			if (!srcSignal.isAnalog())
+			{
+				msg = QString(tr("Discrete signal %1 connected to analog signal %2")).
+						arg(srcSignal.strID()).arg(appSignal.strID());
+
+				m_log->writeError(msg, false, true);
+
+				return false;
+			}
+		}
+		else
+		{
+			if (appSignal.isDiscrete())
+			{
+				if (!srcSignal.isDiscrete())
+				{
+					msg = QString(tr("Analog signal %1 connected to discrete signal %2")).
+							arg(srcSignal.strID()).arg(appSignal.strID());
+
+					m_log->writeError(msg, false, true);
+
+					return false;
+				}
+			}
+			else
+			{
+				assert(false);		// unknown afb signal type
+				return false;
+			}
+		}
+
+		if (appSignal.dataSize() != srcSignal.dataSize())
+		{
+			m_log->writeError(QString(tr("Signals %1 and  %2 is not compatible by dataSize")).
+							  arg(srcSignal.strID()).arg(appSignal.strID()), false, true);
+
+			return false;
+		}
+
 		Command cmd;
 
 		int srcRamAddrOffset = srcSignal.ramAddr().offset();
@@ -1012,6 +1055,8 @@ namespace Builder
 			m_code.newLine();
 			m_code.append(cmd);
 		}
+
+		appSignal.setComputed();
 
 		return true;
 	}
@@ -1087,7 +1132,8 @@ namespace Builder
 		{
 			if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
 			{
-				ASSERT_RESULT_FALSE_BREAK
+				m_log->writeError(QString(tr("Input pin %1 of %2 has wrong direction")).arg(inPin.caption()).arg(appFb->strID()), false, true);
+				RESULT_FALSE_BREAK
 			}
 
 			int connectedPinsCount = 1;
@@ -1098,21 +1144,24 @@ namespace Builder
 				{
 					m_log->writeError(QString(tr("More than one pin is connected to the input")), false, true);
 
-					ASSERT_RESULT_FALSE_BREAK
+					RESULT_FALSE_BREAK
 				}
 
 				connectedPinsCount++;
 
 				if (!m_pinParent.contains(connectedPinGuid))
 				{
-					ASSERT_RESULT_FALSE_BREAK
+					m_log->writeError(QString(tr("Pin is not found, GUID %1")).arg(connectedPinGuid.toString()), false, true);
+
+					RESULT_FALSE_BREAK
 				}
 
 				AppItem* connectedPinParent = m_pinParent[connectedPinGuid];
 
 				if (connectedPinParent == nullptr)
 				{
-					ASSERT_RESULT_FALSE_BREAK
+					m_log->writeError(QString(tr("Pin parent is NULL, pin GUID ")).arg(connectedPinGuid.toString()), false, true);
+					RESULT_FALSE_BREAK
 				}
 
 				if (connectedPinParent->isConst())
@@ -1137,7 +1186,7 @@ namespace Builder
 					{
 						m_log->writeError(QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()), false, true);
 
-						ASSERT_RESULT_FALSE_BREAK
+						RESULT_FALSE_BREAK
 					}
 
 					signalGuid = m_outPinSignal[connectedPinGuid];
@@ -1147,21 +1196,23 @@ namespace Builder
 				{
 					m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()), false, true);
 
-					ASSERT_RESULT_FALSE_BREAK
+					RESULT_FALSE_BREAK
 				}
 
 				AppSignal* appSignal = m_appSignals[signalGuid];
 
 				if (appSignal == nullptr)
 				{
-					ASSERT_RESULT_FALSE_BREAK
+					m_log->writeError(QString(tr("Signal pointer is NULL, signal GUID: %1")).arg(signalGuid.toString()), false, true);
+
+					RESULT_FALSE_BREAK
 				}
 
 				if (!appSignal->isComputed())
 				{
 					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(appSignal->strID()), false, true);
 
-					ASSERT_RESULT_FALSE_BREAK
+					RESULT_FALSE_BREAK
 				}
 
 				result &= generateWriteSignalToFbCode(*appFb, inPin, *appSignal);
@@ -1260,6 +1311,41 @@ namespace Builder
 		quint16 fbType = appFb.opcode();
 		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = inPin.afbOperandIndex();
+
+		LogicAfbSignal afbSignal = appFb.getAfbSignalByIndex(fbParamNo);
+
+		if (afbSignal.isAnalog())
+		{
+			if (!appSignal.isAnalog())
+			{
+				msg = QString(tr("Discrete signal %1 connected to analog input %2.%3")).
+						arg(appSignal.strID()).arg(appFb.strID()).arg(afbSignal.caption());
+
+				m_log->writeError(msg, false, true);
+
+				return false;
+			}
+		}
+		else
+		{
+			if (afbSignal.isDiscrete())
+			{
+				if (!appSignal.isDiscrete())
+				{
+					msg = QString(tr("Analog signal %1 connected to discrete input %2.%3")).
+							arg(appSignal.strID()).arg(appFb.strID()).arg(afbSignal.caption());
+
+					m_log->writeError(msg, false, true);
+
+					return false;
+				}
+			}
+			else
+			{
+				assert(false);		// unknown afb signal type
+				return false;
+			}
+		}
 
 		Command cmd;
 
@@ -1363,8 +1449,7 @@ namespace Builder
 		if (!m_appSignals.contains(signalGuid))
 		{
 			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()), false, true);
-
-			ASSERT_RETURN_FALSE
+			return false;
 		}
 
 		AppSignal* appSignal = m_appSignals[signalGuid];
@@ -1377,6 +1462,41 @@ namespace Builder
 		quint16 fbType = appFb.opcode();
 		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = outPin.afbOperandIndex();
+
+		LogicAfbSignal afbSignal = appFb.getAfbSignalByIndex(fbParamNo);
+
+		if (afbSignal.isAnalog())
+		{
+			if (!appSignal->isAnalog())
+			{
+				msg = QString(tr("Analog output %1.%2 connected to discrete signal %3")).
+						arg(appFb.strID()).arg(afbSignal.caption()).arg(appSignal->strID());
+
+				m_log->writeError(msg, false, true);
+
+				return false;
+			}
+		}
+		else
+		{
+			if (afbSignal.isDiscrete())
+			{
+				if (!appSignal->isDiscrete())
+				{
+					msg = QString(tr("Discrete output %1.%2 connected to analog signal %3")).
+							arg(appFb.strID()).arg(afbSignal.caption()).arg(appSignal->strID());
+
+					m_log->writeError(msg, false, true);
+
+					return false;
+				}
+			}
+			else
+			{
+				assert(false);		// unknown afb signal type
+				return false;
+			}
+		}
 
 		Command cmd;
 
@@ -1608,6 +1728,8 @@ namespace Builder
 		m_appItems.clear();
 		m_pinParent.clear();
 
+		bool result = true;
+
 		for(const AppLogicItem& logicItem : m_moduleLogic->items())
 		{
 			// build QHash<QUuid, AppItem*> m_appItems
@@ -1615,7 +1737,15 @@ namespace Builder
 			//
 			if (m_appItems.contains(logicItem.m_fblItem->guid()))
 			{
-				assert(false);	// guid already in map!
+				AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
+
+				msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
+						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
+
+				m_log->writeError(msg, false, true);
+
+				result = false;
+
 				continue;
 			}
 
@@ -1633,7 +1763,15 @@ namespace Builder
 			{
 				if (m_pinParent.contains(input.guid()))
 				{
-					assert(false);	// guid already in map!
+					AppItem* firstItem = m_pinParent[input.guid()];
+
+					msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
+							arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+
+					m_log->writeError(msg, false, true);
+
+					result = false;
+
 					continue;
 				}
 
@@ -1646,7 +1784,15 @@ namespace Builder
 			{
 				if (m_pinParent.contains(output.guid()))
 				{
-					assert(false);	// guid already in map!
+					AppItem* firstItem = m_pinParent[output.guid()];
+
+					msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
+							arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+
+					m_log->writeError(msg, false, true);
+
+					result = false;
+
 					continue;
 				}
 
@@ -1654,7 +1800,7 @@ namespace Builder
 			}
 		}
 
-		return true;
+		return result;
 	}
 
 
@@ -1695,6 +1841,8 @@ namespace Builder
 		// build map: signal GUID -> ApplicationSignal
 		//
 
+		bool result = true;
+
 		for(AppItem* item : m_appItems)
 		{
 			if (!item->isSignal())
@@ -1702,7 +1850,7 @@ namespace Builder
 				continue;
 			}
 
-			m_appSignals.insert(item);
+			result &= m_appSignals.insert(item);
 		}
 
 		// find fbl's outputs, which NOT connected to signals
@@ -1757,7 +1905,7 @@ namespace Builder
 				{
 					// create shadow signal with Uuid of this output pin
 					//
-					m_appSignals.insert(item, output);
+					result &= m_appSignals.insert(item, output);
 
 					// output pin connected to shadow signal with same guid
 					//
@@ -1766,7 +1914,7 @@ namespace Builder
 			}
 		}
 
-		return true;
+		return result;
 	}
 
 
@@ -2368,6 +2516,53 @@ namespace Builder
 	}
 
 
+	QString AppItem::strID() const
+	{
+		if (m_appLogicItem.m_fblItem->isSignalElement())
+		{
+			VFrame30::VideoItemSignal* itemSignal= m_appLogicItem.m_fblItem->toSignalElement();
+
+			if (itemSignal == nullptr)
+			{
+				assert(false);
+				return "";
+			}
+
+			return itemSignal->signalStrIds();
+		}
+
+		if (m_appLogicItem.m_fblItem->isFblElement())
+		{
+			VFrame30::VideoItemFblElement* itemFb= m_appLogicItem.m_fblItem->toFblElement();
+
+			if (itemFb == nullptr)
+			{
+				assert(false);
+				return "";
+			}
+
+			return itemFb->afbStrID();
+		}
+
+		if (m_appLogicItem.m_fblItem->isConstElement())
+		{
+			VFrame30::SchemeItemConst* itemConst= m_appLogicItem.m_fblItem->toSchemeItemConst();
+
+			if (itemConst == nullptr)
+			{
+				assert(false);
+				return "";
+			}
+
+
+			return QString("Const(%1)").arg(itemConst->valueToString());
+		}
+
+		assert(false);		// unknown type of item
+		return "";
+	}
+
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppFb class implementation
@@ -2377,6 +2572,46 @@ namespace Builder
 		AppItem(*appItem),
 		m_instance(instance)
 	{
+	}
+
+
+	LogicAfbParam AppFb::getAfbParamByIndex(int index) const
+	{
+		for(LogicAfbParam param : afb().params())
+		{
+			if (param.operandIndex() == index)
+			{
+				return param;
+			}
+		}
+
+		assert(false);			// bad param index
+
+		return LogicAfbParam();
+	}
+
+
+	LogicAfbSignal AppFb::getAfbSignalByIndex(int index) const
+	{
+		for(LogicAfbSignal input : afb().inputSignals())
+		{
+			if (input.operandIndex() == index)
+			{
+				return input;
+			}
+		}
+
+		for(LogicAfbSignal output : afb().outputSignals())
+		{
+			if (output.operandIndex() == index)
+			{
+				return output;
+			}
+		}
+
+		assert(false);			// bad signal index
+
+		return LogicAfbSignal();
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -2481,12 +2716,11 @@ namespace Builder
 
 	// insert signal from application logic scheme
 	//
-	void AppSignalMap::insert(const AppItem* appItem)
+	bool AppSignalMap::insert(const AppItem* appItem)
 	{
 		if (!appItem->isSignal())
 		{
-			assert(false);
-			return;
+			ASSERT_RETURN_FALSE
 		}
 
 		QString strID = appItem->strID();
@@ -2496,23 +2730,15 @@ namespace Builder
 			strID = "#" + strID;
 		}
 
-		if (strID == "#SYSTEMID_RACKID_CHASSISID_MD03_CTRLIN_INH25B")
-		{
-			int a = 0;
-			a++;
-		}
-
 		const Signal* s = m_compiler.getSignal(strID);
 
 		if (s == nullptr)
 		{
-			// signal identifier is not found
-
 			QString msg = QString(tr("Signal identifier is not found: %1")).arg(strID);
 
 			m_compiler.log().writeError(msg, false, true);
 
-			return;
+			return false;
 		}
 
 		AppSignal* appSignal = nullptr;
@@ -2537,31 +2763,21 @@ namespace Builder
 		assert(appSignal != nullptr);
 
 		HashedVector<QUuid, AppSignal*>::insert(appItem->guid(), appSignal);
+
+		return true;
 	}
 
 
 	// insert "shadow" signal bound to FB output pin
 	//
-	void AppSignalMap::insert(const AppItem* appItem, const LogicPin& outputPin)
+	bool AppSignalMap::insert(const AppItem* appItem, const LogicPin& outputPin)
 	{
 		if (!appItem->isFb())
 		{
-			assert(false);
-			return;
+			ASSERT_RETURN_FALSE
 		}
 
 		const LogicAfbSignal s = m_compiler.getAfbSignal(appItem->afb().strID(), outputPin.afbOperandIndex());
-
-/*		if (s == nullptr)
-		{
-			// signal identifier is not found
-
-			QString msg = QString(tr("Signal identifier is not found: %1")).arg(outputPin.guid().toString());
-
-			m_compiler.log().writeError(msg, false, true);
-
-			return;
-		}*/
 
 		SignalType signalType = SignalType::Discrete;
 
@@ -2579,6 +2795,7 @@ namespace Builder
 
 		default:
 			assert(false);
+			return false;
 		}
 
 		QUuid outPinGuid = outputPin.guid();
@@ -2609,6 +2826,8 @@ namespace Builder
 		assert(appSignal != nullptr);
 
 		HashedVector<QUuid, AppSignal*>::insert(outPinGuid, appSignal);
+
+		return true;
 	}
 
 
