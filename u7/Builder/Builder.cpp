@@ -579,7 +579,9 @@ namespace Builder
 					if (property.isValid())
 					{
 						const char* name = property.name();
-						equipmentWriter.writeAttribute(name, currentDevice->property(name).toString());
+						QVariant tmp = currentDevice->property(name);
+						assert(tmp.convert(QMetaType::QString));
+						equipmentWriter.writeAttribute(name, tmp.toString());
 					}
 				}
 			}, [&equipmentWriter](Hardware::DeviceObject*)

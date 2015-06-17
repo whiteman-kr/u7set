@@ -43,7 +43,8 @@ HEADERS += \
     DiagTabPage.h \
     ModuleConfigurator.h \
     SettingsForm.h \
-    ../include/Crc.h
+	../include/Crc.h \
+	../include/CUtils.h
 
 SOURCES += \
 	main.cpp \
@@ -60,7 +61,6 @@ SOURCES += \
     ModuleConfigurator.cpp \
     SettingsForm.cpp \
     ../lib/Crc.cpp \
-    ../lib/SignalMask.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui \
