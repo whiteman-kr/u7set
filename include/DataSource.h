@@ -56,6 +56,8 @@ private:
 	QHostAddress m_hostAddress;
 	QString m_name;
 	quint32 m_partCount = 1;
+	QVector<int> m_relatedSignalIndexes;
+
 
 	// dynamic information
 	//
@@ -86,6 +88,9 @@ public:
 	void partCount(quint32 partCount) { m_partCount = partCount; }
 
 	void setState(DataSourceState state) { m_state = state; }
+
+	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
+	const QVector<int>& signalIndexes() { return m_relatedSignalIndexes; }
 
 	void getInfo(DataSourceInfo& dsi);
 	void setInfo(const DataSourceInfo& dsi);

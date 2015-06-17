@@ -94,7 +94,8 @@ HEADERS += \
     ../include/DeviceObject.h \
     ../include/DbStruct.h \
     ../include/ProtoSerialization.h \
-    ../include/Signal.h
+    ../include/Signal.h \
+    ../include/CUtils.h
 
 include(../qtservice/src/qtservice.pri)
 
