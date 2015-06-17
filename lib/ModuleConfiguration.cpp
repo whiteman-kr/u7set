@@ -43,10 +43,13 @@ namespace Hardware
 
 	bool ModuleFirmware::save(QByteArray& dest, QString* errorMsg)
     {
-		if (storeChannelData(errorMsg) == false)
-		{
-			return false;
-		}
+        if (m_channelData.size() != 0)
+        {
+            if (storeChannelData(errorMsg) == false)
+            {
+                return false;
+            }
+        }
 
         QJsonObject jObject;
 
@@ -417,8 +420,17 @@ namespace Hardware
 
 	bool ModuleFirmware::storeChannelData(QString* errorMsg)
 	{
+        if (m_channelData.size() == 0)
+        {
+            // no channel data supplied
+            //
+            return true;
+        }
+
 		const int storageConfigFrame = 1;
 		const int startDataFrame = 2;
+
+        quint16 ssKeyValue = m_ssKey << 6;
 
 		if (frameCount() < 3)
 		{
@@ -473,7 +485,7 @@ namespace Hardware
 			*(quint16*)ptr = qToBigEndian((quint16)uartId());	//Data type (configuration)
 			ptr += sizeof(quint16);
 
-			*(quint64*)ptr = qToBigEndian(CUtils::calcHash(&m_ssKey, sizeof(m_ssKey)));
+            *(quint64*)ptr = qToBigEndian(CUtils::calcHash(&ssKeyValue, sizeof(ssKeyValue)));
 			ptr += sizeof(quint64);
 
 			frame++;
@@ -515,7 +527,7 @@ namespace Hardware
 		*(quint16*)ptr = qToBigEndian((quint16)0x0001);	// Configuration structure version
 		ptr += sizeof(quint16);
 
-		*(quint16*)ptr = qToBigEndian((quint16)m_ssKey);	// Subsystem key
+        *(quint16*)ptr = qToBigEndian((quint16)ssKeyValue);	// Subsystem key
 		ptr += sizeof(quint16);
 
 		ptr += sizeof(quint64);	//reserved
