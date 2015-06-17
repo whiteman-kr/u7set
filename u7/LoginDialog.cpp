@@ -38,6 +38,13 @@ void LoginDialog::on_buttonBox_accepted()
 	m_username = ui->usernameEdit->text().trimmed();
 	m_password = ui->passwordEdit->text();
 
+	if (m_password.isEmpty() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Password cannon be empty"));
+		ui->passwordEdit->setFocus();
+		reject();
+	}
+
 	theSettings.loginDialog_defaultUsername = m_username;
 	return;
 }

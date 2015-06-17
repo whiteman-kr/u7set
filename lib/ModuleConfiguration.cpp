@@ -446,7 +446,7 @@ namespace Hardware
 
 		int frame = startDataFrame;
 
-		for (int c = 0; c < channelNumbers.size(); c++)
+		for (size_t c = 0; c < channelNumbers.size(); c++)
 		{
 			int channel = channelNumbers[c];
 
@@ -523,7 +523,7 @@ namespace Hardware
 		*(quint16*)ptr = qToBigEndian((quint16)channelNumbers.size());	// Configuration channels quantity
 		ptr += sizeof(quint16);
 
-		for (int i = 0; i < channelStartFrame.size(); i++)	// Start frames
+		for (size_t i = 0; i < channelStartFrame.size(); i++)	// Start frames
 		{
 			*(quint16*)ptr = qToBigEndian((quint16)channelStartFrame[i]);
 			ptr += sizeof(quint16);
