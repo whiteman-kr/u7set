@@ -1069,7 +1069,7 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 	return;
 }
 
-void Configurator::writeConfData(ModuleConfFirmware *conf)
+void Configurator::writeConfData(ModuleFirmware *conf)
 {
     emit communicationStarted();
 

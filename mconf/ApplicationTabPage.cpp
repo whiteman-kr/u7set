@@ -20,7 +20,7 @@ bool ApplicationTabPage::isFileLoaded() const
     return m_confFirmware.isEmpty() == false;
 }
 
-Hardware::ModuleConfFirmware *ApplicationTabPage::configuration()
+ModuleFirmware *ApplicationTabPage::configuration()
 {
     return &m_confFirmware;
 }
@@ -33,7 +33,12 @@ void ApplicationTabPage::openFileClicked()
 
 	fd.setAcceptMode(QFileDialog::AcceptOpen);
 	fd.setFileMode(QFileDialog::ExistingFile);
-    fd.setNameFilter("Module Conf Binary Files (*.mcb);; All Files (*.*)");
+
+	QStringList filters;
+	filters << "Module configuration files (*.mcb)"
+			<< "Application logic files (*.alb)"
+			<< "All files (*.*)";
+	fd.setNameFilters(filters);
 	
 	if (fd.exec() == QDialog::Rejected)
 	{
