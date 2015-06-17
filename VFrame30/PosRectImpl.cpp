@@ -84,6 +84,22 @@ namespace VFrame30
 		setTopDocPt(topDocPt() + vertOffsetDocPt);
 	}
 
+	void PosRectImpl::snapToGrid(double gridSize)
+	{
+		QPointF lt(leftDocPt(), topDocPt());
+		QPointF br(leftDocPt() + widthDocPt(), topDocPt() + heightDocPt());
+
+		QPointF leftTop = CUtils::snapToGrid(lt, gridSize);
+		QPointF bottomRight = CUtils::snapToGrid(br, gridSize);
+
+		setLeftDocPt(leftTop.x());
+		setTopDocPt(leftTop.y());
+		setWidthDocPt(bottomRight.x() - leftDocPt());
+		setHeightDocPt(bottomRight.y() - topDocPt());
+
+		return;
+	}
+
 	double PosRectImpl::GetWidthInDocPt() const
 	{
 		return m_widthDocPt;

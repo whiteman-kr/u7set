@@ -17,7 +17,7 @@
 #include "../VFrame30/SchemeItemConst.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/FblItem.h"
-
+#include "Subsystem.h"
 
 namespace Builder
 {
@@ -48,6 +48,7 @@ namespace Builder
 		Q_OBJECT
 
 	private:
+		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
 		Afbl::AfbElementCollection* m_afbl = nullptr;
@@ -66,11 +67,13 @@ namespace Builder
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool compileModulesLogics();
-		bool writeModuleLogicCompilerResult(QString subsysId, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
+		bool writeModuleLogicCompilerResult(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 		bool saveModulesLogicsFiles();
 
 	public:
-		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog* log);
+		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet,
+								 Afbl::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData,
+								 BuildResultWriter* buildResultWriter, OutputLog* log);
 
 		bool run();
 
@@ -89,7 +92,6 @@ namespace Builder
 	typedef Afbl::AfbElement LogicAfb;
 	typedef Afbl::AfbElementSignal LogicAfbSignal;
 	typedef Afbl::AfbElementParam LogicAfbParam;
-
 
 	class AppItem;
 	class ModuleLogicCompiler;
@@ -437,12 +439,19 @@ namespace Builder
 		bool generateAppLogicCode();
 		bool generateAppSignalCode(const AppItem* appItem);
 		bool generateFbCode(const AppItem *appItem);
-		bool writeFbInputSignals(const AppFb *appFb);
-		bool readFbOutputSignals(const AppFb *appFb);
-		bool generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid);
 
-		bool generateWriteConstToFbCode(const AppFb *appFb, const LogicPin &inPin, const LogicConst& constItem);
-		void generateWriteSignalToFbCode(AppSignal* appSignal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
+		bool writeFbInputSignals(const AppFb *appFb);
+		bool startFb(const AppFb* appFb);
+		bool readFbOutputSignals(const AppFb *appFb);
+
+		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
+
+		bool generateWriteConstToSignalCode(const AppSignal& appSignal, const LogicConst& constItem);
+		bool generateWriteSignalToSignalCode(const AppSignal& appSignal, const AppSignal& srcSignal);
+
+		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
+		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
+
 
 		bool copyDiscreteSignalsToRegBuf();
 		bool copyOutModulesAppLogicDataToModulesMemory();

@@ -5,6 +5,7 @@
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
 #include "../../include/DeviceObject.h"
+#include "Subsystem.h"
 
 #include "../../VFrame30/LogicScheme.h"
 #include "../../VFrame30/VideoItemLink.h"
@@ -163,13 +164,27 @@ namespace Builder
 
 			m_log->writeMessage(tr("%1 elements loaded.").arg(afbCollection.elements().size()), false);
 
+			Hardware::SubsystemStorage subsystems;
+
+			QString errorCode;
+			ok = subsystems.load(&db, errorCode);
+
+			if (ok == false)
+			{
+				m_log->writeError(tr("Can't load subsystems file"), false, true);
+				if (errorCode.isEmpty() == false)
+				{
+					m_log->writeError(errorCode, false, false);
+				}
+			}
+
 			//
 			// Compile Module configuration
 			//
 			m_log->writeMessage("", false);
 			m_log->writeMessage(tr("Module configurations compilation"), true);
 
-			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, lastChangesetId, &buildWriter);
+			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, lastChangesetId, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -202,7 +217,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afbCollection, &appLogicData, &buildWriter);
+			compileApplicationLogic(&subsystems, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afbCollection, &appLogicData, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -430,18 +445,19 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, int changesetId, BuildResultWriter* buildWriter)
+	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr ||
 			deviceRoot == nullptr ||
 			signalSet == nullptr ||
+			subsystems == nullptr ||
 			buildWriter == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = cfgBuilder.build();
 
@@ -485,7 +501,8 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment,
+	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
+													Hardware::DeviceObject* equipment,
 													SignalSet* signalSet,
 													Afbl::AfbElementCollection* afbCollection,
 													ApplicationLogicData* appLogicData,
@@ -494,7 +511,7 @@ namespace Builder
 		m_log->writeMessage("", false);
 		m_log->writeMessage(tr("Application Logic compilation"), true);
 
-		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(subsystems, equipment, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 

@@ -5,22 +5,23 @@
 namespace EditEngine
 {
 
-	MoveItemCommand::MoveItemCommand(
-			EditSchemeView* videoFrameView,
+	MoveItemCommand::MoveItemCommand(EditSchemeView* schemeView,
 			double xdiff,
 			double ydiff,
 			const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
+			bool snapToGrid,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
-		EditCommand(videoFrameView, hScrollBar, vScrollBar)
+		EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
-		assert(videoFrameView != nullptr);
+		assert(schemeView != nullptr);
 		assert(items.empty() == false);
 
 		m_xdiff = xdiff;
 		m_ydiff = ydiff;
 
 		m_items = items;
+		m_snapToGrid = snapToGrid;
 		return;
 	}
 
@@ -28,12 +29,15 @@ namespace EditEngine
 	{
 		videoFrameView->setSelectedItems(m_items);
 
-		std::for_each(m_items.begin(), m_items.end(),
-			[this](const std::shared_ptr<VFrame30::VideoItem>& item)
+		for (std::shared_ptr<VFrame30::VideoItem> item : m_items)
+		{
+			item->MoveItem(m_xdiff, m_ydiff);
+
+			if (m_snapToGrid)
 			{
-				item->MoveItem(m_xdiff, m_ydiff);
+				item->snapToGrid(videoFrameView->scheme()->gridSize());
 			}
-			);
+		}
 
 		return;
 	}
@@ -42,12 +46,15 @@ namespace EditEngine
 	{
 		videoFrameView->setSelectedItems(m_items);
 
-		std::for_each(m_items.begin(), m_items.end(),
-			[this](const std::shared_ptr<VFrame30::VideoItem>& item)
+		for (std::shared_ptr<VFrame30::VideoItem> item : m_items)
+		{
+			item->MoveItem(-m_xdiff, -m_ydiff);
+
+			if (m_snapToGrid)
 			{
-				item->MoveItem(-m_xdiff, -m_ydiff);
+				item->snapToGrid(videoFrameView->scheme()->gridSize());
 			}
-			);
+		}
 
 		return;
 	}

@@ -26,6 +26,7 @@ namespace Builder
 	const char* SECTION_MEMORY_SETTINGS = "MemorySettings";
 	const char* SECTION_FLASH_MEMORY = "FlashMemory";
 
+	const char* PARAM_TEST_START_COUNT = "test_start_count";
 
 	const int ERR_VALUE = -1;
 
@@ -43,8 +44,11 @@ namespace Builder
 	//	ApplicationLogicCompiler class implementation
 	//
 
-	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection *afblSet,
-													   ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog *log) :
+	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment,
+													   SignalSet* signalSet, Afbl::AfbElementCollection *afblSet,
+													   ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter,
+													   OutputLog *log) :
+		m_subsystems(subsystems),
 		m_equipment(equipment),
 		m_signals(signalSet),
 		m_afbl(afblSet),
@@ -63,7 +67,8 @@ namespace Builder
 			return false;
 		}
 
-		if (m_equipment == nullptr ||
+		if (m_subsystems == nullptr ||
+			m_equipment == nullptr ||
 			m_signals == nullptr ||
 			m_afbl == nullptr ||
 			m_appLogicData == nullptr ||
@@ -185,29 +190,38 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::writeModuleLogicCompilerResult(QString subsysId, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	bool ApplicationLogicCompiler::writeModuleLogicCompilerResult(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
+		int susbsysID = m_subsystems->ssKey(subsysStrID);
+
+		if (susbsysID == -1)
+		{
+			m_log->writeError(QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(lmCaption), false, true);
+
+			return false;
+		}
+
 		bool result = true;
 
 		Hardware::ModuleFirmware* moduleFirmware = nullptr;
 
-		if (m_subsystemModuleFirmware.contains(subsysId))
+		if (m_subsystemModuleFirmware.contains(subsysStrID))
 		{
-			moduleFirmware = m_subsystemModuleFirmware[subsysId];
+			moduleFirmware = m_subsystemModuleFirmware[subsysStrID];
 		}
 		else
 		{
 			moduleFirmware = new Hardware::ModuleFirmware();
 
-			m_subsystemModuleFirmware.insert(subsysId, moduleFirmware);
+			m_subsystemModuleFirmware.insert(subsysStrID, moduleFirmware);
 
-			moduleFirmware->init(lmCaption, subsysId, 0x0101, frameSize, frameCount,
-								 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
+			moduleFirmware->init(lmCaption, subsysStrID, susbsysID, 0x0101, frameSize, frameCount,
+							 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
 		}
 
 		QString errorMsg;
@@ -237,7 +251,13 @@ namespace Builder
 
 			QByteArray moduleFirmwareFileData;
 
-			moduleFirmware->save(moduleFirmwareFileData);
+			QString errorMsg;
+
+			if (!moduleFirmware->save(moduleFirmwareFileData, &errorMsg))
+			{
+				m_log->writeError(errorMsg, false, true);
+				result = false;
+			}
 
 			result &= m_resultWriter->addFile(moduleFirmware->subsysId(), moduleFirmware->caption() + ".alb", moduleFirmwareFileData);
 		}
@@ -825,6 +845,12 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
+				if (connectedPinParent->isConst())
+				{
+					result &= generateWriteConstToSignalCode(*appSignal, connectedPinParent->logicConst());
+					continue;
+				}
+
 				QUuid srcSignalGuid;
 
 				if (connectedPinParent->isSignal())
@@ -876,39 +902,7 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK;
 				}
 
-				Command cmd;
-
-				int srcRamAddrOffset = srcAppSignal->ramAddr().offset();
-				int srcRamAddrBit = srcAppSignal->ramAddr().bit();
-
-				int destRamAddrOffset = appSignal->ramAddr().offset();
-				int destRamAddrBit = appSignal->ramAddr().bit();
-
-				if (srcRamAddrOffset == -1 || srcRamAddrBit == -1 ||
-					destRamAddrOffset == -1 || destRamAddrBit == -1)
-				{
-					assert(false);		// signal ramAddr is not calculated!!!
-				}
-				else
-				{
-					if (appSignal->isAnalog())
-					{
-						// move value of analog signal
-						//
-						cmd.mov(destRamAddrOffset, srcRamAddrOffset);
-					}
-					else
-					{
-						// move value of discrete signal
-						//
-						cmd.moveBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
-					}
-
-					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal->strID()).arg(srcAppSignal->strID()));
-
-					m_code.newLine();
-					m_code.append(cmd);
-				}
+				result &= generateWriteSignalToSignalCode(*appSignal, *srcAppSignal);
 			}
 
 			if (result == false)
@@ -918,6 +912,108 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::generateWriteConstToSignalCode(const AppSignal& appSignal, const LogicConst& constItem)
+	{
+		bool result = true;
+
+		quint16 ramAddrOffset = appSignal.ramAddr().offset();
+		quint16 ramAddrBit = appSignal.ramAddr().bit();
+
+		quint16 constValue = 0;
+
+		Command cmd;
+
+		switch(appSignal.type())
+		{
+		case SignalType::Discrete:
+
+			if (!constItem.isIntegral())
+			{
+				m_log->writeError(QString(tr("Floating point constant connected to discrete signal: ")).arg(appSignal.strID()), false, true);
+				result = false;
+			}
+			else
+			{
+				constValue = constItem.intValue() > 0 ? 1 : 0;
+
+				cmd.movBitConst(ramAddrOffset, ramAddrBit, constValue);
+				cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constValue));
+			}
+			break;
+
+		case SignalType::Analog:
+			// const connected to analog incput
+			//
+			if (!constItem.isIntegral())
+			{
+				m_log->writeError(QString(tr("Floating point constant connected to integral analog signal")), false, true);
+				result = false;
+			}
+			else
+			{
+				constValue = constItem.intValue();
+
+				cmd.movConst(ramAddrOffset, constValue);
+				cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constValue));
+			}
+			break;
+
+		default:
+			result = false;
+			assert(false);
+		}
+
+		if (cmd.isValidCommand())
+		{
+			m_code.newLine();
+			m_code.append(cmd);
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(const AppSignal& appSignal, const AppSignal& srcSignal)
+	{
+		Command cmd;
+
+		int srcRamAddrOffset = srcSignal.ramAddr().offset();
+		int srcRamAddrBit = srcSignal.ramAddr().bit();
+
+		int destRamAddrOffset = srcSignal.ramAddr().offset();
+		int destRamAddrBit = srcSignal.ramAddr().bit();
+
+		if (srcRamAddrOffset == -1 || srcRamAddrBit == -1 ||
+			destRamAddrOffset == -1 || destRamAddrBit == -1)
+		{
+			assert(false);		// signal ramAddr is not calculated!!!
+			return false;
+		}
+		else
+		{
+			if (appSignal.isAnalog())
+			{
+				// move value of analog signal
+				//
+				cmd.mov(destRamAddrOffset, srcRamAddrOffset);
+			}
+			else
+			{
+				// move value of discrete signal
+				//
+				cmd.moveBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
+			}
+
+			cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(srcSignal.strID()));
+
+			m_code.newLine();
+			m_code.append(cmd);
+		}
+
+		return true;
 	}
 
 
@@ -940,13 +1036,7 @@ namespace Builder
 		{
 			if (!writeFbInputSignals(appFb)) break;
 
-			Command cmd;
-
-			cmd.setComment(appFb->afbStrID());
-
-			cmd.start(appFb->opcode(), appFb->instance());
-
-			m_code.append(cmd);
+			if (!startFb(appFb)) break;
 
 			if (!readFbOutputSignals(appFb)) break;
 
@@ -958,12 +1048,40 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::startFb(const AppFb* appFb)
+	{
+		int startCount = 1;
+
+		for(LogicAfbParam param : appFb->afb().params())
+		{
+			if (param.opName() == PARAM_TEST_START_COUNT)
+			{
+				startCount = param.value().toInt();
+				break;
+			}
+		}
+		Command cmd;
+
+		if (startCount == 1)
+		{
+			cmd.start(appFb->opcode(), appFb->instance());
+			cmd.setComment(QString(tr("compute %1")).arg(appFb->afbStrID()));
+		}
+		else
+		{
+			cmd.nstart(appFb->opcode(), appFb->instance(), startCount);
+			cmd.setComment(QString(tr("compute %1 %2 times")).arg(appFb->afbStrID()).arg(startCount));
+		}
+
+		m_code.append(cmd);
+
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::writeFbInputSignals(const AppFb* appFb)
 	{
 		bool result = true;
-
-		quint16 fbType = appFb->opcode();
-		quint16 fbInstance = appFb->instance();
 
 		for(LogicPin inPin : appFb->inputs())
 		{
@@ -971,8 +1089,6 @@ namespace Builder
 			{
 				ASSERT_RESULT_FALSE_BREAK
 			}
-
-			quint16 fbParamNo = inPin.afbOperandIndex();
 
 			int connectedPinsCount = 1;
 
@@ -1001,7 +1117,7 @@ namespace Builder
 
 				if (connectedPinParent->isConst())
 				{
-					result &= generateWriteConstToFbCode(appFb, inPin, connectedPinParent->logicConst());
+					result &= generateWriteConstToFbCode(*appFb, inPin, connectedPinParent->logicConst());
 					continue;
 				}
 
@@ -1048,7 +1164,7 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				generateWriteSignalToFbCode(appSignal, fbType, fbInstance, fbParamNo);
+				result &= generateWriteSignalToFbCode(*appFb, inPin, *appSignal);
 			}
 
 			if (result == false)
@@ -1061,17 +1177,17 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::generateWriteConstToFbCode(const AppFb* appFb, const LogicPin& inPin, const LogicConst& constItem)
+	bool ModuleLogicCompiler::generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem)
 	{
-		quint16 fbType = appFb->opcode();
-		quint16 fbInstance = appFb->instance();
+		quint16 fbType = appFb.opcode();
+		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = inPin.afbOperandIndex();
 
 		bool result = false;
 
 		LogicAfbSignal fbInput;
 
-		for(LogicAfbSignal input : appFb->afb().inputSignals())
+		for(LogicAfbSignal input : appFb.afb().inputSignals())
 		{
 			if (fbParamNo == input.operandIndex())
 			{
@@ -1079,8 +1195,6 @@ namespace Builder
 				result = true;
 				break;
 			}
-
-			qDebug() << input.caption() << " ==== " << input.operandIndex();
 		}
 
 		if (result == false)
@@ -1108,7 +1222,7 @@ namespace Builder
 				constValue = constItem.intValue() > 0 ? 1 : 0;
 
 				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue);
-				cmd.setComment(QString(tr("<= %1")).arg(constValue));
+				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constValue));
 			}
 			break;
 
@@ -1124,7 +1238,7 @@ namespace Builder
 				constValue = constItem.intValue();
 
 				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue);
-				cmd.setComment(QString(tr("<= %1")).arg(constValue));
+				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constValue));
 			}
 			break;
 
@@ -1141,20 +1255,25 @@ namespace Builder
 	}
 
 
-	void ModuleLogicCompiler::generateWriteSignalToFbCode(AppSignal* appSignal, quint16 fbType, quint16 fbInstance, quint16 fbParamNo)
+	bool ModuleLogicCompiler::generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal)
 	{
+		quint16 fbType = appFb.opcode();
+		quint16 fbInstance = appFb.instance();
+		quint16 fbParamNo = inPin.afbOperandIndex();
+
 		Command cmd;
 
-		int ramAddrOffset = appSignal->ramAddr().offset();
-		int ramAddrBit = appSignal->ramAddr().bit();
+		int ramAddrOffset = appSignal.ramAddr().offset();
+		int ramAddrBit = appSignal.ramAddr().bit();
 
 		if (ramAddrOffset == -1 || ramAddrBit == -1)
 		{
 			assert(false);		// signal ramAddr is not calculated!!!
+			return false;
 		}
 		else
 		{
-			if (appSignal->isAnalog())
+			if (appSignal.isAnalog())
 			{
 				// input connected to analog signal
 				//
@@ -1167,10 +1286,12 @@ namespace Builder
 				cmd.writeFuncBlockBit(fbType, fbInstance, fbParamNo, ramAddrOffset, ramAddrBit);
 			}
 
-			cmd.setComment(QString(tr("<= %1")).arg(appSignal->strID()));
+			cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(appSignal.strID()));
 
 			m_code.append(cmd);
 		}
+
+		return true;
 	}
 
 
@@ -1178,17 +1299,12 @@ namespace Builder
 	{
 		bool result = true;
 
-		quint16 fbType = appFb->opcode();
-		quint16 fbInstance = appFb->instance();
-
 		for(LogicPin outPin : appFb->outputs())
 		{
 			if (outPin.dirrection() != VFrame30::ConnectionDirrection::Output)
 			{
 				ASSERT_RESULT_FALSE_BREAK
 			}
-
-			quint16 fbParamNo = outPin.afbOperandIndex();
 
 			int connectedSignals = 0;
 
@@ -1221,7 +1337,7 @@ namespace Builder
 
 				connectedSignals++;
 
-				result &= generateReadFuncBlockToSignalCode(fbType, fbInstance, fbParamNo, signalGuid);
+				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, signalGuid);
 			}
 
 			if (connectedSignals == 0)
@@ -1229,7 +1345,7 @@ namespace Builder
 				// output pin is not connected to signal
 				// save FB output value to shadow signal with GUID == outPin.guid()
 				//
-				result &= generateReadFuncBlockToSignalCode(fbType, fbInstance, fbParamNo, outPin.guid());
+				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, outPin.guid());
 			}
 
 			if (result == false)
@@ -1242,7 +1358,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid)
+	bool ModuleLogicCompiler::generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid)
 	{
 		if (!m_appSignals.contains(signalGuid))
 		{
@@ -1257,6 +1373,10 @@ namespace Builder
 		{
 			ASSERT_RETURN_FALSE
 		}
+
+		quint16 fbType = appFb.opcode();
+		quint16 fbInstance = appFb.instance();
+		quint16 fbParamNo = outPin.afbOperandIndex();
 
 		Command cmd;
 
@@ -1282,7 +1402,7 @@ namespace Builder
 				cmd.readFuncBlockBit(ramAddrOffset, ramAddrBit, fbType, fbInstance, fbParamNo);
 			}
 
-			cmd.setComment(QString(tr("=> %1")).arg(appSignal->strID()));
+			cmd.setComment(QString(tr("%1 => %2")).arg(outPin.caption()).arg(appSignal->strID()));
 
 			m_code.append(cmd);
 		}
@@ -2037,63 +2157,6 @@ namespace Builder
 	Afb::~Afb()
 	{
 	}
-
-
-/*	quint16 Fbl::addInstance()
-	{
-		assert(m_fblInstance != nullptr);
-		assert(m_nonRamFblInstance != nullptr);
-
-		if (m_afbElement->hasRam())
-		{
-			m_currentInstance++;
-
-			if (m_currentInstance > MAX_FB_INSTANCE)
-			{
-				assert(false);			// reach max instance
-			}
-		}
-		else
-		{
-			// Calculate non-RAM Fbl instance
-			//
-			if (m_fblInstance->isEmpty())
-			{
-				// load all CommandCodes in map
-				//
-				for(unsigned int i = 0; i < sizeof(AllCommandCodes)/sizeof(CommandCodes); i++)
-				{
-					m_fblInstance->insert(AllCommandCodes[i], 0);
-				}
-			}
-
-			if (m_nonRamFblInstance->contains(m_afbElement->strID()))
-			{
-				m_currentInstance = m_nonRamFblInstance->value(m_afbElement->strID());
-			}
-			else
-			{
-				CommandCodes opcode = static_cast<CommandCodes>(m_afbElement->opcode());
-
-				if (m_fblInstance->contains(opcode))
-				{
-					int opcodeInstance = (*m_commandCodesInstance)[opcode];
-
-					opcodeInstance++;
-
-					(*m_fblInstance)[opcode] = opcodeInstance;
-
-					m_currentInstance = opcodeInstance;
-				}
-				else
-				{
-					assert(false);		// unknown opcode
-				}
-			}
-		}
-
-		return m_currentInstance;
-	}*/
 
 
 	// ---------------------------------------------------------------------------------------

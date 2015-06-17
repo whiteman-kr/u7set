@@ -91,6 +91,19 @@ namespace VFrame30
 		}
 	}
 
+	void PosConnectionImpl::snapToGrid(double gridSize)
+	{
+		for(auto pt = points.begin(); pt != points.end(); ++pt)
+		{
+			QPointF snapped = CUtils::snapToGrid(QPointF(pt->X, pt->Y), gridSize);
+
+			pt->X = snapped.x();
+			pt->Y = snapped.y();
+		}
+
+		return;
+	}
+
 	double PosConnectionImpl::GetWidthInDocPt() const
 	{
 		if (points.size() == 0)

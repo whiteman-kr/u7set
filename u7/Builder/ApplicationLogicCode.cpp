@@ -306,6 +306,22 @@ namespace Builder
 	}
 
 
+	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount)
+	{
+		m_code.setOpCode(CommandCodes::NSTART);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setWord3(startCount);
+	}
+
+
+	void Command::appStart(quint16 appStartAddr)
+	{
+		m_code.setOpCode(CommandCodes::APPSTART);
+		m_code.setWord2(appStartAddr);
+	}
+
+
 	void Command::generateBinCode(ByteOrder byteOrder)
 	{
 		m_binCode.clear();
@@ -430,6 +446,14 @@ namespace Builder
 			mnemoCode.sprintf("%s    %d[%d], %d[%d]", CommandStr[opCodeInt], m_code.getWord2(), m_code.getBitNo2(), m_code.getWord3(), m_code.getBitNo1());
 			break;
 
+		case CommandCodes::NSTART:
+			mnemoCode.sprintf("%s  %s.%d, %d", CommandStr[opCodeInt], C_STR(m_code.getFbTypeStr()),
+							  m_code.getFbInstanceInt(), m_code.getWord3());
+			break;
+
+		case CommandCodes::APPSTART:
+			mnemoCode.sprintf("%s %d", CommandStr[opCodeInt], m_code.getWord2());
+			break;
 
 		default:
 			assert(false);

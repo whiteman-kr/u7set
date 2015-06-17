@@ -2348,6 +2348,8 @@ void EditSchemeWidget::mouseLeftDown_AddSchemePosRectStartPoint(QMouseEvent* eve
 
 	setMouseState(MouseState::AddSchemePosRectEndPoint);
 
+	editSchemeView()->update();
+
 	return;
 }
 
@@ -2503,7 +2505,7 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	{
 		// Move items
 		//
-		m_editEngine->runMoveItem(xdif, ydif, selectedItems());
+		m_editEngine->runMoveItem(xdif, ydif, selectedItems(), snapToGrid());
 	}
 	else
 	{

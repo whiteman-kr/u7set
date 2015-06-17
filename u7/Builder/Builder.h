@@ -2,6 +2,7 @@
 #define BUILDER_H
 
 #include "../include/Signal.h"
+#include "Subsystem.h"
 #include "../Builder/BuildResultWriter.h"
 
 // Forware declarations
@@ -69,7 +70,7 @@ namespace Builder
 
 		// Generate Modules Configurations Firmwares
 		//
-		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, int changesetId, BuildResultWriter* buildWriter);
+		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, int changesetId, BuildResultWriter* buildWriter);
 
 		// Build Application Logic
 		//
@@ -77,7 +78,7 @@ namespace Builder
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afbCollection, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
+		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afbCollection, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
 
 		// Compile Data Aquisition Service configuration
 		//
