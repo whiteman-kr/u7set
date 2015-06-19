@@ -81,8 +81,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 		m_dataFormat = DataFormat::UnsignedInt;
 	}
 
-#pragma message("################################## uncomment this line")
-	//m_dataSize = deviceSignal.dataSize();
+	m_dataSize = deviceSignal.size();
 }
 
 

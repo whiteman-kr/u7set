@@ -24,6 +24,8 @@ namespace Builder
 		RDFBTS = 13,
 		SETMEM = 14,
 		MOVB = 15,
+		NSTART = 16,
+		APPSTART = 17,
 
 		Count
 	};
@@ -46,6 +48,8 @@ namespace Builder
 		CommandCodes::RDFBTS,
 		CommandCodes::SETMEM,
 		CommandCodes::MOVB,
+		CommandCodes::NSTART,
+		CommandCodes::APPSTART
 	};
 
 
@@ -69,6 +73,8 @@ namespace Builder
 		3,		//	RDFBTS
 		4,		//	SETMEM
 		4,		//	MOVB
+		3,		//	NSTART
+		2,		//	APPSTART
 	};
 
 	const char* const CommandStr[COMMAND_COUNT] =
@@ -89,6 +95,8 @@ namespace Builder
 		"RDFBTS",
 		"SETMEM",
 		"MOVB",
+		"NSTART",
+		"APPSTART"
 	};
 
 
@@ -332,6 +340,8 @@ namespace Builder
 		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue);
 		void setMem(quint16 addr, quint16 sizeW, quint16 constValue);
 		void moveBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask);
+		void nstart(quint16 fbType, quint16 fbInstance, quint16 startCount);
+		void appStart(quint16 appStartAddr);
 
 		void setAddress(int address) { m_address = address; }
 

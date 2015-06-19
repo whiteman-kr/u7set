@@ -17,7 +17,7 @@
 #include "../VFrame30/SchemeItemConst.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/FblItem.h"
-
+#include "Subsystem.h"
 
 namespace Builder
 {
@@ -48,6 +48,7 @@ namespace Builder
 		Q_OBJECT
 
 	private:
+		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
 		Afbl::AfbElementCollection* m_afbl = nullptr;
@@ -66,11 +67,13 @@ namespace Builder
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool compileModulesLogics();
-		bool writeModuleLogicCompilerResult(QString subsysId, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
+		bool writeModuleLogicCompilerResult(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 		bool saveModulesLogicsFiles();
 
 	public:
-		ApplicationLogicCompiler(Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter, OutputLog* log);
+		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet,
+								 Afbl::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData,
+								 BuildResultWriter* buildResultWriter, OutputLog* log);
 
 		bool run();
 
@@ -89,7 +92,6 @@ namespace Builder
 	typedef Afbl::AfbElement LogicAfb;
 	typedef Afbl::AfbElementSignal LogicAfbSignal;
 	typedef Afbl::AfbElementParam LogicAfbParam;
-
 
 	class AppItem;
 	class ModuleLogicCompiler;
@@ -172,7 +174,7 @@ namespace Builder
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
 		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
 
-		QString strID() const { return m_appLogicItem.m_fblItem->toSignalElement()->signalStrIds(); }
+		QString strID() const;
 
 		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
 		bool isFb() const { return m_appLogicItem.m_fblItem->isFblElement(); }
@@ -205,6 +207,9 @@ namespace Builder
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().opcode(); }		// return FB type
+
+		LogicAfbParam getAfbParamByIndex(int index) const;
+		LogicAfbSignal getAfbSignalByIndex(int index) const;
 	};
 
 
@@ -271,8 +276,8 @@ namespace Builder
 		AppSignalMap(ModuleLogicCompiler& compiler);
 		~AppSignalMap();
 
-		void insert(const AppItem* appItem);
-		void insert(const AppItem* appItem, const LogicPin& outputPin);
+		bool insert(const AppItem* appItem);
+		bool insert(const AppItem* appItem, const LogicPin& outputPin);
 
 		AppSignal* getByStrID(const QString& strID);
 
@@ -439,15 +444,16 @@ namespace Builder
 		bool generateFbCode(const AppItem *appItem);
 
 		bool writeFbInputSignals(const AppFb *appFb);
+		bool startFb(const AppFb* appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
-		bool generateReadFuncBlockToSignalCode(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, QUuid signalGuid);
 
-		bool generateWriteConstToSignalCode(const AppSignal& appSignal, const LogicConst& constItem);
-		bool generateWriteSignalToSignalCode(const AppSignal& appSignal, const AppSignal& srcSignal);
+		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
+
+		bool generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem);
+		bool generateWriteSignalToSignalCode(AppSignal &appSignal, const AppSignal& srcSignal);
 
 		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
 		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
-
 
 		bool copyDiscreteSignalsToRegBuf();
 		bool copyOutModulesAppLogicDataToModulesMemory();
@@ -462,8 +468,7 @@ namespace Builder
 		//bool initAppFbVariableParams(AppFb* appFb);
 
 		bool getUsedAfbs();
-		//bool generateAfbInitialization(int fbType, int fbInstance, AlgFbParamArray& params);
-
+		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
 
 		bool copyInOutSignalsToRegistration();
 

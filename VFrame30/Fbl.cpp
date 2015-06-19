@@ -200,6 +200,15 @@ namespace Afbl
         m_size = value;
     }
 
+	bool AfbElementSignal::isAnalog() const
+	{
+		return m_type == AfbSignalType::Analog;
+	}
+
+	bool AfbElementSignal::isDiscrete() const
+	{
+		return m_type == AfbSignalType::Discrete;
+	}
 
     //
 	//
@@ -1201,6 +1210,63 @@ namespace Afbl
 	void AfbElement::setParams(const std::vector<AfbElementParam>& params)
 	{
 		m_params = params;
+	}
+
+
+	QString AfbElement::instantiatorID() const
+	{
+		if (!m_instantiatorID.isEmpty())
+		{
+			return m_instantiatorID;
+
+		}
+
+		m_instantiatorID = m_strID;
+
+		QVector<int> instantiatorParamIndex;
+
+		for(AfbElementParam param : params())
+		{
+			if (param.instantiator())
+			{
+				instantiatorParamIndex.append(param.operandIndex());
+			}
+		}
+
+		// sort instantiator param's indexes by ascending
+		//
+
+		int count = instantiatorParamIndex.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int j = i + 1; j < count; j++)
+			{
+				if (instantiatorParamIndex[i] > instantiatorParamIndex[j])
+				{
+					int tmp = instantiatorParamIndex[i];
+					instantiatorParamIndex[i] = instantiatorParamIndex[j];
+					instantiatorParamIndex[j] = tmp;
+				}
+			}
+		}
+
+		// append instantiator param's values to instantiatorID
+		//
+
+		for(int paramIndex : instantiatorParamIndex)
+		{
+			for(AfbElementParam param : params())
+			{
+				if (paramIndex == param.operandIndex())
+				{
+					m_instantiatorID += QString(":%1").arg(param.value().toString());
+					break;
+				}
+			}
+		}
+
+		return m_instantiatorID;
 	}
 
 	//

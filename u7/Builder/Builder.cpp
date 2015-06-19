@@ -221,7 +221,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afbCollection, &appLogicData, &buildWriter);
+			compileApplicationLogic(&subsystems, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afbCollection, &appLogicData, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -507,7 +507,8 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::compileApplicationLogic(Hardware::DeviceObject* equipment,
+	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
+													Hardware::DeviceObject* equipment,
 													SignalSet* signalSet,
 													Afbl::AfbElementCollection* afbCollection,
 													ApplicationLogicData* appLogicData,
@@ -516,7 +517,7 @@ namespace Builder
 		m_log->writeMessage("");
 		m_log->writeMessage(tr("Application Logic compilation"));
 
-		ApplicationLogicCompiler appLogicCompiler(equipment, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(subsystems, equipment, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 
@@ -584,7 +585,9 @@ namespace Builder
 					if (property.isValid())
 					{
 						const char* name = property.name();
-						equipmentWriter.writeAttribute(name, currentDevice->property(name).toString());
+						QVariant tmp = currentDevice->property(name);
+						assert(tmp.convert(QMetaType::QString));
+						equipmentWriter.writeAttribute(name, tmp.toString());
 					}
 				}
 			}, [&equipmentWriter](Hardware::DeviceObject*)

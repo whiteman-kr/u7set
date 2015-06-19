@@ -30,7 +30,18 @@ void DataServiceMainFunctionWorker::initDataSources()
 		return;
 	}
 
-	Hardware::equipmentWalker(m_deviceRoot.get(), [this](Hardware::DeviceObject* currentDevice)
+	QMultiHash<quint64, int> deviceStrIdHash2signalIndex;
+	for (int i = 0; i < m_signalSet.count(); i++)
+	{
+		const QString& id = m_signalSet[i].deviceStrID();
+		if (id.isEmpty())
+		{
+			continue;
+		}
+		deviceStrIdHash2signalIndex.insert(CUtils::calcHash(id.constData(), id.length() * sizeof(QChar)), i);
+	}
+
+	Hardware::equipmentWalker(m_deviceRoot.get(), [this, &deviceStrIdHash2signalIndex](Hardware::DeviceObject* currentDevice)
 	{
 		if (currentDevice == nullptr)
 		{
@@ -56,6 +67,29 @@ void DataServiceMainFunctionWorker::initDataSources()
 			QHostAddress ha(ipStr);
 			quint32 ip = ha.toIPv4Address();
 			DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
+
+			Hardware::equipmentWalker(currentModule->parent(), [&ds, &deviceStrIdHash2signalIndex] (Hardware::DeviceObject* currentDevice)
+			{
+				if (currentDevice == nullptr)
+				{
+					return;
+				}
+				if (typeid(*currentDevice) != typeid(Hardware::DeviceSignal))
+				{
+					return;
+				}
+				Hardware::DeviceSignal* currentSignal = dynamic_cast<Hardware::DeviceSignal*>(currentDevice);
+				if (currentSignal == nullptr)
+				{
+					return;
+				}
+				const QString& strId = currentSignal->strId();
+				const QList<int>& values = deviceStrIdHash2signalIndex.values(CUtils::calcHash(strId.constData(), strId.length() * sizeof(QChar)));
+				for (int i = 0; i < values.count(); i++)
+				{
+					ds.addSignalIndex(values.at(i));
+				}
+			});
 			m_dataSources.insert(key, ds);
 
 		}
@@ -146,14 +180,10 @@ void DataServiceMainFunctionWorker::readEquipmentConfig()
 				pDeviceObject->setCaption(attr.value("Caption").toString());
 				pDeviceObject->setChildRestriction(attr.value("ChildRestriction").toString());
 				pDeviceObject->setPlace(attr.value("Place").toInt());
-				int childrenCount = attr.value("ChildrenCount").toInt();
 				pDeviceObject->setDynamicProperties(attr.value("DynamicProperties").toString());
 
 				pCurrentDevice->addChild(pDeviceObject);
-				if (childrenCount > 0)
-				{
-					pCurrentDevice = pDeviceObject.get();
-				}
+				pCurrentDevice = pDeviceObject.get();
 				break;
 			}
 			case QXmlStreamReader::EndElement:

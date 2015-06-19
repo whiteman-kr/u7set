@@ -8,7 +8,7 @@
 namespace Hardware
 {
 	class DeviceObject;
-};
+}
 
 class DbProgress;
 

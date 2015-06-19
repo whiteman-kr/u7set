@@ -1069,7 +1069,7 @@ void Configurator::writeDiagData(quint32 factoryNo, QDate manufactureDate, quint
 	return;
 }
 
-void Configurator::writeConfData(ModuleConfFirmware *conf)
+void Configurator::writeConfData(ModuleFirmware *conf)
 {
     emit communicationStarted();
 
@@ -1121,9 +1121,11 @@ void Configurator::writeConfData(ModuleConfFirmware *conf)
                 //	throw tr("Wrong UART, use %1h port.").arg(QString::number(conf.uartID(), 16));
                 //}
 
-                if (pingReplyVersioned.frameSize < conf->frameSize())
+				int confFrameDataSize = conf->frameSize() - sizeof(pingReplyVersioned.crc64);
+
+				if (pingReplyVersioned.frameSize < confFrameDataSize)
                 {
-                    throw tr("EEPROM Frame size is to small, requeried at least %1, but current frame size is %2.").arg(conf->frameSize()).arg(frameSize);
+					throw tr("EEPROM Frame size is to small, requeried at least %1, but current frame size is %2.").arg(confFrameDataSize).arg(frameSize);
                 }
 
                 // Ignore Wrong moduleUartId flag

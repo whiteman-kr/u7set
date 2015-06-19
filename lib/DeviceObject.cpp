@@ -42,6 +42,17 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 
 		QMetaType::registerConverter<QString, Hardware::DeviceModule::FamilyType>([] (QString str){ return Hardware::DeviceModule::FamilyType(str.toInt()); });
+		QMetaType::registerConverter<QString, Hardware::DeviceSignal::SignalType>([] (QString str){ return Hardware::DeviceSignal::SignalType(str.toInt()); });
+		QMetaType::registerConverter<QString, Hardware::DeviceSignal::SignalFunction>([] (QString str){ return Hardware::DeviceSignal::SignalFunction(str.toInt()); });
+		QMetaType::registerConverter<QString, Hardware::DeviceSignal::ByteOrder>([] (QString str){ return Hardware::DeviceSignal::ByteOrder(str.toInt()); });
+		QMetaType::registerConverter<QString, Hardware::DeviceSignal::DataFormat>([] (QString str){ return Hardware::DeviceSignal::DataFormat(str.toInt()); });
+
+		QMetaType::registerConverter<Hardware::DeviceModule::FamilyType, QString>([] (Hardware::DeviceModule::FamilyType type){ return QString::number(int(type)); });
+		QMetaType::registerConverter<Hardware::DeviceSignal::SignalType, QString>([] (Hardware::DeviceSignal::SignalType type){ return QString::number(int(type)); });
+		QMetaType::registerConverter<Hardware::DeviceSignal::SignalFunction, QString>([] (Hardware::DeviceSignal::SignalFunction type){ return QString::number(int(type)); });
+		QMetaType::registerConverter<Hardware::DeviceSignal::ByteOrder, QString>([] (Hardware::DeviceSignal::ByteOrder type){ return QString::number(int(type)); });
+		QMetaType::registerConverter<Hardware::DeviceSignal::DataFormat, QString>([] (Hardware::DeviceSignal::DataFormat type){ return QString::number(int(type)); });
+
 		QMetaType::registerConverter<int, Hardware::DeviceModule::FamilyType>(IntToEnum<Hardware::DeviceModule::FamilyType>);
 		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalType>(IntToEnum<Hardware::DeviceSignal::SignalType>);
 		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalFunction>(IntToEnum<Hardware::DeviceSignal::SignalFunction>);

@@ -67,6 +67,9 @@ namespace Afbl
 		Q_INVOKABLE int size() const;
         void setSize(int value);
 
+		bool isAnalog() const;
+		bool isDiscrete() const;
+
 		// Data
 		//
 private:
@@ -252,6 +255,7 @@ private:
 		int paramsCount() const;
 		void setParams(const std::vector<AfbElementParam>& params);
 
+		QString instantiatorID() const;
 
 	private:
 		QString m_strID;
@@ -259,6 +263,8 @@ private:
 		unsigned int m_opcode;
 		bool m_hasRam;
 		bool m_requiredStart;
+
+		mutable QString m_instantiatorID;
 
 		QString m_libraryScript;
 		QString m_afterCreationScript;
