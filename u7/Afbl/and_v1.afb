@@ -71,6 +71,14 @@ function createInputSignals(videoItemFblElement, afbElement)
 	{
 		return false;
 	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 16)
+	{
+		count = 16;
+	}
 
 	var opIndex = 2;
 	for (var i = 0; i &lt; count; i++)
