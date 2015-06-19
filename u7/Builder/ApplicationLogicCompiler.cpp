@@ -71,7 +71,7 @@ namespace Builder
 		{
 			msg = tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__);
 
-			m_log->writeError(msg, true, true);
+			m_log->writeError(msg);
 
 			qDebug() << msg;
 
@@ -97,11 +97,11 @@ namespace Builder
 
 		if (m_lm.count() == 0)
 		{
-			m_log->writeMessage(tr("Logic modules (LMs) not found!"), true);
+			m_log->writeMessage(tr("Logic modules (LMs) not found!"));
 		}
 		else
 		{
-			m_log->writeMessage(QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()), false);
+			m_log->writeMessage(QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()));
 		}
 	}
 
@@ -116,7 +116,7 @@ namespace Builder
 
 			msg = QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
 
-			m_log->writeError(msg, false, true);
+			m_log->writeError(msg);
 
 			qDebug() << msg;
 			return;
@@ -147,7 +147,7 @@ namespace Builder
 					{
 						msg = QString(tr("LM %1 is not installed in the chassis")).arg(module->strId());
 
-						m_log->writeWarning(msg, false, true);
+						m_log->writeWarning(msg);
 
 						qDebug() << msg;
 					}
@@ -214,7 +214,7 @@ namespace Builder
 
 		if (!moduleFirmware->setChannelData(channel, frameSize, frameCount, appLogicBinCode, &errorMsg))
 		{
-			m_log->writeError(errorMsg, false, true);
+			m_log->writeError(errorMsg);
 
 			result = false;
 		}
@@ -241,7 +241,7 @@ namespace Builder
 
 			if (!moduleFirmware->save(moduleFirmwareFileData, &errorMsg))
 			{
-				m_log->writeError(errorMsg, false, true);
+				m_log->writeError(errorMsg);
 				result = false;
 			}
 
@@ -308,7 +308,7 @@ namespace Builder
 		if (parent->deviceType() != Hardware::DeviceType::Chassis)
 		{
 			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->strId());
-			m_log->writeError(msg, false, true);
+			m_log->writeError(msg);
 			return false;
 		}
 
@@ -324,7 +324,7 @@ namespace Builder
 
 		msg = QString(tr("Compilation for LM %1 was started...")).arg(m_lm->strId());
 
-		m_log->writeMessage(msg, false);
+		m_log->writeMessage(msg);
 
 		bool result = false;
 
@@ -361,12 +361,12 @@ namespace Builder
 		if (result == true)
 		{
 			msg = QString(tr("Compilation for LM %1 was successfully finished")).arg(m_lm->strId());
-			m_log->writeSuccess(msg, false);
+			m_log->writeSuccess(msg);
 		}
 		else
 		{
 			msg = QString(tr("Compilation for LM %1 was finished with errors")).arg(m_lm->strId());
-			m_log->writeError(msg, false, false);
+			m_log->writeError(msg);
 		}
 
 		cleanup();
@@ -413,11 +413,11 @@ namespace Builder
 
 		if (result)
 		{
-			m_log->writeMessage(QString(tr("Loading LMs settings... Ok")), false);
+			m_log->writeMessage(QString(tr("Loading LMs settings... Ok")));
 		}
 		else
 		{
-			m_log->writeError(QString(tr("LM settings are not loaded")), false, true);
+			m_log->writeError(QString(tr("LM settings are not loaded")));
 		}
 
 		return true;
@@ -495,11 +495,11 @@ namespace Builder
 
 		if (result)
 		{
-			m_log->writeMessage(QString(tr("Loading modules settings... Ok")), false);
+			m_log->writeMessage(QString(tr("Loading modules settings... Ok")));
 		}
 		else
 		{
-			m_log->writeError(QString(tr("Modules settings are not loaded")), false, true);
+			m_log->writeError(QString(tr("Modules settings are not loaded")));
 		}
 
 		return result;
@@ -517,7 +517,7 @@ namespace Builder
 		if (m_moduleLogic == nullptr)
 		{
 			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
-			m_log->writeWarning(msg, false, true);
+			m_log->writeWarning(msg);
 
 			return true;
 		}
@@ -547,7 +547,7 @@ namespace Builder
 			return true;			// nothing to init
 		}
 
-		m_log->writeMessage(QString(tr("Generation of AFB initialization code...")), false);
+		m_log->writeMessage(QString(tr("Generation of AFB initialization code...")));
 
 		bool result = true;
 
@@ -724,7 +724,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateAppLogicCode()
 	{
-		m_log->writeMessage(QString("Generation of application logic code was started..."), false);
+		m_log->writeMessage(QString("Generation of application logic code was started..."));
 
 		bool result = true;
 
@@ -812,7 +812,7 @@ namespace Builder
 			{
 				if (connectedPinsCount > 1)
 				{
-					m_log->writeError(QString(tr("More than one pin is connected to the input")), false, true);
+					m_log->writeError(QString(tr("More than one pin is connected to the input")));
 
 					ASSERT_RESULT_FALSE_BREAK
 				}
@@ -851,7 +851,7 @@ namespace Builder
 					//
 					if (!m_outPinSignal.contains(connectedPinGuid))
 					{
-						m_log->writeError(QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()), false, true);
+						m_log->writeError(QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()));
 
 						ASSERT_RESULT_FALSE_BREAK
 					}
@@ -861,7 +861,7 @@ namespace Builder
 
 				if (!m_appSignals.contains(srcSignalGuid))
 				{
-					m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()), false, true);
+					m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
 
 					ASSERT_RESULT_FALSE_BREAK
 				}
@@ -875,7 +875,7 @@ namespace Builder
 
 				if (!srcAppSignal->isComputed())
 				{
-					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(srcAppSignal->strID()), false, true);
+					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(srcAppSignal->strID()));
 
 					ASSERT_RESULT_FALSE_BREAK
 				}
@@ -883,7 +883,7 @@ namespace Builder
 				if (appSignal->isAnalog() != srcAppSignal->isAnalog() ||
 					appSignal->dataSize() != srcAppSignal->dataSize())
 				{
-					m_log->writeError(QString(tr("Signals is not compatible: %1 & %2")).arg(srcAppSignal->strID()).arg(appSignal->strID()), false, true);
+					m_log->writeError(QString(tr("Signals is not compatible: %1 & %2")).arg(srcAppSignal->strID()).arg(appSignal->strID()));
 
 					ASSERT_RESULT_FALSE_BREAK;
 				}
@@ -1050,7 +1050,7 @@ namespace Builder
 			{
 				if (connectedPinsCount > 1)
 				{
-					m_log->writeError(QString(tr("More than one pin is connected to the input")), false, true);
+					m_log->writeError(QString(tr("More than one pin is connected to the input")));
 
 					ASSERT_RESULT_FALSE_BREAK
 				}
@@ -1089,7 +1089,7 @@ namespace Builder
 					//
 					if (!m_outPinSignal.contains(connectedPinGuid))
 					{
-						m_log->writeError(QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()), false, true);
+						m_log->writeError(QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()));
 
 						ASSERT_RESULT_FALSE_BREAK
 					}
@@ -1099,7 +1099,7 @@ namespace Builder
 
 				if (!m_appSignals.contains(signalGuid))
 				{
-					m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()), false, true);
+					m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
 
 					ASSERT_RESULT_FALSE_BREAK
 				}
@@ -1113,7 +1113,7 @@ namespace Builder
 
 				if (!appSignal->isComputed())
 				{
-					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(appSignal->strID()), false, true);
+					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(appSignal->strID()));
 
 					ASSERT_RESULT_FALSE_BREAK
 				}
@@ -1169,7 +1169,7 @@ namespace Builder
 			//
 			if (!constItem.isIntegral())
 			{
-				m_log->writeError(QString(tr("Floating point constant connected to discrete input")), false, true);
+				m_log->writeError(QString(tr("Floating point constant connected to discrete input")));
 			}
 			else
 			{
@@ -1185,7 +1185,7 @@ namespace Builder
 			//
 			if (!constItem.isIntegral())
 			{
-				m_log->writeError(QString(tr("Floating point constant connected to integral analog input")), false, true);
+				m_log->writeError(QString(tr("Floating point constant connected to integral analog input")));
 			}
 			else
 			{
@@ -1321,7 +1321,7 @@ namespace Builder
 	{
 		if (!m_appSignals.contains(signalGuid))
 		{
-			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()), false, true);
+			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
 
 			ASSERT_RETURN_FALSE
 		}
@@ -1630,7 +1630,7 @@ namespace Builder
 			if (m_signalsStrID.contains(s->strID()))
 			{
 				msg = QString(tr("Duplicate signal identifier: %1")).arg(s->strID());
-				m_log->writeWarning(msg, false, true);
+				m_log->writeWarning(msg);
 			}
 			else
 			{
@@ -1727,7 +1727,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calculateInOutSignalsAddresses()
 	{
-		m_log->writeMessage(QString(tr("Input & Output signals addresses calculation...")), false);
+		m_log->writeMessage(QString(tr("Input & Output signals addresses calculation...")));
 
 		bool result = true;
 
@@ -1755,7 +1755,7 @@ namespace Builder
 
 				if (boundSignals.count() > 1)
 				{
-					m_log->writeWarning(QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()), false, true);
+					m_log->writeWarning(QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
 				}
 
 				for(Signal* signal : boundSignals)
@@ -1795,7 +1795,7 @@ namespace Builder
 					}
 					else
 					{
-						m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(signal->strID()), false, true);
+						m_log->writeError(QString(tr("Can't calculate RAM address of application signal %1")).arg(signal->strID()));
 					}
 				}
 			}
@@ -1807,7 +1807,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calculateInternalSignalsAddresses()
 	{
-		m_log->writeMessage(QString(tr("Internal signals addresses calculation...")), false);
+		m_log->writeMessage(QString(tr("Internal signals addresses calculation...")));
 
 		bool result = true;
 
@@ -2020,7 +2020,7 @@ namespace Builder
 
 		if (val.isValid() == false)
 		{
-			m_log->writeError(QString(tr("Property %1 is not found in device %2")).arg(propertyName).arg(device->strId()), false, true);
+			m_log->writeError(QString(tr("Property %1 is not found in device %2")).arg(propertyName).arg(device->strId()));
 			return false;
 		}
 
@@ -2522,7 +2522,7 @@ namespace Builder
 
 			QString msg = QString(tr("Signal identifier is not found: %1")).arg(strID);
 
-			m_compiler.log().writeError(msg, false, true);
+			m_compiler.log().writeError(msg);
 
 			return;
 		}

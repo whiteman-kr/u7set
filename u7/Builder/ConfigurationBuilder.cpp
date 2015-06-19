@@ -80,15 +80,15 @@ namespace Builder
 		{
 			assert(db());
 			assert(log());
-			m_log->writeError(tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__), true,true);
+			m_log->writeError(tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
 			return false;
 		}
 
 		//
 		// Generate Module Confuiguration Binary File
 		//
-		m_log->writeMessage("", false);
-		m_log->writeMessage(tr("Generating modules configurations"), true);
+		m_log->writeMessage("");
+		m_log->writeMessage(tr("Generating modules configurations"));
 
 		bool ok = false;
 
@@ -108,7 +108,7 @@ namespace Builder
 
 		if (ok == false || fileList.size() != 1)
 		{
-			m_log->writeError(tr("Can't get file list and find Module Configuration description file"), false, true);
+			m_log->writeError(tr("Can't get file list and find Module Configuration description file"));
 			return false;
 		}
 
@@ -125,7 +125,7 @@ namespace Builder
 
 		if (ok == false || scriptFile == nullptr)
 		{
-			m_log->writeError(tr("Can't get Module Configuration description file"), false, true);
+			m_log->writeError(tr("Can't get Module Configuration description file"));
 			return false;
 		}
 
@@ -160,7 +160,7 @@ namespace Builder
 		QJSValue jsEval = jsEngine.evaluate(contents, "ModulesConfigurations.descr");
 		if (jsEval.isError() == true)
 		{
-			m_log->writeError(tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()), false, true);
+			m_log->writeError(tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()));
 			return false;
 		}
 
@@ -176,13 +176,13 @@ namespace Builder
 
 		if (jsResult.isError() == true)
 		{
-			m_log->writeError(tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()), false, true);
+			m_log->writeError(tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()));
 			return false;
 		}
 
 		if (jsResult.toBool() == false)
 		{
-			m_log->writeError(tr("Module configuration generating failed!"), false, false);
+			m_log->writeError(tr("Module configuration generating failed!"));
 			return false;
 		}
 		qDebug() << jsResult.toInt();
@@ -204,7 +204,7 @@ namespace Builder
 				QString errorMsg;
 				if (f.save(data, &errorMsg) == false)
 				{
-					m_log->writeError(errorMsg, true, true);
+					m_log->writeError(errorMsg);
 					return false;
 				}
 
@@ -213,18 +213,18 @@ namespace Builder
 
 				if (path.isEmpty())
 				{
-					m_log->writeError(tr("Failed to save module configuration output file, subsystemId is empty."), true, true);
+					m_log->writeError(tr("Failed to save module configuration output file, subsystemId is empty."));
 					return false;
 				}
 				if (fileName.isEmpty())
 				{
-					m_log->writeError(tr("Failed to save module configuration output file, module type string is empty."), true, true);
+					m_log->writeError(tr("Failed to save module configuration output file, module type string is empty."));
 					return false;
 				}
 
 				if (m_buildWriter->addFile(path, fileName + ".mcb", data) == false)
 				{
-					m_log->writeError(tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.caption() + "!", false, true);
+					m_log->writeError(tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.caption() + "!");
 					return false;
 				}
 			}

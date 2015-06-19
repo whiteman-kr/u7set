@@ -77,6 +77,11 @@ DbController::DbController() :
 
 DbController::~DbController()
 {
+	if (isProjectOpened() == true)
+	{
+		closeProject(nullptr);
+	}
+
 	m_thread.quit();
 	m_thread.wait();
 }

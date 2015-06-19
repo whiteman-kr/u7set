@@ -9,7 +9,8 @@
 // BuildTabPage
 //
 //
-BuildTabPage* BuildTabPage::m_this = nullptr;
+//BuildTabPage* BuildTabPage::m_this = nullptr;
+const char* BuildTabPage::m_buildLogFileName = "buildlog.html";
 
 
 BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
@@ -18,7 +19,7 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 {
 	assert(dbcontroller != nullptr);
 
-	BuildTabPage::m_this = this;
+//	BuildTabPage::m_this = this;
 
 	//
 	// Controls
@@ -101,7 +102,7 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Output Log
 	//
-	m_logTimerId = startTimer(25);
+	m_logTimerId = startTimer(10);
 
 	// Evidently, project is not opened yet
 	//
@@ -110,17 +111,17 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 BuildTabPage::~BuildTabPage()
 {
-	BuildTabPage::m_this = nullptr;
+//	BuildTabPage::m_this = nullptr;
 
 	theSettings.m_buildTabPageSplitterState = m_vsplitter->saveState();
 	theSettings.writeUserScope();
 }
 
-BuildTabPage* BuildTabPage::instance()
-{
-	assert(m_this);
-	return m_this;
-}
+//BuildTabPage* BuildTabPage::instance()
+//{
+//	assert(m_this);
+//	return m_this;
+//}
 
 void BuildTabPage::CreateActions()
 {
@@ -140,36 +141,9 @@ void BuildTabPage::writeOutputLog(const OutputLogItem& logItem)
 		return;
 	}
 
-	// --
-	//
-	QString color;
-	switch (logItem.level)
-	{
-	case OutputMessageLevel::Message:
-		color = "black";
-		break;
-	case OutputMessageLevel::Success:
-		color = "green";
-		break;
-	case OutputMessageLevel::Warning:
-		color = "orange";
-		break;
-	case OutputMessageLevel::Error:
-		color = "red";
-		break;
+	QString html = logItem.toHtml();
+	m_outputWidget->append(html);
 
-	default:
-		assert(false);
-		color = "black";
-	}
-
-	QString s;
-	if (logItem.message.isEmpty() == false)
-	{
-		s = "<font face=\"Verdana\" size=3 color=#808080>" + logItem.time.toString("hh:mm:ss:zzz   ") + "<font color=" + color + ">" + (logItem.bold ? QString("<b>") : QString()) + logItem.message;
-	}
-
-	m_outputWidget->append(s);
 	return;
 }
 
@@ -182,14 +156,14 @@ void BuildTabPage::timerEvent(QTimerEvent* event)
 {
 
 	if (event->timerId() == m_logTimerId &&
-		m_outputLog.windowMessageListEmpty() == false &&
+		m_outputLog.isEmpty() == false &&
 		m_outputWidget != nullptr)
 	{
 		std::list<OutputLogItem> messages;
 
-		for (int i = 0; i < 10 && m_outputLog.windowMessageListEmpty() == false; i++)
+		for (int i = 0; i < 10 && m_outputLog.isEmpty() == false; i++)
 		{
-			messages.push_back(m_outputLog.popWindowMessages());
+			messages.push_back(m_outputLog.popMessages());
 		}
 
 		for (auto m = messages.begin(); m != messages.end(); ++m)
@@ -217,10 +191,47 @@ void BuildTabPage::projectClosed()
 
 void BuildTabPage::build()
 {
-	emit buildStarted();
-
 	m_outputLog.clear();
 	m_outputWidget->clear();
+
+	// init build log file
+	//
+	QString logFileName = theSettings.buildOutputPath();
+	if (logFileName.endsWith('/') == false)
+	{
+		logFileName += '/';
+	}
+	logFileName += m_buildLogFileName;
+
+	if (m_logFile.isOpen() == true && m_logFile.fileName() == logFileName)
+	{
+		// it is ok, file is open and has right name
+		//
+	}
+	else
+	{
+		if (m_logFile.isOpen())
+		{
+			m_logFile.close();
+		}
+
+		m_logFile.setFileName(logFileName);
+		m_logFile.open(QIODevice::Append | QIODevice::Text);
+	}
+
+	if (m_logFile.isOpen() == true)
+	{
+		m_outputLog.writeMessage(tr("Build log file: %1").arg(logFileName));
+
+	}
+	else
+	{
+		m_outputLog.writeWarning(tr("Cannot open outputl log file (%1) for writing").arg(logFileName));
+	}
+
+	// --
+	//
+	emit buildStarted();
 
 	bool debug = m_debugCheckBox->isChecked();
 
@@ -253,3 +264,4 @@ void BuildTabPage::buildWasFinished()
 	m_buildButton->setEnabled(true);
 	m_cancelButton->setEnabled(false);
 }
+

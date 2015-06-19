@@ -23,7 +23,7 @@ public:
 	// Public methods
 	//
 public:
-	static BuildTabPage* instance();
+	//static BuildTabPage* instance();
 
 protected:
 	void CreateActions();
@@ -54,7 +54,7 @@ protected slots:
 	// Data
 	//
 private:
-	static BuildTabPage* m_this;
+	//static BuildTabPage* m_this;
 
 	//QTableWidget* m_taskTable = nullptr;
 
@@ -71,6 +71,9 @@ private:
 
 	OutputLog m_outputLog;
 	int m_logTimerId = -1;
+
+	QFile m_logFile;
+	static const char* m_buildLogFileName;
 
 	Builder::Builder m_builder;				// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
 };
