@@ -571,6 +571,8 @@ namespace Builder
 		m_code.newLine();
 		m_code.comment("Functional Blocks initialization code");
 
+		QHash<QString, int> instantiatorStrIDsMap;
+
 		for(Afb* fbl : m_afbs)
 		{
 			for(AppFb* appFb : m_appFbs)
@@ -580,19 +582,25 @@ namespace Builder
 					continue;
 				}
 
-				if (!appFb->hasRam())
-				{
-					// FB without RAM initialize once for all instances
-					// initialize instantiator params only
-					//
-					result &= initAppFbParams(appFb, true);
-					break;
-				}
-				else
+				if (appFb->hasRam())
 				{
 					// initialize all params for each instance of FB with RAM
 					//
 					result &= initAppFbParams(appFb, false);
+				}
+				else
+				{
+					// FB without RAM initialize once for all instances
+					// initialize instantiator params only
+					//
+					QString instantiatorID = appFb->afb().instantiatorID();
+
+					if (!instantiatorStrIDsMap.contains(instantiatorID))
+					{
+						instantiatorStrIDsMap.insert(instantiatorID, 0);
+
+						result &= initAppFbParams(appFb, true);
+					}
 				}
 			}
 		}
@@ -617,7 +625,16 @@ namespace Builder
 		quint16 fbInstance = appFb->instance();
 
 		m_code.newLine();
-		m_code.comment(QString(tr("Initialization of %1 instance %2")).arg(afb.strID()).arg(fbInstance));
+
+		if (instantiatorOnly == true)
+		{
+			m_code.comment(QString(tr("Initialization of %1 instance %2")).arg(appFb->afb().instantiatorID()).arg(fbInstance));
+		}
+		else
+		{
+			m_code.comment(QString(tr("Initialization of %1 instance %2")).arg(afb.strID()).arg(fbInstance));
+		}
+
 		m_code.newLine();
 
 		// iniitalization of constant params
@@ -2407,13 +2424,15 @@ namespace Builder
 			return 1;
 		}
 
-		if (!contains(appItem->afbStrID()))
+		QString afbStrID = appItem->afbStrID();
+
+		if (!contains(afbStrID))
 		{
 			assert(false);			// unknown FBL guid
 			return 0;
 		}
 
-		Afb* fbl = (*this)[appItem->afbStrID()];
+		Afb* fbl = (*this)[afbStrID];
 
 		if (fbl == nullptr)
 		{
@@ -2431,9 +2450,12 @@ namespace Builder
 		{
 			// Calculate non-RAM Fbl instance
 			//
-			if (m_nonRamFblInstance.contains(fbl->strID()))
+
+			QString instantiatorID = appItem->afb().instantiatorID();
+
+			if (m_nonRamFblInstance.contains(instantiatorID))
 			{
-				instance = m_nonRamFblInstance.value(fbl->strID());
+				instance = m_nonRamFblInstance.value(instantiatorID);
 			}
 			else
 			{
@@ -2447,7 +2469,7 @@ namespace Builder
 
 					m_fblInstance[fblOpcode] = instance;
 
-					m_nonRamFblInstance.insert(fbl->strID(), instance);
+					m_nonRamFblInstance.insert(instantiatorID, instance);
 				}
 				else
 				{
