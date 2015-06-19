@@ -204,7 +204,7 @@ namespace Builder
 
 		if (susbsysID == -1)
 		{
-			m_log->writeError(QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(lmCaption), false, true);
+			m_log->writeError(QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(lmCaption));
 
 			return false;
 		}
@@ -809,7 +809,7 @@ namespace Builder
 	{
 		if (!m_appSignals.contains(appItem->guid()))
 		{
-			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(appItem->guid().toString()), false, true);
+			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(appItem->guid().toString()));
 			return false;
 		}
 
@@ -910,20 +910,7 @@ namespace Builder
 				if (!srcAppSignal->isComputed())
 				{
 					m_log->writeError(QString(tr("Signal value undefined: %1")).arg(srcAppSignal->strID()));
-
-<<<<<<< HEAD
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				if (appSignal->isAnalog() != srcAppSignal->isAnalog() ||
-					appSignal->dataSize() != srcAppSignal->dataSize())
-				{
-					m_log->writeError(QString(tr("Signals is not compatible: %1 & %2")).arg(srcAppSignal->strID()).arg(appSignal->strID()));
-
-					ASSERT_RESULT_FALSE_BREAK;
-=======
 					RESULT_FALSE_BREAK
->>>>>>> 6ed7dcc3cbbc90186eea54855d0f63bda3dc17d2
 				}
 
 				result &= generateWriteSignalToSignalCode(*appSignal, *srcAppSignal);
@@ -937,7 +924,7 @@ namespace Builder
 
 		if(!appSignal->isComputed())
 		{
-			m_log->writeError(QString(tr("Signal value undefined: %1")).arg(appSignal->strID()), false, true);
+			m_log->writeError(QString(tr("Signal value undefined: %1")).arg(appSignal->strID()));
 		}
 
 		return result;
@@ -959,7 +946,7 @@ namespace Builder
 
 			if (!constItem.isIntegral())
 			{
-				m_log->writeError(QString(tr("Floating point constant connected to discrete signal: ")).arg(appSignal.strID()), false, true);
+				m_log->writeError(QString(tr("Floating point constant connected to discrete signal: ")).arg(appSignal.strID()));
 
 				return false;
 			}
@@ -977,7 +964,7 @@ namespace Builder
 			//
 			if (!constItem.isIntegral())
 			{
-				m_log->writeError(QString(tr("Floating point constant connected to integral analog signal")), false, true);
+				m_log->writeError(QString(tr("Floating point constant connected to integral analog signal")));
 
 				return false;
 			}
@@ -1016,7 +1003,7 @@ namespace Builder
 				msg = QString(tr("Discrete signal %1 connected to analog signal %2")).
 						arg(srcSignal.strID()).arg(appSignal.strID());
 
-				m_log->writeError(msg, false, true);
+				m_log->writeError(msg);
 
 				return false;
 			}
@@ -1030,7 +1017,7 @@ namespace Builder
 					msg = QString(tr("Analog signal %1 connected to discrete signal %2")).
 							arg(srcSignal.strID()).arg(appSignal.strID());
 
-					m_log->writeError(msg, false, true);
+					m_log->writeError(msg);
 
 					return false;
 				}
@@ -1045,7 +1032,7 @@ namespace Builder
 		if (appSignal.dataSize() != srcSignal.dataSize())
 		{
 			m_log->writeError(QString(tr("Signals %1 and  %2 is not compatible by dataSize")).
-							  arg(srcSignal.strID()).arg(appSignal.strID()), false, true);
+							  arg(srcSignal.strID()).arg(appSignal.strID()));
 
 			return false;
 		}
@@ -1161,7 +1148,7 @@ namespace Builder
 		{
 			if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
 			{
-				m_log->writeError(QString(tr("Input pin %1 of %2 has wrong direction")).arg(inPin.caption()).arg(appFb->strID()), false, true);
+				m_log->writeError(QString(tr("Input pin %1 of %2 has wrong direction")).arg(inPin.caption()).arg(appFb->strID()));
 				RESULT_FALSE_BREAK
 			}
 
@@ -1180,7 +1167,7 @@ namespace Builder
 
 				if (!m_pinParent.contains(connectedPinGuid))
 				{
-					m_log->writeError(QString(tr("Pin is not found, GUID %1")).arg(connectedPinGuid.toString()), false, true);
+					m_log->writeError(QString(tr("Pin is not found, GUID %1")).arg(connectedPinGuid.toString()));
 
 					RESULT_FALSE_BREAK
 				}
@@ -1189,7 +1176,7 @@ namespace Builder
 
 				if (connectedPinParent == nullptr)
 				{
-					m_log->writeError(QString(tr("Pin parent is NULL, pin GUID ")).arg(connectedPinGuid.toString()), false, true);
+					m_log->writeError(QString(tr("Pin parent is NULL, pin GUID ")).arg(connectedPinGuid.toString()));
 					RESULT_FALSE_BREAK
 				}
 
@@ -1232,7 +1219,7 @@ namespace Builder
 
 				if (appSignal == nullptr)
 				{
-					m_log->writeError(QString(tr("Signal pointer is NULL, signal GUID: %1")).arg(signalGuid.toString()), false, true);
+					m_log->writeError(QString(tr("Signal pointer is NULL, signal GUID: %1")).arg(signalGuid.toString()));
 
 					RESULT_FALSE_BREAK
 				}
@@ -1350,7 +1337,7 @@ namespace Builder
 				msg = QString(tr("Discrete signal %1 connected to analog input %2.%3")).
 						arg(appSignal.strID()).arg(appFb.strID()).arg(afbSignal.caption());
 
-				m_log->writeError(msg, false, true);
+				m_log->writeError(msg);
 
 				return false;
 			}
@@ -1364,7 +1351,7 @@ namespace Builder
 					msg = QString(tr("Analog signal %1 connected to discrete input %2.%3")).
 							arg(appSignal.strID()).arg(appFb.strID()).arg(afbSignal.caption());
 
-					m_log->writeError(msg, false, true);
+					m_log->writeError(msg);
 
 					return false;
 				}
@@ -1477,7 +1464,7 @@ namespace Builder
 	{
 		if (!m_appSignals.contains(signalGuid))
 		{
-			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()), false, true);
+			m_log->writeError(QString(tr("Signal is not found, GUID: %1")).arg(signalGuid.toString()));
 			return false;
 		}
 
@@ -1501,7 +1488,7 @@ namespace Builder
 				msg = QString(tr("Analog output %1.%2 connected to discrete signal %3")).
 						arg(appFb.strID()).arg(afbSignal.caption()).arg(appSignal->strID());
 
-				m_log->writeError(msg, false, true);
+				m_log->writeError(msg);
 
 				return false;
 			}
@@ -1515,7 +1502,7 @@ namespace Builder
 					msg = QString(tr("Discrete output %1.%2 connected to analog signal %3")).
 							arg(appFb.strID()).arg(afbSignal.caption()).arg(appSignal->strID());
 
-					m_log->writeError(msg, false, true);
+					m_log->writeError(msg);
 
 					return false;
 				}
@@ -1771,7 +1758,7 @@ namespace Builder
 				msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
 						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
 
-				m_log->writeError(msg, false, true);
+				m_log->writeError(msg);
 
 				result = false;
 
@@ -1797,7 +1784,7 @@ namespace Builder
 					msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
 							arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
-					m_log->writeError(msg, false, true);
+					m_log->writeError(msg);
 
 					result = false;
 
@@ -1818,7 +1805,7 @@ namespace Builder
 					msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
 							arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
-					m_log->writeError(msg, false, true);
+					m_log->writeError(msg);
 
 					result = false;
 
