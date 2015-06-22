@@ -208,14 +208,10 @@ namespace Builder
 			return false;
 		}
 
-		closeBuildXML();
-
 		m_log->writeEmptyLine();
 
 		int errors = m_log->errorCount();
 		int warnings = m_log->warningCount();
-#pragma message("Load correct Build Log Str")
-		QString buildLogStr = "Build Log Str";
 
 		msg = QString(tr("%1 building #%2 was finished. Errors - %3. Warnings - %4."))
 				.arg(m_release ? "RELEASE" : "DEBUG")
@@ -237,7 +233,11 @@ namespace Builder
 			}
 		}
 
-		buildLogStr = m_log->finishStrLogging();
+		QString buildLogStr = m_log->finishStrLogging();
+
+		addFile("", "build.log", buildLogStr);
+
+		closeBuildXML();
 
 		m_dbController->buildFinish(m_buildNo, errors, warnings, buildLogStr, nullptr);
 
@@ -406,7 +406,7 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(QString subDir, QString fileName, const QByteArray &data)
+	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data)
 	{
 		assert(!fileName.isEmpty());
 
@@ -440,7 +440,45 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::addFile(QString subDir, QString fileName, const QStringList& stringList)
+	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& data)
+	{
+		assert(!fileName.isEmpty());
+
+		BuildSubdirectory* buildSubdirectory = getBuildSubdirectory(subDir);
+
+		int fileIndex = buildSubdirectory->addFile(fileName);
+
+		if (fileIndex == -1)
+		{
+			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
+
+			m_log->writeError(msg);
+
+			return false;
+		}
+
+		QFile file;
+
+		if (createFile(subDir, fileName, file, false) == false)
+		{
+			return false;
+		}
+
+		QTextStream textStream(&file);
+
+		textStream << data;
+
+		textStream.flush();
+
+		file.close();
+
+		buildSubdirectory->setFileInfo(fileIndex, file, QByteArray(C_STR(data)));
+
+		return true;
+	}
+
+
+	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList)
 	{
 		assert(!fileName.isEmpty());
 
