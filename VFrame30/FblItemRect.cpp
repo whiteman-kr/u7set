@@ -499,6 +499,31 @@ namespace VFrame30
 	//
 	IMPLEMENT_FONT_PROPERTIES(FblItemRect, Font, m_font);
 
+	void FblItemRect::setNewGuid()
+	{
+		// Set new guid for the item
+		//
+		VideoItem::setNewGuid();
+
+		// Set new guids for all inputs/outputs
+		//
+		std::list<CFblConnectionPoint>* inputs = mutableInputs();
+
+		for (CFblConnectionPoint& in : *inputs)
+		{
+			in.setGuid(QUuid::createUuid());
+		}
+
+		std::list<CFblConnectionPoint>* outputs = mutableOutputs();
+
+		for (CFblConnectionPoint& out : *outputs)
+		{
+			out.setGuid(QUuid::createUuid());
+		}
+
+		return;
+	}
+
 	bool FblItemRect::IsFblItem() const
 	{
 		return true;

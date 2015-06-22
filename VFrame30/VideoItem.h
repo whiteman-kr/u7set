@@ -19,7 +19,7 @@ namespace VFrame30
 		double X;
 		double Y;
 
-		// Функции
+		// Methods
 		//
 		VideoItemPoint() :
 			X(0),
@@ -109,7 +109,8 @@ namespace VFrame30
 		virtual void setHeight(double value) = 0;
 	};
 
-	// Интерфейс IPointList, для сохранения и восстановления списка точек.
+	// Interface IPointList, for storing and restoring point list
+	//
 	class IPointList
 	{
 	public:
@@ -138,15 +139,16 @@ namespace VFrame30
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<VideoItem>;	// Для вызоыв CreateObject из Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<VideoItem>;	// For call CreateObject from Proto::ObjectSerialization
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	private:
-		// Использовать функцию только при сериализации, т.к. при создании объекта он полностью не инициализируется,
-		// и должне прочитаться
+		// Use this func only for serialization, while creting new object it is not fully initialized
+		// and must be read from somewhere
+		//
 		static VideoItem* CreateObject(const Proto::Envelope& message);
 
 		// Action Functions
@@ -170,7 +172,7 @@ namespace VFrame30
 		//
 		virtual void Draw(CDrawParam* pDrawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const;
 
-		// Рисование элемента при его создании изменении
+		// Draw item outlien, while creation or changing
 		//
 		virtual void DrawOutline(CDrawParam* pDrawParam) const;
 		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items);
@@ -226,8 +228,9 @@ namespace VFrame30
 
 		const QUuid& guid() const;
 		void setGuid(const QUuid& guid);
+		virtual void setNewGuid();			// set new GUID for item, for it's pins etc, useful for copy (mousemove + ctrl)
 
-		// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
+		// Item position unit, can be inches or pixels
 		//
 		SchemeUnit itemUnit() const;
 		void setItemUnit(SchemeUnit value);
@@ -248,7 +251,7 @@ namespace VFrame30
 		bool m_static;
 		bool m_locked;
 		QUuid m_guid;
-		SchemeUnit m_itemUnit;		// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
+		SchemeUnit m_itemUnit;		// Item position unit, can be inches or pixels
 
 		bool m_acceptClick;			// The VideoItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click

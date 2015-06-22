@@ -131,7 +131,7 @@ namespace VFrame30
 		void removeAllInputs();
 		void removeAllOutputs();
 
-		// Вычислить координаты точки
+		// Calc pin position
 		//
 	public:
 		void ClearAssociatedConnections();
