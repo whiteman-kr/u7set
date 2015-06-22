@@ -3,10 +3,14 @@
 
 #define LOG_STRING(PARAM) #PARAM
 
+#define LOG_EMPTY_LINE(logObject)	logObject->writeEmptyLine();
+
 #define LOG_ERROR(logObject, message)	logObject->writeError(message, __FILE__, __LINE__, Q_FUNC_INFO);
 #define LOG_WARNING(logObject, message)	logObject->writeWarning(message, __FILE__, __LINE__, Q_FUNC_INFO);
 #define LOG_MESSAGE(logObject, message)	logObject->writeMessage(message, __FILE__, __LINE__, Q_FUNC_INFO);
 #define LOG_SUCCESS(logObject, message)	logObject->writeSuccess(message, __FILE__, __LINE__, Q_FUNC_INFO);
+
+
 
 enum class OutputMessageLevel
 {

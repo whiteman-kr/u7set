@@ -176,14 +176,14 @@ namespace Builder
 
 		if (m_release == true)
 		{
-			m_log->writeError(tr("RELEASE BUILD IS UNDER CONSTRUCTION!"));
+			LOG_ERROR(m_log, tr("RELEASE BUILD IS UNDER CONSTRUCTION!"));
 
 			m_runBuild = false;
 			return m_runBuild;
 		}
 		else
 		{
-			m_log->writeWarning(tr("WARNING: The workcopies of the checked out files will be compiled!"));
+			LOG_WARNING(m_log, tr("WARNING: The workcopies of the checked out files will be compiled!"));
 		}
 
 		if (createBuildDirectory() == false)
@@ -208,7 +208,7 @@ namespace Builder
 			return false;
 		}
 
-		m_log->writeEmptyLine();
+		LOG_EMPTY_LINE(m_log)
 
 		int errors = m_log->errorCount();
 		int warnings = m_log->warningCount();
@@ -219,17 +219,17 @@ namespace Builder
 
 		if (errors)
 		{
-			m_log->writeError(msg);
+			LOG_ERROR(m_log, msg);
 		}
 		else
 		{
 			if (warnings)
 			{
-				m_log->writeWarning(msg);
+				LOG_WARNING(m_log, msg);
 			}
 			else
 			{
-				m_log->writeSuccess(msg);
+				LOG_SUCCESS(m_log, msg);
 			}
 		}
 
@@ -259,7 +259,7 @@ namespace Builder
 		if (QDir().mkpath(dir) == false)
 		{
 			msg = tr("Can't create directory: ") + dir;
-			m_log->writeError(msg);
+			LOG_ERROR(m_log, msg);
 
 			qDebug() << msg;
 			return false;
@@ -267,7 +267,7 @@ namespace Builder
 
 		msg = tr("Directory was created: ") + dir;
 
-		m_log->writeMessage(msg);
+		LOG_MESSAGE(m_log, msg);
 
 		qDebug() << msg;
 
@@ -289,7 +289,7 @@ namespace Builder
 		if (QDir().mkpath(fullPath) == false)
 		{
 			msg = tr("Can't create subdirectory: ") + subDir;
-			m_log->writeError(msg);
+			LOG_ERROR(m_log, msg);
 
 			qDebug() << msg;
 			return false;
@@ -297,7 +297,7 @@ namespace Builder
 
 		msg = tr("Subdirectory was created: ") + subDir;
 
-		m_log->writeMessage(msg);
+		LOG_MESSAGE(m_log, msg);
 
 		qDebug() << msg;
 		return true;
@@ -371,7 +371,7 @@ namespace Builder
 		{
 			msg = tr("Can't create file: ") + formatFileName(subDir, fileName);;
 
-			m_log->writeError(msg);
+			LOG_ERROR(m_log, msg);
 
 			qDebug() << msg;
 
@@ -380,7 +380,7 @@ namespace Builder
 
 		msg = tr("File was created: ") + formatFileName(subDir, fileName);;
 
-		m_log->writeMessage(msg);
+		LOG_MESSAGE(m_log, msg);
 
 		qDebug() << msg;
 
@@ -418,7 +418,7 @@ namespace Builder
 		{
 			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
 
-			m_log->writeError(msg);
+			LOG_ERROR(m_log, msg);
 
 			return false;
 		}
@@ -452,7 +452,7 @@ namespace Builder
 		{
 			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
 
-			m_log->writeError(msg);
+			LOG_ERROR(m_log, msg);
 
 			return false;
 		}
@@ -490,7 +490,7 @@ namespace Builder
 		{
 			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
 
-			m_log->writeError(msg);
+			LOG_ERROR(m_log, msg);
 
 			return false;
 		}
