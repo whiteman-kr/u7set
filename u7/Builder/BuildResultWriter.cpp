@@ -142,7 +142,7 @@ namespace Builder
 
 			if (m_log != nullptr)
 			{
-				log->writeError(msg);
+				LOG_ERROR(log, msg);
 			}
 
 			qDebug() << msg;
@@ -157,7 +157,7 @@ namespace Builder
 		{
 			msg = tr("%1: Build start error.").arg(__FUNCTION__);
 
-			log->writeError(msg);
+			LOG_ERROR(log, msg);
 
 			qDebug() << msg;
 
@@ -170,7 +170,7 @@ namespace Builder
 				.arg(m_buildNo).arg(m_dbController->currentUser().username())
 				.arg(QHostInfo::localHostName()).arg(m_changesetID);
 
-		log->writeMessage(msg);
+		LOG_MESSAGE(log, msg);
 
 		qDebug() << msg;
 

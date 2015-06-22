@@ -245,7 +245,7 @@ namespace Builder
 
 		if (bushContainer.bushes.empty() == true)
 		{
-			log->writeWarning(QObject::tr("Logic scheme does no contains any correct links."));
+			LOG_WARNING(log, QObject::tr("Logic scheme does no contains any correct links."));
 			return true;
 		}
 
@@ -266,7 +266,7 @@ namespace Builder
 					if (afbElement == nullptr)
 					{
 						assert(afbElement != nullptr);
-						log->writeError(QObject::tr("Fbl element does not have Afb description, scheme: %1, element: %2")
+						LOG_ERROR(log, QObject::tr("Fbl element does not have Afb description, scheme: %1, element: %2")
 										.arg(logicScheme->strID())
 										.arg(f->guid().toString()));
 
@@ -354,7 +354,7 @@ namespace Builder
 			// Imposible set exucution order for branch, there is no first item,
 			// firts item can be item without inputs
 			//
-			log->writeError(tr("There is no start point for the logic scheme branch"));
+			LOG_ERROR(log, tr("There is no start point for the logic scheme branch"));
 
 			result = false;
 			return result;
@@ -474,7 +474,7 @@ namespace Builder
 		if (fblItems.empty() == false)
 		{
 			assert(fblItems.empty() == true);
-			log->writeError(tr("Internal error, not all items were proceded. %s").arg(Q_FUNC_INFO));
+			LOG_ERROR(log, tr("Internal error, not all items were proceded. %s").arg(Q_FUNC_INFO));
 
 			result = false;
 		}
@@ -571,7 +571,7 @@ namespace Builder
 
 				if (signalOutputItems.contains(signalStrId) == true)
 				{
-					log->writeError(QObject::tr("Ouput element has duplicate StrId, element1: %1, element2:%2, StrId: %3")
+					LOG_ERROR(log, QObject::tr("Ouput element has duplicate StrId, element1: %1, element2:%2, StrId: %3")
 									.arg(signalElement->guid().toString())
 									.arg(signalOutputItems[signalStrId].m_fblItem->guid().toString())
 									.arg(signalStrId));
@@ -823,7 +823,7 @@ namespace Builder
 
 		for (std::shared_ptr<ApplicationLogicModule> m : m_modules)
 		{
-			log->writeMessage(QObject::tr("Module: %1").arg(m->moduleStrId()));
+			LOG_MESSAGE(log, QObject::tr("Module: %1").arg(m->moduleStrId()));
 
 			ok = m->orderItems(log);
 
@@ -894,19 +894,19 @@ namespace Builder
 
 		if (schemes.empty() == true)
 		{
-			m_log->writeMessage(tr("There is no appliction logic files in the project."));
+			LOG_MESSAGE(m_log, tr("There is no appliction logic files in the project."));
 			return true;
 		}
 
 		// Compile application logic
 		//
-		m_log->writeMessage(tr("Parsing schemes..."));
+		LOG_MESSAGE(m_log, tr("Parsing schemes..."));
 
 		bool result = true;
 
 		for (std::shared_ptr<VFrame30::LogicScheme> scheme : schemes)
 		{
-			m_log->writeMessage(scheme->caption());
+			LOG_MESSAGE(m_log, scheme->caption());
 
 			ok = compileApplicationLogicScheme(scheme);
 
@@ -919,7 +919,7 @@ namespace Builder
 		// The result is set of ApplicationLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
 		//
-		m_log->writeMessage(tr("Ordering items..."));
+		LOG_MESSAGE(m_log, tr("Ordering items..."));
 
 		ok = m_applicationData->orderItems(m_log);
 
@@ -957,7 +957,7 @@ namespace Builder
 
 		if (ok == false)
 		{
-			m_log->writeError(tr("Cannot get application logic file list."));
+			LOG_ERROR(m_log, tr("Cannot get application logic file list."));
 			return false;
 		}
 
@@ -972,7 +972,7 @@ namespace Builder
 		//
 		for (DbFileInfo& fi : applicationLogicFileList)
 		{
-			m_log->writeMessage(tr("Loading %1").arg(fi.fileName()));
+			LOG_MESSAGE(m_log, tr("Loading %1").arg(fi.fileName()));
 
 			std::shared_ptr<DbFile> file;
 
@@ -987,7 +987,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Cannot get application logic file instances."));
+				LOG_ERROR(m_log, tr("Cannot get application logic file instances."));
 				return false;
 			}
 
@@ -998,13 +998,13 @@ namespace Builder
 			if (ls == nullptr)
 			{
 				assert(ls != nullptr);
-				m_log->writeError(tr("File loading error."));
+				LOG_ERROR(m_log, tr("File loading error."));
 				return false;
 			}
 
 			if (ls->excludeFromBuild() == true)
 			{
-				m_log->writeWarning(tr("Scheme %1 excluded from build.").arg(ls->strID()));
+				LOG_WARNING(m_log, tr("Scheme %1 excluded from build.").arg(ls->strID()));
 				continue;
 			}
 			else
@@ -1051,7 +1051,7 @@ namespace Builder
 
 		if (layerFound == false)
 		{
-			m_log->writeError(tr("There is no compile layer in the scheme."));
+			LOG_ERROR(m_log, tr("There is no compile layer in the scheme."));
 			return false;
 		}
 
@@ -1077,7 +1077,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			log()->writeError(tr("Finding bushes error."));
+			LOG_ERROR(log(), tr("Finding bushes error."));
 			return false;
 		}
 
@@ -1087,7 +1087,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			log()->writeError("setBranchConnectionToPin function error.");
+			LOG_ERROR(log(), "setBranchConnectionToPin function error.");
 			return false;
 		}
 
@@ -1101,7 +1101,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			log()->writeError(tr("Internal error: Cannot set data to ApplicationLogicData."));
+			LOG_ERROR(log(), tr("Internal error: Cannot set data to ApplicationLogicData."));
 			return false;
 		}
 
@@ -1279,7 +1279,7 @@ namespace Builder
 					assert(videoItem);
 					assert(link);
 
-					log()->writeError(tr("%1Internal error, expected VFrame30::VideoItemLink").arg(__FUNCTION__));
+					LOG_ERROR(log(), tr("%1Internal error, expected VFrame30::VideoItemLink").arg(__FUNCTION__));
 					return false;
 				}
 
@@ -1288,7 +1288,7 @@ namespace Builder
 				if (pointList.size() < 2)
 				{
 					assert(pointList.size() >= 2);
-					log()->writeError(tr("%1Internal error, Link has less the two points").arg(__FUNCTION__));
+					LOG_ERROR(log(), tr("%1Internal error, Link has less the two points").arg(__FUNCTION__));
 					return false;
 				}
 
@@ -1377,7 +1377,7 @@ namespace Builder
 
 						if (inputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Input %2 has unconnected pin")
+							LOG_ERROR(log(), tr("LogicScheme %1: Input %2 has unconnected pin")
 								.arg(scheme->caption())
 								.arg(inputSignal->signalStrIds()));
 
@@ -1387,7 +1387,7 @@ namespace Builder
 
 						if (outputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Output %2 has unconnected pin")
+							LOG_ERROR(log(), tr("LogicScheme %1: Output %2 has unconnected pin")
 								.arg(scheme->caption())
 								.arg(outputSignal->signalStrIds()));
 
@@ -1397,7 +1397,7 @@ namespace Builder
 
 						if (schemeItemConst != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Constant element %2 has unconnected pin")
+							LOG_ERROR(log(), tr("LogicScheme %1: Constant element %2 has unconnected pin")
 								.arg(scheme->caption())
 								.arg(schemeItemConst->valueToString()));
 
@@ -1409,7 +1409,7 @@ namespace Builder
 						{
 							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
 
-							log()->writeError(tr("LogicScheme %1: Item '%2', pin '%3' is unconnected")
+							LOG_ERROR(log(), tr("LogicScheme %1: Item '%2', pin '%3' is unconnected")
 								.arg(scheme->caption())
 								.arg(afb->caption())
 								.arg(in.caption()));
@@ -1445,7 +1445,7 @@ namespace Builder
 
 						if (inputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Input %2 has unconnected pin.")
+							LOG_ERROR(log(), tr("LogicScheme %1: Input %2 has unconnected pin.")
 								.arg(scheme->caption())
 								.arg(inputSignal->signalStrIds()));
 
@@ -1455,7 +1455,7 @@ namespace Builder
 
 						if (outputSignal != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Output %2 has unconnected pin.")
+							LOG_ERROR(log(), tr("LogicScheme %1: Output %2 has unconnected pin.")
 								.arg(scheme->caption())
 								.arg(outputSignal->signalStrIds()));
 
@@ -1465,7 +1465,7 @@ namespace Builder
 
 						if (schemeItemConst != nullptr)
 						{
-							log()->writeError(tr("LogicScheme %1: Constant element %2 has unconnected pin.")
+							LOG_ERROR(log(), tr("LogicScheme %1: Constant element %2 has unconnected pin.")
 								.arg(scheme->caption())
 								.arg(schemeItemConst->valueToString()));
 
@@ -1477,7 +1477,7 @@ namespace Builder
 						{
 							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
 
-							log()->writeError(tr("LogicScheme %1: Item '%2', pin '%3' is unconnected")
+							LOG_ERROR(log(), tr("LogicScheme %1: Item '%2', pin '%3' is unconnected")
 								.arg(scheme->caption())
 								.arg(afb->caption())
 								.arg(out.caption()));
@@ -1494,7 +1494,7 @@ namespace Builder
 
 					if (branchContainer->bushes[branchIndex].outputPin.isNull() == false)
 					{
-						log()->writeError(tr("LogicScheme %1 (layer %2): Branch has multiple outputs.")
+						LOG_ERROR(log(), tr("LogicScheme %1 (layer %2): Branch has multiple outputs.")
 							.arg(scheme->caption())
 							.arg(layer->name()));
 
@@ -1562,7 +1562,7 @@ namespace Builder
 						//
 						assert(false);
 
-						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
+						LOG_ERROR(log(), tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
 							.arg(__FUNCTION__));
 
 						result = false;
@@ -1577,7 +1577,7 @@ namespace Builder
 
 					if (bush.outputPin.isNull() == true)
 					{
-						log()->writeError(tr("LogicScheme %1: There is no input pin for branch.").arg(scheme->caption()));
+						LOG_ERROR(log(), tr("LogicScheme %1: There is no input pin for branch.").arg(scheme->caption()));
 
 						result = false;
 						return result;
@@ -1598,7 +1598,7 @@ namespace Builder
 						//
 						assert(false);
 
-						log()->writeError(tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
+						LOG_ERROR(log(), tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
 							.arg(__FUNCTION__));
 
 						result = false;
@@ -1623,7 +1623,7 @@ namespace Builder
 
 		if (hasFblItems == false)
 		{
-			log()->writeWarning("Empty logic scheme, functional blocks were not found.");
+			LOG_WARNING(log(), "Empty logic scheme, functional blocks were not found.");
 			return true;
 		}
 

@@ -2775,7 +2775,7 @@ namespace Builder
 		{
 			QString msg = QString(tr("Signal identifier is not found: %1")).arg(strID);
 
-			m_compiler.log().writeError(msg);
+			LOG_ERROR((&m_compiler.log()), msg);
 
 			return false;
 		}

@@ -48,13 +48,13 @@ namespace Builder
 
 		if (ok == false)
 		{
-			m_log->writeError(db.lastError());
-			m_log->writeError(tr("Opening project %1: error").arg(projectName()));
+			LOG_ERROR(m_log, db.lastError());
+			LOG_ERROR(m_log, tr("Opening project %1: error").arg(projectName()));
 			return;
 		}
 		else
 		{
-			m_log->writeMessage(tr("Opening project %1: ok").arg(projectName()));
+			LOG_MESSAGE(m_log, tr("Opening project %1: ok").arg(projectName()));
 		}
 
 		BuildResultWriter buildWriter;
@@ -69,7 +69,7 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("lastChangesetId Error."));
+				LOG_ERROR(m_log, tr("lastChangesetId Error."));
 				break;
 			}
 
@@ -78,14 +78,14 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("isAnyCheckedOut Error."));
+				LOG_ERROR(m_log, tr("isAnyCheckedOut Error."));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
 
 			if (release() == true && isAnyCheckedOut == true)
 			{
-				m_log->writeError(tr("There are some checked out objects. Please check in all objects before building release version."));
+				LOG_ERROR(m_log, tr("There are some checked out objects. Please check in all objects before building release version."));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
@@ -93,8 +93,8 @@ namespace Builder
 			//
 			// Get Equipment from the database
 			//
-			m_log->writeMessage("");
-			m_log->writeMessage(tr("Getting equipment"));
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Getting equipment"));
 
 			std::shared_ptr<Hardware::DeviceObject> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
 
@@ -110,24 +110,24 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Error"));
+				LOG_ERROR(m_log, tr("Error"));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
 			else
 			{
-				m_log->writeSuccess(tr("Ok"));
+				LOG_SUCCESS(m_log, tr("Ok"));
 			}
 
 			//
 			// Expand Devices StrId
 			//
-			m_log->writeMessage("");
-			m_log->writeMessage(tr("Expanding devices StrIds"));
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Expanding devices StrIds"));
 
 			expandDeviceStrId(deviceRoot.get());
 
-			m_log->writeSuccess(tr("Ok"));
+			LOG_SUCCESS(m_log, tr("Ok"));
 
 			Hardware::EquipmentSet equipmentSet(deviceRoot);
 
@@ -148,8 +148,8 @@ namespace Builder
 			//
 			// Loading AFB elements
 			//
-			m_log->writeMessage("");
-			m_log->writeMessage(tr("Loading AFB elements"));
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Loading AFB elements"));
 
 			Afbl::AfbElementCollection afbCollection;
 
@@ -157,16 +157,16 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Error"));
+				LOG_ERROR(m_log, tr("Error"));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
 			else
 			{
-				m_log->writeSuccess(tr("Ok"));
+				LOG_SUCCESS(m_log, tr("Ok"));
 			}
 
-			m_log->writeMessage(tr("%1 elements loaded.").arg(afbCollection.elements().size()));
+			LOG_MESSAGE(m_log, tr("%1 elements loaded.").arg(afbCollection.elements().size()));
 
 			Hardware::SubsystemStorage subsystems;
 
@@ -175,18 +175,18 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Can't load subsystems file"));
+				LOG_ERROR(m_log, tr("Can't load subsystems file"));
 				if (errorCode.isEmpty() == false)
 				{
-					m_log->writeError(errorCode);
+					LOG_ERROR(m_log, errorCode);
 				}
 			}
 
 			//
 			// Compile Module configuration
 			//
-			m_log->writeMessage("");
-			m_log->writeMessage(tr("Module configurations compilation"));
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
 			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, lastChangesetId, &buildWriter);
 
@@ -197,13 +197,13 @@ namespace Builder
 
 			if (ok == false)
 			{
-				m_log->writeError(tr("Error"));
+				LOG_ERROR(m_log, tr("Error"));
 				QThread::currentThread()->requestInterruption();
 				break;
 			}
 			else
 			{
-				m_log->writeSuccess(tr("Ok"));
+				LOG_SUCCESS(m_log, tr("Ok"));
 			}
 
 			//
@@ -265,7 +265,7 @@ namespace Builder
 
 		if (parent->deviceType() == Hardware::DeviceType::System)
 		{
-			m_log->writeMessage(tr("Getting system %1...").arg(parent->caption()));
+			LOG_MESSAGE(m_log, tr("Getting system %1...").arg(parent->caption()));
 		}
 
 		std::vector<DbFileInfo> files;
@@ -279,7 +279,7 @@ namespace Builder
 
 		if (ok == false)
 		{
-			m_log->writeError(tr("Cannot get equipment file list"));
+			LOG_ERROR(m_log, tr("Cannot get equipment file list"));
 			return false;
 		}
 
@@ -309,7 +309,7 @@ namespace Builder
 
 			if (file == nullptr || ok == false)
 			{
-				m_log->writeError(tr("Cannot get %1 instance.").arg(fi.fileName()));
+				LOG_ERROR(m_log, tr("Cannot get %1 instance.").arg(fi.fileName()));
 				return false;
 			}
 
@@ -371,19 +371,19 @@ namespace Builder
 			return false;
 		}
 
-		m_log->writeEmptyLine();
+		LOG_EMPTY_LINE(m_log);
 
-		m_log->writeMessage(tr("Loading application logic signals"));
+		LOG_MESSAGE(m_log, tr("Loading application logic signals"));
 
 		bool result = db->getSignals(signalSet, nullptr);
 
 		if (result == false)
 		{
-			m_log->writeError(tr("Error"));
+			LOG_ERROR(m_log, tr("Error"));
 			return false;
 		}
 
-		m_log->writeSuccess(tr("Ok"));
+		LOG_SUCCESS(m_log, tr("Ok"));
 
 		return true;
 	}
@@ -406,7 +406,7 @@ namespace Builder
 
 		if (db->getFileList(&files, db->afblFileId(), "afb", nullptr) == false)
 		{
-			m_log->writeError(QObject::tr("Cannot get application functional block file list."));
+			LOG_ERROR(m_log, QObject::tr("Cannot get application functional block file list."));
 			return false;
 		}
 
@@ -421,7 +421,7 @@ namespace Builder
 
 			if (db->getLatestVersion(fi, &f, nullptr) == false)
 			{
-				m_log->writeError(QObject::tr("Getting the latest version of the file %1 failed.").arg(fi.fileName()));
+				LOG_ERROR(m_log, QObject::tr("Getting the latest version of the file %1 failed.").arg(fi.fileName()));
 				result = false;
 				continue;
 			}
@@ -432,11 +432,11 @@ namespace Builder
 
 			if (e->loadFromXml(&reader) == false)
 			{
-				m_log->writeError(QObject::tr("Reading contents of the file %1 failed.").arg(fi.fileName()));
+				LOG_ERROR(m_log, QObject::tr("Reading contents of the file %1 failed.").arg(fi.fileName()));
 
 				if (reader.errorString().isEmpty() == false)
 				{
-					m_log->writeError("XML error: " + reader.errorString());
+					LOG_ERROR(m_log, "XML error: " + reader.errorString());
 				}
 
 				result = false;
@@ -486,8 +486,8 @@ namespace Builder
 			return false;
 		}
 
-		m_log->writeMessage("");
-		m_log->writeMessage(tr("Application Logic building"));
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, tr("Application Logic building"));
 
 		ApplicationLogicBuilder alBuilder = {db, m_log, appLogicData, afbCollection, changesetId, debug()};
 
@@ -495,12 +495,12 @@ namespace Builder
 
 		if (result == false)
 		{
-			m_log->writeError(tr("Error"));
+			LOG_ERROR(m_log, tr("Error"));
 			QThread::currentThread()->requestInterruption();
 		}
 		else
 		{
-			m_log->writeSuccess(tr("Ok"));
+			LOG_SUCCESS(m_log, tr("Ok"));
 		}
 
 		return result;
@@ -514,23 +514,23 @@ namespace Builder
 													ApplicationLogicData* appLogicData,
 													BuildResultWriter* buildResultWriter)
 	{
-		m_log->writeMessage("");
-		m_log->writeMessage(tr("Application Logic compilation"));
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
 		ApplicationLogicCompiler appLogicCompiler(subsystems, equipment, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 
-		m_log->writeEmptyLine();
+		LOG_EMPTY_LINE(m_log);
 
 		if (result == false)
 		{
-			m_log->writeError(tr("Application Logic compilation was finished with errors"));
+			LOG_ERROR(m_log, tr("Application Logic compilation was finished with errors"));
 			QThread::currentThread()->requestInterruption();
 		}
 		else
 		{
-			m_log->writeSuccess(tr("Application Logic compilation was succesfully finished"));
+			LOG_SUCCESS(m_log, tr("Application Logic compilation was succesfully finished"));
 		}
 
 		return result;
@@ -539,8 +539,8 @@ namespace Builder
 	bool BuildWorkerThread::compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, UnitList &unitInfo, BuildResultWriter* buildResultWriter)
 	{
 		DataFormatList dataFormatInfo;
-		m_log->writeMessage("");
-		m_log->writeMessage(tr("Data Aquisition Service configuration compilation"));
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, tr("Data Aquisition Service configuration compilation"));
 
 		if (deviceRoot != nullptr)
 		{
@@ -635,47 +635,47 @@ namespace Builder
 				bool hasWrongField = false;
 				if (!dataFormatInfo.contains(signal.dataFormatInt()))
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong dataFormat field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong dataFormat field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 				if (!unitInfo.contains(signal.unitID()))
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong unitID field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong unitID field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 				if (!unitInfo.contains(signal.inputUnitID()))
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong inputUnitID field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong inputUnitID field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 				if (!unitInfo.contains(signal.outputUnitID()))
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong outputUnitID field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong outputUnitID field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 				if (signal.inputSensorID() < 0 || signal.inputSensorID() >= SENSOR_TYPE_COUNT)
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong inputSensorID field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong inputSensorID field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 				if (signal.outputSensorID() < 0 || signal.outputSensorID() >= SENSOR_TYPE_COUNT)
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong outputSensorID field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong outputSensorID field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 				if (signal.outputRangeMode() < 0 || signal.outputRangeMode() >= OUTPUT_RANGE_MODE_COUNT)
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong outputRangeMode field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong outputRangeMode field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 				if (signal.inOutType() < 0 || signal.inOutType() >= IN_OUT_TYPE_COUNT)
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong inOutType field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong inOutType field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 				if (signal.byteOrderInt() < 0 || signal.byteOrderInt() >= ENUM_COUNT(ByteOrder))
 				{
-					m_log->writeWarning(QString("Signal %1 has wrong byteOrder field").arg(signal.strID()));
+					LOG_WARNING(m_log, QString("Signal %1 has wrong byteOrder field").arg(signal.strID()));
 					hasWrongField = true;
 				}
 
@@ -738,10 +738,10 @@ namespace Builder
 		}
 		else
 		{
-			m_log->writeMessage(tr("Signals not found!"));
+			LOG_MESSAGE(m_log, tr("Signals not found!"));
 		}
 
-		m_log->writeSuccess(tr("Data Aquisition Service configuration compilation was succesfully finished"));
+		LOG_SUCCESS(m_log, tr("Data Aquisition Service configuration compilation was succesfully finished"));
 
 		return true;
 	}
