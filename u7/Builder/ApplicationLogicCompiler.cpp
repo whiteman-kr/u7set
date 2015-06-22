@@ -1922,7 +1922,23 @@ namespace Builder
 				{
 					// create shadow signal with Uuid of this output pin
 					//
-					result &= m_appSignals.insert(item, output);
+					if (m_appFbs.contains(item->guid()))
+					{
+						const AppFb* appFb = m_appFbs[item->guid()];
+
+						if (appFb != nullptr)
+						{
+							result &= m_appSignals.insert(appFb, output);
+						}
+						else
+						{
+							ASSERT_RESULT_FALSE_BREAK
+						}
+					}
+					else
+					{
+						ASSERT_RESULT_FALSE_BREAK			// unknown item->guid(
+					}
 
 					// output pin connected to shadow signal with same guid
 					//
@@ -2590,9 +2606,10 @@ namespace Builder
 	// AppFb class implementation
 	//
 
-	AppFb::AppFb(AppItem *appItem, int instance) :
+	AppFb::AppFb(AppItem *appItem, int instance, int number) :
 		AppItem(*appItem),
-		m_instance(instance)
+		m_instance(instance),
+		m_number(number)
 	{
 	}
 
@@ -2649,7 +2666,9 @@ namespace Builder
 			return;
 		}
 
-		AppFb* appFb = new AppFb(appItem, instance);
+		AppFb* appFb = new AppFb(appItem, instance, m_fbNumber);
+
+		m_fbNumber++;
 
 		HashedVector<QUuid, AppFb*>::insert(appFb->guid(), appFb);
 	}
@@ -2695,13 +2714,13 @@ namespace Builder
 	}
 
 
-	AppSignal::AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem *appItem) :
+	AppSignal::AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem *appItem, const QString& strID) :
 		m_appItem(appItem),
 		m_guid(guid)
 	{
 		// construct shadow AppSignal based on OutputPin
 		//
-		setStrID(QString("#%1").arg(guid.toString()));
+		setStrID(strID);
 		setType(signalType);
 		setDataSize(dataSize);
 		setInOutType(SignalInOutType::Internal);
@@ -2792,14 +2811,14 @@ namespace Builder
 
 	// insert "shadow" signal bound to FB output pin
 	//
-	bool AppSignalMap::insert(const AppItem* appItem, const LogicPin& outputPin)
+	bool AppSignalMap::insert(const AppFb* appFb, const LogicPin& outputPin)
 	{
-		if (!appItem->isFb())
+		if (appFb == nullptr)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
-		const LogicAfbSignal s = m_compiler.getAfbSignal(appItem->afb().strID(), outputPin.afbOperandIndex());
+		const LogicAfbSignal s = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
 
 		SignalType signalType = SignalType::Discrete;
 
@@ -2822,7 +2841,7 @@ namespace Builder
 
 		QUuid outPinGuid = outputPin.guid();
 
-		QString strID = QString("#%1").arg(outPinGuid.toString());
+		QString strID = getShadowSignalStrID(appFb, outputPin);
 
 		AppSignal* appSignal = nullptr;
 
@@ -2836,7 +2855,7 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(outPinGuid, signalType, s.size(), appItem);
+			appSignal = new AppSignal(outPinGuid, signalType, s.size(), appFb, strID);
 
 			m_signalStrIdMap.insert(strID, appSignal);
 
@@ -2850,6 +2869,24 @@ namespace Builder
 		HashedVector<QUuid, AppSignal*>::insert(outPinGuid, appSignal);
 
 		return true;
+	}
+
+
+	QString AppSignalMap::getShadowSignalStrID(const AppFb* appFb, const LogicPin& outputPin)
+	{
+		if (appFb == nullptr)
+		{
+			assert(false);
+			return "";
+		}
+
+		QString strID = QString("%1_%2$кукпук_N%3_P%4").arg(appFb->afbStrID()).arg(appFb->instance()).arg(appFb->number()).arg(outputPin.afbOperandIndex());
+
+		strID = strID.toUpper();
+
+		strID = "#" + strID.remove(QRegularExpression("[^A-Z0-9_]"));
+
+		return strID;
 	}
 
 
