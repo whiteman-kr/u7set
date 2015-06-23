@@ -201,12 +201,14 @@ namespace Builder
 	{
 	private:
 		quint16 m_instance = -1;
+		int m_number = -1;
 
 	public:
-		AppFb(AppItem* appItem, int instance);
+		AppFb(AppItem* appItem, int instance, int number);
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().opcode(); }		// return FB type
+		int number() const { return m_number; }
 
 		LogicAfbParam getAfbParamByIndex(int index) const;
 		LogicAfbSignal getAfbSignalByIndex(int index) const;
@@ -215,6 +217,9 @@ namespace Builder
 
 	class AppFbMap: public HashedVector<QUuid, AppFb*>
 	{
+	private:
+		int m_fbNumber = 1;
+
 	public:
 		~AppFbMap() { clear(); }
 
@@ -240,7 +245,7 @@ namespace Builder
 
 	public:
 		AppSignal(const Signal* signal, const AppItem* appItem);
-		AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem* appItem);
+		AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem* appItem, const QString& strID);
 
 		const AppItem &appItem() const;
 
@@ -272,12 +277,14 @@ namespace Builder
 
 		void incCounters(const AppSignal* appSignal);
 
+		QString getShadowSignalStrID(const AppFb* appFb, const LogicPin& outputPin);
+
 	public:
 		AppSignalMap(ModuleLogicCompiler& compiler);
 		~AppSignalMap();
 
 		bool insert(const AppItem* appItem);
-		bool insert(const AppItem* appItem, const LogicPin& outputPin);
+		bool insert(const AppFb* appFb, const LogicPin& outputPin);
 
 		AppSignal* getByStrID(const QString& strID);
 
@@ -463,9 +470,7 @@ namespace Builder
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
-
 		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
-		//bool initAppFbVariableParams(AppFb* appFb);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }

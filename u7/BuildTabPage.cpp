@@ -221,12 +221,12 @@ void BuildTabPage::build()
 
 	if (m_logFile.isOpen() == true)
 	{
-		m_outputLog.writeMessage(tr("Build log file: %1").arg(logFileName));
+		LOG_MESSAGE((&m_outputLog), tr("Build log file: %1").arg(logFileName));
 
 	}
 	else
 	{
-		m_outputLog.writeWarning(tr("Cannot open outputl log file (%1) for writing").arg(logFileName));
+		LOG_WARNING((&m_outputLog), tr("Cannot open output log file (%1) for writing").arg(logFileName));
 	}
 
 	// --
