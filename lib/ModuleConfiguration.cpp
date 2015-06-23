@@ -352,7 +352,7 @@ namespace Hardware
         return true;
     }
 
-	bool ModuleFirmware::storeHash64(int frameIndex, int offset, quint16 data)
+	bool ModuleFirmware::storeHash64(int frameIndex, int offset, QString dataString)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(quint64)))
@@ -361,7 +361,9 @@ namespace Hardware
 			return false;
 		}
 
-		quint64 result = CUtils::calcHash(&data, sizeof(data));
+		QByteArray bytes = dataString.toUtf8();
+
+		quint64 result = CUtils::calcHash(bytes.data(), bytes.size());
 		setData64(frameIndex, offset, result);
 
 		//qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
@@ -485,7 +487,9 @@ namespace Hardware
 			*(quint16*)ptr = qToBigEndian((quint16)uartId());	//Data type (configuration)
 			ptr += sizeof(quint16);
 
-            *(quint64*)ptr = qToBigEndian(CUtils::calcHash(&ssKeyValue, sizeof(ssKeyValue)));
+			QByteArray bytes = subsysId().toUtf8();
+
+			*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
 			ptr += sizeof(quint64);
 
 			frame++;
