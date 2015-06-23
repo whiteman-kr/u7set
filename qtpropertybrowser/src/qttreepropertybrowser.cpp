@@ -639,9 +639,9 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
 	//item->setStatusTip(0, property->statusTip());
 	//item->setWhatsThis(0, property->whatsThis());
 
-	//item->setText(0, property->propertyName());
+	item->setText(0, property->propertyName());
 
-	item->setText(0, property->displayText().isEmpty() ? property->propertyName() : property->displayText());
+	//item->setText(0, property->displayText().isEmpty() ? property->propertyName() : property->displayText());
 
 	/*bool wasEnabled = item->flags() & Qt::ItemIsEnabled;
 	bool isEnabled = wasEnabled;
