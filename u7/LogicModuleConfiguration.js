@@ -220,7 +220,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     ptr += 2;
     setData16(confFirmware, log, frameServiceConfig, ptr, uartId);   //CFG_Ch_Dtype == UARTID?
     ptr += 2;
-    storeHash64(confFirmware, log, frameServiceConfig, ptr, ssKey);   //ssKey's HASH-64
+    storeHash64(confFirmware, log, frameServiceConfig, ptr, subSysID);   //subSysID HASH-64
     ptr += 8;
     
     // I/O Modules configuration
