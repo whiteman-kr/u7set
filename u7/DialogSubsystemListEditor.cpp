@@ -44,7 +44,7 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 	QStringList l;
 	l << tr("Index");
 	l << tr("Key");
-	l << tr("StrID");
+	l << tr("SubsysID");
 	l << tr("Caption");
 	ui->m_list->setHeaderLabels(l);
 	ui->m_list->setColumnWidth(0, 50);
