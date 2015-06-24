@@ -6,6 +6,10 @@ namespace VFrame30
 	//
 	// CFblConnectionPoint
 	//
+	CFblConnectionPoint::CFblConnectionPoint()
+	{
+	}
+
 	CFblConnectionPoint::CFblConnectionPoint(
 			ConnectionDirrection dirrection,
 			const QUuid& guid,
@@ -408,6 +412,11 @@ namespace VFrame30
 	{
 		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return false;
+	}
+
+	QString FblItem::buildName() const
+	{
+		return "FblItem";
 	}
 
 

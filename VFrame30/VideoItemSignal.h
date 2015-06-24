@@ -61,6 +61,8 @@ namespace VFrame30
 		explicit VideoItemInputSignal(SchemeUnit unit);
 		virtual ~VideoItemInputSignal(void);
 
+		virtual QString buildName() const override;
+
 		// Serialization
 		//
 	protected:
@@ -89,6 +91,8 @@ namespace VFrame30
 	public:
 		explicit VideoItemOutputSignal(SchemeUnit unit);
 		virtual ~VideoItemOutputSignal(void);
+
+		virtual QString buildName() const override;
 
 		// Serialization
 		//

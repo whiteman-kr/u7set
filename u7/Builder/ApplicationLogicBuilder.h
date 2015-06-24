@@ -3,6 +3,7 @@
 
 #include "../../VFrame30/VideoItem.h"
 #include "../../VFrame30/Fbl.h"
+#include "../../VFrame30/FblItemRect.h"
 
 // Forware delcarations
 //
@@ -53,6 +54,9 @@ namespace Builder
 		std::set<QUuid> inputPins;				// Input pins for this branch
 		std::map<QUuid, Link> links;			// Links for this branch
 		std::set<std::shared_ptr<VFrame30::FblItemRect>> fblItems;
+
+		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId);
+		VFrame30::CFblConnectionPoint pinByGuid(QUuid pinId);
 	};
 
 	struct BushContainer
@@ -217,11 +221,11 @@ namespace Builder
 
 		bool setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme,
 									  std::shared_ptr<VFrame30::SchemeLayer> layer,
-									  BushContainer* branchContainer) const;
+									  BushContainer* bushContainer) const;
 
 		bool setPinConnections(std::shared_ptr<VFrame30::LogicScheme> scheme,
 							   std::shared_ptr<VFrame30::SchemeLayer> layer,
-							   BushContainer* branchContainer);
+							   BushContainer* bushContainer);
 
 	private:
 		DbController* db();

@@ -193,6 +193,11 @@ namespace VFrame30
 		assert(outputsCount() == 1);
 	}
 
+	QString VideoItemInputSignal::buildName() const
+	{
+		return QString("Input (%1)").arg(signalStrIds());
+	}
+
 	// Serialization
 	//
 	bool VideoItemInputSignal::SaveData(Proto::Envelope* message) const
@@ -265,6 +270,11 @@ namespace VFrame30
 	VideoItemOutputSignal::~VideoItemOutputSignal(void)
 	{
 		assert(inputsCount() == 1);
+	}
+
+	QString VideoItemOutputSignal::buildName() const
+	{
+		return QString("Output (%1)").arg(signalStrIds());
 	}
 
 	// Serialization

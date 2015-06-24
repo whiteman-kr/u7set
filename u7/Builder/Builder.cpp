@@ -495,7 +495,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(m_log, tr("Error"));
+			//LOG_ERROR(m_log, tr("Error"));	// Error must be logged and described where it was found
 			QThread::currentThread()->requestInterruption();
 		}
 		else

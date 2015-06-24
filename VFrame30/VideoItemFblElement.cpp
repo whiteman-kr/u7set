@@ -241,6 +241,11 @@ namespace VFrame30
 		return true;
 	}
 
+	QString VideoItemFblElement::buildName() const
+	{
+		return QString("AFB (%1)").arg(afbStrID());
+	}
+
 	bool VideoItemFblElement::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Scheme> scheme)
 	{
 		if (name.isEmpty() == true || scheme == nullptr)

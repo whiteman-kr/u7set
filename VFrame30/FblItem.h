@@ -18,7 +18,7 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT CFblConnectionPoint
 	{
 	public:
-		CFblConnectionPoint() = delete;
+		CFblConnectionPoint();
 
 		CFblConnectionPoint(ConnectionDirrection dirrection,
 							const QUuid& guid,
@@ -73,7 +73,7 @@ namespace VFrame30
 	private:
 		QUuid m_guid;
 		VideoItemPoint m_point;
-		ConnectionDirrection m_dirrection;
+		ConnectionDirrection m_dirrection = ConnectionDirrection::Input;
 		int m_afbOperandIndex = 0;
 
 		std::list<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
@@ -131,12 +131,14 @@ namespace VFrame30
 		void removeAllInputs();
 		void removeAllOutputs();
 
-		// Calc pin position
-		//
-	public:
 		void ClearAssociatedConnections();
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep);
 		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const;
+
+		// Public methods
+		//
+	public:
+		virtual QString buildName() const;
 
 		// Properties
 		//

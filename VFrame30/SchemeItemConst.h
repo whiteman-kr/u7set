@@ -50,6 +50,8 @@ namespace VFrame30
 	public:
 		QString valueToString() const;
 
+		virtual QString buildName() const override;
+
 		// Properties
 		//
 	public:

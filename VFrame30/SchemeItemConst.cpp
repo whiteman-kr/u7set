@@ -144,6 +144,11 @@ namespace VFrame30
 		return text;
 	}
 
+	QString SchemeItemConst::buildName() const
+	{
+		return QString("Const (%1)").arg(valueToString());
+	}
+
 	SchemeItemConst::ConstType SchemeItemConst::type() const
 	{
 		return m_type;
