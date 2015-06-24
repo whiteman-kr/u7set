@@ -131,7 +131,8 @@ SOURCES +=\
 	Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
     Subsystem.cpp \
-    CreateSchemeDialog.cpp
+    CreateSchemeDialog.cpp \
+    ChooseAfbDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -195,7 +196,8 @@ HEADERS  += \
     DialogSubsystemListEditor.h \
     ../include/Types.h \
     Subsystem.h \
-    CreateSchemeDialog.h
+    CreateSchemeDialog.h \
+    ChooseAfbDialog.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -211,7 +213,8 @@ FORMS    += \
     DialogFileEditor.ui \
     SchemeLayersDialog.ui \
     DialogSubsystemListEditor.ui \
-    CreateSchemeDialog.ui
+    CreateSchemeDialog.ui \
+    ChooseAfbDialog.ui
 
 RESOURCES += \
 	Resources.qrc

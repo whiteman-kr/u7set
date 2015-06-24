@@ -4,6 +4,7 @@
 #include "SchemePropertiesDialog.h"
 #include "SchemeLayersDialog.h"
 #include "SchemeItemPropertiesDialog.h"
+#include "ChooseAfbDialog.h"
 #include "../VFrame30/VideoItemLine.h"
 #include "../VFrame30/VideoItemRect.h"
 #include "../VFrame30/VideoItemConnectionLine.h"
@@ -3915,6 +3916,7 @@ void EditSchemeWidget::selectionChanged()
 
 void EditSchemeWidget::addFblElement()
 {
+
 	// Get available Afb list
 	//
 	std::vector<DbFileInfo> fileList;
@@ -3947,24 +3949,22 @@ void EditSchemeWidget::addFblElement()
 
 	scheme()->setAfbCollection(elements);
 
-	// Select Afb, create such scheme item and add it to th scheme
-	//
-	QMenu* menu = new QMenu(this);
+	ChooseAfbDialog* dialog = new ChooseAfbDialog(elements, this);
 
-	for (std::shared_ptr<Afbl::AfbElement> afb : elements)
+	if (dialog->exec() == QDialog::Accepted)
 	{
-		QAction* a = new QAction(afb->caption(), this);
+		int index = dialog->index();
 
-		connect(a, &QAction::triggered,
-			[this, afb]()
-			{
-				addItem(std::make_shared<VFrame30::VideoItemFblElement>(scheme()->unit(), *(afb.get())));
-			});
+		if (index < 0 || index >= elements.size())
+		{
+			assert(false);
+			return;
+		}
 
-		menu->addAction(a);
+		std::shared_ptr<Afbl::AfbElement> afb = elements[index];
+
+		addItem(std::make_shared<VFrame30::VideoItemFblElement>(scheme()->unit(), *(afb.get())));
 	}
-
-	menu->exec(this->cursor().pos());
 
 	return;
 }
