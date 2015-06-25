@@ -3,17 +3,17 @@
 
 namespace EditEngine
 {
-	AddItemCommand::AddItemCommand(EditSchemeView* videoFrameView, std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
-		: EditCommand(videoFrameView, hScrollBar, vScrollBar)
+	AddItemCommand::AddItemCommand(EditSchemeView* schemeView, std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+		: EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
-		assert(videoFrameView != nullptr);
+		assert(schemeView != nullptr);
 		assert(items.empty() == false);
 		assert(layer != nullptr);
 
 		m_items = items;
 		m_layer = layer;
 
-		m_selectedItems = videoFrameView->selectedItems();
+		m_selectedItems = schemeView->selectedItems();
 
 		return;
 	}

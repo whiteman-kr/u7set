@@ -10,7 +10,7 @@ namespace EditEngine
 		DeleteItemCommand();		// deleted;
 	public:
 		DeleteItemCommand(
-			EditSchemeView* videoFrameView,
+			EditSchemeView* schemeView,
 			std::vector<std::shared_ptr<VFrame30::SchemeItem>> items,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
 			QScrollBar* hScrollBar,

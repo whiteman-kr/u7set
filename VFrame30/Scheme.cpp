@@ -123,17 +123,17 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		Scheme* pVideoFrame = SchemeFactory.Create(classNameHash);
+		Scheme* scheme = SchemeFactory.Create(classNameHash);
 
-		if (pVideoFrame == nullptr)
+		if (scheme == nullptr)
 		{
-			assert(pVideoFrame);
+			assert(scheme);
 			return nullptr;
 		}
 		
-		pVideoFrame->LoadData(message);
+		scheme->LoadData(message);
 
-		return pVideoFrame;
+		return scheme;
 	}
 
 	void Scheme::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
@@ -322,10 +322,10 @@ namespace VFrame30
 					continue;
 				}
 
-				SchemeItemLink* pVideoItemLink = dynamic_cast<SchemeItemLink*>(item->get());
-				if (pVideoItemLink != nullptr)
+				SchemeItemLink* schemeItemLink = dynamic_cast<SchemeItemLink*>(item->get());
+				if (schemeItemLink != nullptr)
 				{
-					const std::list<SchemePoint>& pointList = pVideoItemLink->GetPointList();
+					const std::list<SchemePoint>& pointList = schemeItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -335,7 +335,7 @@ namespace VFrame30
 					
 					// разложить кривую на отдельные отрезки и занести их в horzlinks и vertlinks
 					//
-					horzVertLinks.AddLinks(pointList, pVideoItemLink->guid());
+					horzVertLinks.AddLinks(pointList, schemeItemLink->guid());
 				}
 			}
 		}
@@ -364,13 +364,13 @@ namespace VFrame30
 				}
 
 			
-				// ≈сли элемент CVideoItemLink, то в качестве координат пинов будут крайние точки
+				// ≈сли элемент SchemeItemLink, то в качестве координат пинов будут крайние точки
 				//
-				SchemeItemLink* pVideoItemLink = dynamic_cast<SchemeItemLink*>(item->get());
+				SchemeItemLink* schemeItemLink = dynamic_cast<SchemeItemLink*>(item->get());
 
-				if (pVideoItemLink != nullptr)
+				if (schemeItemLink != nullptr)
 				{
-					const std::list<SchemePoint>& pointList = pVideoItemLink->GetPointList();
+					const std::list<SchemePoint>& pointList = schemeItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -383,12 +383,12 @@ namespace VFrame30
 
 					// проверить, не лежит ли пин на соединительной линии
 					//
-					if (horzVertLinks.IsPointOnLink(pointList.front(), pVideoItemLink->guid()) == true)
+					if (horzVertLinks.IsPointOnLink(pointList.front(), schemeItemLink->guid()) == true)
 					{
 						pLayer->ConnectionMapPosInc(pointList.front());
 					}
 
-					if (horzVertLinks.IsPointOnLink(pointList.back(), pVideoItemLink->guid()) == true)
+					if (horzVertLinks.IsPointOnLink(pointList.back(), schemeItemLink->guid()) == true)
 					{
 						pLayer->ConnectionMapPosInc(pointList.back());
 					}
@@ -555,7 +555,7 @@ namespace VFrame30
 		//
 		m_afbCollection.setElements(elements);
 
-		// update videoframe items
+		// update scheme items
 		//
 	}
 

@@ -112,7 +112,7 @@ message Envelope
 	optional SchemeItem schemeitem = 6;				// VFrame30::SchemeItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
 	optional Scheme scheme = 100;					// VFrame30::Scheme
-	optional SchemeLayer schemelayer = 101;			// VFrame30::CVideoLayer
+	optional SchemeLayer schemelayer = 101;			// VFrame30::SchemeLayer
 	optional FblElement fblelement = 102;			// Fbl::FblElement
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 }

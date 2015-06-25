@@ -36,20 +36,20 @@ const EditSchemeWidget::MouseStateCursor EditSchemeWidget::m_mouseStateCursor[] 
 
 const EditSchemeWidget::SizeActionToMouseCursor EditSchemeWidget::m_sizeActionToMouseCursor[] =
 	{
-		{VideoItemAction::ChangeSizeTopLeft, MouseState::SizingTopLeft, Qt::SizeFDiagCursor},
-		{VideoItemAction::ChangeSizeTop, MouseState::SizingTop, Qt::SizeVerCursor},
-		{VideoItemAction::ChangeSizeTopRight, MouseState::SizingTopRight, Qt::SizeBDiagCursor},
-		{VideoItemAction::ChangeSizeRight, MouseState::SizingRight, Qt::SizeHorCursor},
-		{VideoItemAction::ChangeSizeBottomRight, MouseState::SizingBottomRight, Qt::SizeFDiagCursor},
-		{VideoItemAction::ChangeSizeBottom, MouseState::SizingBottom, Qt::SizeVerCursor},
-		{VideoItemAction::ChangeSizeBottomLeft, MouseState::SizingBottomLeft, Qt::SizeBDiagCursor},
-		{VideoItemAction::ChangeSizeLeft, MouseState::SizingLeft, Qt::SizeHorCursor}
+		{SchemeItemAction::ChangeSizeTopLeft, MouseState::SizingTopLeft, Qt::SizeFDiagCursor},
+		{SchemeItemAction::ChangeSizeTop, MouseState::SizingTop, Qt::SizeVerCursor},
+		{SchemeItemAction::ChangeSizeTopRight, MouseState::SizingTopRight, Qt::SizeBDiagCursor},
+		{SchemeItemAction::ChangeSizeRight, MouseState::SizingRight, Qt::SizeHorCursor},
+		{SchemeItemAction::ChangeSizeBottomRight, MouseState::SizingBottomRight, Qt::SizeFDiagCursor},
+		{SchemeItemAction::ChangeSizeBottom, MouseState::SizingBottom, Qt::SizeVerCursor},
+		{SchemeItemAction::ChangeSizeBottomLeft, MouseState::SizingBottomLeft, Qt::SizeBDiagCursor},
+		{SchemeItemAction::ChangeSizeLeft, MouseState::SizingLeft, Qt::SizeHorCursor}
 	};
 
 
 //
 //
-// EditVideoFrameView
+// EditSchemeView
 //
 //
 EditSchemeView::EditSchemeView(QWidget* parent) :
@@ -86,7 +86,7 @@ EditSchemeView::~EditSchemeView()
 
 void EditSchemeView::paintEvent(QPaintEvent* pe)
 {
-	// Draw videoframe
+	// Draw scheme
 	//
 	VFrame30::SchemeView::paintEvent(pe);
 
@@ -108,7 +108,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 	//
 	Ajust(&p, 0, 0);
 
-	// Draw VideoFrame
+	// Draw scheme
 	//
 	QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
 
@@ -1045,18 +1045,18 @@ void EditSchemeView::drawGrid(QPainter* p)
 	return;
 }
 
-VideoItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* videoItem, QPointF point, int* outMovingEdgePointIndex)
+SchemeItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* schemeItem, QPointF point, int* outMovingEdgePointIndex)
 {
-	if (videoItem == nullptr)
+	if (schemeItem == nullptr)
 	{
-		assert(videoItem != nullptr);
-		return VideoItemAction::NoAction;
+		assert(schemeItem != nullptr);
+		return SchemeItemAction::NoAction;
 	}
 
-	if (videoItem->itemUnit() != scheme()->unit())
+	if (schemeItem->itemUnit() != scheme()->unit())
 	{
-		assert(videoItem->itemUnit() == scheme()->unit());
-		return VideoItemAction::NoAction;
+		assert(schemeItem->itemUnit() == scheme()->unit());
+		return SchemeItemAction::NoAction;
 	}
 
 	if (outMovingEdgePointIndex != nullptr)
@@ -1064,19 +1064,19 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* videoIte
 		*outMovingEdgePointIndex = -1;
 	}
 
-	float controlBarSize = ControlBar(videoItem->itemUnit(), zoom());
+	float controlBarSize = ControlBar(schemeItem->itemUnit(), zoom());
 
 	// Координаты schemeItem и point одинакового типа
 	//
-	if (dynamic_cast<VFrame30::IPosRect*>(videoItem) != nullptr)
+	if (dynamic_cast<VFrame30::IPosRect*>(schemeItem) != nullptr)
 	{
-		VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(videoItem) ;
+		VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(schemeItem) ;
 
 		// Если внутри прямоугольнка то SchemeItemAction.MoveItem
 		//
-		if (videoItem->IsIntersectPoint(point.x(), point.y()) == true)
+		if (schemeItem->IsIntersectPoint(point.x(), point.y()) == true)
 		{
-			return VideoItemAction::MoveItem;
+			return SchemeItemAction::MoveItem;
 		}
 
 		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
@@ -1090,50 +1090,50 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* videoIte
 
 		if (QRectF(itemRectangle.left() - controlBarSize, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize).contains(point) == true)
 		{
-			return VideoItemAction::ChangeSizeTopLeft;
+			return SchemeItemAction::ChangeSizeTopLeft;
 		}
 
 		if (QRectF(itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize).contains(point) == true)
 		{
-			return VideoItemAction::ChangeSizeTop;
+			return SchemeItemAction::ChangeSizeTop;
 		}
 
 		if (QRectF(itemRectangle.right(), itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize).contains(point) == true)
 		{
-			return VideoItemAction::ChangeSizeTopRight;
+			return SchemeItemAction::ChangeSizeTopRight;
 		}
 
 		if (QRectF(itemRectangle.right(), itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2, controlBarSize, controlBarSize).contains(point) == true)
 		{
-			return VideoItemAction::ChangeSizeRight;
+			return SchemeItemAction::ChangeSizeRight;
 		}
 
 		if (QRectF(itemRectangle.right(), itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize).contains(point) == true)
 		{
-			return VideoItemAction::ChangeSizeBottomRight;
+			return SchemeItemAction::ChangeSizeBottomRight;
 		}
 
 		if (QRectF(itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize).contains(point) == true)
 		{
-			return VideoItemAction::ChangeSizeBottom;
+			return SchemeItemAction::ChangeSizeBottom;
 		}
 
 		if (QRectF(itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize).contains(point) == true)
 		{
-			return VideoItemAction::ChangeSizeBottomLeft;
+			return SchemeItemAction::ChangeSizeBottomLeft;
 		}
 
 		if (QRectF(itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2, controlBarSize, controlBarSize).contains(point) == true)
 		{
-			return VideoItemAction::ChangeSizeLeft;
+			return SchemeItemAction::ChangeSizeLeft;
 		}
 
-		return VideoItemAction::NoAction;
+		return SchemeItemAction::NoAction;
 	}
 
-	if (dynamic_cast<VFrame30::IPosLine*>(videoItem) != nullptr)
+	if (dynamic_cast<VFrame30::IPosLine*>(schemeItem) != nullptr)
 	{
-		VFrame30::IPosLine* itemPos = dynamic_cast<VFrame30::IPosLine*>(videoItem) ;
+		VFrame30::IPosLine* itemPos = dynamic_cast<VFrame30::IPosLine*>(schemeItem) ;
 
 		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
 		//
@@ -1151,28 +1151,28 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* videoIte
 
 		if (controlRectangles[0].contains(point) == true)
 		{
-			return VideoItemAction::MoveStartLinePoint;
+			return SchemeItemAction::MoveStartLinePoint;
 		}
 
 		if (controlRectangles[1].contains(point) == true)
 		{
-			return VideoItemAction::MoveEndLinePoint;
+			return SchemeItemAction::MoveEndLinePoint;
 		}
 
 		// Если просто на линии, то SchemeItemAction.MoveItem
 		//
-		if (videoItem->IsIntersectPoint(point.x(), point.y()) == true)
+		if (schemeItem->IsIntersectPoint(point.x(), point.y()) == true)
 		{
-			return VideoItemAction::MoveItem;
+			return SchemeItemAction::MoveItem;
 		}
 
-		return VideoItemAction::NoAction;
+		return SchemeItemAction::NoAction;
 	}
 
 
-	if (dynamic_cast<VFrame30::IPosConnection*>(videoItem) != nullptr)
+	if (dynamic_cast<VFrame30::IPosConnection*>(schemeItem) != nullptr)
 	{
-		VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(videoItem) ;
+		VFrame30::IPosConnection* itemPos = dynamic_cast<VFrame30::IPosConnection*>(schemeItem) ;
 
 		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
 		//
@@ -1186,7 +1186,7 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* videoIte
 			if (controlRect.contains(point.x(), point.y()) == true)
 			{
 				*outMovingEdgePointIndex = pointIndex;
-				return VideoItemAction::MoveConnectionLinePoint;
+				return SchemeItemAction::MoveConnectionLinePoint;
 			}
 		}
 
@@ -1223,7 +1223,7 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* videoIte
 					point.y() >= y1 && point.y() <= y2)
 				{
 					*outMovingEdgePointIndex = pointIndex - 1;
-					return VideoItemAction::MoveVerticalEdge;
+					return SchemeItemAction::MoveVerticalEdge;
 				}
 			}
 			else
@@ -1237,7 +1237,7 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* videoIte
 					point.y() >= y1 && point.y() <= y2)
 				{
 					*outMovingEdgePointIndex = pointIndex - 1;
-					return VideoItemAction::MoveHorizontalEdge;
+					return SchemeItemAction::MoveHorizontalEdge;
 				}
 			}
 
@@ -1246,12 +1246,12 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::SchemeItem* videoIte
 			lastPoint = *pt;
 		}
 
-		return VideoItemAction::NoAction;
+		return SchemeItemAction::NoAction;
 	}
 
 	assert(false);
 
-	return VideoItemAction::NoAction;
+	return SchemeItemAction::NoAction;
 }
 
 
@@ -1437,7 +1437,7 @@ bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::SchemeItem>&
 
 //
 //
-// EditVideoFrameWidget
+// EditSchemeWidget
 //
 //
 EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* dbController) :
@@ -1502,7 +1502,7 @@ EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, con
 
 	// Mouse Right Button Down
 	//
-	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditVideoFrameWidget::mouseRightDown_None, this, std::placeholders::_1)));
+	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemeWidget::mouseRightDown_None, this, std::placeholders::_1)));
 	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemePosConnectionNextPoint, std::bind(&EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint, this, std::placeholders::_1)));
 
 	// Mouse Right Button Up
@@ -1717,7 +1717,7 @@ void EditSchemeWidget::createActions()
 	m_editCutAction = new QAction(tr("Cut"), this);
 	m_editCutAction->setEnabled(true);
 	m_editCutAction->setShortcut(QKeySequence::Cut);
-	//connect(m_editCutAction, &QAction::triggered, this, &EditVideoFrameWidget::___);
+	//connect(m_editCutAction, &QAction::triggered, this, &EditSchemeWidget::___);
 	addAction(m_editCutAction);
 
 	// Edit->Copy
@@ -1725,7 +1725,7 @@ void EditSchemeWidget::createActions()
 	m_editCopyAction = new QAction(tr("Copy"), this);
 	m_editCopyAction->setEnabled(true);
 	m_editCopyAction->setShortcut(QKeySequence::Copy);
-	//connect(m_editCopyAction, &QAction::triggered, this, &EditVideoFrameWidget::___);
+	//connect(m_editCopyAction, &QAction::triggered, this, &EditSchemeWidget::___);
 	addAction(m_editCopyAction);
 
 	// Edit->Paste
@@ -1733,7 +1733,7 @@ void EditSchemeWidget::createActions()
 	m_editPasteAction = new QAction(tr("Paste"), this);
 	m_editPasteAction->setEnabled(true);
 	m_editPasteAction->setShortcut(QKeySequence::Paste);
-	//connect(m_editPasteAction, &QAction::triggered, this, &EditVideoFrameWidget::___);
+	//connect(m_editPasteAction, &QAction::triggered, this, &EditSchemeWidget::___);
 	addAction(m_editPasteAction);
 
 	// ------------------------------------
@@ -1807,7 +1807,7 @@ void EditSchemeWidget::createActions()
 	//
 	m_snapToGridAction = new QAction(tr("Snap To Grid"), this);
 	m_snapToGridAction->setEnabled(true);
-	//connect(m_snapToGridAction, &QAction::triggered, this, &EditVideoFrameWidget::zoom100);
+	//connect(m_snapToGridAction, &QAction::triggered, this, &EditSchemeWidget::zoom100);
 
 
 	// High Level Menu
@@ -2064,7 +2064,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 			int movingEdgePointIndex = 0;
 			auto selectedItem = selectedItems()[0];
 
-			VideoItemAction possibleAction = editSchemeView()->getPossibleAction(selectedItem.get(), docPoint, &movingEdgePointIndex);
+			SchemeItemAction possibleAction = editSchemeView()->getPossibleAction(selectedItem.get(), docPoint, &movingEdgePointIndex);
 
 			if (dynamic_cast<VFrame30::IPosRect*>(selectedItem.get()) != nullptr)
 			{
@@ -2096,7 +2096,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 			//
 			if (dynamic_cast<VFrame30::IPosLine*>(selectedItem.get()) != nullptr)
 			{
-				if (possibleAction == VideoItemAction::MoveStartLinePoint)
+				if (possibleAction == SchemeItemAction::MoveStartLinePoint)
 				{
 					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
 					//
@@ -2113,7 +2113,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 					return;
 				}
 
-				if (possibleAction == VideoItemAction::MoveEndLinePoint)
+				if (possibleAction == SchemeItemAction::MoveEndLinePoint)
 				{
 					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
 					//
@@ -2135,7 +2135,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 			//
 			if (dynamic_cast<VFrame30::IPosConnection*>(selectedItem.get()) != nullptr)
 			{
-				if (possibleAction == VideoItemAction::MoveHorizontalEdge)
+				if (possibleAction == SchemeItemAction::MoveHorizontalEdge)
 				{
 					assert(movingEdgePointIndex != -1);
 
@@ -2156,7 +2156,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 					return;
 				}
 
-				if (possibleAction == VideoItemAction::MoveVerticalEdge)
+				if (possibleAction == SchemeItemAction::MoveVerticalEdge)
 				{
 					assert(movingEdgePointIndex != -1);
 
@@ -2177,7 +2177,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 					return;
 				}
 
-				if (possibleAction == VideoItemAction::MoveConnectionLinePoint)
+				if (possibleAction == SchemeItemAction::MoveConnectionLinePoint)
 				{
 					assert(movingEdgePointIndex != -1);
 
@@ -2208,9 +2208,9 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 		for (auto si = selectedItems().begin(); si != selectedItems().end(); ++si)
 		{
 			int movingEdgePointIndex = 0;
-			VideoItemAction possibleAction = editSchemeView()->getPossibleAction(si->get(), docPoint, &movingEdgePointIndex);
+			SchemeItemAction possibleAction = editSchemeView()->getPossibleAction(si->get(), docPoint, &movingEdgePointIndex);
 
-			if (possibleAction == VideoItemAction::MoveItem)
+			if (possibleAction == SchemeItemAction::MoveItem)
 			{
 				// Теперь получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
 				//
@@ -2494,7 +2494,7 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 	if (std::abs(xdif) < 0.0000001 && std::abs(ydif) < 0.0000001)
 	{
-		// VideoItem's have not changed positions
+		// SchemeItem's have not changed positions
 		//
 		resetAction();
 		return;
@@ -2510,7 +2510,7 @@ void EditSchemeWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	}
 	else
 	{
-		// Copy VideoItems and move copied items
+		// Copy SchemeItems and move copied items
 		//
 		std::vector<std::shared_ptr<VFrame30::SchemeItem>> newItems;
 
@@ -3615,7 +3615,7 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 			// Если элемент не выделен, то его можно только перемещать
 			//
 			if (itemUnderPoint != nullptr &&
-				editSchemeView()->getPossibleAction(itemUnderPoint.get(), docPos, &movingEdgePointIndex) == VideoItemAction::MoveItem)
+				editSchemeView()->getPossibleAction(itemUnderPoint.get(), docPos, &movingEdgePointIndex) == SchemeItemAction::MoveItem)
 			{
 				setCursor(Qt::SizeAllCursor);
 				return;
@@ -3624,9 +3624,9 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 
 		for (auto si = editSchemeView()->selectedItems().begin(); si != editSchemeView()->selectedItems().end(); ++si)
 		{
-			VideoItemAction possibleAction = editSchemeView()->getPossibleAction(si->get(), docPos, &movingEdgePointIndex);
+			SchemeItemAction possibleAction = editSchemeView()->getPossibleAction(si->get(), docPos, &movingEdgePointIndex);
 
-			if (possibleAction != VideoItemAction::NoAction)
+			if (possibleAction != SchemeItemAction::NoAction)
 			{
 				// Changing size, is possible for only one selected object
 				//
@@ -3651,22 +3651,22 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 				//
 				switch (possibleAction)
 				{
-				case VideoItemAction::MoveItem:
+				case SchemeItemAction::MoveItem:
 					setCursor(Qt::SizeAllCursor);
 					return;
-				case VideoItemAction::MoveStartLinePoint:
+				case SchemeItemAction::MoveStartLinePoint:
 					setCursor(Qt::SizeAllCursor);
 					return;
-				case VideoItemAction::MoveEndLinePoint:
+				case SchemeItemAction::MoveEndLinePoint:
 					setCursor(Qt::SizeAllCursor);
 					return;
-				case VideoItemAction::MoveHorizontalEdge:
+				case SchemeItemAction::MoveHorizontalEdge:
 					setCursor(Qt::SplitVCursor);
 					return;
-				case VideoItemAction::MoveVerticalEdge:
+				case SchemeItemAction::MoveVerticalEdge:
 					setCursor(Qt::SplitHCursor);
 					return;
-				case VideoItemAction::MoveConnectionLinePoint:
+				case SchemeItemAction::MoveConnectionLinePoint:
 					setCursor(Qt::SizeAllCursor);
 					return;
 				default:

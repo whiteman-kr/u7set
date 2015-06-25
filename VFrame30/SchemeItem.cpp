@@ -6,7 +6,7 @@ namespace VFrame30
 {
 	Factory<VFrame30::SchemeItem> SchemeItemFactory;
 
-	// CVideoItem
+	// SchemeItem
 
 	SchemeItem::SchemeItem() :
 		m_static(true),
@@ -88,17 +88,17 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		SchemeItem* pVideoItem = SchemeItemFactory.Create(classNameHash);
+		SchemeItem* schemeItem = SchemeItemFactory.Create(classNameHash);
 
-		if (pVideoItem == nullptr)
+		if (schemeItem == nullptr)
 		{
-			assert(pVideoItem);
+			assert(schemeItem);
 			return nullptr;
 		}
 		
-		pVideoItem->LoadData(message);
+		schemeItem->LoadData(message);
 
-		return pVideoItem;
+		return schemeItem;
 	}
 
 	// Action Functions
@@ -212,7 +212,7 @@ namespace VFrame30
 		return false;
 	};
 
-	// IVideoItemPropertiesPos interface implementation
+	// ISchemeItemPropertiesPos interface implementation
 	//
 	double SchemeItem::left() const
 	{

@@ -194,7 +194,7 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const;
 
-		// IVideoItemPropertiesPos interface implementation
+		// ISchemeItemPropertiesPos interface implementation
 		//
 	public:
 		virtual double left() const override;
@@ -241,7 +241,7 @@ namespace VFrame30
 		const QString& clickScript() const;
 		void setClickScript(const QString& value);
 
-		// Get VideoItem bounding rectangle in itemUnit()
+		// Get SchemeItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const;		
 
@@ -253,7 +253,7 @@ namespace VFrame30
 		QUuid m_guid;
 		SchemeUnit m_itemUnit;		// Item position unit, can be inches or pixels
 
-		bool m_acceptClick;			// The VideoItem accept mouse Left button click and runs script
+		bool m_acceptClick;			// The SchemeItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
 	};
 

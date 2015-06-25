@@ -3,15 +3,14 @@
 
 namespace EditEngine
 {
-	DeleteItemCommand::DeleteItemCommand(
-		EditSchemeView* videoFrameView,
+	DeleteItemCommand::DeleteItemCommand(EditSchemeView* schemeView,
 		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items,
 		std::shared_ptr<VFrame30::SchemeLayer> layer,
 		QScrollBar* hScrollBar,
 		QScrollBar* vScrollBar)
-		: EditCommand(videoFrameView, hScrollBar, vScrollBar)
+		: EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
-		assert(videoFrameView != nullptr);
+		assert(schemeView != nullptr);
 		assert(items.empty() == false);
 		assert(layer != nullptr);
 
@@ -20,7 +19,7 @@ namespace EditEngine
 		m_items.assign(items.begin(), items.end());
 		m_prevOrder.assign(layer->Items.begin(), layer->Items.end());
 
-		m_selectedItems = videoFrameView->selectedItems();
+		m_selectedItems = schemeView->selectedItems();
 
 		return;
 	}

@@ -4,14 +4,14 @@
 namespace EditEngine
 {
 
-	SetPointsCommand::SetPointsCommand(EditSchemeView* videoFrameView,
+	SetPointsCommand::SetPointsCommand(EditSchemeView* schemeView,
 			const std::vector<std::vector<VFrame30::SchemePoint>>& points,
 			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
-		EditCommand(videoFrameView, hScrollBar, vScrollBar)
+		EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
-		assert(videoFrameView != nullptr);
+		assert(schemeView != nullptr);
 		assert(items.empty() == false);
 		assert(points.empty() == false);
 

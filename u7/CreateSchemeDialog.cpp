@@ -114,7 +114,7 @@ void CreateSchemeDialog::accept()
 		return;
 	}
 
-	// Assign values to the videoframe
+	// Assign values to the scheme
 	//
 	m_scheme->setStrID(strID);
 	m_scheme->setCaption(caption);

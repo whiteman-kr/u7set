@@ -28,7 +28,7 @@ namespace VFrame30
 	{
 		qDebug() << Q_FUNC_INFO;
 
-		// Registering VideoFrames
+		// Registering Schemes
 		//
 		SchemeFactory.Register<DiagScheme>();
 		SchemeFactory.Register<LogicScheme>();
@@ -39,7 +39,7 @@ namespace VFrame30
 		//
 		VideoLayerFactory.Register<SchemeLayer>();
 
-		// Registering VideoItems
+		// Registering SchemeItems
 		//
 		SchemeItemFactory.Register<SchemeItemLine>();
 		SchemeItemFactory.Register<SchemeItemRect>();

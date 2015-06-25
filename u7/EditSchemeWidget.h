@@ -43,7 +43,7 @@ enum class MouseState
 
 // Possible action on SchemeItem
 //
-enum class VideoItemAction
+enum class SchemeItemAction
 {
 	NoAction,							// No Action
 	MoveItem,							// Move Item
@@ -74,7 +74,7 @@ namespace EditEngine
 
 //
 //
-// EditVideoFrameView
+// EditSchemeView
 //
 //
 class EditSchemeView : public VFrame30::SchemeView
@@ -105,7 +105,7 @@ protected:
 	// Some determine functions
 	//
 protected:
-	VideoItemAction getPossibleAction(VFrame30::SchemeItem* videoItem, QPointF point, int* outMovingEdgePointIndex);
+	SchemeItemAction getPossibleAction(VFrame30::SchemeItem* schemeItem, QPointF point, int* outMovingEdgePointIndex);
 
 	// Signals
 signals:
@@ -173,7 +173,7 @@ protected:
 	std::list<VFrame30::SchemePoint> m_movingVertexPoints;
 
 
-	// Temporary data, can be changed in EditVideoFrameWidget
+	// Temporary data, can be changed in EditSchemeWidget
 	//
 	friend EditSchemeWidget;
 };
@@ -181,7 +181,7 @@ protected:
 
 //
 //
-// EditVideoFrameWidget
+// EditSchemeWidget
 //
 //
 class EditSchemeWidget : public VFrame30::BaseSchemeWidget
@@ -270,8 +270,8 @@ signals:
 	void checkOutFile();					// Command to the owner to CheckOut the file.
 	void undoChangesFile();					// Command to the owner to Undo the file in version control system, and reread last version.
 	void saveWorkcopy();
-	void getCurrentWorkcopy();				// Save current videoframe to a file
-	void setCurrentWorkcopy();				// Load a videoframe from a file
+	void getCurrentWorkcopy();				// Save current scheme to a file
+	void setCurrentWorkcopy();				// Load a scheme from a file
 	void modifiedChanged(bool modified);	// Command to the owner to change title
 
 	// Slots
@@ -365,7 +365,7 @@ private:
 
 	struct SizeActionToMouseCursor
 	{
-		VideoItemAction action;
+		SchemeItemAction action;
 		MouseState mouseState;
 		Qt::CursorShape cursorShape;
 	};

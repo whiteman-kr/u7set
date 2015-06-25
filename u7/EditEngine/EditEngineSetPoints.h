@@ -10,7 +10,7 @@ namespace EditEngine
 		SetPointsCommand();		// deleted;
 	public:
 		SetPointsCommand(
-				EditSchemeView* videoFrameView,
+				EditSchemeView* schemeView,
 				const std::vector<std::vector<VFrame30::SchemePoint>>& points,
 				const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 				QScrollBar* hScrollBar,

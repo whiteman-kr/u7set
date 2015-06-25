@@ -323,7 +323,7 @@ namespace Builder
 
 		bool result = true;
 
-		// The last preparation - connect VideoItemInputSignal to VideoItemOutputSignal.
+		// The last preparation - connect SchemeItemInput to SchemeItemOutput
 		// Get all signals and put it to hash tables.
 		//
 		result = setInputOutputsElementsConnection(log);
@@ -564,7 +564,7 @@ namespace Builder
 
 	bool ApplicationLogicModule::setInputOutputsElementsConnection(OutputLog* log)
 	{
-		// Set connection between VideoItemInputSignal/VideoItemOutputSignal by StrIds
+		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
 		//
 		if (log == nullptr)
 		{
@@ -1203,8 +1203,8 @@ namespace Builder
 
 			// Check if end points on some link
 			//
-			std::list<QUuid> videoItemsUnderFrontPoint = horzVertLinks.getVideoItemsUnderPoint(pointList.front(), link->guid());
-			std::list<QUuid> videoItemsUnderBackPoint = horzVertLinks.getVideoItemsUnderPoint(pointList.back(), link->guid());
+			std::list<QUuid> itemsUnderFrontPoint = horzVertLinks.getSchemeItemsUnderPoint(pointList.front(), link->guid());
+			std::list<QUuid> itemsUnderBackPoint = horzVertLinks.getSchemeItemsUnderPoint(pointList.back(), link->guid());
 
 			// Find item branch, if branch does not exists, make a new brach
 			//
@@ -1225,14 +1225,14 @@ namespace Builder
 				foundBranch = bushes.begin();
 			}
 
-			// Add to foundBranch everything from  videoItemsUnderFrontPoint, videoItemsUnderBackPoint
+			// Add to foundBranch everything from  itemsUnderFrontPoint, itemsUnderBackPoint
 			//
-			for (QUuid& q : videoItemsUnderFrontPoint)
+			for (QUuid& q : itemsUnderFrontPoint)
 			{
 				foundBranch->insert(q);
 			}
 
-			for (QUuid& q : videoItemsUnderBackPoint)
+			for (QUuid& q : itemsUnderBackPoint)
 			{
 				foundBranch->insert(q);
 			}
@@ -1298,19 +1298,19 @@ namespace Builder
 
 			for (QUuid id : b)
 			{
-				// Get VideoItemLink by this id,
+				// Get SchemeItemLink by this id,
 				// save it's and points to newBranch
 				//
-				std::shared_ptr<VFrame30::SchemeItem> videoItem = layer->getItemById(id);
-				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(videoItem.get());
+				std::shared_ptr<VFrame30::SchemeItem> schemeItem = layer->getItemById(id);
+				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(schemeItem.get());
 
-				if (videoItem == nullptr ||
+				if (schemeItem == nullptr ||
 					link == nullptr)
 				{
-					assert(videoItem);
+					assert(schemeItem);
 					assert(link);
 
-					LOG_ERROR(log(), tr("%1 Internal error, expected VFrame30::VideoItemLink").arg(__FUNCTION__));
+					LOG_ERROR(log(), tr("%1 Internal error, expected VFrame30::SchemeItemLink").arg(__FUNCTION__));
 					return false;
 				}
 
@@ -1381,7 +1381,7 @@ namespace Builder
 
 			if(fblItem != nullptr)
 			{
-				// VideoItem has inputs and outputs
+				// SchemeItem has inputs and outputs
 				// Get coordinates for each input/output and
 				// find branche with point on the pin
 				//
@@ -1491,7 +1491,7 @@ namespace Builder
 				std::shared_ptr<VFrame30::FblItemRect> fblElement =
 						std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
 
-				// VideoItem has inputs and outputs
+				// SchemeItem has inputs and outputs
 				// Get coordinates for each input/output and
 				// find branche with point on the pin
 				//

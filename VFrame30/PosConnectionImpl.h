@@ -5,7 +5,7 @@
 
 namespace VFrame30
 {
-	// Интерфейс для VideoItem который хранит координаты в виде направленной линии,
+	// Интерфейс для SchemeItem который хранит координаты в виде направленной линии,
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
 	class IPosConnection
@@ -77,7 +77,7 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const override;
 
-		// Get VideoItem bounding rectangle in itemUnit()
+		// Get SchemeItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
@@ -101,7 +101,7 @@ namespace VFrame30
 		virtual void DeleteAllExtensionPoints() override;
 		virtual void DeleteLastExtensionPoint() override;
 
-		// Реализация интерефейса IVideoItemPropertiesPos
+		// Реализация интерефейса ISchemeItemPropertiesPos
 		//
 	public:
 		virtual double left() const override;

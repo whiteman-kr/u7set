@@ -414,7 +414,7 @@ namespace VFrame30
 				}
 				else
 				{
-					qDebug()<<"ERROR: VideoItemFblElement::getParamIntValue, parameter "<<name<<" is not integer or is not valid!";
+					qDebug()<<"ERROR: SchemeItemAfb::getParamIntValue, parameter "<<name<<" is not integer or is not valid!";
 					assert(false);
 					return -1;
 				}

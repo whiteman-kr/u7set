@@ -171,7 +171,6 @@ namespace VFrame30
 		return;
 	}
 
-	//bool CVideoItemLink::GetConnectionPointPos(const GUID& connectionPointGuid, VideoItemPoint* pResult) const
 	bool SchemeItemLink::GetConnectionPointPos(const QUuid&, SchemePoint*, double, int) const
 	{
 		return false;

@@ -13,7 +13,7 @@ namespace EditEngine
 		SetPropertyCommand();
 	public:
 		SetPropertyCommand(
-				EditSchemeView* videoFrameView,
+				EditSchemeView* schemeView,
 				QString propertyName,
 				QVariant value,
 				const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,

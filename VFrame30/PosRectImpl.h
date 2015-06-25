@@ -9,7 +9,7 @@ namespace VFrame30
 {
 	class CDrawParam;
 
-	// Интерфейс для VideoItem который хранит координаты в виде прямоугольника, координаты должны быть нормализированы.
+	// Интерфейс для SchemeItem который хранит координаты в виде прямоугольника, координаты должны быть нормализированы.
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
 	class IPosRect
@@ -86,7 +86,7 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const override;
 
-		// Get VideoItem bounding rectangle in itemUnit()
+		// Get SchemeItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
@@ -116,7 +116,7 @@ namespace VFrame30
 		virtual double heightDocPt() const override;
 		virtual void setHeightDocPt(double value) override;
 
-		// Реализация интерефейса IVideoItemPropertiesPos
+		// Реализация интерефейса ISchemeItemPropertiesPos
 		//
 	public:
 		virtual double left() const override;

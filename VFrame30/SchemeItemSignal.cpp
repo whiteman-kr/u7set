@@ -4,7 +4,7 @@
 namespace VFrame30
 {
 	//
-	// CVideoItemSignal
+	// CSchemeItemSignal
 	//
 	SchemeItemSignal::SchemeItemSignal(void)
 	{
@@ -172,7 +172,7 @@ namespace VFrame30
 
 
 	//
-	// CVideoItemInputSignal
+	// CSchemeItemInputSignal
 	//
 	SchemeItemInput::SchemeItemInput(void)
 	{
@@ -251,7 +251,7 @@ namespace VFrame30
 	}
 	
 	//
-	// CVideoItemOutputSignal
+	// CSchemeItemOutputSignal
 	//
 	SchemeItemOutput::SchemeItemOutput(void)
 	{

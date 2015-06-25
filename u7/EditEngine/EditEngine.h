@@ -16,7 +16,7 @@ namespace EditEngine
 
 	//
 	//
-	// EditEngine - Класс обеспечивающий выполнение всех команд изменения VideoFrameView (Undo )
+	// EditEngine - Класс обеспечивающий выполнение всех команд изменения SchemeView (Undo )
 	//
 	//
 	class EditEngine : public QObject
@@ -27,7 +27,7 @@ namespace EditEngine
 		EditEngine();		// deleted;
 
 	public:
-		EditEngine(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent);
+		EditEngine(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent);
 		virtual ~EditEngine();
 
 	public:
@@ -174,7 +174,7 @@ namespace EditEngine
 	private:
 		static const int MaxCommandCount = 2048;
 
-		EditSchemeView* m_videoFrameView;
+		EditSchemeView* m_schemeView;
 		QScrollBar* m_hScrollBar;
 		QScrollBar* m_vScrollBar;
 
@@ -196,18 +196,18 @@ namespace EditEngine
 	private:
 		EditCommand();		// deleted;
 	public:
-		EditCommand(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		EditCommand(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	public:
-		void execute(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void unExecute(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void execute(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void unExecute(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemeView* videoFrameView) = 0;
-		virtual void unExecuteCommand(EditSchemeView* videoFrameView) = 0;
+		virtual void executeCommand(EditSchemeView* schemeView) = 0;
+		virtual void unExecuteCommand(EditSchemeView* schemeView) = 0;
 
-		void saveViewPos(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void restoreViewPos(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void saveViewPos(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void restoreViewPos(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 		// Data
 		//

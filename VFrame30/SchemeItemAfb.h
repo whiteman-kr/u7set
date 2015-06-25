@@ -5,7 +5,7 @@
 namespace VFrame30
 {
 	//
-	// CVideoItemInputSignal
+	// SchemeItemAfb
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemeItemAfb : public FblItemRect
 	{

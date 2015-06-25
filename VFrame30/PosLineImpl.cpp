@@ -323,7 +323,7 @@ namespace VFrame30
 		m_endYDocPt = value;
 	}
 
-	// Реализация интерефейса IVideoItemPropertiesPos
+	// Реализация интерефейса ISchemeItemPropertiesPos
 	//
 	double PosLineImpl::left() const 
 	{

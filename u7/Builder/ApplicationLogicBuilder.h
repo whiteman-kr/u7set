@@ -120,7 +120,7 @@ namespace Builder
 		bool orderItems(OutputLog* log);
 
 	private:
-		// Set connection between VideoItemInputSignal/VideoItemOutputSignal by StrIds
+		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
 		//
 		bool setInputOutputsElementsConnection(OutputLog* log);
 

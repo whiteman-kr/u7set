@@ -4,14 +4,13 @@
 namespace EditEngine
 {
 
-	SetSchemePropertyCommand::SetSchemePropertyCommand(
-			EditSchemeView* videoFrameView,
+	SetSchemePropertyCommand::SetSchemePropertyCommand(EditSchemeView* schemeView,
 			QString propertyName,
 			QVariant value,
 			std::shared_ptr<VFrame30::Scheme> scheme,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
-		EditCommand(videoFrameView, hScrollBar, vScrollBar)
+		EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
 		assert(propertyName.isEmpty() == false);
 		assert(value.isValid() == true);

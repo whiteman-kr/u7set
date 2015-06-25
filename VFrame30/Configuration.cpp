@@ -32,7 +32,7 @@ namespace VFrame30
 		Proto::Write(pMutableConfiguration->mutable_variables(), m_variables);
 		Proto::Write(pMutableConfiguration->mutable_globals(), m_globals);
 		 
-		for (auto vf = m_videoFramesIDs.begin(); vf != m_videoFramesIDs.end(); ++vf)
+		for (auto vf = m_schemeIds.begin(); vf != m_schemeIds.end(); ++vf)
 		{
 			Proto::Uuid* pGuid = pMutableConfiguration->add_schemesids();
 			Proto::Write(pGuid, *vf);
@@ -42,8 +42,8 @@ namespace VFrame30
 
 		for (auto vf = m_schemes.begin(); vf != m_schemes.end(); ++vf)
 		{
-			Proto::Envelope* pVideoFrame = pMutableConfiguration->add_schemes();
-			saveFrameResult &= vf->get()->Save(pVideoFrame);
+			Proto::Envelope* scheme = pMutableConfiguration->add_schemes();
+			saveFrameResult &= vf->get()->Save(scheme);
 		}
 				
 		return saveFrameResult;
@@ -65,11 +65,11 @@ namespace VFrame30
 		Proto::Read(configuration.variables(), &m_variables);
 		Proto::Read(configuration.globals(), &m_globals);
 
-		m_videoFramesIDs.clear();
+		m_schemeIds.clear();
 		for (int i = 0; i < configuration.schemesids().size(); i++)
 		{
 			const QUuid& schemeGuid = Proto::Read(configuration.schemesids(i));
-			m_videoFramesIDs.push_back(schemeGuid);
+			m_schemeIds.push_back(schemeGuid);
 
 			assert(schemeGuid.isNull() == false);
 		}
@@ -169,22 +169,22 @@ namespace VFrame30
 		m_globals = globals;
 	}
 
-	const std::vector<QUuid>& Configuration::videoFramesIDs() const
+	const std::vector<QUuid>& Configuration::schemesIDs() const
 	{
-		return m_videoFramesIDs;
+		return m_schemeIds;
 	}
 
-	std::vector<QUuid>* Configuration::mutableVideoFramesIDs()
+	std::vector<QUuid>* Configuration::mutableSchemesIDs()
 	{
-		return &m_videoFramesIDs;
+		return &m_schemeIds;
 	}
 
-	const std::vector<std::shared_ptr<Scheme>>& Configuration::videoFrames() const
+	const std::vector<std::shared_ptr<Scheme>>& Configuration::schemes() const
 	{
 		return m_schemes;
 	}
 
-	std::vector<std::shared_ptr<Scheme>>* Configuration::mutableVideoFrames()
+	std::vector<std::shared_ptr<Scheme>>* Configuration::mutableSchemes()
 	{
 		return &m_schemes;
 	}

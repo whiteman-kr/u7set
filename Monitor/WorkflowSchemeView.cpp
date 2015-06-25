@@ -13,7 +13,7 @@ WorkflowSchemeView::~WorkflowSchemeView()
 
 void WorkflowSchemeView::paintEvent(QPaintEvent* pe)
 {
-	// Draw videoframe
+	// Draw Scheme
 	//
 	VFrame30::SchemeView::paintEvent(pe);
 
@@ -32,7 +32,7 @@ void WorkflowSchemeView::paintEvent(QPaintEvent* pe)
 	//
 	Ajust(&p, 0, 0);
 
-	// Draw VideoFrame
+	// Draw Scheme
 	//
 	QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
 

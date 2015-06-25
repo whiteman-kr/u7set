@@ -4,7 +4,7 @@
 
 namespace VFrame30
 {
-	// CVideoItemSignal
+	// CSchemeItemSignal
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemeItemSignal : public FblItemRect
 	{
@@ -45,7 +45,7 @@ namespace VFrame30
 
 
 	//
-	// CVideoItemInputSignal
+	// CSchemeItemInput
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemeItemInput : public SchemeItemSignal
 	{
@@ -76,7 +76,7 @@ namespace VFrame30
 
 
 	//
-	// CVideoItemInputSignal
+	// CSchemeItemInput
 	//
 	class VFRAME30LIBSHARED_EXPORT SchemeItemOutput : public SchemeItemSignal
 	{

@@ -5,20 +5,19 @@
 namespace EditEngine
 {
 
-	SetPropertyCommand::SetPropertyCommand(
-			EditSchemeView* videoFrameView,
+	SetPropertyCommand::SetPropertyCommand(EditSchemeView* schemeView,
 			QString propertyName,
 			QVariant value,
 			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
-		EditCommand(videoFrameView, hScrollBar, vScrollBar)
+		EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
 		assert(propertyName.isEmpty() == false);
 		assert(items.empty() == false);
 		assert(value.isValid() == true);
 
-		m_scheme = videoFrameView->scheme();
+		m_scheme = schemeView->scheme();
 		assert(m_scheme != nullptr);
 
 		for (auto& i : items)
@@ -62,7 +61,7 @@ namespace EditEngine
 
 			if (isDynamic == true)
 			{
-				// Apparently it is FblParam, only VFrame30::VideoItemFblElement can have such kind of props
+				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
 				//
 				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
 
@@ -105,7 +104,7 @@ namespace EditEngine
 
 			if (isDynamic == true)
 			{
-				// Apparently it is FblParam, only VFrame30::VideoItemFblElement can have such kind of props
+				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
 				//
 				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
 

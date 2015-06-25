@@ -41,7 +41,7 @@ namespace VFrame30
 
 	void SchemeView::mouseMoveEvent(QMouseEvent* event)
 	{
-		// If any contrtol key is pressed, pass control further (VideoFrameWidget?)
+		// If any contrtol key is pressed, pass control further
 		//
 		if (event->buttons().testFlag(Qt::LeftButton) == true ||
 			event->buttons().testFlag(Qt::RightButton) == true ||
@@ -128,7 +128,7 @@ namespace VFrame30
 		//
 		Ajust(&p, 0, 0);
 
-		// Draw VideoFrame
+		// Draw Scheme
 		//
 		QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
 
