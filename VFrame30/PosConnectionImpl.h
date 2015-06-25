@@ -8,7 +8,7 @@ namespace VFrame30
 	// Интерфейс для VideoItem который хранит координаты в виде направленной линии,
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
-	class IVideoItemPosConnection
+	class IPosConnection
 	{
 	public:
 		virtual const std::list<SchemePoint>& GetPointList() const = 0;
@@ -28,7 +28,7 @@ namespace VFrame30
 		virtual void DeleteLastExtensionPoint() = 0;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public SchemeItem, public IVideoItemPosConnection
+	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public SchemeItem, public IPosConnection
 	{
 		Q_OBJECT
 

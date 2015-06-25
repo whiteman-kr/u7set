@@ -9,7 +9,7 @@ namespace VFrame30
 	// Интерфейс для VideoItem который хранит координаты в виде направленной линии,
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
-	class IVideoItemPosLine
+	class IPosLine
 	{
 	public:
 		virtual double startXDocPt() const = 0;
@@ -26,7 +26,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public SchemeItem, public IVideoItemPosLine
+	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public SchemeItem, public IPosLine
 	{
 		Q_OBJECT
 

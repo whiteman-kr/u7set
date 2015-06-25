@@ -92,7 +92,6 @@ HEADERS += VFrame30Lib_global.h \
     FblItemRect.h \
     FblItemLine.h \
     FblItem.h \
-    FblConnectionsImpl.h \
     Fbl.h \
     DrawParam.h \
     Print.h \

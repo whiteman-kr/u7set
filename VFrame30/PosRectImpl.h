@@ -12,7 +12,7 @@ namespace VFrame30
 	// Интерфейс для VideoItem который хранит координаты в виде прямоугольника, координаты должны быть нормализированы.
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
-	class IVideoItemPosRect
+	class IPosRect
 	{
 	public:
 		virtual double leftDocPt() const = 0;
@@ -34,7 +34,7 @@ namespace VFrame30
 
 	// Реализация базовых интерефейсов для элементов прямоугольного типа
 	//
-	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public SchemeItem, public IVideoItemPosRect
+	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public SchemeItem, public IPosRect
 	{
 		Q_OBJECT
 
