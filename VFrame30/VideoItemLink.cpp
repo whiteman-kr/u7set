@@ -107,7 +107,7 @@ namespace VFrame30
 
 		// Draw the main part
 		//
-		const std::list<VideoItemPoint>& poinlist = GetPointList();
+		const std::list<SchemePoint>& poinlist = GetPointList();
 		if (poinlist.size() < 2)
 		{
 			assert(poinlist.size() >= 2);
@@ -138,7 +138,7 @@ namespace VFrame30
 
 		// вход/выход - рисование красного креста 
 		//
-		auto drawPin = [&](VideoItemPoint pt)
+		auto drawPin = [&](SchemePoint pt)
 			{
 				int connectionCount = pLayer->GetPinPosConnectinCount(pt, itemUnit());
 
@@ -172,7 +172,7 @@ namespace VFrame30
 	}
 
 	//bool CVideoItemLink::GetConnectionPointPos(const GUID& connectionPointGuid, VideoItemPoint* pResult) const
-	bool VideoItemLink::GetConnectionPointPos(const QUuid&, VideoItemPoint*, double, int) const
+	bool VideoItemLink::GetConnectionPointPos(const QUuid&, SchemePoint*, double, int) const
 	{
 		return false;
 	}

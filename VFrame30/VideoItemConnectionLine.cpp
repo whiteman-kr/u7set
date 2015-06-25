@@ -95,7 +95,7 @@ namespace VFrame30
 
 		// Draw the main part
 		//
-		const std::list<VideoItemPoint>& poinlist = GetPointList();
+		const std::list<SchemePoint>& poinlist = GetPointList();
 
 		QPolygonF polyline(static_cast<int>(poinlist.size()));
 		int index = 0;

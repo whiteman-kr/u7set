@@ -323,7 +323,7 @@ namespace VFrame30
 				VideoItemLink* pVideoItemLink = dynamic_cast<VideoItemLink*>(item->get());
 				if (pVideoItemLink != nullptr)
 				{
-					const std::list<VideoItemPoint>& pointList = pVideoItemLink->GetPointList();
+					const std::list<SchemePoint>& pointList = pVideoItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -368,7 +368,7 @@ namespace VFrame30
 
 				if (pVideoItemLink != nullptr)
 				{
-					const std::list<VideoItemPoint>& pointList = pVideoItemLink->GetPointList();
+					const std::list<SchemePoint>& pointList = pVideoItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -404,7 +404,7 @@ namespace VFrame30
 				const std::list<CFblConnectionPoint>& inputs = pFblItem->inputs();
 				for (auto pin = inputs.begin(); pin != inputs.end(); ++pin)
 				{
-					VideoItemPoint pinPos = pin->point();
+					SchemePoint pinPos = pin->point();
 					
 					pLayer->ConnectionMapPosInc(pinPos);
 
@@ -419,7 +419,7 @@ namespace VFrame30
 				const std::list<CFblConnectionPoint>& outputs = pFblItem->outputs();
 				for (auto pin = outputs.begin(); pin != outputs.end(); ++pin)
 				{
-					VideoItemPoint pinPos = pin->point();
+					SchemePoint pinPos = pin->point();
 
 					pLayer->ConnectionMapPosInc(pinPos);
 

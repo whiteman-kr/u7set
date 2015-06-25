@@ -38,14 +38,14 @@ namespace Builder
 	struct Link
 	{
 		Link() = default;
-		Link(const std::list<VFrame30::VideoItemPoint>& points);
+		Link(const std::list<VFrame30::SchemePoint>& points);
 
-		VFrame30::VideoItemPoint ptBegin() const;
-		VFrame30::VideoItemPoint ptEnd() const;
+		VFrame30::SchemePoint ptBegin() const;
+		VFrame30::SchemePoint ptEnd() const;
 
-		bool isPinOnLink(VFrame30::VideoItemPoint pt) const;
+		bool isPinOnLink(VFrame30::SchemePoint pt) const;
 
-		std::list<VFrame30::VideoItemPoint> m_points;
+		std::list<VFrame30::SchemePoint> m_points;
 	};
 
 	struct Bush
@@ -63,7 +63,7 @@ namespace Builder
 	{
 		std::vector<Bush> bushes;
 
-		int getBranchByPinPos(VFrame30::VideoItemPoint pt) const;
+		int getBranchByPinPos(VFrame30::SchemePoint pt) const;
 		int getBranchByPinGuid(const QUuid& guid) const;
 	};
 

@@ -170,7 +170,7 @@ protected:
 												// При перемещении вершины соединительно линии здесь
 												// соххраняются точки (в отрисовке), и потом они
 												// используются при завершении (MouseUp) редактирования.
-	std::list<VFrame30::VideoItemPoint> m_movingVertexPoints;
+	std::list<VFrame30::SchemePoint> m_movingVertexPoints;
 
 
 	// Temporary data, can be changed in EditVideoFrameWidget

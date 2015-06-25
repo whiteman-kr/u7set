@@ -40,8 +40,8 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		const VideoItemPoint& point() const;
-		void setPoint(const VideoItemPoint& value);
+		const SchemePoint& point() const;
+		void setPoint(const SchemePoint& value);
 
 		double x() const;
 		void setX(double val);
@@ -72,7 +72,7 @@ namespace VFrame30
 		//
 	private:
 		QUuid m_guid;
-		VideoItemPoint m_point;
+		SchemePoint m_point;
 		ConnectionDirrection m_dirrection = ConnectionDirrection::Input;
 		int m_afbOperandIndex = 0;
 
@@ -133,7 +133,7 @@ namespace VFrame30
 
 		void ClearAssociatedConnections();
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep);
-		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const;
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemePoint* pResult, double gridSize, int pinGridStep) const;
 
 		// Public methods
 		//

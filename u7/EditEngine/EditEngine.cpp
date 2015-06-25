@@ -207,17 +207,17 @@ namespace EditEngine
 		return runDeleteItem(v, layer);
 	}
 
-	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::VideoItemPoint>>& points, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items)
+	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemePoint>>& points, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items)
 	{
 		addCommand(std::make_shared<SetPointsCommand>(m_videoFrameView, points, items, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runSetPoints(const std::vector<VFrame30::VideoItemPoint>& points, const std::shared_ptr<VFrame30::VideoItem>& item)
+	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemePoint>& points, const std::shared_ptr<VFrame30::VideoItem>& item)
 	{
-		std::vector<VFrame30::VideoItemPoint> ip(points.begin(), points.end());
+		std::vector<VFrame30::SchemePoint> ip(points.begin(), points.end());
 
-		std::vector<std::vector<VFrame30::VideoItemPoint>> allpoints;
+		std::vector<std::vector<VFrame30::SchemePoint>> allpoints;
 		allpoints.push_back(ip);
 
 		std::vector<std::shared_ptr<VFrame30::VideoItem>> items;

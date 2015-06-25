@@ -16,35 +16,35 @@
 namespace Builder
 {
 
-	Link::Link(const std::list<VFrame30::VideoItemPoint>& points) :
+	Link::Link(const std::list<VFrame30::SchemePoint>& points) :
 		m_points(points)
 	{
 		assert(points.size() >= 2);
 	}
 
-	VFrame30::VideoItemPoint Link::ptBegin() const
+	VFrame30::SchemePoint Link::ptBegin() const
 	{
 		if (m_points.empty() == true)
 		{
 			assert(m_points.empty() == false);
-			return VFrame30::VideoItemPoint();
+			return VFrame30::SchemePoint();
 		}
 
 		return m_points.front();
 	}
 
-	VFrame30::VideoItemPoint Link::ptEnd() const
+	VFrame30::SchemePoint Link::ptEnd() const
 	{
 		if (m_points.empty() == true)
 		{
 			assert(m_points.empty() == false);
-			return VFrame30::VideoItemPoint();
+			return VFrame30::SchemePoint();
 		}
 
 		return m_points.back();
 	}
 
-	bool Link::isPinOnLink(VFrame30::VideoItemPoint pt) const
+	bool Link::isPinOnLink(VFrame30::SchemePoint pt) const
 	{
 		VFrame30::CHorzVertLinks hvl;
 
@@ -91,7 +91,7 @@ namespace Builder
 	// Function finds branch with a point on it.
 	// Returns branch index or -1 if a brach was not found
 	//
-	int BushContainer::getBranchByPinPos(VFrame30::VideoItemPoint pt) const
+	int BushContainer::getBranchByPinPos(VFrame30::SchemePoint pt) const
 	{
 		for (size_t i = 0; i < bushes.size(); i++)
 		{
@@ -1168,7 +1168,7 @@ namespace Builder
 
 			if (link != nullptr)
 			{
-				const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+				const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
 
 				if (pointList.size() < 2)
 				{
@@ -1193,7 +1193,7 @@ namespace Builder
 				continue;
 			}
 
-			const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+			const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
 
 			if (pointList.size() < 2)
 			{
@@ -1314,7 +1314,7 @@ namespace Builder
 					return false;
 				}
 
-				const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+				const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
 
 				if (pointList.size() < 2)
 				{
@@ -1393,7 +1393,7 @@ namespace Builder
 
 				for (VFrame30::CFblConnectionPoint& in : *inputs)
 				{
-					VFrame30::VideoItemPoint pinPos = in.point();
+					VFrame30::SchemePoint pinPos = in.point();
 
 					//qDebug() << "input  " << pinPos.X << " -" << pinPos.Y;
 
@@ -1419,7 +1419,7 @@ namespace Builder
 
 				for (const VFrame30::CFblConnectionPoint& out : *outputs)
 				{
-					VFrame30::VideoItemPoint pinPos = out.point();
+					VFrame30::SchemePoint pinPos = out.point();
 
 					//qDebug() << "output  " << pinPos.X << " -" << pinPos.Y;
 

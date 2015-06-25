@@ -176,7 +176,7 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 	// Draw ruller for newItem
 	//
 	bool drawRullers = false;
-	VFrame30::VideoItemPoint rullerPoint;
+	VFrame30::SchemePoint rullerPoint;
 
 	bool posInterfaceFound = false;
 
@@ -223,7 +223,7 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 		posInterfaceFound = true;
 		VFrame30::IVideoItemPosConnection* pos = dynamic_cast<VFrame30::IVideoItemPosConnection*>(m_newItem.get());
 
-		const std::list<VFrame30::VideoItemPoint>& extPoints = pos->GetExtensionPoints();
+		const std::list<VFrame30::SchemePoint>& extPoints = pos->GetExtensionPoints();
 
 		if (extPoints.empty() == false)
 		{
@@ -315,11 +315,11 @@ void EditSchemeView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 			continue;
 		}
 
-		std::vector<VFrame30::VideoItemPoint> points = ipoint->getPointList();
+		std::vector<VFrame30::SchemePoint> points = ipoint->getPointList();
 
 		for (size_t i = 0; i < points.size(); i++)
 		{
-			const VFrame30::VideoItemPoint& p = points[i];
+			const VFrame30::SchemePoint& p = points[i];
 
 			if (it == std::begin(m_selectedItems) && i == 0)
 			{
@@ -413,7 +413,7 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// save old state
 	//
-	std::vector<VFrame30::VideoItemPoint> oldPos = si->getPointList();
+	std::vector<VFrame30::SchemePoint> oldPos = si->getPointList();
 
 	// set new pos
 	//
@@ -519,8 +519,8 @@ void EditSchemeView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// Save result for drawing rullers
 	//
-	m_addRectStartPoint = VFrame30::VideoItemPoint(x1, y1);
-	m_addRectEndPoint = VFrame30::VideoItemPoint(x2, y2);
+	m_addRectStartPoint = VFrame30::SchemePoint(x1, y1);
+	m_addRectEndPoint = VFrame30::SchemePoint(x2, y2);
 
 	// Draw rullers by bounding rect
 	//
@@ -704,8 +704,8 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		return;
 	}
 
-	std::list<VFrame30::VideoItemPoint> pointsList = itemPos->GetPointList();
-	std::vector<VFrame30::VideoItemPoint> points(pointsList.begin(), pointsList.end());
+	std::list<VFrame30::SchemePoint> pointsList = itemPos->GetPointList();
+	std::vector<VFrame30::SchemePoint> points(pointsList.begin(), pointsList.end());
 
 	// Save position
 	//
@@ -728,10 +728,10 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		{
 			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
 
-			VFrame30::VideoItemPoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::VideoItemPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
+			VFrame30::SchemePoint oldEdgeStart = points[m_movingEdgePointIndex];
+			VFrame30::SchemePoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
 
-			VFrame30::VideoItemPoint op = points[m_movingEdgePointIndex];
+			VFrame30::SchemePoint op = points[m_movingEdgePointIndex];
 			op.Y += diff;
 
 			points[m_movingEdgePointIndex] = op;
@@ -764,10 +764,10 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		{
 			double diff = m_editEndMovingEdge - m_editStartMovingEdge;
 
-			VFrame30::VideoItemPoint oldEdgeStart = points[m_movingEdgePointIndex];
-			VFrame30::VideoItemPoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
+			VFrame30::SchemePoint oldEdgeStart = points[m_movingEdgePointIndex];
+			VFrame30::SchemePoint oldEdgeEnd = points[m_movingEdgePointIndex + 1];
 
-			VFrame30::VideoItemPoint op = points[m_movingEdgePointIndex];
+			VFrame30::SchemePoint op = points[m_movingEdgePointIndex];
 			op.X += diff;
 
 			points[m_movingEdgePointIndex] = op;
@@ -808,11 +808,11 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 				bool sameDirrection = true;
 				bool wasVert = true;
 				bool wasHorz = true;
-				VFrame30::VideoItemPoint curPoint = points[index];
+				VFrame30::SchemePoint curPoint = points[index];
 
 				while (index > 0 && sameDirrection == true)
 				{
-					VFrame30::VideoItemPoint prevPoint = points[index - 1];
+					VFrame30::SchemePoint prevPoint = points[index - 1];
 
 					if (std::abs(prevPoint.X - curPoint.X) < std::abs(prevPoint.Y - curPoint.Y))
 					{
@@ -861,11 +861,11 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 				bool sameDirrection = true;
 				bool wasVert = true;
 				bool wasHorz = true;
-				VFrame30::VideoItemPoint curPoint = points[index];
+				VFrame30::SchemePoint curPoint = points[index];
 
 				while (index + 1 < static_cast<int>(points.size()) && sameDirrection == true)
 				{
-					VFrame30::VideoItemPoint nextPoint = points[index + 1];
+					VFrame30::SchemePoint nextPoint = points[index + 1];
 
 					if (std::abs(nextPoint.X - curPoint.X) < std::abs(nextPoint.Y - curPoint.Y))
 					{
@@ -910,7 +910,7 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 
 			// Сдвинуть перемещаемую вершину
 			//
-			VFrame30::VideoItemPoint pt = points[m_movingEdgePointIndex];
+			VFrame30::SchemePoint pt = points[m_movingEdgePointIndex];
 
 			pt.X += diffX;
 			pt.Y += diffY;
@@ -1176,7 +1176,7 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::VideoItem* videoItem
 
 		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
 		//
-		std::list<VFrame30::VideoItemPoint> points = itemPos->GetPointList();
+		std::list<VFrame30::SchemePoint> points = itemPos->GetPointList();
 
 		int pointIndex = 0;
 		for (auto pt = points.begin(); pt != points.end(); pt++, pointIndex++)
@@ -1192,7 +1192,7 @@ VideoItemAction EditSchemeView::getPossibleAction(VFrame30::VideoItem* videoItem
 
 		// Проверка всех отрезков
 		//
-		VFrame30::VideoItemPoint lastPoint;
+		VFrame30::SchemePoint lastPoint;
 
 		pointIndex = 0;
 		for (auto pt = points.begin(); pt != points.end(); pt++, pointIndex++)
@@ -2690,10 +2690,10 @@ void EditSchemeWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 
 	// --
 	//
-	std::vector<VFrame30::VideoItemPoint> itemPoints;
+	std::vector<VFrame30::SchemePoint> itemPoints;
 
-	itemPoints.push_back(VFrame30::VideoItemPoint(std::min(x1, x2), std::min(y1, y2)));
-	itemPoints.push_back(VFrame30::VideoItemPoint(std::min(x1, x2) + std::abs(x2 - x1), std::min(y1, y2) + std::abs(y2 - y1)));
+	itemPoints.push_back(VFrame30::SchemePoint(std::min(x1, x2), std::min(y1, y2)));
+	itemPoints.push_back(VFrame30::SchemePoint(std::min(x1, x2) + std::abs(x2 - x1), std::min(y1, y2) + std::abs(y2 - y1)));
 
 	m_editEngine->runSetPoints(itemPoints, si);
 
@@ -2724,7 +2724,7 @@ void EditSchemeWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 		return;
 	}
 
-	std::vector<VFrame30::VideoItemPoint> points(2);
+	std::vector<VFrame30::SchemePoint> points(2);
 
 	QPointF spt = editSchemeView()->m_editStartDocPt;
 	QPointF ept = widgetPointToDocument(event->pos(), snapToGrid());
@@ -2742,14 +2742,14 @@ void EditSchemeWidget::mouseLeftUp_MovingLinePoint(QMouseEvent* event)
 
 	if (mouseState() == MouseState::MovingStartLinePoint)
 	{
-		points[0] = static_cast<VFrame30::VideoItemPoint>(QPointF(itemPos->startXDocPt() + xdif,itemPos->startYDocPt() + ydif));
-		points[1] = static_cast<VFrame30::VideoItemPoint>(QPointF(itemPos->endXDocPt(), itemPos->endYDocPt()));
+		points[0] = static_cast<VFrame30::SchemePoint>(QPointF(itemPos->startXDocPt() + xdif,itemPos->startYDocPt() + ydif));
+		points[1] = static_cast<VFrame30::SchemePoint>(QPointF(itemPos->endXDocPt(), itemPos->endYDocPt()));
 	}
 
 	if (mouseState() == MouseState::MovingEndLinePoint)
 	{
-		points[0] = static_cast<VFrame30::VideoItemPoint>(QPointF(itemPos->startXDocPt(),itemPos->startYDocPt()));
-		points[1] = static_cast<VFrame30::VideoItemPoint>(QPointF(itemPos->endXDocPt() + xdif, itemPos->endYDocPt() + ydif));
+		points[0] = static_cast<VFrame30::SchemePoint>(QPointF(itemPos->startXDocPt(),itemPos->startYDocPt()));
+		points[1] = static_cast<VFrame30::SchemePoint>(QPointF(itemPos->endXDocPt() + xdif, itemPos->endYDocPt() + ydif));
 	}
 
 	m_editEngine->runSetPoints(points, si);
@@ -2874,8 +2874,8 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 
 		// Если линия началась или окончилась на таком же элементе, то соединить эти две (или три) линии
 		//
-		VFrame30::VideoItemPoint startPoint = points.front();
-		VFrame30::VideoItemPoint endPoint = points.back();
+		VFrame30::SchemePoint startPoint = points.front();
+		VFrame30::SchemePoint endPoint = points.back();
 
 		// Поиск элементов которые лежат на точках startPoint, endPoint
 		//
@@ -2912,7 +2912,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 				points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 				points.reverse();								// Если будет объединение по последней точке, то этот Recerse очень важен
 
-				std::vector<VFrame30::VideoItemPoint> newPoints(points.begin(), points.end());
+				std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
 				m_editEngine->runSetPoints(newPoints, schemeItemStartPoint);
 			}
 			else
@@ -2932,7 +2932,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 					points.clear();
 					points.assign(existingItemPoints.begin(), existingItemPoints.end());
 
-					std::vector<VFrame30::VideoItemPoint> newPoints(points.begin(), points.end());
+					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
 					m_editEngine->runSetPoints(newPoints, schemeItemStartPoint);
 				}
 			}
@@ -2968,7 +2968,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 
 					m_editEngine->runDeleteItem(schemeItemStartPoint, activeLayer());
 
-					std::vector<VFrame30::VideoItemPoint> newPoints(points.begin(), points.end());
+					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
 					m_editEngine->runSetPoints(newPoints, schemeItemEndPoint);
 				}
 				else
@@ -2979,7 +2979,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
-					std::vector<VFrame30::VideoItemPoint> newPoints(points.begin(), points.end());
+					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
 					m_editEngine->runSetPoints(newPoints, schemeItemEndPoint);
 				}
 			}
@@ -3002,7 +3002,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 
 						m_editEngine->runDeleteItem(schemeItemStartPoint, activeLayer());
 
-						std::vector<VFrame30::VideoItemPoint> newPoints(points.begin(), points.end());
+						std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
 						m_editEngine->runSetPoints(newPoints, schemeItemEndPoint);
 					}
 					else
@@ -3013,7 +3013,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 						existingItemPoints.pop_front();
 						points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
-						std::vector<VFrame30::VideoItemPoint> newPoints(points.begin(), points.end());
+						std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
 						m_editEngine->runSetPoints(newPoints, schemeItemEndPoint);
 					}
 				}
@@ -3078,7 +3078,7 @@ void EditSchemeWidget::mouseLeftUp_MovingEdgeOrVertex(QMouseEvent*)
 		return;
 	}
 
-	std::vector<VFrame30::VideoItemPoint> setPoints(editSchemeView()->m_movingVertexPoints.begin(), editSchemeView()->m_movingVertexPoints.end());
+	std::vector<VFrame30::SchemePoint> setPoints(editSchemeView()->m_movingVertexPoints.begin(), editSchemeView()->m_movingVertexPoints.end());
 	m_editEngine->runSetPoints(setPoints, si);
 
 	resetAction();
@@ -3279,7 +3279,7 @@ void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* ev
 
 	auto points = itemPos->GetPointList();
 	auto extPoints = itemPos->GetExtensionPoints();
-	VFrame30::VideoItemPoint ptBase;
+	VFrame30::SchemePoint ptBase;
 
 	if (points.empty() == true || extPoints.empty() == true)
 	{

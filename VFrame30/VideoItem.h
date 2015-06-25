@@ -14,42 +14,42 @@ namespace VFrame30
 
 namespace VFrame30
 {
-	struct VFRAME30LIBSHARED_EXPORT VideoItemPoint
+	struct VFRAME30LIBSHARED_EXPORT SchemePoint
 	{
 		double X;
 		double Y;
 
 		// Methods
 		//
-		VideoItemPoint() :
+		SchemePoint() :
 			X(0),
 			Y(0)
 		{
 		}
 
-		explicit VideoItemPoint(const Proto::VideoItemPoint& vip)
+		explicit SchemePoint(const Proto::SchemePoint& vip)
 		{
 			LoadData(vip);
 		}
 
-		explicit VideoItemPoint(QPointF point) :
+		explicit SchemePoint(QPointF point) :
 			X(point.x()),
 			Y(point.y())
 		{
 		}
 
-		VideoItemPoint(double x, double y) :
+		SchemePoint(double x, double y) :
 			X(x),
 			Y(y)
 		{
 		}
 
-		bool operator == (const VideoItemPoint& pt) const
+		bool operator == (const SchemePoint& pt) const
 		{
 			return std::abs(pt.X - X) < 0.000001 && std::abs(pt.Y - Y) < 0.000001;
 		}
 
-		bool operator < (const VideoItemPoint& pt) const
+		bool operator < (const SchemePoint& pt) const
 		{
 			if (operator==(pt) == true)
 			{
@@ -75,13 +75,13 @@ namespace VFrame30
 			return QPointF(X, Y);
 		}
 
-		bool SaveData(Proto::VideoItemPoint* vip) const
+		bool SaveData(Proto::SchemePoint* vip) const
 		{
 			vip->set_x(X);
 			vip->set_y(Y);
 			return true;
 		}
-		bool LoadData(const Proto::VideoItemPoint& vip)
+		bool LoadData(const Proto::SchemePoint& vip)
 		{
 			this->X = vip.x();
 			this->Y = vip.y();
@@ -114,8 +114,8 @@ namespace VFrame30
 	class IPointList
 	{
 	public:
-		virtual std::vector<VideoItemPoint> getPointList() const = 0;
-		virtual void setPointList(const std::vector<VideoItemPoint>& points) = 0;
+		virtual std::vector<SchemePoint> getPointList() const = 0;
+		virtual void setPointList(const std::vector<SchemePoint>& points) = 0;
 	};
 
 
@@ -212,8 +212,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<VideoItemPoint> getPointList() const override;
-		virtual void setPointList(const std::vector<VideoItemPoint>& points) override;
+		virtual std::vector<SchemePoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemePoint>& points) override;
 
 		// Properties and Data
 		//

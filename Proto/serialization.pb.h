@@ -38,7 +38,7 @@ class Uuid;
 class qvariant;
 class wstring;
 class FontParam;
-class VideoItemPoint;
+class SchemePoint;
 class Envelope;
 class Configuration;
 class AfbElementCollection;
@@ -570,14 +570,14 @@ class FontParam : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class VideoItemPoint : public ::google::protobuf::Message {
+class SchemePoint : public ::google::protobuf::Message {
  public:
-  VideoItemPoint();
-  virtual ~VideoItemPoint();
+  SchemePoint();
+  virtual ~SchemePoint();
 
-  VideoItemPoint(const VideoItemPoint& from);
+  SchemePoint(const SchemePoint& from);
 
-  inline VideoItemPoint& operator=(const VideoItemPoint& from) {
+  inline SchemePoint& operator=(const SchemePoint& from) {
     CopyFrom(from);
     return *this;
   }
@@ -591,17 +591,17 @@ class VideoItemPoint : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemPoint& default_instance();
+  static const SchemePoint& default_instance();
 
-  void Swap(VideoItemPoint* other);
+  void Swap(SchemePoint* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemPoint* New() const;
+  SchemePoint* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemPoint& from);
-  void MergeFrom(const VideoItemPoint& from);
+  void CopyFrom(const SchemePoint& from);
+  void MergeFrom(const SchemePoint& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -638,7 +638,7 @@ class VideoItemPoint : public ::google::protobuf::Message {
   inline double y() const;
   inline void set_y(double value);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemPoint)
+  // @@protoc_insertion_point(class_scope:Proto.SchemePoint)
  private:
   inline void set_has_x();
   inline void clear_has_x();
@@ -658,7 +658,7 @@ class VideoItemPoint : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemPoint* default_instance_;
+  static SchemePoint* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2668,16 +2668,16 @@ class PosConnectionImpl : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.VideoItemPoint points = 1;
+  // repeated .Proto.SchemePoint points = 1;
   inline int points_size() const;
   inline void clear_points();
   static const int kPointsFieldNumber = 1;
-  inline const ::Proto::VideoItemPoint& points(int index) const;
-  inline ::Proto::VideoItemPoint* mutable_points(int index);
-  inline ::Proto::VideoItemPoint* add_points();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint >&
+  inline const ::Proto::SchemePoint& points(int index) const;
+  inline ::Proto::SchemePoint* mutable_points(int index);
+  inline ::Proto::SchemePoint* add_points();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint >&
       points() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint >*
       mutable_points();
 
   // @@protoc_insertion_point(class_scope:Proto.PosConnectionImpl)
@@ -2685,7 +2685,7 @@ class PosConnectionImpl : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint > points_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint > points_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -3093,14 +3093,14 @@ class FblConnectionPoint : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .Proto.VideoItemPoint point = 1;
+  // optional .Proto.SchemePoint point = 1;
   inline bool has_point() const;
   inline void clear_point();
   static const int kPointFieldNumber = 1;
-  inline const ::Proto::VideoItemPoint& point() const;
-  inline ::Proto::VideoItemPoint* mutable_point();
-  inline ::Proto::VideoItemPoint* release_point();
-  inline void set_allocated_point(::Proto::VideoItemPoint* point);
+  inline const ::Proto::SchemePoint& point() const;
+  inline ::Proto::SchemePoint* mutable_point();
+  inline ::Proto::SchemePoint* release_point();
+  inline void set_allocated_point(::Proto::SchemePoint* point);
 
   // optional .Proto.ConnectionDirrection dirrection = 2;
   inline bool has_dirrection() const;
@@ -3152,7 +3152,7 @@ class FblConnectionPoint : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::VideoItemPoint* point_;
+  ::Proto::SchemePoint* point_;
   ::Proto::Uuid* uuid_;
   int dirrection_;
   ::google::protobuf::int32 operandindex_;
@@ -5789,48 +5789,48 @@ inline void FontParam::set_italic(bool value) {
 
 // -------------------------------------------------------------------
 
-// VideoItemPoint
+// SchemePoint
 
 // required double x = 1;
-inline bool VideoItemPoint::has_x() const {
+inline bool SchemePoint::has_x() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItemPoint::set_has_x() {
+inline void SchemePoint::set_has_x() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItemPoint::clear_has_x() {
+inline void SchemePoint::clear_has_x() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItemPoint::clear_x() {
+inline void SchemePoint::clear_x() {
   x_ = 0;
   clear_has_x();
 }
-inline double VideoItemPoint::x() const {
+inline double SchemePoint::x() const {
   return x_;
 }
-inline void VideoItemPoint::set_x(double value) {
+inline void SchemePoint::set_x(double value) {
   set_has_x();
   x_ = value;
 }
 
 // required double y = 2;
-inline bool VideoItemPoint::has_y() const {
+inline bool SchemePoint::has_y() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItemPoint::set_has_y() {
+inline void SchemePoint::set_has_y() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItemPoint::clear_has_y() {
+inline void SchemePoint::clear_has_y() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItemPoint::clear_y() {
+inline void SchemePoint::clear_y() {
   y_ = 0;
   clear_has_y();
 }
-inline double VideoItemPoint::y() const {
+inline double SchemePoint::y() const {
   return y_;
 }
-inline void VideoItemPoint::set_y(double value) {
+inline void SchemePoint::set_y(double value) {
   set_has_y();
   y_ = value;
 }
@@ -8680,27 +8680,27 @@ inline void PosLineImpl::set_endydocpt(double value) {
 
 // PosConnectionImpl
 
-// repeated .Proto.VideoItemPoint points = 1;
+// repeated .Proto.SchemePoint points = 1;
 inline int PosConnectionImpl::points_size() const {
   return points_.size();
 }
 inline void PosConnectionImpl::clear_points() {
   points_.Clear();
 }
-inline const ::Proto::VideoItemPoint& PosConnectionImpl::points(int index) const {
+inline const ::Proto::SchemePoint& PosConnectionImpl::points(int index) const {
   return points_.Get(index);
 }
-inline ::Proto::VideoItemPoint* PosConnectionImpl::mutable_points(int index) {
+inline ::Proto::SchemePoint* PosConnectionImpl::mutable_points(int index) {
   return points_.Mutable(index);
 }
-inline ::Proto::VideoItemPoint* PosConnectionImpl::add_points() {
+inline ::Proto::SchemePoint* PosConnectionImpl::add_points() {
   return points_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint >&
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint >&
 PosConnectionImpl::points() const {
   return points_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint >*
+inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint >*
 PosConnectionImpl::mutable_points() {
   return &points_;
 }
@@ -9017,7 +9017,7 @@ inline void VideoItemConnectionLine::set_linecolor(::google::protobuf::uint32 va
 
 // FblConnectionPoint
 
-// optional .Proto.VideoItemPoint point = 1;
+// optional .Proto.SchemePoint point = 1;
 inline bool FblConnectionPoint::has_point() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -9028,24 +9028,24 @@ inline void FblConnectionPoint::clear_has_point() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void FblConnectionPoint::clear_point() {
-  if (point_ != NULL) point_->::Proto::VideoItemPoint::Clear();
+  if (point_ != NULL) point_->::Proto::SchemePoint::Clear();
   clear_has_point();
 }
-inline const ::Proto::VideoItemPoint& FblConnectionPoint::point() const {
+inline const ::Proto::SchemePoint& FblConnectionPoint::point() const {
   return point_ != NULL ? *point_ : *default_instance_->point_;
 }
-inline ::Proto::VideoItemPoint* FblConnectionPoint::mutable_point() {
+inline ::Proto::SchemePoint* FblConnectionPoint::mutable_point() {
   set_has_point();
-  if (point_ == NULL) point_ = new ::Proto::VideoItemPoint;
+  if (point_ == NULL) point_ = new ::Proto::SchemePoint;
   return point_;
 }
-inline ::Proto::VideoItemPoint* FblConnectionPoint::release_point() {
+inline ::Proto::SchemePoint* FblConnectionPoint::release_point() {
   clear_has_point();
-  ::Proto::VideoItemPoint* temp = point_;
+  ::Proto::SchemePoint* temp = point_;
   point_ = NULL;
   return temp;
 }
-inline void FblConnectionPoint::set_allocated_point(::Proto::VideoItemPoint* point) {
+inline void FblConnectionPoint::set_allocated_point(::Proto::SchemePoint* point) {
   delete point_;
   point_ = point;
   if (point) {

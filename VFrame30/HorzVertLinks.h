@@ -10,19 +10,19 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT CHorzVertLinks
 	{
 	public:
-		void AddLinks(const std::list<VideoItemPoint>& pointList, const QUuid& VideoItemGuid);
+		void AddLinks(const std::list<SchemePoint>& pointList, const QUuid& VideoItemGuid);
 
 		// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 		//
-		bool IsPointOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid);
+		bool IsPointOnLink(SchemePoint pt, const QUuid& VideoItemGuid);
 
 		// Определить, лежит ли чточка на одном из отрезков vertlinks или на концах horzlinks
 		//
-		bool IsPinOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid);
+		bool IsPinOnLink(SchemePoint pt, const QUuid& VideoItemGuid);
 
 		// Вернуть UUid элементов под точкой
 		//
-		std::list<QUuid> getVideoItemsUnderPoint(VideoItemPoint pt, QUuid VideoItemGuid);
+		std::list<QUuid> getVideoItemsUnderPoint(SchemePoint pt, QUuid VideoItemGuid);
 
 	public:
 		struct LINKS

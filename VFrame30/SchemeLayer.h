@@ -38,8 +38,8 @@ namespace VFrame30
 		std::shared_ptr<VideoItem> getItemById(const QUuid& id) const;
 
 		// If in the connectioMap there is a pinPos, then increment value, if not then add new record with value 1
-		void ConnectionMapPosInc(VideoItemPoint pinPos);
-		int GetPinPosConnectinCount(VideoItemPoint pinPos, SchemeUnit unit) const;
+		void ConnectionMapPosInc(SchemePoint pinPos);
+		int GetPinPosConnectinCount(SchemePoint pinPos, SchemeUnit unit) const;
 
 		std::shared_ptr<VideoItem> getItemUnderPoint(QPointF point) const;
 		std::list<std::shared_ptr<VideoItem>> getItemListInRectangle(const QRectF& rect) const;
@@ -70,7 +70,7 @@ namespace VFrame30
 		std::list<std::shared_ptr<VideoItem>> Items;
 
 		// Key is pin position, value is count of pins on the point
-		std::map<VideoItemPoint, int> connectionMap;
+		std::map<SchemePoint, int> connectionMap;
 
 	private:
 		QUuid m_guid;

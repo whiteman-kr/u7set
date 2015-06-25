@@ -60,10 +60,10 @@ message FontParam
 
 //
 //
-// VideoItemPoint
+// SchemePoint
 //
 //
-message VideoItemPoint
+message SchemePoint
 {
 	required double x = 1;
 	required double y = 2;
@@ -387,7 +387,7 @@ message PosLineImpl
 //
 message PosConnectionImpl
 {
-	repeated VideoItemPoint points = 1;
+	repeated SchemePoint points = 1;
 }
 
 
@@ -438,7 +438,7 @@ message VideoItemConnectionLine
 //
 message FblConnectionPoint
 {
-	optional VideoItemPoint point = 1;					// Can be removed in future, not used anymore
+	optional SchemePoint point = 1;					// Can be removed in future, not used anymore
 	optional ConnectionDirrection dirrection = 2;
 	optional Uuid uuid = 3;
 	optional int32 operandIndex = 4 [default = -1];		// -1 is not used, for links etc...

@@ -254,13 +254,13 @@ namespace VFrame30
 		assert(false);
 	}
 
-	std::vector<VideoItemPoint> VideoItem::getPointList() const
+	std::vector<SchemePoint> VideoItem::getPointList() const
 	{
 		Q_ASSERT(false);
-		return std::vector<VideoItemPoint>();
+		return std::vector<SchemePoint>();
 	}
 
-	void VideoItem::setPointList(const std::vector<VideoItemPoint>& /*points*/)
+	void VideoItem::setPointList(const std::vector<SchemePoint>& /*points*/)
 	{
 		Q_ASSERT(false);
 	}

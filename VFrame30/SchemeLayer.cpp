@@ -148,7 +148,7 @@ namespace VFrame30
 		}
 	}
 
-	void SchemeLayer::ConnectionMapPosInc(VideoItemPoint pinPos)
+	void SchemeLayer::ConnectionMapPosInc(SchemePoint pinPos)
 	{
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -162,7 +162,7 @@ namespace VFrame30
 		}
 	}
 
-	int SchemeLayer::GetPinPosConnectinCount(VideoItemPoint pinPos, SchemeUnit /*unit*/) const
+	int SchemeLayer::GetPinPosConnectinCount(SchemePoint pinPos, SchemeUnit /*unit*/) const
 	{
 		auto mapitem = connectionMap.find(pinPos);
 

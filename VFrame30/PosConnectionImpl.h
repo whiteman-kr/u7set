@@ -11,8 +11,8 @@ namespace VFrame30
 	class IVideoItemPosConnection
 	{
 	public:
-		virtual const std::list<VideoItemPoint>& GetPointList() const = 0;
-		virtual void SetPointList(const std::list<VideoItemPoint>& points) = 0;
+		virtual const std::list<SchemePoint>& GetPointList() const = 0;
+		virtual void SetPointList(const std::list<SchemePoint>& points) = 0;
 
 		virtual void AddPoint(double x, double y) = 0;
 		virtual void RemoveSamePoints() = 0;
@@ -21,8 +21,8 @@ namespace VFrame30
 
 		// –абота с Extension точками, которые участвуют в отрисовке при создании элемента, DrawOutline
 		//
-		virtual const std::list<VideoItemPoint>& GetExtensionPoints() const = 0;
-		virtual void SetExtensionPoints(const std::list<VideoItemPoint>& extPoints) = 0;
+		virtual const std::list<SchemePoint>& GetExtensionPoints() const = 0;
+		virtual void SetExtensionPoints(const std::list<SchemePoint>& extPoints) = 0;
 		virtual void AddExtensionPoint(double x, double y) = 0;
 		virtual void DeleteAllExtensionPoints() = 0;
 		virtual void DeleteLastExtensionPoint() = 0;
@@ -84,19 +84,19 @@ namespace VFrame30
 		// –еализаци€ интерефейса IVideoItemPosLine
 		//
 	private:
-		std::list<VideoItemPoint> points;
-		std::list<VideoItemPoint> extPoints;	// точки, которые используютс€ при DrawOutline, не сериализируютс€
+		std::list<SchemePoint> points;
+		std::list<SchemePoint> extPoints;	// точки, которые используютс€ при DrawOutline, не сериализируютс€
 
 	public:
-		virtual const std::list<VideoItemPoint>& GetPointList() const override;
-		virtual void SetPointList(const std::list<VideoItemPoint>& points) override;
+		virtual const std::list<SchemePoint>& GetPointList() const override;
+		virtual void SetPointList(const std::list<SchemePoint>& points) override;
 		virtual void AddPoint(double x, double y) override;
 		virtual void RemoveSamePoints() override;
 		virtual void DeleteAllPoints() override;
 		virtual void DeleteLastPoint() override;
 
-		virtual const std::list<VideoItemPoint>& GetExtensionPoints() const override;
-		virtual void SetExtensionPoints(const std::list<VideoItemPoint>& extPoints) override;
+		virtual const std::list<SchemePoint>& GetExtensionPoints() const override;
+		virtual void SetExtensionPoints(const std::list<SchemePoint>& extPoints) override;
 		virtual void AddExtensionPoint(double x, double y) override;
 		virtual void DeleteAllExtensionPoints() override;
 		virtual void DeleteLastExtensionPoint() override;
@@ -119,8 +119,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<VideoItemPoint> getPointList() const override;
-		virtual void setPointList(const std::vector<VideoItemPoint>& points) override;
+		virtual std::vector<SchemePoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemePoint>& points) override;
 	};
 
 }

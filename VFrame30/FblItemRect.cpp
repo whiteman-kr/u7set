@@ -137,7 +137,7 @@ namespace VFrame30
 			{
 				assert(input->IsInput());
 
-				VideoItemPoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
+				SchemePoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
 				input->setPoint(calculatedPoint);
 
 				inputIndex ++;
@@ -155,7 +155,7 @@ namespace VFrame30
 			{
 				assert(output->IsOutput());
 
-				VideoItemPoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
+				SchemePoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
 				output->setPoint(calculatedPoint);
 
 				outputIndex ++;
@@ -165,7 +165,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const
+	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, SchemePoint* pResult, double gridSize, int pinGridStep) const
 	{
 		if (pResult == nullptr)
 		{
@@ -219,7 +219,7 @@ namespace VFrame30
 		return false;
 	}
 
-	VideoItemPoint FblItemRect::CalcPointPos(
+	SchemePoint FblItemRect::CalcPointPos(
 			const QRectF& fblItemRect,
 			const CFblConnectionPoint& connection,
 			int pinCount,
@@ -230,7 +230,7 @@ namespace VFrame30
 		if (pinCount == 0)
 		{
 			assert(pinCount != 0);
-			return VideoItemPoint(0, 0);
+			return SchemePoint(0, 0);
 		}
 
 		// Cache values
@@ -250,7 +250,7 @@ namespace VFrame30
 		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
 		y = CUtils::snapToGrid(y, gridSize);
 
-		return VideoItemPoint(x, y);
+		return SchemePoint(x, y);
 	}
 
 
@@ -334,7 +334,7 @@ namespace VFrame30
 		{
 			// Get pin position
 			//
-			VideoItemPoint vip;
+			SchemePoint vip;
 			GetConnectionPointPos(input.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
@@ -389,7 +389,7 @@ namespace VFrame30
 		{
 			// Get pin position
 			//
-			VideoItemPoint vip;
+			SchemePoint vip;
 			GetConnectionPointPos(output.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());

@@ -454,17 +454,17 @@ namespace VFrame30
 		}
 	}
 
-	std::vector<VideoItemPoint> PosRectImpl::getPointList() const
+	std::vector<SchemePoint> PosRectImpl::getPointList() const
 	{
-		std::vector<VideoItemPoint> v(2);
+		std::vector<SchemePoint> v(2);
 
-		v[0] = VideoItemPoint(m_leftDocPt, m_topDocPt);
-		v[1] = VideoItemPoint(m_leftDocPt + m_widthDocPt, m_topDocPt + m_heightDocPt);
+		v[0] = SchemePoint(m_leftDocPt, m_topDocPt);
+		v[1] = SchemePoint(m_leftDocPt + m_widthDocPt, m_topDocPt + m_heightDocPt);
 
 		return v;
 	}
 
-	void PosRectImpl::setPointList(const std::vector<VideoItemPoint>& points)
+	void PosRectImpl::setPointList(const std::vector<SchemePoint>& points)
 	{
 		if (points.size() != 2)
 		{

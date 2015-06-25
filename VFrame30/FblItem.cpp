@@ -64,12 +64,12 @@ namespace VFrame30
 		return true;
 	}
 
-	const VideoItemPoint& CFblConnectionPoint::point() const
+	const SchemePoint& CFblConnectionPoint::point() const
 	{
 		return m_point;
 	}
 
-	void CFblConnectionPoint::setPoint(const VideoItemPoint& value)
+	void CFblConnectionPoint::setPoint(const SchemePoint& value)
 	{
 		m_point = value;
 	}
@@ -408,7 +408,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItem::GetConnectionPointPos(const QUuid&, VideoItemPoint*, double /*gridSize*/, int /*pinGridStep*/) const
+	bool FblItem::GetConnectionPointPos(const QUuid&, SchemePoint*, double /*gridSize*/, int /*pinGridStep*/) const
 	{
 		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return false;
