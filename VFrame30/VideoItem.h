@@ -93,7 +93,7 @@ namespace VFrame30
 	// прямоугольник, для отображения в СВОЙСТВАХ ОБЪЕКТА. ВНИМАНИЕ! возврат элементов происходит в единицах мм, дюймы, точки.
 	// ВНИМАНИЕ! Эти свойства нельзя использовать для рисования и вычисления новых координат!
 	//
-	class IVideoItemPropertiesPos
+	class ISchemeItemPropertiesPos
 	{
 	public:
 		virtual double left() const = 0;
@@ -121,7 +121,7 @@ namespace VFrame30
 
 	class VFRAME30LIBSHARED_EXPORT VideoItem :
 		public QObject, 
-		public IVideoItemPropertiesPos, 
+		public ISchemeItemPropertiesPos,
 		public IPointList,
 		public Proto::ObjectSerialization<VideoItem>,
 		public DebugInstCounter<VideoItem>

@@ -119,26 +119,8 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT VideoFrameSharedPtr
-	{
-	public:
-		VideoFrameSharedPtr(const std::shared_ptr<Scheme>& sp) : m_sp(sp)
-		{
-		}
-
-		std::shared_ptr<Scheme> get()
-		{
-			return m_sp;
-		}
-		
-	private:
-		std::shared_ptr<Scheme> m_sp;
-	};
-
-
-
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::Scheme> VideoFrameFactory;
+	extern Factory<VFrame30::Scheme> SchemeFactory;
 #endif
 }
 

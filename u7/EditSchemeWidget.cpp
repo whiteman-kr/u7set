@@ -3955,7 +3955,7 @@ void EditSchemeWidget::addFblElement()
 	{
 		int index = dialog->index();
 
-		if (index < 0 || index >= elements.size())
+		if (index < 0 || static_cast<size_t>(index) >= elements.size())
 		{
 			assert(false);
 			return;

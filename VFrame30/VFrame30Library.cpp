@@ -30,10 +30,10 @@ namespace VFrame30
 
 		// Registering VideoFrames
 		//
-		VideoFrameFactory.Register<DiagScheme>();
-		VideoFrameFactory.Register<LogicScheme>();
-		VideoFrameFactory.Register<WorkflowScheme>();
-		VideoFrameFactory.Register<WiringScheme>();
+		SchemeFactory.Register<DiagScheme>();
+		SchemeFactory.Register<LogicScheme>();
+		SchemeFactory.Register<WorkflowScheme>();
+		SchemeFactory.Register<WiringScheme>();
 
 		// Registering VideoLayers
 		//

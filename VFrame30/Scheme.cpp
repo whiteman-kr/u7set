@@ -8,7 +8,7 @@
 
 namespace VFrame30
 {
-	Factory<VFrame30::Scheme> VideoFrameFactory;
+	Factory<VFrame30::Scheme> SchemeFactory;
 
 	Scheme::Scheme(void)
 	{
@@ -124,7 +124,7 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		Scheme* pVideoFrame = VideoFrameFactory.Create(classNameHash);
+		Scheme* pVideoFrame = SchemeFactory.Create(classNameHash);
 
 		if (pVideoFrame == nullptr)
 		{
