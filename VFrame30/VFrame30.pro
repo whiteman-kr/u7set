@@ -80,10 +80,6 @@ OTHER_FILES += \
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
-    VideoItemSignal.h \
-    VideoItemLink.h \
-    VideoItemFblElement.h \
-    VideoItemConnectionLine.h \
     Settings.h \
     PosRectImpl.h \
     PosLineImpl.h \
@@ -118,13 +114,13 @@ HEADERS += VFrame30Lib_global.h \
     SchemeItemConst.h \
     SchemeItem.h \
     SchemeItemLine.h \
-    SchemeItemRect.h
+    SchemeItemRect.h \
+    SchemeItemPath.h \
+    SchemeItemSignal.h \
+    SchemeItemAfb.h \
+    SchemeItemLink.h
 
 SOURCES += \
-    VideoItemSignal.cpp \
-    VideoItemLink.cpp \
-    VideoItemFblElement.cpp \
-    VideoItemConnectionLine.cpp \
     Settings.cpp \
     PosRectImpl.cpp \
     PosLineImpl.cpp \
@@ -155,7 +151,11 @@ SOURCES += \
     SchemeItemConst.cpp \
     SchemeItem.cpp \
     SchemeItemLine.cpp \
-    SchemeItemRect.cpp
+    SchemeItemRect.cpp \
+    SchemeItemPath.cpp \
+    SchemeItemSignal.cpp \
+    SchemeItemAfb.cpp \
+    SchemeItemLink.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

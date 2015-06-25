@@ -6,16 +6,16 @@ namespace VFrame30
 {
 	// CVideoItemSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT VideoItemSignal : public FblItemRect
+	class VFRAME30LIBSHARED_EXPORT SchemeItemSignal : public FblItemRect
 	{
 		Q_OBJECT
 
 		Q_PROPERTY(QString StrIDs READ signalStrIds WRITE setSignalStrIds)
 
 	protected:
-		VideoItemSignal(void);
-		VideoItemSignal(SchemeUnit unit);
-		virtual ~VideoItemSignal(void);
+		SchemeItemSignal(void);
+		SchemeItemSignal(SchemeUnit unit);
+		virtual ~SchemeItemSignal(void);
 	
 	public:
 
@@ -47,19 +47,19 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT VideoItemInputSignal : public VideoItemSignal
+	class VFRAME30LIBSHARED_EXPORT SchemeItemInput : public SchemeItemSignal
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<VideoItemInputSignal>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemInput>;
 #endif
 
 	private:
-		VideoItemInputSignal(void);
+		SchemeItemInput(void);
 	public:
-		explicit VideoItemInputSignal(SchemeUnit unit);
-		virtual ~VideoItemInputSignal(void);
+		explicit SchemeItemInput(SchemeUnit unit);
+		virtual ~SchemeItemInput(void);
 
 		virtual QString buildName() const override;
 
@@ -78,19 +78,19 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT VideoItemOutputSignal : public VideoItemSignal
+	class VFRAME30LIBSHARED_EXPORT SchemeItemOutput : public SchemeItemSignal
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<VideoItemOutputSignal>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemOutput>;
 #endif
 
 	private:
-		VideoItemOutputSignal(void);
+		SchemeItemOutput(void);
 	public:
-		explicit VideoItemOutputSignal(SchemeUnit unit);
-		virtual ~VideoItemOutputSignal(void);
+		explicit SchemeItemOutput(SchemeUnit unit);
+		virtual ~SchemeItemOutput(void);
 
 		virtual QString buildName() const override;
 

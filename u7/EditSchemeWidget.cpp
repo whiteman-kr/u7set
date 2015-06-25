@@ -7,10 +7,10 @@
 #include "ChooseAfbDialog.h"
 #include "../VFrame30/SchemeItemLine.h"
 #include "../VFrame30/SchemeItemRect.h"
-#include "../VFrame30/VideoItemConnectionLine.h"
-#include "../VFrame30/VideoItemSignal.h"
-#include "../VFrame30/VideoItemFblElement.h"
-#include "../VFrame30/VideoItemLink.h"
+#include "../VFrame30/SchemeItemPath.h"
+#include "../VFrame30/SchemeItemSignal.h"
+#include "../VFrame30/SchemeItemAfb.h"
+#include "../VFrame30/SchemeItemLink.h"
 #include "../VFrame30/SchemeItemConst.h"
 
 
@@ -1617,12 +1617,12 @@ void EditSchemeWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemeItemLine>(scheme()->unit()));
 			});
 
-	m_addConnectionLineAction = new QAction(tr("Connection Line"), this);
-	m_addConnectionLineAction->setEnabled(true);
-	connect(m_addConnectionLineAction, &QAction::triggered,
+	m_addPathAction = new QAction(tr("Path"), this);
+	m_addPathAction->setEnabled(true);
+	connect(m_addPathAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemConnectionLine>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemeItemPath>(scheme()->unit()));
 			});
 
 	m_addRectAction = new QAction(tr("Rect"), this);
@@ -1641,7 +1641,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemInputSignal>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemeItemInput>(scheme()->unit()));
 			});
 
 	m_addOutputSignalAction = new QAction(tr("Output"), this);
@@ -1649,7 +1649,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemOutputSignal>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemeItemOutput>(scheme()->unit()));
 			});
 
 	m_addConstantAction = new QAction(tr("Constant"), this);
@@ -1669,7 +1669,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addLinkAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemLink>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemeItemLink>(scheme()->unit()));
 			});
 
 	//
@@ -1846,8 +1846,8 @@ void EditSchemeWidget::createActions()
 	m_addMenu = new QMenu(this);
 	m_addAction->setMenu(m_addMenu);
 		m_addMenu->addAction(m_addLineAction);
-		m_addMenu->addAction(m_addConnectionLineAction);
 		m_addMenu->addAction(m_addRectAction);
+		m_addMenu->addAction(m_addPathAction);
 		m_addMenu->addAction(m_addSeparatorAction0);
 		m_addMenu->addAction(m_addInputSignalAction);
 		m_addMenu->addAction(m_addOutputSignalAction);
@@ -3963,7 +3963,7 @@ void EditSchemeWidget::addFblElement()
 
 		std::shared_ptr<Afbl::AfbElement> afb = elements[index];
 
-		addItem(std::make_shared<VFrame30::VideoItemFblElement>(scheme()->unit(), *(afb.get())));
+		addItem(std::make_shared<VFrame30::SchemeItemAfb>(scheme()->unit(), *(afb.get())));
 	}
 
 	return;

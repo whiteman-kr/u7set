@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "Scheme.h"
 #include "FblItem.h"
-#include "VideoItemLink.h"
+#include "SchemeItemLink.h"
 #include "HorzVertLinks.h"
 #include "../include/ProtoSerialization.h"
 
@@ -322,7 +322,7 @@ namespace VFrame30
 					continue;
 				}
 
-				VideoItemLink* pVideoItemLink = dynamic_cast<VideoItemLink*>(item->get());
+				SchemeItemLink* pVideoItemLink = dynamic_cast<SchemeItemLink*>(item->get());
 				if (pVideoItemLink != nullptr)
 				{
 					const std::list<SchemePoint>& pointList = pVideoItemLink->GetPointList();
@@ -366,7 +366,7 @@ namespace VFrame30
 			
 				// Если элемент CVideoItemLink, то в качестве координат пинов будут крайние точки
 				//
-				VideoItemLink* pVideoItemLink = dynamic_cast<VideoItemLink*>(item->get());
+				SchemeItemLink* pVideoItemLink = dynamic_cast<SchemeItemLink*>(item->get());
 
 				if (pVideoItemLink != nullptr)
 				{

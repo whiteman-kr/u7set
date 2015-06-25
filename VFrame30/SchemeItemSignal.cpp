@@ -1,28 +1,28 @@
 #include "Stable.h"
-#include "VideoItemSignal.h"
+#include "SchemeItemSignal.h"
 
 namespace VFrame30
 {
 	//
 	// CVideoItemSignal
 	//
-	VideoItemSignal::VideoItemSignal(void)
+	SchemeItemSignal::SchemeItemSignal(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	VideoItemSignal::VideoItemSignal(SchemeUnit unit) :
+	SchemeItemSignal::SchemeItemSignal(SchemeUnit unit) :
 		FblItemRect(unit)
 	{
 	}
 
-	VideoItemSignal::~VideoItemSignal(void)
+	SchemeItemSignal::~SchemeItemSignal(void)
 	{
 	}
 
-	void VideoItemSignal::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* layer) const
+	void SchemeItemSignal::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, scheme, layer);
 
@@ -78,7 +78,7 @@ namespace VFrame30
 		return;
 	}
 
-	QString VideoItemSignal::signalStrIds() const
+	QString SchemeItemSignal::signalStrIds() const
 	{
 		QString result;
 
@@ -97,17 +97,17 @@ namespace VFrame30
 		return result;
 	}
 
-	void VideoItemSignal::setSignalStrIds(const QString& s)
+	void SchemeItemSignal::setSignalStrIds(const QString& s)
 	{
 		m_signalStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 	}
 
-	QStringList* VideoItemSignal::mutable_signalStrIds()
+	QStringList* SchemeItemSignal::mutable_signalStrIds()
 	{
 		return &m_signalStrIds;
 	}
 
-	bool VideoItemSignal::SaveData(Proto::Envelope* message) const
+	bool SchemeItemSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
 
@@ -120,7 +120,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::VideoItemSignal* signal = message->mutable_schemeitem()->mutable_signal();
+		Proto::SchemeItemSignal* signal = message->mutable_schemeitem()->mutable_signal();
 
 		for (const QString& strId : m_signalStrIds)
 		{
@@ -131,7 +131,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemSignal::LoadData(const Proto::Envelope& message)
+	bool SchemeItemSignal::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemeitem() == false)
 		{
@@ -155,7 +155,7 @@ namespace VFrame30
 			return false;
 		}
 
-		const Proto::VideoItemSignal& signal = message.schemeitem().signal();
+		const Proto::SchemeItemSignal& signal = message.schemeitem().signal();
 
 		m_signalStrIds.clear();
 		m_signalStrIds.reserve(signal.signalstrids_size());
@@ -174,35 +174,35 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	VideoItemInputSignal::VideoItemInputSignal(void)
+	SchemeItemInput::SchemeItemInput(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	VideoItemInputSignal::VideoItemInputSignal(SchemeUnit unit) :
-		VideoItemSignal(unit)
+	SchemeItemInput::SchemeItemInput(SchemeUnit unit) :
+		SchemeItemSignal(unit)
 	{
 		addOutput();
 		setSignalStrIds("#IN_STRID");
 	}
 
-	VideoItemInputSignal::~VideoItemInputSignal(void)
+	SchemeItemInput::~SchemeItemInput(void)
 	{
 		assert(outputsCount() == 1);
 	}
 
-	QString VideoItemInputSignal::buildName() const
+	QString SchemeItemInput::buildName() const
 	{
 		return QString("Input (%1)").arg(signalStrIds());
 	}
 
 	// Serialization
 	//
-	bool VideoItemInputSignal::SaveData(Proto::Envelope* message) const
+	bool SchemeItemInput::SaveData(Proto::Envelope* message) const
 	{
-		bool result = VideoItemSignal::SaveData(message);
+		bool result = SchemeItemSignal::SaveData(message);
 		
 		if (result == false || message->has_schemeitem() == false)
 		{
@@ -220,7 +220,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemInputSignal::LoadData(const Proto::Envelope& message)
+	bool SchemeItemInput::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemeitem() == false)
 		{
@@ -230,7 +230,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = VideoItemSignal::LoadData(message);
+		bool result = SchemeItemSignal::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -253,35 +253,35 @@ namespace VFrame30
 	//
 	// CVideoItemOutputSignal
 	//
-	VideoItemOutputSignal::VideoItemOutputSignal(void)
+	SchemeItemOutput::SchemeItemOutput(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	VideoItemOutputSignal::VideoItemOutputSignal(SchemeUnit unit) :
-		VideoItemSignal(unit)
+	SchemeItemOutput::SchemeItemOutput(SchemeUnit unit) :
+		SchemeItemSignal(unit)
 	{
 		addInput();
 		setSignalStrIds("#OUT_STRID");
 	}
 
-	VideoItemOutputSignal::~VideoItemOutputSignal(void)
+	SchemeItemOutput::~SchemeItemOutput(void)
 	{
 		assert(inputsCount() == 1);
 	}
 
-	QString VideoItemOutputSignal::buildName() const
+	QString SchemeItemOutput::buildName() const
 	{
 		return QString("Output (%1)").arg(signalStrIds());
 	}
 
 	// Serialization
 	//
-	bool VideoItemOutputSignal::SaveData(Proto::Envelope* message) const
+	bool SchemeItemOutput::SaveData(Proto::Envelope* message) const
 	{
-		bool result = VideoItemSignal::SaveData(message);
+		bool result = SchemeItemSignal::SaveData(message);
 		
 		if (result == false || message->has_schemeitem() == false)
 		{
@@ -299,7 +299,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemOutputSignal::LoadData(const Proto::Envelope& message)
+	bool SchemeItemOutput::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemeitem() == false)
 		{
@@ -309,7 +309,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = VideoItemSignal::LoadData(message);
+		bool result = SchemeItemSignal::LoadData(message);
 		if (result == false)
 		{
 			return false;

@@ -22,7 +22,7 @@ namespace VFrame30
 {
 	class LogicScheme;
 	class SchemeLayer;
-	class VideoItemFblElement;
+	class SchemeItemAfb;
 	class FblItemRect;
 }
 

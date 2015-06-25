@@ -5,10 +5,10 @@
 #include "../../include/DeviceObject.h"
 
 #include "../../VFrame30/LogicScheme.h"
-#include "../../VFrame30/VideoItemLink.h"
+#include "../../VFrame30/SchemeItemLink.h"
 #include "../../VFrame30/FblItemRect.h"
-#include "../../VFrame30/VideoItemFblElement.h"
-#include "../../VFrame30/VideoItemSignal.h"
+#include "../../VFrame30/SchemeItemAfb.h"
+#include "../../VFrame30/SchemeItemSignal.h"
 #include "../../VFrame30/SchemeItemConst.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
@@ -579,7 +579,7 @@ namespace Builder
 		{
 			if (li.m_fblItem->isInputSignalElement())
 			{
-				VFrame30::VideoItemSignal* signalElement = li.m_fblItem->toSignalElement();
+				VFrame30::SchemeItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
 
 				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
@@ -592,7 +592,7 @@ namespace Builder
 
 			if (li.m_fblItem->isOutputSignalElement())
 			{
-				VFrame30::VideoItemSignal* signalElement = li.m_fblItem->toSignalElement();
+				VFrame30::SchemeItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
 
 				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
@@ -1164,7 +1164,7 @@ namespace Builder
 
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
-			VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
+			VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item->get());
 
 			if (link != nullptr)
 			{
@@ -1186,7 +1186,7 @@ namespace Builder
 		//
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
-			VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
+			VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item->get());
 
 			if (link == nullptr)
 			{
@@ -1302,7 +1302,7 @@ namespace Builder
 				// save it's and points to newBranch
 				//
 				std::shared_ptr<VFrame30::SchemeItem> videoItem = layer->getItemById(id);
-				VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(videoItem.get());
+				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(videoItem.get());
 
 				if (videoItem == nullptr ||
 					link == nullptr)

@@ -8,12 +8,12 @@
 #include "SchemeLayer.h"
 #include "SchemeItemLine.h"
 #include "SchemeItemRect.h"
-#include "VideoItemConnectionLine.h"
+#include "SchemeItemPath.h"
 #include "FblItemLine.h"
 #include "FblItemRect.h"
-#include "VideoItemLink.h"
-#include "VideoItemFblElement.h"
-#include "VideoItemSignal.h"
+#include "SchemeItemLink.h"
+#include "SchemeItemAfb.h"
+#include "SchemeItemSignal.h"
 #include "SchemeItemConst.h"
 #include "../include/Types.h"
 
@@ -43,13 +43,13 @@ namespace VFrame30
 		//
 		SchemeItemFactory.Register<SchemeItemLine>();
 		SchemeItemFactory.Register<SchemeItemRect>();
-		SchemeItemFactory.Register<VideoItemConnectionLine>();
+		SchemeItemFactory.Register<SchemeItemPath>();
 		SchemeItemFactory.Register<FblItemLine>();
 		SchemeItemFactory.Register<FblItemRect>();
-		SchemeItemFactory.Register<VideoItemLink>();
-		SchemeItemFactory.Register<VideoItemFblElement>();
-		SchemeItemFactory.Register<VideoItemInputSignal>();
-		SchemeItemFactory.Register<VideoItemOutputSignal>();
+		SchemeItemFactory.Register<SchemeItemLink>();
+		SchemeItemFactory.Register<SchemeItemAfb>();
+		SchemeItemFactory.Register<SchemeItemInput>();
+		SchemeItemFactory.Register<SchemeItemOutput>();
 		SchemeItemFactory.Register<SchemeItemConst>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemeItemConst::ConstType>(IntToEnum<VFrame30::SchemeItemConst::ConstType>);

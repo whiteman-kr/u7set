@@ -7,21 +7,21 @@ namespace VFrame30
 	//
 	// CVideoItemInputSignal
 	//
-	class VFRAME30LIBSHARED_EXPORT VideoItemFblElement : public FblItemRect
+	class VFRAME30LIBSHARED_EXPORT SchemeItemAfb : public FblItemRect
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<VideoItemFblElement>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemAfb>;
 #endif
 
 	private:
-		VideoItemFblElement(void);
+		SchemeItemAfb(void);
 	public:
-		explicit VideoItemFblElement(SchemeUnit unit);
-		VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement);
+		explicit SchemeItemAfb(SchemeUnit unit);
+		SchemeItemAfb(SchemeUnit unit, const Afbl::AfbElement& fblElement);
 
-		virtual ~VideoItemFblElement(void);
+		virtual ~SchemeItemAfb(void);
 
 		// Draw Functions
 		//

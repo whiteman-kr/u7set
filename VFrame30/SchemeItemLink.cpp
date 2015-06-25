@@ -1,17 +1,17 @@
 #include "Stable.h"
-#include "VideoItemLink.h"
+#include "SchemeItemLink.h"
 #include "SchemeLayer.h"
 
 namespace VFrame30
 {
-	VideoItemLink::VideoItemLink(void)
+	SchemeItemLink::SchemeItemLink(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	VideoItemLink::VideoItemLink(SchemeUnit unit) : 
+	SchemeItemLink::SchemeItemLink(SchemeUnit unit) :
 		FblItemLine(unit)
 	{
 		//AddInput();
@@ -19,13 +19,13 @@ namespace VFrame30
 	}
 
 
-	VideoItemLink::~VideoItemLink(void)
+	SchemeItemLink::~SchemeItemLink(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool VideoItemLink::SaveData(Proto::Envelope* message) const
+	bool SchemeItemLink::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemLine::SaveData(message);
 		if (result == false || message->has_schemeitem() == false)
@@ -45,7 +45,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemLink::LoadData(const Proto::Envelope& message)
+	bool SchemeItemLink::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemeitem() == false)
 		{
@@ -82,7 +82,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void VideoItemLink::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* pLayer) const
+	void SchemeItemLink::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer* pLayer) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -166,13 +166,13 @@ namespace VFrame30
 
 	// Вычислить координаты точки
 	//
-	void VideoItemLink::SetConnectionsPos(double /*gridSize*/, int /*pinGridStep*/)
+	void SchemeItemLink::SetConnectionsPos(double /*gridSize*/, int /*pinGridStep*/)
 	{
 		return;
 	}
 
 	//bool CVideoItemLink::GetConnectionPointPos(const GUID& connectionPointGuid, VideoItemPoint* pResult) const
-	bool VideoItemLink::GetConnectionPointPos(const QUuid&, SchemePoint*, double, int) const
+	bool SchemeItemLink::GetConnectionPointPos(const QUuid&, SchemePoint*, double, int) const
 	{
 		return false;
 	}

@@ -5,11 +5,11 @@
 
 namespace VFrame30
 {
-	class VideoItemSignal;
-	class VideoItemInputSignal;
-	class VideoItemOutputSignal;
+	class SchemeItemSignal;
+	class SchemeItemInput;
+	class SchemeItemOutput;
 	class SchemeItemConst;
-	class VideoItemFblElement;
+	class SchemeItemAfb;
 }
 
 namespace VFrame30
@@ -83,20 +83,20 @@ namespace VFrame30
 		bool isConstElement() const;
 		bool isFblElement() const;
 
-		VFrame30::VideoItemSignal *toSignalElement();
-		const VFrame30::VideoItemSignal* toSignalElement() const;
+		VFrame30::SchemeItemSignal *toSignalElement();
+		const VFrame30::SchemeItemSignal* toSignalElement() const;
 
-		VFrame30::VideoItemInputSignal* toInputSignalElement();
-		const VFrame30::VideoItemInputSignal* toInputSignalElement() const;
+		VFrame30::SchemeItemInput* toInputSignalElement();
+		const VFrame30::SchemeItemInput* toInputSignalElement() const;
 
-		VFrame30::VideoItemOutputSignal* toOutputSignalElement();
-		const VFrame30::VideoItemOutputSignal* toOutputSignalElement() const;
+		VFrame30::SchemeItemOutput* toOutputSignalElement();
+		const VFrame30::SchemeItemOutput* toOutputSignalElement() const;
 
 		VFrame30::SchemeItemConst* toSchemeItemConst();
 		const VFrame30::SchemeItemConst* toSchemeItemConst() const;
 
-		VideoItemFblElement* toFblElement();
-		const VFrame30::VideoItemFblElement* toFblElement() const;
+		SchemeItemAfb* toFblElement();
+		const VFrame30::SchemeItemAfb* toFblElement() const;
 
 		double weight() const;
 		void setWeight(double weight);

@@ -112,7 +112,7 @@ message Envelope
 	optional SchemeItem schemeitem = 6;				// VFrame30::SchemeItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
 	optional Scheme scheme = 100;					// VFrame30::Scheme
-	optional VideoLayer videolayer = 101;			// VFrame30::CVideoLayer
+	optional SchemeLayer schemelayer = 101;			// VFrame30::CVideoLayer
 	optional FblElement fblelement = 102;			// Fbl::FblElement
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 }
@@ -293,11 +293,11 @@ message LogicScheme
 //------------------------------------------------------------------------------------------
 //
 //
-//			VFrame30::VideoLayer
+//			VFrame30::SchemeLayer
 //
 //
 //------------------------------------------------------------------------------------------
-message VideoLayer
+message SchemeLayer
 {
 	required Uuid uuid = 1;
 	required wstring name = 2;
@@ -341,13 +341,13 @@ message SchemeItem
 	//
 	optional SchemeItemRect Rect = 116;							// +PosRectImpl
 	optional SchemeItemLine Line = 117;							// +PosLineImpl
-	optional VideoItemConnectionLine ConnectionLine = 118;		// +PosConnectionImpl
+	optional SchemeItemPath Path = 118;							// +PosConnectionImpl
 	
-	optional VideoItemSignal Signal = 124;						// +FblItemRect
-	optional VideoItemInputSignal InputSignal = 125;			// +Signal
-	optional VideoItemOutputSignal OutputSignal = 126;			// +Signal
-	optional VideoItemLink Link = 127;							// +FblItemLine
-	optional VideoItemFblElement VideoItemFblElement = 128;		// +FblItemRect
+	optional SchemeItemSignal Signal = 124;						// +FblItemRect
+	optional SchemeItemInput InputSignal = 125;					// +Signal
+	optional SchemeItemOutput OutputSignal = 126;				// +Signal
+	optional SchemeItemLink Link = 127;							// +FblItemLine
+	optional SchemeItemAfb Afb = 128;							// +FblItemRect
 	optional SchemeItemConst ConstItem = 129;					// +FblItemRect
 }
 
@@ -421,10 +421,10 @@ message SchemeItemLine
 
 //
 //
-// VideoItemConnectionLine
+// SchemeItemPath
 //
 //
-message VideoItemConnectionLine
+message SchemeItemPath
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
@@ -489,10 +489,10 @@ message FblItemLine
 
 //
 //
-// VideoItemSignal
+// SchemeItemSignal
 //
 //
-message VideoItemSignal
+message SchemeItemSignal
 {
 	repeated wstring signalStrIDs = 1;
 }
@@ -500,40 +500,40 @@ message VideoItemSignal
 
 //
 //
-// VideoItemInputSignal
+// SchemeItemInput
 //
 //
-message VideoItemInputSignal
+message SchemeItemInput
 {
 }
 
 
 //
 //
-// VideoItemOutputSignal
+// SchemeItemOutput
 //
 //
-message VideoItemOutputSignal
+message SchemeItemOutput
 {
 }
 
 
 //
 //
-// VideoItemLink
+// SchemeItemLink
 //
 //
-message VideoItemLink
+message SchemeItemLink
 {
 }
 
 
 //
 //
-// VideoItemFblElement
+// SchemeItemAfb
 //
 //
-message VideoItemFblElement
+message SchemeItemAfb
 {
 	repeated FblElementParam params = 2;
 	optional wstring afbStrid = 3;

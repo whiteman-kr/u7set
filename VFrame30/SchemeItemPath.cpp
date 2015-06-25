@@ -1,16 +1,16 @@
 #include "Stable.h"
-#include "VideoItemConnectionLine.h"
+#include "SchemeItemPath.h"
 
 namespace VFrame30
 {
-	VideoItemConnectionLine::VideoItemConnectionLine(void)
+	SchemeItemPath::SchemeItemPath(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	VideoItemConnectionLine::VideoItemConnectionLine(SchemeUnit unit) : 
+	SchemeItemPath::SchemeItemPath(SchemeUnit unit) : 
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
@@ -19,13 +19,13 @@ namespace VFrame30
 	}
 
 
-	VideoItemConnectionLine::~VideoItemConnectionLine(void)
+	SchemeItemPath::~SchemeItemPath(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool VideoItemConnectionLine::SaveData(Proto::Envelope* message) const
+	bool SchemeItemPath::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosConnectionImpl::SaveData(message);
 		if (result == false || message->has_schemeitem() == false)
@@ -37,15 +37,15 @@ namespace VFrame30
 	
 		// --
 		//
-		Proto::VideoItemConnectionLine* connectionMessage = message->mutable_schemeitem()->mutable_connectionline();
+		Proto::SchemeItemPath* path = message->mutable_schemeitem()->mutable_path();
 
-		connectionMessage->set_weight(m_weight);
-		connectionMessage->set_linecolor(m_lineColor);
+		path->set_weight(m_weight);
+		path->set_linecolor(m_lineColor);
 
 		return true;
 	}
 
-	bool VideoItemConnectionLine::LoadData(const Proto::Envelope& message)
+	bool SchemeItemPath::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemeitem() == false)
 		{
@@ -63,16 +63,16 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_connectionline() == false)
+		if (message.schemeitem().has_path() == false)
 		{
-			assert(message.schemeitem().has_connectionline());
+			assert(message.schemeitem().has_path());
 			return false;
 		}
 
-		const Proto::VideoItemConnectionLine& connectionMessage = message.schemeitem().connectionline();
+		const Proto::SchemeItemPath& path = message.schemeitem().path();
 
-		m_weight = connectionMessage.weight();
-		m_lineColor = connectionMessage.linecolor();
+		m_weight = path.weight();
+		m_lineColor = path.linecolor();
 
 		return true;
 	}
@@ -83,7 +83,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void VideoItemConnectionLine::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer*) const
+	void SchemeItemPath::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer*) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -119,7 +119,7 @@ namespace VFrame30
 
 	// Weight property
 	//
-	double VideoItemConnectionLine::weight() const
+	double SchemeItemPath::weight() const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -132,7 +132,7 @@ namespace VFrame30
 		}
 	}
 
-	void VideoItemConnectionLine::setWeight(double weight)
+	void SchemeItemPath::setWeight(double weight)
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -147,12 +147,12 @@ namespace VFrame30
 
 	// LineColor property
 	//
-	QRgb VideoItemConnectionLine::lineColor() const
+	QRgb SchemeItemPath::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void VideoItemConnectionLine::setLineColor(QRgb color)
+	void SchemeItemPath::setLineColor(QRgb color)
 	{
 		m_lineColor = color;
 	}

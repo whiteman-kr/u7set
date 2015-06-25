@@ -1,22 +1,22 @@
 #include "Stable.h"
-#include "VideoItemFblElement.h"
+#include "SchemeItemAfb.h"
 #include "Scheme.h"
 
 namespace VFrame30
 {
-	VideoItemFblElement::VideoItemFblElement(void)
+	SchemeItemAfb::SchemeItemAfb(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit) :
+	SchemeItemAfb::SchemeItemAfb(SchemeUnit unit) :
 		FblItemRect(unit)
 	{
 	}
 
-	VideoItemFblElement::VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement) :
+	SchemeItemAfb::SchemeItemAfb(SchemeUnit unit, const Afbl::AfbElement& fblElement) :
 		FblItemRect(unit),
 		m_afbStrID(fblElement.strID()),
 		m_params(fblElement.params())
@@ -52,11 +52,11 @@ namespace VFrame30
 
 	}
 
-	VideoItemFblElement::~VideoItemFblElement(void)
+	SchemeItemAfb::~SchemeItemAfb(void)
 	{
 	}
 
-	void VideoItemFblElement::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const
+	void SchemeItemAfb::Draw(CDrawParam* drawParam, const Scheme* scheme, const SchemeLayer* pLayer) const
 	{
 		std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(afbStrID());
 		if (afb.get() == nullptr)
@@ -170,7 +170,7 @@ namespace VFrame30
 
 	// Serialization
 	//
-	bool VideoItemFblElement::SaveData(Proto::Envelope* message) const
+	bool SchemeItemAfb::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
 		if (result == false || message->has_schemeitem() == false)
@@ -182,7 +182,7 @@ namespace VFrame30
 	
 		// --
 		//
-		Proto::VideoItemFblElement* vifble = message->mutable_schemeitem()->mutable_videoitemfblelement();
+		Proto::SchemeItemAfb* vifble = message->mutable_schemeitem()->mutable_afb();
 
 		Proto::Write(vifble->mutable_afbstrid(), m_afbStrID);
 
@@ -195,7 +195,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemFblElement::LoadData(const Proto::Envelope& message)
+	bool SchemeItemAfb::LoadData(const Proto::Envelope& message)
 	{
 		if (message.has_schemeitem() == false)
 		{
@@ -213,13 +213,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemeitem().has_videoitemfblelement() == false)
+		if (message.schemeitem().has_afb() == false)
 		{
-			assert(message.schemeitem().has_videoitemfblelement());
+			assert(message.schemeitem().has_afb());
 			return false;
 		}
 		
-		const Proto::VideoItemFblElement& vifble = message.schemeitem().videoitemfblelement();
+		const Proto::SchemeItemAfb& vifble = message.schemeitem().afb();
 		
 		Proto::Read(vifble.afbstrid(), &m_afbStrID);
 
@@ -241,12 +241,12 @@ namespace VFrame30
 		return true;
 	}
 
-	QString VideoItemFblElement::buildName() const
+	QString SchemeItemAfb::buildName() const
 	{
 		return QString("AFB (%1)").arg(afbStrID());
 	}
 
-	bool VideoItemFblElement::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Scheme> scheme)
+	bool SchemeItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Scheme> scheme)
 	{
 		if (name.isEmpty() == true || scheme == nullptr)
 		{
@@ -294,7 +294,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemFblElement::setAfbElementParams(Afbl::AfbElement* afbElement) const
+	bool SchemeItemAfb::setAfbElementParams(Afbl::AfbElement* afbElement) const
 	{
 		if (afbElement == nullptr)
 		{
@@ -325,7 +325,7 @@ namespace VFrame30
 		return true;
 	}
 
-	void VideoItemFblElement::addQtDynamicParamProperties()
+	void SchemeItemAfb::addQtDynamicParamProperties()
 	{
 		// Clear all dynamic properties
 		//
@@ -350,7 +350,7 @@ namespace VFrame30
 		}
 	}
 
-	bool VideoItemFblElement::executeScript(const QString& script, const Afbl::AfbElement& afb)
+	bool SchemeItemAfb::executeScript(const QString& script, const Afbl::AfbElement& afb)
 	{
 		if (script.isEmpty() == true)
 		{
@@ -402,7 +402,7 @@ namespace VFrame30
 
 	}
 
-	int VideoItemFblElement::getParamIntValue(const QString& name)
+	int SchemeItemAfb::getParamIntValue(const QString& name)
 	{
 		for (Afbl::AfbElementParam& p : m_params)
 		{
@@ -423,32 +423,32 @@ namespace VFrame30
 		return -1;
 	}
 
-	void VideoItemFblElement::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
+	void SchemeItemAfb::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
 	{
 		addInput(opIndex, caption);
 	}
 
-	void VideoItemFblElement::addOutputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
+	void SchemeItemAfb::addOutputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
 	{
 		addOutput(opIndex, caption);
 	}
 
-	void VideoItemFblElement::removeInputSignals()
+	void SchemeItemAfb::removeInputSignals()
 	{
 		removeAllInputs();
 	}
 
-	void VideoItemFblElement::removeOutputSignals()
+	void SchemeItemAfb::removeOutputSignals()
 	{
 		removeAllOutputs();
 	}
 
-	const QString& VideoItemFblElement::afbStrID() const
+	const QString& SchemeItemAfb::afbStrID() const
 	{
 		return m_afbStrID;
 	}
 
-	const std::vector<Afbl::AfbElementParam>& VideoItemFblElement::params() const
+	const std::vector<Afbl::AfbElementParam>& SchemeItemAfb::params() const
 	{
 		return m_params;
 	}

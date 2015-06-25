@@ -4,19 +4,19 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT VideoItemConnectionLine : public PosConnectionImpl
+	class VFRAME30LIBSHARED_EXPORT SchemeItemPath : public PosConnectionImpl
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<VideoItemConnectionLine>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemPath>;
 #endif
 
 	private:
-		VideoItemConnectionLine(void);
+		SchemeItemPath(void);
 	public:
-		explicit VideoItemConnectionLine(SchemeUnit unit);
-		virtual ~VideoItemConnectionLine(void);
+		explicit SchemeItemPath(SchemeUnit unit);
+		virtual ~SchemeItemPath(void);
 
 		// Serialization
 		//

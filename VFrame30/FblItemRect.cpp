@@ -2,9 +2,9 @@
 #include "FblItemRect.h"
 #include "SchemeLayer.h"
 
-#include "VideoItemSignal.h"
+#include "SchemeItemSignal.h"
 #include "SchemeItemConst.h"
-#include "VideoItemFblElement.h"
+#include "SchemeItemAfb.h"
 
 
 namespace VFrame30
@@ -531,13 +531,13 @@ namespace VFrame30
 
 	bool FblItemRect::isInputSignalElement() const
 	{
-		const VFrame30::VideoItemInputSignal* ptr = dynamic_cast<const VFrame30::VideoItemInputSignal*>(this);
+		const VFrame30::SchemeItemInput* ptr = dynamic_cast<const VFrame30::SchemeItemInput*>(this);
 		return ptr != nullptr;
 	}
 
 	bool FblItemRect::isOutputSignalElement() const
 	{
-		const VFrame30::VideoItemOutputSignal* ptr = dynamic_cast<const VFrame30::VideoItemOutputSignal*>(this);
+		const VFrame30::SchemeItemOutput* ptr = dynamic_cast<const VFrame30::SchemeItemOutput*>(this);
 		return ptr != nullptr;
 	}
 
@@ -549,7 +549,7 @@ namespace VFrame30
 
 	bool FblItemRect::isFblElement() const
 	{
-		const VFrame30::VideoItemFblElement* ptr = dynamic_cast<const VFrame30::VideoItemFblElement*>(this);
+		const VFrame30::SchemeItemAfb* ptr = dynamic_cast<const VFrame30::SchemeItemAfb*>(this);
 		return ptr != nullptr;
 	}
 
@@ -558,34 +558,34 @@ namespace VFrame30
 		return isInputSignalElement() || isOutputSignalElement();
 	}
 
-	VFrame30::VideoItemSignal* FblItemRect::toSignalElement()
+	VFrame30::SchemeItemSignal* FblItemRect::toSignalElement()
 	{
-		return dynamic_cast<VFrame30::VideoItemSignal*>(this);
+		return dynamic_cast<VFrame30::SchemeItemSignal*>(this);
 	}
 
-	const VFrame30::VideoItemSignal* FblItemRect::toSignalElement() const
+	const VFrame30::SchemeItemSignal* FblItemRect::toSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::VideoItemSignal*>(this);
+		return dynamic_cast<const VFrame30::SchemeItemSignal*>(this);
 	}
 
-	VFrame30::VideoItemInputSignal* FblItemRect::toInputSignalElement()
+	VFrame30::SchemeItemInput* FblItemRect::toInputSignalElement()
 	{
-		return dynamic_cast<VFrame30::VideoItemInputSignal*>(this);
+		return dynamic_cast<VFrame30::SchemeItemInput*>(this);
 	}
 
-	const VFrame30::VideoItemInputSignal* FblItemRect::toInputSignalElement() const
+	const VFrame30::SchemeItemInput* FblItemRect::toInputSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::VideoItemInputSignal*>(this);
+		return dynamic_cast<const VFrame30::SchemeItemInput*>(this);
 	}
 
-	VFrame30::VideoItemOutputSignal* FblItemRect::toOutputSignalElement()
+	VFrame30::SchemeItemOutput* FblItemRect::toOutputSignalElement()
 	{
-		return dynamic_cast<VFrame30::VideoItemOutputSignal*>(this);
+		return dynamic_cast<VFrame30::SchemeItemOutput*>(this);
 	}
 
-	const VFrame30::VideoItemOutputSignal* FblItemRect::toOutputSignalElement() const
+	const VFrame30::SchemeItemOutput* FblItemRect::toOutputSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::VideoItemOutputSignal*>(this);
+		return dynamic_cast<const VFrame30::SchemeItemOutput*>(this);
 	}
 
 	VFrame30::SchemeItemConst* FblItemRect::toSchemeItemConst()
@@ -598,14 +598,14 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemeItemConst*>(this);
 	}
 
-	VFrame30::VideoItemFblElement* FblItemRect::toFblElement()
+	VFrame30::SchemeItemAfb* FblItemRect::toFblElement()
 	{
-		return dynamic_cast<VFrame30::VideoItemFblElement*>(this);
+		return dynamic_cast<VFrame30::SchemeItemAfb*>(this);
 	}
 
-	const VFrame30::VideoItemFblElement* FblItemRect::toFblElement() const
+	const VFrame30::SchemeItemAfb* FblItemRect::toFblElement() const
 	{
-		return dynamic_cast<const VFrame30::VideoItemFblElement*>(this);
+		return dynamic_cast<const VFrame30::SchemeItemAfb*>(this);
 	}
 	
 	// Weight propertie
