@@ -17,7 +17,7 @@ namespace VFrame30
 		Q_ENUMS(ConstType)
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<SchemeItemConst>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemConst>;
 #endif
 
 		// Declarations

@@ -24,10 +24,10 @@ namespace VFrame30
 	bool FblItemLine::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosConnectionImpl::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
@@ -39,7 +39,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::FblItemLine* itemMessage = message->mutable_videoitem()->mutable_fblitemline();
+		Proto::FblItemLine* itemMessage = message->mutable_schemeitem()->mutable_fblitemline();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor);
@@ -49,9 +49,9 @@ namespace VFrame30
 
 	bool FblItemLine::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -71,13 +71,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_fblitemline() == false)
+		if (message.schemeitem().has_fblitemline() == false)
 		{
-			assert(message.videoitem().has_fblitemline());
+			assert(message.schemeitem().has_fblitemline());
 			return false;
 		}
 		
-		const Proto::FblItemLine& itemMessage = message.videoitem().fblitemline();
+		const Proto::FblItemLine& itemMessage = message.schemeitem().fblitemline();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();

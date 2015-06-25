@@ -52,7 +52,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<VideoItemInputSignal>;
+		friend ::Factory<SchemeItem>::DerivedType<VideoItemInputSignal>;
 #endif
 
 	private:
@@ -83,7 +83,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<VideoItemOutputSignal>;
+		friend ::Factory<SchemeItem>::DerivedType<VideoItemOutputSignal>;
 #endif
 
 	private:

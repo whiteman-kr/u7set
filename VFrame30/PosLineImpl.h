@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VideoItem.h"
+#include "SchemeItem.h"
 #include "../include/CUtils.h"
 #include "Settings.h"
 
@@ -26,7 +26,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public VideoItem, public IVideoItemPosLine
+	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public SchemeItem, public IVideoItemPosLine
 	{
 		Q_OBJECT
 

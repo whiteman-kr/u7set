@@ -177,7 +177,7 @@ namespace VFrame30
 	//
 	bool FblItem::SaveData(Proto::Envelope* message) const
 	{
-		Proto::FblItem* fblItemMessage = message->mutable_videoitem()->mutable_fblitem();
+		Proto::FblItem* fblItemMessage = message->mutable_schemeitem()->mutable_fblitem();
 
 		for (auto pt = m_inputPoints.cbegin(); pt != m_inputPoints.cend(); ++pt)
 		{
@@ -202,23 +202,23 @@ namespace VFrame30
 
 	bool FblItem::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		if (message.videoitem().has_fblitem() == false)
+		if (message.schemeitem().has_fblitem() == false)
 		{
-			assert(message.videoitem().has_fblitem());
+			assert(message.schemeitem().has_fblitem());
 			return false;
 		}
 		
 		// --
 		//
-		const Proto::FblItem& fblItemMessage = message.videoitem().fblitem();
+		const Proto::FblItem& fblItemMessage = message.schemeitem().fblitem();
 
 		m_inputPoints.clear();
 		m_outputPoints.clear();

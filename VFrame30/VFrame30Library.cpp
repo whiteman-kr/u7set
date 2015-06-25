@@ -41,16 +41,16 @@ namespace VFrame30
 
 		// Registering VideoItems
 		//
-		VideoItemFactory.Register<VideoItemLine>();
-		VideoItemFactory.Register<VideoItemRect>();
-		VideoItemFactory.Register<VideoItemConnectionLine>();
-		VideoItemFactory.Register<FblItemLine>();
-		VideoItemFactory.Register<FblItemRect>();
-		VideoItemFactory.Register<VideoItemLink>();
-		VideoItemFactory.Register<VideoItemFblElement>();
-		VideoItemFactory.Register<VideoItemInputSignal>();
-		VideoItemFactory.Register<VideoItemOutputSignal>();
-		VideoItemFactory.Register<SchemeItemConst>();
+		SchemeItemFactory.Register<VideoItemLine>();
+		SchemeItemFactory.Register<VideoItemRect>();
+		SchemeItemFactory.Register<VideoItemConnectionLine>();
+		SchemeItemFactory.Register<FblItemLine>();
+		SchemeItemFactory.Register<FblItemRect>();
+		SchemeItemFactory.Register<VideoItemLink>();
+		SchemeItemFactory.Register<VideoItemFblElement>();
+		SchemeItemFactory.Register<VideoItemInputSignal>();
+		SchemeItemFactory.Register<VideoItemOutputSignal>();
+		SchemeItemFactory.Register<SchemeItemConst>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemeItemConst::ConstType>(IntToEnum<VFrame30::SchemeItemConst::ConstType>);
 

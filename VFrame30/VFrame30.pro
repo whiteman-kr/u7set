@@ -80,7 +80,6 @@ OTHER_FILES += \
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
-    VideoItem.h \
     VideoItemSignal.h \
     VideoItemRect.h \
     VideoItemLink.h \
@@ -123,10 +122,10 @@ HEADERS += VFrame30Lib_global.h \
     version.h \
     ../include/DbStruct.h \
     BaseSchemeWidget.h \
-    SchemeItemConst.h
+    SchemeItemConst.h \
+    SchemeItem.h
 
 SOURCES += \
-    VideoItem.cpp \
     VideoItemSignal.cpp \
     VideoItemRect.cpp \
     VideoItemLink.cpp \
@@ -164,7 +163,8 @@ SOURCES += \
     SchemeView.cpp \
     ../lib/DbStruct.cpp \
     BaseSchemeWidget.cpp \
-    SchemeItemConst.cpp
+    SchemeItemConst.cpp \
+    SchemeItem.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

@@ -24,17 +24,17 @@ namespace VFrame30
 	//
 	bool PosLineImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = VideoItem::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		bool result = SchemeItem::SaveData(message);
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosLineImpl* posLineImplMessage = message->mutable_videoitem()->mutable_poslineimpl();
+		Proto::PosLineImpl* posLineImplMessage = message->mutable_schemeitem()->mutable_poslineimpl();
 
 		posLineImplMessage->set_startxdocpt(m_startXDocPt);
 		posLineImplMessage->set_startydocpt(m_startYDocPt);
@@ -46,15 +46,15 @@ namespace VFrame30
 
 	bool PosLineImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		bool result = VideoItem::LoadData(message);
+		bool result = SchemeItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -62,13 +62,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_poslineimpl() == false)
+		if (message.schemeitem().has_poslineimpl() == false)
 		{
-			assert(message.videoitem().has_poslineimpl());
+			assert(message.schemeitem().has_poslineimpl());
 			return false;
 		}
 
-		const Proto::PosLineImpl& posLineImplMessage = message.videoitem().poslineimpl();
+		const Proto::PosLineImpl& posLineImplMessage = message.schemeitem().poslineimpl();
 
 		m_startXDocPt = posLineImplMessage.startxdocpt();
 		m_startYDocPt = posLineImplMessage.startydocpt();

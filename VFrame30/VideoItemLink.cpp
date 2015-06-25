@@ -28,16 +28,16 @@ namespace VFrame30
 	bool VideoItemLink::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemLine::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 		
 		// --
 		//
-		/*Proto::VideoItemLink* linkMessage = */message->mutable_videoitem()->mutable_link();
+		/*Proto::VideoItemLink* linkMessage = */message->mutable_schemeitem()->mutable_link();
 
 		//linkMessage->set_weight(weight);
 		//linkMessage->set_linecolor(lineColor);
@@ -47,9 +47,9 @@ namespace VFrame30
 
 	bool VideoItemLink::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -63,9 +63,9 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_link() == false)
+		if (message.schemeitem().has_link() == false)
 		{
-			assert(message.videoitem().has_link());
+			assert(message.schemeitem().has_link());
 		}
 
 		//const Proto::VideoItemLink& linkMessage = message.videoitem(0).link();

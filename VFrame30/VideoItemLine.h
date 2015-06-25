@@ -11,7 +11,7 @@ namespace VFrame30
 		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<VideoItemLine>;
+		friend ::Factory<SchemeItem>::DerivedType<VideoItemLine>;
 #endif
 
 	private:

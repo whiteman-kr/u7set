@@ -65,9 +65,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* VideoLayer_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   VideoLayer_reflection_ = NULL;
-const ::google::protobuf::Descriptor* VideoItem_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* SchemeItem_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
-  VideoItem_reflection_ = NULL;
+  SchemeItem_reflection_ = NULL;
 const ::google::protobuf::Descriptor* PosRectImpl_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   PosRectImpl_reflection_ = NULL;
@@ -255,7 +255,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   Envelope_descriptor_ = file->message_type(5);
   static const int Envelope_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, classnamehash_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, videoitem_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, schemeitem_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, deviceobject_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, scheme_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Envelope, videolayer_),
@@ -452,41 +452,41 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(VideoLayer));
-  VideoItem_descriptor_ = file->message_type(15);
-  static const int VideoItem_offsets_[21] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, uuid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, isstatic_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, islocked_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, itemunit_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, acceptclick_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, clickscript_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, posrectimpl_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, poslineimpl_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, posconnectionimpl_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, fblitem_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, fblitemrect_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, fblitemline_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, rect_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, line_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, connectionline_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, signal_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, inputsignal_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, outputsignal_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, link_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, videoitemfblelement_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, constitem_),
+  SchemeItem_descriptor_ = file->message_type(15);
+  static const int SchemeItem_offsets_[21] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, uuid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, isstatic_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, islocked_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, itemunit_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, acceptclick_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, clickscript_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, posrectimpl_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, poslineimpl_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, posconnectionimpl_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, fblitem_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, fblitemrect_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, fblitemline_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, rect_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, line_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, connectionline_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, signal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, inputsignal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, outputsignal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, link_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, videoitemfblelement_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, constitem_),
   };
-  VideoItem_reflection_ =
+  SchemeItem_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
-      VideoItem_descriptor_,
-      VideoItem::default_instance_,
-      VideoItem_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VideoItem, _unknown_fields_),
+      SchemeItem_descriptor_,
+      SchemeItem::default_instance_,
+      SchemeItem_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItem, _unknown_fields_),
       -1,
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(VideoItem));
+      sizeof(SchemeItem));
   PosRectImpl_descriptor_ = file->message_type(16);
   static const int PosRectImpl_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(PosRectImpl, leftdocpt_),
@@ -1023,7 +1023,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     VideoLayer_descriptor_, &VideoLayer::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    VideoItem_descriptor_, &VideoItem::default_instance());
+    SchemeItem_descriptor_, &SchemeItem::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     PosRectImpl_descriptor_, &PosRectImpl::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -1117,8 +1117,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete LogicScheme_reflection_;
   delete VideoLayer::default_instance_;
   delete VideoLayer_reflection_;
-  delete VideoItem::default_instance_;
-  delete VideoItem_reflection_;
+  delete SchemeItem::default_instance_;
+  delete SchemeItem_reflection_;
   delete PosRectImpl::default_instance_;
   delete PosRectImpl_reflection_;
   delete PosLineImpl::default_instance_;
@@ -1193,150 +1193,150 @@ void protobuf_AddDesc_serialization_2eproto() {
     "(\010:\005false\"\027\n\007wstring\022\014\n\004text\030\001 \002(\014\"U\n\tFo"
     "ntParam\022\034\n\004name\030\001 \002(\0132\016.Proto.wstring\022\014\n"
     "\004size\030\002 \002(\001\022\014\n\004bold\030\003 \002(\010\022\016\n\006italic\030\004 \002("
-    "\010\"#\n\013SchemePoint\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\"\213"
-    "\002\n\010Envelope\022\025\n\rclassnamehash\030\001 \002(\r\022#\n\tvi"
-    "deoitem\030\006 \001(\0132\020.Proto.VideoItem\022)\n\014devic"
-    "eobject\030\007 \001(\0132\023.Proto.DeviceObject\022\035\n\006sc"
-    "heme\030d \001(\0132\r.Proto.Scheme\022%\n\nvideolayer\030"
-    "e \001(\0132\021.Proto.VideoLayer\022%\n\nfblelement\030f"
-    " \001(\0132\021.Proto.FblElement\022+\n\rconfiguration"
-    "\030g \001(\0132\024.Proto.Configuration\"\361\001\n\rConfigu"
-    "ration\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005str"
-    "ID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030\003 \002("
-    "\0132\016.Proto.wstring\022!\n\tvariables\030\004 \002(\0132\016.P"
-    "roto.wstring\022\037\n\007globals\030\005 \002(\0132\016.Proto.ws"
-    "tring\022\037\n\nschemesIDs\030d \003(\0132\013.Proto.Uuid\022 "
-    "\n\007schemes\030e \003(\0132\017.Proto.Envelope\">\n\024AfbE"
-    "lementCollection\022&\n\010elements\030\001 \003(\0132\024.Pro"
-    "to.AfbElementXml\"\035\n\rAfbElementXml\022\014\n\004dat"
-    "a\030\001 \002(\014\"\274\002\n\nFblElement\022\035\n\005strID\030\002 \002(\0132\016."
-    "Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.w"
-    "string\022\016\n\006opcode\030\004 \002(\r\022\025\n\006hasRam\030\005 \001(\010:\005"
-    "false\022\033\n\rrequiredStart\030\006 \001(\010:\004true\022-\n\014in"
-    "putSignals\030\013 \003(\0132\027.Proto.FblElementSigna"
-    "l\022.\n\routputSignals\030\014 \003(\0132\027.Proto.FblElem"
-    "entSignal\022&\n\006params\030\r \003(\0132\026.Proto.FblEle"
-    "mentParam\022#\n\013description\030\016 \001(\0132\016.Proto.w"
-    "string\"\241\001\n\020FblElementSignal\022\037\n\007caption\030\001"
-    " \002(\0132\016.Proto.wstring\022\"\n\004type\030\002 \002(\0162\024.Pro"
-    "to.FblSignalType\022\027\n\014operandIndex\030\003 \001(\005:\001"
-    "0\022\017\n\004size\030\004 \001(\005:\0010\022\036\n\006opName\030\005 \001(\0132\016.Pro"
-    "to.wstring\"\227\003\n\017FblElementParam\022\037\n\007captio"
-    "n\030\001 \002(\0132\016.Proto.wstring\022!\n\004type\030\002 \002(\0162\023."
-    "Proto.FblParamType\022\017\n\007visible\030\007 \002(\010\022\027\n\014o"
-    "perandIndex\030\010 \001(\005:\0010\022\017\n\004size\030\t \001(\005:\0010\022\033\n"
-    "\014instantiator\030\n \001(\010:\005false\022\023\n\004user\030\013 \001(\010"
-    ":\005false\022%\n\rchangedScript\030\014 \001(\0132\016.Proto.w"
-    "string\022\036\n\005value\030\r \001(\0132\017.Proto.qvariant\022%"
-    "\n\014defaultvalue\030\016 \001(\0132\017.Proto.qvariant\022!\n"
-    "\010lowlimit\030\017 \001(\0132\017.Proto.qvariant\022\"\n\thigh"
-    "limit\030\020 \001(\0132\017.Proto.qvariant\022\036\n\006opName\030\021"
-    " \001(\0132\016.Proto.wstring\"\274\002\n\006Scheme\022\031\n\004uuid\030"
-    "\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Prot"
-    "o.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstri"
-    "ng\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004uni"
-    "t\030\006 \002(\0162\021.Proto.SchemeUnit\022\037\n\020excludeFro"
-    "mBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\0132\017.Pr"
-    "oto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.AfbEl"
-    "ementCollection\022*\n\rlogics_scheme\030\310\001 \001(\0132"
-    "\022.Proto.LogicScheme\"6\n\013LogicScheme\022\'\n\017ha"
-    "rdware_strids\030\001 \003(\0132\016.Proto.wstring\"\223\001\n\n"
-    "VideoLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\034\n"
-    "\004name\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compile\030\003"
-    " \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005ite"
-    "ms\030\017 \003(\0132\017.Proto.Envelope\"\302\006\n\tVideoItem\022"
-    "\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStatic\030\002"
-    " \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004 \002(\016"
-    "2\021.Proto.SchemeUnit\022\032\n\013acceptClick\030\005 \001(\010"
-    ":\005false\022#\n\013clickScript\030\006 \001(\0132\016.Proto.wst"
-    "ring\022\'\n\013PosRectImpl\030\n \001(\0132\022.Proto.PosRec"
-    "tImpl\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Proto.PosLi"
-    "neImpl\0223\n\021PosConnectionImpl\030\014 \001(\0132\030.Prot"
-    "o.PosConnectionImpl\022\037\n\007FblItem\030j \001(\0132\016.P"
-    "roto.FblItem\022\'\n\013FblItemRect\030k \001(\0132\022.Prot"
-    "o.FblItemRect\022\'\n\013FblItemLine\030l \001(\0132\022.Pro"
-    "to.FblItemLine\022\"\n\004Rect\030t \001(\0132\024.Proto.Vid"
-    "eoItemRect\022\"\n\004Line\030u \001(\0132\024.Proto.VideoIt"
-    "emLine\0226\n\016ConnectionLine\030v \001(\0132\036.Proto.V"
-    "ideoItemConnectionLine\022&\n\006Signal\030| \001(\0132\026"
-    ".Proto.VideoItemSignal\0220\n\013InputSignal\030} "
-    "\001(\0132\033.Proto.VideoItemInputSignal\0222\n\014Outp"
-    "utSignal\030~ \001(\0132\034.Proto.VideoItemOutputSi"
-    "gnal\022\"\n\004Link\030\177 \001(\0132\024.Proto.VideoItemLink"
-    "\0228\n\023VideoItemFblElement\030\200\001 \001(\0132\032.Proto.V"
-    "ideoItemFblElement\022*\n\tConstItem\030\201\001 \001(\0132\026"
-    ".Proto.SchemeItemConst\"[\n\013PosRectImpl\022\021\n"
-    "\tleftDocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n\nwi"
-    "dthDocPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"]\n\013P"
-    "osLineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013start"
-    "YDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tendYD"
-    "ocPt\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006point"
-    "s\030\001 \003(\0132\022.Proto.SchemePoint\"\274\001\n\rVideoIte"
-    "mRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r"
-    "\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.Prot"
-    "o.wstring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030\006 \002"
-    "(\0132\020.Proto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026\n\010dr"
-    "awrect\030\010 \001(\010:\004true\"2\n\rVideoItemLine\022\016\n\006w"
-    "eight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"<\n\027VideoI"
-    "temConnectionLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlin"
-    "eColor\030\002 \002(\r\"\260\001\n\022FblConnectionPoint\022!\n\005p"
-    "oint\030\001 \001(\0132\022.Proto.SchemePoint\022/\n\ndirrec"
-    "tion\030\002 \001(\0162\033.Proto.ConnectionDirrection\022"
-    "\031\n\004uuid\030\003 \001(\0132\013.Proto.Uuid\022\030\n\014operandInd"
-    "ex\030\004 \001(\005:\002-1\022\021\n\007caption\030\005 \001(\t:\000\"4\n\007FblIt"
-    "em\022)\n\006points\030\001 \003(\0132\031.Proto.FblConnection"
-    "Point\"v\n\013FblItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\t"
-    "lineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n\tte"
-    "xtColor\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.Font"
-    "Param\"0\n\013FblItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\t"
-    "lineColor\030\002 \002(\r\"7\n\017VideoItemSignal\022$\n\014si"
-    "gnalStrIDs\030\001 \003(\0132\016.Proto.wstring\"\026\n\024Vide"
-    "oItemInputSignal\"\027\n\025VideoItemOutputSigna"
-    "l\"\017\n\rVideoItemLink\"_\n\023VideoItemFblElemen"
-    "t\022&\n\006params\030\002 \003(\0132\026.Proto.FblElementPara"
-    "m\022 \n\010afbStrid\030\003 \001(\0132\016.Proto.wstring\"N\n\017S"
-    "chemeItemConst\022\017\n\004type\030\001 \001(\005:\0010\022\023\n\010intVa"
-    "lue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001(\001:\0010\"\224\005\n\014"
-    "DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022"
-    "\035\n\005strId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007captio"
-    "n\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRestrict"
-    "ion\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001(\005"
-    ":\0010\022!\n\031dynamic_properties_struct\030\006 \001(\t\022#"
-    "\n\nproperties\030\007 \003(\0132\017.Proto.Property\022\025\n\006p"
-    "reset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010:\005"
-    "false\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstrin"
-    "g\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006Sy"
-    "stem\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack\030"
-    "f \001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001("
-    "\0132\024.Proto.DeviceChassis\022#\n\006Module\030h \001(\0132"
-    "\023.Proto.DeviceModule\022+\n\nController\030i \001(\013"
-    "2\027.Proto.DeviceController\022#\n\006Signal\030j \001("
-    "\0132\023.Proto.DeviceSignal\022\'\n\013Workstation\030k "
-    "\001(\0132\022.Proto.Workstation\022!\n\010Software\030l \001("
-    "\0132\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014Devi"
-    "ceSystem\"\014\n\nDeviceRack\" \n\rDeviceChassis\022"
-    "\017\n\004type\030\001 \001(\005:\0010\"[\n\014DeviceModule\022\017\n\004type"
-    "\030\001 \001(\005:\0010\022\022\n\007Channel\030\002 \001(\005:\0010\022\022\n\010SubsysI"
-    "D\030\003 \001(\t:\000\022\022\n\010ConfType\030\004 \001(\t:\000\"\022\n\020DeviceC"
-    "ontroller\"\347\001\n\014DeviceSignal\022\027\n\014obsoletety"
-    "pe\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006for"
-    "mat\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016validit"
-    "yOffset\030\005 \001(\005:\0010\022\026\n\013validityBit\030\006 \001(\005:\0010"
-    "\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001"
-    "(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005"
-    ":\0010\"\036\n\013Workstation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010S"
-    "oftware\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleConfig"
-    "uration\022\032\n\022struct_description\030\001 \001(\t\022/\n\006v"
-    "alues\030\002 \003(\0132\037.Proto.ModuleConfigurationV"
-    "alue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConfigurat"
-    "ionValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n"
-    "\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3"
-    "\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020"
-    "\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005I"
-    "nput\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006A"
-    "nalog\020\000\022\014\n\010Discrete\020\001*N\n\014FblParamType\022\022\n"
-    "\016AnalogIntegral\020\000\022\027\n\023AnalogFloatingPoint"
-    "\020\001\022\021\n\rDiscreteValue\020\002", 6021);
+    "\010\"#\n\013SchemePoint\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\"\215"
+    "\002\n\010Envelope\022\025\n\rclassnamehash\030\001 \002(\r\022%\n\nsc"
+    "hemeitem\030\006 \001(\0132\021.Proto.SchemeItem\022)\n\014dev"
+    "iceobject\030\007 \001(\0132\023.Proto.DeviceObject\022\035\n\006"
+    "scheme\030d \001(\0132\r.Proto.Scheme\022%\n\nvideolaye"
+    "r\030e \001(\0132\021.Proto.VideoLayer\022%\n\nfblelement"
+    "\030f \001(\0132\021.Proto.FblElement\022+\n\rconfigurati"
+    "on\030g \001(\0132\024.Proto.Configuration\"\361\001\n\rConfi"
+    "guration\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005s"
+    "trID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030\003 "
+    "\002(\0132\016.Proto.wstring\022!\n\tvariables\030\004 \002(\0132\016"
+    ".Proto.wstring\022\037\n\007globals\030\005 \002(\0132\016.Proto."
+    "wstring\022\037\n\nschemesIDs\030d \003(\0132\013.Proto.Uuid"
+    "\022 \n\007schemes\030e \003(\0132\017.Proto.Envelope\">\n\024Af"
+    "bElementCollection\022&\n\010elements\030\001 \003(\0132\024.P"
+    "roto.AfbElementXml\"\035\n\rAfbElementXml\022\014\n\004d"
+    "ata\030\001 \002(\014\"\274\002\n\nFblElement\022\035\n\005strID\030\002 \002(\0132"
+    "\016.Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto"
+    ".wstring\022\016\n\006opcode\030\004 \002(\r\022\025\n\006hasRam\030\005 \001(\010"
+    ":\005false\022\033\n\rrequiredStart\030\006 \001(\010:\004true\022-\n\014"
+    "inputSignals\030\013 \003(\0132\027.Proto.FblElementSig"
+    "nal\022.\n\routputSignals\030\014 \003(\0132\027.Proto.FblEl"
+    "ementSignal\022&\n\006params\030\r \003(\0132\026.Proto.FblE"
+    "lementParam\022#\n\013description\030\016 \001(\0132\016.Proto"
+    ".wstring\"\241\001\n\020FblElementSignal\022\037\n\007caption"
+    "\030\001 \002(\0132\016.Proto.wstring\022\"\n\004type\030\002 \002(\0162\024.P"
+    "roto.FblSignalType\022\027\n\014operandIndex\030\003 \001(\005"
+    ":\0010\022\017\n\004size\030\004 \001(\005:\0010\022\036\n\006opName\030\005 \001(\0132\016.P"
+    "roto.wstring\"\227\003\n\017FblElementParam\022\037\n\007capt"
+    "ion\030\001 \002(\0132\016.Proto.wstring\022!\n\004type\030\002 \002(\0162"
+    "\023.Proto.FblParamType\022\017\n\007visible\030\007 \002(\010\022\027\n"
+    "\014operandIndex\030\010 \001(\005:\0010\022\017\n\004size\030\t \001(\005:\0010\022"
+    "\033\n\014instantiator\030\n \001(\010:\005false\022\023\n\004user\030\013 \001"
+    "(\010:\005false\022%\n\rchangedScript\030\014 \001(\0132\016.Proto"
+    ".wstring\022\036\n\005value\030\r \001(\0132\017.Proto.qvariant"
+    "\022%\n\014defaultvalue\030\016 \001(\0132\017.Proto.qvariant\022"
+    "!\n\010lowlimit\030\017 \001(\0132\017.Proto.qvariant\022\"\n\thi"
+    "ghlimit\030\020 \001(\0132\017.Proto.qvariant\022\036\n\006opName"
+    "\030\021 \001(\0132\016.Proto.wstring\"\274\002\n\006Scheme\022\031\n\004uui"
+    "d\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Pr"
+    "oto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wst"
+    "ring\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004u"
+    "nit\030\006 \002(\0162\021.Proto.SchemeUnit\022\037\n\020excludeF"
+    "romBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\0132\017."
+    "Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.Afb"
+    "ElementCollection\022*\n\rlogics_scheme\030\310\001 \001("
+    "\0132\022.Proto.LogicScheme\"6\n\013LogicScheme\022\'\n\017"
+    "hardware_strids\030\001 \003(\0132\016.Proto.wstring\"\223\001"
+    "\n\nVideoLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022"
+    "\034\n\004name\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compile"
+    "\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005i"
+    "tems\030\017 \003(\0132\017.Proto.Envelope\"\303\006\n\nSchemeIt"
+    "em\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStati"
+    "c\030\002 \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004 "
+    "\002(\0162\021.Proto.SchemeUnit\022\032\n\013acceptClick\030\005 "
+    "\001(\010:\005false\022#\n\013clickScript\030\006 \001(\0132\016.Proto."
+    "wstring\022\'\n\013PosRectImpl\030\n \001(\0132\022.Proto.Pos"
+    "RectImpl\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Proto.Po"
+    "sLineImpl\0223\n\021PosConnectionImpl\030\014 \001(\0132\030.P"
+    "roto.PosConnectionImpl\022\037\n\007FblItem\030j \001(\0132"
+    "\016.Proto.FblItem\022\'\n\013FblItemRect\030k \001(\0132\022.P"
+    "roto.FblItemRect\022\'\n\013FblItemLine\030l \001(\0132\022."
+    "Proto.FblItemLine\022\"\n\004Rect\030t \001(\0132\024.Proto."
+    "VideoItemRect\022\"\n\004Line\030u \001(\0132\024.Proto.Vide"
+    "oItemLine\0226\n\016ConnectionLine\030v \001(\0132\036.Prot"
+    "o.VideoItemConnectionLine\022&\n\006Signal\030| \001("
+    "\0132\026.Proto.VideoItemSignal\0220\n\013InputSignal"
+    "\030} \001(\0132\033.Proto.VideoItemInputSignal\0222\n\014O"
+    "utputSignal\030~ \001(\0132\034.Proto.VideoItemOutpu"
+    "tSignal\022\"\n\004Link\030\177 \001(\0132\024.Proto.VideoItemL"
+    "ink\0228\n\023VideoItemFblElement\030\200\001 \001(\0132\032.Prot"
+    "o.VideoItemFblElement\022*\n\tConstItem\030\201\001 \001("
+    "\0132\026.Proto.SchemeItemConst\"[\n\013PosRectImpl"
+    "\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n"
+    "\nwidthDocPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"]"
+    "\n\013PosLineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013st"
+    "artYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\ten"
+    "dYDocPt\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006po"
+    "ints\030\001 \003(\0132\022.Proto.SchemePoint\"\274\001\n\rVideo"
+    "ItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 "
+    "\002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.P"
+    "roto.wstring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030"
+    "\006 \002(\0132\020.Proto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026\n"
+    "\010drawrect\030\010 \001(\010:\004true\"2\n\rVideoItemLine\022\016"
+    "\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"<\n\027Vid"
+    "eoItemConnectionLine\022\016\n\006weight\030\001 \002(\001\022\021\n\t"
+    "lineColor\030\002 \002(\r\"\260\001\n\022FblConnectionPoint\022!"
+    "\n\005point\030\001 \001(\0132\022.Proto.SchemePoint\022/\n\ndir"
+    "rection\030\002 \001(\0162\033.Proto.ConnectionDirrecti"
+    "on\022\031\n\004uuid\030\003 \001(\0132\013.Proto.Uuid\022\030\n\014operand"
+    "Index\030\004 \001(\005:\002-1\022\021\n\007caption\030\005 \001(\t:\000\"4\n\007Fb"
+    "lItem\022)\n\006points\030\001 \003(\0132\031.Proto.FblConnect"
+    "ionPoint\"v\n\013FblItemRect\022\016\n\006weight\030\001 \002(\001\022"
+    "\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n"
+    "\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.F"
+    "ontParam\"0\n\013FblItemLine\022\016\n\006weight\030\001 \002(\001\022"
+    "\021\n\tlineColor\030\002 \002(\r\"7\n\017VideoItemSignal\022$\n"
+    "\014signalStrIDs\030\001 \003(\0132\016.Proto.wstring\"\026\n\024V"
+    "ideoItemInputSignal\"\027\n\025VideoItemOutputSi"
+    "gnal\"\017\n\rVideoItemLink\"_\n\023VideoItemFblEle"
+    "ment\022&\n\006params\030\002 \003(\0132\026.Proto.FblElementP"
+    "aram\022 \n\010afbStrid\030\003 \001(\0132\016.Proto.wstring\"N"
+    "\n\017SchemeItemConst\022\017\n\004type\030\001 \001(\005:\0010\022\023\n\010in"
+    "tValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001(\001:\0010\"\224"
+    "\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uu"
+    "id\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007cap"
+    "tion\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRestr"
+    "iction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 "
+    "\001(\005:\0010\022!\n\031dynamic_properties_struct\030\006 \001("
+    "\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property\022\025"
+    "\n\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001("
+    "\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.wst"
+    "ring\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n"
+    "\006System\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Ra"
+    "ck\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g"
+    " \001(\0132\024.Proto.DeviceChassis\022#\n\006Module\030h \001"
+    "(\0132\023.Proto.DeviceModule\022+\n\nController\030i "
+    "\001(\0132\027.Proto.DeviceController\022#\n\006Signal\030j"
+    " \001(\0132\023.Proto.DeviceSignal\022\'\n\013Workstation"
+    "\030k \001(\0132\022.Proto.Workstation\022!\n\010Software\030l"
+    " \001(\0132\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014D"
+    "eviceSystem\"\014\n\nDeviceRack\" \n\rDeviceChass"
+    "is\022\017\n\004type\030\001 \001(\005:\0010\"[\n\014DeviceModule\022\017\n\004t"
+    "ype\030\001 \001(\005:\0010\022\022\n\007Channel\030\002 \001(\005:\0010\022\022\n\010Subs"
+    "ysID\030\003 \001(\t:\000\022\022\n\010ConfType\030\004 \001(\t:\000\"\022\n\020Devi"
+    "ceController\"\347\001\n\014DeviceSignal\022\027\n\014obsolet"
+    "etype\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006"
+    "format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016vali"
+    "dityOffset\030\005 \001(\005:\0010\022\026\n\013validityBit\030\006 \001(\005"
+    ":\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030"
+    "\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n "
+    "\001(\005:\0010\"\036\n\013Workstation\022\017\n\004type\030\001 \001(\005:\0010\"\033"
+    "\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleCon"
+    "figuration\022\032\n\022struct_description\030\001 \001(\t\022/"
+    "\n\006values\030\002 \003(\0132\037.Proto.ModuleConfigurati"
+    "onValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConfigu"
+    "rationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t"
+    "\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002("
+    "\t*3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n\nMillimet"
+    "er\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t"
+    "\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n"
+    "\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014FblParamType"
+    "\022\022\n\016AnalogIntegral\020\000\022\027\n\023AnalogFloatingPo"
+    "int\020\001\022\021\n\rDiscreteValue\020\002", 6024);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -1354,7 +1354,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   Scheme::default_instance_ = new Scheme();
   LogicScheme::default_instance_ = new LogicScheme();
   VideoLayer::default_instance_ = new VideoLayer();
-  VideoItem::default_instance_ = new VideoItem();
+  SchemeItem::default_instance_ = new SchemeItem();
   PosRectImpl::default_instance_ = new PosRectImpl();
   PosLineImpl::default_instance_ = new PosLineImpl();
   PosConnectionImpl::default_instance_ = new PosConnectionImpl();
@@ -1399,7 +1399,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   Scheme::default_instance_->InitAsDefaultInstance();
   LogicScheme::default_instance_->InitAsDefaultInstance();
   VideoLayer::default_instance_->InitAsDefaultInstance();
-  VideoItem::default_instance_->InitAsDefaultInstance();
+  SchemeItem::default_instance_->InitAsDefaultInstance();
   PosRectImpl::default_instance_->InitAsDefaultInstance();
   PosLineImpl::default_instance_->InitAsDefaultInstance();
   PosConnectionImpl::default_instance_->InitAsDefaultInstance();
@@ -2876,7 +2876,7 @@ void SchemePoint::Swap(SchemePoint* other) {
 
 #ifndef _MSC_VER
 const int Envelope::kClassnamehashFieldNumber;
-const int Envelope::kVideoitemFieldNumber;
+const int Envelope::kSchemeitemFieldNumber;
 const int Envelope::kDeviceobjectFieldNumber;
 const int Envelope::kSchemeFieldNumber;
 const int Envelope::kVideolayerFieldNumber;
@@ -2890,7 +2890,7 @@ Envelope::Envelope()
 }
 
 void Envelope::InitAsDefaultInstance() {
-  videoitem_ = const_cast< ::Proto::VideoItem*>(&::Proto::VideoItem::default_instance());
+  schemeitem_ = const_cast< ::Proto::SchemeItem*>(&::Proto::SchemeItem::default_instance());
   deviceobject_ = const_cast< ::Proto::DeviceObject*>(&::Proto::DeviceObject::default_instance());
   scheme_ = const_cast< ::Proto::Scheme*>(&::Proto::Scheme::default_instance());
   videolayer_ = const_cast< ::Proto::VideoLayer*>(&::Proto::VideoLayer::default_instance());
@@ -2907,7 +2907,7 @@ Envelope::Envelope(const Envelope& from)
 void Envelope::SharedCtor() {
   _cached_size_ = 0;
   classnamehash_ = 0u;
-  videoitem_ = NULL;
+  schemeitem_ = NULL;
   deviceobject_ = NULL;
   scheme_ = NULL;
   videolayer_ = NULL;
@@ -2922,7 +2922,7 @@ Envelope::~Envelope() {
 
 void Envelope::SharedDtor() {
   if (this != default_instance_) {
-    delete videoitem_;
+    delete schemeitem_;
     delete deviceobject_;
     delete scheme_;
     delete videolayer_;
@@ -2955,8 +2955,8 @@ Envelope* Envelope::New() const {
 void Envelope::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     classnamehash_ = 0u;
-    if (has_videoitem()) {
-      if (videoitem_ != NULL) videoitem_->::Proto::VideoItem::Clear();
+    if (has_schemeitem()) {
+      if (schemeitem_ != NULL) schemeitem_->::Proto::SchemeItem::Clear();
     }
     if (has_deviceobject()) {
       if (deviceobject_ != NULL) deviceobject_->::Proto::DeviceObject::Clear();
@@ -2995,17 +2995,17 @@ bool Envelope::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(50)) goto parse_videoitem;
+        if (input->ExpectTag(50)) goto parse_schemeitem;
         break;
       }
 
-      // optional .Proto.VideoItem videoitem = 6;
+      // optional .Proto.SchemeItem schemeitem = 6;
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_videoitem:
+         parse_schemeitem:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_videoitem()));
+               input, mutable_schemeitem()));
         } else {
           goto handle_uninterpreted;
         }
@@ -3106,10 +3106,10 @@ void Envelope::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->classnamehash(), output);
   }
 
-  // optional .Proto.VideoItem videoitem = 6;
-  if (has_videoitem()) {
+  // optional .Proto.SchemeItem schemeitem = 6;
+  if (has_schemeitem()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      6, this->videoitem(), output);
+      6, this->schemeitem(), output);
   }
 
   // optional .Proto.DeviceObject deviceobject = 7;
@@ -3155,11 +3155,11 @@ void Envelope::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->classnamehash(), target);
   }
 
-  // optional .Proto.VideoItem videoitem = 6;
-  if (has_videoitem()) {
+  // optional .Proto.SchemeItem schemeitem = 6;
+  if (has_schemeitem()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        6, this->videoitem(), target);
+        6, this->schemeitem(), target);
   }
 
   // optional .Proto.DeviceObject deviceobject = 7;
@@ -3215,11 +3215,11 @@ int Envelope::ByteSize() const {
           this->classnamehash());
     }
 
-    // optional .Proto.VideoItem videoitem = 6;
-    if (has_videoitem()) {
+    // optional .Proto.SchemeItem schemeitem = 6;
+    if (has_schemeitem()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->videoitem());
+          this->schemeitem());
     }
 
     // optional .Proto.DeviceObject deviceobject = 7;
@@ -3287,8 +3287,8 @@ void Envelope::MergeFrom(const Envelope& from) {
     if (from.has_classnamehash()) {
       set_classnamehash(from.classnamehash());
     }
-    if (from.has_videoitem()) {
-      mutable_videoitem()->::Proto::VideoItem::MergeFrom(from.videoitem());
+    if (from.has_schemeitem()) {
+      mutable_schemeitem()->::Proto::SchemeItem::MergeFrom(from.schemeitem());
     }
     if (from.has_deviceobject()) {
       mutable_deviceobject()->::Proto::DeviceObject::MergeFrom(from.deviceobject());
@@ -3324,8 +3324,8 @@ void Envelope::CopyFrom(const Envelope& from) {
 bool Envelope::IsInitialized() const {
   if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
-  if (has_videoitem()) {
-    if (!this->videoitem().IsInitialized()) return false;
+  if (has_schemeitem()) {
+    if (!this->schemeitem().IsInitialized()) return false;
   }
   if (has_deviceobject()) {
     if (!this->deviceobject().IsInitialized()) return false;
@@ -3348,7 +3348,7 @@ bool Envelope::IsInitialized() const {
 void Envelope::Swap(Envelope* other) {
   if (other != this) {
     std::swap(classnamehash_, other->classnamehash_);
-    std::swap(videoitem_, other->videoitem_);
+    std::swap(schemeitem_, other->schemeitem_);
     std::swap(deviceobject_, other->deviceobject_);
     std::swap(scheme_, other->scheme_);
     std::swap(videolayer_, other->videolayer_);
@@ -7242,35 +7242,35 @@ void VideoLayer::Swap(VideoLayer* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int VideoItem::kUuidFieldNumber;
-const int VideoItem::kIsStaticFieldNumber;
-const int VideoItem::kIsLockedFieldNumber;
-const int VideoItem::kItemUnitFieldNumber;
-const int VideoItem::kAcceptClickFieldNumber;
-const int VideoItem::kClickScriptFieldNumber;
-const int VideoItem::kPosRectImplFieldNumber;
-const int VideoItem::kPosLineImplFieldNumber;
-const int VideoItem::kPosConnectionImplFieldNumber;
-const int VideoItem::kFblItemFieldNumber;
-const int VideoItem::kFblItemRectFieldNumber;
-const int VideoItem::kFblItemLineFieldNumber;
-const int VideoItem::kRectFieldNumber;
-const int VideoItem::kLineFieldNumber;
-const int VideoItem::kConnectionLineFieldNumber;
-const int VideoItem::kSignalFieldNumber;
-const int VideoItem::kInputSignalFieldNumber;
-const int VideoItem::kOutputSignalFieldNumber;
-const int VideoItem::kLinkFieldNumber;
-const int VideoItem::kVideoItemFblElementFieldNumber;
-const int VideoItem::kConstItemFieldNumber;
+const int SchemeItem::kUuidFieldNumber;
+const int SchemeItem::kIsStaticFieldNumber;
+const int SchemeItem::kIsLockedFieldNumber;
+const int SchemeItem::kItemUnitFieldNumber;
+const int SchemeItem::kAcceptClickFieldNumber;
+const int SchemeItem::kClickScriptFieldNumber;
+const int SchemeItem::kPosRectImplFieldNumber;
+const int SchemeItem::kPosLineImplFieldNumber;
+const int SchemeItem::kPosConnectionImplFieldNumber;
+const int SchemeItem::kFblItemFieldNumber;
+const int SchemeItem::kFblItemRectFieldNumber;
+const int SchemeItem::kFblItemLineFieldNumber;
+const int SchemeItem::kRectFieldNumber;
+const int SchemeItem::kLineFieldNumber;
+const int SchemeItem::kConnectionLineFieldNumber;
+const int SchemeItem::kSignalFieldNumber;
+const int SchemeItem::kInputSignalFieldNumber;
+const int SchemeItem::kOutputSignalFieldNumber;
+const int SchemeItem::kLinkFieldNumber;
+const int SchemeItem::kVideoItemFblElementFieldNumber;
+const int SchemeItem::kConstItemFieldNumber;
 #endif  // !_MSC_VER
 
-VideoItem::VideoItem()
+SchemeItem::SchemeItem()
   : ::google::protobuf::Message() {
   SharedCtor();
 }
 
-void VideoItem::InitAsDefaultInstance() {
+void SchemeItem::InitAsDefaultInstance() {
   uuid_ = const_cast< ::Proto::Uuid*>(&::Proto::Uuid::default_instance());
   clickscript_ = const_cast< ::Proto::wstring*>(&::Proto::wstring::default_instance());
   posrectimpl_ = const_cast< ::Proto::PosRectImpl*>(&::Proto::PosRectImpl::default_instance());
@@ -7290,13 +7290,13 @@ void VideoItem::InitAsDefaultInstance() {
   constitem_ = const_cast< ::Proto::SchemeItemConst*>(&::Proto::SchemeItemConst::default_instance());
 }
 
-VideoItem::VideoItem(const VideoItem& from)
+SchemeItem::SchemeItem(const SchemeItem& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
 }
 
-void VideoItem::SharedCtor() {
+void SchemeItem::SharedCtor() {
   _cached_size_ = 0;
   uuid_ = NULL;
   isstatic_ = false;
@@ -7322,11 +7322,11 @@ void VideoItem::SharedCtor() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
-VideoItem::~VideoItem() {
+SchemeItem::~SchemeItem() {
   SharedDtor();
 }
 
-void VideoItem::SharedDtor() {
+void SchemeItem::SharedDtor() {
   if (this != default_instance_) {
     delete uuid_;
     delete clickscript_;
@@ -7348,28 +7348,28 @@ void VideoItem::SharedDtor() {
   }
 }
 
-void VideoItem::SetCachedSize(int size) const {
+void SchemeItem::SetCachedSize(int size) const {
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
 }
-const ::google::protobuf::Descriptor* VideoItem::descriptor() {
+const ::google::protobuf::Descriptor* SchemeItem::descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return VideoItem_descriptor_;
+  return SchemeItem_descriptor_;
 }
 
-const VideoItem& VideoItem::default_instance() {
+const SchemeItem& SchemeItem::default_instance() {
   if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
   return *default_instance_;
 }
 
-VideoItem* VideoItem::default_instance_ = NULL;
+SchemeItem* SchemeItem::default_instance_ = NULL;
 
-VideoItem* VideoItem::New() const {
-  return new VideoItem;
+SchemeItem* SchemeItem::New() const {
+  return new SchemeItem;
 }
 
-void VideoItem::Clear() {
+void SchemeItem::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
@@ -7435,7 +7435,7 @@ void VideoItem::Clear() {
   mutable_unknown_fields()->Clear();
 }
 
-bool VideoItem::MergePartialFromCodedStream(
+bool SchemeItem::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
@@ -7763,7 +7763,7 @@ bool VideoItem::MergePartialFromCodedStream(
 #undef DO_
 }
 
-void VideoItem::SerializeWithCachedSizes(
+void SchemeItem::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
@@ -7894,7 +7894,7 @@ void VideoItem::SerializeWithCachedSizes(
   }
 }
 
-::google::protobuf::uint8* VideoItem::SerializeWithCachedSizesToArray(
+::google::protobuf::uint8* SchemeItem::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // required .Proto.Uuid uuid = 1;
   if (has_uuid()) {
@@ -8043,7 +8043,7 @@ void VideoItem::SerializeWithCachedSizes(
   return target;
 }
 
-int VideoItem::ByteSize() const {
+int SchemeItem::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
@@ -8203,10 +8203,10 @@ int VideoItem::ByteSize() const {
   return total_size;
 }
 
-void VideoItem::MergeFrom(const ::google::protobuf::Message& from) {
+void SchemeItem::MergeFrom(const ::google::protobuf::Message& from) {
   GOOGLE_CHECK_NE(&from, this);
-  const VideoItem* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const VideoItem*>(
+  const SchemeItem* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const SchemeItem*>(
       &from);
   if (source == NULL) {
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
@@ -8215,7 +8215,7 @@ void VideoItem::MergeFrom(const ::google::protobuf::Message& from) {
   }
 }
 
-void VideoItem::MergeFrom(const VideoItem& from) {
+void SchemeItem::MergeFrom(const SchemeItem& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_uuid()) {
@@ -8289,19 +8289,19 @@ void VideoItem::MergeFrom(const VideoItem& from) {
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
-void VideoItem::CopyFrom(const ::google::protobuf::Message& from) {
+void SchemeItem::CopyFrom(const ::google::protobuf::Message& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void VideoItem::CopyFrom(const VideoItem& from) {
+void SchemeItem::CopyFrom(const SchemeItem& from) {
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool VideoItem::IsInitialized() const {
+bool SchemeItem::IsInitialized() const {
   if ((_has_bits_[0] & 0x0000000f) != 0x0000000f) return false;
 
   if (has_uuid()) {
@@ -8346,7 +8346,7 @@ bool VideoItem::IsInitialized() const {
   return true;
 }
 
-void VideoItem::Swap(VideoItem* other) {
+void SchemeItem::Swap(SchemeItem* other) {
   if (other != this) {
     std::swap(uuid_, other->uuid_);
     std::swap(isstatic_, other->isstatic_);
@@ -8375,11 +8375,11 @@ void VideoItem::Swap(VideoItem* other) {
   }
 }
 
-::google::protobuf::Metadata VideoItem::GetMetadata() const {
+::google::protobuf::Metadata SchemeItem::GetMetadata() const {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::Metadata metadata;
-  metadata.descriptor = VideoItem_descriptor_;
-  metadata.reflection = VideoItem_reflection_;
+  metadata.descriptor = SchemeItem_descriptor_;
+  metadata.reflection = SchemeItem_reflection_;
   return metadata;
 }
 

@@ -8,7 +8,7 @@ namespace EditEngine
 	MoveItemCommand::MoveItemCommand(EditSchemeView* schemeView,
 			double xdiff,
 			double ydiff,
-			const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
+			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 			bool snapToGrid,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
@@ -29,7 +29,7 @@ namespace EditEngine
 	{
 		videoFrameView->setSelectedItems(m_items);
 
-		for (std::shared_ptr<VFrame30::VideoItem> item : m_items)
+		for (std::shared_ptr<VFrame30::SchemeItem> item : m_items)
 		{
 			item->MoveItem(m_xdiff, m_ydiff);
 
@@ -46,7 +46,7 @@ namespace EditEngine
 	{
 		videoFrameView->setSelectedItems(m_items);
 
-		for (std::shared_ptr<VFrame30::VideoItem> item : m_items)
+		for (std::shared_ptr<VFrame30::SchemeItem> item : m_items)
 		{
 			item->MoveItem(-m_xdiff, -m_ydiff);
 

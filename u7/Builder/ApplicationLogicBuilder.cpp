@@ -1301,7 +1301,7 @@ namespace Builder
 				// Get VideoItemLink by this id,
 				// save it's and points to newBranch
 				//
-				std::shared_ptr<VFrame30::VideoItem> videoItem = layer->getItemById(id);
+				std::shared_ptr<VFrame30::SchemeItem> videoItem = layer->getItemById(id);
 				VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(videoItem.get());
 
 				if (videoItem == nullptr ||
@@ -1367,7 +1367,7 @@ namespace Builder
 
 		bool result = true;
 
-		for (std::shared_ptr<VFrame30::VideoItem> item : layer->Items)
+		for (std::shared_ptr<VFrame30::SchemeItem> item : layer->Items)
 		{
 			if (dynamic_cast<VFrame30::FblItemLine*>(item.get()) != nullptr)
 			{

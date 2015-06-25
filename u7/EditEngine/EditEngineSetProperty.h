@@ -16,7 +16,7 @@ namespace EditEngine
 				EditSchemeView* videoFrameView,
 				QString propertyName,
 				QVariant value,
-				const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
+				const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 				QScrollBar* hScrollBar,
 				QScrollBar* vScrollBar);
 
@@ -31,7 +31,7 @@ namespace EditEngine
 			QString propertyName;
 			QVariant oldValue;
 			QVariant newValue;
-			std::shared_ptr<VFrame30::VideoItem> item;
+			std::shared_ptr<VFrame30::SchemeItem> item;
 		};
 
 		// Data

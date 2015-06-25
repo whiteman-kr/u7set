@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VideoItem.h"
+#include "SchemeItem.h"
 #include "Settings.h"
 
 namespace VFrame30
@@ -28,7 +28,7 @@ namespace VFrame30
 		virtual void DeleteLastExtensionPoint() = 0;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public VideoItem, public IVideoItemPosConnection
+	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public SchemeItem, public IVideoItemPosConnection
 	{
 		Q_OBJECT
 

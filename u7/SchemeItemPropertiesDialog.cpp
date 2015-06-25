@@ -21,7 +21,7 @@ SchemeItemPropertiesDialog::~SchemeItemPropertiesDialog()
 	delete ui;
 }
 
-void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items)
+void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items)
 {
 	m_items = items;
 
@@ -64,12 +64,12 @@ void SchemeItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 		return;
 	}
 
-	std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
+	std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
 	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property);
 
 	for (auto& i : objects)
 	{
-		std::shared_ptr<VFrame30::VideoItem> vi = std::dynamic_pointer_cast<VFrame30::VideoItem>(i);
+		std::shared_ptr<VFrame30::SchemeItem> vi = std::dynamic_pointer_cast<VFrame30::SchemeItem>(i);
 		assert(vi.get() != nullptr);
 
 		items.push_back(vi);

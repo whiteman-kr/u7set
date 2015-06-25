@@ -173,7 +173,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 			{
-				const std::shared_ptr<VideoItem>& item = *vi;
+				const std::shared_ptr<SchemeItem>& item = *vi;
 
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
@@ -212,7 +212,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<VideoItem>& item = *vi;
+				const std::shared_ptr<SchemeItem>& item = *vi;
 
 				if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
@@ -231,7 +231,7 @@ namespace VFrame30
 		return;
 	}
 
-	void Scheme::RunClickScript(const std::shared_ptr<VideoItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
+	void Scheme::RunClickScript(const std::shared_ptr<SchemeItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
 	{
 		if (pVideoFrameWidgetAgent == nullptr || videoItem->acceptClick() == false || videoItem->clickScript().isEmpty() == true)
 		{

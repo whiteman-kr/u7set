@@ -10,7 +10,7 @@ namespace VFrame30
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<VideoItemLink>;
+		friend ::Factory<SchemeItem>::DerivedType<VideoItemLink>;
 #endif
 
 	private:

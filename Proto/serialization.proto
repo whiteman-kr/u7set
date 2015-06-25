@@ -109,7 +109,7 @@ message Envelope
 
 	// Possible types for storing
 	//
-	optional VideoItem videoitem = 6;				// VFrame30::CVideoItem
+	optional SchemeItem schemeitem = 6;				// VFrame30::SchemeItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
 	optional Scheme scheme = 100;					// VFrame30::Scheme
 	optional VideoLayer videolayer = 101;			// VFrame30::CVideoLayer
@@ -305,18 +305,18 @@ message VideoLayer
 	required bool show = 4;
 	required bool print = 5;
 
-	repeated Envelope items = 15;		// Список CVideoItem'ов
+	repeated Envelope items = 15;		// Список SchmeItem'ов
 }
 
 
 //------------------------------------------------------------------------------------------
 //
 //
-//			VFrame30::VideItems
+//			VFrame30::SchemeItem
 //
 //
 //------------------------------------------------------------------------------------------
-message VideoItem
+message SchemeItem
 {
 	required Uuid uuid = 1;
 	required bool isStatic = 2;
@@ -325,7 +325,7 @@ message VideoItem
 	optional bool acceptClick = 5 [default = false];
 	optional wstring clickScript = 6;
 
-	// Наследуемые от CVideoItem
+	// Наследуемые от SchmeItem
 	//
 	optional PosRectImpl PosRectImpl = 10;
 	optional PosLineImpl PosLineImpl = 11;

@@ -28,16 +28,16 @@ namespace VFrame30
 	bool VideoItemConnectionLine::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosConnectionImpl::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 	
 		// --
 		//
-		Proto::VideoItemConnectionLine* connectionMessage = message->mutable_videoitem()->mutable_connectionline();
+		Proto::VideoItemConnectionLine* connectionMessage = message->mutable_schemeitem()->mutable_connectionline();
 
 		connectionMessage->set_weight(m_weight);
 		connectionMessage->set_linecolor(m_lineColor);
@@ -47,9 +47,9 @@ namespace VFrame30
 
 	bool VideoItemConnectionLine::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -63,13 +63,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_connectionline() == false)
+		if (message.schemeitem().has_connectionline() == false)
 		{
-			assert(message.videoitem().has_connectionline());
+			assert(message.schemeitem().has_connectionline());
 			return false;
 		}
 
-		const Proto::VideoItemConnectionLine& connectionMessage = message.videoitem().connectionline();
+		const Proto::VideoItemConnectionLine& connectionMessage = message.schemeitem().connectionline();
 
 		m_weight = connectionMessage.weight();
 		m_lineColor = connectionMessage.linecolor();

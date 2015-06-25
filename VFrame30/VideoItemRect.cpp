@@ -47,16 +47,16 @@ namespace VFrame30
 	bool VideoItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 		
 		// --
 		//
-		Proto::VideoItemRect* rectMessage = message->mutable_videoitem()->mutable_rect();
+		Proto::VideoItemRect* rectMessage = message->mutable_schemeitem()->mutable_rect();
 
 		rectMessage->set_weight(m_weight);
 		rectMessage->set_linecolor(m_lineColor);
@@ -73,9 +73,9 @@ namespace VFrame30
 
 	bool VideoItemRect::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -89,13 +89,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_rect() == false)
+		if (message.schemeitem().has_rect() == false)
 		{
-			assert(message.videoitem().has_rect());
+			assert(message.schemeitem().has_rect());
 			return false;
 		}
 
-		const Proto::VideoItemRect& rectMessage = message.videoitem().rect();
+		const Proto::VideoItemRect& rectMessage = message.schemeitem().rect();
 
 		m_weight = rectMessage.weight();
 		m_lineColor = rectMessage.linecolor();

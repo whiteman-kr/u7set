@@ -119,12 +119,12 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT VideoItem :
+	class VFRAME30LIBSHARED_EXPORT SchemeItem :
 		public QObject, 
 		public ISchemeItemPropertiesPos,
 		public IPointList,
-		public Proto::ObjectSerialization<VideoItem>,
-		public DebugInstCounter<VideoItem>
+		public Proto::ObjectSerialization<SchemeItem>,
+		public DebugInstCounter<SchemeItem>
 	{
 		Q_OBJECT
 
@@ -132,14 +132,14 @@ namespace VFrame30
 		Q_PROPERTY(QString ClickScript READ clickScript  WRITE setClickScript)
 
 	protected:
-		VideoItem();
+		SchemeItem();
 
 	public:
-		virtual ~VideoItem();
+		virtual ~SchemeItem();
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<VideoItem>;	// For call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<SchemeItem>;	// For call CreateObject from Proto::ObjectSerialization
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -149,7 +149,7 @@ namespace VFrame30
 		// Use this func only for serialization, while creting new object it is not fully initialized
 		// and must be read from somewhere
 		//
-		static VideoItem* CreateObject(const Proto::Envelope& message);
+		static SchemeItem* CreateObject(const Proto::Envelope& message);
 
 		// Action Functions
 		//
@@ -175,12 +175,12 @@ namespace VFrame30
 		// Draw item outlien, while creation or changing
 		//
 		virtual void DrawOutline(CDrawParam* pDrawParam) const;
-		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items);
+		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemeItem>>& items);
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
 		virtual void DrawSelection(CDrawParam* pDrawParam, bool drawSizeBar) const;
-		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items, bool drawSizeBar);
+		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemeItem>>& items, bool drawSizeBar);
 
 		// Determine and Calculation Functions
 		//
@@ -258,7 +258,7 @@ namespace VFrame30
 	};
 
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::VideoItem> VideoItemFactory;
+	extern Factory<VFrame30::SchemeItem> SchemeItemFactory;
 #endif
 }
 

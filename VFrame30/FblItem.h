@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VideoItem.h"
+#include "SchemeItem.h"
 #include "Fbl.h"
 
 class QPainter;

@@ -25,7 +25,7 @@ namespace VFrame30
 		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<VideoItemRect>;
+		friend ::Factory<SchemeItem>::DerivedType<VideoItemRect>;
 #endif
 
 		VideoItemRect(void);

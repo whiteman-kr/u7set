@@ -9,7 +9,7 @@ namespace VFrame30
 	class CDrawParam;
 	class VideoFrameWidgetAgent;
 	class SchemeLayer;
-	class VideoItem;
+	class SchemeItem;
 
 	
 	class VFRAME30LIBSHARED_EXPORT Scheme :
@@ -50,7 +50,7 @@ namespace VFrame30
 		void Print();
 
 		virtual void MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
-		void RunClickScript(const std::shared_ptr<VideoItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
+		void RunClickScript(const std::shared_ptr<SchemeItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
 
 		// Получить размер документа в точка
 		//

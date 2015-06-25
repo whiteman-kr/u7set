@@ -28,16 +28,16 @@ namespace VFrame30
 	bool VideoItemLine::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosLineImpl::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::VideoItemLine* lineMessage = message->mutable_videoitem()->mutable_line();
+		Proto::VideoItemLine* lineMessage = message->mutable_schemeitem()->mutable_line();
 
 		lineMessage->set_weight(m_weight);
 		lineMessage->set_linecolor(m_lineColor);
@@ -47,9 +47,9 @@ namespace VFrame30
 
 	bool VideoItemLine::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -62,13 +62,13 @@ namespace VFrame30
 		}
 
 		// --
-		if (message.videoitem().has_line() == false)
+		if (message.schemeitem().has_line() == false)
 		{
-			assert(message.videoitem().has_line());
+			assert(message.schemeitem().has_line());
 			return false;
 		}
 
-		const Proto::VideoItemLine& lineMessage = message.videoitem().line();
+		const Proto::VideoItemLine& lineMessage = message.schemeitem().line();
 
 		m_weight = lineMessage.weight();
 		m_lineColor = lineMessage.linecolor();

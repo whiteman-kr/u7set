@@ -23,17 +23,17 @@ namespace VFrame30
 
 	bool PosRectImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = VideoItem::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		bool result = SchemeItem::SaveData(message);
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosRectImpl* posRectImplMessage = message->mutable_videoitem()->mutable_posrectimpl();
+		Proto::PosRectImpl* posRectImplMessage = message->mutable_schemeitem()->mutable_posrectimpl();
 
 		posRectImplMessage->set_leftdocpt(m_leftDocPt);
 		posRectImplMessage->set_topdocpt(m_topDocPt);
@@ -45,28 +45,28 @@ namespace VFrame30
 
 	bool PosRectImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 		
 		// --
 		//
-		bool result = VideoItem::LoadData(message);
+		bool result = SchemeItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
 		}
 
 		// --
-		if (message.videoitem().has_posrectimpl() == false)
+		if (message.schemeitem().has_posrectimpl() == false)
 		{
-			assert(message.videoitem().has_posrectimpl());
+			assert(message.schemeitem().has_posrectimpl());
 			return false;
 		}
 
-		const Proto::PosRectImpl& posRectImplMessage = message.videoitem().posrectimpl();
+		const Proto::PosRectImpl& posRectImplMessage = message.schemeitem().posrectimpl();
 
 		m_leftDocPt = posRectImplMessage.leftdocpt();
 		m_topDocPt = posRectImplMessage.topdocpt();

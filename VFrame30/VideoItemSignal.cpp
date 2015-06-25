@@ -111,16 +111,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::VideoItemSignal* signal = message->mutable_videoitem()->mutable_signal();
+		Proto::VideoItemSignal* signal = message->mutable_schemeitem()->mutable_signal();
 
 		for (const QString& strId : m_signalStrIds)
 		{
@@ -133,9 +133,9 @@ namespace VFrame30
 
 	bool VideoItemSignal::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 		
@@ -149,13 +149,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_signal() == false)
+		if (message.schemeitem().has_signal() == false)
 		{
-			assert(message.videoitem().has_signal());
+			assert(message.schemeitem().has_signal());
 			return false;
 		}
 
-		const Proto::VideoItemSignal& signal = message.videoitem().signal();
+		const Proto::VideoItemSignal& signal = message.schemeitem().signal();
 
 		m_signalStrIds.clear();
 		m_signalStrIds.reserve(signal.signalstrids_size());
@@ -204,16 +204,16 @@ namespace VFrame30
 	{
 		bool result = VideoItemSignal::SaveData(message);
 		
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		/*Proto::VideoItemInputSignal* inputSignal = */message->mutable_videoitem()->mutable_inputsignal();
+		/*Proto::VideoItemInputSignal* inputSignal = */message->mutable_schemeitem()->mutable_inputsignal();
 
 		//inputSignal->set_weight(weight);
 
@@ -222,9 +222,9 @@ namespace VFrame30
 
 	bool VideoItemInputSignal::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -238,13 +238,13 @@ namespace VFrame30
 		
 		// --
 		//
-		if (message.videoitem().has_inputsignal() == false)
+		if (message.schemeitem().has_inputsignal() == false)
 		{
-			assert(message.videoitem().has_inputsignal());
+			assert(message.schemeitem().has_inputsignal());
 			return false;
 		}
 
-		/*const Proto::VideoItemInputSignal& inputSignal = */message.videoitem().inputsignal();
+		/*const Proto::VideoItemInputSignal& inputSignal = */message.schemeitem().inputsignal();
 		//fill = inputSignal.fill();
 
 		return true;
@@ -283,16 +283,16 @@ namespace VFrame30
 	{
 		bool result = VideoItemSignal::SaveData(message);
 		
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		/*Proto::VideoItemOutputSignal* outputSignal = */message->mutable_videoitem()->mutable_outputsignal();
+		/*Proto::VideoItemOutputSignal* outputSignal = */message->mutable_schemeitem()->mutable_outputsignal();
 
 		//inputSignal->set_weight(weight);
 
@@ -301,9 +301,9 @@ namespace VFrame30
 
 	bool VideoItemOutputSignal::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -317,13 +317,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_outputsignal() == false)
+		if (message.schemeitem().has_outputsignal() == false)
 		{
-			assert(message.videoitem().has_outputsignal());
+			assert(message.schemeitem().has_outputsignal());
 			return false;
 		}
 
-		/*const Proto::VideoItemOutputSignal& outputSignal = */message.videoitem().outputsignal();
+		/*const Proto::VideoItemOutputSignal& outputSignal = */message.schemeitem().outputsignal();
 		//fill = inputSignal.fill();
 
 		return true;

@@ -10,7 +10,7 @@ namespace EditEngine
 			EditSchemeView* videoFrameView,
 			QString propertyName,
 			QVariant value,
-			const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
+			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
 		EditCommand(videoFrameView, hScrollBar, vScrollBar)
@@ -43,7 +43,7 @@ namespace EditEngine
 
 	void SetPropertyCommand::executeCommand(EditSchemeView* videoFrameView)
 	{
-		std::list<std::shared_ptr<VFrame30::VideoItem>> sel;
+		std::list<std::shared_ptr<VFrame30::SchemeItem>> sel;
 
 		for (Record& r : m_items)
 		{
@@ -86,7 +86,7 @@ namespace EditEngine
 
 	void SetPropertyCommand::unExecuteCommand(EditSchemeView* videoFrameView)
 	{
-		std::list<std::shared_ptr<VFrame30::VideoItem>> sel;
+		std::list<std::shared_ptr<VFrame30::SchemeItem>> sel;
 
 		for (Record& r : m_items)
 		{

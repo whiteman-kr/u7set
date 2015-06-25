@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VideoItem.h"
+#include "SchemeItem.h"
 #include "Settings.h"
 
 class QPen;
@@ -34,7 +34,7 @@ namespace VFrame30
 
 	// Реализация базовых интерефейсов для элементов прямоугольного типа
 	//
-	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public VideoItem, public IVideoItemPosRect
+	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public SchemeItem, public IVideoItemPosRect
 	{
 		Q_OBJECT
 

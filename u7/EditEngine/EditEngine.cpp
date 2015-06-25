@@ -171,86 +171,86 @@ namespace EditEngine
 		}
 	}
 
-	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
 		addCommand(std::make_shared<AddItemCommand>(m_videoFrameView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runAddItem(std::vector<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runAddItem(std::vector<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
-		std::list<std::shared_ptr<VFrame30::VideoItem>> l(items.begin(), items.end());
+		std::list<std::shared_ptr<VFrame30::SchemeItem>> l(items.begin(), items.end());
 		addCommand(std::make_shared<AddItemCommand>(m_videoFrameView, l, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runAddItem(std::shared_ptr<VFrame30::VideoItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runAddItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
-		std::list<std::shared_ptr<VFrame30::VideoItem>> items;
+		std::list<std::shared_ptr<VFrame30::SchemeItem>> items;
 		items.push_back(item);
 
 		addCommand(std::make_shared<AddItemCommand>(m_videoFrameView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runDeleteItem(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
 		addCommand(std::make_shared<DeleteItemCommand>(m_videoFrameView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runDeleteItem(std::shared_ptr<VFrame30::VideoItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer)
+	void EditEngine::runDeleteItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
-		std::vector<std::shared_ptr<VFrame30::VideoItem>> v;
+		std::vector<std::shared_ptr<VFrame30::SchemeItem>> v;
 		v.push_back(item);
 
 		return runDeleteItem(v, layer);
 	}
 
-	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemePoint>>& points, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items)
+	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemePoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items)
 	{
 		addCommand(std::make_shared<SetPointsCommand>(m_videoFrameView, points, items, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemePoint>& points, const std::shared_ptr<VFrame30::VideoItem>& item)
+	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemePoint>& points, const std::shared_ptr<VFrame30::SchemeItem>& item)
 	{
 		std::vector<VFrame30::SchemePoint> ip(points.begin(), points.end());
 
 		std::vector<std::vector<VFrame30::SchemePoint>> allpoints;
 		allpoints.push_back(ip);
 
-		std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
+		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
 		items.push_back(item);
 
 		runSetPoints(allpoints, items);
 		return;
 	}
 
-	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items, bool snapToGrid)
+	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, bool snapToGrid)
 	{
 		addCommand(std::make_shared<MoveItemCommand>(m_videoFrameView, xdiff, ydiff, items, snapToGrid, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::VideoItem>& item, bool snapToGrid)
+	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemeItem>& item, bool snapToGrid)
 	{
-		std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
+		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
 		items.push_back(item);
 
 		runMoveItem(xdiff, ydiff, items, snapToGrid);
 		return;
 	}
 
-	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items)
+	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items)
 	{
 		addCommand(std::make_shared<SetPropertyCommand>(m_videoFrameView, propertyName, value, items, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::VideoItem>& item)
+	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemeItem>& item)
 	{
-		std::vector<std::shared_ptr<VFrame30::VideoItem>> items;
+		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
 		items.push_back(item);
 
 		return runSetProperty(propertyName, value, items);

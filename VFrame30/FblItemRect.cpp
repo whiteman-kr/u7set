@@ -50,10 +50,10 @@ namespace VFrame30
 	bool FblItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
@@ -67,7 +67,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::FblItemRect* itemMessage = message->mutable_videoitem()->mutable_fblitemrect();
+		Proto::FblItemRect* itemMessage = message->mutable_schemeitem()->mutable_fblitemrect();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor);
@@ -81,9 +81,9 @@ namespace VFrame30
 
 	bool FblItemRect::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -101,13 +101,13 @@ namespace VFrame30
 			return false;
 		}
 
-		if (message.videoitem().has_fblitemrect() == false)
+		if (message.schemeitem().has_fblitemrect() == false)
 		{
-			assert(message.videoitem().has_fblitemrect());
+			assert(message.schemeitem().has_fblitemrect());
 			return false;
 		}
 
-		const Proto::FblItemRect& itemMessage = message.videoitem().fblitemrect();
+		const Proto::FblItemRect& itemMessage = message.schemeitem().fblitemrect();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();
@@ -503,7 +503,7 @@ namespace VFrame30
 	{
 		// Set new guid for the item
 		//
-		VideoItem::setNewGuid();
+		SchemeItem::setNewGuid();
 
 		// Set new guids for all inputs/outputs
 		//

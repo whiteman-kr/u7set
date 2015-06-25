@@ -6,7 +6,7 @@ namespace EditEngine
 {
 	DeleteItemCommand::DeleteItemCommand(
 		EditSchemeView* videoFrameView,
-		std::vector<std::shared_ptr<VFrame30::VideoItem>> items,
+		std::vector<std::shared_ptr<VFrame30::SchemeItem>> items,
 		std::shared_ptr<VFrame30::SchemeLayer> layer,
 		QScrollBar* hScrollBar,
 		QScrollBar* vScrollBar)
@@ -29,7 +29,7 @@ namespace EditEngine
 	void DeleteItemCommand::executeCommand(EditSchemeView* videoFrameView)
 	{
 		std::for_each(m_items.begin(), m_items.end(),
-			[this](std::shared_ptr<VFrame30::VideoItem> item)
+			[this](std::shared_ptr<VFrame30::SchemeItem> item)
 			{
 				m_layer->Items.erase(std::remove(m_layer->Items.begin(), m_layer->Items.end(), item), m_layer->Items.end());
 			}

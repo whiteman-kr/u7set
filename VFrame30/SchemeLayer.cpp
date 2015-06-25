@@ -83,7 +83,7 @@ namespace VFrame30
 
 		for (int i = 0; i < videoLayer.items().size(); i++)
 		{
-			VideoItem* pItem = VideoItem::Create(videoLayer.items(i));
+			SchemeItem* pItem = SchemeItem::Create(videoLayer.items(i));
 			
 			if (pItem == nullptr)
 			{
@@ -91,7 +91,7 @@ namespace VFrame30
 				continue;
 			}
 			
-			Items.push_back(std::shared_ptr<VideoItem>(pItem));
+			Items.push_back(std::shared_ptr<SchemeItem>(pItem));
 		}
 
 		if (videoLayer.items().size() != (int)Items.size())
@@ -130,10 +130,10 @@ namespace VFrame30
 	// Methods
 	//
 
-	std::shared_ptr<VideoItem> SchemeLayer::getItemById(const QUuid& id) const
+	std::shared_ptr<SchemeItem> SchemeLayer::getItemById(const QUuid& id) const
 	{
 		auto foundItem = std::find_if(Items.begin(), Items.end(),
-			[&](const std::shared_ptr<VideoItem>& vi)
+			[&](const std::shared_ptr<SchemeItem>& vi)
 			{
 				return vi->guid() == id;
 			});
@@ -144,7 +144,7 @@ namespace VFrame30
 		}
 		else
 		{
-			return std::shared_ptr<VideoItem>();
+			return std::shared_ptr<SchemeItem>();
 		}
 	}
 
@@ -176,14 +176,14 @@ namespace VFrame30
 		}
 	}
 
-	std::shared_ptr<VideoItem> SchemeLayer::getItemUnderPoint(QPointF point) const
+	std::shared_ptr<SchemeItem> SchemeLayer::getItemUnderPoint(QPointF point) const
 	{
 		double x = point.x();
 		double y = point.y();
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::VideoItem>& item = *it;
+			const std::shared_ptr<VFrame30::SchemeItem>& item = *it;
 
 			if (item->IsIntersectPoint(x, y) == true)
 			{
@@ -191,15 +191,15 @@ namespace VFrame30
 			}
 		}
 
-		return std::shared_ptr<VideoItem>();
+		return std::shared_ptr<SchemeItem>();
 	}
 
-	std::list<std::shared_ptr<VideoItem>> SchemeLayer::getItemListInRectangle(const QRectF& rect) const
+	std::list<std::shared_ptr<SchemeItem>> SchemeLayer::getItemListInRectangle(const QRectF& rect) const
 	{
-		std::list<std::shared_ptr<VideoItem>> out;
+		std::list<std::shared_ptr<SchemeItem>> out;
 
 		std::copy_if(Items.begin(), Items.end(), std::back_inserter(out),
-				[&rect](std::shared_ptr<VideoItem> item)
+				[&rect](std::shared_ptr<SchemeItem> item)
 				{
 					return item->IsIntersectRect(rect.x(), rect.y(), rect.width(), rect.height());
 				}

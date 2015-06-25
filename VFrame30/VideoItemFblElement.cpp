@@ -173,16 +173,16 @@ namespace VFrame30
 	bool VideoItemFblElement::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 	
 		// --
 		//
-		Proto::VideoItemFblElement* vifble = message->mutable_videoitem()->mutable_videoitemfblelement();
+		Proto::VideoItemFblElement* vifble = message->mutable_schemeitem()->mutable_videoitemfblelement();
 
 		Proto::Write(vifble->mutable_afbstrid(), m_afbStrID);
 
@@ -197,9 +197,9 @@ namespace VFrame30
 
 	bool VideoItemFblElement::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -213,13 +213,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_videoitemfblelement() == false)
+		if (message.schemeitem().has_videoitemfblelement() == false)
 		{
-			assert(message.videoitem().has_videoitemfblelement());
+			assert(message.schemeitem().has_videoitemfblelement());
 			return false;
 		}
 		
-		const Proto::VideoItemFblElement& vifble = message.videoitem().videoitemfblelement();
+		const Proto::VideoItemFblElement& vifble = message.schemeitem().videoitemfblelement();
 		
 		Proto::Read(vifble.afbstrid(), &m_afbStrID);
 

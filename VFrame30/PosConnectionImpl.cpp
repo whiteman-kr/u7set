@@ -20,17 +20,17 @@ namespace VFrame30
 	//
 	bool PosConnectionImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = VideoItem::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		bool result = SchemeItem::SaveData(message);
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_videoitem()->mutable_posconnectionimpl();
+		Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_schemeitem()->mutable_posconnectionimpl();
 
 		// Сохранить точки
 		//
@@ -47,15 +47,15 @@ namespace VFrame30
 
 	bool PosConnectionImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		bool result = VideoItem::LoadData(message);
+		bool result = SchemeItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -63,13 +63,13 @@ namespace VFrame30
 		
 		//--
 		//
-		if (message.videoitem().has_posconnectionimpl() == false)
+		if (message.schemeitem().has_posconnectionimpl() == false)
 		{
-			assert(message.videoitem().has_posconnectionimpl());
+			assert(message.schemeitem().has_posconnectionimpl());
 			return false;
 		}
 
-		const Proto::PosConnectionImpl& posConnectionImplMessage = message.videoitem().posconnectionimpl();
+		const Proto::PosConnectionImpl& posConnectionImplMessage = message.schemeitem().posconnectionimpl();
 
 		points.clear();
 		for (int i = 0; i < posConnectionImplMessage.points().size(); i++)

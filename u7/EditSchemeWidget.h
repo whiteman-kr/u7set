@@ -2,7 +2,7 @@
 
 #include "../VFrame30/BaseSchemeWidget.h"
 #include "../VFrame30/SchemeView.h"
-#include "../VFrame30/VideoItem.h"
+#include "../VFrame30/SchemeItem.h"
 #include "../VFrame30/FblItem.h"
 #include "../include/DbController.h"
 
@@ -105,7 +105,7 @@ protected:
 	// Some determine functions
 	//
 protected:
-	VideoItemAction getPossibleAction(VFrame30::VideoItem* videoItem, QPointF point, int* outMovingEdgePointIndex);
+	VideoItemAction getPossibleAction(VFrame30::SchemeItem* videoItem, QPointF point, int* outMovingEdgePointIndex);
 
 	// Signals
 signals:
@@ -125,15 +125,15 @@ public:
 
 	// Selection
 	//
-	const std::vector<std::shared_ptr<VFrame30::VideoItem>>& selectedItems() const;
-	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
-	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::VideoItem>>& items);
-	void setSelectedItem(const std::shared_ptr<VFrame30::VideoItem>& item);
-	void addSelection(const std::shared_ptr<VFrame30::VideoItem>& item);
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selectedItems() const;
+	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
+	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemeItem>>& items);
+	void setSelectedItem(const std::shared_ptr<VFrame30::SchemeItem>& item);
+	void addSelection(const std::shared_ptr<VFrame30::SchemeItem>& item);
 
 	void clearSelection();
-	bool removeFromSelection(const std::shared_ptr<VFrame30::VideoItem>& item);
-	bool isItemSelected(const std::shared_ptr<VFrame30::VideoItem>& item);
+	bool removeFromSelection(const std::shared_ptr<VFrame30::SchemeItem>& item);
+	bool isItemSelected(const std::shared_ptr<VFrame30::SchemeItem>& item);
 
 	// Data
 	//
@@ -142,8 +142,8 @@ private:
 	MouseState m_mouseState;
 
 protected:
-	std::shared_ptr<VFrame30::VideoItem> m_newItem;
-	std::vector<std::shared_ptr<VFrame30::VideoItem>> m_selectedItems;
+	std::shared_ptr<VFrame30::SchemeItem> m_newItem;
+	std::vector<std::shared_ptr<VFrame30::SchemeItem>> m_selectedItems;
 
 	// Selection area variables
 	//
@@ -255,7 +255,7 @@ public:
 	QPointF snapToGrid(QPointF pt) const;
 
 protected:
-	void addItem(std::shared_ptr<VFrame30::VideoItem> newItem);
+	void addItem(std::shared_ptr<VFrame30::SchemeItem> newItem);
 
 	void setMouseCursor(QPoint mousePos);
 
@@ -305,7 +305,7 @@ public:
 
 	std::shared_ptr<VFrame30::SchemeLayer> activeLayer();
 
-	const std::vector<std::shared_ptr<VFrame30::VideoItem>>& selectedItems() const;
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selectedItems() const;
 
 	EditSchemeView* editSchemeView();
 	const EditSchemeView* editSchemeView() const;

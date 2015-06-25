@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/VideoItem.h"
+#include "../VFrame30/SchemeItem.h"
 
 class EditSchemeView;
 
@@ -50,21 +50,21 @@ namespace EditEngine
 		void resetModified();
 
 	public:
-		void runAddItem(std::list<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runAddItem(std::vector<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runAddItem(std::shared_ptr<VFrame30::VideoItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::vector<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
 
-		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runDeleteItem(std::shared_ptr<VFrame30::VideoItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runDeleteItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
 
-		void runSetPoints(const std::vector<std::vector<VFrame30::SchemePoint>>& points, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
-		void runSetPoints(const std::vector<VFrame30::SchemePoint>& points, const std::shared_ptr<VFrame30::VideoItem>& item);
+		void runSetPoints(const std::vector<std::vector<VFrame30::SchemePoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
+		void runSetPoints(const std::vector<VFrame30::SchemePoint>& points, const std::shared_ptr<VFrame30::SchemeItem>& item);
 
-		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items, bool snapToGrid);
-		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::VideoItem>& item, bool snapToGrid);
+		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, bool snapToGrid);
+		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemeItem>& item, bool snapToGrid);
 
-		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
-		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::VideoItem>& item);
+		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
+		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemeItem>& item);
 
 		void runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Scheme>& scheme);
 
