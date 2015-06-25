@@ -185,6 +185,8 @@ message FblElement
 	repeated FblElementSignal inputSignals = 11;
 	repeated FblElementSignal outputSignals = 12;
 	repeated FblElementParam params = 13;
+
+	optional wstring description = 14;
 }
 
 

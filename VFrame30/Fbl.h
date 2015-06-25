@@ -228,6 +228,9 @@ private:
 		QString caption() const;
 		void setCaption(const QString& caption);
 
+		QString description() const;
+		void setDescription(const QString& value);
+
 		unsigned int opcode() const;
 		void setOpcode(unsigned int value);
 
@@ -260,6 +263,7 @@ private:
 	private:
 		QString m_strID;
 		QString m_caption;
+		QString m_description;
 		unsigned int m_opcode;
 		bool m_hasRam;
 		bool m_requiredStart;

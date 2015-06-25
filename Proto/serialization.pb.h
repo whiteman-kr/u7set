@@ -1275,6 +1275,15 @@ class FblElement : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
       mutable_params();
 
+  // optional .Proto.wstring description = 14;
+  inline bool has_description() const;
+  inline void clear_description();
+  static const int kDescriptionFieldNumber = 14;
+  inline const ::Proto::wstring& description() const;
+  inline ::Proto::wstring* mutable_description();
+  inline ::Proto::wstring* release_description();
+  inline void set_allocated_description(::Proto::wstring* description);
+
   // @@protoc_insertion_point(class_scope:Proto.FblElement)
  private:
   inline void set_has_strid();
@@ -1287,6 +1296,8 @@ class FblElement : public ::google::protobuf::Message {
   inline void clear_has_hasram();
   inline void set_has_requiredstart();
   inline void clear_has_requiredstart();
+  inline void set_has_description();
+  inline void clear_has_description();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1298,9 +1309,10 @@ class FblElement : public ::google::protobuf::Message {
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > inputsignals_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > outputsignals_;
   ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
+  ::Proto::wstring* description_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6643,6 +6655,44 @@ FblElement::params() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
 FblElement::mutable_params() {
   return &params_;
+}
+
+// optional .Proto.wstring description = 14;
+inline bool FblElement::has_description() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void FblElement::set_has_description() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void FblElement::clear_has_description() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void FblElement::clear_description() {
+  if (description_ != NULL) description_->::Proto::wstring::Clear();
+  clear_has_description();
+}
+inline const ::Proto::wstring& FblElement::description() const {
+  return description_ != NULL ? *description_ : *default_instance_->description_;
+}
+inline ::Proto::wstring* FblElement::mutable_description() {
+  set_has_description();
+  if (description_ == NULL) description_ = new ::Proto::wstring;
+  return description_;
+}
+inline ::Proto::wstring* FblElement::release_description() {
+  clear_has_description();
+  ::Proto::wstring* temp = description_;
+  description_ = NULL;
+  return temp;
+}
+inline void FblElement::set_allocated_description(::Proto::wstring* description) {
+  delete description_;
+  description_ = description;
+  if (description) {
+    set_has_description();
+  } else {
+    clear_has_description();
+  }
 }
 
 // -------------------------------------------------------------------

@@ -653,6 +653,7 @@ namespace Afbl
 
 		m_strID = that.m_strID;
 		m_caption = that.m_caption;
+		m_description = that.m_description;
 		m_opcode = that.m_opcode;
 		m_hasRam = that.m_hasRam;
 		m_requiredStart = that.m_requiredStart;
@@ -730,6 +731,11 @@ namespace Afbl
 					if (QString::compare(xmlReader->name().toString(), "Caption", Qt::CaseInsensitive) == 0)
 					{
 						setCaption(xmlReader->readElementText());
+					}
+
+					if (QString::compare(xmlReader->name().toString(), "Description", Qt::CaseInsensitive) == 0)
+					{
+						setDescription(xmlReader->readElementText());
 					}
 
 					if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
@@ -892,6 +898,7 @@ namespace Afbl
 
 		xmlWriter->writeStartElement("Properties");
 		xmlWriter->writeTextElement("Caption", caption());
+		xmlWriter->writeTextElement("Description", description());
 		xmlWriter->writeTextElement("OpCode", QString::number(opcode()));
 		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
 		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
@@ -1114,6 +1121,16 @@ namespace Afbl
 	void AfbElement::setCaption(const QString& caption)
 	{
 		m_caption = caption;
+	}
+
+	QString AfbElement::description() const
+	{
+		return m_description;
+	}
+
+	void AfbElement::setDescription(const QString& value)
+	{
+		m_description = value;
 	}
 
 	// Opcode
