@@ -5,8 +5,8 @@
 #include "SchemeLayersDialog.h"
 #include "SchemeItemPropertiesDialog.h"
 #include "ChooseAfbDialog.h"
-#include "../VFrame30/VideoItemLine.h"
-#include "../VFrame30/VideoItemRect.h"
+#include "../VFrame30/SchemeItemLine.h"
+#include "../VFrame30/SchemeItemRect.h"
 #include "../VFrame30/VideoItemConnectionLine.h"
 #include "../VFrame30/VideoItemSignal.h"
 #include "../VFrame30/VideoItemFblElement.h"
@@ -1614,7 +1614,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addLineAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemLine>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemeItemLine>(scheme()->unit()));
 			});
 
 	m_addConnectionLineAction = new QAction(tr("Connection Line"), this);
@@ -1630,7 +1630,7 @@ void EditSchemeWidget::createActions()
 	connect(m_addRectAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::VideoItemRect>(scheme()->unit()));
+				addItem(std::make_shared<VFrame30::SchemeItemRect>(scheme()->unit()));
 			});
 
 	m_addSeparatorAction0 = new QAction(this);

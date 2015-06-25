@@ -53,8 +53,8 @@ class SchemeItem;
 class PosRectImpl;
 class PosLineImpl;
 class PosConnectionImpl;
-class VideoItemRect;
-class VideoItemLine;
+class SchemeItemRect;
+class SchemeItemLine;
 class VideoItemConnectionLine;
 class FblConnectionPoint;
 class FblItem;
@@ -2228,23 +2228,23 @@ class SchemeItem : public ::google::protobuf::Message {
   inline ::Proto::FblItemLine* release_fblitemline();
   inline void set_allocated_fblitemline(::Proto::FblItemLine* fblitemline);
 
-  // optional .Proto.VideoItemRect Rect = 116;
+  // optional .Proto.SchemeItemRect Rect = 116;
   inline bool has_rect() const;
   inline void clear_rect();
   static const int kRectFieldNumber = 116;
-  inline const ::Proto::VideoItemRect& rect() const;
-  inline ::Proto::VideoItemRect* mutable_rect();
-  inline ::Proto::VideoItemRect* release_rect();
-  inline void set_allocated_rect(::Proto::VideoItemRect* rect);
+  inline const ::Proto::SchemeItemRect& rect() const;
+  inline ::Proto::SchemeItemRect* mutable_rect();
+  inline ::Proto::SchemeItemRect* release_rect();
+  inline void set_allocated_rect(::Proto::SchemeItemRect* rect);
 
-  // optional .Proto.VideoItemLine Line = 117;
+  // optional .Proto.SchemeItemLine Line = 117;
   inline bool has_line() const;
   inline void clear_line();
   static const int kLineFieldNumber = 117;
-  inline const ::Proto::VideoItemLine& line() const;
-  inline ::Proto::VideoItemLine* mutable_line();
-  inline ::Proto::VideoItemLine* release_line();
-  inline void set_allocated_line(::Proto::VideoItemLine* line);
+  inline const ::Proto::SchemeItemLine& line() const;
+  inline ::Proto::SchemeItemLine* mutable_line();
+  inline ::Proto::SchemeItemLine* release_line();
+  inline void set_allocated_line(::Proto::SchemeItemLine* line);
 
   // optional .Proto.VideoItemConnectionLine ConnectionLine = 118;
   inline bool has_connectionline() const;
@@ -2368,8 +2368,8 @@ class SchemeItem : public ::google::protobuf::Message {
   ::Proto::FblItem* fblitem_;
   ::Proto::FblItemRect* fblitemrect_;
   ::Proto::FblItemLine* fblitemline_;
-  ::Proto::VideoItemRect* rect_;
-  ::Proto::VideoItemLine* line_;
+  ::Proto::SchemeItemRect* rect_;
+  ::Proto::SchemeItemLine* line_;
   ::Proto::VideoItemConnectionLine* connectionline_;
   ::Proto::VideoItemSignal* signal_;
   ::Proto::VideoItemInputSignal* inputsignal_;
@@ -2699,14 +2699,14 @@ class PosConnectionImpl : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class VideoItemRect : public ::google::protobuf::Message {
+class SchemeItemRect : public ::google::protobuf::Message {
  public:
-  VideoItemRect();
-  virtual ~VideoItemRect();
+  SchemeItemRect();
+  virtual ~SchemeItemRect();
 
-  VideoItemRect(const VideoItemRect& from);
+  SchemeItemRect(const SchemeItemRect& from);
 
-  inline VideoItemRect& operator=(const VideoItemRect& from) {
+  inline SchemeItemRect& operator=(const SchemeItemRect& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2720,17 +2720,17 @@ class VideoItemRect : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemRect& default_instance();
+  static const SchemeItemRect& default_instance();
 
-  void Swap(VideoItemRect* other);
+  void Swap(SchemeItemRect* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemRect* New() const;
+  SchemeItemRect* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemRect& from);
-  void MergeFrom(const VideoItemRect& from);
+  void CopyFrom(const SchemeItemRect& from);
+  void MergeFrom(const SchemeItemRect& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2813,7 +2813,7 @@ class VideoItemRect : public ::google::protobuf::Message {
   inline bool drawrect() const;
   inline void set_drawrect(bool value);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemRect)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemRect)
  private:
   inline void set_has_weight();
   inline void clear_has_weight();
@@ -2851,18 +2851,18 @@ class VideoItemRect : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemRect* default_instance_;
+  static SchemeItemRect* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class VideoItemLine : public ::google::protobuf::Message {
+class SchemeItemLine : public ::google::protobuf::Message {
  public:
-  VideoItemLine();
-  virtual ~VideoItemLine();
+  SchemeItemLine();
+  virtual ~SchemeItemLine();
 
-  VideoItemLine(const VideoItemLine& from);
+  SchemeItemLine(const SchemeItemLine& from);
 
-  inline VideoItemLine& operator=(const VideoItemLine& from) {
+  inline SchemeItemLine& operator=(const SchemeItemLine& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2876,17 +2876,17 @@ class VideoItemLine : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemLine& default_instance();
+  static const SchemeItemLine& default_instance();
 
-  void Swap(VideoItemLine* other);
+  void Swap(SchemeItemLine* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemLine* New() const;
+  SchemeItemLine* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemLine& from);
-  void MergeFrom(const VideoItemLine& from);
+  void CopyFrom(const SchemeItemLine& from);
+  void MergeFrom(const SchemeItemLine& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2923,7 +2923,7 @@ class VideoItemLine : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 linecolor() const;
   inline void set_linecolor(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemLine)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemLine)
  private:
   inline void set_has_weight();
   inline void clear_has_weight();
@@ -2943,7 +2943,7 @@ class VideoItemLine : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemLine* default_instance_;
+  static SchemeItemLine* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -8150,7 +8150,7 @@ inline void SchemeItem::set_allocated_fblitemline(::Proto::FblItemLine* fbliteml
   }
 }
 
-// optional .Proto.VideoItemRect Rect = 116;
+// optional .Proto.SchemeItemRect Rect = 116;
 inline bool SchemeItem::has_rect() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
@@ -8161,24 +8161,24 @@ inline void SchemeItem::clear_has_rect() {
   _has_bits_[0] &= ~0x00001000u;
 }
 inline void SchemeItem::clear_rect() {
-  if (rect_ != NULL) rect_->::Proto::VideoItemRect::Clear();
+  if (rect_ != NULL) rect_->::Proto::SchemeItemRect::Clear();
   clear_has_rect();
 }
-inline const ::Proto::VideoItemRect& SchemeItem::rect() const {
+inline const ::Proto::SchemeItemRect& SchemeItem::rect() const {
   return rect_ != NULL ? *rect_ : *default_instance_->rect_;
 }
-inline ::Proto::VideoItemRect* SchemeItem::mutable_rect() {
+inline ::Proto::SchemeItemRect* SchemeItem::mutable_rect() {
   set_has_rect();
-  if (rect_ == NULL) rect_ = new ::Proto::VideoItemRect;
+  if (rect_ == NULL) rect_ = new ::Proto::SchemeItemRect;
   return rect_;
 }
-inline ::Proto::VideoItemRect* SchemeItem::release_rect() {
+inline ::Proto::SchemeItemRect* SchemeItem::release_rect() {
   clear_has_rect();
-  ::Proto::VideoItemRect* temp = rect_;
+  ::Proto::SchemeItemRect* temp = rect_;
   rect_ = NULL;
   return temp;
 }
-inline void SchemeItem::set_allocated_rect(::Proto::VideoItemRect* rect) {
+inline void SchemeItem::set_allocated_rect(::Proto::SchemeItemRect* rect) {
   delete rect_;
   rect_ = rect;
   if (rect) {
@@ -8188,7 +8188,7 @@ inline void SchemeItem::set_allocated_rect(::Proto::VideoItemRect* rect) {
   }
 }
 
-// optional .Proto.VideoItemLine Line = 117;
+// optional .Proto.SchemeItemLine Line = 117;
 inline bool SchemeItem::has_line() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
@@ -8199,24 +8199,24 @@ inline void SchemeItem::clear_has_line() {
   _has_bits_[0] &= ~0x00002000u;
 }
 inline void SchemeItem::clear_line() {
-  if (line_ != NULL) line_->::Proto::VideoItemLine::Clear();
+  if (line_ != NULL) line_->::Proto::SchemeItemLine::Clear();
   clear_has_line();
 }
-inline const ::Proto::VideoItemLine& SchemeItem::line() const {
+inline const ::Proto::SchemeItemLine& SchemeItem::line() const {
   return line_ != NULL ? *line_ : *default_instance_->line_;
 }
-inline ::Proto::VideoItemLine* SchemeItem::mutable_line() {
+inline ::Proto::SchemeItemLine* SchemeItem::mutable_line() {
   set_has_line();
-  if (line_ == NULL) line_ = new ::Proto::VideoItemLine;
+  if (line_ == NULL) line_ = new ::Proto::SchemeItemLine;
   return line_;
 }
-inline ::Proto::VideoItemLine* SchemeItem::release_line() {
+inline ::Proto::SchemeItemLine* SchemeItem::release_line() {
   clear_has_line();
-  ::Proto::VideoItemLine* temp = line_;
+  ::Proto::SchemeItemLine* temp = line_;
   line_ = NULL;
   return temp;
 }
-inline void SchemeItem::set_allocated_line(::Proto::VideoItemLine* line) {
+inline void SchemeItem::set_allocated_line(::Proto::SchemeItemLine* line) {
   delete line_;
   line_ = line;
   if (line) {
@@ -8707,103 +8707,103 @@ PosConnectionImpl::mutable_points() {
 
 // -------------------------------------------------------------------
 
-// VideoItemRect
+// SchemeItemRect
 
 // required double weight = 1;
-inline bool VideoItemRect::has_weight() const {
+inline bool SchemeItemRect::has_weight() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItemRect::set_has_weight() {
+inline void SchemeItemRect::set_has_weight() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItemRect::clear_has_weight() {
+inline void SchemeItemRect::clear_has_weight() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItemRect::clear_weight() {
+inline void SchemeItemRect::clear_weight() {
   weight_ = 0;
   clear_has_weight();
 }
-inline double VideoItemRect::weight() const {
+inline double SchemeItemRect::weight() const {
   return weight_;
 }
-inline void VideoItemRect::set_weight(double value) {
+inline void SchemeItemRect::set_weight(double value) {
   set_has_weight();
   weight_ = value;
 }
 
 // required uint32 lineColor = 2;
-inline bool VideoItemRect::has_linecolor() const {
+inline bool SchemeItemRect::has_linecolor() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItemRect::set_has_linecolor() {
+inline void SchemeItemRect::set_has_linecolor() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItemRect::clear_has_linecolor() {
+inline void SchemeItemRect::clear_has_linecolor() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItemRect::clear_linecolor() {
+inline void SchemeItemRect::clear_linecolor() {
   linecolor_ = 0u;
   clear_has_linecolor();
 }
-inline ::google::protobuf::uint32 VideoItemRect::linecolor() const {
+inline ::google::protobuf::uint32 SchemeItemRect::linecolor() const {
   return linecolor_;
 }
-inline void VideoItemRect::set_linecolor(::google::protobuf::uint32 value) {
+inline void SchemeItemRect::set_linecolor(::google::protobuf::uint32 value) {
   set_has_linecolor();
   linecolor_ = value;
 }
 
 // required uint32 fillColor = 3;
-inline bool VideoItemRect::has_fillcolor() const {
+inline bool SchemeItemRect::has_fillcolor() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void VideoItemRect::set_has_fillcolor() {
+inline void SchemeItemRect::set_has_fillcolor() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void VideoItemRect::clear_has_fillcolor() {
+inline void SchemeItemRect::clear_has_fillcolor() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void VideoItemRect::clear_fillcolor() {
+inline void SchemeItemRect::clear_fillcolor() {
   fillcolor_ = 0u;
   clear_has_fillcolor();
 }
-inline ::google::protobuf::uint32 VideoItemRect::fillcolor() const {
+inline ::google::protobuf::uint32 SchemeItemRect::fillcolor() const {
   return fillcolor_;
 }
-inline void VideoItemRect::set_fillcolor(::google::protobuf::uint32 value) {
+inline void SchemeItemRect::set_fillcolor(::google::protobuf::uint32 value) {
   set_has_fillcolor();
   fillcolor_ = value;
 }
 
 // required .Proto.wstring text = 4;
-inline bool VideoItemRect::has_text() const {
+inline bool SchemeItemRect::has_text() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void VideoItemRect::set_has_text() {
+inline void SchemeItemRect::set_has_text() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void VideoItemRect::clear_has_text() {
+inline void SchemeItemRect::clear_has_text() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void VideoItemRect::clear_text() {
+inline void SchemeItemRect::clear_text() {
   if (text_ != NULL) text_->::Proto::wstring::Clear();
   clear_has_text();
 }
-inline const ::Proto::wstring& VideoItemRect::text() const {
+inline const ::Proto::wstring& SchemeItemRect::text() const {
   return text_ != NULL ? *text_ : *default_instance_->text_;
 }
-inline ::Proto::wstring* VideoItemRect::mutable_text() {
+inline ::Proto::wstring* SchemeItemRect::mutable_text() {
   set_has_text();
   if (text_ == NULL) text_ = new ::Proto::wstring;
   return text_;
 }
-inline ::Proto::wstring* VideoItemRect::release_text() {
+inline ::Proto::wstring* SchemeItemRect::release_text() {
   clear_has_text();
   ::Proto::wstring* temp = text_;
   text_ = NULL;
   return temp;
 }
-inline void VideoItemRect::set_allocated_text(::Proto::wstring* text) {
+inline void SchemeItemRect::set_allocated_text(::Proto::wstring* text) {
   delete text_;
   text_ = text;
   if (text) {
@@ -8814,56 +8814,56 @@ inline void VideoItemRect::set_allocated_text(::Proto::wstring* text) {
 }
 
 // required uint32 textColor = 5;
-inline bool VideoItemRect::has_textcolor() const {
+inline bool SchemeItemRect::has_textcolor() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void VideoItemRect::set_has_textcolor() {
+inline void SchemeItemRect::set_has_textcolor() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void VideoItemRect::clear_has_textcolor() {
+inline void SchemeItemRect::clear_has_textcolor() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void VideoItemRect::clear_textcolor() {
+inline void SchemeItemRect::clear_textcolor() {
   textcolor_ = 0u;
   clear_has_textcolor();
 }
-inline ::google::protobuf::uint32 VideoItemRect::textcolor() const {
+inline ::google::protobuf::uint32 SchemeItemRect::textcolor() const {
   return textcolor_;
 }
-inline void VideoItemRect::set_textcolor(::google::protobuf::uint32 value) {
+inline void SchemeItemRect::set_textcolor(::google::protobuf::uint32 value) {
   set_has_textcolor();
   textcolor_ = value;
 }
 
 // required .Proto.FontParam font = 6;
-inline bool VideoItemRect::has_font() const {
+inline bool SchemeItemRect::has_font() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void VideoItemRect::set_has_font() {
+inline void SchemeItemRect::set_has_font() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void VideoItemRect::clear_has_font() {
+inline void SchemeItemRect::clear_has_font() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void VideoItemRect::clear_font() {
+inline void SchemeItemRect::clear_font() {
   if (font_ != NULL) font_->::Proto::FontParam::Clear();
   clear_has_font();
 }
-inline const ::Proto::FontParam& VideoItemRect::font() const {
+inline const ::Proto::FontParam& SchemeItemRect::font() const {
   return font_ != NULL ? *font_ : *default_instance_->font_;
 }
-inline ::Proto::FontParam* VideoItemRect::mutable_font() {
+inline ::Proto::FontParam* SchemeItemRect::mutable_font() {
   set_has_font();
   if (font_ == NULL) font_ = new ::Proto::FontParam;
   return font_;
 }
-inline ::Proto::FontParam* VideoItemRect::release_font() {
+inline ::Proto::FontParam* SchemeItemRect::release_font() {
   clear_has_font();
   ::Proto::FontParam* temp = font_;
   font_ = NULL;
   return temp;
 }
-inline void VideoItemRect::set_allocated_font(::Proto::FontParam* font) {
+inline void SchemeItemRect::set_allocated_font(::Proto::FontParam* font) {
   delete font_;
   font_ = font;
   if (font) {
@@ -8874,93 +8874,93 @@ inline void VideoItemRect::set_allocated_font(::Proto::FontParam* font) {
 }
 
 // required bool fill = 7;
-inline bool VideoItemRect::has_fill() const {
+inline bool SchemeItemRect::has_fill() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void VideoItemRect::set_has_fill() {
+inline void SchemeItemRect::set_has_fill() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void VideoItemRect::clear_has_fill() {
+inline void SchemeItemRect::clear_has_fill() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void VideoItemRect::clear_fill() {
+inline void SchemeItemRect::clear_fill() {
   fill_ = false;
   clear_has_fill();
 }
-inline bool VideoItemRect::fill() const {
+inline bool SchemeItemRect::fill() const {
   return fill_;
 }
-inline void VideoItemRect::set_fill(bool value) {
+inline void SchemeItemRect::set_fill(bool value) {
   set_has_fill();
   fill_ = value;
 }
 
 // optional bool drawrect = 8 [default = true];
-inline bool VideoItemRect::has_drawrect() const {
+inline bool SchemeItemRect::has_drawrect() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void VideoItemRect::set_has_drawrect() {
+inline void SchemeItemRect::set_has_drawrect() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void VideoItemRect::clear_has_drawrect() {
+inline void SchemeItemRect::clear_has_drawrect() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void VideoItemRect::clear_drawrect() {
+inline void SchemeItemRect::clear_drawrect() {
   drawrect_ = true;
   clear_has_drawrect();
 }
-inline bool VideoItemRect::drawrect() const {
+inline bool SchemeItemRect::drawrect() const {
   return drawrect_;
 }
-inline void VideoItemRect::set_drawrect(bool value) {
+inline void SchemeItemRect::set_drawrect(bool value) {
   set_has_drawrect();
   drawrect_ = value;
 }
 
 // -------------------------------------------------------------------
 
-// VideoItemLine
+// SchemeItemLine
 
 // required double weight = 1;
-inline bool VideoItemLine::has_weight() const {
+inline bool SchemeItemLine::has_weight() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItemLine::set_has_weight() {
+inline void SchemeItemLine::set_has_weight() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItemLine::clear_has_weight() {
+inline void SchemeItemLine::clear_has_weight() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItemLine::clear_weight() {
+inline void SchemeItemLine::clear_weight() {
   weight_ = 0;
   clear_has_weight();
 }
-inline double VideoItemLine::weight() const {
+inline double SchemeItemLine::weight() const {
   return weight_;
 }
-inline void VideoItemLine::set_weight(double value) {
+inline void SchemeItemLine::set_weight(double value) {
   set_has_weight();
   weight_ = value;
 }
 
 // required uint32 lineColor = 2;
-inline bool VideoItemLine::has_linecolor() const {
+inline bool SchemeItemLine::has_linecolor() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItemLine::set_has_linecolor() {
+inline void SchemeItemLine::set_has_linecolor() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItemLine::clear_has_linecolor() {
+inline void SchemeItemLine::clear_has_linecolor() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItemLine::clear_linecolor() {
+inline void SchemeItemLine::clear_linecolor() {
   linecolor_ = 0u;
   clear_has_linecolor();
 }
-inline ::google::protobuf::uint32 VideoItemLine::linecolor() const {
+inline ::google::protobuf::uint32 SchemeItemLine::linecolor() const {
   return linecolor_;
 }
-inline void VideoItemLine::set_linecolor(::google::protobuf::uint32 value) {
+inline void SchemeItemLine::set_linecolor(::google::protobuf::uint32 value) {
   set_has_linecolor();
   linecolor_ = value;
 }

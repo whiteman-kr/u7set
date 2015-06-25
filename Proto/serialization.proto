@@ -339,8 +339,8 @@ message SchemeItem
 	
 	// Наслдедуемые от PosRectImpl, PosLineImpl, PosConnectionImpl
 	//
-	optional VideoItemRect Rect = 116;							// +PosRectImpl
-	optional VideoItemLine Line = 117;							// +PosLineImpl
+	optional SchemeItemRect Rect = 116;							// +PosRectImpl
+	optional SchemeItemLine Line = 117;							// +PosLineImpl
 	optional VideoItemConnectionLine ConnectionLine = 118;		// +PosConnectionImpl
 	
 	optional VideoItemSignal Signal = 124;						// +FblItemRect
@@ -393,10 +393,10 @@ message PosConnectionImpl
 
 //
 //
-// VideoItemRect
+// SchemeItemRect
 //
 //
-message VideoItemRect
+message SchemeItemRect
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
@@ -410,10 +410,10 @@ message VideoItemRect
 
 //
 //
-// VideoItemLine
+// SchemeItemLine
 //
 //
-message VideoItemLine
+message SchemeItemLine
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;

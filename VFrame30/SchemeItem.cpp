@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "SchemeItem.h"
-#include "VideoItemRect.h"
+#include "SchemeItemRect.h"
 
 namespace VFrame30
 {

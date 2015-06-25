@@ -6,8 +6,8 @@
 #include "WorkflowScheme.h"
 #include "WiringScheme.h"
 #include "SchemeLayer.h"
-#include "VideoItemLine.h"
-#include "VideoItemRect.h"
+#include "SchemeItemLine.h"
+#include "SchemeItemRect.h"
 #include "VideoItemConnectionLine.h"
 #include "FblItemLine.h"
 #include "FblItemRect.h"
@@ -41,8 +41,8 @@ namespace VFrame30
 
 		// Registering VideoItems
 		//
-		SchemeItemFactory.Register<VideoItemLine>();
-		SchemeItemFactory.Register<VideoItemRect>();
+		SchemeItemFactory.Register<SchemeItemLine>();
+		SchemeItemFactory.Register<SchemeItemRect>();
 		SchemeItemFactory.Register<VideoItemConnectionLine>();
 		SchemeItemFactory.Register<FblItemLine>();
 		SchemeItemFactory.Register<FblItemRect>();

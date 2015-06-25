@@ -231,17 +231,17 @@ namespace VFrame30
 		return;
 	}
 
-	void Scheme::RunClickScript(const std::shared_ptr<SchemeItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
+	void Scheme::RunClickScript(const std::shared_ptr<SchemeItem>& schemeItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
 	{
-		if (pVideoFrameWidgetAgent == nullptr || videoItem->acceptClick() == false || videoItem->clickScript().isEmpty() == true)
+		if (pVideoFrameWidgetAgent == nullptr || schemeItem->acceptClick() == false || schemeItem->clickScript().isEmpty() == true)
 		{
 			assert(pVideoFrameWidgetAgent != nullptr);
 			return;
 		}
 
-		// Extract script text from VideoItem
+		// Extract script text from SchemeItem
 		//
-		QString script = videoItem->clickScript();
+		QString script = schemeItem->clickScript();
 		QScriptEngine scriptEngine;
 		QScriptValue globalValue = scriptEngine.globalObject();
 

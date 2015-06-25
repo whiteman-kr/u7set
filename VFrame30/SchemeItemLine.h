@@ -4,21 +4,21 @@
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT VideoItemLine : public PosLineImpl
+	class VFRAME30LIBSHARED_EXPORT SchemeItemLine : public PosLineImpl
 	{
 		Q_OBJECT
 
 		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<SchemeItem>::DerivedType<VideoItemLine>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemLine>;
 #endif
 
 	private:
-		VideoItemLine(void);
+		SchemeItemLine(void);
 	public:
-		explicit VideoItemLine(SchemeUnit unit);
-		virtual ~VideoItemLine(void);
+		explicit SchemeItemLine(SchemeUnit unit);
+		virtual ~SchemeItemLine(void);
 
 		// Serialization
 		//
