@@ -21,8 +21,8 @@ namespace EditEngine
 				QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemeView* videoFrameView) override;
-		virtual void unExecuteCommand(EditSchemeView* videoFrameView) override;
+		virtual void executeCommand(EditSchemeView* schemeView) override;
+		virtual void unExecuteCommand(EditSchemeView* schemeView) override;
 
 		//--
 		//

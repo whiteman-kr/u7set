@@ -90,7 +90,7 @@ namespace VFrame30
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
-		// Реализация интерефейса IVideoItemPosRect
+		// IPosRect
 		//
 	private:
 		double m_leftDocPt;

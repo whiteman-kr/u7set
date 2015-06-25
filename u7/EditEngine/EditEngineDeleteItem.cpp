@@ -1,5 +1,4 @@
 #include "EditEngineDeleteItem.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
 
 namespace EditEngine
@@ -26,7 +25,7 @@ namespace EditEngine
 		return;
 	}
 
-	void DeleteItemCommand::executeCommand(EditSchemeView* videoFrameView)
+	void DeleteItemCommand::executeCommand(EditSchemeView* schemeView)
 	{
 		std::for_each(m_items.begin(), m_items.end(),
 			[this](std::shared_ptr<VFrame30::SchemeItem> item)
@@ -35,15 +34,15 @@ namespace EditEngine
 			}
 			);
 
-		videoFrameView->clearSelection();
+		schemeView->clearSelection();
 		return;
 	}
 
-	void DeleteItemCommand::unExecuteCommand(EditSchemeView* videoFrameView)
+	void DeleteItemCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
 		m_layer->Items.assign(m_prevOrder.begin(), m_prevOrder.end());
 
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 		return;
 	}
 }

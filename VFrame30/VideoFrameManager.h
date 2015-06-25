@@ -3,7 +3,7 @@
 namespace VFrame30
 {
 	class Scheme;
-
+/*
 	class VFRAME30LIBSHARED_EXPORT VideoFrameManager
 	{
 	public:
@@ -33,7 +33,7 @@ namespace VFrame30
 
 		std::map<QString, std::shared_ptr<Scheme>> videoFrames;
 	};
-
+*/
 }
 
 

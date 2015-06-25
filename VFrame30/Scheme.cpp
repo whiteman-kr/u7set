@@ -3,7 +3,6 @@
 #include "FblItem.h"
 #include "VideoItemLink.h"
 #include "HorzVertLinks.h"
-#include "VideoFrameWidgetAgent.h"
 #include "../include/ProtoSerialization.h"
 
 namespace VFrame30
@@ -216,7 +215,7 @@ namespace VFrame30
 
 				if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
-					RunClickScript(item, pVideoFrameWidgetAgent);
+					RunClickScript(item/*, pVideoFrameWidgetAgent*/);
 					stop = true;
 					break;
 				}
@@ -231,9 +230,12 @@ namespace VFrame30
 		return;
 	}
 
-	void Scheme::RunClickScript(const std::shared_ptr<SchemeItem>& schemeItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
+	void Scheme::RunClickScript(const std::shared_ptr<SchemeItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
 	{
-		if (pVideoFrameWidgetAgent == nullptr || schemeItem->acceptClick() == false || schemeItem->clickScript().isEmpty() == true)
+		assert(false);
+		Q_UNUSED(schemeItem);
+
+/*		if (pVideoFrameWidgetAgent == nullptr || schemeItem->acceptClick() == false || schemeItem->clickScript().isEmpty() == true)
 		{
 			assert(pVideoFrameWidgetAgent != nullptr);
 			return;
@@ -261,7 +263,7 @@ namespace VFrame30
 		//
 #ifdef _DEBUG
 		qDebug() << strID() << "RunClickScript result:" << result.toString();
-#endif
+#endif*/
 		return;
 	}
 

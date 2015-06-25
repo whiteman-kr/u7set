@@ -317,7 +317,7 @@ namespace VFrame30
 		return result;
 	}
 	
-	// Реализация интерефейса IVideoItemPosLine
+	// IPosLine Implementation
 	//
 	const std::list<SchemePoint>& PosConnectionImpl::GetPointList() const
 	{

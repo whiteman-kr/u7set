@@ -1,5 +1,4 @@
 #include "EditEngineMoveItem.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
 
 namespace EditEngine
@@ -25,9 +24,9 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::executeCommand(EditSchemeView* videoFrameView)
+	void MoveItemCommand::executeCommand(EditSchemeView* schemeView)
 	{
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 
 		for (std::shared_ptr<VFrame30::SchemeItem> item : m_items)
 		{
@@ -35,16 +34,16 @@ namespace EditEngine
 
 			if (m_snapToGrid)
 			{
-				item->snapToGrid(videoFrameView->scheme()->gridSize());
+				item->snapToGrid(schemeView->scheme()->gridSize());
 			}
 		}
 
 		return;
 	}
 
-	void MoveItemCommand::unExecuteCommand(EditSchemeView* videoFrameView)
+	void MoveItemCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 
 		for (std::shared_ptr<VFrame30::SchemeItem> item : m_items)
 		{
@@ -52,7 +51,7 @@ namespace EditEngine
 
 			if (m_snapToGrid)
 			{
-				item->snapToGrid(videoFrameView->scheme()->gridSize());
+				item->snapToGrid(schemeView->scheme()->gridSize());
 			}
 		}
 

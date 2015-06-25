@@ -98,10 +98,6 @@ HEADERS += VFrame30Lib_global.h \
     VFrame30Library.h \
     HorzVertLinks.h \
 	../include/TypesAndEnums.h \
-    VideoFrameManager.h \
-    VideoFrameWidget.h \
-    VideoFrameWidgetAgent.h \
-    VideoFrameAgent.h \
     FrameHistoryItem.h \
 	Configuration.h \
 	DebugInstCounter.h \
@@ -143,10 +139,6 @@ SOURCES += \
     Stable.cpp \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
-    VideoFrameManager.cpp \
-    VideoFrameWidget.cpp \
-    VideoFrameWidgetAgent.cpp \
-    VideoFrameAgent.cpp \
     FrameHistoryItem.cpp \
 	Configuration.cpp \
     ../lib/StreamedData.cpp \

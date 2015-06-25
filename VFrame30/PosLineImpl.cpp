@@ -285,7 +285,7 @@ namespace VFrame30
 		return result;
 	}
 
-	// IVideoItemPosLine implementation
+	// IPosLine
 	//
 	double PosLineImpl::startXDocPt() const
 	{

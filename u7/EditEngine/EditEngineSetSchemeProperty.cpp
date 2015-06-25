@@ -1,5 +1,4 @@
 #include "EditEngineSetSchemeProperty.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
 
 namespace EditEngine
@@ -29,13 +28,13 @@ namespace EditEngine
 		return;
 	}
 
-	void SetSchemePropertyCommand::executeCommand(EditSchemeView* /*videoFrameView*/)
+	void SetSchemePropertyCommand::executeCommand(EditSchemeView*)
 	{
 		m_scheme->setProperty(m_propertyName.toStdString().c_str(), m_newValue);
 		return;
 	}
 
-	void SetSchemePropertyCommand::unExecuteCommand(EditSchemeView* /*videoFrameView*/)
+	void SetSchemePropertyCommand::unExecuteCommand(EditSchemeView*)
 	{
 		m_scheme->setProperty(m_propertyName.toStdString().c_str(), m_oldValue);
 		return;

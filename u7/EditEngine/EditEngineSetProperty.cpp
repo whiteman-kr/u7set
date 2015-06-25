@@ -1,5 +1,4 @@
 #include "EditEngineSetProperty.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
 #include "../../VFrame30/VideoItemFblElement.h"
 
@@ -41,7 +40,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPropertyCommand::executeCommand(EditSchemeView* videoFrameView)
+	void SetPropertyCommand::executeCommand(EditSchemeView* schemeView)
 	{
 		std::list<std::shared_ptr<VFrame30::SchemeItem>> sel;
 
@@ -80,11 +79,11 @@ namespace EditEngine
 			r.item->setProperty(r.propertyName.toStdString().c_str(), r.newValue);
 		}
 
-		videoFrameView->setSelectedItems(sel);
+		schemeView->setSelectedItems(sel);
 		return;
 	}
 
-	void SetPropertyCommand::unExecuteCommand(EditSchemeView* videoFrameView)
+	void SetPropertyCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
 		std::list<std::shared_ptr<VFrame30::SchemeItem>> sel;
 
@@ -126,7 +125,7 @@ namespace EditEngine
 			r.item->setProperty(r.propertyName.toStdString().c_str(), r.oldValue);
 		}
 
-		videoFrameView->setSelectedItems(sel);
+		schemeView->setSelectedItems(sel);
 		return;
 	}
 

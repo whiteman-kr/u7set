@@ -79,7 +79,7 @@ namespace VFrame30
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
-		// IVideoItemPosLine implementation
+		// IPosLine implementation
 		//
 	private:
 		double m_startXDocPt;
@@ -87,7 +87,7 @@ namespace VFrame30
 		double m_endXDocPt;
 		double m_endYDocPt;
 
-		// IVideoItemPosLine implementation
+		// IPosLine implementation
 		//
 	public:
 		virtual double startXDocPt() const override;

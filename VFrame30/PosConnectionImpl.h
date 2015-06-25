@@ -81,7 +81,7 @@ namespace VFrame30
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
-		// Реализация интерефейса IVideoItemPosLine
+		// IPosLine
 		//
 	private:
 		std::list<SchemePoint> points;

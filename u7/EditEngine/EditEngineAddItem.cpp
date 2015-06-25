@@ -1,5 +1,4 @@
 #include "EditEngineAddItem.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
 
 namespace EditEngine
@@ -19,14 +18,14 @@ namespace EditEngine
 		return;
 	}
 
-	void AddItemCommand::executeCommand(EditSchemeView* videoFrameView)
+	void AddItemCommand::executeCommand(EditSchemeView* schemeView)
 	{
 		m_layer->Items.insert(m_layer->Items.end(), m_items.begin(), m_items.end());
 
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 	}
 
-	void AddItemCommand::unExecuteCommand(EditSchemeView* videoFrameView)
+	void AddItemCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
 		for (auto si = m_items.begin(); si != m_items.end(); ++si)
 		{
@@ -46,6 +45,6 @@ namespace EditEngine
 			}
 		}
 
-		videoFrameView->setSelectedItems(m_selectedItems);
+		schemeView->setSelectedItems(m_selectedItems);
 	}
 }
