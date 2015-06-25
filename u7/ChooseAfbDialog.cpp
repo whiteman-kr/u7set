@@ -5,15 +5,15 @@
 int ChooseAfbDialog::m_lastSelectedIndex = -1;
 Qt::SortOrder ChooseAfbDialog::m_lastSortOrder = Qt::SortOrder::AscendingOrder;
 
-ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElement> >& elements, QWidget *parent) :
+ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElement>>& elements, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::ChooseAfbDialog)
 {
 	ui->setupUi(this);
 
-	for (auto& e : elements)
+	for (std::shared_ptr<Afbl::AfbElement> e : elements)
 	{
-		this->elements.push_back(e);
+		m_elements.push_back(e);
 	}
 
 	QStringList columns;
@@ -26,7 +26,7 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElem
 	//
 	int index = 0;
 
-	for (std::shared_ptr<Afbl::AfbElement>& e : this->elements)
+	for (std::shared_ptr<Afbl::AfbElement> e : m_elements)
 	{
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		item->setText(0, e->caption());
@@ -55,6 +55,7 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElem
 	ui->m_afbTree->sortItems(0, m_lastSortOrder);
 	ui->m_afbTree->setSortingEnabled(true);
 
+	return;
 }
 
 ChooseAfbDialog::~ChooseAfbDialog()
@@ -69,7 +70,7 @@ int ChooseAfbDialog::index()
 
 int ChooseAfbDialog::getSelectedIndex()
 {
-	QList <QTreeWidgetItem*> selectedItems = ui->m_afbTree->selectedItems();
+	QList<QTreeWidgetItem*> selectedItems = ui->m_afbTree->selectedItems();
 	if (selectedItems.size() == 0 || selectedItems.size() > 1)
 	{
 		return -1;
@@ -92,13 +93,15 @@ void ChooseAfbDialog::on_btnOk_clicked()
 		return;
 	}
 
-	if (m_lastSelectedIndex < 0 || m_lastSelectedIndex >= elements.size())
+	if (m_lastSelectedIndex < 0 || static_cast<size_t>(m_lastSelectedIndex) >= m_elements.size())
 	{
 		assert(false);
 		return;
 	}
 
 	accept();
+
+	return;
 }
 
 void ChooseAfbDialog::reject()
@@ -137,13 +140,13 @@ void ChooseAfbDialog::on_m_afbTree_itemSelectionChanged()
 	}
 	else
 	{
-		if (selectedIndex < 0 || selectedIndex >= elements.size())
+		if (selectedIndex < 0 || static_cast<size_t>(selectedIndex) >= m_elements.size())
 		{
 			assert(false);
 			return;
 		}
 
-		std::shared_ptr<Afbl::AfbElement> e = elements[selectedIndex];
+		std::shared_ptr<Afbl::AfbElement> e = m_elements[selectedIndex];
 
 		ui->labelCaption->setText(e->caption());
 		ui->labelDescription->setPlainText(e->description());
@@ -154,7 +157,7 @@ void ChooseAfbDialog::on_m_afbTree_itemSelectionChanged()
 	}
 }
 
-void ChooseAfbDialog::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem *item, int column)
+void ChooseAfbDialog::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem* item, int column)
 {
 	Q_UNUSED(item);
 	Q_UNUSED(column);

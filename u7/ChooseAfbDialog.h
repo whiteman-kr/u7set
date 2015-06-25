@@ -13,7 +13,7 @@ class ChooseAfbDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElement> > &elements, QWidget *parent = 0);
+	explicit ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElement>> &m_elements, QWidget* parent = 0);
 	~ChooseAfbDialog();
 
 	int index();
@@ -30,11 +30,11 @@ private slots:
 	void on_btnOk_clicked();
 	void on_btnCancel_clicked();
 	void on_m_afbTree_itemSelectionChanged();
-	void on_m_afbTree_itemDoubleClicked(QTreeWidgetItem *item, int column);
+	void on_m_afbTree_itemDoubleClicked(QTreeWidgetItem* item, int column);
 
 private:
 	Ui::ChooseAfbDialog *ui;
-	std::vector<std::shared_ptr<Afbl::AfbElement>> elements;
+	std::vector<std::shared_ptr<Afbl::AfbElement>> m_elements;
 
 	static int m_lastSelectedIndex;
 	static Qt::SortOrder m_lastSortOrder;
