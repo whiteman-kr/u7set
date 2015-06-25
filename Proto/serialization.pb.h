@@ -44,8 +44,8 @@ class Configuration;
 class AfbElementCollection;
 class AfbElementXml;
 class FblElement;
-class FblElementSignal;
-class FblElementParam;
+class AfbSignal;
+class AfbParam;
 class Scheme;
 class LogicScheme;
 class SchemeLayer;
@@ -1239,40 +1239,40 @@ class FblElement : public ::google::protobuf::Message {
   inline bool requiredstart() const;
   inline void set_requiredstart(bool value);
 
-  // repeated .Proto.FblElementSignal inputSignals = 11;
-  inline int inputsignals_size() const;
-  inline void clear_inputsignals();
-  static const int kInputSignalsFieldNumber = 11;
-  inline const ::Proto::FblElementSignal& inputsignals(int index) const;
-  inline ::Proto::FblElementSignal* mutable_inputsignals(int index);
-  inline ::Proto::FblElementSignal* add_inputsignals();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >&
-      inputsignals() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
-      mutable_inputsignals();
+  // repeated .Proto.AfbSignal inputs = 11;
+  inline int inputs_size() const;
+  inline void clear_inputs();
+  static const int kInputsFieldNumber = 11;
+  inline const ::Proto::AfbSignal& inputs(int index) const;
+  inline ::Proto::AfbSignal* mutable_inputs(int index);
+  inline ::Proto::AfbSignal* add_inputs();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >&
+      inputs() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >*
+      mutable_inputs();
 
-  // repeated .Proto.FblElementSignal outputSignals = 12;
-  inline int outputsignals_size() const;
-  inline void clear_outputsignals();
-  static const int kOutputSignalsFieldNumber = 12;
-  inline const ::Proto::FblElementSignal& outputsignals(int index) const;
-  inline ::Proto::FblElementSignal* mutable_outputsignals(int index);
-  inline ::Proto::FblElementSignal* add_outputsignals();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >&
-      outputsignals() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
-      mutable_outputsignals();
+  // repeated .Proto.AfbSignal outputs = 12;
+  inline int outputs_size() const;
+  inline void clear_outputs();
+  static const int kOutputsFieldNumber = 12;
+  inline const ::Proto::AfbSignal& outputs(int index) const;
+  inline ::Proto::AfbSignal* mutable_outputs(int index);
+  inline ::Proto::AfbSignal* add_outputs();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >&
+      outputs() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >*
+      mutable_outputs();
 
-  // repeated .Proto.FblElementParam params = 13;
+  // repeated .Proto.AfbParam params = 13;
   inline int params_size() const;
   inline void clear_params();
   static const int kParamsFieldNumber = 13;
-  inline const ::Proto::FblElementParam& params(int index) const;
-  inline ::Proto::FblElementParam* mutable_params(int index);
-  inline ::Proto::FblElementParam* add_params();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+  inline const ::Proto::AfbParam& params(int index) const;
+  inline ::Proto::AfbParam* mutable_params(int index);
+  inline ::Proto::AfbParam* add_params();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >&
       params() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >*
       mutable_params();
 
   // optional .Proto.wstring description = 14;
@@ -1306,9 +1306,9 @@ class FblElement : public ::google::protobuf::Message {
   ::google::protobuf::uint32 opcode_;
   bool hasram_;
   bool requiredstart_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > inputsignals_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > outputsignals_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal > inputs_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal > outputs_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::Proto::wstring* description_;
 
   mutable int _cached_size_;
@@ -1323,14 +1323,14 @@ class FblElement : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class FblElementSignal : public ::google::protobuf::Message {
+class AfbSignal : public ::google::protobuf::Message {
  public:
-  FblElementSignal();
-  virtual ~FblElementSignal();
+  AfbSignal();
+  virtual ~AfbSignal();
 
-  FblElementSignal(const FblElementSignal& from);
+  AfbSignal(const AfbSignal& from);
 
-  inline FblElementSignal& operator=(const FblElementSignal& from) {
+  inline AfbSignal& operator=(const AfbSignal& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1344,17 +1344,17 @@ class FblElementSignal : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const FblElementSignal& default_instance();
+  static const AfbSignal& default_instance();
 
-  void Swap(FblElementSignal* other);
+  void Swap(AfbSignal* other);
 
   // implements Message ----------------------------------------------
 
-  FblElementSignal* New() const;
+  AfbSignal* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const FblElementSignal& from);
-  void MergeFrom(const FblElementSignal& from);
+  void CopyFrom(const AfbSignal& from);
+  void MergeFrom(const AfbSignal& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1416,7 +1416,7 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_opname();
   inline void set_allocated_opname(::Proto::wstring* opname);
 
-  // @@protoc_insertion_point(class_scope:Proto.FblElementSignal)
+  // @@protoc_insertion_point(class_scope:Proto.AfbSignal)
  private:
   inline void set_has_caption();
   inline void clear_has_caption();
@@ -1445,18 +1445,18 @@ class FblElementSignal : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static FblElementSignal* default_instance_;
+  static AfbSignal* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class FblElementParam : public ::google::protobuf::Message {
+class AfbParam : public ::google::protobuf::Message {
  public:
-  FblElementParam();
-  virtual ~FblElementParam();
+  AfbParam();
+  virtual ~AfbParam();
 
-  FblElementParam(const FblElementParam& from);
+  AfbParam(const AfbParam& from);
 
-  inline FblElementParam& operator=(const FblElementParam& from) {
+  inline AfbParam& operator=(const AfbParam& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1470,17 +1470,17 @@ class FblElementParam : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const FblElementParam& default_instance();
+  static const AfbParam& default_instance();
 
-  void Swap(FblElementParam* other);
+  void Swap(AfbParam* other);
 
   // implements Message ----------------------------------------------
 
-  FblElementParam* New() const;
+  AfbParam* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const FblElementParam& from);
-  void MergeFrom(const FblElementParam& from);
+  void CopyFrom(const AfbParam& from);
+  void MergeFrom(const AfbParam& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1608,7 +1608,7 @@ class FblElementParam : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_opname();
   inline void set_allocated_opname(::Proto::wstring* opname);
 
-  // @@protoc_insertion_point(class_scope:Proto.FblElementParam)
+  // @@protoc_insertion_point(class_scope:Proto.AfbParam)
  private:
   inline void set_has_caption();
   inline void clear_has_caption();
@@ -1661,7 +1661,7 @@ class FblElementParam : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static FblElementParam* default_instance_;
+  static AfbParam* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -3826,16 +3826,16 @@ class SchemeItemAfb : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.FblElementParam params = 2;
+  // repeated .Proto.AfbParam params = 2;
   inline int params_size() const;
   inline void clear_params();
   static const int kParamsFieldNumber = 2;
-  inline const ::Proto::FblElementParam& params(int index) const;
-  inline ::Proto::FblElementParam* mutable_params(int index);
-  inline ::Proto::FblElementParam* add_params();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+  inline const ::Proto::AfbParam& params(int index) const;
+  inline ::Proto::AfbParam* mutable_params(int index);
+  inline ::Proto::AfbParam* add_params();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >&
       params() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >*
       mutable_params();
 
   // optional .Proto.wstring afbStrid = 3;
@@ -3854,7 +3854,7 @@ class SchemeItemAfb : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::Proto::wstring* afbstrid_;
 
   mutable int _cached_size_;
@@ -6582,77 +6582,77 @@ inline void FblElement::set_requiredstart(bool value) {
   requiredstart_ = value;
 }
 
-// repeated .Proto.FblElementSignal inputSignals = 11;
-inline int FblElement::inputsignals_size() const {
-  return inputsignals_.size();
+// repeated .Proto.AfbSignal inputs = 11;
+inline int FblElement::inputs_size() const {
+  return inputs_.size();
 }
-inline void FblElement::clear_inputsignals() {
-  inputsignals_.Clear();
+inline void FblElement::clear_inputs() {
+  inputs_.Clear();
 }
-inline const ::Proto::FblElementSignal& FblElement::inputsignals(int index) const {
-  return inputsignals_.Get(index);
+inline const ::Proto::AfbSignal& FblElement::inputs(int index) const {
+  return inputs_.Get(index);
 }
-inline ::Proto::FblElementSignal* FblElement::mutable_inputsignals(int index) {
-  return inputsignals_.Mutable(index);
+inline ::Proto::AfbSignal* FblElement::mutable_inputs(int index) {
+  return inputs_.Mutable(index);
 }
-inline ::Proto::FblElementSignal* FblElement::add_inputsignals() {
-  return inputsignals_.Add();
+inline ::Proto::AfbSignal* FblElement::add_inputs() {
+  return inputs_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >&
-FblElement::inputsignals() const {
-  return inputsignals_;
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >&
+FblElement::inputs() const {
+  return inputs_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
-FblElement::mutable_inputsignals() {
-  return &inputsignals_;
-}
-
-// repeated .Proto.FblElementSignal outputSignals = 12;
-inline int FblElement::outputsignals_size() const {
-  return outputsignals_.size();
-}
-inline void FblElement::clear_outputsignals() {
-  outputsignals_.Clear();
-}
-inline const ::Proto::FblElementSignal& FblElement::outputsignals(int index) const {
-  return outputsignals_.Get(index);
-}
-inline ::Proto::FblElementSignal* FblElement::mutable_outputsignals(int index) {
-  return outputsignals_.Mutable(index);
-}
-inline ::Proto::FblElementSignal* FblElement::add_outputsignals() {
-  return outputsignals_.Add();
-}
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >&
-FblElement::outputsignals() const {
-  return outputsignals_;
-}
-inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
-FblElement::mutable_outputsignals() {
-  return &outputsignals_;
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >*
+FblElement::mutable_inputs() {
+  return &inputs_;
 }
 
-// repeated .Proto.FblElementParam params = 13;
+// repeated .Proto.AfbSignal outputs = 12;
+inline int FblElement::outputs_size() const {
+  return outputs_.size();
+}
+inline void FblElement::clear_outputs() {
+  outputs_.Clear();
+}
+inline const ::Proto::AfbSignal& FblElement::outputs(int index) const {
+  return outputs_.Get(index);
+}
+inline ::Proto::AfbSignal* FblElement::mutable_outputs(int index) {
+  return outputs_.Mutable(index);
+}
+inline ::Proto::AfbSignal* FblElement::add_outputs() {
+  return outputs_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >&
+FblElement::outputs() const {
+  return outputs_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >*
+FblElement::mutable_outputs() {
+  return &outputs_;
+}
+
+// repeated .Proto.AfbParam params = 13;
 inline int FblElement::params_size() const {
   return params_.size();
 }
 inline void FblElement::clear_params() {
   params_.Clear();
 }
-inline const ::Proto::FblElementParam& FblElement::params(int index) const {
+inline const ::Proto::AfbParam& FblElement::params(int index) const {
   return params_.Get(index);
 }
-inline ::Proto::FblElementParam* FblElement::mutable_params(int index) {
+inline ::Proto::AfbParam* FblElement::mutable_params(int index) {
   return params_.Mutable(index);
 }
-inline ::Proto::FblElementParam* FblElement::add_params() {
+inline ::Proto::AfbParam* FblElement::add_params() {
   return params_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >&
 FblElement::params() const {
   return params_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >*
 FblElement::mutable_params() {
   return &params_;
 }
@@ -6697,37 +6697,37 @@ inline void FblElement::set_allocated_description(::Proto::wstring* description)
 
 // -------------------------------------------------------------------
 
-// FblElementSignal
+// AfbSignal
 
 // required .Proto.wstring caption = 1;
-inline bool FblElementSignal::has_caption() const {
+inline bool AfbSignal::has_caption() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void FblElementSignal::set_has_caption() {
+inline void AfbSignal::set_has_caption() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void FblElementSignal::clear_has_caption() {
+inline void AfbSignal::clear_has_caption() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void FblElementSignal::clear_caption() {
+inline void AfbSignal::clear_caption() {
   if (caption_ != NULL) caption_->::Proto::wstring::Clear();
   clear_has_caption();
 }
-inline const ::Proto::wstring& FblElementSignal::caption() const {
+inline const ::Proto::wstring& AfbSignal::caption() const {
   return caption_ != NULL ? *caption_ : *default_instance_->caption_;
 }
-inline ::Proto::wstring* FblElementSignal::mutable_caption() {
+inline ::Proto::wstring* AfbSignal::mutable_caption() {
   set_has_caption();
   if (caption_ == NULL) caption_ = new ::Proto::wstring;
   return caption_;
 }
-inline ::Proto::wstring* FblElementSignal::release_caption() {
+inline ::Proto::wstring* AfbSignal::release_caption() {
   clear_has_caption();
   ::Proto::wstring* temp = caption_;
   caption_ = NULL;
   return temp;
 }
-inline void FblElementSignal::set_allocated_caption(::Proto::wstring* caption) {
+inline void AfbSignal::set_allocated_caption(::Proto::wstring* caption) {
   delete caption_;
   caption_ = caption;
   if (caption) {
@@ -6738,101 +6738,101 @@ inline void FblElementSignal::set_allocated_caption(::Proto::wstring* caption) {
 }
 
 // required .Proto.FblSignalType type = 2;
-inline bool FblElementSignal::has_type() const {
+inline bool AfbSignal::has_type() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void FblElementSignal::set_has_type() {
+inline void AfbSignal::set_has_type() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void FblElementSignal::clear_has_type() {
+inline void AfbSignal::clear_has_type() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void FblElementSignal::clear_type() {
+inline void AfbSignal::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::Proto::FblSignalType FblElementSignal::type() const {
+inline ::Proto::FblSignalType AfbSignal::type() const {
   return static_cast< ::Proto::FblSignalType >(type_);
 }
-inline void FblElementSignal::set_type(::Proto::FblSignalType value) {
+inline void AfbSignal::set_type(::Proto::FblSignalType value) {
   assert(::Proto::FblSignalType_IsValid(value));
   set_has_type();
   type_ = value;
 }
 
 // optional int32 operandIndex = 3 [default = 0];
-inline bool FblElementSignal::has_operandindex() const {
+inline bool AfbSignal::has_operandindex() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void FblElementSignal::set_has_operandindex() {
+inline void AfbSignal::set_has_operandindex() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void FblElementSignal::clear_has_operandindex() {
+inline void AfbSignal::clear_has_operandindex() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void FblElementSignal::clear_operandindex() {
+inline void AfbSignal::clear_operandindex() {
   operandindex_ = 0;
   clear_has_operandindex();
 }
-inline ::google::protobuf::int32 FblElementSignal::operandindex() const {
+inline ::google::protobuf::int32 AfbSignal::operandindex() const {
   return operandindex_;
 }
-inline void FblElementSignal::set_operandindex(::google::protobuf::int32 value) {
+inline void AfbSignal::set_operandindex(::google::protobuf::int32 value) {
   set_has_operandindex();
   operandindex_ = value;
 }
 
 // optional int32 size = 4 [default = 0];
-inline bool FblElementSignal::has_size() const {
+inline bool AfbSignal::has_size() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void FblElementSignal::set_has_size() {
+inline void AfbSignal::set_has_size() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void FblElementSignal::clear_has_size() {
+inline void AfbSignal::clear_has_size() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void FblElementSignal::clear_size() {
+inline void AfbSignal::clear_size() {
   size_ = 0;
   clear_has_size();
 }
-inline ::google::protobuf::int32 FblElementSignal::size() const {
+inline ::google::protobuf::int32 AfbSignal::size() const {
   return size_;
 }
-inline void FblElementSignal::set_size(::google::protobuf::int32 value) {
+inline void AfbSignal::set_size(::google::protobuf::int32 value) {
   set_has_size();
   size_ = value;
 }
 
 // optional .Proto.wstring opName = 5;
-inline bool FblElementSignal::has_opname() const {
+inline bool AfbSignal::has_opname() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void FblElementSignal::set_has_opname() {
+inline void AfbSignal::set_has_opname() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void FblElementSignal::clear_has_opname() {
+inline void AfbSignal::clear_has_opname() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void FblElementSignal::clear_opname() {
+inline void AfbSignal::clear_opname() {
   if (opname_ != NULL) opname_->::Proto::wstring::Clear();
   clear_has_opname();
 }
-inline const ::Proto::wstring& FblElementSignal::opname() const {
+inline const ::Proto::wstring& AfbSignal::opname() const {
   return opname_ != NULL ? *opname_ : *default_instance_->opname_;
 }
-inline ::Proto::wstring* FblElementSignal::mutable_opname() {
+inline ::Proto::wstring* AfbSignal::mutable_opname() {
   set_has_opname();
   if (opname_ == NULL) opname_ = new ::Proto::wstring;
   return opname_;
 }
-inline ::Proto::wstring* FblElementSignal::release_opname() {
+inline ::Proto::wstring* AfbSignal::release_opname() {
   clear_has_opname();
   ::Proto::wstring* temp = opname_;
   opname_ = NULL;
   return temp;
 }
-inline void FblElementSignal::set_allocated_opname(::Proto::wstring* opname) {
+inline void AfbSignal::set_allocated_opname(::Proto::wstring* opname) {
   delete opname_;
   opname_ = opname;
   if (opname) {
@@ -6844,37 +6844,37 @@ inline void FblElementSignal::set_allocated_opname(::Proto::wstring* opname) {
 
 // -------------------------------------------------------------------
 
-// FblElementParam
+// AfbParam
 
 // required .Proto.wstring caption = 1;
-inline bool FblElementParam::has_caption() const {
+inline bool AfbParam::has_caption() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void FblElementParam::set_has_caption() {
+inline void AfbParam::set_has_caption() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void FblElementParam::clear_has_caption() {
+inline void AfbParam::clear_has_caption() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void FblElementParam::clear_caption() {
+inline void AfbParam::clear_caption() {
   if (caption_ != NULL) caption_->::Proto::wstring::Clear();
   clear_has_caption();
 }
-inline const ::Proto::wstring& FblElementParam::caption() const {
+inline const ::Proto::wstring& AfbParam::caption() const {
   return caption_ != NULL ? *caption_ : *default_instance_->caption_;
 }
-inline ::Proto::wstring* FblElementParam::mutable_caption() {
+inline ::Proto::wstring* AfbParam::mutable_caption() {
   set_has_caption();
   if (caption_ == NULL) caption_ = new ::Proto::wstring;
   return caption_;
 }
-inline ::Proto::wstring* FblElementParam::release_caption() {
+inline ::Proto::wstring* AfbParam::release_caption() {
   clear_has_caption();
   ::Proto::wstring* temp = caption_;
   caption_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_caption(::Proto::wstring* caption) {
+inline void AfbParam::set_allocated_caption(::Proto::wstring* caption) {
   delete caption_;
   caption_ = caption;
   if (caption) {
@@ -6885,167 +6885,167 @@ inline void FblElementParam::set_allocated_caption(::Proto::wstring* caption) {
 }
 
 // required .Proto.FblParamType type = 2;
-inline bool FblElementParam::has_type() const {
+inline bool AfbParam::has_type() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void FblElementParam::set_has_type() {
+inline void AfbParam::set_has_type() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void FblElementParam::clear_has_type() {
+inline void AfbParam::clear_has_type() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void FblElementParam::clear_type() {
+inline void AfbParam::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::Proto::FblParamType FblElementParam::type() const {
+inline ::Proto::FblParamType AfbParam::type() const {
   return static_cast< ::Proto::FblParamType >(type_);
 }
-inline void FblElementParam::set_type(::Proto::FblParamType value) {
+inline void AfbParam::set_type(::Proto::FblParamType value) {
   assert(::Proto::FblParamType_IsValid(value));
   set_has_type();
   type_ = value;
 }
 
 // required bool visible = 7;
-inline bool FblElementParam::has_visible() const {
+inline bool AfbParam::has_visible() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void FblElementParam::set_has_visible() {
+inline void AfbParam::set_has_visible() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void FblElementParam::clear_has_visible() {
+inline void AfbParam::clear_has_visible() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void FblElementParam::clear_visible() {
+inline void AfbParam::clear_visible() {
   visible_ = false;
   clear_has_visible();
 }
-inline bool FblElementParam::visible() const {
+inline bool AfbParam::visible() const {
   return visible_;
 }
-inline void FblElementParam::set_visible(bool value) {
+inline void AfbParam::set_visible(bool value) {
   set_has_visible();
   visible_ = value;
 }
 
 // optional int32 operandIndex = 8 [default = 0];
-inline bool FblElementParam::has_operandindex() const {
+inline bool AfbParam::has_operandindex() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void FblElementParam::set_has_operandindex() {
+inline void AfbParam::set_has_operandindex() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void FblElementParam::clear_has_operandindex() {
+inline void AfbParam::clear_has_operandindex() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void FblElementParam::clear_operandindex() {
+inline void AfbParam::clear_operandindex() {
   operandindex_ = 0;
   clear_has_operandindex();
 }
-inline ::google::protobuf::int32 FblElementParam::operandindex() const {
+inline ::google::protobuf::int32 AfbParam::operandindex() const {
   return operandindex_;
 }
-inline void FblElementParam::set_operandindex(::google::protobuf::int32 value) {
+inline void AfbParam::set_operandindex(::google::protobuf::int32 value) {
   set_has_operandindex();
   operandindex_ = value;
 }
 
 // optional int32 size = 9 [default = 0];
-inline bool FblElementParam::has_size() const {
+inline bool AfbParam::has_size() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void FblElementParam::set_has_size() {
+inline void AfbParam::set_has_size() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void FblElementParam::clear_has_size() {
+inline void AfbParam::clear_has_size() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void FblElementParam::clear_size() {
+inline void AfbParam::clear_size() {
   size_ = 0;
   clear_has_size();
 }
-inline ::google::protobuf::int32 FblElementParam::size() const {
+inline ::google::protobuf::int32 AfbParam::size() const {
   return size_;
 }
-inline void FblElementParam::set_size(::google::protobuf::int32 value) {
+inline void AfbParam::set_size(::google::protobuf::int32 value) {
   set_has_size();
   size_ = value;
 }
 
 // optional bool instantiator = 10 [default = false];
-inline bool FblElementParam::has_instantiator() const {
+inline bool AfbParam::has_instantiator() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void FblElementParam::set_has_instantiator() {
+inline void AfbParam::set_has_instantiator() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void FblElementParam::clear_has_instantiator() {
+inline void AfbParam::clear_has_instantiator() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void FblElementParam::clear_instantiator() {
+inline void AfbParam::clear_instantiator() {
   instantiator_ = false;
   clear_has_instantiator();
 }
-inline bool FblElementParam::instantiator() const {
+inline bool AfbParam::instantiator() const {
   return instantiator_;
 }
-inline void FblElementParam::set_instantiator(bool value) {
+inline void AfbParam::set_instantiator(bool value) {
   set_has_instantiator();
   instantiator_ = value;
 }
 
 // optional bool user = 11 [default = false];
-inline bool FblElementParam::has_user() const {
+inline bool AfbParam::has_user() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void FblElementParam::set_has_user() {
+inline void AfbParam::set_has_user() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void FblElementParam::clear_has_user() {
+inline void AfbParam::clear_has_user() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void FblElementParam::clear_user() {
+inline void AfbParam::clear_user() {
   user_ = false;
   clear_has_user();
 }
-inline bool FblElementParam::user() const {
+inline bool AfbParam::user() const {
   return user_;
 }
-inline void FblElementParam::set_user(bool value) {
+inline void AfbParam::set_user(bool value) {
   set_has_user();
   user_ = value;
 }
 
 // optional .Proto.wstring changedScript = 12;
-inline bool FblElementParam::has_changedscript() const {
+inline bool AfbParam::has_changedscript() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void FblElementParam::set_has_changedscript() {
+inline void AfbParam::set_has_changedscript() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void FblElementParam::clear_has_changedscript() {
+inline void AfbParam::clear_has_changedscript() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void FblElementParam::clear_changedscript() {
+inline void AfbParam::clear_changedscript() {
   if (changedscript_ != NULL) changedscript_->::Proto::wstring::Clear();
   clear_has_changedscript();
 }
-inline const ::Proto::wstring& FblElementParam::changedscript() const {
+inline const ::Proto::wstring& AfbParam::changedscript() const {
   return changedscript_ != NULL ? *changedscript_ : *default_instance_->changedscript_;
 }
-inline ::Proto::wstring* FblElementParam::mutable_changedscript() {
+inline ::Proto::wstring* AfbParam::mutable_changedscript() {
   set_has_changedscript();
   if (changedscript_ == NULL) changedscript_ = new ::Proto::wstring;
   return changedscript_;
 }
-inline ::Proto::wstring* FblElementParam::release_changedscript() {
+inline ::Proto::wstring* AfbParam::release_changedscript() {
   clear_has_changedscript();
   ::Proto::wstring* temp = changedscript_;
   changedscript_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_changedscript(::Proto::wstring* changedscript) {
+inline void AfbParam::set_allocated_changedscript(::Proto::wstring* changedscript) {
   delete changedscript_;
   changedscript_ = changedscript;
   if (changedscript) {
@@ -7056,34 +7056,34 @@ inline void FblElementParam::set_allocated_changedscript(::Proto::wstring* chang
 }
 
 // optional .Proto.qvariant value = 13;
-inline bool FblElementParam::has_value() const {
+inline bool AfbParam::has_value() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void FblElementParam::set_has_value() {
+inline void AfbParam::set_has_value() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void FblElementParam::clear_has_value() {
+inline void AfbParam::clear_has_value() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void FblElementParam::clear_value() {
+inline void AfbParam::clear_value() {
   if (value_ != NULL) value_->::Proto::qvariant::Clear();
   clear_has_value();
 }
-inline const ::Proto::qvariant& FblElementParam::value() const {
+inline const ::Proto::qvariant& AfbParam::value() const {
   return value_ != NULL ? *value_ : *default_instance_->value_;
 }
-inline ::Proto::qvariant* FblElementParam::mutable_value() {
+inline ::Proto::qvariant* AfbParam::mutable_value() {
   set_has_value();
   if (value_ == NULL) value_ = new ::Proto::qvariant;
   return value_;
 }
-inline ::Proto::qvariant* FblElementParam::release_value() {
+inline ::Proto::qvariant* AfbParam::release_value() {
   clear_has_value();
   ::Proto::qvariant* temp = value_;
   value_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_value(::Proto::qvariant* value) {
+inline void AfbParam::set_allocated_value(::Proto::qvariant* value) {
   delete value_;
   value_ = value;
   if (value) {
@@ -7094,34 +7094,34 @@ inline void FblElementParam::set_allocated_value(::Proto::qvariant* value) {
 }
 
 // optional .Proto.qvariant defaultvalue = 14;
-inline bool FblElementParam::has_defaultvalue() const {
+inline bool AfbParam::has_defaultvalue() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void FblElementParam::set_has_defaultvalue() {
+inline void AfbParam::set_has_defaultvalue() {
   _has_bits_[0] |= 0x00000200u;
 }
-inline void FblElementParam::clear_has_defaultvalue() {
+inline void AfbParam::clear_has_defaultvalue() {
   _has_bits_[0] &= ~0x00000200u;
 }
-inline void FblElementParam::clear_defaultvalue() {
+inline void AfbParam::clear_defaultvalue() {
   if (defaultvalue_ != NULL) defaultvalue_->::Proto::qvariant::Clear();
   clear_has_defaultvalue();
 }
-inline const ::Proto::qvariant& FblElementParam::defaultvalue() const {
+inline const ::Proto::qvariant& AfbParam::defaultvalue() const {
   return defaultvalue_ != NULL ? *defaultvalue_ : *default_instance_->defaultvalue_;
 }
-inline ::Proto::qvariant* FblElementParam::mutable_defaultvalue() {
+inline ::Proto::qvariant* AfbParam::mutable_defaultvalue() {
   set_has_defaultvalue();
   if (defaultvalue_ == NULL) defaultvalue_ = new ::Proto::qvariant;
   return defaultvalue_;
 }
-inline ::Proto::qvariant* FblElementParam::release_defaultvalue() {
+inline ::Proto::qvariant* AfbParam::release_defaultvalue() {
   clear_has_defaultvalue();
   ::Proto::qvariant* temp = defaultvalue_;
   defaultvalue_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_defaultvalue(::Proto::qvariant* defaultvalue) {
+inline void AfbParam::set_allocated_defaultvalue(::Proto::qvariant* defaultvalue) {
   delete defaultvalue_;
   defaultvalue_ = defaultvalue;
   if (defaultvalue) {
@@ -7132,34 +7132,34 @@ inline void FblElementParam::set_allocated_defaultvalue(::Proto::qvariant* defau
 }
 
 // optional .Proto.qvariant lowlimit = 15;
-inline bool FblElementParam::has_lowlimit() const {
+inline bool AfbParam::has_lowlimit() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
-inline void FblElementParam::set_has_lowlimit() {
+inline void AfbParam::set_has_lowlimit() {
   _has_bits_[0] |= 0x00000400u;
 }
-inline void FblElementParam::clear_has_lowlimit() {
+inline void AfbParam::clear_has_lowlimit() {
   _has_bits_[0] &= ~0x00000400u;
 }
-inline void FblElementParam::clear_lowlimit() {
+inline void AfbParam::clear_lowlimit() {
   if (lowlimit_ != NULL) lowlimit_->::Proto::qvariant::Clear();
   clear_has_lowlimit();
 }
-inline const ::Proto::qvariant& FblElementParam::lowlimit() const {
+inline const ::Proto::qvariant& AfbParam::lowlimit() const {
   return lowlimit_ != NULL ? *lowlimit_ : *default_instance_->lowlimit_;
 }
-inline ::Proto::qvariant* FblElementParam::mutable_lowlimit() {
+inline ::Proto::qvariant* AfbParam::mutable_lowlimit() {
   set_has_lowlimit();
   if (lowlimit_ == NULL) lowlimit_ = new ::Proto::qvariant;
   return lowlimit_;
 }
-inline ::Proto::qvariant* FblElementParam::release_lowlimit() {
+inline ::Proto::qvariant* AfbParam::release_lowlimit() {
   clear_has_lowlimit();
   ::Proto::qvariant* temp = lowlimit_;
   lowlimit_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_lowlimit(::Proto::qvariant* lowlimit) {
+inline void AfbParam::set_allocated_lowlimit(::Proto::qvariant* lowlimit) {
   delete lowlimit_;
   lowlimit_ = lowlimit;
   if (lowlimit) {
@@ -7170,34 +7170,34 @@ inline void FblElementParam::set_allocated_lowlimit(::Proto::qvariant* lowlimit)
 }
 
 // optional .Proto.qvariant highlimit = 16;
-inline bool FblElementParam::has_highlimit() const {
+inline bool AfbParam::has_highlimit() const {
   return (_has_bits_[0] & 0x00000800u) != 0;
 }
-inline void FblElementParam::set_has_highlimit() {
+inline void AfbParam::set_has_highlimit() {
   _has_bits_[0] |= 0x00000800u;
 }
-inline void FblElementParam::clear_has_highlimit() {
+inline void AfbParam::clear_has_highlimit() {
   _has_bits_[0] &= ~0x00000800u;
 }
-inline void FblElementParam::clear_highlimit() {
+inline void AfbParam::clear_highlimit() {
   if (highlimit_ != NULL) highlimit_->::Proto::qvariant::Clear();
   clear_has_highlimit();
 }
-inline const ::Proto::qvariant& FblElementParam::highlimit() const {
+inline const ::Proto::qvariant& AfbParam::highlimit() const {
   return highlimit_ != NULL ? *highlimit_ : *default_instance_->highlimit_;
 }
-inline ::Proto::qvariant* FblElementParam::mutable_highlimit() {
+inline ::Proto::qvariant* AfbParam::mutable_highlimit() {
   set_has_highlimit();
   if (highlimit_ == NULL) highlimit_ = new ::Proto::qvariant;
   return highlimit_;
 }
-inline ::Proto::qvariant* FblElementParam::release_highlimit() {
+inline ::Proto::qvariant* AfbParam::release_highlimit() {
   clear_has_highlimit();
   ::Proto::qvariant* temp = highlimit_;
   highlimit_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_highlimit(::Proto::qvariant* highlimit) {
+inline void AfbParam::set_allocated_highlimit(::Proto::qvariant* highlimit) {
   delete highlimit_;
   highlimit_ = highlimit;
   if (highlimit) {
@@ -7208,34 +7208,34 @@ inline void FblElementParam::set_allocated_highlimit(::Proto::qvariant* highlimi
 }
 
 // optional .Proto.wstring opName = 17;
-inline bool FblElementParam::has_opname() const {
+inline bool AfbParam::has_opname() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
-inline void FblElementParam::set_has_opname() {
+inline void AfbParam::set_has_opname() {
   _has_bits_[0] |= 0x00001000u;
 }
-inline void FblElementParam::clear_has_opname() {
+inline void AfbParam::clear_has_opname() {
   _has_bits_[0] &= ~0x00001000u;
 }
-inline void FblElementParam::clear_opname() {
+inline void AfbParam::clear_opname() {
   if (opname_ != NULL) opname_->::Proto::wstring::Clear();
   clear_has_opname();
 }
-inline const ::Proto::wstring& FblElementParam::opname() const {
+inline const ::Proto::wstring& AfbParam::opname() const {
   return opname_ != NULL ? *opname_ : *default_instance_->opname_;
 }
-inline ::Proto::wstring* FblElementParam::mutable_opname() {
+inline ::Proto::wstring* AfbParam::mutable_opname() {
   set_has_opname();
   if (opname_ == NULL) opname_ = new ::Proto::wstring;
   return opname_;
 }
-inline ::Proto::wstring* FblElementParam::release_opname() {
+inline ::Proto::wstring* AfbParam::release_opname() {
   clear_has_opname();
   ::Proto::wstring* temp = opname_;
   opname_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_opname(::Proto::wstring* opname) {
+inline void AfbParam::set_allocated_opname(::Proto::wstring* opname) {
   delete opname_;
   opname_ = opname;
   if (opname) {
@@ -9460,27 +9460,27 @@ SchemeItemSignal::mutable_signalstrids() {
 
 // SchemeItemAfb
 
-// repeated .Proto.FblElementParam params = 2;
+// repeated .Proto.AfbParam params = 2;
 inline int SchemeItemAfb::params_size() const {
   return params_.size();
 }
 inline void SchemeItemAfb::clear_params() {
   params_.Clear();
 }
-inline const ::Proto::FblElementParam& SchemeItemAfb::params(int index) const {
+inline const ::Proto::AfbParam& SchemeItemAfb::params(int index) const {
   return params_.Get(index);
 }
-inline ::Proto::FblElementParam* SchemeItemAfb::mutable_params(int index) {
+inline ::Proto::AfbParam* SchemeItemAfb::mutable_params(int index) {
   return params_.Mutable(index);
 }
-inline ::Proto::FblElementParam* SchemeItemAfb::add_params() {
+inline ::Proto::AfbParam* SchemeItemAfb::add_params() {
   return params_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >&
 SchemeItemAfb::params() const {
   return params_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >*
 SchemeItemAfb::mutable_params() {
   return &params_;
 }

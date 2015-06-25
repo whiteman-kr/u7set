@@ -182,9 +182,9 @@ message FblElement
 	optional bool hasRam = 5 [default = false];
 	optional bool requiredStart = 6 [default = true];
 
-	repeated FblElementSignal inputSignals = 11;
-	repeated FblElementSignal outputSignals = 12;
-	repeated FblElementParam params = 13;
+	repeated AfbSignal inputs = 11;
+	repeated AfbSignal outputs = 12;
+	repeated AfbParam params = 13;
 
 	optional wstring description = 14;
 }
@@ -192,10 +192,10 @@ message FblElement
 
 //
 //
-// Afbl::FblElementSignal
+// Afbl::AfbSignal
 //
 //
-message FblElementSignal
+message AfbSignal
 {
 	required wstring caption = 1;
 	required FblSignalType type = 2;
@@ -207,10 +207,10 @@ message FblElementSignal
 
 //
 //
-// Afbl::FblElementParam
+// Afbl::AfbParam
 //
 //
-message FblElementParam
+message AfbParam
 {
 	required wstring caption = 1;
 	required FblParamType type = 2;
@@ -535,7 +535,7 @@ message SchemeItemLink
 //
 message SchemeItemAfb
 {
-	repeated FblElementParam params = 2;
+	repeated AfbParam params = 2;
 	optional wstring afbStrid = 3;
 }
 

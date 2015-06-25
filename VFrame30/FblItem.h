@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SchemeItem.h"
-#include "Fbl.h"
+#include "Afb.h"
 
 class QPainter;
 
@@ -25,7 +25,7 @@ namespace VFrame30
 							int operandIndex,
 							QString caption);
 
-		CFblConnectionPoint(ConnectionDirrection dirrection, const QUuid& guid, const Afbl::AfbElementSignal& afbSignal);
+		CFblConnectionPoint(ConnectionDirrection dirrection, const QUuid& guid, const Afbl::AfbSignal& afbSignal);
 
 		CFblConnectionPoint(const Proto::FblConnectionPoint& cpm);
 
@@ -121,11 +121,11 @@ namespace VFrame30
 		int outputsCount() const;
 
 		void addInput();
-		void addInput(const Afbl::AfbElementSignal& s);
+		void addInput(const Afbl::AfbSignal& s);
 		void addInput(int opIndex, QString caption);
 
 		void addOutput();
-		void addOutput(const Afbl::AfbElementSignal& s);
+		void addOutput(const Afbl::AfbSignal& s);
 		void addOutput(int opIndex, QString caption);
 
 		void removeAllInputs();

@@ -23,10 +23,9 @@ namespace VFrame30
 	{
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(
-			ConnectionDirrection dirrection,
+	CFblConnectionPoint::CFblConnectionPoint(ConnectionDirrection dirrection,
 			const QUuid& guid,
-			const Afbl::AfbElementSignal& afbSignal) :
+			const Afbl::AfbSignal& afbSignal) :
 		m_guid(guid),
 		m_point(0, 0),
 		m_dirrection(dirrection),
@@ -345,7 +344,7 @@ namespace VFrame30
 		m_inputPoints.push_back(cp);
 	}
 
-	void FblItem::addInput(const Afbl::AfbElementSignal& s)
+	void FblItem::addInput(const Afbl::AfbSignal& s)
 	{
 		CFblConnectionPoint cp(ConnectionDirrection::Input, QUuid::createUuid(), s);
 		m_inputPoints.push_back(cp);
@@ -373,7 +372,7 @@ namespace VFrame30
 		m_outputPoints.push_back(cp);
 	}
 
-	void FblItem::addOutput(const Afbl::AfbElementSignal& s)
+	void FblItem::addOutput(const Afbl::AfbSignal& s)
 	{
 		CFblConnectionPoint cp(ConnectionDirrection::Output, QUuid::createUuid(), s);
 		m_outputPoints.push_back(cp);

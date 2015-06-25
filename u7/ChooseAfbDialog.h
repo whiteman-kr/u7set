@@ -2,7 +2,7 @@
 #define CHOOSEAFBDIALOG_H
 
 #include <QDialog>
-#include "../VFrame30/Fbl.h"
+#include "../VFrame30/Afb.h"
 
 namespace Ui {
 class ChooseAfbDialog;

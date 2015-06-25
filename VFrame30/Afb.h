@@ -24,25 +24,25 @@ namespace Afbl
 
 	//
 	//
-	//	CFblElementSignal	- Сигнал FBL элемента
+	//	AfbSignal	- Сигнал AFB
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbElementSignal : public QObject
+	class VFRAME30LIBSHARED_EXPORT AfbSignal : public QObject
 	{
 		Q_OBJECT
 	public:
-		AfbElementSignal(void);
-		virtual ~AfbElementSignal(void);
+		AfbSignal(void);
+		virtual ~AfbSignal(void);
 
-		AfbElementSignal(const AfbElementSignal& that);
+		AfbSignal(const AfbSignal& that);
 
-		AfbElementSignal& operator=(const AfbElementSignal& that);
+		AfbSignal& operator=(const AfbSignal& that);
 
 		// Serialization
 		//
 	public:
-		bool SaveData(Proto::FblElementSignal* message) const;
-		bool LoadData(const Proto::FblElementSignal& message);
+		bool SaveData(Proto::AfbSignal* message) const;
+		bool LoadData(const Proto::AfbSignal& message);
 
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
 		bool loadFromXml(QXmlStreamReader* xmlReader);
@@ -86,11 +86,11 @@ private:
 	//	CFblElementParam	- Параметр FBL элемента
 	//
 	//
-	class VFRAME30LIBSHARED_EXPORT AfbElementParam
+	class VFRAME30LIBSHARED_EXPORT AfbParam
 	{
 	public:
-		AfbElementParam(void);
-		virtual ~AfbElementParam(void);
+		AfbParam(void);
+		virtual ~AfbParam(void);
 
 		// Methods
 		//
@@ -100,8 +100,8 @@ private:
 		// Serialization
 		//
 	public:
-		bool SaveData(Proto::FblElementParam* message) const;
-		bool LoadData(const Proto::FblElementParam& message);
+		bool SaveData(Proto::AfbParam* message) const;
+		bool LoadData(const Proto::AfbParam& message);
 
 		bool loadFromXml(QXmlStreamReader* xmlReader);
 		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
@@ -217,7 +217,7 @@ private:
 		// Methods
 		//
 	public:
-		void updateParams(const std::vector<AfbElementParam>& params);
+		void updateParams(const std::vector<AfbParam>& params);
 
 	// Properties and Datas
 	//
@@ -246,17 +246,17 @@ private:
 		QString afterCreationScript() const;
 		void setAfterCreationScript(const QString& value);
 
-		const std::vector<AfbElementSignal>& inputSignals() const;
-		void setInputSignals(const std::vector<AfbElementSignal>& inputsignals);
+		const std::vector<AfbSignal>& inputSignals() const;
+		void setInputSignals(const std::vector<AfbSignal>& inputsignals);
 
-		const std::vector<AfbElementSignal>& outputSignals() const;
-		void setOutputSignals(const std::vector<AfbElementSignal>& outputsignals);
+		const std::vector<AfbSignal>& outputSignals() const;
+		void setOutputSignals(const std::vector<AfbSignal>& outputsignals);
 
-		const std::vector<AfbElementParam>& params() const;
-		std::vector<AfbElementParam>& params();
+		const std::vector<AfbParam>& params() const;
+		std::vector<AfbParam>& params();
 
 		int paramsCount() const;
-		void setParams(const std::vector<AfbElementParam>& params);
+		void setParams(const std::vector<AfbParam>& params);
 
 		QString instantiatorID() const;
 
@@ -273,10 +273,10 @@ private:
 		QString m_libraryScript;
 		QString m_afterCreationScript;
 
-		std::vector<AfbElementSignal> m_inputSignals;
-		std::vector<AfbElementSignal> m_outputSignals;
+		std::vector<AfbSignal> m_inputSignals;
+		std::vector<AfbSignal> m_outputSignals;
 
-		std::vector<AfbElementParam> m_params;
+		std::vector<AfbParam> m_params;
 	};
 
 	//

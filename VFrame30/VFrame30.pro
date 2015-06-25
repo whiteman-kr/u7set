@@ -88,7 +88,6 @@ HEADERS += VFrame30Lib_global.h \
     FblItemRect.h \
     FblItemLine.h \
     FblItem.h \
-    Fbl.h \
     DrawParam.h \
     Print.h \
     VFrame30Library.h \
@@ -118,7 +117,8 @@ HEADERS += VFrame30Lib_global.h \
     SchemeItemPath.h \
     SchemeItemSignal.h \
     SchemeItemAfb.h \
-    SchemeItemLink.h
+    SchemeItemLink.h \
+    Afb.h
 
 SOURCES += \
     Settings.cpp \
@@ -129,7 +129,6 @@ SOURCES += \
     FblItemRect.cpp \
     FblItemLine.cpp \
     FblItem.cpp \
-    Fbl.cpp \
     DrawParam.cpp \
     Print.cpp \
     Stable.cpp \
@@ -155,7 +154,8 @@ SOURCES += \
     SchemeItemPath.cpp \
     SchemeItemSignal.cpp \
     SchemeItemAfb.cpp \
-    SchemeItemLink.cpp
+    SchemeItemLink.cpp \
+    Afb.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

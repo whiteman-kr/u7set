@@ -638,7 +638,7 @@ namespace Builder
 
 		// iniitalization of constant params
 		//
-		for(Afbl::AfbElementParam afbParam : afb.params())
+		for(Afbl::AfbParam afbParam : afb.params())
 		{
 			if (afbParam.operandIndex() == NOT_FB_OPERAND_INDEX)
 			{

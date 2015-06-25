@@ -64,11 +64,11 @@ namespace VFrame30
 	public:
 		const QString& afbStrID() const;
 
-		const std::vector<Afbl::AfbElementParam>& params() const;
+		const std::vector<Afbl::AfbParam>& params() const;
 
 	private:
 		QString m_afbStrID;
-		std::vector<Afbl::AfbElementParam> m_params;
+		std::vector<Afbl::AfbParam> m_params;
 	};
 
 }

@@ -23,21 +23,21 @@ namespace VFrame30
 	{
 		// Создать входные и выходные сигналы в VFrame30::FblEtem
 		//
-		const std::vector<Afbl::AfbElementSignal>& inputSignals = fblElement.inputSignals();
-		for (const Afbl::AfbElementSignal& s : inputSignals)
+		const std::vector<Afbl::AfbSignal>& inputSignals = fblElement.inputSignals();
+		for (const Afbl::AfbSignal& s : inputSignals)
 		{
 			addInput(s);
 		}
 
-		const std::vector<Afbl::AfbElementSignal>& outputSignals = fblElement.outputSignals();
-		for (const Afbl::AfbElementSignal& s : outputSignals)
+		const std::vector<Afbl::AfbSignal>& outputSignals = fblElement.outputSignals();
+		for (const Afbl::AfbSignal& s : outputSignals)
 		{
 			addOutput(s);
 		}
 
 		// Проинициализировать паремтры значением по умолчанию and add Afb properties to class meta object
 		//
-		for (Afbl::AfbElementParam& p : m_params)
+		for (Afbl::AfbParam& p : m_params)
 		{
 			p.setValue(p.defaultValue());
 		}
@@ -127,11 +127,11 @@ namespace VFrame30
 		r.setTop(topDocPt() + m_font.drawSize() * 1.4);
 		r.setHeight(heightDocPt() - m_font.drawSize() * 1.4);
 
-		const std::vector<Afbl::AfbElementParam>& params = afb->params();
+		const std::vector<Afbl::AfbParam>& params = afb->params();
 
 		for (size_t i = 0; i < params.size(); i++)
 		{
-			const Afbl::AfbElementParam& param = params[i];
+			const Afbl::AfbParam& param = params[i];
 
 			if (param.visible() == false)
 			{
@@ -186,9 +186,9 @@ namespace VFrame30
 
 		Proto::Write(vifble->mutable_afbstrid(), m_afbStrID);
 
-		for (const Afbl::AfbElementParam& p : m_params)
+		for (const Afbl::AfbParam& p : m_params)
 		{
-			::Proto::FblElementParam* protoParam = vifble->mutable_params()->Add();
+			::Proto::AfbParam* protoParam = vifble->mutable_params()->Add();
 			p.SaveData(protoParam);
 		}
 
@@ -228,7 +228,7 @@ namespace VFrame30
 
 		for (int i = 0; i < vifble.params_size(); i++)
 		{
-			Afbl::AfbElementParam p;
+			Afbl::AfbParam p;
 			p.LoadData(vifble.params(i));
 
 			m_params.push_back(p);
@@ -255,7 +255,7 @@ namespace VFrame30
 			return false;
 		}
 
-		auto found = std::find_if(m_params.begin(), m_params.end(), [&name](const Afbl::AfbElementParam& p)
+		auto found = std::find_if(m_params.begin(), m_params.end(), [&name](const Afbl::AfbParam& p)
 			{
 				return p.caption() == name;
 			});
@@ -302,7 +302,7 @@ namespace VFrame30
 			return false;
 		}
 
-		for (Afbl::AfbElementParam& param : afbElement->params())
+		for (Afbl::AfbParam& param : afbElement->params())
 		{
 			if (param.user() == false)
 			{
@@ -338,7 +338,7 @@ namespace VFrame30
 
 		// Set new Param Propereties
 		//
-		for (Afbl::AfbElementParam& p : m_params)
+		for (Afbl::AfbParam& p : m_params)
 		{
 			if (p.user() == false)
 			{
@@ -404,7 +404,7 @@ namespace VFrame30
 
 	int SchemeItemAfb::getParamIntValue(const QString& name)
 	{
-		for (Afbl::AfbElementParam& p : m_params)
+		for (Afbl::AfbParam& p : m_params)
 		{
 			if (p.caption() == name)
 			{
@@ -448,7 +448,7 @@ namespace VFrame30
 		return m_afbStrID;
 	}
 
-	const std::vector<Afbl::AfbElementParam>& SchemeItemAfb::params() const
+	const std::vector<Afbl::AfbParam>& SchemeItemAfb::params() const
 	{
 		return m_params;
 	}

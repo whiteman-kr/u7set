@@ -90,8 +90,8 @@ namespace Builder
 	typedef VFrame30::CFblConnectionPoint LogicPin;
 	typedef VFrame30::SchemeItemConst LogicConst;
 	typedef Afbl::AfbElement LogicAfb;
-	typedef Afbl::AfbElementSignal LogicAfbSignal;
-	typedef Afbl::AfbElementParam LogicAfbParam;
+	typedef Afbl::AfbSignal LogicAfbSignal;
+	typedef Afbl::AfbParam LogicAfbParam;
 
 	class AppItem;
 	class ModuleLogicCompiler;

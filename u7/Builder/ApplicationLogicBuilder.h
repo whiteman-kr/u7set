@@ -2,7 +2,7 @@
 #define APPLOGICBUILDER_H
 
 #include "../../VFrame30/SchemeItem.h"
-#include "../../VFrame30/Fbl.h"
+#include "../../VFrame30/Afb.h"
 #include "../../VFrame30/FblItemRect.h"
 
 // Forware delcarations
