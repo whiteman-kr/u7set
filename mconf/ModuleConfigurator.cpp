@@ -138,7 +138,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// --
 	//
-	theLog.writeMessage(tr("Programm is started"), true);
+    theLog.writeMessage(tr("Programm is started"));
 	return;
 }
 
@@ -162,13 +162,13 @@ void ModuleConfigurator::timerEvent(QTimerEvent* pTimerEvent)
 	}
 
 	if (pTimerEvent->timerId() == m_logTimerId && 
-		theLog.windowMessageListEmpty() == false && 
+        theLog.isEmpty() == false &&
 		m_pLog != nullptr)
 	{
 		std::list<OutputLogItem> messages;
-		for (int i = 0; i < 10 && theLog.windowMessageListEmpty() == false; i++)
+        for (int i = 0; i < 10 && theLog.isEmpty() == false; i++)
 		{
-			messages.push_back(theLog.popWindowMessages());
+            messages.push_back(theLog.popMessages());
 		}
 
 		for (auto m = messages.begin(); m != messages.end(); ++m)
@@ -188,35 +188,7 @@ void ModuleConfigurator::writeLog(const OutputLogItem& logItem)
 		return;
 	}
 
-	// --
-	//
-	QString color; 
-	switch (logItem.level)
-	{
-	case OutputMessageLevel::Message:
-		color = "black";
-		break;
-	case OutputMessageLevel::Success:
-		color = "green";
-		break;
-	case OutputMessageLevel::Warning:
-		color = "orange";
-		break;
-	case OutputMessageLevel::Error:
-		color = "red";
-		break;
-		
-	default:
-		assert(false);
-		color = "black";
-	}
-
-	QString s;
-	if (logItem.message.isEmpty() == false)
-	{
-		s = "<font face=\"Verdana\" size=3 color=#808080>" + logItem.time.toString("hh:mm:ss:zzz   ") + "<font color=" + color + ">" + (logItem.bold ? QString("<b>") : QString()) + logItem.message;
-	}
-
+    QString s = logItem.toHtml();
 	m_pLog->append(s);
 	return;
 }
@@ -277,8 +249,8 @@ void ModuleConfigurator::configureClicked()
 
 			// --
 			//
-			theLog.writeMessage("", false);
-			theLog.writeMessage(tr("Writing configuration..."), true);
+            theLog.writeMessage("");
+            theLog.writeMessage(tr("Writing configuration..."));
 
 			// send write in commuinication thread...
 			//
@@ -310,7 +282,7 @@ void ModuleConfigurator::configureClicked()
 	}
 	catch(QString message)
 	{
-		theLog.writeError(message, false, true);
+        theLog.writeError(message);
 		return;
 	}
 
@@ -327,8 +299,8 @@ void ModuleConfigurator::readClicked()
 		{
 			//DiagTabPage* page = dynamic_cast<DiagTabPage*>(m_tabWidget->currentWidget());
 
-			theLog.writeMessage("", false);
-			theLog.writeMessage(tr("Reading configuration..."), true);
+            theLog.writeMessage("");
+            theLog.writeMessage(tr("Reading configuration..."));
 
 			// Read
 			//
@@ -340,7 +312,7 @@ void ModuleConfigurator::readClicked()
 	}
 	catch(QString message)
 	{
-		theLog.writeError(message, false, true);
+        theLog.writeError(message);
 		return;
 	}
 
@@ -369,8 +341,8 @@ void ModuleConfigurator::eraseClicked()
 	{
 		// --
 		//
-		theLog.writeMessage("", false);
-		theLog.writeMessage(tr("Erasing flash memory..."), true);
+        theLog.writeMessage("");
+        theLog.writeMessage(tr("Erasing flash memory..."));
 		
 		// Read
 		//
@@ -380,7 +352,7 @@ void ModuleConfigurator::eraseClicked()
 	}
 	catch(QString message)
 	{
-		theLog.writeError(message, false, true);
+        theLog.writeError(message);
 		return;
 	}
 	
