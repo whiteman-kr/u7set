@@ -60,10 +60,10 @@ message FontParam
 
 //
 //
-// VideoItemPoint
+// SchemePoint
 //
 //
-message VideoItemPoint
+message SchemePoint
 {
 	required double x = 1;
 	required double y = 2;
@@ -109,10 +109,10 @@ message Envelope
 
 	// Possible types for storing
 	//
-	optional VideoItem videoitem = 6;				// VFrame30::CVideoItem
+	optional SchemeItem schemeitem = 6;				// VFrame30::SchemeItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
 	optional Scheme scheme = 100;					// VFrame30::Scheme
-	optional VideoLayer videolayer = 101;			// VFrame30::CVideoLayer
+	optional SchemeLayer schemelayer = 101;			// VFrame30::SchemeLayer
 	optional FblElement fblelement = 102;			// Fbl::FblElement
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 }
@@ -182,18 +182,20 @@ message FblElement
 	optional bool hasRam = 5 [default = false];
 	optional bool requiredStart = 6 [default = true];
 
-	repeated FblElementSignal inputSignals = 11;
-	repeated FblElementSignal outputSignals = 12;
-	repeated FblElementParam params = 13;
+	repeated AfbSignal inputs = 11;
+	repeated AfbSignal outputs = 12;
+	repeated AfbParam params = 13;
+
+	optional wstring description = 14;
 }
 
 
 //
 //
-// Afbl::FblElementSignal
+// Afbl::AfbSignal
 //
 //
-message FblElementSignal
+message AfbSignal
 {
 	required wstring caption = 1;
 	required FblSignalType type = 2;
@@ -205,10 +207,10 @@ message FblElementSignal
 
 //
 //
-// Afbl::FblElementParam
+// Afbl::AfbParam
 //
 //
-message FblElementParam
+message AfbParam
 {
 	required wstring caption = 1;
 	required FblParamType type = 2;
@@ -291,11 +293,11 @@ message LogicScheme
 //------------------------------------------------------------------------------------------
 //
 //
-//			VFrame30::VideoLayer
+//			VFrame30::SchemeLayer
 //
 //
 //------------------------------------------------------------------------------------------
-message VideoLayer
+message SchemeLayer
 {
 	required Uuid uuid = 1;
 	required wstring name = 2;
@@ -303,18 +305,18 @@ message VideoLayer
 	required bool show = 4;
 	required bool print = 5;
 
-	repeated Envelope items = 15;		// Список CVideoItem'ов
+	repeated Envelope items = 15;		// Список SchmeItem'ов
 }
 
 
 //------------------------------------------------------------------------------------------
 //
 //
-//			VFrame30::VideItems
+//			VFrame30::SchemeItem
 //
 //
 //------------------------------------------------------------------------------------------
-message VideoItem
+message SchemeItem
 {
 	required Uuid uuid = 1;
 	required bool isStatic = 2;
@@ -323,7 +325,7 @@ message VideoItem
 	optional bool acceptClick = 5 [default = false];
 	optional wstring clickScript = 6;
 
-	// Наследуемые от CVideoItem
+	// Наследуемые от SchmeItem
 	//
 	optional PosRectImpl PosRectImpl = 10;
 	optional PosLineImpl PosLineImpl = 11;
@@ -337,15 +339,15 @@ message VideoItem
 	
 	// Наслдедуемые от PosRectImpl, PosLineImpl, PosConnectionImpl
 	//
-	optional VideoItemRect Rect = 116;							// +PosRectImpl
-	optional VideoItemLine Line = 117;							// +PosLineImpl
-	optional VideoItemConnectionLine ConnectionLine = 118;		// +PosConnectionImpl
+	optional SchemeItemRect Rect = 116;							// +PosRectImpl
+	optional SchemeItemLine Line = 117;							// +PosLineImpl
+	optional SchemeItemPath Path = 118;							// +PosConnectionImpl
 	
-	optional VideoItemSignal Signal = 124;						// +FblItemRect
-	optional VideoItemInputSignal InputSignal = 125;			// +Signal
-	optional VideoItemOutputSignal OutputSignal = 126;			// +Signal
-	optional VideoItemLink Link = 127;							// +FblItemLine
-	optional VideoItemFblElement VideoItemFblElement = 128;		// +FblItemRect
+	optional SchemeItemSignal Signal = 124;						// +FblItemRect
+	optional SchemeItemInput InputSignal = 125;					// +Signal
+	optional SchemeItemOutput OutputSignal = 126;				// +Signal
+	optional SchemeItemLink Link = 127;							// +FblItemLine
+	optional SchemeItemAfb Afb = 128;							// +FblItemRect
 	optional SchemeItemConst ConstItem = 129;					// +FblItemRect
 }
 
@@ -385,16 +387,16 @@ message PosLineImpl
 //
 message PosConnectionImpl
 {
-	repeated VideoItemPoint points = 1;
+	repeated SchemePoint points = 1;
 }
 
 
 //
 //
-// VideoItemRect
+// SchemeItemRect
 //
 //
-message VideoItemRect
+message SchemeItemRect
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
@@ -408,10 +410,10 @@ message VideoItemRect
 
 //
 //
-// VideoItemLine
+// SchemeItemLine
 //
 //
-message VideoItemLine
+message SchemeItemLine
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
@@ -419,10 +421,10 @@ message VideoItemLine
 
 //
 //
-// VideoItemConnectionLine
+// SchemeItemPath
 //
 //
-message VideoItemConnectionLine
+message SchemeItemPath
 {
 	required double weight = 1;
 	required uint32 lineColor = 2;
@@ -436,7 +438,7 @@ message VideoItemConnectionLine
 //
 message FblConnectionPoint
 {
-	optional VideoItemPoint point = 1;					// Can be removed in future, not used anymore
+	optional SchemePoint point = 1;					// Can be removed in future, not used anymore
 	optional ConnectionDirrection dirrection = 2;
 	optional Uuid uuid = 3;
 	optional int32 operandIndex = 4 [default = -1];		// -1 is not used, for links etc...
@@ -487,10 +489,10 @@ message FblItemLine
 
 //
 //
-// VideoItemSignal
+// SchemeItemSignal
 //
 //
-message VideoItemSignal
+message SchemeItemSignal
 {
 	repeated wstring signalStrIDs = 1;
 }
@@ -498,42 +500,42 @@ message VideoItemSignal
 
 //
 //
-// VideoItemInputSignal
+// SchemeItemInput
 //
 //
-message VideoItemInputSignal
+message SchemeItemInput
 {
 }
 
 
 //
 //
-// VideoItemOutputSignal
+// SchemeItemOutput
 //
 //
-message VideoItemOutputSignal
+message SchemeItemOutput
 {
 }
 
 
 //
 //
-// VideoItemLink
+// SchemeItemLink
 //
 //
-message VideoItemLink
+message SchemeItemLink
 {
 }
 
 
 //
 //
-// VideoItemFblElement
+// SchemeItemAfb
 //
 //
-message VideoItemFblElement
+message SchemeItemAfb
 {
-	repeated FblElementParam params = 2;
+	repeated AfbParam params = 2;
 	optional wstring afbStrid = 3;
 }
 

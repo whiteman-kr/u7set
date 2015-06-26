@@ -1,5 +1,4 @@
 #include "EditEngineMoveItem.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
 
 namespace EditEngine
@@ -8,7 +7,7 @@ namespace EditEngine
 	MoveItemCommand::MoveItemCommand(EditSchemeView* schemeView,
 			double xdiff,
 			double ydiff,
-			const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
+			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 			bool snapToGrid,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
@@ -25,34 +24,34 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::executeCommand(EditSchemeView* videoFrameView)
+	void MoveItemCommand::executeCommand(EditSchemeView* schemeView)
 	{
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 
-		for (std::shared_ptr<VFrame30::VideoItem> item : m_items)
+		for (std::shared_ptr<VFrame30::SchemeItem> item : m_items)
 		{
 			item->MoveItem(m_xdiff, m_ydiff);
 
 			if (m_snapToGrid)
 			{
-				item->snapToGrid(videoFrameView->scheme()->gridSize());
+				item->snapToGrid(schemeView->scheme()->gridSize());
 			}
 		}
 
 		return;
 	}
 
-	void MoveItemCommand::unExecuteCommand(EditSchemeView* videoFrameView)
+	void MoveItemCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 
-		for (std::shared_ptr<VFrame30::VideoItem> item : m_items)
+		for (std::shared_ptr<VFrame30::SchemeItem> item : m_items)
 		{
 			item->MoveItem(-m_xdiff, -m_ydiff);
 
 			if (m_snapToGrid)
 			{
-				item->snapToGrid(videoFrameView->scheme()->gridSize());
+				item->snapToGrid(schemeView->scheme()->gridSize());
 			}
 		}
 

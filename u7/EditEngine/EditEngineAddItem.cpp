@@ -1,37 +1,36 @@
 #include "EditEngineAddItem.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
 
 namespace EditEngine
 {
-	AddItemCommand::AddItemCommand(EditSchemeView* videoFrameView, std::list<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
-		: EditCommand(videoFrameView, hScrollBar, vScrollBar)
+	AddItemCommand::AddItemCommand(EditSchemeView* schemeView, std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+		: EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
-		assert(videoFrameView != nullptr);
+		assert(schemeView != nullptr);
 		assert(items.empty() == false);
 		assert(layer != nullptr);
 
 		m_items = items;
 		m_layer = layer;
 
-		m_selectedItems = videoFrameView->selectedItems();
+		m_selectedItems = schemeView->selectedItems();
 
 		return;
 	}
 
-	void AddItemCommand::executeCommand(EditSchemeView* videoFrameView)
+	void AddItemCommand::executeCommand(EditSchemeView* schemeView)
 	{
 		m_layer->Items.insert(m_layer->Items.end(), m_items.begin(), m_items.end());
 
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 	}
 
-	void AddItemCommand::unExecuteCommand(EditSchemeView* videoFrameView)
+	void AddItemCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
 		for (auto si = m_items.begin(); si != m_items.end(); ++si)
 		{
 			auto findResult = std::find_if(m_layer->Items.begin(), m_layer->Items.end(),
-				[&si](std::shared_ptr<VFrame30::VideoItem> item)
+				[&si](std::shared_ptr<VFrame30::SchemeItem> item)
 				{
 					return item.get() == si->get();
 				});
@@ -46,6 +45,6 @@ namespace EditEngine
 			}
 		}
 
-		videoFrameView->setSelectedItems(m_selectedItems);
+		schemeView->setSelectedItems(m_selectedItems);
 	}
 }

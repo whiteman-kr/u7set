@@ -6,14 +6,14 @@
 #include "WorkflowScheme.h"
 #include "WiringScheme.h"
 #include "SchemeLayer.h"
-#include "VideoItemLine.h"
-#include "VideoItemRect.h"
-#include "VideoItemConnectionLine.h"
+#include "SchemeItemLine.h"
+#include "SchemeItemRect.h"
+#include "SchemeItemPath.h"
 #include "FblItemLine.h"
 #include "FblItemRect.h"
-#include "VideoItemLink.h"
-#include "VideoItemFblElement.h"
-#include "VideoItemSignal.h"
+#include "SchemeItemLink.h"
+#include "SchemeItemAfb.h"
+#include "SchemeItemSignal.h"
 #include "SchemeItemConst.h"
 #include "../include/Types.h"
 
@@ -28,29 +28,29 @@ namespace VFrame30
 	{
 		qDebug() << Q_FUNC_INFO;
 
-		// Registering VideoFrames
+		// Registering Schemes
 		//
-		VideoFrameFactory.Register<DiagScheme>();
-		VideoFrameFactory.Register<LogicScheme>();
-		VideoFrameFactory.Register<WorkflowScheme>();
-		VideoFrameFactory.Register<WiringScheme>();
+		SchemeFactory.Register<DiagScheme>();
+		SchemeFactory.Register<LogicScheme>();
+		SchemeFactory.Register<WorkflowScheme>();
+		SchemeFactory.Register<WiringScheme>();
 
 		// Registering VideoLayers
 		//
 		VideoLayerFactory.Register<SchemeLayer>();
 
-		// Registering VideoItems
+		// Registering SchemeItems
 		//
-		VideoItemFactory.Register<VideoItemLine>();
-		VideoItemFactory.Register<VideoItemRect>();
-		VideoItemFactory.Register<VideoItemConnectionLine>();
-		VideoItemFactory.Register<FblItemLine>();
-		VideoItemFactory.Register<FblItemRect>();
-		VideoItemFactory.Register<VideoItemLink>();
-		VideoItemFactory.Register<VideoItemFblElement>();
-		VideoItemFactory.Register<VideoItemInputSignal>();
-		VideoItemFactory.Register<VideoItemOutputSignal>();
-		VideoItemFactory.Register<SchemeItemConst>();
+		SchemeItemFactory.Register<SchemeItemLine>();
+		SchemeItemFactory.Register<SchemeItemRect>();
+		SchemeItemFactory.Register<SchemeItemPath>();
+		SchemeItemFactory.Register<FblItemLine>();
+		SchemeItemFactory.Register<FblItemRect>();
+		SchemeItemFactory.Register<SchemeItemLink>();
+		SchemeItemFactory.Register<SchemeItemAfb>();
+		SchemeItemFactory.Register<SchemeItemInput>();
+		SchemeItemFactory.Register<SchemeItemOutput>();
+		SchemeItemFactory.Register<SchemeItemConst>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemeItemConst::ConstType>(IntToEnum<VFrame30::SchemeItemConst::ConstType>);
 

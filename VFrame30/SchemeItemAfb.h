@@ -5,23 +5,23 @@
 namespace VFrame30
 {
 	//
-	// CVideoItemInputSignal
+	// SchemeItemAfb
 	//
-	class VFRAME30LIBSHARED_EXPORT VideoItemFblElement : public FblItemRect
+	class VFRAME30LIBSHARED_EXPORT SchemeItemAfb : public FblItemRect
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<VideoItemFblElement>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemAfb>;
 #endif
 
 	private:
-		VideoItemFblElement(void);
+		SchemeItemAfb(void);
 	public:
-		explicit VideoItemFblElement(SchemeUnit unit);
-		VideoItemFblElement(SchemeUnit unit, const Afbl::AfbElement& fblElement);
+		explicit SchemeItemAfb(SchemeUnit unit);
+		SchemeItemAfb(SchemeUnit unit, const Afbl::AfbElement& fblElement);
 
-		virtual ~VideoItemFblElement(void);
+		virtual ~SchemeItemAfb(void);
 
 		// Draw Functions
 		//
@@ -40,6 +40,9 @@ namespace VFrame30
 		// Methods
 		//
 	public:
+
+		virtual QString buildName() const override;
+
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Scheme> scheme);
 
 		// Set Afb element parameters
@@ -61,11 +64,11 @@ namespace VFrame30
 	public:
 		const QString& afbStrID() const;
 
-		const std::vector<Afbl::AfbElementParam>& params() const;
+		const std::vector<Afbl::AfbParam>& params() const;
 
 	private:
 		QString m_afbStrID;
-		std::vector<Afbl::AfbElementParam> m_params;
+		std::vector<Afbl::AfbParam> m_params;
 	};
 
 }

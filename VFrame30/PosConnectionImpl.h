@@ -1,18 +1,18 @@
 #pragma once
 
-#include "VideoItem.h"
+#include "SchemeItem.h"
 #include "Settings.h"
 
 namespace VFrame30
 {
-	// Интерфейс для VideoItem который хранит координаты в виде направленной линии,
+	// Интерфейс для SchemeItem который хранит координаты в виде направленной линии,
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
-	class IVideoItemPosConnection
+	class IPosConnection
 	{
 	public:
-		virtual const std::list<VideoItemPoint>& GetPointList() const = 0;
-		virtual void SetPointList(const std::list<VideoItemPoint>& points) = 0;
+		virtual const std::list<SchemePoint>& GetPointList() const = 0;
+		virtual void SetPointList(const std::list<SchemePoint>& points) = 0;
 
 		virtual void AddPoint(double x, double y) = 0;
 		virtual void RemoveSamePoints() = 0;
@@ -21,14 +21,14 @@ namespace VFrame30
 
 		// Работа с Extension точками, которые участвуют в отрисовке при создании элемента, DrawOutline
 		//
-		virtual const std::list<VideoItemPoint>& GetExtensionPoints() const = 0;
-		virtual void SetExtensionPoints(const std::list<VideoItemPoint>& extPoints) = 0;
+		virtual const std::list<SchemePoint>& GetExtensionPoints() const = 0;
+		virtual void SetExtensionPoints(const std::list<SchemePoint>& extPoints) = 0;
 		virtual void AddExtensionPoint(double x, double y) = 0;
 		virtual void DeleteAllExtensionPoints() = 0;
 		virtual void DeleteLastExtensionPoint() = 0;
 	};
 
-	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public VideoItem, public IVideoItemPosConnection
+	class VFRAME30LIBSHARED_EXPORT PosConnectionImpl : public SchemeItem, public IPosConnection
 	{
 		Q_OBJECT
 
@@ -77,31 +77,31 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const override;
 
-		// Get VideoItem bounding rectangle in itemUnit()
+		// Get SchemeItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
-		// Реализация интерефейса IVideoItemPosLine
+		// IPosLine
 		//
 	private:
-		std::list<VideoItemPoint> points;
-		std::list<VideoItemPoint> extPoints;	// точки, которые используются при DrawOutline, не сериализируются
+		std::list<SchemePoint> points;
+		std::list<SchemePoint> extPoints;	// точки, которые используются при DrawOutline, не сериализируются
 
 	public:
-		virtual const std::list<VideoItemPoint>& GetPointList() const override;
-		virtual void SetPointList(const std::list<VideoItemPoint>& points) override;
+		virtual const std::list<SchemePoint>& GetPointList() const override;
+		virtual void SetPointList(const std::list<SchemePoint>& points) override;
 		virtual void AddPoint(double x, double y) override;
 		virtual void RemoveSamePoints() override;
 		virtual void DeleteAllPoints() override;
 		virtual void DeleteLastPoint() override;
 
-		virtual const std::list<VideoItemPoint>& GetExtensionPoints() const override;
-		virtual void SetExtensionPoints(const std::list<VideoItemPoint>& extPoints) override;
+		virtual const std::list<SchemePoint>& GetExtensionPoints() const override;
+		virtual void SetExtensionPoints(const std::list<SchemePoint>& extPoints) override;
 		virtual void AddExtensionPoint(double x, double y) override;
 		virtual void DeleteAllExtensionPoints() override;
 		virtual void DeleteLastExtensionPoint() override;
 
-		// Реализация интерефейса IVideoItemPropertiesPos
+		// Реализация интерефейса ISchemeItemPropertiesPos
 		//
 	public:
 		virtual double left() const override;
@@ -119,8 +119,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<VideoItemPoint> getPointList() const override;
-		virtual void setPointList(const std::vector<VideoItemPoint>& points) override;
+		virtual std::vector<SchemePoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemePoint>& points) override;
 	};
 
 }

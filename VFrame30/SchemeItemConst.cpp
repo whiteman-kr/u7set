@@ -23,16 +23,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemeItemConst* constitem = message->mutable_videoitem()->mutable_constitem();
+		Proto::SchemeItemConst* constitem = message->mutable_schemeitem()->mutable_constitem();
 
 		constitem->set_type(m_type);
 		constitem->set_intvalue(m_intValue);
@@ -51,13 +51,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.videoitem().has_constitem() == false)
+		if (message.schemeitem().has_constitem() == false)
 		{
-			assert(message.videoitem().has_constitem() == true);
+			assert(message.schemeitem().has_constitem() == true);
 			return false;
 		}
 
-		const Proto::SchemeItemConst& constitem = message.videoitem().constitem();
+		const Proto::SchemeItemConst& constitem = message.schemeitem().constitem();
 
 		m_type = static_cast<ConstType>(constitem.type());
 		m_intValue = constitem.intvalue();
@@ -142,6 +142,11 @@ namespace VFrame30
 		}
 
 		return text;
+	}
+
+	QString SchemeItemConst::buildName() const
+	{
+		return QString("Const (%1)").arg(valueToString());
 	}
 
 	SchemeItemConst::ConstType SchemeItemConst::type() const

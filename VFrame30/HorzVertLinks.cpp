@@ -5,7 +5,7 @@ namespace VFrame30
 {
 	// -- Используется для сохранения декомпозированных Link'ов, в BuildFblConnectionMap
 	//
-	void CHorzVertLinks::AddLinks(const std::list<VideoItemPoint>& pointList, const QUuid& VideoItemGuid)
+	void CHorzVertLinks::AddLinks(const std::list<SchemePoint>& pointList, const QUuid& schemeItemGuid)
 	{
 		// разложить кривую на отдельные отрезки и занести их в horzlinks и vertlinks
 		//
@@ -17,19 +17,19 @@ namespace VFrame30
 			auto prevpoint = linkpoint;
 			--prevpoint;
 
-			VideoItemPoint pt1 = *prevpoint;
-			VideoItemPoint pt2 = *linkpoint;
+			SchemePoint pt1 = *prevpoint;
+			SchemePoint pt2 = *linkpoint;
 
 			if (std::abs(pt1.X - pt2.X) < 0.000001)	// is it verical line?
 			{
-				LINKS l(std::min(pt1.Y, pt2.Y), std::max(pt1.Y, pt2.Y), VideoItemGuid);
+				LINKS l(std::min(pt1.Y, pt2.Y), std::max(pt1.Y, pt2.Y), schemeItemGuid);
 				vertlinks.insert(std::make_pair(pt1.X, l));
 				continue;
 			}
 
 			if (std::abs(pt1.Y - pt2.Y) < 0.000001)	// is it horizontal line?
 			{
-				LINKS l(std::min(pt1.X, pt2.X), std::max(pt1.X, pt2.X), VideoItemGuid);
+				LINKS l(std::min(pt1.X, pt2.X), std::max(pt1.X, pt2.X), schemeItemGuid);
 				horzlinks.insert(std::make_pair(pt1.Y, l));
 				continue;
 			}
@@ -42,7 +42,7 @@ namespace VFrame30
 
 	// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 	//
-	bool CHorzVertLinks::IsPointOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid)
+	bool CHorzVertLinks::IsPointOnLink(SchemePoint pt, const QUuid& schemeItemGuid)
 	{
 		// есть ли такая точка в вертикальных отрезках?
 		//
@@ -50,7 +50,7 @@ namespace VFrame30
 		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
 		{
 			if (vertline->second.IsValInRange(pt.Y) == true &&
-				VideoItemGuid != vertline->second.VideoItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemeItemGuid != vertline->second.SchemeItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				return true;
 			}
@@ -70,7 +70,7 @@ namespace VFrame30
 		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
 		{
 			if (horzline->second.IsValInRange(pt.X) == true &&
-				VideoItemGuid != horzline->second.VideoItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemeItemGuid != horzline->second.SchemeItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				return true;
 			}
@@ -83,7 +83,7 @@ namespace VFrame30
 
 	// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 	//
-	bool CHorzVertLinks::IsPinOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid)
+	bool CHorzVertLinks::IsPinOnLink(SchemePoint pt, const QUuid& schemeItemGuid)
 	{
 		// есть ли такая точка в вертикальных отрезках?
 		//
@@ -91,7 +91,7 @@ namespace VFrame30
 		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
 		{
 			if (vertline->second.IsValInRange(pt.Y) == true &&
-				VideoItemGuid != vertline->second.VideoItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemeItemGuid != vertline->second.SchemeItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				return true;
 			}
@@ -111,7 +111,7 @@ namespace VFrame30
 		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
 		{
 			if (horzline->second.IsValOnEndPoints(pt.X) == true &&
-				VideoItemGuid != horzline->second.VideoItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemeItemGuid != horzline->second.SchemeItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				return true;
 			}
@@ -122,7 +122,7 @@ namespace VFrame30
 		return false;
 	}
 
-	std::list<QUuid> CHorzVertLinks::getVideoItemsUnderPoint(VideoItemPoint pt, QUuid VideoItemGuid)
+	std::list<QUuid> CHorzVertLinks::getSchemeItemsUnderPoint(SchemePoint pt, QUuid schemeItemGuid)
 	{
 		std::list<QUuid> items;
 
@@ -132,9 +132,9 @@ namespace VFrame30
 		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
 		{
 			if (vertline->second.IsValInRange(pt.Y) == true &&
-				VideoItemGuid != vertline->second.VideoItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemeItemGuid != vertline->second.SchemeItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
-				items.push_back(vertline->second.VideoItemGuid);
+				items.push_back(vertline->second.SchemeItemGuid);
 			}
 
 			++ vertline;
@@ -152,9 +152,9 @@ namespace VFrame30
 		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
 		{
 			if (horzline->second.IsValInRange(pt.X) == true &&
-				VideoItemGuid != horzline->second.VideoItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+				schemeItemGuid != horzline->second.SchemeItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
-				items.push_back(horzline->second.VideoItemGuid);
+				items.push_back(horzline->second.SchemeItemGuid);
 			}
 
 			++ horzline;

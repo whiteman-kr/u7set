@@ -1,8 +1,9 @@
 #ifndef APPLOGICBUILDER_H
 #define APPLOGICBUILDER_H
 
-#include "../../VFrame30/VideoItem.h"
-#include "../../VFrame30/Fbl.h"
+#include "../../VFrame30/SchemeItem.h"
+#include "../../VFrame30/Afb.h"
+#include "../../VFrame30/FblItemRect.h"
 
 // Forware delcarations
 //
@@ -21,7 +22,7 @@ namespace VFrame30
 {
 	class LogicScheme;
 	class SchemeLayer;
-	class VideoItemFblElement;
+	class SchemeItemAfb;
 	class FblItemRect;
 }
 
@@ -37,14 +38,14 @@ namespace Builder
 	struct Link
 	{
 		Link() = default;
-		Link(const std::list<VFrame30::VideoItemPoint>& points);
+		Link(const std::list<VFrame30::SchemePoint>& points);
 
-		VFrame30::VideoItemPoint ptBegin() const;
-		VFrame30::VideoItemPoint ptEnd() const;
+		VFrame30::SchemePoint ptBegin() const;
+		VFrame30::SchemePoint ptEnd() const;
 
-		bool isPinOnLink(VFrame30::VideoItemPoint pt) const;
+		bool isPinOnLink(VFrame30::SchemePoint pt) const;
 
-		std::list<VFrame30::VideoItemPoint> m_points;
+		std::list<VFrame30::SchemePoint> m_points;
 	};
 
 	struct Bush
@@ -53,13 +54,16 @@ namespace Builder
 		std::set<QUuid> inputPins;				// Input pins for this branch
 		std::map<QUuid, Link> links;			// Links for this branch
 		std::set<std::shared_ptr<VFrame30::FblItemRect>> fblItems;
+
+		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId);
+		VFrame30::CFblConnectionPoint pinByGuid(QUuid pinId);
 	};
 
 	struct BushContainer
 	{
 		std::vector<Bush> bushes;
 
-		int getBranchByPinPos(VFrame30::VideoItemPoint pt) const;
+		int getBranchByPinPos(VFrame30::SchemePoint pt) const;
 		int getBranchByPinGuid(const QUuid& guid) const;
 	};
 
@@ -116,7 +120,7 @@ namespace Builder
 		bool orderItems(OutputLog* log);
 
 	private:
-		// Set connection between VideoItemInputSignal/VideoItemOutputSignal by StrIds
+		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
 		//
 		bool setInputOutputsElementsConnection(OutputLog* log);
 
@@ -217,11 +221,11 @@ namespace Builder
 
 		bool setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme,
 									  std::shared_ptr<VFrame30::SchemeLayer> layer,
-									  BushContainer* branchContainer) const;
+									  BushContainer* bushContainer) const;
 
 		bool setPinConnections(std::shared_ptr<VFrame30::LogicScheme> scheme,
 							   std::shared_ptr<VFrame30::SchemeLayer> layer,
-							   BushContainer* branchContainer);
+							   BushContainer* bushContainer);
 
 	private:
 		DbController* db();

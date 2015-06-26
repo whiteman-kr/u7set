@@ -6,7 +6,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDateTime>
-#include "../VFrame30/Fbl.h"
+#include "../VFrame30/Afb.h"
 
 using namespace Afbl;
 
@@ -127,12 +127,12 @@ void DialogAfblEditor::on_m_add_clicked()
 	// Add test signals
 	//
 
-	AfbElementSignal signal;
+	AfbSignal signal;
 	signal.setOpName("SignalName");
 	signal.setCaption("SignalCaption");
 	signal.setType(AfbSignalType::Analog);
 
-	std::vector<AfbElementSignal> afbSignals;
+	std::vector<AfbSignal> afbSignals;
 	afbSignals.push_back(signal);
 	afb.setInputSignals(afbSignals);
 	afb.setOutputSignals(afbSignals);
@@ -143,7 +143,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	// Param 1
 	//
 
-	AfbElementParam param1;
+	AfbParam param1;
 	param1.setOpName("ParamName");
 	param1.setCaption("Param1Caption");
 	param1.setType(AfbParamType::AnalogIntegral);
@@ -155,7 +155,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	// Param 2
 	//
 
-	AfbElementParam param2;
+	AfbParam param2;
 	param2.setOpName("ParamName");
 	param2.setCaption("Param2Caption");
 	param2.setType(AfbParamType::AnalogFloatingPoint);
@@ -167,7 +167,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	// Param 3
 	//
 
-	AfbElementParam param3;
+	AfbParam param3;
 	param3.setOpName("ParamName");
 	param3.setCaption("Param3Caption");
 	param3.setType(AfbParamType::DiscreteValue);
@@ -176,7 +176,7 @@ void DialogAfblEditor::on_m_add_clicked()
 	param3.setLowLimit(false);
 	param3.setHighLimit(false);
 
-	std::vector<AfbElementParam> afbParams;
+	std::vector<AfbParam> afbParams;
 	afbParams.push_back(param1);
 	afbParams.push_back(param2);
 	afbParams.push_back(param3);

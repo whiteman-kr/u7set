@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VideoItem.h"
+#include "SchemeItem.h"
 #include "Settings.h"
 
 class QPen;
@@ -9,10 +9,10 @@ namespace VFrame30
 {
 	class CDrawParam;
 
-	// Интерфейс для VideoItem который хранит координаты в виде прямоугольника, координаты должны быть нормализированы.
+	// Интерфейс для SchemeItem который хранит координаты в виде прямоугольника, координаты должны быть нормализированы.
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
-	class IVideoItemPosRect
+	class IPosRect
 	{
 	public:
 		virtual double leftDocPt() const = 0;
@@ -34,7 +34,7 @@ namespace VFrame30
 
 	// Реализация базовых интерефейсов для элементов прямоугольного типа
 	//
-	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public VideoItem, public IVideoItemPosRect
+	class VFRAME30LIBSHARED_EXPORT PosRectImpl : public SchemeItem, public IPosRect
 	{
 		Q_OBJECT
 
@@ -86,11 +86,11 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const override;
 
-		// Get VideoItem bounding rectangle in itemUnit()
+		// Get SchemeItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
-		// Реализация интерефейса IVideoItemPosRect
+		// IPosRect
 		//
 	private:
 		double m_leftDocPt;
@@ -116,7 +116,7 @@ namespace VFrame30
 		virtual double heightDocPt() const override;
 		virtual void setHeightDocPt(double value) override;
 
-		// Реализация интерефейса IVideoItemPropertiesPos
+		// Реализация интерефейса ISchemeItemPropertiesPos
 		//
 	public:
 		virtual double left() const override;
@@ -134,8 +134,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<VideoItemPoint> getPointList() const override;
-		virtual void setPointList(const std::vector<VideoItemPoint>& points) override;
+		virtual std::vector<SchemePoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemePoint>& points) override;
 	};
 }
 

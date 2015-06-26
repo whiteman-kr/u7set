@@ -6,7 +6,7 @@
 
 //
 //
-//	VideoFrameFileView
+//	SchemeFileView
 //
 //
 SchemeFileView::SchemeFileView(DbController* dbcontroller, const QString& parentFileName) :
@@ -73,7 +73,7 @@ void SchemeFileView::fileDoubleClicked(DbFileInfo file)
 
 //
 //
-// EditVideoFrameTabPage
+// SchemesTabPage
 //
 //
 SchemesTabPage::SchemesTabPage(DbController* dbcontroller, QWidget* parent) :
@@ -144,53 +144,19 @@ void SchemesTabPage::projectClosed()
 
 //
 //
-// VideoFrameControlTabPage
+// SchemeControlTabPage
 //
 //
 
-SchemeControlTabPage::SchemeControlTabPage(const QString& fileExt,
-		DbController* dbcontroller, const QString& parentFileName,
-		std::function<VFrame30::Scheme*()> createVideoFrameFunc) :
 
-	HasDbController(dbcontroller),
-	m_createVideoFrameFunc(createVideoFrameFunc)
-{
-	// Create actions
-	//
-	CreateActions();
-
-	// Create controls
-	//
-	m_filesView = new SchemeFileView(dbcontroller, parentFileName);
-	m_filesView->filesModel().setFilter(fileExt);
-
-	QHBoxLayout* pMainLayout = new QHBoxLayout();
-	pMainLayout->addWidget(m_filesView);
-
-	setLayout(pMainLayout);
-
-	// --
-	//
-	//connect(dbcontroller, &DbController::projectOpened, this, &VideoFrameControlTabPage::projectOpened);
-	//connect(dbcontroller, &DbController::projectClosed, this, &VideoFrameControlTabPage::projectClosed);
-
-	connect(m_filesView, &SchemeFileView::openFileSignal, this, &SchemeControlTabPage::openFiles);
-	connect(m_filesView, &SchemeFileView::viewFileSignal, this, &SchemeControlTabPage::viewFiles);
-	connect(m_filesView, &SchemeFileView::addFileSignal, this, &SchemeControlTabPage::addFile);
-	connect(m_filesView, &SchemeFileView::deleteFileSignal, this, &SchemeControlTabPage::deleteFile);
-	connect(m_filesView, &SchemeFileView::checkInSignal, this, &SchemeControlTabPage::checkIn);
-	connect(m_filesView, &SchemeFileView::undoChangesSignal, this, &SchemeControlTabPage::undoChanges);
-
-	return;
-}
 
 SchemeControlTabPage::~SchemeControlTabPage()
 {
 }
 
-VFrame30::Scheme* SchemeControlTabPage::createVideoFrame() const
+VFrame30::Scheme* SchemeControlTabPage::createScheme() const
 {
-	return m_createVideoFrameFunc();
+	return m_createSchemeFunc();
 }
 
 void SchemeControlTabPage::CreateActions()
@@ -224,9 +190,9 @@ void SchemeControlTabPage::addFile()
 		fileName += "." + m_filesView->filesModel().filter();
 	}
 
-	// Create new videoframe and add it to the vcs
+	// Create new Scheme and add it to the vcs
 	//
-	std::shared_ptr<VFrame30::Scheme> scheme(m_createVideoFrameFunc());
+	std::shared_ptr<VFrame30::Scheme> scheme(m_createSchemeFunc());
 
 	scheme->setGuid(QUuid::createUuid());
 
@@ -709,34 +675,34 @@ const DbFileInfo& SchemeControlTabPage::parentFile() const
 
 //
 //
-// EditVideoFrameTabPage
+// EditSchemeTabPage
 //
 //
-EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* dbcontroller) :
+EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* dbcontroller) :
 	HasDbController(dbcontroller),
-	m_videoFrameWidget(nullptr)
+	m_schemeWidget(nullptr)
 {
-	assert(videoFrame.get() != nullptr);
+	assert(scheme.get() != nullptr);
 
-	setWindowTitle(videoFrame->strID());
+	setWindowTitle(scheme->strID());
 
 	CreateActions();
 
 	// Create controls
 	//
-	m_videoFrameWidget = new EditSchemeWidget(videoFrame, fileInfo, dbcontroller);
+	m_schemeWidget = new EditSchemeWidget(scheme, fileInfo, dbcontroller);
 
-	connect(m_videoFrameWidget, &EditSchemeWidget::closeTab, this, &EditSchemeTabPage::closeTab);
-	connect(m_videoFrameWidget, &EditSchemeWidget::modifiedChanged, this, &EditSchemeTabPage::modifiedChanged);
-	connect(m_videoFrameWidget, &EditSchemeWidget::saveWorkcopy, this, &EditSchemeTabPage::saveWorkcopy);
-	connect(m_videoFrameWidget, &EditSchemeWidget::checkInFile, this, &EditSchemeTabPage::checkInFile);
-	connect(m_videoFrameWidget, &EditSchemeWidget::checkOutFile, this, &EditSchemeTabPage::checkOutFile);
-	connect(m_videoFrameWidget, &EditSchemeWidget::undoChangesFile, this, &EditSchemeTabPage::undoChangesFile);
-	connect(m_videoFrameWidget, &EditSchemeWidget::getCurrentWorkcopy, this, &EditSchemeTabPage::getCurrentWorkcopy);
-	connect(m_videoFrameWidget, &EditSchemeWidget::setCurrentWorkcopy, this, &EditSchemeTabPage::setCurrentWorkcopy);
+	connect(m_schemeWidget, &EditSchemeWidget::closeTab, this, &EditSchemeTabPage::closeTab);
+	connect(m_schemeWidget, &EditSchemeWidget::modifiedChanged, this, &EditSchemeTabPage::modifiedChanged);
+	connect(m_schemeWidget, &EditSchemeWidget::saveWorkcopy, this, &EditSchemeTabPage::saveWorkcopy);
+	connect(m_schemeWidget, &EditSchemeWidget::checkInFile, this, &EditSchemeTabPage::checkInFile);
+	connect(m_schemeWidget, &EditSchemeWidget::checkOutFile, this, &EditSchemeTabPage::checkOutFile);
+	connect(m_schemeWidget, &EditSchemeWidget::undoChangesFile, this, &EditSchemeTabPage::undoChangesFile);
+	connect(m_schemeWidget, &EditSchemeWidget::getCurrentWorkcopy, this, &EditSchemeTabPage::getCurrentWorkcopy);
+	connect(m_schemeWidget, &EditSchemeWidget::setCurrentWorkcopy, this, &EditSchemeTabPage::setCurrentWorkcopy);
 
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
-	pMainLayout->addWidget(m_videoFrameWidget);
+	pMainLayout->addWidget(m_schemeWidget);
 
 	setLayout(pMainLayout);
 
@@ -762,11 +728,11 @@ void EditSchemeTabPage::setPageTitle()
 	{
 		if (fileInfo().changeset() == -1 || fileInfo().changeset() == 0)
 		{
-			newTitle = QString("%1: ReadOnly").arg(m_videoFrameWidget->scheme()->strID());
+			newTitle = QString("%1: ReadOnly").arg(m_schemeWidget->scheme()->strID());
 		}
 		else
 		{
-			newTitle = QString("%1: %2 ReadOnly").arg(m_videoFrameWidget->scheme()->strID()).arg(fileInfo().changeset());
+			newTitle = QString("%1: %2 ReadOnly").arg(m_schemeWidget->scheme()->strID()).arg(fileInfo().changeset());
 		}
 
 		if (fileInfo().deleted() == true)
@@ -778,11 +744,11 @@ void EditSchemeTabPage::setPageTitle()
 	{
 		if (modified() == true)
 		{
-			newTitle = m_videoFrameWidget->scheme()->strID() + "*";
+			newTitle = m_schemeWidget->scheme()->strID() + "*";
 		}
 		else
 		{
-			newTitle = m_videoFrameWidget->scheme()->strID();
+			newTitle = m_schemeWidget->scheme()->strID();
 		}
 	}
 
@@ -802,7 +768,7 @@ void EditSchemeTabPage::CreateActions()
 
 void EditSchemeTabPage::closeTab()
 {
-	if (m_videoFrameWidget->modified() == true)
+	if (m_schemeWidget->modified() == true)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("The document has been modified."));
@@ -921,17 +887,17 @@ void EditSchemeTabPage::checkOutFile()
 		return;
 	}
 
-	m_videoFrameWidget->scheme()->Load(out[0].get()->data());
+	m_schemeWidget->scheme()->Load(out[0].get()->data());
 
 	setFileInfo(*(out.front().get()));
 
 	setReadOnly(false);
 	setPageTitle();
 
-	m_videoFrameWidget->resetAction();
-	m_videoFrameWidget->clearSelection();
+	m_schemeWidget->resetAction();
+	m_schemeWidget->clearSelection();
 
-	m_videoFrameWidget->update();
+	m_schemeWidget->update();
 
 	emit vcsFileStateChanged();
 	return;
@@ -970,10 +936,10 @@ void EditSchemeTabPage::undoChangesFile()
 			setReadOnly(true);
 			setPageTitle();
 
-			m_videoFrameWidget->resetAction();
-			m_videoFrameWidget->clearSelection();
+			m_schemeWidget->resetAction();
+			m_schemeWidget->clearSelection();
 
-			m_videoFrameWidget->update();
+			m_schemeWidget->update();
 		}
 	}
 
@@ -993,7 +959,7 @@ bool EditSchemeTabPage::saveWorkcopy()
 	}
 
 	QByteArray data;
-	m_videoFrameWidget->scheme()->Save(data);
+	m_schemeWidget->scheme()->Save(data);
 
 	if (data.isEmpty() == true)
 	{
@@ -1034,7 +1000,7 @@ void EditSchemeTabPage::getCurrentWorkcopy()
 	//
 	QString fileName = dir + fileInfo().fileName();
 
-	bool writeResult = m_videoFrameWidget->scheme()->Save(fileName);
+	bool writeResult = m_schemeWidget->scheme()->Save(fileName);
 
 	if (writeResult == false)
 	{
@@ -1067,7 +1033,7 @@ void EditSchemeTabPage::setCurrentWorkcopy()
 
 	// Load file
 	//
-	bool readResult = m_videoFrameWidget->scheme()->Load(fileName);
+	bool readResult = m_schemeWidget->scheme()->Load(fileName);
 	if (readResult == false)
 	{
 		QMessageBox mb(this);
@@ -1079,51 +1045,51 @@ void EditSchemeTabPage::setCurrentWorkcopy()
 	// --
 	setPageTitle();
 
-	m_videoFrameWidget->resetAction();
-	m_videoFrameWidget->clearSelection();
+	m_schemeWidget->resetAction();
+	m_schemeWidget->clearSelection();
 
-	m_videoFrameWidget->resetEditEngine();
-	m_videoFrameWidget->setModified();
+	m_schemeWidget->resetEditEngine();
+	m_schemeWidget->setModified();
 
-	m_videoFrameWidget->update();
+	m_schemeWidget->update();
 
 	return;
 }
 
 const DbFileInfo& EditSchemeTabPage::fileInfo() const
 {
-	assert(m_videoFrameWidget);
-	return m_videoFrameWidget->fileInfo();
+	assert(m_schemeWidget);
+	return m_schemeWidget->fileInfo();
 }
 
 void EditSchemeTabPage::setFileInfo(const DbFileInfo& fi)
 {
-	assert(m_videoFrameWidget);
-	m_videoFrameWidget->setFileInfo(fi);
+	assert(m_schemeWidget);
+	m_schemeWidget->setFileInfo(fi);
 
 	setPageTitle();
 }
 
 bool EditSchemeTabPage::readOnly() const
 {
-	assert(m_videoFrameWidget);
-	return m_videoFrameWidget->readOnly();
+	assert(m_schemeWidget);
+	return m_schemeWidget->readOnly();
 }
 
 void EditSchemeTabPage::setReadOnly(bool value)
 {
-	assert(m_videoFrameWidget);
-	m_videoFrameWidget->setReadOnly(value);
+	assert(m_schemeWidget);
+	m_schemeWidget->setReadOnly(value);
 }
 
 bool EditSchemeTabPage::modified() const
 {
-	assert(m_videoFrameWidget);
-	return m_videoFrameWidget->modified();
+	assert(m_schemeWidget);
+	return m_schemeWidget->modified();
 }
 
 void EditSchemeTabPage::resetModified()
 {
-	assert(m_videoFrameWidget);
-	return m_videoFrameWidget->resetModified();
+	assert(m_schemeWidget);
+	return m_schemeWidget->resetModified();
 }

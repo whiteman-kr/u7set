@@ -8,7 +8,7 @@
 #include "Subsystem.h"
 
 #include "../../VFrame30/LogicScheme.h"
-#include "../../VFrame30/VideoItemLink.h"
+#include "../../VFrame30/SchemeItemLink.h"
 #include "../../VFrame30/HorzVertLinks.h"
 
 #include "../Builder/ApplicationLogicCompiler.h"
@@ -495,7 +495,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(m_log, tr("Error"));
+			//LOG_ERROR(m_log, tr("Error"));	// Error must be logged and described where it was found
 			QThread::currentThread()->requestInterruption();
 		}
 		else

@@ -41,7 +41,7 @@ namespace VFrame30
 
 	void SchemeView::mouseMoveEvent(QMouseEvent* event)
 	{
-		// If any contrtol key is pressed, pass control further (VideoFrameWidget?)
+		// If any contrtol key is pressed, pass control further
 		//
 		if (event->buttons().testFlag(Qt::LeftButton) == true ||
 			event->buttons().testFlag(Qt::RightButton) == true ||
@@ -85,7 +85,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<VideoItem>& item = *vi;
+				const std::shared_ptr<SchemeItem>& item = *vi;
 
 				if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
@@ -128,7 +128,7 @@ namespace VFrame30
 		//
 		Ajust(&p, 0, 0);
 
-		// Draw VideoFrame
+		// Draw Scheme
 		//
 		QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
 

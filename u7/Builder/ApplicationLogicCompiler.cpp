@@ -638,7 +638,7 @@ namespace Builder
 
 		// iniitalization of constant params
 		//
-		for(Afbl::AfbElementParam afbParam : afb.params())
+		for(Afbl::AfbParam afbParam : afb.params())
 		{
 			if (afbParam.operandIndex() == NOT_FB_OPERAND_INDEX)
 			{
@@ -2556,7 +2556,7 @@ namespace Builder
 	{
 		if (m_appLogicItem.m_fblItem->isSignalElement())
 		{
-			VFrame30::VideoItemSignal* itemSignal= m_appLogicItem.m_fblItem->toSignalElement();
+			VFrame30::SchemeItemSignal* itemSignal= m_appLogicItem.m_fblItem->toSignalElement();
 
 			if (itemSignal == nullptr)
 			{
@@ -2569,7 +2569,7 @@ namespace Builder
 
 		if (m_appLogicItem.m_fblItem->isFblElement())
 		{
-			VFrame30::VideoItemFblElement* itemFb= m_appLogicItem.m_fblItem->toFblElement();
+			VFrame30::SchemeItemAfb* itemFb= m_appLogicItem.m_fblItem->toFblElement();
 
 			if (itemFb == nullptr)
 			{

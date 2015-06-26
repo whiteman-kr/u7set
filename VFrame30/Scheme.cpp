@@ -1,14 +1,13 @@
 #include "Stable.h"
 #include "Scheme.h"
 #include "FblItem.h"
-#include "VideoItemLink.h"
+#include "SchemeItemLink.h"
 #include "HorzVertLinks.h"
-#include "VideoFrameWidgetAgent.h"
 #include "../include/ProtoSerialization.h"
 
 namespace VFrame30
 {
-	Factory<VFrame30::Scheme> VideoFrameFactory;
+	Factory<VFrame30::Scheme> SchemeFactory;
 
 	Scheme::Scheme(void)
 	{
@@ -124,17 +123,17 @@ namespace VFrame30
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		Scheme* pVideoFrame = VideoFrameFactory.Create(classNameHash);
+		Scheme* scheme = SchemeFactory.Create(classNameHash);
 
-		if (pVideoFrame == nullptr)
+		if (scheme == nullptr)
 		{
-			assert(pVideoFrame);
+			assert(scheme);
 			return nullptr;
 		}
 		
-		pVideoFrame->LoadData(message);
+		scheme->LoadData(message);
 
-		return pVideoFrame;
+		return scheme;
 	}
 
 	void Scheme::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
@@ -173,7 +172,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 			{
-				const std::shared_ptr<VideoItem>& item = *vi;
+				const std::shared_ptr<SchemeItem>& item = *vi;
 
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
@@ -212,11 +211,11 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<VideoItem>& item = *vi;
+				const std::shared_ptr<SchemeItem>& item = *vi;
 
 				if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
-					RunClickScript(item, pVideoFrameWidgetAgent);
+					RunClickScript(item/*, pVideoFrameWidgetAgent*/);
 					stop = true;
 					break;
 				}
@@ -231,17 +230,20 @@ namespace VFrame30
 		return;
 	}
 
-	void Scheme::RunClickScript(const std::shared_ptr<VideoItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const
+	void Scheme::RunClickScript(const std::shared_ptr<SchemeItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const
 	{
-		if (pVideoFrameWidgetAgent == nullptr || videoItem->acceptClick() == false || videoItem->clickScript().isEmpty() == true)
+		assert(false);
+		Q_UNUSED(schemeItem);
+
+/*		if (pVideoFrameWidgetAgent == nullptr || schemeItem->acceptClick() == false || schemeItem->clickScript().isEmpty() == true)
 		{
 			assert(pVideoFrameWidgetAgent != nullptr);
 			return;
 		}
 
-		// Extract script text from VideoItem
+		// Extract script text from SchemeItem
 		//
-		QString script = videoItem->clickScript();
+		QString script = schemeItem->clickScript();
 		QScriptEngine scriptEngine;
 		QScriptValue globalValue = scriptEngine.globalObject();
 
@@ -261,7 +263,7 @@ namespace VFrame30
 		//
 #ifdef _DEBUG
 		qDebug() << strID() << "RunClickScript result:" << result.toString();
-#endif
+#endif*/
 		return;
 	}
 
@@ -320,10 +322,10 @@ namespace VFrame30
 					continue;
 				}
 
-				VideoItemLink* pVideoItemLink = dynamic_cast<VideoItemLink*>(item->get());
-				if (pVideoItemLink != nullptr)
+				SchemeItemLink* schemeItemLink = dynamic_cast<SchemeItemLink*>(item->get());
+				if (schemeItemLink != nullptr)
 				{
-					const std::list<VideoItemPoint>& pointList = pVideoItemLink->GetPointList();
+					const std::list<SchemePoint>& pointList = schemeItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -333,7 +335,7 @@ namespace VFrame30
 					
 					// разложить кривую на отдельные отрезки и занести их в horzlinks и vertlinks
 					//
-					horzVertLinks.AddLinks(pointList, pVideoItemLink->guid());
+					horzVertLinks.AddLinks(pointList, schemeItemLink->guid());
 				}
 			}
 		}
@@ -362,13 +364,13 @@ namespace VFrame30
 				}
 
 			
-				// ≈сли элемент CVideoItemLink, то в качестве координат пинов будут крайние точки
+				// ≈сли элемент SchemeItemLink, то в качестве координат пинов будут крайние точки
 				//
-				VideoItemLink* pVideoItemLink = dynamic_cast<VideoItemLink*>(item->get());
+				SchemeItemLink* schemeItemLink = dynamic_cast<SchemeItemLink*>(item->get());
 
-				if (pVideoItemLink != nullptr)
+				if (schemeItemLink != nullptr)
 				{
-					const std::list<VideoItemPoint>& pointList = pVideoItemLink->GetPointList();
+					const std::list<SchemePoint>& pointList = schemeItemLink->GetPointList();
 					
 					if (pointList.size() < 2)
 					{
@@ -381,12 +383,12 @@ namespace VFrame30
 
 					// проверить, не лежит ли пин на соединительной линии
 					//
-					if (horzVertLinks.IsPointOnLink(pointList.front(), pVideoItemLink->guid()) == true)
+					if (horzVertLinks.IsPointOnLink(pointList.front(), schemeItemLink->guid()) == true)
 					{
 						pLayer->ConnectionMapPosInc(pointList.front());
 					}
 
-					if (horzVertLinks.IsPointOnLink(pointList.back(), pVideoItemLink->guid()) == true)
+					if (horzVertLinks.IsPointOnLink(pointList.back(), schemeItemLink->guid()) == true)
 					{
 						pLayer->ConnectionMapPosInc(pointList.back());
 					}
@@ -404,7 +406,7 @@ namespace VFrame30
 				const std::list<CFblConnectionPoint>& inputs = pFblItem->inputs();
 				for (auto pin = inputs.begin(); pin != inputs.end(); ++pin)
 				{
-					VideoItemPoint pinPos = pin->point();
+					SchemePoint pinPos = pin->point();
 					
 					pLayer->ConnectionMapPosInc(pinPos);
 
@@ -419,7 +421,7 @@ namespace VFrame30
 				const std::list<CFblConnectionPoint>& outputs = pFblItem->outputs();
 				for (auto pin = outputs.begin(); pin != outputs.end(); ++pin)
 				{
-					VideoItemPoint pinPos = pin->point();
+					SchemePoint pinPos = pin->point();
 
 					pLayer->ConnectionMapPosInc(pinPos);
 
@@ -553,7 +555,7 @@ namespace VFrame30
 		//
 		m_afbCollection.setElements(elements);
 
-		// update videoframe items
+		// update scheme items
 		//
 	}
 

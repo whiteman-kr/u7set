@@ -3,6 +3,7 @@
     <AfbElement StrId="#or_v1">
         <Properties>
             <Caption>or_v1</Caption>
+            <Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
             <OpCode>2</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>

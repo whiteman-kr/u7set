@@ -1,25 +1,23 @@
 #include "EditEngineSetProperty.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
-#include "../../VFrame30/VideoItemFblElement.h"
+#include "../../VFrame30/SchemeItemAfb.h"
 
 namespace EditEngine
 {
 
-	SetPropertyCommand::SetPropertyCommand(
-			EditSchemeView* videoFrameView,
+	SetPropertyCommand::SetPropertyCommand(EditSchemeView* schemeView,
 			QString propertyName,
 			QVariant value,
-			const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
+			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
-		EditCommand(videoFrameView, hScrollBar, vScrollBar)
+		EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
 		assert(propertyName.isEmpty() == false);
 		assert(items.empty() == false);
 		assert(value.isValid() == true);
 
-		m_scheme = videoFrameView->scheme();
+		m_scheme = schemeView->scheme();
 		assert(m_scheme != nullptr);
 
 		for (auto& i : items)
@@ -41,9 +39,9 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPropertyCommand::executeCommand(EditSchemeView* videoFrameView)
+	void SetPropertyCommand::executeCommand(EditSchemeView* schemeView)
 	{
-		std::list<std::shared_ptr<VFrame30::VideoItem>> sel;
+		std::list<std::shared_ptr<VFrame30::SchemeItem>> sel;
 
 		for (Record& r : m_items)
 		{
@@ -63,9 +61,9 @@ namespace EditEngine
 
 			if (isDynamic == true)
 			{
-				// Apparently it is FblParam, only VFrame30::VideoItemFblElement can have such kind of props
+				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
 				//
-				VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(r.item.get());
+				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
 
 				if (fblElement == nullptr)
 				{
@@ -80,13 +78,13 @@ namespace EditEngine
 			r.item->setProperty(r.propertyName.toStdString().c_str(), r.newValue);
 		}
 
-		videoFrameView->setSelectedItems(sel);
+		schemeView->setSelectedItems(sel);
 		return;
 	}
 
-	void SetPropertyCommand::unExecuteCommand(EditSchemeView* videoFrameView)
+	void SetPropertyCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
-		std::list<std::shared_ptr<VFrame30::VideoItem>> sel;
+		std::list<std::shared_ptr<VFrame30::SchemeItem>> sel;
 
 		for (Record& r : m_items)
 		{
@@ -106,9 +104,9 @@ namespace EditEngine
 
 			if (isDynamic == true)
 			{
-				// Apparently it is FblParam, only VFrame30::VideoItemFblElement can have such kind of props
+				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
 				//
-				VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(r.item.get());
+				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
 
 				if (fblElement == nullptr)
 				{
@@ -126,7 +124,7 @@ namespace EditEngine
 			r.item->setProperty(r.propertyName.toStdString().c_str(), r.oldValue);
 		}
 
-		videoFrameView->setSelectedItems(sel);
+		schemeView->setSelectedItems(sel);
 		return;
 	}
 

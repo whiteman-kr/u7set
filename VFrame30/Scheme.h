@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SchemeLayer.h"
-#include "Fbl.h"
+#include "Afb.h"
 #include "../include/TypesAndEnums.h"
 
 namespace VFrame30
@@ -9,7 +9,7 @@ namespace VFrame30
 	class CDrawParam;
 	class VideoFrameWidgetAgent;
 	class SchemeLayer;
-	class VideoItem;
+	class SchemeItem;
 
 	
 	class VFRAME30LIBSHARED_EXPORT Scheme :
@@ -50,7 +50,7 @@ namespace VFrame30
 		void Print();
 
 		virtual void MouseClick(const QPointF& docPoint, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
-		void RunClickScript(const std::shared_ptr<VideoItem>& videoItem, VideoFrameWidgetAgent* pVideoFrameWidgetAgent) const;
+		void RunClickScript(const std::shared_ptr<SchemeItem>& schemeItem/*, VideoFrameWidgetAgent* pVideoFrameWidgetAgent*/) const;
 
 		// Получить размер документа в точка
 		//
@@ -60,7 +60,7 @@ namespace VFrame30
 		int GetLayerCount() const;
 		
 		// Заполнить connectionMap который хранится в каждом слое.
-		// std::map<VideoItemPoint, int> connectionMap		Ключ - координата пина, значение - количество подключений к пину
+		// std::map<SchemePoint, int> connectionMap		Ключ - координата пина, значение - количество подключений к пину
 		//
 		void BuildFblConnectionMap() const;
 
@@ -119,26 +119,8 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT VideoFrameSharedPtr
-	{
-	public:
-		VideoFrameSharedPtr(const std::shared_ptr<Scheme>& sp) : m_sp(sp)
-		{
-		}
-
-		std::shared_ptr<Scheme> get()
-		{
-			return m_sp;
-		}
-		
-	private:
-		std::shared_ptr<Scheme> m_sp;
-	};
-
-
-
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::Scheme> VideoFrameFactory;
+	extern Factory<VFrame30::Scheme> SchemeFactory;
 #endif
 }
 

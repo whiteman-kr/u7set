@@ -36,20 +36,20 @@ namespace VFrame30
 
 		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
 
-		auto pMutableVideoLayer = message->mutable_videolayer();
+		auto layer = message->mutable_schemelayer();
 
-		Proto::Write(pMutableVideoLayer->mutable_uuid(), m_guid);
-		Proto::Write(pMutableVideoLayer->mutable_name(), m_name);
+		Proto::Write(layer->mutable_uuid(), m_guid);
+		Proto::Write(layer->mutable_name(), m_name);
 
-		pMutableVideoLayer->set_compile(m_compile);
-		pMutableVideoLayer->set_show(m_show);
-		pMutableVideoLayer->set_print(m_print);
+		layer->set_compile(m_compile);
+		layer->set_show(m_show);
+		layer->set_print(m_print);
 
 		// Сохранить Items
 		//
 		for (auto item = Items.begin(); item != Items.end(); ++item)
 		{
-			Proto::Envelope* pItemMessage = pMutableVideoLayer->add_items();
+			Proto::Envelope* pItemMessage = layer->add_items();
 
 			if (item->get()->Save(pItemMessage) == false)
 			{
@@ -62,28 +62,28 @@ namespace VFrame30
 
 	bool SchemeLayer::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videolayer() == false)
+		if (message.has_schemelayer() == false)
 		{
-			assert(message.has_videolayer());
+			assert(message.has_schemelayer());
 			return false;
 		}
 
-		const Proto::VideoLayer& videoLayer = message.videolayer();
+		const Proto::SchemeLayer& layer = message.schemelayer();
 
-		m_guid = Proto::Read(videoLayer.uuid());
-		Proto::Read(videoLayer.name(), &m_name);
+		m_guid = Proto::Read(layer.uuid());
+		Proto::Read(layer.name(), &m_name);
 
-		m_compile = videoLayer.compile();
-		m_show = videoLayer.show();
-		m_print = videoLayer.print();
+		m_compile = layer.compile();
+		m_show = layer.show();
+		m_print = layer.print();
 
 		// Прочитать элементы
 		//
 		Items.clear();
 
-		for (int i = 0; i < videoLayer.items().size(); i++)
+		for (int i = 0; i < layer.items().size(); i++)
 		{
-			VideoItem* pItem = VideoItem::Create(videoLayer.items(i));
+			SchemeItem* pItem = SchemeItem::Create(layer.items(i));
 			
 			if (pItem == nullptr)
 			{
@@ -91,12 +91,12 @@ namespace VFrame30
 				continue;
 			}
 			
-			Items.push_back(std::shared_ptr<VideoItem>(pItem));
+			Items.push_back(std::shared_ptr<SchemeItem>(pItem));
 		}
 
-		if (videoLayer.items().size() != (int)Items.size())
+		if (layer.items().size() != (int)Items.size())
 		{
-			assert(videoLayer.items().size() == (int)Items.size());
+			assert(layer.items().size() == (int)Items.size());
 			return false;
 		}
 
@@ -107,9 +107,9 @@ namespace VFrame30
 	{
 		// Эта функция может создавать только один экземпляр
 		//
-		if (message.has_videolayer() == false)
+		if (message.has_schemelayer() == false)
 		{
-			assert(message.has_videolayer());
+			assert(message.has_schemelayer());
 			return nullptr;
 		}
 
@@ -130,10 +130,10 @@ namespace VFrame30
 	// Methods
 	//
 
-	std::shared_ptr<VideoItem> SchemeLayer::getItemById(const QUuid& id) const
+	std::shared_ptr<SchemeItem> SchemeLayer::getItemById(const QUuid& id) const
 	{
 		auto foundItem = std::find_if(Items.begin(), Items.end(),
-			[&](const std::shared_ptr<VideoItem>& vi)
+			[&](const std::shared_ptr<SchemeItem>& vi)
 			{
 				return vi->guid() == id;
 			});
@@ -144,11 +144,11 @@ namespace VFrame30
 		}
 		else
 		{
-			return std::shared_ptr<VideoItem>();
+			return std::shared_ptr<SchemeItem>();
 		}
 	}
 
-	void SchemeLayer::ConnectionMapPosInc(VideoItemPoint pinPos)
+	void SchemeLayer::ConnectionMapPosInc(SchemePoint pinPos)
 	{
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -162,7 +162,7 @@ namespace VFrame30
 		}
 	}
 
-	int SchemeLayer::GetPinPosConnectinCount(VideoItemPoint pinPos, SchemeUnit /*unit*/) const
+	int SchemeLayer::GetPinPosConnectinCount(SchemePoint pinPos, SchemeUnit /*unit*/) const
 	{
 		auto mapitem = connectionMap.find(pinPos);
 
@@ -176,14 +176,14 @@ namespace VFrame30
 		}
 	}
 
-	std::shared_ptr<VideoItem> SchemeLayer::getItemUnderPoint(QPointF point) const
+	std::shared_ptr<SchemeItem> SchemeLayer::getItemUnderPoint(QPointF point) const
 	{
 		double x = point.x();
 		double y = point.y();
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::VideoItem>& item = *it;
+			const std::shared_ptr<VFrame30::SchemeItem>& item = *it;
 
 			if (item->IsIntersectPoint(x, y) == true)
 			{
@@ -191,15 +191,15 @@ namespace VFrame30
 			}
 		}
 
-		return std::shared_ptr<VideoItem>();
+		return std::shared_ptr<SchemeItem>();
 	}
 
-	std::list<std::shared_ptr<VideoItem>> SchemeLayer::getItemListInRectangle(const QRectF& rect) const
+	std::list<std::shared_ptr<SchemeItem>> SchemeLayer::getItemListInRectangle(const QRectF& rect) const
 	{
-		std::list<std::shared_ptr<VideoItem>> out;
+		std::list<std::shared_ptr<SchemeItem>> out;
 
 		std::copy_if(Items.begin(), Items.end(), std::back_inserter(out),
-				[&rect](std::shared_ptr<VideoItem> item)
+				[&rect](std::shared_ptr<SchemeItem> item)
 				{
 					return item->IsIntersectRect(rect.x(), rect.y(), rect.width(), rect.height());
 				}

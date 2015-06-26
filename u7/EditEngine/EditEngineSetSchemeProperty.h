@@ -13,7 +13,7 @@ namespace EditEngine
 		SetSchemePropertyCommand();
 	public:
 		SetSchemePropertyCommand(
-				EditSchemeView* videoFrameView,
+				EditSchemeView* schemeView,
 				QString propertyName,
 				QVariant value,
 				std::shared_ptr<VFrame30::Scheme> scheme,
@@ -21,8 +21,8 @@ namespace EditEngine
 				QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemeView* videoFrameView) override;
-		virtual void unExecuteCommand(EditSchemeView* videoFrameView) override;
+		virtual void executeCommand(EditSchemeView* schemeView) override;
+		virtual void unExecuteCommand(EditSchemeView* schemeView) override;
 
 		// Data
 		//

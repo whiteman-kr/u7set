@@ -21,3 +21,7 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     UserTests.h
+
+#c++11 support for GCC
+#
+unix:QMAKE_CXXFLAGS += -std=c++11

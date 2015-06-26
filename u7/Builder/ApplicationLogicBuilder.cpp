@@ -5,48 +5,46 @@
 #include "../../include/DeviceObject.h"
 
 #include "../../VFrame30/LogicScheme.h"
-#include "../../VFrame30/VideoItemLink.h"
+#include "../../VFrame30/SchemeItemLink.h"
 #include "../../VFrame30/FblItemRect.h"
-#include "../../VFrame30/VideoItemFblElement.h"
-#include "../../VFrame30/VideoItemSignal.h"
+#include "../../VFrame30/SchemeItemAfb.h"
+#include "../../VFrame30/SchemeItemSignal.h"
 #include "../../VFrame30/SchemeItemConst.h"
 #include "../../VFrame30/HorzVertLinks.h"
-
-#include "../../VFrame30/Fbl.h"
 
 
 namespace Builder
 {
 
-	Link::Link(const std::list<VFrame30::VideoItemPoint>& points) :
+	Link::Link(const std::list<VFrame30::SchemePoint>& points) :
 		m_points(points)
 	{
 		assert(points.size() >= 2);
 	}
 
-	VFrame30::VideoItemPoint Link::ptBegin() const
+	VFrame30::SchemePoint Link::ptBegin() const
 	{
 		if (m_points.empty() == true)
 		{
 			assert(m_points.empty() == false);
-			return VFrame30::VideoItemPoint();
+			return VFrame30::SchemePoint();
 		}
 
 		return m_points.front();
 	}
 
-	VFrame30::VideoItemPoint Link::ptEnd() const
+	VFrame30::SchemePoint Link::ptEnd() const
 	{
 		if (m_points.empty() == true)
 		{
 			assert(m_points.empty() == false);
-			return VFrame30::VideoItemPoint();
+			return VFrame30::SchemePoint();
 		}
 
 		return m_points.back();
 	}
 
-	bool Link::isPinOnLink(VFrame30::VideoItemPoint pt) const
+	bool Link::isPinOnLink(VFrame30::SchemePoint pt) const
 	{
 		VFrame30::CHorzVertLinks hvl;
 
@@ -58,11 +56,42 @@ namespace Builder
 		return result;
 	}
 
+	VFrame30::FblItemRect* Bush::itemByPinGuid(QUuid pinId)
+	{
+		for (std::shared_ptr<VFrame30::FblItemRect> item : fblItems)
+		{
+			VFrame30::CFblConnectionPoint pin;
+			bool found = item->GetConnectionPoint(pinId, &pin);
+
+			if (found == true)
+			{
+				return item.get();
+			}
+		}
+
+		return nullptr;
+	}
+
+	VFrame30::CFblConnectionPoint Bush::pinByGuid(QUuid pinId)
+	{
+		for (std::shared_ptr<VFrame30::FblItemRect> item : fblItems)
+		{
+			VFrame30::CFblConnectionPoint pin;
+			bool found = item->GetConnectionPoint(pinId, &pin);
+
+			if (found == true)
+			{
+				return pin;
+			}
+		}
+
+		return VFrame30::CFblConnectionPoint();
+	}
 
 	// Function finds branch with a point on it.
 	// Returns branch index or -1 if a brach was not found
 	//
-	int BushContainer::getBranchByPinPos(VFrame30::VideoItemPoint pt) const
+	int BushContainer::getBranchByPinPos(VFrame30::SchemePoint pt) const
 	{
 		for (size_t i = 0; i < bushes.size(); i++)
 		{
@@ -266,9 +295,10 @@ namespace Builder
 					if (afbElement == nullptr)
 					{
 						assert(afbElement != nullptr);
-						LOG_ERROR(log, QObject::tr("Fbl element does not have Afb description, scheme: %1, element: %2")
-										.arg(logicScheme->strID())
-										.arg(f->guid().toString()));
+						LOG_ERROR(log, QObject::tr("%1 does not have Afb description, scheme: %2, element: %3")
+								  .arg(f->buildName())
+								  .arg(logicScheme->strID())
+								  .arg(f->guid().toString()));
 
 						return false;
 					}
@@ -293,7 +323,7 @@ namespace Builder
 
 		bool result = true;
 
-		// The last preparation - connect VideoItemInputSignal to VideoItemOutputSignal.
+		// The last preparation - connect SchemeItemInput to SchemeItemOutput
 		// Get all signals and put it to hash tables.
 		//
 		result = setInputOutputsElementsConnection(log);
@@ -534,7 +564,7 @@ namespace Builder
 
 	bool ApplicationLogicModule::setInputOutputsElementsConnection(OutputLog* log)
 	{
-		// Set connection between VideoItemInputSignal/VideoItemOutputSignal by StrIds
+		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
 		//
 		if (log == nullptr)
 		{
@@ -549,7 +579,7 @@ namespace Builder
 		{
 			if (li.m_fblItem->isInputSignalElement())
 			{
-				VFrame30::VideoItemSignal* signalElement = li.m_fblItem->toSignalElement();
+				VFrame30::SchemeItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
 
 				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
@@ -562,7 +592,7 @@ namespace Builder
 
 			if (li.m_fblItem->isOutputSignalElement())
 			{
-				VFrame30::VideoItemSignal* signalElement = li.m_fblItem->toSignalElement();
+				VFrame30::SchemeItemSignal* signalElement = li.m_fblItem->toSignalElement();
 				assert(signalElement);
 
 				// !!!! IN FUTURE, POSSIBLE WE WILL RECEIVE STRING ARRAY HERE, NOW WE ASSUME ONLY ONE STRID IS HERE
@@ -571,10 +601,11 @@ namespace Builder
 
 				if (signalOutputItems.contains(signalStrId) == true)
 				{
-					LOG_ERROR(log, QObject::tr("Ouput element has duplicate StrId, element1: %1, element2:%2, StrId: %3")
-									.arg(signalElement->guid().toString())
-									.arg(signalOutputItems[signalStrId].m_fblItem->guid().toString())
-									.arg(signalStrId));
+					LOG_ERROR(log, QObject::tr("%1 has duplicate StrId, element1: %2, element2:%3, StrId: %4")
+							  .arg(signalElement->buildName())
+							  .arg(signalElement->guid().toString())
+							  .arg(signalOutputItems[signalStrId].m_fblItem->guid().toString())
+							  .arg(signalStrId));
 
 					continue;
 				}
@@ -1133,11 +1164,11 @@ namespace Builder
 
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
-			VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
+			VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item->get());
 
 			if (link != nullptr)
 			{
-				const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+				const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
 
 				if (pointList.size() < 2)
 				{
@@ -1155,14 +1186,14 @@ namespace Builder
 		//
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
-			VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(item->get());
+			VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item->get());
 
 			if (link == nullptr)
 			{
 				continue;
 			}
 
-			const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+			const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
 
 			if (pointList.size() < 2)
 			{
@@ -1172,8 +1203,8 @@ namespace Builder
 
 			// Check if end points on some link
 			//
-			std::list<QUuid> videoItemsUnderFrontPoint = horzVertLinks.getVideoItemsUnderPoint(pointList.front(), link->guid());
-			std::list<QUuid> videoItemsUnderBackPoint = horzVertLinks.getVideoItemsUnderPoint(pointList.back(), link->guid());
+			std::list<QUuid> itemsUnderFrontPoint = horzVertLinks.getSchemeItemsUnderPoint(pointList.front(), link->guid());
+			std::list<QUuid> itemsUnderBackPoint = horzVertLinks.getSchemeItemsUnderPoint(pointList.back(), link->guid());
 
 			// Find item branch, if branch does not exists, make a new brach
 			//
@@ -1186,29 +1217,29 @@ namespace Builder
 
 			if (foundBranch == bushes.end())
 			{
-				std::set<QUuid> newBranch;
-				newBranch.insert(link->guid());
+				std::set<QUuid> newBush;
+				newBush.insert(link->guid());
 
-				bushes.push_front(newBranch);
+				bushes.push_front(newBush);
 
 				foundBranch = bushes.begin();
 			}
 
-			// Add to foundBranch everything from  videoItemsUnderFrontPoint, videoItemsUnderBackPoint
+			// Add to foundBranch everything from  itemsUnderFrontPoint, itemsUnderBackPoint
 			//
-			for (QUuid& q : videoItemsUnderFrontPoint)
+			for (QUuid& q : itemsUnderFrontPoint)
 			{
 				foundBranch->insert(q);
 			}
 
-			for (QUuid& q : videoItemsUnderBackPoint)
+			for (QUuid& q : itemsUnderBackPoint)
 			{
 				foundBranch->insert(q);
 			}
 		}
 
 		// branches can contain same items,
-		// all such branches must be united
+		// all such branches must be joined
 		//
 		bool wasJoining = false;	// if branch was joinedto other branch, then process currentBranch one more time
 
@@ -1263,39 +1294,41 @@ namespace Builder
 
 		for (const std::set<QUuid>& b : bushes)
 		{
-			Bush newBranch;
+			Bush newBush;
 
 			for (QUuid id : b)
 			{
-				// Get VideoItemLink by this id,
+				// Get SchemeItemLink by this id,
 				// save it's and points to newBranch
 				//
-				std::shared_ptr<VFrame30::VideoItem> videoItem = layer->getItemById(id);
-				VFrame30::VideoItemLink* link = dynamic_cast<VFrame30::VideoItemLink*>(videoItem.get());
+				std::shared_ptr<VFrame30::SchemeItem> schemeItem = layer->getItemById(id);
+				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(schemeItem.get());
 
-				if (videoItem == nullptr ||
+				if (schemeItem == nullptr ||
 					link == nullptr)
 				{
-					assert(videoItem);
+					assert(schemeItem);
 					assert(link);
 
-					LOG_ERROR(log(), tr("%1Internal error, expected VFrame30::VideoItemLink").arg(__FUNCTION__));
+					LOG_ERROR(log(), tr("%1 Internal error, expected VFrame30::SchemeItemLink").arg(__FUNCTION__));
 					return false;
 				}
 
-				const std::list<VFrame30::VideoItemPoint>& pointList = link->GetPointList();
+				const std::list<VFrame30::SchemePoint>& pointList = link->GetPointList();
 
 				if (pointList.size() < 2)
 				{
 					assert(pointList.size() >= 2);
-					LOG_ERROR(log(), tr("%1Internal error, Link has less the two points").arg(__FUNCTION__));
+					LOG_ERROR(log(), tr("%1 Internal error, Link has less the two points").arg(__FUNCTION__));
 					return false;
 				}
 
-				newBranch.links[id] = Link(pointList);
+				newBush.links[id] = Link(pointList);
 			}
 
-			bushContainer->bushes.push_back(newBranch);
+			// Add bush to container
+			//
+			bushContainer->bushes.push_back(newBush);
 		}
 
 //		// DEBUG
@@ -1320,21 +1353,21 @@ namespace Builder
 	}
 
 	bool ApplicationLogicBuilder::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme, std::shared_ptr<VFrame30::SchemeLayer> layer,
-						BushContainer* branchContainer) const
+						BushContainer* bushContainer) const
 	{
 		if (scheme.get() == nullptr ||
 			layer.get() == nullptr ||
-			branchContainer == nullptr)
+			bushContainer == nullptr)
 		{
 			assert(scheme);
 			assert(layer);
-			assert(branchContainer);
+			assert(bushContainer);
 			return false;
 		}
 
 		bool result = true;
 
-		for (auto& item : layer->Items)
+		for (std::shared_ptr<VFrame30::SchemeItem> item : layer->Items)
 		{
 			if (dynamic_cast<VFrame30::FblItemLine*>(item.get()) != nullptr)
 			{
@@ -1348,7 +1381,7 @@ namespace Builder
 
 			if(fblItem != nullptr)
 			{
-				// VideoItem has inputs and outputs
+				// SchemeItem has inputs and outputs
 				// Get coordinates for each input/output and
 				// find branche with point on the pin
 				//
@@ -1360,139 +1393,55 @@ namespace Builder
 
 				for (VFrame30::CFblConnectionPoint& in : *inputs)
 				{
-					VFrame30::VideoItemPoint pinPos = in.point();
+					VFrame30::SchemePoint pinPos = in.point();
 
 					//qDebug() << "input  " << pinPos.X << " -" << pinPos.Y;
 
-					int branchIndex = branchContainer->getBranchByPinPos(pinPos);
+					int branchIndex = bushContainer->getBranchByPinPos(pinPos);
 
 					if (branchIndex == -1)
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						VFrame30::VideoItemInputSignal* inputSignal = dynamic_cast<VFrame30::VideoItemInputSignal*>(item.get());
-						VFrame30::VideoItemOutputSignal* outputSignal = dynamic_cast<VFrame30::VideoItemOutputSignal*>(item.get());
-						VFrame30::SchemeItemConst* schemeItemConst = dynamic_cast<VFrame30::SchemeItemConst*>(item.get());
-						VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
+						LOG_ERROR(log(), tr("LogicScheme %1: %2 has unconnected pin %3")
+							.arg(scheme->caption())
+							.arg(fblItem->buildName())
+							.arg(in.caption()));
 
-						if (inputSignal != nullptr)
-						{
-							LOG_ERROR(log(), tr("LogicScheme %1: Input %2 has unconnected pin")
-								.arg(scheme->caption())
-								.arg(inputSignal->signalStrIds()));
-
-							result = false;
-							continue;
-						}
-
-						if (outputSignal != nullptr)
-						{
-							LOG_ERROR(log(), tr("LogicScheme %1: Output %2 has unconnected pin")
-								.arg(scheme->caption())
-								.arg(outputSignal->signalStrIds()));
-
-							result = false;
-							continue;
-						}
-
-						if (schemeItemConst != nullptr)
-						{
-							LOG_ERROR(log(), tr("LogicScheme %1: Constant element %2 has unconnected pin")
-								.arg(scheme->caption())
-								.arg(schemeItemConst->valueToString()));
-
-							result = false;
-							continue;
-						}
-
-						if (fblElement != nullptr)
-						{
-							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
-
-							LOG_ERROR(log(), tr("LogicScheme %1: Item '%2', pin '%3' is unconnected")
-								.arg(scheme->caption())
-								.arg(afb->caption())
-								.arg(in.caption()));
-
-							result = false;
-							continue;
-						}
-
-						assert(false);		// What the item is it?
+						result = false;
+						continue;
 					}
 
 					// Branch was found for current pin
 					//
-					branchContainer->bushes[branchIndex].inputPins.insert(in.guid());
+					bushContainer->bushes[branchIndex].inputPins.insert(in.guid());
 				}
 
 				for (const VFrame30::CFblConnectionPoint& out : *outputs)
 				{
-					VFrame30::VideoItemPoint pinPos = out.point();
+					VFrame30::SchemePoint pinPos = out.point();
 
 					//qDebug() << "output  " << pinPos.X << " -" << pinPos.Y;
 
-					int branchIndex = branchContainer->getBranchByPinPos(pinPos);
+					int branchIndex = bushContainer->getBranchByPinPos(pinPos);
 
 					if (branchIndex == -1)
 					{
 						// Pin is not connectext to any link, this is error
 						//
-						VFrame30::VideoItemInputSignal* inputSignal = dynamic_cast<VFrame30::VideoItemInputSignal*>(item.get());
-						VFrame30::VideoItemOutputSignal* outputSignal = dynamic_cast<VFrame30::VideoItemOutputSignal*>(item.get());
-						VFrame30::SchemeItemConst* schemeItemConst = dynamic_cast<VFrame30::SchemeItemConst*>(item.get());
-						VFrame30::VideoItemFblElement* fblElement = dynamic_cast<VFrame30::VideoItemFblElement*>(item.get());
+						LOG_ERROR(log(), tr("LogicScheme %1: %2 has unconnected pin %3")
+							.arg(scheme->caption())
+							.arg(fblItem->buildName())
+							.arg(out.caption()));
 
-						if (inputSignal != nullptr)
-						{
-							LOG_ERROR(log(), tr("LogicScheme %1: Input %2 has unconnected pin.")
-								.arg(scheme->caption())
-								.arg(inputSignal->signalStrIds()));
-
-							result = false;
-							continue;
-						}
-
-						if (outputSignal != nullptr)
-						{
-							LOG_ERROR(log(), tr("LogicScheme %1: Output %2 has unconnected pin.")
-								.arg(scheme->caption())
-								.arg(outputSignal->signalStrIds()));
-
-							result = false;
-							continue;
-						}
-
-						if (schemeItemConst != nullptr)
-						{
-							LOG_ERROR(log(), tr("LogicScheme %1: Constant element %2 has unconnected pin.")
-								.arg(scheme->caption())
-								.arg(schemeItemConst->valueToString()));
-
-							result = false;
-							continue;
-						}
-
-						if (fblElement != nullptr)
-						{
-							std::shared_ptr<Afbl::AfbElement> afb = scheme->afbCollection().get(fblElement->afbStrID());
-
-							LOG_ERROR(log(), tr("LogicScheme %1: Item '%2', pin '%3' is unconnected")
-								.arg(scheme->caption())
-								.arg(afb->caption())
-								.arg(out.caption()));
-
-							result = false;
-							continue;
-						}
-
-						assert(false);		// What the item is it?
+						result = false;
+						continue;
 					}
 
 					// Branch was found for current pin
 					//
 
-					if (branchContainer->bushes[branchIndex].outputPin.isNull() == false)
+					if (bushContainer->bushes[branchIndex].outputPin.isNull() == false)
 					{
 						LOG_ERROR(log(), tr("LogicScheme %1 (layer %2): Branch has multiple outputs.")
 							.arg(scheme->caption())
@@ -1503,7 +1452,7 @@ namespace Builder
 					}
 					else
 					{
-						branchContainer->bushes[branchIndex].outputPin = out.guid();
+						bushContainer->bushes[branchIndex].outputPin = out.guid();
 					}
 				}
 			}
@@ -1516,15 +1465,15 @@ namespace Builder
 	bool ApplicationLogicBuilder::setPinConnections(
 		std::shared_ptr<VFrame30::LogicScheme> scheme,
 		std::shared_ptr<VFrame30::SchemeLayer> layer,
-		BushContainer* branchContainer)
+		BushContainer* bushContainer)
 	{
 		if (scheme.get() == nullptr ||
 			layer.get() == nullptr ||
-			branchContainer == nullptr)
+			bushContainer == nullptr)
 		{
 			assert(scheme);
 			assert(layer);
-			assert(branchContainer);
+			assert(bushContainer);
 			return false;
 		}
 
@@ -1542,7 +1491,7 @@ namespace Builder
 				std::shared_ptr<VFrame30::FblItemRect> fblElement =
 						std::dynamic_pointer_cast<VFrame30::FblItemRect>(item);
 
-				// VideoItem has inputs and outputs
+				// SchemeItem has inputs and outputs
 				// Get coordinates for each input/output and
 				// find branche with point on the pin
 				//
@@ -1554,7 +1503,7 @@ namespace Builder
 
 				for (VFrame30::CFblConnectionPoint& in : *inputs)
 				{
-					int branchIndex = branchContainer->getBranchByPinGuid(in.guid());
+					int branchIndex = bushContainer->getBranchByPinGuid(in.guid());
 
 					if (branchIndex == -1)
 					{
@@ -1562,8 +1511,9 @@ namespace Builder
 						//
 						assert(false);
 
-						LOG_ERROR(log(), tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
-							.arg(__FUNCTION__));
+						LOG_ERROR(log(), tr("LogicScheme %1: Internalerror in function, branch suppose to be found, %2.")
+								  .arg(scheme->caption())
+								  .arg(__FUNCTION__));
 
 						result = false;
 						return result;
@@ -1571,16 +1521,16 @@ namespace Builder
 
 					// Branch was found for current pin
 					//
-					Bush& bush = branchContainer->bushes[branchIndex];
+					Bush& bush = bushContainer->bushes[branchIndex];
 
 					bush.fblItems.insert(fblElement);
 
 					if (bush.outputPin.isNull() == true)
 					{
-						LOG_ERROR(log(), tr("LogicScheme %1: There is no input pin for branch.").arg(scheme->caption()));
-
+						// Error message @Input is not defined, for items: %1" is later in this function
+						//
 						result = false;
-						return result;
+						continue;
 					}
 
 					// Set sourche pin guid for this pin
@@ -1590,7 +1540,7 @@ namespace Builder
 
 				for (VFrame30::CFblConnectionPoint& out : *outputs)
 				{
-					int branchIndex = branchContainer->getBranchByPinGuid(out.guid());
+					int branchIndex = bushContainer->getBranchByPinGuid(out.guid());
 
 					if (branchIndex == -1)
 					{
@@ -1598,8 +1548,9 @@ namespace Builder
 						//
 						assert(false);
 
-						LOG_ERROR(log(), tr("LogicScheme %1 (layer %2): Internalerror in function, branch suppose to be found, %1.")
-							.arg(__FUNCTION__));
+						LOG_ERROR(log(), tr("LogicScheme %1: Internalerror in function, branch suppose to be found, %2.")
+								  .arg(scheme->caption())
+								  .arg(__FUNCTION__));
 
 						result = false;
 						return result;
@@ -1607,7 +1558,7 @@ namespace Builder
 
 					// Branch was found for current pin
 					//
-					Bush& bush = branchContainer->bushes[branchIndex];
+					Bush& bush = bushContainer->bushes[branchIndex];
 
 					bush.fblItems.insert(fblElement);
 
@@ -1623,8 +1574,49 @@ namespace Builder
 
 		if (hasFblItems == false)
 		{
-			LOG_WARNING(log(), "Empty logic scheme, functional blocks were not found.");
+			LOG_WARNING(log(), "Empty logic scheme %1, functional blocks were not found.");
 			return true;
+		}
+
+		// Check bushes, bush must have output pin and one or several input pins
+		//
+		for (const Bush& bush : bushContainer->bushes)
+		{
+			if (bush.outputPin.isNull() == true)
+			{
+				QString strItems;
+				for (std::shared_ptr<VFrame30::FblItemRect> i : bush.fblItems)
+				{
+					if (strItems.isEmpty() == true)
+					{
+						strItems.append(i->buildName());
+					}
+					else
+					{
+						strItems.append(QString(", %1").arg(i->buildName()));
+					}
+				}
+
+				LOG_ERROR(log(), tr("Input is not defined, for items: %1").arg(strItems));
+			}
+
+			if (bush.inputPins.empty() == true)
+			{
+				// Look for item without associated inputs
+				//
+				for (std::shared_ptr<VFrame30::FblItemRect> item : bush.fblItems)
+				{
+					const std::list<VFrame30::CFblConnectionPoint>& outputs = item->outputs();
+
+					for (const VFrame30::CFblConnectionPoint& out : outputs)
+					{
+						if (out.associatedIOs().empty() == true)
+						{
+							LOG_ERROR(log(), tr("%1 has unconnected pin %2").arg(item->buildName()).arg(out.caption()));
+						}
+					}
+				}
+			}
 		}
 
 		return result;

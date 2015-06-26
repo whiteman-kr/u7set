@@ -38,33 +38,33 @@ class Uuid;
 class qvariant;
 class wstring;
 class FontParam;
-class VideoItemPoint;
+class SchemePoint;
 class Envelope;
 class Configuration;
 class AfbElementCollection;
 class AfbElementXml;
 class FblElement;
-class FblElementSignal;
-class FblElementParam;
+class AfbSignal;
+class AfbParam;
 class Scheme;
 class LogicScheme;
-class VideoLayer;
-class VideoItem;
+class SchemeLayer;
+class SchemeItem;
 class PosRectImpl;
 class PosLineImpl;
 class PosConnectionImpl;
-class VideoItemRect;
-class VideoItemLine;
-class VideoItemConnectionLine;
+class SchemeItemRect;
+class SchemeItemLine;
+class SchemeItemPath;
 class FblConnectionPoint;
 class FblItem;
 class FblItemRect;
 class FblItemLine;
-class VideoItemSignal;
-class VideoItemInputSignal;
-class VideoItemOutputSignal;
-class VideoItemLink;
-class VideoItemFblElement;
+class SchemeItemSignal;
+class SchemeItemInput;
+class SchemeItemOutput;
+class SchemeItemLink;
+class SchemeItemAfb;
 class SchemeItemConst;
 class DeviceObject;
 class DeviceRoot;
@@ -570,14 +570,14 @@ class FontParam : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class VideoItemPoint : public ::google::protobuf::Message {
+class SchemePoint : public ::google::protobuf::Message {
  public:
-  VideoItemPoint();
-  virtual ~VideoItemPoint();
+  SchemePoint();
+  virtual ~SchemePoint();
 
-  VideoItemPoint(const VideoItemPoint& from);
+  SchemePoint(const SchemePoint& from);
 
-  inline VideoItemPoint& operator=(const VideoItemPoint& from) {
+  inline SchemePoint& operator=(const SchemePoint& from) {
     CopyFrom(from);
     return *this;
   }
@@ -591,17 +591,17 @@ class VideoItemPoint : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemPoint& default_instance();
+  static const SchemePoint& default_instance();
 
-  void Swap(VideoItemPoint* other);
+  void Swap(SchemePoint* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemPoint* New() const;
+  SchemePoint* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemPoint& from);
-  void MergeFrom(const VideoItemPoint& from);
+  void CopyFrom(const SchemePoint& from);
+  void MergeFrom(const SchemePoint& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -638,7 +638,7 @@ class VideoItemPoint : public ::google::protobuf::Message {
   inline double y() const;
   inline void set_y(double value);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemPoint)
+  // @@protoc_insertion_point(class_scope:Proto.SchemePoint)
  private:
   inline void set_has_x();
   inline void clear_has_x();
@@ -658,7 +658,7 @@ class VideoItemPoint : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemPoint* default_instance_;
+  static SchemePoint* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -723,14 +723,14 @@ class Envelope : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 classnamehash() const;
   inline void set_classnamehash(::google::protobuf::uint32 value);
 
-  // optional .Proto.VideoItem videoitem = 6;
-  inline bool has_videoitem() const;
-  inline void clear_videoitem();
-  static const int kVideoitemFieldNumber = 6;
-  inline const ::Proto::VideoItem& videoitem() const;
-  inline ::Proto::VideoItem* mutable_videoitem();
-  inline ::Proto::VideoItem* release_videoitem();
-  inline void set_allocated_videoitem(::Proto::VideoItem* videoitem);
+  // optional .Proto.SchemeItem schemeitem = 6;
+  inline bool has_schemeitem() const;
+  inline void clear_schemeitem();
+  static const int kSchemeitemFieldNumber = 6;
+  inline const ::Proto::SchemeItem& schemeitem() const;
+  inline ::Proto::SchemeItem* mutable_schemeitem();
+  inline ::Proto::SchemeItem* release_schemeitem();
+  inline void set_allocated_schemeitem(::Proto::SchemeItem* schemeitem);
 
   // optional .Proto.DeviceObject deviceobject = 7;
   inline bool has_deviceobject() const;
@@ -750,14 +750,14 @@ class Envelope : public ::google::protobuf::Message {
   inline ::Proto::Scheme* release_scheme();
   inline void set_allocated_scheme(::Proto::Scheme* scheme);
 
-  // optional .Proto.VideoLayer videolayer = 101;
-  inline bool has_videolayer() const;
-  inline void clear_videolayer();
-  static const int kVideolayerFieldNumber = 101;
-  inline const ::Proto::VideoLayer& videolayer() const;
-  inline ::Proto::VideoLayer* mutable_videolayer();
-  inline ::Proto::VideoLayer* release_videolayer();
-  inline void set_allocated_videolayer(::Proto::VideoLayer* videolayer);
+  // optional .Proto.SchemeLayer schemelayer = 101;
+  inline bool has_schemelayer() const;
+  inline void clear_schemelayer();
+  static const int kSchemelayerFieldNumber = 101;
+  inline const ::Proto::SchemeLayer& schemelayer() const;
+  inline ::Proto::SchemeLayer* mutable_schemelayer();
+  inline ::Proto::SchemeLayer* release_schemelayer();
+  inline void set_allocated_schemelayer(::Proto::SchemeLayer* schemelayer);
 
   // optional .Proto.FblElement fblelement = 102;
   inline bool has_fblelement() const;
@@ -781,14 +781,14 @@ class Envelope : public ::google::protobuf::Message {
  private:
   inline void set_has_classnamehash();
   inline void clear_has_classnamehash();
-  inline void set_has_videoitem();
-  inline void clear_has_videoitem();
+  inline void set_has_schemeitem();
+  inline void clear_has_schemeitem();
   inline void set_has_deviceobject();
   inline void clear_has_deviceobject();
   inline void set_has_scheme();
   inline void clear_has_scheme();
-  inline void set_has_videolayer();
-  inline void clear_has_videolayer();
+  inline void set_has_schemelayer();
+  inline void clear_has_schemelayer();
   inline void set_has_fblelement();
   inline void clear_has_fblelement();
   inline void set_has_configuration();
@@ -796,10 +796,10 @@ class Envelope : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::VideoItem* videoitem_;
+  ::Proto::SchemeItem* schemeitem_;
   ::Proto::DeviceObject* deviceobject_;
   ::Proto::Scheme* scheme_;
-  ::Proto::VideoLayer* videolayer_;
+  ::Proto::SchemeLayer* schemelayer_;
   ::Proto::FblElement* fblelement_;
   ::Proto::Configuration* configuration_;
   ::google::protobuf::uint32 classnamehash_;
@@ -1239,41 +1239,50 @@ class FblElement : public ::google::protobuf::Message {
   inline bool requiredstart() const;
   inline void set_requiredstart(bool value);
 
-  // repeated .Proto.FblElementSignal inputSignals = 11;
-  inline int inputsignals_size() const;
-  inline void clear_inputsignals();
-  static const int kInputSignalsFieldNumber = 11;
-  inline const ::Proto::FblElementSignal& inputsignals(int index) const;
-  inline ::Proto::FblElementSignal* mutable_inputsignals(int index);
-  inline ::Proto::FblElementSignal* add_inputsignals();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >&
-      inputsignals() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
-      mutable_inputsignals();
+  // repeated .Proto.AfbSignal inputs = 11;
+  inline int inputs_size() const;
+  inline void clear_inputs();
+  static const int kInputsFieldNumber = 11;
+  inline const ::Proto::AfbSignal& inputs(int index) const;
+  inline ::Proto::AfbSignal* mutable_inputs(int index);
+  inline ::Proto::AfbSignal* add_inputs();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >&
+      inputs() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >*
+      mutable_inputs();
 
-  // repeated .Proto.FblElementSignal outputSignals = 12;
-  inline int outputsignals_size() const;
-  inline void clear_outputsignals();
-  static const int kOutputSignalsFieldNumber = 12;
-  inline const ::Proto::FblElementSignal& outputsignals(int index) const;
-  inline ::Proto::FblElementSignal* mutable_outputsignals(int index);
-  inline ::Proto::FblElementSignal* add_outputsignals();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >&
-      outputsignals() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
-      mutable_outputsignals();
+  // repeated .Proto.AfbSignal outputs = 12;
+  inline int outputs_size() const;
+  inline void clear_outputs();
+  static const int kOutputsFieldNumber = 12;
+  inline const ::Proto::AfbSignal& outputs(int index) const;
+  inline ::Proto::AfbSignal* mutable_outputs(int index);
+  inline ::Proto::AfbSignal* add_outputs();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >&
+      outputs() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >*
+      mutable_outputs();
 
-  // repeated .Proto.FblElementParam params = 13;
+  // repeated .Proto.AfbParam params = 13;
   inline int params_size() const;
   inline void clear_params();
   static const int kParamsFieldNumber = 13;
-  inline const ::Proto::FblElementParam& params(int index) const;
-  inline ::Proto::FblElementParam* mutable_params(int index);
-  inline ::Proto::FblElementParam* add_params();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+  inline const ::Proto::AfbParam& params(int index) const;
+  inline ::Proto::AfbParam* mutable_params(int index);
+  inline ::Proto::AfbParam* add_params();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >&
       params() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >*
       mutable_params();
+
+  // optional .Proto.wstring description = 14;
+  inline bool has_description() const;
+  inline void clear_description();
+  static const int kDescriptionFieldNumber = 14;
+  inline const ::Proto::wstring& description() const;
+  inline ::Proto::wstring* mutable_description();
+  inline ::Proto::wstring* release_description();
+  inline void set_allocated_description(::Proto::wstring* description);
 
   // @@protoc_insertion_point(class_scope:Proto.FblElement)
  private:
@@ -1287,6 +1296,8 @@ class FblElement : public ::google::protobuf::Message {
   inline void clear_has_hasram();
   inline void set_has_requiredstart();
   inline void clear_has_requiredstart();
+  inline void set_has_description();
+  inline void clear_has_description();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1295,12 +1306,13 @@ class FblElement : public ::google::protobuf::Message {
   ::google::protobuf::uint32 opcode_;
   bool hasram_;
   bool requiredstart_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > inputsignals_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal > outputsignals_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal > inputs_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal > outputs_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
+  ::Proto::wstring* description_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1311,14 +1323,14 @@ class FblElement : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class FblElementSignal : public ::google::protobuf::Message {
+class AfbSignal : public ::google::protobuf::Message {
  public:
-  FblElementSignal();
-  virtual ~FblElementSignal();
+  AfbSignal();
+  virtual ~AfbSignal();
 
-  FblElementSignal(const FblElementSignal& from);
+  AfbSignal(const AfbSignal& from);
 
-  inline FblElementSignal& operator=(const FblElementSignal& from) {
+  inline AfbSignal& operator=(const AfbSignal& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1332,17 +1344,17 @@ class FblElementSignal : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const FblElementSignal& default_instance();
+  static const AfbSignal& default_instance();
 
-  void Swap(FblElementSignal* other);
+  void Swap(AfbSignal* other);
 
   // implements Message ----------------------------------------------
 
-  FblElementSignal* New() const;
+  AfbSignal* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const FblElementSignal& from);
-  void MergeFrom(const FblElementSignal& from);
+  void CopyFrom(const AfbSignal& from);
+  void MergeFrom(const AfbSignal& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1404,7 +1416,7 @@ class FblElementSignal : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_opname();
   inline void set_allocated_opname(::Proto::wstring* opname);
 
-  // @@protoc_insertion_point(class_scope:Proto.FblElementSignal)
+  // @@protoc_insertion_point(class_scope:Proto.AfbSignal)
  private:
   inline void set_has_caption();
   inline void clear_has_caption();
@@ -1433,18 +1445,18 @@ class FblElementSignal : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static FblElementSignal* default_instance_;
+  static AfbSignal* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class FblElementParam : public ::google::protobuf::Message {
+class AfbParam : public ::google::protobuf::Message {
  public:
-  FblElementParam();
-  virtual ~FblElementParam();
+  AfbParam();
+  virtual ~AfbParam();
 
-  FblElementParam(const FblElementParam& from);
+  AfbParam(const AfbParam& from);
 
-  inline FblElementParam& operator=(const FblElementParam& from) {
+  inline AfbParam& operator=(const AfbParam& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1458,17 +1470,17 @@ class FblElementParam : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const FblElementParam& default_instance();
+  static const AfbParam& default_instance();
 
-  void Swap(FblElementParam* other);
+  void Swap(AfbParam* other);
 
   // implements Message ----------------------------------------------
 
-  FblElementParam* New() const;
+  AfbParam* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const FblElementParam& from);
-  void MergeFrom(const FblElementParam& from);
+  void CopyFrom(const AfbParam& from);
+  void MergeFrom(const AfbParam& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -1596,7 +1608,7 @@ class FblElementParam : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_opname();
   inline void set_allocated_opname(::Proto::wstring* opname);
 
-  // @@protoc_insertion_point(class_scope:Proto.FblElementParam)
+  // @@protoc_insertion_point(class_scope:Proto.AfbParam)
  private:
   inline void set_has_caption();
   inline void clear_has_caption();
@@ -1649,7 +1661,7 @@ class FblElementParam : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static FblElementParam* default_instance_;
+  static AfbParam* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1923,14 +1935,14 @@ class LogicScheme : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class VideoLayer : public ::google::protobuf::Message {
+class SchemeLayer : public ::google::protobuf::Message {
  public:
-  VideoLayer();
-  virtual ~VideoLayer();
+  SchemeLayer();
+  virtual ~SchemeLayer();
 
-  VideoLayer(const VideoLayer& from);
+  SchemeLayer(const SchemeLayer& from);
 
-  inline VideoLayer& operator=(const VideoLayer& from) {
+  inline SchemeLayer& operator=(const SchemeLayer& from) {
     CopyFrom(from);
     return *this;
   }
@@ -1944,17 +1956,17 @@ class VideoLayer : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoLayer& default_instance();
+  static const SchemeLayer& default_instance();
 
-  void Swap(VideoLayer* other);
+  void Swap(SchemeLayer* other);
 
   // implements Message ----------------------------------------------
 
-  VideoLayer* New() const;
+  SchemeLayer* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoLayer& from);
-  void MergeFrom(const VideoLayer& from);
+  void CopyFrom(const SchemeLayer& from);
+  void MergeFrom(const SchemeLayer& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2028,7 +2040,7 @@ class VideoLayer : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
       mutable_items();
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoLayer)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeLayer)
  private:
   inline void set_has_uuid();
   inline void clear_has_uuid();
@@ -2058,18 +2070,18 @@ class VideoLayer : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoLayer* default_instance_;
+  static SchemeLayer* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class VideoItem : public ::google::protobuf::Message {
+class SchemeItem : public ::google::protobuf::Message {
  public:
-  VideoItem();
-  virtual ~VideoItem();
+  SchemeItem();
+  virtual ~SchemeItem();
 
-  VideoItem(const VideoItem& from);
+  SchemeItem(const SchemeItem& from);
 
-  inline VideoItem& operator=(const VideoItem& from) {
+  inline SchemeItem& operator=(const SchemeItem& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2083,17 +2095,17 @@ class VideoItem : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItem& default_instance();
+  static const SchemeItem& default_instance();
 
-  void Swap(VideoItem* other);
+  void Swap(SchemeItem* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItem* New() const;
+  SchemeItem* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItem& from);
-  void MergeFrom(const VideoItem& from);
+  void CopyFrom(const SchemeItem& from);
+  void MergeFrom(const SchemeItem& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2216,77 +2228,77 @@ class VideoItem : public ::google::protobuf::Message {
   inline ::Proto::FblItemLine* release_fblitemline();
   inline void set_allocated_fblitemline(::Proto::FblItemLine* fblitemline);
 
-  // optional .Proto.VideoItemRect Rect = 116;
+  // optional .Proto.SchemeItemRect Rect = 116;
   inline bool has_rect() const;
   inline void clear_rect();
   static const int kRectFieldNumber = 116;
-  inline const ::Proto::VideoItemRect& rect() const;
-  inline ::Proto::VideoItemRect* mutable_rect();
-  inline ::Proto::VideoItemRect* release_rect();
-  inline void set_allocated_rect(::Proto::VideoItemRect* rect);
+  inline const ::Proto::SchemeItemRect& rect() const;
+  inline ::Proto::SchemeItemRect* mutable_rect();
+  inline ::Proto::SchemeItemRect* release_rect();
+  inline void set_allocated_rect(::Proto::SchemeItemRect* rect);
 
-  // optional .Proto.VideoItemLine Line = 117;
+  // optional .Proto.SchemeItemLine Line = 117;
   inline bool has_line() const;
   inline void clear_line();
   static const int kLineFieldNumber = 117;
-  inline const ::Proto::VideoItemLine& line() const;
-  inline ::Proto::VideoItemLine* mutable_line();
-  inline ::Proto::VideoItemLine* release_line();
-  inline void set_allocated_line(::Proto::VideoItemLine* line);
+  inline const ::Proto::SchemeItemLine& line() const;
+  inline ::Proto::SchemeItemLine* mutable_line();
+  inline ::Proto::SchemeItemLine* release_line();
+  inline void set_allocated_line(::Proto::SchemeItemLine* line);
 
-  // optional .Proto.VideoItemConnectionLine ConnectionLine = 118;
-  inline bool has_connectionline() const;
-  inline void clear_connectionline();
-  static const int kConnectionLineFieldNumber = 118;
-  inline const ::Proto::VideoItemConnectionLine& connectionline() const;
-  inline ::Proto::VideoItemConnectionLine* mutable_connectionline();
-  inline ::Proto::VideoItemConnectionLine* release_connectionline();
-  inline void set_allocated_connectionline(::Proto::VideoItemConnectionLine* connectionline);
+  // optional .Proto.SchemeItemPath Path = 118;
+  inline bool has_path() const;
+  inline void clear_path();
+  static const int kPathFieldNumber = 118;
+  inline const ::Proto::SchemeItemPath& path() const;
+  inline ::Proto::SchemeItemPath* mutable_path();
+  inline ::Proto::SchemeItemPath* release_path();
+  inline void set_allocated_path(::Proto::SchemeItemPath* path);
 
-  // optional .Proto.VideoItemSignal Signal = 124;
+  // optional .Proto.SchemeItemSignal Signal = 124;
   inline bool has_signal() const;
   inline void clear_signal();
   static const int kSignalFieldNumber = 124;
-  inline const ::Proto::VideoItemSignal& signal() const;
-  inline ::Proto::VideoItemSignal* mutable_signal();
-  inline ::Proto::VideoItemSignal* release_signal();
-  inline void set_allocated_signal(::Proto::VideoItemSignal* signal);
+  inline const ::Proto::SchemeItemSignal& signal() const;
+  inline ::Proto::SchemeItemSignal* mutable_signal();
+  inline ::Proto::SchemeItemSignal* release_signal();
+  inline void set_allocated_signal(::Proto::SchemeItemSignal* signal);
 
-  // optional .Proto.VideoItemInputSignal InputSignal = 125;
+  // optional .Proto.SchemeItemInput InputSignal = 125;
   inline bool has_inputsignal() const;
   inline void clear_inputsignal();
   static const int kInputSignalFieldNumber = 125;
-  inline const ::Proto::VideoItemInputSignal& inputsignal() const;
-  inline ::Proto::VideoItemInputSignal* mutable_inputsignal();
-  inline ::Proto::VideoItemInputSignal* release_inputsignal();
-  inline void set_allocated_inputsignal(::Proto::VideoItemInputSignal* inputsignal);
+  inline const ::Proto::SchemeItemInput& inputsignal() const;
+  inline ::Proto::SchemeItemInput* mutable_inputsignal();
+  inline ::Proto::SchemeItemInput* release_inputsignal();
+  inline void set_allocated_inputsignal(::Proto::SchemeItemInput* inputsignal);
 
-  // optional .Proto.VideoItemOutputSignal OutputSignal = 126;
+  // optional .Proto.SchemeItemOutput OutputSignal = 126;
   inline bool has_outputsignal() const;
   inline void clear_outputsignal();
   static const int kOutputSignalFieldNumber = 126;
-  inline const ::Proto::VideoItemOutputSignal& outputsignal() const;
-  inline ::Proto::VideoItemOutputSignal* mutable_outputsignal();
-  inline ::Proto::VideoItemOutputSignal* release_outputsignal();
-  inline void set_allocated_outputsignal(::Proto::VideoItemOutputSignal* outputsignal);
+  inline const ::Proto::SchemeItemOutput& outputsignal() const;
+  inline ::Proto::SchemeItemOutput* mutable_outputsignal();
+  inline ::Proto::SchemeItemOutput* release_outputsignal();
+  inline void set_allocated_outputsignal(::Proto::SchemeItemOutput* outputsignal);
 
-  // optional .Proto.VideoItemLink Link = 127;
+  // optional .Proto.SchemeItemLink Link = 127;
   inline bool has_link() const;
   inline void clear_link();
   static const int kLinkFieldNumber = 127;
-  inline const ::Proto::VideoItemLink& link() const;
-  inline ::Proto::VideoItemLink* mutable_link();
-  inline ::Proto::VideoItemLink* release_link();
-  inline void set_allocated_link(::Proto::VideoItemLink* link);
+  inline const ::Proto::SchemeItemLink& link() const;
+  inline ::Proto::SchemeItemLink* mutable_link();
+  inline ::Proto::SchemeItemLink* release_link();
+  inline void set_allocated_link(::Proto::SchemeItemLink* link);
 
-  // optional .Proto.VideoItemFblElement VideoItemFblElement = 128;
-  inline bool has_videoitemfblelement() const;
-  inline void clear_videoitemfblelement();
-  static const int kVideoItemFblElementFieldNumber = 128;
-  inline const ::Proto::VideoItemFblElement& videoitemfblelement() const;
-  inline ::Proto::VideoItemFblElement* mutable_videoitemfblelement();
-  inline ::Proto::VideoItemFblElement* release_videoitemfblelement();
-  inline void set_allocated_videoitemfblelement(::Proto::VideoItemFblElement* videoitemfblelement);
+  // optional .Proto.SchemeItemAfb Afb = 128;
+  inline bool has_afb() const;
+  inline void clear_afb();
+  static const int kAfbFieldNumber = 128;
+  inline const ::Proto::SchemeItemAfb& afb() const;
+  inline ::Proto::SchemeItemAfb* mutable_afb();
+  inline ::Proto::SchemeItemAfb* release_afb();
+  inline void set_allocated_afb(::Proto::SchemeItemAfb* afb);
 
   // optional .Proto.SchemeItemConst ConstItem = 129;
   inline bool has_constitem() const;
@@ -2297,7 +2309,7 @@ class VideoItem : public ::google::protobuf::Message {
   inline ::Proto::SchemeItemConst* release_constitem();
   inline void set_allocated_constitem(::Proto::SchemeItemConst* constitem);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItem)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItem)
  private:
   inline void set_has_uuid();
   inline void clear_has_uuid();
@@ -2327,8 +2339,8 @@ class VideoItem : public ::google::protobuf::Message {
   inline void clear_has_rect();
   inline void set_has_line();
   inline void clear_has_line();
-  inline void set_has_connectionline();
-  inline void clear_has_connectionline();
+  inline void set_has_path();
+  inline void clear_has_path();
   inline void set_has_signal();
   inline void clear_has_signal();
   inline void set_has_inputsignal();
@@ -2337,8 +2349,8 @@ class VideoItem : public ::google::protobuf::Message {
   inline void clear_has_outputsignal();
   inline void set_has_link();
   inline void clear_has_link();
-  inline void set_has_videoitemfblelement();
-  inline void clear_has_videoitemfblelement();
+  inline void set_has_afb();
+  inline void clear_has_afb();
   inline void set_has_constitem();
   inline void clear_has_constitem();
 
@@ -2356,14 +2368,14 @@ class VideoItem : public ::google::protobuf::Message {
   ::Proto::FblItem* fblitem_;
   ::Proto::FblItemRect* fblitemrect_;
   ::Proto::FblItemLine* fblitemline_;
-  ::Proto::VideoItemRect* rect_;
-  ::Proto::VideoItemLine* line_;
-  ::Proto::VideoItemConnectionLine* connectionline_;
-  ::Proto::VideoItemSignal* signal_;
-  ::Proto::VideoItemInputSignal* inputsignal_;
-  ::Proto::VideoItemOutputSignal* outputsignal_;
-  ::Proto::VideoItemLink* link_;
-  ::Proto::VideoItemFblElement* videoitemfblelement_;
+  ::Proto::SchemeItemRect* rect_;
+  ::Proto::SchemeItemLine* line_;
+  ::Proto::SchemeItemPath* path_;
+  ::Proto::SchemeItemSignal* signal_;
+  ::Proto::SchemeItemInput* inputsignal_;
+  ::Proto::SchemeItemOutput* outputsignal_;
+  ::Proto::SchemeItemLink* link_;
+  ::Proto::SchemeItemAfb* afb_;
   ::Proto::SchemeItemConst* constitem_;
 
   mutable int _cached_size_;
@@ -2374,7 +2386,7 @@ class VideoItem : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItem* default_instance_;
+  static SchemeItem* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2656,16 +2668,16 @@ class PosConnectionImpl : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.VideoItemPoint points = 1;
+  // repeated .Proto.SchemePoint points = 1;
   inline int points_size() const;
   inline void clear_points();
   static const int kPointsFieldNumber = 1;
-  inline const ::Proto::VideoItemPoint& points(int index) const;
-  inline ::Proto::VideoItemPoint* mutable_points(int index);
-  inline ::Proto::VideoItemPoint* add_points();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint >&
+  inline const ::Proto::SchemePoint& points(int index) const;
+  inline ::Proto::SchemePoint* mutable_points(int index);
+  inline ::Proto::SchemePoint* add_points();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint >&
       points() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint >*
       mutable_points();
 
   // @@protoc_insertion_point(class_scope:Proto.PosConnectionImpl)
@@ -2673,7 +2685,7 @@ class PosConnectionImpl : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint > points_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint > points_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -2687,14 +2699,14 @@ class PosConnectionImpl : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class VideoItemRect : public ::google::protobuf::Message {
+class SchemeItemRect : public ::google::protobuf::Message {
  public:
-  VideoItemRect();
-  virtual ~VideoItemRect();
+  SchemeItemRect();
+  virtual ~SchemeItemRect();
 
-  VideoItemRect(const VideoItemRect& from);
+  SchemeItemRect(const SchemeItemRect& from);
 
-  inline VideoItemRect& operator=(const VideoItemRect& from) {
+  inline SchemeItemRect& operator=(const SchemeItemRect& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2708,17 +2720,17 @@ class VideoItemRect : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemRect& default_instance();
+  static const SchemeItemRect& default_instance();
 
-  void Swap(VideoItemRect* other);
+  void Swap(SchemeItemRect* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemRect* New() const;
+  SchemeItemRect* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemRect& from);
-  void MergeFrom(const VideoItemRect& from);
+  void CopyFrom(const SchemeItemRect& from);
+  void MergeFrom(const SchemeItemRect& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2801,7 +2813,7 @@ class VideoItemRect : public ::google::protobuf::Message {
   inline bool drawrect() const;
   inline void set_drawrect(bool value);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemRect)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemRect)
  private:
   inline void set_has_weight();
   inline void clear_has_weight();
@@ -2839,18 +2851,18 @@ class VideoItemRect : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemRect* default_instance_;
+  static SchemeItemRect* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class VideoItemLine : public ::google::protobuf::Message {
+class SchemeItemLine : public ::google::protobuf::Message {
  public:
-  VideoItemLine();
-  virtual ~VideoItemLine();
+  SchemeItemLine();
+  virtual ~SchemeItemLine();
 
-  VideoItemLine(const VideoItemLine& from);
+  SchemeItemLine(const SchemeItemLine& from);
 
-  inline VideoItemLine& operator=(const VideoItemLine& from) {
+  inline SchemeItemLine& operator=(const SchemeItemLine& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2864,17 +2876,17 @@ class VideoItemLine : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemLine& default_instance();
+  static const SchemeItemLine& default_instance();
 
-  void Swap(VideoItemLine* other);
+  void Swap(SchemeItemLine* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemLine* New() const;
+  SchemeItemLine* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemLine& from);
-  void MergeFrom(const VideoItemLine& from);
+  void CopyFrom(const SchemeItemLine& from);
+  void MergeFrom(const SchemeItemLine& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -2911,7 +2923,7 @@ class VideoItemLine : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 linecolor() const;
   inline void set_linecolor(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemLine)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemLine)
  private:
   inline void set_has_weight();
   inline void clear_has_weight();
@@ -2931,18 +2943,18 @@ class VideoItemLine : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemLine* default_instance_;
+  static SchemeItemLine* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class VideoItemConnectionLine : public ::google::protobuf::Message {
+class SchemeItemPath : public ::google::protobuf::Message {
  public:
-  VideoItemConnectionLine();
-  virtual ~VideoItemConnectionLine();
+  SchemeItemPath();
+  virtual ~SchemeItemPath();
 
-  VideoItemConnectionLine(const VideoItemConnectionLine& from);
+  SchemeItemPath(const SchemeItemPath& from);
 
-  inline VideoItemConnectionLine& operator=(const VideoItemConnectionLine& from) {
+  inline SchemeItemPath& operator=(const SchemeItemPath& from) {
     CopyFrom(from);
     return *this;
   }
@@ -2956,17 +2968,17 @@ class VideoItemConnectionLine : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemConnectionLine& default_instance();
+  static const SchemeItemPath& default_instance();
 
-  void Swap(VideoItemConnectionLine* other);
+  void Swap(SchemeItemPath* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemConnectionLine* New() const;
+  SchemeItemPath* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemConnectionLine& from);
-  void MergeFrom(const VideoItemConnectionLine& from);
+  void CopyFrom(const SchemeItemPath& from);
+  void MergeFrom(const SchemeItemPath& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3003,7 +3015,7 @@ class VideoItemConnectionLine : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 linecolor() const;
   inline void set_linecolor(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemConnectionLine)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemPath)
  private:
   inline void set_has_weight();
   inline void clear_has_weight();
@@ -3023,7 +3035,7 @@ class VideoItemConnectionLine : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemConnectionLine* default_instance_;
+  static SchemeItemPath* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -3081,14 +3093,14 @@ class FblConnectionPoint : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .Proto.VideoItemPoint point = 1;
+  // optional .Proto.SchemePoint point = 1;
   inline bool has_point() const;
   inline void clear_point();
   static const int kPointFieldNumber = 1;
-  inline const ::Proto::VideoItemPoint& point() const;
-  inline ::Proto::VideoItemPoint* mutable_point();
-  inline ::Proto::VideoItemPoint* release_point();
-  inline void set_allocated_point(::Proto::VideoItemPoint* point);
+  inline const ::Proto::SchemePoint& point() const;
+  inline ::Proto::SchemePoint* mutable_point();
+  inline ::Proto::SchemePoint* release_point();
+  inline void set_allocated_point(::Proto::SchemePoint* point);
 
   // optional .Proto.ConnectionDirrection dirrection = 2;
   inline bool has_dirrection() const;
@@ -3140,7 +3152,7 @@ class FblConnectionPoint : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::VideoItemPoint* point_;
+  ::Proto::SchemePoint* point_;
   ::Proto::Uuid* uuid_;
   int dirrection_;
   ::google::protobuf::int32 operandindex_;
@@ -3459,14 +3471,14 @@ class FblItemLine : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class VideoItemSignal : public ::google::protobuf::Message {
+class SchemeItemSignal : public ::google::protobuf::Message {
  public:
-  VideoItemSignal();
-  virtual ~VideoItemSignal();
+  SchemeItemSignal();
+  virtual ~SchemeItemSignal();
 
-  VideoItemSignal(const VideoItemSignal& from);
+  SchemeItemSignal(const SchemeItemSignal& from);
 
-  inline VideoItemSignal& operator=(const VideoItemSignal& from) {
+  inline SchemeItemSignal& operator=(const SchemeItemSignal& from) {
     CopyFrom(from);
     return *this;
   }
@@ -3480,17 +3492,17 @@ class VideoItemSignal : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemSignal& default_instance();
+  static const SchemeItemSignal& default_instance();
 
-  void Swap(VideoItemSignal* other);
+  void Swap(SchemeItemSignal* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemSignal* New() const;
+  SchemeItemSignal* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemSignal& from);
-  void MergeFrom(const VideoItemSignal& from);
+  void CopyFrom(const SchemeItemSignal& from);
+  void MergeFrom(const SchemeItemSignal& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3525,7 +3537,7 @@ class VideoItemSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
       mutable_signalstrids();
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemSignal)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemSignal)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -3540,18 +3552,18 @@ class VideoItemSignal : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemSignal* default_instance_;
+  static SchemeItemSignal* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class VideoItemInputSignal : public ::google::protobuf::Message {
+class SchemeItemInput : public ::google::protobuf::Message {
  public:
-  VideoItemInputSignal();
-  virtual ~VideoItemInputSignal();
+  SchemeItemInput();
+  virtual ~SchemeItemInput();
 
-  VideoItemInputSignal(const VideoItemInputSignal& from);
+  SchemeItemInput(const SchemeItemInput& from);
 
-  inline VideoItemInputSignal& operator=(const VideoItemInputSignal& from) {
+  inline SchemeItemInput& operator=(const SchemeItemInput& from) {
     CopyFrom(from);
     return *this;
   }
@@ -3565,17 +3577,17 @@ class VideoItemInputSignal : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemInputSignal& default_instance();
+  static const SchemeItemInput& default_instance();
 
-  void Swap(VideoItemInputSignal* other);
+  void Swap(SchemeItemInput* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemInputSignal* New() const;
+  SchemeItemInput* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemInputSignal& from);
-  void MergeFrom(const VideoItemInputSignal& from);
+  void CopyFrom(const SchemeItemInput& from);
+  void MergeFrom(const SchemeItemInput& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3598,7 +3610,7 @@ class VideoItemInputSignal : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemInputSignal)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemInput)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -3612,18 +3624,18 @@ class VideoItemInputSignal : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemInputSignal* default_instance_;
+  static SchemeItemInput* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class VideoItemOutputSignal : public ::google::protobuf::Message {
+class SchemeItemOutput : public ::google::protobuf::Message {
  public:
-  VideoItemOutputSignal();
-  virtual ~VideoItemOutputSignal();
+  SchemeItemOutput();
+  virtual ~SchemeItemOutput();
 
-  VideoItemOutputSignal(const VideoItemOutputSignal& from);
+  SchemeItemOutput(const SchemeItemOutput& from);
 
-  inline VideoItemOutputSignal& operator=(const VideoItemOutputSignal& from) {
+  inline SchemeItemOutput& operator=(const SchemeItemOutput& from) {
     CopyFrom(from);
     return *this;
   }
@@ -3637,17 +3649,17 @@ class VideoItemOutputSignal : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemOutputSignal& default_instance();
+  static const SchemeItemOutput& default_instance();
 
-  void Swap(VideoItemOutputSignal* other);
+  void Swap(SchemeItemOutput* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemOutputSignal* New() const;
+  SchemeItemOutput* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemOutputSignal& from);
-  void MergeFrom(const VideoItemOutputSignal& from);
+  void CopyFrom(const SchemeItemOutput& from);
+  void MergeFrom(const SchemeItemOutput& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3670,7 +3682,7 @@ class VideoItemOutputSignal : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemOutputSignal)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemOutput)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -3684,18 +3696,18 @@ class VideoItemOutputSignal : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemOutputSignal* default_instance_;
+  static SchemeItemOutput* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class VideoItemLink : public ::google::protobuf::Message {
+class SchemeItemLink : public ::google::protobuf::Message {
  public:
-  VideoItemLink();
-  virtual ~VideoItemLink();
+  SchemeItemLink();
+  virtual ~SchemeItemLink();
 
-  VideoItemLink(const VideoItemLink& from);
+  SchemeItemLink(const SchemeItemLink& from);
 
-  inline VideoItemLink& operator=(const VideoItemLink& from) {
+  inline SchemeItemLink& operator=(const SchemeItemLink& from) {
     CopyFrom(from);
     return *this;
   }
@@ -3709,17 +3721,17 @@ class VideoItemLink : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemLink& default_instance();
+  static const SchemeItemLink& default_instance();
 
-  void Swap(VideoItemLink* other);
+  void Swap(SchemeItemLink* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemLink* New() const;
+  SchemeItemLink* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemLink& from);
-  void MergeFrom(const VideoItemLink& from);
+  void CopyFrom(const SchemeItemLink& from);
+  void MergeFrom(const SchemeItemLink& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3742,7 +3754,7 @@ class VideoItemLink : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemLink)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemLink)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -3756,18 +3768,18 @@ class VideoItemLink : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemLink* default_instance_;
+  static SchemeItemLink* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class VideoItemFblElement : public ::google::protobuf::Message {
+class SchemeItemAfb : public ::google::protobuf::Message {
  public:
-  VideoItemFblElement();
-  virtual ~VideoItemFblElement();
+  SchemeItemAfb();
+  virtual ~SchemeItemAfb();
 
-  VideoItemFblElement(const VideoItemFblElement& from);
+  SchemeItemAfb(const SchemeItemAfb& from);
 
-  inline VideoItemFblElement& operator=(const VideoItemFblElement& from) {
+  inline SchemeItemAfb& operator=(const SchemeItemAfb& from) {
     CopyFrom(from);
     return *this;
   }
@@ -3781,17 +3793,17 @@ class VideoItemFblElement : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const VideoItemFblElement& default_instance();
+  static const SchemeItemAfb& default_instance();
 
-  void Swap(VideoItemFblElement* other);
+  void Swap(SchemeItemAfb* other);
 
   // implements Message ----------------------------------------------
 
-  VideoItemFblElement* New() const;
+  SchemeItemAfb* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const VideoItemFblElement& from);
-  void MergeFrom(const VideoItemFblElement& from);
+  void CopyFrom(const SchemeItemAfb& from);
+  void MergeFrom(const SchemeItemAfb& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -3814,16 +3826,16 @@ class VideoItemFblElement : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.FblElementParam params = 2;
+  // repeated .Proto.AfbParam params = 2;
   inline int params_size() const;
   inline void clear_params();
   static const int kParamsFieldNumber = 2;
-  inline const ::Proto::FblElementParam& params(int index) const;
-  inline ::Proto::FblElementParam* mutable_params(int index);
-  inline ::Proto::FblElementParam* add_params();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+  inline const ::Proto::AfbParam& params(int index) const;
+  inline ::Proto::AfbParam* mutable_params(int index);
+  inline ::Proto::AfbParam* add_params();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >&
       params() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >*
       mutable_params();
 
   // optional .Proto.wstring afbStrid = 3;
@@ -3835,14 +3847,14 @@ class VideoItemFblElement : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_afbstrid();
   inline void set_allocated_afbstrid(::Proto::wstring* afbstrid);
 
-  // @@protoc_insertion_point(class_scope:Proto.VideoItemFblElement)
+  // @@protoc_insertion_point(class_scope:Proto.SchemeItemAfb)
  private:
   inline void set_has_afbstrid();
   inline void clear_has_afbstrid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam > params_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::Proto::wstring* afbstrid_;
 
   mutable int _cached_size_;
@@ -3853,7 +3865,7 @@ class VideoItemFblElement : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_serialization_2eproto();
 
   void InitAsDefaultInstance();
-  static VideoItemFblElement* default_instance_;
+  static SchemeItemAfb* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -5777,48 +5789,48 @@ inline void FontParam::set_italic(bool value) {
 
 // -------------------------------------------------------------------
 
-// VideoItemPoint
+// SchemePoint
 
 // required double x = 1;
-inline bool VideoItemPoint::has_x() const {
+inline bool SchemePoint::has_x() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItemPoint::set_has_x() {
+inline void SchemePoint::set_has_x() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItemPoint::clear_has_x() {
+inline void SchemePoint::clear_has_x() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItemPoint::clear_x() {
+inline void SchemePoint::clear_x() {
   x_ = 0;
   clear_has_x();
 }
-inline double VideoItemPoint::x() const {
+inline double SchemePoint::x() const {
   return x_;
 }
-inline void VideoItemPoint::set_x(double value) {
+inline void SchemePoint::set_x(double value) {
   set_has_x();
   x_ = value;
 }
 
 // required double y = 2;
-inline bool VideoItemPoint::has_y() const {
+inline bool SchemePoint::has_y() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItemPoint::set_has_y() {
+inline void SchemePoint::set_has_y() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItemPoint::clear_has_y() {
+inline void SchemePoint::clear_has_y() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItemPoint::clear_y() {
+inline void SchemePoint::clear_y() {
   y_ = 0;
   clear_has_y();
 }
-inline double VideoItemPoint::y() const {
+inline double SchemePoint::y() const {
   return y_;
 }
-inline void VideoItemPoint::set_y(double value) {
+inline void SchemePoint::set_y(double value) {
   set_has_y();
   y_ = value;
 }
@@ -5849,41 +5861,41 @@ inline void Envelope::set_classnamehash(::google::protobuf::uint32 value) {
   classnamehash_ = value;
 }
 
-// optional .Proto.VideoItem videoitem = 6;
-inline bool Envelope::has_videoitem() const {
+// optional .Proto.SchemeItem schemeitem = 6;
+inline bool Envelope::has_schemeitem() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Envelope::set_has_videoitem() {
+inline void Envelope::set_has_schemeitem() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Envelope::clear_has_videoitem() {
+inline void Envelope::clear_has_schemeitem() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void Envelope::clear_videoitem() {
-  if (videoitem_ != NULL) videoitem_->::Proto::VideoItem::Clear();
-  clear_has_videoitem();
+inline void Envelope::clear_schemeitem() {
+  if (schemeitem_ != NULL) schemeitem_->::Proto::SchemeItem::Clear();
+  clear_has_schemeitem();
 }
-inline const ::Proto::VideoItem& Envelope::videoitem() const {
-  return videoitem_ != NULL ? *videoitem_ : *default_instance_->videoitem_;
+inline const ::Proto::SchemeItem& Envelope::schemeitem() const {
+  return schemeitem_ != NULL ? *schemeitem_ : *default_instance_->schemeitem_;
 }
-inline ::Proto::VideoItem* Envelope::mutable_videoitem() {
-  set_has_videoitem();
-  if (videoitem_ == NULL) videoitem_ = new ::Proto::VideoItem;
-  return videoitem_;
+inline ::Proto::SchemeItem* Envelope::mutable_schemeitem() {
+  set_has_schemeitem();
+  if (schemeitem_ == NULL) schemeitem_ = new ::Proto::SchemeItem;
+  return schemeitem_;
 }
-inline ::Proto::VideoItem* Envelope::release_videoitem() {
-  clear_has_videoitem();
-  ::Proto::VideoItem* temp = videoitem_;
-  videoitem_ = NULL;
+inline ::Proto::SchemeItem* Envelope::release_schemeitem() {
+  clear_has_schemeitem();
+  ::Proto::SchemeItem* temp = schemeitem_;
+  schemeitem_ = NULL;
   return temp;
 }
-inline void Envelope::set_allocated_videoitem(::Proto::VideoItem* videoitem) {
-  delete videoitem_;
-  videoitem_ = videoitem;
-  if (videoitem) {
-    set_has_videoitem();
+inline void Envelope::set_allocated_schemeitem(::Proto::SchemeItem* schemeitem) {
+  delete schemeitem_;
+  schemeitem_ = schemeitem;
+  if (schemeitem) {
+    set_has_schemeitem();
   } else {
-    clear_has_videoitem();
+    clear_has_schemeitem();
   }
 }
 
@@ -5963,41 +5975,41 @@ inline void Envelope::set_allocated_scheme(::Proto::Scheme* scheme) {
   }
 }
 
-// optional .Proto.VideoLayer videolayer = 101;
-inline bool Envelope::has_videolayer() const {
+// optional .Proto.SchemeLayer schemelayer = 101;
+inline bool Envelope::has_schemelayer() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void Envelope::set_has_videolayer() {
+inline void Envelope::set_has_schemelayer() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void Envelope::clear_has_videolayer() {
+inline void Envelope::clear_has_schemelayer() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void Envelope::clear_videolayer() {
-  if (videolayer_ != NULL) videolayer_->::Proto::VideoLayer::Clear();
-  clear_has_videolayer();
+inline void Envelope::clear_schemelayer() {
+  if (schemelayer_ != NULL) schemelayer_->::Proto::SchemeLayer::Clear();
+  clear_has_schemelayer();
 }
-inline const ::Proto::VideoLayer& Envelope::videolayer() const {
-  return videolayer_ != NULL ? *videolayer_ : *default_instance_->videolayer_;
+inline const ::Proto::SchemeLayer& Envelope::schemelayer() const {
+  return schemelayer_ != NULL ? *schemelayer_ : *default_instance_->schemelayer_;
 }
-inline ::Proto::VideoLayer* Envelope::mutable_videolayer() {
-  set_has_videolayer();
-  if (videolayer_ == NULL) videolayer_ = new ::Proto::VideoLayer;
-  return videolayer_;
+inline ::Proto::SchemeLayer* Envelope::mutable_schemelayer() {
+  set_has_schemelayer();
+  if (schemelayer_ == NULL) schemelayer_ = new ::Proto::SchemeLayer;
+  return schemelayer_;
 }
-inline ::Proto::VideoLayer* Envelope::release_videolayer() {
-  clear_has_videolayer();
-  ::Proto::VideoLayer* temp = videolayer_;
-  videolayer_ = NULL;
+inline ::Proto::SchemeLayer* Envelope::release_schemelayer() {
+  clear_has_schemelayer();
+  ::Proto::SchemeLayer* temp = schemelayer_;
+  schemelayer_ = NULL;
   return temp;
 }
-inline void Envelope::set_allocated_videolayer(::Proto::VideoLayer* videolayer) {
-  delete videolayer_;
-  videolayer_ = videolayer;
-  if (videolayer) {
-    set_has_videolayer();
+inline void Envelope::set_allocated_schemelayer(::Proto::SchemeLayer* schemelayer) {
+  delete schemelayer_;
+  schemelayer_ = schemelayer;
+  if (schemelayer) {
+    set_has_schemelayer();
   } else {
-    clear_has_videolayer();
+    clear_has_schemelayer();
   }
 }
 
@@ -6570,114 +6582,152 @@ inline void FblElement::set_requiredstart(bool value) {
   requiredstart_ = value;
 }
 
-// repeated .Proto.FblElementSignal inputSignals = 11;
-inline int FblElement::inputsignals_size() const {
-  return inputsignals_.size();
+// repeated .Proto.AfbSignal inputs = 11;
+inline int FblElement::inputs_size() const {
+  return inputs_.size();
 }
-inline void FblElement::clear_inputsignals() {
-  inputsignals_.Clear();
+inline void FblElement::clear_inputs() {
+  inputs_.Clear();
 }
-inline const ::Proto::FblElementSignal& FblElement::inputsignals(int index) const {
-  return inputsignals_.Get(index);
+inline const ::Proto::AfbSignal& FblElement::inputs(int index) const {
+  return inputs_.Get(index);
 }
-inline ::Proto::FblElementSignal* FblElement::mutable_inputsignals(int index) {
-  return inputsignals_.Mutable(index);
+inline ::Proto::AfbSignal* FblElement::mutable_inputs(int index) {
+  return inputs_.Mutable(index);
 }
-inline ::Proto::FblElementSignal* FblElement::add_inputsignals() {
-  return inputsignals_.Add();
+inline ::Proto::AfbSignal* FblElement::add_inputs() {
+  return inputs_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >&
-FblElement::inputsignals() const {
-  return inputsignals_;
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >&
+FblElement::inputs() const {
+  return inputs_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
-FblElement::mutable_inputsignals() {
-  return &inputsignals_;
-}
-
-// repeated .Proto.FblElementSignal outputSignals = 12;
-inline int FblElement::outputsignals_size() const {
-  return outputsignals_.size();
-}
-inline void FblElement::clear_outputsignals() {
-  outputsignals_.Clear();
-}
-inline const ::Proto::FblElementSignal& FblElement::outputsignals(int index) const {
-  return outputsignals_.Get(index);
-}
-inline ::Proto::FblElementSignal* FblElement::mutable_outputsignals(int index) {
-  return outputsignals_.Mutable(index);
-}
-inline ::Proto::FblElementSignal* FblElement::add_outputsignals() {
-  return outputsignals_.Add();
-}
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >&
-FblElement::outputsignals() const {
-  return outputsignals_;
-}
-inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementSignal >*
-FblElement::mutable_outputsignals() {
-  return &outputsignals_;
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >*
+FblElement::mutable_inputs() {
+  return &inputs_;
 }
 
-// repeated .Proto.FblElementParam params = 13;
+// repeated .Proto.AfbSignal outputs = 12;
+inline int FblElement::outputs_size() const {
+  return outputs_.size();
+}
+inline void FblElement::clear_outputs() {
+  outputs_.Clear();
+}
+inline const ::Proto::AfbSignal& FblElement::outputs(int index) const {
+  return outputs_.Get(index);
+}
+inline ::Proto::AfbSignal* FblElement::mutable_outputs(int index) {
+  return outputs_.Mutable(index);
+}
+inline ::Proto::AfbSignal* FblElement::add_outputs() {
+  return outputs_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >&
+FblElement::outputs() const {
+  return outputs_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbSignal >*
+FblElement::mutable_outputs() {
+  return &outputs_;
+}
+
+// repeated .Proto.AfbParam params = 13;
 inline int FblElement::params_size() const {
   return params_.size();
 }
 inline void FblElement::clear_params() {
   params_.Clear();
 }
-inline const ::Proto::FblElementParam& FblElement::params(int index) const {
+inline const ::Proto::AfbParam& FblElement::params(int index) const {
   return params_.Get(index);
 }
-inline ::Proto::FblElementParam* FblElement::mutable_params(int index) {
+inline ::Proto::AfbParam* FblElement::mutable_params(int index) {
   return params_.Mutable(index);
 }
-inline ::Proto::FblElementParam* FblElement::add_params() {
+inline ::Proto::AfbParam* FblElement::add_params() {
   return params_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >&
 FblElement::params() const {
   return params_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >*
 FblElement::mutable_params() {
   return &params_;
 }
 
+// optional .Proto.wstring description = 14;
+inline bool FblElement::has_description() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void FblElement::set_has_description() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void FblElement::clear_has_description() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void FblElement::clear_description() {
+  if (description_ != NULL) description_->::Proto::wstring::Clear();
+  clear_has_description();
+}
+inline const ::Proto::wstring& FblElement::description() const {
+  return description_ != NULL ? *description_ : *default_instance_->description_;
+}
+inline ::Proto::wstring* FblElement::mutable_description() {
+  set_has_description();
+  if (description_ == NULL) description_ = new ::Proto::wstring;
+  return description_;
+}
+inline ::Proto::wstring* FblElement::release_description() {
+  clear_has_description();
+  ::Proto::wstring* temp = description_;
+  description_ = NULL;
+  return temp;
+}
+inline void FblElement::set_allocated_description(::Proto::wstring* description) {
+  delete description_;
+  description_ = description;
+  if (description) {
+    set_has_description();
+  } else {
+    clear_has_description();
+  }
+}
+
 // -------------------------------------------------------------------
 
-// FblElementSignal
+// AfbSignal
 
 // required .Proto.wstring caption = 1;
-inline bool FblElementSignal::has_caption() const {
+inline bool AfbSignal::has_caption() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void FblElementSignal::set_has_caption() {
+inline void AfbSignal::set_has_caption() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void FblElementSignal::clear_has_caption() {
+inline void AfbSignal::clear_has_caption() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void FblElementSignal::clear_caption() {
+inline void AfbSignal::clear_caption() {
   if (caption_ != NULL) caption_->::Proto::wstring::Clear();
   clear_has_caption();
 }
-inline const ::Proto::wstring& FblElementSignal::caption() const {
+inline const ::Proto::wstring& AfbSignal::caption() const {
   return caption_ != NULL ? *caption_ : *default_instance_->caption_;
 }
-inline ::Proto::wstring* FblElementSignal::mutable_caption() {
+inline ::Proto::wstring* AfbSignal::mutable_caption() {
   set_has_caption();
   if (caption_ == NULL) caption_ = new ::Proto::wstring;
   return caption_;
 }
-inline ::Proto::wstring* FblElementSignal::release_caption() {
+inline ::Proto::wstring* AfbSignal::release_caption() {
   clear_has_caption();
   ::Proto::wstring* temp = caption_;
   caption_ = NULL;
   return temp;
 }
-inline void FblElementSignal::set_allocated_caption(::Proto::wstring* caption) {
+inline void AfbSignal::set_allocated_caption(::Proto::wstring* caption) {
   delete caption_;
   caption_ = caption;
   if (caption) {
@@ -6688,101 +6738,101 @@ inline void FblElementSignal::set_allocated_caption(::Proto::wstring* caption) {
 }
 
 // required .Proto.FblSignalType type = 2;
-inline bool FblElementSignal::has_type() const {
+inline bool AfbSignal::has_type() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void FblElementSignal::set_has_type() {
+inline void AfbSignal::set_has_type() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void FblElementSignal::clear_has_type() {
+inline void AfbSignal::clear_has_type() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void FblElementSignal::clear_type() {
+inline void AfbSignal::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::Proto::FblSignalType FblElementSignal::type() const {
+inline ::Proto::FblSignalType AfbSignal::type() const {
   return static_cast< ::Proto::FblSignalType >(type_);
 }
-inline void FblElementSignal::set_type(::Proto::FblSignalType value) {
+inline void AfbSignal::set_type(::Proto::FblSignalType value) {
   assert(::Proto::FblSignalType_IsValid(value));
   set_has_type();
   type_ = value;
 }
 
 // optional int32 operandIndex = 3 [default = 0];
-inline bool FblElementSignal::has_operandindex() const {
+inline bool AfbSignal::has_operandindex() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void FblElementSignal::set_has_operandindex() {
+inline void AfbSignal::set_has_operandindex() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void FblElementSignal::clear_has_operandindex() {
+inline void AfbSignal::clear_has_operandindex() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void FblElementSignal::clear_operandindex() {
+inline void AfbSignal::clear_operandindex() {
   operandindex_ = 0;
   clear_has_operandindex();
 }
-inline ::google::protobuf::int32 FblElementSignal::operandindex() const {
+inline ::google::protobuf::int32 AfbSignal::operandindex() const {
   return operandindex_;
 }
-inline void FblElementSignal::set_operandindex(::google::protobuf::int32 value) {
+inline void AfbSignal::set_operandindex(::google::protobuf::int32 value) {
   set_has_operandindex();
   operandindex_ = value;
 }
 
 // optional int32 size = 4 [default = 0];
-inline bool FblElementSignal::has_size() const {
+inline bool AfbSignal::has_size() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void FblElementSignal::set_has_size() {
+inline void AfbSignal::set_has_size() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void FblElementSignal::clear_has_size() {
+inline void AfbSignal::clear_has_size() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void FblElementSignal::clear_size() {
+inline void AfbSignal::clear_size() {
   size_ = 0;
   clear_has_size();
 }
-inline ::google::protobuf::int32 FblElementSignal::size() const {
+inline ::google::protobuf::int32 AfbSignal::size() const {
   return size_;
 }
-inline void FblElementSignal::set_size(::google::protobuf::int32 value) {
+inline void AfbSignal::set_size(::google::protobuf::int32 value) {
   set_has_size();
   size_ = value;
 }
 
 // optional .Proto.wstring opName = 5;
-inline bool FblElementSignal::has_opname() const {
+inline bool AfbSignal::has_opname() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void FblElementSignal::set_has_opname() {
+inline void AfbSignal::set_has_opname() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void FblElementSignal::clear_has_opname() {
+inline void AfbSignal::clear_has_opname() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void FblElementSignal::clear_opname() {
+inline void AfbSignal::clear_opname() {
   if (opname_ != NULL) opname_->::Proto::wstring::Clear();
   clear_has_opname();
 }
-inline const ::Proto::wstring& FblElementSignal::opname() const {
+inline const ::Proto::wstring& AfbSignal::opname() const {
   return opname_ != NULL ? *opname_ : *default_instance_->opname_;
 }
-inline ::Proto::wstring* FblElementSignal::mutable_opname() {
+inline ::Proto::wstring* AfbSignal::mutable_opname() {
   set_has_opname();
   if (opname_ == NULL) opname_ = new ::Proto::wstring;
   return opname_;
 }
-inline ::Proto::wstring* FblElementSignal::release_opname() {
+inline ::Proto::wstring* AfbSignal::release_opname() {
   clear_has_opname();
   ::Proto::wstring* temp = opname_;
   opname_ = NULL;
   return temp;
 }
-inline void FblElementSignal::set_allocated_opname(::Proto::wstring* opname) {
+inline void AfbSignal::set_allocated_opname(::Proto::wstring* opname) {
   delete opname_;
   opname_ = opname;
   if (opname) {
@@ -6794,37 +6844,37 @@ inline void FblElementSignal::set_allocated_opname(::Proto::wstring* opname) {
 
 // -------------------------------------------------------------------
 
-// FblElementParam
+// AfbParam
 
 // required .Proto.wstring caption = 1;
-inline bool FblElementParam::has_caption() const {
+inline bool AfbParam::has_caption() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void FblElementParam::set_has_caption() {
+inline void AfbParam::set_has_caption() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void FblElementParam::clear_has_caption() {
+inline void AfbParam::clear_has_caption() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void FblElementParam::clear_caption() {
+inline void AfbParam::clear_caption() {
   if (caption_ != NULL) caption_->::Proto::wstring::Clear();
   clear_has_caption();
 }
-inline const ::Proto::wstring& FblElementParam::caption() const {
+inline const ::Proto::wstring& AfbParam::caption() const {
   return caption_ != NULL ? *caption_ : *default_instance_->caption_;
 }
-inline ::Proto::wstring* FblElementParam::mutable_caption() {
+inline ::Proto::wstring* AfbParam::mutable_caption() {
   set_has_caption();
   if (caption_ == NULL) caption_ = new ::Proto::wstring;
   return caption_;
 }
-inline ::Proto::wstring* FblElementParam::release_caption() {
+inline ::Proto::wstring* AfbParam::release_caption() {
   clear_has_caption();
   ::Proto::wstring* temp = caption_;
   caption_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_caption(::Proto::wstring* caption) {
+inline void AfbParam::set_allocated_caption(::Proto::wstring* caption) {
   delete caption_;
   caption_ = caption;
   if (caption) {
@@ -6835,167 +6885,167 @@ inline void FblElementParam::set_allocated_caption(::Proto::wstring* caption) {
 }
 
 // required .Proto.FblParamType type = 2;
-inline bool FblElementParam::has_type() const {
+inline bool AfbParam::has_type() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void FblElementParam::set_has_type() {
+inline void AfbParam::set_has_type() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void FblElementParam::clear_has_type() {
+inline void AfbParam::clear_has_type() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void FblElementParam::clear_type() {
+inline void AfbParam::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::Proto::FblParamType FblElementParam::type() const {
+inline ::Proto::FblParamType AfbParam::type() const {
   return static_cast< ::Proto::FblParamType >(type_);
 }
-inline void FblElementParam::set_type(::Proto::FblParamType value) {
+inline void AfbParam::set_type(::Proto::FblParamType value) {
   assert(::Proto::FblParamType_IsValid(value));
   set_has_type();
   type_ = value;
 }
 
 // required bool visible = 7;
-inline bool FblElementParam::has_visible() const {
+inline bool AfbParam::has_visible() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void FblElementParam::set_has_visible() {
+inline void AfbParam::set_has_visible() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void FblElementParam::clear_has_visible() {
+inline void AfbParam::clear_has_visible() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void FblElementParam::clear_visible() {
+inline void AfbParam::clear_visible() {
   visible_ = false;
   clear_has_visible();
 }
-inline bool FblElementParam::visible() const {
+inline bool AfbParam::visible() const {
   return visible_;
 }
-inline void FblElementParam::set_visible(bool value) {
+inline void AfbParam::set_visible(bool value) {
   set_has_visible();
   visible_ = value;
 }
 
 // optional int32 operandIndex = 8 [default = 0];
-inline bool FblElementParam::has_operandindex() const {
+inline bool AfbParam::has_operandindex() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void FblElementParam::set_has_operandindex() {
+inline void AfbParam::set_has_operandindex() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void FblElementParam::clear_has_operandindex() {
+inline void AfbParam::clear_has_operandindex() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void FblElementParam::clear_operandindex() {
+inline void AfbParam::clear_operandindex() {
   operandindex_ = 0;
   clear_has_operandindex();
 }
-inline ::google::protobuf::int32 FblElementParam::operandindex() const {
+inline ::google::protobuf::int32 AfbParam::operandindex() const {
   return operandindex_;
 }
-inline void FblElementParam::set_operandindex(::google::protobuf::int32 value) {
+inline void AfbParam::set_operandindex(::google::protobuf::int32 value) {
   set_has_operandindex();
   operandindex_ = value;
 }
 
 // optional int32 size = 9 [default = 0];
-inline bool FblElementParam::has_size() const {
+inline bool AfbParam::has_size() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void FblElementParam::set_has_size() {
+inline void AfbParam::set_has_size() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void FblElementParam::clear_has_size() {
+inline void AfbParam::clear_has_size() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void FblElementParam::clear_size() {
+inline void AfbParam::clear_size() {
   size_ = 0;
   clear_has_size();
 }
-inline ::google::protobuf::int32 FblElementParam::size() const {
+inline ::google::protobuf::int32 AfbParam::size() const {
   return size_;
 }
-inline void FblElementParam::set_size(::google::protobuf::int32 value) {
+inline void AfbParam::set_size(::google::protobuf::int32 value) {
   set_has_size();
   size_ = value;
 }
 
 // optional bool instantiator = 10 [default = false];
-inline bool FblElementParam::has_instantiator() const {
+inline bool AfbParam::has_instantiator() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void FblElementParam::set_has_instantiator() {
+inline void AfbParam::set_has_instantiator() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void FblElementParam::clear_has_instantiator() {
+inline void AfbParam::clear_has_instantiator() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void FblElementParam::clear_instantiator() {
+inline void AfbParam::clear_instantiator() {
   instantiator_ = false;
   clear_has_instantiator();
 }
-inline bool FblElementParam::instantiator() const {
+inline bool AfbParam::instantiator() const {
   return instantiator_;
 }
-inline void FblElementParam::set_instantiator(bool value) {
+inline void AfbParam::set_instantiator(bool value) {
   set_has_instantiator();
   instantiator_ = value;
 }
 
 // optional bool user = 11 [default = false];
-inline bool FblElementParam::has_user() const {
+inline bool AfbParam::has_user() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void FblElementParam::set_has_user() {
+inline void AfbParam::set_has_user() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void FblElementParam::clear_has_user() {
+inline void AfbParam::clear_has_user() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void FblElementParam::clear_user() {
+inline void AfbParam::clear_user() {
   user_ = false;
   clear_has_user();
 }
-inline bool FblElementParam::user() const {
+inline bool AfbParam::user() const {
   return user_;
 }
-inline void FblElementParam::set_user(bool value) {
+inline void AfbParam::set_user(bool value) {
   set_has_user();
   user_ = value;
 }
 
 // optional .Proto.wstring changedScript = 12;
-inline bool FblElementParam::has_changedscript() const {
+inline bool AfbParam::has_changedscript() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void FblElementParam::set_has_changedscript() {
+inline void AfbParam::set_has_changedscript() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void FblElementParam::clear_has_changedscript() {
+inline void AfbParam::clear_has_changedscript() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void FblElementParam::clear_changedscript() {
+inline void AfbParam::clear_changedscript() {
   if (changedscript_ != NULL) changedscript_->::Proto::wstring::Clear();
   clear_has_changedscript();
 }
-inline const ::Proto::wstring& FblElementParam::changedscript() const {
+inline const ::Proto::wstring& AfbParam::changedscript() const {
   return changedscript_ != NULL ? *changedscript_ : *default_instance_->changedscript_;
 }
-inline ::Proto::wstring* FblElementParam::mutable_changedscript() {
+inline ::Proto::wstring* AfbParam::mutable_changedscript() {
   set_has_changedscript();
   if (changedscript_ == NULL) changedscript_ = new ::Proto::wstring;
   return changedscript_;
 }
-inline ::Proto::wstring* FblElementParam::release_changedscript() {
+inline ::Proto::wstring* AfbParam::release_changedscript() {
   clear_has_changedscript();
   ::Proto::wstring* temp = changedscript_;
   changedscript_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_changedscript(::Proto::wstring* changedscript) {
+inline void AfbParam::set_allocated_changedscript(::Proto::wstring* changedscript) {
   delete changedscript_;
   changedscript_ = changedscript;
   if (changedscript) {
@@ -7006,34 +7056,34 @@ inline void FblElementParam::set_allocated_changedscript(::Proto::wstring* chang
 }
 
 // optional .Proto.qvariant value = 13;
-inline bool FblElementParam::has_value() const {
+inline bool AfbParam::has_value() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void FblElementParam::set_has_value() {
+inline void AfbParam::set_has_value() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void FblElementParam::clear_has_value() {
+inline void AfbParam::clear_has_value() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void FblElementParam::clear_value() {
+inline void AfbParam::clear_value() {
   if (value_ != NULL) value_->::Proto::qvariant::Clear();
   clear_has_value();
 }
-inline const ::Proto::qvariant& FblElementParam::value() const {
+inline const ::Proto::qvariant& AfbParam::value() const {
   return value_ != NULL ? *value_ : *default_instance_->value_;
 }
-inline ::Proto::qvariant* FblElementParam::mutable_value() {
+inline ::Proto::qvariant* AfbParam::mutable_value() {
   set_has_value();
   if (value_ == NULL) value_ = new ::Proto::qvariant;
   return value_;
 }
-inline ::Proto::qvariant* FblElementParam::release_value() {
+inline ::Proto::qvariant* AfbParam::release_value() {
   clear_has_value();
   ::Proto::qvariant* temp = value_;
   value_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_value(::Proto::qvariant* value) {
+inline void AfbParam::set_allocated_value(::Proto::qvariant* value) {
   delete value_;
   value_ = value;
   if (value) {
@@ -7044,34 +7094,34 @@ inline void FblElementParam::set_allocated_value(::Proto::qvariant* value) {
 }
 
 // optional .Proto.qvariant defaultvalue = 14;
-inline bool FblElementParam::has_defaultvalue() const {
+inline bool AfbParam::has_defaultvalue() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void FblElementParam::set_has_defaultvalue() {
+inline void AfbParam::set_has_defaultvalue() {
   _has_bits_[0] |= 0x00000200u;
 }
-inline void FblElementParam::clear_has_defaultvalue() {
+inline void AfbParam::clear_has_defaultvalue() {
   _has_bits_[0] &= ~0x00000200u;
 }
-inline void FblElementParam::clear_defaultvalue() {
+inline void AfbParam::clear_defaultvalue() {
   if (defaultvalue_ != NULL) defaultvalue_->::Proto::qvariant::Clear();
   clear_has_defaultvalue();
 }
-inline const ::Proto::qvariant& FblElementParam::defaultvalue() const {
+inline const ::Proto::qvariant& AfbParam::defaultvalue() const {
   return defaultvalue_ != NULL ? *defaultvalue_ : *default_instance_->defaultvalue_;
 }
-inline ::Proto::qvariant* FblElementParam::mutable_defaultvalue() {
+inline ::Proto::qvariant* AfbParam::mutable_defaultvalue() {
   set_has_defaultvalue();
   if (defaultvalue_ == NULL) defaultvalue_ = new ::Proto::qvariant;
   return defaultvalue_;
 }
-inline ::Proto::qvariant* FblElementParam::release_defaultvalue() {
+inline ::Proto::qvariant* AfbParam::release_defaultvalue() {
   clear_has_defaultvalue();
   ::Proto::qvariant* temp = defaultvalue_;
   defaultvalue_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_defaultvalue(::Proto::qvariant* defaultvalue) {
+inline void AfbParam::set_allocated_defaultvalue(::Proto::qvariant* defaultvalue) {
   delete defaultvalue_;
   defaultvalue_ = defaultvalue;
   if (defaultvalue) {
@@ -7082,34 +7132,34 @@ inline void FblElementParam::set_allocated_defaultvalue(::Proto::qvariant* defau
 }
 
 // optional .Proto.qvariant lowlimit = 15;
-inline bool FblElementParam::has_lowlimit() const {
+inline bool AfbParam::has_lowlimit() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
-inline void FblElementParam::set_has_lowlimit() {
+inline void AfbParam::set_has_lowlimit() {
   _has_bits_[0] |= 0x00000400u;
 }
-inline void FblElementParam::clear_has_lowlimit() {
+inline void AfbParam::clear_has_lowlimit() {
   _has_bits_[0] &= ~0x00000400u;
 }
-inline void FblElementParam::clear_lowlimit() {
+inline void AfbParam::clear_lowlimit() {
   if (lowlimit_ != NULL) lowlimit_->::Proto::qvariant::Clear();
   clear_has_lowlimit();
 }
-inline const ::Proto::qvariant& FblElementParam::lowlimit() const {
+inline const ::Proto::qvariant& AfbParam::lowlimit() const {
   return lowlimit_ != NULL ? *lowlimit_ : *default_instance_->lowlimit_;
 }
-inline ::Proto::qvariant* FblElementParam::mutable_lowlimit() {
+inline ::Proto::qvariant* AfbParam::mutable_lowlimit() {
   set_has_lowlimit();
   if (lowlimit_ == NULL) lowlimit_ = new ::Proto::qvariant;
   return lowlimit_;
 }
-inline ::Proto::qvariant* FblElementParam::release_lowlimit() {
+inline ::Proto::qvariant* AfbParam::release_lowlimit() {
   clear_has_lowlimit();
   ::Proto::qvariant* temp = lowlimit_;
   lowlimit_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_lowlimit(::Proto::qvariant* lowlimit) {
+inline void AfbParam::set_allocated_lowlimit(::Proto::qvariant* lowlimit) {
   delete lowlimit_;
   lowlimit_ = lowlimit;
   if (lowlimit) {
@@ -7120,34 +7170,34 @@ inline void FblElementParam::set_allocated_lowlimit(::Proto::qvariant* lowlimit)
 }
 
 // optional .Proto.qvariant highlimit = 16;
-inline bool FblElementParam::has_highlimit() const {
+inline bool AfbParam::has_highlimit() const {
   return (_has_bits_[0] & 0x00000800u) != 0;
 }
-inline void FblElementParam::set_has_highlimit() {
+inline void AfbParam::set_has_highlimit() {
   _has_bits_[0] |= 0x00000800u;
 }
-inline void FblElementParam::clear_has_highlimit() {
+inline void AfbParam::clear_has_highlimit() {
   _has_bits_[0] &= ~0x00000800u;
 }
-inline void FblElementParam::clear_highlimit() {
+inline void AfbParam::clear_highlimit() {
   if (highlimit_ != NULL) highlimit_->::Proto::qvariant::Clear();
   clear_has_highlimit();
 }
-inline const ::Proto::qvariant& FblElementParam::highlimit() const {
+inline const ::Proto::qvariant& AfbParam::highlimit() const {
   return highlimit_ != NULL ? *highlimit_ : *default_instance_->highlimit_;
 }
-inline ::Proto::qvariant* FblElementParam::mutable_highlimit() {
+inline ::Proto::qvariant* AfbParam::mutable_highlimit() {
   set_has_highlimit();
   if (highlimit_ == NULL) highlimit_ = new ::Proto::qvariant;
   return highlimit_;
 }
-inline ::Proto::qvariant* FblElementParam::release_highlimit() {
+inline ::Proto::qvariant* AfbParam::release_highlimit() {
   clear_has_highlimit();
   ::Proto::qvariant* temp = highlimit_;
   highlimit_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_highlimit(::Proto::qvariant* highlimit) {
+inline void AfbParam::set_allocated_highlimit(::Proto::qvariant* highlimit) {
   delete highlimit_;
   highlimit_ = highlimit;
   if (highlimit) {
@@ -7158,34 +7208,34 @@ inline void FblElementParam::set_allocated_highlimit(::Proto::qvariant* highlimi
 }
 
 // optional .Proto.wstring opName = 17;
-inline bool FblElementParam::has_opname() const {
+inline bool AfbParam::has_opname() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
-inline void FblElementParam::set_has_opname() {
+inline void AfbParam::set_has_opname() {
   _has_bits_[0] |= 0x00001000u;
 }
-inline void FblElementParam::clear_has_opname() {
+inline void AfbParam::clear_has_opname() {
   _has_bits_[0] &= ~0x00001000u;
 }
-inline void FblElementParam::clear_opname() {
+inline void AfbParam::clear_opname() {
   if (opname_ != NULL) opname_->::Proto::wstring::Clear();
   clear_has_opname();
 }
-inline const ::Proto::wstring& FblElementParam::opname() const {
+inline const ::Proto::wstring& AfbParam::opname() const {
   return opname_ != NULL ? *opname_ : *default_instance_->opname_;
 }
-inline ::Proto::wstring* FblElementParam::mutable_opname() {
+inline ::Proto::wstring* AfbParam::mutable_opname() {
   set_has_opname();
   if (opname_ == NULL) opname_ = new ::Proto::wstring;
   return opname_;
 }
-inline ::Proto::wstring* FblElementParam::release_opname() {
+inline ::Proto::wstring* AfbParam::release_opname() {
   clear_has_opname();
   ::Proto::wstring* temp = opname_;
   opname_ = NULL;
   return temp;
 }
-inline void FblElementParam::set_allocated_opname(::Proto::wstring* opname) {
+inline void AfbParam::set_allocated_opname(::Proto::wstring* opname) {
   delete opname_;
   opname_ = opname;
   if (opname) {
@@ -7534,37 +7584,37 @@ LogicScheme::mutable_hardware_strids() {
 
 // -------------------------------------------------------------------
 
-// VideoLayer
+// SchemeLayer
 
 // required .Proto.Uuid uuid = 1;
-inline bool VideoLayer::has_uuid() const {
+inline bool SchemeLayer::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoLayer::set_has_uuid() {
+inline void SchemeLayer::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoLayer::clear_has_uuid() {
+inline void SchemeLayer::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoLayer::clear_uuid() {
+inline void SchemeLayer::clear_uuid() {
   if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
   clear_has_uuid();
 }
-inline const ::Proto::Uuid& VideoLayer::uuid() const {
+inline const ::Proto::Uuid& SchemeLayer::uuid() const {
   return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Uuid* VideoLayer::mutable_uuid() {
+inline ::Proto::Uuid* SchemeLayer::mutable_uuid() {
   set_has_uuid();
   if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
   return uuid_;
 }
-inline ::Proto::Uuid* VideoLayer::release_uuid() {
+inline ::Proto::Uuid* SchemeLayer::release_uuid() {
   clear_has_uuid();
   ::Proto::Uuid* temp = uuid_;
   uuid_ = NULL;
   return temp;
 }
-inline void VideoLayer::set_allocated_uuid(::Proto::Uuid* uuid) {
+inline void SchemeLayer::set_allocated_uuid(::Proto::Uuid* uuid) {
   delete uuid_;
   uuid_ = uuid;
   if (uuid) {
@@ -7575,34 +7625,34 @@ inline void VideoLayer::set_allocated_uuid(::Proto::Uuid* uuid) {
 }
 
 // required .Proto.wstring name = 2;
-inline bool VideoLayer::has_name() const {
+inline bool SchemeLayer::has_name() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoLayer::set_has_name() {
+inline void SchemeLayer::set_has_name() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoLayer::clear_has_name() {
+inline void SchemeLayer::clear_has_name() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoLayer::clear_name() {
+inline void SchemeLayer::clear_name() {
   if (name_ != NULL) name_->::Proto::wstring::Clear();
   clear_has_name();
 }
-inline const ::Proto::wstring& VideoLayer::name() const {
+inline const ::Proto::wstring& SchemeLayer::name() const {
   return name_ != NULL ? *name_ : *default_instance_->name_;
 }
-inline ::Proto::wstring* VideoLayer::mutable_name() {
+inline ::Proto::wstring* SchemeLayer::mutable_name() {
   set_has_name();
   if (name_ == NULL) name_ = new ::Proto::wstring;
   return name_;
 }
-inline ::Proto::wstring* VideoLayer::release_name() {
+inline ::Proto::wstring* SchemeLayer::release_name() {
   clear_has_name();
   ::Proto::wstring* temp = name_;
   name_ = NULL;
   return temp;
 }
-inline void VideoLayer::set_allocated_name(::Proto::wstring* name) {
+inline void SchemeLayer::set_allocated_name(::Proto::wstring* name) {
   delete name_;
   name_ = name;
   if (name) {
@@ -7613,129 +7663,129 @@ inline void VideoLayer::set_allocated_name(::Proto::wstring* name) {
 }
 
 // required bool compile = 3;
-inline bool VideoLayer::has_compile() const {
+inline bool SchemeLayer::has_compile() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void VideoLayer::set_has_compile() {
+inline void SchemeLayer::set_has_compile() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void VideoLayer::clear_has_compile() {
+inline void SchemeLayer::clear_has_compile() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void VideoLayer::clear_compile() {
+inline void SchemeLayer::clear_compile() {
   compile_ = false;
   clear_has_compile();
 }
-inline bool VideoLayer::compile() const {
+inline bool SchemeLayer::compile() const {
   return compile_;
 }
-inline void VideoLayer::set_compile(bool value) {
+inline void SchemeLayer::set_compile(bool value) {
   set_has_compile();
   compile_ = value;
 }
 
 // required bool show = 4;
-inline bool VideoLayer::has_show() const {
+inline bool SchemeLayer::has_show() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void VideoLayer::set_has_show() {
+inline void SchemeLayer::set_has_show() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void VideoLayer::clear_has_show() {
+inline void SchemeLayer::clear_has_show() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void VideoLayer::clear_show() {
+inline void SchemeLayer::clear_show() {
   show_ = false;
   clear_has_show();
 }
-inline bool VideoLayer::show() const {
+inline bool SchemeLayer::show() const {
   return show_;
 }
-inline void VideoLayer::set_show(bool value) {
+inline void SchemeLayer::set_show(bool value) {
   set_has_show();
   show_ = value;
 }
 
 // required bool print = 5;
-inline bool VideoLayer::has_print() const {
+inline bool SchemeLayer::has_print() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void VideoLayer::set_has_print() {
+inline void SchemeLayer::set_has_print() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void VideoLayer::clear_has_print() {
+inline void SchemeLayer::clear_has_print() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void VideoLayer::clear_print() {
+inline void SchemeLayer::clear_print() {
   print_ = false;
   clear_has_print();
 }
-inline bool VideoLayer::print() const {
+inline bool SchemeLayer::print() const {
   return print_;
 }
-inline void VideoLayer::set_print(bool value) {
+inline void SchemeLayer::set_print(bool value) {
   set_has_print();
   print_ = value;
 }
 
 // repeated .Proto.Envelope items = 15;
-inline int VideoLayer::items_size() const {
+inline int SchemeLayer::items_size() const {
   return items_.size();
 }
-inline void VideoLayer::clear_items() {
+inline void SchemeLayer::clear_items() {
   items_.Clear();
 }
-inline const ::Proto::Envelope& VideoLayer::items(int index) const {
+inline const ::Proto::Envelope& SchemeLayer::items(int index) const {
   return items_.Get(index);
 }
-inline ::Proto::Envelope* VideoLayer::mutable_items(int index) {
+inline ::Proto::Envelope* SchemeLayer::mutable_items(int index) {
   return items_.Mutable(index);
 }
-inline ::Proto::Envelope* VideoLayer::add_items() {
+inline ::Proto::Envelope* SchemeLayer::add_items() {
   return items_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >&
-VideoLayer::items() const {
+SchemeLayer::items() const {
   return items_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Envelope >*
-VideoLayer::mutable_items() {
+SchemeLayer::mutable_items() {
   return &items_;
 }
 
 // -------------------------------------------------------------------
 
-// VideoItem
+// SchemeItem
 
 // required .Proto.Uuid uuid = 1;
-inline bool VideoItem::has_uuid() const {
+inline bool SchemeItem::has_uuid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItem::set_has_uuid() {
+inline void SchemeItem::set_has_uuid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItem::clear_has_uuid() {
+inline void SchemeItem::clear_has_uuid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItem::clear_uuid() {
+inline void SchemeItem::clear_uuid() {
   if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
   clear_has_uuid();
 }
-inline const ::Proto::Uuid& VideoItem::uuid() const {
+inline const ::Proto::Uuid& SchemeItem::uuid() const {
   return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
 }
-inline ::Proto::Uuid* VideoItem::mutable_uuid() {
+inline ::Proto::Uuid* SchemeItem::mutable_uuid() {
   set_has_uuid();
   if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
   return uuid_;
 }
-inline ::Proto::Uuid* VideoItem::release_uuid() {
+inline ::Proto::Uuid* SchemeItem::release_uuid() {
   clear_has_uuid();
   ::Proto::Uuid* temp = uuid_;
   uuid_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_uuid(::Proto::Uuid* uuid) {
+inline void SchemeItem::set_allocated_uuid(::Proto::Uuid* uuid) {
   delete uuid_;
   uuid_ = uuid;
   if (uuid) {
@@ -7746,123 +7796,123 @@ inline void VideoItem::set_allocated_uuid(::Proto::Uuid* uuid) {
 }
 
 // required bool isStatic = 2;
-inline bool VideoItem::has_isstatic() const {
+inline bool SchemeItem::has_isstatic() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItem::set_has_isstatic() {
+inline void SchemeItem::set_has_isstatic() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItem::clear_has_isstatic() {
+inline void SchemeItem::clear_has_isstatic() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItem::clear_isstatic() {
+inline void SchemeItem::clear_isstatic() {
   isstatic_ = false;
   clear_has_isstatic();
 }
-inline bool VideoItem::isstatic() const {
+inline bool SchemeItem::isstatic() const {
   return isstatic_;
 }
-inline void VideoItem::set_isstatic(bool value) {
+inline void SchemeItem::set_isstatic(bool value) {
   set_has_isstatic();
   isstatic_ = value;
 }
 
 // required bool isLocked = 3;
-inline bool VideoItem::has_islocked() const {
+inline bool SchemeItem::has_islocked() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void VideoItem::set_has_islocked() {
+inline void SchemeItem::set_has_islocked() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void VideoItem::clear_has_islocked() {
+inline void SchemeItem::clear_has_islocked() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void VideoItem::clear_islocked() {
+inline void SchemeItem::clear_islocked() {
   islocked_ = false;
   clear_has_islocked();
 }
-inline bool VideoItem::islocked() const {
+inline bool SchemeItem::islocked() const {
   return islocked_;
 }
-inline void VideoItem::set_islocked(bool value) {
+inline void SchemeItem::set_islocked(bool value) {
   set_has_islocked();
   islocked_ = value;
 }
 
 // required .Proto.SchemeUnit itemUnit = 4;
-inline bool VideoItem::has_itemunit() const {
+inline bool SchemeItem::has_itemunit() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void VideoItem::set_has_itemunit() {
+inline void SchemeItem::set_has_itemunit() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void VideoItem::clear_has_itemunit() {
+inline void SchemeItem::clear_has_itemunit() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void VideoItem::clear_itemunit() {
+inline void SchemeItem::clear_itemunit() {
   itemunit_ = 0;
   clear_has_itemunit();
 }
-inline ::Proto::SchemeUnit VideoItem::itemunit() const {
+inline ::Proto::SchemeUnit SchemeItem::itemunit() const {
   return static_cast< ::Proto::SchemeUnit >(itemunit_);
 }
-inline void VideoItem::set_itemunit(::Proto::SchemeUnit value) {
+inline void SchemeItem::set_itemunit(::Proto::SchemeUnit value) {
   assert(::Proto::SchemeUnit_IsValid(value));
   set_has_itemunit();
   itemunit_ = value;
 }
 
 // optional bool acceptClick = 5 [default = false];
-inline bool VideoItem::has_acceptclick() const {
+inline bool SchemeItem::has_acceptclick() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void VideoItem::set_has_acceptclick() {
+inline void SchemeItem::set_has_acceptclick() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void VideoItem::clear_has_acceptclick() {
+inline void SchemeItem::clear_has_acceptclick() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void VideoItem::clear_acceptclick() {
+inline void SchemeItem::clear_acceptclick() {
   acceptclick_ = false;
   clear_has_acceptclick();
 }
-inline bool VideoItem::acceptclick() const {
+inline bool SchemeItem::acceptclick() const {
   return acceptclick_;
 }
-inline void VideoItem::set_acceptclick(bool value) {
+inline void SchemeItem::set_acceptclick(bool value) {
   set_has_acceptclick();
   acceptclick_ = value;
 }
 
 // optional .Proto.wstring clickScript = 6;
-inline bool VideoItem::has_clickscript() const {
+inline bool SchemeItem::has_clickscript() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void VideoItem::set_has_clickscript() {
+inline void SchemeItem::set_has_clickscript() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void VideoItem::clear_has_clickscript() {
+inline void SchemeItem::clear_has_clickscript() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void VideoItem::clear_clickscript() {
+inline void SchemeItem::clear_clickscript() {
   if (clickscript_ != NULL) clickscript_->::Proto::wstring::Clear();
   clear_has_clickscript();
 }
-inline const ::Proto::wstring& VideoItem::clickscript() const {
+inline const ::Proto::wstring& SchemeItem::clickscript() const {
   return clickscript_ != NULL ? *clickscript_ : *default_instance_->clickscript_;
 }
-inline ::Proto::wstring* VideoItem::mutable_clickscript() {
+inline ::Proto::wstring* SchemeItem::mutable_clickscript() {
   set_has_clickscript();
   if (clickscript_ == NULL) clickscript_ = new ::Proto::wstring;
   return clickscript_;
 }
-inline ::Proto::wstring* VideoItem::release_clickscript() {
+inline ::Proto::wstring* SchemeItem::release_clickscript() {
   clear_has_clickscript();
   ::Proto::wstring* temp = clickscript_;
   clickscript_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_clickscript(::Proto::wstring* clickscript) {
+inline void SchemeItem::set_allocated_clickscript(::Proto::wstring* clickscript) {
   delete clickscript_;
   clickscript_ = clickscript;
   if (clickscript) {
@@ -7873,34 +7923,34 @@ inline void VideoItem::set_allocated_clickscript(::Proto::wstring* clickscript) 
 }
 
 // optional .Proto.PosRectImpl PosRectImpl = 10;
-inline bool VideoItem::has_posrectimpl() const {
+inline bool SchemeItem::has_posrectimpl() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void VideoItem::set_has_posrectimpl() {
+inline void SchemeItem::set_has_posrectimpl() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void VideoItem::clear_has_posrectimpl() {
+inline void SchemeItem::clear_has_posrectimpl() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void VideoItem::clear_posrectimpl() {
+inline void SchemeItem::clear_posrectimpl() {
   if (posrectimpl_ != NULL) posrectimpl_->::Proto::PosRectImpl::Clear();
   clear_has_posrectimpl();
 }
-inline const ::Proto::PosRectImpl& VideoItem::posrectimpl() const {
+inline const ::Proto::PosRectImpl& SchemeItem::posrectimpl() const {
   return posrectimpl_ != NULL ? *posrectimpl_ : *default_instance_->posrectimpl_;
 }
-inline ::Proto::PosRectImpl* VideoItem::mutable_posrectimpl() {
+inline ::Proto::PosRectImpl* SchemeItem::mutable_posrectimpl() {
   set_has_posrectimpl();
   if (posrectimpl_ == NULL) posrectimpl_ = new ::Proto::PosRectImpl;
   return posrectimpl_;
 }
-inline ::Proto::PosRectImpl* VideoItem::release_posrectimpl() {
+inline ::Proto::PosRectImpl* SchemeItem::release_posrectimpl() {
   clear_has_posrectimpl();
   ::Proto::PosRectImpl* temp = posrectimpl_;
   posrectimpl_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_posrectimpl(::Proto::PosRectImpl* posrectimpl) {
+inline void SchemeItem::set_allocated_posrectimpl(::Proto::PosRectImpl* posrectimpl) {
   delete posrectimpl_;
   posrectimpl_ = posrectimpl;
   if (posrectimpl) {
@@ -7911,34 +7961,34 @@ inline void VideoItem::set_allocated_posrectimpl(::Proto::PosRectImpl* posrectim
 }
 
 // optional .Proto.PosLineImpl PosLineImpl = 11;
-inline bool VideoItem::has_poslineimpl() const {
+inline bool SchemeItem::has_poslineimpl() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void VideoItem::set_has_poslineimpl() {
+inline void SchemeItem::set_has_poslineimpl() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void VideoItem::clear_has_poslineimpl() {
+inline void SchemeItem::clear_has_poslineimpl() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void VideoItem::clear_poslineimpl() {
+inline void SchemeItem::clear_poslineimpl() {
   if (poslineimpl_ != NULL) poslineimpl_->::Proto::PosLineImpl::Clear();
   clear_has_poslineimpl();
 }
-inline const ::Proto::PosLineImpl& VideoItem::poslineimpl() const {
+inline const ::Proto::PosLineImpl& SchemeItem::poslineimpl() const {
   return poslineimpl_ != NULL ? *poslineimpl_ : *default_instance_->poslineimpl_;
 }
-inline ::Proto::PosLineImpl* VideoItem::mutable_poslineimpl() {
+inline ::Proto::PosLineImpl* SchemeItem::mutable_poslineimpl() {
   set_has_poslineimpl();
   if (poslineimpl_ == NULL) poslineimpl_ = new ::Proto::PosLineImpl;
   return poslineimpl_;
 }
-inline ::Proto::PosLineImpl* VideoItem::release_poslineimpl() {
+inline ::Proto::PosLineImpl* SchemeItem::release_poslineimpl() {
   clear_has_poslineimpl();
   ::Proto::PosLineImpl* temp = poslineimpl_;
   poslineimpl_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_poslineimpl(::Proto::PosLineImpl* poslineimpl) {
+inline void SchemeItem::set_allocated_poslineimpl(::Proto::PosLineImpl* poslineimpl) {
   delete poslineimpl_;
   poslineimpl_ = poslineimpl;
   if (poslineimpl) {
@@ -7949,34 +7999,34 @@ inline void VideoItem::set_allocated_poslineimpl(::Proto::PosLineImpl* poslineim
 }
 
 // optional .Proto.PosConnectionImpl PosConnectionImpl = 12;
-inline bool VideoItem::has_posconnectionimpl() const {
+inline bool SchemeItem::has_posconnectionimpl() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void VideoItem::set_has_posconnectionimpl() {
+inline void SchemeItem::set_has_posconnectionimpl() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void VideoItem::clear_has_posconnectionimpl() {
+inline void SchemeItem::clear_has_posconnectionimpl() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void VideoItem::clear_posconnectionimpl() {
+inline void SchemeItem::clear_posconnectionimpl() {
   if (posconnectionimpl_ != NULL) posconnectionimpl_->::Proto::PosConnectionImpl::Clear();
   clear_has_posconnectionimpl();
 }
-inline const ::Proto::PosConnectionImpl& VideoItem::posconnectionimpl() const {
+inline const ::Proto::PosConnectionImpl& SchemeItem::posconnectionimpl() const {
   return posconnectionimpl_ != NULL ? *posconnectionimpl_ : *default_instance_->posconnectionimpl_;
 }
-inline ::Proto::PosConnectionImpl* VideoItem::mutable_posconnectionimpl() {
+inline ::Proto::PosConnectionImpl* SchemeItem::mutable_posconnectionimpl() {
   set_has_posconnectionimpl();
   if (posconnectionimpl_ == NULL) posconnectionimpl_ = new ::Proto::PosConnectionImpl;
   return posconnectionimpl_;
 }
-inline ::Proto::PosConnectionImpl* VideoItem::release_posconnectionimpl() {
+inline ::Proto::PosConnectionImpl* SchemeItem::release_posconnectionimpl() {
   clear_has_posconnectionimpl();
   ::Proto::PosConnectionImpl* temp = posconnectionimpl_;
   posconnectionimpl_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_posconnectionimpl(::Proto::PosConnectionImpl* posconnectionimpl) {
+inline void SchemeItem::set_allocated_posconnectionimpl(::Proto::PosConnectionImpl* posconnectionimpl) {
   delete posconnectionimpl_;
   posconnectionimpl_ = posconnectionimpl;
   if (posconnectionimpl) {
@@ -7987,34 +8037,34 @@ inline void VideoItem::set_allocated_posconnectionimpl(::Proto::PosConnectionImp
 }
 
 // optional .Proto.FblItem FblItem = 106;
-inline bool VideoItem::has_fblitem() const {
+inline bool SchemeItem::has_fblitem() const {
   return (_has_bits_[0] & 0x00000200u) != 0;
 }
-inline void VideoItem::set_has_fblitem() {
+inline void SchemeItem::set_has_fblitem() {
   _has_bits_[0] |= 0x00000200u;
 }
-inline void VideoItem::clear_has_fblitem() {
+inline void SchemeItem::clear_has_fblitem() {
   _has_bits_[0] &= ~0x00000200u;
 }
-inline void VideoItem::clear_fblitem() {
+inline void SchemeItem::clear_fblitem() {
   if (fblitem_ != NULL) fblitem_->::Proto::FblItem::Clear();
   clear_has_fblitem();
 }
-inline const ::Proto::FblItem& VideoItem::fblitem() const {
+inline const ::Proto::FblItem& SchemeItem::fblitem() const {
   return fblitem_ != NULL ? *fblitem_ : *default_instance_->fblitem_;
 }
-inline ::Proto::FblItem* VideoItem::mutable_fblitem() {
+inline ::Proto::FblItem* SchemeItem::mutable_fblitem() {
   set_has_fblitem();
   if (fblitem_ == NULL) fblitem_ = new ::Proto::FblItem;
   return fblitem_;
 }
-inline ::Proto::FblItem* VideoItem::release_fblitem() {
+inline ::Proto::FblItem* SchemeItem::release_fblitem() {
   clear_has_fblitem();
   ::Proto::FblItem* temp = fblitem_;
   fblitem_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_fblitem(::Proto::FblItem* fblitem) {
+inline void SchemeItem::set_allocated_fblitem(::Proto::FblItem* fblitem) {
   delete fblitem_;
   fblitem_ = fblitem;
   if (fblitem) {
@@ -8025,34 +8075,34 @@ inline void VideoItem::set_allocated_fblitem(::Proto::FblItem* fblitem) {
 }
 
 // optional .Proto.FblItemRect FblItemRect = 107;
-inline bool VideoItem::has_fblitemrect() const {
+inline bool SchemeItem::has_fblitemrect() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
-inline void VideoItem::set_has_fblitemrect() {
+inline void SchemeItem::set_has_fblitemrect() {
   _has_bits_[0] |= 0x00000400u;
 }
-inline void VideoItem::clear_has_fblitemrect() {
+inline void SchemeItem::clear_has_fblitemrect() {
   _has_bits_[0] &= ~0x00000400u;
 }
-inline void VideoItem::clear_fblitemrect() {
+inline void SchemeItem::clear_fblitemrect() {
   if (fblitemrect_ != NULL) fblitemrect_->::Proto::FblItemRect::Clear();
   clear_has_fblitemrect();
 }
-inline const ::Proto::FblItemRect& VideoItem::fblitemrect() const {
+inline const ::Proto::FblItemRect& SchemeItem::fblitemrect() const {
   return fblitemrect_ != NULL ? *fblitemrect_ : *default_instance_->fblitemrect_;
 }
-inline ::Proto::FblItemRect* VideoItem::mutable_fblitemrect() {
+inline ::Proto::FblItemRect* SchemeItem::mutable_fblitemrect() {
   set_has_fblitemrect();
   if (fblitemrect_ == NULL) fblitemrect_ = new ::Proto::FblItemRect;
   return fblitemrect_;
 }
-inline ::Proto::FblItemRect* VideoItem::release_fblitemrect() {
+inline ::Proto::FblItemRect* SchemeItem::release_fblitemrect() {
   clear_has_fblitemrect();
   ::Proto::FblItemRect* temp = fblitemrect_;
   fblitemrect_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_fblitemrect(::Proto::FblItemRect* fblitemrect) {
+inline void SchemeItem::set_allocated_fblitemrect(::Proto::FblItemRect* fblitemrect) {
   delete fblitemrect_;
   fblitemrect_ = fblitemrect;
   if (fblitemrect) {
@@ -8063,34 +8113,34 @@ inline void VideoItem::set_allocated_fblitemrect(::Proto::FblItemRect* fblitemre
 }
 
 // optional .Proto.FblItemLine FblItemLine = 108;
-inline bool VideoItem::has_fblitemline() const {
+inline bool SchemeItem::has_fblitemline() const {
   return (_has_bits_[0] & 0x00000800u) != 0;
 }
-inline void VideoItem::set_has_fblitemline() {
+inline void SchemeItem::set_has_fblitemline() {
   _has_bits_[0] |= 0x00000800u;
 }
-inline void VideoItem::clear_has_fblitemline() {
+inline void SchemeItem::clear_has_fblitemline() {
   _has_bits_[0] &= ~0x00000800u;
 }
-inline void VideoItem::clear_fblitemline() {
+inline void SchemeItem::clear_fblitemline() {
   if (fblitemline_ != NULL) fblitemline_->::Proto::FblItemLine::Clear();
   clear_has_fblitemline();
 }
-inline const ::Proto::FblItemLine& VideoItem::fblitemline() const {
+inline const ::Proto::FblItemLine& SchemeItem::fblitemline() const {
   return fblitemline_ != NULL ? *fblitemline_ : *default_instance_->fblitemline_;
 }
-inline ::Proto::FblItemLine* VideoItem::mutable_fblitemline() {
+inline ::Proto::FblItemLine* SchemeItem::mutable_fblitemline() {
   set_has_fblitemline();
   if (fblitemline_ == NULL) fblitemline_ = new ::Proto::FblItemLine;
   return fblitemline_;
 }
-inline ::Proto::FblItemLine* VideoItem::release_fblitemline() {
+inline ::Proto::FblItemLine* SchemeItem::release_fblitemline() {
   clear_has_fblitemline();
   ::Proto::FblItemLine* temp = fblitemline_;
   fblitemline_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_fblitemline(::Proto::FblItemLine* fblitemline) {
+inline void SchemeItem::set_allocated_fblitemline(::Proto::FblItemLine* fblitemline) {
   delete fblitemline_;
   fblitemline_ = fblitemline;
   if (fblitemline) {
@@ -8100,35 +8150,35 @@ inline void VideoItem::set_allocated_fblitemline(::Proto::FblItemLine* fblitemli
   }
 }
 
-// optional .Proto.VideoItemRect Rect = 116;
-inline bool VideoItem::has_rect() const {
+// optional .Proto.SchemeItemRect Rect = 116;
+inline bool SchemeItem::has_rect() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
-inline void VideoItem::set_has_rect() {
+inline void SchemeItem::set_has_rect() {
   _has_bits_[0] |= 0x00001000u;
 }
-inline void VideoItem::clear_has_rect() {
+inline void SchemeItem::clear_has_rect() {
   _has_bits_[0] &= ~0x00001000u;
 }
-inline void VideoItem::clear_rect() {
-  if (rect_ != NULL) rect_->::Proto::VideoItemRect::Clear();
+inline void SchemeItem::clear_rect() {
+  if (rect_ != NULL) rect_->::Proto::SchemeItemRect::Clear();
   clear_has_rect();
 }
-inline const ::Proto::VideoItemRect& VideoItem::rect() const {
+inline const ::Proto::SchemeItemRect& SchemeItem::rect() const {
   return rect_ != NULL ? *rect_ : *default_instance_->rect_;
 }
-inline ::Proto::VideoItemRect* VideoItem::mutable_rect() {
+inline ::Proto::SchemeItemRect* SchemeItem::mutable_rect() {
   set_has_rect();
-  if (rect_ == NULL) rect_ = new ::Proto::VideoItemRect;
+  if (rect_ == NULL) rect_ = new ::Proto::SchemeItemRect;
   return rect_;
 }
-inline ::Proto::VideoItemRect* VideoItem::release_rect() {
+inline ::Proto::SchemeItemRect* SchemeItem::release_rect() {
   clear_has_rect();
-  ::Proto::VideoItemRect* temp = rect_;
+  ::Proto::SchemeItemRect* temp = rect_;
   rect_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_rect(::Proto::VideoItemRect* rect) {
+inline void SchemeItem::set_allocated_rect(::Proto::SchemeItemRect* rect) {
   delete rect_;
   rect_ = rect;
   if (rect) {
@@ -8138,35 +8188,35 @@ inline void VideoItem::set_allocated_rect(::Proto::VideoItemRect* rect) {
   }
 }
 
-// optional .Proto.VideoItemLine Line = 117;
-inline bool VideoItem::has_line() const {
+// optional .Proto.SchemeItemLine Line = 117;
+inline bool SchemeItem::has_line() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
-inline void VideoItem::set_has_line() {
+inline void SchemeItem::set_has_line() {
   _has_bits_[0] |= 0x00002000u;
 }
-inline void VideoItem::clear_has_line() {
+inline void SchemeItem::clear_has_line() {
   _has_bits_[0] &= ~0x00002000u;
 }
-inline void VideoItem::clear_line() {
-  if (line_ != NULL) line_->::Proto::VideoItemLine::Clear();
+inline void SchemeItem::clear_line() {
+  if (line_ != NULL) line_->::Proto::SchemeItemLine::Clear();
   clear_has_line();
 }
-inline const ::Proto::VideoItemLine& VideoItem::line() const {
+inline const ::Proto::SchemeItemLine& SchemeItem::line() const {
   return line_ != NULL ? *line_ : *default_instance_->line_;
 }
-inline ::Proto::VideoItemLine* VideoItem::mutable_line() {
+inline ::Proto::SchemeItemLine* SchemeItem::mutable_line() {
   set_has_line();
-  if (line_ == NULL) line_ = new ::Proto::VideoItemLine;
+  if (line_ == NULL) line_ = new ::Proto::SchemeItemLine;
   return line_;
 }
-inline ::Proto::VideoItemLine* VideoItem::release_line() {
+inline ::Proto::SchemeItemLine* SchemeItem::release_line() {
   clear_has_line();
-  ::Proto::VideoItemLine* temp = line_;
+  ::Proto::SchemeItemLine* temp = line_;
   line_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_line(::Proto::VideoItemLine* line) {
+inline void SchemeItem::set_allocated_line(::Proto::SchemeItemLine* line) {
   delete line_;
   line_ = line;
   if (line) {
@@ -8176,73 +8226,73 @@ inline void VideoItem::set_allocated_line(::Proto::VideoItemLine* line) {
   }
 }
 
-// optional .Proto.VideoItemConnectionLine ConnectionLine = 118;
-inline bool VideoItem::has_connectionline() const {
+// optional .Proto.SchemeItemPath Path = 118;
+inline bool SchemeItem::has_path() const {
   return (_has_bits_[0] & 0x00004000u) != 0;
 }
-inline void VideoItem::set_has_connectionline() {
+inline void SchemeItem::set_has_path() {
   _has_bits_[0] |= 0x00004000u;
 }
-inline void VideoItem::clear_has_connectionline() {
+inline void SchemeItem::clear_has_path() {
   _has_bits_[0] &= ~0x00004000u;
 }
-inline void VideoItem::clear_connectionline() {
-  if (connectionline_ != NULL) connectionline_->::Proto::VideoItemConnectionLine::Clear();
-  clear_has_connectionline();
+inline void SchemeItem::clear_path() {
+  if (path_ != NULL) path_->::Proto::SchemeItemPath::Clear();
+  clear_has_path();
 }
-inline const ::Proto::VideoItemConnectionLine& VideoItem::connectionline() const {
-  return connectionline_ != NULL ? *connectionline_ : *default_instance_->connectionline_;
+inline const ::Proto::SchemeItemPath& SchemeItem::path() const {
+  return path_ != NULL ? *path_ : *default_instance_->path_;
 }
-inline ::Proto::VideoItemConnectionLine* VideoItem::mutable_connectionline() {
-  set_has_connectionline();
-  if (connectionline_ == NULL) connectionline_ = new ::Proto::VideoItemConnectionLine;
-  return connectionline_;
+inline ::Proto::SchemeItemPath* SchemeItem::mutable_path() {
+  set_has_path();
+  if (path_ == NULL) path_ = new ::Proto::SchemeItemPath;
+  return path_;
 }
-inline ::Proto::VideoItemConnectionLine* VideoItem::release_connectionline() {
-  clear_has_connectionline();
-  ::Proto::VideoItemConnectionLine* temp = connectionline_;
-  connectionline_ = NULL;
+inline ::Proto::SchemeItemPath* SchemeItem::release_path() {
+  clear_has_path();
+  ::Proto::SchemeItemPath* temp = path_;
+  path_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_connectionline(::Proto::VideoItemConnectionLine* connectionline) {
-  delete connectionline_;
-  connectionline_ = connectionline;
-  if (connectionline) {
-    set_has_connectionline();
+inline void SchemeItem::set_allocated_path(::Proto::SchemeItemPath* path) {
+  delete path_;
+  path_ = path;
+  if (path) {
+    set_has_path();
   } else {
-    clear_has_connectionline();
+    clear_has_path();
   }
 }
 
-// optional .Proto.VideoItemSignal Signal = 124;
-inline bool VideoItem::has_signal() const {
+// optional .Proto.SchemeItemSignal Signal = 124;
+inline bool SchemeItem::has_signal() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
-inline void VideoItem::set_has_signal() {
+inline void SchemeItem::set_has_signal() {
   _has_bits_[0] |= 0x00008000u;
 }
-inline void VideoItem::clear_has_signal() {
+inline void SchemeItem::clear_has_signal() {
   _has_bits_[0] &= ~0x00008000u;
 }
-inline void VideoItem::clear_signal() {
-  if (signal_ != NULL) signal_->::Proto::VideoItemSignal::Clear();
+inline void SchemeItem::clear_signal() {
+  if (signal_ != NULL) signal_->::Proto::SchemeItemSignal::Clear();
   clear_has_signal();
 }
-inline const ::Proto::VideoItemSignal& VideoItem::signal() const {
+inline const ::Proto::SchemeItemSignal& SchemeItem::signal() const {
   return signal_ != NULL ? *signal_ : *default_instance_->signal_;
 }
-inline ::Proto::VideoItemSignal* VideoItem::mutable_signal() {
+inline ::Proto::SchemeItemSignal* SchemeItem::mutable_signal() {
   set_has_signal();
-  if (signal_ == NULL) signal_ = new ::Proto::VideoItemSignal;
+  if (signal_ == NULL) signal_ = new ::Proto::SchemeItemSignal;
   return signal_;
 }
-inline ::Proto::VideoItemSignal* VideoItem::release_signal() {
+inline ::Proto::SchemeItemSignal* SchemeItem::release_signal() {
   clear_has_signal();
-  ::Proto::VideoItemSignal* temp = signal_;
+  ::Proto::SchemeItemSignal* temp = signal_;
   signal_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_signal(::Proto::VideoItemSignal* signal) {
+inline void SchemeItem::set_allocated_signal(::Proto::SchemeItemSignal* signal) {
   delete signal_;
   signal_ = signal;
   if (signal) {
@@ -8252,35 +8302,35 @@ inline void VideoItem::set_allocated_signal(::Proto::VideoItemSignal* signal) {
   }
 }
 
-// optional .Proto.VideoItemInputSignal InputSignal = 125;
-inline bool VideoItem::has_inputsignal() const {
+// optional .Proto.SchemeItemInput InputSignal = 125;
+inline bool SchemeItem::has_inputsignal() const {
   return (_has_bits_[0] & 0x00010000u) != 0;
 }
-inline void VideoItem::set_has_inputsignal() {
+inline void SchemeItem::set_has_inputsignal() {
   _has_bits_[0] |= 0x00010000u;
 }
-inline void VideoItem::clear_has_inputsignal() {
+inline void SchemeItem::clear_has_inputsignal() {
   _has_bits_[0] &= ~0x00010000u;
 }
-inline void VideoItem::clear_inputsignal() {
-  if (inputsignal_ != NULL) inputsignal_->::Proto::VideoItemInputSignal::Clear();
+inline void SchemeItem::clear_inputsignal() {
+  if (inputsignal_ != NULL) inputsignal_->::Proto::SchemeItemInput::Clear();
   clear_has_inputsignal();
 }
-inline const ::Proto::VideoItemInputSignal& VideoItem::inputsignal() const {
+inline const ::Proto::SchemeItemInput& SchemeItem::inputsignal() const {
   return inputsignal_ != NULL ? *inputsignal_ : *default_instance_->inputsignal_;
 }
-inline ::Proto::VideoItemInputSignal* VideoItem::mutable_inputsignal() {
+inline ::Proto::SchemeItemInput* SchemeItem::mutable_inputsignal() {
   set_has_inputsignal();
-  if (inputsignal_ == NULL) inputsignal_ = new ::Proto::VideoItemInputSignal;
+  if (inputsignal_ == NULL) inputsignal_ = new ::Proto::SchemeItemInput;
   return inputsignal_;
 }
-inline ::Proto::VideoItemInputSignal* VideoItem::release_inputsignal() {
+inline ::Proto::SchemeItemInput* SchemeItem::release_inputsignal() {
   clear_has_inputsignal();
-  ::Proto::VideoItemInputSignal* temp = inputsignal_;
+  ::Proto::SchemeItemInput* temp = inputsignal_;
   inputsignal_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_inputsignal(::Proto::VideoItemInputSignal* inputsignal) {
+inline void SchemeItem::set_allocated_inputsignal(::Proto::SchemeItemInput* inputsignal) {
   delete inputsignal_;
   inputsignal_ = inputsignal;
   if (inputsignal) {
@@ -8290,35 +8340,35 @@ inline void VideoItem::set_allocated_inputsignal(::Proto::VideoItemInputSignal* 
   }
 }
 
-// optional .Proto.VideoItemOutputSignal OutputSignal = 126;
-inline bool VideoItem::has_outputsignal() const {
+// optional .Proto.SchemeItemOutput OutputSignal = 126;
+inline bool SchemeItem::has_outputsignal() const {
   return (_has_bits_[0] & 0x00020000u) != 0;
 }
-inline void VideoItem::set_has_outputsignal() {
+inline void SchemeItem::set_has_outputsignal() {
   _has_bits_[0] |= 0x00020000u;
 }
-inline void VideoItem::clear_has_outputsignal() {
+inline void SchemeItem::clear_has_outputsignal() {
   _has_bits_[0] &= ~0x00020000u;
 }
-inline void VideoItem::clear_outputsignal() {
-  if (outputsignal_ != NULL) outputsignal_->::Proto::VideoItemOutputSignal::Clear();
+inline void SchemeItem::clear_outputsignal() {
+  if (outputsignal_ != NULL) outputsignal_->::Proto::SchemeItemOutput::Clear();
   clear_has_outputsignal();
 }
-inline const ::Proto::VideoItemOutputSignal& VideoItem::outputsignal() const {
+inline const ::Proto::SchemeItemOutput& SchemeItem::outputsignal() const {
   return outputsignal_ != NULL ? *outputsignal_ : *default_instance_->outputsignal_;
 }
-inline ::Proto::VideoItemOutputSignal* VideoItem::mutable_outputsignal() {
+inline ::Proto::SchemeItemOutput* SchemeItem::mutable_outputsignal() {
   set_has_outputsignal();
-  if (outputsignal_ == NULL) outputsignal_ = new ::Proto::VideoItemOutputSignal;
+  if (outputsignal_ == NULL) outputsignal_ = new ::Proto::SchemeItemOutput;
   return outputsignal_;
 }
-inline ::Proto::VideoItemOutputSignal* VideoItem::release_outputsignal() {
+inline ::Proto::SchemeItemOutput* SchemeItem::release_outputsignal() {
   clear_has_outputsignal();
-  ::Proto::VideoItemOutputSignal* temp = outputsignal_;
+  ::Proto::SchemeItemOutput* temp = outputsignal_;
   outputsignal_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_outputsignal(::Proto::VideoItemOutputSignal* outputsignal) {
+inline void SchemeItem::set_allocated_outputsignal(::Proto::SchemeItemOutput* outputsignal) {
   delete outputsignal_;
   outputsignal_ = outputsignal;
   if (outputsignal) {
@@ -8328,35 +8378,35 @@ inline void VideoItem::set_allocated_outputsignal(::Proto::VideoItemOutputSignal
   }
 }
 
-// optional .Proto.VideoItemLink Link = 127;
-inline bool VideoItem::has_link() const {
+// optional .Proto.SchemeItemLink Link = 127;
+inline bool SchemeItem::has_link() const {
   return (_has_bits_[0] & 0x00040000u) != 0;
 }
-inline void VideoItem::set_has_link() {
+inline void SchemeItem::set_has_link() {
   _has_bits_[0] |= 0x00040000u;
 }
-inline void VideoItem::clear_has_link() {
+inline void SchemeItem::clear_has_link() {
   _has_bits_[0] &= ~0x00040000u;
 }
-inline void VideoItem::clear_link() {
-  if (link_ != NULL) link_->::Proto::VideoItemLink::Clear();
+inline void SchemeItem::clear_link() {
+  if (link_ != NULL) link_->::Proto::SchemeItemLink::Clear();
   clear_has_link();
 }
-inline const ::Proto::VideoItemLink& VideoItem::link() const {
+inline const ::Proto::SchemeItemLink& SchemeItem::link() const {
   return link_ != NULL ? *link_ : *default_instance_->link_;
 }
-inline ::Proto::VideoItemLink* VideoItem::mutable_link() {
+inline ::Proto::SchemeItemLink* SchemeItem::mutable_link() {
   set_has_link();
-  if (link_ == NULL) link_ = new ::Proto::VideoItemLink;
+  if (link_ == NULL) link_ = new ::Proto::SchemeItemLink;
   return link_;
 }
-inline ::Proto::VideoItemLink* VideoItem::release_link() {
+inline ::Proto::SchemeItemLink* SchemeItem::release_link() {
   clear_has_link();
-  ::Proto::VideoItemLink* temp = link_;
+  ::Proto::SchemeItemLink* temp = link_;
   link_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_link(::Proto::VideoItemLink* link) {
+inline void SchemeItem::set_allocated_link(::Proto::SchemeItemLink* link) {
   delete link_;
   link_ = link;
   if (link) {
@@ -8366,73 +8416,73 @@ inline void VideoItem::set_allocated_link(::Proto::VideoItemLink* link) {
   }
 }
 
-// optional .Proto.VideoItemFblElement VideoItemFblElement = 128;
-inline bool VideoItem::has_videoitemfblelement() const {
+// optional .Proto.SchemeItemAfb Afb = 128;
+inline bool SchemeItem::has_afb() const {
   return (_has_bits_[0] & 0x00080000u) != 0;
 }
-inline void VideoItem::set_has_videoitemfblelement() {
+inline void SchemeItem::set_has_afb() {
   _has_bits_[0] |= 0x00080000u;
 }
-inline void VideoItem::clear_has_videoitemfblelement() {
+inline void SchemeItem::clear_has_afb() {
   _has_bits_[0] &= ~0x00080000u;
 }
-inline void VideoItem::clear_videoitemfblelement() {
-  if (videoitemfblelement_ != NULL) videoitemfblelement_->::Proto::VideoItemFblElement::Clear();
-  clear_has_videoitemfblelement();
+inline void SchemeItem::clear_afb() {
+  if (afb_ != NULL) afb_->::Proto::SchemeItemAfb::Clear();
+  clear_has_afb();
 }
-inline const ::Proto::VideoItemFblElement& VideoItem::videoitemfblelement() const {
-  return videoitemfblelement_ != NULL ? *videoitemfblelement_ : *default_instance_->videoitemfblelement_;
+inline const ::Proto::SchemeItemAfb& SchemeItem::afb() const {
+  return afb_ != NULL ? *afb_ : *default_instance_->afb_;
 }
-inline ::Proto::VideoItemFblElement* VideoItem::mutable_videoitemfblelement() {
-  set_has_videoitemfblelement();
-  if (videoitemfblelement_ == NULL) videoitemfblelement_ = new ::Proto::VideoItemFblElement;
-  return videoitemfblelement_;
+inline ::Proto::SchemeItemAfb* SchemeItem::mutable_afb() {
+  set_has_afb();
+  if (afb_ == NULL) afb_ = new ::Proto::SchemeItemAfb;
+  return afb_;
 }
-inline ::Proto::VideoItemFblElement* VideoItem::release_videoitemfblelement() {
-  clear_has_videoitemfblelement();
-  ::Proto::VideoItemFblElement* temp = videoitemfblelement_;
-  videoitemfblelement_ = NULL;
+inline ::Proto::SchemeItemAfb* SchemeItem::release_afb() {
+  clear_has_afb();
+  ::Proto::SchemeItemAfb* temp = afb_;
+  afb_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_videoitemfblelement(::Proto::VideoItemFblElement* videoitemfblelement) {
-  delete videoitemfblelement_;
-  videoitemfblelement_ = videoitemfblelement;
-  if (videoitemfblelement) {
-    set_has_videoitemfblelement();
+inline void SchemeItem::set_allocated_afb(::Proto::SchemeItemAfb* afb) {
+  delete afb_;
+  afb_ = afb;
+  if (afb) {
+    set_has_afb();
   } else {
-    clear_has_videoitemfblelement();
+    clear_has_afb();
   }
 }
 
 // optional .Proto.SchemeItemConst ConstItem = 129;
-inline bool VideoItem::has_constitem() const {
+inline bool SchemeItem::has_constitem() const {
   return (_has_bits_[0] & 0x00100000u) != 0;
 }
-inline void VideoItem::set_has_constitem() {
+inline void SchemeItem::set_has_constitem() {
   _has_bits_[0] |= 0x00100000u;
 }
-inline void VideoItem::clear_has_constitem() {
+inline void SchemeItem::clear_has_constitem() {
   _has_bits_[0] &= ~0x00100000u;
 }
-inline void VideoItem::clear_constitem() {
+inline void SchemeItem::clear_constitem() {
   if (constitem_ != NULL) constitem_->::Proto::SchemeItemConst::Clear();
   clear_has_constitem();
 }
-inline const ::Proto::SchemeItemConst& VideoItem::constitem() const {
+inline const ::Proto::SchemeItemConst& SchemeItem::constitem() const {
   return constitem_ != NULL ? *constitem_ : *default_instance_->constitem_;
 }
-inline ::Proto::SchemeItemConst* VideoItem::mutable_constitem() {
+inline ::Proto::SchemeItemConst* SchemeItem::mutable_constitem() {
   set_has_constitem();
   if (constitem_ == NULL) constitem_ = new ::Proto::SchemeItemConst;
   return constitem_;
 }
-inline ::Proto::SchemeItemConst* VideoItem::release_constitem() {
+inline ::Proto::SchemeItemConst* SchemeItem::release_constitem() {
   clear_has_constitem();
   ::Proto::SchemeItemConst* temp = constitem_;
   constitem_ = NULL;
   return temp;
 }
-inline void VideoItem::set_allocated_constitem(::Proto::SchemeItemConst* constitem) {
+inline void SchemeItem::set_allocated_constitem(::Proto::SchemeItemConst* constitem) {
   delete constitem_;
   constitem_ = constitem;
   if (constitem) {
@@ -8630,130 +8680,130 @@ inline void PosLineImpl::set_endydocpt(double value) {
 
 // PosConnectionImpl
 
-// repeated .Proto.VideoItemPoint points = 1;
+// repeated .Proto.SchemePoint points = 1;
 inline int PosConnectionImpl::points_size() const {
   return points_.size();
 }
 inline void PosConnectionImpl::clear_points() {
   points_.Clear();
 }
-inline const ::Proto::VideoItemPoint& PosConnectionImpl::points(int index) const {
+inline const ::Proto::SchemePoint& PosConnectionImpl::points(int index) const {
   return points_.Get(index);
 }
-inline ::Proto::VideoItemPoint* PosConnectionImpl::mutable_points(int index) {
+inline ::Proto::SchemePoint* PosConnectionImpl::mutable_points(int index) {
   return points_.Mutable(index);
 }
-inline ::Proto::VideoItemPoint* PosConnectionImpl::add_points() {
+inline ::Proto::SchemePoint* PosConnectionImpl::add_points() {
   return points_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint >&
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint >&
 PosConnectionImpl::points() const {
   return points_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::VideoItemPoint >*
+inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemePoint >*
 PosConnectionImpl::mutable_points() {
   return &points_;
 }
 
 // -------------------------------------------------------------------
 
-// VideoItemRect
+// SchemeItemRect
 
 // required double weight = 1;
-inline bool VideoItemRect::has_weight() const {
+inline bool SchemeItemRect::has_weight() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItemRect::set_has_weight() {
+inline void SchemeItemRect::set_has_weight() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItemRect::clear_has_weight() {
+inline void SchemeItemRect::clear_has_weight() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItemRect::clear_weight() {
+inline void SchemeItemRect::clear_weight() {
   weight_ = 0;
   clear_has_weight();
 }
-inline double VideoItemRect::weight() const {
+inline double SchemeItemRect::weight() const {
   return weight_;
 }
-inline void VideoItemRect::set_weight(double value) {
+inline void SchemeItemRect::set_weight(double value) {
   set_has_weight();
   weight_ = value;
 }
 
 // required uint32 lineColor = 2;
-inline bool VideoItemRect::has_linecolor() const {
+inline bool SchemeItemRect::has_linecolor() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItemRect::set_has_linecolor() {
+inline void SchemeItemRect::set_has_linecolor() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItemRect::clear_has_linecolor() {
+inline void SchemeItemRect::clear_has_linecolor() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItemRect::clear_linecolor() {
+inline void SchemeItemRect::clear_linecolor() {
   linecolor_ = 0u;
   clear_has_linecolor();
 }
-inline ::google::protobuf::uint32 VideoItemRect::linecolor() const {
+inline ::google::protobuf::uint32 SchemeItemRect::linecolor() const {
   return linecolor_;
 }
-inline void VideoItemRect::set_linecolor(::google::protobuf::uint32 value) {
+inline void SchemeItemRect::set_linecolor(::google::protobuf::uint32 value) {
   set_has_linecolor();
   linecolor_ = value;
 }
 
 // required uint32 fillColor = 3;
-inline bool VideoItemRect::has_fillcolor() const {
+inline bool SchemeItemRect::has_fillcolor() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void VideoItemRect::set_has_fillcolor() {
+inline void SchemeItemRect::set_has_fillcolor() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void VideoItemRect::clear_has_fillcolor() {
+inline void SchemeItemRect::clear_has_fillcolor() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void VideoItemRect::clear_fillcolor() {
+inline void SchemeItemRect::clear_fillcolor() {
   fillcolor_ = 0u;
   clear_has_fillcolor();
 }
-inline ::google::protobuf::uint32 VideoItemRect::fillcolor() const {
+inline ::google::protobuf::uint32 SchemeItemRect::fillcolor() const {
   return fillcolor_;
 }
-inline void VideoItemRect::set_fillcolor(::google::protobuf::uint32 value) {
+inline void SchemeItemRect::set_fillcolor(::google::protobuf::uint32 value) {
   set_has_fillcolor();
   fillcolor_ = value;
 }
 
 // required .Proto.wstring text = 4;
-inline bool VideoItemRect::has_text() const {
+inline bool SchemeItemRect::has_text() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void VideoItemRect::set_has_text() {
+inline void SchemeItemRect::set_has_text() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void VideoItemRect::clear_has_text() {
+inline void SchemeItemRect::clear_has_text() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void VideoItemRect::clear_text() {
+inline void SchemeItemRect::clear_text() {
   if (text_ != NULL) text_->::Proto::wstring::Clear();
   clear_has_text();
 }
-inline const ::Proto::wstring& VideoItemRect::text() const {
+inline const ::Proto::wstring& SchemeItemRect::text() const {
   return text_ != NULL ? *text_ : *default_instance_->text_;
 }
-inline ::Proto::wstring* VideoItemRect::mutable_text() {
+inline ::Proto::wstring* SchemeItemRect::mutable_text() {
   set_has_text();
   if (text_ == NULL) text_ = new ::Proto::wstring;
   return text_;
 }
-inline ::Proto::wstring* VideoItemRect::release_text() {
+inline ::Proto::wstring* SchemeItemRect::release_text() {
   clear_has_text();
   ::Proto::wstring* temp = text_;
   text_ = NULL;
   return temp;
 }
-inline void VideoItemRect::set_allocated_text(::Proto::wstring* text) {
+inline void SchemeItemRect::set_allocated_text(::Proto::wstring* text) {
   delete text_;
   text_ = text;
   if (text) {
@@ -8764,56 +8814,56 @@ inline void VideoItemRect::set_allocated_text(::Proto::wstring* text) {
 }
 
 // required uint32 textColor = 5;
-inline bool VideoItemRect::has_textcolor() const {
+inline bool SchemeItemRect::has_textcolor() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void VideoItemRect::set_has_textcolor() {
+inline void SchemeItemRect::set_has_textcolor() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void VideoItemRect::clear_has_textcolor() {
+inline void SchemeItemRect::clear_has_textcolor() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void VideoItemRect::clear_textcolor() {
+inline void SchemeItemRect::clear_textcolor() {
   textcolor_ = 0u;
   clear_has_textcolor();
 }
-inline ::google::protobuf::uint32 VideoItemRect::textcolor() const {
+inline ::google::protobuf::uint32 SchemeItemRect::textcolor() const {
   return textcolor_;
 }
-inline void VideoItemRect::set_textcolor(::google::protobuf::uint32 value) {
+inline void SchemeItemRect::set_textcolor(::google::protobuf::uint32 value) {
   set_has_textcolor();
   textcolor_ = value;
 }
 
 // required .Proto.FontParam font = 6;
-inline bool VideoItemRect::has_font() const {
+inline bool SchemeItemRect::has_font() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void VideoItemRect::set_has_font() {
+inline void SchemeItemRect::set_has_font() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void VideoItemRect::clear_has_font() {
+inline void SchemeItemRect::clear_has_font() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void VideoItemRect::clear_font() {
+inline void SchemeItemRect::clear_font() {
   if (font_ != NULL) font_->::Proto::FontParam::Clear();
   clear_has_font();
 }
-inline const ::Proto::FontParam& VideoItemRect::font() const {
+inline const ::Proto::FontParam& SchemeItemRect::font() const {
   return font_ != NULL ? *font_ : *default_instance_->font_;
 }
-inline ::Proto::FontParam* VideoItemRect::mutable_font() {
+inline ::Proto::FontParam* SchemeItemRect::mutable_font() {
   set_has_font();
   if (font_ == NULL) font_ = new ::Proto::FontParam;
   return font_;
 }
-inline ::Proto::FontParam* VideoItemRect::release_font() {
+inline ::Proto::FontParam* SchemeItemRect::release_font() {
   clear_has_font();
   ::Proto::FontParam* temp = font_;
   font_ = NULL;
   return temp;
 }
-inline void VideoItemRect::set_allocated_font(::Proto::FontParam* font) {
+inline void SchemeItemRect::set_allocated_font(::Proto::FontParam* font) {
   delete font_;
   font_ = font;
   if (font) {
@@ -8824,141 +8874,141 @@ inline void VideoItemRect::set_allocated_font(::Proto::FontParam* font) {
 }
 
 // required bool fill = 7;
-inline bool VideoItemRect::has_fill() const {
+inline bool SchemeItemRect::has_fill() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void VideoItemRect::set_has_fill() {
+inline void SchemeItemRect::set_has_fill() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void VideoItemRect::clear_has_fill() {
+inline void SchemeItemRect::clear_has_fill() {
   _has_bits_[0] &= ~0x00000040u;
 }
-inline void VideoItemRect::clear_fill() {
+inline void SchemeItemRect::clear_fill() {
   fill_ = false;
   clear_has_fill();
 }
-inline bool VideoItemRect::fill() const {
+inline bool SchemeItemRect::fill() const {
   return fill_;
 }
-inline void VideoItemRect::set_fill(bool value) {
+inline void SchemeItemRect::set_fill(bool value) {
   set_has_fill();
   fill_ = value;
 }
 
 // optional bool drawrect = 8 [default = true];
-inline bool VideoItemRect::has_drawrect() const {
+inline bool SchemeItemRect::has_drawrect() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void VideoItemRect::set_has_drawrect() {
+inline void SchemeItemRect::set_has_drawrect() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void VideoItemRect::clear_has_drawrect() {
+inline void SchemeItemRect::clear_has_drawrect() {
   _has_bits_[0] &= ~0x00000080u;
 }
-inline void VideoItemRect::clear_drawrect() {
+inline void SchemeItemRect::clear_drawrect() {
   drawrect_ = true;
   clear_has_drawrect();
 }
-inline bool VideoItemRect::drawrect() const {
+inline bool SchemeItemRect::drawrect() const {
   return drawrect_;
 }
-inline void VideoItemRect::set_drawrect(bool value) {
+inline void SchemeItemRect::set_drawrect(bool value) {
   set_has_drawrect();
   drawrect_ = value;
 }
 
 // -------------------------------------------------------------------
 
-// VideoItemLine
+// SchemeItemLine
 
 // required double weight = 1;
-inline bool VideoItemLine::has_weight() const {
+inline bool SchemeItemLine::has_weight() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItemLine::set_has_weight() {
+inline void SchemeItemLine::set_has_weight() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItemLine::clear_has_weight() {
+inline void SchemeItemLine::clear_has_weight() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItemLine::clear_weight() {
+inline void SchemeItemLine::clear_weight() {
   weight_ = 0;
   clear_has_weight();
 }
-inline double VideoItemLine::weight() const {
+inline double SchemeItemLine::weight() const {
   return weight_;
 }
-inline void VideoItemLine::set_weight(double value) {
+inline void SchemeItemLine::set_weight(double value) {
   set_has_weight();
   weight_ = value;
 }
 
 // required uint32 lineColor = 2;
-inline bool VideoItemLine::has_linecolor() const {
+inline bool SchemeItemLine::has_linecolor() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItemLine::set_has_linecolor() {
+inline void SchemeItemLine::set_has_linecolor() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItemLine::clear_has_linecolor() {
+inline void SchemeItemLine::clear_has_linecolor() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItemLine::clear_linecolor() {
+inline void SchemeItemLine::clear_linecolor() {
   linecolor_ = 0u;
   clear_has_linecolor();
 }
-inline ::google::protobuf::uint32 VideoItemLine::linecolor() const {
+inline ::google::protobuf::uint32 SchemeItemLine::linecolor() const {
   return linecolor_;
 }
-inline void VideoItemLine::set_linecolor(::google::protobuf::uint32 value) {
+inline void SchemeItemLine::set_linecolor(::google::protobuf::uint32 value) {
   set_has_linecolor();
   linecolor_ = value;
 }
 
 // -------------------------------------------------------------------
 
-// VideoItemConnectionLine
+// SchemeItemPath
 
 // required double weight = 1;
-inline bool VideoItemConnectionLine::has_weight() const {
+inline bool SchemeItemPath::has_weight() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void VideoItemConnectionLine::set_has_weight() {
+inline void SchemeItemPath::set_has_weight() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void VideoItemConnectionLine::clear_has_weight() {
+inline void SchemeItemPath::clear_has_weight() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void VideoItemConnectionLine::clear_weight() {
+inline void SchemeItemPath::clear_weight() {
   weight_ = 0;
   clear_has_weight();
 }
-inline double VideoItemConnectionLine::weight() const {
+inline double SchemeItemPath::weight() const {
   return weight_;
 }
-inline void VideoItemConnectionLine::set_weight(double value) {
+inline void SchemeItemPath::set_weight(double value) {
   set_has_weight();
   weight_ = value;
 }
 
 // required uint32 lineColor = 2;
-inline bool VideoItemConnectionLine::has_linecolor() const {
+inline bool SchemeItemPath::has_linecolor() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItemConnectionLine::set_has_linecolor() {
+inline void SchemeItemPath::set_has_linecolor() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItemConnectionLine::clear_has_linecolor() {
+inline void SchemeItemPath::clear_has_linecolor() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItemConnectionLine::clear_linecolor() {
+inline void SchemeItemPath::clear_linecolor() {
   linecolor_ = 0u;
   clear_has_linecolor();
 }
-inline ::google::protobuf::uint32 VideoItemConnectionLine::linecolor() const {
+inline ::google::protobuf::uint32 SchemeItemPath::linecolor() const {
   return linecolor_;
 }
-inline void VideoItemConnectionLine::set_linecolor(::google::protobuf::uint32 value) {
+inline void SchemeItemPath::set_linecolor(::google::protobuf::uint32 value) {
   set_has_linecolor();
   linecolor_ = value;
 }
@@ -8967,7 +9017,7 @@ inline void VideoItemConnectionLine::set_linecolor(::google::protobuf::uint32 va
 
 // FblConnectionPoint
 
-// optional .Proto.VideoItemPoint point = 1;
+// optional .Proto.SchemePoint point = 1;
 inline bool FblConnectionPoint::has_point() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -8978,24 +9028,24 @@ inline void FblConnectionPoint::clear_has_point() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void FblConnectionPoint::clear_point() {
-  if (point_ != NULL) point_->::Proto::VideoItemPoint::Clear();
+  if (point_ != NULL) point_->::Proto::SchemePoint::Clear();
   clear_has_point();
 }
-inline const ::Proto::VideoItemPoint& FblConnectionPoint::point() const {
+inline const ::Proto::SchemePoint& FblConnectionPoint::point() const {
   return point_ != NULL ? *point_ : *default_instance_->point_;
 }
-inline ::Proto::VideoItemPoint* FblConnectionPoint::mutable_point() {
+inline ::Proto::SchemePoint* FblConnectionPoint::mutable_point() {
   set_has_point();
-  if (point_ == NULL) point_ = new ::Proto::VideoItemPoint;
+  if (point_ == NULL) point_ = new ::Proto::SchemePoint;
   return point_;
 }
-inline ::Proto::VideoItemPoint* FblConnectionPoint::release_point() {
+inline ::Proto::SchemePoint* FblConnectionPoint::release_point() {
   clear_has_point();
-  ::Proto::VideoItemPoint* temp = point_;
+  ::Proto::SchemePoint* temp = point_;
   point_ = NULL;
   return temp;
 }
-inline void FblConnectionPoint::set_allocated_point(::Proto::VideoItemPoint* point) {
+inline void FblConnectionPoint::set_allocated_point(::Proto::SchemePoint* point) {
   delete point_;
   point_ = point;
   if (point) {
@@ -9367,103 +9417,103 @@ inline void FblItemLine::set_linecolor(::google::protobuf::uint32 value) {
 
 // -------------------------------------------------------------------
 
-// VideoItemSignal
+// SchemeItemSignal
 
 // repeated .Proto.wstring signalStrIDs = 1;
-inline int VideoItemSignal::signalstrids_size() const {
+inline int SchemeItemSignal::signalstrids_size() const {
   return signalstrids_.size();
 }
-inline void VideoItemSignal::clear_signalstrids() {
+inline void SchemeItemSignal::clear_signalstrids() {
   signalstrids_.Clear();
 }
-inline const ::Proto::wstring& VideoItemSignal::signalstrids(int index) const {
+inline const ::Proto::wstring& SchemeItemSignal::signalstrids(int index) const {
   return signalstrids_.Get(index);
 }
-inline ::Proto::wstring* VideoItemSignal::mutable_signalstrids(int index) {
+inline ::Proto::wstring* SchemeItemSignal::mutable_signalstrids(int index) {
   return signalstrids_.Mutable(index);
 }
-inline ::Proto::wstring* VideoItemSignal::add_signalstrids() {
+inline ::Proto::wstring* SchemeItemSignal::add_signalstrids() {
   return signalstrids_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::wstring >&
-VideoItemSignal::signalstrids() const {
+SchemeItemSignal::signalstrids() const {
   return signalstrids_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
-VideoItemSignal::mutable_signalstrids() {
+SchemeItemSignal::mutable_signalstrids() {
   return &signalstrids_;
 }
 
 // -------------------------------------------------------------------
 
-// VideoItemInputSignal
+// SchemeItemInput
 
 // -------------------------------------------------------------------
 
-// VideoItemOutputSignal
+// SchemeItemOutput
 
 // -------------------------------------------------------------------
 
-// VideoItemLink
+// SchemeItemLink
 
 // -------------------------------------------------------------------
 
-// VideoItemFblElement
+// SchemeItemAfb
 
-// repeated .Proto.FblElementParam params = 2;
-inline int VideoItemFblElement::params_size() const {
+// repeated .Proto.AfbParam params = 2;
+inline int SchemeItemAfb::params_size() const {
   return params_.size();
 }
-inline void VideoItemFblElement::clear_params() {
+inline void SchemeItemAfb::clear_params() {
   params_.Clear();
 }
-inline const ::Proto::FblElementParam& VideoItemFblElement::params(int index) const {
+inline const ::Proto::AfbParam& SchemeItemAfb::params(int index) const {
   return params_.Get(index);
 }
-inline ::Proto::FblElementParam* VideoItemFblElement::mutable_params(int index) {
+inline ::Proto::AfbParam* SchemeItemAfb::mutable_params(int index) {
   return params_.Mutable(index);
 }
-inline ::Proto::FblElementParam* VideoItemFblElement::add_params() {
+inline ::Proto::AfbParam* SchemeItemAfb::add_params() {
   return params_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >&
-VideoItemFblElement::params() const {
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >&
+SchemeItemAfb::params() const {
   return params_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::FblElementParam >*
-VideoItemFblElement::mutable_params() {
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam >*
+SchemeItemAfb::mutable_params() {
   return &params_;
 }
 
 // optional .Proto.wstring afbStrid = 3;
-inline bool VideoItemFblElement::has_afbstrid() const {
+inline bool SchemeItemAfb::has_afbstrid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VideoItemFblElement::set_has_afbstrid() {
+inline void SchemeItemAfb::set_has_afbstrid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VideoItemFblElement::clear_has_afbstrid() {
+inline void SchemeItemAfb::clear_has_afbstrid() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void VideoItemFblElement::clear_afbstrid() {
+inline void SchemeItemAfb::clear_afbstrid() {
   if (afbstrid_ != NULL) afbstrid_->::Proto::wstring::Clear();
   clear_has_afbstrid();
 }
-inline const ::Proto::wstring& VideoItemFblElement::afbstrid() const {
+inline const ::Proto::wstring& SchemeItemAfb::afbstrid() const {
   return afbstrid_ != NULL ? *afbstrid_ : *default_instance_->afbstrid_;
 }
-inline ::Proto::wstring* VideoItemFblElement::mutable_afbstrid() {
+inline ::Proto::wstring* SchemeItemAfb::mutable_afbstrid() {
   set_has_afbstrid();
   if (afbstrid_ == NULL) afbstrid_ = new ::Proto::wstring;
   return afbstrid_;
 }
-inline ::Proto::wstring* VideoItemFblElement::release_afbstrid() {
+inline ::Proto::wstring* SchemeItemAfb::release_afbstrid() {
   clear_has_afbstrid();
   ::Proto::wstring* temp = afbstrid_;
   afbstrid_ = NULL;
   return temp;
 }
-inline void VideoItemFblElement::set_allocated_afbstrid(::Proto::wstring* afbstrid) {
+inline void SchemeItemAfb::set_allocated_afbstrid(::Proto::wstring* afbstrid) {
   delete afbstrid_;
   afbstrid_ = afbstrid;
   if (afbstrid) {

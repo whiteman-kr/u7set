@@ -6,6 +6,10 @@ namespace VFrame30
 	//
 	// CFblConnectionPoint
 	//
+	CFblConnectionPoint::CFblConnectionPoint()
+	{
+	}
+
 	CFblConnectionPoint::CFblConnectionPoint(
 			ConnectionDirrection dirrection,
 			const QUuid& guid,
@@ -19,10 +23,9 @@ namespace VFrame30
 	{
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(
-			ConnectionDirrection dirrection,
+	CFblConnectionPoint::CFblConnectionPoint(ConnectionDirrection dirrection,
 			const QUuid& guid,
-			const Afbl::AfbElementSignal& afbSignal) :
+			const Afbl::AfbSignal& afbSignal) :
 		m_guid(guid),
 		m_point(0, 0),
 		m_dirrection(dirrection),
@@ -60,12 +63,12 @@ namespace VFrame30
 		return true;
 	}
 
-	const VideoItemPoint& CFblConnectionPoint::point() const
+	const SchemePoint& CFblConnectionPoint::point() const
 	{
 		return m_point;
 	}
 
-	void CFblConnectionPoint::setPoint(const VideoItemPoint& value)
+	void CFblConnectionPoint::setPoint(const SchemePoint& value)
 	{
 		m_point = value;
 	}
@@ -173,7 +176,7 @@ namespace VFrame30
 	//
 	bool FblItem::SaveData(Proto::Envelope* message) const
 	{
-		Proto::FblItem* fblItemMessage = message->mutable_videoitem()->mutable_fblitem();
+		Proto::FblItem* fblItemMessage = message->mutable_schemeitem()->mutable_fblitem();
 
 		for (auto pt = m_inputPoints.cbegin(); pt != m_inputPoints.cend(); ++pt)
 		{
@@ -198,23 +201,23 @@ namespace VFrame30
 
 	bool FblItem::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		if (message.videoitem().has_fblitem() == false)
+		if (message.schemeitem().has_fblitem() == false)
 		{
-			assert(message.videoitem().has_fblitem());
+			assert(message.schemeitem().has_fblitem());
 			return false;
 		}
 		
 		// --
 		//
-		const Proto::FblItem& fblItemMessage = message.videoitem().fblitem();
+		const Proto::FblItem& fblItemMessage = message.schemeitem().fblitem();
 
 		m_inputPoints.clear();
 		m_outputPoints.clear();
@@ -341,7 +344,7 @@ namespace VFrame30
 		m_inputPoints.push_back(cp);
 	}
 
-	void FblItem::addInput(const Afbl::AfbElementSignal& s)
+	void FblItem::addInput(const Afbl::AfbSignal& s)
 	{
 		CFblConnectionPoint cp(ConnectionDirrection::Input, QUuid::createUuid(), s);
 		m_inputPoints.push_back(cp);
@@ -369,7 +372,7 @@ namespace VFrame30
 		m_outputPoints.push_back(cp);
 	}
 
-	void FblItem::addOutput(const Afbl::AfbElementSignal& s)
+	void FblItem::addOutput(const Afbl::AfbSignal& s)
 	{
 		CFblConnectionPoint cp(ConnectionDirrection::Output, QUuid::createUuid(), s);
 		m_outputPoints.push_back(cp);
@@ -404,10 +407,15 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItem::GetConnectionPointPos(const QUuid&, VideoItemPoint*, double /*gridSize*/, int /*pinGridStep*/) const
+	bool FblItem::GetConnectionPointPos(const QUuid&, SchemePoint*, double /*gridSize*/, int /*pinGridStep*/) const
 	{
 		assert(false);	// Must be implemented in derived classes CFblItemLine, CFblItemRect...
 		return false;
+	}
+
+	QString FblItem::buildName() const
+	{
+		return "FblItem";
 	}
 
 

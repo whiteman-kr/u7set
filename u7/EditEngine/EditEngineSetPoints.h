@@ -10,22 +10,22 @@ namespace EditEngine
 		SetPointsCommand();		// deleted;
 	public:
 		SetPointsCommand(
-				EditSchemeView* videoFrameView,
-				const std::vector<std::vector<VFrame30::VideoItemPoint>>& points,
-				const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
+				EditSchemeView* schemeView,
+				const std::vector<std::vector<VFrame30::SchemePoint>>& points,
+				const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 				QScrollBar* hScrollBar,
 				QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemeView* videoFrameView) override;
-		virtual void unExecuteCommand(EditSchemeView* videoFrameView) override;
+		virtual void executeCommand(EditSchemeView* schemeView) override;
+		virtual void unExecuteCommand(EditSchemeView* schemeView) override;
 
 		// Data
 		//
 	private:
-		std::vector<std::vector<VFrame30::VideoItemPoint>> m_newPoints;
-		std::vector<std::vector<VFrame30::VideoItemPoint>> m_oldPoints;
-		std::vector<std::shared_ptr<VFrame30::VideoItem>> m_items;
+		std::vector<std::vector<VFrame30::SchemePoint>> m_newPoints;
+		std::vector<std::vector<VFrame30::SchemePoint>> m_oldPoints;
+		std::vector<std::shared_ptr<VFrame30::SchemeItem>> m_items;
 	};
 
 }

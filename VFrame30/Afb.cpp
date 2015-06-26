@@ -1,5 +1,5 @@
 #include "Stable.h"
-#include "Fbl.h"
+#include "Afb.h"
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
@@ -10,23 +10,23 @@ namespace Afbl
 	//							CFblElementSignal		
 	//
 	//
-	AfbElementSignal::AfbElementSignal(void):
+	AfbSignal::AfbSignal(void):
 		m_type(AfbSignalType::Analog),
 		m_operandIndex(0),
 		m_size(0)
 	{
 	}
 
-	AfbElementSignal::~AfbElementSignal(void)
+	AfbSignal::~AfbSignal(void)
 	{
 	}
 
-	AfbElementSignal::AfbElementSignal(const AfbElementSignal& that) : QObject()
+	AfbSignal::AfbSignal(const AfbSignal& that) : QObject()
 	{
 		*this = that;
 	}
 
-	AfbElementSignal& AfbElementSignal::operator=(const AfbElementSignal& that)
+	AfbSignal& AfbSignal::operator=(const AfbSignal& that)
 	{
 		if (this == &that)
 		{
@@ -44,7 +44,7 @@ namespace Afbl
 
 // Serialization
 	//
-	bool AfbElementSignal::SaveData(Proto::FblElementSignal* /*message*/) const
+	bool AfbSignal::SaveData(Proto::AfbSignal* /*message*/) const
 	{
 		assert(false);
 		return false;
@@ -56,7 +56,7 @@ namespace Afbl
 //		return true;
 	}
 	
-	bool AfbElementSignal::LoadData(const Proto::FblElementSignal& /*message*/)
+	bool AfbSignal::LoadData(const Proto::AfbSignal& /*message*/)
 	{
 		assert(false);
 		return false;
@@ -66,7 +66,7 @@ namespace Afbl
 //		return true;
 	}
 
-	bool AfbElementSignal::saveToXml(QXmlStreamWriter* xmlWriter) const
+	bool AfbSignal::saveToXml(QXmlStreamWriter* xmlWriter) const
 	{
 		if (xmlWriter == nullptr)
 		{
@@ -85,7 +85,7 @@ namespace Afbl
 		return true;
 	}
 
-	bool AfbElementSignal::loadFromXml(QXmlStreamReader* xmlReader)
+	bool AfbSignal::loadFromXml(QXmlStreamReader* xmlReader)
 	{
 		if (xmlReader == nullptr)
 		{
@@ -139,84 +139,84 @@ namespace Afbl
 
 	}
 
-	const QString& AfbElementSignal::opName() const
+	const QString& AfbSignal::opName() const
 	{
 		return m_opName;
 
 	}
 
-	void AfbElementSignal::setOpName(const QString& value)
+	void AfbSignal::setOpName(const QString& value)
 	{
 		m_opName = value;
 	}
 
 	// Caption
 	//
-	QString AfbElementSignal::jsCaption()
+	QString AfbSignal::jsCaption()
 	{
 		return caption();
 	}
-	const QString& AfbElementSignal::caption() const
+	const QString& AfbSignal::caption() const
 	{
 		return m_caption;
 	}
-	void AfbElementSignal::setCaption(const QString& caption)
+	void AfbSignal::setCaption(const QString& caption)
 	{
 		m_caption = caption;
 	}
 
 	// Type
 	//
-	AfbSignalType AfbElementSignal::type() const
+	AfbSignalType AfbSignal::type() const
 	{
 		return m_type;
 	}
-	int AfbElementSignal::jsType() const
+	int AfbSignal::jsType() const
 	{
 		return static_cast<int>(m_type);
 	}
-	void AfbElementSignal::setType(AfbSignalType type)
+	void AfbSignal::setType(AfbSignalType type)
 	{
 		m_type = type;
 	}
 
-    int AfbElementSignal::operandIndex() const
+	int AfbSignal::operandIndex() const
     {
         return m_operandIndex;
     }
 
-    void AfbElementSignal::setOperandIndex(int value)
+	void AfbSignal::setOperandIndex(int value)
     {
         m_operandIndex = value;
     }
 
-    int AfbElementSignal::size() const
+	int AfbSignal::size() const
     {
         return m_size;
     }
 
-    void AfbElementSignal::setSize(int value)
+	void AfbSignal::setSize(int value)
     {
         m_size = value;
     }
 
-	bool AfbElementSignal::isAnalog() const
+	bool AfbSignal::isAnalog() const
 	{
 		return m_type == AfbSignalType::Analog;
 	}
 
-	bool AfbElementSignal::isDiscrete() const
+	bool AfbSignal::isDiscrete() const
 	{
 		return m_type == AfbSignalType::Discrete;
 	}
 
     //
 	//
-	//							CFblElementParam		
+	//							AfbParam
 	//
 	//
 
-	AfbElementParam::AfbElementParam(void):
+	AfbParam::AfbParam(void):
         m_visible(true),
 		m_type(AfbParamType::AnalogIntegral),
 		m_instantiator(false),
@@ -231,11 +231,11 @@ namespace Afbl
 		m_highLimit = 0;
 	}
 
-	AfbElementParam::~AfbElementParam(void)
+	AfbParam::~AfbParam(void)
 	{
 	}
 
-	void AfbElementParam::update(const AfbParamType& type, const QVariant &lowLimit, const QVariant &highLimit)
+	void AfbParam::update(const AfbParamType& type, const QVariant &lowLimit, const QVariant &highLimit)
 	{
 
 		m_type = type;
@@ -245,7 +245,7 @@ namespace Afbl
 		return;
 	}
 
-	bool AfbElementParam::SaveData(Proto::FblElementParam* message) const
+	bool AfbParam::SaveData(Proto::AfbParam* message) const
 	{
 		Proto::Write(message->mutable_opname(), m_opName);
 		Proto::Write(message->mutable_caption(), m_caption);
@@ -266,7 +266,7 @@ namespace Afbl
 		return true;
 	}
 
-	bool AfbElementParam::LoadData(const Proto::FblElementParam& message)
+	bool AfbParam::LoadData(const Proto::AfbParam& message)
 	{
 		Proto::Read(message.opname(), &m_opName);
 		Proto::Read(message.caption(), &m_caption);
@@ -287,7 +287,7 @@ namespace Afbl
 		return true;
 	}
 
-	bool AfbElementParam::loadFromXml(QXmlStreamReader* xmlReader)
+	bool AfbParam::loadFromXml(QXmlStreamReader* xmlReader)
 	{
 		if (xmlReader == nullptr)
 		{
@@ -422,7 +422,7 @@ namespace Afbl
 
 	}
 
-	bool AfbElementParam::saveToXml(QXmlStreamWriter* xmlWriter) const
+	bool AfbParam::saveToXml(QXmlStreamWriter* xmlWriter) const
 	{
 		if (xmlWriter == nullptr)
 		{
@@ -487,135 +487,135 @@ namespace Afbl
 
 	// Caption
 	//
-	const QString& AfbElementParam::caption() const
+	const QString& AfbParam::caption() const
 	{
 		return m_caption;
 	}
-	void AfbElementParam::setCaption(const QString& caption)
+	void AfbParam::setCaption(const QString& caption)
 	{
 		m_caption = caption;
 	}
 
-	const QString& AfbElementParam::opName() const
+	const QString& AfbParam::opName() const
 	{
 		return m_opName;
 	}
 
-	void AfbElementParam::setOpName(const QString& value)
+	void AfbParam::setOpName(const QString& value)
 	{
 		m_opName = value;
 	}
 
-	bool AfbElementParam::visible() const
+	bool AfbParam::visible() const
 	{
 		return m_visible;
 	}
 
-	void AfbElementParam::setVisible(bool visible)
+	void AfbParam::setVisible(bool visible)
 	{
 		m_visible = visible;
 	}
 
 	// Type
 	//
-	AfbParamType AfbElementParam::type() const
+	AfbParamType AfbParam::type() const
 	{
 		return m_type;
 	}
-	void AfbElementParam::setType(AfbParamType type)
+	void AfbParam::setType(AfbParamType type)
 	{
 		m_type = type;
 	}
 
 	// Value
 	//
-	const QVariant& AfbElementParam::value() const
+	const QVariant& AfbParam::value() const
 	{
 		return m_value;
 	}
-	void AfbElementParam::setValue(const QVariant& value)
+	void AfbParam::setValue(const QVariant& value)
 	{
 		m_value = value;
 	}
 
 	// Defaut Value
 	//
-	const QVariant& AfbElementParam::defaultValue() const
+	const QVariant& AfbParam::defaultValue() const
 	{
 		return m_defaultValue;
 	}
-	void AfbElementParam::setDefaultValue(const QVariant& defaultValue)
+	void AfbParam::setDefaultValue(const QVariant& defaultValue)
 	{
 		m_defaultValue = defaultValue;
 	}
 
 	// LowLimit
-	const QVariant& AfbElementParam::lowLimit() const
+	const QVariant& AfbParam::lowLimit() const
 	{
 		return m_lowLimit;
 	}
-	void AfbElementParam::setLowLimit(const QVariant& lowLimit)
+	void AfbParam::setLowLimit(const QVariant& lowLimit)
 	{
 		m_lowLimit = lowLimit;
 	}
 
 	// highLimit
 	//
-	const QVariant& AfbElementParam::highLimit() const
+	const QVariant& AfbParam::highLimit() const
 	{
 		return m_highLimit;
 	}
-	void AfbElementParam::setHighLimit(const QVariant& highLimit)
+	void AfbParam::setHighLimit(const QVariant& highLimit)
 	{
 		m_highLimit = highLimit;
 	}
 
-	int AfbElementParam::operandIndex() const
+	int AfbParam::operandIndex() const
     {
 		return m_operandIndex;
     }
 
-	void AfbElementParam::setOperandIndex(int value)
+	void AfbParam::setOperandIndex(int value)
     {
 		m_operandIndex = value;
     }
 
-    int AfbElementParam::size() const
+	int AfbParam::size() const
     {
         return m_size;
     }
 
-    void AfbElementParam::setSize(int value)
+	void AfbParam::setSize(int value)
     {
         m_size = value;
     }
 
-	bool AfbElementParam::instantiator() const
+	bool AfbParam::instantiator() const
 	{
 		return m_instantiator;
 	}
 
-	void AfbElementParam::setInstantiator(bool value)
+	void AfbParam::setInstantiator(bool value)
 	{
 		m_instantiator = value;
 	}
 
-	bool AfbElementParam::user() const
+	bool AfbParam::user() const
 	{
 		return m_user;
 	}
 
-	void AfbElementParam::setUser(bool value)
+	void AfbParam::setUser(bool value)
 	{
 		m_user = value;
 	}
 
-	QString AfbElementParam::changedScript() const
+	QString AfbParam::changedScript() const
 	{
 		return m_changedScript;
 	}
 
-	void AfbElementParam::setChangedScript(const QString &value)
+	void AfbParam::setChangedScript(const QString &value)
 	{
 		m_changedScript = value;
 	}
@@ -653,6 +653,7 @@ namespace Afbl
 
 		m_strID = that.m_strID;
 		m_caption = that.m_caption;
+		m_description = that.m_description;
 		m_opcode = that.m_opcode;
 		m_hasRam = that.m_hasRam;
 		m_requiredStart = that.m_requiredStart;
@@ -717,9 +718,9 @@ namespace Afbl
 			setStrID(xmlReader->attributes().value("StrId").toString());
 		}
 
-		std::vector<AfbElementSignal> inputSignals;
-		std::vector<AfbElementSignal> outputSignals;
-		std::vector<AfbElementParam> params;
+		std::vector<AfbSignal> inputSignals;
+		std::vector<AfbSignal> outputSignals;
+		std::vector<AfbParam> params;
 
 		while (xmlReader->readNextStartElement())
 		{
@@ -730,6 +731,11 @@ namespace Afbl
 					if (QString::compare(xmlReader->name().toString(), "Caption", Qt::CaseInsensitive) == 0)
 					{
 						setCaption(xmlReader->readElementText());
+					}
+
+					if (QString::compare(xmlReader->name().toString(), "Description", Qt::CaseInsensitive) == 0)
+					{
+						setDescription(xmlReader->readElementText());
 					}
 
 					if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
@@ -773,7 +779,7 @@ namespace Afbl
 				{
 					if (QString::compare(xmlReader->name().toString(), "AfbElementSignal", Qt::CaseInsensitive) == 0)
 					{
-						AfbElementSignal afbSignal;
+						AfbSignal afbSignal;
 						afbSignal.loadFromXml(xmlReader);
 						if (loadSignalType == LoadSignalType::InputSignal)
 						{
@@ -801,7 +807,7 @@ namespace Afbl
 				{
 					if (QString::compare(xmlReader->name().toString(), "AfbElementParam", Qt::CaseInsensitive) == 0)
 					{
-						AfbElementParam afbParam;
+						AfbParam afbParam;
 						afbParam.loadFromXml(xmlReader);
 						params.push_back(afbParam);
 					}
@@ -892,6 +898,7 @@ namespace Afbl
 
 		xmlWriter->writeStartElement("Properties");
 		xmlWriter->writeTextElement("Caption", caption());
+		xmlWriter->writeTextElement("Description", description());
 		xmlWriter->writeTextElement("OpCode", QString::number(opcode()));
 		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
 		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
@@ -937,14 +944,14 @@ namespace Afbl
 
 	QObject* AfbElement::getAfbSignalByOpIndex(int opIndex)
 	{
-		for (AfbElementSignal& s : m_inputSignals)
+		for (AfbSignal& s : m_inputSignals)
 		{
 			if (s.operandIndex() == opIndex)
 			{
 				return &s;
 			}
 		}
-		for (AfbElementSignal& s : m_outputSignals)
+		for (AfbSignal& s : m_outputSignals)
 		{
 			if (s.operandIndex() == opIndex)
 			{
@@ -1066,15 +1073,15 @@ namespace Afbl
 //		return pFblElement;
 	}
 
-	void AfbElement::updateParams(const std::vector<AfbElementParam>& params)
+	void AfbElement::updateParams(const std::vector<AfbParam>& params)
 	{
-		std::vector<AfbElementParam> newParams;
+		std::vector<AfbParam> newParams;
 		newParams.reserve(params.size());
 
-		for (const AfbElementParam& p : params)
+		for (const AfbParam& p : params)
 		{
-			std::vector<AfbElementParam>::iterator found = std::find_if(m_params.begin(), m_params.end(),
-				[&p](const AfbElementParam& mp)
+			std::vector<AfbParam>::iterator found = std::find_if(m_params.begin(), m_params.end(),
+				[&p](const AfbParam& mp)
 				{
 					return p.caption() == mp.caption() && p.type() == mp.type();
 				});
@@ -1114,6 +1121,16 @@ namespace Afbl
 	void AfbElement::setCaption(const QString& caption)
 	{
 		m_caption = caption;
+	}
+
+	QString AfbElement::description() const
+	{
+		return m_description;
+	}
+
+	void AfbElement::setDescription(const QString& value)
+	{
+		m_description = value;
 	}
 
 	// Opcode
@@ -1170,34 +1187,34 @@ namespace Afbl
 
 	// InputSignals
 	//
-	const std::vector<AfbElementSignal>& AfbElement::inputSignals() const
+	const std::vector<AfbSignal>& AfbElement::inputSignals() const
 	{
 		return m_inputSignals;
 	}
-	void AfbElement::setInputSignals(const std::vector<AfbElementSignal>& inputsignals)
+	void AfbElement::setInputSignals(const std::vector<AfbSignal>& inputsignals)
 	{
 		m_inputSignals = inputsignals;
 	}
 
 	// OutputSignals
 	//
-	const std::vector<AfbElementSignal>& AfbElement::outputSignals() const
+	const std::vector<AfbSignal>& AfbElement::outputSignals() const
 	{
 		return m_outputSignals;
 	}
-	void AfbElement::setOutputSignals(const std::vector<AfbElementSignal>& outputsignals)
+	void AfbElement::setOutputSignals(const std::vector<AfbSignal>& outputsignals)
 	{
 		m_outputSignals = outputsignals;
 	}
 
 	// Params
 	//
-	const std::vector<AfbElementParam>& AfbElement::params() const
+	const std::vector<AfbParam>& AfbElement::params() const
 	{
 		return m_params;
 	}
 
-	std::vector<AfbElementParam>& AfbElement::params()
+	std::vector<AfbParam>& AfbElement::params()
 	{
 		return m_params;
 	}
@@ -1207,7 +1224,7 @@ namespace Afbl
 		return static_cast<int>(m_params.size());
 	}
 
-	void AfbElement::setParams(const std::vector<AfbElementParam>& params)
+	void AfbElement::setParams(const std::vector<AfbParam>& params)
 	{
 		m_params = params;
 	}
@@ -1225,7 +1242,7 @@ namespace Afbl
 
 		QVector<int> instantiatorParamIndex;
 
-		for(AfbElementParam param : params())
+		for(AfbParam param : params())
 		{
 			if (param.instantiator())
 			{
@@ -1256,7 +1273,7 @@ namespace Afbl
 
 		for(int paramIndex : instantiatorParamIndex)
 		{
-			for(AfbElementParam param : params())
+			for(AfbParam param : params())
 			{
 				if (paramIndex == param.operandIndex())
 				{

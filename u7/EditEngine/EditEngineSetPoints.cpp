@@ -1,18 +1,17 @@
 #include "EditEngineSetPoints.h"
-#include "VideoFrameWidget.h"
 #include "EditSchemeWidget.h"
 
 namespace EditEngine
 {
 
-	SetPointsCommand::SetPointsCommand(EditSchemeView* videoFrameView,
-			const std::vector<std::vector<VFrame30::VideoItemPoint>>& points,
-			const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items,
+	SetPointsCommand::SetPointsCommand(EditSchemeView* schemeView,
+			const std::vector<std::vector<VFrame30::SchemePoint>>& points,
+			const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
-		EditCommand(videoFrameView, hScrollBar, vScrollBar)
+		EditCommand(schemeView, hScrollBar, vScrollBar)
 	{
-		assert(videoFrameView != nullptr);
+		assert(schemeView != nullptr);
 		assert(items.empty() == false);
 		assert(points.empty() == false);
 
@@ -27,7 +26,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::executeCommand(EditSchemeView* videoFrameView)
+	void SetPointsCommand::executeCommand(EditSchemeView* schemeView)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{
@@ -35,7 +34,7 @@ namespace EditEngine
 			return;
 		}
 
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 
 		for (unsigned int i = 0; i < m_items.size(); i++)
 		{
@@ -45,7 +44,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::unExecuteCommand(EditSchemeView* videoFrameView)
+	void SetPointsCommand::unExecuteCommand(EditSchemeView* schemeView)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{
@@ -53,7 +52,7 @@ namespace EditEngine
 			return;
 		}
 
-		videoFrameView->setSelectedItems(m_items);
+		schemeView->setSelectedItems(m_items);
 
 		for (unsigned int i = 0; i < m_items.size(); i++)
 		{

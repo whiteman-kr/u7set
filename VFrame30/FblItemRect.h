@@ -5,11 +5,11 @@
 
 namespace VFrame30
 {
-	class VideoItemSignal;
-	class VideoItemInputSignal;
-	class VideoItemOutputSignal;
+	class SchemeItemSignal;
+	class SchemeItemInput;
+	class SchemeItemOutput;
 	class SchemeItemConst;
-	class VideoItemFblElement;
+	class SchemeItemAfb;
 }
 
 namespace VFrame30
@@ -24,7 +24,7 @@ namespace VFrame30
 		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<FblItemRect>;
+		friend ::Factory<SchemeItem>::DerivedType<FblItemRect>;
 #endif
 
 	protected:
@@ -51,12 +51,12 @@ namespace VFrame30
 		// Вычислить координаты точки
 		//
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep) override;
-		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const override;
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemePoint* pResult, double gridSize, int pinGridStep) const override;
 
 		///<summary> 
 		/// Вычисление координат точки, для прямоугольного Fbl элемента
 		///</summary>
-		VideoItemPoint CalcPointPos(const QRectF& fblItemRect,
+		SchemePoint CalcPointPos(const QRectF& fblItemRect,
 									const CFblConnectionPoint& connection,
 									int pinCount,
 									int index,
@@ -83,20 +83,20 @@ namespace VFrame30
 		bool isConstElement() const;
 		bool isFblElement() const;
 
-		VFrame30::VideoItemSignal *toSignalElement();
-		const VFrame30::VideoItemSignal* toSignalElement() const;
+		VFrame30::SchemeItemSignal *toSignalElement();
+		const VFrame30::SchemeItemSignal* toSignalElement() const;
 
-		VFrame30::VideoItemInputSignal* toInputSignalElement();
-		const VFrame30::VideoItemInputSignal* toInputSignalElement() const;
+		VFrame30::SchemeItemInput* toInputSignalElement();
+		const VFrame30::SchemeItemInput* toInputSignalElement() const;
 
-		VFrame30::VideoItemOutputSignal* toOutputSignalElement();
-		const VFrame30::VideoItemOutputSignal* toOutputSignalElement() const;
+		VFrame30::SchemeItemOutput* toOutputSignalElement();
+		const VFrame30::SchemeItemOutput* toOutputSignalElement() const;
 
 		VFrame30::SchemeItemConst* toSchemeItemConst();
 		const VFrame30::SchemeItemConst* toSchemeItemConst() const;
 
-		VideoItemFblElement* toFblElement();
-		const VFrame30::VideoItemFblElement* toFblElement() const;
+		SchemeItemAfb* toFblElement();
+		const VFrame30::SchemeItemAfb* toFblElement() const;
 
 		double weight() const;
 		void setWeight(double weight);

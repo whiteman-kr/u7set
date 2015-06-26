@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <memory>
-#include "../VFrame30/VideoItem.h"
+#include "../VFrame30/SchemeItem.h"
 #include "../include/PropertyEditor.h"
 
 
@@ -29,14 +29,14 @@ public:
 	virtual ~SchemeItemPropertiesDialog();
 
 public:
-	void setObjects(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
+	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
 
 private:
 	Ui::SchemeItemPropertiesDialog *ui;
 
 	SchemeItemPropertyEditor* m_propertyEditor = nullptr;
 
-	std::vector<std::shared_ptr<VFrame30::VideoItem>> m_items;
+	std::vector<std::shared_ptr<VFrame30::SchemeItem>> m_items;
 };
 
 //

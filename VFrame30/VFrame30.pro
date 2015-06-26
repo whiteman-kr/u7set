@@ -80,13 +80,6 @@ OTHER_FILES += \
 
 HEADERS += VFrame30Lib_global.h \
     Stable.h \
-    VideoItem.h \
-    VideoItemSignal.h \
-    VideoItemRect.h \
-    VideoItemLink.h \
-    VideoItemLine.h \
-    VideoItemFblElement.h \
-    VideoItemConnectionLine.h \
     Settings.h \
     PosRectImpl.h \
     PosLineImpl.h \
@@ -95,17 +88,11 @@ HEADERS += VFrame30Lib_global.h \
     FblItemRect.h \
     FblItemLine.h \
     FblItem.h \
-    FblConnectionsImpl.h \
-    Fbl.h \
     DrawParam.h \
     Print.h \
     VFrame30Library.h \
     HorzVertLinks.h \
 	../include/TypesAndEnums.h \
-    VideoFrameManager.h \
-    VideoFrameWidget.h \
-    VideoFrameWidgetAgent.h \
-    VideoFrameAgent.h \
     FrameHistoryItem.h \
 	Configuration.h \
 	DebugInstCounter.h \
@@ -123,16 +110,17 @@ HEADERS += VFrame30Lib_global.h \
     version.h \
     ../include/DbStruct.h \
     BaseSchemeWidget.h \
-    SchemeItemConst.h
+    SchemeItemConst.h \
+    SchemeItem.h \
+    SchemeItemLine.h \
+    SchemeItemRect.h \
+    SchemeItemPath.h \
+    SchemeItemSignal.h \
+    SchemeItemAfb.h \
+    SchemeItemLink.h \
+    Afb.h
 
 SOURCES += \
-    VideoItem.cpp \
-    VideoItemSignal.cpp \
-    VideoItemRect.cpp \
-    VideoItemLink.cpp \
-    VideoItemLine.cpp \
-    VideoItemFblElement.cpp \
-    VideoItemConnectionLine.cpp \
     Settings.cpp \
     PosRectImpl.cpp \
     PosLineImpl.cpp \
@@ -141,16 +129,11 @@ SOURCES += \
     FblItemRect.cpp \
     FblItemLine.cpp \
     FblItem.cpp \
-    Fbl.cpp \
     DrawParam.cpp \
     Print.cpp \
     Stable.cpp \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
-    VideoFrameManager.cpp \
-    VideoFrameWidget.cpp \
-    VideoFrameWidgetAgent.cpp \
-    VideoFrameAgent.cpp \
     FrameHistoryItem.cpp \
 	Configuration.cpp \
     ../lib/StreamedData.cpp \
@@ -164,7 +147,15 @@ SOURCES += \
     SchemeView.cpp \
     ../lib/DbStruct.cpp \
     BaseSchemeWidget.cpp \
-    SchemeItemConst.cpp
+    SchemeItemConst.cpp \
+    SchemeItem.cpp \
+    SchemeItemLine.cpp \
+    SchemeItemRect.cpp \
+    SchemeItemPath.cpp \
+    SchemeItemSignal.cpp \
+    SchemeItemAfb.cpp \
+    SchemeItemLink.cpp \
+    Afb.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VideoItem.h"
-#include "Fbl.h"
+#include "SchemeItem.h"
+#include "Afb.h"
 
 class QPainter;
 
@@ -18,14 +18,14 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT CFblConnectionPoint
 	{
 	public:
-		CFblConnectionPoint() = delete;
+		CFblConnectionPoint();
 
 		CFblConnectionPoint(ConnectionDirrection dirrection,
 							const QUuid& guid,
 							int operandIndex,
 							QString caption);
 
-		CFblConnectionPoint(ConnectionDirrection dirrection, const QUuid& guid, const Afbl::AfbElementSignal& afbSignal);
+		CFblConnectionPoint(ConnectionDirrection dirrection, const QUuid& guid, const Afbl::AfbSignal& afbSignal);
 
 		CFblConnectionPoint(const Proto::FblConnectionPoint& cpm);
 
@@ -40,8 +40,8 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		const VideoItemPoint& point() const;
-		void setPoint(const VideoItemPoint& value);
+		const SchemePoint& point() const;
+		void setPoint(const SchemePoint& value);
 
 		double x() const;
 		void setX(double val);
@@ -72,8 +72,8 @@ namespace VFrame30
 		//
 	private:
 		QUuid m_guid;
-		VideoItemPoint m_point;
-		ConnectionDirrection m_dirrection;
+		SchemePoint m_point;
+		ConnectionDirrection m_dirrection = ConnectionDirrection::Input;
 		int m_afbOperandIndex = 0;
 
 		std::list<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
@@ -121,22 +121,24 @@ namespace VFrame30
 		int outputsCount() const;
 
 		void addInput();
-		void addInput(const Afbl::AfbElementSignal& s);
+		void addInput(const Afbl::AfbSignal& s);
 		void addInput(int opIndex, QString caption);
 
 		void addOutput();
-		void addOutput(const Afbl::AfbElementSignal& s);
+		void addOutput(const Afbl::AfbSignal& s);
 		void addOutput(int opIndex, QString caption);
 
 		void removeAllInputs();
 		void removeAllOutputs();
 
-		// Calc pin position
-		//
-	public:
 		void ClearAssociatedConnections();
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep);
-		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const;
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemePoint* pResult, double gridSize, int pinGridStep) const;
+
+		// Public methods
+		//
+	public:
+		virtual QString buildName() const;
 
 		// Properties
 		//

@@ -1,14 +1,14 @@
 #include "Stable.h"
-#include "VideoItem.h"
-#include "VideoItemRect.h"
+#include "SchemeItem.h"
+#include "SchemeItemRect.h"
 
 namespace VFrame30
 {
-	Factory<VFrame30::VideoItem> VideoItemFactory;
+	Factory<VFrame30::SchemeItem> SchemeItemFactory;
 
-	// CVideoItem
+	// SchemeItem
 
-	VideoItem::VideoItem() :
+	SchemeItem::SchemeItem() :
 		m_static(true),
 		m_locked(false),
 		m_itemUnit(SchemeUnit::Display),
@@ -17,57 +17,57 @@ namespace VFrame30
 		m_guid = QUuid::createUuid();
 	}
 
-	VideoItem::~VideoItem()
+	SchemeItem::~SchemeItem()
 	{
 	}
 	
 	// Serialization
 	//
 
-	bool VideoItem::SaveData(Proto::Envelope* message) const
+	bool SchemeItem::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
 
-		Proto::VideoItem* pMutableVideoItem = message->mutable_videoitem();
+		Proto::SchemeItem* schemeItem = message->mutable_schemeitem();
 
-		Proto::Write(pMutableVideoItem->mutable_uuid(), m_guid);
-		pMutableVideoItem->set_isstatic(m_static);
-		pMutableVideoItem->set_islocked(m_locked);
-		pMutableVideoItem->set_itemunit(static_cast<Proto::SchemeUnit>(m_itemUnit));
+		Proto::Write(schemeItem->mutable_uuid(), m_guid);
+		schemeItem->set_isstatic(m_static);
+		schemeItem->set_islocked(m_locked);
+		schemeItem->set_itemunit(static_cast<Proto::SchemeUnit>(m_itemUnit));
 
-		pMutableVideoItem->set_acceptclick(m_acceptClick);
+		schemeItem->set_acceptclick(m_acceptClick);
 
 		if (m_clickScript.isEmpty() == false)
 		{
-			Proto::Write(pMutableVideoItem->mutable_clickscript(), m_clickScript);
+			Proto::Write(schemeItem->mutable_clickscript(), m_clickScript);
 		}
 
 		return true;
 	}
 
-	bool VideoItem::LoadData(const Proto::Envelope& message)
+	bool SchemeItem::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
-		const Proto::VideoItem& videoitem = message.videoitem();
+		const Proto::SchemeItem& schemeitem = message.schemeitem();
 
-		m_guid = Proto::Read(videoitem.uuid());
-		m_static = videoitem.isstatic();
-		m_locked = videoitem.islocked();
-		m_itemUnit = static_cast<SchemeUnit>(videoitem.itemunit());
+		m_guid = Proto::Read(schemeitem.uuid());
+		m_static = schemeitem.isstatic();
+		m_locked = schemeitem.islocked();
+		m_itemUnit = static_cast<SchemeUnit>(schemeitem.itemunit());
 
-		m_acceptClick = videoitem.acceptclick();
+		m_acceptClick = schemeitem.acceptclick();
 
-		if (videoitem.has_clickscript() == true)
+		if (schemeitem.has_clickscript() == true)
 		{
-			Proto::Read(videoitem.clickscript(), &m_clickScript);
+			Proto::Read(schemeitem.clickscript(), &m_clickScript);
 		}
 		else
 		{
@@ -77,61 +77,61 @@ namespace VFrame30
 		return true;
 	}
 
-	VideoItem* VideoItem::CreateObject(const Proto::Envelope& message)
+	SchemeItem* SchemeItem::CreateObject(const Proto::Envelope& message)
 	{
 		// Эта функция может создавать только один экземпляр
 		//
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return nullptr;
 		}
 
 		quint32 classNameHash = message.classnamehash();
-		VideoItem* pVideoItem = VideoItemFactory.Create(classNameHash);
+		SchemeItem* schemeItem = SchemeItemFactory.Create(classNameHash);
 
-		if (pVideoItem == nullptr)
+		if (schemeItem == nullptr)
 		{
-			assert(pVideoItem);
+			assert(schemeItem);
 			return nullptr;
 		}
 		
-		pVideoItem->LoadData(message);
+		schemeItem->LoadData(message);
 
-		return pVideoItem;
+		return schemeItem;
 	}
 
 	// Action Functions
 	//
 
-	void VideoItem::MoveItem(double /*horzOffsetDocPt*/, double /*vertOffsetDocPt*/)
+	void SchemeItem::MoveItem(double /*horzOffsetDocPt*/, double /*vertOffsetDocPt*/)
 	{
 		assert(false);	// Implement in child classes
 	}
 
-	void VideoItem::snapToGrid(double /*gridSize*/)
+	void SchemeItem::snapToGrid(double /*gridSize*/)
 	{
 		assert(false);
 	}
 
-	double VideoItem::GetWidthInDocPt() const
+	double SchemeItem::GetWidthInDocPt() const
 	{
 		assert(false);	// Implement in child classes
 		return 0;
 	}
 
-	double VideoItem::GetHeightInDocPt() const
+	double SchemeItem::GetHeightInDocPt() const
 	{
 		assert(false);	// Implement in child classes
 		return 0;
 	}
 
-	void VideoItem::SetWidthInDocPt(double /*widthInDocPt*/)
+	void SchemeItem::SetWidthInDocPt(double /*widthInDocPt*/)
 	{
 		assert(false);	// Implement in child classes
 	}
 
-	void VideoItem::SetHeightInDocPt(double /*heightInDocPt*/)
+	void SchemeItem::SetHeightInDocPt(double /*heightInDocPt*/)
 	{
 		assert(false);	// Implement in child classes
 	}
@@ -142,17 +142,17 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void VideoItem::Draw(CDrawParam*, const Scheme*, const SchemeLayer*) const
+	void SchemeItem::Draw(CDrawParam*, const Scheme*, const SchemeLayer*) const
 	{
 	}
 
 	// Рисование элемента при его создании изменении
 	//
-	void VideoItem::DrawOutline(CDrawParam* ) const
+	void SchemeItem::DrawOutline(CDrawParam* ) const
 	{
 	}
 
-	void VideoItem::DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items)
+	void SchemeItem::DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemeItem>>& items)
 	{
 		if (pDrawParam == nullptr)
 		{
@@ -168,11 +168,11 @@ namespace VFrame30
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
-	void VideoItem::DrawSelection(CDrawParam*, bool) const
+	void SchemeItem::DrawSelection(CDrawParam*, bool) const
 	{
 	}
 
-	void VideoItem::DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items, bool drawSizeBar)
+	void SchemeItem::DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemeItem>>& items, bool drawSizeBar)
 	{
 		if (pDrawParam == nullptr)
 		{
@@ -188,7 +188,7 @@ namespace VFrame30
 
 	// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
 	// 
-	bool VideoItem::IsIntersectPoint(double x, double y) const
+	bool SchemeItem::IsIntersectPoint(double x, double y) const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -205,62 +205,62 @@ namespace VFrame30
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
 	// 
-	bool VideoItem::IsIntersectRect(double x, double y, double width, double height) const
+	bool SchemeItem::IsIntersectRect(double x, double y, double width, double height) const
 	{ 
 		x = x; y = y; width = width; height = height;		// убираю unreferenced warning
 		assert(false);
 		return false;
 	};
 
-	// IVideoItemPropertiesPos interface implementation
+	// ISchemeItemPropertiesPos interface implementation
 	//
-	double VideoItem::left() const
+	double SchemeItem::left() const
 	{
 		assert(true);
 		return 0;
 	}
-	void VideoItem::setLeft(double)
+	void SchemeItem::setLeft(double)
 	{
 		assert(true);
 	}
 
-	double VideoItem::top() const
+	double SchemeItem::top() const
 	{
 		assert(false);
 		return 0;
 	}
-	void VideoItem::setTop(double)
+	void SchemeItem::setTop(double)
 	{
 		assert(false);
 	}
 
-	double VideoItem::width() const
+	double SchemeItem::width() const
 	{
 		assert(false);
 		return 0;
 	}
-	void VideoItem::setWidth(double)
+	void SchemeItem::setWidth(double)
 	{
 		assert(false);
 	}
 
-	double VideoItem::height() const
+	double SchemeItem::height() const
 	{
 		assert(false);
 		return 0;
 	}
-	void VideoItem::setHeight(double)
+	void SchemeItem::setHeight(double)
 	{
 		assert(false);
 	}
 
-	std::vector<VideoItemPoint> VideoItem::getPointList() const
+	std::vector<SchemePoint> SchemeItem::getPointList() const
 	{
 		Q_ASSERT(false);
-		return std::vector<VideoItemPoint>();
+		return std::vector<SchemePoint>();
 	}
 
-	void VideoItem::setPointList(const std::vector<VideoItemPoint>& /*points*/)
+	void SchemeItem::setPointList(const std::vector<SchemePoint>& /*points*/)
 	{
 		Q_ASSERT(false);
 	}
@@ -268,44 +268,44 @@ namespace VFrame30
 	// Properties and Data
 	//
 
-	bool VideoItem::IsStatic() const
+	bool SchemeItem::IsStatic() const
 	{
 		return m_static;
 	}
 
-	bool VideoItem::IsDynamic() const
+	bool SchemeItem::IsDynamic() const
 	{
 		return !m_static;
 	}
 
-	bool VideoItem::IsFblItem() const
+	bool SchemeItem::IsFblItem() const
 	{
 		return false;
 	}
 
-	bool VideoItem::IsLocked() const
+	bool SchemeItem::IsLocked() const
 	{
 		return m_locked;
 	}
 
-	void VideoItem::setLocked(bool lock)
+	void SchemeItem::setLocked(bool lock)
 	{
 		m_locked = lock;
 		return;
 	}
 
-	const QUuid& VideoItem::guid() const
+	const QUuid& SchemeItem::guid() const
 	{
 		return m_guid;
 	}
 
-	void VideoItem::setGuid(const QUuid& guid)
+	void SchemeItem::setGuid(const QUuid& guid)
 	{
 		m_guid = guid;
 		return;
 	}
 
-	void VideoItem::setNewGuid()
+	void SchemeItem::setNewGuid()
 	{
 		QUuid uuid = QUuid::createUuid();
 		setGuid(uuid);
@@ -315,12 +315,12 @@ namespace VFrame30
 
 	// Единицы измерения, в которых хранятся координаты (может быть только дюймы или точки)
 	//
-	SchemeUnit VideoItem::itemUnit() const
+	SchemeUnit SchemeItem::itemUnit() const
 	{
 		return m_itemUnit;
 	}
 
-	void VideoItem::setItemUnit(SchemeUnit value)
+	void SchemeItem::setItemUnit(SchemeUnit value)
 	{
 		assert(value == SchemeUnit::Display || value == SchemeUnit::Inch);
 		m_itemUnit = value;
@@ -328,29 +328,29 @@ namespace VFrame30
 
 	// AcceptClick property
 	//
-	bool VideoItem::acceptClick() const
+	bool SchemeItem::acceptClick() const
 	{
 		return m_acceptClick;
 	}
 
-	void VideoItem::setAcceptClick(bool value)
+	void SchemeItem::setAcceptClick(bool value)
 	{
 		m_acceptClick = value;
 	}
 
 	// ClickScript property
 	//
-	const QString& VideoItem::clickScript() const
+	const QString& SchemeItem::clickScript() const
 	{
 		return m_clickScript;
 	}
 
-	void VideoItem::setClickScript(const QString& value)
+	void SchemeItem::setClickScript(const QString& value)
 	{
 		m_clickScript = value;
 	}
 
-	QRectF VideoItem::boundingRectInDocPt() const
+	QRectF SchemeItem::boundingRectInDocPt() const
 	{
 		assert(false);		// Must be implemented in child classes
 		return QRectF();

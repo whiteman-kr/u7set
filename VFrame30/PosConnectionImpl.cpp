@@ -20,23 +20,23 @@ namespace VFrame30
 	//
 	bool PosConnectionImpl::SaveData(Proto::Envelope* message) const
 	{
-		bool result = VideoItem::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		bool result = SchemeItem::SaveData(message);
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_videoitem()->mutable_posconnectionimpl();
+		Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_schemeitem()->mutable_posconnectionimpl();
 
 		// Сохранить точки
 		//
 		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
 		{
-			Proto::VideoItemPoint* pPointMessage = posConnectionImplMessage->add_points();
+			Proto::SchemePoint* pPointMessage = posConnectionImplMessage->add_points();
 
 			pPointMessage->set_x(pt->X);
 			pPointMessage->set_y(pt->Y);
@@ -47,15 +47,15 @@ namespace VFrame30
 
 	bool PosConnectionImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		bool result = VideoItem::LoadData(message);
+		bool result = SchemeItem::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -63,18 +63,18 @@ namespace VFrame30
 		
 		//--
 		//
-		if (message.videoitem().has_posconnectionimpl() == false)
+		if (message.schemeitem().has_posconnectionimpl() == false)
 		{
-			assert(message.videoitem().has_posconnectionimpl());
+			assert(message.schemeitem().has_posconnectionimpl());
 			return false;
 		}
 
-		const Proto::PosConnectionImpl& posConnectionImplMessage = message.videoitem().posconnectionimpl();
+		const Proto::PosConnectionImpl& posConnectionImplMessage = message.schemeitem().posconnectionimpl();
 
 		points.clear();
 		for (int i = 0; i < posConnectionImplMessage.points().size(); i++)
 		{
-			points.push_back(VideoItemPoint(posConnectionImplMessage.points(i)));
+			points.push_back(SchemePoint(posConnectionImplMessage.points(i)));
 		}
 
 		return true;
@@ -271,7 +271,7 @@ namespace VFrame30
 		// Проверить, пересекает ли хоть одна прямая intersectRectangleIn
 		//
 		QRectF intersectRectangleIn(x, y, width, height);
-		VideoItemPoint prevPoint;
+		SchemePoint prevPoint;
 
 		for(auto curPoint = points.cbegin(); curPoint != points.cend(); ++curPoint)
 		{
@@ -317,21 +317,21 @@ namespace VFrame30
 		return result;
 	}
 	
-	// Реализация интерефейса IVideoItemPosLine
+	// IPosLine Implementation
 	//
-	const std::list<VideoItemPoint>& PosConnectionImpl::GetPointList() const
+	const std::list<SchemePoint>& PosConnectionImpl::GetPointList() const
 	{
 		return points;
 	}
 
-	void PosConnectionImpl::SetPointList(const std::list<VideoItemPoint>& newpoints)
+	void PosConnectionImpl::SetPointList(const std::list<SchemePoint>& newpoints)
 	{
 		points.assign(newpoints.begin(), newpoints.end());
 	}
 
 	void PosConnectionImpl::AddPoint(double x, double y)
 	{
-		points.push_back(VideoItemPoint(x, y));
+		points.push_back(SchemePoint(x, y));
 	}
 
 	void PosConnectionImpl::RemoveSamePoints()
@@ -358,19 +358,19 @@ namespace VFrame30
 		}
 	}
 
-	const std::list<VideoItemPoint>& PosConnectionImpl::GetExtensionPoints() const
+	const std::list<SchemePoint>& PosConnectionImpl::GetExtensionPoints() const
 	{
 		return extPoints;
 	}
 	
-	void PosConnectionImpl::SetExtensionPoints(const std::list<VideoItemPoint>& extPoints)
+	void PosConnectionImpl::SetExtensionPoints(const std::list<SchemePoint>& extPoints)
 	{
 		this->extPoints = extPoints;
 	}
 
 	void PosConnectionImpl::AddExtensionPoint(double x, double y)
 	{
-		extPoints.push_back(VideoItemPoint(x, y));
+		extPoints.push_back(SchemePoint(x, y));
 	}
 
 	void PosConnectionImpl::DeleteAllExtensionPoints()
@@ -386,7 +386,7 @@ namespace VFrame30
 		}
 	}
 		
-	// Реализация интерефейса IVideoItemPropertiesPos
+	// Реализация интерефейса ISchemeItemPropertiesPos
 	//
 	double PosConnectionImpl::left() const
 	{
@@ -528,13 +528,13 @@ namespace VFrame30
 		//
 	}
 
-	std::vector<VideoItemPoint> PosConnectionImpl::getPointList() const
+	std::vector<SchemePoint> PosConnectionImpl::getPointList() const
 	{
-		std::vector<VideoItemPoint> v(points.begin(), points.end());
+		std::vector<SchemePoint> v(points.begin(), points.end());
 		return v;
 	}
 
-	void PosConnectionImpl::setPointList(const std::vector<VideoItemPoint>& points)
+	void PosConnectionImpl::setPointList(const std::vector<SchemePoint>& points)
 	{
 		this->points.assign(points.begin(), points.end());
 		extPoints.clear();

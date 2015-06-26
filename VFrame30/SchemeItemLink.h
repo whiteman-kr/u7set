@@ -1,22 +1,23 @@
 #pragma once
 
 #include "PosConnectionImpl.h"
+#include "FblItemLine.h"
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT VideoItemConnectionLine : public PosConnectionImpl
+	class VFRAME30LIBSHARED_EXPORT SchemeItemLink : public FblItemLine
 	{
 		Q_OBJECT
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<VideoItemConnectionLine>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemLink>;
 #endif
 
 	private:
-		VideoItemConnectionLine(void);
+		SchemeItemLink(void);
 	public:
-		explicit VideoItemConnectionLine(SchemeUnit unit);
-		virtual ~VideoItemConnectionLine(void);
+		explicit SchemeItemLink(SchemeUnit unit);
+		virtual ~SchemeItemLink(void);
 
 		// Serialization
 		//
@@ -33,16 +34,13 @@ namespace VFrame30
 		//
 		virtual void Draw(CDrawParam* drawParam, const Scheme* pFrame, const SchemeLayer* pLayer) const override;
 
+		// Вычислить координаты точки
+		//
+		virtual void SetConnectionsPos(double gridSize, int pinGridStep) override;
+		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemePoint* pResult, double gridSize, int pinGridStep) const override;
+
 		// Properties and Data
 	public:
-		double weight() const;
-		void setWeight(double weight);
-
-		QRgb lineColor() const;
-		void setLineColor(QRgb color);
-
 	private:
-		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
-		QRgb m_lineColor;
 	};
 }

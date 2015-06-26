@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/VideoItem.h"
+#include "../VFrame30/SchemeItem.h"
 
 class EditSchemeView;
 
@@ -16,7 +16,7 @@ namespace EditEngine
 
 	//
 	//
-	// EditEngine - Класс обеспечивающий выполнение всех команд изменения VideoFrameView (Undo )
+	// EditEngine - Класс обеспечивающий выполнение всех команд изменения SchemeView (Undo )
 	//
 	//
 	class EditEngine : public QObject
@@ -27,7 +27,7 @@ namespace EditEngine
 		EditEngine();		// deleted;
 
 	public:
-		EditEngine(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent);
+		EditEngine(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar, QObject* parent);
 		virtual ~EditEngine();
 
 	public:
@@ -50,21 +50,21 @@ namespace EditEngine
 		void resetModified();
 
 	public:
-		void runAddItem(std::list<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runAddItem(std::vector<std::shared_ptr<VFrame30::VideoItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runAddItem(std::shared_ptr<VFrame30::VideoItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::list<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::vector<std::shared_ptr<VFrame30::SchemeItem>> items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runAddItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
 
-		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer);
-		void runDeleteItem(std::shared_ptr<VFrame30::VideoItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, std::shared_ptr<VFrame30::SchemeLayer> layer);
+		void runDeleteItem(std::shared_ptr<VFrame30::SchemeItem> item, std::shared_ptr<VFrame30::SchemeLayer> layer);
 
-		void runSetPoints(const std::vector<std::vector<VFrame30::VideoItemPoint>>& points, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
-		void runSetPoints(const std::vector<VFrame30::VideoItemPoint>& points, const std::shared_ptr<VFrame30::VideoItem>& item);
+		void runSetPoints(const std::vector<std::vector<VFrame30::SchemePoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
+		void runSetPoints(const std::vector<VFrame30::SchemePoint>& points, const std::shared_ptr<VFrame30::SchemeItem>& item);
 
-		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items, bool snapToGrid);
-		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::VideoItem>& item, bool snapToGrid);
+		void runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items, bool snapToGrid);
+		void runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemeItem>& item, bool snapToGrid);
 
-		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::VideoItem>>& items);
-		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::VideoItem>& item);
+		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& items);
+		void runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemeItem>& item);
 
 		void runSetSchemeProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Scheme>& scheme);
 
@@ -174,7 +174,7 @@ namespace EditEngine
 	private:
 		static const int MaxCommandCount = 2048;
 
-		EditSchemeView* m_videoFrameView;
+		EditSchemeView* m_schemeView;
 		QScrollBar* m_hScrollBar;
 		QScrollBar* m_vScrollBar;
 
@@ -196,18 +196,18 @@ namespace EditEngine
 	private:
 		EditCommand();		// deleted;
 	public:
-		EditCommand(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		EditCommand(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	public:
-		void execute(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void unExecute(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void execute(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void unExecute(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(EditSchemeView* videoFrameView) = 0;
-		virtual void unExecuteCommand(EditSchemeView* videoFrameView) = 0;
+		virtual void executeCommand(EditSchemeView* schemeView) = 0;
+		virtual void unExecuteCommand(EditSchemeView* schemeView) = 0;
 
-		void saveViewPos(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
-		void restoreViewPos(EditSchemeView* videoFrameView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void saveViewPos(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		void restoreViewPos(EditSchemeView* schemeView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 		// Data
 		//

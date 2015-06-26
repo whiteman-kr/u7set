@@ -49,11 +49,11 @@ namespace VFrame30
 		const QString& globals() const;
 		void setGlobals(const QString& globals);
 
-		const std::vector<QUuid>& videoFramesIDs() const;
-		std::vector<QUuid>* mutableVideoFramesIDs();
+		const std::vector<QUuid>& schemesIDs() const;
+		std::vector<QUuid>* mutableSchemesIDs();
 
-		const std::vector<std::shared_ptr<Scheme>>& videoFrames() const;
-		std::vector<std::shared_ptr<Scheme>>* mutableVideoFrames();
+		const std::vector<std::shared_ptr<Scheme>>& schemes() const;
+		std::vector<std::shared_ptr<Scheme>>* mutableSchemes();
 
 	private:
 		QUuid m_guid;												// Configuration ID
@@ -62,8 +62,8 @@ namespace VFrame30
 		QString m_variables;										// Global scripts varibales
 		QString m_globals;											// Global scripts functions
 		
-		std::vector<QUuid> m_videoFramesIDs;						// The list of VideoFrame's ID's
-		std::vector<std::shared_ptr<Scheme>> m_schemes;	// The list of VideoFrame's
+		std::vector<QUuid> m_schemeIds;								// The list of Scheme's ID's
+		std::vector<std::shared_ptr<Scheme>> m_schemes;				// The list of Scheme's
 	};
 
 

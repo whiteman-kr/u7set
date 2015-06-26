@@ -7,7 +7,7 @@
 
 //
 //
-// VideoFrameFileView
+// SchemeFileView
 //
 //
 class SchemeFileView : public FileListView
@@ -43,7 +43,7 @@ protected:
 
 //
 //
-// EditVideoFrameTabPage
+// SchemesTabPage
 //
 //
 class SchemesTabPage : public MainTabPage
@@ -56,7 +56,7 @@ private:
 public:
 	virtual ~SchemesTabPage();
 
-	template<typename VideoFrameType>
+	template<typename SchemeType>
 	static SchemesTabPage* create(const QString& fileExt, DbController* dbcontroller, const QString& parentFileName, QWidget* parent);
 
 signals:
@@ -70,30 +70,61 @@ public slots:
 	// Data
 	//
 protected:
-	std::function<VFrame30::Scheme*()> m_createVideoFrameFunc;	// same as in VideoFrameControlTabPage
+	std::function<VFrame30::Scheme*()> m_createSchemeFunc;	// same as in SchemeControlTabPage
 	QTabWidget* m_tabWidget;
 };
 
 
 //
 //
-// VideoFrameControlTabPage
+// SchemeControlTabPage
 //
 //
 class SchemeControlTabPage : public QWidget, public HasDbController
 {
     Q_OBJECT
 public:
-    SchemeControlTabPage(
-        const QString& fileExt,
-		DbController* db,
-        const QString& parentFileName,
-        std::function<VFrame30::Scheme*()> createVideoFrameFunc);
+	SchemeControlTabPage(
+			const QString& fileExt,
+			DbController* db,
+			const QString& parentFileName,
+			std::function<VFrame30::Scheme*()> createSchemeFunc) :
+		HasDbController(db),
+		m_createSchemeFunc(createSchemeFunc)
+	{
+		// Create actions
+		//
+		CreateActions();
+
+		// Create controls
+		//
+		m_filesView = new SchemeFileView(db, parentFileName);
+		m_filesView->filesModel().setFilter(fileExt);
+
+		QHBoxLayout* pMainLayout = new QHBoxLayout();
+		pMainLayout->addWidget(m_filesView);
+
+		setLayout(pMainLayout);
+
+		// --
+		//
+		//connect(dbcontroller, &DbController::projectOpened, this, &SchemeControlTabPage::projectOpened);
+		//connect(dbcontroller, &DbController::projectClosed, this, &SchemeControlTabPage::projectClosed);
+
+		connect(m_filesView, &SchemeFileView::openFileSignal, this, &SchemeControlTabPage::openFiles);
+		connect(m_filesView, &SchemeFileView::viewFileSignal, this, &SchemeControlTabPage::viewFiles);
+		connect(m_filesView, &SchemeFileView::addFileSignal, this, &SchemeControlTabPage::addFile);
+		connect(m_filesView, &SchemeFileView::deleteFileSignal, this, &SchemeControlTabPage::deleteFile);
+		connect(m_filesView, &SchemeFileView::checkInSignal, this, &SchemeControlTabPage::checkIn);
+		connect(m_filesView, &SchemeFileView::undoChangesSignal, this, &SchemeControlTabPage::undoChanges);
+
+		return;
+	}
 
     virtual ~SchemeControlTabPage();
 
 public:
-    VFrame30::Scheme* createVideoFrame() const;
+	VFrame30::Scheme* createScheme() const;
 
 protected:
     void CreateActions();
@@ -123,30 +154,30 @@ public:
     // Data
     //
 private:
-    std::function<VFrame30::Scheme*()> m_createVideoFrameFunc;
+	std::function<VFrame30::Scheme*()> m_createSchemeFunc;
     SchemeFileView* m_filesView;
 };
 
 
 // Create MainTab!!!
 //
-template<typename VideoFrameType>
+template<typename SchemeType>
 SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbcontroller,  const QString& parentFileName, QWidget* parent)
 {
-	static_assert(std::is_base_of<VFrame30::Scheme, VideoFrameType>::value, "Base class must be VFrame30::CVideoFrame");
+	static_assert(std::is_base_of<VFrame30::Scheme, SchemeType>::value, "Base class must be VFrame30::Scheme");
 	assert(dbcontroller != nullptr);
 
 	SchemesTabPage* p = new SchemesTabPage(dbcontroller, parent);
 
-	// Create VideoFrame function, will be stored in two places, VideoFrameTabPage and VideoFrameControlTabPage
+	// Create Scheme function, will be stored in two places, SchemeTabPage and SchemeControlTabPage
 	//
 	std::function<VFrame30::Scheme*()> createFunc(
 		[]() -> VFrame30::Scheme*
 		{
-			return new VideoFrameType();
+			return new SchemeType();
 		});
 
-	p->m_createVideoFrameFunc = createFunc;
+	p->m_createSchemeFunc = createFunc;
 
 	// Add control page
 	//
@@ -159,7 +190,7 @@ SchemesTabPage* SchemesTabPage::create(const QString& fileExt, DbController* dbc
 
 //
 //
-// EditVideoFrameTabPage
+// EditSchemeTabPage
 //
 //
 class EditSchemeTabPage : public QWidget, public HasDbController
@@ -168,7 +199,7 @@ class EditSchemeTabPage : public QWidget, public HasDbController
 
 public:
 	EditSchemeTabPage() = delete;
-	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> videoFrame, const DbFileInfo& fileInfo, DbController* db);
+	EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* db);
 	virtual ~EditSchemeTabPage();
 
 	// Public methods
@@ -193,8 +224,8 @@ public:
 	bool saveWorkcopy();
 
 protected:
-	void getCurrentWorkcopy();				// Save current videoframe to a file
-	void setCurrentWorkcopy();				// Load a videoframe from a file
+	void getCurrentWorkcopy();				// Save current scheme to a file
+	void setCurrentWorkcopy();				// Load a scheme from a file
 
 	// Properties
 	//
@@ -211,7 +242,7 @@ public:
 	// Data
 	//
 private:
-	EditSchemeWidget* m_videoFrameWidget;
+	EditSchemeWidget* m_schemeWidget;
 };
 
 

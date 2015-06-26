@@ -7,7 +7,7 @@ class QBrush;
 
 namespace VFrame30
 {
-	class VFRAME30LIBSHARED_EXPORT VideoItemRect : public PosRectImpl
+	class VFRAME30LIBSHARED_EXPORT SchemeItemRect : public PosRectImpl
 	{
 		Q_OBJECT
 
@@ -25,14 +25,14 @@ namespace VFrame30
 		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
 
 #ifdef VFRAME30LIB_LIBRARY
-		friend ::Factory<VideoItem>::DerivedType<VideoItemRect>;
+		friend ::Factory<SchemeItem>::DerivedType<SchemeItemRect>;
 #endif
 
-		VideoItemRect(void);
+		SchemeItemRect(void);
 
 	public:
-		explicit VideoItemRect(SchemeUnit unit);
-		virtual ~VideoItemRect(void);
+		explicit SchemeItemRect(SchemeUnit unit);
+		virtual ~SchemeItemRect(void);
 
 		// Serialization
 		//

@@ -2,9 +2,9 @@
 #include "FblItemRect.h"
 #include "SchemeLayer.h"
 
-#include "VideoItemSignal.h"
+#include "SchemeItemSignal.h"
 #include "SchemeItemConst.h"
-#include "VideoItemFblElement.h"
+#include "SchemeItemAfb.h"
 
 
 namespace VFrame30
@@ -50,10 +50,10 @@ namespace VFrame30
 	bool FblItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
@@ -67,7 +67,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::FblItemRect* itemMessage = message->mutable_videoitem()->mutable_fblitemrect();
+		Proto::FblItemRect* itemMessage = message->mutable_schemeitem()->mutable_fblitemrect();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor);
@@ -81,9 +81,9 @@ namespace VFrame30
 
 	bool FblItemRect::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -101,13 +101,13 @@ namespace VFrame30
 			return false;
 		}
 
-		if (message.videoitem().has_fblitemrect() == false)
+		if (message.schemeitem().has_fblitemrect() == false)
 		{
-			assert(message.videoitem().has_fblitemrect());
+			assert(message.schemeitem().has_fblitemrect());
 			return false;
 		}
 
-		const Proto::FblItemRect& itemMessage = message.videoitem().fblitemrect();
+		const Proto::FblItemRect& itemMessage = message.schemeitem().fblitemrect();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();
@@ -137,7 +137,7 @@ namespace VFrame30
 			{
 				assert(input->IsInput());
 
-				VideoItemPoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
+				SchemePoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
 				input->setPoint(calculatedPoint);
 
 				inputIndex ++;
@@ -155,7 +155,7 @@ namespace VFrame30
 			{
 				assert(output->IsOutput());
 
-				VideoItemPoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
+				SchemePoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
 				output->setPoint(calculatedPoint);
 
 				outputIndex ++;
@@ -165,7 +165,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, VideoItemPoint* pResult, double gridSize, int pinGridStep) const
+	bool FblItemRect::GetConnectionPointPos(const QUuid& connectionPointGuid, SchemePoint* pResult, double gridSize, int pinGridStep) const
 	{
 		if (pResult == nullptr)
 		{
@@ -219,7 +219,7 @@ namespace VFrame30
 		return false;
 	}
 
-	VideoItemPoint FblItemRect::CalcPointPos(
+	SchemePoint FblItemRect::CalcPointPos(
 			const QRectF& fblItemRect,
 			const CFblConnectionPoint& connection,
 			int pinCount,
@@ -230,7 +230,7 @@ namespace VFrame30
 		if (pinCount == 0)
 		{
 			assert(pinCount != 0);
-			return VideoItemPoint(0, 0);
+			return SchemePoint(0, 0);
 		}
 
 		// Cache values
@@ -250,7 +250,7 @@ namespace VFrame30
 		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
 		y = CUtils::snapToGrid(y, gridSize);
 
-		return VideoItemPoint(x, y);
+		return SchemePoint(x, y);
 	}
 
 
@@ -334,7 +334,7 @@ namespace VFrame30
 		{
 			// Get pin position
 			//
-			VideoItemPoint vip;
+			SchemePoint vip;
 			GetConnectionPointPos(input.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
@@ -389,7 +389,7 @@ namespace VFrame30
 		{
 			// Get pin position
 			//
-			VideoItemPoint vip;
+			SchemePoint vip;
 			GetConnectionPointPos(output.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
 			int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
@@ -503,7 +503,7 @@ namespace VFrame30
 	{
 		// Set new guid for the item
 		//
-		VideoItem::setNewGuid();
+		SchemeItem::setNewGuid();
 
 		// Set new guids for all inputs/outputs
 		//
@@ -531,13 +531,13 @@ namespace VFrame30
 
 	bool FblItemRect::isInputSignalElement() const
 	{
-		const VFrame30::VideoItemInputSignal* ptr = dynamic_cast<const VFrame30::VideoItemInputSignal*>(this);
+		const VFrame30::SchemeItemInput* ptr = dynamic_cast<const VFrame30::SchemeItemInput*>(this);
 		return ptr != nullptr;
 	}
 
 	bool FblItemRect::isOutputSignalElement() const
 	{
-		const VFrame30::VideoItemOutputSignal* ptr = dynamic_cast<const VFrame30::VideoItemOutputSignal*>(this);
+		const VFrame30::SchemeItemOutput* ptr = dynamic_cast<const VFrame30::SchemeItemOutput*>(this);
 		return ptr != nullptr;
 	}
 
@@ -549,7 +549,7 @@ namespace VFrame30
 
 	bool FblItemRect::isFblElement() const
 	{
-		const VFrame30::VideoItemFblElement* ptr = dynamic_cast<const VFrame30::VideoItemFblElement*>(this);
+		const VFrame30::SchemeItemAfb* ptr = dynamic_cast<const VFrame30::SchemeItemAfb*>(this);
 		return ptr != nullptr;
 	}
 
@@ -558,34 +558,34 @@ namespace VFrame30
 		return isInputSignalElement() || isOutputSignalElement();
 	}
 
-	VFrame30::VideoItemSignal* FblItemRect::toSignalElement()
+	VFrame30::SchemeItemSignal* FblItemRect::toSignalElement()
 	{
-		return dynamic_cast<VFrame30::VideoItemSignal*>(this);
+		return dynamic_cast<VFrame30::SchemeItemSignal*>(this);
 	}
 
-	const VFrame30::VideoItemSignal* FblItemRect::toSignalElement() const
+	const VFrame30::SchemeItemSignal* FblItemRect::toSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::VideoItemSignal*>(this);
+		return dynamic_cast<const VFrame30::SchemeItemSignal*>(this);
 	}
 
-	VFrame30::VideoItemInputSignal* FblItemRect::toInputSignalElement()
+	VFrame30::SchemeItemInput* FblItemRect::toInputSignalElement()
 	{
-		return dynamic_cast<VFrame30::VideoItemInputSignal*>(this);
+		return dynamic_cast<VFrame30::SchemeItemInput*>(this);
 	}
 
-	const VFrame30::VideoItemInputSignal* FblItemRect::toInputSignalElement() const
+	const VFrame30::SchemeItemInput* FblItemRect::toInputSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::VideoItemInputSignal*>(this);
+		return dynamic_cast<const VFrame30::SchemeItemInput*>(this);
 	}
 
-	VFrame30::VideoItemOutputSignal* FblItemRect::toOutputSignalElement()
+	VFrame30::SchemeItemOutput* FblItemRect::toOutputSignalElement()
 	{
-		return dynamic_cast<VFrame30::VideoItemOutputSignal*>(this);
+		return dynamic_cast<VFrame30::SchemeItemOutput*>(this);
 	}
 
-	const VFrame30::VideoItemOutputSignal* FblItemRect::toOutputSignalElement() const
+	const VFrame30::SchemeItemOutput* FblItemRect::toOutputSignalElement() const
 	{
-		return dynamic_cast<const VFrame30::VideoItemOutputSignal*>(this);
+		return dynamic_cast<const VFrame30::SchemeItemOutput*>(this);
 	}
 
 	VFrame30::SchemeItemConst* FblItemRect::toSchemeItemConst()
@@ -598,14 +598,14 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::SchemeItemConst*>(this);
 	}
 
-	VFrame30::VideoItemFblElement* FblItemRect::toFblElement()
+	VFrame30::SchemeItemAfb* FblItemRect::toFblElement()
 	{
-		return dynamic_cast<VFrame30::VideoItemFblElement*>(this);
+		return dynamic_cast<VFrame30::SchemeItemAfb*>(this);
 	}
 
-	const VFrame30::VideoItemFblElement* FblItemRect::toFblElement() const
+	const VFrame30::SchemeItemAfb* FblItemRect::toFblElement() const
 	{
-		return dynamic_cast<const VFrame30::VideoItemFblElement*>(this);
+		return dynamic_cast<const VFrame30::SchemeItemAfb*>(this);
 	}
 	
 	// Weight propertie

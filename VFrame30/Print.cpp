@@ -49,9 +49,9 @@ namespace VFrame30
 
 		// Установить ориентацию страницы по умолчанию по первому листу
 		//
-		pair<shared_ptr<VFrame30::CVideoFrame>, bool> spFirstFrame  = FrameList.front();
+		pair<shared_ptr<VFrame30::Scheme>, bool> spFirstFrame  = FrameList.front();
 
-		VFrame30::CVideoFrame* pFirstFrame = spFirstFrame.first.get();
+		VFrame30::Scheme* pFirstFrame = spFirstFrame.first.get();
 		if (pFirstFrame == nullptr)
 		{
 			ASSERT(pFirstFrame);
@@ -93,7 +93,7 @@ namespace VFrame30
 			//
 			int SelectedCount = 0;
 
-			for (list <pair<shared_ptr<VFrame30::CVideoFrame>, bool>>::iterator iter = FrameList.begin(); iter != FrameList.end(); ++iter) 
+			for (list <pair<shared_ptr<VFrame30::Scheme>, bool>>::iterator iter = FrameList.begin(); iter != FrameList.end(); ++iter)
 			{
 				if (iter->second == true)
 				{
@@ -166,7 +166,7 @@ namespace VFrame30
 		//
 		int PageCount = 0;
 		int PageCounter = 0;
-		for (list <pair<shared_ptr<VFrame30::CVideoFrame>, bool>>::iterator iter = FrameList.begin(); iter != FrameList.end(); iter++, PageCounter++) 
+		for (list <pair<shared_ptr<VFrame30::Scheme>, bool>>::iterator iter = FrameList.begin(); iter != FrameList.end(); iter++, PageCounter++)
 		{
 			if (printer.printRange() == QPrinter::Selection)
 			{
@@ -189,7 +189,7 @@ namespace VFrame30
 		//Печать
 		//
 		int CurrentPage = 0;
-		for (list <pair<shared_ptr<VFrame30::CVideoFrame>, bool>>::iterator iter = FrameList.begin(); iter != FrameList.end(); iter++, CurrentPage++) 
+		for (list <pair<shared_ptr<VFrame30::Scheme>, bool>>::iterator iter = FrameList.begin(); iter != FrameList.end(); iter++, CurrentPage++)
 		{
 			if (printer.printRange() == QPrinter::Selection)
 			{
@@ -203,7 +203,7 @@ namespace VFrame30
 					continue;
 			}
 
-			VFrame30::CVideoFrame* pFrame = iter->first.get();
+			VFrame30::Scheme* pFrame = iter->first.get();
 			if (pFrame == nullptr)
 			{
 				ASSERT(pFrame);

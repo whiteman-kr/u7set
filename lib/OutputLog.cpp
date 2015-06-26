@@ -56,12 +56,20 @@ QString OutputLogItem::toHtml() const
 		color = "black";
 	}
 
-	result = QString("<font face=\"Sans\" color=#808080>%1 %2  </font>"
-					 "<font face=\"Sans\" color=%3>%4</font>")
-				.arg(m_no, 4, 10, QChar('0'))
-				.arg(m_time.toString("hh:mm:ss:zzz   "))
-				.arg(color)
-				.arg(m_message);
+	if (m_message.isEmpty())
+	{
+		result = QString("<font face=\"Sans\" color=#C0C0C0>%1|</font>")
+					 .arg(m_no, 4, 10, QChar('0'));
+	}
+	else
+	{
+		result = QString("<font face=\"Sans\" color=#808080>%1| %2  </font>"
+						 "<font face=\"Sans\" color=%3>%4</font>")
+					 .arg(m_no, 4, 10, QChar('0'))
+					 .arg(m_time.toString("hh:mm:ss:zzz   "))
+					 .arg(color)
+					 .arg(m_message);
+	}
 
 	return result;
 }

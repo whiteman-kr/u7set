@@ -1,15 +1,15 @@
 #pragma once
 
-#include "VideoItem.h"
+#include "SchemeItem.h"
 #include "../include/CUtils.h"
 #include "Settings.h"
 
 namespace VFrame30
 {
-	// Интерфейс для VideoItem который хранит координаты в виде направленной линии,
+	// Интерфейс для SchemeItem который хранит координаты в виде направленной линии,
 	// Хранятся либо в дюймах либо в точках в зависимости от Unit
 	//
-	class IVideoItemPosLine
+	class IPosLine
 	{
 	public:
 		virtual double startXDocPt() const = 0;
@@ -26,7 +26,7 @@ namespace VFrame30
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public VideoItem, public IVideoItemPosLine
+	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public SchemeItem, public IPosLine
 	{
 		Q_OBJECT
 
@@ -75,11 +75,11 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const override;
 
-		// Get VideoItem bounding rectangle in itemUnit()
+		// Get SchemeItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const override;
 
-		// IVideoItemPosLine implementation
+		// IPosLine implementation
 		//
 	private:
 		double m_startXDocPt;
@@ -87,7 +87,7 @@ namespace VFrame30
 		double m_endXDocPt;
 		double m_endYDocPt;
 
-		// IVideoItemPosLine implementation
+		// IPosLine implementation
 		//
 	public:
 		virtual double startXDocPt() const override;
@@ -102,7 +102,7 @@ namespace VFrame30
 		virtual double endYDocPt() const  override;
 		virtual void setEndYDocPt(double value)  override;
 
-		// IVideoItemPropertiesPos implementation
+		// ISchemeItemPropertiesPos implementation
 		//
 	public:
 		virtual double left() const  override;
@@ -120,8 +120,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<VideoItemPoint> getPointList() const override;
-		virtual void setPointList(const std::vector<VideoItemPoint>& points) override;
+		virtual std::vector<SchemePoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemePoint>& points) override;
 	};
 }
 

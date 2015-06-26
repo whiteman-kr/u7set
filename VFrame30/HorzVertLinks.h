@@ -1,7 +1,7 @@
 #pragma once
 
 #include <limits>
-#include "VideoItem.h"
+#include "SchemeItem.h"
 
 namespace VFrame30
 {
@@ -10,19 +10,19 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT CHorzVertLinks
 	{
 	public:
-		void AddLinks(const std::list<VideoItemPoint>& pointList, const QUuid& VideoItemGuid);
+		void AddLinks(const std::list<SchemePoint>& pointList, const QUuid& schemeItemGuid);
 
 		// Определить, лежит ли чточка на одном из отрезков horzlinks или vertlinks
 		//
-		bool IsPointOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid);
+		bool IsPointOnLink(SchemePoint pt, const QUuid& schemeItemGuid);
 
 		// Определить, лежит ли чточка на одном из отрезков vertlinks или на концах horzlinks
 		//
-		bool IsPinOnLink(VideoItemPoint pt, const QUuid& VideoItemGuid);
+		bool IsPinOnLink(SchemePoint pt, const QUuid& schemeItemGuid);
 
 		// Вернуть UUid элементов под точкой
 		//
-		std::list<QUuid> getVideoItemsUnderPoint(VideoItemPoint pt, QUuid VideoItemGuid);
+		std::list<QUuid> getSchemeItemsUnderPoint(SchemePoint pt, QUuid schemeItemGuid);
 
 	public:
 		struct LINKS
@@ -31,12 +31,12 @@ namespace VFrame30
 			{
 				Pos1 = p1;
 				Pos2 = p2;
-				VideoItemGuid = g;
+				SchemeItemGuid = g;
 			}
 
 			double Pos1;
 			double Pos2;
-			QUuid VideoItemGuid;
+			QUuid SchemeItemGuid;
 
 			bool IsValInRange(double val)
 			{

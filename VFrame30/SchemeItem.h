@@ -14,42 +14,42 @@ namespace VFrame30
 
 namespace VFrame30
 {
-	struct VFRAME30LIBSHARED_EXPORT VideoItemPoint
+	struct VFRAME30LIBSHARED_EXPORT SchemePoint
 	{
 		double X;
 		double Y;
 
 		// Methods
 		//
-		VideoItemPoint() :
+		SchemePoint() :
 			X(0),
 			Y(0)
 		{
 		}
 
-		explicit VideoItemPoint(const Proto::VideoItemPoint& vip)
+		explicit SchemePoint(const Proto::SchemePoint& vip)
 		{
 			LoadData(vip);
 		}
 
-		explicit VideoItemPoint(QPointF point) :
+		explicit SchemePoint(QPointF point) :
 			X(point.x()),
 			Y(point.y())
 		{
 		}
 
-		VideoItemPoint(double x, double y) :
+		SchemePoint(double x, double y) :
 			X(x),
 			Y(y)
 		{
 		}
 
-		bool operator == (const VideoItemPoint& pt) const
+		bool operator == (const SchemePoint& pt) const
 		{
 			return std::abs(pt.X - X) < 0.000001 && std::abs(pt.Y - Y) < 0.000001;
 		}
 
-		bool operator < (const VideoItemPoint& pt) const
+		bool operator < (const SchemePoint& pt) const
 		{
 			if (operator==(pt) == true)
 			{
@@ -75,13 +75,13 @@ namespace VFrame30
 			return QPointF(X, Y);
 		}
 
-		bool SaveData(Proto::VideoItemPoint* vip) const
+		bool SaveData(Proto::SchemePoint* vip) const
 		{
 			vip->set_x(X);
 			vip->set_y(Y);
 			return true;
 		}
-		bool LoadData(const Proto::VideoItemPoint& vip)
+		bool LoadData(const Proto::SchemePoint& vip)
 		{
 			this->X = vip.x();
 			this->Y = vip.y();
@@ -93,7 +93,7 @@ namespace VFrame30
 	// прямоугольник, для отображения в СВОЙСТВАХ ОБЪЕКТА. ВНИМАНИЕ! возврат элементов происходит в единицах мм, дюймы, точки.
 	// ВНИМАНИЕ! Эти свойства нельзя использовать для рисования и вычисления новых координат!
 	//
-	class IVideoItemPropertiesPos
+	class ISchemeItemPropertiesPos
 	{
 	public:
 		virtual double left() const = 0;
@@ -114,17 +114,17 @@ namespace VFrame30
 	class IPointList
 	{
 	public:
-		virtual std::vector<VideoItemPoint> getPointList() const = 0;
-		virtual void setPointList(const std::vector<VideoItemPoint>& points) = 0;
+		virtual std::vector<SchemePoint> getPointList() const = 0;
+		virtual void setPointList(const std::vector<SchemePoint>& points) = 0;
 	};
 
 
-	class VFRAME30LIBSHARED_EXPORT VideoItem :
+	class VFRAME30LIBSHARED_EXPORT SchemeItem :
 		public QObject, 
-		public IVideoItemPropertiesPos, 
+		public ISchemeItemPropertiesPos,
 		public IPointList,
-		public Proto::ObjectSerialization<VideoItem>,
-		public DebugInstCounter<VideoItem>
+		public Proto::ObjectSerialization<SchemeItem>,
+		public DebugInstCounter<SchemeItem>
 	{
 		Q_OBJECT
 
@@ -132,14 +132,14 @@ namespace VFrame30
 		Q_PROPERTY(QString ClickScript READ clickScript  WRITE setClickScript)
 
 	protected:
-		VideoItem();
+		SchemeItem();
 
 	public:
-		virtual ~VideoItem();
+		virtual ~SchemeItem();
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<VideoItem>;	// For call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<SchemeItem>;	// For call CreateObject from Proto::ObjectSerialization
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -149,7 +149,7 @@ namespace VFrame30
 		// Use this func only for serialization, while creting new object it is not fully initialized
 		// and must be read from somewhere
 		//
-		static VideoItem* CreateObject(const Proto::Envelope& message);
+		static SchemeItem* CreateObject(const Proto::Envelope& message);
 
 		// Action Functions
 		//
@@ -175,12 +175,12 @@ namespace VFrame30
 		// Draw item outlien, while creation or changing
 		//
 		virtual void DrawOutline(CDrawParam* pDrawParam) const;
-		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items);
+		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemeItem>>& items);
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
 		virtual void DrawSelection(CDrawParam* pDrawParam, bool drawSizeBar) const;
-		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<VideoItem>>& items, bool drawSizeBar);
+		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemeItem>>& items, bool drawSizeBar);
 
 		// Determine and Calculation Functions
 		//
@@ -194,7 +194,7 @@ namespace VFrame30
 		// 
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const;
 
-		// IVideoItemPropertiesPos interface implementation
+		// ISchemeItemPropertiesPos interface implementation
 		//
 	public:
 		virtual double left() const override;
@@ -212,8 +212,8 @@ namespace VFrame30
 		// IPointList implementation
 		//
 	public:
-		virtual std::vector<VideoItemPoint> getPointList() const override;
-		virtual void setPointList(const std::vector<VideoItemPoint>& points) override;
+		virtual std::vector<SchemePoint> getPointList() const override;
+		virtual void setPointList(const std::vector<SchemePoint>& points) override;
 
 		// Properties and Data
 		//
@@ -241,7 +241,7 @@ namespace VFrame30
 		const QString& clickScript() const;
 		void setClickScript(const QString& value);
 
-		// Get VideoItem bounding rectangle in itemUnit()
+		// Get SchemeItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const;		
 
@@ -253,12 +253,12 @@ namespace VFrame30
 		QUuid m_guid;
 		SchemeUnit m_itemUnit;		// Item position unit, can be inches or pixels
 
-		bool m_acceptClick;			// The VideoItem accept mouse Left button click and runs script
+		bool m_acceptClick;			// The SchemeItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
 	};
 
 #ifdef VFRAME30LIB_LIBRARY
-	extern Factory<VFrame30::VideoItem> VideoItemFactory;
+	extern Factory<VFrame30::SchemeItem> SchemeItemFactory;
 #endif
 }
 

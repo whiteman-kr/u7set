@@ -3,6 +3,7 @@
     <AfbElement StrId="#xor_v1">
         <Properties>
             <Caption>xor_v1</Caption>
+            <Description>XOR Block outputs the logical XOR operation for inputs in accordance with control signal.</Description>
             <OpCode>3</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>

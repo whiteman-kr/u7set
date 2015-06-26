@@ -1,16 +1,16 @@
 #include "Stable.h"
-#include "VideoItemLine.h"
+#include "SchemeItemLine.h"
 
 namespace VFrame30
 {
-	VideoItemLine::VideoItemLine(void)
+	SchemeItemLine::SchemeItemLine(void)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
 		//
 	}
 
-	VideoItemLine::VideoItemLine(SchemeUnit unit) : 
+	SchemeItemLine::SchemeItemLine(SchemeUnit unit) : 
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
@@ -19,25 +19,25 @@ namespace VFrame30
 	}
 
 
-	VideoItemLine::~VideoItemLine(void)
+	SchemeItemLine::~SchemeItemLine(void)
 	{
 	}
 
 	// Serialization
 	//
-	bool VideoItemLine::SaveData(Proto::Envelope* message) const
+	bool SchemeItemLine::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosLineImpl::SaveData(message);
-		if (result == false || message->has_videoitem() == false)
+		if (result == false || message->has_schemeitem() == false)
 		{
 			assert(result);
-			assert(message->has_videoitem());
+			assert(message->has_schemeitem());
 			return false;
 		}
 
 		// --
 		//
-		Proto::VideoItemLine* lineMessage = message->mutable_videoitem()->mutable_line();
+		Proto::SchemeItemLine* lineMessage = message->mutable_schemeitem()->mutable_line();
 
 		lineMessage->set_weight(m_weight);
 		lineMessage->set_linecolor(m_lineColor);
@@ -45,11 +45,11 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VideoItemLine::LoadData(const Proto::Envelope& message)
+	bool SchemeItemLine::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_videoitem() == false)
+		if (message.has_schemeitem() == false)
 		{
-			assert(message.has_videoitem());
+			assert(message.has_schemeitem());
 			return false;
 		}
 
@@ -62,13 +62,13 @@ namespace VFrame30
 		}
 
 		// --
-		if (message.videoitem().has_line() == false)
+		if (message.schemeitem().has_line() == false)
 		{
-			assert(message.videoitem().has_line());
+			assert(message.schemeitem().has_line());
 			return false;
 		}
 
-		const Proto::VideoItemLine& lineMessage = message.videoitem().line();
+		const Proto::SchemeItemLine& lineMessage = message.schemeitem().line();
 
 		m_weight = lineMessage.weight();
 		m_lineColor = lineMessage.linecolor();
@@ -82,7 +82,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void VideoItemLine::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer*) const
+	void SchemeItemLine::Draw(CDrawParam* drawParam, const Scheme*, const SchemeLayer*) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -116,7 +116,7 @@ namespace VFrame30
 
 	// Weight propertie
 	//
-	double VideoItemLine::weight() const
+	double SchemeItemLine::weight() const
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -129,7 +129,7 @@ namespace VFrame30
 		}
 	}
 
-	void VideoItemLine::setWeight(double weight)
+	void SchemeItemLine::setWeight(double weight)
 	{
 		if (itemUnit() == SchemeUnit::Display)
 		{
@@ -144,12 +144,12 @@ namespace VFrame30
 
 	// LineColor propertie
 	//
-	QRgb VideoItemLine::lineColor() const
+	QRgb SchemeItemLine::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void VideoItemLine::setLineColor(QRgb color)
+	void SchemeItemLine::setLineColor(QRgb color)
 	{
 		m_lineColor = color;
 	}
