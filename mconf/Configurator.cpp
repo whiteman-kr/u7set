@@ -1116,10 +1116,10 @@ void Configurator::writeConfData(ModuleFirmware *conf)
                 // Check if the connector in correct Uart
                 //
 #pragma message(Q_FUNC_INFO " DEBUG!!!!!!!!!!!!!!!!!!!!!!! Uncomment it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-                //if (moduleUartId != conf.uartID())
-                //{
-                //	throw tr("Wrong UART, use %1h port.").arg(QString::number(conf.uartID(), 16));
-                //}
+                if (moduleUartId != conf->uartId())
+                {
+                    throw tr("Wrong UART, use %1h port.").arg(QString::number(conf->uartId(), 16));
+                }
 
 				int confFrameDataSize = conf->frameSize() - sizeof(pingReplyVersioned.crc64);
 
