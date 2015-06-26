@@ -12,6 +12,75 @@
 #include "../include/SocketIO.h"
 
 
+class ThreadWorker : public QObject
+{
+	Q_OBJECT
+
+private slots:
+	void slot_onThreadStarted() { onThreadStarted(); }
+	void slot_onThreadFinished() { onThreadFinished(); deleteLater(); }
+
+public:
+	virtual void onThreadStarted() {}
+	virtual void onThreadFinished() {}
+
+	friend class SimpleThread;
+};
+
+
+class SimpleThread : public QObject
+{
+	Q_OBJECT
+
+private:
+	QThread m_thread;
+	ThreadWorker* m_worker = nullptr;
+
+public:
+	SimpleThread() {};
+	SimpleThread(ThreadWorker* worker) :
+		m_worker(worker)
+	{
+		assert(m_worker != nullptr);
+	}
+
+	~SimpleThread()
+	{
+		m_thread.quit();
+		m_thread.wait();
+	}
+
+	void setWorker(ThreadWorker* worker)
+	{
+		if (worker == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		if (m_worker != nullptr)
+		{
+			assert(false);			// worker allready set
+			return;
+		}
+
+		m_worker = worker;
+	}
+
+	void run()
+	{
+		m_worker->moveToThread(&m_thread);
+
+		connect(&m_thread, &QThread::started, m_worker, &ThreadWorker::slot_onThreadStarted);
+		connect(&m_thread, &QThread::finished, m_worker, &ThreadWorker::slot_onThreadFinished);
+
+		m_thread.start();
+	}
+
+	void quit() { m_thread.quit(); }
+};
+
+
 namespace ProtoUdp
 {
 	#pragma pack(push, 1)
@@ -75,7 +144,7 @@ namespace ProtoUdp
 	// -------------------------------------------------------------------------------------
 
 
-	class Socket : public QObject
+	class Socket : public ThreadWorker
 	{
 		Q_OBJECT
 
@@ -208,21 +277,16 @@ namespace ProtoUdp
 	// -------------------------------------------------------------------------------------
 
 
-	class ClientThread : public QObject
+	class ClientThread : public SimpleThread
 	{
 		Q_OBJECT
 
 	private:
-		QThread m_thread;
 		Client* m_client = nullptr;
 
 	public:
 		ClientThread(const HostAddressPort& serverAddress);
 		ClientThread(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress);
-		~ClientThread();
-
-		void run();
-		void quit() { m_thread.quit(); }
 
 		void sendRequest(quint32 requestID, QByteArray& requestData);
 	};
@@ -265,6 +329,27 @@ namespace ProtoUdp
 
 	// -------------------------------------------------------------------------------------
 	//
+	// ClientHandler class declaration
+	//
+	// -------------------------------------------------------------------------------------
+
+	class ClientHandler : public QObject
+	{
+		Q_OBJECT
+
+	private:
+		quint32 m_clientID = 0;
+
+
+	};
+
+
+
+
+
+
+	// -------------------------------------------------------------------------------------
+	//
 	// ProtoUdpServer class declaration
 	//
 	// -------------------------------------------------------------------------------------
@@ -290,6 +375,12 @@ namespace ProtoUdp
 		QHash<quint32, RequestProcessingThread*> m_requestProcesingThreads;
 
 		RequestProcessor* createRequestProcessor(quint32 requestID);
+
+		template<typename RequestProcessorDerivedClass>
+		void registerRequestProcessor()
+		{
+			m_requestProcessorFactory.Register<RequestProcessorDerivedClass>;
+		}
 
 	private slots:
 		void onTimerTimeout();
@@ -328,5 +419,10 @@ namespace ProtoUdp
 		void run();
 		void quit() { m_thread.quit(); }
 
+		template<typename RequestProcessorDerivedClass>
+		void registerRequestProcessor()
+		{
+//			m_server->re
+		}
 	};
 }

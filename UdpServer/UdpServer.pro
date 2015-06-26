@@ -67,7 +67,8 @@ HEADERS  += \
     servermainwindow.h \
     ../include/CircularLogger.h \
     version.h \
-	../include/ProtoUdp.h
+	../include/ProtoUdp.h \
+    ../include/Factory.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -286,16 +286,18 @@ namespace ProtoUdp
 	ClientThread::ClientThread(const HostAddressPort& serverAddress)
 	{
 		m_client = new Client(serverAddress, serverAddress);
+		SimpleThread::setWorker(m_client);
 	}
 
 
 	ClientThread::ClientThread(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress)
 	{
 		m_client = new Client(firstServerAddress, secondServerAddress);
+		SimpleThread::setWorker(m_client);
 	}
 
 
-	void ClientThread::run()
+	/*void ClientThread::run()
 	{
 		m_client->moveToThread(&m_thread);
 
@@ -310,7 +312,7 @@ namespace ProtoUdp
 	{
 		m_thread.quit();
 		m_thread.wait();
-	}
+	}*/
 
 
 	void ClientThread::sendRequest(quint32 requestID, QByteArray& requestData)
