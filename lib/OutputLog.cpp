@@ -58,13 +58,13 @@ QString OutputLogItem::toHtml() const
 
 	if (m_message.isEmpty())
 	{
-		result = QString("<font face=\"Sans\" color=#C0C0C0>%1|</font>")
+		result = QString("<font face=\"Courier\" color=#C0C0C0>%1|</font>")
 					 .arg(m_no, 4, 10, QChar('0'));
 	}
 	else
 	{
-		result = QString("<font face=\"Sans\" color=#808080>%1| %2  </font>"
-						 "<font face=\"Sans\" color=%3>%4</font>")
+		result = QString("<font face=\"Courier\" color=#808080>%1| %2  </font>"
+						 "<font face=\"Courier\" color=%3>%4</font>")
 					 .arg(m_no, 4, 10, QChar('0'))
 					 .arg(m_time.toString("hh:mm:ss:zzz   "))
 					 .arg(color)

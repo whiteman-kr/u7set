@@ -44,6 +44,8 @@ signals:
 	void setCommunicationSettings(QString device, bool showDebugInfo);
 	
 	void readConfiguration(int);
+	void readFirmware(QString fileName);
+
 	void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2);
 	void writeConfData(ModuleFirmware* conf);
 	void eraseFlashMemory(int);
