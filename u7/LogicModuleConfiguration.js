@@ -400,11 +400,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             ptr += 2;
         }
     }
-    
-    // crc
-    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
-    ptr += 8;
-    
+
     // reserved
     ptr += 120;
    
@@ -413,7 +409,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     ptr += 8;
     
     //reserved
-    ptr += 360;
+    ptr += 368;
 
     // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
     //
