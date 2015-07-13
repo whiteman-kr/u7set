@@ -20,3 +20,8 @@ SOURCES += main.cpp \
 
 HEADERS += \
     Convertor.h
+
+
+#c++11 support for GCC
+#
+unix:QMAKE_CXXFLAGS += -std=c++11
