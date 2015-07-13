@@ -382,7 +382,7 @@ namespace Builder
 		else
 		{
 			msg = QString(tr("Compilation for LM %1 was finished with errors")).arg(m_lm->strId());
-			LOG_ERROR(m_log, msg);
+			LOG_MESSAGE(m_log, msg);
 		}
 
 		cleanup();
@@ -1041,35 +1041,40 @@ namespace Builder
 		int srcRamAddrOffset = srcSignal.ramAddr().offset();
 		int srcRamAddrBit = srcSignal.ramAddr().bit();
 
-		int destRamAddrOffset = srcSignal.ramAddr().offset();
-		int destRamAddrBit = srcSignal.ramAddr().bit();
+		int destRamAddrOffset = appSignal.ramAddr().offset();
+		int destRamAddrBit = appSignal.ramAddr().bit();
 
-		if (srcRamAddrOffset == -1 || srcRamAddrBit == -1 ||
-			destRamAddrOffset == -1 || destRamAddrBit == -1)
+		if (srcRamAddrOffset == -1 || srcRamAddrBit == -1)
 		{
-			assert(false);		// signal ramAddr is not calculated!!!
+			LOG_ERROR(m_log, QString(tr("Signal %1 RAM addreess is not calculated")).
+							  arg(srcSignal.strID()));
 			return false;
+		}
+
+		if (destRamAddrOffset == -1 || destRamAddrBit == -1)
+		{
+			LOG_ERROR(m_log, QString(tr("Signal %1 RAM addreess is not calculated")).
+							  arg(appSignal.strID()));
+			return false;
+		}
+
+		if (appSignal.isAnalog())
+		{
+			// move value of analog signal
+			//
+			cmd.mov(destRamAddrOffset, srcRamAddrOffset);
 		}
 		else
 		{
-			if (appSignal.isAnalog())
-			{
-				// move value of analog signal
-				//
-				cmd.mov(destRamAddrOffset, srcRamAddrOffset);
-			}
-			else
-			{
-				// move value of discrete signal
-				//
-				cmd.moveBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
-			}
-
-			cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(srcSignal.strID()));
-
-			m_code.newLine();
-			m_code.append(cmd);
+			// move value of discrete signal
+			//
+			cmd.moveBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
 		}
+
+		cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(srcSignal.strID()));
+
+		m_code.newLine();
+		m_code.append(cmd);
 
 		appSignal.setComputed();
 
@@ -1998,28 +2003,39 @@ namespace Builder
 
 					if (signalOffset != ERR_VALUE && bit != ERR_VALUE)
 					{
-						// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
-						//
-						Address16 ramRegAddr(module.appDataOffset + signalOffset, bit);
-
-						signal->ramAddr() = ramRegAddr;
-						signal->regAddr() = ramRegAddr;
-
-						// set same ramAddr & regAddr for corresponding signals in m_appSignals map
-						//
-						AppSignal* appSignal = m_appSignals.getByStrID(signal->strID());
-
-						if (appSignal != nullptr)
+						if (signalOffset >= module.appLogicDataSize)
 						{
-							// not all device-bound signals must be in m_appSignals map
+							LOG_ERROR(m_log, QString(tr("Signal %1 offset out of module application data size")).arg(signal->strID()));
+
+							result = false;
+						}
+						else
+						{
+							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 							//
-							appSignal->ramAddr() = ramRegAddr;
-							appSignal->regAddr() = ramRegAddr;
+							Address16 ramRegAddr(module.appDataOffset + signalOffset, bit);
+
+							signal->ramAddr() = ramRegAddr;
+							signal->regAddr() = ramRegAddr;
+
+							// set same ramAddr & regAddr for corresponding signals in m_appSignals map
+							//
+							AppSignal* appSignal = m_appSignals.getByStrID(signal->strID());
+
+							if (appSignal != nullptr)
+							{
+								// not all device-bound signals must be in m_appSignals map
+								//
+								appSignal->ramAddr() = ramRegAddr;
+								appSignal->regAddr() = ramRegAddr;
+							}
 						}
 					}
 					else
 					{
 						LOG_ERROR(m_log, QString(tr("Can't calculate RAM address of application signal %1")).arg(signal->strID()));
+
+						result = false;
 					}
 				}
 			}
