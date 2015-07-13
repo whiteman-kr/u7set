@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	m_protoUdpClientThread = new ProtoUdp::ClientThread(HostAddressPort("192.168.75.85", PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
 
-	m_protoUdpClientThread->run();
+	m_protoUdpClientThread->start();
 
 
 //	runFscDataSources();

@@ -13,7 +13,7 @@
 #include "../include/SimpleThread.h"
 
 
-namespace ProtoUdp
+namespace ProtoTcp
 {
 	#pragma pack(push, 1)
 
@@ -274,6 +274,10 @@ namespace ProtoUdp
 
 
 	};
+
+
+
+
 
 
 	// -------------------------------------------------------------------------------------
