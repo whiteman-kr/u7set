@@ -115,6 +115,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(this, &ModuleConfigurator::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 	
 	connect(this, &ModuleConfigurator::readConfiguration, m_pConfigurator, &Configurator::readConfiguration);
+	connect(this, &ModuleConfigurator::readFirmware, m_pConfigurator, &Configurator::readFirmware);
+
 	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
 	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::writeConfData);
 	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::writeDiagData);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
@@ -134,7 +136,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	// Start Timer
 	//
-	m_logTimerId = startTimer(10);
+	m_logTimerId = startTimer(2);
 
 	// --
 	//
@@ -166,7 +168,7 @@ void ModuleConfigurator::timerEvent(QTimerEvent* pTimerEvent)
 		m_pLog != nullptr)
 	{
 		std::list<OutputLogItem> messages;
-        for (int i = 0; i < 10 && theLog.isEmpty() == false; i++)
+		for (int i = 0; i < 30 && theLog.isEmpty() == false; i++)
 		{
             messages.push_back(theLog.popMessages());
 		}
@@ -188,7 +190,7 @@ void ModuleConfigurator::writeLog(const OutputLogItem& logItem)
 		return;
 	}
 
-    QString s = logItem.toHtml();
+	QString s = logItem.toHtml();
 	m_pLog->append(s);
 	return;
 }
@@ -307,6 +309,27 @@ void ModuleConfigurator::readClicked()
 			disableControls();
 
 			emit readConfiguration(0);
+		}
+
+		if (dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget()) != nullptr)
+		{
+			//ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
+
+			QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+
+			if (fileName.isEmpty() == true)
+			{
+				return;
+			}
+
+			theLog.writeMessage("");
+			theLog.writeMessage(tr("Reading firmware to file %1...").arg(fileName));
+
+			// Read
+			//
+			disableControls();
+
+			emit readFirmware(fileName);
 		}
 
 	}

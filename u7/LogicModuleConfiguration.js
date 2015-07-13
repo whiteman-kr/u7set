@@ -39,7 +39,7 @@ var Mode_05mA = 3;
 
 function(root, confCollection, log, signalSet, subsystemStorage)
 {
-    log.writeMessage("Start LogicModuleConfiguration", false);
+    log.writeMessage("Start LogicModuleConfiguration");
 
     var result = true;
 
@@ -50,7 +50,7 @@ function(root, confCollection, log, signalSet, subsystemStorage)
         return false;
     }
 
-    log.writeMessage("Finish LogicModuleConfiguration", false);
+    log.writeMessage("Finish LogicModuleConfiguration");
 
     return result;
 }
@@ -59,7 +59,7 @@ function setData8(confFirmware, log, frameIndex, offset, data)
 {
     if (confFirmware.setData8(frameIndex, offset, data) == false)
     {
-        log.writeError("Error: SetData8, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
+        log.writeError("Error: SetData8, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
         return false;
     }
 }
@@ -68,7 +68,7 @@ function setData16(confFirmware, log, frameIndex, offset, data)
 {
     if (confFirmware.setData16(frameIndex, offset, data) == false)
     {
-        log.writeError("Error: SetData16, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
+        log.writeError("Error: SetData16, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
         return false;
     }
 }
@@ -77,7 +77,7 @@ function setData32(confFirmware, log, frameIndex, offset, data)
 {
     if (confFirmware.setData32(frameIndex, offset, data) == false)
     {
-        log.writeError("Error: SetData32, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
+        log.writeError("Error: SetData32, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
         return false;
     }
 }
@@ -86,7 +86,7 @@ function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
 {
     if (confFirmware.storeCrc64(frameIndex, start, count, offset) == false)
     {
-        log.writeError("Error: StoreCrc64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
+        log.writeError("Error: StoreCrc64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
         return false;
     }
 }
@@ -95,7 +95,7 @@ function storeHash64(confFirmware, log, frameIndex, offset, data)
 {
     if (confFirmware.storeHash64(frameIndex, offset, data) == false)
     {
-        log.writeError("Error: storeHash64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!", false, true);
+        log.writeError("Error: storeHash64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
         return false;
     }
 }
@@ -106,7 +106,7 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
     {
         if (device.ModuleFamily == FamilyLM)
         {
-            log.writeMessage("MODULE LM-1: " + device.StrID, false);
+            log.writeMessage("MODULE LM-1: " + device.StrID);
 
             // Generate Configuration
             //
@@ -146,7 +146,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     if (frameSize == 0 || frameCount == 0)
     {
-        log.writeError("Wrong LM-1 frameSize or frameCount: frameSize = " + frameSize + ", frameCount: " + frameCount, false, true);
+        log.writeError("Wrong LM-1 frameSize or frameCount: frameSize = " + frameSize + ", frameCount: " + frameCount);
         return false;
     }
     
@@ -155,7 +155,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     var ssKeyValue = subsystemStorage.ssKey(subSysID);
     if (ssKeyValue == -1)
     {
-        log.writeError("Subsystem key for " + subSysID + " was not found!", false, true);
+        log.writeError("Subsystem key for " + subSysID + " was not found!");
         return false;
     }
 
@@ -166,7 +166,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     if (channel < 1 || channel > maxChannel)
     {
-        log.writeError("Wrong LM-1 channel (should be 1 - " + maxChannel + "): " + module.StrID + ", channel: " + channel, false, true);
+        log.writeError("Wrong LM-1 channel (should be 1 - " + maxChannel + "): " + module.StrID + ", channel: " + channel);
         return false;
     }
 
@@ -197,7 +197,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     if (oldChannelCount == channel)
     {
-        log.writeError("LM-1 channel is not unique: " + module.StrID + ", channel: " + channel, false, true);
+        log.writeError("LM-1 channel is not unique: " + module.StrID + ", channel: " + channel);
         return false;
     }
     
@@ -238,7 +238,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
         {
             if (ioModule.Place < 1 || ioModule.Place > ioModulesMaxCount)
             {
-                log.writeError("Wrong I/O module place: " + ioModule.StrID + ", place: " + ioModule.Place + ", expected 1..14.", false, true);
+                log.writeError("Wrong I/O module place: " + ioModule.StrID + ", place: " + ioModule.Place + ", expected 1..14.");
                 return false;
             }
             var frame = frameIOConfig + (ioModule.Place - 1);
@@ -342,7 +342,7 @@ function truncate_to_int(x)
 //
 function generate_aim(confFirmware, module, frame, log, signalSet)
 {
-    log.writeMessage("MODULE AIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
+    log.writeMessage("MODULE AIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
 
     var ptr = 0;
     
@@ -356,7 +356,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var inController = module.jsFindChildObjectByMask("*_*_*_*_CTRLIN");
     if (inController == null)
     {
-        log.writeWarning("WARNING: no input controller found in " + module.StrID + "! Using default values.", false, true);
+        log.writeWarning("WARNING: no input controller found in " + module.StrID + "! Using default values.");
     }
 
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
@@ -371,7 +371,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         {
             // Generate default values, there is no signal on this place
             //
-            //log.writeMessage("Default place" + i + ": tf = " + defaultTf + ", hi = " + defaultHighBound + ", lo = " + defaultLowBound + ", diff = " + defaultMaxDiff, false);
+            //log.writeMessage("Default place" + i + ": tf = " + defaultTf + ", hi = " + defaultHighBound + ", lo = " + defaultLowBound + ", diff = " + defaultMaxDiff);
             
             setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
             ptr += 2;
@@ -388,7 +388,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             var filternigTime = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
             var maxDifference = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
 
-            //log.writeMessage("Place" + i + ": tf = " + filternigTime + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + maxDifference, false);
+            //log.writeMessage("Place" + i + ": tf = " + filternigTime + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + maxDifference);
 
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
             ptr += 2;
@@ -400,11 +400,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             ptr += 2;
         }
     }
-    
-    // crc
-    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
-    ptr += 8;
-    
+
     // reserved
     ptr += 120;
    
@@ -413,7 +409,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     ptr += 8;
     
     //reserved
-    ptr += 360;
+    ptr += 368;
 
     // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
     //
@@ -437,7 +433,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     //
     if (ptr != 1016)
     {
-        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr, false, true);
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr);
         ptr = 1016;
     }
     
@@ -451,7 +447,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 //
 function generate_aifm(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE AIFM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
+    log.writeMessage("MODULE AIFM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
     return true;
 
 }
@@ -463,7 +459,7 @@ function generate_aifm(confFirmware, module, frame, log)
 //
 function generate_aom(confFirmware, module, frame, log, signalSet)
 {
-    log.writeMessage("MODULE AOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
+    log.writeMessage("MODULE AOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
 
     var ptr = 0;
     
@@ -473,7 +469,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     var outController = module.jsFindChildObjectByMask("*_*_*_*_CTRLOUT");
     if (outController == null)
     {
-        log.writeWarning("WARNING: no output controller found in " + module.StrID + "! Using default values.", false, true);
+        log.writeWarning("WARNING: no output controller found in " + module.StrID + "! Using default values.");
     }
 
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
@@ -496,7 +492,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
                     var outputRangeMode = signal.jsOutputRangeMode();
                     if (outputRangeMode < 0 || outputRangeMode > Mode_05mA)
                     {
-                        log.writeError("ERROR: Signal " + s.StrID + " - wrong outputRangeMode()! Using default.", false, true);
+                        log.writeError("ERROR: Signal " + s.StrID + " - wrong outputRangeMode()! Using default.");
                     }
                     else
                     {
@@ -511,7 +507,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
             data |= (mode << bit);
         }
         
-        //log.writeMessage("Place" + place + ": Word = " + w + " = " + data, false);
+        //log.writeMessage("Place" + place + ": Word = " + w + " = " + data);
         setData16(confFirmware, log, frame, ptr + w * 2, data);          // InA Filtering time constant
     }
     
@@ -546,7 +542,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     //
     if (ptr != 1016)
     {
-        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr, false, true);
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr);
         ptr = 1016;
     }
 
@@ -582,13 +578,13 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
             signal = signalSet.getSignalByDeviceStrID(s.StrID);
             if (signal == null)    
             {
-                log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database!", false, true);
+                log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database!");
             }
             return signal;
         }
     }
     
-    log.writeWarning("WARNING: Parent " + parent.StrID + ", no signal with place " + place + " was not found!", false, true);
+    log.writeWarning("WARNING: Parent " + parent.StrID + ", no signal with place " + place + " was not found!");
     return null;
 }
 
@@ -599,7 +595,7 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
 //
 function generate_ocm(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE OCM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
+    log.writeMessage("MODULE OCM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
     return true;
 
 }
@@ -611,7 +607,7 @@ function generate_ocm(confFirmware, module, frame, log)
 //
 function generate_dim(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE DIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
+    log.writeMessage("MODULE DIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
 
     var ptr = 120;
     
@@ -644,7 +640,7 @@ function generate_dim(confFirmware, module, frame, log)
     //
     if (ptr != 1016)
     {
-        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr, false, true);
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr);
         ptr = 1016;
     }
 
@@ -659,7 +655,7 @@ function generate_dim(confFirmware, module, frame, log)
 //
 function generate_dom(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE DOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame, false);
+    log.writeMessage("MODULE DOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
 
     var ptr = 120;
     
@@ -692,7 +688,7 @@ function generate_dom(confFirmware, module, frame, log)
     //
     if (ptr != 1016)
     {
-        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr, false, true);
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr);
         ptr = 1016;
     }
 

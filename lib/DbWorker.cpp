@@ -488,6 +488,21 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 			return;
 		}
 
+		// Create get_project_version function
+		//
+		QString request = "CREATE OR REPLACE FUNCTION get_project_version()"
+						  "RETURNS integer AS"
+						  "'SELECT max(\"VersionNo\") FROM \"Version\";'"
+						  "LANGUAGE sql;";
+
+		result = newDbQuery.exec(request);
+		if (result == false)
+		{
+			emitError(newDbQuery.lastError());
+			newDatabase.close();
+			return;
+		}
+
 		// Add first record to version table
 		//
 		QString addFirstVersionRecord = QString(

@@ -218,6 +218,7 @@ public slots:
 	void readConfigurationWorker(int param);
 	void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc1, quint32 firmwareCrc2);
 	void writeConfData(ModuleFirmware* conf);
+	void readFirmware(QString fileName);
 	void eraseFlashMemory(int param);
 
 	// Signals
