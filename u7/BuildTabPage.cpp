@@ -104,6 +104,8 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	m_logTimerId = startTimer(10);
 
+	m_outputLog.setHtmlFont("Arial");
+
 	// Evidently, project is not opened yet
 	//
 	this->setEnabled(false);

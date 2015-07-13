@@ -10,18 +10,20 @@ OutputLogItem::OutputLogItem(int messageNo) :
 
 OutputLogItem::OutputLogItem(int messageNo,
 							 QString message,
-			  OutputMessageLevel level,
-			  QDateTime time,
-			  QString file,
-			  int fileLine,
-			  QString func) :
+							 OutputMessageLevel level,
+							 QDateTime time,
+							 QString file,
+							 int fileLine,
+							 QString func,
+							 QString htmlFont) :
 	m_no(messageNo),
 	m_message(message),
 	m_level(level),
 	m_time(time),
 	m_file(file),
 	m_fileLine(fileLine),
-	m_func(func)
+	m_func(func),
+	m_htmlFont(htmlFont)
 {
 }
 
@@ -58,17 +60,19 @@ QString OutputLogItem::toHtml() const
 
 	if (m_message.isEmpty())
 	{
-		result = QString("<font face=\"Courier\" color=#C0C0C0>%1|</font>")
-					 .arg(m_no, 4, 10, QChar('0'));
+		result = QString("<font face=\"%1\" color=#C0C0C0>%2|</font>")
+					.arg(m_htmlFont)
+					.arg(m_no, 4, 10, QChar('0'));
 	}
 	else
 	{
-		result = QString("<font face=\"Courier\" color=#808080>%1| %2  </font>"
-						 "<font face=\"Courier\" color=%3>%4</font>")
-					 .arg(m_no, 4, 10, QChar('0'))
-					 .arg(m_time.toString("hh:mm:ss:zzz   "))
-					 .arg(color)
-					 .arg(m_message);
+		result = QString("<font face=\"%1\" color=#808080>%2| %3  </font>"
+						 "<font face=\"%1\" color=%4>%5</font>")
+				 .arg(m_htmlFont)
+				 .arg(m_no, 4, 10, QChar('0'))
+				 .arg(m_time.toString("hh:mm:ss:zzz   "))
+				 .arg(color)
+				 .arg(m_message);
 	}
 
 	return result;
@@ -115,7 +119,8 @@ QString OutputLogItem::toCsv() const
 // OutputLog
 //
 
-OutputLog::OutputLog(void)
+OutputLog::OutputLog(void) :
+	m_htmlFont("Courier")
 {
 }
 
@@ -162,7 +167,7 @@ void OutputLog::write(const QString& str, OutputMessageLevel level, QString file
 	}
 
 	QMutexLocker locker(&m_mutex);
-	OutputLogItem li(m_messagesNo ++, str, level, time, file, fileLine, func);
+	OutputLogItem li(m_messagesNo ++, str, level, time, file, fileLine, func, htmlFont());
 	m_messages.push_back(li);
 
 	if (m_strLogging == true)
@@ -362,4 +367,13 @@ void OutputLog::resetWarningCount()
 	return setWarningCount(0);
 }
 
+QString OutputLog::htmlFont() const
+{
+	return m_htmlFont;
+}
+
+void OutputLog::setHtmlFont(QString fontName)
+{
+	m_htmlFont = fontName;
+}
 
