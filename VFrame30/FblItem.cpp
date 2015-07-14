@@ -277,27 +277,27 @@ namespace VFrame30
 
 	// Connections
 	//
-	const std::list<CFblConnectionPoint>& FblItem::inputs() const
+	const std::list<VFrame30::CFblConnectionPoint>& FblItem::inputs() const
 	{
 		return m_inputPoints;
 	}
 
-	const std::list<CFblConnectionPoint>& FblItem::outputs() const
+	const std::list<VFrame30::CFblConnectionPoint>& FblItem::outputs() const
 	{
 		return m_outputPoints;
 	}
 
-	std::list<CFblConnectionPoint>* FblItem::mutableInputs()
+	std::list<VFrame30::CFblConnectionPoint>* FblItem::mutableInputs()
 	{
 		return &m_inputPoints;
 	}
 
-	std::list<CFblConnectionPoint>* FblItem::mutableOutputs()
+	std::list<VFrame30::CFblConnectionPoint>* FblItem::mutableOutputs()
 	{
 		return &m_outputPoints;
 	}
 
-	bool FblItem::GetConnectionPoint(const QUuid& guid, CFblConnectionPoint* pResult) const
+	bool FblItem::GetConnectionPoint(const QUuid& guid, VFrame30::CFblConnectionPoint* pResult) const
 	{
 		if (pResult == nullptr)
 		{

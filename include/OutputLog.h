@@ -30,7 +30,8 @@ public:
 				  QDateTime time,
 				  QString file,
 				  int fileLine,
-				  QString func);
+				  QString func,
+				  QString htmlFont);
 
 	QString toText() const;
 	QString toHtml() const;
@@ -45,6 +46,7 @@ public:
 	QString m_file;
 	int m_fileLine = 0;
 	QString m_func;
+	QString m_htmlFont;
 };
 
 class OutputLog : public QObject
@@ -53,6 +55,7 @@ class OutputLog : public QObject
 
 	Q_PROPERTY(int ErrorCount READ errorCount WRITE setErrorCount RESET resetErrorCount NOTIFY errorCountChanged)
 	Q_PROPERTY(int WarningCount READ warningCount WRITE setWarningCount RESET resetWarningCount NOTIFY warningCountChanged)
+	Q_PROPERTY(QString HtmlFont READ htmlFont WRITE setHtmlFont)
 
 public:
 	OutputLog(void);
@@ -102,6 +105,9 @@ public:
 	void incWarningCount();
 	void resetWarningCount();
 
+	QString htmlFont() const;
+	void setHtmlFont(QString fontName);
+
 private:
 	std::list<OutputLogItem> m_messages;			// List buffer for writing messages to main window Log Widget
 
@@ -112,4 +118,6 @@ private:
 	int m_warningCount = 0;
 	int m_messagesNo = 0;
 	mutable QMutex m_mutex;							// access to windowMessageList, fileMessageList
+
+	QString m_htmlFont;
 };

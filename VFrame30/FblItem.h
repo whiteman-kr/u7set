@@ -72,7 +72,7 @@ namespace VFrame30
 		//
 	private:
 		QUuid m_guid;
-		SchemePoint m_point;
+		SchemePoint m_point;				// Don't remove position!!!
 		ConnectionDirrection m_dirrection = ConnectionDirrection::Input;
 		int m_afbOperandIndex = 0;
 
@@ -109,13 +109,13 @@ namespace VFrame30
 		// Connections
 		//
 	public:
-		const std::list<CFblConnectionPoint>& inputs() const;
-		const std::list<CFblConnectionPoint>& outputs() const;
+		const std::list<VFrame30::CFblConnectionPoint>& inputs() const;
+		const std::list<VFrame30::CFblConnectionPoint>& outputs() const;
 
-		std::list<CFblConnectionPoint>* mutableInputs();
-		std::list<CFblConnectionPoint>* mutableOutputs();
+		std::list<VFrame30::CFblConnectionPoint>* mutableInputs();
+		std::list<VFrame30::CFblConnectionPoint>* mutableOutputs();
 
-		bool GetConnectionPoint(const QUuid& guid, CFblConnectionPoint* pResult) const;
+		bool GetConnectionPoint(const QUuid& guid, VFrame30::CFblConnectionPoint* pResult) const;
 
 		int inputsCount() const;
 		int outputsCount() const;
@@ -143,8 +143,8 @@ namespace VFrame30
 		// Properties
 		//
 	private:
-		std::list<CFblConnectionPoint> m_inputPoints;
-		std::list<CFblConnectionPoint> m_outputPoints;
+		std::list<VFrame30::CFblConnectionPoint> m_inputPoints;
+		std::list<VFrame30::CFblConnectionPoint> m_outputPoints;
 	};
 }
 

@@ -1156,7 +1156,49 @@ namespace Builder
 			return false;
 		}
 
-		std::list<std::set<QUuid>> bushes;
+
+		// FblItems can conatain input or output pins, if input connects to output directly (without link)
+		// then create fake link for it.
+		// This is for special case, when input connects to output without link.
+		//
+		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
+		{
+			VFrame30::FblItemRect* fblItem = dynamic_cast<VFrame30::FblItemRect*>(item->get());
+
+			if (fblItem != nullptr)
+			{
+				fblItem->SetConnectionsPos(logicScheme->gridSize(), logicScheme->pinGridStep());	// Calculate pins positions
+
+				const std::list<VFrame30::CFblConnectionPoint>& inputs = fblItem->inputs();
+				const std::list<VFrame30::CFblConnectionPoint>& outputs = fblItem->outputs();
+
+				for (const VFrame30::CFblConnectionPoint& pt : inputs)
+				{
+					std::shared_ptr<VFrame30::SchemeItemLink> fakeLink = std::make_shared<VFrame30::SchemeItemLink>(fblItem->itemUnit());
+
+					VFrame30::SchemePoint pos = pt.point();
+
+					fakeLink->AddPoint(pos.X, pos.Y);
+					fakeLink->AddPoint(pos.X, pos.Y);
+
+					layer->Items.push_back(fakeLink);
+				}
+
+				for (const VFrame30::CFblConnectionPoint& pt : outputs)
+				{
+					std::shared_ptr<VFrame30::SchemeItemLink> fakeLink = std::make_shared<VFrame30::SchemeItemLink>(fblItem->itemUnit());
+
+					VFrame30::SchemePoint pos = pt.point();
+
+					fakeLink->AddPoint(pos.X, pos.Y);
+					fakeLink->AddPoint(pos.X, pos.Y);
+
+					layer->Items.push_back(fakeLink);
+				}
+
+				continue;
+			}
+		}
 
 		// Enum all links and get all horzlinks and vertlinks
 		//
@@ -1164,6 +1206,8 @@ namespace Builder
 
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
+			// Decompose link to parts
+			//
 			VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item->get());
 
 			if (link != nullptr)
@@ -1179,11 +1223,15 @@ namespace Builder
 				// Decompose link on different parts and put them to horzlinks and vertlinks
 				//
 				horzVertLinks.AddLinks(pointList, link->guid());
+
+				continue;
 			}
 		}
 
 		// Enum all vert and horz links and compose bushes
 		//
+		std::list<std::set<QUuid>> bushes;
+
 		for (auto item = layer->Items.begin(); item != layer->Items.end(); ++item)
 		{
 			VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item->get());
@@ -1206,14 +1254,14 @@ namespace Builder
 			std::list<QUuid> itemsUnderFrontPoint = horzVertLinks.getSchemeItemsUnderPoint(pointList.front(), link->guid());
 			std::list<QUuid> itemsUnderBackPoint = horzVertLinks.getSchemeItemsUnderPoint(pointList.back(), link->guid());
 
-			// Find item branch, if branch does not exists, make a new brach
+			// Find item branch, if branch is not exists, make a new brach
 			//
 			auto foundBranch = std::find_if(bushes.begin(), bushes.end(),
-											[link](const std::set<QUuid>& b)
-			{
-				auto foundBranch = b.find(link->guid());
-				return foundBranch != b.end();
-			});
+				[link](const std::set<QUuid>& b)
+				{
+					auto foundBranch = b.find(link->guid());
+					return foundBranch != b.end();
+				});
 
 			if (foundBranch == bushes.end())
 			{
@@ -1227,12 +1275,12 @@ namespace Builder
 
 			// Add to foundBranch everything from  itemsUnderFrontPoint, itemsUnderBackPoint
 			//
-			for (QUuid& q : itemsUnderFrontPoint)
+			for (QUuid q : itemsUnderFrontPoint)
 			{
 				foundBranch->insert(q);
 			}
 
-			for (QUuid& q : itemsUnderBackPoint)
+			for (QUuid q : itemsUnderBackPoint)
 			{
 				foundBranch->insert(q);
 			}
