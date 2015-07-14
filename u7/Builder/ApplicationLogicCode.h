@@ -5,8 +5,7 @@
 
 namespace Builder
 {
-
-	enum class CommandCodes
+	enum class LmCommandCode
 	{
 		NoCommand = 0,
 		NOP = 1,
@@ -27,78 +26,45 @@ namespace Builder
 		NSTART = 16,
 		APPSTART = 17,
 
-		Count
+		//Count
 	};
 
 
-	const CommandCodes AllCommandCodes[] =
+	struct LmCommand
 	{
-		CommandCodes::NOP,
-		CommandCodes::START,
-		CommandCodes::STOP,
-		CommandCodes::MOV,
-		CommandCodes::MOVMEM,
-		CommandCodes::MOVC,
-		CommandCodes::MOVBC,
-		CommandCodes::WRFB,
-		CommandCodes::RDFB,
-		CommandCodes::WRFBC,
-		CommandCodes::WRFBB,
-		CommandCodes::RDFBB,
-		CommandCodes::RDFBTS,
-		CommandCodes::SETMEM,
-		CommandCodes::MOVB,
-		CommandCodes::NSTART,
-		CommandCodes::APPSTART
+		LmCommandCode code;
+		int sizeW;
+		char* str;
+
+		static bool isValidCode(int commandCode);
+		static int getSizeW(int commandCode);
+		static const char* getStr(int commandCode);
 	};
 
 
-	const int COMMAND_COUNT = static_cast<int>(CommandCodes::Count);
-
-	const int CommandLen[COMMAND_COUNT] =
+	const LmCommand LmCommands[] =
 	{
-		0,		//	NoCommand
-		1,		//	NOP
-		2,		//	START
-		1,		//  STOP
-		3,		//	MOV
-		4,		//	MOVMEM
-		3,		//	MOVC
-		4,		//	MOVBC
-		3,		//	WRFB
-		3,		//	RDFB
-		3,		//	WRFBC
-		4,		//	WRFBB
-		4,		//	RDFBB
-		3,		//	RDFBTS
-		4,		//	SETMEM
-		4,		//	MOVB
-		3,		//	NSTART
-		2,		//	APPSTART
+		{	LmCommandCode::NoCommand,	0,	"NO_CMD"	},
+		{	LmCommandCode::NOP,			1,	"NOP"		},
+		{	LmCommandCode::START,		1,	"START"		},
+		{	LmCommandCode::STOP,		1,	"STOP"		},
+		{	LmCommandCode::MOV,			3,	"MOV"		},
+		{	LmCommandCode::MOVMEM,		4,	"MOVMEM"	},
+		{	LmCommandCode::MOVC,		3,	"MOVC"		},
+		{	LmCommandCode::MOVBC,		4,	"MOVBC"		},
+		{	LmCommandCode::WRFB,		3,	"WRFB"		},
+		{	LmCommandCode::RDFB,		3,	"RDFB"		},
+		{	LmCommandCode::WRFBC,		3,	"WRFBC"		},
+		{	LmCommandCode::WRFBB,		4,	"WRFBB"		},
+		{	LmCommandCode::RDFBB,		4,	"RDFBB"		},
+		{	LmCommandCode::RDFBTS,		3,	"RDFBTS"	},
+		{	LmCommandCode::SETMEM,		4,	"SETMEM"	},
+		{	LmCommandCode::MOVB,		4,	"MOVB"		},
+		{	LmCommandCode::NSTART,		3,	"NSTART"	},
+		{	LmCommandCode::APPSTART,	2,	"APPSTART"	},
 	};
 
-	const char* const CommandStr[COMMAND_COUNT] =
-	{
-		"NO_CMD",
-		"NOP",
-		"START",
-		"STOP",
-		"MOV",
-		"MOVMEM",
-		"MOVC",
-		"MOVBC",
-		"WRFB",
-		"RDFB",
-		"WRFBC",
-		"WRFBB",
-		"RDFBB",
-		"RDFBTS",
-		"SETMEM",
-		"MOVB",
-		"NSTART",
-		"APPSTART"
-	};
-
+	const int LM_COMMAND_COUNT = sizeof(LmCommands) / sizeof(LmCommand);
 
 	enum class FbType
 	{
@@ -229,11 +195,11 @@ namespace Builder
 			setNoCommand();
 		}
 
-		void setNoCommand() { opCode.code = static_cast<int>(CommandCodes::NoCommand); }
+		void setNoCommand() { opCode.code = static_cast<int>(LmCommandCode::NoCommand); }
 
-		void setOpCode(CommandCodes code);
+		void setOpCode(LmCommandCode code);
 		int getOpCodeInt() { return opCode.code; }
-		CommandCodes getOpCode() { return static_cast<CommandCodes>(opCode.code); }
+		LmCommandCode getOpCode() { return static_cast<LmCommandCode>(opCode.code); }
 
 		void setFbType(quint16 fbType);
 		quint16 getFbType() { return opCode.fbType; }
@@ -351,7 +317,7 @@ namespace Builder
 		bool isCommand() override { return true; }
 		bool isComment() override { return false; }
 
-		bool isValidCommand() { return m_code.getOpCode() != CommandCodes::NoCommand; }
+		bool isValidCommand() { return m_code.getOpCode() != LmCommandCode::NoCommand; }
 
 		void generateBinCode(ByteOrder byteOrder) override;
 
@@ -380,6 +346,8 @@ namespace Builder
 		void comment(QString commentStr);
 		void newLine();
 
+		void replaceAt(int commandIndex, const Command &cmd);
+
 		void clear();
 
 		void generateBinCode();
@@ -389,7 +357,8 @@ namespace Builder
 		void getMifCode(QStringList& mifCode);
 
 		void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
-	};
 
+		int commandAddress() const { return m_commandAddress; }
+	};
 
 }

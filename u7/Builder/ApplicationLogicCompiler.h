@@ -440,6 +440,12 @@ namespace Builder
 
 		bool prepareAppLogicGeneration();
 
+		bool generateAppStartCommand();
+		bool generateFbTestCode();
+		bool finishTestCode();
+
+		bool startAppLogicCode();
+
 		bool initAfbs();
 
 		bool copyLMDiagDataToRegBuf();
@@ -465,7 +471,7 @@ namespace Builder
 		bool copyDiscreteSignalsToRegBuf();
 		bool copyOutModulesAppLogicDataToModulesMemory();
 
-		bool finishLMCode();
+		bool finishAppLogicCode();
 
 		bool buildServiceMaps();
 		bool createAppSignalsMap();

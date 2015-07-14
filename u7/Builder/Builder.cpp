@@ -525,7 +525,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR(m_log, tr("Application Logic compilation was finished with errors"));
+			LOG_MESSAGE(m_log, tr("Application Logic compilation was finished with errors"));
 			QThread::currentThread()->requestInterruption();
 		}
 		else

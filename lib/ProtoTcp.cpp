@@ -1,6 +1,6 @@
-#include "../include/ProtoUdp.h"
+#include "../include/ProtoTcp.h"
 
-namespace ProtoUdp
+namespace ProtoTcp
 {
 	// -------------------------------------------------------------------------------------
 	//
