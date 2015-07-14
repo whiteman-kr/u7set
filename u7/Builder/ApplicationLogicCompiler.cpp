@@ -352,7 +352,15 @@ namespace Builder
 
 			if (!prepareAppLogicGeneration()) break;
 
+			if (!generateAppStartCommand()) break;
+
+			if (!generateFbTestCode()) break;
+
 			if (!initAfbs()) break;
+
+			if (!finishTestCode()) break;
+
+			if (!startAppLogicCode()) break;
 
 			if (!copyLMDiagDataToRegBuf()) break;
 
@@ -366,7 +374,7 @@ namespace Builder
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
-			if (!finishLMCode()) break;
+			if (!finishAppLogicCode()) break;
 
 			if (!writeResult()) break;
 
@@ -556,6 +564,61 @@ namespace Builder
 	}
 
 
+	bool ModuleLogicCompiler::generateAppStartCommand()
+	{
+		Command cmd;
+
+		// first command in program!
+
+		cmd.appStart(0);		// real address is set in startAppLogicCode function
+
+		cmd.setComment(tr("set address of application logic code start"));
+		m_code.append(cmd);
+		m_code.newLine();
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::generateFbTestCode()
+	{
+		Comment comment;
+
+		comment.setComment("Start of FB's testing code");
+
+		m_code.append(comment);
+		m_code.newLine();
+
+		// implement testing code generation
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::startAppLogicCode()
+	{
+		// set APPSTART command to current address
+		//
+		Command cmd;
+
+		cmd.appStart(m_code.commandAddress());
+
+		m_code.replaceAt(0, cmd);
+
+		//
+		//
+
+		Comment comment;
+
+		comment.setComment(tr("Start of application logic code"));
+
+		m_code.append(comment);
+		m_code.newLine();
+
+		return true;
+	}
+
+
 	bool ModuleLogicCompiler::initAfbs()
 	{
 		if (m_moduleLogic == nullptr)
@@ -567,8 +630,8 @@ namespace Builder
 
 		bool result = true;
 
+		m_code.comment("FB's initialization code");
 		m_code.newLine();
-		m_code.comment("Functional Blocks initialization code");
 
 		QHash<QString, int> instantiatorStrIDsMap;
 
@@ -604,7 +667,24 @@ namespace Builder
 			}
 		}
 
+		m_code.newLine();
+
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::finishTestCode()
+	{
+		Command cmd;
+
+		cmd.stop();
+
+		m_code.comment(tr("End of FB's testing and initialization code section"));
+		m_code.newLine();
+		m_code.append(cmd);
+		m_code.newLine();
+
+		return true;
 	}
 
 
@@ -689,7 +769,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyLMDiagDataToRegBuf()
 	{
-		m_code.newLine();
 		m_code.comment("Copy LM diagnostics data to RegBuf");
 		m_code.newLine();
 
@@ -1609,10 +1688,10 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::finishLMCode()
+	bool ModuleLogicCompiler::finishAppLogicCode()
 	{
 		m_code.newLine();
-		m_code.comment("End of program");
+		m_code.comment("End of application logic code");
 		m_code.newLine();
 
 		Command cmd;

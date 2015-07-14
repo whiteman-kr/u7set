@@ -380,6 +380,8 @@ namespace Builder
 		void comment(QString commentStr);
 		void newLine();
 
+		void replaceAt(int commandIndex, const Command &cmd);
+
 		void clear();
 
 		void generateBinCode();
@@ -389,7 +391,8 @@ namespace Builder
 		void getMifCode(QStringList& mifCode);
 
 		void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
-	};
 
+		int commandAddress() const { return m_commandAddress; }
+	};
 
 }

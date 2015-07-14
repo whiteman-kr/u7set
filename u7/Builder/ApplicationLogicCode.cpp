@@ -552,6 +552,65 @@ namespace Builder
 	}
 
 
+	void ApplicationLogicCode::replaceAt(int commandIndex, const Command &cmd)
+	{
+		if (commandIndex < 0 && commandIndex >= m_codeItems.count())
+		{
+			assert(false);
+			return;
+		}
+
+		CodeItem* codeItem = m_codeItems[commandIndex];
+
+		Command* oldCommand = dynamic_cast<Command*>(codeItem);
+
+		if (oldCommand == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		Command* newCommand = new Command(cmd);
+
+		m_codeItems[commandIndex] = newCommand;
+
+		if (oldCommand->sizeW() == newCommand->sizeW())
+		{
+			// no need recalc commands addresses
+			//
+			newCommand->setAddress(oldCommand->address());
+		}
+		else
+		{
+			// recalc commands addresses
+			//
+			m_commandAddress = 0;
+
+			for(CodeItem* codeItem : m_codeItems)
+			{
+				if (codeItem->isComment())
+				{
+					continue;
+				}
+
+				Command* cmd = dynamic_cast<Command*>(codeItem);
+
+				if (cmd == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				cmd->setAddress(m_commandAddress);
+
+				m_commandAddress += cmd->sizeW();
+			}
+		}
+
+		delete oldCommand;
+	}
+
+
 	void ApplicationLogicCode::comment(QString commentStr)
 	{
 		Comment* newComment = new Comment();
