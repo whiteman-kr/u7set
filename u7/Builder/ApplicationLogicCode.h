@@ -34,7 +34,7 @@ namespace Builder
 	{
 		LmCommandCode code;
 		int sizeW;
-		char* str;
+		const char* str;
 
 		static bool isValidCode(int commandCode);
 		static int getSizeW(int commandCode);
