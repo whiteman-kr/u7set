@@ -1,6 +1,6 @@
 #pragma once
-#include <QtSql>
 #include <QString>
+#include <QTest>
 
 class UserTests : public QObject
 {

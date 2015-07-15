@@ -1,8 +1,9 @@
-#pragma once
 #include <QtSql>
 #include <QString>
 #include <QTest>
 #include "UserTests.h"
+
+//====================Tests====================
 
 UserTests::UserTests()
 {
@@ -13,15 +14,15 @@ void UserTests::initTestCase()
 	QSqlQuery query;
 
 	//getUserIDTests data
-	query.exec ("SELECT create_user (1, 'TEST', 'TEST', 'TEST', 'TEST', false, false, false);");
+	query.exec("SELECT create_user (1, 'TEST', 'TEST', 'TEST', 'TEST', false, false, false);");
 	query.first();
 	UserTests::m_getUserTempDataID = query.value("create_user").toInt();
 
 	//isAdminTests data
-	query.exec ("SELECT create_user (1, 'AdminTest', 'TEST', 'TEST', 'TEST', false, false, false);");
+	query.exec("SELECT create_user (1, 'AdminTest', 'TEST', 'TEST', 'TEST', false, false, false);");
 	query.first();
 	UserTests::m_isAdminTempDataID = query.value("create_user").toInt();
-	query.exec ("SELECT create_user (1, 'AdminTest1', 'TEST', 'TEST', 'TEST', false, false, false);");
+	query.exec("SELECT create_user (1, 'AdminTest1', 'TEST', 'TEST', 'TEST', false, false, false);");
 	query.first();
 	UserTests::m_isAdminTempDataNullID = query.value("create_user").toInt();
 	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='AdminTest1'"));
@@ -39,7 +40,7 @@ void UserTests::cleanupTestCase()
 	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='TestUser17'"));
 
 	//getUserIDTests litter
-	query.exec ("DELETE FROM \"User\" WHERE \"Username\"='TEST';");
+	query.exec("DELETE FROM \"User\" WHERE \"Username\"='TEST';");
 
 	//isAdminTests litter
 	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='AdminTest'"));
@@ -69,17 +70,17 @@ void UserTests::createUserTest_data()
 
 void UserTests::createUserTest()
 {
-	QFETCH (QString, parentUser);
-	QFETCH (QString, userName);
-	QFETCH (QString, firstName);
-	QFETCH (QString, lastName);
-	QFETCH (QString, password);
-	QFETCH (bool, isAdmin);
-	QFETCH (bool, isReadOnly);
-	QFETCH (bool, isDisabled);
-	QFETCH (bool, Result);
+	QFETCH(QString, parentUser);
+	QFETCH(QString, userName);
+	QFETCH(QString, firstName);
+	QFETCH(QString, lastName);
+	QFETCH(QString, password);
+	QFETCH(bool, isAdmin);
+	QFETCH(bool, isReadOnly);
+	QFETCH(bool, isDisabled);
+	QFETCH(bool, Result);
 
-	QCOMPARE (UserTests::createUserTest(parentUser, userName, firstName, lastName, password, isAdmin, isReadOnly, isDisabled), Result);
+	QCOMPARE(UserTests::createUserTest(parentUser, userName, firstName, lastName, password, isAdmin, isReadOnly, isDisabled), Result);
 }
 
 void UserTests::getUserIDTest_data()
@@ -96,11 +97,11 @@ void UserTests::getUserIDTest_data()
 
 void UserTests::getUserIDTest()
 {
-	QFETCH (QString, login);
-	QFETCH (QString, password);
-	QFETCH (int, result);
+	QFETCH(QString, login);
+	QFETCH(QString, password);
+	QFETCH(int, result);
 
-	QCOMPARE (UserTests::getUserIdTest(login, password), result);
+	QCOMPARE(UserTests::getUserIdTest(login, password), result);
 }
 
 void UserTests::isAdminTest_data()
@@ -115,12 +116,13 @@ void UserTests::isAdminTest_data()
 
 void UserTests::isAdminTest()
 {
-	QFETCH (int, userID);
-	QFETCH (bool, result);
+	QFETCH(int, userID);
+	QFETCH(bool, result);
 
-	QCOMPARE (UserTests::isAdmin(userID), result);
+	QCOMPARE(UserTests::isAdmin(userID), result);
 }
 
+//====================Functions to be tested====================
 
 
 bool UserTests::createUserTest(const QString& parentUser, const QString& userName, const QString& firstName, const QString& lastName, const QString& password, bool isAdmin, bool isReadOnly, bool isDisabled)
@@ -227,7 +229,14 @@ int UserTests::getUserIdTest(const QString& login, const QString& password)
 		qDebug() << query.lastError().text();
 		return -1;
 	}
-	query.first();
+
+	bool result = query.first();
+	if (result == false)
+	{
+		qDebug() << "Cannot get first record";
+		return false;
+	}
+
 	return query.value("GetUserID").toInt();
 }
 
@@ -243,6 +252,13 @@ bool UserTests::isAdmin(int userID)
 		return false;
 	}
 
-	query.first();
+	result = query.first();
+	if (result == false)
+	{
+		qDebug() << "Cannot get first record";
+		return false;
+	}
+
 	return query.value("is_admin").toBool();
 }
+
