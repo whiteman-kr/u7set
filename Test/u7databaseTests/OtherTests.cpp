@@ -2,17 +2,8 @@
 #include <QTest>
 #include "OtherTests.h"
 
-//====================Tests====================
 
 OtherTests::OtherTests()
-{
-}
-
-void OtherTests::initTestCase()
-{
-}
-
-void OtherTests::cleanupTestCase()
 {
 }
 
@@ -20,8 +11,6 @@ void OtherTests::get_project_versionTest()
 {
 	QCOMPARE(OtherTests::get_project_version(), true);
 }
-
-//====================Functions to be tested====================
 
 bool OtherTests::get_project_version()
 {

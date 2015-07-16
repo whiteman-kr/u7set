@@ -9,8 +9,6 @@ public:
 	OtherTests();
 
 private slots:
-	void initTestCase();
-	void cleanupTestCase();
 	void get_project_versionTest();
 
 public:

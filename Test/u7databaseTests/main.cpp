@@ -5,6 +5,7 @@
 #include "FileTests.h"
 #include "OtherTests.h"
 
+const int DatabaseProjectVersion = 39;
 
 int main(int argc, char *argv[])
 {
@@ -12,7 +13,7 @@ int main(int argc, char *argv[])
 	db.setHostName("localhost");
 	db.setUserName("fabler");
 	db.setPassword("qwerty15");
-	db.setDatabaseName("u7_test");
+	db.setDatabaseName("u7_test2");
 
 	bool ok = db.open();
 	if (ok == false)
@@ -22,23 +23,24 @@ int main(int argc, char *argv[])
 	}
 
 	QSqlQuery query;
-	bool result;
-	result = query.exec("SELECT \"VersionNo\" FROM \"Version\" ORDER BY \"VersionNo\" desc limit 1");
+	bool result = query.exec("SELECT \"VersionNo\" FROM \"Version\" ORDER BY \"VersionNo\" desc limit 1");
 	if (result == false)
 	{
 		qDebug() << "Error executting query";
 		return 1;
 	}
+
 	result = query.first();
 	if (result == false)
 	{
 		qDebug() << "Cannot get first record";
 		return 1;
 	}
-	QString version = query.value("VersionNo").toString();
-	if (version != "39")
+
+	int version = query.value("VersionNo").toInt();
+	if (version != DatabaseProjectVersion)
 	{
-		qDebug() << "Invalid database version, 39 required, current: " << version;
+		qDebug() << "Invalid database version, " << DatabaseProjectVersion << " required, current: " << version;
 		return 1;
 	}
 
@@ -58,7 +60,7 @@ int main(int argc, char *argv[])
 	testResult = QTest::qExec(&otherTests, argc, argv);
 	if (testResult != 0)
 	{
-		qDebug() << testResult << " file test(s) has been interrupted by error(s)";
+		qDebug() << testResult << " other test(s) has been interrupted by error(s)";
 		return testResult;
 	}
 
@@ -68,8 +70,6 @@ int main(int argc, char *argv[])
 		qDebug() << testResult << " file test(s) has been interrupted by error(s)";
 		return testResult;
 	}
-
-	//FileTests::file_add(1, "test", 1, "test");
 
 	return 0;
 }

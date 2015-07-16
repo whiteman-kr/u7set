@@ -27,14 +27,12 @@ private slots:
 	void fileExistsTest();
 	void filesExistTest_data();
 	void filesExistTest();
-	void is_any_checked_outEmptyTableTest_data();
 	void is_any_checked_outEmptyTableTest();
 	void filesAddTest_data();
 	void filesAddTest();
 	void is_file_checkedoutTest_data();
 	void is_file_checkedoutTest();
-	void is_any_checked_outTest_data();
-	void is_any_checked_outTest();
+	void is_any_checked_outRecordsExistTest();
 	/*void file_has_childrenTest_data();
 	void file_has_childrenTest();*/
 	/*void get_file_stateTest_data();
