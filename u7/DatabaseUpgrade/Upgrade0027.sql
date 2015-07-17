@@ -405,11 +405,12 @@ LANGUAGE sql;
 CREATE OR REPLACE FUNCTION files_exist(file_ids integer[])
 RETURNS TABLE(fileid integer, fileexists boolean) AS
 $BODY$
-	SELECT IDS.FileID, F.Deleted = FALSE OR F.Deleted IS NULL
-		FROM 	(
-			(SELECT unnest(file_ids) AS FileID) AS IDS
-			LEFT JOIN
-			File AS F ON F.FileID=IDS.FileID
+	SELECT IDS.FileID, F.Deleted = FALSE AND F.Deleted IS NOT NULL
+	FROM	(
+				(SELECT unnest(file_ids) AS FileID) AS IDS
+					LEFT JOIN
+				File AS F
+					ON F.FileID = IDS.FileID
 			);
 $BODY$
 LANGUAGE sql;
