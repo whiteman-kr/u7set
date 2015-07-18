@@ -3,6 +3,7 @@
 #include "../include/DbController.h"
 #include "CreateProjectDialog.h"
 #include "LoginDialog.h"
+#include "Settings.h"
 
 ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent),
@@ -260,12 +261,29 @@ void ProjectsTabPage::openProject()
 		return;
 	}
 
-	LoginDialog ld(this);
+	bool exitLoginLoop = true;
 
-	if (ld.exec() == QDialog::Accepted)
+	do
 	{
-		dbController()->openProject(projectName, ld.username(), ld.password(), this);
+		LoginDialog ld(theSettings.loginCompleter(), this);
+
+		if (ld.exec() == QDialog::Accepted)
+		{
+			bool opened = dbController()->openProject(projectName, ld.username(), ld.password(), this);
+
+			exitLoginLoop = opened;
+
+			if (opened == true && theSettings.loginCompleter().contains(ld.username(), Qt::CaseSensitive) == false)
+			{
+				theSettings.loginCompleter() << ld.username();
+			}
+		}
+		else
+		{
+			exitLoginLoop = true;
+		}
 	}
+	while (exitLoginLoop == false);
 
 	return;
 }
@@ -329,6 +347,12 @@ void ProjectsTabPage::deleteProject()
 
 	if (ok == false)
 	{
+		return;
+	}
+
+	if (password.isEmpty() == true)
+	{
+		QMessageBox::critical(this, tr("u7"), tr("Password cannot be empty!"));
 		return;
 	}
 

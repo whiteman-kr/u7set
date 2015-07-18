@@ -786,7 +786,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (result == false)
 	{
-		emitError(tr("Can't get system floder.") + db.lastError().text());
+		emitError(tr("Can't get system folder.") + db.lastError().text());
 		query.clear();
 		db.close();
 

@@ -46,6 +46,7 @@
 #include <QQmlEngine>
 #include <QHash>
 #include <QMap>
+#include <QStringList>
 
 
 // Qt Widgets
