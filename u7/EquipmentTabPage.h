@@ -249,7 +249,7 @@ private:
 
 	QSplitter* m_splitter = nullptr;
 
-	PropertyEditor* m_propertyEditor = nullptr;
+	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
 };
 
 

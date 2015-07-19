@@ -1679,7 +1679,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	m_splitter = new QSplitter(this);
 
-	m_propertyEditor = new PropertyEditor(m_splitter);
+	m_propertyEditor = new ExtWidgets::PropertyEditor(m_splitter);
 
 	m_splitter->addWidget(m_equipmentView);
 	m_splitter->addWidget(m_propertyEditor);
@@ -1707,7 +1707,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	connect(m_equipmentView->selectionModel(), & QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 	connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 
-	connect(m_propertyEditor, &PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
+	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
 
 	// Evidently, project is not opened yet
