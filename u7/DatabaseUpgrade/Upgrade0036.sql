@@ -180,8 +180,8 @@ $BODY$
 DECLARE
     result boolean;
 BEGIN
-    result = (SELECT ("Administrator" = TRUE AND "Disabled" = FALSE) AS administrator
-        FROM "User" WHERE "UserID" = user_id);
+	result = (SELECT (Administrator = TRUE AND Disabled = FALSE) AS administrator
+		FROM Users WHERE UserID = user_id);
 
     IF (result is NULL) THEN
         result = FALSE;

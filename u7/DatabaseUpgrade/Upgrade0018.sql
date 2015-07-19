@@ -78,7 +78,7 @@ DECLARE
 	file_user int;
 	is_user_admin boolean;
 BEGIN
-	SELECT "Administrator" INTO is_user_admin FROM "User" WHERE "UserID" = user_id;
+	SELECT Users.Administrator INTO is_user_admin FROM Users WHERE Users.UserID = user_id;
 
 	FOREACH file_id IN ARRAY file_ids
 	LOOP
