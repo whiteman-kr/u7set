@@ -1,7 +1,6 @@
 #include <QtSql>
 #include <QString>
 #include <QTest>
-#include <QDateTime>
 #include "FileTests.h"
 
 void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
@@ -22,20 +21,25 @@ void FileTests::initTestCase()
 {
 	QSqlQuery query;
 
-	//Create default user
+	//files_exist & file_exist
+	query.exec("UPDATE file SET Deleted = true WHERE fileid = 3");
 
-	query.exec("SELECT create_user (1, 'TEST', 'TEST', 'TEST', 'TEST', false, false, false);");
+	//Testers
+	query.exec("SElECT create_user(1, 'FIRSTTEST', 'FIRSTTEST', 'FIRSTTEST', '12341234', false, false, false);");
+	query.first();
+	FileTests::firstUserForTest = query.value("create_user").toInt();
 
-	//fileExistTest data
-	query.exec("UPDATE file SET Deleted=true WHERE fileid=2");
+	query.exec("SElECT create_user(1, 'SECONDTEST', 'SECONDTEST', 'SECONDTEST', '12341234', false, false, false);");
+	query.first();
+	FileTests::secondUserForTest = query.value("create_user").toInt();
 }
 
 void FileTests::cleanupTestCase()
 {
 	QSqlQuery query;
 
-	//fileExistTest litter
-	query.exec("UPDATE file SET Deleted=false WHERE fileid=2");
+	//files_exist & file_exist litter
+	query.exec("UPDATE file SET Deleted = false WHERE fileid = 3");
 }
 
 void FileTests::fileExistsTest_data()
@@ -45,7 +49,7 @@ void FileTests::fileExistsTest_data()
 
 	QTest::newRow("existedFileTest") << 1 << true;
 	QTest::newRow("nullFileTest") << 9999 << false;
-	QTest::newRow("deletedFileTest") << 2 << false;
+	QTest::newRow("deletedFileTest") << 3 << false;
 }
 
 void FileTests::fileExistsTest()
@@ -62,10 +66,10 @@ void FileTests::filesExistTest_data()
 	QTest::addColumn<QString>("result");
 
 	QTest::newRow("existedFile") << "1" << "true";
-	QTest::newRow("arrayExistingFiles") << "4,5,3" << "true,true,true";
+	QTest::newRow("arrayExistingFiles") << "4,5,1" << "true,true,true";
 	QTest::newRow("invalidFileTest") << "8590" << "false";
 	QTest::newRow("arrayRandomFiles") << "99,9999,67" << "true,false,true";
-	QTest::newRow("deletedFile") << "2" << "false";
+	QTest::newRow("deletedFile") << "3" << "false";
 }
 
 void FileTests::filesExistTest()
@@ -76,9 +80,12 @@ void FileTests::filesExistTest()
 	QCOMPARE(FileTests::filesExist(fileID), result);
 }
 
-void FileTests::is_any_checked_outEmptyTableTest()
+void FileTests::is_any_checked_outTest()
 {
 	QCOMPARE (FileTests::is_any_checked_out(), false);
+	QSqlQuery query;
+	query.exec("SELECT * FROM add_file (1, 'isAnyCheckedOutTest', 2, 'TEST')");
+	QCOMPARE (FileTests::is_any_checked_out(), true);
 }
 
 void FileTests::filesAddTest_data()
@@ -91,8 +98,9 @@ void FileTests::filesAddTest_data()
 
 	QTest::newRow("checkingRandomFileRandomData") << 1 << "Test" << 2 << "Test" << true;
 	QTest::newRow("existingFile") << 1 << "Test" << 2 << "Test" << false;
-	QTest::newRow("checkInvalidUserId") << 999 << "Test65" << 2 << "OneTwoThree" << false;
-	QTest::newRow("checkInvalidParentId") << 1 << "Test66" << 999 << "OneTwoThreeFour" << false;
+	QTest::newRow("checkInvalidUserId") << 999 << "TestInvalidUserId" << 2 << "OneTwoThree" << false;
+	QTest::newRow("checkInvalidParentId") << 1 << "TestInvalidParentId" << 999 << "OneTwoThreeFour" << false;
+	QTest::newRow("createdByUser") << FileTests::firstUserForTest << "TestCreatedByUser" << 2 << "OneTwoThreeFourFive" << true;
 }
 
 void FileTests::filesAddTest()
@@ -130,7 +138,7 @@ void FileTests::is_file_checkedoutTest_data()
 	QTest::addColumn<bool>("result");
 
 	QSqlQuery query;
-	query.exec("SELECT * FROM add_file (1, 'TESTING', 2, 'TESTING')");
+	query.exec("SELECT * FROM add_file (1, 'isFileCheckedOutTest', 2, 'TESTING')");
 	query.first();
 
 	QTest::newRow("fileExistTest") << query.value(0).toInt() << true;
@@ -145,20 +153,23 @@ void FileTests::is_file_checkedoutTest()
 	QCOMPARE (FileTests::is_file_checkedout(fileId), result);
 }
 
-void FileTests::is_any_checked_outRecordsExistTest()
-{
-	QCOMPARE (FileTests::is_any_checked_out(), true);
-}
-
-/*void FileTests::file_has_childrenTest_data()
+void FileTests::file_has_childrenTest_data()
 {
 	QTest::addColumn<int>("userId");
 	QTest::addColumn<int>("fileId");
 	QTest::addColumn<int>("result");
 
-	QTest::newRow("AdminFirstFile") << 1 << 383 << 32;
-	QTest::newRow("AverageUserFile") << 10 << 383 << 32; //???
-	QTest::newRow("InvalidUserFile") << 999 << 383 << 32; //???
+	QSqlQuery query;
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'fileHasChildrenTestParent', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+
+	query.exec("SELECT count(*) FROM file WHERE parentid = 1");
+	query.first();
+
+	QTest::newRow("CreatedByFirstCalledByFirstUser") << FileTests::firstUserForTest << 1 << query.value(0).toInt();
+	QTest::newRow("CreatedByFirstUserCalledBySecondUser") << FileTests::secondUserForTest << 1 << query.value(0).toInt()-1;
+	QTest::newRow("CreatedByFirstUserCalledByAdmin") << 1 << 1 << query.value(0).toInt();
+	QTest::newRow("InvalidUserFile") << 999 << 1 << 0; //???
 	QTest::newRow("AdminInvalidFile") << 1 << 999 << 0;
 }
 
@@ -169,27 +180,54 @@ void FileTests::file_has_childrenTest()
 	QFETCH (int, result);
 
 	QCOMPARE (FileTests::file_has_children(userId, fileId), result);
-}*/
+}
 
-/*void FileTests::delete_fileTest_data()
+void FileTests::delete_fileTest_data()
 {
 	QTest::addColumn<int>("userId");
 	QTest::addColumn<int>("fileId");
-	QTest::addColumn<QString>("result");
+	QTest::addColumn<bool>("result");
 
-	QTest::newRow("deleteFileByUser") << 10 << 416 << "MAIN QUERY EXECUTION ERROR"; //Do nothing with user, but with no error
-	QTest::newRow("FileExisted") << 1 << 416 << "(416,t,f,,,0)";
-	QTest::newRow("invalidFileTest") << 1 << 999 << "MAIN QUERY EXECUTION ERROR";
+	QSqlQuery query;
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestFirstFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	int firstFileOwnerFirstUser = query.value("id").toInt();
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestSecondFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	int secondFileOwnerFirstUser = query.value("id").toInt();
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestThirdFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	int thirdFileOwnerFirstUser = query.value("id").toInt();
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestFourthFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	int checkedInFileOwnerFirstUser = query.value("id").toInt();
+
+	bool ok = query.exec(QString("SELECT check_in(%1, '{%2}', 'test')")
+			   .arg(1)
+			   .arg(checkedInFileOwnerFirstUser));
+	if (ok == false)
+		qDebug() << "ERROR EXECUTTING check_in QUERY";
+
+	QTest::newRow("deleteFileOwnerFirstUserBySecondUser") << FileTests::secondUserForTest << firstFileOwnerFirstUser << false;
+	QTest::newRow("deleteFileOwnerFirstUserByFirstUser") << FileTests::firstUserForTest << firstFileOwnerFirstUser << true;
+	QTest::newRow("deleteFileOwnerFirstUserByAdmin") << 1 << secondFileOwnerFirstUser << true;
+	QTest::newRow("deleteFileInvalidUser") << 9999 << thirdFileOwnerFirstUser << false;
+	QTest::newRow("deleteFileInvalidFile") << 1 << 9999 << false;
+	QTest::newRow("checkedInFileOwnerFirstUserByAdmin") << 1 << checkedInFileOwnerFirstUser << true;
 }
 
 void FileTests::delete_fileTest()
 {
 	QFETCH (int, userId);
 	QFETCH (int, fileId);
-	QFETCH (QString, result);
+	QFETCH (bool, result);
 
 	QCOMPARE(FileTests::delete_file(userId, fileId), result);
-}*/
+}
 
 bool FileTests::fileExists(int fileID)
 {
@@ -378,7 +416,7 @@ bool FileTests::add_file(int userId, QString fileName, int parentId, QString fil
 
 	if (query.value(0).toInt() != 1)
 	{
-		qDebug() << "Error: There are one mmore record with fileId" << fileId;
+		qDebug() << "Error: There are one more record with fileId" << fileId;
 		return false;
 	}
 
@@ -448,13 +486,13 @@ bool FileTests::is_file_checkedout(int fileId)
 		return false;
 	}
 
-	if (query.value("checkedOutInstanceId").toString() == "")
+	if (query.value("checkedOutInstanceId").toUuid() == 0)
 	{
 		qDebug() << "Error: no record in column \"checkedOutInstanceId\" from \"file\"";
 		return false;
 	}
 
-	if (query.value("checkedInInstanceId").toString() != "")
+	if (query.value("checkedInInstanceId").toUuid() != 0)
 	{
 		qDebug() << "Error: there must not be record in column \"checkedInInstanceId\" from \"file\"";
 		return false;
@@ -488,8 +526,8 @@ int FileTests::file_has_children(int user_id, int fileId)
 	QSqlQuery query;
 
 	bool ok = query.exec(QString("SELECT file_has_children (%1,%2);")
-						 .arg(QString::fromStdString(std::to_string(user_id)))
-						 .arg(QString::fromStdString(std::to_string(fileId))));
+						 .arg(user_id)
+						 .arg(fileId));
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
@@ -506,73 +544,120 @@ int FileTests::file_has_children(int user_id, int fileId)
 	return query.value("file_has_children").toInt();
 }
 
-QString FileTests::delete_file(int user_id, int fileId)
+bool FileTests::delete_file(int userId, int fileId)
 {
 	QSqlQuery query;
-	QString result;
-	bool ok = query.exec(QString("SELECT delete_file(%1,%2)")
-						 .arg(QString::fromStdString(std::to_string(user_id)))
-						 .arg(QString::fromStdString(std::to_string(fileId))));
+	bool ok = query.exec(QString("SELECT * FROM delete_file(%1, %2)")
+						 .arg(userId)
+						 .arg(fileId));
 	if (ok == false)
 	{
-		qDebug() << query.lastError().databaseText();
-		return "MAIN QUERY EXECUTION ERROR";
+		//qDebug() << query.lastError().databaseText();
+		return false;
 	}
 
 	ok = query.first();
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
-		return "ERROR GET FIRST RECORD IN MAIN FUNCTION";
+		return false;
 	}
 
-	result = query.value("delete_file").toString();
+	if (query.value("errCode").toInt() == 1)
+	{
+		//qDebug() << "Cannot checkout file";
+		return false;
+	}
 
-	ok = query.exec(QString("SELECT COUNT(*) FROM file WHERE fileid=%1")
-					.arg(QString::fromStdString(std::to_string(fileId))));
+	if (query.value("errCode").toInt() == 2)
+	{
+		//qDebug() << "Error, user " << userId << " has no rights";
+		return false;
+	}
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM file WHERE fileId = %1").arg(fileId));
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
-		return "ERROR EXECUTE FIRST RESULT TEST FUNCTION";
+		return false;
+	}
+
+	if (query.first() == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		return false;
+	}
+
+	if (query.value(0).toInt() == 0)
+	{
+		return true;
+	}
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM file WHERE fileid = %1").arg(fileId));
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		return false;
+	}
+
+	if (query.first() == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		return false;
+	}
+
+	ok = query.exec(QString("SELECT action FROM fileInstance WHERE fileInstanceId = '%1'").arg(query.value(0).toString()));
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		return false;
+	}
+
+	if (query.first() == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		return false;
+	}
+
+	if (query.value(0).toInt() != 3)
+	{
+		qDebug() << "ERROR: RECORD IS NOT MATCHED TO BE DELETED";
+		return false;
+	}
+
+	ok = query.exec(QString ("SELECT check_in ('%1', '{%2}', 'Deleted %2')").arg(userId).arg(fileId));
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		return false;
+	}
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileid = %1")
+					.arg(fileId));
+
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		return false;
 	}
 
 	ok = query.first();
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
-		return "ERROR GET FIRST RECORD IN FIRST RESULT TEST FUNCTION";
+		return false;
 	}
 
-	if (query.value("count").toInt() != 0)
+	if (query.value("deleted").toBool() == false)
 	{
-		return "RESULT ERROR: FILE HAS NOT BEEN DELETED IN TABLE file";
+		qDebug() << "RESULT ERROR: FILE HAS NOT BEEN DELETED FROM TABLE file";
+		return false;
 	}
 
-	ok = query.exec(QString("SELECT COUNT(*) FROM checkout WHERE fileid=%1")
-					.arg(QString::fromStdString(std::to_string(fileId))));
-
-	if (ok == false)
-	{
-		qDebug() << query.lastError().databaseText();
-		return "ERROR EXECUTE SECONDARY RESULT TEST FUNCTION";
-	}
-
-	ok = query.first();
-	if (ok == false)
-	{
-		qDebug() << query.lastError().databaseText();
-		return "ERROR GET FIRST RECORD IN SECONDARY RESULT TEST FUNCTION";
-	}
-
-	if (query.value("count").toInt() != 0)
-	{
-		return "RESULT ERROR: FILE HAS NOT BEEN DELETED IN TABLE checkout";
-	}
-
-	return result;
+	return true;
 }
 
-QString FileTests::get_file_state(int fileId)
+/*QString FileTests::get_file_state(int fileId)
 {
 	QSqlQuery query;
 	bool ok = query.exec(QString("SELECT get_file_state(%1);").arg(fileId));
@@ -590,4 +675,4 @@ QString FileTests::get_file_state(int fileId)
 	}
 
 	return query.value ("get_file_state").toString();
-}
+}*/

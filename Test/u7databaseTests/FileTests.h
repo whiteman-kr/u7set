@@ -27,18 +27,17 @@ private slots:
 	void fileExistsTest();
 	void filesExistTest_data();
 	void filesExistTest();
-	void is_any_checked_outEmptyTableTest();
+	void is_any_checked_outTest();
 	void filesAddTest_data();
 	void filesAddTest();
 	void is_file_checkedoutTest_data();
 	void is_file_checkedoutTest();
-	void is_any_checked_outRecordsExistTest();
-	/*void file_has_childrenTest_data();
-	void file_has_childrenTest();*/
+	void file_has_childrenTest_data();
+	void file_has_childrenTest();
 	/*void get_file_stateTest_data();
 	void get_file_stateTest();*/
-	/*void delete_fileTest_data();
-	void delete_fileTest();*/
+	void delete_fileTest_data();
+	void delete_fileTest();
 
 public:
 	static bool fileExists(int fileID);
@@ -47,8 +46,11 @@ public:
 	static bool is_file_checkedout(int fileId);
 	static bool is_any_checked_out();
 	static int file_has_children(int user_id, int fileId);
-	static QString delete_file(int user_id, int fileId);
-	static QString get_file_state(int fileId);
+	static bool delete_file(int userId, int fileId);
+	//static QString get_file_state(int fileId);
+
+	int firstUserForTest = -1;
+	int secondUserForTest = -1;
 
 private:
 	static void getObjectState(QSqlQuery& q, ObjectState &os);

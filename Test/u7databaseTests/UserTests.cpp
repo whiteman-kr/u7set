@@ -3,7 +3,7 @@
 #include <QTest>
 #include "UserTests.h"
 
-//====================Tests====================
+
 
 UserTests::UserTests()
 {
@@ -11,39 +11,10 @@ UserTests::UserTests()
 
 void UserTests::initTestCase()
 {
-	QSqlQuery query;
-
-	//getUserIDTests data
-	query.exec("SELECT create_user (1, 'TEST', 'TEST', 'TEST', 'TEST', false, false, false);");
-	query.first();
-	UserTests::m_getUserTempDataID = query.value("create_user").toInt();
-
-	//isAdminTests data
-	query.exec("SELECT create_user (1, 'AdminTest', 'TEST', 'TEST', 'TEST', false, false, false);");
-	query.first();
-	UserTests::m_isAdminTempDataID = query.value("create_user").toInt();
-	query.exec("SELECT create_user (1, 'AdminTest1', 'TEST', 'TEST', 'TEST', false, false, false);");
-	query.first();
-	UserTests::m_isAdminTempDataNullID = query.value("create_user").toInt();
-	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='AdminTest1'"));
 }
 
 void UserTests::cleanupTestCase()
 {
-	QSqlQuery query;
-
-	//createUserTests litter
-	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='TestUser1'"));
-	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='TestUser4'"));
-	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='TestUser5'"));
-	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='TestUser6'"));
-	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='TestUser17'"));
-
-	//getUserIDTests litter
-	query.exec("DELETE FROM \"User\" WHERE \"Username\"='TEST';");
-
-	//isAdminTests litter
-	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='AdminTest'"));
 }
 
 void UserTests::createUserTest_data()
@@ -89,10 +60,14 @@ void UserTests::getUserIDTest_data()
 	QTest::addColumn<QString>("password");
 	QTest::addColumn<int>("result");
 
-	QTest::newRow("TestTrueLoginPassword") << "TEST" << "TEST" << UserTests::m_getUserTempDataID;
-	QTest::newRow("TestTrueLoginFalsePassword") << "TEST" << "abc" << 0;
-	QTest::newRow("TestFalseLoginTruePassword") << "def" << "TEST" << 0;
-	QTest::newRow("TestAllFalse") << "Test" << "Test" << 0;
+	QSqlQuery query;
+	query.exec("SELECT create_user (1, 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', false, false, false);");
+	query.first();
+
+	QTest::newRow("TestTrueLoginPassword") << "getUserIdTest" << "getUserIdTest" << query.value("create_user").toInt();
+	QTest::newRow("TestTrueLoginFalsePassword") << "getUserIdTest" << "abc" << 0;
+	QTest::newRow("TestFalseLoginTruePassword") << "def" << "getUserIdTest" << 0;
+	QTest::newRow("TestAllFalse") << "abc" << "def" << 0;
 }
 
 void UserTests::getUserIDTest()
@@ -109,9 +84,22 @@ void UserTests::isAdminTest_data()
 	QTest::addColumn<int>("userID");
 	QTest::addColumn<bool>("result");
 
+
+	QSqlQuery query;
+
+	query.exec("SELECT create_user (1, 'AdminTest', 'TEST', 'TEST', 'TEST', false, false, false);");
+	query.first();
+	int m_isAdminTempDataID = query.value("create_user").toInt();
+
+	query.exec("SELECT create_user (1, 'AdminTest1', 'TEST', 'TEST', 'TEST', false, false, false);");
+	query.first();
+	int m_isAdminTempDataNullID = query.value("create_user").toInt();
+
+	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='AdminTest1'"));
+
 	QTest::newRow("AdminTest") << 1 << true;
-	QTest::newRow("NoAdminTest") << UserTests::m_isAdminTempDataID << false;
-	QTest::newRow("NullUserTest") << UserTests::m_isAdminTempDataNullID << false;
+	QTest::newRow("NoAdminTest") << m_isAdminTempDataID << false;
+	QTest::newRow("NullUserTest") << m_isAdminTempDataNullID << false;
 }
 
 void UserTests::isAdminTest()
@@ -122,7 +110,7 @@ void UserTests::isAdminTest()
 	QCOMPARE(UserTests::isAdmin(userID), result);
 }
 
-//====================Functions to be tested====================
+
 
 
 bool UserTests::createUserTest(const QString& parentUser, const QString& userName, const QString& firstName, const QString& lastName, const QString& password, bool isAdmin, bool isReadOnly, bool isDisabled)

@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	db.setHostName("localhost");
 	db.setUserName("fabler");
 	db.setPassword("qwerty15");
-	db.setDatabaseName("u7_test2");
+	db.setDatabaseName("u7_test");
 
 	bool ok = db.open();
 	if (ok == false)
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	}
 
 	QSqlQuery query;
-	bool result = query.exec("SELECT \"VersionNo\" FROM \"Version\" ORDER BY \"VersionNo\" desc limit 1");
+	bool result = query.exec("SELECT MAX(\"VersionNo\") FROM \"Version\"");
 	if (result == false)
 	{
 		qDebug() << "Error executting query";
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	int version = query.value("VersionNo").toInt();
+	int version = query.value(0).toInt();
 	if (version != DatabaseProjectVersion)
 	{
 		qDebug() << "Invalid database version, " << DatabaseProjectVersion << " required, current: " << version;
