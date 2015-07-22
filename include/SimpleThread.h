@@ -12,7 +12,7 @@ private slots:
 	void slot_onThreadStarted();
 	void slot_onThreadFinished();
 
-public:
+private:
 	virtual void onThreadStarted() {}
 	virtual void onThreadFinished() {}
 
@@ -24,7 +24,7 @@ class SimpleThread : public QObject
 {
 	Q_OBJECT
 
-private:
+protected:
 	QThread m_thread;
 	SimpleThreadWorker* m_worker = nullptr;
 

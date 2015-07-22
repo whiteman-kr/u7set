@@ -2,6 +2,43 @@
 #include "ui_mainwindow.h"
 #include "../include/DataSource.h"
 
+MyClient::MyClient() :
+	m_timer(this)
+{
+}
+
+
+void MyClient::onSocketThreadStarted()
+{
+	connect(&m_timer, &QTimer::timeout, this, &MyClient::onTimer);
+
+	m_timer.setInterval(2000);
+	m_timer.start();
+}
+
+
+void MyClient::onTimer()
+{
+}
+
+
+void MyClient::onConnection()
+{
+	if (!isConnected())
+	{
+		return;
+	}
+
+	QByteArray b;
+
+	b.resize(10);
+
+	sendRequest(1, b);
+
+	qDebug() << "request";
+}
+
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,10 +55,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	m_ServiceController = new BaseServiceController(STP_CONFIG, new MainFunctionWorker());*/
 
-	m_protoUdpClientThread = new ProtoUdp::ClientThread(HostAddressPort("192.168.75.85", PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
+	/*m_protoUdpClientThread = new ProtoUdp::ClientThread(HostAddressPort("192.168.75.85", PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
 
-	m_protoUdpClientThread->start();
+	m_protoUdpClientThread->start();*/
 
+	m_tcpClientThread = new Tcp::ClientThread<MyClient>(HostAddressPort("192.168.11.254", PORT_CONFIG_SERVICE_REQUEST));
+
+	m_tcpClientThread->start();
 
 //	runFscDataSources();
 }
@@ -29,8 +69,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-	m_protoUdpClientThread->quit();
-	delete m_protoUdpClientThread;
+	m_tcpClientThread->quit();
+
+	delete m_tcpClientThread;
+
+	/*m_protoUdpClientThread->quit();
+	delete m_protoUdpClientThread;*/
 
 	stopFscDataSources();
 	delete ui;
@@ -68,7 +112,7 @@ void MainWindow::on_pushButton_clicked()
 
 	qq.resize(100);
 
-	m_protoUdpClientThread->sendRequest(22, qq);
+	//m_protoUdpClientThread->sendRequest(22, qq);
 }
 
 void MainWindow::on_sendFileButton_clicked()
