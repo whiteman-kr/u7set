@@ -1,6 +1,6 @@
 #pragma once
-#include <QtSql>
 #include <QString>
+#include <QTest>
 
 class UserTests : public QObject
 {
@@ -20,11 +20,8 @@ private slots:
 	void isAdminTest();
 
 public:
+
 	static bool createUserTest(const QString& parentUser, const QString& userName, const QString& firstName, const QString& lastName, const QString& password, bool isAdmin, bool isReadOnly, bool isDisabled);
 	static bool isAdmin(int userID);
 	static int getUserIdTest(const QString& login, const QString& password);
-
-	int m_getUserTempDataID = -1;
-	int m_isAdminTempDataID = -1;
-	int m_isAdminTempDataNullID = -1;
 };
