@@ -146,8 +146,8 @@ namespace Tcp
 		virtual void onDisconnection() {}
 		virtual void onReplyTimeout() {}
 
-		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) {}
-		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) {}
+		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
+		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize);
 	};
 
 

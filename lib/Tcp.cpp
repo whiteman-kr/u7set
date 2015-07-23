@@ -502,6 +502,16 @@ namespace Tcp
 	}
 
 
+	void SocketWorker::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
+	{
+	}
+
+	void SocketWorker::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+	{
+	}
+
+
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::Server class implementation
