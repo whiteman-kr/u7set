@@ -16,12 +16,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    UserTests.cpp
+    UserTests.cpp \
+    FileTests.cpp \
+    OtherTests.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
-    UserTests.h
-
-#c++11 support for GCC
-#
-unix:QMAKE_CXXFLAGS += -std=c++11
+    UserTests.h \
+    FileTests.h \
+    OtherTests.h

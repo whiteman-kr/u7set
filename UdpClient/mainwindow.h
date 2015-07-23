@@ -7,11 +7,29 @@
 #include "FscDataSource.h"
 #include "ClientSocket.h"
 #include "../include/ProtoUdp.h"
+#include "../include/Tcp.h"
 
 namespace Ui {
 class MainWindow;
 }
 
+
+class MyClient : public Tcp::Client
+{
+	Q_OBJECT
+
+private:
+	QTimer m_timer;
+
+	void onTimer();
+
+public:
+	MyClient();
+
+	virtual void onSocketThreadStarted() override;
+
+	virtual void onConnection() override;
+};
 
 
 class MainWindow : public QMainWindow
@@ -43,7 +61,9 @@ private:
 	void runFscDataSources();
 	void stopFscDataSources();
 
-	ProtoUdp::ClientThread* m_protoUdpClientThread = nullptr;
+	//	ProtoUdp::ClientThread* m_protoUdpClientThread = nullptr;
+
+	Tcp::ClientThread<MyClient>* m_tcpClientThread;
 };
 
 
