@@ -341,19 +341,21 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 			QSqlQuery versionQuery(projectDb);
 			result = versionQuery.exec(createVersionTableSql);
 
+			int projectVersion = -1;
+
 			if (result == false)
 			{
-				emitError(versionQuery.lastError());
-				versionQuery.clear();
-				projectDb.close();
-				continue;
+				qDebug() << versionQuery.lastError();
+			}
+			else
+			{
+				if (versionQuery.next())
+				{
+					projectVersion = versionQuery.value(0).toInt();
+				}
 			}
 
-			if (versionQuery.next())
-			{
-				int projectVersion = versionQuery.value(0).toInt();
-				pi->setVersion(projectVersion);
-			}
+			pi->setVersion(projectVersion);
 
 			versionQuery.clear();
 			projectDb.close();
