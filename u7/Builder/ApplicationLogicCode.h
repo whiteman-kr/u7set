@@ -46,7 +46,7 @@ namespace Builder
 	{
 		{	LmCommandCode::NoCommand,	0,	"NO_CMD"	},
 		{	LmCommandCode::NOP,			1,	"NOP"		},
-		{	LmCommandCode::START,		1,	"START"		},
+		{	LmCommandCode::START,		2,	"START"		},
 		{	LmCommandCode::STOP,		1,	"STOP"		},
 		{	LmCommandCode::MOV,			3,	"MOV"		},
 		{	LmCommandCode::MOVMEM,		4,	"MOVMEM"	},

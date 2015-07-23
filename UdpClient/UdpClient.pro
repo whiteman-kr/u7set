@@ -59,8 +59,8 @@ SOURCES += \
     ../lib/DataSource.cpp \
     FscDataSource.cpp \
     ../lib/ProtoUdp.cpp \
-    ../lib/ProtoTcp.cpp \
-    ../lib/SimpleThread.cpp
+    ../lib/SimpleThread.cpp \
+    ../lib/Tcp.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -74,7 +74,7 @@ HEADERS  += mainwindow.h \
     version.h \
     ../include/ProtoUdp.h \
     ../include/SimpleThread.h \
-    ../include/ProtoTcp.h
+    ../include/Tcp.h
 
 include(../qtservice/src/qtservice.pri)
 

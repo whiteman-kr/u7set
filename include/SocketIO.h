@@ -31,6 +31,7 @@ const quint32	SERVICE_TYPE_COUNT = sizeof(serviceTypeStr) / sizeof(const char*);
 const quint16   PORT_BASE_SERVICE = 13300,
 
 				PORT_CONFIG_SERVICE = 13310,
+				PORT_CONFIG_SERVICE_REQUEST = 13311,
 
 				PORT_DATA_AQUISITION_SERVICE = 13320,
 				PORT_DATA_AQUISITION_SERVICE_INFO = 13321,
@@ -185,6 +186,8 @@ public:
 	QHostAddress address() const { return m_hostAddress; }
 
 	quint16 port() const { return m_port; }
+
+	QString addressPortStr() const { return QString("%1:%2").arg(address().toString()).arg(port()); }
 };
 
 
