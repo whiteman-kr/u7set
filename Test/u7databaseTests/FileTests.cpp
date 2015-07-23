@@ -207,8 +207,8 @@ void FileTests::delete_fileTest_data()
 	int checkedInFileOwnerFirstUser = query.value("id").toInt();
 
 	bool ok = query.exec(QString("SELECT check_in(%1, '{%2}', 'test')")
-			   .arg(1)
-			   .arg(checkedInFileOwnerFirstUser));
+						 .arg(1)
+						 .arg(checkedInFileOwnerFirstUser));
 	if (ok == false)
 		qDebug() << "ERROR EXECUTTING check_in QUERY";
 
@@ -227,6 +227,144 @@ void FileTests::delete_fileTest()
 	QFETCH (bool, result);
 
 	QCOMPARE(FileTests::delete_file(userId, fileId), result);
+}
+
+void FileTests::check_inTest()
+{
+	QSqlQuery query;
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFirstFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	QString firstFile = query.value("id").toString();
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestSecondFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	QString secondFile = query.value("id").toString();
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestThirdFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	QString thirdFile = query.value("id").toString();
+	query.exec(QString("UPDATE fileInstance SET action = 3 WHERE fileId = %1").arg(thirdFile));
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFourthFile', 1, 'TESTING')").arg(FileTests::secondUserForTest));
+	query.first();
+	QString fourthFile = query.value("id").toString();
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFifthFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	QString fifthFile = query.value("id").toString();
+	query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(firstUserForTest).arg(fifthFile));
+
+	QString comment = "TEST";
+
+
+	bool ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(firstUserForTest).arg(QString(firstFile + ", " + secondFile + ", " + thirdFile)).arg(comment));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	while (query.next())
+	{
+		int id = query.value("id").toInt();
+
+		QVERIFY2(query.value("errCode").toInt() == 0, qPrintable(QString("ERROR CODE %1 AT FILEID %2").arg(query.value("errCode").toInt()).arg(id)));
+		QSqlQuery tempQuery;
+
+		ok = tempQuery.exec(QString("SELECT COUNT(*) FROM checkout WHERE fileId = %1").arg(id));
+
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.value(0) == 0, qPrintable(QString("FILEID %1 hasn't been deleted from checkout!").arg(id)));
+
+		ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(id));
+
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.value("checkedOutInstanceId") == "", qPrintable(QString("FILE %1 HAS NOT BEEN CHECKED IN").arg(id)));
+
+		QString Uuid = tempQuery.value("checkedInInstanceId").toString();
+
+		ok = tempQuery.exec(QString("SELECT * FROM fileinstance WHERE fileId = %1").arg(id));
+
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.value("fileInstanceId").toString() == Uuid, qPrintable(QString("ERROR: WRONG UUID AT FILE %1!").arg(id)));
+
+		int changeSetId = tempQuery.value("changeSetId").toInt();
+		int action = query.value("action").toInt();
+
+		ok = tempQuery.exec(QString("SELECT COUNT(*) FROM changeSet WHERE changeSetId = %1 AND userId = %2 AND comment = '%3'").arg(changeSetId).arg(firstUserForTest).arg(comment));
+
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.value(0) != 0, qPrintable(QString("FILEID %1 HAS NOT BEEN RECORDED TO CHANGESET TABLE!").arg(id)));
+
+		if (action == 3)
+		{
+			ok = tempQuery.exec(QString("SELECT deleted FROM file WHERE fileId = %1").arg(id));
+
+			QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2(tempQuery.value(0).toBool() == true, qPrintable(QString("ERROR: FLAG DELETED IS NOT SET AT FILE %1").arg(id)));
+		}
+	}
+
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(firstUserForTest).arg(fourthFile).arg("TEST"));
+	QVERIFY2(ok == false, qPrintable("USER HAS NO RIGHTS TO CHECKIN FILE CHECKOUTED BY ANOTHER USER ERROR EXPECTED!"));
+
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(firstUserForTest).arg(fourthFile).arg("TEST"));
+	QVERIFY2(ok == false, qPrintable("CAN NOT CHECKIN CHECKINNED FILE ERROR EXPECTED!"));
+}
+
+void FileTests::check_outTest()
+{
+	QSqlQuery query;
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestFirstFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	QString firstFile = query.value("id").toString();
+	query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(firstUserForTest).arg(firstFile));
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestSecondFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	QString secondFile = query.value("id").toString();
+	query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(firstUserForTest).arg(secondFile));
+
+	query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestThirdFile', 1, 'TESTING')").arg(FileTests::firstUserForTest));
+	query.first();
+	QString thirdFile = query.value("id").toString();
+
+	bool ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(firstUserForTest).arg(QString(firstFile + ", " + secondFile)));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	while (query.next())
+	{
+		int id = query.value("id").toInt();
+		QVERIFY2(query.value("errCode").toInt() == 0, qPrintable(QString("ERROR CODE %1 AT FILEID %2").arg(query.value("errCode").toInt()).arg(id)));
+
+		QSqlQuery tempQuery;
+
+		ok = tempQuery.exec(QString("SELECT COUNT(*) FROM checkOut WHERE fileId = %1 AND userId = %2").arg(id).arg(firstUserForTest));
+
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.value(0).toInt() != 0, qPrintable(QString("File %1 has not been checked out").arg(id)));
+
+		ok = tempQuery.exec(QString("SELECT checkedOutInstanceId FROM file WHERE fileId = %1").arg(id));
+
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+		QString Uuid = tempQuery.value(0).toString();
+
+		ok = tempQuery.exec(QString("SElECT * FROM fileInstance WHERE fileId = %1 AND action  = 2").arg(id));
+
+		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+		QVERIFY2(tempQuery.value("fileInstanceId").toString() == Uuid, qPrintable(QString("ERROR: NO RECORD IN FILEINSTANCE AT FILE %1").arg(id)));
+	}
+
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(firstUserForTest).arg(thirdFile));
+
+	QVERIFY2(ok == false, "ALREADY CHECKED OUT FILE ERROR EXPECTED");
 }
 
 bool FileTests::fileExists(int fileID)
@@ -276,10 +414,10 @@ bool FileTests::add_file(int userId, QString fileName, int parentId, QString fil
 	QSqlQuery query;
 
 	bool ok = query.exec(QString("SELECT * FROM add_file(%1, '%2', %3, '%4');")
-					.arg(userId)
-					.arg(fileName)
-					.arg(parentId)
-					.arg(fileData));
+						 .arg(userId)
+						 .arg(fileName)
+						 .arg(parentId)
+						 .arg(fileData));
 
 	if (ok == false)
 	{
@@ -310,7 +448,6 @@ bool FileTests::add_file(int userId, QString fileName, int parentId, QString fil
 	ok = query.exec("SELECT * FROM file WHERE fileId = " + QString::number(fileId));
 	if (ok == false)
 	{
-		qDebug() << query.lastError().databaseText();
 		return false;
 	}
 
@@ -656,6 +793,7 @@ bool FileTests::delete_file(int userId, int fileId)
 
 	return true;
 }
+
 
 /*QString FileTests::get_file_state(int fileId)
 {
