@@ -31,7 +31,7 @@ bool OtherTests::get_project_version()
 
 	int result = query.value(0).toInt();
 
-	if (query.exec("SELECT MAX(\"VersionNo\") FROM \"Version\"") == false)
+	if (query.exec("SELECT MAX(versionNo) FROM version") == false)
 	{
 		qDebug() << query.lastError().databaseText();
 		return false;
