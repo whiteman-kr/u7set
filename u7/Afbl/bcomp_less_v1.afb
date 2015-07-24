@@ -3,7 +3,7 @@
     <AfbElement StrId="#bcomp_less_v1">
         <Properties>
             <Caption>bcomp_less_v1</Caption>
-            <Description>Binary Comparator Block performs input data comparison with set point value and hysteresis and output result in accordance with control signal</Description>
+            <Description>Binary Comparator Block, Less than comparison</Description>
             <OpCode>12</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
