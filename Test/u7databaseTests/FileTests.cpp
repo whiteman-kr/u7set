@@ -68,7 +68,7 @@ void FileTests::filesExistTest_data()
 	QTest::newRow("existedFile") << "1" << "true";
 	QTest::newRow("arrayExistingFiles") << "4,5,1" << "true,true,true";
 	QTest::newRow("invalidFileTest") << "8590" << "false";
-	QTest::newRow("arrayRandomFiles") << "99,9999,67" << "true,false,true";
+	QTest::newRow("arrayRandomFiles") << "67,99,9999" << "true,true,false";
 	QTest::newRow("deletedFile") << "3" << "false";
 }
 
