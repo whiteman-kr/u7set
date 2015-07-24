@@ -304,11 +304,11 @@ namespace ProtoUdp
 
 		RequestProcessor* createRequestProcessor(quint32 requestID);
 
-		template<typename RequestProcessorDerivedClass>
-		void registerRequestProcessor()
-		{
-			m_requestProcessorFactory.Register<RequestProcessorDerivedClass>;
-		}
+//		template<typename RequestProcessorDerivedClass>
+//		void registerRequestProcessor()
+//		{
+//			m_requestProcessorFactory.Register<RequestProcessorDerivedClass>;
+//		}
 
 	private slots:
 		void onTimerTimeout();
