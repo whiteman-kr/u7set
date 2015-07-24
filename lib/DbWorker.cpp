@@ -48,6 +48,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Add module presets", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0037.sql"},
 	{"Add get_last_signals function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0038.sql"},
 	{"Delete DataFormat table and remove corresponding constraints", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0039.sql"},
+	{"Added CycleDuration to LM-1, AppLogicOffset changed to 117 in DIM", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0040.sql"},
 };
 
 
