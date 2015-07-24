@@ -65,6 +65,8 @@ namespace Builder
 
 		int getBranchByPinPos(VFrame30::SchemePoint pt) const;
 		int getBranchByPinGuid(const QUuid& guid) const;
+
+		void removeEmptyBushes();
 	};
 
 
