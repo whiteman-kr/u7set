@@ -104,18 +104,12 @@ namespace Builder
 	{
 	private:
 		std::shared_ptr<LogicAfb> m_afb;
-		int m_instance = 0;					// for Fbls with RAM
 
 	public:
 		Afb(std::shared_ptr<LogicAfb> afb);
 		~Afb();
 
-		//quint16 addInstance();
-
 		bool hasRam() const { return m_afb->hasRam(); }
-
-		int incInstance() { return (++m_instance); }
-		int instance() const { return m_instance; }
 
 		const LogicAfb& afb() const { return *m_afb; }
 

@@ -707,14 +707,8 @@ namespace Builder
 		quint16 fbOpcode = appFb->opcode();
 		quint16 fbInstance = appFb->instance();
 
-		if (instantiatorOnly == true)
-		{
-			m_code.comment(QString(tr("Initialization of %1 instance %2")).arg(appFb->afb().instantiatorID()).arg(fbInstance));
-		}
-		else
-		{
-			m_code.comment(QString(tr("Initialization of %1 instance %2")).arg(afb.strID()).arg(fbInstance));
-		}
+		m_code.comment(QString(tr("Initialization of %1 instance %2 (%3)")).arg(appFb->afb().instantiatorID()).arg(fbInstance).
+				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
 
 		m_code.newLine();
 
@@ -2555,17 +2549,32 @@ namespace Builder
 
 		int instance = 0;
 
+
+		QString instantiatorID = appItem->afb().instantiatorID();
+
 		if (fbl->hasRam())
 		{
-			instance = fbl->incInstance();
+			int fblOpcode = fbl->opcode();
+
+			if (m_fblInstance.contains(fblOpcode))
+			{
+				instance = m_fblInstance[fblOpcode];
+
+				instance++;
+
+				m_fblInstance[fblOpcode] = instance;
+
+				m_nonRamFblInstance.insert(instantiatorID, instance);
+			}
+			else
+			{
+				assert(false);		// unknown opcode
+			}
 		}
 		else
 		{
 			// Calculate non-RAM Fbl instance
 			//
-
-			QString instantiatorID = appItem->afb().instantiatorID();
-
 			if (m_nonRamFblInstance.contains(instantiatorID))
 			{
 				instance = m_nonRamFblInstance.value(instantiatorID);
