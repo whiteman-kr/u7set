@@ -37,6 +37,45 @@ quint64 Crc::setDataBlockCrc(quint16 frameIndex, void* datablock, int blockSize)
 	return crc;
 }
 
+quint16 Crc::crc4(const void* src, qint64 size)
+{
+
+	const unsigned char* p = static_cast<const unsigned char*>(src);
+	quint16 crc = 0xffff;
+	//unsigned char i;
+
+	const int Polinom = 0x13;
+	//int shifted_Polinom = Polinom << (3+8);
+
+	while (size--)
+	{
+		int r = (*p << 8) & 0xFF00;
+		int shifted_Polinom = Polinom << (3+8); // 3 сдвига для дополнения полинома до размера 1 байта, 8 сдв. для заполнения нулями
+
+		for (int j = 0; j < 8; j++)
+		{
+			if ((r & (1 << 15)) == 0x8000)
+			{
+				r ^= shifted_Polinom;
+				r = (r << 1);
+			}
+			else
+			{
+				r = r << 1;
+			}
+		}
+
+		//r = r >> 8;
+
+		//return r;
+
+		crc ^= r;
+	}
+
+	crc = crc >> 8;
+
+	return crc;
+}
 quint64 Crc::crc64Normal(const void* src, qint64 size)
 {
 	const unsigned char* p = static_cast<const unsigned char*>(src);

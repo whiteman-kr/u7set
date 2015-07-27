@@ -7,6 +7,7 @@ private:
 	~Crc(void);
 
 public:
+	static quint16 crc4(const void* src, qint64 size);
 	static quint64 crc64(const void* src, qint64 l);
 	static quint64 setDataBlockCrc(quint16 frameIndex, void* datablock, int blockSize);
 
