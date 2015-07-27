@@ -371,6 +371,8 @@ namespace Builder
 		int m_lmAppLogicFrameSize = 0;
 		int m_lmAppLogicFrameCount = 0;
 
+		int m_lmCycleDuration = 0;
+
 		// LM's calculated memory offsets and sizes
 		//
 
@@ -471,6 +473,9 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
+		bool calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue);
+
+		bool calculate_TCT_AnalogIntegralParamValue(AppFb* appFb, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
