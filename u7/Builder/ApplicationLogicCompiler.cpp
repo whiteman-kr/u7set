@@ -356,11 +356,15 @@ namespace Builder
 
 			if (!generateFbTestCode()) break;
 
-			if (!initAfbs()) break;
+			//if (!initAfbs()) break;			UNCOMMENT!!!!!
 
 			if (!finishTestCode()) break;
 
 			if (!startAppLogicCode()) break;
+
+			//
+			if (!initAfbs()) break;				// DELETE AFTER TESTS!!!!
+			//S
 
 			if (!copyLMDiagDataToRegBuf()) break;
 
@@ -703,8 +707,6 @@ namespace Builder
 		quint16 fbOpcode = appFb->opcode();
 		quint16 fbInstance = appFb->instance();
 
-		m_code.newLine();
-
 		if (instantiatorOnly == true)
 		{
 			m_code.comment(QString(tr("Initialization of %1 instance %2")).arg(appFb->afb().instantiatorID()).arg(fbInstance));
@@ -762,6 +764,8 @@ namespace Builder
 
 			m_code.append(cmd);
 		}
+
+		m_code.newLine();
 
 		return result;
 	}

@@ -23,7 +23,7 @@ namespace Tcp
 	{
 		Q_OBJECT
 
-	private:
+	protected:
 		#pragma pack(push, 1)
 
 		struct Header
@@ -63,28 +63,9 @@ namespace Tcp
 			WainigForData,
 		};
 
-		enum State
-		{
-			// server states
-			//
-			WainigForRequest,
-			RequestProcessing,
-
-			// client states
-			//
-			ClearToSendRequest,
-			WaitingForReply,
-		};
-
-		bool m_isServer = true;
-
-		qintptr m_connectedSocketDescriptor = 0;	// used only by server socket
 		QTcpSocket* m_tcpSocket = nullptr;
 
-		State m_state = State::WainigForRequest;
 		ReadState m_readState = ReadState::WainigForHeader;
-
-		quint32 m_numerator = 1;					// used only by client socket
 
 		Header m_header;
 		char* m_dataBuffer = nullptr;
@@ -93,61 +74,46 @@ namespace Tcp
 		quint32 m_readedHeaderSize = 0;
 		quint32 m_readedDataSize = 0;
 
-		bool m_requestReady = false;				// set to TRUE when full request (header and data), ack or reply readed from socket
+		bool m_headerAndDataReady = false;			// set to TRUE when full header and data readed from socket
 
-		QTimer m_replyTimeoutTimer;					// used only by client socket
+		virtual QTcpSocket* createSocket() = 0;
+
+		virtual void onThreadStarted() override;
+		virtual void onThreadFinished() override;
+
+		void enableSocketRead() { m_enableSocketRead = true; }
+		void disableSocketRead() { m_enableSocketRead = false; }
+
+		virtual void onHeaderAndDataReady() {};
 
 	private:
+		bool m_enableSocketRead = true;
+
 		void reallocateDataBuffer(int newDataBufferSize);
 
 		int readHeader(int bytesAvailable);
 		int readData(int bytesAvailable);
-
-		void onRequestReady();
-
-	protected:
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
 
 	private slots:
 		void onSocketStateChanged(QAbstractSocket::SocketState newState);
 		void onSocketConnected();
 		void onSocketDisconnected();
 		void onSocketReadyRead();
-		void onReplyTimeoutTimer();
 
 	signals:
-		void disconnected(const SocketWorker* server);
+		void disconnected(const SocketWorker* socketWorker);
 
 	public:
-		SocketWorker(bool isServer);
+		SocketWorker();
 		~SocketWorker();
-
-		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
-
-		bool isServer() const { return m_isServer; }
-		bool isClient() const { return !m_isServer; }
 
 		bool isConnected() const;
 		bool isUnconnected() const;
-		bool isClearToSendRequest() const;
 
 		void closeConnection();
 
-		void sendRequest(quint32 requestID, const QByteArray& requestData);
-		void sendRequest(quint32 requestID, const char* requestData, quint32 requestDatsSize);
-
-		void sendAck();
-		void sendReply(const char* replyData, quint32 replyDatsSize);
-
-		virtual void omSocketThreadStarted() {}
-		virtual void omSocketThreadFinished() {}
 		virtual void onConnection() {}
 		virtual void onDisconnection() {}
-		virtual void onReplyTimeout() {}
-
-		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
-		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize);
 	};
 
 
@@ -163,12 +129,30 @@ namespace Tcp
 		Q_OBJECT
 
 	private:
+		enum ServerState
+		{
+			WainigForRequest,
+			RequestProcessing,
+		};
+
 		static int staticId;
 
 		int m_id = 0;
 
+		qintptr m_connectedSocketDescriptor = 0;
+
+		ServerState m_serverState = ServerState::WainigForRequest;
+
+		bool m_autoAck = true;
+
+		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
+
 		virtual void onThreadStarted() final;
 		virtual void onThreadFinished() final;
+
+		virtual QTcpSocket* createSocket() final;
+
+		void onHeaderAndDataReady() final;
 
 		friend class Listener;
 
@@ -176,7 +160,6 @@ namespace Tcp
 
 		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
 												// { return new ServerDerivedClass(); }
-
 	public:
 		Server();
 		~Server();
@@ -185,6 +168,17 @@ namespace Tcp
 
 		virtual void onServerThreadStarted() {}
 		virtual void onServerThreadFinished() {}
+
+		virtual void onConnection() override;
+		virtual void onDisconnection() override;
+
+		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
+
+		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
+
+		void sendAck();
+		void sendReply(const QByteArray& replyData);
+		void sendReply(const char* replyData, quint32 replyDatsSize);
 	};
 
 
@@ -271,10 +265,23 @@ namespace Tcp
 		Q_OBJECT
 
 	private:
+		enum ClientState
+		{
+			ClearToSendRequest,
+			WaitingForReply,
+		};
+
 		HostAddressPort m_serversAddressPort[2];
 		HostAddressPort m_selectedServer;
 
 		QTimer m_periodicTimer;
+		QTimer m_replyTimeoutTimer;
+
+		quint32 m_requestNumerator = 1;
+
+		Header m_sentRequestHeader;
+
+		ClientState m_clientState = ClientState::ClearToSendRequest;
 
 	private:
 		void connectToServer();
@@ -282,27 +289,43 @@ namespace Tcp
 		virtual void onThreadStarted() final;
 		virtual void onThreadFinished() final;
 
+		virtual void onHeaderAndDataReady() final;
+
+		void restartReplyTimeoutTimer();
+
+		void processAck();
+
 	private slots:
 		void onPeriodicTimer();
+		void onReplyTimeoutTimer();
 
 	public:
 		Client();
 		~Client();
-
-		virtual void onSocketThreadStarted() {}
-		virtual void onSocketThreadFinished() {}
-
-		virtual void onConnection() {}
-		virtual void onDisonnection() {}
-
-		virtual void onRequestTimeout() {}
-
 
 		void setServer(const HostAddressPort& serverAddressPort);
 		void setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
 
 		void selectServer1() { m_selectedServer = m_serversAddressPort[0]; }
 		void selectServer2() { m_selectedServer = m_serversAddressPort[1]; }
+
+		virtual void onClientThreadStarted() {}
+		virtual void onClientThreadFinished() {}
+
+		virtual QTcpSocket* createSocket() override { return new QTcpSocket; }
+
+		virtual void onConnection() override;
+		virtual void onDisconnection() override;
+
+		virtual void onAck() {}
+		virtual void onReplyTimeout() {}
+
+		bool isClearToSendRequest() const;
+
+		void sendRequest(quint32 requestID, const QByteArray& requestData);
+		void sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
+
+		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) = 0;
 	};
 
 
