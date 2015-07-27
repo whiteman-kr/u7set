@@ -223,7 +223,12 @@ namespace Builder
 			jumpers |= (crc4 << 12);
 
 			lmReport << "Jumpers configuration (HEX): 0x" + QString::number(jumpers, 16);
-			lmReport << "Jumpers configuration (BIN): " + QString::number(jumpers, 2).rightJustified(16, '0');
+
+			QString jumpersHex = QString::number(jumpers, 2).rightJustified(16, '0');
+			jumpersHex.insert(4, ' ');
+			jumpersHex.insert(9, ' ');
+			jumpersHex.insert(14, ' ');
+			lmReport << "Jumpers configuration (BIN): " + jumpersHex;
 		}
 
 		QByteArray lmReportData;
