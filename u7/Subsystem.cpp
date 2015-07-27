@@ -11,7 +11,7 @@ namespace Hardware
 	//
 	Subsystem::Subsystem():
 		m_index(0),
-		m_key(0)
+		m_key(5)
 	{
 
 	}

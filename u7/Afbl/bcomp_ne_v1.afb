@@ -9,13 +9,13 @@
             <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" OpIndex = "1" Size = "16"/>
+            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" OpIndex = "4" Size = "16"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "8" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "6" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_sp" Caption = "setting" Visible="true" OpIndex="3" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_sp" Caption = "setting" Visible="true" OpIndex="1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
                 <Value>50</Value>
                 <Default>50</Default>
                 <LowLimit>0</LowLimit>
@@ -24,7 +24,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_hys" Caption = "hysteresis" Visible="true" OpIndex="5" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_hys" Caption = "hysteresis" Visible="true" OpIndex="2" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
                 <Value>50</Value>
                 <Default>50</Default>
                 <LowLimit>0</LowLimit>
@@ -33,7 +33,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="9" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
                 <Value>4</Value>
                 <Default>4</Default>
                 <LowLimit>1</LowLimit>

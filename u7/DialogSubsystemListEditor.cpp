@@ -192,7 +192,7 @@ void DialogSubsystemListEditor::on_m_add_clicked()
 		index = items[0]->data(0, Qt::UserRole).toInt() + 1;
 	}
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "0" << "0" << "StrID" << "Caption");
+	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "0" << "5" << "StrID" << "Caption");
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
 	ui->m_list->insertTopLevelItem(index, item);
 

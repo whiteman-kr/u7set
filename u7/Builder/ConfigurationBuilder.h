@@ -53,6 +53,7 @@ namespace Builder
 
 
 	private:
+		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>& modules);
 		DbController* db();
 		OutputLog* log() const;
 		int changesetId() const;
