@@ -5,7 +5,7 @@
 #include "FileTests.h"
 #include "OtherTests.h"
 
-const int DatabaseProjectVersion = 39;
+const int DatabaseProjectVersion = 40;
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	}
 
 	QSqlQuery query;
-	bool result = query.exec("SELECT MAX(\"VersionNo\") FROM \"Version\"");
+	bool result = query.exec("SELECT MAX(VersionNo) FROM Version");
 	if (result == false)
 	{
 		qDebug() << "Error executting query";

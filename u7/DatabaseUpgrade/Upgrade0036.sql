@@ -147,20 +147,24 @@ BEGIN
         -- try to add file (it will be checked out)
         file_id	:= (SELECT id FROM add_file(user_id, file_name, parent_file_id, file_data));
     ELSE
-        -- try to check out file and set workcopy
-        file_state := get_file_state(file_id);
+		-- check out file if it was not yet
+		file_state := get_file_state(file_id);
 
-        IF (file_state.checkedout = TRUE) THEN
-            RAISE EXCEPTION 'File %/% already checked out, cannot update file.', full_parent_file_name, file_name;
-        END IF;
+		IF (file_state.checkedout = FALSE) THEN
+			file_state := check_out(user_id, ARRAY[file_id]);
 
-        IF (file_state.deleted = TRUE) THEN
-            RAISE EXCEPTION 'File %/% marked as deleted, cannot update file.', full_parent_file_name, file_name;
-        END IF;
+			IF (file_state.checkedout = FALSE) THEN
+				RAISE EXCEPTION 'Check out error %', file_name;
+			END IF;
 
-        file_state := check_out(user_id, ARRAY[file_id]);
+		END IF;
 
-        PERFORM set_workcopy(user_id, file_id, file_data);
+		IF (file_state.deleted = TRUE) THEN
+			RAISE EXCEPTION 'File %/% marked as deleted, cannot update file.', full_parent_file_name, file_name;
+		END IF;
+
+		-- set workcopy
+		PERFORM set_workcopy(user_id, file_id, file_data);
     END IF;
 
     -- check in

@@ -145,7 +145,7 @@ BEGIN
 	-- get check out user id, file cout be checked out by other user, we must check it
 	checkout_user_id := (SELECT UserID FROM CheckOut WHERE FileID = file_id);
 
-	if (checkout_user_id <> user_id OR is_admin(user_id) = FALSE)
+	if (checkout_user_id <> user_id AND is_admin(user_id) = FALSE)
 	THEN
 		result := get_file_state(file_id);
 		result.errcode := 2;				-- Error, user has no rights
