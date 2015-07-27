@@ -26,9 +26,11 @@ private:
 public:
 	MyClient();
 
-	virtual void onSocketThreadStarted() override;
+	virtual void onClientThreadStarted() override;
 
 	virtual void onConnection() override;
+
+	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 };
 
 

@@ -6,6 +6,11 @@ namespace Tcp
 
 	void MyServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
 	{
+		QByteArray reply;
+
+		reply.resize(1024);
+
+		sendReply(reply);
 		return;
 	}
 }
