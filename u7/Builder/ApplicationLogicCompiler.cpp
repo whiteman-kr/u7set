@@ -451,7 +451,7 @@ namespace Builder
 			LOG_ERROR(m_log, QString(tr("LM settings are not loaded")));
 		}
 
-		return true;
+		return result;
 	}
 
 
@@ -802,6 +802,12 @@ namespace Builder
 	{
 		if (param.opName() == "i_counter")
 		{
+			if (m_lmCycleDuration == 0)
+			{
+				assert(false);
+				return false;
+			}
+
 			*paramValue = (paramIntValue * 1000) / m_lmCycleDuration;
 			return true;
 		}
