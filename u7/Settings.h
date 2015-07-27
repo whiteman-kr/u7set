@@ -36,6 +36,9 @@ public:
 	const QString& buildOutputPath() const;
 	void setBuildOutputPath(const QString& value);
 
+	const QStringList& loginCompleter() const;
+	QStringList& loginCompleter();
+
 	// Data
 	//
 public:
@@ -94,6 +97,8 @@ private:
 	QString m_serverUsername;
 	QString m_serverPassword;
 	QString m_buildOutputPath;
+
+	QStringList m_loginCompleter;
 };
 
 extern Settings theSettings;

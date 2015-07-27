@@ -58,6 +58,8 @@ void Settings::writeUserScope() const
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
 
+	s.setValue("LoginDialog/loginCompleter", m_loginCompleter);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -87,6 +89,13 @@ void Settings::loadUserScope()
 
 	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
+
+	m_loginCompleter = s.value("LoginDialog/loginCompleter").toStringList();
+
+	if (m_loginCompleter.isEmpty() == true)
+	{
+		m_loginCompleter << "Administrator";
+	}
 
     return;
 }
@@ -161,5 +170,14 @@ const QString& Settings::buildOutputPath() const
 void Settings::setBuildOutputPath(const QString& value)
 {
 	m_buildOutputPath = value;
+}
 
+const QStringList& Settings::loginCompleter() const
+{
+	return m_loginCompleter;
+}
+
+QStringList& Settings::loginCompleter()
+{
+	return m_loginCompleter;
 }

@@ -2,10 +2,10 @@ CREATE OR REPLACE FUNCTION is_admin(user_id integer)
 RETURNS boolean AS
 $BODY$
 	SELECT
-		("Administrator" = TRUE AND "Disabled" = FALSE) AS administrator
+		(Users.Administrator = TRUE AND Users.Disabled = FALSE) AS administrator
 	FROM
-		"User"
+		Users
 	WHERE
-		"UserID" = user_id;
+		Users.UserID = user_id;
 $BODY$
 LANGUAGE sql;

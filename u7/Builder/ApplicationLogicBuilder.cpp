@@ -137,6 +137,19 @@ namespace Builder
 		return -1;
 	}
 
+	void BushContainer::removeEmptyBushes()
+	{
+		// Remove bushes without fbls
+		//
+
+		bushes.erase(std::remove_if(bushes.begin(), bushes.end(),
+					[](const Bush& b)
+					{
+						return b.fblItems.empty();
+					}),	bushes.end());
+
+	}
+
 
 	// ------------------------------------------------------------------------
 	//
@@ -1626,10 +1639,15 @@ namespace Builder
 			return true;
 		}
 
+		// Delete all empty bushes (bushes without fblitems)
+		//
+		bushContainer->removeEmptyBushes();
+
 		// Check bushes, bush must have output pin and one or several input pins
 		//
 		for (const Bush& bush : bushContainer->bushes)
 		{
+
 			if (bush.outputPin.isNull() == true)
 			{
 				QString strItems;

@@ -11,7 +11,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 {
 	{"Create project", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0001.sql"},
 	{"Add Changeset table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0002.sql"},
-	{"Add Disabled column to User table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0003.sql"},
+	{"Add Disabled column to Users table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0003.sql"},
 	{"Add GetUserID fucntion", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0004.sql"},
 	{"Add File table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0005.sql"},
 	{"Add File to Changeset table", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0006.sql"},
@@ -48,6 +48,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{"Add module presets", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0037.sql"},
 	{"Add get_last_signals function", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0038.sql"},
 	{"Delete DataFormat table and remove corresponding constraints", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0039.sql"},
+	{"Added CycleDuration to LM-1, AppLogicOffset changed to 117 in DIM", ":/DatabaseUpgrade/DatabaseUpgrade/Upgrade0040.sql"},
 };
 
 
@@ -336,24 +337,26 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 			// Get project version
 			//
 
-			QString createVersionTableSql = QString("SELECT max(\"VersionNo\") FROM \"Version\";");
+			QString createVersionTableSql = QString("SELECT max(VersionNo) FROM Version;");
 
 			QSqlQuery versionQuery(projectDb);
 			result = versionQuery.exec(createVersionTableSql);
 
+			int projectVersion = -1;
+
 			if (result == false)
 			{
-				emitError(versionQuery.lastError());
-				versionQuery.clear();
-				projectDb.close();
-				continue;
+				qDebug() << versionQuery.lastError();
+			}
+			else
+			{
+				if (versionQuery.next())
+				{
+					projectVersion = versionQuery.value(0).toInt();
+				}
 			}
 
-			if (versionQuery.next())
-			{
-				int projectVersion = versionQuery.value(0).toInt();
-				pi->setVersion(projectVersion);
-			}
+			pi->setVersion(projectVersion);
 
 			versionQuery.clear();
 			projectDb.close();
@@ -473,11 +476,11 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		QSqlQuery newDbQuery(newDatabase);
 
 		QString createVersionTableSql = QString(
-					"CREATE TABLE \"Version\" ("
-					"\"VersionId\" SERIAL PRIMARY KEY,"
-					"\"VersionNo\" integer NOT NULL,"
-					"\"Date\" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-					"\"Reasone\" text NOT NULL"
+					"CREATE TABLE version ("
+					"versionid SERIAL PRIMARY KEY,"
+					"versionno integer NOT NULL,"
+					"date timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+					"reasone text NOT NULL"
 					");");
 
 		result = newDbQuery.exec(createVersionTableSql);
@@ -492,7 +495,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		//
 		QString request = "CREATE OR REPLACE FUNCTION get_project_version()"
 						  "RETURNS integer AS"
-						  "'SELECT max(\"VersionNo\") FROM \"Version\";'"
+						  "'SELECT max(VersionNo) FROM Version;'"
 						  "LANGUAGE sql;";
 
 		result = newDbQuery.exec(request);
@@ -506,7 +509,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		// Add first record to version table
 		//
 		QString addFirstVersionRecord = QString(
-			"INSERT INTO \"Version\" (\"VersionNo\", \"Reasone\")"
+			"INSERT INTO version (VersionNo, Reasone)"
 			"VALUES (1, 'Create project');");
 
 		result = newDbQuery.exec(addFirstVersionRecord);
@@ -518,19 +521,19 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 			return;
 		}
 
-		// Create User table
+		// Create Users table
 		//
 		QString createUserTableSql = QString(
-			"CREATE TABLE \"User\""
+			"CREATE TABLE users"
 			"("
-				"\"UserID\" serial PRIMARY KEY NOT NULL,"
-				"\"Date\" timestamp with time zone NOT NULL DEFAULT now(),"
-				"\"Username\" text NOT NULL,"
-				"\"FirstName\" text NOT NULL,"
-				"\"LastName\" text NOT NULL,"
-				"\"Password\" text NOT NULL,"
-				"\"Administrator\" boolean NOT NULL DEFAULT FALSE,"
-				"\"ReadOnly\" boolean NOT NULL DEFAULT TRUE"
+				"userid serial PRIMARY KEY NOT NULL,"
+				"date timestamp with time zone NOT NULL DEFAULT now(),"
+				"username text NOT NULL,"
+				"firstname text NOT NULL,"
+				"lastname text NOT NULL,"
+				"password text NOT NULL,"
+				"administrator boolean NOT NULL DEFAULT FALSE,"
+				"readonly boolean NOT NULL DEFAULT TRUE"
 			");"
 			);
 
@@ -548,7 +551,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 		newDbQuery.clear();
 
 		newDbQuery.prepare(
-			"INSERT INTO \"User\"(\"Username\", \"FirstName\", \"LastName\", \"Password\", \"Administrator\", \"ReadOnly\")"
+			"INSERT INTO users(Username, FirstName, LastName, Password, Administrator, ReadOnly)"
 			"VALUES (:username, :firstname, :lastname, :password, :administrator, :readonly);");
 
 		newDbQuery.bindValue(":username", "Administrator");
@@ -630,7 +633,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	// Check username and password
 	//
 	QSqlQuery query(db);
-	result = query.exec(QString("SELECT \"GetUserID\"('%1', '%2');").arg(username).arg(password));
+	result = query.exec(QString("SELECT get_user_id('%1', '%2');").arg(username).arg(password));
 
 	if (result == false)
 	{
@@ -786,7 +789,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (result == false)
 	{
-		emitError(tr("Can't get system floder.") + db.lastError().text());
+		emitError(tr("Can't get system folder.") + db.lastError().text());
 		query.clear();
 		db.close();
 
@@ -897,6 +900,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password)
 		}
 
 		result = db_checkUserPassword(db, username, password);
+
 		if (result == false)
 		{
 			emitError("Wrong password.");
@@ -1140,7 +1144,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 			// LOCK TABLE "Version" IN ACCESS EXCLUSIVE MODE NOWAIT;
 			//
 			QSqlQuery versionQuery(db);
-			result = versionQuery.exec("LOCK TABLE \"Version\" IN ACCESS EXCLUSIVE MODE NOWAIT;");
+			result = versionQuery.exec("LOCK TABLE Version IN ACCESS EXCLUSIVE MODE NOWAIT;");
 
 			if (result == false)
 			{
@@ -1212,7 +1216,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 				//
 				{
 					QString addVersionRecord = QString(
-						"INSERT INTO \"Version\" (\"VersionNo\", \"Reasone\")"
+						"INSERT INTO Version (VersionNo, Reasone)"
 						"VALUES (%1, '%2');").arg(i + 1).arg(ui.text);
 
 					QSqlQuery versionQuery(db);
@@ -1367,10 +1371,10 @@ void DbWorker::slot_updateUser(DbUser user)
 			});
 
 		// Check if such user already exists
-		// SELECT "UserID", "Password" FROM "User" WHERE "Username"=user.username();
+		// SELECT UserID, Password FROM Users WHERE Username=user.username();
 		//
 		QSqlQuery query(db);
-		result = query.exec(QString("SELECT \"UserID\", \"Password\" FROM \"User\" WHERE \"Username\"='%1';").arg(user.username()));
+		result = query.exec(QString("SELECT UserID, Password FROM Users WHERE Username = '%1';").arg(user.username()));
 
 		if (result == false || query.size() != 1)
 		{
@@ -1408,10 +1412,10 @@ void DbWorker::slot_updateUser(DbUser user)
 			}
 		}
 
-		// Update User request
-		// UPDATE "User"
-		//		SET "UserID"=?, "Date"=?, "Username"=?, "FirstName"=?, "LastName"=?,
-		//		"Password"=?, "Administrator"=?, "ReadOnly"=?, "Disabled"=?
+		// Update Users request
+		// UPDATE Users
+		//		SET UserID=?, Date=?, Username=?, FirstName=?, LastName=?,
+		//		Password=?, Administrator=?, ReadOnly=?, Disabled=?
 		//		WHERE <condition>;
 
 		QString updateQurery;
@@ -1419,10 +1423,10 @@ void DbWorker::slot_updateUser(DbUser user)
 		if (updatePassword == true)
 		{
 			updateQurery = QString(
-				"UPDATE \"User\" "
-					"SET \"FirstName\"='%1', \"LastName\"='%2', \"Password\"='%3', "
-					"\"Administrator\"=%4, \"ReadOnly\"=%5, \"Disabled\"=%6 "
-					"WHERE \"UserID\" = %7;")
+				"UPDATE Users "
+					"SET FirstName='%1', LastName='%2', Password='%3', "
+					"Administrator=%4, ReadOnly=%5, Disabled=%6 "
+					"WHERE UserID = %7;")
 				.arg(user.firstName())
 				.arg(user.lastName())
 				.arg(user.newPassword())
@@ -1435,10 +1439,10 @@ void DbWorker::slot_updateUser(DbUser user)
 		else
 		{
 			updateQurery = QString(
-				"UPDATE \"User\" "
-					"SET \"FirstName\"='%1', \"LastName\"='%2', "
-					"\"Administrator\"=%3, \"ReadOnly\"=%4, \"Disabled\"=%5 "
-					"WHERE \"UserID\" = %6;")
+				"UPDATE Users "
+					"SET FirstName='%1', LastName='%2', "
+					"Administrator=%3, ReadOnly=%4, Disabled=%5 "
+					"WHERE UserID = %6;")
 				.arg(user.firstName())
 				.arg(user.lastName())
 				.arg(user.isAdminstrator() ? "TRUE" : "FALSE")
@@ -1484,11 +1488,11 @@ void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 		return;
 	}
 
-	// SELECT "UserID" FROM "User" ORDER BY "Username";
+	// SELECT UserID FROM Users ORDER BY Username;
 	//
 	QSqlQuery q(db);
 
-	bool result = q.exec("SELECT \"UserID\" FROM \"User\" ORDER BY \"Username\";");
+	bool result = q.exec("SELECT UserID FROM Users ORDER BY Username;");
 	if (result == false)
 	{
 		qDebug() << Q_FUNC_INFO << q.lastError();
@@ -3728,7 +3732,7 @@ bool DbWorker::db_getUserData(QSqlDatabase db, int userId, DbUser* user)
 
 	QSqlQuery query(db);
 
-	bool result = query.exec(QString("SELECT * FROM \"User\" WHERE \"UserID\" = %1").arg(userId));
+	bool result = query.exec(QString("SELECT * FROM Users WHERE UserID = %1").arg(userId));
 
 	if (result == false)
 	{
@@ -3775,14 +3779,14 @@ bool DbWorker::db_checkUserPassword(QSqlDatabase db, QString username, QString p
 		return false;
 	}
 
-	if (projectVersion < 4)		// Since version 4 database has stored procedure GetUserID
+	if (projectVersion < 4)		// Since version 4 database has stored procedure get_user_id
 	{
 		// Check by query
 		//
 		QSqlQuery query(db);
 
 		bool result = query.exec(
-			QString("SELECT \"UserID\" FROM \"User\" WHERE \"Username\"='%1' AND \"Password\"='%2'").arg(username).arg(password));
+			QString("SELECT UserID FROM Users WHERE Username='%1' AND Password='%2'").arg(username).arg(password));
 
 		if (result == false)
 		{
@@ -3799,17 +3803,20 @@ bool DbWorker::db_checkUserPassword(QSqlDatabase db, QString username, QString p
 		// Check by store function
 		//
 		QSqlQuery query(db);
-		bool result = query.exec(QString("SELECT \"GetUserID\"('%1', '%2');").arg(username).arg(password));
+		bool result = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg(username).arg(password));
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		if (query.next() == false)
+		if (query.next() == false || query.isNull(0) == true)
 		{
 			return false;
 		}
+
+		bool passwordCorrect = query.value(0).toBool();
+		return passwordCorrect;
 	}
 
 	return true;
@@ -3822,7 +3829,7 @@ int DbWorker::db_getProjectVersion(QSqlDatabase db)
 		return -1;
 	}
 
-	QString createVersionTableSql = QString("SELECT max(\"VersionNo\") FROM \"Version\";");
+	QString createVersionTableSql = QString("SELECT max(VersionNo) FROM Version;");
 
 	QSqlQuery versionQuery(db);
 	bool result = versionQuery.exec(createVersionTableSql);

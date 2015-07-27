@@ -44,7 +44,7 @@ void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VF
 //
 //
 SchemeItemPropertyEditor::SchemeItemPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent) :
-	PropertyEditor(parent),
+	ExtWidgets::PropertyEditor(parent),
 	m_editEngine(editEngine)
 {
 	assert(m_editEngine);

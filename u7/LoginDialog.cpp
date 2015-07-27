@@ -3,7 +3,7 @@
 #include "ui_LoginDialog.h"
 #include "Settings.h"
 
-LoginDialog::LoginDialog(QWidget *parent) :
+LoginDialog::LoginDialog(const QStringList& loginCompleterList, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::LoginDialog)
 {
@@ -11,6 +11,11 @@ LoginDialog::LoginDialog(QWidget *parent) :
 
 	QString defaultUsername = theSettings.loginDialog_defaultUsername;
 	ui->usernameEdit->setText(defaultUsername);
+
+	m_completer = new QCompleter(loginCompleterList, this);
+	m_completer->setCaseSensitivity(Qt::CaseSensitive);
+
+	ui->usernameEdit->setCompleter(m_completer);
 
 	if (defaultUsername.isEmpty() == false)
 	{

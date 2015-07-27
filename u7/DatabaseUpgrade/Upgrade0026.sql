@@ -439,39 +439,45 @@ $BODY$
 CREATE OR REPLACE FUNCTION file_has_children(user_id integer, file_id integer)
 RETURNS integer AS
 $BODY$
+BEGIN
+	IF ((SELECT COUNT(*) FROM Users WHERE UserID = user_id) <> 1)
+	THEN
+		RAISE 'User % is not exists.', user_id;
+	END IF;
 
-SELECT SUM(CNT)::integer AS ChildCount FROM
-	((	-- All checked in now
-	SELECT
-		COUNT(*) AS CNT
-	FROM
-		File F,
-		FileInstance FI
-	WHERE
-		F.ParentID = file_id AND
-		F.Deleted = FALSE AND
-		F.CheckedInInstanceID = FI.FileInstanceID AND
-		F.CheckedOutInstanceID IS NULL AND
-		F.FileID = FI.FileID
-	)
-	UNION
-	(	-- All CheckedOut by any user if user_id is administrator
-	SELECT
-		COUNT(*) AS CNT
-	FROM
-		File F,
-		FileInstance FI,
-		CheckOut CO
-	WHERE
-		F.ParentID = file_id AND
-		F.CheckedOutInstanceID = FI.FileInstanceID AND
-		F.FileID = FI.FileID AND
-		F.FileID = CO.FileID AND
-		(CO.UserID = user_id OR (SELECT is_admin(user_id)) = TRUE)
-	)) AS SubQuery;
+	RETURN (SELECT SUM(CNT)::integer AS ChildCount FROM
+		((	-- All checked in now
+		SELECT
+			COUNT(*) AS CNT
+		FROM
+			File F,
+			FileInstance FI
+		WHERE
+			F.ParentID = file_id AND
+			F.Deleted = FALSE AND
+			F.CheckedInInstanceID = FI.FileInstanceID AND
+			F.CheckedOutInstanceID IS NULL AND
+			F.FileID = FI.FileID
+		)
+		UNION
+		(	-- All CheckedOut by any user if user_id is administrator
+		SELECT
+			COUNT(*) AS CNT
+		FROM
+			File F,
+			FileInstance FI,
+			CheckOut CO
+		WHERE
+			F.ParentID = file_id AND
+			F.CheckedOutInstanceID = FI.FileInstanceID AND
+			F.FileID = FI.FileID AND
+			F.FileID = CO.FileID AND
+			(CO.UserID = user_id OR (SELECT is_admin(user_id)) = TRUE)
+		)) AS SubQuery);
 
+END
 $BODY$
-  LANGUAGE sql;
+LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION is_file_checkedout(file_id integer)

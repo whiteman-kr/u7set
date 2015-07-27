@@ -38,6 +38,10 @@ private slots:
 	void get_file_stateTest();*/
 	void delete_fileTest_data();
 	void delete_fileTest();
+	void check_inTest();
+	void check_outTest();
+	void set_workcopyTest();
+	void get_workcopyTest();
 
 public:
 	static bool fileExists(int fileID);

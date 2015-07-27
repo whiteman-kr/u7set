@@ -95,7 +95,7 @@ void UserTests::isAdminTest_data()
 	query.first();
 	int m_isAdminTempDataNullID = query.value("create_user").toInt();
 
-	query.exec(("DELETE FROM \"User\" WHERE \"Username\"='AdminTest1'"));
+	query.exec(("DELETE FROM users WHERE username='AdminTest1'"));
 
 	QTest::newRow("AdminTest") << 1 << true;
 	QTest::newRow("NoAdminTest") << m_isAdminTempDataID << false;
@@ -140,7 +140,7 @@ bool UserTests::createUserTest(const QString& parentUser, const QString& userNam
 
 	QSqlQuery queryCheckUser;
 
-	ok = queryCheckUser.exec(("SELECT * FROM \"User\" WHERE \"Username\"='" + userName + "'"));
+	ok = queryCheckUser.exec(("SELECT * FROM users WHERE username='" + userName + "'"));
 
 	if (ok == false)
 	{
@@ -212,7 +212,7 @@ bool UserTests::createUserTest(const QString& parentUser, const QString& userNam
 int UserTests::getUserIdTest(const QString& login, const QString& password)
 {
 	QSqlQuery query;
-	if (query.exec(("SELECT \"GetUserID\"('" + login + "', '" + password + "')")) != true)
+	if (query.exec(("SELECT \"get_user_id\"('" + login + "', '" + password + "')")) != true)
 	{
 		qDebug() << query.lastError().text();
 		return -1;
@@ -225,7 +225,7 @@ int UserTests::getUserIdTest(const QString& login, const QString& password)
 		return false;
 	}
 
-	return query.value("GetUserID").toInt();
+	return query.value("get_user_id").toInt();
 }
 
 bool UserTests::isAdmin(int userID)

@@ -45,7 +45,7 @@ private:
 //
 //
 
-class SchemeItemPropertyEditor : public PropertyEditor
+class SchemeItemPropertyEditor : public ExtWidgets::PropertyEditor
 {
 	Q_OBJECT
 

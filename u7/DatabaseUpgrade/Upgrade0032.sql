@@ -39,12 +39,12 @@ BEGIN
 		RAISE 'User % has no right to add another user.', current_user_id;
 	END IF;
 
-	IF (SELECT count(*) FROM "User" WHERE "Username" = user_name) > 0 THEN
+	IF (SELECT count(*) FROM Users WHERE Username = user_name) > 0 THEN
 		RAISE 'User % already exists.', user_name;
 	END IF;
 
-	INSERT INTO "User" ("Username", "FirstName", "LastName", "Password", "Administrator", "ReadOnly", "Disabled")
-		VALUES (user_name, first_name, last_name, user_password, is_admin, is_read_only, is_disabled) RETURNING "UserID" INTO new_user_id;
+	INSERT INTO Users (Username, FirstName, LastName, Password, Administrator, ReadOnly, Disabled)
+		VALUES (user_name, first_name, last_name, user_password, is_admin, is_read_only, is_disabled) RETURNING UserID INTO new_user_id;
 
 	RETURN new_user_id;
 END
