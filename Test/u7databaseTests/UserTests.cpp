@@ -61,8 +61,9 @@ void UserTests::getUserIDTest_data()
 	QTest::addColumn<int>("result");
 
 	QSqlQuery query;
-	query.exec("SELECT create_user (1, 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', false, false, false);");
-	query.first();
+	bool ok = query.exec("SELECT create_user (1, 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', false, false, false);");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	QTest::newRow("TestTrueLoginPassword") << "getUserIdTest" << "getUserIdTest" << query.value("create_user").toInt();
 	QTest::newRow("TestTrueLoginFalsePassword") << "getUserIdTest" << "abc" << 0;
@@ -87,15 +88,18 @@ void UserTests::isAdminTest_data()
 
 	QSqlQuery query;
 
-	query.exec("SELECT create_user (1, 'AdminTest', 'TEST', 'TEST', 'TEST', false, false, false);");
-	query.first();
+	bool ok = query.exec("SELECT create_user (1, 'AdminTest', 'TEST', 'TEST', 'TEST', false, false, false);");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int m_isAdminTempDataID = query.value("create_user").toInt();
 
-	query.exec("SELECT create_user (1, 'AdminTest1', 'TEST', 'TEST', 'TEST', false, false, false);");
-	query.first();
+	ok = query.exec("SELECT create_user (1, 'AdminTest1', 'TEST', 'TEST', 'TEST', false, false, false);");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int m_isAdminTempDataNullID = query.value("create_user").toInt();
 
-	query.exec(("DELETE FROM users WHERE username='AdminTest1'"));
+	ok = query.exec(("DELETE FROM users WHERE username='AdminTest1'"));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	QTest::newRow("AdminTest") << 1 << true;
 	QTest::newRow("NoAdminTest") << m_isAdminTempDataID << false;
