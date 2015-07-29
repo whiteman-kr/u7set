@@ -2852,7 +2852,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosRectEndPoint(QMouseEvent* event)
 	return;
 }
 
-void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
+void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* e)
 {
 	assert(editSchemeView()->m_newItem != nullptr);
 
@@ -2865,15 +2865,21 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent*)
 		return;
 	}
 
-	auto points = itemPos->GetPointList();
-
-	if (points.size() >= 2)
+	if (itemPos->GetPointList().size() >= 1)
 	{
+		// Add the last point, where cursor is now
+		//
+		mouseRightDown_AddSchemePosConnectionNextPoint(e);
+
+		// --
+		//
 		itemPos->RemoveSamePoints();
 		itemPos->DeleteAllExtensionPoints();
 
 		// ≈сли лини€ началась или окончилась на таком же элементе, то соединить эти две (или три) линии
 		//
+		auto points = itemPos->GetPointList();
+
 		VFrame30::SchemePoint startPoint = points.front();
 		VFrame30::SchemePoint endPoint = points.back();
 

@@ -282,7 +282,12 @@ DISTFILES += \
     Afbl/xor_v1.afb \
     Afbl/and_v1.afb \
     Afbl/bcomp_eq_v1.afb \
-    Afbl/_afbl_all.sql
+    Afbl/_afbl_all.sql \
+    Afbl/tct_filter_v1.afb \
+    Afbl/file2pgsql.exe \
+    Afbl/tct_off_v1.afb \
+    Afbl/tct_on_v1.afb \
+    Afbl/tct_vibr_v1.afb
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
