@@ -516,8 +516,13 @@ namespace Builder
 
 		if (fblItems.empty() == false)
 		{
-			assert(fblItems.empty() == true);
-			LOG_ERROR(log, tr("Internal error, not all items were proceded. %s").arg(Q_FUNC_INFO));
+			// Not all items were processes, it can happen if item with input pins does not have any connection
+			// to these inputs
+			//
+			for (const AppLogicItem& item : fblItems)
+			{
+				LOG_ERROR(log, tr("%1 was not processed").arg(item.m_fblItem->buildName()));
+			}
 
 			result = false;
 		}
