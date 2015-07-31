@@ -8,7 +8,7 @@ MyClient::MyClient() :
 }
 
 
-void MyClient::onSocketThreadStarted()
+void MyClient::onClientThreadStarted()
 {
 	connect(&m_timer, &QTimer::timeout, this, &MyClient::onTimer);
 
@@ -36,6 +36,12 @@ void MyClient::onConnection()
 	sendRequest(1, b);
 
 	qDebug() << "request";
+}
+
+
+void MyClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+{
+
 }
 
 

@@ -3,6 +3,7 @@
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
 #include "../../include/DeviceObject.h"
+#include "../../include/Crc.h"
 
 namespace Builder
 {
@@ -187,6 +188,61 @@ namespace Builder
 		}
 		qDebug() << jsResult.toInt();
 
+		// Find all LM modules and save ssKey and channel information
+		//
+		std::vector<Hardware::DeviceModule*> lmModules;
+		findLmModules(m_deviceRoot, lmModules);
+
+		QStringList lmReport;
+		lmReport << "Jumpers configuration for LM modules";
+
+		for (Hardware::DeviceModule* m : lmModules)
+		{
+			int ssKey = m_subsystems->ssKey(m->subSysID());
+
+			lmReport << "\r\n";
+			lmReport << "StrID: " + m->strId();
+			lmReport << "Caption: " + m->caption();
+			lmReport << "Place: " + QString::number(m->place());
+			lmReport << "Subsystem ID: " + m->subSysID();
+			lmReport << "Subsystem code: " + QString::number(ssKey);
+			lmReport << "Channel: " + QString::number(m->channel());
+
+			quint16 jumpers = ssKey << 6;
+			jumpers |= m->channel();
+
+			/*for (quint8 i = 0; i < 255; i++)
+			{
+				quint8 crc4 = Crc::crc4(&i, sizeof(i));
+				qDebug() << i <<" " << QString::number(crc4, 16);
+			}*/
+
+
+			quint16 crc4 = Crc::crc4(&jumpers, sizeof(jumpers));
+			crc4 >>= 4;
+			jumpers |= (crc4 << 12);
+
+			lmReport << "Jumpers configuration (HEX): 0x" + QString::number(jumpers, 16);
+
+			QString jumpersHex = QString::number(jumpers, 2).rightJustified(16, '0');
+			jumpersHex.insert(4, ' ');
+			jumpersHex.insert(9, ' ');
+			jumpersHex.insert(14, ' ');
+			lmReport << "Jumpers configuration (BIN): " + jumpersHex;
+		}
+
+		QByteArray lmReportData;
+		for (QString s : lmReport)
+		{
+			lmReportData.append(s + "\r\n");
+		}
+
+		if (m_buildWriter->addFile("Reports", "lmJumpers.txt", lmReportData) == false)
+		{
+			LOG_ERROR(m_log, tr("Failed to save lmJumpers.txt file!"));
+			return false;
+		}
+
 		// Save confCollection items to binary files
 		//
 		if (release() == true)
@@ -233,6 +289,33 @@ namespace Builder
 		return true;
 	}
 
+	void ConfigurationBuilder::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule *> &modules)
+	{
+		if (object == nullptr)
+		{
+			assert(object);
+			return;
+		}
+
+		for (int i = 0; i < object->childrenCount(); i++)
+		{
+			Hardware::DeviceObject* child = object->child(i);
+
+			if (child->deviceType() == Hardware::DeviceType::Module)
+			{
+				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
+
+				if (module->moduleFamily() == Hardware::DeviceModule::LM)
+				{
+					modules.push_back(module);
+				}
+			}
+
+			findLmModules(child, modules);
+		}
+
+		return;
+	}
 
 	DbController* ConfigurationBuilder::db()
 	{

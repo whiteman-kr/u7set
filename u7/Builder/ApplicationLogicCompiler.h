@@ -104,18 +104,12 @@ namespace Builder
 	{
 	private:
 		std::shared_ptr<LogicAfb> m_afb;
-		int m_instance = 0;					// for Fbls with RAM
 
 	public:
 		Afb(std::shared_ptr<LogicAfb> afb);
 		~Afb();
 
-		//quint16 addInstance();
-
 		bool hasRam() const { return m_afb->hasRam(); }
-
-		int incInstance() { return (++m_instance); }
-		int instance() const { return m_instance; }
 
 		const LogicAfb& afb() const { return *m_afb; }
 
@@ -377,6 +371,8 @@ namespace Builder
 		int m_lmAppLogicFrameSize = 0;
 		int m_lmAppLogicFrameCount = 0;
 
+		int m_lmCycleDuration = 0;
+
 		// LM's calculated memory offsets and sizes
 		//
 
@@ -477,6 +473,9 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
+		bool calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue);
+
+		bool calculate_TCT_AnalogIntegralParamValue(AppFb* appFb, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }

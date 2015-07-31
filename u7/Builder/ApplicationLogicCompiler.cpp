@@ -28,6 +28,7 @@ namespace Builder
 
 	const char* SECTION_MEMORY_SETTINGS = "MemorySettings";
 	const char* SECTION_FLASH_MEMORY = "FlashMemory";
+	const char* SECTION_LOGIC_UNIT = "LogicUnit";
 
 	const char* PARAM_TEST_START_COUNT = "test_start_count";
 
@@ -356,11 +357,15 @@ namespace Builder
 
 			if (!generateFbTestCode()) break;
 
-			if (!initAfbs()) break;
+			//if (!initAfbs()) break;			UNCOMMENT!!!!!
 
 			if (!finishTestCode()) break;
 
 			if (!startAppLogicCode()) break;
+
+			//
+			if (!initAfbs()) break;				// DELETE AFTER TESTS!!!!
+			//S
 
 			if (!copyLMDiagDataToRegBuf()) break;
 
@@ -435,6 +440,8 @@ namespace Builder
 		result &= getLMIntProperty(SECTION_FLASH_MEMORY, "AppLogicFrameSize", &m_lmAppLogicFrameSize);
 		result &= getLMIntProperty(SECTION_FLASH_MEMORY, "AppLogicFrameCount", &m_lmAppLogicFrameCount);
 
+		result &= getLMIntProperty(SECTION_LOGIC_UNIT, "CycleDuration", &m_lmCycleDuration);
+
 		if (result)
 		{
 			LOG_MESSAGE(m_log, QString(tr("Loading LMs settings... Ok")));
@@ -444,7 +451,7 @@ namespace Builder
 			LOG_ERROR(m_log, QString(tr("LM settings are not loaded")));
 		}
 
-		return true;
+		return result;
 	}
 
 
@@ -703,16 +710,8 @@ namespace Builder
 		quint16 fbOpcode = appFb->opcode();
 		quint16 fbInstance = appFb->instance();
 
-		m_code.newLine();
-
-		if (instantiatorOnly == true)
-		{
-			m_code.comment(QString(tr("Initialization of %1 instance %2")).arg(appFb->afb().instantiatorID()).arg(fbInstance));
-		}
-		else
-		{
-			m_code.comment(QString(tr("Initialization of %1 instance %2")).arg(afb.strID()).arg(fbInstance));
-		}
+		m_code.comment(QString(tr("Initialization of %1 instance %2 (%3)")).arg(appFb->afb().instantiatorID()).arg(fbInstance).
+				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
 
 		m_code.newLine();
 
@@ -736,11 +735,12 @@ namespace Builder
 
 			QVariant qv = afbParam.value();
 
+			int paramIntValue = qv.toInt();
+
 			switch(afbParam.type())
 			{
 			case Afbl::AnalogIntegral:
-				paramValue = qv.toInt();
-#pragma message("###################################### Need calculate value!!!!!!!!! ####################")
+				result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
 				break;
 
 			case Afbl::AnalogFloatingPoint:
@@ -748,7 +748,7 @@ namespace Builder
 				break;
 
 			case Afbl::DiscreteValue:
-				paramValue = qv.toInt();
+				paramValue = paramIntValue;
 				break;
 
 			default:
@@ -758,12 +758,69 @@ namespace Builder
 
 			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
 
-			cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
+			if (paramValue == paramIntValue)
+			{
+				cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
+			}
+			else
+			{
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(afbParam.caption()).arg(paramValue).arg(paramIntValue));
+			}
 
 			m_code.append(cmd);
 		}
 
+		m_code.newLine();
+
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue)
+	{
+		if (appFb == nullptr || paramValue == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		switch(appFb->opcode())
+		{
+		case FbType::TCT:
+			return calculate_TCT_AnalogIntegralParamValue(appFb, param, paramIntValue, paramValue);
+
+		default:
+			QVariant qv = param.value();
+			*paramValue = qv.toInt();
+		}
+
+		return true;
+	}
+
+
+	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(AppFb*, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue)
+	{
+		if (param.opName() == "i_counter")
+		{
+			if (m_lmCycleDuration == 0)
+			{
+				assert(false);
+				return false;
+			}
+
+			*paramValue = (paramIntValue * 1000) / m_lmCycleDuration;
+			return true;
+		}
+
+		if (param.opName() == "i_conf")
+		{
+			*paramValue = paramIntValue;
+			return true;
+		}
+
+		assert(false);	// unknown param.opName()
+
+		return false;
 	}
 
 
@@ -2551,17 +2608,32 @@ namespace Builder
 
 		int instance = 0;
 
+
+		QString instantiatorID = appItem->afb().instantiatorID();
+
 		if (fbl->hasRam())
 		{
-			instance = fbl->incInstance();
+			int fblOpcode = fbl->opcode();
+
+			if (m_fblInstance.contains(fblOpcode))
+			{
+				instance = m_fblInstance[fblOpcode];
+
+				instance++;
+
+				m_fblInstance[fblOpcode] = instance;
+
+				m_nonRamFblInstance.insert(instantiatorID, instance);
+			}
+			else
+			{
+				assert(false);		// unknown opcode
+			}
 		}
 		else
 		{
 			// Calculate non-RAM Fbl instance
 			//
-
-			QString instantiatorID = appItem->afb().instantiatorID();
-
 			if (m_nonRamFblInstance.contains(instantiatorID))
 			{
 				instance = m_nonRamFblInstance.value(instantiatorID);
