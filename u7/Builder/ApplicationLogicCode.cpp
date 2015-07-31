@@ -1,4 +1,5 @@
 #include "ApplicationLogicCode.h"
+#include "../VFrame30/Afb.h"
 
 namespace Builder
 {
@@ -181,16 +182,7 @@ namespace Builder
 
 	QString CommandCode::getFbTypeStr()
 	{
-		int fbType = getFbType();
-
-		if (fbType < FB_TYPE_STR_COUNT)
-		{
-			return FbTypeStr[fbType];
-		}
-
-		assert(false);			// need add string in FbTypeStr array
-
-		return QString("FB%1").arg(fbType);
+		return Afb::AfbType::toText(getFbType());
 	}
 
 

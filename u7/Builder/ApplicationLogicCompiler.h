@@ -51,7 +51,7 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
-		Afbl::AfbElementCollection* m_afbl = nullptr;
+		Afb::AfbElementCollection* m_afbl = nullptr;
 		ApplicationLogicData* m_appLogicData = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
@@ -72,7 +72,7 @@ namespace Builder
 
 	public:
 		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet,
-								 Afbl::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData,
+								 Afb::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData,
 								 BuildResultWriter* buildResultWriter, OutputLog* log);
 
 		bool run();
@@ -89,9 +89,9 @@ namespace Builder
 	typedef VFrame30::SchemeItemAfb LogicFb;
 	typedef VFrame30::CFblConnectionPoint LogicPin;
 	typedef VFrame30::SchemeItemConst LogicConst;
-	typedef Afbl::AfbElement LogicAfb;
-	typedef Afbl::AfbSignal LogicAfbSignal;
-	typedef Afbl::AfbParam LogicAfbParam;
+	//typedef Afb::AfbElement LogicAfb;
+	typedef Afb::AfbSignal LogicAfbSignal;
+	typedef Afb::AfbParam LogicAfbParam;
 
 	class AppItem;
 	class ModuleLogicCompiler;
@@ -100,29 +100,29 @@ namespace Builder
 	// Functional Block Library element
 	//
 
-	class Afb
+	class LogicAfb
 	{
 	private:
-		std::shared_ptr<LogicAfb> m_afb;
+		std::shared_ptr<Afb::AfbElement> m_afb;
 
 	public:
-		Afb(std::shared_ptr<LogicAfb> afb);
-		~Afb();
+		LogicAfb(std::shared_ptr<Afb::AfbElement> afb);
+		~LogicAfb();
 
 		bool hasRam() const { return m_afb->hasRam(); }
 
-		const LogicAfb& afb() const { return *m_afb; }
+		const Afb::AfbElement& afb() const { return *m_afb; }
 
 		QString strID() const { return m_afb->strID(); }
-		int opcode() const { return m_afb->opcode(); }
+		Afb::AfbType type() const { return m_afb->type(); }
 	};
 
 
-	typedef QHash<int, int> FblInstanceMap;
+	typedef QHash<int, int> FblInstanceMap;				// Key is OpCode
 	typedef QHash<QString, int> NonRamFblInstanceMap;
 
 
-	class AfbMap: public HashedVector<QString, Afb*>
+	class AfbMap: public HashedVector<QString, LogicAfb*>
 	{
 	private:
 
@@ -145,7 +145,7 @@ namespace Builder
 
 		int addInstance(AppItem *appItem);
 
-		void insert(std::shared_ptr<LogicAfb> logicAfb);
+		void insert(std::shared_ptr<Afb::AfbElement> logicAfb);
 		void clear();
 
 		const LogicAfbSignal getAfbSignal(const QString &afbStrID, int signalIndex);
@@ -181,7 +181,7 @@ namespace Builder
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toFblElement(); }
 		const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemeItemConst(); }
-		const Afbl::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
+		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 		//const LogicItem& logic() const { return *m_fblItem; }
 
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
@@ -201,7 +201,7 @@ namespace Builder
 		AppFb(AppItem* appItem, int instance, int number);
 
 		quint16 instance() const { return m_instance; }
-		quint16 opcode() const { return afb().opcode(); }		// return FB type
+		quint16 opcode() const { return afb().type().toOpCode(); }		// return FB type
 		int number() const { return m_number; }
 
 		LogicAfbParam getAfbParamByIndex(int index) const;
@@ -337,7 +337,7 @@ namespace Builder
 		ApplicationLogicCompiler& m_appLogicCompiler;
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
-		Afbl::AfbElementCollection* m_afbl = nullptr;
+		Afb::AfbElementCollection* m_afbl = nullptr;
 		ApplicationLogicData* m_appLogicData = nullptr;
 		ApplicationLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
@@ -473,9 +473,9 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
-		bool calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue);
+		bool calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue);
 
-		bool calculate_TCT_AnalogIntegralParamValue(AppFb* appFb, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue);
+		bool calculate_TCT_AnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }

@@ -32,7 +32,7 @@ namespace VFrame30
 	class SchemeLayer;
 }
 
-namespace Afbl
+namespace Afb
 {
 	class AfbElementCollection;
 }
@@ -66,7 +66,7 @@ namespace Builder
 
 		// Load Application Functional Block Library
 		//
-		bool loadAfbl(DbController *db, Afbl::AfbElementCollection* afbCollection);
+		bool loadAfbl(DbController *db, Afb::AfbElementCollection* afbCollection);
 
 		// Generate Modules Configurations Firmwares
 		//
@@ -74,11 +74,11 @@ namespace Builder
 
 		// Build Application Logic
 		//
-		bool buildApplicationLogic(DbController* db, ApplicationLogicData* appLogicData, Afbl::AfbElementCollection* afbCollection, int changesetId);
+		bool buildApplicationLogic(DbController* db, ApplicationLogicData* appLogicData, Afb::AfbElementCollection* afbCollection, int changesetId);
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet, Afbl::AfbElementCollection* afbCollection, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
+		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet, Afb::AfbElementCollection* afbCollection, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
 
 		// Compile Data Aquisition Service configuration
 		//

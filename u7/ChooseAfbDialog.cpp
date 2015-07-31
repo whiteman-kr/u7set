@@ -5,13 +5,13 @@
 int ChooseAfbDialog::m_lastSelectedIndex = -1;
 Qt::SortOrder ChooseAfbDialog::m_lastSortOrder = Qt::SortOrder::AscendingOrder;
 
-ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElement>>& elements, QWidget* parent) :
+ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::ChooseAfbDialog)
 {
 	ui->setupUi(this);
 
-	for (std::shared_ptr<Afbl::AfbElement> e : elements)
+	for (std::shared_ptr<Afb::AfbElement> e : elements)
 	{
 		m_elements.push_back(e);
 	}
@@ -26,7 +26,7 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElem
 	//
 	int index = 0;
 
-	for (std::shared_ptr<Afbl::AfbElement> e : m_elements)
+	for (std::shared_ptr<Afb::AfbElement> e : m_elements)
 	{
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		item->setText(0, e->caption());
@@ -146,7 +146,7 @@ void ChooseAfbDialog::on_m_afbTree_itemSelectionChanged()
 			return;
 		}
 
-		std::shared_ptr<Afbl::AfbElement> e = m_elements[selectedIndex];
+		std::shared_ptr<Afb::AfbElement> e = m_elements[selectedIndex];
 
 		ui->labelCaption->setText(e->caption());
 		ui->labelDescription->setPlainText(e->description());

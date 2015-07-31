@@ -8,7 +8,7 @@
 #include <QDateTime>
 #include "../VFrame30/Afb.h"
 
-using namespace Afbl;
+using namespace Afb;
 
 DialogAfblEditor::DialogAfblEditor(DbController* pDbController, QWidget *parent) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),

@@ -13,7 +13,7 @@ class ChooseAfbDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit ChooseAfbDialog(const std::vector<std::shared_ptr<Afbl::AfbElement>> &m_elements, QWidget* parent = 0);
+	explicit ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbElement>> &m_elements, QWidget* parent = 0);
 	~ChooseAfbDialog();
 
 	int index();
@@ -34,7 +34,7 @@ private slots:
 
 private:
 	Ui::ChooseAfbDialog *ui;
-	std::vector<std::shared_ptr<Afbl::AfbElement>> m_elements;
+	std::vector<std::shared_ptr<Afb::AfbElement>> m_elements;
 
 	static int m_lastSelectedIndex;
 	static Qt::SortOrder m_lastSortOrder;

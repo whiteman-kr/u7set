@@ -262,7 +262,7 @@ void DialogFileEditor::on_btnLoadFbl_clicked()
 		return;
 	}
 
-	Afbl::AfbElement afb;
+	Afb::AfbElement afb;
 
 	QString s = ui->m_text->toPlainText();
 	QByteArray textData = s.toUtf8();

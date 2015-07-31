@@ -3942,12 +3942,12 @@ void EditSchemeWidget::addFblElement()
 		return;
 	}
 
-	std::vector<std::shared_ptr<Afbl::AfbElement>> elements;
+	std::vector<std::shared_ptr<Afb::AfbElement>> elements;
 	elements.reserve(files.size());
 
 	for (auto& f : files)
 	{
-		std::shared_ptr<Afbl::AfbElement> afb = std::make_shared<Afbl::AfbElement>();
+		std::shared_ptr<Afb::AfbElement> afb = std::make_shared<Afb::AfbElement>();
 		result = afb->loadFromXml(f->data());
 
 		elements.push_back(afb);
@@ -3967,7 +3967,7 @@ void EditSchemeWidget::addFblElement()
 			return;
 		}
 
-		std::shared_ptr<Afbl::AfbElement> afb = elements[index];
+		std::shared_ptr<Afb::AfbElement> afb = elements[index];
 
 		addItem(std::make_shared<VFrame30::SchemeItemAfb>(scheme()->unit(), *(afb.get())));
 	}

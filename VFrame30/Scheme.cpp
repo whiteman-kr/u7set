@@ -544,12 +544,12 @@ namespace VFrame30
 		m_excludeFromBuild = value;
 	}
 
-	const Afbl::AfbElementCollection& Scheme::afbCollection() const
+	const Afb::AfbElementCollection& Scheme::afbCollection() const
 	{
 		return m_afbCollection;
 	}
 
-	void Scheme::setAfbCollection(const std::vector<std::shared_ptr<Afbl::AfbElement>>& elements)
+	void Scheme::setAfbCollection(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements)
 	{
 		// set new collection
 		//

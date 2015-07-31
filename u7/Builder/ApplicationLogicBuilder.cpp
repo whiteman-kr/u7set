@@ -159,7 +159,7 @@ namespace Builder
 
 	AppLogicItem::AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
 							   std::shared_ptr<VFrame30::LogicScheme> scheme,
-							   std::shared_ptr<Afbl::AfbElement> afbElement) :
+							   std::shared_ptr<Afb::AfbElement> afbElement) :
 		m_fblItem(fblItem),
 		m_scheme(scheme)
 	{
@@ -272,7 +272,7 @@ namespace Builder
 
 	bool ApplicationLogicModule::addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 			const BushContainer& bushContainer,
-			Afbl::AfbElementCollection* afbCollection,
+			Afb::AfbElementCollection* afbCollection,
 			OutputLog* log)
 	{
 		if (logicScheme == nullptr ||
@@ -299,7 +299,7 @@ namespace Builder
 		{
 			for (const std::shared_ptr<VFrame30::FblItemRect>& f : bush.fblItems)
 			{
-				std::shared_ptr<Afbl::AfbElement> afbElement;
+				std::shared_ptr<Afb::AfbElement> afbElement;
 
 				if (f->isFblElement())
 				{
@@ -805,7 +805,7 @@ namespace Builder
 			const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
-			Afbl::AfbElementCollection* afbCollection,
+			Afb::AfbElementCollection* afbCollection,
 			OutputLog* log)
 	{
 		if (bushContainer.bushes.empty() == true)
@@ -906,7 +906,7 @@ namespace Builder
 	ApplicationLogicBuilder::ApplicationLogicBuilder(DbController* db,
 													 OutputLog* log,
 													 ApplicationLogicData* appLogicData,
-													 Afbl::AfbElementCollection* afbCollection,
+													 Afb::AfbElementCollection* afbCollection,
 													 int changesetId,
 													 bool debug) :
 		m_db(db),

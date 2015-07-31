@@ -1,4 +1,5 @@
 #include "ApplicationLogicCompiler.h"
+#include "../VFrame30/Afb.h"
 
 namespace Builder
 {
@@ -49,7 +50,7 @@ namespace Builder
 	//
 
 	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment,
-													   SignalSet* signalSet, Afbl::AfbElementCollection *afblSet,
+													   SignalSet* signalSet, Afb::AfbElementCollection *afblSet,
 													   ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter,
 													   OutputLog *log) :
 		m_subsystems(subsystems),
@@ -642,7 +643,7 @@ namespace Builder
 
 		QHash<QString, int> instantiatorStrIDsMap;
 
-		for(Afb* fbl : m_afbs)
+		for(LogicAfb* fbl : m_afbs)
 		{
 			for(AppFb* appFb : m_appFbs)
 			{
@@ -705,7 +706,7 @@ namespace Builder
 			return false;
 		}
 
-		const Afbl::AfbElement& afb = appFb->afb();
+		const Afb::AfbElement& afb = appFb->afb();
 
 		quint16 fbOpcode = appFb->opcode();
 		quint16 fbInstance = appFb->instance();
@@ -717,7 +718,7 @@ namespace Builder
 
 		// iniitalization of constant params
 		//
-		for(Afbl::AfbParam afbParam : afb.params())
+		for(Afb::AfbParam afbParam : afb.params())
 		{
 			if (afbParam.operandIndex() == NOT_FB_OPERAND_INDEX)
 			{
@@ -739,15 +740,15 @@ namespace Builder
 
 			switch(afbParam.type())
 			{
-			case Afbl::AnalogIntegral:
+			case Afb::AnalogIntegral:
 				result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
 				break;
 
-			case Afbl::AnalogFloatingPoint:
+			case Afb::AnalogFloatingPoint:
 				assert(false);				// not implemented
 				break;
 
-			case Afbl::DiscreteValue:
+			case Afb::DiscreteValue:
 				paramValue = paramIntValue;
 				break;
 
@@ -776,7 +777,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue)
+	bool ModuleLogicCompiler::calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue)
 	{
 		if (appFb == nullptr || paramValue == nullptr)
 		{
@@ -786,7 +787,7 @@ namespace Builder
 
 		switch(appFb->opcode())
 		{
-		case FbType::TCT:
+		case Afb::AfbType::TCT:
 			return calculate_TCT_AnalogIntegralParamValue(appFb, param, paramIntValue, paramValue);
 
 		default:
@@ -798,7 +799,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(AppFb*, const Afbl::AfbParam& param, int paramIntValue, quint16* paramValue)
+	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(AppFb*, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue)
 	{
 		if (param.opName() == "i_counter")
 		{
@@ -1417,7 +1418,7 @@ namespace Builder
 
 		switch(fbInput.type())
 		{
-		case Afbl::AfbSignalType::Discrete:
+		case Afb::AfbSignalType::Discrete:
 			// input connected to discrete input
 			//
 			if (!constItem.isIntegral())
@@ -1433,7 +1434,7 @@ namespace Builder
 			}
 			break;
 
-		case Afbl::AfbSignalType::Analog:
+		case Afb::AfbSignalType::Analog:
 			// const connected to analog incput
 			//
 			if (!constItem.isIntegral())
@@ -1876,7 +1877,7 @@ namespace Builder
 	{
 		m_afbs.clear();
 
-		for(std::shared_ptr<LogicAfb> afbl : m_afbl->elements())
+		for(std::shared_ptr<Afb::AfbElement> afbl : m_afbl->elements())
 		{
 			m_afbs.insert(afbl);
 		}
@@ -2475,7 +2476,7 @@ namespace Builder
 	// Fbl class implementation
 	//
 
-	Afb::Afb(std::shared_ptr<LogicAfb> afb) :
+	LogicAfb::LogicAfb(std::shared_ptr<Afb::AfbElement> afb) :
 		m_afb(afb)
 	{
 		if (m_afb == nullptr)
@@ -2485,7 +2486,7 @@ namespace Builder
 		}
 	}
 
-	Afb::~Afb()
+	LogicAfb::~LogicAfb()
 	{
 	}
 
@@ -2495,7 +2496,7 @@ namespace Builder
 	// FblsMap class implementation
 	//
 
-	void AfbMap::insert(std::shared_ptr<LogicAfb> logicAfb)
+	void AfbMap::insert(std::shared_ptr<Afb::AfbElement> logicAfb)
 	{
 		if (logicAfb == nullptr)
 		{
@@ -2509,15 +2510,15 @@ namespace Builder
 			return;
 		}
 
-		Afb* afb = new Afb(logicAfb);
+		LogicAfb* afb = new LogicAfb(logicAfb);
 
-		HashedVector<QString, Afb*>::insert(afb->strID(), afb);
+		HashedVector<QString, LogicAfb*>::insert(afb->strID(), afb);
 
 		// initialize map Fbl opCode -> current instance
 		//
-		if (!m_fblInstance.contains(logicAfb->opcode()))
+		if (!m_fblInstance.contains(logicAfb->type().toOpCode()))
 		{
-			m_fblInstance.insert(logicAfb->opcode(), 0);
+			m_fblInstance.insert(logicAfb->type().toOpCode(), 0);
 		}
 
 		// add AfbElement in/out signals to m_fblsSignals map
@@ -2598,7 +2599,7 @@ namespace Builder
 			return 0;
 		}
 
-		Afb* fbl = (*this)[afbStrID];
+		LogicAfb* fbl = (*this)[afbStrID];
 
 		if (fbl == nullptr)
 		{
@@ -2613,15 +2614,15 @@ namespace Builder
 
 		if (fbl->hasRam())
 		{
-			int fblOpcode = fbl->opcode();
+			Afb::AfbType afbType = fbl->type();
 
-			if (m_fblInstance.contains(fblOpcode))
+			if (m_fblInstance.contains(afbType.toOpCode()))
 			{
-				instance = m_fblInstance[fblOpcode];
+				instance = m_fblInstance[afbType.toOpCode()];
 
 				instance++;
 
-				m_fblInstance[fblOpcode] = instance;
+				m_fblInstance[afbType.toOpCode()] = instance;
 
 				m_nonRamFblInstance.insert(instantiatorID, instance);
 			}
@@ -2640,15 +2641,15 @@ namespace Builder
 			}
 			else
 			{
-				int fblOpcode = fbl->opcode();
+				Afb::AfbType afbType = fbl->type();
 
-				if (m_fblInstance.contains(fblOpcode))
+				if (m_fblInstance.contains(afbType.toOpCode()))
 				{
-					instance = m_fblInstance[fblOpcode];
+					instance = m_fblInstance[afbType.toOpCode()];
 
 					instance++;
 
-					m_fblInstance[fblOpcode] = instance;
+					m_fblInstance[afbType.toOpCode()] = instance;
 
 					m_nonRamFblInstance.insert(instantiatorID, instance);
 				}
@@ -2693,12 +2694,12 @@ namespace Builder
 
 	void AfbMap::clear()
 	{
-		for(Afb* fbl : *this)
+		for(LogicAfb* fbl : *this)
 		{
 			delete fbl;
 		}
 
-		HashedVector<QString, Afb*>::clear();
+		HashedVector<QString, LogicAfb*>::clear();
 	}
 
 
@@ -2987,15 +2988,15 @@ namespace Builder
 
 		SignalType signalType = SignalType::Discrete;
 
-		Afbl::AfbSignalType st = s.type();
+		Afb::AfbSignalType st = s.type();
 
 		switch(st)
 		{
-		case Afbl::AfbSignalType::Analog:
+		case Afb::AfbSignalType::Analog:
 			signalType = SignalType::Analog;
 			break;
 
-		case Afbl::AfbSignalType::Discrete:
+		case Afb::AfbSignalType::Discrete:
 			signalType = SignalType::Discrete;
 			break;
 

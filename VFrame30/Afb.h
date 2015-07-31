@@ -3,9 +3,80 @@
 #include "../include/ProtoSerialization.h"
 #include "DebugInstCounter.h"
 
-namespace Afbl
+namespace Afb
 {
-	// Тип сигнала элемента
+	class AfbType;
+}
+
+bool operator== (const Afb::AfbType& t1, const Afb::AfbType& t2);
+bool operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2);
+bool operator< (const Afb::AfbType& t1, const Afb::AfbType& t2);
+
+namespace Afb
+{
+	class VFRAME30LIBSHARED_EXPORT AfbType
+	{
+
+		friend bool ::operator== (const Afb::AfbType& t1, const Afb::AfbType& t2);
+		friend bool ::operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2);
+		friend bool ::operator< (const Afb::AfbType& t1, const Afb::AfbType& t2);
+
+	public:
+		// This type is actual OpCode from the Application Functional Block Library documentaion
+		//
+		enum Type
+		{
+			UNKNOWN = 0,
+			AND = 1,
+			OR = 2,
+			XOR = 3,
+			NOT = 4,
+			TCT = 5,
+			SR_RS = 6,
+			CTUD = 7,
+			MAJ = 8,
+			SRSST = 9,
+			BCOD = 10,
+			BDEC = 11,
+			BCOMP = 12,
+			LAG = 13,
+			MID = 14,
+			ADD = 15,
+			SCAL = 16,
+			LINFUN = 17,
+			SQRT = 18,
+			SIN = 19,
+			COS = 20,
+			DIV = 21,
+			MULT = 22,
+			ABS = 23,
+			LN = 24,
+			LIM = 25,
+			MIN_MAX = 26,
+			PID = 27,
+		};
+
+		AfbType();
+		AfbType(const AfbType& t);
+		AfbType(AfbType::Type t);
+
+		void fromOpCode(int opCode);
+		int toOpCode() const;
+
+		QString text() const;
+		QString toText() const;
+		static QString toText(int opCode);
+
+	private:
+		Type m_type;
+	};
+}
+
+
+namespace Afb
+{
+	//
+	// Signal type
 	//
 	enum AfbSignalType
 	{
@@ -13,7 +84,8 @@ namespace Afbl
 		Discrete
 	};
 
-	// Тип параметра элемента
+	//
+	// Param type
 	//
 	enum AfbParamType
 	{
@@ -23,9 +95,7 @@ namespace Afbl
 	};
 
 	//
-	//
-	//	AfbSignal	- Сигнал AFB
-	//
+	// AfbSignal
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbSignal : public QObject
 	{
@@ -82,9 +152,7 @@ private:
 
 
 	//
-	//
-	//	CFblElementParam	- Параметр FBL элемента
-	//
+	// AfbParam
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbParam
 	{
@@ -152,19 +220,19 @@ private:
         // Data
 		//
 	private:
-		QString m_opName;				// Наименование параметра
-		QString m_caption;				// Наименование параметра
+		QString m_opName;			// Param name
+		QString m_caption;			// Param caption
 		bool m_visible;
-		AfbParamType m_type;			// Тип данных параметра
+		AfbParamType m_type;		// Param type
 		bool m_instantiator;
 		bool m_user;
 		QString m_changedScript;
 
-		QVariant m_value;			// Значение параметра
-		QVariant m_defaultValue;	// Значение по умолчанию
+		QVariant m_value;			// Param value
+		QVariant m_defaultValue;	// Param default value
 
-		QVariant m_lowLimit;		// Нижний предел параметра
-		QVariant m_highLimit;		// Верхний предел параметра
+		QVariant m_lowLimit;		// Low limit for param
+		QVariant m_highLimit;		// High limit for param
 
 		int m_operandIndex;
         int m_size;
@@ -172,9 +240,7 @@ private:
 	
 
 	//
-	//
-	//	FblElement	- Application Functioanl Block Description
-	//
+	// FblElement
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbElement :
 		public QObject,
@@ -231,8 +297,9 @@ private:
 		QString description() const;
 		void setDescription(const QString& value);
 
-		unsigned int opcode() const;
-		void setOpcode(unsigned int value);
+		const Afb::AfbType& type() const;
+		Afb::AfbType& type();
+		void setType(const AfbType& value);
 
 		bool hasRam() const;
 		void setHasRam(bool value);
@@ -264,7 +331,7 @@ private:
 		QString m_strID;
 		QString m_caption;
 		QString m_description;
-		unsigned int m_opcode;
+		Afb::AfbType m_type;
 		bool m_hasRam;
 		bool m_requiredStart;
 
@@ -280,9 +347,7 @@ private:
 	};
 
 	//
-	//
-	//	FblElementCollection - Коллекция прототипов FBL элементов
-	//
+	//	AfbElementCollection
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbElementCollection :
 		public VFrame30::DebugInstCounter<AfbElementCollection>

@@ -19,7 +19,7 @@ namespace VFrame30
 		SchemeItemAfb(void);
 	public:
 		explicit SchemeItemAfb(SchemeUnit unit);
-		SchemeItemAfb(SchemeUnit unit, const Afbl::AfbElement& fblElement);
+		SchemeItemAfb(SchemeUnit unit, const Afb::AfbElement& fblElement);
 
 		virtual ~SchemeItemAfb(void);
 
@@ -47,11 +47,11 @@ namespace VFrame30
 
 		// Set Afb element parameters
 		//
-		bool setAfbElementParams(Afbl::AfbElement* afbElement) const;
+		bool setAfbElementParams(Afb::AfbElement* afbElement) const;
 
 	protected:
 		void addQtDynamicParamProperties();
-		bool executeScript(const QString& script, const Afbl::AfbElement& afb);
+		bool executeScript(const QString& script, const Afb::AfbElement& afb);
 		Q_INVOKABLE int getParamIntValue(const QString& name);
 
 		Q_INVOKABLE void addInputSignal(QString caption, int type, int opIndex, int size);
@@ -64,11 +64,11 @@ namespace VFrame30
 	public:
 		const QString& afbStrID() const;
 
-		const std::vector<Afbl::AfbParam>& params() const;
+		const std::vector<Afb::AfbParam>& params() const;
 
 	private:
 		QString m_afbStrID;
-		std::vector<Afbl::AfbParam> m_params;
+		std::vector<Afb::AfbParam> m_params;
 	};
 
 }

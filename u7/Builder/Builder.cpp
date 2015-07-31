@@ -151,7 +151,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Loading AFB elements"));
 
-			Afbl::AfbElementCollection afbCollection;
+			Afb::AfbElementCollection afbCollection;
 
 			ok = loadAfbl(&db, &afbCollection);
 
@@ -388,7 +388,7 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildWorkerThread::loadAfbl(DbController* db, Afbl::AfbElementCollection* afbCollection)
+	bool BuildWorkerThread::loadAfbl(DbController* db, Afb::AfbElementCollection* afbCollection)
 	{
 		if (db == nullptr ||
 			afbCollection == nullptr)
@@ -412,7 +412,7 @@ namespace Builder
 
 		// Get files from the DB
 		//
-		std::vector<std::shared_ptr<Afbl::AfbElement>> afbs;
+		std::vector<std::shared_ptr<Afb::AfbElement>> afbs;
 		afbs.reserve(files.size());
 
 		for (DbFileInfo& fi : files)
@@ -426,7 +426,7 @@ namespace Builder
 				continue;
 			}
 
-			std::shared_ptr<Afbl::AfbElement> e = std::make_shared<Afbl::AfbElement>();
+			std::shared_ptr<Afb::AfbElement> e = std::make_shared<Afb::AfbElement>();
 
 			QXmlStreamReader reader(f->data());
 
@@ -473,7 +473,7 @@ namespace Builder
 
 	bool BuildWorkerThread::buildApplicationLogic(DbController* db,
 												  ApplicationLogicData* appLogicData,
-												  Afbl::AfbElementCollection* afbCollection,
+												  Afb::AfbElementCollection* afbCollection,
 												  int changesetId)
 	{
 		if (db == nullptr ||
@@ -510,7 +510,7 @@ namespace Builder
 	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
 													Hardware::DeviceObject* equipment,
 													SignalSet* signalSet,
-													Afbl::AfbElementCollection* afbCollection,
+													Afb::AfbElementCollection* afbCollection,
 													ApplicationLogicData* appLogicData,
 													BuildResultWriter* buildResultWriter)
 	{

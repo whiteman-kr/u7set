@@ -3,12 +3,137 @@
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
-namespace Afbl
+bool operator== (const Afb::AfbType& t1, const Afb::AfbType& t2)
 {
+	return t1.m_type == t2.m_type;
+}
+
+bool operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2)
+{
+	return t1.m_type != t2.m_type;
+}
+
+
+bool operator< (const Afb::AfbType& t1, const Afb::AfbType& t2)
+{
+	return t1.m_type < t2.m_type;
+}
+
+namespace Afb
+{
+	AfbType::AfbType() :
+		m_type(Type::UNKNOWN)
+	{
+	}
+
+	AfbType::AfbType(const AfbType& t) :
+		m_type(t.m_type)
+	{
+	}
+
+	AfbType::AfbType(AfbType::Type t) :
+		m_type(t)
+	{
+	}
+
+	void AfbType::fromOpCode(int opCode)
+	{
+#ifdef Q_DEBUG
+		if (toText(opCode) == "UNKNOWN")
+		{
+			assert(false);
+			m_type = Type::UNKNOWN;
+			return;
+		}
+#endif
+		m_type = static_cast<Type>(opCode);
+		return;
+	}
+
+	int AfbType::toOpCode() const
+	{
+		return static_cast<int>(m_type);
+	}
+
+	QString AfbType::text() const
+	{
+		return toText(toOpCode());
+	}
+
+	QString AfbType::toText() const
+	{
+		return toText(toOpCode());
+	}
+
+	QString AfbType::toText(int opCode)
+	{
+		switch (static_cast<Type>(opCode))
+		{
+			case Type::UNKNOWN:
+				return "UNKNOWN";
+			case Type::AND:
+				return "AND";
+			case Type::OR:
+				return "OR";
+			case Type::XOR:
+				return "XOR";
+			case Type::NOT:
+				return "NOT";
+			case Type::TCT:
+				return "TCT";
+			case Type::SR_RS:
+				return "SR_RS";
+			case Type::CTUD:
+				return "CTUD";
+			case Type::MAJ:
+				return "MAJ";
+			case Type::SRSST:
+				return "SRSST";
+			case Type::BCOD:
+				return "BCOD";
+			case Type::BDEC:
+				return "BDEC";
+			case Type::BCOMP:
+				return "BCOMP";
+			case Type::LAG:
+				return "LAG";
+			case Type::MID:
+				return "MID";
+			case Type::ADD:
+				return "ADD";
+			case Type::SCAL:
+				return "SCAL";
+			case Type::LINFUN:
+				return "LINFUN";
+			case Type::SQRT:
+				return "SQRT";
+			case Type::SIN:
+				return "SIN";
+			case Type::COS:
+				return "COS";
+			case Type::DIV:
+				return "DIV";
+			case Type::MULT:
+				return "MULT";
+			case Type::ABS:
+				return "ABS";
+			case Type::LN:
+				return "LN";
+			case Type::LIM:
+				return "LIM";
+			case Type::MIN_MAX:
+				return "MIN_MAX";
+			case Type::PID:
+				return "PID";
+			default:
+				assert(false);
+				return "UNKNOWN";
+		}
+	}
+
+
 	//
-	//
-	//							CFblElementSignal		
-	//
+	//							AfbSignal
 	//
 	AfbSignal::AfbSignal(void):
 		m_type(AfbSignalType::Analog),
@@ -626,8 +751,7 @@ namespace Afbl
 	//
 	//
 
-	AfbElement::AfbElement(void):
-		m_opcode(0),
+	AfbElement::AfbElement(void) :
 		m_hasRam(false),
 		m_requiredStart(true)
 	{
@@ -654,7 +778,7 @@ namespace Afbl
 		m_strID = that.m_strID;
 		m_caption = that.m_caption;
 		m_description = that.m_description;
-		m_opcode = that.m_opcode;
+		m_type = that.m_type;
 		m_hasRam = that.m_hasRam;
 		m_requiredStart = that.m_requiredStart;
 
@@ -740,7 +864,12 @@ namespace Afbl
 
 					if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
 					{
-						setOpcode(xmlReader->readElementText().toInt());
+						int opCode = xmlReader->readElementText().toInt();
+
+						Afb::AfbType type;
+						type.fromOpCode(opCode);
+
+						setType(type);
 					}
 
 					if (QString::compare(xmlReader->name().toString(), "HasRam", Qt::CaseInsensitive) == 0)
@@ -899,7 +1028,7 @@ namespace Afbl
 		xmlWriter->writeStartElement("Properties");
 		xmlWriter->writeTextElement("Caption", caption());
 		xmlWriter->writeTextElement("Description", description());
-		xmlWriter->writeTextElement("OpCode", QString::number(opcode()));
+		xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
 		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
 		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
 		xmlWriter->writeEndElement();
@@ -1133,15 +1262,22 @@ namespace Afbl
 		m_description = value;
 	}
 
-	// Opcode
+	// Type - Opcode
 	//
-	unsigned int AfbElement::opcode() const
+
+	const Afb::AfbType& AfbElement::type() const
 	{
-		return m_opcode;
+		return m_type;
 	}
-	void AfbElement::setOpcode(unsigned int value)
+
+	Afb::AfbType& AfbElement::type()
 	{
-		m_opcode = value;
+		return m_type;
+	}
+
+	void AfbElement::setType(const Afb::AfbType& value)
+	{
+		m_type = value;
 	}
 
 	bool AfbElement::hasRam() const
@@ -1322,7 +1458,7 @@ namespace Afbl
 
 		for (int i = 0; i < message.elements_size(); i++)
 		{
-			std::shared_ptr<Afbl::AfbElement> e = std::make_shared<Afbl::AfbElement>();
+			std::shared_ptr<Afb::AfbElement> e = std::make_shared<Afb::AfbElement>();
 			e->loadFromXml(message.elements(i));
 
 			m_elements.push_back(e);

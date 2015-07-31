@@ -26,7 +26,7 @@ namespace VFrame30
 	class FblItemRect;
 }
 
-namespace Afbl
+namespace Afb
 {
 	class AfbElement;
 	class AfbElementCollection;
@@ -82,7 +82,7 @@ namespace Builder
 		//
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::LogicScheme> m_scheme;
-		Afbl::AfbElement m_afbElement;							// Specific instance with initialized Params
+		Afb::AfbElement m_afbElement;							// Specific instance with initialized Params
 
 		// Methods
 		//
@@ -90,7 +90,7 @@ namespace Builder
 		AppLogicItem(const AppLogicItem&) = default;
 		AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
 				  std::shared_ptr<VFrame30::LogicScheme> scheme,
-				  std::shared_ptr<Afbl::AfbElement> afbElement);
+				  std::shared_ptr<Afb::AfbElement> afbElement);
 
 
 		// Items can be kept in set, it is just comparing m_fblItem pointres
@@ -116,7 +116,7 @@ namespace Builder
 
 		bool addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 					   const BushContainer& bushContainer,
-					   Afbl::AfbElementCollection* afbCollection,
+					   Afb::AfbElementCollection* afbCollection,
 					   OutputLog* log);
 
 		bool orderItems(OutputLog* log);
@@ -171,7 +171,7 @@ namespace Builder
 		bool addData(const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
-			Afbl::AfbElementCollection* afbCollection,
+			Afb::AfbElementCollection* afbCollection,
 			OutputLog* log);
 
 		bool orderItems(OutputLog* log);
@@ -201,7 +201,7 @@ namespace Builder
 		ApplicationLogicBuilder(DbController* db,
 								OutputLog* log,
 								ApplicationLogicData* appLogicData,
-								Afbl::AfbElementCollection* afbCollection,
+								Afb::AfbElementCollection* afbCollection,
 								int changesetId,
 								bool debug);
 
@@ -247,7 +247,7 @@ namespace Builder
 		int m_debug = false;
 
 		ApplicationLogicData* m_applicationData = nullptr;
-		Afbl::AfbElementCollection* m_afbCollection = nullptr;
+		Afb::AfbElementCollection* m_afbCollection = nullptr;
 	};
 
 }

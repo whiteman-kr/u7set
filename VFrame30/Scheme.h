@@ -94,8 +94,8 @@ namespace VFrame30
 		bool excludeFromBuild() const;
 		void setExcludeFromBuild(bool value);
 
-		const Afbl::AfbElementCollection& afbCollection() const;
-		void setAfbCollection(const std::vector<std::shared_ptr<Afbl::AfbElement>>& elements);
+		const Afb::AfbElementCollection& afbCollection() const;
+		void setAfbCollection(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements);
 		
 	public:
 		std::vector<std::shared_ptr<SchemeLayer>> Layers;
@@ -115,7 +115,7 @@ namespace VFrame30
 
 		bool m_excludeFromBuild = false;	// Exclude Scheme from build or any other processing
 
-		Afbl::AfbElementCollection m_afbCollection;
+		Afb::AfbElementCollection m_afbCollection;
 	};
 
 
