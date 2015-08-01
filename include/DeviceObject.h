@@ -19,6 +19,15 @@ namespace Hardware
 	void Shutdwon();
 
 	class DeviceObject;
+	class DeviceRoot;
+	class DeviceSystem;
+	class DeviceRack;
+	class DeviceChassis;
+	class DeviceModule;
+	class DeviceController;
+	class Workstation;
+	class Software;
+	class DeviceSignal;
 
 	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
 	//
@@ -169,6 +178,28 @@ namespace Hardware
 
 		virtual DeviceType deviceType() const;
 		Q_INVOKABLE int jsDeviceType() const;
+
+		Q_INVOKABLE bool isRoot() const;
+		Q_INVOKABLE bool isSystem() const;
+		Q_INVOKABLE bool isRack() const;
+		Q_INVOKABLE bool isChassis() const;
+		Q_INVOKABLE bool isModule() const;
+		Q_INVOKABLE bool isController() const;
+		Q_INVOKABLE bool isWorkstation() const;
+		Q_INVOKABLE bool isSoftware() const;
+		Q_INVOKABLE bool isSignal() const;
+
+		const Hardware::DeviceSystem* toSystem() const;
+		Hardware::DeviceSystem* toSystem();
+
+		const Hardware::DeviceRack* toRack() const;
+		Hardware::DeviceRack* toRack();
+
+		const Hardware::DeviceChassis* toChassis() const;
+		Hardware::DeviceChassis* toChassis();
+
+		const Hardware::DeviceModule* toModule() const;
+		Hardware::DeviceModule* toModule();
 
 		QString fileExtension() const;
 		static QString fileExtension(DeviceType device);

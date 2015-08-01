@@ -761,6 +761,114 @@ namespace Hardware
 		return static_cast<int>(deviceType());
 	}
 
+	bool DeviceObject::isRoot() const
+	{
+		return deviceType() == DeviceType::Root;
+	}
+
+	bool DeviceObject::isSystem() const
+	{
+		return deviceType() == DeviceType::System;
+	}
+
+	bool DeviceObject::isRack() const
+	{
+		return deviceType() == DeviceType::Rack;
+	}
+
+	bool DeviceObject::isChassis() const
+	{
+		return deviceType() == DeviceType::Chassis;
+	}
+
+	bool DeviceObject::isModule() const
+	{
+		return deviceType() == DeviceType::Module;
+	}
+
+	bool DeviceObject::isController() const
+	{
+		return deviceType() == DeviceType::Controller;
+	}
+
+	bool DeviceObject::isWorkstation() const
+	{
+		return deviceType() == DeviceType::Workstation;
+	}
+
+	bool DeviceObject::isSoftware() const
+	{
+		return deviceType() == DeviceType::Software;
+	}
+
+	bool DeviceObject::isSignal() const
+	{
+		return deviceType() == DeviceType::Signal;
+	}
+
+	const Hardware::DeviceSystem* DeviceObject::toSystem() const
+	{
+		const Hardware::DeviceSystem* d = dynamic_cast<const Hardware::DeviceSystem*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
+	Hardware::DeviceSystem* DeviceObject::toSystem()
+	{
+		Hardware::DeviceSystem* d = dynamic_cast<Hardware::DeviceSystem*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
+	const Hardware::DeviceRack* DeviceObject::toRack() const
+	{
+		const Hardware::DeviceRack* d = dynamic_cast<const Hardware::DeviceRack*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
+	Hardware::DeviceRack* DeviceObject::toRack()
+	{
+		Hardware::DeviceRack* d = dynamic_cast<Hardware::DeviceRack*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
+	const Hardware::DeviceChassis* DeviceObject::toChassis() const
+	{
+		const Hardware::DeviceChassis* d = dynamic_cast<const Hardware::DeviceChassis*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
+	Hardware::DeviceChassis* DeviceObject::toChassis()
+	{
+		Hardware::DeviceChassis* d = dynamic_cast<Hardware::DeviceChassis*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
+	const Hardware::DeviceModule* DeviceObject::toModule() const
+	{
+		const Hardware::DeviceModule* d = dynamic_cast<const Hardware::DeviceModule*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
+	Hardware::DeviceModule* DeviceObject::toModule()
+	{
+		Hardware::DeviceModule* d = dynamic_cast<Hardware::DeviceModule*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
 
 	QString DeviceObject::fileExtension() const
 	{

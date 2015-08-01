@@ -3,6 +3,7 @@
 #include "../include/DbController.h"
 #include "Settings.h"
 #include "CheckInDialog.h"
+#include "Subsystem.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -1273,6 +1274,28 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 		assert(device->fileInfo().fileId() == fileInfo.fileId());
 		assert(device->presetRoot() == true);
 		return;
+	}
+
+	// If this is LM modlue, then set SusbSysID to the default value
+	//
+	if (device->isModule() == true)
+	{
+		Hardware::DeviceModule* module = device->toModule();
+
+		if (module != nullptr && module->moduleFamily() == Hardware::DeviceModule::LM)
+		{
+			// Get susbsystems
+			//
+			Hardware::SubsystemStorage subsystems;
+			QString errorCode;
+
+			if (subsystems.load(db(), errorCode) == true && subsystems.count() > 0)
+			{
+				std::shared_ptr<Hardware::Subsystem> subsystem = subsystems.get(0);
+
+				module->setSubSysID(subsystem->strId());
+			}
+		}
 	}
 
 	// Reset fileInfo in all objects
