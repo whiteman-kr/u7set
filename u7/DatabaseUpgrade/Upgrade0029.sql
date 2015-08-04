@@ -4,17 +4,25 @@
 --
 -------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION get_file_state(file_id integer)
-RETURNS ObjectState AS
+RETURNS objectstate AS
 $BODY$
 DECLARE
 	checked_out boolean;
+	was_deleted boolean;
 	action int;
 	user_id int;
 	return_value ObjectState;
 BEGIN
+	-- check if file exists
+	IF (EXISTS(SELECT * FROM File WHERE FileID = file_id) = FALSE)
+	THEN
+		RAISE EXCEPTION 'File % is not exists', file_id;
+	END IF;
+
+	--
 	checked_out := (SELECT count(*) > 0 FROM CheckOut WHERE FileID = file_id);
 
-	if (checked_out = TRUE)
+	IF (checked_out = TRUE)
 	THEN
 		action := (SELECT FI.action
 				FROM File F, FileInstance FI
@@ -35,7 +43,9 @@ BEGIN
 					CS.ChangesetID = FI.ChangesetID);
 	END IF;
 
-	return_value := ROW(file_id, (SELECT count(*) = 0 FROM File WHERE FileID = file_id), checked_out, action, user_id, 0);
+	was_deleted := (SELECT Deleted FROM File WHERE FileID = file_id);
+
+	return_value := ROW(file_id, was_deleted, checked_out, action, user_id, 0);
 	RETURN return_value;
 END
 $BODY$
@@ -158,9 +168,7 @@ BEGIN
 
 	if (checked_out_instance_id IS NOT NULL)
 	THEN
-		PERFORM undo_changes(user_id, ARRAY[file_id]);
-
-		result := get_file_state(file_id);
+		result := undo_changes(user_id, ARRAY[file_id]);
 		RETURN result;
 	END IF;
 
@@ -182,7 +190,7 @@ LANGUAGE plpgsql;
 DROP FUNCTION undo_changes(integer, integer[]);
 
 CREATE OR REPLACE FUNCTION undo_changes(user_id integer, file_ids integer[])
-RETURNS SETOF ObjectState AS
+RETURNS SETOF objectstate AS
 $BODY$
 DECLARE
 	WasCheckedOut int;
@@ -225,7 +233,13 @@ BEGIN
 
 	FOREACH file_id IN ARRAY file_ids
 	LOOP
-		file_result := get_file_state(file_id);
+		IF (EXISTS(SELECT * FROM File WHERE FileID = file_id) = FALSE)
+		THEN
+			file_result := ROW(file_id, true, false, 3, user_id, 0);	-- File was totaly removed
+		ELSE
+			file_result := get_file_state(file_id);
+		END IF;
+
 		RETURN NEXT file_result;
 	END LOOP;
 
@@ -233,6 +247,7 @@ BEGIN
 END;
 $BODY$
 LANGUAGE plpgsql;
+
 
 
 -------------------------------------------------------------------------------
