@@ -297,6 +297,11 @@ protected slots:
 
 	void addFblElement();
 
+	void onLeftKey();
+	void onRightKey();
+	void onUpKey();
+	void onDownKey();
+
 	// Properties
 	//
 public:
@@ -464,6 +469,7 @@ private:
 
 	// --
 	// End of ConextMenu
+
 };
 
 

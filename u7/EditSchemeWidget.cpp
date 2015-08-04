@@ -1884,6 +1884,22 @@ void EditSchemeWidget::createActions()
 
 void EditSchemeWidget::keyPressEvent(QKeyEvent* e)
 {
+	switch (e->key())
+	{
+		case Qt::Key_Left:
+			onLeftKey();
+			return;
+		case Qt::Key_Right:
+			onRightKey();
+			return;
+		case Qt::Key_Up:
+			onUpKey();
+			return;
+		case Qt::Key_Down:
+			onDownKey();
+			return;
+	}
+
 	BaseSchemeWidget::keyPressEvent(e);
 
 	// Show properties dialog
@@ -3971,6 +3987,66 @@ void EditSchemeWidget::addFblElement()
 
 		addItem(std::make_shared<VFrame30::SchemeItemAfb>(scheme()->unit(), *(afb.get())));
 	}
+
+	return;
+}
+
+void EditSchemeWidget::onLeftKey()
+{
+	if (selectedItems().empty() == true)
+	{
+		assert(selectedItems().empty() != true);
+		return;
+	}
+
+	double dif = -schemeView()->scheme()->gridSize();
+
+	m_editEngine->runMoveItem(dif, 0, selectedItems(), snapToGrid());
+
+	return;
+}
+
+void EditSchemeWidget::onRightKey()
+{
+	if (selectedItems().empty() == true)
+	{
+		assert(selectedItems().empty() != true);
+		return;
+	}
+
+	double dif = schemeView()->scheme()->gridSize();
+
+	m_editEngine->runMoveItem(dif, 0, selectedItems(), snapToGrid());
+
+	return;
+}
+
+void EditSchemeWidget::onUpKey()
+{
+	if (selectedItems().empty() == true)
+	{
+		assert(selectedItems().empty() != true);
+		return;
+	}
+
+	double dif = -schemeView()->scheme()->gridSize();
+
+	m_editEngine->runMoveItem(0, dif, selectedItems(), snapToGrid());
+
+	return;
+}
+
+void EditSchemeWidget::onDownKey()
+{
+	if (selectedItems().empty() == true)
+	{
+		assert(selectedItems().empty() != true);
+		return;
+	}
+
+	double dif = schemeView()->scheme()->gridSize();
+
+	m_editEngine->runMoveItem(0, dif, selectedItems(), snapToGrid());
 
 	return;
 }
