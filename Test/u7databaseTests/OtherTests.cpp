@@ -9,7 +9,20 @@ OtherTests::OtherTests()
 
 void OtherTests::get_project_versionTest()
 {
-	QCOMPARE(OtherTests::get_project_version(), true);
+	QSqlQuery query;
+
+	bool ok = query.exec("SELECT get_project_version();");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int result = query.value(0).toInt();
+
+	ok = query.exec("SELECT MAX(versionNo) FROM version");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(result == query.value(0).toInt(), qPrintable("Error: wrong project version"));
 }
 
 void OtherTests::get_unitsTest()
@@ -18,8 +31,8 @@ void OtherTests::get_unitsTest()
 	int rowNumber=0;
 
 	bool ok = query.exec("SELECT COUNT(*) FROM unit");
-	QVERIFY2(ok == true, qPrintable(functionQuery.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(functionQuery.lastError().databaseText()));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int rowCount = query.value(0).toInt();
 
 	ok = functionQuery.exec("SELECT * FROM unit ORDER BY unitid");
@@ -40,43 +53,4 @@ void OtherTests::get_unitsTest()
 	}
 
 	QVERIFY2(rowNumber = rowCount, qPrintable("Error: different nomber of rows"));
-}
-
-bool OtherTests::get_project_version()
-{
-	QSqlQuery query;
-	bool ok = query.exec("SELECT get_project_version();");
-	if (ok == false)
-	{
-		qDebug() << query.lastError().databaseText();
-		return false;
-	}
-
-	ok = query.first();
-	if (ok == false)
-	{
-		qDebug() << query.lastError().databaseText();
-		return false;
-	}
-
-	int result = query.value(0).toInt();
-
-	if (query.exec("SELECT MAX(versionNo) FROM version") == false)
-	{
-		qDebug() << query.lastError().databaseText();
-		return false;
-	}
-
-	if (query.first() == false)
-	{
-		qDebug() << query.lastError().databaseText();
-		return false;
-	}
-
-	if (result != query.value(0))
-	{
-		return false;
-	}
-
-	return true;
 }

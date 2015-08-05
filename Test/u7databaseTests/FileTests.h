@@ -23,7 +23,6 @@ public:
 private slots:
 	void initTestCase();
 	void cleanupTestCase();
-	void fileExistsTest_data();
 	void fileExistsTest();
 	void filesExistTest_data();
 	void filesExistTest();
@@ -43,19 +42,24 @@ private slots:
 	void get_file_historyTest();
 	void get_file_stateTest();
 	void get_last_changesetTest();
+	void get_file_IdIntegetTextTest();
+	void get_file_IdIntegetrIntegerTextTest();
+	void get_file_infoTest();
+	void get_latest_file_versionTest();
+	void get_file_listTest();
+	void get_latest_file_tree_versionTest();
 
 public:
 	static bool fileExists(int fileID);
 	static QString filesExist(QString fileID);
 	static bool add_file(int userId, QString fileName, int parentId, QString fileData);
 	static bool is_file_checkedout(int fileId);
-	static bool is_any_checked_out();
 	static int file_has_children(int user_id, int fileId);
 	static bool delete_file(int userId, int fileId);
 
 	int m_firstUserForTest = -1;
 	int m_secondUserForTest = -1;
-	static const int maxValue = 9999999;
+	static const int maxValueId = 9999999;
 
 private:
 	static void getObjectState(QSqlQuery& q, ObjectState &os);

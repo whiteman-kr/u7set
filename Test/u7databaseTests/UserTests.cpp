@@ -17,116 +17,24 @@ void UserTests::cleanupTestCase()
 {
 }
 
-void UserTests::createUserTest_data()
-{
-	QTest::addColumn<QString>("parentUser");
-	QTest::addColumn<QString>("userName");
-	QTest::addColumn<QString>("firstName");
-	QTest::addColumn<QString>("lastName");
-	QTest::addColumn<QString>("password");
-	QTest::addColumn<bool>("isAdmin");
-	QTest::addColumn<bool>("isReadOnly");
-	QTest::addColumn<bool>("isDisabled");
-	QTest::addColumn<bool>("Result");
-
-	QTest::newRow("createUserParentAdmin") << "1" << "TestUser1" << "Jack" << "Toaster" << "qwerty" << false << false << false << true;
-	QTest::newRow("createUserParentUser") << "2" << "TestUser2" << "Jack" << "Toaster" << "qwerty" << false << false << false << false;
-	QTest::newRow("createAdministratorParentUser") << "2" << "TestUser3" << "Jack" << "Toaster" << "qwerty" << true << false << false << false;
-	QTest::newRow("createAdministratorParentAdministrator") << "1" << "TestUser4" << "Jack" << "Toaster" << "qwerty" << true << false << false << true;
-	QTest::newRow("createUserAlreadyExists") << "1" << "TestUser1" << "Jack" << "Toaster" << "qwerty" << true << false << false << false;
-	QTest::newRow("createDisabledUser") << "1" << "TestUser5" << "Jack" << "Toaster" << "qwerty" << false << false << true << true;
-	QTest::newRow("createReadOnlyUser") << "1" << "TestUser6" << "Jack" << "Toaster" << "qwerty" << false << true << false << true;
-	QTest::newRow("createUserRussianSymbols") << "1" << "TestUser17" << "Тестер" << "Тестеров" << "пароль" << false << false << false << true;
-}
-
 void UserTests::createUserTest()
-{
-	QFETCH(QString, parentUser);
-	QFETCH(QString, userName);
-	QFETCH(QString, firstName);
-	QFETCH(QString, lastName);
-	QFETCH(QString, password);
-	QFETCH(bool, isAdmin);
-	QFETCH(bool, isReadOnly);
-	QFETCH(bool, isDisabled);
-	QFETCH(bool, Result);
-
-	QCOMPARE(UserTests::createUserTest(parentUser, userName, firstName, lastName, password, isAdmin, isReadOnly, isDisabled), Result);
-}
-
-void UserTests::getUserIDTest_data()
-{
-	QTest::addColumn<QString>("login");
-	QTest::addColumn<QString>("password");
-	QTest::addColumn<int>("result");
-
+{	
 	QSqlQuery query;
-	bool ok = query.exec("SELECT create_user (1, 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', false, false, false);");
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QSqlQuery tempQuery;
 
-	QTest::newRow("TestTrueLoginPassword") << "getUserIdTest" << "getUserIdTest" << query.value("create_user").toInt();
-	QTest::newRow("TestTrueLoginFalsePassword") << "getUserIdTest" << "abc" << 0;
-	QTest::newRow("TestFalseLoginTruePassword") << "def" << "getUserIdTest" << 0;
-	QTest::newRow("TestAllFalse") << "abc" << "def" << 0;
-}
+	// Create user parent Admin
+	//
 
-void UserTests::getUserIDTest()
-{
-	QFETCH(QString, login);
-	QFETCH(QString, password);
-	QFETCH(int, result);
+	QString parentUser = "1";
+	QString userName = "TestUser1";
+	QString firstName = "Jack";
+	QString lastName = "Toaster";
+	QString password = "qwerty";
+	QString administrator = "false";
+	QString readOnly = "false";
+	QString disabled = "false";
 
-	QCOMPARE(UserTests::getUserIdTest(login, password), result);
-}
-
-void UserTests::isAdminTest_data()
-{
-	QTest::addColumn<int>("userID");
-	QTest::addColumn<bool>("result");
-
-
-	QSqlQuery query;
-
-	bool ok = query.exec("SELECT create_user (1, 'AdminTest', 'TEST', 'TEST', 'TEST', false, false, false);");
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	int m_isAdminTempDataID = query.value("create_user").toInt();
-
-	ok = query.exec("SELECT create_user (1, 'AdminTest1', 'TEST', 'TEST', 'TEST', false, false, false);");
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	int m_isAdminTempDataNullID = query.value("create_user").toInt();
-
-	ok = query.exec(("DELETE FROM users WHERE username='AdminTest1'"));
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-
-	QTest::newRow("AdminTest") << 1 << true;
-	QTest::newRow("NoAdminTest") << m_isAdminTempDataID << false;
-	QTest::newRow("NullUserTest") << m_isAdminTempDataNullID << false;
-}
-
-void UserTests::isAdminTest()
-{
-	QFETCH(int, userID);
-	QFETCH(bool, result);
-
-	QCOMPARE(UserTests::isAdmin(userID), result);
-}
-
-
-
-
-bool UserTests::createUserTest(const QString& parentUser, const QString& userName, const QString& firstName, const QString& lastName, const QString& password, bool isAdmin, bool isReadOnly, bool isDisabled)
-{
-	QSqlQuery queryCreateUser;
-	bool Error = false;
-
-	QString administrator = isAdmin ? "true" : "false";
-	QString readOnly = isReadOnly ? "true" : "false";
-	QString disabled = isDisabled ? "true" : "false";
-
-	bool ok = queryCreateUser.exec(QString("SELECT create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
+	bool ok = query.exec(QString("SELECT create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
 								   .arg(parentUser)
 								   .arg(userName)
 								   .arg(firstName)
@@ -136,121 +44,372 @@ bool UserTests::createUserTest(const QString& parentUser, const QString& userNam
 								   .arg(readOnly)
 								   .arg(disabled));
 
-	if (ok == false)
-	{
-		//qDebug() << queryCreateUser.lastError().databaseText();
-		return false;
-	}
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	QSqlQuery queryCheckUser;
+	ok = tempQuery.exec(("SELECT * FROM users WHERE username='" + userName + "'"));
 
-	ok = queryCheckUser.exec(("SELECT * FROM users WHERE username='" + userName + "'"));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
 
-	if (ok == false)
-	{
-		qDebug() << queryCheckUser.lastError().databaseText();
-		return false;
-	}
+	QVERIFY2(tempQuery.value("username").toString() == userName, qPrintable("ERROR in column userName: data not match! (Create user parent Admin test)"));
+	QVERIFY2(tempQuery.value("firstName").toString() == firstName, qPrintable("ERROR in column firstName: data not match! (Create user parent Admin test)"));
+	QVERIFY2(tempQuery.value("lastName").toString() == lastName, qPrintable("ERROR in column lastName: data not match! (Create user parent Admin test)"));
+	QVERIFY2(tempQuery.value("password").toString() == password, qPrintable("ERROR in column password: data not match! (Create user parent Admin test)"));
+	QVERIFY2(tempQuery.value("administrator").toBool() == false, qPrintable("ERROR in column isAdmin: data not match! (Create user parent Admin test)"));
+	QVERIFY2(tempQuery.value("readOnly").toBool() == false, qPrintable("ERROR in column isReadOnly: data not match! (Create user parent Admin test)"));
+	QVERIFY2(tempQuery.value("disabled").toBool() == false, qPrintable("ERROR in column isDisabled: data not match! (Create user parent Admin test)"));
 
-	ok = queryCheckUser.first();
+	// Create administrator with parent user
+	//
 
-	if (ok == false)
-	{
-		qDebug() << "Cannot get first record";
-		return false;
-	}
+	parentUser = "2";
+	userName = "TestUser2";
+	firstName = "Jack";
+	lastName = "Toaster";
+	password = "qwerty";
+	administrator = "true";
+	readOnly = "false";
+	disabled = "false";
 
-	QString dbUserName = queryCheckUser.value("Username").toString();
-	QString dbFirstName = queryCheckUser.value("FirstName").toString();
-	QString dbLastName = queryCheckUser.value("LastName").toString();
-	QString dbPassword = queryCheckUser.value("Password").toString();
-	bool dbAdministrator = queryCheckUser.value("Administrator").toBool();
-	bool dbReadOnly = queryCheckUser.value("ReadOnly").toBool();
-	bool dbDisabled = queryCheckUser.value("Disabled").toBool();
+	ok = query.exec(QString("SELECT create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
+								   .arg(parentUser)
+								   .arg(userName)
+								   .arg(firstName)
+								   .arg(lastName)
+								   .arg(password)
+								   .arg(administrator)
+								   .arg(readOnly)
+								   .arg(disabled));
 
-	if (dbUserName != userName)
-	{
-		qDebug() << "ERROR in column Username\nActual: " << dbUserName << "\nExpected: " << userName;
-		Error = true;
-	}
+	QVERIFY2(ok == false, qPrintable("User can't be parent of administrator error expected"));
 
-	if (dbFirstName != firstName)
-	{
-		qDebug() << "ERROR in column FirstName\nActual: " << dbFirstName << "\nExpected: " << firstName;
-		Error = true;
-	}
+	// Create user with parent user
+	//
 
-	if (dbLastName != lastName)
-	{
-		qDebug() << "ERROR in column LastName\nActual: " << dbLastName << "\nExpected: " << lastName;
-		Error = true;
-	}
+	parentUser = "2";
+	userName = "TestUser3";
+	firstName = "Jack";
+	lastName = "Toaster";
+	password = "qwerty";
+	administrator = "false";
+	readOnly = "false";
+	disabled = "false";
 
-	if (dbPassword != password)
-	{
-		qDebug() << "ERROR in column Password\nActual: " << dbPassword << "\nExpected: " << password;
-		Error = true;
-	}
+	ok = query.exec(QString("SELECT create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
+								   .arg(parentUser)
+								   .arg(userName)
+								   .arg(firstName)
+								   .arg(lastName)
+								   .arg(password)
+								   .arg(administrator)
+								   .arg(readOnly)
+								   .arg(disabled));
 
-	if (dbAdministrator != isAdmin)
-	{
-		qDebug() << "ERROR in column Administrator\nActual: " << dbAdministrator << "\nExpected: " << isAdmin;
-		Error = true;
-	}
+	QVERIFY2(ok == false, qPrintable("User can't be parent of another user error expected"));
 
-	if (dbReadOnly != isReadOnly)
-	{
-		qDebug() << "ERROR in column ReadOnly\nActual: " << dbReadOnly << "\nExpected: " << isReadOnly;
-		Error = true;
-	}
+	// Create Administrator with parent Administrator
+	//
 
-	if (dbDisabled != isDisabled)
-	{
-		qDebug() << "ERROR in column Disabled\nActual: " << dbDisabled << "\nExpected: " << isDisabled;
-		Error = true;
-	}
+	parentUser = "1";
+	userName = "TestUser4";
+	firstName = "Jack";
+	lastName = "Toaster";
+	password = "qwerty";
+	administrator = "true";
+	readOnly = "false";
+	disabled = "false";
 
-	return Error ? "ERROR" : "OK";
+	ok = query.exec(QString("SELECT create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
+								   .arg(parentUser)
+								   .arg(userName)
+								   .arg(firstName)
+								   .arg(lastName)
+								   .arg(password)
+								   .arg(administrator)
+								   .arg(readOnly)
+								   .arg(disabled));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(("SELECT * FROM users WHERE username='" + userName + "'"));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(tempQuery.value("username").toString() == userName, qPrintable("ERROR in column userName: data not match! (Create Administrator with parent Administrator test)"));
+	QVERIFY2(tempQuery.value("firstName").toString() == firstName, qPrintable("ERROR in column firstName: data not match! (Create Administrator with parent Administrator test)"));
+	QVERIFY2(tempQuery.value("lastName").toString() == lastName, qPrintable("ERROR in column lastName: data not match! (Create Administrator with parent Administrator test)"));
+	QVERIFY2(tempQuery.value("password").toString() == password, qPrintable("ERROR in column password: data not match! (Create Administrator with parent Administrator test)"));
+	QVERIFY2(tempQuery.value("administrator").toBool() == true, qPrintable("ERROR in column isAdmin: data not match! (Create Administrator with parent Administrator test)"));
+	QVERIFY2(tempQuery.value("readOnly").toBool() == false, qPrintable("ERROR in column isReadOnly: data not match! (Create Administrator with parent Administrator test)"));
+	QVERIFY2(tempQuery.value("disabled").toBool() == false, qPrintable("ERROR in column isDisabled: data not match! (Create Administrator with parent Administrator test)"));
+
+	// Create user what already exists
+	//
+
+	parentUser = "1";
+	userName = "TestUser1";
+	firstName = "Jack";
+	lastName = "Toaster";
+	password = "qwerty";
+	administrator = "false";
+	readOnly = "false";
+	disabled = "false";
+
+	ok = query.exec(QString("SELECT create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
+								   .arg(parentUser)
+								   .arg(userName)
+								   .arg(firstName)
+								   .arg(lastName)
+								   .arg(password)
+								   .arg(administrator)
+								   .arg(readOnly)
+								   .arg(disabled));
+
+	QVERIFY2(ok == false, qPrintable("User already exists error expected"));
+
+	// Create readonly user
+	//
+
+	parentUser = "1";
+	userName = "TestUser5";
+	firstName = "Jack";
+	lastName = "Toaster";
+	password = "qwerty";
+	administrator = "false";
+	readOnly = "true";
+	disabled = "false";
+
+	ok = query.exec(QString("SELECT create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
+								   .arg(parentUser)
+								   .arg(userName)
+								   .arg(firstName)
+								   .arg(lastName)
+								   .arg(password)
+								   .arg(administrator)
+								   .arg(readOnly)
+								   .arg(disabled));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(("SELECT * FROM users WHERE username='" + userName + "'"));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(tempQuery.value("username").toString() == userName, qPrintable("ERROR in column userName: data not match! (Create readonly user test)"));
+	QVERIFY2(tempQuery.value("firstName").toString() == firstName, qPrintable("ERROR in column firstName: data not match! (Create readonly user test)"));
+	QVERIFY2(tempQuery.value("lastName").toString() == lastName, qPrintable("ERROR in column lastName: data not match! (Create readonly user test)"));
+	QVERIFY2(tempQuery.value("password").toString() == password, qPrintable("ERROR in column password: data not match! (Create readonly user test)"));
+	QVERIFY2(tempQuery.value("administrator").toBool() == false, qPrintable("ERROR in column isAdmin: data not match! (Create readonly user test)"));
+	QVERIFY2(tempQuery.value("readOnly").toBool() == true, qPrintable("ERROR in column isReadOnly: data not match! (Create readonly user test)"));
+	QVERIFY2(tempQuery.value("disabled").toBool() == false, qPrintable("ERROR in column isDisabled: data not match! (Create readonly user test)"));
+
+	// Create disabled user
+	//
+
+	parentUser = "1";
+	userName = "TestUser6";
+	firstName = "Jack";
+	lastName = "Toaster";
+	password = "qwerty";
+	administrator = "false";
+	readOnly = "false";
+	disabled = "true";
+
+	ok = query.exec(QString("SELECT create_user(%1, '%2', '%3', '%4', '%5', %6, %7, %8);")
+								   .arg(parentUser)
+								   .arg(userName)
+								   .arg(firstName)
+								   .arg(lastName)
+								   .arg(password)
+								   .arg(administrator)
+								   .arg(readOnly)
+								   .arg(disabled));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(("SELECT * FROM users WHERE username='" + userName + "'"));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(tempQuery.value("username").toString() == userName, qPrintable("ERROR in column userName: data not match! (Create disabled user test)"));
+	QVERIFY2(tempQuery.value("firstName").toString() == firstName, qPrintable("ERROR in column firstName: data not match! (Create disabled user test)"));
+	QVERIFY2(tempQuery.value("lastName").toString() == lastName, qPrintable("ERROR in column lastName: data not match! (Create disabled user test)"));
+	QVERIFY2(tempQuery.value("password").toString() == password, qPrintable("ERROR in column password: data not match! (Create disabled user test)"));
+	QVERIFY2(tempQuery.value("administrator").toBool() == false, qPrintable("ERROR in column isAdmin: data not match! (Create disabled user test)"));
+	QVERIFY2(tempQuery.value("readOnly").toBool() == false, qPrintable("ERROR in column isReadOnly: data not match! (Create disabled user test)"));
+	QVERIFY2(tempQuery.value("disabled").toBool() == true, qPrintable("ERROR in column isDisabled: data not match! (Create disabled user test)"));
 }
 
-int UserTests::getUserIdTest(const QString& login, const QString& password)
+void UserTests::getUserIDTest()
 {
 	QSqlQuery query;
-	if (query.exec(("SELECT \"get_user_id\"('" + login + "', '" + password + "')")) != true)
-	{
-		qDebug() << query.lastError().text();
-		return -1;
-	}
 
-	bool result = query.first();
-	if (result == false)
-	{
-		qDebug() << "Cannot get first record";
-		return false;
-	}
+	// Create user to test
+	//
 
-	return query.value("get_user_id").toInt();
+	bool ok = query.exec("SELECT create_user (1, 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', 'getUserIdTest', false, false, false);");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int userId = query.value("create_user").toInt();
+
+	ok = query.exec(QString("SELECT get_user_id('%1', '%2');").arg("getUserIdTest").arg("getUserIdTest"));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("get_user_id").toInt() == userId, qPrintable("Error: userId not match"));
+
+	ok = query.exec(QString("SELECT get_user_id('%1', '%2');").arg("getUserIdTest").arg("abc"));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("get_user_id").toInt() == 0, qPrintable("Error: 0 id expected"));
+
+	ok = query.exec(QString("SELECT get_user_id('%1', '%2');").arg("def").arg("getUserIdTest"));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("get_user_id").toInt() == 0, qPrintable("Error: 0 id expected"));
 }
 
-bool UserTests::isAdmin(int userID)
+void UserTests::isAdminTest()
 {
 	QSqlQuery query;
 
-	bool result = query.exec(QString("SELECT is_admin (%1);").arg(userID));
+	// Create user without admin rights to test
+	//
 
-	if (result == false)
-	{
-		qDebug() << query.lastError().databaseText();
-		return false;
-	}
+	bool ok = query.exec("SELECT create_user (1, 'AdminTest', 'TEST', 'TEST', 'TEST', false, false, false);");
 
-	result = query.first();
-	if (result == false)
-	{
-		qDebug() << "Cannot get first record";
-		return false;
-	}
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	return query.value("is_admin").toBool();
+	int m_isAdminTempDataID = query.value("create_user").toInt();
+
+	// Create and delete user to make NULL row for test
+	//
+
+	ok = query.exec("SELECT create_user (1, 'AdminTest1', 'TEST', 'TEST', 'TEST', false, false, false);");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int m_isAdminTempDataNullID = query.value("create_user").toInt();
+
+	ok = query.exec(("DELETE FROM users WHERE username='AdminTest1'"));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT is_admin (%1);").arg(1));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("is_admin").toBool() == true, qPrintable("Error: \"true\" expected"));
+
+	ok = query.exec(QString("SELECT is_admin (%1);").arg(m_isAdminTempDataID));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("is_admin").toBool() == false, qPrintable("Error: \"false\" expected"));
+
+	ok = query.exec(QString("SELECT is_admin (%1);").arg(m_isAdminTempDataNullID));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value("is_admin").toBool() == false, qPrintable("Data error expected"));
 }
 
+void UserTests::check_user_passwordIntegerTextTest()
+{
+	QSqlQuery query;
+	QString password = "12341234";
+
+	// Create user to test
+	//
+
+	bool ok = query.exec(QString("SELECT * FROM create_user(1, 'Tester', 'Richard', 'Stollman', '%1', false, false, false)").arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int userId = query.value("create_user").toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(userId).arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == true, qPrintable("Error: password or username is wrong!"));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(userId).arg("password"));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(9999999).arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(userId).arg(""));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(0).arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
+}
+
+void UserTests::check_user_passwordTextTextTest()
+{
+	QSqlQuery query;
+	QString password = "12341234";
+	QString name = "Linus";
+
+	// Create user to test
+	//
+
+	bool ok = query.exec(QString("SELECT * FROM create_user(1, '%1', 'Richard', 'Stollman', '%2', false, false, false)").arg(name).arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg(name).arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == true, qPrintable("Error: password or username is wrong!"));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg(name).arg("password"));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg("name").arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg(name).arg(""));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
+
+	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg("").arg(password));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
+}

@@ -11,7 +11,4 @@ public:
 private slots:
 	void get_project_versionTest();
 	void get_unitsTest();
-
-public:
-	static bool get_project_version();
 };
