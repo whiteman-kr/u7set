@@ -3277,6 +3277,8 @@ void EditSchemeWidget::mouseMove_AddSchemePosRectEndPoint(QMouseEvent* event)
 
 void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* event)
 {
+	double gridSize = scheme()->gridSize();
+
 	if (editSchemeView()->m_newItem == nullptr)
 	{
 		assert(editSchemeView()->m_newItem != nullptr);
@@ -3299,9 +3301,14 @@ void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* ev
 
 	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
 
+	// Find "magnet" points, it can be any pin or link
+	//
+
+	// --
+	//
+
 	auto points = itemPos->GetPointList();
 	auto extPoints = itemPos->GetExtensionPoints();
-	VFrame30::SchemePoint ptBase;
 
 	if (points.empty() == true || extPoints.empty() == true)
 	{
@@ -3316,45 +3323,56 @@ void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* ev
 		return;
 	}
 
-	if (extPoints.size() > 1)
+	VFrame30::SchemePoint ptBase = points.back();
+
+	// Add extra points
+	//
+	double horzDistance = std::abs(ptBase.X - docPoint.x()) * (ptBase.X - docPoint.x() > 0.0 ? -1.0 : 1.0);
+	double midPoint = 0.0;
+
+	if (std::abs(ptBase.X - docPoint.x()) < gridSize * 1.0)
 	{
-		ptBase = *std::prev(extPoints.end(), 2);		// extPoints[extPoints.Count - 2];
+		midPoint = ptBase.X;
 	}
 	else
 	{
-		ptBase = points.back();							// ptBase = points[points.Count - 1];
+		midPoint = ptBase.X + horzDistance / 2;
 	}
 
-	QLineF v;
-	v.setP1(ptBase);
-	v.setP2(docPoint);
+	QPointF onePoint(midPoint, ptBase.Y);
+	onePoint = snapToGrid(onePoint);
 
-	// Выровнять угол до кратного 90 градусам значению, прием к ближаейшему
+	itemPos->DeleteAllExtensionPoints();
+
+	// if onePoint on previous line, then move it to base
 	//
-	double angle = std::floor(v.angle() / 90.0 + 0.5) * 90.0;
-
-
-	// сделать новый, горизонтальный вектор, и повернуть его на угол
-	//
-	QLineF v2;
-	v2.setP1(ptBase);
-	v2.setP2(QPointF(ptBase.X + v.length(), ptBase.Y));
-	v2.setAngle(angle);
-
-	QPointF newPoint = v2.p2();
-
-	if (snapToGrid() == true)
+	if (points.size() > 1)
 	{
-		newPoint = snapToGrid(newPoint);
+		VFrame30::SchemePoint lastLinkPt1 = *std::prev(points.end(), 2);
+		VFrame30::SchemePoint lastLinkPt2 = points.back();
+
+		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
+			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
+			((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
+			 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
+			))
+		{
+			onePoint.setX(ptBase.X);
+			onePoint.setY(ptBase.Y);
+		}
 	}
 
-	itemPos->DeleteLastExtensionPoint();
-	itemPos->AddExtensionPoint(newPoint.x(), newPoint.y());
+	QPointF twoPoint(onePoint.x(), docPoint.y());
+
+	if (onePoint != ptBase)
+	{
+		itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
+	}
+	itemPos->AddExtensionPoint(twoPoint.x(), twoPoint.y());
+	itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
+
 
 	editSchemeView()->update();
-
-	// Найти точки к торым может "прилипнуть" край.... смотри некоторую реализацию этого в старом проекте
-	//
 
 	return;
 }
@@ -3442,9 +3460,7 @@ void EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEven
 		return;
 	}
 
-	//QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
-
-	auto extPoints = itemPos->GetExtensionPoints();
+	const std::list<VFrame30::SchemePoint>& extPoints = itemPos->GetExtensionPoints();
 
 	if (extPoints.empty() == true)
 	{
@@ -3452,11 +3468,14 @@ void EditSchemeWidget::mouseRightDown_AddSchemePosConnectionNextPoint(QMouseEven
 		return;
 	}
 
-	auto lastExtPt = extPoints.back();
+	for (VFrame30::SchemePoint p : extPoints)
+	{
+		itemPos->AddPoint(p.X, p.Y);
+	}
 
-	itemPos->AddPoint(lastExtPt.X, lastExtPt.Y);
-
+	VFrame30::SchemePoint lastExtPt = extPoints.back();	// Cache point before deleteing, as it can be removed from REFERENCED list
 	itemPos->DeleteAllExtensionPoints();
+
 	itemPos->AddExtensionPoint(lastExtPt.X, lastExtPt.Y);
 
 	// --
