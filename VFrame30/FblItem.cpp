@@ -6,11 +6,11 @@ namespace VFrame30
 	//
 	// CFblConnectionPoint
 	//
-	CFblConnectionPoint::CFblConnectionPoint()
+	AfbPin::AfbPin()
 	{
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(
+	AfbPin::AfbPin(
 			ConnectionDirrection dirrection,
 			const QUuid& guid,
 			int operandIndex,
@@ -23,7 +23,7 @@ namespace VFrame30
 	{
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(ConnectionDirrection dirrection,
+	AfbPin::AfbPin(ConnectionDirrection dirrection,
 			const QUuid& guid,
 			const Afb::AfbSignal& afbSignal) :
 		m_guid(guid),
@@ -34,12 +34,12 @@ namespace VFrame30
 	{
 	}
 
-	CFblConnectionPoint::CFblConnectionPoint(const Proto::FblConnectionPoint& cpm)
+	AfbPin::AfbPin(const Proto::FblConnectionPoint& cpm)
 	{
 		LoadData(cpm);
 	}
 
-	bool CFblConnectionPoint::SaveData(Proto::FblConnectionPoint* cpm) const
+	bool AfbPin::SaveData(Proto::FblConnectionPoint* cpm) const
 	{
 		//m_point.SaveData(cpm->mutable_point());	// Pin pos will be calculated before drawing or compilation
 
@@ -51,7 +51,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool CFblConnectionPoint::LoadData(const Proto::FblConnectionPoint& cpm)
+	bool AfbPin::LoadData(const Proto::FblConnectionPoint& cpm)
 	{
 		//m_point.LoadData(cpm.point());	// Pin pos will be calculated before drawing or compilation
 
@@ -63,98 +63,98 @@ namespace VFrame30
 		return true;
 	}
 
-	const SchemePoint& CFblConnectionPoint::point() const
+	const SchemePoint& AfbPin::point() const
 	{
 		return m_point;
 	}
 
-	void CFblConnectionPoint::setPoint(const SchemePoint& value)
+	void AfbPin::setPoint(const SchemePoint& value)
 	{
 		m_point = value;
 	}
 
-	double CFblConnectionPoint::x() const
+	double AfbPin::x() const
 	{
 		return m_point.X;
 	}
 
-	void CFblConnectionPoint::setX(double val)
+	void AfbPin::setX(double val)
 	{
 		m_point.X = val;
 	}
 
-	double CFblConnectionPoint::y() const
+	double AfbPin::y() const
 	{
 		return m_point.Y;
 	}
 
-	void CFblConnectionPoint::setY(double val)
+	void AfbPin::setY(double val)
 	{
 		m_point.Y = val;
 	}
 
-	ConnectionDirrection CFblConnectionPoint::dirrection() const
+	ConnectionDirrection AfbPin::dirrection() const
 	{
 		return m_dirrection;
 	}
 
-	bool CFblConnectionPoint::IsInput() const
+	bool AfbPin::IsInput() const
 	{
 		return m_dirrection == ConnectionDirrection::Input;
 	}
 
-	bool CFblConnectionPoint::IsOutput() const
+	bool AfbPin::IsOutput() const
 	{
 		return m_dirrection == ConnectionDirrection::Output;
 	}
 
-	const QUuid& CFblConnectionPoint::guid() const
+	const QUuid& AfbPin::guid() const
 	{
 		return m_guid;
 	}
 
-	void CFblConnectionPoint::setGuid(const QUuid& guid)
+	void AfbPin::setGuid(const QUuid& guid)
 	{
 		m_guid = guid;
 	}
 
-	const std::list<QUuid>& CFblConnectionPoint::associatedIOs() const
+	const std::list<QUuid>& AfbPin::associatedIOs() const
 	{
 		return m_associatedIOs;
 	}
 
-	void CFblConnectionPoint::ClearAssociattdIOs()
+	void AfbPin::ClearAssociattdIOs()
 	{
 		m_associatedIOs.clear();
 	}
 
-	void CFblConnectionPoint::AddAssociattedIOs(const QUuid& guid)
+	void AfbPin::AddAssociattedIOs(const QUuid& guid)
 	{
 		m_associatedIOs.push_back(guid);
 	}
 
-	bool CFblConnectionPoint::HasConnection() const
+	bool AfbPin::HasConnection() const
 	{
 		assert(!(IsInput() && m_associatedIOs.size() > 1));
 		return !m_associatedIOs.empty();
 	}
 
-	int CFblConnectionPoint::afbOperandIndex() const
+	int AfbPin::afbOperandIndex() const
 	{
 		return m_afbOperandIndex;
 	}
 
-	void CFblConnectionPoint::setAfbOperandIndex(int value)
+	void AfbPin::setAfbOperandIndex(int value)
 	{
 		m_afbOperandIndex = value;
 	}
 
-	QString CFblConnectionPoint::caption() const
+	QString AfbPin::caption() const
 	{
 		return m_caption;
 	}
 
-	void CFblConnectionPoint::setCaption(QString caption)
+	void AfbPin::setCaption(QString caption)
 	{
 		m_caption = caption;
 	}
@@ -224,7 +224,7 @@ namespace VFrame30
 		for (int i = 0; i < fblItemMessage.points().size(); i++)
 		{
 			const Proto::FblConnectionPoint& cpm = fblItemMessage.points(i);
-			CFblConnectionPoint cp(cpm);
+			AfbPin cp(cpm);
 
 			if (cp.dirrection() == ConnectionDirrection::Input)
 			{
@@ -277,27 +277,27 @@ namespace VFrame30
 
 	// Connections
 	//
-	const std::list<VFrame30::CFblConnectionPoint>& FblItem::inputs() const
+	const std::list<VFrame30::AfbPin>& FblItem::inputs() const
 	{
 		return m_inputPoints;
 	}
 
-	const std::list<VFrame30::CFblConnectionPoint>& FblItem::outputs() const
+	const std::list<VFrame30::AfbPin>& FblItem::outputs() const
 	{
 		return m_outputPoints;
 	}
 
-	std::list<VFrame30::CFblConnectionPoint>* FblItem::mutableInputs()
+	std::list<VFrame30::AfbPin>* FblItem::mutableInputs()
 	{
 		return &m_inputPoints;
 	}
 
-	std::list<VFrame30::CFblConnectionPoint>* FblItem::mutableOutputs()
+	std::list<VFrame30::AfbPin>* FblItem::mutableOutputs()
 	{
 		return &m_outputPoints;
 	}
 
-	bool FblItem::GetConnectionPoint(const QUuid& guid, VFrame30::CFblConnectionPoint* pResult) const
+	bool FblItem::GetConnectionPoint(const QUuid& guid, VFrame30::AfbPin* pResult) const
 	{
 		if (pResult == nullptr)
 		{
@@ -340,19 +340,19 @@ namespace VFrame30
 
 	void FblItem::addInput()
 	{
-		CFblConnectionPoint cp(ConnectionDirrection::Input, QUuid::createUuid(), -1, "");
+		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), -1, "");
 		m_inputPoints.push_back(cp);
 	}
 
 	void FblItem::addInput(const Afb::AfbSignal& s)
 	{
-		CFblConnectionPoint cp(ConnectionDirrection::Input, QUuid::createUuid(), s);
+		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), s);
 		m_inputPoints.push_back(cp);
 	}
 
 	void FblItem::addInput(int opIndex, QString caption)
 	{
-		CFblConnectionPoint cp(ConnectionDirrection::Input, QUuid::createUuid(), opIndex, caption);
+		AfbPin cp(ConnectionDirrection::Input, QUuid::createUuid(), opIndex, caption);
 		m_inputPoints.push_back(cp);
 	}
 
@@ -368,32 +368,32 @@ namespace VFrame30
 
 	void FblItem::addOutput()
 	{
-		CFblConnectionPoint cp(ConnectionDirrection::Output, QUuid::createUuid(), -1, "");
+		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), -1, "");
 		m_outputPoints.push_back(cp);
 	}
 
 	void FblItem::addOutput(const Afb::AfbSignal& s)
 	{
-		CFblConnectionPoint cp(ConnectionDirrection::Output, QUuid::createUuid(), s);
+		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), s);
 		m_outputPoints.push_back(cp);
 	}
 
 	void FblItem::addOutput(int opIndex, QString caption)
 	{
-		CFblConnectionPoint cp(ConnectionDirrection::Output, QUuid::createUuid(), opIndex, caption);
+		AfbPin cp(ConnectionDirrection::Output, QUuid::createUuid(), opIndex, caption);
 		m_outputPoints.push_back(cp);
 	}
 
 	void FblItem::ClearAssociatedConnections()
 	{
 		std::for_each(m_inputPoints.begin(), m_inputPoints.end(),
-			[](CFblConnectionPoint& pin)
+			[](AfbPin& pin)
 			{
 				pin.ClearAssociattdIOs();
 			});
 
 		std::for_each(m_outputPoints.begin(), m_outputPoints.end(),
-			[](CFblConnectionPoint& pin)
+			[](AfbPin& pin)
 			{
 				pin.ClearAssociattdIOs();
 			});

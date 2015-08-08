@@ -15,19 +15,19 @@ namespace VFrame30
 
 	// CFblConnectionPoint
 	//
-	class VFRAME30LIBSHARED_EXPORT CFblConnectionPoint
+	class VFRAME30LIBSHARED_EXPORT AfbPin
 	{
 	public:
-		CFblConnectionPoint();
+		AfbPin();
 
-		CFblConnectionPoint(ConnectionDirrection dirrection,
-							const QUuid& guid,
-							int operandIndex,
-							QString caption);
+		AfbPin(ConnectionDirrection dirrection,
+			   const QUuid& guid,
+			   int operandIndex,
+			   QString caption);
 
-		CFblConnectionPoint(ConnectionDirrection dirrection, const QUuid& guid, const Afb::AfbSignal& afbSignal);
+		AfbPin(ConnectionDirrection dirrection, const QUuid& guid, const Afb::AfbSignal& afbSignal);
 
-		CFblConnectionPoint(const Proto::FblConnectionPoint& cpm);
+		AfbPin(const Proto::FblConnectionPoint& cpm);
 
 		// Other
 		//
@@ -109,13 +109,13 @@ namespace VFrame30
 		// Connections
 		//
 	public:
-		const std::list<VFrame30::CFblConnectionPoint>& inputs() const;
-		const std::list<VFrame30::CFblConnectionPoint>& outputs() const;
+		const std::list<VFrame30::AfbPin>& inputs() const;
+		const std::list<VFrame30::AfbPin>& outputs() const;
 
-		std::list<VFrame30::CFblConnectionPoint>* mutableInputs();
-		std::list<VFrame30::CFblConnectionPoint>* mutableOutputs();
+		std::list<VFrame30::AfbPin>* mutableInputs();
+		std::list<VFrame30::AfbPin>* mutableOutputs();
 
-		bool GetConnectionPoint(const QUuid& guid, VFrame30::CFblConnectionPoint* pResult) const;
+		bool GetConnectionPoint(const QUuid& guid, VFrame30::AfbPin* pResult) const;
 
 		int inputsCount() const;
 		int outputsCount() const;
@@ -143,8 +143,8 @@ namespace VFrame30
 		// Properties
 		//
 	private:
-		std::list<VFrame30::CFblConnectionPoint> m_inputPoints;
-		std::list<VFrame30::CFblConnectionPoint> m_outputPoints;
+		std::list<VFrame30::AfbPin> m_inputPoints;
+		std::list<VFrame30::AfbPin> m_outputPoints;
 	};
 }
 

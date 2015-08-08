@@ -57,7 +57,7 @@ namespace VFrame30
 		/// Вычисление координат точки, для прямоугольного Fbl элемента
 		///</summary>
 		SchemePoint CalcPointPos(const QRectF& fblItemRect,
-								 const CFblConnectionPoint& connection,
+								 const AfbPin& connection,
 								 int pinCount,
 								 int index,
 								 double gridSize, int pinGridStep) const;

@@ -56,7 +56,7 @@ namespace Builder
 		std::set<std::shared_ptr<VFrame30::FblItemRect>> fblItems;
 
 		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId);
-		VFrame30::CFblConnectionPoint pinByGuid(QUuid pinId);
+		VFrame30::AfbPin pinByGuid(QUuid pinId);
 	};
 
 	struct BushContainer

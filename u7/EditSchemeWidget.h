@@ -254,10 +254,13 @@ public:
 	QPointF widgetPointToDocument(const QPoint& widgetPoint, bool snapToGrid) const;
 	QPointF snapToGrid(QPointF pt) const;
 
+
 protected:
 	void addItem(std::shared_ptr<VFrame30::SchemeItem> newItem);
 
 	void setMouseCursor(QPoint mousePos);
+
+	QPointF magnetPointToPin(QPointF docPoint);
 
 public:
 	void resetAction();

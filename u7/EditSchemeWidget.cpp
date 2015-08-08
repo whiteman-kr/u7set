@@ -241,7 +241,10 @@ void EditSchemeView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 	if (drawRullers == true)
 	{
-		QPen outlinePen(Qt::blue);
+		QColor outlineColor(Qt::blue);
+		outlineColor.setAlphaF(0.5);
+
+		QPen outlinePen(outlineColor);
 		outlinePen.setWidth(0);
 
 		QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -944,7 +947,10 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 	//
 	QPainter* p = drawParam->painter();
 
-	QPen outlinePen(Qt::blue);
+	QColor outlineColor(Qt::blue);
+	outlineColor.setAlphaF(0.5);
+
+	QPen outlinePen(outlineColor);
 	outlinePen.setWidth(0);
 
 	QPainter::RenderHints oldrenderhints = p->renderHints();
@@ -2394,6 +2400,10 @@ void EditSchemeWidget::mouseLeftDown_AddSchemePosConnectionStartPoint(QMouseEven
 
 	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
 
+	// magnet point to pin
+	//
+	docPoint = magnetPointToPin(docPoint);
+
 
 	itemPos->DeleteAllPoints();
 
@@ -3301,12 +3311,12 @@ void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* ev
 
 	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
 
-	// Find "magnet" points, it can be any pin or link
+	// magnet point to pin
 	//
+	docPoint = magnetPointToPin(docPoint);
 
 	// --
 	//
-
 	auto points = itemPos->GetPointList();
 	auto extPoints = itemPos->GetExtensionPoints();
 
@@ -3408,6 +3418,8 @@ void EditSchemeWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
 
 	QPointF docPoint = widgetPointToDocument(event->pos(), snapToGrid());
 
+	// --
+	//
 	switch (mouseState())
 	{
 	case MouseState::MovingHorizontalEdge:
@@ -3417,6 +3429,11 @@ void EditSchemeWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
 		editSchemeView()->m_editEndMovingEdge = docPoint.x();
 		break;
 	case MouseState::MovingConnectionLinePoint:
+
+		// magnet point to pin
+		//
+		docPoint = magnetPointToPin(docPoint);
+
 		editSchemeView()->m_editEndMovingEdgeX = docPoint.x();
 		editSchemeView()->m_editEndMovingEdgeY = docPoint.y();
 		break;
@@ -3745,6 +3762,54 @@ void EditSchemeWidget::setMouseCursor(QPoint mousePos)
 	}
 
 	return;
+}
+
+QPointF EditSchemeWidget::magnetPointToPin(QPointF docPoint)
+{
+	double gridSize = scheme()->gridSize();
+	double pinGridStep = static_cast<double>(scheme()->pinGridStep());
+
+	// Find "magnet" points, it can be any pin or link
+	// Detect if docPoint closer then any pin to gridSize * pinGridStep / 2
+	// If so, stick docPoint to this pin
+	//
+	std::vector<VFrame30::AfbPin> itemPins;
+	itemPins.reserve(64);
+
+	for (const std::shared_ptr<VFrame30::SchemeItem>& item : activeLayer()->Items)
+	{
+		VFrame30::FblItemRect* fblItemRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
+
+		if (fblItemRect != nullptr)
+		{
+			fblItemRect->SetConnectionsPos(scheme()->gridSize(), scheme()->pinGridStep());
+
+			const std::list<VFrame30::AfbPin>& inputs = fblItemRect->inputs();
+			const std::list<VFrame30::AfbPin>& outputs = fblItemRect->outputs();
+
+			itemPins.clear();
+			itemPins.insert(itemPins.end(), inputs.begin(), inputs.end());
+			itemPins.insert(itemPins.end(), outputs.begin(), outputs.end());
+
+			for (const VFrame30::AfbPin& pin : itemPins)
+			{
+				QRectF pinArea = {pin.x() - gridSize * pinGridStep / 2, pin.y() - gridSize * pinGridStep / 2,
+								 gridSize * pinGridStep, gridSize * pinGridStep};
+
+				if (pinArea.contains(docPoint) == true)
+				{
+					return QPointF(pin.x(), pin.y());
+				}
+			}
+
+			continue;
+		}
+
+		// To do, magnet to link
+		//
+	}
+
+	return docPoint;
 }
 
 void EditSchemeWidget::resetAction()

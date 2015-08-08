@@ -177,7 +177,7 @@ namespace VFrame30
 
 		// Look for point in inputs
 		//
-		const std::list<CFblConnectionPoint>& inputPoints = inputs();
+		const std::list<AfbPin>& inputPoints = inputs();
 		int inputCount = inputsCount();
 		int index = 0;
 
@@ -196,7 +196,7 @@ namespace VFrame30
 
 		// Look for point in outputs
 		//
-		const std::list<CFblConnectionPoint>& outputPoints = outputs();
+		const std::list<AfbPin>& outputPoints = outputs();
 		int outputCount = outputsCount();
 		index = 0;
 
@@ -221,7 +221,7 @@ namespace VFrame30
 
 	SchemePoint FblItemRect::CalcPointPos(
 			const QRectF& fblItemRect,
-			const CFblConnectionPoint& connection,
+			const AfbPin& connection,
 			int pinCount,
 			int index,
 			double gridSize,
@@ -325,12 +325,12 @@ namespace VFrame30
 
 		// Draw input pins
 		//
-		const std::list<CFblConnectionPoint>& inputPins = inputs();
+		const std::list<AfbPin>& inputPins = inputs();
 
 		QPen redPen(QColor(0xE0B00000));
 		redPen.setWidthF(m_weight);		// Don't use getter!
 		
-		for (const CFblConnectionPoint& input : inputPins)
+		for (const AfbPin& input : inputPins)
 		{
 			// Get pin position
 			//
@@ -383,9 +383,9 @@ namespace VFrame30
 
 		// Drawing output pins
 		//
-		const std::list<CFblConnectionPoint>& outputPins = outputs();
+		const std::list<AfbPin>& outputPins = outputs();
 
-		for (const CFblConnectionPoint& output : outputPins)
+		for (const AfbPin& output : outputPins)
 		{
 			// Get pin position
 			//
@@ -507,16 +507,16 @@ namespace VFrame30
 
 		// Set new guids for all inputs/outputs
 		//
-		std::list<CFblConnectionPoint>* inputs = mutableInputs();
+		std::list<AfbPin>* inputs = mutableInputs();
 
-		for (CFblConnectionPoint& in : *inputs)
+		for (AfbPin& in : *inputs)
 		{
 			in.setGuid(QUuid::createUuid());
 		}
 
-		std::list<CFblConnectionPoint>* outputs = mutableOutputs();
+		std::list<AfbPin>* outputs = mutableOutputs();
 
-		for (CFblConnectionPoint& out : *outputs)
+		for (AfbPin& out : *outputs)
 		{
 			out.setGuid(QUuid::createUuid());
 		}

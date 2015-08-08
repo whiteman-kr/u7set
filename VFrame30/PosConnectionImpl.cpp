@@ -180,7 +180,7 @@ namespace VFrame30
 			polyline[index++] = QPointF(pt->X, pt->Y);
 		}
 
-		QPen pen(Qt::black);
+		QPen pen(Qt::darkRed);
 		pen.setWidthF(0);
 		p->setPen(pen);
 
@@ -197,7 +197,8 @@ namespace VFrame30
 			extPolyline.push_back(QPointF(pt->X, pt->Y));
 		}
 
-		QPen extPen(QColor(0x061040C0));	// D2D1::ColorF(0x1040C0, 0.3f)
+		//QPen extPen(QColor(0x061040C0));	// D2D1::ColorF(0x1040C0, 0.3f)
+		QPen extPen(Qt::red);
 		extPen.setWidth(0);
 		p->setPen(extPen);
 

@@ -60,7 +60,7 @@ namespace Builder
 	{
 		for (std::shared_ptr<VFrame30::FblItemRect> item : fblItems)
 		{
-			VFrame30::CFblConnectionPoint pin;
+			VFrame30::AfbPin pin;
 			bool found = item->GetConnectionPoint(pinId, &pin);
 
 			if (found == true)
@@ -72,11 +72,11 @@ namespace Builder
 		return nullptr;
 	}
 
-	VFrame30::CFblConnectionPoint Bush::pinByGuid(QUuid pinId)
+	VFrame30::AfbPin Bush::pinByGuid(QUuid pinId)
 	{
 		for (std::shared_ptr<VFrame30::FblItemRect> item : fblItems)
 		{
-			VFrame30::CFblConnectionPoint pin;
+			VFrame30::AfbPin pin;
 			bool found = item->GetConnectionPoint(pinId, &pin);
 
 			if (found == true)
@@ -85,7 +85,7 @@ namespace Builder
 			}
 		}
 
-		return VFrame30::CFblConnectionPoint();
+		return VFrame30::AfbPin();
 	}
 
 	// Function finds branch with a point on it.
@@ -415,9 +415,9 @@ namespace Builder
 			//
 			std::set<AppLogicItem> dependantItems;
 
-			const std::list<VFrame30::CFblConnectionPoint>& outputs = currentItem.m_fblItem->outputs();
+			const std::list<VFrame30::AfbPin>& outputs = currentItem.m_fblItem->outputs();
 
-			for (const VFrame30::CFblConnectionPoint& out : outputs)
+			for (const VFrame30::AfbPin& out : outputs)
 			{
 				auto deps = getItemsWithInput(constFblItems.begin(), constFblItems.end(), out.guid());
 
@@ -689,7 +689,7 @@ namespace Builder
 
 		for (auto item = begin; item != end; ++item)
 		{
-			const std::list<VFrame30::CFblConnectionPoint>& inputs = item->m_fblItem->inputs();
+			const std::list<VFrame30::AfbPin>& inputs = item->m_fblItem->inputs();
 
 			for (auto in : inputs)
 			{
@@ -1187,10 +1187,10 @@ namespace Builder
 			{
 				fblItem->SetConnectionsPos(logicScheme->gridSize(), logicScheme->pinGridStep());	// Calculate pins positions
 
-				const std::list<VFrame30::CFblConnectionPoint>& inputs = fblItem->inputs();
-				const std::list<VFrame30::CFblConnectionPoint>& outputs = fblItem->outputs();
+				const std::list<VFrame30::AfbPin>& inputs = fblItem->inputs();
+				const std::list<VFrame30::AfbPin>& outputs = fblItem->outputs();
 
-				for (const VFrame30::CFblConnectionPoint& pt : inputs)
+				for (const VFrame30::AfbPin& pt : inputs)
 				{
 					std::shared_ptr<VFrame30::SchemeItemLink> fakeLink = std::make_shared<VFrame30::SchemeItemLink>(fblItem->itemUnit());
 
@@ -1202,7 +1202,7 @@ namespace Builder
 					layer->Items.push_back(fakeLink);
 				}
 
-				for (const VFrame30::CFblConnectionPoint& pt : outputs)
+				for (const VFrame30::AfbPin& pt : outputs)
 				{
 					std::shared_ptr<VFrame30::SchemeItemLink> fakeLink = std::make_shared<VFrame30::SchemeItemLink>(fblItem->itemUnit());
 
@@ -1454,10 +1454,10 @@ namespace Builder
 				fblItem->ClearAssociatedConnections();
 				fblItem->SetConnectionsPos(scheme->gridSize(), scheme->pinGridStep());
 
-				std::list<VFrame30::CFblConnectionPoint>* inputs = fblItem->mutableInputs();
-				std::list<VFrame30::CFblConnectionPoint>* outputs = fblItem->mutableOutputs();
+				std::list<VFrame30::AfbPin>* inputs = fblItem->mutableInputs();
+				std::list<VFrame30::AfbPin>* outputs = fblItem->mutableOutputs();
 
-				for (VFrame30::CFblConnectionPoint& in : *inputs)
+				for (VFrame30::AfbPin& in : *inputs)
 				{
 					VFrame30::SchemePoint pinPos = in.point();
 
@@ -1483,7 +1483,7 @@ namespace Builder
 					bushContainer->bushes[branchIndex].inputPins.insert(in.guid());
 				}
 
-				for (const VFrame30::CFblConnectionPoint& out : *outputs)
+				for (const VFrame30::AfbPin& out : *outputs)
 				{
 					VFrame30::SchemePoint pinPos = out.point();
 
@@ -1564,10 +1564,10 @@ namespace Builder
 				fblElement->ClearAssociatedConnections();
 				fblElement->SetConnectionsPos(scheme->gridSize(), scheme->pinGridStep());
 
-				std::list<VFrame30::CFblConnectionPoint>* inputs = fblElement->mutableInputs();
-				std::list<VFrame30::CFblConnectionPoint>* outputs = fblElement->mutableOutputs();
+				std::list<VFrame30::AfbPin>* inputs = fblElement->mutableInputs();
+				std::list<VFrame30::AfbPin>* outputs = fblElement->mutableOutputs();
 
-				for (VFrame30::CFblConnectionPoint& in : *inputs)
+				for (VFrame30::AfbPin& in : *inputs)
 				{
 					int branchIndex = bushContainer->getBranchByPinGuid(in.guid());
 
@@ -1604,7 +1604,7 @@ namespace Builder
 					in.AddAssociattedIOs(bush.outputPin);
 				}
 
-				for (VFrame30::CFblConnectionPoint& out : *outputs)
+				for (VFrame30::AfbPin& out : *outputs)
 				{
 					int branchIndex = bushContainer->getBranchByPinGuid(out.guid());
 
@@ -1677,9 +1677,9 @@ namespace Builder
 				//
 				for (std::shared_ptr<VFrame30::FblItemRect> item : bush.fblItems)
 				{
-					const std::list<VFrame30::CFblConnectionPoint>& outputs = item->outputs();
+					const std::list<VFrame30::AfbPin>& outputs = item->outputs();
 
-					for (const VFrame30::CFblConnectionPoint& out : outputs)
+					for (const VFrame30::AfbPin& out : outputs)
 					{
 						if (out.associatedIOs().empty() == true)
 						{

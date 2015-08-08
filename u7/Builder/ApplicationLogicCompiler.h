@@ -87,7 +87,7 @@ namespace Builder
 	typedef std::shared_ptr<VFrame30::FblItemRect> LogicItem;
 	typedef VFrame30::SchemeItemSignal LogicSignal;
 	typedef VFrame30::SchemeItemAfb LogicFb;
-	typedef VFrame30::CFblConnectionPoint LogicPin;
+	typedef VFrame30::AfbPin LogicPin;
 	typedef VFrame30::SchemeItemConst LogicConst;
 	//typedef Afb::AfbElement LogicAfb;
 	typedef Afb::AfbSignal LogicAfbSignal;
