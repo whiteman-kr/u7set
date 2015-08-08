@@ -179,6 +179,7 @@ $BODY$
 DECLARE
 	user_allowed int;
 	inst_file_id int;
+	fileinstance_uuid uuid;
 BEGIN
 	SELECT count(*) INTO user_allowed
 		FROM CheckOut WHERE FileID = file_id AND UserID = user_id;
@@ -187,8 +188,14 @@ BEGIN
 		RAISE 'User is not allowed to set workcopy for file_id %', file_id;
 	END IF;
 
+	fileinstance_uuid := (SELECT CheckedOutInstanceID FROM File WHERE FileID = file_id);
+
+	IF (fileinstance_uuid IS NULL) THEN
+		RAISE 'File % is not checked out', file_id;
+	END IF;
+
 	UPDATE FileInstance SET Size = length(file_data), Data = file_data
-		WHERE FileInstanceID = (SELECT CheckedOutInstanceID FROM File WHERE FileID = file_id)
+		WHERE FileInstanceID = fileinstance_uuid
 		RETURNING FileID INTO inst_file_id;
 
 	IF (inst_file_id <> file_id) THEN
