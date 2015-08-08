@@ -3356,28 +3356,28 @@ void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* ev
 
 	// if onePoint on previous line, then move it to base
 	//
-	if (points.size() > 1)
-	{
-		VFrame30::SchemePoint lastLinkPt1 = *std::prev(points.end(), 2);
-		VFrame30::SchemePoint lastLinkPt2 = points.back();
+//	if (points.size() > 1)
+//	{
+//		VFrame30::SchemePoint lastLinkPt1 = *std::prev(points.end(), 2);
+//		VFrame30::SchemePoint lastLinkPt2 = points.back();
 
-		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
-			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
-			((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
-			 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
-			))
-		{
+//		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
+//			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
+//			((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
+//			 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
+//			))
+//		{
 			onePoint.setX(ptBase.X);
 			onePoint.setY(ptBase.Y);
-		}
-	}
+//		}
+//	}
 
 	QPointF twoPoint(onePoint.x(), docPoint.y());
 
-	if (onePoint != ptBase)
-	{
-		itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
-	}
+//	if (onePoint != ptBase)
+//	{
+//		itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
+//	}
 	itemPos->AddExtensionPoint(twoPoint.x(), twoPoint.y());
 	itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
 
