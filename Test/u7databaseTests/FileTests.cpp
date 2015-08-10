@@ -432,9 +432,17 @@ void FileTests::set_workcopyTest()
 	QVERIFY2(query.value("size").toInt() == data.length(), qPrintable(QString("Column size has not been changed in table fileInstance with fileID %1").arg(firstFile)));
 	QVERIFY2(query.value("FileID").toString() == firstFile, qPrintable(QString("Column fileId has not been changed in table fileInstance with checkOutInstanceId %1").arg(Uuid)));
 
+	//Call user error
+
 	ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3');").arg(m_firstUserForTest).arg(secondFile).arg(data));
 
 	QVERIFY2(ok == false, qPrintable("User is not allowed set workcopy error expected"));
+
+	//Call checkedIn file error
+
+	ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3');").arg(m_firstUserForTest).arg(1).arg(data));
+
+	QVERIFY2(ok == false, qPrintable("Checked In file error expected"));
 }
 
 void FileTests::get_workcopyTest()
@@ -1200,6 +1208,331 @@ void FileTests::get_latest_file_tree_versionTest()
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Invalid user error expected"));
+}
+
+void FileTests::undo_changesTest()
+{
+	QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	// Create ordinary file for test
+	//
+
+	bool ok = query.exec("SElECT * FROM add_file(1, 'undoChangesFirstTest', 1, 'KDE4');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int firstFileId = query.value("id").toInt();
+
+	// Create file with history (checkedIn - checkedOut) for test
+	//
+
+	ok = query.exec("SElECT * FROM add_file(1, 'undoChangesSecondTest', 1, 'GNOME2');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int secondFileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_in(1, '{%1}', 'I do not like KDE');").arg(secondFileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM check_out(1, '{%1}');").arg(secondFileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Create another ordinary file for test
+	//
+
+	ok = query.exec("SElECT * FROM add_file(1, 'undoChangesThirdTest', 1, 'xfce');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int thirdFileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM undo_changes(1, '{%1, %2, %3}') ORDER BY id;").arg(firstFileId).arg(secondFileId).arg(thirdFileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	int fileIds[3] = {firstFileId, secondFileId, thirdFileId};
+	int fileIdNumber = 0;
+
+	while (query.next())
+	{
+		if (fileIds[fileIdNumber] == firstFileId)
+		{
+			QVERIFY2(query.value("deleted").toBool() == true, qPrintable(query.lastError().databaseText()));
+		}
+
+		if (fileIds[fileIdNumber] == secondFileId)
+		{
+			QVERIFY2(query.value("deleted").toBool() == false, qPrintable(query.lastError().databaseText()));
+		}
+
+		if (fileIds[fileIdNumber] == thirdFileId)
+		{
+			QVERIFY2(query.value("deleted").toBool() == true, qPrintable(query.lastError().databaseText()));
+		}
+
+		if (query.value("deleted").toBool() == true)
+		{
+			ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(fileIds[fileIdNumber]));
+
+			QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2(tempQuery.first() == false, qPrintable("Error: file matched to be deleted"));
+		}
+		else
+		{
+			ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1 AND checkedOutInstanceId IS NULL").arg(fileIds[fileIdNumber]));
+
+			QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+			ok = tempQuery.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1 AND changeSetId IS NULL;").arg(fileIds[fileIdNumber]));
+
+			QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2(tempQuery.first() == false, qPrintable("Error: record in table fileInstance with NULL changesetId must be deleted"));
+
+			ok = tempQuery.exec(QString("SELECT * FROM checkOut WHERE fileId = %1").arg(fileIds[fileIdNumber]));
+
+			QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2(tempQuery.first() == false, qPrintable("Error: record in table checkout must be deleted"));
+		}
+		fileIdNumber++;
+	}
+
+	// Create file for call errors
+	//
+
+	ok = query.exec("SElECT * FROM add_file(1, 'undoChangesErrTest', 1, 'Windows');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int errorCallFileId = query.value("id").toInt();
+
+	// Call wrong user error
+	//
+
+	ok = query.exec(QString("SELECT * FROM undo_changes(%1, '{%2}');").arg(m_firstUserForTest).arg(errorCallFileId));
+
+	QVERIFY2(ok == false, qPrintable("Wrong user error expected"));
+
+	ok = query.exec(QString("SELECT * FROM check_in(1, '{%1}', 'I do not like KDE');").arg(errorCallFileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Call error of not checkedOut file
+	//
+
+	ok = query.exec(QString("SELECT * FROM undo_changes(1, '{%1}');").arg(errorCallFileId));
+
+	QVERIFY2(ok == false, qPrintable("File is not checkedOut error expected"));
+}
+
+void FileTests::add_or_update_fileTest()
+{
+	QSqlQuery query;
+
+	// Create file for update test
+	//
+
+	bool ok = query.exec("SElECT * FROM add_file(1, 'addOrUpdateFileTest', 7, 'Linux Kernel');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int fileId = query.value("id").toInt();
+
+	QString comment = "check_in comment";
+	QString fileData = "data";
+
+	// File update test
+	//
+
+	ok = query.exec(QString("SELECT * FROM add_or_update_file(1, '$root$/MC/', 'addOrUpdateFileTest', '%1', '%2');").arg(comment).arg(fileData));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("add_or_update_file").toInt() == fileId, qPrintable("Error: wrong fileId!"));
+
+	ok = query.exec(QString("SElECT * FROM file WHERE fileId = %1").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("checkedOutInstanceId").toString() == "", qPrintable("Error: file stil checked out"));
+
+	ok = query.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceId = '%1'").arg(query.value("checkedInInstanceId").toString()));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("data").toString() == fileData, qPrintable("Error: data not match!"));
+
+	ok = query.exec(QString("SELECT * FROM changeSet WHERE changeSetId = %1").arg(query.value("changeSetId").toString()));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("comment").toString() == comment, qPrintable("Error: wrong comment"));
+
+	// File create test
+	//
+
+	ok = query.exec(QString("SELECT * FROM add_or_update_file(1, '$root$/MC/', 'addOrUpdateCreateFileTest', '%1', '%2');").arg(comment).arg(fileData));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileId = query.value("add_or_update_file").toInt();
+
+	ok = query.exec(QString("SElECT * FROM file WHERE fileId = %1").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("parentId").toInt() == 7, qPrintable("Wrong parentId"));
+	QVERIFY2(query.value("checkedOutInstanceId").toString() == "", qPrintable("Error: file stil checked out"));
+
+	ok = query.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceId = '%1'").arg(query.value("checkedInInstanceId").toString()));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("data").toString() == fileData, qPrintable("Error: data not match!"));
+
+	ok = query.exec(QString("SELECT * FROM changeSet WHERE changeSetId = %1").arg(query.value("changeSetId").toString()));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("comment").toString() == comment, qPrintable("Error: wrong comment"));
+
+	// Check files marked as deleted
+	//
+
+	ok = query.exec("SElECT * FROM add_file(1, 'addOrUpdateErrorUserTest', 7, 'Linux Kernel');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("UPDATE file SET deleted = true WHERE fileId = %1").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM add_or_update_file(%1, '$root$/MC/', 'addOrUpdateErrorUserTest', 'deleted', 'deleted');").arg(m_firstUserForTest));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId = %1 AND deleted = false").arg(fileId+1));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+}
+
+void FileTests::get_specific_copyTest()
+{
+	QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	bool ok = query.exec("SElECT * FROM add_file(1, 'getSpecificFileCopyTest', 1, 'GNOME2');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_in(1, '{%1}', 'I do not like KDE');").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SElECT checkedInInstanceId FROM file WHERE fileId = %1").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT changeSetId FROM fileInstance WHERE fileInstanceId = '%1'").arg(query.value(0).toString()));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int changeSetId = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_out(1, '{%1}');").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM get_specific_copy (1, %1, %2);").arg(fileId).arg(changeSetId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("name").toString() == tempQuery.value("name").toString(), qPrintable("Error: name not match!)"));
+	QVERIFY2(query.value("parentId").toInt() == tempQuery.value("parentId").toInt(), qPrintable("Error: parentId not match!)"));
+
+	ok = tempQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceId = '%1'").arg(tempQuery.value("checkedInInstanceId").toString()));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("size").toInt() == tempQuery.value("size").toInt(), qPrintable("Error: size not match!)"));
+	QVERIFY2(query.value("data").toString() == tempQuery.value("data").toString(), qPrintable("Error: data not match!)"));
+	QVERIFY2(query.value("action").toInt() == tempQuery.value("action").toInt(), qPrintable("Error: action not match!)"));
+
+	ok = tempQuery.exec(QString("SELECT * FROM changeSet WHERE changeSetId = %1").arg(changeSetId));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("userId").toInt() == tempQuery.value("userId").toInt(), qPrintable("Error: userId not match!)"));
+
+	// Call function with wrong changeSetId
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_specific_copy (1, 1, %1);").arg(maxValueId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == false, qPrintable("Empty row expected"));
+}
+
+void FileTests::add_deviceTest()
+{
+	QSqlQuery query;
+
+	QString data = "Source of linux kernel";
+
+	bool ok = query.exec(QString("SELECT * FROM add_device(1, '%1', 1, '.src');").arg(data));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1 AND parentId=1").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceId = '%1' AND data = '%2'").arg(query.value("checkedOutInstanceId").toString()).arg(data));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkOut WHERE fileId=%1 AND userId=1").arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 }
 
 QString FileTests::filesExist(QString fileID)

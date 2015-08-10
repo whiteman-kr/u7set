@@ -18,10 +18,12 @@ TEMPLATE = app
 SOURCES += main.cpp \
     UserTests.cpp \
     FileTests.cpp \
-    OtherTests.cpp
+    OtherTests.cpp \
+    SignalTests.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     UserTests.h \
     FileTests.h \
-    OtherTests.h
+    OtherTests.h \
+    SignalTests.h
