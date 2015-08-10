@@ -1640,7 +1640,7 @@ namespace Builder
 
 		if (hasFblItems == false)
 		{
-			LOG_WARNING(log(), "Empty logic scheme %1, functional blocks were not found.");
+			LOG_WARNING(log(), QString("Empty logic scheme %1, functional blocks were not found.").arg(scheme->strID()));
 			return true;
 		}
 

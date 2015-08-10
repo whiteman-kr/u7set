@@ -203,7 +203,7 @@ private:
 	double m_outputLowLimit = 0;
 	double m_outputHighLimit = 0;
 	int m_outputUnitID = NO_UNIT_ID;
-	OutputRangeMode m_outputRangeMode = OutputRangeMode::Plus4_Plus20_mA;
+	OutputRangeMode m_outputRangeMode = OutputRangeMode::Plus0_Plus5_V;
 	int m_outputSensorID = 0;
 	bool m_acquire = true;
 	bool m_calculated = false;
