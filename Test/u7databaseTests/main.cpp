@@ -4,6 +4,7 @@
 #include "UserTests.h"
 #include "FileTests.h"
 #include "OtherTests.h"
+#include "SignalTests.h"
 
 const int DatabaseProjectVersion = 40;
 
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
 	UserTests userTests;
 	FileTests fileTests;
 	OtherTests otherTests;
+	SignalTests signalTests;
 
 	int testResult;
 	testResult = QTest::qExec(&userTests, argc, argv);
@@ -61,6 +63,13 @@ int main(int argc, char *argv[])
 	if (testResult != 0)
 	{
 		qDebug() << testResult << " other test(s) has been interrupted by error(s)";
+		return testResult;
+	}
+
+	testResult = QTest::qExec(&signalTests, argc, argv);
+	if (testResult != 0)
+	{
+		qDebug() << testResult << " file test(s) has been interrupted by error(s)";
 		return testResult;
 	}
 

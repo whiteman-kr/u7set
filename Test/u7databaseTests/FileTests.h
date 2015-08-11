@@ -48,6 +48,10 @@ private slots:
 	void get_latest_file_versionTest();
 	void get_file_listTest();
 	void get_latest_file_tree_versionTest();
+	void undo_changesTest();
+	void add_or_update_fileTest();
+	void get_specific_copyTest();
+	void add_deviceTest();
 
 public:
 	static bool fileExists(int fileID);
