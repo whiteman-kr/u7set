@@ -941,7 +941,7 @@ QVector<int> SignalsModel::getSameChannelSignals(int row)
 	QVector<int> sameChannelSignalRows;
 	if (m_signalSet[row].signalGroupID() != 0)
 	{
-        QVector<int> sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[row].signalGroupID());
+		QVector<int> sameChannelSignalIDs = m_signalSet.getChannelSignalsID(m_signalSet[row].signalGroupID());
 		foreach (const int id, sameChannelSignalIDs)
 		{
 			sameChannelSignalRows.append(m_signalSet.keyIndex(id));
@@ -1308,30 +1308,40 @@ void SignalsTabPage::projectClosed()
 void SignalsTabPage::editSignal()
 {
 	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
-    if (selection.count() == 0)
-    {
-        QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
-    }
-    for (int i = 0; i < selection.count(); i++)
-    {
+	if (selection.count() == 0)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+	}
+	QVector<int> selectedSignalId;
+	for (int i = 0; i < selection.count(); i++)
+	{
 		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		selectedSignalId.append(m_signalsModel->key(row));
 		if (!m_signalsModel->editSignal(row))
 		{
 			break;
 		}
 	}
+	m_signalsView->selectionModel()->clearSelection();
+	QAbstractItemView::SelectionMode selectionMode = m_signalsView->selectionMode();
+	m_signalsView->setSelectionMode(QAbstractItemView::MultiSelection);
+	for (int i = 0; i < selectedSignalId.count(); i++)
+	{
+		m_signalsView->selectRow(m_signalsModel->getKeyIndex(selectedSignalId[i]));
+	}
+	m_signalsView->setSelectionMode(selectionMode);
 }
 
 void SignalsTabPage::deleteSignal()
 {
 	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
-    if (selection.count() == 0)
-    {
-        QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
-    }
+	if (selection.count() == 0)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+	}
 	QSet<int> deletedSignalGroupIDs;
-    for (int i = 0; i < selection.count(); i++)
-    {
+	for (int i = 0; i < selection.count(); i++)
+	{
 		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
 		int groupId = m_signalsModel->signal(row).signalGroupID();
 		if (groupId != 0)
@@ -1439,10 +1449,10 @@ void SignalsTabPage::checkScrollPosition()
 void SignalsTabPage::changeSignalActionsVisibility()
 {
 	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
-    if (selection.count() == 0)
-    {
+	if (selection.count() == 0)
+	{
 		emit setSignalActionsVisibility(false);
-    }
+	}
 	else
 	{
 		for (int i = 0; i < selection.count(); i++)
@@ -1463,7 +1473,7 @@ void SignalsTabPage::saveSelection()
 	// Save signal id list of selected rows and signal id with column number of focused cell
 	//
 	m_selectedRowsSignalID.clear();
-    QModelIndexList selectedList = m_signalsView->selectionModel()->selectedRows(0);
+	QModelIndexList selectedList = m_signalsView->selectionModel()->selectedRows(0);
 	foreach (const QModelIndex& index, selectedList)
 	{
 		int row = m_signalsProxyModel->mapToSource(index).row();
@@ -1484,8 +1494,8 @@ void SignalsTabPage::restoreSelection()
 {
 	foreach (int id, m_selectedRowsSignalID)
 	{
-        QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(id), 0);
-        QModelIndex proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
+		QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(id), 0);
+		QModelIndex proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
 		m_signalsView->selectRow(proxyIndex.row());
 	}
 	QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(m_focusedCellSignalID), m_focusedCellColumn);
@@ -1595,7 +1605,7 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 
 void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
 {
-    QVector<int> sourceRows = m_sourceModel->getSameChannelSignals(mapToSource(index(row, 0)).row());
+	QVector<int> sourceRows = m_sourceModel->getSameChannelSignals(mapToSource(index(row, 0)).row());
 	foreach (const int sourceRow, sourceRows)
 	{
 		QModelIndex changedIndex = mapFromSource(m_sourceModel->index(sourceRow, 0));
