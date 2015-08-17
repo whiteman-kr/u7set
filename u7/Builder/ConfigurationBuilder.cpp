@@ -211,15 +211,7 @@ namespace Builder
 			quint16 jumpers = ssKey << 6;
 			jumpers |= m->channel();
 
-			/*for (quint8 i = 0; i < 255; i++)
-			{
-				quint8 crc4 = Crc::crc4(&i, sizeof(i));
-				qDebug() << i <<" " << QString::number(crc4, 16);
-			}*/
-
-
-			quint16 crc4 = Crc::crc4(&jumpers, sizeof(jumpers));
-			crc4 >>= 4;
+            quint16 crc4 = Crc::crc4(jumpers);
 			jumpers |= (crc4 << 12);
 
 			lmReport << "Jumpers configuration (HEX): 0x" + QString::number(jumpers, 16);
