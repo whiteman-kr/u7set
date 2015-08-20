@@ -800,8 +800,8 @@ void EditSchemeView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam*
 		break;
 	case MouseState::MovingConnectionLinePoint:
 		{
-			double diffX = m_editEndMovingEdgeX - m_editStartMovingEdgeX;
-			double diffY = m_editEndMovingEdgeY - m_editStartMovingEdgeY;
+			double diffX = m_editEndMovingEdgeX - points[m_movingEdgePointIndex].X;
+			double diffY = m_editEndMovingEdgeY - points[m_movingEdgePointIndex].Y;
 
 			// Сдвинуть предыдущую точку
 			//
@@ -2203,6 +2203,8 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 				{
 					assert(movingEdgePointIndex != -1);
 
+					//if (movingEdgePointIndex == )
+
 					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
 					//
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
@@ -2225,6 +2227,7 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
+
 		// Проверить выделенные элементы, на возможность выполнения команды их перемещения
 		//
 		for (auto si = selectedItems().begin(); si != selectedItems().end(); ++si)
@@ -2246,6 +2249,55 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 				setMouseCursor(me->pos());
 				editSchemeView()->update();
 				return;
+			}
+		}
+
+		// If mouse is over pin, star drawing SchmeItemLink
+		//
+		{
+			std::vector<VFrame30::AfbPin> itemPins;
+			itemPins.reserve(64);
+
+			double gridSize = scheme()->gridSize();
+			double pinGridStep = static_cast<double>(scheme()->pinGridStep());
+
+			for (std::shared_ptr<VFrame30::SchemeItem> item : activeLayer()->Items)
+			{
+				VFrame30::FblItemRect* fbRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
+				VFrame30::SchemeItemLink* link = dynamic_cast<VFrame30::SchemeItemLink*>(item.get());
+
+				if (fbRect != nullptr &&
+					std::find(selectedItems().begin(), selectedItems().end(), item) == selectedItems().end())	// Item is not selected, as in this case it can be resized or moved by control bars
+				{
+					const std::list<VFrame30::AfbPin>& inputs = fbRect->inputs();
+					const std::list<VFrame30::AfbPin>& outputs = fbRect->outputs();
+
+					itemPins.clear();
+					itemPins.insert(itemPins.end(), inputs.begin(), inputs.end());
+					itemPins.insert(itemPins.end(), outputs.begin(), outputs.end());
+
+					for (const VFrame30::AfbPin& pin : itemPins)
+					{
+						QRectF pinArea = {pin.x() - gridSize * pinGridStep / 2, pin.y() - gridSize * pinGridStep / 2,
+										 gridSize * pinGridStep, gridSize * pinGridStep};
+
+						if (pinArea.contains(docPoint) == true)
+						{
+							addItem(std::make_shared<VFrame30::SchemeItemLink>(scheme()->unit()));
+
+							mouseLeftDown_AddSchemePosConnectionStartPoint(me);
+
+							return;
+						}
+					}
+
+					continue;
+				}
+
+				if (link != nullptr)
+				{
+					continue;
+				}
 			}
 		}
 
@@ -2403,7 +2455,6 @@ void EditSchemeWidget::mouseLeftDown_AddSchemePosConnectionStartPoint(QMouseEven
 	// magnet point to pin
 	//
 	docPoint = magnetPointToPin(docPoint);
-
 
 	itemPos->DeleteAllPoints();
 
@@ -2891,17 +2942,15 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 		return;
 	}
 
-	if (itemPos->GetPointList().size() >= 1)
+	// Add the last point, where cursor is now
+	//
+	mouseRightDown_AddSchemePosConnectionNextPoint(e);
+
+	itemPos->RemoveSamePoints();
+	itemPos->DeleteAllExtensionPoints();
+
+	if (itemPos->GetPointList().size() >= 2)
 	{
-		// Add the last point, where cursor is now
-		//
-		mouseRightDown_AddSchemePosConnectionNextPoint(e);
-
-		// --
-		//
-		itemPos->RemoveSamePoints();
-		itemPos->DeleteAllExtensionPoints();
-
 		// Если линия началась или окончилась на таком же элементе, то соединить эти две (или три) линии
 		//
 		auto points = itemPos->GetPointList();
@@ -2915,18 +2964,26 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 		bool startPointAddedToOther = false;	// Новый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 		bool endPointAddedToOther = false;		// Новый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 
-		auto schemeItemStartPoint = activeLayer()->getItemUnderPoint(QPointF(startPoint.X, startPoint.Y));
-		auto schemeItemEndPoint = activeLayer()->getItemUnderPoint(QPointF(endPoint.X, endPoint.Y));
+		std::shared_ptr<VFrame30::SchemeItem> linkUnderStartPoint = activeLayer()->getItemUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemeView()->m_newItem->metaObject()->className());
+		std::shared_ptr<VFrame30::SchemeItem> linkUnderEndPoint = activeLayer()->getItemUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemeView()->m_newItem->metaObject()->className());
 
-		if (schemeItemStartPoint != nullptr &&
-			schemeItemStartPoint->metaObject()->className() == editSchemeView()->m_newItem->metaObject()->className())
+		std::shared_ptr<VFrame30::SchemeItem> fblRectUnderStartPoint =
+			activeLayer()->findPinUnderPoint(startPoint, scheme()->gridSize(), scheme()->pinGridStep());
+
+		std::shared_ptr<VFrame30::SchemeItem> fblRectUnderEndPoint =
+			activeLayer()->findPinUnderPoint(endPoint, scheme()->gridSize(), scheme()->pinGridStep());
+
+		if (linkUnderStartPoint != nullptr &&
+			fblRectUnderStartPoint.get() == nullptr)	// Start point is not on BlItemRect pin
 		{
+			assert(linkUnderStartPoint->metaObject()->className() == editSchemeView()->m_newItem->metaObject()->className());
+
 			// Это такой же эелемент, если точка schemeItemStartPoint лежит на первой или последней точке schemeItemStartPoint,
 			// то объеденить schemeItemStartPoint и новый элемент
 			//
-			assert(dynamic_cast<VFrame30::IPosConnection*>(schemeItemStartPoint.get()) != nullptr);
+			assert(dynamic_cast<VFrame30::IPosConnection*>(linkUnderStartPoint.get()) != nullptr);
 
-			VFrame30::IPosConnection* existingItemPos = dynamic_cast<VFrame30::IPosConnection*>(schemeItemStartPoint.get());
+			VFrame30::IPosConnection* existingItemPos = dynamic_cast<VFrame30::IPosConnection*>(linkUnderStartPoint.get());
 
 			auto existingItemPoints = existingItemPos->GetPointList();
 
@@ -2935,7 +2992,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 			{
 				// Стартовая точка новой линии лежит на стартовой точке старой линии
 				//
-				startItemGuid = schemeItemStartPoint->guid();		// Сохранить, что бы потом не подключить к этой же линии и последнюю точку, что бы не получилось кольцо
+				startItemGuid = linkUnderStartPoint->guid();		// Сохранить, что бы потом не подключить к этой же линии и последнюю точку, что бы не получилось кольцо
 				startPointAddedToOther = true;
 
 				// --
@@ -2945,7 +3002,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 				points.reverse();								// Если будет объединение по последней точке, то этот Recerse очень важен
 
 				std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
-				m_editEngine->runSetPoints(newPoints, schemeItemStartPoint);
+				m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
 			}
 			else
 			{
@@ -2954,7 +3011,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 				{
 					// ПЕРВАЯ точка новой линии лежит на ПОСЛЕДНЕЙ точке существующей линии
 					//
-					startItemGuid = schemeItemStartPoint->guid();	// Сохранить, что бы потом не подключить к этой же линии и последнюю точку, что бы не получилось кольцо
+					startItemGuid = linkUnderStartPoint->guid();	// Сохранить, что бы потом не подключить к этой же линии и последнюю точку, что бы не получилось кольцо
 					startPointAddedToOther = true;
 
 					// --
@@ -2965,22 +3022,26 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 					points.assign(existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
-					m_editEngine->runSetPoints(newPoints, schemeItemStartPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderStartPoint);
 				}
 			}
 		}
 
 		// --
 		//
-		if (schemeItemEndPoint != nullptr &&
-			schemeItemEndPoint->metaObject()->className() == editSchemeView()->m_newItem->metaObject()->className() &&	// Должен быть такой же тип элемента
-			schemeItemEndPoint->guid() != startItemGuid)								// Элемент не должен быть в пердыдущем условии присоединен к ЭТОЙ ЖЕ линии
+		if (linkUnderEndPoint != nullptr &&
+			fblRectUnderEndPoint.get() == nullptr &&				// End point is not on BlItemRect pin
+			linkUnderEndPoint->guid() != startItemGuid)				// Элемент не должен быть в пердыдущем условии присоединен к ЭТОЙ ЖЕ линии
 		{
+			// Должен быть такой же тип элемента
+			//
+			assert(linkUnderEndPoint->metaObject()->className() == editSchemeView()->m_newItem->metaObject()->className());
+
 			// Это такой же эелемент, если точка schemeItemEndPoint лежит на первой или последней точке schemeItemEndPoint,
 			// то объеденить schemeItemEndPoint и новый элемент
 			//
-			assert(dynamic_cast<VFrame30::IPosConnection*>(schemeItemEndPoint.get()) != nullptr);
-			VFrame30::IPosConnection* existingItemPos = dynamic_cast<VFrame30::IPosConnection*>(schemeItemEndPoint.get());
+			assert(dynamic_cast<VFrame30::IPosConnection*>(linkUnderEndPoint.get()) != nullptr);
+			VFrame30::IPosConnection* existingItemPos = dynamic_cast<VFrame30::IPosConnection*>(linkUnderEndPoint.get());
 
 			auto existingItemPoints = existingItemPos->GetPointList();
 
@@ -2998,10 +3059,10 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 					existingItemPoints.pop_front();
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
-					m_editEngine->runDeleteItem(schemeItemStartPoint, activeLayer());
+					m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
-					m_editEngine->runSetPoints(newPoints, schemeItemEndPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 				}
 				else
 				{
@@ -3012,7 +3073,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 					std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
-					m_editEngine->runSetPoints(newPoints, schemeItemEndPoint);
+					m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 				}
 			}
 			else
@@ -3032,10 +3093,10 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 						existingItemPoints.pop_front();
 						points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
-						m_editEngine->runDeleteItem(schemeItemStartPoint, activeLayer());
+						m_editEngine->runDeleteItem(linkUnderStartPoint, activeLayer());
 
 						std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
-						m_editEngine->runSetPoints(newPoints, schemeItemEndPoint);
+						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 					}
 					else
 					{
@@ -3046,7 +3107,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 						points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
 
 						std::vector<VFrame30::SchemePoint> newPoints(points.begin(), points.end());
-						m_editEngine->runSetPoints(newPoints, schemeItemEndPoint);
+						m_editEngine->runSetPoints(newPoints, linkUnderEndPoint);
 					}
 				}
 			}
@@ -3054,7 +3115,7 @@ void EditSchemeWidget::mouseLeftUp_AddSchemePosConnectionNextPoint(QMouseEvent* 
 
 		if (startPointAddedToOther == false && endPointAddedToOther == false)
 		{
-			m_editEngine->runAddItem(editSchemeView()->m_newItem, activeLayer());
+		m_editEngine->runAddItem(editSchemeView()->m_newItem, activeLayer());
 		}
 	}
 
@@ -3356,28 +3417,28 @@ void EditSchemeWidget::mouseMove_AddSchemePosConnectionNextPoint(QMouseEvent* ev
 
 	// if onePoint on previous line, then move it to base
 	//
-//	if (points.size() > 1)
-//	{
-//		VFrame30::SchemePoint lastLinkPt1 = *std::prev(points.end(), 2);
-//		VFrame30::SchemePoint lastLinkPt2 = points.back();
+	if (points.size() > 1)
+	{
+		VFrame30::SchemePoint lastLinkPt1 = *std::prev(points.end(), 2);
+		VFrame30::SchemePoint lastLinkPt2 = points.back();
 
-//		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
-//			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
-//			((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
-//			 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
-//			))
-//		{
+		if (std::abs(lastLinkPt1.Y - lastLinkPt2.Y) < 0.0000001 &&						// prev line is horizontal
+			std::abs(lastLinkPt1.Y - onePoint.y()) < 0.0000001 &&
+			((lastLinkPt2.X - lastLinkPt1.X > 0 && ptBase.X - onePoint.x() > 0) ||		// new line on the sime side
+			 (lastLinkPt2.X - lastLinkPt1.X < 0 && ptBase.X - onePoint.x() < 0)
+			))
+		{
 			onePoint.setX(ptBase.X);
 			onePoint.setY(ptBase.Y);
-//		}
-//	}
+		}
+	}
 
 	QPointF twoPoint(onePoint.x(), docPoint.y());
 
-//	if (onePoint != ptBase)
-//	{
-//		itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
-//	}
+	if (onePoint != ptBase)
+	{
+		itemPos->AddExtensionPoint(onePoint.x(), onePoint.y());
+	}
 	itemPos->AddExtensionPoint(twoPoint.x(), twoPoint.y());
 	itemPos->AddExtensionPoint(docPoint.x(), docPoint.y());
 
@@ -3429,7 +3490,6 @@ void EditSchemeWidget::mouseMove_MovingEdgesOrVertex(QMouseEvent* event)
 		editSchemeView()->m_editEndMovingEdge = docPoint.x();
 		break;
 	case MouseState::MovingConnectionLinePoint:
-
 		// magnet point to pin
 		//
 		docPoint = magnetPointToPin(docPoint);

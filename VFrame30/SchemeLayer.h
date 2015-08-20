@@ -41,8 +41,10 @@ namespace VFrame30
 		void ConnectionMapPosInc(SchemePoint pinPos);
 		int GetPinPosConnectinCount(SchemePoint pinPos, SchemeUnit unit) const;
 
-		std::shared_ptr<SchemeItem> getItemUnderPoint(QPointF point) const;
+		std::shared_ptr<SchemeItem> getItemUnderPoint(QPointF point, QString className = "") const;
 		std::list<std::shared_ptr<SchemeItem>> getItemListInRectangle(const QRectF& rect) const;
+
+		std::shared_ptr<SchemeItem> findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const;
 
 		// Properties
 		//

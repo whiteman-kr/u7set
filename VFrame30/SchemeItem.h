@@ -70,7 +70,7 @@ namespace VFrame30
 			return false;
 		}
 
-		operator QPointF()
+		operator QPointF() const
 		{
 			return QPointF(X, Y);
 		}

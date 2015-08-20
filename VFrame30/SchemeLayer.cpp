@@ -1,8 +1,11 @@
 #include "Stable.h"
 #include "SchemeLayer.h"
+#include "FblItemRect.h"
+
 
 namespace VFrame30
 {
+
 	Factory<VFrame30::SchemeLayer> VideoLayerFactory;
 
 	SchemeLayer::SchemeLayer(void)
@@ -176,7 +179,7 @@ namespace VFrame30
 		}
 	}
 
-	std::shared_ptr<SchemeItem> SchemeLayer::getItemUnderPoint(QPointF point) const
+	std::shared_ptr<SchemeItem> SchemeLayer::getItemUnderPoint(QPointF point, QString className) const
 	{
 		double x = point.x();
 		double y = point.y();
@@ -187,7 +190,11 @@ namespace VFrame30
 
 			if (item->IsIntersectPoint(x, y) == true)
 			{
-				return item;
+				if ((className.isEmpty() == true) ||
+					(className == item->metaObject()->className()))
+				{
+					return item;
+				}
 			}
 		}
 
@@ -206,6 +213,46 @@ namespace VFrame30
 			);
 
 		return out;
+	}
+
+	std::shared_ptr<SchemeItem> SchemeLayer::findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const
+	{
+		double x = point.x();
+		double y = point.y();
+
+		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
+		{
+			const std::shared_ptr<VFrame30::SchemeItem>& item = *it;
+
+			if (dynamic_cast<VFrame30::FblItemRect*>(item.get()) != nullptr &&
+				item->IsIntersectPoint(x, y) == true)
+			{
+				VFrame30::FblItemRect* fbl = dynamic_cast<VFrame30::FblItemRect*>(item.get());
+
+				fbl->SetConnectionsPos(gridSize, pinGridStep);
+
+				const std::list<VFrame30::AfbPin>& inputs = fbl->inputs();
+				const std::list<VFrame30::AfbPin>& outputs = fbl->outputs();
+
+				for (const VFrame30::AfbPin& pin : inputs)
+				{
+					if (pin.point() == point)
+					{
+						return item;
+					}
+				}
+
+				for (const VFrame30::AfbPin& pin : outputs)
+				{
+					if (pin.point() == point)
+					{
+						return item;
+					}
+				}
+			}
+		}
+
+		return std::shared_ptr<SchemeItem>();
 	}
 
 	// Properties
