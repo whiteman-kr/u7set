@@ -924,6 +924,19 @@ void SignalsModel::loadSignal(int row, bool updateView)
 	}
 }
 
+void SignalsModel::loadSignalSet(QVector<int> keys, bool updateView)
+{
+	for (int i = 0; i < keys.count(); i++)
+	{
+		int row = keyIndex(keys[i]);
+		dbController()->getLatestSignal(keys[i], &m_signalSet[row], parrentWindow());
+		if (updateView)
+		{
+			emit dataChanged(createIndex(row, 0), createIndex(row, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+		}
+	}
+}
+
 void SignalsModel::clearSignals()
 {
 	if (m_signalSet.count() != 0)
@@ -1114,6 +1127,51 @@ bool SignalsModel::editSignal(int row)
 	}
 
 	loadSignal(row);	//Signal could be checked out but not changed
+	return false;
+}
+
+bool SignalsModel::editSignals(QVector<int> ids)
+{
+	loadSignalSet(ids, false);
+
+	int readOnly = false;
+	QVector<Signal*> signalVector;
+	SignalType signalType = SignalType::Analog;
+
+	for (int i = 0; i < ids.count(); i++)
+	{
+		Signal& signal = m_signalSet[m_signalSet.keyIndex(ids[i])];
+		if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId())
+		{
+			readOnly = true;
+		}
+		if (signal.type() == SignalType::Discrete)
+		{
+			signalType = SignalType::Discrete;
+		}
+		signalVector.append(&signal);
+	}
+
+	SignalPropertiesDialog dlg(signalVector, signalType, m_dataFormatInfo, m_unitInfo, readOnly, this, m_parentWindow);
+
+	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
+
+	if (dlg.exec() == QDialog::Accepted)
+	{
+		QVector<ObjectState> states;
+		for (int i = 0; i < ids.count(); i++)
+		{
+			ObjectState state;
+			dbController()->setSignalWorkcopy(signalVector[i], &state, parrentWindow());
+			states.append(state);
+		}
+		showErrors(states);
+
+		loadSignalSet(ids);
+		return true;
+	}
+
+	loadSignalSet(ids);	//Signal could be checked out but not changed
 	return false;
 }
 
@@ -1317,17 +1375,16 @@ void SignalsTabPage::editSignal()
 	{
 		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
 		selectedSignalId.append(m_signalsModel->key(row));
-		if (!m_signalsModel->editSignal(row))
-		{
-			break;
-		}
 	}
+
+	m_signalsModel->editSignals(selectedSignalId);
+
 	m_signalsView->selectionModel()->clearSelection();
 	QAbstractItemView::SelectionMode selectionMode = m_signalsView->selectionMode();
 	m_signalsView->setSelectionMode(QAbstractItemView::MultiSelection);
 	for (int i = 0; i < selectedSignalId.count(); i++)
 	{
-		m_signalsView->selectRow(m_signalsModel->getKeyIndex(selectedSignalId[i]));
+		m_signalsView->selectRow(m_signalsModel->keyIndex(selectedSignalId[i]));
 	}
 	m_signalsView->setSelectionMode(selectionMode);
 }
@@ -1494,11 +1551,11 @@ void SignalsTabPage::restoreSelection()
 {
 	foreach (int id, m_selectedRowsSignalID)
 	{
-		QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(id), 0);
+		QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->keyIndex(id), 0);
 		QModelIndex proxyIndex = m_signalsProxyModel->mapFromSource(sourceIndex);
 		m_signalsView->selectRow(proxyIndex.row());
 	}
-	QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->getKeyIndex(m_focusedCellSignalID), m_focusedCellColumn);
+	QModelIndex sourceIndex = m_signalsModel->index(m_signalsModel->keyIndex(m_focusedCellSignalID), m_focusedCellColumn);
 	m_signalsView->setCurrentIndex(m_signalsProxyModel->mapFromSource(sourceIndex));
 	m_signalsView->horizontalScrollBar()->setValue(m_lastHorizontalScrollPosition);
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
