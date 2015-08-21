@@ -16,9 +16,70 @@
 #include "SignalsTabPage.h"
 
 
+bool isSameFieldValue(QVector<Signal*>& signalVector, std::function<bool (Signal*, Signal*)> equalityOf2Signals)
+{
+	for (int i = 0; i < signalVector.count() - 1; i++)
+	{
+		for (int j = i + 1; j < signalVector.count(); j++)
+		{
+			if (!equalityOf2Signals(signalVector[i], signalVector[j]))
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+
+#define SET_PROPERTY_VALUE(manager, propertyName, fieldName) manager->setValue(propertyName, signalVector[0]->fieldName());
+
+#define SET_STRING_PROPERTY_VALUE(propertyName, fieldName) \
+	if (isSameFieldValue(signalVector, [](Signal* first, Signal* second){ return first->fieldName()==second->fieldName(); })) \
+		m_stringManager->setValue(propertyName, signalVector[0]->fieldName());
+
+#define SET_ENUM_PROPERTY_VALUE(manager, propertyName, enumInfo, fieldName) manager->setValue(propertyName, enumInfo.keyIndex(signalVector[0]->fieldName()));
+
+#define SET_SIGNAL_STRING_FIELD_VALUE(setter, value) \
+	if (m_signalVector[0]->value() != value) \
+		signal.setter(value);
+
+#define SET_SIGNAL_FIELD_VALUE(getter, setter, manager, property) \
+	if (m_signalVector[0]->getter() != manager->value(property)) \
+		signal.setter(manager->value(property));
+
+#define SET_SIGNAL_UNIT_FIELD_VALUE(getter, setter, property) \
+	{ \
+		int unitIndex = m_enumManager->value(property); \
+		if (unitIndex >= 0 && unitIndex < m_unitInfo.count()) \
+		{ \
+			int unitID = m_unitInfo.key(unitIndex); \
+			if (m_signalVector[0]->getter() != unitID) \
+				signal.setter(unitID); \
+		} \
+		else \
+			signal.setter(NO_UNIT_ID); \
+	}
+
+#define SET_SIGNAL_LIST_FIELD_VALUE(listSize, getter, setter, property) \
+	{ \
+		int index = m_enumManager->value(property); \
+		if (index >= 0 && index < listSize && m_signalVector[0]->getter() != index) \
+		{ \
+			signal.setter(index); \
+		} \
+	}
+
+
 SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signalType, DataFormatList &dataFormatInfo, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
+	SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*>() << &signal,signalType, dataFormatInfo, unitInfo, readOnly, signalsModel, parent)
+{
+
+}
+
+SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, SignalType signalType, DataFormatList &dataFormatInfo, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
 	QDialog(parent),
-	m_signal(signal),
+	m_signalVector(signalVector),
 	m_dataFormatInfo(dataFormatInfo),
 	m_unitInfo(unitInfo),
 	m_signalsModel(signalsModel)
@@ -33,42 +94,45 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 
 	QtProperty *signalProperty = groupManager->addProperty(tr("Signal"));
 
-    m_strIDProperty = m_stringManager->addProperty(tr("ID"));
-	QString strID = signal.strID();
-	if (strID[0] != '#')
+	if (signalVector.count() == 1)
 	{
-		strID = '#' + strID;
+		m_strIDProperty = m_stringManager->addProperty(tr("ID"));
+		QString strID = signalVector[0]->strID();
+		if (strID[0] != '#')
+		{
+			strID = '#' + strID;
+		}
+		m_stringManager->setValue(m_strIDProperty, strID);
+		QRegExp rx4ID("^#[A-Za-z][A-Za-z\\d_]*$");
+		m_stringManager->setRegExp(m_strIDProperty, rx4ID);
+		m_stringManager->setReadOnly(m_strIDProperty, readOnly);
+		signalProperty->addSubProperty(m_strIDProperty);
 	}
-	m_stringManager->setValue(m_strIDProperty, strID);
-	QRegExp rx4ID("^#[A-Za-z][A-Za-z\\d_]*$");
-	m_stringManager->setRegExp(m_strIDProperty, rx4ID);
-	m_stringManager->setReadOnly(m_strIDProperty, readOnly);
-    signalProperty->addSubProperty(m_strIDProperty);
 
 	m_extStrIDProperty = m_stringManager->addProperty(tr("External ID"));
-	m_stringManager->setValue(m_extStrIDProperty, signal.extStrID());
+	SET_STRING_PROPERTY_VALUE(m_extStrIDProperty, extStrID);
 	QRegExp rx4ExtID("^[A-Za-z][A-Za-z\\d_]*$");
 	m_stringManager->setRegExp(m_extStrIDProperty, rx4ExtID);
 	m_stringManager->setReadOnly(m_extStrIDProperty, readOnly);
-    signalProperty->addSubProperty(m_extStrIDProperty);
+	signalProperty->addSubProperty(m_extStrIDProperty);
 
 	m_nameProperty = m_stringManager->addProperty(tr("Name"));
-	m_stringManager->setValue(m_nameProperty, signal.name());
+	SET_STRING_PROPERTY_VALUE(m_nameProperty, name);
 	QRegExp rx4Name("^.+$");
 	m_stringManager->setRegExp(m_nameProperty, rx4Name);
 	m_stringManager->setReadOnly(m_nameProperty, readOnly);
-    signalProperty->addSubProperty(m_nameProperty);
+	signalProperty->addSubProperty(m_nameProperty);
 
 	m_dataFormatProperty = m_enumManager->addProperty(tr("Data format"));
 	m_enumManager->setEnumNames(m_dataFormatProperty, dataFormatInfo.toList());
-	m_enumManager->setValue(m_dataFormatProperty, dataFormatInfo.keyIndex(signal.dataFormatInt()));
+	SET_ENUM_PROPERTY_VALUE(m_enumManager, m_dataFormatProperty, dataFormatInfo, dataFormatInt);
 	signalProperty->addSubProperty(m_dataFormatProperty);
 
 	m_dataSizeProperty = m_intManager->addProperty(tr("Data size"));
 	m_intManager->setRange(m_dataSizeProperty, 1, 100);
 	if (signalType == SignalType::Analog)
 	{
-		m_intManager->setValue(m_dataSizeProperty, signal.dataSize());
+		SET_PROPERTY_VALUE(m_intManager, m_dataSizeProperty, dataSize);
 		m_intManager->setReadOnly(m_dataSizeProperty, readOnly);
 	}
 	else
@@ -80,49 +144,49 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 
 	m_lowAdcProperty = m_intManager->addProperty(tr("Low ADC"));
 	m_intManager->setRange(m_lowAdcProperty, 0, 65535);
-	m_intManager->setValue(m_lowAdcProperty, signal.lowADC());
+	SET_PROPERTY_VALUE(m_intManager, m_lowAdcProperty, lowADC);
 	m_intManager->setReadOnly(m_lowAdcProperty, readOnly);
 	signalProperty->addSubProperty(m_lowAdcProperty);
 
 	m_highAdcProperty = m_intManager->addProperty(tr("High ADC"));
 	m_intManager->setRange(m_highAdcProperty, 0, 65535);
-	m_intManager->setValue(m_highAdcProperty, signal.highADC());
+	SET_PROPERTY_VALUE(m_intManager, m_highAdcProperty, highADC);
 	m_intManager->setReadOnly(m_highAdcProperty, readOnly);
 	signalProperty->addSubProperty(m_highAdcProperty);
 
 	m_lowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
-	m_doubleManager->setValue(m_lowLimitProperty, signal.lowLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_lowLimitProperty, lowLimit);
 	m_doubleManager->setReadOnly(m_lowLimitProperty, readOnly);
 	signalProperty->addSubProperty(m_lowLimitProperty);
 
 	m_highLimitProperty = m_doubleManager->addProperty(tr("High limit"));
-	m_doubleManager->setValue(m_highLimitProperty, signal.highLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_highLimitProperty, highLimit);
 	m_doubleManager->setReadOnly(m_highLimitProperty, readOnly);
 	signalProperty->addSubProperty(m_highLimitProperty);
 
 	QStringList unitStringList = unitInfo.toList();
 	m_unitProperty = m_enumManager->addProperty(tr("Unit"));
 	m_enumManager->setEnumNames(m_unitProperty, unitStringList);
-	m_enumManager->setValue(m_unitProperty, unitInfo.keyIndex(signal.unitID()));
+	SET_ENUM_PROPERTY_VALUE(m_doubleManager, m_unitProperty, unitInfo, unitID);
 	signalProperty->addSubProperty(m_unitProperty);
 
 	m_adjustmentProperty = m_doubleManager->addProperty(tr("Adjustment"));
-	m_doubleManager->setValue(m_adjustmentProperty, signal.adjustment());
+	SET_PROPERTY_VALUE(m_doubleManager, m_adjustmentProperty, adjustment);
 	m_doubleManager->setReadOnly(m_adjustmentProperty, readOnly);
 	signalProperty->addSubProperty(m_adjustmentProperty);
 
 	m_dropLimitProperty = m_doubleManager->addProperty(tr("Drop limit"));
-	m_doubleManager->setValue(m_dropLimitProperty, signal.dropLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_dropLimitProperty, dropLimit);
 	m_doubleManager->setReadOnly(m_dropLimitProperty, readOnly);
 	signalProperty->addSubProperty(m_dropLimitProperty);
 
 	m_excessLimitProperty = m_doubleManager->addProperty(tr("Excess limit"));
-	m_doubleManager->setValue(m_excessLimitProperty, signal.excessLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_excessLimitProperty, excessLimit);
 	m_doubleManager->setReadOnly(m_excessLimitProperty, readOnly);
 	signalProperty->addSubProperty(m_excessLimitProperty);
 
 	m_unbalanceLimitProperty = m_doubleManager->addProperty(tr("Unbalance limit"));
-	m_doubleManager->setValue(m_unbalanceLimitProperty, signal.unbalanceLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_unbalanceLimitProperty, unbalanceLimit);
 	m_doubleManager->setReadOnly(m_unbalanceLimitProperty, readOnly);
 	signalProperty->addSubProperty(m_unbalanceLimitProperty);
 
@@ -131,18 +195,18 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	m_inputTreeProperty = groupManager->addProperty(tr("Input sensor"));
 
 	m_inputLowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
-	m_doubleManager->setValue(m_inputLowLimitProperty, signal.inputLowLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_inputLowLimitProperty, inputLowLimit);
 	m_doubleManager->setReadOnly(m_inputLowLimitProperty, readOnly);
 	m_inputTreeProperty->addSubProperty(m_inputLowLimitProperty);
 
 	m_inputHighLimitProperty = m_doubleManager->addProperty(tr("High limit"));
-	m_doubleManager->setValue(m_inputHighLimitProperty, signal.inputHighLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_inputHighLimitProperty, inputHighLimit);
 	m_doubleManager->setReadOnly(m_inputHighLimitProperty, readOnly);
 	m_inputTreeProperty->addSubProperty(m_inputHighLimitProperty);
 
 	m_inputUnitProperty = m_enumManager->addProperty(tr("Unit"));
 	m_enumManager->setEnumNames(m_inputUnitProperty, unitStringList);
-	m_enumManager->setValue(m_inputUnitProperty, unitInfo.keyIndex(signal.inputUnitID()));
+	SET_ENUM_PROPERTY_VALUE(m_enumManager, m_inputUnitProperty, unitInfo, inputUnitID);
 	m_inputTreeProperty->addSubProperty(m_inputUnitProperty);
 
 	QStringList sensorNames;
@@ -152,7 +216,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	}
 	m_inputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
 	m_enumManager->setEnumNames(m_inputSensorProperty, sensorNames);
-	m_enumManager->setValue(m_inputSensorProperty, signal.inputSensorID());
+	SET_PROPERTY_VALUE(m_enumManager, m_inputSensorProperty, inputSensorID);
 	m_inputTreeProperty->addSubProperty(m_inputSensorProperty);
 
 	signalProperty->addSubProperty(m_inputTreeProperty);
@@ -162,18 +226,18 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	m_outputTreeProperty = groupManager->addProperty(tr("Output sensor"));
 
 	m_outputLowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
-	m_doubleManager->setValue(m_outputLowLimitProperty, signal.outputLowLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_outputLowLimitProperty, outputLowLimit);
 	m_doubleManager->setReadOnly(m_outputLowLimitProperty, readOnly);
 	m_outputTreeProperty->addSubProperty(m_outputLowLimitProperty);
 
 	m_outputHighLimitProperty = m_doubleManager->addProperty(tr("High limit"));
-	m_doubleManager->setValue(m_outputHighLimitProperty, signal.outputHighLimit());
+	SET_PROPERTY_VALUE(m_doubleManager, m_outputHighLimitProperty, outputHighLimit);
 	m_doubleManager->setReadOnly(m_outputHighLimitProperty, readOnly);
 	m_outputTreeProperty->addSubProperty(m_outputHighLimitProperty);
 
 	m_outputUnitProperty = m_enumManager->addProperty(tr("Unit"));
 	m_enumManager->setEnumNames(m_outputUnitProperty, unitStringList);
-	m_enumManager->setValue(m_outputUnitProperty, unitInfo.keyIndex(signal.outputUnitID()));
+	SET_ENUM_PROPERTY_VALUE(m_enumManager, m_outputUnitProperty, unitInfo, outputUnitID);
 	m_outputTreeProperty->addSubProperty(m_outputUnitProperty);
 
 	QStringList outputRangeModeNames;
@@ -183,46 +247,46 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	}
 	m_outputRangeModeProperty = m_enumManager->addProperty(tr("Output range mode"));
 	m_enumManager->setEnumNames(m_outputRangeModeProperty, outputRangeModeNames);
-	m_enumManager->setValue(m_outputRangeModeProperty, signal.outputRangeMode());
+	SET_PROPERTY_VALUE(m_enumManager, m_outputRangeModeProperty, outputRangeMode);
 	m_outputTreeProperty->addSubProperty(m_outputRangeModeProperty);
 
 	m_outputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
 	m_enumManager->setEnumNames(m_outputSensorProperty, sensorNames);
-	m_enumManager->setValue(m_outputSensorProperty, signal.outputSensorID());
+	SET_PROPERTY_VALUE(m_enumManager, m_outputRangeModeProperty, outputRangeMode);
 	m_outputTreeProperty->addSubProperty(m_outputSensorProperty);
 
 	signalProperty->addSubProperty(m_outputTreeProperty);
 
 	m_acquireProperty = m_boolManager->addProperty(tr("Acquire"));
-	m_boolManager->setValue(m_acquireProperty, signal.acquire());
+	SET_PROPERTY_VALUE(m_boolManager, m_acquireProperty, acquire);
 	signalProperty->addSubProperty(m_acquireProperty);
 
 	m_calculatedProperty = m_boolManager->addProperty(tr("Calculated"));
-	m_boolManager->setValue(m_calculatedProperty, signal.calculated());
+	SET_PROPERTY_VALUE(m_boolManager, m_calculatedProperty, calculated);
 	signalProperty->addSubProperty(m_calculatedProperty);
 
 	m_normalStateProperty = m_intManager->addProperty(tr("Normal state"));
-	m_intManager->setValue(m_normalStateProperty, signal.normalState());
+	SET_PROPERTY_VALUE(m_intManager, m_normalStateProperty, normalState);
 	m_intManager->setReadOnly(m_normalStateProperty, readOnly);
 	signalProperty->addSubProperty(m_normalStateProperty);
 
 	m_decimalPlacesProperty = m_intManager->addProperty(tr("Decimal places"));
-	m_intManager->setValue(m_decimalPlacesProperty, signal.decimalPlaces());
+	SET_PROPERTY_VALUE(m_intManager, m_decimalPlacesProperty, decimalPlaces);
 	m_intManager->setReadOnly(m_decimalPlacesProperty, readOnly);
 	signalProperty->addSubProperty(m_decimalPlacesProperty);
 
 	m_apertureProperty = m_doubleManager->addProperty(tr("Aperture"));
-	m_doubleManager->setValue(m_apertureProperty, signal.aperture());
+	SET_PROPERTY_VALUE(m_doubleManager, m_apertureProperty, aperture);
 	m_doubleManager->setReadOnly(m_apertureProperty, readOnly);
 	signalProperty->addSubProperty(m_apertureProperty);
 
 	m_filteringTimeProperty = m_doubleManager->addProperty(tr("Filtering time"));
-	m_doubleManager->setValue(m_filteringTimeProperty, signal.filteringTime());
+	SET_PROPERTY_VALUE(m_doubleManager, m_filteringTimeProperty, filteringTime);
 	m_doubleManager->setReadOnly(m_filteringTimeProperty, readOnly);
 	signalProperty->addSubProperty(m_filteringTimeProperty);
 
 	m_maxDifferenceProperty = m_doubleManager->addProperty(tr("Max difference"));
-	m_doubleManager->setValue(m_maxDifferenceProperty, signal.maxDifference());
+	SET_PROPERTY_VALUE(m_doubleManager, m_maxDifferenceProperty, maxDifference);
 	m_doubleManager->setReadOnly(m_maxDifferenceProperty, readOnly);
 	signalProperty->addSubProperty(m_maxDifferenceProperty);
 
@@ -233,7 +297,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 	}
 	m_inOutTypeProperty = m_enumManager->addProperty(tr("Input-output type"));
 	m_enumManager->setEnumNames(m_inOutTypeProperty, inOutStringList);
-	m_enumManager->setValue(m_inOutTypeProperty, signal.inOutType());
+	SET_PROPERTY_VALUE(m_enumManager, m_inOutTypeProperty, inOutType);
 	signalProperty->addSubProperty(m_inOutTypeProperty);
 
 	QStringList byteOrderStringList;
@@ -245,13 +309,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signal
 
 	m_byteOrderProperty = m_enumManager->addProperty(tr("Byte order"));
 	m_enumManager->setEnumNames(m_byteOrderProperty, byteOrderStringList);
-	m_enumManager->setValue(m_byteOrderProperty, signal.byteOrderInt());
+	SET_PROPERTY_VALUE(m_enumManager, m_byteOrderProperty, byteOrderInt);
 	signalProperty->addSubProperty(m_byteOrderProperty);
 
 	m_deviceIDProperty = m_stringManager->addProperty(tr("Device ID"));
-	m_stringManager->setValue(m_deviceIDProperty, signal.deviceStrID());
+	SET_STRING_PROPERTY_VALUE(m_deviceIDProperty, deviceStrID);
 	m_stringManager->setReadOnly(m_deviceIDProperty, readOnly);
-    signalProperty->addSubProperty(m_deviceIDProperty);
+	signalProperty->addSubProperty(m_deviceIDProperty);
 
 	QtLineEditFactory* lineEditFactory = new QtLineEditFactory(this);
 	QtEnumEditorFactory* enumEditFactory = new QtEnumEditorFactory(this);
@@ -310,7 +374,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 {
 	QString strID = m_stringManager->value(m_strIDProperty);
 	QRegExp rx4ID("^#[A-Za-z][A-Za-z\\d_]*$");
-	if (!rx4ID.exactMatch(strID))
+	if (m_signalVector.count() == 1 && !rx4ID.exactMatch(strID))
 	{
 		QMessageBox::information(this, tr("Information"), tr("You have to set ID in correct format, "
 															 "it should begin from '#' and latin letter "
@@ -319,7 +383,8 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	}
 	QString extStrID = m_stringManager->value(m_extStrIDProperty);
 	QRegExp rx4ExtID("^[A-Za-z][A-Za-z\\d_]*$");
-	if (!rx4ExtID.exactMatch(extStrID))
+	if ((m_signalVector.count() == 1 && !rx4ExtID.exactMatch(extStrID)) ||
+			(m_signalVector.count() != 1 && !extStrID.isEmpty() && !rx4ExtID.exactMatch(extStrID)))
 	{
 		QMessageBox::information(this, tr("Information"), tr("You have to set External ID in correct format, "
 															 "it should begin from latin letter "
@@ -327,99 +392,89 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		return;
 	}
 	QString name = m_stringManager->value(m_nameProperty);
-	if (name.isEmpty())
+	if (m_signalVector.count() == 1 && name.isEmpty())
 	{
 		QMessageBox::information(this, tr("Information"), tr("You should fill signal Name, it could not be empty"));
 		return;
 	}
-	m_signal.setStrID(strID);
-	m_signal.setExtStrID(extStrID);
-	m_signal.setName(name);
-	int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
-	if (dataFormatIndex >= 0 && dataFormatIndex < m_dataFormatInfo.count())
+	for (int i = m_signalVector.count() - 1; i >= 0; i--)
 	{
-		m_signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(dataFormatIndex)));
-	}
-	m_signal.setDataSize(m_intManager->value(m_dataSizeProperty));
-	m_signal.setLowADC(m_intManager->value(m_lowAdcProperty));
-	m_signal.setHighADC(m_intManager->value(m_highAdcProperty));
-	m_signal.setLowLimit(m_doubleManager->value(m_lowLimitProperty));
-	m_signal.setHighLimit(m_doubleManager->value(m_highLimitProperty));
-	int unitIndex = m_enumManager->value(m_unitProperty);
-	if (unitIndex >= 0 && unitIndex < m_unitInfo.count())
-	{
-		m_signal.setUnitID(m_unitInfo.key(unitIndex));
-	}
-	else
-	{
-		m_signal.setUnitID(NO_UNIT_ID);
-	}
-	m_signal.setAdjustment(m_doubleManager->value(m_adjustmentProperty));
-	m_signal.setExcessLimit(m_doubleManager->value(m_excessLimitProperty));
-	m_signal.setUnbalanceLimit(m_doubleManager->value(m_unbalanceLimitProperty));
+		Signal& signal = *m_signalVector[i];
 
-	// Input sensor
-	//
-	m_signal.setInputLowLimit(m_doubleManager->value(m_inputLowLimitProperty));
-	m_signal.setInputHighLimit(m_doubleManager->value(m_inputHighLimitProperty));
-	unitIndex = m_enumManager->value(m_inputUnitProperty);
-	if (unitIndex >= 0 && unitIndex < m_unitInfo.count())
-	{
-		m_signal.setInputUnitID(m_unitInfo.key(unitIndex));
-	}
-	else
-	{
-		m_signal.setInputUnitID(NO_UNIT_ID);
-	}
-	int sensorIndex = m_enumManager->value(m_inputSensorProperty);
-	if (sensorIndex >= 0 && sensorIndex < SENSOR_TYPE_COUNT)
-	{
-		m_signal.setInputSensorID(sensorIndex);
-	}
+		if (!strID.isEmpty())
+		{
+			SET_SIGNAL_STRING_FIELD_VALUE(setStrID, strID);
+		}
+		if (!extStrID.isEmpty())
+		{
+			SET_SIGNAL_STRING_FIELD_VALUE(setExtStrID, extStrID);
+		}
+		if (!name.isEmpty())
+		{
+			SET_SIGNAL_STRING_FIELD_VALUE(setName, name);
+		}
+		int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
+		if (dataFormatIndex >= 0 && dataFormatIndex < m_dataFormatInfo.count())
+		{
+			DataFormat dataFormat = static_cast<DataFormat>(m_dataFormatInfo.key(dataFormatIndex));
+			if (dataFormat != m_signalVector[0]->dataFormat())
+			{
+				signal.setDataFormat(dataFormat);
+			}
+		}
+		SET_SIGNAL_FIELD_VALUE(dataSize, setDataSize, m_intManager, m_dataSizeProperty);
+		SET_SIGNAL_FIELD_VALUE(lowADC, setLowADC, m_intManager, m_lowAdcProperty);
+		SET_SIGNAL_FIELD_VALUE(highADC, setHighADC, m_intManager, m_highAdcProperty);
+		SET_SIGNAL_FIELD_VALUE(lowLimit, setLowLimit, m_doubleManager, m_lowLimitProperty);
+		SET_SIGNAL_FIELD_VALUE(highLimit, setHighLimit, m_doubleManager, m_highLimitProperty);
+		SET_SIGNAL_UNIT_FIELD_VALUE(unitID, setUnitID, m_unitProperty);
+		SET_SIGNAL_FIELD_VALUE(adjustment, setAdjustment, m_doubleManager, m_adjustmentProperty);
+		SET_SIGNAL_FIELD_VALUE(dropLimit, setDropLimit, m_doubleManager, m_dropLimitProperty);
+		SET_SIGNAL_FIELD_VALUE(excessLimit, setExcessLimit, m_doubleManager, m_excessLimitProperty);
+		SET_SIGNAL_FIELD_VALUE(unbalanceLimit, setUnbalanceLimit, m_doubleManager, m_unbalanceLimitProperty);
 
-	// Output sensor
-	//
-	m_signal.setOutputLowLimit(m_doubleManager->value(m_outputLowLimitProperty));
-	m_signal.setOutputHighLimit(m_doubleManager->value(m_outputHighLimitProperty));
-	unitIndex = m_enumManager->value(m_outputUnitProperty);
-	if (unitIndex >= 0 && unitIndex < m_unitInfo.count())
-	{
-		m_signal.setOutputUnitID(m_unitInfo.key(unitIndex));
-	}
-	else
-	{
-		m_signal.setOutputUnitID(NO_UNIT_ID);
-	}
-	sensorIndex = m_enumManager->value(m_outputSensorProperty);
-	if (sensorIndex >= 0 && sensorIndex < SENSOR_TYPE_COUNT)
-	{
-		m_signal.setOutputSensorID(sensorIndex);
-	}
-	int outputRangeModeIndex = m_enumManager->value(m_outputRangeModeProperty);
-	if (outputRangeModeIndex >= 0 && outputRangeModeIndex < OUTPUT_RANGE_MODE_COUNT)
-	{
-		m_signal.setOutputRangeMode(OutputRangeMode(outputRangeModeIndex));
-	}
+		// Input sensor
+		//
+		SET_SIGNAL_FIELD_VALUE(inputLowLimit, setInputLowLimit, m_doubleManager, m_inputLowLimitProperty);
+		SET_SIGNAL_FIELD_VALUE(inputHighLimit, setInputHighLimit, m_doubleManager, m_inputHighLimitProperty);
+		SET_SIGNAL_UNIT_FIELD_VALUE(inputUnitID, setInputUnitID, m_inputUnitProperty);
+		SET_SIGNAL_LIST_FIELD_VALUE(SENSOR_TYPE_COUNT, inputSensorID, setInputSensorID, m_inputSensorProperty);
 
-	m_signal.setAcquire(m_boolManager->value(m_acquireProperty));
-	m_signal.setCalculated(m_boolManager->value(m_calculatedProperty));
-	m_signal.setNormalState(m_intManager->value(m_normalStateProperty));
-	m_signal.setDecimalPlaces(m_intManager->value(m_decimalPlacesProperty));
-	m_signal.setAperture(m_doubleManager->value(m_apertureProperty));
-	m_signal.setFilteringTime(m_doubleManager->value(m_filteringTimeProperty));
-	m_signal.setMaxDifference(m_doubleManager->value(m_maxDifferenceProperty));
-	int inOutTypeIndex = m_enumManager->value(m_inOutTypeProperty);
-	if (inOutTypeIndex >= 0 && inOutTypeIndex < IN_OUT_TYPE_COUNT)
-	{
-		m_signal.setInOutType(SignalInOutType(inOutTypeIndex));
-	}
-	int byteOrderIndex = m_enumManager->value(m_byteOrderProperty);
+		// Output sensor
+		//
+		SET_SIGNAL_FIELD_VALUE(outputLowLimit, setOutputLowLimit, m_doubleManager, m_outputLowLimitProperty);
+		SET_SIGNAL_FIELD_VALUE(outputHighLimit, setOutputHighLimit, m_doubleManager, m_outputHighLimitProperty);
+		SET_SIGNAL_UNIT_FIELD_VALUE(outputUnitID, setOutputUnitID, m_outputUnitProperty);
+		SET_SIGNAL_LIST_FIELD_VALUE(SENSOR_TYPE_COUNT, outputSensorID, setOutputSensorID, m_outputSensorProperty);
 
-	if (byteOrderIndex >= 0 && byteOrderIndex < TO_INT(ByteOrder::Count))
-	{
-		m_signal.setByteOrder(ByteOrder(byteOrderIndex));
+		int outputRangeModeIndex = m_enumManager->value(m_outputRangeModeProperty);
+		if (outputRangeModeIndex >= 0 && outputRangeModeIndex < OUTPUT_RANGE_MODE_COUNT && m_signalVector[0]->outputRangeMode() != outputRangeModeIndex)
+		{
+			signal.setOutputRangeMode(OutputRangeMode(outputRangeModeIndex));
+		}
+
+		SET_SIGNAL_FIELD_VALUE(acquire, setAcquire, m_boolManager, m_acquireProperty);
+		SET_SIGNAL_FIELD_VALUE(calculated, setCalculated, m_boolManager, m_calculatedProperty);
+		SET_SIGNAL_FIELD_VALUE(normalState, setNormalState, m_intManager, m_normalStateProperty);
+		SET_SIGNAL_FIELD_VALUE(decimalPlaces, setDecimalPlaces, m_intManager, m_decimalPlacesProperty);
+		SET_SIGNAL_FIELD_VALUE(aperture, setAperture, m_doubleManager, m_apertureProperty);
+		SET_SIGNAL_FIELD_VALUE(filteringTime, setFilteringTime, m_doubleManager, m_filteringTimeProperty);
+		SET_SIGNAL_FIELD_VALUE(maxDifference, setMaxDifference, m_doubleManager, m_maxDifferenceProperty);
+		int inOutTypeIndex = m_enumManager->value(m_inOutTypeProperty);
+		if (inOutTypeIndex >= 0 && inOutTypeIndex < IN_OUT_TYPE_COUNT && m_signalVector[0]->inOutType() != inOutTypeIndex)
+		{
+			signal.setInOutType(SignalInOutType(inOutTypeIndex));
+		}
+
+		int byteOrderIndex = m_enumManager->value(m_byteOrderProperty);
+		if (byteOrderIndex >= 0 && byteOrderIndex < TO_INT(ByteOrder::Count) && m_signalVector[0]->byteOrder() != ByteOrder(byteOrderIndex))
+		{
+			signal.setByteOrder(ByteOrder(byteOrderIndex));
+		}
+
+		QString deviceStrID = m_stringManager->value(m_deviceIDProperty);
+		SET_SIGNAL_STRING_FIELD_VALUE(setDeviceStrID, deviceStrID);
 	}
-	m_signal.setDeviceStrID(m_stringManager->value(m_deviceIDProperty));
 
 	accept();
 }
@@ -440,11 +495,14 @@ void SignalPropertiesDialog::checkoutSignal()
 		return;
 	}
 
-	int row = m_signalsModel->getKeyIndex(m_signal.ID());
-	QString message;
-	if (!m_signalsModel->checkoutSignal(row, message) && !message.isEmpty())
+	for (int i = 0; i < m_signalVector.count(); i++)
 	{
-		emit onError(message);
-		return;
+		int row = m_signalsModel->keyIndex(m_signalVector[i]->ID());
+		QString message;
+		if (!m_signalsModel->checkoutSignal(row, message) && !message.isEmpty())
+		{
+			emit onError(message);
+			return;
+		}
 	}
 }

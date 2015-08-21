@@ -77,7 +77,7 @@ public:
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
 	int key(int row) const { return m_signalSet.key(row); }
-	int getKeyIndex(int key) { return m_signalSet.keyIndex(key); }
+	int keyIndex(int key) { return m_signalSet.keyIndex(key); }
 	const Signal& signal(int row) const { return m_signalSet[row]; }
 	QVector<int> getSameChannelSignals(int row);
 	bool isEditableSignal(int row);
@@ -91,6 +91,7 @@ public:
 	bool checkoutSignal(int index);
 	bool checkoutSignal(int index, QString& message);
 	bool editSignal(int row);
+	bool editSignals(QVector<int> ids);
 	void saveSignal(Signal& signal);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
 	void deleteSignal(int signalID);
@@ -104,6 +105,7 @@ signals:
 
 public slots:
 	void loadSignals();
+	void loadSignalSet(QVector<int> keys, bool updateView = true);
 	void loadSignal(int row, bool updateView = true);
 	void addSignal();
 	void showError(QString message);
