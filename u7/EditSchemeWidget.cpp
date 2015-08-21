@@ -1,4 +1,5 @@
 #include "Stable.h"
+#include <QRubberBand>
 #include "EditEngine/EditEngine.h"
 #include "EditSchemeWidget.h"
 #include "SchemePropertiesDialog.h"
@@ -63,6 +64,7 @@ EditSchemeView::EditSchemeView(QWidget* parent) :
 	m_editEndMovingEdgeX(0),
 	m_editEndMovingEdgeY(0),
 	m_movingEdgePointIndex(0)
+	//m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
 {
 }
 
@@ -77,6 +79,7 @@ EditSchemeView::EditSchemeView(std::shared_ptr<VFrame30::Scheme>& scheme, QWidge
 	m_editEndMovingEdgeX(0),
 	m_editEndMovingEdgeY(0),
 	m_movingEdgePointIndex(0)
+	//m_rubberBand(new QRubberBand(QRubberBand::Rectangle, this))
 {
 }
 
@@ -2346,6 +2349,9 @@ void EditSchemeWidget::mouseLeftDown_None(QMouseEvent* me)
 
 	// Выделение элемента или области
 	//
+//	editSchemeView()->m_rubberBand->show();
+//	editSchemeView()->m_rubberBand->setGeometry(QRect(me->pos(), QSize()));
+
 	editSchemeView()->m_mouseSelectionStartPoint = widgetPointToDocument(me->pos(), false);
 	editSchemeView()->m_mouseSelectionEndPoint = editSchemeView()->m_mouseSelectionStartPoint;
 
@@ -3191,6 +3197,9 @@ void EditSchemeWidget::mouseMove_Selection(QMouseEvent* me)
 	//
 	editSchemeView()->m_mouseSelectionEndPoint = widgetPointToDocument(me->pos(), false);
 	editSchemeView()->update();
+
+//	QRect selectionRect = QRect(editSchemeView()->m_rubberBand->pos(), me->pos()).normalized();
+//	editSchemeView()->m_rubberBand->setGeometry(selectionRect);
 
 	return;
 }
