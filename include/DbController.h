@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QVector>
+#include <QThread>
 
 #include "../include/DbStruct.h"
 #include "../include/DbWorker.h"

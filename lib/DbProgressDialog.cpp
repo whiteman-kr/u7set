@@ -3,6 +3,8 @@
 #include <QPushButton>
 #include <QBoxLayout>
 #include <QLabel>
+#include <QThread>
+#include <assert.h>
 #include "../include/DbProgressDialog.h"
 #include "../include/DbProgress.h"
 

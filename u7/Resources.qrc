@@ -1,46 +1,4 @@
 <RCC>
-    <qresource prefix="/DatabaseUpgrade">
-        <file>DatabaseUpgrade/Upgrade0001.sql</file>
-        <file>DatabaseUpgrade/Upgrade0002.sql</file>
-        <file>DatabaseUpgrade/Upgrade0003.sql</file>
-        <file>DatabaseUpgrade/Upgrade0004.sql</file>
-        <file>DatabaseUpgrade/Upgrade0005.sql</file>
-        <file>DatabaseUpgrade/Upgrade0006.sql</file>
-        <file>DatabaseUpgrade/Upgrade0007.sql</file>
-        <file>DatabaseUpgrade/Upgrade0008.sql</file>
-        <file>DatabaseUpgrade/Upgrade0009.sql</file>
-        <file>DatabaseUpgrade/Upgrade0010.sql</file>
-        <file>DatabaseUpgrade/Upgrade0011.sql</file>
-        <file>DatabaseUpgrade/Upgrade0012.sql</file>
-        <file>DatabaseUpgrade/Upgrade0013.sql</file>
-        <file>DatabaseUpgrade/Upgrade0014.sql</file>
-        <file>DatabaseUpgrade/Upgrade0015.sql</file>
-        <file>DatabaseUpgrade/Upgrade0016.sql</file>
-        <file>DatabaseUpgrade/Upgrade0017.sql</file>
-        <file>DatabaseUpgrade/Upgrade0018.sql</file>
-        <file>DatabaseUpgrade/Upgrade0019.sql</file>
-        <file>DatabaseUpgrade/Upgrade0020.sql</file>
-        <file>DatabaseUpgrade/Upgrade0021.sql</file>
-        <file>DatabaseUpgrade/Upgrade0022.sql</file>
-        <file>DatabaseUpgrade/Upgrade0023.sql</file>
-        <file>DatabaseUpgrade/Upgrade0024.sql</file>
-        <file>DatabaseUpgrade/Upgrade0025.sql</file>
-        <file>DatabaseUpgrade/Upgrade0026.sql</file>
-        <file>DatabaseUpgrade/Upgrade0027.sql</file>
-        <file>DatabaseUpgrade/Upgrade0028.sql</file>
-        <file>DatabaseUpgrade/Upgrade0029.sql</file>
-        <file>DatabaseUpgrade/Upgrade0030.sql</file>
-        <file>DatabaseUpgrade/Upgrade0031.sql</file>
-        <file>DatabaseUpgrade/Upgrade0032.sql</file>
-        <file>DatabaseUpgrade/Upgrade0033.sql</file>
-        <file>DatabaseUpgrade/Upgrade0034.sql</file>
-        <file>DatabaseUpgrade/Upgrade0035.sql</file>
-        <file>DatabaseUpgrade/Upgrade0036.sql</file>
-        <file>DatabaseUpgrade/Upgrade0037.sql</file>
-        <file>DatabaseUpgrade/Upgrade0038.sql</file>
-        <file>DatabaseUpgrade/Upgrade0039.sql</file>
-        <file>DatabaseUpgrade/Upgrade0040.sql</file>
-    </qresource>
     <qresource prefix="/"/>
     <qresource prefix="/Images">
         <file>Images/cross.png</file>

@@ -217,57 +217,16 @@ FORMS    += \
     ChooseAfbDialog.ui
 
 RESOURCES += \
-	Resources.qrc
+	Resources.qrc \
+    ../DatabaseUpgrade/DatabaseUpgrade.qrc
 
 OTHER_FILES += \
 	../Proto/proto_compile.bat \
 	../Proto/serialization.proto \
-	DatabaseUpgrade/Upgrade0007.sql \
-	DatabaseUpgrade/Upgrade0001.sql \
-	DatabaseUpgrade/Upgrade0002.sql \
-	DatabaseUpgrade/Upgrade0003.sql \
-	DatabaseUpgrade/Upgrade0004.sql \
-	DatabaseUpgrade/Upgrade0005.sql \
-	DatabaseUpgrade/Upgrade0006.sql \
-	DatabaseUpgrade/Upgrade0008.sql \
-	DatabaseUpgrade/Upgrade0009.sql \
-	DatabaseUpgrade/Upgrade0010.sql \
-	DatabaseUpgrade/Upgrade0011.sql \
-	DatabaseUpgrade/Upgrade0012.sql \
-	DatabaseUpgrade/Upgrade0002.sql \
-	DatabaseUpgrade/Upgrade0001.sql \
-	DatabaseUpgrade/Upgrade0013.sql \
-	DatabaseUpgrade/Upgrade0014.sql \
-	DatabaseUpgrade/Upgrade0015.sql \
-	DatabaseUpgrade/Upgrade0016.sql \
-	DatabaseUpgrade/Upgrade0017.sql \
-	DatabaseUpgrade/Upgrade0018.sql \
-	DatabaseUpgrade/Upgrade0019.sql \
-	DatabaseUpgrade/Upgrade0020.sql \
-	DatabaseUpgrade/Upgrade0021.sql \
-        DatabaseUpgrade/Upgrade0022.sql \
-        DatabaseUpgrade/Upgrade0023.sql \
-        DatabaseUpgrade/Upgrade0024.sql \
-        DatabaseUpgrade/Upgrade0025.sql \
-        DatabaseUpgrade/Upgrade0026.sql \
-        DatabaseUpgrade/Upgrade0027.sql \
-        DatabaseUpgrade/Upgrade0028.sql \
-        DatabaseUpgrade/Upgrade0029.sql \
-        DatabaseUpgrade/Upgrade0030.sql \
-        DatabaseUpgrade/Upgrade0031.sql \
-        DatabaseUpgrade/Upgrade0032.sql \
-        DatabaseUpgrade/Upgrade0033.sql \
         Tools/afbschema.xsd \
         ../Proto/proto_compile.sh \
-    DatabaseUpgrade/Upgrade0034.sql \
-    DatabaseUpgrade/Upgrade0035.sql \
-	DatabaseUpgrade/Upgrade0036.sql \
-	DatabaseUpgrade/Upgrade0037.sql \
 	month-report.txt \
-    DatabaseUpgrade/Upgrade0038.sql \
-    DatabaseUpgrade/Upgrade0039.txt \
-    DatabaseUpgrade/Upgrade0039.sql \
-    DatabaseUpgrade/Upgrade0040.sql
+    DatabaseUpgrade/Upgrade0039.txt
 
 DISTFILES += \
 	LogicModuleConfiguration.js \

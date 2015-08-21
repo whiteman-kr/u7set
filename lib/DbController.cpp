@@ -1,5 +1,7 @@
 #include "../include/DbController.h"
 
+#include <QDebug>
+
 DbController::DbController() :
 	m_worker(nullptr),
 	m_operationMutex(QMutex::NonRecursive)

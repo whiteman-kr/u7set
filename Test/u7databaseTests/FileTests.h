@@ -3,15 +3,7 @@
 #include <QTest>
 #include <QtSql>
 
-struct ObjectState
-{
-	int newFileId;
-	bool deleted;
-	bool checkedOut;
-	int action;
-	int userId;
-	int errCode;
-};
+class ObjectState;
 
 class FileTests : public QObject
 {
@@ -66,5 +58,5 @@ public:
 	static const int maxValueId = 9999999;
 
 private:
-	static void getObjectState(QSqlQuery& q, ObjectState &os);
+	static void getObjectState(QSqlQuery& q, ObjectState& os);
 };

@@ -1,6 +1,13 @@
 #include "../include/DbProgress.h"
 #include "../include/DbProgressDialog.h"
 
+#include <QThread>
+#include <QDebug>
+#include <QCoreApplication>
+#include <assert.h>
+#include <QMessageBox>
+#include <QProgressDialog>
+
 //
 //
 //	DbProgress
@@ -46,14 +53,17 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 		}
 	}
 
-
 	if (hasError() == true)
 	{
 		if (isGuiThread == true)
 		{
+#ifndef Q_CONSOLE_APP
 			QMessageBox mb;
 			mb.setText(errorMessage());
 			mb.exec();
+#else
+			qDebug() << errorMessage();
+#endif
 		}
 
 		return false;

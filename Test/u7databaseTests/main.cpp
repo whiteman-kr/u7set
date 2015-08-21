@@ -5,79 +5,167 @@
 #include "FileTests.h"
 #include "OtherTests.h"
 #include "SignalTests.h"
+#include "../../include/DbController.h"
 
 const int DatabaseProjectVersion = 40;
 
+const char* DatabaseHost = "127.0.0.1";
+const char* DatabaseUser = "u7";
+const char* DatabaseUserPassword = "P2ssw0rd";
+
+const char* ProjectName = "testproject";
+const char* ProjectAdministratorName = "Administrator";
+const char* ProjectAdministratorPassword = "P2ssw0rd";
+
 int main(int argc, char *argv[])
 {
-	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
-	db.setHostName("localhost");
-	db.setUserName("fabler");
-	db.setPassword("qwerty15");
-	db.setDatabaseName("u7_test");
+	QApplication app(argc, argv);
 
-	bool ok = db.open();
-	if (ok == false)
 	{
-		qDebug() << "Cannot connect to database";
-		return 1;
+		DbController dbc;
+
+		dbc.disableProgress();
+		dbc.setHost(DatabaseHost);
+		dbc.setServerPassword(DatabaseUserPassword);
+		dbc.setServerUsername(DatabaseUser);
+
+		// Create Project
+		//
+		bool ok = dbc.createProject(ProjectName, ProjectAdministratorPassword, nullptr);
+
+		if (ok == false)
+		{
+			qDebug() << "Cannot connect to database or create project. Error: " << dbc.lastError();
+			return 1;
+		}
+
+		// Upgrade project database to actual version
+		//
+		ok = dbc.upgradeProject(ProjectName, ProjectAdministratorPassword, nullptr);
+
+		if (ok == false)
+		{
+			qDebug() << "Cannot upgrade project database. Error: " << dbc.lastError();
+
+			// TODO: Drop database project
+			//
+			return 1;
+		}
+
+		// Open project
+		//
+		//	ok = db.openProject(ProjectName, ProjectAdministratorName, ProjectAdministratorPassword, nullptr);
+		//	if (ok == false)
+		//	{
+		//		qDebug() << "Cannot open project database. Error: " << db.lastError();
+
+		//		// TODO: Drop database project
+		//		//
+		//		return 1;
+		//	}
 	}
 
-	QSqlQuery query;
-	bool result = query.exec("SELECT MAX(VersionNo) FROM Version");
-	if (result == false)
-	{
-		qDebug() << "Error executting query";
-		return 1;
+	{	// Block is to release QSqlDatabase
+
+		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
+
+		db.setHostName(DatabaseHost);
+		db.setUserName(DatabaseUser);
+		db.setPassword(DatabaseUserPassword);
+		db.setDatabaseName(QString("u7_") + ProjectName);
+
+		bool ok = db.open();
+		if (ok == false)
+		{
+			qDebug() << "Cannot connect to database. Error: " << db.lastError();
+			return 1;
+		}
+
+		// TODO: Get project version from DbController
+		//
+		QSqlQuery query;
+		bool result = query.exec("SELECT MAX(VersionNo) FROM Version");
+		if (result == false)
+		{
+			qDebug() << "Error executting query";
+
+			return 1;
+		}
+
+		result = query.first();
+		if (result == false)
+		{
+			qDebug() << "Cannot get first record";
+			return 1;
+		}
+
+		int version = query.value(0).toInt();
+		if (version != DatabaseProjectVersion)
+		{
+			qDebug() << "Invalid database version, " << DatabaseProjectVersion << " required, current: " << version;
+			return 1;
+		}
+
+
+		UserTests userTests;
+		FileTests fileTests;
+		OtherTests otherTests;
+		SignalTests signalTests;
+
+		int testResult;
+		testResult = QTest::qExec(&userTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " user test(s) has been interrupted by error(s)";
+			return testResult;
+		}
+
+		testResult = QTest::qExec(&otherTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " other test(s) has been interrupted by error(s)";
+			return testResult;
+		}
+
+		testResult = QTest::qExec(&signalTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
+			return testResult;
+		}
+
+		testResult = QTest::qExec(&fileTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
+			return testResult;
+		}
+
+		db.close();
 	}
 
-	result = query.first();
-	if (result == false)
+
+	// Drop database project
+	//
 	{
-		qDebug() << "Cannot get first record";
-		return 1;
-	}
+		DbController dbc;
 
-	int version = query.value(0).toInt();
-	if (version != DatabaseProjectVersion)
-	{
-		qDebug() << "Invalid database version, " << DatabaseProjectVersion << " required, current: " << version;
-		return 1;
-	}
+		dbc.disableProgress();
+		dbc.setHost(DatabaseHost);
+		dbc.setServerPassword(DatabaseUserPassword);
+		dbc.setServerUsername(DatabaseUser);
 
+		bool ok = dbc.deleteProject(ProjectName, ProjectAdministratorPassword, nullptr);
 
-	UserTests userTests;
-	FileTests fileTests;
-	OtherTests otherTests;
-	SignalTests signalTests;
+		if (ok == false)
+		{
+			qDebug() << "Cannot delete database project. Error: " << dbc.lastError();
 
-	int testResult;
-	testResult = QTest::qExec(&userTests, argc, argv);
-	if (testResult != 0)
-	{
-		qDebug() << testResult << " user test(s) has been interrupted by error(s)";
-		return testResult;
-	}
+			return 1;
+		}
 
-	testResult = QTest::qExec(&otherTests, argc, argv);
-	if (testResult != 0)
-	{
-		qDebug() << testResult << " other test(s) has been interrupted by error(s)";
-		return testResult;
-	}
-
-	testResult = QTest::qExec(&signalTests, argc, argv);
-	if (testResult != 0)
-	{
-		qDebug() << testResult << " file test(s) has been interrupted by error(s)";
-		return testResult;
-	}
-
-	testResult = QTest::qExec(&fileTests, argc, argv);
-	if (testResult != 0)
-	{
-		qDebug() << testResult << " file test(s) has been interrupted by error(s)";
-		return testResult;
+		// TODO: Drop backups (upgrade and delete)
+		//
 	}
 
 	return 0;

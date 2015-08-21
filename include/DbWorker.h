@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QSqlQuery>
+#include <QMutex>
+
 #include "DbStruct.h"
 #include "../include/Signal.h"
 
