@@ -34,8 +34,8 @@ public:
 	bool createProject(const QString& projectName, const QString& administratorPassword, QWidget* parentWidget);
 	bool openProject(const QString& projectName, const QString& username, const QString& password, QWidget* parentWidget);
 	bool closeProject(QWidget* parentWidget);
-	bool deleteProject(const QString& projectName, const QString& password, QWidget* parentWidget);
-	bool upgradeProject(const QString& projectName, const QString& password, QWidget* parentWidget);
+	bool deleteProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget);
+	bool upgradeProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget);
 
 	// User management
 	//
@@ -122,8 +122,8 @@ signals:
 	void signal_createProject(QString projectName, QString administratorPassword);
 	void signal_openProject(QString projectName, QString username, QString password);
 	void signal_closeProject();
-	void signal_deleteProject(QString projectName, QString password);
-	void signal_upgradeProject(QString projectName, QString password);
+	void signal_deleteProject(QString projectName, QString password, bool doNotBackup);
+	void signal_upgradeProject(QString projectName, QString password, bool doNotBackup);
 
 	void signal_createUser(DbUser user);
 	void signal_updateUser(DbUser user);
@@ -242,7 +242,7 @@ private:
 	DbWorker* m_worker;
 
 	//mutable QMutex m_mutex;
-	mutable QMutex m_operationMutex;	// Non Recursive mutex for single opartion at a time
+	mutable QMutex m_operationMutex;		// Non Recursive mutex for single opartion at a time
 
 	DbProgress m_progress;
 

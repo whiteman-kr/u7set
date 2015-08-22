@@ -854,7 +854,7 @@ void DbWorker::slot_closeProject()
 	return;
 }
 
-void DbWorker::slot_deleteProject(QString projectName, QString password)
+void DbWorker::slot_deleteProject(QString projectName, QString password, bool doNotBackup)
 {
 	// Init automitic varaiables
 	//
@@ -945,10 +945,20 @@ void DbWorker::slot_deleteProject(QString projectName, QString password)
 		QString strTime = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
 
 		QSqlQuery query(db);
-		QString createDatabaseSql = QString("ALTER DATABASE %1 RENAME TO u7deleted_%2_%3;")
-									.arg(databaseName)
-									.arg(projectName.toLower())
-									.arg(strTime);
+		QString createDatabaseSql;
+
+		if (doNotBackup == true)
+		{
+			createDatabaseSql = QString("DROP DATABASE %1;")
+								.arg(databaseName);
+		}
+		else
+		{
+			createDatabaseSql = QString("ALTER DATABASE %1 RENAME TO u7deleted_%2_%3;")
+								.arg(databaseName)
+								.arg(projectName.toLower())
+								.arg(strTime);
+		}
 
 		bool result = query.exec(createDatabaseSql);
 
@@ -970,7 +980,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password)
 	return;
 }
 
-void DbWorker::slot_upgradeProject(QString projectName, QString password)
+void DbWorker::slot_upgradeProject(QString projectName, QString password, bool doNotBackup)
 {
 	// Init automitic varaiables
 	//
@@ -1041,9 +1051,10 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password)
 		}
 	}
 
-	// Copy project from the template u7_[projectname] to u7upgrade[oldversion]_[projectname]_[datetime]
-	//
+	if (doNotBackup == false)
 	{
+		// Copy project from the template u7_[projectname] to u7upgrade[oldversion]_[projectname]_[datetime]
+		//
 		std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
 			{
 				QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
