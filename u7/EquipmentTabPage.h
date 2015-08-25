@@ -4,9 +4,7 @@
 #include "../include/DeviceObject.h"
 #include "../include/PropertyEditor.h"
 
-
 class DbController;
-
 
 //
 //
@@ -203,6 +201,12 @@ public slots:
 
 	void propertiesChanged(QList<std::shared_ptr<QObject>> objects);
 
+protected slots:
+	void addObjectTriggered();
+	void addPresetTriggered();
+
+	void pendingChanges();
+
 	// Data
 	//
 private:
@@ -239,7 +243,8 @@ private:
 	QAction* m_refreshAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction3 = nullptr;
-	QAction* m_switchMode = nullptr;
+	QAction* m_switchModeAction = nullptr;
+	QAction* m_pendingChangesAction = nullptr;
 	QAction* m_SeparatorAction4 = nullptr;
 
 	//--
@@ -248,6 +253,7 @@ private:
 	EquipmentView* m_equipmentView = nullptr;
 
 	QSplitter* m_splitter = nullptr;
+	QToolBar* m_toolBar = nullptr;
 
 	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
 };

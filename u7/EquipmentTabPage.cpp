@@ -1640,7 +1640,6 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	// Controls
 	//
 
-
 	// Equipment View
 	//
 	m_equipmentView = new EquipmentView(dbcontroller);
@@ -1690,7 +1689,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_refreshAction);
 	// -----------------
 	m_equipmentView->addAction(m_SeparatorAction3);
-	m_equipmentView->addAction(m_switchMode);
+	m_equipmentView->addAction(m_switchModeAction);
+	m_equipmentView->addAction(m_pendingChangesAction);
 	// -----------------
 	//m_equipmentView->addAction(m_SeparatorAction4);
 	//m_equipmentView->addAction(m_moduleConfigurationAction);
@@ -1713,11 +1713,26 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_splitter->restoreState(theSettings.m_equipmentTabPageSplitterState);
 
+	// ToolBar
+	//
+
+	m_toolBar = new QToolBar(this);
+	m_toolBar->addAction(m_addObjectAction);
+	m_toolBar->addAction(m_addPresetAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_refreshAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_switchModeAction);
+	m_toolBar->addAction(m_pendingChangesAction);
+
 	//
 	// Layouts
 	//
-	QHBoxLayout* pMainLayout = new QHBoxLayout();
+	QVBoxLayout* pMainLayout = new QVBoxLayout();
 
+	pMainLayout->addWidget(m_toolBar);
 	pMainLayout->addWidget(m_splitter);
 
 	setLayout(pMainLayout);
@@ -1752,6 +1767,7 @@ void EquipmentTabPage::CreateActions()
 	m_addObjectAction = new QAction(tr("Add Object"), this);
 	m_addObjectAction->setEnabled(true);
 	m_addObjectAction->setMenu(m_addObjectMenu);
+	connect(m_addObjectAction, &QAction::triggered, this, &EquipmentTabPage::addObjectTriggered);
 
 		m_addSystemAction = new QAction(tr("System"), this);
 		m_addSystemAction->setStatusTip(tr("Add system to the configuration..."));
@@ -1801,6 +1817,7 @@ void EquipmentTabPage::CreateActions()
 	m_addPresetAction = new QAction(tr("Add From Preset"), this);
 	m_addPresetAction->setEnabled(true);
 	m_addPresetAction->setMenu(m_addPresetMenu);
+	connect(m_addPresetAction, &QAction::triggered, this, &EquipmentTabPage::addPresetTriggered);
 
 		m_addPresetRackAction = new QAction(tr("Preset Rack"), this);
 		m_addPresetRackAction->setStatusTip(tr("Add rack to the preset..."));
@@ -1874,11 +1891,17 @@ void EquipmentTabPage::CreateActions()
 	m_SeparatorAction3 = new QAction(this);
 	m_SeparatorAction3->setSeparator(true);
 
-	m_switchMode = new QAction(tr("Switch to Preset"), this);
-	m_switchMode->setStatusTip(tr("Switch to preset/configuration mode"));
-	m_switchMode->setEnabled(true);
-	connect(m_switchMode, &QAction::triggered, m_equipmentModel, &EquipmentModel::switchMode);
-	connect(m_switchMode, &QAction::triggered, this, &EquipmentTabPage::modeSwitched);
+	m_switchModeAction = new QAction(tr("Switch to Preset"), this);
+	m_switchModeAction->setStatusTip(tr("Switch to preset/configuration mode"));
+	m_switchModeAction->setEnabled(true);
+	connect(m_switchModeAction, &QAction::triggered, m_equipmentModel, &EquipmentModel::switchMode);
+	connect(m_switchModeAction, &QAction::triggered, this, &EquipmentTabPage::modeSwitched);
+
+	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
+	m_pendingChangesAction->setStatusTip(tr("Show pending changes"));
+	m_pendingChangesAction->setEnabled(true);
+	//connect(m_pendingChangesAction, &QAction::triggered, m_equipmentModel, &EquipmentModel::pendingChanges);
+	connect(m_pendingChangesAction, &QAction::triggered, this, &EquipmentTabPage::pendingChanges);
 
 	//-----------------------------------
 	m_SeparatorAction4 = new QAction(this);
@@ -2269,13 +2292,13 @@ void EquipmentTabPage::modeSwitched()
 {
 	if (m_equipmentModel->isPresetMode() == true)
 	{
-		m_switchMode->setText(tr("Switch to Configuration"));
+		m_switchModeAction->setText(tr("Switch to Configuration"));
 
 		m_addPresetAction->setText(tr("Add New Preset"));
 	}
 	else
 	{
-		m_switchMode->setText(tr("Switch to Preset"));
+		m_switchModeAction->setText(tr("Switch to Preset"));
 
 		m_addPresetAction->setText(tr("Add From Preset"));
 	}
@@ -2414,4 +2437,57 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<QObject>> objects
 	}
 
 	return;
+}
+
+void EquipmentTabPage::addObjectTriggered()
+{
+	if (m_toolBar == nullptr)
+	{
+		assert(m_toolBar);
+		return;
+	}
+
+	QWidget* w = m_toolBar->widgetForAction(m_addObjectAction);
+
+	if (w == nullptr)
+	{
+		assert(w);
+		return;
+	}
+
+	QPoint pt = w->pos();
+	pt.ry() += w->height();
+
+	m_addObjectMenu->popup(m_toolBar->mapToGlobal(pt));
+
+	return;
+}
+
+void EquipmentTabPage::addPresetTriggered()
+{
+	if (m_toolBar == nullptr)
+	{
+		assert(m_toolBar);
+		return;
+	}
+
+	QWidget* w = m_toolBar->widgetForAction(m_addPresetAction);
+
+	if (w == nullptr)
+	{
+		assert(w);
+		return;
+	}
+
+	QPoint pt = w->pos();
+	pt.ry() += w->height();
+
+	m_addPresetMenu->popup(m_toolBar->mapToGlobal(pt));
+
+	return;
+}
+
+void EquipmentTabPage::pendingChanges()
+{
+
 }

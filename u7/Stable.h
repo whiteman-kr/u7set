@@ -60,6 +60,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QStatusBar>
+#include <QToolBar>
 #include <QLabel>
 #include <QPushButton>
 #include <QCheckBox>
