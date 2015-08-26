@@ -130,6 +130,13 @@ int main(int argc, char *argv[])
 			throw testResult;
 		}
 
+		testResult = QTest::qExec(&fileTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
+			throw testResult;
+		}
+
 		testResult = QTest::qExec(&signalTests, argc, argv);
 		if (testResult != 0)
 		{
@@ -137,12 +144,6 @@ int main(int argc, char *argv[])
 			throw testResult;
 		}
 
-		testResult = QTest::qExec(&fileTests, argc, argv);
-		if (testResult != 0)
-		{
-			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
-			throw testResult;
-		}
 
 		db.close();
 	}
