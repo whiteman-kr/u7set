@@ -72,7 +72,7 @@ bool isSameFieldValue(QVector<Signal*>& signalVector, std::function<bool (Signal
 
 
 SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signalType, DataFormatList &dataFormatInfo, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
-	SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*>() << &signal,signalType, dataFormatInfo, unitInfo, readOnly, signalsModel, parent)
+	SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*>() << &signal, signalType, dataFormatInfo, unitInfo, readOnly, signalsModel, parent)
 {
 
 }
@@ -82,7 +82,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	m_signalVector(signalVector),
 	m_dataFormatInfo(dataFormatInfo),
 	m_unitInfo(unitInfo),
-	m_signalsModel(signalsModel)
+	m_signalsModel(signalsModel),
+	m_signalType(signalType)
 {
 	QSettings settings;
 	QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(this);
@@ -142,153 +143,159 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	}
 	signalProperty->addSubProperty(m_dataSizeProperty);
 
-	m_lowAdcProperty = m_intManager->addProperty(tr("Low ADC"));
-	m_intManager->setRange(m_lowAdcProperty, 0, 65535);
-	SET_PROPERTY_VALUE(m_intManager, m_lowAdcProperty, lowADC);
-	m_intManager->setReadOnly(m_lowAdcProperty, readOnly);
-	signalProperty->addSubProperty(m_lowAdcProperty);
-
-	m_highAdcProperty = m_intManager->addProperty(tr("High ADC"));
-	m_intManager->setRange(m_highAdcProperty, 0, 65535);
-	SET_PROPERTY_VALUE(m_intManager, m_highAdcProperty, highADC);
-	m_intManager->setReadOnly(m_highAdcProperty, readOnly);
-	signalProperty->addSubProperty(m_highAdcProperty);
-
-	m_lowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_lowLimitProperty, lowLimit);
-	m_doubleManager->setReadOnly(m_lowLimitProperty, readOnly);
-	signalProperty->addSubProperty(m_lowLimitProperty);
-
-	m_highLimitProperty = m_doubleManager->addProperty(tr("High limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_highLimitProperty, highLimit);
-	m_doubleManager->setReadOnly(m_highLimitProperty, readOnly);
-	signalProperty->addSubProperty(m_highLimitProperty);
-
-	QStringList unitStringList = unitInfo.toList();
-	m_unitProperty = m_enumManager->addProperty(tr("Unit"));
-	m_enumManager->setEnumNames(m_unitProperty, unitStringList);
-	SET_ENUM_PROPERTY_VALUE(m_doubleManager, m_unitProperty, unitInfo, unitID);
-	signalProperty->addSubProperty(m_unitProperty);
-
-	m_adjustmentProperty = m_doubleManager->addProperty(tr("Adjustment"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_adjustmentProperty, adjustment);
-	m_doubleManager->setReadOnly(m_adjustmentProperty, readOnly);
-	signalProperty->addSubProperty(m_adjustmentProperty);
-
-	m_dropLimitProperty = m_doubleManager->addProperty(tr("Drop limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_dropLimitProperty, dropLimit);
-	m_doubleManager->setReadOnly(m_dropLimitProperty, readOnly);
-	signalProperty->addSubProperty(m_dropLimitProperty);
-
-	m_excessLimitProperty = m_doubleManager->addProperty(tr("Excess limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_excessLimitProperty, excessLimit);
-	m_doubleManager->setReadOnly(m_excessLimitProperty, readOnly);
-	signalProperty->addSubProperty(m_excessLimitProperty);
-
-	m_unbalanceLimitProperty = m_doubleManager->addProperty(tr("Unbalance limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_unbalanceLimitProperty, unbalanceLimit);
-	m_doubleManager->setReadOnly(m_unbalanceLimitProperty, readOnly);
-	signalProperty->addSubProperty(m_unbalanceLimitProperty);
-
-	// Input sensor
-	//
-	m_inputTreeProperty = groupManager->addProperty(tr("Input sensor"));
-
-	m_inputLowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_inputLowLimitProperty, inputLowLimit);
-	m_doubleManager->setReadOnly(m_inputLowLimitProperty, readOnly);
-	m_inputTreeProperty->addSubProperty(m_inputLowLimitProperty);
-
-	m_inputHighLimitProperty = m_doubleManager->addProperty(tr("High limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_inputHighLimitProperty, inputHighLimit);
-	m_doubleManager->setReadOnly(m_inputHighLimitProperty, readOnly);
-	m_inputTreeProperty->addSubProperty(m_inputHighLimitProperty);
-
-	m_inputUnitProperty = m_enumManager->addProperty(tr("Unit"));
-	m_enumManager->setEnumNames(m_inputUnitProperty, unitStringList);
-	SET_ENUM_PROPERTY_VALUE(m_enumManager, m_inputUnitProperty, unitInfo, inputUnitID);
-	m_inputTreeProperty->addSubProperty(m_inputUnitProperty);
-
-	QStringList sensorNames;
-	for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
+	if (signalType == SignalType::Analog)
 	{
-		sensorNames << SensorTypeStr[i];
+		m_lowAdcProperty = m_intManager->addProperty(tr("Low ADC"));
+		m_intManager->setRange(m_lowAdcProperty, 0, 65535);
+		SET_PROPERTY_VALUE(m_intManager, m_lowAdcProperty, lowADC);
+		m_intManager->setReadOnly(m_lowAdcProperty, readOnly);
+		signalProperty->addSubProperty(m_lowAdcProperty);
+
+		m_highAdcProperty = m_intManager->addProperty(tr("High ADC"));
+		m_intManager->setRange(m_highAdcProperty, 0, 65535);
+		SET_PROPERTY_VALUE(m_intManager, m_highAdcProperty, highADC);
+		m_intManager->setReadOnly(m_highAdcProperty, readOnly);
+		signalProperty->addSubProperty(m_highAdcProperty);
+
+		m_lowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_lowLimitProperty, lowLimit);
+		m_doubleManager->setReadOnly(m_lowLimitProperty, readOnly);
+		signalProperty->addSubProperty(m_lowLimitProperty);
+
+		m_highLimitProperty = m_doubleManager->addProperty(tr("High limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_highLimitProperty, highLimit);
+		m_doubleManager->setReadOnly(m_highLimitProperty, readOnly);
+		signalProperty->addSubProperty(m_highLimitProperty);
+
+		QStringList unitStringList = unitInfo.toList();
+		m_unitProperty = m_enumManager->addProperty(tr("Unit"));
+		m_enumManager->setEnumNames(m_unitProperty, unitStringList);
+		SET_ENUM_PROPERTY_VALUE(m_doubleManager, m_unitProperty, unitInfo, unitID);
+		signalProperty->addSubProperty(m_unitProperty);
+
+		m_adjustmentProperty = m_doubleManager->addProperty(tr("Adjustment"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_adjustmentProperty, adjustment);
+		m_doubleManager->setReadOnly(m_adjustmentProperty, readOnly);
+		signalProperty->addSubProperty(m_adjustmentProperty);
+
+		m_dropLimitProperty = m_doubleManager->addProperty(tr("Drop limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_dropLimitProperty, dropLimit);
+		m_doubleManager->setReadOnly(m_dropLimitProperty, readOnly);
+		signalProperty->addSubProperty(m_dropLimitProperty);
+
+		m_excessLimitProperty = m_doubleManager->addProperty(tr("Excess limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_excessLimitProperty, excessLimit);
+		m_doubleManager->setReadOnly(m_excessLimitProperty, readOnly);
+		signalProperty->addSubProperty(m_excessLimitProperty);
+
+		m_unbalanceLimitProperty = m_doubleManager->addProperty(tr("Unbalance limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_unbalanceLimitProperty, unbalanceLimit);
+		m_doubleManager->setReadOnly(m_unbalanceLimitProperty, readOnly);
+		signalProperty->addSubProperty(m_unbalanceLimitProperty);
+
+		// Input sensor
+		//
+		m_inputTreeProperty = groupManager->addProperty(tr("Input sensor"));
+
+		m_inputLowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_inputLowLimitProperty, inputLowLimit);
+		m_doubleManager->setReadOnly(m_inputLowLimitProperty, readOnly);
+		m_inputTreeProperty->addSubProperty(m_inputLowLimitProperty);
+
+		m_inputHighLimitProperty = m_doubleManager->addProperty(tr("High limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_inputHighLimitProperty, inputHighLimit);
+		m_doubleManager->setReadOnly(m_inputHighLimitProperty, readOnly);
+		m_inputTreeProperty->addSubProperty(m_inputHighLimitProperty);
+
+		m_inputUnitProperty = m_enumManager->addProperty(tr("Unit"));
+		m_enumManager->setEnumNames(m_inputUnitProperty, unitStringList);
+		SET_ENUM_PROPERTY_VALUE(m_enumManager, m_inputUnitProperty, unitInfo, inputUnitID);
+		m_inputTreeProperty->addSubProperty(m_inputUnitProperty);
+
+		QStringList sensorNames;
+		for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
+		{
+			sensorNames << SensorTypeStr[i];
+		}
+		m_inputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
+		m_enumManager->setEnumNames(m_inputSensorProperty, sensorNames);
+		SET_PROPERTY_VALUE(m_enumManager, m_inputSensorProperty, inputSensorID);
+		m_inputTreeProperty->addSubProperty(m_inputSensorProperty);
+
+		signalProperty->addSubProperty(m_inputTreeProperty);
+
+		// Output sensor
+		//
+		m_outputTreeProperty = groupManager->addProperty(tr("Output sensor"));
+
+		m_outputLowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_outputLowLimitProperty, outputLowLimit);
+		m_doubleManager->setReadOnly(m_outputLowLimitProperty, readOnly);
+		m_outputTreeProperty->addSubProperty(m_outputLowLimitProperty);
+
+		m_outputHighLimitProperty = m_doubleManager->addProperty(tr("High limit"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_outputHighLimitProperty, outputHighLimit);
+		m_doubleManager->setReadOnly(m_outputHighLimitProperty, readOnly);
+		m_outputTreeProperty->addSubProperty(m_outputHighLimitProperty);
+
+		m_outputUnitProperty = m_enumManager->addProperty(tr("Unit"));
+		m_enumManager->setEnumNames(m_outputUnitProperty, unitStringList);
+		SET_ENUM_PROPERTY_VALUE(m_enumManager, m_outputUnitProperty, unitInfo, outputUnitID);
+		m_outputTreeProperty->addSubProperty(m_outputUnitProperty);
+
+		QStringList outputRangeModeNames;
+		for (int i = 0; i < OUTPUT_RANGE_MODE_COUNT; i++)
+		{
+			outputRangeModeNames << OutputRangeModeStr[i];
+		}
+		m_outputRangeModeProperty = m_enumManager->addProperty(tr("Output range mode"));
+		m_enumManager->setEnumNames(m_outputRangeModeProperty, outputRangeModeNames);
+		SET_PROPERTY_VALUE(m_enumManager, m_outputRangeModeProperty, outputRangeMode);
+		m_outputTreeProperty->addSubProperty(m_outputRangeModeProperty);
+
+		m_outputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
+		m_enumManager->setEnumNames(m_outputSensorProperty, sensorNames);
+		SET_PROPERTY_VALUE(m_enumManager, m_outputRangeModeProperty, outputRangeMode);
+		m_outputTreeProperty->addSubProperty(m_outputSensorProperty);
+
+		signalProperty->addSubProperty(m_outputTreeProperty);
 	}
-	m_inputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
-	m_enumManager->setEnumNames(m_inputSensorProperty, sensorNames);
-	SET_PROPERTY_VALUE(m_enumManager, m_inputSensorProperty, inputSensorID);
-	m_inputTreeProperty->addSubProperty(m_inputSensorProperty);
-
-	signalProperty->addSubProperty(m_inputTreeProperty);
-
-	// Output sensor
-	//
-	m_outputTreeProperty = groupManager->addProperty(tr("Output sensor"));
-
-	m_outputLowLimitProperty = m_doubleManager->addProperty(tr("Low limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_outputLowLimitProperty, outputLowLimit);
-	m_doubleManager->setReadOnly(m_outputLowLimitProperty, readOnly);
-	m_outputTreeProperty->addSubProperty(m_outputLowLimitProperty);
-
-	m_outputHighLimitProperty = m_doubleManager->addProperty(tr("High limit"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_outputHighLimitProperty, outputHighLimit);
-	m_doubleManager->setReadOnly(m_outputHighLimitProperty, readOnly);
-	m_outputTreeProperty->addSubProperty(m_outputHighLimitProperty);
-
-	m_outputUnitProperty = m_enumManager->addProperty(tr("Unit"));
-	m_enumManager->setEnumNames(m_outputUnitProperty, unitStringList);
-	SET_ENUM_PROPERTY_VALUE(m_enumManager, m_outputUnitProperty, unitInfo, outputUnitID);
-	m_outputTreeProperty->addSubProperty(m_outputUnitProperty);
-
-	QStringList outputRangeModeNames;
-	for (int i = 0; i < OUTPUT_RANGE_MODE_COUNT; i++)
-	{
-		outputRangeModeNames << OutputRangeModeStr[i];
-	}
-	m_outputRangeModeProperty = m_enumManager->addProperty(tr("Output range mode"));
-	m_enumManager->setEnumNames(m_outputRangeModeProperty, outputRangeModeNames);
-	SET_PROPERTY_VALUE(m_enumManager, m_outputRangeModeProperty, outputRangeMode);
-	m_outputTreeProperty->addSubProperty(m_outputRangeModeProperty);
-
-	m_outputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
-	m_enumManager->setEnumNames(m_outputSensorProperty, sensorNames);
-	SET_PROPERTY_VALUE(m_enumManager, m_outputRangeModeProperty, outputRangeMode);
-	m_outputTreeProperty->addSubProperty(m_outputSensorProperty);
-
-	signalProperty->addSubProperty(m_outputTreeProperty);
 
 	m_acquireProperty = m_boolManager->addProperty(tr("Acquire"));
 	SET_PROPERTY_VALUE(m_boolManager, m_acquireProperty, acquire);
 	signalProperty->addSubProperty(m_acquireProperty);
 
-	m_calculatedProperty = m_boolManager->addProperty(tr("Calculated"));
-	SET_PROPERTY_VALUE(m_boolManager, m_calculatedProperty, calculated);
-	signalProperty->addSubProperty(m_calculatedProperty);
+	if (signalType == SignalType::Analog)
+	{
+		m_calculatedProperty = m_boolManager->addProperty(tr("Calculated"));
+		SET_PROPERTY_VALUE(m_boolManager, m_calculatedProperty, calculated);
+		signalProperty->addSubProperty(m_calculatedProperty);
 
-	m_normalStateProperty = m_intManager->addProperty(tr("Normal state"));
-	SET_PROPERTY_VALUE(m_intManager, m_normalStateProperty, normalState);
-	m_intManager->setReadOnly(m_normalStateProperty, readOnly);
-	signalProperty->addSubProperty(m_normalStateProperty);
+		m_normalStateProperty = m_intManager->addProperty(tr("Normal state"));
+		SET_PROPERTY_VALUE(m_intManager, m_normalStateProperty, normalState);
+		m_intManager->setReadOnly(m_normalStateProperty, readOnly);
+		signalProperty->addSubProperty(m_normalStateProperty);
 
-	m_decimalPlacesProperty = m_intManager->addProperty(tr("Decimal places"));
-	SET_PROPERTY_VALUE(m_intManager, m_decimalPlacesProperty, decimalPlaces);
-	m_intManager->setReadOnly(m_decimalPlacesProperty, readOnly);
-	signalProperty->addSubProperty(m_decimalPlacesProperty);
+		m_decimalPlacesProperty = m_intManager->addProperty(tr("Decimal places"));
+		SET_PROPERTY_VALUE(m_intManager, m_decimalPlacesProperty, decimalPlaces);
+		m_intManager->setReadOnly(m_decimalPlacesProperty, readOnly);
+		signalProperty->addSubProperty(m_decimalPlacesProperty);
 
-	m_apertureProperty = m_doubleManager->addProperty(tr("Aperture"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_apertureProperty, aperture);
-	m_doubleManager->setReadOnly(m_apertureProperty, readOnly);
-	signalProperty->addSubProperty(m_apertureProperty);
+		m_apertureProperty = m_doubleManager->addProperty(tr("Aperture"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_apertureProperty, aperture);
+		m_doubleManager->setReadOnly(m_apertureProperty, readOnly);
+		signalProperty->addSubProperty(m_apertureProperty);
 
-	m_filteringTimeProperty = m_doubleManager->addProperty(tr("Filtering time"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_filteringTimeProperty, filteringTime);
-	m_doubleManager->setReadOnly(m_filteringTimeProperty, readOnly);
-	signalProperty->addSubProperty(m_filteringTimeProperty);
+		m_filteringTimeProperty = m_doubleManager->addProperty(tr("Filtering time"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_filteringTimeProperty, filteringTime);
+		m_doubleManager->setReadOnly(m_filteringTimeProperty, readOnly);
+		signalProperty->addSubProperty(m_filteringTimeProperty);
 
-	m_maxDifferenceProperty = m_doubleManager->addProperty(tr("Max difference"));
-	SET_PROPERTY_VALUE(m_doubleManager, m_maxDifferenceProperty, maxDifference);
-	m_doubleManager->setReadOnly(m_maxDifferenceProperty, readOnly);
-	signalProperty->addSubProperty(m_maxDifferenceProperty);
+		m_maxDifferenceProperty = m_doubleManager->addProperty(tr("Max difference"));
+		SET_PROPERTY_VALUE(m_doubleManager, m_maxDifferenceProperty, maxDifference);
+		m_doubleManager->setReadOnly(m_maxDifferenceProperty, readOnly);
+		signalProperty->addSubProperty(m_maxDifferenceProperty);
+	}
 
 	QStringList inOutStringList;
 	for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
@@ -365,8 +372,11 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	setLayout(vl);
 
 	resize(settings.value("Signal properties dialog: size", QSize(320, 640)).toSize());
-	m_browser->setExpanded(m_browser->items(m_inputTreeProperty)[0], settings.value("Signal properties dialog: input property: expanded", false).toBool());
-	m_browser->setExpanded(m_browser->items(m_outputTreeProperty)[0], settings.value("Signal properties dialog: output property: expanded", false).toBool());
+	if (signalType == SignalType::Analog)
+	{
+		m_browser->setExpanded(m_browser->items(m_inputTreeProperty)[0], settings.value("Signal properties dialog: input property: expanded", false).toBool());
+		m_browser->setExpanded(m_browser->items(m_outputTreeProperty)[0], settings.value("Signal properties dialog: output property: expanded", false).toBool());
+	}
 }
 
 
@@ -484,8 +494,11 @@ void SignalPropertiesDialog::saveDialogSettings()
 {
 	QSettings settings;
 	settings.setValue("Signal properties dialog: size", size());
-	settings.setValue("Signal properties dialog: input property: expanded", m_browser->isExpanded(m_browser->items(m_inputTreeProperty)[0]));
-	settings.setValue("Signal properties dialog: output property: expanded", m_browser->isExpanded(m_browser->items(m_outputTreeProperty)[0]));
+	if (m_signalType == SignalType::Analog)
+	{
+		settings.setValue("Signal properties dialog: input property: expanded", m_browser->isExpanded(m_browser->items(m_inputTreeProperty)[0]));
+		settings.setValue("Signal properties dialog: output property: expanded", m_browser->isExpanded(m_browser->items(m_outputTreeProperty)[0]));
+	}
 }
 
 void SignalPropertiesDialog::checkoutSignal()

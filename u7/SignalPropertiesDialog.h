@@ -36,6 +36,8 @@ private:
 	UnitList& m_unitInfo;
 	SignalsModel* m_signalsModel;
 
+	SignalType m_signalType;
+
 	QtStringPropertyManager* m_stringManager;
 	QtEnumPropertyManager* m_enumManager;
 	QtIntPropertyManager* m_intManager;
