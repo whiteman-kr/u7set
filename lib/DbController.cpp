@@ -1,5 +1,7 @@
 #include "../include/DbController.h"
 
+#include <QDebug>
+
 DbController::DbController() :
 	m_worker(nullptr),
 	m_operationMutex(QMutex::NonRecursive)
@@ -199,7 +201,7 @@ bool DbController::closeProject(QWidget* parentWidget)
 	return result;
 }
 
-bool DbController::deleteProject(const QString& projectName, const QString& password, QWidget* parentWidget)
+bool DbController::deleteProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -221,13 +223,13 @@ bool DbController::deleteProject(const QString& projectName, const QString& pass
 
 	// Emit signal end wait for complete
 	//
-	emit signal_deleteProject(projectName, password);
+	emit signal_deleteProject(projectName, password, doNotBackup);
 
 	bool result = waitForComplete(parentWidget, tr("Deleting project"));
 	return result;
 }
 
-bool DbController::upgradeProject(const QString& projectName, const QString& password, QWidget* parentWidget)
+bool DbController::upgradeProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -249,7 +251,7 @@ bool DbController::upgradeProject(const QString& projectName, const QString& pas
 
 	// Emit signal end wait for complete
 	//
-	emit signal_upgradeProject(projectName, password);
+	emit signal_upgradeProject(projectName, password, doNotBackup);
 
 	bool result = waitForComplete(parentWidget, tr("Upgrading project"));
 	return result;
@@ -1674,6 +1676,7 @@ QString DbController::lastError() const
 {
 	return m_lastError;
 }
+
 
 HasDbController::HasDbController()
 {

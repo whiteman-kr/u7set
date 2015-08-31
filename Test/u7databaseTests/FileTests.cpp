@@ -2,10 +2,11 @@
 #include <QString>
 #include <QTest>
 #include "FileTests.h"
+#include "../../include/DbController.h"
 
 void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
 {
-	os.newFileId = q.value(0).toInt();
+	os.id = q.value(0).toInt();
 	os.deleted = q.value(1).toBool();
 	os.checkedOut = q.value(2).toBool();
 	os.action = q.value(3).toInt();
@@ -1580,7 +1581,7 @@ bool FileTests::add_file(int userId, QString fileName, int parentId, QString fil
 	ObjectState resultQueryObject;
 	FileTests::getObjectState(query, resultQueryObject);
 
-	int fileId = resultQueryObject.newFileId;
+	int fileId = resultQueryObject.id;
 	int errCode = resultQueryObject.errCode;
 
 	if (errCode != 0)

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QSqlQuery>
+#include <QMutex>
+
 #include "DbStruct.h"
 #include "../include/Signal.h"
 
@@ -70,8 +73,8 @@ public slots:
 	void slot_createProject(QString projectName, QString administratorPassword);
 	void slot_openProject(QString projectName, QString username, QString password);
 	void slot_closeProject();
-	void slot_deleteProject(QString projectName, QString password);
-	void slot_upgradeProject(QString projectName, QString password);
+	void slot_deleteProject(QString projectName, QString password, bool doNotBackup);
+	void slot_upgradeProject(QString projectName, QString password, bool doNotBackup);
 
 	// User management
 	//

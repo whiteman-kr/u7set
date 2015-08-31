@@ -3,6 +3,7 @@
 #include <QDynamicPropertyChangeEvent>
 #include <QJSEngine>
 #include <QQmlEngine>
+#include <QDebug>
 
 
 namespace Hardware

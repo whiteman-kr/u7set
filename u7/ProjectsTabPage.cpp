@@ -168,7 +168,7 @@ void ProjectsTabPage::createProject()
 			bool result = dbController()->createProject(projectName, administratorPassword, this);
 			if (result == true)
 			{
-				dbController()->upgradeProject(projectName, administratorPassword, this);
+				dbController()->upgradeProject(projectName, administratorPassword, false, this);
 			}
 
 			refreshProjectList();
@@ -255,7 +255,7 @@ void ProjectsTabPage::openProject()
 		}
 
 
-		dbController()->upgradeProject(projectName, password, this);
+		dbController()->upgradeProject(projectName, password, false, this);
 		refreshProjectList();
 
 		return;
@@ -356,7 +356,7 @@ void ProjectsTabPage::deleteProject()
 		return;
 	}
 
-	dbController()->deleteProject(projectName, password, this);
+	dbController()->deleteProject(projectName, password, false, this);
 
 	refreshProjectList();
 	return;

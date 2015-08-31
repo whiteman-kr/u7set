@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QtCore/QUuid>
+#include <QVariant>
 #include <fstream>
 
 #ifdef Q_OS_WIN

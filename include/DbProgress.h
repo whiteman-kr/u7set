@@ -1,6 +1,9 @@
 #ifndef DBPROGRESS_H
 #define DBPROGRESS_H
 
+#include <QObject>
+#include <QMutex>
+
 //
 //
 // DbProgress

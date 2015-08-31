@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../include/CUtils.h"
-
 #include "TypesAndEnums.h"
 
 #include <QApplication>
@@ -16,27 +14,16 @@
 #pragma warning(pop)
 #endif
 
-// Перевести миллиметры в дюймы
-//
 #define mm2in(mmVal) (mmVal / 25.4)
-
-// Перевести дюймы в миллиметры
-//
 #define in2mm(inVal) (inVal * 25.4)
-
-// Ассерт при наступлении условия
-//
-#define ASSERT_IF(expr) std::assert(!(expr))
 
 class CUtils
 {
 public:
-	// Количество знаков после запятой для округления для дюймов
+
 	static const int InchesRoundDigits = 4;
-	// Количество знаков после запятой для округления для миллиметров
 	static const int MillimetresRoundDigits = 2;
 
-	// Получить DpiX для дисплея, инициализируется на первом вызове
 	static int DpiX()
 	{
 		static int dpiX = -1;
@@ -47,7 +34,6 @@ public:
 		return dpiX;
 	}
 
-	// Получить DpiY для дисплея
 	static int DpiY()
 	{
 		static int dpiY = -1;

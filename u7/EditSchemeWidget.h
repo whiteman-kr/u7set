@@ -62,6 +62,10 @@ enum class SchemeItemAction
 	MoveConnectionLinePoint				// Move ConnectionLine point (ISchemePosConnectionLine)
 };
 
+// Forwared declarations
+//
+class QRubberBand;
+
 class EditSchemeWidget;
 class SchemePropertiesDialog;
 class SchemeLayersDialog;
@@ -171,6 +175,9 @@ protected:
 												// соххраняются точки (в отрисовке), и потом они
 												// используются при завершении (MouseUp) редактирования.
 	std::list<VFrame30::SchemePoint> m_movingVertexPoints;
+
+	//QRubberBand* m_rubberBand;					// Not don yet, on linux same CPU ussage for repainting everything and using QRubberBand
+												// TO DO, test CPU Usage on Windows, if it has any advatages, move to using QRubberBand!!!!
 
 
 	// Temporary data, can be changed in EditSchemeWidget
