@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <cstdio>
 #include <fstream>
 #include <iomanip>
@@ -26,7 +27,7 @@
 
 using namespace std;
 
-ofstream versionFile;
+stringstream versionInfoText;
 git_repository *repo = nullptr;
 
 #ifdef _WIN32
@@ -66,12 +67,12 @@ bool report(int error)
 		if (err)
 		{
 			cout << "Git error " << err->klass << ": " << err->message << endl;
-			versionFile << "#error Git error " << err->klass << ": " << err->message << endl;
+			versionInfoText << "#error Git error " << err->klass << ": " << err->message << endl;
 		}
 		else
 		{
 			cout << "Git error " << error << ": no detailed info" << endl;
-			versionFile << "#error Git error " << error << ": no detailed info" << endl;
+			versionInfoText << "#error Git error " << error << ": no detailed info" << endl;
 		}
 		return true;
 	}
@@ -111,7 +112,7 @@ void print_time(const char* const prefix, const git_time& intime)
 #else
 #error Unknown operating system
 #endif
-	versionFile << "#define " << prefix << "_DATE \"" << out << ' '
+	versionInfoText << "#define " << prefix << "_DATE \"" << out << ' '
 				<< sign << setw(2) << setfill('0') << hours
 				<< setw(2) << minutes << "\"\n";
 }
@@ -131,7 +132,7 @@ void print_commit_info(const char* const prefix, const git_oid oid, vector<git_o
 	char sha[41] = {0};
 	git_oid_tostr(sha, 40, &oid);
 
-	versionFile << "#define " << prefix << "_SHA \"" << sha << "\"\n";
+	versionInfoText << "#define " << prefix << "_SHA \"" << sha << "\"\n";
 
 	git_revwalk *walker;
 	REPORT(git_revwalk_new(&walker, repo))
@@ -149,13 +150,13 @@ void print_commit_info(const char* const prefix, const git_oid oid, vector<git_o
 		i++;
 	}
 
-	versionFile << "#define " << prefix << "_NUMBER " << i << endl;
+	versionInfoText << "#define " << prefix << "_NUMBER " << i << endl;
 
 	git_commit *commit;
 	REPORT(git_commit_lookup(&commit, repo, &oid));
 
 	const git_signature *author = git_commit_author(commit);
-	versionFile << "#define " << prefix << "_AUTHOR \"" << author->name << " " << author->email << "\"\n";
+	versionInfoText << "#define " << prefix << "_AUTHOR \"" << author->name << " " << author->email << "\"\n";
 	print_time(prefix, author->when);
 
 	string message = git_commit_message(commit);
@@ -164,14 +165,14 @@ void print_commit_info(const char* const prefix, const git_oid oid, vector<git_o
 		message.resize(message.size() - 1);
 	}
 	replaceAll(message, "\n", "\\n\"\\\n\t\"");
-	versionFile << "#define " << prefix << "_DESCRIPTION \"" << message.c_str() << "\"\n\n";
+	versionInfoText << "#define " << prefix << "_DESCRIPTION \"" << message.c_str() << "\"\n\n";
 }
 
 int each_file_cb(const git_diff_delta *delta,
 				 float /*progress*/,
 				 void* payload)
 {
-	versionFile << "\t\"" << delta->new_file.path << "\",\n";
+	versionInfoText << "\t\"" << delta->new_file.path << "\",\n";
 	*(int*)payload += 1;
 	return 0;
 }
@@ -208,8 +209,7 @@ int main(int argc, char *argv[])
 
 	string versionFileName = projectDir + "/version.h";
 
-	versionFile.open(versionFileName.c_str());
-	versionFile << "// Automatically generated file\n"
+	versionInfoText << "// Automatically generated file\n"
 				<< "// Parameters:\n"
 				<< "// \tProjectPath: " << projectDir.c_str() << "\n"
 				<< "// \tProjectFileName: " << projectFileName.c_str() << "\n"
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
 	git_oid used_server_oid = master_history[commit_index - 1];
 	print_commit_info("USED_SERVER_COMMIT", used_server_oid);
 
-	versionFile << "const char* const ChangedFilesList[] =\n{\n";
+	versionInfoText << "const char* const ChangedFilesList[] =\n{\n";
 
 	git_tree *tree = NULL;
 	git_diff *diff = NULL;
@@ -270,19 +270,19 @@ int main(int argc, char *argv[])
 
 	if (fileCount == 0)
 	{
-		versionFile << "\t\" \"\n"
+		versionInfoText << "\t\" \"\n"
 					<< "};\n\n"
 					<< "const uint CHANGED_FILES_COUNT = 0;\n\n";
 	}
 	else
 	{
-		versionFile << "};\n\n"
+		versionInfoText << "};\n\n"
 					<< "const uint CHANGED_FILES_COUNT = sizeof(ChangedFilesList) / sizeof(ChangedFilesList[0]);\n\n";
 	}
 
 	if (fileCount > 0)
 	{
-		versionFile << "#define BUILD_STATE = \"Local build\"\n"
+		versionInfoText << "#define BUILD_STATE = \"Local build\"\n"
 					<< "#ifndef Q_DEBUG\n"
 					<< "#ifdef _MSC_VER\n"
 					<< " #pragma warning ()\n"
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		versionFile << "#define BUILD_STATE = \"Release build\"\n";
+		versionInfoText << "#define BUILD_STATE = \"Release build\"\n";
 	}
 
 	if (repo)
@@ -307,11 +307,27 @@ int main(int argc, char *argv[])
 	git_threads_shutdown();
 #endif
 
-	versionFile << "#endif\t//GIT_VERSION_FILE\n";
+	versionInfoText << "#endif\t//GIT_VERSION_FILE\n";
 
+	fstream versionFile;
+	versionFile.open(versionFileName);
+	string previousVersionInfoText;
+	string line;
+	while(getline(versionFile, line))
+	{
+		previousVersionInfoText += line + "\n";
+	}
 	versionFile.close();
-
-	cout << versionFileName.c_str() << " was generated\n";
+	if (previousVersionInfoText == versionInfoText.str())
+	{
+		cout << versionFileName.c_str() << " is same\n";
+	}
+	else
+	{
+		versionFile.open(versionFileName);
+		versionFile << versionInfoText.rdbuf();
+		cout << versionFileName.c_str() << " was generated\n";
+	}
 
 	return 0;
 }
