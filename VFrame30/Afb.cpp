@@ -753,7 +753,8 @@ namespace Afb
 
 	AfbElement::AfbElement(void) :
 		m_hasRam(false),
-		m_requiredStart(true)
+        m_requiredStart(true),
+        m_version("0.0")
 	{
 	}
 
@@ -778,6 +779,8 @@ namespace Afb
 		m_strID = that.m_strID;
 		m_caption = that.m_caption;
 		m_description = that.m_description;
+        m_version = that.m_version;
+        m_category = that.m_category;
 		m_type = that.m_type;
 		m_hasRam = that.m_hasRam;
 		m_requiredStart = that.m_requiredStart;
@@ -862,7 +865,17 @@ namespace Afb
 						setDescription(xmlReader->readElementText());
 					}
 
-					if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
+                    if (QString::compare(xmlReader->name().toString(), "Version", Qt::CaseInsensitive) == 0)
+                    {
+                        setVersion(xmlReader->readElementText());
+                    }
+
+                    if (QString::compare(xmlReader->name().toString(), "Category", Qt::CaseInsensitive) == 0)
+                    {
+                        setCategory(xmlReader->readElementText());
+                    }
+
+                    if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
 					{
 						int opCode = xmlReader->readElementText().toInt();
 
@@ -1028,7 +1041,9 @@ namespace Afb
 		xmlWriter->writeStartElement("Properties");
 		xmlWriter->writeTextElement("Caption", caption());
 		xmlWriter->writeTextElement("Description", description());
-		xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
+        xmlWriter->writeTextElement("Version", version());
+        xmlWriter->writeTextElement("Category", category());
+        xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
 		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
 		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
 		xmlWriter->writeEndElement();
@@ -1261,6 +1276,27 @@ namespace Afb
 	{
 		m_description = value;
 	}
+
+    QString AfbElement::version() const
+    {
+        return m_version;
+    }
+
+    void AfbElement::setVersion(const QString& value)
+    {
+        m_version = value;
+    }
+
+    QString AfbElement::category() const
+    {
+        return m_category;
+    }
+
+    void AfbElement::setCategory(const QString& value)
+    {
+        m_category = value;
+    }
+
 
 	// Type - Opcode
 	//

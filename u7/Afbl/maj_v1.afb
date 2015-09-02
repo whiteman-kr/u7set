@@ -2,8 +2,10 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#maj_v1">
         <Properties>
-            <Caption>maj_v1</Caption>
+            <Caption>maj</Caption>
+            <Version>1.0</Version>
             <Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
+            <Category>Logic</Category>
             <OpCode>6</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>

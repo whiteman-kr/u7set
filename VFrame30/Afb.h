@@ -297,6 +297,12 @@ private:
 		QString description() const;
 		void setDescription(const QString& value);
 
+        QString version() const;
+        void setVersion(const QString& value);
+
+        QString category() const;
+        void setCategory(const QString& value);
+
 		const Afb::AfbType& type() const;
 		Afb::AfbType& type();
 		void setType(const AfbType& value);
@@ -331,6 +337,8 @@ private:
 		QString m_strID;
 		QString m_caption;
 		QString m_description;
+        QString m_version;
+        QString m_category;
 		Afb::AfbType m_type;
 		bool m_hasRam;
 		bool m_requiredStart;

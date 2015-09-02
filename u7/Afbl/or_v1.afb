@@ -2,8 +2,10 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#or_v1">
         <Properties>
-            <Caption>or_v1</Caption>
+            <Caption>or</Caption>
+            <Version>1.0</Version>
             <Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
+            <Category>Logic</Category>
             <OpCode>1</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>

@@ -2,8 +2,10 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#xor_v1">
         <Properties>
-            <Caption>xor_v1</Caption>
+            <Caption>xor</Caption>
+            <Version>1.0</Version>
             <Description>XOR Block outputs the logical XOR operation for inputs in accordance with control signal.</Description>
+            <Category>Logic</Category>
             <OpCode>1</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>

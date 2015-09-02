@@ -2,8 +2,10 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#tct_on_v1">
         <Properties>
-            <Caption>tct_on_v1</Caption>
+            <Caption>tct_on</Caption>
+            <Version>1.0</Version>
             <Description>Time Counter Block, Turn on delay function</Description>
+            <Category>Delay</Category>
             <OpCode>3</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>

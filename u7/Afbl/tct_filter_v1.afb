@@ -2,8 +2,10 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#tct_filter_v1">
         <Properties>
-            <Caption>tct_filter_v1</Caption>
+            <Caption>tct_filter</Caption>
+            <Version>1.0</Version>
             <Description>Time Counter Block, Filtering function</Description>
+            <Category>Delay</Category>
             <OpCode>3</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>

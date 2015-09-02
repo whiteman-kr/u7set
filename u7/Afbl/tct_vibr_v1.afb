@@ -2,8 +2,10 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#tct_vibr_v1">
         <Properties>
-            <Caption>tct_vibr_v1</Caption>
+            <Caption>tct_vibr</Caption>
+            <Version>1.0</Version>
             <Description>Time Counter Block, Single vibrator function</Description>
+            <Category>Delay</Category>
             <OpCode>3</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>

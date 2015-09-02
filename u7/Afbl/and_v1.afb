@@ -2,8 +2,10 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#and_v1">
         <Properties>
-            <Caption>and_v1</Caption>
+            <Caption>and</Caption>
+            <Version>1.0</Version>
             <Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
+            <Category>Logic</Category>
             <OpCode>1</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>

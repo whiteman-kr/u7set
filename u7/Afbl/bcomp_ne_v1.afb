@@ -2,8 +2,10 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#bcomp_ne_v1">
         <Properties>
-            <Caption>bcomp_ne_v1</Caption>
+            <Caption>bcomp_ne</Caption>
+            <Version>1.0</Version>
             <Description>Binary Comparator Block, Not equal comparison</Description>
+            <Category>Compare</Category>
             <OpCode>10</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
