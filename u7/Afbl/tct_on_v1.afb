@@ -4,18 +4,18 @@
         <Properties>
             <Caption>tct_on_v1</Caption>
             <Description>Time Counter Block, Turn on delay function</Description>
-            <OpCode>5</OpCode>
+            <OpCode>3</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_wave" Caption="in" Type="Discrete" OpIndex = "4" Size = "1"/>
+            <AfbElementSignal OpName="i_wave" Caption="in" Type="Discrete" OpIndex = "6" Size = "1"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "6" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "8" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_counter" Caption = "time" Visible="true" OpIndex="1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_counter" Caption = "time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="AnalogIntegral">
                 <Value>50</Value>
                 <Default>50</Default>
                 <LowLimit>0</LowLimit>

@@ -4,7 +4,7 @@
         <Properties>
             <Caption>maj_v1</Caption>
             <Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
-            <OpCode>8</OpCode>
+            <OpCode>6</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>
         </Properties>
