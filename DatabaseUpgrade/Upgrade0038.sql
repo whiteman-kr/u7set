@@ -4,6 +4,11 @@ $BODY$
 DECLARE
 	userIsAdmin boolean;
 BEGIN
+	IF (SELECT COUNT(*) FROM users WHERE userid = user_id) = 0
+	THEN
+		RETURN;
+	END IF;
+
 	SELECT is_admin(user_id) INTO userIsAdmin;
 
 	RETURN QUERY SELECT
@@ -62,9 +67,7 @@ BEGIN
 			FROM
 				Signal AS SG
 			WHERE
-				(SG.CheckedOutInstanceID IS NULL OR
-				(SG.UserID <> user_id AND userIsAdmin = FALSE))
-					AND
+				(SG.CheckedOutInstanceID IS NULL) AND
 				SG.SignalID = ANY(signal_ids)
 
 				UNION ALL
@@ -93,6 +96,11 @@ $BODY$
 DECLARE
 	userIsAdmin boolean;
 BEGIN
+	IF (SELECT COUNT(*) FROM users WHERE userid = user_id) = 0
+	THEN
+		RETURN;
+	END IF;
+
 	SELECT is_admin(user_id) INTO userIsAdmin;
 
 	RETURN QUERY SELECT
@@ -152,8 +160,7 @@ BEGIN
 			FROM
 				Signal AS SG
 			WHERE
-				(SG.CheckedOutInstanceID IS NULL OR
-				(SG.UserID <> user_id AND userIsAdmin = FALSE))
+				SG.CheckedOutInstanceID IS NULL
 
 				UNION ALL
 
@@ -169,7 +176,8 @@ BEGIN
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE
-  COST 100;
+  COST 100
+  ROWS 1000;
 
 
 
