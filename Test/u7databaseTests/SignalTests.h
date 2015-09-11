@@ -15,6 +15,10 @@ private slots:
 	void get_signal_countTest();
 	void checkin_signalsTest();
 	void checkout_signalsTest();
+	void delete_signalTest();
+	void get_latest_signalTest();
+	void get_latest_signalsTest();
+	void get_latest_signals_allTest();
 
 public:
 	int m_firstUserForTest = -1;

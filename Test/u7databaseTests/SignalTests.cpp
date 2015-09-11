@@ -615,3 +615,454 @@ void SignalTests::checkout_signalsTest()
 	QVERIFY2(query.value("errCode").toInt() == 2, qPrintable(QString("Error: Error code is %1, expected - 2").arg(query.value("errCode").toInt())));
 }
 
+void SignalTests::delete_signalTest()
+{
+	QSqlQuery query;
+
+	int signalIds[3] = {-1, -1, -1};
+	int numberOfSignal = 0;
+	bool ok = query.exec(QString("SELECT * FROM add_signal(%1, 0, 3)").arg(m_firstUserForTest));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	while (query.next() == true)
+	{
+		signalIds[numberOfSignal] = query.value("id").toInt();
+		numberOfSignal++;
+	}
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM signal WHERE signalId = %1").arg(signalIds[1]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int deletedCheckedOutId = query.value(0).toInt();
+
+	// Check in first signal to make sure, that function will checkOut it, and change action to 3
+	//
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Do not change second signal. Function must delete it from database, because it was never checked in
+	//
+
+	// Check in and checkOut last signal to get ALREADY_CHECKED_OUT error
+	//
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(%1, '{%2}');").arg(m_secondUserForTest).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Start delete_signal function with first signal
+	//
+
+	ok = query.exec(QString("SELECT * FROM delete_signal(%1, %2)").arg(m_firstUserForTest).arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("errCode").toInt() == 0, qPrintable("Error: error code is not 0!"));
+
+	ok = query.exec(QString("SELECT * FROM signal WHERE signalId = %1").arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("checkedOutInstanceId").toInt() != 0, qPrintable("Signal must be checked out"));
+
+	ok = query.exec(QString("SELECT * FROM signalInstance WHERE signalInstanceId = %1").arg(query.value("checkedOutInstanceId").toInt()));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("action").toInt() == 3, qPrintable ("Error: action must be 3 - matched for deletion"));
+
+	// Start delete_signal function with second signal
+	//
+
+	ok = query.exec(QString("SELECT * FROM delete_signal(%1, %2)").arg(m_firstUserForTest).arg(signalIds[1]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("errCode").toInt() == 0, qPrintable("Error: error code is not 0!"));
+
+	ok = query.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(signalIds[1]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("Error: no record expected"));
+
+	// Check signalInstance table for deleted record
+	//
+
+	ok = query.exec(QString("SELECT * FROM signalInstance WHERE signalInstanceId = %1").arg(deletedCheckedOutId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("Error: no record expected"));
+
+	// Start delete_signal function with already checkedOut signal
+	//
+
+	ok = query.exec(QString("SELECT * FROM delete_signal(%1, %2);").arg(m_firstUserForTest).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("errCode").toInt() == 2, qPrintable("SIGNAL_ALREADY_CHECKEDOUT error expected!"));
+
+	// Check deletion of signalGroups
+	//
+
+	ok = query.exec("SELECT * FROM add_signal(1, 0, 2);");
+	QVERIFY2(ok == true, qPrintable (query.lastError().databaseText()));
+
+	// delete data from signalIds array, and fill it with new signaIds
+	//
+
+	int signalIdsForSignalGroupTest[2] = {-1, -1};
+
+	QVERIFY2(query.next() == true, qPrintable (query.lastError().databaseText()));
+	signalIdsForSignalGroupTest[0] = query.value("id").toInt();
+	QVERIFY2(query.next() == true, qPrintable (query.lastError().databaseText()));
+	signalIdsForSignalGroupTest[1] = query.value("id").toInt();
+
+	// Find and save signals groupId
+	//
+
+	ok = query.exec(QString("SELECT signalGroupId FROM Signal WHERE signalId = %1").arg(signalIdsForSignalGroupTest[0]));
+	QVERIFY2(ok == true, qPrintable (query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable (query.lastError().databaseText()));
+
+	int signalGroupId = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM delete_signal(1, %1)").arg(signalIdsForSignalGroupTest[0]));
+	QVERIFY2(ok == true, qPrintable (query.lastError().databaseText()));
+
+	// Check that afted removing first signal, signalGroupId is not removed
+	//
+
+	ok = query.exec(QString("SELECT * FROM signalGroup WHERE signalGroupId = %1").arg(signalGroupId));
+	QVERIFY2(ok == true, qPrintable (query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable ("Error: signalGroup has been deleted."));
+
+	// Delete second signal
+	//
+
+	ok = query.exec(QString("SELECT * FROM delete_signal(1, %1)").arg(signalIdsForSignalGroupTest[1]));
+	QVERIFY2(ok == true, qPrintable (query.lastError().databaseText()));
+
+	// Check that signalGroup has been deleted
+	//
+
+	ok = query.exec(QString("SELECT * FROM signalGroup WHERE signalGroupId = %1").arg(signalGroupId));
+	QVERIFY2(ok == true, qPrintable (query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable ("Error: signalGroup must be deleted"));
+}
+
+void SignalTests::get_latest_signalTest()
+{
+	/*QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	bool ok = query.exec(QString("SELECT * FROM add_signal(%1, 0, 0)").arg(m_firstUserForTest));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+	int signalId = query.value("ID").toInt();
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signal(%1, %2);").arg(m_firstUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("signalInstanceId").toInt() == tempQuery.value(0).toInt(), qPrintable("Error: signalInstanceId is wrong"));
+	QVERIFY2(signalId == query.value("signalId").toInt(), qPrintable("Error: wrong sigalId"));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signal(%1, %2);").arg(m_secondUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("Error: no record expected"));  // Why empty string appears? There must be no string.
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signal(%1, %2);").arg(m_firstUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(QString("SELECT checkedInInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("signalInstanceId").toInt() == tempQuery.value(0).toInt(), qPrintable("Error: signalInstanceId is wrong"));
+	QVERIFY2(signalId == query.value("signalId").toInt(), qPrintable("Error: wrong sigalId"));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(%1, '{%2}');").arg(m_firstUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE signalInstance SET action = 2 WHERE changeSetId IS NULL AND signalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signal(%1, %2);").arg(m_firstUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("signalInstanceId").toInt() == tempQuery.value(0).toInt(), qPrintable("Error: signalInstanceId is wrong"));
+	QVERIFY2(signalId == query.value("signalId").toInt(), qPrintable("Error: wrong sigalId"));
+	QVERIFY2(query.value("action").toInt() == 2, qPrintable("Error: Wrong record!"));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signal(%1, %2);").arg(m_secondUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec(QString("SELECT checkedInInstanceId FROM Signal WHERE SignalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("signalInstanceId").toInt() == tempQuery.value(0).toInt(), qPrintable("Error: signalInstanceId is wrong"));
+	QVERIFY2(signalId == query.value("signalId").toInt(), qPrintable("Error: wrong sigalId"));
+	QVERIFY2(query.value("action").toInt() == 1, qPrintable("Error: Wrong record!"));*/
+}
+
+void SignalTests::get_latest_signalsTest()
+{
+	/*QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	int signalIds[4] = {-1, -1, -1, -1};
+	int numberOfSignal = 0;
+
+	// Value, that will be changed by another user to test checkOuted signals
+	//
+
+	QString nameToChange = "TEST";
+
+	bool ok = query.exec(QString("SELECT * FROM add_signal(%1, 0, 3)").arg(m_firstUserForTest));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	for (numberOfSignal=0; numberOfSignal<3; numberOfSignal++)
+	{
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+		signalIds[numberOfSignal] = query.value("id").toInt();
+	}
+
+	// Create one signal by secondUser to check, that firstUser will get empty string
+	//
+
+	ok = query.exec(QString("SELECT * FROM add_signal(%1, 0, 3)").arg(m_secondUserForTest));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalIds[numberOfSignal] = query.value("id").toInt();
+
+	numberOfSignal = 0;
+
+	// Create history for first signalId. After get_latest_signal() function first user must get all checkedIn data of the signal, and second user
+	// must get all checkedOut data of the signal
+	//
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkOut_signals(%1, '{%2}');").arg(m_secondUserForTest).arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE signalInstance SET name = '%1' WHERE changeSetId IS NULL AND signalId = %2").arg(nameToChange).arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Check in one signal to make sure, that first user get data of checkedIn file
+	//
+
+	ok = query.exec(QString("SElECT * FROM checkin_signals(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(signalIds[1]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Create history for third signal id. First user must checkOut signal, and get all data of checkOuted signal
+	//
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkOut_signals(%1, '{%2}');").arg(m_firstUserForTest).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE signalInstance SET name = '%1' WHERE changeSetId IS NULL AND signalId = %2").arg(nameToChange).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Start get_latest_signals() test function
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signals(%1, '{%2, %3, %4, %5}') ORDER BY SignalId").arg(m_firstUserForTest).arg(signalIds[0]).arg(signalIds[1]).arg(signalIds[2]).arg(signalIds[3]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	while (query.next() == true)
+	{
+		switch (numberOfSignal)
+		{
+			case 0:
+			{
+				QVERIFY2(query.value("signalId").toInt() == signalIds[numberOfSignal], qPrintable("Error: wrong signalId"));
+
+				ok = tempQuery.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(signalIds[numberOfSignal]));
+
+				QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+				QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+				QVERIFY2(tempQuery.value("checkedInInstanceId").toInt() == query.value("signalInstanceId"), qPrintable ("Error: wrong signalinstance in wrong userId with checkOuted signal"));
+
+				ok = tempQuery.exec(QString("SELECT * FROM SignalInstance WHERE signalInstanceId = %1").arg(tempQuery.value("checkedInInstanceId").toInt()));
+
+				QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+				QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+				QVERIFY2(tempQuery.value("signalId").toInt() == signalIds[numberOfSignal], qPrintable("Error: wrong signalId in signalInstance"));
+				QVERIFY2(tempQuery.value("name").toString() != nameToChange, qPrintable("Error: wrong name in wrong userId with checkOuted signal"));
+
+				numberOfSignal++;
+			} break;
+
+			case 1:
+			{
+				QVERIFY2(query.value("signalId").toInt() == signalIds[numberOfSignal], qPrintable("Error: wrong signalId"));
+
+				ok = tempQuery.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(signalIds[numberOfSignal]));
+
+				QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+				QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+				QVERIFY2(tempQuery.value("checkedInInstanceId").toInt() == query.value("signalInstanceId"), qPrintable ("Error: wrong signalinstance in wrong userId with checkOuted signal"));
+
+				numberOfSignal++;
+			} break;
+			case 2:
+			{
+				QVERIFY2(query.value("signalId").toInt() == signalIds[numberOfSignal], qPrintable("Error: wrong signalId"));
+
+				ok = tempQuery.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(signalIds[numberOfSignal]));
+
+				QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+				QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+				QVERIFY2(tempQuery.value("checkedOutInstanceId").toInt() == query.value("signalInstanceId"), qPrintable ("Error: wrong signalinstance in wrong userId with checkOuted signal"));
+
+				ok = tempQuery.exec(QString("SELECT * FROM SignalInstance WHERE signalInstanceId = %1").arg(tempQuery.value("checkedOutInstanceId").toInt()));
+
+				QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+				QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+				QVERIFY2(tempQuery.value("signalId").toInt() == signalIds[numberOfSignal], qPrintable("Error: wrong signalId in signalInstance"));
+				QVERIFY2(tempQuery.value("name").toString() == nameToChange, qPrintable("Error: wrong name in wrong userId with checkOuted signal"));
+
+				numberOfSignal++;
+			} break;
+			case 3: QFAIL("Error: There must be only 3 records"); break;
+		}
+	}
+
+	// Check in edited signal by second user, and check it by function with first user
+	//
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals (%1, '{%2}', '%3')").arg(m_secondUserForTest).arg(signalIds[0]).arg("TEST"));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signals(%1, '{%2}')").arg(m_firstUserForTest).arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value("name").toString() == nameToChange, qPrintable("Error: function returns wrong name after function checkin_signals()"));
+
+	// Check deleted signal. user, who deleted must see it, and others musn't.
+
+	ok = query.exec(QString("SELECT * FROM delete_signal(%1, %2)").arg(m_firstUserForTest).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SElECT * FROM checkin_signals(%1, '{%2}', 'TEST')").arg(m_firstUserForTest).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signals(%1, '{%2}');").arg(m_firstUserForTest).arg(signalIds[2]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+
+
+	// Try start function with invalid user
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signals(%1, '{1}')").arg(maxValueId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("No record expected, invalid userId"));
+
+	// Try start function with invalid signal
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signals(1, '{%1}')").arg(maxValueId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("No record expected, invalid userId"));*/
+}
+
+void SignalTests::get_latest_signals_allTest()
+{
+	/*QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	bool ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	int deletedSignalId = query.value("id").toInt();
+
+	ok = query.exec(QString("UPDATE Signal SET Deleted = true WHERE signalId = %1").arg(query.value("Id").toInt())); // Do it with functions delete_signal and checkin_signal
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));											// change one row which were ediedby another user
+
+	ok = query.exec("SELECT * FROM get_latest_signals_all(1)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec("SELECT * FROM Signal WHERE Deleted = false ORDER BY SignalId");
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	while (query.next() == true && tempQuery.next() == true)
+	{
+		QVERIFY2(query.value("signalId").toInt() != deletedSignalId, qPrintable("Error: deleted signal was not expected"));
+		QVERIFY2(tempQuery.value("signalId").toInt() == query.value("signalId").toInt(), qPrintable(QString("%1:%2").arg(query.value("signalId").toInt()).arg(tempQuery.value("signalId").toInt())));
+
+		if (tempQuery.value("userId").toInt() == 0)
+		{
+			QVERIFY2(tempQuery.value("checkedInInstanceId").toInt() == query.value("signalInstanceId").toInt(), qPrintable("Error: wrong signalInstance Id"));
+		}
+		else
+		{
+			QVERIFY2(tempQuery.value("checkedOutInstanceId").toInt() == query.value("signalInstanceId").toInt(), qPrintable("Error: wrong signalInstance Id"));
+		}
+	}
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signals_all(%1)").arg(m_firstUserForTest));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = tempQuery.exec("SELECT * FROM Signal WHERE Deleted = false ORDER BY SignalId");
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	while (query.next() == true && tempQuery.next() == true)
+	{
+		while (tempQuery.value("checkedInInstanceId").toInt() == 0 && tempQuery.value("userId").toInt() != m_firstUserForTest)
+		{
+			tempQuery.next();
+		}
+
+		QVERIFY2(tempQuery.value("signalId").toInt() == query.value("signalId").toInt(), qPrintable(QString("Error in signal Id's: (function)%1 : (table)%2").arg(query.value("signalId").toInt()).arg(tempQuery.value("signalId").toInt())));
+
+		if (tempQuery.value("userId").toInt() == 0 || tempQuery.value("userId").toInt() != m_firstUserForTest)
+		{
+			QVERIFY2(tempQuery.value("checkedInInstanceId").toInt() == query.value("signalInstanceId").toInt(), qPrintable("Error: wrong signalInstance Id"));
+		}
+		else
+		{
+			QVERIFY2(tempQuery.value("checkedOutInstanceId").toInt() == query.value("signalInstanceId").toInt(), qPrintable("Error: wrong signalInstance Id"));
+		}
+	}
+
+	QVERIFY2(query.next() == false, qPrintable ("Error: some records were skipped"));
+
+	// Try execute function with invalid user
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_latest_signals_all (%1)").arg(maxValueId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("No records with invalid user expected")); // Better not give information for invalid user */
+}
+
