@@ -142,7 +142,7 @@ namespace Builder
 	}
 
 
-	quint16 CommandCode::getWord(int index)
+	quint16 CommandCode::getWord(int index) const
 	{
 		switch(index)
 		{
@@ -166,7 +166,7 @@ namespace Builder
 	}
 
 
-	int CommandCode::sizeW()
+	int CommandCode::sizeW() const
 	{
 		int cmdCode = static_cast<int>(opCode.code);
 
@@ -180,7 +180,7 @@ namespace Builder
 	}
 
 
-	QString CommandCode::getFbTypeStr()
+	QString CommandCode::getFbTypeStr() const
 	{
 		return Afb::AfbType::toText(getFbType());
 	}
@@ -210,12 +210,12 @@ namespace Builder
 	}
 
 
-	void Command::start(quint16 fbType, quint16 fbInstance)
+	void Command::start(quint16 fbType, quint16 fbInstance, const QString& fbCaption)
 	{
 		m_code.setOpCode(LmCommandCode::START);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
-
+		m_code.setFbCaption(fbCaption);
 	}
 
 	void Command::stop()
@@ -258,37 +258,40 @@ namespace Builder
 	}
 
 
-	void Command::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom)
+	void Command::writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
 	{
 		m_code.setOpCode(LmCommandCode::WRFB);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrFrom);
+		m_code.setFbCaption(fbCaption);
 	}
 
 
-	void Command::readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo)
+	void Command::readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
 		m_code.setOpCode(LmCommandCode::RDFB);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrTo);
+		m_code.setFbCaption(fbCaption);
 	}
 
 
-	void Command::writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal)
+	void Command::writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal, const QString& fbCaption)
 	{
 		m_code.setOpCode(LmCommandCode::WRFBC);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(constVal);
+		m_code.setFbCaption(fbCaption);
 	}
 
 
-	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo)
+	void Command::writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo, const QString& fbCaption)
 	{
 		m_code.setOpCode(LmCommandCode::WRFBB);
 		m_code.setFbType(fbType);
@@ -296,10 +299,11 @@ namespace Builder
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrFrom);
 		m_code.setBitNo(bitNo);
+		m_code.setFbCaption(fbCaption);
 	}
 
 
-	void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo)
+	void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
 		m_code.setOpCode(LmCommandCode::RDFBB);
 		m_code.setFbType(fbType);
@@ -307,15 +311,17 @@ namespace Builder
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(addrTo);
 		m_code.setBitNo(bitNo);
+		m_code.setFbCaption(fbCaption);
 	}
 
-	void Command::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue)
+	void Command::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
 	{
 		m_code.setOpCode(LmCommandCode::RDFBTS);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
 		m_code.setWord3(testValue);
+		m_code.setFbCaption(fbCaption);
 	}
 
 
@@ -338,12 +344,13 @@ namespace Builder
 	}
 
 
-	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount)
+	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption)
 	{
 		m_code.setOpCode(LmCommandCode::NSTART);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setWord3(startCount);
+		m_code.setFbCaption(fbCaption);
 	}
 
 
@@ -423,7 +430,7 @@ namespace Builder
 			break;
 
 		case LmCommandCode::START:
-			mnemoCode.sprintf("%s   %s.%d", commandStr, C_STR(m_code.getFbTypeStr()), m_code.getFbInstanceInt());
+			mnemoCode.sprintf("%s   %s.%d", commandStr, C_STR(m_code.getFbCaption()), m_code.getFbInstanceInt());
 			break;
 
 		case LmCommandCode::MOV:
@@ -444,31 +451,31 @@ namespace Builder
 
 		case LmCommandCode::WRFB:
 			mnemoCode.sprintf("%s    %s.%d[%d], %d", commandStr,
-							  C_STR(m_code.getFbTypeStr()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
+							  C_STR(m_code.getFbCaption()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
 			break;
 
 		case LmCommandCode::RDFB:
-			mnemoCode.sprintf("%s    %d, %s.%d[%d]", commandStr, m_code.getWord3(), C_STR(m_code.getFbTypeStr()),
+			mnemoCode.sprintf("%s    %d, %s.%d[%d]", commandStr, m_code.getWord3(), C_STR(m_code.getFbCaption()),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
 			break;
 
 		case LmCommandCode::WRFBC:
-			mnemoCode.sprintf("%s   %s.%d[%d], #%d", commandStr, C_STR(m_code.getFbTypeStr()),
+			mnemoCode.sprintf("%s   %s.%d[%d], #%d", commandStr, C_STR(m_code.getFbCaption()),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
 			break;
 
 		case LmCommandCode::WRFBB:
-			mnemoCode.sprintf("%s   %s.%d[%d], %d[%d]", commandStr, C_STR(m_code.getFbTypeStr()),
+			mnemoCode.sprintf("%s   %s.%d[%d], %d[%d]", commandStr, C_STR(m_code.getFbCaption()),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3(), m_code.getWord4());
 			break;
 
 		case LmCommandCode::RDFBB:
 			mnemoCode.sprintf("%s   %d[%d], %s.%d[%d]", commandStr, m_code.getWord3(), m_code.getWord4(),
-							  C_STR(m_code.getFbTypeStr()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+							  C_STR(m_code.getFbCaption()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
 			break;
 
 		case LmCommandCode::RDFBTS:
-			mnemoCode.sprintf("%s  %s.%d[%d], #%d", commandStr, C_STR(m_code.getFbTypeStr()),
+			mnemoCode.sprintf("%s  %s.%d[%d], #%d", commandStr, C_STR(m_code.getFbCaption()),
 							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
 			break;
 
@@ -481,7 +488,7 @@ namespace Builder
 			break;
 
 		case LmCommandCode::NSTART:
-			mnemoCode.sprintf("%s  %s.%d, %d", commandStr, C_STR(m_code.getFbTypeStr()),
+			mnemoCode.sprintf("%s  %s.%d, %d", commandStr, C_STR(m_code.getFbCaption()),
 							  m_code.getFbInstanceInt(), m_code.getWord3());
 			break;
 

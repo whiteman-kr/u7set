@@ -121,6 +121,8 @@ namespace Builder
 
 #pragma pack(pop)
 
+		QString m_fbCaption;
+
 	public:
 		CommandCode()
 		{
@@ -130,29 +132,32 @@ namespace Builder
 		void setNoCommand() { opCode.code = static_cast<int>(LmCommandCode::NoCommand); }
 
 		void setOpCode(LmCommandCode code);
-		int getOpCodeInt() { return opCode.code; }
+		int getOpCodeInt() const { return opCode.code; }
 		LmCommandCode getOpCode() { return static_cast<LmCommandCode>(opCode.code); }
 
 		void setFbType(quint16 fbType);
-		quint16 getFbType() { return opCode.fbType; }
-		QString getFbTypeStr();
+		quint16 getFbType() const { return opCode.fbType; }
+		QString getFbTypeStr() const;
 
 		void setFbInstance(quint16 fbInstance);
-		quint16 getFbInstance() { return param.fbInstance; }
+		quint16 getFbInstance() const { return param.fbInstance; }
 		int getFbInstanceInt() { return int(param.fbInstance); }
 
+		void setFbCaption(const QString& fbCaption) { m_fbCaption = fbCaption.toUpper(); }
+		QString getFbCaption() const { return m_fbCaption; }
+
 		void setFbParamNo(quint16 fbParamNo);
-		quint16 getFbParamNo() { return param.fbParamNo; }
-		int getFbParamNoInt() { return int(param.fbParamNo); }
+		quint16 getFbParamNo() const { return param.fbParamNo; }
+		int getFbParamNoInt() const { return int(param.fbParamNo); }
 
 		void setWord2(quint16 value) { word2 = value; }
-		quint16 getWord2() { return word2; }
+		quint16 getWord2() const { return word2; }
 
 		void setWord3(quint16 value) { word3 = value; }
-		quint16 getWord3() { return word3; }
+		quint16 getWord3() const { return word3; }
 
 		void setWord4(quint16 value) { word4 = value; }
-		quint16 getWord4() { return word4; }
+		quint16 getWord4() const { return word4; }
 
 		void setBitNo(quint16 bitNo);
 
@@ -162,9 +167,9 @@ namespace Builder
 		void setBitNo2(quint16 bitNo);
 		quint16 getBitNo2() const { return bitNo.b2; }
 
-		quint16 getWord(int index);
+		quint16 getWord(int index) const;
 
-		int sizeW();
+		int sizeW() const;
 	};
 
 
@@ -224,21 +229,21 @@ namespace Builder
 		Command() {}
 
 		void nop();
-		void start(quint16 fbType, quint16 fbInstance);
+		void start(quint16 fbType, quint16 fbInstance, const QString& fbCaption);
 		void stop();
 		void mov(quint16 addrTo, quint16 addrFrom);
 		void movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW);
 		void movConst(quint16 addrTo, quint16 constVal);
 		void movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit);
-		void writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom);
-		void readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
-		void writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal);
-		void writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo);
-		void readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo);
-		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue);
+		void writeFuncBlock(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption);
+		void readFuncBlock(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
+		void writeFuncBlockConst(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 constVal, const QString& fbCaption);
+		void writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, quint16 bitNo, const QString& fbCaption);
+		void readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
+		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption);
 		void setMem(quint16 addr, quint16 sizeW, quint16 constValue);
 		void moveBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask);
-		void nstart(quint16 fbType, quint16 fbInstance, quint16 startCount);
+		void nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption);
 		void appStart(quint16 appStartAddr);
 
 		void setAddress(int address) { m_address = address; }

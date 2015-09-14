@@ -757,7 +757,7 @@ namespace Builder
 			}
 
 
-			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue);
+			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue, appFb->caption());
 
 			if (paramValue == paramIntValue)
 			{
@@ -1266,12 +1266,12 @@ namespace Builder
 
 		if (startCount == 1)
 		{
-			cmd.start(appFb->opcode(), appFb->instance());
+			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption());
 			cmd.setComment(QString(tr("compute %1")).arg(appFb->afbStrID()));
 		}
 		else
 		{
-			cmd.nstart(appFb->opcode(), appFb->instance(), startCount);
+			cmd.nstart(appFb->opcode(), appFb->instance(), startCount, appFb->caption());
 			cmd.setComment(QString(tr("compute %1 %2 times")).arg(appFb->afbStrID()).arg(startCount));
 		}
 
@@ -1429,7 +1429,7 @@ namespace Builder
 			{
 				constValue = constItem.intValue() > 0 ? 1 : 0;
 
-				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue);
+				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue, appFb.caption());
 				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constValue));
 			}
 			break;
@@ -1445,7 +1445,7 @@ namespace Builder
 			{
 				constValue = constItem.intValue();
 
-				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue);
+				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue, appFb.caption());
 				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constValue));
 			}
 			break;
@@ -1520,13 +1520,13 @@ namespace Builder
 			{
 				// input connected to analog signal
 				//
-				cmd.writeFuncBlock(fbType, fbInstance, fbParamNo, ramAddrOffset);
+				cmd.writeFuncBlock(fbType, fbInstance, fbParamNo, ramAddrOffset, appFb.caption());
 			}
 			else
 			{
 				// input connected to discrete signal
 				//
-				cmd.writeFuncBlockBit(fbType, fbInstance, fbParamNo, ramAddrOffset, ramAddrBit);
+				cmd.writeFuncBlockBit(fbType, fbInstance, fbParamNo, ramAddrOffset, ramAddrBit, appFb.caption());
 			}
 
 			cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(appSignal.strID()));
@@ -1670,13 +1670,13 @@ namespace Builder
 			{
 				// input connected to analog signal
 				//
-				cmd.readFuncBlock(ramAddrOffset, fbType, fbInstance, fbParamNo);
+				cmd.readFuncBlock(ramAddrOffset, fbType, fbInstance, fbParamNo, appFb.caption());
 			}
 			else
 			{
 				// input connected to discrete signal
 				//
-				cmd.readFuncBlockBit(ramAddrOffset, ramAddrBit, fbType, fbInstance, fbParamNo);
+				cmd.readFuncBlockBit(ramAddrOffset, ramAddrBit, fbType, fbInstance, fbParamNo, appFb.caption());
 			}
 
 			cmd.setComment(QString(tr("%1 => %2")).arg(outPin.caption()).arg(appSignal->strID()));
