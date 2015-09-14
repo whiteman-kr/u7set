@@ -79,6 +79,11 @@ DECLARE
 	userIsAdmin boolean;
 	checkOutUserID integer;
 BEGIN
+	IF (SELECT COUNT(*) FROM users WHERE userid = user_id) = 0
+	THEN
+		RETURN;
+	END IF;
+
 	SELECT is_admin(user_id) INTO userIsAdmin;
 
 	SELECT S.CheckedInInstanceID, S.CheckedOutInstanceID, S.UserID INTO chInInstanceID, chOutInstanceID, checkOutUserID
