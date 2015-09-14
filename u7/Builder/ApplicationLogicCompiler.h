@@ -202,7 +202,8 @@ namespace Builder
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().type().toOpCode(); }		// return FB type
-		QString caption() const { return afb().caption(); }
+		QString caption() const { return afb().caption().toUpper(); }
+		QString typeCaption() const { return afb().type().text(); }
 		int number() const { return m_number; }
 
 		LogicAfbParam getAfbParamByIndex(int index) const;

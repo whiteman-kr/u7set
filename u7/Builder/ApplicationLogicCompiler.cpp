@@ -711,7 +711,12 @@ namespace Builder
 		quint16 fbOpcode = appFb->opcode();
 		quint16 fbInstance = appFb->instance();
 
-		m_code.comment(QString(tr("Initialization of %1 instance %2 (%3)")).arg(appFb->afb().instantiatorID()).arg(fbInstance).
+		m_code.comment(QString(tr("Initialization of %1 (fbtype %2, opcode %3, instance %4, %5, %6)")).
+				arg(appFb->caption()).
+				arg(appFb->typeCaption()).
+				arg(appFb->opcode()).
+				arg(fbInstance).
+				arg(appFb->afb().instantiatorID()).
 				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
 
 		m_code.newLine();
@@ -1267,7 +1272,7 @@ namespace Builder
 		if (startCount == 1)
 		{
 			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption());
-			cmd.setComment(QString(tr("compute %1")).arg(appFb->afbStrID()));
+			cmd.setComment(QString(tr("compute %1")).arg(appFb->caption()));
 		}
 		else
 		{
