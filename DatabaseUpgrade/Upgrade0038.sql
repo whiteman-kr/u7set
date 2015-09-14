@@ -67,7 +67,9 @@ BEGIN
 			FROM
 				Signal AS SG
 			WHERE
-				(SG.CheckedOutInstanceID IS NULL) AND
+				(SG.CheckedOutInstanceID IS NULL OR
+				(SG.UserID <> user_id AND userIsAdmin = FALSE))
+					AND
 				SG.SignalID = ANY(signal_ids)
 
 				UNION ALL
@@ -160,7 +162,8 @@ BEGIN
 			FROM
 				Signal AS SG
 			WHERE
-				SG.CheckedOutInstanceID IS NULL
+				(SG.CheckedOutInstanceID IS NULL OR
+				(SG.UserID <> user_id AND userIsAdmin = FALSE))
 
 				UNION ALL
 
