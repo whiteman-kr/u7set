@@ -147,6 +147,7 @@ BEGIN
 	WHERE
 		SI.SignalID = signal_id AND
 		SI.SignalID = S.SignalID AND
+		S.Deleted != TRUE AND
 		SI.SignalInstanceID = instanceID;
 END
 $BODY$
