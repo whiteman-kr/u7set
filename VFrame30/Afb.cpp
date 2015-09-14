@@ -71,12 +71,8 @@ namespace Afb
 		{
 			case Type::UNKNOWN:
 				return "UNKNOWN";
-			case Type::AND:
-				return "AND";
-			case Type::OR:
-				return "OR";
-			case Type::XOR:
-				return "XOR";
+            case Type::LOGIC:
+                return "LOGIC";
 			case Type::NOT:
 				return "NOT";
 			case Type::TCT:
@@ -97,34 +93,20 @@ namespace Afb
 				return "BCOMP";
 			case Type::LAG:
 				return "LAG";
-			case Type::MID:
-				return "MID";
-			case Type::ADD:
-				return "ADD";
+            case Type::MID:
+                return "MID";
+            case Type::MATH:
+                return "MATH";
 			case Type::SCAL:
 				return "SCAL";
 			case Type::LINFUN:
 				return "LINFUN";
 			case Type::SQRT:
 				return "SQRT";
-			case Type::SIN:
-				return "SIN";
-			case Type::COS:
-				return "COS";
-			case Type::DIV:
-				return "DIV";
-			case Type::MULT:
-				return "MULT";
-			case Type::ABS:
-				return "ABS";
-			case Type::LN:
-				return "LN";
-			case Type::LIM:
-				return "LIM";
-			case Type::MIN_MAX:
-				return "MIN_MAX";
-			case Type::PID:
-				return "PID";
+            case Type::LIM:
+                return "LIM";
+            case Type::PID:
+                return "PID";
 			default:
 				assert(false);
 				return "UNKNOWN";
