@@ -142,7 +142,7 @@ QString ChooseAfbDialog::getSelectedCategory()
     QList<QTreeWidgetItem*> selectedItems = ui->m_afbTree->selectedItems();
     if (selectedItems.size() == 0 || selectedItems.size() > 1)
     {
-        return -1;
+		return "";
     }
 
     QTreeWidgetItem* item = selectedItems[0];
