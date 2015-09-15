@@ -675,8 +675,6 @@ namespace Builder
 			}
 		}
 
-		m_code.newLine();
-
 		return result;
 	}
 
@@ -2978,7 +2976,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	// insert "shadow" signal bound to FB output pin
 	//

@@ -186,9 +186,52 @@ namespace Builder
 	}
 
 
-	CodeItem::~CodeItem()
+	void CommandCode::setConstFloat(float floatValue)
 	{
+		m_const.floatValue = floatValue;
+		m_constIsFloat = true;
 	}
+
+
+	float CommandCode::getConstFloat() const
+	{
+		if (m_constIsFloat == true)
+		{
+			return m_const.floatValue;
+		}
+
+		assert(false);
+
+		return 0;
+	}
+
+
+	void CommandCode::setConstInt32(qint32 int32Value)
+	{
+		m_const.int32Value = int32Value;
+		m_constIsFloat = false;
+	}
+
+
+	qint32 CommandCode::getConstInt32() const
+	{
+		if (m_constIsFloat == false)
+		{
+			return m_const.int32Value;
+		}
+
+		assert(false);
+
+		return 0;
+	}
+
+
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// Comment class implementation
+	//
+	// ---------------------------------------------------------------------------------------
 
 
 	QString Comment::toString()
@@ -203,6 +246,13 @@ namespace Builder
 		return QString("\t-- %1").arg(getComment());
 	}
 
+
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// Command class implementation
+	//
+	// ---------------------------------------------------------------------------------------
 
 	void Command::nop()
 	{
@@ -361,6 +411,120 @@ namespace Builder
 	}
 
 
+	void Command::mov32(quint16 addrTo, quint16 addrFrom)
+	{
+		m_code.setOpCode(LmCommandCode::MOV32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+	}
+
+
+	void Command::movConstInt32(quint16 addrTo, qint32 constInt32)
+	{
+		m_code.setOpCode(LmCommandCode::MOVC32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constInt32 & 0xFFFF);
+		m_code.setConstInt32(constInt32);
+	}
+
+
+	void Command::movConstFloat(quint16 addrTo, double constFloat)
+	{
+		float floatValue = static_cast<float>(constFloat);
+
+		qint32 constInt32 = *reinterpret_cast<qint32*>(&floatValue);		// map binary code of float to qint32
+
+		m_code.setOpCode(LmCommandCode::MOVC32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constInt32 & 0xFFFF);
+		m_code.setConstFloat(constFloat);
+	}
+
+
+	void Command::writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption)
+	{
+		m_code.setOpCode(LmCommandCode::WRFB32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(addrFrom);
+		m_code.setFbCaption(fbCaption);
+	}
+
+
+	void Command::readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
+	{
+		m_code.setOpCode(LmCommandCode::RDFB32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3(addrTo);
+		m_code.setFbCaption(fbCaption);
+	}
+
+
+	void Command::writeFuncBlockConstInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 constInt32, const QString& fbCaption)
+	{
+		m_code.setOpCode(LmCommandCode::WRFBC32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constInt32 & 0xFFFF);
+		m_code.setFbCaption(fbCaption);
+		m_code.setConstInt32(constInt32);
+	}
+
+
+	void Command::writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, double constFloat, const QString& fbCaption)
+	{
+		float floatValue = static_cast<float>(constFloat);
+
+		qint32 constInt32 = *reinterpret_cast<qint32*>(&floatValue);		// map binary code of float to qint32
+
+		m_code.setOpCode(LmCommandCode::WRFBC32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3((constInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(constInt32 & 0xFFFF);
+		m_code.setFbCaption(fbCaption);
+		m_code.setConstFloat(constFloat);
+	}
+
+
+	void Command::readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption)
+	{
+		m_code.setOpCode(LmCommandCode::RDFBTS32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3((testInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(testInt32 & 0xFFFF);
+		m_code.setFbCaption(fbCaption);
+		m_code.setConstInt32(testInt32);
+	}
+
+
+	void Command::readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, double testFloat, const QString& fbCaption)
+	{
+		float floatValue = static_cast<float>(testFloat);
+
+		qint32 testInt32 = *reinterpret_cast<qint32*>(&floatValue);		// map binary code of float to qint32
+
+		m_code.setOpCode(LmCommandCode::RDFBTS32);
+		m_code.setFbType(fbType);
+		m_code.setFbInstance(fbInstance);
+		m_code.setFbParamNo(fbParamNo);
+		m_code.setWord3((testInt32 >> 16) & 0xFFFF);
+		m_code.setWord4(testInt32 & 0xFFFF);
+		m_code.setFbCaption(fbCaption);
+		m_code.setConstFloat(testFloat);
+	}
+
+
 	void Command::generateBinCode(ByteOrder byteOrder)
 	{
 		m_binCode.clear();
@@ -415,93 +579,191 @@ namespace Builder
 
 	QString Command::getMnemoCode()
 	{
-		QString mnemoCode;
-
 		int opCodeInt = m_code.getOpCodeInt();
 
-		const char* commandStr = LmCommand::getStr(opCodeInt);
+		QString mnemoCode = QString(LmCommand::getStr(opCodeInt)).leftJustified(10, ' ', false);
+
+		QString params;
 
 		switch(m_code.getOpCode())
 		{
 		case LmCommandCode::NoCommand:
 		case LmCommandCode::NOP:
 		case LmCommandCode::STOP:
-			mnemoCode = commandStr;
 			break;
 
 		case LmCommandCode::START:
-			mnemoCode.sprintf("%s   %s.%d", commandStr, C_STR(m_code.getFbCaption()), m_code.getFbInstanceInt());
+			params = QString("%1.%2").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt());
 			break;
 
 		case LmCommandCode::MOV:
-			mnemoCode.sprintf("%s     %d, %d", commandStr, m_code.getWord2(), m_code.getWord3());
+		case LmCommandCode::MOV32:
+			params = QString("%1, %2").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3());
 			break;
 
 		case LmCommandCode::MOVMEM:
-			mnemoCode.sprintf("%s  %d, %d, %d", commandStr, m_code.getWord2(), m_code.getWord3(), m_code.getWord4());
+			params = QString("%1, %2, %3").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
 			break;
 
 		case LmCommandCode::MOVC:
-			mnemoCode.sprintf("%s    %d, #%d", commandStr, m_code.getWord2(), m_code.getWord3());
+			params = QString("%1, #%2").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3());
 			break;
 
 		case LmCommandCode::MOVBC:
-			mnemoCode.sprintf("%s   %d[%d], #%d", commandStr, m_code.getWord2(), m_code.getWord4(), m_code.getWord3());
+			params = QString("%1[%2], #%3").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord4()).
+						arg(m_code.getWord3());
 			break;
 
 		case LmCommandCode::WRFB:
-			mnemoCode.sprintf("%s    %s.%d[%d], %d", commandStr,
-							  C_STR(m_code.getFbCaption()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
+		case LmCommandCode::WRFB32:
+			params = QString("%1.%2[%3], %4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(m_code.getWord3());
 			break;
 
 		case LmCommandCode::RDFB:
-			mnemoCode.sprintf("%s    %d, %s.%d[%d]", commandStr, m_code.getWord3(), C_STR(m_code.getFbCaption()),
-							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+		case LmCommandCode::RDFB32:
+			params = QString("%1, %2.%3[%4]").
+						arg(m_code.getWord3()).
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt());
 			break;
 
 		case LmCommandCode::WRFBC:
-			mnemoCode.sprintf("%s   %s.%d[%d], #%d", commandStr, C_STR(m_code.getFbCaption()),
-							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
+			params = QString("%1.%2[%3], #%4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(m_code.getWord3());
 			break;
 
 		case LmCommandCode::WRFBB:
-			mnemoCode.sprintf("%s   %s.%d[%d], %d[%d]", commandStr, C_STR(m_code.getFbCaption()),
-							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3(), m_code.getWord4());
+			params = QString("%1.%2[%3], %4[%5]").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
 			break;
 
 		case LmCommandCode::RDFBB:
-			mnemoCode.sprintf("%s   %d[%d], %s.%d[%d]", commandStr, m_code.getWord3(), m_code.getWord4(),
-							  C_STR(m_code.getFbCaption()), m_code.getFbInstanceInt(), m_code.getFbParamNoInt());
+			params = QString("%1[%2], %3.%4[%5]").
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4()).
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt());
 			break;
 
 		case LmCommandCode::RDFBTS:
-			mnemoCode.sprintf("%s  %s.%d[%d], #%d", commandStr, C_STR(m_code.getFbCaption()),
-							  m_code.getFbInstanceInt(), m_code.getFbParamNoInt(), m_code.getWord3());
+			params = QString("%1.%2[%3], #%4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(m_code.getWord3());
 			break;
 
 		case LmCommandCode::SETMEM:
-			mnemoCode.sprintf("%s  %d, #%d, %d", commandStr, m_code.getWord2(), m_code.getWord3(), m_code.getWord4());
+			params = QString("%1, #%2, %3").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getWord4());
 			break;
 
 		case LmCommandCode::MOVB:
-			mnemoCode.sprintf("%s    %d[%d], %d[%d]", commandStr, m_code.getWord2(), m_code.getBitNo2(), m_code.getWord3(), m_code.getBitNo1());
+			params = QString("%1[%2], %3[%4]").
+						arg(m_code.getWord2()).
+						arg(m_code.getBitNo2()).
+						arg(m_code.getWord3()).
+						arg(m_code.getBitNo1());
 			break;
 
 		case LmCommandCode::NSTART:
-			mnemoCode.sprintf("%s  %s.%d, %d", commandStr, C_STR(m_code.getFbCaption()),
-							  m_code.getFbInstanceInt(), m_code.getWord3());
+			params = QString("%1.%2, %3").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getWord3());
 			break;
 
 		case LmCommandCode::APPSTART:
-			mnemoCode.sprintf("%s %d", commandStr, m_code.getWord2());
+			params = QString("%1").
+						arg(m_code.getWord2());
+			break;
+
+		case LmCommandCode::MOVC32:
+			if (m_code.constIsFloat())
+			{
+				params = QString("%1, #%2").
+							arg(m_code.getWord2()).
+							arg(m_code.getConstFloat());
+			}
+			else
+			{
+				params = QString("%1, #%2").
+							arg(m_code.getWord2()).
+							arg(m_code.getConstInt32());
+			}
+			break;
+
+		case LmCommandCode::WRFBC32:
+			if (m_code.constIsFloat())
+			{
+				params = QString("%1.%2[%3], #%4").
+							arg(m_code.getFbCaption()).
+							arg(m_code.getFbInstanceInt()).
+							arg(m_code.getFbParamNoInt()).
+							arg(m_code.getConstFloat());
+			}
+			else
+			{
+				params = QString("%1.%2[%3], #%4").
+							arg(m_code.getFbCaption()).
+							arg(m_code.getFbInstanceInt()).
+							arg(m_code.getFbParamNoInt()).
+							arg(m_code.getConstInt32());
+			}
+			break;
+
+		case LmCommandCode::RDFBTS32:
+			if (m_code.constIsFloat())
+			{
+				params = QString("%1.%2[%3], #%4").
+							arg(m_code.getFbCaption()).
+							arg(m_code.getFbInstanceInt()).
+							arg(m_code.getFbParamNoInt()).
+							arg(m_code.getConstFloat());
+			}
+			else
+			{
+				params = QString("%1.%2[%3], #%4").
+							arg(m_code.getFbCaption()).
+							arg(m_code.getFbInstanceInt()).
+							arg(m_code.getFbParamNoInt()).
+							arg(m_code.getConstInt32());
+			}
 			break;
 
 		default:
 			assert(false);
 		}
 
-		return mnemoCode;
+		return mnemoCode + params;
 	}
+
 
 	QString Command::toString()
 	{

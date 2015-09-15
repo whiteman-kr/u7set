@@ -25,8 +25,12 @@ namespace Builder
 		MOVB = 15,
 		NSTART = 16,
 		APPSTART = 17,
-
-		//Count
+		MOV32 = 18,
+		MOVC32 = 19,
+		WRFB32 = 20,
+		RDFB32 = 21,
+		WRFBC32 = 22,
+		RDFBTS32 = 23,
 	};
 
 
@@ -62,6 +66,12 @@ namespace Builder
 		{	LmCommandCode::MOVB,		4,	"MOVB"		},
 		{	LmCommandCode::NSTART,		3,	"NSTART"	},
 		{	LmCommandCode::APPSTART,	2,	"APPSTART"	},
+		{	LmCommandCode::MOV32,		3,	"MOV32"		},
+		{	LmCommandCode::MOVC32,		4,	"MOVC32"	},
+		{	LmCommandCode::WRFB32,		3,	"WRFB32"	},
+		{	LmCommandCode::RDFB32,		3,	"RDFB32"	},
+		{	LmCommandCode::WRFBC32,		4,	"WRFBC32"	},
+		{	LmCommandCode::RDFBTS32,	4,	"RDFBTS32"	},
 	};
 
 	const int LM_COMMAND_COUNT = sizeof(LmCommands) / sizeof(LmCommand);
@@ -123,6 +133,14 @@ namespace Builder
 
 		QString m_fbCaption;
 
+		union
+		{
+			qint32 int32Value;
+			float floatValue;
+		} m_const;
+
+		bool m_constIsFloat = true;
+
 	public:
 		CommandCode()
 		{
@@ -169,6 +187,14 @@ namespace Builder
 
 		quint16 getWord(int index) const;
 
+		void setConstFloat(float floatValue);
+		float getConstFloat() const;
+
+		void setConstInt32(qint32 int32Value);
+		qint32 getConstInt32() const;
+
+		bool constIsFloat() const { return m_constIsFloat; }
+
 		int sizeW() const;
 	};
 
@@ -182,7 +208,7 @@ namespace Builder
 		QByteArray m_binCode;
 
 	public:
-		virtual ~CodeItem();
+		virtual ~CodeItem() {}
 
 		virtual QString toString() = 0;
 		virtual int sizeW()= 0;
@@ -245,6 +271,16 @@ namespace Builder
 		void moveBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask);
 		void nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption);
 		void appStart(quint16 appStartAddr);
+
+		void mov32(quint16 addrTo, quint16 addrFrom);
+		void movConstInt32(quint16 addrTo, qint32 constInt32);
+		void movConstFloat(quint16 addrTo, double constFloat);
+		void writeFuncBlock32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 addrFrom, const QString& fbCaption);
+		void readFuncBlock32(quint16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
+		void writeFuncBlockConstInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 constInt32, const QString& fbCaption);
+		void writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, double constFloat, const QString& fbCaption);
+		void readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption);
+		void readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, double testFloat, const QString& fbCaption);
 
 		void setAddress(int address) { m_address = address; }
 
