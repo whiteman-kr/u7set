@@ -91,7 +91,7 @@ QString Convertor::convert(const QString& inputFilePath, const QString& parentFi
 
 	// Write result to file
 	//
-	query += "SELECT * FROM add_or_update_file(1, \'" + parentFile + "\', \'" + inputFileName + "\', \'Update: Adding file " + inputFileName + "\', " + str + ");\n\n\n";
+	query += "SELECT * FROM add_or_update_file(1, \'" + parentFile + "\', \'" + inputFileName + "\', \'Update: Adding file " + inputFileName + "\', " + str + ", '{}');\n\n\n";
 	//out << str <<"\n\n";
 	return query;
 }

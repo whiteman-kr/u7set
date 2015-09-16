@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	output+= "---------------------------------------------------------------------------\n";
 	output+= "--\n";
 	output+= "-- Automaicaly generated file by file2pgsql, version 1.0\n";
-	output+= ("-- Host: " + QHostInfo::localHostName() + ", User: " + userName + ", Date: " + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:s") + "\n");
+	output+= ("-- Host: " + QHostInfo::localHostName() + ", User: " + userName + ", Date: " + QDateTime::currentDateTime().toString("dd.MM.yyyy HH:mm:ss") + "\n");
 	output+= ("-- FileName: " + inputFileName + "\n");
 	output+= "--\n";
 	output+= "---------------------------------------------------------------------------\n\n";
