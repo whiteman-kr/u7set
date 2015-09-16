@@ -231,11 +231,12 @@ namespace Hardware
 		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list);
 		Q_INVOKABLE QObject* jsFindChildObjectByMask(const QString& mask);
 
-
-
 		// Props
 		//
 	public:
+		const QUuid& uuid() const;
+		void setUuid(const QUuid& value);
+
 		const QString& strId() const;
 		void setStrId(const QString& value);
 
@@ -255,6 +256,8 @@ namespace Hardware
 		int place() const;
 		Q_INVOKABLE int jsPlace() const;
 		void setPlace(int value);
+
+		QString details() const;		// JSON short description, uuid, strId, caption, place, etc
 
 		// Preset
 		//

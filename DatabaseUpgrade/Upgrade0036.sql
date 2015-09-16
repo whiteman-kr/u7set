@@ -119,19 +119,21 @@ $BODY$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION add_or_update_file(
-    user_id integer,
-    full_parent_file_name text,
-    file_name text,
-    checkin_comment text,
-    file_data bytea)
-RETURNS integer AS
+	user_id INTEGER,
+	full_parent_file_name TEXT,
+	file_name TEXT,
+	checkin_comment TEXT,
+	file_data BYTEA,
+	details TEXT)
+RETURNS INTEGER AS
 $BODY$
 DECLARE
     parent_file_id integer;
     file_id integer;
     file_state objectstate;
 BEGIN
-    -- EXAMPLE: SELECT * FROM add_or_update_file(1, '$root$/MC/', 'ModulesConfigurations.descr', 'Check in cooment', 'file content, can be binary');
+	-- EXAMPLE: SELECT * FROM add_or_update_file(1, '$root$/MC/', 'ModulesConfigurations.descr', 'Check in cooment', 'file content, can be binary', '{}');
+	--
 
     -- get parent file id, exception will occur if it dows not exists
     parent_file_id := get_file_id(user_id, full_parent_file_name);
@@ -145,7 +147,7 @@ BEGIN
 
     IF (file_id IS NULL) THEN
         -- try to add file (it will be checked out)
-        file_id	:= (SELECT id FROM add_file(user_id, file_name, parent_file_id, file_data));
+		file_id	:= (SELECT id FROM add_file(user_id, file_name, parent_file_id, file_data, details));
     ELSE
 		-- check out file if it was not yet
 		file_state := get_file_state(file_id);
@@ -195,3 +197,4 @@ BEGIN
 END;
 $BODY$
   LANGUAGE plpgsql;
+

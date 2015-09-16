@@ -1138,20 +1138,20 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 		{
 			std::shared_ptr<int*> closeDb(nullptr, [&db, &result](void*)
-			{
-				if (result == true)
 				{
-					qDebug() << "Upgrade: Commit changes.";
-					db.commit();
-				}
-				else
-				{
-					qDebug() << "Upgrade: Rollback changes.";
-					db.rollback();
-				}
+					if (result == true)
+					{
+						qDebug() << "Upgrade: Commit changes.";
+						db.commit();
+					}
+					else
+					{
+						qDebug() << "Upgrade: Rollback changes.";
+						db.rollback();
+					}
 
-				db.close();
-			});
+					db.close();
+				});
 
 			// Get project version, check it
 			//
@@ -1248,6 +1248,95 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 				qDebug() << "End upgrade item";
 			}
+
+			// The table FileInstance has details field which is JSONB, details for some files
+			// DeviceObjects has some description in details() method
+			// Some files can be added during update and most likely
+			// these instances will not contain details,
+			// Here, read Equipment Configuration Files, parse them, update details column
+			//
+			{
+				QString reqEquipmentList =
+R"(
+SELECT
+	FI.FileInstanceID AS FileInstanceID, F.FileID AS FileID, F.Name AS Name
+FROM
+	FileInstance AS FI, File AS F
+WHERE
+	FI.FileID = F.FileID AND
+	(FI.FileInstanceID = F.CheckedInInstanceID OR FI.FileInstanceID = F.CheckedOutInstanceID) AND
+	(Name ILIKE '%.hsm' OR Name ILIKE '%.hrk' OR Name ILIKE '%.hcs' OR Name ILIKE '%.hmd' OR Name ILIKE '%.hcr' OR Name ILIKE '%.hws' OR Name ILIKE '%.hsw' OR Name ILIKE '%.hds') AND
+	FI.Details = '{}';
+)";
+
+				qDebug() << "Update file details";
+
+				QSqlQuery euipmentListQuery(db);
+				result = euipmentListQuery.exec(reqEquipmentList);
+
+				if (result == false)
+				{
+					emitError(euipmentListQuery.lastError());
+					return;
+				}
+
+				while (euipmentListQuery.next())
+				{
+					QUuid fileInstanceId = euipmentListQuery.value(0).toUuid();
+					int fileId = euipmentListQuery.value(1).toInt();
+					QString fileName = euipmentListQuery.value(2).toString();
+
+					qDebug() << "FileName: " << fileName << ", FileID: " << fileId << ", FileInstanceID: " << fileInstanceId.toString();
+
+					// Get file instance, read it to DeviceObject
+					//
+					{
+						QSqlQuery getFileQuery(db);
+
+						result = getFileQuery.exec(QString("SELECT Data FROM FileInstance WHERE FileInstanceID = '%1';").arg(fileInstanceId.toString()));
+
+						if (result == false || getFileQuery.next() == false)
+						{
+							emitError(tr("Cannot get file data, FileInstanceID: %1").arg(fileInstanceId.toString()));
+							return;
+						}
+
+						QByteArray data = getFileQuery.value(0).toByteArray();
+						Hardware::DeviceObject* device = Hardware::DeviceObject::Create(data);
+
+						if (device == nullptr)
+						{
+							result = false;
+							emitError(tr("Cannot read file data, FileName %1, FileInstanceID %2.").arg(fileName).arg(fileInstanceId.toString()));
+							return;
+						}
+
+						getFileQuery.clear();
+
+						QString details = device->details();
+
+						// Update details field in DB
+						//
+						QSqlQuery updateDetailsQuery(db);
+
+						result = updateDetailsQuery.exec(
+							QString("UPDATE FileInstance SET Details = '%1' WHERE FileInstanceID = '%2';")
+								.arg(details)
+								.arg(fileInstanceId.toString()));
+
+						if (result == false)
+						{
+							emitError(tr("Cannot update file details, FileInstanceID: %1").arg(fileInstanceId.toString()));
+							return;
+						}
+					}
+				}
+			}
+
+
+//			---- result = true | false
+//			---emitError(tr("Database %1 is newer than the software version.").arg(databaseName));
+//			----return;
 		}
 	}
 
@@ -1745,7 +1834,7 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		request.append(data);
 		data.clear();
 
-		request += ");";
+		request += QString(", '%1');").arg(file->details());
 
 		QSqlQuery q(db);
 
@@ -1974,6 +2063,62 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 
 	return;
 }
+
+void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (parentFileInfo.fileId() == -1 ||
+		out == nullptr)
+	{
+		assert(parentFileInfo.fileId() != -1);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// request, result is a list of DbFile
+	//
+	QString request = QString("SELECT * FROM get_checked_out_files(%1, %2);")
+			.arg(currentUser().userId())
+			.arg(parentFileInfo.fileId());
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		db_updateFile(q, file.get());
+
+		out->push_back(file);
+	}
+
+	return;
+}
+
 
 void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
 {
@@ -2660,7 +2805,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		nesting ++;
 
 		// request
-		// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
+		// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text, details text)
 		//
 		QByteArray data;
 		bool result = current->Save(data);
@@ -2675,11 +2820,12 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		QString strData;
 		DbFile::convertToDatabaseString(data, &strData);
 
-		QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
+		QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4', '%5');")
 				.arg(currentUser().userId())
 				.arg(strData)
 				.arg(parentId)
-				.arg(current->fileExtension());
+				.arg(current->fileExtension())
+				.arg(current->details());
 
 		strData.clear();
 

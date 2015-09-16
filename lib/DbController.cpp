@@ -39,6 +39,7 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_getLatestVersion, m_worker, &DbWorker::slot_getLatestVersion);
 	connect(this, &DbController::signal_getLatestTreeVersion, m_worker, &DbWorker::slot_getLatestTreeVersion);
+	connect(this, &DbController::signal_getCheckedOutFiles, m_worker, &DbWorker::slot_getCheckedOutFiles);
 
 	connect(this, &DbController::signal_getWorkcopy, m_worker, &DbWorker::slot_getWorkcopy);
 	connect(this, &DbController::signal_setWorkcopy, m_worker, &DbWorker::slot_setWorkcopy);
@@ -574,6 +575,33 @@ bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::list<std::s
 	emit signal_getLatestTreeVersion(file, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting files"));
+	return out;
+}
+
+bool DbController::getCheckedOutFiles(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr || file.fileId() == -1)
+	{
+		assert(out != nullptr);
+		assert(file.fileId() != -1);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getCheckedOutFiles(file, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting checked out files"));
 	return out;
 }
 

@@ -18,3 +18,6 @@ ALTER TABLE file
 ALTER TABLE fileinstance
 	ADD COLUMN action integer DEFAULT 1;
 
+ALTER TABLE fileinstance
+	ADD COLUMN details JSONB DEFAULT '{}';
+

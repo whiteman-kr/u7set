@@ -60,8 +60,8 @@ LANGUAGE plpgsql;
 
 DROP FUNCTION add_file(integer, text, integer, bytea);
 
-CREATE OR REPLACE FUNCTION add_file(user_id integer, file_name text, parent_id integer, file_data bytea)
-RETURNS ObjectState AS
+CREATE OR REPLACE FUNCTION add_file(user_id INTEGER, file_name TEXT, parent_id INTEGER, file_data bytea, details TEXT)
+RETURNS objectstate AS
 $BODY$
 DECLARE
 	exists int;
@@ -80,8 +80,8 @@ BEGIN
 	INSERT INTO CheckOut (UserID, FileID)
 		VALUES (user_id, newfileid);
 
-	INSERT INTO FileInstance (FileID, Size, Data, Action)
-		VALUES (newfileid, length(file_data), file_data, 1) RETURNING FileInstanceID INTO newfileinstanceid;
+	INSERT INTO FileInstance (FileID, Size, Data, Action, Details)
+		VALUES (newfileid, length(file_data), file_data, 1, details::jsonb) RETURNING FileInstanceID INTO newfileinstanceid;
 
 	UPDATE File SET CheckedOutInstanceID = newfileinstanceid WHERE FileID = newfileid;
 
@@ -99,7 +99,7 @@ LANGUAGE plpgsql;
 -------------------------------------------------------------------------------
 DROP FUNCTION add_device(integer, bytea, integer, text);
 
-CREATE OR REPLACE FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
+CREATE OR REPLACE FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text, details TEXT)
 RETURNS ObjectState AS
 $BODY$
 DECLARE
@@ -116,7 +116,7 @@ BEGIN
 	new_filename := 'device-' || new_filename || file_extension;	-- smthng like: device-5be363ac-3c02-11e4-9de8-3f84f459cb27.hsystem
 
 	-- add new file
-	SELECT * INTO add_result FROM add_file(user_id, new_filename, parent_id, file_data);
+	SELECT * INTO add_result FROM add_file(user_id, new_filename, parent_id, file_data, details);
 	RETURN add_result;
 END
 $BODY$
@@ -504,3 +504,17 @@ END
 $BODY$
 LANGUAGE plpgsql;
 
+-------------------------------------------------------------------------------
+--
+--							get_checked_out_files
+--
+-------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_checked_out_files(user_id integer, parent_file_id integer)
+RETURNS SETOF dbfile AS
+$BODY$
+DECLARE
+BEGIN
+	RETURN QUERY (SELECT * FROM get_latest_file_tree_version(user_id, parent_file_id) WHERE CheckedOut = TRUE);
+END;
+$BODY$
+LANGUAGE plpgsql;

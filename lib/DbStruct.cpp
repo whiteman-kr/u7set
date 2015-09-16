@@ -300,7 +300,8 @@ void DbUser::setDisabled(bool value)
 //
 DbFileInfo::DbFileInfo() :
 	m_state(VcsState::CheckedIn),
-	m_action(VcsItemAction::Added)
+	m_action(VcsItemAction::Added),
+	m_details("{}")
 {
 }
 
@@ -446,6 +447,16 @@ int DbFileInfo::userId() const
 void DbFileInfo::setUserId(int value)
 {
 	m_userId = value;
+}
+
+QString DbFileInfo::details() const
+{
+	return m_details;
+}
+
+void DbFileInfo::setDetails(QString value)
+{
+	m_details = value;
 }
 
 //

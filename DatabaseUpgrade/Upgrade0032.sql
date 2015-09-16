@@ -8,7 +8,7 @@
 -- MC		Module Configuration
 
 
-SELECT check_in(1, ARRAY(SELECT id FROM add_file(1, 'MC', 0, '')), 'Upgrade: MC system folder was added');
+SELECT check_in(1, ARRAY(SELECT id FROM add_file(1, 'MC', 0, '', '{}')), 'Upgrade: MC system folder was added');
 
 -- These files are not used anymore, but we will kepp them, just in case
 UPDATE File SET ParentID = (SELECT FileID FROM File WHERE Name = 'MC' AND ParentID = 0 AND Deleted = FALSE)

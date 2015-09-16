@@ -4,6 +4,7 @@
 #include "Settings.h"
 #include "CheckInDialog.h"
 #include "Subsystem.h"
+#include "EquipmentVcsDialog.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -144,6 +145,8 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 	Hardware::DeviceObject* device = static_cast<Hardware::DeviceObject*>(index.internalPointer());
 	assert(device != nullptr);
 
+	const DbFileInfo& devieFileInfo = device->fileInfo();
+
 	switch (role)
 	{
 	case Qt::DisplayRole:
@@ -173,18 +176,18 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 
 			case ObjectStateColumn:
 				{
-					if (device->fileInfo().state() == VcsState::CheckedOut)
+					if (devieFileInfo.state() == VcsState::CheckedOut)
 					{
-						QString state = device->fileInfo().action().text();
+						QString state = devieFileInfo.action().text();
 						v.setValue<QString>(state);
 					}
 				}
 				break;
 
 			case ObjectUserColumn:
-				if (device->fileInfo().state() == VcsState::CheckedOut)
+				if (devieFileInfo.state() == VcsState::CheckedOut)
 				{
-					v.setValue<qint32>(device->fileInfo().userId());
+					v.setValue<qint32>(devieFileInfo.userId());
 				}
 				break;
 
@@ -204,11 +207,11 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 
 	case Qt::BackgroundRole:
 		{
-			if (device->fileInfo().state() == VcsState::CheckedOut)
+			if (devieFileInfo.state() == VcsState::CheckedOut)
 			{
 				QBrush b(QColor(0xFF, 0xFF, 0xFF));
 
-				switch (static_cast<VcsItemAction::VcsItemActionType>(device->fileInfo().action().toInt()))
+				switch (static_cast<VcsItemAction::VcsItemActionType>(devieFileInfo.action().toInt()))
 				{
 				case VcsItemAction::Added:
 					b.setColor(QColor(0xF9, 0xFF, 0xF9));
@@ -936,6 +939,8 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 	m_dbController(dbcontroller)
 {
 	assert(m_dbController);
+
+	setUniformRowHeights(true);
 
 	setSortingEnabled(true);
 
@@ -2489,5 +2494,6 @@ void EquipmentTabPage::addPresetTriggered()
 
 void EquipmentTabPage::pendingChanges()
 {
-
+	EquipmentVcsDialog d(db(), this);
+	d.exec();
 }
