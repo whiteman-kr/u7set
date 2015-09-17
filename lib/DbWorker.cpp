@@ -2199,6 +2199,8 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 
 		file->setUserId(q.value("UserID").toInt());
 
+		file->setDetails(q.value("Details").toString());
+
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
 
@@ -2264,7 +2266,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 		request.append(data);
 		data.clear();
 
-		request += ");";
+		request += QString(", %1);").arg(file->details());
 
 		QSqlQuery q(db);
 

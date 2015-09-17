@@ -166,7 +166,7 @@ BEGIN
 		END IF;
 
 		-- set workcopy
-		PERFORM set_workcopy(user_id, file_id, file_data);
+		PERFORM set_workcopy(user_id, file_id, file_data, details);
     END IF;
 
     -- check in

@@ -147,7 +147,8 @@ RETURNS
 		size integer,
 		data bytea,
 		checkouttime timestamp with time zone,
-		userid integer)
+		userid integer,
+		details text)
 	 AS
 $BODY$
 	SELECT
@@ -158,7 +159,8 @@ $BODY$
 		length(FI.Data) AS Size,
 		FI.Data as Data,
 		CO.Time As ChechoutTime,
-		CO.UserID AS UserID
+		CO.UserID AS UserID,
+		FI.Details::text AS Details
 	FROM
 		File F, FileInstance FI, Checkout CO
 	WHERE
@@ -173,7 +175,7 @@ LANGUAGE sql;
 
 DROP FUNCTION setworkcopy(integer, bytea);
 
-CREATE OR REPLACE FUNCTION set_workcopy(user_id integer, file_id integer, file_data bytea)
+CREATE OR REPLACE FUNCTION set_workcopy(user_id integer, file_id integer, file_data bytea, in_details text)
 RETURNS INT AS
 $BODY$
 DECLARE
@@ -194,7 +196,7 @@ BEGIN
 		RAISE 'File % is not checked out', file_id;
 	END IF;
 
-	UPDATE FileInstance SET Size = length(file_data), Data = file_data
+	UPDATE FileInstance SET Size = length(file_data), Data = file_data, Details = in_details::JSONB
 		WHERE FileInstanceID = fileinstance_uuid
 		RETURNING FileID INTO inst_file_id;
 
