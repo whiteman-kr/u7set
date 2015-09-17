@@ -74,14 +74,14 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	if (m_type == SignalType::Analog)
 	{
-		m_dataFormat = DataFormat::SignedInt;
+		m_dataFormat = DataFormat::Float;
+		m_dataSize = 32;
 	}
 	else
 	{
 		m_dataFormat = DataFormat::UnsignedInt;
+		m_dataSize = deviceSignal.size();
 	}
-
-	m_dataSize = deviceSignal.size();
 }
 
 
