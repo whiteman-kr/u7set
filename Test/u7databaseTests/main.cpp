@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
 		if (ok == false)
 		{
 			qDebug() << "Cannot connect to database. Error: " << db.lastError();
+			db.close();
 			throw 1;
 		}
 
@@ -92,6 +93,7 @@ int main(int argc, char *argv[])
 		if (result == false)
 		{
 			qDebug() << "Error executting query";
+			db.close();
 			throw 1;
 		}
 
@@ -99,6 +101,7 @@ int main(int argc, char *argv[])
 		if (result == false)
 		{
 			qDebug() << "Cannot get first record";
+			db.close();
 			throw 1;
 		}
 
@@ -106,6 +109,7 @@ int main(int argc, char *argv[])
 		if (version != DatabaseProjectVersion)
 		{
 			qDebug() << "Invalid database version, " << DatabaseProjectVersion << " required, current: " << version;
+			db.close();
 			throw 1;
 		}
 
@@ -120,20 +124,7 @@ int main(int argc, char *argv[])
 		if (testResult != 0)
 		{
 			qDebug() << testResult << " user test(s) has been interrupted by error(s)";
-			throw testResult;
-		}
-
-		testResult = QTest::qExec(&otherTests, argc, argv);
-		if (testResult != 0)
-		{
-			qDebug() << testResult << " other test(s) has been interrupted by error(s)";
-			throw testResult;
-		}
-
-		testResult = QTest::qExec(&signalTests, argc, argv);
-		if (testResult != 0)
-		{
-			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
+			db.close();
 			throw testResult;
 		}
 
@@ -141,6 +132,23 @@ int main(int argc, char *argv[])
 		if (testResult != 0)
 		{
 			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
+			db.close();
+			throw testResult;
+		}
+
+		testResult = QTest::qExec(&signalTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " signal test(s) has been interrupted by error(s)";
+			db.close();
+			throw testResult;
+		}
+
+		testResult = QTest::qExec(&otherTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " other test(s) has been interrupted by error(s)";
+			db.close();
 			throw testResult;
 		}
 

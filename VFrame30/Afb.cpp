@@ -71,12 +71,8 @@ namespace Afb
 		{
 			case Type::UNKNOWN:
 				return "UNKNOWN";
-			case Type::AND:
-				return "AND";
-			case Type::OR:
-				return "OR";
-			case Type::XOR:
-				return "XOR";
+            case Type::LOGIC:
+                return "LOGIC";
 			case Type::NOT:
 				return "NOT";
 			case Type::TCT:
@@ -97,34 +93,20 @@ namespace Afb
 				return "BCOMP";
 			case Type::LAG:
 				return "LAG";
-			case Type::MID:
-				return "MID";
-			case Type::ADD:
-				return "ADD";
+            case Type::MID:
+                return "MID";
+            case Type::MATH:
+                return "MATH";
 			case Type::SCAL:
 				return "SCAL";
 			case Type::LINFUN:
 				return "LINFUN";
 			case Type::SQRT:
 				return "SQRT";
-			case Type::SIN:
-				return "SIN";
-			case Type::COS:
-				return "COS";
-			case Type::DIV:
-				return "DIV";
-			case Type::MULT:
-				return "MULT";
-			case Type::ABS:
-				return "ABS";
-			case Type::LN:
-				return "LN";
-			case Type::LIM:
-				return "LIM";
-			case Type::MIN_MAX:
-				return "MIN_MAX";
-			case Type::PID:
-				return "PID";
+            case Type::LIM:
+                return "LIM";
+            case Type::PID:
+                return "PID";
 			default:
 				assert(false);
 				return "UNKNOWN";
@@ -753,7 +735,8 @@ namespace Afb
 
 	AfbElement::AfbElement(void) :
 		m_hasRam(false),
-		m_requiredStart(true)
+        m_requiredStart(true),
+        m_version("0.0")
 	{
 	}
 
@@ -778,6 +761,8 @@ namespace Afb
 		m_strID = that.m_strID;
 		m_caption = that.m_caption;
 		m_description = that.m_description;
+        m_version = that.m_version;
+        m_category = that.m_category;
 		m_type = that.m_type;
 		m_hasRam = that.m_hasRam;
 		m_requiredStart = that.m_requiredStart;
@@ -862,7 +847,17 @@ namespace Afb
 						setDescription(xmlReader->readElementText());
 					}
 
-					if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
+                    if (QString::compare(xmlReader->name().toString(), "Version", Qt::CaseInsensitive) == 0)
+                    {
+                        setVersion(xmlReader->readElementText());
+                    }
+
+                    if (QString::compare(xmlReader->name().toString(), "Category", Qt::CaseInsensitive) == 0)
+                    {
+                        setCategory(xmlReader->readElementText());
+                    }
+
+                    if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
 					{
 						int opCode = xmlReader->readElementText().toInt();
 
@@ -1028,7 +1023,9 @@ namespace Afb
 		xmlWriter->writeStartElement("Properties");
 		xmlWriter->writeTextElement("Caption", caption());
 		xmlWriter->writeTextElement("Description", description());
-		xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
+        xmlWriter->writeTextElement("Version", version());
+        xmlWriter->writeTextElement("Category", category());
+        xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
 		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
 		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
 		xmlWriter->writeEndElement();
@@ -1261,6 +1258,27 @@ namespace Afb
 	{
 		m_description = value;
 	}
+
+    QString AfbElement::version() const
+    {
+        return m_version;
+    }
+
+    void AfbElement::setVersion(const QString& value)
+    {
+        m_version = value;
+    }
+
+    QString AfbElement::category() const
+    {
+        return m_category;
+    }
+
+    void AfbElement::setCategory(const QString& value)
+    {
+        m_category = value;
+    }
+
 
 	// Type - Opcode
 	//

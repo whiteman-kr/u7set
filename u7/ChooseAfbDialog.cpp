@@ -3,6 +3,8 @@
 #include "ui_ChooseAfbDialog.h"
 
 int ChooseAfbDialog::m_lastSelectedIndex = -1;
+QString ChooseAfbDialog::AllCategoryName = "All";
+QString ChooseAfbDialog::m_lastSelectedCategory = AllCategoryName;
 Qt::SortOrder ChooseAfbDialog::m_lastSortOrder = Qt::SortOrder::AscendingOrder;
 
 ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements, QWidget* parent) :
@@ -22,38 +24,92 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbEleme
 
 	ui->m_afbTree->setColumnWidth(0, 150);
 
-	// add items
-	//
-	int index = 0;
+    fillTree();
+}
 
-	for (std::shared_ptr<Afb::AfbElement> e : m_elements)
-	{
-		QTreeWidgetItem* item = new QTreeWidgetItem();
-		item->setText(0, e->caption());
+void ChooseAfbDialog::fillTree()
+{
+    ui->m_afbTree->clear();
 
-		item->setData(0, Qt::UserRole, index);
-		index++;
+    QString mask = ui->editQuickSearch->text();
 
-		ui->m_afbTree->addTopLevelItem(item);
-	}
+    // create categories list
+    //
+    QStringList categories;
+    categories.append(AllCategoryName);
 
-	// select the last item
-	//
-	if (m_lastSelectedIndex != -1 && m_lastSelectedIndex < ui->m_afbTree->topLevelItemCount())
-	{
-		ui->m_afbTree->setCurrentItem(ui->m_afbTree->topLevelItem(m_lastSelectedIndex));
-	}
-	else
-	{
-		if (ui->m_afbTree->topLevelItemCount() > 0)
-		{
-			ui->m_afbTree->setCurrentItem(ui->m_afbTree->topLevelItem(0));
-			m_lastSelectedIndex = 0;
-		}
-	}
+    for (std::shared_ptr<Afb::AfbElement> e : m_elements)
+    {
+        if (e->category().isEmpty())
+        {
+            continue;
+        }
 
-	ui->m_afbTree->sortItems(0, m_lastSortOrder);
-	ui->m_afbTree->setSortingEnabled(true);
+        if (categories.contains(e->category()) == false)
+        {
+            categories.append(e->category());
+        }
+    }
+
+    if (mask.isEmpty() == true)
+    {
+        // add categories
+        //
+        for (QString cat : categories)
+        {
+            QTreeWidgetItem* catItem = new QTreeWidgetItem();
+            catItem->setText(0, cat);
+            catItem->setData(0, Qt::UserRole, -1);
+            ui->m_afbTree->addTopLevelItem(catItem);
+
+            int index = 0;
+
+            for (std::shared_ptr<Afb::AfbElement> e : m_elements)
+            {
+                if (e->category() == cat || cat == AllCategoryName)
+                {
+                    QTreeWidgetItem* item = new QTreeWidgetItem(catItem);
+                    item->setText(0, e->caption());
+                    item->setData(0, Qt::UserRole, index);
+
+                    if (m_lastSelectedCategory == cat && index == m_lastSelectedIndex)
+                    {
+                        ui->m_afbTree->setCurrentItem(item);
+                    }
+                }
+
+                index++;
+            }
+
+            if (m_lastSelectedCategory == cat)
+            {
+                ui->m_afbTree->expandItem(catItem);
+            }
+        }
+    }
+    else
+    {
+        // mask is entered, create a simple list
+        //
+        int index = 0;
+
+        for (std::shared_ptr<Afb::AfbElement> e : m_elements)
+        {
+            if (e->caption().contains(mask, Qt::CaseInsensitive))
+            {
+                QTreeWidgetItem* item = new QTreeWidgetItem();
+                item->setText(0, e->caption());
+                item->setData(0, Qt::UserRole, index);
+                ui->m_afbTree->addTopLevelItem(item);
+            }
+
+            index++;
+        }
+    }
+
+
+    ui->m_afbTree->sortItems(0, m_lastSortOrder);
+    ui->m_afbTree->setSortingEnabled(true);
 
 	return;
 }
@@ -74,11 +130,45 @@ int ChooseAfbDialog::getSelectedIndex()
 	if (selectedItems.size() == 0 || selectedItems.size() > 1)
 	{
 		return -1;
-	}
+    }
 
-	int result = selectedItems[0]->data(0, Qt::UserRole).toInt();
-	return result;
+    int result = selectedItems[0]->data(0, Qt::UserRole).toInt();
+    return result;
 
+}
+
+QString ChooseAfbDialog::getSelectedCategory()
+{
+    QList<QTreeWidgetItem*> selectedItems = ui->m_afbTree->selectedItems();
+    if (selectedItems.size() == 0 || selectedItems.size() > 1)
+    {
+		return "";
+    }
+
+    QTreeWidgetItem* item = selectedItems[0];
+
+    QString result;
+
+    int index = item->data(0, Qt::UserRole).toInt();
+    if (index != -1)
+    {
+        // this is afb item, get parent
+        //
+        item = item->parent();
+    }
+
+    if (item == nullptr)
+    {
+        //root, the item is an AFB item with entered mask
+        //
+        result = AllCategoryName;
+    }
+    else
+    {
+        result = item->text(0);
+    }
+
+    return result;
 }
 
 void ChooseAfbDialog::on_btnOk_clicked()
@@ -86,6 +176,7 @@ void ChooseAfbDialog::on_btnOk_clicked()
 	m_lastSortOrder = ui->m_afbTree->header()->sortIndicatorOrder();
 
 	m_lastSelectedIndex = getSelectedIndex();
+    m_lastSelectedCategory = getSelectedCategory();
 
 	if (m_lastSelectedIndex == -1)
 	{
@@ -148,7 +239,7 @@ void ChooseAfbDialog::on_m_afbTree_itemSelectionChanged()
 
 		std::shared_ptr<Afb::AfbElement> e = m_elements[selectedIndex];
 
-		ui->labelCaption->setText(e->caption());
+        ui->labelCaption->setText(e->caption() + tr(", version ") + e->version());
 		ui->labelDescription->setPlainText(e->description());
 		ui->labelInputCount->setText(QString::number(e->inputSignals().size()));
 		ui->labelOutputCount->setText(QString::number(e->outputSignals().size()));
@@ -163,4 +254,11 @@ void ChooseAfbDialog::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem* item, int 
 	Q_UNUSED(column);
 
 	on_btnOk_clicked();
+}
+
+void ChooseAfbDialog::on_editQuickSearch_textEdited(const QString &arg1)
+{
+    Q_UNUSED(arg1);
+
+    fillTree();
 }

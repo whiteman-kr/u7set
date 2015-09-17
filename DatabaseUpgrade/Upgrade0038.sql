@@ -4,6 +4,11 @@ $BODY$
 DECLARE
 	userIsAdmin boolean;
 BEGIN
+	IF (SELECT COUNT(*) FROM users WHERE userid = user_id) = 0
+	THEN
+		RETURN;
+	END IF;
+
 	SELECT is_admin(user_id) INTO userIsAdmin;
 
 	RETURN QUERY SELECT
@@ -55,6 +60,7 @@ BEGIN
 	FROM Signal AS S, SignalInstance AS SI
 	WHERE
 		SI.SignalID = S.SignalID AND
+		S.Deleted != TRUE AND
 		SI.SignalInstanceID IN (
 
 			SELECT
@@ -93,6 +99,11 @@ $BODY$
 DECLARE
 	userIsAdmin boolean;
 BEGIN
+	IF (SELECT COUNT(*) FROM users WHERE userid = user_id) = 0
+	THEN
+		RETURN;
+	END IF;
+
 	SELECT is_admin(user_id) INTO userIsAdmin;
 
 	RETURN QUERY SELECT
@@ -169,7 +180,8 @@ BEGIN
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE
-  COST 100;
+  COST 100
+  ROWS 1000;
 
 
 

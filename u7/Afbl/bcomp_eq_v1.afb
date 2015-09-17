@@ -2,20 +2,22 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#bcomp_eq_v1">
         <Properties>
-            <Caption>bcomp_eq_v1</Caption>
+            <Caption>bcomp_eq</Caption>
+            <Version>1.0</Version>
             <Description>Binary Comparator Block, Equal comparison</Description>
-            <OpCode>12</OpCode>
+            <Category>Compare</Category>
+            <OpCode>10</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" OpIndex = "4" Size = "16"/>
+            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" OpIndex = "6" Size = "32"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "6" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "9" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_sp" Caption = "setting" Visible="true" OpIndex="1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_sp" Caption = "setting" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="AnalogIntegral">
                 <Value>50</Value>
                 <Default>50</Default>
                 <LowLimit>0</LowLimit>
@@ -24,7 +26,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_hys" Caption = "hysteresis" Visible="true" OpIndex="2" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_hys" Caption = "hysteresis" Visible="true" OpIndex="3" Size="32" Instantiator="false" User="true" Type="AnalogIntegral">
                 <Value>50</Value>
                 <Default>50</Default>
                 <LowLimit>0</LowLimit>

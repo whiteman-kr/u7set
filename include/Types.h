@@ -13,6 +13,7 @@ enum class DataFormat
 {
 	UnsignedInt,
 	SignedInt,
+	Float,
 
 	Count
 };
@@ -22,6 +23,7 @@ const char* const DataFormatStr[] =
 {
 	"Unsigned Int",
 	"Signed Int",
+	"Float",
 };
 
 

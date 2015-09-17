@@ -14,6 +14,18 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 DEFINES += Q_CONSOLE_APP
+DEFINES += SRCDIR=\\\"$$PWD/\\\"
+
+# DESTDIR
+#
+win32 {
+        CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
+        CONFIG(release, debug|release): DESTDIR = ../../bin/release
+}
+unix {
+        CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
+        CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
+}
 
 
 SOURCES += main.cpp \
@@ -29,7 +41,6 @@ SOURCES += main.cpp \
     ../../lib/Signal.cpp \
     ../../lib/ProtoSerialization.cpp \
     ../../lib/DbProgressDialog.cpp
-DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     UserTests.h \
@@ -59,9 +70,8 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 #protobuf
 #
 win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
-
-	INCLUDEPATH += ./../../Protobuf
+        LIBS += -L$$DESTDIR -lprotobuf
+        INCLUDEPATH += ./../../Protobuf
 }
 unix {
 	LIBS += -lprotobuf

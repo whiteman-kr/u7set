@@ -27,33 +27,24 @@ namespace Afb
 		enum Type
 		{
 			UNKNOWN = 0,
-			AND = 1,
-			OR = 2,
-			XOR = 3,
-			NOT = 4,
-			TCT = 5,
-			SR_RS = 6,
-			CTUD = 7,
-			MAJ = 8,
-			SRSST = 9,
-			BCOD = 10,
-			BDEC = 11,
-			BCOMP = 12,
-			LAG = 13,
-			MID = 14,
-			ADD = 15,
-			SCAL = 16,
-			LINFUN = 17,
-			SQRT = 18,
-			SIN = 19,
-			COS = 20,
-			DIV = 21,
-			MULT = 22,
-			ABS = 23,
-			LN = 24,
-			LIM = 25,
-			MIN_MAX = 26,
-			PID = 27,
+            LOGIC = 1,
+            NOT = 2,
+            TCT = 3,
+            SR_RS = 4,
+            CTUD = 5,
+            MAJ = 6,
+            SRSST = 7,
+            BCOD = 8,
+            BDEC = 9,
+            BCOMP = 10,
+            LAG = 11,
+            MID = 12,
+            MATH = 13,
+            SCAL = 14,
+            LINFUN = 15,
+            SQRT = 16,
+            LIM = 17,
+            PID = 18,
 		};
 
 		AfbType();
@@ -297,6 +288,12 @@ private:
 		QString description() const;
 		void setDescription(const QString& value);
 
+        QString version() const;
+        void setVersion(const QString& value);
+
+        QString category() const;
+        void setCategory(const QString& value);
+
 		const Afb::AfbType& type() const;
 		Afb::AfbType& type();
 		void setType(const AfbType& value);
@@ -331,6 +328,8 @@ private:
 		QString m_strID;
 		QString m_caption;
 		QString m_description;
+        QString m_version;
+        QString m_category;
 		Afb::AfbType m_type;
 		bool m_hasRam;
 		bool m_requiredStart;

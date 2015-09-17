@@ -1595,9 +1595,10 @@ void SignalsTabPage::showError(QString message)
 }
 
 
-CheckedoutSignalsModel::CheckedoutSignalsModel(SignalsModel* sourceModel, QObject* parent) :
+CheckedoutSignalsModel::CheckedoutSignalsModel(SignalsModel* sourceModel, QTableView* view, QObject* parent) :
 	QSortFilterProxyModel(parent),
-	m_sourceModel(sourceModel)
+	m_sourceModel(sourceModel),
+	m_view(view)
 {
 	setSourceModel(sourceModel);
 	states.resize(rowCount());
@@ -1616,7 +1617,11 @@ bool CheckedoutSignalsModel::setData(const QModelIndex& index, const QVariant& v
 {
 	if (index.column() == SC_STR_ID && role == Qt::CheckStateRole)
 	{
-		setCheckState(index.row(), Qt::CheckState(value.toInt()));
+		QModelIndexList list = m_view->selectionModel()->selectedRows(0);
+		for (int i = 0; i < list.count(); i++)
+		{
+			setCheckState(list[i].row(), Qt::CheckState(value.toInt()));
+		}
 		return true;
 	}
 	return QSortFilterProxyModel::setData(index, value, role);
@@ -1688,7 +1693,8 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelInde
 	QVBoxLayout* vl2 = new QVBoxLayout;
 	vl2->setMargin(0);
 
-	m_proxyModel = new CheckedoutSignalsModel(sourceModel, this);
+	m_signalsView = new QTableView(this);
+	m_proxyModel = new CheckedoutSignalsModel(sourceModel, m_signalsView, this);
 
 	if (selection.count() != 0)
 	{
@@ -1701,7 +1707,6 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelInde
 	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
 	vl2->addWidget(selectAll);
 
-	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_proxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
 	m_signalsView->resizeColumnsToContents();
@@ -1872,13 +1877,13 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
-	m_proxyModel = new CheckedoutSignalsModel(sourceModel, this);
+	QTableView* signalsView = new QTableView(this);
+	m_proxyModel = new CheckedoutSignalsModel(sourceModel, signalsView, this);
 
 	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
 	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
 	vl->addWidget(selectAll);
 
-	QTableView* signalsView = new QTableView(this);
 	signalsView->setModel(m_proxyModel);
 	signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
 	signalsView->resizeColumnsToContents();

@@ -14,7 +14,6 @@ ALTER TABLE signalinstance ADD COLUMN maxdifference double precision NOT NULL DE
 ALTER TABLE signalinstance ADD COLUMN byteorder integer NOT NULL DEFAULT 1;
 
 
-DROP FUNCTION get_latest_signal(integer, integer);
 DROP FUNCTION set_signal_workcopy(integer, signaldata);
 DROP FUNCTION checkout_signals(user_id integer, signal_ids integer[]);
 
@@ -70,7 +69,7 @@ CREATE TYPE signaldata AS
 
 
 CREATE OR REPLACE FUNCTION get_latest_signal(user_id integer, signal_id integer)
-  RETURNS signaldata AS
+  RETURNS SETOF signaldata AS
 $BODY$
 DECLARE
 	signal_data signaldata;
@@ -80,6 +79,11 @@ DECLARE
 	userIsAdmin boolean;
 	checkOutUserID integer;
 BEGIN
+	IF (SELECT COUNT(*) FROM users WHERE userid = user_id) = 0
+	THEN
+		RETURN;
+	END IF;
+
 	SELECT is_admin(user_id) INTO userIsAdmin;
 
 	SELECT S.CheckedInInstanceID, S.CheckedOutInstanceID, S.UserID INTO chInInstanceID, chOutInstanceID, checkOutUserID
@@ -98,7 +102,7 @@ BEGIN
 		END IF;
 	END IF;
 
-	SELECT
+	RETURN QUERY SELECT
 		S.SignalID,
 		S.SignalGroupID,
 		SI.SignalInstanceID,
@@ -144,15 +148,12 @@ BEGIN
 		SI.FilteringTime,
 		SI.MaxDifference,
 		SI.ByteOrder
-	INTO
-		signal_data
 	FROM Signal AS S, SignalInstance AS SI
 	WHERE
 		SI.SignalID = signal_id AND
 		SI.SignalID = S.SignalID AND
+		S.Deleted != TRUE AND
 		SI.SignalInstanceID = instanceID;
-
-	RETURN signal_data;
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE

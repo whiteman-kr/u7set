@@ -2,32 +2,34 @@
 <ApplicationFunctionalBlocks>
     <AfbElement StrId="#and_v1">
         <Properties>
-            <Caption>and_v1</Caption>
+            <Caption>and</Caption>
+            <Version>1.0</Version>
             <Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
+            <Category>Logic</Category>
             <OpCode>1</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_1_oprd" Caption="in 1" Type="Discrete" OpIndex = "2" Size = "1"/>
-            <AfbElementSignal OpName="i_2_oprd" Caption="in 2" Type="Discrete" OpIndex = "3" Size = "1"/>
-            <AfbElementSignal OpName="i_3_oprd" Caption="in 3" Type="Discrete" OpIndex = "4" Size = "1"/>
-            <AfbElementSignal OpName="i_4_oprd" Caption="in 4" Type="Discrete" OpIndex = "5" Size = "1"/>
-            <AfbElementSignal OpName="i_5_oprd" Caption="in 5" Type="Discrete" OpIndex = "6" Size = "1"/>
-            <AfbElementSignal OpName="i_6_oprd" Caption="in 6" Type="Discrete" OpIndex = "7" Size = "1"/>
-            <AfbElementSignal OpName="i_7_oprd" Caption="in 7" Type="Discrete" OpIndex = "8" Size = "1"/>
-            <AfbElementSignal OpName="i_8_oprd" Caption="in 8" Type="Discrete" OpIndex = "9" Size = "1"/>
-            <AfbElementSignal OpName="i_9_oprd" Caption="in 9" Type="Discrete" OpIndex = "10" Size = "1"/>
-            <AfbElementSignal OpName="i_10_oprd" Caption="in 10" Type="Discrete" OpIndex = "11" Size = "1"/>
-            <AfbElementSignal OpName="i_11_oprd" Caption="in 11" Type="Discrete" OpIndex = "12" Size = "1"/>
-            <AfbElementSignal OpName="i_12_oprd" Caption="in 12" Type="Discrete" OpIndex = "13" Size = "1"/>
-            <AfbElementSignal OpName="i_13_oprd" Caption="in 13" Type="Discrete" OpIndex = "14" Size = "1"/>
-            <AfbElementSignal OpName="i_14_oprd" Caption="in 14" Type="Discrete" OpIndex = "15" Size = "1"/>
-            <AfbElementSignal OpName="i_15_oprd" Caption="in 15" Type="Discrete" OpIndex = "16" Size = "1"/>
-            <AfbElementSignal OpName="i_16_oprd" Caption="in 16" Type="Discrete" OpIndex = "17" Size = "1"/>
+            <AfbElementSignal OpName="i_1_oprd" Caption="in 1" Type="Discrete" OpIndex = "3" Size = "1"/>
+            <AfbElementSignal OpName="i_2_oprd" Caption="in 2" Type="Discrete" OpIndex = "4" Size = "1"/>
+            <AfbElementSignal OpName="i_3_oprd" Caption="in 3" Type="Discrete" OpIndex = "5" Size = "1"/>
+            <AfbElementSignal OpName="i_4_oprd" Caption="in 4" Type="Discrete" OpIndex = "6" Size = "1"/>
+            <AfbElementSignal OpName="i_5_oprd" Caption="in 5" Type="Discrete" OpIndex = "7" Size = "1"/>
+            <AfbElementSignal OpName="i_6_oprd" Caption="in 6" Type="Discrete" OpIndex = "8" Size = "1"/>
+            <AfbElementSignal OpName="i_7_oprd" Caption="in 7" Type="Discrete" OpIndex = "9" Size = "1"/>
+            <AfbElementSignal OpName="i_8_oprd" Caption="in 8" Type="Discrete" OpIndex = "10" Size = "1"/>
+            <AfbElementSignal OpName="i_9_oprd" Caption="in 9" Type="Discrete" OpIndex = "11" Size = "1"/>
+            <AfbElementSignal OpName="i_10_oprd" Caption="in 10" Type="Discrete" OpIndex = "12" Size = "1"/>
+            <AfbElementSignal OpName="i_11_oprd" Caption="in 11" Type="Discrete" OpIndex = "13" Size = "1"/>
+            <AfbElementSignal OpName="i_12_oprd" Caption="in 12" Type="Discrete" OpIndex = "14" Size = "1"/>
+            <AfbElementSignal OpName="i_13_oprd" Caption="in 13" Type="Discrete" OpIndex = "15" Size = "1"/>
+            <AfbElementSignal OpName="i_14_oprd" Caption="in 14" Type="Discrete" OpIndex = "16" Size = "1"/>
+            <AfbElementSignal OpName="i_15_oprd" Caption="in 15" Type="Discrete" OpIndex = "17" Size = "1"/>
+            <AfbElementSignal OpName="i_16_oprd" Caption="in 16" Type="Discrete" OpIndex = "18" Size = "1"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex = "19" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex = "20" Size = "1"/>
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_oprd_quant" Caption = "oprd quant" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="AnalogIntegral">
@@ -45,6 +47,12 @@ function(videoItemFblElement, afbElement)
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="i_bus_width" Caption = "bus width" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
+                <Value>1</Value>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
                 <Value>1</Value>
                 <Script>
                     <Changed></Changed>
@@ -81,7 +89,7 @@ function createInputSignals(videoItemFblElement, afbElement)
 		count = 16;
 	}
 
-	var opIndex = 2;
+	var opIndex = 3;
 	for (var i = 0; i &lt; count; i++)
 	{
 		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);

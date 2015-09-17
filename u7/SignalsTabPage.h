@@ -154,7 +154,7 @@ class CheckedoutSignalsModel : public QSortFilterProxyModel
 {
 	Q_OBJECT
 public:
-	CheckedoutSignalsModel(SignalsModel* sourceModel, QObject* parent = 0);
+	CheckedoutSignalsModel(SignalsModel* sourceModel, QTableView* view, QObject* parent = 0);
 
 	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
@@ -168,6 +168,7 @@ public:
 
 private:
 	SignalsModel* m_sourceModel;
+	QTableView* m_view;
 	QVector<Qt::CheckState> states;
 };
 

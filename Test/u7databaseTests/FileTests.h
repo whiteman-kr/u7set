@@ -3,7 +3,7 @@
 #include <QTest>
 #include <QtSql>
 
-class ObjectState;
+struct ObjectState;
 
 class FileTests : public QObject
 {

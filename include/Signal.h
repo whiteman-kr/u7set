@@ -185,8 +185,8 @@ private:
 	QString m_strID;
 	QString m_extStrID;
 	QString m_name;
-	DataFormat m_dataFormat = DataFormat::SignedInt;
-	int m_dataSize = 16;
+	DataFormat m_dataFormat = DataFormat::Float;
+	int m_dataSize = 32;
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
 	double m_lowLimit = 0;
