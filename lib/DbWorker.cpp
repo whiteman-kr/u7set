@@ -1332,11 +1332,6 @@ WHERE
 					}
 				}
 			}
-
-
-//			---- result = true | false
-//			---emitError(tr("Database %1 is newer than the software version.").arg(databaseName));
-//			----return;
 		}
 	}
 
@@ -1770,6 +1765,7 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
 		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
 		fileInfo.setUserId(q.value("UserID").toInt());
+		fileInfo.setDetails(q.value("Details").toString());
 
 		if (deleted == false)
 		{
@@ -2382,6 +2378,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
 		file->setUserId(q.value("UserID").toInt());
+		file->setDetails(q.value("Details").toString());
 
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
@@ -4062,6 +4059,8 @@ bool DbWorker::db_updateFile(const QSqlQuery& q, DbFile* file) const
 	file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
 	file->setUserId(q.value("UserID").toInt());
+
+	file->setDetails(q.value("Details").toString());
 
 	QByteArray data = q.value("Data").toByteArray();
 	file->swapData(data);

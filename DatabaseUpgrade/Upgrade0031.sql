@@ -4,7 +4,11 @@
 --
 -------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION get_file_info(IN user_id integer, file_ids integer[])
-  RETURNS TABLE(fileid integer, deleted boolean, name text, parentid integer, created timestamp with time zone, fileinstanceid uuid, changesetid integer, size integer, instancecreated timestamp with time zone, changesettime timestamp with time zone, userid integer, checkedout boolean, action integer) AS
+  RETURNS
+	TABLE(
+		fileid integer, deleted boolean, name text, parentid integer, created timestamp with time zone,
+		fileinstanceid uuid, changesetid integer, size integer, instancecreated timestamp with time zone,
+		changesettime timestamp with time zone, userid integer, checkedout boolean, action integer, details text) AS
 $BODY$
 
 (SELECT
@@ -20,7 +24,8 @@ $BODY$
 	Changeset.time AS ChangesetTime,
 	Changeset.UserID AS UserID,
 	F.ChangesetID IS NULL AS CheckedOut,
-	F.Action AS Action
+	F.Action AS Action,
+	F.Details AS Details
 FROM
 	-- All checked in now
 	(SELECT
@@ -33,7 +38,8 @@ FROM
 		FI.ChangesetID AS ChangesetID,
 		length(FI.data) AS Size,
 		FI.Created AS InstanceCreated,
-		FI.Action AS Action
+		FI.Action AS Action,
+		FI.Details::text AS Details
 	FROM
 		File F,
 		FileInstance FI
@@ -59,7 +65,8 @@ UNION
 	CheckOut.time AS ChangesetTime,
 	CheckOut.UserID AS UserID,
 	F.ChangesetID IS NULL AS CheckedOut,
-	F.Action AS Action
+	F.Action AS Action,
+	F.Details AS Details
 FROM
 	-- All CheckedOut by any user if user_id is administrator
 	(SELECT
@@ -72,7 +79,8 @@ FROM
 		FI.ChangesetID AS ChangesetID,
 		length(FI.data) AS Size,
 		FI.Created AS InstanceCreated,
-		FI.Action AS Action
+		FI.Action AS Action,
+		FI.Details::text AS Details
 	FROM
 		File F,
 		FileInstance FI,
@@ -128,7 +136,10 @@ LANGUAGE plpgsql;
 -------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION get_specific_copy(IN user_id integer, IN file_id integer, IN changeset_id integer)
 RETURNS
-TABLE(fileid integer, name text, parentid integer, created timestamp with time zone, size integer, data bytea, checkintime timestamp with time zone, userid integer, action integer) AS
+	TABLE(
+		fileid integer, name text, parentid integer, created timestamp with time zone,
+		size integer, data bytea, checkintime timestamp with time zone, userid integer,
+		action integer, details text) AS
 $BODY$
 	SELECT
 		F.FileID AS FileID,
@@ -139,7 +150,8 @@ $BODY$
 		FI.Data as Data,
 		CS.Time As ChechInTime,
 		CS.UserID AS UserID,
-		FI.Action AS Action
+		FI.Action AS Action,
+		FI.Details::text AS Details
 	FROM
 		File F, FileInstance FI, Changeset CS
 	WHERE
@@ -149,4 +161,3 @@ $BODY$
 		CS.ChangesetID = changeset_id;
 $BODY$
 LANGUAGE sql;
-

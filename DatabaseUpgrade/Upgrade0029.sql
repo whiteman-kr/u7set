@@ -392,7 +392,8 @@ CREATE TYPE dbfile AS (
 	checkedout boolean,
 	checkouttime timestamp with time zone,
 	userid integer,
-	action integer
+	action integer,
+	details text
 );
 
 
@@ -425,7 +426,8 @@ BEGIN
 				TRUE,	-- Checked_out
 				CO.Time As ChechOutOrInTime,	-- CheckOutTime
 				CO.UserID AS UserID,
-				FI.Action AS Action
+				FI.Action AS Action,
+				FI.Details::text AS Details
 			FROM
 				File F, FileInstance FI, Checkout CO
 			WHERE
@@ -447,7 +449,8 @@ BEGIN
 				FALSE,	-- Checked_in
 				CS.Time As ChechOutOrInTime,	-- CheckIn time
 				CS.UserID AS UserID,
-				FI.Action AS Action
+				FI.Action AS Action,
+				FI.Details::text AS Details
 			FROM
 				File F, FileInstance FI, Changeset CS
 			WHERE
