@@ -347,9 +347,9 @@ BEGIN
 
 		-- Make new work copy in FileInstance
 		INSERT INTO
-			FileInstance (Data, Size, FileID, ChangesetID, Action)
+			FileInstance (Data, Size, FileID, ChangesetID, Action, Details)
 			SELECT
-				Data, length(Data) AS Size, FileId, NULL, 2
+				Data, length(Data) AS Size, FileId, NULL, 2, Details
 			FROM
 				FileInstance
 			WHERE
