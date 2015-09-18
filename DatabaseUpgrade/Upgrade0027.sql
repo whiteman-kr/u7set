@@ -22,7 +22,8 @@ RETURNS
 		changesettime timestamp with time zone,
 		userid integer,
 		checkedout boolean,
-		action integer
+		action integer,
+		details text
 	) AS
 $BODY$
 
@@ -39,7 +40,8 @@ $BODY$
 	Changeset.time AS ChangesetTime,
 	Changeset.UserID AS UserID,
 	F.ChangesetID IS NULL AS CheckedOut,
-	F.Action AS Action
+	F.Action AS Action,
+	F.Details AS Details
 FROM
 	-- All checked in now
 	(SELECT
@@ -52,7 +54,8 @@ FROM
 		FI.ChangesetID AS ChangesetID,
 		length(FI.data) AS Size,
 		FI.Created AS InstanceCreated,
-		FI.Action AS Action
+		FI.Action AS Action,
+		FI.Details::text AS Details
 	FROM
 		File F,
 		FileInstance FI
@@ -79,7 +82,8 @@ UNION
 	CheckOut.time AS ChangesetTime,
 	CheckOut.UserID AS UserID,
 	F.ChangesetID IS NULL AS CheckedOut,
-	F.Action AS Action
+	F.Action AS Action,
+	F.Details AS Details
 FROM
 	-- All CheckedOut by any user if user_id is administrator
 	(SELECT
@@ -92,7 +96,8 @@ FROM
 		FI.ChangesetID AS ChangesetID,
 		length(FI.data) AS Size,
 		FI.Created AS InstanceCreated,
-		FI.Action AS Action
+		FI.Action AS Action,
+		FI.Details::text AS Details
 	FROM
 		File F,
 		FileInstance FI,
