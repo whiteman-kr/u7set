@@ -1682,6 +1682,7 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
 		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
 		fileInfo.setUserId(q.value("UserID").toInt());
+		fileInfo.setDetails(q.value("Details").toString());
 
 		if (deleted == false)
 		{
