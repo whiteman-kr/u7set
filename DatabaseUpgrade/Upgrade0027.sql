@@ -187,7 +187,11 @@ LANGUAGE plpgsql;
 DROP FUNCTION get_workcopy(integer, integer);
 
 CREATE OR REPLACE FUNCTION get_workcopy(IN user_id integer, IN file_id integer)
-  RETURNS TABLE(fileid integer, name text, parentid integer, created timestamp with time zone, size integer, data bytea, checkouttime timestamp with time zone, userid integer, action integer) AS
+  RETURNS TABLE(
+		fileid integer, name text, parentid integer,
+		created timestamp with time zone, size integer,
+		data bytea, checkouttime timestamp with time zone,
+		userid integer, action integer, details text) AS
 $BODY$
 	SELECT
 		F.FileID AS FileID,
@@ -198,7 +202,8 @@ $BODY$
 		FI.Data as Data,
 		CO.Time As ChechoutTime,
 		CO.UserID AS UserID,
-		FI.Action AS Action
+		FI.Action AS Action,
+		FI.Details::text AS Details
 	FROM
 		File F, FileInstance FI, Checkout CO
 	WHERE
