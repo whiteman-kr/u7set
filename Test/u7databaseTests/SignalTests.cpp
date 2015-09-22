@@ -1150,3 +1150,361 @@ void SignalTests::get_latest_signals_allTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.next() == false, qPrintable("No records with invalid user expected"));
 }
+
+void SignalTests::undo_signal_changesTest()
+{
+	QSqlQuery query;
+
+	int signalId = -1;
+	int signalGroupId = -1;
+
+	bool ok = query.exec ("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Call signal was not checked out error
+	//
+
+	ok = query.exec(QString("SELECT * FROM undo_signal_changes(1, %1);").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("errCode").toInt() == 1, qPrintable ("Expected error: ERR_SIGNAL_IS_NOT_CHECKED_OUT"));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM delete_signal(1, %1)").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Call wrong user error
+	//
+
+	ok = query.exec(QString("SELECT * FROM undo_signal_changes(%1, %2)").arg(m_firstUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("errCode").toInt() == 2, qPrintable ("Expected error: ERR_SIGNAL_ALREADY_CHECKED_OUT"));
+
+	// Remember checkedOutInstanceId of the signal, to check deleted record from signalInstance
+	//
+
+	ok = query.exec(QString("SELECT checkedOutInstanceId FROM Signal WHERE signalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int deletedCheckedOutInstanceId = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM undo_signal_changes(1, %1)").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("errCode").toInt() == 0, qPrintable ("Expected error: ERR_SIGNAL_ALREADY_CHECKED_OUT"));
+
+	// Check changes in Signal table
+	//
+
+	ok = query.exec(QString("SELECT * FROM signal WHERE signalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("checkedOutInstanceId").toInt() == 0, qPrintable("Error: function not changed Signal table (value checkedOutInstanceId is not NULL"));
+	QVERIFY2(query.value("userId").toInt() == 0, qPrintable("Error: function not changed Signal table (value userId is not NULL)"));
+
+	ok = query.exec(QString("SELECT * FROM SignalInstance WHERE signalInstanceId = %1").arg(deletedCheckedOutInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("Error: record from signalInstance was not deleted"));
+
+	ok = query.exec(QString("SELECT * FROM checkOut WHERE signalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("No record expected"));
+
+	// Check signalGroupId to be deleted in case no checked in signal, and no more signals
+	// with same signalGroupId
+	//
+
+	int signalIds[2] = {-1, -1};
+	int numberOfSignal=0;
+
+	ok = query.exec ("SELECT * FROM add_signal(1, 0, 2)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	for (int i=0; i<2; i++)
+	{
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+		signalIds[numberOfSignal] = query.value("id").toInt();
+		numberOfSignal++;
+	}
+
+	ok = query.exec(QString("SELECT signalGroupId FROM signal WHERE signalId = %1").arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalGroupId = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM undo_signal_changes(1, %1)").arg(signalIds[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM undo_signal_changes(1, %1)").arg(signalIds[1]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM signalGroup WHERE signalGroupId = %1").arg(signalGroupId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2 (query.value(0).toInt() == 0, qPrintable ("Error: signalGroupId of signal must be deleted"));
+
+	ok = query.exec(QString("SELECT * FROM Signal WHERE SignalId = %1 OR SignalId = %2").arg(signalIds[0]).arg(signalIds[1]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("Error: must be no records"));
+
+	// Test undo_signal_changes. Signal checkedOut by user, function started by admin
+	//
+
+	ok = query.exec("SELECT * FROM add_signal(1,0,0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	signalId = query.value("Id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals (1, '{%1}', 'TEST')").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkOut_signals (%1, '{%2}')").arg(m_firstUserForTest).arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM undo_signal_changes(1, %1)").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("errCode").toInt() == 0, qPrintable("Error: function must work from admin on user's checked out signals"));
+}
+
+void SignalTests::set_signal_workcopyTest()
+{
+	QSqlQuery query;
+	signalData sd;
+
+	// Create signal with history
+	//
+
+	bool ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	// Remember signalId, to check function work
+	//
+
+	sd.signalId = query.value("Id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(sd.signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(sd.signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Get checkedOutInstanceId from signal to test function
+	//
+
+	ok = query.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(sd.signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	// Values, that not used in function, but required
+	//
+
+	sd.signalGroupId = 0;
+	sd.changeSetId = 0;
+	sd.checkedOut = "false";
+	sd.userId = 0;
+	sd.channel = 0;
+	sd.type =0;
+	sd.created = "2015-09-15 00:00:00.811+03";
+	sd.deleted = "false";
+	sd.instanceCreated = "2015-09-15 00:00:00.811+03";
+	sd.action = 0;
+
+	// Fill values that function use
+	//
+
+	sd.signalInstanceId = query.value("checkedOutInstanceId").toInt();
+	sd.strId = "strId";
+	sd.extStrId = "exStrId";
+	sd.name = "name";
+	sd.dataFormatId = 1;
+	sd.dataSize = 2;
+	sd.lowAdc = 3;
+	sd.highAdc = 4;
+	sd.lowLimit = 5;
+	sd.highLimit = 6;
+	sd.unitId = 7;
+	sd.adjustment = 8;
+	sd.dropLimit = 9;
+	sd.excessLimit = 10;
+	sd.unbalanceLimit = 11;
+	sd.inputLowLimit = 12;
+	sd.inputHighLimit = 13;
+	sd.inputUnitId = 14;
+	sd.inputSensorId = 15;
+	sd.outputLowLimit = 16;
+	sd.outputHighLimit = 17;
+	sd.outputUnitId = 18;
+	sd.outputSensorId = 19;
+	sd.acquire = "true";
+	sd.calculated = "true";
+	sd.normalState = 20;
+	sd.decimalPlaces = 21;
+	sd.aperture = 22;
+	sd.inOutType = 23;
+	sd.deviceStrId = "dviceStrId";
+	sd.outputRangeMode = 24;
+	sd.filteringTime = 25;
+	sd.maxDifference = 26;
+	sd.byteOrder = 27;
+
+	QString arguments = QString("%1, %2, %3, %4, %5, %6, %7, %8, '%9', %10, ")
+					.arg(sd.signalId)
+					.arg(sd.signalGroupId)
+					.arg(sd.changeSetId)
+					.arg(sd.signalInstanceId)
+					.arg(sd.checkedOut)
+					.arg(sd.userId)
+					.arg(sd.channel)
+					.arg(sd.type)
+					.arg(sd.created)
+					.arg(sd.deleted);
+
+	arguments.append(QString("'%1', %2, '%3', '%4', '%5', %6, %7, %8, %9, %10, ")
+					 .arg(sd.instanceCreated)
+					 .arg(sd.action)
+					 .arg(sd.strId)
+					 .arg(sd.extStrId)
+					 .arg(sd.name)
+					 .arg(sd.dataFormatId)
+					 .arg(sd.dataSize)
+					 .arg(sd.lowAdc)
+					 .arg(sd.highAdc)
+					 .arg(sd.lowLimit));
+
+	arguments.append(QString("%1, %2, %3, %4, %5, %6, %7, %8, %9, %10, ")
+					 .arg(sd.highLimit)
+					 .arg(sd.unitId)
+					 .arg(sd.adjustment)
+					 .arg(sd.dropLimit)
+					 .arg(sd.excessLimit)
+					 .arg(sd.unbalanceLimit)
+					 .arg(sd.inputLowLimit)
+					 .arg(sd.inputHighLimit)
+					 .arg(sd.inputUnitId)
+					 .arg(sd.inputSensorId));
+
+	arguments.append(QString("%1, %2, %3, %4, %5, %6, %7, %8, %9, %10, ")
+					 .arg(sd.outputLowLimit)
+					 .arg(sd.outputHighLimit)
+					 .arg(sd.outputUnitId)
+					 .arg(sd.outputSensorId)
+					 .arg(sd.acquire)
+					 .arg(sd.calculated)
+					 .arg(sd.normalState)
+					 .arg(sd.decimalPlaces)
+					 .arg(sd.aperture)
+					 .arg(sd.inOutType));
+
+	arguments.append(QString("'%1', %2, %3, %4, %5")
+					 .arg(sd.deviceStrId)
+					 .arg(sd.outputRangeMode)
+					 .arg(sd.filteringTime)
+					 .arg(sd.maxDifference)
+					 .arg(sd.byteOrder));
+
+	// Start function
+	//
+
+	ok = query.exec(QString("SELECT * FROM set_signal_workcopy(1, ROW(%1))").arg(arguments));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	// Check errCode is 0
+	//
+
+	QVERIFY2(query.value("ErrCode").toInt() == 0, qPrintable ("Error: error code is not 0!"));
+
+	// Check all data from table signalInstance
+	//
+
+	ok = query.exec(QString("SELECT * FROM signalInstance WHERE signalInstanceId = %1").arg(sd.signalInstanceId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("signalId").toInt() == sd.signalId, qPrintable(QString("Error: value signalId is not match (Actual: %1, Expected: %2)").arg(query.value("signalId").toInt()).arg(sd.signalId)));
+	QVERIFY2(query.value("strId").toString() == sd.strId, qPrintable(QString("Error: value strId is not match (Actual: %1, Expected: %2)").arg(query.value("strId").toString()).arg(sd.strId)));
+	QVERIFY2(query.value("extStrId").toString() == sd.extStrId, qPrintable(QString("Error: value exStrId is not match (Actual: %1, Expected: %2)").arg(query.value("extStrId").toString()).arg(sd.extStrId)));
+	QVERIFY2(query.value("name").toString() == sd.name, qPrintable(QString("Error: value name is not match (Actual: %1, Expected: %2)").arg(query.value("name").toString()).arg(sd.name)));
+	QVERIFY2(query.value("dataFormatId").toInt() == sd.dataFormatId, qPrintable(QString("Error: value dataFormatId is not match (Actual: %1, Expected: %2)").arg(query.value("dataFormatId").toInt()).arg(sd.dataFormatId)));
+	QVERIFY2(query.value("dataSize").toInt() == sd.dataSize, qPrintable(QString("Error: value dataSize is not match (Actual: %1, Expected: %2)").arg(query.value("dataSize").toInt()).arg(sd.dataSize)));
+	QVERIFY2(query.value("lowAdc").toInt() == sd.lowAdc, qPrintable(QString("Error: value lowAdc is not match (Actual: %1, Expected: %2)").arg(query.value("lowAdc").toInt()).arg(sd.lowAdc)));
+	QVERIFY2(query.value("highAdc").toInt() == sd.highAdc, qPrintable(QString("Error: value highAdc is not match (Actual: %1, Expected: %2)").arg(query.value("highAdc").toInt()).arg(sd.highAdc)));
+	QVERIFY2(query.value("lowLimit").toInt() == sd.lowLimit, qPrintable(QString("Error: value lowLimit is not match (Actual: %1, Expected: %2)").arg(query.value("lowLimit").toInt()).arg(sd.lowLimit)));
+	QVERIFY2(query.value("highLimit").toInt() == sd.highLimit, qPrintable(QString("Error: value highLimit is not match (Actual: %1, Expected: %2)").arg(query.value("highLimit").toInt()).arg(sd.highLimit)));
+	QVERIFY2(query.value("unitId").toInt() == sd.unitId, qPrintable(QString("Error: value unitId is not match (Actual: %1, Expected: %2)").arg(query.value("unitId").toInt()).arg(sd.unitId)));
+	QVERIFY2(query.value("adjustment").toInt() == sd.adjustment, qPrintable(QString("Error: value adjustment is not match (Actual: %1, Expected: %2)").arg(query.value("adjustment").toInt()).arg(sd.adjustment)));
+	QVERIFY2(query.value("dropLimit").toInt() == sd.dropLimit, qPrintable(QString("Error: value dropLimit is not match (Actual: %1, Expected: %2)").arg(query.value("dropLimit").toInt()).arg(sd.dropLimit)));
+	QVERIFY2(query.value("excessLimit").toInt() == sd.excessLimit, qPrintable(QString("Error: value excessLimit is not match (Actual: %1, Expected: %2)").arg(query.value("excessLimit").toInt()).arg(sd.excessLimit)));
+	QVERIFY2(query.value("unbalanceLimit").toInt() == sd.unbalanceLimit, qPrintable(QString("Error: value unbalanceLimit is not match (Actual: %1, Expected: %2)").arg(query.value("unbalanceLimit").toInt()).arg(sd.unbalanceLimit)));
+	QVERIFY2(query.value("inputLowLimit").toInt() == sd.inputLowLimit, qPrintable(QString("Error: value inputLowLimit is not match (Actual: %1, Expected: %2)").arg(query.value("inputLowLimit").toInt()).arg(sd.inputLowLimit)));
+	QVERIFY2(query.value("inputHighLimit").toInt() == sd.inputHighLimit, qPrintable(QString("Error: value inputHighLimit is not match (Actual: %1, Expected: %2)").arg(query.value("inputHighLimit").toInt()).arg(sd.inputHighLimit)));
+	QVERIFY2(query.value("inputUnitId").toInt() == sd.inputUnitId, qPrintable(QString("Error: value inputUnitId is not match (Actual: %1, Expected: %2)").arg(query.value("inputUnitId").toInt()).arg(sd.inputUnitId)));
+	QVERIFY2(query.value("inputSensorId").toInt() == sd.inputSensorId, qPrintable(QString("Error: value inputSensorId is not match (Actual: %1, Expected: %2)").arg(query.value("inputSensorId").toInt()).arg(sd.inputSensorId)));
+	QVERIFY2(query.value("outputLowLimit").toInt() == sd.outputLowLimit, qPrintable(QString("Error: value outputLowLimit is not match (Actual: %1, Expected: %2)").arg(query.value("outputLowLimit").toInt()).arg(sd.outputLowLimit)));
+	QVERIFY2(query.value("outputHighLimit").toInt() == sd.outputHighLimit, qPrintable(QString("Error: value outputHighLimit is not match (Actual: %1, Expected: %2)").arg(query.value("outputHighLimit").toInt()).arg(sd.outputHighLimit)));
+	QVERIFY2(query.value("outputUnitId").toInt() == sd.outputUnitId, qPrintable(QString("Error: value outputUnitId is not match (Actual: %1, Expected: %2)").arg(query.value("outputUnitId").toInt()).arg(sd.outputUnitId)));
+	QVERIFY2(query.value("outputSensorId").toInt() == sd.outputSensorId, qPrintable(QString("Error: value outputSensorId is not match (Actual: %1, Expected: %2)").arg(query.value("outputSensorId").toInt()).arg(sd.outputSensorId)));
+	QVERIFY2(query.value("acquire").toString() == sd.acquire, qPrintable(QString("Error: value acquire is not match (Actual: %1, Expected: %2)").arg(query.value("acquire").toString()).arg(sd.acquire)));
+	QVERIFY2(query.value("calculated").toString() == sd.calculated, qPrintable(QString("Error: value calculated is not match (Actual: %1, Expected: %2)").arg(query.value("calculated").toString()).arg(sd.calculated)));
+	QVERIFY2(query.value("normalState").toInt() == sd.normalState, qPrintable(QString("Error: value normalState is not match (Actual: %1, Expected: %2)").arg(query.value("normalState").toInt()).arg(sd.normalState)));
+	QVERIFY2(query.value("decimalPlaces").toInt() == sd.decimalPlaces, qPrintable(QString("Error: value decimalPlaces is not match (Actual: %1, Expected: %2)").arg(query.value("decimalPlaces").toInt()).arg(sd.decimalPlaces)));
+	QVERIFY2(query.value("aperture").toInt() == sd.aperture, qPrintable(QString("Error: value aperture is not match (Actual: %1, Expected: %2)").arg(query.value("aperture").toInt()).arg(sd.aperture)));
+	QVERIFY2(query.value("inOutType").toInt() == sd.inOutType, qPrintable(QString("Error: value inOutType is not match (Actual: %1, Expected: %2)").arg(query.value("inOutType").toInt()).arg(sd.inOutType)));
+	QVERIFY2(query.value("deviceStrId").toString() == sd.deviceStrId, qPrintable(QString("Error: value deviceStrId is not match (Actual: %1, Expected: %2)").arg(query.value("deviceStrId").toString()).arg(sd.deviceStrId)));
+	QVERIFY2(query.value("outputRangeMode").toInt() == sd.outputRangeMode, qPrintable(QString("Error: value outputRangeMode is not match (Actual: %1, Expected: %2)").arg(query.value("outputRangeMode").toInt()).arg(sd.outputRangeMode)));
+	QVERIFY2(query.value("filteringTime").toInt() == sd.filteringTime, qPrintable(QString("Error: value filteringTime is not match (Actual: %1, Expected: %2)").arg(query.value("filteringTime").toInt()).arg(sd.filteringTime)));
+	QVERIFY2(query.value("maxDifference").toInt() == sd.maxDifference, qPrintable(QString("Error: value maxDifference is not match (Actual: %1, Expected: %2)").arg(query.value("maxDifference").toInt()).arg(sd.maxDifference)));
+	QVERIFY2(query.value("byteOrder").toInt() == sd.byteOrder, qPrintable(QString("Error: value byteOrder is not match (Actual: %1, Expected: %2)").arg(query.value("byteOrder").toInt()).arg(sd.byteOrder)));
+
+	// Call checked out by another user error
+	//
+
+	ok = query.exec(QString("SELECT * FROM set_signal_workcopy(%1, ROW(%2))").arg(m_firstUserForTest).arg(arguments));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("ErrCode").toInt() == 2, qPrintable ("Expected ERR_SIGNAL_ALREADY_CHECKED_OUT"));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'TEST')").arg(sd.signalId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Try invalid userId
+	//
+
+	ok = query.exec(QString("SELECT * FROM set_signal_workcopy(%1, ROW(%2))").arg(maxValueId).arg(arguments));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("ErrCode").toInt() == 1, qPrintable ("Expected ERR_SIGNAL_IS_NOT_CHECKED_OUT"));
+
+	// Call signal is not checked out error
+	//
+
+	ok = query.exec(QString("SELECT * FROM set_signal_workcopy(1, ROW(%1))").arg(arguments));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("ErrCode").toInt() == 1, qPrintable ("Expected ERR_SIGNAL_IS_NOT_CHECKED_OUT"));
+
+}

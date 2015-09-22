@@ -21,7 +21,9 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 
-	{
+	Hardware::Init();
+
+	{	
 		DbController dbc;
 
 		dbc.disableProgress();
@@ -36,6 +38,8 @@ int main(int argc, char *argv[])
 		if (ok == false)
 		{
 			qDebug() << "Cannot connect to database or create project. Error: " << dbc.lastError();
+
+			Hardware::Shutdwon();
 			return 1;
 		}
 
@@ -49,6 +53,9 @@ int main(int argc, char *argv[])
 
 			// TODO: Drop database project
 			//
+
+			Hardware::Shutdwon();
+
 			return 1;
 		}
 
@@ -177,6 +184,8 @@ int main(int argc, char *argv[])
 			returnCode = 1;
 		}
 	}
+
+	Hardware::Shutdwon();
 
 	return returnCode;
 }
