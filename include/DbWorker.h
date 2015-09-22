@@ -102,6 +102,7 @@ public slots:
 	void slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
 
 	void slot_checkIn(std::vector<DbFileInfo>* files, QString comment);
+	void slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);
 	void slot_checkOut(std::vector<DbFileInfo>* files);
 	void slot_undoChanges(std::vector<DbFileInfo>* files);
 

@@ -318,6 +318,84 @@ $BODY$
 LANGUAGE plpgsql;
 
 
+
+-------------------------------------------------------------------------------
+--
+--							check_in_tree
+--
+-------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION check_in_tree(user_id integer, parent_file_ids integer[], checkin_comment text)
+  RETURNS SETOF objectstate AS
+$BODY$
+DECLARE
+	NewChangesetID int;
+	parent_id int;
+	file_id int;
+	file_result ObjectState;
+	checked_out_ids integer[];
+BEGIN
+
+	FOREACH parent_id IN ARRAY parent_file_ids
+	LOOP
+		-- get all checked out files for parents (including parent)
+		checked_out_ids := array_cat(
+			array(
+				SELECT SQ.FileID FROM (
+					(WITH RECURSIVE files(FileID, ParentID) AS (
+							SELECT FileID, ParentID FROM get_file_list(user_id, parent_id, '%')
+						UNION ALL
+							SELECT FL.FileID, FL.ParentID FROM Files, get_file_list(user_id, files.FileID, '%') FL
+						)
+						SELECT * FROM files)
+					UNION
+						SELECT FileID, ParentID FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = parent_id), '%') WHERE FileID = parent_id
+				) SQ, File AS F
+				WHERE SQ.FileID = F.FileID AND F.CheckedOutInstanceID IS NOT NULL
+				ORDER BY SQ.FileID
+			), checked_out_ids);
+
+	END LOOP;
+
+	IF (array_length(checked_out_ids, 1) = 0)
+	THEN
+		-- Nothing to check in
+		RETURN;
+	END IF;
+
+	-- Add new record to Changeset
+	INSERT INTO Changeset (UserID, Comment, File)
+		VALUES (user_id, checkin_comment, TRUE)
+		RETURNING ChangesetID INTO NewChangesetID;
+
+	-- Set File.Deleted flag if action in FileInstance is Deleted
+	UPDATE File SET Deleted = TRUE
+	WHERE
+		FileID = ANY(checked_out_ids) AND
+		3 = (SELECT Action FROM FileInstance FI WHERE FI.FileInstanceID = CheckedOutInstanceID AND FI.FileID = FileID);
+
+	-- Set CheckedInInstance to current CheckedOutInstance, and set CheckedOutInstanceID to NULL
+	UPDATE File SET CheckedInInstanceID = CheckedOutInstanceID WHERE FileID = ANY(checked_out_ids);
+	UPDATE File SET CheckedOutInstanceID = NULL WHERE FileID = ANY(checked_out_ids);
+
+	-- Update FileInstance, set it's ChangesetID
+	UPDATE FileInstance SET ChangesetID = NewChangesetID WHERE FileID = ANY(checked_out_ids) AND ChangesetID IS NULL;
+
+	-- Remove CheckOut roecords
+	DELETE FROM CheckOut WHERE FileID = ANY(checked_out_ids);
+
+	-- Return result
+	FOREACH file_id IN ARRAY checked_out_ids
+	LOOP
+		file_result := get_file_state(file_id);
+		RETURN NEXT file_result;
+	END LOOP;
+
+	RETURN;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+
 -------------------------------------------------------------------------------
 --
 --							check_out

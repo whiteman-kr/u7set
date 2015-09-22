@@ -2480,6 +2480,93 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	return;
 }
 
+void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (parentFiles == nullptr ||
+		parentFiles->empty() == true ||
+		outCheckedIn == nullptr)
+	{
+		assert(parentFiles != nullptr);
+		assert(parentFiles->empty() != true);
+		assert(outCheckedIn != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM check_in_tree(%1, ARRAY[")
+		.arg(currentUser().userId());
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < parentFiles->size(); i++)
+	{
+		auto file = parentFiles->at(i);
+
+		if (i == 0)
+		{
+			request += QString("%1").arg(file.fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(file.fileId());
+		}
+	}
+
+	request += QString("], '%1');")
+			.arg(comment);
+
+	// request
+	//
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't check in. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	// Result is table of (ObjectState);
+	//
+	outCheckedIn->clear();
+
+	int resultSize = q.size();
+	if (resultSize != -1)
+	{
+		outCheckedIn->reserve(resultSize);
+	}
+
+	while (q.next())
+	{
+		// Update file state
+		//
+		DbFileInfo fi;
+
+		db_updateFileState(q, &fi, false);
+		outCheckedIn->push_back(fi);
+	}
+
+	return;
+}
+
 void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 {
 	// Init automitic varaiables

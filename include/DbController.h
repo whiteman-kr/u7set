@@ -73,6 +73,7 @@ public:
 
 	bool checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget);
 	bool checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget);
+	bool checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector<DbFileInfo>* outCheckedIn, const QString& comment, QWidget* parentWidget);
 	bool checkOut(DbFileInfo& file, QWidget* parentWidget);
 	bool checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 	bool undoChanges(DbFileInfo& file, QWidget* parentWidget);
@@ -146,6 +147,7 @@ signals:
 	void signal_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
 
 	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
+	void signal_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
 
