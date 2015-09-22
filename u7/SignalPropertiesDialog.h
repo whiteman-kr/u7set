@@ -29,6 +29,7 @@ public slots:
 	void checkAndSaveSignal();
 	void saveDialogSettings();
 	void checkoutSignal();
+	void saveLastEditedSignalProperties();
 
 private:
 	QVector<Signal*> m_signalVector;

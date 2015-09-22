@@ -1028,6 +1028,42 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
+	QSettings settings;
+
+	signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(settings.value("LastEditedSignal: dataFormat").toInt())));
+	signal.setDataSize(settings.value("LastEditedSignal: dataSize").toInt());
+	signal.setLowADC(settings.value("LastEditedSignal: lowADC").toInt());
+	signal.setHighADC(settings.value("LastEditedSignal: highADC").toInt());
+	signal.setLowLimit(settings.value("LastEditedSignal: lowLimit").toDouble());
+	signal.setHighLimit(settings.value("LastEditedSignal: highLimit").toDouble());
+	signal.setUnitID(m_unitInfo.key(settings.value("LastEditedSignal: unitID").toInt()));
+	signal.setAdjustment(settings.value("LastEditedSignal: adjustment").toDouble());
+	signal.setDropLimit(settings.value("LastEditedSignal: dropLimit").toDouble());
+	signal.setExcessLimit(settings.value("LastEditedSignal: excessLimit").toDouble());
+	signal.setUnbalanceLimit(settings.value("LastEditedSignal: unbalanceLimit").toDouble());
+
+	signal.setInputLowLimit(settings.value("LastEditedSignal: inputLowLimit").toDouble());
+	signal.setInputHighLimit(settings.value("LastEditedSignal: inputHighLimit").toDouble());
+	signal.setInputUnitID(m_unitInfo.key(settings.value("LastEditedSignal: inputUnitID").toInt()));
+	signal.setInputSensorID(settings.value("LastEditedSignal: inputSensorID").toInt());
+
+	signal.setOutputLowLimit(settings.value("LastEditedSignal: outputLowLimit").toDouble());
+	signal.setOutputHighLimit(settings.value("LastEditedSignal: outputHighLimit").toDouble());
+	signal.setOutputUnitID(m_unitInfo.key(settings.value("LastEditedSignal: outputUnitID").toInt()));
+	signal.setOutputSensorID(settings.value("LastEditedSignal: outputSensorID").toInt());
+
+	signal.setOutputRangeMode(OutputRangeMode(settings.value("LastEditedSignal: outputRangeMode").toInt()));
+
+	signal.setAcquire(settings.value("LastEditedSignal: acquire").toBool());
+	signal.setCalculated(settings.value("LastEditedSignal: calculated").toBool());
+	signal.setNormalState(settings.value("LastEditedSignal: normalState").toInt());
+	signal.setDecimalPlaces(settings.value("LastEditedSignal: decimalPlaces").toInt());
+	signal.setAperture(settings.value("LastEditedSignal: aperture").toDouble());
+	signal.setFilteringTime(settings.value("LastEditedSignal: filteringTime").toDouble());
+	signal.setMaxDifference(settings.value("LastEditedSignal: maxDifference").toDouble());
+	signal.setInOutType(SignalInOutType(settings.value("LastEditedSignal: inOutType").toInt()));
+	signal.setByteOrder(ByteOrder(settings.value("LastEditedSignal: byteOrder").toInt()));
+
 	SignalPropertiesDialog dlg(signal, SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, false, nullptr, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
