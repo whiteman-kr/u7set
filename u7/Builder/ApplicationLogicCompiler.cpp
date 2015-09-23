@@ -21,27 +21,305 @@ namespace Builder
 									}
 
 
-
-	// Signals properties
+	// ---------------------------------------------------------------------------------
 	//
-	const char	*VALUE_OFFSET = "ValueOffset",
-				*VALUE_BIT = "ValueBit";
+	//	LmMemoryMap class implementation
+	//
 
-	const char* SECTION_MEMORY_SETTINGS = "MemorySettings";
-	const char* SECTION_FLASH_MEMORY = "FlashMemory";
-	const char* SECTION_LOGIC_UNIT = "LogicUnit";
 
-	const char* PARAM_TEST_START_COUNT = "test_start_count";
 
-	const int ERR_VALUE = -1;
+	LmMemoryMap::LmMemoryMap(OutputLog *log) :
+		m_log(log)
+	{
+		assert(m_log != nullptr);
 
-	const int NOT_FB_OPERAND_INDEX = -1;
+		m_appBitAdressed.regDiscreteSignalCount = 0;
+		m_appBitAdressed.nonRegDiscreteSignalCount = 0;
 
-	const int	LM1_PLACE = 0,
-				LM2_PLACE = 15,
+		m_appWordAdressed.regAnalogSignalCount = 0;
+		m_appWordAdressed.nonRegAnalogSignalCount = 0;
+	}
 
-				FIRST_MODULE_PLACE = 1,
-				LAST_MODULE_PLACE = 14;
+
+	bool LmMemoryMap::init(	const MemoryArea& moduleData,
+							const MemoryArea& optoInterfaceData,
+							const MemoryArea& appLogicBitData,
+							const MemoryArea& tuningData,
+							const MemoryArea& appLogicWordData,
+							const MemoryArea& lmDiagData,
+							const MemoryArea& lmIntOutData)
+	{
+
+		// init modules memory mapping
+		//
+		m_modules.memory.setStartAddress(moduleData.startAddress());
+		m_modules.memory.setSizeW(moduleData.sizeW() * MODULES_COUNT);
+		m_modules.memory.lock();
+
+		for(int i = 0; i < MODULES_COUNT; i++)
+		{
+			m_modules.module[i].setStartAddress(m_modules.memory.startAddress() + i * moduleData.sizeW());
+			m_modules.module[i].setSizeW(moduleData.sizeW());
+		}
+
+		// init opto interface memory mapping
+		//
+		m_optoInterface.memory.setStartAddress(optoInterfaceData.startAddress());
+		m_optoInterface.memory.setSizeW(optoInterfaceData.sizeW() * (OPTO_INTERFACE_COUNT + 1));
+		m_optoInterface.memory.lock();
+
+		for(int i = 0; i < OPTO_INTERFACE_COUNT; i++)
+		{
+			if (i == 0)
+			{
+				m_optoInterface.channel[i].setStartAddress(m_optoInterface.memory.startAddress());
+			}
+			else
+			{
+				m_optoInterface.channel[i].setStartAddress(m_optoInterface.channel[i-1].nextAddress());
+			}
+
+			m_optoInterface.channel[i].setSizeW(optoInterfaceData.sizeW());
+		}
+
+		m_optoInterface.result.setStartAddress(m_optoInterface.channel[OPTO_INTERFACE_COUNT -1].nextAddress());
+		m_optoInterface.result.setSizeW(optoInterfaceData.sizeW());
+
+		// init application bit-addressed memory mapping
+		//
+		m_appBitAdressed.memory = appLogicBitData;
+		m_appBitAdressed.memory.lock();
+
+		// init tuning interface memory mapping
+		//
+		m_tuningInterface.memory = tuningData;
+		m_tuningInterface.memory.lock();
+
+		// init application word-addressed memory mapping
+		//
+		m_appWordAdressed.memory = appLogicWordData;
+		m_appWordAdressed.memory.lock();
+
+		// init LM diagnostics memory mapping
+		//
+		m_lmDiagnostics.memory = lmDiagData;
+		m_lmDiagnostics.memory.lock();
+
+		// init LM in/out controller memory mapping
+		//
+		m_lmInOuts.memory = lmIntOutData;
+		m_lmInOuts.memory.lock();
+
+		return recalculateAddresses();
+	}
+
+
+	bool LmMemoryMap::recalculateAddresses()
+	{
+		// recalc application bit-addressed memory mapping
+		//
+
+		// registered discrete signals
+
+		m_appBitAdressed.regDiscretSignals.setStartAddress(m_appBitAdressed.memory.startAddress());
+		m_appBitAdressed.regDiscretSignals.setSizeW(m_appBitAdressed.regDiscreteSignalsSizeW());
+
+		// non registered discrete signals
+
+		m_appBitAdressed.nonRegDiscretSignals.setStartAddress(m_appBitAdressed.regDiscretSignals.nextAddress());
+		m_appBitAdressed.nonRegDiscretSignals.setSizeW(m_appBitAdressed.nonRegDiscreteSignalsSizeW());
+
+		if (m_appBitAdressed.nonRegDiscretSignals.nextAddress() > m_appBitAdressed.memory.nextAddress())
+		{
+			LOG_ERROR(m_log, tr("Out of bit-addressed memory range!"));
+
+			return false;
+		}
+
+		// recalc application word-addressed memory mapping
+		//
+
+		// LM diagnostics
+
+		m_appWordAdressed.lmDiagnostics.setStartAddress(m_appWordAdressed.memory.startAddress());
+		m_appWordAdressed.lmDiagnostics.setSizeW(m_lmDiagnostics.memory.sizeW());
+
+		// LM input discrete signals
+
+		m_appWordAdressed.lmInputs.setStartAddress(m_appWordAdressed.lmDiagnostics.nextAddress());
+		m_appWordAdressed.lmInputs.setSizeW(m_lmInOuts.memory.sizeW());
+
+		// LM output discrete signals
+
+		m_appWordAdressed.lmOutputs.setStartAddress(m_appWordAdressed.lmInputs.nextAddress());
+		m_appWordAdressed.lmOutputs.setSizeW(m_lmInOuts.memory.sizeW());
+
+		// modules data
+
+		for(int i = 0; i < MODULES_COUNT; i++)
+		{
+			if (i == 0)
+			{
+				m_appWordAdressed.module[0].setStartAddress(m_appWordAdressed.lmOutputs.nextAddress());
+			}
+			else
+			{
+				m_appWordAdressed.module[i].setStartAddress(m_appWordAdressed.module[i-1].nextAddress());
+			}
+		}
+
+		// registered analog signals
+
+		m_appWordAdressed.regAnalogSignals.setStartAddress(m_appWordAdressed.module[MODULES_COUNT - 1].nextAddress());
+		m_appWordAdressed.regAnalogSignals.setSizeW(m_appWordAdressed.regAnalogSignalsSizeW());
+
+		// registered discrete signals
+
+		m_appWordAdressed.regDiscreteSignals.setStartAddress(m_appWordAdressed.regAnalogSignals.nextAddress());
+		m_appWordAdressed.regDiscreteSignals.setSizeW(m_appBitAdressed.regDiscretSignals.sizeW());
+
+		// non registered analog signals
+
+		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(m_appWordAdressed.regDiscreteSignals.nextAddress());
+		m_appWordAdressed.nonRegAnalogSignals.setSizeW(m_appWordAdressed.nonRegAnalogSignalsSizeW());
+
+		if (m_appWordAdressed.nonRegAnalogSignals.nextAddress() > m_appWordAdressed.memory.nextAddress())
+		{
+			LOG_ERROR(m_log, tr("Out of word-addressed memory range!"));
+
+			return false;
+		}
+
+		return true;
+	}
+
+
+	int LmMemoryMap::getModuleDataOffset(int place)
+	{
+		assert(place >= FIRST_MODULE_PLACE && place <= LAST_MODULE_PLACE);
+
+		return m_modules.module[place - 1].startAddress();;
+	}
+
+
+	int LmMemoryMap::getModuleRegDataOffset(int place)
+	{
+		assert(place >= FIRST_MODULE_PLACE && place <= LAST_MODULE_PLACE);
+
+		return m_appWordAdressed.module[place - 1].startAddress();;
+	}
+
+
+	int LmMemoryMap::addModule(int place, int moduleAppRegDataSize)
+	{
+		assert(place >= FIRST_MODULE_PLACE && place <= LAST_MODULE_PLACE);
+
+		m_appWordAdressed.module[place - 1].setSizeW(moduleAppRegDataSize);
+
+		recalculateAddresses();
+
+		return getModuleRegDataOffset(place);
+	}
+
+
+	void LmMemoryMap::getFile(QStringList& memFile)
+	{
+		memFile.append(QString(" LM's memory map"));
+
+		//
+
+		addSection(memFile, m_modules.memory, "I/O modules controller memory");
+
+		for(int i = 0; i < MODULES_COUNT; i++)
+		{
+			addRecord(memFile, m_modules.module[i], QString().sprintf("I/O module %02d", i + 1));
+		}
+
+		addSection(memFile, m_optoInterface.memory, "Opto interfaces memory");
+
+		//
+
+		for(int i = 0; i < OPTO_INTERFACE_COUNT; i++)
+		{
+			addRecord(memFile, m_optoInterface.channel[i], QString().sprintf("opto interface %02d", i + 1));
+		}
+
+		memFile.append("");
+
+		addRecord(memFile, m_optoInterface.result, "opto interfaces data processing result");
+
+		//
+
+		addSection(memFile, m_appBitAdressed.memory, "Application logic bit-addressed memory");
+
+		addRecord(memFile, m_appBitAdressed.regDiscretSignals, "registrated discrete signals");
+
+		memFile.append("");
+
+		addRecord(memFile, m_appBitAdressed.nonRegDiscretSignals, "non-registrated discrete signals");
+
+		//
+
+		addSection(memFile, m_tuningInterface.memory, "Tuning interface memory");
+
+		//
+
+		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory");
+
+		addRecord(memFile, m_appWordAdressed.lmDiagnostics, "LM's diagnostics data");
+		addRecord(memFile, m_appWordAdressed.lmInputs, "LM's inputs state");
+		addRecord(memFile, m_appWordAdressed.lmOutputs, "LM's outputs state");
+
+		memFile.append("");
+
+		for(int i = 0; i < MODULES_COUNT; i++)
+		{
+			addRecord(memFile, m_appWordAdressed.module[i], QString().sprintf("I/O module %02d data", i + 1));
+		}
+
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "registrated analogs signals");
+
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "registrated discrete signals (copyed from bit-addressed memory)");
+
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "non-registrated analogs signals");
+
+		//
+
+		addSection(memFile, m_lmDiagnostics.memory, "LM's diagnostics memory");
+		addSection(memFile, m_lmInOuts.memory, "LM's inputs/outputs memory");
+	}
+
+	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title)
+	{
+		memFile.append("");
+		memFile.append(QString().rightJustified(80, '-'));
+		memFile.append(QString(" Address    Size      Description"));
+		memFile.append(QString().rightJustified(80, '-'));
+
+		QString str;
+
+		str.sprintf(" %05d      %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
+
+		memFile.append(str);
+		memFile.append(QString().rightJustified(80, '-'));
+		memFile.append("");
+	}
+
+	void LmMemoryMap::addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title)
+	{
+		QString str;
+
+		str.sprintf(" %05d      %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
+
+		memFile.append(str);
+	}
+
 
 
 	// ---------------------------------------------------------------------------------
@@ -287,7 +565,8 @@ namespace Builder
 
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
-		m_appSignals(*this)
+		m_appSignals(*this),
+		m_memoryMap(appLogicCompiler.m_log)
 	{
 		m_equipment = appLogicCompiler.m_equipment;
 		m_signals = appLogicCompiler.m_signals;
@@ -411,31 +690,42 @@ namespace Builder
 
 		const PropertyNameVar memSettings[] =
 		{
-			{	"ModuleDataOffset", &m_moduleDataOffset },
-			{	"ModuleDataSize", &m_moduleDataSize },
+			{	"ModuleDataOffset", m_moduleData.ptrStartAddress() },
+			{	"ModuleDataSize", m_moduleData.ptrSizeW() },
 
-			{	"OptoInterfaceDataOffset", &m_optoInterfaceDataOffset },
-			{	"OptoInterfaceDataSize", &m_optoInterfaceDataSize },
+			{	"OptoInterfaceDataOffset", m_optoInterfaceData.ptrStartAddress() },
+			{	"OptoInterfaceDataSize", m_optoInterfaceData.ptrSizeW() },
 
-			{	"AppLogicBitDataOffset", &m_appLogicBitDataOffset },
-			{	"AppLogicBitDataSize", &m_appLogicBitDataSize },
+			{	"AppLogicBitDataOffset", m_appLogicBitData.ptrStartAddress() },
+			{	"AppLogicBitDataSize", m_appLogicBitData.ptrSizeW() },
 
-			{	"TuningDataOffset", &m_tuningDataOffset },
-			{	"TuningDataSize", &m_tuningDataSize },
+			{	"TuningDataOffset", m_tuningData.ptrStartAddress() },
+			{	"TuningDataSize", m_tuningData.ptrSizeW() },
 
-			{	"AppLogicWordDataOffset", &m_appLogicWordDataOffset },
-			{	"AppLogicWordDataSize", &m_appLogicWordDataSize },
+			{	"AppLogicWordDataOffset", m_appLogicWordData.ptrStartAddress() },
+			{	"AppLogicWordDataSize", m_appLogicWordData.ptrSizeW() },
 
-			{	"LMDiagDataOffset", &m_lmDiagDataOffset },
-			{	"LMDiagDataSize", &m_lmDiagDataSize },
+			{	"LMDiagDataOffset", m_lmDiagData.ptrStartAddress() },
+			{	"LMDiagDataSize", m_lmDiagData.ptrSizeW() },
 
-			{	"LMIntOutDataOffset", &m_lmIntOutDataOffset },
-			{	"LMIntOutDataSize", &m_lmIntOutDataSize }
+			{	"LMIntOutDataOffset", m_lmIntOutData.ptrStartAddress() },
+			{	"LMIntOutDataSize", m_lmIntOutData.ptrSizeW() }
 		};
 
 		for(PropertyNameVar memSetting : memSettings)
 		{
 			result &= getLMIntProperty(SECTION_MEMORY_SETTINGS, memSetting.name, memSetting.var);
+		}
+
+		if (result == true)
+		{
+			m_memoryMap.init(m_moduleData,
+							 m_optoInterfaceData,
+							 m_appLogicBitData,
+							 m_tuningData,
+							 m_appLogicWordData,
+							 m_lmDiagData,
+							 m_lmIntOutData);
 		}
 
 		result &= getLMIntProperty(SECTION_FLASH_MEMORY, "AppLogicFrameSize", &m_lmAppLogicFrameSize);
@@ -462,15 +752,11 @@ namespace Builder
 
 		m_modules.clear();
 
-		int moduleAppDataOffset = m_appLogicWordDataOffset + m_lmDiagDataSize;
-
 		// build Module structures array
 		//
 		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
 		{
 			Module m;
-
-			int placeIndex = place - 1;
 
 			Hardware::DeviceModule* device = getModuleOnPlace(place);
 
@@ -492,7 +778,11 @@ namespace Builder
 
 				{	"AppLogicDataOffset", &m.appLogicDataOffset },
 				{	"AppLogicDataSize", &m.appLogicDataSize },
-				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve }
+				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve },
+
+#pragma message("!!!!!!!!!!!!!!!!!! UNCOMMENT !!!!!!!!!!!!!!!!!!!!!!")
+			//	{	"AppLogicRegDataSize", &m.appLogicRegDataSize },
+#pragma message("!!!!!!!!!!!!!!!!!! UNCOMMENT !!!!!!!!!!!!!!!!!!!!!!")
 			};
 
 			for(PropertyNameVar moduleSetting : moduleSettings)
@@ -500,30 +790,10 @@ namespace Builder
 				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSetting.name, moduleSetting.var);
 			}
 
-			m.rxTxDataOffset = m_moduleDataOffset + m_moduleDataSize * placeIndex;
+			m.rxTxDataOffset = m_memoryMap.getModuleDataOffset(place);
 			m.moduleAppDataOffset = m.rxTxDataOffset + m.appLogicDataOffset;
-			m.appDataOffset = moduleAppDataOffset;
-
-			moduleAppDataOffset += m.appLogicDataSize;
-
-			m_modules.append(m);
+			m.appRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
 		}
-
-		m_registeredInternalAnalogSignalsOffset = moduleAppDataOffset;
-		m_registeredInternalDiscreteSignalsOffset = m_appLogicBitDataOffset;
-
-		// the actual values of:
-		//
-		// m_registeredInternalAnalogSignalsSize
-		// m_internalAnalogSignalsOffset
-		// m_internalAnalogSignalsSize
-		// m_registeredInternalDiscreteSignalsSize
-		// m_internalDiscreteSignalsOffset
-		// m_internalDiscreteSignalsSize
-		// m_regBufferInternalDiscreteSignalsOffset
-		// m_regBufferInternalDiscreteSignalsSize
-		//
-		// will be calculated later in calculateInternalSignalsAddresses function
 
 		if (result)
 		{
@@ -560,6 +830,8 @@ namespace Builder
 
 			if (!createAppSignalsMap()) break;
 
+			if (!calculateLmMemoryMap()) break;
+
 			if (!calculateInOutSignalsAddresses()) break;
 
 			if (!calculateInternalSignalsAddresses()) break;
@@ -569,6 +841,12 @@ namespace Builder
 		while(false);
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::calculateLmMemoryMap()
+	{
+		return true;
 	}
 
 
@@ -835,7 +1113,9 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(m_appLogicWordDataOffset, m_lmDiagDataOffset, m_lmDiagDataSize);
+		cmd.movMem(m_memoryMap.getRegLmDiagnosticsAddress(),
+				   m_memoryMap.getLmDiagnosticsAddress(),
+				   m_memoryMap.getLmDiagnosticsSizeW());
 
 		m_code.append(cmd);
 
@@ -845,11 +1125,18 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyInModulesAppLogicDataToRegBuf()
 	{
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		//
+		//	REFACTOR!!!!
+		//
+
 		m_code.newLine();
 		m_code.comment("Copy input modules application logic data to RegBuf");
 		m_code.newLine();
 
-		for(Module module : m_modules)
+#pragma message("!!!!!!!!!!!!!!!! REFACTOR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+		/*for(Module module : m_modules)
 		{
 			if (!module.device->isInputModule())
 			{
@@ -858,12 +1145,12 @@ namespace Builder
 
 			Command cmd;
 
-			cmd.movMem(module.appDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
+			cmd.movMem(module.appRegDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
 
 			cmd.setComment(QString(tr("copy %1 data (place %2) to RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
 
 			m_code.append(cmd);
-		}
+		}*/
 
 		return true;
 	}
@@ -883,7 +1170,7 @@ namespace Builder
 
 			Command cmd;
 
-			cmd.setMem(module.appDataOffset, module.appLogicDataSize, 0);
+			cmd.setMem(module.appRegDataOffset, module.appLogicRegDataSize, 0);
 
 			cmd.setComment(QString(tr("init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
 
@@ -1727,9 +2014,19 @@ namespace Builder
 				continue;
 			}
 
+			if (module.device->moduleFamily() == Hardware::DeviceModule::FamilyType::AOM)
+			{
+				// NEED IMPLEMENTATION!!!
+				//
+				assert(false);
+				continue;
+			}
+
 			Command cmd;
 
-			cmd.movMem(module.moduleAppDataOffset, module.appDataOffset, module.appLogicDataSize);
+			assert(module.appLogicDataSize == module.appLogicRegDataSize);
+
+			cmd.movMem(module.moduleAppDataOffset, module.appRegDataOffset, module.appLogicDataSize);
 
 			cmd.setComment(QString(tr("copy %1 data (place %2) to modules memory")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
 
@@ -1790,6 +2087,12 @@ namespace Builder
 		m_code.getAsmCode(asmCode);
 
 		result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.asm").arg(m_lm->caption()), asmCode);
+
+		QStringList memFile;
+
+		m_memoryMap.getFile(memFile);
+
+		result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.mem").arg(m_lm->caption()), memFile);
 
 		//
 
@@ -2151,9 +2454,18 @@ namespace Builder
 						}
 						else
 						{
+							if (module.device->moduleFamily() == Hardware::DeviceModule::FamilyType::AIM ||
+								module.device->moduleFamily() == Hardware::DeviceModule::FamilyType::AOM)
+							{
+								// NEED IMPLEMENTATION!!!!
+								//
+								assert(false);
+								continue;
+							}
+
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 							//
-							Address16 ramRegAddr(module.appDataOffset + signalOffset, bit);
+							Address16 ramRegAddr(module.appRegDataOffset + signalOffset, bit);
 
 							signal->ramAddr() = ramRegAddr;
 							signal->regAddr() = ramRegAddr;

@@ -216,6 +216,9 @@ private:
 	double m_maxDifference = 0.5;
 	ByteOrder m_byteOrder = ByteOrder::BigEndian;
 
+	Address16 m_iobufferAddr;			// only for modules input/output signals
+										// signal address in i/o modules buffers
+
 	Address16 m_ramAddr;				// signal address in LM RAM
 	Address16 m_regAddr;				// signal address in FSC data packet (registration address)
 
@@ -277,9 +280,11 @@ public:
 	QDateTime instanceCreated() const { return m_instanceCreated; }
 	InstanceAction instanceAction() const { return m_instanceAction; }
 
+	Address16& iobufferAddr() { return m_iobufferAddr; }
 	Address16& ramAddr() { return m_ramAddr; }
 	Address16& regAddr() { return m_regAddr; }
 
+	const Address16& iobufferAddr() const { return m_iobufferAddr; }
 	const Address16& ramAddr() const { return m_ramAddr; }
 	const Address16& regAddr() const { return m_regAddr; }
 
