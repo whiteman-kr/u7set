@@ -94,6 +94,7 @@ public slots:
 
 	void slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
+	void slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
 
 	void slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
@@ -101,6 +102,7 @@ public slots:
 	void slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
 
 	void slot_checkIn(std::vector<DbFileInfo>* files, QString comment);
+	void slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);
 	void slot_checkOut(std::vector<DbFileInfo>* files);
 	void slot_undoChanges(std::vector<DbFileInfo>* files);
 

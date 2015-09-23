@@ -15,45 +15,45 @@
 const UpgradeItem DbWorker::upgradeItems[] =
 {
 	{"Create project", ":/DatabaseUpgrade/Upgrade0001.sql"},
-	{"Add Changeset table", ":/DatabaseUpgrade/Upgrade0002.sql"},
-	{"Add Disabled column to Users table", ":/DatabaseUpgrade/Upgrade0003.sql"},
-	{"Add GetUserID fucntion", ":/DatabaseUpgrade/Upgrade0004.sql"},
-	{"Add File table", ":/DatabaseUpgrade/Upgrade0005.sql"},
-	{"Add File to Changeset table", ":/DatabaseUpgrade/Upgrade0006.sql"},
-	{"Add UUID extension, cretae FileInstance table", ":/DatabaseUpgrade/Upgrade0007.sql"},
-	{"Add CheckOut table", ":/DatabaseUpgrade/Upgrade0008.sql"},
-	{"Add UndoFilePendingChanges function", ":/DatabaseUpgrade/Upgrade0009.sql"},
-	{"Add UNIQUE(FileID), UNIQUE(SignalID) to the CheckOut table", ":/DatabaseUpgrade/Upgrade0010.sql"},
-	{"Add SysttemInst, CaseInst, SubblockInst and BlockInst tables", ":/DatabaseUpgrade/Upgrade0011.sql"},
-	{"Add SystemID, CaseID, SubblockID, BlockID columns to CheckOut table", ":/DatabaseUpgrade/Upgrade0012.sql"},
-	{"Add GetFileList stored procedure", ":/DatabaseUpgrade/Upgrade0013.sql"},
-	{"Add AddFile stored procedure", ":/DatabaseUpgrade/Upgrade0014.sql"},
-	{"Add fields ParentID, Deleted to File table", ":/DatabaseUpgrade/Upgrade0015.sql"},
-	{"Replace AddFile function", ":/DatabaseUpgrade/Upgrade0016.sql"},
-	{"Add GetWorkcopy function", ":/DatabaseUpgrade/Upgrade0017.sql"},
-	{"Add CheckIn function", ":/DatabaseUpgrade/Upgrade0018.sql"},
-	{"Add system folders (AFBL, AL, HC, WVS, DVS)", ":/DatabaseUpgrade/Upgrade0019.sql"},
-	{"Add tables for storing application signals", ":/DatabaseUpgrade/Upgrade0020.sql"},
-	{"Add AddSystem function", ":/DatabaseUpgrade/Upgrade0021.sql"},
-	{"Add add_device function, drop AddSystem", ":/DatabaseUpgrade/Upgrade0022.sql"},
-	{"Add is_admin function", ":/DatabaseUpgrade/Upgrade0023.sql"},
-	{"Add CheckedInInstanceID, CheckedOutInstanceID to table File", ":/DatabaseUpgrade/Upgrade0024.sql"},
-	{"Add columns in Signal table and some stored procedures", ":/DatabaseUpgrade/Upgrade0025.sql"},
-	{"Changes in  get_file_list, add_file", ":/DatabaseUpgrade/Upgrade0026.sql"},
-	{"Add action column to result from get_file_list", ":/DatabaseUpgrade/Upgrade0027.sql"},
-	{"Type ObjectState was added", ":/DatabaseUpgrade/Upgrade0028.sql"},
-	{"File API, adding ObjectState to results", ":/DatabaseUpgrade/Upgrade0029.sql"},
-	{"Signal API, adding ObjectState to results", ":/DatabaseUpgrade/Upgrade0030.sql"},
-	{"File API, adding get_file_info", ":/DatabaseUpgrade/Upgrade0031.sql"},
-	{"Add MC system file", ":/DatabaseUpgrade/Upgrade0032.sql"},
-	{"Add presets to equipment configuration", ":/DatabaseUpgrade/Upgrade0033.sql"},
-	{"Add Build table", ":/DatabaseUpgrade/Upgrade0034.sql"},
-	{"Add OutputRangeMode column to SignalInstance table", ":/DatabaseUpgrade/Upgrade0035.sql"},
-	{"Add get_file_id dunctions", ":/DatabaseUpgrade/Upgrade0036.sql"},
-	{"Add module presets", ":/DatabaseUpgrade/Upgrade0037.sql"},
-	{"Add get_last_signals function", ":/DatabaseUpgrade/Upgrade0038.sql"},
-	{"Delete DataFormat table and remove corresponding constraints", ":/DatabaseUpgrade/Upgrade0039.sql"},
-	{"Added CycleDuration to LM-1, AppLogicOffset changed to 117 in DIM", ":/DatabaseUpgrade/Upgrade0040.sql"},
+	{"Upgrade to version 2", ":/DatabaseUpgrade/Upgrade0002.sql"},
+	{"Upgrade to version 3", ":/DatabaseUpgrade/Upgrade0003.sql"},
+	{"Upgrade to version 4", ":/DatabaseUpgrade/Upgrade0004.sql"},
+	{"Upgrade to version 5", ":/DatabaseUpgrade/Upgrade0005.sql"},
+	{"Upgrade to version 6", ":/DatabaseUpgrade/Upgrade0006.sql"},
+	{"Upgrade to version 7", ":/DatabaseUpgrade/Upgrade0007.sql"},
+	{"Upgrade to version 8", ":/DatabaseUpgrade/Upgrade0008.sql"},
+	{"Upgrade to version 9", ":/DatabaseUpgrade/Upgrade0009.sql"},
+	{"Upgrade to version 10", ":/DatabaseUpgrade/Upgrade0010.sql"},
+	{"Upgrade to version 11", ":/DatabaseUpgrade/Upgrade0011.sql"},
+	{"Upgrade to version 12", ":/DatabaseUpgrade/Upgrade0012.sql"},
+	{"Upgrade to version 13", ":/DatabaseUpgrade/Upgrade0013.sql"},
+	{"Upgrade to version 14", ":/DatabaseUpgrade/Upgrade0014.sql"},
+	{"Upgrade to version 15", ":/DatabaseUpgrade/Upgrade0015.sql"},
+	{"Upgrade to version 16", ":/DatabaseUpgrade/Upgrade0016.sql"},
+	{"Upgrade to version 17", ":/DatabaseUpgrade/Upgrade0017.sql"},
+	{"Upgrade to version 18", ":/DatabaseUpgrade/Upgrade0018.sql"},
+	{"Upgrade to version 19", ":/DatabaseUpgrade/Upgrade0019.sql"},
+	{"Upgrade to version 20", ":/DatabaseUpgrade/Upgrade0020.sql"},
+	{"Upgrade to version 21", ":/DatabaseUpgrade/Upgrade0021.sql"},
+	{"Upgrade to version 22", ":/DatabaseUpgrade/Upgrade0022.sql"},
+	{"Upgrade to version 23", ":/DatabaseUpgrade/Upgrade0023.sql"},
+	{"Upgrade to version 24", ":/DatabaseUpgrade/Upgrade0024.sql"},
+	{"Upgrade to version 25", ":/DatabaseUpgrade/Upgrade0025.sql"},
+	{"Upgrade to version 26", ":/DatabaseUpgrade/Upgrade0026.sql"},
+	{"Upgrade to version 27", ":/DatabaseUpgrade/Upgrade0027.sql"},
+	{"Upgrade to version 28", ":/DatabaseUpgrade/Upgrade0028.sql"},
+	{"Upgrade to version 29", ":/DatabaseUpgrade/Upgrade0029.sql"},
+	{"Upgrade to version 30", ":/DatabaseUpgrade/Upgrade0030.sql"},
+	{"Upgrade to version 31", ":/DatabaseUpgrade/Upgrade0031.sql"},
+	{"Upgrade to version 32", ":/DatabaseUpgrade/Upgrade0032.sql"},
+	{"Upgrade to version 33", ":/DatabaseUpgrade/Upgrade0033.sql"},
+	{"Upgrade to version 34", ":/DatabaseUpgrade/Upgrade0034.sql"},
+	{"Upgrade to version 35", ":/DatabaseUpgrade/Upgrade0035.sql"},
+	{"Upgrade to version 36", ":/DatabaseUpgrade/Upgrade0036.sql"},
+	{"Upgrade to version 37", ":/DatabaseUpgrade/Upgrade0037.sql"},
+	{"Upgrade to version 38", ":/DatabaseUpgrade/Upgrade0038.sql"},
+	{"Upgrade to version 39", ":/DatabaseUpgrade/Upgrade0039.sql"},
+	{"Upgrade to version 40", ":/DatabaseUpgrade/Upgrade0040.sql"},
 };
 
 
@@ -1138,20 +1138,20 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 		{
 			std::shared_ptr<int*> closeDb(nullptr, [&db, &result](void*)
-			{
-				if (result == true)
 				{
-					qDebug() << "Upgrade: Commit changes.";
-					db.commit();
-				}
-				else
-				{
-					qDebug() << "Upgrade: Rollback changes.";
-					db.rollback();
-				}
+					if (result == true)
+					{
+						qDebug() << "Upgrade: Commit changes.";
+						db.commit();
+					}
+					else
+					{
+						qDebug() << "Upgrade: Rollback changes.";
+						db.rollback();
+					}
 
-				db.close();
-			});
+					db.close();
+				});
 
 			// Get project version, check it
 			//
@@ -1247,6 +1247,90 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				}
 
 				qDebug() << "End upgrade item";
+			}
+
+			// The table FileInstance has details field which is JSONB, details for some files
+			// DeviceObjects has some description in details() method
+			// Some files can be added during update and most likely
+			// these instances will not contain details,
+			// Here, read Equipment Configuration Files, parse them, update details column
+			//
+			{
+				QString reqEquipmentList =
+R"(
+SELECT
+	FI.FileInstanceID AS FileInstanceID, F.FileID AS FileID, F.Name AS Name
+FROM
+	FileInstance AS FI, File AS F
+WHERE
+	FI.FileID = F.FileID AND
+	(FI.FileInstanceID = F.CheckedInInstanceID OR FI.FileInstanceID = F.CheckedOutInstanceID) AND
+	(Name ILIKE '%.hsm' OR Name ILIKE '%.hrk' OR Name ILIKE '%.hcs' OR Name ILIKE '%.hmd' OR Name ILIKE '%.hcr' OR Name ILIKE '%.hws' OR Name ILIKE '%.hsw' OR Name ILIKE '%.hds') AND
+	FI.Details = '{}';
+)";
+
+				qDebug() << "Update file details";
+
+				QSqlQuery euipmentListQuery(db);
+				result = euipmentListQuery.exec(reqEquipmentList);
+
+				if (result == false)
+				{
+					emitError(euipmentListQuery.lastError());
+					return;
+				}
+
+				while (euipmentListQuery.next())
+				{
+					QUuid fileInstanceId = euipmentListQuery.value(0).toUuid();
+					int fileId = euipmentListQuery.value(1).toInt();
+					QString fileName = euipmentListQuery.value(2).toString();
+
+					qDebug() << "FileName: " << fileName << ", FileID: " << fileId << ", FileInstanceID: " << fileInstanceId.toString();
+
+					// Get file instance, read it to DeviceObject
+					//
+					{
+						QSqlQuery getFileQuery(db);
+
+						result = getFileQuery.exec(QString("SELECT Data FROM FileInstance WHERE FileInstanceID = '%1';").arg(fileInstanceId.toString()));
+
+						if (result == false || getFileQuery.next() == false)
+						{
+							emitError(tr("Cannot get file data, FileInstanceID: %1").arg(fileInstanceId.toString()));
+							return;
+						}
+
+						QByteArray data = getFileQuery.value(0).toByteArray();
+						Hardware::DeviceObject* device = Hardware::DeviceObject::Create(data);
+
+						if (device == nullptr)
+						{
+							result = false;
+							emitError(tr("Cannot read file data, FileName %1, FileInstanceID %2.").arg(fileName).arg(fileInstanceId.toString()));
+							return;
+						}
+
+						getFileQuery.clear();
+
+						QString details = device->details();
+
+						// Update details field in DB
+						//
+						QSqlQuery updateDetailsQuery(db);
+
+						result = updateDetailsQuery.exec(
+							QString("UPDATE FileInstance SET Details = '%1' WHERE FileInstanceID = '%2';")
+								.arg(details)
+								.arg(fileInstanceId.toString()));
+
+						if (result == false)
+						{
+							emitError(tr("Cannot update file details, FileInstanceID: %1").arg(fileInstanceId.toString()));
+							return;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -1598,6 +1682,7 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
 		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
 		fileInfo.setUserId(q.value("UserID").toInt());
+		fileInfo.setDetails(q.value("Details").toString());
 
 		if (deleted == false)
 		{
@@ -1681,6 +1766,7 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
 		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
 		fileInfo.setUserId(q.value("UserID").toInt());
+		fileInfo.setDetails(q.value("Details").toString());
 
 		if (deleted == false)
 		{
@@ -1745,7 +1831,7 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		request.append(data);
 		data.clear();
 
-		request += ");";
+		request += QString(", '%1');").arg(file->details());
 
 		QSqlQuery q(db);
 
@@ -1975,6 +2061,62 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	return;
 }
 
+void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (parentFileInfo.fileId() == -1 ||
+		out == nullptr)
+	{
+		assert(parentFileInfo.fileId() != -1);
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	// request, result is a list of DbFile
+	//
+	QString request = QString("SELECT * FROM get_checked_out_files(%1, %2);")
+			.arg(currentUser().userId())
+			.arg(parentFileInfo.fileId());
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(tr("Can't get file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+		db_updateFile(q, file.get());
+
+		out->push_back(file);
+	}
+
+	return;
+}
+
+
 void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
 {
 	// Init automitic varaiables
@@ -2058,6 +2200,8 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 
 		file->setUserId(q.value("UserID").toInt());
 
+		file->setDetails(q.value("Details").toString());
+
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
 
@@ -2123,7 +2267,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 		request.append(data);
 		data.clear();
 
-		request += ");";
+		request += QString(", '%1');").arg(file->details());
 
 		QSqlQuery q(db);
 
@@ -2237,6 +2381,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
 		file->setUserId(q.value("UserID").toInt());
+		file->setDetails(q.value("Details").toString());
 
 		QByteArray data = q.value("Data").toByteArray();
 		file->swapData(data);
@@ -2330,6 +2475,93 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 			}
 		}
 		assert(updated == true);
+	}
+
+	return;
+}
+
+void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (parentFiles == nullptr ||
+		parentFiles->empty() == true ||
+		outCheckedIn == nullptr)
+	{
+		assert(parentFiles != nullptr);
+		assert(parentFiles->empty() != true);
+		assert(outCheckedIn != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM check_in_tree(%1, ARRAY[")
+		.arg(currentUser().userId());
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < parentFiles->size(); i++)
+	{
+		auto file = parentFiles->at(i);
+
+		if (i == 0)
+		{
+			request += QString("%1").arg(file.fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(file.fileId());
+		}
+	}
+
+	request += QString("], '%1');")
+			.arg(comment);
+
+	// request
+	//
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't check in. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	// Result is table of (ObjectState);
+	//
+	outCheckedIn->clear();
+
+	int resultSize = q.size();
+	if (resultSize != -1)
+	{
+		outCheckedIn->reserve(resultSize);
+	}
+
+	while (q.next())
+	{
+		// Update file state
+		//
+		DbFileInfo fi;
+
+		db_updateFileState(q, &fi, false);
+		outCheckedIn->push_back(fi);
 	}
 
 	return;
@@ -2660,7 +2892,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		nesting ++;
 
 		// request
-		// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
+		// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text, details text)
 		//
 		QByteArray data;
 		bool result = current->Save(data);
@@ -2675,11 +2907,12 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		QString strData;
 		DbFile::convertToDatabaseString(data, &strData);
 
-		QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4');")
+		QString request = QString("SELECT * FROM add_device(%1, %2, %3, '%4', '%5');")
 				.arg(currentUser().userId())
 				.arg(strData)
 				.arg(parentId)
-				.arg(current->fileExtension());
+				.arg(current->fileExtension())
+				.arg(current->details());
 
 		strData.clear();
 
@@ -3916,6 +4149,8 @@ bool DbWorker::db_updateFile(const QSqlQuery& q, DbFile* file) const
 	file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
 
 	file->setUserId(q.value("UserID").toInt());
+
+	file->setDetails(q.value("Details").toString());
 
 	QByteArray data = q.value("Data").toByteArray();
 	file->swapData(data);

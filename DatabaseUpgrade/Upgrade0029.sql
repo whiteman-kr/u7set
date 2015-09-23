@@ -60,8 +60,8 @@ LANGUAGE plpgsql;
 
 DROP FUNCTION add_file(integer, text, integer, bytea);
 
-CREATE OR REPLACE FUNCTION add_file(user_id integer, file_name text, parent_id integer, file_data bytea)
-RETURNS ObjectState AS
+CREATE OR REPLACE FUNCTION add_file(user_id INTEGER, file_name TEXT, parent_id INTEGER, file_data bytea, details TEXT)
+RETURNS objectstate AS
 $BODY$
 DECLARE
 	exists int;
@@ -80,8 +80,8 @@ BEGIN
 	INSERT INTO CheckOut (UserID, FileID)
 		VALUES (user_id, newfileid);
 
-	INSERT INTO FileInstance (FileID, Size, Data, Action)
-		VALUES (newfileid, length(file_data), file_data, 1) RETURNING FileInstanceID INTO newfileinstanceid;
+	INSERT INTO FileInstance (FileID, Size, Data, Action, Details)
+		VALUES (newfileid, length(file_data), file_data, 1, details::jsonb) RETURNING FileInstanceID INTO newfileinstanceid;
 
 	UPDATE File SET CheckedOutInstanceID = newfileinstanceid WHERE FileID = newfileid;
 
@@ -99,7 +99,7 @@ LANGUAGE plpgsql;
 -------------------------------------------------------------------------------
 DROP FUNCTION add_device(integer, bytea, integer, text);
 
-CREATE OR REPLACE FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text)
+CREATE OR REPLACE FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text, details TEXT)
 RETURNS ObjectState AS
 $BODY$
 DECLARE
@@ -116,7 +116,7 @@ BEGIN
 	new_filename := 'device-' || new_filename || file_extension;	-- smthng like: device-5be363ac-3c02-11e4-9de8-3f84f459cb27.hsystem
 
 	-- add new file
-	SELECT * INTO add_result FROM add_file(user_id, new_filename, parent_id, file_data);
+	SELECT * INTO add_result FROM add_file(user_id, new_filename, parent_id, file_data, details);
 	RETURN add_result;
 END
 $BODY$
@@ -318,6 +318,84 @@ $BODY$
 LANGUAGE plpgsql;
 
 
+
+-------------------------------------------------------------------------------
+--
+--							check_in_tree
+--
+-------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION check_in_tree(user_id integer, parent_file_ids integer[], checkin_comment text)
+  RETURNS SETOF objectstate AS
+$BODY$
+DECLARE
+	NewChangesetID int;
+	parent_id int;
+	file_id int;
+	file_result ObjectState;
+	checked_out_ids integer[];
+BEGIN
+
+	FOREACH parent_id IN ARRAY parent_file_ids
+	LOOP
+		-- get all checked out files for parents (including parent)
+		checked_out_ids := array_cat(
+			array(
+				SELECT SQ.FileID FROM (
+					(WITH RECURSIVE files(FileID, ParentID) AS (
+							SELECT FileID, ParentID FROM get_file_list(user_id, parent_id, '%')
+						UNION ALL
+							SELECT FL.FileID, FL.ParentID FROM Files, get_file_list(user_id, files.FileID, '%') FL
+						)
+						SELECT * FROM files)
+					UNION
+						SELECT FileID, ParentID FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = parent_id), '%') WHERE FileID = parent_id
+				) SQ, File AS F
+				WHERE SQ.FileID = F.FileID AND F.CheckedOutInstanceID IS NOT NULL
+				ORDER BY SQ.FileID
+			), checked_out_ids);
+
+	END LOOP;
+
+	IF (array_length(checked_out_ids, 1) = 0)
+	THEN
+		-- Nothing to check in
+		RETURN;
+	END IF;
+
+	-- Add new record to Changeset
+	INSERT INTO Changeset (UserID, Comment, File)
+		VALUES (user_id, checkin_comment, TRUE)
+		RETURNING ChangesetID INTO NewChangesetID;
+
+	-- Set File.Deleted flag if action in FileInstance is Deleted
+	UPDATE File SET Deleted = TRUE
+	WHERE
+		FileID = ANY(checked_out_ids) AND
+		3 = (SELECT Action FROM FileInstance FI WHERE FI.FileInstanceID = CheckedOutInstanceID AND FI.FileID = FileID);
+
+	-- Set CheckedInInstance to current CheckedOutInstance, and set CheckedOutInstanceID to NULL
+	UPDATE File SET CheckedInInstanceID = CheckedOutInstanceID WHERE FileID = ANY(checked_out_ids);
+	UPDATE File SET CheckedOutInstanceID = NULL WHERE FileID = ANY(checked_out_ids);
+
+	-- Update FileInstance, set it's ChangesetID
+	UPDATE FileInstance SET ChangesetID = NewChangesetID WHERE FileID = ANY(checked_out_ids) AND ChangesetID IS NULL;
+
+	-- Remove CheckOut roecords
+	DELETE FROM CheckOut WHERE FileID = ANY(checked_out_ids);
+
+	-- Return result
+	FOREACH file_id IN ARRAY checked_out_ids
+	LOOP
+		file_result := get_file_state(file_id);
+		RETURN NEXT file_result;
+	END LOOP;
+
+	RETURN;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+
 -------------------------------------------------------------------------------
 --
 --							check_out
@@ -347,9 +425,9 @@ BEGIN
 
 		-- Make new work copy in FileInstance
 		INSERT INTO
-			FileInstance (Data, Size, FileID, ChangesetID, Action)
+			FileInstance (Data, Size, FileID, ChangesetID, Action, Details)
 			SELECT
-				Data, length(Data) AS Size, FileId, NULL, 2
+				Data, length(Data) AS Size, FileId, NULL, 2, Details
 			FROM
 				FileInstance
 			WHERE
@@ -392,7 +470,8 @@ CREATE TYPE dbfile AS (
 	checkedout boolean,
 	checkouttime timestamp with time zone,
 	userid integer,
-	action integer
+	action integer,
+	details text
 );
 
 
@@ -425,7 +504,8 @@ BEGIN
 				TRUE,	-- Checked_out
 				CO.Time As ChechOutOrInTime,	-- CheckOutTime
 				CO.UserID AS UserID,
-				FI.Action AS Action
+				FI.Action AS Action,
+				FI.Details::text AS Details
 			FROM
 				File F, FileInstance FI, Checkout CO
 			WHERE
@@ -447,7 +527,8 @@ BEGIN
 				FALSE,	-- Checked_in
 				CS.Time As ChechOutOrInTime,	-- CheckIn time
 				CS.UserID AS UserID,
-				FI.Action AS Action
+				FI.Action AS Action,
+				FI.Details::text AS Details
 			FROM
 				File F, FileInstance FI, Changeset CS
 			WHERE
@@ -504,3 +585,17 @@ END
 $BODY$
 LANGUAGE plpgsql;
 
+-------------------------------------------------------------------------------
+--
+--							get_checked_out_files
+--
+-------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_checked_out_files(user_id integer, parent_file_id integer)
+RETURNS SETOF dbfile AS
+$BODY$
+DECLARE
+BEGIN
+	RETURN QUERY (SELECT * FROM get_latest_file_tree_version(user_id, parent_file_id) WHERE CheckedOut = TRUE);
+END;
+$BODY$
+LANGUAGE plpgsql;

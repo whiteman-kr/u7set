@@ -56,7 +56,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	// Add main tab pages
 	//
 	getCentralWidget()->addTabPage(new ProjectsTabPage(dbController(), nullptr), tr("Projects"));
-	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Hardware Configuration"));
+	getCentralWidget()->addTabPage(new EquipmentTabPage(dbController(), nullptr), tr("Equipment"));
 	getCentralWidget()->addTabPage(new SignalsTabPage(dbController(), nullptr), tr("Application Signals"));
 	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
 //	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));

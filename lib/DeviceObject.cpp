@@ -1218,6 +1218,19 @@ namespace Hardware
 		return c;
 	}
 
+	const QUuid& DeviceObject::uuid() const
+	{
+		return m_uuid;
+	}
+
+	void DeviceObject::setUuid(const QUuid& value)
+	{
+		if (m_uuid != value)
+		{
+			m_uuid = value;
+		}
+	}
+
 	const QString& DeviceObject::strId() const
 	{
 		return m_strId;
@@ -1225,7 +1238,10 @@ namespace Hardware
 
 	void DeviceObject::setStrId(const QString& value)
 	{
-		m_strId = value;
+		if (m_strId != value)
+		{
+			m_strId = value;
+		}
 	}
 
 	const QString& DeviceObject::caption() const
@@ -1235,22 +1251,28 @@ namespace Hardware
 
 	void DeviceObject::setCaption(const QString& value)
 	{
-		m_caption = value;
+		if (m_caption != value)
+		{
+			m_caption = value;
+		}
 	}
 
 	DbFileInfo& DeviceObject::fileInfo()
 	{
+		//m_fileInfo.setDetails(details());		// fileInfo() is called to often
 		return m_fileInfo;
 	}
 
 	const DbFileInfo& DeviceObject::fileInfo() const
 	{
+		//const_cast<DeviceObject*>(this)->m_fileInfo.setDetails(details());	// fileInfo() is called to often
 		return m_fileInfo;
 	}
 
 	void DeviceObject::setFileInfo(const DbFileInfo& value)
 	{
 		m_fileInfo = value;
+		m_fileInfo.setDetails(details());
 	}
 
 	const QString& DeviceObject::childRestriction() const
@@ -1290,7 +1312,31 @@ namespace Hardware
 
 	void DeviceObject::setPlace(int value)
 	{
-		m_place = value;
+		if (m_place != value)
+		{
+			m_place = value;
+		}
+	}
+
+	// JSON short description, uuid, strId, caption, place, etc
+	//
+	QString DeviceObject::details() const
+	{
+		QString json = QString(
+R"DELIM({
+	"Uuid" : "%1",
+	"StrID" : "%2",
+	"Caption" : "%3",
+	"Place" : %4,
+	"Type" : "%5"
+})DELIM")
+			.arg(uuid().toString())
+			.arg(strId())
+			.arg(caption())
+			.arg(place())
+			.arg(fileExtension());
+
+		return json;
 	}
 
 	bool DeviceObject::preset() const

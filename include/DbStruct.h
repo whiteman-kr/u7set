@@ -260,6 +260,9 @@ public:
 	int userId() const;
 	void setUserId(int value);
 
+	QString details() const;
+	void setDetails(QString value);		// Value must be valid JSON, Example: "{}"
+
 	// Data
 	//
 protected:
@@ -276,6 +279,8 @@ protected:
 	VcsState m_state;
 	VcsItemAction m_action;
 	int m_userId = -1;
+
+	QString m_details;
 };
 
 //

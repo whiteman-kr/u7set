@@ -60,6 +60,7 @@ public:
 	bool getLatestVersion(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
 	bool getLatestTreeVersion(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
+	bool getCheckedOutFiles(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 
 	bool getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getWorkcopy(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
@@ -72,6 +73,7 @@ public:
 
 	bool checkIn(DbFileInfo& file, const QString& comment, QWidget* parentWidget);
 	bool checkIn(std::vector<DbFileInfo>& files, const QString& comment, QWidget* parentWidget);
+	bool checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector<DbFileInfo>* outCheckedIn, const QString& comment, QWidget* parentWidget);
 	bool checkOut(DbFileInfo& file, QWidget* parentWidget);
 	bool checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 	bool undoChanges(DbFileInfo& file, QWidget* parentWidget);
@@ -137,6 +139,7 @@ signals:
 
 	void signal_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void signal_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
+	void signal_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
 
 	void signal_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void signal_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
@@ -144,6 +147,7 @@ signals:
 	void signal_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
 
 	void signal_checkIn(std::vector<DbFileInfo>* files, QString comment);
+	void signal_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
 

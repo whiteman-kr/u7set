@@ -70,6 +70,9 @@ bool isSameFieldValue(QVector<Signal*>& signalVector, std::function<bool (Signal
 		} \
 	}
 
+#define SAVE_PROPERTY_VALUE(type, propertyName) settings.setValue("LastEditedSignal: "#propertyName, m_##type##Manager->value(m_##propertyName##Property))
+#define SAVE_PROPERTY_VALUE2(type, propertyName, localPropertyName) settings.setValue("LastEditedSignal: "#propertyName, m_##type##Manager->value(m_##localPropertyName##Property))
+
 
 SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signalType, DataFormatList &dataFormatInfo, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
 	SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*>() << &signal, signalType, dataFormatInfo, unitInfo, readOnly, signalsModel, parent)
@@ -255,7 +258,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 
 		m_outputSensorProperty = m_enumManager->addProperty(tr("Sensor type"));
 		m_enumManager->setEnumNames(m_outputSensorProperty, sensorNames);
-		SET_PROPERTY_VALUE(m_enumManager, m_outputRangeModeProperty, outputRangeMode);
+		SET_PROPERTY_VALUE(m_enumManager, m_outputSensorProperty, outputSensorID);
 		m_outputTreeProperty->addSubProperty(m_outputSensorProperty);
 
 		signalProperty->addSubProperty(m_outputTreeProperty);
@@ -486,6 +489,8 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		SET_SIGNAL_STRING_FIELD_VALUE(setDeviceStrID, deviceStrID);
 	}
 
+	saveLastEditedSignalProperties();
+
 	accept();
 }
 
@@ -518,4 +523,43 @@ void SignalPropertiesDialog::checkoutSignal()
 			return;
 		}
 	}
+}
+
+void SignalPropertiesDialog::saveLastEditedSignalProperties()
+{
+	QSettings settings;
+
+	SAVE_PROPERTY_VALUE(enum, dataFormat);
+	SAVE_PROPERTY_VALUE(int, dataSize);
+	SAVE_PROPERTY_VALUE2(int, lowADC, lowAdc);
+	SAVE_PROPERTY_VALUE2(int, highADC, highAdc);
+	SAVE_PROPERTY_VALUE(double, lowLimit);
+	SAVE_PROPERTY_VALUE(double, highLimit);
+	SAVE_PROPERTY_VALUE2(enum, unitID, unit);
+	SAVE_PROPERTY_VALUE(double, adjustment);
+	SAVE_PROPERTY_VALUE(double, dropLimit);
+	SAVE_PROPERTY_VALUE(double, excessLimit);
+	SAVE_PROPERTY_VALUE(double, unbalanceLimit);
+
+	SAVE_PROPERTY_VALUE(double, inputLowLimit);
+	SAVE_PROPERTY_VALUE(double, inputHighLimit);
+	SAVE_PROPERTY_VALUE2(enum, inputUnitID, inputUnit);
+	SAVE_PROPERTY_VALUE2(enum, inputSensorID, inputSensor);
+
+	SAVE_PROPERTY_VALUE(double, outputLowLimit);
+	SAVE_PROPERTY_VALUE(double, outputHighLimit);
+	SAVE_PROPERTY_VALUE2(enum, outputUnitID, outputUnit);
+	SAVE_PROPERTY_VALUE2(enum, outputSensorID, outputSensor);
+
+	SAVE_PROPERTY_VALUE(enum, outputRangeMode);
+
+	SAVE_PROPERTY_VALUE(bool, acquire);
+	SAVE_PROPERTY_VALUE(bool, calculated);
+	SAVE_PROPERTY_VALUE(int, normalState);
+	SAVE_PROPERTY_VALUE(int, decimalPlaces);
+	SAVE_PROPERTY_VALUE(double, aperture);
+	SAVE_PROPERTY_VALUE(double, filteringTime);
+	SAVE_PROPERTY_VALUE(double, maxDifference);
+	SAVE_PROPERTY_VALUE(enum, inOutType);
+	SAVE_PROPERTY_VALUE(enum, byteOrder);
 }

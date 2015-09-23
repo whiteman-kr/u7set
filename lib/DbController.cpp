@@ -39,6 +39,7 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_getLatestVersion, m_worker, &DbWorker::slot_getLatestVersion);
 	connect(this, &DbController::signal_getLatestTreeVersion, m_worker, &DbWorker::slot_getLatestTreeVersion);
+	connect(this, &DbController::signal_getCheckedOutFiles, m_worker, &DbWorker::slot_getCheckedOutFiles);
 
 	connect(this, &DbController::signal_getWorkcopy, m_worker, &DbWorker::slot_getWorkcopy);
 	connect(this, &DbController::signal_setWorkcopy, m_worker, &DbWorker::slot_setWorkcopy);
@@ -46,6 +47,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSpecificCopy, m_worker, &DbWorker::slot_getSpecificCopy);
 
 	connect(this, &DbController::signal_checkIn, m_worker, &DbWorker::slot_checkIn);
+	connect(this, &DbController::signal_checkInTree, m_worker, &DbWorker::slot_checkInTree);
 	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
 	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
 
@@ -577,6 +579,33 @@ bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::list<std::s
 	return out;
 }
 
+bool DbController::getCheckedOutFiles(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr || file.fileId() == -1)
+	{
+		assert(out != nullptr);
+		assert(file.fileId() != -1);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getCheckedOutFiles(file, out);
+
+	ok = waitForComplete(parentWidget, tr("Getting checked out files"));
+	return out;
+}
+
 bool DbController::getWorkcopy(const std::vector<DbFileInfo>& files,
 							   std::vector<std::shared_ptr<DbFile>>* out,
 							   QWidget* parentWidget)
@@ -745,6 +774,34 @@ bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& commen
 	// Emit signal end wait for complete
 	//
 	emit signal_checkIn(&files, comment);
+
+	ok = waitForComplete(parentWidget, tr("Checking in files"));
+	return true;
+}
+
+bool DbController::checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector<DbFileInfo>* outCheckedIn, const QString& comment, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (parentFiles.empty() == true ||
+		outCheckedIn == nullptr)
+	{
+		assert(parentFiles.empty() == true);
+		assert(outCheckedIn != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_checkInTree(&parentFiles, outCheckedIn, comment);
 
 	ok = waitForComplete(parentWidget, tr("Checking in files"));
 	return true;
