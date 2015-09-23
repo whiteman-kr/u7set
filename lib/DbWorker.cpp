@@ -2267,7 +2267,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 		request.append(data);
 		data.clear();
 
-		request += QString(", %1);").arg(file->details());
+		request += QString(", '%1');").arg(file->details());
 
 		QSqlQuery q(db);
 
