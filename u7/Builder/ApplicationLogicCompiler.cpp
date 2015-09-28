@@ -283,7 +283,7 @@ namespace Builder
 
 		memFile.append("");
 
-		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "registrated discrete signals (copyed from bit-addressed memory)");
+		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "registrated discrete signals (from bit-addressed memory)");
 
 		memFile.append("");
 
@@ -295,6 +295,7 @@ namespace Builder
 		addSection(memFile, m_lmInOuts.memory, "LM's inputs/outputs memory");
 	}
 
+
 	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title)
 	{
 		memFile.append("");
@@ -303,13 +304,13 @@ namespace Builder
 		memFile.append(QString().rightJustified(80, '-'));
 
 		QString str;
-
 		str.sprintf(" %05d      %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
 
 		memFile.append(str);
 		memFile.append(QString().rightJustified(80, '-'));
 		memFile.append("");
 	}
+
 
 	void LmMemoryMap::addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title)
 	{
@@ -319,7 +320,6 @@ namespace Builder
 
 		memFile.append(str);
 	}
-
 
 
 	// ---------------------------------------------------------------------------------
@@ -708,8 +708,8 @@ namespace Builder
 			{	"LMDiagDataOffset", m_lmDiagData.ptrStartAddress() },
 			{	"LMDiagDataSize", m_lmDiagData.ptrSizeW() },
 
-			{	"LMIntOutDataOffset", m_lmIntOutData.ptrStartAddress() },
-			{	"LMIntOutDataSize", m_lmIntOutData.ptrSizeW() }
+			{	"LMInOutDataOffset", m_lmIntOutData.ptrStartAddress() },
+			{	"LMInOutDataSize", m_lmIntOutData.ptrSizeW() }
 		};
 
 		for(PropertyNameVar memSetting : memSettings)
@@ -780,9 +780,7 @@ namespace Builder
 				{	"AppLogicDataSize", &m.appLogicDataSize },
 				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve },
 
-#pragma message("!!!!!!!!!!!!!!!!!! UNCOMMENT !!!!!!!!!!!!!!!!!!!!!!")
-			//	{	"AppLogicRegDataSize", &m.appLogicRegDataSize },
-#pragma message("!!!!!!!!!!!!!!!!!! UNCOMMENT !!!!!!!!!!!!!!!!!!!!!!")
+				{	"AppLogicRegDataSize", &m.appLogicRegDataSize },
 			};
 
 			for(PropertyNameVar moduleSetting : moduleSettings)
@@ -793,6 +791,8 @@ namespace Builder
 			m.rxTxDataOffset = m_memoryMap.getModuleDataOffset(place);
 			m.moduleAppDataOffset = m.rxTxDataOffset + m.appLogicDataOffset;
 			m.appRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
+
+			m_modules.append(m);
 		}
 
 		if (result)
@@ -1125,34 +1125,63 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyInModulesAppLogicDataToRegBuf()
 	{
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//
-		//	REFACTOR!!!!
-		//
+		bool firstInputModle = true;
 
-		m_code.newLine();
-		m_code.comment("Copy input modules application logic data to RegBuf");
-		m_code.newLine();
+		bool result = true;
 
-#pragma message("!!!!!!!!!!!!!!!! REFACTOR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
-		/*for(Module module : m_modules)
+		for(Module module : m_modules)
 		{
-			if (!module.device->isInputModule())
+			if (!module.isInputModule())
 			{
 				continue;
 			}
 
-			Command cmd;
+			if (firstInputModle)
+			{
+				m_code.newLine();
+				m_code.comment("Copy input modules application logic data to RegBuf");
+				m_code.newLine();
 
-			cmd.movMem(module.appRegDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
+				firstInputModle = false;
+			}
 
-			cmd.setComment(QString(tr("copy %1 data (place %2) to RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+			switch(module.familyType())
+			{
+			case Hardware::DeviceModule::FamilyType::DIM:
+				copyDimDataToRegBuf(module);
+				break;
 
-			m_code.append(cmd);
-		}*/
+			case Hardware::DeviceModule::FamilyType::AIM:
+				copyAimDataToRegBuf(module);
+				break;
 
-		return true;
+			default:
+				assert(false);
+
+				LOG_ERROR(m_log, tr("Unknown input module family type"));
+
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
+
+	void ModuleLogicCompiler::copyDimDataToRegBuf(const Module& module)
+	{
+		Command cmd;
+
+		cmd.movMem(module.appRegDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
+
+		cmd.setComment(QString(tr("copy %1 data (place %2) to RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+
+		m_code.append(cmd);
+	}
+
+
+	void ModuleLogicCompiler::copyAimDataToRegBuf(const Module& module)
+	{
 	}
 
 
@@ -1163,7 +1192,7 @@ namespace Builder
 
 		for(Module module : m_modules)
 		{
-			if (!module.device->isOutputModule())
+			if (!module.isOutputModule())
 			{
 				continue;
 			}
@@ -2004,45 +2033,76 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyOutModulesAppLogicDataToModulesMemory()
 	{
-		m_code.newLine();
-		m_code.comment("Copy output modules application logic data to modules memory");
+		bool firstOutputModule = true;
+
+		bool result = true;
 
 		for(Module module : m_modules)
 		{
-			if (!module.device->isOutputModule())
+			if (!module.isOutputModule())
 			{
 				continue;
 			}
 
-			if (module.device->moduleFamily() == Hardware::DeviceModule::FamilyType::AOM)
+			if (firstOutputModule)
 			{
-				// NEED IMPLEMENTATION!!!
+				m_code.newLine();
+				m_code.comment("Copy output modules application logic data to modules memory");
+
+				firstOutputModule = false;
+			}
+
+			switch(module.familyType())
+			{
+			case Hardware::DeviceModule::FamilyType::AOM:
+				copyAomDataToModuleMemory(module);
+				break;
+
+			case Hardware::DeviceModule::FamilyType::DOM:
+				copyDomDataToModuleMemory(module);
+				break;
+
+			default:
+				// unknown output module family type
 				//
 				assert(false);
-				continue;
-			}
 
-			Command cmd;
+				LOG_ERROR(m_log, tr("Unknown output module family type"));
 
-			assert(module.appLogicDataSize == module.appLogicRegDataSize);
-
-			cmd.movMem(module.moduleAppDataOffset, module.appRegDataOffset, module.appLogicDataSize);
-
-			cmd.setComment(QString(tr("copy %1 data (place %2) to modules memory")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
-
-			m_code.newLine();
-			m_code.append(cmd);
-
-			if (module.appLogicDataSize < module.appLogicDataSizeWithReserve)
-			{
-				cmd.setMem(module.moduleAppDataOffset + module.appLogicDataSize, module.appLogicDataSizeWithReserve - module.appLogicDataSize, 0);
-				cmd.setComment(QString(tr("set reserv data to 0")));
-
-				m_code.append(cmd);
+				result = false;
 			}
 		}
 
-		return true;
+		return result;
+	}
+
+
+	void ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
+	{
+		Command cmd;
+
+		assert(module.appLogicDataSize == module.appLogicRegDataSize);
+
+		cmd.movMem(module.moduleAppDataOffset, module.appRegDataOffset, module.appLogicDataSize);
+
+		cmd.setComment(QString(tr("copy %1 data (place %2) to modules memory")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+
+		m_code.newLine();
+		m_code.append(cmd);
+
+		if (module.appLogicDataSize < module.appLogicDataSizeWithReserve)
+		{
+			cmd.setMem(module.moduleAppDataOffset + module.appLogicDataSize, module.appLogicDataSizeWithReserve - module.appLogicDataSize, 0);
+			cmd.setComment(QString(tr("set reserv data to 0")));
+
+			m_code.append(cmd);
+		}
+	}
+
+
+	void ModuleLogicCompiler::copyAomDataToModuleMemory(const Module& module)
+	{
+		// NEEED IMPLEMENTATION!!!!!!!!!!!
 	}
 
 
@@ -2454,8 +2514,8 @@ namespace Builder
 						}
 						else
 						{
-							if (module.device->moduleFamily() == Hardware::DeviceModule::FamilyType::AIM ||
-								module.device->moduleFamily() == Hardware::DeviceModule::FamilyType::AOM)
+							if (module.familyType() == Hardware::DeviceModule::FamilyType::AIM ||
+								module.familyType() == Hardware::DeviceModule::FamilyType::AOM)
 							{
 								// NEED IMPLEMENTATION!!!!
 								//
@@ -3442,7 +3502,7 @@ namespace Builder
 	// ---------------------------------------------------------------------------------------
 
 
-	bool ModuleLogicCompiler::Module::isInputModule()
+	bool ModuleLogicCompiler::Module::isInputModule() const
 	{
 		if (device == nullptr)
 		{
@@ -3454,7 +3514,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::Module::isOutputModue()
+	bool ModuleLogicCompiler::Module::isOutputModule() const
 	{
 		if (device == nullptr)
 		{
@@ -3465,7 +3525,7 @@ namespace Builder
 		return device->isOutputModule();
 	}
 
-	Hardware::DeviceModule::FamilyType ModuleLogicCompiler::Module::familyType()
+	Hardware::DeviceModule::FamilyType ModuleLogicCompiler::Module::familyType() const
 	{
 		if (device == nullptr)
 		{

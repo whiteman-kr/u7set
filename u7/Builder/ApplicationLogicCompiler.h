@@ -523,9 +523,9 @@ namespace Builder
 
 			int appRegDataOffset = 0;			// offset of module application data for processing (in registration buffer)
 
-			bool isInputModule();
-			bool isOutputModue();
-			Hardware::DeviceModule::FamilyType familyType();
+			bool isInputModule() const;
+			bool isOutputModule() const;
+			Hardware::DeviceModule::FamilyType familyType() const;
 		};
 
 		// input parameters
@@ -632,6 +632,9 @@ namespace Builder
 
 		bool copyLMDiagDataToRegBuf();
 		bool copyInModulesAppLogicDataToRegBuf();
+		void copyDimDataToRegBuf(const Module& module);
+		void copyAimDataToRegBuf(const Module& module);
+
 		bool initOutModulesAppLogicDataInRegBuf();
 
 		bool generateAppLogicCode();
@@ -651,7 +654,11 @@ namespace Builder
 		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
 
 		bool copyDiscreteSignalsToRegBuf();
+
 		bool copyOutModulesAppLogicDataToModulesMemory();
+
+		void copyDomDataToModuleMemory(const Module& module);
+		void copyAomDataToModuleMemory(const Module& module);
 
 		bool finishAppLogicCode();
 
