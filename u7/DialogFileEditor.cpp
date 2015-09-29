@@ -271,7 +271,7 @@ void DialogFileEditor::on_btnLoadFbl_clicked()
 
 	if (afb.loadFromXml(&xmlReader) == true)
 	{
-		QMessageBox::information(this, "XML Read", "XML debug read successful!");
+        QMessageBox::information(this, "XML Read", "XML debug read finished!");
 	}
 	else
 	{

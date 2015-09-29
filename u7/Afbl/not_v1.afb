@@ -17,7 +17,7 @@
             <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "2" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>0</LowLimit>

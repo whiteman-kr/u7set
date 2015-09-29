@@ -78,12 +78,12 @@ namespace Afb
 	//
 	// Param type
 	//
-	enum AfbParamType
+    enum AfbDataFormat
 	{
-		AnalogIntegral,
-		AnalogFloatingPoint,
-		DiscreteValue
-	};
+        UnsignedInt,
+        SignedInt,
+        Float
+    };
 
 	//
 	// AfbSignal
@@ -122,7 +122,10 @@ namespace Afb
 		Q_INVOKABLE int jsType() const;
 		void setType(AfbSignalType type);
 
-		Q_INVOKABLE int operandIndex() const;
+        AfbDataFormat dataFormat() const;
+        void setDataFormat(AfbDataFormat dataFormat);
+
+        Q_INVOKABLE int operandIndex() const;
 		void setOperandIndex(int value);
 
 		Q_INVOKABLE int size() const;
@@ -137,6 +140,7 @@ private:
 		QString m_opName;
 		QString m_caption;
 		AfbSignalType m_type;
+        AfbDataFormat m_dataFormat;
 		int m_operandIndex;
         int m_size;
 	};
@@ -154,7 +158,7 @@ private:
 		// Methods
 		//
 	public:
-		void update(const AfbParamType& type, const QVariant& lowLimit, const QVariant& highLimit);
+        void update(const AfbSignalType &type, const AfbDataFormat dataFormat, const QVariant& lowLimit, const QVariant& highLimit);
 
 		// Serialization
 		//
@@ -178,10 +182,16 @@ private:
 		bool visible() const;
 		void setVisible(bool visible);
 
-		AfbParamType type() const;
-		void setType(AfbParamType type);
+        AfbSignalType type() const;
+        void setType(AfbSignalType type);
 
-		const QVariant& value() const;
+        AfbDataFormat dataFormat() const;
+        void setDataFormat(AfbDataFormat dataFormat);
+
+        bool isAnalog() const;
+        bool isDiscrete() const;
+
+        const QVariant& value() const;
 		void setValue(const QVariant& value);
 
 		const QVariant& defaultValue() const;
@@ -214,7 +224,8 @@ private:
 		QString m_opName;			// Param name
 		QString m_caption;			// Param caption
 		bool m_visible;
-		AfbParamType m_type;		// Param type
+        AfbSignalType m_type;		// Param type
+        AfbDataFormat m_dataFormat;
 		bool m_instantiator;
 		bool m_user;
 		QString m_changedScript;

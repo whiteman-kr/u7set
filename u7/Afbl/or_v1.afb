@@ -32,7 +32,7 @@
             <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex = "20" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_oprd_quant" Caption = "oprd quant" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_oprd_quant" Caption = "oprd quant" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>2</Value>
                 <Default>2</Default>
                 <LowLimit>2</LowLimit>
@@ -46,19 +46,19 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_bus_width" Caption = "bus width" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_bus_width" Caption = "bus width" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>2</Value>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>0</LowLimit>
