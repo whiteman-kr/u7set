@@ -1113,9 +1113,9 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(m_memoryMap.getRegLmDiagnosticsAddress(),
-				   m_memoryMap.getLmDiagnosticsAddress(),
-				   m_memoryMap.getLmDiagnosticsSizeW());
+		cmd.movMem(m_memoryMap.regBufLmDiagnosticsAddress(),
+				   m_memoryMap.lmDiagnosticsAddress(),
+				   m_memoryMap.lmDiagnosticsSizeW());
 
 		m_code.append(cmd);
 
@@ -2011,7 +2011,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyDiscreteSignalsToRegBuf()
 	{
-		if (m_registeredInternalDiscreteSignalsSize == 0)
+		if (m_memoryMap.regDiscreteSignalsSizeW() == 0)
 		{
 			return true;
 		}
@@ -2022,8 +2022,9 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(m_regBufferInternalDiscreteSignalsOffset,
-				   m_registeredInternalDiscreteSignalsOffset, m_registeredInternalDiscreteSignalsSize);
+		cmd.movMem(m_memoryMap.regBufRegDiscreteSignalsAddress(),
+				   m_memoryMap.regDiscreteSignalsAddress(),
+				   m_memoryMap.regDiscreteSignalsSizeW());
 
 		m_code.append(cmd);
 
@@ -2563,7 +2564,7 @@ namespace Builder
 
 		bool result = true;
 
-		m_registeredInternalAnalogSignalsSize = 0;
+/*		m_registeredInternalAnalogSignalsSize = 0;
 		m_internalAnalogSignalsSize = 0;
 
 		m_registeredInternalDiscreteSignalsSize = 0;
@@ -2719,7 +2720,7 @@ namespace Builder
 					(*m_signals)[index].ramAddr() = ramAddr;
 				}
 			}
-		}
+		}*/
 
 		return result;
 	}

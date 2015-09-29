@@ -389,12 +389,12 @@ namespace Builder
 			int regDiscreteSignalCount;
 			int nonRegDiscreteSignalCount;
 
-			int regDiscreteSignalsSizeW()
+			int regDiscreteSignalsSizeW() const
 			{
 				return regDiscreteSignalCount % WORD_SIZE ? regDiscreteSignalCount / WORD_SIZE + 1 : regDiscreteSignalCount / WORD_SIZE;
 			}
 
-			int nonRegDiscreteSignalsSizeW()
+			int nonRegDiscreteSignalsSizeW() const
 			{
 				return nonRegDiscreteSignalCount % WORD_SIZE ? nonRegDiscreteSignalCount / WORD_SIZE + 1 : nonRegDiscreteSignalCount / WORD_SIZE;
 			}
@@ -461,9 +461,14 @@ namespace Builder
 					const MemoryArea& lmDiagData,
 					const MemoryArea& lmIntOutData);
 
-		int getLmDiagnosticsAddress() const { return m_lmDiagnostics.memory.startAddress(); }
-		int getLmDiagnosticsSizeW() const { return m_lmDiagnostics.memory.sizeW(); }
-		int getRegLmDiagnosticsAddress() const { return m_appWordAdressed.lmDiagnostics.startAddress(); }
+		int lmDiagnosticsAddress() const { return m_lmDiagnostics.memory.startAddress(); }
+		int lmDiagnosticsSizeW() const { return m_lmDiagnostics.memory.sizeW(); }
+
+		int regDiscreteSignalsAddress() const { return m_appBitAdressed.regDiscretSignals.startAddress(); }
+		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.regDiscreteSignalsSizeW(); }
+
+		int regBufLmDiagnosticsAddress() const { return m_appWordAdressed.lmDiagnostics.startAddress(); }
+		int regBufRegDiscreteSignalsAddress() const { return m_appWordAdressed.regDiscreteSignals.startAddress(); }
 
 		int getModuleDataOffset(int place);
 
@@ -562,7 +567,7 @@ namespace Builder
 
 		LmMemoryMap m_memoryMap;
 
-		int m_registeredInternalAnalogSignalsOffset = 0;	// offset of internal analog signals (in registration buffer)
+/*		int m_registeredInternalAnalogSignalsOffset = 0;	// offset of internal analog signals (in registration buffer)
 		int m_registeredInternalAnalogSignalsSize = 0;		// size of internal analog signals (in words)
 
 		int m_internalAnalogSignalsOffset = 0;				// offset of internal analog signals (in registration buffer)
@@ -577,7 +582,7 @@ namespace Builder
 
 		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit-addressed memory)
 		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
-		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals
+		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals*/
 
 		QVector<Module> m_modules;
 
