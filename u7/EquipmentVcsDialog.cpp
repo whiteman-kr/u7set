@@ -65,27 +65,33 @@ void EquipmentVcsDialog::on_m_refresh_clicked()
 
 	// Get checked out files
 	//
-	std::list<std::shared_ptr<DbFile>> files;
+	assert(false);
+//	std::list<std::shared_ptr<DbFile>> files;
 
-	DbFileInfo parentFile = m_db->systemFileInfo(m_db->hcFileId());
-	assert(parentFile.fileId() != -1);
+//	DbFileInfo parentFile = m_db->systemFileInfo(m_db->hcFileId());
+//	assert(parentFile.fileId() != -1);
 
-	bool ok = m_db->getCheckedOutFiles(parentFile, &files, this);
+//	bool ok = m_db->getCheckedOutFiles(parentFile, &files, this);
 
-	if (ok == false || files.empty() == true)
-	{
-		return;
-	}
+//	if (ok == false || files.empty() == true)
+//	{
+//		return;
+//	}
 
-	// Read files to DeviceObject
-	//
-	std::map<int, std::shared_ptr<Hardware::DeviceObject>> objectsMap;	// key is fileId
+//	// Read files to DeviceObject
+//	//
+//	std::map<int, std::shared_ptr<Hardware::DeviceObject>> objectsMap;	// key is fileId
 
-	for (const std::shared_ptr<DbFile>& f : files)
-	{
-		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
-		objectsMap[object->fileInfo().fileId()] = object;
-	}
+//	for (const std::shared_ptr<DbFile>& f : files)
+//	{
+//		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
+//		objectsMap[object->fileInfo().fileId()] = object;
+//	}
+
+
+	//---------------------_
+	//---------------------_
+	//---------------------_
 
 	// Set list of trees
 	//

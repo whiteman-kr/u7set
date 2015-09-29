@@ -335,7 +335,9 @@ void DialogAfblEditor::on_m_checkIn_clicked()
         files.push_back(*pFi);
     }
 
-    bool result = CheckInDialog::checkIn(files, m_pDbController, this);
+	std::vector<DbFileInfo> updatedFiles;
+
+	bool result = CheckInDialog::checkIn(files, false, &updatedFiles, m_pDbController, this);
     if (result == true)
     {
         refreshFiles();

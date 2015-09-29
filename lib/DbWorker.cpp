@@ -698,7 +698,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	//
 	std::vector<DbFileInfo> systemFiles;
 
-	getFileList_worker(&systemFiles, rootFileId(), "%");
+	getFileList_worker(&systemFiles, rootFileId(), "%", true);
 
 	m_mutex.lock();
 	m_afblFileId = -1;
@@ -1619,7 +1619,7 @@ void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 	return;
 }
 
-void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter)
+void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted)
 {
 	// Init automitic varaiables
 	//
@@ -1628,10 +1628,10 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 			this->m_progress->setCompleted(true);			// set complete flag on return
 		});
 
-	return getFileList_worker(files, parentId, filter);
+	return getFileList_worker(files, parentId, filter, removeDeleted);
 }
 
-void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter)
+void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted)
 {
 	// Check parameters
 	//
@@ -1671,20 +1671,10 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	{
 		DbFileInfo fileInfo;
 
-		fileInfo.setFileName(q.value("Name").toString());
-		fileInfo.setFileId(q.value("FileID").toInt());
-		bool deleted = q.value("Deleted").toBool();
-		fileInfo.setParentId(q.value("ParentID").toInt());
-		fileInfo.setSize(q.value("Size").toInt());
-		fileInfo.setChangeset(q.value("ChangesetID").toInt());
-		fileInfo.setCreated(q.value("Created").toString());
-		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
-		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
-		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
-		fileInfo.setUserId(q.value("UserID").toInt());
-		fileInfo.setDetails(q.value("Details").toString());
+		db_dbFileInfo(q, &fileInfo);
 
-		if (deleted == false)
+		if (removeDeleted == false ||
+			(removeDeleted == true && fileInfo.deleted() == false))
 		{
 			files->push_back(fileInfo);
 		}
@@ -1755,23 +1745,7 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 	{
 		DbFileInfo fileInfo;
 
-		fileInfo.setFileName(q.value("Name").toString());
-		fileInfo.setFileId(q.value("FileID").toInt());
-		bool deleted = q.value("Deleted").toBool();
-		fileInfo.setParentId(q.value("ParentID").toInt());
-		fileInfo.setSize(q.value("Size").toInt());
-		fileInfo.setChangeset(q.value("ChangesetID").toInt());
-		fileInfo.setCreated(q.value("Created").toString());
-		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
-		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
-		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
-		fileInfo.setUserId(q.value("UserID").toInt());
-		fileInfo.setDetails(q.value("Details").toString());
-
-		if (deleted == false)
-		{
-			out->push_back(fileInfo);
-		}
+		db_dbFileInfo(q, &fileInfo);
 	}
 
 	return;
@@ -2061,7 +2035,7 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	return;
 }
 
-void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out)
+void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out)
 {
 	// Init automitic varaiables
 	//
@@ -2072,10 +2046,12 @@ void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::li
 
 	// Check parameters
 	//
-	if (parentFileInfo.fileId() == -1 ||
+	if (parentFiles == nullptr ||
+		parentFiles->empty() == true ||
 		out == nullptr)
 	{
-		assert(parentFileInfo.fileId() != -1);
+		assert(parentFiles != nullptr);
+		assert(parentFiles->empty() == false);
 		assert(out != nullptr);
 		return;
 	}
@@ -2089,11 +2065,27 @@ void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::li
 		return;
 	}
 
+	// ARRAY[1, 2, 3];
+	//
+	QString filesArray;
+	for (size_t pi = 0; pi < parentFiles->size(); pi++)
+	{
+		if (pi == 0)
+		{
+			filesArray = QString("ARRAY[%1").arg(parentFiles->at(pi).fileId());
+		}
+		else
+		{
+			filesArray += QString(", %1").arg(parentFiles->at(pi).fileId());
+		}
+	}
+	filesArray += "]";
+
 	// request, result is a list of DbFile
 	//
 	QString request = QString("SELECT * FROM get_checked_out_files(%1, %2);")
 			.arg(currentUser().userId())
-			.arg(parentFileInfo.fileId());
+			.arg(filesArray);
 
 	QSqlQuery q(db);
 
@@ -2104,13 +2096,15 @@ void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::li
 		return;
 	}
 
+	out->reserve(q.size());
+
 	while (q.next())
 	{
-		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+		DbFileInfo fileInfo;
 
-		db_updateFile(q, file.get());
+		db_updateFileState(q, &fileInfo, false);
 
-		out->push_back(file);
+		out->push_back(fileInfo);
 	}
 
 	return;
@@ -4154,6 +4148,44 @@ bool DbWorker::db_updateFile(const QSqlQuery& q, DbFile* file) const
 
 	QByteArray data = q.value("Data").toByteArray();
 	file->swapData(data);
+
+	return true;
+}
+
+bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
+{
+	// Database custom type DbFileInfo
+	//
+	//	CREATE TYPE dbfileinfo AS
+	//	   (fileid integer,
+	//	    deleted boolean,
+	//	    name text,
+	//	    parentid integer,
+	//	    changesetid integer,
+	//	    created timestamp with time zone,
+	//	    size integer,
+	//	    checkedout boolean,
+	//	    checkouttime timestamp with time zone,
+	//	    userid integer,
+	//	    action integer,
+	//	    details text);
+	//	ALTER TYPE dbfileinfo
+	//	  OWNER TO postgres;
+
+	assert(fileInfo);
+
+	fileInfo->setFileId(q.value(0).toInt());
+	fileInfo->setDeleted(q.value(1).toBool());
+	fileInfo->setFileName(q.value(2).toString());
+	fileInfo->setParentId(q.value(3).toInt());
+	fileInfo->setChangeset(q.value(4).toInt());
+	fileInfo->setCreated(q.value(5).toString());
+	fileInfo->setSize(q.value(6).toInt());
+	fileInfo->setState(q.value(7).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+	//fileInfo->setCheckoutTime(q.value(8).toString());
+	fileInfo->setUserId(q.value(9).toInt());
+	fileInfo->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(10).toInt()));
+	fileInfo->setDetails(q.value(10).toString());
 
 	return true;
 }

@@ -454,7 +454,9 @@ void FileListView::checkOut(std::vector<DbFileInfo> files)
 
 void FileListView::checkIn(std::vector<DbFileInfo> files)
 {
-	CheckInDialog::checkIn(files, dbController(), this);
+	std::vector<DbFileInfo> updatedFiles;
+
+	CheckInDialog::checkIn(files, false, &updatedFiles, dbController(), this);
 
 	refreshFiles();
 
@@ -627,7 +629,7 @@ void FileListView::refreshFiles()
 	//
 	std::vector<DbFileInfo> files;
 
-	dbController()->getFileList(&files, parentFile().fileId(), filesModel().filter(), this);
+	dbController()->getFileList(&files, parentFile().fileId(), filesModel().filter(), true, this);
 
 	// Set files to the view
 	//

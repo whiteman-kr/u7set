@@ -275,7 +275,7 @@ namespace Builder
 		// Get file list with checked out files,
 		// if this is release build, specific copies will be fetched later
 		//
-		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+		ok = db->getFileList(&files, parent->fileInfo().fileId(), true, nullptr);
 
 		if (ok == false)
 		{

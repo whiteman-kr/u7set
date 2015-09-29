@@ -338,7 +338,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 
 	std::vector<DbFileInfo> files;
 
-	bool ok = dbController()->getFileList(&files, parentObject->fileInfo().fileId(), m_parentWidget);
+	bool ok = dbController()->getFileList(&files, parentObject->fileInfo().fileId(), true, m_parentWidget);
 	if (ok == false)
 		return;
 
@@ -522,24 +522,67 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 
 void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 {
-	std::vector<DbFileInfo> files;
 	QModelIndexList checkedOutList;
 	DbUser currentUser = dbController()->currentUser();
+
+	std::vector<DbFileInfo> files;
+	files.reserve(rowList.size());
 
 	for (QModelIndex& index : rowList)
 	{
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
 
-		if (d->fileInfo().state() == VcsState::CheckedOut &&
-			(d->fileInfo().userId() == currentUser.userId() || currentUser.isAdminstrator() == true))
-		{
-			files.push_back(d->fileInfo());
-			checkedOutList.push_back(index);
-		}
+		files.push_back(d->fileInfo());
 	}
 
-	CheckInDialog::checkIn(files, dbController(), m_parentWidget);
+	// Get all checked out files for selected parents
+	//
+	std::vector<DbFileInfo> checkedOutFiles;
+	dbController()->getCheckedOutFiles(&files, &checkedOutFiles, m_parentWidget);
+
+	// Check in
+	//
+	std::vector<DbFileInfo> checkedInFiles;
+	CheckInDialog::checkIn(checkedOutFiles, false, &checkedInFiles, dbController(), m_parentWidget);
+
+	/*
+	std::map<int, DbFileInfo> updateFiles;
+
+	// Copy everything to map for faster access
+	//
+	for (const DbFileInfo& f : checkedInFiles)
+	{
+		updateFiles[f.fileId()] = f;
+	}
+
+	auto updateRowFunc = [this](const DbFileInfo& f, QModelIndex modelIndex, Hardware::DeviceObject* device) -> void
+		{
+			assert(f.fileId() != -1);
+			assert(f.fileId() == device->fileInfo().fileId());
+
+			device->setFileInfo(f);
+
+			if (device->fileInfo().deleted() == true ||
+				(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == VcsState::CheckedIn))
+			{
+				QModelIndex pi = modelIndex.parent();
+				Hardware::DeviceObject* po = this->deviceObject(pi);
+				assert(po);
+
+				int childIndex = po->childIndex(device);
+				assert(childIndex != -1);
+
+				beginRemoveRows(pi, childIndex, childIndex);
+				po->deleteChild(device);
+				endRemoveRows();
+			}
+			else
+			{
+				emit dataChanged(modelIndex, modelIndex);
+			}
+		};
+
 
 	// Update FileInfo in devices and Update model
 	//
@@ -548,7 +591,16 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
 
-		for (const auto& fi : files)
+		std::map<int, DbFileInfo>::iterator updatedFile = updateFiles.find(d->fileInfo().fileId());
+
+		if (updatedFile != updateFiles.end())
+		{
+			updateRowFunc(updatedFile->second, index, d);
+		}
+		*/
+
+
+/*		for (const auto& fi : checkedInFiles)
 		{
 			if (fi.fileId() == d->fileInfo().fileId())
 			{
@@ -575,8 +627,8 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 
 				break;
 			}
-		}
-	}
+		}*/
+	//}
 
 	return;
 }
@@ -1203,6 +1255,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 				&fileList,
 				db()->hpFileId(),
 				Hardware::DeviceObject::fileExtension(type),
+				true,
 				this);
 
 	if (ok == false || fileList.empty() == true)
@@ -1984,6 +2037,12 @@ void EquipmentTabPage::setActionState()
 	assert(m_addPresetSoftwareAction);
 	assert(m_inOutsToSignals);
 
+
+	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
+	// about does parent have any checked out files
+	//
+	m_checkInAction->setEnabled(true);
+
 	// Disable all
 	//
 	m_addSystemAction->setEnabled(false);
@@ -1998,7 +2057,7 @@ void EquipmentTabPage::setActionState()
 
 	m_deleteObjectAction->setEnabled(false);
 	m_checkOutAction->setEnabled(false);
-	m_checkInAction->setEnabled(false);
+	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	m_undoChangesAction->setEnabled(false);
 	m_refreshAction->setEnabled(false);
 
@@ -2094,7 +2153,7 @@ void EquipmentTabPage::setActionState()
 		}
 	}
 
-	m_checkInAction->setEnabled(canAnyBeCheckedIn);
+	//m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 

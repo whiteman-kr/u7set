@@ -345,7 +345,9 @@ void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
 
 	// Check in file
 	//
-	bool ok = CheckInDialog::checkIn(files, db(), this);
+	std::vector<DbFileInfo> updatedFiles;
+
+	bool ok = CheckInDialog::checkIn(files, false, &updatedFiles, db(), this);
 	if (ok == false)
 	{
 		return;
@@ -364,6 +366,15 @@ void SchemeControlTabPage::checkIn(std::vector<DbFileInfo> files)
 	}
 
 	db()->getFileInfo(&fileIds, &files, this);
+
+	// Remove deleted files
+	//
+	std::remove_if(std::begin(files), std::end(files),
+		[](const DbFileInfo& file)
+		{
+			return file.deleted();
+		});
+
 
 	// Set readonly to file if it is open
 	//
@@ -840,7 +851,9 @@ void EditSchemeTabPage::checkInFile()
 	std::vector<DbFileInfo> files;
 	files.push_back(fileInfo());
 
-	bool checkInResult = CheckInDialog::checkIn(files, db(), this);
+	std::vector<DbFileInfo> updatedFiles;
+
+	bool checkInResult = CheckInDialog::checkIn(files, false, &updatedFiles, db(), this);
 	if (checkInResult == false)
 	{
 		return;
