@@ -65,14 +65,14 @@ void DialogAfblEditor::refreshFiles()
 	QList<QTreeWidgetItem*> items;
 
     std::vector<DbFileInfo> afbfiles;
-    if (m_pDbController->getFileList(&afbfiles, m_pDbController->afblFileId(), "afb", this) == false)
+	if (m_pDbController->getFileList(&afbfiles, m_pDbController->afblFileId(), "afb", true, this) == false)
     {
         QMessageBox::critical(this, "Error", "Could not get afb files list!");
         return;
     }
 
     std::vector<DbFileInfo> xsdfiles;
-    if (m_pDbController->getFileList(&xsdfiles, m_pDbController->afblFileId(), "xsd", this) == false)
+	if (m_pDbController->getFileList(&xsdfiles, m_pDbController->afblFileId(), "xsd", true, this) == false)
     {
         QMessageBox::critical(this, "Error", "Could not get xsd files list!");
         return;

@@ -404,7 +404,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> files;
 
-		if (db->getFileList(&files, db->afblFileId(), "afb", nullptr) == false)
+		if (db->getFileList(&files, db->afblFileId(), "afb", true, nullptr) == false)
 		{
 			LOG_ERROR(m_log, QObject::tr("Cannot get application functional block file list."));
 			return false;
