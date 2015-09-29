@@ -1001,7 +1001,7 @@ namespace Builder
 		}
 		else
 		{
-			ok = db->getFileList(&applicationLogicFileList, db->alFileId(), "%.als", nullptr);
+			ok = db->getFileList(&applicationLogicFileList, db->alFileId(), "%.als", true, nullptr);
 		}
 
 		if (ok == false)

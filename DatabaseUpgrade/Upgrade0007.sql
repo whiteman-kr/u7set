@@ -1,4 +1,6 @@
 CREATE EXTENSION "uuid-ossp";
+CREATE EXTENSION intarray;
+
 
 CREATE TABLE FileInstance (
     FileInstanceID uuid PRIMARY KEY DEFAULT uuid_generate_v1(),

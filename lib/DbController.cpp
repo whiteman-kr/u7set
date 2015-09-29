@@ -311,12 +311,12 @@ bool DbController::updateUser(const DbUser& user, QWidget* parentWidget)
 	return result;
 }
 
-bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QWidget* parentWidget)
+bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget)
 {
-	return getFileList(files, parentId, QString(), parentWidget);
+	return getFileList(files, parentId, QString(), removeDeleted, parentWidget);
 }
 
-bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, QWidget* parentWidget)
+bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, bool removeDeleted, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -336,7 +336,7 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, con
 
 	// Emit signal end wait for complete
 	//
-	emit signal_getFileList(files, parentId, filter);
+	emit signal_getFileList(files, parentId, filter, removeDeleted);
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list"));
 	return result;
@@ -579,14 +579,21 @@ bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::list<std::s
 	return out;
 }
 
-bool DbController::getCheckedOutFiles(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+bool DbController::getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out, QWidget* parentWidget)
 {
 	// Check parameters
 	//
-	if (out == nullptr || file.fileId() == -1)
+	if (parentFiles == nullptr ||
+		parentFiles->empty() == true
+		)
+	{
+		assert(parentFiles);
+		assert(parentFiles->empty() == false);
+	}
+
+	if (out == nullptr)
 	{
 		assert(out != nullptr);
-		assert(file.fileId() != -1);
 		return false;
 	}
 
@@ -600,7 +607,7 @@ bool DbController::getCheckedOutFiles(const DbFileInfo& file, std::list<std::sha
 
 	// Emit signal end wait for complete
 	//
-	emit signal_getCheckedOutFiles(file, out);
+	emit signal_getCheckedOutFiles(parentFiles, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting checked out files"));
 	return out;

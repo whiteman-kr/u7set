@@ -407,7 +407,7 @@ void FileTreeModel::fetchMore(const QModelIndex& parentIndex)
 
 	std::vector<DbFileInfo> files;
 
-	bool ok = db()->getFileList(&files, parentFile->fileId(), m_parentWidget);
+	bool ok = db()->getFileList(&files, parentFile->fileId(), true, m_parentWidget);
 	if (ok == false)
 		return;
 
@@ -1027,11 +1027,13 @@ void FileTreeView::checkInFile()
 
 	// CheckIn changes to the database
 	//
-	CheckInDialog::checkIn(files, db(), this);
+	std::vector<DbFileInfo> checkedInFiles;
+
+	CheckInDialog::checkIn(files, false, &checkedInFiles, db(), this);
 
 	// Update files state
 	//
-	for (const DbFileInfo& fi : files)
+	for (const DbFileInfo& fi : checkedInFiles)
 	{
 		auto mipos = std::find_if(selectedIndexList.begin(), selectedIndexList.end(),
 			[&fi, this](QModelIndex& mi)
@@ -1276,7 +1278,7 @@ bool FileTreeView::getLatestFileVersionRecursive(const DbFileInfo& f, const QStr
 
 	std::vector<DbFileInfo> childFiles;
 
-	if (db()->getFileList(&childFiles, f.fileId(), this) == false)
+	if (db()->getFileList(&childFiles, f.fileId(), true, this) == false)
 	{
 		QMessageBox::critical(this, "Error", "Can't get child files list of the file " + f.fileName());
 		return false;

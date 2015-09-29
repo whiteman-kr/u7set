@@ -1,30 +1,31 @@
+-------------------------------------------------------------------------------
 --
+--							dbfileinfo struct
 --
+-------------------------------------------------------------------------------
+CREATE TYPE dbfileinfo AS
+   (fileid integer,
+	deleted boolean,
+	name text,
+	parentid integer,
+	changesetid integer,
+	created timestamp with time zone,
+	size integer,
+	checkedout boolean,
+	checkouttime timestamp with time zone,
+	userid integer,
+	action integer,
+	details text);
+
+-------------------------------------------------------------------------------
 --
--- get_file_list
+--							get_file_list
 --
---
---
+-------------------------------------------------------------------------------
 DROP FUNCTION get_file_list(integer, integer, text);
 
 CREATE OR REPLACE FUNCTION get_file_list(IN user_id integer, IN parent_id integer, IN file_mask text)
-RETURNS
-	TABLE(
-		fileid integer,
-		deleted boolean,
-		name text,
-		parentid integer,
-		created timestamp with time zone,
-		fileinstanceid uuid,
-		changesetid integer,
-		size integer,
-		instancecreated timestamp with time zone,
-		changesettime timestamp with time zone,
-		userid integer,
-		checkedout boolean,
-		action integer,
-		details text
-	) AS
+	RETURNS	SETOF DbFileInfo AS
 $BODY$
 
 (SELECT
@@ -32,14 +33,12 @@ $BODY$
 	F.Deleted AS Deleted,
 	F.Name AS Name,
 	F.ParentID AS ParentID,
-	F.Created AS Created,
-	F.FileInstanceID AS FileInstanceID,
 	F.ChangesetID AS ChangesetID,
+	F.Created AS Created,
 	F.Size AS Size,
-	F.InstanceCreated AS InstanceCreated,
-	Changeset.time AS ChangesetTime,
-	Changeset.UserID AS UserID,
 	F.ChangesetID IS NULL AS CheckedOut,
+	Changeset.time AS CheckOutTime,
+	Changeset.UserID AS UserID,
 	F.Action AS Action,
 	F.Details AS Details
 FROM
@@ -74,14 +73,12 @@ UNION
 	F.Deleted AS Deleted,
 	F.Name AS Name,
 	F.ParentID AS ParentID,
-	F.Created AS Created,
-	F.FileInstanceID AS FileInstanceID,
 	F.ChangesetID AS ChangesetID,
+	F.Created AS Created,
 	F.Size AS Size,
-	F.InstanceCreated AS InstanceCreated,
-	CheckOut.time AS ChangesetTime,
-	CheckOut.UserID AS UserID,
 	F.ChangesetID IS NULL AS CheckedOut,
+	CheckOut.time AS CheckOutTime,
+	CheckOut.UserID AS UserID,
 	F.Action AS Action,
 	F.Details AS Details
 FROM
@@ -115,7 +112,7 @@ FROM
 ORDER BY Name;
 
 $BODY$
-  LANGUAGE sql;
+LANGUAGE sql;
 
 
 --

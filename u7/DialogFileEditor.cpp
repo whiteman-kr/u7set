@@ -160,7 +160,7 @@ void DialogFileEditor::on_m_text_textChanged()
 
 void DialogFileEditor::on_btnValidate_clicked()
 {
-	if (m_pDbController->getFileList(&m_validateFiles, m_pDbController->afblFileId(), "xsd", this) == false)
+	if (m_pDbController->getFileList(&m_validateFiles, m_pDbController->afblFileId(), "xsd", true, this) == false)
 	{
 		QMessageBox::critical(this, "Error", "Could not get files list!");
 		return;
