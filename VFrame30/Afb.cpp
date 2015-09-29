@@ -119,6 +119,7 @@ namespace Afb
 	//
 	AfbSignal::AfbSignal(void):
 		m_type(AfbSignalType::Analog),
+        m_dataFormat(AfbDataFormat::UnsignedInt),
 		m_operandIndex(0),
 		m_size(0)
 	{
@@ -143,6 +144,7 @@ namespace Afb
 		m_opName = that.m_opName;
 		m_caption = that.m_caption;
 		m_type = that.m_type;
+        m_dataFormat = that.m_dataFormat;
 		m_operandIndex = that.m_operandIndex;
 		m_size = that.m_size;
 
@@ -184,7 +186,32 @@ namespace Afb
 		xmlWriter->writeStartElement("AfbElementSignal");
 		xmlWriter->writeAttribute("OpName", opName());
 		xmlWriter->writeAttribute("Caption", caption());
-		xmlWriter->writeAttribute("Type", type() == AfbSignalType::Analog ? "Analog" : "Discrete");
+        xmlWriter->writeAttribute("Type", isAnalog() ? "Analog" : "Discrete");
+
+        switch (dataFormat())
+        {
+        case AfbDataFormat::UnsignedInt:
+            {
+                xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
+                break;
+            }
+        case AfbDataFormat::SignedInt:
+            {
+                xmlWriter->writeAttribute("DataFormat", "SignedInt");
+                break;
+            }
+        case AfbDataFormat::Float:
+            {
+                xmlWriter->writeAttribute("DataFormat", "Float");
+                break;
+            }
+        default:
+            {
+                xmlWriter->writeAttribute("DataFormat", "Unknown");
+                assert(false);
+            }
+        }
+
 		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
         xmlWriter->writeAttribute("Size", QString::number(size()));
 		xmlWriter->writeEndElement();
@@ -222,12 +249,38 @@ namespace Afb
 			{
 				setType(AfbSignalType::Analog);
 			}
-			else
-			{
-				setType(AfbSignalType::Discrete);
-			}
-
+            else
+                if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
+                {
+                    setType(AfbSignalType::Discrete);
+                }
+                else
+                {
+                    assert(false);
+                }
 		}
+
+        if (xmlReader->attributes().hasAttribute("DataFormat"))
+        {
+            if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
+            {
+                setDataFormat(AfbDataFormat::UnsignedInt);
+            }
+            else
+                if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
+                {
+                    setDataFormat(AfbDataFormat::SignedInt);
+                }
+                else
+                    if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
+                    {
+                        setDataFormat(AfbDataFormat::Float);
+                    }
+                    else
+                    {
+                        assert(false);
+                    }
+        }
 
 		if (xmlReader->attributes().hasAttribute("OpIndex"))
         {
@@ -287,6 +340,16 @@ namespace Afb
 		m_type = type;
 	}
 
+    AfbDataFormat AfbSignal::dataFormat() const
+    {
+        return m_dataFormat;
+    }
+
+    void AfbSignal::setDataFormat(AfbDataFormat dataFormat)
+    {
+        m_dataFormat = dataFormat;
+    }
+
 	int AfbSignal::operandIndex() const
     {
         return m_operandIndex;
@@ -325,8 +388,9 @@ namespace Afb
 
 	AfbParam::AfbParam(void):
         m_visible(true),
-		m_type(AfbParamType::AnalogIntegral),
-		m_instantiator(false),
+        m_type(AfbSignalType::Analog),
+        m_dataFormat(AfbDataFormat::UnsignedInt),
+        m_instantiator(false),
 		m_user(false),
 		m_operandIndex(0),
 		m_size(0)
@@ -342,10 +406,11 @@ namespace Afb
 	{
 	}
 
-	void AfbParam::update(const AfbParamType& type, const QVariant &lowLimit, const QVariant &highLimit)
+    void AfbParam::update(const AfbSignalType& type, const AfbDataFormat dataFormat, const QVariant &lowLimit, const QVariant &highLimit)
 	{
 
 		m_type = type;
+        m_dataFormat = dataFormat;
 		m_lowLimit = lowLimit;
 		m_highLimit = highLimit;
 
@@ -357,7 +422,8 @@ namespace Afb
 		Proto::Write(message->mutable_opname(), m_opName);
 		Proto::Write(message->mutable_caption(), m_caption);
 		message->set_visible(visible());
-		message->set_type(static_cast<Proto::FblParamType>(m_type));
+        message->set_type(static_cast<Proto::FblSignalType>(m_type));
+        message->set_dataformat(static_cast<Proto::FblDataFormat>(m_dataFormat));
 
 		Proto::Write(message->mutable_value(), m_value);
 		Proto::Write(message->mutable_defaultvalue(), m_defaultValue);
@@ -377,8 +443,9 @@ namespace Afb
 	{
 		Proto::Read(message.opname(), &m_opName);
 		Proto::Read(message.caption(), &m_caption);
-		m_type = static_cast<AfbParamType>(message.type());
-		m_visible = message.visible();
+        m_type = static_cast<AfbSignalType>(message.type());
+        m_dataFormat = static_cast<AfbDataFormat>(message.dataformat());
+        m_visible = message.visible();
 
 		m_value = Proto::Read(message.value());
 		m_defaultValue = Proto::Read(message.defaultvalue());
@@ -423,10 +490,44 @@ namespace Afb
 			setVisible(xmlReader->attributes().value("Visible").toString() == "true" ? true : false);
 		}
 
-		if (xmlReader->attributes().hasAttribute("Type"))
-		{
-			setType((AfbParamType)xmlReader->attributes().value("Type").toInt());
-		}
+        if (xmlReader->attributes().hasAttribute("Type"))
+        {
+            if (QString::compare(xmlReader->attributes().value("Type").toString(), "Analog", Qt::CaseInsensitive) == 0)
+            {
+                setType(AfbSignalType::Analog);
+            }
+            else
+                if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
+                {
+                    setType(AfbSignalType::Discrete);
+                }
+                else
+                {
+                    assert(false);
+                }
+        }
+
+        if (xmlReader->attributes().hasAttribute("DataFormat"))
+        {
+            if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
+            {
+                setDataFormat(AfbDataFormat::UnsignedInt);
+            }
+            else
+                if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
+                {
+                    setDataFormat(AfbDataFormat::SignedInt);
+                }
+                else
+                    if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
+                    {
+                        setDataFormat(AfbDataFormat::Float);
+                    }
+                    else
+                    {
+                        assert(false);
+                    }
+        }
 
 		if (xmlReader->attributes().hasAttribute("OpIndex"))
         {
@@ -478,26 +579,29 @@ namespace Afb
 				QString str = xmlReader->readElementText();
 				QVariant val;
 
-				switch (type())
-				{
-					case AnalogIntegral:
-					{
-						val = str.toInt();
-						break;
-					}
-					case AnalogFloatingPoint:
-					{
-						val = str.toDouble();
-						break;
-					}
-					case DiscreteValue:
-					{
-						val = str == "1" ? true : false;
-						break;
-					}
-				default:
-					assert(false);
-				}
+                if (isAnalog())
+                {
+                    switch (dataFormat())
+                    {
+                        case AfbDataFormat::UnsignedInt:
+                        case AfbDataFormat::SignedInt:
+                        {
+                            val = str.toInt();
+                            break;
+                        }
+                        case AfbDataFormat::Float:
+                        {
+                            val = str.toDouble();
+                            break;
+                        }
+                        deafult:
+                            assert(false);
+                    }
+                }
+                else
+                {
+                    val = str == "1" ? true : false;
+                }
 
 				if (val.isNull())
 				{
@@ -545,29 +649,33 @@ namespace Afb
         xmlWriter->writeAttribute("Size", QString::number(size()));
 		xmlWriter->writeAttribute("Instantiator", instantiator() ? "true" : "false");
 		xmlWriter->writeAttribute("User", user() ? "true" : "false");
+        xmlWriter->writeAttribute("Type", isAnalog() ? "Analog" : "Discrete");
 
-		switch (type())
-		{
-			case AnalogIntegral:
-				{
-					xmlWriter->writeAttribute("Type", "AnalogIntegral");
-				}
-				break;
-			case AnalogFloatingPoint:
-				{
-					xmlWriter->writeAttribute("Type", "AnalogFloatingPoint");
-				}
-				break;
-			case DiscreteValue:
-				{
-					xmlWriter->writeAttribute("Type", "DiscreteValue");
-				}
-				break;
-			default:
-				Q_ASSERT(false);
-		}
+        switch (dataFormat())
+        {
+        case AfbDataFormat::UnsignedInt:
+            {
+                xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
+                break;
+            }
+        case AfbDataFormat::SignedInt:
+            {
+                xmlWriter->writeAttribute("DataFormat", "SignedInt");
+                break;
+            }
+        case AfbDataFormat::Float:
+            {
+                xmlWriter->writeAttribute("DataFormat", "Float");
+                break;
+            }
+        default:
+            {
+                xmlWriter->writeAttribute("DataFormat", "Unknown");
+                assert(false);
+            }
+        }
 
-		if (type() == DiscreteValue)
+        if (isDiscrete())
 		{
 			xmlWriter->writeTextElement("Value", value() == true ? "1" : "0");
 			xmlWriter->writeTextElement("Default", defaultValue() == true ? "1" : "0");
@@ -625,14 +733,34 @@ namespace Afb
 
 	// Type
 	//
-	AfbParamType AfbParam::type() const
+    AfbSignalType AfbParam::type() const
 	{
 		return m_type;
 	}
-	void AfbParam::setType(AfbParamType type)
+    void AfbParam::setType(AfbSignalType type)
 	{
 		m_type = type;
 	}
+
+    AfbDataFormat AfbParam::dataFormat() const
+    {
+        return m_dataFormat;
+    }
+
+    void AfbParam::setDataFormat(AfbDataFormat dataFormat)
+    {
+        m_dataFormat = dataFormat;
+    }
+
+    bool AfbParam::isAnalog() const
+    {
+        return m_type == AfbSignalType::Analog;
+    }
+
+    bool AfbParam::isDiscrete() const
+    {
+        return m_type == AfbSignalType::Discrete;
+    }
 
 	// Value
 	//
@@ -1214,7 +1342,7 @@ namespace Afb
 
 			if (found != m_params.end())
 			{
-				found->update(p.type(), p.lowLimit(), p.highLimit());
+                found->update(p.type(), p.dataFormat(), p.lowLimit(), p.highLimit());
 				newParams.push_back(*found);
 			}
 			else

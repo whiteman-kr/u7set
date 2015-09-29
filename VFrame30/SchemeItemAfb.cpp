@@ -408,7 +408,7 @@ namespace VFrame30
 		{
 			if (p.caption() == name)
 			{
-				if (p.type() == Afb::AnalogIntegral && p.value().isValid() == true)
+                if (p.isAnalog() && (p.dataFormat() ==Afb::AfbDataFormat::SignedInt || p.dataFormat() == Afb::AfbDataFormat::UnsignedInt) && p.value().isValid() == true)
 				{
 					return p.value().toInt();
 				}

@@ -146,7 +146,8 @@ void DialogAfblEditor::on_m_add_clicked()
 	AfbParam param1;
 	param1.setOpName("ParamName");
 	param1.setCaption("Param1Caption");
-	param1.setType(AfbParamType::AnalogIntegral);
+    param1.setType(AfbSignalType::Analog);
+    param1.setDataFormat(AfbDataFormat::UnsignedInt);
 	param1.setValue(0);
 	param1.setDefaultValue(0);
 	param1.setLowLimit(0);
@@ -158,8 +159,9 @@ void DialogAfblEditor::on_m_add_clicked()
 	AfbParam param2;
 	param2.setOpName("ParamName");
 	param2.setCaption("Param2Caption");
-	param2.setType(AfbParamType::AnalogFloatingPoint);
-	param2.setValue(1.5);
+    param2.setType(AfbSignalType::Analog);
+    param2.setDataFormat(AfbDataFormat::Float);
+    param2.setValue(1.5);
 	param2.setDefaultValue(1.5);
 	param2.setLowLimit(0.5);
 	param2.setHighLimit(100.5);
@@ -170,8 +172,8 @@ void DialogAfblEditor::on_m_add_clicked()
 	AfbParam param3;
 	param3.setOpName("ParamName");
 	param3.setCaption("Param3Caption");
-	param3.setType(AfbParamType::DiscreteValue);
-	param3.setValue(false);
+    param3.setType(AfbSignalType::Discrete);
+    param3.setValue(false);
 	param3.setDefaultValue(true);
 	param3.setLowLimit(false);
 	param3.setHighLimit(false);

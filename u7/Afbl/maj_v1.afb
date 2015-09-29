@@ -32,7 +32,7 @@
             <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "19" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_conf_x" Caption = "x count" Visible="true" OpIndex="0" Size="5" Instantiator="true" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_conf_x" Caption = "x count" Visible="true" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>2</Value>
                 <Default>2</Default>
                 <LowLimit>1</LowLimit>
@@ -42,7 +42,7 @@
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_conf_y" Caption = "y count" Visible="true" OpIndex="1" Size="5" Instantiator="true" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_conf_y" Caption = "y count" Visible="true" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>3</Value>
                 <Default>3</Default>
                 <LowLimit>1</LowLimit>
@@ -56,7 +56,7 @@ function(videoItemFblElement, afbElement)
 		</Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>0</LowLimit>

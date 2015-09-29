@@ -158,7 +158,7 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::EnumDescriptor* SchemeUnit_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblSignalType_descriptor_ = NULL;
-const ::google::protobuf::EnumDescriptor* FblParamType_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* FblDataFormat_descriptor_ = NULL;
 
 }  // namespace
 
@@ -348,12 +348,13 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblElement));
   AfbSignal_descriptor_ = file->message_type(10);
-  static const int AfbSignal_offsets_[5] = {
+  static const int AfbSignal_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbSignal, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbSignal, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbSignal, operandindex_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbSignal, size_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbSignal, opname_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbSignal, dataformat_),
   };
   AfbSignal_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -367,9 +368,8 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AfbSignal));
   AfbParam_descriptor_ = file->message_type(11);
-  static const int AfbParam_offsets_[13] = {
+  static const int AfbParam_offsets_[14] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, caption_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, visible_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, operandindex_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, size_),
@@ -381,6 +381,8 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, lowlimit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, highlimit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, opname_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AfbParam, dataformat_),
   };
   AfbParam_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -979,7 +981,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   SchemeUnit_descriptor_ = file->enum_type(0);
   ConnectionDirrection_descriptor_ = file->enum_type(1);
   FblSignalType_descriptor_ = file->enum_type(2);
-  FblParamType_descriptor_ = file->enum_type(3);
+  FblDataFormat_descriptor_ = file->enum_type(3);
 }
 
 namespace {
@@ -1216,124 +1218,126 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\n\006inputs\030\013 \003(\0132\020.Proto.AfbSignal\022!\n\007outp"
     "uts\030\014 \003(\0132\020.Proto.AfbSignal\022\037\n\006params\030\r "
     "\003(\0132\017.Proto.AfbParam\022#\n\013description\030\016 \001("
-    "\0132\016.Proto.wstring\"\232\001\n\tAfbSignal\022\037\n\007capti"
+    "\0132\016.Proto.wstring\"\304\001\n\tAfbSignal\022\037\n\007capti"
     "on\030\001 \002(\0132\016.Proto.wstring\022\"\n\004type\030\002 \002(\0162\024"
     ".Proto.FblSignalType\022\027\n\014operandIndex\030\003 \001"
     "(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\036\n\006opName\030\005 \001(\0132\016"
-    ".Proto.wstring\"\220\003\n\010AfbParam\022\037\n\007caption\030\001"
-    " \002(\0132\016.Proto.wstring\022!\n\004type\030\002 \002(\0162\023.Pro"
-    "to.FblParamType\022\017\n\007visible\030\007 \002(\010\022\027\n\014oper"
-    "andIndex\030\010 \001(\005:\0010\022\017\n\004size\030\t \001(\005:\0010\022\033\n\014in"
-    "stantiator\030\n \001(\010:\005false\022\023\n\004user\030\013 \001(\010:\005f"
-    "alse\022%\n\rchangedScript\030\014 \001(\0132\016.Proto.wstr"
-    "ing\022\036\n\005value\030\r \001(\0132\017.Proto.qvariant\022%\n\014d"
-    "efaultvalue\030\016 \001(\0132\017.Proto.qvariant\022!\n\010lo"
-    "wlimit\030\017 \001(\0132\017.Proto.qvariant\022\"\n\thighlim"
-    "it\030\020 \001(\0132\017.Proto.qvariant\022\036\n\006opName\030\021 \001("
-    "\0132\016.Proto.wstring\"\274\002\n\006Scheme\022\031\n\004uuid\030\001 \002"
-    "(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Proto.w"
-    "string\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022"
-    "\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004unit\030\006"
-    " \002(\0162\021.Proto.SchemeUnit\022\037\n\020excludeFromBu"
-    "ild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\0132\017.Proto"
-    ".Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.AfbEleme"
-    "ntCollection\022*\n\rlogics_scheme\030\310\001 \001(\0132\022.P"
-    "roto.LogicScheme\"6\n\013LogicScheme\022\'\n\017hardw"
-    "are_strids\030\001 \003(\0132\016.Proto.wstring\"\224\001\n\013Sch"
-    "emeLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\034\n\004n"
-    "ame\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compile\030\003 \002"
-    "(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005items"
-    "\030\017 \003(\0132\017.Proto.Envelope\"\224\006\n\nSchemeItem\022\031"
-    "\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStatic\030\002 "
-    "\002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004 \002(\0162"
-    "\021.Proto.SchemeUnit\022\032\n\013acceptClick\030\005 \001(\010:"
-    "\005false\022#\n\013clickScript\030\006 \001(\0132\016.Proto.wstr"
-    "ing\022\'\n\013PosRectImpl\030\n \001(\0132\022.Proto.PosRect"
-    "Impl\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Proto.PosLin"
-    "eImpl\0223\n\021PosConnectionImpl\030\014 \001(\0132\030.Proto"
-    ".PosConnectionImpl\022\037\n\007FblItem\030j \001(\0132\016.Pr"
-    "oto.FblItem\022\'\n\013FblItemRect\030k \001(\0132\022.Proto"
-    ".FblItemRect\022\'\n\013FblItemLine\030l \001(\0132\022.Prot"
-    "o.FblItemLine\022#\n\004Rect\030t \001(\0132\025.Proto.Sche"
-    "meItemRect\022#\n\004Line\030u \001(\0132\025.Proto.SchemeI"
-    "temLine\022#\n\004Path\030v \001(\0132\025.Proto.SchemeItem"
-    "Path\022\'\n\006Signal\030| \001(\0132\027.Proto.SchemeItemS"
-    "ignal\022+\n\013InputSignal\030} \001(\0132\026.Proto.Schem"
-    "eItemInput\022-\n\014OutputSignal\030~ \001(\0132\027.Proto"
-    ".SchemeItemOutput\022#\n\004Link\030\177 \001(\0132\025.Proto."
-    "SchemeItemLink\022\"\n\003Afb\030\200\001 \001(\0132\024.Proto.Sch"
-    "emeItemAfb\022*\n\tConstItem\030\201\001 \001(\0132\026.Proto.S"
-    "chemeItemConst\"[\n\013PosRectImpl\022\021\n\tleftDoc"
-    "Pt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n\nwidthDocPt"
-    "\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"]\n\013PosLineIm"
-    "pl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013startYDocPt\030\002"
-    " \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tendYDocPt\030\004 \002"
-    "(\001\"7\n\021PosConnectionImpl\022\"\n\006points\030\001 \003(\0132"
-    "\022.Proto.SchemePoint\"\275\001\n\016SchemeItemRect\022\016"
-    "\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfil"
-    "lColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.Proto.wstri"
-    "ng\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030\006 \002(\0132\020.Pr"
-    "oto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026\n\010drawrect\030"
-    "\010 \001(\010:\004true\"3\n\016SchemeItemLine\022\016\n\006weight\030"
-    "\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"3\n\016SchemeItemPa"
-    "th\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"\260\001"
-    "\n\022FblConnectionPoint\022!\n\005point\030\001 \001(\0132\022.Pr"
-    "oto.SchemePoint\022/\n\ndirrection\030\002 \001(\0162\033.Pr"
-    "oto.ConnectionDirrection\022\031\n\004uuid\030\003 \001(\0132\013"
-    ".Proto.Uuid\022\030\n\014operandIndex\030\004 \001(\005:\002-1\022\021\n"
-    "\007caption\030\005 \001(\t:\000\"4\n\007FblItem\022)\n\006points\030\001 "
-    "\003(\0132\031.Proto.FblConnectionPoint\"v\n\013FblIte"
-    "mRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r"
-    "\022\021\n\tfillColor\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036"
-    "\n\004font\030\005 \002(\0132\020.Proto.FontParam\"0\n\013FblIte"
-    "mLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r"
-    "\"8\n\020SchemeItemSignal\022$\n\014signalStrIDs\030\001 \003"
-    "(\0132\016.Proto.wstring\"\021\n\017SchemeItemInput\"\022\n"
-    "\020SchemeItemOutput\"\020\n\016SchemeItemLink\"R\n\rS"
-    "chemeItemAfb\022\037\n\006params\030\002 \003(\0132\017.Proto.Afb"
-    "Param\022 \n\010afbStrid\030\003 \001(\0132\016.Proto.wstring\""
-    "N\n\017SchemeItemConst\022\017\n\004type\030\001 \001(\005:\0010\022\023\n\010i"
-    "ntValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001(\001:\0010\""
-    "\224\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.U"
-    "uid\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007ca"
-    "ption\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRest"
-    "riction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005"
-    " \001(\005:\0010\022!\n\031dynamic_properties_struct\030\006 \001"
-    "(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property\022"
-    "\025\n\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001"
-    "(\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.ws"
-    "tring\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#"
-    "\n\006System\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004R"
-    "ack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030"
-    "g \001(\0132\024.Proto.DeviceChassis\022#\n\006Module\030h "
-    "\001(\0132\023.Proto.DeviceModule\022+\n\nController\030i"
-    " \001(\0132\027.Proto.DeviceController\022#\n\006Signal\030"
-    "j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Workstatio"
-    "n\030k \001(\0132\022.Proto.Workstation\022!\n\010Software\030"
-    "l \001(\0132\017.Proto.Software\"\014\n\nDeviceRoot\"\016\n\014"
-    "DeviceSystem\"\014\n\nDeviceRack\" \n\rDeviceChas"
-    "sis\022\017\n\004type\030\001 \001(\005:\0010\"[\n\014DeviceModule\022\017\n\004"
-    "type\030\001 \001(\005:\0010\022\022\n\007Channel\030\002 \001(\005:\0010\022\022\n\010Sub"
-    "sysID\030\003 \001(\t:\000\022\022\n\010ConfType\030\004 \001(\t:\000\"\022\n\020Dev"
-    "iceController\"\347\001\n\014DeviceSignal\022\027\n\014obsole"
-    "tetype\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n"
-    "\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016val"
-    "idityOffset\030\005 \001(\005:\0010\022\026\n\013validityBit\030\006 \001("
-    "\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit"
-    "\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n"
-    " \001(\005:\0010\"\036\n\013Workstation\022\017\n\004type\030\001 \001(\005:\0010\""
-    "\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleCo"
-    "nfiguration\022\032\n\022struct_description\030\001 \001(\t\022"
-    "/\n\006values\030\002 \003(\0132\037.Proto.ModuleConfigurat"
-    "ionValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConfig"
-    "urationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002("
-    "\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002"
-    "(\t*3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n\nMillime"
-    "ter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022"
-    "\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022"
-    "\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*N\n\014FblParamTyp"
-    "e\022\022\n\016AnalogIntegral\020\000\022\027\n\023AnalogFloatingP"
-    "oint\020\001\022\021\n\rDiscreteValue\020\002", 5905);
+    ".Proto.wstring\022(\n\ndataFormat\030\006 \001(\0162\024.Pro"
+    "to.FblDataFormat\"\273\003\n\010AfbParam\022\037\n\007caption"
+    "\030\001 \002(\0132\016.Proto.wstring\022\017\n\007visible\030\007 \002(\010\022"
+    "\027\n\014operandIndex\030\010 \001(\005:\0010\022\017\n\004size\030\t \001(\005:\001"
+    "0\022\033\n\014instantiator\030\n \001(\010:\005false\022\023\n\004user\030\013"
+    " \001(\010:\005false\022%\n\rchangedScript\030\014 \001(\0132\016.Pro"
+    "to.wstring\022\036\n\005value\030\r \001(\0132\017.Proto.qvaria"
+    "nt\022%\n\014defaultvalue\030\016 \001(\0132\017.Proto.qvarian"
+    "t\022!\n\010lowlimit\030\017 \001(\0132\017.Proto.qvariant\022\"\n\t"
+    "highlimit\030\020 \001(\0132\017.Proto.qvariant\022\036\n\006opNa"
+    "me\030\021 \001(\0132\016.Proto.wstring\022\"\n\004type\030\022 \001(\0162\024"
+    ".Proto.FblSignalType\022(\n\ndataFormat\030\023 \001(\016"
+    "2\024.Proto.FblDataFormat\"\274\002\n\006Scheme\022\031\n\004uui"
+    "d\030\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Pr"
+    "oto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wst"
+    "ring\022\r\n\005width\030\004 \002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004u"
+    "nit\030\006 \002(\0162\021.Proto.SchemeUnit\022\037\n\020excludeF"
+    "romBuild\030\007 \001(\010:\005false\022\037\n\006layers\030d \003(\0132\017."
+    "Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.Afb"
+    "ElementCollection\022*\n\rlogics_scheme\030\310\001 \001("
+    "\0132\022.Proto.LogicScheme\"6\n\013LogicScheme\022\'\n\017"
+    "hardware_strids\030\001 \003(\0132\016.Proto.wstring\"\224\001"
+    "\n\013SchemeLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid"
+    "\022\034\n\004name\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compil"
+    "e\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005"
+    "items\030\017 \003(\0132\017.Proto.Envelope\"\224\006\n\nSchemeI"
+    "tem\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStat"
+    "ic\030\002 \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004"
+    " \002(\0162\021.Proto.SchemeUnit\022\032\n\013acceptClick\030\005"
+    " \001(\010:\005false\022#\n\013clickScript\030\006 \001(\0132\016.Proto"
+    ".wstring\022\'\n\013PosRectImpl\030\n \001(\0132\022.Proto.Po"
+    "sRectImpl\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Proto.P"
+    "osLineImpl\0223\n\021PosConnectionImpl\030\014 \001(\0132\030."
+    "Proto.PosConnectionImpl\022\037\n\007FblItem\030j \001(\013"
+    "2\016.Proto.FblItem\022\'\n\013FblItemRect\030k \001(\0132\022."
+    "Proto.FblItemRect\022\'\n\013FblItemLine\030l \001(\0132\022"
+    ".Proto.FblItemLine\022#\n\004Rect\030t \001(\0132\025.Proto"
+    ".SchemeItemRect\022#\n\004Line\030u \001(\0132\025.Proto.Sc"
+    "hemeItemLine\022#\n\004Path\030v \001(\0132\025.Proto.Schem"
+    "eItemPath\022\'\n\006Signal\030| \001(\0132\027.Proto.Scheme"
+    "ItemSignal\022+\n\013InputSignal\030} \001(\0132\026.Proto."
+    "SchemeItemInput\022-\n\014OutputSignal\030~ \001(\0132\027."
+    "Proto.SchemeItemOutput\022#\n\004Link\030\177 \001(\0132\025.P"
+    "roto.SchemeItemLink\022\"\n\003Afb\030\200\001 \001(\0132\024.Prot"
+    "o.SchemeItemAfb\022*\n\tConstItem\030\201\001 \001(\0132\026.Pr"
+    "oto.SchemeItemConst\"[\n\013PosRectImpl\022\021\n\tle"
+    "ftDocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n\nwidth"
+    "DocPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"]\n\013PosL"
+    "ineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013startYDo"
+    "cPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tendYDocP"
+    "t\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006points\030\001"
+    " \003(\0132\022.Proto.SchemePoint\"\275\001\n\016SchemeItemR"
+    "ect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021"
+    "\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.Proto."
+    "wstring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030\006 \002(\013"
+    "2\020.Proto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026\n\010draw"
+    "rect\030\010 \001(\010:\004true\"3\n\016SchemeItemLine\022\016\n\006we"
+    "ight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"3\n\016SchemeI"
+    "temPath\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002"
+    "(\r\"\260\001\n\022FblConnectionPoint\022!\n\005point\030\001 \001(\013"
+    "2\022.Proto.SchemePoint\022/\n\ndirrection\030\002 \001(\016"
+    "2\033.Proto.ConnectionDirrection\022\031\n\004uuid\030\003 "
+    "\001(\0132\013.Proto.Uuid\022\030\n\014operandIndex\030\004 \001(\005:\002"
+    "-1\022\021\n\007caption\030\005 \001(\t:\000\"4\n\007FblItem\022)\n\006poin"
+    "ts\030\001 \003(\0132\031.Proto.FblConnectionPoint\"v\n\013F"
+    "blItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030"
+    "\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n\ttextColor\030\004 "
+    "\002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.FontParam\"0\n\013F"
+    "blItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030"
+    "\002 \002(\r\"8\n\020SchemeItemSignal\022$\n\014signalStrID"
+    "s\030\001 \003(\0132\016.Proto.wstring\"\021\n\017SchemeItemInp"
+    "ut\"\022\n\020SchemeItemOutput\"\020\n\016SchemeItemLink"
+    "\"R\n\rSchemeItemAfb\022\037\n\006params\030\002 \003(\0132\017.Prot"
+    "o.AfbParam\022 \n\010afbStrid\030\003 \001(\0132\016.Proto.wst"
+    "ring\"N\n\017SchemeItemConst\022\017\n\004type\030\001 \001(\005:\0010"
+    "\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001("
+    "\001:\0010\"\224\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013.Pr"
+    "oto.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstring\022"
+    "\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022(\n\020chil"
+    "dRestriction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005pl"
+    "ace\030\005 \001(\005:\0010\022!\n\031dynamic_properties_struc"
+    "t\030\006 \001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Prop"
+    "erty\022\025\n\006preset\030  \001(\010:\005false\022\031\n\npresetRoo"
+    "t\030! \001(\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.Pro"
+    "to.wstring\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceR"
+    "oot\022#\n\006System\030e \001(\0132\023.Proto.DeviceSystem"
+    "\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Cha"
+    "ssis\030g \001(\0132\024.Proto.DeviceChassis\022#\n\006Modu"
+    "le\030h \001(\0132\023.Proto.DeviceModule\022+\n\nControl"
+    "ler\030i \001(\0132\027.Proto.DeviceController\022#\n\006Si"
+    "gnal\030j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Works"
+    "tation\030k \001(\0132\022.Proto.Workstation\022!\n\010Soft"
+    "ware\030l \001(\0132\017.Proto.Software\"\014\n\nDeviceRoo"
+    "t\"\016\n\014DeviceSystem\"\014\n\nDeviceRack\" \n\rDevic"
+    "eChassis\022\017\n\004type\030\001 \001(\005:\0010\"[\n\014DeviceModul"
+    "e\022\017\n\004type\030\001 \001(\005:\0010\022\022\n\007Channel\030\002 \001(\005:\0010\022\022"
+    "\n\010SubsysID\030\003 \001(\t:\000\022\022\n\010ConfType\030\004 \001(\t:\000\"\022"
+    "\n\020DeviceController\"\347\001\n\014DeviceSignal\022\027\n\014o"
+    "bsoletetype\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:"
+    "\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031"
+    "\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013validityBit"
+    "\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010val"
+    "ueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010funct"
+    "ion\030\n \001(\005:\0010\"\036\n\013Workstation\022\017\n\004type\030\001 \001("
+    "\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023Mod"
+    "uleConfiguration\022\032\n\022struct_description\030\001"
+    " \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleConfi"
+    "gurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030ModuleC"
+    "onfigurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value"
+    "\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005valu"
+    "e\030\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display\020\000\022\016\n\nMi"
+    "llimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrec"
+    "tion\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignal"
+    "Type\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDat"
+    "aFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022"
+    "\t\n\005Float\020\002", 5970);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -1478,11 +1482,11 @@ bool FblSignalType_IsValid(int value) {
   }
 }
 
-const ::google::protobuf::EnumDescriptor* FblParamType_descriptor() {
+const ::google::protobuf::EnumDescriptor* FblDataFormat_descriptor() {
   protobuf_AssignDescriptorsOnce();
-  return FblParamType_descriptor_;
+  return FblDataFormat_descriptor_;
 }
-bool FblParamType_IsValid(int value) {
+bool FblDataFormat_IsValid(int value) {
   switch(value) {
     case 0:
     case 1:
@@ -4856,6 +4860,7 @@ const int AfbSignal::kTypeFieldNumber;
 const int AfbSignal::kOperandIndexFieldNumber;
 const int AfbSignal::kSizeFieldNumber;
 const int AfbSignal::kOpNameFieldNumber;
+const int AfbSignal::kDataFormatFieldNumber;
 #endif  // !_MSC_VER
 
 AfbSignal::AfbSignal()
@@ -4881,6 +4886,7 @@ void AfbSignal::SharedCtor() {
   operandindex_ = 0;
   size_ = 0;
   opname_ = NULL;
+  dataformat_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -4927,6 +4933,7 @@ void AfbSignal::Clear() {
     if (has_opname()) {
       if (opname_ != NULL) opname_->::Proto::wstring::Clear();
     }
+    dataformat_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -5014,6 +5021,27 @@ bool AfbSignal::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(48)) goto parse_dataFormat;
+        break;
+      }
+
+      // optional .Proto.FblDataFormat dataFormat = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_dataFormat:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          if (::Proto::FblDataFormat_IsValid(value)) {
+            set_dataformat(static_cast< ::Proto::FblDataFormat >(value));
+          } else {
+            mutable_unknown_fields()->AddVarint(6, value);
+          }
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -5064,6 +5092,12 @@ void AfbSignal::SerializeWithCachedSizes(
       5, this->opname(), output);
   }
 
+  // optional .Proto.FblDataFormat dataFormat = 6;
+  if (has_dataformat()) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      6, this->dataformat(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -5100,6 +5134,12 @@ void AfbSignal::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         5, this->opname(), target);
+  }
+
+  // optional .Proto.FblDataFormat dataFormat = 6;
+  if (has_dataformat()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      6, this->dataformat(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -5147,6 +5187,12 @@ int AfbSignal::ByteSize() const {
           this->opname());
     }
 
+    // optional .Proto.FblDataFormat dataFormat = 6;
+    if (has_dataformat()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::EnumSize(this->dataformat());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -5189,6 +5235,9 @@ void AfbSignal::MergeFrom(const AfbSignal& from) {
     if (from.has_opname()) {
       mutable_opname()->::Proto::wstring::MergeFrom(from.opname());
     }
+    if (from.has_dataformat()) {
+      set_dataformat(from.dataformat());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -5224,6 +5273,7 @@ void AfbSignal::Swap(AfbSignal* other) {
     std::swap(operandindex_, other->operandindex_);
     std::swap(size_, other->size_);
     std::swap(opname_, other->opname_);
+    std::swap(dataformat_, other->dataformat_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -5243,7 +5293,6 @@ void AfbSignal::Swap(AfbSignal* other) {
 
 #ifndef _MSC_VER
 const int AfbParam::kCaptionFieldNumber;
-const int AfbParam::kTypeFieldNumber;
 const int AfbParam::kVisibleFieldNumber;
 const int AfbParam::kOperandIndexFieldNumber;
 const int AfbParam::kSizeFieldNumber;
@@ -5255,6 +5304,8 @@ const int AfbParam::kDefaultvalueFieldNumber;
 const int AfbParam::kLowlimitFieldNumber;
 const int AfbParam::kHighlimitFieldNumber;
 const int AfbParam::kOpNameFieldNumber;
+const int AfbParam::kTypeFieldNumber;
+const int AfbParam::kDataFormatFieldNumber;
 #endif  // !_MSC_VER
 
 AfbParam::AfbParam()
@@ -5281,7 +5332,6 @@ AfbParam::AfbParam(const AfbParam& from)
 void AfbParam::SharedCtor() {
   _cached_size_ = 0;
   caption_ = NULL;
-  type_ = 0;
   visible_ = false;
   operandindex_ = 0;
   size_ = 0;
@@ -5293,6 +5343,8 @@ void AfbParam::SharedCtor() {
   lowlimit_ = NULL;
   highlimit_ = NULL;
   opname_ = NULL;
+  type_ = 0;
+  dataformat_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -5338,7 +5390,6 @@ void AfbParam::Clear() {
     if (has_caption()) {
       if (caption_ != NULL) caption_->::Proto::wstring::Clear();
     }
-    type_ = 0;
     visible_ = false;
     operandindex_ = 0;
     size_ = 0;
@@ -5347,11 +5398,11 @@ void AfbParam::Clear() {
     if (has_changedscript()) {
       if (changedscript_ != NULL) changedscript_->::Proto::wstring::Clear();
     }
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (has_value()) {
       if (value_ != NULL) value_->::Proto::qvariant::Clear();
     }
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (has_defaultvalue()) {
       if (defaultvalue_ != NULL) defaultvalue_->::Proto::qvariant::Clear();
     }
@@ -5364,6 +5415,8 @@ void AfbParam::Clear() {
     if (has_opname()) {
       if (opname_ != NULL) opname_->::Proto::wstring::Clear();
     }
+    type_ = 0;
+    dataformat_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -5381,27 +5434,6 @@ bool AfbParam::MergePartialFromCodedStream(
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_caption()));
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(16)) goto parse_type;
-        break;
-      }
-
-      // required .Proto.FblParamType type = 2;
-      case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_type:
-          int value;
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
-                 input, &value)));
-          if (::Proto::FblParamType_IsValid(value)) {
-            set_type(static_cast< ::Proto::FblParamType >(value));
-          } else {
-            mutable_unknown_fields()->AddVarint(2, value);
-          }
         } else {
           goto handle_uninterpreted;
         }
@@ -5569,6 +5601,48 @@ bool AfbParam::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(144)) goto parse_type;
+        break;
+      }
+
+      // optional .Proto.FblSignalType type = 18;
+      case 18: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_type:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          if (::Proto::FblSignalType_IsValid(value)) {
+            set_type(static_cast< ::Proto::FblSignalType >(value));
+          } else {
+            mutable_unknown_fields()->AddVarint(18, value);
+          }
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(152)) goto parse_dataFormat;
+        break;
+      }
+
+      // optional .Proto.FblDataFormat dataFormat = 19;
+      case 19: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_dataFormat:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          if (::Proto::FblDataFormat_IsValid(value)) {
+            set_dataformat(static_cast< ::Proto::FblDataFormat >(value));
+          } else {
+            mutable_unknown_fields()->AddVarint(19, value);
+          }
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -5595,12 +5669,6 @@ void AfbParam::SerializeWithCachedSizes(
   if (has_caption()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       1, this->caption(), output);
-  }
-
-  // required .Proto.FblParamType type = 2;
-  if (has_type()) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      2, this->type(), output);
   }
 
   // required bool visible = 7;
@@ -5664,6 +5732,18 @@ void AfbParam::SerializeWithCachedSizes(
       17, this->opname(), output);
   }
 
+  // optional .Proto.FblSignalType type = 18;
+  if (has_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      18, this->type(), output);
+  }
+
+  // optional .Proto.FblDataFormat dataFormat = 19;
+  if (has_dataformat()) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      19, this->dataformat(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -5677,12 +5757,6 @@ void AfbParam::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         1, this->caption(), target);
-  }
-
-  // required .Proto.FblParamType type = 2;
-  if (has_type()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
-      2, this->type(), target);
   }
 
   // required bool visible = 7;
@@ -5752,6 +5826,18 @@ void AfbParam::SerializeWithCachedSizes(
         17, this->opname(), target);
   }
 
+  // optional .Proto.FblSignalType type = 18;
+  if (has_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      18, this->type(), target);
+  }
+
+  // optional .Proto.FblDataFormat dataFormat = 19;
+  if (has_dataformat()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      19, this->dataformat(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -5768,12 +5854,6 @@ int AfbParam::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->caption());
-    }
-
-    // required .Proto.FblParamType type = 2;
-    if (has_type()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
     }
 
     // required bool visible = 7;
@@ -5812,8 +5892,6 @@ int AfbParam::ByteSize() const {
           this->changedscript());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional .Proto.qvariant value = 13;
     if (has_value()) {
       total_size += 1 +
@@ -5821,6 +5899,8 @@ int AfbParam::ByteSize() const {
           this->value());
     }
 
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional .Proto.qvariant defaultvalue = 14;
     if (has_defaultvalue()) {
       total_size += 1 +
@@ -5847,6 +5927,18 @@ int AfbParam::ByteSize() const {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->opname());
+    }
+
+    // optional .Proto.FblSignalType type = 18;
+    if (has_type()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
+    }
+
+    // optional .Proto.FblDataFormat dataFormat = 19;
+    if (has_dataformat()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::EnumSize(this->dataformat());
     }
 
   }
@@ -5879,9 +5971,6 @@ void AfbParam::MergeFrom(const AfbParam& from) {
     if (from.has_caption()) {
       mutable_caption()->::Proto::wstring::MergeFrom(from.caption());
     }
-    if (from.has_type()) {
-      set_type(from.type());
-    }
     if (from.has_visible()) {
       set_visible(from.visible());
     }
@@ -5900,11 +5989,11 @@ void AfbParam::MergeFrom(const AfbParam& from) {
     if (from.has_changedscript()) {
       mutable_changedscript()->::Proto::wstring::MergeFrom(from.changedscript());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_value()) {
       mutable_value()->::Proto::qvariant::MergeFrom(from.value());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_defaultvalue()) {
       mutable_defaultvalue()->::Proto::qvariant::MergeFrom(from.defaultvalue());
     }
@@ -5916,6 +6005,12 @@ void AfbParam::MergeFrom(const AfbParam& from) {
     }
     if (from.has_opname()) {
       mutable_opname()->::Proto::wstring::MergeFrom(from.opname());
+    }
+    if (from.has_type()) {
+      set_type(from.type());
+    }
+    if (from.has_dataformat()) {
+      set_dataformat(from.dataformat());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -5934,7 +6029,7 @@ void AfbParam::CopyFrom(const AfbParam& from) {
 }
 
 bool AfbParam::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
   if (has_caption()) {
     if (!this->caption().IsInitialized()) return false;
@@ -5963,7 +6058,6 @@ bool AfbParam::IsInitialized() const {
 void AfbParam::Swap(AfbParam* other) {
   if (other != this) {
     std::swap(caption_, other->caption_);
-    std::swap(type_, other->type_);
     std::swap(visible_, other->visible_);
     std::swap(operandindex_, other->operandindex_);
     std::swap(size_, other->size_);
@@ -5975,6 +6069,8 @@ void AfbParam::Swap(AfbParam* other) {
     std::swap(lowlimit_, other->lowlimit_);
     std::swap(highlimit_, other->highlimit_);
     std::swap(opname_, other->opname_);
+    std::swap(type_, other->type_);
+    std::swap(dataformat_, other->dataformat_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

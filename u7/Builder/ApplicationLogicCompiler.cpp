@@ -741,24 +741,47 @@ namespace Builder
 
 			int paramIntValue = qv.toInt();
 
-			switch(afbParam.type())
-			{
-			case Afb::AnalogIntegral:
-				result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
-				break;
+            if (afbParam.isAnalog())
+            {
+                switch (afbParam.dataFormat())
+                {
+                case Afb::UnsignedInt:
+                case Afb::SignedInt:
+                    result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
+                    break;
 
-			case Afb::AnalogFloatingPoint:
-				assert(false);				// not implemented
-				break;
+                case Afb::Float:
+                    assert(false);
+                    break;
 
-			case Afb::DiscreteValue:
-				paramValue = paramIntValue;
-				break;
+                default:
+                    assert(false);
+                }
+            }
+            else
+            {
+                paramValue = paramIntValue;
+            }
 
-			default:
-				assert(false);
-			}
+/*
+            switch(afbParam.type())
+            {
+            case Afb::AnalogIntegral:
+                result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
+                break;
 
+            case Afb::AnalogFloatingPoint:
+                assert(false);				// not implemented
+                break;
+
+            case Afb::DiscreteValue:
+                paramValue = paramIntValue;
+                break;
+
+            default:
+                assert(false);
+            }
+*/
 
 			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue, appFb->caption());
 
