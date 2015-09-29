@@ -256,7 +256,8 @@ namespace Afb
                 }
                 else
                 {
-                    assert(false);
+                    xmlReader->raiseError(QObject::tr("AfbSignal, unknown Type"));
+                    return false;
                 }
 		}
 
@@ -278,7 +279,8 @@ namespace Afb
                     }
                     else
                     {
-                        assert(false);
+                        xmlReader->raiseError(QObject::tr("AfbSignal, unknown DataFormat"));
+                        return false;
                     }
         }
 
@@ -503,7 +505,8 @@ namespace Afb
                 }
                 else
                 {
-                    assert(false);
+                    xmlReader->raiseError(QObject::tr("AfbElementParam, unknown Type"));
+                    return false;
                 }
         }
 
@@ -525,7 +528,8 @@ namespace Afb
                     }
                     else
                     {
-                        assert(false);
+                        xmlReader->raiseError(QObject::tr("AfbElementParam, unknown DataFormat"));
+                        return false;
                     }
         }
 
