@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#scal_32fp_32fp_v1">
+        <Properties>
+            <Caption>scal_32fp_32fp</Caption>
+            <Version>1.0</Version>
+            <Description>Scaling Block</Description>
+            <Category>Scaling</Category>
+            <OpCode>14</OpCode>
+            <HasRam>true</HasRam>
+            <RequiredStart>true</RequiredStart>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="Float" OpIndex = "6" Size = "32"/>
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="Float" OpIndex = "9" Size = "32"/>
+        </OutputSignals>
+        <Params>
+            <AfbElementParam OpName="i_scal_k1_coef" Caption = "K1" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+                <Value>50</Value>
+                <Default>50</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>100</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_scal_k2_coef" Caption = "K2" Visible="true" OpIndex="3" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+                <Value>50</Value>
+                <Default>50</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>100</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+                <Value>6</Value>
+                <Default>1</Default>
+                <LowLimit>1</LowLimit>
+                <HighLimit>9</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed>
+		</Changed>
+                </Script>
+            </AfbElementParam>
+        </Params>
+        <CommonScript>
+            <Library></Library>
+            <AfterCreation></AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>
