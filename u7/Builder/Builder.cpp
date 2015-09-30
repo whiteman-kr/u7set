@@ -275,7 +275,7 @@ namespace Builder
 		// Get file list with checked out files,
 		// if this is release build, specific copies will be fetched later
 		//
-		ok = db->getFileList(&files, parent->fileInfo().fileId(), nullptr);
+		ok = db->getFileList(&files, parent->fileInfo().fileId(), true, nullptr);
 
 		if (ok == false)
 		{
@@ -404,7 +404,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> files;
 
-		if (db->getFileList(&files, db->afblFileId(), "afb", nullptr) == false)
+		if (db->getFileList(&files, db->afblFileId(), "afb", true, nullptr) == false)
 		{
 			LOG_ERROR(m_log, QObject::tr("Cannot get application functional block file list."));
 			return false;

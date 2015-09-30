@@ -1,9 +1,10 @@
 #include "CheckInDialog.h"
 #include "ui_CheckInDialog.h"
 
-CheckInDialog::CheckInDialog(const std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent) :
+CheckInDialog::CheckInDialog(const std::vector<DbFileInfo>& files, bool treeCheckIn, DbController* dbcontroller, QWidget* parent) :
 	QDialog(parent),
 	HasDbController(dbcontroller),
+	m_treeCheckIn(treeCheckIn),
 	ui(new Ui::CheckInDialog),
 	m_files(files)
 {
@@ -16,9 +17,16 @@ CheckInDialog::CheckInDialog(const std::vector<DbFileInfo>& files, DbController*
 	ui->fileListEditBox->setReadOnly(true);
 
 	QString fileListStr;
-	for (unsigned int i = 0; i < m_files.size(); i++)
+	for (size_t i = 0; i < m_files.size(); i++)
 	{
-		fileListStr += m_files[i].fileName() + "\n";
+		QString fileName = m_files[i].fileName();
+
+		if (fileName.isEmpty() == true)
+		{
+			fileName = tr("Not defined yet.");
+		}
+
+		fileListStr += fileName + "\n";
 	}
 
 	ui->fileListEditBox->setText(fileListStr);
@@ -31,14 +39,27 @@ CheckInDialog::~CheckInDialog()
 	delete ui;
 }
 
-bool CheckInDialog::checkIn(std::vector<DbFileInfo>& files, DbController* dbcontroller, QWidget* parent)
+bool CheckInDialog::checkIn(std::vector<DbFileInfo>& files, bool treeCheckIn, std::vector<DbFileInfo>* checkedInFiles, DbController* dbcontroller, QWidget* parent)
 {
-	CheckInDialog d(files, dbcontroller, parent);
+	if (files.empty() == true)
+	{
+		return false;
+	}
+
+	if (checkedInFiles == nullptr)
+	{
+		assert(checkedInFiles != nullptr);
+		return false;
+	}
+
+	CheckInDialog d(files, treeCheckIn, dbcontroller, parent);
 	d.exec();
+
+	checkedInFiles->clear();
 
 	if (d.result() == Accepted)
 	{
-		files.swap(d.m_files);
+		checkedInFiles->swap(d.m_files);
 	}
 
 	return d.result();
@@ -60,7 +81,21 @@ void CheckInDialog::on_checkInButton_clicked()
 		return;
 	}
 
-	bool result = db()->checkIn(m_files, comment, this);
+	bool result = false;
+
+	if (m_treeCheckIn == true)
+	{
+		std::vector<DbFileInfo> checkedInFiles;
+
+		result = db()->checkInTree(m_files, &checkedInFiles, comment, this);
+
+		checkedInFiles.swap(m_files);
+	}
+	else
+	{
+		result = db()->checkIn(m_files, comment, this);
+	}
+
 	if (result == true)
 	{
 		accept();

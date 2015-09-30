@@ -104,7 +104,7 @@ namespace Builder
 		}
 		else
 		{
-			ok = db()->getFileList(&fileList, db()->mcFileId(), "ModulesConfigurations.descr", nullptr);
+			ok = db()->getFileList(&fileList, db()->mcFileId(), "ModulesConfigurations.descr", true, nullptr);
 		}
 
 		if (ok == false || fileList.size() != 1)

@@ -3,12 +3,8 @@
 --		get_file_info
 --
 -------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION get_file_info(IN user_id integer, file_ids integer[])
-  RETURNS
-	TABLE(
-		fileid integer, deleted boolean, name text, parentid integer, created timestamp with time zone,
-		fileinstanceid uuid, changesetid integer, size integer, instancecreated timestamp with time zone,
-		changesettime timestamp with time zone, userid integer, checkedout boolean, action integer, details text) AS
+CREATE OR REPLACE FUNCTION get_file_info(IN user_id integer, IN file_ids integer[])
+RETURNS SETOF DbFileInfo AS
 $BODY$
 
 (SELECT
@@ -16,14 +12,12 @@ $BODY$
 	F.Deleted AS Deleted,
 	F.Name AS Name,
 	F.ParentID AS ParentID,
-	F.Created AS Created,
-	F.FileInstanceID AS FileInstanceID,
 	F.ChangesetID AS ChangesetID,
+	F.Created AS Created,
 	F.Size AS Size,
-	F.InstanceCreated AS InstanceCreated,
-	Changeset.time AS ChangesetTime,
-	Changeset.UserID AS UserID,
 	F.ChangesetID IS NULL AS CheckedOut,
+	Changeset.time AS CheckOutTime,
+	Changeset.UserID AS UserID,
 	F.Action AS Action,
 	F.Details AS Details
 FROM
@@ -57,14 +51,12 @@ UNION
 	F.Deleted AS Deleted,
 	F.Name AS Name,
 	F.ParentID AS ParentID,
-	F.Created AS Created,
-	F.FileInstanceID AS FileInstanceID,
 	F.ChangesetID AS ChangesetID,
+	F.Created AS Created,
 	F.Size AS Size,
-	F.InstanceCreated AS InstanceCreated,
-	CheckOut.time AS ChangesetTime,
-	CheckOut.UserID AS UserID,
 	F.ChangesetID IS NULL AS CheckedOut,
+	CheckOut.time AS CheckOutTime,
+	CheckOut.UserID AS UserID,
 	F.Action AS Action,
 	F.Details AS Details
 FROM
@@ -97,8 +89,7 @@ FROM
 ORDER BY Name;
 
 $BODY$
-  LANGUAGE sql;
-
+LANGUAGE sql;
 
 -------------------------------------------------------------------------------
 --

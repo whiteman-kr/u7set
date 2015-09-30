@@ -151,7 +151,7 @@ namespace Hardware
 		//
 
 		std::vector<DbFileInfo> fileList;
-		bool ok = db->getFileList(&fileList, db->mcFileId(), fileName, nullptr);
+		bool ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
 		if (ok == false || fileList.size() != 1)
 		{
 			return false;
@@ -242,7 +242,7 @@ namespace Hardware
 
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = db->getFileList(&fileList, db->mcFileId(), fileName, nullptr);
+		bool ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
 
 		if (ok == false || fileList.size() != 1)
 		{
@@ -256,7 +256,7 @@ namespace Hardware
 				return false;
 			}
 
-			ok = db->getFileList(&fileList, db->mcFileId(), fileName, nullptr);
+			ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
 			if (ok == false || fileList.size() != 1)
 			{
 				return false;

@@ -4096,7 +4096,7 @@ void EditSchemeWidget::addFblElement()
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool result = db()->getFileList(&fileList, db()->afblFileId(), "afb", this);
+	bool result = db()->getFileList(&fileList, db()->afblFileId(), "afb", true, this);
 	if (result == false || fileList.empty() == true)
 	{
 		return;
