@@ -591,12 +591,10 @@ LANGUAGE plpgsql;
 --
 -------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION get_checked_out_files(user_id integer, parent_file_ids integer[])
-RETURNS SETOF ObjectState AS
+RETURNS SETOF DbFileInfo AS
 $BODY$
 DECLARE
 	parent_id int;
-	file_id int;
-	file_result ObjectState;
 	checked_out_ids integer[];
 BEGIN
 	FOREACH parent_id IN ARRAY parent_file_ids
@@ -629,13 +627,7 @@ BEGIN
 	checked_out_ids := (SELECT * FROM uniq(sort(checked_out_ids)));
 
 	-- Return result
-	FOREACH file_id IN ARRAY checked_out_ids
-	LOOP
-		file_result := get_file_state(file_id);
-		RETURN NEXT file_result;
-	END LOOP;
-
-	RETURN;
+	RETURN QUERY SELECT * FROM get_file_info(user_id, checked_out_ids);
 END;
 $BODY$
 LANGUAGE plpgsql;

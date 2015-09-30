@@ -546,89 +546,82 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 	std::vector<DbFileInfo> checkedInFiles;
 	CheckInDialog::checkIn(checkedOutFiles, false, &checkedInFiles, dbController(), m_parentWidget);
 
-	/*
-	std::map<int, DbFileInfo> updateFiles;
+	// Update model, look for all checkedInFiles and update their FileInfo
+	//
 
 	// Copy everything to map for faster access
 	//
+	std::map<int, DbFileInfo> updateFiles;
+
 	for (const DbFileInfo& f : checkedInFiles)
 	{
 		updateFiles[f.fileId()] = f;
 	}
 
-	auto updateRowFunc = [this](const DbFileInfo& f, QModelIndex modelIndex, Hardware::DeviceObject* device) -> void
+	std::function<void(QModelIndex modelIndex)> updateRowFunc
+		= [this, &updateRowFunc, &updateFiles](QModelIndex modelIndex)
 		{
-			assert(f.fileId() != -1);
-			assert(f.fileId() == device->fileInfo().fileId());
+			Hardware::DeviceObject* device = this->deviceObject(modelIndex);
+			assert(device);
+			assert(device->fileInfo().fileId() != -1);
 
-			device->setFileInfo(f);
-
-			if (device->fileInfo().deleted() == true ||
-				(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == VcsState::CheckedIn))
+			// Update children first, as items can be deleted
+			//
+			for (int childRow = 0; childRow < 65535;childRow++)		// Just in case childRow < 65535
 			{
-				QModelIndex pi = modelIndex.parent();
-				Hardware::DeviceObject* po = this->deviceObject(pi);
-				assert(po);
+				assert(childRow < 65534);
 
-				int childIndex = po->childIndex(device);
-				assert(childIndex != -1);
+				if (this->hasIndex(childRow, 0, modelIndex) == false)
+				{
+					break;
+				}
 
-				beginRemoveRows(pi, childIndex, childIndex);
-				po->deleteChild(device);
-				endRemoveRows();
+				QModelIndex childIndex = this->index(childRow, 0, modelIndex);
+				assert(childIndex.isValid() == true);
+
+				Hardware::DeviceObject* childDevice = this->deviceObject(childIndex);
+				assert(childDevice);
+
+				updateRowFunc(childIndex);
 			}
-			else
+
+			// Update current ModelIndex, Check if thes device was cgecked out
+			//
+			auto foundFileInfo = updateFiles.find(device->fileInfo().fileId());
+
+			if (foundFileInfo != std::end(updateFiles))
 			{
-				emit dataChanged(modelIndex, modelIndex);
+				assert(foundFileInfo->second.fileId() == device->fileInfo().fileId());
+
+				device->setFileInfo(foundFileInfo->second);
+
+				if (device->fileInfo().deleted() == true ||
+					(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == VcsState::CheckedIn))
+				{
+					QModelIndex pi = modelIndex.parent();
+					Hardware::DeviceObject* po = this->deviceObject(pi);
+					assert(po);
+
+					int childIndex = po->childIndex(device);
+					assert(childIndex != -1);
+
+					beginRemoveRows(pi, childIndex, childIndex);
+					po->deleteChild(device);
+					endRemoveRows();
+				}
+				else
+				{
+					emit dataChanged(modelIndex, modelIndex);
+				}
 			}
 		};
-
 
 	// Update FileInfo in devices and Update model
 	//
 	for (QModelIndex& index : rowList)
 	{
-		Hardware::DeviceObject* d = deviceObject(index);
-		assert(d);
-
-		std::map<int, DbFileInfo>::iterator updatedFile = updateFiles.find(d->fileInfo().fileId());
-
-		if (updatedFile != updateFiles.end())
-		{
-			updateRowFunc(updatedFile->second, index, d);
-		}
-		*/
-
-
-/*		for (const auto& fi : checkedInFiles)
-		{
-			if (fi.fileId() == d->fileInfo().fileId())
-			{
-				d->setFileInfo(fi);
-
-				if (d->fileInfo().deleted() == true ||
-					(d->fileInfo().action() == VcsItemAction::Deleted && d->fileInfo().state() == VcsState::CheckedIn))
-				{
-					QModelIndex pi = index.parent();
-					Hardware::DeviceObject* po = deviceObject(pi);
-					assert(po);
-
-					int childIndex = po->childIndex(d);
-					assert(childIndex != -1);
-
-					beginRemoveRows(pi, childIndex, childIndex);
-					po->deleteChild(d);
-					endRemoveRows();
-				}
-				else
-				{
-					emit dataChanged(index, index);
-				}
-
-				break;
-			}
-		}*/
-	//}
+		updateRowFunc(index);
+	}
 
 	return;
 }
