@@ -2479,6 +2479,8 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<QObject>> objects
 		*file = device->fileInfo();
 		file->swapData(data);
 
+		file->setDetails(device->details());
+
 		files.push_back(file);
 	}
 
