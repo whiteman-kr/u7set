@@ -647,11 +647,7 @@ namespace Builder
 			if (!initAfbs()) break;				// DELETE AFTER TESTS!!!!
 			//S
 
-			if (!copyLMDiagDataToRegBuf()) break;
-
-			if (!copyLmInSignalsToRegBuf()) break;
-
-			if (!initLmOutSignalsInRegBuf()) break;
+			if (!copyLMDataToRegBuf()) break;
 
 			if (!copyInModulesAppLogicDataToRegBuf()) break;
 
@@ -1135,58 +1131,40 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyLMDiagDataToRegBuf()
+	bool ModuleLogicCompiler::copyLMDataToRegBuf()
 	{
-		m_code.comment("Copy LM diagnostics data to RegBuf");
-		m_code.newLine();
-
 		Command cmd;
 
 		cmd.movMem(m_memoryMap.rb_lmDiagnosticsAddress(),
 				   m_memoryMap.lmDiagnosticsAddress(),
 				   m_memoryMap.lmDiagnosticsSizeW());
 
+		cmd.setComment("copy LM diagnostics data to RegBuf");
+
 		m_code.append(cmd);
-		m_code.newLine();
 
-		return true;
-	}
-
-
-	bool ModuleLogicCompiler::copyLmInSignalsToRegBuf()
-	{
-		m_code.comment("Copy LM's' input signals to RegBuf");
-		m_code.newLine();
-
-		Command cmd;
+		//
 
 		cmd.movMem(m_memoryMap.rb_lmInputsAddress(),
 				   m_memoryMap.lmInOutsAddress(),
 				   m_memoryMap.lmInOutsSizeW());
 
+		cmd.setComment("copy LM's' input signals to RegBuf");
+
 		m_code.append(cmd);
-		m_code.newLine();
 
-		return true;
-	}
-
-
-	bool ModuleLogicCompiler::initLmOutSignalsInRegBuf()
-	{
-		m_code.comment("Init to 0 LM's output signals");
-		m_code.newLine();
-
-		Command cmd;
+		//
 
 		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), m_memoryMap.lmInOutsSizeW(), 0);
 
+		cmd.setComment("init to 0 LM's output signals");
+
 		m_code.append(cmd);
 		m_code.newLine();
 
+
 		return true;
-
 	}
-
 
 	bool ModuleLogicCompiler::copyLmOutSignalsToModuleMemory()
 	{
@@ -1244,6 +1222,11 @@ namespace Builder
 
 				result = false;
 			}
+		}
+
+		if (firstInputModle == false)
+		{
+			m_code.newLine();
 		}
 
 		return result;

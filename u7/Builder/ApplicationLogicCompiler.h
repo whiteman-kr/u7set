@@ -645,11 +645,9 @@ namespace Builder
 
 		bool initAfbs();
 
-		bool copyLMDiagDataToRegBuf();
+		bool copyLMDataToRegBuf();
 		bool copyInModulesAppLogicDataToRegBuf();
 
-		bool copyLmInSignalsToRegBuf();
-		bool initLmOutSignalsInRegBuf();
 		bool copyLmOutSignalsToModuleMemory();
 
 		void copyDimDataToRegBuf(const Module& module);
