@@ -647,7 +647,7 @@ namespace Builder
 			if (!initAfbs()) break;				// DELETE AFTER TESTS!!!!
 			//S
 
-			if (!copyLMDiagDataToRegBuf()) break;
+			if (!copyLMDataToRegBuf()) break;
 
 			if (!copyInModulesAppLogicDataToRegBuf()) break;
 
@@ -656,6 +656,8 @@ namespace Builder
 			if (!generateAppLogicCode()) break;
 
 			if (!copyDiscreteSignalsToRegBuf()) break;
+
+			if (!copyLmOutSignalsToModuleMemory()) break;
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
@@ -1129,18 +1131,54 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyLMDiagDataToRegBuf()
+	bool ModuleLogicCompiler::copyLMDataToRegBuf()
 	{
-		m_code.comment("Copy LM diagnostics data to RegBuf");
+		Command cmd;
+
+		cmd.movMem(m_memoryMap.rb_lmDiagnosticsAddress(),
+				   m_memoryMap.lmDiagnosticsAddress(),
+				   m_memoryMap.lmDiagnosticsSizeW());
+
+		cmd.setComment("copy LM diagnostics data to RegBuf");
+
+		m_code.append(cmd);
+
+		//
+
+		cmd.movMem(m_memoryMap.rb_lmInputsAddress(),
+				   m_memoryMap.lmInOutsAddress(),
+				   m_memoryMap.lmInOutsSizeW());
+
+		cmd.setComment("copy LM's' input signals to RegBuf");
+
+		m_code.append(cmd);
+
+		//
+
+		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), m_memoryMap.lmInOutsSizeW(), 0);
+
+		cmd.setComment("init to 0 LM's output signals");
+
+		m_code.append(cmd);
+		m_code.newLine();
+
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copyLmOutSignalsToModuleMemory()
+	{
+		m_code.comment("Copy LM's output signals from RegBuf to LM's in/out memory");
 		m_code.newLine();
 
 		Command cmd;
 
-		cmd.movMem(m_memoryMap.regBufLmDiagnosticsAddress(),
-				   m_memoryMap.lmDiagnosticsAddress(),
-				   m_memoryMap.lmDiagnosticsSizeW());
+		cmd.movMem(	m_memoryMap.lmInOutsAddress(),
+					m_memoryMap.rb_lmOutputsAddress(),
+					m_memoryMap.lmInOutsSizeW());
 
 		m_code.append(cmd);
+		m_code.newLine();
 
 		return true;
 	}
@@ -1161,7 +1199,6 @@ namespace Builder
 
 			if (firstInputModle)
 			{
-				m_code.newLine();
 				m_code.comment("Copy input modules application logic data to RegBuf");
 				m_code.newLine();
 
@@ -1187,6 +1224,11 @@ namespace Builder
 			}
 		}
 
+		if (firstInputModle == false)
+		{
+			m_code.newLine();
+		}
+
 		return result;
 	}
 
@@ -1210,8 +1252,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initOutModulesAppLogicDataInRegBuf()
 	{
-		m_code.newLine();
 		m_code.comment("Init output modules application logic data in RegBuf");
+		m_code.newLine();
 
 		for(Module module : m_modules)
 		{
@@ -1226,9 +1268,10 @@ namespace Builder
 
 			cmd.setComment(QString(tr("init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
 
-			m_code.newLine();
 			m_code.append(cmd);
 		}
+
+		m_code.newLine();
 
 		return true;
 	}
@@ -1240,8 +1283,8 @@ namespace Builder
 
 		bool result = true;
 
-		m_code.newLine();
 		m_code.comment("Application logic code");
+		m_code.newLine();
 
 		for(AppItem* appItem : m_appItems)
 		{
@@ -2045,7 +2088,7 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(m_memoryMap.regBufRegDiscreteSignalsAddress(),
+		cmd.movMem(m_memoryMap.rb_regDiscreteSignalsAddress(),
 				   m_memoryMap.regDiscreteSignalsAddress(),
 				   m_memoryMap.regDiscreteSignalsSizeW());
 

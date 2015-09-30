@@ -464,11 +464,21 @@ namespace Builder
 		int lmDiagnosticsAddress() const { return m_lmDiagnostics.memory.startAddress(); }
 		int lmDiagnosticsSizeW() const { return m_lmDiagnostics.memory.sizeW(); }
 
+		int lmInOutsAddress() const { return m_lmInOuts.memory.startAddress(); }
+		int lmInOutsSizeW() const { return m_lmInOuts.memory.sizeW(); }
+
 		int regDiscreteSignalsAddress() const { return m_appBitAdressed.regDiscretSignals.startAddress(); }
 		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.regDiscreteSignalsSizeW(); }
 
-		int regBufLmDiagnosticsAddress() const { return m_appWordAdressed.lmDiagnostics.startAddress(); }
-		int regBufRegDiscreteSignalsAddress() const { return m_appWordAdressed.regDiscreteSignals.startAddress(); }
+		// rb_* - adrresses and sizes in Registration Buffer
+		//
+		int rb_lmDiagnosticsAddress() const { return m_appWordAdressed.lmDiagnostics.startAddress(); }
+		int rb_regDiscreteSignalsAddress() const { return m_appWordAdressed.regDiscreteSignals.startAddress(); }
+
+		int rb_lmInputsAddress() const { return m_appWordAdressed.lmInputs.startAddress(); }
+		int rb_lmOutputsAddress() const { return m_appWordAdressed.lmOutputs.startAddress(); }
+
+		//
 
 		int getModuleDataOffset(int place);
 
@@ -635,10 +645,14 @@ namespace Builder
 
 		bool initAfbs();
 
-		bool copyLMDiagDataToRegBuf();
+		bool copyLMDataToRegBuf();
 		bool copyInModulesAppLogicDataToRegBuf();
+
+		bool copyLmOutSignalsToModuleMemory();
+
 		void copyDimDataToRegBuf(const Module& module);
 		void copyAimDataToRegBuf(const Module& module);
+
 
 		bool initOutModulesAppLogicDataInRegBuf();
 
