@@ -168,8 +168,13 @@ BEGIN
 
 	if (checked_out_instance_id IS NOT NULL)
 	THEN
-		result := undo_changes(user_id, ARRAY[file_id]);
-		RETURN result;
+		-- try to undo file, if undo fails then mark file instance as deleted (set Action to Deleted)
+		BEGIN
+			result := undo_changes(user_id, ARRAY[file_id]);
+			RETURN result;
+		EXCEPTION WHEN OTHERS THEN
+			-- File cannot be undone, probably it has dependants, mark file instance as deleted (set Action to Deleted)
+		END;
 	END IF;
 
 	-- mark fileinstance action as deleted

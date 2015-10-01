@@ -491,9 +491,24 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 		return;
 	}
 
+	// As some rows can be deleted during update model,
+	// rowList must be sorted in FileID descending order,
+	// to delete first children and then their parents
+	//
+	QModelIndexList sortedRowList = rowList;
+
+	qSort(sortedRowList.begin(), sortedRowList.end(),
+		[this](QModelIndex& m1, QModelIndex m2)
+		{
+			Hardware::DeviceObject* d1 = deviceObject(m1);
+			Hardware::DeviceObject* d2 = deviceObject(m2);
+
+			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
+		});
+
 	// Update model
 	//
-	for (QModelIndex& index : rowList)
+	for (QModelIndex& index : sortedRowList)
 	{
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
@@ -2073,6 +2088,7 @@ void EquipmentTabPage::setActionState()
 	// about does parent have any checked out files
 	//
 	m_checkInAction->setEnabled(true);
+	m_deleteObjectAction->setEnabled(true);		// Allow to TRY to delete always
 
 	// Disable all
 	//
@@ -2086,7 +2102,7 @@ void EquipmentTabPage::setActionState()
 	m_addWorkstationAction->setEnabled(false);
 	m_addSoftwareAction->setEnabled(false);
 
-	m_deleteObjectAction->setEnabled(false);
+	//m_deleteObjectAction->setEnabled(false);
 	m_checkOutAction->setEnabled(false);
 	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	m_undoChangesAction->setEnabled(false);
@@ -2132,27 +2148,31 @@ void EquipmentTabPage::setActionState()
 
 	// Delete Items action
 	//
-	m_deleteObjectAction->setEnabled(false);
-	for (const QModelIndex& mi : selectedIndexList)
-	{
-		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
-		assert(device);
 
-		if (device->fileInfo().state() == VcsState::CheckedIn /*&&
-			device->fileInfo().action() != VcsItemAction::Deleted*/)
-		{
-			m_deleteObjectAction->setEnabled(true);
-			break;
-		}
+	// Allow to delete item always, even when it was already marked as deleted
+	//
 
-		if (device->fileInfo().state() == VcsState::CheckedOut &&
-			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
-			&& device->fileInfo().action() != VcsItemAction::Deleted)
-		{
-			m_deleteObjectAction->setEnabled(true);
-			break;
-		}
-	}
+//	m_deleteObjectAction->setEnabled(false);
+//	for (const QModelIndex& mi : selectedIndexList)
+//	{
+//		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+//		assert(device);
+
+//		if (device->fileInfo().state() == VcsState::CheckedIn /*&&
+//			device->fileInfo().action() != VcsItemAction::Deleted*/)
+//		{
+//			m_deleteObjectAction->setEnabled(true);
+//			break;
+//		}
+
+//		if (device->fileInfo().state() == VcsState::CheckedOut &&
+//			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
+//			&& device->fileInfo().action() != VcsItemAction::Deleted)
+//		{
+//			m_deleteObjectAction->setEnabled(true);
+//			break;
+//		}
+//	}
 
 	// CheckIn, CheckOut
 	//
