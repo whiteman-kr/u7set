@@ -56,7 +56,6 @@ public:
 
 	std::shared_ptr<Hardware::DeviceObject> deviceObjectSharedPtr(QModelIndex& index);
 
-
 public slots:
 	void projectOpened();
 	void projectClosed();
@@ -116,6 +115,9 @@ public:
 
 	bool isPresetMode() const;
 	bool isConfigurationMode() const;
+
+signals:
+	void updateState();
 
 public slots:
 	void addSystem();

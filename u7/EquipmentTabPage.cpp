@@ -1029,6 +1029,8 @@ void EquipmentView::addSystem()
 	system->setCaption(tr("System"));
 
 	addDeviceObject(system);
+
+	emit updateState();
 	return;
 }
 
@@ -1040,6 +1042,8 @@ void EquipmentView::addRack()
 	rack->setCaption(tr("Rack"));
 
 	addDeviceObject(rack);
+
+		emit updateState();
 	return;
 }
 
@@ -1047,10 +1051,12 @@ void EquipmentView::addChassis()
 {
 	std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(isPresetMode());
 
-    chassis->setStrId("$(PARENT)_CHASSISID");
+	chassis->setStrId("$(PARENT)_CHID");
     chassis->setCaption(tr("Chassis"));
 
     addDeviceObject(chassis);
+
+	emit updateState();
 	return;
 }
 
@@ -1062,6 +1068,8 @@ void EquipmentView::addModule()
 	module->setCaption(tr("Module"));
 
 	addDeviceObject(module);
+
+	emit updateState();
 	return;
 }
 
@@ -1069,10 +1077,12 @@ void EquipmentView::addController()
 {
 	std::shared_ptr<Hardware::DeviceObject> controller = std::make_shared<Hardware::DeviceController>(isPresetMode());
 
-	controller->setStrId("$(PARENT)_CTRLXXX");
+	controller->setStrId("$(PARENT)_CTRLXX");
 	controller->setCaption(tr("Controller"));
 
 	addDeviceObject(controller);
+
+	emit updateState();
 	return;
 }
 
@@ -1084,6 +1094,8 @@ void EquipmentView::addSignal()
 	signal->setCaption(tr("Signal"));
 
 	addDeviceObject(signal);
+
+	emit updateState();
 	return;
 }
 
@@ -1095,6 +1107,8 @@ void EquipmentView::addWorkstation()
 	workstation->setCaption(tr("Workstation"));
 
 	addDeviceObject(workstation);
+
+	emit updateState();
 	return;
 }
 
@@ -1106,6 +1120,8 @@ void EquipmentView::addSoftware()
 	software->setCaption(tr("Software"));
 
 	addDeviceObject(software);
+
+	emit updateState();
 	return;
 }
 
@@ -1128,6 +1144,8 @@ void EquipmentView::addPresetRack()
 	{
 		choosePreset(Hardware::DeviceType::Rack);
 	}
+
+	emit updateState();
 	return;
 }
 
@@ -1149,6 +1167,8 @@ void EquipmentView::addPresetChassis()
 	{
 		choosePreset(Hardware::DeviceType::Chassis);
 	}
+
+	emit updateState();
 }
 
 void EquipmentView::addPresetModule()
@@ -1169,6 +1189,8 @@ void EquipmentView::addPresetModule()
 	{
 		choosePreset(Hardware::DeviceType::Module);
 	}
+
+	emit updateState();
 }
 
 void EquipmentView::addPresetController()
@@ -1189,6 +1211,8 @@ void EquipmentView::addPresetController()
 	{
 		choosePreset(Hardware::DeviceType::Controller);
 	}
+
+	emit updateState();
 }
 
 void EquipmentView::addPresetWorkstation()
@@ -1209,6 +1233,8 @@ void EquipmentView::addPresetWorkstation()
 	{
 		choosePreset(Hardware::DeviceType::Workstation);
 	}
+
+	emit updateState();
 }
 
 void EquipmentView::addPresetSoftware()
@@ -1229,6 +1255,8 @@ void EquipmentView::addPresetSoftware()
 	{
 		choosePreset(Hardware::DeviceType::Software);
 	}
+
+	emit updateState();
 }
 
 
@@ -1605,6 +1633,7 @@ void EquipmentView::deleteSelectedDevices()
 	//
 	equipmentModel()->deleteDeviceObject(selected);
 
+	emit updateState();
 	return;
 }
 
@@ -1618,6 +1647,8 @@ void EquipmentView::checkInSelectedDevices()
 	}
 
 	equipmentModel()->checkInDeviceObject(selected);
+
+	emit updateState();
 	return;
 }
 
@@ -1631,6 +1662,8 @@ void EquipmentView::checkOutSelectedDevices()
 	}
 
 	equipmentModel()->checkOutDeviceObject(selected);
+
+	emit updateState();
 	return;
 }
 
@@ -1651,6 +1684,8 @@ void EquipmentView::refreshSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
 	equipmentModel()->refreshDeviceObject(selected);
+
+	emit updateState();
 	return;
 }
 
@@ -1660,6 +1695,7 @@ void EquipmentView::updateSelectedDevices()
 
 	equipmentModel()->updateDeviceObject(selected);
 
+	emit updateState();
 	return;
 }
 
@@ -1794,7 +1830,9 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	connect(dbController(), &DbController::projectClosed, this, &EquipmentTabPage::projectClosed);
 
 	connect(m_equipmentView->selectionModel(), & QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
-	connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
+
+	//connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
+	connect(m_equipmentView, &EquipmentView::updateState, this, &EquipmentTabPage::setActionState);
 
 	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
