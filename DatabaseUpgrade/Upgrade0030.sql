@@ -3,6 +3,16 @@ ALTER TABLE checkout
 	  REFERENCES signal (signalid) MATCH SIMPLE
 	  ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+CREATE INDEX checkout_index_fileid
+  ON checkout
+  USING btree
+  (fileid);
+
+CREATE INDEX checkout_index_signalid
+  ON checkout
+  USING btree
+  (signalid);
+
 
 DROP FUNCTION get_signals_ids(integer, boolean);
 

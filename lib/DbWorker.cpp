@@ -2102,7 +2102,7 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 	{
 		DbFileInfo fileInfo;
 
-		db_updateFileState(q, &fileInfo, false);
+		db_dbFileInfo(q, &fileInfo);
 
 		out->push_back(fileInfo);
 	}

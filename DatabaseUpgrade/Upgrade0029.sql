@@ -591,12 +591,10 @@ LANGUAGE plpgsql;
 --
 -------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION get_checked_out_files(user_id integer, parent_file_ids integer[])
-RETURNS SETOF ObjectState AS
+  RETURNS SETOF dbfileinfo AS
 $BODY$
 DECLARE
 	parent_id int;
-	file_id int;
-	file_result ObjectState;
 	checked_out_ids integer[];
 BEGIN
 	FOREACH parent_id IN ARRAY parent_file_ids
@@ -604,20 +602,19 @@ BEGIN
 		-- get all checked out files for parents, including parent
 		checked_out_ids := array_cat(
 			array(
-				SELECT SQ.FileID FROM (
-					(WITH RECURSIVE files(FileID, ParentID) AS (
-							SELECT FileID, ParentID FROM get_file_list(user_id, parent_id, '%')
+				SELECT SQ.FileID
+				FROM (
+					(WITH RECURSIVE files(FileID, ParentID, CheckedOut) AS (
+							SELECT FileID, ParentID, CheckedOut FROM get_file_list(user_id, parent_id)
 						UNION ALL
-							SELECT FL.FileID, FL.ParentID FROM Files, get_file_list(user_id, files.FileID, '%') FL
+							SELECT FL.FileID, FL.ParentID, FL.CheckedOut FROM Files, get_file_list(user_id, files.FileID) FL
 						)
 						SELECT * FROM files)
 					UNION
-						SELECT FileID, ParentID FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = parent_id), '%') WHERE FileID = parent_id
-				) SQ, File AS F
-				WHERE SQ.FileID = F.FileID AND F.CheckedOutInstanceID IS NOT NULL
-				ORDER BY SQ.FileID
+						SELECT FileID, ParentID, CheckedOut FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = parent_id)) WHERE FileID = parent_id
+				) SQ
+				WHERE CheckedOut = TRUE
 			), checked_out_ids);
-
 	END LOOP;
 
 	IF (array_length(checked_out_ids, 1) = 0)
@@ -629,13 +626,7 @@ BEGIN
 	checked_out_ids := (SELECT * FROM uniq(sort(checked_out_ids)));
 
 	-- Return result
-	FOREACH file_id IN ARRAY checked_out_ids
-	LOOP
-		file_result := get_file_state(file_id);
-		RETURN NEXT file_result;
-	END LOOP;
-
-	RETURN;
+	RETURN QUERY SELECT * FROM get_file_info(user_id, checked_out_ids);
 END;
 $BODY$
 LANGUAGE plpgsql;

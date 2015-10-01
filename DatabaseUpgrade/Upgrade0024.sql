@@ -5,6 +5,11 @@ ALTER TABLE file
 ALTER TABLE file
 	ADD COLUMN checkedoutinstanceid uuid DEFAULT NULL REFERENCES FileInstance(FileInstanceID);
 
+CREATE INDEX file_index_parentid
+  ON file
+  USING btree
+  (parentid);
+
 
 -- Update added columns to the correct state
 UPDATE File SET CheckedInInstanceID =

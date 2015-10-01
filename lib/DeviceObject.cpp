@@ -905,18 +905,19 @@ namespace Hardware
 
 	int DeviceObject::childIndex(DeviceObject* child) const
 	{
-		auto fr = std::find_if(m_children.begin(), m_children.end(),
-							   [child](const std::shared_ptr<DeviceObject>& v)
+		// Manual searching for an index is 1.6 times fastre than stl method
+		//
+		size_t childCount = m_children.size();
+		for (size_t i = 0; i < childCount; i++)
 		{
-			return v.get() == child;
-		});
+			if (m_children[i].get() == child)
+			{
+				return i;
+			}
 
-		if (fr == m_children.end())
-		{
-			return -1;
 		}
 
-		return std::distance(m_children.begin(), fr);
+		return -1;
 	}
 
 	std::shared_ptr<DeviceObject> DeviceObject::childSharedPtr(int index)
