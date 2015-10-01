@@ -637,15 +637,11 @@ namespace Builder
 
 			if (!generateFbTestCode()) break;
 
-			//if (!initAfbs()) break;			UNCOMMENT!!!!!
+			if (!initAfbs()) break;
 
 			if (!finishTestCode()) break;
 
 			if (!startAppLogicCode()) break;
-
-			//
-			if (!initAfbs()) break;				// DELETE AFTER TESTS!!!!
-			//S
 
 			if (!copyLMDataToRegBuf()) break;
 
@@ -831,6 +827,8 @@ namespace Builder
 			if (!buildServiceMaps()) break;
 
 			if (!createAppSignalsMap()) break;
+
+			if (!appendFbsForAnalogInOutSignalsConversion()) break;
 
 			if (!calculateLmMemoryMap()) break;
 
@@ -1617,8 +1615,6 @@ namespace Builder
 
 		bool result = false;
 
-		m_code.newLine();
-
 		do
 		{
 			if (!writeFbInputSignals(appFb)) break;
@@ -1630,6 +1626,8 @@ namespace Builder
 			result = true;
 		}
 		while(false);
+
+		m_code.newLine();
 
 		return result;
 	}
@@ -2113,7 +2111,6 @@ namespace Builder
 
 			if (firstOutputModule)
 			{
-				m_code.newLine();
 				m_code.comment("Copy output modules application logic data to modules memory");
 
 				firstOutputModule = false;
@@ -2279,7 +2276,7 @@ namespace Builder
 		cmd.moveBit(20, 1, 30, 2);
 		m_testCode.append(cmd);*/
 
-		cmd.movConst(49906, 1);
+/*		cmd.movConst(49906, 1);
 		m_testCode.append(cmd);
 
 		cmd.movConst(49907, 2);
@@ -2302,7 +2299,143 @@ namespace Builder
 
 		m_testCode.getMifCode(mifCode);
 
-		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);
+		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);*/
+	}
+
+
+	bool ModuleLogicCompiler::appendFbsForAnalogInOutSignalsConversion()
+	{
+		LOG_MESSAGE(m_log, QString(tr("Prepare FBs for input/output signals conversion...")));
+
+		bool result = true;
+
+		// find scal_16ui_32fp & scal_16ui_32si functional blocks
+		//
+
+		for(std::shared_ptr<Afb::AfbElement> afbElement : m_afbl->elements())
+		{
+			if (afbElement->caption() == FB_SCAL_16UI_32FP_CAPTION)
+			{
+				m_scal_16ui_32fp = afbElement;
+				continue;
+			}
+
+			if (afbElement->caption() == FB_SCAL_16UI_32SI_CAPTION)
+			{
+				 m_scal_16ui_32si = afbElement;
+			}
+		}
+
+		if (m_scal_16ui_32fp == nullptr)
+		{
+			LOG_ERROR(m_log, tr("Functionsl block scal_16ui_32fp is not found"))
+			result = false;
+		}
+
+		if (m_scal_16ui_32si == nullptr)
+		{
+			LOG_ERROR(m_log, tr("Functionsl block scal_16ui_32si is not found"))
+			result = false;
+		}
+
+		if (result == false)
+		{
+			return result;
+		}
+
+		for(const Module& module : m_modules)
+		{
+			if (module.device == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
+
+			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+			{
+				if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+				{
+					continue;
+				}
+
+				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+
+				if (boundSignals.count() > 1)
+				{
+					LOG_WARNING(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+				}
+
+				for(Signal* signal : boundSignals)
+				{
+					if (signal == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					if (signal->isDiscrete())
+					{
+						continue;
+					}
+
+					if (signal->isInput())
+					{
+						appendFbForAnalogInputSignalConversion(*signal);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::appendFbForAnalogInputSignalConversion(const Signal& signal)
+	{
+		bool result = true;
+
+		assert(signal.isAnalog());
+		assert(signal.isInput());
+		assert(signal.deviceStrID().isEmpty() == false);
+
+		int x1 = signal.lowADC();
+		int x2 = signal.highADC();
+
+		double y1 = signal.lowLimit();
+		double y2 = signal.highLimit();
+
+		double k1 = 0;
+		double k2 = 0;
+
+		switch(signal.dataFormat())
+		{
+		case DataFormat::Float:
+			{
+				k1 = (y2 - y1) / (x2 - x1);
+				k2 = y1 - k1 * x1;
+
+				m_scal_16ui_32fp->params()[FB_SCAL_K1_PARAM_INDEX].setValue(QVariant(k1));
+				m_scal_16ui_32fp->params()[FB_SCAL_K1_PARAM_INDEX].setValue(QVariant(k2));
+
+				m_afbs.insert(m_scal_16ui_32fp);
+			}
+
+			break;
+
+		case DataFormat::SignedInt:
+			break;
+
+		default:
+			LOG_ERROR(m_log, QString(tr("Unknown conversion for signal %1, dataFormat %2")).
+					  arg(signal.strID()).arg(static_cast<int>(signal.dataFormat())));
+			result = false;
+		}
+
+		//m_afbs.insert(sharedAfbl);
+
+		return result;
 	}
 
 
@@ -2584,10 +2717,21 @@ namespace Builder
 							if (module.familyType() == Hardware::DeviceModule::FamilyType::AIM ||
 								module.familyType() == Hardware::DeviceModule::FamilyType::AOM)
 							{
-								// NEED IMPLEMENTATION!!!!
-								//
-								assert(false);
-								continue;
+								int signalGroup = signalOffset / 17;
+								int signalNo = signalOffset % 17;
+
+								if (signalNo == 0)
+								{
+									// this is discrete validity signal
+									//
+									signalOffset = signalGroup * 33;
+								}
+								else
+								{
+									// this is analog input signal
+									//
+									signalOffset = signalGroup * 33 + 1 + 2 * (signalNo - 1);
+								}
 							}
 
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!

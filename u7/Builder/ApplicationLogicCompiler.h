@@ -36,6 +36,16 @@ namespace Builder
 	// Constants
 	//
 
+	// FB SCALE
+
+	const char* const FB_SCAL_16UI_32FP_CAPTION = "scal_16ui_32fp";
+	const char* const FB_SCAL_16UI_32SI_CAPTION = "scal_16ui_32si";
+
+	const int FB_SCAL_K1_PARAM_INDEX = 1;
+	const int FB_SCAL_K2_PARAM_INDEX = 3;
+
+	//
+
 	const int ERR_VALUE = -1;
 
 	const int NOT_FB_OPERAND_INDEX = -1;
@@ -619,6 +629,9 @@ namespace Builder
 
 		QString msg;
 
+		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32fp;
+		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32si;
+
 	private:
 		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);
 		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int* value);
@@ -653,7 +666,6 @@ namespace Builder
 		void copyDimDataToRegBuf(const Module& module);
 		void copyAimDataToRegBuf(const Module& module);
 
-
 		bool initOutModulesAppLogicDataInRegBuf();
 
 		bool generateAppLogicCode();
@@ -680,6 +692,9 @@ namespace Builder
 		void copyAomDataToModuleMemory(const Module& module);
 
 		bool finishAppLogicCode();
+
+		bool appendFbsForAnalogInOutSignalsConversion();
+		bool appendFbForAnalogInputSignalConversion(const Signal &signal);
 
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
