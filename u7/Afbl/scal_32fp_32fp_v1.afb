@@ -7,7 +7,7 @@
             <Description>Scaling Block</Description>
             <Category>Scaling</Category>
             <OpCode>14</OpCode>
-            <HasRam>true</HasRam>
+            <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
