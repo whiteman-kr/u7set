@@ -818,8 +818,6 @@ namespace Builder
 		{
 			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
 			LOG_WARNING(m_log, msg);
-
-			return true;
 		}
 
 		do
@@ -907,10 +905,10 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initAfbs()
 	{
-		if (m_moduleLogic == nullptr)
+/*		if (m_moduleLogic == nullptr)
 		{
 			return true;			// nothing to init
-		}
+		}*/
 
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
@@ -2409,18 +2407,18 @@ namespace Builder
 		double k1 = 0;
 		double k2 = 0;
 
+		AppItem* appItem = nullptr;
+
 		switch(signal.dataFormat())
 		{
 		case DataFormat::Float:
-			{
-				k1 = (y2 - y1) / (x2 - x1);
-				k2 = y1 - k1 * x1;
+			k1 = (y2 - y1) / (x2 - x1);
+			k2 = y1 - k1 * x1;
 
-				m_scal_16ui_32fp->params()[FB_SCAL_K1_PARAM_INDEX].setValue(QVariant(k1));
-				m_scal_16ui_32fp->params()[FB_SCAL_K1_PARAM_INDEX].setValue(QVariant(k2));
+			m_scal_16ui_32fp->params()[FB_SCAL_K1_PARAM_INDEX].setValue(QVariant(k1));
+			m_scal_16ui_32fp->params()[FB_SCAL_K2_PARAM_INDEX].setValue(QVariant(k2));
 
-				m_afbs.insert(m_scal_16ui_32fp);
-			}
+			appItem = new AppItem(m_scal_16ui_32fp);
 
 			break;
 
@@ -2433,7 +2431,13 @@ namespace Builder
 			result = false;
 		}
 
-		//m_afbs.insert(sharedAfbl);
+		if (appItem != nullptr)
+		{
+			m_scalAppItems.append(appItem);
+
+			int instance = m_afbs.addInstance(appItem);
+			m_appFbs.insert(appItem, instance);
+		}
 
 		return result;
 	}
@@ -2453,43 +2457,19 @@ namespace Builder
 
 		bool result = true;
 
-		for(const AppLogicItem& logicItem : m_moduleLogic->items())
+		if (m_moduleLogic != nullptr)
 		{
-			// build QHash<QUuid, AppItem*> m_appItems
-			// item GUID -> item ptr
-			//
-			if (m_appItems.contains(logicItem.m_fblItem->guid()))
+			for(const AppLogicItem& logicItem : m_moduleLogic->items())
 			{
-				AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
-
-				msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
-						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
-
-				LOG_ERROR(m_log, msg);
-
-				result = false;
-
-				continue;
-			}
-
-			AppItem* appItem = new AppItem(logicItem);
-
-			m_appItems.insert(appItem->guid(), appItem);
-
-			// build QHash<QUuid, LogicItem*> m_itemsPins;
-			// pin GUID -> parent item ptr
-			//
-
-			// add input pins
-			//
-			for(LogicPin input : appItem->inputs())
-			{
-				if (m_pinParent.contains(input.guid()))
+				// build QHash<QUuid, AppItem*> m_appItems
+				// item GUID -> item ptr
+				//
+				if (m_appItems.contains(logicItem.m_fblItem->guid()))
 				{
-					AppItem* firstItem = m_pinParent[input.guid()];
+					AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
 
-					msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
-							arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+					msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
+							arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
 
 					LOG_ERROR(m_log, msg);
 
@@ -2498,28 +2478,55 @@ namespace Builder
 					continue;
 				}
 
-				m_pinParent.insert(input.guid(), appItem);
-			}
+				AppItem* appItem = new AppItem(logicItem);
 
-			// add output pins
-			//
-			for(LogicPin output : appItem->outputs())
-			{
-				if (m_pinParent.contains(output.guid()))
+				m_appItems.insert(appItem->guid(), appItem);
+
+				// build QHash<QUuid, LogicItem*> m_itemsPins;
+				// pin GUID -> parent item ptr
+				//
+
+				// add input pins
+				//
+				for(LogicPin input : appItem->inputs())
 				{
-					AppItem* firstItem = m_pinParent[output.guid()];
+					if (m_pinParent.contains(input.guid()))
+					{
+						AppItem* firstItem = m_pinParent[input.guid()];
 
-					msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
-							arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+						msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
+								arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
-					LOG_ERROR(m_log, msg);
+						LOG_ERROR(m_log, msg);
 
-					result = false;
+						result = false;
 
-					continue;
+						continue;
+					}
+
+					m_pinParent.insert(input.guid(), appItem);
 				}
 
-				m_pinParent.insert(output.guid(), appItem);
+				// add output pins
+				//
+				for(LogicPin output : appItem->outputs())
+				{
+					if (m_pinParent.contains(output.guid()))
+					{
+						AppItem* firstItem = m_pinParent[output.guid()];
+
+						msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
+								arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+
+						LOG_ERROR(m_log, msg);
+
+						result = false;
+
+						continue;
+					}
+
+					m_pinParent.insert(output.guid(), appItem);
+				}
 			}
 		}
 
@@ -2529,11 +2536,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createAppSignalsMap()
 	{
-		if (m_moduleLogic == nullptr)
+		/*if (m_moduleLogic == nullptr)
 		{
 			assert(false);
 			return false;
-		}
+		}*/
 
 		int count = m_signals->count();
 
@@ -3054,6 +3061,13 @@ namespace Builder
 		}
 
 		m_appItems.clear();
+
+		for(AppItem* scalAppItem : m_scalAppItems)
+		{
+			delete scalAppItem;
+		}
+
+		m_scalAppItems.clear();
 	}
 
 
@@ -3181,7 +3195,7 @@ namespace Builder
 
 		if (!contains(afbStrID))
 		{
-			assert(false);			// unknown FBL guid
+			assert(false);			// unknown FBL strID
 			return 0;
 		}
 
@@ -3303,6 +3317,14 @@ namespace Builder
 	AppItem::AppItem(const AppItem& appItem)
 	{
 		m_appLogicItem = appItem.m_appLogicItem;
+	}
+
+
+	AppItem::AppItem(std::shared_ptr<Afb::AfbElement> afbElement)
+	{
+		m_appLogicItem.m_afbElement = *afbElement.get();
+		m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
+					new VFrame30::SchemeItemAfb(VFrame30::SchemeUnit::Display, *afbElement.get()));
 	}
 
 

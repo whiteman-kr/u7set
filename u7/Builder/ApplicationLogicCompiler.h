@@ -208,6 +208,7 @@ namespace Builder
 	public:
 		AppItem(const AppItem& appItem);
 		AppItem(const AppLogicItem& appLogicItem);
+		AppItem(std::shared_ptr<Afb::AfbElement> afbElement);
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
 		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
@@ -631,6 +632,8 @@ namespace Builder
 
 		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32fp;
 		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32si;
+
+		QVector<AppItem*> m_scalAppItems;
 
 	private:
 		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);
