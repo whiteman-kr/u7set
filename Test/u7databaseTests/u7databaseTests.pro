@@ -40,7 +40,8 @@ SOURCES += main.cpp \
     ../../lib/DbProgress.cpp \
     ../../lib/Signal.cpp \
     ../../lib/ProtoSerialization.cpp \
-    ../../lib/DbProgressDialog.cpp
+    ../../lib/DbProgressDialog.cpp \
+    MultiThreadTest.cpp
 
 HEADERS += \
     UserTests.h \
@@ -55,7 +56,8 @@ HEADERS += \
     ../../include/DbProgress.h \
     ../../include/Signal.h \
     ../../include/ProtoSerialization.h \
-    ../../include/DbProgressDialog.h
+    ../../include/DbProgressDialog.h \
+    MultiThreadTest.h
 
 #c++11 support for GCC
 #
