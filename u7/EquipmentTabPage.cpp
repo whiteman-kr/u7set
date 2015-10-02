@@ -687,8 +687,25 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 	return;
 }
 
-void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
+void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 {
+	QModelIndexList rowList = undowRowList;
+
+	// As some rows can be deleted during update model,
+	// rowList must be sorted in FileID descending order,
+	// to delete first children and then their parents
+	//
+	qSort(rowList.begin(), rowList.end(),
+		[this](const QModelIndex& m1, const QModelIndex& m2)
+		{
+			const Hardware::DeviceObject* d1 = this->deviceObject(m1);
+			const Hardware::DeviceObject* d2 = this->deviceObject(m2);
+
+			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
+		});
+
+	// --
+	//
 	std::vector<DbFileInfo> files;
 	QModelIndexList checkedOutList;
 	DbUser currentUser = dbController()->currentUser();
@@ -1644,9 +1661,17 @@ void EquipmentView::deleteSelectedDevices()
 		return;
 	}
 
-	// --
+	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
+	//
+	const QSignalBlocker blocker(selectionModel());
+	Q_UNUSED(blocker);
+
+	// perform delete
 	//
 	equipmentModel()->deleteDeviceObject(selected);
+
+	// blocker will enable undoChangesDeviceObject::selectionChanged
+	//
 
 	emit updateState();
 	return;
@@ -1691,7 +1716,19 @@ void EquipmentView::undoChangesSelectedDevices()
 		return;
 	}
 
+	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
+	//
+	const QSignalBlocker blocker(selectionModel());
+	Q_UNUSED(blocker);
+
+	// Perform undo
+	//
 	equipmentModel()->undoChangesDeviceObject(selected);
+
+	// blocker will enable undoChangesDeviceObject::selectionChanged
+	//
+
+	emit updateState();
 	return;
 }
 
@@ -1844,7 +1881,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	connect(dbController(), &DbController::projectOpened, this, &EquipmentTabPage::projectOpened);
 	connect(dbController(), &DbController::projectClosed, this, &EquipmentTabPage::projectClosed);
 
-	connect(m_equipmentView->selectionModel(), & QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
+	connect(m_equipmentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 
 	//connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 	connect(m_equipmentView, &EquipmentView::updateState, this, &EquipmentTabPage::setActionState);
@@ -2062,6 +2099,8 @@ void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/, const QM
 
 void EquipmentTabPage::setActionState()
 {
+	qDebug() << "EquipmentTabPage::setActionState()";
+
 	assert(m_addSystemAction);
 	assert(m_addSystemAction);
 	assert(m_addChassisAction);
