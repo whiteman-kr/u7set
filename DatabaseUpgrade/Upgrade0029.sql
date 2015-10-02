@@ -110,7 +110,7 @@ BEGIN
 	-- TO DO: Check user right here
 
 	-- generate filename
-	SELECT * INTO new_filename FROM uuid_generate_v1();
+	SELECT * INTO new_filename FROM uuid_generate_v4();
 	SELECT octet_length(new_filename) INTO fileid_lenght;
 
 	new_filename := 'device-' || new_filename || file_extension;	-- smthng like: device-5be363ac-3c02-11e4-9de8-3f84f459cb27.hsystem

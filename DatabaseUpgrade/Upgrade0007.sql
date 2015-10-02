@@ -3,7 +3,7 @@ CREATE EXTENSION intarray;
 
 
 CREATE TABLE FileInstance (
-    FileInstanceID uuid PRIMARY KEY DEFAULT uuid_generate_v1(),
+	FileInstanceID uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     Sequence serial NOT NULL,
     Data bytea,
     Size integer NOT NULL,
