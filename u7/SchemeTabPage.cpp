@@ -264,7 +264,7 @@ void SchemeControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 
 	std::vector<std::shared_ptr<DbFileInfo>> deleteFiles;
 
-	for(const auto& f : files)
+	for(const DbFileInfo& f : files)
 	{
 		deleteFiles.push_back(std::make_shared<DbFileInfo>(f));
 	}

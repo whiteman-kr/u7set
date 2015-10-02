@@ -46,7 +46,7 @@ public:
 
 	void checkInDeviceObject(QModelIndexList& rowList);
 	void checkOutDeviceObject(QModelIndexList& rowList);
-	void undoChangesDeviceObject(QModelIndexList& rowList);
+	void undoChangesDeviceObject(QModelIndexList& undowRowList);
 
 	void refreshDeviceObject(QModelIndexList& rowList);
 	void updateDeviceObject(QModelIndexList& rowList);

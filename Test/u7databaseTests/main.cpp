@@ -5,6 +5,7 @@
 #include "FileTests.h"
 #include "OtherTests.h"
 #include "SignalTests.h"
+#include "MultiThreadTest.h"
 #include "../../include/DbController.h"
 
 const int DatabaseProjectVersion = 40;
@@ -17,13 +18,31 @@ const char* ProjectName = "testproject";
 const char* ProjectAdministratorName = "Administrator";
 const char* ProjectAdministratorPassword = "P2ssw0rd";
 
+const int AmountOfThreadsInMultiThreadTest = 5;
+const int AmountOfFilesInMultiThreadTest = 1000;
+
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 
 	Hardware::Init();
 
-	{	
+	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
+	bool matchedForDeletion = false;
+
+	db.setHostName(DatabaseHost);
+	db.setUserName(DatabaseUser);
+	db.setPassword(DatabaseUserPassword);
+	db.setDatabaseName(QString("u7_") + ProjectName);
+
+	if (db.open() == true)
+	{
+		matchedForDeletion = true;
+	}
+
+	db.close();
+
+	{
 		DbController dbc;
 
 		dbc.disableProgress();
@@ -31,8 +50,23 @@ int main(int argc, char *argv[])
 		dbc.setServerPassword(DatabaseUserPassword);
 		dbc.setServerUsername(DatabaseUser);
 
+		// Check project need to be deleted
+		//
+
+		if (matchedForDeletion)
+		{
+			bool ok = dbc.deleteProject(ProjectName, ProjectAdministratorPassword, true, nullptr);
+
+			if (ok == false)
+			{
+				qDebug() << "Cannot delete database project. Error: " << dbc.lastError();
+				return 1;
+			}
+		}
+
 		// Create Project
 		//
+
 		bool ok = dbc.createProject(ProjectName, ProjectAdministratorPassword, nullptr);
 
 		if (ok == false)
@@ -165,6 +199,33 @@ int main(int argc, char *argv[])
 	{
 		returnCode = retval;
 	}
+
+	// Multi-thread testing
+	//
+
+	qDebug() << "********* Start testing of Multi-thread tests *********";
+
+	std::vector<MultiThreadTest*> multiThreadTest;
+
+	for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
+	{
+		MultiThreadTest* thread = new MultiThreadTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfFilesInMultiThreadTest);
+
+		thread->start();
+
+		multiThreadTest.push_back(thread);
+	}
+
+	for (MultiThreadTest* thread : multiThreadTest)
+	{
+		while (thread->isFinished() == false)
+		{
+		}
+
+		delete thread;
+	}
+
+	qDebug() << "********* Finished testing of Multi-thread tests *********";
 
 	// Drop database project
 	//

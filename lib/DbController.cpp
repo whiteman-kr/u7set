@@ -993,7 +993,22 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 		return false;
 	}
 
+	// During delete file output can be in differetn order, so sort it in DESCENDING order, assume that files
+	// already sorted in desc order in DbWorker::slot_deleteFiles, but sort it again just in case
+	//
 	assert(devices.size() == files.size());
+
+	std::sort(devices.begin(), devices.end(),
+		[](const Hardware::DeviceObject* d1, const Hardware::DeviceObject* d2)
+		{
+			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
+		});
+
+	std::sort(files.begin(), files.end(),
+		[](const DbFileInfo& f1, const DbFileInfo& f2)
+		{
+			return f1.fileId() >= f2.fileId();
+		});
 
 	for (size_t i = 0; i < devices.size(); i++)
 	{

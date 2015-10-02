@@ -491,9 +491,24 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 		return;
 	}
 
+	// As some rows can be deleted during update model,
+	// rowList must be sorted in FileID descending order,
+	// to delete first children and then their parents
+	//
+	QModelIndexList sortedRowList = rowList;
+
+	qSort(sortedRowList.begin(), sortedRowList.end(),
+		[this](QModelIndex& m1, QModelIndex m2)
+		{
+			Hardware::DeviceObject* d1 = deviceObject(m1);
+			Hardware::DeviceObject* d2 = deviceObject(m2);
+
+			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
+		});
+
 	// Update model
 	//
-	for (QModelIndex& index : rowList)
+	for (QModelIndex& index : sortedRowList)
 	{
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
@@ -672,8 +687,25 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 	return;
 }
 
-void EquipmentModel::undoChangesDeviceObject(QModelIndexList& rowList)
+void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 {
+	QModelIndexList rowList = undowRowList;
+
+	// As some rows can be deleted during update model,
+	// rowList must be sorted in FileID descending order,
+	// to delete first children and then their parents
+	//
+	qSort(rowList.begin(), rowList.end(),
+		[this](const QModelIndex& m1, const QModelIndex& m2)
+		{
+			const Hardware::DeviceObject* d1 = this->deviceObject(m1);
+			const Hardware::DeviceObject* d2 = this->deviceObject(m2);
+
+			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
+		});
+
+	// --
+	//
 	std::vector<DbFileInfo> files;
 	QModelIndexList checkedOutList;
 	DbUser currentUser = dbController()->currentUser();
@@ -1629,9 +1661,17 @@ void EquipmentView::deleteSelectedDevices()
 		return;
 	}
 
-	// --
+	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
+	//
+	const QSignalBlocker blocker(selectionModel());
+	Q_UNUSED(blocker);
+
+	// perform delete
 	//
 	equipmentModel()->deleteDeviceObject(selected);
+
+	// blocker will enable undoChangesDeviceObject::selectionChanged
+	//
 
 	emit updateState();
 	return;
@@ -1676,7 +1716,19 @@ void EquipmentView::undoChangesSelectedDevices()
 		return;
 	}
 
+	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
+	//
+	const QSignalBlocker blocker(selectionModel());
+	Q_UNUSED(blocker);
+
+	// Perform undo
+	//
 	equipmentModel()->undoChangesDeviceObject(selected);
+
+	// blocker will enable undoChangesDeviceObject::selectionChanged
+	//
+
+	emit updateState();
 	return;
 }
 
@@ -1829,7 +1881,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	connect(dbController(), &DbController::projectOpened, this, &EquipmentTabPage::projectOpened);
 	connect(dbController(), &DbController::projectClosed, this, &EquipmentTabPage::projectClosed);
 
-	connect(m_equipmentView->selectionModel(), & QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
+	connect(m_equipmentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 
 	//connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 	connect(m_equipmentView, &EquipmentView::updateState, this, &EquipmentTabPage::setActionState);
@@ -2047,6 +2099,8 @@ void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/, const QM
 
 void EquipmentTabPage::setActionState()
 {
+	qDebug() << "EquipmentTabPage::setActionState()";
+
 	assert(m_addSystemAction);
 	assert(m_addSystemAction);
 	assert(m_addChassisAction);
@@ -2073,6 +2127,7 @@ void EquipmentTabPage::setActionState()
 	// about does parent have any checked out files
 	//
 	m_checkInAction->setEnabled(true);
+	m_deleteObjectAction->setEnabled(true);		// Allow to TRY to delete always
 
 	// Disable all
 	//
@@ -2086,7 +2141,7 @@ void EquipmentTabPage::setActionState()
 	m_addWorkstationAction->setEnabled(false);
 	m_addSoftwareAction->setEnabled(false);
 
-	m_deleteObjectAction->setEnabled(false);
+	//m_deleteObjectAction->setEnabled(false);
 	m_checkOutAction->setEnabled(false);
 	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	m_undoChangesAction->setEnabled(false);
@@ -2132,27 +2187,31 @@ void EquipmentTabPage::setActionState()
 
 	// Delete Items action
 	//
-	m_deleteObjectAction->setEnabled(false);
-	for (const QModelIndex& mi : selectedIndexList)
-	{
-		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
-		assert(device);
 
-		if (device->fileInfo().state() == VcsState::CheckedIn /*&&
-			device->fileInfo().action() != VcsItemAction::Deleted*/)
-		{
-			m_deleteObjectAction->setEnabled(true);
-			break;
-		}
+	// Allow to delete item always, even when it was already marked as deleted
+	//
 
-		if (device->fileInfo().state() == VcsState::CheckedOut &&
-			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
-			&& device->fileInfo().action() != VcsItemAction::Deleted)
-		{
-			m_deleteObjectAction->setEnabled(true);
-			break;
-		}
-	}
+//	m_deleteObjectAction->setEnabled(false);
+//	for (const QModelIndex& mi : selectedIndexList)
+//	{
+//		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+//		assert(device);
+
+//		if (device->fileInfo().state() == VcsState::CheckedIn /*&&
+//			device->fileInfo().action() != VcsItemAction::Deleted*/)
+//		{
+//			m_deleteObjectAction->setEnabled(true);
+//			break;
+//		}
+
+//		if (device->fileInfo().state() == VcsState::CheckedOut &&
+//			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
+//			&& device->fileInfo().action() != VcsItemAction::Deleted)
+//		{
+//			m_deleteObjectAction->setEnabled(true);
+//			break;
+//		}
+//	}
 
 	// CheckIn, CheckOut
 	//

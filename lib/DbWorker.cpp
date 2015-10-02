@@ -1859,11 +1859,24 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 		return;
 	}
 
+	// files for deletion shoud be sorted in DESCENDING FileID order, to delete dependant files first
+	//
+	std::vector<DbFileInfo> filesToDetele;
+	filesToDetele.reserve(files->size());
+
+	filesToDetele.assign(files->begin(), files->end());
+
+	std::sort(filesToDetele.begin(), filesToDetele.end(),
+		[](const DbFileInfo& f1, const DbFileInfo& f2)
+		{
+			return f1.fileId() >= f2.fileId();
+		});
+
 	// Iterate through files
 	//
-	for (unsigned int i = 0; i < files->size(); i++)
+	for (unsigned int i = 0; i < filesToDetele.size(); i++)
 	{
-		DbFileInfo& file = files->operator[](i);
+		DbFileInfo& file = filesToDetele[i];
 
 		// Set progress value here
 		// ...
@@ -1898,6 +1911,10 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 
 		db_updateFileState(q, &file, true);
 	}
+
+	// set back DbFilInfo states
+	//
+	files->swap(filesToDetele);
 
 	return;
 }
