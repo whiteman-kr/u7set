@@ -533,7 +533,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 			"("
 				"userid serial PRIMARY KEY NOT NULL,"
 				"date timestamp with time zone NOT NULL DEFAULT now(),"
-				"username text NOT NULL,"
+				"username text NOT NULL UNIQUE,"
 				"firstname text NOT NULL,"
 				"lastname text NOT NULL,"
 				"password text NOT NULL,"
