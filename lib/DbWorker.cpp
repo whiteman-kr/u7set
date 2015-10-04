@@ -683,6 +683,15 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		return;
 	}
 
+	if (user.isDisabled() == true)
+	{
+		emitError(tr("User %1 is not allowed to open the project. User was disabled by Administrator.").arg(username));
+
+		query.clear();
+		db.close();
+		return;
+	}
+
 	setCurrentUser(user);
 
 	// Set project data
