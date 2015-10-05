@@ -38,12 +38,6 @@ namespace Builder
 
 	// FB SCALE
 
-	const char* const FB_SCAL_16UI_32FP_CAPTION = "scal_16ui_32fp";
-	const char* const FB_SCAL_16UI_32SI_CAPTION = "scal_16ui_32si";
-
-	const int FB_SCAL_K1_PARAM_INDEX = 1;
-	const int FB_SCAL_K2_PARAM_INDEX = 3;
-
 	//
 
 	const int ERR_VALUE = -1;
@@ -63,6 +57,9 @@ namespace Builder
 	const int	WORD_SIZE = 16;
 
 	const int	ANALOG_SIZE_W = 2;
+
+	const int	SIZE_16BIT = 16;
+	const int	SIZE_32BIT = 32;
 
 
 	class AddrW
@@ -554,6 +551,24 @@ namespace Builder
 			Hardware::DeviceModule::FamilyType familyType() const;
 		};
 
+
+		struct AfbParamValue
+		{
+			Afb::AfbSignalType type = Afb::AfbSignalType::Discrete;
+			Afb::AfbDataFormat format = Afb::AfbDataFormat::UnsignedInt;
+			int size = 1;
+
+			union
+			{
+				float floatValue;
+				quint32 unsignedIntValue;
+				qint32 signedIntValue;
+			};
+
+			AfbParamValue(const Afb::AfbParam& afbParam);
+		};
+
+
 		// input parameters
 		//
 
@@ -631,7 +646,14 @@ namespace Builder
 		QString msg;
 
 		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32fp;
+
+		int m_scal_16ui_32fp_k1_param_index = -1;
+		int m_scal_16ui_32fp_k2_param_index = -1;
+
 		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32si;
+
+		int m_scal_16ui_32si_k1_param_index = -1;
+		int m_scal_16ui_32si_k2_param_index = -1;
 
 		QVector<AppItem*> m_scalAppItems;
 
@@ -703,9 +725,10 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
-		bool calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue);
+		bool generateWriteAfbParamCode(const AppFb& appFb, const Afb::AfbParam& afbParam, const AfbParamValue& prevAfbParamValue, const AfbParamValue& afbParamValue);
+		bool calculateFbAnalogParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue);
 
-		bool calculate_TCT_AnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue);
+		bool calculate_TCT_AnalogIntegralParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }

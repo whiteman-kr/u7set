@@ -970,6 +970,46 @@ namespace Builder
 	}
 
 
+	ModuleLogicCompiler::AfbParamValue::AfbParamValue(const Afb::AfbParam& afbParam)
+	{
+		QVariant qv = afbParam.value();
+
+		if (afbParam.isDiscrete())
+		{
+			type = Afb::AfbSignalType::Discrete;
+			format = Afb::AfbDataFormat::UnsignedInt;
+			size = 1;
+
+			unsignedIntValue = qv.toUInt();
+		}
+		else
+		{
+			type = Afb::AfbSignalType::Analog;
+			format = afbParam.dataFormat();
+			size = afbParam.size();
+
+			switch(format)
+			{
+			case Afb::SignedInt:
+				signedIntValue = qv.toInt();
+				break;
+
+			case Afb::UnsignedInt:
+				unsignedIntValue = qv.toUInt();
+				break;
+
+			case Afb::Float:
+				assert(size == SIZE_32BIT);
+				floatValue = qv.toFloat();
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+	}
+
+
 	bool ModuleLogicCompiler::initAppFbParams(AppFb* appFb, bool instantiatorOnly)
 	{
 		bool result = true;
@@ -982,14 +1022,11 @@ namespace Builder
 
 		const Afb::AfbElement& afb = appFb->afb();
 
-		quint16 fbOpcode = appFb->opcode();
-		quint16 fbInstance = appFb->instance();
-
 		m_code.comment(QString(tr("Initialization of %1 (fbtype %2, opcode %3, instance %4, %5, %6)")).
 				arg(appFb->caption()).
 				arg(appFb->typeCaption()).
 				arg(appFb->opcode()).
-				arg(fbInstance).
+				arg(appFb->instance()).
 				arg(appFb->afb().instantiatorID()).
 				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
 
@@ -1009,68 +1046,15 @@ namespace Builder
 				continue;
 			}
 
-			Command cmd;
-
-			quint16 paramValue = 0;
-
-			QVariant qv = afbParam.value();
-
-			int paramIntValue = qv.toInt();
+			AfbParamValue prevAfbParamValue(afbParam);
+			AfbParamValue afbParamValue(afbParam);
 
             if (afbParam.isAnalog())
             {
-                switch (afbParam.dataFormat())
-                {
-                case Afb::UnsignedInt:
-                case Afb::SignedInt:
-                    result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
-                    break;
-
-                case Afb::Float:
-                    assert(false);
-                    break;
-
-                default:
-                    assert(false);
-                }
-            }
-            else
-            {
-                paramValue = paramIntValue;
+				result &= calculateFbAnalogParamValue(*appFb, afbParam, &afbParamValue);
             }
 
-/*
-            switch(afbParam.type())
-            {
-            case Afb::AnalogIntegral:
-                result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
-                break;
-
-            case Afb::AnalogFloatingPoint:
-                assert(false);				// not implemented
-                break;
-
-            case Afb::DiscreteValue:
-                paramValue = paramIntValue;
-                break;
-
-            default:
-                assert(false);
-            }
-*/
-
-			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue, appFb->caption());
-
-			if (paramValue == paramIntValue)
-			{
-				cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
-			}
-			else
-			{
-				cmd.setComment(QString("%1 <= %2 (%3)").arg(afbParam.caption()).arg(paramValue).arg(paramIntValue));
-			}
-
-			m_code.append(cmd);
+			result &= generateWriteAfbParamCode(*appFb, afbParam, prevAfbParamValue, afbParamValue);
 		}
 
 		m_code.newLine();
@@ -1079,29 +1063,116 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue)
+	bool ModuleLogicCompiler::generateWriteAfbParamCode(const AppFb& appFb, const Afb::AfbParam& afbParam, const AfbParamValue& prevAfbParamValue, const AfbParamValue& afbParamValue)
 	{
-		if (appFb == nullptr || paramValue == nullptr)
+		QString caption = appFb.caption();
+		int fbOpcode = appFb.opcode();
+		int fbInstance = appFb.instance();
+
+		QString paramCaption = afbParam.caption();
+		int operandIndex = afbParam.operandIndex();
+
+		bool result = true;
+
+		Command cmd;
+
+		if (afbParamValue.type == Afb::AfbSignalType::Discrete)
+		{
+			// for discrete parameters
+			//
+			cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+			cmd.setComment(QString("%1 <= %2").arg(paramCaption).arg(afbParamValue.unsignedIntValue));
+
+			m_code.append(cmd);
+
+			return result;
+		}
+
+		// for analog parameters
+		//
+
+		if (afbParamValue.size == SIZE_32BIT)
+		{
+			switch (afbParam.dataFormat())
+			{
+			case Afb::UnsignedInt:
+				cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.unsignedIntValue).
+							   arg(prevAfbParamValue.unsignedIntValue));
+				break;
+
+			case Afb::SignedInt:
+				cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, afbParamValue.signedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.signedIntValue).
+							   arg(prevAfbParamValue.signedIntValue));
+				break;
+
+			case Afb::Float:
+				cmd.writeFuncBlockConstFloat(fbOpcode, fbInstance, operandIndex, afbParamValue.floatValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.floatValue).
+							   arg(prevAfbParamValue.floatValue));
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+		else
+		{
+			// other sizes
+			//
+			switch (afbParam.dataFormat())
+			{
+			case Afb::UnsignedInt:
+				cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.unsignedIntValue).
+							   arg(prevAfbParamValue.unsignedIntValue));
+				break;
+
+			case Afb::SignedInt:
+				cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.signedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.signedIntValue).
+							   arg(prevAfbParamValue.signedIntValue));
+				break;
+
+			case Afb::Float:
+			default:
+				LOG_ERROR(m_log, tr("Unknown Afb parameter data format"));
+
+				result = false;
+				assert(false);
+			}
+		}
+
+		m_code.append(cmd);
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::calculateFbAnalogParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue)
+	{
+		if (afbParamValue == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		switch(appFb->opcode())
+		switch(appFb.opcode())
 		{
 		case Afb::AfbType::TCT:
-			return calculate_TCT_AnalogIntegralParamValue(appFb, param, paramIntValue, paramValue);
+			return calculate_TCT_AnalogIntegralParamValue(appFb, param, afbParamValue);
 
 		default:
-			QVariant qv = param.value();
-			*paramValue = qv.toInt();
+			// for othes no need calculate afbParamValue
+			;
 		}
 
 		return true;
 	}
 
 
-	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(AppFb*, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue)
+	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(const AppFb&, const Afb::AfbParam& param, AfbParamValue* afbParamValue)
 	{
 		if (param.opName() == "i_counter")
 		{
@@ -1111,19 +1182,12 @@ namespace Builder
 				return false;
 			}
 
-			*paramValue = (paramIntValue * 1000) / m_lmCycleDuration;
-			return true;
+			assert(afbParamValue->format == Afb::UnsignedInt && afbParamValue->size == SIZE_32BIT);
+
+			afbParamValue->unsignedIntValue = (afbParamValue->unsignedIntValue * 1000) / m_lmCycleDuration;
 		}
 
-		if (param.opName() == "i_conf")
-		{
-			*paramValue = paramIntValue;
-			return true;
-		}
-
-		assert(false);	// unknown param.opName()
-
-		return false;
+		return true;
 	}
 
 
@@ -2310,29 +2374,78 @@ namespace Builder
 		// find scal_16ui_32fp & scal_16ui_32si functional blocks
 		//
 
+		const char* const FB_SCAL_16UI_32FP_CAPTION = "scal_16ui_32fp";
+		const char* const FB_SCAL_16UI_32SI_CAPTION = "scal_16ui_32si";
+
+		const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
+		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";
+
 		for(std::shared_ptr<Afb::AfbElement> afbElement : m_afbl->elements())
 		{
 			if (afbElement->caption() == FB_SCAL_16UI_32FP_CAPTION)
 			{
 				m_scal_16ui_32fp = afbElement;
+
+				int index = 0;
+
+				for(Afb::AfbParam afbParam :m_scal_16ui_32fp->params())
+				{
+					if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
+					{
+						m_scal_16ui_32fp_k1_param_index = index;
+					}
+
+					if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
+					{
+						m_scal_16ui_32fp_k2_param_index = index;
+					}
+
+					index++;
+				}
 				continue;
 			}
 
 			if (afbElement->caption() == FB_SCAL_16UI_32SI_CAPTION)
 			{
 				 m_scal_16ui_32si = afbElement;
+
+				 int index = 0;
+
+				 for(Afb::AfbParam afbParam : m_scal_16ui_32si->params())
+				 {
+					 if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
+					 {
+						 m_scal_16ui_32si_k1_param_index = index;
+					 }
+
+					 if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
+					 {
+						 m_scal_16ui_32si_k2_param_index = index;
+					 }
+
+					 index++;
+				 }
 			}
 		}
 
 		if (m_scal_16ui_32fp == nullptr)
 		{
-			LOG_ERROR(m_log, tr("Functionsl block scal_16ui_32fp is not found"))
+			LOG_ERROR(m_log, tr("Functional block scal_16ui_32fp is not found"))
 			result = false;
 		}
 
 		if (m_scal_16ui_32si == nullptr)
 		{
-			LOG_ERROR(m_log, tr("Functionsl block scal_16ui_32si is not found"))
+			LOG_ERROR(m_log, tr("Functional block scal_16ui_32si is not found"))
+			result = false;
+		}
+
+		if (m_scal_16ui_32fp_k1_param_index == -1 ||
+			m_scal_16ui_32fp_k2_param_index == -1 ||
+			m_scal_16ui_32si_k1_param_index == -1 ||
+			m_scal_16ui_32si_k2_param_index == -1)
+		{
+			LOG_ERROR(m_log, tr("Functional block scal_16 required parameters is not found"))
 			result = false;
 		}
 
@@ -2415,8 +2528,8 @@ namespace Builder
 			k1 = (y2 - y1) / (x2 - x1);
 			k2 = y1 - k1 * x1;
 
-			m_scal_16ui_32fp->params()[FB_SCAL_K1_PARAM_INDEX].setValue(QVariant(k1));
-			m_scal_16ui_32fp->params()[FB_SCAL_K2_PARAM_INDEX].setValue(QVariant(k2));
+			m_scal_16ui_32fp->params()[m_scal_16ui_32fp_k1_param_index].setValue(QVariant(k1));
+			m_scal_16ui_32fp->params()[m_scal_16ui_32fp_k2_param_index].setValue(QVariant(k2));
 
 			appItem = new AppItem(m_scal_16ui_32fp);
 
