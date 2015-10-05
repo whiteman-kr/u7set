@@ -243,7 +243,7 @@ BEGIN
 			DELETE FROM File WHERE FileID = file_id AND (CheckedInInstanceID IS NULL) RETURNING * INTO deleted_count;
 
 			-- form output result
-			IF (deleted_count = 0)
+			IF (deleted_count = 0 OR deleted_count IS NULL)
 			THEN
 				file_result := get_file_state(file_id);
 			ELSE
