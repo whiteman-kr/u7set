@@ -44,7 +44,11 @@ public:
 	bool insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex);
 	void deleteDeviceObject(QModelIndexList& rowList);
 
+private:
+	void updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::map<int, DbFileInfo>& updateFiles, std::set<void*>& updatedModelIndexes);
+public:
 	void checkInDeviceObject(QModelIndexList& rowList);
+
 	void checkOutDeviceObject(QModelIndexList& rowList);
 	void undoChangesDeviceObject(QModelIndexList& undowRowList);
 
