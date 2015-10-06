@@ -33,7 +33,7 @@ public slots:
 
 private:
 	QVector<Signal*> m_signalVector;
-	DataFormatList& m_dataFormatInfo;
+	DataFormatList m_dataFormatInfo;
 	UnitList& m_unitInfo;
 	SignalsModel* m_signalsModel;
 
