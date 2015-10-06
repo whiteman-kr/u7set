@@ -1030,13 +1030,24 @@ void SignalsModel::addSignal()
 
 	QSettings settings;
 
-	signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(settings.value("LastEditedSignal: dataFormat").toInt())));
+	if (SignalType(signalTypeCombo->currentIndex()) == SignalType::Analog)
+	{
+		signal.setDataFormat(DataFormat::Float);
+	}
+	else
+	{
+		signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(settings.value("LastEditedSignal: dataFormat").toInt())));
+	}
 	signal.setDataSize(settings.value("LastEditedSignal: dataSize").toInt());
 	signal.setLowADC(settings.value("LastEditedSignal: lowADC").toInt());
 	signal.setHighADC(settings.value("LastEditedSignal: highADC").toInt());
 	signal.setLowLimit(settings.value("LastEditedSignal: lowLimit").toDouble());
 	signal.setHighLimit(settings.value("LastEditedSignal: highLimit").toDouble());
-	signal.setUnitID(m_unitInfo.key(settings.value("LastEditedSignal: unitID").toInt()));
+	int unit = settings.value("LastEditedSignal: unitID").toInt();
+	if (unit != -1)
+	{
+		signal.setUnitID(m_unitInfo.key(unit));
+	}
 	signal.setAdjustment(settings.value("LastEditedSignal: adjustment").toDouble());
 	signal.setDropLimit(settings.value("LastEditedSignal: dropLimit").toDouble());
 	signal.setExcessLimit(settings.value("LastEditedSignal: excessLimit").toDouble());
@@ -1044,12 +1055,20 @@ void SignalsModel::addSignal()
 
 	signal.setInputLowLimit(settings.value("LastEditedSignal: inputLowLimit").toDouble());
 	signal.setInputHighLimit(settings.value("LastEditedSignal: inputHighLimit").toDouble());
-	signal.setInputUnitID(m_unitInfo.key(settings.value("LastEditedSignal: inputUnitID").toInt()));
+	unit = settings.value("LastEditedSignal: inputUnitID").toInt();
+	if (unit != -1)
+	{
+		signal.setInputUnitID(m_unitInfo.key(unit));
+	}
 	signal.setInputSensorID(settings.value("LastEditedSignal: inputSensorID").toInt());
 
 	signal.setOutputLowLimit(settings.value("LastEditedSignal: outputLowLimit").toDouble());
 	signal.setOutputHighLimit(settings.value("LastEditedSignal: outputHighLimit").toDouble());
-	signal.setOutputUnitID(m_unitInfo.key(settings.value("LastEditedSignal: outputUnitID").toInt()));
+	unit = settings.value("LastEditedSignal: outputUnitID").toInt();
+	if (unit != -1)
+	{
+		signal.setOutputUnitID(m_unitInfo.key(unit));
+	}
 	signal.setOutputSensorID(settings.value("LastEditedSignal: outputSensorID").toInt());
 
 	signal.setOutputRangeMode(OutputRangeMode(settings.value("LastEditedSignal: outputRangeMode").toInt()));

@@ -26,8 +26,6 @@ namespace Builder
 	//	LmMemoryMap class implementation
 	//
 
-
-
 	LmMemoryMap::LmMemoryMap(OutputLog *log) :
 		m_log(log)
 	{
@@ -637,15 +635,11 @@ namespace Builder
 
 			if (!generateFbTestCode()) break;
 
-			//if (!initAfbs()) break;			UNCOMMENT!!!!!
+			if (!initAfbs()) break;
 
 			if (!finishTestCode()) break;
 
 			if (!startAppLogicCode()) break;
-
-			//
-			if (!initAfbs()) break;				// DELETE AFTER TESTS!!!!
-			//S
 
 			if (!copyLMDataToRegBuf()) break;
 
@@ -822,8 +816,6 @@ namespace Builder
 		{
 			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
 			LOG_WARNING(m_log, msg);
-
-			return true;
 		}
 
 		do
@@ -831,6 +823,8 @@ namespace Builder
 			if (!buildServiceMaps()) break;
 
 			if (!createAppSignalsMap()) break;
+
+			if (!appendFbsForAnalogInOutSignalsConversion()) break;
 
 			if (!calculateLmMemoryMap()) break;
 
@@ -909,11 +903,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initAfbs()
 	{
-		if (m_moduleLogic == nullptr)
-		{
-			return true;			// nothing to init
-		}
-
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
 		bool result = true;
@@ -974,6 +963,46 @@ namespace Builder
 	}
 
 
+	ModuleLogicCompiler::AfbParamValue::AfbParamValue(const Afb::AfbParam& afbParam)
+	{
+		QVariant qv = afbParam.value();
+
+		if (afbParam.isDiscrete())
+		{
+			type = Afb::AfbSignalType::Discrete;
+			format = Afb::AfbDataFormat::UnsignedInt;
+			size = 1;
+
+			unsignedIntValue = qv.toUInt();
+		}
+		else
+		{
+			type = Afb::AfbSignalType::Analog;
+			format = afbParam.dataFormat();
+			size = afbParam.size();
+
+			switch(format)
+			{
+			case Afb::SignedInt:
+				signedIntValue = qv.toInt();
+				break;
+
+			case Afb::UnsignedInt:
+				unsignedIntValue = qv.toUInt();
+				break;
+
+			case Afb::Float:
+				assert(size == SIZE_32BIT);
+				floatValue = qv.toFloat();
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+	}
+
+
 	bool ModuleLogicCompiler::initAppFbParams(AppFb* appFb, bool instantiatorOnly)
 	{
 		bool result = true;
@@ -986,14 +1015,11 @@ namespace Builder
 
 		const Afb::AfbElement& afb = appFb->afb();
 
-		quint16 fbOpcode = appFb->opcode();
-		quint16 fbInstance = appFb->instance();
-
 		m_code.comment(QString(tr("Initialization of %1 (fbtype %2, opcode %3, instance %4, %5, %6)")).
 				arg(appFb->caption()).
 				arg(appFb->typeCaption()).
 				arg(appFb->opcode()).
-				arg(fbInstance).
+				arg(appFb->instance()).
 				arg(appFb->afb().instantiatorID()).
 				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
 
@@ -1013,68 +1039,15 @@ namespace Builder
 				continue;
 			}
 
-			Command cmd;
-
-			quint16 paramValue = 0;
-
-			QVariant qv = afbParam.value();
-
-			int paramIntValue = qv.toInt();
+			AfbParamValue prevAfbParamValue(afbParam);
+			AfbParamValue afbParamValue(afbParam);
 
             if (afbParam.isAnalog())
             {
-                switch (afbParam.dataFormat())
-                {
-                case Afb::UnsignedInt:
-                case Afb::SignedInt:
-                    result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
-                    break;
-
-                case Afb::Float:
-                    assert(false);
-                    break;
-
-                default:
-                    assert(false);
-                }
-            }
-            else
-            {
-                paramValue = paramIntValue;
+				result &= calculateFbAnalogParamValue(*appFb, afbParam, &afbParamValue);
             }
 
-/*
-            switch(afbParam.type())
-            {
-            case Afb::AnalogIntegral:
-                result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
-                break;
-
-            case Afb::AnalogFloatingPoint:
-                assert(false);				// not implemented
-                break;
-
-            case Afb::DiscreteValue:
-                paramValue = paramIntValue;
-                break;
-
-            default:
-                assert(false);
-            }
-*/
-
-			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue, appFb->caption());
-
-			if (paramValue == paramIntValue)
-			{
-				cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
-			}
-			else
-			{
-				cmd.setComment(QString("%1 <= %2 (%3)").arg(afbParam.caption()).arg(paramValue).arg(paramIntValue));
-			}
-
-			m_code.append(cmd);
+			result &= generateWriteAfbParamCode(*appFb, afbParam, prevAfbParamValue, afbParamValue);
 		}
 
 		m_code.newLine();
@@ -1083,29 +1056,116 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue)
+	bool ModuleLogicCompiler::generateWriteAfbParamCode(const AppFb& appFb, const Afb::AfbParam& afbParam, const AfbParamValue& prevAfbParamValue, const AfbParamValue& afbParamValue)
 	{
-		if (appFb == nullptr || paramValue == nullptr)
+		QString caption = appFb.caption();
+		int fbOpcode = appFb.opcode();
+		int fbInstance = appFb.instance();
+
+		QString paramCaption = afbParam.caption();
+		int operandIndex = afbParam.operandIndex();
+
+		bool result = true;
+
+		Command cmd;
+
+		if (afbParamValue.type == Afb::AfbSignalType::Discrete)
+		{
+			// for discrete parameters
+			//
+			cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+			cmd.setComment(QString("%1 <= %2").arg(paramCaption).arg(afbParamValue.unsignedIntValue));
+
+			m_code.append(cmd);
+
+			return result;
+		}
+
+		// for analog parameters
+		//
+
+		if (afbParamValue.size == SIZE_32BIT)
+		{
+			switch (afbParam.dataFormat())
+			{
+			case Afb::UnsignedInt:
+				cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.unsignedIntValue).
+							   arg(prevAfbParamValue.unsignedIntValue));
+				break;
+
+			case Afb::SignedInt:
+				cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, afbParamValue.signedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.signedIntValue).
+							   arg(prevAfbParamValue.signedIntValue));
+				break;
+
+			case Afb::Float:
+				cmd.writeFuncBlockConstFloat(fbOpcode, fbInstance, operandIndex, afbParamValue.floatValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.floatValue).
+							   arg(prevAfbParamValue.floatValue));
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+		else
+		{
+			// other sizes
+			//
+			switch (afbParam.dataFormat())
+			{
+			case Afb::UnsignedInt:
+				cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.unsignedIntValue).
+							   arg(prevAfbParamValue.unsignedIntValue));
+				break;
+
+			case Afb::SignedInt:
+				cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.signedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.signedIntValue).
+							   arg(prevAfbParamValue.signedIntValue));
+				break;
+
+			case Afb::Float:
+			default:
+				LOG_ERROR(m_log, tr("Unknown Afb parameter data format"));
+
+				result = false;
+				assert(false);
+			}
+		}
+
+		m_code.append(cmd);
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::calculateFbAnalogParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue)
+	{
+		if (afbParamValue == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		switch(appFb->opcode())
+		switch(appFb.opcode())
 		{
 		case Afb::AfbType::TCT:
-			return calculate_TCT_AnalogIntegralParamValue(appFb, param, paramIntValue, paramValue);
+			return calculate_TCT_AnalogIntegralParamValue(appFb, param, afbParamValue);
 
 		default:
-			QVariant qv = param.value();
-			*paramValue = qv.toInt();
+			// for othes no need calculate afbParamValue
+			;
 		}
 
 		return true;
 	}
 
 
-	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(AppFb*, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue)
+	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(const AppFb&, const Afb::AfbParam& param, AfbParamValue* afbParamValue)
 	{
 		if (param.opName() == "i_counter")
 		{
@@ -1115,19 +1175,12 @@ namespace Builder
 				return false;
 			}
 
-			*paramValue = (paramIntValue * 1000) / m_lmCycleDuration;
-			return true;
+			assert(afbParamValue->format == Afb::UnsignedInt && afbParamValue->size == SIZE_32BIT);
+
+			afbParamValue->unsignedIntValue = (afbParamValue->unsignedIntValue * 1000) / m_lmCycleDuration;
 		}
 
-		if (param.opName() == "i_conf")
-		{
-			*paramValue = paramIntValue;
-			return true;
-		}
-
-		assert(false);	// unknown param.opName()
-
-		return false;
+		return true;
 	}
 
 
@@ -1617,8 +1670,6 @@ namespace Builder
 
 		bool result = false;
 
-		m_code.newLine();
-
 		do
 		{
 			if (!writeFbInputSignals(appFb)) break;
@@ -1630,6 +1681,8 @@ namespace Builder
 			result = true;
 		}
 		while(false);
+
+		m_code.newLine();
 
 		return result;
 	}
@@ -2113,7 +2166,6 @@ namespace Builder
 
 			if (firstOutputModule)
 			{
-				m_code.newLine();
 				m_code.comment("Copy output modules application logic data to modules memory");
 
 				firstOutputModule = false;
@@ -2279,7 +2331,7 @@ namespace Builder
 		cmd.moveBit(20, 1, 30, 2);
 		m_testCode.append(cmd);*/
 
-		cmd.movConst(49906, 1);
+/*		cmd.movConst(49906, 1);
 		m_testCode.append(cmd);
 
 		cmd.movConst(49907, 2);
@@ -2302,7 +2354,222 @@ namespace Builder
 
 		m_testCode.getMifCode(mifCode);
 
-		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);
+		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);*/
+	}
+
+
+	bool ModuleLogicCompiler::appendFbsForAnalogInOutSignalsConversion()
+	{
+		LOG_MESSAGE(m_log, QString(tr("Prepare FBs for input/output signals conversion...")));
+
+		bool result = true;
+
+		// find scal_16ui_32fp & scal_16ui_32si functional blocks
+		//
+
+		const char* const FB_SCAL_16UI_32FP_CAPTION = "scal_16ui_32fp";
+		const char* const FB_SCAL_16UI_32SI_CAPTION = "scal_16ui_32si";
+
+		const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
+		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";
+
+		for(std::shared_ptr<Afb::AfbElement> afbElement : m_afbl->elements())
+		{
+			if (afbElement->caption() == FB_SCAL_16UI_32FP_CAPTION)
+			{
+				m_scal_16ui_32fp = afbElement;
+
+				int index = 0;
+
+				for(Afb::AfbParam afbParam :m_scal_16ui_32fp->params())
+				{
+					if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
+					{
+						m_scal_16ui_32fp_k1_param_index = index;
+					}
+
+					if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
+					{
+						m_scal_16ui_32fp_k2_param_index = index;
+					}
+
+					index++;
+				}
+				continue;
+			}
+
+			if (afbElement->caption() == FB_SCAL_16UI_32SI_CAPTION)
+			{
+				 m_scal_16ui_32si = afbElement;
+
+				 int index = 0;
+
+				 for(Afb::AfbParam afbParam : m_scal_16ui_32si->params())
+				 {
+					 if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
+					 {
+						 m_scal_16ui_32si_k1_param_index = index;
+					 }
+
+					 if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
+					 {
+						 m_scal_16ui_32si_k2_param_index = index;
+					 }
+
+					 index++;
+				 }
+			}
+		}
+
+		if (m_scal_16ui_32fp == nullptr)
+		{
+			LOG_ERROR(m_log, tr("Functional block scal_16ui_32fp is not found"))
+			result = false;
+		}
+
+		if (m_scal_16ui_32si == nullptr)
+		{
+			LOG_ERROR(m_log, tr("Functional block scal_16ui_32si is not found"))
+			result = false;
+		}
+
+		if (m_scal_16ui_32fp_k1_param_index == -1 ||
+			m_scal_16ui_32fp_k2_param_index == -1 ||
+			m_scal_16ui_32si_k1_param_index == -1 ||
+			m_scal_16ui_32si_k2_param_index == -1)
+		{
+			LOG_ERROR(m_log, tr("Functional block scal_16 required parameters is not found"))
+			result = false;
+		}
+
+		if (result == false)
+		{
+			return result;
+		}
+
+		for(const Module& module : m_modules)
+		{
+			if (module.device == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
+
+			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+			{
+				if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+				{
+					continue;
+				}
+
+				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+
+				if (boundSignals.count() > 1)
+				{
+					LOG_WARNING(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+				}
+
+				for(Signal* signal : boundSignals)
+				{
+					if (signal == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					if (signal->isDiscrete())
+					{
+						continue;
+					}
+
+					if (signal->isInput())
+					{
+						result &= appendFbForAnalogInputSignalConversion(*signal);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::appendFbForAnalogInputSignalConversion(const Signal& signal)
+	{
+		assert(signal.isAnalog());
+		assert(signal.isInput());
+		assert(signal.deviceStrID().isEmpty() == false);
+
+		int x1 = signal.lowADC();
+		int x2 = signal.highADC();
+
+		if (x2 - x1 == 0)
+		{
+			LOG_ERROR(m_log, QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
+			return false;
+		}
+
+		double y1 = signal.lowLimit();
+		double y2 = signal.highLimit();
+
+		double k1 = 0;
+		double k2 = 0;
+
+		AppItem* appItem = nullptr;
+
+		bool result = true;
+
+		const int MULTIPLIER = 32768 - 1;
+
+		switch(signal.dataFormat())
+		{
+		case DataFormat::Float:
+			k1 = (y2 - y1) / (x2 - x1);
+			k2 = y1 - k1 * x1;
+
+			m_scal_16ui_32fp->params()[m_scal_16ui_32fp_k1_param_index].setValue(QVariant(k1));
+			m_scal_16ui_32fp->params()[m_scal_16ui_32fp_k2_param_index].setValue(QVariant(k2));
+
+			appItem = new AppItem(m_scal_16ui_32fp);
+
+			break;
+
+		case DataFormat::SignedInt:
+			{
+				k1 = (y2 - y1) / (x2 - x1) * MULTIPLIER;
+				k2 = y1 - k1 * x1 / MULTIPLIER;
+
+				QVariant k1Int(QVariant(k1).toInt());
+				QVariant k2Int(QVariant(k2).toInt());
+
+				m_scal_16ui_32si->params()[m_scal_16ui_32si_k1_param_index].setValue(k1Int);
+				m_scal_16ui_32si->params()[m_scal_16ui_32si_k2_param_index].setValue(k2Int);
+
+				appItem = new AppItem(m_scal_16ui_32si);
+			}
+
+			break;
+
+		default:
+			LOG_ERROR(m_log, QString(tr("Unknown conversion for signal %1, dataFormat %2")).
+					  arg(signal.strID()).arg(static_cast<int>(signal.dataFormat())));
+			result = false;
+		}
+
+		if (appItem != nullptr)
+		{
+			m_scalAppItems.append(appItem);
+
+			int instance = m_afbs.addInstance(appItem);
+
+			AppFb* appFb = m_appFbs.insert(appItem, instance);
+
+			m_inOutSignalsToScalAppFbMap.insert(signal.strID(), appFb);
+		}
+
+		return result;
 	}
 
 
@@ -2320,43 +2587,19 @@ namespace Builder
 
 		bool result = true;
 
-		for(const AppLogicItem& logicItem : m_moduleLogic->items())
+		if (m_moduleLogic != nullptr)
 		{
-			// build QHash<QUuid, AppItem*> m_appItems
-			// item GUID -> item ptr
-			//
-			if (m_appItems.contains(logicItem.m_fblItem->guid()))
+			for(const AppLogicItem& logicItem : m_moduleLogic->items())
 			{
-				AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
-
-				msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
-						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
-
-				LOG_ERROR(m_log, msg);
-
-				result = false;
-
-				continue;
-			}
-
-			AppItem* appItem = new AppItem(logicItem);
-
-			m_appItems.insert(appItem->guid(), appItem);
-
-			// build QHash<QUuid, LogicItem*> m_itemsPins;
-			// pin GUID -> parent item ptr
-			//
-
-			// add input pins
-			//
-			for(LogicPin input : appItem->inputs())
-			{
-				if (m_pinParent.contains(input.guid()))
+				// build QHash<QUuid, AppItem*> m_appItems
+				// item GUID -> item ptr
+				//
+				if (m_appItems.contains(logicItem.m_fblItem->guid()))
 				{
-					AppItem* firstItem = m_pinParent[input.guid()];
+					AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
 
-					msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
-							arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+					msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
+							arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
 
 					LOG_ERROR(m_log, msg);
 
@@ -2365,28 +2608,55 @@ namespace Builder
 					continue;
 				}
 
-				m_pinParent.insert(input.guid(), appItem);
-			}
+				AppItem* appItem = new AppItem(logicItem);
 
-			// add output pins
-			//
-			for(LogicPin output : appItem->outputs())
-			{
-				if (m_pinParent.contains(output.guid()))
+				m_appItems.insert(appItem->guid(), appItem);
+
+				// build QHash<QUuid, LogicItem*> m_itemsPins;
+				// pin GUID -> parent item ptr
+				//
+
+				// add input pins
+				//
+				for(LogicPin input : appItem->inputs())
 				{
-					AppItem* firstItem = m_pinParent[output.guid()];
+					if (m_pinParent.contains(input.guid()))
+					{
+						AppItem* firstItem = m_pinParent[input.guid()];
 
-					msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
-							arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+						msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
+								arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
-					LOG_ERROR(m_log, msg);
+						LOG_ERROR(m_log, msg);
 
-					result = false;
+						result = false;
 
-					continue;
+						continue;
+					}
+
+					m_pinParent.insert(input.guid(), appItem);
 				}
 
-				m_pinParent.insert(output.guid(), appItem);
+				// add output pins
+				//
+				for(LogicPin output : appItem->outputs())
+				{
+					if (m_pinParent.contains(output.guid()))
+					{
+						AppItem* firstItem = m_pinParent[output.guid()];
+
+						msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
+								arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+
+						LOG_ERROR(m_log, msg);
+
+						result = false;
+
+						continue;
+					}
+
+					m_pinParent.insert(output.guid(), appItem);
+				}
 			}
 		}
 
@@ -2396,11 +2666,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createAppSignalsMap()
 	{
-		if (m_moduleLogic == nullptr)
+		/*if (m_moduleLogic == nullptr)
 		{
 			assert(false);
 			return false;
-		}
+		}*/
 
 		int count = m_signals->count();
 
@@ -2584,10 +2854,21 @@ namespace Builder
 							if (module.familyType() == Hardware::DeviceModule::FamilyType::AIM ||
 								module.familyType() == Hardware::DeviceModule::FamilyType::AOM)
 							{
-								// NEED IMPLEMENTATION!!!!
-								//
-								assert(false);
-								continue;
+								int signalGroup = signalOffset / 17;
+								int signalNo = signalOffset % 17;
+
+								if (signalNo == 0)
+								{
+									// this is discrete validity signal
+									//
+									signalOffset = signalGroup * 33;
+								}
+								else
+								{
+									// this is analog input signal
+									//
+									signalOffset = signalGroup * 33 + 1 + 2 * (signalNo - 1);
+								}
 							}
 
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
@@ -2910,6 +3191,13 @@ namespace Builder
 		}
 
 		m_appItems.clear();
+
+		for(AppItem* scalAppItem : m_scalAppItems)
+		{
+			delete scalAppItem;
+		}
+
+		m_scalAppItems.clear();
 	}
 
 
@@ -3037,7 +3325,7 @@ namespace Builder
 
 		if (!contains(afbStrID))
 		{
-			assert(false);			// unknown FBL guid
+			assert(false);			// unknown FBL strID
 			return 0;
 		}
 
@@ -3162,6 +3450,14 @@ namespace Builder
 	}
 
 
+	AppItem::AppItem(std::shared_ptr<Afb::AfbElement> afbElement)
+	{
+		m_appLogicItem.m_afbElement = *afbElement.get();
+		m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
+					new VFrame30::SchemeItemAfb(VFrame30::SchemeUnit::Display, *afbElement.get()));
+	}
+
+
 	QString AppItem::strID() const
 	{
 		if (m_appLogicItem.m_fblItem->isSignalElement())
@@ -3266,12 +3562,12 @@ namespace Builder
 	// AppFbsMap class implementation
 	//
 
-	void AppFbMap::insert(AppItem *appItem, int instance)
+	AppFb* AppFbMap::insert(AppItem *appItem, int instance)
 	{
 		if (appItem == nullptr)
 		{
 			assert(false);
-			return;
+			return nullptr;
 		}
 
 		AppFb* appFb = new AppFb(appItem, instance, m_fbNumber);
@@ -3279,6 +3575,8 @@ namespace Builder
 		m_fbNumber++;
 
 		HashedVector<QUuid, AppFb*>::insert(appFb->guid(), appFb);
+
+		return appFb;
 	}
 
 

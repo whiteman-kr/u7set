@@ -429,11 +429,9 @@ namespace Builder
 	}
 
 
-	void Command::movConstFloat(quint16 addrTo, double constFloat)
+	void Command::movConstFloat(quint16 addrTo, float constFloat)
 	{
-		float floatValue = static_cast<float>(constFloat);
-
-		qint32 constInt32 = *reinterpret_cast<qint32*>(&floatValue);		// map binary code of float to qint32
+		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
 
 		m_code.setOpCode(LmCommandCode::MOVC32);
 		m_code.setWord2(addrTo);
@@ -478,11 +476,9 @@ namespace Builder
 	}
 
 
-	void Command::writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, double constFloat, const QString& fbCaption)
+	void Command::writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float constFloat, const QString& fbCaption)
 	{
-		float floatValue = static_cast<float>(constFloat);
-
-		qint32 constInt32 = *reinterpret_cast<qint32*>(&floatValue);		// map binary code of float to qint32
+		qint32 constInt32 = *reinterpret_cast<qint32*>(&constFloat);		// map binary code of float to qint32
 
 		m_code.setOpCode(LmCommandCode::WRFBC32);
 		m_code.setFbType(fbType);
@@ -508,11 +504,9 @@ namespace Builder
 	}
 
 
-	void Command::readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, double testFloat, const QString& fbCaption)
+	void Command::readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption)
 	{
-		float floatValue = static_cast<float>(testFloat);
-
-		qint32 testInt32 = *reinterpret_cast<qint32*>(&floatValue);		// map binary code of float to qint32
+		qint32 testInt32 = *reinterpret_cast<qint32*>(&testFloat);		// map binary code of float to qint32
 
 		m_code.setOpCode(LmCommandCode::RDFBTS32);
 		m_code.setFbType(fbType);
@@ -794,6 +788,11 @@ namespace Builder
 		if (!commentIsEmpty())
 		{
 			tabLen = 64 - 32 - mnemoCode.length();
+
+			if (tabLen <= 0)
+			{
+				tabLen += 16;
+			}
 
 			tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
 

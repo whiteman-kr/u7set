@@ -36,6 +36,10 @@ namespace Builder
 	// Constants
 	//
 
+	// FB SCALE
+
+	//
+
 	const int ERR_VALUE = -1;
 
 	const int NOT_FB_OPERAND_INDEX = -1;
@@ -53,6 +57,9 @@ namespace Builder
 	const int	WORD_SIZE = 16;
 
 	const int	ANALOG_SIZE_W = 2;
+
+	const int	SIZE_16BIT = 16;
+	const int	SIZE_32BIT = 32;
 
 
 	class AddrW
@@ -198,6 +205,7 @@ namespace Builder
 	public:
 		AppItem(const AppItem& appItem);
 		AppItem(const AppLogicItem& appLogicItem);
+		AppItem(std::shared_ptr<Afb::AfbElement> afbElement);
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
 		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
@@ -253,7 +261,7 @@ namespace Builder
 	public:
 		~AppFbMap() { clear(); }
 
-		void insert(AppItem* appItem, int instance);
+		AppFb* insert(AppItem* appItem, int instance);
 		void clear();
 	};
 
@@ -543,6 +551,24 @@ namespace Builder
 			Hardware::DeviceModule::FamilyType familyType() const;
 		};
 
+
+		struct AfbParamValue
+		{
+			Afb::AfbSignalType type = Afb::AfbSignalType::Discrete;
+			Afb::AfbDataFormat format = Afb::AfbDataFormat::UnsignedInt;
+			int size = 1;
+
+			union
+			{
+				float floatValue;
+				quint32 unsignedIntValue;
+				qint32 signedIntValue;
+			};
+
+			AfbParamValue(const Afb::AfbParam& afbParam);
+		};
+
+
 		// input parameters
 		//
 
@@ -619,6 +645,19 @@ namespace Builder
 
 		QString msg;
 
+		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32fp;
+
+		int m_scal_16ui_32fp_k1_param_index = -1;
+		int m_scal_16ui_32fp_k2_param_index = -1;
+
+		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32si;
+
+		int m_scal_16ui_32si_k1_param_index = -1;
+		int m_scal_16ui_32si_k2_param_index = -1;
+
+		QVector<AppItem*> m_scalAppItems;
+		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
+
 	private:
 		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);
 		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int* value);
@@ -653,7 +692,6 @@ namespace Builder
 		void copyDimDataToRegBuf(const Module& module);
 		void copyAimDataToRegBuf(const Module& module);
 
-
 		bool initOutModulesAppLogicDataInRegBuf();
 
 		bool generateAppLogicCode();
@@ -681,13 +719,17 @@ namespace Builder
 
 		bool finishAppLogicCode();
 
+		bool appendFbsForAnalogInOutSignalsConversion();
+		bool appendFbForAnalogInputSignalConversion(const Signal &signal);
+
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
-		bool calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue);
+		bool generateWriteAfbParamCode(const AppFb& appFb, const Afb::AfbParam& afbParam, const AfbParamValue& prevAfbParamValue, const AfbParamValue& afbParamValue);
+		bool calculateFbAnalogParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue);
 
-		bool calculate_TCT_AnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue);
+		bool calculate_TCT_AnalogIntegralParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
