@@ -110,7 +110,7 @@ BEGIN
 	-- TO DO: Check user right here
 
 	-- generate filename
-	SELECT * INTO new_filename FROM uuid_generate_v1();
+	SELECT * INTO new_filename FROM uuid_generate_v4();
 	SELECT octet_length(new_filename) INTO fileid_lenght;
 
 	new_filename := 'device-' || new_filename || file_extension;	-- smthng like: device-5be363ac-3c02-11e4-9de8-3f84f459cb27.hsystem
@@ -243,7 +243,7 @@ BEGIN
 			DELETE FROM File WHERE FileID = file_id AND (CheckedInInstanceID IS NULL) RETURNING * INTO deleted_count;
 
 			-- form output result
-			IF (deleted_count = 0)
+			IF (deleted_count = 0 OR deleted_count IS NULL)
 			THEN
 				file_result := get_file_state(file_id);
 			ELSE

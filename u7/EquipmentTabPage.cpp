@@ -528,11 +528,98 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 		}
 		else
 		{
-			emit dataChanged(index, index);
+			QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+			emit dataChanged(index, bottomRightIndex);
 		}
 	}
 
 	return;
+}
+
+
+void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::map<int, DbFileInfo>& updateFiles, std::set<void*>& updatedModelIndexes)
+{
+//static QString nested;
+//	nested += "+---";
+
+	if (updatedModelIndexes.find(modelIndex.internalPointer()) != updatedModelIndexes.end())
+	{
+//		qDebug() << "updateRowFuncOnCheckIn" << nested << " already updated";
+		return;
+	}
+	else
+	{
+		updatedModelIndexes.insert(modelIndex.internalPointer());
+	}
+
+	// --
+	//
+	Hardware::DeviceObject* device = this->deviceObject(modelIndex);
+	assert(device);
+	assert(device->fileInfo().fileId() != -1);
+
+//	qDebug() << "updateRowFuncOnCheckIn" << nested << device->fileInfo().fileId();
+
+	// Update children first, as items can be deleted
+	//
+	for (int childRow = device->childrenCount() - 1; childRow >= 0; childRow--)
+	{
+		if (updatedModelIndexes.find(device->child(childRow)) != updatedModelIndexes.end())
+		{
+			// skip, it was already processed
+			//
+			continue;
+		}
+
+		QModelIndex childIndex = modelIndex.child(childRow, 0);
+		if (childIndex.isValid() == false)
+		{
+			assert(childIndex.isValid() == true);
+			break;
+		}
+
+		Hardware::DeviceObject* childDevice = this->deviceObject(childIndex);
+		assert(childDevice);
+		assert(childDevice == device->child(childRow));
+
+//		qDebug() << "updateRowFuncOnCheckIn" << nested << "child row " << childRow << ", and fileid is" << childDevice->fileInfo().fileId();
+
+		updateRowFuncOnCheckIn(childIndex, updateFiles, updatedModelIndexes);
+	}
+
+	// Update current ModelIndex, Check if thes device was cgecked out
+	//
+	auto foundFileInfo = updateFiles.find(device->fileInfo().fileId());
+
+	if (foundFileInfo != std::end(updateFiles))
+	{
+		assert(foundFileInfo->second.fileId() == device->fileInfo().fileId());
+
+		device->setFileInfo(foundFileInfo->second);
+
+		if (device->fileInfo().deleted() == true ||
+			(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == VcsState::CheckedIn))
+		{
+			QModelIndex pi = modelIndex.parent();
+			Hardware::DeviceObject* po = this->deviceObject(pi);
+			assert(po);
+
+			int childIndex = po->childIndex(device);
+			assert(childIndex != -1);
+
+//			qDebug() << "updateRowFuncOnCheckIn" << nested << " REMOVED fileid " << device->fileInfo().fileId();
+			beginRemoveRows(pi, childIndex, childIndex);
+			po->deleteChild(device);
+			endRemoveRows();
+		}
+		else
+		{
+			QModelIndex bottomRightIndex = this->index(modelIndex.row(), ColumnCount, modelIndex.parent());
+			emit dataChanged(modelIndex, bottomRightIndex);
+		}
+	}
+
+//	nested = nested.left(nested.size() - 4);
 }
 
 void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
@@ -573,69 +660,13 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 		updateFiles[f.fileId()] = f;
 	}
 
-	std::function<void(QModelIndex modelIndex)> updateRowFunc
-		= [this, &updateRowFunc, &updateFiles](QModelIndex modelIndex)
-		{
-			Hardware::DeviceObject* device = this->deviceObject(modelIndex);
-			assert(device);
-			assert(device->fileInfo().fileId() != -1);
-
-			// Update children first, as items can be deleted
-			//
-			for (int childRow = 0; childRow < 65535;childRow++)		// Just in case childRow < 65535
-			{
-				assert(childRow < 65534);
-
-				if (this->hasIndex(childRow, 0, modelIndex) == false)
-				{
-					break;
-				}
-
-				QModelIndex childIndex = this->index(childRow, 0, modelIndex);
-				assert(childIndex.isValid() == true);
-
-				Hardware::DeviceObject* childDevice = this->deviceObject(childIndex);
-				assert(childDevice);
-
-				updateRowFunc(childIndex);
-			}
-
-			// Update current ModelIndex, Check if thes device was cgecked out
-			//
-			auto foundFileInfo = updateFiles.find(device->fileInfo().fileId());
-
-			if (foundFileInfo != std::end(updateFiles))
-			{
-				assert(foundFileInfo->second.fileId() == device->fileInfo().fileId());
-
-				device->setFileInfo(foundFileInfo->second);
-
-				if (device->fileInfo().deleted() == true ||
-					(device->fileInfo().action() == VcsItemAction::Deleted && device->fileInfo().state() == VcsState::CheckedIn))
-				{
-					QModelIndex pi = modelIndex.parent();
-					Hardware::DeviceObject* po = this->deviceObject(pi);
-					assert(po);
-
-					int childIndex = po->childIndex(device);
-					assert(childIndex != -1);
-
-					beginRemoveRows(pi, childIndex, childIndex);
-					po->deleteChild(device);
-					endRemoveRows();
-				}
-				else
-				{
-					emit dataChanged(modelIndex, modelIndex);
-				}
-			}
-		};
-
 	// Update FileInfo in devices and Update model
 	//
+	std::set<void*> updatedModelIndexes;
+
 	for (QModelIndex& index : rowList)
 	{
-		updateRowFunc(index);
+		updateRowFuncOnCheckIn(index, updateFiles, updatedModelIndexes);
 	}
 
 	return;
@@ -676,7 +707,8 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 
 				if (d->fileInfo().state() == VcsState::CheckedOut)
 				{
-					emit dataChanged(index, index);		// Notify view about data update
+					QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+					emit dataChanged(index, bottomRightIndex);		// Notify view about data update
 				}
 
 				break;
@@ -737,7 +769,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 
 	// Update FileInfo in devices and Update model
 	//
-	for (QModelIndex& index : rowList)
+	for (QModelIndex& index : checkedOutList)
 	{
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
@@ -764,7 +796,8 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 				}
 				else
 				{
-					emit dataChanged(index, index);
+					QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+					emit dataChanged(index, bottomRightIndex);
 				}
 
 				updated = true;
@@ -1686,7 +1719,15 @@ void EquipmentView::checkInSelectedDevices()
 		return;
 	}
 
+	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
+	//
+	const QSignalBlocker blocker(selectionModel());
+	Q_UNUSED(blocker);
+
 	equipmentModel()->checkInDeviceObject(selected);
+
+	// blocker will enable undoChangesDeviceObject::selectionChanged
+	//
 
 	emit updateState();
 	return;
