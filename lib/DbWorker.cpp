@@ -533,7 +533,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 			"("
 				"userid serial PRIMARY KEY NOT NULL,"
 				"date timestamp with time zone NOT NULL DEFAULT now(),"
-				"username text NOT NULL,"
+				"username text NOT NULL UNIQUE,"
 				"firstname text NOT NULL,"
 				"lastname text NOT NULL,"
 				"password text NOT NULL,"
@@ -683,6 +683,15 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		return;
 	}
 
+	if (user.isDisabled() == true)
+	{
+		emitError(tr("User %1 is not allowed to open the project. User was disabled by Administrator.").arg(username));
+
+		query.clear();
+		db.close();
+		return;
+	}
+
 	setCurrentUser(user);
 
 	// Set project data
@@ -698,7 +707,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	//
 	std::vector<DbFileInfo> systemFiles;
 
-	getFileList_worker(&systemFiles, rootFileId(), "%");
+	getFileList_worker(&systemFiles, rootFileId(), "%", true);
 
 	m_mutex.lock();
 	m_afblFileId = -1;
@@ -1423,11 +1432,10 @@ void DbWorker::slot_updateUser(DbUser user)
 
 	// Operation
 	//
-
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(tr("Cannot get user list. Database connection is not openned."));
+		emitError(tr("Database connection is not openned."));
 		return;
 	}
 
@@ -1439,126 +1447,176 @@ void DbWorker::slot_updateUser(DbUser user)
 	}
 
 
-	// Start transaction
+	// update user
 	//
-	bool result = db.transaction();
+	QString request;
+
+	if (user.newPassword().isEmpty() == false)
+	{
+		request = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', '%6', %7, %8, %9);")
+				  .arg(currentUser().userId())
+				  .arg(user.username())
+				  .arg(user.firstName())
+				  .arg(user.lastName())
+				  .arg(user.password())
+				  .arg(user.newPassword())
+				  .arg(user.isAdminstrator() ? "true" : "false")
+				  .arg(user.isReadonly() ? "true" : "false")
+				  .arg(user.isDisabled() ? "true" : "false");
+	}
+	else
+	{
+		request = QString("SELECT * FROM update_user(%1, '%2', '%3', '%4', '%5', NULL, %6, %7, %8);")
+				  .arg(currentUser().userId())
+				  .arg(user.username())
+				  .arg(user.firstName())
+				  .arg(user.lastName())
+				  .arg(user.password())
+				  .arg(user.isAdminstrator() ? "true" : "false")
+				  .arg(user.isReadonly() ? "true" : "false")
+				  .arg(user.isDisabled() ? "true" : "false");
+	}
+
+	QSqlQuery query(db);
+	bool result = query.exec(request);
 
 	if (result == false)
 	{
-		emitError(db.lastError());
+		emitError(tr("Can't update user %1, error: %2").arg(user.username()).arg(db.lastError().text()));
 		return;
 	}
 
-	// Operation
-	//
+	if (query.size() > 0)
 	{
-		std::shared_ptr<int*> finishTransaction(nullptr, [this, &db, &result](void*)
-		{
-			if (result == true)
-			{
-				qDebug() << "UpdateUser: Commit changes.";
-				result = db.commit();
-				if (result == false)
-				{
-					emitError(db.lastError());
-				}
-			}
-			else
-			{
-				qDebug() << "UpdateUser: Rollback changes.";
-				db.rollback();
-			}
-			});
-
-		// Check if such user already exists
-		// SELECT UserID, Password FROM Users WHERE Username=user.username();
-		//
-		QSqlQuery query(db);
-		result = query.exec(QString("SELECT UserID, Password FROM Users WHERE Username = '%1';").arg(user.username()));
-
-		if (result == false || query.size() != 1)
-		{
-			emitError(tr("Can't update user data, error: %1").arg(db.lastError().text()));
-			result = false;
-			return;
-		}
-
 		result = query.next();
 		assert(result);
 
-		int userID = query.value("UserID").toInt();
-		QString password = query.value("Password").toString();
-
-		if (userID == 0)
-		{
-			emitError(tr("User %1 is not exists").arg(user.username()));
-			result = false;
-			return;
-		}
-
-		bool updatePassword = false;
-
-		if (user.newPassword().isEmpty() == false)
-		{
-			if (user.password() != password)
-			{
-				emitError(tr("Wrong old password."));
-				result = false;
-				return;
-			}
-			else
-			{
-				updatePassword = true;
-			}
-		}
-
-		// Update Users request
-		// UPDATE Users
-		//		SET UserID=?, Date=?, Username=?, FirstName=?, LastName=?,
-		//		Password=?, Administrator=?, ReadOnly=?, Disabled=?
-		//		WHERE <condition>;
-
-		QString updateQurery;
-
-		if (updatePassword == true)
-		{
-			updateQurery = QString(
-				"UPDATE Users "
-					"SET FirstName='%1', LastName='%2', Password='%3', "
-					"Administrator=%4, ReadOnly=%5, Disabled=%6 "
-					"WHERE UserID = %7;")
-				.arg(user.firstName())
-				.arg(user.lastName())
-				.arg(user.newPassword())
-				.arg(user.isAdminstrator() ? "TRUE" : "FALSE")
-				.arg(user.isReadonly() ? "TRUE" : "FALSE")
-				.arg(user.isDisabled() ? "TRUE" : "FALSE")
-				.arg(userID);
-
-		}
-		else
-		{
-			updateQurery = QString(
-				"UPDATE Users "
-					"SET FirstName='%1', LastName='%2', "
-					"Administrator=%3, ReadOnly=%4, Disabled=%5 "
-					"WHERE UserID = %6;")
-				.arg(user.firstName())
-				.arg(user.lastName())
-				.arg(user.isAdminstrator() ? "TRUE" : "FALSE")
-				.arg(user.isReadonly() ? "TRUE" : "FALSE")
-				.arg(user.isDisabled() ? "TRUE" : "FALSE")
-				.arg(userID);
-		}
-
-		result = query.exec(updateQurery);
-
-		if (result == false)
-		{
-			emitError(tr("Update user data error: %1").arg(query.lastError().text()));
-			return;
-		}
+		//int userID = query.value("UserID").toInt();
 	}
+
+	return;
+
+
+//	// Start transaction
+//	//
+//	bool result = db.transaction();
+
+//	if (result == false)
+//	{
+//		emitError(db.lastError());
+//		return;
+//	}
+
+	// Operation
+	//
+//	{
+//		std::shared_ptr<int*> finishTransaction(nullptr, [this, &db, &result](void*)
+//		{
+//			if (result == true)
+//			{
+//				qDebug() << "UpdateUser: Commit changes.";
+//				result = db.commit();
+//				if (result == false)
+//				{
+//					emitError(db.lastError());
+//				}
+//			}
+//			else
+//			{
+//				qDebug() << "UpdateUser: Rollback changes.";
+//				db.rollback();
+//			}
+//			});
+
+//		// Check if such user already exists
+//		// SELECT UserID, Password FROM Users WHERE Username=user.username();
+//		//
+//		QSqlQuery query(db);
+//		result = query.exec(QString("SELECT UserID, Password FROM Users WHERE Username = '%1';").arg(user.username()));
+
+//		if (result == false || query.size() != 1)
+//		{
+//			emitError(tr("Can't update user data, error: %1").arg(db.lastError().text()));
+//			result = false;
+//			return;
+//		}
+
+//		result = query.next();
+//		assert(result);
+
+//		int userID = query.value("UserID").toInt();
+//		QString password = query.value("Password").toString();
+
+//		if (userID == 0)
+//		{
+//			emitError(tr("User %1 is not exists").arg(user.username()));
+//			result = false;
+//			return;
+//		}
+
+//		bool updatePassword = false;
+
+//		if (user.newPassword().isEmpty() == false)
+//		{
+//			if (user.password() != password)
+//			{
+//				emitError(tr("Wrong old password."));
+//				result = false;
+//				return;
+//			}
+//			else
+//			{
+//				updatePassword = true;
+//			}
+//		}
+
+//		// Update Users request
+//		// UPDATE Users
+//		//		SET UserID=?, Date=?, Username=?, FirstName=?, LastName=?,
+//		//		Password=?, Administrator=?, ReadOnly=?, Disabled=?
+//		//		WHERE <condition>;
+
+//		QString updateQurery;
+
+//		if (updatePassword == true)
+//		{
+//			updateQurery = QString(
+//				"UPDATE Users "
+//					"SET FirstName='%1', LastName='%2', Password='%3', "
+//					"Administrator=%4, ReadOnly=%5, Disabled=%6 "
+//					"WHERE UserID = %7;")
+//				.arg(user.firstName())
+//				.arg(user.lastName())
+//				.arg(user.newPassword())
+//				.arg(user.isAdminstrator() ? "TRUE" : "FALSE")
+//				.arg(user.isReadonly() ? "TRUE" : "FALSE")
+//				.arg(user.isDisabled() ? "TRUE" : "FALSE")
+//				.arg(userID);
+
+//		}
+//		else
+//		{
+//			updateQurery = QString(
+//				"UPDATE Users "
+//					"SET FirstName='%1', LastName='%2', "
+//					"Administrator=%3, ReadOnly=%4, Disabled=%5 "
+//					"WHERE UserID = %6;")
+//				.arg(user.firstName())
+//				.arg(user.lastName())
+//				.arg(user.isAdminstrator() ? "TRUE" : "FALSE")
+//				.arg(user.isReadonly() ? "TRUE" : "FALSE")
+//				.arg(user.isDisabled() ? "TRUE" : "FALSE")
+//				.arg(userID);
+//		}
+
+//		result = query.exec(updateQurery);
+
+//		if (result == false)
+//		{
+//			emitError(tr("Update user data error: %1").arg(query.lastError().text()));
+//			return;
+//		}
+//	}
 }
 
 void DbWorker::slot_getUserList(std::vector<DbUser>* out)
@@ -1619,7 +1677,7 @@ void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 	return;
 }
 
-void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter)
+void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted)
 {
 	// Init automitic varaiables
 	//
@@ -1628,10 +1686,10 @@ void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QS
 			this->m_progress->setCompleted(true);			// set complete flag on return
 		});
 
-	return getFileList_worker(files, parentId, filter);
+	return getFileList_worker(files, parentId, filter, removeDeleted);
 }
 
-void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter)
+void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted)
 {
 	// Check parameters
 	//
@@ -1671,20 +1729,10 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	{
 		DbFileInfo fileInfo;
 
-		fileInfo.setFileName(q.value("Name").toString());
-		fileInfo.setFileId(q.value("FileID").toInt());
-		bool deleted = q.value("Deleted").toBool();
-		fileInfo.setParentId(q.value("ParentID").toInt());
-		fileInfo.setSize(q.value("Size").toInt());
-		fileInfo.setChangeset(q.value("ChangesetID").toInt());
-		fileInfo.setCreated(q.value("Created").toString());
-		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
-		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
-		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
-		fileInfo.setUserId(q.value("UserID").toInt());
-		fileInfo.setDetails(q.value("Details").toString());
+		db_dbFileInfo(q, &fileInfo);
 
-		if (deleted == false)
+		if (removeDeleted == false ||
+			(removeDeleted == true && fileInfo.deleted() == false))
 		{
 			files->push_back(fileInfo);
 		}
@@ -1755,23 +1803,7 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 	{
 		DbFileInfo fileInfo;
 
-		fileInfo.setFileName(q.value("Name").toString());
-		fileInfo.setFileId(q.value("FileID").toInt());
-		bool deleted = q.value("Deleted").toBool();
-		fileInfo.setParentId(q.value("ParentID").toInt());
-		fileInfo.setSize(q.value("Size").toInt());
-		fileInfo.setChangeset(q.value("ChangesetID").toInt());
-		fileInfo.setCreated(q.value("Created").toString());
-		fileInfo.setLastCheckIn(q.value("ChangesetTime").toString());
-		fileInfo.setState(q.value("CheckedOut").toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
-		fileInfo.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value("Action").toInt()));
-		fileInfo.setUserId(q.value("UserID").toInt());
-		fileInfo.setDetails(q.value("Details").toString());
-
-		if (deleted == false)
-		{
-			out->push_back(fileInfo);
-		}
+		db_dbFileInfo(q, &fileInfo);
 	}
 
 	return;
@@ -1885,11 +1917,24 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 		return;
 	}
 
+	// files for deletion shoud be sorted in DESCENDING FileID order, to delete dependant files first
+	//
+	std::vector<DbFileInfo> filesToDetele;
+	filesToDetele.reserve(files->size());
+
+	filesToDetele.assign(files->begin(), files->end());
+
+	std::sort(filesToDetele.begin(), filesToDetele.end(),
+		[](const DbFileInfo& f1, const DbFileInfo& f2)
+		{
+			return f1.fileId() >= f2.fileId();
+		});
+
 	// Iterate through files
 	//
-	for (unsigned int i = 0; i < files->size(); i++)
+	for (unsigned int i = 0; i < filesToDetele.size(); i++)
 	{
-		DbFileInfo& file = files->operator[](i);
+		DbFileInfo& file = filesToDetele[i];
 
 		// Set progress value here
 		// ...
@@ -1924,6 +1969,10 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 
 		db_updateFileState(q, &file, true);
 	}
+
+	// set back DbFilInfo states
+	//
+	files->swap(filesToDetele);
 
 	return;
 }
@@ -2061,7 +2110,7 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	return;
 }
 
-void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out)
+void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out)
 {
 	// Init automitic varaiables
 	//
@@ -2072,10 +2121,12 @@ void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::li
 
 	// Check parameters
 	//
-	if (parentFileInfo.fileId() == -1 ||
+	if (parentFiles == nullptr ||
+		parentFiles->empty() == true ||
 		out == nullptr)
 	{
-		assert(parentFileInfo.fileId() != -1);
+		assert(parentFiles != nullptr);
+		assert(parentFiles->empty() == false);
 		assert(out != nullptr);
 		return;
 	}
@@ -2089,11 +2140,27 @@ void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::li
 		return;
 	}
 
+	// ARRAY[1, 2, 3];
+	//
+	QString filesArray;
+	for (size_t pi = 0; pi < parentFiles->size(); pi++)
+	{
+		if (pi == 0)
+		{
+			filesArray = QString("ARRAY[%1").arg(parentFiles->at(pi).fileId());
+		}
+		else
+		{
+			filesArray += QString(", %1").arg(parentFiles->at(pi).fileId());
+		}
+	}
+	filesArray += "]";
+
 	// request, result is a list of DbFile
 	//
 	QString request = QString("SELECT * FROM get_checked_out_files(%1, %2);")
 			.arg(currentUser().userId())
-			.arg(parentFileInfo.fileId());
+			.arg(filesArray);
 
 	QSqlQuery q(db);
 
@@ -2104,13 +2171,15 @@ void DbWorker::slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::li
 		return;
 	}
 
+	out->reserve(q.size());
+
 	while (q.next())
 	{
-		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+		DbFileInfo fileInfo;
 
-		db_updateFile(q, file.get());
+		db_dbFileInfo(q, &fileInfo);
 
-		out->push_back(file);
+		out->push_back(fileInfo);
 	}
 
 	return;
@@ -2267,7 +2336,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 		request.append(data);
 		data.clear();
 
-		request += QString(", %1);").arg(file->details());
+		request += QString(", '%1');").arg(file->details());
 
 		QSqlQuery q(db);
 
@@ -2475,6 +2544,93 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 			}
 		}
 		assert(updated == true);
+	}
+
+	return;
+}
+
+void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (parentFiles == nullptr ||
+		parentFiles->empty() == true ||
+		outCheckedIn == nullptr)
+	{
+		assert(parentFiles != nullptr);
+		assert(parentFiles->empty() != true);
+		assert(outCheckedIn != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot get file. Database connection is not openned."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM check_in_tree(%1, ARRAY[")
+		.arg(currentUser().userId());
+
+	// Iterate through files
+	//
+	for (unsigned int i = 0; i < parentFiles->size(); i++)
+	{
+		auto file = parentFiles->at(i);
+
+		if (i == 0)
+		{
+			request += QString("%1").arg(file.fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(file.fileId());
+		}
+	}
+
+	request += QString("], '%1');")
+			.arg(comment);
+
+	// request
+	//
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(tr("Can't check in. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	// Result is table of (ObjectState);
+	//
+	outCheckedIn->clear();
+
+	int resultSize = q.size();
+	if (resultSize != -1)
+	{
+		outCheckedIn->reserve(resultSize);
+	}
+
+	while (q.next())
+	{
+		// Update file state
+		//
+		DbFileInfo fi;
+
+		db_updateFileState(q, &fi, false);
+		outCheckedIn->push_back(fi);
 	}
 
 	return;
@@ -4067,6 +4223,44 @@ bool DbWorker::db_updateFile(const QSqlQuery& q, DbFile* file) const
 
 	QByteArray data = q.value("Data").toByteArray();
 	file->swapData(data);
+
+	return true;
+}
+
+bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
+{
+	// Database custom type DbFileInfo
+	//
+	//	CREATE TYPE dbfileinfo AS
+	//	   (fileid integer,
+	//	    deleted boolean,
+	//	    name text,
+	//	    parentid integer,
+	//	    changesetid integer,
+	//	    created timestamp with time zone,
+	//	    size integer,
+	//	    checkedout boolean,
+	//	    checkouttime timestamp with time zone,
+	//	    userid integer,
+	//	    action integer,
+	//	    details text);
+	//	ALTER TYPE dbfileinfo
+	//	  OWNER TO postgres;
+
+	assert(fileInfo);
+
+	fileInfo->setFileId(q.value(0).toInt());
+	fileInfo->setDeleted(q.value(1).toBool());
+	fileInfo->setFileName(q.value(2).toString());
+	fileInfo->setParentId(q.value(3).toInt());
+	fileInfo->setChangeset(q.value(4).toInt());
+	fileInfo->setCreated(q.value(5).toString());
+	fileInfo->setSize(q.value(6).toInt());
+	fileInfo->setState(q.value(7).toBool() ? VcsState::CheckedOut : VcsState::CheckedIn);
+	//fileInfo->setCheckoutTime(q.value(8).toString());
+	fileInfo->setUserId(q.value(9).toInt());
+	fileInfo->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(10).toInt()));
+	fileInfo->setDetails(q.value(10).toString());
 
 	return true;
 }

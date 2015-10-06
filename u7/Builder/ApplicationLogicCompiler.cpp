@@ -21,27 +21,303 @@ namespace Builder
 									}
 
 
-
-	// Signals properties
+	// ---------------------------------------------------------------------------------
 	//
-	const char	*VALUE_OFFSET = "ValueOffset",
-				*VALUE_BIT = "ValueBit";
+	//	LmMemoryMap class implementation
+	//
 
-	const char* SECTION_MEMORY_SETTINGS = "MemorySettings";
-	const char* SECTION_FLASH_MEMORY = "FlashMemory";
-	const char* SECTION_LOGIC_UNIT = "LogicUnit";
+	LmMemoryMap::LmMemoryMap(OutputLog *log) :
+		m_log(log)
+	{
+		assert(m_log != nullptr);
 
-	const char* PARAM_TEST_START_COUNT = "test_start_count";
+		m_appBitAdressed.regDiscreteSignalCount = 0;
+		m_appBitAdressed.nonRegDiscreteSignalCount = 0;
 
-	const int ERR_VALUE = -1;
+		m_appWordAdressed.regAnalogSignalCount = 0;
+		m_appWordAdressed.nonRegAnalogSignalCount = 0;
+	}
 
-	const int NOT_FB_OPERAND_INDEX = -1;
 
-	const int	LM1_PLACE = 0,
-				LM2_PLACE = 15,
+	bool LmMemoryMap::init(	const MemoryArea& moduleData,
+							const MemoryArea& optoInterfaceData,
+							const MemoryArea& appLogicBitData,
+							const MemoryArea& tuningData,
+							const MemoryArea& appLogicWordData,
+							const MemoryArea& lmDiagData,
+							const MemoryArea& lmIntOutData)
+	{
 
-				FIRST_MODULE_PLACE = 1,
-				LAST_MODULE_PLACE = 14;
+		// init modules memory mapping
+		//
+		m_modules.memory.setStartAddress(moduleData.startAddress());
+		m_modules.memory.setSizeW(moduleData.sizeW() * MODULES_COUNT);
+		m_modules.memory.lock();
+
+		for(int i = 0; i < MODULES_COUNT; i++)
+		{
+			m_modules.module[i].setStartAddress(m_modules.memory.startAddress() + i * moduleData.sizeW());
+			m_modules.module[i].setSizeW(moduleData.sizeW());
+		}
+
+		// init opto interface memory mapping
+		//
+		m_optoInterface.memory.setStartAddress(optoInterfaceData.startAddress());
+		m_optoInterface.memory.setSizeW(optoInterfaceData.sizeW() * (OPTO_INTERFACE_COUNT + 1));
+		m_optoInterface.memory.lock();
+
+		for(int i = 0; i < OPTO_INTERFACE_COUNT; i++)
+		{
+			if (i == 0)
+			{
+				m_optoInterface.channel[i].setStartAddress(m_optoInterface.memory.startAddress());
+			}
+			else
+			{
+				m_optoInterface.channel[i].setStartAddress(m_optoInterface.channel[i-1].nextAddress());
+			}
+
+			m_optoInterface.channel[i].setSizeW(optoInterfaceData.sizeW());
+		}
+
+		m_optoInterface.result.setStartAddress(m_optoInterface.channel[OPTO_INTERFACE_COUNT -1].nextAddress());
+		m_optoInterface.result.setSizeW(optoInterfaceData.sizeW());
+
+		// init application bit-addressed memory mapping
+		//
+		m_appBitAdressed.memory = appLogicBitData;
+		m_appBitAdressed.memory.lock();
+
+		// init tuning interface memory mapping
+		//
+		m_tuningInterface.memory = tuningData;
+		m_tuningInterface.memory.lock();
+
+		// init application word-addressed memory mapping
+		//
+		m_appWordAdressed.memory = appLogicWordData;
+		m_appWordAdressed.memory.lock();
+
+		// init LM diagnostics memory mapping
+		//
+		m_lmDiagnostics.memory = lmDiagData;
+		m_lmDiagnostics.memory.lock();
+
+		// init LM in/out controller memory mapping
+		//
+		m_lmInOuts.memory = lmIntOutData;
+		m_lmInOuts.memory.lock();
+
+		return recalculateAddresses();
+	}
+
+
+	bool LmMemoryMap::recalculateAddresses()
+	{
+		// recalc application bit-addressed memory mapping
+		//
+
+		// registered discrete signals
+
+		m_appBitAdressed.regDiscretSignals.setStartAddress(m_appBitAdressed.memory.startAddress());
+		m_appBitAdressed.regDiscretSignals.setSizeW(m_appBitAdressed.regDiscreteSignalsSizeW());
+
+		// non registered discrete signals
+
+		m_appBitAdressed.nonRegDiscretSignals.setStartAddress(m_appBitAdressed.regDiscretSignals.nextAddress());
+		m_appBitAdressed.nonRegDiscretSignals.setSizeW(m_appBitAdressed.nonRegDiscreteSignalsSizeW());
+
+		if (m_appBitAdressed.nonRegDiscretSignals.nextAddress() > m_appBitAdressed.memory.nextAddress())
+		{
+			LOG_ERROR(m_log, tr("Out of bit-addressed memory range!"));
+
+			return false;
+		}
+
+		// recalc application word-addressed memory mapping
+		//
+
+		// LM diagnostics
+
+		m_appWordAdressed.lmDiagnostics.setStartAddress(m_appWordAdressed.memory.startAddress());
+		m_appWordAdressed.lmDiagnostics.setSizeW(m_lmDiagnostics.memory.sizeW());
+
+		// LM input discrete signals
+
+		m_appWordAdressed.lmInputs.setStartAddress(m_appWordAdressed.lmDiagnostics.nextAddress());
+		m_appWordAdressed.lmInputs.setSizeW(m_lmInOuts.memory.sizeW());
+
+		// LM output discrete signals
+
+		m_appWordAdressed.lmOutputs.setStartAddress(m_appWordAdressed.lmInputs.nextAddress());
+		m_appWordAdressed.lmOutputs.setSizeW(m_lmInOuts.memory.sizeW());
+
+		// modules data
+
+		for(int i = 0; i < MODULES_COUNT; i++)
+		{
+			if (i == 0)
+			{
+				m_appWordAdressed.module[0].setStartAddress(m_appWordAdressed.lmOutputs.nextAddress());
+			}
+			else
+			{
+				m_appWordAdressed.module[i].setStartAddress(m_appWordAdressed.module[i-1].nextAddress());
+			}
+		}
+
+		// registered analog signals
+
+		m_appWordAdressed.regAnalogSignals.setStartAddress(m_appWordAdressed.module[MODULES_COUNT - 1].nextAddress());
+		m_appWordAdressed.regAnalogSignals.setSizeW(m_appWordAdressed.regAnalogSignalsSizeW());
+
+		// registered discrete signals
+
+		m_appWordAdressed.regDiscreteSignals.setStartAddress(m_appWordAdressed.regAnalogSignals.nextAddress());
+		m_appWordAdressed.regDiscreteSignals.setSizeW(m_appBitAdressed.regDiscretSignals.sizeW());
+
+		// non registered analog signals
+
+		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(m_appWordAdressed.regDiscreteSignals.nextAddress());
+		m_appWordAdressed.nonRegAnalogSignals.setSizeW(m_appWordAdressed.nonRegAnalogSignalsSizeW());
+
+		if (m_appWordAdressed.nonRegAnalogSignals.nextAddress() > m_appWordAdressed.memory.nextAddress())
+		{
+			LOG_ERROR(m_log, tr("Out of word-addressed memory range!"));
+
+			return false;
+		}
+
+		return true;
+	}
+
+
+	int LmMemoryMap::getModuleDataOffset(int place)
+	{
+		assert(place >= FIRST_MODULE_PLACE && place <= LAST_MODULE_PLACE);
+
+		return m_modules.module[place - 1].startAddress();;
+	}
+
+
+	int LmMemoryMap::getModuleRegDataOffset(int place)
+	{
+		assert(place >= FIRST_MODULE_PLACE && place <= LAST_MODULE_PLACE);
+
+		return m_appWordAdressed.module[place - 1].startAddress();;
+	}
+
+
+	int LmMemoryMap::addModule(int place, int moduleAppRegDataSize)
+	{
+		assert(place >= FIRST_MODULE_PLACE && place <= LAST_MODULE_PLACE);
+
+		m_appWordAdressed.module[place - 1].setSizeW(moduleAppRegDataSize);
+
+		recalculateAddresses();
+
+		return getModuleRegDataOffset(place);
+	}
+
+
+	void LmMemoryMap::getFile(QStringList& memFile)
+	{
+		memFile.append(QString(" LM's memory map"));
+
+		//
+
+		addSection(memFile, m_modules.memory, "I/O modules controller memory");
+
+		for(int i = 0; i < MODULES_COUNT; i++)
+		{
+			addRecord(memFile, m_modules.module[i], QString().sprintf("I/O module %02d", i + 1));
+		}
+
+		addSection(memFile, m_optoInterface.memory, "Opto interfaces memory");
+
+		//
+
+		for(int i = 0; i < OPTO_INTERFACE_COUNT; i++)
+		{
+			addRecord(memFile, m_optoInterface.channel[i], QString().sprintf("opto interface %02d", i + 1));
+		}
+
+		memFile.append("");
+
+		addRecord(memFile, m_optoInterface.result, "opto interfaces data processing result");
+
+		//
+
+		addSection(memFile, m_appBitAdressed.memory, "Application logic bit-addressed memory");
+
+		addRecord(memFile, m_appBitAdressed.regDiscretSignals, "registrated discrete signals");
+
+		memFile.append("");
+
+		addRecord(memFile, m_appBitAdressed.nonRegDiscretSignals, "non-registrated discrete signals");
+
+		//
+
+		addSection(memFile, m_tuningInterface.memory, "Tuning interface memory");
+
+		//
+
+		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory");
+
+		addRecord(memFile, m_appWordAdressed.lmDiagnostics, "LM's diagnostics data");
+		addRecord(memFile, m_appWordAdressed.lmInputs, "LM's inputs state");
+		addRecord(memFile, m_appWordAdressed.lmOutputs, "LM's outputs state");
+
+		memFile.append("");
+
+		for(int i = 0; i < MODULES_COUNT; i++)
+		{
+			addRecord(memFile, m_appWordAdressed.module[i], QString().sprintf("I/O module %02d data", i + 1));
+		}
+
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "registrated analogs signals");
+
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "registrated discrete signals (from bit-addressed memory)");
+
+		memFile.append("");
+
+		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "non-registrated analogs signals");
+
+		//
+
+		addSection(memFile, m_lmDiagnostics.memory, "LM's diagnostics memory");
+		addSection(memFile, m_lmInOuts.memory, "LM's inputs/outputs memory");
+	}
+
+
+	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title)
+	{
+		memFile.append("");
+		memFile.append(QString().rightJustified(80, '-'));
+		memFile.append(QString(" Address    Size      Description"));
+		memFile.append(QString().rightJustified(80, '-'));
+
+		QString str;
+		str.sprintf(" %05d      %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
+
+		memFile.append(str);
+		memFile.append(QString().rightJustified(80, '-'));
+		memFile.append("");
+	}
+
+
+	void LmMemoryMap::addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title)
+	{
+		QString str;
+
+		str.sprintf(" %05d      %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
+
+		memFile.append(str);
+	}
 
 
 	// ---------------------------------------------------------------------------------
@@ -287,7 +563,8 @@ namespace Builder
 
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
-		m_appSignals(*this)
+		m_appSignals(*this),
+		m_memoryMap(appLogicCompiler.m_log)
 	{
 		m_equipment = appLogicCompiler.m_equipment;
 		m_signals = appLogicCompiler.m_signals;
@@ -358,17 +635,13 @@ namespace Builder
 
 			if (!generateFbTestCode()) break;
 
-			//if (!initAfbs()) break;			UNCOMMENT!!!!!
+			if (!initAfbs()) break;
 
 			if (!finishTestCode()) break;
 
 			if (!startAppLogicCode()) break;
 
-			//
-			if (!initAfbs()) break;				// DELETE AFTER TESTS!!!!
-			//S
-
-			if (!copyLMDiagDataToRegBuf()) break;
+			if (!copyLMDataToRegBuf()) break;
 
 			if (!copyInModulesAppLogicDataToRegBuf()) break;
 
@@ -377,6 +650,8 @@ namespace Builder
 			if (!generateAppLogicCode()) break;
 
 			if (!copyDiscreteSignalsToRegBuf()) break;
+
+			if (!copyLmOutSignalsToModuleMemory()) break;
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
@@ -411,31 +686,42 @@ namespace Builder
 
 		const PropertyNameVar memSettings[] =
 		{
-			{	"ModuleDataOffset", &m_moduleDataOffset },
-			{	"ModuleDataSize", &m_moduleDataSize },
+			{	"ModuleDataOffset", m_moduleData.ptrStartAddress() },
+			{	"ModuleDataSize", m_moduleData.ptrSizeW() },
 
-			{	"OptoInterfaceDataOffset", &m_optoInterfaceDataOffset },
-			{	"OptoInterfaceDataSize", &m_optoInterfaceDataSize },
+			{	"OptoInterfaceDataOffset", m_optoInterfaceData.ptrStartAddress() },
+			{	"OptoInterfaceDataSize", m_optoInterfaceData.ptrSizeW() },
 
-			{	"AppLogicBitDataOffset", &m_appLogicBitDataOffset },
-			{	"AppLogicBitDataSize", &m_appLogicBitDataSize },
+			{	"AppLogicBitDataOffset", m_appLogicBitData.ptrStartAddress() },
+			{	"AppLogicBitDataSize", m_appLogicBitData.ptrSizeW() },
 
-			{	"TuningDataOffset", &m_tuningDataOffset },
-			{	"TuningDataSize", &m_tuningDataSize },
+			{	"TuningDataOffset", m_tuningData.ptrStartAddress() },
+			{	"TuningDataSize", m_tuningData.ptrSizeW() },
 
-			{	"AppLogicWordDataOffset", &m_appLogicWordDataOffset },
-			{	"AppLogicWordDataSize", &m_appLogicWordDataSize },
+			{	"AppLogicWordDataOffset", m_appLogicWordData.ptrStartAddress() },
+			{	"AppLogicWordDataSize", m_appLogicWordData.ptrSizeW() },
 
-			{	"LMDiagDataOffset", &m_lmDiagDataOffset },
-			{	"LMDiagDataSize", &m_lmDiagDataSize },
+			{	"LMDiagDataOffset", m_lmDiagData.ptrStartAddress() },
+			{	"LMDiagDataSize", m_lmDiagData.ptrSizeW() },
 
-			{	"LMIntOutDataOffset", &m_lmIntOutDataOffset },
-			{	"LMIntOutDataSize", &m_lmIntOutDataSize }
+			{	"LMInOutDataOffset", m_lmIntOutData.ptrStartAddress() },
+			{	"LMInOutDataSize", m_lmIntOutData.ptrSizeW() }
 		};
 
 		for(PropertyNameVar memSetting : memSettings)
 		{
 			result &= getLMIntProperty(SECTION_MEMORY_SETTINGS, memSetting.name, memSetting.var);
+		}
+
+		if (result == true)
+		{
+			m_memoryMap.init(m_moduleData,
+							 m_optoInterfaceData,
+							 m_appLogicBitData,
+							 m_tuningData,
+							 m_appLogicWordData,
+							 m_lmDiagData,
+							 m_lmIntOutData);
 		}
 
 		result &= getLMIntProperty(SECTION_FLASH_MEMORY, "AppLogicFrameSize", &m_lmAppLogicFrameSize);
@@ -462,15 +748,11 @@ namespace Builder
 
 		m_modules.clear();
 
-		int moduleAppDataOffset = m_appLogicWordDataOffset + m_lmDiagDataSize;
-
 		// build Module structures array
 		//
 		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
 		{
 			Module m;
-
-			int placeIndex = place - 1;
 
 			Hardware::DeviceModule* device = getModuleOnPlace(place);
 
@@ -492,7 +774,9 @@ namespace Builder
 
 				{	"AppLogicDataOffset", &m.appLogicDataOffset },
 				{	"AppLogicDataSize", &m.appLogicDataSize },
-				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve }
+				{	"AppLogicDataSizeWithReserve", &m.appLogicDataSizeWithReserve },
+
+				{	"AppLogicRegDataSize", &m.appLogicRegDataSize },
 			};
 
 			for(PropertyNameVar moduleSetting : moduleSettings)
@@ -500,30 +784,12 @@ namespace Builder
 				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSetting.name, moduleSetting.var);
 			}
 
-			m.rxTxDataOffset = m_moduleDataOffset + m_moduleDataSize * placeIndex;
+			m.rxTxDataOffset = m_memoryMap.getModuleDataOffset(place);
 			m.moduleAppDataOffset = m.rxTxDataOffset + m.appLogicDataOffset;
-			m.appDataOffset = moduleAppDataOffset;
-
-			moduleAppDataOffset += m.appLogicDataSize;
+			m.appRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
 
 			m_modules.append(m);
 		}
-
-		m_registeredInternalAnalogSignalsOffset = moduleAppDataOffset;
-		m_registeredInternalDiscreteSignalsOffset = m_appLogicBitDataOffset;
-
-		// the actual values of:
-		//
-		// m_registeredInternalAnalogSignalsSize
-		// m_internalAnalogSignalsOffset
-		// m_internalAnalogSignalsSize
-		// m_registeredInternalDiscreteSignalsSize
-		// m_internalDiscreteSignalsOffset
-		// m_internalDiscreteSignalsSize
-		// m_regBufferInternalDiscreteSignalsOffset
-		// m_regBufferInternalDiscreteSignalsSize
-		//
-		// will be calculated later in calculateInternalSignalsAddresses function
 
 		if (result)
 		{
@@ -550,8 +816,6 @@ namespace Builder
 		{
 			msg = QString(tr("Application logic not found for module %1")).arg(m_lm->strId());
 			LOG_WARNING(m_log, msg);
-
-			return true;
 		}
 
 		do
@@ -559,6 +823,10 @@ namespace Builder
 			if (!buildServiceMaps()) break;
 
 			if (!createAppSignalsMap()) break;
+
+			if (!appendFbsForAnalogInOutSignalsConversion()) break;
+
+			if (!calculateLmMemoryMap()) break;
 
 			if (!calculateInOutSignalsAddresses()) break;
 
@@ -569,6 +837,12 @@ namespace Builder
 		while(false);
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::calculateLmMemoryMap()
+	{
+		return true;
 	}
 
 
@@ -629,11 +903,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initAfbs()
 	{
-		if (m_moduleLogic == nullptr)
-		{
-			return true;			// nothing to init
-		}
-
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
 		bool result = true;
@@ -694,6 +963,46 @@ namespace Builder
 	}
 
 
+	ModuleLogicCompiler::AfbParamValue::AfbParamValue(const Afb::AfbParam& afbParam)
+	{
+		QVariant qv = afbParam.value();
+
+		if (afbParam.isDiscrete())
+		{
+			type = Afb::AfbSignalType::Discrete;
+			format = Afb::AfbDataFormat::UnsignedInt;
+			size = 1;
+
+			unsignedIntValue = qv.toUInt();
+		}
+		else
+		{
+			type = Afb::AfbSignalType::Analog;
+			format = afbParam.dataFormat();
+			size = afbParam.size();
+
+			switch(format)
+			{
+			case Afb::SignedInt:
+				signedIntValue = qv.toInt();
+				break;
+
+			case Afb::UnsignedInt:
+				unsignedIntValue = qv.toUInt();
+				break;
+
+			case Afb::Float:
+				assert(size == SIZE_32BIT);
+				floatValue = qv.toFloat();
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+	}
+
+
 	bool ModuleLogicCompiler::initAppFbParams(AppFb* appFb, bool instantiatorOnly)
 	{
 		bool result = true;
@@ -706,14 +1015,11 @@ namespace Builder
 
 		const Afb::AfbElement& afb = appFb->afb();
 
-		quint16 fbOpcode = appFb->opcode();
-		quint16 fbInstance = appFb->instance();
-
 		m_code.comment(QString(tr("Initialization of %1 (fbtype %2, opcode %3, instance %4, %5, %6)")).
 				arg(appFb->caption()).
 				arg(appFb->typeCaption()).
 				arg(appFb->opcode()).
-				arg(fbInstance).
+				arg(appFb->instance()).
 				arg(appFb->afb().instantiatorID()).
 				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
 
@@ -733,45 +1039,15 @@ namespace Builder
 				continue;
 			}
 
-			Command cmd;
+			AfbParamValue prevAfbParamValue(afbParam);
+			AfbParamValue afbParamValue(afbParam);
 
-			quint16 paramValue = 0;
+            if (afbParam.isAnalog())
+            {
+				result &= calculateFbAnalogParamValue(*appFb, afbParam, &afbParamValue);
+            }
 
-			QVariant qv = afbParam.value();
-
-			int paramIntValue = qv.toInt();
-
-			switch(afbParam.type())
-			{
-			case Afb::AnalogIntegral:
-				result &= calculateFbAnalogIntegralParamValue(appFb, afbParam, paramIntValue, &paramValue);
-				break;
-
-			case Afb::AnalogFloatingPoint:
-				assert(false);				// not implemented
-				break;
-
-			case Afb::DiscreteValue:
-				paramValue = paramIntValue;
-				break;
-
-			default:
-				assert(false);
-			}
-
-
-			cmd.writeFuncBlockConst(fbOpcode, fbInstance, afbParam.operandIndex(), paramValue, appFb->caption());
-
-			if (paramValue == paramIntValue)
-			{
-				cmd.setComment(QString("%1 <= %2").arg(afbParam.caption()).arg(paramValue));
-			}
-			else
-			{
-				cmd.setComment(QString("%1 <= %2 (%3)").arg(afbParam.caption()).arg(paramValue).arg(paramIntValue));
-			}
-
-			m_code.append(cmd);
+			result &= generateWriteAfbParamCode(*appFb, afbParam, prevAfbParamValue, afbParamValue);
 		}
 
 		m_code.newLine();
@@ -780,29 +1056,116 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue)
+	bool ModuleLogicCompiler::generateWriteAfbParamCode(const AppFb& appFb, const Afb::AfbParam& afbParam, const AfbParamValue& prevAfbParamValue, const AfbParamValue& afbParamValue)
 	{
-		if (appFb == nullptr || paramValue == nullptr)
+		QString caption = appFb.caption();
+		int fbOpcode = appFb.opcode();
+		int fbInstance = appFb.instance();
+
+		QString paramCaption = afbParam.caption();
+		int operandIndex = afbParam.operandIndex();
+
+		bool result = true;
+
+		Command cmd;
+
+		if (afbParamValue.type == Afb::AfbSignalType::Discrete)
+		{
+			// for discrete parameters
+			//
+			cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+			cmd.setComment(QString("%1 <= %2").arg(paramCaption).arg(afbParamValue.unsignedIntValue));
+
+			m_code.append(cmd);
+
+			return result;
+		}
+
+		// for analog parameters
+		//
+
+		if (afbParamValue.size == SIZE_32BIT)
+		{
+			switch (afbParam.dataFormat())
+			{
+			case Afb::UnsignedInt:
+				cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.unsignedIntValue).
+							   arg(prevAfbParamValue.unsignedIntValue));
+				break;
+
+			case Afb::SignedInt:
+				cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, afbParamValue.signedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.signedIntValue).
+							   arg(prevAfbParamValue.signedIntValue));
+				break;
+
+			case Afb::Float:
+				cmd.writeFuncBlockConstFloat(fbOpcode, fbInstance, operandIndex, afbParamValue.floatValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.floatValue).
+							   arg(prevAfbParamValue.floatValue));
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+		else
+		{
+			// other sizes
+			//
+			switch (afbParam.dataFormat())
+			{
+			case Afb::UnsignedInt:
+				cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.unsignedIntValue).
+							   arg(prevAfbParamValue.unsignedIntValue));
+				break;
+
+			case Afb::SignedInt:
+				cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.signedIntValue, caption);
+				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.signedIntValue).
+							   arg(prevAfbParamValue.signedIntValue));
+				break;
+
+			case Afb::Float:
+			default:
+				LOG_ERROR(m_log, tr("Unknown Afb parameter data format"));
+
+				result = false;
+				assert(false);
+			}
+		}
+
+		m_code.append(cmd);
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::calculateFbAnalogParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue)
+	{
+		if (afbParamValue == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		switch(appFb->opcode())
+		switch(appFb.opcode())
 		{
 		case Afb::AfbType::TCT:
-			return calculate_TCT_AnalogIntegralParamValue(appFb, param, paramIntValue, paramValue);
+			return calculate_TCT_AnalogIntegralParamValue(appFb, param, afbParamValue);
 
 		default:
-			QVariant qv = param.value();
-			*paramValue = qv.toInt();
+			// for othes no need calculate afbParamValue
+			;
 		}
 
 		return true;
 	}
 
 
-	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(AppFb*, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue)
+	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(const AppFb&, const Afb::AfbParam& param, AfbParamValue* afbParamValue)
 	{
 		if (param.opName() == "i_counter")
 		{
@@ -812,32 +1175,63 @@ namespace Builder
 				return false;
 			}
 
-			*paramValue = (paramIntValue * 1000) / m_lmCycleDuration;
-			return true;
+			assert(afbParamValue->format == Afb::UnsignedInt && afbParamValue->size == SIZE_32BIT);
+
+			afbParamValue->unsignedIntValue = (afbParamValue->unsignedIntValue * 1000) / m_lmCycleDuration;
 		}
 
-		if (param.opName() == "i_conf")
-		{
-			*paramValue = paramIntValue;
-			return true;
-		}
-
-		assert(false);	// unknown param.opName()
-
-		return false;
+		return true;
 	}
 
 
-	bool ModuleLogicCompiler::copyLMDiagDataToRegBuf()
+	bool ModuleLogicCompiler::copyLMDataToRegBuf()
 	{
-		m_code.comment("Copy LM diagnostics data to RegBuf");
+		Command cmd;
+
+		cmd.movMem(m_memoryMap.rb_lmDiagnosticsAddress(),
+				   m_memoryMap.lmDiagnosticsAddress(),
+				   m_memoryMap.lmDiagnosticsSizeW());
+
+		cmd.setComment("copy LM diagnostics data to RegBuf");
+
+		m_code.append(cmd);
+
+		//
+
+		cmd.movMem(m_memoryMap.rb_lmInputsAddress(),
+				   m_memoryMap.lmInOutsAddress(),
+				   m_memoryMap.lmInOutsSizeW());
+
+		cmd.setComment("copy LM's' input signals to RegBuf");
+
+		m_code.append(cmd);
+
+		//
+
+		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), m_memoryMap.lmInOutsSizeW(), 0);
+
+		cmd.setComment("init to 0 LM's output signals");
+
+		m_code.append(cmd);
+		m_code.newLine();
+
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copyLmOutSignalsToModuleMemory()
+	{
+		m_code.comment("Copy LM's output signals from RegBuf to LM's in/out memory");
 		m_code.newLine();
 
 		Command cmd;
 
-		cmd.movMem(m_appLogicWordDataOffset, m_lmDiagDataOffset, m_lmDiagDataSize);
+		cmd.movMem(	m_memoryMap.lmInOutsAddress(),
+					m_memoryMap.rb_lmOutputsAddress(),
+					m_memoryMap.lmInOutsSizeW());
 
 		m_code.append(cmd);
+		m_code.newLine();
 
 		return true;
 	}
@@ -845,51 +1239,92 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyInModulesAppLogicDataToRegBuf()
 	{
-		m_code.newLine();
-		m_code.comment("Copy input modules application logic data to RegBuf");
-		m_code.newLine();
+		bool firstInputModle = true;
+
+		bool result = true;
 
 		for(Module module : m_modules)
 		{
-			if (!module.device->isInputModule())
+			if (!module.isInputModule())
 			{
 				continue;
 			}
 
-			Command cmd;
+			if (firstInputModle)
+			{
+				m_code.comment("Copy input modules application logic data to RegBuf");
+				m_code.newLine();
 
-			cmd.movMem(module.appDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
+				firstInputModle = false;
+			}
 
-			cmd.setComment(QString(tr("copy %1 data (place %2) to RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+			switch(module.familyType())
+			{
+			case Hardware::DeviceModule::FamilyType::DIM:
+				copyDimDataToRegBuf(module);
+				break;
 
-			m_code.append(cmd);
+			case Hardware::DeviceModule::FamilyType::AIM:
+				copyAimDataToRegBuf(module);
+				break;
+
+			default:
+				assert(false);
+
+				LOG_ERROR(m_log, tr("Unknown input module family type"));
+
+				result = false;
+			}
 		}
 
-		return true;
+		if (firstInputModle == false)
+		{
+			m_code.newLine();
+		}
+
+		return result;
+	}
+
+
+	void ModuleLogicCompiler::copyDimDataToRegBuf(const Module& module)
+	{
+		Command cmd;
+
+		cmd.movMem(module.appRegDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
+
+		cmd.setComment(QString(tr("copy %1 data (place %2) to RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+
+		m_code.append(cmd);
+	}
+
+
+	void ModuleLogicCompiler::copyAimDataToRegBuf(const Module& module)
+	{
 	}
 
 
 	bool ModuleLogicCompiler::initOutModulesAppLogicDataInRegBuf()
 	{
-		m_code.newLine();
 		m_code.comment("Init output modules application logic data in RegBuf");
+		m_code.newLine();
 
 		for(Module module : m_modules)
 		{
-			if (!module.device->isOutputModule())
+			if (!module.isOutputModule())
 			{
 				continue;
 			}
 
 			Command cmd;
 
-			cmd.setMem(module.appDataOffset, module.appLogicDataSize, 0);
+			cmd.setMem(module.appRegDataOffset, module.appLogicRegDataSize, 0);
 
 			cmd.setComment(QString(tr("init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
 
-			m_code.newLine();
 			m_code.append(cmd);
 		}
+
+		m_code.newLine();
 
 		return true;
 	}
@@ -901,8 +1336,8 @@ namespace Builder
 
 		bool result = true;
 
-		m_code.newLine();
 		m_code.comment("Application logic code");
+		m_code.newLine();
 
 		for(AppItem* appItem : m_appItems)
 		{
@@ -1235,8 +1670,6 @@ namespace Builder
 
 		bool result = false;
 
-		m_code.newLine();
-
 		do
 		{
 			if (!writeFbInputSignals(appFb)) break;
@@ -1248,6 +1681,8 @@ namespace Builder
 			result = true;
 		}
 		while(false);
+
+		m_code.newLine();
 
 		return result;
 	}
@@ -1695,7 +2130,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyDiscreteSignalsToRegBuf()
 	{
-		if (m_registeredInternalDiscreteSignalsSize == 0)
+		if (m_memoryMap.regDiscreteSignalsSizeW() == 0)
 		{
 			return true;
 		}
@@ -1706,8 +2141,9 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(m_regBufferInternalDiscreteSignalsOffset,
-				   m_registeredInternalDiscreteSignalsOffset, m_registeredInternalDiscreteSignalsSize);
+		cmd.movMem(m_memoryMap.rb_regDiscreteSignalsAddress(),
+				   m_memoryMap.regDiscreteSignalsAddress(),
+				   m_memoryMap.regDiscreteSignalsSizeW());
 
 		m_code.append(cmd);
 
@@ -1717,35 +2153,75 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyOutModulesAppLogicDataToModulesMemory()
 	{
-		m_code.newLine();
-		m_code.comment("Copy output modules application logic data to modules memory");
+		bool firstOutputModule = true;
+
+		bool result = true;
 
 		for(Module module : m_modules)
 		{
-			if (!module.device->isOutputModule())
+			if (!module.isOutputModule())
 			{
 				continue;
 			}
 
-			Command cmd;
-
-			cmd.movMem(module.moduleAppDataOffset, module.appDataOffset, module.appLogicDataSize);
-
-			cmd.setComment(QString(tr("copy %1 data (place %2) to modules memory")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
-
-			m_code.newLine();
-			m_code.append(cmd);
-
-			if (module.appLogicDataSize < module.appLogicDataSizeWithReserve)
+			if (firstOutputModule)
 			{
-				cmd.setMem(module.moduleAppDataOffset + module.appLogicDataSize, module.appLogicDataSizeWithReserve - module.appLogicDataSize, 0);
-				cmd.setComment(QString(tr("set reserv data to 0")));
+				m_code.comment("Copy output modules application logic data to modules memory");
 
-				m_code.append(cmd);
+				firstOutputModule = false;
+			}
+
+			switch(module.familyType())
+			{
+			case Hardware::DeviceModule::FamilyType::AOM:
+				copyAomDataToModuleMemory(module);
+				break;
+
+			case Hardware::DeviceModule::FamilyType::DOM:
+				copyDomDataToModuleMemory(module);
+				break;
+
+			default:
+				// unknown output module family type
+				//
+				assert(false);
+
+				LOG_ERROR(m_log, tr("Unknown output module family type"));
+
+				result = false;
 			}
 		}
 
-		return true;
+		return result;
+	}
+
+
+	void ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
+	{
+		Command cmd;
+
+		assert(module.appLogicDataSize == module.appLogicRegDataSize);
+
+		cmd.movMem(module.moduleAppDataOffset, module.appRegDataOffset, module.appLogicDataSize);
+
+		cmd.setComment(QString(tr("copy %1 data (place %2) to modules memory")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
+
+		m_code.newLine();
+		m_code.append(cmd);
+
+		if (module.appLogicDataSize < module.appLogicDataSizeWithReserve)
+		{
+			cmd.setMem(module.moduleAppDataOffset + module.appLogicDataSize, module.appLogicDataSizeWithReserve - module.appLogicDataSize, 0);
+			cmd.setComment(QString(tr("set reserv data to 0")));
+
+			m_code.append(cmd);
+		}
+	}
+
+
+	void ModuleLogicCompiler::copyAomDataToModuleMemory(const Module& module)
+	{
+		// NEEED IMPLEMENTATION!!!!!!!!!!!
 	}
 
 
@@ -1790,6 +2266,12 @@ namespace Builder
 		m_code.getAsmCode(asmCode);
 
 		result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.asm").arg(m_lm->caption()), asmCode);
+
+		QStringList memFile;
+
+		m_memoryMap.getFile(memFile);
+
+		result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.mem").arg(m_lm->caption()), memFile);
 
 		//
 
@@ -1849,7 +2331,7 @@ namespace Builder
 		cmd.moveBit(20, 1, 30, 2);
 		m_testCode.append(cmd);*/
 
-		cmd.movConst(49906, 1);
+/*		cmd.movConst(49906, 1);
 		m_testCode.append(cmd);
 
 		cmd.movConst(49907, 2);
@@ -1872,7 +2354,222 @@ namespace Builder
 
 		m_testCode.getMifCode(mifCode);
 
-		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);
+		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);*/
+	}
+
+
+	bool ModuleLogicCompiler::appendFbsForAnalogInOutSignalsConversion()
+	{
+		LOG_MESSAGE(m_log, QString(tr("Prepare FBs for input/output signals conversion...")));
+
+		bool result = true;
+
+		// find scal_16ui_32fp & scal_16ui_32si functional blocks
+		//
+
+		const char* const FB_SCAL_16UI_32FP_CAPTION = "scal_16ui_32fp";
+		const char* const FB_SCAL_16UI_32SI_CAPTION = "scal_16ui_32si";
+
+		const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
+		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";
+
+		for(std::shared_ptr<Afb::AfbElement> afbElement : m_afbl->elements())
+		{
+			if (afbElement->caption() == FB_SCAL_16UI_32FP_CAPTION)
+			{
+				m_scal_16ui_32fp = afbElement;
+
+				int index = 0;
+
+				for(Afb::AfbParam afbParam :m_scal_16ui_32fp->params())
+				{
+					if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
+					{
+						m_scal_16ui_32fp_k1_param_index = index;
+					}
+
+					if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
+					{
+						m_scal_16ui_32fp_k2_param_index = index;
+					}
+
+					index++;
+				}
+				continue;
+			}
+
+			if (afbElement->caption() == FB_SCAL_16UI_32SI_CAPTION)
+			{
+				 m_scal_16ui_32si = afbElement;
+
+				 int index = 0;
+
+				 for(Afb::AfbParam afbParam : m_scal_16ui_32si->params())
+				 {
+					 if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
+					 {
+						 m_scal_16ui_32si_k1_param_index = index;
+					 }
+
+					 if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
+					 {
+						 m_scal_16ui_32si_k2_param_index = index;
+					 }
+
+					 index++;
+				 }
+			}
+		}
+
+		if (m_scal_16ui_32fp == nullptr)
+		{
+			LOG_ERROR(m_log, tr("Functional block scal_16ui_32fp is not found"))
+			result = false;
+		}
+
+		if (m_scal_16ui_32si == nullptr)
+		{
+			LOG_ERROR(m_log, tr("Functional block scal_16ui_32si is not found"))
+			result = false;
+		}
+
+		if (m_scal_16ui_32fp_k1_param_index == -1 ||
+			m_scal_16ui_32fp_k2_param_index == -1 ||
+			m_scal_16ui_32si_k1_param_index == -1 ||
+			m_scal_16ui_32si_k2_param_index == -1)
+		{
+			LOG_ERROR(m_log, tr("Functional block scal_16 required parameters is not found"))
+			result = false;
+		}
+
+		if (result == false)
+		{
+			return result;
+		}
+
+		for(const Module& module : m_modules)
+		{
+			if (module.device == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
+
+			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+			{
+				if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+				{
+					continue;
+				}
+
+				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+
+				if (boundSignals.count() > 1)
+				{
+					LOG_WARNING(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+				}
+
+				for(Signal* signal : boundSignals)
+				{
+					if (signal == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					if (signal->isDiscrete())
+					{
+						continue;
+					}
+
+					if (signal->isInput())
+					{
+						result &= appendFbForAnalogInputSignalConversion(*signal);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::appendFbForAnalogInputSignalConversion(const Signal& signal)
+	{
+		assert(signal.isAnalog());
+		assert(signal.isInput());
+		assert(signal.deviceStrID().isEmpty() == false);
+
+		int x1 = signal.lowADC();
+		int x2 = signal.highADC();
+
+		if (x2 - x1 == 0)
+		{
+			LOG_ERROR(m_log, QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
+			return false;
+		}
+
+		double y1 = signal.lowLimit();
+		double y2 = signal.highLimit();
+
+		double k1 = 0;
+		double k2 = 0;
+
+		AppItem* appItem = nullptr;
+
+		bool result = true;
+
+		const int MULTIPLIER = 32768 - 1;
+
+		switch(signal.dataFormat())
+		{
+		case DataFormat::Float:
+			k1 = (y2 - y1) / (x2 - x1);
+			k2 = y1 - k1 * x1;
+
+			m_scal_16ui_32fp->params()[m_scal_16ui_32fp_k1_param_index].setValue(QVariant(k1));
+			m_scal_16ui_32fp->params()[m_scal_16ui_32fp_k2_param_index].setValue(QVariant(k2));
+
+			appItem = new AppItem(m_scal_16ui_32fp);
+
+			break;
+
+		case DataFormat::SignedInt:
+			{
+				k1 = (y2 - y1) / (x2 - x1) * MULTIPLIER;
+				k2 = y1 - k1 * x1 / MULTIPLIER;
+
+				QVariant k1Int(QVariant(k1).toInt());
+				QVariant k2Int(QVariant(k2).toInt());
+
+				m_scal_16ui_32si->params()[m_scal_16ui_32si_k1_param_index].setValue(k1Int);
+				m_scal_16ui_32si->params()[m_scal_16ui_32si_k2_param_index].setValue(k2Int);
+
+				appItem = new AppItem(m_scal_16ui_32si);
+			}
+
+			break;
+
+		default:
+			LOG_ERROR(m_log, QString(tr("Unknown conversion for signal %1, dataFormat %2")).
+					  arg(signal.strID()).arg(static_cast<int>(signal.dataFormat())));
+			result = false;
+		}
+
+		if (appItem != nullptr)
+		{
+			m_scalAppItems.append(appItem);
+
+			int instance = m_afbs.addInstance(appItem);
+
+			AppFb* appFb = m_appFbs.insert(appItem, instance);
+
+			m_inOutSignalsToScalAppFbMap.insert(signal.strID(), appFb);
+		}
+
+		return result;
 	}
 
 
@@ -1890,43 +2587,19 @@ namespace Builder
 
 		bool result = true;
 
-		for(const AppLogicItem& logicItem : m_moduleLogic->items())
+		if (m_moduleLogic != nullptr)
 		{
-			// build QHash<QUuid, AppItem*> m_appItems
-			// item GUID -> item ptr
-			//
-			if (m_appItems.contains(logicItem.m_fblItem->guid()))
+			for(const AppLogicItem& logicItem : m_moduleLogic->items())
 			{
-				AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
-
-				msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
-						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
-
-				LOG_ERROR(m_log, msg);
-
-				result = false;
-
-				continue;
-			}
-
-			AppItem* appItem = new AppItem(logicItem);
-
-			m_appItems.insert(appItem->guid(), appItem);
-
-			// build QHash<QUuid, LogicItem*> m_itemsPins;
-			// pin GUID -> parent item ptr
-			//
-
-			// add input pins
-			//
-			for(LogicPin input : appItem->inputs())
-			{
-				if (m_pinParent.contains(input.guid()))
+				// build QHash<QUuid, AppItem*> m_appItems
+				// item GUID -> item ptr
+				//
+				if (m_appItems.contains(logicItem.m_fblItem->guid()))
 				{
-					AppItem* firstItem = m_pinParent[input.guid()];
+					AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
 
-					msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
-							arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+					msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
+							arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getAppLogicItemStrID(logicItem));
 
 					LOG_ERROR(m_log, msg);
 
@@ -1935,28 +2608,55 @@ namespace Builder
 					continue;
 				}
 
-				m_pinParent.insert(input.guid(), appItem);
-			}
+				AppItem* appItem = new AppItem(logicItem);
 
-			// add output pins
-			//
-			for(LogicPin output : appItem->outputs())
-			{
-				if (m_pinParent.contains(output.guid()))
+				m_appItems.insert(appItem->guid(), appItem);
+
+				// build QHash<QUuid, LogicItem*> m_itemsPins;
+				// pin GUID -> parent item ptr
+				//
+
+				// add input pins
+				//
+				for(LogicPin input : appItem->inputs())
 				{
-					AppItem* firstItem = m_pinParent[output.guid()];
+					if (m_pinParent.contains(input.guid()))
+					{
+						AppItem* firstItem = m_pinParent[input.guid()];
 
-					msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
-							arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+						msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
+								arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
 
-					LOG_ERROR(m_log, msg);
+						LOG_ERROR(m_log, msg);
 
-					result = false;
+						result = false;
 
-					continue;
+						continue;
+					}
+
+					m_pinParent.insert(input.guid(), appItem);
 				}
 
-				m_pinParent.insert(output.guid(), appItem);
+				// add output pins
+				//
+				for(LogicPin output : appItem->outputs())
+				{
+					if (m_pinParent.contains(output.guid()))
+					{
+						AppItem* firstItem = m_pinParent[output.guid()];
+
+						msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
+								arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
+
+						LOG_ERROR(m_log, msg);
+
+						result = false;
+
+						continue;
+					}
+
+					m_pinParent.insert(output.guid(), appItem);
+				}
 			}
 		}
 
@@ -1966,11 +2666,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createAppSignalsMap()
 	{
-		if (m_moduleLogic == nullptr)
+		/*if (m_moduleLogic == nullptr)
 		{
 			assert(false);
 			return false;
-		}
+		}*/
 
 		int count = m_signals->count();
 
@@ -2151,9 +2851,29 @@ namespace Builder
 						}
 						else
 						{
+							if (module.familyType() == Hardware::DeviceModule::FamilyType::AIM ||
+								module.familyType() == Hardware::DeviceModule::FamilyType::AOM)
+							{
+								int signalGroup = signalOffset / 17;
+								int signalNo = signalOffset % 17;
+
+								if (signalNo == 0)
+								{
+									// this is discrete validity signal
+									//
+									signalOffset = signalGroup * 33;
+								}
+								else
+								{
+									// this is analog input signal
+									//
+									signalOffset = signalGroup * 33 + 1 + 2 * (signalNo - 1);
+								}
+							}
+
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 							//
-							Address16 ramRegAddr(module.appDataOffset + signalOffset, bit);
+							Address16 ramRegAddr(module.appRegDataOffset + signalOffset, bit);
 
 							signal->ramAddr() = ramRegAddr;
 							signal->regAddr() = ramRegAddr;
@@ -2191,7 +2911,7 @@ namespace Builder
 
 		bool result = true;
 
-		m_registeredInternalAnalogSignalsSize = 0;
+/*		m_registeredInternalAnalogSignalsSize = 0;
 		m_internalAnalogSignalsSize = 0;
 
 		m_registeredInternalDiscreteSignalsSize = 0;
@@ -2347,7 +3067,7 @@ namespace Builder
 					(*m_signals)[index].ramAddr() = ramAddr;
 				}
 			}
-		}
+		}*/
 
 		return result;
 	}
@@ -2471,6 +3191,13 @@ namespace Builder
 		}
 
 		m_appItems.clear();
+
+		for(AppItem* scalAppItem : m_scalAppItems)
+		{
+			delete scalAppItem;
+		}
+
+		m_scalAppItems.clear();
 	}
 
 
@@ -2598,7 +3325,7 @@ namespace Builder
 
 		if (!contains(afbStrID))
 		{
-			assert(false);			// unknown FBL guid
+			assert(false);			// unknown FBL strID
 			return 0;
 		}
 
@@ -2723,6 +3450,14 @@ namespace Builder
 	}
 
 
+	AppItem::AppItem(std::shared_ptr<Afb::AfbElement> afbElement)
+	{
+		m_appLogicItem.m_afbElement = *afbElement.get();
+		m_appLogicItem.m_fblItem = std::shared_ptr<VFrame30::FblItemRect>(
+					new VFrame30::SchemeItemAfb(VFrame30::SchemeUnit::Display, *afbElement.get()));
+	}
+
+
 	QString AppItem::strID() const
 	{
 		if (m_appLogicItem.m_fblItem->isSignalElement())
@@ -2827,12 +3562,12 @@ namespace Builder
 	// AppFbsMap class implementation
 	//
 
-	void AppFbMap::insert(AppItem *appItem, int instance)
+	AppFb* AppFbMap::insert(AppItem *appItem, int instance)
 	{
 		if (appItem == nullptr)
 		{
 			assert(false);
-			return;
+			return nullptr;
 		}
 
 		AppFb* appFb = new AppFb(appItem, instance, m_fbNumber);
@@ -2840,6 +3575,8 @@ namespace Builder
 		m_fbNumber++;
 
 		HashedVector<QUuid, AppFb*>::insert(appFb->guid(), appFb);
+
+		return appFb;
 	}
 
 
@@ -3130,7 +3867,7 @@ namespace Builder
 	// ---------------------------------------------------------------------------------------
 
 
-	bool ModuleLogicCompiler::Module::isInputModule()
+	bool ModuleLogicCompiler::Module::isInputModule() const
 	{
 		if (device == nullptr)
 		{
@@ -3142,7 +3879,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::Module::isOutputModue()
+	bool ModuleLogicCompiler::Module::isOutputModule() const
 	{
 		if (device == nullptr)
 		{
@@ -3153,7 +3890,7 @@ namespace Builder
 		return device->isOutputModule();
 	}
 
-	Hardware::DeviceModule::FamilyType ModuleLogicCompiler::Module::familyType()
+	Hardware::DeviceModule::FamilyType ModuleLogicCompiler::Module::familyType() const
 	{
 		if (device == nullptr)
 		{

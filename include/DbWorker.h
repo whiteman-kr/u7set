@@ -84,8 +84,8 @@ public slots:
 
 	// File management
 	//
-	void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter);
-	void getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter);
+	void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
+	void getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
 
 	void slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
@@ -94,7 +94,7 @@ public slots:
 
 	void slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
-	void slot_getCheckedOutFiles(const DbFileInfo& parentFileInfo, std::list<std::shared_ptr<DbFile>>* out);
+	void slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out);
 
 	void slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
 	void slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files);
@@ -102,6 +102,7 @@ public slots:
 	void slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out);
 
 	void slot_checkIn(std::vector<DbFileInfo>* files, QString comment);
+	void slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);
 	void slot_checkOut(std::vector<DbFileInfo>* files);
 	void slot_undoChanges(std::vector<DbFileInfo>* files);
 
@@ -154,6 +155,7 @@ public slots:
 
 	bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId) const;
 	bool db_updateFile(const QSqlQuery& q, DbFile* file) const;
+	bool db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo);
 
 	// Properties
 	//

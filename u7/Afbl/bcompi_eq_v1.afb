@@ -1,23 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#tct_on_v1">
+    <AfbElement StrId="#bcompi_eq_v1">
         <Properties>
-            <Caption>tct_on</Caption>
+            <Caption>bcompi_eq</Caption>
             <Version>1.0</Version>
-            <Description>Time Counter Block, Turn on delay function</Description>
-            <Category>Delay</Category>
-            <OpCode>3</OpCode>
+            <Description>Binary Comparator Block, Equal int comparison</Description>
+            <Category>Compare</Category>
+            <OpCode>10</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_wave" Caption="in" Type="Discrete" OpIndex = "6" Size = "1"/>
+            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="SignedInt" OpIndex = "6" Size = "32"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "8" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "9" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_counter" Caption = "time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="i_sp_s" Caption = "setting s" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+                <Value>50</Value>
+                <Default>50</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>100</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_sp_r" Caption = "setting r" Visible="true" OpIndex="3" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
                 <Value>50</Value>
                 <Default>50</Default>
                 <LowLimit>0</LowLimit>

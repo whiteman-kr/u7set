@@ -138,25 +138,25 @@ inline bool FblSignalType_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<FblSignalType>(
     FblSignalType_descriptor(), name, value);
 }
-enum FblParamType {
-  AnalogIntegral = 0,
-  AnalogFloatingPoint = 1,
-  DiscreteValue = 2
+enum FblDataFormat {
+  UnsignedInt = 0,
+  SignedInt = 1,
+  Float = 2
 };
-bool FblParamType_IsValid(int value);
-const FblParamType FblParamType_MIN = AnalogIntegral;
-const FblParamType FblParamType_MAX = DiscreteValue;
-const int FblParamType_ARRAYSIZE = FblParamType_MAX + 1;
+bool FblDataFormat_IsValid(int value);
+const FblDataFormat FblDataFormat_MIN = UnsignedInt;
+const FblDataFormat FblDataFormat_MAX = Float;
+const int FblDataFormat_ARRAYSIZE = FblDataFormat_MAX + 1;
 
-const ::google::protobuf::EnumDescriptor* FblParamType_descriptor();
-inline const ::std::string& FblParamType_Name(FblParamType value) {
+const ::google::protobuf::EnumDescriptor* FblDataFormat_descriptor();
+inline const ::std::string& FblDataFormat_Name(FblDataFormat value) {
   return ::google::protobuf::internal::NameOfEnum(
-    FblParamType_descriptor(), value);
+    FblDataFormat_descriptor(), value);
 }
-inline bool FblParamType_Parse(
-    const ::std::string& name, FblParamType* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<FblParamType>(
-    FblParamType_descriptor(), name, value);
+inline bool FblDataFormat_Parse(
+    const ::std::string& name, FblDataFormat* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<FblDataFormat>(
+    FblDataFormat_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -1416,6 +1416,13 @@ class AfbSignal : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_opname();
   inline void set_allocated_opname(::Proto::wstring* opname);
 
+  // optional .Proto.FblDataFormat dataFormat = 6;
+  inline bool has_dataformat() const;
+  inline void clear_dataformat();
+  static const int kDataFormatFieldNumber = 6;
+  inline ::Proto::FblDataFormat dataformat() const;
+  inline void set_dataformat(::Proto::FblDataFormat value);
+
   // @@protoc_insertion_point(class_scope:Proto.AfbSignal)
  private:
   inline void set_has_caption();
@@ -1428,6 +1435,8 @@ class AfbSignal : public ::google::protobuf::Message {
   inline void clear_has_size();
   inline void set_has_opname();
   inline void clear_has_opname();
+  inline void set_has_dataformat();
+  inline void clear_has_dataformat();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1436,9 +1445,10 @@ class AfbSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 operandindex_;
   ::Proto::wstring* opname_;
   ::google::protobuf::int32 size_;
+  int dataformat_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -1511,13 +1521,6 @@ class AfbParam : public ::google::protobuf::Message {
   inline ::Proto::wstring* mutable_caption();
   inline ::Proto::wstring* release_caption();
   inline void set_allocated_caption(::Proto::wstring* caption);
-
-  // required .Proto.FblParamType type = 2;
-  inline bool has_type() const;
-  inline void clear_type();
-  static const int kTypeFieldNumber = 2;
-  inline ::Proto::FblParamType type() const;
-  inline void set_type(::Proto::FblParamType value);
 
   // required bool visible = 7;
   inline bool has_visible() const;
@@ -1608,12 +1611,24 @@ class AfbParam : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_opname();
   inline void set_allocated_opname(::Proto::wstring* opname);
 
+  // optional .Proto.FblSignalType type = 18;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 18;
+  inline ::Proto::FblSignalType type() const;
+  inline void set_type(::Proto::FblSignalType value);
+
+  // optional .Proto.FblDataFormat dataFormat = 19;
+  inline bool has_dataformat() const;
+  inline void clear_dataformat();
+  static const int kDataFormatFieldNumber = 19;
+  inline ::Proto::FblDataFormat dataformat() const;
+  inline void set_dataformat(::Proto::FblDataFormat value);
+
   // @@protoc_insertion_point(class_scope:Proto.AfbParam)
  private:
   inline void set_has_caption();
   inline void clear_has_caption();
-  inline void set_has_type();
-  inline void clear_has_type();
   inline void set_has_visible();
   inline void clear_has_visible();
   inline void set_has_operandindex();
@@ -1636,25 +1651,30 @@ class AfbParam : public ::google::protobuf::Message {
   inline void clear_has_highlimit();
   inline void set_has_opname();
   inline void clear_has_opname();
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_dataformat();
+  inline void clear_has_dataformat();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::Proto::wstring* caption_;
-  int type_;
   ::google::protobuf::int32 operandindex_;
   ::google::protobuf::int32 size_;
   bool visible_;
   bool instantiator_;
   bool user_;
+  int type_;
   ::Proto::wstring* changedscript_;
   ::Proto::qvariant* value_;
   ::Proto::qvariant* defaultvalue_;
   ::Proto::qvariant* lowlimit_;
   ::Proto::qvariant* highlimit_;
   ::Proto::wstring* opname_;
+  int dataformat_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6842,6 +6862,29 @@ inline void AfbSignal::set_allocated_opname(::Proto::wstring* opname) {
   }
 }
 
+// optional .Proto.FblDataFormat dataFormat = 6;
+inline bool AfbSignal::has_dataformat() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void AfbSignal::set_has_dataformat() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void AfbSignal::clear_has_dataformat() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void AfbSignal::clear_dataformat() {
+  dataformat_ = 0;
+  clear_has_dataformat();
+}
+inline ::Proto::FblDataFormat AfbSignal::dataformat() const {
+  return static_cast< ::Proto::FblDataFormat >(dataformat_);
+}
+inline void AfbSignal::set_dataformat(::Proto::FblDataFormat value) {
+  assert(::Proto::FblDataFormat_IsValid(value));
+  set_has_dataformat();
+  dataformat_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // AfbParam
@@ -6884,38 +6927,15 @@ inline void AfbParam::set_allocated_caption(::Proto::wstring* caption) {
   }
 }
 
-// required .Proto.FblParamType type = 2;
-inline bool AfbParam::has_type() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void AfbParam::set_has_type() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void AfbParam::clear_has_type() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void AfbParam::clear_type() {
-  type_ = 0;
-  clear_has_type();
-}
-inline ::Proto::FblParamType AfbParam::type() const {
-  return static_cast< ::Proto::FblParamType >(type_);
-}
-inline void AfbParam::set_type(::Proto::FblParamType value) {
-  assert(::Proto::FblParamType_IsValid(value));
-  set_has_type();
-  type_ = value;
-}
-
 // required bool visible = 7;
 inline bool AfbParam::has_visible() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void AfbParam::set_has_visible() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void AfbParam::clear_has_visible() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void AfbParam::clear_visible() {
   visible_ = false;
@@ -6931,13 +6951,13 @@ inline void AfbParam::set_visible(bool value) {
 
 // optional int32 operandIndex = 8 [default = 0];
 inline bool AfbParam::has_operandindex() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void AfbParam::set_has_operandindex() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void AfbParam::clear_has_operandindex() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void AfbParam::clear_operandindex() {
   operandindex_ = 0;
@@ -6953,13 +6973,13 @@ inline void AfbParam::set_operandindex(::google::protobuf::int32 value) {
 
 // optional int32 size = 9 [default = 0];
 inline bool AfbParam::has_size() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void AfbParam::set_has_size() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void AfbParam::clear_has_size() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void AfbParam::clear_size() {
   size_ = 0;
@@ -6975,13 +6995,13 @@ inline void AfbParam::set_size(::google::protobuf::int32 value) {
 
 // optional bool instantiator = 10 [default = false];
 inline bool AfbParam::has_instantiator() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void AfbParam::set_has_instantiator() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void AfbParam::clear_has_instantiator() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void AfbParam::clear_instantiator() {
   instantiator_ = false;
@@ -6997,13 +7017,13 @@ inline void AfbParam::set_instantiator(bool value) {
 
 // optional bool user = 11 [default = false];
 inline bool AfbParam::has_user() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void AfbParam::set_has_user() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void AfbParam::clear_has_user() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void AfbParam::clear_user() {
   user_ = false;
@@ -7019,13 +7039,13 @@ inline void AfbParam::set_user(bool value) {
 
 // optional .Proto.wstring changedScript = 12;
 inline bool AfbParam::has_changedscript() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void AfbParam::set_has_changedscript() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void AfbParam::clear_has_changedscript() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void AfbParam::clear_changedscript() {
   if (changedscript_ != NULL) changedscript_->::Proto::wstring::Clear();
@@ -7057,13 +7077,13 @@ inline void AfbParam::set_allocated_changedscript(::Proto::wstring* changedscrip
 
 // optional .Proto.qvariant value = 13;
 inline bool AfbParam::has_value() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void AfbParam::set_has_value() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void AfbParam::clear_has_value() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void AfbParam::clear_value() {
   if (value_ != NULL) value_->::Proto::qvariant::Clear();
@@ -7095,13 +7115,13 @@ inline void AfbParam::set_allocated_value(::Proto::qvariant* value) {
 
 // optional .Proto.qvariant defaultvalue = 14;
 inline bool AfbParam::has_defaultvalue() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void AfbParam::set_has_defaultvalue() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void AfbParam::clear_has_defaultvalue() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void AfbParam::clear_defaultvalue() {
   if (defaultvalue_ != NULL) defaultvalue_->::Proto::qvariant::Clear();
@@ -7133,13 +7153,13 @@ inline void AfbParam::set_allocated_defaultvalue(::Proto::qvariant* defaultvalue
 
 // optional .Proto.qvariant lowlimit = 15;
 inline bool AfbParam::has_lowlimit() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void AfbParam::set_has_lowlimit() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void AfbParam::clear_has_lowlimit() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void AfbParam::clear_lowlimit() {
   if (lowlimit_ != NULL) lowlimit_->::Proto::qvariant::Clear();
@@ -7171,13 +7191,13 @@ inline void AfbParam::set_allocated_lowlimit(::Proto::qvariant* lowlimit) {
 
 // optional .Proto.qvariant highlimit = 16;
 inline bool AfbParam::has_highlimit() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void AfbParam::set_has_highlimit() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void AfbParam::clear_has_highlimit() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void AfbParam::clear_highlimit() {
   if (highlimit_ != NULL) highlimit_->::Proto::qvariant::Clear();
@@ -7209,13 +7229,13 @@ inline void AfbParam::set_allocated_highlimit(::Proto::qvariant* highlimit) {
 
 // optional .Proto.wstring opName = 17;
 inline bool AfbParam::has_opname() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void AfbParam::set_has_opname() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void AfbParam::clear_has_opname() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void AfbParam::clear_opname() {
   if (opname_ != NULL) opname_->::Proto::wstring::Clear();
@@ -7243,6 +7263,52 @@ inline void AfbParam::set_allocated_opname(::Proto::wstring* opname) {
   } else {
     clear_has_opname();
   }
+}
+
+// optional .Proto.FblSignalType type = 18;
+inline bool AfbParam::has_type() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void AfbParam::set_has_type() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void AfbParam::clear_has_type() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void AfbParam::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::Proto::FblSignalType AfbParam::type() const {
+  return static_cast< ::Proto::FblSignalType >(type_);
+}
+inline void AfbParam::set_type(::Proto::FblSignalType value) {
+  assert(::Proto::FblSignalType_IsValid(value));
+  set_has_type();
+  type_ = value;
+}
+
+// optional .Proto.FblDataFormat dataFormat = 19;
+inline bool AfbParam::has_dataformat() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void AfbParam::set_has_dataformat() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void AfbParam::clear_has_dataformat() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void AfbParam::clear_dataformat() {
+  dataformat_ = 0;
+  clear_has_dataformat();
+}
+inline ::Proto::FblDataFormat AfbParam::dataformat() const {
+  return static_cast< ::Proto::FblDataFormat >(dataformat_);
+}
+inline void AfbParam::set_dataformat(::Proto::FblDataFormat value) {
+  assert(::Proto::FblDataFormat_IsValid(value));
+  set_has_dataformat();
+  dataformat_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -11275,8 +11341,8 @@ inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblSignalType>() {
   return ::Proto::FblSignalType_descriptor();
 }
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblParamType>() {
-  return ::Proto::FblParamType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::Proto::FblDataFormat>() {
+  return ::Proto::FblDataFormat_descriptor();
 }
 
 }  // namespace google

@@ -202,6 +202,8 @@ message AfbSignal
 	optional int32 operandIndex = 3 [default = 0];
 	optional int32 size = 4 [default = 0];
 	optional wstring opName = 5;
+	optional FblDataFormat dataFormat = 6;
+
 }
 
 
@@ -213,7 +215,6 @@ message AfbSignal
 message AfbParam
 {
 	required wstring caption = 1;
-	required FblParamType type = 2;
 	required bool visible = 7;
 	optional int32 operandIndex = 8 [default = 0];
 	optional int32 size = 9 [default = 0];
@@ -225,6 +226,8 @@ message AfbParam
 	optional qvariant lowlimit = 15;
 	optional qvariant highlimit = 16;
 	optional wstring opName = 17;
+	optional FblSignalType type = 18;
+	optional FblDataFormat dataFormat = 19;
 }
 
 
@@ -242,14 +245,14 @@ enum FblSignalType
 
 //
 //
-// FblParamType
+// FblDataFormat
 //
 //
-enum FblParamType
+enum FblDataFormat
 {
-	AnalogIntegral = 0;			// 32bit signed int
-	AnalogFloatingPoint = 1;	// double, 64bit
-	DiscreteValue = 2;			// bool, c++
+	UnsignedInt = 0;		
+	SignedInt = 1;			
+	Float = 2;			
 }
 
 

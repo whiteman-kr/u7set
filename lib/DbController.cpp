@@ -47,6 +47,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSpecificCopy, m_worker, &DbWorker::slot_getSpecificCopy);
 
 	connect(this, &DbController::signal_checkIn, m_worker, &DbWorker::slot_checkIn);
+	connect(this, &DbController::signal_checkInTree, m_worker, &DbWorker::slot_checkInTree);
 	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
 	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
 
@@ -310,12 +311,12 @@ bool DbController::updateUser(const DbUser& user, QWidget* parentWidget)
 	return result;
 }
 
-bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QWidget* parentWidget)
+bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget)
 {
-	return getFileList(files, parentId, QString(), parentWidget);
+	return getFileList(files, parentId, QString(), removeDeleted, parentWidget);
 }
 
-bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, QWidget* parentWidget)
+bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, const QString& filter, bool removeDeleted, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -335,7 +336,7 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, con
 
 	// Emit signal end wait for complete
 	//
-	emit signal_getFileList(files, parentId, filter);
+	emit signal_getFileList(files, parentId, filter, removeDeleted);
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list"));
 	return result;
@@ -578,14 +579,21 @@ bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::list<std::s
 	return out;
 }
 
-bool DbController::getCheckedOutFiles(const DbFileInfo& file, std::list<std::shared_ptr<DbFile>>* out, QWidget* parentWidget)
+bool DbController::getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out, QWidget* parentWidget)
 {
 	// Check parameters
 	//
-	if (out == nullptr || file.fileId() == -1)
+	if (parentFiles == nullptr ||
+		parentFiles->empty() == true
+		)
+	{
+		assert(parentFiles);
+		assert(parentFiles->empty() == false);
+	}
+
+	if (out == nullptr)
 	{
 		assert(out != nullptr);
-		assert(file.fileId() != -1);
 		return false;
 	}
 
@@ -599,7 +607,7 @@ bool DbController::getCheckedOutFiles(const DbFileInfo& file, std::list<std::sha
 
 	// Emit signal end wait for complete
 	//
-	emit signal_getCheckedOutFiles(file, out);
+	emit signal_getCheckedOutFiles(parentFiles, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting checked out files"));
 	return out;
@@ -773,6 +781,34 @@ bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& commen
 	// Emit signal end wait for complete
 	//
 	emit signal_checkIn(&files, comment);
+
+	ok = waitForComplete(parentWidget, tr("Checking in files"));
+	return true;
+}
+
+bool DbController::checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector<DbFileInfo>* outCheckedIn, const QString& comment, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (parentFiles.empty() == true ||
+		outCheckedIn == nullptr)
+	{
+		assert(parentFiles.empty() == true);
+		assert(outCheckedIn != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_checkInTree(&parentFiles, outCheckedIn, comment);
 
 	ok = waitForComplete(parentWidget, tr("Checking in files"));
 	return true;
@@ -957,7 +993,22 @@ bool DbController::deleteDeviceObjects(std::vector<Hardware::DeviceObject*>& dev
 		return false;
 	}
 
+	// During delete file output can be in differetn order, so sort it in DESCENDING order, assume that files
+	// already sorted in desc order in DbWorker::slot_deleteFiles, but sort it again just in case
+	//
 	assert(devices.size() == files.size());
+
+	std::sort(devices.begin(), devices.end(),
+		[](const Hardware::DeviceObject* d1, const Hardware::DeviceObject* d2)
+		{
+			return d1->fileInfo().fileId() >= d2->fileInfo().fileId();
+		});
+
+	std::sort(files.begin(), files.end(),
+		[](const DbFileInfo& f1, const DbFileInfo& f2)
+		{
+			return f1.fileId() >= f2.fileId();
+		});
 
 	for (size_t i = 0; i < devices.size(); i++)
 	{

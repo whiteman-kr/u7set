@@ -21,6 +21,47 @@
 
 namespace Builder
 {
+
+	// Signals properties
+	//
+	const char* const VALUE_OFFSET = "ValueOffset";
+	const char* const VALUE_BIT = "ValueBit";
+
+	const char* const SECTION_MEMORY_SETTINGS = "MemorySettings";
+	const char* const SECTION_FLASH_MEMORY = "FlashMemory";
+	const char* const SECTION_LOGIC_UNIT = "LogicUnit";
+
+	const char* const PARAM_TEST_START_COUNT = "test_start_count";
+
+	// Constants
+	//
+
+	// FB SCALE
+
+	//
+
+	const int ERR_VALUE = -1;
+
+	const int NOT_FB_OPERAND_INDEX = -1;
+
+	const int	LM1_PLACE = 0,
+				LM2_PLACE = 15,
+
+				FIRST_MODULE_PLACE = 1,
+				LAST_MODULE_PLACE = 14,
+
+				MODULES_COUNT = 14,
+
+				OPTO_INTERFACE_COUNT = 3;
+
+	const int	WORD_SIZE = 16;
+
+	const int	ANALOG_SIZE_W = 2;
+
+	const int	SIZE_16BIT = 16;
+	const int	SIZE_32BIT = 32;
+
+
 	class AddrW
 	{
 	private:
@@ -164,6 +205,7 @@ namespace Builder
 	public:
 		AppItem(const AppItem& appItem);
 		AppItem(const AppLogicItem& appLogicItem);
+		AppItem(std::shared_ptr<Afb::AfbElement> afbElement);
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
 		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
@@ -219,7 +261,7 @@ namespace Builder
 	public:
 		~AppFbMap() { clear(); }
 
-		void insert(AppItem* appItem, int instance);
+		AppFb* insert(AppItem* appItem, int instance);
 		void clear();
 	};
 
@@ -287,6 +329,181 @@ namespace Builder
 		void clear();
 	};
 
+
+	struct MemoryArea
+	{
+	private:
+		int m_startAddress = 0;
+		int m_sizeW = 0;
+
+		bool m_locked = false;
+
+	public:
+		void setStartAddress(int startAddress) { assert(m_locked == false); m_startAddress = startAddress; }
+		void setSizeW(int sizeW) { assert(m_locked == false); m_sizeW = sizeW; }
+
+		int startAddress() const { return m_startAddress; }
+		int sizeW() const { return m_sizeW; }
+
+		int* ptrStartAddress() { return &m_startAddress; }
+		int* ptrSizeW() { return &m_sizeW; }
+
+		void lock() { m_locked = true; }
+		void unlock() { m_locked = false; }
+
+		int nextAddress() const { return m_startAddress + m_sizeW; }
+
+		MemoryArea& operator = (const MemoryArea& ma)
+		{
+			assert(m_locked == false);
+
+			m_startAddress = ma.m_startAddress;
+			m_sizeW = ma.m_sizeW;
+
+			return *this;
+		}
+	};
+
+
+	class LmMemoryMap : public QObject
+	{
+		Q_OBJECT
+
+	private:
+
+		struct
+		{
+			MemoryArea memory;
+
+			MemoryArea module[MODULES_COUNT];
+		} m_modules;
+
+		struct
+		{
+			MemoryArea memory;
+
+			MemoryArea channel[OPTO_INTERFACE_COUNT];
+			MemoryArea result;
+
+		} m_optoInterface;
+
+		struct
+		{
+			MemoryArea memory;
+
+			MemoryArea regDiscretSignals;
+			MemoryArea nonRegDiscretSignals;
+
+			int regDiscreteSignalCount;
+			int nonRegDiscreteSignalCount;
+
+			int regDiscreteSignalsSizeW() const
+			{
+				return regDiscreteSignalCount % WORD_SIZE ? regDiscreteSignalCount / WORD_SIZE + 1 : regDiscreteSignalCount / WORD_SIZE;
+			}
+
+			int nonRegDiscreteSignalsSizeW() const
+			{
+				return nonRegDiscreteSignalCount % WORD_SIZE ? nonRegDiscreteSignalCount / WORD_SIZE + 1 : nonRegDiscreteSignalCount / WORD_SIZE;
+			}
+
+		} m_appBitAdressed;
+
+		struct
+		{
+			MemoryArea memory;
+		} m_tuningInterface;
+
+		struct
+		{
+			MemoryArea memory;
+
+			MemoryArea lmDiagnostics;					// copying from this->lmDiagnostics
+			MemoryArea lmInputs;						// reads from this->m_lmInOuts area
+			MemoryArea lmOutputs;						// writes to this->m_lmInOuts ares
+			MemoryArea module[MODULES_COUNT];			// depends from chassis	configuration
+			MemoryArea regAnalogSignals;
+			MemoryArea regDiscreteSignals;				// copying from this->appBitAdressed.regDiscretSignals
+			MemoryArea nonRegAnalogSignals;
+
+			int regAnalogSignalCount;
+			int nonRegAnalogSignalCount;
+
+			int regAnalogSignalsSizeW()
+			{
+				return regAnalogSignalCount * ANALOG_SIZE_W;
+			}
+
+			int nonRegAnalogSignalsSizeW()
+			{
+				return nonRegAnalogSignalCount * ANALOG_SIZE_W;
+			}
+		} m_appWordAdressed;
+
+		struct
+		{
+			MemoryArea memory;
+		} m_lmDiagnostics;
+
+		struct
+		{
+			MemoryArea memory;
+		} m_lmInOuts;
+
+		bool recalculateAddresses();
+
+		OutputLog* m_log = nullptr;
+
+		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title);
+		void addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title);
+
+	public:
+
+		LmMemoryMap(OutputLog* log);
+
+		bool init(	const MemoryArea& moduleData,
+					const MemoryArea& optoInterfaceData,
+					const MemoryArea& appLogicBitData,
+					const MemoryArea& tuningData,
+					const MemoryArea& appLogicWordData,
+					const MemoryArea& lmDiagData,
+					const MemoryArea& lmIntOutData);
+
+		int lmDiagnosticsAddress() const { return m_lmDiagnostics.memory.startAddress(); }
+		int lmDiagnosticsSizeW() const { return m_lmDiagnostics.memory.sizeW(); }
+
+		int lmInOutsAddress() const { return m_lmInOuts.memory.startAddress(); }
+		int lmInOutsSizeW() const { return m_lmInOuts.memory.sizeW(); }
+
+		int regDiscreteSignalsAddress() const { return m_appBitAdressed.regDiscretSignals.startAddress(); }
+		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.regDiscreteSignalsSizeW(); }
+
+		// rb_* - adrresses and sizes in Registration Buffer
+		//
+		int rb_lmDiagnosticsAddress() const { return m_appWordAdressed.lmDiagnostics.startAddress(); }
+		int rb_regDiscreteSignalsAddress() const { return m_appWordAdressed.regDiscreteSignals.startAddress(); }
+
+		int rb_lmInputsAddress() const { return m_appWordAdressed.lmInputs.startAddress(); }
+		int rb_lmOutputsAddress() const { return m_appWordAdressed.lmOutputs.startAddress(); }
+
+		//
+
+		int getModuleDataOffset(int place);
+
+		int getModuleRegDataOffset(int place);
+
+		int addModule(int place, int moduleAppRegDataSize);
+
+		void getFile(QStringList& memFile);
+
+		/*Address16 addRegDiscreteSignal();
+		Address16 addNonRegDiscreteSignal();
+
+		Address16 addRegAnalogSignal();
+		Address16 addNonRegAnalogSignal();*/
+	};
+
+
 	class ModuleLogicCompiler : public QObject
 	{
 		Q_OBJECT
@@ -317,6 +534,7 @@ namespace Builder
 			int appLogicDataOffset = 0;
 			int appLogicDataSize = 0;
 			int appLogicDataSizeWithReserve = 0;
+			int appLogicRegDataSize = 0;
 
 			// calculated fields
 			//
@@ -326,12 +544,30 @@ namespace Builder
 			int moduleAppDataOffset = 0;		// offset of module application data in LM's memory
 												// moduleAppDataOffset == rxTxDataOffset + appLogicDataOffset
 
-			int appDataOffset = 0;				// offset of module application data for processing (in registration buffer)
+			int appRegDataOffset = 0;			// offset of module application data for processing (in registration buffer)
 
-			bool isInputModule();
-			bool isOutputModue();
-			Hardware::DeviceModule::FamilyType familyType();
+			bool isInputModule() const;
+			bool isOutputModule() const;
+			Hardware::DeviceModule::FamilyType familyType() const;
 		};
+
+
+		struct AfbParamValue
+		{
+			Afb::AfbSignalType type = Afb::AfbSignalType::Discrete;
+			Afb::AfbDataFormat format = Afb::AfbDataFormat::UnsignedInt;
+			int size = 1;
+
+			union
+			{
+				float floatValue;
+				quint32 unsignedIntValue;
+				qint32 signedIntValue;
+			};
+
+			AfbParamValue(const Afb::AfbParam& afbParam);
+		};
+
 
 		// input parameters
 		//
@@ -349,26 +585,13 @@ namespace Builder
 
 		// LM's and modules settings
 		//
-		int	m_moduleDataOffset = 0;
-		int m_moduleDataSize = 0;
-
-		int m_optoInterfaceDataOffset = 0;
-		int m_optoInterfaceDataSize = 0;
-
-		int m_appLogicBitDataOffset = 0;
-		int	m_appLogicBitDataSize = 0;
-
-		int m_tuningDataOffset = 0;
-		int m_tuningDataSize = 0;
-
-		int m_appLogicWordDataOffset = 0;
-		int m_appLogicWordDataSize = 0;
-
-		int m_lmDiagDataOffset = 0;
-		int m_lmDiagDataSize = 0;
-
-		int m_lmIntOutDataOffset = 0;
-		int m_lmIntOutDataSize = 0;
+		MemoryArea m_moduleData;
+		MemoryArea m_optoInterfaceData;
+		MemoryArea m_appLogicBitData;
+		MemoryArea m_tuningData;
+		MemoryArea m_appLogicWordData;
+		MemoryArea m_lmDiagData;
+		MemoryArea m_lmIntOutData;
 
 		int m_lmAppLogicFrameSize = 0;
 		int m_lmAppLogicFrameCount = 0;
@@ -378,7 +601,9 @@ namespace Builder
 		// LM's calculated memory offsets and sizes
 		//
 
-		int m_registeredInternalAnalogSignalsOffset = 0;	// offset of internal analog signals (in registration buffer)
+		LmMemoryMap m_memoryMap;
+
+/*		int m_registeredInternalAnalogSignalsOffset = 0;	// offset of internal analog signals (in registration buffer)
 		int m_registeredInternalAnalogSignalsSize = 0;		// size of internal analog signals (in words)
 
 		int m_internalAnalogSignalsOffset = 0;				// offset of internal analog signals (in registration buffer)
@@ -393,7 +618,7 @@ namespace Builder
 
 		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit-addressed memory)
 		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
-		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals
+		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals*/
 
 		QVector<Module> m_modules;
 
@@ -419,6 +644,19 @@ namespace Builder
 		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
 
 		QString msg;
+
+		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32fp;
+
+		int m_scal_16ui_32fp_k1_param_index = -1;
+		int m_scal_16ui_32fp_k2_param_index = -1;
+
+		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32si;
+
+		int m_scal_16ui_32si_k1_param_index = -1;
+		int m_scal_16ui_32si_k2_param_index = -1;
+
+		QVector<AppItem*> m_scalAppItems;
+		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
 
 	private:
 		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);
@@ -446,8 +684,14 @@ namespace Builder
 
 		bool initAfbs();
 
-		bool copyLMDiagDataToRegBuf();
+		bool copyLMDataToRegBuf();
 		bool copyInModulesAppLogicDataToRegBuf();
+
+		bool copyLmOutSignalsToModuleMemory();
+
+		void copyDimDataToRegBuf(const Module& module);
+		void copyAimDataToRegBuf(const Module& module);
+
 		bool initOutModulesAppLogicDataInRegBuf();
 
 		bool generateAppLogicCode();
@@ -467,23 +711,32 @@ namespace Builder
 		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
 
 		bool copyDiscreteSignalsToRegBuf();
+
 		bool copyOutModulesAppLogicDataToModulesMemory();
 
+		void copyDomDataToModuleMemory(const Module& module);
+		void copyAomDataToModuleMemory(const Module& module);
+
 		bool finishAppLogicCode();
+
+		bool appendFbsForAnalogInOutSignalsConversion();
+		bool appendFbForAnalogInputSignalConversion(const Signal &signal);
 
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
 
 		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
-		bool calculateFbAnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue);
+		bool generateWriteAfbParamCode(const AppFb& appFb, const Afb::AfbParam& afbParam, const AfbParamValue& prevAfbParamValue, const AfbParamValue& afbParamValue);
+		bool calculateFbAnalogParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue);
 
-		bool calculate_TCT_AnalogIntegralParamValue(AppFb* appFb, const Afb::AfbParam& param, int paramIntValue, quint16* paramValue);
+		bool calculate_TCT_AnalogIntegralParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
 
 		bool copyInOutSignalsToRegistration();
 
+		bool calculateLmMemoryMap();
 		bool calculateInOutSignalsAddresses();
 		bool calculateInternalSignalsAddresses();
 

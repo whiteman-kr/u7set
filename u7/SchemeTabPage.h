@@ -223,6 +223,7 @@ protected slots:
 public:
 	bool saveWorkcopy();
 
+
 protected:
 	void getCurrentWorkcopy();				// Save current scheme to a file
 	void setCurrentWorkcopy();				// Load a scheme from a file

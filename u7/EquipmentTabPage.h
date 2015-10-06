@@ -44,9 +44,13 @@ public:
 	bool insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex);
 	void deleteDeviceObject(QModelIndexList& rowList);
 
+private:
+	void updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::map<int, DbFileInfo>& updateFiles, std::set<void*>& updatedModelIndexes);
+public:
 	void checkInDeviceObject(QModelIndexList& rowList);
+
 	void checkOutDeviceObject(QModelIndexList& rowList);
-	void undoChangesDeviceObject(QModelIndexList& rowList);
+	void undoChangesDeviceObject(QModelIndexList& undowRowList);
 
 	void refreshDeviceObject(QModelIndexList& rowList);
 	void updateDeviceObject(QModelIndexList& rowList);
@@ -55,7 +59,6 @@ public:
 	const Hardware::DeviceObject* deviceObject(const QModelIndex& index) const;
 
 	std::shared_ptr<Hardware::DeviceObject> deviceObjectSharedPtr(QModelIndex& index);
-
 
 public slots:
 	void projectOpened();
@@ -116,6 +119,9 @@ public:
 
 	bool isPresetMode() const;
 	bool isConfigurationMode() const;
+
+signals:
+	void updateState();
 
 public slots:
 	void addSystem();

@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#bcomp_eq_v1">
+    <AfbElement StrId="#scal_16ui_16ui_v1">
         <Properties>
-            <Caption>bcomp_eq</Caption>
+            <Caption>scal_16ui_16ui</Caption>
             <Version>1.0</Version>
-            <Description>Binary Comparator Block, Equal comparison</Description>
-            <Category>Compare</Category>
-            <OpCode>10</OpCode>
-            <HasRam>true</HasRam>
+            <Description>Scaling Block</Description>
+            <Category>Scaling</Category>
+            <OpCode>14</OpCode>
+            <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" OpIndex = "6" Size = "32"/>
+            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="UnsignedInt" OpIndex = "5" Size = "16"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "9" Size = "1"/>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="UnsignedInt" OpIndex = "8" Size = "16"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_sp" Caption = "setting" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_scal_k1_coef" Caption = "K1" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>50</Value>
                 <Default>50</Default>
                 <LowLimit>0</LowLimit>
@@ -26,7 +26,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_hys" Caption = "hysteresis" Visible="true" OpIndex="3" Size="32" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_scal_k2_coef" Caption = "K2" Visible="true" OpIndex="3" Size="32" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>50</Value>
                 <Default>50</Default>
                 <LowLimit>0</LowLimit>
@@ -35,16 +35,16 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="AnalogIntegral">
+            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>1</LowLimit>
-                <HighLimit>4</HighLimit>
+                <HighLimit>9</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="AnalogIntegral">
+            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>0</LowLimit>

@@ -21,3 +21,8 @@ ALTER TABLE fileinstance
 ALTER TABLE fileinstance
 	ADD COLUMN details JSONB DEFAULT '{}';
 
+CREATE INDEX fileinstance_index_changesetid
+  ON fileinstance
+  USING btree
+  (changesetid);
+

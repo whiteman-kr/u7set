@@ -110,7 +110,7 @@ BEGIN
 	-- TO DO: Check user right here
 
 	-- generate filename
-	SELECT * INTO new_filename FROM uuid_generate_v1();
+	SELECT * INTO new_filename FROM uuid_generate_v4();
 	SELECT octet_length(new_filename) INTO fileid_lenght;
 
 	new_filename := 'device-' || new_filename || file_extension;	-- smthng like: device-5be363ac-3c02-11e4-9de8-3f84f459cb27.hsystem
@@ -168,8 +168,13 @@ BEGIN
 
 	if (checked_out_instance_id IS NOT NULL)
 	THEN
-		result := undo_changes(user_id, ARRAY[file_id]);
-		RETURN result;
+		-- try to undo file, if undo fails then mark file instance as deleted (set Action to Deleted)
+		BEGIN
+			result := undo_changes(user_id, ARRAY[file_id]);
+			RETURN result;
+		EXCEPTION WHEN OTHERS THEN
+			-- File cannot be undone, probably it has dependants, mark file instance as deleted (set Action to Deleted)
+		END;
 	END IF;
 
 	-- mark fileinstance action as deleted
@@ -190,24 +195,28 @@ LANGUAGE plpgsql;
 DROP FUNCTION undo_changes(integer, integer[]);
 
 CREATE OR REPLACE FUNCTION undo_changes(user_id integer, file_ids integer[])
-RETURNS SETOF objectstate AS
+  RETURNS SETOF objectstate AS
 $BODY$
 DECLARE
 	WasCheckedOut int;
 	file_id int;
 	file_user int;
 	is_user_admin boolean;
+	deleted_count int;
 	file_result ObjectState;
 BEGIN
-
 	is_user_admin := is_admin(user_id);
 
+	-- sort file_ids in descending order, so children will be deleted (if it was not checked in yet) first
+	file_ids := uniq(sort_desc(file_ids));
+
+	-- undo operation for each file
 	FOREACH file_id IN ARRAY file_ids
 	LOOP
 		-- Check if files really checked out
 		SELECT count(*) INTO WasCheckedOut FROM CheckOut WHERE FileID = file_id;
 		IF (WasCheckedOut <> 1)	THEN
-			RAISE 'File is not checked out: %', file_id;
+			RAISE 'File is not checked out or file is not exists: %', file_id;
 		END IF;
 
 		-- Check if the file can be undo by this user_id
@@ -216,29 +225,44 @@ BEGIN
 		IF (is_user_admin = FALSE AND file_user <> user_id) THEN
 			RAISE 'User % has no right to perform operation.', user_id;
 		END IF;
-	END LOOP;
-
-	-- update table file, set CheckedOutIntsnceID to NULL
-	UPDATE File SET CheckedOutInstanceID = NULL WHERE FileID = ANY(file_ids);
-
-	-- Delete from file instance all these files
-	DELETE FROM FileInstance WHERE FileID = ANY(file_ids) AND ChangesetID IS NULL;
-
-	-- Delete all check outs
-	DELETE FROM CheckOut WHERE FileID = ANY(file_ids);
 
 
-	-- if column File.CheckedInIntsnceID is NULL then this file was not checked in, and we have to remove it from the table
-	DELETE FROM File WHERE FileID = ANY(file_ids) AND CheckedInInstanceID IS NULL;
+		-- During removing record form File (if it was not checked in yet),
+		-- if there is any dependants exception can ocure
+		BEGIN
+			-- update table file, set CheckedOutIntsnceID to NULL
+			UPDATE File SET CheckedOutInstanceID = NULL WHERE FileID = file_id;
 
-	FOREACH file_id IN ARRAY file_ids
-	LOOP
-		IF (EXISTS(SELECT * FROM File WHERE FileID = file_id) = FALSE)
-		THEN
-			file_result := ROW(file_id, true, false, 3, user_id, 0);	-- File was totaly removed
-		ELSE
+			-- Delete from file instance all these files
+			DELETE FROM FileInstance WHERE FileID = file_id AND ChangesetID IS NULL;
+
+			-- Delete all check outs
+			DELETE FROM CheckOut WHERE FileID = file_id;
+
+			-- if column File.CheckedInIntsnceID is NULL then this file was not checked in, and we have to TRY to remove it from the table
+			DELETE FROM File WHERE FileID = file_id AND (CheckedInInstanceID IS NULL) RETURNING * INTO deleted_count;
+
+			-- form output result
+			IF (deleted_count = 0 OR deleted_count IS NULL)
+			THEN
+				file_result := get_file_state(file_id);
+			ELSE
+				file_result.id := file_id;
+				file_result.deleted := true;
+				file_result.checkedout := false;
+				file_result.action := 3;
+				file_result.userid := user_id;
+				file_result.errcode := 0;
+			END IF;
+
+		EXCEPTION WHEN foreign_key_violation THEN
+
+			-- cannot remove file? mark it as deleted, mark fileinstance action as deleted
+			UPDATE FileInstance SET Action = 3 WHERE FileInstanceID = (SELECT CheckedOutInstanceID FROM File WHERE FileID = file_id);
+
+			-- form output result
 			file_result := get_file_state(file_id);
-		END IF;
+		END;
 
 		RETURN NEXT file_result;
 	END LOOP;
@@ -246,8 +270,7 @@ BEGIN
 	RETURN;
 END;
 $BODY$
-LANGUAGE plpgsql;
-
+LANGUAGE plpgsql ;
 
 
 -------------------------------------------------------------------------------
@@ -312,6 +335,84 @@ BEGIN
 		file_result := get_file_state(file_id);
 		RETURN NEXT file_result;
 	END LOOP;
+	RETURN;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+
+
+-------------------------------------------------------------------------------
+--
+--							check_in_tree
+--
+-------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION check_in_tree(user_id integer, parent_file_ids integer[], checkin_comment text)
+  RETURNS SETOF objectstate AS
+$BODY$
+DECLARE
+	NewChangesetID int;
+	parent_id int;
+	file_id int;
+	file_result ObjectState;
+	checked_out_ids integer[];
+BEGIN
+
+	FOREACH parent_id IN ARRAY parent_file_ids
+	LOOP
+		-- get all checked out files for parents (including parent)
+		checked_out_ids := array_cat(
+			array(
+				SELECT SQ.FileID FROM (
+					(WITH RECURSIVE files(FileID, ParentID) AS (
+							SELECT FileID, ParentID FROM get_file_list(user_id, parent_id, '%')
+						UNION ALL
+							SELECT FL.FileID, FL.ParentID FROM Files, get_file_list(user_id, files.FileID, '%') FL
+						)
+						SELECT * FROM files)
+					UNION
+						SELECT FileID, ParentID FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = parent_id), '%') WHERE FileID = parent_id
+				) SQ, File AS F
+				WHERE SQ.FileID = F.FileID AND F.CheckedOutInstanceID IS NOT NULL
+				ORDER BY SQ.FileID
+			), checked_out_ids);
+
+	END LOOP;
+
+	IF (array_length(checked_out_ids, 1) = 0)
+	THEN
+		-- Nothing to check in
+		RETURN;
+	END IF;
+
+	-- Add new record to Changeset
+	INSERT INTO Changeset (UserID, Comment, File)
+		VALUES (user_id, checkin_comment, TRUE)
+		RETURNING ChangesetID INTO NewChangesetID;
+
+	-- Set File.Deleted flag if action in FileInstance is Deleted
+	UPDATE File SET Deleted = TRUE
+	WHERE
+		FileID = ANY(checked_out_ids) AND
+		3 = (SELECT Action FROM FileInstance FI WHERE FI.FileInstanceID = CheckedOutInstanceID AND FI.FileID = FileID);
+
+	-- Set CheckedInInstance to current CheckedOutInstance, and set CheckedOutInstanceID to NULL
+	UPDATE File SET CheckedInInstanceID = CheckedOutInstanceID WHERE FileID = ANY(checked_out_ids);
+	UPDATE File SET CheckedOutInstanceID = NULL WHERE FileID = ANY(checked_out_ids);
+
+	-- Update FileInstance, set it's ChangesetID
+	UPDATE FileInstance SET ChangesetID = NewChangesetID WHERE FileID = ANY(checked_out_ids) AND ChangesetID IS NULL;
+
+	-- Remove CheckOut roecords
+	DELETE FROM CheckOut WHERE FileID = ANY(checked_out_ids);
+
+	-- Return result
+	FOREACH file_id IN ARRAY checked_out_ids
+	LOOP
+		file_result := get_file_state(file_id);
+		RETURN NEXT file_result;
+	END LOOP;
+
 	RETURN;
 END;
 $BODY$
@@ -512,12 +613,43 @@ LANGUAGE plpgsql;
 --							get_checked_out_files
 --
 -------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION get_checked_out_files(user_id integer, parent_file_id integer)
-RETURNS SETOF dbfile AS
+CREATE OR REPLACE FUNCTION get_checked_out_files(user_id integer, parent_file_ids integer[])
+  RETURNS SETOF dbfileinfo AS
 $BODY$
 DECLARE
+	parent_id int;
+	checked_out_ids integer[];
 BEGIN
-	RETURN QUERY (SELECT * FROM get_latest_file_tree_version(user_id, parent_file_id) WHERE CheckedOut = TRUE);
+	FOREACH parent_id IN ARRAY parent_file_ids
+	LOOP
+		-- get all checked out files for parents, including parent
+		checked_out_ids := array_cat(
+			array(
+				SELECT SQ.FileID
+				FROM (
+					(WITH RECURSIVE files(FileID, ParentID, CheckedOut) AS (
+							SELECT FileID, ParentID, CheckedOut FROM get_file_list(user_id, parent_id)
+						UNION ALL
+							SELECT FL.FileID, FL.ParentID, FL.CheckedOut FROM Files, get_file_list(user_id, files.FileID) FL
+						)
+						SELECT * FROM files)
+					UNION
+						SELECT FileID, ParentID, CheckedOut FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = parent_id)) WHERE FileID = parent_id
+				) SQ
+				WHERE CheckedOut = TRUE
+			), checked_out_ids);
+	END LOOP;
+
+	IF (array_length(checked_out_ids, 1) = 0)
+	THEN
+		RETURN;
+	END IF;
+
+	-- remove same identifiers, Ids will be sorted
+	checked_out_ids := (SELECT * FROM uniq(sort(checked_out_ids)));
+
+	-- Return result
+	RETURN QUERY SELECT * FROM get_file_info(user_id, checked_out_ids);
 END;
 $BODY$
 LANGUAGE plpgsql;
