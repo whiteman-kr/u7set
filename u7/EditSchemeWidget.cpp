@@ -1550,6 +1550,16 @@ void EditSchemeWidget::createActions()
 	connect(m_escapeAction, &QAction::triggered, this, &EditSchemeWidget::escapeKey);
 	addAction(m_escapeAction);
 
+	// F2 Button Pressed
+	//
+	m_f2Action = new QAction(tr("Edit StrID"), this);
+	m_f2Action->setEnabled(true);
+	m_f2Action->setMenuRole(QAction::NoRole);
+	m_f2Action->setShortcut(QKeySequence(Qt::Key_F2));
+	connect(m_f2Action, &QAction::triggered, this, &EditSchemeWidget::f2Key);
+	addAction(m_f2Action);
+
+
 	//
 	// File
 	//
@@ -3999,6 +4009,61 @@ void EditSchemeWidget::escapeKey()
 	editSchemeView()->update();
 	return;
 }
+
+void EditSchemeWidget::f2Key()
+{
+	if (mouseState() != MouseState::None)
+	{
+		return;
+	}
+
+
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+
+	if (selected.size() != 1)
+	{
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemeItem> item = selected.at(0);
+	assert(item);
+
+	VFrame30::SchemeItemSignal* itemSignal = dynamic_cast<VFrame30::SchemeItemSignal*>(item.get());
+	if (itemSignal == nullptr)
+	{
+		return;
+	}
+
+	QString strId = itemSignal->signalStrIds();
+
+	// Show input dialog
+	//
+	QInputDialog inputDialog(this);
+
+	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+	inputDialog.setWindowTitle("Set StrID");
+	inputDialog.setLabelText(tr("StrID:"));
+	inputDialog.setTextEchoMode(QLineEdit::Normal);
+	inputDialog.resize(400, inputDialog.height());
+	inputDialog.setTextValue(strId);
+
+	int inputDialogRecult = inputDialog.exec();
+	QString newValue = inputDialog.textValue();
+
+	if (inputDialogRecult == QDialog::Accepted &&
+		newValue.isNull() == false &&
+		strId != newValue)
+	{
+		// Set value
+		//
+		m_editEngine->runSetProperty("StrIDs", QVariant(newValue), item);
+
+		editSchemeView()->update();
+	}
+
+	return;
+}
+
 
 void EditSchemeWidget::deleteKey()
 {

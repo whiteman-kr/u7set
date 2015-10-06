@@ -294,6 +294,7 @@ protected slots:
 	void exportToPdf();
 
 	void escapeKey();
+	void f2Key();
 	void deleteKey();
 
 	void undo();
@@ -402,6 +403,7 @@ private:
 	//
 private:
 	QAction* m_escapeAction = nullptr;
+	QAction* m_f2Action = nullptr;		// Edit inputs/outputs signal strid
 
 	//	Contexet Menu
 	//
