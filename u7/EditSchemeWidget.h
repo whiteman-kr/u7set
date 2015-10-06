@@ -91,6 +91,7 @@ public:
 
 	virtual ~EditSchemeView();
 
+
 	// Painting
 	//
 protected:
@@ -287,7 +288,10 @@ signals:
 	// Slots
 	//
 protected slots:
+
 	void contextMenu(const QPoint& pos);
+
+	void exportToPdf();
 
 	void escapeKey();
 	void deleteKey();
@@ -412,6 +416,7 @@ private:
 		// ------------------------------
 		QAction* m_fileSeparatorAction0 = nullptr;
 		QAction* m_fileSaveAction = nullptr;
+		QAction* m_fileExportToPdfAction = nullptr;
 		QAction* m_fileSeparatorAction1 = nullptr;
 		// ------------------------------
 		QAction* m_fileGetWorkcopyAction = nullptr;

@@ -20,7 +20,10 @@ namespace VFrame30
 	protected:
 		virtual void paintEvent(QPaintEvent*) override;
 
-		void Ajust(QPainter* painter, double startX, double startY) const;
+		void Ajust(QPainter* painter, double startX, double startY, double zoom) const;
+
+	public:
+		void exportToPdf(QString fileName) const;
 
 		// Methods
 	public:

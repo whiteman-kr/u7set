@@ -30,7 +30,7 @@ void WorkflowSchemeView::paintEvent(QPaintEvent* pe)
 
 	// Ajust QPainter
 	//
-	Ajust(&p, 0, 0);
+	Ajust(&p, 0, 0, zoom());
 
 	// Draw Scheme
 	//

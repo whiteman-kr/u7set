@@ -109,7 +109,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	// Ajust QPainter
 	//
-	Ajust(&p, 0, 0);
+	Ajust(&p, 0, 0, zoom());
 
 	// Draw scheme
 	//
@@ -1581,6 +1581,12 @@ void EditSchemeWidget::createActions()
 	connect(m_fileSaveAction, &QAction::triggered, this, &EditSchemeWidget::saveWorkcopy);
 	addAction(m_fileSaveAction);
 
+	m_fileExportToPdfAction = new QAction(tr("Export to PDF"), this);
+	m_fileExportToPdfAction->setStatusTip(tr("Export scheme to PDF..."));
+	m_fileExportToPdfAction->setEnabled(true);
+	connect(m_fileExportToPdfAction, &QAction::triggered, this, &EditSchemeWidget::exportToPdf);
+	addAction(m_fileExportToPdfAction);
+
 	m_fileSeparatorAction1 = new QAction(this);
 	m_fileSeparatorAction1->setSeparator(true);
 
@@ -1844,6 +1850,7 @@ void EditSchemeWidget::createActions()
 		m_fileMenu->addAction(m_fileUndoChangesAction);
 		m_fileMenu->addAction(m_fileSeparatorAction0);
 		m_fileMenu->addAction(m_fileSaveAction);
+		m_fileMenu->addAction(m_fileExportToPdfAction);
 		m_fileMenu->addAction(m_fileSeparatorAction1);
 		m_fileMenu->addAction(m_fileGetWorkcopyAction);
 		m_fileMenu->addAction(m_fileSetWorkcopyAction);
@@ -3956,6 +3963,25 @@ void EditSchemeWidget::contextMenu(const QPoint& pos)
 	actions << m_propertiesAction;
 
 	menu.exec(actions, mapToGlobal(pos), 0, this);
+	return;
+}
+
+void EditSchemeWidget::exportToPdf()
+{
+	assert(scheme());
+
+	QString fileName = QFileDialog::getSaveFileName(
+		this, "Export scheme to PDF", scheme()->strID() + ".pdf", "PDF (*.pdf);;All files (*.*)");
+
+	if (fileName.isEmpty())
+	{
+		return;
+	}
+
+	qDebug() << "Export scheme " << scheme()->caption() << " " << scheme()->strID() << " to PDF, " << fileName;
+
+	editSchemeView()->exportToPdf(fileName);
+
 	return;
 }
 

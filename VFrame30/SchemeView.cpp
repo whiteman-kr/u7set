@@ -1,5 +1,6 @@
 #include "Stable.h"
 #include "SchemeView.h"
+#include <QPdfWriter>
 
 namespace VFrame30
 {
@@ -126,7 +127,7 @@ namespace VFrame30
 
 		// Ajust QPainter
 		//
-		Ajust(&p, 0, 0);
+		Ajust(&p, 0, 0, zoom());
 
 		// Draw Scheme
 		//
@@ -139,7 +140,7 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemeView::Ajust(QPainter* painter, double startX, double startY) const
+	void SchemeView::Ajust(QPainter* painter, double startX, double startY, double zoom) const
 	{
 		// Set transform matrix
 		//
@@ -149,8 +150,8 @@ namespace VFrame30
 		{
 			painter->translate(startX + 0.5, startY + 0.5);
 			painter->scale(
-				(double)painter->device()->logicalDpiX() * zoom() / 100.0,
-				(double)painter->device()->logicalDpiY() * zoom() / 100.0);
+				(double)painter->device()->logicalDpiX() * zoom / 100.0,
+				(double)painter->device()->logicalDpiY() * zoom / 100.0);
 		}
 		else
 		{
@@ -158,8 +159,73 @@ namespace VFrame30
 			startY = CUtils::Round(startY) + 0.5;
 
 			painter->translate(startX, startY);
-			painter->scale(zoom() / 100.0, zoom() / 100.0);
+			painter->scale(zoom / 100.0, zoom / 100.0);
 		}
+
+		return;
+	}
+
+	void SchemeView::exportToPdf(QString fileName) const
+	{
+		if (scheme().get() == nullptr)
+		{
+			return;
+		}
+
+		// --
+		//
+		QPdfWriter pdfWriter(fileName);
+
+		pdfWriter.setTitle(scheme()->caption());
+
+		QPageSize pageSize;
+		double pageWidth = scheme()->docWidth();
+		double pageHeight = scheme()->docHeight();
+
+		if (m_scheme->unit() == SchemeUnit::Inch)
+		{
+			pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
+		}
+		else
+		{
+			assert(m_scheme->unit() == SchemeUnit::Display);
+			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
+
+			pdfWriter.setResolution(72);	// 72 is from enum QPageLayout::Unit help,
+											// QPageLayout::Point	1	1/!!! 72th !!!! of an inch
+		}
+
+		pdfWriter.setPageSize(pageSize);
+		pdfWriter.setPageMargins(QMarginsF(0, 0, pageWidth, pageHeight));
+
+		// --
+		//
+		QPainter p(&pdfWriter);
+		CDrawParam drawParam(&p, scheme()->gridSize(), scheme()->pinGridStep());
+
+		// Calc size
+		//
+		int widthInPixel = scheme()->GetDocumentWidth(p.device()->logicalDpiX(), 100.0);		// Export 100% zoom
+		int heightInPixel = scheme()->GetDocumentHeight(p.device()->logicalDpiY(), 100.0);		// Export 100% zoom
+
+		// Clear device
+		//
+		p.fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
+		p.setRenderHint(QPainter::Antialiasing);
+
+		// Ajust QPainter
+		//
+		//Ajust(&p, 0, 0, 100.0);		// Export 100% zoom
+		Ajust(&p, 0, 0, 100.0);		// Export 100% zoom
+
+		// Draw Scheme
+		//
+		QRectF clipRect(0, 0, scheme()->docWidth(), scheme()->docHeight());
+
+		scheme()->Draw(&drawParam, clipRect);
+
+		// Ending
+		//
 
 		return;
 	}
