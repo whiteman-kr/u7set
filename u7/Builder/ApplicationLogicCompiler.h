@@ -261,7 +261,7 @@ namespace Builder
 	public:
 		~AppFbMap() { clear(); }
 
-		void insert(AppItem* appItem, int instance);
+		AppFb* insert(AppItem* appItem, int instance);
 		void clear();
 	};
 
@@ -656,6 +656,7 @@ namespace Builder
 		int m_scal_16ui_32si_k2_param_index = -1;
 
 		QVector<AppItem*> m_scalAppItems;
+		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
 
 	private:
 		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);

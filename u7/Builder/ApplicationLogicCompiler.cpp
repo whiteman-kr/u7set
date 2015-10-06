@@ -26,8 +26,6 @@ namespace Builder
 	//	LmMemoryMap class implementation
 	//
 
-
-
 	LmMemoryMap::LmMemoryMap(OutputLog *log) :
 		m_log(log)
 	{
@@ -905,11 +903,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initAfbs()
 	{
-/*		if (m_moduleLogic == nullptr)
-		{
-			return true;			// nothing to init
-		}*/
-
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
 		bool result = true;
@@ -2493,7 +2486,7 @@ namespace Builder
 
 					if (signal->isInput())
 					{
-						appendFbForAnalogInputSignalConversion(*signal);
+						result &= appendFbForAnalogInputSignalConversion(*signal);
 					}
 				}
 			}
@@ -2505,14 +2498,18 @@ namespace Builder
 
 	bool ModuleLogicCompiler::appendFbForAnalogInputSignalConversion(const Signal& signal)
 	{
-		bool result = true;
-
 		assert(signal.isAnalog());
 		assert(signal.isInput());
 		assert(signal.deviceStrID().isEmpty() == false);
 
 		int x1 = signal.lowADC();
 		int x2 = signal.highADC();
+
+		if (x2 - x1 == 0)
+		{
+			LOG_ERROR(m_log, QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
+			return false;
+		}
 
 		double y1 = signal.lowLimit();
 		double y2 = signal.highLimit();
@@ -2521,6 +2518,10 @@ namespace Builder
 		double k2 = 0;
 
 		AppItem* appItem = nullptr;
+
+		bool result = true;
+
+		const int MULTIPLIER = 32768 - 1;
 
 		switch(signal.dataFormat())
 		{
@@ -2536,6 +2537,19 @@ namespace Builder
 			break;
 
 		case DataFormat::SignedInt:
+			{
+				k1 = (y2 - y1) / (x2 - x1) * MULTIPLIER;
+				k2 = y1 - k1 * x1 / MULTIPLIER;
+
+				QVariant k1Int(QVariant(k1).toInt());
+				QVariant k2Int(QVariant(k2).toInt());
+
+				m_scal_16ui_32si->params()[m_scal_16ui_32si_k1_param_index].setValue(k1Int);
+				m_scal_16ui_32si->params()[m_scal_16ui_32si_k2_param_index].setValue(k2Int);
+
+				appItem = new AppItem(m_scal_16ui_32si);
+			}
+
 			break;
 
 		default:
@@ -2549,7 +2563,10 @@ namespace Builder
 			m_scalAppItems.append(appItem);
 
 			int instance = m_afbs.addInstance(appItem);
-			m_appFbs.insert(appItem, instance);
+
+			AppFb* appFb = m_appFbs.insert(appItem, instance);
+
+			m_inOutSignalsToScalAppFbMap.insert(signal.strID(), appFb);
 		}
 
 		return result;
@@ -3545,12 +3562,12 @@ namespace Builder
 	// AppFbsMap class implementation
 	//
 
-	void AppFbMap::insert(AppItem *appItem, int instance)
+	AppFb* AppFbMap::insert(AppItem *appItem, int instance)
 	{
 		if (appItem == nullptr)
 		{
 			assert(false);
-			return;
+			return nullptr;
 		}
 
 		AppFb* appFb = new AppFb(appItem, instance, m_fbNumber);
@@ -3558,6 +3575,8 @@ namespace Builder
 		m_fbNumber++;
 
 		HashedVector<QUuid, AppFb*>::insert(appFb->guid(), appFb);
+
+		return appFb;
 	}
 
 
