@@ -1450,7 +1450,6 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 
 	// Add new device
 	//
-
 	addDeviceObject(device);
 	return;
 }
