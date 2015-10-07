@@ -534,13 +534,14 @@ void FileTests::get_workcopyTest()
 	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
 	QVERIFY2(tempQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable(QString("Error: in column \"userId\" - data mistmatch")));
+	QVERIFY2(query.value("checkedOut").toBool() == true, qPrintable(QString("Error: in column \"checkOut\" - data mistmatch")));
 
 	ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(query.value("fileId").toInt()));
 
 	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
-	QVERIFY2(tempQuery.value("name").toString() == query.value("name").toString(), qPrintable(QString("Error: in column \"name\" - data mistmatch")));
-	QVERIFY2(tempQuery.value("parentId").toInt() == query.value("parentId").toInt(), qPrintable(QString("Error: in column \"parentId\" - data mistmatch")));
+	QVERIFY2(tempQuery.value("name").toString() == query.value("name").toString(), qPrintable("Error: in column \"name\" - data mistmatch"));
+	QVERIFY2(tempQuery.value("parentId").toInt() == query.value("parentId").toInt(), qPrintable("Error: in column \"parentId\" - data mistmatch"));
 
 	ok = tempQuery.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1").arg(query.value("fileId").toInt()));
 
@@ -550,6 +551,14 @@ void FileTests::get_workcopyTest()
 	QVERIFY2(data == query.value("data").toString(), qPrintable(QString("Error: in column \"data\" - data mistmatch")));
 	QVERIFY2(tempQuery.value("action").toInt() == query.value("action").toInt(), qPrintable(QString("Error: in column \"action\" - data mistmatch")));
 	QVERIFY2(query.value("details").toString() == detail, qPrintable(QString("Error: details not match! \nActual: %1\nExpected: %2").arg(query.value("details").toString()).arg(detail)));
+	QVERIFY2(query.value("changeSetId").toInt() == tempQuery.value("changeSetId").toInt(), qPrintable("Error: in column \"changeSetId\" - data mistmatch"));
+
+	ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(query.value("fileId").toInt()));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(tempQuery.value("deleted").toBool() == query.value("deleted").toBool(), qPrintable("Error in column \"deleted\""));
 }
 
 void FileTests::get_file_historyTest()
@@ -1593,8 +1602,7 @@ void FileTests::get_specific_copyTest()
 
 	ok = query.exec(QString("SELECT * FROM get_specific_copy (1, 1, %1);").arg(maxValueId));
 
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == false, qPrintable("Empty row expected"));
+	QVERIFY2(ok == false, qPrintable("Wrong changeset error expected"));
 }
 
 void FileTests::add_deviceTest()
