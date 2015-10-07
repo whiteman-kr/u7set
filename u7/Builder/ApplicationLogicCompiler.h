@@ -568,6 +568,16 @@ namespace Builder
 			AfbParamValue(const Afb::AfbParam& afbParam);
 		};
 
+		struct FbScal
+		{
+			QString caption;
+
+			std::shared_ptr<Afb::AfbElement> pointer;
+
+			int k1ParamIndex = -1;
+			int k2ParamIndex = -1;
+		};
+
 
 		// input parameters
 		//
@@ -645,15 +655,12 @@ namespace Builder
 
 		QString msg;
 
-		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32fp;
+		QVector<FbScal> m_fbScal;
 
-		int m_scal_16ui_32fp_k1_param_index = -1;
-		int m_scal_16ui_32fp_k2_param_index = -1;
-
-		std::shared_ptr<Afb::AfbElement> m_scal_16ui_32si;
-
-		int m_scal_16ui_32si_k1_param_index = -1;
-		int m_scal_16ui_32si_k2_param_index = -1;
+		const int FB_SCAL_16UI_32FP_INDEX = 0;
+		const int FB_SCAL_16UI_32SI_INDEX = 1;
+		const int FB_SCAL_32FP_16UI_INDEX = 2;
+		const int FB_SCAL_32SI_16UI_INDEX = 3;
 
 		QVector<AppItem*> m_scalAppItems;
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
@@ -721,6 +728,7 @@ namespace Builder
 
 		bool appendFbsForAnalogInOutSignalsConversion();
 		bool appendFbForAnalogInputSignalConversion(const Signal &signal);
+		bool appendFbForAnalogOutputSignalConversion(const Signal &signal);
 
 		bool buildServiceMaps();
 		bool createAppSignalsMap();
