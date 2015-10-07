@@ -2285,76 +2285,19 @@ namespace Builder
 
 	void ModuleLogicCompiler::writeLMCodeTestFile()
 	{
+		/*
+
 		ApplicationLogicCode m_testCode;
 
 		Command cmd;
 
-		/*cmd.nop();
-		m_testCode.append(cmd);
-
-		cmd.start(1, 1);
-		m_testCode.append(cmd);
-
-		cmd.mov(200, 400);
-		m_testCode.append(cmd);
-
-		cmd.movMem(300, 100, 50);
-		m_testCode.append(cmd);
-
-		cmd.movConst(50, 123);
-		m_testCode.append(cmd);
-
-		cmd.movBitConst(51, 2, 1);
-		m_testCode.append(cmd);
-
-		cmd.writeFuncBlock(1, 3, 4, 10);
-		m_testCode.append(cmd);
-
-		cmd.readFuncBlock(77, 1, 4, 5);
-		m_testCode.append(cmd);
-
-		cmd.writeFuncBlockConst(1, 2, 3, 55);
-		m_testCode.append(cmd);
-
-		cmd.writeFuncBlockBit(1, 2, 3, 12, 7);
-		m_testCode.append(cmd);
-
-		cmd.readFuncBlockBit(88, 9, 1, 3, 4);
-		m_testCode.append(cmd);
-
-		cmd.readFuncBlockTest(1, 2, 3, 1);
-		m_testCode.append(cmd);
-
-		cmd.setMem(500, 10, 22);
-		m_testCode.append(cmd);
-
-		cmd.moveBit(20, 1, 30, 2);
-		m_testCode.append(cmd);*/
-
-/*		cmd.movConst(49906, 1);
-		m_testCode.append(cmd);
-
-		cmd.movConst(49907, 2);
-		m_testCode.append(cmd);
-
-		cmd.movConst(49908, 3);
-		m_testCode.append(cmd);
-
-		cmd.movMem(49916, 49906, 3);
+		cmd.nop();
 
 		m_testCode.append(cmd);
 
+		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);
 
-		cmd.stop();
-		m_testCode.append(cmd);
-
-		m_testCode.generateBinCode();
-
-		QStringList mifCode;
-
-		m_testCode.getMifCode(mifCode);
-
-		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);*/
+		*/
 	}
 
 
@@ -2364,87 +2307,86 @@ namespace Builder
 
 		bool result = true;
 
-		// find scal_16ui_32fp & scal_16ui_32si functional blocks
+		// find AFB: scal_16ui_32fp, scal_16ui_32si, scal_32fp_16ui, scal_32si_16ui
 		//
 
-		const char* const FB_SCAL_16UI_32FP_CAPTION = "scal_16ui_32fp";
-		const char* const FB_SCAL_16UI_32SI_CAPTION = "scal_16ui_32si";
+		const char* const fbScalCaption[] =
+		{
+
+			// for input signals conversion
+			//
+
+			"scal_16ui_32fp",				// FB_SCAL_16UI_32FP_INDEX
+			"scal_16ui_32si",				// FB_SCAL_16UI_32SI_INDEX
+
+			// for output signals conversion
+			//
+
+			"scal_32fp_16ui",				// FB_SCAL_32FP_16UI_INDEX
+			"scal_32si_16ui",				// FB_SCAL_32SI_16UI_INDEX
+		};
 
 		const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
 		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";
 
-		for(std::shared_ptr<Afb::AfbElement> afbElement : m_afbl->elements())
+		for(const char* const fbCaption : fbScalCaption)
 		{
-			if (afbElement->caption() == FB_SCAL_16UI_32FP_CAPTION)
+			bool fbFound = false;
+
+			for(std::shared_ptr<Afb::AfbElement> afbElement : m_afbl->elements())
 			{
-				m_scal_16ui_32fp = afbElement;
+				if (afbElement->caption() != fbCaption)
+				{
+					continue;
+				}
+
+				fbFound = true;
+
+				FbScal fb;
+
+				fb.caption = fbCaption;
+				fb.pointer = afbElement;
+				fb.k1ParamIndex = -1;
+				fb.k2ParamIndex = -1;
 
 				int index = 0;
 
-				for(Afb::AfbParam afbParam :m_scal_16ui_32fp->params())
+				for(Afb::AfbParam afbParam : afbElement->params())
 				{
 					if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
 					{
-						m_scal_16ui_32fp_k1_param_index = index;
+						fb.k1ParamIndex = index;
 					}
 
 					if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
 					{
-						m_scal_16ui_32fp_k2_param_index = index;
+						fb.k2ParamIndex = index;
 					}
 
 					index++;
 				}
-				continue;
+
+				if (fb.k1ParamIndex == -1 || fb.k2ParamIndex == -1)
+				{
+					LOG_ERROR(m_log, QString(tr("Required parameters k1 & k2 of AFB %1 is not found")).arg(fb.caption))
+					result = false;
+					break;
+				}
+
+				m_fbScal.append(fb);
 			}
 
-			if (afbElement->caption() == FB_SCAL_16UI_32SI_CAPTION)
+			if (fbFound == false)
 			{
-				 m_scal_16ui_32si = afbElement;
-
-				 int index = 0;
-
-				 for(Afb::AfbParam afbParam : m_scal_16ui_32si->params())
-				 {
-					 if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
-					 {
-						 m_scal_16ui_32si_k1_param_index = index;
-					 }
-
-					 if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
-					 {
-						 m_scal_16ui_32si_k2_param_index = index;
-					 }
-
-					 index++;
-				 }
+				LOG_ERROR(m_log, QString(tr("Required AFB %1 is not found")).arg(fbCaption));
+				result = false;
+				break;
 			}
-		}
-
-		if (m_scal_16ui_32fp == nullptr)
-		{
-			LOG_ERROR(m_log, tr("Functional block scal_16ui_32fp is not found"))
-			result = false;
-		}
-
-		if (m_scal_16ui_32si == nullptr)
-		{
-			LOG_ERROR(m_log, tr("Functional block scal_16ui_32si is not found"))
-			result = false;
-		}
-
-		if (m_scal_16ui_32fp_k1_param_index == -1 ||
-			m_scal_16ui_32fp_k2_param_index == -1 ||
-			m_scal_16ui_32si_k1_param_index == -1 ||
-			m_scal_16ui_32si_k2_param_index == -1)
-		{
-			LOG_ERROR(m_log, tr("Functional block scal_16 required parameters is not found"))
-			result = false;
 		}
 
 		if (result == false)
 		{
-			return result;
+			return false;
 		}
 
 		for(const Module& module : m_modules)
@@ -2488,6 +2430,18 @@ namespace Builder
 					{
 						result &= appendFbForAnalogInputSignalConversion(*signal);
 					}
+					else
+					{
+						if (signal->isOutput())
+						{
+							result &= appendFbForAnalogOutputSignalConversion(*signal);
+						}
+						else
+						{
+							assert(false);
+						}
+					}
+
 				}
 			}
 		}
@@ -2521,18 +2475,105 @@ namespace Builder
 
 		bool result = true;
 
+		switch(signal.dataFormat())
+		{
+		case DataFormat::Float:
+			{
+				k1 = (y2 - y1) / (x2 - x1);
+				k2 = y1 - k1 * x1;
+
+				FbScal& fb = m_fbScal[FB_SCAL_16UI_32FP_INDEX];
+
+				fb.pointer->params()[fb.k1ParamIndex].setValue(QVariant(k1));
+				fb.pointer->params()[fb.k2ParamIndex].setValue(QVariant(k2));
+
+				appItem = new AppItem(fb.pointer);
+			}
+
+			break;
+
+		case DataFormat::SignedInt:
+			{
+				const int MULTIPLIER = 32768 - 1;
+
+				k1 = (y2 - y1) / (x2 - x1) * MULTIPLIER;
+				k2 = y1 - k1 * x1 / MULTIPLIER;
+
+				QVariant k1Int(QVariant(k1).toInt());
+				QVariant k2Int(QVariant(k2).toInt());
+
+				FbScal& fb = m_fbScal[FB_SCAL_16UI_32SI_INDEX];
+
+				fb.pointer->params()[fb.k1ParamIndex].setValue(k1Int);
+				fb.pointer->params()[fb.k2ParamIndex].setValue(k2Int);
+
+				appItem = new AppItem(fb.pointer);
+			}
+
+			break;
+
+		default:
+			LOG_ERROR(m_log, QString(tr("Unknown conversion for signal %1, dataFormat %2")).
+					  arg(signal.strID()).arg(static_cast<int>(signal.dataFormat())));
+			result = false;
+		}
+
+		if (appItem != nullptr)
+		{
+			m_scalAppItems.append(appItem);
+
+			int instance = m_afbs.addInstance(appItem);
+
+			AppFb* appFb = m_appFbs.insert(appItem, instance);
+
+			m_inOutSignalsToScalAppFbMap.insert(signal.strID(), appFb);
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::appendFbForAnalogOutputSignalConversion(const Signal& signal)
+	{
+		assert(signal.isAnalog());
+		assert(signal.isOutput());
+		assert(signal.deviceStrID().isEmpty() == false);
+
+		double x1 = signal.lowLimit();
+		double x2 = signal.highLimit();
+
+		if (x2 - x1 == 0.0)
+		{
+			LOG_ERROR(m_log, QString(tr("Low and High Limit values of signal %1 are equal (= %2)")).arg(signal.strID()).arg(x1));
+			return false;
+		}
+
+		int y1 = signal.lowADC();
+		int y2 = signal.highADC();
+
+		double k1 = 0;
+		double k2 = 0;
+
+		AppItem* appItem = nullptr;
+
+		bool result = true;
+
 		const int MULTIPLIER = 32768 - 1;
 
 		switch(signal.dataFormat())
 		{
 		case DataFormat::Float:
-			k1 = (y2 - y1) / (x2 - x1);
-			k2 = y1 - k1 * x1;
+			{
+				k1 = (y2 - y1) / (x2 - x1);
+				k2 = y1 - k1 * x1;
 
-			m_scal_16ui_32fp->params()[m_scal_16ui_32fp_k1_param_index].setValue(QVariant(k1));
-			m_scal_16ui_32fp->params()[m_scal_16ui_32fp_k2_param_index].setValue(QVariant(k2));
+				FbScal& fb = m_fbScal[FB_SCAL_32FP_16UI_INDEX];
 
-			appItem = new AppItem(m_scal_16ui_32fp);
+				fb.pointer->params()[fb.k1ParamIndex].setValue(QVariant(k1));
+				fb.pointer->params()[fb.k2ParamIndex].setValue(QVariant(k2));
+
+				appItem = new AppItem(fb.pointer);
+			}
 
 			break;
 
@@ -2541,13 +2582,12 @@ namespace Builder
 				k1 = (y2 - y1) / (x2 - x1) * MULTIPLIER;
 				k2 = y1 - k1 * x1 / MULTIPLIER;
 
-				QVariant k1Int(QVariant(k1).toInt());
-				QVariant k2Int(QVariant(k2).toInt());
+				FbScal& fb = m_fbScal[FB_SCAL_32SI_16UI_INDEX];
 
-				m_scal_16ui_32si->params()[m_scal_16ui_32si_k1_param_index].setValue(k1Int);
-				m_scal_16ui_32si->params()[m_scal_16ui_32si_k2_param_index].setValue(k2Int);
+				fb.pointer->params()[fb.k1ParamIndex].setValue(QVariant(k1));
+				fb.pointer->params()[fb.k2ParamIndex].setValue(QVariant(k2));
 
-				appItem = new AppItem(m_scal_16ui_32si);
+				appItem = new AppItem(fb.pointer);
 			}
 
 			break;

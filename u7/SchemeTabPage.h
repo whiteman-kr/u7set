@@ -220,6 +220,8 @@ protected slots:
 	void checkOutFile();
 	void undoChangesFile();
 
+	void fileMenuTriggered();
+
 public:
 	bool saveWorkcopy();
 
@@ -243,7 +245,6 @@ public:
 	// Data
 	//
 private:
-	EditSchemeWidget* m_schemeWidget;
+	EditSchemeWidget* m_schemeWidget = nullptr;
+	QToolBar* m_toolBar = nullptr;
 };
-
-
