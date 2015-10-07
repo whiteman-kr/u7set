@@ -6,13 +6,11 @@
 #include "../VFrame30/FblItem.h"
 #include "../include/DbController.h"
 
-//#define GridSizeDisplay				5
-//#define GridSizeMm					mm2in(1.0)
-//#define GridSizeIn					0.04
 
 #define ControlBarSizeDisplay		10
 #define ControlBarMm				mm2in(2.4)
 #define ControlBar(_unit, _zoom)	((_unit == VFrame30::SchemeUnit::Display) ?	ControlBarSizeDisplay * (100.0 / _zoom) : ControlBarMm * (100.0 / _zoom))
+
 
 enum class MouseState
 {
@@ -41,6 +39,7 @@ enum class MouseState
 	MovingConnectionLinePoint			// Moving point ISchemePosConnectionLine
 };
 
+
 // Possible action on SchemeItem
 //
 enum class SchemeItemAction
@@ -62,7 +61,8 @@ enum class SchemeItemAction
 	MoveConnectionLinePoint				// Move ConnectionLine point (ISchemePosConnectionLine)
 };
 
-// Forwared declarations
+
+// Forward declarations
 //
 class QRubberBand;
 
@@ -70,6 +70,8 @@ class EditSchemeWidget;
 class SchemePropertiesDialog;
 class SchemeLayersDialog;
 class SchemeItemPropertiesDialog;
+class EditSchemeTabPage;
+
 
 namespace EditEngine
 {
@@ -403,10 +405,12 @@ private:
 	//
 private:
 	QAction* m_escapeAction = nullptr;
-	QAction* m_f2Action = nullptr;		// Edit inputs/outputs signal strid
+	QAction* m_f2Action = nullptr;	// Edit inputs/outputs signal strid
 
 	//	Contexet Menu
 	//
+friend class EditSchemeTabPage;		// EditSchemeTabPage has toolbar, and it will contain some actions from this class
+
 private:
 	// File
 	//
@@ -486,7 +490,7 @@ private:
 
 	// --
 	// End of ConextMenu
-
+private:
 };
 
 
