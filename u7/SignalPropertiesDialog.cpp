@@ -128,8 +128,19 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	signalProperty->addSubProperty(m_nameProperty);
 
 	m_dataFormatProperty = m_enumManager->addProperty(tr("Data format"));
-	m_enumManager->setEnumNames(m_dataFormatProperty, dataFormatInfo.toList());
-	SET_ENUM_PROPERTY_VALUE(m_enumManager, m_dataFormatProperty, dataFormatInfo, dataFormatInt);
+	if (signalType == SignalType::Analog)
+	{
+		m_dataFormatInfo.remove(TO_INT(DataFormat::UnsignedInt));
+	}
+	m_enumManager->setEnumNames(m_dataFormatProperty, m_dataFormatInfo.toList());
+	if (signalType == SignalType::Analog && signalVector[0]->dataFormat() == DataFormat::UnsignedInt)
+	{
+		m_enumManager->setValue(m_dataFormatProperty, m_dataFormatInfo.keyIndex(TO_INT(DataFormat::SignedInt)));
+	}
+	else
+	{
+		SET_ENUM_PROPERTY_VALUE(m_enumManager, m_dataFormatProperty, m_dataFormatInfo, dataFormatInt);
+	}
 	signalProperty->addSubProperty(m_dataFormatProperty);
 
 	m_dataSizeProperty = m_intManager->addProperty(tr("Data size"));

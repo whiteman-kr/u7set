@@ -461,14 +461,17 @@ void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder
 
 bool EquipmentModel::insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex)
 {
-	// TODO: This function should take into consideration sort property!!!
-	//
-
 	Hardware::DeviceObject* parent = deviceObject(parentIndex);
 
+	// Insert
+	//
 	beginInsertRows(parentIndex, parent->childrenCount(), parent->childrenCount());
 	parent->addChild(object);
 	endInsertRows();
+
+	// Sort items
+	//
+	sort(m_sortColumn, m_sortOrder);
 
 	return true;
 }
@@ -1447,7 +1450,6 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 
 	// Add new device
 	//
-
 	addDeviceObject(device);
 	return;
 }

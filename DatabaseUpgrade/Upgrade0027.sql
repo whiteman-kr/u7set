@@ -17,6 +17,28 @@ CREATE TYPE dbfileinfo AS
 	action integer,
 	details text);
 
+
+-------------------------------------------------------------------------------
+--
+--							dbfile struct
+--
+-------------------------------------------------------------------------------
+CREATE TYPE dbfile AS (
+	fileid integer,
+	deleted boolean,			-- File or signal was deleted from the table, so such ID is not exists anymore
+	name text,
+	parentid integer,
+	changesetid integer,
+	created timestamp with time zone,
+	size integer,
+	data bytea,
+	checkedout boolean,
+	checkouttime timestamp with time zone,
+	userid integer,
+	action integer,
+	details text
+);
+
 -------------------------------------------------------------------------------
 --
 --							get_file_list
@@ -207,13 +229,12 @@ FROM
 $BODY$
 LANGUAGE sql;
 
+
+-------------------------------------------------------------------------------
 --
+--							get_latest_file_version
 --
---
--- get_latest_file_version
---
---
---
+-------------------------------------------------------------------------------
 DROP FUNCTION get_latest_file_version(integer, integer);
 
 CREATE OR REPLACE FUNCTION get_latest_file_version(IN user_id integer, IN file_id integer)
@@ -271,33 +292,52 @@ $BODY$
 LANGUAGE plpgsql;
 
 
+-------------------------------------------------------------------------------
 --
+--					get_workcopy
 --
---
--- get_workcopy
---
---
---
+-------------------------------------------------------------------------------
 DROP FUNCTION get_workcopy(integer, integer);
 
-CREATE OR REPLACE FUNCTION get_workcopy(IN user_id integer, IN file_id integer)
-  RETURNS TABLE(
-		fileid integer, name text, parentid integer,
-		created timestamp with time zone, size integer,
-		data bytea, checkouttime timestamp with time zone,
-		userid integer, action integer, details text) AS
+CREATE OR REPLACE FUNCTION get_workcopy(user_id integer, file_id integer)
+  RETURNS dbfile AS
 $BODY$
-	SELECT
-		F.FileID AS FileID,
+DECLARE
+	checked_out_instance_id uuid;
+	checked_out_by_user int;
+	result DbFile;
+BEGIN
+	-- Check if the file checked out
+	checked_out_instance_id := (SELECT CheckedOutInstanceID FROM File WHERE FileID = file_id);
+	IF (checked_out_instance_id IS NULL)
+	THEN
+		RAISE EXCEPTION 'File % not checked out or not exists', file_id;
+	END IF;
+
+	-- check if a file is checked out by the same user or user is an administartor
+	checked_out_by_user := (SELECT UserID FROM CheckOut WHERE FileID = file_id);
+	IF (checked_out_by_user IS NULL) OR
+		(is_admin(user_id) = FALSE AND user_id != checked_out_by_user)
+	THEN
+		RAISE EXCEPTION 'File % is checked out by user %', file_id, checked_out_by_user;
+	END IF;
+
+	-- select data into result variable
+	SELECT F.FileID AS FileID,
+		F.Deleted AS Deleted,
 		F.Name AS Name,
 		F.ParentID AS ParentID,
+		0 AS ChangesetID,
 		F.Created AS Created,
 		length(FI.Data) AS Size,
-		FI.Data as Data,
+		FI.Data AS Data,
+		TRUE AS CheckedOut,
 		CO.Time As ChechoutTime,
 		CO.UserID AS UserID,
 		FI.Action AS Action,
 		FI.Details::text AS Details
+	INTO
+		result
 	FROM
 		File F, FileInstance FI, Checkout CO
 	WHERE
@@ -305,17 +345,18 @@ $BODY$
 		FI.FileInstanceID = F.CheckedOutInstanceID AND
 		CO.FileID = file_id AND
 		(user_id = CO.UserID OR (SELECT is_admin(user_id)) = TRUE);
+
+	RETURN result;
+END;
 $BODY$
-LANGUAGE sql;
+LANGUAGE plpgsql;
 
 
+-------------------------------------------------------------------------------
 --
+--						check_in
 --
---
--- check_in
---
---
---
+-------------------------------------------------------------------------------
 DROP FUNCTION check_in(integer, integer[], text);
 
 CREATE OR REPLACE FUNCTION check_in(IN user_id integer, IN file_ids integer[], IN checkin_comment text)
@@ -376,13 +417,11 @@ END;
 $BODY$
   LANGUAGE plpgsql;
 
+-------------------------------------------------------------------------------
 --
+--					check_out
 --
---
--- check_out
---
---
---
+-------------------------------------------------------------------------------
 DROP FUNCTION check_out(integer, integer[]);
 
 CREATE OR REPLACE FUNCTION check_out(user_id integer, file_ids integer[])
@@ -427,13 +466,11 @@ END
 $BODY$
   LANGUAGE plpgsql;
 
+-------------------------------------------------------------------------------
 --
+--						delete_file
 --
---
--- delete_file
---
---
---
+-------------------------------------------------------------------------------
 DROP FUNCTION delete_file(integer, integer);
 
 CREATE OR REPLACE FUNCTION delete_file(user_id integer, file_id integer)
@@ -480,13 +517,11 @@ $BODY$
 LANGUAGE plpgsql;
 
 
+-------------------------------------------------------------------------------
 --
+--						file_exists
 --
---
--- file_exists
---
---
---
+-------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION file_exists(file_id integer)
 RETURNS boolean AS
 $BODY$
@@ -494,13 +529,11 @@ $BODY$
 $BODY$
 LANGUAGE sql;
 
+-------------------------------------------------------------------------------
 --
+--						files_exist
 --
---
--- files_exist
---
---
---
+-------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION files_exist(file_ids integer[])
 RETURNS TABLE(fileid integer, fileexists boolean) AS
 $BODY$

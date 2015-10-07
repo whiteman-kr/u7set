@@ -2255,24 +2255,7 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-		file->setFileId(q.value("FileID").toInt());
-
-		file->setFileName(q.value("Name").toString());
-		file->setParentId(q.value("ParentID").toInt());
-		file->setChangeset(0);
-		file->setCreated(q.value("Created").toString());
-		file->setLastCheckIn(q.value("CheckOutTime").toString());		// setLastCheckIn BUT TIME IS CheckOutTime
-		file->setState(VcsState::CheckedOut);
-
-		int action = q.value("Action").toInt();
-		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
-
-		file->setUserId(q.value("UserID").toInt());
-
-		file->setDetails(q.value("Details").toString());
-
-		QByteArray data = q.value("Data").toByteArray();
-		file->swapData(data);
+		db_updateFile(q, file.get());
 
 		out->push_back(file);
 
@@ -2437,23 +2420,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-		file->setFileId(q.value("FileID").toInt());
-
-		file->setFileName(q.value("Name").toString());
-		file->setParentId(q.value("ParentID").toInt());
-		file->setChangeset(changesetId);							// From the param, not from the DB!!!
-		file->setCreated(q.value("Created").toString());
-		file->setLastCheckIn(q.value("CheckInTime").toString());	// setLastCheckIn BUT TIME IS CheckOutTime
-		file->setState(VcsState::CheckedOut);
-
-		int action = q.value("Action").toInt();
-		file->setAction(static_cast<VcsItemAction::VcsItemActionType>(action));
-
-		file->setUserId(q.value("UserID").toInt());
-		file->setDetails(q.value("Details").toString());
-
-		QByteArray data = q.value("Data").toByteArray();
-		file->swapData(data);
+		db_updateFile(q, file.get());
 
 		out->push_back(file);
 

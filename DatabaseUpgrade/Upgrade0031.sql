@@ -125,24 +125,29 @@ LANGUAGE plpgsql;
 --		get_specific_copy
 --
 -------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION get_specific_copy(IN user_id integer, IN file_id integer, IN changeset_id integer)
-RETURNS
-	TABLE(
-		fileid integer, name text, parentid integer, created timestamp with time zone,
-		size integer, data bytea, checkintime timestamp with time zone, userid integer,
-		action integer, details text) AS
+CREATE OR REPLACE FUNCTION get_specific_copy(user_id integer, file_id integer, changeset_id integer)
+  RETURNS DbFile AS
 $BODY$
+DECLARE
+	result DbFile;
+BEGIN
 	SELECT
 		F.FileID AS FileID,
+		F.Deleted AS Deleted,
 		F.Name AS Name,
 		F.ParentID AS ParentID,
+		CS.ChangesetID AS ChangesetID,
 		F.Created AS Created,
 		length(FI.Data) AS Size,
 		FI.Data as Data,
+		(SELECT count(*) > 0 FROM CheckOut WHERE FileID = file_id) AS CheckedOut,
+		--(SELECT Time FROM CheckOut WHERE FileID = file_id) AS CheckOutTime,
 		CS.Time As ChechInTime,
 		CS.UserID AS UserID,
 		FI.Action AS Action,
 		FI.Details::text AS Details
+	INTO
+		result
 	FROM
 		File F, FileInstance FI, Changeset CS
 	WHERE
@@ -150,5 +155,13 @@ $BODY$
 		FI.FileID = file_id AND
 		FI.ChangesetId = changeset_id AND
 		CS.ChangesetID = changeset_id;
+
+	IF (result IS NULL) THEN
+		RAISE EXCEPTION 'Cannot find file copy for changeset (FileID: %, ChangesetID: %)', file_id, changeset_id;
+	END IF;
+
+	RETURN result;
+END;
 $BODY$
-LANGUAGE sql;
+LANGUAGE plpgsql;
+
