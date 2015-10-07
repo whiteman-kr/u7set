@@ -2285,76 +2285,19 @@ namespace Builder
 
 	void ModuleLogicCompiler::writeLMCodeTestFile()
 	{
+		/*
+
 		ApplicationLogicCode m_testCode;
 
 		Command cmd;
 
-		/*cmd.nop();
-		m_testCode.append(cmd);
-
-		cmd.start(1, 1);
-		m_testCode.append(cmd);
-
-		cmd.mov(200, 400);
-		m_testCode.append(cmd);
-
-		cmd.movMem(300, 100, 50);
-		m_testCode.append(cmd);
-
-		cmd.movConst(50, 123);
-		m_testCode.append(cmd);
-
-		cmd.movBitConst(51, 2, 1);
-		m_testCode.append(cmd);
-
-		cmd.writeFuncBlock(1, 3, 4, 10);
-		m_testCode.append(cmd);
-
-		cmd.readFuncBlock(77, 1, 4, 5);
-		m_testCode.append(cmd);
-
-		cmd.writeFuncBlockConst(1, 2, 3, 55);
-		m_testCode.append(cmd);
-
-		cmd.writeFuncBlockBit(1, 2, 3, 12, 7);
-		m_testCode.append(cmd);
-
-		cmd.readFuncBlockBit(88, 9, 1, 3, 4);
-		m_testCode.append(cmd);
-
-		cmd.readFuncBlockTest(1, 2, 3, 1);
-		m_testCode.append(cmd);
-
-		cmd.setMem(500, 10, 22);
-		m_testCode.append(cmd);
-
-		cmd.moveBit(20, 1, 30, 2);
-		m_testCode.append(cmd);*/
-
-/*		cmd.movConst(49906, 1);
-		m_testCode.append(cmd);
-
-		cmd.movConst(49907, 2);
-		m_testCode.append(cmd);
-
-		cmd.movConst(49908, 3);
-		m_testCode.append(cmd);
-
-		cmd.movMem(49916, 49906, 3);
+		cmd.nop();
 
 		m_testCode.append(cmd);
 
+		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);
 
-		cmd.stop();
-		m_testCode.append(cmd);
-
-		m_testCode.generateBinCode();
-
-		QStringList mifCode;
-
-		m_testCode.getMifCode(mifCode);
-
-		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);*/
+		*/
 	}
 
 
@@ -2668,7 +2611,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 
 	bool ModuleLogicCompiler::buildServiceMaps()
