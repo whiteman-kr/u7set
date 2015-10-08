@@ -319,6 +319,15 @@ protected slots:
 	void onUpKey();
 	void onDownKey();
 
+	void sameWidth();
+	void sameHeight();
+	void sameSize();
+
+	void alignLeft();
+	void alignRight();
+	void alignTop();
+	void alignBottom();
+
 	// Properties
 	//
 public:
@@ -469,6 +478,21 @@ private:
 		// ------------------------------
 		QAction* m_editSeparatorAction3 = nullptr;
 		QAction* m_propertiesAction = nullptr;
+
+	// Size and Pos (Align)
+	//
+	QMenu* m_sizeAndPosMenu = nullptr;
+	QAction* m_sizeAndPosAction = nullptr;
+		QAction* m_sameWidthAction = nullptr;
+		QAction* m_sameHeightAction = nullptr;
+		QAction* m_sameSizeAction = nullptr;
+		// ------------------------------
+		QAction* m_sizeAndPosSeparatorAction0 = nullptr;
+		QAction* m_alignLeftAction = nullptr;
+		QAction* m_alignTopAction = nullptr;
+		QAction* m_alignRightAction = nullptr;
+		QAction* m_alignBottomAction = nullptr;
+
 
 	// View
 	//

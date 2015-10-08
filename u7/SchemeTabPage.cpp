@@ -83,6 +83,8 @@ SchemesTabPage::SchemesTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_tabWidget->setMovable(true);
 
 	QVBoxLayout* layout = new QVBoxLayout();
+	layout->setContentsMargins(0, 6, 0, 0);
+
 	layout->addWidget(m_tabWidget);
 
 	setLayout(layout);
@@ -733,12 +735,15 @@ EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> scheme, c
 	m_toolBar->addAction(m_schemeWidget->m_addFblElementAction);
 	m_toolBar->addAction(m_schemeWidget->m_addLinkAction);
 
-	// m_toolBar->addSeparator();
-
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_schemeWidget->m_sizeAndPosAction);
 
 	// --
 	//
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
+
+	pMainLayout->setContentsMargins(0, 5, 0, 5);
+	pMainLayout->setSpacing(0);
 
 	pMainLayout->addWidget(m_toolBar);
 	pMainLayout->addWidget(m_schemeWidget);
@@ -748,6 +753,7 @@ EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> scheme, c
 	// --
 	//
 	connect(m_schemeWidget->m_fileAction, &QAction::triggered, this, &EditSchemeTabPage::fileMenuTriggered);
+	connect(m_schemeWidget->m_sizeAndPosAction, &QAction::triggered, this, &EditSchemeTabPage::sizeAndPosMenuTriggered);
 
 	return;
 }
@@ -1012,6 +1018,30 @@ void EditSchemeTabPage::fileMenuTriggered()
 	pt.rx() += w->width();
 
 	m_schemeWidget->m_fileMenu->popup(m_toolBar->mapToGlobal(pt));
+
+	return;
+}
+
+void EditSchemeTabPage::sizeAndPosMenuTriggered()
+{
+	if (m_toolBar == nullptr)
+	{
+		assert(m_toolBar);
+		return;
+	}
+
+	QWidget* w = m_toolBar->widgetForAction(m_schemeWidget->m_sizeAndPosAction);
+
+	if (w == nullptr)
+	{
+		assert(w);
+		return;
+	}
+
+	QPoint pt = w->pos();
+	pt.rx() += w->width();
+
+	m_schemeWidget->m_sizeAndPosMenu->popup(m_toolBar->mapToGlobal(pt));
 
 	return;
 }
