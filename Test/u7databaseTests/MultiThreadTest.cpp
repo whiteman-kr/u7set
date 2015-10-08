@@ -18,9 +18,9 @@ MultiThreadTest::MultiThreadTest(int number,
 	m_amountOfFileIds(amountOfFiles)
 {
 	assert(dbHost);
-	Q_ASSERT(dbUser != "");
-	Q_ASSERT(dbUserPassword != "");
-	Q_ASSERT(name != "");
+	assert(dbUser);
+	assert(dbUserPassword);
+	assert(name);
 }
 
 MultiThreadTest::~MultiThreadTest()
@@ -70,18 +70,17 @@ void MultiThreadTest::run()
 	//
 
 	int userId = query.value(0).toInt();
-
 	int fileNumber = 0;						// Value, that will count amount of files
+	int numberOfErrorsInWorkTest = 0;		// Number of errors, which can be occured in one test
+	int totalErrors = 0;					// Total count of errors
+
 	bool error = false;						// Value, that store info of error
-	int numberOfErrorsInAddTest = 0;		// Number of errors, which can be occured
 
 	std::vector<int> fileIds;	// Array of fileIds of created files
 	fileIds.reserve(m_amountOfFileIds);
 
-	// Start cycle, where function will create files
+	// Start add_file function testing
 	//
-
-	qDebug() << "Thread " << m_threadNumber << " started add_file() procedure for " << m_amountOfFileIds << "times";
 
 	for (fileNumber = 0; fileNumber < m_amountOfFileIds; fileNumber++)
 	{
@@ -119,36 +118,39 @@ void MultiThreadTest::run()
 			error = true;
 		}
 
-		// Remember fileId to array
+		// Write fileId to array
 		//
 
 		fileIds.push_back(query.value(0).toInt());
 
-		// Show result of function
+		// Show errors from test
 		//
 
 		if (error)
 		{
-			qDebug() << "Thread_" << m_threadNumber << " Add_file" << fileNumber << ": ERROR";
-			numberOfErrorsInAddTest++;
+			qDebug() << "Thread_" << m_threadNumber << " Add_file " << fileNumber << ": ERROR";
+			numberOfErrorsInWorkTest++;
 		}
 		error = false;
 	}
 
-	qDebug() << "Thread " << m_threadNumber << " ended add_file() procedure with " << numberOfErrorsInAddTest << "errors";
+	if (numberOfErrorsInWorkTest == 0)
+	{
+		qDebug() << "PASS   : Thread " << m_threadNumber << ":: add_file() " << m_amountOfFileIds << "files";
+	}
+	else
+	{
+		qDebug() << "FAIL   : Thread " << m_threadNumber << ":: add_file() " << m_amountOfFileIds << "files";
+	}
 
-	// Erase all error data for new test
+	totalErrors += numberOfErrorsInWorkTest;
+	numberOfErrorsInWorkTest = 0;
+
+	// Start check_in function test
 	//
-
-	int numberOfErrorsInWorkTest = 0;
-
-	qDebug() << "Thread " << m_threadNumber << " started work simulation procedure with " << m_amountOfFileIds << "files";
 
 	for (int fileId : fileIds)
 	{
-		// Check in and check out file to make history
-		//
-
 		ok = query.exec(QString("SElECT * FROM check_in (%1, '{%2}', 'TEST');")
 						.arg(userId)
 						.arg(fileId));
@@ -156,9 +158,17 @@ void MultiThreadTest::run()
 		if (ok == false)
 		{
 			qDebug() << query.lastError().databaseText();
-			error = true;
+			qDebug() << "Thread_" << m_threadNumber << " check_in(): " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
 		}
+		error = false;
+	}
 
+	// Check that files were correctly checked in
+	//
+
+	for (int fileId : fileIds)
+	{
 		ok = query.exec(QString("SELECT * FROM get_file_state(%1)")
 						.arg(fileId));
 
@@ -204,14 +214,48 @@ void MultiThreadTest::run()
 			error = true;
 		}
 
-		ok = query.exec(QString("SElECT * FROM check_out (%1, '{%2}');").arg(userId).arg(fileId));
+		if (error)
+		{
+			qDebug() << "Thread_" << m_threadNumber << " get_file_info() after check_in(): " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
+		}
+		error = false;
+	}
+
+	if (numberOfErrorsInWorkTest == 0)
+	{
+		qDebug() << "PASS   : Thread " << m_threadNumber << ":: check_in() " << m_amountOfFileIds << "files";
+	}
+	else
+	{
+		qDebug() << "FAIL   : Thread " << m_threadNumber << ":: check_in() " << m_amountOfFileIds << "files";
+	}
+
+	totalErrors += numberOfErrorsInWorkTest;
+	numberOfErrorsInWorkTest = 0;
+
+	// Start check_out files test
+	//
+
+	for (int fileId : fileIds)
+	{
+		bool ok = query.exec(QString("SElECT * FROM check_out (%1, '{%2}');")
+							 .arg(userId)
+							 .arg(fileId));
 
 		if (ok == false)
 		{
 			qDebug() << query.lastError().databaseText();
-			error = true;
+			qDebug() << "Thread_" << m_threadNumber << " check_out() : " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
 		}
+	}
 
+	// Check files were correctly checked out
+	//
+
+	for (int fileId : fileIds)
+	{
 		ok = query.exec(QString("SELECT * FROM get_file_state(%1)")
 						.arg(fileId));
 
@@ -257,10 +301,37 @@ void MultiThreadTest::run()
 			error = true;
 		}
 
-		// Try set_workcopy() and get_workcopy functions()
-		//
+		if (error)
+		{
+			qDebug() << "Thread_" << m_threadNumber << " get_file_info() after check_out(): " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
+		}
+		error = false;
+	}
 
-		ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3', '{}')").arg(userId).arg(fileId).arg(QString("Thread_%1_fileId_%2 testingData").arg(m_threadNumber).arg(fileId)));
+	if (numberOfErrorsInWorkTest == 0)
+	{
+		qDebug() << "PASS   : Thread " << m_threadNumber << ":: check_out() " << m_amountOfFileIds << "files";
+	}
+	else
+	{
+		qDebug() << "FAIL   : Thread " << m_threadNumber << ":: check_out() " << m_amountOfFileIds << "files";
+	}
+
+	totalErrors += numberOfErrorsInWorkTest;
+	numberOfErrorsInWorkTest = 0;
+
+	// Start set_workcopy() test (write data to files)
+	//
+
+	for (int fileId : fileIds)
+	{
+		ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3', '{}')")
+						.arg(userId)
+						.arg(fileId)
+						.arg(QString("Thread_%1_fileId_%2 testingData")
+						.arg(m_threadNumber)
+						.arg(fileId)));
 
 		if (ok == false)
 		{
@@ -268,7 +339,34 @@ void MultiThreadTest::run()
 			error = true;
 		}
 
-		ok = query.exec(QString("SELECT * FROM get_workcopy(%1, %2)").arg(userId).arg(fileId));
+		if (error)
+		{
+			qDebug() << "Thread_" << m_threadNumber << "  set_workcopy() : " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
+		}
+		error = false;
+	}
+
+	if (numberOfErrorsInWorkTest == 0)
+	{
+		qDebug() << "PASS   : Thread " << m_threadNumber << ":: set_workcopy() " << m_amountOfFileIds << "files";
+	}
+	else
+	{
+		qDebug() << "FAIL   : Thread " << m_threadNumber << ":: set_workcopy() " << m_amountOfFileIds << "files";
+	}
+
+	totalErrors += numberOfErrorsInWorkTest;
+	numberOfErrorsInWorkTest = 0;
+
+	// Start get_workcopy() test (read data from files)
+	//
+
+	for (int fileId : fileIds)
+	{
+		bool ok = query.exec(QString("SELECT * FROM get_workcopy(%1, %2)")
+							 .arg(userId)
+							 .arg(fileId));
 
 		if (ok == false)
 		{
@@ -294,10 +392,31 @@ void MultiThreadTest::run()
 			error = true;
 		}
 
-		// Delete file, and check result from table fileInstance
-		//
+		if (error)
+		{
+			qDebug() << "Thread_" << m_threadNumber << " get_workcopy() : " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
+		}
+		error = false;
+	}
 
-		ok = query.exec(QString("SELECT * FROM delete_file(%1, %2)").arg(userId).arg(fileId));
+	if (numberOfErrorsInWorkTest == 0)
+	{
+		qDebug() << "PASS   : Thread " << m_threadNumber << ":: get_workcopy() " << m_amountOfFileIds << "files";
+	}
+	else
+	{
+		qDebug() << "FAIL   : Thread " << m_threadNumber << ":: get_workcopy() " << m_amountOfFileIds << "files";
+	}
+
+	// Start get_file_info() test
+	//
+
+	for (int fileId : fileIds)
+	{
+		ok = query.exec(QString("SELECT * FROM get_file_info(%1, '{%2}')")
+						.arg(userId)
+						.arg(fileId));
 
 		if (ok == false)
 		{
@@ -305,7 +424,150 @@ void MultiThreadTest::run()
 			error = true;
 		}
 
-		ok = query.exec(QString("SELECT * FROM get_file_state(%1)").arg(fileId));
+		if (query.next() == false)
+		{
+			qDebug() << query.lastError().databaseText();
+			error = true;
+		}
+
+		if (query.value("fileId").toInt() != fileId)
+		{
+			qDebug() << "Error: wrong fileId in get_file_info() function\nThread: " << m_threadNumber << "\nFileId: " << fileId;
+			error = true;
+		}
+	}
+
+	//Start get_latest_file_version() test
+	//
+
+	fileNumber = 0;
+
+	for (int fileId : fileIds)
+	{
+		ok = query.exec(QString("SELECT * FROM get_latest_file_version(%1, %2);")
+						.arg(userId)
+						.arg(fileId));
+
+		if (ok == false)
+		{
+			qDebug() << query.lastError().databaseText();
+			error = true;
+		}
+
+		if (query.next() == false)
+		{
+			qDebug() << query.lastError().databaseText();
+			error = true;
+		}
+
+		if (query.value("fileId").toInt() != fileId)
+		{
+			qDebug() << "Error: wrong fileId in get_latest_file_version() function\nThread: " << m_threadNumber << "\nFileId: " << fileId;
+			error = true;
+		}
+
+		if (query.value("deleted").toBool() == true)
+		{
+			qDebug() << "Error: File matched as deleted in get_latest_file_version() function\nThread: " << m_threadNumber << "\nFileId: " << fileId;
+			error = true;
+		}
+
+		if (query.value("name").toString() != QString("thread" + QString::number(m_threadNumber) + "_" + "number" + QString::number(fileNumber)))
+		{
+			qDebug() << "Error: wrong name in get_latest_file_version() function\nThread: " << m_threadNumber << "\nFileId: " << fileId;
+			error = true;
+		}
+
+		if (error)
+		{
+			qDebug() << "Thread_" << m_threadNumber << " get_latest_file_version() : " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
+		}
+		error = false;
+		fileNumber++;
+	}
+
+	if (numberOfErrorsInWorkTest == 0)
+	{
+		qDebug() << "PASS   : Thread " << m_threadNumber << ":: get_latest_file_version() " << m_amountOfFileIds << "files";
+	}
+	else
+	{
+		qDebug() << "FAIL   : Thread " << m_threadNumber << ":: get_latest_file_version() " << m_amountOfFileIds << "files";
+	}
+
+	totalErrors += numberOfErrorsInWorkTest;
+	numberOfErrorsInWorkTest = 0;
+
+	// Start is_file_checkedout() test
+	//
+
+	for (int fileId: fileIds)
+	{
+		ok = query.exec(QString("SELECT * FROM is_file_checkedOut(%1)").arg(fileId));
+
+		if (ok == false)
+		{
+			qDebug() << query.lastError().databaseText();
+			error = true;
+		}
+
+		if (query.next() == false)
+		{
+			qDebug() << query.lastError().databaseText();
+			error = true;
+		}
+
+		if (query.value(0).toBool() == false)
+		{
+			qDebug() << "Error: file must be checked out\nThread: " << m_threadNumber << "FileId" << fileId;
+			error = true;
+		}
+
+		if (error)
+		{
+			qDebug() << "Thread_" << m_threadNumber << " Result of work simulation: " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
+		}
+		error = false;
+	}
+
+	if (numberOfErrorsInWorkTest == 0)
+	{
+		qDebug() << "PASS   : Thread " << m_threadNumber << ":: is_file_checkedout() " << m_amountOfFileIds << "files";
+	}
+	else
+	{
+		qDebug() << "FAIL   : Thread " << m_threadNumber << ":: is_file_checkedout() " << m_amountOfFileIds << "files";
+	}
+
+	totalErrors += numberOfErrorsInWorkTest;
+	numberOfErrorsInWorkTest = 0;
+
+	// Start delete_file() test
+	//
+
+	for (int fileId : fileIds)
+	{
+		ok = query.exec(QString("SELECT * FROM delete_file(%1, %2)")
+						.arg(userId)
+						.arg(fileId));
+
+		if (ok == false)
+		{
+			qDebug() << query.lastError().databaseText();
+			qDebug() << "Thread_" << m_threadNumber << " Result of work simulation: " << fileId << ": ERROR";
+			numberOfErrorsInWorkTest++;
+		}
+	}
+
+	// Check result of delete_file() test
+	//
+
+	for (int fileId : fileIds)
+	{
+		ok = query.exec(QString("SELECT * FROM get_file_state(%1)")
+						.arg(fileId));
 
 		if (ok == false)
 		{
@@ -364,14 +626,16 @@ void MultiThreadTest::run()
 		error = false;
 	}
 
-	//qDebug() << "Thread_" << threadNumber << ": has been ended testing work simulation with " << numberOfErrorsInWorkTest << " errors";
-	if (numberOfErrorsInAddTest == 0 && numberOfErrorsInWorkTest == 0)
+	totalErrors += numberOfErrorsInWorkTest;
+	numberOfErrorsInWorkTest = 0;
+
+	if (totalErrors == 0)
 	{
 		qDebug() << "PASS   : Thread # " << m_threadNumber;
 	}
 	else
 	{
-		qDebug() << "FAIL   : Thread # " << m_threadNumber << ": File creation errors - " << numberOfErrorsInAddTest << ", File processing errors - " << numberOfErrorsInWorkTest;
+		qDebug() << "FAIL   : Thread # " << m_threadNumber << ": Total " << totalErrors;
 	}
 
 	db.close();

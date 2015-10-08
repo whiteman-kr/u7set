@@ -544,7 +544,7 @@ namespace Builder
 			int moduleAppDataOffset = 0;		// offset of module application data in LM's memory
 												// moduleAppDataOffset == rxTxDataOffset + appLogicDataOffset
 
-			int appRegDataOffset = 0;			// offset of module application data for processing (in registration buffer)
+			int appLogicRegDataOffset = 0;			// offset of module application data for processing (in registration buffer)
 
 			bool isInputModule() const;
 			bool isOutputModule() const;
@@ -576,6 +576,8 @@ namespace Builder
 
 			int k1ParamIndex = -1;
 			int k2ParamIndex = -1;
+			int inputSignalIndex = -1;
+			int outputSignalIndex = -1;
 		};
 
 
@@ -592,6 +594,11 @@ namespace Builder
 		OutputLog* m_log = nullptr;
 		Hardware::DeviceModule* m_lm = nullptr;
 		Hardware::DeviceChassis* m_chassis = nullptr;
+
+		// compiler settings
+		//
+
+		bool m_convertUsedInOutAnalogSignalsOnly = false;
 
 		// LM's and modules settings
 		//
@@ -696,8 +703,8 @@ namespace Builder
 
 		bool copyLmOutSignalsToModuleMemory();
 
-		void copyDimDataToRegBuf(const Module& module);
-		void copyAimDataToRegBuf(const Module& module);
+		bool copyDimDataToRegBuf(const Module& module);
+		bool copyAimDataToRegBuf(const Module& module);
 
 		bool initOutModulesAppLogicDataInRegBuf();
 

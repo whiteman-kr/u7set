@@ -18,8 +18,8 @@ const char* ProjectName = "testproject";
 const char* ProjectAdministratorName = "Administrator";
 const char* ProjectAdministratorPassword = "P2ssw0rd";
 
-const int AmountOfThreadsInMultiThreadTest = 5;
-const int AmountOfFilesInMultiThreadTest = 1000;
+const int AmountOfThreadsInMultiThreadTest = 10;
+const int AmountOfFilesInMultiThreadTest = 500;
 
 int main(int argc, char *argv[])
 {

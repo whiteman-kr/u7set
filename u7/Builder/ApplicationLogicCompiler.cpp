@@ -786,7 +786,7 @@ namespace Builder
 
 			m.rxTxDataOffset = m_memoryMap.getModuleDataOffset(place);
 			m.moduleAppDataOffset = m.rxTxDataOffset + m.appLogicDataOffset;
-			m.appRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
+			m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
 
 			m_modules.append(m);
 		}
@@ -1261,11 +1261,11 @@ namespace Builder
 			switch(module.familyType())
 			{
 			case Hardware::DeviceModule::FamilyType::DIM:
-				copyDimDataToRegBuf(module);
+				result &= copyDimDataToRegBuf(module);
 				break;
 
 			case Hardware::DeviceModule::FamilyType::AIM:
-				copyAimDataToRegBuf(module);
+				result &= copyAimDataToRegBuf(module);
 				break;
 
 			default:
@@ -1277,29 +1277,175 @@ namespace Builder
 			}
 		}
 
-		if (firstInputModle == false)
-		{
-			m_code.newLine();
-		}
-
 		return result;
 	}
 
 
-	void ModuleLogicCompiler::copyDimDataToRegBuf(const Module& module)
+	bool ModuleLogicCompiler::copyDimDataToRegBuf(const Module& module)
 	{
 		Command cmd;
 
-		cmd.movMem(module.appRegDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
+		cmd.movMem(module.appLogicRegDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
 
 		cmd.setComment(QString(tr("copy %1 data (place %2) to RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
 
 		m_code.append(cmd);
+
+		return true;
 	}
 
 
-	void ModuleLogicCompiler::copyAimDataToRegBuf(const Module& module)
+	bool ModuleLogicCompiler::copyAimDataToRegBuf(const Module& module)
 	{
+		if (module.device == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_code.comment(QString(tr("Copying data from AIM place %1")).arg(module.place));
+		m_code.newLine();
+
+		Command cmd;
+
+		//
+		m_convertUsedInOutAnalogSignalsOnly = false;
+		//
+
+		if (m_convertUsedInOutAnalogSignalsOnly == false)
+		{
+			// initialize module signals memory to 0
+			//
+			cmd.setMem(module.appLogicRegDataOffset, module.appLogicRegDataSize, 0);
+			cmd.setComment(tr("initialize module memory to 0"));
+			m_code.append(cmd);
+			m_code.newLine();
+		}
+
+		bool result = true;
+
+		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
+
+		// sort signals by place ascending
+		//
+
+		int moduleSignalsCount = static_cast<int>(moduleSignals.size());
+
+		if (moduleSignalsCount != 128)
+		{
+			LOG_ERROR(m_log, QString(tr("AIM module must have 128 input signals")));
+			return false;
+		}
+
+		for(int i = 0; i < moduleSignalsCount - 1; i++)
+		{
+			for(int j = i + 1; j < moduleSignalsCount; j++)
+			{
+				if (moduleSignals[i]->place() > moduleSignals[j]->place())
+				{
+					std::shared_ptr<Hardware::DeviceSignal> tmp = moduleSignals[i];
+					moduleSignals[i] = moduleSignals[j];
+					moduleSignals[j] = tmp;
+				}
+			}
+
+		}
+
+		// copy validity words
+		//
+		const int dataBlockSize = 17;
+		const int regDataBlockSize = 33;
+
+		for(int dataBlock = 0; dataBlock < 4; dataBlock++)
+		{
+			cmd.mov(module.appLogicRegDataOffset + regDataBlockSize * dataBlock,
+					module.appLogicDataOffset + dataBlockSize * dataBlock);
+			cmd.setComment(QString(tr("validity of %1 ... %2 inputs")).arg(dataBlock * 16 + 16).arg(dataBlock * 16 + 1));
+			m_code.append(cmd);
+		}
+
+		m_code.newLine();
+
+		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+		{
+			if (deviceSignal->isAnalogSignal() == false)
+			{
+				continue;
+			}
+
+			if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+			{
+				continue;
+			}
+
+			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+
+			if (boundSignals.count() > 1)
+			{
+				LOG_ERROR(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+				result = false;
+				break;
+			}
+
+			for(Signal* signal : boundSignals)
+			{
+				if (signal == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				if (signal->isDiscrete())
+				{
+					continue;
+				}
+
+				if (m_inOutSignalsToScalAppFbMap.contains(signal->strID()) == false)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->strID()];
+
+				if (appFb == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+				FbScal& fbScal = m_fbScal[FB_SCAL_16UI_32FP_INDEX];
+
+				if (signal->dataFormat() == DataFormat::Float)
+				{
+					;	// already assigned
+				}
+				else
+				{
+					if (signal->dataFormat() == DataFormat::SignedInt)
+					{
+						fbScal = m_fbScal[FB_SCAL_16UI_32SI_INDEX];
+					}
+					else
+					{
+						assert(false);
+					}
+				}
+
+				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+								   module.appLogicDataOffset + deviceSignal->valueOffset(), appFb->caption());
+				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->strID()));
+				m_code.append(cmd);
+
+				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption());
+				cmd.setComment("");
+				m_code.append(cmd);
+
+				cmd.readFuncBlock32(signal->ramAddr().offset(), appFb->opcode(), appFb->instance(),
+									fbScal.outputSignalIndex, appFb->caption());
+				m_code.append(cmd);
+			}
+
+			m_code.newLine();
+		}
+
+		return result;
 	}
 
 
@@ -1317,7 +1463,7 @@ namespace Builder
 
 			Command cmd;
 
-			cmd.setMem(module.appRegDataOffset, module.appLogicRegDataSize, 0);
+			cmd.setMem(module.appLogicRegDataOffset, module.appLogicRegDataSize, 0);
 
 			cmd.setComment(QString(tr("init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
 
@@ -2202,7 +2348,7 @@ namespace Builder
 
 		assert(module.appLogicDataSize == module.appLogicRegDataSize);
 
-		cmd.movMem(module.moduleAppDataOffset, module.appRegDataOffset, module.appLogicDataSize);
+		cmd.movMem(module.moduleAppDataOffset, module.appLogicRegDataOffset, module.appLogicDataSize);
 
 		cmd.setComment(QString(tr("copy %1 data (place %2) to modules memory")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
 
@@ -2328,6 +2474,8 @@ namespace Builder
 
 		const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
 		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";
+		const char* const FB_SCAL_INPUT_SIGNAL_CAPTION = "i_data";
+		const char* const FB_SCAL_OUTPUT_SIGNAL_CAPTION = "o_result";
 
 		for(const char* const fbCaption : fbScalCaption)
 		{
@@ -2346,29 +2494,57 @@ namespace Builder
 
 				fb.caption = fbCaption;
 				fb.pointer = afbElement;
-				fb.k1ParamIndex = -1;
-				fb.k2ParamIndex = -1;
-
-				int index = 0;
 
 				for(Afb::AfbParam afbParam : afbElement->params())
 				{
 					if (afbParam.opName() == FB_SCAL_K1_PARAM_CAPTION)
 					{
-						fb.k1ParamIndex = index;
+						fb.k1ParamIndex = afbParam.operandIndex();
 					}
 
 					if (afbParam.opName() == FB_SCAL_K2_PARAM_CAPTION)
 					{
-						fb.k2ParamIndex = index;
+						fb.k2ParamIndex = afbParam.operandIndex();
 					}
-
-					index++;
 				}
 
 				if (fb.k1ParamIndex == -1 || fb.k2ParamIndex == -1)
 				{
 					LOG_ERROR(m_log, QString(tr("Required parameters k1 & k2 of AFB %1 is not found")).arg(fb.caption))
+					result = false;
+					break;
+				}
+
+				for(Afb::AfbSignal afbSignal : afbElement->inputSignals())
+				{
+					if (afbSignal.opName() == FB_SCAL_INPUT_SIGNAL_CAPTION)
+					{
+						fb.inputSignalIndex = afbSignal.operandIndex();
+						break;
+					}
+				}
+
+				if (fb.inputSignalIndex == -1)
+				{
+					LOG_ERROR(m_log, QString(tr("Required input signal %1 of AFB %2 is not found")).
+							  arg(FB_SCAL_INPUT_SIGNAL_CAPTION).arg(fb.caption))
+					result = false;
+					break;
+				}
+
+				for(Afb::AfbSignal afbSignal : afbElement->outputSignals())
+				{
+					if (afbSignal.opName() == FB_SCAL_OUTPUT_SIGNAL_CAPTION)
+					{
+						fb.outputSignalIndex = afbSignal.operandIndex();
+						break;
+					}
+				}
+
+				if (fb.outputSignalIndex == -1)
+				{
+					LOG_ERROR(m_log, QString(tr("Required output signal %1 of AFB %2 is not found")).
+							  arg(FB_SCAL_OUTPUT_SIGNAL_CAPTION).arg(fb.caption))
 					result = false;
 					break;
 				}
@@ -2913,7 +3089,7 @@ namespace Builder
 
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 							//
-							Address16 ramRegAddr(module.appRegDataOffset + signalOffset, bit);
+							Address16 ramRegAddr(module.appLogicRegDataOffset + signalOffset, bit);
 
 							signal->ramAddr() = ramRegAddr;
 							signal->regAddr() = ramRegAddr;
