@@ -1636,6 +1636,7 @@ void EditSchemeWidget::createActions()
 
 	m_addLineAction = new QAction(tr("Line"), this);
 	m_addLineAction->setEnabled(true);
+	m_addLineAction->setIcon(QIcon(":/Images/Images/SchemeLine.svg"));
 	connect(m_addLineAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1644,6 +1645,7 @@ void EditSchemeWidget::createActions()
 
 	m_addPathAction = new QAction(tr("Path"), this);
 	m_addPathAction->setEnabled(true);
+	m_addPathAction->setIcon(QIcon(":/Images/Images/SchemePath.svg"));
 	connect(m_addPathAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1652,6 +1654,7 @@ void EditSchemeWidget::createActions()
 
 	m_addRectAction = new QAction(tr("Rect"), this);
 	m_addRectAction->setEnabled(true);
+	m_addRectAction->setIcon(QIcon(":/Images/Images/SchemeRect.svg"));
 	connect(m_addRectAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1663,6 +1666,7 @@ void EditSchemeWidget::createActions()
 
 	m_addInputSignalAction = new QAction(tr("Input"), this);
 	m_addInputSignalAction->setEnabled(true);
+	m_addInputSignalAction->setIcon(QIcon(":/Images/Images/SchemeInputSignal.svg"));
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1671,6 +1675,7 @@ void EditSchemeWidget::createActions()
 
 	m_addOutputSignalAction = new QAction(tr("Output"), this);
 	m_addOutputSignalAction->setEnabled(true);
+	m_addOutputSignalAction->setIcon(QIcon(":/Images/Images/SchemeOutputSignal.svg"));
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1679,6 +1684,7 @@ void EditSchemeWidget::createActions()
 
 	m_addConstantAction = new QAction(tr("Constant"), this);
 	m_addConstantAction->setEnabled(true);
+	m_addConstantAction->setIcon(QIcon(":/Images/Images/SchemeConstant.svg"));
 	connect(m_addConstantAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -1687,10 +1693,12 @@ void EditSchemeWidget::createActions()
 
 	m_addFblElementAction = new QAction(tr("FBL Element"), this);
 	m_addFblElementAction->setEnabled(true);
+	m_addFblElementAction->setIcon(QIcon(":/Images/Images/SchemeFblElement.svg"));
 	connect(m_addFblElementAction, &QAction::triggered, this, &EditSchemeWidget::addFblElement);
 
 	m_addLinkAction = new QAction(tr("Link"), this);
 	m_addLinkAction->setEnabled(true);
+	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemeLink.svg"));
 	connect(m_addLinkAction, &QAction::triggered,
 			[this](bool)
 			{
