@@ -1801,6 +1801,66 @@ void EditSchemeWidget::createActions()
 	addAction(m_propertiesAction);
 
 	//
+	// Size And Pos (align)
+	//
+	m_sizeAndPosAction = new QAction(tr("Size/Pos"), this);
+	m_sizeAndPosAction->setEnabled(true);
+
+	// Size/Pos->Same Width
+	//
+	m_sameWidthAction = new QAction(tr("Same Width"), this);
+	m_sameWidthAction->setEnabled(false);
+	connect(m_sameWidthAction, &QAction::triggered, this, &EditSchemeWidget::sameWidth);
+	addAction(m_sameWidthAction);
+
+	// Size/Pos->Same Height
+	//
+	m_sameHeightAction = new QAction(tr("Same Height"), this);
+	m_sameHeightAction->setEnabled(false);
+	connect(m_sameHeightAction, &QAction::triggered, this, &EditSchemeWidget::sameHeight);
+	addAction(m_sameHeightAction);
+
+	// Size/Pos->Same Size
+	//
+	m_sameSizeAction = new QAction(tr("Same Size"), this);
+	m_sameSizeAction->setEnabled(false);
+	connect(m_sameSizeAction, &QAction::triggered, this, &EditSchemeWidget::sameSize);
+	addAction(m_sameSizeAction);
+
+	// ------------------------------------
+	//
+	m_sizeAndPosSeparatorAction0 = new QAction(this);
+	m_sizeAndPosSeparatorAction0->setSeparator(true);
+
+	// Size/Pos->Align Left
+	//
+	m_alignLeftAction = new QAction(tr("Align Left"), this);
+	m_alignLeftAction->setEnabled(false);
+	connect(m_alignLeftAction, &QAction::triggered, this, &EditSchemeWidget::alignLeft);
+	addAction(m_alignLeftAction);
+
+	// Size/Pos->Align Right
+	//
+	m_alignRightAction = new QAction(tr("Align Right"), this);
+	m_alignRightAction->setEnabled(false);
+	connect(m_alignRightAction, &QAction::triggered, this, &EditSchemeWidget::alignRight);
+	addAction(m_alignRightAction);
+
+	// Size/Pos->Align Top
+	//
+	m_alignTopAction = new QAction(tr("Align Top"), this);
+	m_alignTopAction->setEnabled(false);
+	connect(m_alignTopAction, &QAction::triggered, this, &EditSchemeWidget::alignTop);
+	addAction(m_alignTopAction);
+
+	// Size/Pos->Align Bottom
+	//
+	m_alignBottomAction = new QAction(tr("Align Bottom"), this);
+	m_alignBottomAction->setEnabled(false);
+	connect(m_alignBottomAction, &QAction::triggered, this, &EditSchemeWidget::alignBottom);
+	addAction(m_alignBottomAction);
+
+	//
 	// View
 	//
 	m_viewAction = new QAction(tr("View"), this);
@@ -1904,6 +1964,16 @@ void EditSchemeWidget::createActions()
 		m_editMenu->addAction(m_editSeparatorAction3);
 		m_editMenu->addAction(m_propertiesAction);
 
+	m_sizeAndPosMenu = new QMenu(this);
+	m_sizeAndPosAction->setMenu(m_sizeAndPosMenu);
+		m_sizeAndPosMenu->addAction(m_sameWidthAction);
+		m_sizeAndPosMenu->addAction(m_sameHeightAction);
+		m_sizeAndPosMenu->addAction(m_sameSizeAction);
+		m_sizeAndPosMenu->addAction(m_sizeAndPosSeparatorAction0);
+		m_sizeAndPosMenu->addAction(m_alignLeftAction);
+		m_sizeAndPosMenu->addAction(m_alignRightAction);
+		m_sizeAndPosMenu->addAction(m_alignTopAction);
+		m_sizeAndPosMenu->addAction(m_alignBottomAction);
 
 	m_viewMenu = new QMenu(this);
 	m_viewAction->setMenu(m_viewMenu);
@@ -3975,6 +4045,7 @@ void EditSchemeWidget::contextMenu(const QPoint& pos)
 	actions << m_fileAction;
 	actions << m_addAction;
 	actions << m_editAction;
+	actions << m_sizeAndPosAction;
 
 	actions << m_separatorAction0;
 	actions << m_layersAction;
@@ -4179,12 +4250,44 @@ void EditSchemeWidget::layers()
 
 void EditSchemeWidget::selectionChanged()
 {
+	// Properties dialog
+	//
 	if (m_itemsPropertiesDialog == nullptr)
 	{
 		m_itemsPropertiesDialog = new SchemeItemPropertiesDialog(m_editEngine, this);
 	}
 
 	m_itemsPropertiesDialog->setObjects(editSchemeView()->selectedItems());
+
+	// Allign
+	//
+	bool allowAlign = selectedItems().size() >= 2;
+
+	m_alignLeftAction->setEnabled(allowAlign);
+	m_alignRightAction->setEnabled(allowAlign);
+	m_alignTopAction->setEnabled(allowAlign);
+	m_alignBottomAction->setEnabled(allowAlign);
+
+	// Size
+	//
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = editSchemeView()->selectedItems();
+	std::vector<std::shared_ptr<VFrame30::SchemeItem>> selectedFiltered;
+
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr ||
+			dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
+		{
+			selectedFiltered.push_back(item);
+		}
+	}
+
+	bool allowSize = selectedFiltered.size() >= 2;
+
+	m_sameWidthAction->setEnabled(allowSize);
+	m_sameHeightAction->setEnabled(allowSize);
+	m_sameSizeAction->setEnabled(allowSize);
+
 	return;
 }
 
@@ -4299,6 +4402,575 @@ void EditSchemeWidget::onDownKey()
 	double dif = schemeView()->scheme()->gridSize();
 
 	m_editEngine->runMoveItem(0, dif, selectedItems(), snapToGrid());
+
+	return;
+}
+
+void EditSchemeWidget::sameWidth()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+
+	// Same Width/Height works only for usual lines and rectangles,filter connection line
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemeItem>> selectedFiltered;
+
+	for (auto item : selected)
+	{
+		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr ||
+			dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
+		{
+			selectedFiltered.push_back(item);
+		}
+	}
+
+	if (selectedFiltered.size() < 2)
+	{
+		assert(selectedFiltered.size() >= 2);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemeItem> firstItem = selectedFiltered.at(0);
+
+	// find the most left and most right points
+	//
+	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+
+	if (firstItemPoints.empty() == true)
+	{
+		assert(firstItemPoints.empty() == false);
+		return;
+	}
+
+	VFrame30::SchemePoint leftPoint = firstItemPoints[0];
+	VFrame30::SchemePoint rightPoint = firstItemPoints[0];
+
+	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	{
+		if (pt.X < leftPoint.X)
+		{
+			leftPoint = pt;
+		}
+
+		if (pt.X > rightPoint.X)
+		{
+			rightPoint = pt;
+		}
+	}
+
+	double width = rightPoint.X - leftPoint.X;
+
+	// get new points for all items
+	//
+	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selectedFiltered)
+	{
+		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		assert(points.empty() == false);
+
+		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr)
+		{
+			assert(points.size() == 2);
+
+			if (points[0].X < points[1].X)
+			{
+				points[1].X = points[0].X + width;
+			}
+			else
+			{
+				points[0].X = points[1].X + width;
+			}
+		}
+
+		if (dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
+		{
+			assert(points.size() == 2);
+
+			if (points.size() == 2)
+			{
+				points[1].X = points[0].X + width;
+			}
+		}
+
+		newPoints.push_back(points);
+	}
+
+	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+
+	return;
+}
+
+void EditSchemeWidget::sameHeight()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+
+	// Same Width/Height works only for usual lines and rectangles,filter connection line
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemeItem>> selectedFiltered;
+
+	for (auto item : selected)
+	{
+		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr ||
+			dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
+		{
+			selectedFiltered.push_back(item);
+		}
+	}
+
+	if (selectedFiltered.size() < 2)
+	{
+		assert(selectedFiltered.size() >= 2);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemeItem> firstItem = selectedFiltered.at(0);
+
+	// find the top and bottom points
+	//
+	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+
+	if (firstItemPoints.empty() == true)
+	{
+		assert(firstItemPoints.empty() == false);
+		return;
+	}
+
+	VFrame30::SchemePoint topPoint = firstItemPoints[0];
+	VFrame30::SchemePoint bottomPoint = firstItemPoints[0];
+
+	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	{
+		if (pt.Y < topPoint.Y)
+		{
+			topPoint = pt;
+		}
+
+		if (pt.Y > bottomPoint.Y)
+		{
+			bottomPoint = pt;
+		}
+	}
+
+	double height = bottomPoint.Y - topPoint.Y;
+
+	// get new points for all items
+	//
+	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selectedFiltered)
+	{
+		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		assert(points.empty() == false);
+
+		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr)
+		{
+			assert(points.size() == 2);
+
+			if (points[0].Y < points[1].Y)
+			{
+				points[1].Y = points[0].Y + height;
+			}
+			else
+			{
+				points[0].Y = points[1].Y + height;
+			}
+		}
+
+		if (dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
+		{
+			assert(points.size() == 2);
+
+			if (points.size() == 2)
+			{
+				points[1].Y = points[0].Y + height;
+			}
+		}
+
+		newPoints.push_back(points);
+	}
+
+	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+
+	return;
+}
+
+void EditSchemeWidget::sameSize()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+
+	// Same Width/Height works only for usual lines and rectangles,filter connection line
+	//
+	std::vector<std::shared_ptr<VFrame30::SchemeItem>> selectedFiltered;
+
+	for (auto item : selected)
+	{
+		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr ||
+			dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
+		{
+			selectedFiltered.push_back(item);
+		}
+	}
+
+	if (selectedFiltered.size() < 2)
+	{
+		assert(selectedFiltered.size() >= 2);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemeItem> firstItem = selectedFiltered.at(0);
+
+	// find the most left and most right points
+	//
+	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+
+	if (firstItemPoints.empty() == true)
+	{
+		assert(firstItemPoints.empty() == false);
+		return;
+	}
+
+	VFrame30::SchemePoint leftPoint = firstItemPoints[0];
+	VFrame30::SchemePoint rightPoint = firstItemPoints[0];
+
+	VFrame30::SchemePoint topPoint = firstItemPoints[0];
+	VFrame30::SchemePoint bottomPoint = firstItemPoints[0];
+
+	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	{
+		if (pt.X < leftPoint.X)
+		{
+			leftPoint = pt;
+		}
+
+		if (pt.X > rightPoint.X)
+		{
+			rightPoint = pt;
+		}
+
+		if (pt.Y < topPoint.Y)
+		{
+			topPoint = pt;
+		}
+
+		if (pt.Y > bottomPoint.Y)
+		{
+			bottomPoint = pt;
+		}
+	}
+
+	double width = rightPoint.X - leftPoint.X;
+	double height = bottomPoint.Y - topPoint.Y;
+
+	// get new points for all items
+	//
+	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selectedFiltered)
+	{
+		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		assert(points.empty() == false);
+
+		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr)
+		{
+			assert(points.size() == 2);
+
+			if (points[0].X < points[1].X)
+			{
+				points[1].X = points[0].X + width;
+			}
+			else
+			{
+				points[0].X = points[1].X + width;
+			}
+
+			if (points[0].Y < points[1].Y)
+			{
+				points[1].Y = points[0].Y + height;
+			}
+			else
+			{
+				points[0].Y = points[1].Y + height;
+			}
+		}
+
+		if (dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
+		{
+			assert(points.size() == 2);
+
+			if (points.size() == 2)
+			{
+				points[1].X = points[0].X + width;
+			}
+
+			if (points.size() == 2)
+			{
+				points[1].Y = points[0].Y + height;
+			}
+		}
+
+		// --
+		//
+		newPoints.push_back(points);
+	}
+
+	m_editEngine->runSetPoints(newPoints, selectedFiltered);
+
+	return;
+}
+
+void EditSchemeWidget::alignLeft()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+
+	if (selected.size() < 2)
+	{
+		assert(selected.size() >= 2);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemeItem> firstItem = selected.at(0);
+
+	// find the most left point
+	//
+	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+
+	if (firstItemPoints.empty() == true)
+	{
+		assert(firstItemPoints.empty() == false);
+		return;
+	}
+
+	VFrame30::SchemePoint firstItemMostLeftPoint = firstItemPoints[0];
+	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	{
+		if (pt.X < firstItemMostLeftPoint.X)
+		{
+			firstItemMostLeftPoint = pt;
+		}
+	}
+
+	// get new points for all items
+	//
+	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	{
+		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		assert(points.empty() == false);
+
+		// find the most left point for the item
+		//
+		VFrame30::SchemePoint itemMostLeftPoint = points[0];
+		for (const VFrame30::SchemePoint& pt : points)
+		{
+			if (pt.X < itemMostLeftPoint.X)
+			{
+				itemMostLeftPoint = pt;
+			}
+		}
+
+		double diff = firstItemMostLeftPoint.X - itemMostLeftPoint.X;
+
+		for (VFrame30::SchemePoint& pt : points)
+		{
+			pt.X += diff;
+		}
+
+		newPoints.push_back(points);
+	}
+
+	m_editEngine->runSetPoints(newPoints, selected);
+
+	return;
+}
+
+void EditSchemeWidget::alignRight()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+
+	if (selected.size() < 2)
+	{
+		assert(selected.size() >= 2);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemeItem> firstItem = selected.at(0);
+
+	// find the most right point
+	//
+	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+
+	if (firstItemPoints.empty() == true)
+	{
+		assert(firstItemPoints.empty() == false);
+		return;
+	}
+
+	VFrame30::SchemePoint firstItemMostRightPoint = firstItemPoints[0];
+	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	{
+		if (pt.X > firstItemMostRightPoint.X)
+		{
+			firstItemMostRightPoint = pt;
+		}
+	}
+
+	// get new points for all items
+	//
+	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	{
+		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		assert(points.empty() == false);
+
+		// find the most right point for the item
+		//
+		VFrame30::SchemePoint itemMostRightPoint = points[0];
+		for (const VFrame30::SchemePoint& pt : points)
+		{
+			if (pt.X > itemMostRightPoint.X)
+			{
+				itemMostRightPoint = pt;
+			}
+		}
+
+		double diff = itemMostRightPoint.X - firstItemMostRightPoint.X;
+
+		for (VFrame30::SchemePoint& pt : points)
+		{
+			pt.X -= diff;
+		}
+
+		newPoints.push_back(points);
+	}
+
+	m_editEngine->runSetPoints(newPoints, selected);
+
+	return;
+}
+
+void EditSchemeWidget::alignTop()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+
+	if (selected.size() < 2)
+	{
+		assert(selected.size() >= 2);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemeItem> firstItem = selected.at(0);
+
+	// find the most top point
+	//
+	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+
+	if (firstItemPoints.empty() == true)
+	{
+		assert(firstItemPoints.empty() == false);
+		return;
+	}
+
+	VFrame30::SchemePoint firstItemMostTopPoint = firstItemPoints[0];
+	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	{
+		if (pt.Y < firstItemMostTopPoint.Y)
+		{
+			firstItemMostTopPoint = pt;
+		}
+	}
+
+	// get new points for all items
+	//
+	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	{
+		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		assert(points.empty() == false);
+
+		// find the most top point for the item
+		//
+		VFrame30::SchemePoint itemMostTopPoint = points[0];
+		for (const VFrame30::SchemePoint& pt : points)
+		{
+			if (pt.Y < itemMostTopPoint.Y)
+			{
+				itemMostTopPoint = pt;
+			}
+		}
+
+		double diff = firstItemMostTopPoint.Y - itemMostTopPoint.Y;
+
+		for (VFrame30::SchemePoint& pt : points)
+		{
+			pt.Y += diff;
+		}
+
+		newPoints.push_back(points);
+	}
+
+	m_editEngine->runSetPoints(newPoints, selected);
+
+	return;
+}
+
+void EditSchemeWidget::alignBottom()
+{
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = selectedItems();
+
+	if (selected.size() < 2)
+	{
+		assert(selected.size() >= 2);
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemeItem> firstItem = selected.at(0);
+
+	// find the most bottom point
+	//
+	std::vector<VFrame30::SchemePoint> firstItemPoints = firstItem->getPointList();
+
+	if (firstItemPoints.empty() == true)
+	{
+		assert(firstItemPoints.empty() == false);
+		return;
+	}
+
+	VFrame30::SchemePoint firstItemMostBottomPoint = firstItemPoints[0];
+	for (const VFrame30::SchemePoint& pt : firstItemPoints)
+	{
+		if (pt.Y > firstItemMostBottomPoint.Y)
+		{
+			firstItemMostBottomPoint = pt;
+		}
+	}
+
+	// get new points for all items
+	//
+	std::vector<std::vector<VFrame30::SchemePoint>> newPoints;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	{
+		std::vector<VFrame30::SchemePoint> points = item->getPointList();
+		assert(points.empty() == false);
+
+		// find the most bottom point for the item
+		//
+		VFrame30::SchemePoint itemMostBottomPoint = points[0];
+		for (const VFrame30::SchemePoint& pt : points)
+		{
+			if (pt.Y > itemMostBottomPoint.Y)
+			{
+				itemMostBottomPoint = pt;
+			}
+		}
+
+		double diff = itemMostBottomPoint.Y - firstItemMostBottomPoint.Y;
+
+		for (VFrame30::SchemePoint& pt : points)
+		{
+			pt.Y -= diff;
+		}
+
+		newPoints.push_back(points);
+	}
+
+	m_editEngine->runSetPoints(newPoints, selected);
 
 	return;
 }

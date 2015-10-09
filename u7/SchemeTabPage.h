@@ -221,6 +221,7 @@ protected slots:
 	void undoChangesFile();
 
 	void fileMenuTriggered();
+	void sizeAndPosMenuTriggered();
 
 public:
 	bool saveWorkcopy();
