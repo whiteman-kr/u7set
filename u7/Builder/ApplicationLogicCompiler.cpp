@@ -665,8 +665,25 @@ namespace Builder
 
 		if (result == true)
 		{
-			msg = QString(tr("Compilation for LM %1 was successfully finished")).arg(m_lm->strId());
+			msg = QString(tr("Compilation for LM %1 was successfully finished.")).
+					arg(m_lm->strId());
+
 			LOG_SUCCESS(m_log, msg);
+
+			QString str;
+
+			if (m_code.commandAddress() != 0)
+			{
+				str.sprintf("%.2f", (m_code.commandAddress() * 100.0) / 65536.0);
+			}
+			else
+			{
+				str = "0.00";
+			}
+
+			msg = QString("Code memory used - %1%").arg(str);
+
+			LOG_MESSAGE(m_log, msg);
 		}
 		else
 		{
@@ -1283,13 +1300,15 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyDimDataToRegBuf(const Module& module)
 	{
+		m_code.comment(QString(tr("Copying DIM data place %2 to RegBuf")).arg(module.place));
+		m_code.newLine();
+
 		Command cmd;
 
 		cmd.movMem(module.appLogicRegDataOffset, module.moduleAppDataOffset, module.appLogicDataSize);
-
-		cmd.setComment(QString(tr("copy %1 data (place %2) to RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
-
 		m_code.append(cmd);
+
+		m_code.newLine();
 
 		return true;
 	}
@@ -1299,20 +1318,26 @@ namespace Builder
 	{
 		if (module.device == nullptr)
 		{
-			assert(false);
-			return false;
+			ASSERT_RETURN_FALSE
 		}
 
-		m_code.comment(QString(tr("Copying data from AIM place %1")).arg(module.place));
+		msg = QString(tr("Copying AIM data place %1 to RegBuf")).arg(module.place);
+
+		if (m_convertUsedInOutAnalogSignalsOnly == true)
+		{
+			msg += QString(tr(" (validities & used signals only)"));
+		}
+		else
+		{
+			msg += QString(tr(" (all signals)"));
+		}
+
+		m_code.comment(msg);
 		m_code.newLine();
 
 		Command cmd;
 
-		//
-		m_convertUsedInOutAnalogSignalsOnly = false;
-		//
-
-		if (m_convertUsedInOutAnalogSignalsOnly == false)
+		if (m_convertUsedInOutAnalogSignalsOnly == true)
 		{
 			// initialize module signals memory to 0
 			//
@@ -1359,7 +1384,7 @@ namespace Builder
 		for(int dataBlock = 0; dataBlock < 4; dataBlock++)
 		{
 			cmd.mov(module.appLogicRegDataOffset + regDataBlockSize * dataBlock,
-					module.appLogicDataOffset + dataBlockSize * dataBlock);
+					module.moduleAppDataOffset + dataBlockSize * dataBlock);
 			cmd.setComment(QString(tr("validity of %1 ... %2 inputs")).arg(dataBlock * 16 + 16).arg(dataBlock * 16 + 1));
 			m_code.append(cmd);
 		}
@@ -1387,6 +1412,8 @@ namespace Builder
 				break;
 			}
 
+			bool commandWritten = false;
+
 			for(Signal* signal : boundSignals)
 			{
 				if (signal == nullptr)
@@ -1395,6 +1422,18 @@ namespace Builder
 				}
 
 				if (signal->isDiscrete())
+				{
+					continue;
+				}
+
+				if (signal->dataSize() != SIZE_32BIT)
+				{
+					LOG_ERROR(m_log, QString(tr("Signal %1 must have 32-bit data size")).arg(signal->strID()));
+					RESULT_FALSE_BREAK
+				}
+
+				if (m_convertUsedInOutAnalogSignalsOnly == true &&
+					m_appSignals.getByStrID(signal->strID()) == nullptr)
 				{
 					continue;
 				}
@@ -1410,6 +1449,7 @@ namespace Builder
 				{
 					ASSERT_RESULT_FALSE_BREAK
 				}
+
 				FbScal& fbScal = m_fbScal[FB_SCAL_16UI_32FP_INDEX];
 
 				if (signal->dataFormat() == DataFormat::Float)
@@ -1429,7 +1469,7 @@ namespace Builder
 				}
 
 				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-								   module.appLogicDataOffset + deviceSignal->valueOffset(), appFb->caption());
+								   module.moduleAppDataOffset + deviceSignal->valueOffset(), appFb->caption());
 				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->strID()));
 				m_code.append(cmd);
 
@@ -1440,9 +1480,14 @@ namespace Builder
 				cmd.readFuncBlock32(signal->ramAddr().offset(), appFb->opcode(), appFb->instance(),
 									fbScal.outputSignalIndex, appFb->caption());
 				m_code.append(cmd);
+
+				commandWritten = true;
 			}
 
-			m_code.newLine();
+			if (commandWritten)
+			{
+				m_code.newLine();
+			}
 		}
 
 		return result;
@@ -1749,6 +1794,14 @@ namespace Builder
 			}
 		}
 
+		if (appSignal.dataFormat() != srcSignal.dataFormat())
+		{
+			LOG_ERROR(m_log, QString(tr("Signals %1 and  %2 is not compatible by dataFormat")).
+							  arg(srcSignal.strID()).arg(appSignal.strID()));
+
+			return false;
+		}
+
 		if (appSignal.dataSize() != srcSignal.dataSize())
 		{
 			LOG_ERROR(m_log, QString(tr("Signals %1 and  %2 is not compatible by dataSize")).
@@ -1783,7 +1836,24 @@ namespace Builder
 		{
 			// move value of analog signal
 			//
-			cmd.mov(destRamAddrOffset, srcRamAddrOffset);
+			if (appSignal.dataSize() == SIZE_32BIT)
+			{
+				cmd.mov32(destRamAddrOffset, srcRamAddrOffset);
+			}
+			else
+			{
+				if (appSignal.dataSize() == SIZE_16BIT)
+				{
+					cmd.mov(destRamAddrOffset, srcRamAddrOffset);
+				}
+				else
+				{
+					LOG_ERROR(m_log, QString(tr("Unknown data size of signal %1 - %2 bit")).
+									  arg(appSignal.strID()).arg(appSignal.dataSize()));
+					assert(false);
+					return false;
+				}
+			}
 		}
 		else
 		{
@@ -1793,9 +1863,8 @@ namespace Builder
 		}
 
 		cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(srcSignal.strID()));
-
-		m_code.newLine();
 		m_code.append(cmd);
+		m_code.newLine();
 
 		appSignal.setComputed();
 
@@ -2313,6 +2382,7 @@ namespace Builder
 			if (firstOutputModule)
 			{
 				m_code.comment("Copy output modules application logic data to modules memory");
+				m_code.newLine();
 
 				firstOutputModule = false;
 			}
@@ -2320,11 +2390,11 @@ namespace Builder
 			switch(module.familyType())
 			{
 			case Hardware::DeviceModule::FamilyType::AOM:
-				copyAomDataToModuleMemory(module);
+				result &= copyAomDataToModuleMemory(module);
 				break;
 
 			case Hardware::DeviceModule::FamilyType::DOM:
-				copyDomDataToModuleMemory(module);
+				result &= copyDomDataToModuleMemory(module);
 				break;
 
 			default:
@@ -2342,17 +2412,16 @@ namespace Builder
 	}
 
 
-	void ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
+	bool ModuleLogicCompiler::copyDomDataToModuleMemory(const Module& module)
 	{
+		m_code.comment(QString(tr("Copying DOM data place %1 to modules memory")).arg(module.place));
+		m_code.newLine();
+
 		Command cmd;
 
 		assert(module.appLogicDataSize == module.appLogicRegDataSize);
 
 		cmd.movMem(module.moduleAppDataOffset, module.appLogicRegDataOffset, module.appLogicDataSize);
-
-		cmd.setComment(QString(tr("copy %1 data (place %2) to modules memory")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
-
-		m_code.newLine();
 		m_code.append(cmd);
 
 		if (module.appLogicDataSize < module.appLogicDataSizeWithReserve)
@@ -2362,18 +2431,185 @@ namespace Builder
 
 			m_code.append(cmd);
 		}
+
+		m_code.newLine();
+
+		return true;
 	}
 
 
-	void ModuleLogicCompiler::copyAomDataToModuleMemory(const Module& module)
+	bool ModuleLogicCompiler::copyAomDataToModuleMemory(const Module& module)
 	{
-		// NEEED IMPLEMENTATION!!!!!!!!!!!
+		if (module.device == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		msg = QString(tr("Copying AOM data place %1 to modules memory")).arg(module.place);
+
+		if (m_convertUsedInOutAnalogSignalsOnly == true)
+		{
+			msg += QString(tr(" (used signals only)"));
+		}
+		else
+		{
+			msg += QString(tr(" (all signals)"));
+		}
+
+		m_code.comment(msg);
+		m_code.newLine();
+
+		Command cmd;
+
+		if (m_convertUsedInOutAnalogSignalsOnly == true)
+		{
+			cmd.setMem(module.moduleAppDataOffset, module.appLogicDataSize, 0);
+			m_code.append(cmd);
+			m_code.newLine();
+		}
+
+		bool result = true;
+
+		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = module.device->getAllSignals();
+
+		// sort signals by place ascending
+		//
+
+		int moduleSignalsCount = static_cast<int>(moduleSignals.size());
+
+		if (moduleSignalsCount != 32)
+		{
+			LOG_ERROR(m_log, QString(tr("AOM module must have 32 output signals")));
+			return false;
+		}
+
+		for(int i = 0; i < moduleSignalsCount - 1; i++)
+		{
+			for(int j = i + 1; j < moduleSignalsCount; j++)
+			{
+				if (moduleSignals[i]->place() > moduleSignals[j]->place())
+				{
+					std::shared_ptr<Hardware::DeviceSignal> tmp = moduleSignals[i];
+					moduleSignals[i] = moduleSignals[j];
+					moduleSignals[j] = tmp;
+				}
+			}
+
+		}
+
+		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
+		{
+			if (deviceSignal->isAnalogSignal() == false)
+			{
+				continue;
+			}
+
+			if (!m_deviceBoundSignals.contains(deviceSignal->strId()))
+			{
+				continue;
+			}
+
+			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->strId());
+
+			if (boundSignals.count() > 1)
+			{
+				LOG_ERROR(m_log, QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->strId()));
+				result = false;
+				break;
+			}
+
+			bool codeWritten = false;
+
+			for(Signal* signal : boundSignals)
+			{
+				if (signal == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				if (signal->isDiscrete())
+				{
+					continue;
+				}
+
+				if (signal->dataSize() != SIZE_32BIT)
+				{
+					LOG_ERROR(m_log, QString(tr("Signal %1 must have 32-bit data size")).arg(signal->strID()));
+					RESULT_FALSE_BREAK
+				}
+
+				if (m_convertUsedInOutAnalogSignalsOnly == true &&
+					m_appSignals.getByStrID(signal->strID()) == nullptr)
+				{
+					continue;
+				}
+
+				if (m_inOutSignalsToScalAppFbMap.contains(signal->strID()) == false)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+
+				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->strID()];
+
+				if (appFb == nullptr)
+				{
+					ASSERT_RESULT_FALSE_BREAK
+				}
+				FbScal& fbScal = m_fbScal[FB_SCAL_32FP_16UI_INDEX];
+
+				if (signal->dataFormat() == DataFormat::Float)
+				{
+					;	// already assigned
+				}
+				else
+				{
+					if (signal->dataFormat() == DataFormat::SignedInt)
+					{
+						fbScal = m_fbScal[FB_SCAL_32SI_16UI_INDEX];
+					}
+					else
+					{
+						assert(false);
+					}
+				}
+
+				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+								   signal->ramAddr().offset(), appFb->caption());
+				cmd.setComment(QString(tr("output %1 %2")).arg(deviceSignal->place()).arg(signal->strID()));
+				m_code.append(cmd);
+
+				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption());
+				cmd.setComment("");
+				m_code.append(cmd);
+
+				cmd.readFuncBlock(module.moduleAppDataOffset + deviceSignal->valueOffset(), appFb->opcode(), appFb->instance(),
+								fbScal.outputSignalIndex, appFb->caption());
+				m_code.append(cmd);
+
+				codeWritten = true;
+			}
+
+			if (codeWritten == true)
+			{
+				m_code.newLine();
+			}
+		}
+
+		if (module.appLogicDataSize < module.appLogicDataSizeWithReserve)
+		{
+			cmd.setMem(module.moduleAppDataOffset + module.appLogicDataSize, module.appLogicDataSizeWithReserve - module.appLogicDataSize, 0);
+			cmd.setComment(QString(tr("set reserv data to 0")));
+
+			m_code.append(cmd);
+			m_code.newLine();
+		}
+
+		return result;
 	}
 
 
 	bool ModuleLogicCompiler::finishAppLogicCode()
 	{
-		m_code.newLine();
 		m_code.comment("End of application logic code");
 		m_code.newLine();
 
@@ -3067,24 +3303,39 @@ namespace Builder
 						}
 						else
 						{
-							if (module.familyType() == Hardware::DeviceModule::FamilyType::AIM ||
-								module.familyType() == Hardware::DeviceModule::FamilyType::AOM)
+							switch(module.familyType())
 							{
-								int signalGroup = signalOffset / 17;
-								int signalNo = signalOffset % 17;
+							case Hardware::DeviceModule::FamilyType::AIM:
+								{
+									int signalGroup = signalOffset / 17;
+									int signalNo = signalOffset % 17;
 
-								if (signalNo == 0)
-								{
-									// this is discrete validity signal
-									//
-									signalOffset = signalGroup * 33;
+									if (signalNo == 0)
+									{
+										// this is discrete validity signal
+										//
+										signalOffset = signalGroup * 33;
+									}
+									else
+									{
+										// this is analog input signal
+										//
+										signalOffset = signalGroup * 33 + 1 + 2 * (signalNo - 1);
+									}
 								}
-								else
-								{
-									// this is analog input signal
-									//
-									signalOffset = signalGroup * 33 + 1 + 2 * (signalNo - 1);
-								}
+								break;
+
+							case Hardware::DeviceModule::FamilyType::AOM:
+								signalOffset *= 2;
+								break;
+
+							case Hardware::DeviceModule::FamilyType::DIM:
+							case Hardware::DeviceModule::FamilyType::DOM:
+								break;
+
+							default:
+								assert(false);
+								break;
 							}
 
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
@@ -3513,6 +3764,11 @@ namespace Builder
 
 		for(LogicAfbParam param : params)
 		{
+			if (param.operandIndex() == FOR_USER_ONLY_PARAM_INDEX)
+			{
+				continue;
+			}
+
 			StrIDIndex si;
 
 			si.strID = logicAfb->strID();
