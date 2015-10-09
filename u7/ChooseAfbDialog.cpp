@@ -15,7 +15,10 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbEleme
 
 	for (std::shared_ptr<Afb::AfbElement> e : elements)
 	{
-		m_elements.push_back(e);
+        if (e->internalUse() == false)
+        {
+            m_elements.push_back(e);
+        }
 	}
 
 	QStringList columns;
