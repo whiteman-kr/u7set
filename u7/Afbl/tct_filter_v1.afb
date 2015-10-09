@@ -9,6 +9,7 @@
             <OpCode>3</OpCode>
             <HasRam>true</HasRam>
             <RequiredStart>true</RequiredStart>
+            <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
             <AfbElementSignal OpName="i_wave" Caption="in" Type="Discrete" OpIndex = "6" Size = "1"/>
