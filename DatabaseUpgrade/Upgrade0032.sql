@@ -43,6 +43,10 @@ BEGIN
 		RAISE 'User % already exists.', user_name;
 	END IF;
 
+	IF (char_length(user_password) < 6) THEN
+		RAISE 'Password is too simple, it must containe at least 6 symbols.';
+	END IF;
+
 	INSERT INTO Users (Username, FirstName, LastName, Password, Administrator, ReadOnly, Disabled)
 		VALUES (user_name, first_name, last_name, user_password, is_admin, is_read_only, is_disabled) RETURNING UserID INTO new_user_id;
 
