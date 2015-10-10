@@ -315,6 +315,9 @@ private:
 		bool requiredStart() const;
 		void setRequiredStart(bool value);
 
+        bool internalUse() const;
+        void setInternalUse(bool value);
+
 		QString libraryScript() const;
 		void setLibraryScript(const QString& value);
 
@@ -344,6 +347,7 @@ private:
 		Afb::AfbType m_type;
 		bool m_hasRam;
 		bool m_requiredStart;
+        bool m_internalUse;
 
 		mutable QString m_instantiatorID;
 

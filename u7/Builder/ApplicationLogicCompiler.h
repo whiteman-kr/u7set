@@ -61,6 +61,8 @@ namespace Builder
 	const int	SIZE_16BIT = 16;
 	const int	SIZE_32BIT = 32;
 
+	const int	FOR_USER_ONLY_PARAM_INDEX = -1;		// index of FB's parameters used by user only
+
 
 	class AddrW
 	{
@@ -598,7 +600,7 @@ namespace Builder
 		// compiler settings
 		//
 
-		bool m_convertUsedInOutAnalogSignalsOnly = false;
+		bool m_convertUsedInOutAnalogSignalsOnly = true;
 
 		// LM's and modules settings
 		//
@@ -728,8 +730,8 @@ namespace Builder
 
 		bool copyOutModulesAppLogicDataToModulesMemory();
 
-		void copyDomDataToModuleMemory(const Module& module);
-		void copyAomDataToModuleMemory(const Module& module);
+		bool copyDomDataToModuleMemory(const Module& module);
+		bool copyAomDataToModuleMemory(const Module& module);
 
 		bool finishAppLogicCode();
 

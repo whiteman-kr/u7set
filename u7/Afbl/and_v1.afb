@@ -9,6 +9,7 @@
             <OpCode>1</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>
+            <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
             <AfbElementSignal OpName="i_1_oprd" Caption="in 1" Type="Discrete" OpIndex = "3" Size = "1"/>

@@ -577,7 +577,7 @@ namespace Afb
 
 			if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0
 					|| QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0
-					|| QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0
+                    || QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0
 					|| QString::compare(valueName, "HighLimit", Qt::CaseInsensitive) == 0)
 			{
 				QString str = xmlReader->readElementText();
@@ -598,7 +598,7 @@ namespace Afb
                             val = str.toDouble();
                             break;
                         }
-                        deafult:
+                        default:
                             assert(false);
                     }
                 }
@@ -868,6 +868,7 @@ namespace Afb
 	AfbElement::AfbElement(void) :
 		m_hasRam(false),
         m_requiredStart(true),
+        m_internalUse(false),
         m_version("0.0")
 	{
 	}
@@ -898,6 +899,7 @@ namespace Afb
 		m_type = that.m_type;
 		m_hasRam = that.m_hasRam;
 		m_requiredStart = that.m_requiredStart;
+        m_internalUse = that.m_internalUse;
 
 		m_libraryScript = that.m_libraryScript;
 		m_afterCreationScript = that.m_afterCreationScript;
@@ -972,21 +974,25 @@ namespace Afb
 					if (QString::compare(xmlReader->name().toString(), "Caption", Qt::CaseInsensitive) == 0)
 					{
 						setCaption(xmlReader->readElementText());
+                        continue;
 					}
 
 					if (QString::compare(xmlReader->name().toString(), "Description", Qt::CaseInsensitive) == 0)
 					{
 						setDescription(xmlReader->readElementText());
-					}
+                        continue;
+                    }
 
                     if (QString::compare(xmlReader->name().toString(), "Version", Qt::CaseInsensitive) == 0)
                     {
                         setVersion(xmlReader->readElementText());
+                        continue;
                     }
 
                     if (QString::compare(xmlReader->name().toString(), "Category", Qt::CaseInsensitive) == 0)
                     {
                         setCategory(xmlReader->readElementText());
+                        continue;
                     }
 
                     if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
@@ -997,17 +1003,29 @@ namespace Afb
 						type.fromOpCode(opCode);
 
 						setType(type);
-					}
+                        continue;
+                    }
 
 					if (QString::compare(xmlReader->name().toString(), "HasRam", Qt::CaseInsensitive) == 0)
 					{
 						setHasRam(xmlReader->readElementText() == "true" ? true : false);
-					}
+                        continue;
+                    }
 
 					if (QString::compare(xmlReader->name().toString(), "RequiredStart", Qt::CaseInsensitive) == 0)
 					{
 						setRequiredStart(xmlReader->readElementText() == "true" ? true : false);
-					}
+                        continue;
+                    }
+
+                    if (QString::compare(xmlReader->name().toString(), "InternalUse", Qt::CaseInsensitive) == 0)
+                    {
+                        setInternalUse(xmlReader->readElementText() == "true" ? true : false);
+                        continue;
+                    }
+
+                    xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
+                    xmlReader->skipCurrentElement();
 				}
 
 				continue;
@@ -1160,6 +1178,7 @@ namespace Afb
         xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
 		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
 		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
+        xmlWriter->writeTextElement("InternalUse", internalUse() ? "true" : "false");
 		xmlWriter->writeEndElement();
 
 		xmlWriter->writeStartElement("InputSignals");
@@ -1450,6 +1469,15 @@ namespace Afb
 		m_requiredStart = value;
 	}
 
+    bool AfbElement::internalUse() const
+    {
+        return m_internalUse;
+    }
+
+    void AfbElement::setInternalUse(bool value)
+    {
+        m_internalUse = value;
+    }
 
 	QString AfbElement::libraryScript() const
 	{
