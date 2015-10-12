@@ -2062,3 +2062,174 @@ void FileTests::get_checked_out_filesTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Invalid user error expected"));
 }
+
+void FileTests::check_in_treeTest()
+{
+	QSqlQuery query;
+	QSqlQuery tempQuery;
+
+	int fileIds[7] = {0, 0, 0, 0, 0, 0, 0};
+
+	bool ok = query.exec("SElECT * FROM add_file(1, 'checkInTreeTest', 0, 'FreeBSD', '{}');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[0] = query.value("id").toInt();
+
+	// Create children file of first file for test
+	//
+
+	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestSecondFile', %1, 'OpenBSD', '{}');").arg(fileIds[0]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[1] = query.value("id").toInt();
+
+	// Create children file of second file for test
+	//
+
+	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestThirdFile', %1, 'NetBSD', '{}');").arg(fileIds[1]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[2] = query.value("id").toInt();
+
+	// Create children file from first file
+	//
+
+	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestFourthFile', %1, 'PC-BSD', '{}');").arg(fileIds[0]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[3] = query.value("id").toInt();
+
+	// Create file with random parent
+	//
+
+	ok = query.exec("SElECT * FROM add_file(1, 'checkInTreeTestRandomFile', 0, 'Yosemite', '{}');");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[4] = query.value("id").toInt();
+
+	// Create child of the file with random parent, which will be deleted
+	//
+
+	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestRandomFileChild', %1, 'El Capitano', '{}');").arg(fileIds[4]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[5] = query.value("id").toInt();
+
+	// Create file from first file, and check it in
+	//
+
+	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestFifthFile', %1, 'Solaris', '{}');").arg(fileIds[0]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[6] = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_in (1, '{%1, %2}', 'TEST');").arg(fileIds[6]).arg(fileIds[5]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM check_out(1, '{%1}');").arg(fileIds[5]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM delete_file (1, %1);").arg(fileIds[5]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM check_in_tree(1, '{%1, %2}', 'TEST') ORDER BY id").arg(fileIds[0]).arg(fileIds[4]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	int fileNumber = 0;
+	while (query.next())
+	{
+		QVERIFY2(query.value("id").toInt() != fileIds[6], qPrintable("Error: checked in file has been checked_in twice"));
+		QVERIFY2(query.value("id").toInt() == fileIds[fileNumber], qPrintable(QString("Error: wrong fileId\nActual: %1\nExpected: %2").arg(query.value("id").toInt()).arg(fileIds[fileNumber])));
+
+		if (query.value("id").toInt() == fileIds[5])
+		{
+			// Check deleted file
+			//
+
+			ok = tempQuery.exec(QString("SELECT deleted FROM file WHERE fileId = %1").arg(fileIds[5]));
+
+			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2 (tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+			QVERIFY2 (tempQuery.value(0).toBool() == true, qPrintable ("File has not been deleted"));
+		}
+		else
+		{
+			// Check all data of the checkedIn file
+			//
+
+			ok = tempQuery.exec(QString("SELECT * FROM checkOut WHERE fileId = %1").arg(query.value("id").toInt()));
+			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2 (tempQuery.next() == false, qPrintable("Error: file was not checked in"));
+
+			ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(query.value("id").toInt()));
+			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2 (tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+			QVERIFY2 (tempQuery.value("checkedInInstanceId").toString() != "", qPrintable("File table was not uppdated (checkedInInstanceId"));
+			QVERIFY2 (tempQuery.value("checkedOutInstanceId").toString() == "", qPrintable ("File table was not updated (checkedOutInstanceId"));
+
+			ok = tempQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceId = '%1'").arg(tempQuery.value("checkedInInstanceId").toString()));
+
+			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2 (tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+			QVERIFY2 (tempQuery.value("fileId").toInt() == fileIds[fileNumber], qPrintable ("Wrong fileId in table fileInstance"));
+		}
+
+		fileNumber++;
+	}
+
+	// Check amount of results
+	//
+
+	QVERIFY2 (fileNumber == 6, qPrintable ("Error: wrong file amount"));
+
+	// Try call bug, when child file dublates in result
+	//
+
+	int dublicateTest[2] = {0, 0};
+
+	ok = query.exec("SELECT * FROM add_file (1, 'checkInTreeFileDublicateTest', 1, 'comment', '{}')");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	dublicateTest[0] = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM add_file (1, 'checkInTreeFileDublicateTest', %1, 'comment', '{}')").arg(dublicateTest[0]));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	dublicateTest[1] = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_in_tree(1, '{%1, %2}', 'TEST') ORDER BY id").arg(dublicateTest[0]).arg(dublicateTest[1]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	fileNumber = 0;
+	while (query.next())
+	{
+		QVERIFY2 (fileNumber < 2, qPrintable ("Error: child file dublicates in result"));
+		QVERIFY2 (query.value("id").toInt() == dublicateTest[fileNumber], qPrintable("Error: wrong id in dublicateTest"));
+
+		fileNumber++;
+	}
+}

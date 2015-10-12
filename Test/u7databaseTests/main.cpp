@@ -5,7 +5,8 @@
 #include "FileTests.h"
 #include "OtherTests.h"
 #include "SignalTests.h"
-#include "MultiThreadTest.h"
+#include "MultiThreadFileTest.h"
+#include "MultiThreadSignalTest.h"
 #include "../../include/DbController.h"
 
 const int DatabaseProjectVersion = 40;
@@ -203,20 +204,20 @@ int main(int argc, char *argv[])
 	// Multi-thread testing
 	//
 
-	qDebug() << "********* Start testing of Multi-thread tests *********";
+	qDebug() << "********* Start testing of MultiThreadFile tests *********";
 
-	std::vector<MultiThreadTest*> multiThreadTest;
+	std::vector<MultiThreadFileTest*> multiThreadFileTest;
 
 	for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
 	{
-		MultiThreadTest* thread = new MultiThreadTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfFilesInMultiThreadTest);
+		MultiThreadFileTest* thread = new MultiThreadFileTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfFilesInMultiThreadTest);
 
 		thread->start();
 
-		multiThreadTest.push_back(thread);
+		multiThreadFileTest.push_back(thread);
 	}
 
-	for (MultiThreadTest* thread : multiThreadTest)
+	for (MultiThreadFileTest* thread : multiThreadFileTest)
 	{
 		while (thread->isFinished() == false)
 		{
@@ -225,7 +226,30 @@ int main(int argc, char *argv[])
 		delete thread;
 	}
 
-	qDebug() << "********* Finished testing of Multi-thread tests *********";
+	qDebug() << "********* Finished testing of MultiThreadFile tests *********";
+	/*qDebug() << "********* Started testing of MultiThreadSignal tests *********";
+
+	std::vector<MultiThreadSignalTest*> multiThreadSignalTest;
+
+	for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
+	{
+		MultiThreadSignalTest* thread = new MultiThreadSignalTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfFilesInMultiThreadTest);
+
+		thread->start();
+
+		multiThreadSignalTest.push_back(thread);
+	}
+
+	for (MultiThreadSignalTest* thread : multiThreadSignalTest)
+	{
+		while (thread->isFinished() == false)
+		{
+		}
+
+		delete thread;
+	}
+
+	qDebug() << "********* Finished testing of MultiThreadSignal tests *********";*/
 
 	// Drop database project
 	//

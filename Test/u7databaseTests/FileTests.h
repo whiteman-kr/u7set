@@ -43,6 +43,7 @@ private slots:
 	void get_specific_copyTest();
 	void add_deviceTest();
 	void get_checked_out_filesTest();
+	void check_in_treeTest();
 
 public:
 	static QString filesExist(QString fileID);
