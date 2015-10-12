@@ -17,6 +17,8 @@ public:
 	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
+	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
 	void addFile(std::shared_ptr<DbFileInfo> file);
 
 	void setFiles(const std::vector<DbFileInfo>& files);
