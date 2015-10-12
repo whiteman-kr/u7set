@@ -306,11 +306,14 @@ protected slots:
 	void modifiedChangedSlot(bool modified);
 
 	void selectAll();
+	void editPaste();
 
 	void schemeProperties();
 	void properties();
 	void layers();
 	void selectionChanged();
+
+	void clipboardDataChanged();
 
 	void addFblElement();
 
