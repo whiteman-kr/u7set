@@ -17,6 +17,6 @@ SUBDIRS += qtservice \
     DataAquisitionService \
 	VFrame30 \
 	u7 \
-    Monitor
-
+    Monitor \
+    PacketViewer
 

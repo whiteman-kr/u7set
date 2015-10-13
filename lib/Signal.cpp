@@ -486,3 +486,124 @@ void Address16::fromString(QString str)
 	m_offset = list[0].toInt();
 	m_bit = list[1].toInt();
 }
+
+
+
+void SerializeSignalsFromXml(UnitList& unitInfo, SignalSet& signalSet)
+{
+	QXmlStreamReader applicationSignalsReader;
+	QFile file("applicationSignals.xml");
+
+	if (file.open(QIODevice::ReadOnly))
+	{
+		DataFormatList dataFormatInfo;
+		applicationSignalsReader.setDevice(&file);
+
+		while (!applicationSignalsReader.atEnd())
+		{
+			QXmlStreamReader::TokenType token = applicationSignalsReader.readNext();
+
+			switch (token)
+			{
+			case QXmlStreamReader::StartElement:
+			{
+				const QXmlStreamAttributes& attr = applicationSignalsReader.attributes();
+				if (applicationSignalsReader.name() == "unit")
+				{
+					unitInfo.append(attr.value("ID").toInt(), attr.value("name").toString());
+				}
+				if (applicationSignalsReader.name() == "signal")
+				{
+					Signal* pSignal = new Signal;
+					pSignal->serializeFields(attr, dataFormatInfo, unitInfo);
+					signalSet.append(pSignal->ID(), pSignal);
+				}
+				break;
+			}
+			default:
+				continue;
+			}
+		}
+		if (applicationSignalsReader.hasError())
+		{
+			qDebug() << "Parse applicationSignals.xml error";
+		}
+	}
+}
+
+
+void InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet)
+{
+	dataSources.clear();
+
+	if (deviceRoot == nullptr)
+	{
+		return;
+	}
+
+	QMultiHash<quint64, int> deviceStrIdHash2signalIndex;
+	for (int i = 0; i < signalSet.count(); i++)
+	{
+		const QString& id = signalSet[i].deviceStrID();
+		if (id.isEmpty())
+		{
+			continue;
+		}
+		deviceStrIdHash2signalIndex.insert(CUtils::calcHash(id.constData(), id.length() * sizeof(QChar)), i);
+	}
+
+	Hardware::equipmentWalker(deviceRoot, [&dataSources, &deviceStrIdHash2signalIndex](Hardware::DeviceObject* currentDevice)
+	{
+		if (currentDevice == nullptr)
+		{
+			return;
+		}
+		if (typeid(*currentDevice) != typeid(Hardware::DeviceModule))
+		{
+			return;
+		}
+		Hardware::DeviceModule* currentModule = dynamic_cast<Hardware::DeviceModule*>(currentDevice);
+		if (currentModule == nullptr)
+		{
+			return;
+		}
+		if (currentModule->moduleFamily() != Hardware::DeviceModule::LM)
+		{
+			return;
+		}
+		if (currentModule->property("Network\\RegServerIP").isValid())
+		{
+			int key = dataSources.count() + 1;
+			QString ipStr = currentModule->property("Network\\RegServerIP").toString();
+			QHostAddress ha(ipStr);
+			quint32 ip = ha.toIPv4Address();
+			DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
+
+			Hardware::equipmentWalker(currentModule->parent(), [&ds, &deviceStrIdHash2signalIndex] (Hardware::DeviceObject* currentDevice)
+			{
+				if (currentDevice == nullptr)
+				{
+					return;
+				}
+				if (typeid(*currentDevice) != typeid(Hardware::DeviceSignal))
+				{
+					return;
+				}
+				Hardware::DeviceSignal* currentSignal = dynamic_cast<Hardware::DeviceSignal*>(currentDevice);
+				if (currentSignal == nullptr)
+				{
+					return;
+				}
+				const QString& strId = currentSignal->strId();
+				const QList<int>& values = deviceStrIdHash2signalIndex.values(CUtils::calcHash(strId.constData(), strId.length() * sizeof(QChar)));
+				for (int i = 0; i < values.count(); i++)
+				{
+					ds.addSignalIndex(values.at(i));
+				}
+			});
+			dataSources.insert(key, ds);
+
+		}
+	});
+}
+

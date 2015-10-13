@@ -7,6 +7,7 @@
 #include "../include/DbStruct.h"
 #include "../include/OrderedHash.h"
 #include "../include/DeviceObject.h"
+#include "../include/DataSource.h"
 
 
 class QXmlStreamAttributes;
@@ -441,6 +442,9 @@ public:
 	void resetAddresses();
 };
 
+
+void SerializeSignalsFromXml(UnitList& unitInfo, SignalSet& signalSet);
+void InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceObject* deviceRoot, const SignalSet& signalSet);
 
 
 
