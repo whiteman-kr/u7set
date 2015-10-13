@@ -129,5 +129,10 @@ void MultiThreadSignalTest::run()
 	totalErrors += numberOfErrorsInWorkTest;
 	numberOfErrorsInWorkTest = 0;
 
+	/*for (signalId : signalIds)
+	{
+
+	}*/
+
 	db.close();
 }
