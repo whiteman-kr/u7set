@@ -500,7 +500,6 @@ void UserTests::update_userTest()
 
 	// Try to change user flags by user
 	//
-
 	ok = query.exec("SElECT * FROM create_user(1, 'UpdateUserHackAdminTest', 'firstName', 'lastName', 'testPassword', false, false, false)");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));

@@ -104,15 +104,28 @@ BEGIN
 	END IF;
 
 	-- upadte all other fields
-	UPDATE Users
-		SET
-			FirstName = first_name,
-			LastName = last_name,
-			Administrator = is_admin,
-			ReadOnly = is_read_only,
-			Disabled = is_disabled
-		WHERE
-			userid = user_id;
+	IF (is_admin(current_user_id) = TRUE)
+	THEN
+		UPDATE Users
+			SET
+				FirstName = first_name,
+				LastName = last_name,
+				Administrator = is_admin,
+				ReadOnly = is_read_only,
+				Disabled = is_disabled
+			WHERE
+				userid = user_id;
+	ELSE
+		UPDATE Users
+			SET
+				FirstName = first_name,
+				LastName = last_name,
+				--Administrator = is_admin,	-- If user is not administrator it has no right to change this columns
+				ReadOnly = is_read_only
+				--Disabled = is_disabled	-- If user is not administrator it has no right to change this columns
+			WHERE
+				userid = user_id;
+	END IF;
 
 	-- return
 	RETURN user_id;
