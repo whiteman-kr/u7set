@@ -30,8 +30,6 @@ private:
 	void initDataSources();
 	void initListeningPorts();
 	void readConfigurationFiles();
-	void readEquipmentConfig();
-	void readApplicationSignalsConfig();
 
 	void runUdpThreads();
 	void stopUdpThreads();

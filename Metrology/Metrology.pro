@@ -89,7 +89,9 @@ SOURCES += \
     ../lib/ModuleConfiguration.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
-    MeasureSignalBase.cpp
+    MeasureSignalBase.cpp \
+    ../lib/DataSource.cpp \
+    ../lib/SocketIO.cpp
 
 
 HEADERS  += \
@@ -127,7 +129,9 @@ HEADERS  += \
     ../include/OrderedHash.h \
     Stable.h \
     ObjectVector.h \
-    MeasureSignalBase.h
+    MeasureSignalBase.h \
+    ../include/DataSource.h \
+    ../include/SocketIO.h
 
 
 FORMS    +=

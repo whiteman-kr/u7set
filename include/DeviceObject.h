@@ -779,6 +779,8 @@ namespace Hardware
 	//
 	void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren);
 	void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren);
+
+	void SerializeEquipmentFromXml(std::shared_ptr<DeviceRoot>& deviceRoot);
 }
 
 Q_DECLARE_METATYPE(Hardware::DeviceModule::FamilyType)

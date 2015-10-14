@@ -460,7 +460,7 @@ void UserTests::update_userTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2(query.value("firstName").toString() == newDataForTest, qPrintable("Error: firstName is not correct!"));
+	QVERIFY2(query.value("firstName").toString() == newDataForTest, qPrintable("Error: firstName is not correct, or wrong userId has been returned!"));
 	QVERIFY2(query.value("lastName").toString() == newDataForTest, qPrintable("Error: lastName is not correct!"));
 	QVERIFY2(query.value("password").toString() == newDataForTest, qPrintable("Error: lastName is not correct!"));
 	QVERIFY2(query.value("administrator").toBool() == true, qPrintable("Error: lastName is not correct!"));
@@ -507,8 +507,21 @@ void UserTests::update_userTest()
 
 	int setAdminUpdateUserTest = query.value(0).toInt();
 
-	ok = query.exec(QString("SELECT * FROM update_user(%2, 'UpdateUserHackAdminTest', 'firstName', 'lastName', 'testPassword', 'newPassword', true, true, true)").arg(setAdminUpdateUserTest));
-	QVERIFY2(ok == false, qPrintable("Error: user must not be able to change his rights"));
+	ok = query.exec(QString("SELECT * FROM update_user(%1, 'UpdateUserHackAdminTest', 'firstName', 'lastName', 'testPassword', 'newPassword', true, true, true)").arg(setAdminUpdateUserTest));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toInt() == setAdminUpdateUserTest, qPrintable ("Error: function returned wrong id"));
+
+	ok = query.exec(QString("SELECT * FROM users WHERE userId = %1").arg(setAdminUpdateUserTest));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("administrator").toBool() == false, qPrintable ("Error: function changed value administrator by user"));
+	QVERIFY2(query.value("readOnly").toBool() == true, qPrintable ("Error: function do not changed value readOnly"));
+	QVERIFY2(query.value("disabled").toBool() == false, qPrintable ("Error: function changed value disabled y user"));
 
 	// Call wrong password error
 	//
