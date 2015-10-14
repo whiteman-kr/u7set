@@ -1468,6 +1468,24 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 		return;
 	}
 
+	// Set new id, recusively to all children
+	//
+	std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid](Hardware::DeviceObject* object)
+		{
+			assert(object);
+
+			object->setUuid(QUuid::createUuid());
+
+			for (int i = 0; i < object->childrenCount(); i++)
+			{
+				setUuid(object->child(i));
+			}
+		};
+
+	setUuid(object.get());
+
+	// Set Parent
+	//
 	Hardware::DeviceObject* parentObject = nullptr;
 	QModelIndex parentIndex;	// Currently it is root;
 
