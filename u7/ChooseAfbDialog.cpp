@@ -15,10 +15,7 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbEleme
 
 	for (std::shared_ptr<Afb::AfbElement> e : elements)
 	{
-        if (e->internalUse() == false)
-        {
-            m_elements.push_back(e);
-        }
+        m_elements.push_back(e);
 	}
 
 	QStringList columns;
@@ -69,7 +66,8 @@ void ChooseAfbDialog::fillTree()
 
             for (std::shared_ptr<Afb::AfbElement> e : m_elements)
             {
-                if (e->category() == cat || cat == AllCategoryName)
+                if (e->internalUse() == false &&
+                        (e->category() == cat || cat == AllCategoryName))
                 {
                     QTreeWidgetItem* item = new QTreeWidgetItem(catItem);
                     item->setText(0, e->caption());
@@ -98,7 +96,7 @@ void ChooseAfbDialog::fillTree()
 
         for (std::shared_ptr<Afb::AfbElement> e : m_elements)
         {
-            if (e->caption().contains(mask, Qt::CaseInsensitive))
+            if (e->internalUse() == false && e->caption().contains(mask, Qt::CaseInsensitive))
             {
                 QTreeWidgetItem* item = new QTreeWidgetItem();
                 item->setText(0, e->caption());
@@ -183,7 +181,6 @@ void ChooseAfbDialog::on_btnOk_clicked()
 
 	if (m_lastSelectedIndex == -1)
 	{
-		QMessageBox::warning(this, "Warning", "No AFB element is chosen!");
 		return;
 	}
 
