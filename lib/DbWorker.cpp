@@ -3850,11 +3850,47 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 }
 
 
-void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* /*deviceSignals*/)
+void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals)
 {
+	AUTO_COMPLETE
 
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(tr("Cannot delete signal. Database connection is not opened."));
+		return;
+	}
+
+	ObjectState os;
+
+	for(Hardware::DeviceSignal* deviceSignal : *deviceSignals)
+	{
+		QString request = QString("SELECT * FROM delete_signal_by_device_str_id(%1, '%2'')")
+			.arg(currentUser().userId()).arg(deviceSignal->strId());
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(tr("Can't delete signal! Error: ") +  q.lastError().text());
+			return;
+		}
+
+		if (q.next() != false)
+		{
+			getObjectState(q, os);
+		}
+		else
+		{
+			emitError(tr("Can't delete signal! No data returned!"));
+		}
+	}
 }
-
 
 
 // Build management

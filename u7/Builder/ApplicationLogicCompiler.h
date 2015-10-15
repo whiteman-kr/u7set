@@ -101,8 +101,6 @@ namespace Builder
 
 		QVector<Hardware::DeviceModule*> m_lm;
 
-		QHash<QString, Hardware::ModuleFirmware*> m_subsystemModuleFirmware;
-
 		QString msg;
 
 	private:
@@ -110,8 +108,8 @@ namespace Builder
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool compileModulesLogics();
-		bool writeModuleLogicCompilerResult(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
-		bool saveModulesLogicsFiles();
+
+		bool writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
 
 	public:
 		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet,
@@ -334,14 +332,59 @@ namespace Builder
 
 	struct MemoryArea
 	{
+	public:
+		struct SignalAddress16
+		{
+		private:
+			Address16 m_address;
+			QString m_signalStrID;
+			int m_sizeW = 0;
+			bool m_isDiscrete = false;
+
+		public:
+			SignalAddress16() {}
+
+			SignalAddress16(const QString& strID, const Address16& address, int sizeW, bool isDiscrete) :
+				m_signalStrID(strID),
+				m_address(address),
+				m_sizeW(sizeW),
+				m_isDiscrete(isDiscrete)
+			{
+			}
+
+			SignalAddress16(const SignalAddress16& sa)
+			{
+				m_signalStrID = sa.m_signalStrID;
+				m_address = sa.m_address;
+				m_sizeW = sa.m_sizeW;
+				m_isDiscrete = sa.m_isDiscrete;
+			}
+
+			void setSignalStrID(const QString& strID) { m_signalStrID = strID; }
+			QString signalStrID() const { return m_signalStrID; }
+
+			void setAddress(const Address16& address) { m_address = address; }
+			Address16 address() const { return m_address; }
+
+			void setSizeW(int sizeW) { m_sizeW = sizeW; }
+			int sizeW() const { return m_sizeW; }
+
+			void setDiscrete(bool discrete) { m_isDiscrete = discrete; }
+			bool isDiscrete() const { return m_isDiscrete; }
+		};
+
 	private:
 		int m_startAddress = 0;
 		int m_sizeW = 0;
 
 		bool m_locked = false;
 
+		Address16 m_nextSignalAddress;
+		QVector<SignalAddress16> m_signals;
+
 	public:
-		void setStartAddress(int startAddress) { assert(m_locked == false); m_startAddress = startAddress; }
+		void setStartAddress(int startAddress);
+
 		void setSizeW(int sizeW) { assert(m_locked == false); m_sizeW = sizeW; }
 
 		int startAddress() const { return m_startAddress; }
@@ -355,15 +398,13 @@ namespace Builder
 
 		int nextAddress() const { return m_startAddress + m_sizeW; }
 
-		MemoryArea& operator = (const MemoryArea& ma)
-		{
-			assert(m_locked == false);
+		MemoryArea& operator = (const MemoryArea& ma);
 
-			m_startAddress = ma.m_startAddress;
-			m_sizeW = ma.m_sizeW;
+		Address16 appendSignal(const Signal &signal);
 
-			return *this;
-		}
+		bool hasSignals() const { return m_signals.size() > 0; }
+
+		QVector<SignalAddress16>& getSignals() { return m_signals; }
 	};
 
 
@@ -396,24 +437,12 @@ namespace Builder
 			MemoryArea regDiscretSignals;
 			MemoryArea nonRegDiscretSignals;
 
-			int regDiscreteSignalCount;
-			int nonRegDiscreteSignalCount;
-
-			int regDiscreteSignalsSizeW() const
-			{
-				return regDiscreteSignalCount % WORD_SIZE ? regDiscreteSignalCount / WORD_SIZE + 1 : regDiscreteSignalCount / WORD_SIZE;
-			}
-
-			int nonRegDiscreteSignalsSizeW() const
-			{
-				return nonRegDiscreteSignalCount % WORD_SIZE ? nonRegDiscreteSignalCount / WORD_SIZE + 1 : nonRegDiscreteSignalCount / WORD_SIZE;
-			}
-
 		} m_appBitAdressed;
 
 		struct
 		{
 			MemoryArea memory;
+
 		} m_tuningInterface;
 
 		struct
@@ -428,18 +457,6 @@ namespace Builder
 			MemoryArea regDiscreteSignals;				// copying from this->appBitAdressed.regDiscretSignals
 			MemoryArea nonRegAnalogSignals;
 
-			int regAnalogSignalCount;
-			int nonRegAnalogSignalCount;
-
-			int regAnalogSignalsSizeW()
-			{
-				return regAnalogSignalCount * ANALOG_SIZE_W;
-			}
-
-			int nonRegAnalogSignalsSizeW()
-			{
-				return nonRegAnalogSignalCount * ANALOG_SIZE_W;
-			}
 		} m_appWordAdressed;
 
 		struct
@@ -452,12 +469,11 @@ namespace Builder
 			MemoryArea memory;
 		} m_lmInOuts;
 
-		bool recalculateAddresses();
-
 		OutputLog* m_log = nullptr;
 
 		void addSection(QStringList& memFile, MemoryArea& memArea, const QString& title);
 		void addRecord(QStringList& memFile, MemoryArea& memArea, const QString& title);
+		void addSignals(QStringList& memFile, MemoryArea& memArea);
 
 	public:
 
@@ -471,6 +487,8 @@ namespace Builder
 					const MemoryArea& lmDiagData,
 					const MemoryArea& lmIntOutData);
 
+		bool recalculateAddresses();
+
 		int lmDiagnosticsAddress() const { return m_lmDiagnostics.memory.startAddress(); }
 		int lmDiagnosticsSizeW() const { return m_lmDiagnostics.memory.sizeW(); }
 
@@ -478,7 +496,11 @@ namespace Builder
 		int lmInOutsSizeW() const { return m_lmInOuts.memory.sizeW(); }
 
 		int regDiscreteSignalsAddress() const { return m_appBitAdressed.regDiscretSignals.startAddress(); }
-		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.regDiscreteSignalsSizeW(); }
+		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.regDiscretSignals.sizeW(); }
+
+		int bitAddressedMemoryAddress() const { return m_appBitAdressed.memory.startAddress(); }
+		int wordAddressedMemoryAddress() const { return m_appWordAdressed.memory.startAddress(); }
+
 
 		// rb_* - adrresses and sizes in Registration Buffer
 		//
@@ -498,11 +520,14 @@ namespace Builder
 
 		void getFile(QStringList& memFile);
 
-		/*Address16 addRegDiscreteSignal();
-		Address16 addNonRegDiscreteSignal();
+		Address16 addRegDiscreteSignal(const Signal& signal);
+		Address16 addRegDiscreteSignalToRegBuffer(const Signal& signal);
+		Address16 addNonRegDiscreteSignal(const Signal& signal);
+		Address16 addRegAnalogSignal(const Signal& signal);
+		Address16 addNonRegAnalogSignal(const Signal& signal);
 
-		Address16 addRegAnalogSignal();
-		Address16 addNonRegAnalogSignal();*/
+		double bitAddressedMemoryUsed();
+		double wordAddressedMemoryUsed();
 	};
 
 
@@ -604,14 +629,6 @@ namespace Builder
 
 		// LM's and modules settings
 		//
-		MemoryArea m_moduleData;
-		MemoryArea m_optoInterfaceData;
-		MemoryArea m_appLogicBitData;
-		MemoryArea m_tuningData;
-		MemoryArea m_appLogicWordData;
-		MemoryArea m_lmDiagData;
-		MemoryArea m_lmIntOutData;
-
 		int m_lmAppLogicFrameSize = 0;
 		int m_lmAppLogicFrameCount = 0;
 
@@ -621,23 +638,6 @@ namespace Builder
 		//
 
 		LmMemoryMap m_memoryMap;
-
-/*		int m_registeredInternalAnalogSignalsOffset = 0;	// offset of internal analog signals (in registration buffer)
-		int m_registeredInternalAnalogSignalsSize = 0;		// size of internal analog signals (in words)
-
-		int m_internalAnalogSignalsOffset = 0;				// offset of internal analog signals (in registration buffer)
-		int m_internalAnalogSignalsSize = 0;				// size of internal analog signals (in words)
-
-		int m_registeredInternalDiscreteSignalsOffset = 0;	// offset of internal discrete signals (in bit-addressed memory)
-		int m_registeredInternalDiscreteSignalsSize = 0;	// size of internal discrete signals (in words)
-		int m_registeredInternalDiscreteSignalsCount = 0;	// count of nternal discrete signals
-
-		int m_regBufferInternalDiscreteSignalsOffset = 0;	// offset of internal discrete signals (in registration buffer)
-		int m_regBufferInternalDiscreteSignalsSize = 0;		// size of internal discrete signals (in words)
-
-		int m_internalDiscreteSignalsOffset = 0;			// offset of internal discrete signals (in bit-addressed memory)
-		int m_internalDiscreteSignalsSize = 0;				// size of internal discrete signals (in words)
-		int m_internalDiscreteSignalsCount = 0;				// count of nternal discrete signals*/
 
 		QVector<Module> m_modules;
 
