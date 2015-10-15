@@ -50,7 +50,7 @@ DataSource& DataSource::operator = (const DataSource& ds)
 	m_hostAddress = ds.hostAddress();
 	m_name = ds.name();
 	m_partCount = ds.partCount();
-	m_relatedSignalIndexes.append(ds.m_relatedSignalIndexes);
+	m_relatedSignalIndexes = ds.m_relatedSignalIndexes;
 
 	m_state = ds.state();
 	m_uptime = ds.uptime();
