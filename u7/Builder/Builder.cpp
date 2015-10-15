@@ -13,6 +13,7 @@
 
 #include "../Builder/ApplicationLogicCompiler.h"
 #include <QBuffer>
+#include <functional>
 
 namespace Builder
 {
@@ -130,6 +131,21 @@ namespace Builder
 			LOG_SUCCESS(m_log, tr("Ok"));
 
 			Hardware::EquipmentSet equipmentSet(deviceRoot);
+
+			//
+			// Check same Uuids and same StrIds
+			//
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Checking for same Uuids and StrIds"));
+
+			ok = checkSameUuidAndStrId(deviceRoot.get());
+
+			if (ok == false)
+			{
+				break;
+			}
+
+			LOG_SUCCESS(m_log, tr("Ok"));
 
 			//
 			// SignalSet
@@ -268,6 +284,8 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Getting system %1...").arg(parent->caption()));
 		}
 
+		// --
+		//
 		std::vector<DbFileInfo> files;
 
 		bool ok = false;
@@ -359,6 +377,78 @@ namespace Builder
 		device->expandStrId();
 
 		return true;
+	}
+
+	bool BuildWorkerThread::checkSameUuidAndStrId(Hardware::DeviceObject* root)
+	{
+		if (root == nullptr)
+		{
+			assert(root);
+			return false;
+		}
+
+		std::map<QUuid, Hardware::DeviceObject*> uuidMap;
+		std::map<QString, Hardware::DeviceObject*> strIdMap;
+
+		// Recursive function
+		//
+
+		bool ok = checkSameUuidAndStrIdWorker(root, uuidMap, strIdMap);
+
+		return ok;
+	}
+
+	bool BuildWorkerThread::checkSameUuidAndStrIdWorker(Hardware::DeviceObject* device,
+									 std::map<QUuid, Hardware::DeviceObject*>& uuidMap,
+									 std::map<QString, Hardware::DeviceObject*>& strIdMap)
+	{
+		if (device == nullptr)
+		{
+			assert(device);
+			return false;
+		}
+
+		auto foundSameUuid = uuidMap.find(device->uuid());
+		auto foundSameStrId = strIdMap.find(device->strId());
+
+		bool ok = true;
+
+		if (foundSameUuid != uuidMap.end())
+		{
+			LOG_ERROR(m_log, tr("There are DeviceObjects with the same Uuid %1, StrID1: %2, StrID2: %3")
+					  .arg(device->uuid().toString())
+					  .arg(device->strId())
+					  .arg(foundSameUuid->second->strId()));
+
+			ok = false;
+		}
+		else
+		{
+			uuidMap[device->uuid()] = device;
+		}
+
+		if (foundSameStrId != strIdMap.end())
+		{
+			LOG_ERROR(m_log, tr("There are DeviceObjects with the same StrID %1, Parent1: %2, Parent2: %3")
+					  .arg(device->strId())
+					  .arg(device->parent()->strId())
+					  .arg(foundSameStrId->second->parent()->strId()));
+
+			ok = false;
+		}
+		else
+		{
+			strIdMap[device->strId()] = device;
+		}
+
+		int childCount = device->childrenCount();
+
+		for (int i = 0; i < childCount; i++)
+		{
+			ok &= checkSameUuidAndStrIdWorker(device->child(i), uuidMap, strIdMap);
+		}
+
+		return ok;
 	}
 
 

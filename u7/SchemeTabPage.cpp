@@ -103,6 +103,58 @@ SchemesTabPage::~SchemesTabPage()
 {
 }
 
+bool SchemesTabPage::hasUnsavedSchemes() const
+{
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		QWidget* tab = m_tabWidget->widget(i);
+
+		if (tab == nullptr)
+		{
+			assert(tab);
+			continue;
+		}
+
+		EditSchemeTabPage* schemeTabPage = dynamic_cast<EditSchemeTabPage*>(tab);
+		if (schemeTabPage != nullptr)
+		{
+			if (schemeTabPage->modified() == true)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool SchemesTabPage::saveUnsavedSchemes()
+{
+	bool ok = true;
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		QWidget* tab = m_tabWidget->widget(i);
+
+		if (tab == nullptr)
+		{
+			assert(tab);
+			continue;
+		}
+
+		EditSchemeTabPage* schemeTabPage = dynamic_cast<EditSchemeTabPage*>(tab);
+		if (schemeTabPage != nullptr)
+		{
+			if (schemeTabPage->modified() == true)
+			{
+				ok &= schemeTabPage->saveWorkcopy();
+			}
+		}
+	}
+
+	return ok;
+}
+
 void SchemesTabPage::projectOpened()
 {
 	this->setEnabled(true);

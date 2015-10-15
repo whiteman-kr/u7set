@@ -41,7 +41,8 @@ SOURCES += main.cpp \
     ../../lib/Signal.cpp \
     ../../lib/ProtoSerialization.cpp \
     ../../lib/DbProgressDialog.cpp \
-    MultiThreadTest.cpp
+    MultiThreadFileTest.cpp \
+    MultiThreadSignalTest.cpp
 
 HEADERS += \
     UserTests.h \
@@ -57,7 +58,8 @@ HEADERS += \
     ../../include/Signal.h \
     ../../include/ProtoSerialization.h \
     ../../include/DbProgressDialog.h \
-    MultiThreadTest.h
+    MultiThreadFileTest.h \
+    MultiThreadSignalTest.h
 
 #c++11 support for GCC
 #

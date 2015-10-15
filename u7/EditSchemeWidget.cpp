@@ -1,5 +1,7 @@
 #include "Stable.h"
 #include <QRubberBand>
+#include <QClipboard>
+#include <QMimeData>
 #include "EditEngine/EditEngine.h"
 #include "EditSchemeWidget.h"
 #include "SchemePropertiesDialog.h"
@@ -1532,6 +1534,10 @@ EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, con
 
 	connect(editSchemeView(), &EditSchemeView::selectionChanged, this, &EditSchemeWidget::selectionChanged);
 
+	// Clipboard
+	//
+	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EditSchemeWidget::clipboardDataChanged);
+
 	return;
 }
 
@@ -1764,9 +1770,9 @@ void EditSchemeWidget::createActions()
 	// Edit->Paste
 	//
 	m_editPasteAction = new QAction(tr("Paste"), this);
-	m_editPasteAction->setEnabled(true);
+	m_editPasteAction->setEnabled(false);
 	m_editPasteAction->setShortcut(QKeySequence::Paste);
-	//connect(m_editPasteAction, &QAction::triggered, this, &EditSchemeWidget::___);
+	connect(m_editPasteAction, &QAction::triggered, this, &EditSchemeWidget::editPaste);
 	addAction(m_editPasteAction);
 
 	// ------------------------------------
@@ -4022,8 +4028,12 @@ void EditSchemeWidget::contextMenu(const QPoint& pos)
 	// Disable some actions in ReadOnly mode
 	//
 	m_addAction->setDisabled(readOnly());
-	m_editPasteAction->setDisabled(readOnly());
-	m_deleteAction->setDisabled(readOnly());
+
+	if (readOnly() == true)
+	{
+		m_editPasteAction->setDisabled(true);
+		m_deleteAction->setDisabled(true);
+	}
 
 	// Version Control enable/disable items
 	//
@@ -4213,6 +4223,38 @@ void EditSchemeWidget::selectAll()
 	return;
 }
 
+void EditSchemeWidget::editPaste()
+{
+	// To DO: Paste scheme items
+	//
+
+	// Paste strid to SchemeItemSignal
+	//
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = editSchemeView()->selectedItems();
+
+	bool allItemsAreSignals = true;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemeItemSignal*>(item.get()) == nullptr)
+		{
+			allItemsAreSignals = false;
+			break;
+		}
+	}
+
+	const QClipboard* clipboard = QApplication::clipboard();
+	const QMimeData* mimeData = clipboard->mimeData();
+
+	if (allItemsAreSignals == true &&
+		mimeData->hasText() == true &&
+		mimeData->text().startsWith('#') == true)
+	{
+		m_editEngine->runSetProperty("StrIDs", QVariant(mimeData->text()), selected);
+	}
+
+	return;
+}
+
 void EditSchemeWidget::schemeProperties()
 {
 	if (m_schemePropertiesDialog == nullptr)
@@ -4287,6 +4329,46 @@ void EditSchemeWidget::selectionChanged()
 	m_sameWidthAction->setEnabled(allowSize);
 	m_sameHeightAction->setEnabled(allowSize);
 	m_sameSizeAction->setEnabled(allowSize);
+
+	clipboardDataChanged();
+
+	return;
+}
+
+void EditSchemeWidget::clipboardDataChanged()
+{
+	bool paste = false;
+
+	// TO DO: if same SchemeItems in the clipboard
+	//
+
+	// if Any SchemeItemSignal is selected and strId is in the clipboard
+	//
+	const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& selected = editSchemeView()->selectedItems();
+
+	bool allItemsAreSignals = true;
+	for (std::shared_ptr<VFrame30::SchemeItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemeItemSignal*>(item.get()) == nullptr)
+		{
+			allItemsAreSignals = false;
+			break;
+		}
+	}
+
+	const QClipboard* clipboard = QApplication::clipboard();
+	const QMimeData* mimeData = clipboard->mimeData();
+
+	if (allItemsAreSignals == true &&
+		mimeData->hasText() == true &&
+		mimeData->text().startsWith('#') == true)
+	{
+		paste = true;
+	}
+
+	// --
+	//
+	m_editPasteAction->setEnabled(paste);
 
 	return;
 }

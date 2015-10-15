@@ -59,6 +59,9 @@ public:
 	template<typename SchemeType>
 	static SchemesTabPage* create(const QString& fileExt, DbController* dbcontroller, const QString& parentFileName, QWidget* parent);
 
+	bool hasUnsavedSchemes() const;
+	bool saveUnsavedSchemes();
+
 signals:
 	void buildStarted();
 	void buildFinished();

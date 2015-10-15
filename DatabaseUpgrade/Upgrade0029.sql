@@ -385,6 +385,9 @@ BEGIN
 		RETURN;
 	END IF;
 
+	-- remove same ids
+	checked_out_ids := uniq(sort_desc(checked_out_ids));
+
 	-- Add new record to Changeset
 	INSERT INTO Changeset (UserID, Comment, File)
 		VALUES (user_id, checkin_comment, TRUE)

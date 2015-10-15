@@ -1,10 +1,10 @@
-#include "MultiThreadTest.h"
+#include "MultiThreadFileTest.h"
 #include <QtSql>
 #include <vector>
 #include <QDebug>
 #include <assert.h>
 
-MultiThreadTest::MultiThreadTest(int number,
+MultiThreadFileTest::MultiThreadFileTest(int number,
 								 const char* dbHost,
 								 const char* dbUser,
 								 const char* dbUserPassword,
@@ -23,17 +23,17 @@ MultiThreadTest::MultiThreadTest(int number,
 	assert(name);
 }
 
-MultiThreadTest::~MultiThreadTest()
+MultiThreadFileTest::~MultiThreadFileTest()
 {
 	//qDebug() << "MultiThreadTest::~MultiThreadTest() " << m_threadNumber;
 }
 
-void MultiThreadTest::run()
+void MultiThreadFileTest::run()
 {
 	// Create new database connection for thread to work with
 	//
 
-	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "Thread_" + QString::number(m_threadNumber));
+	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "fileThread_" + QString::number(m_threadNumber));
 
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
@@ -52,10 +52,10 @@ void MultiThreadTest::run()
 	//
 
 	bool ok = query.exec(QString("SELECT * FROM create_user(1, '%1', '%2', '%3', '%4', false, false, false)")
-						 .arg("Thread_" + QString::number(m_threadNumber))
-						 .arg("Thread_" + QString::number(m_threadNumber))
-						 .arg("Thread_" + QString::number(m_threadNumber))
-						 .arg("Thread_" + QString::number(m_threadNumber)));
+						 .arg("fileThread_" + QString::number(m_threadNumber))
+						 .arg("fileThread_" + QString::number(m_threadNumber))
+						 .arg("fileThread_" + QString::number(m_threadNumber))
+						 .arg("fileThread_" + QString::number(m_threadNumber)));
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
@@ -85,8 +85,9 @@ void MultiThreadTest::run()
 	for (fileNumber = 0; fileNumber < m_amountOfFileIds; fileNumber++)
 	{
 		ok = query.exec(QString("SELECT * FROM add_file(%1, '%2', 1, '%3', '{}')")
-						.arg(userId).arg("thread" + QString::number(m_threadNumber) + "_" + "number" + QString::number(fileNumber))
-						.arg("thread" + QString::number(m_threadNumber) + "_" + "number" + QString::number(fileNumber)));
+						.arg(userId)
+						.arg("fileThread_" + QString::number(m_threadNumber) + "_" + "number" + QString::number(fileNumber))
+						.arg("fileThread_" + QString::number(m_threadNumber) + "_" + "number" + QString::number(fileNumber)));
 
 		if (ok == false)
 		{
@@ -329,7 +330,7 @@ void MultiThreadTest::run()
 		ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3', '{}')")
 						.arg(userId)
 						.arg(fileId)
-						.arg(QString("Thread_%1_fileId_%2 testingData")
+						.arg(QString("fileThread_%1_fileId_%2 testingData")
 						.arg(m_threadNumber)
 						.arg(fileId)));
 
@@ -386,7 +387,7 @@ void MultiThreadTest::run()
 			error = true;
 		}
 
-		if (query.value("data").toString() != QString("Thread_%1_fileId_%2 testingData").arg(m_threadNumber).arg(fileId))
+		if (query.value("data").toString() != QString("fileThread_%1_fileId_%2 testingData").arg(m_threadNumber).arg(fileId))
 		{
 			qDebug() << "Error: fileId is not match after function get_workcopy()\nThread: " << m_threadNumber << "FileId" << fileId;
 			error = true;
@@ -472,7 +473,7 @@ void MultiThreadTest::run()
 			error = true;
 		}
 
-		if (query.value("name").toString() != QString("thread" + QString::number(m_threadNumber) + "_" + "number" + QString::number(fileNumber)))
+		if (query.value("name").toString() != QString("fileThread_" + QString::number(m_threadNumber) + "_" + "number" + QString::number(fileNumber)))
 		{
 			qDebug() << "Error: wrong name in get_latest_file_version() function\nThread: " << m_threadNumber << "\nFileId: " << fileId;
 			error = true;

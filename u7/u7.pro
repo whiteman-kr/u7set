@@ -133,7 +133,9 @@ SOURCES +=\
     Subsystem.cpp \
     CreateSchemeDialog.cpp \
     ChooseAfbDialog.cpp \
-    EquipmentVcsDialog.cpp
+    EquipmentVcsDialog.cpp \
+    ../lib/DataSource.cpp \
+    ../lib/SocketIO.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -199,7 +201,9 @@ HEADERS  += \
     Subsystem.h \
     CreateSchemeDialog.h \
     ChooseAfbDialog.h \
-    EquipmentVcsDialog.h
+    EquipmentVcsDialog.h \
+    ../include/DataSource.h \
+    ../include/SocketIO.h
 
 FORMS    += \
     ChangesetDialog.ui \

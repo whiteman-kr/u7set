@@ -677,8 +677,8 @@ namespace Builder
 
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
-		m_appSignals(*this),
-		m_memoryMap(appLogicCompiler.m_log)
+		m_memoryMap(appLogicCompiler.m_log),
+		m_appSignals(*this)
 	{
 		m_equipment = appLogicCompiler.m_equipment;
 		m_signals = appLogicCompiler.m_signals;

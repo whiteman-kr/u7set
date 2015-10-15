@@ -3,6 +3,7 @@
 
 class CentralWidget;
 class DbController;
+class SchemesTabPage;
 
 namespace Ui {
 class MainWindow;
@@ -84,6 +85,10 @@ private:
 	QLabel* m_pStatusBarInfo;
 	QLabel* m_pStatusBarConnectionStatistics;
 	QLabel* m_pStatusBarConnectionState;
+
+	SchemesTabPage* m_logicScheme = nullptr;
+	SchemesTabPage* m_workflowScheme = nullptr;
+	SchemesTabPage* m_diagScheme = nullptr;
 
 	DbController* m_dbController;
 };

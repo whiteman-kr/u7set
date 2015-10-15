@@ -4,6 +4,7 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QDebug>
+#include <QXmlStreamReader>
 
 
 namespace Hardware
@@ -2376,6 +2377,109 @@ R"DELIM({
 	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren)
 	{
 		equipmentWalker(currentDevice, processBeforeChildren, nullptr);
+	}
+
+	void SerializeEquipmentFromXml(std::shared_ptr<Hardware::DeviceRoot>& deviceRoot)
+	{
+		QXmlStreamReader equipmentReader;
+		QFile file("equipment.xml");
+
+		Hardware::DeviceObject* pCurrentDevice;
+
+		if (file.open(QIODevice::ReadOnly))
+		{
+			equipmentReader.setDevice(&file);
+			Hardware::Init();
+
+			while (!equipmentReader.atEnd())
+			{
+				QXmlStreamReader::TokenType token = equipmentReader.readNext();
+
+				switch (token)
+				{
+				case QXmlStreamReader::StartElement:
+				{
+					const QXmlStreamAttributes& attr = equipmentReader.attributes();
+					const QString classNameHash = attr.value("classNameHash").toString();
+					if (classNameHash.isEmpty())
+					{
+						qDebug() << "Attribute classNameHash of DeviceObject not found";
+						continue;
+					}
+					bool ok = false;
+					quint32 hash = classNameHash.toUInt(&ok, 16);
+					if (!ok)
+					{
+						qDebug() << QString("Could not interpret hash %s").arg(classNameHash);
+						continue;
+					}
+					std::shared_ptr<Hardware::DeviceObject> pDeviceObject(Hardware::DeviceObjectFactory.Create(hash));
+					if (pDeviceObject == nullptr)
+					{
+						qDebug() << QString("Unknown element %s found").arg(equipmentReader.name().toString());
+						continue;
+					}
+
+					if (typeid(*pDeviceObject) == typeid(Hardware::DeviceRoot))
+					{
+						pCurrentDevice = pDeviceObject.get();
+						deviceRoot = std::dynamic_pointer_cast<Hardware::DeviceRoot>(pDeviceObject);
+						continue;
+					}
+
+					if (pCurrentDevice == nullptr)
+					{
+						qDebug() << "DeviceRoot should be the root xml element";
+						return;
+					}
+
+					const QMetaObject* metaObject = pDeviceObject->metaObject();
+					for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i)
+					{
+						const QMetaProperty& property = metaObject->property(i);
+						if (property.isValid())
+						{
+							const char* name = property.name();
+							QVariant tmp = QVariant::fromValue(attr.value(name).toString());
+							assert(tmp.convert(pDeviceObject->property(name).userType()));
+							pDeviceObject->setProperty(name, tmp);
+						}
+					}
+
+					pDeviceObject->setStrId(attr.value("StrID").toString());
+					pDeviceObject->setCaption(attr.value("Caption").toString());
+					pDeviceObject->setChildRestriction(attr.value("ChildRestriction").toString());
+					pDeviceObject->setPlace(attr.value("Place").toInt());
+					pDeviceObject->setDynamicProperties(attr.value("DynamicProperties").toString());
+
+					pCurrentDevice->addChild(pDeviceObject);
+					pCurrentDevice = pDeviceObject.get();
+					break;
+				}
+				case QXmlStreamReader::EndElement:
+					if (typeid(*pCurrentDevice) != typeid(Hardware::DeviceRoot))
+					{
+						if (pCurrentDevice->parent() == nullptr)
+						{
+							assert(false);
+							break;
+						}
+						pCurrentDevice = pCurrentDevice->parent();
+					}
+					else
+					{
+						return;	// Closing root element, nothing to read left
+					}
+					break;
+				default:
+					continue;
+				}
+			}
+			if (equipmentReader.hasError())
+			{
+				qDebug() << "Parse equipment.xml error";
+			}
+		}
 	}
 
 }

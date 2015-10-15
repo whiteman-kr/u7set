@@ -1482,7 +1482,7 @@ void DbWorker::slot_updateUser(DbUser user)
 
 	if (result == false)
 	{
-		emitError(tr("Can't update user %1, error: %2").arg(user.username()).arg(db.lastError().text()));
+		emitError(tr("Can't update user %1, error: %2").arg(user.username()).arg(query.lastError().text()));
 		return;
 	}
 

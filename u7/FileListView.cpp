@@ -100,6 +100,126 @@ QVariant FileListModel::headerData(int section, Qt::Orientation orientation, int
 	return QVariant();
 }
 
+void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*/)
+{
+	emit layoutAboutToBeChanged();
+
+	QModelIndexList pers = persistentIndexList();
+	std::vector<std::shared_ptr<DbFileInfo>> oldFileOrder(m_files);
+
+	switch (column)
+	{
+		case FileNameColumn:
+			std::sort(m_files.begin(), m_files.end(),
+				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+				{
+					if (order == Qt::AscendingOrder)
+					{
+						return f1->fileName() > f2->fileName();
+					}
+					else
+					{
+						return f1->fileName() <= f2->fileName();
+					}
+				});
+			break;
+
+		case FileSizeColumn:
+			std::sort(m_files.begin(), m_files.end(),
+				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+				{
+					if (order == Qt::AscendingOrder)
+					{
+						return f1->size() > f2->size();
+					}
+					else
+					{
+						return f1->size() <= f2->size();
+					}
+				});
+			break;
+
+		case FileStateColumn:
+			std::sort(m_files.begin(), m_files.end(),
+				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+				{
+					if (order == Qt::AscendingOrder)
+					{
+						return f1->state().text() > f2->state().text();
+					}
+					else
+					{
+						return f1->state().text() <= f2->state().text();
+					}
+				});
+			break;
+
+		case FileUserColumn:
+			std::sort(m_files.begin(), m_files.end(),
+				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+				{
+					if (order == Qt::AscendingOrder)
+					{
+						return f1->userId() > f2->userId();
+					}
+					else
+					{
+						return f1->userId() <= f2->userId();
+					}
+				});
+			break;
+
+		case FileActionColumn:
+			std::sort(m_files.begin(), m_files.end(),
+				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+				{
+					if (order == Qt::AscendingOrder)
+					{
+						return f1->action().text() > f2->action().text();
+					}
+					else
+					{
+						return f1->action().text() <= f2->action().text();
+					}
+				});
+			break;
+
+		case FileLastCheckInColumn:
+			std::sort(m_files.begin(), m_files.end(),
+				[order](std::shared_ptr<DbFileInfo> f1, std::shared_ptr<DbFileInfo> f2)
+				{
+					if (order == Qt::AscendingOrder)
+					{
+						return f1->created() > f2->created();
+					}
+					else
+					{
+						return f1->created() <= f2->created();
+					}
+				});
+			break;
+
+
+		default:
+			assert(false);
+	}
+
+	// Move pers indexes
+	//
+	for (QModelIndex& oldIndex : pers)
+	{
+		std::shared_ptr<DbFileInfo> oldFile = oldFileOrder.at(oldIndex.row());
+		QModelIndex newIndex = index(getFileRow(oldFile->fileId()), oldIndex.column());
+
+		if (oldIndex != newIndex)
+		{
+			changePersistentIndex(oldIndex, newIndex);
+		}
+	}
+
+	emit layoutChanged();
+}
+
 void FileListModel::addFile(std::shared_ptr<DbFileInfo> file)
 {
 	if (file->fileName().endsWith(m_filter, Qt::CaseInsensitive) == true)
@@ -635,6 +755,8 @@ void FileListView::refreshFiles()
 	//
 	setFiles(files);
 
+	setSortingEnabled(true);	// it triggers setSortingEnabled() with the current sort section and order.
+
 	return;
 }
 
@@ -815,6 +937,11 @@ void FileListView::slot_UndoChanges()
 void FileListView::slot_AddFile()
 {
 	addFile();
+
+	//  setSortingEnabled() triggers a call to sortByColumn() with the current sort section and order.
+	//
+	setSortingEnabled(true);
+
 	return;
 }
 

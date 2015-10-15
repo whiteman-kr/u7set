@@ -61,25 +61,25 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	getCentralWidget()->addTabPage(new FilesTabPage(dbController(), nullptr), tr("Files"));
 //	getCentralWidget()->addTabPage(new ConfigurationsTabPage(dbController(), nullptr), tr("Modules Configurations"));
 
-	SchemesTabPage* logicScheme = SchemesTabPage::create<VFrame30::LogicScheme>("als", dbController(), AlFileName, nullptr);
-	SchemesTabPage* workflowScheme = SchemesTabPage::create<VFrame30::WorkflowScheme>("wvs", dbController(), WvsFileName, nullptr);
-	SchemesTabPage* diagScheme = SchemesTabPage::create<VFrame30::DiagScheme>("dvs", dbController(), DvsFileName, nullptr);
+	m_logicScheme = SchemesTabPage::create<VFrame30::LogicScheme>("als", dbController(), AlFileName, nullptr);
+	m_workflowScheme = SchemesTabPage::create<VFrame30::WorkflowScheme>("wvs", dbController(), WvsFileName, nullptr);
+	m_diagScheme = SchemesTabPage::create<VFrame30::DiagScheme>("dvs", dbController(), DvsFileName, nullptr);
 
-	getCentralWidget()->addTabPage(logicScheme, tr("Application Logic"));
-	getCentralWidget()->addTabPage(workflowScheme, tr("Workflow Schemes"));
-	getCentralWidget()->addTabPage(diagScheme, tr("Diag Schemes"));
+	getCentralWidget()->addTabPage(m_logicScheme, tr("Application Logic"));
+	getCentralWidget()->addTabPage(m_workflowScheme, tr("Workflow Schemes"));
+	getCentralWidget()->addTabPage(m_diagScheme, tr("Diag Schemes"));
 
 	BuildTabPage* buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(buildTabPage, tr("Build"));
 
 	// Connect BuildStarted and BuildFinished signals to SchemesTabPage
 	//
-	connect(buildTabPage, &BuildTabPage::buildStarted, logicScheme, &SchemesTabPage::buildStarted);
-	connect(buildTabPage, &BuildTabPage::buildFinished, logicScheme, &SchemesTabPage::buildFinished);
-	connect(buildTabPage, &BuildTabPage::buildStarted, workflowScheme, &SchemesTabPage::buildStarted);
-	connect(buildTabPage, &BuildTabPage::buildFinished, workflowScheme, &SchemesTabPage::buildFinished);
-	connect(buildTabPage, &BuildTabPage::buildStarted, diagScheme, &SchemesTabPage::buildStarted);
-	connect(buildTabPage, &BuildTabPage::buildFinished, diagScheme, &SchemesTabPage::buildFinished);
+	connect(buildTabPage, &BuildTabPage::buildStarted, m_logicScheme, &SchemesTabPage::buildStarted);
+	connect(buildTabPage, &BuildTabPage::buildFinished, m_logicScheme, &SchemesTabPage::buildFinished);
+	connect(buildTabPage, &BuildTabPage::buildStarted, m_workflowScheme, &SchemesTabPage::buildStarted);
+	connect(buildTabPage, &BuildTabPage::buildFinished, m_workflowScheme, &SchemesTabPage::buildFinished);
+	connect(buildTabPage, &BuildTabPage::buildStarted, m_diagScheme, &SchemesTabPage::buildStarted);
+	connect(buildTabPage, &BuildTabPage::buildFinished, m_diagScheme, &SchemesTabPage::buildFinished);
 
 
 	// --
@@ -99,13 +99,49 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-	//QMessageBox mb(this);
-	//mb.setText(tr("Do you want to save your changes?"));
-	//mb.exec();
+	// check if any scheme is not saved
+	//
+	if (m_logicScheme == nullptr ||
+		m_workflowScheme == nullptr ||
+		m_diagScheme == nullptr)
+	{
+		assert(m_logicScheme);
+		assert(m_workflowScheme);
+		assert(m_diagScheme);
+		e->accept();
+		return;
+	}
 
+	if (m_logicScheme->hasUnsavedSchemes() == true ||
+		m_workflowScheme->hasUnsavedSchemes() == true ||
+		m_diagScheme->hasUnsavedSchemes() == true)
+	{
+		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
+			 tr("Some schemes have unsaved changes."),
+			QMessageBox::SaveAll | QMessageBox::Discard | QMessageBox::Cancel,
+			QMessageBox::SaveAll);
+
+		if (result == QMessageBox::Cancel)
+		{
+			e->ignore();
+			return;
+		}
+
+		if (result == QMessageBox::SaveAll)
+		{
+			m_logicScheme->saveUnsavedSchemes();
+			m_workflowScheme->saveUnsavedSchemes();
+			m_diagScheme->saveUnsavedSchemes();
+		}
+	}
+
+	// save windows state and accept event to close app
+	//
 	saveWindowState();
 
 	e->accept();
+
+	return;
 }
 
 void MainWindow::saveWindowState()

@@ -4,25 +4,26 @@
 #include <QtSql>
 #include <QThread>
 
-class MultiThreadTest : public QThread
+class MultiThreadFileTest : public QThread
 {
 
 public:
-	MultiThreadTest(int number,
+	MultiThreadFileTest(int number,
 					const char* dbHost,
 					const char* dbUser,
 					const char* dbUserPassword,
 					const char* name,
 					int amountOfFiles);
-	virtual ~MultiThreadTest();
 
-	void run();
+	virtual ~MultiThreadFileTest();
+
+	virtual void run();
 
 	int m_threadNumber;
 	int m_amountOfFileIds;
 
-	const char* m_databaseHost;
-	const char* m_databaseUser;
-	const char* m_databaseUserPassword;
-	const char* m_projectName;
+	QString m_databaseHost;
+	QString m_databaseUser;
+	QString m_databaseUserPassword;
+	QString m_projectName;
 };
