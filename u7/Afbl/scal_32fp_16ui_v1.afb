@@ -9,7 +9,7 @@
             <OpCode>14</OpCode>
             <HasRam>false</HasRam>
             <RequiredStart>true</RequiredStart>
-            <InternalUse>false</InternalUse>
+            <InternalUse>true</InternalUse>
         </Properties>
         <InputSignals>
             <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="Float" OpIndex = "6" Size = "32"/>
