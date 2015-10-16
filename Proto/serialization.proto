@@ -575,6 +575,7 @@ message DeviceObject
 	optional bool preset = 32 [default = false];
 	optional bool presetRoot = 33 [default = false];
 	optional wstring presetName = 34;
+	optional Uuid presetObjectUuid = 35;
 
 	// Derived from Hardware::DeviceObject
 	//

@@ -121,11 +121,17 @@ namespace Hardware
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(QUuid Uuid READ uuid)
 		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
 		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
 		Q_PROPERTY(QString ChildRestriction READ childRestriction WRITE setChildRestriction)
 		Q_PROPERTY(int Place READ place WRITE setPlace)
 		Q_PROPERTY(QString DynamicProperties READ dynamicProperties WRITE setDynamicProperties)
+
+		Q_PROPERTY(bool Preset READ preset)
+		Q_PROPERTY(bool PresetRoot READ presetRoot)
+		Q_PROPERTY(QString PresetName READ presetName WRITE setPresetName)
+		Q_PROPERTY(QUuid PresetObjectUuid READ presetObjectUuid)
 
 	protected:
 		explicit DeviceObject(bool preset = false);
@@ -235,24 +241,24 @@ namespace Hardware
 		// Props
 		//
 	public:
-		const QUuid& uuid() const;
-		void setUuid(const QUuid& value);
+		QUuid uuid() const;
+		void setUuid(QUuid value);
 
-		const QString& strId() const;
-		void setStrId(const QString& value);
+		QString strId() const;
+		void setStrId(QString value);
 
-		const QString& caption() const;
-		void setCaption(const QString& value);
+		QString caption() const;
+		void setCaption(QString value);
 
 		DbFileInfo& fileInfo();
 		const DbFileInfo& fileInfo() const;
 		void setFileInfo(const DbFileInfo& value);
 
-		const QString& childRestriction() const;
-		void setChildRestriction(const QString& value);
+		QString childRestriction() const;
+		void setChildRestriction(QString value);
 
-		const QString& dynamicProperties() const;
-		void setDynamicProperties(const QString& value);
+		QString dynamicProperties() const;
+		void setDynamicProperties(QString value);
 
 		int place() const;
 		Q_INVOKABLE int jsPlace() const;
@@ -267,8 +273,11 @@ namespace Hardware
 		bool presetRoot() const;
 		void setPresetRoot(bool value);
 
-		const QString& presetName() const;
-		void setPresetName(const QString& value);
+		QString presetName() const;
+		void setPresetName(QString value);
+
+		QUuid presetObjectUuid() const;
+		void setPresetObjectUuid(QUuid value);
 
 		// Data
 		//
@@ -292,7 +301,8 @@ namespace Hardware
 		bool m_preset = false;				// It is preset or part of it
 		bool m_presetRoot = false;			// This object is preset root
 		QString m_presetName;				// PresetName, if it is preset
-		//QUuid m_presetId;
+		QUuid m_presetObjectUuid;			// In configuration this field has uuid of the PRESET object from which it was constructed
+											// In preset edit mode this field has the same valie with m_uuid
 
 	private:
 		bool m_avoidEventRecursion = false;

@@ -781,11 +781,11 @@ EditSchemeTabPage::EditSchemeTabPage(std::shared_ptr<VFrame30::Scheme> scheme, c
 	m_toolBar->addAction(m_schemeWidget->m_addPathAction);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_schemeWidget->m_addLinkAction);
 	m_toolBar->addAction(m_schemeWidget->m_addInputSignalAction);
 	m_toolBar->addAction(m_schemeWidget->m_addOutputSignalAction);
 	m_toolBar->addAction(m_schemeWidget->m_addConstantAction);
 	m_toolBar->addAction(m_schemeWidget->m_addFblElementAction);
-	m_toolBar->addAction(m_schemeWidget->m_addLinkAction);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_schemeWidget->m_sizeAndPosAction);
