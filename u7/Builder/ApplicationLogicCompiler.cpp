@@ -1827,8 +1827,6 @@ namespace Builder
 		quint16 ramAddrOffset = appSignal.ramAddr().offset();
 		quint16 ramAddrBit = appSignal.ramAddr().bit();
 
-		quint16 constValue = 0;
-
 		Command cmd;
 
 		switch(appSignal.type())
@@ -1843,7 +1841,7 @@ namespace Builder
 			}
 			else
 			{
-				constValue = constItem.intValue() > 0 ? 1 : 0;
+				quint16 constValue = constItem.intValue() > 0 ? 1 : 0;
 
 				cmd.movBitConst(ramAddrOffset, ramAddrBit, constValue);
 				cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constValue));
@@ -1851,20 +1849,34 @@ namespace Builder
 			break;
 
 		case SignalType::Analog:
-			// const connected to analog incput
-			//
-			if (!constItem.isIntegral())
+			switch(appSignal.dataSize())
 			{
-				LOG_ERROR(m_log, QString(tr("Floating point constant connected to integral analog signal")));
+			case SIZE_16BIT:
+				cmd.movConst(ramAddrOffset, constItem.intValue());
+				cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.intValue()));
+				break;
 
-				return false;
-			}
-			else
-			{
-				constValue = constItem.intValue();
+			case SIZE_32BIT:
+				switch(appSignal.dataFormat())
+				{
+				case DataFormat::SignedInt:
+					cmd.movConstInt32(ramAddrOffset, constItem.intValue());
+					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.intValue()));
+					break;
 
-				cmd.movConst(ramAddrOffset, constValue);
-				cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constValue));
+				case DataFormat::Float:
+					cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
+					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.floatValue()));
+					break;
+
+				default:
+					assert(false);
+				}
+
+				break;
+
+			default:
+				assert(false);
 			}
 			break;
 
@@ -1893,6 +1905,26 @@ namespace Builder
 			{
 				msg = QString(tr("Discrete signal %1 connected to analog signal %2")).
 						arg(srcSignal.strID()).arg(appSignal.strID());
+
+				LOG_ERROR(m_log, msg);
+
+				return false;
+			}
+
+			if (appSignal.dataFormat() != srcSignal.dataFormat())
+			{
+				msg = QString(tr("Signals %1 and %2 data formats are not compatible")).
+						arg(appSignal.strID()).arg(srcSignal.strID());
+
+				LOG_ERROR(m_log, msg);
+
+				return false;
+			}
+
+			if (appSignal.dataSize() != srcSignal.dataSize())
+			{
+				msg = QString(tr("Signals %1 and %2 have different data sizes")).
+						arg(appSignal.strID()).arg(srcSignal.strID());
 
 				LOG_ERROR(m_log, msg);
 
@@ -1962,23 +1994,20 @@ namespace Builder
 		{
 			// move value of analog signal
 			//
-			if (appSignal.dataSize() == SIZE_32BIT)
+			switch(appSignal.dataSize())
 			{
+			case SIZE_16BIT:
+				cmd.mov(destRamAddrOffset, srcRamAddrOffset);
+				break;
+
+			case SIZE_32BIT:
 				cmd.mov32(destRamAddrOffset, srcRamAddrOffset);
-			}
-			else
-			{
-				if (appSignal.dataSize() == SIZE_16BIT)
-				{
-					cmd.mov(destRamAddrOffset, srcRamAddrOffset);
-				}
-				else
-				{
-					LOG_ERROR(m_log, QString(tr("Unknown data size of signal %1 - %2 bit")).
-									  arg(appSignal.strID()).arg(appSignal.dataSize()));
-					assert(false);
-					return false;
-				}
+				break;
+
+			default:
+				LOG_ERROR(m_log, QString(tr("Unknown data size of signal %1 - %2 bit")).
+								  arg(appSignal.strID()).arg(appSignal.dataSize()));
+				return false;
 			}
 		}
 		else
@@ -2193,7 +2222,6 @@ namespace Builder
 		}
 
 		Command cmd;
-		quint16 constValue = 0;
 
 		switch(fbInput.type())
 		{
@@ -2206,7 +2234,7 @@ namespace Builder
 			}
 			else
 			{
-				constValue = constItem.intValue() > 0 ? 1 : 0;
+				quint16 constValue = constItem.intValue() > 0 ? 1 : 0;
 
 				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue, appFb.caption());
 				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constValue));
@@ -2214,19 +2242,34 @@ namespace Builder
 			break;
 
 		case Afb::AfbSignalType::Analog:
-			// const connected to analog incput
+			// const connected to analog input
 			//
-			if (!constItem.isIntegral())
-			{
-				LOG_ERROR(m_log, QString(tr("Floating point constant connected to integral analog input")));
-			}
-			else
-			{
-				constValue = constItem.intValue();
 
-				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue, appFb.caption());
-				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constValue));
+			switch(fbInput.size())
+			{
+			case SIZE_16BIT:
+				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
+				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constItem.intValue()));
+				break;
+
+			case SIZE_32BIT:
+				switch(fbInput.dataFormat())
+				{
+				case Afb::AfbDataFormat::SignedInt:
+					cmd.writeFuncBlockConstInt32(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
+					cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.intValue()));
+					break;
+
+				case Afb::AfbDataFormat::Float:
+					cmd.writeFuncBlockConstFloat(fbType, fbInstance, fbParamNo, constItem.floatValue(), appFb.caption());
+					cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.floatValue()));
+					break;
+
+				default:
+					assert(false);
+				}
 			}
+
 			break;
 
 		default:
@@ -2254,8 +2297,29 @@ namespace Builder
 		{
 			if (!appSignal.isAnalog())
 			{
-				msg = QString(tr("Discrete signal %1 connected to analog input %2.%3")).
-						arg(appSignal.strID()).arg(appFb.strID()).arg(afbSignal.caption());
+				msg = QString(tr("Discrete signal %1 connected to analog input '%2' of %3")).
+						arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
+
+				LOG_ERROR(m_log, msg);
+
+				return false;
+			}
+
+			if (appSignal.isCompatibleDataFormat(afbSignal.dataFormat()) == false)
+			{
+				msg = QString(tr("Signal %1 data format is not compatible with input '%2' data format of %3 ")).
+						arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
+
+				LOG_ERROR(m_log, msg);
+
+				return false;
+			}
+
+			if (appSignal.dataSize() != afbSignal.size())
+			{
+				msg = QString(tr("Signal %1 data size (%2) is not compatible with input '%3' data size (%4) of %4")).
+						arg(appSignal.strID()).arg(appSignal.dataSize()).
+						arg(afbSignal.caption()).arg(afbSignal.size()).arg(appFb.caption());
 
 				LOG_ERROR(m_log, msg);
 
@@ -2268,8 +2332,8 @@ namespace Builder
 			{
 				if (!appSignal.isDiscrete())
 				{
-					msg = QString(tr("Analog signal %1 connected to discrete input %2.%3")).
-							arg(appSignal.strID()).arg(appFb.strID()).arg(afbSignal.caption());
+					msg = QString(tr("Analog signal %1 connected to discrete input '%2' of %3")).
+							arg(appSignal.strID()).arg(afbSignal.caption()).arg(appFb.caption());
 
 					LOG_ERROR(m_log, msg);
 
@@ -2299,7 +2363,20 @@ namespace Builder
 			{
 				// input connected to analog signal
 				//
-				cmd.writeFuncBlock(fbType, fbInstance, fbParamNo, ramAddrOffset, appFb.caption());
+				switch(appSignal.dataSize())
+				{
+				case SIZE_16BIT:
+					cmd.writeFuncBlock(fbType, fbInstance, fbParamNo, ramAddrOffset, appFb.caption());
+					break;
+
+				case SIZE_32BIT:
+					cmd.writeFuncBlock32(fbType, fbInstance, fbParamNo, ramAddrOffset, appFb.caption());
+					break;
+
+				default:
+					assert(false);
+					return false;
+				}
 			}
 			else
 			{
@@ -2412,6 +2489,27 @@ namespace Builder
 
 				return false;
 			}
+
+			if (appSignal->isCompatibleDataFormat(afbSignal.dataFormat()) == false)
+			{
+				msg = QString(tr("Signal %1 data format is not compatible with output '%2' data format of %3 ")).
+						arg(appSignal->strID()).arg(afbSignal.caption()).arg(appFb.caption());
+
+				LOG_ERROR(m_log, msg);
+
+				return false;
+			}
+
+			if (appSignal->dataSize() != afbSignal.size())
+			{
+				msg = QString(tr("Signal %1 data size (%2) is not compatible with output '%3' data size (%4) of %4")).
+						arg(appSignal->strID()).arg(appSignal->dataSize()).
+						arg(afbSignal.caption()).arg(afbSignal.size()).arg(appFb.caption());
+
+				LOG_ERROR(m_log, msg);
+
+				return false;
+			}
 		}
 		else
 		{
@@ -2447,13 +2545,26 @@ namespace Builder
 		{
 			if (appSignal->isAnalog())
 			{
-				// input connected to analog signal
+				// output connected to analog signal
 				//
-				cmd.readFuncBlock(ramAddrOffset, fbType, fbInstance, fbParamNo, appFb.caption());
+				switch(appSignal->dataSize())
+				{
+				case SIZE_16BIT:
+					cmd.readFuncBlock(ramAddrOffset, fbType, fbInstance, fbParamNo, appFb.caption());
+					break;
+
+				case SIZE_32BIT:
+					cmd.readFuncBlock32(ramAddrOffset, fbType, fbInstance, fbParamNo, appFb.caption());
+					break;
+
+				default:
+					assert(false);
+					return false;
+				}
 			}
 			else
 			{
-				// input connected to discrete signal
+				// output connected to discrete signal
 				//
 				cmd.readFuncBlockBit(ramAddrOffset, ramAddrBit, fbType, fbInstance, fbParamNo, appFb.caption());
 			}

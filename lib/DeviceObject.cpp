@@ -5,6 +5,8 @@
 #include <QQmlEngine>
 #include <QDebug>
 #include <QXmlStreamReader>
+#include <QFile>
+#include <QMetaProperty>
 
 
 namespace Hardware
