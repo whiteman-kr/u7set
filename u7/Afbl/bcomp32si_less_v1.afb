@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#bcompi_less_v1">
+    <AfbElement StrId="#bcomp32si_less_v1">
         <Properties>
-            <Caption>bcompi_less</Caption>
+            <Caption>bcomp32si_less</Caption>
             <Version>1.0</Version>
             <Description>Binary Comparator Block, Less than int comparison</Description>
             <Category>Compare</Category>
@@ -19,19 +19,28 @@
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_sp_s" Caption = "setting s" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-                <Value>50</Value>
-                <Default>50</Default>
-                <LowLimit>0</LowLimit>
-                <HighLimit>100</HighLimit>
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-2147483648</LowLimit>
+                <HighLimit>2147483647</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_sp_r" Caption = "setting r" Visible="true" OpIndex="3" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-                <Value>50</Value>
-                <Default>50</Default>
-                <LowLimit>0</LowLimit>
-                <HighLimit>100</HighLimit>
+            <AfbElementParam OpName="i_sp_r" Caption = "setting r" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" DataFormat="SignedInt">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-2147483648</LowLimit>
+                <HighLimit>2147483647</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="hysteresis" Caption = "Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-2147483648</LowLimit>
+                <HighLimit>2147483647</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>

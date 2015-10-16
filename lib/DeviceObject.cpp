@@ -4,6 +4,7 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QDebug>
+#include <QFile>
 #include <QXmlStreamReader>
 #include <QFile>
 #include <QMetaProperty>
@@ -261,7 +262,7 @@ namespace Hardware
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
+		message->set_classnamehash(classnamehash);
 
 		Proto::DeviceObject* pMutableDeviceObject = message->mutable_deviceobject();
 
@@ -297,6 +298,7 @@ namespace Hardware
 
 			pMutableDeviceObject->set_presetroot(m_presetRoot);
 			Proto::Write(pMutableDeviceObject->mutable_presetname(), m_presetName);
+			Proto::Write(pMutableDeviceObject->mutable_presetobjectuuid(), m_presetObjectUuid);
 		}
 
 		return true;
@@ -313,6 +315,8 @@ namespace Hardware
 		const Proto::DeviceObject& deviceobject = message.deviceobject();
 
 		m_uuid = Proto::Read(deviceobject.uuid());
+		assert(m_uuid.isNull() == false);
+
 		Proto::Read(deviceobject.strid(), &m_strId);
 		Proto::Read(deviceobject.caption(), &m_caption);
 		m_place = deviceobject.place();
@@ -367,23 +371,24 @@ namespace Hardware
 		{
 			m_preset = deviceobject.preset();
 
+			assert(deviceobject.has_presetroot() == true);
 			if (deviceobject.has_presetroot() == true)
 			{
 				m_presetRoot = deviceobject.presetroot();
 			}
-			else
-			{
-				assert(deviceobject.has_presetroot() == true);
-			}
 
+			assert(deviceobject.has_presetname());
 			if (deviceobject.has_presetname() == true)
 			{
 				Proto::Read(deviceobject.presetname(), &m_presetName);
 			}
-			else
+
+			assert(deviceobject.has_presetobjectuuid());
+			if (deviceobject.has_presetobjectuuid() == true)
 			{
-				assert(deviceobject.has_presetname());
+				m_presetObjectUuid = Proto::Read(deviceobject.presetobjectuuid());
 			}
+
 		}
 
 		return true;
@@ -908,16 +913,15 @@ namespace Hardware
 
 	int DeviceObject::childIndex(DeviceObject* child) const
 	{
-		// Manual searching for an index is 1.6 times fastre than stl method
+		// Manual search for an index is 1.6 times faster than std::find
 		//
 		size_t childCount = m_children.size();
 		for (size_t i = 0; i < childCount; i++)
 		{
 			if (m_children[i].get() == child)
 			{
-				return i;
+				return static_cast<int>(i);
 			}
-
 		}
 
 		return -1;
@@ -1222,12 +1226,12 @@ namespace Hardware
 		return c;
 	}
 
-	const QUuid& DeviceObject::uuid() const
+	QUuid DeviceObject::uuid() const
 	{
 		return m_uuid;
 	}
 
-	void DeviceObject::setUuid(const QUuid& value)
+	void DeviceObject::setUuid(QUuid value)
 	{
 		if (m_uuid != value)
 		{
@@ -1235,12 +1239,12 @@ namespace Hardware
 		}
 	}
 
-	const QString& DeviceObject::strId() const
+	QString DeviceObject::strId() const
 	{
 		return m_strId;
 	}
 
-	void DeviceObject::setStrId(const QString& value)
+	void DeviceObject::setStrId(QString value)
 	{
 		if (m_strId != value)
 		{
@@ -1248,12 +1252,12 @@ namespace Hardware
 		}
 	}
 
-	const QString& DeviceObject::caption() const
+	QString DeviceObject::caption() const
 	{
 		return m_caption;
 	}
 
-	void DeviceObject::setCaption(const QString& value)
+	void DeviceObject::setCaption(QString value)
 	{
 		if (m_caption != value)
 		{
@@ -1279,22 +1283,22 @@ namespace Hardware
 		m_fileInfo.setDetails(details());
 	}
 
-	const QString& DeviceObject::childRestriction() const
+	QString DeviceObject::childRestriction() const
 	{
 		return m_childRestriction;
 	}
 
-	void DeviceObject::setChildRestriction(const QString& value)
+	void DeviceObject::setChildRestriction(QString value)
 	{
 		m_childRestriction = value;
 	}
 
-	const QString& DeviceObject::dynamicProperties() const
+	QString DeviceObject::dynamicProperties() const
 	{
 		return m_dynamicPropertiesStruct;
 	}
 
-	void DeviceObject::setDynamicProperties(const QString& value)
+	void DeviceObject::setDynamicProperties(QString value)
 	{
 		if (m_dynamicPropertiesStruct != value)
 		{
@@ -1350,7 +1354,6 @@ R"DELIM({
 
 	bool DeviceObject::presetRoot() const
 	{
-		assert(m_preset == true);
 		return m_presetRoot;
 	}
 
@@ -1359,15 +1362,24 @@ R"DELIM({
 		m_presetRoot = value;
 	}
 
-	const QString& DeviceObject::presetName() const
+	QString DeviceObject::presetName() const
 	{
-		assert(m_preset == true);
 		return m_presetName;
 	}
 
-	void DeviceObject::setPresetName(const QString& value)
+	void DeviceObject::setPresetName(QString value)
 	{
 		m_presetName = value;
+	}
+
+	QUuid DeviceObject::presetObjectUuid() const
+	{
+		return m_presetObjectUuid;
+	}
+
+	void DeviceObject::setPresetObjectUuid(QUuid value)
+	{
+		m_presetObjectUuid = value;
 	}
 
 	//

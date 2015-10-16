@@ -974,6 +974,17 @@ namespace ExtWidgets
 						}
 						break;
 
+					case QVariant::Uuid:
+						{
+							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent);
+							editor = m_editor;
+							m_editor->setValue(manager->value(property).toUuid().toString());
+
+							connect(m_editor, &QtMultiTextEdit::valueChanged, this, &QtMultiVariantFactory::slotSetValue);
+							connect(m_editor, &QtMultiTextEdit::destroyed, this, &QtMultiVariantFactory::slotEditorDestroyed);
+						}
+						break;
+
 					default:
 						Q_ASSERT(false);
 				}
@@ -1338,6 +1349,13 @@ namespace ExtWidgets
 									  arg(color.blue()).
 									  arg(color.alpha());
 						return val;
+					}
+					break;
+
+				case QVariant::Uuid:
+					{
+						QUuid uuid = value(property).value<QUuid>();
+						return uuid.toString();
 					}
 					break;
 
@@ -1772,6 +1790,18 @@ namespace ExtWidgets
 							else
 							{
 								m_propertyVariantManager->setValue(subProperty, QColor(Qt::black));
+							}
+							break;
+
+						case QVariant::Uuid:
+							subProperty = m_propertyVariantManager->addProperty(fullName);
+							if (sameValue == true)
+							{
+								m_propertyVariantManager->setValue(subProperty, value.toUuid());
+							}
+							else
+							{
+								m_propertyVariantManager->setValue(subProperty, false);
 							}
 							break;
 

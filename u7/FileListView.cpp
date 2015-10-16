@@ -102,6 +102,11 @@ QVariant FileListModel::headerData(int section, Qt::Orientation orientation, int
 
 void FileListModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*/)
 {
+	if (m_files.empty() == true)
+	{
+		return;
+	}
+
 	emit layoutAboutToBeChanged();
 
 	QModelIndexList pers = persistentIndexList();
@@ -252,9 +257,9 @@ void FileListModel::setFiles(const std::vector<DbFileInfo> &files)
 
 void FileListModel::clear()
 {
-	emit layoutAboutToBeChanged();
+	beginResetModel();
 	m_files.clear();
-	emit layoutChanged();
+	endResetModel();
 	return;
 }
 
