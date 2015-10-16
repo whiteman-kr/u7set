@@ -4,6 +4,7 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QDebug>
+#include <QFile>
 #include <QXmlStreamReader>
 
 
