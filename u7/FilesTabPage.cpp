@@ -841,7 +841,7 @@ void FileTreeView::editFile()
     QByteArray data;
     f->swapData(data);
 
-    DialogFileEditor d(fileInfo.fileName(), &data, db(), false);
+    DialogFileEditor d(fileInfo.fileName(), &data, db(), false, this);
     if (d.exec() != QDialog::Accepted)
     {
         return;

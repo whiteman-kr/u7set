@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#bcomp32fp_less_v1">
+    <AfbElement StrId="#bcomp_32fp_less_v1">
         <Properties>
-            <Caption>bcomp32fp_less</Caption>
+            <Caption>bcomp_32fp_less</Caption>
             <Version>1.0</Version>
             <Description>Binary Comparator Block, Less than float comparison</Description>
             <Category>Compare</Category>
