@@ -20,6 +20,63 @@ namespace Builder
 										return false; \
 									}
 
+	// ---------------------------------------------------------------------------------
+	//
+	//	MemoryArea class implementation
+	//
+
+	void MemoryArea::setStartAddress(int startAddress)
+	{
+		assert(m_locked == false);
+		m_startAddress = startAddress;
+		m_nextSignalAddress.set(startAddress, 0);
+	}
+
+
+	MemoryArea& MemoryArea::operator = (const MemoryArea& ma)
+	{
+		assert(m_locked == false);
+
+		m_startAddress = ma.m_startAddress;
+		m_sizeW = ma.m_sizeW;
+
+		return *this;
+	}
+
+
+	Address16 MemoryArea::appendSignal(const Signal& signal)
+	{
+		Address16 signalAddress;
+
+		if (signal.isAnalog())
+		{
+			// do word-align
+			//
+			m_nextSignalAddress.wordAlign();
+		}
+
+		signalAddress = m_nextSignalAddress;
+
+		if (signal.isAnalog())
+		{
+			m_nextSignalAddress.addWord(signal.sizeW());
+		}
+		else
+		{
+			m_nextSignalAddress.add1Bit();
+		}
+
+		m_signals.append(SignalAddress16(signal.strID(), signalAddress, signal.sizeW(), signal.isDiscrete()));
+
+		m_sizeW = m_nextSignalAddress.offset() - m_startAddress;
+
+		if (m_nextSignalAddress.bit() > 0)
+		{
+			m_sizeW += 1;
+		}
+
+		return signalAddress;
+	}
 
 	// ---------------------------------------------------------------------------------
 	//
@@ -30,12 +87,6 @@ namespace Builder
 		m_log(log)
 	{
 		assert(m_log != nullptr);
-
-		m_appBitAdressed.regDiscreteSignalCount = 0;
-		m_appBitAdressed.nonRegDiscreteSignalCount = 0;
-
-		m_appWordAdressed.regAnalogSignalCount = 0;
-		m_appWordAdressed.nonRegAnalogSignalCount = 0;
 	}
 
 
@@ -88,6 +139,9 @@ namespace Builder
 		m_appBitAdressed.memory = appLogicBitData;
 		m_appBitAdressed.memory.lock();
 
+		m_appBitAdressed.regDiscretSignals.setStartAddress(appLogicBitData.startAddress());
+		m_appBitAdressed.nonRegDiscretSignals.setStartAddress(appLogicBitData.startAddress());
+
 		// init tuning interface memory mapping
 		//
 		m_tuningInterface.memory = tuningData;
@@ -97,6 +151,13 @@ namespace Builder
 		//
 		m_appWordAdressed.memory = appLogicWordData;
 		m_appWordAdressed.memory.lock();
+
+		m_appWordAdressed.lmDiagnostics.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.lmInputs.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.lmOutputs.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.regAnalogSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.regDiscreteSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(appLogicWordData.startAddress());
 
 		// init LM diagnostics memory mapping
 		//
@@ -117,15 +178,7 @@ namespace Builder
 		// recalc application bit-addressed memory mapping
 		//
 
-		// registered discrete signals
-
-		m_appBitAdressed.regDiscretSignals.setStartAddress(m_appBitAdressed.memory.startAddress());
-		m_appBitAdressed.regDiscretSignals.setSizeW(m_appBitAdressed.regDiscreteSignalsSizeW());
-
-		// non registered discrete signals
-
 		m_appBitAdressed.nonRegDiscretSignals.setStartAddress(m_appBitAdressed.regDiscretSignals.nextAddress());
-		m_appBitAdressed.nonRegDiscretSignals.setSizeW(m_appBitAdressed.nonRegDiscreteSignalsSizeW());
 
 		if (m_appBitAdressed.nonRegDiscretSignals.nextAddress() > m_appBitAdressed.memory.nextAddress())
 		{
@@ -169,7 +222,6 @@ namespace Builder
 		// registered analog signals
 
 		m_appWordAdressed.regAnalogSignals.setStartAddress(m_appWordAdressed.module[MODULES_COUNT - 1].nextAddress());
-		m_appWordAdressed.regAnalogSignals.setSizeW(m_appWordAdressed.regAnalogSignalsSizeW());
 
 		// registered discrete signals
 
@@ -179,7 +231,6 @@ namespace Builder
 		// non registered analog signals
 
 		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(m_appWordAdressed.regDiscreteSignals.nextAddress());
-		m_appWordAdressed.nonRegAnalogSignals.setSizeW(m_appWordAdressed.nonRegAnalogSignalsSizeW());
 
 		if (m_appWordAdressed.nonRegAnalogSignals.nextAddress() > m_appWordAdressed.memory.nextAddress())
 		{
@@ -223,6 +274,7 @@ namespace Builder
 	void LmMemoryMap::getFile(QStringList& memFile)
 	{
 		memFile.append(QString(" LM's memory map"));
+		memFile.append("");
 
 		//
 
@@ -232,6 +284,8 @@ namespace Builder
 		{
 			addRecord(memFile, m_modules.module[i], QString().sprintf("I/O module %02d", i + 1));
 		}
+
+		memFile.append("");
 
 		addSection(memFile, m_optoInterface.memory, "Opto interfaces memory");
 
@@ -246,6 +300,8 @@ namespace Builder
 
 		addRecord(memFile, m_optoInterface.result, "opto interfaces data processing result");
 
+		memFile.append("");
+
 		//
 
 		addSection(memFile, m_appBitAdressed.memory, "Application logic bit-addressed memory");
@@ -254,11 +310,19 @@ namespace Builder
 
 		memFile.append("");
 
+		addSignals(memFile, m_appBitAdressed.regDiscretSignals);
+
 		addRecord(memFile, m_appBitAdressed.nonRegDiscretSignals, "non-registrated discrete signals");
+
+		memFile.append("");
+
+		addSignals(memFile, m_appBitAdressed.nonRegDiscretSignals);
 
 		//
 
 		addSection(memFile, m_tuningInterface.memory, "Tuning interface memory");
+
+		memFile.append("");
 
 		//
 
@@ -281,11 +345,19 @@ namespace Builder
 
 		memFile.append("");
 
-		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "registrated discrete signals (from bit-addressed memory)");
+		addSignals(memFile, m_appWordAdressed.regAnalogSignals);
+
+		addRecord(memFile, m_appWordAdressed.regDiscreteSignals, "registrated discrete signals (from bit-addressed memory)");
 
 		memFile.append("");
 
-		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "non-registrated analogs signals");
+		addSignals(memFile, m_appWordAdressed.regDiscreteSignals);
+
+		addRecord(memFile, m_appWordAdressed.nonRegAnalogSignals, "non-registrated analogs signals");
+
+		memFile.append("");
+
+		addSignals(memFile, m_appWordAdressed.nonRegAnalogSignals);
 
 		//
 
@@ -296,7 +368,6 @@ namespace Builder
 
 	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title)
 	{
-		memFile.append("");
 		memFile.append(QString().rightJustified(80, '-'));
 		memFile.append(QString(" Address    Size      Description"));
 		memFile.append(QString().rightJustified(80, '-'));
@@ -317,6 +388,91 @@ namespace Builder
 		str.sprintf(" %05d      %05d     %s", memArea.startAddress(), memArea.sizeW(), C_STR(title));
 
 		memFile.append(str);
+	}
+
+
+	void LmMemoryMap::addSignals(QStringList& memFile, MemoryArea& memArea)
+	{
+		if (memArea.hasSignals() == false)
+		{
+			return;
+		}
+
+		QVector<MemoryArea::SignalAddress16>& signalsArray = memArea.getSignals();
+
+		for(MemoryArea::SignalAddress16& signal : signalsArray)
+		{
+			QString str;
+
+			if (signal.isDiscrete())
+			{
+				str.sprintf(" %05d.%02d   00000.01  %s",
+							signal.address().offset(), signal.address().bit(),
+							C_STR(signal.signalStrID()));
+
+			}
+			else
+			{
+				str.sprintf(" %05d      %05d     %s",
+							signal.address().offset(),
+							signal.sizeW(),
+							C_STR(signal.signalStrID()));
+			}
+
+			memFile.append(str);
+		}
+
+		memFile.append("");
+	}
+
+
+	Address16 LmMemoryMap::addRegDiscreteSignal(const Signal& signal)
+	{
+		assert(signal.isInternal() && signal.isRegistered() && signal.isDiscrete());
+
+		return m_appBitAdressed.regDiscretSignals.appendSignal(signal);
+	}
+
+	Address16 LmMemoryMap::addRegDiscreteSignalToRegBuffer(const Signal& signal)
+	{
+		assert(signal.isInternal() && signal.isRegistered() && signal.isDiscrete());
+
+		return m_appWordAdressed.regDiscreteSignals.appendSignal(signal);
+	}
+
+	Address16 LmMemoryMap::addNonRegDiscreteSignal(const Signal& signal)
+	{
+		assert(signal.isInternal() && !signal.isRegistered() && signal.isDiscrete());
+
+		return m_appBitAdressed.nonRegDiscretSignals.appendSignal(signal);
+	}
+
+
+	Address16 LmMemoryMap::addRegAnalogSignal(const Signal& signal)
+	{
+		assert(signal.isInternal() && signal.isRegistered() && signal.isAnalog());
+
+		return m_appWordAdressed.regAnalogSignals.appendSignal(signal);
+	}
+
+
+	Address16 LmMemoryMap::addNonRegAnalogSignal(const Signal& signal)
+	{
+		assert(signal.isInternal() && !signal.isRegistered() && signal.isAnalog());
+
+		return m_appWordAdressed.nonRegAnalogSignals.appendSignal(signal);
+	}
+
+	double LmMemoryMap::bitAddressedMemoryUsed()
+	{
+		return double((m_appBitAdressed.regDiscretSignals.sizeW() + m_appBitAdressed.nonRegDiscretSignals.sizeW()) * 100) /
+				double(m_appBitAdressed.memory.sizeW());
+	}
+
+	double LmMemoryMap::wordAddressedMemoryUsed()
+	{
+		return double((m_appWordAdressed.nonRegAnalogSignals.nextAddress() - m_appWordAdressed.memory.startAddress()) * 100) /
+				double(m_appWordAdressed.memory.sizeW());
 	}
 
 
@@ -464,13 +620,11 @@ namespace Builder
 			result &= moduleLogicCompiler.run();
 		}
 
-		saveModulesLogicsFiles();
-
 		return result;
 	}
 
 
-	bool ApplicationLogicCompiler::writeModuleLogicCompilerResult(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsysStrID, QString lmCaption, int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
 	{
 		if (m_resultWriter == nullptr)
 		{
@@ -488,69 +642,29 @@ namespace Builder
 
 		bool result = true;
 
-		Hardware::ModuleFirmware* moduleFirmware = nullptr;
+		Hardware::ModuleFirmware moduleFirmware;
 
-		if (m_subsystemModuleFirmware.contains(subsysStrID))
-		{
-			moduleFirmware = m_subsystemModuleFirmware[subsysStrID];
-		}
-		else
-		{
-			moduleFirmware = new Hardware::ModuleFirmware();
-
-			m_subsystemModuleFirmware.insert(subsysStrID, moduleFirmware);
-
-			moduleFirmware->init(lmCaption, subsysStrID, susbsysID, 0x0101, frameSize, frameCount,
-							 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
-		}
+		moduleFirmware.init(lmCaption, subsysStrID, susbsysID, 0x0101, frameSize, frameCount,
+						 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
 
 		QString errorMsg;
 
-		if (!moduleFirmware->setChannelData(channel, frameSize, frameCount, appLogicBinCode, &errorMsg))
+		if (!moduleFirmware.setChannelData(channel, frameSize, frameCount, appLogicBinCode, &errorMsg))
 		{
 			LOG_ERROR(m_log, errorMsg);
 
 			result = false;
 		}
 
-		return result;
-	}
+		QByteArray moduleFirmwareFileData;
 
-
-	bool ApplicationLogicCompiler::saveModulesLogicsFiles()
-	{
-		bool result = true;
-
-		for(Hardware::ModuleFirmware* moduleFirmware : m_subsystemModuleFirmware)
+		if (!moduleFirmware.save(moduleFirmwareFileData, &errorMsg))
 		{
-			if (moduleFirmware == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			QByteArray moduleFirmwareFileData;
-
-			QString errorMsg;
-
-			if (!moduleFirmware->save(moduleFirmwareFileData, &errorMsg))
-			{
-				LOG_ERROR(m_log, errorMsg);
-				result = false;
-			}
-
-			result &= m_resultWriter->addFile(moduleFirmware->subsysId(), moduleFirmware->caption() + ".alb", moduleFirmwareFileData);
+			LOG_ERROR(m_log, errorMsg);
+			result = false;
 		}
 
-		for(Hardware::ModuleFirmware* moduleFirmware : m_subsystemModuleFirmware)
-		{
-			if (moduleFirmware != nullptr)
-			{
-				delete moduleFirmware;
-			}
-		}
-
-		m_subsystemModuleFirmware.clear();
+		result &= m_resultWriter->addFile(moduleFirmware.subsysId(), moduleFirmware.caption() + ".alb", moduleFirmwareFileData);
 
 		return result;
 	}
@@ -681,9 +795,13 @@ namespace Builder
 				str = "0.00";
 			}
 
-			msg = QString("Code memory used - %1%").arg(str);
+			LOG_MESSAGE(m_log, QString(tr("Code memory used - %1%")).arg(str));
 
-			LOG_MESSAGE(m_log, msg);
+			str.sprintf("%.2f", m_memoryMap.bitAddressedMemoryUsed());
+			LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory used - %1%")).arg(str));
+
+			str.sprintf("%.2f", m_memoryMap.wordAddressedMemoryUsed());
+			LOG_MESSAGE(m_log, QString(tr("Word-addressed memory used - %1%")).arg(str));
 		}
 		else
 		{
@@ -700,6 +818,14 @@ namespace Builder
 	bool ModuleLogicCompiler::loadLMSettings()
 	{
 		bool result = true;
+
+		MemoryArea m_moduleData;
+		MemoryArea m_optoInterfaceData;
+		MemoryArea m_appLogicBitData;
+		MemoryArea m_tuningData;
+		MemoryArea m_appLogicWordData;
+		MemoryArea m_lmDiagData;
+		MemoryArea m_lmIntOutData;
 
 		const PropertyNameVar memSettings[] =
 		{
@@ -2633,9 +2759,7 @@ namespace Builder
 
 		m_code.getBinCode(binCode);
 
-		//result &= m_resultWriter->addFile(m_lm->subSysID(), QString("%1.alc").arg(m_lm->caption()), binCode);
-
-		m_appLogicCompiler.writeModuleLogicCompilerResult(m_lm->subSysID(), m_lm->caption(), m_lm->channel(),
+		m_appLogicCompiler.writeBinCodeForLm(m_lm->subSysID(), m_lm->caption(), m_lm->channel(),
 														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, binCode);
 		QStringList mifCode;
 
@@ -3378,19 +3502,7 @@ namespace Builder
 
 		bool result = true;
 
-/*		m_registeredInternalAnalogSignalsSize = 0;
-		m_internalAnalogSignalsSize = 0;
-
-		m_registeredInternalDiscreteSignalsSize = 0;
-		m_registeredInternalDiscreteSignalsCount = 0;
-
-		m_internalDiscreteSignalsSize = 0;
-		m_internalDiscreteSignalsCount = 0;
-
-		m_regBufferInternalDiscreteSignalsOffset = 0;
-		m_regBufferInternalDiscreteSignalsSize = 0;
-
-		// calculate internal analog & discrete signals sizes
+		// internal analog registered
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
@@ -3399,142 +3511,62 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
-			if (!appSignal->isInternal())
+			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isAnalog())
 			{
-				continue;
-			}
+				Address16 ramAddr = m_memoryMap.addRegAnalogSignal(*appSignal);
 
-			if (appSignal->isAnalog())
-			{
-				// analog signal
-				//
-				if (appSignal->isRegistered())
-				{
-					m_registeredInternalAnalogSignalsSize += appSignal->sizeInWords();
-				}
-				else
-				{
-					m_internalAnalogSignalsSize += appSignal->sizeInWords();
-				}
-			}
-			else
-			{
-				// discrete signal
-				//
-				if (appSignal->isRegistered())
-				{
-					m_registeredInternalDiscreteSignalsCount++;
-				}
-				else
-				{
-					m_internalDiscreteSignalsCount++;
-				}
+				appSignal->ramAddr() = ramAddr;
+				appSignal->regAddr() = Address16(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), 0);
 			}
 		}
 
-		// size of registered internal discrete signals in words
+		m_memoryMap.recalculateAddresses();
+
+		// internal discrete registered
 		//
-		m_registeredInternalDiscreteSignalsSize = m_registeredInternalDiscreteSignalsCount / 16 +
-				(m_registeredInternalDiscreteSignalsCount % 16 ? 1 : 0);
-
-		// size of internal discrete signals in words
-		//
-		m_internalDiscreteSignalsSize = m_internalDiscreteSignalsCount / 16 +
-				(m_internalDiscreteSignalsCount % 16 ? 1 : 0);
-
-		m_internalDiscreteSignalsOffset = m_registeredInternalDiscreteSignalsOffset + m_registeredInternalDiscreteSignalsSize;
-
-		m_regBufferInternalDiscreteSignalsOffset = m_registeredInternalAnalogSignalsOffset + m_registeredInternalAnalogSignalsSize;
-		m_regBufferInternalDiscreteSignalsSize = m_registeredInternalDiscreteSignalsSize;
-
-		m_internalAnalogSignalsOffset = m_registeredInternalAnalogSignalsOffset +
-										m_registeredInternalAnalogSignalsSize +
-										m_registeredInternalDiscreteSignalsSize;
-
-
-		// calculate internal analog & discrete signals addresses
-		//
-
-		Address16 regInternalAnalog(m_registeredInternalAnalogSignalsOffset, 0);
-		Address16 internalAnalog(m_internalAnalogSignalsOffset, 0);
-
-		Address16 regInternalDiscrete(m_registeredInternalDiscreteSignalsOffset, 0);
-		Address16 regBufferInternalDiscrete(m_regBufferInternalDiscreteSignalsOffset, 0);
-		Address16 internalDiscrete(m_internalDiscreteSignalsOffset, 0);
-
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			if (appSignal == nullptr)
+			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isDiscrete())
 			{
-				ASSERT_RESULT_FALSE_BREAK
-			}
+				Address16 ramAddr = m_memoryMap.addRegDiscreteSignal(*appSignal);
 
-			if (!appSignal->isInternal())
+				appSignal->ramAddr() = ramAddr;
+
+				Address16 regAddr = m_memoryMap.addRegDiscreteSignalToRegBuffer(*appSignal);
+
+				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), ramAddr.bit());
+			}
+		}
+
+		m_memoryMap.recalculateAddresses();
+
+		// internal analog non-registered
+		//
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isAnalog())
 			{
-				continue;
+				Address16 ramAddr = m_memoryMap.addNonRegAnalogSignal(*appSignal);
+
+				appSignal->ramAddr() = ramAddr;
 			}
+		}
 
-			Address16 ramAddr;
-			Address16 regAddr;
+		m_memoryMap.recalculateAddresses();
 
-			if (appSignal->isAnalog())
+		// internal discrete non-registered
+		//
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isDiscrete())
 			{
-				// analog signal
-				//
-				if (appSignal->isRegistered())
-				{
-					ramAddr = regInternalAnalog;
-					regAddr = regInternalAnalog;
+				Address16 ramAddr = m_memoryMap.addNonRegDiscreteSignal(*appSignal);
 
-					regInternalAnalog.addWord(appSignal->sizeInWords());
-				}
-				else
-				{
-					ramAddr = internalAnalog;
-
-					internalAnalog.addWord(appSignal->sizeInWords());
-				}
+				appSignal->ramAddr() = ramAddr;
 			}
-			else
-			{
-				// discrete signal
-				//
-				if (appSignal->isRegistered())
-				{
-					ramAddr = regInternalDiscrete;
-					regAddr = regBufferInternalDiscrete;
+		}
 
-					regInternalDiscrete.addBit();
-					regBufferInternalDiscrete.addBit();
-				}
-				else
-				{
-					ramAddr = internalDiscrete;
-
-					internalDiscrete.addBit();
-				}
-			}
-
-			appSignal->ramAddr() = ramAddr;
-			appSignal->regAddr() = regAddr;
-
-			if (!appSignal->isShadowSignal())
-			{
-				// set same ramAddr & regAddr for corresponding signals in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
-				//
-				int index = m_signals->keyIndex(appSignal->ID());
-
-				if (index == -1)
-				{
-					assert(false);
-				}
-				else
-				{
-					(*m_signals)[index].regAddr() = regAddr;
-					(*m_signals)[index].ramAddr() = ramAddr;
-				}
-			}
-		}*/
+		m_memoryMap.recalculateAddresses();
 
 		return result;
 	}
@@ -4233,6 +4265,8 @@ namespace Builder
 		else
 		{
 			appSignal = new AppSignal(outPinGuid, signalType, s.size(), appFb, strID);
+
+			appSignal->setAcquire(false);			// non-registered signal
 
 			m_signalStrIdMap.insert(strID, appSignal);
 

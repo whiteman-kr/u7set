@@ -11,6 +11,17 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = PacketViewer
 TEMPLATE = app
 
+# DESTDIR
+#
+win32 {
+        CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+        CONFIG(release, debug|release): DESTDIR = ../bin/release
+}
+unix {
+        CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+        CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+}
+
 
 SOURCES += main.cpp\
         SourceListWidget.cpp \
