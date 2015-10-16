@@ -1948,12 +1948,13 @@ void EditSchemeWidget::createActions()
 		m_addMenu->addAction(m_addLineAction);
 		m_addMenu->addAction(m_addRectAction);
 		m_addMenu->addAction(m_addPathAction);
+
 		m_addMenu->addAction(m_addSeparatorAction0);
+		m_addMenu->addAction(m_addLinkAction);
 		m_addMenu->addAction(m_addInputSignalAction);
 		m_addMenu->addAction(m_addOutputSignalAction);
 		m_addMenu->addAction(m_addConstantAction);
 		m_addMenu->addAction(m_addFblElementAction);
-		m_addMenu->addAction(m_addLinkAction);
 
 	m_editMenu = new QMenu(this);
 	m_editAction->setMenu(m_editMenu);
