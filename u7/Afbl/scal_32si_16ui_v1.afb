@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#scal_32si_16ui_v1">
+        <Properties>
+            <Caption>scal_32si_16ui</Caption>
+            <Version>1.0</Version>
+            <Description>Scaling Block</Description>
+            <Category>Scaling</Category>
+            <OpCode>14</OpCode>
+            <HasRam>false</HasRam>
+            <RequiredStart>true</RequiredStart>
+            <InternalUse>true</InternalUse>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="SignedInt" OpIndex = "6" Size = "32"/>
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="UnsignedInt" OpIndex = "8" Size = "16"/>
+        </OutputSignals>
+        <Params>
+            <AfbElementParam OpName="i_scal_k1_coef" Caption = "K1" Visible="false" OpIndex="1" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>-2147483648</LowLimit>
+                <HighLimit>2147483647</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_scal_k2_coef" Caption = "K2" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-2147483648</LowLimit>
+                <HighLimit>2147483647</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="InputLow" Caption = "InputLow" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>-2147483648</LowLimit>
+                <HighLimit>2147483647</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="InputHigh" Caption = "InputHigh" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+                <Value>100</Value>
+                <Default>100</Default>
+                <LowLimit>-2147483648</LowLimit>
+                <HighLimit>2147483647</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutputLow" Caption = "OutputLow" Visible="true" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>0</Value>
+                <Default>0</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutputHigh" Caption = "OutputHigh" Visible="true" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>100</Value>
+                <Default>100</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+                <Value>3</Value>
+                <Default>1</Default>
+                <LowLimit>1</LowLimit>
+                <HighLimit>9</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed>
+		</Changed>
+                </Script>
+            </AfbElementParam>
+        </Params>
+        <CommonScript>
+            <Library></Library>
+            <AfterCreation></AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>
