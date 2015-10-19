@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#bcomp32fp_ne_v1">
+    <AfbElement StrId="#bcomp_32fp_great_v1">
         <Properties>
-            <Caption>bcomp32fp_ne</Caption>
+            <Caption>bcomp_32fp_great</Caption>
             <Version>1.0</Version>
-            <Description>Binary Comparator Block, Not equal float comparison</Description>
+            <Description>Binary Comparator Block, Greater than float comparison</Description>
             <Category>Compare</Category>
             <OpCode>10</OpCode>
             <HasRam>true</HasRam>
@@ -46,8 +46,8 @@
                 </Script>
             </AfbElementParam>
             <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>8</Value>
-                <Default>8</Default>
+                <Value>6</Value>
+                <Default>6</Default>
                 <LowLimit>1</LowLimit>
                 <HighLimit>8</HighLimit>
                 <Script>

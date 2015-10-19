@@ -13,7 +13,7 @@ class DialogFileEditor : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogFileEditor(const QString& fileName, QByteArray *pData, DbController* pDbController, bool readOnly, QWidget *parent = 0);
+    explicit DialogFileEditor(const QString& fileName, QByteArray *pData, DbController* pDbController, bool readOnly, QWidget *parent);
     ~DialogFileEditor();
 
 
