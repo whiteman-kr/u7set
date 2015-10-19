@@ -5,6 +5,8 @@
 #include <QQmlEngine>
 #include <QDebug>
 #include <QFile>
+#include <QMetaObject>
+#include <QMetaProperty>
 #include <QXmlStreamReader>
 
 
@@ -27,6 +29,8 @@ namespace Hardware
 
 	void Init()
 	{
+		qDebug() << "Hardware::Init";
+
 		static bool firstRun = false;
 		if (firstRun)
 		{
@@ -65,6 +69,7 @@ namespace Hardware
 
 	void Shutdwon()
 	{
+		qDebug() << "Hardware::Shutdown";
 	}
 
 	//

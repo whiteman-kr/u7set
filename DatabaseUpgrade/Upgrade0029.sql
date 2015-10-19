@@ -438,35 +438,46 @@ DECLARE
 	checkout_instance_id uuid;
 	file_result ObjectState;
 BEGIN
-	-- Check if file is not checked out already
-	SELECT count(CheckOutID) INTO AlreadyCheckedOut FROM CheckOut WHERE FileID = ANY(file_ids);
+	-- Check if file is not checked out by other user,
+	-- if it's already checked out by user_id then it is ok
+	--
+	SELECT count(CheckOutID) INTO AlreadyCheckedOut
+		FROM CheckOut
+		WHERE FileID = ANY(file_ids) AND UserID <> user_id;
+
 	IF (AlreadyCheckedOut > 0) THEN
 		RAISE 'Files already checked out';
 	END IF;
 
 	FOREACH file_id IN ARRAY file_ids
 	LOOP
-		-- Add record to the CheckOutTable
-		INSERT INTO CheckOut (UserID, FileID) VALUES (user_id, file_id);
+		-- Check out only if file_id has not been already checked out
+		--
+		IF (SELECT count(CheckOutID) FROM CheckOut WHERE FileID = file_id) = 0
+		THEN
+			-- Add record to the CheckOutTable
+			INSERT INTO CheckOut (UserID, FileID) VALUES (user_id, file_id);
 
-		-- Make new work copy in FileInstance
-		INSERT INTO
-			FileInstance (Data, Size, FileID, ChangesetID, Action, Details)
-			SELECT
-				Data, length(Data) AS Size, FileId, NULL, 2, Details
-			FROM
-				FileInstance
-			WHERE
-				FileID = file_id AND
-				FileInstanceID = (SELECT CheckedInInstanceID FROM File WHERE FileID = file_id)
-			RETURNING FileInstanceID INTO checkout_instance_id;
+			-- Make new work copy in FileInstance
+			INSERT INTO
+				FileInstance (Data, Size, FileID, ChangesetID, Action, Details)
+				SELECT
+					Data, length(Data) AS Size, FileId, NULL, 2, Details
+				FROM
+					FileInstance
+				WHERE
+					FileID = file_id AND
+					FileInstanceID = (SELECT CheckedInInstanceID FROM File WHERE FileID = file_id)
+				RETURNING FileInstanceID INTO checkout_instance_id;
 
-		-- Set CheckedOutInstanceID for File table
-		UPDATE File SET CheckedOutInstanceID = checkout_instance_id WHERE FileID = file_id;
+			-- Set CheckedOutInstanceID for File table
+			UPDATE File SET CheckedOutInstanceID = checkout_instance_id WHERE FileID = file_id;
+		END IF;
 
 	END LOOP;
 
-	-- Return just checked out files
+	-- Return checked out files
+	--
 	FOREACH file_id IN ARRAY file_ids
 	LOOP
 		file_result := get_file_state(file_id);

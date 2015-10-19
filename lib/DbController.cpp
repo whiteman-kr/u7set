@@ -1061,8 +1061,18 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
-		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
-		objectsMap[object->fileInfo().fileId()] = object;
+		if (f->fileId() == hcFileId())
+		{
+			std::shared_ptr<Hardware::DeviceObject> object = std::make_shared<Hardware::DeviceRoot>();
+			object->setFileInfo(*(f.get()));
+
+			objectsMap[object->fileInfo().fileId()] = object;
+		}
+		else
+		{
+			std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
+			objectsMap[object->fileInfo().fileId()] = object;
+		}
 	}
 
 	// 2.2 Set child to items
@@ -1733,7 +1743,7 @@ DbFileInfo DbController::systemFileInfo(const QString& fileName) const
 DbFileInfo DbController::systemFileInfo(int fileId) const
 {
 	DbFileInfo result;
-	result.setFileId(-1);
+	result.setFileId(DbFileInfo::Null);
 
 	std::vector<DbFileInfo> systemFiles = m_worker->systemFiles();
 

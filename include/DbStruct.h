@@ -281,6 +281,9 @@ protected:
 	int m_userId = -1;
 
 	QString m_details;
+
+public:
+	static const int Null = -1;
 };
 
 //

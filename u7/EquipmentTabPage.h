@@ -60,6 +60,8 @@ public:
 
 	std::shared_ptr<Hardware::DeviceObject> deviceObjectSharedPtr(QModelIndex& index);
 
+	void reset();
+
 public slots:
 	void projectOpened();
 	void projectClosed();
@@ -155,6 +157,8 @@ public slots:
 
 	void updateSelectedDevices();
 
+	void updateFromPreset();
+
 	// Properties
 	//
 protected:
@@ -249,6 +253,7 @@ private:
 	QAction* m_refreshAction = nullptr;
 	//----------------------------------
 	QAction* m_SeparatorAction3 = nullptr;
+	QAction* m_updateFromPresetAction = nullptr;
 	QAction* m_switchModeAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
 	QAction* m_SeparatorAction4 = nullptr;

@@ -266,6 +266,8 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 
 bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 {
+	qDebug() << Q_FUNC_INFO;
+
 	if (dbController()->isProjectOpened() == false)
 	{
 		return false;
@@ -287,6 +289,9 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 	DbFileInfo fi = object->fileInfo();
 
 	bool result = dbController()->fileHasChildren(&hasChildren, fi, m_parentWidget);
+
+	qDebug() << "------- hasChildren::fileHasChildren -----------" << fi.fileId() << ", " << fi.fileName() << ", result " << hasChildren;
+
 	if (result == false)
 	{
 		return false;
@@ -319,6 +324,8 @@ bool EquipmentModel::canFetchMore(const QModelIndex& parent) const
 
 	bool result = dbController()->fileHasChildren(&hasChildren, fi, m_parentWidget);
 
+	qDebug() << "------- canFetchMore::fileHasChildren -----------" <<fi.fileId() << ", " << fi.fileName() << ", result " << hasChildren;
+
 	if (result == false)
 	{
 		return false;
@@ -341,6 +348,13 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 	bool ok = dbController()->getFileList(&files, parentObject->fileInfo().fileId(), true, m_parentWidget);
 	if (ok == false)
 		return;
+
+	qDebug() << "------- fetch more -----------";
+	for (DbFileInfo& fi : files)
+	{
+		qDebug() << fi.fileId() << ", " << fi.fileName();
+	}
+	//--
 
 	beginInsertRows(parentIndex, 0, static_cast<int>(files.size()) - 1);
 
@@ -981,12 +995,29 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentModel::deviceObjectSharedPtr(QM
 	return object;
 }
 
+void EquipmentModel::reset()
+{
+	beginResetModel();
+
+	m_configuration->deleteAllChildren();
+	m_preset->deleteAllChildren();
+
+	endResetModel();
+}
+
 void EquipmentModel::projectOpened()
 {
 	beginResetModel();
 
-	m_configuration->fileInfo().setFileId(dbController()->hcFileId());
-	m_preset->fileInfo().setFileId(dbController()->hpFileId());
+	if (dbController()->isProjectOpened() == true)
+	{
+		m_configuration->fileInfo().setFileId(dbController()->hcFileId());
+		m_preset->fileInfo().setFileId(dbController()->hpFileId());
+	}
+	else
+	{
+		assert(dbController()->isProjectOpened() == true);
+	}
 
 	endResetModel();
 
@@ -1826,6 +1857,73 @@ void EquipmentView::updateSelectedDevices()
 	return;
 }
 
+void EquipmentView::updateFromPreset()
+{
+	if (isConfigurationMode() == false)
+	{
+		return;
+	}
+
+	// Get all equipment from the database
+	//
+	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->hcFileId());
+	assert(hcFileInfo.fileId() != DbFileInfo::Null);
+
+	std::shared_ptr<Hardware::DeviceObject> root;
+
+	bool ok = db()->getDeviceTreeLatestVersion(hcFileInfo, &root, this);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	assert(root);
+
+	// Check out all preset files
+	//
+	std::vector<DbFileInfo> presetFiles;
+
+	std::function<void(Hardware::DeviceObject*)> getPresetFiles =
+		[&getPresetFiles, &presetFiles](Hardware::DeviceObject* object)
+		{
+			assert(object);
+
+			if (object->preset() == true)
+			{
+				presetFiles.push_back(object->fileInfo());
+			}
+
+			for (int i = 0; i < object->childrenCount(); i++)
+			{
+				getPresetFiles(object->child(i));
+			}
+		};
+
+	getPresetFiles(root.get());
+
+	ok = db()->checkOut(presetFiles, this);
+
+	if (ok == false)
+	{
+		// Cannot check out one or more files, update from preset is imposiible
+		//
+		return;
+	}
+
+	// Get all presets
+	//
+
+	// Get All preset Roots and update these objects
+	//
+
+	// Reset model
+	//
+	equipmentModel()->reset();
+
+	return;
+}
+
 EquipmentModel* EquipmentView::equipmentModel()
 {
 	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
@@ -1903,6 +2001,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_refreshAction);
 	// -----------------
 	m_equipmentView->addAction(m_SeparatorAction3);
+	m_equipmentView->addAction(m_updateFromPresetAction);
 	m_equipmentView->addAction(m_switchModeAction);
 	m_equipmentView->addAction(m_pendingChangesAction);
 	// -----------------
@@ -2106,6 +2205,11 @@ void EquipmentTabPage::CreateActions()
 	//-----------------------------------
 	m_SeparatorAction3 = new QAction(this);
 	m_SeparatorAction3->setSeparator(true);
+
+	m_updateFromPresetAction = new QAction(tr("Update from Preset"), this);
+	m_updateFromPresetAction->setStatusTip(tr("Update from all object from preset"));
+	m_updateFromPresetAction->setEnabled(true);
+	connect(m_updateFromPresetAction, &QAction::triggered, m_equipmentView, &EquipmentView::updateFromPreset);
 
 	m_switchModeAction = new QAction(tr("Switch to Preset"), this);
 	m_switchModeAction->setStatusTip(tr("Switch to preset/configuration mode"));
@@ -2522,14 +2626,16 @@ void EquipmentTabPage::modeSwitched()
 	if (m_equipmentModel->isPresetMode() == true)
 	{
 		m_switchModeAction->setText(tr("Switch to Configuration"));
-
 		m_addPresetAction->setText(tr("Add New Preset"));
+
+		m_updateFromPresetAction->setEnabled(false);
 	}
 	else
 	{
 		m_switchModeAction->setText(tr("Switch to Preset"));
-
 		m_addPresetAction->setText(tr("Add From Preset"));
+
+		m_updateFromPresetAction->setEnabled(true);
 	}
 
 	setActionState();
