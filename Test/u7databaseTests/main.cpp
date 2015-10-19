@@ -11,7 +11,7 @@
 
 const int DatabaseProjectVersion = 40;
 
-const char* DatabaseHost = "192.168.75.101";
+const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
 const char* DatabaseUserPassword = "P2ssw0rd";
 
