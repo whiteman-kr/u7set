@@ -304,6 +304,98 @@ protected:
 
 
 
+// --------------------------- Data structs used for parsing "Radiy" platform packets ------------------------
+//
+
+#pragma pack(push, 2)
+
+const int ENTIRE_UDP_SIZE = 1472;
+
+struct RpPacketFlags
+{
+	quint16 registration : 1;
+	quint16 diagnostics : 1;
+	quint16 control : 1;
+	quint16 test : 1;
+};
+
+
+struct RpTimeStamp
+{
+	quint16 hour;			// 0..23
+	quint16 Minute;			// 0..59
+	quint16 Second;			// 0..59
+	quint16 Millisecond;	// 0..999
+
+	quint16 day;	// 1..31
+	quint16 month;	// 1..12
+	quint16 year;	// 1970..65535
+};
+
+
+struct RpDateStamp
+{
+	quint16 day;
+	quint16 month;
+	quint16 year;
+};
+
+
+struct RpPacketHeader
+{
+	quint16 packetSize;			// packet size including header, bytes
+	quint16 protocolVersion;
+
+	RpPacketFlags flags;
+
+	quint32 moduleFactoryNo;
+	quint16 moduleType;			// module type ID
+	quint16 subblockID;			// = 16 less significant bits of subblock IP
+	quint32 packetNo;
+	quint16 partCount;			// >=1
+	quint16 partNo;				// 0..(partCount-1)
+
+	RpTimeStamp TimeStamp;
+};
+
+
+const int RP_PACKET_DATA_SIZE = 1428;
+
+typedef quint8 RpPacketData[RP_PACKET_DATA_SIZE];
+
+struct RpPacket
+{
+	RpPacketHeader Header;
+
+	RpPacketData Data;
+
+	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
+};
+
+
+struct RpDiagMsgHeader
+{
+	quint16 msgLen;					// message size including header
+	quint16 blockPlace;
+	quint16 blockType;
+	quint16 version;
+	quint32 factoryNo;
+	RpDateStamp firmwareDate;
+	RpDateStamp productionDate;
+	quint16 firmwareVersion;
+	quint16 plVersion;				// PL FPGA version
+	quint16 comVersion;				// COM FPGA version
+	quint32 plCRC;					// CRC PL FPGA
+	quint32 comCRC;					// CRC COM FPGA
+	quint16 reserv[6];
+};
+
+
+const quint16 NO_ACK_BLOCK_TYPE = 0;		// block type value if block didn't ack
+
+#pragma pack(pop)
+
+
 
 #pragma pack(pop)
 
