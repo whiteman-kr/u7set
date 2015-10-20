@@ -135,7 +135,8 @@ SOURCES +=\
     ChooseAfbDialog.cpp \
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
-    ../lib/SocketIO.cpp
+    ../lib/SocketIO.cpp \
+    Builder/FbParamCalculation.cpp
 
 HEADERS  += \
     CentralWidget.h \

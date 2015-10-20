@@ -1077,7 +1077,7 @@ namespace Builder
 					//
 					QString instantiatorID = appFb->afb().instantiatorID();
 
-					if (!instantiatorStrIDsMap.contains(instantiatorID))
+					if (instantiatorStrIDsMap.contains(instantiatorID) == false)
 					{
 						instantiatorStrIDsMap.insert(instantiatorID, 0);
 
@@ -1085,6 +1085,46 @@ namespace Builder
 					}
 				}
 			}
+		}
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::initAppFbParams(AppFb* appFb, bool instantiatorOnly)
+	{
+		bool result = true;
+
+		if (appFb == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_code.comment(QString(tr("Initialization of %1 (fbtype %2, opcode %3, instance %4, %5, %6)")).
+				arg(appFb->caption()).
+				arg(appFb->typeCaption()).
+				arg(appFb->opcode()).
+				arg(appFb->instance()).
+				arg(appFb->afb().instantiatorID()).
+				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
+
+		m_code.newLine();
+
+		// iniitalization of constant params
+		//
+		AfbParamValuesArray afbParamValues;
+
+		result = calculateFbParamsValues(*appFb, afbParamValues, instantiatorOnly);			// implemented in FbParamCalculation.cpp
+
+		if (result == true && afbParamValues.isEmpty() == false)
+		{
+			for(const AfbParamValue& afbParamValue : afbParamValues)
+			{
+				result &= generateWriteAfbParamCode(*appFb, afbParamValue);
+			}
+
+			m_code.newLine();
 		}
 
 		return result;
@@ -1106,25 +1146,28 @@ namespace Builder
 	}
 
 
-	ModuleLogicCompiler::AfbParamValue::AfbParamValue(const Afb::AfbParam& afbParam)
+	AfbParamValue::AfbParamValue(const Afb::AfbParam& afbParam)
 	{
 		QVariant qv = afbParam.value();
+
+		opName = afbParam.opName();
+		operandIndex = afbParam.operandIndex();
 
 		if (afbParam.isDiscrete())
 		{
 			type = Afb::AfbSignalType::Discrete;
-			format = Afb::AfbDataFormat::UnsignedInt;
-			size = 1;
+			dataFormat = Afb::AfbDataFormat::UnsignedInt;
+			dataSize = 1;
 
 			unsignedIntValue = qv.toUInt();
 		}
 		else
 		{
 			type = Afb::AfbSignalType::Analog;
-			format = afbParam.dataFormat();
-			size = afbParam.size();
+			dataFormat = afbParam.dataFormat();
+			dataSize = afbParam.size();
 
-			switch(format)
+			switch(dataFormat)
 			{
 			case Afb::SignedInt:
 				signedIntValue = qv.toInt();
@@ -1135,7 +1178,7 @@ namespace Builder
 				break;
 
 			case Afb::Float:
-				assert(size == SIZE_32BIT);
+				assert(dataSize == SIZE_32BIT);
 				floatValue = qv.toFloat();
 				break;
 
@@ -1146,67 +1189,21 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::initAppFbParams(AppFb* appFb, bool instantiatorOnly)
-	{
-		bool result = true;
 
-		if (appFb == nullptr)
+
+	bool ModuleLogicCompiler::generateWriteAfbParamCode(const AppFb& appFb, const AfbParamValue& afbParamValue)
+	{
+		if (afbParamValue.operandIndex == NOT_FB_OPERAND_INDEX)
 		{
-			assert(false);
-			return false;
+			return true;
 		}
 
-		const Afb::AfbElement& afb = appFb->afb();
-
-		m_code.comment(QString(tr("Initialization of %1 (fbtype %2, opcode %3, instance %4, %5, %6)")).
-				arg(appFb->caption()).
-				arg(appFb->typeCaption()).
-				arg(appFb->opcode()).
-				arg(appFb->instance()).
-				arg(appFb->afb().instantiatorID()).
-				arg(appFb->hasRam() ? "has RAM" : "non RAM"));
-
-		m_code.newLine();
-
-		// iniitalization of constant params
-		//
-		for(Afb::AfbParam afbParam : afb.params())
-		{
-			if (afbParam.operandIndex() == NOT_FB_OPERAND_INDEX)
-			{
-				continue;
-			}
-
-			if (instantiatorOnly && !afbParam.instantiator())
-			{
-				continue;
-			}
-
-			AfbParamValue prevAfbParamValue(afbParam);
-			AfbParamValue afbParamValue(afbParam);
-
-            if (afbParam.isAnalog())
-            {
-				result &= calculateFbAnalogParamValue(*appFb, afbParam, &afbParamValue);
-            }
-
-			result &= generateWriteAfbParamCode(*appFb, afbParam, prevAfbParamValue, afbParamValue);
-		}
-
-		m_code.newLine();
-
-		return result;
-	}
-
-
-	bool ModuleLogicCompiler::generateWriteAfbParamCode(const AppFb& appFb, const Afb::AfbParam& afbParam, const AfbParamValue& prevAfbParamValue, const AfbParamValue& afbParamValue)
-	{
 		QString caption = appFb.caption();
 		int fbOpcode = appFb.opcode();
 		int fbInstance = appFb.instance();
 
-		QString paramCaption = afbParam.caption();
-		int operandIndex = afbParam.operandIndex();
+		QString opName = afbParamValue.opName;
+		int operandIndex = afbParamValue.operandIndex;
 
 		bool result = true;
 
@@ -1217,7 +1214,7 @@ namespace Builder
 			// for discrete parameters
 			//
 			cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
-			cmd.setComment(QString("%1 <= %2").arg(paramCaption).arg(afbParamValue.unsignedIntValue));
+			cmd.setComment(QString("%1 <= %2").arg(opName).arg(afbParamValue.unsignedIntValue));
 
 			m_code.append(cmd);
 
@@ -1227,26 +1224,23 @@ namespace Builder
 		// for analog parameters
 		//
 
-		if (afbParamValue.size == SIZE_32BIT)
+		if (afbParamValue.dataSize == SIZE_32BIT)
 		{
-			switch (afbParam.dataFormat())
+			switch (afbParamValue.dataFormat)
 			{
 			case Afb::UnsignedInt:
 				cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
-				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.unsignedIntValue).
-							   arg(prevAfbParamValue.unsignedIntValue));
+				cmd.setComment(QString("%1 <= %2").arg(opName).arg(afbParamValue.unsignedIntValue));
 				break;
 
 			case Afb::SignedInt:
 				cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, afbParamValue.signedIntValue, caption);
-				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.signedIntValue).
-							   arg(prevAfbParamValue.signedIntValue));
+				cmd.setComment(QString("%1 <= %2").arg(opName).arg(afbParamValue.signedIntValue));
 				break;
 
 			case Afb::Float:
 				cmd.writeFuncBlockConstFloat(fbOpcode, fbInstance, operandIndex, afbParamValue.floatValue, caption);
-				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.floatValue).
-							   arg(prevAfbParamValue.floatValue));
+				cmd.setComment(QString("%1 <= %2").arg(opName).arg(afbParamValue.floatValue));
 				break;
 
 			default:
@@ -1257,18 +1251,16 @@ namespace Builder
 		{
 			// other sizes
 			//
-			switch (afbParam.dataFormat())
+			switch (afbParamValue.dataFormat)
 			{
 			case Afb::UnsignedInt:
 				cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.unsignedIntValue, caption);
-				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.unsignedIntValue).
-							   arg(prevAfbParamValue.unsignedIntValue));
+				cmd.setComment(QString("%1 <= %2").arg(opName).arg(afbParamValue.unsignedIntValue));
 				break;
 
 			case Afb::SignedInt:
 				cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, afbParamValue.signedIntValue, caption);
-				cmd.setComment(QString("%1 <= %2 (%3)").arg(paramCaption).arg(afbParamValue.signedIntValue).
-							   arg(prevAfbParamValue.signedIntValue));
+				cmd.setComment(QString("%1 <= %2").arg(opName).arg(afbParamValue.signedIntValue));
 				break;
 
 			case Afb::Float:
@@ -1283,47 +1275,6 @@ namespace Builder
 		m_code.append(cmd);
 
 		return result;
-	}
-
-
-	bool ModuleLogicCompiler::calculateFbAnalogParamValue(const AppFb& appFb, const Afb::AfbParam& param, AfbParamValue* afbParamValue)
-	{
-		if (afbParamValue == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		switch(appFb.opcode())
-		{
-		case Afb::AfbType::TCT:
-			return calculate_TCT_AnalogIntegralParamValue(appFb, param, afbParamValue);
-
-		default:
-			// for othes no need calculate afbParamValue
-			;
-		}
-
-		return true;
-	}
-
-
-	bool ModuleLogicCompiler::calculate_TCT_AnalogIntegralParamValue(const AppFb&, const Afb::AfbParam& param, AfbParamValue* afbParamValue)
-	{
-		if (param.opName() == "i_counter")
-		{
-			if (m_lmCycleDuration == 0)
-			{
-				assert(false);
-				return false;
-			}
-
-			assert(afbParamValue->format == Afb::UnsignedInt && afbParamValue->size == SIZE_32BIT);
-
-			afbParamValue->unsignedIntValue = (afbParamValue->unsignedIntValue * 1000) / m_lmCycleDuration;
-		}
-
-		return true;
 	}
 
 
@@ -2587,7 +2538,6 @@ namespace Builder
 			return true;
 		}
 
-		m_code.newLine();
 		m_code.comment("Copy internal discrete signals from bit-addressed memory to RegBuf");
 		m_code.newLine();
 
@@ -2598,6 +2548,8 @@ namespace Builder
 				   m_memoryMap.regDiscreteSignalsSizeW());
 
 		m_code.append(cmd);
+
+		m_code.newLine();
 
 		return true;
 	}
