@@ -1470,11 +1470,18 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 
 	// Set new id, recusively to all children
 	//
-	std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid](Hardware::DeviceObject* object)
+	bool presetMode = isPresetMode();
+
+	std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid, presetMode](Hardware::DeviceObject* object)
 		{
 			assert(object);
 
 			object->setUuid(QUuid::createUuid());
+
+			if (presetMode == true)
+			{
+				object->setPresetObjectUuid(object->uuid());
+			}
 
 			for (int i = 0; i < object->childrenCount(); i++)
 			{
@@ -1543,6 +1550,8 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 
 	// Debugging .... parentObject->setChildRestriction("function(device) { return device.Place >=0 && device.Place < 16; }");
 
+	assert(parentObject != nullptr);
+
 	QString errorMessage;
 	bool allowed = parentObject->checkChild(object.get(), &errorMessage);
 
@@ -1552,10 +1561,15 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 		return;
 	}
 
+	//  Set presetName, parent object should contain it
+	//
+	if (isPresetMode() == true && object->preset() == true && object->presetRoot() == false && parentObject != nullptr)
+	{
+		object->setPresetName(parentObject->presetName());
+	}
+
 	// Add device to DB
 	//
-	assert(parentObject != nullptr);
-
 	bool result = db()->addDeviceObject(object.get(), parentObject->fileInfo().fileId(), this);
 
 	if (result == false)

@@ -245,7 +245,7 @@ void DialogAfblEditor::on_m_view_clicked()
     QByteArray data;
     f->swapData(data);
 
-	DialogFileEditor d(pFi->fileName(), &data, m_pDbController, true);
+    DialogFileEditor d(pFi->fileName(), &data, m_pDbController, true, this);
     d.exec();
 
     return;
@@ -280,7 +280,7 @@ void DialogAfblEditor::on_m_edit_clicked()
     QByteArray data;
     f->swapData(data);
 
-	DialogFileEditor d(pFi->fileName(), &data, m_pDbController, false);
+    DialogFileEditor d(pFi->fileName(), &data, m_pDbController, false, this);
     if (d.exec() != QDialog::Accepted)
     {
         return;

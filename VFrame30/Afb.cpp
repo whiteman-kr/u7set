@@ -868,8 +868,8 @@ namespace Afb
 	AfbElement::AfbElement(void) :
 		m_hasRam(false),
         m_requiredStart(true),
-        m_internalUse(false),
-        m_version("0.0")
+		m_version("0.0"),
+		m_internalUse(false)
 	{
 	}
 

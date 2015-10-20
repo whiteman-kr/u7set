@@ -117,7 +117,7 @@ namespace VFrame30
 		// This is not good, it is subject to change.
 		//
 		mutable double m_cachedGridSize = -1;			// -1 means it is not iniotialized
-		mutable double m_cachedPinGridStep = 0;
+		mutable int m_cachedPinGridStep = 0;
 
 		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
 		QRgb m_lineColor;
