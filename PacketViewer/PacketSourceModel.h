@@ -8,6 +8,7 @@
 
 class QUdpSocket;
 class PacketSourceModel;
+class PacketBufferTableModel;
 
 #define DECLARE_INCREMENTER(function, member) void function() \
 { \
@@ -41,6 +42,15 @@ public:
 	DECLARE_INCREMENTER(incrementPartialFrameCount, m_partialFrameCount)
 	DECLARE_INCREMENTER(incrementFormatErrorCount, m_formatErrorCount)
 
+	void incrementPacketLostCount(int difference)
+	{
+		if (parent() != nullptr)
+		{
+			parent()->incrementPacketLostCount(difference);
+		}
+		m_packetLostCount += difference;
+	}
+
 	virtual int childCount() = 0;
 
 	virtual bool operator ==(const Statistic& s) const
@@ -73,11 +83,23 @@ public:
 	Source() : Statistic(nullptr) {}
 	Source(QString address, int port, Statistic* parent);
 
+	~Source();
+
 	int childCount() { return 0; }
 
 	void parseReceivedBuffer(char* buffer, quint64 readBytes);
+	void openStatusWidget();
+	void removeDependentWidget(QObject* object);
+
 signals:
 	void fieldsChanged();
+
+private:
+	quint8 m_buffer[RP_MAX_FRAME_COUNT * RP_PACKET_DATA_SIZE];
+	RpPacketHeader m_lastHeader;
+	std::vector<QWidget*> dependentWidgets;
+	PacketBufferTableModel* m_packetBufferModel;
+	//should be SignalTableModel;
 };
 
 

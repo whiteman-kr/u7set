@@ -3,6 +3,9 @@
 #include <QWidget>
 #include <QUdpSocket>
 #include "../include/SocketIO.h"
+#include "PacketBufferTableModel.h"
+#include <QHBoxLayout>
+#include <QTableView>
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)
@@ -209,7 +212,6 @@ int PacketSourceModel::index(Listener* listener)
 
 void PacketSourceModel::openSourceStatusWidget(const QModelIndex& index)
 {
-
 	if (index.isValid() == false)
 	{
 		return;
@@ -228,9 +230,8 @@ void PacketSourceModel::openSourceStatusWidget(const QModelIndex& index)
 		return;
 	}
 
-	QWidget* widget = new QWidget();
-	widget->setWindowTitle(statistic->fullAddress());
-	widget->show();
+	Source* source = dynamic_cast<Source*>(statistic);
+	source->openStatusWidget();
 }
 
 void PacketSourceModel::removeListener(size_t row)
@@ -383,19 +384,81 @@ void Listener::readPendingDatagrams()
 
 
 Source::Source(QString address, int port, Statistic* parent) :
-	Statistic(address, port, parent)
+	Statistic(address, port, parent),
+	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this))
 {
+	m_lastHeader.packetNo = 0;
+	memset(m_buffer, 0, RP_MAX_FRAME_COUNT * RP_PACKET_DATA_SIZE);
+}
 
+Source::~Source()
+{
+	for (size_t i = 0; i < dependentWidgets.size(); i++)
+	{
+		dependentWidgets[i]->deleteLater();
+	}
 }
 
 void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 {
-	RpPacketHeader& header = *reinterpret_cast<RpPacketHeader*>(buffer);
+	RpPacket& packet = *reinterpret_cast<RpPacket*>(buffer);
+	RpPacketHeader& header = packet.Header;
 	incrementPacketReceivedCount();
 	if (readBytes != header.packetSize)
 	{
 		incrementPartialFrameCount();
 	}
+	if (header.partCount > RP_MAX_FRAME_COUNT || header.partNo >= header.partCount || header.packetSize > ENTIRE_UDP_SIZE)
+	{
+		incrementFormatErrorCount();
+		delete [] buffer;
+		return;
+	}
+	if (header.packetNo - m_lastHeader.packetNo > 1 && m_lastHeader.packetNo != 0)
+	{
+		incrementPacketLostCount(header.packetNo - m_lastHeader.packetNo);
+	}
+	// Check correct packet part sequence
+	if (!((header.packetNo == m_lastHeader.packetNo && header.partNo == m_lastHeader.partNo + 1) ||
+		(header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == 0 && m_lastHeader.partNo == m_lastHeader.partCount - 1)))
+	{
+		incrementPartialPacketCount();
+	}
+	int currentDataSize = header.packetSize - sizeof(RpPacketHeader) - sizeof(packet.CRC64);
+	memcpy(m_buffer + header.partNo * currentDataSize, packet.Data, currentDataSize);
+	m_packetBufferModel->updateFrame(header.partNo);
+	memcpy(&m_lastHeader, &header, sizeof(RpPacketHeader));
 	emit fieldsChanged();
 	delete [] buffer;
+}
+
+void Source::openStatusWidget()
+{
+	QWidget* widget = new QWidget();
+	dependentWidgets.push_back(widget);
+	widget->setWindowTitle(fullAddress());
+	connect(widget, &QWidget::destroyed, this, &Source::removeDependentWidget);
+
+	QTableView* table = new QTableView(widget);
+	table->setModel(m_packetBufferModel);
+	table->resizeColumnsToContents();
+
+	QHBoxLayout* layout = new QHBoxLayout;
+	layout->addWidget(table);
+	widget->setLayout(layout);
+	widget->resize(640, 480);
+	widget->show();
+	widget->setAttribute(Qt::WA_DeleteOnClose, true);
+}
+
+void Source::removeDependentWidget(QObject* object)
+{
+	QWidget* widget = dynamic_cast<QWidget*>(object);
+	for (size_t i = 0; i < dependentWidgets.size(); i++)
+	{
+		if (dependentWidgets[i] == widget)
+		{
+			dependentWidgets.erase(dependentWidgets.begin() + i);
+		}
+	}
 }

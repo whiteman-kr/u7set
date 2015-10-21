@@ -360,6 +360,7 @@ struct RpPacketHeader
 
 
 const int RP_PACKET_DATA_SIZE = 1428;
+const int RP_MAX_FRAME_COUNT = 10;
 
 typedef quint8 RpPacketData[RP_PACKET_DATA_SIZE];
 
