@@ -1,6 +1,6 @@
 #include "../include/Signal.h"
 #include <QXmlStreamAttributes>
-
+#include <QFile>
 
 DataFormatList::DataFormatList()
 {
@@ -389,6 +389,27 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 
 
 
+bool Signal::isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const
+{
+	if (m_dataFormat == DataFormat::Float && afbDataFormat == Afb::AfbDataFormat::Float)
+	{
+		return true;
+	}
+
+	if (m_dataFormat == DataFormat::SignedInt && afbDataFormat == Afb::AfbDataFormat::SignedInt)
+	{
+		return true;
+	}
+
+	if (m_dataFormat == DataFormat::UnsignedInt && afbDataFormat == Afb::AfbDataFormat::UnsignedInt)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
 SignalSet::SignalSet()
 {
 }
@@ -486,7 +507,6 @@ void Address16::fromString(QString str)
 	m_offset = list[0].toInt();
 	m_bit = list[1].toInt();
 }
-
 
 
 void SerializeSignalsFromXml(UnitList& unitInfo, SignalSet& signalSet)

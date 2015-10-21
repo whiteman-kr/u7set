@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QFile>
 #include <QXmlStreamReader>
+#include <QFile>
+#include <QMetaProperty>
 
 
 namespace Hardware

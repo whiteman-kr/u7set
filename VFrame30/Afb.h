@@ -2,6 +2,9 @@
 
 #include "../include/ProtoSerialization.h"
 #include "DebugInstCounter.h"
+#include "../VFrame30/VFrame30Lib_global.h"
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 namespace Afb
 {
