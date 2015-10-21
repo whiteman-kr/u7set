@@ -6,7 +6,7 @@
 #include "OtherTests.h"
 #include "SignalTests.h"
 #include "MultiThreadFileTest.h"
-#include "MultiThreadSignalTest.h"
+#include "MultiThreadSignalTests.h"
 #include "../../include/DbController.h"
 
 const int DatabaseProjectVersion = 40;
@@ -20,7 +20,7 @@ const char* ProjectAdministratorName = "Administrator";
 const char* ProjectAdministratorPassword = "P2ssw0rd";
 
 const int AmountOfThreadsInMultiThreadTest = 10;
-const int AmountOfFilesInMultiThreadTest = 500;
+const int AmountOfItemsInMultiThreadTest = 500;
 
 int main(int argc, char *argv[])
 {
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 
 	for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
 	{
-		MultiThreadFileTest* thread = new MultiThreadFileTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfFilesInMultiThreadTest);
+		MultiThreadFileTest* thread = new MultiThreadFileTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfItemsInMultiThreadTest);
 
 		thread->start();
 
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 
 	for (int numberOfThread = 0; numberOfThread < AmountOfThreadsInMultiThreadTest; numberOfThread++)
 	{
-		MultiThreadSignalTest* thread = new MultiThreadSignalTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfFilesInMultiThreadTest);
+		MultiThreadSignalTest* thread = new MultiThreadSignalTest(numberOfThread, DatabaseHost, DatabaseUser, DatabaseUserPassword, ProjectName, AmountOfItemsInMultiThreadTest);
 
 		thread->start();
 
@@ -249,7 +249,60 @@ int main(int argc, char *argv[])
 		delete thread;
 	}
 
-	qDebug() << "********* Finished testing of MultiThreadSignal tests *********";*/
+	qDebug() << "********* Finished testing of MultiThreadSignal tests *********";
+	qDebug() << "********* Started testing of MultiThreadStressSignal tests *********";
+
+	std::vector<int> signalIds;
+
+	int userIdForSignalStressTest = MultiThreadSignalStressTest::create_user(DatabaseHost,
+																			 DatabaseUser,
+																			 DatabaseUserPassword,
+																			 ProjectName);
+
+	int errCode = MultiThreadSignalStressTest::fillSignalIdsVector(signalIds,
+																   userIdForSignalStressTest,
+																   AmountOfItemsInMultiThreadTest,
+																   DatabaseHost,
+																   DatabaseUser,
+																   DatabaseUserPassword,
+																   ProjectName);
+
+	if (errCode == 0)
+	{
+		MultiThreadSignalStressTest* threadCheckInCheckOut = new MultiThreadSignalStressTest(DatabaseHost,
+																							 DatabaseUser,
+																							 DatabaseUserPassword,
+																							 ProjectName,
+																							 0,
+																							 userIdForSignalStressTest,
+																							 signalIds);
+
+		MultiThreadSignalStressTest* threadGetLatestSignal = new MultiThreadSignalStressTest(DatabaseHost,
+																							 DatabaseUser,
+																							 DatabaseUserPassword,
+																							 ProjectName,
+																							 1,
+																							 userIdForSignalStressTest,
+																							 signalIds);
+
+		threadCheckInCheckOut->start();
+		threadGetLatestSignal->start();
+
+		while (threadCheckInCheckOut->isFinished() == false)
+		{
+		}
+
+		while (threadGetLatestSignal->isFinished() == false)
+		{
+		}
+
+		delete threadCheckInCheckOut;
+		delete threadGetLatestSignal;
+	}
+	else
+		qDebug() << "FAIL: errCode is " << errCode << ": can not fill vector with fileIds or create user";
+
+	qDebug() << "********* Finished testing of MultiThreadStressSignal tests *********";*/
 
 	// Drop database project
 	//
