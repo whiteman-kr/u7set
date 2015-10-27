@@ -5,6 +5,8 @@
 #include "../include/DbController.h"
 #include "../include/DeviceObject.h"
 
+#include "../include/PropertyObject.h"
+
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
 _CRT_REPORT_HOOK prevHook = nullptr;
@@ -75,6 +77,7 @@ int reportingHook(int, char* userMessage, int*)
 
 #endif
 
+
 int main(int argc, char *argv[])
 {
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
@@ -109,6 +112,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<std::vector<int>>();
 	qRegisterMetaType<std::vector<DbFileInfo>>();
 	qRegisterMetaType<SignalType>();
+
 
 	// Start database communication thread
 	//

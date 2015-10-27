@@ -1393,10 +1393,12 @@ R"DELIM({
 	DeviceRoot::DeviceRoot(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
+		qDebug() << "DeviceRoot::DeviceRoot";
 	}
 
 	DeviceRoot::~DeviceRoot()
 	{
+		qDebug() << "DeviceRoot::~DeviceRoot";
 	}
 
 	DeviceType DeviceRoot::deviceType() const
@@ -1413,11 +1415,12 @@ R"DELIM({
 	DeviceSystem::DeviceSystem(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
+		qDebug() << "DeviceRoot::DeviceSystem";
 	}
 
 	DeviceSystem::~DeviceSystem()
 	{
-		qDebug() << Q_FUNC_INFO;
+		qDebug() << "DeviceRoot::~DeviceSystem";
 	}
 
 	bool DeviceSystem::SaveData(Proto::Envelope* message) const

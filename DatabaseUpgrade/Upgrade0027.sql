@@ -49,72 +49,45 @@ DROP FUNCTION get_file_list(integer, integer, text);
 CREATE OR REPLACE FUNCTION get_file_list(IN user_id integer, IN parent_id integer, IN file_mask text)
 	RETURNS	SETOF DbFileInfo AS
 $BODY$
-
-(SELECT
-	F.FileID AS FileID,
-	F.Deleted AS Deleted,
-	F.Name AS Name,
-	F.ParentID AS ParentID,
-	F.ChangesetID AS ChangesetID,
-	F.Created AS Created,
-	F.Size AS Size,
-	F.ChangesetID IS NULL AS CheckedOut,
-	Changeset.time AS CheckOutTime,
-	Changeset.UserID AS UserID,
-	F.Action AS Action,
-	F.Details AS Details
-FROM
 	-- All checked in now
 	(SELECT
 		F.FileID AS FileID,
 		F.Deleted AS Deleted,
 		F.Name AS Name,
 		F.ParentID AS ParentID,
+		CS.ChangesetID AS ChangesetID,
 		F.Created AS Created,
-		FI.FileInstanceID AS FileInstanceID,
-		FI.ChangesetID AS ChangesetID,
 		length(FI.data) AS Size,
-		FI.Created AS InstanceCreated,
+		false AS CheckedOut,
+		CS.Time AS CheckOutTime,
+		CS.UserID AS USerID,
 		FI.Action AS Action,
 		FI.Details::text AS Details
 	FROM
 		File F,
-		FileInstance FI
+		FileInstance FI,
+		Changeset CS
 	WHERE
 		F.ParentID = parent_id AND
 		F.CheckedInInstanceID = FI.FileInstanceID AND
 		F.CheckedOutInstanceID IS NULL AND
-		F.FileID = FI.FileID AND
+		--F.FileID = FI.FileID AND 	-- F.CheckedInInstanceID = FI.FileInstanceID, it is soppose that F.CheckedInInstanceID pointed to the right FileID
+		CS.ChangesetID = FI.ChangesetID AND
 		F.Name ILIKE file_mask
-	) AS F
-	LEFT JOIN
-	Changeset USING (ChangesetID))
+	)
 UNION
-(SELECT
-	F.FileID AS FileID,
-	F.Deleted AS Deleted,
-	F.Name AS Name,
-	F.ParentID AS ParentID,
-	F.ChangesetID AS ChangesetID,
-	F.Created AS Created,
-	F.Size AS Size,
-	F.ChangesetID IS NULL AS CheckedOut,
-	CheckOut.time AS CheckOutTime,
-	CheckOut.UserID AS UserID,
-	F.Action AS Action,
-	F.Details AS Details
-FROM
 	-- All CheckedOut by any user if user_id is administrator
 	(SELECT
 		F.FileID AS FileID,
 		F.Deleted AS Deleted,
 		F.Name AS Name,
 		F.ParentID AS ParentID,
-		F.Created AS Created,
-		FI.FileInstanceID AS FileInstanceID,
 		FI.ChangesetID AS ChangesetID,
+		F.Created AS Created,
 		length(FI.data) AS Size,
-		FI.Created AS InstanceCreated,
+		true AS CheckedOut,
+		CO.Time AS CheckOutTime,
+		CO.UserID AS UserID,
 		FI.Action AS Action,
 		FI.Details::text AS Details
 	FROM
@@ -123,15 +96,40 @@ FROM
 		CheckOut CO
 	WHERE
 		F.ParentID = parent_id AND
-		F.CheckedOutInstanceID = FI.FileInstanceID AND
-		F.FileID = FI.FileID AND
-		F.FileID = CO.FileID AND
+		FI.FileInstanceID = F.CheckedOutInstanceID AND
+		--F.FileID = FI.FileID AND		-- it is done by (F.CheckedOutInstanceID = FI.FileInstanceID)
+		CO.FileID = F.FileID AND
 		(CO.UserID = user_id OR (SELECT is_admin(user_id)) = TRUE) AND
 		F.Name ILIKE file_mask
-	) AS F
-	LEFT JOIN
-	CheckOut USING (FileID))
-ORDER BY Name;
+	)
+UNION
+	-- All CheckedOut by somebody else and was checked in it least one time
+	(SELECT
+		F.FileID AS FileID,
+		F.Deleted AS Deleted,
+		F.Name AS Name,
+		F.ParentID AS ParentID,
+		FI.ChangesetID AS ChangesetID,
+		F.Created AS Created,
+		length(FI.data) AS Size,
+		true AS CheckedOut,
+		CO.Time AS CheckOutTime,
+		CO.UserID AS UserID,
+		FI.Action AS Action,
+		FI.Details::text AS Details
+	FROM
+		File F,
+		FileInstance FI,
+		CheckOut CO
+	WHERE
+		F.ParentID = parent_id AND
+		FI.FileInstanceID = F.CheckedInInstanceID AND
+		--F.FileID = FI.FileID AND			-- it is done by (FI.FileInstanceID = F.CheckedInInstanceID)
+		CO.FileID = F.FileID AND
+		--F.CheckedInInstanceID IS NOT NULL AND		-- done by FI.FileInstanceID = F.CheckedInInstanceID,
+		(CO.UserID <> user_id AND (SELECT is_admin(user_id)) = FALSE) AND
+		F.Name ILIKE file_mask
+	)
 
 $BODY$
 LANGUAGE sql;
@@ -143,73 +141,47 @@ LANGUAGE sql;
 --
 -------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION get_file_list(user_id integer, parent_id integer)
-  RETURNS SETOF dbfileinfo AS
+RETURNS SETOF dbfileinfo AS
 $BODY$
 
-(SELECT
-	F.FileID AS FileID,
-	F.Deleted AS Deleted,
-	F.Name AS Name,
-	F.ParentID AS ParentID,
-	F.ChangesetID AS ChangesetID,
-	F.Created AS Created,
-	F.Size AS Size,
-	F.ChangesetID IS NULL AS CheckedOut,
-	Changeset.time AS CheckOutTime,
-	Changeset.UserID AS UserID,
-	F.Action AS Action,
-	F.Details AS Details
-FROM
 	-- All checked in now
 	(SELECT
 		F.FileID AS FileID,
 		F.Deleted AS Deleted,
 		F.Name AS Name,
 		F.ParentID AS ParentID,
+		CS.ChangesetID AS ChangesetID,
 		F.Created AS Created,
-		FI.FileInstanceID AS FileInstanceID,
-		FI.ChangesetID AS ChangesetID,
 		length(FI.data) AS Size,
-		FI.Created AS InstanceCreated,
+		false AS CheckedOut,
+		CS.Time AS CheckOutTime,
+		CS.UserID AS USerID,
 		FI.Action AS Action,
 		FI.Details::text AS Details
 	FROM
 		File F,
-		FileInstance FI
+		FileInstance FI,
+		Changeset CS
 	WHERE
 		F.ParentID = parent_id AND
 		F.CheckedInInstanceID = FI.FileInstanceID AND
 		F.CheckedOutInstanceID IS NULL AND
-		F.FileID = FI.FileID
-	) AS F
-	LEFT JOIN
-	Changeset USING (ChangesetID))
+		--F.FileID = FI.FileID AND 	-- F.CheckedInInstanceID = FI.FileInstanceID, it is soppose that F.CheckedInInstanceID pointed to the right FileID
+		CS.ChangesetID = FI.ChangesetID
+	)
 UNION
-(SELECT
-	F.FileID AS FileID,
-	F.Deleted AS Deleted,
-	F.Name AS Name,
-	F.ParentID AS ParentID,
-	F.ChangesetID AS ChangesetID,
-	F.Created AS Created,
-	F.Size AS Size,
-	F.ChangesetID IS NULL AS CheckedOut,
-	CheckOut.time AS CheckOutTime,
-	CheckOut.UserID AS UserID,
-	F.Action AS Action,
-	F.Details AS Details
-FROM
 	-- All CheckedOut by any user if user_id is administrator
 	(SELECT
 		F.FileID AS FileID,
 		F.Deleted AS Deleted,
 		F.Name AS Name,
 		F.ParentID AS ParentID,
-		F.Created AS Created,
-		FI.FileInstanceID AS FileInstanceID,
 		FI.ChangesetID AS ChangesetID,
+		F.Created AS Created,
 		length(FI.data) AS Size,
-		FI.Created AS InstanceCreated,
+		true AS CheckedOut,
+		CO.Time AS CheckOutTime,
+		CO.UserID AS UserID,
 		FI.Action AS Action,
 		FI.Details::text AS Details
 	FROM
@@ -218,13 +190,38 @@ FROM
 		CheckOut CO
 	WHERE
 		F.ParentID = parent_id AND
-		F.CheckedOutInstanceID = FI.FileInstanceID AND
-		F.FileID = FI.FileID AND
-		F.FileID = CO.FileID AND
+		FI.FileInstanceID = F.CheckedOutInstanceID AND
+		--F.FileID = FI.FileID AND		-- it is done by (F.CheckedOutInstanceID = FI.FileInstanceID)
+		CO.FileID = F.FileID AND
 		(CO.UserID = user_id OR (SELECT is_admin(user_id)) = TRUE)
-	) AS F
-	LEFT JOIN
-	CheckOut USING (FileID));
+	)
+UNION
+	-- All CheckedOut by somebody else and was checked in it least one time
+	(SELECT
+		F.FileID AS FileID,
+		F.Deleted AS Deleted,
+		F.Name AS Name,
+		F.ParentID AS ParentID,
+		FI.ChangesetID AS ChangesetID,
+		F.Created AS Created,
+		length(FI.data) AS Size,
+		true AS CheckedOut,
+		CO.Time AS CheckOutTime,
+		CO.UserID AS UserID,
+		FI.Action AS Action,
+		FI.Details::text AS Details
+	FROM
+		File F,
+		FileInstance FI,
+		CheckOut CO
+	WHERE
+		F.ParentID = parent_id AND
+		FI.FileInstanceID = F.CheckedInInstanceID AND
+		--F.FileID = FI.FileID AND			-- it is done by (FI.FileInstanceID = F.CheckedInInstanceID)
+		CO.FileID = F.FileID AND
+		--F.CheckedInInstanceID IS NOT NULL AND		-- done by FI.FileInstanceID = F.CheckedInInstanceID,
+		(CO.UserID <> user_id AND (SELECT is_admin(user_id)) = FALSE)
+	)
 
 $BODY$
 LANGUAGE sql;

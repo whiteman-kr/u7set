@@ -348,12 +348,17 @@ void DbFileInfo::setFileId(int value)
 
 void DbFileInfo::resetFileId()
 {
-	m_fileId = -1;
+	m_fileId = DbFileInfo::Null;
 }
 
 bool DbFileInfo::hasFileId() const
 {
-	return m_fileId == -1;
+	return m_fileId != DbFileInfo::Null;
+}
+
+bool DbFileInfo::isNull() const
+{
+	return m_fileId == DbFileInfo::Null;
 }
 
 int DbFileInfo::parentId() const

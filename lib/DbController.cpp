@@ -1061,7 +1061,7 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
-		if (f->fileId() == hcFileId())
+		if (f->fileId() == hcFileId() || f->fileId() == hpFileId())
 		{
 			std::shared_ptr<Hardware::DeviceObject> object = std::make_shared<Hardware::DeviceRoot>();
 			object->setFileInfo(*(f.get()));

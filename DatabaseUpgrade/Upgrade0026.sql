@@ -482,6 +482,21 @@ BEGIN
 			F.FileID = FI.FileID AND
 			F.FileID = CO.FileID AND
 			(CO.UserID = user_id OR (SELECT is_admin(user_id)) = TRUE)
+		)
+		UNION
+		(	-- All CheckedOut by other user but has at least one check in
+		SELECT
+			COUNT(*) AS CNT
+		FROM
+			File F,
+			FileInstance FI,
+			CheckOut CO
+		WHERE
+			F.ParentID = file_id AND
+			F.CheckedInInstanceID = FI.FileInstanceID AND
+			F.FileID = FI.FileID AND
+			F.FileID = CO.FileID AND
+			(CO.UserID <> user_id AND (SELECT is_admin(user_id)) = FALSE)
 		)) AS SubQuery);
 
 END
