@@ -4,39 +4,57 @@
 #include <QtSql>
 #include <QThread>
 
-class MultiThreadSignalStressTest : public QThread
+class MultiThreadGetSignalTest : public QThread
 {
 public:
-	MultiThreadSignalStressTest(const char* dbHost,
+	MultiThreadGetSignalTest(const char* dbHost,
 								const char* dbUser,
 								const char* dbUserPassword,
 								const char* name,
-								const int mode,
-								const int userIdSignalCreator,
 								std::vector<int>& signalIds);
 
-	virtual ~MultiThreadSignalStressTest();
+	virtual ~MultiThreadGetSignalTest();
 
 	virtual void run();
-	static int fillSignalIdsVector(std::vector<int>& signalIds,
-								   int userId,
-								   int signalAmount,
-								   const char* dbHost,
-								   const char* dbUser,
-								   const char* dbUserPassword,
-								   const char* name);
-	static int create_user(const char* dbHost,
-						   const char* dbUser,
-						   const char* dbUserPassword,
-						   const char* name);
 
 	std::vector<int> m_signalIds;
-	int m_mode = 0;
 
 	QString m_databaseHost;
 	QString m_databaseUser;
 	QString m_databaseUserPassword;
 	QString m_projectName;
+
+	int m_currentSignalId=0;
+
+	QMutex mutex;
+};
+
+class MultiThreadSignalCheckInTest : public QThread
+{
+public:
+	MultiThreadSignalCheckInTest(const char* dbHost,
+								const char* dbUser,
+								const char* dbUserPassword,
+								const char* name,
+								const int userIdSignalCreator,
+								std::vector<int> &signalIds,
+								 MultiThreadGetSignalTest* thread);
+
+	virtual ~MultiThreadSignalCheckInTest();
+
+	virtual void run();
+
+	std::vector<int> m_signalIds;
+
+	MultiThreadGetSignalTest *m_getSignalThread;
+
+	QMutex mutex;
+
+	QString m_databaseHost;
+	QString m_databaseUser;
+	QString m_databaseUserPassword;
+	QString m_projectName;
+
 	int m_userIdSignalCreator;
 };
 
@@ -51,6 +69,18 @@ public:
 						  int amountOfFiles);
 
 	virtual ~MultiThreadSignalTest();
+
+	static int fillSignalIdsVector(std::vector<int>& signalIds,
+								   int userId,
+								   int signalAmount,
+								   const char* dbHost,
+								   const char* dbUser,
+								   const char* dbUserPassword,
+								   const char* name);
+	static int create_user(const char* dbHost,
+						   const char* dbUser,
+						   const char* dbUserPassword,
+						   const char* name);
 
 	virtual void run();
 

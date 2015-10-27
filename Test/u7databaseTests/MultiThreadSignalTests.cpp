@@ -23,11 +23,6 @@ MultiThreadSignalTest::MultiThreadSignalTest(int number,
 	assert(name);
 }
 
-MultiThreadSignalTest::~MultiThreadSignalTest()
-{
-	//qDebug() << "MultiThreadTest::~MultiThreadTest() " << m_threadNumber;
-}
-
 void MultiThreadSignalTest::run()
 {
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "sgnalThread_" + QString::number(m_threadNumber));
@@ -543,31 +538,10 @@ void MultiThreadSignalTest::run()
 	db.close();
 }
 
-MultiThreadSignalStressTest :: MultiThreadSignalStressTest(const char* dbHost,
-														   const char* dbUser,
-														   const char* dbUserPassword,
-														   const char* name,
-														   const int mode,
-														   const int userIdSignalCreator,
-														   std::vector<int>& signalIds) :
-	m_mode(mode),
-	m_signalIds(signalIds),
-	m_databaseHost(dbHost),
-	m_databaseUser(dbUser),
-	m_databaseUserPassword(dbUserPassword),
-	m_projectName(name),
-	m_userIdSignalCreator(userIdSignalCreator)
-{
-	assert(dbHost);
-	assert(dbUser);
-	assert(dbUserPassword);
-	assert(name);
-}
-
-int MultiThreadSignalStressTest::create_user(const char* dbHost,
-											 const char* dbUser,
-											 const char* dbUserPassword,
-											 const char* name)
+int MultiThreadSignalTest::create_user(const char* dbHost,
+									   const char* dbUser,
+									   const char* dbUserPassword,
+									   const char* name)
 {
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "sgnalStressCreateUser");
 
@@ -602,13 +576,13 @@ int MultiThreadSignalStressTest::create_user(const char* dbHost,
 	return query.value(0).toInt();
 }
 
-int MultiThreadSignalStressTest::fillSignalIdsVector(std::vector<int>& signalIds,
-													 int userId,
-													 int signalAmount,
-													 const char* dbHost,
-													 const char* dbUser,
-													 const char* dbUserPassword,
-													 const char* name)
+int MultiThreadSignalTest::fillSignalIdsVector(std::vector<int>& signalIds,
+											   int userId,
+											   int signalAmount,
+											   const char* dbHost,
+											   const char* dbUser,
+											   const char* dbUserPassword,
+											   const char* name)
 {
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "sgnalStressfillSignalIdsVector");
 
@@ -652,9 +626,125 @@ int MultiThreadSignalStressTest::fillSignalIdsVector(std::vector<int>& signalIds
 	return 0;
 }
 
-void MultiThreadSignalStressTest::run()
+MultiThreadSignalTest::~MultiThreadSignalTest()
 {
-	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "SignalStressTestMode_" + QString::number(m_mode));
+}
+
+MultiThreadGetSignalTest :: MultiThreadGetSignalTest(const char* dbHost,
+													 const char* dbUser,
+													 const char* dbUserPassword,
+													 const char* name,
+													 std::vector<int>& signalIds) :
+	m_signalIds(signalIds),
+	m_databaseHost(dbHost),
+	m_databaseUser(dbUser),
+	m_databaseUserPassword(dbUserPassword),
+	m_projectName(name)
+{
+	assert(dbHost);
+	assert(dbUser);
+	assert(dbUserPassword);
+	assert(name);
+}
+
+void MultiThreadGetSignalTest::run()
+{
+	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "GetSignalTestMode");
+
+	db.setHostName(m_databaseHost);
+	db.setUserName(m_databaseUser);
+	db.setPassword(m_databaseUserPassword);
+	db.setDatabaseName(QString("u7_") + m_projectName);
+
+	if (db.open() == false)
+	{
+		qDebug() << "Error: Database not open. " << db.lastError().databaseText();
+		this->terminate();
+	}
+
+	QSqlQuery query(db);
+	bool error = false;
+	int numberOfErrors = 0;
+
+	// Create random user, to start get_latest_file() funtion on signal owned by another user
+	//
+
+	bool ok = query.exec("SELECT * FROM create_user(1, 'StressTestRandomUser', 'StressTestRandomUser', 'StressTestRandomUser', 'StressTestRandomUser', false, false, false);");
+
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		error = true;
+	}
+
+	if (query.next() == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		error = true;
+	}
+
+	int randomUserId = query.value(0).toInt();
+
+	while (m_currentSignalId != m_signalIds.size())
+	{
+
+		// Work with signals, that were send by checkInOut thread
+		//
+
+		ok = query.exec(QString("SELECT * FROM get_latest_signal(%1, %2)").arg(randomUserId).arg(m_signalIds[m_currentSignalId]));
+
+		if (ok == false)
+		{
+			qDebug() << query.lastError().databaseText();
+			error = true;
+		}
+
+		if (error)
+		{
+			qDebug() << "get_latest_signal " << m_currentSignalId << ": ERROR";
+			numberOfErrors++;
+		}
+		error = false;
+	}
+	if (numberOfErrors == 0)
+	{
+		qDebug() << "PASS   : MultiSignalStressTest :: get_latest_signal() ";
+	}
+	else
+	{
+		qDebug() << "FAIL   : MultiSignalStressTest :: get_latest_signal() ";
+	}
+	db.close();
+}
+
+MultiThreadGetSignalTest::~MultiThreadGetSignalTest()
+{
+}
+
+MultiThreadSignalCheckInTest :: MultiThreadSignalCheckInTest(const char* dbHost,
+															 const char* dbUser,
+															 const char* dbUserPassword,
+															 const char* name,
+															 const int userIdSignalCreator,
+															 std::vector<int>& signalIds,
+															 MultiThreadGetSignalTest* getSignalThread) :
+	m_signalIds(signalIds),
+	m_databaseHost(dbHost),
+	m_databaseUser(dbUser),
+	m_databaseUserPassword(dbUserPassword),
+	m_projectName(name),
+	m_userIdSignalCreator(userIdSignalCreator),
+	m_getSignalThread(getSignalThread)
+{
+	assert(dbHost);
+	assert(dbUser);
+	assert(dbUserPassword);
+	assert(name);
+}
+
+void MultiThreadSignalCheckInTest::run()
+{
+	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "SignalCheckInTestMode");
 
 	db.setHostName(m_databaseHost);
 	db.setUserName(m_databaseUser);
@@ -672,123 +762,68 @@ void MultiThreadSignalStressTest::run()
 	int numberOfErrors = 0;
 	int signalNumber = 0;
 
-	if (m_mode == 0)						// Start checkin_checkout test
+	for (int signalId : m_signalIds)
 	{
-		for (int signalId : m_signalIds)	// Try every signal
+		m_getSignalThread->m_currentSignalId = signalNumber;
+		for (int numberOfFunctionStart = 0; numberOfFunctionStart < 5; numberOfFunctionStart++)
 		{
-			for (int numberOfCycleToMakeStressTest = 0; numberOfCycleToMakeStressTest < 5; numberOfCycleToMakeStressTest++)
+			// Check every signal from vector for 5 times
+			//
+
+			bool ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'TEST');").arg(m_userIdSignalCreator).arg(signalId));
+
+			if (ok == false)
 			{
-				// To make sure, that signal has been checked by function get_latest_signal() at least once,
-				// we need check_in - check_out function 5 times
-				//
-
-				bool ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'TEST');").arg(m_userIdSignalCreator).arg(signalId));
-
-				if (ok == false)
-				{
-					qDebug() << query.lastError().databaseText();
-					error = true;
-				}
-
-				if (query.next() == false)
-				{
-					qDebug() << query.lastError().databaseText();
-					error = true;
-				}
-
-				ok = query.exec(QString("SELECT * FROM checkout_signals(%1, '{%2}');").arg(m_userIdSignalCreator).arg(signalId));
-
-				if (ok == false)
-				{
-					qDebug() << query.lastError().databaseText();
-					error = true;
-				}
-
-				if (query.next() == false)
-				{
-					qDebug() << query.lastError().databaseText();
-					error = true;
-				}
-
-				if (error)
-				{
-					qDebug() << "get_latest_signal " << signalNumber << ": ERROR";
-					numberOfErrors++;
-				}
-				error = false;
+				qDebug() << query.lastError().databaseText();
+				error = true;
 			}
-			signalNumber++;
+
+			if (query.next() == false)
+			{
+				qDebug() << query.lastError().databaseText();
+				error = true;
+			}
+
+			ok = query.exec(QString("SELECT * FROM checkout_signals(%1, '{%2}');").arg(m_userIdSignalCreator).arg(signalId));
+
+			if (ok == false)
+			{
+				qDebug() << query.lastError().databaseText();
+				error = true;
+			}
+
+			if (query.next() == false)
+			{
+				qDebug() << query.lastError().databaseText();
+				error = true;
+			}
+
+			if (error)
+			{
+				qDebug() << "get_latest_signal " << m_signalIds[signalNumber] << ": ERROR";
+				numberOfErrors++;
+			}
+			error = false;
 		}
-		if (numberOfErrors == 0)
-		{
-			qDebug() << "PASS   : MultiSignalStressTest :: checkIn - checkOut() ";
-		}
-		else
-		{
-			qDebug() << "FAIL   : MultiSignalStressTest :: checkIn - checkOut() ";
-		}
+		signalNumber++;
 	}
-	else	// Start get_latest_signal Test
+
+	// When all signals were checked, send non-existed signal number
+	// for get_latest_signal thread to stop
+
+	m_getSignalThread->m_currentSignalId = signalNumber;
+
+	if (numberOfErrors == 0)
 	{
-		// Create random user, to start get_latest_file() funtion on signal owned by another user
-		//
-
-		bool ok = query.exec("SELECT * FROM create_user(1, 'StressTestRandomUser', 'StressTestRandomUser', 'StressTestRandomUser', 'StressTestRandomUser', false, false, false);");
-
-		if (ok == false)
-		{
-			qDebug() << query.lastError().databaseText();
-			error = true;
-		}
-
-		if (query.next() == false)
-		{
-			qDebug() << query.lastError().databaseText();
-			error = true;
-		}
-
-		int randomUserId = query.value(0).toInt();
-
-		for (int signalId : m_signalIds)
-		{
-			for (int numberOfCycleToMakeStressTest = 0; numberOfCycleToMakeStressTest < 5; numberOfCycleToMakeStressTest++)
-			{
-				ok = query.exec(QString("SELECT * FROM get_latest_signal(%1, %2)").arg(randomUserId).arg(signalId));
-
-				if (ok == false)
-				{
-					qDebug() << query.lastError().databaseText();
-					error = true;
-				}
-
-				/*if (query.next() == false)
-				{
-					qDebug() << query.lastError().databaseText();
-					error = true;
-				}*/
-
-				if (error)
-				{
-					qDebug() << "get_latest_signal " << signalNumber << ": ERROR";
-					numberOfErrors++;
-				}
-				error = false;
-			}
-			signalNumber++;
-		}
-		if (numberOfErrors == 0)
-		{
-			qDebug() << "PASS   : MultiSignalStressTest :: get_latest_signal() ";
-		}
-		else
-		{
-			qDebug() << "FAIL   : MultiSignalStressTest :: get_latest_signal() ";
-		}
+		qDebug() << "PASS   : MultiSignalStressTest :: checkIn - checkOut() ";
+	}
+	else
+	{
+		qDebug() << "FAIL   : MultiSignalStressTest :: checkIn - checkOut() ";
 	}
 	db.close();
 }
 
-MultiThreadSignalStressTest::~MultiThreadSignalStressTest()
+MultiThreadSignalCheckInTest::~MultiThreadSignalCheckInTest()
 {
-	//qDebug() << "MultiThreadTest::~MultiThreadTest() " << m_threadNumber;
 }

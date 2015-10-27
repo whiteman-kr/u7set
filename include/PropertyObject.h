@@ -12,6 +12,7 @@
 #include <QObject>
 #include <QString>
 #include <QVariant>
+#include <QMetaEnum>
 
 
 // Add property which is stored in QVariant and does not have getter or setter
