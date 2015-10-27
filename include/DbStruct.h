@@ -231,6 +231,8 @@ public:
 	void resetFileId();
 	bool hasFileId() const;
 
+	bool isNull() const;
+
 	int parentId() const;
 	void setParentId(int value);
 
@@ -267,7 +269,7 @@ public:
 	//
 protected:
 	QString m_fileName;
-	int m_fileId = -1;
+	int m_fileId = DbFileInfo::Null;
 	int m_parentId = 0;
 	int m_size = 0;
 	bool m_deleted = false;		// File was deleted from database, from all tables, such FileInfo does not exist anymore
@@ -281,6 +283,9 @@ protected:
 	int m_userId = -1;
 
 	QString m_details;
+
+public:
+	static const int Null = -1;
 };
 
 //

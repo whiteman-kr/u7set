@@ -136,6 +136,7 @@ SOURCES +=\
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
+	../lib/PropertyObject.cpp \
     Builder/FbParamCalculation.cpp
 
 HEADERS  += \
@@ -204,7 +205,8 @@ HEADERS  += \
     ChooseAfbDialog.h \
     EquipmentVcsDialog.h \
     ../include/DataSource.h \
-    ../include/SocketIO.h
+    ../include/SocketIO.h \
+    ../include/PropertyObject.h
 
 FORMS    += \
     ChangesetDialog.ui \

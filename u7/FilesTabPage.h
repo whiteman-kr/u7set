@@ -98,6 +98,8 @@ private:
 		FileSizeColumn,
 		FileStateColumn,
 		FileUserColumn,
+		FileIdColumn,
+		FileDetailsColumn,
 
 		// Add other column befor this line
 		//

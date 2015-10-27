@@ -4263,7 +4263,7 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 	//fileInfo->setCheckoutTime(q.value(8).toString());
 	fileInfo->setUserId(q.value(9).toInt());
 	fileInfo->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(10).toInt()));
-	fileInfo->setDetails(q.value(10).toString());
+	fileInfo->setDetails(q.value(11).toString());
 
 	return true;
 }

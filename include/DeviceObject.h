@@ -5,6 +5,7 @@
 #include <QJSValue>
 #include "DbStruct.h"
 #include "QUuid"
+#include "../include/PropertyObject.h"
 #include "../include/Factory.h"
 #include "../include/Types.h"
 #include "../include/ProtoSerialization.h"
@@ -116,7 +117,7 @@ namespace Hardware
 	//
 	//
 	class DeviceObject :
-		public QObject,
+		public PropertyObject,
 		public Proto::ObjectSerialization<DeviceObject>
 	{
 		Q_OBJECT
@@ -241,6 +242,8 @@ namespace Hardware
 		// Props
 		//
 	public:
+		int fileId() const;
+
 		QUuid uuid() const;
 		void setUuid(QUuid value);
 

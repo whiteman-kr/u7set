@@ -44,6 +44,8 @@ namespace Hardware
 		Q_INVOKABLE bool storeCrc64(int frameIndex, int start, int count, int offset);
 		Q_INVOKABLE bool storeHash64(int frameIndex, int offset, QString dataString);
 
+        Q_INVOKABLE void writeLog(QString logString);
+
         std::vector<quint8> frame(int frameIndex);
 
 		bool setChannelData(int channel, int frameSize, int frameCount, const QByteArray& data, QString* errorMsg);
@@ -59,6 +61,7 @@ namespace Hardware
 		int frameSize() const;
 		int frameCount() const;
 		int changesetId() const;
+        const QByteArray& log() const;
 
 		// Data
 		//
@@ -76,6 +79,8 @@ namespace Hardware
         std::vector<std::vector<quint8>> m_frames;
 
 		std::map<int, QByteArray> m_channelData;
+
+        QByteArray m_log;
     };
 
 	class ModuleFirmwareCollection : public QObject

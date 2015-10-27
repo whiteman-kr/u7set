@@ -290,10 +290,13 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 	DbFileInfo fi = object->fileInfo();
 
 	bool result = dbController()->fileHasChildren(&hasChildren, fi, m_parentWidget);
+
 	if (result == false)
 	{
 		return false;
 	}
+
+	qDebug() << object->caption() << " has children = " << hasChildren;
 
 	return hasChildren;
 }
@@ -426,8 +429,6 @@ void EquipmentModel::sortDeviceObject(Hardware::DeviceObject* object, int column
 
 void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*/)
 {
-	qDebug() << "Sort column: " << column << ", order: " << static_cast<int>(order);
-
 	m_sortColumn = column;
 	m_sortOrder = order;
 
@@ -564,8 +565,6 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 	assert(device);
 	assert(device->fileInfo().fileId() != -1);
 
-//	qDebug() << "updateRowFuncOnCheckIn" << nested << device->fileInfo().fileId();
-
 	// Update children first, as items can be deleted
 	//
 	for (int childRow = device->childrenCount() - 1; childRow >= 0; childRow--)
@@ -587,8 +586,6 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 		Hardware::DeviceObject* childDevice = this->deviceObject(childIndex);
 		assert(childDevice);
 		assert(childDevice == device->child(childRow));
-
-//		qDebug() << "updateRowFuncOnCheckIn" << nested << "child row " << childRow << ", and fileid is" << childDevice->fileInfo().fileId();
 
 		updateRowFuncOnCheckIn(childIndex, updateFiles, updatedModelIndexes);
 	}
@@ -613,7 +610,6 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 			int childIndex = po->childIndex(device);
 			assert(childIndex != -1);
 
-//			qDebug() << "updateRowFuncOnCheckIn" << nested << " REMOVED fileid " << device->fileInfo().fileId();
 			beginRemoveRows(pi, childIndex, childIndex);
 			po->deleteChild(device);
 			endRemoveRows();
@@ -984,12 +980,29 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentModel::deviceObjectSharedPtr(QM
 	return object;
 }
 
+void EquipmentModel::reset()
+{
+	beginResetModel();
+
+	m_configuration->deleteAllChildren();
+	m_preset->deleteAllChildren();
+
+	endResetModel();
+}
+
 void EquipmentModel::projectOpened()
 {
 	beginResetModel();
 
-	m_configuration->fileInfo().setFileId(dbController()->hcFileId());
-	m_preset->fileInfo().setFileId(dbController()->hpFileId());
+	if (dbController()->isProjectOpened() == true)
+	{
+		m_configuration->fileInfo().setFileId(dbController()->hcFileId());
+		m_preset->fileInfo().setFileId(dbController()->hpFileId());
+	}
+	else
+	{
+		assert(dbController()->isProjectOpened() == true);
+	}
 
 	endResetModel();
 
@@ -1829,6 +1842,228 @@ void EquipmentView::updateSelectedDevices()
 	return;
 }
 
+void EquipmentView::updateFromPreset()
+{
+	if (isConfigurationMode() == false)
+	{
+		return;
+	}
+
+	// Get all equipment from the database
+	//
+	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->hcFileId());
+	assert(hcFileInfo.isNull() == false);
+
+	std::shared_ptr<Hardware::DeviceObject> root;
+
+	bool ok = db()->getDeviceTreeLatestVersion(hcFileInfo, &root, this);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	assert(root);
+
+	// Check out all preset files
+	//
+	std::vector<DbFileInfo> presetFiles;
+	presetFiles.reserve(4096);
+
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> presetRoots;
+	presetRoots.reserve(4096);
+
+	std::function<void(std::shared_ptr<Hardware::DeviceObject>)> getPresetFiles =
+		[&presetRoots, &getPresetFiles, &presetFiles](std::shared_ptr<Hardware::DeviceObject> object)
+		{
+			assert(object);
+
+			if (object->preset() == true)
+			{
+				presetFiles.push_back(object->fileInfo());
+			}
+
+			if (object->preset() == true && object->presetRoot() == true)
+			{
+				presetRoots.push_back(object);
+			}
+
+			for (int i = 0; i < object->childrenCount(); i++)
+			{
+				getPresetFiles(object->childSharedPtr(i));
+			}
+		};
+
+	getPresetFiles(root);
+
+	ok = db()->checkOut(presetFiles, this);
+
+	if (ok == false)
+	{
+		// Cannot check out one or more files, update from preset is imposiible
+		//
+		return;
+	}
+
+	// All files were checked out by the current user, update preset can be performed now
+	//
+
+	// Get all presets
+	//
+	DbFileInfo hpFileInfo = db()->systemFileInfo(db()->hpFileId());		//	hp -- hardware presets
+	assert(hpFileInfo.isNull() == false);
+
+	std::shared_ptr<Hardware::DeviceObject> presetRoot;
+
+	ok = db()->getDeviceTreeLatestVersion(hpFileInfo, &presetRoot, this);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	assert(presetRoot);
+
+	// Get All preset Roots
+	//
+	std::map<QString, std::shared_ptr<Hardware::DeviceObject>>  presets;
+
+	for (int i = 0; i < presetRoot->childrenCount(); i++)
+	{
+		std::shared_ptr<Hardware::DeviceObject> preset = presetRoot->childSharedPtr(i);
+
+		if (preset.get() == nullptr || preset->presetRoot() == false)
+		{
+			assert(preset);
+			assert(preset->presetRoot() == true);
+			continue;
+		}
+
+		if (presets.count(preset->presetName()) > 0)
+		{
+			QMessageBox::critical(this,
+								  QApplication::applicationName(),
+								  tr("There are preset with the same name %1. Preset names must be uniques. Update from preset is not posiible.").arg(preset->presetName()));
+			return;
+		}
+
+		presets[preset->presetName()] = preset;
+	}
+
+	presetRoot.reset();
+
+	// Update all preset objects
+	//
+	for (std::shared_ptr<Hardware::DeviceObject> device : presetRoots)
+	{
+		if (device->presetRoot() == false)
+		{
+			// presetFiles contains all files from preset, update from preset is started from presetRoot objects
+			//
+			continue;
+		}
+
+		QString presetName = device->presetName();
+
+		auto foundPreset = presets.find(presetName);
+
+		if (foundPreset == presets.end())
+		{
+			// preset is not found
+			//
+			int mbResult = QMessageBox::critical(this,
+				QApplication::applicationName(),
+				tr("Preset %1 is not found.").arg(presetName),
+				QMessageBox::Ignore | QMessageBox::Cancel,
+				QMessageBox::Cancel);
+
+			if (mbResult == QMessageBox::Ignore)
+			{
+				continue;
+			}
+
+			if (mbResult == QMessageBox::Cancel)
+			{
+				return;
+			}
+
+			assert(false);
+			return;
+		}
+
+		// --
+		//
+		std::shared_ptr<Hardware::DeviceObject> preset = foundPreset->second;
+
+		assert(preset->presetRoot() == true);
+		assert(preset->presetName() == presetName);
+
+		ok = updateDeviceFromPreset(device, preset);
+
+	}
+
+	// Reset model
+	//
+	equipmentModel()->reset();
+
+	return;
+}
+
+bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObject> device,
+							std::shared_ptr<Hardware::DeviceObject> preset)
+{
+	if (device == nullptr ||
+		preset == nullptr ||
+		device->preset() == false ||
+		preset->preset() == false ||
+		device->presetName() != preset->presetName())
+	{
+		assert(device);
+		assert(preset);
+		assert(device->preset() == true);
+		assert(preset->preset() == true);
+		assert(device->presetName() == preset->presetName());
+		return false;
+	}
+
+	qDebug();
+	qDebug() << "EquipmentView::updateDeviceFromPreset"
+			 << ", device: " << device->strId()
+			 << ", " << device->caption()
+			 << ", place: " << device->place();
+
+	// Update device object properties
+	//
+	const QMetaObject* deviceMetaObject = device->metaObject();
+
+	QStringList deviceProperties;
+
+//	for(int i = 0; i < deviceMetaObject->propertyCount(); i++)
+//	{
+//		QString propertyName = QString::fromLatin1(deviceMetaObject->property(i).name());
+
+//		if (propertyName == "objectName" ||
+//			propertyName == "Uuid" ||
+//			propertyName == "StrID" ||
+
+//		deviceProperties << propertyName;
+
+//		qDebug() << QString::fromLatin1(deviceMetaObject->property(i).name());
+//	}
+
+
+	// Update existing children
+	//
+
+	// Add children
+	//
+
+	// Delete children
+	//
+
+	return true;
+}
+
 EquipmentModel* EquipmentView::equipmentModel()
 {
 	EquipmentModel* result = dynamic_cast<EquipmentModel*>(model());
@@ -1906,6 +2141,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_refreshAction);
 	// -----------------
 	m_equipmentView->addAction(m_SeparatorAction3);
+	m_equipmentView->addAction(m_updateFromPresetAction);
 	m_equipmentView->addAction(m_switchModeAction);
 	m_equipmentView->addAction(m_pendingChangesAction);
 	// -----------------
@@ -2109,6 +2345,11 @@ void EquipmentTabPage::CreateActions()
 	//-----------------------------------
 	m_SeparatorAction3 = new QAction(this);
 	m_SeparatorAction3->setSeparator(true);
+
+	m_updateFromPresetAction = new QAction(tr("Update from Preset"), this);
+	m_updateFromPresetAction->setStatusTip(tr("Update from all object from preset"));
+	m_updateFromPresetAction->setEnabled(true);
+	connect(m_updateFromPresetAction, &QAction::triggered, m_equipmentView, &EquipmentView::updateFromPreset);
 
 	m_switchModeAction = new QAction(tr("Switch to Preset"), this);
 	m_switchModeAction->setStatusTip(tr("Switch to preset/configuration mode"));
@@ -2525,14 +2766,16 @@ void EquipmentTabPage::modeSwitched()
 	if (m_equipmentModel->isPresetMode() == true)
 	{
 		m_switchModeAction->setText(tr("Switch to Configuration"));
-
 		m_addPresetAction->setText(tr("Add New Preset"));
+
+		m_updateFromPresetAction->setEnabled(false);
 	}
 	else
 	{
 		m_switchModeAction->setText(tr("Switch to Preset"));
-
 		m_addPresetAction->setText(tr("Add From Preset"));
+
+		m_updateFromPresetAction->setEnabled(true);
 	}
 
 	setActionState();

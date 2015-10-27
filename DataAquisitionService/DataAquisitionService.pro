@@ -79,7 +79,8 @@ SOURCES += main.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/Signal.cpp
+    ../lib/Signal.cpp \
+    ../lib/PropertyObject.cpp
 
 HEADERS += \
         Stable.h \
@@ -95,7 +96,8 @@ HEADERS += \
     ../include/DbStruct.h \
     ../include/ProtoSerialization.h \
     ../include/Signal.h \
-    ../include/CUtils.h
+    ../include/CUtils.h \
+    ../include/PropertyObject.h
 
 include(../qtservice/src/qtservice.pri)
 

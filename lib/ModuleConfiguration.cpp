@@ -371,6 +371,11 @@ namespace Hardware
 		return true;
 	}
 
+    void ModuleFirmware::writeLog(QString logString)
+    {
+        m_log.append(logString);
+    }
+
 	std::vector<quint8> ModuleFirmware::frame(int frameIndex)
     {
         if (frameIndex < 0 || frameIndex >= frameCount())
@@ -581,6 +586,11 @@ namespace Hardware
 	{
         return static_cast<int>(m_frames.size());
 	}
+
+    const QByteArray& ModuleFirmware::log() const
+    {
+        return m_log;
+    }
 
 	ModuleFirmwareCollection::ModuleFirmwareCollection(const QString &projectName, const QString &userName, int changesetId):
 		m_projectName(projectName),

@@ -171,6 +171,15 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     }
 
     var confFirmware = confCollection.jsGet("LM-1", subSysID, ssKeyValue, uartId, frameSize, frameCount);
+	
+    confFirmware.writeLog("---\r\n");
+    confFirmware.writeLog("Module: LM-1\r\n");
+	confFirmware.writeLog("StrID = " + module.StrID+ "\r\n");
+	confFirmware.writeLog("Subsystem ID = " + subSysID+ "\r\n");
+	confFirmware.writeLog("Key value = " + ssKeyValue+ "\r\n");
+	confFirmware.writeLog("UartID = " + uartId+ "\r\n");
+	confFirmware.writeLog("Frame size = " + frameSize+ "\r\n");
+	confFirmware.writeLog("Channel = " + channel + "\r\n");
 
     // Configuration storage format
     //
@@ -178,14 +187,17 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     var ptr = 0;
     
     setData16(confFirmware, log, frameStorageConfig, ptr, 0xca70);     //CFG_Marker
+	confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": CFG_Marker = 0xca70" + "\r\n");
     ptr += 2;
     
     setData16(confFirmware, log, frameStorageConfig, ptr, 0x0001);     //CFG_Version
+	confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": CFG_Version = 0x0001" + "\r\n");
     ptr += 2;
     
     
     var ssKey = ssKeyValue << 6;             //0000SSKEYY000000b
     setData16(confFirmware, log, frameStorageConfig, ptr, ssKey);
+	confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": ssKey = " + ssKey + "\r\n");
     ptr += 2;
     
     // reserved
@@ -197,13 +209,15 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     if (oldChannelCount == channel)
     {
-        log.writeError("LM-1 channel is not unique: " + module.StrID + ", channel: " + channel);
+        log.writeError("LM-1 channel is not unique: " + module.StrID + ", channel: " + channel + "\r\n");
         return false;
     }
     
     if (oldChannelCount < channel)
     {
         setData16(confFirmware, log, frameStorageConfig, ptr, channel);
+		confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": Channel = " + channel + "\r\n");
+
     }
     ptr += 2;
     
@@ -211,16 +225,22 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     var configFrame = configStartFrames + configFrameCount * (channel - 1);
     
     setData16(confFirmware, log, frameStorageConfig, configIndexOffset, configFrame);
+	confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + configIndexOffset +": configFrame = " + configFrame + "\r\n");
 
     // Service information
     //
+	confFirmware.writeLog("Writing service information.\r\n");
+	
     var frameServiceConfig = configFrame;
     ptr = 0;
     setData16(confFirmware, log, frameServiceConfig, ptr, 0x0001);   //CFG_Ch_Vers
+	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": CFG_Ch_Vers = 0x0001\r\n");
     ptr += 2;
     setData16(confFirmware, log, frameServiceConfig, ptr, uartId);   //CFG_Ch_Dtype == UARTID?
+	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": uartId = "+ uartId + "\r\n");
     ptr += 2;
     storeHash64(confFirmware, log, frameServiceConfig, ptr, subSysID);   //subSysID HASH-64
+	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": subSysID HASH-64 = "+ subSysID + "\r\n");
     ptr += 8;
     
     // I/O Modules configuration

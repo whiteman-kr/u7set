@@ -5,6 +5,8 @@
 #include <QQmlEngine>
 #include <QDebug>
 #include <QFile>
+#include <QMetaObject>
+#include <QMetaProperty>
 #include <QXmlStreamReader>
 #include <QFile>
 #include <QMetaProperty>
@@ -29,6 +31,8 @@ namespace Hardware
 
 	void Init()
 	{
+		qDebug() << "Hardware::Init";
+
 		static bool firstRun = false;
 		if (firstRun)
 		{
@@ -67,6 +71,7 @@ namespace Hardware
 
 	void Shutdwon()
 	{
+		qDebug() << "Hardware::Shutdown";
 	}
 
 	//
@@ -237,6 +242,20 @@ namespace Hardware
 	DeviceObject::DeviceObject(bool preset /*= false*/) :
 		m_preset(preset)
 	{
+		ADD_PROPERTY_GETTER(int, FilID, true, DeviceObject::fileId);
+		ADD_PROPERTY_GETTER(QUuid, Uuid, true, DeviceObject::uuid);
+		ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, DeviceObject::strId, DeviceObject::setStrId);
+		ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
+		ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
+		ADD_PROPERTY_GETTER_SETTER(int, Place, true, DeviceObject::place, DeviceObject::setPlace);
+		ADD_PROPERTY_GETTER_SETTER(QString, DynamicProperties, true, DeviceObject::dynamicProperties, DeviceObject::setDynamicProperties);
+		ADD_PROPERTY_GETTER(bool, Preset, true, DeviceObject::preset);
+		ADD_PROPERTY_GETTER(bool, PresetRoot, true, DeviceObject::presetRoot);
+		if (preset == true)
+		{
+			ADD_PROPERTY_GETTER_SETTER(QString, PresetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
+		}
+		ADD_PROPERTY_GETTER(QUuid, PresetObjectUuid, true, DeviceObject::presetObjectUuid);
 	}
 
 	DeviceObject::~DeviceObject()
@@ -1226,6 +1245,11 @@ namespace Hardware
 		return c;
 	}
 
+	int DeviceObject::fileId() const
+	{
+		return fileInfo().fileId();
+	}
+
 	QUuid DeviceObject::uuid() const
 	{
 		return m_uuid;
@@ -1390,10 +1414,12 @@ R"DELIM({
 	DeviceRoot::DeviceRoot(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
+		qDebug() << "DeviceRoot::DeviceRoot";
 	}
 
 	DeviceRoot::~DeviceRoot()
 	{
+		qDebug() << "DeviceRoot::~DeviceRoot";
 	}
 
 	DeviceType DeviceRoot::deviceType() const
@@ -1410,11 +1436,12 @@ R"DELIM({
 	DeviceSystem::DeviceSystem(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
+		qDebug() << "DeviceRoot::DeviceSystem";
 	}
 
 	DeviceSystem::~DeviceSystem()
 	{
-		qDebug() << Q_FUNC_INFO;
+		qDebug() << "DeviceRoot::~DeviceSystem";
 	}
 
 	bool DeviceSystem::SaveData(Proto::Envelope* message) const

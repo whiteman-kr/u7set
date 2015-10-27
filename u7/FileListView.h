@@ -49,6 +49,8 @@ private:
 		FileUserColumn,
 		FileActionColumn,
 		FileLastCheckInColumn,
+		FileIdColumn,
+		FileDetailsColumn,
 
 		// Add other column befor this line
 		//
