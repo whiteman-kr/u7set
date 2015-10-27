@@ -8,6 +8,8 @@
 #include <QMetaObject>
 #include <QMetaProperty>
 #include <QXmlStreamReader>
+#include <QFile>
+#include <QMetaProperty>
 
 
 namespace Hardware

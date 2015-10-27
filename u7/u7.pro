@@ -136,7 +136,8 @@ SOURCES +=\
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
-    ../lib/PropertyObject.cpp
+	../lib/PropertyObject.cpp \
+    Builder/FbParamCalculation.cpp
 
 HEADERS  += \
     CentralWidget.h \

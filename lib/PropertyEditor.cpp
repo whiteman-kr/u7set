@@ -532,10 +532,10 @@ namespace ExtWidgets
 	QtMultiDoubleSpinBox::QtMultiDoubleSpinBox(QWidget* parent):
 		QWidget(parent)
 	{
-		m_spinBox = new QDoubleSpinBox(parent);
-		m_spinBox->setKeyboardTracking(false);
-		m_spinBox->setRange(std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
-		m_spinBox->setDecimals(2);
+        m_spinBox = new QDoubleSpinBox(parent);
+        m_spinBox->setKeyboardTracking(false);
+        m_spinBox->setRange(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+        m_spinBox->setDecimals(2);
 
 		connect(m_spinBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 				this, &QtMultiDoubleSpinBox::onValueChanged);

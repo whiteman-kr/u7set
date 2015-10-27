@@ -443,7 +443,7 @@ void SignalTests::checkin_signalsTest()
 			QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 			QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
 
-			QVERIFY2(tempQuery.value("checkedOutInstanceId").toInt() == NULL, qPrintable("Error: no checkedOutInstanceId expected"));
+			QVERIFY2(tempQuery.value("checkedOutInstanceId").toInt() == 0, qPrintable("Error: no checkedOutInstanceId expected"));
 			QVERIFY2(tempQuery.value("checkedInInstanceId").toInt() == checkedInInstanceId, qPrintable("Error: wrong checkedInInstanceId"));
 		}
 		else	// Checking deleted record
@@ -570,7 +570,7 @@ void SignalTests::checkout_signalsTest()
 				tempQuery.exec(QString("SELECT * FROM Signal WHERE signalId = %1").arg(signalIds[currentSignalId]));
 				QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 				QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
-				QVERIFY2(tempQuery.value("checkedOutInstanceId").toInt() != NULL, qPrintable("Error: no record in column checkedInInstanceId expected"));
+				QVERIFY2(tempQuery.value("checkedOutInstanceId").toInt() != 0, qPrintable("Error: no record in column checkedInInstanceId expected"));
 
 				int checkOutId = tempQuery.value("checkedOutInstanceId").toInt();
 

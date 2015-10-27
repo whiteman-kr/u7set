@@ -275,7 +275,13 @@ namespace Builder
 					LOG_ERROR(m_log, tr("Failed to save module configuration output file for") + f.subsysId() + ", " + f.caption() + "!");
 					return false;
 				}
-			}
+
+                if (m_buildWriter->addFile(path, fileName + ".mct", f.log()) == false)
+                {
+                    LOG_ERROR(m_log, tr("Failed to save module configuration output log file for") + f.subsysId() + ", " + f.caption() + "!");
+                    return false;
+                }
+            }
 		}
 
 		return true;

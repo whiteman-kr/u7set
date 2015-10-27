@@ -8,12 +8,13 @@
 #include "../include/OrderedHash.h"
 #include "../include/DeviceObject.h"
 #include "../include/DataSource.h"
+#include "../VFrame30/Afb.h"
 
 
 class QXmlStreamAttributes;
 
 
-Q_DECLARE_METATYPE(SignalType);
+Q_DECLARE_METATYPE(SignalType)
 
 
 enum SignalInOutType
@@ -435,6 +436,7 @@ public:
 	Q_INVOKABLE int byteOrderInt() const { return TO_INT(m_byteOrder); }
 	void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
+	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
 	friend class DbWorker;
 };

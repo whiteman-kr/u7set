@@ -28,6 +28,9 @@ EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget
 	m_configuration(std::make_shared<Hardware::DeviceRoot>()),
 	m_preset(std::make_shared<Hardware::DeviceRoot>())
 {
+	m_configuration->setUuid(QUuid::createUuid());
+	m_preset->setUuid(QUuid::createUuid());
+
 	m_root = m_configuration;	// Edit configuration default mode
 
 	assert(dbcontroller);

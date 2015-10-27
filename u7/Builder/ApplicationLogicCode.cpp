@@ -787,7 +787,7 @@ namespace Builder
 
 		if (!commentIsEmpty())
 		{
-			tabLen = 64 - 32 - mnemoCode.length();
+			tabLen = 80 - 32 - mnemoCode.length();
 
 			if (tabLen <= 0)
 			{

@@ -426,7 +426,7 @@ template <typename KEY, typename VALUE>
 class HashedVector : private QVector<VALUE>
 {
 private:
-	QHash<KEY, VALUE> m_map;
+	QHash<KEY, int> m_map;
 
 public:
 	bool contains(const KEY& key) const { return m_map.contains(key); }
@@ -438,10 +438,15 @@ public:
 	typename QVector<VALUE>::iterator end() { return QVector<VALUE>::end(); }
 	typename QVector<VALUE>::const_iterator end() const { return QVector<VALUE>::end(); }
 
-	VALUE& operator[](const KEY& key) { return m_map[key]; }
-	const VALUE	operator[](const KEY& key) const { return m_map[key]; }
+	VALUE& operator[](int i) { return QVector<VALUE>::operator [](i); }
+	const VALUE& operator[](int i) const { return QVector<VALUE>::operator [](i); }
+
+	VALUE& operator[](const KEY& key) { return (*this)[m_map.value(key)]; }
+	const VALUE& operator[](const KEY& key) const {  return (*this)[m_map[key]]; }
 
 	void clear() { m_map.clear(); QVector<VALUE>::clear(); }
+
+	bool isEmpty() { return QVector<VALUE>::isEmpty(); }
 };
 
 
@@ -455,5 +460,5 @@ void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 	}
 
 	this->append(value);
-	m_map.insert(key, value);
+	m_map.insert(key, this->size() - 1);
 }
