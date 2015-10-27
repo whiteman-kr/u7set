@@ -44,6 +44,7 @@ namespace VFrame30
 		virtual QString buildName() const override;
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Scheme> scheme);
+		bool setAfbParamByOpName(const QString& opName, QVariant value);
 
 		// Set Afb element parameters
 		//

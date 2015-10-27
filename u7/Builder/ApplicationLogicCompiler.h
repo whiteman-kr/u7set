@@ -163,6 +163,8 @@ namespace Builder
 	typedef QHash<QString, int> NonRamFblInstanceMap;
 
 
+	class AppFb;
+
 	class AfbMap: public HashedVector<QString, LogicAfb*>
 	{
 	private:
@@ -184,7 +186,7 @@ namespace Builder
 	public:
 		~AfbMap() { clear(); }
 
-		int addInstance(AppItem *appItem);
+		bool addInstance(AppFb *appFb);
 
 		void insert(std::shared_ptr<Afb::AfbElement> logicAfb);
 		void clear();
@@ -197,10 +199,16 @@ namespace Builder
 	// contains pointer to AppLogicItem
 	//
 
-	class AppItem
+	class AppItem : public QObject
 	{
+		Q_OBJECT
+
 	protected:
 		AppLogicItem m_appLogicItem;
+
+
+	private:
+		QHash<QString, int> m_opNameToIndexMap;
 
 	public:
 		AppItem(const AppItem& appItem);
@@ -220,27 +228,104 @@ namespace Builder
 
 		const std::list<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
 		const std::list<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
+		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.m_fblItem->toFblElement()->params(); }
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toFblElement(); }
 		const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemeItemConst(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
-		//const LogicItem& logic() const { return *m_fblItem; }
 
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 	};
 
 
+	class AppFbParamValue
+	{
+	private:
+		SignalType m_type = SignalType::Discrete;
+		DataFormat m_dataFormat = DataFormat::UnsignedInt;
+		bool m_instantiator = false;
+		int m_dataSize = 1;
+		QString m_opName;
+		int m_operandIndex = NOT_FB_OPERAND_INDEX;
+
+		quint32 m_unsignedIntValue = 0;
+		qint32 m_signedIntValue = 0;
+		double m_floatValue = 0;
+
+	public:
+		AppFbParamValue() {}
+		AppFbParamValue(const Afb::AfbParam& afbParam);
+
+		bool isUnsignedInt() const { return m_dataFormat == DataFormat::UnsignedInt; }
+		bool isUnsignedInt16() const { return m_dataFormat == DataFormat::UnsignedInt && m_dataSize == SIZE_16BIT; }
+		bool isUnsignedInt32() const { return m_dataFormat == DataFormat::UnsignedInt && m_dataSize == SIZE_32BIT; }
+		bool isSignedInt32() const { return m_dataFormat == DataFormat::SignedInt && m_dataSize == SIZE_32BIT; }
+		bool isFloat32() const { return m_dataFormat == DataFormat::Float && m_dataSize == SIZE_32BIT; }
+
+		bool instantiator() const { return m_instantiator; }
+
+		SignalType type() const { return m_type; }
+		DataFormat dataFormat() const { return m_dataFormat; }
+		int dataSize() const { return m_dataSize; }
+
+		int operandIndex() const { return m_operandIndex; }
+		const QString& opName() const { return m_opName; }
+
+		quint32 unsignedIntValue() const { return m_unsignedIntValue; }
+		void setUnsignedIntValue(quint32 value) { m_unsignedIntValue = value; }
+
+		qint32 signedIntValue() const { return m_signedIntValue; }
+		void setSignedIntValue(qint32 value) { m_signedIntValue = value; }
+
+		double floatValue() const { return m_floatValue; }
+		void setFloatValue(double value) { m_floatValue = value; }
+
+		QString toString() const;
+	};
+
+	typedef HashedVector<QString, AppFbParamValue> AppFbParamValuesArray;
+
+
 	// Application Functional Block
 	// represent all FB items in application logic schemes
 	//
+
+	class ModuleLogicCompiler;
+
 	class AppFb : public AppItem
 	{
 	private:
 		quint16 m_instance = -1;
 		int m_number = -1;
+		QString m_instantiatorID;
+
+		AppFbParamValuesArray m_paramValuesArray;
+
+		ModuleLogicCompiler* m_compiler = nullptr;
+		OutputLog* m_log = nullptr;
+
+		// FB's parameters values calculations
+		// implemented in file FbParamCalculation.cpp
+		//
+
+		bool calculate_TCT_paramValues();
+		bool calculate_BCOMP_paramValues();
+		bool calculate_SCAL_paramValues();
+
+		//
+
+		bool checkRequiredParameters(const QStringList& requiredParams);
+
+		bool checkUnsignedInt(const AppFbParamValue& paramValue);
+		bool checkUnsignedInt16(const AppFbParamValue& paramValue);
+		bool checkUnsignedInt32(const AppFbParamValue& paramValue);
+		bool checkSignedInt32(const AppFbParamValue& paramValue);
+		bool checkFloat32(const AppFbParamValue& paramValue);
+
+		//
 
 	public:
-		AppFb(AppItem* appItem, int instance, int number);
+		AppFb(const AppItem &appItem);
 
 		quint16 instance() const { return m_instance; }
 		quint16 opcode() const { return afb().type().toOpCode(); }		// return FB type
@@ -248,8 +333,17 @@ namespace Builder
 		QString typeCaption() const { return afb().type().text(); }
 		int number() const { return m_number; }
 
+		QString instantiatorID();
+
+		void setInstance(quint16 instance) { m_instance = instance; }
+		void setNumber(int number) { m_number = number; }
+
 		LogicAfbParam getAfbParamByIndex(int index) const;
 		LogicAfbSignal getAfbSignalByIndex(int index) const;
+
+		bool calculateFbParamValues(ModuleLogicCompiler *compiler);			// implemented in file FbParamCalculation.cpp
+
+		const AppFbParamValuesArray& paramValuesArray() const { return m_paramValuesArray; }
 	};
 
 
@@ -261,7 +355,7 @@ namespace Builder
 	public:
 		~AppFbMap() { clear(); }
 
-		AppFb* insert(AppItem* appItem, int instance);
+		AppFb* insert(AppFb *appFb);
 		void clear();
 	};
 
@@ -531,32 +625,6 @@ namespace Builder
 	};
 
 
-	struct AfbParamValue
-	{
-		Afb::AfbSignalType type = Afb::AfbSignalType::Discrete;
-		Afb::AfbDataFormat dataFormat = Afb::AfbDataFormat::UnsignedInt;
-		int dataSize = 1;
-		QString opName;
-		int operandIndex = NOT_FB_OPERAND_INDEX;
-
-		double floatValue = 0;
-		quint32 unsignedIntValue = 0;
-		qint32 signedIntValue = 0;
-
-		AfbParamValue() {}
-		AfbParamValue(const Afb::AfbParam& afbParam);
-
-		bool isSignedInt32() const { return dataFormat == Afb::AfbDataFormat::SignedInt && dataSize == SIZE_32BIT; }
-		bool isUnsignedInt32() const { return dataFormat == Afb::AfbDataFormat::UnsignedInt && dataSize == SIZE_32BIT; }
-		bool isFloat32() const { return dataFormat == Afb::AfbDataFormat::Float && dataSize == SIZE_32BIT; }
-
-		bool isUnsignedInt() const { return dataFormat == Afb::AfbDataFormat::UnsignedInt; }
-	};
-
-
-	typedef HashedVector<QString, AfbParamValue> AfbParamValuesArray;
-
-
 	class ModuleLogicCompiler : public QObject
 	{
 		Q_OBJECT
@@ -611,8 +679,11 @@ namespace Builder
 
 			std::shared_ptr<Afb::AfbElement> pointer;
 
-			int k1ParamIndex = -1;
-			int k2ParamIndex = -1;
+			int x1ParamIndex = -1;
+			int x2ParamIndex = -1;
+			int y1ParamIndex = -1;
+			int y2ParamIndex = -1;
+
 			int inputSignalIndex = -1;
 			int outputSignalIndex = -1;
 		};
@@ -745,28 +816,20 @@ namespace Builder
 
 		bool finishAppLogicCode();
 
+		bool findFbsForAnalogInOutSignalsConversion();
 		bool appendFbsForAnalogInOutSignalsConversion();
-		bool appendFbForAnalogInputSignalConversion(const Signal &signal);
-		bool appendFbForAnalogOutputSignalConversion(const Signal &signal);
+		AppItem* createFbForAnalogInputSignalConversion(const Signal &signal);
+		AppItem* createFbForAnalogOutputSignalConversion(const Signal &signal);
 
 		bool buildServiceMaps();
+
+		bool createAppFbsMap();
+		AppFb* createAppFb(const AppItem& appItem);
+
+		bool createDeviceBoundSignalsMap();
 		bool createAppSignalsMap();
 
-		bool initAppFbParams(AppFb* appFb, bool instantiatorOnly);
-		bool generateWriteAfbParamCode(const AppFb& appFb, const AfbParamValue& afbParamValue);
-
-		// next members implemented in FbParamCalculation.cpp
-		//
-
-		bool calculateFbParamsValues(const AppFb& appFb, AfbParamValuesArray& paramValuesArray, bool);
-
-		bool checkRequiredParameters(const AppFb& appFb, AfbParamValuesArray& paramValuesArray, const QStringList& requiredParams);
-
-		bool calculate_BCOMP_paramsValues(const AppFb& appFb, AfbParamValuesArray& paramValuesArray);
-		bool calculate_TCT_paramsValues(const AppFb& appFb, AfbParamValuesArray& paramValuesArray);
-		bool calculate_SCAL_paramsValues(const AppFb& appFb, AfbParamValuesArray& paramValuesArray);
-
-		//
+		bool initAppFbParams(AppFb* appFb, bool instantiatorsOnly);
 
 		bool getUsedAfbs();
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
@@ -791,11 +854,13 @@ namespace Builder
 		const SignalSet& signalSet() { return *m_signals; }
 		const Signal* getSignal(const QString& strID);
 
-		OutputLog& log() { return *m_log; }
+		OutputLog* log() { return m_log; }
 
 		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
 
 		bool run();
+
+		int lmCycleDuration() const { return m_lmCycleDuration; }
 	};
 }
 
