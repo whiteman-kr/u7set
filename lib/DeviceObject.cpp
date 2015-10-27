@@ -242,6 +242,38 @@ namespace Hardware
 	DeviceObject::DeviceObject(bool preset /*= false*/) :
 		m_preset(preset)
 	{
+//		Q_PROPERTY(QUuid Uuid READ uuid)
+		ADD_PROPERTY_GETTER(QUuid, Uuid, DeviceObject::uuid);
+
+//		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
+		ADD_PROPERTY_GETTER_SETTER(QString, StrID, DeviceObject::strId, DeviceObject::setStrId);
+
+//		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
+		ADD_PROPERTY_GETTER_SETTER(QString, Caption, DeviceObject::caption, DeviceObject::setCaption);
+
+//		Q_PROPERTY(QString ChildRestriction READ childRestriction WRITE setChildRestriction)
+		ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
+
+//		Q_PROPERTY(int Place READ place WRITE setPlace)
+		ADD_PROPERTY_GETTER_SETTER(int, Place, DeviceObject::place, DeviceObject::setPlace);
+
+//		Q_PROPERTY(QString DynamicProperties READ dynamicProperties WRITE setDynamicProperties)
+		ADD_PROPERTY_GETTER_SETTER(QString, DynamicProperties, DeviceObject::dynamicProperties, DeviceObject::setDynamicProperties);
+
+//		Q_PROPERTY(bool Preset READ preset)
+		ADD_PROPERTY_GETTER(bool, Preset, DeviceObject::preset);
+
+//		Q_PROPERTY(bool PresetRoot READ presetRoot)
+		ADD_PROPERTY_GETTER(bool, PresetRoot, DeviceObject::presetRoot);
+
+//		Q_PROPERTY(QString PresetName READ presetName WRITE setPresetName)
+		if (preset == true)
+		{
+			ADD_PROPERTY_GETTER_SETTER(QString, PresetName, DeviceObject::presetName, DeviceObject::setPresetName);
+		}
+
+//		Q_PROPERTY(QUuid PresetObjectUuid READ presetObjectUuid)
+		ADD_PROPERTY_GETTER(QUuid, PresetObjectUuid, DeviceObject::presetObjectUuid);
 	}
 
 	DeviceObject::~DeviceObject()

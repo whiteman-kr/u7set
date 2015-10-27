@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     ../lib/SocketIO.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
-    PacketBufferTableModel.cpp
+    PacketBufferTableModel.cpp \
+    ../lib/PropertyObject.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -45,7 +46,8 @@ HEADERS  += SourceListWidget.h \
     ../include/SocketIO.h \
     ../include/DbStruct.h \
     ../include/ProtoSerialization.h \
-    PacketBufferTableModel.h
+    PacketBufferTableModel.h \
+    ../include/PropertyObject.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

@@ -71,7 +71,7 @@ public:
 	virtual void setValue(const QVariant& value) = 0;
 
 	virtual void setEnumValue(int value) = 0;
-	virtual void setEnumValue(const char*) = 0;
+	virtual void setEnumValue(const char* value) = 0;
 
 private:
 	QString m_caption;
@@ -201,7 +201,18 @@ public:
 		checkLimits();
 	}
 
-	virtual void setEnumValue(int value) override				// Overriden from class Propery
+	virtual void setEnumValue(int value) override	// Overriden from class Propery
+	{
+		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
+	}
+	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	{
+		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
+	}
+
+private:
+	template <typename ENUM>
+	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
 	{
 		assert(std::is_enum<TYPE>::value == true);
 
@@ -214,8 +225,15 @@ public:
 			m_value = QVariant::fromValue(static_cast<TYPE>(value));
 		}
 	}
+	template <typename NON_ENUM>
+	void setEnumValueInternal(int value, non_enum_tag)
+	{
+		Q_UNUSED(value)
+		assert(false);
+	}
 
-	virtual void setEnumValue(const char* value) override				// Overriden from class Propery
+	template <typename ENUM>
+	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
 	{
 		assert(std::is_enum<TYPE>::value == true);
 
@@ -224,7 +242,12 @@ public:
 
 		return;
 	}
-
+	template <typename NON_ENUM>
+	void setEnumValueInternal(const char* value, non_enum_tag)
+	{
+		Q_UNUSED(value)
+		assert(false);
+	}
 
 private:
 	void checkLimits()
@@ -336,7 +359,7 @@ class PropertyObject : public QObject
 	Q_OBJECT
 
 public:
-	PropertyObject();
+	explicit PropertyObject(QObject* parent = nullptr);
 	virtual ~PropertyObject();
 
 public:
@@ -363,6 +386,11 @@ public:
 			property->setValue(QVariant::fromValue(TYPE()));
 		}
 
+		if (!setter)
+		{
+			property->setReadOnly(true);
+		}
+
 		auto alreadyExists = m_properties.find(caption);
 
 		if (alreadyExists == m_properties.end())
@@ -385,8 +413,8 @@ public:
 	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found
 	//
-	Property* property(QString caption);
-	const Property* property(QString caption) const;
+	Property* propertyByCaption(QString caption);
+	const Property* propertyByCaption(QString caption) const;
 
 	// Get property value
 	//

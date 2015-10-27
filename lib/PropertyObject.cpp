@@ -86,7 +86,8 @@ void Property::setPrecision(int value)
 //			Class PropertyObject
 //
 //
-PropertyObject::PropertyObject()
+PropertyObject::PropertyObject(QObject* parent) :
+	QObject(parent)
 {
 }
 
@@ -113,7 +114,7 @@ std::vector<Property*> PropertyObject::properties()
 	return result;
 }
 
-Property* PropertyObject::property(QString caption)
+Property* PropertyObject::propertyByCaption(QString caption)
 {
 	Property* result = nullptr;
 
@@ -127,7 +128,7 @@ Property* PropertyObject::property(QString caption)
 	return result;
 }
 
-const Property* PropertyObject::property(QString caption) const
+const Property* PropertyObject::propertyByCaption(QString caption) const
 {
 	const Property* result = nullptr;
 
