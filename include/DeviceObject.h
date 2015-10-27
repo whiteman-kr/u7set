@@ -242,6 +242,8 @@ namespace Hardware
 		// Props
 		//
 	public:
+		int fileId() const;
+
 		QUuid uuid() const;
 		void setUuid(QUuid value);
 

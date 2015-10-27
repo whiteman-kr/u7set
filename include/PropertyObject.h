@@ -16,20 +16,20 @@
 
 // Add property which is stored in QVariant and does not have getter or setter
 //
-#define ADD_PROPERTY_QVARIANT(TYPE, NAME) \
-	addProperty<TYPE>(tr(#NAME));
+#define ADD_PROPERTY_QVARIANT(TYPE, NAME, VISIBLE) \
+	addProperty<TYPE>(tr(#NAME), VISIBLE);
 
 // Add property which has getter	QString caption() const;
 void setCaption(QString value);
 //
-#define ADD_PROPERTY_GETTER(TYPE, NAME, GETTER) \
-	addProperty<TYPE>(tr(#NAME), \
+#define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
+	addProperty<TYPE>(tr(#NAME), VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this));
 
 // Add property which has getter and setter
 //
-#define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, GETTER, SETTER) \
-	addProperty<TYPE>(tr(#NAME), \
+#define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER) \
+	addProperty<TYPE>(tr(#NAME), VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
 			std::bind(&SETTER, this, std::placeholders::_1));
 
@@ -372,12 +372,14 @@ public:
 	//
 	template <typename TYPE>
 	PropertyValue<TYPE>* addProperty(QString caption,
+									 bool visible = false,
 									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
 									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
 	{
 		PropertyValue<TYPE>* property = new PropertyValue<TYPE>();
 
 		property->setCaption(caption);
+		property->setVisible(visible);
 		property->setGetter(getter);
 		property->setSetter(setter);
 
@@ -487,11 +489,13 @@ class TestProp : public PropertyObject
 public:
 	TestProp()
 	{
-		ADD_PROPERTY_QVARIANT(int, varint);
-		ADD_PROPERTY_GETTER(int, varintgetter, TestProp::someProp);
-		ADD_PROPERTY_GETTER_SETTER(int, varintgs, TestProp::someProp, TestProp::setSomeProp);
+		ADD_PROPERTY_QVARIANT(int, varint, true);
+		ADD_PROPERTY_GETTER(int, varintgetter, true, TestProp::someProp);
+		ADD_PROPERTY_GETTER_SETTER(int, varintgs, true, TestProp::someProp, TestProp::setSomeProp);
 
-		PropertyValue<int>* pi = addProperty<int>(tr("SomeProp"),
+		PropertyValue<int>* pi = addProperty<int>(
+					tr("SomeProp"),
+					true,
 					(std::function<int(void)>)std::bind(&TestProp::someProp, this),
 					std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
 		pi->setLowLimit(-100);
@@ -500,16 +504,19 @@ public:
 		pdi->setLowLimit(-200);
 
 		addProperty<bool>(tr("SomeBool"),
-					(std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-					std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
+						  true,
+						  (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
+						  std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
 
 		addProperty<QString>(tr("SomeString"),
-					std::bind(&TestProp::someString, this),
-					std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
+							 true,
+							 std::bind(&TestProp::someString, this),
+							 std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
 
 		addProperty<TestEnum::Priority>(tr("Priority"),
-					std::bind(&TestProp::priority, this),
-					std::bind(&TestProp::setPriority, this, std::placeholders::_1));
+										true,
+										std::bind(&TestProp::priority, this),
+										std::bind(&TestProp::setPriority, this, std::placeholders::_1));
 	}
 
 	int someProp() const				{		return m_someProp;		}
