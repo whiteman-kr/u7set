@@ -591,10 +591,10 @@ void InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceOb
 		{
 			return;
 		}
-		if (currentModule->property("Network\\RegServerIP").isValid())
+		if (currentModule->property("Network\\RegIP").isValid())
 		{
 			int key = dataSources.count() + 1;
-			QString ipStr = currentModule->property("Network\\RegServerIP").toString();
+			QString ipStr = currentModule->property("Network\\RegIP").toString();
 			QHostAddress ha(ipStr);
 			quint32 ip = ha.toIPv4Address();
 			DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);

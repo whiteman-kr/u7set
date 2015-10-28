@@ -9,6 +9,7 @@
 class QUdpSocket;
 class PacketSourceModel;
 class PacketBufferTableModel;
+class SignalTableModel;
 
 #define DECLARE_INCREMENTER(function, member) void function() \
 { \
@@ -81,7 +82,7 @@ class Source : public Statistic
 	Q_OBJECT
 public:
 	Source() : Statistic(nullptr) {}
-	Source(QString address, int port, Statistic* parent);
+	Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, DataSource>& dataSources, Statistic* parent);
 
 	~Source();
 
@@ -99,7 +100,7 @@ private:
 	RpPacketHeader m_lastHeader;
 	std::vector<QWidget*> dependentWidgets;
 	PacketBufferTableModel* m_packetBufferModel;
-	//should be SignalTableModel;
+	SignalTableModel* m_signalTableModel;
 };
 
 
@@ -161,6 +162,9 @@ public:
 
 	void addListener(QString ip, int port);
 	int index(Listener* listener);
+
+	const SignalSet& signalSet() { return m_signalSet; }
+	const QHash<quint32, DataSource>& dataSources() { return m_dataSources; }
 
 signals:
 	void contentChanged(int column);

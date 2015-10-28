@@ -90,7 +90,7 @@ public:
 	void setState(DataSourceState state) { m_state = state; }
 
 	void addSignalIndex(int index) { m_relatedSignalIndexes.append(index); }
-	const QVector<int>& signalIndexes() { return m_relatedSignalIndexes; }
+	const QVector<int>& signalIndexes() const { return m_relatedSignalIndexes; }
 
 	void getInfo(DataSourceInfo& dsi);
 	void setInfo(const DataSourceInfo& dsi);
