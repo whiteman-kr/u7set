@@ -92,12 +92,14 @@ void DialogAfblEditor::refreshFiles()
         l.append(fi.action().text());
         l.append(fi.lastCheckIn().toString());
 
-		QTreeWidgetItem* pItem = new QTreeWidgetItem(ui->m_afbTree, l);
+        QTreeWidgetItem* pItem = new QTreeWidgetItem(ui->m_afbTree, l);
+        pItem->setData(0, Qt::UserRole, i);
         items.append(pItem);
 
     }
 
     ui->m_afbTree->insertTopLevelItems(0, items);
+    ui->m_afbTree->sortItems(0, Qt::AscendingOrder);
 
 	// restore selection
 	//
@@ -410,7 +412,10 @@ std::vector<DbFileInfo*> DialogAfblEditor::getSelectedFiles()
         if (mi.column() != 0)
             continue;
 
-        selectedFiles.push_back(&files[mi.row()]);
+        QTreeWidgetItem* item = ui->m_afbTree->topLevelItem(mi.row());
+
+
+        selectedFiles.push_back(&files[item->data(0, Qt::UserRole).toInt()]);
     }
 
     return selectedFiles;

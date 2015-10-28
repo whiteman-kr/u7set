@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#bcomp_32si_ne_v1">
+    <AfbElement StrId="#comp_fp_eq_v1">
         <Properties>
-            <Caption>bcomp_32si_ne</Caption>
+            <Caption>comp_fp_eq</Caption>
             <Version>1.0</Version>
-            <Description>Binary Comparator Block, Not equal comparison</Description>
+            <Description>Comparator Block, equal single-precision floating-point comparison</Description>
             <Category>Compare</Category>
             <OpCode>10</OpCode>
             <HasRam>true</HasRam>
@@ -12,49 +12,49 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="SignedInt" OpIndex = "6" Size = "32"/>
+            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="Float" OpIndex = "6" Size = "32"/>
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption = "out" Type="Discrete" OpIndex = "9" Size = "1"/>
         </OutputSignals>
         <Params>
-            <AfbElementParam OpName="i_sp_s" Caption = "setting s" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+            <AfbElementParam OpName="i_sp_s" Caption = "Setting" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
-                <LowLimit>-2147483648</LowLimit>
-                <HighLimit>2147483647</HighLimit>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_sp_r" Caption = "setting r" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" DataFormat="SignedInt">
+            <AfbElementParam OpName="i_sp_r" Caption = "Setting R" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
-                <LowLimit>-2147483648</LowLimit>
-                <HighLimit>2147483647</HighLimit>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="hysteresis" Caption = "Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
+            <AfbElementParam OpName="hysteresis" Caption = "Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
-                <LowLimit>-2147483648</LowLimit>
-                <HighLimit>2147483647</HighLimit>
+                <LowLimit>-3.40282e+38</LowLimit>
+                <HighLimit>3.40282e+38</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-                <Value>4</Value>
-                <Default>4</Default>
+            <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+                <Value>5</Value>
+                <Default>5</Default>
                 <LowLimit>1</LowLimit>
-                <HighLimit>4</HighLimit>
+                <HighLimit>8</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>0</LowLimit>
