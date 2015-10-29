@@ -38,7 +38,7 @@ void SchemePropertiesDialog::setScheme(std::shared_ptr<VFrame30::Scheme> scheme)
 //
 //
 SchemePropertyEditor::SchemePropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent) :
-	PropertyEditor(parent),
+	PropertyEditorOld(parent),
 	m_editEngine(editEngine)
 {
 	assert(m_editEngine);

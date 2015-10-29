@@ -1,7 +1,6 @@
-#ifndef PROPERTYEDITOR_H
-#define PROPERTYEDITOR_H
+#ifndef PROPERTYEDITOROLD_H
+#define PROPERTYEDITOROLD_H
 
-#include "../include/PropertyObject.h"
 #include "../qtpropertybrowser/src/qteditorfactory.h"
 #include <memory>
 #include <QWidget>
@@ -21,9 +20,7 @@ class QtTreePropertyBrowser;
 class QtProperty;
 
 
-Q_DECLARE_METATYPE(std::shared_ptr<Property>)
-
-namespace ExtWidgets
+namespace ExtWidgetsOld
 {
 	struct FilePathPropertyType
 	{
@@ -38,9 +35,27 @@ namespace ExtWidgets
 		static int filePathTypeId();
 	};
 }
-Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
+Q_DECLARE_METATYPE(ExtWidgetsOld::FilePathPropertyType)
 
-namespace ExtWidgets
+namespace ExtWidgetsOld
+{
+	struct EnumPropertyType
+	{
+		EnumPropertyType()
+		{
+		}
+
+		std::vector<std::pair<QString, int>> items;
+		int value = -1;
+		QVariant typeVariant;
+
+		static int enumTypeId();
+	};
+}
+Q_DECLARE_METATYPE(ExtWidgetsOld::EnumPropertyType)
+
+
+namespace ExtWidgetsOld
 {
 	class QtMultiFilePathEdit : public QWidget
 	{
@@ -48,7 +63,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiFilePathEdit(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(QVariant value);
 
 	public slots:
 		void onEditingFinished();
@@ -67,7 +82,6 @@ namespace ExtWidgets
 		bool m_escape = false;
 		QVariant m_oldPath;
 
-
 	};
 
 	class QtMultiEnumEdit : public QWidget
@@ -76,7 +90,8 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiEnumEdit(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setItems(QVariant value);
+		void setValue(QVariant value);
 
 	public slots:
 		void indexChanged(int index);
@@ -92,7 +107,7 @@ namespace ExtWidgets
 
 	private:
 		QComboBox* m_combo = nullptr;
-        int m_oldValue;
+		QVariant m_oldValue;
 
 	};
 	class QtMultiColorEdit : public QWidget
@@ -101,7 +116,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiColorEdit(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(QVariant value);
 
 	public slots:
 		void onEditingFinished();
@@ -128,7 +143,7 @@ namespace ExtWidgets
 	class MultiLineEdit : public QDialog
 	{
 	public:
-        MultiLineEdit(QWidget* parent, const QString& text);
+		MultiLineEdit(QWidget* parent, const QString& text);
 		QString text();
 
 	private:
@@ -146,7 +161,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiCheckBox(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property, bool sameValue);
+		void setCheckState(Qt::CheckState state);
 
 	public slots:
 		void onStateChanged(int state);
@@ -169,7 +184,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiTextEdit(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(QString value);
 
 	public slots:
 		void onEditingFinished();
@@ -196,7 +211,7 @@ namespace ExtWidgets
 
 	public:
 		explicit QtMultiDoubleSpinBox(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(double value);
 
 	public slots:
 		void onValueChanged(double value);
@@ -218,7 +233,7 @@ namespace ExtWidgets
 		Q_OBJECT
 	public:
 		explicit QtMultiIntSpinBox(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(int value);
 
 	public slots:
 		void onValueChanged(int value);
@@ -240,7 +255,7 @@ namespace ExtWidgets
 		Q_OBJECT
 	public:
 		explicit QtMultiUIntSpinBox(QWidget* parent);
-        void setValue(std::shared_ptr<Property> property);
+		void setValue(quint32 value);
 
 	public slots:
 		void onValueChanged(quint32 value);
@@ -267,11 +282,10 @@ namespace ExtWidgets
 		QVariant attribute(const QtProperty* property, const QString& attribute) const;
 		bool hasAttribute(const QtProperty* property, const QString& attribute) const;
 
-        std::shared_ptr<Property> value(const QtProperty* property) const;
+		QVariant value(const QtProperty* property) const;
 		int valueType(const QtProperty* property) const;
 
-        void setProperty(const QtProperty* property, std::shared_ptr<Property> propertyValue);
-        bool sameValue(const QtProperty* property) const;
+		bool sameValue(const QtProperty* property) const;
 
 		QSet<QtProperty*> propertyByName(const QString& propertyName);
 
@@ -282,15 +296,15 @@ namespace ExtWidgets
 
 	private:
 
-        struct Data
+		struct Data
 		{
-            std::shared_ptr<Property> p;
+			QVariant value;
 			QMap<QString, QVariant> attributes;
 		};
-        QMap<const QtProperty*, Data> values;
+		QMap<const QtProperty*, Data> values;
 
 	public slots:
-        void setValue(QtProperty* property, const QVariant& value);
+		void setValue(QtProperty* property, const QVariant& value);
 		void setAttribute (QtProperty* property, const QString& attribute, const QVariant& value);
 
 	signals:
@@ -328,18 +342,18 @@ namespace ExtWidgets
 	// -------------------------------------------------------------------------------
 
 	//template <class Type>
-	class PropertyEditor : public QtTreePropertyBrowser
+    class PropertyEditorOld : public QtTreePropertyBrowser
 	{
 		Q_OBJECT
 
 	public:
-		explicit PropertyEditor(QWidget* parent);
+        explicit PropertyEditorOld(QWidget* parent);
 
 		void updateProperty(const QString& propertyName);
 		// Public functions
 		//
 	public:
-        void setObjects(QList<std::shared_ptr<PropertyObject>>& objects);
+		void setObjects(QList<std::shared_ptr<QObject>>& objects);
 		void clearProperties();
 
 	protected:
@@ -355,7 +369,17 @@ namespace ExtWidgets
 
 	signals:
 		void showErrorMessage(QString message);
-        void propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+		void propertiesChanged(QList<std::shared_ptr<QObject>> objects);
+
+		// Protected functions and structs
+		//
+	protected:
+		struct PropertyItem
+		{
+			std::shared_ptr<QObject> object;
+			int type;
+			QVariant value;
+		};
 
 		// Data
 		//
@@ -364,15 +388,15 @@ namespace ExtWidgets
 
 		QtMultiVariantPropertyManager* m_propertyVariantManager = nullptr;
 
-        QList<std::shared_ptr<PropertyObject>> m_objects;
+		QMap<QtProperty*, std::shared_ptr<QObject>> m_propToClassMap;   //Property Name to Class Map
 
 		//Private Data
 		//
 	private:
 		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values);
-        QtProperty* createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const std::shared_ptr<Property> value, bool sameValue);
+		QtProperty* createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QVariant& value, int type, bool sameValue);
 	};
 
 }
 
-#endif // PROPERTYEDITOR_H
+#endif // PROPERTYEDITOROLD_H

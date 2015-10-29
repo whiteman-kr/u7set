@@ -2155,7 +2155,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	m_splitter = new QSplitter(this);
 
-	m_propertyEditor = new ExtWidgets::PropertyEditor(m_splitter);
+    m_propertyEditor = new ExtWidgets::PropertyEditor(m_splitter);
 
 	m_splitter->addWidget(m_equipmentView);
 	m_splitter->addWidget(m_propertyEditor);
@@ -2200,7 +2200,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 	connect(m_equipmentView, &EquipmentView::updateState, this, &EquipmentTabPage::setActionState);
 
-	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
+    connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
 
 	// Evidently, project is not opened yet
@@ -2835,8 +2835,8 @@ void EquipmentTabPage::setProperties()
 		return;
 	}
 
-	QList<std::shared_ptr<QObject>> checkedInList;
-	QList<std::shared_ptr<QObject>> checkedOutList;
+    QList<std::shared_ptr<PropertyObject>> checkedInList;
+    QList<std::shared_ptr<PropertyObject>> checkedOutList;
 
 	for (QModelIndex& mi : selectedIndexList)
 	{
@@ -2869,7 +2869,7 @@ void EquipmentTabPage::setProperties()
 	return;
 }
 
-void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<QObject>> objects)
+void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
 	std::vector<std::shared_ptr<DbFile>> files;
 
