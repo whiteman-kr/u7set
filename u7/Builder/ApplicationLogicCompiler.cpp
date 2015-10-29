@@ -1488,7 +1488,7 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				FbScal& fbScal = m_fbScal[FB_SCAL_16UI_32FP_INDEX];
+				FbScal& fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
 				if (signal->dataFormat() == DataFormat::Float)
 				{
@@ -1498,7 +1498,7 @@ namespace Builder
 				{
 					if (signal->dataFormat() == DataFormat::SignedInt)
 					{
-						fbScal = m_fbScal[FB_SCAL_16UI_32SI_INDEX];
+						fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 					}
 					else
 					{
@@ -2705,7 +2705,7 @@ namespace Builder
 				{
 					ASSERT_RESULT_FALSE_BREAK
 				}
-				FbScal& fbScal = m_fbScal[FB_SCAL_32FP_16UI_INDEX];
+				FbScal& fbScal = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
 				if (signal->dataFormat() == DataFormat::Float)
 				{
@@ -2715,7 +2715,7 @@ namespace Builder
 				{
 					if (signal->dataFormat() == DataFormat::SignedInt)
 					{
-						fbScal = m_fbScal[FB_SCAL_32SI_16UI_INDEX];
+						fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 					}
 					else
 					{
@@ -2844,26 +2844,26 @@ namespace Builder
 			// for input signals conversion
 			//
 
-			"scal_16ui_32fp",				// FB_SCAL_16UI_32FP_INDEX
-			"scal_16ui_32si",				// FB_SCAL_16UI_32SI_INDEX
+			"scale_16ui_fp",				// FB_SCALE_16UI_FP_INDEX
+			"scale_16ui_si",				// FB_SCALE_16UI_SI_INDEX
 
 			// for output signals conversion
 			//
 
-			"scal_32fp_16ui",				// FB_SCAL_32FP_16UI_INDEX
-			"scal_32si_16ui",				// FB_SCAL_32SI_16UI_INDEX
+			"scale_fp_16ui",				// FB_SCALE_FP_16UI_INDEX
+			"scale_si_16ui",				// FB_SCALE_SI_16UI_INDEX
 		};
 
 		/*const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
 		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";*/
 
-		const char* const FB_SCAL_X1_OPNAME = "InputLow";
-		const char* const FB_SCAL_X2_OPNAME = "InputHigh";
-		const char* const FB_SCAL_Y1_OPNAME = "OutputLow";
-		const char* const FB_SCAL_Y2_OPNAME = "OutputHigh";
+		const char* const FB_SCALE_X1_OPNAME = "input_low";
+		const char* const FB_SCALE_X2_OPNAME = "input_high";
+		const char* const FB_SCALE_Y1_OPNAME = "output_low";
+		const char* const FB_SCALE_Y2_OPNAME = "output_high";
 
-		const char* const FB_SCAL_INPUT_SIGNAL_CAPTION = "i_data";
-		const char* const FB_SCAL_OUTPUT_SIGNAL_CAPTION = "o_result";
+		const char* const FB_SCALE_INPUT_SIGNAL_CAPTION = "i_data";
+		const char* const FB_SCALE_OUTPUT_SIGNAL_CAPTION = "o_result";
 
 		for(const char* const fbCaption : fbScalCaption)
 		{
@@ -2887,22 +2887,22 @@ namespace Builder
 
 				for(const Afb::AfbParam& afbParam : afbElement->params())
 				{
-					if (afbParam.opName() == FB_SCAL_X1_OPNAME)
+					if (afbParam.opName() == FB_SCALE_X1_OPNAME)
 					{
 						fb.x1ParamIndex = index;
 					}
 
-					if (afbParam.opName() == FB_SCAL_X2_OPNAME)
+					if (afbParam.opName() == FB_SCALE_X2_OPNAME)
 					{
 						fb.x2ParamIndex = index;
 					}
 
-					if (afbParam.opName() == FB_SCAL_Y1_OPNAME)
+					if (afbParam.opName() == FB_SCALE_Y1_OPNAME)
 					{
 						fb.y1ParamIndex = index;
 					}
 
-					if (afbParam.opName() == FB_SCAL_Y2_OPNAME)
+					if (afbParam.opName() == FB_SCALE_Y2_OPNAME)
 					{
 						fb.y2ParamIndex = index;
 					}
@@ -2941,7 +2941,7 @@ namespace Builder
 
 				for(Afb::AfbSignal afbSignal : afbElement->inputSignals())
 				{
-					if (afbSignal.opName() == FB_SCAL_INPUT_SIGNAL_CAPTION)
+					if (afbSignal.opName() == FB_SCALE_INPUT_SIGNAL_CAPTION)
 					{
 						fb.inputSignalIndex = afbSignal.operandIndex();
 						break;
@@ -2951,14 +2951,14 @@ namespace Builder
 				if (fb.inputSignalIndex == -1)
 				{
 					LOG_ERROR(m_log, QString(tr("Required input signal %1 of AFB %2 is not found")).
-							  arg(FB_SCAL_INPUT_SIGNAL_CAPTION).arg(fb.caption))
+							  arg(FB_SCALE_INPUT_SIGNAL_CAPTION).arg(fb.caption))
 					result = false;
 					break;
 				}
 
 				for(Afb::AfbSignal afbSignal : afbElement->outputSignals())
 				{
-					if (afbSignal.opName() == FB_SCAL_OUTPUT_SIGNAL_CAPTION)
+					if (afbSignal.opName() == FB_SCALE_OUTPUT_SIGNAL_CAPTION)
 					{
 						fb.outputSignalIndex = afbSignal.operandIndex();
 						break;
@@ -2968,7 +2968,7 @@ namespace Builder
 				if (fb.outputSignalIndex == -1)
 				{
 					LOG_ERROR(m_log, QString(tr("Required output signal %1 of AFB %2 is not found")).
-							  arg(FB_SCAL_OUTPUT_SIGNAL_CAPTION).arg(fb.caption))
+							  arg(FB_SCALE_OUTPUT_SIGNAL_CAPTION).arg(fb.caption))
 					result = false;
 					break;
 				}
@@ -3100,7 +3100,7 @@ namespace Builder
 		{
 		case DataFormat::Float:
 			{
-				FbScal fb = m_fbScal[FB_SCAL_16UI_32FP_INDEX];
+				FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
 				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
 				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
@@ -3115,7 +3115,7 @@ namespace Builder
 
 		case DataFormat::SignedInt:
 			{
-				FbScal& fb = m_fbScal[FB_SCAL_16UI_32SI_INDEX];
+				FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 
 				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
 				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
@@ -3161,7 +3161,7 @@ namespace Builder
 		{
 		case DataFormat::Float:
 			{
-				FbScal& fb = m_fbScal[FB_SCAL_32FP_16UI_INDEX];
+				FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
 				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
 				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
@@ -3176,7 +3176,7 @@ namespace Builder
 
 		case DataFormat::SignedInt:
 			{
-				FbScal& fb = m_fbScal[FB_SCAL_32SI_16UI_INDEX];
+				FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 
 				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1).toInt());
 				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2).toInt());
