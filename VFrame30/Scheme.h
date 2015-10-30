@@ -20,6 +20,8 @@ namespace VFrame30
 		Q_OBJECT
 
 		Q_PROPERTY(bool ExcludeFromBuild READ excludeFromBuild WRITE setExcludeFromBuild)
+		Q_PROPERTY(double SchemeWidth READ docWidth WRITE setDocWidth)
+		Q_PROPERTY(double SchemeHeight READ docHeight WRITE setDocHeight)
 	
 	protected:
 		Scheme(void);

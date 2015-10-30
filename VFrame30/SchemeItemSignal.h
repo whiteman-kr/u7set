@@ -11,6 +11,7 @@ namespace VFrame30
 		Q_OBJECT
 
 		Q_PROPERTY(QString StrIDs READ signalStrIds WRITE setSignalStrIds)
+		Q_PROPERTY(bool MultiChannel READ multiChannel WRITE setMultiChannel)
 
 	protected:
 		SchemeItemSignal(void);
@@ -37,10 +38,14 @@ namespace VFrame30
 		void setSignalStrIds(const QString& s);
 		QStringList* mutable_signalStrIds();
 
+		bool multiChannel() const;
+		void setMultiChannel(bool value);
+
 		// Data
 		//
 	private:
 		QStringList m_signalStrIds;
+		bool m_multiChannel = false;
 	};
 
 

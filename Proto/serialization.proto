@@ -498,6 +498,7 @@ message FblItemLine
 message SchemeItemSignal
 {
 	repeated wstring signalStrIDs = 1;
+	optional bool multiChannel = 2 [default = false];
 }
 
 
