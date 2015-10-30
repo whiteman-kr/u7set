@@ -361,7 +361,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_MAX_DIFFERENCE: if (le) s.setMaxDifference(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(cb->currentIndex()))); break;
+		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.key(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
@@ -818,7 +818,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setStrID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
 			case SC_NAME: signal.setName(value.toString()); break;
-			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<DataFormat>(value.toInt())); break;
+			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<E::DataFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
@@ -1035,11 +1035,11 @@ void SignalsModel::addSignal()
 
 	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
-		signal.setDataFormat(DataFormat::Float);
+		signal.setDataFormat(E::DataFormat::Float);
 	}
 	else
 	{
-		signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(settings.value("LastEditedSignal: dataFormat").toInt())));
+		signal.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.key(settings.value("LastEditedSignal: dataFormat").toInt())));
 	}
 	signal.setDataSize(settings.value("LastEditedSignal: dataSize").toInt());
 	signal.setLowADC(settings.value("LastEditedSignal: lowADC").toInt());

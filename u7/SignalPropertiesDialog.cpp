@@ -130,12 +130,12 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, E:
 	m_dataFormatProperty = m_enumManager->addProperty(tr("Data format"));
 	if (signalType == E::SignalType::Analog)
 	{
-		m_dataFormatInfo.remove(TO_INT(DataFormat::UnsignedInt));
+		m_dataFormatInfo.remove(TO_INT(E::DataFormat::UnsignedInt));
 	}
 	m_enumManager->setEnumNames(m_dataFormatProperty, m_dataFormatInfo.toList());
-	if (signalType == E::SignalType::Analog && signalVector[0]->dataFormat() == DataFormat::UnsignedInt)
+	if (signalType == E::SignalType::Analog && signalVector[0]->dataFormat() == E::DataFormat::UnsignedInt)
 	{
-		m_enumManager->setValue(m_dataFormatProperty, m_dataFormatInfo.keyIndex(TO_INT(DataFormat::SignedInt)));
+		m_enumManager->setValue(m_dataFormatProperty, m_dataFormatInfo.keyIndex(TO_INT(E::DataFormat::SignedInt)));
 	}
 	else
 	{
@@ -442,7 +442,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
 		if (dataFormatIndex >= 0 && dataFormatIndex < m_dataFormatInfo.count())
 		{
-			DataFormat dataFormat = static_cast<DataFormat>(m_dataFormatInfo.key(dataFormatIndex));
+			E::DataFormat dataFormat = static_cast<E::DataFormat>(m_dataFormatInfo.key(dataFormatIndex));
 			if (dataFormat != m_signalVector[0]->dataFormat())
 			{
 				signal.setDataFormat(dataFormat);

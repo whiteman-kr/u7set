@@ -819,7 +819,7 @@ namespace Builder
 				applicationSignalsWriter.writeAttribute("deviceStrID", signal.deviceStrID());
 				applicationSignalsWriter.writeAttribute("filteringTime", QString::number(signal.filteringTime()));
 				applicationSignalsWriter.writeAttribute("maxDifference", QString::number(signal.maxDifference()));
-				applicationSignalsWriter.writeAttribute("byteOrder", ByteOrderStr[signal.byteOrderInt()]);
+				applicationSignalsWriter.writeAttribute("byteOrder", E::valueToString<E::ByteOrder>(signal.byteOrderInt()));
 				applicationSignalsWriter.writeAttribute("ramAddr", signal.ramAddr().toString());
 				applicationSignalsWriter.writeAttribute("regAddr", signal.regAddr().toString());
 

@@ -122,18 +122,6 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-//		Q_PROPERTY(QUuid Uuid READ uuid)
-//		Q_PROPERTY(QString StrID READ strId WRITE setStrId)
-//		Q_PROPERTY(QString Caption READ caption WRITE setCaption)
-//		Q_PROPERTY(QString ChildRestriction READ childRestriction WRITE setChildRestriction)
-//		Q_PROPERTY(int Place READ place WRITE setPlace)
-//		Q_PROPERTY(QString DynamicProperties READ dynamicProperties WRITE setDynamicProperties)
-
-//		Q_PROPERTY(bool Preset READ preset)
-//		Q_PROPERTY(bool PresetRoot READ presetRoot)
-//		Q_PROPERTY(QString PresetName READ presetName WRITE setPresetName)
-//		Q_PROPERTY(QUuid PresetObjectUuid READ presetObjectUuid)
-
 	protected:
 		explicit DeviceObject(bool preset = false);
 
@@ -397,8 +385,6 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(int Type READ type WRITE setType)
-
 	public:
 		explicit DeviceChassis(bool preset = false);
 		virtual ~DeviceChassis();
@@ -537,19 +523,6 @@ namespace Hardware
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(DataFormat Format READ format WRITE setFormat)
-
-		Q_PROPERTY(int Size READ size WRITE setSize)
-
-		Q_PROPERTY(int ValidityOffset READ validityOffset WRITE setValidityOffset)
-		Q_PROPERTY(int ValidityBit READ validityBit WRITE setValidityBit)
-
-		Q_PROPERTY(int ValueOffset READ valueOffset WRITE setValueOffset)
-		Q_PROPERTY(int ValueBit READ valueBit WRITE setValueBit)
-
-		Q_ENUMS(ByteOrder)
-		Q_ENUMS(DataFormat)
-
 	public:
 		enum SignalFunction
 		{
@@ -559,12 +532,6 @@ namespace Hardware
 			Diagnostics				// Diagnostics signal
 		};
 		Q_ENUM(SignalFunction)
-
-		enum DataFormat
-		{
-			UnsignedInt = 0,
-			SignedInt = 1,
-		};
 
 	public:
 		explicit DeviceSignal(bool preset = false);
@@ -594,8 +561,8 @@ namespace Hardware
 		E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
 
-		DataFormat format() const;
-		void setFormat(DataFormat value);
+		E::DataFormat format() const;
+		void setFormat(E::DataFormat value);
 
 		int size() const;
 		void setSize(int value);
@@ -629,7 +596,7 @@ namespace Hardware
 		SignalFunction m_function = SignalFunction::Input;
 
 		E::ByteOrder m_byteOrder = E::ByteOrder::LittleEndian;
-		DataFormat m_format = DataFormat::UnsignedInt;
+		E::DataFormat m_format = E::DataFormat::UnsignedInt;
 
 		int m_size = 0;
 		int m_validityOffset = -1;
@@ -647,8 +614,6 @@ namespace Hardware
 	class Workstation : public DeviceObject
 	{
 		Q_OBJECT
-
-		Q_PROPERTY(int Type READ type WRITE setType)
 
 	public:
 		explicit Workstation(bool preset = false);
@@ -690,8 +655,6 @@ namespace Hardware
 	class Software : public DeviceObject
 	{
 		Q_OBJECT
-
-		Q_PROPERTY(int Type READ type WRITE setType)
 
 	public:
 		explicit Software(bool preset = false);
@@ -771,6 +734,4 @@ namespace Hardware
 
 	void SerializeEquipmentFromXml(std::shared_ptr<DeviceRoot>& deviceRoot);
 }
-
-Q_DECLARE_METATYPE(Hardware::DeviceSignal::DataFormat)
 

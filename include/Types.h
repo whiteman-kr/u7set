@@ -12,12 +12,14 @@ class E : public QObject
 public:
 	E();
 
+
 	enum SignalType
 	{
 		Analog,
 		Discrete
 	};
 	Q_ENUM(SignalType)
+
 
 	enum ByteOrder
 	{
@@ -26,7 +28,17 @@ public:
 	};
 	Q_ENUM(ByteOrder)
 
+
+	enum DataFormat
+	{
+		UnsignedInt,
+		SignedInt,
+		Float
+	};
+	Q_ENUM(DataFormat)
+
 public:
+	// Convert enum vale (not index) to QString
 	template <typename ENUM_TYPE>
 	static QString valueToString(int value)
 	{
@@ -50,6 +62,8 @@ public:
 		return result;
 	}
 
+	// Get list of enum values and assigned String
+	//
 	template <typename ENUM_TYPE>
 	static std::list<std::pair<int, QString>> enumValues()
 	{
@@ -72,21 +86,8 @@ public:
 
 		return result;
 	}
-
-
 };
 
-
-
-
-enum class DataFormat
-{
-	UnsignedInt,
-	SignedInt,
-	Float,
-
-	Count
-};
 
 
 const char* const DataFormatStr[] =
@@ -96,12 +97,6 @@ const char* const DataFormatStr[] =
 	"Float",
 };
 
-
-const char* const ByteOrderStr[] =
-{
-	"Little Endian",
-	"Big Endian",
-};
 
 enum class UartID
 {

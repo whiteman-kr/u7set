@@ -3208,7 +3208,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setStrID(q.value(12).toString());
 	s.setExtStrID(q.value(13).toString());
 	s.setName(q.value(14).toString());
-	s.setDataFormat(static_cast<DataFormat>(q.value(15).toInt()));
+	s.setDataFormat(static_cast<E::DataFormat>(q.value(15).toInt()));
 	s.setDataSize(q.value(16).toInt());
 	s.setLowADC(q.value(17).toInt());
 	s.setHighADC(q.value(18).toInt());

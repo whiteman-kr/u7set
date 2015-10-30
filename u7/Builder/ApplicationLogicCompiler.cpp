@@ -1162,17 +1162,17 @@ namespace Builder
 			{
 				switch (paramValue.dataFormat())
 				{
-				case DataFormat::UnsignedInt:
+				case E::DataFormat::UnsignedInt:
 					cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, paramValue.unsignedIntValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.unsignedIntValue()));
 					break;
 
-				case DataFormat::SignedInt:
+				case E::DataFormat::SignedInt:
 					cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, paramValue.signedIntValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.signedIntValue()));
 					break;
 
-				case DataFormat::Float:
+				case E::DataFormat::Float:
 					cmd.writeFuncBlockConstFloat(fbOpcode, fbInstance, operandIndex, paramValue.floatValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.floatValue()));
 					break;
@@ -1187,17 +1187,17 @@ namespace Builder
 				//
 				switch (paramValue.dataFormat())
 				{
-				case DataFormat::UnsignedInt:
+				case E::DataFormat::UnsignedInt:
 					cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, paramValue.unsignedIntValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.unsignedIntValue()));
 					break;
 
-				case DataFormat::SignedInt:
+				case E::DataFormat::SignedInt:
 					cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, paramValue.signedIntValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.signedIntValue()));
 					break;
 
-				case DataFormat::Float:
+				case E::DataFormat::Float:
 					LOG_ERROR(m_log, QString(tr("Afb parameter '%1' with Float data format must have dataSize == 32")).arg(opName));
 					result = false;
 					break;
@@ -1490,13 +1490,13 @@ namespace Builder
 
 				FbScal& fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
-				if (signal->dataFormat() == DataFormat::Float)
+				if (signal->dataFormat() == E::DataFormat::Float)
 				{
 					;	// already assigned
 				}
 				else
 				{
-					if (signal->dataFormat() == DataFormat::SignedInt)
+					if (signal->dataFormat() == E::DataFormat::SignedInt)
 					{
 						fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 					}
@@ -1771,12 +1771,12 @@ namespace Builder
 			case SIZE_32BIT:
 				switch(appSignal.dataFormat())
 				{
-				case DataFormat::SignedInt:
+				case E::DataFormat::SignedInt:
 					cmd.movConstInt32(ramAddrOffset, constItem.intValue());
 					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.intValue()));
 					break;
 
-				case DataFormat::Float:
+				case E::DataFormat::Float:
 					cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
 					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.floatValue()));
 					break;
@@ -2707,13 +2707,13 @@ namespace Builder
 				}
 				FbScal& fbScal = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
-				if (signal->dataFormat() == DataFormat::Float)
+				if (signal->dataFormat() == E::DataFormat::Float)
 				{
 					;	// already assigned
 				}
 				else
 				{
-					if (signal->dataFormat() == DataFormat::SignedInt)
+					if (signal->dataFormat() == E::DataFormat::SignedInt)
 					{
 						fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 					}
@@ -3098,7 +3098,7 @@ namespace Builder
 
 		switch(signal.dataFormat())
 		{
-		case DataFormat::Float:
+		case E::DataFormat::Float:
 			{
 				FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
@@ -3113,7 +3113,7 @@ namespace Builder
 
 			break;
 
-		case DataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			{
 				FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 
@@ -3159,7 +3159,7 @@ namespace Builder
 
 		switch(signal.dataFormat())
 		{
-		case DataFormat::Float:
+		case E::DataFormat::Float:
 			{
 				FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
@@ -3174,7 +3174,7 @@ namespace Builder
 
 			break;
 
-		case DataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			{
 				FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 
@@ -4046,7 +4046,8 @@ namespace Builder
 	}
 
 
-	AppItem::AppItem(const AppItem& appItem)
+	AppItem::AppItem(const AppItem& appItem) :
+		QObject()
 	{
 		m_appLogicItem = appItem.m_appLogicItem;
 	}
@@ -4197,15 +4198,15 @@ namespace Builder
 
 			switch(paramValue.dataFormat())
 			{
-			case DataFormat::Float:
+			case E::DataFormat::Float:
 				m_instantiatorID += QString(":%1").arg(paramValue.floatValue());
 				break;
 
-			case DataFormat::SignedInt:
+			case E::DataFormat::SignedInt:
 				m_instantiatorID += QString(":%1").arg(paramValue.signedIntValue());
 				break;
 
-			case DataFormat::UnsignedInt:
+			case E::DataFormat::UnsignedInt:
 				m_instantiatorID += QString(":%1").arg(paramValue.unsignedIntValue());
 				break;
 
@@ -4672,7 +4673,7 @@ namespace Builder
 		if (afbParam.isDiscrete())
 		{
 			m_type = E::SignalType::Discrete;
-			m_dataFormat = DataFormat::UnsignedInt;
+			m_dataFormat = E::DataFormat::UnsignedInt;
 			m_dataSize = 1;
 
 			m_unsignedIntValue = qv.toUInt();
@@ -4685,18 +4686,18 @@ namespace Builder
 			switch(afbParam.dataFormat())
 			{
 			case Afb::SignedInt:
-				m_dataFormat = DataFormat::SignedInt;
+				m_dataFormat = E::DataFormat::SignedInt;
 				m_signedIntValue = qv.toInt();
 				break;
 
 			case Afb::UnsignedInt:
-				m_dataFormat = DataFormat::UnsignedInt;
+				m_dataFormat = E::DataFormat::UnsignedInt;
 				m_unsignedIntValue = qv.toUInt();
 				break;
 
 			case Afb::Float:
 				assert(m_dataSize == SIZE_32BIT);
-				m_dataFormat = DataFormat::Float;
+				m_dataFormat = E::DataFormat::Float;
 				m_floatValue = qv.toFloat();
 				break;
 
@@ -4713,15 +4714,15 @@ namespace Builder
 
 		switch(m_dataFormat)
 		{
-		case DataFormat::UnsignedInt:
+		case E::DataFormat::UnsignedInt:
 			str = QString("%1").arg(m_unsignedIntValue);
 			break;
 
-		case DataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			str = QString("%1").arg(m_signedIntValue);
 			break;
 
-		case DataFormat::Float:
+		case E::DataFormat::Float:
 			str = QString("%1").arg(m_floatValue);
 			break;
 

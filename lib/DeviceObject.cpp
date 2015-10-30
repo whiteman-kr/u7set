@@ -51,13 +51,10 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
 
 		QMetaType::registerConverter<QString, Hardware::DeviceSignal::SignalFunction>([] (QString str){ return Hardware::DeviceSignal::SignalFunction(str.toInt()); });
-		QMetaType::registerConverter<QString, Hardware::DeviceSignal::DataFormat>([] (QString str){ return Hardware::DeviceSignal::DataFormat(str.toInt()); });
 
 		QMetaType::registerConverter<Hardware::DeviceSignal::SignalFunction, QString>([] (Hardware::DeviceSignal::SignalFunction type){ return QString::number(int(type)); });
-		QMetaType::registerConverter<Hardware::DeviceSignal::DataFormat, QString>([] (Hardware::DeviceSignal::DataFormat type){ return QString::number(int(type)); });
 
 		QMetaType::registerConverter<int, Hardware::DeviceSignal::SignalFunction>(IntToEnum<Hardware::DeviceSignal::SignalFunction>);
-		QMetaType::registerConverter<int, Hardware::DeviceSignal::DataFormat>(IntToEnum<Hardware::DeviceSignal::DataFormat>);
 	}
 
 	void Shutdwon()
@@ -1574,6 +1571,7 @@ R"DELIM({
 	DeviceChassis::DeviceChassis(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
+		ADD_PROPERTY_GETTER_SETTER(int, Type, true, DeviceChassis::type, DeviceChassis::setType)
 	}
 
 	DeviceChassis::~DeviceChassis()
@@ -1890,6 +1888,14 @@ R"DELIM({
 		ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, true, DeviceSignal::type, DeviceSignal::setType)
 		ADD_PROPERTY_GETTER_SETTER(SignalFunction, Function, true, DeviceSignal::function, DeviceSignal::setFunction)
 		ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
+		ADD_PROPERTY_GETTER_SETTER(E::DataFormat, Format, true, DeviceSignal::format, DeviceSignal::setFormat)
+
+		ADD_PROPERTY_GETTER_SETTER(int, Size, true, DeviceSignal::size, DeviceSignal::setSize)
+		ADD_PROPERTY_GETTER_SETTER(int, ValidityOffset, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
+		ADD_PROPERTY_GETTER_SETTER(int, ValidityBit, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
+
+		ADD_PROPERTY_GETTER_SETTER(int, ValueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
+		ADD_PROPERTY_GETTER_SETTER(int, ValueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
 	}
 
 	DeviceSignal::~DeviceSignal()
@@ -1995,7 +2001,7 @@ R"DELIM({
 		}
 
 		m_byteOrder = static_cast<E::ByteOrder>(signalMessage.byteorder());
-		m_format = static_cast<DataFormat>(signalMessage.format());
+		m_format = static_cast<E::DataFormat>(signalMessage.format());
 
 		m_size = signalMessage.size();
 
@@ -2053,12 +2059,12 @@ R"DELIM({
 		m_byteOrder = value;
 	}
 
-	DeviceSignal::DataFormat DeviceSignal::format() const
+	E::DataFormat DeviceSignal::format() const
 	{
 		return m_format;
 	}
 
-	void DeviceSignal::setFormat(DeviceSignal::DataFormat value)
+	void DeviceSignal::setFormat(E::DataFormat value)
 	{
 		m_format = value;
 	}
@@ -2152,7 +2158,7 @@ R"DELIM({
 	Workstation::Workstation(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-
+		ADD_PROPERTY_GETTER_SETTER(int, Type, true, Workstation::type, Workstation::setType)
 	}
 
 	Workstation::~Workstation()
@@ -2233,7 +2239,7 @@ R"DELIM({
 	Software::Software(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-
+		ADD_PROPERTY_GETTER_SETTER(int, Type, true, Software::type, Software::setType)
 	}
 
 	Software::~Software()

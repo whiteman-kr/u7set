@@ -241,7 +241,7 @@ namespace Builder
 	{
 	private:
 		E::SignalType m_type = E::SignalType::Discrete;
-		DataFormat m_dataFormat = DataFormat::UnsignedInt;
+		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		bool m_instantiator = false;
 		int m_dataSize = 1;
 		QString m_opName;
@@ -255,16 +255,16 @@ namespace Builder
 		AppFbParamValue() {}
 		AppFbParamValue(const Afb::AfbParam& afbParam);
 
-		bool isUnsignedInt() const { return m_dataFormat == DataFormat::UnsignedInt; }
-		bool isUnsignedInt16() const { return m_dataFormat == DataFormat::UnsignedInt && m_dataSize == SIZE_16BIT; }
-		bool isUnsignedInt32() const { return m_dataFormat == DataFormat::UnsignedInt && m_dataSize == SIZE_32BIT; }
-		bool isSignedInt32() const { return m_dataFormat == DataFormat::SignedInt && m_dataSize == SIZE_32BIT; }
-		bool isFloat32() const { return m_dataFormat == DataFormat::Float && m_dataSize == SIZE_32BIT; }
+		bool isUnsignedInt() const { return m_dataFormat == E::DataFormat::UnsignedInt; }
+		bool isUnsignedInt16() const { return m_dataFormat == E::DataFormat::UnsignedInt && m_dataSize == SIZE_16BIT; }
+		bool isUnsignedInt32() const { return m_dataFormat == E::DataFormat::UnsignedInt && m_dataSize == SIZE_32BIT; }
+		bool isSignedInt32() const { return m_dataFormat == E::DataFormat::SignedInt && m_dataSize == SIZE_32BIT; }
+		bool isFloat32() const { return m_dataFormat == E::DataFormat::Float && m_dataSize == SIZE_32BIT; }
 
 		bool instantiator() const { return m_instantiator; }
 
 		E::SignalType type() const { return m_type; }
-		DataFormat dataFormat() const { return m_dataFormat; }
+		E::DataFormat dataFormat() const { return m_dataFormat; }
 		int dataSize() const { return m_dataSize; }
 
 		int operandIndex() const { return m_operandIndex; }
@@ -438,8 +438,8 @@ namespace Builder
 			SignalAddress16() {}
 
 			SignalAddress16(const QString& strID, const Address16& address, int sizeW, bool isDiscrete) :
-				m_signalStrID(strID),
 				m_address(address),
+				m_signalStrID(strID),
 				m_sizeW(sizeW),
 				m_isDiscrete(isDiscrete)
 			{

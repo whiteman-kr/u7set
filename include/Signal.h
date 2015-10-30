@@ -208,7 +208,7 @@ private:
 	QString m_strID;
 	QString m_extStrID;
 	QString m_name;
-	DataFormat m_dataFormat = DataFormat::Float;
+	E::DataFormat m_dataFormat = E::DataFormat::Float;
 	int m_dataSize = 32;
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
@@ -325,7 +325,7 @@ public:
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalInOutType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(DataFormat));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(E::DataFormat));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(int));
 	void serializeSensorField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
 
@@ -340,9 +340,9 @@ public:
     Q_INVOKABLE QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
 
-	Q_INVOKABLE DataFormat dataFormat() const { return m_dataFormat; }
+	Q_INVOKABLE E::DataFormat dataFormat() const { return m_dataFormat; }
 	Q_INVOKABLE int dataFormatInt() const { return TO_INT(m_dataFormat); }
-	void setDataFormat(DataFormat dataFormat) { m_dataFormat = dataFormat; }
+	void setDataFormat(E::DataFormat dataFormat) { m_dataFormat = dataFormat; }
 
     Q_INVOKABLE int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }

@@ -4,9 +4,11 @@
 
 DataFormatList::DataFormatList()
 {
-	for(int i = 0; i < ENUM_COUNT(DataFormat); i++)
+	auto enumValues = E::enumValues<E::DataFormat>();
+
+	for (auto v : enumValues)
 	{
-		append(i, DataFormatStr[i]);
+		append(v.first, v.second);
 	}
 }
 
@@ -74,12 +76,12 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	if (m_type == E::SignalType::Analog)
 	{
-		m_dataFormat = DataFormat::Float;
+		m_dataFormat = E::DataFormat::Float;
 		m_dataSize = 32;
 	}
 	else
 	{
-		m_dataFormat = DataFormat::UnsignedInt;
+		m_dataFormat = E::DataFormat::UnsignedInt;
 		m_dataSize = deviceSignal.size();
 	}
 }
@@ -295,7 +297,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	(this->*setter)(address);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(DataFormat))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(E::DataFormat))
 {
 	const QStringRef& strValue = attr.value(fieldName);
 	if (strValue.isEmpty())
@@ -307,7 +309,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	{
 		if (strValue == dataFormatInfo[i])
 		{
-			(this->*setter)(static_cast<DataFormat>(dataFormatInfo.key(i)));
+			(this->*setter)(static_cast<E::DataFormat>(dataFormatInfo.key(i)));
 			return;
 		}
 	}
@@ -395,17 +397,17 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 
 bool Signal::isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const
 {
-	if (m_dataFormat == DataFormat::Float && afbDataFormat == Afb::AfbDataFormat::Float)
+	if (m_dataFormat == E::DataFormat::Float && afbDataFormat == Afb::AfbDataFormat::Float)
 	{
 		return true;
 	}
 
-	if (m_dataFormat == DataFormat::SignedInt && afbDataFormat == Afb::AfbDataFormat::SignedInt)
+	if (m_dataFormat == E::DataFormat::SignedInt && afbDataFormat == Afb::AfbDataFormat::SignedInt)
 	{
 		return true;
 	}
 
-	if (m_dataFormat == DataFormat::UnsignedInt && afbDataFormat == Afb::AfbDataFormat::UnsignedInt)
+	if (m_dataFormat == E::DataFormat::UnsignedInt && afbDataFormat == Afb::AfbDataFormat::UnsignedInt)
 	{
 		return true;
 	}
