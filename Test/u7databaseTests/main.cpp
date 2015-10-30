@@ -1,6 +1,7 @@
 #include <QString>
 #include <QtTest>
 #include <QtSql>
+#include <QObject>
 #include "UserTests.h"
 #include "FileTests.h"
 #include "OtherTests.h"
@@ -227,7 +228,7 @@ int main(int argc, char *argv[])
 	}
 
 	qDebug() << "********* Finished testing of MultiThreadFile tests *********";
-	/*qDebug() << "********* Started testing of MultiThreadSignal tests *********";
+	qDebug() << "********* Started testing of MultiThreadSignal tests *********";
 
 	std::vector<MultiThreadSignalTest*> multiThreadSignalTest;
 
@@ -254,39 +255,39 @@ int main(int argc, char *argv[])
 
 	std::vector<int> signalIds;
 
-	int userIdForSignalStressTest = MultiThreadSignalStressTest::create_user(DatabaseHost,
-																			 DatabaseUser,
-																			 DatabaseUserPassword,
-																			 ProjectName);
+	int userIdForSignalStressTest = MultiThreadSignalTest::create_user(DatabaseHost,
+																	   DatabaseUser,
+																	   DatabaseUserPassword,
+																	   ProjectName);
 
-	int errCode = MultiThreadSignalStressTest::fillSignalIdsVector(signalIds,
-																   userIdForSignalStressTest,
-																   AmountOfItemsInMultiThreadTest,
-																   DatabaseHost,
-																   DatabaseUser,
-																   DatabaseUserPassword,
-																   ProjectName);
+	int errCode = MultiThreadSignalTest::fillSignalIdsVector(signalIds,
+															 userIdForSignalStressTest,
+															 AmountOfItemsInMultiThreadTest,
+															 DatabaseHost,
+															 DatabaseUser,
+															 DatabaseUserPassword,
+															 ProjectName);
 
 	if (errCode == 0)
 	{
-		MultiThreadSignalStressTest* threadCheckInCheckOut = new MultiThreadSignalStressTest(DatabaseHost,
-																							 DatabaseUser,
-																							 DatabaseUserPassword,
-																							 ProjectName,
-																							 0,
-																							 userIdForSignalStressTest,
-																							 signalIds);
+		MultiThreadGetSignalTest* threadGetLatestSignal = new MultiThreadGetSignalTest(DatabaseHost,
+																					   DatabaseUser,
+																					   DatabaseUserPassword,
+																					   ProjectName,
+																					   signalIds);
 
-		MultiThreadSignalStressTest* threadGetLatestSignal = new MultiThreadSignalStressTest(DatabaseHost,
-																							 DatabaseUser,
-																							 DatabaseUserPassword,
-																							 ProjectName,
-																							 1,
-																							 userIdForSignalStressTest,
-																							 signalIds);
+		MultiThreadSignalCheckInTest* threadCheckInCheckOut = new MultiThreadSignalCheckInTest(DatabaseHost,
+																							   DatabaseUser,
+																							   DatabaseUserPassword,
+																							   ProjectName,
+																							   userIdForSignalStressTest,
+																							   signalIds,
+																							   threadGetLatestSignal);
 
-		threadCheckInCheckOut->start();
+
+
 		threadGetLatestSignal->start();
+		threadCheckInCheckOut->start();
 
 		while (threadCheckInCheckOut->isFinished() == false)
 		{
@@ -302,7 +303,7 @@ int main(int argc, char *argv[])
 	else
 		qDebug() << "FAIL: errCode is " << errCode << ": can not fill vector with fileIds or create user";
 
-	qDebug() << "********* Finished testing of MultiThreadStressSignal tests *********";*/
+	qDebug() << "********* Finished testing of MultiThreadStressSignal tests *********";
 
 	// Drop database project
 	//

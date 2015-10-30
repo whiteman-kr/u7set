@@ -406,6 +406,7 @@ void FileTests::check_outTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString firstFile = query.value("id").toString();
+
 	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(firstFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -413,6 +414,7 @@ void FileTests::check_outTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString secondFile = query.value("id").toString();
+
 	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(secondFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -451,10 +453,6 @@ void FileTests::check_outTest()
 		QVERIFY2(tempQuery.value("fileInstanceId").toString() == Uuid, qPrintable(QString("No record in fileinstance at file %1").arg(id)));
 		QVERIFY2(tempQuery.value("details").toString() == detail, qPrintable(QString("Error: details not match! \nActual: %1\nExpected: %2").arg(tempQuery.value("details").toString()).arg(detail)));
 	}
-
-	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(m_firstUserForTest).arg(thirdFile));
-
-	QVERIFY2(ok == false, "Already checked file error expected");
 }
 
 void FileTests::set_workcopyTest()

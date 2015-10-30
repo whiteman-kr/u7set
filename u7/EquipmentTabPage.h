@@ -211,7 +211,7 @@ public slots:
 
 	void setProperties();
 
-	void propertiesChanged(QList<std::shared_ptr<QObject>> objects);
+    void propertiesChanged(QList<std::shared_ptr<PropertyObject> > objects);
 
 protected slots:
 	void addObjectTriggered();
@@ -268,7 +268,7 @@ private:
 	QSplitter* m_splitter = nullptr;
 	QToolBar* m_toolBar = nullptr;
 
-	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
+    ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
 };
 
 

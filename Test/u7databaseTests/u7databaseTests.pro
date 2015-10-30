@@ -43,6 +43,7 @@ SOURCES += main.cpp \
     ../../lib/DbProgressDialog.cpp \
     ../../lib/DataSource.cpp \
     ../../lib/SocketIO.cpp  \
+    ../../lib/PropertyObject.cpp \
     MultiThreadFileTest.cpp \
     MultiThreadSignalTests.cpp
 
@@ -62,6 +63,7 @@ HEADERS += \
     ../../include/DbProgressDialog.h \
     ../../include/DataSource.h \
     ../../include/SocketIO.h \
+    ../../include/PropertyObject.h \
     MultiThreadFileTest.h \
     MultiThreadSignalTests.h
 

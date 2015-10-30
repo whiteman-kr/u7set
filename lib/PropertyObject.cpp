@@ -93,20 +93,16 @@ PropertyObject::PropertyObject(QObject* parent) :
 
 PropertyObject::~PropertyObject()
 {
-	for (auto p : m_properties)
-	{
-		delete p.second;
-	}
 
 	return;
 }
 
-std::vector<Property*> PropertyObject::properties()
+std::vector<std::shared_ptr<Property>> PropertyObject::properties()
 {
-	std::vector<Property*> result;
+    std::vector<std::shared_ptr<Property>> result;
 	result.reserve(m_properties.size());
 
-	for (std::pair<QString, Property*> p : m_properties)
+    for (std::pair<QString, std::shared_ptr<Property>> p : m_properties)
 	{
 		result.push_back(p.second);
 	}
@@ -114,9 +110,9 @@ std::vector<Property*> PropertyObject::properties()
 	return result;
 }
 
-Property* PropertyObject::propertyByCaption(QString caption)
+std::shared_ptr<Property> PropertyObject::propertyByCaption(QString caption)
 {
-	Property* result = nullptr;
+    std::shared_ptr<Property> result = nullptr;
 
 	auto it = m_properties.find(caption);
 
@@ -128,9 +124,9 @@ Property* PropertyObject::propertyByCaption(QString caption)
 	return result;
 }
 
-const Property* PropertyObject::propertyByCaption(QString caption) const
+const std::shared_ptr<Property> PropertyObject::propertyByCaption(QString caption) const
 {
-	const Property* result = nullptr;
+    std::shared_ptr<Property> result = nullptr;
 
 	auto it = m_properties.find(caption);
 
@@ -166,7 +162,7 @@ bool PropertyObject::setPropertyValue(QString caption, const char* value)
 		return false;
 	}
 
-	Property* property = it->second;
+    std::shared_ptr<Property> property = it->second;
 
 	if (property->isEnum() == true)
 	{
@@ -175,7 +171,7 @@ bool PropertyObject::setPropertyValue(QString caption, const char* value)
 	}
 	else
 	{
-		PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property);
+        PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property.get());
 
 		if (propertyValue == nullptr)
 		{

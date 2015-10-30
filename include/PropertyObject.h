@@ -8,10 +8,12 @@
 #include <vector>
 #include <utility>
 #include <assert.h>
+#include <memory>
 
 #include <QObject>
 #include <QString>
 #include <QVariant>
+#include <QMetaEnum>
 
 
 // Add property which is stored in QVariant and does not have getter or setter
@@ -376,7 +378,7 @@ public:
 									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
 									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
 	{
-		PropertyValue<TYPE>* property = new PropertyValue<TYPE>();
+        std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
 
 		property->setCaption(caption);
 		property->setVisible(visible);
@@ -401,22 +403,21 @@ public:
 		}
 		else
 		{
-			delete alreadyExists->second;
 			alreadyExists->second = property;
 		}
 
-		return property;
+        return property.get();
 	}
 
 	// Get all properties
 	//
-	std::vector<Property*> properties();
+    std::vector<std::shared_ptr<Property> > properties();
 
 	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found
 	//
-	Property* propertyByCaption(QString caption);
-	const Property* propertyByCaption(QString caption) const;
+    std::shared_ptr<Property> propertyByCaption(QString caption);
+    const std::shared_ptr<Property> propertyByCaption(QString caption) const;
 
 	// Get property value
 	//
@@ -458,12 +459,12 @@ public:
 		return false;
 	}
 
-	bool setPropertyValue(QString caption, const char* value);
+    bool setPropertyValue(QString caption, const char* value);
 	bool setPropertyValue(QString caption, const QVariant& value);
 	std::list<std::pair<int, QString>> enumValues(QString property);
 
 private:
-	std::map<QString, Property*> m_properties;
+    std::map<QString, std::shared_ptr<Property>> m_properties;
 };
 
 

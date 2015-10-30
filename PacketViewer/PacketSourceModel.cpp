@@ -6,6 +6,7 @@
 #include "PacketBufferTableModel.h"
 #include <QHBoxLayout>
 #include <QTableView>
+#include "SignalTableModel.h"
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)
@@ -341,7 +342,7 @@ int Listener::getSourceIndex(quint32 ip, quint16 port)
 
 int Listener::addNewSource(quint32 ip, quint16 port)
 {
-	std::shared_ptr<Source> newSource(new Source(QHostAddress(ip).toString(), port, this));
+	std::shared_ptr<Source> newSource(new Source(QHostAddress(ip).toString(), port, m_model->signalSet(), m_model->dataSources(), this));
 	connect(newSource.get(), &Source::fieldsChanged, m_model, &PacketSourceModel::updateSourceStatistic);
 	for (size_t i = 0; i < m_sources.size(); i++)
 	{
@@ -383,10 +384,22 @@ void Listener::readPendingDatagrams()
 }
 
 
-Source::Source(QString address, int port, Statistic* parent) :
+Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, DataSource>& dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
-	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this))
+	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
+	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this))
 {
+	QHashIterator<quint32, DataSource> iterator(dataSources);
+
+	while (iterator.hasNext())
+	{
+		iterator.next();
+
+		if (iterator.value().hostAddress().toIPv4Address() == ip())
+		{
+			m_signalTableModel->addDataSource(iterator.value());
+		}
+	}
 	m_lastHeader.packetNo = 0;
 	memset(m_buffer, 0, RP_MAX_FRAME_COUNT * RP_PACKET_DATA_SIZE);
 }
@@ -426,7 +439,9 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 	}
 	int currentDataSize = header.packetSize - sizeof(RpPacketHeader) - sizeof(packet.CRC64);
 	memcpy(m_buffer + header.partNo * currentDataSize, packet.Data, currentDataSize);
+	m_signalTableModel->updateFrame(header.partNo);
 	m_packetBufferModel->updateFrame(header.partNo);
+	m_packetBufferModel->checkPartCount(header.partCount);
 	memcpy(&m_lastHeader, &header, sizeof(RpPacketHeader));
 	emit fieldsChanged();
 	delete [] buffer;
@@ -439,12 +454,17 @@ void Source::openStatusWidget()
 	widget->setWindowTitle(fullAddress());
 	connect(widget, &QWidget::destroyed, this, &Source::removeDependentWidget);
 
-	QTableView* table = new QTableView(widget);
-	table->setModel(m_packetBufferModel);
-	table->resizeColumnsToContents();
+	QTableView* bufferTable = new QTableView(widget);
+	bufferTable->setModel(m_packetBufferModel);
+	bufferTable->resizeColumnsToContents();
+
+	QTableView* signalTable = new QTableView(widget);
+	signalTable->setModel(m_signalTableModel);
+	signalTable->resizeColumnsToContents();
 
 	QHBoxLayout* layout = new QHBoxLayout;
-	layout->addWidget(table);
+	layout->addWidget(bufferTable);
+	layout->addWidget(signalTable);
 	widget->setLayout(layout);
 	widget->resize(640, 480);
 	widget->show();

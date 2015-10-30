@@ -3,131 +3,105 @@
 namespace Builder
 {
 
-	bool ModuleLogicCompiler::calculateFbParamsValues(const AppFb& appFb, AfbParamValuesArray& paramValuesArray, bool /* instantiatorOnly */ )
+#define CHECK_REQUIRED_PARAMTERES(paramList)	if (checkRequiredParameters(paramList) == false) { return false; }
+#define CHECK_UNSIGNED_INT(param)				if (checkUnsignedInt(param) == false) { return false; }
+#define CHECK_UNSIGNED_INT16(param)				if (checkUnsignedInt16(param) == false) { return false; }
+#define CHECK_UNSIGNED_INT32(param)				if (checkUnsignedInt32(param) == false) { return false; }
+#define CHECK_SIGNED_INT32(param)				if (checkSignedInt32(param) == false) { return false; }
+#define CHECK_FLOAT32(param)					if (checkFloat32(param) == false) { return false; }
+
+
+	bool AppFb::calculateFbParamValues(ModuleLogicCompiler* compiler)
 	{
-		bool result = true;
-
-		for(const Afb::AfbParam& afbParam : appFb.afb().params())
+		if (compiler == nullptr)
 		{
-			AfbParamValue afbParamValue(afbParam);
-
-			paramValuesArray.insert(afbParam.opName(), afbParamValue);
+			assert(false);
+			return false;
 		}
 
-		switch(appFb.opcode())
+		m_compiler = compiler;
+		m_log = compiler->log();
+
+		if (m_log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (isFb() == false)
+		{
+			assert(false);
+			return true;
+		}
+
+		bool result = true;
+
+		switch(afb().type().toOpCode())
 		{
 		case Afb::AfbType::LOGIC:
-			// parameter's values calculation are not required
+			// parameter's values calculation is not required
 			break;
 
 		case Afb::AfbType::TCT:
-			result = calculate_TCT_paramsValues(appFb, paramValuesArray);
+			result = calculate_TCT_paramValues();
 			break;
 
-		case Afb::AfbType::BCOMP:
-			result = calculate_BCOMP_paramsValues(appFb, paramValuesArray);
+		case Afb::AfbType::COMP:
+			result = calculate_BCOMP_paramValues();
 			break;
 
 
-		case Afb::AfbType::SCAL:
-			//result = calculate_SCAL_paramsValues(appFb, paramValuesArray);
+		case Afb::AfbType::SCALE:
+			result = calculate_SCAL_paramValues();
 			break;
 
 		default:
 			LOG_ERROR(m_log, QString(tr("Parameter's values calculation for FB %1 (opcode %2) is not implemented")).
-					arg(appFb.caption()).arg(appFb.opcode()));
+					arg(afb().caption()).arg(afb().type().toOpCode()));
 			result = false;
 		}
 
-		/*
-			for(Afb::AfbParam afbParam : afb.params())
-			{
-				if (afbParam.operandIndex() == NOT_FB_OPERAND_INDEX)
-				{
-					continue;
-				}
-
-				if (instantiatorOnly && !afbParam.instantiator())
-				{
-					continue;
-				}
-
-				AfbParamValue afbParamValue(afbParam);
-
-				if (afbParam.isAnalog())
-				{
-					result &= calculateFbAnalogParamValue(*appFb, afbParam, &afbParamValue);
-				}
-
-				result &= generateWriteAfbParamCode(*appFb, afbParam, afbParamValue);
-			}
-		*/
-
 		return result;
 	}
 
 
-	bool ModuleLogicCompiler::checkRequiredParameters(const AppFb& appFb, AfbParamValuesArray& paramValuesArray, const QStringList& requiredParams)
-	{
-		bool result = true;
-
-		for(const QString& param : requiredParams)
-		{
-			if (paramValuesArray.contains(param) == false)
-			{
-				LOG_ERROR(m_log, QString(tr("Required parameter '%1' of FB %2 (%3) is missing")).
-						  arg(param).arg(appFb.caption()).arg(appFb.typeCaption()));
-				result = false;
-			}
-		}
-
-		return result;
-	}
-
-
-	bool ModuleLogicCompiler::calculate_TCT_paramsValues(const AppFb& appFb, AfbParamValuesArray& paramValuesArray)
+	bool AppFb::calculate_TCT_paramValues()
 	{
 		QStringList requiredParams;
 
 		requiredParams.append("i_counter");
 
-		if (checkRequiredParameters(appFb, paramValuesArray, requiredParams) == false)
-		{
-			return false;
-		}
+		CHECK_REQUIRED_PARAMTERES(requiredParams);
 
-		AfbParamValue& afbParamValue = paramValuesArray["i_counter"];
+		AppFbParamValue& i_counter = m_paramValuesArray["i_counter"];
 
-		assert(afbParamValue.isUnsignedInt32());
+		CHECK_UNSIGNED_INT(i_counter)
 
-		afbParamValue.unsignedIntValue = (afbParamValue.unsignedIntValue * 1000) / m_lmCycleDuration;
+		i_counter.setUnsignedIntValue((i_counter.unsignedIntValue() * 1000) / m_compiler->lmCycleDuration());
 
 		return true;
 	}
 
 
-	bool ModuleLogicCompiler::calculate_BCOMP_paramsValues(const AppFb& appFb, AfbParamValuesArray& paramValuesArray)
+	bool AppFb::calculate_BCOMP_paramValues()
 	{
 		QStringList requiredParams;
 
+		requiredParams.append("i_conf");
 		requiredParams.append("i_sp_s");
 		requiredParams.append("i_sp_r");
 		requiredParams.append("hysteresis");
-		requiredParams.append("i_conf");
 
-		if (checkRequiredParameters(appFb, paramValuesArray, requiredParams) == false)
-		{
-			return false;
-		}
+		CHECK_REQUIRED_PARAMTERES(requiredParams)
 
-		AfbParamValue& iConfParam = paramValuesArray["i_conf"];
-		AfbParamValue& sSettingParam = paramValuesArray["i_sp_s"];
-		AfbParamValue& rSettingParam = paramValuesArray["i_sp_r"];
-		AfbParamValue& hysteresisRParam = paramValuesArray["hysteresis"];
+		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
+		AppFbParamValue& sSettingParam = m_paramValuesArray["i_sp_s"];
+		AppFbParamValue& rSettingParam = m_paramValuesArray["i_sp_r"];
+		AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
-		assert(iConfParam.isUnsignedInt());
+		CHECK_UNSIGNED_INT(iConfParam)
 
-		int iConf = iConfParam.unsignedIntValue;
+		int iConf = iConfParam.unsignedIntValue();
 
 		const int	BCOMP_32SI_EQU = 1,
 					BCOMP_32SI_GREAT = 2,
@@ -144,31 +118,31 @@ namespace Builder
 		{
 			// comparison of signed int values
 			//
-			assert(sSettingParam.isSignedInt32());
-			assert(rSettingParam.isSignedInt32());
-			assert(hysteresisRParam.isSignedInt32());
+			CHECK_SIGNED_INT32(sSettingParam)
+			CHECK_SIGNED_INT32(rSettingParam)
+			CHECK_SIGNED_INT32(hysteresisParam)
 
-			int sSetting = sSettingParam.signedIntValue;
-			int hysteresis = abs(hysteresisRParam.signedIntValue);
+			int sSetting = sSettingParam.signedIntValue();
+			int hysteresis = abs(hysteresisParam.signedIntValue());
 
 			switch(iConf)
 			{
 			case BCOMP_32SI_EQU:
-				sSettingParam.signedIntValue = sSetting + hysteresis / 2;
-				rSettingParam.signedIntValue = sSetting - hysteresis / 2;
+				sSettingParam.setSignedIntValue(sSetting + hysteresis / 2);
+				rSettingParam.setSignedIntValue(sSetting - hysteresis / 2);
 				break;
 
 			case BCOMP_32SI_GREAT:
-				rSettingParam.signedIntValue = sSetting - hysteresis;
+				rSettingParam.setSignedIntValue(sSetting - hysteresis);
 				break;
 
 			case BCOMP_32SI_LESS:
-				rSettingParam.signedIntValue = sSetting + hysteresis;
+				rSettingParam.setSignedIntValue(sSetting + hysteresis);
 				break;
 
 			case BCOMP_32SI_NOT_EQU:
-				sSettingParam.signedIntValue = sSetting - hysteresis / 2;
-				rSettingParam.signedIntValue = sSetting + hysteresis / 2;
+				sSettingParam.setSignedIntValue(sSetting - hysteresis / 2);
+				rSettingParam.setSignedIntValue(sSetting + hysteresis / 2);
 				break;
 
 			default:
@@ -183,31 +157,31 @@ namespace Builder
 		{
 			// comparison of floating point values
 			//
-			assert(sSettingParam.isFloat32());
-			assert(rSettingParam.isFloat32());
-			assert(hysteresisRParam.isFloat32());
+			CHECK_FLOAT32(sSettingParam)
+			CHECK_FLOAT32(rSettingParam)
+			CHECK_FLOAT32(hysteresisParam)
 
-			double sSetting = sSettingParam.floatValue;
-			double hysteresis = abs(hysteresisRParam.floatValue);
+			double sSetting = sSettingParam.floatValue();
+			double hysteresis = abs(hysteresisParam.floatValue());
 
 			switch(iConf)
 			{
 			case BCOMP_32FP_EQU:
-				sSettingParam.floatValue = sSetting + hysteresis / 2;
-				rSettingParam.floatValue = sSetting - hysteresis / 2;
+				sSettingParam.setFloatValue(sSetting + hysteresis / 2);
+				rSettingParam.setFloatValue(sSetting - hysteresis / 2);
 				break;
 
 			case BCOMP_32FP_GREAT:
-				rSettingParam.floatValue = sSetting - hysteresis;
+				rSettingParam.setFloatValue(sSetting - hysteresis);
 				break;
 
 			case BCOMP_32FP_LESS:
-				rSettingParam.floatValue = sSetting + hysteresis;
+				rSettingParam.setFloatValue(sSetting + hysteresis);
 				break;
 
 			case BCOMP_32FP_NOT_EQU:
-				sSettingParam.floatValue = sSetting - hysteresis / 2;
-				rSettingParam.floatValue = sSetting + hysteresis / 2;
+				sSettingParam.setFloatValue(sSetting - hysteresis / 2);
+				rSettingParam.setFloatValue(sSetting + hysteresis / 2);
 				break;
 
 			default:
@@ -217,15 +191,218 @@ namespace Builder
 			return true;
 		}
 
-		LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_confog' of FB %2 is incorrect")).
-				  arg(iConf).arg(appFb.caption()));
+		LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).
+				  arg(iConf).arg(caption()));
 
 		return false;
 	}
 
 
-	bool ModuleLogicCompiler::calculate_SCAL_paramsValues(const AppFb&, AfbParamValuesArray& paramValuesArray)
+	bool AppFb::calculate_SCAL_paramValues()
 	{
-		return true;
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_scal_k1_coef");
+		requiredParams.append("i_scal_k2_coef");
+		requiredParams.append("input_low");
+		requiredParams.append("input_high");
+		requiredParams.append("output_low");
+		requiredParams.append("output_high");
+
+		CHECK_REQUIRED_PARAMTERES(requiredParams)
+
+		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
+		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
+		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
+		AppFbParamValue& x1Param = m_paramValuesArray["input_low"];
+		AppFbParamValue& x2Param = m_paramValuesArray["input_high"];
+		AppFbParamValue& y1Param = m_paramValuesArray["output_low"];
+		AppFbParamValue& y2Param = m_paramValuesArray["output_high"];
+
+		CHECK_UNSIGNED_INT(iConfParam)
+
+		int iConf = iConfParam.unsignedIntValue();
+
+		const int	SCALE_16UI_16UI = 1,
+					SCALE_16UI_SI = 2,
+					SCALE_SI_16UI = 3,
+					SCALE_SI_SI = 4,
+					SCALE_SI_FP = 5,
+					SCALE_FP_FP = 6,
+					SCALE_FP_16UI = 7,
+					SCALE_FP_SI = 8,
+					SCALE_16UI_FP = 9;
+
+		if (iConf == SCALE_16UI_16UI || iConf == SCALE_16UI_SI ||
+			iConf == SCALE_SI_16UI || iConf == SCALE_SI_SI)
+		{
+			// k1 & k2 are Signed Integer
+			//
+			CHECK_SIGNED_INT32(k1Param)
+			CHECK_SIGNED_INT32(k2Param);
+
+			int x1 = 0;
+			int x2 = 0;
+
+			int y1 = 0;
+			int y2 = 0;
+
+			switch(iConf)
+			{
+			case SCALE_16UI_16UI:
+				CHECK_UNSIGNED_INT16(x1Param)
+				CHECK_UNSIGNED_INT16(x2Param)
+				CHECK_UNSIGNED_INT16(y1Param)
+				CHECK_UNSIGNED_INT16(y2Param)
+
+				x1 = x1Param.unsignedIntValue();
+				x2 = x2Param.unsignedIntValue();
+				y1 = y1Param.unsignedIntValue();
+				y2 = y2Param.unsignedIntValue();
+				break;
+
+			case SCALE_16UI_SI:
+				CHECK_UNSIGNED_INT16(x1Param)
+				CHECK_UNSIGNED_INT16(x2Param)
+				CHECK_SIGNED_INT32(y1Param);
+				CHECK_SIGNED_INT32(y2Param);
+
+				x1 = x1Param.unsignedIntValue();
+				x2 = x2Param.unsignedIntValue();
+				y1 = y1Param.signedIntValue();
+				y2 = y2Param.signedIntValue();
+				break;
+
+			case SCALE_SI_16UI:
+				CHECK_SIGNED_INT32(x1Param)
+				CHECK_SIGNED_INT32(x2Param)
+				CHECK_UNSIGNED_INT16(y1Param)
+				CHECK_UNSIGNED_INT16(y2Param)
+
+				x1 = x1Param.signedIntValue();
+				x2 = x2Param.signedIntValue();
+				y1 = y1Param.unsignedIntValue();
+				y2 = y2Param.unsignedIntValue();
+				break;
+
+			case SCALE_SI_SI:
+				CHECK_SIGNED_INT32(x1Param)
+				CHECK_SIGNED_INT32(x2Param)
+				CHECK_SIGNED_INT32(y1Param)
+				CHECK_SIGNED_INT32(y2Param)
+
+				x1 = x1Param.signedIntValue();
+				x2 = x2Param.signedIntValue();
+				y1 = y1Param.signedIntValue();
+				y2 = y2Param.signedIntValue();
+				break;
+
+			default:
+				assert(false);
+			}
+
+			const int MULTIPLIER = 32768 - 1;
+
+			int k1 = ((y2 - y1) * MULTIPLIER) / (x2 - x1);
+
+			k1Param.setSignedIntValue(k1);
+			k2Param.setSignedIntValue(y1 - (k1 * x1) / MULTIPLIER);
+
+			return true;
+		}
+
+		if (iConf == SCALE_SI_FP || iConf == SCALE_FP_FP || iConf == SCALE_FP_16UI ||
+			iConf == SCALE_FP_SI || iConf == SCALE_16UI_FP)
+		{
+			// k1 & k2 are Floating Point
+			//
+			CHECK_FLOAT32(k1Param);
+			CHECK_FLOAT32(k2Param);
+
+			double x1 = 0;
+			double x2 = 0;
+
+			double y1 = 0;
+			double y2 = 0;
+
+			switch(iConf)
+			{
+			case SCALE_SI_FP:
+				CHECK_SIGNED_INT32(x1Param)
+				CHECK_SIGNED_INT32(x2Param)
+				CHECK_FLOAT32(y1Param)
+				CHECK_FLOAT32(y2Param)
+
+				x1 = x1Param.signedIntValue();
+				x2 = x2Param.signedIntValue();
+				y1 = y1Param.floatValue();
+				y2 = y2Param.floatValue();
+				break;
+
+			case SCALE_FP_FP:
+				CHECK_FLOAT32(x1Param)
+				CHECK_FLOAT32(x2Param)
+				CHECK_FLOAT32(y1Param)
+				CHECK_FLOAT32(y2Param)
+
+				x1 = x1Param.floatValue();
+				x2 = x2Param.floatValue();
+				y1 = y1Param.floatValue();
+				y2 = y2Param.floatValue();
+				break;
+
+			case SCALE_FP_16UI:
+				CHECK_FLOAT32(x1Param);
+				CHECK_FLOAT32(x2Param);
+				CHECK_UNSIGNED_INT16(y1Param);
+				CHECK_UNSIGNED_INT16(y2Param);
+
+				x1 = x1Param.floatValue();
+				x2 = x2Param.floatValue();
+				y1 = y1Param.unsignedIntValue();
+				y2 = y2Param.unsignedIntValue();
+				break;
+
+			case SCALE_FP_SI:
+				CHECK_FLOAT32(x1Param)
+				CHECK_FLOAT32(x2Param)
+				CHECK_SIGNED_INT32(y1Param)
+				CHECK_SIGNED_INT32(y2Param)
+
+				x1 = x1Param.floatValue();
+				x2 = x2Param.floatValue();
+				y1 = y1Param.signedIntValue();
+				y2 = y2Param.signedIntValue();
+				break;
+
+			case SCALE_16UI_FP:
+				CHECK_UNSIGNED_INT16(x1Param)
+				CHECK_UNSIGNED_INT16(x2Param)
+				CHECK_FLOAT32(y1Param)
+				CHECK_FLOAT32(y2Param)
+
+				x1 = x1Param.unsignedIntValue();
+				x2 = x2Param.unsignedIntValue();
+				y1 = y1Param.floatValue();
+				y2 = y2Param.floatValue();
+				break;
+
+			default:
+				assert(false);
+			}
+
+			double k1 = (y2 - y1) / (x2 - x1);
+
+			k1Param.setFloatValue(k1);
+			k2Param.setFloatValue(y1 - k1 * x1);
+
+			return true;
+		}
+
+		LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).
+				  arg(iConf).arg(caption()));
+
+		return false;
 	}
 }

@@ -23,7 +23,7 @@ PacketBufferTableModel::PacketBufferTableModel(quint8* buffer, RpPacketHeader& l
 
 int PacketBufferTableModel::rowCount(const QModelIndex&) const
 {
-	return RP_PACKET_DATA_SIZE * RP_MAX_FRAME_COUNT / sizeof(m_buffer[0]);
+	return RP_PACKET_DATA_SIZE * m_lastHeader.partCount / sizeof(m_buffer[0]);
 }
 
 int PacketBufferTableModel::columnCount(const QModelIndex&) const
@@ -75,5 +75,25 @@ void PacketBufferTableModel::updateFrame(int frameNo)
 	emit dataChanged(index(frameNo * RP_PACKET_DATA_SIZE / sizeof(m_buffer[0]), C_DECIMAL),
 			index((frameNo + 1) * RP_PACKET_DATA_SIZE / sizeof(m_buffer[0]) - 1, C_BINARY),
 			QVector<int>() << Qt::DisplayRole);
+}
+
+void PacketBufferTableModel::checkPartCount(int newPartCount)
+{
+	if (newPartCount == m_lastHeader.partCount)
+	{
+		return;
+	}
+	if (newPartCount > m_lastHeader.partCount)
+	{
+		emit beginInsertRows(QModelIndex(),
+							RP_PACKET_DATA_SIZE * m_lastHeader.partCount / sizeof(m_buffer[0]),
+							RP_PACKET_DATA_SIZE * newPartCount / sizeof(m_buffer[0]) - 1);
+	}
+	if (newPartCount < m_lastHeader.partCount)
+	{
+		emit beginInsertRows(QModelIndex(),
+							RP_PACKET_DATA_SIZE * newPartCount / sizeof(m_buffer[0]),
+							RP_PACKET_DATA_SIZE * m_lastHeader.partCount / sizeof(m_buffer[0]) - 1);
+	}
 }
 
