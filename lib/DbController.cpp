@@ -1186,7 +1186,7 @@ bool DbController::getLatestSignal(int signalID, Signal* signal, QWidget* parent
 }
 
 
-bool DbController::addSignal(SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)
+bool DbController::addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)
 {
 	if (newSignal == nullptr)
 	{

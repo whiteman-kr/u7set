@@ -27,13 +27,13 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	if (deviceSignal.isAnalogSignal())
 	{
-		m_type = SignalType::Analog;
+		m_type = E::SignalType::Analog;
 	}
 	else
 	{
 		if (deviceSignal.isDiscreteSignal())
 		{
-			m_type = SignalType::Discrete;
+			m_type = E::SignalType::Discrete;
 		}
 		else
 		{
@@ -72,7 +72,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	m_name = QString("Signal #%1").arg(deviceSignalStrID);
 	m_deviceStrID = deviceSignal.strId();
 
-	if (m_type == SignalType::Analog)
+	if (m_type == E::SignalType::Analog)
 	{
 		m_dataFormat = DataFormat::Float;
 		m_dataSize = 32;
@@ -200,7 +200,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	(this->*setter)(strValue.toString());
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalType))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType))
 {
 	const QStringRef& strValue = attr.value(fieldName);
 	if (strValue.isEmpty())
@@ -210,12 +210,12 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	}
 	if (strValue == "Analog")
 	{
-		(this->*setter)(SignalType::Analog);
+		(this->*setter)(E::SignalType::Analog);
 		return;
 	}
 	if (strValue == "Discrete")
 	{
-		(this->*setter)(SignalType::Discrete);
+		(this->*setter)(E::SignalType::Discrete);
 		return;
 	}
 	assert(false);
@@ -259,7 +259,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	assert(false);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(ByteOrder))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder))
 {
 	const QStringRef& strValue = attr.value(fieldName);
 	if (strValue.isEmpty())
@@ -267,14 +267,18 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		assert(false);
 		return;
 	}
-	for (int i = 0; i < ENUM_COUNT(ByteOrder); i++)
+
+	auto el = E::enumValues<E::ByteOrder>();
+
+	for (auto e : el)
 	{
-		if (strValue == ByteOrderStr[i])
+		if (e.second == strValue)
 		{
-			(this->*setter)(ByteOrder(i));
+			(this->*setter)(static_cast<E::ByteOrder>(e.first));
 			return;
 		}
 	}
+
 	assert(false);
 }
 

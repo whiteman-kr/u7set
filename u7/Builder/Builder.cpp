@@ -763,11 +763,17 @@ namespace Builder
 					LOG_WARNING(m_log, QString("Signal %1 has wrong inOutType field").arg(signal.strID()));
 					hasWrongField = true;
 				}
-				if (signal.byteOrderInt() < 0 || signal.byteOrderInt() >= ENUM_COUNT(ByteOrder))
+
+				switch (static_cast<E::ByteOrder>(signal.byteOrderInt()))
 				{
-					LOG_WARNING(m_log, QString("Signal %1 has wrong byteOrder field").arg(signal.strID()));
-					hasWrongField = true;
+					case E::ByteOrder::LittleEndian:
+					case E::ByteOrder::BigEndian:
+						break;
+					default:
+						LOG_WARNING(m_log, QString("Signal %1 has wrong byteOrder field").arg(signal.strID()));
+						hasWrongField = true;
 				}
+
 
 				if (hasWrongField)
 				{
@@ -780,7 +786,7 @@ namespace Builder
 				applicationSignalsWriter.writeAttribute("signalGroupID", QString::number(signal.signalGroupID()));
 				applicationSignalsWriter.writeAttribute("signalInstanceID", QString::number(signal.signalInstanceID()));
 				applicationSignalsWriter.writeAttribute("channel", QString::number(signal.channel()));
-				applicationSignalsWriter.writeAttribute("type", signal.type() == SignalType::Analog ? "Analog" : "Discrete");
+				applicationSignalsWriter.writeAttribute("type", signal.type() == E::SignalType::Analog ? "Analog" : "Discrete");
 				applicationSignalsWriter.writeAttribute("strID", signal.strID());
 				applicationSignalsWriter.writeAttribute("extStrID", signal.extStrID());
 				applicationSignalsWriter.writeAttribute("name", signal.name());

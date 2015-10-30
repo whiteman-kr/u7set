@@ -200,11 +200,10 @@ namespace ExtWidgets
 	void QtMultiEnumEdit::indexChanged(int index)
 	{
 		int value = m_combo->itemData(index).toInt();
-
         if (m_oldValue != value)
 		{
             m_oldValue = value;
-            emit valueChanged(value);
+			emit valueChanged(m_combo->itemText(index));
         }
 	}
 

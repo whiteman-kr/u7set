@@ -138,7 +138,8 @@ SOURCES +=\
 	../lib/PropertyObject.cpp \
     Builder/FbParamCalculation.cpp \
     ../lib/PropertyEditorOld.cpp \
-    ../lib/PropertyEditor.cpp
+    ../lib/PropertyEditor.cpp \
+    ../lib/Types.cpp
 
 HEADERS  += \
     CentralWidget.h \

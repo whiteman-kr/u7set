@@ -433,7 +433,7 @@ public:
 			return false;
 		}
 
-		Property* property = it->second;
+		std::shared_ptr<Property> property = it->second;
 
 		if (property->isEnum() == true)
 		{
@@ -444,7 +444,7 @@ public:
 		}
 		else
 		{
-			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property);
+			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property.get());
 
 			if (propertyValue == nullptr)
 			{

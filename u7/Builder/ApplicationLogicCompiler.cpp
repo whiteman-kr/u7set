@@ -1141,7 +1141,7 @@ namespace Builder
 
 			Command cmd;
 
-			if (paramValue.type() == SignalType::Discrete)
+			if (paramValue.type() == E::SignalType::Discrete)
 			{
 				// for discrete parameters
 				//
@@ -1743,7 +1743,7 @@ namespace Builder
 
 		switch(appSignal.type())
 		{
-		case SignalType::Discrete:
+		case E::SignalType::Discrete:
 
 			if (!constItem.isIntegral())
 			{
@@ -1760,7 +1760,7 @@ namespace Builder
 			}
 			break;
 
-		case SignalType::Analog:
+		case E::SignalType::Analog:
 			switch(appSignal.dataSize())
 			{
 			case SIZE_16BIT:
@@ -4228,7 +4228,7 @@ namespace Builder
 			{
 				LOG_ERROR(m_log, QString(tr("Required parameter '%1' of FB %2 (%3) is missing")).
 						  arg(opName).arg(caption()).arg(typeCaption()));
-				result = FALSE;
+				result = false;
 			}
 		}
 
@@ -4370,7 +4370,7 @@ namespace Builder
 	}
 
 
-	AppSignal::AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem *appItem, const QString& strID) :
+	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, int dataSize, const AppItem *appItem, const QString& strID) :
 		m_appItem(appItem),
 		m_guid(guid)
 	{
@@ -4475,18 +4475,18 @@ namespace Builder
 
 		const LogicAfbSignal s = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
 
-		SignalType signalType = SignalType::Discrete;
+		E::SignalType signalType = E::SignalType::Discrete;
 
 		Afb::AfbSignalType st = s.type();
 
 		switch(st)
 		{
 		case Afb::AfbSignalType::Analog:
-			signalType = SignalType::Analog;
+			signalType = E::SignalType::Analog;
 			break;
 
 		case Afb::AfbSignalType::Discrete:
-			signalType = SignalType::Discrete;
+			signalType = E::SignalType::Discrete;
 			break;
 
 		default:
@@ -4671,7 +4671,7 @@ namespace Builder
 
 		if (afbParam.isDiscrete())
 		{
-			m_type = SignalType::Discrete;
+			m_type = E::SignalType::Discrete;
 			m_dataFormat = DataFormat::UnsignedInt;
 			m_dataSize = 1;
 
@@ -4679,7 +4679,7 @@ namespace Builder
 		}
 		else
 		{
-			m_type = SignalType::Analog;
+			m_type = E::SignalType::Analog;
 			m_dataSize = afbParam.size();
 
 			switch(afbParam.dataFormat())

@@ -19,8 +19,8 @@ class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(Signal& signal, SignalType signalType, DataFormatList& dataFormatInfo, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
-	explicit SignalPropertiesDialog(QVector<Signal*> signalVector, SignalType signalType, DataFormatList& dataFormatInfo, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(Signal& signal, E::SignalType signalType, DataFormatList& dataFormatInfo, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(QVector<Signal*> signalVector, E::SignalType signalType, DataFormatList& dataFormatInfo, UnitList& unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent = 0);
 
 signals:
 	void onError(QString message);
@@ -37,7 +37,7 @@ private:
 	UnitList& m_unitInfo;
 	SignalsModel* m_signalsModel;
 
-	SignalType m_signalType;
+	E::SignalType m_signalType;
 
 	QtStringPropertyManager* m_stringManager;
 	QtEnumPropertyManager* m_enumManager;

@@ -1,12 +1,82 @@
 #pragma once
+#include <type_traits>
+#include <assert.h>
+#include <QObject>
+#include <QMetaEnum>
+#include <QVariant>
 
-enum class SignalType
+
+class E : public QObject
 {
-	Analog,
-	Discrete,
+	Q_OBJECT
+public:
+	E();
 
-	Count
+	enum SignalType
+	{
+		Analog,
+		Discrete
+	};
+	Q_ENUM(SignalType)
+
+	enum ByteOrder
+	{
+		LittleEndian,
+		BigEndian
+	};
+	Q_ENUM(ByteOrder)
+
+public:
+	template <typename ENUM_TYPE>
+	static QString valueToString(int value)
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return QString();
+		}
+
+		const char* str = me.valueToKey(value);
+		if (str == nullptr)
+		{
+			assert(str);
+			return QString();
+		}
+
+		QString result(str);
+		return result;
+	}
+
+	template <typename ENUM_TYPE>
+	static std::list<std::pair<int, QString>> enumValues()
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		std::list<std::pair<int, QString>> result;
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return result;
+		}
+
+		int keyCount = me.keyCount();
+		for (int i = 0; i < keyCount; i++)
+		{
+			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+		}
+
+		return result;
+	}
+
+
 };
+
+
 
 
 enum class DataFormat
@@ -24,15 +94,6 @@ const char* const DataFormatStr[] =
 	"Unsigned Int",
 	"Signed Int",
 	"Float",
-};
-
-
-enum class ByteOrder
-{
-	LittleEndian,
-	BigEndian,
-
-	Count
 };
 
 

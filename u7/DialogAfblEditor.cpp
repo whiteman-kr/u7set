@@ -93,7 +93,7 @@ void DialogAfblEditor::refreshFiles()
         l.append(fi.lastCheckIn().toString());
 
         QTreeWidgetItem* pItem = new QTreeWidgetItem(ui->m_afbTree, l);
-        pItem->setData(0, Qt::UserRole, i);
+		pItem->setData(0, Qt::UserRole, static_cast<int>(i));
         items.append(pItem);
 
     }

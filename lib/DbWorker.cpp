@@ -3200,7 +3200,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setCheckedOut(q.value(4).toBool());
 	s.setUserID(q.value(5).toInt());
 	s.setChannel(q.value(6).toInt());
-	s.setType(static_cast<SignalType>(q.value(7).toInt()));
+	s.setType(static_cast<E::SignalType>(q.value(7).toInt()));
 	s.setCreated(q.value(8).toString());
 	s.setDeleted(q.value(9).toBool());
 	s.setInstanceCreated(q.value(10).toString());
@@ -3237,7 +3237,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value(41).toInt()));		// since version 35 of database
 	s.setFilteringTime(q.value(42).toDouble());										//
 	s.setMaxDifference(q.value(43).toDouble());										//
-	s.setByteOrder(static_cast<ByteOrder>(q.value(44).toInt()));					//
+	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//
 
 /*	s.setID(q.value("signalid").toInt());
 	s.setSignalGroupID(q.value("signalgroupid").toInt());
@@ -3358,7 +3358,7 @@ void DbWorker::getObjectState(QSqlQuery& q, ObjectState &os)
 }
 
 
-void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
+void DbWorker::slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
 	AUTO_COMPLETE
 
@@ -3366,7 +3366,7 @@ void DbWorker::slot_addSignal(SignalType signalType, QVector<Signal>* newSignal)
 }
 
 
-void DbWorker::addSignal(SignalType signalType, QVector<Signal>* newSignal)
+void DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
 	if (newSignal == nullptr)
 	{

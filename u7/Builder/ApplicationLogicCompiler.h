@@ -240,7 +240,7 @@ namespace Builder
 	class AppFbParamValue
 	{
 	private:
-		SignalType m_type = SignalType::Discrete;
+		E::SignalType m_type = E::SignalType::Discrete;
 		DataFormat m_dataFormat = DataFormat::UnsignedInt;
 		bool m_instantiator = false;
 		int m_dataSize = 1;
@@ -263,7 +263,7 @@ namespace Builder
 
 		bool instantiator() const { return m_instantiator; }
 
-		SignalType type() const { return m_type; }
+		E::SignalType type() const { return m_type; }
 		DataFormat dataFormat() const { return m_dataFormat; }
 		int dataSize() const { return m_dataSize; }
 
@@ -376,7 +376,7 @@ namespace Builder
 
 	public:
 		AppSignal(const Signal* signal, const AppItem* appItem);
-		AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem* appItem, const QString& strID);
+		AppSignal(const QUuid& guid, E::SignalType signalType, int dataSize, const AppItem* appItem, const QString& strID);
 
 		const AppItem &appItem() const;
 

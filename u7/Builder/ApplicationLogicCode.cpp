@@ -519,7 +519,7 @@ namespace Builder
 	}
 
 
-	void Command::generateBinCode(ByteOrder byteOrder)
+	void Command::generateBinCode(E::ByteOrder byteOrder)
 	{
 		m_binCode.clear();
 
@@ -531,7 +531,7 @@ namespace Builder
 		{
 			quint16 cmdWord = m_code.getWord(i);
 
-			if (byteOrder == ByteOrder::LittleEndian)
+			if (byteOrder == E::ByteOrder::LittleEndian)
 			{
 				// Little Endian byte order
 				//

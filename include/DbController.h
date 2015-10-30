@@ -94,7 +94,7 @@ public:
 	bool getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
 	bool getSignals(SignalSet* signalSet, QWidget* parentWidget);
 	bool getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget);
-	bool addSignal(SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
+	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 
 	bool getUnits(UnitList* units, QWidget* parentWidget);
 
@@ -162,7 +162,7 @@ signals:
 	void signal_getSignalsIDs(QVector<int>* signalIDs);
 	void signal_getSignals(SignalSet* signalSet);
 	void signal_getLatestSignal(int signalID, Signal* signal);
-	void signal_addSignal(SignalType signalType, QVector<Signal>* newSignal);
+	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
 	void signal_getUnits(UnitList* units);
 	void signal_getDataFormats(DataFormatList* dataFormats);
