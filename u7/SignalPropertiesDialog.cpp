@@ -74,13 +74,13 @@ bool isSameFieldValue(QVector<Signal*>& signalVector, std::function<bool (Signal
 #define SAVE_PROPERTY_VALUE2(type, propertyName, localPropertyName) settings.setValue("LastEditedSignal: "#propertyName, m_##type##Manager->value(m_##localPropertyName##Property))
 
 
-SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, SignalType signalType, DataFormatList &dataFormatInfo, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, E::SignalType signalType, DataFormatList &dataFormatInfo, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
 	SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*>() << &signal, signalType, dataFormatInfo, unitInfo, readOnly, signalsModel, parent)
 {
 
 }
 
-SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, SignalType signalType, DataFormatList &dataFormatInfo, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, E::SignalType signalType, DataFormatList &dataFormatInfo, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :
 	QDialog(parent),
 	m_signalVector(signalVector),
 	m_dataFormatInfo(dataFormatInfo),
@@ -128,14 +128,14 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	signalProperty->addSubProperty(m_nameProperty);
 
 	m_dataFormatProperty = m_enumManager->addProperty(tr("Data format"));
-	if (signalType == SignalType::Analog)
+	if (signalType == E::SignalType::Analog)
 	{
-		m_dataFormatInfo.remove(TO_INT(DataFormat::UnsignedInt));
+		m_dataFormatInfo.remove(TO_INT(E::DataFormat::UnsignedInt));
 	}
 	m_enumManager->setEnumNames(m_dataFormatProperty, m_dataFormatInfo.toList());
-	if (signalType == SignalType::Analog && signalVector[0]->dataFormat() == DataFormat::UnsignedInt)
+	if (signalType == E::SignalType::Analog && signalVector[0]->dataFormat() == E::DataFormat::UnsignedInt)
 	{
-		m_enumManager->setValue(m_dataFormatProperty, m_dataFormatInfo.keyIndex(TO_INT(DataFormat::SignedInt)));
+		m_enumManager->setValue(m_dataFormatProperty, m_dataFormatInfo.keyIndex(TO_INT(E::DataFormat::SignedInt)));
 	}
 	else
 	{
@@ -145,7 +145,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 
 	m_dataSizeProperty = m_intManager->addProperty(tr("Data size"));
 	m_intManager->setRange(m_dataSizeProperty, 1, 100);
-	if (signalType == SignalType::Analog)
+	if (signalType == E::SignalType::Analog)
 	{
 		SET_PROPERTY_VALUE(m_intManager, m_dataSizeProperty, dataSize);
 		m_intManager->setReadOnly(m_dataSizeProperty, readOnly);
@@ -157,7 +157,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	}
 	signalProperty->addSubProperty(m_dataSizeProperty);
 
-	if (signalType == SignalType::Analog)
+	if (signalType == E::SignalType::Analog)
 	{
 		m_lowAdcProperty = m_intManager->addProperty(tr("Low ADC"));
 		m_intManager->setRange(m_lowAdcProperty, 0, 65535);
@@ -279,7 +279,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	SET_PROPERTY_VALUE(m_boolManager, m_acquireProperty, acquire);
 	signalProperty->addSubProperty(m_acquireProperty);
 
-	if (signalType == SignalType::Analog)
+	if (signalType == E::SignalType::Analog)
 	{
 		m_calculatedProperty = m_boolManager->addProperty(tr("Calculated"));
 		SET_PROPERTY_VALUE(m_boolManager, m_calculatedProperty, calculated);
@@ -321,11 +321,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	SET_PROPERTY_VALUE(m_enumManager, m_inOutTypeProperty, inOutType);
 	signalProperty->addSubProperty(m_inOutTypeProperty);
 
-	QStringList byteOrderStringList;
 
-	for (int i = 0; i < TO_INT(ByteOrder::Count); i++)
+	auto byteOrderValues = E::enumValues<E::ByteOrder>();
+
+	QStringList byteOrderStringList;
+	for (auto bo : byteOrderValues)
 	{
-		byteOrderStringList << ByteOrderStr[i];
+		byteOrderStringList << QString(bo.second);
 	}
 
 	m_byteOrderProperty = m_enumManager->addProperty(tr("Byte order"));
@@ -386,7 +388,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, Si
 	setLayout(vl);
 
 	resize(settings.value("Signal properties dialog: size", QSize(320, 640)).toSize());
-	if (signalType == SignalType::Analog)
+	if (signalType == E::SignalType::Analog)
 	{
 		m_browser->setExpanded(m_browser->items(m_inputTreeProperty)[0], settings.value("Signal properties dialog: input property: expanded", false).toBool());
 		m_browser->setExpanded(m_browser->items(m_outputTreeProperty)[0], settings.value("Signal properties dialog: output property: expanded", false).toBool());
@@ -440,7 +442,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
 		if (dataFormatIndex >= 0 && dataFormatIndex < m_dataFormatInfo.count())
 		{
-			DataFormat dataFormat = static_cast<DataFormat>(m_dataFormatInfo.key(dataFormatIndex));
+			E::DataFormat dataFormat = static_cast<E::DataFormat>(m_dataFormatInfo.key(dataFormatIndex));
 			if (dataFormat != m_signalVector[0]->dataFormat())
 			{
 				signal.setDataFormat(dataFormat);
@@ -491,9 +493,10 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		}
 
 		int byteOrderIndex = m_enumManager->value(m_byteOrderProperty);
-		if (byteOrderIndex >= 0 && byteOrderIndex < TO_INT(ByteOrder::Count) && m_signalVector[0]->byteOrder() != ByteOrder(byteOrderIndex))
+
+		if (m_signalVector[0]->byteOrder() != static_cast<E::ByteOrder>(byteOrderIndex))
 		{
-			signal.setByteOrder(ByteOrder(byteOrderIndex));
+			signal.setByteOrder(static_cast<E::ByteOrder>(byteOrderIndex));
 		}
 
 		QString deviceStrID = m_stringManager->value(m_deviceIDProperty);
@@ -510,7 +513,7 @@ void SignalPropertiesDialog::saveDialogSettings()
 {
 	QSettings settings;
 	settings.setValue("Signal properties dialog: size", size());
-	if (m_signalType == SignalType::Analog)
+	if (m_signalType == E::SignalType::Analog)
 	{
 		settings.setValue("Signal properties dialog: input property: expanded", m_browser->isExpanded(m_browser->items(m_inputTreeProperty)[0]));
 		settings.setValue("Signal properties dialog: output property: expanded", m_browser->isExpanded(m_browser->items(m_outputTreeProperty)[0]));

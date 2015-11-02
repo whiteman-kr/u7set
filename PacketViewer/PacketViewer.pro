@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     ../lib/ProtoSerialization.cpp \
     PacketBufferTableModel.cpp \
     ../lib/PropertyObject.cpp \
-    SignalTableModel.cpp
+    SignalTableModel.cpp \
+    ../lib/Types.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -49,7 +50,8 @@ HEADERS  += SourceListWidget.h \
     ../include/ProtoSerialization.h \
     PacketBufferTableModel.h \
     ../include/PropertyObject.h \
-    SignalTableModel.h
+    SignalTableModel.h \
+    ../include/Types.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

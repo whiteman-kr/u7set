@@ -46,12 +46,12 @@ namespace Builder
 			result = calculate_TCT_paramValues();
 			break;
 
-		case Afb::AfbType::BCOMP:
+		case Afb::AfbType::COMP:
 			result = calculate_BCOMP_paramValues();
 			break;
 
 
-		case Afb::AfbType::SCAL:
+		case Afb::AfbType::SCALE:
 			result = calculate_SCAL_paramValues();
 			break;
 
@@ -205,37 +205,37 @@ namespace Builder
 		requiredParams.append("i_conf");
 		requiredParams.append("i_scal_k1_coef");
 		requiredParams.append("i_scal_k2_coef");
-		requiredParams.append("InputLow");
-		requiredParams.append("InputHigh");
-		requiredParams.append("OutputLow");
-		requiredParams.append("OutputHigh");
+		requiredParams.append("input_low");
+		requiredParams.append("input_high");
+		requiredParams.append("output_low");
+		requiredParams.append("output_high");
 
 		CHECK_REQUIRED_PARAMTERES(requiredParams)
 
 		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
 		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
 		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
-		AppFbParamValue& x1Param = m_paramValuesArray["InputLow"];
-		AppFbParamValue& x2Param = m_paramValuesArray["InputHigh"];
-		AppFbParamValue& y1Param = m_paramValuesArray["OutputLow"];
-		AppFbParamValue& y2Param = m_paramValuesArray["OutputHigh"];
+		AppFbParamValue& x1Param = m_paramValuesArray["input_low"];
+		AppFbParamValue& x2Param = m_paramValuesArray["input_high"];
+		AppFbParamValue& y1Param = m_paramValuesArray["output_low"];
+		AppFbParamValue& y2Param = m_paramValuesArray["output_high"];
 
 		CHECK_UNSIGNED_INT(iConfParam)
 
 		int iConf = iConfParam.unsignedIntValue();
 
-		const int	SCAL_16UI_16UI = 1,
-					SCAL_16UI_32SI = 2,
-					SCAL_32SI_16UI = 3,
-					SCAL_32SI_32SI = 4,
-					SCAL_32SI_32FP = 5,
-					SCAL_32FP_32FP = 6,
-					SCAL_32FP_16UI = 7,
-					SCAL_32FP_32SI = 8,
-					SCAL_16UI_32FP = 9;
+		const int	SCALE_16UI_16UI = 1,
+					SCALE_16UI_SI = 2,
+					SCALE_SI_16UI = 3,
+					SCALE_SI_SI = 4,
+					SCALE_SI_FP = 5,
+					SCALE_FP_FP = 6,
+					SCALE_FP_16UI = 7,
+					SCALE_FP_SI = 8,
+					SCALE_16UI_FP = 9;
 
-		if (iConf == SCAL_16UI_16UI || iConf == SCAL_16UI_32SI ||
-			iConf == SCAL_32SI_16UI || iConf == SCAL_32SI_32SI)
+		if (iConf == SCALE_16UI_16UI || iConf == SCALE_16UI_SI ||
+			iConf == SCALE_SI_16UI || iConf == SCALE_SI_SI)
 		{
 			// k1 & k2 are Signed Integer
 			//
@@ -250,7 +250,7 @@ namespace Builder
 
 			switch(iConf)
 			{
-			case SCAL_16UI_16UI:
+			case SCALE_16UI_16UI:
 				CHECK_UNSIGNED_INT16(x1Param)
 				CHECK_UNSIGNED_INT16(x2Param)
 				CHECK_UNSIGNED_INT16(y1Param)
@@ -262,7 +262,7 @@ namespace Builder
 				y2 = y2Param.unsignedIntValue();
 				break;
 
-			case SCAL_16UI_32SI:
+			case SCALE_16UI_SI:
 				CHECK_UNSIGNED_INT16(x1Param)
 				CHECK_UNSIGNED_INT16(x2Param)
 				CHECK_SIGNED_INT32(y1Param);
@@ -274,7 +274,7 @@ namespace Builder
 				y2 = y2Param.signedIntValue();
 				break;
 
-			case SCAL_32SI_16UI:
+			case SCALE_SI_16UI:
 				CHECK_SIGNED_INT32(x1Param)
 				CHECK_SIGNED_INT32(x2Param)
 				CHECK_UNSIGNED_INT16(y1Param)
@@ -286,7 +286,7 @@ namespace Builder
 				y2 = y2Param.unsignedIntValue();
 				break;
 
-			case SCAL_32SI_32SI:
+			case SCALE_SI_SI:
 				CHECK_SIGNED_INT32(x1Param)
 				CHECK_SIGNED_INT32(x2Param)
 				CHECK_SIGNED_INT32(y1Param)
@@ -312,8 +312,8 @@ namespace Builder
 			return true;
 		}
 
-		if (iConf == SCAL_32SI_32FP || iConf == SCAL_32FP_32FP || iConf == SCAL_32FP_16UI ||
-			iConf == SCAL_32FP_32SI || iConf == SCAL_16UI_32FP)
+		if (iConf == SCALE_SI_FP || iConf == SCALE_FP_FP || iConf == SCALE_FP_16UI ||
+			iConf == SCALE_FP_SI || iConf == SCALE_16UI_FP)
 		{
 			// k1 & k2 are Floating Point
 			//
@@ -328,7 +328,7 @@ namespace Builder
 
 			switch(iConf)
 			{
-			case SCAL_32SI_32FP:
+			case SCALE_SI_FP:
 				CHECK_SIGNED_INT32(x1Param)
 				CHECK_SIGNED_INT32(x2Param)
 				CHECK_FLOAT32(y1Param)
@@ -340,7 +340,7 @@ namespace Builder
 				y2 = y2Param.floatValue();
 				break;
 
-			case SCAL_32FP_32FP:
+			case SCALE_FP_FP:
 				CHECK_FLOAT32(x1Param)
 				CHECK_FLOAT32(x2Param)
 				CHECK_FLOAT32(y1Param)
@@ -352,7 +352,7 @@ namespace Builder
 				y2 = y2Param.floatValue();
 				break;
 
-			case SCAL_32FP_16UI:
+			case SCALE_FP_16UI:
 				CHECK_FLOAT32(x1Param);
 				CHECK_FLOAT32(x2Param);
 				CHECK_UNSIGNED_INT16(y1Param);
@@ -364,7 +364,7 @@ namespace Builder
 				y2 = y2Param.unsignedIntValue();
 				break;
 
-			case SCAL_32FP_32SI:
+			case SCALE_FP_SI:
 				CHECK_FLOAT32(x1Param)
 				CHECK_FLOAT32(x2Param)
 				CHECK_SIGNED_INT32(y1Param)
@@ -376,7 +376,7 @@ namespace Builder
 				y2 = y2Param.signedIntValue();
 				break;
 
-			case SCAL_16UI_32FP:
+			case SCALE_16UI_FP:
 				CHECK_UNSIGNED_INT16(x1Param)
 				CHECK_UNSIGNED_INT16(x2Param)
 				CHECK_FLOAT32(y1Param)

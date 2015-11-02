@@ -1141,7 +1141,7 @@ namespace Builder
 
 			Command cmd;
 
-			if (paramValue.type() == SignalType::Discrete)
+			if (paramValue.type() == E::SignalType::Discrete)
 			{
 				// for discrete parameters
 				//
@@ -1162,17 +1162,17 @@ namespace Builder
 			{
 				switch (paramValue.dataFormat())
 				{
-				case DataFormat::UnsignedInt:
+				case E::DataFormat::UnsignedInt:
 					cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, paramValue.unsignedIntValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.unsignedIntValue()));
 					break;
 
-				case DataFormat::SignedInt:
+				case E::DataFormat::SignedInt:
 					cmd.writeFuncBlockConstInt32(fbOpcode, fbInstance, operandIndex, paramValue.signedIntValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.signedIntValue()));
 					break;
 
-				case DataFormat::Float:
+				case E::DataFormat::Float:
 					cmd.writeFuncBlockConstFloat(fbOpcode, fbInstance, operandIndex, paramValue.floatValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.floatValue()));
 					break;
@@ -1187,17 +1187,17 @@ namespace Builder
 				//
 				switch (paramValue.dataFormat())
 				{
-				case DataFormat::UnsignedInt:
+				case E::DataFormat::UnsignedInt:
 					cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, paramValue.unsignedIntValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.unsignedIntValue()));
 					break;
 
-				case DataFormat::SignedInt:
+				case E::DataFormat::SignedInt:
 					cmd.writeFuncBlockConst(fbOpcode, fbInstance, operandIndex, paramValue.signedIntValue(), fbCaption);
 					cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.signedIntValue()));
 					break;
 
-				case DataFormat::Float:
+				case E::DataFormat::Float:
 					LOG_ERROR(m_log, QString(tr("Afb parameter '%1' with Float data format must have dataSize == 32")).arg(opName));
 					result = false;
 					break;
@@ -1488,17 +1488,17 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				FbScal& fbScal = m_fbScal[FB_SCAL_16UI_32FP_INDEX];
+				FbScal& fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
-				if (signal->dataFormat() == DataFormat::Float)
+				if (signal->dataFormat() == E::DataFormat::Float)
 				{
 					;	// already assigned
 				}
 				else
 				{
-					if (signal->dataFormat() == DataFormat::SignedInt)
+					if (signal->dataFormat() == E::DataFormat::SignedInt)
 					{
-						fbScal = m_fbScal[FB_SCAL_16UI_32SI_INDEX];
+						fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 					}
 					else
 					{
@@ -1743,7 +1743,7 @@ namespace Builder
 
 		switch(appSignal.type())
 		{
-		case SignalType::Discrete:
+		case E::SignalType::Discrete:
 
 			if (!constItem.isIntegral())
 			{
@@ -1760,7 +1760,7 @@ namespace Builder
 			}
 			break;
 
-		case SignalType::Analog:
+		case E::SignalType::Analog:
 			switch(appSignal.dataSize())
 			{
 			case SIZE_16BIT:
@@ -1771,12 +1771,12 @@ namespace Builder
 			case SIZE_32BIT:
 				switch(appSignal.dataFormat())
 				{
-				case DataFormat::SignedInt:
+				case E::DataFormat::SignedInt:
 					cmd.movConstInt32(ramAddrOffset, constItem.intValue());
 					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.intValue()));
 					break;
 
-				case DataFormat::Float:
+				case E::DataFormat::Float:
 					cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
 					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.floatValue()));
 					break;
@@ -2705,17 +2705,17 @@ namespace Builder
 				{
 					ASSERT_RESULT_FALSE_BREAK
 				}
-				FbScal& fbScal = m_fbScal[FB_SCAL_32FP_16UI_INDEX];
+				FbScal& fbScal = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
-				if (signal->dataFormat() == DataFormat::Float)
+				if (signal->dataFormat() == E::DataFormat::Float)
 				{
 					;	// already assigned
 				}
 				else
 				{
-					if (signal->dataFormat() == DataFormat::SignedInt)
+					if (signal->dataFormat() == E::DataFormat::SignedInt)
 					{
-						fbScal = m_fbScal[FB_SCAL_32SI_16UI_INDEX];
+						fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 					}
 					else
 					{
@@ -2844,26 +2844,26 @@ namespace Builder
 			// for input signals conversion
 			//
 
-			"scal_16ui_32fp",				// FB_SCAL_16UI_32FP_INDEX
-			"scal_16ui_32si",				// FB_SCAL_16UI_32SI_INDEX
+			"scale_16ui_fp",				// FB_SCALE_16UI_FP_INDEX
+			"scale_16ui_si",				// FB_SCALE_16UI_SI_INDEX
 
 			// for output signals conversion
 			//
 
-			"scal_32fp_16ui",				// FB_SCAL_32FP_16UI_INDEX
-			"scal_32si_16ui",				// FB_SCAL_32SI_16UI_INDEX
+			"scale_fp_16ui",				// FB_SCALE_FP_16UI_INDEX
+			"scale_si_16ui",				// FB_SCALE_SI_16UI_INDEX
 		};
 
 		/*const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
 		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";*/
 
-		const char* const FB_SCAL_X1_OPNAME = "InputLow";
-		const char* const FB_SCAL_X2_OPNAME = "InputHigh";
-		const char* const FB_SCAL_Y1_OPNAME = "OutputLow";
-		const char* const FB_SCAL_Y2_OPNAME = "OutputHigh";
+		const char* const FB_SCALE_X1_OPNAME = "input_low";
+		const char* const FB_SCALE_X2_OPNAME = "input_high";
+		const char* const FB_SCALE_Y1_OPNAME = "output_low";
+		const char* const FB_SCALE_Y2_OPNAME = "output_high";
 
-		const char* const FB_SCAL_INPUT_SIGNAL_CAPTION = "i_data";
-		const char* const FB_SCAL_OUTPUT_SIGNAL_CAPTION = "o_result";
+		const char* const FB_SCALE_INPUT_SIGNAL_CAPTION = "i_data";
+		const char* const FB_SCALE_OUTPUT_SIGNAL_CAPTION = "o_result";
 
 		for(const char* const fbCaption : fbScalCaption)
 		{
@@ -2887,22 +2887,22 @@ namespace Builder
 
 				for(const Afb::AfbParam& afbParam : afbElement->params())
 				{
-					if (afbParam.opName() == FB_SCAL_X1_OPNAME)
+					if (afbParam.opName() == FB_SCALE_X1_OPNAME)
 					{
 						fb.x1ParamIndex = index;
 					}
 
-					if (afbParam.opName() == FB_SCAL_X2_OPNAME)
+					if (afbParam.opName() == FB_SCALE_X2_OPNAME)
 					{
 						fb.x2ParamIndex = index;
 					}
 
-					if (afbParam.opName() == FB_SCAL_Y1_OPNAME)
+					if (afbParam.opName() == FB_SCALE_Y1_OPNAME)
 					{
 						fb.y1ParamIndex = index;
 					}
 
-					if (afbParam.opName() == FB_SCAL_Y2_OPNAME)
+					if (afbParam.opName() == FB_SCALE_Y2_OPNAME)
 					{
 						fb.y2ParamIndex = index;
 					}
@@ -2941,7 +2941,7 @@ namespace Builder
 
 				for(Afb::AfbSignal afbSignal : afbElement->inputSignals())
 				{
-					if (afbSignal.opName() == FB_SCAL_INPUT_SIGNAL_CAPTION)
+					if (afbSignal.opName() == FB_SCALE_INPUT_SIGNAL_CAPTION)
 					{
 						fb.inputSignalIndex = afbSignal.operandIndex();
 						break;
@@ -2951,14 +2951,14 @@ namespace Builder
 				if (fb.inputSignalIndex == -1)
 				{
 					LOG_ERROR(m_log, QString(tr("Required input signal %1 of AFB %2 is not found")).
-							  arg(FB_SCAL_INPUT_SIGNAL_CAPTION).arg(fb.caption))
+							  arg(FB_SCALE_INPUT_SIGNAL_CAPTION).arg(fb.caption))
 					result = false;
 					break;
 				}
 
 				for(Afb::AfbSignal afbSignal : afbElement->outputSignals())
 				{
-					if (afbSignal.opName() == FB_SCAL_OUTPUT_SIGNAL_CAPTION)
+					if (afbSignal.opName() == FB_SCALE_OUTPUT_SIGNAL_CAPTION)
 					{
 						fb.outputSignalIndex = afbSignal.operandIndex();
 						break;
@@ -2968,7 +2968,7 @@ namespace Builder
 				if (fb.outputSignalIndex == -1)
 				{
 					LOG_ERROR(m_log, QString(tr("Required output signal %1 of AFB %2 is not found")).
-							  arg(FB_SCAL_OUTPUT_SIGNAL_CAPTION).arg(fb.caption))
+							  arg(FB_SCALE_OUTPUT_SIGNAL_CAPTION).arg(fb.caption))
 					result = false;
 					break;
 				}
@@ -3098,9 +3098,9 @@ namespace Builder
 
 		switch(signal.dataFormat())
 		{
-		case DataFormat::Float:
+		case E::DataFormat::Float:
 			{
-				FbScal fb = m_fbScal[FB_SCAL_16UI_32FP_INDEX];
+				FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
 
 				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
 				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
@@ -3113,9 +3113,9 @@ namespace Builder
 
 			break;
 
-		case DataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			{
-				FbScal& fb = m_fbScal[FB_SCAL_16UI_32SI_INDEX];
+				FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
 
 				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
 				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
@@ -3159,9 +3159,9 @@ namespace Builder
 
 		switch(signal.dataFormat())
 		{
-		case DataFormat::Float:
+		case E::DataFormat::Float:
 			{
-				FbScal& fb = m_fbScal[FB_SCAL_32FP_16UI_INDEX];
+				FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
 
 				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
 				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
@@ -3174,9 +3174,9 @@ namespace Builder
 
 			break;
 
-		case DataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			{
-				FbScal& fb = m_fbScal[FB_SCAL_32SI_16UI_INDEX];
+				FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
 
 				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1).toInt());
 				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2).toInt());
@@ -4046,7 +4046,8 @@ namespace Builder
 	}
 
 
-	AppItem::AppItem(const AppItem& appItem)
+	AppItem::AppItem(const AppItem& appItem) :
+		QObject()
 	{
 		m_appLogicItem = appItem.m_appLogicItem;
 	}
@@ -4197,15 +4198,15 @@ namespace Builder
 
 			switch(paramValue.dataFormat())
 			{
-			case DataFormat::Float:
+			case E::DataFormat::Float:
 				m_instantiatorID += QString(":%1").arg(paramValue.floatValue());
 				break;
 
-			case DataFormat::SignedInt:
+			case E::DataFormat::SignedInt:
 				m_instantiatorID += QString(":%1").arg(paramValue.signedIntValue());
 				break;
 
-			case DataFormat::UnsignedInt:
+			case E::DataFormat::UnsignedInt:
 				m_instantiatorID += QString(":%1").arg(paramValue.unsignedIntValue());
 				break;
 
@@ -4370,7 +4371,7 @@ namespace Builder
 	}
 
 
-	AppSignal::AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem *appItem, const QString& strID) :
+	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, int dataSize, const AppItem *appItem, const QString& strID) :
 		m_appItem(appItem),
 		m_guid(guid)
 	{
@@ -4475,18 +4476,18 @@ namespace Builder
 
 		const LogicAfbSignal s = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
 
-		SignalType signalType = SignalType::Discrete;
+		E::SignalType signalType = E::SignalType::Discrete;
 
 		Afb::AfbSignalType st = s.type();
 
 		switch(st)
 		{
 		case Afb::AfbSignalType::Analog:
-			signalType = SignalType::Analog;
+			signalType = E::SignalType::Analog;
 			break;
 
 		case Afb::AfbSignalType::Discrete:
-			signalType = SignalType::Discrete;
+			signalType = E::SignalType::Discrete;
 			break;
 
 		default:
@@ -4671,32 +4672,32 @@ namespace Builder
 
 		if (afbParam.isDiscrete())
 		{
-			m_type = SignalType::Discrete;
-			m_dataFormat = DataFormat::UnsignedInt;
+			m_type = E::SignalType::Discrete;
+			m_dataFormat = E::DataFormat::UnsignedInt;
 			m_dataSize = 1;
 
 			m_unsignedIntValue = qv.toUInt();
 		}
 		else
 		{
-			m_type = SignalType::Analog;
+			m_type = E::SignalType::Analog;
 			m_dataSize = afbParam.size();
 
 			switch(afbParam.dataFormat())
 			{
 			case Afb::SignedInt:
-				m_dataFormat = DataFormat::SignedInt;
+				m_dataFormat = E::DataFormat::SignedInt;
 				m_signedIntValue = qv.toInt();
 				break;
 
 			case Afb::UnsignedInt:
-				m_dataFormat = DataFormat::UnsignedInt;
+				m_dataFormat = E::DataFormat::UnsignedInt;
 				m_unsignedIntValue = qv.toUInt();
 				break;
 
 			case Afb::Float:
 				assert(m_dataSize == SIZE_32BIT);
-				m_dataFormat = DataFormat::Float;
+				m_dataFormat = E::DataFormat::Float;
 				m_floatValue = qv.toFloat();
 				break;
 
@@ -4713,15 +4714,15 @@ namespace Builder
 
 		switch(m_dataFormat)
 		{
-		case DataFormat::UnsignedInt:
+		case E::DataFormat::UnsignedInt:
 			str = QString("%1").arg(m_unsignedIntValue);
 			break;
 
-		case DataFormat::SignedInt:
+		case E::DataFormat::SignedInt:
 			str = QString("%1").arg(m_signedIntValue);
 			break;
 
-		case DataFormat::Float:
+		case E::DataFormat::Float:
 			str = QString("%1").arg(m_floatValue);
 			break;
 

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#scal_32fp_32fp_v1">
+    <AfbElement StrId="#scale_fp_fp_v1">
         <Properties>
-            <Caption>scal_32fp_32fp</Caption>
+            <Caption>scale_fp_fp</Caption>
             <Version>1.0</Version>
-            <Description>Scaling Block</Description>
+            <Description>Scaling Block, single-precision floating-point to single-precision floating-point</Description>
             <Category>Scaling</Category>
             <OpCode>14</OpCode>
             <HasRam>false</HasRam>
@@ -36,7 +36,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="InputLow" Caption = "InputLow" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="input_low" Caption = "InputLow" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -45,7 +45,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="InputHigh" Caption = "InputHigh" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="input_high" Caption = "InputHigh" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>100</Value>
                 <Default>100</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -54,7 +54,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutputLow" Caption = "OutputLow" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
+            <AfbElementParam OpName="output_low" Caption = "OutputLow" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
                 <Value>0</Value>
                 <Default>0</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -63,7 +63,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="OutputHigh" Caption = "OutputHigh" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">Float
+            <AfbElementParam OpName="output_high" Caption = "OutputHigh" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">Float
                 <Value>100</Value>
                 <Default>100</Default>
                 <LowLimit>-3.40282e+38</LowLimit>
@@ -72,7 +72,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="i_conf" Caption = "config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>6</Value>
                 <Default>1</Default>
                 <LowLimit>1</LowLimit>
@@ -81,7 +81,7 @@
                     <Changed></Changed>
                 </Script>
             </AfbElementParam>
-            <AfbElementParam OpName="test_start_count" Caption="test_start_count" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+            <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
                 <Value>1</Value>
                 <Default>1</Default>
                 <LowLimit>0</LowLimit>

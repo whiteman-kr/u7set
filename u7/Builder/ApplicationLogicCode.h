@@ -216,7 +216,7 @@ namespace Builder
 		virtual bool isCommand() = 0;
 		virtual bool isComment() = 0;
 
-		virtual void generateBinCode(ByteOrder byteOrder) = 0;
+		virtual void generateBinCode(E::ByteOrder byteOrder) = 0;
 		virtual const QByteArray& getBinCode() { return m_binCode; }
 
 		void setComment(const QString& comment) { m_comment = comment; }
@@ -235,7 +235,7 @@ namespace Builder
 		QString toString() override;
 		int sizeW() override { return 0; }
 
-		void generateBinCode(ByteOrder) override {}
+		void generateBinCode(E::ByteOrder) override {}
 
 		bool isCommand() override { return false; }
 		bool isComment() override { return true; }
@@ -292,7 +292,7 @@ namespace Builder
 
 		bool isValidCommand() { return m_code.getOpCode() != LmCommandCode::NoCommand; }
 
-		void generateBinCode(ByteOrder byteOrder) override;
+		void generateBinCode(E::ByteOrder byteOrder) override;
 
 		QString getMnemoCode();
 
@@ -308,7 +308,7 @@ namespace Builder
 
 		int m_commandAddress = 0;
 
-		ByteOrder m_byteOrder = ByteOrder::BigEndian;
+		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
 	public:
 		ApplicationLogicCode();
@@ -329,7 +329,7 @@ namespace Builder
 		void getBinCode(QByteArray& byteArray);
 		void getMifCode(QStringList& mifCode);
 
-		void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
+		void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 		int commandAddress() const { return m_commandAddress; }
 	};

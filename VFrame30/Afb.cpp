@@ -89,16 +89,16 @@ namespace Afb
 				return "BCOD";
 			case Type::BDEC:
 				return "BDEC";
-			case Type::BCOMP:
-				return "BCOMP";
+			case Type::COMP:
+				return "COMP";
 			case Type::LAG:
 				return "LAG";
             case Type::MID:
                 return "MID";
             case Type::MATH:
                 return "MATH";
-			case Type::SCAL:
-				return "SCAL";
+			case Type::SCALE:
+				return "SCALE";
 			case Type::LINFUN:
 				return "LINFUN";
 			case Type::SQRT:

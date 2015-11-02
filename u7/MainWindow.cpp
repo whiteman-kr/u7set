@@ -19,15 +19,6 @@
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	QMainWindow(parent),
-	m_pExitAction(nullptr),
-	m_pUsersAction(nullptr),
-	m_pLogAction(nullptr),
-	m_pSettingsAction(nullptr),
-	m_pConfiguratorAction(nullptr),
-	m_pAboutAction(nullptr),
-	m_pStatusBarInfo(nullptr),
-	m_pStatusBarConnectionStatistics(nullptr),
-	m_pStatusBarConnectionState(nullptr),
 	m_dbController(dbcontroller)
 {
 	assert(m_dbController);
@@ -164,52 +155,52 @@ void MainWindow::restoreWindowState()
 
 void MainWindow::createActions()
 {
-	m_pExitAction = new QAction(tr("Exit"), this);
-	m_pExitAction->setStatusTip(tr("Quit the application"));
-	m_pExitAction->setShortcut(QKeySequence::Quit);
-	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
-	m_pExitAction->setEnabled(true);
-	connect(m_pExitAction, &QAction::triggered, this, &MainWindow::exit);
+	m_exitAction = new QAction(tr("Exit"), this);
+	m_exitAction->setStatusTip(tr("Quit the application"));
+	m_exitAction->setShortcut(QKeySequence::Quit);
+	m_exitAction->setShortcutContext(Qt::ApplicationShortcut);
+	m_exitAction->setEnabled(true);
+	connect(m_exitAction, &QAction::triggered, this, &MainWindow::exit);
 
-	m_pUsersAction = new QAction(tr("Users..."), this);
-	m_pUsersAction->setStatusTip(tr("User management"));
-	m_pUsersAction->setEnabled(false);
-	connect(m_pUsersAction, &QAction::triggered, this, &MainWindow::userManagement);
+	m_usersAction = new QAction(tr("Users..."), this);
+	m_usersAction->setStatusTip(tr("User management"));
+	m_usersAction->setEnabled(false);
+	connect(m_usersAction, &QAction::triggered, this, &MainWindow::userManagement);
 
-	m_pLogAction = new QAction(tr("Log..."), this);
-	m_pLogAction->setStatusTip(tr("Show application log"));
+	m_logAction = new QAction(tr("Log..."), this);
+	m_logAction->setStatusTip(tr("Show application log"));
 	//m_pLogAction->setEnabled(false);
-	connect(m_pLogAction, &QAction::triggered, this, &MainWindow::showLog);
+	connect(m_logAction, &QAction::triggered, this, &MainWindow::showLog);
 
-	m_pSettingsAction = new QAction(tr("Settings..."), this);
-	m_pSettingsAction->setStatusTip(tr("Change application settings"));
-	m_pSettingsAction->setEnabled(true);
-	connect(m_pSettingsAction, &QAction::triggered, this, &MainWindow::showSettings);
+	m_settingsAction = new QAction(tr("Settings..."), this);
+	m_settingsAction->setStatusTip(tr("Change application settings"));
+	m_settingsAction->setEnabled(true);
+	connect(m_settingsAction, &QAction::triggered, this, &MainWindow::showSettings);
 
-	m_pConfiguratorAction = new QAction(tr("Module Configurator..."), this);
-	m_pConfiguratorAction->setStatusTip(tr("Run module configurator"));
+	m_configuratorAction = new QAction(tr("Module Configurator..."), this);
+	m_configuratorAction->setStatusTip(tr("Run module configurator"));
 	//m_pConfiguratorAction->setEnabled(true);
-	connect(m_pConfiguratorAction, &QAction::triggered, this, &MainWindow::runConfigurator);
+	connect(m_configuratorAction, &QAction::triggered, this, &MainWindow::runConfigurator);
 
-    m_pAfblEditorAction = new QAction(tr("AFBL Editor..."), this);
-    m_pAfblEditorAction->setStatusTip(tr("Run AFBL Editor"));
-	m_pAfblEditorAction->setEnabled(false);
-    connect(m_pAfblEditorAction, &QAction::triggered, this, &MainWindow::runAfblEditor);
+	m_afblEditorAction = new QAction(tr("AFBL Editor..."), this);
+	m_afblEditorAction->setStatusTip(tr("Run AFBL Editor"));
+	m_afblEditorAction->setEnabled(false);
+	connect(m_afblEditorAction, &QAction::triggered, this, &MainWindow::runAfblEditor);
 
-	m_pSubsystemListEditorAction = new QAction(tr("Subsystem List Editor..."), this);
-	m_pSubsystemListEditorAction->setStatusTip(tr("Run Subsystem List Editor"));
-	m_pSubsystemListEditorAction->setEnabled(false);
-	connect(m_pSubsystemListEditorAction, &QAction::triggered, this, &MainWindow::runSubsystemListEditor);
+	m_subsystemListEditorAction = new QAction(tr("Subsystem List Editor..."), this);
+	m_subsystemListEditorAction->setStatusTip(tr("Run Subsystem List Editor"));
+	m_subsystemListEditorAction->setEnabled(false);
+	connect(m_subsystemListEditorAction, &QAction::triggered, this, &MainWindow::runSubsystemListEditor);
 
-	m_pAboutAction = new QAction(tr("About..."), this);
-	m_pAboutAction->setStatusTip(tr("Show application information"));
+	m_aboutAction = new QAction(tr("About..."), this);
+	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
-	connect(m_pAboutAction, &QAction::triggered, this, &MainWindow::showAbout);
+	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 
-	m_pDebugAction = new QAction(tr("Debug..."), this);
-	m_pDebugAction->setStatusTip(tr("Perform some debug actions, don't run it!"));
-	m_pDebugAction->setEnabled(true);
-	connect(m_pDebugAction, &QAction::triggered, this, &MainWindow::debug);
+	m_debugAction = new QAction(tr("Debug..."), this);
+	m_debugAction->setStatusTip(tr("Perform some debug actions, don't run it!"));
+	m_debugAction->setEnabled(true);
+	connect(m_debugAction, &QAction::triggered, this, &MainWindow::debug);
 
 	return;
 }
@@ -220,32 +211,32 @@ void MainWindow::createMenus()
 	//
 	QMenu* pFileMenu = menuBar()->addMenu(tr("&File"));
 
-	pFileMenu->addAction(m_pExitAction);
+	pFileMenu->addAction(m_exitAction);
 
 	// Administration
 	//
 	QMenu* pAdmMenu = menuBar()->addMenu(tr("&Administration"));
 
-	pAdmMenu->addAction(m_pUsersAction);
-	pAdmMenu->addAction(m_pLogAction);
+	pAdmMenu->addAction(m_usersAction);
+	pAdmMenu->addAction(m_logAction);
 
 	// Tools
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-	pToolsMenu->addAction(m_pConfiguratorAction);
-    pToolsMenu->addAction(m_pAfblEditorAction);
-	pToolsMenu->addAction(m_pSubsystemListEditorAction);
+	pToolsMenu->addAction(m_configuratorAction);
+	pToolsMenu->addAction(m_afblEditorAction);
+	pToolsMenu->addAction(m_subsystemListEditorAction);
     pToolsMenu->addSeparator();
-	pToolsMenu->addAction(m_pSettingsAction);
+	pToolsMenu->addAction(m_settingsAction);
 
 	// Help
 	//
 	menuBar()->addSeparator();
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
-	pHelpMenu->addAction(m_pAboutAction);
-	pHelpMenu->addAction(m_pDebugAction);
+	pHelpMenu->addAction(m_aboutAction);
+	pHelpMenu->addAction(m_debugAction);
 
 	return;
 }
@@ -256,23 +247,23 @@ void MainWindow::createToolBars()
 
 void MainWindow::createStatusBar()
 {
-	m_pStatusBarInfo = new QLabel();
-	m_pStatusBarInfo->setAlignment(Qt::AlignLeft);
-	m_pStatusBarInfo->setIndent(3);
+	m_statusBarInfo = new QLabel();
+	m_statusBarInfo->setAlignment(Qt::AlignLeft);
+	m_statusBarInfo->setIndent(3);
 
-	m_pStatusBarConnectionStatistics = new QLabel();
-	m_pStatusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
-	m_pStatusBarConnectionStatistics->setMinimumWidth(100);
+	m_statusBarConnectionStatistics = new QLabel();
+	m_statusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
+	m_statusBarConnectionStatistics->setMinimumWidth(100);
 
-	m_pStatusBarConnectionState = new QLabel();
-	m_pStatusBarConnectionState->setAlignment(Qt::AlignHCenter);
-	m_pStatusBarConnectionState->setMinimumWidth(100);
+	m_statusBarConnectionState = new QLabel();
+	m_statusBarConnectionState->setAlignment(Qt::AlignHCenter);
+	m_statusBarConnectionState->setMinimumWidth(100);
 
 	// --
 	//
-	statusBar()->addWidget(m_pStatusBarInfo, 1);
-	statusBar()->addPermanentWidget(m_pStatusBarConnectionStatistics, 0);
-	statusBar()->addPermanentWidget(m_pStatusBarConnectionState, 0);
+	statusBar()->addWidget(m_statusBarInfo, 1);
+	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
+	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
 
 	return;
 }
@@ -426,11 +417,11 @@ void MainWindow::projectOpened(DbProject project)
 
 	// Action, disable/enable
 	//
-	assert(m_pUsersAction != nullptr);
+	assert(m_usersAction != nullptr);
 
-	m_pUsersAction->setEnabled(true);
-	m_pAfblEditorAction->setEnabled(true);
-	m_pSubsystemListEditorAction->setEnabled(true);
+	m_usersAction->setEnabled(true);
+	m_afblEditorAction->setEnabled(true);
+	m_subsystemListEditorAction->setEnabled(true);
 
 	// Tab Pages, enable all tab pages
 	//
@@ -438,9 +429,9 @@ void MainWindow::projectOpened(DbProject project)
 
 	// Status bar
 	//
-	assert(m_pStatusBarConnectionState != nullptr);
+	assert(m_statusBarConnectionState != nullptr);
 
-	m_pStatusBarConnectionState->setText(tr("Opened: ") + theSettings.serverIpAddress());
+	m_statusBarConnectionState->setText(tr("Opened: ") + theSettings.serverIpAddress());
 	return;
 }
 
@@ -450,11 +441,11 @@ void MainWindow::projectClosed()
 
 	// Actions, disable/enable
 	//
-	assert(m_pUsersAction != nullptr);
+	assert(m_usersAction != nullptr);
 
-	m_pUsersAction->setEnabled(false);
-	m_pAfblEditorAction->setEnabled(false);
-	m_pSubsystemListEditorAction->setEnabled(false);
+	m_usersAction->setEnabled(false);
+	m_afblEditorAction->setEnabled(false);
+	m_subsystemListEditorAction->setEnabled(false);
 
 	// Tab Pages, disable all tab pages except the first.
 	//
@@ -462,9 +453,9 @@ void MainWindow::projectClosed()
 
 	// Status bar
 	//
-	assert(m_pStatusBarConnectionState != nullptr);
+	assert(m_statusBarConnectionState != nullptr);
 
-	m_pStatusBarConnectionState->setText(tr("Closed"));
+	m_statusBarConnectionState->setText(tr("Closed"));
 	return;
 }
 

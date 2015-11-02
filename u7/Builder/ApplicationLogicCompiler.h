@@ -130,7 +130,6 @@ namespace Builder
 	typedef VFrame30::SchemeItemAfb LogicFb;
 	typedef VFrame30::AfbPin LogicPin;
 	typedef VFrame30::SchemeItemConst LogicConst;
-	//typedef Afb::AfbElement LogicAfb;
 	typedef Afb::AfbSignal LogicAfbSignal;
 	typedef Afb::AfbParam LogicAfbParam;
 
@@ -241,8 +240,8 @@ namespace Builder
 	class AppFbParamValue
 	{
 	private:
-		SignalType m_type = SignalType::Discrete;
-		DataFormat m_dataFormat = DataFormat::UnsignedInt;
+		E::SignalType m_type = E::SignalType::Discrete;
+		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		bool m_instantiator = false;
 		int m_dataSize = 1;
 		QString m_opName;
@@ -256,16 +255,16 @@ namespace Builder
 		AppFbParamValue() {}
 		AppFbParamValue(const Afb::AfbParam& afbParam);
 
-		bool isUnsignedInt() const { return m_dataFormat == DataFormat::UnsignedInt; }
-		bool isUnsignedInt16() const { return m_dataFormat == DataFormat::UnsignedInt && m_dataSize == SIZE_16BIT; }
-		bool isUnsignedInt32() const { return m_dataFormat == DataFormat::UnsignedInt && m_dataSize == SIZE_32BIT; }
-		bool isSignedInt32() const { return m_dataFormat == DataFormat::SignedInt && m_dataSize == SIZE_32BIT; }
-		bool isFloat32() const { return m_dataFormat == DataFormat::Float && m_dataSize == SIZE_32BIT; }
+		bool isUnsignedInt() const { return m_dataFormat == E::DataFormat::UnsignedInt; }
+		bool isUnsignedInt16() const { return m_dataFormat == E::DataFormat::UnsignedInt && m_dataSize == SIZE_16BIT; }
+		bool isUnsignedInt32() const { return m_dataFormat == E::DataFormat::UnsignedInt && m_dataSize == SIZE_32BIT; }
+		bool isSignedInt32() const { return m_dataFormat == E::DataFormat::SignedInt && m_dataSize == SIZE_32BIT; }
+		bool isFloat32() const { return m_dataFormat == E::DataFormat::Float && m_dataSize == SIZE_32BIT; }
 
 		bool instantiator() const { return m_instantiator; }
 
-		SignalType type() const { return m_type; }
-		DataFormat dataFormat() const { return m_dataFormat; }
+		E::SignalType type() const { return m_type; }
+		E::DataFormat dataFormat() const { return m_dataFormat; }
 		int dataSize() const { return m_dataSize; }
 
 		int operandIndex() const { return m_operandIndex; }
@@ -377,7 +376,7 @@ namespace Builder
 
 	public:
 		AppSignal(const Signal* signal, const AppItem* appItem);
-		AppSignal(const QUuid& guid, SignalType signalType, int dataSize, const AppItem* appItem, const QString& strID);
+		AppSignal(const QUuid& guid, E::SignalType signalType, int dataSize, const AppItem* appItem, const QString& strID);
 
 		const AppItem &appItem() const;
 
@@ -439,8 +438,8 @@ namespace Builder
 			SignalAddress16() {}
 
 			SignalAddress16(const QString& strID, const Address16& address, int sizeW, bool isDiscrete) :
-				m_signalStrID(strID),
 				m_address(address),
+				m_signalStrID(strID),
 				m_sizeW(sizeW),
 				m_isDiscrete(isDiscrete)
 			{
@@ -747,10 +746,10 @@ namespace Builder
 
 		QVector<FbScal> m_fbScal;
 
-		const int FB_SCAL_16UI_32FP_INDEX = 0;
-		const int FB_SCAL_16UI_32SI_INDEX = 1;
-		const int FB_SCAL_32FP_16UI_INDEX = 2;
-		const int FB_SCAL_32SI_16UI_INDEX = 3;
+		const int FB_SCALE_16UI_FP_INDEX = 0;
+		const int FB_SCALE_16UI_SI_INDEX = 1;
+		const int FB_SCALE_FP_16UI_INDEX = 2;
+		const int FB_SCALE_SI_16UI_INDEX = 3;
 
 		QVector<AppItem*> m_scalAppItems;
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;

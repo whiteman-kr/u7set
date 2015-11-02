@@ -8,6 +8,7 @@
 #include <vector>
 #include <utility>
 #include <assert.h>
+#include <memory>
 
 #include <QObject>
 #include <QString>
@@ -56,7 +57,10 @@ public:
 	QString description() const;
 	void setDescription(QString value);
 
-	bool readOnly() const;
+    QString category() const;
+    void setCategory(QString value);
+
+    bool readOnly() const;
 	void setReadOnly(bool value);
 
 	bool updateFromPreset() const;
@@ -73,6 +77,15 @@ public:
 
 	virtual void setEnumValue(int value) = 0;
 	virtual void setEnumValue(const char* value) = 0;
+
+    virtual const QVariant& lowLimit() const = 0;
+    virtual void setLowLimit(const QVariant& value) = 0;
+
+    virtual const QVariant& highLimit() const = 0;
+    virtual void setHighLimit(const QVariant& value) = 0;
+
+    virtual const QVariant& step() const = 0;
+    virtual void setStep(const QVariant& value) = 0;
 
 private:
 	QString m_caption;
@@ -377,7 +390,7 @@ public:
 									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
 									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
 	{
-		PropertyValue<TYPE>* property = new PropertyValue<TYPE>();
+        std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
 
 		property->setCaption(caption);
 		property->setVisible(visible);
@@ -402,22 +415,21 @@ public:
 		}
 		else
 		{
-			delete alreadyExists->second;
 			alreadyExists->second = property;
 		}
 
-		return property;
+        return property.get();
 	}
 
 	// Get all properties
 	//
-	std::vector<Property*> properties();
+    std::vector<std::shared_ptr<Property> > properties();
 
 	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found
 	//
-	Property* propertyByCaption(QString caption);
-	const Property* propertyByCaption(QString caption) const;
+    std::shared_ptr<Property> propertyByCaption(QString caption);
+    const std::shared_ptr<Property> propertyByCaption(QString caption) const;
 
 	// Get property value
 	//
@@ -433,7 +445,7 @@ public:
 			return false;
 		}
 
-		Property* property = it->second;
+		std::shared_ptr<Property> property = it->second;
 
 		if (property->isEnum() == true)
 		{
@@ -444,7 +456,7 @@ public:
 		}
 		else
 		{
-			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property);
+			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property.get());
 
 			if (propertyValue == nullptr)
 			{
@@ -459,12 +471,12 @@ public:
 		return false;
 	}
 
-	bool setPropertyValue(QString caption, const char* value);
+    bool setPropertyValue(QString caption, const char* value);
 	bool setPropertyValue(QString caption, const QVariant& value);
 	std::list<std::pair<int, QString>> enumValues(QString property);
 
 private:
-	std::map<QString, Property*> m_properties;
+    std::map<QString, std::shared_ptr<Property>> m_properties;
 };
 
 
