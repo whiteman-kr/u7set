@@ -4228,7 +4228,7 @@ namespace Builder
 			{
 				LOG_ERROR(m_log, QString(tr("Required parameter '%1' of FB %2 (%3) is missing")).
 						  arg(opName).arg(caption()).arg(typeCaption()));
-				result = FALSE;
+				result = false;
 			}
 		}
 
