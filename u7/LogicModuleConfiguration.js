@@ -104,9 +104,9 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
-        if (device.ModuleFamily == FamilyLM)
+        if (device.propertyValue("ModuleFamily") == FamilyLM)
         {
-            log.writeMessage("MODULE LM-1: " + device.StrID);
+            log.writeMessage("MODULE LM-1: " + device.propertyValue("StrID"));
 
             // Generate Configuration
             //
@@ -136,13 +136,13 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 {
     // Variables
     //
-    var subSysID = module.SubsysID;
-    var channel = module.Channel;
+    var subSysID = module.propertyValue("SubsysID");
+    var channel = module.propertyValue("Channel");
     
     // Constants
     //
-    var frameSize = module.jsPropertyInt("FlashMemory\\ConfigFrameSize");
-    var frameCount = module.jsPropertyInt("FlashMemory\\ConfigFrameCount");
+    var frameSize = module.jsPropertyInt("ConfigFrameSize");
+    var frameCount = module.jsPropertyInt("ConfigFrameCount");
     
     if (frameSize == 0 || frameCount == 0)
     {
@@ -166,7 +166,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     if (channel < 1 || channel > maxChannel)
     {
-        log.writeError("Wrong LM-1 channel (should be 1 - " + maxChannel + "): " + module.StrID + ", channel: " + channel);
+        log.writeError("Wrong LM-1 channel (should be 1 - " + maxChannel + "): " + module.propertyValue("StrID") + ", channel: " + channel);
         return false;
     }
 
@@ -174,7 +174,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 	
     confFirmware.writeLog("---\r\n");
     confFirmware.writeLog("Module: LM-1\r\n");
-	confFirmware.writeLog("StrID = " + module.StrID+ "\r\n");
+	confFirmware.writeLog("StrID = " + module.propertyValue("StrID") + "\r\n");
 	confFirmware.writeLog("Subsystem ID = " + subSysID+ "\r\n");
 	confFirmware.writeLog("Key value = " + ssKeyValue+ "\r\n");
 	confFirmware.writeLog("UartID = " + uartId+ "\r\n");
@@ -209,7 +209,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     if (oldChannelCount == channel)
     {
-        log.writeError("LM-1 channel is not unique: " + module.StrID + ", channel: " + channel + "\r\n");
+        log.writeError("LM-1 channel is not unique: " + module.propertyValue("StrID") + ", channel: " + channel + "\r\n");
         return false;
     }
     
@@ -240,7 +240,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": uartId = "+ uartId + "\r\n");
     ptr += 2;
     storeHash64(confFirmware, log, frameServiceConfig, ptr, subSysID);   //subSysID HASH-64
-	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": subSysID HASH-64 = "+ subSysID + "\r\n");
+	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": subSysID HASH-64 (CALC HASH!!!!!) = "+ subSysID + "\r\n");
     ptr += 8;
     
     // I/O Modules configuration
@@ -252,38 +252,38 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     for (var i = 0; i < parent.childrenCount(); i++)
     {
         var ioModule = parent.jsChild(i);
-        if (ioModule.ModuleFamily == FamilyAIM || ioModule.ModuleFamily == FamilyAIFM || 
-            ioModule.ModuleFamily == FamilyAOM || ioModule.ModuleFamily == FamilyOCM ||
-            ioModule.ModuleFamily == FamilyDIM || ioModule.ModuleFamily == FamilyDOM)
+        if (ioModule.propertyValue("ModuleFamily") == FamilyAIM || ioModule.propertyValue("ModuleFamily") == FamilyAIFM || 
+            ioModule.propertyValue("ModuleFamily") == FamilyAOM || ioModule.propertyValue("ModuleFamily") == FamilyOCM ||
+            ioModule.propertyValue("ModuleFamily") == FamilyDIM || ioModule.propertyValue("ModuleFamily") == FamilyDOM)
         {
-            if (ioModule.Place < 1 || ioModule.Place > ioModulesMaxCount)
+            if (ioModule.propertyValue("Place") < 1 || ioModule.propertyValue("Place") > ioModulesMaxCount)
             {
-                log.writeError("Wrong I/O module place: " + ioModule.StrID + ", place: " + ioModule.Place + ", expected 1..14.");
+                log.writeError("Wrong I/O module place: " + ioModule.propertyValue("StrID") + ", place: " + ioModule.propertyValue("Place") + ", expected 1..14.");
                 return false;
             }
-            var frame = frameIOConfig + (ioModule.Place - 1);
+            var frame = frameIOConfig + (ioModule.propertyValue("Place") - 1);
             
-            if (ioModule.ModuleFamily == FamilyAIM)
+            if (ioModule.propertyValue("ModuleFamily") == FamilyAIM)
             {
                 generate_aim(confFirmware, ioModule, frame, log, signalSet);
             }
-            if (ioModule.ModuleFamily == FamilyAIFM)
+            if (ioModule.propertyValue("ModuleFamily") == FamilyAIFM)
             {
                 generate_aifm(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.ModuleFamily == FamilyAOM)
+            if (ioModule.propertyValue("ModuleFamily") == FamilyAOM)
             {
                 generate_aom(confFirmware, ioModule, frame, log, signalSet);
             }
-            if (ioModule.ModuleFamily == FamilyOCM)
+            if (ioModule.propertyValue("ModuleFamily") == FamilyOCM)
             {
                 generate_ocm(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.ModuleFamily == FamilyDIM)
+            if (ioModule.propertyValue("ModuleFamily") == FamilyDIM)
             {
                 generate_dim(confFirmware, ioModule, frame, log);
             }
-            if (ioModule.ModuleFamily == FamilyDOM)
+            if (ioModule.propertyValue("ModuleFamily") == FamilyDOM)
             {
                 generate_dom(confFirmware, ioModule, frame, log);
             }
@@ -362,7 +362,8 @@ function truncate_to_int(x)
 //
 function generate_aim(confFirmware, module, frame, log, signalSet)
 {
-    log.writeMessage("MODULE AIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("MODULE AIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
     var ptr = 0;
     
@@ -376,7 +377,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var inController = module.jsFindChildObjectByMask("*_*_*_*_CTRLIN");
     if (inController == null)
     {
-        log.writeWarning("WARNING: no input controller found in " + module.StrID + "! Using default values.");
+        log.writeWarning("WARNING: no input controller found in " + module.propertyValue("StrID") + "! Using default values.");
     }
 
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
@@ -467,7 +468,8 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 //
 function generate_aifm(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE AIFM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("MODULE AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
     return true;
 
 }
@@ -479,7 +481,8 @@ function generate_aifm(confFirmware, module, frame, log)
 //
 function generate_aom(confFirmware, module, frame, log, signalSet)
 {
-    log.writeMessage("MODULE AOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE AOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("MODULE AOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
     var ptr = 0;
     
@@ -489,7 +492,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     var outController = module.jsFindChildObjectByMask("*_*_*_*_CTRLOUT");
     if (outController == null)
     {
-        log.writeWarning("WARNING: no output controller found in " + module.StrID + "! Using default values.");
+        log.writeWarning("WARNING: no output controller found in " + module.propertyValue("StrID") + "! Using default values.");
     }
 
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
@@ -512,7 +515,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
                     var outputRangeMode = signal.jsOutputRangeMode();
                     if (outputRangeMode < 0 || outputRangeMode > Mode_05mA)
                     {
-                        log.writeError("ERROR: Signal " + s.StrID + " - wrong outputRangeMode()! Using default.");
+                        log.writeError("ERROR: Signal " + signal.propertyValue("StrID") + " - wrong outputRangeMode()! Using default.");
                     }
                     else
                     {
@@ -595,16 +598,16 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
         }
         if (s.jsPlace() == place)
         {
-            signal = signalSet.getSignalByDeviceStrID(s.StrID);
+            signal = signalSet.getSignalByDeviceStrID(s.propertyValue("StrID"));
             if (signal == null)    
             {
-                log.writeWarning("WARNING: Signal " + s.StrID + " was not found in the signal database!");
+                log.writeWarning("WARNING: Signal " + s.propertyValue("StrID") + " was not found in the signal database!");
             }
             return signal;
         }
     }
     
-    log.writeWarning("WARNING: Parent " + parent.StrID + ", no signal with place " + place + " was not found!");
+    log.writeWarning("WARNING: Parent " + parent.propertyValue("StrID")	+ ", no signal with place " + place + " was not found!");
     return null;
 }
 
@@ -615,7 +618,8 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
 //
 function generate_ocm(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE OCM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE OCM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("MODULE OCM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
     return true;
 
 }
@@ -627,7 +631,8 @@ function generate_ocm(confFirmware, module, frame, log)
 //
 function generate_dim(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE DIM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE DIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("MODULE DIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
     var ptr = 120;
     
@@ -675,7 +680,8 @@ function generate_dim(confFirmware, module, frame, log)
 //
 function generate_dom(confFirmware, module, frame, log)
 {
-    log.writeMessage("MODULE DOM: " + module.StrID + " Place: " + module.Place + " Frame: " + frame);
+    log.writeMessage("MODULE DOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
+	confFirmware.writeLog("MODULE DOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
     var ptr = 120;
     
@@ -722,12 +728,16 @@ function generate_txRxConfig(confFirmware, frame, offset, log, flags, configFram
     var ptr = offset;
     
     setData16(confFirmware, log, frame, ptr, flags);        // Flags word
+	confFirmware.writeLog("generate_txRxConfig: Frame " + frame + ", offset " + ptr +": flags = "+ flags + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, configFrames); // Configuration words quantity
+	confFirmware.writeLog("generate_txRxConfig: Frame " + frame + ", offset " + ptr +": configFrames = "+ configFrames + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, dataFrames);   // Data words quantity
+	confFirmware.writeLog("generate_txRxConfig: Frame " + frame + ", offset " + ptr +": dataFrames = "+ dataFrames + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, txId);         // Tx ID
+	confFirmware.writeLog("generate_txRxConfig: Frame " + frame + ", offset " + ptr +": txId = "+ txId + "\r\n");
     ptr += 2;
     
     return true;

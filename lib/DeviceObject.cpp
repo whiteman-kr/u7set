@@ -620,7 +620,7 @@ namespace Hardware
 
 	int DeviceObject::jsPropertyInt(QString name) const
 	{
-		QVariant v = property(name.toStdString().c_str());
+        QVariant v = propertyByCaption(name)->value();
 		if (v.isValid() == false)
 		{
 			assert(v.isValid());

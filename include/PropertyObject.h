@@ -460,7 +460,7 @@ public:
 
 	// Get property value
 	//
-	QVariant propertyValue(QString caption) const;
+    Q_INVOKABLE QVariant propertyValue(QString caption) const;
 
 	template <typename TYPE>
 	bool setPropertyValue(QString caption, const TYPE& value)
