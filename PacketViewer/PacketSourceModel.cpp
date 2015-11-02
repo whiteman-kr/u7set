@@ -7,6 +7,7 @@
 #include <QHBoxLayout>
 #include <QTableView>
 #include "SignalTableModel.h"
+#include <QSettings>
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)
@@ -180,7 +181,7 @@ void PacketSourceModel::sort(int, Qt::SortOrder)
 
 }
 
-void PacketSourceModel::addListener(QString ip, int port)
+void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 {
 	std::shared_ptr<Listener> listener(new Listener(this, ip, port));
 	for (size_t i = 0; i < m_listeners.size(); i++)
@@ -195,6 +196,18 @@ void PacketSourceModel::addListener(QString ip, int port)
 	endInsertRows();
 	connect(listener.get(), &Listener::beginAddSource, this, &PacketSourceModel::beginInsertSource, Qt::DirectConnection);
 	connect(listener.get(), &Listener::endAddSource, this, &PacketSourceModel::endInsertSource, Qt::DirectConnection);
+	if (saveList)
+	{
+		QSettings settings;
+		settings.beginWriteArray("listenAddresses", m_listeners.size());
+		for (size_t i = 0; i < m_listeners.size(); i++)
+		{
+			settings.setArrayIndex(i);
+			settings.setValue("ip", m_listeners[i]->ip());
+			settings.setValue("port", m_listeners[i]->port());
+		}
+		settings.endArray();
+	}
 	emit contentChanged(0);
 }
 
