@@ -1688,6 +1688,11 @@ namespace ExtWidgets
             //
             QString description = p->description().isEmpty() ? p->caption() : p->description();
 
+            if (p->readOnly() == true)
+            {
+                description = QString("[ReadOnly] ") + description;
+            }
+
             if (p->value().userType() == QVariant::Double)
             {
                 bool ok1 = false;
@@ -1697,7 +1702,7 @@ namespace ExtWidgets
 
                 if (ok1 == true && ok2 == true && l < h)
                 {
-                    description = QString("%1 [%2 - %3]").arg(description).arg(l).arg(h);
+                    description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
                 }
             }
             if (p->value().userType() == QVariant::Int || p->value().userType() == QVariant::UInt)
@@ -1709,54 +1714,37 @@ namespace ExtWidgets
 
                 if (ok1 == true && ok2 == true && l < h)
                 {
-                    description = QString("%1 [%2 - %3]").arg(description).arg(l).arg(h);
+                    description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
                 }
             }
-            createProperty(nullptr, p.get()->caption(), p.get()->caption(), description, p, sameValue);
+
+            QString category = p->category();
+            if (category.isEmpty())
+            {
+                category = "Common";
+            }
+
+            createProperty(nullptr, p->caption(), category, description, p, sameValue);
 		}
 
-		setVisible(true);
+        sortItems(0, Qt::AscendingOrder);
+
+        setVisible(true);
 		return;
 	}
 
-    QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QString& description, const std::shared_ptr<Property> value, bool sameValue)
+    QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& caption, const QString& category, const QString& description, const std::shared_ptr<Property> value, bool sameValue)
 	{
-		int slashPos = name.indexOf("\\");
-		if (parentProperty == nullptr || slashPos != -1)
+        if (parentProperty == nullptr)
 		{
-			QString groupName;
-			QString propName;
-
-			if (slashPos == -1)
-			{
-				propName = name;
-				groupName = "Common";
-			}
-			else
-			{
-				propName = name.right(name.length() - slashPos - 1);
-				groupName = name.left(slashPos);
-			}
-
-			// Add the property now
+            // Add the property now
 			//
 			QtProperty* subGroup = nullptr;
-			QList<QtProperty*> propList;
 
-			if (parentProperty != nullptr)
-			{
-				// Find, if group already exists
-				//
-				propList = parentProperty->subProperties();
-			}
-			else
-			{
-				propList = properties();
-			}
-
+            QList<QtProperty*> propList = properties();
 			for (QtProperty* p : propList)
 			{
-				if (p->propertyName() == groupName)
+                if (p->propertyName() == category)
 				{
 					subGroup = p;
 					break;
@@ -1765,10 +1753,10 @@ namespace ExtWidgets
 
 			if (subGroup == nullptr)
 			{
-				subGroup = m_propertyGroupManager->addProperty(groupName);
+                subGroup = m_propertyGroupManager->addProperty(category);
 			}
 
-            QtProperty* property = createProperty(subGroup, propName, fullName, description, value, sameValue);
+            QtProperty* property = createProperty(subGroup, caption, category, description, value, sameValue);
 
 			if (parentProperty == nullptr)
 			{
@@ -1788,7 +1776,7 @@ namespace ExtWidgets
 			QtProperty* subProperty = nullptr;
 
 
-            subProperty = m_propertyVariantManager->addProperty(fullName);
+            subProperty = m_propertyVariantManager->addProperty(caption);
             subProperty->setToolTip(description);
             m_propertyVariantManager->setProperty(subProperty, value);
             m_propertyVariantManager->setAttribute(subProperty, "@propertyEditor@sameValue", sameValue);

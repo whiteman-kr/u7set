@@ -363,9 +363,9 @@ namespace ExtWidgets
 		// Data
 		//
 	protected:
-		QtGroupPropertyManager* m_propertyGroupManager = nullptr;
+        QtGroupPropertyManager* m_propertyGroupManager = nullptr;
 
-		QtMultiVariantPropertyManager* m_propertyVariantManager = nullptr;
+        QtMultiVariantPropertyManager* m_propertyVariantManager = nullptr;
 
         QList<std::shared_ptr<PropertyObject>> m_objects;
 
@@ -373,7 +373,7 @@ namespace ExtWidgets
 		//
 	private:
 		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values);
-        QtProperty* createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
+        QtProperty* createProperty(QtProperty *parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
 	};
 
 }
