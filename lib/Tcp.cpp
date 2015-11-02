@@ -329,7 +329,7 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	int Server::staticId = 1;
+	int Server::staticId = 0;
 
 
 	Server::Server() :
