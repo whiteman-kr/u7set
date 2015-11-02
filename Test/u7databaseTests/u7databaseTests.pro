@@ -44,6 +44,7 @@ SOURCES += main.cpp \
     ../../lib/DataSource.cpp \
     ../../lib/SocketIO.cpp  \
     ../../lib/PropertyObject.cpp \
+    ../../lib/Types.cpp \
     MultiThreadFileTest.cpp \
     MultiThreadSignalTests.cpp
 
@@ -64,6 +65,7 @@ HEADERS += \
     ../../include/DataSource.h \
     ../../include/SocketIO.h \
     ../../include/PropertyObject.h \
+    ../../include/Types.h \
     MultiThreadFileTest.h \
     MultiThreadSignalTests.h
 
