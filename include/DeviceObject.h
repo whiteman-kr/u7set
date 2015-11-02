@@ -66,45 +66,47 @@ namespace Hardware
 	// DynamicProperty
 	//
 	//
-	class DynamicProperty
-	{
-	public:
-		DynamicProperty();
-		DynamicProperty(const QString& name,
-						const QVariant& min,
-						const QVariant& max,
-						const QVariant& defaultVal,
-						const QVariant& value);
+//	class DynamicProperty
+//	{
+//	public:
+//		DynamicProperty();
+//		DynamicProperty(const QString& category,
+//						const QString& name,
+//						const QVariant& min,
+//						const QVariant& max,
+//						const QVariant& defaultVal,
+//						const QVariant& value);
 
-		void saveValue(::Proto::Property* protoProperty) const;
-		bool loadValue(const ::Proto::Property& protoProperty);
+//		static bool loadValue(const ::Proto::Property& protoProperty);
 
-		// Properties
-		//
-	public:
-		QString name() const;
-		const char* name_c_str() const;
-		void setName(const QString& value);
+//		// Properties
+//		//
+//	public:
+//		QString name() const;
+//		void setName(QString value);
 
-		QVariant min() const;
-		QVariant max() const;
-		QVariant defaultValue() const;
+//		QString category() const;
+//		void setCategory(QString value);
 
-		QVariant value() const;
-		void setValue(QVariant v);
+//		QVariant min() const;
+//		QVariant max() const;
+//		QVariant defaultValue() const;
 
-		// Data
-		//
-	private:
-		QString m_name;
-		QByteArray m_c_str_name;
+//		QVariant value() const;
+//		void setValue(QVariant v);
 
-		QVariant m_min;
-		QVariant m_max;
-		QVariant m_default;
+//		// Data
+//		//
+//	private:
+//		QString m_category;
+//		QString m_name;
 
-		QVariant m_value;
-	};
+//		QVariant m_min;
+//		QVariant m_max;
+//		QVariant m_default;
+
+//		QVariant m_value;
+//	};
 
 
 	// Forward declarations
@@ -296,8 +298,6 @@ namespace Hardware
 											// In preset edit mode this field has the same valie with m_uuid
 
 	private:
-		bool m_avoidEventRecursion = false;
-		QHash<QString, DynamicProperty> m_dynamicProperties;
 	};
 
 
