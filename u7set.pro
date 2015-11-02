@@ -18,5 +18,6 @@ SUBDIRS += qtservice \
 	VFrame30 \
 	u7 \
     Monitor \
-    PacketViewer
+    PacketViewer \
+    TcpClient
 

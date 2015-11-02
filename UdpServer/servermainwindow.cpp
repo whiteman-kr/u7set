@@ -8,9 +8,12 @@ namespace Tcp
 	{
 		QByteArray reply;
 
+//		currentThread->sleep(15);
+
 		reply.resize(1024);
 
 		sendReply(reply);
+
 		return;
 	}
 }

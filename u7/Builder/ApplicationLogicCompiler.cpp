@@ -853,7 +853,7 @@ namespace Builder
 
 		for(PropertyNameVar memSetting : memSettings)
 		{
-			result &= getLMIntProperty(SECTION_MEMORY_SETTINGS, memSetting.name, memSetting.var);
+			result &= getLMIntProperty(memSetting.name, memSetting.var);
 		}
 
 		if (result == true)
@@ -867,10 +867,10 @@ namespace Builder
 							 m_lmIntOutData);
 		}
 
-		result &= getLMIntProperty(SECTION_FLASH_MEMORY, "AppLogicFrameSize", &m_lmAppLogicFrameSize);
-		result &= getLMIntProperty(SECTION_FLASH_MEMORY, "AppLogicFrameCount", &m_lmAppLogicFrameCount);
+		result &= getLMIntProperty("AppLogicFrameSize", &m_lmAppLogicFrameSize);
+		result &= getLMIntProperty("AppLogicFrameCount", &m_lmAppLogicFrameCount);
 
-		result &= getLMIntProperty(SECTION_LOGIC_UNIT, "CycleDuration", &m_lmCycleDuration);
+		result &= getLMIntProperty("CycleDuration", &m_lmCycleDuration);
 
 		if (result)
 		{
@@ -924,7 +924,7 @@ namespace Builder
 
 			for(PropertyNameVar moduleSetting : moduleSettings)
 			{
-				result &= getDeviceIntProperty(device, SECTION_MEMORY_SETTINGS, moduleSetting.name, moduleSetting.var);
+				result &= getDeviceIntProperty(device, moduleSetting.name, moduleSetting.var);
 			}
 
 			m.rxTxDataOffset = m_memoryMap.getModuleDataOffset(place);
@@ -3667,25 +3667,13 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::getLMIntProperty(const QString &section, const QString& name, int *value)
-	{
-		return getDeviceIntProperty(m_lm, section, name, value);
-	}
-
-
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
 	{
-		return getDeviceIntProperty(m_lm, QString(""), name, value);
+		return getDeviceIntProperty(m_lm, name, value);
 	}
 
 
 	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int *value)
-	{
-		return getDeviceIntProperty(device, QString(""), name, value);
-	}
-
-
-	bool ModuleLogicCompiler::getDeviceIntProperty(Hardware::DeviceObject* device, const QString &section, const QString& name, int *value)
 	{
 		if (device == nullptr)
 		{
@@ -3699,22 +3687,11 @@ namespace Builder
 			return false;
 		}
 
-		QString propertyName;
-
-		if (!section.isEmpty())
-		{
-			propertyName = QString("%1\\%2").arg(section).arg(name);
-		}
-		else
-		{
-			propertyName = name;
-		}
-
-		QVariant val = device->property(C_STR(propertyName));
+		QVariant val = device->propertyValue(name);
 
 		if (val.isValid() == false)
 		{
-			LOG_ERROR(m_log, QString(tr("Property %1 is not found in device %2")).arg(propertyName).arg(device->strId()));
+			LOG_ERROR(m_log, QString(tr("Property %1 is not found in device %2")).arg(name).arg(device->strId()));
 			return false;
 		}
 

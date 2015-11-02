@@ -9,42 +9,31 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	SocketWorker::SocketWorker()
+	SocketWorker::SocketWorker() :
+		m_mutex(QMutex::Recursive)
 	{
+		m_dataBuffer = new char[TCP_MAX_DATA_SIZE];
 	}
 
 
 	SocketWorker::~SocketWorker()
 	{
+		delete [] m_dataBuffer;
 	}
-
-
-	void SocketWorker::reallocateDataBuffer(int newDataBufferSize)
-	{
-		if (newDataBufferSize > TCP_PACKET_MAX_DATA_SIZE)
-		{
-			assert(false);
-			return;
-		}
-
-		if (m_dataBuffer != nullptr)
-		{
-			delete [] m_dataBuffer;
-		}
-
-		m_dataBuffer = new char[newDataBufferSize];
-
-		m_dataBufferSize = newDataBufferSize;
-	}
-
 
 	void SocketWorker::onThreadStarted()
 	{
-		assert(m_tcpSocket == nullptr);
+		createSocket();
+	}
 
-		m_tcpSocket = createSocket();
 
-		m_tcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+	void SocketWorker::createSocket()
+	{
+		deleteSocket();
+
+		m_tcpSocket = new QTcpSocket;
+
+		m_tcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 0);
 
 		connect(m_tcpSocket, &QTcpSocket::stateChanged, this, &SocketWorker::onSocketStateChanged);
 		connect(m_tcpSocket, &QTcpSocket::connected, this, &SocketWorker::onSocketConnected);
@@ -53,17 +42,26 @@ namespace Tcp
 	}
 
 
+	void SocketWorker::deleteSocket()
+	{
+		if (m_tcpSocket != nullptr)
+		{
+			m_tcpSocket->close();
+			delete m_tcpSocket;
+			m_tcpSocket = nullptr;
+		}
+	}
+
+
 	void SocketWorker::onThreadFinished()
 	{
-		m_tcpSocket->close();
-		delete m_tcpSocket;
-
-		delete [] m_dataBuffer;
+		deleteSocket();
 	}
 
 
 	void SocketWorker::onSocketConnected()
 	{
+		initReadStatusVariables();
 		onConnection();
 	}
 
@@ -78,12 +76,6 @@ namespace Tcp
 
 	void SocketWorker::onSocketReadyRead()
 	{
-		if (!m_enableSocketRead)
-		{
-			assert(false);
-			return;
-		}
-
 		if (m_tcpSocket == nullptr)
 		{
 			assert(false);
@@ -91,27 +83,32 @@ namespace Tcp
 		}
 
 		int bytesAvailable = m_tcpSocket->bytesAvailable();
+		int bytesReaded = 0;
 
 		while(bytesAvailable > 0)
 		{
 			switch(m_readState)
 			{
-			case ReadState::WainigForHeader:
-				bytesAvailable -= readHeader(bytesAvailable);
+			case ReadState::WaitingAnything:
+				assert(false);
+				return;
+
+			case ReadState::WaitingForHeader:
+				bytesReaded = readHeader(bytesAvailable);
 				break;
 
-			case ReadState::WainigForData:
-				bytesAvailable -= readData(bytesAvailable);
+			case ReadState::WaitingForData:
+				bytesReaded = readData(bytesAvailable);
 				break;
 
 			default:
 				assert(false);
 			}
 
+			bytesAvailable -= bytesReaded;
+
 			if (m_headerAndDataReady)
 			{
-				disableSocketRead();
-
 				// prepare to read next request
 				//
 				m_headerAndDataReady = false;
@@ -126,7 +123,7 @@ namespace Tcp
 
 	int SocketWorker::readHeader(int bytesAvailable)
 	{
-		if (m_readState != ReadState::WainigForHeader)
+		if (m_readState != ReadState::WaitingForHeader)
 		{
 			assert(false);
 			return 0;
@@ -141,7 +138,7 @@ namespace Tcp
 
 		int bytesReaded = m_tcpSocket->read(reinterpret_cast<char*>(&m_header) + m_readedHeaderSize, bytesToRead);
 
-		qDebug() << "Read header bytes " << bytesReaded;
+		//qDebug() << "Read header bytes " << bytesReaded;
 
 		m_readedHeaderSize += bytesReaded;
 
@@ -170,28 +167,23 @@ namespace Tcp
 		{
 			m_headerAndDataReady = true;
 
-			m_readState = ReadState::WainigForHeader;
+			m_readState = ReadState::WaitingAnything;
 
 			return bytesReaded;
 		}
 
-		if (m_dataBufferSize < m_header.dataSize)
+		if (m_header.dataSize > TCP_MAX_DATA_SIZE)
 		{
-			if (m_header.dataSize > TCP_PACKET_MAX_DATA_SIZE)
-			{
-				assert(false);
+			assert(false);
 
-				closeConnection();
+			closeConnection();
 
-				qDebug() << "Request" << m_header.id << "dataSize too big - " << m_header.dataSize;
+			qDebug() << "Request" << m_header.id << "dataSize too big - " << m_header.dataSize;
 
-				return 0;
-			}
-
-			reallocateDataBuffer(m_header.dataSize);
+			return 0;
 		}
 
-		m_readState = ReadState::WainigForData;
+		m_readState = ReadState::WaitingForData;
 
 		return bytesReaded;
 	}
@@ -199,7 +191,7 @@ namespace Tcp
 
 	int SocketWorker::readData(int bytesAvailable)
 	{
-		if (m_readState != ReadState::WainigForData)
+		if (m_readState != ReadState::WaitingForData)
 		{
 			assert(false);
 			return 0;
@@ -212,7 +204,7 @@ namespace Tcp
 			bytesToRead = bytesAvailable;
 		}
 
-		if (m_readedDataSize + bytesToRead > m_dataBufferSize)
+		if (m_readedDataSize + bytesToRead > TCP_MAX_DATA_SIZE)
 		{
 			assert(false);
 
@@ -225,7 +217,7 @@ namespace Tcp
 
 		int bytesReaded = m_tcpSocket->read(m_dataBuffer + m_readedDataSize, bytesToRead);
 
-		qDebug() << "Read data bytes " << bytesReaded;
+		//qDebug() << "Read data bytes " << bytesReaded;
 
 		m_readedDataSize += bytesReaded;
 
@@ -234,10 +226,40 @@ namespace Tcp
 		if (m_readedDataSize == m_header.dataSize)
 		{
 			m_headerAndDataReady = true;
+
+			m_readState = ReadState::WaitingAnything;
 		}
 
 		return bytesReaded;
 	}
+
+
+	qint64 SocketWorker::socketWrite(const char* data, qint64 size)
+	{
+		if (m_tcpSocket == nullptr)
+		{
+			assert(false);
+			return -1;
+		}
+
+		qint64 written = m_tcpSocket->write(data, size);
+
+		if (written == -1)
+		{
+			return -1;
+		}
+
+		m_tcpSocket->waitForBytesWritten(TCP_BYTES_WRITTEN_TIMEOUT);
+
+		return written;
+	}
+
+
+	qint64 SocketWorker::socketWrite(const Header& header)
+	{
+		return socketWrite(reinterpret_cast<const char*>(&header), sizeof(header));
+	}
+
 
 	void SocketWorker::onSocketStateChanged(QAbstractSocket::SocketState newState)
 	{
@@ -289,18 +311,6 @@ namespace Tcp
 	}
 
 
-	bool SocketWorker::isUnconnected() const
-	{
-		if (m_tcpSocket == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		return m_tcpSocket->state() == QAbstractSocket::UnconnectedState;
-	}
-
-
 	void SocketWorker::closeConnection()
 	{
 		if (m_tcpSocket == nullptr)
@@ -322,10 +332,15 @@ namespace Tcp
 	int Server::staticId = 1;
 
 
-	Server::Server()
+	Server::Server() :
+		m_autoAckTimer(this)
 	{
 		m_id = staticId;
 		staticId++;
+
+		initReadStatusVariables();
+
+		m_autoAckTimer.setSingleShot(false);
 	}
 
 
@@ -336,6 +351,8 @@ namespace Tcp
 
 	void Server::onThreadStarted()
 	{
+		connect(&m_autoAckTimer, &QTimer::timeout, this, &Server::onAutoAckTimer);
+
 		SocketWorker::onThreadStarted();
 
 		onServerThreadStarted();
@@ -352,17 +369,23 @@ namespace Tcp
 	}
 
 
-	QTcpSocket* Server::createSocket()
+	void Server::createSocket()
 	{
 		assert(m_connectedSocketDescriptor != 0);
 
-		QTcpSocket* tcpSocket = new QTcpSocket;
+		SocketWorker::createSocket();
 
-		tcpSocket->setSocketDescriptor(m_connectedSocketDescriptor);
-
-		return tcpSocket;
+		m_tcpSocket->setSocketDescriptor(m_connectedSocketDescriptor);
 	}
 
+
+	void Server::initReadStatusVariables()
+	{
+		m_serverState = ServerState::WainigForRequest;
+		m_readState = ReadState::WaitingForHeader;
+		m_readedHeaderSize = 0;
+		m_readedDataSize = 0;
+	}
 
 	void Server::onConnection()
 	{
@@ -392,12 +415,25 @@ namespace Tcp
 
 		m_serverState = ServerState::RequestProcessing;
 
-		if (m_autoAck)
+		if (m_autoAck == true)
 		{
-			sendAck();
+			m_autoAckTimer.start(TCP_AUTO_ACK_TIMER_INTERVAL);
 		}
 
 		processRequest(m_header.id, m_dataBuffer, m_header.dataSize);
+	}
+
+
+	void Server::onAutoAckTimer()
+	{
+		if (m_autoAck == false || m_serverState != ServerState::RequestProcessing)
+		{
+			m_autoAckTimer.stop();
+
+			return;
+		}
+
+		sendAck();
 	}
 
 
@@ -409,6 +445,11 @@ namespace Tcp
 			return;
 		}
 
+		if (m_serverState != Server::ServerState::RequestProcessing)
+		{
+			return;
+		}
+
 		SocketWorker::Header header;
 
 		header.type = SocketWorker::Header::Type::Ack;
@@ -417,7 +458,7 @@ namespace Tcp
 		header.dataSize = 0;
 		header.calcCRC();
 
-		qint64 written = m_tcpSocket->write(reinterpret_cast<const char*>(&header), sizeof(header));
+		qint64 written = socketWrite(header);
 
 		if (written == -1)
 		{
@@ -430,8 +471,6 @@ namespace Tcp
 			assert(false);
 			return;
 		}
-
-		m_tcpSocket->flush();
 	}
 
 
@@ -443,7 +482,15 @@ namespace Tcp
 
 	void Server::sendReply(const char* replyData, quint32 replyDatsSize)
 	{
+		m_autoAckTimer.stop();
+
 		if (m_tcpSocket == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		if (m_serverState != ServerState::RequestProcessing)
 		{
 			assert(false);
 			return;
@@ -457,7 +504,7 @@ namespace Tcp
 		header.dataSize = replyDatsSize;
 		header.calcCRC();
 
-		qint64 written = m_tcpSocket->write(reinterpret_cast<const char*>(&header), sizeof(header));
+		qint64 written = socketWrite(header);
 
 		if (written == -1)
 		{
@@ -473,7 +520,7 @@ namespace Tcp
 
 		if (replyDatsSize > 0)
 		{
-			qint64 written = m_tcpSocket->write(replyData, replyDatsSize);
+			written = socketWrite(replyData, replyDatsSize);
 
 			if (written == -1)
 			{
@@ -488,9 +535,7 @@ namespace Tcp
 			}
 		}
 
-		m_tcpSocket->flush();
-
-		m_serverState = ServerState::WainigForRequest;
+		initReadStatusVariables();
 	}
 
 
@@ -534,8 +579,7 @@ namespace Tcp
 	{
 		assert(m_serverInstance != nullptr);
 
-		//connect(&m_tcpServer, &QTcpServer::newConnection, this, &Listener::onNewConnection);
-		//connect(&m_tcpServer, &QTcpServer::acceptError, this, &Listener::onAcceptError);
+		m_serverInstance->setParent(this);
 
 		connect(&m_periodicTimer, &QTimer::timeout, this, &Listener::onPeriodicTimer);
 	}
@@ -545,13 +589,13 @@ namespace Tcp
 	{
 		// close all conection threads
 		//
-		for(SimpleThread* connectionThread : m_runningServices)
+		for(SimpleThread* connectionThread : m_runningServers)
 		{
 			connectionThread->quit();
 			delete connectionThread;
 		}
 
-		m_runningServices.clear();
+		m_runningServers.clear();
 
 		delete m_serverInstance;
 	}
@@ -559,7 +603,7 @@ namespace Tcp
 
 	void Listener::onThreadStarted()
 	{
-		m_periodicTimer.setInterval(1000);
+		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
 		m_periodicTimer.start();
 
 		startListening();
@@ -608,7 +652,7 @@ namespace Tcp
 
 		SimpleThread* newThread = new SimpleThread(newServerInstance);
 
-		m_runningServices.insert(newServerInstance, newThread);
+		m_runningServers.insert(newServerInstance, newThread);
 
 		newThread->start();
 
@@ -623,18 +667,15 @@ namespace Tcp
 
 	void Listener::onServerDisconnected(const SocketWorker* server)
 	{
-		if (!m_runningServices.contains(server))
+		if (!m_runningServers.contains(server))
 		{
 			assert(false);
 			return;
 		}
 
-		SimpleThread* thread = m_runningServices[server];
+		SimpleThread* thread = m_runningServers[server];
 
-		m_runningServices.remove(server);
-
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!! reimplement
-		//qDebug() << "Connection closed #" << server->id();
+		m_runningServers.remove(server);
 
 		thread->quit();
 
@@ -650,7 +691,7 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	ServerThread::ServerThread(const HostAddressPort& listenAddressPort, Server* server) :
+	ServerThread::ServerThread(const HostAddressPort &listenAddressPort, Server* server) :
 		SimpleThread(new Listener(listenAddressPort, server))
 	{
 	}
@@ -667,11 +708,21 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-
-	Client::Client() :
+	Client::Client(const HostAddressPort &serverAddressPort) :
 		m_periodicTimer(this),
 		m_replyTimeoutTimer(this)
 	{
+		setServer(serverAddressPort, false);
+		initReadStatusVariables();
+	}
+
+
+	Client::Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
+		m_periodicTimer(this),
+		m_replyTimeoutTimer(this)
+	{
+		setServers(serverAddressPort1, serverAddressPort2, false);
+		initReadStatusVariables();
 	}
 
 
@@ -680,21 +731,25 @@ namespace Tcp
 	}
 
 
-	void Client::setServer(const HostAddressPort& serverAddressPort)
+	void Client::setServer(const HostAddressPort& serverAddressPort, bool reconnect)
 	{
+		AUTO_LOCK(m_mutex)
+
 		m_serversAddressPort[0] = serverAddressPort;
 		m_serversAddressPort[1] = serverAddressPort;
 
-		selectServer1();
+		selectServer1(reconnect);
 	}
 
 
-	void Client::setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
+	void Client::setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, bool reconnect)
 	{
+		AUTO_LOCK(m_mutex)
+
 		m_serversAddressPort[0] = serverAddressPort1;
 		m_serversAddressPort[1] = serverAddressPort2;
 
-		selectServer1();
+		selectServer1(reconnect);
 	}
 
 
@@ -710,7 +765,7 @@ namespace Tcp
 
 		connect(&m_periodicTimer, &QTimer::timeout, this, &Client::onPeriodicTimer);
 
-		m_periodicTimer.setInterval(1000);
+		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
 		m_periodicTimer.start();
 
 		connectToServer();
@@ -735,6 +790,16 @@ namespace Tcp
 	}
 
 
+	void Client::initReadStatusVariables()
+	{
+		m_clientState = ClientState::ClearToSendRequest;
+		m_readState = ReadState::WaitingAnything;
+		m_readedHeaderSize = 0;
+		m_readedDataSize = 0;
+		m_connectTimeout = 0;
+	}
+
+
 	void Client::onConnection()
 	{
 		qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
@@ -749,16 +814,41 @@ namespace Tcp
 
 	void Client::onHeaderAndDataReady()
 	{
-		assert(m_clientState == ClientState::WaitingForReply);
+		if (m_clientState != ClientState::WaitingForReply)
+		{
+			assert(false);
+			closeConnection();
+			return;
+		}
+
+		if (m_header.id != m_sentRequestHeader.id ||
+			m_header.numerator != m_sentRequestHeader.numerator)
+		{
+			assert(false);
+			closeConnection();
+			return;
+		}
 
 		switch(m_header.type)
 		{
 		case Header::Type::Ack:
-			processAck();
+			restartReplyTimeoutTimer();
+
+			onAck();
+
+			qDebug() << "ack received";
+
+			m_readState = ReadState::WaitingForHeader;
+
 			break;
 
 		case Header::Type::Reply:
+			initReadStatusVariables();
+
+			qDebug() << "reply received";
+
 			processReply(m_header.id, m_dataBuffer, m_header.dataSize);
+
 			break;
 
 		default:
@@ -767,23 +857,50 @@ namespace Tcp
 	}
 
 
-	void Client::processAck()
+	void Client::autoSwitchServer()
 	{
-		if (m_header.id == m_sentRequestHeader.id &&
-			m_header.numerator == m_sentRequestHeader.numerator)
+		AUTO_LOCK(m_mutex)
+
+		if (m_autoSwitchServer == true)
 		{
-			restartReplyTimeoutTimer();
-			onAck();
+			if (m_selectedServerIndex == 0)
+			{
+				m_selectedServerIndex = 1;
+			}
+			else
+			{
+				m_selectedServerIndex = 0;
+			}
+
+			m_selectedServer = m_serversAddressPort[m_selectedServerIndex];
 		}
-		else
+	}
+
+
+	void Client::selectServer(int serverIndex, bool reconnect)
+	{
+		AUTO_LOCK(m_mutex)
+
+		if (serverIndex < 0 || serverIndex > 1)
 		{
 			assert(false);
+			serverIndex = 0;
+		}
+
+		m_selectedServerIndex = serverIndex;
+		m_selectedServer = m_serversAddressPort[m_selectedServerIndex];
+
+		if (reconnect == true)
+		{
+			closeConnection();
 		}
 	}
 
 
 	void Client::connectToServer()
 	{
+		AUTO_LOCK(m_mutex);
+
 		if (m_tcpSocket == nullptr)
 		{
 			assert(false);
@@ -798,9 +915,18 @@ namespace Tcp
 
 	void Client::onPeriodicTimer()
 	{
-		if (isUnconnected())
+		if (isConnected() == false)
 		{
-			connectToServer();
+			m_connectTimeout++;
+
+			if (m_connectTimeout >= TCP_CONNECT_TIMEOUT)
+			{
+				autoSwitchServer();
+				createSocket();
+				connectToServer();
+
+				m_connectTimeout = 0;
+			}
 		}
 	}
 
@@ -808,8 +934,7 @@ namespace Tcp
 	void Client::onReplyTimeoutTimer()
 	{
 		onReplyTimeout();
-
-		//closeConnection();
+		closeConnection();
 	}
 
 
@@ -822,6 +947,12 @@ namespace Tcp
 	void Client::restartReplyTimeoutTimer()
 	{
 		m_replyTimeoutTimer.start(TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT);
+	}
+
+
+	void Client::sendRequest(quint32 requestID)
+	{
+		sendRequest(requestID, nullptr, 0);
 	}
 
 
@@ -853,7 +984,7 @@ namespace Tcp
 
 		m_requestNumerator++;
 
-		qint64 written = m_tcpSocket->write(reinterpret_cast<const char*>(&m_sentRequestHeader), sizeof(m_sentRequestHeader));
+		qint64 written = socketWrite(m_sentRequestHeader);
 
 		if (written == -1)
 		{
@@ -867,25 +998,33 @@ namespace Tcp
 			return;
 		}
 
-		written = m_tcpSocket->write(requestData, requestDataSize);
-
-		if (written == -1)
+		if (requestDataSize > 0)
 		{
-			qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
-			return;
-		}
+			if (requestData == nullptr)
+			{
+				assert(false);
+				return;
+			}
 
-		if (written < requestDataSize)
-		{
-			assert(false);
-			return;
-		}
+			written = socketWrite(requestData, requestDataSize);
 
-		m_tcpSocket->flush();		//	?
+			if (written == -1)
+			{
+				qDebug() << qPrintable(QString("Socket write error: %1").arg(m_tcpSocket->errorString()));
+				return;
+			}
+
+			if (written < requestDataSize)
+			{
+				assert(false);
+				return;
+			}
+		}
 
 		restartReplyTimeoutTimer();
 
 		m_clientState = ClientState::WaitingForReply;
+		m_readState = ReadState::WaitingForHeader;
 	}
 
 }
