@@ -34,6 +34,16 @@ void Property::setDescription(QString value)
 	m_description = value;
 }
 
+QString Property::category() const
+{
+    return m_category;
+}
+
+void Property::setCategory(QString value)
+{
+    m_category = value;
+}
+
 bool Property::readOnly() const
 {
 	return m_readOnly;

@@ -64,6 +64,7 @@ namespace ExtWidgets
 
 	private:
 		QLineEdit* m_lineEdit = nullptr;
+        QToolButton* m_button = nullptr;
 		bool m_escape = false;
 		QVariant m_oldPath;
 
@@ -119,6 +120,7 @@ namespace ExtWidgets
 
 	private:
 		QLineEdit* m_lineEdit = nullptr;
+        QToolButton* m_button = nullptr;
 		bool m_escape = false;
 		QColor m_oldColor;
 
@@ -185,6 +187,7 @@ namespace ExtWidgets
 
 	private:
 		QLineEdit* m_lineEdit = nullptr;
+        QToolButton* m_button = nullptr;
 		bool m_escape = false;
 		QString m_oldValue;
 	};
@@ -370,7 +373,7 @@ namespace ExtWidgets
 		//
 	private:
 		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values);
-        QtProperty* createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const std::shared_ptr<Property> value, bool sameValue);
+        QtProperty* createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
 	};
 
 }

@@ -48,18 +48,18 @@ namespace ExtWidgets
 	{
 		m_lineEdit = new QLineEdit(parent);
 
-		QToolButton* button = new QToolButton(parent);
-		button->setText("...");
+        m_button = new QToolButton(parent);
+        m_button->setText("...");
 
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiFilePathEdit::onEditingFinished);
 
-		connect(button, &QToolButton::clicked, this, &QtMultiFilePathEdit::onButtonPressed);
+        connect(m_button, &QToolButton::clicked, this, &QtMultiFilePathEdit::onButtonPressed);
 
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(0, 0, 0, 0);
 		lt->setSpacing(0);
 		lt->addWidget(m_lineEdit);
-		lt->addWidget(button, 0, Qt::AlignRight);
+        lt->addWidget(m_button, 0, Qt::AlignRight);
 
 		setLayout(lt);
 
@@ -118,6 +118,8 @@ namespace ExtWidgets
 
         FilePathPropertyType f = property->value().value<FilePathPropertyType>();
 		m_lineEdit->setText(f.filePath);
+        m_lineEdit->setReadOnly(property->readOnly());
+        m_button->setEnabled(property->readOnly() == false);
 	}
 
 	void QtMultiFilePathEdit::onEditingFinished()
@@ -195,6 +197,8 @@ namespace ExtWidgets
 		{
 			m_combo->setCurrentIndex(-1);
         }
+
+        m_combo->setEnabled(property->readOnly() == false);
 	}
 
 	void QtMultiEnumEdit::indexChanged(int index)
@@ -217,18 +221,18 @@ namespace ExtWidgets
 	{
 		m_lineEdit = new QLineEdit(parent);
 
-		QToolButton* button = new QToolButton(parent);
-		button->setText("...");
+        m_button = new QToolButton(parent);
+        m_button->setText("...");
 
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiColorEdit::onEditingFinished);
 
-		connect(button, &QToolButton::clicked, this, &QtMultiColorEdit::onButtonPressed);
+        connect(m_button, &QToolButton::clicked, this, &QtMultiColorEdit::onButtonPressed);
 
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(0, 0, 0, 0);
 		lt->setSpacing(0);
 		lt->addWidget(m_lineEdit);
-		lt->addWidget(button, 0, Qt::AlignRight);
+        lt->addWidget(m_button, 0, Qt::AlignRight);
 
 		setLayout(lt);
 
@@ -305,6 +309,8 @@ namespace ExtWidgets
 		m_oldColor = color;
 
         m_lineEdit->setText(str);
+        m_lineEdit->setReadOnly(property->readOnly());
+        m_button->setEnabled(property->readOnly() == false);
 	}
 
 	void QtMultiColorEdit::onEditingFinished()
@@ -429,18 +435,18 @@ namespace ExtWidgets
 	{
 		m_lineEdit = new QLineEdit(parent);
 
-		QToolButton* button = new QToolButton(parent);
-		button->setText("...");
+        m_button = new QToolButton(parent);
+        m_button->setText("...");
 
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
 
-		connect(button, &QToolButton::clicked, this, &QtMultiTextEdit::onButtonPressed);
+        connect(m_button, &QToolButton::clicked, this, &QtMultiTextEdit::onButtonPressed);
 
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(0, 0, 0, 0);
 		lt->setSpacing(0);
 		lt->addWidget(m_lineEdit);
-		lt->addWidget(button, 0, Qt::AlignRight);
+        lt->addWidget(m_button, 0, Qt::AlignRight);
 
 		setLayout(lt);
 
@@ -497,6 +503,8 @@ namespace ExtWidgets
 
         m_oldValue = property->value().toString();
         m_lineEdit->setText(m_oldValue);
+        m_lineEdit->setReadOnly(property->readOnly());
+        m_button->setEnabled(property->readOnly() == false);
 	}
 
 	void QtMultiTextEdit::onEditingFinished()
@@ -566,7 +574,34 @@ namespace ExtWidgets
 		}
 
         m_spinBox->blockSignals(true);
+
+        // Set limits
+        //
+        bool ok1 = false;
+        bool ok2 = false;
+        double lowLimit = property->lowLimit().toDouble(&ok1);
+        double highLimit = property->lowLimit().toDouble(&ok2);
+        if (ok1 == true && ok2 == true && lowLimit < highLimit)
+        {
+            m_spinBox->setRange(lowLimit, highLimit);
+
+        }
+
+        // Set step
+        //
+        bool ok3 = false;
+        double step = property->step().toDouble(&ok3);
+        if (ok3 == true && step > 0)
+        {
+            m_spinBox->setSingleStep(step);
+        }
+
+        // Set precision and value
+        //
+        m_spinBox->setDecimals(property->precision());
         m_spinBox->setValue(property->value().toDouble());
+        m_spinBox->setReadOnly(property->readOnly());
+
 		m_spinBox->blockSignals(false);
 	}
 
@@ -629,7 +664,33 @@ namespace ExtWidgets
 		}
 
         m_spinBox->blockSignals(true);
+
+        // Set limits
+        //
+        bool ok1 = false;
+        bool ok2 = false;
+        int lowLimit = property->lowLimit().toInt(&ok1);
+        int highLimit = property->lowLimit().toInt(&ok2);
+        if (ok1 == true && ok2 == true && lowLimit < highLimit)
+        {
+            m_spinBox->setRange(lowLimit, highLimit);
+
+        }
+
+        // Set step
+        //
+        bool ok3 = false;
+        int step = property->step().toInt(&ok3);
+        if (ok3 == true && step > 0)
+        {
+            m_spinBox->setSingleStep(step);
+        }
+
+        // Set precision and value
+        //
         m_spinBox->setValue(property->value().toInt());
+        m_spinBox->setReadOnly(property->readOnly());
+
 		m_spinBox->blockSignals(false);
 	}
 
@@ -650,7 +711,6 @@ namespace ExtWidgets
 	{
 		m_spinBox = new QSpinBox(parent);
 		m_spinBox->setKeyboardTracking(false);
-		// warning! a problem that QSpinBox::setRange needs "ints", and we have uint type...
 		m_spinBox->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 
 		connect(m_spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
@@ -693,7 +753,36 @@ namespace ExtWidgets
 		}
 
         m_spinBox->blockSignals(true);
+
+        // QSpinBox has limits and step parameters with type int!
+        //
+
+        // Set limits
+        //
+        bool ok1 = false;
+        bool ok2 = false;
+        int lowLimit = property->lowLimit().toInt(&ok1);
+        int highLimit = property->lowLimit().toInt(&ok2);
+        if (ok1 == true && ok2 == true && lowLimit < highLimit)
+        {
+            m_spinBox->setRange(lowLimit, highLimit);
+
+        }
+
+        // Set step
+        //
+        bool ok3 = false;
+        int step = property->step().toInt(&ok3);
+        if (ok3 == true && step > 0)
+        {
+            m_spinBox->setSingleStep(step);
+        }
+
+        // Set precision and value
+        //
         m_spinBox->setValue(property->value().toUInt());
+        m_spinBox->setReadOnly(property->readOnly());
+
 		m_spinBox->blockSignals(false);
 	}
 
@@ -708,7 +797,7 @@ namespace ExtWidgets
 	//
 	// ---------QtMultiCheckBox----------
 	//
-	static QIcon drawCheckBox(int state)
+    static QIcon drawCheckBox(int state, bool enabled)
 	{
 		QStyleOptionButton opt;
 		switch (state)
@@ -726,7 +815,15 @@ namespace ExtWidgets
 				Q_ASSERT(false);
 		}
 
-		opt.state |= QStyle::State_Enabled;
+        if (enabled == false)
+        {
+            opt.state |= QStyle::State_ReadOnly;
+        }
+        else
+        {
+            opt.state |= QStyle::State_Enabled;
+        }
+
 		const QStyle *style = QApplication::style();
 		// Figure out size of an indicator and make sure it is not scaled down in a list view item
 		// by making the pixmap as big as a list view icon and centering the indicator in it.
@@ -811,6 +908,7 @@ namespace ExtWidgets
             m_checkBox->setCheckState(Qt::PartiallyChecked);
         }
 		updateText();
+        m_checkBox->setEnabled(property->readOnly() == false);
 		m_checkBox->blockSignals(false);
 	}
 
@@ -1258,9 +1356,7 @@ namespace ExtWidgets
             return QIcon();
         }
 
-        Property* _p = p.get();
-
-        QVariant value = _p->value();
+        QVariant value = p->value();
 
         switch (value.userType())
 		{
@@ -1269,11 +1365,11 @@ namespace ExtWidgets
 					if (sameValue(property) == true)
 					{
                         Qt::CheckState checkState = value.toBool() == true ? Qt::Checked : Qt::Unchecked;
-						return drawCheckBox(checkState);
+                        return drawCheckBox(checkState, p->readOnly() == false);
 					}
 					else
 					{
-						return drawCheckBox(Qt::PartiallyChecked);
+                        return drawCheckBox(Qt::PartiallyChecked, p->readOnly() == false);
 					}
 				}
 				break;
@@ -1500,13 +1596,16 @@ namespace ExtWidgets
 
             for (std::shared_ptr<Property> p : object->properties())
 			{
-                Property* _p = p.get();
+                if (p->visible() == false)
+                {
+                    continue;
+                }
 
-                propertyItems.insertMulti(_p->caption(), p);
+                propertyItems.insertMulti(p->caption(), p);
 
-                if (propertyNames.indexOf(_p->caption()) == -1)
+                if (propertyNames.indexOf(p->caption()) == -1)
 				{
-                    propertyNames.append(_p->caption());
+                    propertyNames.append(p->caption());
 				}
 			}
 		}
@@ -1585,14 +1684,42 @@ namespace ExtWidgets
                 continue;
             }
 
-            createProperty(nullptr, p.get()->caption(), p.get()->caption(), p, sameValue);
+            // set the description and limits
+            //
+            QString description = p->description().isEmpty() ? p->caption() : p->description();
+
+            if (p->value().userType() == QVariant::Double)
+            {
+                bool ok1 = false;
+                bool ok2 = false;
+                double l = p->lowLimit().toDouble(&ok1);
+                double h = p->highLimit().toDouble(&ok2);
+
+                if (ok1 == true && ok2 == true && l < h)
+                {
+                    description = QString("%1 [%2 - %3]").arg(description).arg(l).arg(h);
+                }
+            }
+            if (p->value().userType() == QVariant::Int || p->value().userType() == QVariant::UInt)
+            {
+                bool ok1 = false;
+                bool ok2 = false;
+                int l = p->lowLimit().toInt(&ok1);
+                int h = p->highLimit().toInt(&ok2);
+
+                if (ok1 == true && ok2 == true && l < h)
+                {
+                    description = QString("%1 [%2 - %3]").arg(description).arg(l).arg(h);
+                }
+            }
+            createProperty(nullptr, p.get()->caption(), p.get()->caption(), description, p, sameValue);
 		}
 
 		setVisible(true);
 		return;
 	}
 
-    QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const std::shared_ptr<Property> value, bool sameValue)
+    QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& name, const QString& fullName, const QString& description, const std::shared_ptr<Property> value, bool sameValue)
 	{
 		int slashPos = name.indexOf("\\");
 		if (parentProperty == nullptr || slashPos != -1)
@@ -1641,7 +1768,7 @@ namespace ExtWidgets
 				subGroup = m_propertyGroupManager->addProperty(groupName);
 			}
 
-            QtProperty* property = createProperty(subGroup, propName, fullName, value, sameValue);
+            QtProperty* property = createProperty(subGroup, propName, fullName, description, value, sameValue);
 
 			if (parentProperty == nullptr)
 			{
@@ -1662,6 +1789,7 @@ namespace ExtWidgets
 
 
             subProperty = m_propertyVariantManager->addProperty(fullName);
+            subProperty->setToolTip(description);
             m_propertyVariantManager->setProperty(subProperty, value);
             m_propertyVariantManager->setAttribute(subProperty, "@propertyEditor@sameValue", sameValue);
 
