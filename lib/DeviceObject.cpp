@@ -372,7 +372,7 @@ namespace Hardware
 		min:		property minimum value (ignored for bool, string)
 		max:		property maximim value (ignored for bool, string)
 		default:	can be any value of the specified type
-		 */
+		*/
 
 		QStringList rows = m_dynamicPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
 
@@ -447,6 +447,7 @@ namespace Hardware
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
 				newProperty->setValue(QVariant(defaultInt));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -482,6 +483,7 @@ namespace Hardware
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
 				newProperty->setValue(QVariant(defaultUInt));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -517,6 +519,7 @@ namespace Hardware
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
 				newProperty->setValue(QVariant(defaultDouble));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -534,6 +537,7 @@ namespace Hardware
 				newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setValue(QVariant(defaultBool));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -547,6 +551,7 @@ namespace Hardware
 				newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setValue(QVariant(defaultValue.toString()));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}

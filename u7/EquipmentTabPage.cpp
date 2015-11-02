@@ -2016,13 +2016,15 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		preset == nullptr ||
 		device->preset() == false ||
 		preset->preset() == false ||
-		device->presetName() != preset->presetName())
+		device->presetName() != preset->presetName() ||
+		device->presetRoot() != preset->presetRoot())
 	{
 		assert(device);
 		assert(preset);
 		assert(device->preset() == true);
 		assert(preset->preset() == true);
 		assert(device->presetName() == preset->presetName());
+		assert(device->presetRoot() == preset->presetRoot());
 		return false;
 	}
 
@@ -2034,9 +2036,10 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	// Update device object properties
 	//
-	const QMetaObject* deviceMetaObject = device->metaObject();
+	//auto deviceProperties =
 
-	QStringList deviceProperties;
+	//const QMetaObject* deviceMetaObject = device->metaObject();
+	//QStringList deviceProperties;
 
 //	for(int i = 0; i < deviceMetaObject->propertyCount(); i++)
 //	{
