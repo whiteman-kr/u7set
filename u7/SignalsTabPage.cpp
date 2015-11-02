@@ -156,7 +156,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_DATA_SIZE:
 		{
-			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].type() == SignalType::Discrete)
+			if (m_signalSet.count() > index.row() && m_signalSet[index.row()].type() == E::SignalType::Discrete)
 			{
 				return nullptr;
 			}
@@ -241,9 +241,12 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_BYTE_ORDER:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			for (int i = 0; i < TO_INT(ByteOrder::Count); i++)
+
+			auto byteOrderList = E::enumValues<E::ByteOrder>();
+
+			for (auto bo : byteOrderList)
 			{
-				cb->addItem(ByteOrderStr[i]);
+				cb->addItem(bo.second);
 			}
 			return cb;
 		}
@@ -358,7 +361,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_MAX_DIFFERENCE: if (le) s.setMaxDifference(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(cb->currentIndex()))); break;
+		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.key(cb->currentIndex()))); break;
 		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
@@ -368,7 +371,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_CALCULATED: if (cb) s.setCalculated(cb->currentIndex() == 0 ? false : true); break;
 		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(SignalInOutType(cb->currentIndex())); break;
-		case SC_BYTE_ORDER: if (cb) s.setByteOrder(ByteOrder(cb->currentIndex())); break;
+		case SC_BYTE_ORDER: if (cb) s.setByteOrder(E::ByteOrder(cb->currentIndex())); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		case SC_TYPE:
@@ -635,7 +638,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		if (signal.type() == SignalType::Analog)
+		if (signal.type() == E::SignalType::Analog)
 		{
 			switch (col)
 			{
@@ -686,7 +689,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_FILTERING_TIME: return signal.filteringTime();
 				case SC_MAX_DIFFERENCE: return signal.maxDifference();
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
-				case SC_BYTE_ORDER: return (signal.byteOrderInt() < ENUM_COUNT(ByteOrder)) ? ByteOrderStr[signal.byteOrderInt()] : tr("Unknown byte order");
+				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 				default:
@@ -716,7 +719,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_DATA_SIZE: return signal.dataSize();
 				case SC_ACQUIRE: return signal.acquire() ? tr("Yes") : tr("No");
 				case SC_IN_OUT_TYPE: return (signal.inOutType() < IN_OUT_TYPE_COUNT) ? InOutTypeStr[signal.inOutType()] : tr("Unknown type");
-				case SC_BYTE_ORDER: return (signal.byteOrderInt() < ENUM_COUNT(ByteOrder)) ? ByteOrderStr[signal.byteOrderInt()] : tr("Unknown byte order");
+				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 				case SC_DEVICE_STR_ID: return signal.deviceStrID();
 
 				case SC_LOW_ADC:
@@ -815,7 +818,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setStrID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setExtStrID(value.toString()); break;
 			case SC_NAME: signal.setName(value.toString()); break;
-			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<DataFormat>(value.toInt())); break;
+			case SC_DATA_FORMAT: signal.setDataFormat(static_cast<E::DataFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
@@ -843,7 +846,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
 			case SC_MAX_DIFFERENCE: signal.setMaxDifference(value.toDouble()); break;
 			case SC_IN_OUT_TYPE: signal.setInOutType(SignalInOutType(value.toInt())); break;
-			case SC_BYTE_ORDER: signal.setByteOrder(ByteOrder(value.toInt())); break;
+			case SC_BYTE_ORDER: signal.setByteOrder(E::ByteOrder(value.toInt())); break;
 			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
 			case SC_CHANNEL:
@@ -1030,13 +1033,13 @@ void SignalsModel::addSignal()
 
 	QSettings settings;
 
-	if (SignalType(signalTypeCombo->currentIndex()) == SignalType::Analog)
+	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
-		signal.setDataFormat(DataFormat::Float);
+		signal.setDataFormat(E::DataFormat::Float);
 	}
 	else
 	{
-		signal.setDataFormat(static_cast<DataFormat>(m_dataFormatInfo.key(settings.value("LastEditedSignal: dataFormat").toInt())));
+		signal.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.key(settings.value("LastEditedSignal: dataFormat").toInt())));
 	}
 	signal.setDataSize(settings.value("LastEditedSignal: dataSize").toInt());
 	signal.setLowADC(settings.value("LastEditedSignal: lowADC").toInt());
@@ -1081,9 +1084,9 @@ void SignalsModel::addSignal()
 	signal.setFilteringTime(settings.value("LastEditedSignal: filteringTime").toDouble());
 	signal.setMaxDifference(settings.value("LastEditedSignal: maxDifference").toDouble());
 	signal.setInOutType(SignalInOutType(settings.value("LastEditedSignal: inOutType").toInt()));
-	signal.setByteOrder(ByteOrder(settings.value("LastEditedSignal: byteOrder").toInt()));
+	signal.setByteOrder(E::ByteOrder(settings.value("LastEditedSignal: byteOrder").toInt()));
 
-	SignalPropertiesDialog dlg(signal, SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, false, nullptr, m_parentWindow);
+	SignalPropertiesDialog dlg(signal, E::SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, false, nullptr, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1118,7 +1121,7 @@ void SignalsModel::addSignal()
 				signalVector[i].setName(name);
 			}
 
-			if (dbController()->addSignal(SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
+			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, m_parentWindow))
 			{
 				for (int i = 0; i < signalVector.count(); i++)
 				{
@@ -1191,7 +1194,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 
 	int readOnly = false;
 	QVector<Signal*> signalVector;
-	SignalType signalType = SignalType::Analog;
+	E::SignalType signalType = E::SignalType::Analog;
 
 	for (int i = 0; i < ids.count(); i++)
 	{
@@ -1200,9 +1203,9 @@ bool SignalsModel::editSignals(QVector<int> ids)
 		{
 			readOnly = true;
 		}
-		if (signal.type() == SignalType::Discrete)
+		if (signal.type() == E::SignalType::Discrete)
 		{
-			signalType = SignalType::Discrete;
+			signalType = E::SignalType::Discrete;
 		}
 		signalVector.append(&signal);
 	}

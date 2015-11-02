@@ -3557,15 +3557,25 @@ class SchemeItemSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
       mutable_signalstrids();
 
+  // optional bool multiChannel = 2 [default = false];
+  inline bool has_multichannel() const;
+  inline void clear_multichannel();
+  static const int kMultiChannelFieldNumber = 2;
+  inline bool multichannel() const;
+  inline void set_multichannel(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemeItemSignal)
  private:
+  inline void set_has_multichannel();
+  inline void clear_has_multichannel();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::wstring > signalstrids_;
+  bool multichannel_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9520,6 +9530,28 @@ SchemeItemSignal::signalstrids() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::wstring >*
 SchemeItemSignal::mutable_signalstrids() {
   return &signalstrids_;
+}
+
+// optional bool multiChannel = 2 [default = false];
+inline bool SchemeItemSignal::has_multichannel() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemeItemSignal::set_has_multichannel() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemeItemSignal::clear_has_multichannel() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemeItemSignal::clear_multichannel() {
+  multichannel_ = false;
+  clear_has_multichannel();
+}
+inline bool SchemeItemSignal::multichannel() const {
+  return multichannel_;
+}
+inline void SchemeItemSignal::set_multichannel(bool value) {
+  set_has_multichannel();
+  multichannel_ = value;
 }
 
 // -------------------------------------------------------------------

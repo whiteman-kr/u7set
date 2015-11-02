@@ -50,6 +50,9 @@ namespace VFrame30
 		//
 		bool setAfbElementParams(Afb::AfbElement* afbElement) const;
 
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+
 	protected:
 		void addQtDynamicParamProperties();
 		bool executeScript(const QString& script, const Afb::AfbElement& afb);

@@ -80,7 +80,8 @@ SOURCES += main.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
-    ../lib/PropertyObject.cpp
+    ../lib/PropertyObject.cpp \
+    ../lib/Types.cpp
 
 HEADERS += \
         Stable.h \
@@ -97,7 +98,8 @@ HEADERS += \
     ../include/ProtoSerialization.h \
     ../include/Signal.h \
     ../include/CUtils.h \
-    ../include/PropertyObject.h
+    ../include/PropertyObject.h \
+    ../include/Types.h
 
 include(../qtservice/src/qtservice.pri)
 

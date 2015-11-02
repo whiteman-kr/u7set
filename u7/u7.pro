@@ -96,7 +96,6 @@ SOURCES +=\
 	../lib/StreamedData.cpp \
 	../lib/ProtoSerialization.cpp \
 	../lib/Signal.cpp \
-	../lib/PropertyEditor.cpp \
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
@@ -137,7 +136,10 @@ SOURCES +=\
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
 	../lib/PropertyObject.cpp \
-    Builder/FbParamCalculation.cpp
+    Builder/FbParamCalculation.cpp \
+    ../lib/PropertyEditorOld.cpp \
+    ../lib/PropertyEditor.cpp \
+    ../lib/Types.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -164,7 +166,6 @@ HEADERS  += \
 	../include/CUtils.h \
 	../include/Signal.h \
 	../include/OrderedHash.h \
-	../include/PropertyEditor.h \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
@@ -206,7 +207,9 @@ HEADERS  += \
     EquipmentVcsDialog.h \
     ../include/DataSource.h \
     ../include/SocketIO.h \
-    ../include/PropertyObject.h
+    ../include/PropertyObject.h \
+    ../include/PropertyEditorOld.h \
+    ../include/PropertyEditor.h
 
 FORMS    += \
     ChangesetDialog.ui \

@@ -1,5 +1,6 @@
 #include "../include/PropertyObject.h"
 #include <QDebug>
+#include "../Proto/serialization.pb.h"
 
 //
 //
@@ -12,6 +13,94 @@ Property::Property()
 
 Property::~Property()
 {
+}
+
+void Property::saveValue(::Proto::Property* protoProperty) const
+{
+	protoProperty->set_name(m_caption.toLocal8Bit());
+
+	QString valueStr;
+
+	QVariant value = this->value();
+
+	switch (value.type())
+	{
+		case QVariant::Bool:
+			valueStr = value.toBool() ? "t" : "f";
+			break;
+		case QVariant::Int:
+			valueStr.setNum(value.toInt());
+			break;
+		case QVariant::UInt:
+			valueStr.setNum(value.toUInt());
+			break;
+		case QVariant::String:
+			valueStr = value.toString();
+			break;
+		case QVariant::Double:
+			valueStr.setNum(value.toDouble());
+			break;
+		default:
+			assert(false);
+	}
+
+	protoProperty->set_value(valueStr.toLocal8Bit());
+}
+
+bool Property::loadValue(const ::Proto::Property& protoProperty)
+{
+	if (protoProperty.name() != m_caption.toStdString())
+	{
+		assert(protoProperty.name() == m_caption.toStdString());
+		return false;
+	}
+
+	bool ok = false;
+	QString sv(protoProperty.value().c_str());
+	QVariant value = this->value();
+
+	switch (value.type())
+	{
+		case QVariant::Bool:
+			{
+				value = (sv == "t") ? true : false;
+				ok = true;
+			}
+			break;
+		case QVariant::Int:
+			{
+				qint32 i = sv.toInt(&ok);
+				value = QVariant(i);
+			}
+			break;
+		case QVariant::UInt:
+			{
+				quint32 ui = sv.toUInt(&ok);
+				value = QVariant(ui);
+			}
+			break;
+		case QVariant::String:
+			{
+				value = sv;
+				ok = true;
+			}
+			break;
+		case QVariant::Double:
+			{
+				double d = sv.toDouble(&ok);
+				value = QVariant(d);
+			}
+			break;
+		default:
+			assert(false);
+	}
+
+	if (ok == true)
+	{
+		setValue(value);
+	}
+
+	return ok;
 }
 
 QString Property::caption() const
@@ -34,6 +123,16 @@ void Property::setDescription(QString value)
 	m_description = value;
 }
 
+QString Property::category() const
+{
+    return m_category;
+}
+
+void Property::setCategory(QString value)
+{
+	m_category = value;
+}
+
 bool Property::readOnly() const
 {
 	return m_readOnly;
@@ -52,6 +151,16 @@ bool Property::updateFromPreset() const
 void Property::setUpdateFromPreset(bool value)
 {
 	m_updateFromPreset = value;
+}
+
+bool Property::dynamic() const
+{
+	return m_dynamic;
+}
+
+void Property::setDynamic(bool value)
+{
+	m_dynamic = value;
 }
 
 bool Property::visible() const
@@ -93,20 +202,16 @@ PropertyObject::PropertyObject(QObject* parent) :
 
 PropertyObject::~PropertyObject()
 {
-	for (auto p : m_properties)
-	{
-		delete p.second;
-	}
 
 	return;
 }
 
-std::vector<Property*> PropertyObject::properties()
+std::vector<std::shared_ptr<Property>> PropertyObject::properties() const
 {
-	std::vector<Property*> result;
+    std::vector<std::shared_ptr<Property>> result;
 	result.reserve(m_properties.size());
 
-	for (std::pair<QString, Property*> p : m_properties)
+    for (std::pair<QString, std::shared_ptr<Property>> p : m_properties)
 	{
 		result.push_back(p.second);
 	}
@@ -114,9 +219,29 @@ std::vector<Property*> PropertyObject::properties()
 	return result;
 }
 
-Property* PropertyObject::propertyByCaption(QString caption)
+void PropertyObject::removeAllProperties()
 {
-	Property* result = nullptr;
+	m_properties.clear();
+}
+
+void PropertyObject::removeDynamicProperties()
+{
+	for(auto it = m_properties.begin(); it != m_properties.end();)
+	{
+		if(it->second->dynamic() == true)
+		{
+			it = m_properties.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+std::shared_ptr<Property> PropertyObject::propertyByCaption(QString caption)
+{
+    std::shared_ptr<Property> result = nullptr;
 
 	auto it = m_properties.find(caption);
 
@@ -128,9 +253,9 @@ Property* PropertyObject::propertyByCaption(QString caption)
 	return result;
 }
 
-const Property* PropertyObject::propertyByCaption(QString caption) const
+const std::shared_ptr<Property> PropertyObject::propertyByCaption(QString caption) const
 {
-	const Property* result = nullptr;
+    std::shared_ptr<Property> result = nullptr;
 
 	auto it = m_properties.find(caption);
 
@@ -153,6 +278,7 @@ QVariant PropertyObject::propertyValue(QString caption) const
 	}
 	else
 	{
+        qDebug() << "PropertyObject::propertyValue: property not found: " << caption;
 		return QVariant();
 	}
 }
@@ -166,7 +292,7 @@ bool PropertyObject::setPropertyValue(QString caption, const char* value)
 		return false;
 	}
 
-	Property* property = it->second;
+    std::shared_ptr<Property> property = it->second;
 
 	if (property->isEnum() == true)
 	{
@@ -175,7 +301,7 @@ bool PropertyObject::setPropertyValue(QString caption, const char* value)
 	}
 	else
 	{
-		PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property);
+        PropertyValue<QString>* propertyValue = dynamic_cast<PropertyValue<QString>*>(property.get());
 
 		if (propertyValue == nullptr)
 		{
@@ -183,7 +309,7 @@ bool PropertyObject::setPropertyValue(QString caption, const char* value)
 			return false;
 		}
 
-		propertyValue->setValue(QString(value));
+		propertyValue->setValueDirect(QString(value));
 
 		return true;
 	}

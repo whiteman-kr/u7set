@@ -41,20 +41,45 @@ namespace VFrame30
 		{
 			r.setBottom(r.top() + 0.000001);
 		}
-
 		int dpiX = 96;
-		QPaintDevice* pPaintDevice = p->device();
-		if (pPaintDevice == nullptr)
+		QPaintDevice* paintDevice = p->device();
+		if (paintDevice == nullptr)
 		{
-			assert(pPaintDevice);
+			assert(paintDevice);
 			dpiX = 96;
 		}
 		else
 		{
-			dpiX = pPaintDevice->logicalDpiX();
+			dpiX = paintDevice->logicalDpiX();
 		}
 
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+
+
+		if (multiChannel() == true)
+		{
+			QPen pen(lineColor());
+			pen.setWidthF(m_weight);		// Don't use getter!
+			p->setPen(pen);
+
+			if (inputsCount() > 0)
+			{
+				const std::list<AfbPin>& inputPins = inputs();
+				assert(inputPins.empty() == false);
+
+				p->drawLine(QPointF(r.left() + (pinWidth / 3.0) * 2.0, inputPins.front().y() - pinWidth / 4.0),
+							QPointF(r.left() + (pinWidth / 3.0) * 1.0, inputPins.front().y() + pinWidth / 4.0));
+			}
+
+			if (outputsCount() > 0)
+			{
+				const std::list<AfbPin>& pins = outputs();
+				assert(pins.empty() == false);
+
+				p->drawLine(QPointF(r.right() - (pinWidth / 3.0) * 2.0, pins.front().y() + pinWidth / 4.0),
+							QPointF(r.right() - (pinWidth / 3.0) * 1.0, pins.front().y() - pinWidth / 4.0));
+			}
+		}
 
 		if (inputsCount() > 0)
 		{
@@ -107,6 +132,16 @@ namespace VFrame30
 		return &m_signalStrIds;
 	}
 
+	bool SchemeItemSignal::multiChannel() const
+	{
+		return m_multiChannel;
+	}
+
+	void SchemeItemSignal::setMultiChannel(bool value)
+	{
+		m_multiChannel = value;
+	}
+
 	bool SchemeItemSignal::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
@@ -127,6 +162,8 @@ namespace VFrame30
 			::Proto::wstring* ps = signal->add_signalstrids();
 			Proto::Write(ps, strId);
 		}
+
+		signal->set_multichannel(m_multiChannel);
 
 		return true;
 	}
@@ -166,6 +203,8 @@ namespace VFrame30
 			Proto::Read(signal.signalstrids().Get(i), &s);
 			m_signalStrIds.push_back(s);
 		}
+
+		m_multiChannel = signal.multichannel();
 
 		return true;
 	}

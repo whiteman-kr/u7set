@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <memory>
 #include "../VFrame30/SchemeItem.h"
-#include "../include/PropertyEditor.h"
+#include "../include/PropertyEditorOld.h"
 
 
 namespace Ui {
@@ -45,7 +45,7 @@ private:
 //
 //
 
-class SchemeItemPropertyEditor : public ExtWidgets::PropertyEditor
+class SchemeItemPropertyEditor : public ExtWidgetsOld::PropertyEditorOld
 {
 	Q_OBJECT
 

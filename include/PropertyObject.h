@@ -8,12 +8,18 @@
 #include <vector>
 #include <utility>
 #include <assert.h>
+#include <memory>
 
 #include <QObject>
 #include <QString>
 #include <QVariant>
 #include <QMetaEnum>
 
+
+namespace Proto
+{
+	class Property;
+}
 
 // Add property which is stored in QVariant and does not have getter or setter
 //
@@ -46,6 +52,9 @@ public:
 	virtual ~Property();
 
 public:
+	void saveValue(::Proto::Property* protoProperty) const;
+	bool loadValue(const ::Proto::Property& protoProperty);
+
 	virtual bool isEnum() const = 0;
 	virtual std::list<std::pair<int, QString>> enumValues() const = 0;
 
@@ -56,11 +65,17 @@ public:
 	QString description() const;
 	void setDescription(QString value);
 
+	QString category() const;
+	void setCategory(QString value);
+
 	bool readOnly() const;
 	void setReadOnly(bool value);
 
 	bool updateFromPreset() const;
 	void setUpdateFromPreset(bool value);
+
+	bool dynamic() const;
+	void setDynamic(bool value);
 
 	bool visible() const;
 	void setVisible(bool value);
@@ -74,12 +89,22 @@ public:
 	virtual void setEnumValue(int value) = 0;
 	virtual void setEnumValue(const char* value) = 0;
 
+    virtual const QVariant& lowLimit() const = 0;
+    virtual void setLowLimit(const QVariant& value) = 0;
+
+    virtual const QVariant& highLimit() const = 0;
+    virtual void setHighLimit(const QVariant& value) = 0;
+
+    virtual const QVariant& step() const = 0;
+    virtual void setStep(const QVariant& value) = 0;
+
 private:
 	QString m_caption;
 	QString m_description;
 	QString m_category;
 	bool m_readOnly = false;
-	bool m_updateFromPreset = false;
+	bool m_updateFromPreset = false;		// Update this property from preset, used in DeviceObject
+	bool m_dynamic = false;					// Dynamic property, used in DeviceObject
 	bool m_visible = false;
 	int m_precision = 0;
 };
@@ -167,7 +192,7 @@ public:
 		}
 	}
 
-	void setValue(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
+	void setValueDirect(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
 	{
 		if (m_setter)
 		{
@@ -303,6 +328,13 @@ private:
 	}
 
 public:
+
+	void setLimits(const QVariant& low, const QVariant& high)
+	{
+		setLowLimit(low);
+		setHighLimit(high);
+	}
+
 	const QVariant& lowLimit() const
 	{
 		return m_lowLimit;
@@ -377,7 +409,7 @@ public:
 									 std::function<TYPE(void)> getter = std::function<TYPE(void)>(),
 									 std::function<void(TYPE)> setter = std::function<void(TYPE)>())
 	{
-		PropertyValue<TYPE>* property = new PropertyValue<TYPE>();
+        std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
 
 		property->setCaption(caption);
 		property->setVisible(visible);
@@ -402,26 +434,33 @@ public:
 		}
 		else
 		{
-			delete alreadyExists->second;
 			alreadyExists->second = property;
 		}
 
-		return property;
+        return property.get();
 	}
 
 	// Get all properties
 	//
-	std::vector<Property*> properties();
+	std::vector<std::shared_ptr<Property>> properties() const;
+
+	// Delete all properties
+	//
+	void removeAllProperties();
+
+	// Delete all deynamic properties
+	//
+	void removeDynamicProperties();
 
 	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found
 	//
-	Property* propertyByCaption(QString caption);
-	const Property* propertyByCaption(QString caption) const;
+    std::shared_ptr<Property> propertyByCaption(QString caption);
+    const std::shared_ptr<Property> propertyByCaption(QString caption) const;
 
 	// Get property value
 	//
-	QVariant propertyValue(QString caption) const;
+    Q_INVOKABLE QVariant propertyValue(QString caption) const;
 
 	template <typename TYPE>
 	bool setPropertyValue(QString caption, const TYPE& value)
@@ -433,7 +472,7 @@ public:
 			return false;
 		}
 
-		Property* property = it->second;
+		std::shared_ptr<Property> property = it->second;
 
 		if (property->isEnum() == true)
 		{
@@ -444,7 +483,7 @@ public:
 		}
 		else
 		{
-			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property);
+			PropertyValue<TYPE>* propertyValue = dynamic_cast<PropertyValue<TYPE>*>(property.get());
 
 			if (propertyValue == nullptr)
 			{
@@ -452,19 +491,19 @@ public:
 				return false;
 			}
 
-			propertyValue->setValue(value);
+			propertyValue->setValueDirect(value);
 			return true;
 		}
 
 		return false;
 	}
 
-	bool setPropertyValue(QString caption, const char* value);
+    bool setPropertyValue(QString caption, const char* value);
 	bool setPropertyValue(QString caption, const QVariant& value);
 	std::list<std::pair<int, QString>> enumValues(QString property);
 
 private:
-	std::map<QString, Property*> m_properties;
+    std::map<QString, std::shared_ptr<Property>> m_properties;
 };
 
 

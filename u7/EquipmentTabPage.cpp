@@ -2016,13 +2016,15 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		preset == nullptr ||
 		device->preset() == false ||
 		preset->preset() == false ||
-		device->presetName() != preset->presetName())
+		device->presetName() != preset->presetName() ||
+		device->presetRoot() != preset->presetRoot())
 	{
 		assert(device);
 		assert(preset);
 		assert(device->preset() == true);
 		assert(preset->preset() == true);
 		assert(device->presetName() == preset->presetName());
+		assert(device->presetRoot() == preset->presetRoot());
 		return false;
 	}
 
@@ -2034,9 +2036,10 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	// Update device object properties
 	//
-	const QMetaObject* deviceMetaObject = device->metaObject();
+	//auto deviceProperties =
 
-	QStringList deviceProperties;
+	//const QMetaObject* deviceMetaObject = device->metaObject();
+	//QStringList deviceProperties;
 
 //	for(int i = 0; i < deviceMetaObject->propertyCount(); i++)
 //	{
@@ -2155,7 +2158,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	m_splitter = new QSplitter(this);
 
-	m_propertyEditor = new ExtWidgets::PropertyEditor(m_splitter);
+    m_propertyEditor = new ExtWidgets::PropertyEditor(m_splitter);
 
 	m_splitter->addWidget(m_equipmentView);
 	m_splitter->addWidget(m_propertyEditor);
@@ -2200,7 +2203,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 	connect(m_equipmentView, &EquipmentView::updateState, this, &EquipmentTabPage::setActionState);
 
-	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
+    connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
 
 	// Evidently, project is not opened yet
@@ -2835,8 +2838,8 @@ void EquipmentTabPage::setProperties()
 		return;
 	}
 
-	QList<std::shared_ptr<QObject>> checkedInList;
-	QList<std::shared_ptr<QObject>> checkedOutList;
+    QList<std::shared_ptr<PropertyObject>> checkedInList;
+    QList<std::shared_ptr<PropertyObject>> checkedOutList;
 
 	for (QModelIndex& mi : selectedIndexList)
 	{
@@ -2869,7 +2872,7 @@ void EquipmentTabPage::setProperties()
 	return;
 }
 
-void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<QObject>> objects)
+void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
 	std::vector<std::shared_ptr<DbFile>> files;
 

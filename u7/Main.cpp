@@ -111,8 +111,6 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<std::vector<std::shared_ptr<DbFile>>>();
 	qRegisterMetaType<std::vector<int>>();
 	qRegisterMetaType<std::vector<DbFileInfo>>();
-	qRegisterMetaType<SignalType>();
-
 
 	// Start database communication thread
 	//

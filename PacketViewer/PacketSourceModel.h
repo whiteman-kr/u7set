@@ -160,7 +160,7 @@ public:
 
 	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
-	void addListener(QString ip, int port);
+	void addListener(QString ip, int port, bool saveList = true);
 	int index(Listener* listener);
 
 	const SignalSet& signalSet() { return m_signalSet; }

@@ -350,6 +350,74 @@ namespace VFrame30
 		return true;
 	}
 
+	double SchemeItemAfb::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// --
+		//
+		int pinCount = std::max(inputsCount(), outputsCount());
+		if (pinCount == 0)
+		{
+			pinCount = 1;
+		}
+
+		// 1 string for caption
+		// N param count
+		//
+		int textLineCount = 1;
+		for (const Afb::AfbParam& p : m_params)
+		{
+			if (p.visible() == true)
+			{
+				textLineCount ++;
+			}
+		}
+
+		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+
+		textLineCount = std::max(pinCount, textLineCount);
+		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(textLineCount), gridSize);
+
+		return minHeight;
+	}
+
+	double SchemeItemAfb::minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		return m_cachedGridSize * 16;
+
+//		std::shared_ptr<Afb::AfbElement> afb = scheme->afbCollection().get(afbStrID());
+//		if (afb.get() == nullptr)
+//		{
+//			// Such AfbItem was not found
+//			//
+//			assert(afb.get() != nullptr);
+//			return m_cachedGridSize * 16;
+//			return;
+//		}
+
+//		QFont font(m_font.name(), m_font.drawSize());
+//		QFontMetricsF fm(font);
+
+//		double minTextWide = fm.width(afb->caption());
+
+//		double minWidth = CUtils::snapToGrid(minTextWide, gridSize);
+
+//		minWidth = std::max(minWidth, m_cachedGridSize * 16);
+
+//		// --
+//		//
+//		return m_cachedGridSize * 16;
+	}
+
 	void SchemeItemAfb::addQtDynamicParamProperties()
 	{
 		// Clear all dynamic properties

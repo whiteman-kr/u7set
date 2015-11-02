@@ -97,6 +97,8 @@ public:
 
     QTreeWidgetItem *editedItem() const;
 
+    void sortItems(int column, Qt::SortOrder order);
+
 private:
     void updateItem(QTreeWidgetItem *item);
 
@@ -592,6 +594,7 @@ void QtTreePropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, QtBrow
 	m_treeWidget->setItemExpanded(newItem, true);
 
 	updateItem(newItem);
+
 }
 
 void QtTreePropertyBrowserPrivate::propertyRemoved(QtBrowserItem *index)
@@ -635,7 +638,14 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
     }
 	item->setIcon(0, expandIcon);
 	//item->setFirstColumnSpanned(!property->hasValue());
-	item->setToolTip(0, property->propertyName());
+    if (property->toolTip().isEmpty())
+    {
+        item->setToolTip(0, property->propertyName());
+    }
+    else
+    {
+        item->setToolTip(0, property->toolTip());
+    }
 	//item->setStatusTip(0, property->statusTip());
 	//item->setWhatsThis(0, property->whatsThis());
 
@@ -717,6 +727,11 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
         m_treeWidget->setCurrentItem (treeItem, 1);
         m_treeWidget->editItem(treeItem, 1);
     }
+}
+
+void QtTreePropertyBrowserPrivate::sortItems(int column, Qt::SortOrder order)
+{
+    m_treeWidget->sortItems(column, order);
 }
 
 /*!
@@ -1076,6 +1091,11 @@ void QtTreePropertyBrowser::itemChanged(QtBrowserItem *item)
 void QtTreePropertyBrowser::editItem(QtBrowserItem *item)
 {
     d_ptr->editItem(item);
+}
+
+void QtTreePropertyBrowser::sortItems(int column, Qt::SortOrder order)
+{
+    d_ptr->sortItems(column, order);
 }
 
 #if QT_VERSION >= 0x040400

@@ -14,9 +14,6 @@
 class QXmlStreamAttributes;
 
 
-Q_DECLARE_METATYPE(SignalType)
-
-
 enum SignalInOutType
 {
 	Input = 0,
@@ -202,7 +199,7 @@ private:
 	bool m_checkedOut = false;
 	int m_userID = 0;
 	int m_channel = 1;
-	SignalType m_type = SignalType::Analog;
+	E::SignalType m_type = E::SignalType::Analog;
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
@@ -211,7 +208,7 @@ private:
 	QString m_strID;
 	QString m_extStrID;
 	QString m_name;
-	DataFormat m_dataFormat = DataFormat::Float;
+	E::DataFormat m_dataFormat = E::DataFormat::Float;
 	int m_dataSize = 32;
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
@@ -240,7 +237,7 @@ private:
 	QString m_deviceStrID;
 	double m_filteringTime = 0.05;
 	double m_maxDifference = 0.5;
-	ByteOrder m_byteOrder = ByteOrder::BigEndian;
+	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
 	Address16 m_iobufferAddr;			// only for modules input/output signals
 										// signal address in i/o modules buffers
@@ -287,11 +284,11 @@ public:
 	int channel() const { return m_channel; }
 
 	int typeInt() const { return TO_INT(m_type); }
-	SignalType type() const { return m_type; }
-	void setType(SignalType type) { m_type = type; }
+	E::SignalType type() const { return m_type; }
+	void setType(E::SignalType type) { m_type = type; }
 
-	bool isAnalog() const { return m_type == SignalType::Analog; }
-	bool isDiscrete() const { return m_type == SignalType::Discrete; }
+	bool isAnalog() const { return m_type == E::SignalType::Analog; }
+	bool isDiscrete() const { return m_type == E::SignalType::Discrete; }
 
 	bool isInput() const { return m_inOutType == SignalInOutType::Input; }
 	bool isOutput() const { return m_inOutType == SignalInOutType::Output; }
@@ -323,12 +320,12 @@ public:
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(double));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalType));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(OutputRangeMode));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalInOutType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(ByteOrder));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(DataFormat));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(E::DataFormat));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(int));
 	void serializeSensorField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
 
@@ -343,9 +340,9 @@ public:
     Q_INVOKABLE QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
 
-	Q_INVOKABLE DataFormat dataFormat() const { return m_dataFormat; }
+	Q_INVOKABLE E::DataFormat dataFormat() const { return m_dataFormat; }
 	Q_INVOKABLE int dataFormatInt() const { return TO_INT(m_dataFormat); }
-	void setDataFormat(DataFormat dataFormat) { m_dataFormat = dataFormat; }
+	void setDataFormat(E::DataFormat dataFormat) { m_dataFormat = dataFormat; }
 
     Q_INVOKABLE int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
@@ -432,9 +429,9 @@ public:
 	Q_INVOKABLE double maxDifference() const { return m_maxDifference; }
 	void setMaxDifference(double maxDifference) { m_maxDifference = maxDifference; }
 
-	Q_INVOKABLE ByteOrder byteOrder() const { return m_byteOrder; }
+	Q_INVOKABLE E::ByteOrder byteOrder() const { return m_byteOrder; }
 	Q_INVOKABLE int byteOrderInt() const { return TO_INT(m_byteOrder); }
-	void setByteOrder(ByteOrder byteOrder) { m_byteOrder = byteOrder; }
+	void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
