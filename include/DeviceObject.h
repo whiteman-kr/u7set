@@ -61,52 +61,6 @@ namespace Hardware
 		DataArchivingService = 9003,
 	};
 
-	//
-	//
-	// DynamicProperty
-	//
-	//
-	class DynamicProperty
-	{
-	public:
-		DynamicProperty();
-		DynamicProperty(const QString& name,
-						const QVariant& min,
-						const QVariant& max,
-						const QVariant& defaultVal,
-						const QVariant& value);
-
-		void saveValue(::Proto::Property* protoProperty) const;
-		bool loadValue(const ::Proto::Property& protoProperty);
-
-		// Properties
-		//
-	public:
-		QString name() const;
-		const char* name_c_str() const;
-		void setName(const QString& value);
-
-		QVariant min() const;
-		QVariant max() const;
-		QVariant defaultValue() const;
-
-		QVariant value() const;
-		void setValue(QVariant v);
-
-		// Data
-		//
-	private:
-		QString m_name;
-		QByteArray m_c_str_name;
-
-		QVariant m_min;
-		QVariant m_max;
-		QVariant m_default;
-
-		QVariant m_value;
-	};
-
-
 	// Forward declarations
 	//
 	class DeviceSignal;
@@ -296,8 +250,6 @@ namespace Hardware
 											// In preset edit mode this field has the same valie with m_uuid
 
 	private:
-		bool m_avoidEventRecursion = false;
-		QHash<QString, DynamicProperty> m_dynamicProperties;
 	};
 
 

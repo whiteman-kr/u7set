@@ -16,6 +16,11 @@
 #include <QMetaEnum>
 
 
+namespace Proto
+{
+	class Property;
+}
+
 // Add property which is stored in QVariant and does not have getter or setter
 //
 #define ADD_PROPERTY_QVARIANT(TYPE, NAME, VISIBLE) \
@@ -47,6 +52,9 @@ public:
 	virtual ~Property();
 
 public:
+	void saveValue(::Proto::Property* protoProperty) const;
+	bool loadValue(const ::Proto::Property& protoProperty);
+
 	virtual bool isEnum() const = 0;
 	virtual std::list<std::pair<int, QString>> enumValues() const = 0;
 
@@ -57,14 +65,17 @@ public:
 	QString description() const;
 	void setDescription(QString value);
 
-    QString category() const;
-    void setCategory(QString value);
+	QString category() const;
+	void setCategory(QString value);
 
-    bool readOnly() const;
+	bool readOnly() const;
 	void setReadOnly(bool value);
 
 	bool updateFromPreset() const;
 	void setUpdateFromPreset(bool value);
+
+	bool dynamic() const;
+	void setDynamic(bool value);
 
 	bool visible() const;
 	void setVisible(bool value);
@@ -92,7 +103,8 @@ private:
 	QString m_description;
 	QString m_category;
 	bool m_readOnly = false;
-	bool m_updateFromPreset = false;
+	bool m_updateFromPreset = false;		// Update this property from preset, used in DeviceObject
+	bool m_dynamic = false;					// Dynamic property, used in DeviceObject
 	bool m_visible = false;
 	int m_precision = 0;
 };
@@ -180,7 +192,7 @@ public:
 		}
 	}
 
-	void setValue(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
+	void setValueDirect(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
 	{
 		if (m_setter)
 		{
@@ -316,6 +328,13 @@ private:
 	}
 
 public:
+
+	void setLimits(const QVariant& low, const QVariant& high)
+	{
+		setLowLimit(low);
+		setHighLimit(high);
+	}
+
 	const QVariant& lowLimit() const
 	{
 		return m_lowLimit;
@@ -423,7 +442,15 @@ public:
 
 	// Get all properties
 	//
-    std::vector<std::shared_ptr<Property> > properties();
+	std::vector<std::shared_ptr<Property>> properties() const;
+
+	// Delete all properties
+	//
+	void removeAllProperties();
+
+	// Delete all deynamic properties
+	//
+	void removeDynamicProperties();
 
 	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found
@@ -464,7 +491,7 @@ public:
 				return false;
 			}
 
-			propertyValue->setValue(value);
+			propertyValue->setValueDirect(value);
 			return true;
 		}
 
