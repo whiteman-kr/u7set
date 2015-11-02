@@ -46,7 +46,8 @@ SOURCES += main.cpp \
     ../../lib/PropertyObject.cpp \
     ../../lib/Types.cpp \
     MultiThreadFileTest.cpp \
-    MultiThreadSignalTests.cpp
+    MultiThreadSignalTests.cpp \
+    PropertyObjectTests.cpp
 
 HEADERS += \
     UserTests.h \
@@ -67,7 +68,8 @@ HEADERS += \
     ../../include/PropertyObject.h \
     ../../include/Types.h \
     MultiThreadFileTest.h \
-    MultiThreadSignalTests.h
+    MultiThreadSignalTests.h \
+    PropertyObjectTests.h
 
 #c++11 support for GCC
 #
