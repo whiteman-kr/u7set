@@ -443,7 +443,7 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
 				newProperty->setValue(QVariant(defaultInt));
@@ -478,7 +478,7 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
 				newProperty->setValue(QVariant(defaultUInt));
@@ -513,7 +513,7 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
 				newProperty->setValue(QVariant(defaultDouble));
@@ -531,7 +531,7 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setValue(QVariant(defaultBool));
 
@@ -544,7 +544,7 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setValue(QVariant(defaultValue.toString()));
 

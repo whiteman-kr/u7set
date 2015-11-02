@@ -108,6 +108,8 @@ public:
 
     void editItem(QtBrowserItem *item);
 
+    void sortItems(int column, Qt::SortOrder order);
+
 Q_SIGNALS:
 
     void collapsed(QtBrowserItem *item);
