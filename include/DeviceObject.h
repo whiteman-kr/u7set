@@ -61,54 +61,6 @@ namespace Hardware
 		DataArchivingService = 9003,
 	};
 
-	//
-	//
-	// DynamicProperty
-	//
-	//
-//	class DynamicProperty
-//	{
-//	public:
-//		DynamicProperty();
-//		DynamicProperty(const QString& category,
-//						const QString& name,
-//						const QVariant& min,
-//						const QVariant& max,
-//						const QVariant& defaultVal,
-//						const QVariant& value);
-
-//		static bool loadValue(const ::Proto::Property& protoProperty);
-
-//		// Properties
-//		//
-//	public:
-//		QString name() const;
-//		void setName(QString value);
-
-//		QString category() const;
-//		void setCategory(QString value);
-
-//		QVariant min() const;
-//		QVariant max() const;
-//		QVariant defaultValue() const;
-
-//		QVariant value() const;
-//		void setValue(QVariant v);
-
-//		// Data
-//		//
-//	private:
-//		QString m_category;
-//		QString m_name;
-
-//		QVariant m_min;
-//		QVariant m_max;
-//		QVariant m_default;
-
-//		QVariant m_value;
-//	};
-
-
 	// Forward declarations
 	//
 	class DeviceSignal;

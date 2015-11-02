@@ -125,7 +125,7 @@ void Property::setDescription(QString value)
 
 QString Property::category() const
 {
-	return m_category;
+    return m_category;
 }
 
 void Property::setCategory(QString value)

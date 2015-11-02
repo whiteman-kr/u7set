@@ -89,6 +89,15 @@ public:
 	virtual void setEnumValue(int value) = 0;
 	virtual void setEnumValue(const char* value) = 0;
 
+    virtual const QVariant& lowLimit() const = 0;
+    virtual void setLowLimit(const QVariant& value) = 0;
+
+    virtual const QVariant& highLimit() const = 0;
+    virtual void setHighLimit(const QVariant& value) = 0;
+
+    virtual const QVariant& step() const = 0;
+    virtual void setStep(const QVariant& value) = 0;
+
 private:
 	QString m_caption;
 	QString m_description;
