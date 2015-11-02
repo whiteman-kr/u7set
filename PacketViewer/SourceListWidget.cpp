@@ -6,10 +6,15 @@
 #include <QLineEdit>
 #include <QNetworkInterface>
 #include "PacketSourceModel.h"
+#include <QSettings>
 
 SourceListWidget::SourceListWidget(QWidget *parent)
 	: QWidget(parent)
 {
+	m_packetSourceView = new QTreeView(this);
+	m_listenerModel = new PacketSourceModel(this);
+	m_packetSourceView->setModel(m_listenerModel);
+
 	m_netListCombo = new QComboBox(this);
 	m_netListCombo->addItem("0.0.0.0");
 	QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
@@ -24,6 +29,18 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 				continue;
 			}
 			m_netListCombo->addItem(ip.toString());
+			QSettings settings;
+			int count = settings.beginReadArray("listenAddresses");
+			for (int i = 0; i < count; i++)
+			{
+				settings.setArrayIndex(i);
+				quint32 listenIp = settings.value("ip").toUInt();
+				if (listenIp == ip.toIPv4Address())
+				{
+					m_listenerModel->addListener(ip.toString(), settings.value("port").toUInt(), false);
+				}
+			}
+			settings.endArray();
 		}
 	}
 
@@ -43,9 +60,6 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 	QVBoxLayout* vl = new QVBoxLayout;
 	vl->addLayout(hl);
 
-	m_packetSourceView = new QTreeView(this);
-	m_listenerModel = new PacketSourceModel(this);
-	m_packetSourceView->setModel(m_listenerModel);
 	connect(m_listenerModel, &PacketSourceModel::contentChanged, m_packetSourceView, &QTreeView::resizeColumnToContents);
 	connect(m_packetSourceView, &QTreeView::doubleClicked, m_listenerModel, &PacketSourceModel::openSourceStatusWidget);
 	for (int i = 0; i < m_listenerModel->columnCount(); i++)
