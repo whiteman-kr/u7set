@@ -2,49 +2,6 @@
 #include "ui_mainwindow.h"
 #include "../include/DataSource.h"
 
-MyClient::MyClient() :
-	m_timer(this)
-{
-}
-
-
-void MyClient::onClientThreadStarted()
-{
-	connect(&m_timer, &QTimer::timeout, this, &MyClient::onTimer);
-
-	m_timer.setInterval(2000);
-	m_timer.start();
-}
-
-
-void MyClient::onTimer()
-{
-}
-
-
-void MyClient::onConnection()
-{
-	if (!isConnected())
-	{
-		return;
-	}
-
-	QByteArray b;
-
-	b.resize(10);
-
-	sendRequest(1, b);
-
-	qDebug() << "request";
-}
-
-
-void MyClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
-{
-
-}
-
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -65,9 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	m_protoUdpClientThread->start();*/
 
-	m_tcpClientThread = new Tcp::ClientThread<MyClient>(HostAddressPort("192.168.11.254", PORT_CONFIG_SERVICE_REQUEST));
+	/*m_tcpClientThread = new Tcp::ClientThread<MyClient>(HostAddressPort("192.168.11.254", PORT_CONFIG_SERVICE_REQUEST));
 
-	m_tcpClientThread->start();
+	m_tcpClientThread->start();*/
 
 //	runFscDataSources();
 }
@@ -75,18 +32,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-	m_tcpClientThread->quit();
+	/*m_tcpClientThread->quit();
 
-	delete m_tcpClientThread;
+	delete m_tcpClientThread;*/
 
 	/*m_protoUdpClientThread->quit();
 	delete m_protoUdpClientThread;*/
 
-	stopFscDataSources();
+//	stopFscDataSources();
 	delete ui;
-	delete m_ServiceController;
+//	delete m_ServiceController;
 }
-
+/*
 
 void MainWindow::runFscDataSources()
 {
@@ -104,7 +61,7 @@ void MainWindow::stopFscDataSources()
 
 	m_fscDataSources.clear();
 }
-
+*/
 
 void MainWindow::on_pushButton_clicked()
 {
@@ -123,7 +80,7 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_sendFileButton_clicked()
 {
-	emit m_ServiceController->sendFile(QHostAddress("127.0.0.1"), PORT_BASE_SERVICE, "d:/qqq.pdf");
+//	emit m_ServiceController->sendFile(QHostAddress("127.0.0.1"), PORT_BASE_SERVICE, "d:/qqq.pdf");
 }
 
 

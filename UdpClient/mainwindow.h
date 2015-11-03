@@ -20,8 +20,11 @@ class MyClient : public Tcp::Client
 
 private:
 	QTimer m_timer;
+	QByteArray m_data;
 
 	void onTimer();
+
+	void sendRandomRequest();
 
 public:
 	MyClient();
@@ -54,7 +57,7 @@ signals:
 private:
     Ui::MainWindow *ui;
 
-    UdpSocketThread m_clientSocketThread;
+/*    UdpSocketThread m_clientSocketThread;
 
 	BaseServiceController* m_ServiceController = nullptr;
 
@@ -63,9 +66,9 @@ private:
 	void runFscDataSources();
 	void stopFscDataSources();
 
-	//	ProtoUdp::ClientThread* m_protoUdpClientThread = nullptr;
+	//	ProtoUdp::ClientThread* m_protoUdpClientThread = nullptr;*/
 
-	Tcp::ClientThread<MyClient>* m_tcpClientThread;
+	//Tcp::ClientThread* m_tcpClientThread;
 };
 
 

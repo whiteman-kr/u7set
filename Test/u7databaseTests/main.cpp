@@ -6,6 +6,7 @@
 #include "FileTests.h"
 #include "OtherTests.h"
 #include "SignalTests.h"
+#include "PropertyObjectTests.h"
 #include "MultiThreadFileTest.h"
 #include "MultiThreadSignalTests.h"
 #include "../../include/DbController.h"
@@ -161,6 +162,7 @@ int main(int argc, char *argv[])
 		FileTests fileTests;
 		OtherTests otherTests;
 		SignalTests signalTests;
+		PropertyObjectTests propertyObjectTests;
 
 		int testResult;
 		testResult = QTest::qExec(&userTests, argc, argv);
@@ -191,6 +193,14 @@ int main(int argc, char *argv[])
 		if (testResult != 0)
 		{
 			qDebug() << testResult << " other test(s) has been interrupted by error(s)";
+			db.close();
+			throw testResult;
+		}
+
+		testResult = QTest::qExec(&propertyObjectTests, argc, argv);
+		if (testResult != 0)
+		{
+			qDebug() << testResult << " propertyObject test(s) has been interrupted by error(s)";
 			db.close();
 			throw testResult;
 		}

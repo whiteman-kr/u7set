@@ -27,10 +27,6 @@ namespace Builder
 	const char* const VALUE_OFFSET = "ValueOffset";
 	const char* const VALUE_BIT = "ValueBit";
 
-	const char* const SECTION_MEMORY_SETTINGS = "MemorySettings";
-	const char* const SECTION_FLASH_MEMORY = "FlashMemory";
-	const char* const SECTION_LOGIC_UNIT = "LogicUnit";
-
 	const char* const PARAM_TEST_START_COUNT = "test_start_count";
 
 	// Constants
@@ -705,7 +701,7 @@ namespace Builder
 		// compiler settings
 		//
 
-		bool m_convertUsedInOutAnalogSignalsOnly = true;
+		bool m_convertUsedInOutAnalogSignalsOnly = false;
 
 		// LM's and modules settings
 		//
@@ -755,10 +751,8 @@ namespace Builder
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
 
 	private:
-		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& section, const QString& name, int* value);
 		bool getDeviceIntProperty(Hardware::DeviceObject* device, const QString& name, int* value);
 
-		bool getLMIntProperty(const QString& section, const QString& name, int* value);
 		bool getLMIntProperty(const QString& name, int* value);
 
 		Hardware::DeviceModule* getModuleOnPlace(int place);

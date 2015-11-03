@@ -278,6 +278,7 @@ QVariant PropertyObject::propertyValue(QString caption) const
 	}
 	else
 	{
+        qDebug() << "PropertyObject::propertyValue: property not found: " << caption;
 		return QVariant();
 	}
 }

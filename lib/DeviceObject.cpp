@@ -372,7 +372,7 @@ namespace Hardware
 		min:		property minimum value (ignored for bool, string)
 		max:		property maximim value (ignored for bool, string)
 		default:	can be any value of the specified type
-		 */
+		*/
 
 		QStringList rows = m_dynamicPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
 
@@ -443,10 +443,11 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
 				newProperty->setValue(QVariant(defaultInt));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -478,10 +479,11 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
 				newProperty->setValue(QVariant(defaultUInt));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -513,10 +515,11 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
 				newProperty->setValue(QVariant(defaultDouble));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -531,9 +534,10 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setValue(QVariant(defaultBool));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -544,9 +548,10 @@ namespace Hardware
 				//
 				auto newProperty = addProperty<QVariant>(name, true);
 
-				newProperty->setDynamic(true);
+                newProperty->setDynamic(true);
 				newProperty->setCategory(category);
 				newProperty->setValue(QVariant(defaultValue.toString()));
+				newProperty->setReadOnly(false);
 
 				continue;
 			}
@@ -620,7 +625,7 @@ namespace Hardware
 
 	int DeviceObject::jsPropertyInt(QString name) const
 	{
-		QVariant v = property(name.toStdString().c_str());
+        QVariant v = propertyByCaption(name)->value();
 		if (v.isValid() == false)
 		{
 			assert(v.isValid());
