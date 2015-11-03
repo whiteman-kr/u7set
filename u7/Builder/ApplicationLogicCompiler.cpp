@@ -3559,10 +3559,11 @@ namespace Builder
 
 							// !!! signal - pointer to Signal objects in build-time SignalSet (ModuleLogicCompiler::m_signals member) !!!
 							//
-							Address16 ramRegAddr(module.appLogicRegDataOffset + signalOffset, bit);
+							Address16 ramAddr(module.appLogicRegDataOffset + signalOffset, bit);
+							Address16 regAddr(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), bit);
 
-							signal->ramAddr() = ramRegAddr;
-							signal->regAddr() = ramRegAddr;
+							signal->ramAddr() = ramAddr;
+							signal->regAddr() = regAddr;
 
 							// set same ramAddr & regAddr for corresponding signals in m_appSignals map
 							//
@@ -3572,8 +3573,8 @@ namespace Builder
 							{
 								// not all device-bound signals must be in m_appSignals map
 								//
-								appSignal->ramAddr() = ramRegAddr;
-								appSignal->regAddr() = ramRegAddr;
+								appSignal->ramAddr() = ramAddr;
+								appSignal->regAddr() = regAddr;
 							}
 						}
 					}
