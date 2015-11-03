@@ -2348,24 +2348,16 @@ R"DELIM({
 						return;
 					}
 
-					const QMetaObject* metaObject = pDeviceObject->metaObject();
-					for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i)
+					for (auto p : pDeviceObject->properties())
 					{
-						const QMetaProperty& property = metaObject->property(i);
-						if (property.isValid())
+						if (p->readOnly() || p->dynamic())
 						{
-							const char* name = property.name();
-							QVariant tmp = QVariant::fromValue(attr.value(name).toString());
-							assert(tmp.convert(pDeviceObject->property(name).userType()));
-							pDeviceObject->setProperty(name, tmp);
+							continue;
 						}
+						QVariant tmp = QVariant::fromValue(attr.value(p->caption()).toString());
+						assert(tmp.convert(p->value().userType()));
+						p->setValue(tmp);
 					}
-
-					pDeviceObject->setStrId(attr.value("StrID").toString());
-					pDeviceObject->setCaption(attr.value("Caption").toString());
-					pDeviceObject->setChildRestriction(attr.value("ChildRestriction").toString());
-					pDeviceObject->setPlace(attr.value("Place").toInt());
-					pDeviceObject->setDynamicProperties(attr.value("DynamicProperties").toString());
 
 					pCurrentDevice->addChild(pDeviceObject);
 					pCurrentDevice = pDeviceObject.get();

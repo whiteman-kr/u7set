@@ -120,7 +120,7 @@ QVariant SignalTableModel::headerData(int section, Qt::Orientation orientation, 
 
 void SignalTableModel::updateFrame(int frameNo)
 {
-	if (m_signalSet.isEmpty())
+	if (m_signalSet.isEmpty() || m_frameSignalIndexLimits.empty())
 	{
 		return;
 	}
