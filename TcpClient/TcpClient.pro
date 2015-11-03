@@ -18,12 +18,14 @@ SOURCES +=\
     TcpClientMain.cpp \
     ../lib/SimpleThread.cpp \
     ../lib/Tcp.cpp \
-    ../lib/SocketIO.cpp
+    ../lib/SocketIO.cpp \
+    ../lib/TcpFileTransfer.cpp
 
 HEADERS  += TcpClientMainWindow.h \
     ../include/SimpleThread.h \
     ../include/Tcp.h \
-    ../include/SocketIO.h
+    ../include/SocketIO.h \
+    ../include/TcpFileTransfer.h
 
 FORMS    += TcpClientMainWindow.ui
 

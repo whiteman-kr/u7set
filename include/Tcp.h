@@ -155,6 +155,8 @@ namespace Tcp
 
 		ServerState m_serverState = ServerState::WainigForRequest;
 
+		double m_requestProcessingPorgress = 0;
+
 		bool m_autoAck = true;
 
 		QTimer m_autoAckTimer;

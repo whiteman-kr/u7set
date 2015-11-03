@@ -420,6 +420,8 @@ namespace Tcp
 			m_autoAckTimer.start(TCP_AUTO_ACK_TIMER_INTERVAL);
 		}
 
+		m_requestProcessingPorgress = 0;
+
 		processRequest(m_header.id, m_dataBuffer, m_header.dataSize);
 	}
 
@@ -456,6 +458,7 @@ namespace Tcp
 		header.id = m_header.id;
 		header.numerator = m_header.numerator;
 		header.dataSize = 0;
+		header.requestProcessingPorgress = m_requestProcessingPorgress;
 		header.calcCRC();
 
 		qint64 written = socketWrite(header);
@@ -502,6 +505,7 @@ namespace Tcp
 		header.id = m_header.id;
 		header.numerator = m_header.numerator;
 		header.dataSize = replyDatsSize;
+		header.requestProcessingPorgress = 100;
 		header.calcCRC();
 
 		qint64 written = socketWrite(header);
