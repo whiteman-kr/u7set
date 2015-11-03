@@ -59,7 +59,8 @@ SOURCES +=\
     ../lib/CircularLogger.cpp \
 	../lib/ProtoUdp.cpp \
 	../lib/Tcp.cpp \
-    ../lib/SimpleThread.cpp
+    ../lib/SimpleThread.cpp \
+    ../lib/TcpFileTransfer.cpp
 
 HEADERS  += \
     ../include/SocketIO.h \
@@ -72,7 +73,8 @@ HEADERS  += \
 	../include/ProtoUdp.h \
     ../include/Factory.h \
 	../include/Tcp.h \
-    ../include/SimpleThread.h
+    ../include/SimpleThread.h \
+    ../include/TcpFileTransfer.h
 
 include(../qtservice/src/qtservice.pri)
 
