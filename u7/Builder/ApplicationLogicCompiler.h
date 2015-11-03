@@ -701,7 +701,7 @@ namespace Builder
 		// compiler settings
 		//
 
-		bool m_convertUsedInOutAnalogSignalsOnly = true;
+		bool m_convertUsedInOutAnalogSignalsOnly = false;
 
 		// LM's and modules settings
 		//
