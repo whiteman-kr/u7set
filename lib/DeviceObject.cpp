@@ -2348,9 +2348,11 @@ R"DELIM({
 						return;
 					}
 
+					pDeviceObject->setDynamicProperties(attr.value("DynamicProperties").toString());
+
 					for (auto p : pDeviceObject->properties())
 					{
-						if (p->readOnly() || p->dynamic())
+						if (p->readOnly() || p->caption() == "DynamicProperties")
 						{
 							continue;
 						}

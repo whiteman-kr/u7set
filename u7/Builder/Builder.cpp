@@ -664,7 +664,7 @@ namespace Builder
 
 				for (auto p : currentDevice->properties())
 				{
-					if (p->readOnly() || p->dynamic())
+					if (p->readOnly())
 					{
 						continue;
 					}
