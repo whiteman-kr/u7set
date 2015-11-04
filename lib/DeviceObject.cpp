@@ -69,13 +69,13 @@ namespace Hardware
 	DeviceObject::DeviceObject(bool preset /*= false*/) :
 		m_preset(preset)
 	{
-		ADD_PROPERTY_GETTER(int, FilID, true, DeviceObject::fileId);
+		ADD_PROPERTY_GETTER(int, FileID, true, DeviceObject::fileId);
 		ADD_PROPERTY_GETTER(QUuid, Uuid, true, DeviceObject::uuid);
 		ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, DeviceObject::strId, DeviceObject::setStrId);
-		ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
-		ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
+		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
+		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
 		ADD_PROPERTY_GETTER_SETTER(int, Place, true, DeviceObject::place, DeviceObject::setPlace);
-		ADD_PROPERTY_GETTER_SETTER(QString, DynamicProperties, true, DeviceObject::dynamicProperties, DeviceObject::setDynamicProperties);
+		auto dynamicProp = ADD_PROPERTY_GETTER_SETTER(QString, DynamicProperties, true, DeviceObject::dynamicProperties, DeviceObject::setDynamicProperties);
 		ADD_PROPERTY_GETTER(bool, Preset, true, DeviceObject::preset);
 		ADD_PROPERTY_GETTER(bool, PresetRoot, true, DeviceObject::presetRoot);
 		if (preset == true)
@@ -83,6 +83,10 @@ namespace Hardware
 			ADD_PROPERTY_GETTER_SETTER(QString, PresetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 		}
 		ADD_PROPERTY_GETTER(QUuid, PresetObjectUuid, true, DeviceObject::presetObjectUuid);
+
+		captionProp->setUpdateFromPreset(true);
+		childRestrProp->setUpdateFromPreset(true);
+		dynamicProp->setUpdateFromPreset(true);
 	}
 
 	DeviceObject::~DeviceObject()
@@ -1440,7 +1444,8 @@ R"DELIM({
 	DeviceChassis::DeviceChassis(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Type, true, DeviceChassis::type, DeviceChassis::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, DeviceChassis::type, DeviceChassis::setType)
+		typeProp->setUpdateFromPreset(true);
 	}
 
 	DeviceChassis::~DeviceChassis()
@@ -1518,12 +1523,15 @@ R"DELIM({
 	DeviceModule::DeviceModule(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, ModuleFamily, true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
-		ADD_PROPERTY_GETTER_SETTER(int, ModuleVersion, true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
+		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, ModuleFamily, true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
+		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, ModuleVersion, true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
 		ADD_PROPERTY_GETTER_SETTER(int, Channel, true, DeviceModule::channel, DeviceModule::setChannel)
 
 		ADD_PROPERTY_GETTER_SETTER(QString, SubsysID, true, DeviceModule::subSysID, DeviceModule::setSubSysID)
 		ADD_PROPERTY_GETTER_SETTER(QString, ConfType, true, DeviceModule::confType, DeviceModule::setConfType)
+
+		familyTypeProp->setUpdateFromPreset(true);
+		moduleVersionProp->setUpdateFromPreset(true);
 	}
 
 	DeviceModule::~DeviceModule()
@@ -1754,17 +1762,29 @@ R"DELIM({
 	DeviceSignal::DeviceSignal(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, true, DeviceSignal::type, DeviceSignal::setType)
-		ADD_PROPERTY_GETTER_SETTER(SignalFunction, Function, true, DeviceSignal::function, DeviceSignal::setFunction)
-		ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
-		ADD_PROPERTY_GETTER_SETTER(E::DataFormat, Format, true, DeviceSignal::format, DeviceSignal::setFormat)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, true, DeviceSignal::type, DeviceSignal::setType)
+		auto functionProp = ADD_PROPERTY_GETTER_SETTER(SignalFunction, Function, true, DeviceSignal::function, DeviceSignal::setFunction)
+		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
+		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, Format, true, DeviceSignal::format, DeviceSignal::setFormat)
 
-		ADD_PROPERTY_GETTER_SETTER(int, Size, true, DeviceSignal::size, DeviceSignal::setSize)
-		ADD_PROPERTY_GETTER_SETTER(int, ValidityOffset, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
-		ADD_PROPERTY_GETTER_SETTER(int, ValidityBit, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
+		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, Size, true, DeviceSignal::size, DeviceSignal::setSize)
+		auto validityOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, ValidityOffset, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
+		auto valididtyBitProp = ADD_PROPERTY_GETTER_SETTER(int, ValidityBit, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
 
-		ADD_PROPERTY_GETTER_SETTER(int, ValueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
-		ADD_PROPERTY_GETTER_SETTER(int, ValueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, ValueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
+		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, ValueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+
+		typeProp->setUpdateFromPreset(true);
+		functionProp->setUpdateFromPreset(true);
+		byteOrderProp->setUpdateFromPreset(true);
+		formatProp->setUpdateFromPreset(true);
+
+		sizeProp->setUpdateFromPreset(true);
+		validityOffsetProp->setUpdateFromPreset(true);
+		valididtyBitProp->setUpdateFromPreset(true);
+
+		valueOffsetProp->setUpdateFromPreset(true);
+		valueBitProp->setUpdateFromPreset(true);
 	}
 
 	DeviceSignal::~DeviceSignal()
@@ -2027,7 +2047,9 @@ R"DELIM({
 	Workstation::Workstation(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Type, true, Workstation::type, Workstation::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, Workstation::type, Workstation::setType)
+
+		typeProp->setUpdateFromPreset(true);
 	}
 
 	Workstation::~Workstation()
@@ -2108,7 +2130,9 @@ R"DELIM({
 	Software::Software(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Type, true, Software::type, Software::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, Software::type, Software::setType);
+
+		typeProp->setUpdateFromPreset(true);
 	}
 
 	Software::~Software()
