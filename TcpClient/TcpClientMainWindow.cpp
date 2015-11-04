@@ -8,21 +8,27 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	m_testClient = new TestClient(HostAddressPort("192.168.11.254", PORT_CONFIG_SERVICE_REQUEST),
+	/*m_testClient = new TestClient(HostAddressPort("192.168.11.254", PORT_CONFIG_SERVICE_REQUEST),
 								  HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST));
 	m_tcpThread = new Tcp::Thread(m_testClient);
 
 	connect(m_testClient, &TestClient::signal_changeCount, this, &TcpClientMainWindow::slot_changeCount);
 
-	m_tcpThread->start();
+	m_tcpThread->start();*/
+
+	m_fileClient = new Tcp::FileClient("d:/temp22/fileClient", HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST));
+	m_fileClientThread = new Tcp::Thread(m_fileClient);
+
+	m_fileClientThread->start();
 
 }
 
 TcpClientMainWindow::~TcpClientMainWindow()
 {
-	m_tcpThread->quit();
-
-	delete m_tcpThread;
+	m_fileClientThread->quit();
+	delete m_fileClientThread;
+//	m_tcpThread->quit();
+//	delete m_tcpThread;
 	delete ui;
 }
 
@@ -80,4 +86,10 @@ void TestClient::sendRandomRequest()
 void TestClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
 	sendRandomRequest();
+}
+
+
+void TcpClientMainWindow::on_pushButton_clicked()
+{
+	m_fileClient->downloadFile("/qq/build.xml");
 }

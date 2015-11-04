@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "../include/Tcp.h"
+#include "../include/TcpFileTransfer.h"
 
 namespace Ui {
 class TcpClientMainWindow;
@@ -40,11 +41,17 @@ public:
 
 	void slot_changeCount(int count);
 
+private slots:
+	void on_pushButton_clicked();
+
 private:
 	Ui::TcpClientMainWindow *ui;
 
 	TestClient* m_testClient = nullptr;
 	Tcp::Thread* m_tcpThread = nullptr;
+
+	Tcp::FileClient* m_fileClient = nullptr;
+	Tcp::Thread* m_fileClientThread = nullptr;
 };
 
 #endif // TCPCLIENTMAINWINDOW_H
