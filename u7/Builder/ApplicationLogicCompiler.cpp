@@ -1079,7 +1079,7 @@ namespace Builder
 					// FB without RAM initialize once for all instances
 					// initialize instantiator params only
 					//
-					QString instantiatorID = appFb->afb().instantiatorID();
+					QString instantiatorID = appFb->instantiatorID();
 
 					if (instantiatorStrIDsMap.contains(instantiatorID) == false)
 					{
@@ -1712,7 +1712,6 @@ namespace Builder
 
 				if (!srcAppSignal->isComputed())
 				{
-					LOG_ERROR(m_log, QString(tr("Signal value undefined: %1")).arg(srcAppSignal->strID()));
 					RESULT_FALSE_BREAK
 				}
 
@@ -1756,7 +1755,8 @@ namespace Builder
 				quint16 constValue = constItem.intValue() > 0 ? 1 : 0;
 
 				cmd.movBitConst(ramAddrOffset, ramAddrBit, constValue);
-				cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constValue));
+				cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
+							   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).arg(constValue));
 			}
 			break;
 
@@ -1765,7 +1765,8 @@ namespace Builder
 			{
 			case SIZE_16BIT:
 				cmd.movConst(ramAddrOffset, constItem.intValue());
-				cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.intValue()));
+				cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
+							   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).arg(constItem.intValue()));
 				break;
 
 			case SIZE_32BIT:
@@ -1775,7 +1776,8 @@ namespace Builder
 					if (constItem.isIntegral())
 					{
 						cmd.movConstInt32(ramAddrOffset, constItem.intValue());
-						cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.intValue()));
+						cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
+									   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).arg(constItem.intValue()));
 					}
 					else
 					{
@@ -1788,7 +1790,8 @@ namespace Builder
 					if (constItem.isFloat())
 					{
 						cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
-						cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.floatValue()));
+						cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
+									   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).arg(constItem.floatValue()));
 					}
 					else
 					{
@@ -1945,7 +1948,9 @@ namespace Builder
 			cmd.moveBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
 		}
 
-		cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(srcSignal.strID()));
+		cmd.setComment(QString(tr("%1 (reg %2) <= %3 (reg %4)")).
+					   arg(appSignal.strID()).arg(appSignal.regAddr().toString()).
+					   arg(srcSignal.strID()).arg(srcSignal.regAddr().toString()));
 		m_code.append(cmd);
 		m_code.newLine();
 
@@ -2313,7 +2318,8 @@ namespace Builder
 				cmd.writeFuncBlockBit(fbType, fbInstance, fbParamNo, ramAddrOffset, ramAddrBit, appFb.caption());
 			}
 
-			cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(appSignal.strID()));
+			cmd.setComment(QString(tr("%1 <= %2 (reg %3)")).
+						   arg(inPin.caption()).arg(appSignal.strID()).arg(appSignal.regAddr().toString()));
 
 			m_code.append(cmd);
 		}
@@ -2467,7 +2473,8 @@ namespace Builder
 
 		if (ramAddrOffset == -1 || ramAddrBit == -1)
 		{
-			ASSERT_RETURN_FALSE		// signal ramAddr is not calculated!!!
+			LOG_ERROR(m_log, QString(tr("RAM-address of signal %1 is not calculated")).arg(appSignal->strID()));
+			return false;
 		}
 		else
 		{
@@ -2497,7 +2504,8 @@ namespace Builder
 				cmd.readFuncBlockBit(ramAddrOffset, ramAddrBit, fbType, fbInstance, fbParamNo, appFb.caption());
 			}
 
-			cmd.setComment(QString(tr("%1 => %2")).arg(outPin.caption()).arg(appSignal->strID()));
+			cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
+						   arg(appSignal->strID()).arg(appSignal->regAddr().toString()).arg(outPin.caption()));
 
 			m_code.append(cmd);
 		}
@@ -3248,16 +3256,6 @@ namespace Builder
 
 					continue;
 				}
-
-				/*if (logicItem.m_fblItem->toFblElement() != nullptr)
-				{
-					qDebug() << logicItem.m_fblItem->toFblElement()->afbStrID();
-
-					for(const Afb::AfbParam& param : logicItem.m_fblItem->toFblElement()->params())
-					{
-						qDebug() << param.opName() << " " << param.value();
-					}
-				}*/
 
 				AppItem* appItem = new AppItem(logicItem);
 
