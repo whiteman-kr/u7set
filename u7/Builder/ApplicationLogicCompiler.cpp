@@ -749,11 +749,13 @@ namespace Builder
 
 			if (!generateFbTestCode()) break;
 
-			if (!initAfbs()) break;
+//			if (!initAfbs()) break;
 
 			if (!finishTestCode()) break;
 
 			if (!startAppLogicCode()) break;
+
+			if (!initAfbs()) break;
 
 			if (!copyLMDataToRegBuf()) break;
 
