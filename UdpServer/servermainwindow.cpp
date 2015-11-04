@@ -8,9 +8,12 @@ namespace Tcp
 	{
 		QByteArray reply;
 
+//		currentThread->sleep(15);
+
 		reply.resize(1024);
 
 		sendReply(reply);
+
 		return;
 	}
 }
@@ -26,9 +29,11 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 
 	m_protoUdpServerThread->run();*/
 
-	Tcp::MyServer* ms = new Tcp::MyServer;
+//	Tcp::MyServer* ms = new Tcp::MyServer;
 
-	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("192.168.11.254", PORT_CONFIG_SERVICE_REQUEST), ms);
+	Tcp::FileServer* m_fileServer = new Tcp::FileServer("d:/temp/ww");
+
+	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), m_fileServer);
 
 	m_tcpServerThread->start();
 }

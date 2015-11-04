@@ -6,15 +6,17 @@ C_DESCRIPTION = 1,
 C_ADC = 2,
 C_VALUE = 3,
 C_REG_ADDR = 4,
-C_COUNT = 5;
+C_DATA_SIZE = 5,
+C_COUNT = 6;
 
-const char* const Columns[] =
+const char* const Columns[C_COUNT] =
 {
 	"ID",
 	"Description",
 	"ADC",
 	"Value",
-	"Registration address"
+	"Registration address",
+	"Data size"
 };
 
 SignalTableModel::SignalTableModel(quint8* buffer, const SignalSet& signalSet, QObject* parent) :
@@ -50,51 +52,37 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 			case C_DESCRIPTION: return signal.name();
 			case C_ADC:
 			{
-				if (!signal.regAddr().isValid())
+				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RP_BUFFER_SIZE))
 				{
 					return "???";
 				}
-				int offset = signal.regAddr().offset();
-				int bit = signal.regAddr().offset();
 				if (signal.isAnalog())
 				{
-					quint16 adc = m_buffer[offset];
-					if (bit != 0)
-					{
-						adc >>= bit;
-						adc += m_buffer[offset + 1] << (16 - bit);
-					}
-					return QString("%1").arg(adc, 4, 16, QChar('0'));
+					return QString("0x%1").arg(getAdc(signal), signal.dataSize() / 4, 16, QChar('0'));
 				}
 				else
 				{
-					return QString("%1").arg((m_buffer[offset] & (1 << bit)), 16, 2, QChar('0'));
+					return QString("B%1").arg(getAdc(signal), signal.dataSize(), 2, QChar('0'));
 				}
 			}
 			case C_VALUE:
 			{
-				if (!signal.regAddr().isValid())
+				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RP_BUFFER_SIZE))
 				{
 					return "???";
 				}
-				int offset = signal.regAddr().offset();
-				int bit = signal.regAddr().offset();
+				quint64 adc = getAdc(signal);
 				if (signal.isAnalog())
 				{
-					quint16 adc = m_buffer[offset];
-					if (bit != 0)
-					{
-						adc >>= bit;
-						adc += m_buffer[offset + 1] << (16 - bit);
-					}
 					return signal.lowLimit() + (adc - signal.lowADC()) * (signal.highLimit() - signal.lowLimit()) / (signal.highADC() - signal.lowADC());
 				}
 				else
 				{
-					return ((m_buffer[offset] & (1 << bit)) == 0) ? 0 : 1;
+					return (adc == 0) ? 0 : 1;
 				}
 			}
 			case C_REG_ADDR: return signal.regAddr().toString();
+			case C_DATA_SIZE: return signal.dataSize();
 			default: return QVariant();
 		}
 	}
@@ -120,7 +108,7 @@ QVariant SignalTableModel::headerData(int section, Qt::Orientation orientation, 
 
 void SignalTableModel::updateFrame(int frameNo)
 {
-	if (m_signalSet.isEmpty())
+	if (m_signalSet.isEmpty() || m_frameSignalIndexLimits.empty())
 	{
 		return;
 	}
@@ -176,5 +164,36 @@ void SignalTableModel::addDataSource(const DataSource& dataSource)
 		}
 		m_frameSignalIndexLimits[i] = limits;
 	}
+}
+
+quint64 SignalTableModel::getAdc(const Signal& signal) const
+{
+	if (signal.dataSize() > 64)
+	{
+		return 0;
+	}
+	int offset = signal.regAddr().offset();
+	int bit = signal.regAddr().bit();
+	int size = signal.dataSize();
+	if ((offset < 0) || (offset + (bit + size) / 8 >= RP_BUFFER_SIZE))
+	{
+		return 0;
+	}
+	quint64 adc = m_buffer[offset] >> bit;
+	int bitsCopied = sizeof(m_buffer[0]) * 8 - bit;
+	if (bitsCopied > size)
+	{
+		adc &= (1ull << size) - 1ull;
+		bitsCopied = size;
+	}
+	offset++;
+	while (bitsCopied < signal.dataSize())
+	{
+		int bitsToRead = std::min(signal.dataSize() - bitsCopied, static_cast<int>(sizeof(m_buffer[0]) * 8));
+		adc += (m_buffer[offset] & ((1ull << bitsToRead) - 1ull)) << bitsCopied;
+		bitsCopied += bitsToRead;
+		offset++;
+	}
+	return adc;
 }
 

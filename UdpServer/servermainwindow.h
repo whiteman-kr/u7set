@@ -5,6 +5,7 @@
 #include "../include/BaseService.h"
 #include "../include/ProtoUdp.h"
 #include "../include/Tcp.h"
+#include "../include/TcpFileTransfer.h"
 
 namespace Ui
 {

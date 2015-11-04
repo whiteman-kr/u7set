@@ -10,13 +10,17 @@
 #include <cassert>
 #include "../include/SocketIO.h"
 #include "../include/SimpleThread.h"
+#include "../include/Utils.h"
 
 
 namespace Tcp
 {
-	const int TCP_PACKET_MIN_DATA_SIZE = 128 * 1024;					// 128 Kb
-	const int TCP_PACKET_MAX_DATA_SIZE = TCP_PACKET_MIN_DATA_SIZE * 16;	// 2 Mb
-	const int TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT = 2000;				// 2 seconds
+	const int TCP_MAX_DATA_SIZE = 4 * 1024 * 1024;				// 4 Mb
+	const int TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT = 3000;		// 3 seconds
+	const int TCP_BYTES_WRITTEN_TIMEOUT = 1000;					// 1 second
+	const int TCP_PERIODIC_TIMER_INTERVAL = 1000;				// 1 second
+	const int TCP_AUTO_ACK_TIMER_INTERVAL = 1000;				// 1 second
+	const int TCP_CONNECT_TIMEOUT = 3;							// 3 seconds
 
 
 	class SocketWorker : public SimpleThreadWorker
@@ -40,6 +44,7 @@ namespace Tcp
 			quint32 id = 0;
 			quint32 dataSize = 0;
 			quint32 numerator = 0;
+			double requestProcessingPorgress = 0;	// for Ack & Replay headers
 
 			quint32 CRC32 = 0;
 
@@ -59,40 +64,47 @@ namespace Tcp
 
 		enum ReadState
 		{
-			WainigForHeader,
-			WainigForData,
+			WaitingForHeader,
+			WaitingForData,
+			WaitingAnything
 		};
 
 		QTcpSocket* m_tcpSocket = nullptr;
 
-		ReadState m_readState = ReadState::WainigForHeader;
+		QMutex m_mutex;
 
-		Header m_header;
-		char* m_dataBuffer = nullptr;
-		quint32 m_dataBufferSize = 0;				// current size of allocated m_dataBuffer
-
+		// read-status variables
+		//
+		ReadState m_readState = ReadState::WaitingForHeader;
 		quint32 m_readedHeaderSize = 0;
 		quint32 m_readedDataSize = 0;
 
-		bool m_headerAndDataReady = false;			// set to TRUE when full header and data readed from socket
+		//
 
-		virtual QTcpSocket* createSocket() = 0;
+		Header m_header;
+		char* m_dataBuffer = nullptr;
+
+
+		bool m_headerAndDataReady = false;					// set to TRUE when full header and data readed from socket
+
+		virtual void createSocket();
+		void deleteSocket();
 
 		virtual void onThreadStarted() override;
 		virtual void onThreadFinished() override;
 
-		void enableSocketRead() { m_enableSocketRead = true; }
-		void disableSocketRead() { m_enableSocketRead = false; }
+		virtual void onHeaderAndDataReady() {}
 
-		virtual void onHeaderAndDataReady() {};
+		qint64 socketWrite(const char* data, qint64 size);
+		qint64 socketWrite(const Header& header);
 
 	private:
 		bool m_enableSocketRead = true;
 
-		void reallocateDataBuffer(int newDataBufferSize);
-
 		int readHeader(int bytesAvailable);
 		int readData(int bytesAvailable);
+
+		virtual void initReadStatusVariables() = 0;
 
 	private slots:
 		void onSocketStateChanged(QAbstractSocket::SocketState newState);
@@ -143,18 +155,27 @@ namespace Tcp
 
 		ServerState m_serverState = ServerState::WainigForRequest;
 
+		double m_requestProcessingPorgress = 0;
+
 		bool m_autoAck = true;
+
+		QTimer m_autoAckTimer;
 
 		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
 
 		virtual void onThreadStarted() final;
 		virtual void onThreadFinished() final;
 
-		virtual QTcpSocket* createSocket() final;
+		virtual void initReadStatusVariables() final;
+
+		virtual void createSocket() final;
 
 		void onHeaderAndDataReady() final;
 
 		friend class Listener;
+
+	private slots:
+		void onAutoAckTimer();
 
 	protected:
 
@@ -215,7 +236,7 @@ namespace Tcp
 
 		Server* m_serverInstance = nullptr;
 
-		QHash<const SocketWorker*, SimpleThread*> m_runningServices;
+		QHash<const SocketWorker*, SimpleThread*> m_runningServers;
 
 		friend class TcpServer;
 
@@ -273,6 +294,7 @@ namespace Tcp
 
 		HostAddressPort m_serversAddressPort[2];
 		HostAddressPort m_selectedServer;
+		int m_selectedServerIndex = 0;
 
 		QTimer m_periodicTimer;
 		QTimer m_replyTimeoutTimer;
@@ -281,15 +303,24 @@ namespace Tcp
 
 		Header m_sentRequestHeader;
 
+		bool m_autoSwitchServer = true;
+
+		int m_connectTimeout = 0;
+
 		ClientState m_clientState = ClientState::ClearToSendRequest;
 
 	private:
+		void autoSwitchServer();
+		void selectServer(int serverIndex, bool reconnect);
+
 		void connectToServer();
 
 		virtual void onThreadStarted() final;
 		virtual void onThreadFinished() final;
 
 		virtual void onHeaderAndDataReady() final;
+
+		virtual void initReadStatusVariables() final;
 
 		void restartReplyTimeoutTimer();
 
@@ -300,19 +331,22 @@ namespace Tcp
 		void onReplyTimeoutTimer();
 
 	public:
-		Client();
+		Client(const HostAddressPort &serverAddressPort);
+		Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+
 		~Client();
 
-		void setServer(const HostAddressPort& serverAddressPort);
-		void setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+		void setServer(const HostAddressPort& serverAddressPort, bool reconnect);
+		void setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, bool reconnect);
 
-		void selectServer1() { m_selectedServer = m_serversAddressPort[0]; }
-		void selectServer2() { m_selectedServer = m_serversAddressPort[1]; }
+		void selectServer1(bool reconnect) { selectServer(0, reconnect); }
+		void selectServer2(bool reconnect) { selectServer(1, reconnect); }
+
+		bool isAutoSwitchServer() const { return m_autoSwitchServer; }
+		void setAutoSwitchServer(bool autoSwitch) { m_autoSwitchServer = autoSwitch; }
 
 		virtual void onClientThreadStarted() {}
 		virtual void onClientThreadFinished() {}
-
-		virtual QTcpSocket* createSocket() override { return new QTcpSocket; }
 
 		virtual void onConnection() override;
 		virtual void onDisconnection() override;
@@ -322,6 +356,7 @@ namespace Tcp
 
 		bool isClearToSendRequest() const;
 
+		void sendRequest(quint32 requestID);
 		void sendRequest(quint32 requestID, const QByteArray& requestData);
 		void sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
 
@@ -336,61 +371,6 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-
-	template <typename ClientDerivedClass>
-	class ClientThread : public SimpleThread
-	{
-	public:
-		ClientThread(const HostAddressPort& serverAddressPort);
-		ClientThread(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
-
-		~ClientThread();
-	};
-
-
-	// -------------------------------------------------------------------------------------
-	//
-	// Tcp::ClientThread class implementation
-	//
-	// -------------------------------------------------------------------------------------
-
-	template <typename ClientDerivedClass>
-	ClientThread<ClientDerivedClass>::ClientThread(const HostAddressPort &serverAddressPort) :
-		SimpleThread(new ClientDerivedClass)
-	{
-		Client* client = dynamic_cast<Client*>(m_worker);
-
-		if (client != nullptr)
-		{
-			client->setServer(serverAddressPort);
-		}
-		else
-		{
-			assert(false);
-		}
-	}
-
-
-	template <typename ClientDerivedClass>
-	ClientThread<ClientDerivedClass>::ClientThread(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-		SimpleThread(new ClientDerivedClass)
-	{
-		Client* client = dynamic_cast<Client*>(m_worker);
-
-		if (client != nullptr)
-		{
-			client->setServers(serverAddressPort1, serverAddressPort2);
-		}
-		else
-		{
-			assert(false);
-		}
-	}
-
-
-	template <typename ClientDerivedClass>
-	ClientThread<ClientDerivedClass>::~ClientThread()
-	{
-	}
+	typedef SimpleThread Thread;
 
 }

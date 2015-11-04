@@ -662,23 +662,15 @@ namespace Builder
 				const std::string& className = metaObject->className();
 				equipmentWriter.writeAttribute("classNameHash", QString::number(CUtils::GetClassHashCode(className), 16));
 
-				equipmentWriter.writeAttribute("StrID", currentDevice->strId());
-				equipmentWriter.writeAttribute("Caption", currentDevice->caption());
-				equipmentWriter.writeAttribute("ChildRestriction", currentDevice->childRestriction());
-				equipmentWriter.writeAttribute("Place", QString::number(currentDevice->place()));
-				equipmentWriter.writeAttribute("ChildrenCount", QString::number(currentDevice->childrenCount()));
-				equipmentWriter.writeAttribute("DynamicProperties", currentDevice->dynamicProperties());
-
-				for(int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i)
+				for (auto p : currentDevice->properties())
 				{
-					const QMetaProperty& property = metaObject->property(i);
-					if (property.isValid())
+					if (p->readOnly())
 					{
-						const char* name = property.name();
-						QVariant tmp = currentDevice->property(name);
-						assert(tmp.convert(QMetaType::QString));
-						equipmentWriter.writeAttribute(name, tmp.toString());
+						continue;
 					}
+					QVariant tmp = p->value();
+					assert(tmp.convert(QMetaType::QString));
+					equipmentWriter.writeAttribute(p->caption(), tmp.toString());
 				}
 			}, [&equipmentWriter](Hardware::DeviceObject*)
 			{
