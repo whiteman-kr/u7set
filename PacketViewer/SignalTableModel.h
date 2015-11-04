@@ -5,6 +5,7 @@
 
 class SignalSet;
 class DataSource;
+class Signal;
 
 class SignalTableModel : public QAbstractTableModel
 {
@@ -30,6 +31,8 @@ private:
 	const SignalSet& m_signalSet;
 	QVector<int> m_relatedSignalIndexes;
 	std::vector<std::pair<int, int>> m_frameSignalIndexLimits;
+
+	quint64 getAdc(const Signal& signal) const;
 };
 
 #endif // SIGNALTABLEMODEL_H
