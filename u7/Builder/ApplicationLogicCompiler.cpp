@@ -1772,13 +1772,29 @@ namespace Builder
 				switch(appSignal.dataFormat())
 				{
 				case E::DataFormat::SignedInt:
-					cmd.movConstInt32(ramAddrOffset, constItem.intValue());
-					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.intValue()));
+					if (constItem.isIntegral())
+					{
+						cmd.movConstInt32(ramAddrOffset, constItem.intValue());
+						cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.intValue()));
+					}
+					else
+					{
+						LOG_ERROR(m_log, QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
+								  arg(constItem.floatValue()).arg(appSignal.strID()));
+					}
 					break;
 
 				case E::DataFormat::Float:
-					cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
-					cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.floatValue()));
+					if (constItem.isFloat())
+					{
+						cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
+						cmd.setComment(QString(tr("%1 <= %2")).arg(appSignal.strID()).arg(constItem.floatValue()));
+					}
+					else
+					{
+						LOG_ERROR(m_log, QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
+								  arg(constItem.intValue()).arg(appSignal.strID()));
+					}
 					break;
 
 				default:
@@ -3232,6 +3248,16 @@ namespace Builder
 
 					continue;
 				}
+
+				/*if (logicItem.m_fblItem->toFblElement() != nullptr)
+				{
+					qDebug() << logicItem.m_fblItem->toFblElement()->afbStrID();
+
+					for(const Afb::AfbParam& param : logicItem.m_fblItem->toFblElement()->params())
+					{
+						qDebug() << param.opName() << " " << param.value();
+					}
+				}*/
 
 				AppItem* appItem = new AppItem(logicItem);
 
