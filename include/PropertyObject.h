@@ -509,13 +509,15 @@ public:
 	//
 	void removeDynamicProperties();
 
-	// Get specific property by its caption,
+    Q_INVOKABLE bool propertyExists(QString caption) const;
+
+    // Get specific property by its caption,
 	// return Property* or nullptr if property is not found
 	//
     std::shared_ptr<Property> propertyByCaption(QString caption);
     const std::shared_ptr<Property> propertyByCaption(QString caption) const;
 
-	// Get property value
+    // Get property value
 	//
     Q_INVOKABLE QVariant propertyValue(QString caption) const;
 

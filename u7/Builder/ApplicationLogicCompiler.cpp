@@ -2801,33 +2801,49 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeResult()
 	{
-		bool result = true;
+        if (m_lm->propertyExists("SubsysID") == false)
+        {
+            assert(false);
+            return false;
+        }
 
-		m_code.generateBinCode();
+        if (m_lm->propertyExists("Channel") == false)
+        {
+            assert(false);
+            return false;
+        }
+
+        QString subsysId = m_lm->propertyValue("SubsysID").toString();
+
+        int channel = m_lm->propertyValue("Channel").toInt();
+
+        bool result = true;
+
+        m_code.generateBinCode();
 
 		QByteArray binCode;
 
 		m_code.getBinCode(binCode);
 
-		m_appLogicCompiler.writeBinCodeForLm(m_lm->subSysID(), m_lm->caption(), m_lm->channel(),
+        m_appLogicCompiler.writeBinCodeForLm(subsysId, m_lm->caption(), channel,
 														  m_lmAppLogicFrameSize, m_lmAppLogicFrameCount, binCode);
 		QStringList mifCode;
 
 		m_code.getMifCode(mifCode);
 
-		result &= m_resultWriter->addFile(m_lm->subSysID(), QString("%1.mif").arg(m_lm->caption()), mifCode);
+        result &= m_resultWriter->addFile(subsysId, QString("%1.mif").arg(m_lm->caption()), mifCode);
 
 		QStringList asmCode;
 
 		m_code.getAsmCode(asmCode);
 
-		result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.asm").arg(m_lm->caption()), asmCode);
+        result = m_resultWriter->addFile(subsysId, QString("%1.asm").arg(m_lm->caption()), asmCode);
 
 		QStringList memFile;
 
 		m_memoryMap.getFile(memFile);
 
-		result = m_resultWriter->addFile(m_lm->subSysID(), QString("%1.mem").arg(m_lm->caption()), memFile);
+        result = m_resultWriter->addFile(subsysId, QString("%1.mem").arg(m_lm->caption()), memFile);
 
 		//
 

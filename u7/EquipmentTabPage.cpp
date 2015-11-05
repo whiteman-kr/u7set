@@ -1456,7 +1456,14 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 			{
 				std::shared_ptr<Hardware::Subsystem> subsystem = subsystems.get(0);
 
-				module->setSubSysID(subsystem->strId());
+                if (module->propertyExists("SubsysID") == false)
+                {
+                    assert(false);
+                }
+                else
+                {
+                    module->setPropertyValue("SubsysID", QVariant::fromValue(subsystem->strId()));
+                }
 			}
 		}
 	}
