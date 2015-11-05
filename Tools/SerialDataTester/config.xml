@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<signals>
+	<signal STRID="#AVR75639" caption="AVR75639" offset="0" bit="3" type="Discrette"></signal>
+	<signal STRID="2" caption="test" offset="8" bit="3" type="Analog"></signal>
+</signals>
