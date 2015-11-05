@@ -266,7 +266,11 @@ int main(int argc, char *argv[])
 	REPORT(git_tree_lookup(&tree, repo, git_commit_tree_id(commit)));
 	REPORT(git_diff_tree_to_workdir_with_index(&diff, repo, tree, NULL));
 	int fileCount = 0;
+#if defined(_WIN32) || LIBGIT2_VER_MINOR < 23
 	REPORT(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, &fileCount));
+#else
+	REPORT(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, nullptr, &fileCount));
+#endif
 
 	if (fileCount == 0)
 	{
