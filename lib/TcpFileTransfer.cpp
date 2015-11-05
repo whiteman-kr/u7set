@@ -2,9 +2,16 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QCryptographicHash>
+#include <QMetaObject>
 
 namespace Tcp
 {
+
+	// -------------------------------------------------------------------------------------
+	//
+	// Tcp::GetFileReply structure implementation
+	//
+	// -------------------------------------------------------------------------------------
 
 	GetFileReply::GetFileReply()
 	{
@@ -14,7 +21,7 @@ namespace Tcp
 
 	void GetFileReply::clear()
 	{
-		errorCode = FileTransferError::Ok;
+		errorCode = FileTransferResult::Ok;
 		fileSize = 0;
 		totalParts = 0;
 		currentPart = 0;
@@ -34,6 +41,25 @@ namespace Tcp
 		memcpy(this->md5, md5.constData(), MD5_LEN);
 	}
 
+
+	// -------------------------------------------------------------------------------------
+	//
+	// Tcp::FileTransfer class implementation
+	//
+	// -------------------------------------------------------------------------------------
+
+	bool FileTransfer::m_FileTransferErrorIsRegistered = false;
+
+	FileTransfer::FileTransfer() :
+		m_md5Generator(QCryptographicHash::Md5)
+	{
+		if (m_FileTransferErrorIsRegistered == false)
+		{
+			qRegisterMetaType<FileTransferResult>("FileTransferResult");
+			m_FileTransferErrorIsRegistered = true;
+		}
+	}
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::FileClient class implementation
@@ -41,17 +67,21 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	FileClient::FileClient(const QString& rootFolder, const HostAddressPort &serverAddressPort) :
-		Client(serverAddressPort),
-		m_rootFolder(rootFolder)
+		Client(serverAddressPort)
 	{
+		m_rootFolder = rootFolder;
+		m_file.setParent(this);
+
 		init();
 	}
 
 
 	FileClient::FileClient(const QString &rootFolder, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-		Client(serverAddressPort1, serverAddressPort2),
-		m_rootFolder(rootFolder)
+		Client(serverAddressPort1, serverAddressPort2)
 	{
+		m_rootFolder = rootFolder;
+		m_file.setParent(this);
+
 		init();
 	}
 
@@ -61,29 +91,37 @@ namespace Tcp
 		connect(this, &FileClient::signal_downloadFile, this, &FileClient::slot_downloadFile);
 	}
 
-	void FileClient::init()
+
+	void FileClient::onClientThreadFinished()
 	{
-		m_downloadInProgress = false;
-		m_fileName = "";
-		m_fileSize = 0;
-		m_fileMD5.clear();
+		m_file.close();
 	}
 
 
-	FileTransferError FileClient::checkLocalFolder()
+	void FileClient::init()
+	{
+		m_fileName = "";
+		m_file.close();
+		m_transferInProgress = false;
+		m_reply.clear();
+		m_md5Generator.reset();
+	}
+
+
+	FileTransferResult FileClient::checkLocalFolder()
 	{
 		QFileInfo pathInfo(m_rootFolder);
 
 		if (pathInfo.permission(QFileDevice::WriteUser | QFileDevice::ReadUser) == false)
 		{
-			return FileTransferError::LocalFolderIsNotWriteable;
+			return FileTransferResult::LocalFolderIsNotWriteable;
 		}
 
-		return FileTransferError::Ok;
+		return FileTransferResult::Ok;
 	}
 
 
-	FileTransferError FileClient::createFile()
+	FileTransferResult FileClient::createFile()
 	{
 		QFileInfo fileInfo(m_rootFolder + m_fileName);
 
@@ -93,56 +131,49 @@ namespace Tcp
 
 		if (dir.mkpath(path) == false)
 		{
-			return FileTransferError::CantCreateLocalFolder;
+			return FileTransferResult::CantCreateLocalFolder;
 		}
 
-		return FileTransferError::Ok;
+		return FileTransferResult::Ok;
 	}
 
 
-
-	void FileClient::endFileDownload(FileTransferError errorCode)
+	void FileClient::endFileDownload(FileTransferResult errorCode)
 	{
-		emit signal_fileDownloaded(m_fileName, errorCode);
+		emit signal_endDownloadFile(m_fileName, errorCode);
 		init();
 	}
 
 
 	void FileClient::slot_downloadFile(const QString fileName)
 	{
-		if (m_downloadInProgress == true)
+		if (isConnected() == false)
 		{
-			assert(false);
-			emit signal_fileDownloaded(fileName, FileTransferError::AlreadyDownloadFile);
+			emit signal_endDownloadFile(fileName, FileTransferResult::NotConnectedToServer);
 			return;
 		}
 
-		m_downloadInProgress = true;
+		if (m_transferInProgress == true)
+		{
+			assert(false);
+			emit signal_endDownloadFile(fileName, FileTransferResult::AlreadyDownloadFile);
+			return;
+		}
+
+		m_transferInProgress = true;
 		m_fileName = fileName;
 
-		FileTransferError err = checkLocalFolder();
+		FileTransferResult err = checkLocalFolder();
 
-		if (err != FileTransferError::Ok)
+		if (err != FileTransferResult::Ok)
 		{
 			endFileDownload(err);
 			return;
 		}
 
-		if (isConnected() == false)
-		{
-			endFileDownload(FileTransferError::NotConnectedToServer);
-			return;
-		}
-
-		startFileDownload();
-	}
-
-
-	void FileClient::startFileDownload()
-	{
 		if (isClearToSendRequest() == false)
 		{
-			endFileDownload(FileTransferError::CantSendRequest);
+			endFileDownload(FileTransferResult::CantSendRequest);
 			return;
 		}
 
@@ -155,13 +186,11 @@ namespace Tcp
 		switch(requestID)
 		{
 		case RQID_GET_FILE_START:
-			processGetFileStartReply(replyData, replyDataSize);
+			processGetFileStartNextReply(true, replyData, replyDataSize);
 			break;
 
 		case RQID_GET_FILE_NEXT:
-			break;
-
-		case RQID_GET_FILE_CANCEL:
+			processGetFileStartNextReply(false, replyData, replyDataSize);
 			break;
 
 		default:
@@ -170,25 +199,80 @@ namespace Tcp
 	}
 
 
-	void FileClient::processGetFileStartReply(const char* replyData, quint32 replyDataSize)
+	void FileClient::processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize)
 	{
 		assert(replyDataSize >= sizeof(GetFileReply));
 
 		const GetFileReply* reply = reinterpret_cast<const GetFileReply*>(replyData);
 
-		if (reply->errorCode != FileTransferError::Ok)
+		if (reply->errorCode != FileTransferResult::Ok)
 		{
 			endFileDownload(reply->errorCode);
 			return;
 		}
 
-//		assert(replyDataSize == (sizeof(GetFileReply) - sizeof(char) + reply->md5Size));
+		assert(replyDataSize == (sizeof(GetFileReply) + reply->currentPartSize));
 
-		m_fileSize = reply->fileSize;
+		if (startReply)
+		{
+			QString fileName = m_rootFolder + m_fileName;
 
-	//	m_fileMD5.fromRawData(&reply->md5, reply->md5Size);
+			QFileInfo fi(fileName);
 
-		// try create file & set file size
+			QDir dir(fi.path());
+
+			if (dir.mkpath(fi.path()) == false)
+			{
+				endFileDownload(FileTransferResult::CantCreateLocalFolder);
+				return;
+			}
+
+			m_file.setFileName(fileName);
+
+			if (m_file.open(QIODevice::ReadWrite | QIODevice::Truncate) == false)
+			{
+				endFileDownload(FileTransferResult::CantCreateLocalFile);
+				return;
+			}
+
+			if (m_file.resize(reply->fileSize) == false)
+			{
+				endFileDownload(FileTransferResult::CantCreateLocalFile);
+				return;
+			}
+
+			m_file.seek(0);
+		}
+
+		const char* filePartData = replyData + sizeof(GetFileReply);
+
+		m_md5Generator.addData(filePartData, reply->currentPartSize);
+
+		if (memcmp(m_md5Generator.result().constData(), reply->md5, MD5_LEN) != 0)
+		{
+			endFileDownload(FileTransferResult::FileDataCorrupted);
+			return;
+		}
+
+		qint64 written = m_file.write(filePartData, reply->currentPartSize);
+
+		if (written < reply->currentPartSize)
+		{
+			endFileDownload(FileTransferResult::CantWriteLocalFile);
+			return;
+		}
+
+		if (reply->currentPart != reply->totalParts)
+		{
+			sendRequest(RQID_GET_FILE_NEXT);
+			return;
+		}
+
+		QString downloadedFileName = m_fileName;
+
+		init();
+
+		emit signal_endDownloadFile(downloadedFileName, FileTransferResult::Ok);
 	}
 
 
@@ -198,10 +282,10 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileServer::FileServer(const QString& rootFolder) :
-		m_rootFolder(rootFolder),
-		m_md5Generator(QCryptographicHash::Md5)
+	FileServer::FileServer(const QString& rootFolder)
 	{
+		m_rootFolder = rootFolder;
+		m_file.setParent(this);
 	}
 
 
@@ -209,14 +293,9 @@ namespace Tcp
 	{
 		m_fileName = "";
 		m_file.close();
-		m_uploadInProgress = false;
+		m_transferInProgress = false;
 		m_reply.clear();
 		m_md5Generator.reset();
-	}
-
-
-	void FileServer::onServerThreadStarted()
-	{
 	}
 
 
@@ -225,43 +304,50 @@ namespace Tcp
 		switch(requestID)
 		{
 		case RQID_GET_FILE_START:
-			processGetFileStartRequest(requestData, requestDataSize);
+			sendFirstFilePart(QString::fromUtf8(requestData, requestDataSize));
 			break;
+
+		case RQID_GET_FILE_NEXT:
+			sendNextFilePart();
+			break;
+
+		default:
+			assert(false);
 		}
 	}
 
 
-	void FileServer::processGetFileStartRequest(const char* requestData, quint32 requestDataSize)
+	void FileServer::sendFirstFilePart(const QString& fileName)
 	{
-		/*if (m_uploadInProgress == true)
+		if (m_transferInProgress == true)
 		{
-			reply.errorCode = FileTransferError::AlreadyUploadFile;
-			sendReply(reply, sizeof(reply));
-			return;
+			// cancel current transfer
+			//
+			init();
 		}
 
-		m_uploadInProgress = true;
+		m_transferInProgress = true;
 
 		// start upload process
 		//
 		init();
 
-		m_fileName = QString::fromUtf8(requestData, requestDataSize);
+		m_fileName = fileName;
 
-		m_file.setFileName(m_fileName);
+		m_file.setFileName(m_rootFolder + m_fileName);
 
 		if (m_file.exists() == false)
 		{
-			reply.errorCode = FileTransferError::FileNotFound;
-			sendReply(reply, sizeof(reply));
+			m_reply.errorCode = FileTransferResult::NotFoundRemoteFile;
+			sendReply(m_reply, sizeof(m_reply));
 			init();
 			return;
 		}
 
 		if (m_file.open(QIODevice::ReadOnly) == false)
 		{
-			reply.errorCode = FileTransferError::CantOpenFile;
-			sendReply(reply, sizeof(reply));
+			m_reply.errorCode = FileTransferResult::CantOpenRemoteFile;
+			sendReply(m_reply, sizeof(m_reply));
 			init();
 			return;
 		}
@@ -269,12 +355,48 @@ namespace Tcp
 		QFileInfo fi(m_file);
 
 		m_reply.fileSize = fi.size();
-		m_reply.totalParts = m_reply.fileSize / FILE_PART_SIZE + (m_reply.fileSize % FILE_PART_SIZE ? 1 : 0);*/
+		m_reply.totalParts = m_reply.fileSize / FILE_PART_SIZE + (m_reply.fileSize % FILE_PART_SIZE ? 1 : 0);
+
+		sendNextFilePart();
 	}
 
-	void FileServer::readFileData()
-	{
 
+	void FileServer::sendNextFilePart()
+	{
+		if (m_file.isOpen() == false)
+		{
+			assert(false);
+			m_reply.errorCode = FileTransferResult::CantReadRemoteFile;
+			sendReply(m_reply, sizeof(m_reply));
+			init();
+			return;
+		}
+
+		int readed = m_file.read(m_fileData, FILE_PART_SIZE);
+
+		if (readed == 0 || readed == -1)
+		{
+			assert(false);
+			m_reply.errorCode = FileTransferResult::CantReadRemoteFile;
+			sendReply(m_reply, sizeof(m_reply));
+			init();
+			return;
+		}
+
+		m_reply.currentPart++;
+		m_reply.currentPartSize = readed;
+
+		m_md5Generator.addData(m_fileData, readed);
+		m_reply.setMD5(m_md5Generator.result());
+
+		sendReply(m_replyData, sizeof(GetFileReply) + m_reply.currentPartSize);
+
+		if (m_reply.currentPart == m_reply.totalParts)
+		{
+			// all parts of file are sent
+			//
+			init();
+		}
 	}
 
 }

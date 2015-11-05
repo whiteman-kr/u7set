@@ -198,6 +198,7 @@ namespace Tcp
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
 
 		void sendAck();
+		void sendReply();
 		void sendReply(const QByteArray& replyData);
 		void sendReply(const char* replyData, quint32 replyDatsSize);
 	};

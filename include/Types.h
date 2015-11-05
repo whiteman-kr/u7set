@@ -38,7 +38,8 @@ public:
 	Q_ENUM(DataFormat)
 
 public:
-	// Convert enum vale (not index) to QString
+	// Convert enum value (not index) to QString
+	//
 	template <typename ENUM_TYPE>
 	static QString valueToString(int value)
 	{

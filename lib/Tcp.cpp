@@ -477,6 +477,12 @@ namespace Tcp
 	}
 
 
+	void Server::sendReply()
+	{
+		sendReply(nullptr, 0);
+	}
+
+
 	void Server::sendReply(const QByteArray& replyData)
 	{
 		sendReply(replyData.constData(), replyData.size());
@@ -840,16 +846,12 @@ namespace Tcp
 
 			onAck();
 
-			qDebug() << "ack received";
-
 			m_readState = ReadState::WaitingForHeader;
 
 			break;
 
 		case Header::Type::Reply:
 			initReadStatusVariables();
-
-			qDebug() << "reply received";
 
 			processReply(m_header.id, m_dataBuffer, m_header.dataSize);
 

@@ -43,6 +43,7 @@ public:
 
 private slots:
 	void on_pushButton_clicked();
+	void onEndDownloadFile(const QString fileName, Tcp::FileTransferResult errorCode);
 
 private:
 	Ui::TcpClientMainWindow *ui;
