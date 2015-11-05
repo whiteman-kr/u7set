@@ -357,9 +357,9 @@ namespace Hardware
 		/*
 		Example:
 
-        version;    name; 	category;	type;		min;		max;		default             updateFromPreset
-        1;          IP;		Server;		string;		0;			0;			192.168.75.254;     false
-        1;          Port;	Server;		uint32_t;	1;			65535;		2345;               false
+        version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset
+        1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
+        1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
 
         version:            record version
         name:               property name
@@ -373,6 +373,7 @@ namespace Hardware
         min:                property minimum value (ignored for bool, string)
         max:                property maximim value (ignored for bool, string)
         default:            can be any value of the specified type
+        precision:          property precision
         updateFromPreset:   property will be updated from preset
 		*/
 
@@ -387,10 +388,10 @@ namespace Hardware
 
 			QStringList columns = r.split(';');
 
-            if (columns.count() != 8)
+            if (columns.count() != 9)
 			{
 				qDebug() << Q_FUNC_INFO << " Wrong proprty struct: " << r;
-                qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;updateFromPreset";
+                qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset";
 				continue;
 			}
 
@@ -417,8 +418,10 @@ namespace Hardware
                 QStringRef min(&columns[4]);
                 QStringRef max(&columns[5]);
                 QStringRef defaultValue(&columns[6]);
-                QString strUpdateFromPreset(columns[7]);
+                QStringRef strPrecision(&columns[7]);
+                QString strUpdateFromPreset(columns[8]);
 
+                int precision = strPrecision.toInt();
 
                 bool updateFromPreset = false;
                 if (strUpdateFromPreset.toUpper() == "TRUE")
@@ -475,6 +478,7 @@ namespace Hardware
                     newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
                     newProperty->setValue(QVariant(defaultInt));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -512,6 +516,7 @@ namespace Hardware
                     newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
                     newProperty->setValue(QVariant(defaultUInt));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -549,6 +554,7 @@ namespace Hardware
                     newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
                     newProperty->setValue(QVariant(defaultDouble));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -568,6 +574,7 @@ namespace Hardware
                     newProperty->setCategory(category);
                     newProperty->setValue(QVariant(defaultBool));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -583,6 +590,7 @@ namespace Hardware
                     newProperty->setCategory(category);
                     newProperty->setValue(QVariant(defaultValue.toString()));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
