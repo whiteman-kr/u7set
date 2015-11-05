@@ -216,7 +216,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     if (oldChannelCount < channel)
     {
         setData16(confFirmware, log, frameStorageConfig, ptr, channel);
-		confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": Channel = " + channel + "\r\n");
+		confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": ChannelCount = " + channel + "\r\n");
 
     }
     ptr += 2;
@@ -245,6 +245,8 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     
     // I/O Modules configuration
     //
+	confFirmware.writeLog("Writing I/O modules configuration.\r\n");
+
     var frameIOConfig = configFrame + 1;
 
     var parent = module.jsParent();
@@ -289,30 +291,10 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
             }
         }
     }
-    /*
-    // Create TxRx Blocks (Opto) configuration
-    //
-    var txRxOptoCount = 3;
-    var txRxOptoStartFrame = 16;
-    
-    for (var i = 0; i < txRxOptoCount; i++)
-    {
-        var ptr = 0;
-        setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 10);       //Start address
-        ptr += 2;
-        setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 20);           //Quantity of words
-        ptr += 2;
-        setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 30);           //Tx ID
-        ptr += 2;
-        setData16(confFirmware, log, txRxOptoStartFrame + i, ptr, 40);           //Quantity of words
-        ptr += 2;
-        //reserved
-        ptr += 1008;
-        storeCrc64(confFirmware, log, txRxOptoStartFrame + i, 0, ptr, ptr);  //CRC-64
-        ptr += 8;
-    }
-    
-    // Create LANs configuration
+	
+	var lanConfigFrame = frameIOConfig + 14;
+
+/*    // Create LANs configuration
     //
     var lanCount = 3;
     var lanStartFrame = 19;
@@ -328,7 +310,13 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
         ptr += 8;
     }
 */
-    return true;
+/*
+	var txRxConfigFrame = lanConfigFrame + 3;
+	var optoCount = 3;
+	
+	generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, optoCount, false/*modeWordGeneration*//*);
+*/  
+	return true;
 }
 
 function truncate_to_int(x)
@@ -447,7 +435,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var dataFramesQuantity = 0;
     var txId = aimTxId;
     
-    generate_txRxConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
     
     // assert if we not on the correct place
@@ -558,7 +546,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     var dataFramesQuantity = 1;
     var txId = aomTxId;
     
-    generate_txRxConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
 
     // assert if we not on the correct place
@@ -658,7 +646,7 @@ function generate_dim(confFirmware, module, frame, log)
     var dataFramesQuantity = 0;
     var txId = dimTxId;
     
-    generate_txRxConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
 
     // assert if we not on the correct place
@@ -707,7 +695,7 @@ function generate_dom(confFirmware, module, frame, log)
     var dataFramesQuantity = 1;
     var txId = domTxId;
     
-    generate_txRxConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
 
     // assert if we not on the correct place
@@ -721,24 +709,78 @@ function generate_dom(confFirmware, module, frame, log)
     return true;
 
 }
-function generate_txRxConfig(confFirmware, frame, offset, log, flags, configFrames, dataFrames, txId)
+function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFrames, dataFrames, txId)
 {
-    // TxRx Block's configuration structure
+    confFirmware.writeLog("Writing TxRx Blocks configuration.\r\n");
+	// TxRx Block's configuration structure
     //
     var ptr = offset;
     
     setData16(confFirmware, log, frame, ptr, flags);        // Flags word
-	confFirmware.writeLog("generate_txRxConfig: Frame " + frame + ", offset " + ptr +": flags = "+ flags + "\r\n");
+	confFirmware.writeLog("generate_txRxIoConfig: Frame " + frame + ", offset " + ptr +": flags = "+ flags + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, configFrames); // Configuration words quantity
-	confFirmware.writeLog("generate_txRxConfig: Frame " + frame + ", offset " + ptr +": configFrames = "+ configFrames + "\r\n");
+	confFirmware.writeLog("generate_txRxIoConfig: Frame " + frame + ", offset " + ptr +": configFrames = "+ configFrames + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, dataFrames);   // Data words quantity
-	confFirmware.writeLog("generate_txRxConfig: Frame " + frame + ", offset " + ptr +": dataFrames = "+ dataFrames + "\r\n");
+	confFirmware.writeLog("generate_txRxIoConfig: Frame " + frame + ", offset " + ptr +": dataFrames = "+ dataFrames + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, txId);         // Tx ID
-	confFirmware.writeLog("generate_txRxConfig: Frame " + frame + ", offset " + ptr +": txId = "+ txId + "\r\n");
+	confFirmware.writeLog("generate_txRxIoConfig: Frame " + frame + ", offset " + ptr +": txId = "+ txId + "\r\n");
     ptr += 2;
     
     return true;
+}
+
+function generate_txRxOptoConfiguration(confFirmware, log, frame, module, txRxOptoCount, modeWordGeneration)
+{
+    // Create TxRx Blocks (Opto) configuration
+	//
+	confFirmware.writeLog("Writing TxRx Blocks (Opto) configuration.\r\n");
+
+    for (var i = 0; i < txRxOptoCount; i++)
+    {
+        var ptr = (0 + i) * 2;
+		var startAddress = 0;
+        setData16(confFirmware, log, frame, ptr, startAddress); 
+		confFirmware.writeLog("generate_txRxOptoConfiguration: Frame " + frame + ", offset " + ptr + ": TX startAddress for TxRx Block (Opto) " + (i + 1) + " = " + startAddress + "\r\n");
+		
+        ptr = (5 + i) * 2;
+		var txWordsQuantity = 0;
+        setData16(confFirmware, log, frame, ptr, txWordsQuantity);
+		confFirmware.writeLog("generate_txRxOptoConfiguration: Frame " + frame + ", offset " + ptr +": TX data words quantity for TxRx Block (Opto) " + (i + 1) + " = " + txWordsQuantity + "\r\n");
+
+        ptr = (10 + i) * 2;
+		var id = 0;
+        setData16(confFirmware, log, frame, ptr, id);       //Start address
+		confFirmware.writeLog("generate_txRxOptoConfiguration: Frame " + frame + ", offset " + ptr +": TX id for TxRx Block (Opto) " + (i + 1) + " = " + id + "\r\n");
+
+        ptr = (15 + i) * 2;
+		var rxWordsQuantity = 0;
+        setData16(confFirmware, log, frame, ptr, rxWordsQuantity);
+		confFirmware.writeLog("generate_txRxOptoConfiguration: Frame " + frame + ", offset " + ptr +": RX data words quantity for TxRx Block (Opto) " + (i + 1) + " = " + rxWordsQuantity + "\r\n");
+		
+		ptr = 20 * 2;
+		
+		var txEn = 1;	//1 - enabled, 0 - disabled
+		var txStandard = 0;	//0 - rs232, 1 - rs485
+		
+		var txMode = (txEn << 1) | txStandard;
+		txMode <<= (i * 2);
+		
+		if (modeWordGeneration == true)
+		{
+			var allModes = confFirmware.data16(frame, ptr);
+			allModes |= txMode;
+			setData16(confFirmware, log, frame, ptr, allModes);
+		}
+    }
+	
+	if (modeWordGeneration == true)
+	{
+		var allModes = confFirmware.data16(frame, ptr);
+		allModes |= txMode;
+		confFirmware.writeLog("generate_txRxOptoConfiguration: Frame " + frame + ", offset " + ptr +": RS mode configuration = " + allModes + "\r\n");
+	}
+ 
 }

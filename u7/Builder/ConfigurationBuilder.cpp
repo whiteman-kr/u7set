@@ -198,18 +198,33 @@ namespace Builder
 
 		for (Hardware::DeviceModule* m : lmModules)
 		{
-			int ssKey = m_subsystems->ssKey(m->subSysID());
+            if (m->propertyExists("SubsysID") == false)
+            {
+                lmReport << "No SubsysID property found in " + m->strId();
+                assert(false);
+                continue;
+            }
+
+            if (m->propertyExists("Channel") == false)
+            {
+                lmReport << "No Channel property found in " + m->strId();
+                assert(false);
+                continue;
+            }
+
+            int ssKey = m_subsystems->ssKey(m->propertyValue("SubsysID").toString());
+            int channel = m->propertyValue("Channel").toInt();
 
 			lmReport << "\r\n";
 			lmReport << "StrID: " + m->strId();
 			lmReport << "Caption: " + m->caption();
 			lmReport << "Place: " + QString::number(m->place());
-			lmReport << "Subsystem ID: " + m->subSysID();
+            lmReport << "Subsystem ID: " + m->propertyValue("SubsysID").toString();
 			lmReport << "Subsystem code: " + QString::number(ssKey);
-			lmReport << "Channel: " + QString::number(m->channel());
+            lmReport << "Channel: " + QString::number(channel);
 
 			quint16 jumpers = ssKey << 6;
-			jumpers |= m->channel();
+            jumpers |= channel;
 
             quint16 crc4 = Crc::crc4(jumpers);
 			jumpers |= (crc4 << 12);
@@ -220,7 +235,7 @@ namespace Builder
 			jumpersHex.insert(4, ' ');
 			jumpersHex.insert(9, ' ');
 			jumpersHex.insert(14, ' ');
-			lmReport << "Jumpers configuration (BIN): " + jumpersHex;
+            lmReport << "Jumpers configuration (BIN): " + jumpersHex;
 		}
 
 		QByteArray lmReportData;

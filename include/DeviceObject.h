@@ -159,11 +159,14 @@ namespace Hardware
 		Q_INVOKABLE int childrenCount() const;
 
 		DeviceObject* child(int index) const;
+		DeviceObject* child(QUuid uuid) const;
 		Q_INVOKABLE QObject* jsChild(int index) const;
 
 		int childIndex(DeviceObject* child) const;
 
 		std::shared_ptr<DeviceObject> childSharedPtr(int index);
+		std::shared_ptr<DeviceObject> childSharedPtr(QUuid uuid);
+		std::shared_ptr<DeviceObject> childSharedPtrByPresetUuid(QUuid presetObjectUuid);
 
 		void addChild(std::shared_ptr<DeviceObject> child);
 		void deleteChild(DeviceObject* child);
@@ -413,15 +416,6 @@ namespace Hardware
 
 		int moduleVersion() const;
 		void setModuleVersion(int value);
-
-		int channel() const;
-		void setChannel(int value);
-
-		QString subSysID() const;
-		void setSubSysID(const QString& value);
-
-		QString confType() const;
-		void setConfType(const QString& value);
 
 		bool isIOModule() const;
 		bool isInputModule() const;

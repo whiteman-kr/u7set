@@ -189,6 +189,26 @@ void Property::setPrecision(int value)
 	m_precision = value;
 }
 
+void Property::copy(const Property* source)
+{
+	if (source == nullptr ||
+		source == this)
+	{
+		assert(source);
+		return;
+	}
+
+	m_caption = source->m_caption;
+	m_description = source->m_description;
+	m_category = source->m_category;
+	m_readOnly = source->m_readOnly;
+	m_updateFromPreset = source->m_updateFromPreset;
+	m_dynamic = source->m_dynamic;
+	m_visible = source->m_visible;
+	m_precision = source->m_precision;
+
+	return;
+}
 
 //
 //
@@ -224,6 +244,14 @@ void PropertyObject::removeAllProperties()
 	m_properties.clear();
 }
 
+void PropertyObject::addProperties(std::vector<std::shared_ptr<Property>> properties)
+{
+	for (auto p : properties)
+	{
+		m_properties[p->caption()] = p;
+	}
+}
+
 void PropertyObject::removeDynamicProperties()
 {
 	for(auto it = m_properties.begin(); it != m_properties.end();)
@@ -237,6 +265,12 @@ void PropertyObject::removeDynamicProperties()
 			++it;
 		}
 	}
+}
+
+bool PropertyObject::propertyExists(QString caption) const
+{
+    auto it = m_properties.find(caption);
+    return it != m_properties.end();
 }
 
 std::shared_ptr<Property> PropertyObject::propertyByCaption(QString caption)

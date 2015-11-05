@@ -98,7 +98,15 @@ public:
     virtual const QVariant& step() const = 0;
     virtual void setStep(const QVariant& value) = 0;
 
+	virtual bool isTheSameType(Property* property) = 0;
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) = 0;
+
+protected:
+	void copy(const Property* source);
+
 private:
+	// WARNING!!! If you add a field, do not forget to add it to void copy(const Property* source);
+	//
 	QString m_caption;
 	QString m_description;
 	QString m_category;
@@ -371,7 +379,48 @@ public:
 		m_setter = setter;
 	}
 
+	virtual bool isTheSameType(Property* property) override
+	{
+		if (dynamic_cast<PropertyValue<TYPE>*>(property) == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	{
+		if (presetProperty == nullptr ||
+			isTheSameType(presetProperty) == false)
+		{
+			assert(presetProperty != nullptr);
+			assert(isTheSameType(presetProperty) == true);
+			return;
+		}
+
+		Property::copy(presetProperty);	// Copy data from the base class
+
+		PropertyValue<TYPE>* source = dynamic_cast<PropertyValue<TYPE>*>(presetProperty);
+		assert(source);
+
+		if (updateValue == true)
+		{
+			setValue(presetProperty->value());
+		}
+
+		m_lowLimit = source->m_lowLimit;
+		m_highLimit = source->m_highLimit;
+		m_step = source->m_step;
+
+		// Do not copy m_getter/m_setter, because the yare binded to own object instances
+		//
+		return;
+	}
+
 private:
+	// WARNING!!! If you add a field, do not forget to add it to updateFromPreset();
+	//
 	QVariant m_value;
 	QVariant m_lowLimit;
 	QVariant m_highLimit;
@@ -448,17 +497,27 @@ public:
 	//
 	void removeAllProperties();
 
+	// Add properties
+	// 1. If properties have getter or setter the must be added via PropertyObject::addProperty
+	// because getter and setter are binded to this
+	// 2. It is posible to use addProperties with getter and setter properties
+	// if they were added via PropertyObject::addProperty and later removed by removeAllProperties
+	//
+	void addProperties(std::vector<std::shared_ptr<Property>> properties);
+
 	// Delete all deynamic properties
 	//
 	void removeDynamicProperties();
 
-	// Get specific property by its caption,
+    Q_INVOKABLE bool propertyExists(QString caption) const;
+
+    // Get specific property by its caption,
 	// return Property* or nullptr if property is not found
 	//
     std::shared_ptr<Property> propertyByCaption(QString caption);
     const std::shared_ptr<Property> propertyByCaption(QString caption) const;
 
-	// Get property value
+    // Get property value
 	//
     Q_INVOKABLE QVariant propertyValue(QString caption) const;
 

@@ -159,7 +159,10 @@ public slots:
 
 	void updateFromPreset();
 	bool updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObject> device,
-								std::shared_ptr<Hardware::DeviceObject> preset);
+								std::shared_ptr<Hardware::DeviceObject> preset,
+								std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
+								std::vector<Hardware::DeviceObject*>* deleteDeviceList,
+								std::vector<std::pair<int, int> >* addDeviceList);
 
 	// Properties
 	//

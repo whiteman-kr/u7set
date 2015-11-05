@@ -1360,7 +1360,7 @@ namespace Afb
 			std::vector<AfbParam>::iterator found = std::find_if(m_params.begin(), m_params.end(),
 				[&p](const AfbParam& mp)
 				{
-					return p.caption() == mp.caption() && p.type() == mp.type();
+					return p.opName() == mp.opName() && p.type() == mp.type();
 				});
 
 			if (found != m_params.end())

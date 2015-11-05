@@ -35,13 +35,6 @@ namespace VFrame30
 			addOutput(s);
 		}
 
-		// Проинициализировать паремтры значением по умолчанию and add Afb properties to class meta object
-		//
-		for (Afb::AfbParam& p : m_params)
-		{
-			p.setValue(p.defaultValue());
-		}
-
 		addQtDynamicParamProperties();
 
 		QString afterCreationScript = fblElement.afterCreationScript();
