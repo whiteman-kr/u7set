@@ -357,21 +357,23 @@ namespace Hardware
 		/*
 		Example:
 
-		name; 	category;	type;		min;		max;		default
-		IP;		Server;		string;		0;			0;			192.168.75.254
-		Port;	Server;		uint32_t;	1;			65535;		2345
+        version;    name; 	category;	type;		min;		max;		default             updateFromPreset
+        1;          IP;		Server;		string;		0;			0;			192.168.75.254;     false
+        1;          Port;	Server;		uint32_t;	1;			65535;		2345;               false
 
-		name:		property name
-		category:	category name
-		type:		property type, can by one of
-					qint32  (4 bytes signed integral),
-					quint32 (4 bytes unsigned integer)
-					bool (true, false),
-					double,
-					string
-		min:		property minimum value (ignored for bool, string)
-		max:		property maximim value (ignored for bool, string)
-		default:	can be any value of the specified type
+        version:            record version
+        name:               property name
+        category:           category name
+        type:               property type, can by one of
+                            qint32  (4 bytes signed integral),
+                            quint32 (4 bytes unsigned integer)
+                            bool (true, false),
+                            double,
+                            string
+        min:                property minimum value (ignored for bool, string)
+        max:                property maximim value (ignored for bool, string)
+        default:            can be any value of the specified type
+        updateFromPreset:   property will be updated from preset
 		*/
 
 		QStringList rows = m_dynamicPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
@@ -385,178 +387,209 @@ namespace Hardware
 
 			QStringList columns = r.split(';');
 
-			if (columns.count() != 6)
+            if (columns.count() != 8)
 			{
 				qDebug() << Q_FUNC_INFO << " Wrong proprty struct: " << r;
-				qDebug() << Q_FUNC_INFO << " Expected: name;type;min;max;default";
+                qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;updateFromPreset";
 				continue;
 			}
 
-			QString name(columns[0]);
-			QString category(columns[1]);
-			QStringRef type(&columns[2]);
-			QStringRef min(&columns[3]);
-			QStringRef max(&columns[4]);
-			QStringRef defaultValue(&columns[5]);
+            QString strVersion(columns[0]);
+            bool ok = false;
+            int version = strVersion.toInt(&ok);
+            if (ok == false || version < 1)
+            {
+                qDebug() << Q_FUNC_INFO << " DynamicProperties: version should be greater than 0: " << strVersion;
+                continue;
+            }
 
-			if (name.isEmpty() || name.size() > 1024)
-			{
-				qDebug() << Q_FUNC_INFO << " DynamicProperties: filed name must have size  from 1 to 1024, name: " << name;
-				continue;
-			}
+            if (version > 1)
+            {
+                qDebug() << Q_FUNC_INFO << " DynamicProperties: Unsupported property version: " << version;
+                continue;
+            }
 
-			if (type != "qint32" &&
-				type != "quint32" &&
-				type != "bool" &&
-				type != "double" &&
-				type != "string")
-			{
-				qDebug() << Q_FUNC_INFO << " DynamicProperties: wrong filed tyep: " << type;
-				continue;
-			}
+            if (version == 1)
+            {
+                QString name(columns[1]);
+                QString category(columns[2]);
+                QStringRef type(&columns[3]);
+                QStringRef min(&columns[4]);
+                QStringRef max(&columns[5]);
+                QStringRef defaultValue(&columns[6]);
+                QString strUpdateFromPreset(columns[7]);
 
 
-			if (type == "qint32")
-			{
-				// Min
-				//
-				bool ok = false;
-				qint32 minInt = min.toInt(&ok);
-				if (ok == false)
-				{
-					minInt = std::numeric_limits<qint32>::min();
-				}
+                bool updateFromPreset = false;
+                if (strUpdateFromPreset.toUpper() == "TRUE")
+                {
+                    updateFromPreset = true;
+                }
 
-				// Max
-				//
-				qint32 maxInt = max.toInt(&ok);
-				if (ok == false)
-				{
-					maxInt = std::numeric_limits<qint32>::max();
-				}
+                if (name.isEmpty() || name.size() > 1024)
+                {
+                    qDebug() << Q_FUNC_INFO << " DynamicProperties: filed name must have size  from 1 to 1024, name: " << name;
+                    continue;
+                }
 
-				// Default Value
-				//
-				qint32 defaultInt = defaultValue.toInt();
+                if (type != "qint32" &&
+                        type != "quint32" &&
+                        type != "bool" &&
+                        type != "double" &&
+                        type != "string")
+                {
+                    qDebug() << Q_FUNC_INFO << " DynamicProperties: wrong filed tyep: " << type;
+                    continue;
+                }
 
-				// Add property with default value, if present old value, it will be set later
-				//
-				auto newProperty = addProperty<QVariant>(name, true);
 
-                newProperty->setDynamic(true);
-				newProperty->setCategory(category);
-				newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
-				newProperty->setValue(QVariant(defaultInt));
-				newProperty->setReadOnly(false);
+                if (type == "qint32")
+                {
+                    // Min
+                    //
+                    bool ok = false;
+                    qint32 minInt = min.toInt(&ok);
+                    if (ok == false)
+                    {
+                        minInt = std::numeric_limits<qint32>::min();
+                    }
 
-				continue;
-			}
+                    // Max
+                    //
+                    qint32 maxInt = max.toInt(&ok);
+                    if (ok == false)
+                    {
+                        maxInt = std::numeric_limits<qint32>::max();
+                    }
 
-			if (type == "quint32")
-			{
-				// Min
-				//
-				bool ok = false;
-				quint32 minUInt = min.toUInt(&ok);
-				if (ok == false)
-				{
-					minUInt = std::numeric_limits<quint32>::min();
-				}
+                    // Default Value
+                    //
+                    qint32 defaultInt = defaultValue.toInt();
 
-				// Max
-				//
-				quint32 maxUInt = max.toUInt(&ok);
-				if (ok == false)
-				{
-					maxUInt = std::numeric_limits<quint32>::max();
-				}
+                    // Add property with default value, if present old value, it will be set later
+                    //
+                    auto newProperty = addProperty<QVariant>(name, true);
 
-				// Default Value
-				//
-				quint32 defaultUInt = defaultValue.toUInt();
+                    newProperty->setDynamic(true);
+                    newProperty->setCategory(category);
+                    newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
+                    newProperty->setValue(QVariant(defaultInt));
+                    newProperty->setReadOnly(false);
+                    newProperty->setUpdateFromPreset(updateFromPreset);
 
-				// Add property with default value, if present old value, it will be set later
-				//
-				auto newProperty = addProperty<QVariant>(name, true);
+                    continue;
+                }
 
-                newProperty->setDynamic(true);
-				newProperty->setCategory(category);
-				newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
-				newProperty->setValue(QVariant(defaultUInt));
-				newProperty->setReadOnly(false);
+                if (type == "quint32")
+                {
+                    // Min
+                    //
+                    bool ok = false;
+                    quint32 minUInt = min.toUInt(&ok);
+                    if (ok == false)
+                    {
+                        minUInt = std::numeric_limits<quint32>::min();
+                    }
 
-				continue;
-			}
+                    // Max
+                    //
+                    quint32 maxUInt = max.toUInt(&ok);
+                    if (ok == false)
+                    {
+                        maxUInt = std::numeric_limits<quint32>::max();
+                    }
 
-			if (type == "double")
-			{
-				// Min
-				//
-				bool ok = false;
-				double minDouble = min.toDouble(&ok);
-				if (ok == false)
-				{
-					minDouble = std::numeric_limits<double>::min();
-				}
+                    // Default Value
+                    //
+                    quint32 defaultUInt = defaultValue.toUInt();
 
-				// Max
-				//
-				double maxDouble = max.toDouble(&ok);
-				if (ok == false)
-				{
-					maxDouble = std::numeric_limits<double>::max();
-				}
+                    // Add property with default value, if present old value, it will be set later
+                    //
+                    auto newProperty = addProperty<QVariant>(name, true);
 
-				// Default Value
-				//
-				double defaultDouble = defaultValue.toDouble();
+                    newProperty->setDynamic(true);
+                    newProperty->setCategory(category);
+                    newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
+                    newProperty->setValue(QVariant(defaultUInt));
+                    newProperty->setReadOnly(false);
+                    newProperty->setUpdateFromPreset(updateFromPreset);
 
-				// Add property with default value, if present old value, it will be set later
-				//
-				auto newProperty = addProperty<QVariant>(name, true);
+                    continue;
+                }
 
-                newProperty->setDynamic(true);
-				newProperty->setCategory(category);
-				newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
-				newProperty->setValue(QVariant(defaultDouble));
-				newProperty->setReadOnly(false);
+                if (type == "double")
+                {
+                    // Min
+                    //
+                    bool ok = false;
+                    double minDouble = min.toDouble(&ok);
+                    if (ok == false)
+                    {
+                        minDouble = std::numeric_limits<double>::min();
+                    }
 
-				continue;
-			}
+                    // Max
+                    //
+                    double maxDouble = max.toDouble(&ok);
+                    if (ok == false)
+                    {
+                        maxDouble = std::numeric_limits<double>::max();
+                    }
 
-			if (type == "bool")
-			{
-				// Default Value
-				//
-				bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
+                    // Default Value
+                    //
+                    double defaultDouble = defaultValue.toDouble();
 
-				// Add property with default value, if present old value, it will be set later
-				//
-				auto newProperty = addProperty<QVariant>(name, true);
+                    // Add property with default value, if present old value, it will be set later
+                    //
+                    auto newProperty = addProperty<QVariant>(name, true);
 
-                newProperty->setDynamic(true);
-				newProperty->setCategory(category);
-				newProperty->setValue(QVariant(defaultBool));
-				newProperty->setReadOnly(false);
+                    newProperty->setDynamic(true);
+                    newProperty->setCategory(category);
+                    newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
+                    newProperty->setValue(QVariant(defaultDouble));
+                    newProperty->setReadOnly(false);
+                    newProperty->setUpdateFromPreset(updateFromPreset);
 
-				continue;
-			}
+                    continue;
+                }
 
-			if (type == "string")
-			{
-				// Add property with default value, if present old value, it will be set later
-				//
-				auto newProperty = addProperty<QVariant>(name, true);
+                if (type == "bool")
+                {
+                    // Default Value
+                    //
+                    bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
 
-                newProperty->setDynamic(true);
-				newProperty->setCategory(category);
-				newProperty->setValue(QVariant(defaultValue.toString()));
-				newProperty->setReadOnly(false);
+                    // Add property with default value, if present old value, it will be set later
+                    //
+                    auto newProperty = addProperty<QVariant>(name, true);
 
-				continue;
-			}
+                    newProperty->setDynamic(true);
+                    newProperty->setCategory(category);
+                    newProperty->setValue(QVariant(defaultBool));
+                    newProperty->setReadOnly(false);
+                    newProperty->setUpdateFromPreset(updateFromPreset);
 
-			assert(false);
+                    continue;
+                }
+
+                if (type == "string")
+                {
+                    // Add property with default value, if present old value, it will be set later
+                    //
+                    auto newProperty = addProperty<QVariant>(name, true);
+
+                    newProperty->setDynamic(true);
+                    newProperty->setCategory(category);
+                    newProperty->setValue(QVariant(defaultValue.toString()));
+                    newProperty->setReadOnly(false);
+                    newProperty->setUpdateFromPreset(updateFromPreset);
+
+                    continue;
+                }
+            }
+
+            assert(false);
 		}
 
 		// Set to parsed properties old value
@@ -578,7 +611,9 @@ namespace Hardware
 			}
 			else
 			{
-				// default value already was set
+                qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;updateFromPreset";
+                continue;
+                // default value already was set
 			}
 		}
 
@@ -1520,10 +1555,6 @@ R"DELIM({
 	{
 		ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, ModuleFamily, true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
 		ADD_PROPERTY_GETTER_SETTER(int, ModuleVersion, true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
-		ADD_PROPERTY_GETTER_SETTER(int, Channel, true, DeviceModule::channel, DeviceModule::setChannel)
-
-		ADD_PROPERTY_GETTER_SETTER(QString, SubsysID, true, DeviceModule::subSysID, DeviceModule::setSubSysID)
-		ADD_PROPERTY_GETTER_SETTER(QString, ConfType, true, DeviceModule::confType, DeviceModule::setConfType)
 	}
 
 	DeviceModule::~DeviceModule()
@@ -1620,36 +1651,6 @@ R"DELIM({
 		assert((tmp & 0xFF00) == 0);
 
 		m_type = (m_type & 0xFF00) | tmp;
-	}
-
-	int DeviceModule::channel() const
-	{
-		return m_channel;
-	}
-
-	void DeviceModule::setChannel(int value)
-	{
-		m_channel = value;
-	}
-
-	QString DeviceModule::subSysID() const
-	{
-		return m_subSysID;
-	}
-
-	void DeviceModule::setSubSysID(const QString& value)
-	{
-		m_subSysID = value;
-	}
-
-	QString DeviceModule::confType() const
-	{
-		return m_confType;
-	}
-
-	void DeviceModule::setConfType(const QString& value)
-	{
-		m_confType = value;
 	}
 
 	bool DeviceModule::isIOModule() const

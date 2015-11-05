@@ -239,6 +239,12 @@ void PropertyObject::removeDynamicProperties()
 	}
 }
 
+bool PropertyObject::propertyExists(QString caption) const
+{
+    auto it = m_properties.find(caption);
+    return it != m_properties.end();
+}
+
 std::shared_ptr<Property> PropertyObject::propertyByCaption(QString caption)
 {
     std::shared_ptr<Property> result = nullptr;

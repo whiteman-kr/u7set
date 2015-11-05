@@ -414,15 +414,6 @@ namespace Hardware
 		int moduleVersion() const;
 		void setModuleVersion(int value);
 
-		int channel() const;
-		void setChannel(int value);
-
-		QString subSysID() const;
-		void setSubSysID(const QString& value);
-
-		QString confType() const;
-		void setConfType(const QString& value);
-
 		bool isIOModule() const;
 		bool isInputModule() const;
 		bool isOutputModule() const;
