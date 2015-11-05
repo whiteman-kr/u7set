@@ -339,8 +339,6 @@ private:
 		int paramsCount() const;
 		void setParams(const std::vector<AfbParam>& params);
 
-		QString instantiatorID() const;
-
 	private:
 		QString m_strID;
 		QString m_caption;
@@ -351,8 +349,6 @@ private:
 		bool m_hasRam;
 		bool m_requiredStart;
         bool m_internalUse;
-
-		mutable QString m_instantiatorID;
 
 		QString m_libraryScript;
 		QString m_afterCreationScript;

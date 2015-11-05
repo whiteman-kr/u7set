@@ -6,6 +6,34 @@
 namespace Tcp
 {
 
+	GetFileReply::GetFileReply()
+	{
+		clear();
+	}
+
+
+	void GetFileReply::clear()
+	{
+		errorCode = FileTransferError::Ok;
+		fileSize = 0;
+		totalParts = 0;
+		currentPart = 0;
+		currentPartSize = 0;
+		memset(md5, 0, MD5_LEN);
+	}
+
+
+	void GetFileReply::setMD5(const QByteArray& md5)
+	{
+		if (md5.size() < MD5_LEN)
+		{
+			assert(false);
+			return;
+		}
+
+		memcpy(this->md5, md5.constData(), MD5_LEN);
+	}
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::FileClient class implementation
@@ -144,9 +172,9 @@ namespace Tcp
 
 	void FileClient::processGetFileStartReply(const char* replyData, quint32 replyDataSize)
 	{
-		assert(replyDataSize >= sizeof(GetFileStartReply));
+		assert(replyDataSize >= sizeof(GetFileReply));
 
-		const GetFileStartReply* reply = reinterpret_cast<const GetFileStartReply*>(replyData);
+		const GetFileReply* reply = reinterpret_cast<const GetFileReply*>(replyData);
 
 		if (reply->errorCode != FileTransferError::Ok)
 		{
@@ -154,11 +182,11 @@ namespace Tcp
 			return;
 		}
 
-		assert(replyDataSize == (sizeof(GetFileStartReply) - sizeof(char) + reply->md5Size));
+//		assert(replyDataSize == (sizeof(GetFileReply) - sizeof(char) + reply->md5Size));
 
 		m_fileSize = reply->fileSize;
 
-		m_fileMD5.fromRawData(&reply->md5, reply->md5Size);
+	//	m_fileMD5.fromRawData(&reply->md5, reply->md5Size);
 
 		// try create file & set file size
 	}
@@ -171,16 +199,19 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	FileServer::FileServer(const QString& rootFolder) :
-		m_rootFolder(rootFolder)
+		m_rootFolder(rootFolder),
+		m_md5Generator(QCryptographicHash::Md5)
 	{
-
 	}
+
 
 	void FileServer::init()
 	{
 		m_fileName = "";
 		m_file.close();
 		m_uploadInProgress = false;
+		m_reply.clear();
+		m_md5Generator.reset();
 	}
 
 
@@ -202,9 +233,7 @@ namespace Tcp
 
 	void FileServer::processGetFileStartRequest(const char* requestData, quint32 requestDataSize)
 	{
-		GetFileStartReply reply;
-
-		if (m_uploadInProgress == true)
+		/*if (m_uploadInProgress == true)
 		{
 			reply.errorCode = FileTransferError::AlreadyUploadFile;
 			sendReply(reply, sizeof(reply));
@@ -212,6 +241,10 @@ namespace Tcp
 		}
 
 		m_uploadInProgress = true;
+
+		// start upload process
+		//
+		init();
 
 		m_fileName = QString::fromUtf8(requestData, requestDataSize);
 
@@ -235,14 +268,13 @@ namespace Tcp
 
 		QFileInfo fi(m_file);
 
-		reply.fileSize = fi.size();
+		m_reply.fileSize = fi.size();
+		m_reply.totalParts = m_reply.fileSize / FILE_PART_SIZE + (m_reply.fileSize % FILE_PART_SIZE ? 1 : 0);*/
+	}
 
-		QCryptographicHash ch(QCryptographicHash::Md5);
+	void FileServer::readFileData()
+	{
 
-		ch.addData(&m_file);
-
-		//QByteArray md5 = ch.result();
-		//reply.
 	}
 
 }

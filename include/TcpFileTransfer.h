@@ -2,6 +2,7 @@
 
 #include "../include/Tcp.h"
 #include <QFile>
+#include <QCryptographicHash>
 
 
 namespace Tcp
@@ -26,14 +27,25 @@ namespace Tcp
 	};
 
 
-	struct GetFileStartReply
+	const int MD5_LEN = 128 / 8;		// MD5 code lenght in bytes
+
+	const int FILE_PART_SIZE = 65536;
+
+
+	struct GetFileReply
 	{
 		FileTransferError errorCode = FileTransferError::Ok;
 		qint64 fileSize = 0;
-		int md5Size = 0;
-		char md5 = 0;			// array of bytes md5[md5Size]
+		int totalParts = 0;				// == fileSize / FILE_PART_SIZE + (fileSize % FILE_PART_SIZE ? 1 : 0)
+		int currentPart = 0;			// from 1
+		int currentPartSize = 0;		// <= FILE_PART_SIZE
+		char md5[MD5_LEN];				// current MD5 code
 
+		GetFileReply();
+
+		void setMD5(const QByteArray& md5);
 		operator const char* () { return reinterpret_cast<const char*>(this); }
+		void clear();
 	};
 
 
@@ -98,6 +110,10 @@ namespace Tcp
 		QString m_rootFolder;
 		QString m_fileName;
 		QFile m_file;
+		GetFileReply m_reply;
+		QCryptographicHash m_md5Generator;
+
+		char m_fileData[FILE_PART_SIZE];
 
 		bool m_uploadInProgress = false;
 
@@ -108,6 +124,8 @@ namespace Tcp
 		void processGetFileStartRequest(const char* requestData, quint32 requestDataSize);
 
 		void onServerThreadStarted() override;
+
+		void readFileData();
 
 	public:
 		FileServer(const QString& rootFolder);
