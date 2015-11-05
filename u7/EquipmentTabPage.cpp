@@ -1579,7 +1579,10 @@ void EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObject> obje
 
 	//  Set presetName, parent object should contain it
 	//
-	if (isPresetMode() == true && object->preset() == true && object->presetRoot() == false && parentObject != nullptr)
+	if (isPresetMode() == true &&
+		object->preset() == true &&
+		object->presetRoot() == false &&
+		parentObject != nullptr)
 	{
 		object->setPresetName(parentObject->presetName());
 	}
@@ -1957,7 +1960,12 @@ void EquipmentView::updateFromPreset()
 	// Update all preset objects
 	//
 	std::vector<std::shared_ptr<Hardware::DeviceObject>> updateDeviceList;
+	std::vector<Hardware::DeviceObject*> deleteDeviceList;
+	std::vector<std::pair<int, int>> addDeviceList;		// first: parent fileId, second: preset file id
+
 	updateDeviceList.reserve(65536);
+	deleteDeviceList.reserve(65536);
+	addDeviceList.reserve(65536);
 
 	for (std::shared_ptr<Hardware::DeviceObject> device : presetRoots)
 	{
@@ -2003,8 +2011,7 @@ void EquipmentView::updateFromPreset()
 		assert(preset->presetRoot() == true);
 		assert(preset->presetName() == presetName);
 
-		ok = updateDeviceFromPreset(device, preset, &updateDeviceList);
-
+		ok = updateDeviceFromPreset(device, preset, &updateDeviceList, &deleteDeviceList, &addDeviceList);
 	}
 
 	// save all updated data to DB
@@ -2043,6 +2050,74 @@ void EquipmentView::updateFromPreset()
 
 	db()->setWorkcopy(updatedFiles, this);
 
+	// Delete files from DB
+	//
+	if (deleteDeviceList.empty() == false)
+	{
+		db()->deleteDeviceObjects(deleteDeviceList, this);
+	}
+
+	// Add files to DB, addPresetList contains std::pair<int, int>, first: parent file id, second preset file id
+	//
+	for (std::pair<int, int> ad : addDeviceList)
+	{
+		int parentFileId = ad.first;
+		int presetFileId = ad.second;
+
+		if (parentFileId == -1 || presetFileId == -1)
+		{
+			assert(parentFileId != -1);
+			assert(presetFileId != -1);
+			continue;
+		}
+
+		// Read preset tree from DB
+		//
+		std::shared_ptr<Hardware::DeviceObject> device;
+		DbFileInfo presetFileInfo;
+		presetFileInfo.setFileId(presetFileId);
+
+		bool ok = db()->getDeviceTreeLatestVersion(presetFileInfo, &device, this);
+		if (ok == false)
+		{
+			return;
+		}
+
+		if (device == nullptr ||
+			device->preset() == false ||
+			device->fileInfo().fileId() != presetFileInfo.fileId())		// can be not presetRoot
+		{
+			assert(device);
+			assert(device->preset() == true);
+			assert(device->fileInfo().fileId() == presetFileInfo.fileId());
+			return;
+		}
+
+		// Set new id, recusively to all children
+		//
+		std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid](Hardware::DeviceObject* object)
+			{
+				assert(object);
+
+				object->setUuid(QUuid::createUuid());
+
+				for (int i = 0; i < object->childrenCount(); i++)
+				{
+					setUuid(object->child(i));
+				}
+			};
+
+		setUuid(device.get());
+
+		// Add device to DB
+		//
+		bool result = db()->addDeviceObject(device.get(), parentFileId, this);
+		if (result == false)
+		{
+			continue;
+		}
+	}
+
 	// Reset model
 	//
 	equipmentModel()->reset();
@@ -2052,25 +2127,32 @@ void EquipmentView::updateFromPreset()
 
 bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObject> device,
 										   std::shared_ptr<Hardware::DeviceObject> preset,
-										   std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList)
+										   std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
+										   std::vector<Hardware::DeviceObject*>* deleteDeviceList,
+										   std::vector<std::pair<int, int>>* addDeviceList)
 {
-	if (updateDeviceList == nullptr)
+	if (updateDeviceList == nullptr ||
+		deleteDeviceList == nullptr ||
+		addDeviceList == nullptr)
 	{
 		assert(updateDeviceList);
+		assert(deleteDeviceList);
+		assert(addDeviceList);
 		return false;
 	}
 
-	if (device == nullptr ||
-		preset == nullptr ||
-		device->preset() == false ||
-		preset->preset() == false ||
-		device->presetName() != preset->presetName() ||
-		device->presetRoot() != preset->presetRoot())
+	if (device == nullptr)
 	{
 		assert(device);
+		return false;
+	}
+
+	if (device->preset() == true &&
+		(preset == nullptr ||
+		device->presetName() != preset->presetName() ||
+		device->presetRoot() != preset->presetRoot()))
+	{
 		assert(preset);
-		assert(device->preset() == true);
-		assert(preset->preset() == true);
 		assert(device->presetName() == preset->presetName());
 		assert(device->presetRoot() == preset->presetRoot());
 		return false;
@@ -2084,107 +2166,172 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	updateDeviceList->push_back(device);
 
-	// Update device object properties
+	// If it is preset, update object add/delete children
 	//
-	std::vector<std::shared_ptr<Property>> deviceProperties = device->properties();
-	std::vector<std::shared_ptr<Property>> presetProperties = preset->properties();
-
-	for (auto dit = deviceProperties.begin(); dit != deviceProperties.end();)
+	if (device->preset() == true)
 	{
-		std::shared_ptr<Property> deviceProperty = *dit;
+		// Update device object properties
+		//
 
-		auto pit = std::find_if(presetProperties.begin(), presetProperties.end(),
-			[deviceProperty](std::shared_ptr<Property> preset)
-			{
-				 return preset->caption() == deviceProperty->caption();
-			});
+		std::vector<std::shared_ptr<Property>> deviceProperties = device->properties();
+		std::vector<std::shared_ptr<Property>> presetProperties = preset->properties();
 
-		if (pit == presetProperties.end())
+		for (auto dit = deviceProperties.begin(); dit != deviceProperties.end();)
 		{
-			// Preset property is not found, delete this property
-			//
-			dit = deviceProperties.erase(dit);
-			continue;
-		}
-		else
-		{
-			std::shared_ptr<Property> presetProperty = *pit;
+			std::shared_ptr<Property> deviceProperty = *dit;
 
-			// Check if the property was not marked for update from preset
-			// Update only limits, description, etc, not value!
-			//
-			if (deviceProperty->updateFromPreset() == false)
+			auto pit = std::find_if(presetProperties.begin(), presetProperties.end(),
+									[deviceProperty](std::shared_ptr<Property> preset)
 			{
-				deviceProperty->updateFromPreset(presetProperty.get(), false);
+					   return preset->caption() == deviceProperty->caption();
+		});
+
+			if (pit == presetProperties.end())
+			{
+				// Preset property is not found, delete this property
+				//
+				dit = deviceProperties.erase(dit);
+				continue;
+			}
+			else
+			{
+				std::shared_ptr<Property> presetProperty = *pit;
+
+				// Check if the property was not marked for update from preset
+				// Update only limits, description, etc, not value!
+				//
+				if (deviceProperty->updateFromPreset() == false)
+				{
+					deviceProperty->updateFromPreset(presetProperty.get(), false);
+
+					++dit;
+					continue;
+				}
+
+				// Update property
+				//
+				if (deviceProperty->isTheSameType(presetProperty.get()) == true)
+				{
+					if (deviceProperty->caption() == "ChildRestriction")
+					{
+						int i = 155;
+						i++;
+					}
+
+					deviceProperty->updateFromPreset(presetProperty.get(), true);
+				}
+				else
+				{
+					// The type is different, PropertyValue<int> <-> PropettyValue<QString>
+					// Obviosly thi2s is static properties
+					//
+					assert(false);
+				}
 
 				++dit;
 				continue;
 			}
 
-			// Update property
-			//
-			if (deviceProperty->isTheSameType(presetProperty.get()) == true)
-			{
-				if (deviceProperty->caption() == "ChildRestriction")
-				{
-					int i = 155;
-					i++;
-				}
+			assert(false);
+		}
 
-				deviceProperty->updateFromPreset(presetProperty.get(), true);
+		// Check if there are any new proprties in preset, the add them to device
+		//
+		for (auto pit = presetProperties.begin(); pit != presetProperties.end();)
+		{
+			std::shared_ptr<Property> presetProperty = *pit;
+
+			auto dit = std::find_if(deviceProperties.begin(), deviceProperties.end(),
+									[presetProperty](std::shared_ptr<Property> device)
+			{
+					   return device->caption() == presetProperty->caption();
+		});
+
+			if (dit == deviceProperties.end())
+			{
+				// Preset property is not found in device, this is new property, add it
+				//
+				assert(dynamic_cast<PropertyValue<QVariant>*>(presetProperty.get()) != nullptr);
+
+				std::shared_ptr<PropertyValue<QVariant>> newDeviceProperty = std::make_shared<PropertyValue<QVariant>>();
+
+				newDeviceProperty->updateFromPreset(presetProperty.get(), true);
+
+				deviceProperties.push_back(newDeviceProperty);
+				continue;
+			}
+
+			++pit;
+		}
+
+		device->removeAllProperties();
+		device->addProperties(deviceProperties);
+
+		// Update existing children, delete children
+		//
+		for (int i = 0; i < device->childrenCount(); i++)
+		{
+			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtr(i);
+			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->childSharedPtr(deviceChild->presetObjectUuid());
+
+			if (deviceChild->preset() == true &&
+				presetChild == nullptr)
+			{
+				// Child was deleted from preset, add all deviceChild to delete list
+				//
+				std::function<void(Hardware::DeviceObject*,
+								   std::vector<Hardware::DeviceObject*>*)> deleteDevices =
+						[&deleteDevices]
+						(Hardware::DeviceObject* device,
+						std::vector<Hardware::DeviceObject*>* deleteDeviceList)
+				{
+					deleteDeviceList->push_back(device);
+
+					for (int i = 0; i < device->childrenCount(); i++)
+					{
+						deleteDevices(device->child(i), deleteDeviceList);
+					}
+				};
+
+				deleteDevices(deviceChild.get(), deleteDeviceList);
 			}
 			else
 			{
-				// The type is different, PropertyValue<int> <-> PropettyValue<QString>
-				// Obviosly this is static properties
+				// update child
 				//
-				assert(false);
+				updateDeviceFromPreset(deviceChild, presetChild, updateDeviceList, deleteDeviceList, addDeviceList);
 			}
-
-			++dit;
-			continue;
 		}
 
-		assert(false);
-	}
-
-	// Check if there are any new proprties in preset, the add them to device
-	//
-	for (auto pit = presetProperties.begin(); pit != presetProperties.end();)
-	{
-		std::shared_ptr<Property> presetProperty = *pit;
-
-		auto dit = std::find_if(deviceProperties.begin(), deviceProperties.end(),
-			[presetProperty](std::shared_ptr<Property> device)
-			{
-				 return device->caption() == presetProperty->caption();
-			});
-
-		if (dit == deviceProperties.end())
+		// Add children
+		//
+		for (int i = 0; i < preset->childrenCount(); i++)
 		{
-			// Preset property is not found in device, this is new property, add it
-			//
-			assert(dynamic_cast<PropertyValue<QVariant>*>(presetProperty.get()) != nullptr);
+			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->childSharedPtr(i);
+			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtrByPresetUuid(preset->presetObjectUuid());
 
-			std::shared_ptr<PropertyValue<QVariant>> newDeviceProperty = std::make_shared<PropertyValue<QVariant>>();
-
-			newDeviceProperty->updateFromPreset(presetProperty.get(), true);
-
-			deviceProperties.push_back(newDeviceProperty);
-			continue;
+			if (deviceChild == nullptr)
+			{
+				// Child is not added yet, add it
+				//
+				addDeviceList->push_back(std::make_pair(device->fileId(), presetChild->fileId()));
+			}
 		}
-
-		++pit;
 	}
 
-	device->removeAllProperties();
-	device->addProperties(deviceProperties);
-
-	// Update existing children, delete children
+	// Update all non preset children
 	//
+	for (int i = 0; i < device->childrenCount(); i++)
+	{
+		std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtr(i);
+		std::shared_ptr<Hardware::DeviceObject> preset;		// not intiazized, as deviceChild is not preset
 
-	// Add children
-	//
+		if (deviceChild->preset() == false)
+		{
+			updateDeviceFromPreset(deviceChild, preset, updateDeviceList, deleteDeviceList, addDeviceList);
+		}
+	}
+
 
 	return true;
 }

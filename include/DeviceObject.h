@@ -159,11 +159,14 @@ namespace Hardware
 		Q_INVOKABLE int childrenCount() const;
 
 		DeviceObject* child(int index) const;
+		DeviceObject* child(QUuid uuid) const;
 		Q_INVOKABLE QObject* jsChild(int index) const;
 
 		int childIndex(DeviceObject* child) const;
 
 		std::shared_ptr<DeviceObject> childSharedPtr(int index);
+		std::shared_ptr<DeviceObject> childSharedPtr(QUuid uuid);
+		std::shared_ptr<DeviceObject> childSharedPtrByPresetUuid(QUuid presetObjectUuid);
 
 		void addChild(std::shared_ptr<DeviceObject> child);
 		void deleteChild(DeviceObject* child);

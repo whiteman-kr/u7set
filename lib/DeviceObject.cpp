@@ -784,6 +784,19 @@ namespace Hardware
 		return m_children.at(index).get();
 	}
 
+	DeviceObject* DeviceObject::child(QUuid uuid) const
+	{
+		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
+		{
+			if (child->uuid() == uuid)
+			{
+				return child.get();
+			}
+		}
+
+		return nullptr;
+	}
+
 	QObject* DeviceObject::jsChild(int index) const
 	{
 		QObject* c = m_children.at(index).get();
@@ -811,6 +824,32 @@ namespace Hardware
 	{
 		std::shared_ptr<DeviceObject> sp = m_children.at(index);
 		return sp;
+	}
+
+	std::shared_ptr<DeviceObject> DeviceObject::childSharedPtr(QUuid uuid)
+	{
+		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
+		{
+			if (child->uuid() == uuid)
+			{
+				return child;
+			}
+		}
+
+		return std::shared_ptr<DeviceObject>();
+	}
+
+	std::shared_ptr<DeviceObject> DeviceObject::childSharedPtrByPresetUuid(QUuid presetObjectUuid)
+	{
+		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
+		{
+			if (child->presetObjectUuid() == presetObjectUuid)
+			{
+				return child;
+			}
+		}
+
+		return std::shared_ptr<DeviceObject>();
 	}
 
 	void DeviceObject::addChild(std::shared_ptr<DeviceObject> child)
