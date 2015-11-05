@@ -69,13 +69,13 @@ namespace Hardware
 	DeviceObject::DeviceObject(bool preset /*= false*/) :
 		m_preset(preset)
 	{
-		ADD_PROPERTY_GETTER(int, FilID, true, DeviceObject::fileId);
+		ADD_PROPERTY_GETTER(int, FileID, true, DeviceObject::fileId);
 		ADD_PROPERTY_GETTER(QUuid, Uuid, true, DeviceObject::uuid);
 		ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, DeviceObject::strId, DeviceObject::setStrId);
-		ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
-		ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
+		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
+		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
 		ADD_PROPERTY_GETTER_SETTER(int, Place, true, DeviceObject::place, DeviceObject::setPlace);
-		ADD_PROPERTY_GETTER_SETTER(QString, DynamicProperties, true, DeviceObject::dynamicProperties, DeviceObject::setDynamicProperties);
+		auto dynamicProp = ADD_PROPERTY_GETTER_SETTER(QString, DynamicProperties, true, DeviceObject::dynamicProperties, DeviceObject::setDynamicProperties);
 		ADD_PROPERTY_GETTER(bool, Preset, true, DeviceObject::preset);
 		ADD_PROPERTY_GETTER(bool, PresetRoot, true, DeviceObject::presetRoot);
 		if (preset == true)
@@ -83,6 +83,10 @@ namespace Hardware
 			ADD_PROPERTY_GETTER_SETTER(QString, PresetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 		}
 		ADD_PROPERTY_GETTER(QUuid, PresetObjectUuid, true, DeviceObject::presetObjectUuid);
+
+		captionProp->setUpdateFromPreset(true);
+		childRestrProp->setUpdateFromPreset(true);
+		dynamicProp->setUpdateFromPreset(true);
 	}
 
 	DeviceObject::~DeviceObject()
@@ -357,9 +361,9 @@ namespace Hardware
 		/*
 		Example:
 
-        version;    name; 	category;	type;		min;		max;		default             updateFromPreset
-        1;          IP;		Server;		string;		0;			0;			192.168.75.254;     false
-        1;          Port;	Server;		uint32_t;	1;			65535;		2345;               false
+        version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset
+        1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
+        1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
 
         version:            record version
         name:               property name
@@ -373,6 +377,7 @@ namespace Hardware
         min:                property minimum value (ignored for bool, string)
         max:                property maximim value (ignored for bool, string)
         default:            can be any value of the specified type
+        precision:          property precision
         updateFromPreset:   property will be updated from preset
 		*/
 
@@ -387,10 +392,10 @@ namespace Hardware
 
 			QStringList columns = r.split(';');
 
-            if (columns.count() != 8)
+            if (columns.count() != 9)
 			{
 				qDebug() << Q_FUNC_INFO << " Wrong proprty struct: " << r;
-                qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;updateFromPreset";
+                qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset";
 				continue;
 			}
 
@@ -417,8 +422,10 @@ namespace Hardware
                 QStringRef min(&columns[4]);
                 QStringRef max(&columns[5]);
                 QStringRef defaultValue(&columns[6]);
-                QString strUpdateFromPreset(columns[7]);
+                QStringRef strPrecision(&columns[7]);
+                QString strUpdateFromPreset(columns[8]);
 
+                int precision = strPrecision.toInt();
 
                 bool updateFromPreset = false;
                 if (strUpdateFromPreset.toUpper() == "TRUE")
@@ -475,6 +482,7 @@ namespace Hardware
                     newProperty->setLimits(QVariant(minInt), QVariant(maxInt));
                     newProperty->setValue(QVariant(defaultInt));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -512,6 +520,7 @@ namespace Hardware
                     newProperty->setLimits(QVariant(minUInt), QVariant(maxUInt));
                     newProperty->setValue(QVariant(defaultUInt));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -549,6 +558,7 @@ namespace Hardware
                     newProperty->setLimits(QVariant(minDouble), QVariant(maxDouble));
                     newProperty->setValue(QVariant(defaultDouble));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -568,6 +578,7 @@ namespace Hardware
                     newProperty->setCategory(category);
                     newProperty->setValue(QVariant(defaultBool));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -583,6 +594,7 @@ namespace Hardware
                     newProperty->setCategory(category);
                     newProperty->setValue(QVariant(defaultValue.toString()));
                     newProperty->setReadOnly(false);
+                    newProperty->setPrecision(precision);
                     newProperty->setUpdateFromPreset(updateFromPreset);
 
                     continue;
@@ -815,6 +827,19 @@ namespace Hardware
 		return m_children.at(index).get();
 	}
 
+	DeviceObject* DeviceObject::child(QUuid uuid) const
+	{
+		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
+		{
+			if (child->uuid() == uuid)
+			{
+				return child.get();
+			}
+		}
+
+		return nullptr;
+	}
+
 	QObject* DeviceObject::jsChild(int index) const
 	{
 		QObject* c = m_children.at(index).get();
@@ -842,6 +867,32 @@ namespace Hardware
 	{
 		std::shared_ptr<DeviceObject> sp = m_children.at(index);
 		return sp;
+	}
+
+	std::shared_ptr<DeviceObject> DeviceObject::childSharedPtr(QUuid uuid)
+	{
+		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
+		{
+			if (child->uuid() == uuid)
+			{
+				return child;
+			}
+		}
+
+		return std::shared_ptr<DeviceObject>();
+	}
+
+	std::shared_ptr<DeviceObject> DeviceObject::childSharedPtrByPresetUuid(QUuid presetObjectUuid)
+	{
+		for (std::shared_ptr<Hardware::DeviceObject> child : m_children)
+		{
+			if (child->presetObjectUuid() == presetObjectUuid)
+			{
+				return child;
+			}
+		}
+
+		return std::shared_ptr<DeviceObject>();
 	}
 
 	void DeviceObject::addChild(std::shared_ptr<DeviceObject> child)
@@ -1475,7 +1526,8 @@ R"DELIM({
 	DeviceChassis::DeviceChassis(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Type, true, DeviceChassis::type, DeviceChassis::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, DeviceChassis::type, DeviceChassis::setType)
+		typeProp->setUpdateFromPreset(true);
 	}
 
 	DeviceChassis::~DeviceChassis()
@@ -1553,8 +1605,11 @@ R"DELIM({
 	DeviceModule::DeviceModule(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, ModuleFamily, true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
-		ADD_PROPERTY_GETTER_SETTER(int, ModuleVersion, true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
+		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, ModuleFamily, true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
+		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, ModuleVersion, true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
+
+		familyTypeProp->setUpdateFromPreset(true);
+		moduleVersionProp->setUpdateFromPreset(true);
 	}
 
 	DeviceModule::~DeviceModule()
@@ -1755,17 +1810,29 @@ R"DELIM({
 	DeviceSignal::DeviceSignal(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, true, DeviceSignal::type, DeviceSignal::setType)
-		ADD_PROPERTY_GETTER_SETTER(SignalFunction, Function, true, DeviceSignal::function, DeviceSignal::setFunction)
-		ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
-		ADD_PROPERTY_GETTER_SETTER(E::DataFormat, Format, true, DeviceSignal::format, DeviceSignal::setFormat)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, true, DeviceSignal::type, DeviceSignal::setType)
+		auto functionProp = ADD_PROPERTY_GETTER_SETTER(SignalFunction, Function, true, DeviceSignal::function, DeviceSignal::setFunction)
+		auto byteOrderProp = ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, DeviceSignal::byteOrder, DeviceSignal::setByteOrder)
+		auto formatProp = ADD_PROPERTY_GETTER_SETTER(E::DataFormat, Format, true, DeviceSignal::format, DeviceSignal::setFormat)
 
-		ADD_PROPERTY_GETTER_SETTER(int, Size, true, DeviceSignal::size, DeviceSignal::setSize)
-		ADD_PROPERTY_GETTER_SETTER(int, ValidityOffset, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
-		ADD_PROPERTY_GETTER_SETTER(int, ValidityBit, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
+		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, Size, true, DeviceSignal::size, DeviceSignal::setSize)
+		auto validityOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, ValidityOffset, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
+		auto valididtyBitProp = ADD_PROPERTY_GETTER_SETTER(int, ValidityBit, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
 
-		ADD_PROPERTY_GETTER_SETTER(int, ValueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
-		ADD_PROPERTY_GETTER_SETTER(int, ValueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, ValueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
+		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, ValueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+
+		typeProp->setUpdateFromPreset(true);
+		functionProp->setUpdateFromPreset(true);
+		byteOrderProp->setUpdateFromPreset(true);
+		formatProp->setUpdateFromPreset(true);
+
+		sizeProp->setUpdateFromPreset(true);
+		validityOffsetProp->setUpdateFromPreset(true);
+		valididtyBitProp->setUpdateFromPreset(true);
+
+		valueOffsetProp->setUpdateFromPreset(true);
+		valueBitProp->setUpdateFromPreset(true);
 	}
 
 	DeviceSignal::~DeviceSignal()
@@ -2028,7 +2095,9 @@ R"DELIM({
 	Workstation::Workstation(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Type, true, Workstation::type, Workstation::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, Workstation::type, Workstation::setType)
+
+		typeProp->setUpdateFromPreset(true);
 	}
 
 	Workstation::~Workstation()
@@ -2109,7 +2178,9 @@ R"DELIM({
 	Software::Software(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		ADD_PROPERTY_GETTER_SETTER(int, Type, true, Software::type, Software::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, Software::type, Software::setType);
+
+		typeProp->setUpdateFromPreset(true);
 	}
 
 	Software::~Software()

@@ -14,27 +14,27 @@ class MainWindow;
 }
 
 
-class MyClient : public Tcp::Client
-{
-	Q_OBJECT
+//class MyClient : public Tcp::Client
+//{
+//	Q_OBJECT
 
-private:
-	QTimer m_timer;
-	QByteArray m_data;
+//private:
+//	QTimer m_timer;
+//	QByteArray m_data;
 
-	void onTimer();
+//	void onTimer();
 
-	void sendRandomRequest();
+//	void sendRandomRequest();
 
-public:
-	MyClient();
+//public:
+//	MyClient();
 
-	virtual void onClientThreadStarted() override;
+//	virtual void onClientThreadStarted() override;
 
-	virtual void onConnection() override;
+//	virtual void onConnection() override;
 
-	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
-};
+//	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
+//};
 
 
 class MainWindow : public QMainWindow

@@ -577,13 +577,13 @@ BEGIN
 	file_ids := array(
 					SELECT SQ.FileID FROM (
 						(WITH RECURSIVE files(FileID, ParentID) AS (
-								SELECT FileID, ParentID FROM get_file_list(user_id, file_id, '%')
+								SELECT FileID, ParentID FROM get_file_list(user_id, file_id) WHERE Deleted = FALSE
 							UNION ALL
-								SELECT FL.FileID, FL.ParentID FROM Files, get_file_list(user_id, files.FileID, '%') FL
+								SELECT FL.FileID, FL.ParentID FROM Files, get_file_list(user_id, files.FileID) FL  WHERE FL.Deleted = FALSE
 							)
 							SELECT * FROM files)
 						UNION
-							SELECT FileID, ParentID FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = file_id), '%') WHERE FileID = file_id
+							SELECT FileID, ParentID FROM get_file_list(user_id, (SELECT ParentID FROM File WHERE FileID = file_id)) WHERE FileID = file_id
 					) SQ
 					ORDER BY SQ.FileID
 				);

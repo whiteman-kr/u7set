@@ -563,7 +563,7 @@ bool Configurator::send(int moduleUartId,
     std::vector<quint8> recBuffer;
     int recSize = headerSize + expecetedDataBytes;
 
-    int recMaxTime = (1000 * recSize / 11520) + 50; // time needed to receive all packet + 50 ms
+	int recMaxTime = (1000 * recSize / 11520) + 200; // time needed to receive all packet + 200 ms
 
     while (m_serialPort->waitForReadyRead(recMaxTime))
     {

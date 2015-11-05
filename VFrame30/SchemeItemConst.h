@@ -11,8 +11,8 @@ namespace VFrame30
 		Q_OBJECT
 
 		Q_PROPERTY(ConstType Type READ type WRITE setType)
-		Q_PROPERTY(int IntegralValue READ intValue WRITE setIntValue)
-		Q_PROPERTY(int FloatValue READ floatValue WRITE setFloatValue)
+		Q_PROPERTY(int IntegralValue READ intValue WRITE setIntValue)		// SignedInt
+		Q_PROPERTY(double FloatValue READ floatValue WRITE setFloatValue)	// Float
 
 		Q_ENUMS(ConstType)
 
