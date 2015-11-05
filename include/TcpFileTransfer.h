@@ -9,21 +9,26 @@ namespace Tcp
 {
 
 	const quint32	RQID_GET_FILE_START = 400,
-					RQID_GET_FILE_NEXT = 401,
-					RQID_GET_FILE_CANCEL = 402;
+					RQID_GET_FILE_NEXT = 401;
 
-	enum FileTransferError
+
+	enum FileTransferResult
 	{
 		Ok,
-		FileNotFound,
-		LocalFolderIsNotWriteable,
-		FileDownloadError,
-		AlreadyDownloadFile,
-		CantCreateLocalFolder,
+
 		NotConnectedToServer,
+
+		NotFoundRemoteFile,
+		CantOpenRemoteFile,
+		CantReadRemoteFile,
+
+		LocalFolderIsNotWriteable,
+		CantCreateLocalFolder,
+		AlreadyDownloadFile,
 		CantSendRequest,
-		AlreadyUploadFile,
-		CantOpenFile
+		CantCreateLocalFile,
+		FileDataCorrupted,
+		CantWriteLocalFile,
 	};
 
 
@@ -32,9 +37,11 @@ namespace Tcp
 	const int FILE_PART_SIZE = 65536;
 
 
+#pragma pack(push, 1)
+
 	struct GetFileReply
 	{
-		FileTransferError errorCode = FileTransferError::Ok;
+		FileTransferResult errorCode = FileTransferResult::Ok;
 		qint64 fileSize = 0;
 		int totalParts = 0;				// == fileSize / FILE_PART_SIZE + (fileSize % FILE_PART_SIZE ? 1 : 0)
 		int currentPart = 0;			// from 1
@@ -48,6 +55,26 @@ namespace Tcp
 		void clear();
 	};
 
+#pragma pack(pop)
+
+
+	class FileTransfer
+	{
+	private:
+		static bool m_FileTransferErrorIsRegistered;
+
+	protected:
+		QString m_rootFolder;
+		QString m_fileName;
+		QFile m_file;
+		QCryptographicHash m_md5Generator;
+
+		bool m_transferInProgress = false;
+
+	public:
+		FileTransfer();
+	};
+
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -55,40 +82,33 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	class FileClient : public Client
+	class FileClient : public Client, public FileTransfer
 	{
 		Q_OBJECT
 
-	public:
-
 	private:
-		QString m_rootFolder;
-		bool m_downloadInProgress = false;
-		QString m_fileName;
-		qint64 m_fileSize = 0;
-		QByteArray m_fileMD5 = 0;
+		GetFileReply m_reply;
 
-		FileTransferError checkLocalFolder();		// check read/write ability for m_rootFolder
-		FileTransferError createFile();
+		FileTransferResult checkLocalFolder();		// check read/write ability for m_rootFolder
+		FileTransferResult createFile();
 
 		void init();
 
-		void startFileDownload();
-
-		void endFileDownload(FileTransferError errorCode);
+		void endFileDownload(FileTransferResult errorCode);
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) final;
 
-		void processGetFileStartReply(const char* replyData, quint32 replyDataSize);
+		void processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize);
 
 		virtual void onClientThreadStarted() override;
+		virtual void onClientThreadFinished() override;
 
 	private slots:
 		void slot_downloadFile(const QString fileName);
 
 	signals:
 		void signal_downloadFile(const QString fileName);
-		void signal_fileDownloaded(const QString filename, FileTransferError errorCode);
+		void signal_endDownloadFile(const QString fileName, FileTransferResult errorCode);
 
 	public:
 		FileClient(const QString& rootFolder, const HostAddressPort& serverAddressPort);
@@ -104,28 +124,26 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	class FileServer : public Server
+	class FileServer : public Server, public FileTransfer
 	{
 	private:
-		QString m_rootFolder;
-		QString m_fileName;
-		QFile m_file;
-		GetFileReply m_reply;
-		QCryptographicHash m_md5Generator;
+		union
+		{
+			struct
+			{
+				GetFileReply m_reply;
+				char m_fileData[FILE_PART_SIZE];
+			};
 
-		char m_fileData[FILE_PART_SIZE];
-
-		bool m_uploadInProgress = false;
+			char m_replyData[sizeof(GetFileReply) + FILE_PART_SIZE];
+		};
 
 		void init();
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
 
-		void processGetFileStartRequest(const char* requestData, quint32 requestDataSize);
-
-		void onServerThreadStarted() override;
-
-		void readFileData();
+		void sendFirstFilePart(const QString& fileName);
+		void sendNextFilePart();
 
 	public:
 		FileServer(const QString& rootFolder);
@@ -134,3 +152,5 @@ namespace Tcp
 	};
 
 }
+
+

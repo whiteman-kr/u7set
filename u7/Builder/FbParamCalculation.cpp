@@ -302,7 +302,7 @@ namespace Builder
 				assert(false);
 			}
 
-			const int MULTIPLIER = 32768 - 1;
+			const int MULTIPLIER = 32768;
 
 			int k1 = ((y2 - y1) * MULTIPLIER) / (x2 - x1);
 
