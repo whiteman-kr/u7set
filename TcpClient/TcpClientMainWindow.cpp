@@ -16,12 +16,21 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 
 	m_tcpThread->start();*/
 
-	m_fileClient = new Tcp::FileClient("d:/temp22/fileClient", HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST));
+	m_fileClient = new Tcp::FileClient("d:/temp22/client_cfg", HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST));
 	m_fileClientThread = new Tcp::Thread(m_fileClient);
 
 	m_fileClientThread->start();
 
+	connect(m_fileClient, &Tcp::FileClient::signal_endDownloadFile, this, &TcpClientMainWindow::onEndDownloadFile);
 }
+
+
+void TcpClientMainWindow::onEndDownloadFile(const QString filename, Tcp::FileTransferResult errorCode)
+{
+	qDebug() << "End download file " << filename << " error = " << static_cast<int>(errorCode);
+}
+
+
 
 TcpClientMainWindow::~TcpClientMainWindow()
 {
@@ -91,5 +100,7 @@ void TestClient::processReply(quint32 requestID, const char* replyData, quint32 
 
 void TcpClientMainWindow::on_pushButton_clicked()
 {
-	m_fileClient->downloadFile("/qq/build.xml");
+	m_fileClient->downloadFile("/DataAquisitionService/applicationsignals.xml");
 }
+
+

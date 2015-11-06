@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>images/check.png</file>
+        <file>config.xml</file>
+    </qresource>
+</RCC>
