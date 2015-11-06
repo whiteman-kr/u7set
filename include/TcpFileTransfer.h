@@ -127,16 +127,10 @@ namespace Tcp
 	class FileServer : public Server, public FileTransfer
 	{
 	private:
-		union
-		{
-			struct
-			{
-				GetFileReply m_reply;
-				char m_fileData[FILE_PART_SIZE];
-			};
+		GetFileReply& m_reply;
+		char* m_fileData = nullptr;
 
-			char m_replyData[sizeof(GetFileReply) + FILE_PART_SIZE];
-		};
+		char m_replyData[sizeof(GetFileReply) + FILE_PART_SIZE];
 
 		void init();
 

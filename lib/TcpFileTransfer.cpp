@@ -282,10 +282,13 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileServer::FileServer(const QString& rootFolder)
+	FileServer::FileServer(const QString& rootFolder) :
+		m_reply(*reinterpret_cast<GetFileReply*>(m_replyData))
 	{
 		m_rootFolder = rootFolder;
 		m_file.setParent(this);
+
+		m_fileData = m_replyData + sizeof(GetFileReply);
 	}
 
 
