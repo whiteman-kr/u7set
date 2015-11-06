@@ -101,6 +101,7 @@ namespace Hardware
 		// Public methods
 		//
 	public:
+		// Expand str id for this and for all children
 		void expandStrId();
 
 		// Get all signals, including signals from child items
@@ -122,6 +123,7 @@ namespace Hardware
 		//
 	public:
 		DeviceObject* parent();
+		const DeviceObject* parent() const;
         Q_INVOKABLE QObject* jsParent() const;
 
 		Q_INVOKABLE int jsPropertyInt(QString name) const;
@@ -194,6 +196,8 @@ namespace Hardware
 
 		QString strId() const;
 		void setStrId(QString value);
+
+		QString strIdExpanded() const;
 
 		QString caption() const;
 		void setCaption(QString value);
