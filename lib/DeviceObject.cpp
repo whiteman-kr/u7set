@@ -1632,10 +1632,6 @@ R"DELIM({
 
 		moduleMessage->set_type(static_cast<int>(m_type));
 
-		moduleMessage->set_channel(m_channel);
-		moduleMessage->set_subsysid(m_subSysID.toStdString());
-		moduleMessage->set_conftype(m_confType.toStdString());
-
 		return true;
 	}
 
@@ -1664,10 +1660,6 @@ R"DELIM({
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
 		m_type =  static_cast<decltype(m_type)>(moduleMessage.type());
-
-		m_channel = moduleMessage.channel();
-		m_subSysID = moduleMessage.subsysid().c_str();
-		m_confType = moduleMessage.conftype().c_str();
 
 		return true;
 	}

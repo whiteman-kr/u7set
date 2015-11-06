@@ -612,10 +612,6 @@ message DeviceChassis
 message DeviceModule
 {
 	optional int32 type = 1 [default = 0];
-
-    optional int32 Channel = 2 [default = 0];
-	optional string SubsysID = 3 [default = ""];
-	optional string ConfType = 4 [default = ""];
 }
 
 message DeviceController

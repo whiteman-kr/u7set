@@ -427,10 +427,6 @@ namespace Hardware
 		static const DeviceType m_deviceType = DeviceType::Module;
 
 		uint16_t m_type = 0;	// high byte is family type, low byte is module version
-
-		int m_channel = 0;		// 1 - base channel, 0 - means channel not set or not required
-		QString m_subSysID;
-		QString m_confType;
 	};
 
 
