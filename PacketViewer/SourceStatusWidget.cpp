@@ -12,7 +12,7 @@ SourceStatusWidget::SourceStatusWidget(Source &source, PacketBufferTableModel *p
 	setWindowTitle(source.fullAddress());
 	connect(this, &QWidget::destroyed, &source, &Source::removeDependentWidget);
 
-	QCheckBox* cb = new QCheckBox(this);
+	QCheckBox* cb = new QCheckBox("Change byte order", this);
 	connect(cb, &QCheckBox::toggled, packetBufferModel, &PacketBufferTableModel::setNeedToSwapBytes);
 	cb->setChecked(true);
 	QVBoxLayout* vl = new QVBoxLayout;
