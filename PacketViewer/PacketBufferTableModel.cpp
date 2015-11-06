@@ -1,5 +1,7 @@
 #include "PacketBufferTableModel.h"
 #include <../include/SocketIO.h>
+#include <algorithm>
+#include <QSettings>
 
 const int C_DECIMAL = 0,
 C_HEXADECIMAL = 1,
@@ -16,9 +18,18 @@ const char* const Columns[] =
 PacketBufferTableModel::PacketBufferTableModel(quint8* buffer, RpPacketHeader& lastHeader, QObject* parent) :
 	QAbstractTableModel(parent),
 	m_buffer(reinterpret_cast<quint16*>(buffer)),
-	m_lastHeader(lastHeader)
+	m_lastHeader(lastHeader),
+	needToSwapBytes(true)
 {
+	QSettings settings;
+	needToSwapBytes = settings.value("needToSwapBytes", needToSwapBytes).toBool();
+}
 
+template <typename TYPE>
+void swapBytes(TYPE& value)
+{
+	quint8* memory = reinterpret_cast<quint8*>(&value);
+	std::reverse(memory, memory + sizeof(TYPE));
 }
 
 int PacketBufferTableModel::rowCount(const QModelIndex&) const
@@ -36,6 +47,10 @@ QVariant PacketBufferTableModel::data(const QModelIndex& index, int role) const
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		quint16 value = m_buffer[index.row()];
+		if (needToSwapBytes)
+		{
+			swapBytes(value);
+		}
 		switch (index.column())
 		{
 			case C_DECIMAL: return value;
@@ -95,5 +110,14 @@ void PacketBufferTableModel::checkPartCount(int newPartCount)
 							RP_PACKET_DATA_SIZE * newPartCount / sizeof(m_buffer[0]),
 							RP_PACKET_DATA_SIZE * m_lastHeader.partCount / sizeof(m_buffer[0]) - 1);
 	}
+}
+
+void PacketBufferTableModel::setNeedToSwapBytes(bool value)
+{
+	beginResetModel();
+	needToSwapBytes = value;
+	endResetModel();
+	QSettings settings;
+	settings.setValue("needToSwapBytes", needToSwapBytes);
 }
 

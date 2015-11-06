@@ -22,10 +22,12 @@ public:
 signals:
 
 public slots:
+	void setNeedToSwapBytes(bool value);
 
 private:
 	quint16* m_buffer;
 	RpPacketHeader& m_lastHeader;
+	bool needToSwapBytes;
 };
 
 #endif // PACKETBUFFERTABLEMODEL_H
