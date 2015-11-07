@@ -124,4 +124,14 @@ namespace VFrame30
 		return &m_hardwareStrIds;
 	}
 
+	bool LogicScheme::isMultichannelScheme() const
+	{
+		return m_hardwareStrIds.size() > 1;
+	}
+
+	int LogicScheme::channelCount() const
+	{
+		return m_hardwareStrIds.size();
+	}
+
 }

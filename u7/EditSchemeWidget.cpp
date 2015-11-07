@@ -103,7 +103,7 @@ void EditSchemeView::paintEvent(QPaintEvent* pe)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, scheme()->gridSize(), scheme()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, scheme().get(), scheme()->gridSize(), scheme()->pinGridStep());
 
 	// Calc size
 	//
@@ -1453,7 +1453,7 @@ bool EditSchemeView::isItemSelected(const std::shared_ptr<VFrame30::SchemeItem>&
 //
 EditSchemeWidget::EditSchemeWidget(std::shared_ptr<VFrame30::Scheme> scheme, const DbFileInfo& fileInfo, DbController* dbController) :
 	VFrame30::BaseSchemeWidget(scheme, new EditSchemeView(scheme)),
-	m_fileInfo(fileInfo),
+m_fileInfo(fileInfo),
 	m_dbcontroller(dbController)
 {
 	assert(scheme != nullptr);
@@ -1676,7 +1676,15 @@ void EditSchemeWidget::createActions()
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::SchemeItemInput>(scheme()->unit()));
+				auto item = std::make_shared<VFrame30::SchemeItemInput>(scheme()->unit());
+
+				if (isLogicScheme() == true &&
+					logicScheme()->isMultichannelScheme() == true)
+				{
+					item->setMultiChannel(true);
+				}
+
+				addItem(item);
 			});
 
 	m_addOutputSignalAction = new QAction(tr("Output"), this);
@@ -1685,7 +1693,15 @@ void EditSchemeWidget::createActions()
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
-				addItem(std::make_shared<VFrame30::SchemeItemOutput>(scheme()->unit()));
+				auto item = std::make_shared<VFrame30::SchemeItemOutput>(scheme()->unit());
+
+				if (isLogicScheme() == true &&
+					logicScheme()->isMultichannelScheme() == true)
+				{
+					item->setMultiChannel(true);
+				}
+
+				addItem(item);
 			});
 
 	m_addConstantAction = new QAction(tr("Constant"), this);
@@ -3720,6 +3736,24 @@ const EditSchemeView* EditSchemeWidget::editSchemeView() const
 	const EditSchemeView* sw = dynamic_cast<const EditSchemeView*>(schemeView());
 	assert(sw != nullptr);
 	return sw;
+}
+
+bool EditSchemeWidget::isLogicScheme() const
+{
+	VFrame30::LogicScheme* logicScheme = dynamic_cast<VFrame30::LogicScheme*>(scheme().get());
+	return logicScheme != nullptr;
+}
+
+std::shared_ptr<VFrame30::LogicScheme> EditSchemeWidget::logicScheme()
+{
+	std::shared_ptr<VFrame30::LogicScheme> logicScheme = std::dynamic_pointer_cast<VFrame30::LogicScheme>(scheme());
+	return logicScheme;
+}
+
+const std::shared_ptr<VFrame30::LogicScheme> EditSchemeWidget::logicScheme() const
+{
+	const std::shared_ptr<VFrame30::LogicScheme> logicScheme = std::dynamic_pointer_cast<VFrame30::LogicScheme>(scheme());
+	return logicScheme;
 }
 
 const std::vector<std::shared_ptr<VFrame30::SchemeItem>>& EditSchemeWidget::selectedItems() const

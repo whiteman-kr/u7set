@@ -4,12 +4,14 @@
 
 namespace VFrame30
 {
-	CDrawParam::CDrawParam(QPainter* painter, double gridSize, int pinGridStep) :
+	CDrawParam::CDrawParam(QPainter* painter, Scheme* scheme, double gridSize, int pinGridStep) :
 		m_painter(painter),
+		m_scheme(scheme),
 		m_gridSize(gridSize),
 		m_pinGridStep(pinGridStep)
 	{
 		assert(m_painter != nullptr);
+		assert(m_scheme != nullptr);
 	}
 	
 	CDrawParam::~CDrawParam(void)
@@ -24,6 +26,11 @@ namespace VFrame30
 	QPaintDevice* CDrawParam::device()
 	{
 		return m_painter->device();
+	}
+
+	const Scheme* CDrawParam::scheme() const
+	{
+		return m_scheme;
 	}
 
 	double CDrawParam::controlBarSize() const

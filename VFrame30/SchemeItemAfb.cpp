@@ -143,16 +143,26 @@ namespace VFrame30
 							case Afb::AfbDataFormat::UnsignedInt:
 								paramValue = a.toString();
 								break;
+
 							case Afb::AfbDataFormat::SignedInt:
 								paramValue = a.toString();
 								break;
+
 							case Afb::AfbDataFormat::Float:
+
 								paramValue.setNum(a.toDouble(), 'f', 3);	// There is no Precision field in Afb::AfbParam
+
 								while(paramValue.endsWith('0'))
 								{
 									paramValue.chop(1);
 								}
+
+								if (paramValue.endsWith('.'))
+								{
+									paramValue.chop(1);
+								}
 								break;
+
 							default:
 								assert(false);
 						}

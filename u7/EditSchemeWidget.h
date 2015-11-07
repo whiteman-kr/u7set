@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../VFrame30/BaseSchemeWidget.h"
+#include "../VFrame30/LogicScheme.h"
 #include "../VFrame30/SchemeView.h"
 #include "../VFrame30/SchemeItem.h"
 #include "../VFrame30/FblItem.h"
@@ -343,6 +344,11 @@ public:
 
 	EditSchemeView* editSchemeView();
 	const EditSchemeView* editSchemeView() const;
+
+	bool isLogicScheme() const;
+
+	std::shared_ptr<VFrame30::LogicScheme> logicScheme();
+	const std::shared_ptr<VFrame30::LogicScheme> logicScheme() const;
 
 	MouseState mouseState() const;
 	void setMouseState(MouseState state);
