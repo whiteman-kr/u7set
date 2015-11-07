@@ -123,7 +123,6 @@ SOURCES +=\
     ../lib/Crc.cpp \
     DialogFileEditor.cpp \
     Builder/Builder.cpp \
-    Builder/ApplicationLogicBuilder.cpp \
 	Builder/BuildResultWriter.cpp \
 	SchemeLayersDialog.cpp \
     Builder/ConfigurationBuilder.cpp \
@@ -140,7 +139,8 @@ SOURCES +=\
     Builder/FbParamCalculation.cpp \
     ../lib/PropertyEditorOld.cpp \
     ../lib/PropertyEditor.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    Builder/Parser.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -194,7 +194,6 @@ HEADERS  += \
     ../include/Crc.h \
     DialogFileEditor.h \
     Builder/Builder.h \
-    Builder/ApplicationLogicBuilder.h \
 	Builder/BuildResultWriter.h \
     SchemeLayersDialog.h \
     Builder/ConfigurationBuilder.h \
@@ -210,7 +209,8 @@ HEADERS  += \
     ../include/SocketIO.h \
     ../include/PropertyObject.h \
     ../include/PropertyEditorOld.h \
-    ../include/PropertyEditor.h
+    ../include/PropertyEditor.h \
+    Builder/Parser.h
 
 FORMS    += \
     ChangesetDialog.ui \

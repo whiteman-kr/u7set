@@ -106,13 +106,13 @@ namespace Builder
 	//		ApplicationLogicModule
 	//
 	// ------------------------------------------------------------------------
-	class ApplicationLogicModule : QObject
+	class AppLogicModule : QObject
 	{
 		Q_OBJECT
 
 	public:
-		ApplicationLogicModule() = delete;
-		ApplicationLogicModule(QString moduleStrId);
+		AppLogicModule() = delete;
+		AppLogicModule(QString moduleStrId);
 
 		bool addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 					   const BushContainer& bushContainer,
@@ -158,12 +158,12 @@ namespace Builder
 	//		ApplicationLogicData
 	//
 	// ------------------------------------------------------------------------
-	class ApplicationLogicData
+	class AppLogicData
 	{
 	public:
-		ApplicationLogicData();
+		AppLogicData();
 
-		std::shared_ptr<ApplicationLogicModule> getModuleLogicData(QString moduleStrID);
+		std::shared_ptr<AppLogicModule> getModuleLogicData(QString moduleStrID);
 
 		// Public methods
 		//
@@ -179,11 +179,11 @@ namespace Builder
 		// Properties
 		//
 	public:
-		const std::list<std::shared_ptr<ApplicationLogicModule>>& modules() const;
-		std::list<std::shared_ptr<ApplicationLogicModule>>& modules();
+		const std::list<std::shared_ptr<AppLogicModule>>& modules() const;
+		std::list<std::shared_ptr<AppLogicModule>>& modules();
 
 	private:
-		std::list<std::shared_ptr<ApplicationLogicModule>> m_modules;
+		std::list<std::shared_ptr<AppLogicModule>> m_modules;
 	};
 
 
@@ -192,20 +192,20 @@ namespace Builder
 	//		ApplicationLogicBuilder
 	//
 	// ------------------------------------------------------------------------
-	class ApplicationLogicBuilder : QObject
+	class Parser : QObject
 	{
 		Q_OBJECT
 
 	public:
-		ApplicationLogicBuilder() = delete;
-		ApplicationLogicBuilder(DbController* db,
+		Parser() = delete;
+		Parser(DbController* db,
 								OutputLog* log,
-								ApplicationLogicData* appLogicData,
+								AppLogicData* appLogicData,
 								Afb::AfbElementCollection* afbCollection,
 								int changesetId,
 								bool debug);
 
-		virtual ~ApplicationLogicBuilder();
+		virtual ~Parser();
 
 		bool build();
 
@@ -237,8 +237,8 @@ namespace Builder
 		bool debug() const;
 		bool release() const;
 
-		const ApplicationLogicData *applicationData() const;
-		ApplicationLogicData* applicationData();
+		const AppLogicData* applicationData() const;
+		AppLogicData* applicationData();
 
 	private:
 		DbController* m_db = nullptr;
@@ -246,7 +246,7 @@ namespace Builder
 		int m_changesetId = 0;
 		int m_debug = false;
 
-		ApplicationLogicData* m_applicationData = nullptr;
+		AppLogicData* m_applicationData = nullptr;
 		Afb::AfbElementCollection* m_afbCollection = nullptr;
 	};
 

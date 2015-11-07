@@ -8,7 +8,7 @@
 #include "../include/Signal.h"
 #include "../include/OrderedHash.h"
 #include "../include/ModuleConfiguration.h"
-#include "../Builder/ApplicationLogicBuilder.h"
+#include "../Builder/Parser.h"
 #include "../Builder/BuildResultWriter.h"
 #include "../Builder/ApplicationLogicCode.h"
 #include "../VFrame30/FblItemRect.h"
@@ -91,7 +91,7 @@ namespace Builder
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
 		Afb::AfbElementCollection* m_afbl = nullptr;
-		ApplicationLogicData* m_appLogicData = nullptr;
+		AppLogicData* m_appLogicData = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
 
@@ -109,7 +109,7 @@ namespace Builder
 
 	public:
 		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet,
-								 Afb::AfbElementCollection* afblSet, ApplicationLogicData* appLogicData,
+								 Afb::AfbElementCollection* afblSet, AppLogicData* appLogicData,
 								 BuildResultWriter* buildResultWriter, OutputLog* log);
 
 		bool run();
@@ -691,8 +691,8 @@ namespace Builder
 		Hardware::DeviceObject* m_equipment = nullptr;
 		SignalSet* m_signals = nullptr;
 		Afb::AfbElementCollection* m_afbl = nullptr;
-		ApplicationLogicData* m_appLogicData = nullptr;
-		ApplicationLogicModule* m_moduleLogic = nullptr;
+		AppLogicData* m_appLogicData = nullptr;
+		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
 		Hardware::DeviceModule* m_lm = nullptr;

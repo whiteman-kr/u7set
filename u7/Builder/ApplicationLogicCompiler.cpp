@@ -483,7 +483,7 @@ namespace Builder
 
 	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment,
 													   SignalSet* signalSet, Afb::AfbElementCollection *afblSet,
-													   ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter,
+													   AppLogicData* appLogicData, BuildResultWriter* buildResultWriter,
 													   OutputLog *log) :
 		m_subsystems(subsystems),
 		m_equipment(equipment),
@@ -953,7 +953,7 @@ namespace Builder
 	{
 		bool result = false;
 
-		std::shared_ptr<ApplicationLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->strId());
+		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->getModuleLogicData(m_lm->strId());
 
 		m_moduleLogic = appLogicModule.get();
 
