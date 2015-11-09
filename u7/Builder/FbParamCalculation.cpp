@@ -3,7 +3,7 @@
 namespace Builder
 {
 
-#define CHECK_REQUIRED_PARAMTERES(paramList)	if (checkRequiredParameters(paramList) == false) { return false; }
+#define CHECK_REQUIRED_PARAMETERS(paramList)	if (checkRequiredParameters(paramList) == false) { return false; }
 #define CHECK_UNSIGNED_INT(param)				if (checkUnsignedInt(param) == false) { return false; }
 #define CHECK_UNSIGNED_INT16(param)				if (checkUnsignedInt16(param) == false) { return false; }
 #define CHECK_UNSIGNED_INT32(param)				if (checkUnsignedInt32(param) == false) { return false; }
@@ -39,6 +39,13 @@ namespace Builder
 		switch(afb().type().toOpCode())
 		{
 		case Afb::AfbType::LOGIC:
+		case Afb::AfbType::NOT:
+		case Afb::AfbType::SR_RS:
+		case Afb::AfbType::CTUD:
+		case Afb::AfbType::MAJ:
+		case Afb::AfbType::SRSST:
+		case Afb::AfbType::BCOD:
+		case Afb::AfbType::BDEC:
 			// parameter's values calculation is not required
 			break;
 
@@ -71,7 +78,7 @@ namespace Builder
 
 		requiredParams.append("i_counter");
 
-		CHECK_REQUIRED_PARAMTERES(requiredParams);
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
 		AppFbParamValue& i_counter = m_paramValuesArray["i_counter"];
 
@@ -92,7 +99,7 @@ namespace Builder
 		requiredParams.append("i_sp_r");
 		requiredParams.append("hysteresis");
 
-		CHECK_REQUIRED_PARAMTERES(requiredParams)
+		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
 		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
 		AppFbParamValue& sSettingParam = m_paramValuesArray["i_sp_s"];
@@ -210,7 +217,7 @@ namespace Builder
 		requiredParams.append("output_low");
 		requiredParams.append("output_high");
 
-		CHECK_REQUIRED_PARAMTERES(requiredParams)
+		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
 		AppFbParamValue& iConfParam = m_paramValuesArray["i_conf"];
 		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];

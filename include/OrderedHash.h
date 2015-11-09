@@ -447,6 +447,9 @@ public:
 	void clear() { m_map.clear(); QVector<VALUE>::clear(); }
 
 	bool isEmpty() const { return QVector<VALUE>::isEmpty(); }
+
+	int size() const { return QVector<VALUE>::size(); }
+	int count() const { return QVector<VALUE>::size(); }
 };
 
 

@@ -288,6 +288,7 @@ namespace Tcp
 		m_rootFolder = rootFolder;
 		m_file.setParent(this);
 
+		m_reply.clear();
 		m_fileData = m_replyData + sizeof(GetFileReply);
 	}
 

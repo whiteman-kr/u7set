@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#lock_sim_v1">
+        <Properties>
+            <Caption>lock_sim</Caption>
+            <Version>1.0</Version>
+            <Description>Locking and simulaton module</Description>
+            <Category>Logic</Category>
+            <OpCode>7</OpCode>
+            <HasRam>false</HasRam>
+            <RequiredStart>true</RequiredStart>
+            <InternalUse>true</InternalUse>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="UnsignedInt" OpIndex = "0" Size = "16"/>
+            <AfbElementSignal OpName="i_val" Caption = "val" Type="Analog" DataFormat="UnsignedInt" OpIndex = "1" Size = "16"/>
+            <AfbElementSignal OpName="i_set" Caption = "lock" Type="Analog" DataFormat="UnsignedInt" OpIndex = "2" Size = "16"/>
+            <AfbElementSignal OpName="i_reset" Caption = "sim" Type="Analog" DataFormat="UnsignedInt" OpIndex = "3" Size = "16"/>
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="UnsignedInt" OpIndex = "5" Size = "16"/>
+        </OutputSignals>
+        <Params>
+            <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed>
+		</Changed>
+                </Script>
+            </AfbElementParam>
+        </Params>
+        <CommonScript>
+            <Library></Library>
+            <AfterCreation></AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>

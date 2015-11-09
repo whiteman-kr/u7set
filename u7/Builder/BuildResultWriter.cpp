@@ -11,78 +11,195 @@ namespace Builder
 {
 
 	// --------------------------------------------------------------------------------------
-	//	BuildSubdirectory class implementation
 	//
+	//	BuildFile class implementation
+	//
+	// --------------------------------------------------------------------------------------
 
-	BuildSubdirectory::BuildSubdirectory(QString name) :
-		m_name(name)
+	QString BuildFile::m_separator = QDir::separator();
+
+
+	BuildFile::BuildFile(const QString& subDir, const QString& fileName)
 	{
+		m_fileName = removeHeadTailSeparator(fileName);
 
+		if (subDir.isEmpty())
+		{
+			m_pathFileName = m_separator + m_fileName;
+		}
+		else
+		{
+			m_pathFileName = m_separator + removeHeadTailSeparator(subDir) + m_separator + m_fileName;
+		}
 	}
 
 
-	BuildSubdirectory::~BuildSubdirectory()
+	QString BuildFile::removeHeadTailSeparator(const QString& str)
 	{
-		for(BuildFile* file : m_file)
+		QString result = str;
+
+		if (result.isEmpty())
 		{
-			delete file;
+			return result;
 		}
 
-		m_file.clear();
+		// remove head separator
+		//
+		if (result.startsWith(m_separator) == true)
+		{
+			result = result.remove(0, 1);
+		}
+
+		if (result.isEmpty())
+		{
+			return result;
+		}
+
+		// remove tail separator
+		//
+		if (result.endsWith(m_separator) == true)
+		{
+			result.truncate(result.length() - 1);
+		}
+
+		return result;
 	}
 
 
-	int BuildSubdirectory::addFile(QString fileName)
+	bool BuildFile::open(const QString& fullBuildPath, bool textMode, OutputLog* log)
 	{
-		for(int i = 0; i < m_file.count(); i++)
+		QString fullPathFileName = fullBuildPath + m_pathFileName;
+
+		QFileInfo fi(fullPathFileName);
+
+		QString fullPath = fi.path();
+
+		QDir dir(fullPath);
+
+		if (dir.mkpath(fullPath) == false)
 		{
-			if (m_file[i]->name() == fileName)
-			{
-				return -1;			// file already exists
-			}
+			LOG_ERROR(log, QString(tr("Can't create directory: %1")).arg(fullPath));
+			return false;
 		}
 
-		BuildFile* newFile = new BuildFile(fileName);
+		m_file.setFileName(fullPathFileName);
 
-		m_file.append(newFile);
+		bool result = false;
 
-		return m_file.count() - 1;
+		if (textMode)
+		{
+			result = m_file.open(QIODevice::ReadWrite | QIODevice::Text);
+		}
+		else
+		{
+			result = m_file.open(QIODevice::ReadWrite);
+		}
+
+		if (result == false)
+		{
+			LOG_ERROR(log, QString(tr("Can't create file: %1")).arg(fullPathFileName));
+
+			return false;
+		}
+
+		LOG_MESSAGE(log, QString(tr("File was created: %1")).arg(m_pathFileName));
+
+		return true;
 	}
 
 
-	void BuildSubdirectory::setFileInfo(int fileIndex, const QFile& file, const QByteArray& data)
+	void BuildFile::getFileInfo()
 	{
-		if (fileIndex < 0 || fileIndex >= m_file.count())
-		{
-			assert(false);
-			return;
-		}
+		QFileInfo fi(m_file);
 
-		QFileInfo fi(file);
+		m_size = fi.size();
 
-		qint64 fileSize = fi.size();
+		QCryptographicHash md5Generator(QCryptographicHash::Md5);
 
-		QString md5 = QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
+		md5Generator.addData(&m_file);
 
-		m_file[fileIndex]->setInfo(fileSize, md5);
+		m_md5 = QString(md5Generator.result().toHex());
 	}
 
 
-	BuildFile* BuildSubdirectory::file(int index)
+	bool BuildFile::write(const QString& fullBuildPath, const QByteArray& data, OutputLog* log)
 	{
-		if (index < 0  || index >=m_file.count())
+		if (open(fullBuildPath, false, log) == false)
 		{
-			assert(false);
-			return nullptr;
+			return false;
 		}
 
-		return m_file[index];
+		bool result = true;
+
+		qint64 written = m_file.write(data);
+
+		if (written == -1)
+		{
+			LOG_ERROR(log, QString(tr("Write error of file: ")).arg(m_pathFileName));
+			result = false;
+		}
+
+		m_file.flush();
+
+		getFileInfo();
+
+		m_file.close();
+
+		return result;
+	}
+
+
+	bool BuildFile::write(const QString& fullBuildPath, const QString& dataString, OutputLog* log)
+	{
+		if (open(fullBuildPath, true, log) == false)
+		{
+			return false;
+		}
+
+		QTextStream textStream(&m_file);
+
+		textStream << dataString;
+
+		textStream.flush();
+
+		getFileInfo();
+
+		m_file.close();
+
+		return true;
+	}
+
+
+	bool BuildFile::write(const QString& fullBuildPath, const QStringList& stringList, OutputLog* log)
+	{
+		if (open(fullBuildPath, true, log) == false)
+		{
+			return false;
+		}
+
+		QTextStream textStream(&m_file);
+
+		for(auto string : stringList)
+		{
+			textStream << string << "\n";
+		}
+
+		textStream.flush();
+
+		getFileInfo();
+
+		m_file.close();
+
+		return true;
 	}
 
 
 	// --------------------------------------------------------------------------------------
+	//
 	//	BuildResultWriter class implementation
 	//
+	// --------------------------------------------------------------------------------------
+
 
 	BuildResultWriter::BuildResultWriter(QObject *parent) :
 		QObject(parent),
@@ -93,12 +210,12 @@ namespace Builder
 
 	BuildResultWriter::~BuildResultWriter()
 	{
-		for(BuildSubdirectory* subDir : m_subdirectory)
+		for(BuildFile* file : m_buildFiles)
 		{
-			delete subDir;
+			delete file;
 		}
 
-		m_subdirectory.clear();
+		m_buildFiles.clear();
 	}
 
 
@@ -138,14 +255,10 @@ namespace Builder
 			assert(m_dbController != nullptr);
 			assert(m_log != nullptr);
 
-			msg = tr("%1: Invalid build params. Build aborted.").arg(__FUNCTION__);
-
 			if (m_log != nullptr)
 			{
-				LOG_ERROR(log, msg);
+				LOG_ERROR(log, QString(tr("%1: Invalid build params. Build aborted.")).arg(__FUNCTION__));
 			}
-
-			qDebug() << msg;
 
 			m_runBuild = false;
 			return m_runBuild;
@@ -155,12 +268,7 @@ namespace Builder
 
 		if (m_dbController->buildStart(m_workstation, m_release, m_changesetID, &m_buildNo, nullptr) == false)
 		{
-			msg = tr("%1: Build start error.").arg(__FUNCTION__);
-
-			LOG_ERROR(log, msg);
-
-			qDebug() << msg;
-
+			LOG_ERROR(log, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
 			m_runBuild = false;
 			return m_runBuild;
 		}
@@ -172,18 +280,15 @@ namespace Builder
 
 		LOG_MESSAGE(log, msg);
 
-		qDebug() << msg;
-
 		if (m_release == true)
 		{
-			LOG_ERROR(m_log, tr("RELEASE BUILD IS UNDER CONSTRUCTION!"));
-
+			LOG_ERROR(m_log, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
 			m_runBuild = false;
 			return m_runBuild;
 		}
 		else
 		{
-			LOG_WARNING(m_log, tr("WARNING: The workcopies of the checked out files will be compiled!"));
+			LOG_WARNING(m_log, QString(tr("WARNING: The workcopies of the checked out files will be compiled!")));
 		}
 
 		if (createBuildDirectory() == false)
@@ -195,7 +300,6 @@ namespace Builder
 		{
 			return false;
 		}
-
 
 		return true;
 	}
@@ -237,78 +341,24 @@ namespace Builder
 
 		addFile("", "build.log", buildLogStr);
 
+		writeBuildXML();
+
 		closeBuildXML();
 
 		m_dbController->buildFinish(m_buildNo, errors, warnings, buildLogStr, nullptr);
 
-		qDebug() << msg;
-
-		return true;
-	}
-
-
-	// create full path directory
-	//
-	bool BuildResultWriter::createDirectory(QString dir)
-	{
-		if (QDir().exists(dir))
-		{
-			return true;
-		}
-
-		if (QDir().mkpath(dir) == false)
-		{
-			msg = tr("Can't create directory: ") + dir;
-			LOG_ERROR(m_log, msg);
-
-			qDebug() << msg;
-			return false;
-		}
-
-		msg = tr("Directory was created: ") + dir;
-
-		LOG_MESSAGE(m_log, msg);
-
-		qDebug() << msg;
-
-		return true;
-	}
-
-
-	// create subdirectory in build directory
-	//
-	bool BuildResultWriter::createSubdirectory(QString subDir)
-	{
-		QString fullPath = m_buildFullPath + m_separator + subDir;
-
-		if (QDir().exists(fullPath))
-		{
-			return true;
-		}
-
-		if (QDir().mkpath(fullPath) == false)
-		{
-			msg = tr("Can't create subdirectory: ") + subDir;
-			LOG_ERROR(m_log, msg);
-
-			qDebug() << msg;
-			return false;
-		}
-
-		msg = tr("Subdirectory was created: ") + subDir;
-
-		LOG_MESSAGE(m_log, msg);
-
-		qDebug() << msg;
 		return true;
 	}
 
 
 	bool BuildResultWriter::createBuildDirectory()
 	{
-		//QStandardPaths::writableLocation(QStandardPaths::DataLocation)
-
 		QString appDataPath = QDir::toNativeSeparators(theSettings.buildOutputPath());
+
+		if (appDataPath.endsWith(m_separator) == true)
+		{
+			appDataPath.truncate(appDataPath.length() - 1);
+		}
 
 		QString buildNoStr;
 
@@ -320,223 +370,93 @@ namespace Builder
 
 		m_buildFullPath = appDataPath + m_separator + m_buildDirectory;
 
-		if (createDirectory(m_buildFullPath) == false)
+		if (QDir().mkpath(m_buildFullPath) == false)
 		{
+			LOG_ERROR(m_log, QString(tr("Can't create build directory: %1")).arg(m_buildFullPath));
 			m_runBuild = false;
 			return false;
 		}
-		return true;
-	}
 
-
-	QString BuildResultWriter::formatFileName(const QString& subDir, const QString& fileName)
-	{
-		if (subDir.isEmpty())
-		{
-			return fileName;
-		}
-
-		return subDir + m_separator + fileName;
-	}
-
-
-	bool BuildResultWriter::createFile(QString subDir, QString fileName, QFile& file, bool textMode)
-	{
-		if (subDir.isEmpty())
-		{
-			file.setFileName(m_buildFullPath +  m_separator + fileName);
-		}
-		else
-		{
-			if (createSubdirectory(subDir) == false)
-			{
-				return false;
-			}
-
-			file.setFileName(m_buildFullPath + m_separator + subDir + m_separator + fileName);
-		}
-
-		bool res = false;
-
-		if (textMode)
-		{
-			res = file.open(QIODevice::ReadWrite | QIODevice::Text);
-		}
-		else
-		{
-			res = file.open(QIODevice::ReadWrite);
-		}
-
-		if (res == false)
-		{
-			msg = tr("Can't create file: ") + formatFileName(subDir, fileName);;
-
-			LOG_ERROR(m_log, msg);
-
-			qDebug() << msg;
-
-			return false;
-		}
-
-		msg = tr("File was created: ") + formatFileName(subDir, fileName);;
-
-		LOG_MESSAGE(m_log, msg);
-
-		qDebug() << msg;
+		LOG_MESSAGE(m_log, QString(tr("Build directory was created: %1")).arg(m_buildFullPath));
 
 		return true;
 	}
 
 
-	BuildSubdirectory* BuildResultWriter::getBuildSubdirectory(QString subDir)
+	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName)
 	{
-		BuildSubdirectory* buildSubdirectory = nullptr;
+		assert(fileName.isEmpty() == false);
 
-		if (m_subdirectory.contains(subDir))
+		BuildFile* buildFile = new BuildFile(subDir, fileName);
+
+		QString pathFileName = buildFile->pathFileName();
+
+		if (m_buildFiles.contains(pathFileName))
 		{
-			buildSubdirectory = m_subdirectory.value(subDir);
-		}
-		else
-		{
-			buildSubdirectory = new BuildSubdirectory(subDir);
-			m_subdirectory.insert(subDir, buildSubdirectory);
+			LOG_ERROR(m_log, QString(tr("File already exists: %1")).arg(pathFileName));
+
+			delete buildFile;
+
+			return nullptr;
 		}
 
-		return buildSubdirectory;
+		m_buildFiles.insert(pathFileName, buildFile);
+
+		return buildFile;
 	}
 
 
 	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data)
 	{
-		assert(!fileName.isEmpty());
+		BuildFile* buildFile = createBuildFile(subDir, fileName);
 
-		BuildSubdirectory* buildSubdirectory = getBuildSubdirectory(subDir);
-
-		int fileIndex = buildSubdirectory->addFile(fileName);
-
-		if (fileIndex == -1)
-		{
-			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
-
-			LOG_ERROR(m_log, msg);
-
-			return false;
-		}
-
-		QFile file;
-
-		if (createFile(subDir, fileName, file, false) == false)
+		if (buildFile == nullptr)
 		{
 			return false;
 		}
 
-		file.write(data);
-
-		file.close();
-
-		buildSubdirectory->setFileInfo(fileIndex, file, data);
-
-		return true;
+		return buildFile->write(m_buildFullPath, data, m_log);
 	}
 
 
-	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& data)
+	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& dataString)
 	{
-		assert(!fileName.isEmpty());
+		BuildFile* buildFile = createBuildFile(subDir, fileName);
 
-		BuildSubdirectory* buildSubdirectory = getBuildSubdirectory(subDir);
-
-		int fileIndex = buildSubdirectory->addFile(fileName);
-
-		if (fileIndex == -1)
-		{
-			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
-
-			LOG_ERROR(m_log, msg);
-
-			return false;
-		}
-
-		QFile file;
-
-		if (createFile(subDir, fileName, file, false) == false)
+		if (buildFile == nullptr)
 		{
 			return false;
 		}
 
-		QTextStream textStream(&file);
-
-		textStream << data;
-
-		textStream.flush();
-
-		file.close();
-
-		buildSubdirectory->setFileInfo(fileIndex, file, QByteArray(C_STR(data)));
-
-		return true;
+		return buildFile->write(m_buildFullPath, dataString, m_log);
 	}
 
 
 	bool BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList)
 	{
-		assert(!fileName.isEmpty());
+		BuildFile* buildFile = createBuildFile(subDir, fileName);
 
-		BuildSubdirectory* buildSubdirectory = getBuildSubdirectory(subDir);
-
-		int fileIndex = buildSubdirectory->addFile(fileName);
-
-		if (fileIndex == -1)
-		{
-			msg = tr("File already exists: ") + formatFileName(subDir, fileName);
-
-			LOG_ERROR(m_log, msg);
-
-			return false;
-		}
-
-		QFile file;
-
-		if (createFile(subDir, fileName, file, false) == false)
+		if (buildFile == nullptr)
 		{
 			return false;
 		}
 
-		QTextStream textStream(&file);
-
-		for(auto string : stringList)
-		{
-			textStream << string << "\n";
-		}
-
-		textStream.flush();
-
-		file.seek(0);
-
-		QByteArray data = file.read(MAX_FILE_SIZE);
-
-		if (data.count() == MAX_FILE_SIZE)
-		{
-			assert(false);		// possible need increase MAX_FILE_SIZE
-		}
-
-		file.close();
-
-		buildSubdirectory->setFileInfo(fileIndex, file, data);
-
-		return true;
+		return buildFile->write(m_buildFullPath, stringList, m_log);
 	}
 
 
 	bool BuildResultWriter::createBuildXML()
 	{
-		if (!createFile("", "build.xml", m_buildXMLFile, true))
+		m_buildXMLFile.setFileName(m_buildFullPath + m_separator + "build.xml");
+
+		if (m_buildXMLFile.open(QIODevice::ReadWrite | QIODevice::Text) == false)
 		{
 			m_runBuild = false;
 			return false;
 		}
 
 		m_buildXML.setDevice(&m_buildXMLFile);
+
 		m_buildXML.setAutoFormatting(true);
 
 		m_buildXML.writeStartDocument();
@@ -560,39 +480,32 @@ namespace Builder
 	}
 
 
+	bool BuildResultWriter::writeBuildXML()
+	{
+		return writeFilesSection();
+	}
+
+
 	bool BuildResultWriter::writeFilesSection()
 	{
-		QHashIterator<QString, BuildSubdirectory*> iterator(m_subdirectory);
+		m_buildXML.writeStartElement("files");
+		m_buildXML.writeAttribute("count", QString("%1").arg(m_buildFiles.size()));
 
-		while (iterator.hasNext())
+		for(BuildFile* buildFile : m_buildFiles)
 		{
-			iterator.next();
-
-			m_buildXML.writeStartElement("directory");
-			m_buildXML.writeAttribute("name", iterator.key());
-
-			BuildSubdirectory* buildDirectory = iterator.value();
-
-			for(int i = 0; i < buildDirectory->fileCount(); i++)
+			if (buildFile == nullptr)
 			{
-				BuildFile* file = buildDirectory->file(i);
-
-				if (file == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				m_buildXML.writeStartElement("file");
-
-				m_buildXML.writeAttribute("name", file->name());
-				m_buildXML.writeAttribute("size", QString("%1").arg(file->size()));
-				m_buildXML.writeAttribute("md5", file->md5());
-
-				m_buildXML.writeEndElement();		// file
+				assert(false);
+				continue;
 			}
 
-			m_buildXML.writeEndElement();			// directory
+			m_buildXML.writeStartElement("file");
+
+			m_buildXML.writeAttribute("name", buildFile->pathFileName());
+			m_buildXML.writeAttribute("size", QString("%1").arg(buildFile->size()));
+			m_buildXML.writeAttribute("md5", buildFile->md5());
+
+			m_buildXML.writeEndElement();		// file
 		}
 
 		return true;
@@ -601,9 +514,7 @@ namespace Builder
 
 	bool BuildResultWriter::closeBuildXML()
 	{
-		writeFilesSection();
-
-		m_buildXML.writeEndElement();		// build
+		m_buildXML.writeEndElement();			// build
 		m_buildXML.writeEndDocument();
 
 		m_buildXMLFile.close();
