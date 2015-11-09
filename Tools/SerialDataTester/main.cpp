@@ -4,6 +4,9 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+	QCoreApplication::setOrganizationName("Radiy");
+	QCoreApplication::setApplicationName("Serial Data Tester");
+
 	SerialDataTester w;
 	w.show();
 
