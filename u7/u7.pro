@@ -140,7 +140,10 @@ SOURCES +=\
     ../lib/PropertyEditorOld.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/Types.cpp \
-    Builder/Parser.cpp
+	Builder/Parser.cpp \
+    Connection.cpp \
+    DialogConnectionsEditor.cpp \
+    ../lib/PropertyEditorDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -210,7 +213,11 @@ HEADERS  += \
     ../include/PropertyObject.h \
     ../include/PropertyEditorOld.h \
     ../include/PropertyEditor.h \
-    Builder/Parser.h
+	Builder/Parser.h \
+    Connection.h \
+    DialogConnectionsEditor.h \
+    ../include/PropertyEditorDialog.h
+
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -228,7 +235,8 @@ FORMS    += \
     DialogSubsystemListEditor.ui \
     CreateSchemeDialog.ui \
     ChooseAfbDialog.ui \
-    EquipmentVcsDialog.ui
+    EquipmentVcsDialog.ui \
+    DialogConnectionsEditor.ui
 
 RESOURCES += \
 	Resources.qrc \

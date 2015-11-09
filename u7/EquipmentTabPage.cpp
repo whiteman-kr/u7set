@@ -5,6 +5,7 @@
 #include "CheckInDialog.h"
 #include "Subsystem.h"
 #include "EquipmentVcsDialog.h"
+#include "DialogConnectionsEditor.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -2422,6 +2423,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_SeparatorAction3);
 	m_equipmentView->addAction(m_updateFromPresetAction);
 	m_equipmentView->addAction(m_switchModeAction);
+    m_equipmentView->addAction(m_connectionsAction);
 	m_equipmentView->addAction(m_pendingChangesAction);
 	// -----------------
 	//m_equipmentView->addAction(m_SeparatorAction4);
@@ -2457,6 +2459,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_switchModeAction);
+    m_toolBar->addAction(m_connectionsAction);
 	m_toolBar->addAction(m_pendingChangesAction);
 
 	//
@@ -2636,7 +2639,12 @@ void EquipmentTabPage::CreateActions()
 	connect(m_switchModeAction, &QAction::triggered, m_equipmentModel, &EquipmentModel::switchMode);
 	connect(m_switchModeAction, &QAction::triggered, this, &EquipmentTabPage::modeSwitched);
 
-	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
+    m_connectionsAction = new QAction(tr("Connections..."), this);
+    m_connectionsAction->setStatusTip(tr("Edit connections"));
+    m_connectionsAction->setEnabled(true);
+    connect(m_connectionsAction, &QAction::triggered, this, &EquipmentTabPage::editConnections);
+
+    m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setStatusTip(tr("Show pending changes"));
 	m_pendingChangesAction->setEnabled(true);
 	//connect(m_pendingChangesAction, &QAction::triggered, m_equipmentModel, &EquipmentModel::pendingChanges);
@@ -3060,6 +3068,17 @@ void EquipmentTabPage::modeSwitched()
 	setActionState();
 
 	return;
+}
+
+void EquipmentTabPage::editConnections()
+{
+    if (dbController()->isProjectOpened() == false)
+    {
+        return;
+    }
+
+    DialogConnectionsEditor d(dbController(), this);
+    d.exec();
 }
 
 //void EquipmentTabPage::moduleConfiguration()

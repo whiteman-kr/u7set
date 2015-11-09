@@ -2,12 +2,15 @@
 #define SOURCESTATUSWIDGET_H
 
 #include <QWidget>
+class Source;
+class PacketBufferTableModel;
+class SignalTableModel;
 
 class SourceStatusWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit SourceStatusWidget(QWidget *parent = 0);
+	explicit SourceStatusWidget(Source& source, PacketBufferTableModel* packetBufferModel, SignalTableModel* signalTableModel, QWidget *parent = 0);
 
 signals:
 

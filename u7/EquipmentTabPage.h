@@ -209,6 +209,7 @@ public slots:
 
 	void setActionState();
 	void modeSwitched();
+    void editConnections();
 
 	//void moduleConfiguration();
 
@@ -260,6 +261,7 @@ private:
 	QAction* m_SeparatorAction3 = nullptr;
 	QAction* m_updateFromPresetAction = nullptr;
 	QAction* m_switchModeAction = nullptr;
+    QAction* m_connectionsAction = nullptr;
 	QAction* m_pendingChangesAction = nullptr;
 	QAction* m_SeparatorAction4 = nullptr;
 

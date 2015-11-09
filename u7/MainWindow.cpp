@@ -13,6 +13,7 @@
 #include "SignalsTabPage.h"
 #include "DialogAfblEditor.h"
 #include "DialogSubsystemListEditor.h"
+#include "DialogConnectionsEditor.h"
 #include "BuildTabPage.h"
 
 #include "../VFrame30/VFrame30.h"
@@ -187,12 +188,17 @@ void MainWindow::createActions()
 	m_afblEditorAction->setEnabled(false);
 	connect(m_afblEditorAction, &QAction::triggered, this, &MainWindow::runAfblEditor);
 
-	m_subsystemListEditorAction = new QAction(tr("Subsystem List Editor..."), this);
+    m_subsystemListEditorAction = new QAction(tr("Subsystem List Editor..."), this);
 	m_subsystemListEditorAction->setStatusTip(tr("Run Subsystem List Editor"));
 	m_subsystemListEditorAction->setEnabled(false);
 	connect(m_subsystemListEditorAction, &QAction::triggered, this, &MainWindow::runSubsystemListEditor);
 
-	m_aboutAction = new QAction(tr("About..."), this);
+    m_connectionsEditorAction = new QAction(tr("Connections Editor..."), this);
+    m_connectionsEditorAction->setStatusTip(tr("Run Connections Editor"));
+    m_connectionsEditorAction->setEnabled(false);
+    connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
+
+    m_aboutAction = new QAction(tr("About..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
@@ -227,6 +233,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_configuratorAction);
 	pToolsMenu->addAction(m_afblEditorAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
+    pToolsMenu->addAction(m_connectionsEditorAction);
     pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_settingsAction);
 
@@ -343,6 +350,16 @@ void MainWindow::runSubsystemListEditor()
 	d.exec();
 }
 
+void MainWindow::runConnectionsEditor()
+{
+    if (dbController()->isProjectOpened() == false)
+    {
+        return;
+    }
+
+    DialogConnectionsEditor d(dbController(), this);
+    d.exec();
+}
 void MainWindow::showAbout()
 {
 
@@ -422,6 +439,7 @@ void MainWindow::projectOpened(DbProject project)
 	m_usersAction->setEnabled(true);
 	m_afblEditorAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
+    m_connectionsEditorAction->setEnabled(true);
 
 	// Tab Pages, enable all tab pages
 	//
@@ -446,6 +464,7 @@ void MainWindow::projectClosed()
 	m_usersAction->setEnabled(false);
 	m_afblEditorAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
+    m_connectionsEditorAction->setEnabled(false);
 
 	// Tab Pages, disable all tab pages except the first.
 	//
