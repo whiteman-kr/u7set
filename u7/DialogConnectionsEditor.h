@@ -5,7 +5,18 @@
 #include <QItemDelegate>
 #include "../include/DbController.h"
 #include "../include/PropertyEditor.h"
+#include "../include/PropertyEditorDialog.h"
 #include "Connection.h"
+
+class DialogConnectionsPropertyEditor : public PropertyEditorDialog
+{
+public:
+    DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage* connections);
+
+    virtual bool onPropertiesChanged(std::shared_ptr<PropertyObject> object);
+private:
+    Hardware::ConnectionStorage *m_connections = nullptr;
+};
 
 namespace Ui {
 class DialogConnectionsEditor;
@@ -25,6 +36,7 @@ private:
     bool askForSaveChanged();
     bool checkUniqueConnections();
     bool saveChanges();
+    void updateButtons(bool checkOut);
 
 protected:
     virtual void closeEvent(QCloseEvent* e);
@@ -34,11 +46,11 @@ private slots:
     void on_m_Remove_clicked();
     void on_m_OK_clicked();
     void on_m_Cancel_clicked();
-
     void on_m_Edit_clicked();
-
     void on_m_list_doubleClicked(const QModelIndex &index);
-
+    void on_m_checkOut_clicked();
+    void on_m_checkIn_clicked();
+    void on_m_Undo_clicked();
 private:
     Ui::DialogConnectionsEditor *ui;
 
@@ -47,7 +59,7 @@ private:
     DbController* db();
     DbController* m_dbController;
 
-    Hardware::ConnectionStorage m_connections;
+    Hardware::ConnectionStorage* m_connections;
 };
 
 #endif // DIALOGCONNECTIONSEDITOR_H
