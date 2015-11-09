@@ -4,6 +4,43 @@
 
 //
 //
+// DialogConnectionsPropertyEditor
+//
+//
+
+DialogConnectionsPropertyEditor::DialogConnectionsPropertyEditor(std::shared_ptr<PropertyObject> object, QWidget *parent, Hardware::ConnectionStorage *connections)
+    :PropertyEditorDialog(object, parent)
+{
+    m_connections = connections;
+}
+
+bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<PropertyObject> object)
+{
+    if (m_connections == nullptr)
+    {
+        assert(m_connections);
+        return false;
+    }
+
+    Hardware::Connection* c = dynamic_cast<Hardware::Connection*>(object.get());
+    if (c == nullptr)
+    {
+        assert(c);
+        return false;
+    }
+
+    bool uniqueConnections = m_connections->checkUniqueConnections(c);
+    if (uniqueConnections == false)
+    {
+        QMessageBox::warning(this, "Connections Editor", "Duplicate string identifiers and port numbers found! Please correct the errors.");
+        return false;
+    }
+    return true;
+}
+
+
+//
+//
 // DialogConnectionsEditor
 //
 //
@@ -14,6 +51,8 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     ui(new Ui::DialogConnectionsEditor)
 {
     assert(db());
+
+    m_connections = new Hardware::ConnectionStorage(db(), this);
 
     ui->setupUi(this);
 
@@ -41,12 +80,13 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
     QString errorCode;
 
-    if (m_connections.load(db(), errorCode) == false)
+    if (m_connections->load(errorCode) == false)
     {
         QMessageBox::critical(this, QString("Error"), tr("Can't load connections!"));
         return;
     }
 
+    updateButtons(m_connections->isCheckedOut());
     fillConnectionsList();
 }
 
@@ -59,9 +99,9 @@ void DialogConnectionsEditor::fillConnectionsList()
 {
     ui->m_list->clear();
 
-    for (int i = 0; i < m_connections.count(); i++)
+    for (int i = 0; i < m_connections->count(); i++)
     {
-        std::shared_ptr<Hardware::Connection> connection = m_connections.get(i);
+        std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
         if (connection == nullptr)
         {
             assert(connection);
@@ -73,7 +113,7 @@ void DialogConnectionsEditor::fillConnectionsList()
                                                     connection->device1StrID() <<
                                                     QString::number(connection->device1Port()) <<
                                                     connection->device2StrID() <<
-                                                    QString::number(connection->device2Port()) <<
+                                                        QString::number(connection->device2Port()) <<
                                                     (connection->connectionMode() == Hardware::Connection::ConnectionMode::ModeRS232 ? "RS-232" : "RS-485") <<
                                                     (connection->enable() ? "true" : "false"));
         item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
@@ -89,7 +129,6 @@ bool DialogConnectionsEditor::askForSaveChanged()
     }
 
     QMessageBox::StandardButton result = QMessageBox::warning(this, "Connections Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-
     if (result == QMessageBox::Yes)
     {
         if (saveChanges() == false)
@@ -109,31 +148,9 @@ bool DialogConnectionsEditor::askForSaveChanged()
 
 bool DialogConnectionsEditor::saveChanges()
 {
-    bool uniqueConnections = m_connections.checkUniqueConnections();
-    if (uniqueConnections == false)
-    {
-        QMessageBox::warning(this, "Connections Editor", "Duplicate string identifiers and port numbers found! Please correct the errors.");
-        return false;
-    }
-
-    bool ok;
-    QString comment = QInputDialog::getText(this, tr("Connections Editor"),
-                                            tr("Please enter comment:"), QLineEdit::Normal,
-                                            tr("comment"), &ok);
-
-    if (ok == false)
-    {
-        return false;
-    }
-    if (comment.isEmpty())
-    {
-        QMessageBox::warning(this, "Connections Editor", "No comment supplied!");
-        return false;
-    }
-
     // save to db
     //
-    if (m_connections.save(db(), comment) == false)
+    if (m_connections->save() == false)
     {
         QMessageBox::critical(this, QString("Error"), tr("Can't save connections."));
         return false;
@@ -142,6 +159,17 @@ bool DialogConnectionsEditor::saveChanges()
     m_modified = false;
 
     return true;
+}
+
+void DialogConnectionsEditor::updateButtons(bool checkOut)
+{
+    ui->m_Add->setEnabled(checkOut == true);
+    ui->m_Edit->setEnabled(checkOut == true);
+    ui->m_Remove->setEnabled(checkOut == true);
+    ui->m_checkIn->setEnabled(checkOut == true);
+    ui->m_checkOut->setEnabled(checkOut == false);
+    ui->m_Undo->setEnabled(checkOut == true);
+    ui->m_OK->setEnabled(checkOut == true);
 }
 
 void DialogConnectionsEditor::closeEvent(QCloseEvent* e)
@@ -171,7 +199,14 @@ void DialogConnectionsEditor::on_m_Add_clicked()
         assert(connection);
         return;
     }
-    m_connections.add(connection);
+    connection->setCaption("New Connection");
+    connection->setDevice1StrID("DEVICE1_STRID");
+    connection->setDevice1Port(1);
+    connection->setDevice2StrID("DEVICE2_STRID");
+    connection->setDevice2Port(2);
+    connection->setEnable(true);
+
+    m_connections->add(connection);
 
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                 connection->caption() <<
@@ -217,7 +252,7 @@ void DialogConnectionsEditor::on_m_Edit_clicked()
     std::shared_ptr<Hardware::Connection> editConnection = std::make_shared<Hardware::Connection>();
     *editConnection = *connection;
 
-    PropertyEditorDialog* pd = new PropertyEditorDialog(editConnection, this);
+    DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, m_connections);
 
     if (pd->exec() == QDialog::Accepted)
     {
@@ -253,7 +288,7 @@ void DialogConnectionsEditor::on_m_Remove_clicked()
         assert(connection);
         return;
     }
-    m_connections.remove(connection);
+    m_connections->remove(connection);
 
     fillConnectionsList();
     if (ui->m_list->topLevelItemCount() > 0 && selectedIndex >= 0)
@@ -291,5 +326,85 @@ void DialogConnectionsEditor::on_m_Cancel_clicked()
 void DialogConnectionsEditor::on_m_list_doubleClicked(const QModelIndex &index)
 {
     Q_UNUSED(index);
-    on_m_Edit_clicked();
+    if (ui->m_Edit->isEnabled() == true)
+    {
+        on_m_Edit_clicked();
+    }
+}
+
+void DialogConnectionsEditor::on_m_checkOut_clicked()
+{
+    if (m_connections->checkOut() == false)
+    {
+        QMessageBox::critical(this, "Connections Editor", "Check out error!");
+        return;
+    }
+
+    updateButtons(true);
+}
+
+
+void DialogConnectionsEditor::on_m_checkIn_clicked()
+{
+    bool ok;
+    QString comment = QInputDialog::getText(this, tr("Connections Editor"),
+                                            tr("Please enter comment:"), QLineEdit::Normal,
+                                            tr("comment"), &ok);
+
+    if (ok == false)
+    {
+        return;
+    }
+    if (comment.isEmpty())
+    {
+        QMessageBox::warning(this, "Connections Editor", "No comment supplied!");
+        return;
+    }
+
+    if (m_modified == true)
+    {
+        if (saveChanges() == false)
+        {
+            return;
+        }
+    }
+
+    if (m_connections->checkIn(comment) == false)
+    {
+        QMessageBox::critical(this, "Connections Editor", "Check in error!");
+        return;
+    }
+
+    updateButtons(false);
+}
+
+void DialogConnectionsEditor::on_m_Undo_clicked()
+{
+    QMessageBox::StandardButton result = QMessageBox::warning(this, "Connections Editor", "Are you sure you want to undo the changes?", QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::No)
+    {
+        return;
+    }
+
+    if (m_connections->undo() == false)
+    {
+        QMessageBox::critical(this, "Connections Editor", "Undo error!");
+        return;
+    }
+
+    m_modified = false;
+
+    updateButtons(false);
+
+    QString errorCode;
+
+    // Load the unmodified file
+    //
+    if (m_connections->load(errorCode) == false)
+    {
+        QMessageBox::critical(this, QString("Error"), tr("Can't load connections!"));
+        return;
+    }
+
+    fillConnectionsList();
 }

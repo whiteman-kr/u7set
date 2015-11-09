@@ -215,8 +215,11 @@ namespace Hardware
     //
     //
 
-    ConnectionStorage::ConnectionStorage()
+    ConnectionStorage::ConnectionStorage(DbController* db, QObject *parent)
+        :QObject(parent),
+        m_db(db)
     {
+        assert(m_db);
 
     }
 
@@ -294,57 +297,69 @@ namespace Hardware
         m_connections.clear();
     }
 
-    bool ConnectionStorage::checkUniqueConnections()
+    bool ConnectionStorage::checkUniqueConnections(Connection* editObject)
     {
-        for (std::shared_ptr<Hardware::Connection> c1 : m_connections)
+        if (editObject->device1StrID() == editObject->device2StrID() && editObject->device1Port() == editObject->device2Port())
         {
-            if (c1->device1StrID() == c1->device2StrID() && c1->device1Port() == c1->device2Port())
+            return false;
+        }
+
+        for (std::shared_ptr<Hardware::Connection> c : m_connections)
+        {
+            if (editObject->index() == c->index())
+            {
+                continue;
+            }
+
+            if (editObject->device1StrID() == c->device1StrID() && editObject->device1Port() == c->device1Port())
             {
                 return false;
             }
 
-            for (std::shared_ptr<Hardware::Connection> c2 : m_connections)
+            if (editObject->device1StrID() == c->device2StrID() && editObject->device1Port() == c->device2Port())
             {
-                if (c1->index() == c2->index())
-                {
-                    continue;
-                }
-
-                if (c1->device1StrID() == c2->device1StrID() && c1->device1Port() == c2->device1Port())
-                {
-                    return false;
-                }
-
-                if (c1->device1StrID() == c2->device2StrID() && c1->device1Port() == c2->device2Port())
-                {
-                    return false;
-                }
+                return false;
             }
         }
 
         return true;
     }
 
-    bool ConnectionStorage::load(DbController *db, QString& errorCode)
+    bool ConnectionStorage::load(QString& errorCode)
     {
-        if (db == nullptr)
+        if (m_db == nullptr)
         {
-            assert(db);
+            assert(m_db);
             return false;
         }
 
         // Load the file from the database
         //
+        m_connections.clear();
 
         std::vector<DbFileInfo> fileList;
-        bool ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
+        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), fileName, true, nullptr);
         if (ok == false || fileList.size() != 1)
         {
-            return false;
+            // create a file, if it does not exists
+            //
+            std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
+            pf->setFileName(fileName);
+
+            if (m_db->addFile(pf, m_db->mcFileId(), nullptr) == false)
+            {
+                return false;
+            }
+
+            // save the empty file structure and exit
+            //
+            save();
+
+            return true;
         }
 
         std::shared_ptr<DbFile> file = nullptr;
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
+        ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
         if (ok == false || file == nullptr)
         {
             return false;
@@ -395,11 +410,11 @@ namespace Hardware
         return !reader.hasError();
     }
 
-    bool ConnectionStorage::save(DbController *db, const QString& comment)
+    bool ConnectionStorage::save()
     {
-        if (db == nullptr)
+        if (m_db == nullptr)
         {
-            assert(db);
+            assert(m_db);
             return false;
         }
 
@@ -428,28 +443,14 @@ namespace Hardware
 
         std::vector<DbFileInfo> fileList;
 
-        bool ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
+        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), fileName, true, nullptr);
 
         if (ok == false || fileList.size() != 1)
         {
-            // create a file, if it does not exists
-            //
-            std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
-            pf->setFileName(fileName);
-
-            if (db->addFile(pf, db->mcFileId(), nullptr) == false)
-            {
-                return false;
-            }
-
-            ok = db->getFileList(&fileList, db->mcFileId(), fileName, true, nullptr);
-            if (ok == false || fileList.size() != 1)
-            {
-                return false;
-            }
+            return false;
         }
 
-        ok = db->getLatestVersion(fileList[0], &file, nullptr);
+        ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
         if (ok == false || file == nullptr)
         {
             return false;
@@ -457,20 +458,12 @@ namespace Hardware
 
         if (file->state() != VcsState::CheckedOut)
         {
-            if (db->checkOut(fileList[0], nullptr) == false)
-            {
-                return false;
-            }
+            return false;
         }
 
         file->swapData(data);
 
-        if (db->setWorkcopy(file, nullptr) == false)
-        {
-            return false;
-        }
-
-        if (db->checkIn(fileList[0], comment, nullptr) == false)
+        if (m_db->setWorkcopy(file, nullptr) == false)
         {
             return false;
         }
@@ -478,5 +471,144 @@ namespace Hardware
         return true;
     }
 
+    bool ConnectionStorage::checkOut()
+    {
+        if (m_db == nullptr)
+        {
+            assert(m_db);
+            return false;
+        }
+        std::shared_ptr<DbFile> file = nullptr;
+
+        std::vector<DbFileInfo> fileList;
+
+        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), fileName, true, nullptr);
+        if (ok == false || fileList.size() != 1)
+        {
+            return false;
+        }
+
+        ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
+        if (ok == false || file == nullptr)
+        {
+            return false;
+        }
+
+        if (file->state() == VcsState::CheckedOut)
+        {
+            return false;
+        }
+
+        if (m_db->checkOut(fileList[0], nullptr) == false)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool ConnectionStorage::checkIn(const QString& comment)
+    {
+        if (m_db == nullptr)
+        {
+            assert(m_db);
+            return false;
+        }
+        std::shared_ptr<DbFile> file = nullptr;
+
+        std::vector<DbFileInfo> fileList;
+
+        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), fileName, true, nullptr);
+        if (ok == false || fileList.size() != 1)
+        {
+            return false;
+        }
+
+        ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
+        if (ok == false || file == nullptr)
+        {
+            return false;
+        }
+
+        if (file->state() != VcsState::CheckedOut)
+        {
+            return false;
+        }
+
+        if (m_db->checkIn(fileList[0], comment, nullptr) == false)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool ConnectionStorage::undo()
+    {
+        if (m_db == nullptr)
+        {
+            assert(m_db);
+            return false;
+        }
+        std::shared_ptr<DbFile> file = nullptr;
+
+        std::vector<DbFileInfo> fileList;
+
+        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), fileName, true, nullptr);
+        if (ok == false || fileList.size() != 1)
+        {
+            return false;
+        }
+
+        ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
+        if (ok == false || file == nullptr)
+        {
+            return false;
+        }
+
+        if (file->state() != VcsState::CheckedOut)
+        {
+            return false;
+        }
+
+        if (m_db->undoChanges(fileList[0], nullptr) == false)
+        {
+            return false;
+        }
+
+        return true;
+
+    }
+
+    bool ConnectionStorage::isCheckedOut()
+    {
+        if (m_db == nullptr)
+        {
+            assert(m_db);
+            return false;
+        }
+        std::shared_ptr<DbFile> file = nullptr;
+
+        std::vector<DbFileInfo> fileList;
+
+        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), fileName, true, nullptr);
+        if (ok == false || fileList.size() != 1)
+        {
+            return false;
+        }
+
+        ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
+        if (ok == false || file == nullptr)
+        {
+            return false;
+        }
+
+        if (file->state() != VcsState::CheckedOut)
+        {
+            return false;
+        }
+
+        return true;
+    }
 }
 

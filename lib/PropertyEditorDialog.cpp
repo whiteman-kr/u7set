@@ -8,9 +8,11 @@
 PropertyEditorDialog::PropertyEditorDialog(std::shared_ptr<PropertyObject> object, QWidget* parent)
     :QDialog(parent)
 {
+    m_object = object;
+
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-    connect(buttonBox, &QDialogButtonBox::accepted, this, &PropertyEditorDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &PropertyEditorDialog::onOk);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &PropertyEditorDialog::reject);
 
     ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
@@ -23,4 +25,18 @@ PropertyEditorDialog::PropertyEditorDialog(std::shared_ptr<PropertyObject> objec
     mainLayout->addWidget(pe);
     mainLayout->addWidget(buttonBox);
     setLayout(mainLayout);
+}
+
+bool PropertyEditorDialog::onPropertiesChanged(std::shared_ptr<PropertyObject> object)
+{
+    Q_UNUSED(object);
+    return true;
+}
+
+void PropertyEditorDialog::onOk()
+{
+    if (onPropertiesChanged(m_object) == true)
+    {
+        accept();
+    }
 }
