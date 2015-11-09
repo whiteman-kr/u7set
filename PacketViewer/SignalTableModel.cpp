@@ -202,7 +202,7 @@ template<typename TYPE>
 TYPE SignalTableModel::getAdc(const Signal& signal) const
 {
 	int size = signal.dataSize();
-	int sizeBytes = size / 8 + (size % 8 > 0) ? 1 : 0;
+	int sizeBytes = size / 8 + ((size % 8 > 0) ? 1 : 0);
 	if (static_cast<size_t>(sizeBytes) > sizeof(TYPE))
 	{
 		return 0;
