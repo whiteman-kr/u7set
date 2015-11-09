@@ -1,6 +1,7 @@
 #ifndef SERIALDATATESTER_H
 #define SERIALDATATESTER_H
 
+#include "SettingsDialog.h"
 #include <QMainWindow>
 #include <QXmlReader>
 #include <QPixmap>
@@ -18,23 +19,16 @@ public:
 	virtual ~SerialDataTester();
 
 private slots:
-		//void reloadConfig();
+		void reloadConfig();
 		void parseFile();
 
 private:
 	Ui::SerialDataTester *ui;
 
-	/*QMenu* m_file = nullptr;
-	QAction* m_reloadCfg = nullptr;*/
+	SettingsDialog* m_applicationSettingsDialog;
 
-	QMenu* m_settingsMenu = nullptr;
-	QAction* m_setComPort = nullptr;
-
-	QMenu* m_setPortBaud = nullptr;
-	QAction* m_baud115200 = nullptr;
-	QAction* m_baud57600 = nullptr;
-	QAction* m_baud38400 = nullptr;
-	QAction* m_baud19200 = nullptr;
+	QMenu* m_file;
+	QAction* m_reloadCfg;
 
 	struct SignalData
 	{
@@ -45,16 +39,14 @@ private:
 		QString type;
 	};
 
-	struct Columns
+	enum Columns
 	{
-		int strId = 0;
-		int caption = 1;
-		int offset = 2;
-		int bit = 3;
-		int type = 4;
+		strId,
+		caption,
+		offset,
+		bit,
+		type
 	};
-
-	Columns tableColumns;
 
 	QVector<SignalData> signalsFromXml;
 };

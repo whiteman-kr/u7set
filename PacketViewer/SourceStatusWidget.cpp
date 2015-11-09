@@ -14,6 +14,7 @@ SourceStatusWidget::SourceStatusWidget(Source &source, PacketBufferTableModel *p
 
 	QCheckBox* cb = new QCheckBox("Change byte order", this);
 	connect(cb, &QCheckBox::toggled, packetBufferModel, &PacketBufferTableModel::setNeedToSwapBytes);
+	connect(cb, &QCheckBox::toggled, signalTableModel, &SignalTableModel::setNeedToSwapBytes);
 	cb->setChecked(true);
 	QVBoxLayout* vl = new QVBoxLayout;
 	vl->addWidget(cb);

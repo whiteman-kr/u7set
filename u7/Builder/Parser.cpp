@@ -820,33 +820,37 @@ namespace Builder
 
 		// Get module, if it is not in the list, add it
 		//
-		std::shared_ptr<AppLogicModule> module;
+		QStringList moduleStrIdList = scheme->hardwareStrIdList();
+		bool result = true;
 
-		QString moduleStrId = scheme->hardwareStrIds();
+		for (QString moduleStrId : moduleStrIdList)
+		{
+			std::shared_ptr<AppLogicModule> module;
 
-		auto moduleIt = std::find_if(m_modules.begin(), m_modules.end(),
-			[&moduleStrId](const std::shared_ptr<AppLogicModule>& m)
+			auto moduleIt = std::find_if(m_modules.begin(), m_modules.end(),
+										 [&moduleStrId](const std::shared_ptr<AppLogicModule>& m)
 			{
 				return m->moduleStrId() == moduleStrId;
 			});
 
-		if (moduleIt == m_modules.end())
-		{
-			// Module was not found, addit
+			if (moduleIt == m_modules.end())
+			{
+				// Module was not found, addit
+				//
+				module = std::make_shared<AppLogicModule>(moduleStrId);
+				m_modules.push_back(module);
+			}
+			else
+			{
+				module = *moduleIt;
+			}
+
+			assert(module);
+
+			// add new branch to module
 			//
-			module = std::make_shared<AppLogicModule>(moduleStrId);
-			m_modules.push_back(module);
+			result &= module->addBranch(scheme, bushContainer, afbCollection, log);
 		}
-		else
-		{
-			module = *moduleIt;
-		}
-
-		assert(module);
-
-		// add new branch to module
-		//
-		bool result = module->addBranch(scheme, bushContainer, afbCollection,log);
 
 		return result;
 	}
@@ -950,7 +954,7 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, scheme->caption());
 
-			ok = compileAppLogicScheme(scheme);
+			ok = parseAppLogicScheme(scheme);
 
 			if (ok == false)
 			{
@@ -958,7 +962,7 @@ namespace Builder
 			}
 		}
 
-		// The result is set of ApplicationLogicModule (m_modules), but items are not ordered yet
+		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
 		//
 		LOG_MESSAGE(m_log, tr("Ordering items..."));
@@ -1060,7 +1064,7 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::compileAppLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme)
+	bool Parser::parseAppLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme)
 	{
 		if (logicScheme.get() == nullptr)
 		{
@@ -1078,14 +1082,14 @@ namespace Builder
 			if (l->compile() == true)
 			{
 				layerFound = true;
-				ok = compileAppLogicLayer(logicScheme, l);
+				ok = parseAppLogicLayer(logicScheme, l);
 
 				if (ok == false)
 				{
 					return false;
 				}
 
-				// We can compile only one layer
+				// We can parse only one layer
 				//
 				break;
 			}
@@ -1100,7 +1104,7 @@ namespace Builder
 		return true;
 	}
 
-	bool Parser::compileAppLogicLayer(
+	bool Parser::parseAppLogicLayer(
 		std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 		std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{

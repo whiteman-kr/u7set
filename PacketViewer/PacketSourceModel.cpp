@@ -430,6 +430,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 {
 	RpPacket& packet = *reinterpret_cast<RpPacket*>(buffer);
 	RpPacketHeader& header = packet.Header;
+	swapHeader(header);
 	incrementPacketReceivedCount();
 	if (readBytes != header.packetSize)
 	{
@@ -476,4 +477,24 @@ void Source::removeDependentWidget(QObject* object)
 			dependentWidgets.erase(dependentWidgets.begin() + i);
 		}
 	}
+}
+
+void Source::swapHeader(RpPacketHeader &header)
+{
+	swapBytes(header.packetSize);
+	swapBytes(header.protocolVersion);
+	swapBytes(header.flags);
+	swapBytes(header.moduleFactoryNo);
+	swapBytes(header.moduleType);
+	swapBytes(header.subblockID);
+	swapBytes(header.packetNo);
+	swapBytes(header.partCount);
+	swapBytes(header.partNo);
+	swapBytes(header.TimeStamp.hour);
+	swapBytes(header.TimeStamp.Minute);
+	swapBytes(header.TimeStamp.Second);
+	swapBytes(header.TimeStamp.Millisecond);
+	swapBytes(header.TimeStamp.day);
+	swapBytes(header.TimeStamp.month);
+	swapBytes(header.TimeStamp.year);
 }

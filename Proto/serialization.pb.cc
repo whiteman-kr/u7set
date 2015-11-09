@@ -664,9 +664,8 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItemLine));
   SchemeItemSignal_descriptor_ = file->message_type(26);
-  static const int SchemeItemSignal_offsets_[2] = {
+  static const int SchemeItemSignal_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItemSignal, signalstrids_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemeItemSignal, multichannel_),
   };
   SchemeItemSignal_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1290,53 +1289,52 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n\ttextColor\030\004 "
     "\002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.FontParam\"0\n\013F"
     "blItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030"
-    "\002 \002(\r\"U\n\020SchemeItemSignal\022$\n\014signalStrID"
-    "s\030\001 \003(\0132\016.Proto.wstring\022\033\n\014multiChannel\030"
-    "\002 \001(\010:\005false\"\021\n\017SchemeItemInput\"\022\n\020Schem"
-    "eItemOutput\"\020\n\016SchemeItemLink\"R\n\rSchemeI"
-    "temAfb\022\037\n\006params\030\002 \003(\0132\017.Proto.AfbParam\022"
-    " \n\010afbStrid\030\003 \001(\0132\016.Proto.wstring\"N\n\017Sch"
-    "emeItemConst\022\017\n\004type\030\001 \001(\005:\0010\022\023\n\010intValu"
-    "e\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001(\001:\0010\"\273\005\n\014De"
-    "viceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\035\n"
-    "\005strId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030"
-    "\003 \002(\0132\016.Proto.wstring\022(\n\020childRestrictio"
-    "n\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001(\005:\001"
-    "0\022!\n\031dynamic_properties_struct\030\006 \001(\t\022#\n\n"
-    "properties\030\007 \003(\0132\017.Proto.Property\022\025\n\006pre"
-    "set\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010:\005fa"
-    "lse\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstring\022"
-    "%\n\020presetObjectUuid\030# \001(\0132\013.Proto.Uuid\022\037"
-    "\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006Syste"
-    "m\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack\030f \001"
-    "(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001(\0132\024"
-    ".Proto.DeviceChassis\022#\n\006Module\030h \001(\0132\023.P"
-    "roto.DeviceModule\022+\n\nController\030i \001(\0132\027."
-    "Proto.DeviceController\022#\n\006Signal\030j \001(\0132\023"
-    ".Proto.DeviceSignal\022\'\n\013Workstation\030k \001(\013"
-    "2\022.Proto.Workstation\022!\n\010Software\030l \001(\0132\017"
-    ".Proto.Software\"\014\n\nDeviceRoot\"\016\n\014DeviceS"
-    "ystem\"\014\n\nDeviceRack\" \n\rDeviceChassis\022\017\n\004"
-    "type\030\001 \001(\005:\0010\"\037\n\014DeviceModule\022\017\n\004type\030\001 "
-    "\001(\005:\0010\"\022\n\020DeviceController\"\347\001\n\014DeviceSig"
-    "nal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyteOrde"
-    "r\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 "
-    "\001(\005:\0010\022\031\n\016validityOffset\030\005 \001(\005:\0010\022\026\n\013val"
-    "idityBit\030\006 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\001"
-    "0\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022"
-    "\023\n\010function\030\n \001(\005:\0010\"\036\n\013Workstation\022\017\n\004t"
-    "ype\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\001"
-    "0\"r\n\023ModuleConfiguration\022\032\n\022struct_descr"
-    "iption\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.Mod"
-    "uleConfigurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n"
-    "\030ModuleConfigurationValue\022\014\n\004name\030\001 \002(\t\022"
-    "\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t"
-    "\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUnit\022\013\n\007Display"
-    "\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connecti"
-    "onDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rF"
-    "blSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:"
-    "\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSign"
-    "edInt\020\001\022\t\n\005Float\020\002", 5978);
+    "\002 \002(\r\"8\n\020SchemeItemSignal\022$\n\014signalStrID"
+    "s\030\001 \003(\0132\016.Proto.wstring\"\021\n\017SchemeItemInp"
+    "ut\"\022\n\020SchemeItemOutput\"\020\n\016SchemeItemLink"
+    "\"R\n\rSchemeItemAfb\022\037\n\006params\030\002 \003(\0132\017.Prot"
+    "o.AfbParam\022 \n\010afbStrid\030\003 \001(\0132\016.Proto.wst"
+    "ring\"N\n\017SchemeItemConst\022\017\n\004type\030\001 \001(\005:\0010"
+    "\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001("
+    "\001:\0010\"\273\005\n\014DeviceObject\022\031\n\004uuid\030\001 \002(\0132\013.Pr"
+    "oto.Uuid\022\035\n\005strId\030\002 \002(\0132\016.Proto.wstring\022"
+    "\037\n\007caption\030\003 \002(\0132\016.Proto.wstring\022(\n\020chil"
+    "dRestriction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005pl"
+    "ace\030\005 \001(\005:\0010\022!\n\031dynamic_properties_struc"
+    "t\030\006 \001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Prop"
+    "erty\022\025\n\006preset\030  \001(\010:\005false\022\031\n\npresetRoo"
+    "t\030! \001(\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.Pro"
+    "to.wstring\022%\n\020presetObjectUuid\030# \001(\0132\013.P"
+    "roto.Uuid\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRo"
+    "ot\022#\n\006System\030e \001(\0132\023.Proto.DeviceSystem\022"
+    "\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chas"
+    "sis\030g \001(\0132\024.Proto.DeviceChassis\022#\n\006Modul"
+    "e\030h \001(\0132\023.Proto.DeviceModule\022+\n\nControll"
+    "er\030i \001(\0132\027.Proto.DeviceController\022#\n\006Sig"
+    "nal\030j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Workst"
+    "ation\030k \001(\0132\022.Proto.Workstation\022!\n\010Softw"
+    "are\030l \001(\0132\017.Proto.Software\"\014\n\nDeviceRoot"
+    "\"\016\n\014DeviceSystem\"\014\n\nDeviceRack\" \n\rDevice"
+    "Chassis\022\017\n\004type\030\001 \001(\005:\0010\"\037\n\014DeviceModule"
+    "\022\017\n\004type\030\001 \001(\005:\0010\"\022\n\020DeviceController\"\347\001"
+    "\n\014DeviceSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022"
+    "\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010"
+    "\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016validityOffset\030\005 \001("
+    "\005:\0010\022\026\n\013validityBit\030\006 \001(\005:\0010\022\026\n\013valueOff"
+    "set\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004typ"
+    "e\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\"\036\n\013Works"
+    "tation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004t"
+    "ype\030\001 \001(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022s"
+    "truct_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132"
+    "\037.Proto.ModuleConfigurationValue\022\016\n\004name"
+    "\030\003 \001(\t:\000\"7\n\030ModuleConfigurationValue\022\014\n\004"
+    "name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n"
+    "\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*3\n\nSchemeUnit"
+    "\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*"
+    "-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Ou"
+    "tput\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010D"
+    "iscrete\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedIn"
+    "t\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 5949);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -11556,7 +11554,6 @@ void FblItemLine::Swap(FblItemLine* other) {
 
 #ifndef _MSC_VER
 const int SchemeItemSignal::kSignalStrIDsFieldNumber;
-const int SchemeItemSignal::kMultiChannelFieldNumber;
 #endif  // !_MSC_VER
 
 SchemeItemSignal::SchemeItemSignal()
@@ -11575,7 +11572,6 @@ SchemeItemSignal::SchemeItemSignal(const SchemeItemSignal& from)
 
 void SchemeItemSignal::SharedCtor() {
   _cached_size_ = 0;
-  multichannel_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -11610,9 +11606,6 @@ SchemeItemSignal* SchemeItemSignal::New() const {
 }
 
 void SchemeItemSignal::Clear() {
-  if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
-    multichannel_ = false;
-  }
   signalstrids_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -11635,22 +11628,6 @@ bool SchemeItemSignal::MergePartialFromCodedStream(
           goto handle_uninterpreted;
         }
         if (input->ExpectTag(10)) goto parse_signalStrIDs;
-        if (input->ExpectTag(16)) goto parse_multiChannel;
-        break;
-      }
-
-      // optional bool multiChannel = 2 [default = false];
-      case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_multiChannel:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &multichannel_)));
-          set_has_multichannel();
-        } else {
-          goto handle_uninterpreted;
-        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -11679,11 +11656,6 @@ void SchemeItemSignal::SerializeWithCachedSizes(
       1, this->signalstrids(i), output);
   }
 
-  // optional bool multiChannel = 2 [default = false];
-  if (has_multichannel()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->multichannel(), output);
-  }
-
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -11699,11 +11671,6 @@ void SchemeItemSignal::SerializeWithCachedSizes(
         1, this->signalstrids(i), target);
   }
 
-  // optional bool multiChannel = 2 [default = false];
-  if (has_multichannel()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->multichannel(), target);
-  }
-
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -11714,13 +11681,6 @@ void SchemeItemSignal::SerializeWithCachedSizes(
 int SchemeItemSignal::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
-    // optional bool multiChannel = 2 [default = false];
-    if (has_multichannel()) {
-      total_size += 1 + 1;
-    }
-
-  }
   // repeated .Proto.wstring signalStrIDs = 1;
   total_size += 1 * this->signalstrids_size();
   for (int i = 0; i < this->signalstrids_size(); i++) {
@@ -11755,11 +11715,6 @@ void SchemeItemSignal::MergeFrom(const ::google::protobuf::Message& from) {
 void SchemeItemSignal::MergeFrom(const SchemeItemSignal& from) {
   GOOGLE_CHECK_NE(&from, this);
   signalstrids_.MergeFrom(from.signalstrids_);
-  if (from._has_bits_[1 / 32] & (0xffu << (1 % 32))) {
-    if (from.has_multichannel()) {
-      set_multichannel(from.multichannel());
-    }
-  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -11786,7 +11741,6 @@ bool SchemeItemSignal::IsInitialized() const {
 void SchemeItemSignal::Swap(SchemeItemSignal* other) {
   if (other != this) {
     signalstrids_.Swap(&other->signalstrids_);
-    std::swap(multichannel_, other->multichannel_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
