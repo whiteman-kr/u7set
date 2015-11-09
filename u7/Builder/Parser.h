@@ -132,13 +132,6 @@ namespace Builder
 			Iter end,
 			const QUuid& inputGuid);
 
-//		template<typename Iter>
-//		std::list<std::shared_ptr<VFrame30::FblItemRect>> getItemsWithInput(
-//			Iter begin,
-//			Iter end,
-//			const std::list<QUuid>& inputGuids);
-
-
 	public:
 		QString moduleStrId() const;
 		void setModuleStrId(QString value);
@@ -210,12 +203,12 @@ namespace Builder
 		bool build();
 
 	protected:
-		bool loadApplicationLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out);
+		bool loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out);
 
-		bool compileApplicationLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme);
+		bool compileAppLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme);
 
-		bool compileApplicationLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
-										  std::shared_ptr<VFrame30::SchemeLayer> layer);
+		bool compileAppLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+								  std::shared_ptr<VFrame30::SchemeLayer> layer);
 
 		bool findBushes(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 						std::shared_ptr<VFrame30::SchemeLayer> layer,
