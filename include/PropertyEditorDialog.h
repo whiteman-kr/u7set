@@ -7,7 +7,16 @@
 class PropertyEditorDialog : public QDialog
 {
 public:
-    PropertyEditorDialog(std::shared_ptr<PropertyObject>, QWidget *parent);
+    PropertyEditorDialog(std::shared_ptr<PropertyObject> object, QWidget *parent);
+
+protected:
+    virtual bool onPropertiesChanged(std::shared_ptr<PropertyObject> object);
+
+private slots:
+    void onOk();
+
+private:
+    std::shared_ptr<PropertyObject> m_object;
 
 };
 

@@ -107,7 +107,7 @@ namespace Hardware
 
     public:
 
-        ConnectionStorage();
+        ConnectionStorage(DbController* db, QObject* parent);
 
         void add(std::shared_ptr<Connection> connection);
         bool remove(std::shared_ptr<Connection> connection);
@@ -115,14 +115,21 @@ namespace Hardware
         int count() const;
         std::shared_ptr<Connection> get(int index) const;
         void clear();
-        bool checkUniqueConnections();
+        bool checkUniqueConnections(Connection *editObject);
 
-        bool load(DbController* db, QString &errorCode);
-        bool save(DbController* db, const QString &comment);
+        bool load(QString &errorCode);
+        bool save();
+
+        bool checkOut();
+        bool checkIn(const QString &comment);
+        bool undo();
+        bool isCheckedOut();
 
     private:
         std::vector<std::shared_ptr<Connection>> m_connections;
         const QString fileName = "Connections.xml";
+
+        DbController* m_db;
 
     };
 }
