@@ -631,9 +631,9 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
-		int susbsysID = m_subsystems->ssKey(subsysStrID);
+		int subsysID = m_subsystems->ssKey(subsysStrID);
 
-		if (susbsysID == -1)
+		if (subsysID == -1)
 		{
 			LOG_ERROR(m_log, QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(lmCaption));
 
@@ -642,7 +642,18 @@ namespace Builder
 
 		bool result = true;
 
-		Hardware::ModuleFirmware moduleFirmware;
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmCaption, frameSize, frameCount);
+
+		if (multichannelFile != nullptr)
+		{
+			result = multichannelFile->setChannelData(channel, frameSize, frameCount, appLogicBinCode);
+		}
+		else
+		{
+			result = false;
+		}
+
+/*		Hardware::ModuleFirmware moduleFirmware;
 
 		moduleFirmware.init(lmCaption, subsysStrID, susbsysID, 0x0101, frameSize, frameCount,
 						 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
@@ -664,7 +675,7 @@ namespace Builder
 			result = false;
 		}
 
-		result &= m_resultWriter->addFile(moduleFirmware.subsysId(), moduleFirmware.caption() + ".alb", moduleFirmwareFileData);
+		result &= m_resultWriter->addFile(moduleFirmware.subsysId(), moduleFirmware.caption() + ".alb", moduleFirmwareFileData);*/
 
 		return result;
 	}
