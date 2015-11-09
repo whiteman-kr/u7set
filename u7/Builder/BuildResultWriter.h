@@ -7,6 +7,7 @@
 #include <QHash>
 
 #include "../include/OutputLog.h"
+#include "../include/OrderedHash.h"
 
 
 class DbController;
@@ -14,42 +15,42 @@ class DbController;
 namespace Builder
 {
 
-	const int MAX_FILE_SIZE = 1024 * 1024 * 10;			// 10 MBytes
-
-	class BuildFile
+class BuildFile : public QObject
 	{
+		Q_OBJECT
+
 	private:
-		QString m_name;
-		qint64 m_size = 0;
-		QString m_md5;
+		QString m_fileName;			// filename only, like "filename.xml"
+		QString m_pathFileName;		// path and file name from build root directory, like "/subdir/filename.xml"
+		qint64 m_size = 0;			// size of file
+		QString m_md5;				// MD5 hash of file
+
+		QFile m_file;
+
+		static QString m_separator;
+
+		QString removeHeadTailSeparator(const QString& str);
+
+		void getFileInfo();
 
 	public:
-		BuildFile(const QString& fileName) : m_name(fileName) {}
+		BuildFile(const QString& subDir, const QString& fileName);
 
-		QString name() const { return m_name; }
+		bool open(const QString& fullBuildPath, bool textMode, OutputLog* log);
+
+		bool write(const QString& fullBuildPath, const QByteArray& data, OutputLog* log);
+		bool write(const QString& fullBuildPath, const QString& dataString, OutputLog* log);
+		bool write(const QString& fullBuildPath, const QStringList& stringList, OutputLog* log);
+
+		QString fileName() const { return m_fileName; }
+		QString pathFileName() const { return m_pathFileName; }
+
 		qint64 size() const { return m_size; }
 		QString md5() const { return m_md5; }
 
+		QFile& file() { return m_file; }
+
 		void setInfo(qint64 size, const QString& md5) { m_size = size; m_md5 = md5; }
-	};
-
-	class BuildSubdirectory
-	{
-	private:
-		QString	m_name;
-		QVector<BuildFile*> m_file;
-
-	public:
-		BuildSubdirectory(QString name);
-		~BuildSubdirectory();
-
-		int addFile(QString fileName);
-
-		void setFileInfo(int fileIndex, const QFile& file, const QByteArray& data);
-
-		int fileCount() const { return m_file.count(); }
-
-		BuildFile* file(int index);
 	};
 
 
@@ -75,25 +76,22 @@ namespace Builder
 		OutputLog* m_log = nullptr;
 		DbController* m_dbController = nullptr;
 
-		QHash<QString, BuildSubdirectory*> m_subdirectory;
+		HashedVector<QString, BuildFile*> m_buildFiles;
 
 		bool m_runBuild = true;
 
 	private:
-		bool createDirectory(QString dir);				// create full path directory
-		bool createSubdirectory(QString subDir);		// create subDirectory in build directory
+		BuildFile* createBuildFile(const QString& subDir, const QString& fileName);
 
-		QString formatFileName(const QString& subDir, const QString& fileName);
-
-		bool createFile(QString subDir, QString fileName, QFile& file, bool textMode);
+		bool createFile(const QString &pathFileName, QFile& file, bool textMode);
 
 		bool createBuildDirectory();
+
 		bool createBuildXML();
+		bool writeBuildXML();
 		bool closeBuildXML();
 
 		bool writeFilesSection();
-
-		BuildSubdirectory* getBuildSubdirectory(QString subDir);
 
 	public:
 		BuildResultWriter(QObject *parent = 0);
@@ -103,17 +101,12 @@ namespace Builder
 		bool finish();
 
 		bool addFile(const QString& subDir, const QString& fileName, const QByteArray& data);
-		bool addFile(const QString& subDir, const QString& fileName, const QString& data);
+		bool addFile(const QString& subDir, const QString& fileName, const QString& dataString);
 		bool addFile(const QString& subDir, const QString& fileName, const QStringList& stringList);
 
 		QString projectName() const;
 		QString userName() const;
 		int changesetID() const { return m_changesetID; }
-
-	signals:
-
-	public slots:
-
 	};
 }
 
