@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#bdec_v1">
+        <Properties>
+            <Caption>bdec</Caption>
+            <Version>1.0</Version>
+            <Description>Binary Decoder Block sets the needed output to state 1 in accordance with the received number and control signal.</Description>
+            <Category>Logic</Category>
+            <OpCode>9</OpCode>
+            <HasRam>false</HasRam>
+            <RequiredStart>true</RequiredStart>
+            <InternalUse>false</InternalUse>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_number" Caption = "in" Type="Analog" DataFormat = "UnsignedInt" OpIndex = "0" Size = "4"/>
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_1_oprd" Caption="out 1" Type="Discrete" OpIndex = "2" Size = "1"/>
+            <AfbElementSignal OpName="o_2_oprd" Caption="out 2" Type="Discrete" OpIndex = "3" Size = "1"/>
+            <AfbElementSignal OpName="o_3_oprd" Caption="out 3" Type="Discrete" OpIndex = "4" Size = "1"/>
+            <AfbElementSignal OpName="o_4_oprd" Caption="out 4" Type="Discrete" OpIndex = "5" Size = "1"/>
+            <AfbElementSignal OpName="o_5_oprd" Caption="out 5" Type="Discrete" OpIndex = "6" Size = "1"/>
+            <AfbElementSignal OpName="o_6_oprd" Caption="out 6" Type="Discrete" OpIndex = "7" Size = "1"/>
+            <AfbElementSignal OpName="o_7_oprd" Caption="out 7" Type="Discrete" OpIndex = "8" Size = "1"/>
+            <AfbElementSignal OpName="o_8_oprd" Caption="out 8" Type="Discrete" OpIndex = "9" Size = "1"/>
+            <AfbElementSignal OpName="o_9_oprd" Caption="out 9" Type="Discrete" OpIndex = "10" Size = "1"/>
+            <AfbElementSignal OpName="o_10_oprd" Caption="out 10" Type="Discrete" OpIndex = "11" Size = "1"/>
+            <AfbElementSignal OpName="o_11_oprd" Caption="out 11" Type="Discrete" OpIndex = "12" Size = "1"/>
+            <AfbElementSignal OpName="o_12_oprd" Caption="out 12" Type="Discrete" OpIndex = "13" Size = "1"/>
+            <AfbElementSignal OpName="o_13_oprd" Caption="out 13" Type="Discrete" OpIndex = "14" Size = "1"/>
+            <AfbElementSignal OpName="o_14_oprd" Caption="out 14" Type="Discrete" OpIndex = "15" Size = "1"/>
+            <AfbElementSignal OpName="o_15_oprd" Caption="out 15" Type="Discrete" OpIndex = "16" Size = "1"/>
+            <AfbElementSignal OpName="o_16_oprd" Caption="out 16" Type="Discrete" OpIndex = "17" Size = "1"/>
+        </OutputSignals>
+        <Params>
+        </Params>
+        <CommonScript>
+	<Library>
+	</Library>
+            <AfterCreation>
+	</AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>
