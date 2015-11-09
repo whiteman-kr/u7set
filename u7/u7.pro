@@ -140,7 +140,10 @@ SOURCES +=\
     Builder/FbParamCalculation.cpp \
     ../lib/PropertyEditorOld.cpp \
     ../lib/PropertyEditor.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    Connection.cpp \
+    DialogConnectionsEditor.cpp \
+    ../lib/PropertyEditorDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -210,7 +213,10 @@ HEADERS  += \
     ../include/SocketIO.h \
     ../include/PropertyObject.h \
     ../include/PropertyEditorOld.h \
-    ../include/PropertyEditor.h
+    ../include/PropertyEditor.h \
+    Connection.h \
+    DialogConnectionsEditor.h \
+    ../include/PropertyEditorDialog.h
 
 FORMS    += \
     ChangesetDialog.ui \
@@ -228,7 +234,8 @@ FORMS    += \
     DialogSubsystemListEditor.ui \
     CreateSchemeDialog.ui \
     ChooseAfbDialog.ui \
-    EquipmentVcsDialog.ui
+    EquipmentVcsDialog.ui \
+    DialogConnectionsEditor.ui
 
 RESOURCES += \
 	Resources.qrc \
