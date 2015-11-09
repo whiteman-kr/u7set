@@ -39,6 +39,7 @@ namespace Builder
 		switch(afb().type().toOpCode())
 		{
 		case Afb::AfbType::LOGIC:
+		case Afb::AfbType::NOT:
 			// parameter's values calculation is not required
 			break;
 
