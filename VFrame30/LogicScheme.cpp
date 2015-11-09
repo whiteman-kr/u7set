@@ -114,6 +114,11 @@ namespace VFrame30
 		return result;
 	}
 
+	QStringList LogicScheme::hardwareStrIdList() const
+	{
+		return m_hardwareStrIds;
+	}
+
 	void LogicScheme::setHardwareStrIds(const QString& s)
 	{
 		m_hardwareStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);

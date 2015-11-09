@@ -205,9 +205,9 @@ namespace Builder
 	protected:
 		bool loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out);
 
-		bool compileAppLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme);
+		bool parseAppLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme);
 
-		bool compileAppLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 								  std::shared_ptr<VFrame30::SchemeLayer> layer);
 
 		bool findBushes(std::shared_ptr<VFrame30::LogicScheme> logicScheme,

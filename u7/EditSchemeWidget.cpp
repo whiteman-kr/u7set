@@ -1677,13 +1677,6 @@ void EditSchemeWidget::createActions()
 			[this](bool)
 			{
 				auto item = std::make_shared<VFrame30::SchemeItemInput>(scheme()->unit());
-
-				if (isLogicScheme() == true &&
-					logicScheme()->isMultichannelScheme() == true)
-				{
-					item->setMultiChannel(true);
-				}
-
 				addItem(item);
 			});
 
@@ -1694,13 +1687,6 @@ void EditSchemeWidget::createActions()
 			[this](bool)
 			{
 				auto item = std::make_shared<VFrame30::SchemeItemOutput>(scheme()->unit());
-
-				if (isLogicScheme() == true &&
-					logicScheme()->isMultichannelScheme() == true)
-				{
-					item->setMultiChannel(true);
-				}
-
 				addItem(item);
 			});
 

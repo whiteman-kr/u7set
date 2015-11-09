@@ -30,7 +30,9 @@ namespace VFrame30
 		//
 	public:
 		QString hardwareStrIds() const;
+		QStringList hardwareStrIdList() const;
 		void setHardwareStrIds(const QString& s);
+
 		QStringList* mutable_hardwareStrIds();
 
 		bool isMultichannelScheme() const;
