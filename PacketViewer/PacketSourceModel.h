@@ -101,6 +101,8 @@ private:
 	std::vector<QWidget*> dependentWidgets;
 	PacketBufferTableModel* m_packetBufferModel;
 	SignalTableModel* m_signalTableModel;
+
+	void swapHeader(RpPacketHeader& header);
 };
 
 
