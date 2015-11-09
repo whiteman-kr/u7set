@@ -5,32 +5,14 @@
 #include <QAbstractTableModel>
 
 template <typename TYPE>
-void swapBytes(TYPE& value, int startPosition = -1, int count = -1)
+void swapBytes(TYPE& value, int count = -1)
 {
 	quint8* memory = reinterpret_cast<quint8*>(&value);
-	if (startPosition == -1)
+	if (static_cast<size_t>(count) > sizeof(TYPE) || count < 0)
 	{
-		std::reverse(memory, memory + sizeof(TYPE));
+		count = sizeof(TYPE);
 	}
-	else
-	{
-		if (static_cast<size_t>(startPosition) > sizeof(TYPE) - 1)
-		{
-			startPosition = sizeof(TYPE) - 1;
-		}
-		if (count == -1)
-		{
-			std::reverse(memory + startPosition, memory + sizeof(TYPE));
-		}
-		else
-		{
-			if (static_cast<size_t>(startPosition + count) > sizeof(TYPE))
-			{
-				count = sizeof(TYPE) - startPosition;
-			}
-			std::reverse(memory + startPosition, memory + startPosition + count);
-		}
-	}
+	std::reverse(memory, memory + count);
 }
 
 class RpPacketHeader;
