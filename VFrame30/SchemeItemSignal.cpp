@@ -105,14 +105,7 @@ namespace VFrame30
 
 		if (multiChannel() == true && logicScheme != nullptr && signalStrIds().size() >= 1)
 		{
-			QString baseStrId = m_signalStrIds[0];
-			text.clear();
-
-			for (int i = 0; i < logicScheme->channelCount(); i++)
-			{
-				text.append(QString("%1_%2CH\n").arg(baseStrId).arg(i + 1));
-			}
-
+			text = signalStrIds();
 		}
 		else
 		{
@@ -155,12 +148,7 @@ namespace VFrame30
 
 	bool SchemeItemSignal::multiChannel() const
 	{
-		return m_multiChannel;
-	}
-
-	void SchemeItemSignal::setMultiChannel(bool value)
-	{
-		m_multiChannel = value;
+		return m_signalStrIds.size() > 1;
 	}
 
 	bool SchemeItemSignal::SaveData(Proto::Envelope* message) const
@@ -183,8 +171,6 @@ namespace VFrame30
 			::Proto::wstring* ps = signal->add_signalstrids();
 			Proto::Write(ps, strId);
 		}
-
-		signal->set_multichannel(m_multiChannel);
 
 		return true;
 	}
@@ -224,8 +210,6 @@ namespace VFrame30
 			Proto::Read(signal.signalstrids().Get(i), &s);
 			m_signalStrIds.push_back(s);
 		}
-
-		m_multiChannel = signal.multichannel();
 
 		return true;
 	}

@@ -223,11 +223,11 @@ namespace Builder
 			}
 
 			//
-			// Build application logic
+			// Parse application logic
 			//
 			AppLogicData appLogicData;
 
-			buildApplicationLogic(&db, &appLogicData, &afbCollection, lastChangesetId);
+			parseApplicationLogic(&db, &appLogicData, &afbCollection, lastChangesetId);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -561,7 +561,7 @@ namespace Builder
 
 	}
 
-	bool BuildWorkerThread::buildApplicationLogic(DbController* db,
+	bool BuildWorkerThread::parseApplicationLogic(DbController* db,
 												  AppLogicData* appLogicData,
 												  Afb::AfbElementCollection* afbCollection,
 												  int changesetId)
@@ -577,11 +577,11 @@ namespace Builder
 		}
 
 		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, tr("Application Logic building"));
+		LOG_MESSAGE(m_log, tr("Application Logic parsing"));
 
-		Parser alBuilder = {db, m_log, appLogicData, afbCollection, changesetId, debug()};
+		Parser alPareser = {db, m_log, appLogicData, afbCollection, changesetId, debug()};
 
-		bool result = alBuilder.build();
+		bool result = alPareser.build();
 
 		if (result == false)
 		{
