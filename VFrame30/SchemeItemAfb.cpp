@@ -131,9 +131,57 @@ namespace VFrame30
 				continue;
 			}
 
-			QString paramStr = QString("%1 = %2")
+			QString paramValue;
+			switch (param.type())
+			{
+				case Afb::AfbSignalType::Analog:
+					{
+						QVariant a = property(param.caption().toStdString().c_str());
+
+						switch (param.dataFormat())
+						{
+							case Afb::AfbDataFormat::UnsignedInt:
+								paramValue = a.toString();
+								break;
+
+							case Afb::AfbDataFormat::SignedInt:
+								paramValue = a.toString();
+								break;
+
+							case Afb::AfbDataFormat::Float:
+
+								paramValue.setNum(a.toDouble(), 'f', 3);	// There is no Precision field in Afb::AfbParam
+
+								while(paramValue.endsWith('0'))
+								{
+									paramValue.chop(1);
+								}
+
+								if (paramValue.endsWith('.'))
+								{
+									paramValue.chop(1);
+								}
+								break;
+
+							default:
+								assert(false);
+						}
+					}
+					break;
+
+				case Afb::AfbSignalType::Discrete:
+					{
+						QVariant d = property(param.caption().toStdString().c_str());
+						paramValue = d.toString();
+					}
+					break;
+				default:
+					assert(false);
+			}
+
+			QString paramStr = QString("%1: %2")
 				.arg(param.caption())
-				.arg(property(param.caption().toStdString().c_str()).toString());
+				.arg(paramValue);
 
 			if (text.isEmpty() == true)
 			{

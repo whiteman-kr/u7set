@@ -16,7 +16,7 @@ class DbController;
 namespace Builder
 {
 	class SignalSetObject;
-	class ApplicationLogicData;
+	class AppLogicData;
 }
 
 namespace Hardware
@@ -81,11 +81,11 @@ namespace Builder
 
 		// Build Application Logic
 		//
-		bool buildApplicationLogic(DbController* db, ApplicationLogicData* appLogicData, Afb::AfbElementCollection* afbCollection, int changesetId);
+		bool buildApplicationLogic(DbController* db, AppLogicData* appLogicData, Afb::AfbElementCollection* afbCollection, int changesetId);
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet, Afb::AfbElementCollection* afbCollection, ApplicationLogicData* appLogicData, BuildResultWriter* buildResultWriter);
+		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet, Afb::AfbElementCollection* afbCollection, AppLogicData* appLogicData, BuildResultWriter* buildResultWriter);
 
 		// Compile Data Aquisition Service configuration
 		//

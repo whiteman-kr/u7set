@@ -22,7 +22,7 @@ void WorkflowSchemeView::paintEvent(QPaintEvent* pe)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, scheme()->gridSize(), scheme()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, scheme().get(), scheme()->gridSize(), scheme()->pinGridStep());
 
 	// Calc size
 	//

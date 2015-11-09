@@ -8,6 +8,7 @@
 #include <QTableView>
 #include "SignalTableModel.h"
 #include <QSettings>
+#include "SourceStatusWidget.h"
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)
@@ -462,26 +463,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 
 void Source::openStatusWidget()
 {
-	QWidget* widget = new QWidget();
-	dependentWidgets.push_back(widget);
-	widget->setWindowTitle(fullAddress());
-	connect(widget, &QWidget::destroyed, this, &Source::removeDependentWidget);
-
-	QTableView* bufferTable = new QTableView(widget);
-	bufferTable->setModel(m_packetBufferModel);
-	bufferTable->resizeColumnsToContents();
-
-	QTableView* signalTable = new QTableView(widget);
-	signalTable->setModel(m_signalTableModel);
-	signalTable->resizeColumnsToContents();
-
-	QHBoxLayout* layout = new QHBoxLayout;
-	layout->addWidget(bufferTable);
-	layout->addWidget(signalTable);
-	widget->setLayout(layout);
-	widget->resize(640, 480);
-	widget->show();
-	widget->setAttribute(Qt::WA_DeleteOnClose, true);
+	dependentWidgets.push_back(new SourceStatusWidget(*this, m_packetBufferModel, m_signalTableModel));
 }
 
 void Source::removeDependentWidget(QObject* object)

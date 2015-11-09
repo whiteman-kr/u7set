@@ -55,6 +55,7 @@ protected slots:
 	void runConfigurator();
     void runAfblEditor();
 	void runSubsystemListEditor();
+    void runConnectionsEditor();
     void showAbout();
 	void debug();
 
@@ -79,6 +80,7 @@ private:
 	QAction* m_configuratorAction = nullptr;
 	QAction* m_afblEditorAction = nullptr;
 	QAction* m_subsystemListEditorAction = nullptr;
+    QAction* m_connectionsEditorAction = nullptr;
 	QAction* m_aboutAction = nullptr;
 	QAction* m_debugAction = nullptr;
 

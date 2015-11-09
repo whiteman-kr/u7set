@@ -1,4 +1,4 @@
-#include "ApplicationLogicBuilder.h"
+#include "Parser.h"
 
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
@@ -141,7 +141,6 @@ namespace Builder
 	{
 		// Remove bushes without fbls
 		//
-
 		bushes.erase(std::remove_if(bushes.begin(), bushes.end(),
 					[](const Bush& b)
 					{
@@ -265,12 +264,12 @@ namespace Builder
 	//		ApplicationLogicModule
 	//
 	// ------------------------------------------------------------------------
-	ApplicationLogicModule::ApplicationLogicModule(QString moduleStrId) :
+	AppLogicModule::AppLogicModule(QString moduleStrId) :
 		m_moduleStrId(moduleStrId)
 	{
 	}
 
-	bool ApplicationLogicModule::addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
+	bool AppLogicModule::addBranch(std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 			const BushContainer& bushContainer,
 			Afb::AfbElementCollection* afbCollection,
 			OutputLog* log)
@@ -326,7 +325,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ApplicationLogicModule::orderItems(OutputLog* log)
+	bool AppLogicModule::orderItems(OutputLog* log)
 	{
 		if (log == nullptr)
 		{
@@ -569,18 +568,12 @@ namespace Builder
 			//
 
 			std::swap(m_items, orderedList);
-
-			// ApplicationLogicScheme appScheme;
-			// appScheme.setData(logicScheme, orderedList);
-
-			// m_schemes.push_back(appScheme);
-
 		}
 
 		return result;
 	}
 
-	bool ApplicationLogicModule::setInputOutputsElementsConnection(OutputLog* log)
+	bool AppLogicModule::setInputOutputsElementsConnection(OutputLog* log)
 	{
 		// Set connection between SchemeItemInput/SchemeItemOutput by StrIds
 		//
@@ -680,7 +673,7 @@ namespace Builder
 	}
 
 	template<typename Iter>
-	std::list<AppLogicItem> ApplicationLogicModule::getItemsWithInput(
+	std::list<AppLogicItem> AppLogicModule::getItemsWithInput(
 		Iter begin,
 		Iter end,
 		const QUuid& guid)
@@ -755,22 +748,22 @@ namespace Builder
 //	}
 
 
-	QString ApplicationLogicModule::moduleStrId() const
+	QString AppLogicModule::moduleStrId() const
 	{
 		return m_moduleStrId;
 	}
 
-	void ApplicationLogicModule::setModuleStrId(QString value)
+	void AppLogicModule::setModuleStrId(QString value)
 	{
 		m_moduleStrId = value;
 	}
 
-	const std::list<AppLogicItem>& ApplicationLogicModule::items() const
+	const std::list<AppLogicItem>& AppLogicModule::items() const
 	{
 		return m_items;
 	}
 
-	std::list<AppLogicItem>& ApplicationLogicModule::items()
+	std::list<AppLogicItem>& AppLogicModule::items()
 	{
 		return m_items;
 	}
@@ -781,14 +774,14 @@ namespace Builder
 	//		ApplicationLogicData
 	//
 	// ------------------------------------------------------------------------
-	ApplicationLogicData::ApplicationLogicData()
+	AppLogicData::AppLogicData()
 	{
 	}
 
 
-	std::shared_ptr<ApplicationLogicModule> ApplicationLogicData::getModuleLogicData(QString moduleStrID)
+	std::shared_ptr<AppLogicModule> AppLogicData::getModuleLogicData(QString moduleStrID)
 	{
-		for(std::shared_ptr<ApplicationLogicModule> modulePtr : m_modules)
+		for(std::shared_ptr<AppLogicModule> modulePtr : m_modules)
 		{
 			if (modulePtr->moduleStrId() == moduleStrID)
 			{
@@ -796,12 +789,12 @@ namespace Builder
 			}
 		}
 
-		std::shared_ptr<ApplicationLogicModule> nullPtr(nullptr);
+		std::shared_ptr<AppLogicModule> nullPtr(nullptr);
 		return nullPtr;
 	}
 
 
-	bool ApplicationLogicData::addData(
+	bool AppLogicData::addData(
 			const BushContainer& bushContainer,
 			std::shared_ptr<VFrame30::LogicScheme> scheme,
 			std::shared_ptr<VFrame30::SchemeLayer> layer,
@@ -827,12 +820,12 @@ namespace Builder
 
 		// Get module, if it is not in the list, add it
 		//
-		std::shared_ptr<ApplicationLogicModule> module;
+		std::shared_ptr<AppLogicModule> module;
 
 		QString moduleStrId = scheme->hardwareStrIds();
 
 		auto moduleIt = std::find_if(m_modules.begin(), m_modules.end(),
-			[&moduleStrId](const std::shared_ptr<ApplicationLogicModule>& m)
+			[&moduleStrId](const std::shared_ptr<AppLogicModule>& m)
 			{
 				return m->moduleStrId() == moduleStrId;
 			});
@@ -841,7 +834,7 @@ namespace Builder
 		{
 			// Module was not found, addit
 			//
-			module = std::make_shared<ApplicationLogicModule>(moduleStrId);
+			module = std::make_shared<AppLogicModule>(moduleStrId);
 			m_modules.push_back(module);
 		}
 		else
@@ -859,7 +852,7 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicData::orderItems(OutputLog* log)
+	bool AppLogicData::orderItems(OutputLog* log)
 	{
 		if (log == nullptr)
 		{
@@ -870,7 +863,7 @@ namespace Builder
 		bool ok = true;
 		bool result = true;
 
-		for (std::shared_ptr<ApplicationLogicModule> m : m_modules)
+		for (std::shared_ptr<AppLogicModule> m : m_modules)
 		{
 			LOG_MESSAGE(log, QObject::tr("Module: %1").arg(m->moduleStrId()));
 
@@ -885,12 +878,12 @@ namespace Builder
 		return result;
 	}
 
-	const std::list<std::shared_ptr<ApplicationLogicModule>>& ApplicationLogicData::modules() const
+	const std::list<std::shared_ptr<AppLogicModule>>& AppLogicData::modules() const
 	{
 		return m_modules;
 	}
 
-	std::list<std::shared_ptr<ApplicationLogicModule>>& ApplicationLogicData::modules()
+	std::list<std::shared_ptr<AppLogicModule>>& AppLogicData::modules()
 	{
 		return m_modules;
 	}
@@ -903,9 +896,9 @@ namespace Builder
 	// ------------------------------------------------------------------------
 
 
-	ApplicationLogicBuilder::ApplicationLogicBuilder(DbController* db,
+	Parser::Parser(DbController* db,
 													 OutputLog* log,
-													 ApplicationLogicData* appLogicData,
+													 AppLogicData* appLogicData,
 													 Afb::AfbElementCollection* afbCollection,
 													 int changesetId,
 													 bool debug) :
@@ -924,17 +917,17 @@ namespace Builder
 		return;
 	}
 
-	ApplicationLogicBuilder::~ApplicationLogicBuilder()
+	Parser::~Parser()
 	{
 	}
 
-	bool ApplicationLogicBuilder::build()
+	bool Parser::build()
 	{
 		// Get Application Logic
 		//
 		std::vector<std::shared_ptr<VFrame30::LogicScheme>> schemes;
 
-		bool ok = loadApplicationLogicFiles(db(), &schemes);
+		bool ok = loadAppLogicFiles(db(), &schemes);
 
 		if (ok == false)
 		{
@@ -957,7 +950,7 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, scheme->caption());
 
-			ok = compileApplicationLogicScheme(scheme);
+			ok = compileAppLogicScheme(scheme);
 
 			if (ok == false)
 			{
@@ -980,7 +973,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ApplicationLogicBuilder::loadApplicationLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out)
+	bool Parser::loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicScheme>>* out)
 	{
 		if (out == nullptr)
 		{
@@ -1067,7 +1060,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ApplicationLogicBuilder::compileApplicationLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme)
+	bool Parser::compileAppLogicScheme(std::shared_ptr<VFrame30::LogicScheme> logicScheme)
 	{
 		if (logicScheme.get() == nullptr)
 		{
@@ -1085,7 +1078,7 @@ namespace Builder
 			if (l->compile() == true)
 			{
 				layerFound = true;
-				ok = compileApplicationLogicLayer(logicScheme, l);
+				ok = compileAppLogicLayer(logicScheme, l);
 
 				if (ok == false)
 				{
@@ -1107,7 +1100,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ApplicationLogicBuilder::compileApplicationLogicLayer(
+	bool Parser::compileAppLogicLayer(
 		std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 		std::shared_ptr<VFrame30::SchemeLayer> layer)
 	{
@@ -1159,7 +1152,7 @@ namespace Builder
 
 	// Function connects all links, and compose them into bushes
 	//
-	bool ApplicationLogicBuilder::findBushes(
+	bool Parser::findBushes(
 		std::shared_ptr<VFrame30::LogicScheme> logicScheme,
 		std::shared_ptr<VFrame30::SchemeLayer> layer,
 		BushContainer* bushContainer) const
@@ -1418,7 +1411,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ApplicationLogicBuilder::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme, std::shared_ptr<VFrame30::SchemeLayer> layer,
+	bool Parser::setBranchConnectionToPin(std::shared_ptr<VFrame30::LogicScheme> scheme, std::shared_ptr<VFrame30::SchemeLayer> layer,
 						BushContainer* bushContainer) const
 	{
 		if (scheme.get() == nullptr ||
@@ -1528,7 +1521,7 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicBuilder::setPinConnections(
+	bool Parser::setPinConnections(
 		std::shared_ptr<VFrame30::LogicScheme> scheme,
 		std::shared_ptr<VFrame30::SchemeLayer> layer,
 		BushContainer* bushContainer)
@@ -1694,37 +1687,37 @@ namespace Builder
 	}
 
 
-	DbController* ApplicationLogicBuilder::db()
+	DbController* Parser::db()
 	{
 		return m_db;
 	}
 
-	OutputLog* ApplicationLogicBuilder::log() const
+	OutputLog* Parser::log() const
 	{
 		return m_log;
 	}
 
-	int ApplicationLogicBuilder::changesetId() const
+	int Parser::changesetId() const
 	{
 		return m_changesetId;
 	}
 
-	bool ApplicationLogicBuilder::debug() const
+	bool Parser::debug() const
 	{
 		return m_debug;
 	}
 
-	bool ApplicationLogicBuilder::release() const
+	bool Parser::release() const
 	{
 		return !debug();
 	}
 
-	const ApplicationLogicData* ApplicationLogicBuilder::applicationData() const
+	const AppLogicData* Parser::applicationData() const
 	{
 		return m_applicationData;
 	}
 
-	ApplicationLogicData* ApplicationLogicBuilder::applicationData()
+	AppLogicData* Parser::applicationData()
 	{
 		return m_applicationData;
 	}

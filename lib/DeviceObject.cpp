@@ -1,5 +1,6 @@
 #include "../include/DeviceObject.h"
 #include "../include/ProtoSerialization.h"
+#include <utility>
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QDebug>
@@ -72,6 +73,8 @@ namespace Hardware
 		ADD_PROPERTY_GETTER(int, FileID, true, DeviceObject::fileId);
 		ADD_PROPERTY_GETTER(QUuid, Uuid, true, DeviceObject::uuid);
 		ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, DeviceObject::strId, DeviceObject::setStrId);
+		auto strIdExpandedProp = ADD_PROPERTY_GETTER(QString, StrIDExpanded, true, DeviceObject::strIdExpanded);
+
 		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, DeviceObject::caption, DeviceObject::setCaption);
 		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, ChildRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
 		ADD_PROPERTY_GETTER_SETTER(int, Place, true, DeviceObject::place, DeviceObject::setPlace);
@@ -83,6 +86,8 @@ namespace Hardware
 			ADD_PROPERTY_GETTER_SETTER(QString, PresetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 		}
 		ADD_PROPERTY_GETTER(QUuid, PresetObjectUuid, true, DeviceObject::presetObjectUuid);
+
+		strIdExpandedProp->setReadOnly(true);
 
 		captionProp->setUpdateFromPreset(true);
 		childRestrProp->setUpdateFromPreset(true);
@@ -663,6 +668,11 @@ namespace Hardware
 		return m_parent;
 	}
 
+	const DeviceObject* DeviceObject::parent() const
+	{
+		return m_parent;
+	}
+
     QObject* DeviceObject::jsParent() const
     {
         QObject* c = m_parent;
@@ -1219,6 +1229,38 @@ namespace Hardware
 		}
 	}
 
+	QString DeviceObject::strIdExpanded() const
+	{
+		std::list<std::pair<const DeviceObject*, QString>> devices;		// 1st: device, 2nd: it's strid
+
+		const DeviceObject* d = this;
+		while (d != nullptr)
+		{
+			devices.push_front(std::make_pair(d, d->strId()));
+
+			d = d->parent();
+		}
+
+		QString parentStrId = "";
+		for (std::pair<const DeviceObject*, QString>& dp : devices)
+		{
+			const DeviceObject* device = dp.first;
+			QString strId = dp.second;
+
+			if (device->parent() != nullptr)
+			{
+				strId.replace(QString("$(PARENT)"), parentStrId, Qt::CaseInsensitive);
+			}
+
+			strId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+
+			parentStrId = strId;
+		}
+
+		QString thisStrId = parentStrId;
+		return thisStrId;
+	}
+
 	QString DeviceObject::caption() const
 	{
 		return m_caption;
@@ -1632,10 +1674,6 @@ R"DELIM({
 
 		moduleMessage->set_type(static_cast<int>(m_type));
 
-		moduleMessage->set_channel(m_channel);
-		moduleMessage->set_subsysid(m_subSysID.toStdString());
-		moduleMessage->set_conftype(m_confType.toStdString());
-
 		return true;
 	}
 
@@ -1664,10 +1702,6 @@ R"DELIM({
 		const Proto::DeviceModule& moduleMessage = message.deviceobject().module();
 
 		m_type =  static_cast<decltype(m_type)>(moduleMessage.type());
-
-		m_channel = moduleMessage.channel();
-		m_subSysID = moduleMessage.subsysid().c_str();
-		m_confType = moduleMessage.conftype().c_str();
 
 		return true;
 	}

@@ -33,6 +33,9 @@ namespace VFrame30
 		void setHardwareStrIds(const QString& s);
 		QStringList* mutable_hardwareStrIds();
 
+		bool isMultichannelScheme() const;
+		int channelCount() const;
+
 		// Data
 		//
 	private:

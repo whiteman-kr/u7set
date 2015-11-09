@@ -1,5 +1,6 @@
 #include "Stable.h"
 #include "SchemeItemSignal.h"
+#include "LogicScheme.h"
 
 namespace VFrame30
 {
@@ -98,7 +99,27 @@ namespace VFrame30
 		//
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), signalStrIds(), r, Qt::AlignLeft | Qt::AlignTop);
+		QString text;
+
+		const VFrame30::LogicScheme* logicScheme = dynamic_cast<const VFrame30::LogicScheme*>(drawParam->scheme());
+
+		if (multiChannel() == true && logicScheme != nullptr && signalStrIds().size() >= 1)
+		{
+			QString baseStrId = m_signalStrIds[0];
+			text.clear();
+
+			for (int i = 0; i < logicScheme->channelCount(); i++)
+			{
+				text.append(QString("%1_%2CH\n").arg(baseStrId).arg(i + 1));
+			}
+
+		}
+		else
+		{
+			text = signalStrIds();
+		}
+
+		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignTop);
 
 		return;
 	}

@@ -1,5 +1,5 @@
 #include "Builder.h"
-#include "ApplicationLogicBuilder.h"
+#include "Parser.h"
 #include "ConfigurationBuilder.h"
 
 #include "../../include/DbController.h"
@@ -225,7 +225,7 @@ namespace Builder
 			//
 			// Build application logic
 			//
-			ApplicationLogicData appLogicData;
+			AppLogicData appLogicData;
 
 			buildApplicationLogic(&db, &appLogicData, &afbCollection, lastChangesetId);
 
@@ -562,7 +562,7 @@ namespace Builder
 	}
 
 	bool BuildWorkerThread::buildApplicationLogic(DbController* db,
-												  ApplicationLogicData* appLogicData,
+												  AppLogicData* appLogicData,
 												  Afb::AfbElementCollection* afbCollection,
 												  int changesetId)
 	{
@@ -579,7 +579,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic building"));
 
-		ApplicationLogicBuilder alBuilder = {db, m_log, appLogicData, afbCollection, changesetId, debug()};
+		Parser alBuilder = {db, m_log, appLogicData, afbCollection, changesetId, debug()};
 
 		bool result = alBuilder.build();
 
@@ -601,7 +601,7 @@ namespace Builder
 													Hardware::DeviceObject* equipment,
 													SignalSet* signalSet,
 													Afb::AfbElementCollection* afbCollection,
-													ApplicationLogicData* appLogicData,
+													AppLogicData* appLogicData,
 													BuildResultWriter* buildResultWriter)
 	{
 		LOG_EMPTY_LINE(m_log);

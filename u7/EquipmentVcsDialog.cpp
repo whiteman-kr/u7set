@@ -65,7 +65,7 @@ void EquipmentVcsDialog::on_m_refresh_clicked()
 
 	// Get checked out files
 	//
-	assert(false);
+	//assert(false);
 //	std::list<std::shared_ptr<DbFile>> files;
 
 //	DbFileInfo parentFile = m_db->systemFileInfo(m_db->hcFileId());

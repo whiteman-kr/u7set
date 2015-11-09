@@ -239,7 +239,10 @@ void DialogSubsystemListEditor::on_m_remove_clicked()
 		item->setData(0, Qt::UserRole, i);
 	}
 
-	ui->m_list->selectionModel()->select(ui->m_list->model()->index (index, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    if (ui->m_list->topLevelItemCount() > 0 && index != -1)
+    {
+        ui->m_list->selectionModel()->select(ui->m_list->model()->index (index, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
 
 	m_modified = true;
 }
