@@ -114,3 +114,9 @@ void PacketBufferTableModel::setNeedToSwapBytes(bool value)
 	settings.setValue("needToSwapBytes", needToSwapBytes);
 }
 
+void PacketBufferTableModel::updateData()
+{
+	beginResetModel();
+	endResetModel();
+}
+

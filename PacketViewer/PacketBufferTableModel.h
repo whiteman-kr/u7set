@@ -34,6 +34,7 @@ signals:
 
 public slots:
 	void setNeedToSwapBytes(bool value);
+	void updateData();
 
 private:
 	quint16* m_buffer;
