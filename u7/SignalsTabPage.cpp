@@ -1104,6 +1104,7 @@ void SignalsModel::addSignal()
 				if (!deviceIdEdit->text().isEmpty())
 				{
 					name += " Device " + deviceIdEdit->text();
+					signal.setDeviceStrID(deviceIdEdit->text());
 				}
 
 				if (signalCount > 1)
