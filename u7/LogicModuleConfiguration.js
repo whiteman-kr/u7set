@@ -44,7 +44,12 @@ function(root, confCollection, log, signalSet, subsystemStorage, connectionStora
     var result = true;
 
     result = module_lm_1(root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
+    if (result == false)
+    {
+        return false;
+    }
 
+    result = module_lm_1_statistics(root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
     if (result == false)
     {
         return false;
@@ -120,6 +125,62 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage, c
     {
         var child = device.jsChild(i);
         if (module_lm_1(child, confCollection, log, signalSet, subsystemStorage, connectionStorage) == false)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function module_lm_1_statistics(device, confCollection, log, signalSet, subsystemStorage, connectionStorage)
+{
+    if (device.jsDeviceType() == ModuleType)
+    {
+        if (device.propertyValue("ModuleFamily") == FamilyLM)
+        {
+            log.writeMessage("MODULE LM-1: " + device.propertyValue("StrID"));
+
+            // Generate Configuration
+            //
+			// Variables
+			//
+			var subSysID = device.propertyValue("SubsysID");
+			var channel = device.propertyValue("Channel");
+			
+			var frameSize = device.jsPropertyInt("ConfigFrameSize");
+			var frameCount = device.jsPropertyInt("ConfigFrameCount");			
+			
+			var uartId = 0x0102;                   // Check it !!!!
+			
+			var ssKeyValue = subsystemStorage.ssKey(subSysID);
+			if (ssKeyValue == -1)
+			{
+				log.writeError("Subsystem key for " + subSysID + " was not found!");
+				return false;
+			}
+
+			var configStartFrames = 2;
+			var configFrameCount = 19;          // number of frames in each configuration
+
+			var confFirmware = confCollection.jsGet("LM-1", subSysID, ssKeyValue, uartId, frameSize, frameCount);            
+			
+			var frameStorageConfig = 1;
+			var ptr = 14;
+
+			var channelCount = confFirmware.data16(frameStorageConfig, ptr);
+			confFirmware.writeLog("---\r\n");
+			confFirmware.writeLog("LM-1 for subsystem " + subSysID + ", Channel " + channel +": Frame " + frameStorageConfig + ", offset " + ptr +": ChannelCount = " + channelCount + "\r\n");
+			return true;
+		}
+
+		return true;
+	}
+
+    for (var i = 0; i < device.childrenCount(); i++)
+    {
+        var child = device.jsChild(i);
+        if (module_lm_1_statistics(child, confCollection, log, signalSet, subsystemStorage, connectionStorage) == false)
         {
             return false;
         }
@@ -217,7 +278,6 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     if (oldChannelCount < channel)
     {
         setData16(confFirmware, log, frameStorageConfig, ptr, channel);
-		confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": ChannelCount = " + channel + "\r\n");
 
     }
     ptr += 2;
