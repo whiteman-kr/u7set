@@ -1086,6 +1086,11 @@ void SignalsModel::addSignal()
 	signal.setInOutType(SignalInOutType(settings.value("LastEditedSignal: inOutType").toInt()));
 	signal.setByteOrder(E::ByteOrder(settings.value("LastEditedSignal: byteOrder").toInt()));
 
+	if (!deviceIdEdit->text().isEmpty())
+	{
+		signal.setDeviceStrID(deviceIdEdit->text());
+	}
+
 	SignalPropertiesDialog dlg(signal, E::SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, false, nullptr, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)

@@ -198,6 +198,12 @@ void SignalTableModel::setNeedToSwapBytes(bool value)
 	endResetModel();
 }
 
+void SignalTableModel::updateData()
+{
+	beginResetModel();
+	endResetModel();
+}
+
 template<typename TYPE>
 TYPE SignalTableModel::getAdc(const Signal& signal) const
 {

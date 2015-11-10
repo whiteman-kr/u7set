@@ -387,14 +387,17 @@ void Listener::updateSourceMap()
 
 void Listener::readPendingDatagrams()
 {
-	QHostAddress senderAddress;
-	quint16 senderPort;
-	char* buffer = new char[ENTIRE_UDP_SIZE];
-	quint64 readBytes = m_socket->readDatagram(buffer, ENTIRE_UDP_SIZE, &senderAddress, &senderPort);
-	quint32 senderIp4 = senderAddress.toIPv4Address();
+	while (m_socket->hasPendingDatagrams())
+	{
+		QHostAddress senderAddress;
+		quint16 senderPort;
+		char* buffer = new char[ENTIRE_UDP_SIZE];
+		quint64 readBytes = m_socket->readDatagram(buffer, ENTIRE_UDP_SIZE, &senderAddress, &senderPort);
+		quint32 senderIp4 = senderAddress.toIPv4Address();
 
-	int sourceIndex = getSourceIndex(senderIp4, senderPort);
-	m_sources[sourceIndex]->parseReceivedBuffer(buffer, readBytes);	// source owns buffer from this moment
+		int sourceIndex = getSourceIndex(senderIp4, senderPort);
+		m_sources[sourceIndex]->parseReceivedBuffer(buffer, readBytes);	// source owns buffer from this moment
+	}
 }
 
 
@@ -414,7 +417,7 @@ Source::Source(QString address, int port, const SignalSet& signalSet, const QHas
 			m_signalTableModel->addDataSource(iterator.value());
 		}
 	}
-	m_lastHeader.packetNo = 0;
+	m_lastHeader.packetNo = -1;
 	memset(m_buffer, 0, RP_MAX_FRAME_COUNT * RP_PACKET_DATA_SIZE);
 }
 
@@ -442,21 +445,24 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 		delete [] buffer;
 		return;
 	}
-	if (header.packetNo - m_lastHeader.packetNo > 1 && m_lastHeader.packetNo != 0)
+	if (header.packetNo > m_lastHeader.packetNo && header.packetNo - m_lastHeader.packetNo > header.partCount)
 	{
-		incrementPacketLostCount(header.packetNo - m_lastHeader.packetNo);
+		incrementPacketLostCount((header.packetNo - m_lastHeader.packetNo) / header.partCount);
 	}
 	// Check correct packet part sequence
-	if (!((header.packetNo == m_lastHeader.packetNo && header.partNo == m_lastHeader.partNo + 1) ||
+	if (!((header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == m_lastHeader.partNo + 1) ||
 		(header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == 0 && m_lastHeader.partNo == m_lastHeader.partCount - 1)))
 	{
 		incrementPartialPacketCount();
 	}
 	int currentDataSize = header.packetSize - sizeof(RpPacketHeader) - sizeof(packet.CRC64);
 	memcpy(m_buffer + header.partNo * currentDataSize, packet.Data, currentDataSize);
-	m_signalTableModel->updateFrame(header.partNo);
-	m_packetBufferModel->updateFrame(header.partNo);
-	m_packetBufferModel->checkPartCount(header.partCount);
+	if (!dependentWidgets.empty())
+	{
+		m_signalTableModel->updateFrame(header.partNo);
+		m_packetBufferModel->updateFrame(header.partNo);
+		m_packetBufferModel->checkPartCount(header.partCount);
+	}
 	memcpy(&m_lastHeader, &header, sizeof(RpPacketHeader));
 	emit fieldsChanged();
 	delete [] buffer;
@@ -465,6 +471,11 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 void Source::openStatusWidget()
 {
 	dependentWidgets.push_back(new SourceStatusWidget(*this, m_packetBufferModel, m_signalTableModel));
+	if (dependentWidgets.size() == 1)
+	{
+		m_signalTableModel->updateData();
+		m_packetBufferModel->updateData();
+	}
 }
 
 void Source::removeDependentWidget(QObject* object)

@@ -318,9 +318,12 @@ namespace Hardware
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
 			return 0;
-		}
+        }
 
-		return qToLittleEndian(static_cast<quint16>(*(m_frames[frameIndex].data() + offset)));
+        std::vector<quint8>& frameData = m_frames[frameIndex];
+
+        quint16 data = *(reinterpret_cast<quint16*>(frameData.data() + offset));
+        return qFromBigEndian(data);
 	}
 
 	quint32 ModuleFirmware::data32(int frameIndex, int offset)
@@ -332,8 +335,11 @@ namespace Hardware
 			return 0;
 		}
 
-		return qToLittleEndian(static_cast<quint32>(*(m_frames[frameIndex].data() + offset)));
-	}
+        std::vector<quint8>& frameData = m_frames[frameIndex];
+
+        quint32 data = *(reinterpret_cast<quint32*>(frameData.data() + offset));
+        return qFromBigEndian(data);
+    }
 
 	bool ModuleFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
     {
