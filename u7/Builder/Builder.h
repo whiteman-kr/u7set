@@ -3,6 +3,7 @@
 
 #include "../include/Signal.h"
 #include "Subsystem.h"
+#include "Connection.h"
 #include "../Builder/BuildResultWriter.h"
 
 // Forware declarations
@@ -77,7 +78,7 @@ namespace Builder
 
 		// Generate Modules Configurations Firmwares
 		//
-		bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, int changesetId, BuildResultWriter* buildWriter);
+        bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter);
 
 		// Build Application Logic
 		//

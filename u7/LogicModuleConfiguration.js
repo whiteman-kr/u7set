@@ -37,13 +37,13 @@ var Mode_420mA = 1;
 var Mode_10V = 2;
 var Mode_05mA = 3;
 
-function(root, confCollection, log, signalSet, subsystemStorage)
+function(root, confCollection, log, signalSet, subsystemStorage, connectionStorage)
 {
     log.writeMessage("Start LogicModuleConfiguration");
 
     var result = true;
 
-    result = module_lm_1(root, confCollection, log, signalSet, subsystemStorage);
+    result = module_lm_1(root, confCollection, log, signalSet, subsystemStorage, connectionStorage);
 
     if (result == false)
     {
@@ -93,14 +93,15 @@ function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
 
 function storeHash64(confFirmware, log, frameIndex, offset, data)
 {
-    if (confFirmware.storeHash64(frameIndex, offset, data) == false)
+	var result = confFirmware.storeHash64(frameIndex, offset, data);
+    if (result == "")
     {
         log.writeError("Error: storeHash64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
-        return false;
     }
+    return result;
 }
 
-function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
+function module_lm_1(device, confCollection, log, signalSet, subsystemStorage, connectionStorage)
 {
     if (device.jsDeviceType() == ModuleType)
     {
@@ -110,7 +111,7 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
 
             // Generate Configuration
             //
-            return generate_lm_1_rev3(device, confCollection, log, signalSet, subsystemStorage);
+            return generate_lm_1_rev3(device, confCollection, log, signalSet, subsystemStorage, connectionStorage);
         }
         return true;
     }
@@ -118,7 +119,7 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
     for (var i = 0; i < device.childrenCount(); i++)
     {
         var child = device.jsChild(i);
-        if (module_lm_1(child, confCollection, log, signalSet, subsystemStorage) == false)
+        if (module_lm_1(child, confCollection, log, signalSet, subsystemStorage, connectionStorage) == false)
         {
             return false;
         }
@@ -132,7 +133,7 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage)
 // confCollection - Hardware::ModuleConfCollection
 //
 //
-function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemStorage)
+function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemStorage, connectionStorage)
 {
     // Variables
     //
@@ -239,8 +240,8 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     setData16(confFirmware, log, frameServiceConfig, ptr, uartId);   //CFG_Ch_Dtype == UARTID?
 	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": uartId = "+ uartId + "\r\n");
     ptr += 2;
-    storeHash64(confFirmware, log, frameServiceConfig, ptr, subSysID);   //subSysID HASH-64
-	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": subSysID HASH-64 (CALC HASH!!!!!) = "+ subSysID + "\r\n");
+	var hashString = storeHash64(confFirmware, log, frameServiceConfig, ptr, subSysID);
+	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": subSysID HASH-64 = " + hashString + "\r\n");
     ptr += 8;
     
     // I/O Modules configuration
@@ -310,12 +311,12 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
         ptr += 8;
     }
 */
-/*
+
 	var txRxConfigFrame = lanConfigFrame + 3;
 	var optoCount = 3;
 	
-	generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, optoCount, false/*modeWordGeneration*//*);
-*/  
+	generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, false/*modeWordGeneration*/);
+  
 	return true;
 }
 
@@ -717,28 +718,48 @@ function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFr
     var ptr = offset;
     
     setData16(confFirmware, log, frame, ptr, flags);        // Flags word
-	confFirmware.writeLog("generate_txRxIoConfig: Frame " + frame + ", offset " + ptr +": flags = "+ flags + "\r\n");
+	confFirmware.writeLog("Frame " + frame + ", offset " + ptr +": flags = "+ flags + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, configFrames); // Configuration words quantity
-	confFirmware.writeLog("generate_txRxIoConfig: Frame " + frame + ", offset " + ptr +": configFrames = "+ configFrames + "\r\n");
+	confFirmware.writeLog("Frame " + frame + ", offset " + ptr +": configFrames = "+ configFrames + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, dataFrames);   // Data words quantity
-	confFirmware.writeLog("generate_txRxIoConfig: Frame " + frame + ", offset " + ptr +": dataFrames = "+ dataFrames + "\r\n");
+	confFirmware.writeLog("Frame " + frame + ", offset " + ptr +": dataFrames = "+ dataFrames + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, txId);         // Tx ID
-	confFirmware.writeLog("generate_txRxIoConfig: Frame " + frame + ", offset " + ptr +": txId = "+ txId + "\r\n");
+	confFirmware.writeLog("Frame " + frame + ", offset " + ptr +": txId = "+ txId + "\r\n");
     ptr += 2;
     
     return true;
 }
 
-function generate_txRxOptoConfiguration(confFirmware, log, frame, module, txRxOptoCount, modeWordGeneration)
+function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connections, txRxOptoCount, modeWordGeneration)
 {
     // Create TxRx Blocks (Opto) configuration
 	//
 	confFirmware.writeLog("Writing TxRx Blocks (Opto) configuration.\r\n");
-
-    for (var i = 0; i < txRxOptoCount; i++)
+		
+	confFirmware.writeLog("There are " + connections.count() + " connections in the project.\r\n");
+	
+	for (var c = 0; c < connections.count(); c++)
+	{
+		var connection = connections.jsGet(c);
+		if (connection == null)
+		{
+			continue;
+		}
+	
+		if (connection.propertyValue("Device1StrID") == module.propertyValue("StrID") || 
+				connection.propertyValue("Device2StrID") == module.propertyValue("StrID"))
+		{
+			confFirmware.writeLog("Connection " + connection.propertyValue("Caption") + ":" + 
+				connection.propertyValue("Device1StrID") + ":" + connection.propertyValue("Device1Port") + " <=> " +
+				connection.propertyValue("Device2StrID") + ":" + connection.propertyValue("Device2Port") + "\r\n");
+			
+		}
+	}
+	
+    /*for (var i = 0; i < txRxOptoCount; i++)
     {
         var ptr = (0 + i) * 2;
 		var startAddress = 0;
@@ -781,6 +802,6 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, txRxOp
 		var allModes = confFirmware.data16(frame, ptr);
 		allModes |= txMode;
 		confFirmware.writeLog("generate_txRxOptoConfiguration: Frame " + frame + ", offset " + ptr +": RS mode configuration = " + allModes + "\r\n");
-	}
+	}*/
  
 }

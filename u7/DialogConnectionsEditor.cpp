@@ -52,8 +52,6 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 {
     assert(db());
 
-    m_connections = new Hardware::ConnectionStorage(db(), this);
-
     ui->setupUi(this);
 
     setWindowTitle(tr("Connections Editor"));
@@ -80,13 +78,13 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
     QString errorCode;
 
-    if (m_connections->load(errorCode) == false)
+    if (connections.load(db(), errorCode) == false)
     {
         QMessageBox::critical(this, QString("Error"), tr("Can't load connections!"));
         return;
     }
 
-    updateButtons(m_connections->isCheckedOut());
+    updateButtons(connections.isCheckedOut(db()));
     fillConnectionsList();
 }
 
@@ -99,9 +97,9 @@ void DialogConnectionsEditor::fillConnectionsList()
 {
     ui->m_list->clear();
 
-    for (int i = 0; i < m_connections->count(); i++)
+    for (int i = 0; i < connections.count(); i++)
     {
-        std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
+        std::shared_ptr<Hardware::Connection> connection = connections.get(i);
         if (connection == nullptr)
         {
             assert(connection);
@@ -150,7 +148,7 @@ bool DialogConnectionsEditor::saveChanges()
 {
     // save to db
     //
-    if (m_connections->save() == false)
+    if (connections.save(db()) == false)
     {
         QMessageBox::critical(this, QString("Error"), tr("Can't save connections."));
         return false;
@@ -206,7 +204,7 @@ void DialogConnectionsEditor::on_m_Add_clicked()
     connection->setDevice2Port(2);
     connection->setEnable(true);
 
-    m_connections->add(connection);
+    connections.add(connection);
 
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                 connection->caption() <<
@@ -252,7 +250,7 @@ void DialogConnectionsEditor::on_m_Edit_clicked()
     std::shared_ptr<Hardware::Connection> editConnection = std::make_shared<Hardware::Connection>();
     *editConnection = *connection;
 
-    DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, m_connections);
+    DialogConnectionsPropertyEditor* pd = new DialogConnectionsPropertyEditor(editConnection, this, &connections);
 
     if (pd->exec() == QDialog::Accepted)
     {
@@ -288,7 +286,7 @@ void DialogConnectionsEditor::on_m_Remove_clicked()
         assert(connection);
         return;
     }
-    m_connections->remove(connection);
+    connections.remove(connection);
 
     fillConnectionsList();
     if (ui->m_list->topLevelItemCount() > 0 && selectedIndex >= 0)
@@ -334,7 +332,7 @@ void DialogConnectionsEditor::on_m_list_doubleClicked(const QModelIndex &index)
 
 void DialogConnectionsEditor::on_m_checkOut_clicked()
 {
-    if (m_connections->checkOut() == false)
+    if (connections.checkOut(db()) == false)
     {
         QMessageBox::critical(this, "Connections Editor", "Check out error!");
         return;
@@ -369,7 +367,7 @@ void DialogConnectionsEditor::on_m_checkIn_clicked()
         }
     }
 
-    if (m_connections->checkIn(comment) == false)
+    if (connections.checkIn(db(), comment) == false)
     {
         QMessageBox::critical(this, "Connections Editor", "Check in error!");
         return;
@@ -386,7 +384,7 @@ void DialogConnectionsEditor::on_m_Undo_clicked()
         return;
     }
 
-    if (m_connections->undo() == false)
+    if (connections.undo(db()) == false)
     {
         QMessageBox::critical(this, "Connections Editor", "Undo error!");
         return;
@@ -400,7 +398,7 @@ void DialogConnectionsEditor::on_m_Undo_clicked()
 
     // Load the unmodified file
     //
-    if (m_connections->load(errorCode) == false)
+    if (connections.load(db(), errorCode) == false)
     {
         QMessageBox::critical(this, QString("Error"), tr("Can't load connections!"));
         return;
