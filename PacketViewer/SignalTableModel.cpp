@@ -213,7 +213,12 @@ TYPE SignalTableModel::getAdc(const Signal& signal) const
 	{
 		return 0;
 	}
-	TYPE adc = m_buffer[offset] >> bit;
+	auto firstWord = m_buffer[offset];
+	if (bit + size < static_cast<int>(sizeof(firstWord)))	//	discrete
+	{
+		swapBytes(firstWord);
+	}
+	TYPE adc = firstWord >> bit;
 	int bitsCopied = sizeof(m_buffer[0]) * 8 - bit;
 	if (bitsCopied > size)
 	{
