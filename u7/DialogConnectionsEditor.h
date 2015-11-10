@@ -59,7 +59,7 @@ private:
     DbController* db();
     DbController* m_dbController;
 
-    Hardware::ConnectionStorage* m_connections;
+    Hardware::ConnectionStorage connections;
 };
 
 #endif // DIALOGCONNECTIONSEDITOR_H

@@ -430,7 +430,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 {
 	RpPacket& packet = *reinterpret_cast<RpPacket*>(buffer);
 	RpPacketHeader& header = packet.Header;
-	swapHeader(header);
+	//swapHeader(header);
 	incrementPacketReceivedCount();
 	if (readBytes != header.packetSize)
 	{

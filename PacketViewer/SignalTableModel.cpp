@@ -75,7 +75,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 				switch (signal.dataFormat())
 				{
 				case E::SignedInt:
-					switch (signal.dataSize())
+					switch (signal.dataSize() / 8)
 					{
 					case sizeof(qint8): return getAdc<qint8>(signal);
 					case sizeof(qint16): return getAdc<qint16>(signal);
@@ -89,7 +89,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 					return getAdc<quint64>(signal);
 				case E::Float:
 					static_assert(sizeof(float) == sizeof(quint32) && sizeof(double) == sizeof(quint64), "Please check size of basic types");
-					switch (signal.dataSize())
+					switch (signal.dataSize() / 8)
 					{
 					case sizeof(float):
 					{
@@ -193,25 +193,32 @@ void SignalTableModel::addDataSource(const DataSource& dataSource)
 
 void SignalTableModel::setNeedToSwapBytes(bool value)
 {
+	beginResetModel();
 	needToSwapBytes = value;
+	endResetModel();
 }
 
 template<typename TYPE>
 TYPE SignalTableModel::getAdc(const Signal& signal) const
 {
-	if (static_cast<size_t>(signal.dataSize()) > sizeof(TYPE))
+	int size = signal.dataSize();
+	int sizeBytes = size / 8 + ((size % 8 > 0) ? 1 : 0);
+	if (static_cast<size_t>(sizeBytes) > sizeof(TYPE))
 	{
 		return 0;
 	}
 	int offset = signal.regAddr().offset();
 	int bit = signal.regAddr().bit();
-	int size = signal.dataSize();
-	int sizeBytes = size / 8 + (size % 8 > 0) ? 1 : 0;
 	if ((offset < 0) || (offset + (bit + size) / 8 >= RP_BUFFER_SIZE))
 	{
 		return 0;
 	}
-	TYPE adc = m_buffer[offset] >> bit;
+	auto firstWord = m_buffer[offset];
+	if (bit + size < static_cast<int>(sizeof(firstWord) * 8) && needToSwapBytes)	//	discrete
+	{
+		swapBytes(firstWord);
+	}
+	TYPE adc = firstWord >> bit;
 	int bitsCopied = sizeof(m_buffer[0]) * 8 - bit;
 	if (bitsCopied > size)
 	{
@@ -228,7 +235,7 @@ TYPE SignalTableModel::getAdc(const Signal& signal) const
 	}
 	if (needToSwapBytes)
 	{
-		swapBytes(adc, sizeof(TYPE) - sizeBytes, sizeBytes);
+		swapBytes(adc, sizeBytes);
 	}
 	return adc;
 }
