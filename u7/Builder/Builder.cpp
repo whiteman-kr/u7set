@@ -184,6 +184,10 @@ namespace Builder
 
 			LOG_MESSAGE(m_log, tr("%1 elements loaded.").arg(afbCollection.elements().size()));
 
+            //
+            // Loading subsystems
+            //
+
 			Hardware::SubsystemStorage subsystems;
 
 			QString errorCode;
@@ -198,13 +202,30 @@ namespace Builder
 				}
 			}
 
-			//
+            //
+            // Loading connections
+            //
+
+            Hardware::ConnectionStorage connections;
+
+            ok = connections.load(&db, errorCode);
+
+            if (ok == false)
+            {
+                LOG_ERROR(m_log, tr("Can't load connections file"));
+                if (errorCode.isEmpty() == false)
+                {
+                    LOG_ERROR(m_log, errorCode);
+                }
+            }
+
+            //
 			// Compile Module configuration
 			//
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, lastChangesetId, &buildWriter);
+            ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &connections, lastChangesetId, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -541,7 +562,7 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, int changesetId, BuildResultWriter* buildWriter)
+    bool BuildWorkerThread::modulesConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter)
 	{
 		if (db == nullptr ||
 			deviceRoot == nullptr ||
@@ -553,7 +574,7 @@ namespace Builder
 			return false;
 		}
 
-		ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+        ConfigurationBuilder cfgBuilder = {db, deviceRoot, signalSet, subsystems, connections, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
 
 		bool result = cfgBuilder.build();
 
