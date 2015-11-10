@@ -25,13 +25,6 @@ PacketBufferTableModel::PacketBufferTableModel(quint8* buffer, RpPacketHeader& l
 	needToSwapBytes = settings.value("needToSwapBytes", needToSwapBytes).toBool();
 }
 
-template <typename TYPE>
-void swapBytes(TYPE& value)
-{
-	quint8* memory = reinterpret_cast<quint8*>(&value);
-	std::reverse(memory, memory + sizeof(TYPE));
-}
-
 int PacketBufferTableModel::rowCount(const QModelIndex&) const
 {
 	return RP_PACKET_DATA_SIZE * m_lastHeader.partCount / sizeof(m_buffer[0]);

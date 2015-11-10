@@ -1,9 +1,10 @@
 #include "SignalTableModel.h"
 #include "../include/Signal.h"
+#include "PacketBufferTableModel.h"
 
 const int C_STR_ID = 0,
 C_DESCRIPTION = 1,
-C_ADC = 2,
+C_RAW_DATA = 2,
 C_VALUE = 3,
 C_REG_ADDR = 4,
 C_DATA_SIZE = 5,
@@ -13,7 +14,7 @@ const char* const Columns[C_COUNT] =
 {
 	"ID",
 	"Description",
-	"ADC",
+	"Raw data",
 	"Value",
 	"Registration address",
 	"Data size"
@@ -50,7 +51,7 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 		{
 			case C_STR_ID: return signal.strID();
 			case C_DESCRIPTION: return signal.name();
-			case C_ADC:
+			case C_RAW_DATA:
 			{
 				if (!signal.regAddr().isValid() || (signal.regAddr().offset() + (signal.regAddr().bit() + signal.dataSize()) / 8 > RP_BUFFER_SIZE))
 				{
@@ -58,11 +59,11 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 				}
 				if (signal.isAnalog())
 				{
-					return QString("0x%1").arg(getAdc(signal), signal.dataSize() / 4, 16, QChar('0'));
+					return QString("0x%1").arg(getAdc<quint64>(signal), signal.dataSize() / 4, 16, QChar('0'));
 				}
 				else
 				{
-					return QString("B%1").arg(getAdc(signal), signal.dataSize(), 2, QChar('0'));
+					return QString("%1b").arg(getAdc<quint64>(signal), signal.dataSize(), 2, QChar('0'));
 				}
 			}
 			case C_VALUE:
@@ -71,14 +72,38 @@ QVariant SignalTableModel::data(const QModelIndex& index, int role) const
 				{
 					return "???";
 				}
-				quint64 adc = getAdc(signal);
-				if (signal.isAnalog())
+				switch (signal.dataFormat())
 				{
-					return signal.lowLimit() + (adc - signal.lowADC()) * (signal.highLimit() - signal.lowLimit()) / (signal.highADC() - signal.lowADC());
-				}
-				else
-				{
-					return (adc == 0) ? 0 : 1;
+				case E::SignedInt:
+					switch (signal.dataSize() / 8)
+					{
+					case sizeof(qint8): return getAdc<qint8>(signal);
+					case sizeof(qint16): return getAdc<qint16>(signal);
+					case sizeof(qint32): return getAdc<qint32>(signal);
+					case sizeof(qint64): return getAdc<qint64>(signal);
+					default: return "???";
+					}
+
+					break;
+				case E::UnsignedInt:
+					return getAdc<quint64>(signal);
+				case E::Float:
+					static_assert(sizeof(float) == sizeof(quint32) && sizeof(double) == sizeof(quint64), "Please check size of basic types");
+					switch (signal.dataSize() / 8)
+					{
+					case sizeof(float):
+					{
+						quint32 value = getAdc<quint32>(signal);
+						return *reinterpret_cast<float*>(&value);
+					}
+					case sizeof(double):
+					{
+						quint64 value = getAdc<quint64>(signal);
+						return *reinterpret_cast<double*>(&value);
+					}
+					default:
+						return "???";
+					}
 				}
 			}
 			case C_REG_ADDR: return signal.regAddr().toString();
@@ -166,20 +191,34 @@ void SignalTableModel::addDataSource(const DataSource& dataSource)
 	}
 }
 
-quint64 SignalTableModel::getAdc(const Signal& signal) const
+void SignalTableModel::setNeedToSwapBytes(bool value)
 {
-	if (signal.dataSize() > 64)
+	beginResetModel();
+	needToSwapBytes = value;
+	endResetModel();
+}
+
+template<typename TYPE>
+TYPE SignalTableModel::getAdc(const Signal& signal) const
+{
+	int size = signal.dataSize();
+	int sizeBytes = size / 8 + ((size % 8 > 0) ? 1 : 0);
+	if (static_cast<size_t>(sizeBytes) > sizeof(TYPE))
 	{
 		return 0;
 	}
 	int offset = signal.regAddr().offset();
 	int bit = signal.regAddr().bit();
-	int size = signal.dataSize();
 	if ((offset < 0) || (offset + (bit + size) / 8 >= RP_BUFFER_SIZE))
 	{
 		return 0;
 	}
-	quint64 adc = m_buffer[offset] >> bit;
+	auto firstWord = m_buffer[offset];
+	if (bit + size < static_cast<int>(sizeof(firstWord)))	//	discrete
+	{
+		swapBytes(firstWord);
+	}
+	TYPE adc = firstWord >> bit;
 	int bitsCopied = sizeof(m_buffer[0]) * 8 - bit;
 	if (bitsCopied > size)
 	{
@@ -193,6 +232,10 @@ quint64 SignalTableModel::getAdc(const Signal& signal) const
 		adc += (m_buffer[offset] & ((1ull << bitsToRead) - 1ull)) << bitsCopied;
 		bitsCopied += bitsToRead;
 		offset++;
+	}
+	if (needToSwapBytes)
+	{
+		swapBytes(adc, sizeBytes);
 	}
 	return adc;
 }

@@ -107,30 +107,29 @@ namespace Hardware
 
     public:
 
-        ConnectionStorage(DbController* db, QObject* parent);
+        ConnectionStorage();
 
         void add(std::shared_ptr<Connection> connection);
         bool remove(std::shared_ptr<Connection> connection);
 
-        int count() const;
+        Q_INVOKABLE int count() const;
         std::shared_ptr<Connection> get(int index) const;
+        Q_INVOKABLE QObject* jsGet(int index) const;
+
         void clear();
         bool checkUniqueConnections(Connection *editObject);
 
-        bool load(QString &errorCode);
-        bool save();
+        bool load(DbController* db, QString &errorCode);
+        bool save(DbController* db);
 
-        bool checkOut();
-        bool checkIn(const QString &comment);
-        bool undo();
-        bool isCheckedOut();
+        bool checkOut(DbController* db);
+        bool checkIn(DbController* db, const QString &comment);
+        bool undo(DbController* db);
+        bool isCheckedOut(DbController* db);
 
     private:
         std::vector<std::shared_ptr<Connection>> m_connections;
         const QString fileName = "Connections.xml";
-
-        DbController* m_db;
-
     };
 }
 Q_DECLARE_METATYPE (std::shared_ptr<Hardware::Connection>)

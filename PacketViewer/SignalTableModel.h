@@ -25,14 +25,17 @@ public:
 signals:
 
 public slots:
+	void setNeedToSwapBytes(bool value);
 
 private:
 	quint16* m_buffer;
 	const SignalSet& m_signalSet;
 	QVector<int> m_relatedSignalIndexes;
 	std::vector<std::pair<int, int>> m_frameSignalIndexLimits;
+	bool needToSwapBytes;
 
-	quint64 getAdc(const Signal& signal) const;
+	template <typename TYPE>
+	TYPE getAdc(const Signal& signal) const;
 };
 
 #endif // SIGNALTABLEMODEL_H

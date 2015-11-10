@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml
+QT       += core gui xml serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,11 +14,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         SerialDataTester.cpp \
-    PortReceiver.cpp
+    PortReceiver.cpp \
+    SettingsDialog.cpp
 
 HEADERS  += SerialDataTester.h \
-    PortReceiver.h
+    PortReceiver.h \
+    SettingsDialog.h
 
-FORMS    += SerialDataTester.ui
+FORMS    += SerialDataTester.ui \
+    SettingsDialog.ui
 
-RESOURCES += resources.qrc
+RESOURCES +=

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ApplicationFunctionalBlocks>
-    <AfbElement StrId="#trig_rs_v1">
+    <AfbElement StrId="#trig_sr_v1">
         <Properties>
-            <Caption>trigger_rs</Caption>
+            <Caption>trigger_sr</Caption>
             <Version>1.0</Version>
             <Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Set signal has the priority.</Description>
             <Category>Trigger</Category>

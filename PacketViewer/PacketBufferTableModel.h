@@ -4,6 +4,17 @@
 #include <QObject>
 #include <QAbstractTableModel>
 
+template <typename TYPE>
+void swapBytes(TYPE& value, int count = -1)
+{
+	quint8* memory = reinterpret_cast<quint8*>(&value);
+	if (static_cast<size_t>(count) > sizeof(TYPE) || count < 0)
+	{
+		count = sizeof(TYPE);
+	}
+	std::reverse(memory, memory + count);
+}
+
 class RpPacketHeader;
 
 class PacketBufferTableModel : public QAbstractTableModel

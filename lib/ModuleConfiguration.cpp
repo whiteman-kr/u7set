@@ -352,13 +352,13 @@ namespace Hardware
         return true;
     }
 
-	bool ModuleFirmware::storeHash64(int frameIndex, int offset, QString dataString)
+    QString ModuleFirmware::storeHash64(int frameIndex, int offset, QString dataString)
 	{
 		if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(quint64)))
 		{
 			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
-			return false;
+            return QString("");
 		}
 
 		QByteArray bytes = dataString.toUtf8();
@@ -366,9 +366,10 @@ namespace Hardware
 		quint64 result = CUtils::calcHash(bytes.data(), bytes.size());
 		setData64(frameIndex, offset, result);
 
+        return QString::number(result);
+
 		//qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
 
-		return true;
 	}
 
     void ModuleFirmware::writeLog(QString logString)
