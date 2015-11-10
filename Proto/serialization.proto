@@ -552,6 +552,7 @@ message SchemeItemConst
 	optional int32 type = 1 [default = 0];
 	optional int32 intValue = 2 [default = 0];
 	optional double floatValue = 3 [default = 0.0];
+	optional int32 precision = 4 [default = 2];
 }
 
 //------------------------------------------------------------------------------------------

@@ -882,7 +882,7 @@ void EditSchemeTabPage::closeTab()
 		switch (result)
 		{
 		case QMessageBox::Save:
-			assert(false);			// to do
+			saveWorkcopy();
 			break;
 		case QMessageBox::Discard:
 			break;

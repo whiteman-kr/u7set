@@ -37,6 +37,7 @@ namespace VFrame30
 		constitem->set_type(m_type);
 		constitem->set_intvalue(m_intValue);
 		constitem->set_floatvalue(m_floatValue);
+		constitem->set_precision(m_precision);
 
 		return true;
 	}
@@ -62,6 +63,7 @@ namespace VFrame30
 		m_type = static_cast<ConstType>(constitem.type());
 		m_intValue = constitem.intvalue();
 		m_floatValue = constitem.floatvalue();
+		m_precision = constitem.precision();
 
 		return true;
 	}
@@ -134,7 +136,7 @@ namespace VFrame30
 				text = QString::number(intValue());
 				break;
 			case ConstType::FloatType:
-				text = QString::number(floatValue(), 'g', 4);
+				text = QString::number(floatValue(), 'f', precision());
 				break;
 			default:
 				assert(false);
@@ -186,6 +188,26 @@ namespace VFrame30
 	void SchemeItemConst::setFloatValue(double doubleValue)
 	{
 		m_floatValue = doubleValue;
+	}
+
+	int SchemeItemConst::precision() const
+	{
+		return m_precision;
+	}
+
+	void SchemeItemConst::setPrecision(int value)
+	{
+		if (value < 0)
+		{
+			value = 0;
+		}
+
+		if (value > 24)
+		{
+			value = 24;
+		}
+
+		m_precision = value;
 	}
 
 }
