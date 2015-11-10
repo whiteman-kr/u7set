@@ -196,6 +196,66 @@ namespace Builder
 
 	// --------------------------------------------------------------------------------------
 	//
+	//	ConfigurationXmlFile class implementation
+	//
+	// --------------------------------------------------------------------------------------
+
+	ConfigurationXmlFile::ConfigurationXmlFile(BuildResultWriter& buildResultWriter, const QString& subDir) :
+		m_buildResultWriter(buildResultWriter),
+		m_xmlWriter(&m_xmlData),
+		m_log(buildResultWriter.log()),
+		m_subDir(subDir)
+	{
+	}
+
+	// --------------------------------------------------------------------------------------
+	//
+	//	MultichannelFile class implementation
+	//
+	// --------------------------------------------------------------------------------------
+
+	MultichannelFile::MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID,
+									   QString lmCaption, int frameSize, int frameCount) :
+		m_buildResultWriter(buildResultWriter),
+		m_subsysStrID(subsysStrID),
+		m_subsysID(subsysID),
+		m_lmCaption(lmCaption)
+	{
+		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount,
+						 m_buildResultWriter.projectName(), m_buildResultWriter.userName(), m_buildResultWriter.changesetID());
+	}
+
+
+	bool MultichannelFile::setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode)
+	{
+		QString errorMsg;
+
+		if (m_moduleFirmware.setChannelData(channel, frameSize, frameCount, appLogicBinCode, &errorMsg) == false)
+		{
+			LOG_ERROR(m_log, errorMsg);
+			return false;
+		}
+
+		return true;
+	}
+
+
+	bool MultichannelFile::getFileData(QByteArray& fileData)
+	{
+		QString errorMsg;
+
+		if (m_moduleFirmware.save(fileData, &errorMsg) == false)
+		{
+			LOG_ERROR(m_log, errorMsg);
+			return false;
+		}
+
+		return true;
+	}
+
+
+	// --------------------------------------------------------------------------------------
+	//
 	//	BuildResultWriter class implementation
 	//
 	// --------------------------------------------------------------------------------------
@@ -447,34 +507,34 @@ namespace Builder
 
 	bool BuildResultWriter::createBuildXML()
 	{
-		m_buildXMLFile.setFileName(m_buildFullPath + m_separator + "build.xml");
+		m_buildXmlFile.setFileName(m_buildFullPath + m_separator + "build.xml");
 
-		if (m_buildXMLFile.open(QIODevice::ReadWrite | QIODevice::Text) == false)
+		if (m_buildXmlFile.open(QIODevice::ReadWrite | QIODevice::Text) == false)
 		{
 			m_runBuild = false;
 			return false;
 		}
 
-		m_buildXML.setDevice(&m_buildXMLFile);
+		m_buildXml.setDevice(&m_buildXmlFile);
 
-		m_buildXML.setAutoFormatting(true);
+		m_buildXml.setAutoFormatting(true);
 
-		m_buildXML.writeStartDocument();
+		m_buildXml.writeStartDocument();
 
-		m_buildXML.writeStartElement("build");
+		m_buildXml.writeStartElement("build");
 
-		m_buildXML.writeAttribute("id", QString("%1").arg(m_buildNo));
-		m_buildXML.writeAttribute("type", m_release ? "release" : "debug");
+		m_buildXml.writeAttribute("id", QString("%1").arg(m_buildNo));
+		m_buildXml.writeAttribute("type", m_release ? "release" : "debug");
 
 		QDateTime now = QDateTime::currentDateTime();
 
-		m_buildXML.writeAttribute("date", now.toString("dd.MM.yyyy"));
-		m_buildXML.writeAttribute("time", now.toString("hh:mm:ss"));
+		m_buildXml.writeAttribute("date", now.toString("dd.MM.yyyy"));
+		m_buildXml.writeAttribute("time", now.toString("hh:mm:ss"));
 
-		m_buildXML.writeAttribute("changeset", QString("%1").arg(m_changesetID));
+		m_buildXml.writeAttribute("changeset", QString("%1").arg(m_changesetID));
 
-		m_buildXML.writeAttribute("user", m_dbController->currentUser().username());
-		m_buildXML.writeAttribute("workstation", m_workstation);
+		m_buildXml.writeAttribute("user", m_dbController->currentUser().username());
+		m_buildXml.writeAttribute("workstation", m_workstation);
 
 		return true;
 	}
@@ -488,8 +548,8 @@ namespace Builder
 
 	bool BuildResultWriter::writeFilesSection()
 	{
-		m_buildXML.writeStartElement("files");
-		m_buildXML.writeAttribute("count", QString("%1").arg(m_buildFiles.size()));
+		m_buildXml.writeStartElement("files");
+		m_buildXml.writeAttribute("count", QString("%1").arg(m_buildFiles.size()));
 
 		for(BuildFile* buildFile : m_buildFiles)
 		{
@@ -499,13 +559,13 @@ namespace Builder
 				continue;
 			}
 
-			m_buildXML.writeStartElement("file");
+			m_buildXml.writeStartElement("file");
 
-			m_buildXML.writeAttribute("name", buildFile->pathFileName());
-			m_buildXML.writeAttribute("size", QString("%1").arg(buildFile->size()));
-			m_buildXML.writeAttribute("md5", buildFile->md5());
+			m_buildXml.writeAttribute("name", buildFile->pathFileName());
+			m_buildXml.writeAttribute("size", QString("%1").arg(buildFile->size()));
+			m_buildXml.writeAttribute("md5", buildFile->md5());
 
-			m_buildXML.writeEndElement();		// file
+			m_buildXml.writeEndElement();		// file
 		}
 
 		return true;
@@ -514,10 +574,97 @@ namespace Builder
 
 	bool BuildResultWriter::closeBuildXML()
 	{
-		m_buildXML.writeEndElement();			// build
-		m_buildXML.writeEndDocument();
+		m_buildXml.writeEndElement();			// build
+		m_buildXml.writeEndDocument();
 
-		m_buildXMLFile.close();
+		m_buildXmlFile.close();
 		return true;
+	}
+
+
+	MultichannelFile* BuildResultWriter::createMutichannelFile(QString subsysStrID, int subsysID, QString lmCaption, int frameSize, int frameCount)
+	{
+		MultichannelFile* multichannelFile = nullptr;
+
+		if (m_multichannelFiles.contains(subsysStrID) == true)
+		{
+			multichannelFile = m_multichannelFiles[subsysStrID];
+
+			if (multichannelFile == nullptr)
+			{
+				assert(false);
+				return nullptr;
+			}
+
+			if (multichannelFile->subsysID() != subsysID)
+			{
+				LOG_ERROR(m_log, QString(tr("Different subsysID (%1 & %2) for subsysStrID = '%3'")).
+						  arg(multichannelFile->subsysID()).arg(subsysID).arg(subsysStrID));
+
+				return nullptr;
+			}
+		}
+		else
+		{
+			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmCaption, frameSize, frameCount);
+
+			m_multichannelFiles.insert(subsysStrID, multichannelFile);
+		}
+
+		return multichannelFile;
+	}
+
+
+	bool BuildResultWriter::writeMultichannelFiles()
+	{
+		bool result = true;
+
+		if (m_multichannelFiles.isEmpty() == false)
+		{
+			LOG_EMPTY_LINE(m_log);
+		}
+
+		for(MultichannelFile* multichannelFile : m_multichannelFiles)
+		{
+			if (multichannelFile == nullptr)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			QByteArray fileData;
+
+			if (multichannelFile->getFileData(fileData) == true)
+			{
+				result &= addFile(multichannelFile->subsysStrID(), multichannelFile->lmCaption() + ".alb", fileData);
+			}
+			else
+			{
+				assert(false);
+				result = false;
+			}
+
+			delete multichannelFile;
+		}
+
+		m_multichannelFiles.clear();
+
+		return result;
+	}
+
+
+
+	ConfigurationXmlFile* BuildResultWriter::createConfigurationXmlFile(const QString& subDir)
+	{
+		if (m_cfgFiles.contains(subDir))
+		{
+			LOG_ERROR(m_log, QString(tr("'Configuration.xml' file already created for '%1'")).arg(subDir));
+			return nullptr;
+		}
+
+		// ConfigurationXmlFile* cfgFile = new ConfigurationXmlFile(*this, subDir);
+		return nullptr;	// !!!!!!
 	}
 }

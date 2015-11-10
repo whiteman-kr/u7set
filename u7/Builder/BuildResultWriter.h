@@ -8,6 +8,7 @@
 
 #include "../include/OutputLog.h"
 #include "../include/OrderedHash.h"
+#include "../include/DeviceObject.h"
 
 
 class DbController;
@@ -15,7 +16,7 @@ class DbController;
 namespace Builder
 {
 
-class BuildFile : public QObject
+	class BuildFile : public QObject
 	{
 		Q_OBJECT
 
@@ -54,6 +55,49 @@ class BuildFile : public QObject
 	};
 
 
+	class BuildResultWriter;
+
+
+	class ConfigurationXmlFile
+	{
+	private:
+		BuildResultWriter& m_buildResultWriter;
+		QByteArray m_xmlData;
+		QXmlStreamWriter m_xmlWriter;
+		OutputLog* m_log = nullptr;
+		QString m_subDir;
+
+	public:
+		ConfigurationXmlFile(BuildResultWriter& buildResultWriter, const QString& subDir);
+	};
+
+
+
+	class MultichannelFile
+	{
+	private:
+		BuildResultWriter& m_buildResultWriter;
+		OutputLog* m_log = nullptr;
+		QString m_subsysStrID;
+		int m_subsysID = 0;
+		QString m_lmCaption;
+
+		Hardware::ModuleFirmware m_moduleFirmware;
+
+	public:
+		MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID, QString lmCaption, int frameSize, int frameCount);
+
+		bool setChannelData(int channel, int frameSize, int frameCount, const QByteArray& appLogicBinCode);
+
+		bool getFileData(QByteArray& fileData);
+
+		QString subsysStrID() const { return m_subsysStrID; }
+		QString lmCaption() const { return m_lmCaption; }
+		int subsysID() const { return m_subsysID; }
+	};
+
+
+
 	class BuildResultWriter : public QObject
 	{
 		Q_OBJECT
@@ -65,8 +109,8 @@ class BuildFile : public QObject
 		QString m_buildFullPath;
 		QString m_separator;
 
-		QFile m_buildXMLFile;
-		QXmlStreamWriter m_buildXML;
+		QFile m_buildXmlFile;
+		QXmlStreamWriter m_buildXml;
 
 		bool m_release = false;
 		int m_changesetID = 0;
@@ -77,6 +121,10 @@ class BuildFile : public QObject
 		DbController* m_dbController = nullptr;
 
 		HashedVector<QString, BuildFile*> m_buildFiles;
+
+		HashedVector<QString, ConfigurationXmlFile*> m_cfgFiles;
+
+		HashedVector<QString, MultichannelFile*> m_multichannelFiles;
 
 		bool m_runBuild = true;
 
@@ -104,9 +152,16 @@ class BuildFile : public QObject
 		bool addFile(const QString& subDir, const QString& fileName, const QString& dataString);
 		bool addFile(const QString& subDir, const QString& fileName, const QStringList& stringList);
 
+		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
+
+		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmCaption, int frameSize, int frameCount);
+		bool writeMultichannelFiles();
+
 		QString projectName() const;
 		QString userName() const;
 		int changesetID() const { return m_changesetID; }
+
+		OutputLog* log() { return m_log; }
 	};
 }
 

@@ -959,8 +959,6 @@ namespace Builder
 
 			QString str = codeItem->toString();
 
-			qDebug() << str;
-
 			asmCode.append(str);
 		}
 	}
