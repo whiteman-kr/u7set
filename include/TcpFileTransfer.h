@@ -43,9 +43,9 @@ namespace Tcp
 	{
 		FileTransferResult errorCode = FileTransferResult::Ok;
 		qint64 fileSize = 0;
-		int totalParts = 0;				// == fileSize / FILE_PART_SIZE + (fileSize % FILE_PART_SIZE ? 1 : 0)
-		int currentPart = 0;			// from 1
-		int currentPartSize = 0;		// <= FILE_PART_SIZE
+		qint32 totalParts = 0;				// == fileSize / FILE_PART_SIZE + (fileSize % FILE_PART_SIZE ? 1 : 0)
+		qint32 currentPart = 0;			// from 1
+		qint32 currentPartSize = 0;		// <= FILE_PART_SIZE
 		char md5[MD5_LEN];				// current MD5 code
 
 		GetFileReply();
