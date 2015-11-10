@@ -214,7 +214,7 @@ TYPE SignalTableModel::getAdc(const Signal& signal) const
 		return 0;
 	}
 	auto firstWord = m_buffer[offset];
-	if (bit + size < static_cast<int>(sizeof(firstWord)))	//	discrete
+	if (bit + size < static_cast<int>(sizeof(firstWord) * 8) && needToSwapBytes)	//	discrete
 	{
 		swapBytes(firstWord);
 	}

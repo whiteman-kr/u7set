@@ -620,6 +620,8 @@ namespace Builder
 			result &= moduleLogicCompiler.run();
 		}
 
+		m_resultWriter->writeMultichannelFiles();
+
 		return result;
 	}
 
@@ -631,9 +633,9 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
-		int susbsysID = m_subsystems->ssKey(subsysStrID);
+		int subsysID = m_subsystems->ssKey(subsysStrID);
 
-		if (susbsysID == -1)
+		if (subsysID == -1)
 		{
 			LOG_ERROR(m_log, QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(lmCaption));
 
@@ -642,7 +644,18 @@ namespace Builder
 
 		bool result = true;
 
-		Hardware::ModuleFirmware moduleFirmware;
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsysStrID, subsysID, lmCaption, frameSize, frameCount);
+
+		if (multichannelFile != nullptr)
+		{
+			result = multichannelFile->setChannelData(channel, frameSize, frameCount, appLogicBinCode);
+		}
+		else
+		{
+			result = false;
+		}
+
+/*		Hardware::ModuleFirmware moduleFirmware;
 
 		moduleFirmware.init(lmCaption, subsysStrID, susbsysID, 0x0101, frameSize, frameCount,
 						 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
@@ -664,7 +677,7 @@ namespace Builder
 			result = false;
 		}
 
-		result &= m_resultWriter->addFile(moduleFirmware.subsysId(), moduleFirmware.caption() + ".alb", moduleFirmwareFileData);
+		result &= m_resultWriter->addFile(moduleFirmware.subsysId(), moduleFirmware.caption() + ".alb", moduleFirmwareFileData);*/
 
 		return result;
 	}
@@ -2289,7 +2302,8 @@ namespace Builder
 
 		if (ramAddrOffset == -1 || ramAddrBit == -1)
 		{
-			assert(false);		// signal ramAddr is not calculated!!!
+			LOG_ERROR(m_log, QString(tr("Address of signal '%1' is not calculated")).
+					  arg(appSignal.strID()));
 			return false;
 		}
 		else
@@ -2831,19 +2845,22 @@ namespace Builder
 
 		m_code.getMifCode(mifCode);
 
-        result &= m_resultWriter->addFile(subsysId, QString("%1.mif").arg(m_lm->caption()), mifCode);
+		result &= m_resultWriter->addFile(subsysId, QString("%1-%2ch.mif").
+										  arg(m_lm->caption()).arg(channel), mifCode);
 
 		QStringList asmCode;
 
 		m_code.getAsmCode(asmCode);
 
-        result = m_resultWriter->addFile(subsysId, QString("%1.asm").arg(m_lm->caption()), asmCode);
+		result = m_resultWriter->addFile(subsysId, QString("%1-%2ch.asm").
+										 arg(m_lm->caption()).arg(channel), asmCode);
 
 		QStringList memFile;
 
 		m_memoryMap.getFile(memFile);
 
-        result = m_resultWriter->addFile(subsysId, QString("%1.mem").arg(m_lm->caption()), memFile);
+		result = m_resultWriter->addFile(subsysId, QString("%1-%2ch.mem").
+										 arg(m_lm->caption()).arg(channel), memFile);
 
 		//
 
@@ -4150,11 +4167,7 @@ namespace Builder
 			AppFbParamValue value(afbParam);
 
 			m_paramValuesArray.insert(afbParam.opName(), value);
-
-			qDebug() << afbParam.opName() << " =  " << value.toString();
 		}
-
-		qDebug() << "";
 	}
 
 
@@ -4523,7 +4536,7 @@ namespace Builder
 
 		if (m_signalStrIdMap.contains(strID))
 		{
-			assert(false);			// duplicate pin GUID
+			assert(false);							// duplicate StrID
 
 			appSignal = m_signalStrIdMap[strID];
 
@@ -4558,7 +4571,7 @@ namespace Builder
 			return "";
 		}
 
-		QString strID = QString("%1_%2$кукпук_N%3_P%4").arg(appFb->afbStrID()).arg(appFb->instance()).arg(appFb->number()).arg(outputPin.afbOperandIndex());
+		QString strID = QString("%1_I%2_N%3_P%4").arg(appFb->afbStrID()).arg(appFb->instance()).arg(appFb->number()).arg(outputPin.afbOperandIndex());
 
 		strID = strID.toUpper();
 

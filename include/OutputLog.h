@@ -10,6 +10,7 @@
 #define LOG_MESSAGE(logObject, message)	logObject->writeMessage(message, __FILE__, __LINE__, Q_FUNC_INFO);
 #define LOG_SUCCESS(logObject, message)	logObject->writeSuccess(message, __FILE__, __LINE__, Q_FUNC_INFO);
 
+#define LOG_INTERNAL_ERROR(logObject)	logObject->writeError(QString(tr("Internal error! File: %1 Line: %2 Function: %3")).arg(__FILE__).arg(__LINE__).arg(Q_FUNC_INFO), __FILE__, __LINE__, Q_FUNC_INFO);
 
 
 enum class OutputMessageLevel
