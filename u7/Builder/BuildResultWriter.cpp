@@ -372,8 +372,6 @@ namespace Builder
 			return false;
 		}
 
-		writeMultichannelFiles();
-
 		LOG_EMPTY_LINE(m_log)
 
 		int errors = m_log->errorCount();
@@ -609,6 +607,8 @@ namespace Builder
 		else
 		{
 			multichannelFile = new MultichannelFile(*this, subsysStrID, subsysID, lmCaption, frameSize, frameCount);
+
+			m_multichannelFiles.insert(subsysStrID, multichannelFile);
 		}
 
 		return multichannelFile;
@@ -618,6 +618,11 @@ namespace Builder
 	bool BuildResultWriter::writeMultichannelFiles()
 	{
 		bool result = true;
+
+		if (m_multichannelFiles.isEmpty() == false)
+		{
+			LOG_EMPTY_LINE(m_log);
+		}
 
 		for(MultichannelFile* multichannelFile : m_multichannelFiles)
 		{
