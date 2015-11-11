@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../include/ProtoSerialization.h"
 #include "DrawParam.h"
-#include "DebugInstCounter.h"
+#include "../include/PropertyObject.h"
+#include "../include/ProtoSerialization.h"
+#include "../include/DebugInstCounter.h"
 #include "../include/TypesAndEnums.h"
 
 namespace VFrame30
@@ -120,16 +121,13 @@ namespace VFrame30
 
 
 	class VFRAME30LIBSHARED_EXPORT SchemeItem :
-		public QObject, 
+		public PropertyObject,
 		public ISchemeItemPropertiesPos,
 		public IPointList,
 		public Proto::ObjectSerialization<SchemeItem>,
 		public DebugInstCounter<SchemeItem>
 	{
 		Q_OBJECT
-
-		Q_PROPERTY(bool AcceptClick READ acceptClick  WRITE setAcceptClick)
-		Q_PROPERTY(QString ClickScript READ clickScript  WRITE setClickScript)
 
 	protected:
 		SchemeItem();

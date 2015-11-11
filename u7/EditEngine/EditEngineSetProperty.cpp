@@ -27,7 +27,7 @@ namespace EditEngine
 			Record r;
 
 			r.propertyName = propertyName;
-			r.oldValue = i->property(propertyName.toStdString().c_str());
+			r.oldValue = i->propertyValue(propertyName);
 			r.newValue = value;
 			r.item = i;
 
@@ -41,44 +41,30 @@ namespace EditEngine
 
 	void SetPropertyCommand::executeCommand(EditSchemeView* schemeView)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemeItem>> sel;
+		std::list<std::shared_ptr<VFrame30::SchemeItem>> selection;
 
 		for (Record& r : m_items)
 		{
-			QList<QByteArray> dynamicProperties = r.item->dynamicPropertyNames();
+			selection.push_back(r.item);
+			r.item->setPropertyValue(r.propertyName, r.newValue);
 
-			bool isDynamic = false;
-			for (QByteArray& ba : dynamicProperties)
-			{
-				QString strName(ba);
+//			if (isDynamic == true)
+//			{
+//				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
+//				//
+//				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
 
-				if (r.propertyName == strName)
-				{
-					isDynamic = true;
-					break;
-				}
-			}
+//				if (fblElement == nullptr)
+//				{
+//					assert(fblElement != nullptr);
+//					continue;
+//				}
 
-			if (isDynamic == true)
-			{
-				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
-				//
-				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
-
-				if (fblElement == nullptr)
-				{
-					assert(fblElement != nullptr);
-					continue;
-				}
-
-				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
-			}
-
-			sel.push_back(r.item);
-			r.item->setProperty(r.propertyName.toStdString().c_str(), r.newValue);
+//				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
+//			}
 		}
 
-		schemeView->setSelectedItems(sel);
+		schemeView->setSelectedItems(selection);
 		return;
 	}
 
@@ -88,40 +74,26 @@ namespace EditEngine
 
 		for (Record& r : m_items)
 		{
-			QList<QByteArray> dynamicProperties = r.item->dynamicPropertyNames();
-
-			bool isDynamic = false;
-			for (QByteArray& ba : dynamicProperties)
-			{
-				QString strName(ba);
-
-				if (r.propertyName == strName)
-				{
-					isDynamic = true;
-					break;
-				}
-			}
-
-			if (isDynamic == true)
-			{
-				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
-				//
-				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
-
-				if (fblElement == nullptr)
-				{
-					assert(fblElement != nullptr);
-					continue;
-				}
-
-				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
-
-			}
-
-			// --
-			//
 			sel.push_back(r.item);
-			r.item->setProperty(r.propertyName.toStdString().c_str(), r.oldValue);
+			r.item->setPropertyValue(r.propertyName, r.oldValue);
+
+
+//			if (isDynamic == true)
+//			{
+//				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
+//				//
+//				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
+
+//				if (fblElement == nullptr)
+//				{
+//					assert(fblElement != nullptr);
+//					continue;
+//				}
+
+//				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
+//			}
+
+
 		}
 
 		schemeView->setSelectedItems(sel);

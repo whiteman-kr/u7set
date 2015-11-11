@@ -46,9 +46,9 @@ bool DialogConnectionsPropertyEditor::onPropertiesChanged(std::shared_ptr<Proper
 //
 
 DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QWidget *parent) :
-    m_dbController(pDbController),
-    QDialog(parent),
-    ui(new Ui::DialogConnectionsEditor)
+	QDialog(parent),
+	ui(new Ui::DialogConnectionsEditor),
+	m_dbController(pDbController)
 {
     assert(db());
 

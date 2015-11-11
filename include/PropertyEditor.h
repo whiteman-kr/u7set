@@ -330,7 +330,6 @@ namespace ExtWidgets
 
 	// -------------------------------------------------------------------------------
 
-	//template <class Type>
 	class PropertyEditor : public QtTreePropertyBrowser
 	{
 		Q_OBJECT
@@ -338,10 +337,11 @@ namespace ExtWidgets
 	public:
 		explicit PropertyEditor(QWidget* parent);
 
-		void updateProperty(const QString& propertyName);
 		// Public functions
 		//
 	public:
+		void updateProperty(const QString& propertyName);
+
         void setObjects(QList<std::shared_ptr<PropertyObject>>& objects);
 		void clearProperties();
 
@@ -369,7 +369,7 @@ namespace ExtWidgets
 
         QList<std::shared_ptr<PropertyObject>> m_objects;
 
-		//Private Data
+		// Private Data
 		//
 	private:
 		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, QVariant>& values);

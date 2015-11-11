@@ -55,17 +55,17 @@ namespace VFrame30
 		double weight() const;
 		void setWeight(double weight);
 
-		QRgb lineColor() const;
-		void setLineColor(QRgb color);
+		QColor lineColor() const;
+		void setLineColor(QColor color);
 
-		QRgb fillColor() const;
-		void setFillColor(QRgb color);
+		QColor fillColor() const;
+		void setFillColor(QColor color);
 
 		const QString& text() const;
-		void setText(QString& value);
+		void setText(QString value);
 
-		QRgb textColor() const;
-		void setTextColor(QRgb color);
+		QColor textColor() const;
+		void setTextColor(QColor color);
 		
 		DECLARE_FONT_PROPERTIES(Font);
 
@@ -77,10 +77,10 @@ namespace VFrame30
 
 	private:
 		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
-		QRgb m_lineColor;
-		QRgb m_fillColor;
+		QColor m_lineColor;
+		QColor m_fillColor;
+		QColor m_textColor;
 		QString m_text;
-		QRgb m_textColor;
 		FontParam m_font;
 		bool m_fill;
 		bool m_drawRect = true;				// Rect is visible, thikness 0 is possible
