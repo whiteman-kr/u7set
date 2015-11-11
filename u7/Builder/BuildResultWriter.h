@@ -16,23 +16,30 @@ class DbController;
 namespace Builder
 {
 
+	struct BuildFileInfo
+	{
+		QString pathFileName;		// path and file name from build root directory, like "/subdir/filename.xml"
+		qint64 size = 0;			// size of file
+		QString md5;				// MD5 hash of file
+	};
+
+
 	class BuildFile : public QObject
 	{
 		Q_OBJECT
 
 	private:
 		QString m_fileName;			// filename only, like "filename.xml"
-		QString m_pathFileName;		// path and file name from build root directory, like "/subdir/filename.xml"
-		qint64 m_size = 0;			// size of file
-		QString m_md5;				// MD5 hash of file
+
+		BuildFileInfo m_info;
 
 		QFile m_file;
 
 		static QString m_separator;
 
-		QString removeHeadTailSeparator(const QString& str);
-
 		void getFileInfo();
+
+		static QString removeHeadTailSeparator(const QString& str);
 
 	public:
 		BuildFile(const QString& subDir, const QString& fileName);
@@ -44,33 +51,44 @@ namespace Builder
 		bool write(const QString& fullBuildPath, const QStringList& stringList, OutputLog* log);
 
 		QString fileName() const { return m_fileName; }
-		QString pathFileName() const { return m_pathFileName; }
+		QString pathFileName() const { return m_info.pathFileName; }
 
-		qint64 size() const { return m_size; }
-		QString md5() const { return m_md5; }
+		qint64 size() const { return m_info.size; }
+		QString md5() const { return m_info.md5; }
 
 		QFile& file() { return m_file; }
 
-		void setInfo(qint64 size, const QString& md5) { m_size = size; m_md5 = md5; }
+		BuildFileInfo getInfo() const { return m_info; }
+
+		static QString constructPathFileName(const QString& subDir, const QString& fileName);
 	};
 
 
 	class BuildResultWriter;
 
 
-	class ConfigurationXmlFile
+	class ConfigurationXmlFile : public QObject
 	{
+		Q_OBJECT
+
 	private:
 		BuildResultWriter& m_buildResultWriter;
-		QByteArray m_xmlData;
+		QByteArray m_fileData;
 		QXmlStreamWriter m_xmlWriter;
 		OutputLog* m_log = nullptr;
 		QString m_subDir;
 
+		HashedVector<QString, BuildFileInfo> m_linkedFilesInfo;
+
 	public:
 		ConfigurationXmlFile(BuildResultWriter& buildResultWriter, const QString& subDir);
-	};
 
+		QXmlStreamWriter& xmlWriter() { return m_xmlWriter; }
+		bool addLinkToFile(const QString& subDir, const QString& fileName);
+		void finalize();
+		const QByteArray& getFileData() { return m_fileData; }
+		QString subDir() const { return m_subDir; }
+	};
 
 
 	class MultichannelFile
@@ -97,7 +115,6 @@ namespace Builder
 	};
 
 
-
 	class BuildResultWriter : public QObject
 	{
 		Q_OBJECT
@@ -110,12 +127,16 @@ namespace Builder
 		QString m_separator;
 
 		QFile m_buildXmlFile;
-		QXmlStreamWriter m_buildXml;
+		QXmlStreamWriter m_xmlWriter;
+
+		QString m_projectName;
+		QString m_userName;
+		QString m_workstation;
+		QDateTime m_buildDateTime;
 
 		bool m_release = false;
 		int m_changesetID = 0;
 		int m_buildNo = -1;
-		QString m_workstation;
 
 		OutputLog* m_log = nullptr;
 		DbController* m_dbController = nullptr;
@@ -135,11 +156,11 @@ namespace Builder
 
 		bool createBuildDirectory();
 
-		bool createBuildXML();
-		bool writeBuildXML();
-		bool closeBuildXML();
+		bool createBuildXml();
+		bool writeBuildXmlFilesSection();
+		bool closeBuildXml();
 
-		bool writeFilesSection();
+		bool writeConfigurationXmlFiles();
 
 	public:
 		BuildResultWriter(QObject *parent = 0);
@@ -157,11 +178,17 @@ namespace Builder
 		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmCaption, int frameSize, int frameCount);
 		bool writeMultichannelFiles();
 
-		QString projectName() const;
-		QString userName() const;
+		QString projectName() const { return m_projectName; }
+		QString userName() const { return m_userName; }
 		int changesetID() const { return m_changesetID; }
+		int buildNo() const { return m_buildNo; }
+		QString buildType() const { return m_release ? "release" : "debug"; }
+		QString workstation() const { return m_workstation; }
+		QDateTime buildDateTime() const { return m_buildDateTime; }
 
 		OutputLog* log() { return m_log; }
+
+		BuildFile* getBuildFile(const QString& pathFileName);
 	};
 }
 

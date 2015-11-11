@@ -655,30 +655,6 @@ namespace Builder
 			result = false;
 		}
 
-/*		Hardware::ModuleFirmware moduleFirmware;
-
-		moduleFirmware.init(lmCaption, subsysStrID, susbsysID, 0x0101, frameSize, frameCount,
-						 m_resultWriter->projectName(), m_resultWriter->userName(), m_resultWriter->changesetID());
-
-		QString errorMsg;
-
-		if (!moduleFirmware.setChannelData(channel, frameSize, frameCount, appLogicBinCode, &errorMsg))
-		{
-			LOG_ERROR(m_log, errorMsg);
-
-			result = false;
-		}
-
-		QByteArray moduleFirmwareFileData;
-
-		if (!moduleFirmware.save(moduleFirmwareFileData, &errorMsg))
-		{
-			LOG_ERROR(m_log, errorMsg);
-			result = false;
-		}
-
-		result &= m_resultWriter->addFile(moduleFirmware.subsysId(), moduleFirmware.caption() + ".alb", moduleFirmwareFileData);*/
-
 		return result;
 	}
 
@@ -2861,7 +2837,6 @@ namespace Builder
 
 		result = m_resultWriter->addFile(subsysId, QString("%1-%2ch.mem").
 										 arg(m_lm->caption()).arg(channel), memFile);
-
 		//
 
 		writeLMCodeTestFile();

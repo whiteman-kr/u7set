@@ -23,14 +23,7 @@ namespace Builder
 	{
 		m_fileName = removeHeadTailSeparator(fileName);
 
-		if (subDir.isEmpty())
-		{
-			m_pathFileName = m_separator + m_fileName;
-		}
-		else
-		{
-			m_pathFileName = m_separator + removeHeadTailSeparator(subDir) + m_separator + m_fileName;
-		}
+		m_info.pathFileName = constructPathFileName(subDir, fileName);
 	}
 
 
@@ -66,9 +59,28 @@ namespace Builder
 	}
 
 
+	QString BuildFile::constructPathFileName(const QString& subDir, const QString& fileName)
+	{
+		QString pathFileName;
+
+		QString fName = removeHeadTailSeparator(fileName);
+
+		if (subDir.isEmpty())
+		{
+			pathFileName = BuildFile::m_separator + fName;
+		}
+		else
+		{
+			pathFileName = BuildFile::m_separator + removeHeadTailSeparator(subDir) + m_separator + fName;
+		}
+
+		return pathFileName;
+	}
+
+
 	bool BuildFile::open(const QString& fullBuildPath, bool textMode, OutputLog* log)
 	{
-		QString fullPathFileName = fullBuildPath + m_pathFileName;
+		QString fullPathFileName = fullBuildPath + m_info.pathFileName;
 
 		QFileInfo fi(fullPathFileName);
 
@@ -102,7 +114,7 @@ namespace Builder
 			return false;
 		}
 
-		LOG_MESSAGE(log, QString(tr("File was created: %1")).arg(m_pathFileName));
+		LOG_MESSAGE(log, QString(tr("File was created: %1")).arg(m_info.pathFileName));
 
 		return true;
 	}
@@ -112,13 +124,15 @@ namespace Builder
 	{
 		QFileInfo fi(m_file);
 
-		m_size = fi.size();
+		m_info.size = fi.size();
 
 		QCryptographicHash md5Generator(QCryptographicHash::Md5);
 
+		m_file.seek(0);
+
 		md5Generator.addData(&m_file);
 
-		m_md5 = QString(md5Generator.result().toHex());
+		m_info.md5 = QString(md5Generator.result().toHex());
 	}
 
 
@@ -135,7 +149,7 @@ namespace Builder
 
 		if (written == -1)
 		{
-			LOG_ERROR(log, QString(tr("Write error of file: ")).arg(m_pathFileName));
+			LOG_ERROR(log, QString(tr("Write error of file: ")).arg(m_info.pathFileName));
 			result = false;
 		}
 
@@ -202,11 +216,72 @@ namespace Builder
 
 	ConfigurationXmlFile::ConfigurationXmlFile(BuildResultWriter& buildResultWriter, const QString& subDir) :
 		m_buildResultWriter(buildResultWriter),
-		m_xmlWriter(&m_xmlData),
+		m_xmlWriter(&m_fileData),
 		m_log(buildResultWriter.log()),
 		m_subDir(subDir)
 	{
+		m_xmlWriter.setAutoFormatting(true);
+
+		m_xmlWriter.writeStartDocument();
+
+		m_xmlWriter.writeStartElement("build");
+
+		m_xmlWriter.writeAttribute("id", QString("%1").arg(m_buildResultWriter.buildNo()));
+		m_xmlWriter.writeAttribute("type", m_buildResultWriter.buildType());
+
+		m_xmlWriter.writeAttribute("date", m_buildResultWriter.buildDateTime().toString("dd.MM.yyyy"));
+		m_xmlWriter.writeAttribute("time", m_buildResultWriter.buildDateTime().toString("hh:mm:ss"));
+
+		m_xmlWriter.writeAttribute("changeset", QString("%1").arg(m_buildResultWriter.changesetID()));
+
+		m_xmlWriter.writeAttribute("user", m_buildResultWriter.userName());
+		m_xmlWriter.writeAttribute("workstation", m_buildResultWriter.workstation());
 	}
+
+
+	bool ConfigurationXmlFile::addLinkToFile(const QString& subDir, const QString& fileName)
+	{
+		QString pathFileName = BuildFile::constructPathFileName(subDir, fileName);
+
+		BuildFile* buildFile = m_buildResultWriter.getBuildFile(pathFileName);
+
+		if (buildFile == nullptr)
+		{
+			LOG_ERROR(m_log, QString(tr("Build file '%1' is not found, can't link to '%2/configuration.xml'")).
+					  arg(pathFileName).arg(m_subDir));
+			return false;
+		}
+
+		m_linkedFilesInfo.insert(pathFileName, buildFile->getInfo());
+
+		return true;
+	}
+
+
+	void ConfigurationXmlFile::finalize()
+	{
+		m_xmlWriter.writeStartElement("files");
+
+		m_xmlWriter.writeAttribute("count", QString("%1").arg(m_linkedFilesInfo.count()));
+
+		for(const BuildFileInfo& buildFileInfo : m_linkedFilesInfo)
+		{
+			m_xmlWriter.writeStartElement("file");
+
+			m_xmlWriter.writeAttribute("name", buildFileInfo.pathFileName);
+			m_xmlWriter.writeAttribute("size", QString("%1").arg(buildFileInfo.size));
+			m_xmlWriter.writeAttribute("md5", buildFileInfo.md5);
+
+			m_xmlWriter.writeEndElement();		// file
+		}
+
+		m_xmlWriter.writeEndElement();			// files
+
+		m_xmlWriter.writeEndElement();			// build
+
+		m_xmlWriter.writeEndDocument();
+	}
+
 
 	// --------------------------------------------------------------------------------------
 	//
@@ -279,30 +354,6 @@ namespace Builder
 	}
 
 
-	QString	BuildResultWriter::projectName() const
-	{
-		if (m_dbController == nullptr)
-		{
-			assert(false);
-			return QString();
-		}
-
-		return m_dbController->currentProject().projectName();
-	}
-
-
-	QString BuildResultWriter::userName() const
-	{
-		if (m_dbController == nullptr)
-		{
-			assert(false);
-			return QString();
-		}
-
-		return m_dbController->currentUser().username();
-	}
-
-
 	bool BuildResultWriter::start(DbController* db, OutputLog* log, bool release, int changesetID)
 	{
 		m_dbController = db;
@@ -324,7 +375,10 @@ namespace Builder
 			return m_runBuild;
 		}
 
+		m_projectName = m_dbController->currentProject().projectName();
+		m_userName = m_dbController->currentUser().username();
 		m_workstation = QHostInfo::localHostName();
+		m_buildDateTime = QDateTime::currentDateTime();
 
 		if (m_dbController->buildStart(m_workstation, m_release, m_changesetID, &m_buildNo, nullptr) == false)
 		{
@@ -356,7 +410,7 @@ namespace Builder
 			return false;
 		}
 
-		if (createBuildXML() == false)
+		if (createBuildXml() == false)
 		{
 			return false;
 		}
@@ -371,6 +425,8 @@ namespace Builder
 		{
 			return false;
 		}
+
+		writeConfigurationXmlFiles();
 
 		LOG_EMPTY_LINE(m_log)
 
@@ -401,9 +457,10 @@ namespace Builder
 
 		addFile("", "build.log", buildLogStr);
 
-		writeBuildXML();
 
-		closeBuildXML();
+		writeBuildXmlFilesSection();
+
+		closeBuildXml();
 
 		m_dbController->buildFinish(m_buildNo, errors, warnings, buildLogStr, nullptr);
 
@@ -505,7 +562,7 @@ namespace Builder
 	}
 
 
-	bool BuildResultWriter::createBuildXML()
+	bool BuildResultWriter::createBuildXml()
 	{
 		m_buildXmlFile.setFileName(m_buildFullPath + m_separator + "build.xml");
 
@@ -515,41 +572,68 @@ namespace Builder
 			return false;
 		}
 
-		m_buildXml.setDevice(&m_buildXmlFile);
+		m_xmlWriter.setDevice(&m_buildXmlFile);
 
-		m_buildXml.setAutoFormatting(true);
+		m_xmlWriter.setAutoFormatting(true);
 
-		m_buildXml.writeStartDocument();
+		m_xmlWriter.writeStartDocument();
 
-		m_buildXml.writeStartElement("build");
+		m_xmlWriter.writeStartElement("build");
 
-		m_buildXml.writeAttribute("id", QString("%1").arg(m_buildNo));
-		m_buildXml.writeAttribute("type", m_release ? "release" : "debug");
+		m_xmlWriter.writeAttribute("id", QString("%1").arg(m_buildNo));
+		m_xmlWriter.writeAttribute("type", buildType());
 
-		QDateTime now = QDateTime::currentDateTime();
+		m_xmlWriter.writeAttribute("date", m_buildDateTime.toString("dd.MM.yyyy"));
+		m_xmlWriter.writeAttribute("time", m_buildDateTime.toString("hh:mm:ss"));
 
-		m_buildXml.writeAttribute("date", now.toString("dd.MM.yyyy"));
-		m_buildXml.writeAttribute("time", now.toString("hh:mm:ss"));
+		m_xmlWriter.writeAttribute("changeset", QString("%1").arg(m_changesetID));
 
-		m_buildXml.writeAttribute("changeset", QString("%1").arg(m_changesetID));
-
-		m_buildXml.writeAttribute("user", m_dbController->currentUser().username());
-		m_buildXml.writeAttribute("workstation", m_workstation);
+		m_xmlWriter.writeAttribute("user", m_userName);
+		m_xmlWriter.writeAttribute("workstation", m_workstation);
 
 		return true;
 	}
 
 
-	bool BuildResultWriter::writeBuildXML()
+	bool BuildResultWriter::writeConfigurationXmlFiles()
 	{
-		return writeFilesSection();
+		if (m_cfgFiles.isEmpty())
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString(tr("Configuration files writing...")));
+
+		for(ConfigurationXmlFile* cfgFile : m_cfgFiles)
+		{
+			if (cfgFile == nullptr)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			cfgFile->finalize();
+
+			result &= addFile(cfgFile->subDir(), "configuration.xml", cfgFile->getFileData());
+
+			delete cfgFile;		// is no longer needed
+		}
+
+		m_cfgFiles.clear();
+
+		return result;
 	}
 
 
-	bool BuildResultWriter::writeFilesSection()
+	bool BuildResultWriter::writeBuildXmlFilesSection()
 	{
-		m_buildXml.writeStartElement("files");
-		m_buildXml.writeAttribute("count", QString("%1").arg(m_buildFiles.size()));
+		m_xmlWriter.writeStartElement("files");
+		m_xmlWriter.writeAttribute("count", QString("%1").arg(m_buildFiles.size()));
 
 		for(BuildFile* buildFile : m_buildFiles)
 		{
@@ -559,23 +643,25 @@ namespace Builder
 				continue;
 			}
 
-			m_buildXml.writeStartElement("file");
+			m_xmlWriter.writeStartElement("file");
 
-			m_buildXml.writeAttribute("name", buildFile->pathFileName());
-			m_buildXml.writeAttribute("size", QString("%1").arg(buildFile->size()));
-			m_buildXml.writeAttribute("md5", buildFile->md5());
+			m_xmlWriter.writeAttribute("name", buildFile->pathFileName());
+			m_xmlWriter.writeAttribute("size", QString("%1").arg(buildFile->size()));
+			m_xmlWriter.writeAttribute("md5", buildFile->md5());
 
-			m_buildXml.writeEndElement();		// file
+			m_xmlWriter.writeEndElement();		// file
 		}
+
+		m_xmlWriter.writeEndElement();			// files
 
 		return true;
 	}
 
 
-	bool BuildResultWriter::closeBuildXML()
+	bool BuildResultWriter::closeBuildXml()
 	{
-		m_buildXml.writeEndElement();			// build
-		m_buildXml.writeEndDocument();
+		m_xmlWriter.writeEndElement();			// build
+		m_xmlWriter.writeEndDocument();
 
 		m_buildXmlFile.close();
 		return true;
@@ -593,6 +679,7 @@ namespace Builder
 			if (multichannelFile == nullptr)
 			{
 				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
 				return nullptr;
 			}
 
@@ -646,7 +733,7 @@ namespace Builder
 				result = false;
 			}
 
-			delete multichannelFile;
+			delete multichannelFile;		// is no longer needed
 		}
 
 		m_multichannelFiles.clear();
@@ -655,16 +742,29 @@ namespace Builder
 	}
 
 
-
 	ConfigurationXmlFile* BuildResultWriter::createConfigurationXmlFile(const QString& subDir)
 	{
 		if (m_cfgFiles.contains(subDir))
 		{
-			LOG_ERROR(m_log, QString(tr("'Configuration.xml' file already created for '%1'")).arg(subDir));
-			return nullptr;
+			return m_cfgFiles[subDir];
 		}
 
-		// ConfigurationXmlFile* cfgFile = new ConfigurationXmlFile(*this, subDir);
-		return nullptr;	// !!!!!!
+		ConfigurationXmlFile* cfgFile = new ConfigurationXmlFile(*this, subDir);
+
+		m_cfgFiles.insert(subDir, cfgFile);
+
+		return cfgFile;
 	}
+
+
+	BuildFile* BuildResultWriter::getBuildFile(const QString& pathFileName)
+	{
+		if (m_buildFiles.contains(pathFileName))
+		{
+			return m_buildFiles[pathFileName];
+		}
+
+		return nullptr;
+	}
+
 }
