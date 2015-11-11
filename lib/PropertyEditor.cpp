@@ -280,12 +280,11 @@ namespace ExtWidgets
                           arg(color.blue()).
                           arg(color.alpha());
 
-            m_oldColor = color;
-
-            m_lineEdit->setText(str);
-
             if (color != m_oldColor)
             {
+                m_oldColor = color;
+                m_lineEdit->setText(str);
+
                 emit valueChanged(color);
             }
 		}
@@ -322,6 +321,7 @@ namespace ExtWidgets
 
             if (color != m_oldColor)
 			{
+                m_oldColor = color;
                 emit valueChanged(color);
 			}
 		}
