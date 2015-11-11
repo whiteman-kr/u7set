@@ -280,12 +280,11 @@ namespace ExtWidgets
                           arg(color.blue()).
                           arg(color.alpha());
 
-            m_oldColor = color;
-
-            m_lineEdit->setText(str);
-
             if (color != m_oldColor)
             {
+                m_oldColor = color;
+                m_lineEdit->setText(str);
+
                 emit valueChanged(color);
             }
 		}
@@ -322,6 +321,7 @@ namespace ExtWidgets
 
             if (color != m_oldColor)
 			{
+                m_oldColor = color;
                 emit valueChanged(color);
 			}
 		}
@@ -532,7 +532,8 @@ namespace ExtWidgets
         m_spinBox = new QDoubleSpinBox(parent);
         m_spinBox->setKeyboardTracking(false);
         m_spinBox->setRange(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
-        m_spinBox->setDecimals(2);
+        m_spinBox->setDecimals(1);
+        m_spinBox->setSingleStep(0.1);
 
 		connect(m_spinBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 				this, &QtMultiDoubleSpinBox::onValueChanged);
@@ -598,7 +599,11 @@ namespace ExtWidgets
 
         // Set precision and value
         //
-        m_spinBox->setDecimals(property->precision());
+        int precision = property->precision();
+        if (precision > 0)
+        {
+            m_spinBox->setDecimals(precision);
+        }
         m_spinBox->setValue(property->value().toDouble());
         m_spinBox->setReadOnly(property->readOnly());
 
@@ -1403,9 +1408,7 @@ namespace ExtWidgets
             return QString();
         }
 
-        Property* _p = p.get();
-
-        QVariant value = _p->value();
+        QVariant value = p->value();
 
         // Output the text
         //
@@ -1413,10 +1416,10 @@ namespace ExtWidgets
 		{
             // enum is special
             //
-            if (_p->isEnum())
+            if (p->isEnum())
             {
-                int v = _p->value().toInt();
-                for (std::pair<int, QString>& i : _p->enumValues())
+                int v = p->value().toInt();
+                for (std::pair<int, QString>& i : p->enumValues())
                 {
                     if (i.first == v)
                     {
@@ -1455,7 +1458,12 @@ namespace ExtWidgets
 				case QVariant::Double:
 					{
                         double val = value.toDouble();
-						return QString::number(val);
+                        int precision = p->precision();
+                        if (precision == 0)
+                        {
+                            precision = 1;
+                        }
+                        return QString::number(val, 'f', precision);
 					}
 					break;
 				case QVariant::Bool:
