@@ -89,11 +89,12 @@ function setData32(confFirmware, log, frameIndex, offset, data)
 
 function storeCrc64(confFirmware, log, frameIndex, start, count, offset)
 {
-    if (confFirmware.storeCrc64(frameIndex, start, count, offset) == false)
-    {
+	var result = confFirmware.storeCrc64(frameIndex, start, count, offset);
+    if (result == "")
+	{
         log.writeError("Error: StoreCrc64, Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range!");
-        return false;
     }
+	return result;
 }
 
 function storeHash64(confFirmware, log, frameIndex, offset, data)
@@ -249,17 +250,17 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     var ptr = 0;
     
     setData16(confFirmware, log, frameStorageConfig, ptr, 0xca70);     //CFG_Marker
-	confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": CFG_Marker = 0xca70" + "\r\n");
+	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] CFG_Marker = 0xca70" + "\r\n");
     ptr += 2;
     
     setData16(confFirmware, log, frameStorageConfig, ptr, 0x0001);     //CFG_Version
-	confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": CFG_Version = 0x0001" + "\r\n");
+	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] CFG_Version = 0x0001" + "\r\n");
     ptr += 2;
     
     
     var ssKey = ssKeyValue << 6;             //0000SSKEYY000000b
     setData16(confFirmware, log, frameStorageConfig, ptr, ssKey);
-	confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + ptr +": ssKey = " + ssKey + "\r\n");
+	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] ssKey = " + ssKey + "\r\n");
     ptr += 2;
     
     // reserved
@@ -286,7 +287,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     var configFrame = configStartFrames + configFrameCount * (channel - 1);
     
     setData16(confFirmware, log, frameStorageConfig, configIndexOffset, configFrame);
-	confFirmware.writeLog("Frame " + frameStorageConfig + ", offset " + configIndexOffset +": configFrame = " + configFrame + "\r\n");
+	confFirmware.writeLog("    [" + frameStorageConfig + ":" + configIndexOffset + "] configFrame = " + configFrame + "\r\n");
 
     // Service information
     //
@@ -295,17 +296,18 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     var frameServiceConfig = configFrame;
     ptr = 0;
     setData16(confFirmware, log, frameServiceConfig, ptr, 0x0001);   //CFG_Ch_Vers
-	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": CFG_Ch_Vers = 0x0001\r\n");
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] CFG_Ch_Vers = 0x0001\r\n");
     ptr += 2;
     setData16(confFirmware, log, frameServiceConfig, ptr, uartId);   //CFG_Ch_Dtype == UARTID?
-	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": uartId = "+ uartId + "\r\n");
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] uartId = "+ uartId + "\r\n");
     ptr += 2;
 	var hashString = storeHash64(confFirmware, log, frameServiceConfig, ptr, subSysID);
-	confFirmware.writeLog("Frame " + frameServiceConfig + ", offset " + ptr +": subSysID HASH-64 = " + hashString + "\r\n");
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = " + hashString + "\r\n");
     ptr += 8;
     
     // I/O Modules configuration
     //
+	
 	confFirmware.writeLog("Writing I/O modules configuration.\r\n");
 
     var frameIOConfig = configFrame + 1;
@@ -371,6 +373,8 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
         ptr += 8;
     }
 */
+
+	confFirmware.writeLog("Writing TxRx(Opto) configuration.\r\n");
 
 	var txRxConfigFrame = lanConfigFrame + 3;
 	var optoCount = 3;
@@ -441,7 +445,10 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         {
             // Generate default values, there is no signal on this place
             //
-            //log.writeMessage("Default place" + i + ": tf = " + defaultTf + ", hi = " + defaultHighBound + ", lo = " + defaultLowBound + ", diff = " + defaultMaxDiff);
+			confFirmware.writeLog("    in" + i + "[default]: [" + frame + ":" + ptr + "] Tf = " + defaultTf + 
+			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + defaultHighBound +
+			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
+			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + defaultMaxDiff + "\r\n");
             
             setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
             ptr += 2;
@@ -456,9 +463,12 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
         {
             
             var filternigTime = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
-            var maxDifference = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
+            var maxDifference = valToADC(signal.maxDifference(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
 
-            //log.writeMessage("Place" + i + ": tf = " + filternigTime + ", hi = " + signal.highADC() + ", lo = " + signal.lowADC() + ", diff = " + maxDifference);
+			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
+			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + signal.highADC() +
+			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + signal.lowADC() +
+			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + maxDifference + "\r\n");
 
             setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
             ptr += 2;
@@ -475,7 +485,8 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     ptr += 120;
    
     // final crc
-    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+    var stringCrc64 = storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;
     
     //reserved
@@ -579,14 +590,15 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
             data |= (mode << bit);
         }
         
-        //log.writeMessage("Place" + place + ": Word = " + w + " = " + data);
         setData16(confFirmware, log, frame, ptr + w * 2, data);          // InA Filtering time constant
+		confFirmware.writeLog("    [" + frame + ":" + (ptr + w * 2) + "] data" + w + " = " + data + "\r\n");
     }
     
     ptr += 120;
     
     // crc
-    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+    var stringCrc64 = storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;    
 
     // reserved
@@ -686,7 +698,8 @@ function generate_dim(confFirmware, module, frame, log)
     var ptr = 120;
     
     // crc
-    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+    var stringCrc64 = storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;    
 
     // reserved
@@ -735,7 +748,8 @@ function generate_dom(confFirmware, module, frame, log)
     var ptr = 120;
     
     // crc
-    storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+    var stringCrc64 = storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
     ptr += 8;    
 
     // reserved
@@ -772,22 +786,22 @@ function generate_dom(confFirmware, module, frame, log)
 }
 function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFrames, dataFrames, txId)
 {
-    confFirmware.writeLog("Writing TxRx Blocks configuration.\r\n");
 	// TxRx Block's configuration structure
     //
     var ptr = offset;
+
+	confFirmware.writeLog("    TxRxConfig: [" + frame + ":" + ptr + "] flags = "+ flags + 
+	"; [" + frame + ":" + (ptr + 2) +"] configFrames = "+ configFrames +
+	"; [" + frame + ":" + (ptr + 4) +"] dataFrames = "+ dataFrames +
+	"; [" + frame + ":" + (ptr + 6) +"] txId = "+ txId + "\r\n");
     
     setData16(confFirmware, log, frame, ptr, flags);        // Flags word
-	confFirmware.writeLog("Frame " + frame + ", offset " + ptr +": flags = "+ flags + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, configFrames); // Configuration words quantity
-	confFirmware.writeLog("Frame " + frame + ", offset " + ptr +": configFrames = "+ configFrames + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, dataFrames);   // Data words quantity
-	confFirmware.writeLog("Frame " + frame + ", offset " + ptr +": dataFrames = "+ dataFrames + "\r\n");
     ptr += 2;
     setData16(confFirmware, log, frame, ptr, txId);         // Tx ID
-	confFirmware.writeLog("Frame " + frame + ", offset " + ptr +": txId = "+ txId + "\r\n");
     ptr += 2;
     
     return true;
@@ -797,8 +811,6 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 {
     // Create TxRx Blocks (Opto) configuration
 	//
-	confFirmware.writeLog("Writing TxRx Blocks (Opto) configuration.\r\n");
-		
 	confFirmware.writeLog("There are " + connections.count() + " connections in the project.\r\n");
 	
 	for (var c = 0; c < connections.count(); c++)

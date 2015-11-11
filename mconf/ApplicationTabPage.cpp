@@ -35,7 +35,7 @@ void ApplicationTabPage::openFileClicked()
 	fd.setFileMode(QFileDialog::ExistingFile);
 
 	QStringList filters;
-    filters << "Firmwares (*.mcb, *.alb)"
+	filters << "Firmwares (*.mcb *.alb)"
             << "Module configuration files (*.mcb)"
 			<< "Application logic files (*.alb)"
 			<< "All files (*.*)";
