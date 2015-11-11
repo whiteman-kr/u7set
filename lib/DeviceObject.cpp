@@ -60,6 +60,10 @@ namespace Hardware
 	void Shutdwon()
 	{
 		qDebug() << "Hardware::Shutdown";
+
+		DeviceObject::PrintRefCounter("DeviceObject");
+
+		return;
 	}
 
 	//

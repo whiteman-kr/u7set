@@ -216,7 +216,8 @@ HEADERS  += \
 	Builder/Parser.h \
     Connection.h \
     DialogConnectionsEditor.h \
-    ../include/PropertyEditorDialog.h
+    ../include/PropertyEditorDialog.h \
+    ../include/DebugInstCounter.h
 
 
 FORMS    += \

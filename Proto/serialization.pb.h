@@ -3964,6 +3964,13 @@ class SchemeItemConst : public ::google::protobuf::Message {
   inline double floatvalue() const;
   inline void set_floatvalue(double value);
 
+  // optional int32 precision = 4 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 4;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemeItemConst)
  private:
   inline void set_has_type();
@@ -3972,15 +3979,18 @@ class SchemeItemConst : public ::google::protobuf::Message {
   inline void clear_has_intvalue();
   inline void set_has_floatvalue();
   inline void clear_has_floatvalue();
+  inline void set_has_precision();
+  inline void clear_has_precision();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 intvalue_;
   double floatvalue_;
+  ::google::protobuf::int32 precision_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9629,6 +9639,28 @@ inline double SchemeItemConst::floatvalue() const {
 inline void SchemeItemConst::set_floatvalue(double value) {
   set_has_floatvalue();
   floatvalue_ = value;
+}
+
+// optional int32 precision = 4 [default = 2];
+inline bool SchemeItemConst::has_precision() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemeItemConst::set_has_precision() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemeItemConst::clear_has_precision() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemeItemConst::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 SchemeItemConst::precision() const {
+  return precision_;
+}
+inline void SchemeItemConst::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
 }
 
 // -------------------------------------------------------------------

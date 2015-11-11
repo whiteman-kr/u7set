@@ -122,6 +122,7 @@ private:
 //			Class Property
 //
 //
+
 template <typename TYPE>
 class PropertyValue : public Property
 {
@@ -284,18 +285,15 @@ private:
 	}
 
 private:
+
 	void checkLimits()
 	{
 		if (lowLimit().isValid() == true)
 		{
 			if (m_getter)
 			{
-				assert(m_setter);	// to control min value, and if getter set, setter must be also set
-
-				if (m_getter() < m_lowLimit.value<TYPE>() && m_setter)
-				{
-					m_setter(m_lowLimit.value<TYPE>());
-				}
+				// Setter suppose to check limits
+				//
 			}
 			else
 			{
@@ -314,12 +312,8 @@ private:
 		{
 			if (m_getter)
 			{
-				assert(m_setter);	// to control max value, and if getter set, setter must be also set
-
-				if (m_getter() > m_highLimit.value<TYPE>() && m_setter)
-				{
-					m_setter(m_highLimit.value<TYPE>());
-				}
+				// Setter suppose to check limits
+				//
 			}
 			else
 			{

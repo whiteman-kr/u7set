@@ -13,6 +13,7 @@ namespace VFrame30
 		Q_PROPERTY(ConstType Type READ type WRITE setType)
 		Q_PROPERTY(int IntegralValue READ intValue WRITE setIntValue)		// SignedInt
 		Q_PROPERTY(double FloatValue READ floatValue WRITE setFloatValue)	// Float
+		Q_PROPERTY(int Precision READ precision() WRITE setPrecision)
 
 		Q_ENUMS(ConstType)
 
@@ -67,12 +68,16 @@ namespace VFrame30
 		double floatValue() const;
 		void setFloatValue(double floatValue);
 
+		int precision() const;
+		void setPrecision(int value);
+
 		// Data
 		//
 	private:
 		ConstType m_type = ConstType::IntegralType;
 		int m_intValue = 0;
 		double m_floatValue = 0.0;
+		int m_precision = 2;
 	};
 
 }

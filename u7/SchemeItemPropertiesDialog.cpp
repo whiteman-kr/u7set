@@ -25,7 +25,7 @@ void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VF
 {
 	m_items = items;
 
-	QList<std::shared_ptr<QObject>> ol;
+	QList<std::shared_ptr<PropertyObject>> ol;
 
 	for (const auto& item : m_items)
 	{
@@ -44,7 +44,7 @@ void SchemeItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VF
 //
 //
 SchemeItemPropertyEditor::SchemeItemPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent) :
-	ExtWidgetsOld::PropertyEditorOld(parent),
+	ExtWidgets::PropertyEditor(parent),
 	m_editEngine(editEngine)
 {
 	assert(m_editEngine);
@@ -64,13 +64,21 @@ void SchemeItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 		return;
 	}
 
+	// Set the new property value in all objects
+	//
 	std::vector<std::shared_ptr<VFrame30::SchemeItem>> items;
-	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property);
 
-	for (auto& i : objects)
+	for (auto i : m_objects)
 	{
 		std::shared_ptr<VFrame30::SchemeItem> vi = std::dynamic_pointer_cast<VFrame30::SchemeItem>(i);
 		assert(vi.get() != nullptr);
+
+		// Do not set property, if it has same value
+		//
+		if (vi->propertyValue(property->propertyName()) == value)
+		{
+			continue;
+		}
 
 		items.push_back(vi);
 	}

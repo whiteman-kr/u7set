@@ -61,6 +61,8 @@ namespace VFrame30
 	{
 		qDebug() << Q_FUNC_INFO;
 
+		SchemeItem::PrintRefCounter("SchemeItem");
+
 		google::protobuf::ShutdownProtobufLibrary();
 		return true;
 	}

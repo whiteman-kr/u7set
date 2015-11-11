@@ -341,13 +341,13 @@ namespace Hardware
         return qFromBigEndian(data);
     }
 
-	bool ModuleFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
+    QString ModuleFirmware::storeCrc64(int frameIndex, int start, int count, int offset)
     {
         if (frameIndex >= static_cast<int>(m_frames.size()) ||
 			offset > (int)(frameSize() - sizeof(quint64)) || start + count >= frameSize())
         {
             qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
-            return false;
+            return QString();
         }
 
         quint64 result = Crc::crc64(m_frames[frameIndex].data() + start, count);
@@ -355,7 +355,7 @@ namespace Hardware
 
         //qDebug() << "Frame " << frameIndex << "Count " << count << "Offset" << offset << "CRC" << hex << result;
 
-        return true;
+        return QString::number(result);
     }
 
     QString ModuleFirmware::storeHash64(int frameIndex, int offset, QString dataString)

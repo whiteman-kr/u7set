@@ -17,6 +17,24 @@ namespace VFrame30
 		m_textColor(qRgb(0x00, 0x00, 0x00)),
 		m_fill(true)
 	{
+		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemeItemRect::weight, SchemeItemRect::setWeight);
+
+		ADD_PROPERTY_GETTER_SETTER(QColor, LineColor, true, SchemeItemRect::lineColor, SchemeItemRect::setLineColor);
+		ADD_PROPERTY_GETTER_SETTER(QColor, FillColor, true, SchemeItemRect::fillColor, SchemeItemRect::setFillColor)
+		ADD_PROPERTY_GETTER_SETTER(QColor, TextColor, true, SchemeItemRect::textColor, SchemeItemRect::setTextColor);
+
+		ADD_PROPERTY_GETTER_SETTER(bool, Fill, true, SchemeItemRect::fill, SchemeItemRect::setFill);
+		ADD_PROPERTY_GETTER_SETTER(QString, Text, true, SchemeItemRect::text, SchemeItemRect::setText);
+
+		ADD_PROPERTY_GETTER_SETTER(bool, DrawRect, true, SchemeItemRect::drawRect, SchemeItemRect::setDrawRect);
+
+		ADD_PROPERTY_GETTER_SETTER(QString, FontName, true, SchemeItemRect::getFontName, SchemeItemRect::setFontName);
+		ADD_PROPERTY_GETTER_SETTER(double, FontSize, true, SchemeItemRect::getFontSize, SchemeItemRect::setFontSize);
+		ADD_PROPERTY_GETTER_SETTER(bool, FontBold, true, SchemeItemRect::getFontBold, SchemeItemRect::setFontBold);
+		ADD_PROPERTY_GETTER_SETTER(bool, FontItalic, true,  SchemeItemRect::getFontItalic, SchemeItemRect::setFontItalic);
+
+		// --
+		//
 		m_font.setName("Arial");
 
 		switch (unit)
@@ -59,13 +77,13 @@ namespace VFrame30
 		Proto::SchemeItemRect* rectMessage = message->mutable_schemeitem()->mutable_rect();
 
 		rectMessage->set_weight(m_weight);
-		rectMessage->set_linecolor(m_lineColor);
-		rectMessage->set_fillcolor(m_fillColor);
+		rectMessage->set_linecolor(m_lineColor.rgba());
+		rectMessage->set_fillcolor(m_fillColor.rgba());
 		rectMessage->set_fill(m_fill);
 		rectMessage->set_drawrect(m_drawRect);
 
 		Proto::Write(rectMessage->mutable_text(), m_text);
-		rectMessage->set_textcolor(m_textColor);
+		rectMessage->set_textcolor(m_textColor.rgba());
 		m_font.SaveData(rectMessage->mutable_font());
 
 		return true;
@@ -98,11 +116,11 @@ namespace VFrame30
 		const Proto::SchemeItemRect& rectMessage = message.schemeitem().rect();
 
 		m_weight = rectMessage.weight();
-		m_lineColor = rectMessage.linecolor();
-		m_fillColor = rectMessage.fillcolor();
+		m_lineColor = QColor::fromRgba(rectMessage.linecolor());
+		m_fillColor = QColor::fromRgba(rectMessage.fillcolor());
 		m_fill = rectMessage.fill();
 		Proto::Read(rectMessage.text(), &m_text);
-		m_textColor = rectMessage.textcolor();
+		m_textColor = QColor::fromRgba(rectMessage.textcolor());
 		m_drawRect = rectMessage.drawrect();
 		m_font.LoadData(rectMessage.font());
 
@@ -221,22 +239,22 @@ namespace VFrame30
 
 	// LineColor property
 	//
-	QRgb SchemeItemRect::lineColor() const
+	QColor SchemeItemRect::lineColor() const
 	{
 		return m_lineColor;
 	}
-	void SchemeItemRect::setLineColor(QRgb color)
+	void SchemeItemRect::setLineColor(QColor color)
 	{
 		m_lineColor = color;
 	}
 
 	// FillColor property
 	//
-	QRgb SchemeItemRect::fillColor() const
+	QColor SchemeItemRect::fillColor() const
 	{
 		return m_fillColor;
 	}
-	void SchemeItemRect::setFillColor(QRgb color)
+	void SchemeItemRect::setFillColor(QColor color)
 	{
 		m_fillColor = color;
 	}
@@ -258,18 +276,18 @@ namespace VFrame30
 	{
 		return m_text;
 	}
-	void SchemeItemRect::setText(QString& value)
+	void SchemeItemRect::setText(QString value)
 	{
 		m_text = value;
 	}
 
 	// TextColor property
 	//
-	QRgb SchemeItemRect::textColor() const
+	QColor SchemeItemRect::textColor() const
 	{
 		return m_textColor;
 	}
-	void SchemeItemRect::setTextColor(QRgb color)
+	void SchemeItemRect::setTextColor(QColor color)
 	{
 		m_textColor = color;
 	}

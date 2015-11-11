@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../include/ProtoSerialization.h"
-#include "DebugInstCounter.h"
+#include "../include/DebugInstCounter.h"
 #include "../VFrame30/VFrame30Lib_global.h"
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
@@ -363,7 +363,7 @@ private:
 	//	AfbElementCollection
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbElementCollection :
-		public VFrame30::DebugInstCounter<AfbElementCollection>
+		public DebugInstCounter<AfbElementCollection>
 	{
 	public:
 		AfbElementCollection(void);

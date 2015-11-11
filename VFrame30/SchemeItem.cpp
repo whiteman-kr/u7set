@@ -15,6 +15,10 @@ namespace VFrame30
 		m_acceptClick(false)
 	{	
 		m_guid = QUuid::createUuid();
+
+		ADD_PROPERTY_GETTER_SETTER(bool, AcceptClick, true, SchemeItem::acceptClick, SchemeItem::setAcceptClick);
+		ADD_PROPERTY_GETTER_SETTER(QString, ClickScript, true, SchemeItem::clickScript, SchemeItem::setClickScript);
+
 	}
 
 	SchemeItem::~SchemeItem()

@@ -95,7 +95,6 @@ HEADERS += VFrame30Lib_global.h \
 	../include/TypesAndEnums.h \
     FrameHistoryItem.h \
 	Configuration.h \
-	DebugInstCounter.h \
     VFrame30.h \
     ../include/StreamedData.h \
     ../include/ProtoSerialization.h \
@@ -118,7 +117,9 @@ HEADERS += VFrame30Lib_global.h \
     SchemeItemSignal.h \
     SchemeItemAfb.h \
     SchemeItemLink.h \
-    Afb.h
+    Afb.h \
+    ../include/DebugInstCounter.h \
+    ../include/PropertyObject.h
 
 SOURCES += \
     Settings.cpp \
@@ -155,7 +156,8 @@ SOURCES += \
     SchemeItemSignal.cpp \
     SchemeItemAfb.cpp \
     SchemeItemLink.cpp \
-    Afb.cpp
+    Afb.cpp \
+    ../lib/PropertyObject.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

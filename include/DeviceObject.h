@@ -5,6 +5,7 @@
 #include <QJSValue>
 #include "DbStruct.h"
 #include "QUuid"
+#include "../include/DebugInstCounter.h"
 #include "../include/PropertyObject.h"
 #include "../include/Factory.h"
 #include "../include/Types.h"
@@ -72,7 +73,8 @@ namespace Hardware
 	//
 	class DeviceObject :
 		public PropertyObject,
-		public Proto::ObjectSerialization<DeviceObject>
+		public Proto::ObjectSerialization<DeviceObject>,
+		public DebugInstCounter<DeviceObject>
 	{
 		Q_OBJECT
 
