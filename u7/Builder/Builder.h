@@ -92,6 +92,10 @@ namespace Builder
 		//
 		bool compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, UnitList& unitInfo, BuildResultWriter* buildResultWriter);
 
+		// Generate SCADA software configurations
+		//
+		bool generateSoftwareConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, BuildResultWriter* buildResultWriter);
+
 		// What's the next compilation task?
 		//
 
