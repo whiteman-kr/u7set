@@ -20,6 +20,10 @@ namespace VFrame30
 
 	void Scheme::Init(void)
 	{
+		ADD_PROPERTY_GETTER_SETTER(bool, ExcludeFromBuild, true, Scheme::excludeFromBuild, Scheme::setExcludeFromBuild);
+		ADD_PROPERTY_GETTER_SETTER(double, SchemeWidth, true, Scheme::docWidth, Scheme::setDocWidth);
+		ADD_PROPERTY_GETTER_SETTER(double, SchemeHeight, true, Scheme::docHeight, Scheme::setDocHeight);
+
 		m_guid = QUuid();  // GUID_NULL
 
 		m_width = 0;

@@ -24,7 +24,7 @@ void SchemePropertiesDialog::setScheme(std::shared_ptr<VFrame30::Scheme> scheme)
 {
 	m_scheme = scheme;
 
-	QList<std::shared_ptr<QObject>> ol;
+	QList<std::shared_ptr<PropertyObject>> ol;
 	ol.push_back(scheme);
 
 	m_propertyEditor->setObjects(ol);
@@ -38,7 +38,7 @@ void SchemePropertiesDialog::setScheme(std::shared_ptr<VFrame30::Scheme> scheme)
 //
 //
 SchemePropertyEditor::SchemePropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent) :
-	PropertyEditorOld(parent),
+	PropertyEditor(parent),
 	m_editEngine(editEngine)
 {
 	assert(m_editEngine);
@@ -56,7 +56,7 @@ void SchemePropertyEditor::valueChanged(QtProperty* property, QVariant value)
 		return;
 	}
 
-	QList<std::shared_ptr<QObject>> objects = m_propToClassMap.values(property);
+	QList<std::shared_ptr<PropertyObject>> objects = m_objects;
 
 	if (objects.size() != 1)
 	{
@@ -67,7 +67,11 @@ void SchemePropertyEditor::valueChanged(QtProperty* property, QVariant value)
 	std::shared_ptr<VFrame30::Scheme> scheme = std::dynamic_pointer_cast<VFrame30::Scheme>(objects.front());
 	assert(scheme.get() != nullptr);
 
-	editEngine()->runSetSchemeProperty(property->propertyName(), value, scheme);
+	if (scheme->propertyValue(property->propertyName()) != value)
+	{
+		editEngine()->runSetSchemeProperty(property->propertyName(), value, scheme);
+	}
+
 	return;
 }
 

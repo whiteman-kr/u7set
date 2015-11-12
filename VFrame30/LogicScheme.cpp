@@ -5,6 +5,8 @@ namespace VFrame30
 {
 	LogicScheme::LogicScheme(void)
 	{
+		ADD_PROPERTY_GETTER_SETTER(QString, HardwareStrIDs, true, LogicScheme::hardwareStrIds, LogicScheme::setHardwareStrIds)
+
 		setUnit(SchemeUnit::Inch);
 
 		setGridSize(Settings::defaultGridSize(unit()));

@@ -19,7 +19,7 @@ namespace EditEngine
 		m_scheme = scheme;
 
 		m_propertyName = propertyName;
-		m_oldValue = m_scheme->property(m_propertyName.toStdString().c_str());
+		m_oldValue = m_scheme->propertyValue(m_propertyName);
 		m_newValue = value;
 
 		assert(m_oldValue.isValid() == true);
@@ -29,13 +29,13 @@ namespace EditEngine
 
 	void SetSchemePropertyCommand::executeCommand(EditSchemeView*)
 	{
-		m_scheme->setProperty(m_propertyName.toStdString().c_str(), m_newValue);
+		m_scheme->setPropertyValue(m_propertyName, m_newValue);
 		return;
 	}
 
 	void SetSchemePropertyCommand::unExecuteCommand(EditSchemeView*)
 	{
-		m_scheme->setProperty(m_propertyName.toStdString().c_str(), m_oldValue);
+		m_scheme->setPropertyValue(m_propertyName, m_oldValue);
 		return;
 	}
 
