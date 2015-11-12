@@ -37,6 +37,17 @@ public:
 	};
 	Q_ENUM(DataFormat)
 
+	// Software Module Type Identifiers
+	//
+	enum SoftwareType
+	{
+		Monitor = 9000,
+		ConfigurationService = 9001,
+		DataAcquisitionService = 9002,
+		DataArchivingService = 9003,
+	};
+	Q_ENUM(SoftwareType)
+
 public:
 	// Convert enum value (not index) to QString
 	//
