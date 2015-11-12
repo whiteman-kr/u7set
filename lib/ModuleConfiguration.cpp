@@ -462,7 +462,10 @@ namespace Hardware
 		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
 		{
 			int channel = it->first;
-            int size = it->second.size() / sizeof(quint16);
+            double fSize = (double)it->second.size() / frameSize();
+            fSize = ceil(fSize);
+            int size = (int)fSize;
+
             channelNumbersAndSize.push_back(std::make_pair(channel, size));
 		}
         std::sort(channelNumbersAndSize.begin(), channelNumbersAndSize.end(), [](std::pair<int, int> a, std::pair<int, int> b)
