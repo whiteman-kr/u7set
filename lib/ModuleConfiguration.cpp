@@ -475,10 +475,15 @@ namespace Hardware
         std::vector<int> channelStartFrame;
 
 		int frame = startDataFrame;
+        int maxChannel = 1;
 
         for (size_t c = 0; c < channelNumbersAndSize.size(); c++)
 		{
             int channel = channelNumbersAndSize[c].first;
+            if (channel > maxChannel)
+            {
+                maxChannel = channel;
+            }
 
 			if (frame >= frameCount())
 			{
@@ -552,7 +557,7 @@ namespace Hardware
 
 		ptr += sizeof(quint64);	//reserved
 
-        *(quint16*)ptr = qToBigEndian((quint16)channelNumbersAndSize.size());	// Configuration channels quantity
+        *(quint16*)ptr = qToBigEndian((quint16)maxChannel);	// Configuration channels quantity
 		ptr += sizeof(quint16);
 
         if (channelNumbersAndSize.size() != channelStartFrame.size())
@@ -561,21 +566,30 @@ namespace Hardware
             return false;
         }
 
+        quint8* ptrChannelTable = ptr;
+
         for (size_t i = 0; i < channelNumbersAndSize.size(); i++)	// Start frames
 		{
-            quint16 startFrame = (quint16)channelStartFrame[i];
+            int channel = channelNumbersAndSize[i].first;
+            if (channel < 1 || channel > 4)
+            {
+                assert(false);
+                return false;
+            }
 
-            *(quint16*)ptr = qToBigEndian(startFrame);
-			ptr += sizeof(quint16);
+            quint8* ptrChannel = ptrChannelTable + (sizeof(quint16) * 3) *(channel - 1);
 
             quint16 size = (quint16)channelNumbersAndSize[i].second;
+            quint16 startFrame = (quint16)channelStartFrame[i];
 
-            *(quint16*)ptr = qToBigEndian(size);
-            ptr += sizeof(quint16);
+            *(quint16*)ptrChannel = qToBigEndian(startFrame);
+            ptrChannel += sizeof(quint16);
 
-			//reserved
-            ptr += sizeof(quint16);
+            *(quint16*)ptrChannel = qToBigEndian(size);
+            ptrChannel += sizeof(quint16);
 		}
+
+        ptr += (sizeof(quint16) * 3) * 4;
 
 		return true;
 	}
