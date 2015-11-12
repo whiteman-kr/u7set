@@ -487,6 +487,7 @@ namespace Hardware
             {
                 maxChannel = channel;
             }
+            int size = (quint16)channelNumbersAndSize[c].second;
 
 			if (frame >= frameCount())
 			{
@@ -515,6 +516,9 @@ namespace Hardware
 
 			*(quint64*)ptr = qToBigEndian(CUtils::calcHash(bytes.data(), bytes.size()));
 			ptr += sizeof(quint64);
+
+            *(quint16*)ptr = qToBigEndian((quint16)size);           // Frames count
+            ptr += sizeof(quint16);
 
 			frame++;
 
@@ -582,14 +586,12 @@ namespace Hardware
 
             quint8* ptrChannel = ptrChannelTable + (sizeof(quint16) * 3) *(channel - 1);
 
-            quint16 size = (quint16)channelNumbersAndSize[i].second;
             quint16 startFrame = (quint16)channelStartFrame[i];
 
             *(quint16*)ptrChannel = qToBigEndian(startFrame);
             ptrChannel += sizeof(quint16);
 
-            *(quint16*)ptrChannel = qToBigEndian(size);
-            ptrChannel += sizeof(quint16);
+            ptrChannel += sizeof(quint32);
 		}
 
         ptr += (sizeof(quint16) * 3) * 4;
