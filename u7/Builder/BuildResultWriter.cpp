@@ -426,8 +426,6 @@ namespace Builder
 			return false;
 		}
 
-		writeConfigurationXmlFiles();
-
 		LOG_EMPTY_LINE(m_log)
 
 		int errors = m_log->errorCount();
@@ -604,8 +602,7 @@ namespace Builder
 
 		bool result = true;
 
-		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("Configuration files writing...")));
+		LOG_MESSAGE(m_log, QString(tr("Software configuration files writing...")));
 
 		for(ConfigurationXmlFile* cfgFile : m_cfgFiles)
 		{

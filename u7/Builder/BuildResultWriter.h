@@ -160,8 +160,6 @@ namespace Builder
 		bool writeBuildXmlFilesSection();
 		bool closeBuildXml();
 
-		bool writeConfigurationXmlFiles();
-
 	public:
 		BuildResultWriter(QObject *parent = 0);
 		~BuildResultWriter();
@@ -177,6 +175,8 @@ namespace Builder
 
 		MultichannelFile* createMutichannelFile(QString subsysStrID, int subsysID, QString lmCaption, int frameSize, int frameCount);
 		bool writeMultichannelFiles();
+
+		bool writeConfigurationXmlFiles();
 
 		QString projectName() const { return m_projectName; }
 		QString userName() const { return m_userName; }

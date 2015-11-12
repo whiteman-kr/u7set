@@ -12,8 +12,11 @@
 #include "../../VFrame30/HorzVertLinks.h"
 
 #include "../Builder/ApplicationLogicCompiler.h"
+#include "../Builder/SoftwareCfgGenerator.h"
 #include <QBuffer>
 #include <functional>
+
+
 
 namespace Builder
 {
@@ -268,10 +271,20 @@ namespace Builder
 			//
 			// Compile Data Aquisition Service configuration
 			//
-			UnitList unitInfo;
+			/*UnitList unitInfo;
 			db.getUnits(&unitInfo, nullptr);
 
 			compileDataAquisitionServiceConfiguration(dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, unitInfo, &buildWriter);
+
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}*/
+
+			//
+			// Generate SCADA software configurations
+			//
+			generateSoftwareConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -853,6 +866,54 @@ namespace Builder
 		LOG_SUCCESS(m_log, tr("Data Aquisition Service configuration compilation was succesfully finished"));
 
 		return true;
+	}
+
+
+	bool BuildWorkerThread::generateSoftwareConfiguration(DbController *db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, BuildResultWriter* buildResultWriter)
+	{
+		bool result = true;
+
+		LOG_EMPTY_LINE(m_log);
+
+		LOG_MESSAGE(m_log, QString(tr("SCADA sofware configuration generation...")))
+
+		equipmentWalker(deviceRoot,
+			[&db, &signalSet, &buildResultWriter, &result](Hardware::DeviceObject* currentDevice)
+			{
+				if (currentDevice->isSoftware() == false)
+				{
+					return;
+				}
+
+				Hardware::Software* software = dynamic_cast<Hardware::Software*>(currentDevice);
+
+				if (software == nullptr)
+				{
+					assert(false);
+					return;
+				}
+
+				SoftwareCfgGenerator softwareCfgGenerator(db, software, signalSet, buildResultWriter);
+
+				result &= softwareCfgGenerator.run();
+			}
+		);
+
+		buildResultWriter->writeConfigurationXmlFiles();
+
+		LOG_EMPTY_LINE(m_log);
+
+		if (result == false)
+		{
+			LOG_MESSAGE(m_log, tr("Sofware configuration generation was finished with errors"));
+			QThread::currentThread()->requestInterruption();
+		}
+		else
+		{
+			LOG_SUCCESS(m_log, tr("Sofware configuration generation was succesfully finished"));
+		}
+
+		return result;
 	}
 
 
