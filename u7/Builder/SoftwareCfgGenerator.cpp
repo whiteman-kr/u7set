@@ -54,7 +54,7 @@ namespace Builder
 
 		bool result = true;
 
-		switch(m_software->type())
+		switch(static_cast<Hardware::SoftwareType>(m_software->type()))
 		{
 		case Hardware::SoftwareType::Monitor:
 			result = generateMonitorCfg();
