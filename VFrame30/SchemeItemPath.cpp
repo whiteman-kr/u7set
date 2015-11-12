@@ -3,7 +3,8 @@
 
 namespace VFrame30
 {
-	SchemeItemPath::SchemeItemPath(void)
+	SchemeItemPath::SchemeItemPath(void) :
+		SchemeItemPath(SchemeUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
@@ -14,6 +15,10 @@ namespace VFrame30
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
+		ADD_PROPERTY_GETTER_SETTER(double, LineWeight, true, SchemeItemPath::weight, SchemeItemPath::setWeight);
+
+		// --
+		//
 		m_static = true;
 		setItemUnit(unit);
 	}

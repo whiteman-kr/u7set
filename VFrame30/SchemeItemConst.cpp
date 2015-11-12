@@ -3,7 +3,8 @@
 namespace VFrame30
 {
 
-	SchemeItemConst::SchemeItemConst()
+	SchemeItemConst::SchemeItemConst() :
+		SchemeItemConst(SchemeUnit::Inch)
 	{
 		// This constructor can be called while serialization
 		//
@@ -12,6 +13,14 @@ namespace VFrame30
 	SchemeItemConst::SchemeItemConst(SchemeUnit unit) :
 		FblItemRect(unit)
 	{
+		ADD_PROPERTY_GETTER_SETTER(ConstType, Type, true, SchemeItemConst::type, SchemeItemConst::setType);
+		ADD_PROPERTY_GETTER_SETTER(int, ValueIntegral, true, SchemeItemConst::intValue, SchemeItemConst::setIntValue);
+		ADD_PROPERTY_GETTER_SETTER(double, ValueFloat, true, SchemeItemConst::floatValue, SchemeItemConst::setFloatValue);
+		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemeItemConst::precision, SchemeItemConst::setPrecision);
+
+		// --
+		//
+
 		addOutput();
 	}
 

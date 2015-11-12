@@ -10,13 +10,6 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(ConstType Type READ type WRITE setType)
-		Q_PROPERTY(int IntegralValue READ intValue WRITE setIntValue)		// SignedInt
-		Q_PROPERTY(double FloatValue READ floatValue WRITE setFloatValue)	// Float
-		Q_PROPERTY(int Precision READ precision() WRITE setPrecision)
-
-		Q_ENUMS(ConstType)
-
 #ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemeItem>::DerivedType<SchemeItemConst>;
 #endif
@@ -29,6 +22,7 @@ namespace VFrame30
 			IntegralType,
 			FloatType
 		};
+		Q_ENUM(ConstType)
 
 	public:
 		SchemeItemConst();
@@ -74,7 +68,7 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		ConstType m_type = ConstType::IntegralType;
+		ConstType m_type = ConstType::FloatType;
 		int m_intValue = 0;
 		double m_floatValue = 0.0;
 		int m_precision = 2;
@@ -82,6 +76,5 @@ namespace VFrame30
 
 }
 
-Q_DECLARE_METATYPE(VFrame30::SchemeItemConst::ConstType)
 
 #endif // SCHEMEITEMCONST_H

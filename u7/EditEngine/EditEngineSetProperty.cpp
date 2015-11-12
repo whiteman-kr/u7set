@@ -48,20 +48,23 @@ namespace EditEngine
 			selection.push_back(r.item);
 			r.item->setPropertyValue(r.propertyName, r.newValue);
 
-//			if (isDynamic == true)
-//			{
-//				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
-//				//
-//				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
+			auto property = r.item->propertyByCaption(r.propertyName);
+			assert(property);
 
-//				if (fblElement == nullptr)
-//				{
-//					assert(fblElement != nullptr);
-//					continue;
-//				}
+			if (property.get() != nullptr && property->dynamic() == true)
+			{
+				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
+				//
+				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
 
-//				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
-//			}
+				if (fblElement == nullptr)
+				{
+					assert(fblElement != nullptr);
+					continue;
+				}
+
+				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
+			}
 		}
 
 		schemeView->setSelectedItems(selection);
@@ -78,22 +81,23 @@ namespace EditEngine
 			r.item->setPropertyValue(r.propertyName, r.oldValue);
 
 
-//			if (isDynamic == true)
-//			{
-//				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
-//				//
-//				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
+			auto property = r.item->propertyByCaption(r.propertyName);
+			assert(property);
 
-//				if (fblElement == nullptr)
-//				{
-//					assert(fblElement != nullptr);
-//					continue;
-//				}
+			if (property.get() != nullptr && property->dynamic() == true)
+			{
+				// Apparently it is FblParam, only VFrame30::SchemeItemAfb can have such kind of props
+				//
+				VFrame30::SchemeItemAfb* fblElement = dynamic_cast<VFrame30::SchemeItemAfb*>(r.item.get());
 
-//				fblElement->setAfbParam(r.propertyName, r.newValue, m_scheme);
-//			}
+				if (fblElement == nullptr)
+				{
+					assert(fblElement != nullptr);
+					continue;
+				}
 
-
+				fblElement->setAfbParam(r.propertyName, r.oldValue, m_scheme);
+			}
 		}
 
 		schemeView->setSelectedItems(sel);

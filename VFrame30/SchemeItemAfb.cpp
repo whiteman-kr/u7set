@@ -4,7 +4,8 @@
 
 namespace VFrame30
 {
-	SchemeItemAfb::SchemeItemAfb(void)
+	SchemeItemAfb::SchemeItemAfb(void) :
+		SchemeItemAfb(SchemeUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
@@ -14,6 +15,7 @@ namespace VFrame30
 	SchemeItemAfb::SchemeItemAfb(SchemeUnit unit) :
 		FblItemRect(unit)
 	{
+		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemeItemAfb::precision, SchemeItemAfb::setPrecision);
 	}
 
 	SchemeItemAfb::SchemeItemAfb(SchemeUnit unit, const Afb::AfbElement& fblElement) :
@@ -21,7 +23,9 @@ namespace VFrame30
 		m_afbStrID(fblElement.strID()),
 		m_params(fblElement.params())
 	{
-		// Создать входные и выходные сигналы в VFrame30::FblEtem
+		ADD_PROPERTY_GETTER_SETTER(int, Precision, true, SchemeItemAfb::precision, SchemeItemAfb::setPrecision);
+
+		// Create input output signals in VFrame30::FblEtem
 		//
 		const std::vector<Afb::AfbSignal>& inputSignals = fblElement.inputSignals();
 		for (const Afb::AfbSignal& s : inputSignals)
@@ -35,7 +39,7 @@ namespace VFrame30
 			addOutput(s);
 		}
 
-		addQtDynamicParamProperties();
+		addDynamicParamProperties();
 
 		QString afterCreationScript = fblElement.afterCreationScript();
 		if (afterCreationScript.isEmpty() == false)
@@ -136,7 +140,7 @@ namespace VFrame30
 			{
 				case Afb::AfbSignalType::Analog:
 					{
-						QVariant a = property(param.caption().toStdString().c_str());
+						QVariant a = propertyValue(param.caption());
 
 						switch (param.dataFormat())
 						{
@@ -150,7 +154,7 @@ namespace VFrame30
 
 							case Afb::AfbDataFormat::Float:
 
-								paramValue.setNum(a.toDouble(), 'f', 3);	// There is no Precision field in Afb::AfbParam
+								paramValue.setNum(a.toDouble(), 'f', precision());
 
 								while(paramValue.endsWith('0'))
 								{
@@ -233,6 +237,8 @@ namespace VFrame30
 			p.SaveData(protoParam);
 		}
 
+		vifble->set_precision(m_precision);
+
 		return true;
 	}
 
@@ -275,9 +281,11 @@ namespace VFrame30
 			m_params.push_back(p);
 		}
 
+		m_precision = vifble.precision();
+
 		// Add afb properties to class meta object
 		//
-		addQtDynamicParamProperties();
+		addDynamicParamProperties();
 
 		return true;
 	}
@@ -375,7 +383,7 @@ namespace VFrame30
 				continue;
 			}
 
-			QVariant propValue = property(param.caption().toStdString().c_str());
+			QVariant propValue = propertyValue(param.caption());
 
 			if (propValue.isValid() == false)
 			{
@@ -459,16 +467,11 @@ namespace VFrame30
 //		return m_cachedGridSize * 16;
 	}
 
-	void SchemeItemAfb::addQtDynamicParamProperties()
+	void SchemeItemAfb::addDynamicParamProperties()
 	{
 		// Clear all dynamic properties
 		//
-		QList<QByteArray> dynamicProperties = dynamicPropertyNames();
-		for (QByteArray& p : dynamicProperties)
-		{
-			QString name(p);
-			setProperty(name.toStdString().c_str(), QVariant());		// Delete property by setting invalid QVariant()
-		}
+		removeDynamicProperties();
 
 		// Set new Param Propereties
 		//
@@ -480,7 +483,15 @@ namespace VFrame30
 			}
 
 			QVariant value = p.value();
-			setProperty(p.caption().toStdString().c_str(), value);
+
+			auto prop = this->addProperty<QVariant>(p.caption(),true);
+
+			prop->setValue(value);
+			prop->setReadOnly(false);
+			prop->setDynamic(true);
+			prop->setCategory(tr("Parameters"));
+			prop->setLimits(p.lowLimit(), p.highLimit());
+			prop->setPrecision(precision());
 		}
 	}
 
@@ -492,7 +503,6 @@ namespace VFrame30
 		}
 
 		QString exeScript = afb.libraryScript() + script;
-
 
 		exeScript.replace(QString("&lt;"), QString("<"));
 		exeScript.replace(QString("&gt;"), QString(">"));
@@ -513,7 +523,7 @@ namespace VFrame30
 		QJSValue jsEval = jsEngine.evaluate(exeScript);
 		if (jsEval.isError() == true)
 		{
-			qDebug()<<tr("Script evaluation failed: %1").arg(jsEval.toString());
+			qDebug() << tr("Script evaluation failed: %1").arg(jsEval.toString());
 			assert(false);
 			return false;
 		}
@@ -527,7 +537,7 @@ namespace VFrame30
 
 		if (jsResult.isError() == true)
 		{
-			qDebug()<<tr("Script execution failed: %1").arg(jsResult.toString());
+			qDebug() << tr("Script execution failed: %1").arg(jsResult.toString());
 			assert(false);
 			return false;
 		}
@@ -585,5 +595,44 @@ namespace VFrame30
 	const std::vector<Afb::AfbParam>& SchemeItemAfb::params() const
 	{
 		return m_params;
+	}
+
+	int SchemeItemAfb::precision() const
+	{
+		return m_precision;
+	}
+
+	void SchemeItemAfb::setPrecision(int value)
+	{
+		if (value < 0)
+		{
+			value = 0;
+		}
+
+		if (value > 24)
+		{
+			value = 24;
+		}
+
+		m_precision = value;
+
+		// Set new precsion to all dynamic properties
+		//
+		for (Afb::AfbParam& p : m_params)
+		{
+			if (p.user() == false)
+			{
+				continue;
+			}
+
+			auto prop = this->propertyByCaption(p.caption());
+
+			if (prop.get() != nullptr && prop->dynamic() == true)
+			{
+				prop->setPrecision(m_precision);
+			}
+		}
+
+		return;
 	}
 }

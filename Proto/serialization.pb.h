@@ -3867,18 +3867,28 @@ class SchemeItemAfb : public ::google::protobuf::Message {
   inline ::Proto::wstring* release_afbstrid();
   inline void set_allocated_afbstrid(::Proto::wstring* afbstrid);
 
+  // optional int32 precision = 4 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 4;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemeItemAfb)
  private:
   inline void set_has_afbstrid();
   inline void clear_has_afbstrid();
+  inline void set_has_precision();
+  inline void clear_has_precision();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::Proto::wstring* afbstrid_;
+  ::google::protobuf::int32 precision_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9569,6 +9579,28 @@ inline void SchemeItemAfb::set_allocated_afbstrid(::Proto::wstring* afbstrid) {
   } else {
     clear_has_afbstrid();
   }
+}
+
+// optional int32 precision = 4 [default = 2];
+inline bool SchemeItemAfb::has_precision() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemeItemAfb::set_has_precision() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemeItemAfb::clear_has_precision() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemeItemAfb::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 SchemeItemAfb::precision() const {
+  return precision_;
+}
+inline void SchemeItemAfb::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
 }
 
 // -------------------------------------------------------------------

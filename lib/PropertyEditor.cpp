@@ -533,7 +533,7 @@ namespace ExtWidgets
         m_spinBox->setKeyboardTracking(false);
         m_spinBox->setRange(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
         m_spinBox->setDecimals(1);
-        m_spinBox->setSingleStep(0.1);
+		m_spinBox->setSingleStep(0.01);
 
 		connect(m_spinBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 				this, &QtMultiDoubleSpinBox::onValueChanged);

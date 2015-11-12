@@ -9,7 +9,8 @@
 
 namespace VFrame30
 {
-	FblItemRect::FblItemRect(void)
+	FblItemRect::FblItemRect(void) :
+		FblItemRect(SchemeUnit::Inch)
 	{
 	}
 
@@ -19,6 +20,13 @@ namespace VFrame30
 		m_fillColor(qRgb(0xF0, 0xF0, 0xF0)),
 		m_textColor(qRgb(0x00, 0x00, 0xC0))
 	{
+		ADD_PROPERTY_GETTER_SETTER(QString, FontName, true, FblItemRect::getFontName, FblItemRect::setFontName);
+		ADD_PROPERTY_GETTER_SETTER(double, FontSize, true, FblItemRect::getFontSize, FblItemRect::setFontSize);
+		ADD_PROPERTY_GETTER_SETTER(bool, FontBold, true, FblItemRect::getFontBold, FblItemRect::setFontBold);
+		ADD_PROPERTY_GETTER_SETTER(bool, FontItalic, true, FblItemRect::getFontItalic, FblItemRect::setFontItalic);
+
+		// --
+		//
 		setItemUnit(unit);
 		m_font.setName("Sans");
 
