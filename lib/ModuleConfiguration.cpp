@@ -458,23 +458,27 @@ namespace Hardware
 
 		// sort channel data by growing channel number
 		//
-		std::vector<int> channelNumbers;
+        std::vector<std::pair<int, int>> channelNumbersAndSize;
 		for (auto it = m_channelData.begin(); it != m_channelData.end(); it++)
 		{
 			int channel = it->first;
-			channelNumbers.push_back(channel);
+            int size = it->second.size() / sizeof(quint16);
+            channelNumbersAndSize.push_back(std::make_pair(channel, size));
 		}
-		std::sort(channelNumbers.begin(), channelNumbers.end());
+        std::sort(channelNumbersAndSize.begin(), channelNumbersAndSize.end(), [](std::pair<int, int> a, std::pair<int, int> b)
+            {
+                return a.first < b.first;
+            });
 
 		// place channel data to frames
 		//
-		std::vector<int> channelStartFrame;
+        std::vector<int> channelStartFrame;
 
 		int frame = startDataFrame;
 
-		for (size_t c = 0; c < channelNumbers.size(); c++)
+        for (size_t c = 0; c < channelNumbersAndSize.size(); c++)
 		{
-			int channel = channelNumbers[c];
+            int channel = channelNumbersAndSize[c].first;
 
 			if (frame >= frameCount())
 			{
@@ -548,16 +552,29 @@ namespace Hardware
 
 		ptr += sizeof(quint64);	//reserved
 
-		*(quint16*)ptr = qToBigEndian((quint16)channelNumbers.size());	// Configuration channels quantity
+        *(quint16*)ptr = qToBigEndian((quint16)channelNumbersAndSize.size());	// Configuration channels quantity
 		ptr += sizeof(quint16);
 
-		for (size_t i = 0; i < channelStartFrame.size(); i++)	// Start frames
+        if (channelNumbersAndSize.size() != channelStartFrame.size())
+        {
+            assert(channelNumbersAndSize.size() == channelStartFrame.size());
+            return false;
+        }
+
+        for (size_t i = 0; i < channelNumbersAndSize.size(); i++)	// Start frames
 		{
-			*(quint16*)ptr = qToBigEndian((quint16)channelStartFrame[i]);
+            quint16 startFrame = (quint16)channelStartFrame[i];
+
+            *(quint16*)ptr = qToBigEndian(startFrame);
 			ptr += sizeof(quint16);
 
+            quint16 size = (quint16)channelNumbersAndSize[i].second;
+
+            *(quint16*)ptr = qToBigEndian(size);
+            ptr += sizeof(quint16);
+
 			//reserved
-			ptr += sizeof(quint32);
+            ptr += sizeof(quint16);
 		}
 
 		return true;
