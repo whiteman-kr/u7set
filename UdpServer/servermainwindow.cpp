@@ -31,9 +31,15 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 
 //	Tcp::MyServer* ms = new Tcp::MyServer;
 
-	Tcp::FileServer* m_fileServer = new Tcp::FileServer("d:/temp/bbb-debug-000023");
+/*	Tcp::FileServer* m_fileServer = new Tcp::FileServer("d:/temp/bbb-debug-000023");
 
 	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), m_fileServer);
+
+	m_tcpServerThread->start();*/
+
+	m_cfgServer = new CfgServer("d:/temp/build");
+
+	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), m_cfgServer);
 
 	m_tcpServerThread->start();
 }
@@ -41,6 +47,7 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 
 ServerMainWindow::~ServerMainWindow()
 {
+
 	m_tcpServerThread->quit();
 
 	delete m_tcpServerThread;

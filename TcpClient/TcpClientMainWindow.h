@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "../include/Tcp.h"
 #include "../include/TcpFileTransfer.h"
+#include "../include/CfgServerLoader.h"
 
 namespace Ui {
 class TcpClientMainWindow;
@@ -53,6 +54,8 @@ private:
 
 	Tcp::FileClient* m_fileClient = nullptr;
 	Tcp::Thread* m_fileClientThread = nullptr;
+
+	CfgLoader* m_cfgLoader = nullptr;
 };
 
 #endif // TCPCLIENTMAINWINDOW_H

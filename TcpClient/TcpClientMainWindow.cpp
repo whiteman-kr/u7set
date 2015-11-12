@@ -16,12 +16,12 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 
 	m_tcpThread->start();*/
 
-	m_fileClient = new Tcp::FileClient("d:/temp22/client_cfg", HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST));
-	m_fileClientThread = new Tcp::Thread(m_fileClient);
+	m_cfgLoader = new CfgLoader("APP_QQQ", HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIG_SERVICE_REQUEST));
+	m_fileClientThread = new Tcp::Thread(m_cfgLoader);
 
 	m_fileClientThread->start();
 
-	connect(m_fileClient, &Tcp::FileClient::signal_endDownloadFile, this, &TcpClientMainWindow::onEndDownloadFile);
+	//connect(m_fileClient, &Tcp::FileClient::signal_endDownloadFile, this, &TcpClientMainWindow::onEndDownloadFile);
 }
 
 

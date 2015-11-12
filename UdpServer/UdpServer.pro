@@ -60,7 +60,8 @@ SOURCES +=\
 	../lib/ProtoUdp.cpp \
 	../lib/Tcp.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/TcpFileTransfer.cpp
+    ../lib/TcpFileTransfer.cpp \
+    ../lib/CfgServerLoader.cpp
 
 HEADERS  += \
     ../include/SocketIO.h \
@@ -74,7 +75,8 @@ HEADERS  += \
     ../include/Factory.h \
 	../include/Tcp.h \
     ../include/SimpleThread.h \
-    ../include/TcpFileTransfer.h
+    ../include/TcpFileTransfer.h \
+    ../include/CfgServerLoader.h
 
 include(../qtservice/src/qtservice.pri)
 
