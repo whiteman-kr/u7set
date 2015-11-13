@@ -22,6 +22,7 @@ namespace Builder
 
 		bool generateMonitorCfg();
 		bool writeAppSignalsXml();
+		bool writeEquipmentXml();
 
 		bool generateDataAcqisitionServiceCfg();
 
