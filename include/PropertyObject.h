@@ -114,7 +114,7 @@ private:
 	bool m_updateFromPreset = false;		// Update this property from preset, used in DeviceObject
 	bool m_dynamic = false;					// Dynamic property, used in DeviceObject
 	bool m_visible = false;
-	int m_precision = 0;
+	int m_precision = 2;
 };
 
 //

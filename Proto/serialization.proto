@@ -540,6 +540,7 @@ message SchemeItemAfb
 {
 	repeated AfbParam params = 2;
 	optional wstring afbStrid = 3;
+	optional int32 precision = 4 [default = 2];
 }
 
 //

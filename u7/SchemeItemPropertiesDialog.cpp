@@ -83,8 +83,12 @@ void SchemeItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 		items.push_back(vi);
 	}
 
-	editEngine()->runSetProperty(property->propertyName(), value, items);
+	if (items.empty() == true)
+	{
+		return;
+	}
 
+	editEngine()->runSetProperty(property->propertyName(), value, items);
 	return;
 }
 

@@ -2216,7 +2216,7 @@ R"DELIM({
 	Software::Software(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, Type, true, Software::type, Software::setType);
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(E::SoftwareType, Type, true, Software::type, Software::setType);
 
 		typeProp->setUpdateFromPreset(true);
 	}
@@ -2239,7 +2239,7 @@ R"DELIM({
 		//
 		Proto::Software* softwareMessage = message->mutable_deviceobject()->mutable_software();
 
-		softwareMessage->set_type(m_type);
+		softwareMessage->set_type(static_cast<int>(m_type));
 
 		return true;
 	}
@@ -2268,7 +2268,7 @@ R"DELIM({
 
 		const Proto::Software& softwareMessage = message.deviceobject().software();
 
-		m_type =  softwareMessage.type();
+		m_type =  static_cast<E::SoftwareType>(softwareMessage.type());
 
 		return true;
 	}
@@ -2279,12 +2279,12 @@ R"DELIM({
 	}
 
 
-	int Software::type() const
+	E::SoftwareType Software::type() const
 	{
 		return m_type;
 	}
 
-	void Software::setType(int value)
+	void Software::setType(E::SoftwareType value)
 	{
 		m_type = value;
 	}

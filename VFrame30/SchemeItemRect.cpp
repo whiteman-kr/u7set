@@ -3,7 +3,8 @@
 
 namespace VFrame30
 {
-	SchemeItemRect::SchemeItemRect(void)
+	SchemeItemRect::SchemeItemRect(void) :
+		SchemeItemRect(SchemeUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
@@ -220,7 +221,8 @@ namespace VFrame30
 		else
 		{
 			double pt = CUtils::ConvertPoint(m_weight, SchemeUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
-			return CUtils::RoundPoint(pt, Settings::regionalUnit());
+			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
+			return pt;
 		}
 	}
 

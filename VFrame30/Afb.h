@@ -161,7 +161,7 @@ private:
 		// Methods
 		//
 	public:
-        void update(const AfbSignalType &type, const AfbDataFormat dataFormat, const QVariant& lowLimit, const QVariant& highLimit);
+		void update(const AfbSignalType& type, const AfbDataFormat dataFormat, const QVariant& lowLimit, const QVariant& highLimit);
 
 		// Serialization
 		//

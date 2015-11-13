@@ -54,13 +54,13 @@ namespace Builder
 
 		bool result = true;
 
-		switch(m_software->type())
+		switch(static_cast<E::SoftwareType>(m_software->type()))
 		{
-		case Hardware::SoftwareType::Monitor:
+		case E::SoftwareType::Monitor:
 			result = generateMonitorCfg();
 			break;
 
-		case Hardware::SoftwareType::DataAcquisitionService:
+		case E::SoftwareType::DataAcquisitionService:
 			result = generateDataAcqisitionServiceCfg();
 			break;
 
