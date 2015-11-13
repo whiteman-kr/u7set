@@ -25,9 +25,9 @@ signals:
 	void sendSettingsCreated();
 
 private:
-	Ui::SettingsDialog *ui;
+	Ui::SettingsDialog *ui = nullptr;
 
-	QString m_pathToSignalsXml;
+	QString m_pathToSignalsXml = "";
 };
 
 #endif // SETTINGSDIALOG_H
