@@ -19,10 +19,10 @@
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_counter" Caption = "Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-                <Value>50</Value>
-                <Default>50</Default>
+                <Value>1000</Value>
+                <Default>1000</Default>
                 <LowLimit>0</LowLimit>
-                <HighLimit>100</HighLimit>
+                <HighLimit>360000</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>
