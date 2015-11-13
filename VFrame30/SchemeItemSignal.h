@@ -32,6 +32,8 @@ namespace VFrame30
 		//
 	public:
 		QString signalStrIds() const;
+		const QStringList& signalStrIdList() const;
+
 		void setSignalStrIds(const QString& s);
 		QStringList* mutable_signalStrIds();
 
