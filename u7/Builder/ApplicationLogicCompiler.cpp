@@ -4388,7 +4388,7 @@ namespace Builder
 		setStrID(strID);
 		setType(signalType);
 		setDataSize(dataSize);
-		setInOutType(SignalInOutType::Internal);
+		setInOutType(E::SignalInOutType::Internal);
 
 		m_isShadowSignal = true;
 	}
