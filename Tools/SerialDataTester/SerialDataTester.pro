@@ -14,12 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         SerialDataTester.cpp \
-    PortReceiver.cpp \
-    SettingsDialog.cpp
+    SettingsDialog.cpp \
+    PortReceiver.cpp
 
 HEADERS  += SerialDataTester.h \
-    PortReceiver.h \
-    SettingsDialog.h
+    SettingsDialog.h \
+    PortReceiver.h
 
 FORMS    += SerialDataTester.ui \
     SettingsDialog.ui

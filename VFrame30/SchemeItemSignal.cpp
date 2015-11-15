@@ -138,6 +138,11 @@ namespace VFrame30
 		return result;
 	}
 
+	const QStringList& SchemeItemSignal::signalStrIdList() const
+	{
+		return m_signalStrIds;
+	}
+
 	void SchemeItemSignal::setSignalStrIds(const QString& s)
 	{
 		m_signalStrIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);

@@ -2,6 +2,7 @@
 #define SERIALDATATESTER_H
 
 #include "SettingsDialog.h"
+#include "PortReceiver.h"
 #include <QMainWindow>
 #include <QXmlReader>
 #include <QPixmap>
@@ -19,23 +20,41 @@ public:
 	virtual ~SerialDataTester();
 
 private slots:
-		void reloadConfig();
-		void parseFile();
+	void parseFile();
+	void reloadConfig();
+	void selectNewSignalsFile();
+	void applicationExit();
+	void setPort(QAction* );
+	void setBaud(QAction* );
+	void portError(QString);
+
+signals:
+	void portChanged(QString);
+	void baudChanged(int);
 
 private:
-	Ui::SerialDataTester *ui;
+	Ui::SerialDataTester *ui = nullptr;
 
-	SettingsDialog* m_applicationSettingsDialog;
+	SettingsDialog* m_applicationSettingsDialog = nullptr;
+	PortReceiver* m_portReceiver = nullptr;
 
-	QMenu* m_file;
-	QAction* m_reloadCfg;
+	QMenu* m_file = nullptr;
+	QAction* m_reloadCfg = nullptr;
+	QAction* m_changeSignalSettingsFile = nullptr;
+	QAction* m_exit = nullptr;
+
+	QMenu* m_settings = nullptr;
+	QMenu* m_setPort = nullptr;
+	QMenu* m_setBaud = nullptr;
+
+	QString m_pathToSignalsXml = "";
 
 	struct SignalData
 	{
 		QString strId;
 		QString caption;
-		int offset;
-		int bit;
+		int offset = 0;
+		int bit = 0;
 		QString type;
 	};
 

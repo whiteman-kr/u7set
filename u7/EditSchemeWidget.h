@@ -296,6 +296,8 @@ protected slots:
 
 	void exportToPdf();
 
+	void signalsProperties(QStringList strIds);
+
 	void escapeKey();
 	void f2Key();
 	void deleteKey();

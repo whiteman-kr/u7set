@@ -4078,6 +4078,74 @@ void EditSchemeWidget::contextMenu(const QPoint& pos)
 	actions << m_editAction;
 	actions << m_sizeAndPosAction;
 
+	// Signal properties
+	//
+	QSet<QString> signalStrIds;		// QSet for unique strIds
+
+	if (selectedItems().empty() == false)
+	{
+		auto& selected = selectedItems();
+
+		for (auto item : selected)
+		{
+			if (dynamic_cast<VFrame30::SchemeItemSignal*>(item.get()) != nullptr)
+			{
+				auto itemSignal = dynamic_cast<VFrame30::SchemeItemSignal*>(item.get());
+				assert(itemSignal);
+
+				const QStringList& signalStrIdList = itemSignal->signalStrIdList();
+
+				for (const QString& s : signalStrIdList)
+				{
+					if (s.isEmpty() == false)
+					{
+						signalStrIds << s;
+					}
+				}
+			}
+		}
+
+		if (signalStrIds.empty() == false)
+		{
+			QAction* signalSeparator = new QAction(tr("Signals"), &menu);
+			signalSeparator->setSeparator(true);
+			actions << signalSeparator;
+
+			for (QString s : signalStrIds)
+			{
+				QAction* signalAction = new QAction(s, &menu);
+				connect(signalAction, &QAction::triggered,
+						[s, this](bool)
+						{
+							QStringList sl;
+							sl << s;
+							this->signalsProperties(sl);
+						});
+
+				actions << signalAction;
+			}
+
+			if (signalStrIds.size() > 1)
+			{
+				QAction* allSignals = new QAction(tr("All Signals %1 Properties...").arg(signalStrIds.size()), &menu);
+				connect(allSignals, &QAction::triggered,
+						[&signalStrIds, this](bool)
+						{
+							QStringList sl;
+							for (auto s : signalStrIds)
+							{
+								sl << s;
+							}
+
+							this->signalsProperties(sl);
+						});
+
+				actions << allSignals;
+			}
+		}
+	}
+
+	// --
 	actions << m_separatorAction0;
 	actions << m_layersAction;
 	actions << m_propertiesAction;
@@ -4101,6 +4169,23 @@ void EditSchemeWidget::exportToPdf()
 	qDebug() << "Export scheme " << scheme()->caption() << " " << scheme()->strID() << " to PDF, " << fileName;
 
 	editSchemeView()->exportToPdf(fileName);
+
+	return;
+}
+
+void EditSchemeWidget::signalsProperties(QStringList strIds)
+{
+	if (strIds.isEmpty() == true)
+	{
+		return;
+	}
+
+	qDebug() << Q_FUNC_INFO;
+
+	for (auto s : strIds)
+	{
+		qDebug() << s;
+	}
 
 	return;
 }
