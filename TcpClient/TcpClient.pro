@@ -20,13 +20,15 @@ SOURCES +=\
     ../lib/SimpleThread.cpp \
     ../lib/Tcp.cpp \
     ../lib/SocketIO.cpp \
-    ../lib/TcpFileTransfer.cpp
+    ../lib/TcpFileTransfer.cpp \
+    ../lib/CfgServerLoader.cpp
 
 HEADERS  += TcpClientMainWindow.h \
     ../include/SimpleThread.h \
     ../include/Tcp.h \
     ../include/SocketIO.h \
-    ../include/TcpFileTransfer.h
+    ../include/TcpFileTransfer.h \
+    ../include/CfgServerLoader.h
 
 FORMS    += TcpClientMainWindow.ui
 

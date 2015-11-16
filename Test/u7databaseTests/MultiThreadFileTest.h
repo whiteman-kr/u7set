@@ -19,8 +19,8 @@ public:
 
 	virtual void run();
 
-	int m_threadNumber;
-	int m_amountOfFileIds;
+	int m_threadNumber = 0;
+	int m_amountOfFileIds = 0;
 
 	QString m_databaseHost;
 	QString m_databaseUser;

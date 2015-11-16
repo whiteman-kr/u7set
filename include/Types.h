@@ -48,6 +48,32 @@ public:
 	};
 	Q_ENUM(SoftwareType)
 
+
+	enum InstanceAction
+	{
+		Added = 1,
+		Modified = 2,
+		Deleted = 3
+	};
+	Q_ENUM(InstanceAction)
+
+	enum OutputRangeMode
+	{
+		Plus0_Plus5_V = 0,
+		Plus4_Plus20_mA = 1,
+		Minus10_Plus10_V = 2,
+		Plus0_Plus5_mA = 3,
+	};
+	Q_ENUM(OutputRangeMode)
+
+	enum SignalInOutType
+	{
+		Input = 0,
+		Output = 1,
+		Internal = 2
+	};
+	Q_ENUM(SignalInOutType)
+
 public:
 	// Convert enum value (not index) to QString
 	//

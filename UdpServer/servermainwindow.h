@@ -6,6 +6,7 @@
 #include "../include/ProtoUdp.h"
 #include "../include/Tcp.h"
 #include "../include/TcpFileTransfer.h"
+#include "../include/CfgServerLoader.h"
 
 namespace Ui
 {
@@ -45,6 +46,8 @@ private:
 	ProtoUdp::ServerThread* m_protoUdpServerThread = nullptr;
 
 	Tcp::ServerThread* m_tcpServerThread = nullptr;
+
+	CfgServer* m_cfgServer = nullptr;
 };
 
 #endif // SERVERMAINWINDOW_H

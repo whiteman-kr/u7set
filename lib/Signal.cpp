@@ -14,12 +14,13 @@ DataFormatList::DataFormatList()
 
 
 Signal::Signal() :
-	QObject()
+	PropertyObject()
 {
+	InitProperties();
 }
 
 
-Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
+Signal::Signal(const Hardware::DeviceSignal& deviceSignal) : PropertyObject()
 {
 	if (deviceSignal.isDiagSignal())
 	{
@@ -45,17 +46,17 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 	if (deviceSignal.isInputSignal() || deviceSignal.isValiditySignal())
 	{
-		m_inOutType = SignalInOutType::Input;
+		m_inOutType = E::SignalInOutType::Input;
 	}
 	else
 	{
 		if (deviceSignal.isOutputSignal())
 		{
-			m_inOutType = SignalInOutType::Output;
+			m_inOutType = E::SignalInOutType::Output;
 		}
 		else
 		{
-			m_inOutType = SignalInOutType::Internal;
+			m_inOutType = E::SignalInOutType::Internal;
 		}
 	}
 
@@ -84,6 +85,8 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 		m_dataFormat = E::DataFormat::UnsignedInt;
 		m_dataSize = deviceSignal.size();
 	}
+
+	InitProperties();
 }
 
 
@@ -137,6 +140,72 @@ Signal& Signal::operator =(const Signal& signal)
 	m_byteOrder = signal.byteOrder();
 
 	return *this;
+}
+
+void Signal::InitProperties()
+{
+	ADD_PROPERTY_GETTER(int, ID, false, Signal::ID);
+	ADD_PROPERTY_GETTER(int, SignalGroupID, false, Signal::signalGroupID);
+	ADD_PROPERTY_GETTER(int, SignalInstanceID, false, Signal::signalInstanceID);
+	ADD_PROPERTY_GETTER(int, ChangesetID, false, Signal::changesetID);
+	ADD_PROPERTY_GETTER(bool, CheckedOut, false, Signal::checkedOut);
+	ADD_PROPERTY_GETTER(int, UserID, false, Signal::userID);
+	ADD_PROPERTY_GETTER(int, Channel, false, Signal::channel);
+	ADD_PROPERTY_GETTER(QDateTime, Created, false, Signal::created);
+	ADD_PROPERTY_GETTER(bool, Deleted, false, Signal::deleted);
+	ADD_PROPERTY_GETTER(QDateTime, InstanceCreated, false, Signal::instanceCreated);
+	ADD_PROPERTY_GETTER(E::InstanceAction, InstanceAction, false, Signal::instanceAction);
+
+	ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, false, Signal::type, Signal::setType);
+
+	ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, Signal::strID, Signal::setStrID);
+	ADD_PROPERTY_GETTER_SETTER(QString, ExtStrID, true, Signal::extStrID, Signal::setExtStrID);
+	ADD_PROPERTY_GETTER_SETTER(QString, Name, true, Signal::name, Signal::setName);
+	ADD_PROPERTY_GETTER_SETTER(E::DataFormat, DataFormat, true, Signal::dataFormat, Signal::setDataFormat);
+	ADD_PROPERTY_GETTER_SETTER(int, DataSize, true, Signal::dataSize, Signal::setDataSize);
+	if (isAnalog())
+	{
+		ADD_PROPERTY_GETTER_SETTER(int, LowADC, true, Signal::lowADC, Signal::setLowADC);
+		ADD_PROPERTY_GETTER_SETTER(int, HighADC, true, Signal::highADC, Signal::setHighADC);
+		ADD_PROPERTY_GETTER_SETTER(double, LowLimit, true, Signal::lowLimit, Signal::setLowLimit);
+		ADD_PROPERTY_GETTER_SETTER(double, HighLimit, true, Signal::highLimit, Signal::setHighLimit);
+		ADD_PROPERTY_GETTER_SETTER(int, UnitID, true, Signal::unitID, Signal::setUnitID);
+		ADD_PROPERTY_GETTER_SETTER(double, Adjustment, true, Signal::adjustment, Signal::setAdjustment);
+		ADD_PROPERTY_GETTER_SETTER(double, DropLimit, true, Signal::dropLimit, Signal::setDropLimit);
+		ADD_PROPERTY_GETTER_SETTER(double, ExcessLimit, true, Signal::excessLimit, Signal::setExcessLimit);
+		ADD_PROPERTY_GETTER_SETTER(double, UnbalanceLimit, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit);
+		auto inputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, InputLowLimit, true, Signal::inputLowLimit, Signal::setInputLowLimit);
+		inputLowLimitPropetry->setCategory("Input sensor");
+		auto inputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, InputHighLimit, true, Signal::inputHighLimit, Signal::setInputHighLimit);
+		inputHighLimitPropetry->setCategory("Input sensor");
+		auto inputUnitIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, InputUnitID, true, Signal::inputUnitID, Signal::setInputUnitID);
+		inputUnitIDPropetry->setCategory("Input sensor");
+		auto inputSensorIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, InputSensorID, true, Signal::inputSensorID, Signal::setInputSensorID);
+		inputSensorIDPropetry->setCategory("Input sensor");
+		auto outputLowLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, OutputLowLimit, true, Signal::outputLowLimit, Signal::setOutputLowLimit);
+		outputLowLimitPropetry->setCategory("Output sensor");
+		auto outputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, OutputHighLimit, true, Signal::outputHighLimit, Signal::setOutputHighLimit);
+		outputHighLimitPropetry->setCategory("Output sensor");
+		auto outputUnitIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, OutputUnitID, true, Signal::outputUnitID, Signal::setOutputUnitID);
+		outputUnitIDPropetry->setCategory("Output sensor");
+		auto outputRangeModePropetry = ADD_PROPERTY_GETTER_SETTER(E::OutputRangeMode, OutputRangeMode, true, Signal::outputRangeMode, Signal::setOutputRangeMode);
+		outputRangeModePropetry->setCategory("Output sensor");
+		auto outputSensorIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, OutputSensorID, true, Signal::outputSensorID, Signal::setOutputSensorID);
+		outputSensorIDPropetry->setCategory("Output sensor");
+	}
+	ADD_PROPERTY_GETTER_SETTER(bool, Acquire, true, Signal::acquire, Signal::setAcquire);
+	if (isAnalog())
+	{
+		ADD_PROPERTY_GETTER_SETTER(bool, Calculated, true, Signal::calculated, Signal::setCalculated);
+		ADD_PROPERTY_GETTER_SETTER(int, NormalState, true, Signal::normalState, Signal::setNormalState);
+		ADD_PROPERTY_GETTER_SETTER(int, DecimalPlaces, true, Signal::decimalPlaces, Signal::setDecimalPlaces);
+		ADD_PROPERTY_GETTER_SETTER(double, Aperture, true, Signal::aperture, Signal::setAperture);
+		ADD_PROPERTY_GETTER_SETTER(double, FilteringTime, true, Signal::filteringTime, Signal::setFilteringTime);
+		ADD_PROPERTY_GETTER_SETTER(double, MaxDifference, true, Signal::maxDifference, Signal::setMaxDifference);
+	}
+	ADD_PROPERTY_GETTER_SETTER(E::SignalInOutType, InOutType, true, Signal::inOutType, Signal::setInOutType);
+	ADD_PROPERTY_GETTER_SETTER(E::ByteOrder, ByteOrder, true, Signal::byteOrder, Signal::setByteOrder);
+	ADD_PROPERTY_GETTER_SETTER(QString, DeviceStrID, true, Signal::deviceStrID, Signal::setDeviceStrID);
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
@@ -223,7 +292,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	assert(false);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(OutputRangeMode))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputRangeMode))
 {
 	const QStringRef& strValue = attr.value(fieldName);
 	if (strValue.isEmpty())
@@ -235,14 +304,14 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	{
 		if (strValue == OutputRangeModeStr[i])
 		{
-			(this->*setter)(OutputRangeMode(i));
+			(this->*setter)(static_cast<E::OutputRangeMode>(i));
 			return;
 		}
 	}
 	assert(false);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalInOutType))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType))
 {
 	const QStringRef& strValue = attr.value(fieldName);
 	if (strValue.isEmpty())
@@ -254,7 +323,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	{
 		if (strValue == InOutTypeStr[i])
 		{
-			(this->*setter)(SignalInOutType(i));
+			(this->*setter)(static_cast<E::SignalInOutType>(i));
 			return;
 		}
 	}

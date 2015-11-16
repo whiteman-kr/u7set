@@ -38,6 +38,8 @@ public:
 	QList<VALUE> toList() const;
 
 	void reserve(int n);
+
+	std::vector<std::pair<KEY, VALUE>> getKeyValueVector();
 };
 
 
@@ -193,6 +195,30 @@ void OrderedHash<KEY, VALUE>::reserve(int n)
 	m_valueVector.reserve(n);
 	m_valueVector.reserve(n);
 	m_hash.reserve(n);
+}
+
+
+template <typename KEY, typename VALUE>
+std::vector<std::pair<KEY, VALUE>> OrderedHash<KEY, VALUE>::getKeyValueVector()
+{
+	std::vector<std::pair<KEY, VALUE>> result;
+
+	if (m_keyVector.count() != m_valueVector.count())
+	{
+		assert(false);
+		return result;
+	}
+
+	int index = 0;
+
+	for(KEY key : m_keyVector)
+	{
+		result.push_back(std::pair<KEY, VALUE>(key, m_valueVector[index]));
+
+		index++;
+	}
+
+	return result;
 }
 
 

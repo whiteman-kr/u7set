@@ -14,31 +14,6 @@
 class QXmlStreamAttributes;
 
 
-enum SignalInOutType
-{
-	Input = 0,
-	Output = 1,
-	Internal = 2
-};
-
-
-enum InstanceAction
-{
-	Added = 1,
-	Modified = 2,
-	Deleted = 3
-};
-
-
-enum OutputRangeMode
-{
-	Plus0_Plus5_V = 0,
-	Plus4_Plus20_mA = 1,
-	Minus10_Plus10_V = 2,
-	Plus0_Plus5_mA = 3,
-};
-
-
 const char* const InOutTypeStr[] =
 {
 	"Input",
@@ -185,11 +160,13 @@ public:
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
-class Signal : public QObject
+class Signal : public PropertyObject
 {
 	Q_OBJECT
 
 private:
+	void InitProperties();
+
 	// Signal fields from database
 	//
 	int m_ID = 0;
@@ -203,7 +180,7 @@ private:
 	QDateTime m_created;
 	bool m_deleted = false;
 	QDateTime m_instanceCreated;
-	InstanceAction m_instanceAction = InstanceAction::Added;
+	E::InstanceAction m_instanceAction = E::InstanceAction::Added;
 
 	QString m_strID;
 	QString m_extStrID;
@@ -226,14 +203,14 @@ private:
 	double m_outputLowLimit = 0;
 	double m_outputHighLimit = 0;
 	int m_outputUnitID = NO_UNIT_ID;
-	OutputRangeMode m_outputRangeMode = OutputRangeMode::Plus0_Plus5_V;
+	E::OutputRangeMode m_outputRangeMode = E::OutputRangeMode::Plus0_Plus5_V;
 	int m_outputSensorID = 0;
 	bool m_acquire = true;
 	bool m_calculated = false;
 	int m_normalState = 0;
 	int m_decimalPlaces = 2;
 	double m_aperture = 0;
-	SignalInOutType m_inOutType = SignalInOutType::Internal;
+	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
 	QString m_deviceStrID;
 	double m_filteringTime = 0.05;
 	double m_maxDifference = 0.5;
@@ -260,15 +237,17 @@ private:
 	void setDeleted(bool deleted) { m_deleted = deleted; }
 	void setInstanceCreated(const QDateTime& instanceCreated) { m_instanceCreated = instanceCreated; }
 	void setInstanceCreated(const QString& instanceCreatedStr) { m_instanceCreated = QDateTime::fromString(instanceCreatedStr, DATE_TIME_FORMAT_STR); }
-	void setInstanceAction(InstanceAction action) { m_instanceAction = action; }
+	void setInstanceAction(E::InstanceAction action) { m_instanceAction = action; }
 
 public:
 	Signal();
 
 	Signal(const Signal& signal) :
-		QObject()
+		PropertyObject()
 	{
 		*this = signal;
+
+		InitProperties();
 	}
 
 	Signal(const Hardware::DeviceSignal& deviceSignal);
@@ -290,9 +269,9 @@ public:
 	bool isAnalog() const { return m_type == E::SignalType::Analog; }
 	bool isDiscrete() const { return m_type == E::SignalType::Discrete; }
 
-	bool isInput() const { return m_inOutType == SignalInOutType::Input; }
-	bool isOutput() const { return m_inOutType == SignalInOutType::Output; }
-	bool isInternal() const { return m_inOutType == SignalInOutType::Internal; }
+	bool isInput() const { return m_inOutType == E::SignalInOutType::Input; }
+	bool isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
+	bool isInternal() const { return m_inOutType == E::SignalInOutType::Internal; }
 
 	bool isRegistered() const { return acquire(); }
 
@@ -301,7 +280,7 @@ public:
 	QDateTime created() const { return m_created; }
 	bool deleted() const { return m_deleted; }
 	QDateTime instanceCreated() const { return m_instanceCreated; }
-	InstanceAction instanceAction() const { return m_instanceAction; }
+	E::InstanceAction instanceAction() const { return m_instanceAction; }
 
 	Address16& iobufferAddr() { return m_iobufferAddr; }
 	Address16& ramAddr() { return m_ramAddr; }
@@ -321,8 +300,8 @@ public:
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(double));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(OutputRangeMode));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(SignalInOutType));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputRangeMode));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(E::DataFormat));
@@ -395,9 +374,9 @@ public:
     Q_INVOKABLE int outputUnitID() const { return m_outputUnitID; }
 	void setOutputUnitID(int outputUnitID) { m_outputUnitID = outputUnitID; }
 
-	OutputRangeMode outputRangeMode() const { return m_outputRangeMode; }
+	E::OutputRangeMode outputRangeMode() const { return m_outputRangeMode; }
 	Q_INVOKABLE int jsOutputRangeMode() const { return static_cast<int>(outputRangeMode());}
-	void setOutputRangeMode(OutputRangeMode outputRangeMode) { m_outputRangeMode = outputRangeMode; }
+	void setOutputRangeMode(E::OutputRangeMode outputRangeMode) { m_outputRangeMode = outputRangeMode; }
 
     Q_INVOKABLE int outputSensorID() const { return m_outputSensorID; }
 	void setOutputSensorID(int outputSensorID) { m_outputSensorID = outputSensorID; }
@@ -417,8 +396,8 @@ public:
     Q_INVOKABLE double aperture() const { return m_aperture; }
 	void setAperture(double aperture) { m_aperture = aperture; }
 
-    Q_INVOKABLE SignalInOutType inOutType() const { return m_inOutType; }
-	void setInOutType(SignalInOutType inOutType) { m_inOutType = inOutType; }
+	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_inOutType; }
+	void setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
 
     Q_INVOKABLE QString deviceStrID() const { return m_deviceStrID; }
 	void setDeviceStrID(const QString& deviceStrID) { m_deviceStrID = deviceStrID; }

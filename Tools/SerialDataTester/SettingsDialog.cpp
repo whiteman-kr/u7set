@@ -7,6 +7,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <QList>
+#include <QDebug>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
 	QDialog(parent),
@@ -16,17 +18,22 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
 	for (QSerialPortInfo port : QSerialPortInfo::availablePorts())
 	{
-		ui->comboBox->addItem(port.portName());
+		ui->comPortSelectionBox->addItem(port.portName());
 	}
 
-	ui->comboBox_2->addItem("115200");
-	ui->comboBox_2->addItem("57600");
-	ui->comboBox_2->addItem("38400");
-	ui->comboBox_2->addItem("19200");
+	/*for (quint32 baudRate : QSerialPortInfo::standardBaudRates())
+	{
+		ui->portBaudBox->addItem(QString::number(baudRate));
+	}*/
 
-	connect (ui->pushButton, &QPushButton::clicked, this, &SettingsDialog::browseSignalsXmlFile);
-	connect (ui->pushButton_3, &QPushButton::clicked, this, &SettingsDialog::settingsConfirmed);
-	connect (ui->pushButton_2, &QPushButton::clicked, this, &SettingsDialog::settingsCanceled);
+	ui->portBaudBox->addItem(QString::number(QSerialPort::Baud115200));
+	ui->portBaudBox->addItem(QString::number(QSerialPort::Baud57600));
+	ui->portBaudBox->addItem(QString::number(QSerialPort::Baud38400));
+	ui->portBaudBox->addItem(QString::number(QSerialPort::Baud19200));
+
+	connect(ui->browseButton, &QPushButton::clicked, this, &SettingsDialog::browseSignalsXmlFile);
+	connect(ui->okButton, &QPushButton::clicked, this, &SettingsDialog::settingsConfirmed);
+	connect(ui->cancelButton, &QPushButton::clicked, this, &SettingsDialog::settingsCanceled);
 }
 
 SettingsDialog::~SettingsDialog()
@@ -36,22 +43,13 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::settingsConfirmed()
 {	
-	QFile settingsFile("settings.conf");
-	QTextStream writeDataInFile(&settingsFile);
+	QSettings settings;
 
-	if (settingsFile.open(QIODevice::WriteOnly|QIODevice::Text))
-	{
-		writeDataInFile << ui->lineEdit->text() << "\n";
-		writeDataInFile << ui->comboBox->currentText() << "\n";
-		writeDataInFile << ui->comboBox_2->currentText();
-		settingsFile.close();
-		this->close();
-		emit sendSettingsCreated();
-	}
-	else
-	{
-		QMessageBox::critical(this, tr("Critical error"), tr("Can not write data to settings.conf"));
-	}
+	settings.setValue("pathToSignals", ui->pathToSignalsXmlFile->text());
+	settings.setValue("port", ui->comPortSelectionBox->currentText());
+	settings.setValue("baud", ui->portBaudBox->currentText());
+
+	this->close();
 }
 
 void SettingsDialog::settingsCanceled()
@@ -62,5 +60,5 @@ void SettingsDialog::settingsCanceled()
 void SettingsDialog::browseSignalsXmlFile()
 {
 	m_pathToSignalsXml = QFileDialog::getOpenFileName(this, tr("Open Signals.xml"), "", tr("XML-file (*.xml)"));
-	ui->lineEdit->setText(m_pathToSignalsXml);
+	ui->pathToSignalsXmlFile->setText(m_pathToSignalsXml);
 }

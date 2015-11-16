@@ -2,6 +2,7 @@
 
 #include "../include/Tcp.h"
 #include <QFile>
+#include <QDir>
 #include <QCryptographicHash>
 
 
@@ -115,6 +116,8 @@ namespace Tcp
 		FileClient(const QString& rootFolder, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
 
 		void downloadFile(const QString& fileName) { emit signal_downloadFile(fileName); }
+
+		void setRootFolder(const QString& rootFolder) { m_rootFolder = rootFolder; }
 	};
 
 
