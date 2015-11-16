@@ -378,7 +378,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	{
 		if (strValue == dataFormatInfo[i])
 		{
-			(this->*setter)(static_cast<E::DataFormat>(dataFormatInfo.key(i)));
+			(this->*setter)(static_cast<E::DataFormat>(dataFormatInfo.keyAt(i)));
 			return;
 		}
 	}
@@ -392,7 +392,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	{
 		if (strValue == unitInfo[i])
 		{
-			(this->*setter)(unitInfo.key(i));
+			(this->*setter)(unitInfo.keyAt(i));
 			return;
 		}
 	}

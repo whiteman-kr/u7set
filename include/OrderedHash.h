@@ -194,7 +194,7 @@ const KEY OrderedHash<KEY, VALUE>::key(const VALUE& value) const
 
 	assert(false);
 
-	return VALUE();
+	return KEY();
 }
 
 
@@ -237,14 +237,14 @@ int OrderedHash<KEY, VALUE>::valueIndex(const VALUE &value) const
 template <typename KEY, typename VALUE>
 VALUE& OrderedHash<KEY, VALUE>::operator[](int index)
 {
-	return QVector<QPair<KEY, VALUE>>::operator [](index);
+	return QVector<QPair<KEY, VALUE>>::operator [](index).second;
 }
 
 
 template <typename KEY, typename VALUE>
 const VALUE& OrderedHash<KEY, VALUE>::operator[](int index) const
 {
-	return QVector<QPair<KEY, VALUE>>::operator [](index);
+	return QVector<QPair<KEY, VALUE>>::operator [](index).second;
 }
 
 
@@ -276,17 +276,11 @@ std::vector<std::pair<KEY, VALUE>> OrderedHash<KEY, VALUE>::getKeyValueVector() 
 {
 	std::vector<std::pair<KEY, VALUE>> result;
 
-	if (m_keyVector.count() != m_valueVector.count())
-	{
-		assert(false);
-		return result;
-	}
-
 	int index = 0;
 
-	for(KEY key : m_keyVector)
+	for(KEY key : *this)
 	{
-		result.push_back(std::pair<KEY, VALUE>(key, m_valueVector[index]));
+		result.push_back(std::pair<KEY, VALUE>(key, *this[index].second));
 
 		index++;
 	}

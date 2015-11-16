@@ -55,7 +55,7 @@ bool isSameFieldValue(QVector<Signal*>& signalVector, std::function<bool (Signal
 		int unitIndex = m_enumManager->value(property); \
 		if (unitIndex >= 0 && unitIndex < m_unitInfo.count()) \
 		{ \
-			int unitID = m_unitInfo.key(unitIndex); \
+			int unitID = m_unitInfo.keyAt(unitIndex); \
 			if (m_signalVector[0]->getter() != unitID) \
 				signal.setter(unitID); \
 		} \
@@ -456,7 +456,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
 		if (dataFormatIndex >= 0 && dataFormatIndex < m_dataFormatInfo.count())
 		{
-			E::DataFormat dataFormat = static_cast<E::DataFormat>(m_dataFormatInfo.key(dataFormatIndex));
+			E::DataFormat dataFormat = static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(dataFormatIndex));
 			if (dataFormat != m_signalVector[0]->dataFormat())
 			{
 				signal.setDataFormat(dataFormat);
