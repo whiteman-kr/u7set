@@ -23,6 +23,12 @@ void CfgServer::onRootFolderChange()
 {
 	m_buildXmlPathFileName = m_rootFolder + QDir::separator() + "build.xml";
 
+	readBuildXml();
+}
+
+
+void CfgServer::readBuildXml()
+{
 	QDir dir(m_buildXmlPathFileName);
 
 	if (dir.exists(m_buildXmlPathFileName) == false)
@@ -70,6 +76,7 @@ void CfgServer::onRootFolderChange()
 	}
 
 	buildXml.close();
+
 }
 
 

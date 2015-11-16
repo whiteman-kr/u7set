@@ -4,15 +4,17 @@
 #include <QHash>
 
 
+// Ordered hash of unique pairs key->valuse
+//
+
 template <typename KEY, typename VALUE>
-class OrderedHash
+class OrderedHash : public QVector<QPair<KEY, VALUE>>
 {
 private:
-	QVector<VALUE> m_valueVector;
-	QVector<KEY> m_keyVector;
-	QHash<KEY, int> m_hash;
+	QHash<KEY, int> m_keyToIndex;
+	QHash<VALUE, int> m_valueToIndex;
 
-	void recalcHash();
+	void rebuildHash();
 
 public:
 	OrderedHash();
@@ -21,37 +23,35 @@ public:
 
 	bool isEmpty() const;
 	int count() const;
+
 	bool contains(const KEY& key) const;
+	bool contains(const VALUE& value) const;
 
 	virtual void append(const KEY& key, const VALUE& value);
+
 	virtual void remove(const KEY& key);
+	virtual void remove(const VALUE& value);
+
 	virtual void removeAt(const int index);
 
 	const VALUE value(const KEY& key) const;
+	const KEY key(const VALUE& value) const;
 
-	const KEY key(const int index) const;
+	const KEY keyAt(const int index) const;
+	const VALUE valueAt(const int index) const;
+
 	int keyIndex(const KEY& key) const;
+	int valueIndex(const VALUE& value) const;
 
 	VALUE& operator[](int index);
 	const VALUE& operator[](int index) const;
 
-	QList<VALUE> toList() const;
+	QList<VALUE> getValuesList() const;
 
 	void reserve(int n);
 
-	std::vector<std::pair<KEY, VALUE>> getKeyValueVector();
+	std::vector<std::pair<KEY, VALUE>> getKeyValueVector() const;
 };
-
-
-template <typename KEY, typename VALUE>
-void OrderedHash<KEY, VALUE>::recalcHash()
-{
-	m_hash.clear();
-	for (int i = 0; i < m_keyVector.count(); i++)
-	{
-		m_hash[m_keyVector[i]] = i;
-	}
-}
 
 
 template <typename KEY, typename VALUE>
@@ -61,87 +61,120 @@ OrderedHash<KEY, VALUE>::OrderedHash()
 
 
 template <typename KEY, typename VALUE>
+void OrderedHash<KEY, VALUE>::rebuildHash()
+{
+	m_keyToIndex.clear();
+	m_valueToIndex.clear();
+
+	int count = QVector<QPair<KEY, VALUE>>::count();
+
+	for (int i = 0; i < count; i++)
+	{
+		m_keyToIndex[QVector<QPair<KEY, VALUE>>::at(i).first] = i;
+		m_valueToIndex[QVector<QPair<KEY, VALUE>>::at(i).second] = i;
+	}
+}
+
+
+template <typename KEY, typename VALUE>
 void OrderedHash<KEY, VALUE>::clear()
 {
-	m_valueVector.clear();
-	m_keyVector.clear();
-	m_hash.clear();
+	QVector<QPair<KEY, VALUE>>::clear();
+	m_keyToIndex.clear();
+	m_valueToIndex.clear();
 }
 
 
 template <typename KEY, typename VALUE>
 bool OrderedHash<KEY, VALUE>::isEmpty() const
 {
-	return m_valueVector.isEmpty();
+	return QVector<QPair<KEY, VALUE>>::isEmpty();
 }
 
 
 template <typename KEY, typename VALUE>
 int OrderedHash<KEY, VALUE>::count() const
 {
-	return m_valueVector.count();
+	return QVector<QPair<KEY, VALUE>>::count();
 }
 
 
 template <typename KEY, typename VALUE>
 bool OrderedHash<KEY, VALUE>::contains(const KEY& key) const
 {
-	return m_hash.contains(key);
+	return m_keyToIndex.contains(key);
+}
+
+
+template <typename KEY, typename VALUE>
+bool OrderedHash<KEY, VALUE>::contains(const VALUE& value) const
+{
+	return m_valueToIndex.contains(value);
 }
 
 
 template <typename KEY, typename VALUE>
 void OrderedHash<KEY, VALUE>::append(const KEY& key, const VALUE& value)
 {
-	if (m_hash.contains(key))
+	if (m_keyToIndex.contains(key))
 	{
-		int valueIndex = m_hash[key];
-
-		m_valueVector[valueIndex] = value;
-		m_keyVector[valueIndex] = key;
+		assert(false);					// key already exists
+		return;
 	}
-	else
+
+	if (m_valueToIndex.contains(value))
 	{
-		int newValueIndex = m_valueVector.count();
-
-		m_valueVector.append(value);
-		m_keyVector.append(key);
-		m_hash.insert(key, newValueIndex);
+		assert(false);					// value already exists
+		return;
 	}
+
+	int newIndex = count();
+
+	QVector<QPair<KEY, VALUE>>::append(QPair<KEY, VALUE>(key, value));
+
+	m_keyToIndex.insert(key, newIndex);
+	m_valueToIndex.insert(value, newIndex);
 }
 
 
 template <typename KEY, typename VALUE>
 void OrderedHash<KEY, VALUE>::remove(const KEY &key)
 {
-	int index = m_hash[key];
+	int index = m_keyToIndex[key];
 
-	m_hash.remove(key);
-	m_valueVector.remove(index);
-	m_keyVector.remove(index);
+	QVector<QPair<KEY, VALUE>>::removeAt(index);
 
-	recalcHash();
+	rebuildHash();
+}
+
+
+template <typename KEY, typename VALUE>
+void OrderedHash<KEY, VALUE>::remove(const VALUE &value)
+{
+	int index = m_valueToIndex[value];
+
+	QVector<QPair<KEY, VALUE>>::removeAt(index);
+
+	rebuildHash();
 }
 
 
 template <typename KEY, typename VALUE>
 void OrderedHash<KEY, VALUE>::removeAt(const int index)
 {
-	m_hash.remove(m_keyVector[index]);
-	m_valueVector.removeAt(index);
-	m_keyVector.removeAt(index);
+	QVector<QPair<KEY, VALUE>>::removeAt(index);
 
-	recalcHash();
+	rebuildHash();
 }
 
 
 template <typename KEY, typename VALUE>
 const VALUE OrderedHash<KEY, VALUE>::value(const KEY& key) const
 {
-	if (m_hash.contains(key))
+	if (m_keyToIndex.contains(key))
 	{
-		int valueIndex = m_hash[key];
-		return m_valueVector[valueIndex];
+		int valueIndex = m_keyToIndex[key];
+		return QVector<QPair<KEY, VALUE>>::at(valueIndex).second;
 	}
 
 	assert(false);
@@ -151,18 +184,51 @@ const VALUE OrderedHash<KEY, VALUE>::value(const KEY& key) const
 
 
 template <typename KEY, typename VALUE>
-const KEY OrderedHash<KEY, VALUE>::key(const int index) const
+const KEY OrderedHash<KEY, VALUE>::key(const VALUE& value) const
 {
-	return m_keyVector[index];
+	if (m_valueToIndex.contains(value))
+	{
+		int keyIndex = m_valueToIndex[value];
+		return QVector<QPair<KEY, VALUE>>::at(keyIndex).first;
+	}
+
+	assert(false);
+
+	return KEY();
+}
+
+
+template <typename KEY, typename VALUE>
+const KEY OrderedHash<KEY, VALUE>::keyAt(const int index) const
+{
+	return QVector<QPair<KEY, VALUE>>::at(index).first;
+}
+
+
+template <typename KEY, typename VALUE>
+const VALUE OrderedHash<KEY, VALUE>::valueAt(const int index) const
+{
+	return QVector<QPair<KEY, VALUE>>::at(index).second;
 }
 
 
 template <typename KEY, typename VALUE>
 int OrderedHash<KEY, VALUE>::keyIndex(const KEY &key) const
 {
-	if (m_hash.contains(key))
+	if (m_keyToIndex.contains(key))
 	{
-		return m_hash[key];
+		return m_keyToIndex[key];
+	}
+	return -1;
+}
+
+
+template <typename KEY, typename VALUE>
+int OrderedHash<KEY, VALUE>::valueIndex(const VALUE &value) const
+{
+	if (m_valueToIndex.contains(value))
+	{
+		return m_valueToIndex[value];
 	}
 	return -1;
 }
@@ -171,49 +237,50 @@ int OrderedHash<KEY, VALUE>::keyIndex(const KEY &key) const
 template <typename KEY, typename VALUE>
 VALUE& OrderedHash<KEY, VALUE>::operator[](int index)
 {
-	return m_valueVector[index];
+	return QVector<QPair<KEY, VALUE>>::operator [](index).second;
 }
 
 
 template <typename KEY, typename VALUE>
 const VALUE& OrderedHash<KEY, VALUE>::operator[](int index) const
 {
-	return m_valueVector[index];
+	return QVector<QPair<KEY, VALUE>>::operator [](index).second;
 }
 
 
 template <typename KEY, typename VALUE>
-QList<VALUE> OrderedHash<KEY, VALUE>::toList() const
+QList<VALUE> OrderedHash<KEY, VALUE>::getValuesList() const
 {
-	return m_valueVector.toList();
+	QList<VALUE> list;
+
+	for(QPair<KEY, VALUE> pair : *this)
+	{
+		list.append(pair.second);
+	}
+
+	return list;
 }
 
 
 template <typename KEY, typename VALUE>
 void OrderedHash<KEY, VALUE>::reserve(int n)
 {
-	m_valueVector.reserve(n);
-	m_valueVector.reserve(n);
-	m_hash.reserve(n);
+	QVector<QPair<KEY, VALUE>>::reserve(n);
+	m_keyToIndex.reserve(n);
+	m_valueToIndex.reserve(n);
 }
 
 
 template <typename KEY, typename VALUE>
-std::vector<std::pair<KEY, VALUE>> OrderedHash<KEY, VALUE>::getKeyValueVector()
+std::vector<std::pair<KEY, VALUE>> OrderedHash<KEY, VALUE>::getKeyValueVector() const
 {
 	std::vector<std::pair<KEY, VALUE>> result;
 
-	if (m_keyVector.count() != m_valueVector.count())
-	{
-		assert(false);
-		return result;
-	}
-
 	int index = 0;
 
-	for(KEY key : m_keyVector)
+	for(KEY key : *this)
 	{
-		result.push_back(std::pair<KEY, VALUE>(key, m_valueVector[index]));
+		result.push_back(std::pair<KEY, VALUE>(key, *this[index].second));
 
 		index++;
 	}

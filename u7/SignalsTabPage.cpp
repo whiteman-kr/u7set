@@ -192,7 +192,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_DATA_FORMAT:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			cb->addItems(m_dataFormatInfo.toList());
+			cb->addItems(m_dataFormatInfo.getValuesList());
 			return cb;
 		}
 		case SC_UNIT:
@@ -200,7 +200,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_OUTPUT_UNIT:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			cb->addItems(m_unitInfo.toList());
+			cb->addItems(m_unitInfo.getValuesList());
 			return cb;
 		}
 		case SC_INPUT_SENSOR:
@@ -361,10 +361,10 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_MAX_DIFFERENCE: if (le) s.setMaxDifference(le->text().toDouble()); break;
 		// ComboBox
 		//
-		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.key(cb->currentIndex()))); break;
-		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.key(cb->currentIndex())); break;
-		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.key(cb->currentIndex())); break;
-		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
+		case SC_DATA_FORMAT: if (cb) s.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(cb->currentIndex()))); break;
+		case SC_UNIT: if (cb) s.setUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
+		case SC_INPUT_UNIT: if (cb) s.setInputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
+		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.keyAt(cb->currentIndex())); break;
 		case SC_INPUT_SENSOR: if (cb) s.setInputSensorID(cb->currentIndex()); break;
 		case SC_OUTPUT_SENSOR: if (cb) s.setOutputSensorID(cb->currentIndex()); break;
 		case SC_OUTPUT_RANGE_MODE: if (cb) s.setOutputRangeMode(static_cast<E::OutputRangeMode>(cb->currentIndex())); break;
@@ -1039,7 +1039,7 @@ void SignalsModel::addSignal()
 	}
 	else
 	{
-		signal.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.key(settings.value("LastEditedSignal: dataFormat").toInt())));
+		signal.setDataFormat(static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(settings.value("LastEditedSignal: dataFormat").toInt())));
 	}
 	signal.setDataSize(settings.value("LastEditedSignal: dataSize").toInt());
 	signal.setLowADC(settings.value("LastEditedSignal: lowADC").toInt());
@@ -1049,7 +1049,7 @@ void SignalsModel::addSignal()
 	int unit = settings.value("LastEditedSignal: unitID").toInt();
 	if (unit != -1)
 	{
-		signal.setUnitID(m_unitInfo.key(unit));
+		signal.setUnitID(m_unitInfo.keyAt(unit));
 	}
 	signal.setAdjustment(settings.value("LastEditedSignal: adjustment").toDouble());
 	signal.setDropLimit(settings.value("LastEditedSignal: dropLimit").toDouble());
@@ -1061,7 +1061,7 @@ void SignalsModel::addSignal()
 	unit = settings.value("LastEditedSignal: inputUnitID").toInt();
 	if (unit != -1)
 	{
-		signal.setInputUnitID(m_unitInfo.key(unit));
+		signal.setInputUnitID(m_unitInfo.keyAt(unit));
 	}
 	signal.setInputSensorID(settings.value("LastEditedSignal: inputSensorID").toInt());
 
@@ -1070,7 +1070,7 @@ void SignalsModel::addSignal()
 	unit = settings.value("LastEditedSignal: outputUnitID").toInt();
 	if (unit != -1)
 	{
-		signal.setOutputUnitID(m_unitInfo.key(unit));
+		signal.setOutputUnitID(m_unitInfo.keyAt(unit));
 	}
 	signal.setOutputSensorID(settings.value("LastEditedSignal: outputSensorID").toInt());
 

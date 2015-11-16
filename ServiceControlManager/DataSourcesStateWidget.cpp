@@ -354,9 +354,9 @@ void DataSourcesStateModel::ackReceived(UdpRequest udpRequest)
 		{
 			quint32 sourceID = udpRequest.readDword();
 
-			DataSource dataSource;
-			dataSource.setID(sourceID);
-			m_dataSource.append(sourceID, dataSource);
+			DataSource* dataSource = new DataSource;
+			dataSource->setID(sourceID);
+			m_dataSource.append(static_cast<int>(sourceID), dataSource);
 		}
 		endResetModel();
 

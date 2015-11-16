@@ -55,7 +55,7 @@ bool isSameFieldValue(QVector<Signal*>& signalVector, std::function<bool (Signal
 		int unitIndex = m_enumManager->value(property); \
 		if (unitIndex >= 0 && unitIndex < m_unitInfo.count()) \
 		{ \
-			int unitID = m_unitInfo.key(unitIndex); \
+			int unitID = m_unitInfo.keyAt(unitIndex); \
 			if (m_signalVector[0]->getter() != unitID) \
 				signal.setter(unitID); \
 		} \
@@ -134,7 +134,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, E:
 	{
 		m_dataFormatInfo.remove(TO_INT(E::DataFormat::UnsignedInt));
 	}
-	m_enumManager->setEnumNames(m_dataFormatProperty, m_dataFormatInfo.toList());
+	m_enumManager->setEnumNames(m_dataFormatProperty, m_dataFormatInfo.getValuesList());
 	if (signalType == E::SignalType::Analog && signalVector[0]->dataFormat() == E::DataFormat::UnsignedInt)
 	{
 		m_enumManager->setValue(m_dataFormatProperty, m_dataFormatInfo.keyIndex(TO_INT(E::DataFormat::SignedInt)));
@@ -183,7 +183,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, E:
 		m_doubleManager->setReadOnly(m_highLimitProperty, readOnly);
 		signalProperty->addSubProperty(m_highLimitProperty);
 
-		QStringList unitStringList = unitInfo.toList();
+		QStringList unitStringList = unitInfo.getValuesList();
 		m_unitProperty = m_enumManager->addProperty(tr("Unit"));
 		m_enumManager->setEnumNames(m_unitProperty, unitStringList);
 		SET_ENUM_PROPERTY_VALUE(m_doubleManager, m_unitProperty, unitInfo, unitID);
@@ -456,7 +456,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		int dataFormatIndex = m_enumManager->value(m_dataFormatProperty);
 		if (dataFormatIndex >= 0 && dataFormatIndex < m_dataFormatInfo.count())
 		{
-			E::DataFormat dataFormat = static_cast<E::DataFormat>(m_dataFormatInfo.key(dataFormatIndex));
+			E::DataFormat dataFormat = static_cast<E::DataFormat>(m_dataFormatInfo.keyAt(dataFormatIndex));
 			if (dataFormat != m_signalVector[0]->dataFormat())
 			{
 				signal.setDataFormat(dataFormat);
