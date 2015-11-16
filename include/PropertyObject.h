@@ -76,6 +76,9 @@ public:
 	QString category() const;
 	void setCategory(QString value);
 
+	QString validator() const;
+	void setValidator(QString value);
+
 	bool readOnly() const;
 	void setReadOnly(bool value);
 
@@ -118,6 +121,7 @@ private:
 	QString m_caption;
 	QString m_description;
 	QString m_category;
+	QString m_validator;
 	bool m_readOnly = false;
 	bool m_updateFromPreset = false;		// Update this property from preset, used in DeviceObject
 	bool m_dynamic = false;					// Dynamic property, used in DeviceObject
