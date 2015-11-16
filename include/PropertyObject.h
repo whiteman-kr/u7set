@@ -15,6 +15,7 @@
 #include <QVariant>
 #include <QMetaEnum>
 
+#include "../include/OrderedHash.h"
 
 namespace Proto
 {
@@ -424,6 +425,170 @@ private:
 	std::function<void(TYPE)> m_setter;
 };
 
+//
+//
+//			Class PropertyValue specialization for OrderedHash<int, QString>,
+//			class behave like enum
+//
+//
+template <>
+class PropertyValue<OrderedHash<int, QString>> : public Property
+{
+public:
+	PropertyValue(std::shared_ptr<OrderedHash<int, QString>> enumValues) :
+		m_enumValues(enumValues)
+	{
+		assert(m_enumValues);
+	}
+
+	virtual ~PropertyValue()
+	{
+	}
+
+public:
+	virtual bool isEnum() const override
+	{
+		return true;
+	}
+
+	virtual std::list<std::pair<int, QString>> enumValues() const override
+	{
+		std::list<std::pair<int, QString>> result;
+
+		for (auto i : m_enumValues)
+		{
+			!!!!!!!!1
+			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
+		}
+
+		return result;
+	}
+
+public:
+	virtual QVariant value() const override
+	{
+		if (m_getter)
+		{
+			QVariant result(QVariant::fromValue(m_getter()));
+			return result;
+		}
+		else
+		{
+			return QVariant(m_value);
+		}
+	}
+
+	void setValueDirect(const int& value)				// Not virtual, is called from class ProprtyObject for direct access
+	{
+		// setValueDirect is used for non enum types only
+		//
+		return;
+	}
+
+	void setValue(const QVariant& value) override		// Overriden from class Propery
+	{
+		assert(value.canConvert<int>());
+
+		if (m_setter)
+		{
+			m_setter(value.value<int>());
+		}
+		else
+		{
+			m_value = value.toInt();
+		}
+	}
+
+	virtual void setEnumValue(int value) override			// Overriden from class Propery
+	{
+		if (m_setter)
+		{
+			m_setter(value);
+		}
+		else
+		{
+			m_value = value;
+		}
+	}
+	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	{
+		get values map and set it
+		!!!!!!!!
+	}
+
+private:
+
+	void checkLimits()
+	{
+	}
+
+public:
+
+	void setLimits(const QVariant& low, const QVariant& high)
+	{
+	}
+
+	const QVariant& lowLimit() const
+	{
+		return QVariant();
+	}
+	void setLowLimit(const QVariant& value)
+	{
+	}
+
+	const QVariant& highLimit() const
+	{
+		return QVariant();
+	}
+	void setHighLimit(const QVariant& value)
+	{
+	}
+
+	const QVariant& step() const
+	{
+		return QVariant();
+	}
+	void setStep(const QVariant& value)
+	{
+	}
+
+	void setGetter(std::function<int(void)> getter)
+	{
+		m_getter = getter;
+	}
+	void setSetter(std::function<void(int)> setter)
+	{
+		m_setter = setter;
+	}
+
+	virtual bool isTheSameType(Property* property) override
+	{
+		if (dynamic_cast<PropertyValue<TYPE>*>(property) == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	{
+		// Implementation is not requiered yet
+		// To do if need
+	}
+
+private:
+	// WARNING!!! If you add a field, do not forget to add it to updateFromPreset();
+	//
+	std::shared_ptr<OrderedHash<int, QString>> m_enumValues;
+
+	int m_value = 0;
+
+	std::function<int(void)> m_getter;
+	std::function<void(int)> m_setter;
+};
+
+
 
 //
 //
@@ -610,10 +775,19 @@ public:
 										true,
 										std::bind(&TestProp::priority, this),
 										std::bind(&TestProp::setPriority, this, std::placeholders::_1));
+
+		PropertyValue<OrderedHash<int, QString>>* pi = addProperty<OrderedHash<int, QString>>(
+					tr("Units"),
+					true,
+					(std::function<int(void)>)std::bind(&TestProp::units, this),
+					std::bind(&TestProp::setUnits, this, std::placeholders::_1));
 	}
 
 	int someProp() const				{		return m_someProp;		}
 	void setSomeProp(int value)			{		m_someProp = value;		}
+
+	int units() const					{		return m_units;		}
+	void setUnits(int value)			{		m_units = value;		}
 
 	bool someBool() const				{		return m_someBool;		}
 	void setSomeBool(bool value)		{		m_someBool = value;		}
@@ -626,6 +800,7 @@ public:
 
 private:
 	int m_someProp = -1;
+	int m_units = 0;
 	bool m_someBool = false;
 	QString m_someString;
 	TestEnum::Priority m_priority = TestEnum::Priority::Low;
