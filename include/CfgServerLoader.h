@@ -5,14 +5,13 @@
 
 // -------------------------------------------------------------------------------------
 //
-// CfgServer class declaration
+// CfgServerLoaderBase class declaration
 //
 // -------------------------------------------------------------------------------------
 
-class CfgServer : public Tcp::FileServer
+class CfgServerLoaderBase
 {
-private:
-	QString m_buildXmlPathFileName;
+protected:
 
 	enum ErrorCode
 	{
@@ -20,10 +19,25 @@ private:
 		BuildNotFound,
 		BuildCantRead
 	};
+};
+
+
+// -------------------------------------------------------------------------------------
+//
+// CfgServer class declaration
+//
+// -------------------------------------------------------------------------------------
+
+class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
+{
+private:
+	QString m_buildXmlPathFileName;
 
 	ErrorCode m_errorCode = ErrorCode::Ok;
 
 	void onRootFolderChange();
+
+	void readBuildXml();
 
 public:
 	CfgServer(const QString& rootFolder);
@@ -40,7 +54,7 @@ public:
 //
 // -------------------------------------------------------------------------------------
 
-class CfgLoader: public Tcp::FileClient
+class CfgLoader: public Tcp::FileClient, public CfgServerLoaderBase
 {
 private:
 public:

@@ -15,6 +15,22 @@ class DbController;
 
 namespace Builder
 {
+	struct BuildInfo
+	{
+		QString project;
+		int id = -1;
+		bool release = false;
+		QDateTime dateTime;
+		int changeset = 0;
+		QString user;
+		QString workstation;
+
+		QString typeStr() const { return release ? "release" : "debug"; }
+		QString dateStr() const { return dateTime.toString("dd.MM.yyyy"); }
+		QString timeStr() const { return dateTime.toString("hh:mm:ss"); }
+
+		void writeToXml(QXmlStreamWriter& xmlWriter) const;
+	};
 
 	struct BuildFileInfo
 	{
@@ -129,14 +145,7 @@ namespace Builder
 		QFile m_buildXmlFile;
 		QXmlStreamWriter m_xmlWriter;
 
-		QString m_projectName;
-		QString m_userName;
-		QString m_workstation;
-		QDateTime m_buildDateTime;
-
-		bool m_release = false;
-		int m_changesetID = 0;
-		int m_buildNo = -1;
+		BuildInfo m_buildInfo;
 
 		OutputLog* m_log = nullptr;
 		DbController* m_dbController = nullptr;
@@ -178,13 +187,15 @@ namespace Builder
 
 		bool writeConfigurationXmlFiles();
 
-		QString projectName() const { return m_projectName; }
-		QString userName() const { return m_userName; }
-		int changesetID() const { return m_changesetID; }
-		int buildNo() const { return m_buildNo; }
-		QString buildType() const { return m_release ? "release" : "debug"; }
-		QString workstation() const { return m_workstation; }
-		QDateTime buildDateTime() const { return m_buildDateTime; }
+/*		QString project() const { return m_buildInfo.project; }
+		QString user() const { return m_buildInfo.user; }
+		int changeset() const { return m_buildInfo.changeset; }
+		int id() const { return m_buildInfo.id; }
+		QString buildType() const { return m_buildInfo.release ? "release" : "debug"; }
+		QString workstation() const { return m_buildInfo.workstation; }
+		QDateTime buildDateTime() const { return m_buildInfo.dateTime; }*/
+
+		BuildInfo buildInfo() const { return m_buildInfo; }
 
 		OutputLog* log() { return m_log; }
 
