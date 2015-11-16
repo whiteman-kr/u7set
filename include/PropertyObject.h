@@ -15,6 +15,7 @@
 #include <QVariant>
 #include <QMetaEnum>
 
+#include "../include/OrderedHash.h"
 
 namespace Proto
 {
@@ -38,6 +39,13 @@ void setCaption(QString value);
 #define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER) \
 	addProperty<TYPE>(tr(#NAME), VISIBLE, \
 			(std::function<TYPE(void)>)std::bind(&GETTER, this), \
+			std::bind(&SETTER, this, std::placeholders::_1));
+
+// Add property which has getter and setter
+//
+#define ADD_PROPERTY_DYNAMIC_ENUM(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER) \
+	addDynamicEnumProperty(tr(#NAME), ENUMVALUES, VISIBLE, \
+			(std::function<int(void)>)std::bind(&GETTER, this), \
 			std::bind(&SETTER, this, std::placeholders::_1));
 
 //
@@ -424,6 +432,182 @@ private:
 	std::function<void(TYPE)> m_setter;
 };
 
+//
+//			Dynamic Enum Property
+//			Class PropertyValue specialization for OrderedHash<int, QString>,
+//			class behave like enum
+//
+//
+template <>
+class PropertyValue<OrderedHash<int, QString>> : public Property
+{
+public:
+	PropertyValue(std::shared_ptr<OrderedHash<int, QString>> enumValues) :
+		m_enumValues(enumValues)
+	{
+		assert(m_enumValues);
+	}
+
+	virtual ~PropertyValue()
+	{
+	}
+
+public:
+	virtual bool isEnum() const override
+	{
+		return true;	// This is dynamic enumeration
+	}
+
+	virtual std::list<std::pair<int, QString>> enumValues() const override
+	{
+		std::list<std::pair<int, QString>> result;
+
+		auto values = m_enumValues->getKeyValueVector();
+
+		for (auto i : values)
+		{
+			result.push_back(std::make_pair(i.first, i.second));
+		}
+
+		return result;
+	}
+
+public:
+	virtual QVariant value() const override
+	{
+		if (m_getter)
+		{
+			QVariant result(QVariant::fromValue(m_getter()));
+			return result;
+		}
+		else
+		{
+			return QVariant(m_value);
+		}
+	}
+
+	void setValueDirect(const int& value)				// Not virtual, is called from class ProprtyObject for direct access
+	{
+		// setValueDirect is used for non enum types only
+		//
+		Q_UNUSED(value);
+		return;
+	}
+
+	void setValue(const QVariant& value) override		// Overriden from class Propery
+	{
+		assert(value.canConvert<int>());
+
+		if (m_setter)
+		{
+			m_setter(value.value<int>());
+		}
+		else
+		{
+			m_value = value.toInt();
+		}
+	}
+
+	virtual void setEnumValue(int value) override			// Overriden from class Propery
+	{
+		if (m_setter)
+		{
+			m_setter(value);
+		}
+		else
+		{
+			m_value = value;
+		}
+	}
+
+	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
+	{
+		int key = m_enumValues->key(QString::fromLocal8Bit(value));
+		setEnumValue(key);
+	}
+
+private:
+
+	void checkLimits()
+	{
+	}
+
+public:
+
+	void setLimits(const QVariant& low, const QVariant& high)
+	{
+		Q_UNUSED(low);
+		Q_UNUSED(high);
+	}
+
+	const QVariant& lowLimit() const
+	{
+		return m_interanalUse;
+	}
+	void setLowLimit(const QVariant& value)
+	{
+		Q_UNUSED(value);
+	}
+
+	const QVariant& highLimit() const
+	{
+		return m_interanalUse;
+	}
+	void setHighLimit(const QVariant& value)
+	{
+		Q_UNUSED(value);
+	}
+
+	const QVariant& step() const
+	{
+		return m_interanalUse;
+	}
+	void setStep(const QVariant& value)
+	{
+		Q_UNUSED(value);
+	}
+
+	void setGetter(std::function<int(void)> getter)
+	{
+		m_getter = getter;
+	}
+	void setSetter(std::function<void(int)> setter)
+	{
+		m_setter = setter;
+	}
+
+	virtual bool isTheSameType(Property* property) override
+	{
+		if (dynamic_cast<PropertyValue<OrderedHash<int, QString>>*>(property) == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override
+	{
+		// Implementation is not requiered yet
+		// To do if requeired
+		//
+		Q_UNUSED(presetProperty);
+		Q_UNUSED(updateValue);
+	}
+
+private:
+	// WARNING!!! If you add a field, do not forget to add it to updateFromPreset();
+	//
+	std::shared_ptr<OrderedHash<int, QString>> m_enumValues;
+
+	int m_value = 0;
+	QVariant m_interanalUse;	//	for return from lowLimt, hughLimt, step
+
+	std::function<int(void)> m_getter;
+	std::function<void(int)> m_setter;
+};
+
+
 
 //
 //
@@ -481,6 +665,50 @@ public:
 		}
 
         return property.get();
+	}
+
+	PropertyValue<OrderedHash<int, QString>>* addDynamicEnumProperty(
+			QString caption,
+			std::shared_ptr<OrderedHash<int, QString>> enumValues,
+			bool visible = false,
+			std::function<int(void)> getter = std::function<int(void)>(),
+			std::function<void(int)> setter = std::function<void(int)>())
+	{
+		if (enumValues.get() == nullptr)
+		{
+			assert(enumValues);
+			return nullptr;
+		}
+
+		std::shared_ptr<PropertyValue<OrderedHash<int, QString>>> property = std::make_shared<PropertyValue<OrderedHash<int, QString>>>(enumValues);
+
+		property->setCaption(caption);
+		property->setVisible(visible);
+		property->setGetter(getter);
+		property->setSetter(setter);
+
+		if (!getter)
+		{
+			property->setValue(QVariant::fromValue(int()));
+		}
+
+		if (!setter)
+		{
+			property->setReadOnly(true);
+		}
+
+		auto alreadyExists = m_properties.find(caption);
+
+		if (alreadyExists == m_properties.end())
+		{
+			m_properties[caption] = property;
+		}
+		else
+		{
+			alreadyExists->second = property;
+		}
+
+		return property.get();
 	}
 
 	// Get all properties
@@ -610,10 +838,29 @@ public:
 										true,
 										std::bind(&TestProp::priority, this),
 										std::bind(&TestProp::setPriority, this, std::placeholders::_1));
+
+		std::shared_ptr<OrderedHash<int, QString>> enumValues = std::make_shared<OrderedHash<int, QString>>();
+		enumValues->append(0, "Zero");
+		enumValues->append(1, "One");
+		enumValues->append(10, "Ten");
+
+		PropertyValue<OrderedHash<int, QString>>* pu = addDynamicEnumProperty(
+					tr("Units"),
+					enumValues,
+					true,
+					(std::function<int(void)>)std::bind(&TestProp::units, this),
+					std::bind(&TestProp::setUnits, this, std::placeholders::_1));
+
+		pu->setValue(2);
+
+		ADD_PROPERTY_DYNAMIC_ENUM(Units2, true, enumValues, TestProp::units, TestProp::setUnits);
 	}
 
 	int someProp() const				{		return m_someProp;		}
 	void setSomeProp(int value)			{		m_someProp = value;		}
+
+	int units() const					{		return m_units;		}
+	void setUnits(int value)			{		m_units = value;		}
 
 	bool someBool() const				{		return m_someBool;		}
 	void setSomeBool(bool value)		{		m_someBool = value;		}
@@ -626,6 +873,7 @@ public:
 
 private:
 	int m_someProp = -1;
+	int m_units = 0;
 	bool m_someBool = false;
 	QString m_someString;
 	TestEnum::Priority m_priority = TestEnum::Priority::Low;

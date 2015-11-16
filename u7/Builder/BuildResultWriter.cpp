@@ -10,6 +10,27 @@
 namespace Builder
 {
 
+	void BuildInfo::writeToXml(QXmlStreamWriter& xmlWriter) const
+	{
+		xmlWriter.writeStartElement("build");
+
+		xmlWriter.writeAttribute("project", project);
+
+		xmlWriter.writeAttribute("id", QString::number(id));
+		xmlWriter.writeAttribute("type", typeStr());
+
+		xmlWriter.writeAttribute("date", dateStr());
+		xmlWriter.writeAttribute("time", timeStr());
+
+		xmlWriter.writeAttribute("changeset", QString::number(changeset));
+
+		xmlWriter.writeAttribute("user", user);
+		xmlWriter.writeAttribute("workstation", workstation);
+
+		xmlWriter.writeEndElement();			// build
+	}
+
+
 	// --------------------------------------------------------------------------------------
 	//
 	//	BuildFile class implementation
@@ -224,18 +245,9 @@ namespace Builder
 
 		m_xmlWriter.writeStartDocument();
 
-		m_xmlWriter.writeStartElement("build");
+		BuildInfo bi = buildResultWriter.buildInfo();
 
-		m_xmlWriter.writeAttribute("id", QString("%1").arg(m_buildResultWriter.buildNo()));
-		m_xmlWriter.writeAttribute("type", m_buildResultWriter.buildType());
-
-		m_xmlWriter.writeAttribute("date", m_buildResultWriter.buildDateTime().toString("dd.MM.yyyy"));
-		m_xmlWriter.writeAttribute("time", m_buildResultWriter.buildDateTime().toString("hh:mm:ss"));
-
-		m_xmlWriter.writeAttribute("changeset", QString("%1").arg(m_buildResultWriter.changesetID()));
-
-		m_xmlWriter.writeAttribute("user", m_buildResultWriter.userName());
-		m_xmlWriter.writeAttribute("workstation", m_buildResultWriter.workstation());
+		bi.writeToXml(m_xmlWriter);
 	}
 
 
@@ -296,8 +308,10 @@ namespace Builder
 		m_subsysID(subsysID),
 		m_lmCaption(lmCaption)
 	{
+		BuildInfo bi = m_buildResultWriter.buildInfo();
+
 		m_moduleFirmware.init(lmCaption, subsysStrID, subsysID, 0x0101, frameSize, frameCount,
-						 m_buildResultWriter.projectName(), m_buildResultWriter.userName(), m_buildResultWriter.changesetID());
+						 bi.project, bi.user, bi.changeset);
 	}
 
 
@@ -358,8 +372,9 @@ namespace Builder
 	{
 		m_dbController = db;
 		m_log = log;
-		m_release = release;
-		m_changesetID = changesetID;
+
+		m_buildInfo.release = release;
+		m_buildInfo.changeset = changesetID;
 
 		if (m_dbController == nullptr || m_log == nullptr)
 		{
@@ -375,12 +390,12 @@ namespace Builder
 			return m_runBuild;
 		}
 
-		m_projectName = m_dbController->currentProject().projectName();
-		m_userName = m_dbController->currentUser().username();
-		m_workstation = QHostInfo::localHostName();
-		m_buildDateTime = QDateTime::currentDateTime();
+		m_buildInfo.project = m_dbController->currentProject().projectName();
+		m_buildInfo.user = m_dbController->currentUser().username();
+		m_buildInfo.workstation = QHostInfo::localHostName();
+		m_buildInfo.dateTime = QDateTime::currentDateTime();
 
-		if (m_dbController->buildStart(m_workstation, m_release, m_changesetID, &m_buildNo, nullptr) == false)
+		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.release, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
 		{
 			LOG_ERROR(log, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
 			m_runBuild = false;
@@ -388,13 +403,13 @@ namespace Builder
 		}
 
 		msg = QString(tr("%1 building #%2 was started. User - %3, host - %4, changeset - %5."))
-				.arg(m_release ? "RELEASE" : "DEBUG")
-				.arg(m_buildNo).arg(m_dbController->currentUser().username())
-				.arg(QHostInfo::localHostName()).arg(m_changesetID);
+				.arg(m_buildInfo.release ? "RELEASE" : "DEBUG")
+				.arg(m_buildInfo.id).arg(m_dbController->currentUser().username())
+				.arg(QHostInfo::localHostName()).arg(m_buildInfo.changeset);
 
 		LOG_MESSAGE(log, msg);
 
-		if (m_release == true)
+		if (m_buildInfo.release == true)
 		{
 			LOG_ERROR(m_log, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
 			m_runBuild = false;
@@ -421,7 +436,7 @@ namespace Builder
 
 	bool BuildResultWriter::finish()
 	{
-		if (m_buildNo == -1)
+		if (m_buildInfo.id == -1)
 		{
 			return false;
 		}
@@ -432,8 +447,8 @@ namespace Builder
 		int warnings = m_log->warningCount();
 
 		msg = QString(tr("%1 building #%2 was finished. Errors - %3. Warnings - %4."))
-				.arg(m_release ? "RELEASE" : "DEBUG")
-				.arg(m_buildNo).arg(errors).arg(warnings);
+				.arg(m_buildInfo.release ? "RELEASE" : "DEBUG")
+				.arg(m_buildInfo.id).arg(errors).arg(warnings);
 
 		if (errors)
 		{
@@ -460,7 +475,7 @@ namespace Builder
 
 		closeBuildXml();
 
-		m_dbController->buildFinish(m_buildNo, errors, warnings, buildLogStr, nullptr);
+		m_dbController->buildFinish(m_buildInfo.id, errors, warnings, buildLogStr, nullptr);
 
 		return true;
 	}
@@ -477,11 +492,11 @@ namespace Builder
 
 		QString buildNoStr;
 
-		buildNoStr.sprintf("%06d", m_buildNo);
+		buildNoStr.sprintf("%06d", m_buildInfo.id);
 
 		m_buildDirectory = QString("%1-%2-%3")
 				.arg(m_dbController->currentProject().projectName())
-				.arg(m_release ? "release" : "debug").arg(buildNoStr);
+				.arg(m_buildInfo.typeStr()).arg(buildNoStr);
 
 		m_buildFullPath = appDataPath + m_separator + m_buildDirectory;
 
@@ -576,18 +591,7 @@ namespace Builder
 
 		m_xmlWriter.writeStartDocument();
 
-		m_xmlWriter.writeStartElement("build");
-
-		m_xmlWriter.writeAttribute("id", QString("%1").arg(m_buildNo));
-		m_xmlWriter.writeAttribute("type", buildType());
-
-		m_xmlWriter.writeAttribute("date", m_buildDateTime.toString("dd.MM.yyyy"));
-		m_xmlWriter.writeAttribute("time", m_buildDateTime.toString("hh:mm:ss"));
-
-		m_xmlWriter.writeAttribute("changeset", QString("%1").arg(m_changesetID));
-
-		m_xmlWriter.writeAttribute("user", m_userName);
-		m_xmlWriter.writeAttribute("workstation", m_workstation);
+		m_buildInfo.writeToXml(m_xmlWriter);
 
 		return true;
 	}
