@@ -192,7 +192,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_DATA_FORMAT:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			cb->addItems(m_dataFormatInfo.toList());
+			cb->addItems(m_dataFormatInfo.getValuesList());
 			return cb;
 		}
 		case SC_UNIT:
@@ -200,7 +200,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_OUTPUT_UNIT:
 		{
 			QComboBox* cb = new QComboBox(parent);
-			cb->addItems(m_unitInfo.toList());
+			cb->addItems(m_unitInfo.getValuesList());
 			return cb;
 		}
 		case SC_INPUT_SENSOR:
