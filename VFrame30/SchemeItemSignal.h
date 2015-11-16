@@ -10,8 +10,6 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(QString StrIDs READ signalStrIds WRITE setSignalStrIds)
-
 	protected:
 		SchemeItemSignal(void);
 		SchemeItemSignal(SchemeUnit unit);
@@ -34,6 +32,8 @@ namespace VFrame30
 		//
 	public:
 		QString signalStrIds() const;
+		const QStringList& signalStrIdList() const;
+
 		void setSignalStrIds(const QString& s);
 		QStringList* mutable_signalStrIds();
 

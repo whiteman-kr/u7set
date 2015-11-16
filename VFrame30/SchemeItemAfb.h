@@ -54,7 +54,7 @@ namespace VFrame30
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 	protected:
-		void addQtDynamicParamProperties();
+		void addDynamicParamProperties();
 		bool executeScript(const QString& script, const Afb::AfbElement& afb);
 		Q_INVOKABLE int getParamIntValue(const QString& name);
 
@@ -70,9 +70,13 @@ namespace VFrame30
 
 		const std::vector<Afb::AfbParam>& params() const;
 
+		int precision() const;
+		void setPrecision(int value);
+
 	private:
 		QString m_afbStrID;
 		std::vector<Afb::AfbParam> m_params;
+		int m_precision = 2;
 	};
 
 }

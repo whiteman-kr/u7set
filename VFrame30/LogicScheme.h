@@ -9,8 +9,6 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(QString HardwareStrIDs READ hardwareStrIds WRITE setHardwareStrIds)
-
 	public:
 		LogicScheme(void);
 		virtual ~LogicScheme(void);

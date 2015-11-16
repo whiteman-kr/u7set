@@ -2190,9 +2190,9 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 			auto pit = std::find_if(presetProperties.begin(), presetProperties.end(),
 									[deviceProperty](std::shared_ptr<Property> preset)
-			{
-					   return preset->caption() == deviceProperty->caption();
-		});
+					{
+						return preset->caption() == deviceProperty->caption();
+					});
 
 			if (pit == presetProperties.end())
 			{
@@ -2220,12 +2220,6 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 				//
 				if (deviceProperty->isTheSameType(presetProperty.get()) == true)
 				{
-					if (deviceProperty->caption() == "ChildRestriction")
-					{
-						int i = 155;
-						i++;
-					}
-
 					deviceProperty->updateFromPreset(presetProperty.get(), true);
 				}
 				else
@@ -2251,9 +2245,9 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 			auto dit = std::find_if(deviceProperties.begin(), deviceProperties.end(),
 									[presetProperty](std::shared_ptr<Property> device)
-			{
-					   return device->caption() == presetProperty->caption();
-		});
+				{
+					return device->caption() == presetProperty->caption();
+				});
 
 			if (dit == deviceProperties.end())
 			{
@@ -2283,6 +2277,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->childSharedPtr(deviceChild->presetObjectUuid());
 
 			if (deviceChild->preset() == true &&
+				deviceChild->presetName() == device->presetName() &&
 				presetChild == nullptr)
 			{
 				// Child was deleted from preset, add all deviceChild to delete list
@@ -2307,7 +2302,11 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			{
 				// update child
 				//
-				updateDeviceFromPreset(deviceChild, presetChild, updateDeviceList, deleteDeviceList, addDeviceList);
+				if (deviceChild->preset() &&
+					deviceChild->presetName() == device->presetName())
+				{
+					updateDeviceFromPreset(deviceChild, presetChild, updateDeviceList, deleteDeviceList, addDeviceList);
+				}
 			}
 		}
 

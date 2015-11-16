@@ -2,7 +2,10 @@
 #include "ui_serialdatatester.h"
 #include <QMessageBox>
 #include <QXmlStreamReader>
-#include <QDebug>
+#include <QSettings>
+#include <QDir>
+#include <QFileDialog>
+#include <QSerialPortInfo>
 
 SerialDataTester::SerialDataTester(QWidget *parent) :
 	QMainWindow(parent),
@@ -10,45 +13,118 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 {
 	ui->setupUi(this);
 
+	// Menu "File"
+	//
+
 	m_file = new QMenu(tr("&File"));
 	m_reloadCfg = new QAction(tr("Reload singals xml file"), this);
+	m_changeSignalSettingsFile = new QAction(tr("Change signals file"), this);
+	m_exit = new QAction(tr("Exit"), this);
 
 	m_file->addAction(m_reloadCfg);
+	m_file->addAction(m_changeSignalSettingsFile);
+	m_file->addSeparator();
+	m_file->addAction(m_exit);
+
+	// Menu "Settings"
+	//
+
+	m_settings = new QMenu(tr("&Settings"));
+	m_setPort = new QMenu(tr("Set Port"));
+
+	for (QSerialPortInfo port : QSerialPortInfo::availablePorts())
+	{
+		m_setPort->addAction(port.portName());
+	}
+
+	for (QAction* port : m_setPort->actions())
+	{
+		port->setCheckable(true);
+	}
+
+	m_setBaud = new QMenu(tr("Set Baud"));
+
+	m_setBaud->addAction(QString::number(QSerialPort::Baud115200));
+	m_setBaud->addAction(QString::number(QSerialPort::Baud57600));
+	m_setBaud->addAction(QString::number(QSerialPort::Baud38400));
+	m_setBaud->addAction(QString::number(QSerialPort::Baud19200));
+
+	m_settings->addMenu(m_setPort);
+	m_settings->addMenu(m_setBaud);
 
 	ui->menuBar->addMenu(m_file);
+	ui->menuBar->addMenu(m_settings);
 
-	ui->tableWidget->setColumnCount(5);
+	ui->signalsTable->setColumnCount(5);
 
-	ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui->signalsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-	ui->tableWidget->setHorizontalHeaderItem(strId, new QTableWidgetItem(tr("StrID")));
-	ui->tableWidget->setHorizontalHeaderItem(caption, new QTableWidgetItem(tr("Caption")));
-	ui->tableWidget->setHorizontalHeaderItem(offset, new QTableWidgetItem(tr("Offset")));
-	ui->tableWidget->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
-	ui->tableWidget->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
+	ui->signalsTable->setHorizontalHeaderItem(strId, new QTableWidgetItem(tr("StrID")));
+	ui->signalsTable->setHorizontalHeaderItem(caption, new QTableWidgetItem(tr("Caption")));
+	ui->signalsTable->setHorizontalHeaderItem(offset, new QTableWidgetItem(tr("Offset")));
+	ui->signalsTable->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
+	ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
 
 	// Try to load application settings
 	//
 
 	m_applicationSettingsDialog = new SettingsDialog();
 
-	QFile settingsFile("settings.conf");
-
-	if (settingsFile.open(QIODevice::ReadOnly) == false)
+	QSettings applicationSettings;
+	if (applicationSettings.value("port").isNull())
 	{
 		m_applicationSettingsDialog->exec();
 	}
-	else
-	{
-		// If settings.conf exist, start parsing file.
-		// Othervise, wait until SettingsDialog window
-		// send signal, that file where created
 
-		parseFile();
+	delete m_applicationSettingsDialog;
+	m_applicationSettingsDialog = nullptr;
+
+	// Read application settings from application settings
+	//
+
+	QString portName = applicationSettings.value("port").toString();
+	int portBaud = applicationSettings.value("baud").toInt();
+
+	ui->portNameLabel->setText(portName);
+	ui->baudRateLabel->setText(QString::number(portBaud));
+
+	for (QAction* port : m_setPort->actions())
+	{
+		if (portName == port->text())
+		{
+			port->setChecked(true);
+		}
 	}
 
+	for (QAction* baud : m_setBaud->actions())
+	{
+		baud->setCheckable(true);
+		if (QString::number(portBaud) == baud->text())
+		{
+			baud->setChecked(true);
+		}
+	}
+
+	m_portReceiver = new PortReceiver(this);
+
+	m_pathToSignalsXml = applicationSettings.value("pathToSignals").toString();
+
+	// Create port connection
+	//
+
+	// Now read
+	//
+
 	connect(m_reloadCfg, &QAction::triggered, this, &SerialDataTester::reloadConfig);
-	connect(m_applicationSettingsDialog, &SettingsDialog::sendSettingsCreated, this, &SerialDataTester::parseFile);
+	connect(m_changeSignalSettingsFile, &QAction::triggered, this, &SerialDataTester::selectNewSignalsFile);
+	connect(m_exit, &QAction::triggered, this, &SerialDataTester::applicationExit);
+	connect(m_setPort, &QMenu::triggered, this, &SerialDataTester::setPort);
+	connect(m_setBaud, &QMenu::triggered, this, &SerialDataTester::setBaud);
+	connect(m_portReceiver, &PortReceiver::portError, this, &SerialDataTester::portError);
+	connect(this, &SerialDataTester::portChanged, m_portReceiver, &PortReceiver::setNewPort);
+
+	parseFile();
+	m_portReceiver->openPort();
 }
 
 SerialDataTester::~SerialDataTester()
@@ -58,41 +134,23 @@ SerialDataTester::~SerialDataTester()
 
 void SerialDataTester::parseFile()
 {	
-	QFile settingsFile("settings.conf");
-	QTextStream readSettings(&settingsFile);
-	QString pathToSignalsXml;
-
-	// Open application settings file to read
-	// path to signals xml file
-	//
-
-	if (settingsFile.open(QIODevice::ReadOnly) == false)
-	{
-		QMessageBox::critical(this, tr("Critical error"), tr("Can not open settings.conf"));
-		pathToSignalsXml = "Error";
-	}
-	else
-	{
-		pathToSignalsXml = readSettings.readLine();
-	}
-
 	// Try to open signals xml to read signals
 	//
 
-	QFile* slgnalsXmlFile = new QFile(pathToSignalsXml);
+	QFile slgnalsXmlFile(m_pathToSignalsXml);
 	bool errorLoadingXml = false;
 
-	if (slgnalsXmlFile->exists() == false)
+	if (slgnalsXmlFile.exists() == false)
 	{
-		QMessageBox::critical(this, tr("Critical error"), tr("File not found: config.xml"));
-		ui->statusBar->showMessage(tr("Error loading config.xml"));
+		QMessageBox::critical(this, tr("Critical error"), "File not found: " + m_pathToSignalsXml);
+		ui->statusBar->showMessage("Error loading " + m_pathToSignalsXml);
 		errorLoadingXml = true;
 	}
 
-	if (slgnalsXmlFile->open(QIODevice::ReadOnly | QIODevice::Text) == false)
+	if (slgnalsXmlFile.open(QIODevice::ReadOnly | QIODevice::Text) == false)
 	{
-		QMessageBox::critical(this, tr("Critical error"), tr("Error opening config.xml"));
-		ui->statusBar->showMessage(tr("Error loading config.xml"));
+		QMessageBox::critical(this, tr("Critical error"), "Error opening " + m_pathToSignalsXml);
+		ui->statusBar->showMessage("Error loading " + m_pathToSignalsXml);
 		errorLoadingXml = true;
 	}
 
@@ -100,7 +158,7 @@ void SerialDataTester::parseFile()
 	// from file to vector
 	//
 
-	QXmlStreamReader xmlReader(slgnalsXmlFile);
+	QXmlStreamReader xmlReader(&slgnalsXmlFile);
 	SignalData currentSignal;
 
 	while(xmlReader.atEnd() == false && xmlReader.error() == false)
@@ -181,13 +239,15 @@ void SerialDataTester::parseFile()
 
 	if (errorLoadingXml)
 	{
-		ui->statusBar->showMessage( tr("Error loading config.xml"));
+		ui->statusBar->showMessage("Error loading " + m_pathToSignalsXml);
 		signalsFromXml.clear();
 	}
 	else
 	{
-		ui->statusBar->showMessage( tr("config.xml has been succsessfully loaded"));
+		ui->statusBar->showMessage(m_pathToSignalsXml + " has been succsessfully loaded");
 	}
+
+	slgnalsXmlFile.close();
 
 	// Test data from xml-file
 	// DEBUG ONLY
@@ -197,12 +257,12 @@ void SerialDataTester::parseFile()
 
 	for (SignalData& signalData : signalsFromXml)
 	{
-		ui->tableWidget->setRowCount(numberOfSignalFromVector + 1);
-		ui->tableWidget->setItem(numberOfSignalFromVector, strId, new QTableWidgetItem(signalData.strId));
-		ui->tableWidget->setItem(numberOfSignalFromVector, caption, new QTableWidgetItem(signalData.caption));
-		ui->tableWidget->setItem(numberOfSignalFromVector, offset, new QTableWidgetItem(QString::number(signalData.offset)));
-		ui->tableWidget->setItem(numberOfSignalFromVector, bit, new QTableWidgetItem(QString::number(signalData.bit)));
-		ui->tableWidget->setItem(numberOfSignalFromVector, type, new QTableWidgetItem(signalData.type));
+		ui->signalsTable->setRowCount(numberOfSignalFromVector + 1);
+		ui->signalsTable->setItem(numberOfSignalFromVector, strId, new QTableWidgetItem(signalData.strId));
+		ui->signalsTable->setItem(numberOfSignalFromVector, caption, new QTableWidgetItem(signalData.caption));
+		ui->signalsTable->setItem(numberOfSignalFromVector, offset, new QTableWidgetItem(QString::number(signalData.offset)));
+		ui->signalsTable->setItem(numberOfSignalFromVector, bit, new QTableWidgetItem(QString::number(signalData.bit)));
+		ui->signalsTable->setItem(numberOfSignalFromVector, type, new QTableWidgetItem(signalData.type));
 
 		numberOfSignalFromVector++;
 	}
@@ -210,14 +270,73 @@ void SerialDataTester::parseFile()
 
 void SerialDataTester::reloadConfig()
 {
-	ui->tableWidget->clear();
+	ui->signalsTable->clear();
 
-	ui->tableWidget->setHorizontalHeaderItem(strId, new QTableWidgetItem(tr("StrID")));
-	ui->tableWidget->setHorizontalHeaderItem(caption, new QTableWidgetItem(tr("Caption")));
-	ui->tableWidget->setHorizontalHeaderItem(offset, new QTableWidgetItem(tr("Offset")));
-	ui->tableWidget->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
-	ui->tableWidget->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
+	ui->signalsTable->setHorizontalHeaderItem(strId, new QTableWidgetItem(tr("StrID")));
+	ui->signalsTable->setHorizontalHeaderItem(caption, new QTableWidgetItem(tr("Caption")));
+	ui->signalsTable->setHorizontalHeaderItem(offset, new QTableWidgetItem(tr("Offset")));
+	ui->signalsTable->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
+	ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
 
 	signalsFromXml.clear();
 	parseFile();
+}
+
+void SerialDataTester::selectNewSignalsFile()
+{
+	QString newPathToSignals = QFileDialog::getOpenFileName(this, tr("Open Signals.xml"), "", tr("XML-file (*.xml)"));
+	if (newPathToSignals.isEmpty() == false)
+	{
+		m_pathToSignalsXml = newPathToSignals;
+		QSettings applicationSettings;
+		applicationSettings.setValue("pathToSignals", m_pathToSignalsXml);
+		reloadConfig();
+	}
+}
+
+void SerialDataTester::applicationExit()
+{
+	this->close();
+}
+
+void SerialDataTester::setPort(QAction* newPort)
+{
+	for (QAction* port : m_setPort->actions())
+	{
+		if(port->text() != newPort->text())
+		{
+			port->setChecked(false);
+		}
+	}
+
+	emit portChanged(newPort->text());
+
+	QSettings applicationSettings;
+
+	applicationSettings.setValue("port", newPort->text());
+	ui->portNameLabel->setText(newPort->text());
+}
+
+void SerialDataTester::setBaud(QAction* newBaud)
+{
+	for (QAction* baud : m_setBaud->actions())
+	{
+		if(baud->text() != newBaud->text())
+		{
+			baud->setChecked(false);
+		}
+	}
+
+	emit baudChanged(newBaud->text().toInt());
+
+	QSettings applicationSettings;
+
+	applicationSettings.setValue("baud", newBaud->text());
+	ui->baudRateLabel->setText(newBaud->text());
+}
+
+void SerialDataTester::portError(QString error)
+{
+	QMessageBox::critical(this, tr("Critical error"), error);
+	ui->portNameLabel->setText("Error");
 }

@@ -54,13 +54,13 @@ namespace Builder
 
 		bool result = true;
 
-		switch(m_software->type())
+		switch(static_cast<E::SoftwareType>(m_software->type()))
 		{
-		case Hardware::SoftwareType::Monitor:
+		case E::SoftwareType::Monitor:
 			result = generateMonitorCfg();
 			break;
 
-		case Hardware::SoftwareType::DataAcquisitionService:
+		case E::SoftwareType::DataAcquisitionService:
 			result = generateDataAcqisitionServiceCfg();
 			break;
 
@@ -80,6 +80,7 @@ namespace Builder
 		bool result = true;
 
 		result &= writeAppSignalsXml();
+		result &= writeEquipmentXml();
 
 		return result;
 	}
@@ -242,6 +243,74 @@ namespace Builder
 
 		m_cfgXml->addLinkToFile(m_subDir, "appSignals.xml");
 
+		return true;
+	}
+
+	bool SoftwareCfgGenerator::writeEquipmentXml()
+	{
+		Hardware::DeviceRoot* deviceRoot;
+
+		Hardware::DeviceObject* currentDevice = m_software->parent();
+		while (currentDevice != nullptr)
+		{
+			if (typeid(*currentDevice) == typeid(Hardware::DeviceRoot))
+			{
+				deviceRoot = dynamic_cast<Hardware::DeviceRoot*>(currentDevice);
+				break;
+			}
+			currentDevice = currentDevice->parent();
+		}
+
+		if (deviceRoot != nullptr)
+		{
+			QByteArray data;
+			QXmlStreamWriter equipmentWriter(&data);
+
+			equipmentWriter.setAutoFormatting(true);
+			equipmentWriter.writeStartDocument();
+
+			equipmentWalker(deviceRoot, [&equipmentWriter](Hardware::DeviceObject* currentDevice)
+			{
+				if (currentDevice == nullptr)
+				{
+					return;
+				}
+				const QMetaObject* metaObject = currentDevice->metaObject();
+				QString name = metaObject->className();
+				int position = name.lastIndexOf(QChar(':'));
+				if (position == -1)
+				{
+					equipmentWriter.writeStartElement(name);
+				}
+				else
+				{
+					equipmentWriter.writeStartElement(name.mid(position + 1));
+				}
+
+				const std::string& className = metaObject->className();
+				equipmentWriter.writeAttribute("classNameHash", QString::number(CUtils::GetClassHashCode(className), 16));
+
+				for (auto p : currentDevice->properties())
+				{
+					if (p->readOnly())
+					{
+						continue;
+					}
+					QVariant tmp = p->value();
+					assert(tmp.convert(QMetaType::QString));
+					equipmentWriter.writeAttribute(p->caption(), tmp.toString());
+				}
+			}, [&equipmentWriter](Hardware::DeviceObject*)
+			{
+				equipmentWriter.writeEndElement();
+			});
+
+			equipmentWriter.writeEndDocument();
+
+			m_buildResultWriter->addFile(m_subDir, "equipment.xml", data);
+
+			m_cfgXml->addLinkToFile(m_subDir, "equipment.xml");
+		}
 		return true;
 	}
 

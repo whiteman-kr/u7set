@@ -2,6 +2,7 @@
 
 #include "SchemeLayer.h"
 #include "Afb.h"
+#include "../include/PropertyObject.h"
 #include "../include/TypesAndEnums.h"
 
 namespace VFrame30
@@ -13,16 +14,12 @@ namespace VFrame30
 
 	
 	class VFRAME30LIBSHARED_EXPORT Scheme :
-		public QObject,
+		public PropertyObject,
 		public Proto::ObjectSerialization<Scheme>,
 		public DebugInstCounter<Scheme>
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(bool ExcludeFromBuild READ excludeFromBuild WRITE setExcludeFromBuild)
-		Q_PROPERTY(double SchemeWidth READ docWidth WRITE setDocWidth)
-		Q_PROPERTY(double SchemeHeight READ docHeight WRITE setDocHeight)
-	
 	protected:
 		Scheme(void);
 	

@@ -3204,7 +3204,7 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setCreated(q.value(8).toString());
 	s.setDeleted(q.value(9).toBool());
 	s.setInstanceCreated(q.value(10).toString());
-	s.setInstanceAction(static_cast<InstanceAction>(q.value(11).toInt()));
+	s.setInstanceAction(static_cast<E::InstanceAction>(q.value(11).toInt()));
 	s.setStrID(q.value(12).toString());
 	s.setExtStrID(q.value(13).toString());
 	s.setName(q.value(14).toString());
@@ -3232,9 +3232,9 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setNormalState(q.value(36).toInt());
 	s.setDecimalPlaces(q.value(37).toInt());
 	s.setAperture(q.value(38).toDouble());
-	s.setInOutType(static_cast<SignalInOutType>(q.value(39).toInt()));
+	s.setInOutType(static_cast<E::SignalInOutType>(q.value(39).toInt()));
 	s.setDeviceStrID(q.value(40).toString());
-	s.setOutputRangeMode(static_cast<OutputRangeMode>(q.value(41).toInt()));		// since version 35 of database
+	s.setOutputRangeMode(static_cast<E::OutputRangeMode>(q.value(41).toInt()));		// since version 35 of database
 	s.setFilteringTime(q.value(42).toDouble());										//
 	s.setMaxDifference(q.value(43).toDouble());										//
 	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//

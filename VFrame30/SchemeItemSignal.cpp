@@ -7,7 +7,8 @@ namespace VFrame30
 	//
 	// CSchemeItemSignal
 	//
-	SchemeItemSignal::SchemeItemSignal(void)
+	SchemeItemSignal::SchemeItemSignal(void) :
+		SchemeItemSignal(SchemeUnit::Inch)
 	{
 		// Вызов этого конструктора возможен при сериализации объектов такого типа.
 		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
@@ -17,6 +18,7 @@ namespace VFrame30
 	SchemeItemSignal::SchemeItemSignal(SchemeUnit unit) :
 		FblItemRect(unit)
 	{
+		ADD_PROPERTY_GETTER_SETTER(QString, StrIDs, true, SchemeItemSignal::signalStrIds, SchemeItemSignal::setSignalStrIds);
 	}
 
 	SchemeItemSignal::~SchemeItemSignal(void)
@@ -134,6 +136,11 @@ namespace VFrame30
 		}
 
 		return result;
+	}
+
+	const QStringList& SchemeItemSignal::signalStrIdList() const
+	{
+		return m_signalStrIds;
 	}
 
 	void SchemeItemSignal::setSignalStrIds(const QString& s)

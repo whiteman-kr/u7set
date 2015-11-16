@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
-    <height>575</height>
+    <width>1010</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>SerialDataTester</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QTableWidget" name="tableWidget">
+   <widget class="QTableWidget" name="signalsTable">
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1101</width>
+      <width>861</width>
       <height>531</height>
      </rect>
     </property>
@@ -33,13 +33,61 @@
      <number>0</number>
     </property>
    </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>0</y>
+      <width>141</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="portLabel">
+         <property name="text">
+          <string>Port: </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="baudLabel">
+         <property name="text">
+          <string>Baud: </string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="portNameLabel">
+         <property name="text">
+          <string>Error</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="baudRateLabel">
+         <property name="text">
+          <string>Error</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1100</width>
+     <width>1010</width>
      <height>21</height>
     </rect>
    </property>

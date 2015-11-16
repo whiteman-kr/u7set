@@ -24,7 +24,7 @@ public:
 	QString m_databaseUserPassword;
 	QString m_projectName;
 
-	int m_currentSignalId=0;
+	int m_currentSignalId = 0;
 
 	QMutex mutex;
 };
@@ -46,7 +46,7 @@ public:
 
 	std::vector<int> m_signalIds;
 
-	MultiThreadGetSignalTest *m_getSignalThread;
+	MultiThreadGetSignalTest *m_getSignalThread = nullptr;
 
 	QMutex mutex;
 
@@ -55,7 +55,7 @@ public:
 	QString m_databaseUserPassword;
 	QString m_projectName;
 
-	int m_userIdSignalCreator;
+	int m_userIdSignalCreator = 0;
 };
 
 class MultiThreadSignalTest : public QThread
@@ -84,8 +84,8 @@ public:
 
 	virtual void run();
 
-	int m_threadNumber;
-	int m_amountOfSignalIds;
+	int m_threadNumber = 0;
+	int m_amountOfSignalIds = 0;
 
 	QString m_databaseHost;
 	QString m_databaseUser;
@@ -94,50 +94,50 @@ public:
 
 	struct signalData
 	{
-		int signalId;
-		int signalGroupId;
-		int signalInstanceId;
-		int changeSetId;
+		int signalId = 0;
+		int signalGroupId = 0;
+		int signalInstanceId = 0;
+		int changeSetId = 0;
 		QString checkedOut;
-		int userId;
-		int channel;
-		int type;
+		int userId = 0;
+		int channel = 0;
+		int type = 0;
 		QString created;
 		QString deleted;
 		QString instanceCreated;
-		int action;
+		int action = 0;
 		QString strId;
 		QString extStrId;
 		QString name;
-		int dataFormatId;
-		int dataSize;
-		int lowAdc;
-		int highAdc;
-		int lowLimit;
-		int highLimit;
-		int unitId;
-		int adjustment;
-		int dropLimit;
-		int excessLimit;
-		int unbalanceLimit;
-		int inputLowLimit;
-		int inputHighLimit;
-		int inputUnitId;
-		int inputSensorId;
-		int outputLowLimit;
-		int outputHighLimit;
-		int outputUnitId;
-		int outputSensorId;
+		int dataFormatId = 0;
+		int dataSize = 0;
+		int lowAdc = 0;
+		int highAdc = 0;
+		int lowLimit = 0;
+		int highLimit = 0;
+		int unitId = 0;
+		int adjustment = 0;
+		int dropLimit = 0;
+		int excessLimit = 0;
+		int unbalanceLimit = 0;
+		int inputLowLimit = 0;
+		int inputHighLimit = 0;
+		int inputUnitId = 0;
+		int inputSensorId = 0;
+		int outputLowLimit = 0;
+		int outputHighLimit = 0;
+		int outputUnitId = 0;
+		int outputSensorId = 0;
 		QString acquire;
 		QString calculated;
-		int normalState;
-		int decimalPlaces;
-		int aperture;
-		int inOutType;
+		int normalState = 0;
+		int decimalPlaces = 0;
+		int aperture = 0;
+		int inOutType = 0;
 		QString deviceStrId;
-		int outputRangeMode;
-		int filteringTime;
-		int maxDifference;
-		int byteOrder;
+		int outputRangeMode = 0;
+		int filteringTime = 0;
+		int maxDifference = 0;
+		int byteOrder = 0;
 	};
 };

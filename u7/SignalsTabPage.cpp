@@ -367,10 +367,10 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_OUTPUT_UNIT: if (cb) s.setOutputUnitID(m_unitInfo.key(cb->currentIndex())); break;
 		case SC_INPUT_SENSOR: if (cb) s.setInputSensorID(cb->currentIndex()); break;
 		case SC_OUTPUT_SENSOR: if (cb) s.setOutputSensorID(cb->currentIndex()); break;
-		case SC_OUTPUT_RANGE_MODE: if (cb) s.setOutputRangeMode(OutputRangeMode(cb->currentIndex())); break;
+		case SC_OUTPUT_RANGE_MODE: if (cb) s.setOutputRangeMode(static_cast<E::OutputRangeMode>(cb->currentIndex())); break;
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_CALCULATED: if (cb) s.setCalculated(cb->currentIndex() == 0 ? false : true); break;
-		case SC_IN_OUT_TYPE: if (cb) s.setInOutType(SignalInOutType(cb->currentIndex())); break;
+	case SC_IN_OUT_TYPE: if (cb) s.setInOutType(static_cast<E::SignalInOutType>(cb->currentIndex())); break;
 		case SC_BYTE_ORDER: if (cb) s.setByteOrder(E::ByteOrder(cb->currentIndex())); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
@@ -772,9 +772,9 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 			{
 				switch (signal.instanceAction())
 				{
-					case InstanceAction::Added: return plus;
-					case InstanceAction::Modified: return pencil;
-					case InstanceAction::Deleted: return cross;
+					case E::InstanceAction::Added: return plus;
+					case E::InstanceAction::Modified: return pencil;
+					case E::InstanceAction::Deleted: return cross;
 					default:
 						assert(false);
 						return QVariant();
@@ -837,7 +837,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_OUTPUT_HIGH_LIMIT: signal.setOutputHighLimit(value.toDouble()); break;
 			case SC_OUTPUT_UNIT: signal.setOutputUnitID(value.toInt()); break;
 			case SC_OUTPUT_SENSOR: signal.setOutputSensorID(value.toInt()); break;
-			case SC_OUTPUT_RANGE_MODE: signal.setOutputRangeMode(OutputRangeMode(value.toInt())); break;
+			case SC_OUTPUT_RANGE_MODE: signal.setOutputRangeMode(static_cast<E::OutputRangeMode>(value.toInt())); break;
 			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
 			case SC_CALCULATED: signal.setCalculated(value.toBool()); break;
 			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
@@ -845,7 +845,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_APERTURE: signal.setAperture(value.toDouble()); break;
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
 			case SC_MAX_DIFFERENCE: signal.setMaxDifference(value.toDouble()); break;
-			case SC_IN_OUT_TYPE: signal.setInOutType(SignalInOutType(value.toInt())); break;
+			case SC_IN_OUT_TYPE: signal.setInOutType(static_cast<E::SignalInOutType>(value.toInt())); break;
 			case SC_BYTE_ORDER: signal.setByteOrder(E::ByteOrder(value.toInt())); break;
 			case SC_DEVICE_STR_ID: signal.setDeviceStrID(value.toString()); break;
 			case SC_LAST_CHANGE_USER:
@@ -1074,7 +1074,7 @@ void SignalsModel::addSignal()
 	}
 	signal.setOutputSensorID(settings.value("LastEditedSignal: outputSensorID").toInt());
 
-	signal.setOutputRangeMode(OutputRangeMode(settings.value("LastEditedSignal: outputRangeMode").toInt()));
+	signal.setOutputRangeMode(static_cast<E::OutputRangeMode>(settings.value("LastEditedSignal: outputRangeMode").toInt()));
 
 	signal.setAcquire(settings.value("LastEditedSignal: acquire").toBool());
 	signal.setCalculated(settings.value("LastEditedSignal: calculated").toBool());
@@ -1083,7 +1083,7 @@ void SignalsModel::addSignal()
 	signal.setAperture(settings.value("LastEditedSignal: aperture").toDouble());
 	signal.setFilteringTime(settings.value("LastEditedSignal: filteringTime").toDouble());
 	signal.setMaxDifference(settings.value("LastEditedSignal: maxDifference").toDouble());
-	signal.setInOutType(SignalInOutType(settings.value("LastEditedSignal: inOutType").toInt()));
+	signal.setInOutType(static_cast<E::SignalInOutType>(settings.value("LastEditedSignal: inOutType").toInt()));
 	signal.setByteOrder(E::ByteOrder(settings.value("LastEditedSignal: byteOrder").toInt()));
 
 	if (!deviceIdEdit->text().isEmpty())

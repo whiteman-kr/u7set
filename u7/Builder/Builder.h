@@ -88,10 +88,6 @@ namespace Builder
 		//
 		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet, Afb::AfbElementCollection* afbCollection, AppLogicData* appLogicData, BuildResultWriter* buildResultWriter);
 
-		// Compile Data Aquisition Service configuration
-		//
-		bool compileDataAquisitionServiceConfiguration(Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, UnitList& unitInfo, BuildResultWriter* buildResultWriter);
-
 		// Generate SCADA software configurations
 		//
 		bool generateSoftwareConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, BuildResultWriter* buildResultWriter);

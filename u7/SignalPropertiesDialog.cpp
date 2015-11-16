@@ -14,6 +14,8 @@
 #include <QtVariantProperty>
 #include "../include/Signal.h"
 #include "SignalsTabPage.h"
+#include "../include/PropertyEditor.h"
+#include <QHBoxLayout>
 
 
 bool isSameFieldValue(QVector<Signal*>& signalVector, std::function<bool (Signal*, Signal*)> equalityOf2Signals)
@@ -356,7 +358,19 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, E:
 	m_browser->addProperty(signalProperty);
 
 	QVBoxLayout* vl = new QVBoxLayout;
-	vl->addWidget(m_browser);
+	QHBoxLayout* hl = new QHBoxLayout;
+	hl->addWidget(m_browser);
+	/*ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
+
+	QList<std::shared_ptr<PropertyObject>> objList;
+	for (int i = 0; i < signalVector.count(); i++)
+	{
+		objList.push_back(std::shared_ptr<Signal>(new Signal(*signalVector[i])));
+	}
+	pe->setObjects(objList);
+	hl->addWidget(pe);*/
+	vl->addLayout(hl);
+	//vl->addWidget(m_browser);
 
 	QDialogButtonBox* buttonBox;
 
@@ -476,7 +490,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		int outputRangeModeIndex = m_enumManager->value(m_outputRangeModeProperty);
 		if (outputRangeModeIndex >= 0 && outputRangeModeIndex < OUTPUT_RANGE_MODE_COUNT && m_signalVector[0]->outputRangeMode() != outputRangeModeIndex)
 		{
-			signal.setOutputRangeMode(OutputRangeMode(outputRangeModeIndex));
+			signal.setOutputRangeMode(static_cast<E::OutputRangeMode>(outputRangeModeIndex));
 		}
 
 		SET_SIGNAL_FIELD_VALUE(acquire, setAcquire, m_boolManager, m_acquireProperty);
@@ -489,7 +503,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		int inOutTypeIndex = m_enumManager->value(m_inOutTypeProperty);
 		if (inOutTypeIndex >= 0 && inOutTypeIndex < IN_OUT_TYPE_COUNT && m_signalVector[0]->inOutType() != inOutTypeIndex)
 		{
-			signal.setInOutType(SignalInOutType(inOutTypeIndex));
+			signal.setInOutType(static_cast<E::SignalInOutType>(inOutTypeIndex));
 		}
 
 		int byteOrderIndex = m_enumManager->value(m_byteOrderProperty);

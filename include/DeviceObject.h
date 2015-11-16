@@ -52,16 +52,6 @@ namespace Hardware
 	};
 
 
-	// Software Module Type Identifiers
-	//
-	enum class SoftwareType
-	{
-		Monitor = 9000,
-		ConfigurationService = 9001,
-		DataAcquisitionService = 9002,
-		DataArchivingService = 9003,
-	};
-
 	// Forward declarations
 	//
 	class DeviceSignal;
@@ -624,15 +614,15 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		int type() const;
-		void setType(int value);
+		E::SoftwareType type() const;
+		void setType(E::SoftwareType value);
 
 		// Data
 		//
 	private:
 		static const DeviceType m_deviceType = DeviceType::Software;
 
-		int m_type = 0;
+		E::SoftwareType m_type = E::SoftwareType::Monitor;
 	};
 
 	//

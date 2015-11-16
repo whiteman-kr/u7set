@@ -18,11 +18,6 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
-		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
-		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
-		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
-
 #ifdef VFRAME30LIB_LIBRARY
 		friend ::Factory<SchemeItem>::DerivedType<FblItemRect>;
 #endif
