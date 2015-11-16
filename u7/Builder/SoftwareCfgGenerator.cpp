@@ -116,7 +116,7 @@ namespace Builder
 		{
 			appSignalsXml.writeStartElement("unit");
 
-			appSignalsXml.writeAttribute("ID", QString::number(unitInfo.key(i)));
+			appSignalsXml.writeAttribute("ID", QString::number(unitInfo.keyAt(i)));
 			appSignalsXml.writeAttribute("name", unitInfo[i]);
 
 			appSignalsXml.writeEndElement();
