@@ -15,7 +15,7 @@ void swapBytes(TYPE& value, int count = -1)
 	std::reverse(memory, memory + count);
 }
 
-class RpPacketHeader;
+struct RpPacketHeader;
 
 class PacketBufferTableModel : public QAbstractTableModel
 {

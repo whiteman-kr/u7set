@@ -36,6 +36,7 @@ private:
 	DataFormatList m_dataFormatInfo;
 	UnitList& m_unitInfo;
 	SignalsModel* m_signalsModel;
+	QList<std::shared_ptr<PropertyObject>> m_objList;
 
 	E::SignalType m_signalType;
 

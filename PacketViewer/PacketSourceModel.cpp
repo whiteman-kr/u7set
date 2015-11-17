@@ -70,7 +70,7 @@ QModelIndex PacketSourceModel::parent(const QModelIndex& childIndex) const
 	{
 		return QModelIndex();
 	}
-	for (size_t i = 0; i < m_listeners.size(); i++)
+    for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
 	{
 		if ((*child->parent()) == *m_listeners[i])
 		{
@@ -84,7 +84,7 @@ int PacketSourceModel::rowCount(const QModelIndex& parentIndex) const
 {
 	if (!parentIndex.isValid())
 	{
-		return m_listeners.size();
+        return static_cast<int>(m_listeners.size());
 	}
 	else
 	{
@@ -192,7 +192,7 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 			return;
 		}
 	}
-	beginInsertRows(QModelIndex(), m_listeners.size(), m_listeners.size());
+    beginInsertRows(QModelIndex(), static_cast<int>(m_listeners.size()), static_cast<int>(m_listeners.size()));
 	m_listeners.push_back(listener);
 	endInsertRows();
 	connect(listener.get(), &Listener::beginAddSource, this, &PacketSourceModel::beginInsertSource, Qt::DirectConnection);
@@ -200,8 +200,8 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 	if (saveList)
 	{
 		QSettings settings;
-		settings.beginWriteArray("listenAddresses", m_listeners.size());
-		for (size_t i = 0; i < m_listeners.size(); i++)
+        settings.beginWriteArray("listenAddresses", static_cast<int>(m_listeners.size()));
+        for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
 		{
 			settings.setArrayIndex(i);
 			settings.setValue("ip", m_listeners[i]->ip());
@@ -214,7 +214,7 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 
 int PacketSourceModel::index(Listener* listener)
 {
-	for (size_t i = 0; i < m_listeners.size(); i++)
+    for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
 	{
 		if (m_listeners[i].get() == listener)
 		{
@@ -249,9 +249,9 @@ void PacketSourceModel::openSourceStatusWidget(const QModelIndex& index)
 	source->openStatusWidget();
 }
 
-void PacketSourceModel::removeListener(size_t row)
+void PacketSourceModel::removeListener(int row)
 {
-	if (m_listeners.size() > row)
+    if (m_listeners.size() > static_cast<int>(row))
 	{
 		beginRemoveRows(QModelIndex(), row, row);
 		m_listeners.erase(m_listeners.begin() + row);
@@ -318,7 +318,7 @@ Listener::Listener(PacketSourceModel* model, QString address, int port) :
 
 int Listener::index(Source* source) const
 {
-	for (size_t i = 0; i < m_sources.size(); i++)
+    for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 	{
 		if (m_sources[i].get() == source)
 		{
@@ -338,7 +338,7 @@ int Listener::getSourceIndex(quint32 ip, quint16 port)
 		if (!source.isSameAddress(ip, port))
 		{
 			sourceIndex = -1;
-			for (size_t i = 0; i < m_sources.size(); i++)
+            for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 			{
 				if (m_sources[i]->isSameAddress(ip, port))
 				{
@@ -358,7 +358,7 @@ int Listener::addNewSource(quint32 ip, quint16 port)
 {
 	std::shared_ptr<Source> newSource(new Source(QHostAddress(ip).toString(), port, m_model->signalSet(), m_model->dataSources(), this));
 	connect(newSource.get(), &Source::fieldsChanged, m_model, &PacketSourceModel::updateSourceStatistic);
-	for (size_t i = 0; i < m_sources.size(); i++)
+    for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 	{
 		if (m_sources[i]->ip() > ip || (m_sources[i]->ip() == ip && m_sources[i]->port() >= port))
 		{
@@ -369,17 +369,17 @@ int Listener::addNewSource(quint32 ip, quint16 port)
 			return i;
 		}
 	}
-	emit beginAddSource(m_sources.size());
+    emit beginAddSource(static_cast<int>(m_sources.size()));
 	m_sources.push_back(newSource);
 	emit endAddSource();
 	updateSourceMap();
-	return m_sources.size() - 1;
+    return static_cast<int>(m_sources.size()) - 1;
 }
 
 void Listener::updateSourceMap()
 {
 	m_sourcesMap.clear();
-	for (size_t i = 0; i < m_sources.size(); i++)
+    for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 	{
 		m_sourcesMap.insert(m_sources[i]->ip(), i);
 	}
