@@ -116,7 +116,7 @@ public:
 	Source& source(int index) const { return *m_sources[index].get(); }
 	int index(Source* source) const;
 
-	int childCount() { return m_sources.size(); }
+    int childCount() { return static_cast<int>(m_sources.size()); }
 
 	int getSourceIndex(quint32 ip, quint16 port);
 	int addNewSource(quint32 ip, quint16 port);	// returns index of new source
@@ -173,7 +173,7 @@ signals:
 
 public slots:
 	void openSourceStatusWidget(const QModelIndex &index);
-	void removeListener(size_t row);
+    void removeListener(int row);
 
 	void beginInsertSource(int row);
 	void endInsertSource();
