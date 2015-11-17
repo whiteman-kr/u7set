@@ -90,6 +90,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, E:
 	m_signalsModel(signalsModel),
 	m_signalType(signalType)
 {
+	*Signal::m_unitList.get() = unitInfo;
 	QSettings settings;
 	QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(this);
 	m_stringManager = new QtStringPropertyManager(this);
@@ -360,17 +361,15 @@ SignalPropertiesDialog::SignalPropertiesDialog(QVector<Signal*> signalVector, E:
 	QVBoxLayout* vl = new QVBoxLayout;
 	QHBoxLayout* hl = new QHBoxLayout;
 	hl->addWidget(m_browser);
-	/*ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
+	ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
 
-	QList<std::shared_ptr<PropertyObject>> objList;
 	for (int i = 0; i < signalVector.count(); i++)
 	{
-		objList.push_back(std::shared_ptr<Signal>(new Signal(*signalVector[i])));
+		m_objList.push_back(std::make_shared<Signal>(*signalVector[i]));
 	}
-	pe->setObjects(objList);
-	hl->addWidget(pe);*/
+	pe->setObjects(m_objList);
+	hl->addWidget(pe);
 	vl->addLayout(hl);
-	//vl->addWidget(m_browser);
 
 	QDialogButtonBox* buttonBox;
 
@@ -441,7 +440,7 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	{
 		Signal& signal = *m_signalVector[i];
 
-		if (!strID.isEmpty())
+		/*if (!strID.isEmpty())
 		{
 			SET_SIGNAL_STRING_FIELD_VALUE(setStrID, strID);
 		}
@@ -514,7 +513,9 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		}
 
 		QString deviceStrID = m_stringManager->value(m_deviceIDProperty);
-		SET_SIGNAL_STRING_FIELD_VALUE(setDeviceStrID, deviceStrID);
+		SET_SIGNAL_STRING_FIELD_VALUE(setDeviceStrID, deviceStrID);*/
+
+		signal = *(dynamic_cast<Signal*>(m_objList[i].get()));
 	}
 
 	saveLastEditedSignalProperties();

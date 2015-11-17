@@ -13,6 +13,9 @@ DataFormatList::DataFormatList()
 }
 
 
+std::shared_ptr<UnitList> Signal::m_unitList = std::make_shared<UnitList>();
+
+
 Signal::Signal() :
 	PropertyObject()
 {
@@ -169,7 +172,7 @@ void Signal::InitProperties()
 		ADD_PROPERTY_GETTER_SETTER(int, HighADC, true, Signal::highADC, Signal::setHighADC);
 		ADD_PROPERTY_GETTER_SETTER(double, LowLimit, true, Signal::lowLimit, Signal::setLowLimit);
 		ADD_PROPERTY_GETTER_SETTER(double, HighLimit, true, Signal::highLimit, Signal::setHighLimit);
-		ADD_PROPERTY_GETTER_SETTER(int, UnitID, true, Signal::unitID, Signal::setUnitID);
+		ADD_PROPERTY_DYNAMIC_ENUM(Unit, true, m_unitList, Signal::unitID, Signal::setUnitID);
 		ADD_PROPERTY_GETTER_SETTER(double, Adjustment, true, Signal::adjustment, Signal::setAdjustment);
 		ADD_PROPERTY_GETTER_SETTER(double, DropLimit, true, Signal::dropLimit, Signal::setDropLimit);
 		ADD_PROPERTY_GETTER_SETTER(double, ExcessLimit, true, Signal::excessLimit, Signal::setExcessLimit);
@@ -178,7 +181,7 @@ void Signal::InitProperties()
 		inputLowLimitPropetry->setCategory("Input sensor");
 		auto inputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, InputHighLimit, true, Signal::inputHighLimit, Signal::setInputHighLimit);
 		inputHighLimitPropetry->setCategory("Input sensor");
-		auto inputUnitIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, InputUnitID, true, Signal::inputUnitID, Signal::setInputUnitID);
+		auto inputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(InputUnit, true, m_unitList, Signal::inputUnitID, Signal::setInputUnitID);/*ADD_PROPERTY_GETTER_SETTER(int, InputUnitID, true, Signal::inputUnitID, Signal::setInputUnitID);*/
 		inputUnitIDPropetry->setCategory("Input sensor");
 		auto inputSensorIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, InputSensorID, true, Signal::inputSensorID, Signal::setInputSensorID);
 		inputSensorIDPropetry->setCategory("Input sensor");
@@ -186,7 +189,7 @@ void Signal::InitProperties()
 		outputLowLimitPropetry->setCategory("Output sensor");
 		auto outputHighLimitPropetry = ADD_PROPERTY_GETTER_SETTER(double, OutputHighLimit, true, Signal::outputHighLimit, Signal::setOutputHighLimit);
 		outputHighLimitPropetry->setCategory("Output sensor");
-		auto outputUnitIDPropetry = ADD_PROPERTY_GETTER_SETTER(int, OutputUnitID, true, Signal::outputUnitID, Signal::setOutputUnitID);
+		auto outputUnitIDPropetry = ADD_PROPERTY_DYNAMIC_ENUM(OutputUnit, true, m_unitList, Signal::outputUnitID, Signal::setOutputUnitID);/*ADD_PROPERTY_GETTER_SETTER(int, OutputUnitID, true, Signal::outputUnitID, Signal::setOutputUnitID);*/
 		outputUnitIDPropetry->setCategory("Output sensor");
 		auto outputRangeModePropetry = ADD_PROPERTY_GETTER_SETTER(E::OutputRangeMode, OutputRangeMode, true, Signal::outputRangeMode, Signal::setOutputRangeMode);
 		outputRangeModePropetry->setCategory("Output sensor");
