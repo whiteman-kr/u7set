@@ -251,7 +251,7 @@ void PacketSourceModel::openSourceStatusWidget(const QModelIndex& index)
 
 void PacketSourceModel::removeListener(int row)
 {
-    if (m_listeners.size() > static_cast<int>(row))
+	if (static_cast<int>(m_listeners.size()) > row)
 	{
 		beginRemoveRows(QModelIndex(), row, row);
 		m_listeners.erase(m_listeners.begin() + row);

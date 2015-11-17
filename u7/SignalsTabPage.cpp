@@ -1083,7 +1083,7 @@ void SignalsModel::addSignal()
 	signal.setAperture(settings.value("LastEditedSignal: aperture").toDouble());
 	signal.setFilteringTime(settings.value("LastEditedSignal: filteringTime").toDouble());
 	signal.setMaxDifference(settings.value("LastEditedSignal: maxDifference").toDouble());
-	signal.setInOutType(static_cast<E::SignalInOutType>(settings.value("LastEditedSignal: inOutType").toInt()));
+	signal.setInOutType(E::Internal);
 	signal.setByteOrder(E::ByteOrder(settings.value("LastEditedSignal: byteOrder").toInt()));
 
 	if (!deviceIdEdit->text().isEmpty())
