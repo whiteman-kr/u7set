@@ -16,7 +16,7 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 
 	m_tcpThread->start();*/
 
-	m_cfgLoader = new CfgLoader("APP_QQQ", HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIG_SERVICE_REQUEST));
+	m_cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIG_SERVICE_REQUEST));
 	m_fileClientThread = new Tcp::Thread(m_cfgLoader);
 
 	m_fileClientThread->start();

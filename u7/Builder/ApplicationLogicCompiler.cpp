@@ -4379,7 +4379,7 @@ namespace Builder
 	}
 
 
-	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, int dataSize, const AppItem *appItem, const QString& strID) :
+	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem *appItem, const QString& strID) :
 		m_appItem(appItem),
 		m_guid(guid)
 	{
@@ -4387,6 +4387,7 @@ namespace Builder
 		//
 		setStrID(strID);
 		setType(signalType);
+		setDataFormat(dataFormat);
 		setDataSize(dataSize);
 		setInOutType(E::SignalInOutType::Internal);
 
@@ -4486,9 +4487,7 @@ namespace Builder
 
 		E::SignalType signalType = E::SignalType::Discrete;
 
-		Afb::AfbSignalType st = s.type();
-
-		switch(st)
+		switch(s.type())			// Afb::AfbSignalType
 		{
 		case Afb::AfbSignalType::Analog:
 			signalType = E::SignalType::Analog;
@@ -4496,6 +4495,27 @@ namespace Builder
 
 		case Afb::AfbSignalType::Discrete:
 			signalType = E::SignalType::Discrete;
+			break;
+
+		default:
+			assert(false);
+			return false;
+		}
+
+		E::DataFormat dataFormat = E::DataFormat::SignedInt;
+
+		switch(s.dataFormat())		// Afb::AfbDataFormat
+		{
+		case Afb::AfbDataFormat::Float:
+			dataFormat = E::DataFormat::Float;
+			break;
+
+		case Afb::AfbDataFormat::UnsignedInt:
+			dataFormat = E::DataFormat::UnsignedInt;
+			break;
+
+		case Afb::AfbDataFormat::SignedInt:
+			dataFormat = E::DataFormat::SignedInt;
 			break;
 
 		default:
@@ -4519,7 +4539,7 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(outPinGuid, signalType, s.size(), appFb, strID);
+			appSignal = new AppSignal(outPinGuid, signalType, dataFormat, s.size(), appFb, strID);
 
 			appSignal->setAcquire(false);			// non-registered signal
 

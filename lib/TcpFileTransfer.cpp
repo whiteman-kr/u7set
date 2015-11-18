@@ -110,6 +110,13 @@ namespace Tcp
 
 	FileTransferResult FileClient::checkLocalFolder()
 	{
+		QDir dir(m_rootFolder);
+
+		if (dir.exists() == false)
+		{
+			dir.mkpath(m_rootFolder);
+		}
+
 		QFileInfo pathInfo(m_rootFolder);
 
 		if (pathInfo.permission(QFileDevice::WriteUser | QFileDevice::ReadUser) == false)
@@ -140,7 +147,10 @@ namespace Tcp
 
 	void FileClient::endFileDownload(FileTransferResult errorCode)
 	{
-		emit signal_endDownloadFile(m_fileName, errorCode);
+		emit signal_endFileDownload(m_fileName, errorCode, QString(""));
+
+		onEndFileDownload(m_fileName, errorCode, QString(""));
+
 		init();
 	}
 
@@ -149,14 +159,16 @@ namespace Tcp
 	{
 		if (isConnected() == false)
 		{
-			emit signal_endDownloadFile(fileName, FileTransferResult::NotConnectedToServer);
+			emit signal_endFileDownload(fileName, FileTransferResult::NotConnectedToServer, QString(""));
+			onEndFileDownload(fileName, FileTransferResult::NotConnectedToServer, QString(""));
 			return;
 		}
 
 		if (m_transferInProgress == true)
 		{
 			assert(false);
-			emit signal_endDownloadFile(fileName, FileTransferResult::AlreadyDownloadFile);
+			emit signal_endFileDownload(fileName, FileTransferResult::AlreadyDownloadFile, QString(""));
+			onEndFileDownload(fileName, FileTransferResult::AlreadyDownloadFile, QString(""));
 			return;
 		}
 
@@ -194,7 +206,7 @@ namespace Tcp
 			break;
 
 		default:
-			assert(false);
+			processSuccessorReply(requestID, replyData, replyDataSize);
 		}
 	}
 
@@ -272,7 +284,21 @@ namespace Tcp
 
 		init();
 
-		emit signal_endDownloadFile(downloadedFileName, FileTransferResult::Ok);
+		QString md5 = QString(m_md5Generator.result().toHex());
+
+		emit signal_endFileDownload(downloadedFileName, FileTransferResult::Ok, md5);
+
+		onEndFileDownload(downloadedFileName, FileTransferResult::Ok, md5);
+	}
+
+
+	void FileClient::processSuccessorReply(quint32 /*requestID*/, const char* /*replyData*/, quint32 /*replyDataSize*/)
+	{
+	}
+
+
+	void FileClient::onEndFileDownload(const QString /*fileName*/, FileTransferResult /*errorCode*/, const QString md5)
+	{
 	}
 
 
@@ -316,7 +342,7 @@ namespace Tcp
 			break;
 
 		default:
-			assert(false);
+			processSuccessorRequest(requestID, requestData, requestDataSize);
 		}
 	}
 
@@ -402,5 +428,11 @@ namespace Tcp
 			init();
 		}
 	}
+
+
+	void FileServer::processSuccessorRequest(quint32 /*requestID*/, const char* /*requestData*/, quint32 /*requestDataSize*/)
+	{
+	}
+
 
 }

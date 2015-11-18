@@ -372,7 +372,7 @@ namespace Builder
 
 	public:
 		AppSignal(const Signal* signal, const AppItem* appItem);
-		AppSignal(const QUuid& guid, E::SignalType signalType, int dataSize, const AppItem* appItem, const QString& strID);
+		AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem* appItem, const QString& strID);
 
 		const AppItem &appItem() const;
 
