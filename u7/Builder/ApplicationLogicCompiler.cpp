@@ -2215,7 +2215,12 @@ namespace Builder
 		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = inPin.afbOperandIndex();
 
-		LogicAfbSignal afbSignal = appFb.getAfbSignalByIndex(fbParamNo);
+		LogicAfbSignal afbSignal;
+
+		if (appFb.getAfbSignalByIndex(fbParamNo, &afbSignal) == false)
+		{
+			return false;
+		}
 
 		if (afbSignal.isAnalog())
 		{
@@ -2402,7 +2407,12 @@ namespace Builder
 		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = outPin.afbOperandIndex();
 
-		LogicAfbSignal afbSignal = appFb.getAfbSignalByIndex(fbParamNo);
+		LogicAfbSignal afbSignal;
+
+		if (appFb.getAfbSignalByIndex(fbParamNo, &afbSignal) == false)
+		{
+			return false;
+		}
 
 		if (afbSignal.isAnalog())
 		{
@@ -4146,29 +4156,36 @@ namespace Builder
 	}
 
 
-	LogicAfbParam AppFb::getAfbParamByIndex(int index) const
+	bool AppFb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
 	{
 		for(LogicAfbParam param : afb().params())
 		{
 			if (param.operandIndex() == index)
 			{
-				return param;
+				*afbParam = param;
+				return true;
 			}
 		}
 
-		assert(false);			// bad param index
+		LOG_ERROR(m_log, QString(tr("Not found parameter with opIndex = %1 int FB %2")).arg(index).arg(caption()));
 
-		return LogicAfbParam();
+		return false;
 	}
 
 
-	LogicAfbSignal AppFb::getAfbSignalByIndex(int index) const
+	bool AppFb::getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const
 	{
+		if (afbSignal == nullptr)
+		{
+			return false;
+		}
+
 		for(LogicAfbSignal input : afb().inputSignals())
 		{
 			if (input.operandIndex() == index)
 			{
-				return input;
+				*afbSignal = input;
+				return true;
 			}
 		}
 
@@ -4176,13 +4193,14 @@ namespace Builder
 		{
 			if (output.operandIndex() == index)
 			{
-				return output;
+				*afbSignal = output;
+				return true;
 			}
 		}
 
-		assert(false);			// bad signal index
+		LOG_ERROR(m_log, QString(tr("Not found signal with opIndex = %1 int FB %2")).arg(index).arg(caption()));
 
-		return LogicAfbSignal();
+		return false;
 	}
 
 
