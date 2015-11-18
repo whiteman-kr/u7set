@@ -14,8 +14,8 @@
         <InputSignals>
             <AfbElementSignal OpName="i_data" Caption = "in" Type="Analog" DataFormat="UnsignedInt" OpIndex = "0" Size = "16"/>
             <AfbElementSignal OpName="i_val" Caption = "val" Type="Analog" DataFormat="UnsignedInt" OpIndex = "1" Size = "16"/>
-            <AfbElementSignal OpName="i_set" Caption = "lock" Type="Analog" DataFormat="UnsignedInt" OpIndex = "2" Size = "16"/>
-            <AfbElementSignal OpName="i_reset" Caption = "sim" Type="Analog" DataFormat="UnsignedInt" OpIndex = "3" Size = "16"/>
+            <AfbElementSignal OpName="i_set" Caption = "sim" Type="Analog" DataFormat="UnsignedInt" OpIndex = "2" Size = "16"/>
+            <AfbElementSignal OpName="i_reset" Caption = "block" Type="Analog" DataFormat="UnsignedInt" OpIndex = "3" Size = "16"/>
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="UnsignedInt" OpIndex = "5" Size = "16"/>
