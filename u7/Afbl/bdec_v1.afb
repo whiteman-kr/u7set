@@ -12,7 +12,7 @@
             <InternalUse>false</InternalUse>
         </Properties>
         <InputSignals>
-            <AfbElementSignal OpName="i_number" Caption = "in" Type="Analog" DataFormat = "UnsignedInt" OpIndex = "0" Size = "4"/>
+            <AfbElementSignal OpName="i_number" Caption = "in" Type="Analog" DataFormat = "UnsignedInt" OpIndex = "0" Size = "32"/>
         </InputSignals>
         <OutputSignals>
             <AfbElementSignal OpName="o_1_oprd" Caption="out 1" Type="Discrete" OpIndex = "2" Size = "1"/>

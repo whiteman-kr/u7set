@@ -279,9 +279,9 @@ std::vector<std::pair<KEY, VALUE>> OrderedHash<KEY, VALUE>::getKeyValueVector() 
 
 	int index = 0;
 
-	for(KEY key : *this)
+	for(const QPair<KEY, VALUE>& p : *this)
 	{
-		result.push_back(std::pair<KEY, VALUE>(key, *this[index].second));
+		result.push_back(std::pair<KEY, VALUE>(p.first, p.second));
 
 		index++;
 	}

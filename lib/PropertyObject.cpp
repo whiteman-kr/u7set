@@ -133,6 +133,16 @@ void Property::setCategory(QString value)
 	m_category = value;
 }
 
+QString Property::validator() const
+{
+	return m_validator;
+}
+
+void Property::setValidator(QString value)
+{
+	m_validator = value;
+}
+
 bool Property::readOnly() const
 {
 	return m_readOnly;
