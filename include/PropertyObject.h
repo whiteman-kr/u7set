@@ -500,16 +500,20 @@ public:
 
 	void setValue(const QVariant& value) override		// Overriden from class Propery
 	{
-		assert(value.canConvert<int>());
+		if (value.type() == QVariant::Int)
+		{
+			setEnumValue(value.value<int>());
+			return;
+		}
 
-		if (m_setter)
+		if (value.type() == QVariant::String)
 		{
-			m_setter(value.value<int>());
+			int key = m_enumValues->key(value.toString());
+			setEnumValue(key);
+			return;
 		}
-		else
-		{
-			m_value = value.toInt();
-		}
+
+		assert(false);
 	}
 
 	virtual void setEnumValue(int value) override			// Overriden from class Propery
@@ -526,7 +530,7 @@ public:
 
 	virtual void setEnumValue(const char* value) override	// Overriden from class Propery
 	{
-		int key = m_enumValues->key(QString::fromLocal8Bit(value));
+		int key = m_enumValues->key(QString(value));
 		setEnumValue(key);
 	}
 
