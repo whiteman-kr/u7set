@@ -161,9 +161,12 @@ void Signal::InitProperties()
 
 	ADD_PROPERTY_GETTER_SETTER(E::SignalType, Type, false, Signal::type, Signal::setType);
 
-	ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, Signal::strID, Signal::setStrID);
-	ADD_PROPERTY_GETTER_SETTER(QString, ExtStrID, true, Signal::extStrID, Signal::setExtStrID);
-	ADD_PROPERTY_GETTER_SETTER(QString, Name, true, Signal::name, Signal::setName);
+	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, StrID, true, Signal::strID, Signal::setStrID);
+	strIdProperty->setValidator("^#[A-Za-z][A-Za-z\\d_]*$");
+	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER(QString, ExtStrID, true, Signal::extStrID, Signal::setExtStrID);
+	extStrIdProperty->setValidator("^[A-Za-z][A-Za-z\\d_]*$");
+	auto nameProperty = ADD_PROPERTY_GETTER_SETTER(QString, Name, true, Signal::name, Signal::setName);
+	nameProperty->setValidator("^.+$");
 	ADD_PROPERTY_GETTER_SETTER(E::DataFormat, DataFormat, true, Signal::dataFormat, Signal::setDataFormat);
 	ADD_PROPERTY_GETTER_SETTER(int, DataSize, true, Signal::dataSize, Signal::setDataSize);
 	if (isAnalog())
@@ -485,6 +488,14 @@ bool Signal::isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const
 	}
 
 	return false;
+}
+
+void Signal::setReadOnly(bool value)
+{
+	for (auto property : properties())
+	{
+		property->setReadOnly(value);
+	}
 }
 
 

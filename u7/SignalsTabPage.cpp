@@ -1091,7 +1091,7 @@ void SignalsModel::addSignal()
 		signal.setDeviceStrID(deviceIdEdit->text());
 	}
 
-	SignalPropertiesDialog dlg(signal, E::SignalType(signalTypeCombo->currentIndex()), m_dataFormatInfo, m_unitInfo, false, nullptr, m_parentWindow);
+	SignalPropertiesDialog dlg(signal, m_unitInfo, false, nullptr, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
@@ -1171,7 +1171,7 @@ bool SignalsModel::editSignal(int row)
 		readOnly = true;
 	}
 
-	SignalPropertiesDialog dlg(signal, signal.type(), m_dataFormatInfo, m_unitInfo, readOnly, this, m_parentWindow);
+	SignalPropertiesDialog dlg(signal, m_unitInfo, readOnly, this, m_parentWindow);
 
 	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
 
@@ -1197,9 +1197,8 @@ bool SignalsModel::editSignals(QVector<int> ids)
 {
 	loadSignalSet(ids, false);
 
-	int readOnly = false;
+	bool readOnly = false;
 	QVector<Signal*> signalVector;
-	E::SignalType signalType = E::SignalType::Analog;
 
 	for (int i = 0; i < ids.count(); i++)
 	{
@@ -1208,14 +1207,11 @@ bool SignalsModel::editSignals(QVector<int> ids)
 		{
 			readOnly = true;
 		}
-		if (signal.type() == E::SignalType::Discrete)
-		{
-			signalType = E::SignalType::Discrete;
-		}
+
 		signalVector.append(&signal);
 	}
 
-	SignalPropertiesDialog dlg(signalVector, signalType, m_dataFormatInfo, m_unitInfo, readOnly, this, m_parentWindow);
+	SignalPropertiesDialog dlg(signalVector, m_unitInfo, readOnly, this, m_parentWindow);
 
 	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
 
