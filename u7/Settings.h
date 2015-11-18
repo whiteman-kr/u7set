@@ -1,5 +1,9 @@
 #pragma once
 
+#include <QString>
+#include <QStringList>
+#include <QPoint>
+
 class Settings
 {
 public:

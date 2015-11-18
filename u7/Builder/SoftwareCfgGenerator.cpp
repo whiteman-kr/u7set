@@ -44,13 +44,13 @@ namespace Builder
 		LOG_MESSAGE(m_log, QString(tr("Generate configuration for: %1")).
 					arg(m_software->strId()));
 
-		m_cfgXml->xmlWriter().writeStartElement("software");
+		m_cfgXml->xmlWriter().writeStartElement("Software");
 
-		m_cfgXml->xmlWriter().writeAttribute("caption", m_software->caption());
-		m_cfgXml->xmlWriter().writeAttribute("strId", m_software->strId());
-		m_cfgXml->xmlWriter().writeAttribute("type", QString("%1").arg(static_cast<int>(m_software->type())));
+		m_cfgXml->xmlWriter().writeAttribute("Caption", m_software->caption());
+		m_cfgXml->xmlWriter().writeAttribute("StrID", m_software->strId());
+		m_cfgXml->xmlWriter().writeAttribute("Type", QString("%1").arg(static_cast<int>(m_software->type())));
 
-		m_cfgXml->xmlWriter().writeEndElement();
+		m_cfgXml->xmlWriter().writeEndElement();	// </Software>
 
 		bool result = true;
 

@@ -94,13 +94,13 @@ namespace Tcp
 		FileTransferResult createFile();
 
 		void init();
-
 		void endFileDownload(FileTransferResult errorCode);
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) final;
 
 		void processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize);
 
+	protected:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
 
@@ -109,7 +109,7 @@ namespace Tcp
 
 	signals:
 		void signal_downloadFile(const QString fileName);
-		void signal_endDownloadFile(const QString fileName, FileTransferResult errorCode);
+		void signal_endFileDownload(const QString fileName, FileTransferResult errorCode, const QString md5);
 
 	public:
 		FileClient(const QString& rootFolder, const HostAddressPort& serverAddressPort);
@@ -118,6 +118,12 @@ namespace Tcp
 		void downloadFile(const QString& fileName) { emit signal_downloadFile(fileName); }
 
 		void setRootFolder(const QString& rootFolder) { m_rootFolder = rootFolder; }
+
+		virtual void processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize);
+
+		virtual void onEndFileDownload(const QString fileName, FileTransferResult errorCode, const QString md5);
+
+		bool isTransferInProgress() { return m_transferInProgress; }
 	};
 
 
@@ -137,7 +143,7 @@ namespace Tcp
 
 		void init();
 
-		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
+		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) final;
 
 		void sendFirstFilePart(const QString& fileName);
 		void sendNextFilePart();
@@ -146,6 +152,8 @@ namespace Tcp
 		FileServer(const QString& rootFolder);
 
 		virtual Server* getNewInstance() override { return new FileServer(m_rootFolder); }
+
+		virtual void processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
 	};
 
 }

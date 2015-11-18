@@ -4,31 +4,11 @@
 #include <QCryptographicHash>
 
 #include "BuildResultWriter.h"
-#include "Settings.h"
+#include "../u7/Settings.h"
 #include "../include/DbController.h"
 
 namespace Builder
 {
-
-	void BuildInfo::writeToXml(QXmlStreamWriter& xmlWriter) const
-	{
-		xmlWriter.writeStartElement("build");
-
-		xmlWriter.writeAttribute("project", project);
-
-		xmlWriter.writeAttribute("id", QString::number(id));
-		xmlWriter.writeAttribute("type", typeStr());
-
-		xmlWriter.writeAttribute("date", dateStr());
-		xmlWriter.writeAttribute("time", timeStr());
-
-		xmlWriter.writeAttribute("changeset", QString::number(changeset));
-
-		xmlWriter.writeAttribute("user", user);
-		xmlWriter.writeAttribute("workstation", workstation);
-
-		xmlWriter.writeEndElement();			// build
-	}
 
 
 	// --------------------------------------------------------------------------------------
@@ -36,9 +16,6 @@ namespace Builder
 	//	BuildFile class implementation
 	//
 	// --------------------------------------------------------------------------------------
-
-	QString BuildFile::m_separator = QDir::separator();
-
 
 	BuildFile::BuildFile(const QString& subDir, const QString& fileName)
 	{
@@ -59,7 +36,7 @@ namespace Builder
 
 		// remove head separator
 		//
-		if (result.startsWith(m_separator) == true)
+		if (result.startsWith("/") == true || result.startsWith("\\") == true)
 		{
 			result = result.remove(0, 1);
 		}
@@ -71,7 +48,7 @@ namespace Builder
 
 		// remove tail separator
 		//
-		if (result.endsWith(m_separator) == true)
+		if (result.endsWith("/") == true || result.endsWith("\\") == true)
 		{
 			result.truncate(result.length() - 1);
 		}
@@ -88,11 +65,11 @@ namespace Builder
 
 		if (subDir.isEmpty())
 		{
-			pathFileName = BuildFile::m_separator + fName;
+			pathFileName = "/" + fName;
 		}
 		else
 		{
-			pathFileName = BuildFile::m_separator + removeHeadTailSeparator(subDir) + m_separator + fName;
+			pathFileName = "/" + removeHeadTailSeparator(subDir) + "/" + fName;
 		}
 
 		return pathFileName;
@@ -245,6 +222,8 @@ namespace Builder
 
 		m_xmlWriter.writeStartDocument();
 
+		m_xmlWriter.writeStartElement("Configuration");
+
 		BuildInfo bi = buildResultWriter.buildInfo();
 
 		bi.writeToXml(m_xmlWriter);
@@ -272,24 +251,18 @@ namespace Builder
 
 	void ConfigurationXmlFile::finalize()
 	{
-		m_xmlWriter.writeStartElement("files");
+		m_xmlWriter.writeStartElement("Files");
 
-		m_xmlWriter.writeAttribute("count", QString("%1").arg(m_linkedFilesInfo.count()));
+		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_linkedFilesInfo.count()));
 
 		for(const BuildFileInfo& buildFileInfo : m_linkedFilesInfo)
 		{
-			m_xmlWriter.writeStartElement("file");
-
-			m_xmlWriter.writeAttribute("name", buildFileInfo.pathFileName);
-			m_xmlWriter.writeAttribute("size", QString("%1").arg(buildFileInfo.size));
-			m_xmlWriter.writeAttribute("md5", buildFileInfo.md5);
-
-			m_xmlWriter.writeEndElement();		// file
+			buildFileInfo.writeToXml(m_xmlWriter);
 		}
 
-		m_xmlWriter.writeEndElement();			// files
+		m_xmlWriter.writeEndElement();		// </Files>
 
-		m_xmlWriter.writeEndElement();			// build
+		m_xmlWriter.writeEndElement();		// </Configuration>
 
 		m_xmlWriter.writeEndDocument();
 	}
@@ -351,8 +324,7 @@ namespace Builder
 
 
 	BuildResultWriter::BuildResultWriter(QObject *parent) :
-		QObject(parent),
-		m_separator(QDir::separator())
+		QObject(parent)
 	{
 	}
 
@@ -393,7 +365,7 @@ namespace Builder
 		m_buildInfo.project = m_dbController->currentProject().projectName();
 		m_buildInfo.user = m_dbController->currentUser().username();
 		m_buildInfo.workstation = QHostInfo::localHostName();
-		m_buildInfo.dateTime = QDateTime::currentDateTime();
+		m_buildInfo.date = QDateTime::currentDateTime();
 
 		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.release, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
 		{
@@ -470,7 +442,6 @@ namespace Builder
 
 		addFile("", "build.log", buildLogStr);
 
-
 		writeBuildXmlFilesSection();
 
 		closeBuildXml();
@@ -483,9 +454,9 @@ namespace Builder
 
 	bool BuildResultWriter::createBuildDirectory()
 	{
-		QString appDataPath = QDir::toNativeSeparators(theSettings.buildOutputPath());
+		QString appDataPath = QDir::fromNativeSeparators(theSettings.buildOutputPath());
 
-		if (appDataPath.endsWith(m_separator) == true)
+		if (appDataPath.endsWith("/") == true)
 		{
 			appDataPath.truncate(appDataPath.length() - 1);
 		}
@@ -498,7 +469,7 @@ namespace Builder
 				.arg(m_dbController->currentProject().projectName())
 				.arg(m_buildInfo.typeStr()).arg(buildNoStr);
 
-		m_buildFullPath = appDataPath + m_separator + m_buildDirectory;
+		m_buildFullPath = appDataPath + "/" + m_buildDirectory;
 
 		if (QDir().mkpath(m_buildFullPath) == false)
 		{
@@ -577,7 +548,7 @@ namespace Builder
 
 	bool BuildResultWriter::createBuildXml()
 	{
-		m_buildXmlFile.setFileName(m_buildFullPath + m_separator + "build.xml");
+		m_buildXmlFile.setFileName(m_buildFullPath + "/build.xml");
 
 		if (m_buildXmlFile.open(QIODevice::ReadWrite | QIODevice::Text) == false)
 		{
@@ -591,8 +562,42 @@ namespace Builder
 
 		m_xmlWriter.writeStartDocument();
 
+		m_xmlWriter.writeStartElement("Build");
+
 		m_buildInfo.writeToXml(m_xmlWriter);
 
+		return true;
+	}
+
+
+	bool BuildResultWriter::writeBuildXmlFilesSection()
+	{
+		m_xmlWriter.writeStartElement("Files");
+		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_buildFiles.size()));
+
+		for(BuildFile* buildFile : m_buildFiles)
+		{
+			if (buildFile == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			buildFile->getInfo().writeToXml(m_xmlWriter);
+		}
+
+		m_xmlWriter.writeEndElement();			// </Files>
+
+		return true;
+	}
+
+
+	bool BuildResultWriter::closeBuildXml()
+	{
+		m_xmlWriter.writeEndElement();			// </Build>
+		m_xmlWriter.writeEndDocument();
+
+		m_buildXmlFile.close();
 		return true;
 	}
 
@@ -628,44 +633,6 @@ namespace Builder
 		m_cfgFiles.clear();
 
 		return result;
-	}
-
-
-	bool BuildResultWriter::writeBuildXmlFilesSection()
-	{
-		m_xmlWriter.writeStartElement("files");
-		m_xmlWriter.writeAttribute("count", QString("%1").arg(m_buildFiles.size()));
-
-		for(BuildFile* buildFile : m_buildFiles)
-		{
-			if (buildFile == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			m_xmlWriter.writeStartElement("file");
-
-			m_xmlWriter.writeAttribute("name", buildFile->pathFileName());
-			m_xmlWriter.writeAttribute("size", QString("%1").arg(buildFile->size()));
-			m_xmlWriter.writeAttribute("md5", buildFile->md5());
-
-			m_xmlWriter.writeEndElement();		// file
-		}
-
-		m_xmlWriter.writeEndElement();			// files
-
-		return true;
-	}
-
-
-	bool BuildResultWriter::closeBuildXml()
-	{
-		m_xmlWriter.writeEndElement();			// build
-		m_xmlWriter.writeEndDocument();
-
-		m_buildXmlFile.close();
-		return true;
 	}
 
 
