@@ -6,7 +6,7 @@
 
 QT += core gui
 QT += network
-QT += testlib
+QT += testlib qml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,14 +21,16 @@ SOURCES +=\
     ../lib/Tcp.cpp \
     ../lib/SocketIO.cpp \
     ../lib/TcpFileTransfer.cpp \
-    ../lib/CfgServerLoader.cpp
+    ../lib/CfgServerLoader.cpp \
+    ../lib/BuildInfo.cpp
 
 HEADERS  += TcpClientMainWindow.h \
     ../include/SimpleThread.h \
     ../include/Tcp.h \
     ../include/SocketIO.h \
     ../include/TcpFileTransfer.h \
-    ../include/CfgServerLoader.h
+    ../include/CfgServerLoader.h \
+    ../include/BuildInfo.h
 
 FORMS    += TcpClientMainWindow.ui
 

@@ -144,7 +144,8 @@ SOURCES +=\
     Connection.cpp \
     DialogConnectionsEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
-    Builder/SoftwareCfgGenerator.cpp
+    Builder/SoftwareCfgGenerator.cpp \
+    ../lib/BuildInfo.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -219,7 +220,8 @@ HEADERS  += \
     DialogConnectionsEditor.h \
     ../include/PropertyEditorDialog.h \
     ../include/DebugInstCounter.h \
-    Builder/SoftwareCfgGenerator.h
+    Builder/SoftwareCfgGenerator.h \
+    ../include/BuildInfo.h
 
 
 FORMS    += \

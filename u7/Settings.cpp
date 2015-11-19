@@ -1,6 +1,7 @@
-#include "Settings.h"
+#include "../u7/Settings.h"
 #include "QStandardPaths"
 #include "QDir"
+#include <QSettings>
 
 Settings theSettings;
 

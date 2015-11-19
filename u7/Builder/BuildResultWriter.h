@@ -9,36 +9,13 @@
 #include "../include/OutputLog.h"
 #include "../include/OrderedHash.h"
 #include "../include/DeviceObject.h"
+#include "../include/BuildInfo.h"
 
 
 class DbController;
 
 namespace Builder
 {
-	struct BuildInfo
-	{
-		QString project;
-		int id = -1;
-		bool release = false;
-		QDateTime dateTime;
-		int changeset = 0;
-		QString user;
-		QString workstation;
-
-		QString typeStr() const { return release ? "release" : "debug"; }
-		QString dateStr() const { return dateTime.toString("dd.MM.yyyy"); }
-		QString timeStr() const { return dateTime.toString("hh:mm:ss"); }
-
-		void writeToXml(QXmlStreamWriter& xmlWriter) const;
-	};
-
-	struct BuildFileInfo
-	{
-		QString pathFileName;		// path and file name from build root directory, like "/subdir/filename.xml"
-		qint64 size = 0;			// size of file
-		QString md5;				// MD5 hash of file
-	};
-
 
 	class BuildFile : public QObject
 	{
@@ -50,8 +27,6 @@ namespace Builder
 		BuildFileInfo m_info;
 
 		QFile m_file;
-
-		static QString m_separator;
 
 		void getFileInfo();
 
@@ -140,7 +115,6 @@ namespace Builder
 
 		QString m_buildDirectory;
 		QString m_buildFullPath;
-		QString m_separator;
 
 		QFile m_buildXmlFile;
 		QXmlStreamWriter m_xmlWriter;

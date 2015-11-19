@@ -414,6 +414,7 @@ public:
 
 	bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const;
 
+	void setReadOnly(bool value);
 	static std::shared_ptr<UnitList> m_unitList;
 
 	friend class DbWorker;

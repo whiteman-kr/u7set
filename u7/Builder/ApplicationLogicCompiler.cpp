@@ -2215,7 +2215,12 @@ namespace Builder
 		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = inPin.afbOperandIndex();
 
-		LogicAfbSignal afbSignal = appFb.getAfbSignalByIndex(fbParamNo);
+		LogicAfbSignal afbSignal;
+
+		if (appFb.getAfbSignalByIndex(fbParamNo, &afbSignal) == false)
+		{
+			return false;
+		}
 
 		if (afbSignal.isAnalog())
 		{
@@ -2402,7 +2407,12 @@ namespace Builder
 		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = outPin.afbOperandIndex();
 
-		LogicAfbSignal afbSignal = appFb.getAfbSignalByIndex(fbParamNo);
+		LogicAfbSignal afbSignal;
+
+		if (appFb.getAfbSignalByIndex(fbParamNo, &afbSignal) == false)
+		{
+			return false;
+		}
 
 		if (afbSignal.isAnalog())
 		{
@@ -4146,29 +4156,36 @@ namespace Builder
 	}
 
 
-	LogicAfbParam AppFb::getAfbParamByIndex(int index) const
+	bool AppFb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
 	{
 		for(LogicAfbParam param : afb().params())
 		{
 			if (param.operandIndex() == index)
 			{
-				return param;
+				*afbParam = param;
+				return true;
 			}
 		}
 
-		assert(false);			// bad param index
+		LOG_ERROR(m_log, QString(tr("Not found parameter with opIndex = %1 int FB %2")).arg(index).arg(caption()));
 
-		return LogicAfbParam();
+		return false;
 	}
 
 
-	LogicAfbSignal AppFb::getAfbSignalByIndex(int index) const
+	bool AppFb::getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const
 	{
+		if (afbSignal == nullptr)
+		{
+			return false;
+		}
+
 		for(LogicAfbSignal input : afb().inputSignals())
 		{
 			if (input.operandIndex() == index)
 			{
-				return input;
+				*afbSignal = input;
+				return true;
 			}
 		}
 
@@ -4176,13 +4193,14 @@ namespace Builder
 		{
 			if (output.operandIndex() == index)
 			{
-				return output;
+				*afbSignal = output;
+				return true;
 			}
 		}
 
-		assert(false);			// bad signal index
+		LOG_ERROR(m_log, QString(tr("Not found signal with opIndex = %1 int FB %2")).arg(index).arg(caption()));
 
-		return LogicAfbSignal();
+		return false;
 	}
 
 
@@ -4379,7 +4397,7 @@ namespace Builder
 	}
 
 
-	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, int dataSize, const AppItem *appItem, const QString& strID) :
+	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem *appItem, const QString& strID) :
 		m_appItem(appItem),
 		m_guid(guid)
 	{
@@ -4387,6 +4405,7 @@ namespace Builder
 		//
 		setStrID(strID);
 		setType(signalType);
+		setDataFormat(dataFormat);
 		setDataSize(dataSize);
 		setInOutType(E::SignalInOutType::Internal);
 
@@ -4486,9 +4505,7 @@ namespace Builder
 
 		E::SignalType signalType = E::SignalType::Discrete;
 
-		Afb::AfbSignalType st = s.type();
-
-		switch(st)
+		switch(s.type())			// Afb::AfbSignalType
 		{
 		case Afb::AfbSignalType::Analog:
 			signalType = E::SignalType::Analog;
@@ -4496,6 +4513,27 @@ namespace Builder
 
 		case Afb::AfbSignalType::Discrete:
 			signalType = E::SignalType::Discrete;
+			break;
+
+		default:
+			assert(false);
+			return false;
+		}
+
+		E::DataFormat dataFormat = E::DataFormat::SignedInt;
+
+		switch(s.dataFormat())		// Afb::AfbDataFormat
+		{
+		case Afb::AfbDataFormat::Float:
+			dataFormat = E::DataFormat::Float;
+			break;
+
+		case Afb::AfbDataFormat::UnsignedInt:
+			dataFormat = E::DataFormat::UnsignedInt;
+			break;
+
+		case Afb::AfbDataFormat::SignedInt:
+			dataFormat = E::DataFormat::SignedInt;
 			break;
 
 		default:
@@ -4519,7 +4557,7 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(outPinGuid, signalType, s.size(), appFb, strID);
+			appSignal = new AppSignal(outPinGuid, signalType, dataFormat, s.size(), appFb, strID);
 
 			appSignal->setAcquire(false);			// non-registered signal
 

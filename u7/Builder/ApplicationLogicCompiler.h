@@ -333,8 +333,8 @@ namespace Builder
 		void setInstance(quint16 instance) { m_instance = instance; }
 		void setNumber(int number) { m_number = number; }
 
-		LogicAfbParam getAfbParamByIndex(int index) const;
-		LogicAfbSignal getAfbSignalByIndex(int index) const;
+		bool getAfbParamByIndex(int index, LogicAfbParam* afbParam) const;
+		bool getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const;
 
 		bool calculateFbParamValues(ModuleLogicCompiler *compiler);			// implemented in file FbParamCalculation.cpp
 
@@ -372,7 +372,7 @@ namespace Builder
 
 	public:
 		AppSignal(const Signal* signal, const AppItem* appItem);
-		AppSignal(const QUuid& guid, E::SignalType signalType, int dataSize, const AppItem* appItem, const QString& strID);
+		AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem* appItem, const QString& strID);
 
 		const AppItem &appItem() const;
 

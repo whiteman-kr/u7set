@@ -9,8 +9,8 @@ SUBDIRS += qtservice \
     GetGitProjectVersion \
     BaseService \
     ServiceControlManager \
-    UdpClient \
-    UdpServer \
+	UdpClient \
+	UdpServer \
     Metrology \
     ConfigurationService \
     ArchivingService \
