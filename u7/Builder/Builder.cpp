@@ -271,7 +271,7 @@ namespace Builder
 			//
 			// Generate SCADA software configurations
 			//
-			generateSoftwareConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &buildWriter);
+			generateSoftwareConfiguration(&db, &equipmentSet, &signalSet, &buildWriter);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -648,7 +648,7 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::generateSoftwareConfiguration(DbController *db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, BuildResultWriter* buildResultWriter)
+	bool BuildWorkerThread::generateSoftwareConfiguration(DbController *db, Hardware::EquipmentSet* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter)
 	{
 		bool result = true;
 
@@ -656,8 +656,8 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("SCADA sofware configuration generation...")))
 
-		equipmentWalker(deviceRoot,
-			[&db, &signalSet, &buildResultWriter, &result](Hardware::DeviceObject* currentDevice)
+		equipmentWalker(equipment->root(),
+			[&db, &signalSet, &buildResultWriter, equipment, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (currentDevice->isSoftware() == false)
 				{
@@ -672,7 +672,7 @@ namespace Builder
 					return;
 				}
 
-				SoftwareCfgGenerator softwareCfgGenerator(db, software, signalSet, buildResultWriter);
+				SoftwareCfgGenerator softwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 
 				result &= softwareCfgGenerator.run();
 			}

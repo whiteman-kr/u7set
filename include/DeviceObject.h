@@ -642,6 +642,9 @@ namespace Hardware
 		DeviceObject* deviceObject(const QString& strId);
 		std::shared_ptr<DeviceObject> deviceObjectSharedPointer(const QString& strId);
 
+		DeviceRoot* root();
+		const DeviceRoot* root() const;
+
 	private:
 		void addDeviceChildrenToHashTable(std::shared_ptr<DeviceObject> parent);
 

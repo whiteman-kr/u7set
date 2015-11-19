@@ -90,7 +90,7 @@ namespace Builder
 
 		// Generate SCADA software configurations
 		//
-		bool generateSoftwareConfiguration(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, BuildResultWriter* buildResultWriter);
+		bool generateSoftwareConfiguration(DbController* db, Hardware::EquipmentSet* equipment, SignalSet* signalSet, BuildResultWriter* buildResultWriter);
 
 		// What's the next compilation task?
 		//
