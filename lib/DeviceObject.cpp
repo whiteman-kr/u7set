@@ -2353,6 +2353,15 @@ R"DELIM({
 		}
 	}
 
+	DeviceRoot* EquipmentSet::root()
+	{
+		return dynamic_cast<DeviceRoot*>(m_root.get());
+	}
+
+	const DeviceRoot* EquipmentSet::root() const
+	{
+		return dynamic_cast<const DeviceRoot*>(m_root.get());
+	}
 
 	void EquipmentSet::addDeviceChildrenToHashTable(std::shared_ptr<DeviceObject> parent)
 	{

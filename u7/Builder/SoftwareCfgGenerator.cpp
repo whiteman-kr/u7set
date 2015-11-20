@@ -2,10 +2,11 @@
 
 namespace Builder
 {
-	SoftwareCfgGenerator::SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, BuildResultWriter* buildResultWriter) :
+	SoftwareCfgGenerator::SoftwareCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter) :
 		m_dbController(db),
 		m_software(software),
 		m_signalSet(signalSet),
+		m_equipment(equipment),
 		m_buildResultWriter(buildResultWriter)
 	{
 	}
@@ -16,6 +17,7 @@ namespace Builder
 		if (m_dbController == nullptr ||
 			m_software == nullptr ||
 			m_signalSet == nullptr ||
+			m_equipment == nullptr ||
 			m_buildResultWriter == nullptr)
 		{
 			assert(false);
@@ -305,7 +307,7 @@ namespace Builder
 				equipmentWriter.writeEndElement();
 			});
 
-			equipmentWriter.writeEndDocument();
+			//equipmentWriter.writeEndDocument();
 
 			m_buildResultWriter->addFile(m_subDir, "equipment.xml", data);
 
@@ -319,8 +321,23 @@ namespace Builder
 	{
 		bool result = true;
 
+		if (m_software == nullptr ||
+			m_software->type() != E::SoftwareType::Monitor ||
+			m_equipment == nullptr ||
+			m_cfgXml == nullptr ||
+			m_buildResultWriter == nullptr)
+		{
+			assert(m_software);
+			assert(m_software->type() == E::SoftwareType::Monitor);
+			assert(m_equipment);
+			assert(m_cfgXml);
+			assert(m_buildResultWriter);
+			return false;
+		}
+
 		// write XML via m_cfgXml->xmlWriter()
 		//
+		result &= writeMonitorSettings();
 
 		// write any files via m_buildResultWriter->addFile(...)
 		//
@@ -329,6 +346,106 @@ namespace Builder
 		//
 
 		return result;
+	}
+
+	bool SoftwareCfgGenerator::writeMonitorSettings()
+	{
+		// write XML via m_cfgXml->xmlWriter()
+		//
+		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
+
+		{
+			xmlWriter.writeStartElement("Settings");
+			std::shared_ptr<int*> writeEndSettings(nullptr, [&xmlWriter](void*)
+				{
+					xmlWriter.writeEndElement();
+				});
+
+			// --
+			//
+			QVariant vDataAquisistionService = m_software->propertyValue("DataAquisitionServiceStrID");
+
+			if (vDataAquisistionService.isValid() == false ||
+				vDataAquisistionService.type() != QVariant::String)
+			{
+				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceStrID is invalid").arg(m_software->strId());
+				m_log->writeError(errorStr);
+				writeErrorSection(xmlWriter, errorStr);
+				return false;
+			}
+
+			QString dasStrId = vDataAquisistionService.toString().trimmed();
+
+			if (dasStrId.isEmpty() == true)
+			{
+				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceStrID is empty").arg(m_software->strId());
+
+				m_log->writeError(errorStr);
+				writeErrorSection(xmlWriter, errorStr);
+				return false;
+			}
+
+			Hardware::DeviceObject* dasObject = m_equipment->deviceObject(dasStrId);
+			Hardware::Software* dasSoftwareObject = dynamic_cast<Hardware::Software*>(dasObject);
+
+			if (dasObject == nullptr)
+			{
+				QString errorStr = tr("Monitor configuration error %1, DataAquisitionServiceStrID %2 is not found")
+								   .arg(m_software->strId())
+								   .arg(dasStrId);
+
+				m_log->writeError(errorStr);
+				writeErrorSection(xmlWriter, errorStr);
+				return false;
+			}
+
+			if (dasObject->isSoftware() == false ||
+				dasSoftwareObject == nullptr ||
+				dasSoftwareObject->type() != E::SoftwareType::DataAcquisitionService)
+			{
+				QString errorStr = tr("Monitor configuration error %1, DataAquisitionServiceStrID %2 is not software")
+								  .arg(m_software->strId())
+								  .arg(dasStrId);
+
+				m_log->writeError(errorStr);
+				writeErrorSection(xmlWriter, errorStr);
+				return false;
+			}
+
+			// Get ip addresses and ports, write them to configurations
+			//
+			{
+				xmlWriter.writeStartElement("DataAquisitionService");
+				std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
+					{
+						xmlWriter.writeEndElement();
+					});
+
+				// --
+				//
+				xmlWriter.writeAttribute("StrID", dasSoftwareObject->strId());
+
+				xmlWriter.writeStartElement("Connection1");
+				xmlWriter.writeAttribute("ip", "127.0.0.1");
+				xmlWriter.writeAttribute("port", QString::number(PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
+				xmlWriter.writeEndElement();		// Connection1"
+
+				xmlWriter.writeStartElement("Connection2");
+				xmlWriter.writeAttribute("ip", "127.0.0.1");
+				xmlWriter.writeAttribute("port", QString::number(PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
+				xmlWriter.writeEndElement();		// Connection2"
+			}	// DataAquisitionService
+
+
+		} // Settings
+
+
+		return true;
+	}
+
+	void SoftwareCfgGenerator::writeErrorSection(QXmlStreamWriter& xmlWriter, QString error)
+	{
+		xmlWriter.writeTextElement("Error", error);
 	}
 }
 
