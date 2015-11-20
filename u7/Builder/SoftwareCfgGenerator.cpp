@@ -307,6 +307,8 @@ namespace Builder
 				equipmentWriter.writeEndElement();
 			});
 
+			//equipmentWriter.writeEndDocument();
+
 			m_buildResultWriter->addFile(m_subDir, "equipment.xml", data);
 
 			m_cfgXml->addLinkToFile(m_subDir, "equipment.xml");
@@ -432,11 +434,11 @@ namespace Builder
 				xmlWriter.writeAttribute("ip", "127.0.0.1");
 				xmlWriter.writeAttribute("port", QString::number(PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
 				xmlWriter.writeEndElement();		// Connection2"
-			}
-			xmlWriter.writeEndElement();		// DataAquisitionService
+			}	// DataAquisitionService
 
-		}
-		xmlWriter.writeEndElement();			// Settings
+
+		} // Settings
+
 
 		return true;
 	}
