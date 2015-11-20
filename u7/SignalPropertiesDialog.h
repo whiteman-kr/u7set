@@ -15,7 +15,9 @@ class QtTreePropertyBrowser;
 class SignalsModel;
 enum class SignalType;
 
-//void editSignals(std::vector<QString> signalId, DbController* dbController, QWidget *parent = 0);
+
+void editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget *parent = 0);
+
 
 class SignalPropertiesDialog : public QDialog
 {
