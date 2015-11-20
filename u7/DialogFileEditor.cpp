@@ -78,32 +78,6 @@ void DialogFileEditor::on_DialogFileEditor_finished(int result)
 
 }
 
-bool DialogFileEditor::askForSaveChanged()
-{
-	if (m_modified == false)
-	{
-		return true;
-	}
-
-	QMessageBox::StandardButton result = QMessageBox::warning(this, "Subsystem List Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-
-	if (result == QMessageBox::Yes)
-	{
-		if (saveChanges() == false)
-		{
-			return false;
-		}
-		return true;
-	}
-
-	if (result == QMessageBox::No)
-	{
-		return true;
-	}
-
-	return false;
-}
-
 bool DialogFileEditor::saveChanges()
 {
 
@@ -120,14 +94,55 @@ bool DialogFileEditor::saveChanges()
 
 void DialogFileEditor::closeEvent(QCloseEvent* e)
 {
-	if (askForSaveChanged() == true)
-	{
-		e->accept();
-	}
-	else
-	{
-		e->ignore();
-	}
+    if (m_modified == true)
+    {
+        QMessageBox::StandardButton result = QMessageBox::warning(this, "Subsystem List Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+        if (result == QMessageBox::Yes)
+        {
+            if (saveChanges() == true)
+            {
+                setResult(QDialog::Accepted);
+            }
+
+            e->accept();
+            return;
+        }
+
+        if (result == QMessageBox::Cancel)
+        {
+            e->ignore();
+            return;
+        }
+    }
+
+    e->accept();
+    return;
+}
+
+void DialogFileEditor::reject()
+{
+    if (m_modified == true)
+    {
+        QMessageBox::StandardButton result = QMessageBox::warning(this, "Subsystem List Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+        if (result == QMessageBox::Yes)
+        {
+            if (saveChanges() == true)
+            {
+                accept();
+                return;
+            }
+        }
+
+        if (result == QMessageBox::Cancel)
+        {
+            return;
+        }
+    }
+
+    QDialog::reject();
+    return;
 }
 
 void DialogFileEditor::on_btnOk_clicked()
@@ -146,10 +161,7 @@ void DialogFileEditor::on_btnOk_clicked()
 
 void DialogFileEditor::on_btnCancel_clicked()
 {
-	if (askForSaveChanged() == true)
-	{
-		reject();
-	}
+    reject();
 	return;
 }
 
