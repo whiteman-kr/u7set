@@ -12,12 +12,9 @@ SourceStatusWidget::SourceStatusWidget(Source &source, PacketBufferTableModel *p
 	setWindowTitle(source.fullAddress());
 	connect(this, &QWidget::destroyed, &source, &Source::removeDependentWidget);
 
-	QCheckBox* cb = new QCheckBox("Change byte order", this);
-	connect(cb, &QCheckBox::toggled, packetBufferModel, &PacketBufferTableModel::setNeedToSwapBytes);
+	QCheckBox* cb = new QCheckBox("Convert from BigEndian", this);
 	connect(cb, &QCheckBox::toggled, signalTableModel, &SignalTableModel::setNeedToSwapBytes);
 	cb->setChecked(true);
-	QVBoxLayout* vl = new QVBoxLayout;
-	vl->addWidget(cb);
 
 	QTableView* bufferTable = new QTableView(this);
 	bufferTable->setModel(packetBufferModel);
@@ -28,10 +25,12 @@ SourceStatusWidget::SourceStatusWidget(Source &source, PacketBufferTableModel *p
 	signalTable->resizeColumnsToContents();
 
 	QHBoxLayout* hl = new QHBoxLayout;
+	QVBoxLayout* vl = new QVBoxLayout;
 	hl->addWidget(bufferTable);
-	hl->addWidget(signalTable);
-	vl->addLayout(hl);
-	setLayout(vl);
+	vl->addWidget(cb);
+	vl->addWidget(signalTable);
+	hl->addLayout(vl);
+	setLayout(hl);
 	resize(640, 480);
 	show();
 	setAttribute(Qt::WA_DeleteOnClose, true);

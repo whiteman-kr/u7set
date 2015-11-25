@@ -92,7 +92,7 @@ void TestClient::sendRandomRequest()
 }
 
 
-void TestClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+void TestClient::processReply(quint32 /*requestID*/, const char* /*replyData*/, quint32 /*replyDataSize*/)
 {
 	sendRandomRequest();
 }

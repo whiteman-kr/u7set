@@ -36,7 +36,7 @@ void DataServiceMainFunctionWorker::initListeningPorts()
 void DataServiceMainFunctionWorker::readConfigurationFiles()
 {
 	SerializeEquipmentFromXml(m_deviceRoot);
-	SerializeSignalsFromXml(m_unitInfo, m_signalSet);
+	SerializeSignalsFromXml("appSignals.xml", m_unitInfo, m_signalSet);
 }
 
 void DataServiceMainFunctionWorker::runUdpThreads()

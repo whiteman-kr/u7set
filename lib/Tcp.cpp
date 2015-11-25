@@ -469,7 +469,7 @@ namespace Tcp
 			return;
 		}
 
-		if (written < sizeof(header))
+		if (written < static_cast<qint64>(sizeof(header)))
 		{
 			assert(false);
 			return;
@@ -522,7 +522,7 @@ namespace Tcp
 			return;
 		}
 
-		if (written < sizeof(header))
+		if (written < static_cast<qint64>(sizeof(header)))
 		{
 			assert(false);
 			return;
@@ -998,7 +998,7 @@ namespace Tcp
 			return;
 		}
 
-		if (written < sizeof(m_sentRequestHeader))
+		if (written < static_cast<qint64>(sizeof(m_sentRequestHeader)))
 		{
 			assert(false);
 			return;

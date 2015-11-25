@@ -598,10 +598,10 @@ void Address16::fromString(QString str)
 }
 
 
-void SerializeSignalsFromXml(UnitList& unitInfo, SignalSet& signalSet)
+void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet)
 {
 	QXmlStreamReader applicationSignalsReader;
-	QFile file("applicationSignals.xml");
+	QFile file(filePath);
 
 	if (file.open(QIODevice::ReadOnly))
 	{
