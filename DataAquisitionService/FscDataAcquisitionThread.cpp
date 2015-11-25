@@ -1,7 +1,7 @@
 #include "FscDataAcquisitionThread.h"
 
 
-FscDataAcquisitionSocket::FscDataAcquisitionSocket(HostAddressPort fscDataAcquisitionAddressPort)
+FscDataAcquisitionSocket::FscDataAcquisitionSocket(HostAddressPort /*fscDataAcquisitionAddressPort*/)
 {/*
 		udpSocket->bind(QHostAddress::LocalHost, 7755);
 	connect(udpSocket, SIGNAL(readyRead()),
