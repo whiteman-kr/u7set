@@ -363,52 +363,69 @@ namespace Builder
 
 			// --
 			//
-			QVariant vDataAquisistionService = m_software->propertyValue("DataAquisitionServiceStrID");
+			bool ok = true;
 
-			if (vDataAquisistionService.isValid() == false ||
-				vDataAquisistionService.type() != QVariant::String)
+			// DataAquisitionServiceStrID1
+			//
+			QString dacStrID1 = getObjectProperty<QString>(m_software->strId(), "DataAquisitionServiceStrID1", &ok).trimmed();
+			if (ok == false)
 			{
-				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceStrID is invalid").arg(m_software->strId());
-				m_log->writeError(errorStr);
-				writeErrorSection(xmlWriter, errorStr);
 				return false;
 			}
 
-			QString dasStrId = vDataAquisistionService.toString().trimmed();
-
-			if (dasStrId.isEmpty() == true)
+			if (dacStrID1.isEmpty() == true)
 			{
-				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceStrID is empty").arg(m_software->strId());
-
-				m_log->writeError(errorStr);
-				writeErrorSection(xmlWriter, errorStr);
-				return false;
-			}
-
-			Hardware::DeviceObject* dasObject = m_equipment->deviceObject(dasStrId);
-			Hardware::Software* dasSoftwareObject = dynamic_cast<Hardware::Software*>(dasObject);
-
-			if (dasObject == nullptr)
-			{
-				QString errorStr = tr("Monitor configuration error %1, DataAquisitionServiceStrID %2 is not found")
-								   .arg(m_software->strId())
-								   .arg(dasStrId);
+				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceStrID1 is invalid")
+								   .arg(m_software->strId());
 
 				m_log->writeError(errorStr);
 				writeErrorSection(xmlWriter, errorStr);
 				return false;
 			}
 
-			if (dasObject->isSoftware() == false ||
-				dasSoftwareObject == nullptr ||
-				dasSoftwareObject->type() != E::SoftwareType::DataAcquisitionService)
+			// DataAquisitionServiceStrID2
+			//
+			QString dacStrID2 = getObjectProperty<QString>(m_software->strId(), "DataAquisitionServiceStrID2", &ok).trimmed();
+			if (ok == false)
 			{
-				QString errorStr = tr("Monitor configuration error %1, DataAquisitionServiceStrID %2 is not software")
-								  .arg(m_software->strId())
-								  .arg(dasStrId);
+				return false;
+			}
+
+			if (dacStrID2.isEmpty() == true)
+			{
+				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceStrID2 is invalid")
+								   .arg(m_software->strId());
 
 				m_log->writeError(errorStr);
 				writeErrorSection(xmlWriter, errorStr);
+				return false;
+			}
+
+			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
+			//
+			QString clientRequestIP1 = getObjectProperty<QString>(dacStrID1, "ClientRequestIP", &ok).trimmed();
+			if (ok == false)
+			{
+				return false;
+			}
+
+			QString clientRequestPort1 = getObjectProperty<QString>(dacStrID1, "ClientRequestPort", &ok).trimmed();
+			if (ok == false)
+			{
+				return false;
+			}
+
+			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
+			//
+			QString clientRequestIP2 = getObjectProperty<QString>(dacStrID2, "ClientRequestIP", &ok).trimmed();
+			if (ok == false)
+			{
+				return false;
+			}
+
+			QString clientRequestPort2 = getObjectProperty<QString>(dacStrID2, "ClientRequestPort", &ok).trimmed();
+			if (ok == false)
+			{
 				return false;
 			}
 
@@ -423,18 +440,102 @@ namespace Builder
 
 				// --
 				//
-				xmlWriter.writeAttribute("StrID", dasSoftwareObject->strId());
+				xmlWriter.writeAttribute("StrID1", dacStrID1);
+				xmlWriter.writeAttribute("StrID2", dacStrID2);
 
-				xmlWriter.writeStartElement("Connection1");
-				xmlWriter.writeAttribute("ip", "127.0.0.1");
-				xmlWriter.writeAttribute("port", QString::number(PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
-				xmlWriter.writeEndElement();		// Connection1"
-
-				xmlWriter.writeStartElement("Connection2");
-				xmlWriter.writeAttribute("ip", "127.0.0.1");
-				xmlWriter.writeAttribute("port", QString::number(PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST));
-				xmlWriter.writeEndElement();		// Connection2"
+				xmlWriter.writeAttribute("ip1", clientRequestIP1);
+				xmlWriter.writeAttribute("port1", clientRequestPort1);
+				xmlWriter.writeAttribute("ip2", clientRequestIP2);
+				xmlWriter.writeAttribute("port2", clientRequestPort2);
 			}	// DataAquisitionService
+
+
+			// Archive Service Settings
+			//
+
+//			// ArchiveServiceStrID1
+//			//
+//			QString asStrID1 = getObjectProperty<QString>(m_software->strId(), "ArchiveServiceStrID1", &ok).trimmed();
+//			if (ok == false)
+//			{
+//				return false;
+//			}
+
+//			if (asStrID1.isEmpty() == true)
+//			{
+//				QString errorStr = tr("Monitor configuration error %1, property ArchiveServiceStrID1 is invalid")
+//								   .arg(m_software->strId());
+
+//				m_log->writeError(errorStr);
+//				writeErrorSection(xmlWriter, errorStr);
+//				return false;
+//			}
+
+//			// ArchiveServiceStrID2
+//			//
+//			QString asStrID2 = getObjectProperty<QString>(m_software->strId(), "ArchiveServiceStrID2", &ok).trimmed();
+//			if (ok == false)
+//			{
+//				return false;
+//			}
+
+//			if (asStrID2.isEmpty() == true)
+//			{
+//				QString errorStr = tr("Monitor configuration error %1, property ArchiveServiceStrID2 is invalid")
+//								   .arg(m_software->strId());
+
+//				m_log->writeError(errorStr);
+//				writeErrorSection(xmlWriter, errorStr);
+//				return false;
+//			}
+
+//			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
+//			//
+//			QString clientRequestIP1 = getObjectProperty<QString>(dacStrID1, "ClientRequestIP", &ok).trimmed();
+//			if (ok == false)
+//			{
+//				return false;
+//			}
+
+//			QString clientRequestPort1 = getObjectProperty<QString>(dacStrID1, "ClientRequestPort", &ok).trimmed();
+//			if (ok == false)
+//			{
+//				return false;
+//			}
+
+//			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
+//			//
+//			QString clientRequestIP2 = getObjectProperty<QString>(dacStrID2, "ClientRequestIP", &ok).trimmed();
+//			if (ok == false)
+//			{
+//				return false;
+//			}
+
+//			QString clientRequestPort2 = getObjectProperty<QString>(dacStrID2, "ClientRequestPort", &ok).trimmed();
+//			if (ok == false)
+//			{
+//				return false;
+//			}
+
+//			// Get ip addresses and ports, write them to configurations
+//			//
+//			{
+//				xmlWriter.writeStartElement("DataAquisitionService");
+//				std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
+//					{
+//						xmlWriter.writeEndElement();
+//					});
+
+//				// --
+//				//
+//				xmlWriter.writeAttribute("StrID1", dacStrID1);
+//				xmlWriter.writeAttribute("StrID2", dacStrID2);
+
+//				xmlWriter.writeAttribute("ip1", clientRequestIP1);
+//				xmlWriter.writeAttribute("port1", clientRequestPort1);
+//				xmlWriter.writeAttribute("ip2", clientRequestIP2);
+//				xmlWriter.writeAttribute("port2", clientRequestPort2);
+//			}	// DataAquisitionService
 
 
 		} // Settings

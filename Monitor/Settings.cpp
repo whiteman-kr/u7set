@@ -6,8 +6,11 @@
 Settings theSettings;
 
 Settings::Settings() :
-	m_configuratorIpAddress("127.0.0.1"),
-	m_configuratorPort(PORT_CONFIG_SERVICE)
+	m_instanceStrId("SYSTEM_RACKID_WS00_MONITOR"),
+	m_configuratorIpAddress1("127.0.0.1"),
+	m_configuratorPort1(PORT_CONFIG_SERVICE),
+	m_configuratorIpAddress2("127.0.0.1"),
+	m_configuratorPort2(PORT_CONFIG_SERVICE)
 {
 }
 
@@ -15,14 +18,34 @@ Settings::~Settings()
 {
 }
 
+Settings& Settings::operator = (const Settings& src)
+{
+	if (this != &src)
+	{
+		setInstanceStrId(src.instanceStrId());
+
+		setConfiguratorIpAddress1(src.configuratorIpAddress1());
+		setConfiguratorPort1(src.configuratorPort1());
+
+		setConfiguratorIpAddress2(src.configuratorIpAddress2());
+		setConfiguratorPort1(src.configuratorPort2());
+	}
+
+	return *this;
+}
+
 void Settings::write() const
 {
+	QMutexLocker l(&m_mutex);
+
 	writeUserScope();
 	writeSystemScope();
 }
 
 void Settings::load()
 {
+	QMutexLocker l(&m_mutex);
+
 	loadUserScope();
 	loadSystemScope();
 }
@@ -52,8 +75,13 @@ void Settings::writeSystemScope() const
 {
 	QSettings s;
 
-	s.setValue("m_configuratorIpAddress", m_configuratorIpAddress);
-	s.setValue("m_configuratorPort", m_configuratorPort);
+	s.setValue("m_instanceStrId", m_instanceStrId);
+
+	s.setValue("m_configuratorIpAddress1", m_configuratorIpAddress1);
+	s.setValue("m_configuratorPort1", m_configuratorPort1);
+
+	s.setValue("m_configuratorIpAddress2", m_configuratorIpAddress2);
+	s.setValue("m_configuratorPort2", m_configuratorPort2);
 
 	return;
 }
@@ -61,30 +89,73 @@ void Settings::loadSystemScope()
 {
 	QSettings s;
 
-	m_configuratorIpAddress = s.value("m_configuratorIpAddress", "127.0.0.1").toString();
-	m_configuratorPort = s.value("m_configuratorPort", PORT_CONFIG_SERVICE).toInt();
+	m_instanceStrId = s.value("m_instanceStrId", "SYSTEM_RACKID_WS00_MONITOR").toString();
+
+	m_configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
+	m_configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIG_SERVICE).toInt();
+
+	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
+	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIG_SERVICE).toInt();
 
 	return;
 }
 
-QString Settings::configuratorIpAddress() const
+QString Settings::instanceStrId() const
 {
-	return m_configuratorIpAddress;
+	QMutexLocker l(&m_mutex);
+	return m_instanceStrId;
 }
 
-void Settings::setConfiguratorIpAddress(QString configuratorIpAddress)
+void Settings::setInstanceStrId(QString value)
 {
-	m_configuratorIpAddress = configuratorIpAddress;
+	QMutexLocker l(&m_mutex);
+	m_instanceStrId = value;
 }
 
-int Settings::configuratorPort() const
+QString Settings::configuratorIpAddress1() const
 {
-	return m_configuratorPort;
+	QMutexLocker l(&m_mutex);
+	return m_configuratorIpAddress1;
 }
 
-void Settings::setConfiguratorPort(int configuratorPort)
+void Settings::setConfiguratorIpAddress1(QString configuratorIpAddress)
 {
-	m_configuratorPort = configuratorPort;
+	QMutexLocker l(&m_mutex);
+	m_configuratorIpAddress1 = configuratorIpAddress;
 }
 
+int Settings::configuratorPort1() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_configuratorPort1;
+}
 
+void Settings::setConfiguratorPort1(int configuratorPort)
+{
+	QMutexLocker l(&m_mutex);
+	m_configuratorPort1 = configuratorPort;
+}
+
+QString Settings::configuratorIpAddress2() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_configuratorIpAddress2;
+}
+
+void Settings::setConfiguratorIpAddress2(QString configuratorIpAddress)
+{
+	QMutexLocker l(&m_mutex);
+	m_configuratorIpAddress2 = configuratorIpAddress;
+}
+
+int Settings::configuratorPort2() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_configuratorPort2;
+}
+
+void Settings::setConfiguratorPort2(int configuratorPort)
+{
+	QMutexLocker l(&m_mutex);
+	m_configuratorPort2 = configuratorPort;
+}

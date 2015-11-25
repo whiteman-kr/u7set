@@ -8,6 +8,7 @@
 #include "SchemeLayersDialog.h"
 #include "SchemeItemPropertiesDialog.h"
 #include "ChooseAfbDialog.h"
+#include "SignalPropertiesDialog.h"
 #include "../VFrame30/SchemeItemLine.h"
 #include "../VFrame30/SchemeItemRect.h"
 #include "../VFrame30/SchemeItemPath.h"
@@ -4180,12 +4181,7 @@ void EditSchemeWidget::signalsProperties(QStringList strIds)
 		return;
 	}
 
-	qDebug() << Q_FUNC_INFO;
-
-	for (auto s : strIds)
-	{
-		qDebug() << s;
-	}
+	editApplicationSignals(strIds, db(), this);
 
 	return;
 }
@@ -4538,7 +4534,6 @@ void EditSchemeWidget::onLeftKey()
 {
 	if (selectedItems().empty() == true)
 	{
-		assert(selectedItems().empty() != true);
 		return;
 	}
 
@@ -4553,7 +4548,6 @@ void EditSchemeWidget::onRightKey()
 {
 	if (selectedItems().empty() == true)
 	{
-		assert(selectedItems().empty() != true);
 		return;
 	}
 
@@ -4568,7 +4562,6 @@ void EditSchemeWidget::onUpKey()
 {
 	if (selectedItems().empty() == true)
 	{
-		assert(selectedItems().empty() != true);
 		return;
 	}
 
@@ -4583,7 +4576,6 @@ void EditSchemeWidget::onDownKey()
 {
 	if (selectedItems().empty() == true)
 	{
-		assert(selectedItems().empty() != true);
 		return;
 	}
 

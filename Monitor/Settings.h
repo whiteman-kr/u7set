@@ -1,10 +1,14 @@
 #pragma once
 
+#include <QMutex>
+
 class Settings
 {
 public:
 	Settings();
 	virtual ~Settings();
+
+	Settings& operator = (const Settings& src);
 
 	// Public methods
 	//
@@ -21,13 +25,22 @@ public:
 	// Properties
 	//
 public:
-	QString configuratorIpAddress() const;
-	void setConfiguratorIpAddress(QString configuratorIpAddress);
+	QString instanceStrId() const;
+	void setInstanceStrId(QString value);
 
-	int configuratorPort() const;
-	void setConfiguratorPort(int configuratorPort);
+	QString configuratorIpAddress1() const;
+	void setConfiguratorIpAddress1(QString configuratorIpAddress);
 
-	// Data
+	int configuratorPort1() const;
+	void setConfiguratorPort1(int configuratorPort);
+
+	QString configuratorIpAddress2() const;
+	void setConfiguratorIpAddress2(QString configuratorIpAddress);
+
+	int configuratorPort2() const;
+	void setConfiguratorPort2(int configuratorPort);
+
+	// Data	-- DO NOT FORGET TO ADD NEW MEMBERS TO ASSIGN OPERATOR
 	//
 public:
 
@@ -39,10 +52,18 @@ public:
 
 
 private:
+	mutable QMutex m_mutex;
+
+	QString m_instanceStrId;
+
 	// --
 	//
-	QString m_configuratorIpAddress;
-	int m_configuratorPort;
+	QString m_configuratorIpAddress1;
+	int m_configuratorPort1;
+
+	QString m_configuratorIpAddress2;
+	int m_configuratorPort2;
+
 };
 
 extern Settings theSettings;

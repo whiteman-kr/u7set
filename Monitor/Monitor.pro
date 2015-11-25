@@ -47,7 +47,13 @@ SOURCES += main.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
     WorkflowSchemeView.cpp \
-    WorkflowSchemeWidget.cpp
+    WorkflowSchemeWidget.cpp \
+    ../lib/CfgServerLoader.cpp \
+    ../lib/TcpFileTransfer.cpp \
+    ../lib/Tcp.cpp \
+    ../lib/BuildInfo.cpp \
+    ../lib/SimpleThread.cpp \
+    MonitorConfigThread.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -57,7 +63,13 @@ HEADERS  += \
     ../include/SocketIO.h \
     DialogSettings.h \
     WorkflowSchemeView.h \
-    WorkflowSchemeWidget.h
+    WorkflowSchemeWidget.h \
+    ../include/Tcp.h \
+    ../include/TcpFileTransfer.h \
+    ../include/CfgServerLoader.h \
+    ../include/BuildInfo.h \
+    ../include/SimpleThread.h \
+    MonitorConfigThread.h
 
 FORMS    += \
     DialogSettings.ui
