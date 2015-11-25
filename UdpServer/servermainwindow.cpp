@@ -4,7 +4,7 @@
 namespace Tcp
 {
 
-	void MyServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
+	void MyServer::processRequest(quint32 /*requestID*/, const char* /*requestData*/, quint32 /*requestDataSize*/)
 	{
 		QByteArray reply;
 
