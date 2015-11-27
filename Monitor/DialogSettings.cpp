@@ -29,50 +29,106 @@ void DialogSettings::setSettings(const Settings& value)
 {
 	m_settings = value;
 
-	ui->editConfiguratorIpAddress->setText(m_settings.configuratorIpAddress());
-	ui->editConfiguratorPort->setText(QString().setNum(m_settings.configuratorPort()));
+	ui->instanceStrId->setText(m_settings.instanceStrId());
+
+	ui->editConfiguratorIpAddress1->setText(m_settings.configuratorIpAddress1());
+	ui->editConfiguratorPort1->setText(QString().setNum(m_settings.configuratorPort1()));
+
+	ui->editConfiguratorIpAddress2->setText(m_settings.configuratorIpAddress2());
+	ui->editConfiguratorPort2->setText(QString().setNum(m_settings.configuratorPort2()));
 
 	return;
 }
 
 void DialogSettings::on_ok_clicked()
 {
-	// Check ip address
+	// Check Instance StrID
 	//
-	QString configuratorIpAddress = ui->editConfiguratorIpAddress->text();
+	QString instanceStrId = ui->instanceStrId->text();
+
+	if (instanceStrId.isEmpty() == true)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("Instance StrID cannot be empty"));
+		mb.exec();
+
+		ui->instanceStrId->setFocus();
+		ui->instanceStrId->selectAll();
+		return;
+	}
+
+	// Check ip address 1
+	//
+	QString configuratorIpAddress1 = ui->editConfiguratorIpAddress1->text();
 
 	QHostAddress ha;
-	if (ha.setAddress(configuratorIpAddress) == false)
+	if (ha.setAddress(configuratorIpAddress1) == false)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("Incorrect format of the configurator IP Address."));
 		mb.exec();
 
-		ui->editConfiguratorIpAddress->setFocus();
-		ui->editConfiguratorIpAddress->selectAll();
+		ui->editConfiguratorIpAddress1->setFocus();
+		ui->editConfiguratorIpAddress1->selectAll();
 		return;
 	}
 
-	// Check port num
+	// Check port num 1
 	//
 	bool result = false;
-	int serverPort = ui->editConfiguratorPort->text().toInt(&result);
+	int serverPort1 = ui->editConfiguratorPort1->text().toInt(&result);
 
-	if (result == false || serverPort < 0 || serverPort > 65535)
+	if (result == false || serverPort1 < 0 || serverPort1 > 65535)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("Incorrect server port."));
 		mb.exec();
 
-		ui->editConfiguratorPort->setFocus();
-		ui->editConfiguratorPort->selectAll();
+		ui->editConfiguratorPort1->setFocus();
+		ui->editConfiguratorPort1->selectAll();
+		return;
+	}
+
+	// Check ip address 2
+	//
+	QString configuratorIpAddress2 = ui->editConfiguratorIpAddress2->text();
+
+	if (ha.setAddress(configuratorIpAddress2) == false)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("Incorrect format of the configurator IP Address."));
+		mb.exec();
+
+		ui->editConfiguratorIpAddress2->setFocus();
+		ui->editConfiguratorIpAddress2->selectAll();
+		return;
+	}
+
+	// Check port num 2
+	//
+	result = false;
+	int serverPort2 = ui->editConfiguratorPort2->text().toInt(&result);
+
+	if (result == false || serverPort2 < 0 || serverPort2 > 65535)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("Incorrect server port."));
+		mb.exec();
+
+		ui->editConfiguratorPort2->setFocus();
+		ui->editConfiguratorPort2->selectAll();
 		return;
 	}
 
 	// --
 	//
-	m_settings.setConfiguratorIpAddress(configuratorIpAddress);
-	m_settings.setConfiguratorPort(serverPort);
+	m_settings.setInstanceStrId(instanceStrId);
+
+	m_settings.setConfiguratorIpAddress1(configuratorIpAddress1);
+	m_settings.setConfiguratorPort1(serverPort1);
+
+	m_settings.setConfiguratorIpAddress2(configuratorIpAddress2);
+	m_settings.setConfiguratorPort2(serverPort2);
 
 	accept();
 	return;

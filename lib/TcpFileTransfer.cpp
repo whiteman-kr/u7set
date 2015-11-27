@@ -298,7 +298,7 @@ namespace Tcp
 	}
 
 
-	void FileClient::onEndFileDownload(const QString /*fileName*/, FileTransferResult /*errorCode*/, const QString md5)
+	void FileClient::onEndFileDownload(const QString /*fileName*/, FileTransferResult /*errorCode*/, const QString /*md5*/)
 	{
 	}
 

@@ -14,7 +14,7 @@ PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)
 {
 	SerializeEquipmentFromXml(m_deviceRoot);
-	SerializeSignalsFromXml(m_unitInfo, m_signalSet);
+	SerializeSignalsFromXml("appSignals.xml", m_unitInfo, m_signalSet);
 	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
 }
 
@@ -70,7 +70,7 @@ QModelIndex PacketSourceModel::parent(const QModelIndex& childIndex) const
 	{
 		return QModelIndex();
 	}
-    for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
+	for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
 	{
 		if ((*child->parent()) == *m_listeners[i])
 		{
@@ -84,7 +84,7 @@ int PacketSourceModel::rowCount(const QModelIndex& parentIndex) const
 {
 	if (!parentIndex.isValid())
 	{
-        return static_cast<int>(m_listeners.size());
+		return static_cast<int>(m_listeners.size());
 	}
 	else
 	{
@@ -118,12 +118,12 @@ QVariant PacketSourceModel::data(const QModelIndex& index, int role) const
 	{
 		switch (index.column())
 		{
-		case 0: return statistic->fullAddress();
-		case 1: return statistic->packetReceivedCount();
-		case 2: return statistic->packetLostCount();
-		case 3: return statistic->partialPacketCount();
-		case 4: return statistic->partialFrameCount();
-		case 5: return statistic->formatErrorCount();
+			case 0: return statistic->fullAddress();
+			case 1: return statistic->packetReceivedCount();
+			case 2: return statistic->packetLostCount();
+			case 3: return statistic->partialPacketCount();
+			case 4: return statistic->partialFrameCount();
+			case 5: return statistic->formatErrorCount();
 		}
 	}
 
@@ -138,12 +138,12 @@ QVariant PacketSourceModel::headerData(int section, Qt::Orientation orientation,
 		{
 			switch (section)
 			{
-			case 0: return "IP";
-			case 1: return "Received";
-			case 2: return "Lost";
-			case 3: return "Partial packets";
-			case 4: return "Partial frames";
-			case 5: return "Format errors";
+				case 0: return "IP";
+				case 1: return "Received";
+				case 2: return "Lost";
+				case 3: return "Partial packets";
+				case 4: return "Partial frames";
+				case 5: return "Format errors";
 			}
 		}
 	}
@@ -192,7 +192,7 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 			return;
 		}
 	}
-    beginInsertRows(QModelIndex(), static_cast<int>(m_listeners.size()), static_cast<int>(m_listeners.size()));
+	beginInsertRows(QModelIndex(), static_cast<int>(m_listeners.size()), static_cast<int>(m_listeners.size()));
 	m_listeners.push_back(listener);
 	endInsertRows();
 	connect(listener.get(), &Listener::beginAddSource, this, &PacketSourceModel::beginInsertSource, Qt::DirectConnection);
@@ -200,8 +200,8 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 	if (saveList)
 	{
 		QSettings settings;
-        settings.beginWriteArray("listenAddresses", static_cast<int>(m_listeners.size()));
-        for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
+		settings.beginWriteArray("listenAddresses", static_cast<int>(m_listeners.size()));
+		for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
 		{
 			settings.setArrayIndex(i);
 			settings.setValue("ip", m_listeners[i]->ip());
@@ -214,7 +214,7 @@ void PacketSourceModel::addListener(QString ip, int port, bool saveList)
 
 int PacketSourceModel::index(Listener* listener)
 {
-    for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
+	for (int i = 0; i < static_cast<int>(m_listeners.size()); i++)
 	{
 		if (m_listeners[i].get() == listener)
 		{
@@ -318,7 +318,7 @@ Listener::Listener(PacketSourceModel* model, QString address, int port) :
 
 int Listener::index(Source* source) const
 {
-    for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
+	for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 	{
 		if (m_sources[i].get() == source)
 		{
@@ -338,7 +338,7 @@ int Listener::getSourceIndex(quint32 ip, quint16 port)
 		if (!source.isSameAddress(ip, port))
 		{
 			sourceIndex = -1;
-            for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
+			for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 			{
 				if (m_sources[i]->isSameAddress(ip, port))
 				{
@@ -358,7 +358,7 @@ int Listener::addNewSource(quint32 ip, quint16 port)
 {
 	std::shared_ptr<Source> newSource(new Source(QHostAddress(ip).toString(), port, m_model->signalSet(), m_model->dataSources(), this));
 	connect(newSource.get(), &Source::fieldsChanged, m_model, &PacketSourceModel::updateSourceStatistic);
-    for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
+	for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 	{
 		if (m_sources[i]->ip() > ip || (m_sources[i]->ip() == ip && m_sources[i]->port() >= port))
 		{
@@ -369,17 +369,17 @@ int Listener::addNewSource(quint32 ip, quint16 port)
 			return i;
 		}
 	}
-    emit beginAddSource(static_cast<int>(m_sources.size()));
+	emit beginAddSource(static_cast<int>(m_sources.size()));
 	m_sources.push_back(newSource);
 	emit endAddSource();
 	updateSourceMap();
-    return static_cast<int>(m_sources.size()) - 1;
+	return static_cast<int>(m_sources.size()) - 1;
 }
 
 void Listener::updateSourceMap()
 {
 	m_sourcesMap.clear();
-    for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
+	for (int i = 0; i < static_cast<int>(m_sources.size()); i++)
 	{
 		m_sourcesMap.insert(m_sources[i]->ip(), i);
 	}
@@ -451,7 +451,7 @@ void Source::parseReceivedBuffer(char* buffer, quint64 readBytes)
 	}
 	// Check correct packet part sequence
 	if (!((header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == m_lastHeader.partNo + 1) ||
-		(header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == 0 && m_lastHeader.partNo == m_lastHeader.partCount - 1)))
+		  (header.packetNo == m_lastHeader.packetNo + 1 && header.partNo == 0 && m_lastHeader.partNo == m_lastHeader.partCount - 1)))
 	{
 		incrementPartialPacketCount();
 	}

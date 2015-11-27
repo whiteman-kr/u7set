@@ -6,37 +6,101 @@
 #include "../include/Signal.h"
 #include "SignalsTabPage.h"
 #include "../include/PropertyEditor.h"
+#include "../include/DbController.h"
+#include "Stable.h"
 
 
-/*void editSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
+void editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
 {
+	SignalSet signalSet;
+	dbController->getSignals(&signalSet, parent);
+	dbController->getUnits(Signal::m_unitList.get(), parent);
 	int readOnly = false;
 	QVector<Signal*> signalVector;
-	for (int id : signalId)
+	QMap<QString, int> signalIndexMap;
+	int lastIndexProcessed = -1;
+	QString wrongIds;
+	for (QString id : signalId)
 	{
-		Signal signal = m_signalSet[row];
-		if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId())
+		if (signalIndexMap.contains(id))
+		{
+			int index = signalIndexMap[id];
+			signalVector.push_back(&signalSet[index]);
+			continue;
+		}
+		for (lastIndexProcessed++; lastIndexProcessed < signalSet.count(); lastIndexProcessed++)
+		{
+			QString currentId = signalSet[lastIndexProcessed].strID();
+			signalIndexMap.insert(currentId, lastIndexProcessed);
+			if (currentId == id)
+			{
+				signalVector.push_back(&signalSet[lastIndexProcessed]);
+				break;
+			}
+		}
+		if (lastIndexProcessed == signalSet.count())
+		{
+			wrongIds += id + "\n";
+		}
+	}
+	if (!wrongIds.isEmpty())
+	{
+		QMessageBox::critical(parent, "Error", "Wrong id detected:\n\n" + wrongIds);
+	}
+	for (Signal* signal : signalVector)
+	{
+		if (signal->checkedOut() && signal->userID() != dbController->currentUser().userId())
 		{
 			readOnly = true;
 		}
-		signalVector << signal;
 	}
-	SignalPropertiesDialog dlg(signalVector, m_dataFormatInfo, m_unitInfo, readOnly, this, parent);
+	SignalPropertiesDialog dlg(signalVector, *Signal::m_unitList.get(), readOnly, nullptr, parent);
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		ObjectState state;
-		dbController()->setSignalWorkcopy(&signal, &state, parrentWindow());
-		if (state.errCode != ERR_SIGNAL_OK)
+		QString message;
+		for (int i = 0; i < signalVector.count(); i++)
 		{
-			showError(state);
+			ObjectState state;
+			dbController->setSignalWorkcopy(signalVector[i], &state, parent);
+			if (state.errCode != ERR_SIGNAL_OK)
+			{
+				switch(state.errCode)
+				{
+					case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
+					{
+						message += QString("Signal %1 could not be checked out\n").arg(state.id);
+						break;
+					}
+					case ERR_SIGNAL_ALREADY_CHECKED_OUT:
+					{
+						message += QString("Signal %1 is checked out by other user\n").arg(state.id);
+						break;
+					}
+					case ERR_SIGNAL_DELETED:
+					{
+						message += QString("Signal %1 was deleted already\n").arg(state.id);
+						break;
+					}
+					case ERR_SIGNAL_NOT_FOUND:
+					{
+						message += QString("Signal %1 not found\n").arg(state.id);
+						break;
+					}
+					default:
+					{
+						assert(false);
+						message += QString("Unknown error %1\n").arg(state.errCode);
+					}
+				}
+			}
 		}
-
-		loadSignal(row);
-		emit signalActivated(row);
-		return true;
+		if (!message.isEmpty())
+		{
+			QMessageBox::critical(parent, "Error", message);
+		}
 	}
-}*/
+}
 
 
 SignalPropertiesDialog::SignalPropertiesDialog(Signal& signal, UnitList &unitInfo, bool readOnly, SignalsModel* signalsModel, QWidget *parent) :

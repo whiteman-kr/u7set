@@ -27,10 +27,10 @@ private slots:
 	void on_validate(QAction* pAction);
 
 private:
-	bool askForSaveChanged();
 	bool saveChanges();
 
 	virtual void closeEvent(QCloseEvent* e);
+    virtual void reject();
 
 	bool validate(int schemaFileId);
 private:

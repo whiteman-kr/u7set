@@ -19,7 +19,7 @@ PacketBufferTableModel::PacketBufferTableModel(quint8* buffer, RpPacketHeader& l
 	QAbstractTableModel(parent),
 	m_buffer(reinterpret_cast<quint16*>(buffer)),
 	m_lastHeader(lastHeader),
-	needToSwapBytes(true)
+	needToSwapBytes(false)
 {
 	QSettings settings;
 	needToSwapBytes = settings.value("needToSwapBytes", needToSwapBytes).toBool();

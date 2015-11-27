@@ -427,7 +427,17 @@ void DialogAfblEditor::on_m_afbTree_itemDoubleClicked(QTreeWidgetItem* item, int
 {
     Q_UNUSED(item);
     Q_UNUSED(column);
-    on_m_view_clicked();
+
+    std::vector<DbFileInfo*> selectedFiles = getSelectedFiles();
+
+    if (selectedFiles.size() == 1 && selectedFiles[0]->state() == VcsState::CheckedOut)
+    {
+        on_m_edit_clicked();
+    }
+    else
+    {
+        on_m_view_clicked();
+    }
 }
 
 void DialogAfblEditor::on_m_afbTree_itemSelectionChanged()
