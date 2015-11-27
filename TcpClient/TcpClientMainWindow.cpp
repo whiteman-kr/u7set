@@ -19,6 +19,8 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 	m_cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIG_SERVICE_REQUEST));
 	m_fileClientThread = new Tcp::Thread(m_cfgLoader);
 
+	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &TcpClientMainWindow::onCfgReady);
+
 	m_fileClientThread->start();
 
 	//connect(m_fileClient, &Tcp::FileClient::signal_endDownloadFile, this, &TcpClientMainWindow::onEndDownloadFile);
@@ -104,3 +106,9 @@ void TcpClientMainWindow::on_pushButton_clicked()
 }
 
 
+
+void TcpClientMainWindow::onCfgReady(const QByteArray& configurationXmlData, BuildFileInfoArray buildFileInfoArray)
+{
+	int a = 0;
+	a++;
+}

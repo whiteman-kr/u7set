@@ -61,7 +61,7 @@ namespace Builder
 		xmlWriter.writeStartElement("File");
 
 		xmlWriter.writeAttribute("Name", pathFileName);
-		xmlWriter.writeAttribute("Sze", QString::number(size));
+		xmlWriter.writeAttribute("Size", QString::number(size));
 		xmlWriter.writeAttribute("MD5", md5);
 
 		xmlWriter.writeEndElement();		// file

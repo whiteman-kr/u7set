@@ -1,5 +1,8 @@
 #include "../include/SimpleThread.h"
 #include <cassert>
+#include <QTimer>
+#include <QMetaMethod>
+
 
 // -------------------------------------------------------------------------------------
 //
@@ -100,4 +103,48 @@ void SimpleThread::beforeStart()
 void SimpleThread::beforeQuit()
 {
 }
+
+
+// -------------------------------------------------------------------------------------
+//
+// WaitForSignalHelper class implementation
+//
+// -------------------------------------------------------------------------------------
+
+
+WaitForSignalHelper::WaitForSignalHelper(const QObject* sender, const char* signal)
+{
+	connect(sender, signal, &m_eventLoop, SLOT(quit));
+}
+
+
+void WaitForSignalHelper::slot_timeout()
+{
+	m_timeout = true;
+	m_eventLoop.quit();
+}
+
+
+bool WaitForSignalHelper::wait(int milliseconds)
+{
+	QTimer timer;
+
+	if (milliseconds != 0 )
+	{
+		connect(&timer, &QTimer::timeout, this, &WaitForSignalHelper::slot_timeout);
+		timer.setInterval(milliseconds);
+		timer.start();
+	}
+	else
+	{
+		// else, wait for ever!
+	}
+
+	m_timeout = false;
+
+	m_eventLoop.exec();
+
+	return !m_timeout;
+}
+
 

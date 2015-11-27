@@ -60,6 +60,7 @@ namespace Tcp
 		}
 	}
 
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::FileClient class implementation
@@ -302,6 +303,68 @@ namespace Tcp
 	}
 
 
+	QString FileClient::getErrorStr(FileTransferResult errorCode)
+	{
+		QString str;
+
+		switch(errorCode)
+		{
+		case Ok:
+			// return ""
+			break;
+
+		case NotConnectedToServer:
+			str = QString(tr("Not connected to server"));
+			break;
+
+		case NotFoundRemoteFile:
+			str = QString(tr("Not found remote file"));
+			break;
+
+		case CantOpenRemoteFile:
+			str = QString(tr("Can't open remote file"));
+			break;
+
+		case CantReadRemoteFile:
+			str = QString(tr("Can't read remote file"));
+			break;
+
+		case LocalFolderIsNotWriteable:
+			str = QString(tr("Local folder is not writeable"));
+			break;
+
+		case CantCreateLocalFolder:
+			str = QString(tr("Can't create local folder"));
+			break;
+
+		case AlreadyDownloadFile:
+			str = QString(tr("Allready download file now"));
+			break;
+
+		case CantSendRequest:
+			str = QString(tr("Can't send request"));
+			break;
+
+		case CantCreateLocalFile:
+			str = QString(tr("Can't create local file"));
+			break;
+
+		case FileDataCorrupted:
+			str = QString(tr("File data corrupted"));
+			break;
+
+		case CantWriteLocalFile:
+			str = QString(tr("Can't write local file"));
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return str;
+	}
+
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::FileServer class implementation
@@ -433,6 +496,5 @@ namespace Tcp
 	void FileServer::processSuccessorRequest(quint32 /*requestID*/, const char* /*requestData*/, quint32 /*requestDataSize*/)
 	{
 	}
-
 
 }
