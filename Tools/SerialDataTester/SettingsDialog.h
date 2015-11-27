@@ -14,7 +14,7 @@ class SettingsDialog : public QDialog
 
 public:
 	explicit SettingsDialog(QWidget *parent = 0);
-	~SettingsDialog();
+	virtual ~SettingsDialog();
 
 private slots:
 	void settingsConfirmed();

@@ -1,4 +1,6 @@
 #include "serialdatatester.h"
+#include "SettingsDialog.h"
+#include "PortReceiver.h"
 #include "ui_serialdatatester.h"
 #include <QMessageBox>
 #include <QXmlStreamReader>
@@ -6,6 +8,8 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QSerialPortInfo>
+#include <QThread>
+#include <QDebug>
 
 SerialDataTester::SerialDataTester(QWidget *parent) :
 	QMainWindow(parent),
@@ -55,7 +59,7 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	ui->menuBar->addMenu(m_file);
 	ui->menuBar->addMenu(m_settings);
 
-	ui->signalsTable->setColumnCount(5);
+	ui->signalsTable->setColumnCount(6);
 
 	ui->signalsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -64,6 +68,7 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	ui->signalsTable->setHorizontalHeaderItem(offset, new QTableWidgetItem(tr("Offset")));
 	ui->signalsTable->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
 	ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
+	ui->signalsTable->setHorizontalHeaderItem(value, new QTableWidgetItem(tr("Value")));
 
 	// Try to load application settings
 	//
@@ -105,9 +110,11 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 		}
 	}
 
-	m_portReceiver = new PortReceiver(this);
+	m_portReceiver = new PortReceiver();
 
 	m_pathToSignalsXml = applicationSettings.value("pathToSignals").toString();
+
+	receiveTimeout = new QTimer();
 
 	// Create port connection
 	//
@@ -122,14 +129,23 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	connect(m_setBaud, &QMenu::triggered, this, &SerialDataTester::setBaud);
 	connect(m_portReceiver, &PortReceiver::portError, this, &SerialDataTester::portError);
 	connect(this, &SerialDataTester::portChanged, m_portReceiver, &PortReceiver::setNewPort);
+	connect(m_portReceiver, &PortReceiver::dataFromPort, this, &SerialDataTester::dataReceived);
+	connect(receiveTimeout, &QTimer::timeout, this, &SerialDataTester::signalTimeout);
 
 	parseFile();
 	m_portReceiver->openPort();
+
+	m_PortThread = new QThread(this);
+	m_portReceiver->moveToThread(m_PortThread);
+
+	m_PortThread->start();
 }
 
 SerialDataTester::~SerialDataTester()
 {
 	delete ui;
+	m_PortThread->terminate();
+	delete m_PortThread;
 }
 
 void SerialDataTester::parseFile()
@@ -263,6 +279,7 @@ void SerialDataTester::parseFile()
 		ui->signalsTable->setItem(numberOfSignalFromVector, offset, new QTableWidgetItem(QString::number(signalData.offset)));
 		ui->signalsTable->setItem(numberOfSignalFromVector, bit, new QTableWidgetItem(QString::number(signalData.bit)));
 		ui->signalsTable->setItem(numberOfSignalFromVector, type, new QTableWidgetItem(signalData.type));
+		ui->signalsTable->setItem(numberOfSignalFromVector, value, new QTableWidgetItem(QString::number(0)));
 
 		numberOfSignalFromVector++;
 	}
@@ -272,11 +289,14 @@ void SerialDataTester::reloadConfig()
 {
 	ui->signalsTable->clear();
 
+	ui->signalsTable->setRowCount(0);
+
 	ui->signalsTable->setHorizontalHeaderItem(strId, new QTableWidgetItem(tr("StrID")));
 	ui->signalsTable->setHorizontalHeaderItem(caption, new QTableWidgetItem(tr("Caption")));
 	ui->signalsTable->setHorizontalHeaderItem(offset, new QTableWidgetItem(tr("Offset")));
 	ui->signalsTable->setHorizontalHeaderItem(bit, new QTableWidgetItem(tr("Bit")));
 	ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
+	ui->signalsTable->setHorizontalHeaderItem(value, new QTableWidgetItem(tr("Value")));
 
 	signalsFromXml.clear();
 	parseFile();
@@ -339,4 +359,87 @@ void SerialDataTester::portError(QString error)
 {
 	QMessageBox::critical(this, tr("Critical error"), error);
 	ui->portNameLabel->setText("Error");
+}
+
+void SerialDataTester::dataReceived(QByteArray data)
+{
+	receiveTimeout->stop();
+	receiveTimeout->start(5000);
+	QDataStream packet(&data, QIODevice::ReadOnly);
+
+	quint32 signature;
+	packet >> signature;
+	ui->signature->setText(QString::number(signature, 16));
+
+	quint16 version;
+	packet >> version;
+
+	ui->version->setText(QString::number(version));
+
+	quint16 transmissionId;
+	packet >> transmissionId;
+
+	ui->transmissionId->setText(QString::number(transmissionId));
+
+	quint16 numerator;
+	packet >> numerator;
+
+	ui->numerator->setText(QString::number(numerator));
+
+	quint16 amount;
+	packet >> amount;
+
+	quint16 dataUniqueId;
+	packet >> dataUniqueId;
+
+	quint8 m_offset = 0x00;
+	quint8 m_bit = 0x00;
+	qint16 m_value = 0x0000;
+
+	for (int currentSignal = 0; currentSignal < amount / 4; currentSignal++)
+	{
+		ui->statusBar->showMessage("Connected");
+		packet >> m_offset;
+		packet >> m_bit;
+		packet >> m_value;
+
+		bool signalExists = false;
+		SignalData receivedSignal;
+		int rowNumber = 0;
+		int itemNumber = 0;
+
+		for (SignalData signalFromXml : signalsFromXml)
+		{
+			if (signalFromXml.offset == m_offset && signalFromXml.bit == m_bit)
+			{
+				signalExists = true;
+				receivedSignal = signalFromXml;
+				rowNumber = itemNumber;
+			}
+			itemNumber++;
+		}
+
+		if (signalExists)
+		{
+			ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(QString::number(m_value)));
+			ui->processedPackets->setText(QString::number(ui->processedPackets->text().toInt() + 1));
+		}
+		else
+		{
+			ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt() + 1));
+		}
+
+		ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
+	}
+
+	//ui->caption->setText(dataFromPacket);
+}
+
+void SerialDataTester::signalTimeout()
+{
+	for (int currentRow = 0; currentRow < ui->signalsTable->rowCount(); currentRow++)
+	{
+		ui->signalsTable->setItem(currentRow, value, new QTableWidgetItem(QString::number(0)));
+	}
+	ui->statusBar->showMessage("Signal timeout!");
 }

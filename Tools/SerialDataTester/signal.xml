@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<signals>
+	<signal strId="#AVR75639" caption="AVR75639" offset="0" bit="3" type="Discrette"></signal>
+</signals>

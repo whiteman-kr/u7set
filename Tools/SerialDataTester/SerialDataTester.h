@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QXmlReader>
 #include <QPixmap>
+#include <QTimer>
 
 namespace Ui {
 	class SerialDataTester;
@@ -24,9 +25,11 @@ private slots:
 	void reloadConfig();
 	void selectNewSignalsFile();
 	void applicationExit();
-	void setPort(QAction* );
-	void setBaud(QAction* );
-	void portError(QString);
+	void setPort(QAction* newPort);
+	void setBaud(QAction* newBaud);
+	void portError(QString error);
+	void dataReceived(QByteArray data);
+	void signalTimeout();
 
 signals:
 	void portChanged(QString);
@@ -34,6 +37,8 @@ signals:
 
 private:
 	Ui::SerialDataTester *ui = nullptr;
+
+	QTimer* receiveTimeout;
 
 	SettingsDialog* m_applicationSettingsDialog = nullptr;
 	PortReceiver* m_portReceiver = nullptr;
@@ -47,7 +52,9 @@ private:
 	QMenu* m_setPort = nullptr;
 	QMenu* m_setBaud = nullptr;
 
-	QString m_pathToSignalsXml = "";
+	QString m_pathToSignalsXml;
+
+	QThread *m_PortThread;
 
 	struct SignalData
 	{
@@ -64,7 +71,8 @@ private:
 		caption,
 		offset,
 		bit,
-		type
+		type,
+		value
 	};
 
 	QVector<SignalData> signalsFromXml;

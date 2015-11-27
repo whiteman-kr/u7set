@@ -19,6 +19,12 @@ PortReceiver::PortReceiver(QObject *parent) : QObject(parent)
 	m_serialPort->setParity(QSerialPort::NoParity);
 	m_serialPort->setStopBits(QSerialPort::OneStop);
 	m_serialPort->setFlowControl(QSerialPort::NoFlowControl);
+
+	connect(m_serialPort, &QSerialPort::readyRead, this, &PortReceiver::dataReceived);
+}
+
+PortReceiver::~PortReceiver()
+{
 }
 
 void PortReceiver::setNewPort(const QString &port)
@@ -50,8 +56,5 @@ void PortReceiver::dataReceived()
 	QByteArray receivedData;
 	receivedData = m_serialPort->readAll();
 
-	// Protocol???
-	//
+	emit dataFromPort(receivedData);
 }
-
-
