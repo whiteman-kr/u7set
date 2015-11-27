@@ -30,7 +30,9 @@ HEADERS  += TcpClientMainWindow.h \
     ../include/SocketIO.h \
     ../include/TcpFileTransfer.h \
     ../include/CfgServerLoader.h \
-    ../include/BuildInfo.h
+    ../include/BuildInfo.h \
+    ../include/Utils.h \
+    ../include/Md5Hash.h
 
 FORMS    += TcpClientMainWindow.ui
 

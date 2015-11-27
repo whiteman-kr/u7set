@@ -2,6 +2,7 @@
 
 
 #include <QThread>
+#include <QEventLoop>
 
 
 class SimpleThreadWorker : public QObject
@@ -41,4 +42,25 @@ public:
 
 	virtual void beforeStart();
 	virtual void beforeQuit();
+};
+
+
+class WaitForSignalHelper : public QObject
+{
+	Q_OBJECT
+
+private:
+	bool m_timeout = false;
+	QEventLoop m_eventLoop;
+
+private slots:
+	void slot_timeout();
+
+public:
+	WaitForSignalHelper(const QObject* sender, const char* signal);
+
+	bool wait(int milliseconds);			// return true if signal received before timeout
+											// return false if timeout elapsed
+
+	bool waitForever() { return wait(0); }
 };

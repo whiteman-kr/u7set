@@ -106,20 +106,20 @@ namespace Builder
 
 		appSignalsXml.setAutoFormatting(true);
 		appSignalsXml.writeStartDocument();
-		appSignalsXml.writeStartElement("configuration");
+		appSignalsXml.writeStartElement("AppSignals");
 
 		// Writing units
-		appSignalsXml.writeStartElement("units");
-		appSignalsXml.writeAttribute("count", QString::number(unitInfo.count()));
+		appSignalsXml.writeStartElement("Units");
+		appSignalsXml.writeAttribute("Count", QString::number(unitInfo.count()));
 
 		int unitsCount = unitInfo.count();
 
 		for (int i = 0; i < unitsCount; i++)
 		{
-			appSignalsXml.writeStartElement("unit");
+			appSignalsXml.writeStartElement("Unit");
 
 			appSignalsXml.writeAttribute("ID", QString::number(unitInfo.keyAt(i)));
-			appSignalsXml.writeAttribute("name", unitInfo[i]);
+			appSignalsXml.writeAttribute("Name", unitInfo[i]);
 
 			appSignalsXml.writeEndElement();
 		}
@@ -127,7 +127,7 @@ namespace Builder
 		appSignalsXml.writeEndElement();
 
 		// Writing signals
-		appSignalsXml.writeStartElement("applicationSignals");
+		appSignalsXml.writeStartElement("Signals");
 
 		for (int i = 0; i < m_signalSet->count(); i++)
 		{
@@ -191,54 +191,54 @@ namespace Builder
 				continue;
 			}
 
-			appSignalsXml.writeStartElement("signal");
+			appSignalsXml.writeStartElement("Signal");
 
 			appSignalsXml.writeAttribute("ID", QString::number(signal.ID()));
-			appSignalsXml.writeAttribute("signalGroupID", QString::number(signal.signalGroupID()));
-			appSignalsXml.writeAttribute("signalInstanceID", QString::number(signal.signalInstanceID()));
-			appSignalsXml.writeAttribute("channel", QString::number(signal.channel()));
-			appSignalsXml.writeAttribute("type", signal.type() == E::SignalType::Analog ? "Analog" : "Discrete");
-			appSignalsXml.writeAttribute("strID", signal.strID());
-			appSignalsXml.writeAttribute("extStrID", signal.extStrID());
-			appSignalsXml.writeAttribute("name", signal.name());
-			appSignalsXml.writeAttribute("dataFormat", dataFormatInfo.value(signal.dataFormatInt()));
-			appSignalsXml.writeAttribute("dataSize", QString::number(signal.dataSize()));
-			appSignalsXml.writeAttribute("lowADC", QString::number(signal.lowADC()));
-			appSignalsXml.writeAttribute("highADC", QString::number(signal.highADC()));
-			appSignalsXml.writeAttribute("lowLimit", QString::number(signal.lowLimit()));
-			appSignalsXml.writeAttribute("highLimit", QString::number(signal.highLimit()));
-			appSignalsXml.writeAttribute("unitID", unitInfo.value(signal.unitID()));
-			appSignalsXml.writeAttribute("adjustment", QString::number(signal.adjustment()));
-			appSignalsXml.writeAttribute("dropLimit", QString::number(signal.dropLimit()));
-			appSignalsXml.writeAttribute("excessLimit", QString::number(signal.excessLimit()));
-			appSignalsXml.writeAttribute("unbalanceLimit", QString::number(signal.unbalanceLimit()));
-			appSignalsXml.writeAttribute("inputLowLimit", QString::number(signal.inputLowLimit()));
-			appSignalsXml.writeAttribute("inputHighLimit", QString::number(signal.inputHighLimit()));
-			appSignalsXml.writeAttribute("inputUnitID", unitInfo.value(signal.inputUnitID()));
-			appSignalsXml.writeAttribute("inputSensorID", SensorTypeStr[signal.inputSensorID()]);
-			appSignalsXml.writeAttribute("outputLowLimit", QString::number(signal.outputLowLimit()));
-			appSignalsXml.writeAttribute("outputHighLimit", QString::number(signal.outputHighLimit()));
-			appSignalsXml.writeAttribute("outputUnitID", unitInfo.value(signal.outputUnitID()));
-			appSignalsXml.writeAttribute("outputRangeMode", OutputRangeModeStr[signal.outputRangeMode()]);
-			appSignalsXml.writeAttribute("outputSensorID", SensorTypeStr[signal.outputSensorID()]);
-			appSignalsXml.writeAttribute("acquire", signal.acquire() ? "true" : "false");
-			appSignalsXml.writeAttribute("calculated", signal.calculated() ? "true" : "false");
-			appSignalsXml.writeAttribute("normalState", QString::number(signal.normalState()));
-			appSignalsXml.writeAttribute("decimalPlaces", QString::number(signal.decimalPlaces()));
-			appSignalsXml.writeAttribute("aperture", QString::number(signal.aperture()));
-			appSignalsXml.writeAttribute("inOutType", InOutTypeStr[signal.inOutType()]);
-			appSignalsXml.writeAttribute("deviceStrID", signal.deviceStrID());
-			appSignalsXml.writeAttribute("filteringTime", QString::number(signal.filteringTime()));
-			appSignalsXml.writeAttribute("maxDifference", QString::number(signal.maxDifference()));
-			appSignalsXml.writeAttribute("byteOrder", E::valueToString<E::ByteOrder>(signal.byteOrderInt()));
-			appSignalsXml.writeAttribute("ramAddr", signal.ramAddr().toString());
-			appSignalsXml.writeAttribute("regAddr", signal.regAddr().toString());
+			appSignalsXml.writeAttribute("SignalGroupID", QString::number(signal.signalGroupID()));
+			appSignalsXml.writeAttribute("SignalInstanceID", QString::number(signal.signalInstanceID()));
+			appSignalsXml.writeAttribute("Channel", QString::number(signal.channel()));
+			appSignalsXml.writeAttribute("Type", signal.type() == E::SignalType::Analog ? "Analog" : "Discrete");
+			appSignalsXml.writeAttribute("StrID", signal.strID());
+			appSignalsXml.writeAttribute("ExtStrID", signal.extStrID());
+			appSignalsXml.writeAttribute("Name", signal.name());
+			appSignalsXml.writeAttribute("DataFormat", dataFormatInfo.value(signal.dataFormatInt()));
+			appSignalsXml.writeAttribute("DataSize", QString::number(signal.dataSize()));
+			appSignalsXml.writeAttribute("LowADC", QString::number(signal.lowADC()));
+			appSignalsXml.writeAttribute("HighADC", QString::number(signal.highADC()));
+			appSignalsXml.writeAttribute("LowLimit", QString::number(signal.lowLimit()));
+			appSignalsXml.writeAttribute("HighLimit", QString::number(signal.highLimit()));
+			appSignalsXml.writeAttribute("UnitID", unitInfo.value(signal.unitID()));
+			appSignalsXml.writeAttribute("Adjustment", QString::number(signal.adjustment()));
+			appSignalsXml.writeAttribute("DropLimit", QString::number(signal.dropLimit()));
+			appSignalsXml.writeAttribute("ExcessLimit", QString::number(signal.excessLimit()));
+			appSignalsXml.writeAttribute("UnbalanceLimit", QString::number(signal.unbalanceLimit()));
+			appSignalsXml.writeAttribute("InputLowLimit", QString::number(signal.inputLowLimit()));
+			appSignalsXml.writeAttribute("InputHighLimit", QString::number(signal.inputHighLimit()));
+			appSignalsXml.writeAttribute("InputUnitID", unitInfo.value(signal.inputUnitID()));
+			appSignalsXml.writeAttribute("InputSensorID", SensorTypeStr[signal.inputSensorID()]);
+			appSignalsXml.writeAttribute("OutputLowLimit", QString::number(signal.outputLowLimit()));
+			appSignalsXml.writeAttribute("OutputHighLimit", QString::number(signal.outputHighLimit()));
+			appSignalsXml.writeAttribute("OutputUnitID", unitInfo.value(signal.outputUnitID()));
+			appSignalsXml.writeAttribute("OutputRangeMode", OutputRangeModeStr[signal.outputRangeMode()]);
+			appSignalsXml.writeAttribute("OutputSensorID", SensorTypeStr[signal.outputSensorID()]);
+			appSignalsXml.writeAttribute("Acquire", signal.acquire() ? "true" : "false");
+			appSignalsXml.writeAttribute("Calculated", signal.calculated() ? "true" : "false");
+			appSignalsXml.writeAttribute("NormalState", QString::number(signal.normalState()));
+			appSignalsXml.writeAttribute("DecimalPlaces", QString::number(signal.decimalPlaces()));
+			appSignalsXml.writeAttribute("Aperture", QString::number(signal.aperture()));
+			appSignalsXml.writeAttribute("InOutType", InOutTypeStr[signal.inOutType()]);
+			appSignalsXml.writeAttribute("DeviceStrID", signal.deviceStrID());
+			appSignalsXml.writeAttribute("FilteringTime", QString::number(signal.filteringTime()));
+			appSignalsXml.writeAttribute("MaxDifference", QString::number(signal.maxDifference()));
+			appSignalsXml.writeAttribute("ByteOrder", E::valueToString<E::ByteOrder>(signal.byteOrderInt()));
+			appSignalsXml.writeAttribute("RamAddr", signal.ramAddr().toString());
+			appSignalsXml.writeAttribute("RegAddr", signal.regAddr().toString());
 
 			appSignalsXml.writeEndElement();	// signal
 		}
 
-		appSignalsXml.writeEndElement();	// applicationSignals
-		appSignalsXml.writeEndElement();	// configuration
+		appSignalsXml.writeEndElement();	// </Signals>
+		appSignalsXml.writeEndElement();	// </AppSignals>
 		appSignalsXml.writeEndDocument();
 
 		m_buildResultWriter->addFile(m_subDir, "appSignals.xml", data);

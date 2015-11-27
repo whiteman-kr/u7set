@@ -5,6 +5,10 @@
 #include "../include/BuildInfo.h"
 
 
+
+typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
+
+
 // -------------------------------------------------------------------------------------
 //
 // CfgServerLoaderBase class declaration
@@ -13,6 +17,9 @@
 
 class CfgServerLoaderBase
 {
+private:
+	static bool m_BuildFileInfoArrayRegistered;
+
 protected:
 
 	enum ErrorCode
@@ -21,6 +28,9 @@ protected:
 		BuildNotFound,
 		BuildCantRead
 	};
+
+public:
+	CfgServerLoaderBase();
 };
 
 
@@ -61,6 +71,9 @@ public:
 //
 // -------------------------------------------------------------------------------------
 
+
+const int CONFIGURATION_XML = 0;
+
 class CfgLoader: public Tcp::FileClient, public CfgServerLoaderBase
 {
 	Q_OBJECT
@@ -69,6 +82,8 @@ private:
 
 	struct CfgFileInfo : public Builder::BuildFileInfo
 	{
+		QByteArray fileData;
+
 		bool loaded = false;
 	};
 
@@ -77,6 +92,15 @@ private:
 		QString pathFileName;
 		QString etalonMD5;
 		bool isAutoRequest = false;
+		bool isTestCfgRequest = false;			// does matter only for configuration.xml file request
+
+		void clear()
+		{
+			pathFileName = "";
+			etalonMD5 = "";
+			isAutoRequest = false;
+			isTestCfgRequest = false;
+		}
 	};
 
 	QString m_appStrID;
@@ -85,18 +109,18 @@ private:
 	QString m_appDataPath;
 	QString m_rootFolder;
 	QString m_configurationXmlPathFileName;
+	QString m_configurationXmlMd5;
 
 	QList<FileDownloadRequest> m_downloadQueue;
 	FileDownloadRequest m_currentDownloadRequest;
 
 	QTimer m_timer;
-	bool m_configurationlReady = false;
+	bool m_configurationReady = false;
 	bool m_allFilesLoaded = false;
+	int m_autoDownloadIndex = 0;
 
 	Builder::BuildInfo m_buildInfo;
 	HashedVector<QString, CfgFileInfo> m_cfgFileInfo;
-
-	int m_autoDownloadIndex = 0;
 
 	FileDownloadRequest m_currentDownload;
 
@@ -108,19 +132,25 @@ private:
 
 	void startDownload();
 
+	void resetStatuses();
+
+	bool readFile(const QString& filePathName, QByteArray* fileData);
+
+	bool cfgFileIsExists(const QString& filePathName, const QString& etalonMd5);
+
 	virtual void onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5) final;
 
-	void readConfigurationXml();
+	bool readConfigurationXml();
+	bool readConfigurationFile(const QString& pathFileName, QByteArray* fileData);
 
 signals:
-	void configurationReady(/*QVector<BuildFileInfo>*/);
-	void endFileDownload(const QString fileName, const QString errorStr, const QString md5);
-
-	void signal_downloadCfgFile(const QString& fileName);
+	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void signal_endFileDownload(const QString fileName, const QString errorStr);
+	void signal_downloadCfgFile(const QString& fileName, QByteArray* fileData);
 
 private slots:
 
-	void slot_downloadCfgdFile(const QString& fileName);
+	void slot_downloadCfgdFile(const QString& fileName, QByteArray *fileData);
 
 public:
 	CfgLoader(const QString& appStrID, int appInstance, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
@@ -129,6 +159,5 @@ public:
 
 	void changeApp(const QString& appStrID, int appInstance);
 
-	void downloadCfgFile(const QString& fileName);
-
+	bool downloadCfgFile(const QString& pathFileName, QByteArray* fileData);
 };
