@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#div_si_v1">
+        <Properties>
+            <Caption>div_si</Caption>
+            <Version>1.0</Version>
+            <Description>Divider Block with signed int data format</Description>
+            <Category>Math</Category>
+            <OpCode>13</OpCode>
+            <HasRam>true</HasRam>
+            <RequiredStart>true</RequiredStart>
+            <InternalUse>false</InternalUse>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_1_oprd" Caption = "in 1" Type="Analog" DataFormat="SignedInt" OpIndex = "1" Size = "32"/>
+            <AfbElementSignal OpName="i_2_oprd" Caption = "in 2" Type="Analog" DataFormat="SignedInt" OpIndex = "3" Size = "32"/>
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_result" Caption = "out" Type="Analog" DataFormat="SignedInt" OpIndex = "6" Size = "32"/>
+        </OutputSignals>
+        <Params>
+            <AfbElementParam OpName="i_conf" Caption = "Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+                <Value>4</Value>
+                <Default>4</Default>
+                <LowLimit>1</LowLimit>
+                <HighLimit>8</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed>
+		</Changed>
+                </Script>
+            </AfbElementParam>
+        </Params>
+        <CommonScript>
+            <Library></Library>
+            <AfterCreation></AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>

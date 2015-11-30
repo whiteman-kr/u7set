@@ -46,6 +46,7 @@ namespace Builder
 		case Afb::AfbType::SRSST:
 		case Afb::AfbType::BCOD:
 		case Afb::AfbType::BDEC:
+		case Afb::AfbType::MATH:
 			// parameter's values calculation is not required
 			break;
 
@@ -58,8 +59,12 @@ namespace Builder
 			break;
 
 
+		case Afb::AfbType::LAG:
+			result = calculate_LAG_paramValues();			// dempfer
+			break;
+
 		case Afb::AfbType::SCALE:
-			result = calculate_SCAL_paramValues();
+			result = calculate_SCALE_paramValues();
 			break;
 
 		default:
@@ -205,7 +210,7 @@ namespace Builder
 	}
 
 
-	bool AppFb::calculate_SCAL_paramValues()
+	bool AppFb::calculate_SCALE_paramValues()
 	{
 		QStringList requiredParams;
 
@@ -411,5 +416,34 @@ namespace Builder
 				  arg(iConf).arg(caption()));
 
 		return false;
+	}
+
+
+	bool AppFb::calculate_LAG_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_del");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_del = m_paramValuesArray["i_del"];
+
+		CHECK_UNSIGNED_INT16(i_del)
+
+		int v = i_del.unsignedIntValue() / 5.0;
+
+		if (v == 0)
+		{
+			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_del' of FB %2 is incorrect (must be > 5ms)")).
+					  arg(v).arg(caption()));
+
+			return false;
+
+		}
+
+		i_del.setUnsignedIntValue(static_cast<int>(log2(v)));
+
+		return true;
 	}
 }

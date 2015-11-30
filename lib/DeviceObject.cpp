@@ -263,6 +263,11 @@ namespace Hardware
 		{
 			m_preset = deviceobject.preset();
 
+			if (m_preset == true && propertyExists("PresetName") == false)
+			{
+				ADD_PROPERTY_GETTER_SETTER(QString, PresetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
+			}
+
 			assert(deviceobject.has_presetroot() == true);
 			if (deviceobject.has_presetroot() == true)
 			{

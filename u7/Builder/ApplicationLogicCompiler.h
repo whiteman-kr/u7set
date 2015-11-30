@@ -305,7 +305,8 @@ namespace Builder
 
 		bool calculate_TCT_paramValues();
 		bool calculate_BCOMP_paramValues();
-		bool calculate_SCAL_paramValues();
+		bool calculate_SCALE_paramValues();
+		bool calculate_LAG_paramValues();
 
 		//
 

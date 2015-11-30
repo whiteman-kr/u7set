@@ -56,6 +56,8 @@ private:
 	Tcp::Thread* m_fileClientThread = nullptr;
 
 	CfgLoader* m_cfgLoader = nullptr;
+
+	void onCfgReady(const QByteArray& configurationXmlData, BuildFileInfoArray buildFileInfoArray);
 };
 
 #endif // TCPCLIENTMAINWINDOW_H

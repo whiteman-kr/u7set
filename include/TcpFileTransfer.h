@@ -3,7 +3,7 @@
 #include "../include/Tcp.h"
 #include <QFile>
 #include <QDir>
-#include <QCryptographicHash>
+#include "../include/Md5Hash.h"
 
 
 namespace Tcp
@@ -103,6 +103,8 @@ namespace Tcp
 	protected:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
+
+		QString getErrorStr(FileTransferResult errorCode);
 
 	private slots:
 		void slot_downloadFile(const QString fileName);

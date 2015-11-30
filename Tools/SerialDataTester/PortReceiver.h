@@ -8,16 +8,18 @@ class PortReceiver : public QObject
 	Q_OBJECT
 public:
 	explicit PortReceiver(QObject *parent = 0);
+	virtual ~PortReceiver();
 
 signals:
-	void portError(QString);
+	void portError(QString error);
+	void dataFromPort(QByteArray data);
 
 private slots:
 	void dataReceived();
 
 public slots:
-	void setNewPort(const QString&);
-	void setBaud(const int&);
+	void setNewPort(const QString& portName);
+	void setBaud(const int& baud);
 	void openPort();
 
 private:
