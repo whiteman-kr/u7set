@@ -427,45 +427,45 @@ void Signal::serializeSensorField(const QXmlStreamAttributes& attr, QString fiel
 void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& dataFormatInfo, UnitList &unitInfo)
 {
 	serializeField(attr, "ID", &Signal::setID);
-	serializeField(attr, "signalGroupID", &Signal::setSignalGroupID);
-	serializeField(attr, "signalInstanceID", &Signal::setSignalInstanceID);
-	serializeField(attr, "channel", &Signal::setChannel);
-	serializeField(attr, "type", &Signal::setType);
-	serializeField(attr, "strID", &Signal::setStrID);
-	serializeField(attr, "extStrID", &Signal::setExtStrID);
-	serializeField(attr, "name", &Signal::setName);
-	serializeField(attr, "dataFormat", dataFormatInfo, &Signal::setDataFormat);
-	serializeField(attr, "dataSize", &Signal::setDataSize);
-	serializeField(attr, "lowADC", &Signal::setLowADC);
-	serializeField(attr, "highADC", &Signal::setHighADC);
-	serializeField(attr, "lowLimit", &Signal::setLowLimit);
-	serializeField(attr, "highLimit", &Signal::setHighLimit);
-	serializeField(attr, "unitID", unitInfo, &Signal::setUnitID);
-	serializeField(attr, "adjustment", &Signal::setAdjustment);
-	serializeField(attr, "dropLimit", &Signal::setDropLimit);
-	serializeField(attr, "excessLimit", &Signal::setExcessLimit);
-	serializeField(attr, "unbalanceLimit", &Signal::setUnbalanceLimit);
-	serializeField(attr, "inputLowLimit", &Signal::setInputLowLimit);
-	serializeField(attr, "inputHighLimit", &Signal::setInputHighLimit);
-	serializeField(attr, "inputUnitID", unitInfo, &Signal::setInputUnitID);
-	serializeSensorField(attr, "inputSensorID", &Signal::setInputSensorID);
-	serializeField(attr, "outputLowLimit", &Signal::setOutputLowLimit);
-	serializeField(attr, "outputHighLimit", &Signal::setOutputHighLimit);
-	serializeField(attr, "outputUnitID", unitInfo, &Signal::setOutputUnitID);
-	serializeField(attr, "outputRangeMode", &Signal::setOutputRangeMode);
-	serializeSensorField(attr, "outputSensorID", &Signal::setOutputSensorID);
-	serializeField(attr, "acquire", &Signal::setAcquire);
-	serializeField(attr, "calculated", &Signal::setCalculated);
-	serializeField(attr, "normalState", &Signal::setNormalState);
-	serializeField(attr, "decimalPlaces", &Signal::setDecimalPlaces);
-	serializeField(attr, "aperture", &Signal::setAperture);
-	serializeField(attr, "inOutType", &Signal::setInOutType);
-	serializeField(attr, "deviceStrID", &Signal::setDeviceStrID);
-	serializeField(attr, "filteringTime", &Signal::setFilteringTime);
-	serializeField(attr, "maxDifference", &Signal::setMaxDifference);
-	serializeField(attr, "byteOrder", &Signal::setByteOrder);
-	serializeField(attr, "ramAddr", &Signal::setRamAddr);
-	serializeField(attr, "regAddr", &Signal::setRegAddr);
+	serializeField(attr, "SignalGroupID", &Signal::setSignalGroupID);
+	serializeField(attr, "SignalInstanceID", &Signal::setSignalInstanceID);
+	serializeField(attr, "Channel", &Signal::setChannel);
+	serializeField(attr, "Type", &Signal::setType);
+	serializeField(attr, "StrID", &Signal::setStrID);
+	serializeField(attr, "ExtStrID", &Signal::setExtStrID);
+	serializeField(attr, "Name", &Signal::setName);
+	serializeField(attr, "DataFormat", dataFormatInfo, &Signal::setDataFormat);
+	serializeField(attr, "DataSize", &Signal::setDataSize);
+	serializeField(attr, "LowADC", &Signal::setLowADC);
+	serializeField(attr, "HighADC", &Signal::setHighADC);
+	serializeField(attr, "LowLimit", &Signal::setLowLimit);
+	serializeField(attr, "HighLimit", &Signal::setHighLimit);
+	serializeField(attr, "UnitID", unitInfo, &Signal::setUnitID);
+	serializeField(attr, "Adjustment", &Signal::setAdjustment);
+	serializeField(attr, "DropLimit", &Signal::setDropLimit);
+	serializeField(attr, "ExcessLimit", &Signal::setExcessLimit);
+	serializeField(attr, "UnbalanceLimit", &Signal::setUnbalanceLimit);
+	serializeField(attr, "InputLowLimit", &Signal::setInputLowLimit);
+	serializeField(attr, "InputHighLimit", &Signal::setInputHighLimit);
+	serializeField(attr, "InputUnitID", unitInfo, &Signal::setInputUnitID);
+	serializeSensorField(attr, "InputSensorID", &Signal::setInputSensorID);
+	serializeField(attr, "OutputLowLimit", &Signal::setOutputLowLimit);
+	serializeField(attr, "OutputHighLimit", &Signal::setOutputHighLimit);
+	serializeField(attr, "OutputUnitID", unitInfo, &Signal::setOutputUnitID);
+	serializeField(attr, "OutputRangeMode", &Signal::setOutputRangeMode);
+	serializeSensorField(attr, "OutputSensorID", &Signal::setOutputSensorID);
+	serializeField(attr, "Acquire", &Signal::setAcquire);
+	serializeField(attr, "Calculated", &Signal::setCalculated);
+	serializeField(attr, "NormalState", &Signal::setNormalState);
+	serializeField(attr, "DecimalPlaces", &Signal::setDecimalPlaces);
+	serializeField(attr, "Aperture", &Signal::setAperture);
+	serializeField(attr, "InOutType", &Signal::setInOutType);
+	serializeField(attr, "DeviceStrID", &Signal::setDeviceStrID);
+	serializeField(attr, "FilteringTime", &Signal::setFilteringTime);
+	serializeField(attr, "MaxDifference", &Signal::setMaxDifference);
+	serializeField(attr, "ByteOrder", &Signal::setByteOrder);
+	serializeField(attr, "RamAddr", &Signal::setRamAddr);
+	serializeField(attr, "RegAddr", &Signal::setRegAddr);
 }
 
 
@@ -617,11 +617,11 @@ void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, Signal
 			case QXmlStreamReader::StartElement:
 			{
 				const QXmlStreamAttributes& attr = applicationSignalsReader.attributes();
-				if (applicationSignalsReader.name() == "unit")
+				if (applicationSignalsReader.name() == "Unit")
 				{
-					unitInfo.append(attr.value("ID").toInt(), attr.value("name").toString());
+					unitInfo.append(attr.value("ID").toInt(), attr.value("Name").toString());
 				}
-				if (applicationSignalsReader.name() == "signal")
+				if (applicationSignalsReader.name() == "Signal")
 				{
 					Signal* pSignal = new Signal;
 					pSignal->serializeFields(attr, dataFormatInfo, unitInfo);

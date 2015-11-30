@@ -9,6 +9,7 @@
 #include <QSettings>
 #include <QDirIterator>
 #include <QSettings>
+#include <QTimer>
 
 SourceListWidget::SourceListWidget(QWidget *parent)
 	: QWidget(parent)
@@ -57,6 +58,10 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 
 	loadProjectList();
 	m_listenerModel->loadProject(m_rootPath + '/' + m_projectListCombo->currentText());
+
+	QTimer* updateProjectListTimer = new QTimer(this);
+	connect(updateProjectListTimer, &QTimer::timeout, this, &SourceListWidget::loadProjectList);
+	updateProjectListTimer->start(10000);
 
 	QPushButton* button = new QPushButton("Reload", this);
 	connect(button, &QPushButton::pressed, this, &SourceListWidget::reloadFiles);
