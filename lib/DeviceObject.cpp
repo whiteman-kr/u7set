@@ -2413,17 +2413,16 @@ R"DELIM({
 		equipmentWalker(currentDevice, processBeforeChildren, nullptr);
 	}
 
-	void SerializeEquipmentFromXml(std::shared_ptr<Hardware::DeviceRoot>& deviceRoot)
+	void SerializeEquipmentFromXml(const QString& filePath, std::shared_ptr<Hardware::DeviceRoot>& deviceRoot)
 	{
 		QXmlStreamReader equipmentReader;
-		QFile file("equipment.xml");
+		QFile file(filePath);
 
 		Hardware::DeviceObject* pCurrentDevice;
 
 		if (file.open(QIODevice::ReadOnly))
 		{
 			equipmentReader.setDevice(&file);
-			Hardware::Init();
 
 			while (!equipmentReader.atEnd())
 			{

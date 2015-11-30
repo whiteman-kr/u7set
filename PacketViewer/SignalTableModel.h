@@ -21,6 +21,8 @@ public:
 
 	void updateFrame(int frameNo);
 	void addDataSource(const DataSource& dataSource);
+	void beginReloadProject();
+	void endReloadProject();
 
 signals:
 

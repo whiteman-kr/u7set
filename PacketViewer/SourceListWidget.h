@@ -19,12 +19,16 @@ public:
 public slots:
 	void addListener();
 	void removeListener();
+	void reloadFiles();
+	void loadProjectList();
 
 private:
 	QComboBox* m_netListCombo;
+	QComboBox* m_projectListCombo;
 	QLineEdit* m_portEditor;
 	QTreeView* m_packetSourceView;
 	PacketSourceModel* m_listenerModel;
+	QString m_rootPath;
 };
 
 #endif // SOURCELISTWIDGET_H

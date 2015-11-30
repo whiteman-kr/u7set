@@ -191,6 +191,17 @@ void SignalTableModel::addDataSource(const DataSource& dataSource)
 	}
 }
 
+void SignalTableModel::beginReloadProject()
+{
+	beginResetModel();
+	m_relatedSignalIndexes.clear();
+}
+
+void SignalTableModel::endReloadProject()
+{
+	endResetModel();
+}
+
 void SignalTableModel::setNeedToSwapBytes(bool value)
 {
 	beginResetModel();

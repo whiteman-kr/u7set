@@ -7,10 +7,15 @@
 #include <QNetworkInterface>
 #include "PacketSourceModel.h"
 #include <QSettings>
+#include <QDirIterator>
+#include <QSettings>
 
 SourceListWidget::SourceListWidget(QWidget *parent)
 	: QWidget(parent)
 {
+	QSettings s("Radiy", "u7");
+	m_rootPath = s.value("m_buildOutputPath", QDir::currentPath()).toString();
+
 	m_packetSourceView = new QTreeView(this);
 	m_listenerModel = new PacketSourceModel(this);
 	m_packetSourceView->setModel(m_listenerModel);
@@ -44,7 +49,22 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 		}
 	}
 
+	QVBoxLayout* vl = new QVBoxLayout;
 	QHBoxLayout* hl = new QHBoxLayout;
+
+	m_projectListCombo = new QComboBox(this);
+	hl->addWidget(m_projectListCombo);
+
+	loadProjectList();
+	m_listenerModel->loadProject(m_rootPath + '/' + m_projectListCombo->currentText());
+
+	QPushButton* button = new QPushButton("Reload", this);
+	connect(button, &QPushButton::pressed, this, &SourceListWidget::reloadFiles);
+	hl->addWidget(button);
+
+	hl->addStretch();
+	vl->addLayout(hl);
+	hl = new QHBoxLayout;
 	hl->addWidget(m_netListCombo);
 	hl->addWidget(m_portEditor = new QLineEdit("2000", this));
 
@@ -57,7 +77,6 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 	hl->addWidget(removeListenerButton);
 	hl->addStretch(1);
 
-	QVBoxLayout* vl = new QVBoxLayout;
 	vl->addLayout(hl);
 
 	connect(m_listenerModel, &PacketSourceModel::contentChanged, m_packetSourceView, &QTreeView::resizeColumnToContents);
@@ -90,4 +109,29 @@ void SourceListWidget::removeListener()
 			m_listenerModel->removeListener(selected[i].row());
 		}
 	}
+}
+
+void SourceListWidget::reloadFiles()
+{
+	QSettings s;
+	s.setValue("Selected project", m_projectListCombo->currentText());
+	m_listenerModel->loadProject(m_rootPath + '/' + m_projectListCombo->currentText());
+}
+
+void SourceListWidget::loadProjectList()
+{
+	QDirIterator it(m_rootPath, QStringList() << "*build.xml", QDir::Files, QDirIterator::Subdirectories);
+	while (it.hasNext()) {
+		QString path = it.next();
+		int lastSlash = path.lastIndexOf('/');
+		QString projectPath = path.left(lastSlash);
+		if (QDirIterator(projectPath, QStringList() << "*appSignals.xml", QDir::Files, QDirIterator::Subdirectories).hasNext() &&
+				QDirIterator(projectPath, QStringList() << "*equipment.xml", QDir::Files, QDirIterator::Subdirectories).hasNext())
+		{
+			int prevSlash = path.lastIndexOf('/', lastSlash - 1);
+			m_projectListCombo->addItem(path.mid(prevSlash + 1, lastSlash - prevSlash - 1));
+		}
+	}
+	QSettings s;
+	m_projectListCombo->setCurrentText(s.value("Selected project", m_projectListCombo->itemText(m_projectListCombo->count() - 1)).toString());
 }

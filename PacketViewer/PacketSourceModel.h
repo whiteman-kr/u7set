@@ -91,6 +91,7 @@ public:
 	void parseReceivedBuffer(char* buffer, quint64 readBytes);
 	void openStatusWidget();
 	void removeDependentWidget(QObject* object);
+	void reloadProject();
 
 signals:
 	void fieldsChanged();
@@ -101,6 +102,7 @@ private:
 	std::vector<QWidget*> dependentWidgets;
 	PacketBufferTableModel* m_packetBufferModel;
 	SignalTableModel* m_signalTableModel;
+	const QHash<quint32, DataSource>* m_dataSources;
 
 	void swapHeader(RpPacketHeader& header);
 };
@@ -116,7 +118,7 @@ public:
 	Source& source(int index) const { return *m_sources[index].get(); }
 	int index(Source* source) const;
 
-    int childCount() { return static_cast<int>(m_sources.size()); }
+	int childCount() { return static_cast<int>(m_sources.size()); }
 
 	int getSourceIndex(quint32 ip, quint16 port);
 	int addNewSource(quint32 ip, quint16 port);	// returns index of new source
@@ -128,6 +130,7 @@ signals:
 
 public slots:
 	void readPendingDatagrams();
+	void reloadProject();
 
 private:
 	std::vector<std::shared_ptr<Source>> m_sources;
@@ -172,8 +175,10 @@ signals:
 	void contentChanged(int column);
 
 public slots:
+	void loadProject(const QString& projectPath);
+
 	void openSourceStatusWidget(const QModelIndex &index);
-    void removeListener(int row);
+	void removeListener(int row);
 
 	void beginInsertSource(int row);
 	void endInsertSource();

@@ -9,13 +9,13 @@
 #include "SignalTableModel.h"
 #include <QSettings>
 #include "SourceStatusWidget.h"
+#include <QDirIterator>
+#include <QMessageBox>
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)
 {
-	SerializeEquipmentFromXml(m_deviceRoot);
-	SerializeSignalsFromXml("appSignals.xml", m_unitInfo, m_signalSet);
-	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
+	Hardware::Init();
 }
 
 PacketSourceModel::~PacketSourceModel()
@@ -224,6 +224,39 @@ int PacketSourceModel::index(Listener* listener)
 	return -1;
 }
 
+void PacketSourceModel::loadProject(const QString& projectPath)
+{
+	QDirIterator signalsIt(projectPath, QStringList() << "*appSignals.xml", QDir::Files, QDirIterator::Subdirectories);
+	if (signalsIt.hasNext())
+	{
+		m_unitInfo.clear();
+		m_signalSet.clear();
+		SerializeSignalsFromXml(signalsIt.next(), m_unitInfo, m_signalSet);
+	}
+	else
+	{
+		QMessageBox::critical(nullptr, "Error", "Could not find appSignals.xml");
+		return;
+	}
+	QDirIterator equipmentIt(projectPath, QStringList() << "*equipment.xml", QDir::Files, QDirIterator::Subdirectories);
+	if (equipmentIt.hasNext())
+	{
+		m_deviceRoot.reset();
+		SerializeEquipmentFromXml(equipmentIt.next(), m_deviceRoot);
+	}
+	else
+	{
+		QMessageBox::critical(nullptr, "Error", "Could not find equipment.xml");
+		return;
+	}
+	m_dataSources.clear();
+	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
+	for (auto listener : m_listeners)
+	{
+		listener->reloadProject();
+	}
+}
+
 
 void PacketSourceModel::openSourceStatusWidget(const QModelIndex& index)
 {
@@ -400,23 +433,21 @@ void Listener::readPendingDatagrams()
 	}
 }
 
+void Listener::reloadProject()
+{
+	for (auto source : m_sources)
+	{
+		source->reloadProject();
+	}
+}
+
 
 Source::Source(QString address, int port, const SignalSet& signalSet, const QHash<quint32, DataSource>& dataSources, Statistic* parent) :
 	Statistic(address, port, parent),
 	m_packetBufferModel(new PacketBufferTableModel(m_buffer, m_lastHeader, this)),
-	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this))
+	m_signalTableModel(new SignalTableModel(m_buffer, signalSet, this)),
+	m_dataSources(&dataSources)
 {
-	QHashIterator<quint32, DataSource> iterator(dataSources);
-
-	while (iterator.hasNext())
-	{
-		iterator.next();
-
-		if (iterator.value().hostAddress().toIPv4Address() == ip())
-		{
-			m_signalTableModel->addDataSource(iterator.value());
-		}
-	}
 	m_lastHeader.packetNo = -1;
 	memset(m_buffer, 0, RP_MAX_FRAME_COUNT * RP_PACKET_DATA_SIZE);
 }
@@ -488,6 +519,23 @@ void Source::removeDependentWidget(QObject* object)
 			dependentWidgets.erase(dependentWidgets.begin() + i);
 		}
 	}
+}
+
+void Source::reloadProject()
+{
+	m_signalTableModel->beginReloadProject();
+	QHashIterator<quint32, DataSource> iterator(*m_dataSources);
+
+	while (iterator.hasNext())
+	{
+		iterator.next();
+
+		if (iterator.value().hostAddress().toIPv4Address() == ip())
+		{
+			m_signalTableModel->addDataSource(iterator.value());
+		}
+	}
+	m_signalTableModel->endReloadProject();
 }
 
 void Source::swapHeader(RpPacketHeader &header)
