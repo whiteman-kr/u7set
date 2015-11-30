@@ -48,7 +48,7 @@ void MonitorConfigThread::run()
 	return;
 }
 
-void MonitorConfigThread::reconnect(QString ip1, int port1, QString ip2, int port2, QString instanceStrId, int instanceNo)
+void MonitorConfigThread::reconnect(QString /*ip1*/, int /*port1*/, QString /*ip2*/, int /*port2*/, QString /*instanceStrId*/, int /*instanceNo*/)
 {
 	assert(false);	// TO DO
 }

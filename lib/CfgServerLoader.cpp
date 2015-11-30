@@ -266,7 +266,7 @@ bool CfgLoader::readFile(const QString& filePathName, QByteArray* fileData)
 		return false;
 	}
 
-	fileData->swap(file.readAll());
+	*fileData = file.readAll();
 
 	return true;
 }
@@ -466,7 +466,7 @@ bool CfgLoader::readConfigurationFile(const QString& pathFileName, QByteArray* f
 		return false;
 	}
 
-	fileData->swap(file.readAll());
+	*fileData = file.readAll();
 
 	file.close();
 

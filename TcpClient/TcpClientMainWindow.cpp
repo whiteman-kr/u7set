@@ -107,7 +107,7 @@ void TcpClientMainWindow::on_pushButton_clicked()
 
 
 
-void TcpClientMainWindow::onCfgReady(const QByteArray& configurationXmlData, BuildFileInfoArray buildFileInfoArray)
+void TcpClientMainWindow::onCfgReady(const QByteArray& /*configurationXmlData*/, BuildFileInfoArray /*buildFileInfoArray*/)
 {
 	int a = 0;
 	a++;
