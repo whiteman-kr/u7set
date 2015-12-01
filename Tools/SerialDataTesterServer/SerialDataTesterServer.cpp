@@ -35,6 +35,21 @@ SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 
 	qsrand(qrand());
 
+	const quint64 polynom = 0xd800000000000000ULL;	// CRC-64-ISO
+	quint64 tempValue;
+	for (int i=0; i<256; i++)
+	{
+		tempValue=i;
+		for (int j = 8; j>0; j--)
+		{
+			if (tempValue & 1)
+				tempValue = (tempValue >> 1) ^ polynom;
+			else
+				tempValue >>= 1;
+		}
+		crc_table[i] = tempValue;
+	}
+
 	connect(ui->openFileButton, &QPushButton::clicked, this, &SerialDataTesterServer::setFile);
 	connect(m_timerForPackets, &QTimer::timeout, this, &SerialDataTesterServer::sendPacket);
 	connect(ui->startServerButton, &QPushButton::clicked, this, &SerialDataTesterServer::startServer);
@@ -239,13 +254,48 @@ void SerialDataTesterServer::sendPacket()
 
 	QDataStream packetDataStream(&m_bytes, QIODevice::WriteOnly);
 
-	packetDataStream << m_signature << m_version << m_Id << m_numerator << m_dataAmount << m_dataUniqueId << m_dataOffset << m_dataBits << m_dataValue;
+	if (m_numberOfPacket%5 == 0)
+	{
+		packetDataStream << quint32(0x424D4C46) << m_version << m_Id << m_numerator << m_dataAmount << m_dataUniqueId << m_dataOffset << m_dataBits << m_dataValue;
+		ui->signature->setText(QString::number(quint32(0x424D4C46), 16));
+	}
+	else
+	{
+		packetDataStream << m_signature << m_version << m_Id << m_numerator << m_dataAmount << m_dataUniqueId << m_dataOffset << m_dataBits << m_dataValue;
+		ui->signature->setText(QString::number(m_signature, 16));
+	}
 
-	ui->signature->setText(QString::number(m_signature, 16));
 	ui->version->setText(QString::number(m_version));
 	ui->transmissionId->setText(QString::number(m_Id));
 	ui->numerator->setText(QString::number(m_numerator));
 	ui->dataUniqueId->setText(QString::number(m_dataUniqueId));
+	ui->dataAmount->setText(QString::number(m_dataAmount));
+	ui->data->setText(QString::number(m_dataOffset) + QString::number(m_dataBits) + QString::number(m_dataValue));
+	ui->crc->setText("Calculated crc");
+
+	// Calculate CRC-64
+	//
+
+	QString data = QString::number(m_dataOffset);
+	data.append(QString::number(m_dataBits));
+	data.append(QString::number(m_dataValue));
+
+	char *crcData = data.toLocal8Bit().data();
+
+	quint64 crc = 0;
+	for (int i=0; i<data.size(); i++)
+	{
+		crc = crc_table[(crc ^ (crcData[i])) & 0xFF] ^ (crc >> 8);
+	}
+	crc = ~crc;
+
+	if (m_numberOfPacket%7 == 0)
+	{
+		crc = 0;
+		ui->crc->setText("Wrong crc");
+	}
+
+	packetDataStream << crc;
 
 	m_serialPort->write(m_bytes);
 	bool result = m_serialPort->flush();

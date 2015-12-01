@@ -75,7 +75,9 @@ private:
 		value
 	};
 
-	QVector<SignalData> signalsFromXml;
+	QVector<SignalData> m_signalsFromXml;
+	quint64 m_crc_table[256];
+	const quint32 m_signature = 0x424D4C47;
 };
 
 #endif // SERIALDATATESTER_H

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1077</width>
+    <width>1120</width>
     <height>573</height>
    </rect>
   </property>
@@ -33,61 +33,13 @@
      <number>0</number>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>0</y>
-      <width>141</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="portLabel">
-         <property name="text">
-          <string>Port: </string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="baudLabel">
-         <property name="text">
-          <string>Baud: </string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLabel" name="portNameLabel">
-         <property name="text">
-          <string>Error</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="baudRateLabel">
-         <property name="text">
-          <string>Error</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
    <widget class="QGroupBox" name="currentSignalInfo">
     <property name="geometry">
      <rect>
       <x>870</x>
-      <y>60</y>
-      <width>201</width>
-      <height>131</height>
+      <y>90</y>
+      <width>241</width>
+      <height>151</height>
      </rect>
     </property>
     <property name="title">
@@ -97,9 +49,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
-       <width>171</width>
-       <height>93</height>
+       <y>20</y>
+       <width>221</width>
+       <height>121</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -130,6 +82,13 @@
          <widget class="QLabel" name="numeratorLabel">
           <property name="text">
            <string>Numerator</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="crcLabel">
+          <property name="text">
+           <string>CRC check</string>
           </property>
          </widget>
         </item>
@@ -165,6 +124,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QLabel" name="crc">
+          <property name="text">
+           <string>No data</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -174,20 +140,20 @@
     <property name="geometry">
      <rect>
       <x>870</x>
-      <y>200</y>
-      <width>201</width>
+      <y>250</y>
+      <width>241</width>
       <height>81</height>
      </rect>
     </property>
     <property name="title">
-     <string>GroupBox</string>
+     <string>Packet info</string>
     </property>
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>167</width>
+       <width>221</width>
        <height>55</height>
       </rect>
      </property>
@@ -245,13 +211,74 @@
      </layout>
     </widget>
    </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>0</y>
+      <width>241</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>GroupBox</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>211</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="portLabel">
+          <property name="text">
+           <string>Port: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="baudLabel">
+          <property name="text">
+           <string>Baud: </string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="portNameLabel">
+          <property name="text">
+           <string>Error</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="baudRateLabel">
+          <property name="text">
+           <string>Error</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1077</width>
+     <width>1120</width>
      <height>21</height>
     </rect>
    </property>
