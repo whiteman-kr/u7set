@@ -53,6 +53,8 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 	QVBoxLayout* vl = new QVBoxLayout;
 	QHBoxLayout* hl = new QHBoxLayout;
 
+	setLayout(vl);
+
 	m_projectListCombo = new QComboBox(this);
 	hl->addWidget(m_projectListCombo);
 
@@ -91,7 +93,6 @@ SourceListWidget::SourceListWidget(QWidget *parent)
 		m_packetSourceView->resizeColumnToContents(i);
 	}
 	vl->addWidget(m_packetSourceView);
-	setLayout(vl);
 }
 
 SourceListWidget::~SourceListWidget()
@@ -125,6 +126,7 @@ void SourceListWidget::reloadFiles()
 
 void SourceListWidget::loadProjectList()
 {
+	m_projectListCombo->clear();
 	QDirIterator it(m_rootPath, QStringList() << "*build.xml", QDir::Files, QDirIterator::Subdirectories);
 	while (it.hasNext()) {
 		QString path = it.next();

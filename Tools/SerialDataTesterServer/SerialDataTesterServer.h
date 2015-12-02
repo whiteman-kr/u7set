@@ -57,6 +57,7 @@ private:
 	QVector<SignalData> m_signalsFromXml;
 
 	QByteArray  m_bytes;
+	quint64 crc_table[256];
 };
 
 #endif // SERIALDATATESTERSERVER_H

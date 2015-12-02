@@ -70,7 +70,9 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
 	ui->signalsTable->setHorizontalHeaderItem(value, new QTableWidgetItem(tr("Value")));
 
-	// Try to load application settings
+	// Try to load application settings. If there is no port
+	// in settings, call application settings dialog and reconfigure
+	// settings
 	//
 
 	m_applicationSettingsDialog = new SettingsDialog();
@@ -84,7 +86,7 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	delete m_applicationSettingsDialog;
 	m_applicationSettingsDialog = nullptr;
 
-	// Read application settings from application settings
+	// Read stored application settings
 	//
 
 	QString portName = applicationSettings.value("port").toString();
@@ -114,13 +116,33 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 
 	m_pathToSignalsXml = applicationSettings.value("pathToSignals").toString();
 
+	// Receiver timer
+	//
+
 	receiveTimeout = new QTimer();
 
-	// Create port connection
+	// Read xml file
 	//
 
-	// Now read
+	parseFile();
+
+	// Calculate crc-64 table
 	//
+
+	const quint64 polynom = 0xd800000000000000ULL;	// CRC-64-ISO
+	quint64 tempValue;
+	for (int i=0; i<256; i++)
+	{
+		tempValue=i;
+		for (int j = 8; j>0; j--)
+		{
+			if (tempValue & 1)
+				tempValue = (tempValue >> 1) ^ polynom;
+			else
+				tempValue >>= 1;
+		}
+		m_crc_table[i] = tempValue;
+	}
 
 	connect(m_reloadCfg, &QAction::triggered, this, &SerialDataTester::reloadConfig);
 	connect(m_changeSignalSettingsFile, &QAction::triggered, this, &SerialDataTester::selectNewSignalsFile);
@@ -132,7 +154,10 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	connect(m_portReceiver, &PortReceiver::dataFromPort, this, &SerialDataTester::dataReceived);
 	connect(receiveTimeout, &QTimer::timeout, this, &SerialDataTester::signalTimeout);
 
-	parseFile();
+	// Start port receiver in another
+	// thread
+	//
+
 	m_portReceiver->openPort();
 
 	m_PortThread = new QThread(this);
@@ -149,7 +174,7 @@ SerialDataTester::~SerialDataTester()
 }
 
 void SerialDataTester::parseFile()
-{	
+{
 	// Try to open signals xml to read signals
 	//
 
@@ -242,7 +267,7 @@ void SerialDataTester::parseFile()
 					errorLoadingXml = true;
 				}
 
-				signalsFromXml.push_back(currentSignal);
+				m_signalsFromXml.push_back(currentSignal);
 			}
 		}
 	}
@@ -256,7 +281,7 @@ void SerialDataTester::parseFile()
 	if (errorLoadingXml)
 	{
 		ui->statusBar->showMessage("Error loading " + m_pathToSignalsXml);
-		signalsFromXml.clear();
+		m_signalsFromXml.clear();
 	}
 	else
 	{
@@ -271,7 +296,7 @@ void SerialDataTester::parseFile()
 
 	int numberOfSignalFromVector = 0;
 
-	for (SignalData& signalData : signalsFromXml)
+	for (SignalData& signalData : m_signalsFromXml)
 	{
 		ui->signalsTable->setRowCount(numberOfSignalFromVector + 1);
 		ui->signalsTable->setItem(numberOfSignalFromVector, strId, new QTableWidgetItem(signalData.strId));
@@ -298,7 +323,7 @@ void SerialDataTester::reloadConfig()
 	ui->signalsTable->setHorizontalHeaderItem(type, new QTableWidgetItem(tr("Type")));
 	ui->signalsTable->setHorizontalHeaderItem(value, new QTableWidgetItem(tr("Value")));
 
-	signalsFromXml.clear();
+	m_signalsFromXml.clear();
 	parseFile();
 }
 
@@ -398,40 +423,74 @@ void SerialDataTester::dataReceived(QByteArray data)
 
 	for (int currentSignal = 0; currentSignal < amount / 4; currentSignal++)
 	{
-		ui->statusBar->showMessage("Connected");
 		packet >> m_offset;
 		packet >> m_bit;
 		packet >> m_value;
+	}
 
-		bool signalExists = false;
-		SignalData receivedSignal;
-		int rowNumber = 0;
-		int itemNumber = 0;
+	QString dataForCrc = QString::number(m_offset);
+	dataForCrc.append(QString::number(m_bit));
+	dataForCrc.append(QString::number(m_value));
 
-		for (SignalData signalFromXml : signalsFromXml)
+	char *dataForCrcPtr = dataForCrc.toLocal8Bit().data();
+
+	quint64 crc = 0;
+	for (int i=0; i<dataForCrc.size(); i++)
+	{
+		crc = m_crc_table[(crc ^ (dataForCrcPtr[i])) & 0xFF] ^ (crc >> 8);
+	}
+	crc = ~crc;
+
+	quint64 packetCrc;
+	packet >> packetCrc;
+
+	if (crc != packetCrc)
+	{
+		ui->crc->setText("ERROR");
+		ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt() + 1));
+		ui->statusBar->showMessage("Corrupted packet (CRC error)");
+	}
+	else
+	{
+		ui->crc->setText("OK");
+		if (signature != m_signature)
 		{
-			if (signalFromXml.offset == m_offset && signalFromXml.bit == m_bit)
-			{
-				signalExists = true;
-				receivedSignal = signalFromXml;
-				rowNumber = itemNumber;
-			}
-			itemNumber++;
-		}
-
-		if (signalExists)
-		{
-			ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(QString::number(m_value)));
-			ui->processedPackets->setText(QString::number(ui->processedPackets->text().toInt() + 1));
+			ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt() + 1));
+			ui->statusBar->showMessage("Unknown signature");
 		}
 		else
 		{
-			ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt() + 1));
+			for (int currentSignal = 0; currentSignal < amount / 4; currentSignal++)
+			{
+				bool signalExists = false;
+				SignalData receivedSignal;
+				int rowNumber = 0;
+				int itemNumber = 0;
+
+				for (SignalData signalFromXml : m_signalsFromXml)
+				{
+					if (signalFromXml.offset == m_offset && signalFromXml.bit == m_bit)
+					{
+						signalExists = true;
+						receivedSignal = signalFromXml;
+						rowNumber = itemNumber;
+					}
+					itemNumber++;
+				}
+
+				if (signalExists)
+				{
+					ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(QString::number(m_value)));
+					ui->processedPackets->setText(QString::number(ui->processedPackets->text().toInt() + 1));
+				}
+				else
+				{
+					ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt() + 1));
+				}
+			}
 		}
-
-		ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
 	}
-
+	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
 	//ui->caption->setText(dataFromPacket);
 }
 
