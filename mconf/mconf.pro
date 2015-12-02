@@ -44,7 +44,9 @@ HEADERS += \
     ModuleConfigurator.h \
     SettingsForm.h \
 	../include/Crc.h \
-	../include/CUtils.h
+	../include/CUtils.h \
+    ../include/PropertyObject.h \
+    ../include/Types.h
 
 SOURCES += \
 	main.cpp \
@@ -61,6 +63,8 @@ SOURCES += \
     ModuleConfigurator.cpp \
     SettingsForm.cpp \
     ../lib/Crc.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/Types.cpp
 
 FORMS += moduleconfigurator.ui \
 	diagtabpage.ui \

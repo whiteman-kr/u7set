@@ -106,7 +106,6 @@ void CfgServer::readBuildXml()
 
 		m_buildFileInfo.insert(bfi.pathFileName, bfi);
 	}
-
 }
 
 
@@ -132,7 +131,7 @@ void CfgLoader::onClientThreadStarted()
 	connect(this, &CfgLoader::signal_downloadCfgFile, this, &CfgLoader::slot_downloadCfgdFile);
 
 	m_timer.setInterval(2000);
-	m_timer.start();
+	//m_timer.start();			!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 
@@ -330,6 +329,8 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 	if (fileName == m_configurationXmlPathFileName)
 	{
+		// configuration.xml is loaded
+		//
 		if (m_currentDownload.isTestCfgRequest)
 		{
 			if (m_cfgFileInfo[CONFIGURATION_XML].md5 != md5)
@@ -339,6 +340,8 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		}
 		else
 		{
+			qDebug() << "Downloaded configuration.xml";
+
 			if (readConfigurationXml() == true)
 			{
 				m_configurationReady = true;
@@ -356,13 +359,14 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 					bfiArray.append(bfi);
 				}
 
+				qDebug() << "Readed configuration.xml";
+
 				emit signal_configurationReady(m_cfgFileInfo[CONFIGURATION_XML].fileData, bfiArray);
 			}
 		}
 	}
 	else
 	{
-
 		qDebug() << "Downloaded " << (m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :")  << fileName;
 
 		if (m_cfgFileInfo.contains(m_currentDownloadRequest.pathFileName))
@@ -378,7 +382,23 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		{
 			// emit signal for "manual" requests only!
 			//
-			emit signal_endFileDownload(fileName, "");
+
+			if(m_currentDownloadRequest.fileData == nullptr)
+			{
+				assert(false);
+				emit signal_endFileDownload(fileName, "Internal error");
+			}
+			else
+			{
+				if (readFile(fileName, m_currentDownloadRequest.fileData) == false)
+				{
+					emit signal_endFileDownload(fileName, "Read file error");
+				}
+				else
+				{
+					emit signal_endFileDownload(fileName, "");
+				}
+			}
 		}
 	}
 
@@ -501,8 +521,15 @@ void CfgLoader::slot_downloadCfgdFile(const QString& fileName, QByteArray* fileD
 		// file allready loaded
 		// read file data
 		//
+		if (readFile(fileName, fileData) == false)
+		{
+			emit signal_endFileDownload(fileName, "Read file error");
+		}
+		else
+		{
+			emit signal_endFileDownload(fileName, "");
+		}
 
-		emit signal_endFileDownload(fileName, "");
 		return;
 	}
 
@@ -513,6 +540,7 @@ void CfgLoader::slot_downloadCfgdFile(const QString& fileName, QByteArray* fileD
 
 	fdr.pathFileName = fileName;
 	fdr.isAutoRequest = false;		// manual request
+	fdr.fileData = fileData;
 
 	m_downloadQueue.append(fdr);
 
@@ -533,9 +561,18 @@ bool CfgLoader::downloadCfgFile(const QString& pathFileName, QByteArray* fileDat
 
 	WaitForSignalHelper wsh(this, SIGNAL(signal_endFileDownload));
 
-	emit signal_downloadCfgFile(pathFileName, fileData);
+	QByteArray localFileData;
 
-	return wsh.wait(5000);
+	emit signal_downloadCfgFile(pathFileName, &localFileData);
+
+	if (wsh.wait(5000) == true)
+	{
+		fileData->swap(localFileData);
+		return true;
+	}
+
+	fileData->clear();
+	return false;
 }
 
 

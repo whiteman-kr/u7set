@@ -690,8 +690,6 @@ namespace Tcp
 		thread->quit();
 
 		delete thread;
-
-
 	}
 
 

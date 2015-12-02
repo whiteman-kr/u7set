@@ -688,7 +688,7 @@ namespace Builder
 	}
 
 
-	const Signal* ModuleLogicCompiler::getSignal(const QString& strID)
+	Signal* ModuleLogicCompiler::getSignal(const QString& strID)
 	{
 		if (m_signalsStrID.contains(strID))
 		{
@@ -3082,20 +3082,24 @@ namespace Builder
 
 					AppItem* appItem = nullptr;
 
-					if (signal->isInput())
+					switch(signal->inOutType())
 					{
+					case E::SignalInOutType::Input:
 						appItem = createFbForAnalogInputSignalConversion(*signal);
-					}
-					else
-					{
-						if (signal->isOutput())
-						{
-							appItem = createFbForAnalogOutputSignalConversion(*signal);
-						}
-						else
-						{
-							assert(false);
-						}
+						break;
+
+					case E::SignalInOutType::Output:
+						appItem = createFbForAnalogOutputSignalConversion(*signal);
+						break;
+
+					case E::SignalInOutType::Internal:
+						LOG_ERROR(m_log, QString(tr("Internal signal %1 can not be connected to device signal. Connect this signal to appropriate LM module or change its type to Input or Output")).
+								  arg(signal->strID()));
+						break;
+
+					default:
+						LOG_ERROR(m_log, QString(tr("Unknown inOutType of signal %1.")).
+								  arg(signal->strID()));
 					}
 
 					if (appItem != nullptr)
@@ -3107,10 +3111,6 @@ namespace Builder
 						qDebug() << signal->strID();
 
 						delete appItem;
-					}
-					else
-					{
-						assert(false);
 					}
 				}
 			}
@@ -3653,7 +3653,7 @@ namespace Builder
 
 			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isAnalog())
 			{
-				Address16 ramAddr = m_memoryMap.addRegAnalogSignal(*appSignal);
+				Address16 ramAddr = m_memoryMap.addRegAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 				appSignal->regAddr() = Address16(ramAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), 0);
@@ -3668,11 +3668,11 @@ namespace Builder
 		{
 			if (appSignal->isInternal() && appSignal->isRegistered() && appSignal->isDiscrete())
 			{
-				Address16 ramAddr = m_memoryMap.addRegDiscreteSignal(*appSignal);
+				Address16 ramAddr = m_memoryMap.addRegDiscreteSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 
-				Address16 regAddr = m_memoryMap.addRegDiscreteSignalToRegBuffer(*appSignal);
+				Address16 regAddr = m_memoryMap.addRegDiscreteSignalToRegBuffer(appSignal->constSignal());
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.wordAddressedMemoryAddress(), ramAddr.bit());
 			}
@@ -3686,7 +3686,7 @@ namespace Builder
 		{
 			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isAnalog())
 			{
-				Address16 ramAddr = m_memoryMap.addNonRegAnalogSignal(*appSignal);
+				Address16 ramAddr = m_memoryMap.addNonRegAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 			}
@@ -3700,7 +3700,7 @@ namespace Builder
 		{
 			if (appSignal->isInternal() && !appSignal->isRegistered() && appSignal->isDiscrete())
 			{
-				Address16 ramAddr = m_memoryMap.addNonRegDiscreteSignal(*appSignal);
+				Address16 ramAddr = m_memoryMap.addNonRegDiscreteSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 			}
@@ -4374,23 +4374,25 @@ namespace Builder
 	//
 
 
-	AppSignal::AppSignal(const Signal *signal, const AppItem *appItem) :
+	AppSignal::AppSignal(Signal *signal, const AppItem *appItem) :
+		m_signal(signal),
 		m_appItem(appItem)
 	{
+		m_isShadowSignal = false;
+
 		// construct AppSignal based on real signal
 		//
-		if (signal == nullptr)
+		if (m_signal == nullptr)
 		{
 			assert(false);
+			return;
 		}
 
-		*dynamic_cast<Signal*>(this) = *signal;
-
-		m_isShadowSignal = false;
+		//*dynamic_cast<Signal*>(this) = *signal;
 
 		// believe that all input signals have already been computed
 		//
-		if (isInput())
+		if (m_signal->isInput())
 		{
 			setComputed();
 		}
@@ -4401,15 +4403,28 @@ namespace Builder
 		m_appItem(appItem),
 		m_guid(guid)
 	{
+		m_isShadowSignal = true;
+
+		m_signal = new Signal;
+
 		// construct shadow AppSignal based on OutputPin
 		//
-		setStrID(strID);
-		setType(signalType);
-		setDataFormat(dataFormat);
-		setDataSize(dataSize);
-		setInOutType(E::SignalInOutType::Internal);
+		m_signal->setStrID(strID);
+		m_signal->setType(signalType);
+		m_signal->setDataFormat(dataFormat);
+		m_signal->setDataSize(dataSize);
+		m_signal->setInOutType(E::SignalInOutType::Internal);
+		m_signal->setAcquire(false);								// non-registered signal !
 
-		m_isShadowSignal = true;
+	}
+
+
+	AppSignal::~AppSignal()
+	{
+		if (m_isShadowSignal == true)
+		{
+			delete m_signal;
+		}
 	}
 
 
@@ -4455,7 +4470,7 @@ namespace Builder
 			strID = "#" + strID;
 		}
 
-		const Signal* s = m_compiler.getSignal(strID);
+		Signal* s = m_compiler.getSignal(strID);
 
 		if (s == nullptr)
 		{
@@ -4558,8 +4573,6 @@ namespace Builder
 		else
 		{
 			appSignal = new AppSignal(outPinGuid, signalType, dataFormat, s.size(), appFb, strID);
-
-			appSignal->setAcquire(false);			// non-registered signal
 
 			m_signalStrIdMap.insert(strID, appSignal);
 

@@ -360,11 +360,13 @@ namespace Builder
 	// represent all signal in application logic schemes, and signals, which createad in compiling time
 	//
 
-	class AppSignal : public Signal
+	class AppSignal //: public Signal
 	{
 	private:
+		Signal* m_signal = nullptr;							// pointer to signal in m_signalSet
+
 		const AppItem* m_appItem = nullptr;					// application signals pointer (for real signals)
-															// application sunctional block pointer (for shadow signals)
+															// application functional block pointer (for shadow signals)
 		QUuid m_guid;
 
 		bool m_isShadowSignal = false;
@@ -372,8 +374,10 @@ namespace Builder
 		bool m_computed = false;
 
 	public:
-		AppSignal(const Signal* signal, const AppItem* appItem);
+		AppSignal(Signal* signal, const AppItem* appItem);
 		AppSignal(const QUuid& guid, E::SignalType signalType, E::DataFormat dataFormat, int dataSize, const AppItem* appItem, const QString& strID);
+
+		~AppSignal();
 
 		const AppItem &appItem() const;
 
@@ -381,7 +385,30 @@ namespace Builder
 		bool isComputed() const { return m_computed; }
 
 
-		bool isShadowSignal() { return m_isShadowSignal; }
+		bool isShadowSignal() const { return m_isShadowSignal; }
+
+		QString strID() const { return m_signal->strID(); }
+
+		const Address16& ramAddr() const { return m_signal->ramAddr(); }
+		const Address16& regAddr() const { return m_signal->regAddr(); }
+
+		Address16& ramAddr() { return m_signal->ramAddr(); }
+		Address16& regAddr() { return m_signal->regAddr(); }
+
+
+		E::SignalType type() const { return m_signal->type(); }
+		E::DataFormat dataFormat() const { return m_signal->dataFormat(); }
+		int dataSize() const { return m_signal->dataSize(); }
+
+		bool isAnalog() const { return m_signal->isAnalog(); }
+		bool isDiscrete() const { return m_signal->isDiscrete(); }
+		bool isRegistered() const { return m_signal->isRegistered(); }
+		bool isInternal() const { return m_signal->isInternal(); }
+		bool isInput() const { return m_signal->isInput(); }
+		bool isOutput() const { return m_signal->isOutput(); }
+		bool isCompatibleDataFormat(Afb::AfbDataFormat afbDataFormat) const { return m_signal->isCompatibleDataFormat(afbDataFormat); }
+
+		const Signal& constSignal() { return *m_signal; }
 
 	};
 
@@ -846,7 +873,7 @@ namespace Builder
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
 
 		const SignalSet& signalSet() { return *m_signals; }
-		const Signal* getSignal(const QString& strID);
+		Signal* getSignal(const QString& strID);
 
 		OutputLog* log() { return m_log; }
 

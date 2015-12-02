@@ -353,7 +353,7 @@ namespace Tcp
 		virtual void onDisconnection() override;
 
 		virtual void onAck() {}
-		virtual void onReplyTimeout() {}
+		virtual void onReplyTimeout() { qDebug() << "Reply timeout"; }
 
 		bool isClearToSendRequest() const;
 

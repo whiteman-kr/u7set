@@ -93,6 +93,7 @@ private:
 		QString etalonMD5;
 		bool isAutoRequest = false;
 		bool isTestCfgRequest = false;			// does matter only for configuration.xml file request
+		QByteArray* fileData = nullptr;
 
 		void clear()
 		{
@@ -100,6 +101,7 @@ private:
 			etalonMD5 = "";
 			isAutoRequest = false;
 			isTestCfgRequest = false;
+			fileData = nullptr;
 		}
 	};
 

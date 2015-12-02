@@ -19,7 +19,7 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 	m_cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIG_SERVICE_REQUEST));
 	m_fileClientThread = new Tcp::Thread(m_cfgLoader);
 
-	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &TcpClientMainWindow::onCfgReady);
+	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &TcpClientMainWindow::onConfigurationReady);
 
 	m_fileClientThread->start();
 
@@ -102,13 +102,22 @@ void TestClient::processReply(quint32 /*requestID*/, const char* /*replyData*/, 
 
 void TcpClientMainWindow::on_pushButton_clicked()
 {
-	m_fileClient->downloadFile("/DataAquisitionService/applicationsignals.xml");
+	//m_fileClient->downloadFile("/DataAquisitionService/applicationsignals.xml");
+
+	QByteArray fileData;
+	bool result = m_cfgLoader->downloadCfgFile(dnFile, &fileData);
+
+	int a = 0;
+	a++;
 }
 
 
 
-void TcpClientMainWindow::onCfgReady(const QByteArray& /*configurationXmlData*/, BuildFileInfoArray /*buildFileInfoArray*/)
+
+void TcpClientMainWindow::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
 	int a = 0;
 	a++;
+
+	dnFile = buildFileInfoArray[1].pathFileName;
 }

@@ -46,7 +46,11 @@ private slots:
 	void on_pushButton_clicked();
 	void onEndDownloadFile(const QString fileName, Tcp::FileTransferResult errorCode);
 
+
+	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+
 private:
+	QString dnFile;
 	Ui::TcpClientMainWindow *ui;
 
 	TestClient* m_testClient = nullptr;
@@ -56,8 +60,6 @@ private:
 	Tcp::Thread* m_fileClientThread = nullptr;
 
 	CfgLoader* m_cfgLoader = nullptr;
-
-	void onCfgReady(const QByteArray& configurationXmlData, BuildFileInfoArray buildFileInfoArray);
 };
 
 #endif // TCPCLIENTMAINWINDOW_H
