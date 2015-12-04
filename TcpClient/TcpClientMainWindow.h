@@ -50,7 +50,7 @@ private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
-	QString dnFile;
+	QString dnFile = "/SYSTEMID_RACKID_WS00_DACQSERVICE/equipment.xml";
 	Ui::TcpClientMainWindow *ui;
 
 	TestClient* m_testClient = nullptr;

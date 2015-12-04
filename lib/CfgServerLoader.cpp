@@ -131,143 +131,12 @@ void CfgLoader::onClientThreadStarted()
 	connect(this, &CfgLoader::signal_downloadCfgFile, this, &CfgLoader::slot_downloadCfgdFile);
 
 	m_timer.setInterval(2000);
-	//m_timer.start();			!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-}
-
-
-void CfgLoader::changeApp(const QString& appStrID, int appInstance)
-{
-	shutdown();
-
-	m_appStrID = appStrID;
-	m_appInstance = appInstance;
-
-	m_appDataPath = "/" + m_appStrID + "-" + QString::number(m_appInstance);
-	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
-
-	setRootFolder(m_rootFolder);
-
-	m_configurationXmlPathFileName = "/" + m_appStrID + "/configuration.xml";
-
-	resetStatuses();
-}
-
-
-void CfgLoader::resetStatuses()
-{
-	m_downloadQueue.clear();
-	m_currentDownload.clear();
-
-	m_configurationXmlMd5 = "";
-
-	m_configurationReady = false;
-	m_autoDownloadIndex = 0;
-	m_allFilesLoaded = false;
+	m_timer.start();
 }
 
 
 void CfgLoader::shutdown()
 {
-}
-
-
-void CfgLoader::onTimer()
-{
-	if (m_autoDownloadIndex >= m_cfgFileInfo.count() ||
-		isConnected() == false ||
-		m_configurationReady == false ||
-		isTransferInProgress() ||
-		m_allFilesLoaded == true ||
-		m_downloadQueue.isEmpty() == false)
-	{
-		return;
-	}
-
-	while(m_autoDownloadIndex < m_cfgFileInfo.count())
-	{
-		CfgFileInfo& cfi = m_cfgFileInfo[m_autoDownloadIndex];
-
-		if (cfi.loaded == false)
-		{
-			if (cfgFileIsExists(cfi.pathFileName, cfi.md5) == true)
-			{
-				// file exists from previous downloads
-				// nothing to do
-				//
-				cfi.loaded = true;
-			}
-			else
-			{
-				FileDownloadRequest fdr;
-
-				fdr.pathFileName = m_cfgFileInfo[m_autoDownloadIndex].pathFileName;
-				fdr.isAutoRequest = true;
-
-				m_downloadQueue.append(fdr);
-
-				startDownload();
-
-				m_autoDownloadIndex++;
-
-				break;
-			}
-		}
-
-		m_autoDownloadIndex++;
-	}
-}
-
-
-bool CfgLoader::cfgFileIsExists(const QString& filePathName, const QString& etalonMd5)
-{
-	QString fileName = m_rootFolder + filePathName;
-
-	QFile file(fileName);
-
-	if (file.exists() == false)
-	{
-		return false;
-	}
-
-	if (file.open(QIODevice::ReadOnly) == false)
-	{
-		return false;
-	}
-
-	Md5Hash md5Hash;
-
-	md5Hash.addData(&file);
-
-	file.close();
-
-	if (md5Hash.resultStr() == etalonMd5)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-
-bool CfgLoader::readFile(const QString& filePathName, QByteArray* fileData)
-{
-	QString fileName = m_rootFolder + filePathName;
-
-	QFile file(fileName);
-
-	if (file.exists() == false)
-	{
-		return false;
-	}
-
-	if (file.open(QIODevice::ReadOnly) == false)
-	{
-		return false;
-	}
-
-	*fileData = file.readAll();
-
-	return true;
 }
 
 
@@ -295,9 +164,103 @@ void CfgLoader::startDownload()
 
 	m_currentDownloadRequest = m_downloadQueue.first();
 
+	qDebug() << "start request " << m_currentDownloadRequest.pathFileName;
+
 	m_downloadQueue.removeFirst();
 
-	downloadFile(m_currentDownloadRequest.pathFileName);
+	slot_downloadFile(m_currentDownloadRequest.pathFileName);	// TcpFileTransfer::slot_downloadFile
+}
+
+
+bool CfgLoader::downloadCfgFile(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
+{
+	if (fileData == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	fileData->clear();
+
+	WaitForSignalHelper wsh(this, SIGNAL(signal_endCfgFileDownload()));
+
+	QByteArray localFileData;
+	Tcp::FileTransferResult errorCode = Tcp::FileTransferResult::Ok;
+
+	emit signal_downloadCfgFile(pathFileName, &localFileData, &errorCode);
+
+	if (wsh.wait(5000) == true)
+	{
+		*errorStr = getErrorStr(errorCode);
+
+		if (errorCode == Tcp::FileTransferResult::Ok)
+		{
+			fileData->swap(localFileData);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	*errorStr = tr("File reading timeout");
+
+	return false;
+}
+
+
+void CfgLoader::slot_downloadCfgdFile(const QString& fileName, QByteArray* fileData, Tcp::FileTransferResult* errorCode)
+{
+	if (fileData == nullptr || errorCode == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	fileData->clear();
+
+	if (m_configurationReady == false)
+	{
+		*errorCode = Tcp::FileTransferResult::ConfigurationIsNotReady;
+		emit signal_endCfgFileDownload();
+		return;
+	}
+
+	if (m_cfgFileInfo.contains(fileName) == false)
+	{
+		*errorCode = Tcp::FileTransferResult::NotFoundRemoteFile;
+		emit signal_endCfgFileDownload();
+		return;
+	}
+
+	if (readCfgFileIfExists(fileName, fileData, m_cfgFileInfo[fileName].md5) == true)
+	{
+		qDebug() << "File " << fileName << " allready exists, md5 = " << m_cfgFileInfo[fileName].md5;
+
+		*errorCode = Tcp::FileTransferResult::Ok;
+		emit signal_endCfgFileDownload();
+
+		return;
+	}
+
+	// file is not exists
+	//
+
+	FileDownloadRequest fdr;
+
+	fdr.pathFileName = fileName;
+	fdr.isAutoRequest = false;			// manual request
+	fdr.fileData = fileData;
+	fdr.errorCode = errorCode;
+	fdr.etalonMD5 = m_cfgFileInfo[fileName].md5;
+
+	m_downloadQueue.append(fdr);
+
+	if (isTransferInProgress() == false)
+	{
+		startDownload();
+	}
 }
 
 
@@ -306,7 +269,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 	if (errorCode != Tcp::FileTransferResult::Ok)
 	{
 		assert(false);
-		emit signal_endFileDownload(fileName, getErrorStr(errorCode));
+		emit signal_endCfgFileDownload();
 		return;
 	}
 
@@ -320,9 +283,11 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 	{
 		if (m_currentDownloadRequest.etalonMD5 != md5)
 		{
-			errorCode = Tcp::FileDataCorrupted;
 			assert(false);
-			emit signal_endFileDownload(fileName, getErrorStr(errorCode));
+
+			m_currentDownloadRequest.setErrorCode(Tcp::FileDataCorrupted);
+			emit signal_endCfgFileDownload();
+
 			return;
 		}
 	}
@@ -331,7 +296,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 	{
 		// configuration.xml is loaded
 		//
-		if (m_currentDownload.isTestCfgRequest)
+		if (m_currentDownloadRequest.isTestCfgRequest)
 		{
 			if (m_cfgFileInfo[CONFIGURATION_XML].md5 != md5)
 			{
@@ -369,34 +334,26 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 	{
 		qDebug() << "Downloaded " << (m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :")  << fileName;
 
-		if (m_cfgFileInfo.contains(m_currentDownloadRequest.pathFileName))
-		{
-			m_cfgFileInfo[m_currentDownloadRequest.pathFileName].loaded = true;
-		}
-		else
-		{
-			assert(false);
-		}
-
 		if (m_currentDownloadRequest.isAutoRequest == false)
 		{
-			// emit signal for "manual" requests only!
+			// emit signal_endFileDownload for "manual" requests only!
 			//
-
 			if(m_currentDownloadRequest.fileData == nullptr)
 			{
 				assert(false);
-				emit signal_endFileDownload(fileName, "Internal error");
+				m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::InternalError);
+				emit signal_endCfgFileDownload();
 			}
 			else
 			{
-				if (readFile(fileName, m_currentDownloadRequest.fileData) == false)
+				if (readCfgFile(fileName, m_currentDownloadRequest.fileData) == false)
 				{
-					emit signal_endFileDownload(fileName, "Read file error");
+					m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::LocalFileReadingError);
+					emit signal_endCfgFileDownload();
 				}
 				else
 				{
-					emit signal_endFileDownload(fileName, "");
+					emit signal_endCfgFileDownload();
 				}
 			}
 		}
@@ -414,11 +371,121 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 }
 
 
+void CfgLoader::onTimer()
+{
+	if (m_autoDownloadIndex >= m_cfgFileInfo.count() ||
+		isConnected() == false ||
+		m_configurationReady == false ||
+		isTransferInProgress() ||
+		m_allFilesLoaded == true ||
+		m_downloadQueue.isEmpty() == false)
+	{
+		return;
+	}
+
+	while(m_autoDownloadIndex < m_cfgFileInfo.count())
+	{
+		CfgFileInfo& cfi = m_cfgFileInfo[m_autoDownloadIndex];
+
+		if (isCfgFileIsExists(cfi.pathFileName, cfi.md5) == true)
+		{
+			// file exists from previous downloads
+			// nothing to do
+			//
+			qDebug() << "File " << cfi.pathFileName << " allready exists, md5 = " << cfi.md5;
+		}
+		else
+		{
+			FileDownloadRequest fdr;
+
+			fdr.pathFileName = m_cfgFileInfo[m_autoDownloadIndex].pathFileName;
+			fdr.etalonMD5 = m_cfgFileInfo[m_autoDownloadIndex].md5;
+			fdr.isAutoRequest = true;
+
+			m_downloadQueue.append(fdr);
+
+			startDownload();
+
+			m_autoDownloadIndex++;
+
+			break;
+		}
+
+		m_autoDownloadIndex++;
+	}
+}
+
+
+void CfgLoader::changeApp(const QString& appStrID, int appInstance)
+{
+	shutdown();
+
+	m_appStrID = appStrID;
+	m_appInstance = appInstance;
+
+	m_appDataPath = "/" + m_appStrID + "-" + QString::number(m_appInstance);
+
+	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
+
+	//m_rootFolder = "d:/cfgloader" + m_appDataPath;		// for debugging only!!!
+
+	setRootFolder(m_rootFolder);
+
+	m_configurationXmlPathFileName = "/" + m_appStrID + "/configuration.xml";
+
+	resetStatuses();
+}
+
+
+void CfgLoader::resetStatuses()
+{
+	m_downloadQueue.clear();
+	m_currentDownloadRequest.clear();
+
+	m_configurationXmlMd5 = "";
+
+	m_configurationReady = false;
+	m_autoDownloadIndex = 1;		// index 0 - configuration.xml
+	m_allFilesLoaded = false;
+}
+
+
+bool CfgLoader::isCfgFileIsExists(const QString& filePathName, const QString& etalonMd5)
+{
+	QString fileName = m_rootFolder + filePathName;
+
+	QFile file(fileName);
+
+	if (file.exists() == false)
+	{
+		return false;
+	}
+
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		return false;
+	}
+
+	Md5Hash md5Hash;
+
+	md5Hash.addData(&file);
+
+	file.close();
+
+	if (md5Hash.resultStr() == etalonMd5)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
 bool CfgLoader::readConfigurationXml()
 {
 	QByteArray fileData;
 
-	if (readConfigurationFile(m_configurationXmlPathFileName, &fileData) == false)
+	if (readCfgFile(m_configurationXmlPathFileName, &fileData) == false)
 	{
 		return false;
 	}
@@ -430,7 +497,6 @@ bool CfgLoader::readConfigurationXml()
 	cfi.pathFileName = m_configurationXmlPathFileName;
 	cfi.size = fileData.size();
 	cfi.md5 = Md5Hash::hashStr(fileData);
-	cfi.loaded = true;
 	cfi.fileData.swap(fileData);
 
 	// configuration.xml info always first item in m_cfgFileInfo
@@ -470,7 +536,7 @@ bool CfgLoader::readConfigurationXml()
 }
 
 
-bool CfgLoader::readConfigurationFile(const QString& pathFileName, QByteArray* fileData)
+bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData)
 {
 	if (fileData == nullptr)
 	{
@@ -500,58 +566,7 @@ bool CfgLoader::readConfigurationFile(const QString& pathFileName, QByteArray* f
 }
 
 
-void CfgLoader::slot_downloadCfgdFile(const QString& fileName, QByteArray* fileData)
-{
-	if (fileData == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	fileData->clear();
-
-	if (m_cfgFileInfo.contains(fileName) == false)
-	{
-		emit signal_endFileDownload(fileName, "File not found in configuration.xml");
-		return;
-	}
-
-	if (m_cfgFileInfo[fileName].loaded)
-	{
-		// file allready loaded
-		// read file data
-		//
-		if (readFile(fileName, fileData) == false)
-		{
-			emit signal_endFileDownload(fileName, "Read file error");
-		}
-		else
-		{
-			emit signal_endFileDownload(fileName, "");
-		}
-
-		return;
-	}
-
-	// file is not loaded
-	//
-
-	FileDownloadRequest fdr;
-
-	fdr.pathFileName = fileName;
-	fdr.isAutoRequest = false;		// manual request
-	fdr.fileData = fileData;
-
-	m_downloadQueue.append(fdr);
-
-	if (isTransferInProgress() == false)
-	{
-		startDownload();
-	}
-}
-
-
-bool CfgLoader::downloadCfgFile(const QString& pathFileName, QByteArray* fileData)
+bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fileData, const QString& etalonMd5)
 {
 	if (fileData == nullptr)
 	{
@@ -559,21 +574,39 @@ bool CfgLoader::downloadCfgFile(const QString& pathFileName, QByteArray* fileDat
 		return false;
 	}
 
-	WaitForSignalHelper wsh(this, SIGNAL(signal_endFileDownload));
+	QString fileName = m_rootFolder + filePathName;
 
-	QByteArray localFileData;
+	QFile file(fileName);
 
-	emit signal_downloadCfgFile(pathFileName, &localFileData);
-
-	if (wsh.wait(5000) == true)
+	if (file.exists() == false)
 	{
-		fileData->swap(localFileData);
+		return false;
+	}
+
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		return false;
+	}
+
+	fileData->swap(file.readAll());
+
+	file.close();
+
+	Md5Hash md5Hash;
+
+	md5Hash.addData(*fileData);
+
+	if (md5Hash.resultStr() == etalonMd5)
+	{
 		return true;
 	}
 
 	fileData->clear();
+
 	return false;
 }
+
+
 
 
 

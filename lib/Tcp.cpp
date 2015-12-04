@@ -849,6 +849,8 @@ namespace Tcp
 			break;
 
 		case Header::Type::Reply:
+			stopReplyTimeoutTimer();
+
 			initReadStatusVariables();
 
 			processReply(m_header.id, m_dataBuffer, m_header.dataSize);
@@ -951,6 +953,12 @@ namespace Tcp
 	void Client::restartReplyTimeoutTimer()
 	{
 		m_replyTimeoutTimer.start(TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT);
+	}
+
+
+	void Client::stopReplyTimeoutTimer()
+	{
+		m_replyTimeoutTimer.stop();
 	}
 
 

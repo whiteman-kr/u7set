@@ -30,6 +30,11 @@ namespace Tcp
 		CantCreateLocalFile,
 		FileDataCorrupted,
 		CantWriteLocalFile,
+		LocalFileReadingError,
+
+		ConfigurationIsNotReady,		// for CfgLoader class
+
+		InternalError,
 	};
 
 
@@ -106,7 +111,7 @@ namespace Tcp
 
 		QString getErrorStr(FileTransferResult errorCode);
 
-	private slots:
+	protected slots:
 		void slot_downloadFile(const QString fileName);
 
 	signals:

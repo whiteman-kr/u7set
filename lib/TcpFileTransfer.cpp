@@ -283,9 +283,9 @@ namespace Tcp
 
 		QString downloadedFileName = m_fileName;
 
-		init();
-
 		QString md5 = QString(m_md5Generator.result().toHex());
+
+		init();
 
 		emit signal_endFileDownload(downloadedFileName, FileTransferResult::Ok, md5);
 
@@ -356,6 +356,19 @@ namespace Tcp
 		case CantWriteLocalFile:
 			str = QString(tr("Can't write local file"));
 			break;
+
+		case InternalError:
+			str = QString(tr("Internal error"));
+			break;
+
+		case LocalFileReadingError:
+			str = QString(tr("Local file reading error"));
+			break;
+
+		case ConfigurationIsNotReady:
+			str = QString(tr("Configuration is not ready"));
+			break;
+
 
 		default:
 			assert(false);

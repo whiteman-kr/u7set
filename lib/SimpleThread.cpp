@@ -114,7 +114,7 @@ void SimpleThread::beforeQuit()
 
 WaitForSignalHelper::WaitForSignalHelper(const QObject* sender, const char* signal)
 {
-	connect(sender, signal, &m_eventLoop, SLOT(quit));
+	connect(sender, signal, &m_eventLoop, SLOT(quit()));
 }
 
 

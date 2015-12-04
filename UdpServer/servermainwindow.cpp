@@ -37,6 +37,8 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 
 	m_tcpServerThread->start();*/
 
+	//m_cfgServer = new CfgServer("d:/temp/build");
+
 	m_cfgServer = new CfgServer("d:/temp/build");
 
 	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), m_cfgServer);
