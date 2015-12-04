@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QXmlStreamReader>
 #include <QSettings>
+#include <string>
 
 SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 	QDialog(parent),
@@ -280,7 +281,9 @@ void SerialDataTesterServer::sendPacket()
 	data.append(QString::number(m_dataBits));
 	data.append(QString::number(m_dataValue));
 
-	char *crcData = data.toLocal8Bit().data();
+	std::string dataToCalculateCrc = data.toStdString();
+
+	char *crcData = &dataToCalculateCrc[0];
 
 	quint64 crc = 0;
 	for (int i=0; i<data.size(); i++)

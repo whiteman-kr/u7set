@@ -10,6 +10,7 @@
 #include <QSerialPortInfo>
 #include <QThread>
 #include <QDebug>
+#include <string>
 
 SerialDataTester::SerialDataTester(QWidget *parent) :
 	QMainWindow(parent),
@@ -432,7 +433,9 @@ void SerialDataTester::dataReceived(QByteArray data)
 	dataForCrc.append(QString::number(m_bit));
 	dataForCrc.append(QString::number(m_value));
 
-	char *dataForCrcPtr = dataForCrc.toLocal8Bit().data();
+	std::string dataToCalculateCrc = dataForCrc.toStdString();
+
+	char *dataForCrcPtr = &dataToCalculateCrc[0];
 
 	quint64 crc = 0;
 	for (int i=0; i<dataForCrc.size(); i++)
@@ -444,10 +447,12 @@ void SerialDataTester::dataReceived(QByteArray data)
 	quint64 packetCrc;
 	packet >> packetCrc;
 
+	bool packageCorrupted = false;
+
 	if (crc != packetCrc)
 	{
 		ui->crc->setText("ERROR");
-		ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt() + 1));
+		packageCorrupted = true;
 		ui->statusBar->showMessage("Corrupted packet (CRC error)");
 	}
 	else
@@ -455,7 +460,7 @@ void SerialDataTester::dataReceived(QByteArray data)
 		ui->crc->setText("OK");
 		if (signature != m_signature)
 		{
-			ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt() + 1));
+			packageCorrupted = true;
 			ui->statusBar->showMessage("Unknown signature");
 		}
 		else
@@ -481,15 +486,24 @@ void SerialDataTester::dataReceived(QByteArray data)
 				if (signalExists)
 				{
 					ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(QString::number(m_value)));
-					ui->processedPackets->setText(QString::number(ui->processedPackets->text().toInt() + 1));
 				}
 				else
 				{
-					ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt() + 1));
+					packageCorrupted = true;
 				}
 			}
 		}
 	}
+
+	if (packageCorrupted)
+	{
+		ui->corruptedPackets->setText(QString::number(ui->corruptedPackets->text().toInt()+1));
+	}
+	else
+	{
+		ui->processedPackets->setText(QString::number(ui->processedPackets->text().toInt() + 1));
+	}
+
 	ui->totalPackets->setText(QString::number(ui->totalPackets->text().toInt() + 1));
 	//ui->caption->setText(dataFromPacket);
 }

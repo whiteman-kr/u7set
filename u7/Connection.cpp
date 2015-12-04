@@ -14,15 +14,12 @@ namespace Hardware
     {
         ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Connection::caption, Connection::setCaption);
         ADD_PROPERTY_GETTER_SETTER(QString, Device1StrID, true, Connection::device1StrID, Connection::setDevice1StrID);
-        ADD_PROPERTY_GETTER_SETTER(int, Device1Port, true, Connection::device1Port, Connection::setDevice1Port);
         ADD_PROPERTY_GETTER_SETTER(QString, Device2StrID, true, Connection::device2StrID, Connection::setDevice2StrID);
-        ADD_PROPERTY_GETTER_SETTER(int, Device2Port, true, Connection::device2Port, Connection::setDevice2Port);
 
         ADD_PROPERTY_GETTER_SETTER(int, TxStartAddress, false, Connection::txStartAddress, Connection::setTxStartAddress);
         ADD_PROPERTY_GETTER_SETTER(int, TxWordsQuantity, false, Connection::txWordsQuantity, Connection::setTxWordsQuantity);
         ADD_PROPERTY_GETTER_SETTER(int, RxWordsQuantity, false, Connection::rxWordsQuantity, Connection::setRxWordsQuantity);
 
-        ADD_PROPERTY_GETTER_SETTER(ConnectionMode, ConnectionMode, true, Connection::connectionMode, Connection::setConnectionMode);
         ADD_PROPERTY_GETTER_SETTER(bool, Enable, true, Connection::enable, Connection::setEnable);
 
     }
@@ -309,7 +306,7 @@ namespace Hardware
 
     bool ConnectionStorage::checkUniqueConnections(Connection* editObject)
     {
-        if (editObject->device1StrID() == editObject->device2StrID() && editObject->device1Port() == editObject->device2Port())
+        if (editObject->device1StrID() == editObject->device2StrID())
         {
             return false;
         }
@@ -321,12 +318,12 @@ namespace Hardware
                 continue;
             }
 
-            if (editObject->device1StrID() == c->device1StrID() && editObject->device1Port() == c->device1Port())
+            if (editObject->device1StrID() == c->device1StrID())
             {
                 return false;
             }
 
-            if (editObject->device1StrID() == c->device2StrID() && editObject->device1Port() == c->device2Port())
+            if (editObject->device1StrID() == c->device2StrID())
             {
                 return false;
             }
