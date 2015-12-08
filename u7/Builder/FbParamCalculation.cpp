@@ -431,18 +431,27 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT16(i_del)
 
-		int v = i_del.unsignedIntValue() / 5.0;
+		int v = i_del.unsignedIntValue();
 
-		if (v == 0)
+		if (v > 160000)
 		{
-			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_del' of FB %2 is incorrect (must be > 5ms)")).
+			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_del' of FB %2 is incorrect (must be < 160000 ms)")).
 					  arg(v).arg(caption()));
 
 			return false;
-
 		}
 
-		i_del.setUnsignedIntValue(static_cast<int>(log2(v)));
+		v /= 5.0;
+
+		if (v == 0)
+		{
+			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_del' of FB %2 is incorrect (must be > 5 ms)")).
+					  arg(v).arg(caption()));
+
+			return false;
+		}
+
+		i_del.setUnsignedIntValue(static_cast<int>(log2(v)) * 4096);
 
 		return true;
 	}

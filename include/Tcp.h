@@ -324,6 +324,7 @@ namespace Tcp
 		virtual void initReadStatusVariables() final;
 
 		void restartReplyTimeoutTimer();
+		void stopReplyTimeoutTimer();
 
 		void processAck();
 

@@ -56,25 +56,20 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
     setWindowTitle(tr("Connections Editor"));
 
-    ui->m_list->setColumnCount(6);
     QStringList l;
     l << tr("ID");
     l << tr("Caption");
     l << tr("Device1 StrID");
-    l << tr("Device1 Port");
     l << tr("Device2 StrID");
-    l << tr("Device2 Port");
-    l << tr("Mode");
     l << tr("Enabled");
-	ui->m_list->setHeaderLabels(l);
-    ui->m_list->setColumnWidth(0, 50);
-    ui->m_list->setColumnWidth(1, 100);
-    ui->m_list->setColumnWidth(2, 150);
-    ui->m_list->setColumnWidth(3, 80);
-    ui->m_list->setColumnWidth(4, 150);
-    ui->m_list->setColumnWidth(5, 80);
-    ui->m_list->setColumnWidth(6, 50);
-    ui->m_list->setColumnWidth(7, 50);
+    ui->m_list->setColumnCount(l.size());
+    ui->m_list->setHeaderLabels(l);
+    int il = 0;
+    ui->m_list->setColumnWidth(il++, 50);
+    ui->m_list->setColumnWidth(il++, 100);
+    ui->m_list->setColumnWidth(il++, 150);
+    ui->m_list->setColumnWidth(il++, 150);
+    ui->m_list->setColumnWidth(il++, 50);
 
     QString errorCode;
 
@@ -114,10 +109,7 @@ void DialogConnectionsEditor::fillConnectionsList()
         QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                     connection->caption() <<
                                                     connection->device1StrID() <<
-                                                    QString::number(connection->device1Port()) <<
                                                     connection->device2StrID() <<
-                                                        QString::number(connection->device2Port()) <<
-                                                    (connection->connectionMode() == Hardware::Connection::ConnectionMode::ModeRS232 ? "RS-232" : "RS-485") <<
                                                     (connection->enable() ? "true" : "false"));
         item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
 		ui->m_list->addTopLevelItem(item);
@@ -203,10 +195,8 @@ void DialogConnectionsEditor::on_m_Add_clicked()
         return;
     }
     connection->setCaption("New Connection");
-    connection->setDevice1StrID("DEVICE1_STRID");
-    connection->setDevice1Port(1);
-    connection->setDevice2StrID("DEVICE2_STRID");
-    connection->setDevice2Port(2);
+    connection->setDevice1StrID("CTRL1_STRID");
+    connection->setDevice2StrID("CTRL2_STRID");
     connection->setEnable(true);
 
     connections.add(connection);
@@ -214,10 +204,7 @@ void DialogConnectionsEditor::on_m_Add_clicked()
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                 connection->caption() <<
                                                 connection->device1StrID() <<
-                                                QString::number(connection->device1Port()) <<
                                                 connection->device2StrID() <<
-                                                QString::number(connection->device2Port()) <<
-                                                (connection->connectionMode() == Hardware::Connection::ConnectionMode::ModeRS232 ? "RS-232" : "RS-485") <<
                                                 (connection->enable() ? "true" : "false"));
     item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
     ui->m_list->insertTopLevelItem(index, item);

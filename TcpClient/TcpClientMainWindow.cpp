@@ -102,19 +102,28 @@ void TestClient::processReply(quint32 /*requestID*/, const char* /*replyData*/, 
 
 void TcpClientMainWindow::on_pushButton_clicked()
 {
-	//m_fileClient->downloadFile("/DataAquisitionService/applicationsignals.xml");
-
 	QByteArray fileData;
-	bool result = m_cfgLoader->downloadCfgFile(dnFile, &fileData);
+	QString errorStr;
 
-	int a = 0;
-	a++;
+	bool result = m_cfgLoader->downloadCfgFile("/SYSTEMID_RACKID_WS00_DACQSERVICE/equipment.xml", &fileData, &errorStr);
+
+	if (result == false)
+	{
+		qDebug() << errorStr;
+	}
+
+	result = m_cfgLoader->downloadCfgFile("/SYSTEMID_RACKID_WS00_DACQSERVICE/appSignals.xml", &fileData, &errorStr);
+
+	if (result == false)
+	{
+		qDebug() << errorStr;
+	}
 }
 
 
 
 
-void TcpClientMainWindow::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void TcpClientMainWindow::onConfigurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray buildFileInfoArray)
 {
 	int a = 0;
 	a++;
