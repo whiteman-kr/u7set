@@ -14,6 +14,7 @@
 #include "DialogAfblEditor.h"
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnectionsEditor.h"
+#include "Rs232SignalListEditor.h"
 #include "BuildTabPage.h"
 
 #include "../VFrame30/VFrame30.h"
@@ -198,6 +199,11 @@ void MainWindow::createActions()
     m_connectionsEditorAction->setEnabled(false);
     connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
 
+	m_rs232SignalListEditorAction = new QAction(tr("RS232/485 Connections Editor..."), this);
+	m_rs232SignalListEditorAction->setStatusTip(tr("Run RS232/485 Connections Editor"));
+	m_rs232SignalListEditorAction->setEnabled(false);
+	connect(m_rs232SignalListEditorAction, &QAction::triggered, this, &MainWindow::runRS232SignalListEditor);
+
     m_aboutAction = new QAction(tr("About..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
@@ -234,6 +240,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_afblEditorAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
     pToolsMenu->addAction(m_connectionsEditorAction);
+	pToolsMenu->addAction(m_rs232SignalListEditorAction);
     pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_settingsAction);
 
@@ -358,8 +365,20 @@ void MainWindow::runConnectionsEditor()
     }
 
     DialogConnectionsEditor d(dbController(), this);
-    d.exec();
+	d.exec();
 }
+
+void MainWindow::runRS232SignalListEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	Rs232SignalListEditor d(dbController(), this);
+	d.exec();
+}
+
 void MainWindow::showAbout()
 {
 
@@ -440,6 +459,7 @@ void MainWindow::projectOpened(DbProject project)
 	m_afblEditorAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
+	m_rs232SignalListEditorAction->setEnabled(true);
 
 	// Tab Pages, enable all tab pages
 	//
@@ -465,6 +485,7 @@ void MainWindow::projectClosed()
 	m_afblEditorAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
+	m_rs232SignalListEditorAction->setEnabled(false);
 
 	// Tab Pages, disable all tab pages except the first.
 	//

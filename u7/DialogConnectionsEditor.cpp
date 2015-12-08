@@ -66,7 +66,7 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     l << tr("Device2 Port");
     l << tr("Mode");
     l << tr("Enabled");
-    ui->m_list->setHeaderLabels(l);
+	ui->m_list->setHeaderLabels(l);
     ui->m_list->setColumnWidth(0, 50);
     ui->m_list->setColumnWidth(1, 100);
     ui->m_list->setColumnWidth(2, 150);
@@ -106,6 +106,11 @@ void DialogConnectionsEditor::fillConnectionsList()
             break;
         }
 
+		if (connection->connectionType() != Hardware::Connection::ConnectionType::DeviceConnectionType)
+		{
+			continue;
+		}
+
         QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                     connection->caption() <<
                                                     connection->device1StrID() <<
@@ -115,7 +120,7 @@ void DialogConnectionsEditor::fillConnectionsList()
                                                     (connection->connectionMode() == Hardware::Connection::ConnectionMode::ModeRS232 ? "RS-232" : "RS-485") <<
                                                     (connection->enable() ? "true" : "false"));
         item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
-        ui->m_list->insertTopLevelItem(i, item);
+		ui->m_list->addTopLevelItem(item);
     }
 }
 
