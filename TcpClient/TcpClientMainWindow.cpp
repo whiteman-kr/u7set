@@ -123,7 +123,7 @@ void TcpClientMainWindow::on_pushButton_clicked()
 
 
 
-void TcpClientMainWindow::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void TcpClientMainWindow::onConfigurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray buildFileInfoArray)
 {
 	int a = 0;
 	a++;
