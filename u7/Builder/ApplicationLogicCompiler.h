@@ -299,10 +299,21 @@ namespace Builder
 		ModuleLogicCompiler* m_compiler = nullptr;
 		OutputLog* m_log = nullptr;
 
-		// FB's parameters values calculations
+		int m_runTime = 0;
+
+		// FB's parameters values and runtime calculations
 		// implemented in file FbParamCalculation.cpp
 		//
 
+		bool calculate_LOGIC_paramValues();
+		bool calculate_NOT_paramValues();
+		bool calculate_SR_RS_paramValues();
+		bool calculate_CTUD_paramValues();
+		bool calculate_MAJ_paramValues();
+		bool calculate_SRSST_paramValues();
+		bool calculate_BCOD_paramValues();
+		bool calculate_BDEC_paramValues();
+		bool calculate_MATH_paramValues();
 		bool calculate_TCT_paramValues();
 		bool calculate_BCOMP_paramValues();
 		bool calculate_SCALE_paramValues();
@@ -340,6 +351,8 @@ namespace Builder
 		bool calculateFbParamValues(ModuleLogicCompiler *compiler);			// implemented in file FbParamCalculation.cpp
 
 		const AppFbParamValuesArray& paramValuesArray() const { return m_paramValuesArray; }
+
+		int const runTime() const { return m_runTime; }
 	};
 
 
@@ -738,6 +751,8 @@ namespace Builder
 
 		int m_lmCycleDuration = 0;
 
+		int m_lmClockFrequency = 96000000;
+
 		// LM's calculated memory offsets and sizes
 		//
 
@@ -750,6 +765,9 @@ namespace Builder
 		AddrW m_regDataAddress;
 
 		ApplicationLogicCode m_code;
+
+		int m_idrPhaseClockCount = 0;		// input data receive phase clock count
+		int m_alpPhaseClockCount = 0;		// application logic processing clock count
 
 		AfbMap m_afbs;
 
@@ -835,6 +853,8 @@ namespace Builder
 		bool copyDomDataToModuleMemory(const Module& module);
 		bool copyAomDataToModuleMemory(const Module& module);
 
+		bool calculateCodeRunTime();
+
 		bool finishAppLogicCode();
 
 		bool findFbsForAnalogInOutSignalsConversion();
@@ -864,6 +884,8 @@ namespace Builder
 		bool generateApplicationLogicCode();
 
 		bool writeResult();
+
+		void displayTimingInfo();
 
 		void writeLMCodeTestFile();
 

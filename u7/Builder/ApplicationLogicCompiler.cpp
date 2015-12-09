@@ -762,6 +762,8 @@ namespace Builder
 
 			if (!finishAppLogicCode()) break;
 
+			if (!calculateCodeRunTime()) break;
+
 			if (!writeResult()) break;
 
 			result = true;
@@ -793,6 +795,12 @@ namespace Builder
 
 			str.sprintf("%.2f", m_memoryMap.wordAddressedMemoryUsed());
 			LOG_MESSAGE(m_log, QString(tr("Word-addressed memory used - %1%")).arg(str));
+
+			displayTimingInfo();
+
+
+
+
 		}
 		else
 		{
@@ -803,6 +811,77 @@ namespace Builder
 		cleanup();
 
 		return result;
+	}
+
+
+	void ModuleLogicCompiler::displayTimingInfo()
+	{
+		QString str_percent;
+		QString str;
+
+		// display IDR phase timing
+		//
+		double idrPhaseTime = (1.0/m_lmClockFrequency) * m_idrPhaseClockCount;
+		double idrPhaseTimeUsed = 0;
+
+		if (idrPhaseTime != 0)
+		{
+			idrPhaseTimeUsed = (idrPhaseTime * 100) / 0.001;
+		}
+
+		str_percent.sprintf("%.3f", static_cast<float>(idrPhaseTimeUsed));
+		str.sprintf("%.3f", static_cast<float>(idrPhaseTime * 1000000));
+
+		if (idrPhaseTimeUsed < 90)
+		{
+			LOG_MESSAGE(m_log, QString(tr("IDR phase time used - %1% (%2 clocks or %3 μs of 1000 μs)")).
+						arg(str_percent).arg(m_idrPhaseClockCount).arg(str));
+		}
+		else
+		{
+			if (idrPhaseTimeUsed < 100)
+			{
+				LOG_WARNING(m_log, QString(tr("IDR phase time used - %1% (%2 clocks or %3 μs of 1000 μs)")).
+							arg(str_percent).arg(m_idrPhaseClockCount).arg(str));
+			}
+			else
+			{
+				LOG_ERROR(m_log, QString(tr("IDR phase time used - %1% (%2 clocks or %3 μs of 1000 μs)")).
+							arg(str_percent).arg(m_idrPhaseClockCount).arg(str));
+			}
+		}
+
+		// display ALP phase timing
+		//
+		double alpPhaseTime = (1.0/m_lmClockFrequency) * m_alpPhaseClockCount;
+		double alpPhaseTimeUsed = 0;
+
+		if (alpPhaseTime != 0)
+		{
+			alpPhaseTimeUsed = (alpPhaseTime * 100) / 0.0025;
+		}
+
+		str_percent.sprintf("%.3f", static_cast<float>(alpPhaseTimeUsed));
+		str.sprintf("%.3f", static_cast<float>(alpPhaseTime * 1000000));
+
+		if (alpPhaseTimeUsed < 90)
+		{
+			LOG_MESSAGE(m_log, QString(tr("ALP phase time used - %1% (%2 clocks or %3 μs of 2500 μs)")).
+						arg(str_percent).arg(m_alpPhaseClockCount).arg(str));
+		}
+		else
+		{
+			if (alpPhaseTimeUsed < 100)
+			{
+				LOG_WARNING(m_log, QString(tr("ALP phase time used - %1% (%2 clocks or %3 μs of 2500 μs)")).
+							arg(str_percent).arg(m_alpPhaseClockCount).arg(str));
+			}
+			else
+			{
+				LOG_ERROR(m_log, QString(tr("ALP phase time used - %1% (%2 clocks or %3 μs of 2500 μs)")).
+							arg(str_percent).arg(m_alpPhaseClockCount).arg(str));
+			}
+		}
 	}
 
 
@@ -856,7 +935,16 @@ namespace Builder
 							 m_appLogicWordData,
 							 m_lmDiagData,
 							 m_lmIntOutData);
+
+			m_code.initCommandMemoryRanges(m_appLogicBitData.startAddress(),
+										   m_appLogicBitData.sizeW(),
+										   m_appLogicWordData.startAddress(),
+										   m_appLogicWordData.sizeW());
 		}
+
+		LOG_WARNING(m_log, QString(tr("LM's clock frequency loading is not implemented, assigned to 96 MHz")));
+
+		m_lmClockFrequency = 96000000;
 
 		result &= getLMIntProperty("AppLogicFrameSize", &m_lmAppLogicFrameSize);
 		result &= getLMIntProperty("AppLogicFrameCount", &m_lmAppLogicFrameCount);
@@ -1502,7 +1590,7 @@ namespace Builder
 				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->strID()));
 				m_code.append(cmd);
 
-				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption());
+				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
 				cmd.setComment("");
 				m_code.append(cmd);
 
@@ -1998,12 +2086,12 @@ namespace Builder
 
 		if (startCount == 1)
 		{
-			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption());
+			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
 			cmd.setComment(QString(tr("compute %1")).arg(appFb->caption()));
 		}
 		else
 		{
-			cmd.nstart(appFb->opcode(), appFb->instance(), startCount, appFb->caption());
+			cmd.nstart(appFb->opcode(), appFb->instance(), startCount, appFb->caption(), appFb->runTime());
 			cmd.setComment(QString(tr("compute %1 %2 times")).arg(appFb->afbStrID()).arg(startCount));
 		}
 
@@ -2754,7 +2842,7 @@ namespace Builder
 				cmd.setComment(QString(tr("output %1 %2")).arg(deviceSignal->place()).arg(signal->strID()));
 				m_code.append(cmd);
 
-				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption());
+				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
 				cmd.setComment("");
 				m_code.append(cmd);
 
@@ -2796,6 +2884,19 @@ namespace Builder
 		m_code.append(cmd);
 
 		return true;
+	}
+
+
+	bool ModuleLogicCompiler::calculateCodeRunTime()
+	{
+		bool result = m_code.getRunTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
+
+		if (result == false)
+		{
+			LOG_ERROR(m_log, QString(tr("Code runtime calculcation error!")))
+		}
+
+		return result;
 	}
 
 

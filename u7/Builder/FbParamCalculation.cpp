@@ -39,15 +39,39 @@ namespace Builder
 		switch(afb().type().toOpCode())
 		{
 		case Afb::AfbType::LOGIC:
+			result = calculate_LOGIC_paramValues();
+			break;
+
 		case Afb::AfbType::NOT:
+			result = calculate_NOT_paramValues();
+			break;
+
 		case Afb::AfbType::SR_RS:
+			result = calculate_SR_RS_paramValues();
+			break;
+
 		case Afb::AfbType::CTUD:
+			result = calculate_CTUD_paramValues();
+			break;
+
 		case Afb::AfbType::MAJ:
+			result = calculate_MAJ_paramValues();
+			break;
+
 		case Afb::AfbType::SRSST:
+			result = calculate_SRSST_paramValues();
+			break;
+
 		case Afb::AfbType::BCOD:
+			result = calculate_BCOD_paramValues();
+			break;
+
 		case Afb::AfbType::BDEC:
+			result = calculate_BDEC_paramValues();
+			break;
+
 		case Afb::AfbType::MATH:
-			// parameter's values calculation is not required
+			result = calculate_MATH_paramValues();
 			break;
 
 		case Afb::AfbType::TCT:
@@ -57,7 +81,6 @@ namespace Builder
 		case Afb::AfbType::COMP:
 			result = calculate_BCOMP_paramValues();
 			break;
-
 
 		case Afb::AfbType::LAG:
 			result = calculate_LAG_paramValues();			// dempfer
@@ -77,8 +100,109 @@ namespace Builder
 	}
 
 
+	bool AppFb::calculate_LOGIC_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_NOT_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_SR_RS_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_CTUD_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_MAJ_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_SRSST_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_BCOD_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_BDEC_paramValues()
+	{
+		m_runTime = 2;
+		return true;
+	}
+
+
+	bool AppFb::calculate_MATH_paramValues()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_counf"];
+
+		CHECK_UNSIGNED_INT(i_conf)
+
+		m_runTime = 0;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+			m_runTime = 2;
+			break;
+
+		case 5:
+		case 6:
+		case 8:
+			m_runTime = 8;
+			break;
+
+		case 7:
+			m_runTime = 6;
+			break;
+
+		default:
+			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).
+					  arg(i_conf.unsignedIntValue()).arg(caption()));
+			return false;
+		}
+
+		return true;
+	}
+
+
 	bool AppFb::calculate_TCT_paramValues()
 	{
+		m_runTime = 2;
+
 		QStringList requiredParams;
 
 		requiredParams.append("i_counter");
@@ -97,6 +221,8 @@ namespace Builder
 
 	bool AppFb::calculate_BCOMP_paramValues()
 	{
+		m_runTime = 2;
+
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
@@ -123,7 +249,6 @@ namespace Builder
 					BCOMP_32FP_GREAT = 6,
 					BCOMP_32FP_LESS = 7,
 					BCOMP_32FP_NOT_EQU = 8;
-
 
 		if (iConf == BCOMP_32SI_EQU || iConf == BCOMP_32SI_GREAT ||
 			iConf == BCOMP_32SI_LESS || iConf == BCOMP_32SI_NOT_EQU)
@@ -235,6 +360,34 @@ namespace Builder
 		CHECK_UNSIGNED_INT(iConfParam)
 
 		int iConf = iConfParam.unsignedIntValue();
+
+		m_runTime = 0;
+
+		switch(iConf)
+		{
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+			m_runTime = 2;
+			break;
+
+		case 5:
+		case 7:
+		case 8:
+		case 9:
+			m_runTime = 18;
+			break;
+
+		case 6:
+			m_runTime = 11;
+			break;
+
+		default:
+			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_config' of FB %2 is incorrect")).
+					  arg(iConf).arg(caption()));
+			return false;
+		}
 
 		const int	SCALE_16UI_16UI = 1,
 					SCALE_16UI_SI = 2,
@@ -421,6 +574,10 @@ namespace Builder
 
 	bool AppFb::calculate_LAG_paramValues()
 	{
+		LOG_WARNING(m_log, QString(tr("Undefined damper runTime value. Assigned to 1")));
+
+		m_runTime = 1;
+
 		QStringList requiredParams;
 
 		requiredParams.append("i_del");
