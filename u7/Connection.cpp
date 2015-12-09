@@ -5,95 +5,115 @@
 namespace Hardware
 {
 
-    //
-    //
-    // Connection
-    //
-    //
-    Connection::Connection()
-    {
-        ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Connection::caption, Connection::setCaption);
-        ADD_PROPERTY_GETTER_SETTER(QString, Device1StrID, true, Connection::device1StrID, Connection::setDevice1StrID);
-        ADD_PROPERTY_GETTER_SETTER(QString, Device2StrID, true, Connection::device2StrID, Connection::setDevice2StrID);
+	//
+	//
+	// Connection
+	//
+	//
+	Connection::Connection()
+	{
+		ADD_PROPERTY_GETTER_SETTER(QString, Caption, true, Connection::caption, Connection::setCaption);
+		ADD_PROPERTY_GETTER_SETTER(QString, Device1StrID, true, Connection::device1StrID, Connection::setDevice1StrID);
+		ADD_PROPERTY_GETTER_SETTER(QString, Device2StrID, true, Connection::device2StrID, Connection::setDevice2StrID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, TxStartAddress, false, Connection::txStartAddress, Connection::setTxStartAddress);
-        ADD_PROPERTY_GETTER_SETTER(int, TxWordsQuantity, false, Connection::txWordsQuantity, Connection::setTxWordsQuantity);
-        ADD_PROPERTY_GETTER_SETTER(int, RxWordsQuantity, false, Connection::rxWordsQuantity, Connection::setRxWordsQuantity);
+		ADD_PROPERTY_GETTER_SETTER(QString, OsmStrID, false, Connection::osmStrID, Connection::setOsmStrID);
 
-        ADD_PROPERTY_GETTER_SETTER(bool, Enable, true, Connection::enable, Connection::setEnable);
+		ADD_PROPERTY_GETTER_SETTER(int, TxStartAddress, false, Connection::txStartAddress, Connection::setTxStartAddress);
+		ADD_PROPERTY_GETTER_SETTER(int, TxWordsQuantity, false, Connection::txWordsQuantity, Connection::setTxWordsQuantity);
+		ADD_PROPERTY_GETTER_SETTER(int, RxWordsQuantity, false, Connection::rxWordsQuantity, Connection::setRxWordsQuantity);
 
-    }
+		ADD_PROPERTY_GETTER_SETTER(ConnectionMode, ConnectionMode, true, Connection::connectionMode, Connection::setConnectionMode);
+		ADD_PROPERTY_GETTER_SETTER(bool, Enable, true, Connection::enable, Connection::setEnable);
+	}
 
     Connection::Connection(const Connection& that):Connection()
     {
         *this = that;
     }
 
-    bool Connection::save(QXmlStreamWriter& writer)
-    {
-        writer.writeAttribute("Index", QString::number(index()));
-        writer.writeAttribute("Caption", caption());
+	bool Connection::save(QXmlStreamWriter& writer)
+	{
+		writer.writeAttribute("Index", QString::number(index()));
+		writer.writeAttribute("Caption", caption());
+		writer.writeAttribute("OsmStrID", osmStrID());
 		writer.writeAttribute("Device1StrID", device1StrID());
 		writer.writeAttribute("Device1Port", QString::number(device1Port()));
 		writer.writeAttribute("Device2StrID", device2StrID());
 		writer.writeAttribute("Device2Port", QString::number(device2Port()));
-        writer.writeAttribute("ConnectionMode", QString::number(static_cast<int>(connectionMode())));
-        writer.writeAttribute("Enable", enable() ? "true" : "false");
-        return true;
-    }
+		writer.writeAttribute("ConnectionMode", QString::number(static_cast<int>(connectionMode())));
+		writer.writeAttribute("ConnectionType", QString::number(static_cast<int>(connectionType())));
+		writer.writeAttribute("Enable", enable() ? "true" : "false");
+		writer.writeAttribute("SignalList", signalList().join(';'));
+		return true;
+	}
 
 
-    bool Connection::load(QXmlStreamReader& reader)
-    {
-        if (reader.attributes().hasAttribute("Index"))
-        {
-            setIndex(reader.attributes().value("Index").toInt());
-        }
+	bool Connection::load(QXmlStreamReader& reader)
+	{
+		if (reader.attributes().hasAttribute("Index"))
+		{
+			setIndex(reader.attributes().value("Index").toInt());
+		}
 
-        if (reader.attributes().hasAttribute("Caption"))
-        {
-            setCaption(reader.attributes().value("Caption").toString());
-        }
+		if (reader.attributes().hasAttribute("Caption"))
+		{
+			setCaption(reader.attributes().value("Caption").toString());
+		}
+
+		if (reader.attributes().hasAttribute("OsmStrID"))
+		{
+			setOsmStrID(reader.attributes().value("OsmStrID").toString());
+		}
 
 		if (reader.attributes().hasAttribute("Device1StrID"))
-        {
+		{
 			setDevice1StrID(reader.attributes().value("Device1StrID").toString());
-        }
+		}
 
 		if (reader.attributes().hasAttribute("Device1Port"))
-        {
+		{
 			setDevice1Port(reader.attributes().value("Device1Port").toInt());
-        }
+		}
 
 		if (reader.attributes().hasAttribute("Device2StrID"))
-        {
+		{
 			setDevice2StrID(reader.attributes().value("Device2StrID").toString());
-        }
+		}
 
 		if (reader.attributes().hasAttribute("Device2Port"))
-        {
+		{
 			setDevice2Port(reader.attributes().value("Device2Port").toInt());
-        }
+		}
 
-        if (reader.attributes().hasAttribute("ConnectionMode"))
-        {
-            setConnectionMode(static_cast<ConnectionMode>(reader.attributes().value("ConnectionMode").toInt()));
-        }
+		if (reader.attributes().hasAttribute("ConnectionMode"))
+		{
+			setConnectionMode(static_cast<ConnectionMode>(reader.attributes().value("ConnectionMode").toInt()));
+		}
 
-        if (reader.attributes().hasAttribute("Enable"))
-        {
-            setEnable(reader.attributes().value("Enable").toString() == "true" ? true : false);
-        }
+		if (reader.attributes().hasAttribute("ConnectionType"))
+		{
+			setConnectionType(static_cast<ConnectionType>(reader.attributes().value("ConnectionType").toInt()));
+		}
 
-        QXmlStreamReader::TokenType endToken = reader.readNext();
-        if (endToken != QXmlStreamReader::EndElement && endToken != QXmlStreamReader::Invalid)
-        {
-            Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
-            return false;
-        }
+		if (reader.attributes().hasAttribute("Enable"))
+		{
+			setEnable(reader.attributes().value("Enable").toString() == "true" ? true : false);
+		}
 
-        return true;
-    }
+		if (reader.attributes().hasAttribute("SignalList"))
+		{
+			setSignalList(reader.attributes().value("SignalList").toString().split(';'));
+		}
+
+		QXmlStreamReader::TokenType endToken = reader.readNext();
+		if (endToken != QXmlStreamReader::EndElement && endToken != QXmlStreamReader::Invalid)
+		{
+			Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
+			return false;
+		}
+
+		return true;
+	}
 
 	int Connection::index() const
     {
@@ -112,8 +132,18 @@ namespace Hardware
 
     void Connection::setCaption(const QString& value)
     {
-        m_caption = value;
-    }
+		m_caption = value;
+	}
+
+	QString Connection::osmStrID() const
+	{
+		return m_osmStrID;
+	}
+
+	void Connection::setOsmStrID(const QString& value)
+	{
+		m_osmStrID = value;
+	}
 
 	QString Connection::device1StrID() const
     {
@@ -192,8 +222,37 @@ namespace Hardware
 
     void Connection::setConnectionMode(const ConnectionMode& value)
     {
-        m_connectionMode = value;
-    }
+		m_connectionMode = value;
+	}
+
+	Connection::ConnectionType Connection::connectionType() const
+	{
+		return m_connectionType;
+	}
+
+	void Connection::setConnectionType(const ConnectionType &value)
+	{
+		m_connectionType = value;
+		switch(value)
+		{
+			case ConnectionType::DeviceConnectionType:
+				propertyByCaption("OsmStrID")->setVisible(false);
+				propertyByCaption("Device1StrID")->setVisible(true);
+				propertyByCaption("Device1Port")->setVisible(true);
+				propertyByCaption("Device2StrID")->setVisible(true);
+				propertyByCaption("Device2Port")->setVisible(true);
+				break;
+			case ConnectionType::SerialPortSignalListType:
+				propertyByCaption("OsmStrID")->setVisible(true);
+				propertyByCaption("Device1StrID")->setVisible(false);
+				propertyByCaption("Device1Port")->setVisible(false);
+				propertyByCaption("Device2StrID")->setVisible(false);
+				propertyByCaption("Device2Port")->setVisible(false);
+				break;
+			default:
+				assert(false);
+		}
+	}
 
 	bool Connection::enable() const
     {
@@ -202,8 +261,18 @@ namespace Hardware
 
     void Connection::setEnable(bool value)
     {
-        m_enable = value;
-    }
+		m_enable = value;
+	}
+
+	QStringList Connection::signalList() const
+	{
+		return m_signalList;
+	}
+
+	void Connection::setSignalList(const QStringList &value)
+	{
+		m_signalList = value;
+	}
 
 
     //
@@ -306,7 +375,12 @@ namespace Hardware
 
     bool ConnectionStorage::checkUniqueConnections(Connection* editObject)
     {
-        if (editObject->device1StrID() == editObject->device2StrID())
+		if (editObject->connectionType() != Hardware::Connection::ConnectionType::DeviceConnectionType)
+		{
+			return true;
+		}
+
+		if (editObject->device1StrID() == editObject->device2StrID())
         {
             return false;
         }

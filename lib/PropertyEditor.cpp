@@ -1713,12 +1713,26 @@ namespace ExtWidgets
                     description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
                 }
             }
-            if (p->value().userType() == QVariant::Int || p->value().userType() == QVariant::UInt)
+
+            if (p->value().userType() == QVariant::Int)
             {
                 bool ok1 = false;
                 bool ok2 = false;
                 int l = p->lowLimit().toInt(&ok1);
                 int h = p->highLimit().toInt(&ok2);
+
+                if (ok1 == true && ok2 == true && l < h)
+                {
+                    description = QString("%1 {%2 - %3}").arg(description).arg(l).arg(h);
+                }
+            }
+
+            if (p->value().userType() == QVariant::UInt)
+            {
+                bool ok1 = false;
+                bool ok2 = false;
+                uint l = p->lowLimit().toUInt(&ok1);
+                uint h = p->highLimit().toUInt(&ok2);
 
                 if (ok1 == true && ok2 == true && l < h)
                 {
