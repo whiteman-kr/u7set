@@ -40,38 +40,52 @@ namespace Builder
 		int sizeW;
 		const char* str;
 
+		int readTime;
+		int runTime;
+
 		static bool isValidCode(int commandCode);
 		static int getSizeW(int commandCode);
 		static const char* getStr(int commandCode);
 	};
 
 
+	const int	RUNTIME_START	= 10000,
+				RUNTIME_MOVE	= 10100,
+				RUNTIME_MOVEMEM	= 10200,
+				RUNTIME_MOVC	= 10300,
+				RUNTIME_MOVBC	= 10400,
+				RUNTIME_RDFBB	= 10500,
+				RUNTIME_SETMEM	= 10600,
+				RUNTIME_MOVB	= 10700,
+				RUNTIME_NSTART	= 10800;
+
+
 	const LmCommand LmCommands[] =
 	{
-		{	LmCommandCode::NoCommand,	0,	"NO_CMD"	},
-		{	LmCommandCode::NOP,			1,	"NOP"		},
-		{	LmCommandCode::START,		2,	"START"		},
-		{	LmCommandCode::STOP,		1,	"STOP"		},
-		{	LmCommandCode::MOV,			3,	"MOV"		},
-		{	LmCommandCode::MOVMEM,		4,	"MOVMEM"	},
-		{	LmCommandCode::MOVC,		3,	"MOVC"		},
-		{	LmCommandCode::MOVBC,		4,	"MOVBC"		},
-		{	LmCommandCode::WRFB,		3,	"WRFB"		},
-		{	LmCommandCode::RDFB,		3,	"RDFB"		},
-		{	LmCommandCode::WRFBC,		3,	"WRFBC"		},
-		{	LmCommandCode::WRFBB,		4,	"WRFBB"		},
-		{	LmCommandCode::RDFBB,		4,	"RDFBB"		},
-		{	LmCommandCode::RDFBTS,		3,	"RDFBTS"	},
-		{	LmCommandCode::SETMEM,		4,	"SETMEM"	},
-		{	LmCommandCode::MOVB,		4,	"MOVB"		},
-		{	LmCommandCode::NSTART,		3,	"NSTART"	},
-		{	LmCommandCode::APPSTART,	2,	"APPSTART"	},
-		{	LmCommandCode::MOV32,		3,	"MOV32"		},
-		{	LmCommandCode::MOVC32,		4,	"MOVC32"	},
-		{	LmCommandCode::WRFB32,		3,	"WRFB32"	},
-		{	LmCommandCode::RDFB32,		3,	"RDFB32"	},
-		{	LmCommandCode::WRFBC32,		4,	"WRFBC32"	},
-		{	LmCommandCode::RDFBTS32,	4,	"RDFBTS32"	},
+		{	LmCommandCode::NoCommand,	0,	"NO_CMD",	0,	0				},
+		{	LmCommandCode::NOP,			1,	"NOP",		9,	2				},
+		{	LmCommandCode::START,		2,	"START",	12,	RUNTIME_START	},
+		{	LmCommandCode::STOP,		1,	"STOP",		9,	2				},
+		{	LmCommandCode::MOV,			3,	"MOV",		18,	RUNTIME_MOVE	},
+		{	LmCommandCode::MOVMEM,		4,	"MOVMEM",	18,	RUNTIME_MOVEMEM	},
+		{	LmCommandCode::MOVC,		3,	"MOVC",		15, RUNTIME_MOVC 	},
+		{	LmCommandCode::MOVBC,		4,	"MOVBC",	18, RUNTIME_MOVBC	},
+		{	LmCommandCode::WRFB,		3,	"WRFB",		15,	9				},
+		{	LmCommandCode::RDFB,		3,	"RDFB",		15,	7				},
+		{	LmCommandCode::WRFBC,		3,	"WRFBC",	15,	5				},
+		{	LmCommandCode::WRFBB,		4,	"WRFBB",	18,	8				},
+		{	LmCommandCode::RDFBB,		4,	"RDFBB",	18,	RUNTIME_RDFBB	},
+		{	LmCommandCode::RDFBTS,		3,	"RDFBTS",	18,	4				},
+		{	LmCommandCode::SETMEM,		4,	"SETMEM",	18, RUNTIME_SETMEM	},
+		{	LmCommandCode::MOVB,		4,	"MOVB",		18,	RUNTIME_MOVB	},
+		{	LmCommandCode::NSTART,		3,	"NSTART",	15,	RUNTIME_NSTART	},
+		{	LmCommandCode::APPSTART,	2,	"APPSTART",	12,	2				},
+		{	LmCommandCode::MOV32,		3,	"MOV32",	15,	12				},
+		{	LmCommandCode::MOVC32,		4,	"MOVC32",	18, 7				},
+		{	LmCommandCode::WRFB32,		3,	"WRFB32",	15,	12				},
+		{	LmCommandCode::RDFB32,		3,	"RDFB32",	15,	11				},
+		{	LmCommandCode::WRFBC32,		4,	"WRFBC32",	18,	10				},
+		{	LmCommandCode::RDFBTS32,	4,	"RDFBTS32",	18,	9				},
 	};
 
 	const int LM_COMMAND_COUNT = sizeof(LmCommands) / sizeof(LmCommand);
@@ -151,7 +165,7 @@ namespace Builder
 
 		void setOpCode(LmCommandCode code);
 		int getOpCodeInt() const { return opCode.code; }
-		LmCommandCode getOpCode() { return static_cast<LmCommandCode>(opCode.code); }
+		LmCommandCode getOpCode() const { return static_cast<LmCommandCode>(opCode.code); }
 
 		void setFbType(quint16 fbType);
 		quint16 getFbType() const { return opCode.fbType; }
@@ -245,17 +259,31 @@ namespace Builder
 	class Command : public CodeItem
 	{
 	private:
+		static QHash<int, const LmCommand*> m_lmCommands;
+
+		// initialized by ApplicationLogicCode::initCommandMemoryRanges()
+		//
+		static int m_bitMemoryStart;
+		static int m_bitMemorySizeW;
+		static int m_wordMemoryStart;
+		static int m_wordMemorySizeW;
+
 		int m_address = -1;
+
+		int m_fbRunTime = 0;			// != 0 for commands START and NSTART only
 
 		CommandCode m_code;
 
 		QString getCodeWordStr(int wordNo);
 
+		bool addressInBitMemory(int address);
+		bool addressInWordMemory(int address);
+
 	public:
-		Command() {}
+		Command();
 
 		void nop();
-		void start(quint16 fbType, quint16 fbInstance, const QString& fbCaption);
+		void start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime);
 		void stop();
 		void mov(quint16 addrTo, quint16 addrFrom);
 		void movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW);
@@ -269,7 +297,7 @@ namespace Builder
 		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption);
 		void setMem(quint16 addr, quint16 sizeW, quint16 constValue);
 		void moveBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask);
-		void nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption);
+		void nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime);
 		void appStart(quint16 appStartAddr);
 
 		void mov32(quint16 addrTo, quint16 addrFrom);
@@ -290,6 +318,10 @@ namespace Builder
 		bool isCommand() override { return true; }
 		bool isComment() override { return false; }
 
+		bool isOpCode(LmCommandCode code) const { return m_code.getOpCode() == code; }
+
+		quint16 getWord2() const { return m_code.getWord2(); }
+
 		bool isValidCommand() { return m_code.getOpCode() != LmCommandCode::NoCommand; }
 
 		void generateBinCode(E::ByteOrder byteOrder) override;
@@ -297,6 +329,11 @@ namespace Builder
 		QString getMnemoCode();
 
 		int address() const { return m_address; }
+
+		bool getReadAndRunTimes(int* readTime, int* runTime);
+
+		static void setMemoryRanges(int bitMemoryStart, int bitMemorySizeW, int wordMemoryStart, int wordMemorySizeW);
+		static void resetMemoryRanges();
 	};
 
 
@@ -314,6 +351,8 @@ namespace Builder
 		ApplicationLogicCode();
 		~ApplicationLogicCode();
 
+		void initCommandMemoryRanges(int bitMemoryStart, int bitMemorySizeW, int wordMemoryStart, int wordMemorySizeW);
+
 		void append(const Command &cmd);
 		void append(const Comment &cmt);
 		void comment(QString commentStr);
@@ -328,6 +367,8 @@ namespace Builder
 		void getAsmCode(QStringList& asmCode);
 		void getBinCode(QByteArray& byteArray);
 		void getMifCode(QStringList& mifCode);
+
+		bool getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount);
 
 		void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
