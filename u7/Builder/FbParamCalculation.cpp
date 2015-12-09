@@ -574,41 +574,50 @@ namespace Builder
 
 	bool AppFb::calculate_LAG_paramValues()
 	{
-		LOG_WARNING(m_log, QString(tr("Undefined damper runTime value. Assigned to 1")));
-
-		m_runTime = 1;
-
 		QStringList requiredParams;
 
 		requiredParams.append("i_del");
+		requiredParams.append("i_conf");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_del = m_paramValuesArray["i_del"];
+		AppFbParamValue& iDel = m_paramValuesArray["i_del"];
+		AppFbParamValue& iConf = m_paramValuesArray["i_conf"];
 
-		CHECK_UNSIGNED_INT16(i_del)
+		CHECK_UNSIGNED_INT16(iDel)
+		CHECK_UNSIGNED_INT(iConf)
 
-		int v = i_del.unsignedIntValue();
+		m_runTime = 0;
 
-		if (v > 160000)
+		switch(iConf.unsignedIntValue())
 		{
-			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_del' of FB %2 is incorrect (must be < 160000 ms)")).
-					  arg(v).arg(caption()));
+		case 1:
+			m_runTime = 3;		// for signed int input
+			break;
+
+		case 2:
+			m_runTime = 19;		// for float input
+			break;
+
+		default:
+			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_conf' of FB %2 is incorrect")).
+					  arg(iConf.unsignedIntValue()).arg(caption()));
 
 			return false;
 		}
 
-		v /= 5.0;
+		int v = iDel.unsignedIntValue();
 
-		if (v == 0)
+		v = (v * 1000) / m_compiler->lmCycleDuration();
+
+		if (v > 65535)
 		{
-			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_del' of FB %2 is incorrect (must be > 5 ms)")).
-					  arg(v).arg(caption()));
-
+			LOG_ERROR(m_log, QString(tr("Value %1 of parameter 'i_del' of FB %2 out of range (0..65535). The damper time should be less than %3 ms")).
+					  arg(v).arg(caption()).arg((65535 * m_compiler->lmCycleDuration()) / 1000));
 			return false;
 		}
 
-		i_del.setUnsignedIntValue(static_cast<int>(log2(v)) * 4096);
+		iDel.setUnsignedIntValue(v);
 
 		return true;
 	}

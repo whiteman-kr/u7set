@@ -3447,7 +3447,6 @@ namespace Builder
 
 			if (appFb == nullptr)
 			{
-				assert(false);
 				return false;
 			}
 		}
