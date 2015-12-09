@@ -826,7 +826,7 @@ namespace Builder
 
 		if (idrPhaseTime != 0)
 		{
-			idrPhaseTimeUsed = (idrPhaseTime * 100) / 0.001;
+			idrPhaseTimeUsed = (idrPhaseTime * 100) / (static_cast<double>(m_lmIDRPhaseTime) / 1000000.0);
 		}
 
 		str_percent.sprintf("%.3f", static_cast<float>(idrPhaseTimeUsed));
@@ -834,20 +834,20 @@ namespace Builder
 
 		if (idrPhaseTimeUsed < 90)
 		{
-			LOG_MESSAGE(m_log, QString(tr("IDR phase time used - %1% (%2 clocks or %3 μs of 1000 μs)")).
-						arg(str_percent).arg(m_idrPhaseClockCount).arg(str));
+			LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+						arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 		}
 		else
 		{
 			if (idrPhaseTimeUsed < 100)
 			{
-				LOG_WARNING(m_log, QString(tr("IDR phase time used - %1% (%2 clocks or %3 μs of 1000 μs)")).
-							arg(str_percent).arg(m_idrPhaseClockCount).arg(str));
+				LOG_WARNING(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+							arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 			}
 			else
 			{
-				LOG_ERROR(m_log, QString(tr("IDR phase time used - %1% (%2 clocks or %3 μs of 1000 μs)")).
-							arg(str_percent).arg(m_idrPhaseClockCount).arg(str));
+				LOG_ERROR(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+							arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 			}
 		}
 
@@ -858,7 +858,7 @@ namespace Builder
 
 		if (alpPhaseTime != 0)
 		{
-			alpPhaseTimeUsed = (alpPhaseTime * 100) / 0.0025;
+			alpPhaseTimeUsed = (alpPhaseTime * 100) / (static_cast<double>(m_lmALPPhaseTime) / 1000000.0);
 		}
 
 		str_percent.sprintf("%.3f", static_cast<float>(alpPhaseTimeUsed));
@@ -866,20 +866,20 @@ namespace Builder
 
 		if (alpPhaseTimeUsed < 90)
 		{
-			LOG_MESSAGE(m_log, QString(tr("ALP phase time used - %1% (%2 clocks or %3 μs of 2500 μs)")).
-						arg(str_percent).arg(m_alpPhaseClockCount).arg(str));
+			LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+						arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 		}
 		else
 		{
 			if (alpPhaseTimeUsed < 100)
 			{
-				LOG_WARNING(m_log, QString(tr("ALP phase time used - %1% (%2 clocks or %3 μs of 2500 μs)")).
-							arg(str_percent).arg(m_alpPhaseClockCount).arg(str));
+				LOG_WARNING(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+							arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 			}
 			else
 			{
-				LOG_ERROR(m_log, QString(tr("ALP phase time used - %1% (%2 clocks or %3 μs of 2500 μs)")).
-							arg(str_percent).arg(m_alpPhaseClockCount).arg(str));
+				LOG_ERROR(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+							arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 			}
 		}
 	}
@@ -942,9 +942,9 @@ namespace Builder
 										   m_appLogicWordData.sizeW());
 		}
 
-		LOG_WARNING(m_log, QString(tr("LM's clock frequency loading is not implemented, assigned to 96 MHz")));
-
-		m_lmClockFrequency = 96000000;
+		result &= getLMIntProperty("ClockFrequency", &m_lmClockFrequency);
+		result &= getLMIntProperty("ALPPhaseTime", &m_lmALPPhaseTime);
+		result &= getLMIntProperty("IDRPhaseTime", &m_lmIDRPhaseTime);
 
 		result &= getLMIntProperty("AppLogicFrameSize", &m_lmAppLogicFrameSize);
 		result &= getLMIntProperty("AppLogicFrameCount", &m_lmAppLogicFrameCount);

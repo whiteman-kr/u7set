@@ -752,6 +752,8 @@ namespace Builder
 		int m_lmCycleDuration = 0;
 
 		int m_lmClockFrequency = 96000000;
+		int m_lmALPPhaseTime = 1000;
+		int m_lmIDRPhaseTime = 2500;
 
 		// LM's calculated memory offsets and sizes
 		//
