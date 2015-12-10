@@ -669,24 +669,28 @@ void InitDataSources(QHash<quint32, DataSource>& dataSources, Hardware::DeviceOb
 		{
 			return;
 		}
-		if (currentModule->propertyValue("RegIP").isValid())
+		QStringList propertyList = QStringList() << "RegIP1" << "RegIP2";
+		for (QString prop : propertyList)
 		{
-			int key = dataSources.count() + 1;
-			QString ipStr = currentModule->propertyValue("RegIP").toString();
-			QHostAddress ha(ipStr);
-			quint32 ip = ha.toIPv4Address();
-			DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
-
-			QString signalPrefix = currentModule->parent()->strId();
-			int signalPrefixLength = signalPrefix.length();
-			for (int i = 0; i < signalSet.count(); i++)
+			if (currentModule->propertyValue(prop).isValid())
 			{
-				if (signalSet[i].deviceStrID().left(signalPrefixLength) == signalPrefix)
+				int key = dataSources.count() + 1;
+				QString ipStr = currentModule->propertyValue(prop).toString();
+				QHostAddress ha(ipStr);
+				quint32 ip = ha.toIPv4Address();
+				DataSource ds(ip, QString("Data Source %1").arg(key), ha, 1);
+
+				QString signalPrefix = currentModule->parent()->strId();
+				int signalPrefixLength = signalPrefix.length();
+				for (int i = 0; i < signalSet.count(); i++)
 				{
-					ds.addSignalIndex(i);
+					if (signalSet[i].deviceStrID().left(signalPrefixLength) == signalPrefix)
+					{
+						ds.addSignalIndex(i);
+					}
 				}
+				dataSources.insert(key, ds);
 			}
-			dataSources.insert(key, ds);
 		}
 	});
 }
