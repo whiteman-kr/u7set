@@ -39,7 +39,7 @@ public:
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 signals:
-	void itemDoubleClicked(int row);
+	void itemDoubleClicked();
 
 public slots:
 
@@ -90,7 +90,6 @@ public:
 	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
 	bool checkoutSignal(int index, QString& message);
-	bool editSignal(int row);
 	bool editSignals(QVector<int> ids);
 	void saveSignal(Signal& signal);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);

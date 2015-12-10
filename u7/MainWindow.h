@@ -56,6 +56,7 @@ protected slots:
     void runAfblEditor();
 	void runSubsystemListEditor();
     void runConnectionsEditor();
+	void runRS232SignalListEditor();
     void showAbout();
 	void debug();
 
@@ -81,6 +82,7 @@ private:
 	QAction* m_afblEditorAction = nullptr;
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
+	QAction* m_rs232SignalListEditorAction = nullptr;
 	QAction* m_aboutAction = nullptr;
 	QAction* m_debugAction = nullptr;
 

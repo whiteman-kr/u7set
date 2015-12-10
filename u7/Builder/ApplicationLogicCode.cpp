@@ -247,12 +247,59 @@ namespace Builder
 	}
 
 
-
 	// ---------------------------------------------------------------------------------------
 	//
 	// Command class implementation
 	//
 	// ---------------------------------------------------------------------------------------
+
+	QHash<int, const LmCommand*> Command::m_lmCommands;
+
+	int Command::m_bitMemoryStart = 0;
+	int Command::m_bitMemorySizeW = 0;
+	int Command::m_wordMemoryStart = 0;
+	int Command::m_wordMemorySizeW = 0;
+
+
+	Command::Command()
+	{
+		if (m_bitMemoryStart == 0 ||
+			m_bitMemorySizeW == 0 ||
+			m_wordMemoryStart == 0 ||
+			m_wordMemorySizeW == 0)
+		{
+			assert(false);			// call ApplicationLogicCode::initCommandMemoryRanges() first
+			return;
+		}
+
+		if (m_lmCommands.isEmpty())
+		{
+			for(const LmCommand& lmCommand : LmCommands)
+			{
+				m_lmCommands.insert(static_cast<int>(lmCommand.code), &lmCommand);
+			}
+		}
+
+	}
+
+
+	void Command::setMemoryRanges(int bitMemoryStart, int bitMemorySizeW, int wordMemoryStart, int wordMemorySizeW)
+	{
+		m_bitMemoryStart = bitMemoryStart;
+		m_bitMemorySizeW = bitMemorySizeW;
+		m_wordMemoryStart = wordMemoryStart;
+		m_wordMemorySizeW = wordMemorySizeW;
+	}
+
+
+	void Command::resetMemoryRanges()
+	{
+		m_bitMemoryStart = 0;
+		m_bitMemorySizeW = 0;
+		m_wordMemoryStart = 0;
+		m_wordMemorySizeW = 0;
+	}
+
 
 	void Command::nop()
 	{
@@ -260,13 +307,21 @@ namespace Builder
 	}
 
 
-	void Command::start(quint16 fbType, quint16 fbInstance, const QString& fbCaption)
+	void Command::start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime)
 	{
+		if (fbRunTime == 0)
+		{
+			assert(false);		// fbRunTime can't be 0
+		}
+
+		m_fbRunTime = fbRunTime;
+
 		m_code.setOpCode(LmCommandCode::START);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbCaption(fbCaption);
 	}
+
 
 	void Command::stop()
 	{
@@ -284,6 +339,13 @@ namespace Builder
 
 	void Command::movMem(quint16 addrTo, quint16 addrFrom, quint16 sizeW)
 	{
+		if (addressInBitMemory(addrTo) ||
+			addressInBitMemory(addrTo + sizeW - 1))
+		{
+			assert(false);			// MOVEMEM command can't write to bit-addressed memory
+			return;
+		}
+
 		m_code.setOpCode(LmCommandCode::MOVMEM);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(addrFrom);
@@ -301,6 +363,13 @@ namespace Builder
 
 	void Command::movBitConst(quint16 addrTo, quint16 bitNo, quint16 constBit)
 	{
+		if (addressInBitMemory(addrTo) == false &&
+			addressInWordMemory(addrTo) == false)
+		{
+			assert(false);			// MOVBC command can write only in bit- or word-addressed memory
+			return;
+		}
+
 		m_code.setOpCode(LmCommandCode::MOVBC);
 		m_code.setWord2(addrTo);
 		m_code.setWord3(constBit);
@@ -355,6 +424,13 @@ namespace Builder
 
 	void Command::readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption)
 	{
+		if (addressInBitMemory(addrTo) == false &&
+			addressInWordMemory(addrTo) == false)
+		{
+			assert(false);			// RDFBB command can write only in bit- or word-addressed memory
+			return;
+		}
+
 		m_code.setOpCode(LmCommandCode::RDFBB);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
@@ -377,6 +453,13 @@ namespace Builder
 
 	void Command::setMem(quint16 addr, quint16 sizeW, quint16 constValue)
 	{
+		if (addressInBitMemory(addr) ||
+			addressInBitMemory(addr + sizeW - 1))
+		{
+			assert(false);			// SETMEM command can't write to bit-addressed memory
+			return;
+		}
+
 		m_code.setOpCode(LmCommandCode::SETMEM);
 		m_code.setWord2(addr);
 		m_code.setWord3(constValue);
@@ -394,8 +477,15 @@ namespace Builder
 	}
 
 
-	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption)
+	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime)
 	{
+		if (fbRunTime == 0)
+		{
+			assert(false);		// fbRunTime can't be 0
+		}
+
+		m_fbRunTime = fbRunTime;
+
 		m_code.setOpCode(LmCommandCode::NSTART);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
@@ -781,6 +871,18 @@ namespace Builder
 			cmdStr += "\t";
 		}
 
+		int readTime = 0;
+		int runTime = 0;
+
+		getReadAndRunTimes(&readTime, &runTime);
+
+		QString str;
+
+		str.sprintf("[%02d:%02d]", readTime, runTime);
+		str = str.leftJustified(12, ' ');
+
+		cmdStr += str;
+
 		QString mnemoCode = getMnemoCode();
 
 		cmdStr += mnemoCode;
@@ -808,6 +910,108 @@ namespace Builder
 	}
 
 
+	bool Command::getReadAndRunTimes(int* readTime, int* runTime)
+	{
+		if (readTime == nullptr || runTime == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (m_lmCommands.contains(m_code.getOpCodeInt()) == false)
+		{
+			assert(false);			// unknown command code!
+			return false;
+		}
+
+		const LmCommand* lmCommand = m_lmCommands[m_code.getOpCodeInt()];
+
+		if (lmCommand == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		*readTime = lmCommand->readTime;
+
+		switch(lmCommand->runTime)
+		{
+		case RUNTIME_START:
+			*runTime = 5 + m_fbRunTime;
+			break;
+
+		case RUNTIME_MOVE:
+			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 54 : 8;
+			break;
+
+		case RUNTIME_MOVEMEM:
+			*runTime = 2 + m_code.getWord4() * 6 + 3;
+			break;
+
+		case RUNTIME_MOVC:
+			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 52 : 5;
+			break;
+
+		case RUNTIME_MOVBC:
+			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 6 : 11;
+			break;
+
+		case RUNTIME_RDFBB:
+			*runTime = addressInBitMemory(m_code.getWord3()) == true ? 8 : 9;
+			break;
+
+		case RUNTIME_SETMEM:
+			*runTime = 2 + m_code.getWord4() * 3;
+			break;
+
+		case RUNTIME_MOVB:
+			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 7 : 11;
+			break;
+
+		case RUNTIME_NSTART:
+			*runTime = 3 + m_code.getWord3() * (2 + m_fbRunTime);
+			break;
+
+		default:
+			assert(lmCommand->runTime < RUNTIME_START);
+
+			*runTime = lmCommand->runTime;
+		}
+
+		return true;
+	}
+
+
+	bool Command::addressInBitMemory(int address)
+	{
+		if (address >= m_bitMemoryStart &&
+			address < m_bitMemoryStart + m_bitMemorySizeW)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+
+	bool Command::addressInWordMemory(int address)
+	{
+		if (address >= m_wordMemoryStart &&
+			address < m_wordMemoryStart + m_wordMemorySizeW)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+
+
+	// ---------------------------------------------------------------------------------------
+	//
+	// ApplicationLogicCode structure static members implementation
+	//
+	// ---------------------------------------------------------------------------------------
 
 	ApplicationLogicCode::ApplicationLogicCode()
 	{
@@ -816,12 +1020,20 @@ namespace Builder
 
 	ApplicationLogicCode::~ApplicationLogicCode()
 	{
+		Command::resetMemoryRanges();
+
 		for(auto codeItem : m_codeItems)
 		{
 			delete codeItem;
 		}
 
 		m_codeItems.clear();
+	}
+
+
+	void ApplicationLogicCode::initCommandMemoryRanges(int bitMemoryStart, int bitMemorySizeW, int wordMemoryStart, int wordMemorySizeW)
+	{
+		Command::setMemoryRanges(bitMemoryStart, bitMemorySizeW, wordMemoryStart, wordMemorySizeW);
 	}
 
 
@@ -837,8 +1049,6 @@ namespace Builder
 		Command* newCommand = new Command(cmd);
 
 		newCommand->setAddress(m_commandAddress);
-
-		//newCommand->generateRawCode();
 
 		m_commandAddress += newCommand->sizeW();
 
@@ -1134,5 +1344,140 @@ namespace Builder
 
 		mifCode.append("END;");
 	}
+
+
+	bool ApplicationLogicCode::getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount)
+	{
+		if (idrPhaseClockCount == nullptr || alpPhaseClockCount == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		*idrPhaseClockCount = 0;
+		*alpPhaseClockCount = 0;
+
+		if (m_codeItems.isEmpty())
+		{
+			return true;
+		}
+
+		// find appStart command and read application logic processing code start address
+		//
+
+		int appLogicProcessingCodeStartAddress = -1;
+
+		for(CodeItem* codeItem : m_codeItems)
+		{
+			if (codeItem == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			if (codeItem->isCommand() == false)
+			{
+				continue;
+			}
+
+			Command* command = dynamic_cast<Command*>(codeItem);
+
+			if (command == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			if (command->isOpCode(LmCommandCode::APPSTART))
+			{
+				appLogicProcessingCodeStartAddress = command->getWord2();
+				break;
+			}
+		}
+
+		if (appLogicProcessingCodeStartAddress == -1)
+		{
+			assert(false);
+			return false;
+		}
+
+		// read commands and calculate code runtime
+		//
+		bool idrPhaseCode = true;
+
+		int prevRunTime = 0;
+
+		for(CodeItem* codeItem : m_codeItems)
+		{
+			if (codeItem == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			if (codeItem->isCommand() == false)
+			{
+				continue;
+			}
+
+			Command* command = dynamic_cast<Command*>(codeItem);
+
+			if (command == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			if (command->address() == appLogicProcessingCodeStartAddress)
+			{
+				*idrPhaseClockCount += prevRunTime;
+
+				prevRunTime = 0;
+
+				idrPhaseCode = false;
+			}
+
+			int readTime = 0;
+			int runTime = 0;
+
+			command->getReadAndRunTimes(&readTime, &runTime);
+
+			if (idrPhaseCode == true)
+			{
+				// alpPhaseCode
+				//
+				if (prevRunTime >= readTime)
+				{
+					*idrPhaseClockCount += prevRunTime;
+				}
+				else
+				{
+					*idrPhaseClockCount += readTime;
+				}
+
+				prevRunTime = runTime;
+			}
+			else
+			{
+				// alpPhaseCode
+				//
+				if (prevRunTime >= readTime)
+				{
+					*alpPhaseClockCount += prevRunTime;
+				}
+				else
+				{
+					*alpPhaseClockCount += readTime;
+				}
+
+				prevRunTime = runTime;
+			}
+		}
+
+		*alpPhaseClockCount += prevRunTime;
+
+		return true;
+	}
+
 
 }

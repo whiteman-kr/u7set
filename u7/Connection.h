@@ -17,6 +17,13 @@ namespace Hardware
         };
         Q_ENUM(ConnectionMode)
 
+		enum class ConnectionType
+		{
+			DeviceConnectionType,
+			SerialPortSignalListType
+		};
+		Q_ENUM(ConnectionType)
+
         Connection();
         Connection(const Connection& that);
 
@@ -32,7 +39,10 @@ namespace Hardware
         void setIndex(int value);
 
 		QString caption() const;
-        void setCaption(const QString& value);
+		void setCaption(const QString& value);
+
+		QString osmStrID() const;
+		void setOsmStrID(const QString& value);
 
 		QString device1StrID() const;
         void setDevice1StrID(const QString& value);
@@ -62,13 +72,20 @@ namespace Hardware
 		ConnectionMode connectionMode() const;
         void setConnectionMode(const ConnectionMode& value);
 
+		ConnectionType connectionType() const;
+		void setConnectionType(const ConnectionType& value);
+
 		bool enable() const;
         void setEnable(bool value);
+
+		QStringList signalList() const;
+		void setSignalList(const QStringList& value);
 
         Hardware::Connection& operator = (const Hardware::Connection& that)
         {
             m_index = that.m_index;
             m_caption = that.m_caption;
+			m_osmStrID = that.m_osmStrID;
             m_device1StrID = that.m_device1StrID;
             m_device1Port = that.m_device1Port;
             m_device2StrID = that.m_device2StrID;
@@ -81,12 +98,16 @@ namespace Hardware
             m_connectionMode = that.m_connectionMode;
             m_enable = that.m_enable;
 
+			setConnectionType(that.connectionType());
+			setSignalList(that.signalList());
+
             return *this;
         }
 
     private:
         int m_index = -1;
         QString m_caption;
+		QString m_osmStrID;
         QString m_device1StrID;
         int m_device1Port = 0;
         QString m_device2StrID;
@@ -97,7 +118,10 @@ namespace Hardware
         int m_rxWordsQuantity = 0;
 
         ConnectionMode m_connectionMode = ConnectionMode::ModeRS232;
+		ConnectionType m_connectionType = ConnectionType::DeviceConnectionType;
         bool m_enable = false;
+
+		QStringList m_signalList;
     };
 
 

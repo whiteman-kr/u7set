@@ -101,13 +101,18 @@ void DialogConnectionsEditor::fillConnectionsList()
             break;
         }
 
+		if (connection->connectionType() != Hardware::Connection::ConnectionType::DeviceConnectionType)
+		{
+			continue;
+		}
+
         QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                     connection->caption() <<
                                                     connection->device1StrID() <<
                                                     connection->device2StrID() <<
                                                     (connection->enable() ? "true" : "false"));
         item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
-        ui->m_list->insertTopLevelItem(i, item);
+		ui->m_list->addTopLevelItem(item);
     }
 }
 

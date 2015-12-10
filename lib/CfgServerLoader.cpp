@@ -588,8 +588,7 @@ bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fil
 		return false;
 	}
 
-	QByteArray fileAllData = file.readAll();
-	fileData->swap(fileAllData);
+	*fileData = file.readAll();
 
 	file.close();
 
