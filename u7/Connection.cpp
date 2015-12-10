@@ -238,16 +238,12 @@ namespace Hardware
 			case ConnectionType::DeviceConnectionType:
 				propertyByCaption("OsmStrID")->setVisible(false);
 				propertyByCaption("Device1StrID")->setVisible(true);
-				propertyByCaption("Device1Port")->setVisible(true);
 				propertyByCaption("Device2StrID")->setVisible(true);
-				propertyByCaption("Device2Port")->setVisible(true);
 				break;
 			case ConnectionType::SerialPortSignalListType:
 				propertyByCaption("OsmStrID")->setVisible(true);
 				propertyByCaption("Device1StrID")->setVisible(false);
-				propertyByCaption("Device1Port")->setVisible(false);
 				propertyByCaption("Device2StrID")->setVisible(false);
-				propertyByCaption("Device2Port")->setVisible(false);
 				break;
 			default:
 				assert(false);

@@ -13,6 +13,8 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 {
 	assert(m_db);
 
+	setWindowTitle(tr("Serial port signal list editor"));
+
 	m_rs232Connections->setColumnCount(4);
 	QStringList l;
 	l << tr("Caption")
@@ -53,6 +55,10 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 	m_signalList->setColumnCount(1);
 	m_signalList->setHorizontalHeaderLabels(QStringList() << "Signal Str ID");
 	m_signalList->setColumnWidth(0, 100);
+
+	m_signalList->setSelectionMode(QAbstractItemView::SingleSelection);
+
+	connect(m_signalList, &QTableWidget::doubleClicked, this, &Rs232SignalListEditor::editSignal);
 
 	m_addSignal = new QPushButton("Add", this);
 	connect(m_addSignal, &QPushButton::pressed, this, &Rs232SignalListEditor::addSignal);
@@ -323,15 +329,48 @@ void Rs232SignalListEditor::addSignal()
 
 	std::shared_ptr<Hardware::Connection> connection = m_connections.get(items[0]->data(Qt::UserRole).toInt());
 
-	QStringList signalList = connection->signalList();
-	signalList << "#NEW_SIGNAL_ID";
-	connection->setSignalList(connection->signalList() << "#NEW_SIGNAL_ID");
-	fillSignalList(true);
+	bool ok;
+	QString&& id = QInputDialog::getText(this, windowTitle(),
+										tr("Please enter new id:"), QLineEdit::Normal,
+										"#NEW_SIGNAL_ID", &ok);
+	if (ok)
+	{
+		connection->setSignalList(connection->signalList() << id);
+		fillSignalList(true);
+		m_signalList->selectionModel()->select(m_signalList->model()->index(m_signalList->rowCount() - 1, 0), QItemSelectionModel::SelectCurrent);
+	}
 }
 
 void Rs232SignalListEditor::editSignal()
 {
+	QList<QTableWidgetItem*> items = m_rs232Connections->selectedItems();
+	if (items.size() == 0)
+	{
+		return;
+	}
 
+	std::shared_ptr<Hardware::Connection> connection = m_connections.get(items[0]->data(Qt::UserRole).toInt());
+
+	items = m_signalList->selectedItems();
+	if (items.size() != 1)
+	{
+		return;
+	}
+
+	QStringList&& signalList = connection->signalList();
+	bool ok;
+	int row = m_signalList->row(items[0]);
+	QString id = QInputDialog::getText(this, windowTitle(),
+											tr("Please enter new id:"), QLineEdit::Normal,
+											signalList[row], &ok);
+
+	if (ok)
+	{
+		signalList[row] = id;
+		connection->setSignalList(signalList);
+		fillSignalList(true);
+		m_signalList->selectionModel()->select(m_signalList->model()->index(row, 0), QItemSelectionModel::SelectCurrent);
+	}
 }
 
 void Rs232SignalListEditor::removeSignal()
@@ -349,10 +388,16 @@ void Rs232SignalListEditor::removeSignal()
 	{
 		return;
 	}
+	int row = m_signalList->row(items[0]);
 	QStringList signalList = connection->signalList();
-	signalList.removeAt(m_signalList->row(items[0]));
+	signalList.removeAt(row);
+	if (row != 0)
+	{
+		row--;
+	}
 	connection->setSignalList(signalList);
 	fillSignalList(true);
+	m_signalList->selectionModel()->select(m_signalList->model()->index(row, 0), QItemSelectionModel::SelectCurrent);
 }
 
 void Rs232SignalListEditor::onConnectionChanged()

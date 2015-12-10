@@ -393,17 +393,11 @@ void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionVi
 	}
 }
 
-bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QStyleOptionViewItem &, const QModelIndex &index)
+bool SignalsDelegate::editorEvent(QEvent *event, QAbstractItemModel *, const QStyleOptionViewItem &, const QModelIndex &)
 {
 	if (event->type() == QEvent::MouseButtonDblClick)
 	{
-		QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
-		if (mouseEvent == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-		emit itemDoubleClicked(m_proxyModel->mapToSource(index).row());
+		emit itemDoubleClicked();
 		return true;
 	}
 	return false;
@@ -1160,39 +1154,6 @@ void SignalsModel::showError(QString message)
 	QMessageBox::critical(m_parentWindow, tr("Error"), message);
 }
 
-bool SignalsModel::editSignal(int row)
-{
-	loadSignal(row, false);
-
-	Signal signal = m_signalSet[row];
-	int readOnly = false;
-	if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId())
-	{
-		readOnly = true;
-	}
-
-	SignalPropertiesDialog dlg(signal, m_unitInfo, readOnly, this, m_parentWindow);
-
-	QObject::connect(&dlg, &SignalPropertiesDialog::onError, m_parentWindow, &SignalsTabPage::showError, Qt::QueuedConnection);
-
-	if (dlg.exec() == QDialog::Accepted)
-	{
-		ObjectState state;
-		dbController()->setSignalWorkcopy(&signal, &state, parrentWindow());
-		if (state.errCode != ERR_SIGNAL_OK)
-		{
-			showError(state);
-		}
-
-		loadSignal(row);
-		emit signalActivated(row);
-		return true;
-	}
-
-	loadSignal(row);	//Signal could be checked out but not changed
-	return false;
-}
-
 bool SignalsModel::editSignals(QVector<int> ids)
 {
 	loadSignalSet(ids, false);
@@ -1322,7 +1283,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_signalsModel, &SignalsModel::dataChanged, this, &SignalsTabPage::updateCellsSize);
 	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, this, &SignalsTabPage::updateCellsSize);
 	connect(m_signalsModel, &SignalsModel::signalActivated, m_signalsView, &QTableView::selectRow);
-	connect(delegate, &SignalsDelegate::itemDoubleClicked, m_signalsModel, &SignalsModel::editSignal);
+	connect(delegate, &SignalsDelegate::itemDoubleClicked, this, &SignalsTabPage::editSignal);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::changeSignalActionsVisibility);
