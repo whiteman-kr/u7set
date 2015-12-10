@@ -19,6 +19,9 @@ private:
 public:
 	void reconnect(QString ip1, int port1, QString ip2, int port2, QString instanceStrId, int instanceNo);
 
+private slots:
+	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+
 	// Data section
 	//
 private:
