@@ -14,6 +14,7 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 	assert(m_db);
 
 	setWindowTitle(tr("Serial port signal list editor"));
+	resize(640, 480);
 
 	m_rs232Connections->setColumnCount(4);
 	QStringList l;
@@ -22,9 +23,9 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 		<< tr("Mode")
 		<< tr("Enabled");
 	m_rs232Connections->setHorizontalHeaderLabels(l);
-	m_rs232Connections->setColumnWidth(0, 100);
+	m_rs232Connections->setColumnWidth(0, 150);
 	m_rs232Connections->setColumnWidth(1, 150);
-	m_rs232Connections->setColumnWidth(2, 50);
+	m_rs232Connections->setColumnWidth(2, 70);
 	m_rs232Connections->setColumnWidth(4, 100);
 
 	m_rs232Connections->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -54,7 +55,7 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 
 	m_signalList->setColumnCount(1);
 	m_signalList->setHorizontalHeaderLabels(QStringList() << "Signal Str ID");
-	m_signalList->setColumnWidth(0, 100);
+	m_signalList->setColumnWidth(0, 300);
 
 	m_signalList->setSelectionMode(QAbstractItemView::SingleSelection);
 
