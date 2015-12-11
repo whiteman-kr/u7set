@@ -222,30 +222,6 @@ namespace Builder
                 }
             }
 
-            //
-			// Compile Module configuration
-			//
-			LOG_EMPTY_LINE(m_log);
-			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
-
-            ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &connections, lastChangesetId, &buildWriter);
-
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			if (ok == false)
-			{
-				LOG_ERROR(m_log, tr("Error"));
-				QThread::currentThread()->requestInterruption();
-				break;
-			}
-			else
-			{
-				LOG_SUCCESS(m_log, tr("Ok"));
-			}
-
 			//
 			// Parse application logic
 			//
@@ -277,6 +253,31 @@ namespace Builder
 			{
 				break;
 			}
+
+
+            //
+            // Compile Module configuration
+            //
+            LOG_EMPTY_LINE(m_log);
+            LOG_MESSAGE(m_log, tr("Module configurations compilation"));
+
+            ok = modulesConfiguration(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &connections, lastChangesetId, &buildWriter);
+
+            if (QThread::currentThread()->isInterruptionRequested() == true)
+            {
+                break;
+            }
+
+            if (ok == false)
+            {
+                LOG_ERROR(m_log, tr("Error"));
+                QThread::currentThread()->requestInterruption();
+                break;
+            }
+            else
+            {
+                LOG_SUCCESS(m_log, tr("Ok"));
+            }
 		}
 		while (false);
 
