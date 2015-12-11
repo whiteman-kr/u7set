@@ -5,6 +5,7 @@
 #include "../../VFrame30/Afb.h"
 #include "../../VFrame30/FblItemRect.h"
 
+
 // Forware delcarations
 //
 class QThread;
@@ -16,6 +17,7 @@ namespace Hardware
 	class DeviceObject;
 	class DeviceModule;
 	class McFirmwareOld;
+	class EquipmentSet;
 }
 
 namespace VFrame30
@@ -192,11 +194,12 @@ namespace Builder
 	public:
 		Parser() = delete;
 		Parser(DbController* db,
-								OutputLog* log,
-								AppLogicData* appLogicData,
-								Afb::AfbElementCollection* afbCollection,
-								int changesetId,
-								bool debug);
+			   OutputLog* log,
+			   AppLogicData* appLogicData,
+			   Afb::AfbElementCollection* afbCollection,
+			   Hardware::EquipmentSet* equipmentSet,
+			   int changesetId,
+			   bool debug);
 
 		virtual ~Parser();
 
@@ -241,6 +244,7 @@ namespace Builder
 
 		AppLogicData* m_applicationData = nullptr;
 		Afb::AfbElementCollection* m_afbCollection = nullptr;
+		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 	};
 
 }
