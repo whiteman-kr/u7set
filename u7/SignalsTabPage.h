@@ -241,10 +241,6 @@ public slots:
 	void undoSignalChanges();
 	void showPendingChanges();
 
-	void updateCellsSize();
-	void saveScrollPosition();
-	void checkScrollPosition();
-
 	void changeSignalActionsVisibility();
 
 	void saveSelection();
@@ -261,10 +257,8 @@ private:
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
-	QCheckBox* m_autoResizeToContents = nullptr;
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
-	QTimer* m_scrollTimer = nullptr;
 
 	QList<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;

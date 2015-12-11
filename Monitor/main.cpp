@@ -54,6 +54,8 @@ int main(int argc, char *argv[])
 
 	instanceNoMemory.unlock();
 
+	qDebug() << "instanceNo: " << instanceNo;
+
 	MonitorConfigThread congigThread(theSettings.configuratorIpAddress1(), theSettings.configuratorPort1(),
 									 theSettings.configuratorIpAddress2(), theSettings.configuratorPort2(),
 									 "Monitor", instanceNo);

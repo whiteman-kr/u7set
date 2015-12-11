@@ -352,7 +352,7 @@ namespace Builder
 
 		const AppFbParamValuesArray& paramValuesArray() const { return m_paramValuesArray; }
 
-		int const runTime() const { return m_runTime; }
+		int runTime() const { return m_runTime; }
 	};
 
 

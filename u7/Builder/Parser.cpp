@@ -901,22 +901,24 @@ namespace Builder
 
 
 	Parser::Parser(DbController* db,
-													 OutputLog* log,
-													 AppLogicData* appLogicData,
-													 Afb::AfbElementCollection* afbCollection,
-													 int changesetId,
-													 bool debug) :
+				   OutputLog* log,
+				   AppLogicData* appLogicData,
+				   Afb::AfbElementCollection* afbCollection, Hardware::EquipmentSet* equipmentSet,
+				   int changesetId,
+				   bool debug) :
 		m_db(db),
 		m_log(log),
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_applicationData(appLogicData),
-		m_afbCollection(afbCollection)
+		m_afbCollection(afbCollection),
+		m_equipmentSet(equipmentSet)
 	{
 		assert(m_db);
 		assert(m_log);
 		assert(m_applicationData);
-		assert(afbCollection);
+		assert(m_afbCollection);
+		assert(m_equipmentSet);
 
 		return;
 	}
@@ -943,6 +945,59 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("There is no appliction logic files in the project."));
 			return true;
 		}
+
+		// Check schemes hardwareSetrIds
+		//
+		assert(m_equipmentSet);
+
+		if (m_equipmentSet != nullptr)
+		{
+			for (std::shared_ptr<VFrame30::LogicScheme> scheme : schemes)
+			{
+				QStringList deviceStrIds = scheme->hardwareStrIdList();
+
+				if (deviceStrIds.isEmpty() == true)
+				{
+					QString message = tr("DeviceStrIds is not set for scheme %1").arg(scheme->strID());
+					LOG_WARNING(m_log, message);
+					continue;
+				}
+
+				for (QString strid : deviceStrIds)
+				{
+					Hardware::DeviceObject* device = m_equipmentSet->deviceObject(strid);
+
+					if (device == nullptr)
+					{
+						QString message = tr("Cannot find HardwareStrId %1 for scheme %2").arg(strid).arg(scheme->strID());
+						LOG_WARNING(m_log, message);
+						continue;
+					}
+
+					if (device->isModule() == false)
+					{
+						QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
+						LOG_WARNING(m_log, message);
+						continue;
+					}
+					else
+					{
+						// Is module, check if it is LM family
+						//
+						Hardware::DeviceModule* module = device->toModule();
+						assert(module);
+
+						if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM)
+						{
+							QString message = tr("HardwareStrId %1 must be LM family module, scheme %2").arg(strid).arg(scheme->strID());
+							LOG_WARNING(m_log, message);
+							continue;
+						}
+					}
+				}
+			}
+		}
+
 
 		// Compile application logic
 		//

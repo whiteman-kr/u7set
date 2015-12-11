@@ -1248,8 +1248,7 @@ const DbController *SignalsModel::dbController() const
 //
 //
 SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
-	MainTabPage(dbcontroller, parent),
-	m_scrollTimer(new QTimer(this))
+	MainTabPage(dbcontroller, parent)
 {
 	assert(dbcontroller != nullptr);
 
@@ -1274,14 +1273,17 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	m_signalsView->horizontalHeader()->setHighlightSections(false);
-	connect(m_signalsView->horizontalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::saveScrollPosition);
-	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::saveScrollPosition);
-	connect(m_scrollTimer, &QTimer::timeout, this, &SignalsTabPage::checkScrollPosition);
+
+	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
+	m_signalsView->horizontalHeader()->setDefaultSectionSize(150);
+
+	m_signalsView->setColumnWidth(SC_STR_ID, 400);
+	m_signalsView->setColumnWidth(SC_EXT_STR_ID, 400);
+	m_signalsView->setColumnWidth(SC_NAME, 400);
+	m_signalsView->setColumnWidth(SC_DEVICE_STR_ID, 400);
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
-	connect(m_signalsModel, &SignalsModel::dataChanged, this, &SignalsTabPage::updateCellsSize);
-	connect(m_signalsModel, &SignalsModel::cellsSizeChanged, this, &SignalsTabPage::updateCellsSize);
 	connect(m_signalsModel, &SignalsModel::signalActivated, m_signalsView, &QTableView::selectRow);
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, this, &SignalsTabPage::editSignal);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
@@ -1294,12 +1296,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	// Create Actions
 	//
 	CreateActions(toolBar);
-
-	m_autoResizeToContents = new QCheckBox(tr("Autoresize to contents"));
-	m_autoResizeToContents->setChecked(true);
-	connect(m_autoResizeToContents, &QCheckBox::clicked, this, &SignalsTabPage::updateCellsSize);
-
-	toolBar->addWidget(m_autoResizeToContents);
 
 	//
 	// Layouts
@@ -1462,65 +1458,6 @@ void SignalsTabPage::showPendingChanges()
 	}
 
 	m_signalsModel->loadSignals();
-}
-
-void SignalsTabPage::updateCellsSize()
-{
-	if (m_autoResizeToContents->isChecked())
-	{
-		QModelIndex topLeft = m_signalsView->indexAt(m_signalsView->rect().topLeft());
-		QModelIndex bottomRight = m_signalsView->indexAt(m_signalsView->rect().bottomRight());
-
-		for (int column = topLeft.column(); column <= bottomRight.column(); column++)
-		{
-			m_signalsView->resizeColumnToContents(column);
-		}
-
-		for (int row = topLeft.row(); row <= bottomRight.row(); row++)
-		{
-			m_signalsView->resizeRowToContents(row);
-		}
-
-		QModelIndex newBottomRight = m_signalsView->indexAt(m_signalsView->rect().bottomRight());
-		while (bottomRight.row() < newBottomRight.row())
-		{
-			for (int row = bottomRight.row(); row <= newBottomRight.row(); row++)
-			{
-				m_signalsView->resizeRowToContents(row);
-			}
-			bottomRight = newBottomRight;
-			newBottomRight = m_signalsView->indexAt(m_signalsView->rect().bottomRight());
-		}
-	}
-}
-
-void SignalsTabPage::saveScrollPosition()
-{
-	if (!m_autoResizeToContents->isChecked())
-	{
-		return;
-	}
-	m_lastVerticalScrollPosition = m_signalsView->verticalScrollBar()->value();
-	m_lastHorizontalScrollPosition = m_signalsView->horizontalScrollBar()->value();
-	if (m_scrollTimer->isActive())
-	{
-		m_scrollTimer->stop();
-	}
-	m_scrollTimer->start(1000);
-}
-
-void SignalsTabPage::checkScrollPosition()
-{
-	if (!m_autoResizeToContents->isChecked())
-	{
-		return;
-	}
-	if (m_lastVerticalScrollPosition == m_signalsView->verticalScrollBar()->value() &&
-			m_lastHorizontalScrollPosition == m_signalsView->horizontalScrollBar()->value())
-	{
-		updateCellsSize();
-		m_scrollTimer->stop();
-	}
 }
 
 void SignalsTabPage::changeSignalActionsVisibility()

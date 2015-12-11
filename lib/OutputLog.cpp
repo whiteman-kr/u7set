@@ -60,14 +60,14 @@ QString OutputLogItem::toHtml() const
 
 	if (m_message.isEmpty())
 	{
-		result = QString("<font face=\"%1\" color=#C0C0C0>%2|</font>")
+		result = QString("<font face=\"%1\" size=\"4\" color=#C0C0C0>%2|</font>")
 					.arg(m_htmlFont)
 					.arg(m_no, 4, 10, QChar('0'));
 	}
 	else
 	{
-		result = QString("<font face=\"%1\" color=#808080>%2| %3  </font>"
-						 "<font face=\"%1\" color=%4>%5</font>")
+		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
+						 "<font face=\"%1\" size=\"4\" color=%4>%5</font>")
 				 .arg(m_htmlFont)
 				 .arg(m_no, 4, 10, QChar('0'))
 				 .arg(m_time.toString("hh:mm:ss:zzz   "))

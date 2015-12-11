@@ -227,7 +227,7 @@ namespace Builder
 			//
 			AppLogicData appLogicData;
 
-			parseApplicationLogic(&db, &appLogicData, &afbCollection, lastChangesetId);
+			parseApplicationLogic(&db, &appLogicData, &afbCollection, &equipmentSet, lastChangesetId);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -586,6 +586,7 @@ namespace Builder
 	bool BuildWorkerThread::parseApplicationLogic(DbController* db,
 												  AppLogicData* appLogicData,
 												  Afb::AfbElementCollection* afbCollection,
+												  Hardware::EquipmentSet* equipment,
 												  int changesetId)
 	{
 		if (db == nullptr ||
@@ -601,7 +602,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic parsing"));
 
-		Parser alPareser = {db, m_log, appLogicData, afbCollection, changesetId, debug()};
+		Parser alPareser = {db, m_log, appLogicData, afbCollection, equipment, changesetId, debug()};
 
 		bool result = alPareser.build();
 
