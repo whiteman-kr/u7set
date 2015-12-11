@@ -203,8 +203,11 @@ namespace Hardware
         void clear();
         bool checkUniqueConnections(Connection *editObject);
 
-        bool setConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
-                                 int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRxID, quint32 m_txRxDataUID);
+        bool setLMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
+                                 int m_txRxOptoID, quint32 m_txRxOptoDataUID);
+
+        bool setOCMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
+                                 int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRxRsID, quint32 m_txRxRsDataUID);
 
         bool load(DbController* db, QString &errorCode);
         bool save(DbController* db);

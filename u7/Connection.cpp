@@ -512,8 +512,14 @@ namespace Hardware
         return true;
     }
 
-    bool ConnectionStorage::setConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
-                                                int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRxID, quint32 m_txRxDataUID)
+    bool ConnectionStorage::setLMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
+                             int m_txRxOptoID, quint32 m_txRxOptoDataUID)
+    {
+        return setOCMConnectionParams(deviceStrID, m_txStartAddress, m_txWordsQuantity, m_rxWordsQuantity, m_txRxOptoID, m_txRxOptoDataUID, 0, 0);
+    }
+
+    bool ConnectionStorage::setOCMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
+                             int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRxRsID, quint32 m_txRxRsDataUID)
     {
         for (std::shared_ptr<Hardware::Connection> c : m_connections)
         {
@@ -524,8 +530,8 @@ namespace Hardware
                 c->setDevice1RxWordsQuantity(m_rxWordsQuantity);
                 c->setDevice1TxRxOptoID(m_txRxOptoID);
                 c->setDevice1TxRxOptoDataUID(m_txRxOptoDataUID);
-                c->setDevice1TxRxID(m_txRxID);
-                c->setDevice1TxRxDataUID(m_txRxDataUID);
+                c->setDevice1TxRxID(m_txRxRsID);
+                c->setDevice1TxRxDataUID(m_txRxRsDataUID);
                 return true;
             }
 
@@ -536,8 +542,8 @@ namespace Hardware
                 c->setDevice2RxWordsQuantity(m_rxWordsQuantity);
                 c->setDevice2TxRxOptoID(m_txRxOptoID);
                 c->setDevice2TxRxOptoDataUID(m_txRxOptoDataUID);
-                c->setDevice2TxRxID(m_txRxID);
-                c->setDevice2TxRxDataUID(m_txRxDataUID);
+                c->setDevice2TxRxID(m_txRxRsID);
+                c->setDevice2TxRxDataUID(m_txRxRsDataUID);
                 return true;
             }
         }
