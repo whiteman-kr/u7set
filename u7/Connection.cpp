@@ -102,7 +102,7 @@ namespace Hardware
 
 		if (reader.attributes().hasAttribute("SignalList"))
 		{
-			setSignalList(reader.attributes().value("SignalList").toString().split(';'));
+			setSignalList(reader.attributes().value("SignalList").toString().split(';', QString::SkipEmptyParts));
 		}
 
 		QXmlStreamReader::TokenType endToken = reader.readNext();

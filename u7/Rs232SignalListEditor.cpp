@@ -117,7 +117,7 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 
 void Rs232SignalListEditor::closeEvent(QCloseEvent *e)
 {
-	if (saveChanges())
+	if (!m_connections.isCheckedOut(m_db) || saveChanges())
 	{
 		e->accept();
 	}
@@ -145,7 +145,7 @@ void Rs232SignalListEditor::checkIn()
 											tr("Please enter comment:"), QLineEdit::Normal,
 											tr("comment"), &ok);
 
-	if (ok)
+	if (!ok)
 	{
 		return;
 	}
@@ -327,16 +327,21 @@ void Rs232SignalListEditor::addSignal()
 										"#NEW_SIGNAL_ID", &ok);
 	if (ok && !id.isEmpty())
 	{
+		QStringList&& signalList = connection->signalList();
+		if (signalList.contains(id))
+		{
+			QMessageBox::information(this, windowTitle(), tr("This signal ID already exists"));
+			return;
+		}
 		items = m_signalList->selectedItems();
 		if (items.size() == 0)
 		{
-			connection->setSignalList(connection->signalList() << id);
+			connection->setSignalList(signalList << id);
 			fillSignalList(true);
 			m_signalList->selectionModel()->select(m_signalList->model()->index(m_signalList->rowCount() - 1, 0), QItemSelectionModel::SelectCurrent);
 		}
 		else
 		{
-			QStringList&& signalList = connection->signalList();
 			int row = m_signalList->row(items[0]);
 			signalList.insert(row, id);
 			connection->setSignalList(signalList);
@@ -371,6 +376,11 @@ void Rs232SignalListEditor::editSignal()
 
 	if (ok && !id.isEmpty())
 	{
+		if (signalList.contains(id))
+		{
+			QMessageBox::information(this, windowTitle(), tr("This signal ID already exists"));
+			return;
+		}
 		signalList[row] = id;
 		connection->setSignalList(signalList);
 		fillSignalList(true);
