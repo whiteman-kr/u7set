@@ -519,7 +519,7 @@ namespace Hardware
     }
 
     bool ConnectionStorage::setOCMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
-                             int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRxRsID, quint32 m_txRxRsDataUID)
+                             int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID)
     {
         for (std::shared_ptr<Hardware::Connection> c : m_connections)
         {
@@ -530,8 +530,8 @@ namespace Hardware
                 c->setDevice1RxWordsQuantity(m_rxWordsQuantity);
                 c->setDevice1TxRxOptoID(m_txRxOptoID);
                 c->setDevice1TxRxOptoDataUID(m_txRxOptoDataUID);
-                c->setDevice1TxRxID(m_txRxRsID);
-                c->setDevice1TxRxDataUID(m_txRxRsDataUID);
+                c->setDevice1TxRxID(m_txRsID);
+                c->setDevice1TxRxDataUID(m_txRsDataUID);
                 return true;
             }
 
@@ -542,8 +542,8 @@ namespace Hardware
                 c->setDevice2RxWordsQuantity(m_rxWordsQuantity);
                 c->setDevice2TxRxOptoID(m_txRxOptoID);
                 c->setDevice2TxRxOptoDataUID(m_txRxOptoDataUID);
-                c->setDevice2TxRxID(m_txRxRsID);
-                c->setDevice2TxRxDataUID(m_txRxRsDataUID);
+                c->setDevice2TxRxID(m_txRsID);
+                c->setDevice2TxRxDataUID(m_txRsDataUID);
                 return true;
             }
         }

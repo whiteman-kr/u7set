@@ -207,7 +207,7 @@ namespace Hardware
                                  int m_txRxOptoID, quint32 m_txRxOptoDataUID);
 
         bool setOCMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
-                                 int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRxRsID, quint32 m_txRxRsDataUID);
+                                 int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID);
 
         bool load(DbController* db, QString &errorCode);
         bool save(DbController* db);
