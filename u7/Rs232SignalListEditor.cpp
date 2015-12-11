@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include "DialogConnectionsEditor.h"
+#include <QCloseEvent>
 
 Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidget *parent) :
 	QDialog(parent),
@@ -14,6 +15,9 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 	assert(m_db);
 
 	setWindowTitle(tr("Serial port signal list editor"));
+	resize(640, 480);
+
+	m_rs232Connections->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_rs232Connections->fontMetrics().height() * 1.4));
 
 	m_rs232Connections->setColumnCount(4);
 	QStringList l;
@@ -22,12 +26,13 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 		<< tr("Mode")
 		<< tr("Enabled");
 	m_rs232Connections->setHorizontalHeaderLabels(l);
-	m_rs232Connections->setColumnWidth(0, 100);
+	m_rs232Connections->setColumnWidth(0, 150);
 	m_rs232Connections->setColumnWidth(1, 150);
-	m_rs232Connections->setColumnWidth(2, 50);
+	m_rs232Connections->setColumnWidth(2, 70);
 	m_rs232Connections->setColumnWidth(4, 100);
 
 	m_rs232Connections->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_rs232Connections->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	connect(m_rs232Connections, &QTableWidget::doubleClicked, this, &Rs232SignalListEditor::editConnection);
 	connect(m_rs232Connections->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Rs232SignalListEditor::onConnectionChanged);
@@ -52,11 +57,14 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 	mainLayout->addLayout(hl);
 
+	m_signalList->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalList->fontMetrics().height() * 1.4));
+
 	m_signalList->setColumnCount(1);
 	m_signalList->setHorizontalHeaderLabels(QStringList() << "Signal Str ID");
-	m_signalList->setColumnWidth(0, 100);
+	m_signalList->setColumnWidth(0, 300);
 
 	m_signalList->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_signalList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	connect(m_signalList, &QTableWidget::doubleClicked, this, &Rs232SignalListEditor::editSignal);
 
@@ -86,18 +94,11 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 	m_undo = new QPushButton("Undo", this);
 	connect(m_undo, &QPushButton::pressed, this, &Rs232SignalListEditor::undo);
 
-	m_ok = new QPushButton("Ok", this);
-	connect(m_ok, &QPushButton::pressed, this, &Rs232SignalListEditor::onOk);
-	m_cancel = new QPushButton("Cancel", this);
-	connect(m_cancel, &QPushButton::pressed, this, &Rs232SignalListEditor::onCancel);
-
 	hl = new QHBoxLayout;
 	hl->addWidget(m_checkOut);
 	hl->addWidget(m_checkIn);
 	hl->addWidget(m_undo);
 	hl->addStretch();
-	hl->addWidget(m_ok);
-	hl->addWidget(m_cancel);
 
 	mainLayout->addLayout(hl);
 	setLayout(mainLayout);
@@ -112,6 +113,18 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 
 	updateButtons(m_connections.isCheckedOut(m_db));
 	fillConnectionsList();
+}
+
+void Rs232SignalListEditor::closeEvent(QCloseEvent *e)
+{
+	if (saveChanges())
+	{
+		e->accept();
+	}
+	else
+	{
+		e->ignore();
+	}
 }
 
 void Rs232SignalListEditor::checkOut()
@@ -190,27 +203,6 @@ void Rs232SignalListEditor::undo()
 	fillConnectionsList();
 }
 
-void Rs232SignalListEditor::onOk()
-{
-	if (m_modified)
-	{
-		if (!saveChanges())
-		{
-			return;
-		}
-	}
-
-	accept();
-}
-
-void Rs232SignalListEditor::onCancel()
-{
-	if (askForSaveChanged())
-	{
-		reject();
-	}
-}
-
 void Rs232SignalListEditor::addConnection()
 {
 	int index = m_rs232Connections->rowCount();
@@ -250,7 +242,7 @@ void Rs232SignalListEditor::addConnection()
 void Rs232SignalListEditor::editConnection()
 {
 	QList<QTableWidgetItem*> items = m_rs232Connections->selectedItems();
-	if (items.size() != 1)
+	if (items.size() == 0)
 	{
 		return;
 	}
@@ -289,7 +281,7 @@ void Rs232SignalListEditor::editConnection()
 void Rs232SignalListEditor::removeConnection()
 {
 	QList<QTableWidgetItem*> items = m_rs232Connections->selectedItems();
-	if (items.size() != 1)
+	if (items.size() == 0)
 	{
 		return;
 	}
@@ -333,11 +325,24 @@ void Rs232SignalListEditor::addSignal()
 	QString&& id = QInputDialog::getText(this, windowTitle(),
 										tr("Please enter new id:"), QLineEdit::Normal,
 										"#NEW_SIGNAL_ID", &ok);
-	if (ok)
+	if (ok && !id.isEmpty())
 	{
-		connection->setSignalList(connection->signalList() << id);
-		fillSignalList(true);
-		m_signalList->selectionModel()->select(m_signalList->model()->index(m_signalList->rowCount() - 1, 0), QItemSelectionModel::SelectCurrent);
+		items = m_signalList->selectedItems();
+		if (items.size() == 0)
+		{
+			connection->setSignalList(connection->signalList() << id);
+			fillSignalList(true);
+			m_signalList->selectionModel()->select(m_signalList->model()->index(m_signalList->rowCount() - 1, 0), QItemSelectionModel::SelectCurrent);
+		}
+		else
+		{
+			QStringList&& signalList = connection->signalList();
+			int row = m_signalList->row(items[0]);
+			signalList.insert(row, id);
+			connection->setSignalList(signalList);
+			fillSignalList(true);
+			m_signalList->selectionModel()->select(m_signalList->model()->index(row, 0), QItemSelectionModel::SelectCurrent);
+		}
 	}
 }
 
@@ -352,7 +357,7 @@ void Rs232SignalListEditor::editSignal()
 	std::shared_ptr<Hardware::Connection> connection = m_connections.get(items[0]->data(Qt::UserRole).toInt());
 
 	items = m_signalList->selectedItems();
-	if (items.size() != 1)
+	if (items.size() == 0)
 	{
 		return;
 	}
@@ -364,7 +369,7 @@ void Rs232SignalListEditor::editSignal()
 											tr("Please enter new id:"), QLineEdit::Normal,
 											signalList[row], &ok);
 
-	if (ok)
+	if (ok && !id.isEmpty())
 	{
 		signalList[row] = id;
 		connection->setSignalList(signalList);
@@ -384,7 +389,7 @@ void Rs232SignalListEditor::removeSignal()
 	std::shared_ptr<Hardware::Connection> connection = m_connections.get(items[0]->data(Qt::UserRole).toInt());
 
 	items = m_signalList->selectedItems();
-	if (items.size() != 1)
+	if (items.size() == 0)
 	{
 		return;
 	}
@@ -473,36 +478,15 @@ void Rs232SignalListEditor::fillSignalList(bool forceUpdate)
 	}
 }
 
-bool Rs232SignalListEditor::askForSaveChanged()
-{
-	if (!m_modified)
-	{
-		return true;
-	}
-
-	QMessageBox::StandardButton result = QMessageBox::warning(this, windowTitle(), "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-	if (result == QMessageBox::Yes)
-	{
-		if (!saveChanges())
-		{
-			return false;
-		}
-		return true;
-	}
-
-	if (result == QMessageBox::No)
-	{
-		return true;
-	}
-
-	return false;
-}
-
 bool Rs232SignalListEditor::saveChanges()
 {
 	if (!m_connections.save(m_db))
 	{
-		QMessageBox::critical(this, QString("Error"), tr("Can't save connections."));
+		QMessageBox::StandardButton result = QMessageBox::critical(this, windowTitle(), tr("Can't save connections."), QMessageBox::Ignore | QMessageBox::Retry);
+		if (result == QMessageBox::Ignore)
+		{
+			return true;
+		}
 		return false;
 	}
 
@@ -523,6 +507,5 @@ void Rs232SignalListEditor::updateButtons(bool checkOut)
 	m_checkIn->setEnabled(checkOut);
 	m_checkOut->setEnabled(!checkOut);
 	m_undo->setEnabled(checkOut);
-	m_ok->setEnabled(checkOut);
 }
 

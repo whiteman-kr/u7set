@@ -15,15 +15,15 @@ class Rs232SignalListEditor : public QDialog
 public:
 	explicit Rs232SignalListEditor(DbController* pDbController, QWidget *parent = 0);
 
+protected:
+	virtual void closeEvent(QCloseEvent * e);
+
 signals:
 
 public slots:
 	void checkOut();
 	void checkIn();
 	void undo();
-
-	void onOk();
-	void onCancel();
 
 	void addConnection();
 	void editConnection();
@@ -38,7 +38,6 @@ public slots:
 private:
 	void fillConnectionsList();
 	void fillSignalList(bool forceUpdate = false);
-	bool askForSaveChanged();
 	bool saveChanges();
 	void updateButtons(bool checkOut);
 
@@ -53,8 +52,6 @@ private:
 	QPushButton* m_checkIn;
 	QPushButton* m_checkOut;
 	QPushButton* m_undo;
-	QPushButton* m_ok;
-	QPushButton* m_cancel;
 
 	QTableWidget* m_rs232Connections;
 	QTableWidget* m_signalList;
