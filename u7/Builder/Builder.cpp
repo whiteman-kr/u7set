@@ -261,7 +261,7 @@ namespace Builder
 			//
 			// Compile application logic
 			//
-			compileApplicationLogic(&subsystems, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afbCollection, &appLogicData, &buildWriter);
+			compileApplicationLogic(&subsystems, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &afbCollection, &appLogicData, &buildWriter, &connections);
 
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -488,6 +488,11 @@ namespace Builder
 
 		bool result = db->getSignals(signalSet, nullptr);
 
+		if (result)
+		{
+			result = result && db->getUnits(Signal::m_unitList.get(), nullptr);
+		}
+
 		if (result == false)
 		{
 			LOG_ERROR(m_log, tr("Error"));
@@ -624,12 +629,13 @@ namespace Builder
 													SignalSet* signalSet,
 													Afb::AfbElementCollection* afbCollection,
 													AppLogicData* appLogicData,
-													BuildResultWriter* buildResultWriter)
+													BuildResultWriter* buildResultWriter,
+													Hardware::ConnectionStorage* connections)
 	{
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
-		ApplicationLogicCompiler appLogicCompiler(subsystems, equipment, signalSet, afbCollection, appLogicData, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(subsystems, equipment, signalSet, afbCollection, appLogicData, buildResultWriter, m_log, connections);
 
 		bool result = appLogicCompiler.run();
 

@@ -19,6 +19,10 @@
 #include "../VFrame30/FblItem.h"
 #include "Subsystem.h"
 
+namespace Hardware {
+	class ConnectionStorage;
+}
+
 namespace Builder
 {
 
@@ -94,6 +98,7 @@ namespace Builder
 		AppLogicData* m_appLogicData = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		OutputLog* m_log = nullptr;
+		Hardware::ConnectionStorage* m_connections = nullptr;
 
 		QVector<Hardware::DeviceModule*> m_lm;
 
@@ -110,7 +115,7 @@ namespace Builder
 	public:
 		ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet,
 								 Afb::AfbElementCollection* afblSet, AppLogicData* appLogicData,
-								 BuildResultWriter* buildResultWriter, OutputLog* log);
+								 BuildResultWriter* buildResultWriter, OutputLog* log, Hardware::ConnectionStorage* connections);
 
 		bool run();
 
@@ -738,6 +743,7 @@ namespace Builder
 		OutputLog* m_log = nullptr;
 		Hardware::DeviceModule* m_lm = nullptr;
 		Hardware::DeviceChassis* m_chassis = nullptr;
+		Hardware::ConnectionStorage* m_connections = nullptr;
 
 		// compiler settings
 		//
@@ -890,6 +896,8 @@ namespace Builder
 		void displayTimingInfo();
 
 		void writeLMCodeTestFile();
+
+		bool writeOcmRsSignalsXml();
 
 		void cleanup();
 

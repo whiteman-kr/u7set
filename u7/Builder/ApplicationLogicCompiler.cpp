@@ -1,5 +1,6 @@
 #include "ApplicationLogicCompiler.h"
 #include "../VFrame30/Afb.h"
+#include "../Connection.h"
 
 namespace Builder
 {
@@ -484,14 +485,15 @@ namespace Builder
 	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems, Hardware::DeviceObject* equipment,
 													   SignalSet* signalSet, Afb::AfbElementCollection *afblSet,
 													   AppLogicData* appLogicData, BuildResultWriter* buildResultWriter,
-													   OutputLog *log) :
+													   OutputLog *log, Hardware::ConnectionStorage *connections) :
 		m_subsystems(subsystems),
 		m_equipment(equipment),
 		m_signals(signalSet),
 		m_afbl(afblSet),
 		m_appLogicData(appLogicData),
 		m_resultWriter(buildResultWriter),
-		m_log(log)
+		m_log(log),
+		m_connections(connections)
 	{
 	}
 
@@ -509,7 +511,8 @@ namespace Builder
 			m_signals == nullptr ||
 			m_afbl == nullptr ||
 			m_appLogicData == nullptr ||
-			m_resultWriter == nullptr)
+			m_resultWriter == nullptr ||
+			m_connections == nullptr)
 		{
 			msg = tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__);
 
@@ -676,6 +679,7 @@ namespace Builder
 		m_resultWriter = appLogicCompiler.m_resultWriter;
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
+		m_connections = appLogicCompiler.m_connections;
 
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
@@ -763,6 +767,8 @@ namespace Builder
 			if (!finishAppLogicCode()) break;
 
 			if (!calculateCodeRunTime()) break;
+
+			if (!writeOcmRsSignalsXml()) break;
 
 			if (!writeResult()) break;
 
@@ -2973,6 +2979,117 @@ namespace Builder
 		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);
 
 		*/
+	}
+
+
+	bool ModuleLogicCompiler::writeOcmRsSignalsXml()
+	{
+		if (!m_signals || m_signals->isEmpty())
+		{
+			LOG_MESSAGE(m_log, tr("Signals not found!"));
+			return true;
+		}
+
+		if (!m_connections)
+		{
+			LOG_MESSAGE(m_log, tr("Connections not found!"));
+			return true;
+		}
+
+		if (m_signalsStrID.isEmpty())
+		{
+			createDeviceBoundSignalsMap();
+		}
+
+		equipmentWalker(m_chassis, [this](Hardware::DeviceObject* device){
+			if (!device->isModule())
+			{
+				return;
+			}
+			Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
+			if (module == nullptr || module->moduleFamily() != Hardware::DeviceModule::OCM)
+			{
+				return;
+			}
+			for (int i = 0; i < m_connections->count(); i++)
+			{
+				auto connection = m_connections->get(i);
+				if (connection->connectionType() != Hardware::Connection::ConnectionType::SerialPortSignalListType)
+				{
+					continue;
+				}
+				if (connection->osmStrID() != module->strId())
+				{
+					continue;
+				}
+
+				QByteArray data;
+				QXmlStreamWriter serialDataXml(&data);
+
+				serialDataXml.setAutoFormatting(true);
+				serialDataXml.writeStartDocument();
+				serialDataXml.writeStartElement("SerialData");
+
+				m_resultWriter->buildInfo().writeToXml(serialDataXml);
+
+				serialDataXml.writeStartElement("PortInfo");
+
+				serialDataXml.writeAttribute("StrID", connection->osmStrID());
+				serialDataXml.writeAttribute("ID", QString::number(connection->index()));
+				serialDataXml.writeAttribute("DataID", "12334");
+				serialDataXml.writeAttribute("Speed", "115200");
+				serialDataXml.writeAttribute("Bits", "8");
+				serialDataXml.writeAttribute("StopBits", "2");
+				serialDataXml.writeAttribute("ParityControl", "false");
+				serialDataXml.writeAttribute("DataSize", "512");
+
+				serialDataXml.writeEndElement();	// </PortInfo>
+
+				serialDataXml.writeStartElement("Signals");
+
+				QList<Signal*> connectionSignalList;
+
+				for (QString signalId : connection->signalList())
+				{
+					Signal* s = getSignal(signalId);
+					if (s == nullptr)
+					{
+						LOG_ERROR(m_log, tr("Signal %1 listed in OCM connections not found in database").arg(signalId));
+						continue;
+					}
+					connectionSignalList << s;
+				}
+
+				serialDataXml.writeAttribute("Count", QString::number(connectionSignalList.count()));
+
+				for (auto s : connectionSignalList)
+				{
+					serialDataXml.writeStartElement("Signal");
+
+					serialDataXml.writeAttribute("StrID", s->strID());
+					serialDataXml.writeAttribute("ExtStrID", s->extStrID());
+					serialDataXml.writeAttribute("Name", s->name());
+					serialDataXml.writeAttribute("Type", QMetaEnum::fromType<E::SignalType>().valueToKey(s->typeInt()));
+					serialDataXml.writeAttribute("Unit", Signal::m_unitList->valueAt(s->unitID()));
+					serialDataXml.writeAttribute("DataSize", QString::number(s->dataSize()));
+					serialDataXml.writeAttribute("DataFormat", QMetaEnum::fromType<E::DataFormat>().valueToKey(s->dataFormatInt()));
+					serialDataXml.writeAttribute("ByteOrder", QMetaEnum::fromType<E::ByteOrder>().valueToKey(s->byteOrderInt()));
+					serialDataXml.writeAttribute("Offset", "1234");
+					serialDataXml.writeAttribute("BitNo", "0.." + QString::number(s->dataSize() - 1));
+
+					serialDataXml.writeEndElement();	// </Signal>
+				}
+
+				serialDataXml.writeEndElement();	// </Signals>
+
+				serialDataXml.writeEndElement();	// </SerialData>
+				serialDataXml.writeEndDocument();
+
+				m_resultWriter->addFile(m_lm->propertyValue("SubsysID").toString(), QString("rs-%1-ocm.xml").arg(connection->osmStrID()), data);
+			}
+		});
+
+		return true;
 	}
 
 

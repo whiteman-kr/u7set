@@ -86,7 +86,7 @@ namespace Builder
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet, Afb::AfbElementCollection* afbCollection, AppLogicData* appLogicData, BuildResultWriter* buildResultWriter);
+		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems, Hardware::DeviceObject* equipment, SignalSet* signalSet, Afb::AfbElementCollection* afbCollection, AppLogicData* appLogicData, BuildResultWriter* buildResultWriter, Hardware::ConnectionStorage *connections);
 
 		// Generate SCADA software configurations
 		//
