@@ -435,9 +435,13 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     {
         log.writeWarning("WARNING: no input controller found in " + module.propertyValue("StrID") + "! Using default values.");
     }
-
+	
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
+
+	var channelAPlace = 0;
+	var channelAMaxDifference = 0;
+
     for (var i = 0; i < AIMSignalMaxCount; i++)
     {
         // find a signal with Place = i
@@ -467,6 +471,25 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
             
             var filternigTime = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
             var maxDifference = valToADC(signal.maxDifference(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
+
+			if ((i & 1) == 0)
+			{
+				// this is A input
+				channelAPlace = i;
+				channelAMaxDifference = maxDifference;
+			}
+			else
+			{
+				if (i == channelAPlace + 1)
+				{
+					// this is B input, next to saved A
+					if (maxDifference != channelAMaxDifference)
+					{
+						log.writeError("Error - AIM input " + channelAPlace + " maxDifference ADC "+ channelAMaxDifference + " is not equal to input " + i + " maxDifference ADC " + maxDifference);
+						return false;
+					}
+				}
+			}
 
 			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
 			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + signal.highADC() +
