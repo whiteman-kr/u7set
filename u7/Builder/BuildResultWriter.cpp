@@ -422,20 +422,13 @@ namespace Builder
 				.arg(m_buildInfo.release ? "RELEASE" : "DEBUG")
 				.arg(m_buildInfo.id).arg(errors).arg(warnings);
 
-		if (errors)
+		if (errors || warnings)
 		{
-			LOG_ERROR(m_log, msg);
+			LOG_MESSAGE(m_log, msg);
 		}
 		else
 		{
-			if (warnings)
-			{
-				LOG_WARNING(m_log, msg);
-			}
-			else
-			{
-				LOG_SUCCESS(m_log, msg);
-			}
+			LOG_SUCCESS(m_log, msg);
 		}
 
 		QString buildLogStr = m_log->finishStrLogging();
@@ -594,6 +587,14 @@ namespace Builder
 
 	bool BuildResultWriter::closeBuildXml()
 	{
+
+		m_xmlWriter.writeStartElement("BuildResult");
+
+		m_xmlWriter.writeAttribute("Errors", QString::number(m_log->errorCount()));
+		m_xmlWriter.writeAttribute("Warnings", QString::number(m_log->warningCount()));
+
+		m_xmlWriter.writeEndElement();			// </BuildResult>
+
 		m_xmlWriter.writeEndElement();			// </Build>
 		m_xmlWriter.writeEndDocument();
 
