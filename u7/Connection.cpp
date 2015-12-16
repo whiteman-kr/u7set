@@ -37,7 +37,7 @@ namespace Hardware
         ADD_PROPERTY_GETTER_SETTER(quint32, Device2TxRsDataUID, false, Connection::device2TxRsDataUID, Connection::setDevice2TxRsDataUID);
 
         ADD_PROPERTY_GETTER_SETTER(ConnectionMode, ConnectionMode, false, Connection::connectionMode, Connection::setConnectionMode);
-		ADD_PROPERTY_GETTER_SETTER(bool, Enable, true, Connection::enable, Connection::setEnable);
+		ADD_PROPERTY_GETTER_SETTER(bool, Enable, false, Connection::enable, Connection::setEnable);
 	}
 
     Connection::Connection(const Connection& that):Connection()
@@ -352,12 +352,14 @@ namespace Hardware
 			case ConnectionType::DeviceConnectionType:
 				propertyByCaption("OsmStrID")->setVisible(false);
                 propertyByCaption("ConnectionMode")->setVisible(false);
+				propertyByCaption("Enable")->setVisible(false);
 				propertyByCaption("Device1StrID")->setVisible(true);
 				propertyByCaption("Device2StrID")->setVisible(true);
 				break;
 			case ConnectionType::SerialPortSignalListType:
 				propertyByCaption("OsmStrID")->setVisible(true);
                 propertyByCaption("ConnectionMode")->setVisible(true);
+				propertyByCaption("Enable")->setVisible(true);
 				propertyByCaption("Device1StrID")->setVisible(false);
 				propertyByCaption("Device2StrID")->setVisible(false);
 				break;

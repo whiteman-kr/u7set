@@ -61,7 +61,6 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     l << tr("Caption");
     l << tr("Device1 StrID");
     l << tr("Device2 StrID");
-    l << tr("Enabled");
     ui->m_list->setColumnCount(l.size());
     ui->m_list->setHeaderLabels(l);
     int il = 0;
@@ -69,7 +68,6 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     ui->m_list->setColumnWidth(il++, 100);
     ui->m_list->setColumnWidth(il++, 150);
     ui->m_list->setColumnWidth(il++, 150);
-    ui->m_list->setColumnWidth(il++, 50);
 
     QString errorCode;
 
@@ -109,8 +107,7 @@ void DialogConnectionsEditor::fillConnectionsList()
         QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                     connection->caption() <<
                                                     connection->device1StrID() <<
-                                                    connection->device2StrID() <<
-                                                    (connection->enable() ? "true" : "false"));
+													connection->device2StrID());
         item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
 		ui->m_list->addTopLevelItem(item);
     }
@@ -204,8 +201,7 @@ void DialogConnectionsEditor::on_m_Add_clicked()
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << QString::number(connection->index()) <<
                                                 connection->caption() <<
                                                 connection->device1StrID() <<
-                                                connection->device2StrID() <<
-                                                (connection->enable() ? "true" : "false"));
+												connection->device2StrID());
     item->setData(0, Qt::UserRole, QVariant::fromValue(connection));
     ui->m_list->insertTopLevelItem(index, item);
 
