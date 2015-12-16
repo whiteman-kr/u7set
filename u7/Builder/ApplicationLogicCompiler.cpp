@@ -3014,11 +3014,11 @@ namespace Builder
 			for (int i = 0; i < m_connections->count(); i++)
 			{
 				auto connection = m_connections->get(i);
-				if (connection->connectionType() != Hardware::Connection::ConnectionType::SerialPortSignalListType)
+				if (connection->connectionType() != Hardware::Connection::ConnectionType::SerialConnectionType)
 				{
 					continue;
 				}
-				if (connection->osmStrID() != module->strId())
+				if (connection->ocmPortStrID() != module->strId())
 				{
 					continue;
 				}
@@ -3034,7 +3034,7 @@ namespace Builder
 
 				serialDataXml.writeStartElement("PortInfo");
 
-				serialDataXml.writeAttribute("StrID", connection->osmStrID());
+				serialDataXml.writeAttribute("StrID", connection->ocmPortStrID());
 				serialDataXml.writeAttribute("ID", QString::number(connection->index()));
 				serialDataXml.writeAttribute("DataID", "12334");
 				serialDataXml.writeAttribute("Speed", "115200");
@@ -3085,7 +3085,7 @@ namespace Builder
 				serialDataXml.writeEndElement();	// </SerialData>
 				serialDataXml.writeEndDocument();
 
-				m_resultWriter->addFile(m_lm->propertyValue("SubsysID").toString(), QString("rs-%1-ocm.xml").arg(connection->osmStrID()), data);
+				m_resultWriter->addFile(m_lm->propertyValue("SubsysID").toString(), QString("rs-%1-ocm.xml").arg(connection->ocmPortStrID()), data);
 			}
 		});
 

@@ -99,7 +99,7 @@ void DialogConnectionsEditor::fillConnectionsList()
             break;
         }
 
-		if (connection->connectionType() != Hardware::Connection::ConnectionType::DeviceConnectionType)
+		if (connection->connectionType() != Hardware::Connection::ConnectionType::OpticalConnectionType)
 		{
 			continue;
 		}

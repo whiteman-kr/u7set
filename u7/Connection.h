@@ -19,8 +19,8 @@ namespace Hardware
 
 		enum class ConnectionType
 		{
-			DeviceConnectionType,
-			SerialPortSignalListType
+			OpticalConnectionType,
+			SerialConnectionType
 		};
 		Q_ENUM(ConnectionType)
 
@@ -43,8 +43,8 @@ namespace Hardware
 		QString caption() const;
 		void setCaption(const QString& value);
 
-		QString osmStrID() const;
-		void setOsmStrID(const QString& value);
+		QString ocmPortStrID() const;
+		void setOcmPortStrID(const QString& value);
 
 		QString device1StrID() const;
         void setDevice1StrID(const QString& value);
@@ -116,7 +116,7 @@ namespace Hardware
         {
             m_index = that.m_index;
             m_caption = that.m_caption;
-			m_osmStrID = that.m_osmStrID;
+			m_ocmPortStrID = that.m_ocmPortStrID;
             m_device1StrID = that.m_device1StrID;
             m_device2StrID = that.m_device2StrID;
 
@@ -146,7 +146,7 @@ namespace Hardware
     private:
         int m_index = -1;
         QString m_caption;
-		QString m_osmStrID;
+		QString m_ocmPortStrID;
 
         QString m_device1StrID;
         int m_device1TxWordsQuantity = 0;
@@ -166,7 +166,7 @@ namespace Hardware
 
 
         ConnectionMode m_connectionMode = ConnectionMode::ModeRS232;
-		ConnectionType m_connectionType = ConnectionType::DeviceConnectionType;
+		ConnectionType m_connectionType = ConnectionType::OpticalConnectionType;
         bool m_enable = false;
 
 		QStringList m_signalList;

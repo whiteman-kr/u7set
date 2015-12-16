@@ -870,7 +870,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			var deviceNo = -1;
 			var rsConnection = false;
 		
-			if (controller.propertyValue("StrID") == connection.propertyValue("OsmStrID"))
+            if (controller.propertyValue("StrID") == connection.propertyValue("OcmPortStrID"))
 			{
 				// this is rs connection
 				//
@@ -905,7 +905,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			if (rsConnection == true)
 			{
 				confFirmware.writeLog("    Controller " + controller.propertyValue("StrID") + ": Rs connection  ID = " + connection.propertyValue("Caption") + ":" + 
-					connection.propertyValue("OsmStrID") + "\r\n");	
+                    connection.propertyValue("OcmPortStrID") + "\r\n");
 			}
 			else
 			{

@@ -16,7 +16,7 @@ namespace Hardware
 		ADD_PROPERTY_GETTER_SETTER(QString, Device1StrID, true, Connection::device1StrID, Connection::setDevice1StrID);
 		ADD_PROPERTY_GETTER_SETTER(QString, Device2StrID, true, Connection::device2StrID, Connection::setDevice2StrID);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, OsmStrID, false, Connection::osmStrID, Connection::setOsmStrID);
+		ADD_PROPERTY_GETTER_SETTER(QString, OcmPortStrID, false, Connection::ocmPortStrID, Connection::setOcmPortStrID);
 
         ADD_PROPERTY_GETTER_SETTER(int, Device1TxWordsQuantity, false, Connection::device1TxWordsQuantity, Connection::setDevice1TxWordsQuantity);
         ADD_PROPERTY_GETTER_SETTER(int, Device1RxWordsQuantity, false, Connection::device1RxWordsQuantity, Connection::setDevice1RxWordsQuantity);
@@ -49,7 +49,7 @@ namespace Hardware
 	{
 		writer.writeAttribute("Index", QString::number(index()));
 		writer.writeAttribute("Caption", caption());
-		writer.writeAttribute("OsmStrID", osmStrID());
+		writer.writeAttribute("OcmPortStrID", ocmPortStrID());
 		writer.writeAttribute("Device1StrID", device1StrID());
 		writer.writeAttribute("Device2StrID", device2StrID());
 		writer.writeAttribute("ConnectionMode", QString::number(static_cast<int>(connectionMode())));
@@ -72,9 +72,9 @@ namespace Hardware
 			setCaption(reader.attributes().value("Caption").toString());
 		}
 
-		if (reader.attributes().hasAttribute("OsmStrID"))
+		if (reader.attributes().hasAttribute("OcmPortStrID"))
 		{
-			setOsmStrID(reader.attributes().value("OsmStrID").toString());
+			setOcmPortStrID(reader.attributes().value("OcmPortStrID").toString());
 		}
 
 		if (reader.attributes().hasAttribute("Device1StrID"))
@@ -121,7 +121,7 @@ namespace Hardware
     {
         quint16 hashOpto = CUtils::calcHash16(m_caption.data(), m_caption.size() * sizeof(QChar));
 
-        quint16 hashRs = CUtils::calcHash16(m_osmStrID.data(), m_osmStrID.size() * sizeof(QChar));
+		quint16 hashRs = CUtils::calcHash16(m_ocmPortStrID.data(), m_ocmPortStrID.size() * sizeof(QChar));
 
         setDevice1TxWordsQuantity(479);
         setDevice1RxWordsQuantity(479);
@@ -161,14 +161,14 @@ namespace Hardware
 		m_caption = value;
 	}
 
-	QString Connection::osmStrID() const
+	QString Connection::ocmPortStrID() const
 	{
-		return m_osmStrID;
+		return m_ocmPortStrID;
 	}
 
-	void Connection::setOsmStrID(const QString& value)
+	void Connection::setOcmPortStrID(const QString& value)
 	{
-		m_osmStrID = value;
+		m_ocmPortStrID = value;
 	}
 
 	QString Connection::device1StrID() const
@@ -347,21 +347,29 @@ namespace Hardware
 	void Connection::setConnectionType(const ConnectionType &value)
 	{
 		m_connectionType = value;
+		auto propertyVisibilityChanger = [this](const char* propertyName, bool visible) {
+			auto property = propertyByCaption(propertyName);
+			if (property != nullptr)
+			{
+				property->setVisible(visible);
+			}
+		};
+
 		switch(value)
 		{
-			case ConnectionType::DeviceConnectionType:
-				propertyByCaption("OsmStrID")->setVisible(false);
-                propertyByCaption("ConnectionMode")->setVisible(false);
-				propertyByCaption("Enable")->setVisible(false);
-				propertyByCaption("Device1StrID")->setVisible(true);
-				propertyByCaption("Device2StrID")->setVisible(true);
+			case ConnectionType::OpticalConnectionType:
+				propertyVisibilityChanger("OcmPortStrID", false);
+				propertyVisibilityChanger("ConnectionMode", false);
+				propertyVisibilityChanger("Enable", false);
+				propertyVisibilityChanger("Device1StrID", true);
+				propertyVisibilityChanger("Device2StrID", true);
 				break;
-			case ConnectionType::SerialPortSignalListType:
-				propertyByCaption("OsmStrID")->setVisible(true);
-                propertyByCaption("ConnectionMode")->setVisible(true);
-				propertyByCaption("Enable")->setVisible(true);
-				propertyByCaption("Device1StrID")->setVisible(false);
-				propertyByCaption("Device2StrID")->setVisible(false);
+			case ConnectionType::SerialConnectionType:
+				propertyVisibilityChanger("OcmPortStrID", true);
+				propertyVisibilityChanger("ConnectionMode", true);
+				propertyVisibilityChanger("Enable", true);
+				propertyVisibilityChanger("Device1StrID", false);
+				propertyVisibilityChanger("Device2StrID", false);
 				break;
 			default:
 				assert(false);
@@ -489,7 +497,7 @@ namespace Hardware
 
     bool ConnectionStorage::checkUniqueConnections(Connection* editObject)
     {
-		if (editObject->connectionType() != Hardware::Connection::ConnectionType::DeviceConnectionType)
+		if (editObject->connectionType() != Hardware::Connection::ConnectionType::OpticalConnectionType)
 		{
 			return true;
 		}
