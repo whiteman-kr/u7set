@@ -3002,12 +3002,17 @@ namespace Builder
 		}
 
 		equipmentWalker(m_chassis, [this](Hardware::DeviceObject* device){
-			if (!device->isModule())
+			if (device->parent() == nullptr || !device->parent()->isModule())
 			{
 				return;
 			}
-			Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
+			Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device->parent());
 			if (module == nullptr || module->moduleFamily() != Hardware::DeviceModule::OCM)
+			{
+				return;
+			}
+			Hardware::DeviceController* port = dynamic_cast<Hardware::DeviceController*>(device);
+			if (port == nullptr)
 			{
 				return;
 			}
@@ -3018,7 +3023,7 @@ namespace Builder
 				{
 					continue;
 				}
-				if (connection->ocmPortStrID() != module->strId())
+				if (connection->ocmPortStrID() != port->strId())
 				{
 					continue;
 				}
