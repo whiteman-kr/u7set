@@ -54,7 +54,7 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
 
     ui->setupUi(this);
 
-    setWindowTitle(tr("Connections Editor"));
+    setWindowTitle(tr("Optical Connections Editor"));
 
     QStringList l;
     l << tr("ID");
@@ -195,8 +195,8 @@ void DialogConnectionsEditor::on_m_Add_clicked()
         return;
     }
     connection->setCaption("New Connection");
-    connection->setDevice1StrID("CTRL1_STRID");
-    connection->setDevice2StrID("CTRL2_STRID");
+    connection->setDevice1StrID("SYS_RACKID_CHID_MD_PORT1");
+    connection->setDevice2StrID("SYS_RACKID_CHID_MD_PORT2");
     connection->setEnable(true);
 
     connections.add(connection);

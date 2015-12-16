@@ -607,6 +607,24 @@ public:
 
 	#define UNDEFINED_HASH	0x0000000000000000l
 
+    static quint16 calcHash16(const void* src, int l)
+    {
+        if (src == nullptr)
+        {
+            assert(src);
+            return 0;
+        }
+
+        quint16 nHash = 0;
+
+        register quint8* p = (quint8*)src;
+
+        while (l--)
+            nHash += (nHash<<5) + *p++;
+
+        return nHash;
+    }
+
 	static quint64 calcHash(const void* src, qint64 l)
 	{
 		if (src == nullptr)

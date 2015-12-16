@@ -30,6 +30,8 @@ namespace Hardware
         bool save(QXmlStreamWriter& writer);
         bool load(QXmlStreamReader& reader);
 
+        void createTestData();
+
 
 		// Properties
         //
@@ -54,9 +56,6 @@ namespace Hardware
         //
         //
 
-        int device1TxStartAddress() const;
-        void setDevice1TxStartAddress(int value);
-
         int device1TxWordsQuantity() const;
         void setDevice1TxWordsQuantity(int value);
 
@@ -69,18 +68,15 @@ namespace Hardware
         quint32 device1TxRxOptoDataUID() const;
         void setDevice1TxRxOptoDataUID(quint32 value);
 
-        int device1TxRxID() const;
-        void setDevice1TxRxID(int value);
+        int device1TxRsID() const;
+        void setDevice1TxRsID(int value);
 
-        quint32 device1TxRxDataUID() const;
-        void setDevice1TxRxDataUID(quint32 value);
+        quint32 device1TxRsDataUID() const;
+        void setDevice1TxRsDataUID(quint32 value);
 
         //
         //
         //
-
-        int device2TxStartAddress() const;
-        void setDevice2TxStartAddress(int value);
 
         int device2TxWordsQuantity() const;
         void setDevice2TxWordsQuantity(int value);
@@ -94,11 +90,11 @@ namespace Hardware
         quint32 device2TxRxOptoDataUID() const;
         void setDevice2TxRxOptoDataUID(quint32 value);
 
-        int device2TxRxID() const;
-        void setDevice2TxRxID(int value);
+        int device2TxRsID() const;
+        void setDevice2TxRsID(int value);
 
-        quint32 device2TxRxDataUID() const;
-        void setDevice2TxRxDataUID(quint32 value);
+        quint32 device2TxRsDataUID() const;
+        void setDevice2TxRsDataUID(quint32 value);
 
         //
         //
@@ -124,23 +120,19 @@ namespace Hardware
             m_device1StrID = that.m_device1StrID;
             m_device2StrID = that.m_device2StrID;
 
-
-
-            m_device1TxStartAddress = that.m_device1TxStartAddress;
             m_device1TxWordsQuantity = that.m_device1TxWordsQuantity;
             m_device1RxWordsQuantity = that.m_device1RxWordsQuantity;
             m_device1TxRxOptoID = that.m_device1TxRxOptoID;
             m_device1TxRxOptoDataUID = that.m_device1TxRxOptoDataUID;
-            m_device1TxRxID = that.m_device1TxRxID;
-            m_device1TxRxDataUID = that.m_device1TxRxDataUID;
+            m_device1TxRsID = that.m_device1TxRsID;
+            m_device1TxRsDataUID = that.m_device1TxRsDataUID;
 
-            m_device2TxStartAddress = that.m_device2TxStartAddress;
             m_device2TxWordsQuantity = that.m_device2TxWordsQuantity;
             m_device2RxWordsQuantity = that.m_device2RxWordsQuantity;
             m_device2TxRxOptoID = that.m_device2TxRxOptoID;
             m_device2TxRxOptoDataUID = that.m_device2TxRxOptoDataUID;
-            m_device2TxRxID = that.m_device2TxRxID;
-            m_device2TxRxDataUID = that.m_device2TxRxDataUID;
+            m_device2TxRsID = that.m_device2TxRsID;
+            m_device2TxRsDataUID = that.m_device2TxRsDataUID;
 
             m_connectionMode = that.m_connectionMode;
             m_enable = that.m_enable;
@@ -156,25 +148,21 @@ namespace Hardware
         QString m_caption;
 		QString m_osmStrID;
 
-
-
         QString m_device1StrID;
-        int m_device1TxStartAddress = 0;
         int m_device1TxWordsQuantity = 0;
         int m_device1RxWordsQuantity = 0;
         int m_device1TxRxOptoID = 0;
         quint32 m_device1TxRxOptoDataUID = 0;
-        int m_device1TxRxID = 0;
-        quint32 m_device1TxRxDataUID = 0;
+        int m_device1TxRsID = 0;
+        quint32 m_device1TxRsDataUID = 0;
 
         QString m_device2StrID;
-        int m_device2TxStartAddress = 0;
         int m_device2TxWordsQuantity = 0;
         int m_device2RxWordsQuantity = 0;
         int m_device2TxRxOptoID = 0;
         quint32 m_device2TxRxOptoDataUID = 0;
-        int m_device2TxRxID = 0;
-        quint32 m_device2TxRxDataUID = 0;
+        int m_device2TxRsID = 0;
+        quint32 m_device2TxRsDataUID = 0;
 
 
         ConnectionMode m_connectionMode = ConnectionMode::ModeRS232;
@@ -203,10 +191,12 @@ namespace Hardware
         void clear();
         bool checkUniqueConnections(Connection *editObject);
 
-        bool setLMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
+        void createTestData();
+
+        bool setLMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
                                  int m_txRxOptoID, quint32 m_txRxOptoDataUID);
 
-        bool setOCMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
+        bool setOCMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
                                  int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID);
 
         bool load(DbController* db, QString &errorCode);

@@ -194,8 +194,8 @@ void MainWindow::createActions()
 	m_subsystemListEditorAction->setEnabled(false);
 	connect(m_subsystemListEditorAction, &QAction::triggered, this, &MainWindow::runSubsystemListEditor);
 
-    m_connectionsEditorAction = new QAction(tr("Connections Editor..."), this);
-    m_connectionsEditorAction->setStatusTip(tr("Run Connections Editor"));
+    m_connectionsEditorAction = new QAction(tr("Optical Connections Editor..."), this);
+    m_connectionsEditorAction->setStatusTip(tr("Run Optical Connections Editor"));
     m_connectionsEditorAction->setEnabled(false);
     connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
 

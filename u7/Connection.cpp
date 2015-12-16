@@ -18,25 +18,25 @@ namespace Hardware
 
 		ADD_PROPERTY_GETTER_SETTER(QString, OsmStrID, false, Connection::osmStrID, Connection::setOsmStrID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Device1TxStartAddress, false, Connection::device1TxStartAddress, Connection::setDevice1TxStartAddress);
         ADD_PROPERTY_GETTER_SETTER(int, Device1TxWordsQuantity, false, Connection::device1TxWordsQuantity, Connection::setDevice1TxWordsQuantity);
         ADD_PROPERTY_GETTER_SETTER(int, Device1RxWordsQuantity, false, Connection::device1RxWordsQuantity, Connection::setDevice1RxWordsQuantity);
 
         ADD_PROPERTY_GETTER_SETTER(int, Device1TxRxOptoID, false, Connection::device1TxRxOptoID, Connection::setDevice1TxRxOptoID);
         ADD_PROPERTY_GETTER_SETTER(quint32, Device1TxRxOptoDataUID, false, Connection::device1TxRxOptoDataUID, Connection::setDevice1TxRxOptoDataUID);
-        ADD_PROPERTY_GETTER_SETTER(int, Device1TxRxID, false, Connection::device1TxRxID, Connection::setDevice1TxRxID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Device1TxRxDataUID, false, Connection::device1TxRxDataUID, Connection::setDevice1TxRxDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(int, Device2TxStartAddress, false, Connection::device2TxStartAddress, Connection::setDevice2TxStartAddress);
+        ADD_PROPERTY_GETTER_SETTER(int, Device1TxRsID, false, Connection::device1TxRsID, Connection::setDevice1TxRsID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, Device1TxRsDataUID, false, Connection::device1TxRsDataUID, Connection::setDevice1TxRsDataUID);
+
         ADD_PROPERTY_GETTER_SETTER(int, Device2TxWordsQuantity, false, Connection::device2TxWordsQuantity, Connection::setDevice2TxWordsQuantity);
         ADD_PROPERTY_GETTER_SETTER(int, Device2RxWordsQuantity, false, Connection::device2RxWordsQuantity, Connection::setDevice2RxWordsQuantity);
 
         ADD_PROPERTY_GETTER_SETTER(int, Device2TxRxOptoID, false, Connection::device2TxRxOptoID, Connection::setDevice2TxRxOptoID);
         ADD_PROPERTY_GETTER_SETTER(quint32, Device2TxRxOptoDataUID, false, Connection::device2TxRxOptoDataUID, Connection::setDevice2TxRxOptoDataUID);
-        ADD_PROPERTY_GETTER_SETTER(int, Device2TxRxID, false, Connection::device2TxRxID, Connection::setDevice2TxRxID);
-        ADD_PROPERTY_GETTER_SETTER(quint32, Device2TxRxDataUID, false, Connection::device2TxRxDataUID, Connection::setDevice2TxRxDataUID);
 
-        ADD_PROPERTY_GETTER_SETTER(ConnectionMode, ConnectionMode, true, Connection::connectionMode, Connection::setConnectionMode);
+        ADD_PROPERTY_GETTER_SETTER(int, Device2TxRsID, false, Connection::device2TxRsID, Connection::setDevice2TxRsID);
+        ADD_PROPERTY_GETTER_SETTER(quint32, Device2TxRsDataUID, false, Connection::device2TxRsDataUID, Connection::setDevice2TxRsDataUID);
+
+        ADD_PROPERTY_GETTER_SETTER(ConnectionMode, ConnectionMode, false, Connection::connectionMode, Connection::setConnectionMode);
 		ADD_PROPERTY_GETTER_SETTER(bool, Enable, true, Connection::enable, Connection::setEnable);
 	}
 
@@ -117,6 +117,30 @@ namespace Hardware
 		return true;
 	}
 
+    void Connection::createTestData()
+    {
+        quint16 hashOpto = CUtils::calcHash16(m_caption.data(), m_caption.size() * sizeof(QChar));
+
+        quint16 hashRs = CUtils::calcHash16(m_osmStrID.data(), m_osmStrID.size() * sizeof(QChar));
+
+        setDevice1TxWordsQuantity(479);
+        setDevice1RxWordsQuantity(479);
+        setDevice1TxRxOptoID(hashOpto);
+        setDevice1TxRxOptoDataUID(0);
+        setDevice1TxRsID(hashRs);
+        setDevice1TxRsDataUID(0);
+
+        setDevice2TxWordsQuantity(479);
+        setDevice2RxWordsQuantity(479);
+        setDevice2TxRxOptoID(hashOpto);
+        setDevice2TxRxOptoDataUID(0);
+        setDevice2TxRsID(hashRs);
+        setDevice2TxRsDataUID(0);
+
+
+
+    }
+
 	int Connection::index() const
     {
         return m_index;
@@ -171,16 +195,6 @@ namespace Hardware
     // Device1
     //
 
-    int Connection::device1TxStartAddress() const
-    {
-        return m_device1TxStartAddress;
-    }
-
-    void Connection::setDevice1TxStartAddress(int value)
-    {
-        m_device1TxStartAddress = value;
-    }
-
     int Connection::device1TxWordsQuantity() const
     {
         return m_device1TxWordsQuantity;
@@ -226,39 +240,29 @@ namespace Hardware
 
     }
 
-    int Connection::device1TxRxID() const
+    int Connection::device1TxRsID() const
     {
-        return m_device1TxRxID;
+        return m_device1TxRsID;
     }
 
-    void Connection::setDevice1TxRxID(int value)
+    void Connection::setDevice1TxRsID(int value)
     {
-        m_device1TxRxID = value;
+        m_device1TxRsID = value;
     }
 
-    quint32 Connection::device1TxRxDataUID() const
+    quint32 Connection::device1TxRsDataUID() const
     {
-        return m_device1TxRxDataUID;
+        return m_device1TxRsDataUID;
     }
 
-    void Connection::setDevice1TxRxDataUID(quint32 value)
+    void Connection::setDevice1TxRsDataUID(quint32 value)
     {
-        m_device1TxRxDataUID = value;
+        m_device1TxRsDataUID = value;
     }
 
     //
     // Device2
     //
-
-    int Connection::device2TxStartAddress() const
-    {
-        return m_device2TxStartAddress;
-    }
-
-    void Connection::setDevice2TxStartAddress(int value)
-    {
-        m_device2TxStartAddress = value;
-    }
 
     int Connection::device2TxWordsQuantity() const
     {
@@ -305,24 +309,24 @@ namespace Hardware
 
     }
 
-    int Connection::device2TxRxID() const
+    int Connection::device2TxRsID() const
     {
-        return m_device2TxRxID;
+        return m_device2TxRsID;
     }
 
-    void Connection::setDevice2TxRxID(int value)
+    void Connection::setDevice2TxRsID(int value)
     {
-        m_device2TxRxID = value;
+        m_device2TxRsID = value;
     }
 
-    quint32 Connection::device2TxRxDataUID() const
+    quint32 Connection::device2TxRsDataUID() const
     {
-        return m_device2TxRxDataUID;
+        return m_device2TxRsDataUID;
     }
 
-    void Connection::setDevice2TxRxDataUID(quint32 value)
+    void Connection::setDevice2TxRsDataUID(quint32 value)
     {
-        m_device2TxRxDataUID = value;
+        m_device2TxRsDataUID = value;
     }
 
     Connection::ConnectionMode Connection::connectionMode() const
@@ -347,11 +351,13 @@ namespace Hardware
 		{
 			case ConnectionType::DeviceConnectionType:
 				propertyByCaption("OsmStrID")->setVisible(false);
+                propertyByCaption("ConnectionMode")->setVisible(false);
 				propertyByCaption("Device1StrID")->setVisible(true);
 				propertyByCaption("Device2StrID")->setVisible(true);
 				break;
 			case ConnectionType::SerialPortSignalListType:
 				propertyByCaption("OsmStrID")->setVisible(true);
+                propertyByCaption("ConnectionMode")->setVisible(true);
 				propertyByCaption("Device1StrID")->setVisible(false);
 				propertyByCaption("Device2StrID")->setVisible(false);
 				break;
@@ -503,7 +509,7 @@ namespace Hardware
                 return false;
             }
 
-            if (editObject->device1StrID() == c->device2StrID())
+            if (editObject->device2StrID() == c->device2StrID())
             {
                 return false;
             }
@@ -512,38 +518,44 @@ namespace Hardware
         return true;
     }
 
-    bool ConnectionStorage::setLMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
-                             int m_txRxOptoID, quint32 m_txRxOptoDataUID)
+    void ConnectionStorage::createTestData()
     {
-        return setOCMConnectionParams(deviceStrID, m_txStartAddress, m_txWordsQuantity, m_rxWordsQuantity, m_txRxOptoID, m_txRxOptoDataUID, 0, 0);
+        for (auto c : m_connections)
+        {
+            c->createTestData();
+        }
     }
 
-    bool ConnectionStorage::setOCMConnectionParams(const QString& deviceStrID, int m_txStartAddress, int m_txWordsQuantity, int m_rxWordsQuantity,
+    bool ConnectionStorage::setLMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
+                             int m_txRxOptoID, quint32 m_txRxOptoDataUID)
+    {
+        return setOCMConnectionParams(deviceStrID, m_txWordsQuantity, m_rxWordsQuantity, m_txRxOptoID, m_txRxOptoDataUID, 0, 0);
+    }
+
+    bool ConnectionStorage::setOCMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
                              int m_txRxOptoID, quint32 m_txRxOptoDataUID, int m_txRsID, quint32 m_txRsDataUID)
     {
         for (std::shared_ptr<Hardware::Connection> c : m_connections)
         {
             if (c->device1StrID() == deviceStrID)
             {
-                c->setDevice1TxStartAddress(m_txStartAddress);
                 c->setDevice1TxWordsQuantity(m_txWordsQuantity);
                 c->setDevice1RxWordsQuantity(m_rxWordsQuantity);
                 c->setDevice1TxRxOptoID(m_txRxOptoID);
                 c->setDevice1TxRxOptoDataUID(m_txRxOptoDataUID);
-                c->setDevice1TxRxID(m_txRsID);
-                c->setDevice1TxRxDataUID(m_txRsDataUID);
+                c->setDevice1TxRsID(m_txRsID);
+                c->setDevice1TxRsDataUID(m_txRsDataUID);
                 return true;
             }
 
             if (c->device2StrID() == deviceStrID)
             {
-                c->setDevice2TxStartAddress(m_txStartAddress);
                 c->setDevice2TxWordsQuantity(m_txWordsQuantity);
                 c->setDevice2RxWordsQuantity(m_rxWordsQuantity);
                 c->setDevice2TxRxOptoID(m_txRxOptoID);
                 c->setDevice2TxRxOptoDataUID(m_txRxOptoDataUID);
-                c->setDevice2TxRxID(m_txRsID);
-                c->setDevice2TxRxDataUID(m_txRsDataUID);
+                c->setDevice2TxRsID(m_txRsID);
+                c->setDevice2TxRsDataUID(m_txRsDataUID);
                 return true;
             }
         }

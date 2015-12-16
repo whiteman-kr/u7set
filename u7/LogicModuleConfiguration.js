@@ -845,6 +845,8 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 	//
 	confFirmware.writeLog("    There are " + connections.count() + " connections in the project.\r\n");
 	
+	var txStartAddress = 0;
+	
 	for (var p = 0; p < portCount; p++)
 	{
 		var controllerID = "*_*_*_*_PORT0";
@@ -866,16 +868,29 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			}
 			
 			var deviceNo = -1;
+			var rsConnection = false;
 		
-			if (controller.propertyValue("StrID") == connection.propertyValue("Device1StrID"))
+			if (controller.propertyValue("StrID") == connection.propertyValue("OsmStrID"))
 			{
+				// this is rs connection
+				//
+				rsConnection = true;
 				deviceNo = 1;
 			}
 			else
 			{
-				if (controller.propertyValue("StrID") == connection.propertyValue("Device2StrID"))
+				// this is optical connection
+				//
+				if (controller.propertyValue("StrID") == connection.propertyValue("Device1StrID"))
 				{
-					deviceNo = 2;
+					deviceNo = 1;
+				}
+				else
+				{
+					if (controller.propertyValue("StrID") == connection.propertyValue("Device2StrID"))
+					{
+						deviceNo = 2;
+					}
 				}
 			}
 			
@@ -887,48 +902,61 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			//
 			// A connection was found for this controller
 			//
-			
-			confFirmware.writeLog("    Controller " + controller.propertyValue("StrID") + ": connection device No " + deviceNo + " ID = " + connection.propertyValue("Caption") + ":" + 
-				connection.propertyValue("Device1StrID") + " <=> " + connection.propertyValue("Device2StrID") + "\r\n");
+			if (rsConnection == true)
+			{
+				confFirmware.writeLog("    Controller " + controller.propertyValue("StrID") + ": Rs connection  ID = " + connection.propertyValue("Caption") + ":" + 
+					connection.propertyValue("OsmStrID") + "\r\n");	
+			}
+			else
+			{
+				confFirmware.writeLog("    Controller " + controller.propertyValue("StrID") + ": Opto connection device No " + deviceNo + " ID = " + connection.propertyValue("Caption") + ":" + 
+					connection.propertyValue("Device1StrID") + " <=> " + connection.propertyValue("Device2StrID") + "\r\n");	
+			}
 					
 			var deviceName = "Device" + deviceNo;
 
 			var ptr = 0 + p * 2;
-			var value = connection.propertyValue(deviceName + "TxStartAddress");
+			var value = txStartAddress;
 			setData16(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    Frame " + frame + ", offset " + ptr + ": TX startAddress for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX startAddress for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 				
 			ptr = 5 * 2 + p * 2;
 			value = connection.propertyValue(deviceName + "TxWordsQuantity");
+			txStartAddress += value;
 			setData16(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    Frame " + frame + ", offset " + ptr + ": TX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 				
 			ptr = 10 * 2 + p * 2;
 			value = connection.propertyValue(deviceName + "TxRxOptoID");
 			setData16(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    Frame " + frame + ", offset " + ptr + ": TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 				
-			ptr = 15 * 2 + p * 2;
-			value = connection.propertyValue(deviceName + "RxWordsQuantity");
-			setData16(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    Frame " + frame + ", offset " + ptr + ": RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			if (rsConnection == false)
+			{
+				// write RxWordsQuantity for Opto connections only
+				//
+				ptr = 15 * 2 + p * 2;
+				value = connection.propertyValue(deviceName + "RxWordsQuantity");
+				setData16(confFirmware, log, frame, ptr, value); 
+				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			}
 				
 			ptr = 20 * 2 + p * 4;
 			value = connection.propertyValue(deviceName + "TxRxOptoDataUID");
 			setData32(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    Frame " + frame + ", offset " + ptr + ": TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
 				
-			if (modeOCM == true)
+			if (modeOCM == true && rsConnection == true)
 			{
 				ptr = 30 * 2 + p * 2;
-				value = connection.propertyValue(deviceName + "TxRxID");
+				value = connection.propertyValue(deviceName + "TxRsID");
 				setData16(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    Frame " + frame + ", offset " + ptr + ": TX ID for RS-232/485 transmitter " + (p + 1) + " = " + value + "\r\n");
+				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX ID for RS-232/485 transmitter " + (p + 1) + " = " + value + "\r\n");
 					
 				ptr = 35 * 2 + p * 4;
-				value = connection.propertyValue(deviceName + "TxRxDataUID");
+				value = connection.propertyValue(deviceName + "TxRsDataUID");
 				setData32(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    Frame " + frame + ", offset " + ptr + ": RS-232/485 Data UID " + (p + 1) + " = " + value + "\r\n");
+				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RS-232/485 Data UID " + (p + 1) + " = " + value + "\r\n");
 				
 				//
 				// RS232/485_CFG
@@ -954,6 +982,8 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				allModes |= txMode;
 				setData16(confFirmware, log, frame, ptr, allModes);
 			}
+			
+			break;
 		} // c
 	} // p
 	
@@ -961,6 +991,6 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 	{
 		var ptr = 45 * 2;
 		var allModes = confFirmware.data16(frame, ptr);
-		confFirmware.writeLog("    Frame " + frame + ", offset " + ptr +": RS mode configuration = " + allModes + "\r\n");
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RS mode configuration = " + allModes + "\r\n");
 	}
 }
