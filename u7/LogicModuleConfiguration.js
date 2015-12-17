@@ -114,6 +114,13 @@ function module_lm_1(device, confCollection, log, signalSet, subsystemStorage, c
 {
     if (device.jsDeviceType() == ModuleType)
     {
+	
+		if (device.propertyValue("ModuleFamily") == undefined || device.propertyValue("StrID") == undefined)
+		{
+			log.writeError("Undefined properties in function module_lm_1");
+			return false;
+		}
+	
         if (device.propertyValue("ModuleFamily") == FamilyLM)
         {
             log.writeMessage("MODULE LM-1: " + device.propertyValue("StrID"));
@@ -141,11 +148,24 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 {
     if (device.jsDeviceType() == ModuleType)
     {
+		if (device.propertyValue("ModuleFamily") == undefined || device.propertyValue("StrID") == undefined)
+		{
+			log.writeError("Undefined properties in function module_lm_1_statistics");
+			return false;
+		}
+		
         if (device.propertyValue("ModuleFamily") == FamilyLM)
         {
             log.writeMessage("MODULE LM-1: " + device.propertyValue("StrID"));
 
-            // Generate Configuration
+			if (device.propertyValue("SubsysID") == undefined || device.propertyValue("Channel") == undefined
+				|| device.propertyValue("ConfigFrameSize") == undefined || device.propertyValue("ConfigFrameCount") == undefined)
+			{
+				log.writeError("Undefined LM-1 properties in function module_lm_1_statistics");
+				return false;
+			}
+
+			// Generate Configuration
             //
 			// Variables
 			//
@@ -200,7 +220,15 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 //
 function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemStorage, connectionStorage)
 {
-    // Variables
+	if (module.propertyValue("StrID") == undefined
+		|| module.propertyValue("SubsysID") == undefined || module.propertyValue("Channel") == undefined
+		|| module.propertyValue("ConfigFrameSize") == undefined || module.propertyValue("ConfigFrameCount") == undefined)
+	{
+		log.writeError("Undefined properties in function generate_lm_1_rev3");
+		return false;
+	}
+
+	// Variables
     //
     var subSysID = module.propertyValue("SubsysID");
     var channel = module.propertyValue("Channel");
@@ -320,6 +348,14 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     for (var i = 0; i < parent.childrenCount(); i++)
     {
         var ioModule = parent.jsChild(i);
+		
+		if (ioModule.propertyValue("ModuleFamily") == undefined || ioModule.propertyValue("StrID") == undefined
+			|| ioModule.propertyValue("Place") == undefined)
+		{
+			log.writeError("Undefined ioModule properties in function generate_lm_1_rev3");
+			return false;
+		}		
+		
         if (ioModule.propertyValue("ModuleFamily") == FamilyAIM || ioModule.propertyValue("ModuleFamily") == FamilyAIFM || 
             ioModule.propertyValue("ModuleFamily") == FamilyAOM || ioModule.propertyValue("ModuleFamily") == FamilyOCM ||
             ioModule.propertyValue("ModuleFamily") == FamilyDIM || ioModule.propertyValue("ModuleFamily") == FamilyDOM)
@@ -418,6 +454,12 @@ function truncate_to_int(x)
 //
 function generate_aim(confFirmware, module, frame, log, signalSet)
 {
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	{
+		log.writeError("Undefined properties in function generate_aim");
+		return false;
+	}
+	
     log.writeMessage("MODULE AIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
 	confFirmware.writeLog("MODULE AIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
@@ -554,6 +596,12 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 //
 function generate_aifm(confFirmware, module, frame, log)
 {
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	{
+		log.writeError("Undefined properties in function generate_aifm");
+		return false;
+	}
+
     log.writeMessage("MODULE AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
 	confFirmware.writeLog("MODULE AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
     return true;
@@ -567,6 +615,12 @@ function generate_aifm(confFirmware, module, frame, log)
 //
 function generate_aom(confFirmware, module, frame, log, signalSet)
 {
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	{
+		log.writeError("Undefined properties in function generate_aom");
+		return false;
+	}
+
     log.writeMessage("MODULE AOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
 	confFirmware.writeLog("MODULE AOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
@@ -596,7 +650,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
             if (outController != null)
             {
                 var signal = findSignalByPlace(outController, place, Analog, Output, signalSet, log);
-                if (signal != null)
+                if (signal != null && signal.propertyValue("StrID") != undefined)
                 {
                     var outputRangeMode = signal.jsOutputRangeMode();
                     if (outputRangeMode < 0 || outputRangeMode > Mode_05mA)
@@ -666,6 +720,11 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
     {
         return null;
     }
+	if (parent.propertyValue("StrID") == undefined)
+	{
+		log.writeError("Undefined properties in function findSignalByPlace");
+		return null;
+	}
 
     for (var j = 0; j < parent.childrenCount(); j++)
     {
@@ -683,12 +742,20 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
         {
             continue;
         }
+		
+		var strID = s.propertyValue("StrID");
+		if (strID == undefined)
+		{
+			log.writeError("Undefined properties in function findSignalByPlace");
+			return null;
+		}
+		
         if (s.jsPlace() == place)
         {
-            signal = signalSet.getSignalByDeviceStrID(s.propertyValue("StrID"));
+            signal = signalSet.getSignalByDeviceStrID(strID);
             if (signal == null)    
             {
-                log.writeWarning("WARNING: Signal " + s.propertyValue("StrID") + " was not found in the signal database!");
+                log.writeWarning("WARNING: Signal " + strID + " was not found in the signal database!");
             }
             return signal;
         }
@@ -705,6 +772,12 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
 //
 function generate_ocm(confFirmware, module, frame, log, connectionStorage)
 {
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	{
+		log.writeError("Undefined properties in function generate_ocm");
+		return false;
+	}
+
     log.writeMessage("MODULE OCM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
 	confFirmware.writeLog("MODULE OCM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 	
@@ -724,6 +797,12 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
 //
 function generate_dim(confFirmware, module, frame, log)
 {
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	{
+		log.writeError("Undefined properties in function generate_ocm");
+		return false;
+	}
+
     log.writeMessage("MODULE DIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
 	confFirmware.writeLog("MODULE DIM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
@@ -774,6 +853,12 @@ function generate_dim(confFirmware, module, frame, log)
 //
 function generate_dom(confFirmware, module, frame, log)
 {
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	{
+		log.writeError("Undefined properties in function generate_ocm");
+		return false;
+	}
+
     log.writeMessage("MODULE DOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
 	confFirmware.writeLog("MODULE DOM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
@@ -841,6 +926,12 @@ function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFr
 
 function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connections, portCount, modeOCM)
 {
+	if (module.propertyValue("StrID") == undefined)
+	{
+		log.writeError("Undefined properties in function generate_txRxOptoConfiguration");
+		return false;
+	}
+	
     // Create TxRx Blocks (Opto) configuration
 	//
 	confFirmware.writeLog("    There are " + connections.count() + " connections in the project.\r\n");
@@ -858,6 +949,12 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			log.writeWarning("WARNING: no port controller " + controllerID + " found in " + module.propertyValue("StrID") + "!");
 			continue;
 		}
+		
+		if (controller.propertyValue("StrID") == undefined)
+		{
+			log.writeError("Undefined controller properties in function generate_txRxOptoConfiguration");
+			return false;
+		}
 
 		for (var c = 0; c < connections.count(); c++)
 		{
@@ -865,6 +962,14 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			if (connection == null)
 			{
 				continue;
+			}
+			
+			if (connection.propertyValue("Caption") == undefined || connection.propertyValue("OcmPortStrID") == undefined
+			|| connection.propertyValue("Device1StrID") == undefined || connection.propertyValue("Device2StrID") == undefined
+			|| connection.propertyValue("Enable") == undefined || connection.propertyValue("ConnectionMode") == undefined)
+			{
+				log.writeError("Undefined connection properties in function generate_txRxOptoConfiguration");
+				return false;
 			}
 			
 			var deviceNo = -1;
@@ -922,14 +1027,30 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				
 			ptr = 5 * 2 + p * 2;
 			value = connection.propertyValue(deviceName + "TxWordsQuantity");
-			txStartAddress += value;
-			setData16(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			if (value == undefined)
+			{
+				log.writeError("Undefined connection TxWordsQuantity properties in function generate_txRxOptoConfiguration");
+				return false;
+			}
+			else
+			{
+				txStartAddress += value;
+				setData16(confFirmware, log, frame, ptr, value); 
+				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			}
 				
 			ptr = 10 * 2 + p * 2;
 			value = connection.propertyValue(deviceName + "TxRxOptoID");
-			setData16(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			if (value == undefined)
+			{
+				log.writeError("Undefined connection TxRxOptoID properties in function generate_txRxOptoConfiguration");
+				return false;
+			}
+			else
+			{
+				setData16(confFirmware, log, frame, ptr, value); 
+				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			}
 				
 			if (rsConnection == false)
 			{
@@ -937,26 +1058,58 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				//
 				ptr = 15 * 2 + p * 2;
 				value = connection.propertyValue(deviceName + "RxWordsQuantity");
-				setData16(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+				if (value == undefined)
+				{
+					log.writeError("Undefined connection RxWordsQuantity properties in function generate_txRxOptoConfiguration");
+					return false;
+				}
+				else
+				{
+					setData16(confFirmware, log, frame, ptr, value); 
+					confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+				}
 			}
 				
 			ptr = 20 * 2 + p * 4;
 			value = connection.propertyValue(deviceName + "TxRxOptoDataUID");
-			setData32(confFirmware, log, frame, ptr, value); 
-			confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
+			if (value == undefined)
+			{
+				log.writeError("Undefined connection TxRxOptoDataUID properties in function generate_txRxOptoConfiguration");
+				return false;
+			}
+			else
+			{
+				setData32(confFirmware, log, frame, ptr, value); 
+				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TxRx Block (Opto) Data UID " + (p + 1) + " = " + value + "\r\n");
+			}
 				
 			if (modeOCM == true && rsConnection == true)
 			{
 				ptr = 30 * 2 + p * 2;
 				value = connection.propertyValue(deviceName + "TxRsID");
-				setData16(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX ID for RS-232/485 transmitter " + (p + 1) + " = " + value + "\r\n");
+				if (value == undefined)
+				{
+					log.writeError("Undefined connection TxRsID properties in function generate_txRxOptoConfiguration");
+					return false;
+				}
+				else
+				{
+					setData16(confFirmware, log, frame, ptr, value); 
+					confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX ID for RS-232/485 transmitter " + (p + 1) + " = " + value + "\r\n");
+				}
 					
 				ptr = 35 * 2 + p * 4;
 				value = connection.propertyValue(deviceName + "TxRsDataUID");
-				setData32(confFirmware, log, frame, ptr, value); 
-				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RS-232/485 Data UID " + (p + 1) + " = " + value + "\r\n");
+				if (value == undefined)
+				{
+					log.writeError("Undefined connection TxRsDataUID properties in function generate_txRxOptoConfiguration");
+					return false;
+				}
+				else
+				{
+					setData32(confFirmware, log, frame, ptr, value); 
+					confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RS-232/485 Data UID " + (p + 1) + " = " + value + "\r\n");
+				}
 				
 				//
 				// RS232/485_CFG
