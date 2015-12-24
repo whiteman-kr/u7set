@@ -6,279 +6,337 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1120</width>
-    <height>573</height>
+    <width>1255</width>
+    <height>667</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>SerialDataTester</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QTableWidget" name="signalsTable">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>861</width>
-      <height>531</height>
-     </rect>
-    </property>
-    <property name="sizeAdjustPolicy">
-     <enum>QAbstractScrollArea::AdjustToContents</enum>
-    </property>
-    <property name="rowCount">
-     <number>0</number>
-    </property>
-    <property name="columnCount">
-     <number>0</number>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="currentSignalInfo">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>90</y>
-      <width>241</width>
-      <height>151</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Current signal</string>
-    </property>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>221</width>
-       <height>121</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTableWidget" name="signalsTable">
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
+      <property name="rowCount">
+       <number>0</number>
+      </property>
+      <property name="columnCount">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_7">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QLabel" name="signatureLabel">
-          <property name="text">
-           <string>Signature</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="versionLabel">
-          <property name="text">
-           <string>Version</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="transmissionLabel">
-          <property name="text">
-           <string>Transmission ID</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="numeratorLabel">
-          <property name="text">
-           <string>Numerator</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="crcLabel">
-          <property name="text">
-           <string>CRC check</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>130</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Port info</string>
+        </property>
+        <widget class="QWidget" name="layoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>231</width>
+           <height>93</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QLabel" name="portLabel">
+              <property name="text">
+               <string>Port: </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="baudLabel">
+              <property name="text">
+               <string>Baud: </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="bitsLabel">
+              <property name="text">
+               <string>Bits:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="stopBitsLabel">
+              <property name="text">
+               <string>Stop bits:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="portStatusLabel">
+              <property name="text">
+               <string>Status:</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="portName">
+              <property name="text">
+               <string>Error</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="baudRate">
+              <property name="text">
+               <string>Error</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="bits">
+              <property name="text">
+               <string>Error</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="stopBits">
+              <property name="text">
+               <string>Error</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="portStatus">
+              <property name="text">
+               <string>Closed</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QLabel" name="signature">
-          <property name="text">
-           <string>No data</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="version">
-          <property name="text">
-           <string>No data</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="transmissionId">
-          <property name="text">
-           <string>No data</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="numerator">
-          <property name="text">
-           <string>No data</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="crc">
-          <property name="text">
-           <string>No data</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QGroupBox" name="currentSignalInfo">
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>130</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Current signal</string>
+        </property>
+        <widget class="QWidget" name="layoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>231</width>
+           <height>93</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QLabel" name="signatureLabel">
+              <property name="text">
+               <string>Signature</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="versionLabel">
+              <property name="text">
+               <string>Version</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="transmissionLabel">
+              <property name="text">
+               <string>Transmission ID</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="numeratorLabel">
+              <property name="text">
+               <string>Numerator</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="crcLabel">
+              <property name="text">
+               <string>CRC check</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QLabel" name="signature">
+              <property name="text">
+               <string>No data</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="version">
+              <property name="text">
+               <string>No data</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="transmissionId">
+              <property name="text">
+               <string>No data</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="numerator">
+              <property name="text">
+               <string>No data</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="crc">
+              <property name="text">
+               <string>No data</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>130</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Packet info</string>
+        </property>
+        <widget class="QWidget" name="layoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>231</width>
+           <height>55</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QLabel" name="totalPacketsLabel">
+              <property name="text">
+               <string>Total packets received</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="corruptedPacketsLabel">
+              <property name="text">
+               <string>Corrupted packets</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="processedPacketsLabel">
+              <property name="text">
+               <string>Processed packets</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QLabel" name="totalPackets">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="corruptedPackets">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="processedPackets">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>200</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>250</y>
-      <width>241</width>
-      <height>81</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Packet info</string>
-    </property>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>221</width>
-       <height>55</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
-        <item>
-         <widget class="QLabel" name="totalPacketsLabel">
-          <property name="text">
-           <string>Total packets received</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="corruptedPacketsLabel">
-          <property name="text">
-           <string>Corrupted packets</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="processedPacketsLabel">
-          <property name="text">
-           <string>Processed packets</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_6">
-        <item>
-         <widget class="QLabel" name="totalPackets">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="corruptedPackets">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="processedPackets">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_3">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>0</y>
-      <width>241</width>
-      <height>80</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>GroupBox</string>
-    </property>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>211</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QLabel" name="portLabel">
-          <property name="text">
-           <string>Port: </string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="baudLabel">
-          <property name="text">
-           <string>Baud: </string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QLabel" name="portNameLabel">
-          <property name="text">
-           <string>Error</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="baudRateLabel">
-          <property name="text">
-           <string>Error</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1120</width>
+     <width>1255</width>
      <height>21</height>
     </rect>
    </property>

@@ -5,6 +5,8 @@
 #include <QXmlStreamReader>
 #include <QSettings>
 #include <string>
+#include <math.h>
+#include <QDebug>
 
 SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 	QDialog(parent),
@@ -29,6 +31,8 @@ SerialDataTesterServer::SerialDataTesterServer(QWidget *parent) :
 	ui->pathToXml->setText(applicationSettings.value("pathToSignals").toString());
 	ui->countOfPackets->setValue(applicationSettings.value("amountOfPackets").toInt());
 	ui->timeInterval->setValue(applicationSettings.value("timeInterval").toInt());
+	ui->portsList->setCurrentText(applicationSettings.value("currentPort").toString());
+	ui->baudList->setCurrentText(applicationSettings.value("currentBaud").toString());
 
 	m_timerForPackets = new QTimer(this);
 
@@ -71,6 +75,9 @@ void SerialDataTesterServer::setFile()
 
 void SerialDataTesterServer::startServer()
 {
+	if (ui->timeInterval->text().toInt() <= 10)
+		QMessageBox::warning(this, tr("Warning"), tr("Time interval is lower or equal 10: possible loss of data"));
+
 	m_serialPort = new QSerialPort(this);
 	m_serialPort->setPortName(ui->portsList->currentText());
 	m_serialPort->setBaudRate(ui->baudList->currentText().toInt());
@@ -111,6 +118,8 @@ void SerialDataTesterServer::startServer()
 		QSettings applicationSettngs;
 		applicationSettngs.setValue("amountOfPackets", ui->countOfPackets->text().toInt());
 		applicationSettngs.setValue("timeInterval", ui->timeInterval->text().toInt());
+		applicationSettngs.setValue("currentPort", ui->portsList->currentText());
+		applicationSettngs.setValue("currentBaud", ui->baudList->currentText());
 	}
 }
 
@@ -151,60 +160,54 @@ void SerialDataTesterServer::parseFile()
 		{
 			QXmlStreamAttributes attributes = xmlReader.attributes();
 
+			if(xmlReader.name() == "port")
+			{
+				if (attributes.hasAttribute("PortInfoStrID")
+					&& attributes.hasAttribute("ID")
+					&& attributes.hasAttribute("DataID")
+					&& attributes.hasAttribute("Speed")
+					&& attributes.hasAttribute("Bits")
+					&& attributes.hasAttribute("StopBits")
+					&& attributes.hasAttribute("ParityControl")
+					&& attributes.hasAttribute("DataSize"))
+				{
+					m_dataSize = attributes.value("DataSize").toInt();
+				}
+			}
+
 			if(xmlReader.name() == "signal")
 			{
-				if(attributes.hasAttribute("strId"))
+
+				if(attributes.hasAttribute("SignalStrID")
+				   && attributes.hasAttribute("ExtStrID")
+				   && attributes.hasAttribute("Name")
+				   && attributes.hasAttribute("Type")
+				   && attributes.hasAttribute("Unit")
+				   && attributes.hasAttribute("DataSize")
+				   && attributes.hasAttribute("DataFormat")
+				   && attributes.hasAttribute("ByteOrder")
+				   && attributes.hasAttribute("Offset")
+				   && attributes.hasAttribute("BitNo"))
 				{
-					currentSignal.strId  = attributes.value("strId").toString();
+					currentSignal.strId  = attributes.value("SignalStrID").toString();
+					currentSignal.exStrId = attributes.value("ExtStrID").toString();
+					currentSignal.name =  attributes.value("Name").toString();
+					currentSignal.type = attributes.value("Type").toString();
+					currentSignal.unit = attributes.value("Unit").toString();
+					currentSignal.dataSize = attributes.value("DataSize").toInt();
+					currentSignal.dataFormat = attributes.value("DataFormat").toString();
+					currentSignal.byteOrder = attributes.value("ByteOrder").toString();
+					currentSignal.offset = attributes.value("Offset").toInt();
+					currentSignal.bit = attributes.value("BitNo").toInt();
+
+					m_signalsFromXml.push_back(currentSignal);
+					m_amountOfSignals++;
 				}
 				else
 				{
-					QMessageBox::critical(this, tr("Critical error"), tr("Can not read STRID"));
+					QMessageBox::critical(this, tr("Critical error"), tr("Error reading attributes"));
 					errorLoadingXml = true;
 				}
-
-				if (attributes.hasAttribute("caption"))
-				{
-					currentSignal.caption =  attributes.value("caption").toString();
-				}
-				else
-				{
-					QMessageBox::critical(this, tr("Critical error"), tr("Can not read caption"));
-					errorLoadingXml = true;
-				}
-
-				if (attributes.hasAttribute("offset"))
-				{
-					currentSignal.offset = attributes.value("offset").toInt();
-				}
-				else
-				{
-					QMessageBox::critical(this, tr("Critical error"), tr("Can not read offset"));
-					errorLoadingXml = true;
-				}
-
-				if (attributes.hasAttribute("bit"))
-				{
-					currentSignal.bit = attributes.value("bit").toInt();
-				}
-				else
-				{
-					QMessageBox::critical(this, tr("Critical error"), tr("Can not read signal bit"));
-					errorLoadingXml = true;
-				}
-
-				if (attributes.hasAttribute("type"))
-				{
-					currentSignal.type = attributes.value("type").toString();
-				}
-				else
-				{
-					QMessageBox::critical(this, tr("Critical error"), tr("Can not read signal type"));
-					errorLoadingXml = true;
-				}
-
-				m_signalsFromXml.push_back(currentSignal);
-				m_amountOfSignals++;
 			}
 		}
 	}
@@ -242,65 +245,119 @@ void SerialDataTesterServer::stopServer()
 
 void SerialDataTesterServer::sendPacket()
 {
-	int signalNumber = qrand()%m_amountOfSignals;
+	m_data.fill(0, m_dataSize*8);
+	m_packet.clear();
 
-	m_dataOffset = m_signalsFromXml[signalNumber].offset;
-	m_dataBits = m_signalsFromXml[signalNumber].bit;
-	if (m_signalsFromXml[signalNumber].type == "Analog")
-		m_dataValue = 500 - qrand()%1001;
-	else
-		m_dataValue = qrand()%2;
-
-	m_bytes.clear();
-
-	QDataStream packetDataStream(&m_bytes, QIODevice::WriteOnly);
-
-	if (m_numberOfPacket%5 == 0)
+	for (SignalData signal : m_signalsFromXml)
 	{
-		packetDataStream << quint32(0x424D4C46) << m_version << m_Id << m_numerator << m_dataAmount << m_dataUniqueId << m_dataOffset << m_dataBits << m_dataValue;
-		ui->signature->setText(QString::number(quint32(0x424D4C46), 16));
+		// Get type of the signal
+		//
+
+		quint16 value;
+
+		if (signal.type == "analog")
+		{
+			int maxDataSize = pow(2, signal.dataSize*8);
+			value = qrand()%maxDataSize;
+			for (int pos = 0; value>0; pos++)
+			{
+				if (value%2 == 0)
+				{
+					m_data.setBit(signal.offset + signal.bit + pos, 0);
+				}
+				else
+				{
+					m_data.setBit(signal.offset + signal.bit + pos, 1);
+				}
+				value/=2;
+			}
+
+		}
+		else
+		{
+			m_data.setBit(signal.offset + signal.bit, qrand()%2);
+		}
+	}
+
+	QByteArray recorderedValues;
+	recorderedValues.resize(m_dataSize);
+
+	recorderedValues.fill(0);
+
+	for(int b=0; b<m_data.count();++b) {
+		recorderedValues[b/8] = (recorderedValues.at(b/8) | ((m_data[b]?1:0)<<((b%8))));
+	}
+
+	m_dataAmount = m_dataSize;
+
+
+	QDataStream packetDataStream(&m_packet, QIODevice::WriteOnly);
+
+	quint32 signature;
+
+	if (m_numberOfPacket%45 == 0 && m_numberOfPacket != 0)
+	{
+		signature = 0x00000000;
 	}
 	else
 	{
-		packetDataStream << m_signature << m_version << m_Id << m_numerator << m_dataAmount << m_dataUniqueId << m_dataOffset << m_dataBits << m_dataValue;
-		ui->signature->setText(QString::number(m_signature, 16));
+		signature = m_signature;
 	}
+
+	packetDataStream << signature;
+	ui->signature->setText(QString::number(signature, 16));
+	//}
+
+	QString stringData;
+	for (int currentBitPos = 0; currentBitPos < m_data.size(); currentBitPos++)
+	{
+		switch(m_data.at(currentBitPos))
+		{
+			case 0: stringData.append("0"); break;
+			case 1: stringData.append("1"); break;
+		}
+		if ((currentBitPos+1) % 8 == 0)
+		{
+			stringData.append(" ");
+		}
+	}
+
+	packetDataStream << m_version << m_Id << m_numerator << m_dataAmount << m_dataUniqueId << recorderedValues;
 
 	ui->version->setText(QString::number(m_version));
 	ui->transmissionId->setText(QString::number(m_Id));
 	ui->numerator->setText(QString::number(m_numerator));
 	ui->dataUniqueId->setText(QString::number(m_dataUniqueId));
 	ui->dataAmount->setText(QString::number(m_dataAmount));
-	ui->data->setText(QString::number(m_dataOffset) + QString::number(m_dataBits) + QString::number(m_dataValue));
+	ui->data->setText(stringData);
+
+	qDebug() << m_data;
+
 	ui->crc->setText("Calculated crc");
 
 	// Calculate CRC-64
 	//
 
-	QString data = QString::number(m_dataOffset);
-	data.append(QString::number(m_dataBits));
-	data.append(QString::number(m_dataValue));
-
-	std::string dataToCalculateCrc = data.toStdString();
+	std::string dataToCalculateCrc = QString::fromLocal8Bit(recorderedValues).toStdString();
 
 	char *crcData = &dataToCalculateCrc[0];
 
 	quint64 crc = 0;
-	for (int i=0; i<data.size(); i++)
+	for (int i=0; i<dataToCalculateCrc.size(); i++)
 	{
 		crc = crc_table[(crc ^ (crcData[i])) & 0xFF] ^ (crc >> 8);
 	}
 	crc = ~crc;
 
-	if (m_numberOfPacket%7 == 0)
+	if (m_numberOfPacket%30 == 0 && m_numberOfPacket != 0)
 	{
 		crc = 0;
-		ui->crc->setText("Wrong crc");
+		ui->crc->setText("Error crc");
 	}
 
 	packetDataStream << crc;
 
-	m_serialPort->write(m_bytes);
+	m_serialPort->write(m_packet);
 	bool result = m_serialPort->flush();
 
 	if (result == false)

@@ -17,7 +17,7 @@ PortReceiver::PortReceiver(QObject *parent) : QObject(parent)
 	m_serialPort->setBaudRate(baud);
 	m_serialPort->setDataBits(QSerialPort::Data8);
 	m_serialPort->setParity(QSerialPort::NoParity);
-	m_serialPort->setStopBits(QSerialPort::OneStop);
+	m_serialPort->setStopBits(QSerialPort::TwoStop);
 	m_serialPort->setFlowControl(QSerialPort::NoFlowControl);
 
 	connect(m_serialPort, &QSerialPort::readyRead, this, &PortReceiver::dataReceived);
@@ -27,7 +27,7 @@ PortReceiver::~PortReceiver()
 {
 }
 
-void PortReceiver::setNewPort(const QString &port)
+void PortReceiver::setPort(const QString &port)
 {
 	m_serialPort->close();
 	m_serialPort->setPortName(port);
@@ -41,6 +41,20 @@ void PortReceiver::setBaud(const int& baud)
 	openPort();
 }
 
+void PortReceiver::setDataBits(const QSerialPort::DataBits &dataBits)
+{
+	m_serialPort->close();
+	m_serialPort->setDataBits(dataBits);
+	openPort();
+}
+
+void PortReceiver::setStopBits(const QSerialPort::StopBits& stopBits)
+{
+	m_serialPort->close();
+	m_serialPort->setStopBits(stopBits);
+	openPort();
+}
+
 void PortReceiver::openPort()
 {
 	m_serialPort->open(QIODevice::ReadOnly);
@@ -49,6 +63,11 @@ void PortReceiver::openPort()
 	{
 		emit portError("Serial Port: " + m_serialPort->errorString());
 	}
+}
+
+void PortReceiver::closePort()
+{
+	m_serialPort->close();
 }
 
 void PortReceiver::dataReceived()

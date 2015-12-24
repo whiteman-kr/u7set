@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QBitArray>
 
 namespace Ui {
 	class SerialDataTesterServer;
@@ -34,17 +35,22 @@ private:
 	quint16 m_numerator = 0x0003;
 	quint16 m_dataAmount = 0x0004;
 	quint16 m_dataUniqueId = 0x0005;
-	quint8 m_dataOffset = 0x00;
-	quint8 m_dataBits = 0x03;
-	qint16 m_dataValue = 1;
+	int m_dataBits = 0;
+	quint8 m_dataType = 0x00;
+	int m_dataSize = 0;
 
 	struct SignalData
 	{
 		QString strId;
-		QString caption;
+		QString exStrId;
+		QString name;
+		QString type;
+		QString unit;
+		int dataSize = 0;
+		QString dataFormat;
+		QString byteOrder;
 		int offset = 0;
 		int bit = 0;
-		QString type;
 	};
 
 	int m_numberOfPacket = 0;
@@ -56,7 +62,8 @@ private:
 
 	QVector<SignalData> m_signalsFromXml;
 
-	QByteArray  m_bytes;
+	QByteArray  m_packet;
+	QBitArray m_data;
 	quint64 crc_table[256];
 };
 

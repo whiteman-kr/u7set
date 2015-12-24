@@ -1,5 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<signals>
-	<signal strId="#AVR75639" caption="AVR75639" offset="0" bit="3" type="Discrette"></signal>
-	<signal strId="2" caption="test" offset="8" bit="3" type="Analog"></signal>
-</signals>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<SerialData>
+<BuildInfo Project="ddd" ID="19" Type="debug" Date="10.12.2015 15:50:57" Changeset="0" User="Administrator" Workstation="Dragon2"/>
+<port PortInfoStrID="OCM_PORT1" ID="12" DataID = "12334" Speed="115200" Bits="8" StopBits ="2" ParityControl="false" DataSize="4"/>
+<Signals Count="N">
+	<signal SignalStrID="#SIGNAL_1" ExtStrID="SIGNAL_1" Name="Signal 1" Type="discrete" Unit="кг" DataSize="1" DataFormat="UnsignedInt" ByteOrder="LittleEndian" Offset="0" BitNo="0"/>
+	<signal SignalStrID="#SIGNAL_2" ExtStrID="SIGNAL_2" Name="Signal 2" Type="analog" Unit="кг" DataSize="1" DataFormat="SignedInt" ByteOrder="LittleEndian" Offset="8" BitNo="0"/>
+	<signal SignalStrID="#SIGNAL_3" ExtStrID="SIGNAL_3" Name="Signal 3" Type="analog" Unit="кг" DataSize="1" DataFormat="UnsignedInt" ByteOrder="LittleEndian" Offset="16" BitNo="0"/>
+	<signal SignalStrID="#SIGNAL_4" ExtStrID="SIGNAL_4" Name="Signal 4" Type="analog" Unit="кг" DataSize="1" DataFormat="Float" ByteOrder="LittleEndian" Offset="24" BitNo="0"/>
+</Signals>
+</SerialData>

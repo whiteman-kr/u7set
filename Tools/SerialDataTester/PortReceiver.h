@@ -18,9 +18,13 @@ private slots:
 	void dataReceived();
 
 public slots:
-	void setNewPort(const QString& portName);
+	void setPort(const QString& portName);
 	void setBaud(const int& baud);
+	void setDataBits(const QSerialPort::DataBits& dataBits);
+	void setStopBits(const QSerialPort::StopBits& stopBits);
+
 	void openPort();
+	void closePort();
 
 private:
 	QSerialPort* m_serialPort = nullptr;
