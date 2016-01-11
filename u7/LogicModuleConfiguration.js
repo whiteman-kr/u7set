@@ -786,6 +786,42 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
 	
 	generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, true/*modeOCM*/);
 	
+    var ptr = 120;
+    
+    // crc
+    var stringCrc64 = storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
+    ptr += 8;    
+
+    // reserved
+    ptr += 880;
+    
+    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
+    //
+    var dataTransmittingEnableFlag = false;
+    var dataReceiveEnableFlag = true;
+    
+    var flags = 0;
+    if (dataTransmittingEnableFlag == true)
+        flags |= 1;
+    if (dataReceiveEnableFlag == true)
+        flags |= 2;
+    
+    var configFramesQuantity = 1;
+    var dataFramesQuantity = 0;
+    var txId = ocmTxId;
+    
+    generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    ptr += 8;
+
+    // assert if we not on the correct place
+    //
+    if (ptr != 1016)
+    {
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr);
+        ptr = 1016;
+    }
+
     return true;
 
 }
