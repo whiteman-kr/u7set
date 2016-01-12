@@ -604,6 +604,130 @@ function generate_aifm(confFirmware, module, frame, log)
 
     log.writeMessage("MODULE AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame);
 	confFirmware.writeLog("MODULE AIFM: " + module.propertyValue("StrID") + " Place: " + module.propertyValue("Place") + " Frame: " + frame + "\r\n");
+	
+    var ptr = 0;
+    
+    /*var AIMSignalMaxCount = 64;
+    
+    var defaultTf = valToADC(50, 0, 65535, 0, 0xffff);
+    var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
+    var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
+    var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
+    
+    var inController = module.jsFindChildObjectByMask("*_*_*_*_CTRLIN");
+    if (inController == null)
+    {
+        log.writeWarning("WARNING: no input controller found in " + module.propertyValue("StrID") + "! Using default values.");
+    }*/
+	
+    // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
+    //
+
+	/*var channelAPlace = 0;
+	var channelAMaxDifference = 0;
+
+    for (var i = 0; i < AIMSignalMaxCount; i++)
+    {
+        // find a signal with Place = i
+        //
+        var signal = findSignalByPlace(inController, i, Analog, Input, signalSet, log);
+        
+        if (signal == null)
+        {
+            // Generate default values, there is no signal on this place
+            //
+			confFirmware.writeLog("    in" + i + "[default]: [" + frame + ":" + ptr + "] Tf = " + defaultTf + 
+			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + defaultHighBound +
+			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
+			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + defaultMaxDiff + "\r\n");
+            
+            setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultHighBound);         // InA High bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultLowBound);          // InA Low Bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
+            ptr += 2;
+        }
+        else
+        {
+            
+            var filternigTime = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
+            var maxDifference = valToADC(signal.maxDifference(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
+
+			if ((i & 1) == 0)
+			{
+				// this is A input
+				channelAPlace = i;
+				channelAMaxDifference = maxDifference;
+			}
+			else
+			{
+				if (i == channelAPlace + 1)
+				{
+					// this is B input, next to saved A
+					if (maxDifference != channelAMaxDifference)
+					{
+						log.writeError("Error - AIM input " + channelAPlace + " maxDifference ADC "+ channelAMaxDifference + " is not equal to input " + i + " maxDifference ADC " + maxDifference);
+						return false;
+					}
+				}
+			}
+
+			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
+			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + signal.highADC() +
+			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + signal.lowADC() +
+			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + maxDifference + "\r\n");
+
+            setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
+            ptr += 2;
+            setData16(confFirmware, log, frame, ptr, maxDifference);      // InA MaxDiff
+            ptr += 2;
+        }
+    }
+	*/
+	
+	ptr = 632;
+	
+    // final crc
+    var stringCrc64 = storeCrc64(confFirmware, log, frame, 0, ptr, ptr);   //CRC-64
+	confFirmware.writeLog("    [" + frame + ":" + ptr + "] crc64 = " + stringCrc64 + "\r\n");
+    ptr += 8;
+    
+    //reserved
+    ptr += 368;
+
+    // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
+    //
+    var dataTransmittingEnableFlag = true;
+    var dataReceiveEnableFlag = true;
+    
+    var flags = 0;
+    if (dataTransmittingEnableFlag == true)
+        flags |= 1;
+    if (dataReceiveEnableFlag == true)
+        flags |= 2;
+    
+    var configFramesQuantity = 5;
+    var dataFramesQuantity = 1;
+    var txId = aimTxId;
+    
+    generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
+    ptr += 8;
+    
+    // assert if we not on the correct place
+    //
+    if (ptr != 1016)
+    {
+        log.writeWarning("WARNING!!! PTR != 1016!!! " + ptr);
+        ptr = 1016;
+    }
+    
     return true;
 
 }
