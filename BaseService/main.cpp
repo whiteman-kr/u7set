@@ -15,7 +15,7 @@
 
 int main(int argc, char *argv[])
 {
-	BaseService service(argc, argv, "RPCT Base Service", STP_BASE, new MainFunctionWorker());
+	BaseService service(argc, argv, "RPCT Base Service", SERVICE_BASE, new MainFunctionWorker());
 
     return service.exec();
 }

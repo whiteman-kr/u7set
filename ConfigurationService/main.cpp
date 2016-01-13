@@ -1,8 +1,11 @@
 #include <QCoreApplication>
 
+#include "ConfigurationService.h"
+
+
 int main(int argc, char *argv[])
 {
-	QCoreApplication a(argc, argv);
+	ConfigurationService service(argc, argv);
 
-	return a.exec();
+	return service.exec();
 }

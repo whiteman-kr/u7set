@@ -826,7 +826,7 @@ BaseService::BaseService(int argc, char ** argv, const QString & name, unsigned 
 	{
 		assert(m_serviceType >= SERVICE_TYPE_COUNT);
 
-		m_serviceType = STP_BASE;
+		m_serviceType = SERVICE_BASE;
 	}
 }
 

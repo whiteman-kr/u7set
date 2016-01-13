@@ -34,7 +34,7 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
             buffer.open(QBuffer::WriteOnly);
             QDataStream out(&buffer);
             QDateTime currentTime = QDateTime::currentDateTime();
-			out << STP_CONFIG;
+			out << SERVICE_CONFIGURATION;
             out << quint32(0);   // Major version
             out << quint32(1);   // Minor version
             out << quint32(2);   // BuildNo

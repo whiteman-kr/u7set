@@ -28,8 +28,8 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 //
 // -------------------------------------------------------------------------------------
 
-CfgServer::CfgServer(const QString& rootFolder) :
-	Tcp::FileServer(rootFolder)
+CfgServer::CfgServer(const QString& buildFolder) :
+	Tcp::FileServer(buildFolder)
 {
 }
 
@@ -44,7 +44,7 @@ void CfgServer::onServerThreadStarted()
 
 void CfgServer::onRootFolderChange()
 {
-	m_buildXmlPathFileName = m_rootFolder + QDir::separator() + "build.xml";
+	m_buildXmlPathFileName = m_rootFolder + "/build.xml";
 
 	readBuildXml();
 }

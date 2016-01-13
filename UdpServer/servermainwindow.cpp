@@ -41,7 +41,7 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 
 	m_cfgServer = new CfgServer("/home/serhiy/temp/udpserver");
 
-	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIG_SERVICE_REQUEST), m_cfgServer);
+	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), m_cfgServer);
 
 	m_tcpServerThread->start();
 }
