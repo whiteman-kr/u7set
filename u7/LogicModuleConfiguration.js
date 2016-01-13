@@ -454,7 +454,7 @@ function truncate_to_int(x)
 //
 function generate_aim(confFirmware, module, frame, log, signalSet)
 {
-	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined || module.propertyValue("ModuleVersion") == undefined)
 	{
 		log.writeError("Undefined properties in function generate_aim");
 		return false;
@@ -573,7 +573,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     
     var configFramesQuantity = 5;
     var dataFramesQuantity = 0;
-    var txId = aimTxId;
+    var txId = aimTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
@@ -596,7 +596,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
 //
 function generate_aifm(confFirmware, module, frame, log)
 {
-	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined || module.propertyValue("ModuleVersion") == undefined)
 	{
 		log.writeError("Undefined properties in function generate_aifm");
 		return false;
@@ -715,7 +715,7 @@ function generate_aifm(confFirmware, module, frame, log)
     
     var configFramesQuantity = 5;
     var dataFramesQuantity = 1;
-    var txId = aimTxId;
+    var txId = aifmTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
@@ -739,7 +739,7 @@ function generate_aifm(confFirmware, module, frame, log)
 //
 function generate_aom(confFirmware, module, frame, log, signalSet)
 {
-	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined || module.propertyValue("ModuleVersion") == undefined)
 	{
 		log.writeError("Undefined properties in function generate_aom");
 		return false;
@@ -821,7 +821,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     
     var configFramesQuantity = 1;
     var dataFramesQuantity = 1;
-    var txId = aomTxId;
+    var txId = aomTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
@@ -896,7 +896,7 @@ function findSignalByPlace(parent, place, type, func, signalSet, log)
 //
 function generate_ocm(confFirmware, module, frame, log, connectionStorage)
 {
-	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined || module.propertyValue("ModuleVersion") == undefined)
 	{
 		log.writeError("Undefined properties in function generate_ocm");
 		return false;
@@ -933,7 +933,7 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
     
     var configFramesQuantity = 1;
     var dataFramesQuantity = 0;
-    var txId = ocmTxId;
+    var txId = ocmTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
@@ -957,7 +957,7 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
 //
 function generate_dim(confFirmware, module, frame, log)
 {
-	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined || module.propertyValue("ModuleVersion") == undefined)
 	{
 		log.writeError("Undefined properties in function generate_ocm");
 		return false;
@@ -989,7 +989,7 @@ function generate_dim(confFirmware, module, frame, log)
     
     var configFramesQuantity = 1;
     var dataFramesQuantity = 0;
-    var txId = dimTxId;
+    var txId = dimTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
@@ -1013,7 +1013,7 @@ function generate_dim(confFirmware, module, frame, log)
 //
 function generate_dom(confFirmware, module, frame, log)
 {
-	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined)
+	if (module.propertyValue("StrID") == undefined || module.propertyValue("Place") == undefined || module.propertyValue("ModuleVersion") == undefined)
 	{
 		log.writeError("Undefined properties in function generate_ocm");
 		return false;
@@ -1045,7 +1045,7 @@ function generate_dom(confFirmware, module, frame, log)
     
     var configFramesQuantity = 1;
     var dataFramesQuantity = 1;
-    var txId = domTxId;
+    var txId = domTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
     ptr += 8;
