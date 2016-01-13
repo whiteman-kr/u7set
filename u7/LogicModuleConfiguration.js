@@ -607,91 +607,108 @@ function generate_aifm(confFirmware, module, frame, log)
 	
     var ptr = 0;
     
-    /*var AIMSignalMaxCount = 64;
-    
-    var defaultTf = valToADC(50, 0, 65535, 0, 0xffff);
-    var defaultHighBound = valToADC(5.1, 0, 5.1, 0, 0xffff);
-    var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
-    var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
-    
+ 
     var inController = module.jsFindChildObjectByMask("*_*_*_*_CTRLIN");
     if (inController == null)
     {
         log.writeWarning("WARNING: no input controller found in " + module.propertyValue("StrID") + "! Using default values.");
-    }*/
+    }
 	
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
     //
+	
+	var aifmChannelCount = 3;
 
-	/*var channelAPlace = 0;
-	var channelAMaxDifference = 0;
-
-    for (var i = 0; i < AIMSignalMaxCount; i++)
-    {
-        // find a signal with Place = i
-        //
-        var signal = findSignalByPlace(inController, i, Analog, Input, signalSet, log);
-        
-        if (signal == null)
-        {
-            // Generate default values, there is no signal on this place
-            //
-			confFirmware.writeLog("    in" + i + "[default]: [" + frame + ":" + ptr + "] Tf = " + defaultTf + 
-			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + defaultHighBound +
-			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + defaultLowBound +
-			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + defaultMaxDiff + "\r\n");
-            
-            setData16(confFirmware, log, frame, ptr, defaultTf);          // InA Filtering time constant
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, defaultHighBound);         // InA High bound
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, defaultLowBound);          // InA Low Bound
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, defaultMaxDiff);      // InA MaxDiff
-            ptr += 2;
-        }
-        else
-        {
-            
-            var filternigTime = valToADC(signal.filteringTime(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
-            var maxDifference = valToADC(signal.maxDifference(), signal.lowLimit(), signal.highLimit(), signal.lowADC(), signal.highADC());
-
-			if ((i & 1) == 0)
+	// CUR, FLU, FRQ
+	//
+	var koeffs = ["CUR", "FLU", "FRQ"];
+	
+	for (var k = 0; k < 3; k++)
+	{
+		for (var i = 0; i < aifmChannelCount; i++)
+		{
+			var signal = inController.jsFindChildObjectByMask("*_*_*_*_*_IN0" + (i + 1) + koeffs[k]);
+			var value = 1;
+			if (signal == null)
 			{
-				// this is A input
-				channelAPlace = i;
-				channelAMaxDifference = maxDifference;
+				log.writeWarning("WARNING: no signal *_*_*_*_*_IN0" + (i + 1) + koeffs[k] + " found in " + inController.propertyValue("StrID") + "! Using default values.");
 			}
 			else
 			{
-				if (i == channelAPlace + 1)
+				if (signal.propertyExists("PowerCoefficient") == true)
 				{
-					// this is B input, next to saved A
-					if (maxDifference != channelAMaxDifference)
-					{
-						log.writeError("Error - AIM input " + channelAPlace + " maxDifference ADC "+ channelAMaxDifference + " is not equal to input " + i + " maxDifference ADC " + maxDifference);
-						return false;
-					}
+					value = signal.propertyValue("PowerCoefficient");
+				}
+				else
+				{
+					log.writeWarning("WARNING: no property PowerCoefficient exists in " + signal.propertyValue("StrID") + "! Using default values.");
 				}
 			}
-
-			confFirmware.writeLog("    in" + i + ": [" + frame + ":" + ptr + "] Tf = " + filternigTime + 
-			"; [" + frame + ":" + (ptr + 2) + "] HighADC = " + signal.highADC() +
-			"; [" + frame + ":" + (ptr + 4) + "] LowADC = " + signal.lowADC() +
-			"; [" + frame + ":" + (ptr + 6) + "] MaxDiff = " + maxDifference + "\r\n");
-
-            setData16(confFirmware, log, frame, ptr, filternigTime);          // InA Filtering time constant
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, signal.highADC());         // InA High bound
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, signal.lowADC());          // InA Low Bound
-            ptr += 2;
-            setData16(confFirmware, log, frame, ptr, maxDifference);      // InA MaxDiff
-            ptr += 2;
-        }
-    }
-	*/
+			
+			var v = signal.valueToMantExp1616(value);
+			var m =  v >> 16;
+			var p = v & 0xffff;
+				
+			confFirmware.writeLog("    IN" + i + koeffs[k] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + m + "^" + p + "]\r\n");
 	
+			setData16(confFirmware, log, frame, ptr, m); 
+			ptr += 2;
+			setData16(confFirmware, log, frame, ptr, p); 
+			ptr += 2;
+		}
+	}
+	
+	// POWER, REACT, PERIOD
+	//
+	var modeNames = ["PERIOD", "POWER", "REACT"];
+	
+	var setPointCount = 5;
+	
+	for (var k = 0; k < 3; k++)
+	{
+		for (var i = 0; i < aifmChannelCount; i++)
+		{
+			for (var m = 0; m < 3; m++)
+			{
+				for (var p = 0; p < setPointCount; p++)
+				{
+					var signal = inController.jsFindChildObjectByMask("*_*_*_*_*_IN0" + (i + 1) + koeffs[k] + modeNames[m]);
+					var value = 1;
+					if (signal == null)
+					{
+						log.writeWarning("WARNING: no signal *_*_*_*_*_IN0" + (i + 1) + koeffs[k]  + modeNames[m] + " found in " + inController.propertyValue("StrID") + "! Using default values.");
+					}
+					else
+					{
+						var setPointName = "SetPoint0" + (p + 1);
+						
+						if (signal.propertyExists(setPointName) == true)
+						{
+							value = signal.propertyValue(setPointName);
+						}
+						else
+						{
+							log.writeWarning("WARNING: no property " + setPointName + "	exists in " + signal.propertyValue("StrID") + "! Using default values.");
+						}
+					}
+					
+					var v = signal.valueToMantExp1616(value);
+					var mantissa =  v >> 16;
+					var exponent = v & 0xffff;
+						
+					confFirmware.writeLog("    IN" + (i + 1) + koeffs[k] + modeNames[m] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
+			
+					setData16(confFirmware, log, frame, ptr, mantissa); 
+					ptr += 2;
+					setData16(confFirmware, log, frame, ptr, exponent); 
+					ptr += 2;
+				}
+			}
+			ptr += 2; //reserved
+			ptr += 2; //reserved
+		}
+	}
+
 	ptr = 632;
 	
     // final crc

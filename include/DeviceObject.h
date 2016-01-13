@@ -484,6 +484,8 @@ namespace Hardware
 	public:
 		virtual DeviceType deviceType() const override;
 
+        Q_INVOKABLE quint32 valueToMantExp1616(double value);
+
 		// Properties
 		//
 	public:
