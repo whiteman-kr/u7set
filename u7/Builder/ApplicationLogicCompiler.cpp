@@ -1385,6 +1385,15 @@ namespace Builder
 
 		for(Module module : m_modules)
 		{
+			if (module.device == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+
+				result = false;
+
+				continue;
+			}
+
 			if (!module.isInputModule())
 			{
 				continue;
@@ -1408,10 +1417,12 @@ namespace Builder
 				result &= copyAimDataToRegBuf(module);
 				break;
 
-			default:
-				assert(false);
+			case Hardware::DeviceModule::FamilyType::AIFM:
+				result &= copyAifmDataToRegBuf(module);
+				break;
 
-				LOG_ERROR(m_log, tr("Unknown input module family type"));
+			default:
+				LOG_ERROR(m_log, QString(tr("Unknown input module %1 family type")).arg(module.device->strId()));
 
 				result = false;
 			}
@@ -1615,6 +1626,15 @@ namespace Builder
 
 		return result;
 	}
+
+
+	bool ModuleLogicCompiler::copyAifmDataToRegBuf(const Module& module)
+	{
+		LOG_WARNING(m_log, QString(tr("Copying AIFM data to RegBuf is not implemented (module %1)")).arg(module.device->strId()));
+
+		return true;
+	}
+
 
 
 	bool ModuleLogicCompiler::initOutModulesAppLogicDataInRegBuf()
