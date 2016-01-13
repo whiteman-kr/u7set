@@ -835,6 +835,7 @@ namespace Builder
 
 		bool copyDimDataToRegBuf(const Module& module);
 		bool copyAimDataToRegBuf(const Module& module);
+		bool copyAifmDataToRegBuf(const Module& module);
 
 		bool initOutModulesAppLogicDataInRegBuf();
 
