@@ -47,7 +47,7 @@ class BaseServiceWorker : public QObject
     Q_OBJECT
 
 private:
-	int m_serviceType = STP_BASE;
+	int m_serviceType = SERVICE_BASE;
 
 	BaseServiceController* m_baseServiceController;
 

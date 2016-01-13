@@ -1636,7 +1636,6 @@ namespace Builder
 	}
 
 
-
 	bool ModuleLogicCompiler::initOutModulesAppLogicDataInRegBuf()
 	{
 		m_code.comment("Init output modules application logic data in RegBuf");

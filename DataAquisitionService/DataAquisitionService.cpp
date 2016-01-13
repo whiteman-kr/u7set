@@ -7,7 +7,7 @@
 //
 
 DataAquisitionService::DataAquisitionService(int argc, char ** argv) :
-	BaseService(argc, argv, "FSC Data Aquisition Service", STP_FSC_ACQUISITION, new DataServiceMainFunctionWorker())
+	BaseService(argc, argv, "FSC Data Aquisition Service", SERVICE_DATA_ACQUISITION, new DataServiceMainFunctionWorker())
 {
 }
 

@@ -437,7 +437,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 	{
 		switch (serviceData.information.type)
 		{
-			case STP_FSC_ACQUISITION:
+			case SERVICE_DATA_ACQUISITION:
 				serviceData.statusWidget = new DataSourcesStateWidget(m_hostsInfo[index.row()].ip, index.column());
 				break;
 			default:

@@ -8,19 +8,19 @@
 const int MAX_DATAGRAM_SIZE = 4096;
 
 
-const quint32   STP_BASE = 0,
-				STP_CONFIG = 1,
-				STP_FSC_ACQUISITION = 2,
-				STP_FSC_TUNING = 3,
-				STP_ARCHIVING = 4;
+const quint32   SERVICE_BASE = 0,
+				SERVICE_CONFIGURATION = 1,
+				SERVICE_DATA_ACQUISITION = 2,
+				SERVICE_TUNING = 3,
+				SERVICE_ARCHIVING = 4;
 
 
 const char* const serviceTypeStr[] =
 {
 	"Base Service",
 	"Configuration Service",
-	"FSC Data Acquisition Service",
-	"FSC Tuning Service",
+	"Data Acquisition Service",
+	"Tuning Service",
 	"Data Archiving Service"
 };
 
@@ -30,8 +30,8 @@ const quint32	SERVICE_TYPE_COUNT = sizeof(serviceTypeStr) / sizeof(const char*);
 
 const quint16   PORT_BASE_SERVICE = 13300,
 
-				PORT_CONFIG_SERVICE = 13310,
-				PORT_CONFIG_SERVICE_REQUEST = 13311,
+				PORT_CONFIGURATION_SERVICE = 13310,
+				PORT_CONFIGURATION_SERVICE_REQUEST = 13311,
 
 				PORT_DATA_AQUISITION_SERVICE = 13320,
 				PORT_DATA_AQUISITION_SERVICE_INFO = 13321,
@@ -39,8 +39,8 @@ const quint16   PORT_BASE_SERVICE = 13300,
 				PORT_DATA_AQUISITION_SERVICE_DIAG_DATA = 13323,			// port receiving diagnostics data from LM's
 				PORT_DATA_AQUISITION_SERVICE_CLIENT_REQUEST = 13324,
 
-				PORT_FCS_TUNING_SERVICE = 13330,
-				PORT_FCS_TUNING_SERVICE_DATA = 13332,
+				PORT_TUNING_SERVICE = 13330,
+				PORT_TUNING_SERVICE_DATA = 13332,
 
 				PORT_ARCHIVING_SERVICE = 13340,
 				PORT_ARCHIVING_SERVICE_INFO = 13341,
@@ -52,6 +52,8 @@ const quint16   PORT_BASE_SERVICE = 13300,
 const quint16	PORT_DATA_AQUISITION = 13400;
 
 
+// All services request IDs
+//
 const quint32   RQID_GET_SERVICE_INFO = 1000,
 
                 RQID_SERVICE_MF_START = 1100,
@@ -59,13 +61,24 @@ const quint32   RQID_GET_SERVICE_INFO = 1000,
                 RQID_SERVICE_MF_RESTART = 1102,
 
                 RQID_SEND_FILE_START = 1200,
-				RQID_SEND_FILE_NEXT = 1201,
+				RQID_SEND_FILE_NEXT = 1201;
 
-				RQID_GET_DATA_SOURCES_IDS = 1250,
+
+// DataAcquisitionService specific request IDs
+//
+const quint32	RQID_GET_DATA_SOURCES_IDS = 1250,
 				RQID_GET_DATA_SOURCES_INFO = 1251,
 				RQID_GET_DATA_SOURCES_STATISTICS = 1252;
 
 
+// ConfigurationService specific request IDs
+//
+const quint32	RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1300,
+				RQID_SET_CONFIGURATION_SERVICE_SETTINGS = 1301;
+
+
+// States of service's Main Function
+//
 const quint32   SS_MF_STOPPED = 0,
                 SS_MF_STARTS = 1,
                 SS_MF_WORK = 2,
@@ -91,11 +104,11 @@ struct ServiceTypeInfo
 
 const ServiceTypeInfo serviceTypesInfo[] =
 {
-	{ STP_BASE, PORT_BASE_SERVICE, serviceTypeStr[STP_BASE] },
-	{ STP_CONFIG, PORT_CONFIG_SERVICE, serviceTypeStr[STP_CONFIG]},
-	{ STP_FSC_ACQUISITION, PORT_DATA_AQUISITION_SERVICE, serviceTypeStr[STP_FSC_ACQUISITION]},
-	{ STP_FSC_TUNING, PORT_FCS_TUNING_SERVICE, serviceTypeStr[STP_FSC_TUNING]},
-	{ STP_ARCHIVING, PORT_ARCHIVING_SERVICE, serviceTypeStr[STP_ARCHIVING]},
+	{ SERVICE_BASE, PORT_BASE_SERVICE, serviceTypeStr[SERVICE_BASE] },
+	{ SERVICE_CONFIGURATION, PORT_CONFIGURATION_SERVICE, serviceTypeStr[SERVICE_CONFIGURATION]},
+	{ SERVICE_DATA_ACQUISITION, PORT_DATA_AQUISITION_SERVICE, serviceTypeStr[SERVICE_DATA_ACQUISITION]},
+	{ SERVICE_TUNING, PORT_TUNING_SERVICE, serviceTypeStr[SERVICE_TUNING]},
+	{ SERVICE_ARCHIVING, PORT_ARCHIVING_SERVICE, serviceTypeStr[SERVICE_ARCHIVING]},
 };
 
 
@@ -251,6 +264,22 @@ struct SendFileNext
 	quint32 CRC32;
 
 	char data[SEND_FILE_DATA_SIZE];
+};
+
+
+
+// RQID_SET_CONFIGURATION_SERVICE_SETTINGS request format &
+// RQID_GET_CONFIGURATION_SERVICE_SETTINGS reply format
+//
+
+const int MAX_BUILD_FOLDER_LEN = 512;
+
+struct ConfigurationServiceSettings
+{
+	quint32 configurationRequestAddress;
+	quint32 configurationRequestPort;
+
+	char currentBuildFolder[MAX_BUILD_FOLDER_LEN];
 };
 
 

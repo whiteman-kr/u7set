@@ -57,7 +57,7 @@ private:
 	void readBuildXml();
 
 public:
-	CfgServer(const QString& rootFolder);
+	CfgServer(const QString& buildFolder);
 
 	virtual CfgServer* getNewInstance() override { return new CfgServer(m_rootFolder); }
 

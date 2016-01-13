@@ -118,7 +118,7 @@ void DataSourcesStateWidget::updateSourceState()
 
 void DataSourcesStateWidget::updateServiceState()
 {
-	QString str = serviceTypeStr[STP_FSC_ACQUISITION];
+	QString str = serviceTypeStr[SERVICE_DATA_ACQUISITION];
 	str += QString(" v%1.%2.%3(0x%4)\n")
 			.arg(serviceState.majorVersion)
 			.arg(serviceState.minorVersion)

@@ -3,7 +3,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QThread>
-#include <QApplication>
+#include <QCoreApplication>
 #include <QTimer>
 #include <QDebug>
 
@@ -142,7 +142,7 @@ void CircularLoggerWorker::writeRecord(const QString record)
 	}
 	*m_stream << record << '\n';
 
-	qDebug() << record;
+	//qDebug() << record;
 }
 
 void CircularLoggerWorker::close()
