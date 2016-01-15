@@ -58,7 +58,8 @@ SOURCES += main.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/BaseService.cpp \
     ../lib/SocketIO.cpp \
-    ../lib/CircularLogger.cpp
+    ../lib/CircularLogger.cpp \
+    ../lib/JsonSerializable.cpp
 
 HEADERS += \
     ../include/SocketIO.h \
@@ -66,7 +67,8 @@ HEADERS += \
     ../include/BaseService.h \
     ../include/CircularLogger.h \
 	../include/FscDataFormat.h \
-    version.h
+    version.h \
+    ../include/JsonSerializable.h
 
 include(../qtservice/src/qtservice.pri)
 

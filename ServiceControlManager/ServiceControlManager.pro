@@ -64,7 +64,8 @@ SOURCES += mainwindow.cpp \
     ../lib/SocketIO.cpp \
     DataSourcesStateWidget.cpp \
     ../lib/DataSource.cpp \
-    main.cpp
+    main.cpp \
+    ../lib/JsonSerializable.cpp
 
 HEADERS  += mainwindow.h \
     scanoptionswidget.h \
@@ -73,7 +74,8 @@ HEADERS  += mainwindow.h \
     ../include/SocketIO.h \
     DataSourcesStateWidget.h \
     ../include/DataSource.h \
-    version.h
+    version.h \
+    ../include/JsonSerializable.h
 
 FORMS    +=
 

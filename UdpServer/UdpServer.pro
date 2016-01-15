@@ -64,7 +64,8 @@ SOURCES +=\
     ../lib/SimpleThread.cpp \
     ../lib/TcpFileTransfer.cpp \
 	../lib/CfgServerLoader.cpp \
-    ../lib/BuildInfo.cpp
+    ../lib/BuildInfo.cpp \
+    ../lib/JsonSerializable.cpp
 
 HEADERS  += \
     ../include/SocketIO.h \
@@ -80,7 +81,8 @@ HEADERS  += \
     ../include/SimpleThread.h \
     ../include/TcpFileTransfer.h \
 	../include/CfgServerLoader.h \
-    ../include/BuildInfo.h
+    ../include/BuildInfo.h \
+    ../include/JsonSerializable.h
 
 
 include(../qtservice/src/qtservice.pri)

@@ -81,7 +81,8 @@ SOURCES += main.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     ../lib/PropertyObject.cpp \
-    ../lib/Types.cpp
+    ../lib/Types.cpp \
+    ../lib/JsonSerializable.cpp
 
 HEADERS += \
         Stable.h \
@@ -99,7 +100,8 @@ HEADERS += \
     ../include/Signal.h \
     ../include/CUtils.h \
     ../include/PropertyObject.h \
-    ../include/Types.h
+    ../include/Types.h \
+    ../include/JsonSerializable.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -97,7 +97,9 @@ public:
 
 	bool writeDword(quint32 dw);
 	bool writeData(const char* data, quint32 dataSize);
+	bool writeData(const QByteArray& data);
 	bool writeStruct(Serializable *s);
+	bool writeStruct(const JsonSerializable& s);
 
 	void initRead()
 	{

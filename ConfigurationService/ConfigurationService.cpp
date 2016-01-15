@@ -18,14 +18,12 @@ ConfigurationService::~ConfigurationService()
 }
 
 
-// DataServiceMainFunctionWorker class implementation
+// ConfigurationServiceMainFunctionWorker class implementation
 //
-
 void ConfigurationServiceMainFunctionWorker::initialize()
 {
 	// Service Main Function initialization
 	//
-
 	m_cfgServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST),
 											  new CfgServer(""));
 
@@ -39,7 +37,6 @@ void ConfigurationServiceMainFunctionWorker::shutdown()
 {
 	// Service Main Function deinitialization
 	//
-
 	m_cfgServerThread->quit();
 
 	delete m_cfgServerThread;

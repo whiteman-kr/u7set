@@ -3,6 +3,10 @@
 #include <QtGlobal>
 #include <QDebug>
 #include <QHostAddress>
+#include <QAbstractSocket>
+
+#include "../include/BuildInfo.h"
+#include "../include/JsonSerializable.h"
 
 
 const int MAX_DATAGRAM_SIZE = 4096;
@@ -74,7 +78,8 @@ const quint32	RQID_GET_DATA_SOURCES_IDS = 1250,
 // ConfigurationService specific request IDs
 //
 const quint32	RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1300,
-				RQID_SET_CONFIGURATION_SERVICE_SETTINGS = 1301;
+				RQID_SET_CONFIGURATION_SERVICE_SETTINGS = 1301,
+				RQID_SET_CONFIGURATION_SERVICE_INFO = 1302;
 
 
 // States of service's Main Function
@@ -271,16 +276,44 @@ struct SendFileNext
 // RQID_SET_CONFIGURATION_SERVICE_SETTINGS request format &
 // RQID_GET_CONFIGURATION_SERVICE_SETTINGS reply format
 //
-
-const int MAX_BUILD_FOLDER_LEN = 512;
-
-struct ConfigurationServiceSettings
+class ConfigurationServiceSettings : public JsonSerializable
 {
-	quint32 configurationRequestAddress;
-	quint32 configurationRequestPort;
+private:
+	quint32 m_cfgRequestAddress = 0;
+	int m_cfgRequestPort = 0;
 
-	char currentBuildFolder[MAX_BUILD_FOLDER_LEN];
+	QString m_buildFolder;
+
+	virtual void toJson(QJsonObject& jsonObject) const final;
+	virtual bool fromJson(const QJsonObject& jsonObject, int version) final;
+
+public:
+	quint32 cfgRequestAddress() { return m_cfgRequestAddress; }
+	QString cfgRequestAddressStr() { return QHostAddress(m_cfgRequestAddress).toString(); }
+	void setCfgRequestAddress(quint32 cfgRequestAddress) { m_cfgRequestAddress = cfgRequestAddress; }
+
+	int cfgRequestPort() { return m_cfgRequestPort; }
+	void setCfgRequestPort(int cfgRequestPort) { m_cfgRequestPort = cfgRequestPort; }
+
+	QString buildFolder() { return m_buildFolder; }
+	void setBuildFolder(const QString& buildFolder) { m_buildFolder = buildFolder; }
 };
+
+
+// RQID_GET_CONFIGURATION_SERVICE_INFO reply format
+//
+class ConfigurationServiceInfo : public JsonSerializable
+{
+private:
+	Builder::BuildInfo m_buildInfo;
+
+	virtual void toJson(QJsonObject& jsonObject) final;
+	virtual bool fromJson(const QJsonObject& jsonObject, int version) final;
+
+public:
+	Builder::BuildInfo buildInfo() { return m_buildInfo; }
+};
+
 
 
 

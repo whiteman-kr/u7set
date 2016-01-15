@@ -71,7 +71,8 @@ SOURCES += main.cpp \
     ConfigurationService.cpp \
     ../lib/BaseService.cpp \
     ../lib/UdpSocket.cpp \
-    ../lib/CircularLogger.cpp
+    ../lib/CircularLogger.cpp \
+    ../lib/JsonSerializable.cpp
 
 HEADERS += \
     version.h \
@@ -84,7 +85,8 @@ HEADERS += \
     ConfigurationService.h \
     ../include/BaseService.h \
     ../include/UdpSocket.h \
-    ../include/CircularLogger.h
+    ../include/CircularLogger.h \
+    ../include/JsonSerializable.h
 
 include(../qtservice/src/qtservice.pri)
 

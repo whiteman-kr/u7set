@@ -85,11 +85,9 @@ void UdpClientSocket::onSocketThreadFinished()
 
 void UdpClientSocket::onSocketReadyRead()
 {
-    m_mutex.lock();
+	QMutexLocker locker(&m_mutex);
 
     assert(m_state == UdpClientSocketState::waitingForAck);
-
-	m_timer.stop();
 
 	QHostAddress address;
 	quint16 port = 0;
@@ -98,9 +96,11 @@ void UdpClientSocket::onSocketReadyRead()
 
 	if (recevedDataSize == -1)
 	{
-		assert(false);
+		QAbstractSocket::SocketError err = m_socket.error();
 		return;
 	}
+
+	m_timer.stop();
 
 	m_ack.setAddress(address);
 	m_ack.setPort(port);
@@ -121,8 +121,7 @@ void UdpClientSocket::onSocketReadyRead()
 		unknownAck = false;
 	}
 
-	m_mutex.unlock();
-
+	locker.unlock();
 
 	if (unknownAck)
     {
@@ -144,11 +143,9 @@ const QHostAddress& UdpClientSocket::serverAddress() const
 
 void UdpClientSocket::setServerAddress(const QHostAddress& serverAddress)
 {
-    m_mutex.lock();
+	QMutexLocker locker(&m_mutex);
 
     m_serverAddress = serverAddress;
-
-    m_mutex.unlock();
 }
 
 
@@ -160,11 +157,9 @@ quint16 UdpClientSocket::port() const
 
 void UdpClientSocket::setPort(quint16 port)
 {
-    m_mutex.lock();
+	QMutexLocker locker(&m_mutex);
 
     m_port = port;
-
-    m_mutex.unlock();
 }
 
 
@@ -225,7 +220,7 @@ void UdpClientSocket::retryRequest()
 
 void UdpClientSocket::onAckTimerTimeout()
 {
-    m_mutex.lock();
+	QMutexLocker locker(&m_mutex);
 
     m_ackTimeoutCtr++;
 
@@ -241,9 +236,9 @@ void UdpClientSocket::onAckTimerTimeout()
        m_state = UdpClientSocketState::readyToSend;
 
 	   emit ackTimeout(m_request);
-    }
 
-	m_mutex.unlock();
+	   qDebug() << "Ack timeout: server " << m_request.address().toString() << " : " << m_request.port();
+    }
 }
 
 
@@ -384,6 +379,12 @@ bool UdpRequest::writeData(const char* data, quint32 dataSize)
 }
 
 
+bool UdpRequest::writeData(const QByteArray& data)
+{
+	return writeData(data.constData(), data.size());
+}
+
+
 bool UdpRequest::writeStruct(Serializable* s)
 {
 	if (s == nullptr)
@@ -400,6 +401,16 @@ bool UdpRequest::writeStruct(Serializable* s)
 	assert(m_rawDataSize <= MAX_DATAGRAM_SIZE);
 
 	return true;
+}
+
+
+bool UdpRequest::writeStruct(const JsonSerializable& s)
+{
+	QByteArray json;
+
+	s.writeToJson(json);
+
+	return writeData(json);
 }
 
 
@@ -513,13 +524,13 @@ qint64 UdpClientRequestHandler::lastRequestTime() const
 
 void UdpClientRequestHandler::putRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 recevedDataSize)
 {
-    m_queueMutex.lock();
+	QMutexLocker locker(&m_queueMutex);
 
     m_lastRequestTime = QDateTime::currentMSecsSinceEpoch();
 
     requestQueue.enqueue(UdpRequest(senderAddress, senderPort, receivedData, recevedDataSize));
 
-    m_queueMutex.unlock();
+	locker.unlock();
 
     emit requestQueueIsNotEmpty();
 }
@@ -527,18 +538,14 @@ void UdpClientRequestHandler::putRequest(const QHostAddress& senderAddress, qint
 
 UdpRequest UdpClientRequestHandler::getRequest()
 {
-    m_queueMutex.lock();
+	QMutexLocker locker(&m_queueMutex);
 
     if (requestQueue.isEmpty())
     {
-        m_queueMutex.unlock();
-
         return UdpRequest();
     }
 
     UdpRequest request = requestQueue.dequeue();
-
-    m_queueMutex.unlock();
 
     return request;
 }
@@ -548,11 +555,9 @@ bool UdpClientRequestHandler::hasRequest()
 {
     bool result = false;
 
-    m_queueMutex.lock();
+	QMutexLocker locker(&m_queueMutex);
 
     result = !requestQueue.isEmpty();
-
-    m_queueMutex.unlock();
 
     return result;
 }
@@ -638,7 +643,7 @@ void UdpServerSocket::onTimer()
 
 	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
 
-    m_clientMapMutex.lock();
+	QMutexLocker locker(&m_clientMapMutex);
 
     QHashIterator<quint32, UdpClientRequestHandler*> i(clientRequestHandlerMap);
 
@@ -668,8 +673,6 @@ void UdpServerSocket::onTimer()
             }
         }
     }
-
-    m_clientMapMutex.unlock();
 }
 
 

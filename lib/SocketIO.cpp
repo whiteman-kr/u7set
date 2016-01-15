@@ -166,3 +166,38 @@ void Serializable::copyBufferToString(const quint16* buffer, QString &str)
 }
 
 
+
+void ConfigurationServiceSettings::toJson(QJsonObject& jsonObject) const
+{
+	jsonObject.insert("cfgRequestAddress", static_cast<qint64>(m_cfgRequestAddress));
+	jsonObject.insert("cfgRequestPort", m_cfgRequestPort);
+	jsonObject.insert("buildFolder", m_buildFolder);
+}
+
+
+bool ConfigurationServiceSettings::fromJson(const QJsonObject& jsonObject, int)
+{
+	JSON_READ_INT(jsonObject, "cfgRequestAddress", m_cfgRequestAddress);
+	JSON_READ_INT(jsonObject, "cfgRequestPort", m_cfgRequestPort);
+	JSON_READ_INT(jsonObject, "buildFolder", m_buildFolder);
+
+	return true;
+}
+
+
+
+void ConfigurationServiceInfo::toJson(QJsonObject& jsonObject)
+{
+	jsonObject.insert("project", m_buildInfo.project);
+	jsonObject.insert("buildID", m_buildInfo.id);
+	jsonObject.insert("release", m_buildInfo.release);
+	jsonObject.insert("changeset", m_buildInfo.changeset);
+	jsonObject.insert("user", m_buildInfo.user);
+	jsonObject.insert("workstation", m_buildInfo.workstation);
+
+	JSON_WRITE_DATETIME(jsonObject, "date", m_buildInfo.date);
+}
+
+
+
+

@@ -60,7 +60,8 @@ SOURCES += \
     FscDataSource.cpp \
     ../lib/ProtoUdp.cpp \
     ../lib/SimpleThread.cpp \
-    ../lib/Tcp.cpp
+    ../lib/Tcp.cpp \
+    ../lib/JsonSerializable.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -74,7 +75,8 @@ HEADERS  += mainwindow.h \
     version.h \
     ../include/ProtoUdp.h \
     ../include/SimpleThread.h \
-    ../include/Tcp.h
+    ../include/Tcp.h \
+    ../include/JsonSerializable.h
 
 include(../qtservice/src/qtservice.pri)
 
