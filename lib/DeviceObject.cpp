@@ -1999,6 +1999,55 @@ R"DELIM({
 		return DeviceSignal::m_deviceType;
 	}
 
+    quint32 DeviceSignal::valueToMantExp1616(double value)
+    {
+        if (value == 0)
+            return 0;
+
+        //value = 2;
+
+        double m = 0;
+        int p = 1;
+
+        m = frexp (value, &p);
+
+        p+= 30;
+
+        if (abs((int)m) < 0x3fffffff)
+        {
+            while (abs((int)m) < 0x3fffffff)
+            {
+                m *= 2;
+                p--;
+            }
+
+            if ((int)m == -0x40000000)
+            {
+                m *= 2;
+                p--;
+            }
+        }
+        else
+        {
+            while (abs((int)m) > 0x20000000)
+            {
+                m /= 2;
+                p++;
+            }
+        }
+
+        if (p < -256 || p > 255)
+        {
+            return 0;
+        }
+
+        quint16 _m16 = (int)m >> 16;
+        quint16 _p16 = p;
+
+        quint32 result = (_m16 << 16) | _p16;
+        return result;
+    }
+
 	E::SignalType DeviceSignal::type() const
 	{
 		return m_type;
