@@ -156,7 +156,7 @@ function module_lm_1_statistics(device, confCollection, log, signalSet, subsyste
 		
         if (device.propertyValue("ModuleFamily") == FamilyLM)
         {
-            log.writeMessage("MODULE LM-1: " + device.propertyValue("StrID"));
+            log.writeMessage("MODULE LM-1 (statistics): " + device.propertyValue("StrID"));
 
 			if (device.propertyValue("SubsysID") == undefined || device.propertyValue("Channel") == undefined
 				|| device.propertyValue("ConfigFrameSize") == undefined || device.propertyValue("ConfigFrameCount") == undefined)
@@ -472,7 +472,7 @@ function generate_aim(confFirmware, module, frame, log, signalSet)
     var defaultLowBound = valToADC(0, 0, 5.1, 0, 0xffff);
     var defaultMaxDiff = valToADC(0.5, 0, 5.1, 0, 0xffff);
     
-    var inController = module.jsFindChildObjectByMask("*_*_*_*_CTRLIN");
+    var inController = module.jsFindChildObjectByMask(module.propertyValue("StrID") + "_CTRLIN");
     if (inController == null)
     {
         log.writeWarning("WARNING: no input controller found in " + module.propertyValue("StrID") + "! Using default values.");
@@ -608,10 +608,11 @@ function generate_aifm(confFirmware, module, frame, log)
     var ptr = 0;
     
  
-    var inController = module.jsFindChildObjectByMask("*_*_*_*_CTRLIN");
+    var inController = module.jsFindChildObjectByMask(module.propertyValue("StrID") + "_CTRLIN");
     if (inController == null)
     {
-        log.writeWarning("WARNING: no input controller found in " + module.propertyValue("StrID") + "! Using default values.");
+        log.writeWarning("ERROR: no input controller found in " + module.propertyValue("StrID") + "!");
+	return false;
     }
 	
     // ------------------------------------------ I/O Module configuration (640 bytes) ---------------------------------
@@ -627,11 +628,11 @@ function generate_aifm(confFirmware, module, frame, log)
 	{
 		for (var i = 0; i < aifmChannelCount; i++)
 		{
-			var signal = inController.jsFindChildObjectByMask("*_*_*_*_*_IN0" + (i + 1) + koeffs[k]);
+			var signal = inController.jsFindChildObjectByMask(inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k]);
 			var value = 1;
 			if (signal == null)
 			{
-				log.writeWarning("WARNING: no signal *_*_*_*_*_IN0" + (i + 1) + koeffs[k] + " found in " + inController.propertyValue("StrID") + "! Using default values.");
+				log.writeWarning("WARNING: no signal " + inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k] + " found in " + inController.propertyValue("StrID") + "! Using default values.");
 			}
 			else
 			{
@@ -645,15 +646,21 @@ function generate_aifm(confFirmware, module, frame, log)
 				}
 			}
 			
-			var v = signal.valueToMantExp1616(value);
-			var m =  v >> 16;
-			var p = v & 0xffff;
+			var v = 0;
+			var mantissa = 0;
+			var exponent = 0;
+			if (signal != null)
+			{
+				v = signal.valueToMantExp1616(value);
+				mantissa =  v >> 16;
+				exponent = v & 0xffff;
+			}
 				
-			confFirmware.writeLog("    IN" + i + koeffs[k] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + m + "^" + p + "]\r\n");
+			confFirmware.writeLog("    IN" + i + koeffs[k] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
 	
-			setData16(confFirmware, log, frame, ptr, m); 
+			setData16(confFirmware, log, frame, ptr, mantissa); 
 			ptr += 2;
-			setData16(confFirmware, log, frame, ptr, p); 
+			setData16(confFirmware, log, frame, ptr, exponent); 
 			ptr += 2;
 		}
 	}
@@ -672,11 +679,11 @@ function generate_aifm(confFirmware, module, frame, log)
 			{
 				for (var p = 0; p < setPointCount; p++)
 				{
-					var signal = inController.jsFindChildObjectByMask("*_*_*_*_*_IN0" + (i + 1) + koeffs[k] + modeNames[m]);
+					var signal = inController.jsFindChildObjectByMask(inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k] + modeNames[m]);
 					var value = 1;
 					if (signal == null)
 					{
-						log.writeWarning("WARNING: no signal *_*_*_*_*_IN0" + (i + 1) + koeffs[k]  + modeNames[m] + " found in " + inController.propertyValue("StrID") + "! Using default values.");
+						log.writeWarning("WARNING: no signal " + inController.propertyValue("StrID") + "_IN0" + (i + 1) + koeffs[k]  + modeNames[m] + " found in " + inController.propertyValue("StrID") + "! Using default values.");
 					}
 					else
 					{
@@ -692,9 +699,15 @@ function generate_aifm(confFirmware, module, frame, log)
 						}
 					}
 					
-					var v = signal.valueToMantExp1616(value);
-					var mantissa =  v >> 16;
-					var exponent = v & 0xffff;
+					var v = 0;
+					var mantissa =  0;
+					var exponent = 0;
+					if (signal != null)
+					{
+						v = signal.valueToMantExp1616(value);
+						mantissa =  v >> 16;
+						exponent = v & 0xffff;
+					}	
 						
 					confFirmware.writeLog("    IN" + (i + 1) + koeffs[k] + modeNames[m] + " : [" + frame + ":" + ptr + "] PowerCoefficient = " + value + " [" + mantissa + "^" + exponent + "]\r\n");
 			
@@ -708,7 +721,7 @@ function generate_aifm(confFirmware, module, frame, log)
 			ptr += 2; //reserved
 		}
 	}
-
+	
 	ptr = 632;
 	
     // final crc
@@ -770,7 +783,7 @@ function generate_aom(confFirmware, module, frame, log, signalSet)
     var AOMWordCount = 4;                       // total words count
     var AOMSignalsInWordCount = 8;              // signals in a word count
     
-    var outController = module.jsFindChildObjectByMask("*_*_*_*_CTRLOUT");
+    var outController = module.jsFindChildObjectByMask(module.propertyValue("StrID") + "_CTRLOUT");
     if (outController == null)
     {
         log.writeWarning("WARNING: no output controller found in " + module.propertyValue("StrID") + "! Using default values.");
@@ -1117,7 +1130,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 	
 	for (var p = 0; p < portCount; p++)
 	{
-		var controllerID = "*_*_*_*_PORT0";
+		var controllerID = module.propertyValue("StrID") + "_PORT0";
 		controllerID = controllerID + (p + 1);
 	    
 		var controller = module.jsFindChildObjectByMask(controllerID);
