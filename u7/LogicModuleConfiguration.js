@@ -1156,7 +1156,8 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			
 			if (connection.propertyValue("Caption") == undefined || connection.propertyValue("OcmPortStrID") == undefined
 			|| connection.propertyValue("Device1StrID") == undefined || connection.propertyValue("Device2StrID") == undefined
-			|| connection.propertyValue("Enable") == undefined || connection.propertyValue("ConnectionMode") == undefined)
+			|| connection.propertyValue("Enable") == undefined || connection.propertyValue("EnableDuplex") == undefined 
+			|| connection.propertyValue("ConnectionMode") == undefined)
 			{
 				log.writeError("Undefined connection properties in function generate_txRxOptoConfiguration");
 				return false;
@@ -1317,9 +1318,24 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 					txStandard = Mode_RS485;
 				}
 				
+				var txDuplex = 0;	//1 - enabled
+				if (connection.propertyValue("EnableDuplex") == true)
+				{
+					txDuplex = 1;
+				}
+
 				ptr = 45 * 2;
+				
+				//bits 9..0
+				//
 				var txMode = (txEn << 1) | txStandard;
 				txMode <<= (p * 2);
+				
+				// bits 14..10
+				//
+				txDuplex <<= 10;
+				txDuplex <<= p;
+				txMode |= txDuplex;
 				
 				var allModes = confFirmware.data16(frame, ptr);
 				allModes |= txMode;

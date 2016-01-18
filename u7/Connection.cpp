@@ -38,6 +38,7 @@ namespace Hardware
 
         ADD_PROPERTY_GETTER_SETTER(ConnectionMode, ConnectionMode, false, Connection::connectionMode, Connection::setConnectionMode);
 		ADD_PROPERTY_GETTER_SETTER(bool, Enable, false, Connection::enable, Connection::setEnable);
+        ADD_PROPERTY_GETTER_SETTER(bool, EnableDuplex, false, Connection::enableDuplex, Connection::setEnableDuplex);
 	}
 
     Connection::Connection(const Connection& that):Connection()
@@ -55,6 +56,7 @@ namespace Hardware
 		writer.writeAttribute("ConnectionMode", QString::number(static_cast<int>(connectionMode())));
 		writer.writeAttribute("ConnectionType", QString::number(static_cast<int>(connectionType())));
 		writer.writeAttribute("Enable", enable() ? "true" : "false");
+        writer.writeAttribute("EnableDuplex", enableDuplex() ? "true" : "false");
 		writer.writeAttribute("SignalList", signalList().join(';'));
 
         // Tx/Rx words quantity
@@ -110,7 +112,12 @@ namespace Hardware
 			setEnable(reader.attributes().value("Enable").toString() == "true" ? true : false);
 		}
 
-		if (reader.attributes().hasAttribute("SignalList"))
+        if (reader.attributes().hasAttribute("EnableDuplex"))
+        {
+            setEnableDuplex(reader.attributes().value("EnableDuplex").toString() == "true" ? true : false);
+        }
+
+        if (reader.attributes().hasAttribute("SignalList"))
 		{
 			setSignalList(reader.attributes().value("SignalList").toString().split(';', QString::SkipEmptyParts));
 		}
@@ -379,6 +386,7 @@ namespace Hardware
 				propertyVisibilityChanger("OcmPortStrID", false);
 				propertyVisibilityChanger("ConnectionMode", false);
 				propertyVisibilityChanger("Enable", false);
+                propertyVisibilityChanger("EnableDuplex", false);
 				propertyVisibilityChanger("Device1StrID", true);
 				propertyVisibilityChanger("Device2StrID", true);
 				break;
@@ -386,6 +394,7 @@ namespace Hardware
 				propertyVisibilityChanger("OcmPortStrID", true);
 				propertyVisibilityChanger("ConnectionMode", true);
 				propertyVisibilityChanger("Enable", true);
+                propertyVisibilityChanger("EnableDuplex", true);
 				propertyVisibilityChanger("Device1StrID", false);
 				propertyVisibilityChanger("Device2StrID", false);
 				break;
@@ -401,10 +410,20 @@ namespace Hardware
 
     void Connection::setEnable(bool value)
     {
-		m_enable = value;
+        m_enable = value;
 	}
 
-	QStringList Connection::signalList() const
+    bool Connection::enableDuplex() const
+    {
+        return m_enableDuplex;
+    }
+
+    void Connection::setEnableDuplex(bool value)
+    {
+        m_enableDuplex = value;
+    }
+
+    QStringList Connection::signalList() const
 	{
 		return m_signalList;
 	}

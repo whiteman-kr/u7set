@@ -106,7 +106,10 @@ namespace Hardware
 		bool enable() const;
         void setEnable(bool value);
 
-		QStringList signalList() const;
+        bool enableDuplex() const;
+        void setEnableDuplex(bool value);
+
+        QStringList signalList() const;
 		void setSignalList(const QStringList& value);
 
         Hardware::Connection& operator = (const Hardware::Connection& that)
@@ -133,6 +136,7 @@ namespace Hardware
 
             m_connectionMode = that.m_connectionMode;
             m_enable = that.m_enable;
+            m_enableDuplex = that.m_enableDuplex;
 
 			setConnectionType(that.connectionType());
 			setSignalList(that.signalList());
@@ -165,6 +169,7 @@ namespace Hardware
         ConnectionMode m_connectionMode = ConnectionMode::ModeRS232;
 		ConnectionType m_connectionType = ConnectionType::OpticalConnectionType;
         bool m_enable = false;
+        bool m_enableDuplex = false;
 
 		QStringList m_signalList;
     };
