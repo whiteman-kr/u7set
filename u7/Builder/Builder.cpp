@@ -213,8 +213,6 @@ namespace Builder
 
             ok = connections.load(&db, errorCode);
 
-            connections.createTestData();
-
             if (ok == false)
             {
                 LOG_ERROR(m_log, tr("Can't load connections file"));

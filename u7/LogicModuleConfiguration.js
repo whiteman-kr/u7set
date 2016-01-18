@@ -1242,23 +1242,23 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 			}
 				
-			if (rsConnection == false)
+			//if (rsConnection == false)
+			//{
+			// write RxWordsQuantity for Opto connections only
+			//
+			ptr = 15 * 2 + p * 2;
+			value = connection.propertyValue(deviceName + "RxWordsQuantity");
+			if (value == undefined)
 			{
-				// write RxWordsQuantity for Opto connections only
-				//
-				ptr = 15 * 2 + p * 2;
-				value = connection.propertyValue(deviceName + "RxWordsQuantity");
-				if (value == undefined)
-				{
-					log.writeError("Undefined connection RxWordsQuantity properties in function generate_txRxOptoConfiguration");
-					return false;
-				}
-				else
-				{
-					setData16(confFirmware, log, frame, ptr, value); 
-					confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
-				}
+				log.writeError("Undefined connection RxWordsQuantity properties in function generate_txRxOptoConfiguration");
+				return false;
 			}
+			else
+			{
+				setData16(confFirmware, log, frame, ptr, value); 
+				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			}
+			//}
 				
 			ptr = 20 * 2 + p * 4;
 			value = connection.propertyValue(deviceName + "TxRxOptoDataUID");
