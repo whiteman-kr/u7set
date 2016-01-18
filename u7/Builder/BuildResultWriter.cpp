@@ -277,6 +277,7 @@ namespace Builder
 	MultichannelFile::MultichannelFile(BuildResultWriter& buildResultWriter, QString subsysStrID, int subsysID,
 									   QString lmCaption, int frameSize, int frameCount) :
 		m_buildResultWriter(buildResultWriter),
+		m_log(buildResultWriter.log()),
 		m_subsysStrID(subsysStrID),
 		m_subsysID(subsysID),
 		m_lmCaption(lmCaption)

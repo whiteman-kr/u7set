@@ -387,7 +387,7 @@ namespace Hardware
     {
         if (frameIndex < 0 || frameIndex >= frameCount())
         {
-            Q_ASSERT(false);
+			assert(frameIndex >= 0 && frameIndex < frameCount());
             return std::vector<quint8>();
         }
 
@@ -402,7 +402,10 @@ namespace Hardware
 			{
 				*errorMsg = QString("ModuleFirmware::setChannelData error - channel ") + QString::number(channel) + QString(" wrong frameSize!");
 			}
-			assert(false);
+			else
+			{
+				assert(this->frameSize() == frameSize);
+			}
 			return false;
 		}
 
@@ -412,7 +415,10 @@ namespace Hardware
 			{
 				*errorMsg = "ModuleFirmware::setChannelData error - channel " + QString::number(channel) + " wrong frameCount!";
 			}
-			assert(false);
+			else
+			{
+				assert(this->frameCount() == frameCount);
+			}
 			return false;
 		}
 
@@ -423,7 +429,10 @@ namespace Hardware
 			{
 				*errorMsg = "ModuleFirmware::setChannelData error - channel " + QString::number(channel) + " already exists!";
 			}
-			assert(false);
+			else
+			{
+				assert(it == m_channelData.end());
+			}
 			return false;
 		}
 
@@ -452,7 +461,10 @@ namespace Hardware
 			{
 				*errorMsg = QString("ModuleFirmware::storeChannelData failed: At least 3 frames needed.");
 			}
-			assert(false);
+			else
+			{
+				assert(frameCount() >= 3);
+			}
 			return false;
 		}
 
@@ -496,7 +508,10 @@ namespace Hardware
 					*errorMsg = QString("ModuleFirmware::storeChannelData failed: data is too big. Channel = ") +
 							QString::number(channel) + ", frame = " + QString::number(frame);
 				}
-				assert(false);
+				else
+				{
+					assert(frame < frameCount());
+				}
 				return false;
 			}
 
@@ -580,7 +595,14 @@ namespace Hardware
             int channel = channelNumbersAndSize[i].first;
             if (channel < 1 || channel > 4)
             {
-                assert(false);
+				if (errorMsg != nullptr)
+				{
+					*errorMsg = QString("ModuleFirmware::storeChannelData error - wrong channel number: ") + QString::number(channel);
+				}
+				else
+				{
+					assert(channel >= 1 && channel <= 4);
+				}
                 return false;
             }
 
