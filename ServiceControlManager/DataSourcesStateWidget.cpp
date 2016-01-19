@@ -349,18 +349,28 @@ void DataSourcesStateModel::ackReceived(UdpRequest udpRequest)
 	case RQID_GET_DATA_SOURCES_IDS:
 		sourceCount = udpRequest.readDword();
 
-		beginResetModel();
-		for (quint32 i = 0; i < sourceCount; i++)
+		if (sourceCount == 0)
 		{
-			quint32 sourceID = udpRequest.readDword();
-
-			DataSource* dataSource = new DataSource;
-			dataSource->setID(sourceID);
-			m_dataSource.append(static_cast<int>(sourceID), dataSource);
+			beginResetModel();
+			m_dataSource.clear();
+			endResetModel();
 		}
-		endResetModel();
+		else
+		{
+			beginResetModel();
+			for (quint32 i = 0; i < sourceCount; i++)
+			{
+				quint32 sourceID = udpRequest.readDword();
 
-		sendDataRequest(RQID_GET_DATA_SOURCES_INFO);
+				DataSource* dataSource = new DataSource;
+				dataSource->setID(sourceID);
+				m_dataSource.append(static_cast<int>(sourceID), dataSource);
+			}
+			endResetModel();
+
+			sendDataRequest(RQID_GET_DATA_SOURCES_INFO);
+		}
+
 		break;
 
 	case RQID_GET_DATA_SOURCES_INFO:

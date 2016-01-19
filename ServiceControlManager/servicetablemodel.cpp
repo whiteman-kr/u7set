@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <QBuffer>
 #include "DataSourcesStateWidget.h"
+#include "BaseServiceStateWidget.h"
 
 
 ServiceData::ServiceData() :
@@ -441,11 +442,14 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 				serviceData.statusWidget = new DataSourcesStateWidget(m_hostsInfo[index.row()].ip, index.column());
 				break;
 			default:
-				return;
+				serviceData.statusWidget = new BaseServiceStateWidget(m_hostsInfo[index.row()].ip, index.column());
+				break;
 		}
 	}
 
-	serviceData.statusWidget->showMaximized();
+	serviceData.statusWidget->showNormal();
+	serviceData.statusWidget->raise();
+	serviceData.statusWidget->activateWindow();
 }
 
 void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, ServiceInformation serviceInfo)
