@@ -59,7 +59,7 @@ void ConfigurationServiceMainFunctionWorker::onInformationRequest(UdpRequest req
 }
 
 
-void ConfigurationServiceMainFunctionWorker::onGetSettings(UdpRequest& request)
+void ConfigurationServiceMainFunctionWorker::onGetSettings(UdpRequest& /*request*/)
 {
 	/*quint32 count = request.readDword();
 
