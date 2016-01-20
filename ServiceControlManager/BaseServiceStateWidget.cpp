@@ -3,6 +3,7 @@
 #include <QStatusBar>
 #include <QLabel>
 #include <QToolBar>
+#include <QMessageBox>
 
 BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidget *parent) : QMainWindow(parent)
 {
@@ -186,6 +187,11 @@ void BaseServiceStateWidget::sendCommand(int command)
 	if (!(state == SS_MF_WORK && (command == RQID_SERVICE_MF_STOP || command == RQID_SERVICE_MF_RESTART)) &&
 		!(state == SS_MF_STOPPED && (command == RQID_SERVICE_MF_START || command == RQID_SERVICE_MF_RESTART)))
 	{
+		return;
+	}
+	if (m_clientSocket->isWaitingForAck())
+	{
+		QMessageBox::critical(this, tr("Command send error"), tr("Socket is waiting for ack, repeat your command later."));
 		return;
 	}
 	m_clientSocket->sendShortRequest(command);
