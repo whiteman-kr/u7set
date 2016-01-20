@@ -14,6 +14,7 @@
 #include "scanoptionswidget.h"
 #include "servicetablemodel.h"
 #include "../include/UdpSocket.h"
+#include <functional>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -224,7 +225,7 @@ void MainWindow::removeHost()
 				assert(false);
 		}
 	}
-    //std::sort(hostsForRemoving.begin(), hostsForRemoving.end(), std::greater<int>());
+	std::sort(hostsForRemoving.begin(), hostsForRemoving.end(), std::greater<int>());
 	for (int row : hostsForRemoving)
 	{
 		m_serviceModel->removeHost(row);
