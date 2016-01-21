@@ -11,7 +11,6 @@
 #include <QThread>
 #include <QDebug>
 #include <string>
-//#include <math.h>
 
 SerialDataTester::SerialDataTester(QWidget *parent) :
 	QMainWindow(parent),
@@ -141,42 +140,22 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	QSettings applicationSettings;
 	if (applicationSettings.value("port").isNull())
 	{
-		QMessageBox::warning(this, tr("First time start"), tr("Look like you started programm for the first time. Select default settings before use it"));
-
-		execStartMenu:
-
-		m_applicationSettingsDialog->exec();
-
-		// In case, that user save no settings show
-		// warning message
-		//
-
-		if (applicationSettings.value("port").isNull())
+		if (QSerialPortInfo::availablePorts().count() == 0)
 		{
-			QMessageBox::warning(this, tr("Warning"), tr("No default port selected! To run programm you must select port"));
-			goto execStartMenu;
+			QMessageBox::critical(this, tr("Serial Data Tester"), tr("No ports detected! Program will not work until ports would be detected"));
 		}
+		else
+		{
+			QMessageBox::warning(this, tr("First time start"), tr("Look like you started programm for the first time. Select default settings before use it"));
 
-		applicationSettings.setValue("bits", QSerialPort::Data8);
-		applicationSettings.setValue("stopBits", QSerialPort::TwoStop);
+			m_applicationSettingsDialog->exec();
+
+			applicationSettings.setValue("bits", QSerialPort::Data8);
+			applicationSettings.setValue("stopBits", QSerialPort::TwoStop);
+		}
 	}
 
-	// Get application settings from stored settings
-	//
-
-	if (QFile(applicationSettings.value("pathToSignals").toString()).exists())
-	{
-		m_pathToSignalsXml = applicationSettings.value("pathToSignals").toString();
-	}
-	else
-	{
-		QMessageBox::warning(this, tr("Warning"), tr("No xml-file specified. program will not work until file would be selected"));
-	}
-
-	// delete m_applicationSettingsDialog;
-	//
-
-	m_applicationSettingsDialog = nullptr;
+	delete m_applicationSettingsDialog;
 
 	// Create port receiver object
 	//
@@ -229,8 +208,9 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 	// If xml-file exists, we will parse it
 	//
 
-	if (QFile(m_pathToSignalsXml).exists())
+	if (QFile(applicationSettings.value("pathToSignals").toString()).exists())
 	{
+		m_pathToSignalsXml = applicationSettings.value("pathToSignals").toString();
 		parseFile();
 	}
 	else
@@ -239,14 +219,15 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 		loadLastUsedSettings();
 	}
 
-	// Open port, and place it in another
+	// Place portReceiver in another
 	// thread
 	//
 
-	m_portReceiver->openPort();
+	//m_portReceiver->openPort();
 
 	m_PortThread = new QThread(this);
 	m_portReceiver->moveToThread(m_PortThread);
+	m_PortThread->start();
 
 	// Clean old packet data
 	//
@@ -256,10 +237,11 @@ SerialDataTester::SerialDataTester(QWidget *parent) :
 
 SerialDataTester::~SerialDataTester()
 {
-	delete ui;
 	m_portReceiver->closePort();
-	delete m_portReceiver;
 	m_PortThread->terminate();
+
+	delete m_portReceiver;
+	delete ui;
 	delete m_PortThread;
 }
 
@@ -273,12 +255,12 @@ void SerialDataTester::parseFile()
 	QFile slgnalsXmlFile(m_pathToSignalsXml);
 	bool errorLoadingXml = false;
 
-	if (slgnalsXmlFile.exists() == false)
+	/*if (slgnalsXmlFile.exists() == false)
 	{
 		QMessageBox::critical(this, tr("Critical error"), "File not found: " + m_pathToSignalsXml);
 		ui->statusBar->showMessage("Error loading " + m_pathToSignalsXml);
 		errorLoadingXml = true;
-	}
+	}*/
 
 	if (slgnalsXmlFile.open(QIODevice::ReadOnly | QIODevice::Text) == false)
 	{
@@ -324,6 +306,7 @@ void SerialDataTester::parseFile()
 						port->setChecked(false);
 						if (port->text() == attributes.value("PortInfoStrID").toString())
 						{
+							portExists = true;
 							port->setChecked(true);
 							m_portReceiver->setPort(attributes.value("PortInfoStrID").toString());
 							m_portReceiver->setBaud(attributes.value("Speed").toInt());
@@ -333,6 +316,7 @@ void SerialDataTester::parseFile()
 								case 6: m_portReceiver->setDataBits(QSerialPort::Data6); break;
 								case 7: m_portReceiver->setDataBits(QSerialPort::Data7); break;
 								case 8: m_portReceiver->setDataBits(QSerialPort::Data8); break;
+								default: QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Data bits value in xml-file of port " + port->text() + " is wrong. port will not work")));
 							}
 
 							QString stopBitsMenuEntryName;
@@ -357,8 +341,8 @@ void SerialDataTester::parseFile()
 									stopBitsMenuEntryName = "One and half stop";
 									break;
 								}
+								default: QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Stop bits value in xml-file of port " + port->text() + " is wrong. port will not work")));
 							}
-							portExists = true;
 							ui->portName->setText(attributes.value("PortInfoStrID").toString());
 							ui->baudRate->setText(attributes.value("Speed").toString());
 							ui->bits->setText(attributes.value("Bits").toString());
@@ -401,7 +385,7 @@ void SerialDataTester::parseFile()
 
 					if (!portExists)
 					{
-						QMessageBox::critical(this, tr("Critical error"), tr("Port error: no such port"));
+						QMessageBox::warning(this, tr("Critical error"), tr("XML file has port which was not detected or not exist on this machine. Programm will load last used settings"));
 						loadLastUsedSettings();
 					}
 				}
@@ -412,7 +396,7 @@ void SerialDataTester::parseFile()
 				}
 			}
 
-			if(xmlReader.name() == "signal")
+			if(xmlReader.name() == "Signal")
 			{
 
 				if(attributes.hasAttribute("SignalStrID")
@@ -443,7 +427,7 @@ void SerialDataTester::parseFile()
 				}
 				else
 				{
-					QMessageBox::critical(this, tr("Critical error"), tr("Error reading attributes"));
+					QMessageBox::critical(this, tr("Serial Data Tester"), tr("Error reading attributes"));
 					errorLoadingXml = true;
 				}
 			}
@@ -452,7 +436,7 @@ void SerialDataTester::parseFile()
 
 	if (xmlReader.error())
 	{
-		QMessageBox::critical(this, tr("Critical error"), xmlReader.errorString());
+		QMessageBox::critical(this, tr("Serial Data Tester"), xmlReader.errorString());
 		errorLoadingXml = true;
 	}
 
@@ -541,6 +525,7 @@ void SerialDataTester::applicationExit()
 
 void SerialDataTester::setPort(QAction* newPort)
 {
+	this->stopReceiver();
 	for (QAction* port : m_setPort->actions())
 	{
 		if(port->text() != newPort->text())
@@ -559,6 +544,7 @@ void SerialDataTester::setPort(QAction* newPort)
 
 void SerialDataTester::setBaud(QAction* newBaud)
 {
+	this->stopReceiver();
 	for (QAction* baud : m_setBaud->actions())
 	{
 		if(baud->text() != newBaud->text())
@@ -577,6 +563,7 @@ void SerialDataTester::setBaud(QAction* newBaud)
 
 void SerialDataTester::setBits(QAction *newBits)
 {
+	this->stopReceiver();
 	for (QAction* bits : m_setDataBits->actions())
 	{
 		if(bits->text() != newBits->text())
@@ -619,6 +606,7 @@ void SerialDataTester::setBits(QAction *newBits)
 
 void SerialDataTester::setStopBits(QAction *newStopBits)
 {
+	this->stopReceiver();
 	for (QAction* stopBits : m_setStopBits->actions())
 	{
 		if(stopBits->text() != newStopBits->text())
@@ -938,6 +926,8 @@ void SerialDataTester::startReceiver()
 {
 	bool errors = false;
 
+	m_portReceiver->openPort();
+
 	if (ui->portName->text() == "Error")
 	{
 		QMessageBox::critical(this, tr("Program start"), tr("No port specified"));
@@ -982,7 +972,8 @@ void SerialDataTester::startReceiver()
 
 	if (errors == false)
 	{
-		m_PortThread->start();
+		//m_PortThread->start();
+		m_portReceiver->openPort();
 		ui->portStatus->setText("Opened");
 	}
 	else
@@ -994,6 +985,7 @@ void SerialDataTester::startReceiver()
 
 void SerialDataTester::stopReceiver()
 {
-	m_PortThread->terminate();
+	//m_PortThread->terminate();
+	m_portReceiver->closePort();
 	ui->portStatus->setText("Closed");
 }

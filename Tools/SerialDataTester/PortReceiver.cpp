@@ -31,28 +31,28 @@ void PortReceiver::setPort(const QString &port)
 {
 	m_serialPort->close();
 	m_serialPort->setPortName(port);
-	openPort();
+	//openPort();
 }
 
 void PortReceiver::setBaud(const int& baud)
 {
 	m_serialPort->close();
 	m_serialPort->setBaudRate(baud);
-	openPort();
+	//openPort();
 }
 
 void PortReceiver::setDataBits(const QSerialPort::DataBits &dataBits)
 {
 	m_serialPort->close();
 	m_serialPort->setDataBits(dataBits);
-	openPort();
+	//openPort();
 }
 
 void PortReceiver::setStopBits(const QSerialPort::StopBits& stopBits)
 {
 	m_serialPort->close();
 	m_serialPort->setStopBits(stopBits);
-	openPort();
+	//openPort();
 }
 
 void PortReceiver::openPort()
