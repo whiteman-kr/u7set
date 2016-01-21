@@ -1317,12 +1317,6 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				{
 					txStandard = Mode_RS485;
 				}
-				
-				var txDuplex = 0;	//1 - enabled
-				if (connection.propertyValue("EnableDuplex") == true)
-				{
-					txDuplex = 1;
-				}
 
 				ptr = 45 * 2;
 				
@@ -1331,11 +1325,22 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				var txMode = (txEn << 1) | txStandard;
 				txMode <<= (p * 2);
 				
-				// bits 14..10
-				//
-				txDuplex <<= 10;
-				txDuplex <<= p;
-				txMode |= txDuplex;
+				
+				if (module.propertyValue("ModuleVersion") == 255)	// this is only for OCM version 255 (ACNF)
+				{
+					// bits 14..10
+					//
+					var txDuplex = 0;	//1 - enabled
+					
+					if (connection.propertyValue("EnableDuplex") == true)
+					{
+						txDuplex = 1;
+					}
+					txDuplex <<= 10;
+					txDuplex <<= p;
+					txMode |= txDuplex;
+				}
+				
 				
 				var allModes = confFirmware.data16(frame, ptr);
 				allModes |= txMode;

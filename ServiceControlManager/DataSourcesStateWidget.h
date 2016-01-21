@@ -7,10 +7,7 @@
 #include "../include/UdpSocket.h"
 #include "../include/OrderedHash.h"
 #include "../include/DataSource.h"
-
-
-const quint32   SS_MF_UNDEFINED = 10,
-SS_MF_UNAVAILABLE = 11;
+#include "BaseServiceStateWidget.h"
 
 
 class QTimer;

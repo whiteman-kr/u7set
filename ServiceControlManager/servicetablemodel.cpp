@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <QBuffer>
 #include "DataSourcesStateWidget.h"
+#include "BaseServiceStateWidget.h"
 
 
 ServiceData::ServiceData() :
@@ -390,28 +391,6 @@ void ServiceTableModel::checkServiceStates()
 	}
 }
 
-void ServiceTableModel::sendCommand(int row, int col, int command)
-{
-	UdpClientSocket* clientSocket = m_hostsInfo[row].servicesData[col].clientSocket;
-	int state = m_hostsInfo[row].servicesData[col].information.mainFunctionState;
-	if (clientSocket == nullptr)
-	{
-		return;
-	}
-	if (!(state == SS_MF_WORK && (command == RQID_SERVICE_MF_STOP || command == RQID_SERVICE_MF_RESTART)) &&
-		!(state == SS_MF_STOPPED && (command == RQID_SERVICE_MF_START || command == RQID_SERVICE_MF_RESTART)))
-	{
-		return;
-	}
-	m_freezeUpdate = true;
-	while (clientSocket->isWaitingForAck())
-	{
-		qApp->processEvents();
-	}
-	clientSocket->sendShortRequest(command);
-	m_freezeUpdate = false;
-}
-
 void ServiceTableModel::removeHost(int row)
 {
 	beginRemoveRows(QModelIndex(), row, row);
@@ -441,11 +420,14 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 				serviceData.statusWidget = new DataSourcesStateWidget(m_hostsInfo[index.row()].ip, index.column());
 				break;
 			default:
-				return;
+				serviceData.statusWidget = new BaseServiceStateWidget(m_hostsInfo[index.row()].ip, index.column());
+				break;
 		}
 	}
 
-	serviceData.statusWidget->showMaximized();
+	serviceData.statusWidget->showNormal();
+	serviceData.statusWidget->raise();
+	serviceData.statusWidget->activateWindow();
 }
 
 void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, ServiceInformation serviceInfo)
