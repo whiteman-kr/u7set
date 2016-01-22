@@ -10,6 +10,9 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	QHostAddress host = QHostAddress(ip);
 	setWindowTitle(QString(serviceTypesInfo[portIndex].name) + " - " + host.toString());
 
+	m_tabWidget = new QTabWidget(this);
+	setCentralWidget(m_tabWidget);
+
 	resize(640, 480);
 
 	serviceState.mainFunctionState = SS_MF_UNDEFINED;
@@ -179,6 +182,11 @@ void BaseServiceStateWidget::serviceNotFound()
 		serviceState.mainFunctionState = SS_MF_UNAVAILABLE;
 		updateServiceState();
 	}
+}
+
+int BaseServiceStateWidget::addTab(QWidget* page, const QString& label)
+{
+	return m_tabWidget->addTab(page, label);
 }
 
 void BaseServiceStateWidget::sendCommand(int command)

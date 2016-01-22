@@ -7,7 +7,7 @@
 #include <QWidget>
 #include <QApplication>
 #include <QBuffer>
-#include "DataSourcesStateWidget.h"
+#include "DataAquisitionServiceWidget.h"
 #include "BaseServiceStateWidget.h"
 
 
@@ -417,7 +417,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 		switch (serviceData.information.type)
 		{
 			case SERVICE_DATA_ACQUISITION:
-				serviceData.statusWidget = new DataSourcesStateWidget(m_hostsInfo[index.row()].ip, index.column());
+				serviceData.statusWidget = new DataAquisitionServiceWidget(m_hostsInfo[index.row()].ip, index.column());
 				break;
 			default:
 				serviceData.statusWidget = new BaseServiceStateWidget(m_hostsInfo[index.row()].ip, index.column());

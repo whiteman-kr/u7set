@@ -9,6 +9,7 @@
 DataAquisitionService::DataAquisitionService(int argc, char ** argv) :
 	BaseService(argc, argv, "FSC Data Aquisition Service", SERVICE_DATA_ACQUISITION, new DataServiceMainFunctionWorker())
 {
+	Hardware::Init();
 }
 
 
@@ -35,7 +36,6 @@ void DataServiceMainFunctionWorker::initListeningPorts()
 
 void DataServiceMainFunctionWorker::readConfigurationFiles()
 {
-	Hardware::Init();
 	SerializeEquipmentFromXml("equipment.xml", m_deviceRoot);
 	SerializeSignalsFromXml("appSignals.xml", m_unitInfo, m_signalSet);
 }

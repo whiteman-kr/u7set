@@ -17,6 +17,8 @@ public:
 	explicit BaseServiceStateWidget(quint32 ip, int portIndex, QWidget *parent = 0);
 	virtual ~BaseServiceStateWidget();
 
+	int addTab(QWidget* page, const QString& label);
+
 signals:
 
 public slots:
@@ -42,6 +44,7 @@ private:
 	QLabel* m_whoIsLabel = nullptr;
 	QLabel* m_uptimeLabel = nullptr;
 	QLabel* m_runningLabel = nullptr;
+	QTabWidget* m_tabWidget = nullptr;
 
 	ServiceInformation serviceState;
 };

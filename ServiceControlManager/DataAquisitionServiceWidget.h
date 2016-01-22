@@ -1,20 +1,12 @@
-#ifndef DATASOURCESSTATEWIDGET_H
-#define DATASOURCESSTATEWIDGET_H
+#ifndef DATAAQUISITIONSERVICEWIDGET_H
+#define DATAAQUISITIONSERVICEWIDGET_H
 
-#include <QWidget>
-#include <QAbstractTableModel>
-#include <QHostAddress>
-#include "../include/UdpSocket.h"
-#include "../include/OrderedHash.h"
-#include "../include/DataSource.h"
 #include "BaseServiceStateWidget.h"
+#include "../include/OrderedHash.h"
+#include <QAbstractTableModel>
+#include "../include/DataSource.h"
 
-
-class QTimer;
 class QTableView;
-class QLabel;
-class QPushButton;
-
 
 class DataSourcesStateModel : public QAbstractTableModel
 {
@@ -53,45 +45,20 @@ private:
 	void sendDataRequest(int requestType);
 };
 
-
-class DataSourcesStateWidget : public QWidget
+class DataAquisitionServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	explicit DataSourcesStateWidget(quint32 ip, int portIndex, QWidget *parent = 0);
-	~DataSourcesStateWidget();
-
-signals:
+	DataAquisitionServiceWidget(quint32 ip, int portIndex, QWidget *parent = 0);
 
 public slots:
-	void checkVisibility();
 	void updateSourceInfo();
 	void updateSourceState();
-	void updateServiceState();
-	void askServiceState();
-
-	void startService();
-	void stopService();
-	void restartService();
-
-	void serviceAckReceived(const UdpRequest udpRequest);
-	void serviceNotFound();
+	void checkVisibility();
 
 private:
-	void sendCommand(int command);
-
-	QPushButton* startServiceButton;
-	QPushButton* stopServiceButton;
-	QPushButton* restartServiceButton;
-
-	QTimer* m_timer = nullptr;
 	DataSourcesStateModel* m_model = nullptr;
 	QTableView* m_view = nullptr;
-	QLabel* m_stateLabel = nullptr;
-	UdpClientSocket* m_clientSocket = nullptr;
-
-	ServiceInformation serviceState;
 };
 
-
-#endif // DATASOURCESSTATEWIDGET_H
+#endif // DATAAQUISITIONSERVICEWIDGET_H
