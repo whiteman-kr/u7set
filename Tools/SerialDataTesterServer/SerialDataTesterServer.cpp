@@ -175,7 +175,7 @@ void SerialDataTesterServer::parseFile()
 				}
 			}
 
-			if(xmlReader.name() == "signal")
+			if(xmlReader.name() == "Signal")
 			{
 
 				if(attributes.hasAttribute("SignalStrID")

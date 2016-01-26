@@ -30,9 +30,6 @@ namespace Hardware
         bool save(QXmlStreamWriter& writer);
         bool load(QXmlStreamReader& reader);
 
-        void createTestData();
-
-
 		// Properties
         //
     public:
@@ -109,7 +106,10 @@ namespace Hardware
 		bool enable() const;
         void setEnable(bool value);
 
-		QStringList signalList() const;
+        bool enableDuplex() const;
+        void setEnableDuplex(bool value);
+
+        QStringList signalList() const;
 		void setSignalList(const QStringList& value);
 
         Hardware::Connection& operator = (const Hardware::Connection& that)
@@ -136,6 +136,7 @@ namespace Hardware
 
             m_connectionMode = that.m_connectionMode;
             m_enable = that.m_enable;
+            m_enableDuplex = that.m_enableDuplex;
 
 			setConnectionType(that.connectionType());
 			setSignalList(that.signalList());
@@ -149,16 +150,16 @@ namespace Hardware
 		QString m_ocmPortStrID;
 
         QString m_device1StrID;
-        int m_device1TxWordsQuantity = 0;
-        int m_device1RxWordsQuantity = 0;
+        int m_device1TxWordsQuantity = 479;
+        int m_device1RxWordsQuantity = 479;
         int m_device1TxRxOptoID = 0;
         quint32 m_device1TxRxOptoDataUID = 0;
         int m_device1TxRsID = 0;
         quint32 m_device1TxRsDataUID = 0;
 
         QString m_device2StrID;
-        int m_device2TxWordsQuantity = 0;
-        int m_device2RxWordsQuantity = 0;
+        int m_device2TxWordsQuantity = 479;
+        int m_device2RxWordsQuantity = 479;
         int m_device2TxRxOptoID = 0;
         quint32 m_device2TxRxOptoDataUID = 0;
         int m_device2TxRsID = 0;
@@ -168,6 +169,7 @@ namespace Hardware
         ConnectionMode m_connectionMode = ConnectionMode::ModeRS232;
 		ConnectionType m_connectionType = ConnectionType::OpticalConnectionType;
         bool m_enable = false;
+        bool m_enableDuplex = false;
 
 		QStringList m_signalList;
     };
@@ -190,8 +192,6 @@ namespace Hardware
 
         void clear();
         bool checkUniqueConnections(Connection *editObject);
-
-        void createTestData();
 
         bool setLMConnectionParams(const QString& deviceStrID, int m_txWordsQuantity, int m_rxWordsQuantity,
                                  int m_txRxOptoID, quint32 m_txRxOptoDataUID);

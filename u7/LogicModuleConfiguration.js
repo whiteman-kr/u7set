@@ -952,7 +952,7 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
     
     // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
     //
-    var dataTransmittingEnableFlag = false;
+    var dataTransmittingEnableFlag = true;
     var dataReceiveEnableFlag = true;
     
     var flags = 0;
@@ -962,7 +962,7 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
         flags |= 2;
     
     var configFramesQuantity = 1;
-    var dataFramesQuantity = 0;
+    var dataFramesQuantity = 40;
     var txId = ocmTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
@@ -1156,7 +1156,8 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			
 			if (connection.propertyValue("Caption") == undefined || connection.propertyValue("OcmPortStrID") == undefined
 			|| connection.propertyValue("Device1StrID") == undefined || connection.propertyValue("Device2StrID") == undefined
-			|| connection.propertyValue("Enable") == undefined || connection.propertyValue("ConnectionMode") == undefined)
+			|| connection.propertyValue("Enable") == undefined || connection.propertyValue("EnableDuplex") == undefined 
+			|| connection.propertyValue("ConnectionMode") == undefined)
 			{
 				log.writeError("Undefined connection properties in function generate_txRxOptoConfiguration");
 				return false;
@@ -1242,23 +1243,23 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 			}
 				
-			if (rsConnection == false)
+			//if (rsConnection == false)
+			//{
+			// write RxWordsQuantity for Opto connections only
+			//
+			ptr = 15 * 2 + p * 2;
+			value = connection.propertyValue(deviceName + "RxWordsQuantity");
+			if (value == undefined)
 			{
-				// write RxWordsQuantity for Opto connections only
-				//
-				ptr = 15 * 2 + p * 2;
-				value = connection.propertyValue(deviceName + "RxWordsQuantity");
-				if (value == undefined)
-				{
-					log.writeError("Undefined connection RxWordsQuantity properties in function generate_txRxOptoConfiguration");
-					return false;
-				}
-				else
-				{
-					setData16(confFirmware, log, frame, ptr, value); 
-					confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
-				}
+				log.writeError("Undefined connection RxWordsQuantity properties in function generate_txRxOptoConfiguration");
+				return false;
 			}
+			else
+			{
+				setData16(confFirmware, log, frame, ptr, value); 
+				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+			}
+			//}
 				
 			ptr = 20 * 2 + p * 4;
 			value = connection.propertyValue(deviceName + "TxRxOptoDataUID");
@@ -1316,10 +1317,30 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				{
 					txStandard = Mode_RS485;
 				}
-				
+
 				ptr = 45 * 2;
+				
+				//bits 9..0
+				//
 				var txMode = (txEn << 1) | txStandard;
 				txMode <<= (p * 2);
+				
+				
+				if (module.propertyValue("ModuleVersion") == 255)	// this is only for OCM version 255 (ACNF)
+				{
+					// bits 14..10
+					//
+					var txDuplex = 0;	//1 - enabled
+					
+					if (connection.propertyValue("EnableDuplex") == true)
+					{
+						txDuplex = 1;
+					}
+					txDuplex <<= 10;
+					txDuplex <<= p;
+					txMode |= txDuplex;
+				}
+				
 				
 				var allModes = confFirmware.data16(frame, ptr);
 				allModes |= txMode;

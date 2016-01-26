@@ -19,17 +19,19 @@ Rs232SignalListEditor::Rs232SignalListEditor(DbController* pDbController, QWidge
 
 	m_rs232Connections->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_rs232Connections->fontMetrics().height() * 1.4));
 
-	m_rs232Connections->setColumnCount(4);
 	QStringList l;
 	l << tr("Caption")
 		<< tr("OCM StrID")
 		<< tr("Mode")
-		<< tr("Enabled");
-	m_rs232Connections->setHorizontalHeaderLabels(l);
+        << tr("Enabled")
+        << tr("Duplex");
+    m_rs232Connections->setColumnCount(l.size());
+    m_rs232Connections->setHorizontalHeaderLabels(l);
 	m_rs232Connections->setColumnWidth(0, 150);
 	m_rs232Connections->setColumnWidth(1, 150);
 	m_rs232Connections->setColumnWidth(2, 70);
-	m_rs232Connections->setColumnWidth(4, 100);
+    m_rs232Connections->setColumnWidth(3, 70);
+    m_rs232Connections->setColumnWidth(4, 70);
 
 	m_rs232Connections->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_rs232Connections->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -230,6 +232,8 @@ void Rs232SignalListEditor::addConnection()
 	m_rs232Connections->item(index, 2)->setData(Qt::UserRole, m_connections.count() - 1);
 	m_rs232Connections->setItem(index, 3, new QTableWidgetItem(connection->enable() ? "true" : "false"));
 	m_rs232Connections->item(index, 3)->setData(Qt::UserRole, m_connections.count() - 1);
+    m_rs232Connections->setItem(index, 4, new QTableWidgetItem(connection->enableDuplex() ? "true" : "false"));
+    m_rs232Connections->item(index, 4)->setData(Qt::UserRole, m_connections.count() - 1);
 
 	// Select the created element
 	//
@@ -461,7 +465,9 @@ void Rs232SignalListEditor::fillConnectionsList()
 		m_rs232Connections->item(rowCount, 2)->setData(Qt::UserRole, i);
 		m_rs232Connections->setItem(rowCount, 3, new QTableWidgetItem(connection->enable() ? "true" : "false"));
 		m_rs232Connections->item(rowCount, 3)->setData(Qt::UserRole, i);
-		rowCount++;
+        m_rs232Connections->setItem(rowCount, 4, new QTableWidgetItem(connection->enableDuplex() ? "true" : "false"));
+        m_rs232Connections->item(rowCount, 4)->setData(Qt::UserRole, i);
+        rowCount++;
 	}
 }
 

@@ -49,7 +49,6 @@ public slots:
 	void serviceNotFound();
 	void checkServiceStates();
 
-	void sendCommand(int row, int col, int command);
 	void removeHost(int row);
 	void openServiceStatusWidget(const QModelIndex& index);
 

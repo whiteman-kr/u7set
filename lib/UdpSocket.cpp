@@ -97,6 +97,7 @@ void UdpClientSocket::onSocketReadyRead()
 	if (recevedDataSize == -1)
 	{
 		QAbstractSocket::SocketError err = m_socket.error();
+		Q_UNUSED(err)
 		return;
 	}
 

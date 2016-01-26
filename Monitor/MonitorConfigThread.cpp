@@ -55,7 +55,7 @@ void MonitorConfigThread::reconnect(QString /*ip1*/, int /*port1*/, QString /*ip
 	//m_cfgLoader->setServers();
 }
 
-void MonitorConfigThread::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void MonitorConfigThread::slot_configurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
 
 }

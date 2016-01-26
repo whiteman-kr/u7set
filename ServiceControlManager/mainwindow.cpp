@@ -14,6 +14,7 @@
 #include "scanoptionswidget.h"
 #include "servicetablemodel.h"
 #include "../include/UdpSocket.h"
+#include <functional>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -22,8 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_serviceTable(new QTableView(this))
 {
 	qRegisterMetaType<ServiceInformation>("ServiceInformation");
-
-	connect(this, &MainWindow::commandPushed, m_serviceModel, &ServiceTableModel::sendCommand);
 
 	m_serviceTable->setModel(m_serviceModel);
 	connect(m_serviceModel, &ServiceTableModel::dataChanged, m_serviceTable, &QTableView::resizeColumnsToContents);
@@ -50,12 +49,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	toolBar->addAction(scanNetworkAction);
 	contextMenu->addAction(scanNetworkAction);
 	contextMenu->addSeparator();
-
-	toolBar->addSeparator();
-	toolBar->addAction(menu->addAction(tr("Start service"), this, SLOT(startService())));
-	toolBar->addAction(menu->addAction(tr("Stop service"), this, SLOT(stopService())));
-	toolBar->addAction(menu->addAction(tr("Restart service"), this, SLOT(restartService())));
-	toolBar->addSeparator();
 
 	menu->addSeparator();
 	toolBar->addAction(menu->addAction(tr("Remove host"), this, SLOT(removeHost())));
@@ -148,19 +141,6 @@ void MainWindow::openConnectionInfo(QString text)
 	m_widgets.append(w);
 }
 
-void MainWindow::setServicesForCommand(int command)
-{
-	QModelIndexList selection = m_serviceTable->selectionModel()->selectedIndexes();
-	if (selection.count() == 0)
-	{
-		QMessageBox::warning(this, tr("Warning"), tr("No service is selected!"));
-	}
-	for (int i = 0; i < selection.count(); i++)
-	{
-		emit commandPushed(selection[i].row(), selection[i].column(), command);
-	}
-}
-
 void MainWindow::openEditor()
 {
 	showNormal();
@@ -203,21 +183,6 @@ void MainWindow::scanNetwork()
 	sow.exec();
 }
 
-void MainWindow::startService()
-{
-	setServicesForCommand(RQID_SERVICE_MF_START);
-}
-
-void MainWindow::stopService()
-{
-	setServicesForCommand(RQID_SERVICE_MF_STOP);
-}
-
-void MainWindow::restartService()
-{
-	setServicesForCommand(RQID_SERVICE_MF_RESTART);
-}
-
 void MainWindow::removeHost()
 {
 	QModelIndexList selection = m_serviceTable->selectionModel()->selectedIndexes();
@@ -225,8 +190,44 @@ void MainWindow::removeHost()
 	{
 		QMessageBox::warning(this, tr("Warning"), tr("No service is selected!"));
 	}
+	QVector<int> hostsForRemoving;
+	QVector<int> checkedHosts;
 	for (int i = 0; i < selection.count(); i++)
 	{
-		m_serviceModel->removeHost(selection[i].row());
+		bool checked = false;
+		int row = selection[i].row();
+		for (int j = 0; j < checkedHosts.count(); j++)
+		{
+			if (row == checkedHosts[j])
+			{
+				checked = true;
+			}
+		}
+		if (checked)
+		{
+			continue;
+		}
+		checkedHosts.append(row);
+		auto reply = QMessageBox::question(this,
+										   tr("Confirmation"),
+										   tr("Are you sure you want to delete %1 host").arg(m_serviceModel->headerData(row, Qt::Vertical).toString()),
+										   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+		switch (reply)
+		{
+			case QMessageBox::Yes:
+				hostsForRemoving.append(row);
+				break;
+			case QMessageBox::No:
+				continue;
+			case QMessageBox::Cancel:
+				return;
+			default:
+				assert(false);
+		}
+	}
+	std::sort(hostsForRemoving.begin(), hostsForRemoving.end(), std::greater<int>());
+	for (int row : hostsForRemoving)
+	{
+		m_serviceModel->removeHost(row);
 	}
 }

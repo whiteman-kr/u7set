@@ -22,7 +22,6 @@ private:
     QTableView* m_serviceTable;
 
     void openConnectionInfo(QString text);
-    void setServicesForCommand(int command);
 
 public slots:
     void openEditor();
@@ -30,13 +29,7 @@ public slots:
     void switchLanguage(QAction* selectedAction);
     void connectionClicked(QAction* selectedAction);
     void scanNetwork();
-    void startService();
-    void stopService();
-    void restartService();
     void removeHost();
-
-signals:
-    void commandPushed(int row, int col, int command);
 };
 
 #endif // MAINWINDOW_H

@@ -198,6 +198,11 @@ void ConfigurationServiceInfo::toJson(QJsonObject& jsonObject)
 	JSON_WRITE_DATETIME(jsonObject, "date", m_buildInfo.date);
 }
 
+bool ConfigurationServiceInfo::fromJson(const QJsonObject &/*jsonObject*/, int /*version*/)
+{
+	return true;
+}
+
 
 
 

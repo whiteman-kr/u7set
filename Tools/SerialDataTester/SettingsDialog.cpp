@@ -43,13 +43,19 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::settingsConfirmed()
 {	
-	QSettings settings;
+	if (ui->pathToSignalsXmlFile->text().isEmpty())
+	{
+		QMessageBox::warning(this, tr("Serial Data Tester"), tr("XML-file path is not set!"));
+	}
+	{
+		QSettings settings;
 
-	settings.setValue("pathToSignals", ui->pathToSignalsXmlFile->text());
-	settings.setValue("port", ui->comPortSelectionBox->currentText());
-	settings.setValue("baud", ui->portBaudBox->currentText());
+		settings.setValue("pathToSignals", ui->pathToSignalsXmlFile->text());
+		settings.setValue("port", ui->comPortSelectionBox->currentText());
+		settings.setValue("baud", ui->portBaudBox->currentText());
 
-	this->close();
+		this->close();
+	}
 }
 
 void SettingsDialog::settingsCanceled()

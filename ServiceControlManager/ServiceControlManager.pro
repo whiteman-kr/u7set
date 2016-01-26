@@ -62,20 +62,22 @@ SOURCES += mainwindow.cpp \
     servicetablemodel.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
-    DataSourcesStateWidget.cpp \
     ../lib/DataSource.cpp \
     main.cpp \
-    ../lib/JsonSerializable.cpp
+    ../lib/JsonSerializable.cpp \
+    BaseServiceStateWidget.cpp \
+    DataAquisitionServiceWidget.cpp
 
 HEADERS  += mainwindow.h \
     scanoptionswidget.h \
     servicetablemodel.h \
     ../include/UdpSocket.h \
     ../include/SocketIO.h \
-    DataSourcesStateWidget.h \
     ../include/DataSource.h \
     version.h \
-    ../include/JsonSerializable.h
+    ../include/JsonSerializable.h \
+    BaseServiceStateWidget.h \
+    DataAquisitionServiceWidget.h
 
 FORMS    +=
 
