@@ -172,6 +172,8 @@ unix:QMAKE_CXXFLAGS += -std=c++11
 #Optimization flags
 #
 win32 {
+
+    QMAKE_CXXFLAGS += -wd4275
 }
 unix {
 	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0

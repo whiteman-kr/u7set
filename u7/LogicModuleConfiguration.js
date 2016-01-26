@@ -952,7 +952,7 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
     
     // ------------------------------------------ TX/RX Config (8 bytes) ---------------------------------
     //
-    var dataTransmittingEnableFlag = false;
+    var dataTransmittingEnableFlag = true;
     var dataReceiveEnableFlag = true;
     
     var flags = 0;
@@ -962,7 +962,7 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
         flags |= 2;
     
     var configFramesQuantity = 1;
-    var dataFramesQuantity = 0;
+    var dataFramesQuantity = 40;
     var txId = ocmTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
