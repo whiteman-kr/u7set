@@ -3,6 +3,7 @@
 #include "../include/BaseService.h"
 #include "../include/DataSource.h"
 #include "../include/Signal.h"
+#include "../include/CfgServerLoader.h"
 
 #include "FscDataAcquisitionThread.h"
 
@@ -23,6 +24,8 @@ private:
 
 	UdpSocketThread* m_infoSocketThread = nullptr;
 
+	Tcp::Thread* m_cfgLoaderThread = nullptr;
+
 	std::shared_ptr<Hardware::DeviceRoot> m_deviceRoot;
 	SignalSet m_signalSet;
 	UnitList m_unitInfo;
@@ -34,6 +37,9 @@ private:
 	void runUdpThreads();
 	void stopUdpThreads();
 
+	void runCfgLoaderThread();
+	void stopCfgLoaderThread();
+
 	void runFscDataReceivingThreads();
 	void stopFscDataReceivingThreads();
 
@@ -41,6 +47,7 @@ private:
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
 
+	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
 	virtual void initialize() override;
