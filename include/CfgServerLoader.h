@@ -125,7 +125,7 @@ private:
 	FileDownloadRequest m_currentDownloadRequest;
 
 	QTimer m_timer;
-	bool m_configurationReady = false;
+	bool m_configurationXmlReady = false;
 	bool m_allFilesLoaded = false;
 	int m_autoDownloadIndex = 0;
 
@@ -143,6 +143,7 @@ private:
 
 	virtual void onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5) final;
 
+	bool startConfigurationXmlLoading();
 	bool readConfigurationXml();
 
 	bool readCfgFile(const QString& pathFileName, QByteArray* fileData);

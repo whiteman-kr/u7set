@@ -144,6 +144,19 @@ void CfgLoader::onConnection()
 {
 	resetStatuses();
 
+	startConfigurationXmlLoading();
+}
+
+
+bool CfgLoader::startConfigurationXmlLoading()
+{
+	if (isConnected() == false || m_transferInProgress == true)
+	{
+		return true;
+	}
+
+	m_configurationXmlReady = false;
+
 	FileDownloadRequest fdr;
 
 	fdr.pathFileName = m_configurationXmlPathFileName;
@@ -151,6 +164,8 @@ void CfgLoader::onConnection()
 	m_downloadQueue.push_front(fdr);
 
 	startDownload();
+
+	return true;
 }
 
 
@@ -220,7 +235,7 @@ void CfgLoader::slot_downloadCfgdFile(const QString& fileName, QByteArray* fileD
 
 	fileData->clear();
 
-	if (m_configurationReady == false)
+	if (m_configurationXmlReady == false)
 	{
 		*errorCode = Tcp::FileTransferResult::ConfigurationIsNotReady;
 		emit signal_endCfgFileDownload();
@@ -268,8 +283,14 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 {
 	if (errorCode != Tcp::FileTransferResult::Ok)
 	{
-		assert(false);
+		QString msg = QString("File '%1' download error - %2").
+				arg(m_currentDownloadRequest.pathFileName).
+				arg(getErrorStr(errorCode));
+
+		qDebug() << msg;
+
 		emit signal_endCfgFileDownload();
+
 		return;
 	}
 
@@ -309,7 +330,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 			if (readConfigurationXml() == true)
 			{
-				m_configurationReady = true;
+				m_configurationXmlReady = true;
 
 				BuildFileInfoArray bfiArray;
 
@@ -373,9 +394,15 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 void CfgLoader::onTimer()
 {
+	if (m_configurationXmlReady == false)
+	{
+		startConfigurationXmlLoading();
+		return;
+	}
+
 	if (m_autoDownloadIndex >= m_cfgFileInfo.count() ||
 		isConnected() == false ||
-		m_configurationReady == false ||
+		m_configurationXmlReady == false ||
 		isTransferInProgress() ||
 		m_allFilesLoaded == true ||
 		m_downloadQueue.isEmpty() == false)
@@ -444,7 +471,7 @@ void CfgLoader::resetStatuses()
 
 	m_configurationXmlMd5 = "";
 
-	m_configurationReady = false;
+	m_configurationXmlReady = false;
 	m_autoDownloadIndex = 1;		// index 0 - configuration.xml
 	m_allFilesLoaded = false;
 }
