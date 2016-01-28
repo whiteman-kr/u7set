@@ -66,8 +66,8 @@ DialogConnectionsEditor::DialogConnectionsEditor(DbController *pDbController, QW
     int il = 0;
     ui->m_list->setColumnWidth(il++, 50);
     ui->m_list->setColumnWidth(il++, 100);
-    ui->m_list->setColumnWidth(il++, 150);
-    ui->m_list->setColumnWidth(il++, 150);
+    ui->m_list->setColumnWidth(il++, 250);
+    ui->m_list->setColumnWidth(il++, 250);
 
     QString errorCode;
 

@@ -3,6 +3,7 @@
 #include "../../include/DbController.h"
 #include "../../include/OutputLog.h"
 #include "../../include/DeviceObject.h"
+#include "Connection.h"
 #include "../../include/Crc.h"
 
 namespace Builder
@@ -94,6 +95,45 @@ namespace Builder
 		LOG_MESSAGE(m_log, tr("Generating modules configurations"));
 
 		bool ok = false;
+
+        // Check if connections' identifiers exist in the database
+        //
+        for (int i = 0; i < m_connections->count(); i++)
+        {
+            std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
+
+            std::vector<Hardware::DeviceObject*> list;
+
+            if (connection->connectionType() == Hardware::Connection::ConnectionType::OpticalConnectionType)
+            {
+                list.clear();
+                m_deviceRoot->findChildObjectsByMask(connection->device1StrID(), list);
+                if (list.empty() == true)
+                {
+                    LOG_ERROR(m_log, tr("No source port %1 was found for optical connection %2").arg(connection->device1StrID()).arg(connection->caption()));
+                    return false;
+                }
+
+                list.clear();
+                m_deviceRoot->findChildObjectsByMask(connection->device2StrID(), list);
+                if (list.empty() == true)
+                {
+                    LOG_ERROR(m_log, tr("No target port %1 was found for optical connection %2").arg(connection->device2StrID()).arg(connection->caption()));
+                    return false;
+                }
+            }
+            else
+            {
+                m_deviceRoot->findChildObjectsByMask(connection->ocmPortStrID(), list);
+                if (list.empty() == true)
+                {
+                    LOG_ERROR(m_log, tr("No port %1 was found for serial connection %2").arg(connection->ocmPortStrID()).arg(connection->caption()));
+                    return false;
+                }
+            }
+
+
+        }
 
 
 		// Get script file from the project databse
