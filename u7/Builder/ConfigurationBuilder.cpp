@@ -96,7 +96,7 @@ namespace Builder
 
 		bool ok = false;
 
-        // Check if connections' identifiers exist in the database
+		// Check if connections' identifiers (non-empty) exist in the database
         //
         for (int i = 0; i < m_connections->count(); i++)
         {
@@ -106,21 +106,27 @@ namespace Builder
 
             if (connection->connectionType() == Hardware::Connection::ConnectionType::OpticalConnectionType)
             {
-                list.clear();
-                m_deviceRoot->findChildObjectsByMask(connection->device1StrID(), list);
-                if (list.empty() == true)
-                {
-                    LOG_ERROR(m_log, tr("No source port %1 was found for optical connection %2").arg(connection->device1StrID()).arg(connection->caption()));
-                    return false;
-                }
+				if (connection->device1StrID().length() > 0)
+				{
+					list.clear();
+					m_deviceRoot->findChildObjectsByMask(connection->device1StrID(), list);
+					if (list.empty() == true)
+					{
+						LOG_ERROR(m_log, tr("No source port %1 was found for optical connection %2").arg(connection->device1StrID()).arg(connection->caption()));
+						return false;
+					}
+				}
 
-                list.clear();
-                m_deviceRoot->findChildObjectsByMask(connection->device2StrID(), list);
-                if (list.empty() == true)
-                {
-                    LOG_ERROR(m_log, tr("No target port %1 was found for optical connection %2").arg(connection->device2StrID()).arg(connection->caption()));
-                    return false;
-                }
+				if (connection->device2StrID().length() > 0)
+				{
+					list.clear();
+					m_deviceRoot->findChildObjectsByMask(connection->device2StrID(), list);
+					if (list.empty() == true)
+					{
+						LOG_ERROR(m_log, tr("No target port %1 was found for optical connection %2").arg(connection->device2StrID()).arg(connection->caption()));
+						return false;
+					}
+				}
             }
             else
             {
