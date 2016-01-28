@@ -536,31 +536,85 @@ namespace Hardware
     {
 		if (editObject->connectionType() != Hardware::Connection::ConnectionType::OpticalConnectionType)
 		{
+			// Serial connection
+			//
+			for (std::shared_ptr<Hardware::Connection> c : m_connections)
+			{
+				if (editObject->index() == c->index())
+				{
+					continue;
+				}
+
+				if (editObject->ocmPortStrID().length() == 0)
+				{
+					continue;
+				}
+
+				if (editObject->ocmPortStrID() == c->device1StrID())
+				{
+					return false;
+				}
+				if (editObject->ocmPortStrID() == c->device2StrID())
+				{
+					return false;
+				}
+				if (editObject->ocmPortStrID() == c->ocmPortStrID())
+				{
+					return false;
+				}
+			}
+
 			return true;
 		}
+		else
+		{
+			// Optical connection
+			//
+			if (editObject->device1StrID() == editObject->device2StrID())
+			{
+				return false;
+			}
 
-		if (editObject->device1StrID() == editObject->device2StrID())
-        {
-            return false;
-        }
+			for (std::shared_ptr<Hardware::Connection> c : m_connections)
+			{
+				if (editObject->index() == c->index())
+				{
+					continue;
+				}
 
-        for (std::shared_ptr<Hardware::Connection> c : m_connections)
-        {
-            if (editObject->index() == c->index())
-            {
-                continue;
-            }
+				if (editObject->device1StrID().length() > 0)
+				{
+					if (editObject->device1StrID() == c->device1StrID())
+					{
+						return false;
+					}
+					if (editObject->device1StrID() == c->device2StrID())
+					{
+						return false;
+					}
+					if (editObject->device1StrID() == c->ocmPortStrID())
+					{
+						return false;
+					}
+				}
 
-            if (editObject->device1StrID() == c->device1StrID())
-            {
-                return false;
-            }
-
-            if (editObject->device2StrID() == c->device2StrID())
-            {
-                return false;
-            }
-        }
+				if (editObject->device2StrID().length() > 0)
+				{
+					if (editObject->device2StrID() == c->device2StrID())
+					{
+						return false;
+					}
+					if (editObject->device2StrID() == c->device1StrID())
+					{
+						return false;
+					}
+					if (editObject->device2StrID() == c->ocmPortStrID())
+					{
+						return false;
+					}
+				}
+			}
+		}
 
         return true;
     }
