@@ -291,7 +291,7 @@ void DataServiceMainFunctionWorker::onGetDataSourcesState(UdpRequest& request)
 }
 
 
-void DataServiceMainFunctionWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void DataServiceMainFunctionWorker::onConfigurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
 	qDebug() << "Configuration Ready!";
 }
