@@ -76,8 +76,8 @@ PRECOMPILED_HEADER = stable.h
 
 OTHER_FILES +=
 
-win32: LIBS += -L$$PWD/ftdi -lftd2xx
-#win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
+#win32: LIBS += -L$$PWD/ftdi -lftd2xx
+win32: LIBS += -L$$PWD/ftdi64 -lftd2xx
 
 INCLUDEPATH += $$PWD/ftdi
 DEPENDPATH += $$PWD/ftdi
