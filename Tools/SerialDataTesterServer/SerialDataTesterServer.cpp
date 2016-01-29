@@ -292,7 +292,6 @@ void SerialDataTesterServer::sendPacket()
 			{
 				int pos = 31; // declare variables
 				float f = value * 0.1;
-				qDebug() << signal.name << "::" << f;
 				int bit = 0;
 
 				int *b = reinterpret_cast<int*>(&f);

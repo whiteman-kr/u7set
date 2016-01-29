@@ -427,6 +427,12 @@ void SerialDataTester::parseFile()
 						errorLoadingXml = true;
 					}
 
+					if (currentSignal.dataFormat == "Float" && currentSignal.dataSize != 32)
+					{
+						QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Error reading size attribute on " + currentSignal.strId + ": only 32 bits need to work with float value")));
+						errorLoadingXml = true;
+					}
+
 					if (currentSignal.type == "analog")
 					{
 						currentSignal.dataSize/=8;
@@ -787,8 +793,7 @@ void SerialDataTester::dataReceived(QByteArray data)
 				}
 
 				std::reverse(valueString.begin(), valueString.end());
-				qDebug() << valueString;
-				quint32 result = valueString.toInt(false, 2);
+				qint64 result = valueString.toInt(false, 2);
 				QString resultString;
 				if (signal.dataFormat == "UnsignedInt")
 				{
@@ -796,7 +801,15 @@ void SerialDataTester::dataReceived(QByteArray data)
 				}
 				if (signal.dataFormat == "SignedInt")
 				{
-					resultString = QString::number(result - pow(2, signal.dataSize*8)/2);
+					if (valueString[0] == '0')
+					{
+						resultString = QString::number(result);
+					}
+					else
+					{
+						result = result - pow (2, (signal.dataSize*8)-1);
+						resultString = QString::number(result * -1);
+					}
 				}
 				if (signal.dataFormat == "Float")
 				{
@@ -821,15 +834,9 @@ void SerialDataTester::dataReceived(QByteArray data)
 						(valueString[bitPos] == '1') ? mantissa += pow(0.5, bitPos-8) : mantissa += 0;
 					}
 
-					qDebug() << mantissa;
-
-					qDebug() << exponentCalculation;
-
 					int sign;
 
 					(valueString[0] == '1') ? sign = -1 : sign = 1;
-
-					qDebug() << sign * exponentCalculation * mantissa;
 
 					resultString = QString::number( sign * exponentCalculation * mantissa );
 					//resultString = QString::number(result * 0.1);
