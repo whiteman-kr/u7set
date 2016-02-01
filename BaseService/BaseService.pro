@@ -56,19 +56,23 @@ QMAKE_EXTRA_TARGETS += versionTarget
 
 SOURCES += main.cpp \
     ../lib/UdpSocket.cpp \
-    ../lib/BaseService.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
-    ../lib/JsonSerializable.cpp
+    ../lib/JsonSerializable.cpp \
+    ../lib/UdpFileTransfer.cpp \
+    ../lib/Service.cpp \
+    ../lib/SimpleThread.cpp
 
 HEADERS += \
     ../include/SocketIO.h \
     ../include/UdpSocket.h \
-    ../include/BaseService.h \
     ../include/CircularLogger.h \
 	../include/FscDataFormat.h \
     version.h \
-    ../include/JsonSerializable.h
+    ../include/JsonSerializable.h \
+    ../include/UdpFileTransfer.h \
+    ../include/Service.h \
+    ../include/SimpleThread.h
 
 include(../qtservice/src/qtservice.pri)
 

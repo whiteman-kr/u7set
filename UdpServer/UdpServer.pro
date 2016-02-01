@@ -55,7 +55,7 @@ SOURCES +=\
     servermain.cpp \
     ../lib/UdpSocket.cpp \
     ServerSocket.cpp \
-    ../lib/BaseService.cpp \
+	../lib/Service.cpp \
     servermainwindow.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
@@ -71,7 +71,7 @@ HEADERS  += \
     ../include/SocketIO.h \
     ../include/UdpSocket.h \
     ServerSocket.h \
-    ../include/BaseService.h \
+	../include/Service.h \
     servermainwindow.h \
     ../include/CircularLogger.h \
     version.h \

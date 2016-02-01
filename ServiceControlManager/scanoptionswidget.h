@@ -5,6 +5,7 @@
 #include <QSet>
 #include <QNetworkAddressEntry>
 #include "../include/SocketIO.h"
+#include "../include/Service.h"
 
 class QLineEdit;
 class ServiceTableModel;

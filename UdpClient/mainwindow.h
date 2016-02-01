@@ -2,7 +2,7 @@
 
 #include <QMainWindow>
 
-#include "../include/BaseService.h"
+#include "../include/Service.h"
 #include "../include/SocketIO.h"
 #include "FscDataSource.h"
 #include "ClientSocket.h"

@@ -167,7 +167,7 @@ void SubnetChecker::startChecking()
 	m_requestHeader.version = 0;
 	m_requestHeader.no = 1;
 	m_requestHeader.errorCode = RQERROR_OK;
-	m_requestHeader.id = RQID_GET_SERVICE_INFO;
+	m_requestHeader.id = RQID_SERVICE_GET_INFO;
 	m_requestHeader.dataSize = 0;
 
 	m_sendPacketTimer = new QTimer(this);
@@ -185,7 +185,7 @@ void SubnetChecker::checkNextHost()
 	{
 		QHostAddress ip(m_ip);
 		qint64 sent = m_socket->writeDatagram((char*)&m_requestHeader, sizeof(m_requestHeader),
-											  ip, serviceTypesInfo[i].port);
+											  ip, serviceInfo[i].port);
 		if (sent == -1)
 	    {
 			if (m_socket->error() == QAbstractSocket::NetworkError)

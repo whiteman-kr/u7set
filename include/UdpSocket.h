@@ -317,8 +317,10 @@ private slots:
 
 
 // -------------------------------------------------------------------
-// UDP sockets' thread
 //
+// UdpSocketThread class declaration
+//
+// -------------------------------------------------------------------
 
 class UdpSocketThread : public QObject
 {

@@ -69,7 +69,7 @@ SOURCES += main.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SocketIO.cpp \
     ConfigurationService.cpp \
-    ../lib/BaseService.cpp \
+	../lib/Service.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/JsonSerializable.cpp
@@ -83,7 +83,7 @@ HEADERS += \
     ../include/BuildInfo.h \
     ../include/SocketIO.h \
     ConfigurationService.h \
-    ../include/BaseService.h \
+	../include/Service.h \
     ../include/UdpSocket.h \
     ../include/CircularLogger.h \
     ../include/JsonSerializable.h

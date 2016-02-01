@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/BaseService.h"
+#include "../include/Service.h"
 #include "../include/DataSource.h"
 #include "../include/Signal.h"
 #include "../include/CfgServerLoader.h"
@@ -12,7 +12,7 @@ namespace Hardware {
 }
 
 
-class DataServiceMainFunctionWorker : public MainFunctionWorker
+class DataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
 
@@ -50,8 +50,11 @@ private:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
+	DataServiceWorker() : ServiceWorker(ServiceType::DataAcquisition) {}
 	virtual void initialize() override;
 	virtual void shutdown() override;
+
+	ServiceWorker* createInstance() override { return new DataServiceWorker; }
 
 signals:
 	void ackInformationRequest(UdpRequest request);
@@ -61,9 +64,11 @@ public slots:
 };
 
 
-class DataAquisitionService : public BaseService
+/*
+class DataAquisitionService : public Service
 {
 public:
 	DataAquisitionService(int argc, char ** argv);
 	~DataAquisitionService();
 };
+*/

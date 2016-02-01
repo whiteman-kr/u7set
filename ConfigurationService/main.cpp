@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-	ConfigurationService service(argc, argv);
+	ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", new ConfigurationServiceWorker());
 
-	return service.exec();
+	return serviceStarter.exec();
 }

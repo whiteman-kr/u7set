@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QHostAddress>
 #include "../include/UdpSocket.h"
+#include "../include/Service.h"
 
 
 
@@ -58,7 +59,7 @@ private:
 	QVector<HostInfo> m_hostsInfo;
 	bool m_freezeUpdate;
 
-	void setServiceState(quint32 ip, quint16 port, uint state);
+	void setServiceState(quint32 ip, quint16 port, ServiceState state);
 	QPair<int,int> getServiceState(quint32 ip, quint16 port);
 	void checkForDeletingSocket(UdpClientSocket* socket);
 };

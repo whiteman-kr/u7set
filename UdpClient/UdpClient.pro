@@ -53,7 +53,7 @@ SOURCES += \
         mainwindow.cpp \
         clientmain.cpp \
         ../lib/UdpSocket.cpp \
-    ../lib/BaseService.cpp \
+	../lib/Service.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
     ../lib/DataSource.cpp \
@@ -67,7 +67,7 @@ SOURCES += \
 HEADERS  += mainwindow.h \
         ../include/SocketIO.h \
         ../include/UdpSocket.h \
-    ../include/BaseService.h \
+	../include/Service.h \
     ../include/CircularLogger.h \
     ../include/DataSource.h \
 	FscDataSource.h \
