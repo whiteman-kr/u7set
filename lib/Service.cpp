@@ -407,8 +407,8 @@ void BaseServiceController::onMainFunctionStopped()
 // -------------------------------------------------------------------------------------
 
 Service::Service(ServiceWorker* serviceWorker):
-	m_serviceWorker(serviceWorker),
-	m_startTime(QDateTime::currentMSecsSinceEpoch())
+	m_startTime(QDateTime::currentMSecsSinceEpoch()),
+	m_serviceWorker(serviceWorker)
 {
 	if (m_serviceWorker == nullptr)
 	{

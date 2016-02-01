@@ -96,7 +96,7 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			{
 				str += QString(" v%1.%2.%3(0x%4)\n").arg(si.majorVersion).arg(si.minorVersion).arg(si.buildNo).arg(si.crc, 0, 16, QChar('0'));
 			}
-			if (si.serviceState != SS_MF_UNDEFINED && si.serviceState != SS_MF_UNAVAILABLE)
+			if (si.serviceState != ServiceState::Undefined && si.serviceState != ServiceState::Unavailable)
 			{
 				quint32 time = si.uptime;
 				int s = time % 60; time /= 60;
@@ -127,12 +127,14 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 		case Qt::BackgroundRole:
 			switch(si.serviceState)
 			{
-				case ServiceState::Work: return QBrush(QColor(0x7f,0xff,0x7f));
+				case ServiceState::Work:
+					return QBrush(QColor(0x7f,0xff,0x7f));
 				case ServiceState::Starts:
 				case ServiceState::Stops:
 				case ServiceState::Stopped:
 					return QBrush(QColor(0xff,0xff,0x7f));
-				case SS_MF_UNAVAILABLE: return QBrush(Qt::lightGray);
+				case ServiceState::Unavailable:
+					return QBrush(Qt::lightGray);
 				default: return QBrush(Qt::red);
 			}
 			break;
