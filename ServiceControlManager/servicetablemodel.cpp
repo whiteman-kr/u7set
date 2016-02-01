@@ -424,7 +424,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 			case ServiceType::DataAcquisition:
 				serviceData.statusWidget = new DataAquisitionServiceWidget(m_hostsInfo[index.row()].ip, index.column());
 				break;
-			case SERVICE_CONFIGURATION:
+			case ServiceType::Configuration:
 				serviceData.statusWidget = new ConfigurationServiceWidget(m_hostsInfo[index.row()].ip, index.column());
 				break;
 			default:
