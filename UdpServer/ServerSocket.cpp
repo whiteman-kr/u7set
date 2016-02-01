@@ -27,10 +27,10 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
 
     switch (request.ID())
     {
-    case RQID_GET_SERVICE_INFO:
+    case RQID_SERVICE_GET_INFO:
         {
-            QByteArray array;/* = QByteArray::fromRawData(newRequest.m_requestData + sizeof(REQUEST_HEADER), MAX_DATAGRAM_SIZE - sizeof(REQUEST_HEADER));*/
-            QBuffer buffer(&array);
+			QByteArray array;/* = QByteArray::fromRawData(newRequest.m_requestData + sizeof(REQUEST_HEADER), MAX_DATAGRAM_SIZE - sizeof(REQUEST_HEADER));*/
+		   /* QBuffer buffer(&array);
             buffer.open(QBuffer::WriteOnly);
             QDataStream out(&buffer);
             QDateTime currentTime = QDateTime::currentDateTime();
@@ -40,15 +40,15 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
             out << quint32(2);   // BuildNo
             out << quint32(0xffffffff);  // CRC
             out << quint32(runTime.secsTo(currentTime));
-            out << quint32(isRunning ? SS_MF_WORK : SS_MF_STOPPED);
-            out << quint32(isRunning ? lastStartTime.secsTo(currentTime) : 0);
+			out << quint32(isRunning ? "SS_MF_WORK" : SS_MF_STOPPED);
+			out << quint32(isRunning ? lastStartTime.secsTo(currentTime) : 0);*/
 
             newRequest.writeData(array.constData(), array.size());
 
             emit ackIsReady(newRequest);
             return;
         }
-    case RQID_SERVICE_MF_START:
+    case RQID_SERVICE_START:
         {
             if (isRunning)
             {
@@ -60,7 +60,7 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
             return;
         }
         break;
-    case RQID_SERVICE_MF_STOP:
+    case RQID_SERVICE_STOP:
         {
             if (!isRunning)
             {
@@ -71,7 +71,7 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
             return;
         }
         break;
-    case RQID_SERVICE_MF_RESTART:
+    case RQID_SERVICE_RESTART:
         {
             if (!isRunning)
             {

@@ -1,4 +1,4 @@
-#include "../include/BaseService.h"
+#include "../include/Service.h"
 
 
 #if defined(Q_OS_WIN) && defined(_MSC_VER)
@@ -13,9 +13,17 @@
 #endif
 
 
+class BaseServiceWorker : public ServiceWorker
+{
+public:
+	BaseServiceWorker() : ServiceWorker(ServiceType::Base) {}
+	ServiceWorker* createInstance() override { return new BaseServiceWorker(); }
+};
+
+
 int main(int argc, char *argv[])
 {
-	BaseService service(argc, argv, "RPCT Base Service", SERVICE_BASE, new MainFunctionWorker());
+	ServiceStarter serviceStarter(argc, argv, "RPCT Base Service", new BaseServiceWorker());
 
-    return service.exec();
+	return serviceStarter.exec();
 }

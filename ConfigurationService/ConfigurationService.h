@@ -1,21 +1,34 @@
 #pragma once
 
-#include "../include/BaseService.h"
+#include "../include/Service.h"
 #include "../include/CfgServerLoader.h"
 
 
-class ConfigurationServiceMainFunctionWorker : public MainFunctionWorker
+class ConfigurationServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
 
 private:
+	UdpSocketThread* m_infoSocketThread = nullptr;
+
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
+	void startCfgServerThread();
+	void stopCfgServerThread();
+
+	void startUdpThreads();
+	void stopUdpThreads();
+
+	void onGetInfo(UdpRequest& request);
 	void onGetSettings(UdpRequest& request);
+	void onSetSettings(UdpRequest& request);
 
 public:
+	ConfigurationServiceWorker() : ServiceWorker(ServiceType::Configuration) {}
 	virtual void initialize() override;
 	virtual void shutdown() override;
+
+	ServiceWorker* createInstance() override { return new ConfigurationServiceWorker; }
 
 signals:
 	void ackInformationRequest(UdpRequest request);
@@ -24,10 +37,3 @@ public slots:
 	void onInformationRequest(UdpRequest request);
 };
 
-
-class ConfigurationService : public BaseService
-{
-public:
-	ConfigurationService(int argc, char ** argv);
-	~ConfigurationService();
-};

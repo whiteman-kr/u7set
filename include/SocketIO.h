@@ -12,30 +12,11 @@
 const int MAX_DATAGRAM_SIZE = 4096;
 
 
-const quint32   SERVICE_BASE = 0,
-				SERVICE_CONFIGURATION = 1,
-				SERVICE_DATA_ACQUISITION = 2,
-				SERVICE_TUNING = 3,
-				SERVICE_ARCHIVING = 4;
-
-
-const char* const serviceTypeStr[] =
-{
-	"Base Service",
-	"Configuration Service",
-	"Data Acquisition Service",
-	"Tuning Service",
-	"Data Archiving Service"
-};
-
-
-const quint32	SERVICE_TYPE_COUNT = sizeof(serviceTypeStr) / sizeof(const char*);
-
-
 const quint16   PORT_BASE_SERVICE = 13300,
 
 				PORT_CONFIGURATION_SERVICE = 13310,
-				PORT_CONFIGURATION_SERVICE_REQUEST = 13311,
+				PORT_CONFIGURATION_SERVICE_INFO = 13311,
+				PORT_CONFIGURATION_SERVICE_REQUEST = 13321,
 
 				PORT_DATA_AQUISITION_SERVICE = 13320,
 				PORT_DATA_AQUISITION_SERVICE_INFO = 13321,
@@ -58,11 +39,14 @@ const quint16	PORT_DATA_AQUISITION = 13400;
 
 // All services request IDs
 //
-const quint32   RQID_GET_SERVICE_INFO = 1000,
+const quint32   RQID_SERVICE_GET_INFO = 1000,
 
-                RQID_SERVICE_MF_START = 1100,
-                RQID_SERVICE_MF_STOP = 1101,
-                RQID_SERVICE_MF_RESTART = 1102,
+				RQID_SERVICE_START = 1100,
+				RQID_SERVICE_STOP = 1101,
+				RQID_SERVICE_RESTART = 1102,
+
+				RQID_SERVICE_GET_SETTINGS = 1103,
+				RQID_SERVICE_SET_SETTINGS = 1104,
 
                 RQID_SEND_FILE_START = 1200,
 				RQID_SEND_FILE_NEXT = 1201;
@@ -77,17 +61,11 @@ const quint32	RQID_GET_DATA_SOURCES_IDS = 1250,
 
 // ConfigurationService specific request IDs
 //
-const quint32	RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1300,
-				RQID_SET_CONFIGURATION_SERVICE_SETTINGS = 1301,
-				RQID_SET_CONFIGURATION_SERVICE_INFO = 1302;
+const quint32	RQID_GET_CONFIGURATION_SERVICE_INFO = 1300,
+				RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1301,
+				RQID_SET_CONFIGURATION_SERVICE_SETTINGS = 1302;
 
 
-// States of service's Main Function
-//
-const quint32   SS_MF_STOPPED = 0,
-                SS_MF_STARTS = 1,
-                SS_MF_WORK = 2,
-                SS_MF_STOPS = 3;
 
 
 // Request error codes
@@ -99,22 +77,6 @@ const quint32	RQERROR_OK = 0,
 				RQERROR_TIMEOUT = 4;					// request ack timeout
 
 
-struct ServiceTypeInfo
-{
-    quint32 serviceType;
-    quint16 port;
-	const char* name;
-};
-
-
-const ServiceTypeInfo serviceTypesInfo[] =
-{
-	{ SERVICE_BASE, PORT_BASE_SERVICE, serviceTypeStr[SERVICE_BASE] },
-	{ SERVICE_CONFIGURATION, PORT_CONFIGURATION_SERVICE, serviceTypeStr[SERVICE_CONFIGURATION]},
-	{ SERVICE_DATA_ACQUISITION, PORT_DATA_AQUISITION_SERVICE, serviceTypeStr[SERVICE_DATA_ACQUISITION]},
-	{ SERVICE_TUNING, PORT_TUNING_SERVICE, serviceTypeStr[SERVICE_TUNING]},
-	{ SERVICE_ARCHIVING, PORT_ARCHIVING_SERVICE, serviceTypeStr[SERVICE_ARCHIVING]},
-};
 
 
 class HostAddressPort
@@ -223,16 +185,28 @@ struct RequestHeader
 };
 
 
+
+struct ServiceSettings
+{
+	quint32 cfgServiceIPAddress;
+	quint32 cfgServicePort;
+	char serviceStrID[256];
+};
+
+
+enum ServiceType;
+enum ServiceState;
+
 struct ServiceInformation
 {
-	quint32 type;						// RQSTP_* constants
+	ServiceType type;
 	quint32 majorVersion;
 	quint32 minorVersion;
 	quint32 buildNo;
 	quint32 crc;
-	quint32 uptime;
-	quint32 mainFunctionState;           // SS_MF_* constants
-	quint32 mainFunctionUptime;
+	quint64 uptime;
+	ServiceState serviceState;
+	quint32 serviceUptime;
 };
 
 
@@ -272,6 +246,20 @@ struct SendFileNext
 };
 
 
+// RQID_GET_CONFIGURATION_SERVICE_INFO reply format
+//
+class ConfigurationServiceInfo : public JsonSerializable
+{
+private:
+	Builder::BuildInfo m_buildInfo;
+
+	virtual void toJson(QJsonObject& jsonObject) final;
+	virtual bool fromJson(const QJsonObject& jsonObject, int version) final;
+
+public:
+	Builder::BuildInfo buildInfo() { return m_buildInfo; }
+};
+
 
 // RQID_SET_CONFIGURATION_SERVICE_SETTINGS request format &
 // RQID_GET_CONFIGURATION_SERVICE_SETTINGS reply format
@@ -300,19 +288,6 @@ public:
 };
 
 
-// RQID_GET_CONFIGURATION_SERVICE_INFO reply format
-//
-class ConfigurationServiceInfo : public JsonSerializable
-{
-private:
-	Builder::BuildInfo m_buildInfo;
-
-	virtual void toJson(QJsonObject& jsonObject) final;
-	virtual bool fromJson(const QJsonObject& jsonObject, int version) final;
-
-public:
-	Builder::BuildInfo buildInfo() { return m_buildInfo; }
-};
 
 
 

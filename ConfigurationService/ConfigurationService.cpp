@@ -4,51 +4,107 @@
 #include "ConfigurationService.h"
 
 
+// ------------------------------------------------------------------------------------
+//
 // ConfigurationService class implementation
 //
+// ------------------------------------------------------------------------------------
 
+/*
 ConfigurationService::ConfigurationService(int argc, char ** argv) :
-	BaseService(argc, argv, "Configuration Service", SERVICE_CONFIGURATION, new ConfigurationServiceMainFunctionWorker())
+	Service(argc, argv, "Configuration Service", SERVICE_CONFIGURATION, new ConfigurationServiceWorker())
 {
 }
 
 
 ConfigurationService::~ConfigurationService()
 {
-}
+}*/
 
 
-// ConfigurationServiceMainFunctionWorker class implementation
+// ------------------------------------------------------------------------------------
 //
-void ConfigurationServiceMainFunctionWorker::initialize()
+// ConfigurationServiceWorker class implementation
+//
+// ------------------------------------------------------------------------------------
+
+
+void ConfigurationServiceWorker::startCfgServerThread()
 {
-	// Service Main Function initialization
-	//
 	m_cfgServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST),
 											  new CfgServer(""));
 
 	m_cfgServerThread->start();
-
-	qDebug() << "ConfigurationServiceMainFunctionWorker initialized";
 }
 
 
-void ConfigurationServiceMainFunctionWorker::shutdown()
+void ConfigurationServiceWorker::stopCfgServerThread()
 {
-	// Service Main Function deinitialization
-	//
 	m_cfgServerThread->quit();
 
 	delete m_cfgServerThread;
+}
+
+
+void ConfigurationServiceWorker::startUdpThreads()
+{
+	// Information Socket Thread running
+	//
+	m_infoSocketThread = new UdpSocketThread();
+
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_CONFIGURATION_SERVICE_INFO);
+
+	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &ConfigurationServiceWorker::onInformationRequest);
+	connect(this, &ConfigurationServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
+
+	m_infoSocketThread->run(serverSocket);
+}
+
+
+void ConfigurationServiceWorker::stopUdpThreads()
+{
+	m_infoSocketThread->quit();
+
+	delete m_infoSocketThread;
+}
+
+
+void ConfigurationServiceWorker::initialize()
+{
+	// Service Main Function initialization
+	//
+
+	startCfgServerThread();
+	startUdpThreads();
+
+	qDebug() << "ConfigurationServiceWorker initialized";
+}
+
+
+void ConfigurationServiceWorker::shutdown()
+{
+	// Service Main Function deinitialization
+	//
+
+	stopUdpThreads();
+	stopCfgServerThread();
 
 	qDebug() << "ConfigurationServiceMainFunctionWorker stoped";
 }
 
 
-void ConfigurationServiceMainFunctionWorker::onInformationRequest(UdpRequest request)
+void ConfigurationServiceWorker::onInformationRequest(UdpRequest request)
 {
 	switch(request.ID())
 	{
+	case RQID_GET_CONFIGURATION_SERVICE_INFO:
+		onGetInfo(request);
+		break;
+
+	case RQID_SET_CONFIGURATION_SERVICE_SETTINGS:
+		onSetSettings(request);
+		break;
+
 	case RQID_GET_CONFIGURATION_SERVICE_SETTINGS:
 		onGetSettings(request);
 		break;
@@ -59,42 +115,36 @@ void ConfigurationServiceMainFunctionWorker::onInformationRequest(UdpRequest req
 }
 
 
-void ConfigurationServiceMainFunctionWorker::onGetSettings(UdpRequest& /*request*/)
+void ConfigurationServiceWorker::onGetInfo(UdpRequest& request)
 {
-	/*quint32 count = request.readDword();
-
-	QVector<DataSourceInfo> dsInfo;
-
-	for(quint32 i = 0; i < count; i++)
-	{
-		quint32 sourceID = request.readDword();
-
-		if (m_dataSources.contains(sourceID))
-		{
-			DataSourceInfo dsi;
-
-			DataSource ds = m_dataSources.value(sourceID);
-
-			ds.getInfo(dsi);
-
-			dsInfo.append(dsi);
-		}
-	}
-
 	UdpRequest ack;
 
 	ack.initAck(request);
 
-	count = static_cast<quint32>(dsInfo.count());
-
-	ack.writeDword(count);
-
-	for(quint32 i = 0; i < count; i++)
-	{
-		ack.writeStruct(&dsInfo[i]);
-	}
-
-	ackInformationRequest(ack);*/
+	ackInformationRequest(ack);
 }
+
+
+void ConfigurationServiceWorker::onSetSettings(UdpRequest& request)
+{
+	UdpRequest ack;
+
+	ack.initAck(request);
+
+	ackInformationRequest(ack);
+}
+
+
+void ConfigurationServiceWorker::onGetSettings(UdpRequest& request)
+{
+	UdpRequest ack;
+
+	ack.initAck(request);
+
+	ackInformationRequest(ack);
+}
+
+
+
 
 

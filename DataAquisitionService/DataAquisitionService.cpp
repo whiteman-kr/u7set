@@ -5,9 +5,9 @@
 
 // DataAquisitionService class implementation
 //
-
+/*
 DataAquisitionService::DataAquisitionService(int argc, char ** argv) :
-	BaseService(argc, argv, "FSC Data Aquisition Service", SERVICE_DATA_ACQUISITION, new DataServiceMainFunctionWorker())
+	Service(argc, argv, "FSC Data Aquisition Service", SERVICE_DATA_ACQUISITION, new DataServiceWorker())
 {
 	Hardware::Init();
 }
@@ -16,31 +16,31 @@ DataAquisitionService::DataAquisitionService(int argc, char ** argv) :
 DataAquisitionService::~DataAquisitionService()
 {
 }
-
+*/
 
 
 // DataServiceMainFunctionWorker class implementation
 //
 
-void DataServiceMainFunctionWorker::initDataSources()
+void DataServiceWorker::initDataSources()
 {
 	InitDataSources(m_dataSources, m_deviceRoot.get(), m_signalSet);
 }
 
 
-void DataServiceMainFunctionWorker::initListeningPorts()
+void DataServiceWorker::initListeningPorts()
 {
 	m_fscDataAcquisitionAddressPorts.append(HostAddressPort("192.168.11.254", 2000));
 	m_fscDataAcquisitionAddressPorts.append(HostAddressPort("192.168.12.254", 2000));
 }
 
-void DataServiceMainFunctionWorker::readConfigurationFiles()
+void DataServiceWorker::readConfigurationFiles()
 {
 	SerializeEquipmentFromXml("equipment.xml", m_deviceRoot);
 	SerializeSignalsFromXml("appSignals.xml", m_unitInfo, m_signalSet);
 }
 
-void DataServiceMainFunctionWorker::runUdpThreads()
+void DataServiceWorker::runUdpThreads()
 {
 	// Information Socket Thread running
 	//
@@ -48,20 +48,20 @@ void DataServiceMainFunctionWorker::runUdpThreads()
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_DATA_AQUISITION_SERVICE_INFO);
 
-	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &DataServiceMainFunctionWorker::onInformationRequest);
-	connect(this, &DataServiceMainFunctionWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
+	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &DataServiceWorker::onInformationRequest);
+	connect(this, &DataServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
 
 	m_infoSocketThread->run(serverSocket);
 }
 
 
-void DataServiceMainFunctionWorker::stopUdpThreads()
+void DataServiceWorker::stopUdpThreads()
 {
 	delete m_infoSocketThread;
 }
 
 
-void DataServiceMainFunctionWorker::runFscDataReceivingThreads()
+void DataServiceWorker::runFscDataReceivingThreads()
 {
 	for(int i = 0; i < m_fscDataAcquisitionAddressPorts.count(); i++)
 	{
@@ -72,19 +72,19 @@ void DataServiceMainFunctionWorker::runFscDataReceivingThreads()
 }
 
 
-void DataServiceMainFunctionWorker::runCfgLoaderThread()
+void DataServiceWorker::runCfgLoaderThread()
 {
 	CfgLoader* cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST));
 
 	m_cfgLoaderThread = new Tcp::Thread(cfgLoader);
 
-	connect(cfgLoader, &CfgLoader::signal_configurationReady, this, &DataServiceMainFunctionWorker::onConfigurationReady);
+	connect(cfgLoader, &CfgLoader::signal_configurationReady, this, &DataServiceWorker::onConfigurationReady);
 
 	m_cfgLoaderThread->start();
 }
 
 
-void DataServiceMainFunctionWorker::stopCfgLoaderThread()
+void DataServiceWorker::stopCfgLoaderThread()
 {
 	if (m_cfgLoaderThread == nullptr)
 	{
@@ -98,7 +98,7 @@ void DataServiceMainFunctionWorker::stopCfgLoaderThread()
 }
 
 
-void DataServiceMainFunctionWorker::stopFscDataReceivingThreads()
+void DataServiceWorker::stopFscDataReceivingThreads()
 {
 	for(int i = 0; i < m_fscDataAcquisitionThreads.count(); i++)
 	{
@@ -109,7 +109,7 @@ void DataServiceMainFunctionWorker::stopFscDataReceivingThreads()
 }
 
 
-void DataServiceMainFunctionWorker::initialize()
+void DataServiceWorker::initialize()
 {
 	// Service Main Function initialization
 	//
@@ -126,7 +126,7 @@ void DataServiceMainFunctionWorker::initialize()
 }
 
 
-void DataServiceMainFunctionWorker::shutdown()
+void DataServiceWorker::shutdown()
 {
 	// Service Main Function deinitialization
 	//
@@ -140,7 +140,7 @@ void DataServiceMainFunctionWorker::shutdown()
 }
 
 
-void DataServiceMainFunctionWorker::onInformationRequest(UdpRequest request)
+void DataServiceWorker::onInformationRequest(UdpRequest request)
 {
 	switch(request.ID())
 	{
@@ -162,7 +162,7 @@ void DataServiceMainFunctionWorker::onInformationRequest(UdpRequest request)
 }
 
 
-void DataServiceMainFunctionWorker::onGetDataSourcesIDs(UdpRequest& request)
+void DataServiceWorker::onGetDataSourcesIDs(UdpRequest& request)
 {
 	int dataSourcesCount = m_dataSources.count();
 
@@ -213,7 +213,7 @@ void DataServiceMainFunctionWorker::onGetDataSourcesIDs(UdpRequest& request)
 }
 
 
-void DataServiceMainFunctionWorker::onGetDataSourcesInfo(UdpRequest& request)
+void DataServiceWorker::onGetDataSourcesInfo(UdpRequest& request)
 {
 	quint32 count = request.readDword();
 
@@ -252,7 +252,7 @@ void DataServiceMainFunctionWorker::onGetDataSourcesInfo(UdpRequest& request)
 }
 
 
-void DataServiceMainFunctionWorker::onGetDataSourcesState(UdpRequest& request)
+void DataServiceWorker::onGetDataSourcesState(UdpRequest& request)
 {
 	quint32 count = request.readDword();
 
@@ -291,7 +291,7 @@ void DataServiceMainFunctionWorker::onGetDataSourcesState(UdpRequest& request)
 }
 
 
-void DataServiceMainFunctionWorker::onConfigurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
+void DataServiceWorker::onConfigurationReady(const QByteArray /*configurationXmlData*/, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
 	qDebug() << "Configuration Ready!";
 }

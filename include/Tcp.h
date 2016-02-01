@@ -369,10 +369,9 @@ namespace Tcp
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::ClientThread class declaration
+	// Tcp::Thread class declaration
 	//
 	// -------------------------------------------------------------------------------------
 
 	typedef SimpleThread Thread;
-
 }

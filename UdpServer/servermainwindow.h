@@ -2,7 +2,7 @@
 #define SERVERMAINWINDOW_H
 
 #include <QMainWindow>
-#include "../include/BaseService.h"
+#include "../include/Service.h"
 #include "../include/ProtoUdp.h"
 #include "../include/Tcp.h"
 #include "../include/TcpFileTransfer.h"
@@ -41,7 +41,7 @@ public:
 private:
 	Ui::ServerMainWindow *ui;
 
-	BaseServiceController* m_ServiceController = nullptr;
+	//BaseServiceController* m_ServiceController = nullptr;
 
 	ProtoUdp::ServerThread* m_protoUdpServerThread = nullptr;
 

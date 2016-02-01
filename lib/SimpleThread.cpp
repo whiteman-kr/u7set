@@ -95,6 +95,12 @@ void SimpleThread::quit()
 }
 
 
+void SimpleThread::wait(unsigned long time)
+{
+	m_thread.wait(time);
+}
+
+
 void SimpleThread::beforeStart()
 {
 }

@@ -70,7 +70,7 @@ unix {
 
 SOURCES += main.cpp \
 	../lib/UdpSocket.cpp \
-	../lib/BaseService.cpp \
+	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
 	../lib/CircularLogger.cpp \
     DataAquisitionService.cpp \
@@ -93,7 +93,7 @@ HEADERS += \
         Stable.h \
 	../include/SocketIO.h \
 	../include/UdpSocket.h \
-	../include/BaseService.h \
+	../include/Service.h \
 	../include/CircularLogger.h \
     DataAquisitionService.h \
     ../include/DataSource.h \

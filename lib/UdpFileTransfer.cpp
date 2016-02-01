@@ -1,5 +1,6 @@
-#include "../include/BaseService.h"
+#include "../include/UdpFileTransfer.h"
 
+/*
 
 quint32 ReceivedFile::m_serialID = 0;
 
@@ -67,20 +68,9 @@ quint32 ReceivedFile::CRC32()
 }
 
 
-// BaseServiceWorker class implementation
-//
+*/
 
-BaseServiceWorker::BaseServiceWorker(BaseServiceController *baseServiceController, int serviceType) :
-	m_serviceType(serviceType),
-    m_baseServiceController(baseServiceController),
-	m_log(m_baseServiceController->log)
-{
-    assert(m_baseServiceController != nullptr);
-
-
-}
-
-
+/*
 BaseServiceWorker::~BaseServiceWorker()
 {
 	delete m_sendFileClientSocketThread;
@@ -97,7 +87,11 @@ BaseServiceWorker::~BaseServiceWorker()
 	m_receivedFile.clear();
 }
 
+*/
 
+
+
+/*
 void BaseServiceWorker::onThreadStarted()
 {
 	m_serverSocketThread = new UdpSocketThread;
@@ -105,7 +99,7 @@ void BaseServiceWorker::onThreadStarted()
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, serviceTypesInfo[m_serviceType].port);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &BaseServiceWorker::onBaseRequest);
-    connect(this, &BaseServiceWorker::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
+	connect(this, &BaseServiceWorker::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
 
 	connect(this, &BaseServiceWorker::startMainFunction, m_baseServiceController, &BaseServiceController::startMainFunction);
 	connect(this, &BaseServiceWorker::stopMainFunction, m_baseServiceController, &BaseServiceController::stopMainFunction);
@@ -121,46 +115,20 @@ void BaseServiceWorker::onThreadStarted()
 
 	threadStarted();
 }
+*/
 
 
-void BaseServiceWorker::onThreadFinished()
-{
-	threadFinished();
-
-	delete m_serverSocketThread;
-
-    deleteLater();
-}
-
-
+/*
 void BaseServiceWorker::onBaseRequest(UdpRequest request)
 {
-    UdpRequest ack;
+	UdpRequest ack;
 
-    ack.initAck(request);
+	ack.initAck(request);
 
 	switch(request.ID())
-    {
-		case RQID_GET_SERVICE_INFO:
-			ServiceInformation si;
-			m_baseServiceController->getServiceInfo(si);
-			ack.writeData(reinterpret_cast<const char*>(&si), sizeof(si));
-			break;
+	{
 
-		case RQID_SERVICE_MF_START:
-			APP_MSG(m_log, QString("Main function START request from %1.").arg(request.address().toString()));
-			emit startMainFunction();
-			break;
-
-		case RQID_SERVICE_MF_STOP:
-			APP_MSG(m_log, QString("Main function STOP request from %1.").arg(request.address().toString()));
-			emit stopMainFunction();
-			break;
-
-		case RQID_SERVICE_MF_RESTART:
-			APP_MSG(m_log, QString("Main function RESTART request from %1.").arg(request.address().toString()));
-			emit restartMainFunction();
-			break;
+............
 
 		case RQID_SEND_FILE_START:
 			onSendFileStartRequest(request, ack);
@@ -170,6 +138,8 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 			onSendFileNextRequest(request, ack);
 			break;
 
+............
+
 		default:
 			assert(false);
 			ack.setErrorCode(RQERROR_UNKNOWN_REQUEST);
@@ -178,8 +148,9 @@ void BaseServiceWorker::onBaseRequest(UdpRequest request)
 
 	emit ackBaseRequest(ack);
 }
+*/
 
-
+/*
 void BaseServiceWorker::onSendFile(QHostAddress address, quint16 port, QString fileName)
 {
 	if (m_sendFileClientSocketThread != nullptr)
@@ -523,270 +494,10 @@ void BaseServiceWorker::onFreeReceivedFile(quint32 fileID)
 
 		m_receivedFile.remove(fileID);
 	}
-}
+}*/
 
 
-// MainFunctionWorker class implementation
-//
-
-MainFunctionWorker::MainFunctionWorker()
-{
-}
-
-
-MainFunctionWorker::~MainFunctionWorker()
-{
-}
-
-
-void MainFunctionWorker::onThreadStartedSlot()
-{
-	initialize();
-
-	emit mainFunctionWork();
-}
-
-
-void MainFunctionWorker::onThreadFinishedSlot()
-{
-	shutdown();
-
-	emit mainFunctionStopped();
-
-	moveToThread(m_baseServiceController->thread());
-}
-
-
-// BaseServiceController class implementation
-//
-
-
-BaseServiceController::BaseServiceController(unsigned int serviceType, MainFunctionWorker* mainFunctionWorker) :
-	m_mainFunctionWorker(mainFunctionWorker),
-	m_mainFunctionNeedRestart(false),
-	m_mainFunctionStopped(false),
-	m_serviceType(serviceType),
-    m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
-    m_mainFunctionStartTime(0),
-	m_mainFunctionState(MainFunctionState::stopped),
-    m_majorVersion(1),
-    m_minorVersion(0),
-    m_buildNo(123),
-	m_crc(0xF0F1F2F3)
-{
-	assert(m_serviceType < SERVICE_TYPE_COUNT);
-
-	qRegisterMetaType<QHostAddress>("QHostAddress");
-	qRegisterMetaType<UdpRequest>("UdpRequest");
-
-	initLog();
-
-	APP_MSG(log, QString(serviceTypeStr[m_serviceType]) + " was started");
-
-	// start timer
-	//
-	connect(&m_timer500ms, &QTimer::timeout, this, &BaseServiceController::onTimer500ms);
-
-	m_timer500ms.start(500);
-
-	// start BaseWorker
-	//
-    BaseServiceWorker *worker = new BaseServiceWorker(this, m_serviceType);
-
-    worker->moveToThread(&m_baseWorkerThread);
-
-	connect(&m_baseWorkerThread, &QThread::started, worker, &BaseServiceWorker::onThreadStarted);
-	connect(&m_baseWorkerThread, &QThread::finished, worker, &BaseServiceWorker::onThreadFinished);
-
-    m_baseWorkerThread.start();
-
-	// start MainFunctionWorker
-	//
-	m_mainFunctionWorker->setController(this);
-
-	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionWork, this, &BaseServiceController::onMainFunctionWork);
-	connect(m_mainFunctionWorker, &MainFunctionWorker::mainFunctionStopped, this, &BaseServiceController::onMainFunctionStopped);
-
-	startMainFunction();
-}
-
-
-BaseServiceController::~BaseServiceController()
-{
-	stopMainFunction();
-
-	m_baseWorkerThread.quit();
-    m_baseWorkerThread.wait();
-
-	delete m_mainFunctionWorker;
-
-	APP_MSG(log, QString(serviceTypeStr[m_serviceType]) + " was finished");
-}
-
-
-void BaseServiceController::getServiceInfo(ServiceInformation &serviceInfo)
-{
-    m_mutex.lock();
-
-	serviceInfo.type = m_serviceType;
-	serviceInfo.majorVersion = m_majorVersion;
-	serviceInfo.minorVersion = m_minorVersion;
-	serviceInfo.buildNo = m_buildNo;
-	serviceInfo.crc = m_crc;
-	serviceInfo.uptime = (QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000;
-
-	serviceInfo.mainFunctionState = m_mainFunctionState;
-
-	if (m_mainFunctionState != MainFunctionState::stopped)
-	{
-		serviceInfo.mainFunctionUptime = (QDateTime::currentMSecsSinceEpoch() - m_mainFunctionStartTime) / 1000;
-	}
-	else
-	{
-		serviceInfo.mainFunctionUptime = 0;
-	}
-
-	m_mutex.unlock();
-}
-
-
-void BaseServiceController::initLog()
-{
-	QFileInfo fi(qApp->applicationFilePath());
-
-	log.initLog(fi.baseName(), 5, 10);
-}
-
-
-void BaseServiceController::stopMainFunction()
-{
-	qDebug() << "Called BaseServiceController::stopMainFunction";
-
-	if (m_mainFunctionState != MainFunctionState::work)
-	{
-		return;
-	}
-
-	m_mainFunctionState = MainFunctionState::stops;
-
-	m_mainFunctionThread->quit();
-	m_mainFunctionThread->wait();
-
-	delete m_mainFunctionThread;
-
-	m_mainFunctionThread = nullptr;
-
-	//m_mainFunctionWorker->moveToThread(thread());
-
-	// m_mainFunctionState = MainFunctionState::Stopped setted in testMainFunctionState
-	//
-
-	APP_MSG(log, QString("Main function was stopped."));
-}
-
-
-void BaseServiceController::startMainFunction()
-{
-	qDebug() << "Called BaseServiceController::startMainFunction";
-
-	if (m_mainFunctionState != MainFunctionState::stopped)
-	{
-		return;
-	}
-
-	m_mainFunctionStopped = false;
-	m_mainFunctionNeedRestart = false;
-
-	m_mainFunctionState = MainFunctionState::starts;
-
-	//MainFunctionWorker* mainFunctionWorker = new MainFunctionWorker(this);
-
-	assert(m_mainFunctionThread == nullptr);
-
-	m_mainFunctionThread = new QThread();
-
-	connect(m_mainFunctionThread, &QThread::started, m_mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
-	connect(m_mainFunctionThread, &QThread::finished, m_mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
-
-	m_mainFunctionWorker->moveToThread(m_mainFunctionThread);
-
-	m_mainFunctionStartTime = QDateTime::currentMSecsSinceEpoch();
-
-	m_mainFunctionThread->start();
-
-	APP_MSG(log, QString("Main function was started."));
-
-	// m_mainFunctionState = MainFunctionState::Work setted in slot onMainFunctionWork
-	//
-}
-
-
-void BaseServiceController::restartMainFunction()
-{
-	qDebug() << "Called BaseServiceController::restartMainFunction";
-
-	switch(m_mainFunctionState)
-	{
-	case MainFunctionState::work:
-		stopMainFunction();
-		m_mainFunctionNeedRestart = true;
-		break;
-
-	case MainFunctionState::stopped:
-		startMainFunction();
-		break;
-
-	case MainFunctionState::starts:
-	case MainFunctionState::stops:
-		break;
-	}
-}
-
-
-void BaseServiceController::onTimer500ms()
-{
-	checkMainFunctionState();
-}
-
-
-void BaseServiceController::checkMainFunctionState()
-{
-	if (m_mainFunctionState == MainFunctionState::stops)
-	{
-		if (m_mainFunctionStopped && m_mainFunctionThread == nullptr)
-		{
-			m_mainFunctionStopped = false;
-
-			m_mainFunctionState = MainFunctionState::stopped;
-
-			m_mainFunctionStartTime = 0;
-
-			if (m_mainFunctionNeedRestart)
-			{
-				m_mainFunctionNeedRestart = false;
-				startMainFunction();
-			}
-		}
-	}
-}
-
-
-void BaseServiceController::onMainFunctionWork()
-{
-	qDebug() << "Called BaseServiceController::onMainFunctionWork";
-
-	m_mainFunctionState = MainFunctionState::work;
-}
-
-
-void BaseServiceController::onMainFunctionStopped()
-{
-	qDebug() << "Called BaseServiceController::onMainFunctionStopped";
-
-	m_mainFunctionStopped = true;
-}
-
-
+/*
 void BaseServiceController::onEndSendFile(bool result, QString fileName)
 {
 	if (result == false)
@@ -811,52 +522,5 @@ void BaseServiceController::onFileReceived(ReceivedFile* receivedFile)
 	qDebug() << "File " << receivedFile->fileName() << " received OK";
 
 	emit freeReceivedFile(receivedFile->ID());
-}
+}*/
 
-
-// BaseService class implementation
-//
-
-BaseService::BaseService(int argc, char ** argv, const QString & name, unsigned int serviceType, MainFunctionWorker* mainFunctionWorker):
-	QtService(argc, argv, name),
-	m_mainFunctionWorker(mainFunctionWorker),
-	m_serviceType(serviceType)
-{
-	if (m_serviceType >= SERVICE_TYPE_COUNT)
-	{
-		assert(m_serviceType >= SERVICE_TYPE_COUNT);
-
-		m_serviceType = SERVICE_BASE;
-	}
-}
-
-
-BaseService::~BaseService()
-{
-	if (m_mainFunctionWorker != nullptr)
-	{
-		delete m_mainFunctionWorker;
-	}
-}
-
-
-void BaseService::start()
-{
-	m_baseServiceController = new BaseServiceController(m_serviceType, m_mainFunctionWorker);
-}
-
-
-void BaseService::stop()
-{
-	delete m_baseServiceController;
-
-	m_mainFunctionWorker = nullptr;			// m_mainFunctionWorker already deleted in m_baseServiceController destructor
-}
-
-
-void BaseService::sendFile(QHostAddress address, quint16 port, QString fileName)
-{
-	assert(m_baseServiceController != nullptr);
-
-	emit m_baseServiceController->sendFile(address, port, fileName);
-}

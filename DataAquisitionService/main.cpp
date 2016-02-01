@@ -15,7 +15,7 @@
 
 int main(int argc, char *argv[])
 {
-	DataAquisitionService service(argc, argv);
+	ServiceStarter service(argc, argv, "RPCT DataAcquisition Service", new DataServiceWorker);
 
 	return service.exec();
 }
