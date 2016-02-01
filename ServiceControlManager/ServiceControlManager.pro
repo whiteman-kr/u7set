@@ -66,7 +66,8 @@ SOURCES += mainwindow.cpp \
     main.cpp \
     ../lib/JsonSerializable.cpp \
     BaseServiceStateWidget.cpp \
-    DataAquisitionServiceWidget.cpp
+    DataAquisitionServiceWidget.cpp \
+    ConfigurationServiceWidget.cpp
 
 HEADERS  += mainwindow.h \
     scanoptionswidget.h \
@@ -77,7 +78,8 @@ HEADERS  += mainwindow.h \
     version.h \
     ../include/JsonSerializable.h \
     BaseServiceStateWidget.h \
-    DataAquisitionServiceWidget.h
+    DataAquisitionServiceWidget.h \
+    ConfigurationServiceWidget.h
 
 FORMS    +=
 

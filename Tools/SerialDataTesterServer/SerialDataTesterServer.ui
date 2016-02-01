@@ -86,34 +86,6 @@
        </item>
       </layout>
      </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_12">
-       <item>
-        <widget class="QLabel" name="dataBitsLabel">
-         <property name="text">
-          <string>Data bits</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="dataBits"/>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_13">
-       <item>
-        <widget class="QLabel" name="stopBitsLabel">
-         <property name="text">
-          <string>Stop bits</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="stopBits"/>
-       </item>
-      </layout>
-     </item>
     </layout>
    </item>
    <item>

@@ -381,7 +381,7 @@ void SerialDataTester::parseFile()
 						}
 					}
 
-					m_dataSize = attributes.value("DataSize").toInt();
+					m_dataSize = attributes.value("DataSize").toInt()/8;
 
 					if (!portExists)
 					{
@@ -420,6 +420,23 @@ void SerialDataTester::parseFile()
 					currentSignal.byteOrder = attributes.value("ByteOrder").toString();
 					currentSignal.offset = attributes.value("Offset").toInt();
 					currentSignal.bit = attributes.value("BitNo").toInt();
+
+					if (currentSignal.dataSize != 1 && currentSignal.dataSize != 16 && currentSignal.dataSize != 32)
+					{
+						QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Error reading size attribute on " + currentSignal.strId + ": wrong size")));
+						errorLoadingXml = true;
+					}
+
+					if (currentSignal.dataFormat == "Float" && currentSignal.dataSize != 32)
+					{
+						QMessageBox::critical(this, tr("Serial Data Tester"), tr(qPrintable("Error reading size attribute on " + currentSignal.strId + ": only 32 bits need to work with float value")));
+						errorLoadingXml = true;
+					}
+
+					if (currentSignal.type == "analog")
+					{
+						currentSignal.dataSize/=8;
+					}
 
 					calculatedDataSize += currentSignal.dataSize;
 
@@ -475,7 +492,7 @@ void SerialDataTester::parseFile()
 
 	if (m_dataSize != calculatedDataSize)
 	{
-		QMessageBox::warning(this, tr("Warning"), tr("Packet size is not equal to summ of signals size: possible loss of data. Please, check the packet data amount, and sizes of each signal data."));
+		QMessageBox::warning(this, tr("Warning"), tr(qPrintable("Packet size is not equal to summ of signals size: possible loss of data. Please, check the packet data amount, and sizes of each signal data.\nCalculated size: " + QString::number(calculatedDataSize) + "\nSetted size: " + QString::number(m_dataSize))));
 		m_dataSize = 0;
 		ui->signalsTable->clear();
 		ui->signalsTable->setRowCount(0);
@@ -776,8 +793,7 @@ void SerialDataTester::dataReceived(QByteArray data)
 				}
 
 				std::reverse(valueString.begin(), valueString.end());
-				qDebug() << valueString;
-				int result = valueString.toInt(false, 2);
+				qint64 result = valueString.toInt(false, 2);
 				QString resultString;
 				if (signal.dataFormat == "UnsignedInt")
 				{
@@ -785,11 +801,45 @@ void SerialDataTester::dataReceived(QByteArray data)
 				}
 				if (signal.dataFormat == "SignedInt")
 				{
-					resultString = QString::number(result - pow(2, signal.dataSize*8)/2);
+					if (valueString[0] == '0')
+					{
+						resultString = QString::number(result);
+					}
+					else
+					{
+						result = result - pow (2, (signal.dataSize*8)-1);
+						resultString = QString::number(result * -1);
+					}
 				}
 				if (signal.dataFormat == "Float")
 				{
-					resultString = QString::number(result * 0.1);
+					float exponentCalculation = 0;
+
+					for (int bitPos = 8; bitPos>0; bitPos--)
+					{
+						(valueString[bitPos] == '1') ? exponentCalculation += pow(2, 8-bitPos) : exponentCalculation += 0;
+					}
+
+					if (exponentCalculation != 0)
+						exponentCalculation = pow(2, exponentCalculation - 127);
+					else
+						exponentCalculation = pow(2, -126);
+
+					float mantissa;
+
+					(exponentCalculation == 0) ? mantissa = 0 : mantissa = 1;
+
+					for (int bitPos = 9; bitPos < 32; bitPos++)
+					{
+						(valueString[bitPos] == '1') ? mantissa += pow(0.5, bitPos-8) : mantissa += 0;
+					}
+
+					int sign;
+
+					(valueString[0] == '1') ? sign = -1 : sign = 1;
+
+					resultString = QString::number( sign * exponentCalculation * mantissa );
+					//resultString = QString::number(result * 0.1);
 				}
 				ui->signalsTable->setItem(rowNumber, value, new QTableWidgetItem(resultString));
 				rowNumber++;

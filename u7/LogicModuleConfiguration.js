@@ -418,7 +418,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 	var txRxConfigFrame = lanConfigFrame + 3;
 	var optoCount = 3;
 	
-	generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, false/*modeOCM*/);
+	/*var txWordsCount = */generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, false/*modeOCM*/);
   
 	return true;
 }
@@ -938,7 +938,7 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
 	var txRxConfigFrame = frame;
 	var optoCount = 5;
 	
-	generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, true/*modeOCM*/);
+	var txWordsCount = generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, true/*modeOCM*/);
 	
     var ptr = 120;
     
@@ -954,6 +954,8 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
     //
     var dataTransmittingEnableFlag = true;
     var dataReceiveEnableFlag = true;
+	
+	var ocmFrameSize = 64;
     
     var flags = 0;
     if (dataTransmittingEnableFlag == true)
@@ -962,7 +964,13 @@ function generate_ocm(confFirmware, module, frame, log, connectionStorage)
         flags |= 2;
     
     var configFramesQuantity = 1;
-    var dataFramesQuantity = 40;
+    var dataFramesQuantity = 0;
+	if (txWordsCount > 0)
+	{
+		dataFramesQuantity = Math.ceil(txWordsCount / ocmFrameSize);
+	}
+	confFirmware.writeLog("    txWordsCount = " + txWordsCount + "\r\n");
+	
     var txId = ocmTxId + module.propertyValue("ModuleVersion");
     
     generate_txRxIoConfig(confFirmware, frame, ptr, log, flags, configFramesQuantity, dataFramesQuantity, txId);
@@ -1114,12 +1122,14 @@ function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFr
     return true;
 }
 
+// function returns the amount of transmitting words
+//
 function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connections, portCount, modeOCM)
 {
 	if (module.propertyValue("StrID") == undefined)
 	{
 		log.writeError("Undefined properties in function generate_txRxOptoConfiguration");
-		return false;
+		return 0;
 	}
 	
     // Create TxRx Blocks (Opto) configuration
@@ -1143,7 +1153,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 		if (controller.propertyValue("StrID") == undefined)
 		{
 			log.writeError("Undefined controller properties in function generate_txRxOptoConfiguration");
-			return false;
+			return 0;
 		}
 
 		for (var c = 0; c < connections.count(); c++)
@@ -1160,7 +1170,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			|| connection.propertyValue("ConnectionMode") == undefined)
 			{
 				log.writeError("Undefined connection properties in function generate_txRxOptoConfiguration");
-				return false;
+				return 0;
 			}
 			
 			var deviceNo = -1;
@@ -1221,7 +1231,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			if (value == undefined)
 			{
 				log.writeError("Undefined connection TxWordsQuantity properties in function generate_txRxOptoConfiguration");
-				return false;
+				return 0;
 			}
 			else
 			{
@@ -1235,7 +1245,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 			if (value == undefined)
 			{
 				log.writeError("Undefined connection TxRxOptoID properties in function generate_txRxOptoConfiguration");
-				return false;
+				return 0;
 			}
 			else
 			{
@@ -1243,30 +1253,25 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : TX id for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 			}
 				
-			//if (rsConnection == false)
-			//{
-			// write RxWordsQuantity for Opto connections only
-			//
 			ptr = 15 * 2 + p * 2;
 			value = connection.propertyValue(deviceName + "RxWordsQuantity");
 			if (value == undefined)
 			{
 				log.writeError("Undefined connection RxWordsQuantity properties in function generate_txRxOptoConfiguration");
-				return false;
+				return 0;
 			}
 			else
 			{
 				setData16(confFirmware, log, frame, ptr, value); 
 				confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
 			}
-			//}
 				
 			ptr = 20 * 2 + p * 4;
 			value = connection.propertyValue(deviceName + "TxRxOptoDataUID");
 			if (value == undefined)
 			{
 				log.writeError("Undefined connection TxRxOptoDataUID properties in function generate_txRxOptoConfiguration");
-				return false;
+				return 0;
 			}
 			else
 			{
@@ -1281,7 +1286,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				if (value == undefined)
 				{
 					log.writeError("Undefined connection TxRsID properties in function generate_txRxOptoConfiguration");
-					return false;
+					return 0;
 				}
 				else
 				{
@@ -1294,7 +1299,7 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 				if (value == undefined)
 				{
 					log.writeError("Undefined connection TxRsDataUID properties in function generate_txRxOptoConfiguration");
-					return false;
+					return 0;
 				}
 				else
 				{
@@ -1357,4 +1362,6 @@ function generate_txRxOptoConfiguration(confFirmware, log, frame, module, connec
 		var allModes = confFirmware.data16(frame, ptr);
 		confFirmware.writeLog("    [" + frame + ":" + ptr +"] : RS mode configuration = " + allModes + "\r\n");
 	}
+	
+	return txStartAddress;
 }

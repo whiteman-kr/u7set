@@ -233,7 +233,7 @@ DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portInd
 	BaseServiceStateWidget(ip, portIndex, parent)
 {
 	m_model = new DataSourcesStateModel(QHostAddress(ip), this);
-	m_view = new QTableView(this);
+	m_view = new QTableView;
 	m_view->setModel(m_model);
 
 	m_view->resizeColumnsToContents();

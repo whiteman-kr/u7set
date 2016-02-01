@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <SerialData>
 <BuildInfo Project="ddd" ID="19" Type="debug" Date="10.12.2015 15:50:57" Changeset="0" User="Administrator" Workstation="Dragon2"/>
-<port PortInfoStrID="OCM_PORT1" ID="12" DataID = "12334" Speed="115200" Bits="8" StopBits ="2" ParityControl="false" DataSize="5"/>
+<port PortInfoStrID="OCM_PORT1" ID="12" DataID = "12334" Speed="115200" Bits="8" StopBits ="2" ParityControl="false" DataSize="88"/>
 <Signals Count="N">
 	<Signal SignalStrID="#SIGNAL_1" ExtStrID="SIGNAL_1" Name="Signal 1" Type="discrete" Unit="кг" DataSize="1" DataFormat="UnsignedInt" ByteOrder="LittleEndian" Offset="0" BitNo="0"/>
-	<Signal SignalStrID="#SIGNAL_2" ExtStrID="SIGNAL_2" Name="Signal 2" Type="analog" Unit="кг" DataSize="1" DataFormat="SignedInt" ByteOrder="LittleEndian" Offset="8" BitNo="0"/>
-	<Signal SignalStrID="#SIGNAL_3" ExtStrID="SIGNAL_3" Name="Signal 3" Type="analog" Unit="кг" DataSize="2" DataFormat="UnsignedInt" ByteOrder="LittleEndian" Offset="16" BitNo="0"/>
-	<Signal SignalStrID="#SIGNAL_4" ExtStrID="SIGNAL_4" Name="Signal 4" Type="analog" Unit="кг" DataSize="1" DataFormat="Float" ByteOrder="LittleEndian" Offset="32" BitNo="0"/>
+	<Signal SignalStrID="#SIGNAL_2" ExtStrID="SIGNAL_2" Name="Signal 2" Type="analog" Unit="кг" DataSize="16" DataFormat="SignedInt" ByteOrder="LittleEndian" Offset="8" BitNo="0"/>
+	<Signal SignalStrID="#SIGNAL_3" ExtStrID="SIGNAL_3" Name="Signal 3" Type="analog" Unit="кг" DataSize="32" DataFormat="UnsignedInt" ByteOrder="LittleEndian" Offset="24" BitNo="0"/>
+	<Signal SignalStrID="#SIGNAL_4" ExtStrID="SIGNAL_4" Name="Signal 4" Type="analog" Unit="кг" DataSize="32" DataFormat="Float" ByteOrder="LittleEndian" Offset="56" BitNo="0"/>
 </Signals>
 </SerialData>

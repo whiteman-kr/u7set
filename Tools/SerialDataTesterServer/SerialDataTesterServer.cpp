@@ -171,7 +171,7 @@ void SerialDataTesterServer::parseFile()
 					&& attributes.hasAttribute("ParityControl")
 					&& attributes.hasAttribute("DataSize"))
 				{
-					m_dataSize = attributes.value("DataSize").toInt();
+					m_dataSize = attributes.value("DataSize").toInt()/8;
 				}
 			}
 
@@ -199,6 +199,15 @@ void SerialDataTesterServer::parseFile()
 					currentSignal.byteOrder = attributes.value("ByteOrder").toString();
 					currentSignal.offset = attributes.value("Offset").toInt();
 					currentSignal.bit = attributes.value("BitNo").toInt();
+
+					if (currentSignal.dataFormat == "discrete")
+					{
+						currentSignal.dataSize = 8;
+					}
+					else
+					{
+						currentSignal.dataSize/=8;
+					}
 
 					m_signalsFromXml.push_back(currentSignal);
 					m_amountOfSignals++;
@@ -253,25 +262,65 @@ void SerialDataTesterServer::sendPacket()
 		// Get type of the signal
 		//
 
-		quint16 value;
+		quint64 value;
 
 		if (signal.type == "analog")
 		{
-			int maxDataSize = pow(2, signal.dataSize*8);
-			value = qrand()%maxDataSize;
-			for (int pos = 0; value>0; pos++)
+			quint64 maxDataSize = 2;
+
+			// Do not change this! pow() function returns value, sizeof which is 2 bytes. If we working with more than two bytes - value will be lost
+			//
+
+			for (int i=1; i<signal.dataSize*8; i++)
 			{
-				if (value%2 == 0)
-				{
-					m_data.setBit(signal.offset + signal.bit + pos, 0);
-				}
-				else
-				{
-					m_data.setBit(signal.offset + signal.bit + pos, 1);
-				}
-				value/=2;
+				maxDataSize *= 2;
 			}
 
+			value = qrand()%maxDataSize;
+
+			if (signal.dataSize == 2 && signal.dataFormat == "SignedInt")
+			{
+				value += qrand()%maxDataSize;
+			}
+
+			if (signal.dataSize == 4)
+			{
+				value*=qrand()%10000*qrand()%100;
+			}
+
+			if (signal.dataFormat == "Float")
+			{
+				int pos = 31; // declare variables
+				float f = value * 0.1;
+				int bit = 0;
+
+				int *b = reinterpret_cast<int*>(&f);
+				for (int binaryNumber = 31; binaryNumber >=0; binaryNumber--)
+				{
+				bit = ((*b >> binaryNumber)&1);
+				if (bit == 0)
+					m_data.setBit(signal.offset + signal.bit + pos, 0);
+				else
+					m_data.setBit(signal.offset + signal.bit + pos, 1);
+				pos--;
+				}
+			}
+			else
+			{
+
+				for (int pos = 0; value>0; pos++)
+				{
+					if (value%2 == 0)
+					{
+						m_data.setBit(signal.offset + signal.bit + pos, 0);
+					}
+					else
+					{
+						m_data.setBit(signal.offset + signal.bit + pos, 1);
+					}
+					value/=2;
+				}
+			}
 		}
 		else
 		{
