@@ -345,32 +345,15 @@
         </size>
        </property>
        <property name="title">
-        <string>GroupBox</string>
+        <string>Transfering data</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLabel" name="dataLabel">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Data</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="data">
-            <property name="text">
-             <string>No data</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLabel" name="data">
+          <property name="text">
+           <string>No data</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
