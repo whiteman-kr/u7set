@@ -3,21 +3,6 @@
 #include "../include/DeviceObject.h"
 #include <QMetaProperty>
 
-// DataAquisitionService class implementation
-//
-/*
-DataAquisitionService::DataAquisitionService(int argc, char ** argv) :
-	Service(argc, argv, "FSC Data Aquisition Service", SERVICE_DATA_ACQUISITION, new DataServiceWorker())
-{
-	Hardware::Init();
-}
-
-
-DataAquisitionService::~DataAquisitionService()
-{
-}
-*/
-
 
 // DataServiceMainFunctionWorker class implementation
 //
@@ -136,7 +121,7 @@ void DataServiceWorker::shutdown()
 
 	stopCfgLoaderThread();
 
-	qDebug() << "DataServiceMainFunctionWorker stoped";
+	qDebug() << "DataServiceWorker stoped";
 }
 
 

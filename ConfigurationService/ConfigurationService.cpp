@@ -48,8 +48,6 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 
 void ConfigurationServiceWorker::startUdpThreads()
 {
-	// Information Socket Thread running
-	//
 	m_infoSocketThread = new UdpSocketThread();
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_CONFIGURATION_SERVICE_INFO);
@@ -71,9 +69,6 @@ void ConfigurationServiceWorker::stopUdpThreads()
 
 void ConfigurationServiceWorker::initialize()
 {
-	// Service Main Function initialization
-	//
-
 	startCfgServerThread();
 	startUdpThreads();
 
@@ -89,7 +84,7 @@ void ConfigurationServiceWorker::shutdown()
 	stopUdpThreads();
 	stopCfgServerThread();
 
-	qDebug() << "ConfigurationServiceMainFunctionWorker stoped";
+	qDebug() << "ConfigurationServiceWorker stoped";
 }
 
 
