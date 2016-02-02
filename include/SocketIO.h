@@ -194,8 +194,27 @@ struct ServiceSettings
 };
 
 
-enum ServiceType;
-enum ServiceState;
+enum ServiceType
+{
+	Base,
+	Configuration,
+	DataAcquisition,
+	Tuning,
+	Archiving
+};
+
+
+enum ServiceState
+{
+	Stopped,
+	Starts,
+	Work,
+	Stops,
+
+	Undefined,			// this states used by 'Service Control Manager' only
+	Unavailable,
+};
+
 
 struct ServiceInformation
 {

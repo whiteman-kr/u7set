@@ -50,7 +50,7 @@ void BaseServiceStateWidget::updateServiceState()
 						  .arg(serviceState.buildNo)
 						  .arg(serviceState.crc, 0, 16, QChar('0')));
 
-	if (serviceState.serviceState != SS_MF_UNDEFINED && serviceState.serviceState != SS_MF_UNAVAILABLE)
+	if (serviceState.serviceState != ServiceState::Undefined && serviceState.serviceState != ServiceState::Unavailable)
 	{
 		quint32 time = serviceState.uptime;
 		int s = time % 60; time /= 60;
@@ -142,7 +142,10 @@ void BaseServiceStateWidget::updateServiceState()
 
 void BaseServiceStateWidget::askServiceState()
 {
-	m_clientSocket->sendShortRequest(RQID_SERVICE_GET_INFO);
+	if (!m_clientSocket->isWaitingForAck())
+	{
+		m_clientSocket->sendShortRequest(RQID_SERVICE_GET_INFO);
+	}
 }
 
 void BaseServiceStateWidget::startService()

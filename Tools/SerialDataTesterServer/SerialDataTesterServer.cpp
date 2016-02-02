@@ -266,15 +266,7 @@ void SerialDataTesterServer::sendPacket()
 
 		if (signal.type == "analog")
 		{
-			quint64 maxDataSize = 2;
-
-			// Do not change this! pow() function returns value, sizeof which is 2 bytes. If we working with more than two bytes - value will be lost
-			//
-
-			for (int i=1; i<signal.dataSize*8; i++)
-			{
-				maxDataSize *= 2;
-			}
+			quint64 maxDataSize = pow(2, signal.dataSize*8);
 
 			value = qrand()%maxDataSize;
 

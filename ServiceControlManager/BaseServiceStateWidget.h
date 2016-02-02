@@ -5,9 +5,6 @@
 #include "../include/UdpSocket.h"
 #include "../include/Service.h"
 
-const quint32	SS_MF_UNDEFINED = 10,
-SS_MF_UNAVAILABLE = 11;
-
 class QAction;
 class QLabel;
 
