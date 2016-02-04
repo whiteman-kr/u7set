@@ -25,7 +25,14 @@ struct HostInfo
 	quint32 ip;
 	ServiceData servicesData[SERVICE_TYPE_COUNT];
 
-	HostInfo() : ip(0) {}
+	HostInfo() :
+		ip(0)
+	{
+		for (int i = 0; i < SERVICE_TYPE_COUNT; i++)
+		{
+			servicesData[i].information.type = serviceInfo[i].serviceType;
+		}
+	}
 };
 
 class ServiceTableModel : public QAbstractTableModel
