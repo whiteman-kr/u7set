@@ -16,51 +16,51 @@ ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *p
 	QDialog(parent),
 	m_serviceModel(serviceModel)
 {
-    setWindowTitle(tr("Scan settings"));
+	setWindowTitle(tr("Scan settings"));
 	QRegExp re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[12]?[0-9]|3[0-2]?)?)\\b");
 	QRegExpValidator* rev = new QRegExpValidator(re, this);
-    m_addressEdit = new QLineEdit(this);
-    m_addressEdit->setValidator(rev);
+	m_addressEdit = new QLineEdit(this);
+	m_addressEdit->setValidator(rev);
 
-    QFormLayout* fl = new QFormLayout;
-    fl->addRow(tr("Enter IP or subnet"), m_addressEdit);
+	QFormLayout* fl = new QFormLayout;
+	fl->addRow(tr("Enter IP or subnet"), m_addressEdit);
 
-    QComboBox* addressCombo = new QComboBox;
+	QComboBox* addressCombo = new QComboBox(this);
 
-    QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
-    for (int i = 0; i < interfaceList.count(); i++)
-    {
-        QList<QNetworkAddressEntry> addressList = interfaceList[i].addressEntries();
-        for (int j = 0; j < addressList.count(); j++)
-        {
-            QHostAddress ip = addressList[j].ip();
-            if (ip.protocol() != QAbstractSocket::IPv4Protocol)
-            {
-                continue;
-            }
+	QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
+	for (int i = 0; i < interfaceList.count(); i++)
+	{
+		QList<QNetworkAddressEntry> addressList = interfaceList[i].addressEntries();
+		for (int j = 0; j < addressList.count(); j++)
+		{
+			QHostAddress ip = addressList[j].ip();
+			if (ip.protocol() != QAbstractSocket::IPv4Protocol)
+			{
+				continue;
+			}
 			m_addressEntryList.append(addressList[j]);
-            QString ipStr = ip.toString();
-            if (addressList[j].prefixLength() >= 0)
-            {
+			QString ipStr = ip.toString();
+			if (addressList[j].prefixLength() >= 0)
+			{
 				ipStr += "/" + QString::number(addressList[j].prefixLength());
-            }
-            addressCombo->addItem(ipStr);
-        }
-    }
+			}
+			addressCombo->addItem(ipStr);
+		}
+	}
 
 	QSettings settings;
 	m_addressEdit->setText(settings.value("last scan target", addressCombo->currentText()).toString());
 
 	connect(addressCombo, &QComboBox::currentTextChanged, m_addressEdit, &QLineEdit::setText);
 
-    fl->addRow(tr("Or select from following"), addressCombo);
+	fl->addRow(tr("Or select from following"), addressCombo);
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(buttonBox, &QDialogButtonBox::accepted, this, &ScanOptionsWidget::startChecking);
-    connect(buttonBox, &QDialogButtonBox::rejected, this, &ScanOptionsWidget::reject);
-    fl->addRow(buttonBox);
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &ScanOptionsWidget::startChecking);
+	connect(buttonBox, &QDialogButtonBox::rejected, this, &ScanOptionsWidget::reject);
+	fl->addRow(buttonBox);
 
-    setLayout(fl);
+	setLayout(fl);
 }
 
 QString ScanOptionsWidget::getSelectedAddress()

@@ -534,10 +534,12 @@ void Service::onBaseRequest(UdpRequest request)
 	switch(request.ID())
 	{
 		case RQID_SERVICE_GET_INFO:
+		{
 			ServiceInformation si;
 			getServiceInfo(si);
 			ack.writeData(reinterpret_cast<const char*>(&si), sizeof(si));
 			break;
+		}
 
 		case RQID_SERVICE_START:
 			APP_MSG(m_log, QString("Service START request from %1.").arg(request.address().toString()));
