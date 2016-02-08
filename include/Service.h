@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QCoreApplication>
+#include <iostream>
 #include "../qtservice/src/qtservice.h"
 #include "../include/UdpSocket.h"
 #include "../include/CircularLogger.h"
@@ -73,6 +74,24 @@ public:
 //
 // -------------------------------------------------------------------------------------
 
+class ConsoleServiceKeyReaderThread : public QThread
+{
+	Q_OBJECT
+
+signals:
+	void keyReaded();
+
+public:
+	virtual void run()
+	{
+		char c = 0;
+		std::cin >> c;
+
+		emit keyReaded();
+	}
+};
+
+
 class ConsoleServiceStarter : private QCoreApplication
 {
 private:
@@ -137,6 +156,8 @@ private:
 	void startBaseRequestSocketThread();
 	void stopBaseRequestSocketThread();
 
+	void getServiceInfo(ServiceInformation& serviceInfo);
+
 private slots:
 	void onTimer500ms();
 
@@ -157,8 +178,6 @@ public:
 
 	HostAddressPort cfgServiceAddressPort() const { return m_cfgServiceAddressPort; }
 	HostAddressPort setCfgServiceAddressPort(const HostAddressPort& addressPort) { return m_cfgServiceAddressPort = addressPort; }
-
-	void getServiceInfo(ServiceInformation& serviceInfo);
 
 	virtual void initLog();
 
@@ -198,8 +217,8 @@ public:
 	virtual ~ServiceWorker();
 
 
-	virtual void initialize() { QThread::sleep(2); qDebug() << "Called ServiceWorker::initialize"; }
-	virtual void shutdown() { QThread::sleep(2); qDebug() << "Called ServiceWorker::shutdown"; }
+	virtual void initialize() { qDebug() << "Called ServiceWorker::initialize"; }
+	virtual void shutdown() { qDebug() << "Called ServiceWorker::shutdown"; }
 
 signals:
 	void work();

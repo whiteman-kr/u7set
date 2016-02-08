@@ -1,6 +1,5 @@
 #include "../include/Service.h"
 #include "../include/Types.h"
-#include <iostream>
 
 
 // -------------------------------------------------------------------------------------
@@ -114,6 +113,7 @@ void DaemonServiceStarter::stop()
 	m_serviceWorkerDeleted = true;
 }
 
+
 // -------------------------------------------------------------------------------------
 //
 // ConsoleServiceStarter class implementation
@@ -134,39 +134,35 @@ int ConsoleServiceStarter::exec()
 	qDebug() << "\n======" << C_STR(m_name) << "sarted ======\n";
 	qDebug() << "Press any key and <Return> to finish service\n";
 
-	// ------------------------------------------------------------------------------
-	// same as DaemonServiceStarter::start() code
-	//
 	if (m_serviceWorker == nullptr)
 	{
 		assert(false);
 		return 0;
 	}
 
-	m_service = new Service(m_serviceWorker);
+	// run keyboard reading thread
+	//
+	ConsoleServiceKeyReaderThread* keyReader = new ConsoleServiceKeyReaderThread();
+	connect(keyReader, &ConsoleServiceKeyReaderThread::keyReaded, this, &QCoreApplication::quit);
+	keyReader->start();
 
+	// run service
+	//
+	m_service = new Service(m_serviceWorker);
 	m_service->start();
 
-	// ------------------------------------------------------------------------------
+	QCoreApplication::exec();
 
-	// wait for user input
-	//
-	char a;
-
-	std::cin >> a;
-
-	qDebug() << "\n";
-
-	// ------------------------------------------------------------------------------
-	// same as DaemonServiceStarter::stop() code
+	// stop service
 	//
 	m_service->stop();
-
 	delete m_service;
-
 	m_service = nullptr;
 
-	// ------------------------------------------------------------------------------
+	// delete keyboard reading thread
+	//
+	keyReader->wait();
+	delete keyReader;
 
 	qDebug() << "\n======" << C_STR(m_name) << "finished ======\n";
 
@@ -174,232 +170,6 @@ int ConsoleServiceStarter::exec()
 }
 
 
-// BaseServiceController class implementation
-//
-/*
-BaseServiceController::BaseServiceController(unsigned int serviceType, MainFunctionWorker* mainFunctionWorker) :
-	m_mainFunctionWorker(mainFunctionWorker),
-	m_mainFunctionNeedRestart(false),
-	m_mainFunctionStopped(false),
-	m_serviceType(serviceType),
-    m_mainFunctionStartTime(0),
-	m_mainFunctionState(MainFunctionState::stopped),
-    m_majorVersion(1),
-    m_minorVersion(0),
-    m_buildNo(123),
-	m_crc(0xF0F1F2F3)
-{
-	assert(m_serviceType < SERVICE_TYPE_COUNT);
-
-	qRegisterMetaType<QHostAddress>("QHostAddress");
-	qRegisterMetaType<UdpRequest>("UdpRequest");
-
-	initLog();
-
-	APP_MSG(log, QString(serviceTypeStr[m_serviceType]) + " was started");
-
-	// start timer
-	//
-	connect(&m_timer500ms, &QTimer::timeout, this, &BaseServiceController::onTimer500ms);
-
-	m_timer500ms.start(500);
-
-	// start BaseWorker
-	//
-    BaseServiceWorker *worker = new BaseServiceWorker(this, m_serviceType);
-
-    worker->moveToThread(&m_baseWorkerThread);
-
-	connect(&m_baseWorkerThread, &QThread::started, worker, &BaseServiceWorker::onThreadStarted);
-	connect(&m_baseWorkerThread, &QThread::finished, worker, &BaseServiceWorker::onThreadFinished);
-
-    m_baseWorkerThread.start();
-
-	// start MainFunctionWorker
-	//
-	m_mainFunctionWorker->setController(this);
-
-
-	startMainFunction();
-}
-
-
-BaseServiceController::~BaseServiceController()
-{
-	stopMainFunction();
-
-	m_baseWorkerThread.quit();
-    m_baseWorkerThread.wait();
-
-	delete m_mainFunctionWorker;
-
-	APP_MSG(log, QString(serviceTypeStr[m_serviceType]) + " was finished");
-}
-
-
-void BaseServiceController::getServiceInfo(ServiceInformation &serviceInfo)
-{
-    m_mutex.lock();
-
-	serviceInfo.type = m_serviceType;
-	serviceInfo.majorVersion = m_majorVersion;
-	serviceInfo.minorVersion = m_minorVersion;
-	serviceInfo.buildNo = m_buildNo;
-	serviceInfo.crc = m_crc;
-	serviceInfo.uptime = (QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000;
-
-	serviceInfo.mainFunctionState = m_mainFunctionState;
-
-	if (m_mainFunctionState != MainFunctionState::stopped)
-	{
-		serviceInfo.mainFunctionUptime = (QDateTime::currentMSecsSinceEpoch() - m_mainFunctionStartTime) / 1000;
-	}
-	else
-	{
-		serviceInfo.mainFunctionUptime = 0;
-	}
-
-	m_mutex.unlock();
-}
-
-
-void BaseServiceController::initLog()
-{
-	QFileInfo fi(qApp->applicationFilePath());
-
-	log.initLog(fi.baseName(), 5, 10);
-}
-
-
-void BaseServiceController::stopMainFunction()
-{
-	qDebug() << "Called BaseServiceController::stopMainFunction";
-
-	if (m_mainFunctionState != MainFunctionState::work)
-	{
-		return;
-	}
-
-	m_mainFunctionState = MainFunctionState::stops;
-
-	m_mainFunctionThread->quit();
-	m_mainFunctionThread->wait();
-
-	delete m_mainFunctionThread;
-
-	m_mainFunctionThread = nullptr;
-
-	//m_mainFunctionWorker->moveToThread(thread());
-
-	// m_mainFunctionState = MainFunctionState::Stopped setted in testMainFunctionState
-	//
-
-	APP_MSG(log, QString("Main function was stopped."));
-}
-
-
-void BaseServiceController::startMainFunction()
-{
-	qDebug() << "Called BaseServiceController::startMainFunction";
-
-	if (m_mainFunctionState != MainFunctionState::stopped)
-	{
-		return;
-	}
-
-	m_mainFunctionStopped = false;
-	m_mainFunctionNeedRestart = false;
-
-	m_mainFunctionState = MainFunctionState::starts;
-
-	//MainFunctionWorker* mainFunctionWorker = new MainFunctionWorker(this);
-
-	assert(m_mainFunctionThread == nullptr);
-
-	m_mainFunctionThread = new QThread();
-
-	connect(m_mainFunctionThread, &QThread::started, m_mainFunctionWorker, &MainFunctionWorker::onThreadStartedSlot);
-	connect(m_mainFunctionThread, &QThread::finished, m_mainFunctionWorker, &MainFunctionWorker::onThreadFinishedSlot);
-
-	m_mainFunctionWorker->moveToThread(m_mainFunctionThread);
-
-	m_mainFunctionStartTime = QDateTime::currentMSecsSinceEpoch();
-
-	m_mainFunctionThread->start();
-
-	APP_MSG(log, QString("Main function was started."));
-
-	// m_mainFunctionState = MainFunctionState::Work setted in slot onMainFunctionWork
-	//
-}
-
-
-void BaseServiceController::restartMainFunction()
-{
-	qDebug() << "Called BaseServiceController::restartMainFunction";
-
-	switch(m_mainFunctionState)
-	{
-	case MainFunctionState::work:
-		stopMainFunction();
-		m_mainFunctionNeedRestart = true;
-		break;
-
-	case MainFunctionState::stopped:
-		startMainFunction();
-		break;
-
-	case MainFunctionState::starts:
-	case MainFunctionState::stops:
-		break;
-	}
-}
-
-
-void BaseServiceController::onTimer500ms()
-{
-	checkMainFunctionState();
-}
-
-
-void BaseServiceController::checkMainFunctionState()
-{
-	if (m_mainFunctionState == MainFunctionState::stops)
-	{
-		if (m_mainFunctionStopped && m_mainFunctionThread == nullptr)
-		{
-			m_mainFunctionStopped = false;
-
-			m_mainFunctionState = MainFunctionState::stopped;
-
-			m_mainFunctionStartTime = 0;
-
-			if (m_mainFunctionNeedRestart)
-			{
-				m_mainFunctionNeedRestart = false;
-				startMainFunction();
-			}
-		}
-	}
-}
-
-
-void BaseServiceController::onMainFunctionWork()
-{
-	qDebug() << "Called BaseServiceController::onMainFunctionWork";
-
-	m_mainFunctionState = MainFunctionState::work;
-}
-
-
-void BaseServiceController::onMainFunctionStopped()
-{
-	qDebug() << "Called BaseServiceController::onMainFunctionStopped";
-
-	m_mainFunctionStopped = true;
-}
-
-*/
 // -------------------------------------------------------------------------------------
 //
 // Service class implementation
@@ -501,7 +271,6 @@ void Service::stopServiceThread()
 
 	m_state = ServiceState::Stopped;
 }
-
 
 
 void Service::startBaseRequestSocketThread()
@@ -639,7 +408,6 @@ ServiceWorker::~ServiceWorker()
 void ServiceWorker::onThreadStarted()
 {
 	initialize();
-
 	emit work();
 }
 
@@ -647,7 +415,6 @@ void ServiceWorker::onThreadStarted()
 void ServiceWorker::onThreadFinished()
 {
 	shutdown();
-
 	emit stopped();
 }
 
