@@ -43,6 +43,7 @@ DataSourcesStateModel::DataSourcesStateModel(QHostAddress ip, QObject* parent) :
 
 DataSourcesStateModel::~DataSourcesStateModel()
 {
+	m_clientSocket->deleteLater();
 }
 
 int DataSourcesStateModel::rowCount(const QModelIndex&) const

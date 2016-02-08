@@ -26,9 +26,9 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	statusBar()->addWidget(m_uptimeLabel = new QLabel(this));
 	statusBar()->addWidget(m_runningLabel = new QLabel(this));
 
-	m_clientSocket = new UdpClientSocket(QHostAddress(ip), serviceInfo[portIndex].port);
-	connect(m_clientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceStateWidget::serviceNotFound);
-	connect(m_clientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceStateWidget::serviceAckReceived);
+	m_baseClientSocket = new UdpClientSocket(QHostAddress(ip), serviceInfo[portIndex].port);
+	connect(m_baseClientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceStateWidget::serviceNotFound);
+	connect(m_baseClientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceStateWidget::serviceAckReceived);
 
 	QTimer* timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
@@ -39,7 +39,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 
 BaseServiceStateWidget::~BaseServiceStateWidget()
 {
-
+	delete m_baseClientSocket;
 }
 
 void BaseServiceStateWidget::updateServiceState()
@@ -142,9 +142,9 @@ void BaseServiceStateWidget::updateServiceState()
 
 void BaseServiceStateWidget::askServiceState()
 {
-	if (!m_clientSocket->isWaitingForAck())
+	if (!m_baseClientSocket->isWaitingForAck())
 	{
-		m_clientSocket->sendShortRequest(RQID_SERVICE_GET_INFO);
+		m_baseClientSocket->sendShortRequest(RQID_SERVICE_GET_INFO);
 	}
 }
 
@@ -203,10 +203,10 @@ void BaseServiceStateWidget::sendCommand(int command)
 	{
 		return;
 	}
-	if (m_clientSocket->isWaitingForAck())
+	if (m_baseClientSocket->isWaitingForAck())
 	{
 		QMessageBox::critical(this, tr("Command send error"), tr("Socket is waiting for ack, repeat your command later."));
 		return;
 	}
-	m_clientSocket->sendShortRequest(command);
+	m_baseClientSocket->sendShortRequest(command);
 }

@@ -226,6 +226,12 @@ struct ServiceInformation
 	quint64 uptime;
 	ServiceState serviceState;
 	quint32 serviceUptime;
+
+	ServiceInformation()
+	{
+		memset(this, 0, sizeof(*this));
+		serviceState = Undefined;
+	}
 };
 
 
