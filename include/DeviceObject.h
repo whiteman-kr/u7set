@@ -119,6 +119,7 @@ namespace Hardware
         Q_INVOKABLE QObject* jsParent() const;
 
 		Q_INVOKABLE int jsPropertyInt(QString name) const;
+        Q_INVOKABLE quint32 jsPropertyIP(QString name) const;
 
 		virtual DeviceType deviceType() const;
 		Q_INVOKABLE int jsDeviceType() const;
