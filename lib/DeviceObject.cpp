@@ -691,7 +691,14 @@ namespace Hardware
 
 	int DeviceObject::jsPropertyInt(QString name) const
 	{
-        QVariant v = propertyByCaption(name)->value();
+        const std::shared_ptr<Property> p = propertyByCaption(name);
+        if (p == nullptr)
+        {
+            assert(false);
+            return 0;
+        }
+
+        QVariant v = p->value();
 		if (v.isValid() == false)
 		{
 			assert(v.isValid());
@@ -700,6 +707,50 @@ namespace Hardware
 
 		return v.toInt();
 	}
+
+    quint32 DeviceObject::jsPropertyIP(QString name) const
+    {
+        const std::shared_ptr<Property> p = propertyByCaption(name);
+        if (p == nullptr)
+        {
+            assert(false);
+            return 0;
+        }
+
+        QVariant v = p->value();
+        if (v.isValid() == false)
+        {
+            assert(v.isValid());
+            return 0;
+        }
+
+        QString s = v.toString();
+        QStringList l = s.split(".");
+        if (l.size() != 4)
+        {
+            return 0;
+        }
+
+        quint32 result = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            bool ok = false;
+            quint8 b = l[i].toInt(&ok);
+
+            if (ok == false)
+            {
+                return 0;
+            }
+
+            result |= b;
+            if (i < 3)
+            {
+                result <<= 8;
+            }
+        }
+
+        return result;
+    }
 
     DeviceType DeviceObject::deviceType() const
 	{

@@ -222,7 +222,12 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 {
 	if (module.propertyValue("StrID") == undefined
 		|| module.propertyValue("SubsysID") == undefined || module.propertyValue("Channel") == undefined
-		|| module.propertyValue("ConfigFrameSize") == undefined || module.propertyValue("ConfigFrameCount") == undefined)
+		|| module.propertyValue("ConfigFrameSize") == undefined || module.propertyValue("ConfigFrameCount") == undefined
+		|| module.propertyValue("RegIP1") == undefined || module.propertyValue("RegIP2") == undefined
+		|| module.propertyValue("DiagIP1") == undefined || module.propertyValue("DiagIP2") == undefined
+		|| module.propertyValue("SourcePort") == undefined || module.propertyValue("TuningPort") == undefined
+		|| module.propertyValue("TuningIP") == undefined  || module.propertyValue("TuningServerIP") == undefined
+		)
 	{
 		log.writeError("Undefined properties in function generate_lm_1_rev3");
 		return false;
@@ -396,26 +401,69 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 	
 	var lanConfigFrame = frameIOConfig + 14;
 
-/*    // Create LANs configuration
+	// Create LANs configuration
     //
+	confFirmware.writeLog("Writing LAN configuration.\r\n");
+
     var lanCount = 3;
     var lanStartFrame = 19;
-    
-    for (var i = 0; i < lanCount; i++)
-    {
-        var ptr = 0;
-        //setData16(confFirmware, log, lanStartFrame + i, ptr, 10);      //LAN configuration
-        ptr += 62;
-        //reserved
-        ptr += 954;
-        storeCrc64(confFirmware, log, lanStartFrame + i, 0, ptr, ptr);   //CRC-64
-        ptr += 8;
-    }
-*/
+	
+	var regWordsCount = 3580;
+	var diagWordsCount = 3580;
+	
+	// Tuning
+	//
 
+	var sourcePort = module.propertyValue("SourcePort");
+
+	var tuningServerIPValue = module.jsPropertyIP("TuningServerIP");
+	var tuningServerIP = tuningServerIPValue & 0xff;
+	var tuningServerSubnetwork = (tuningServerIPValue >> 8) & 0xff;
+	
+	var tuningIPValue = module.jsPropertyIP("TuningIP");
+	var tuningIP = tuningIPValue & 0xff;
+	
+	var tuningServerPort = 50000 + tuningIP;
+
+	generate_LANConfiguration(confFirmware, log, lanConfigFrame, module, 0, 0, 
+								tuningIPValue, sourcePort, 0,
+								tuningServerSubnetwork, tuningServerIP, tuningServerPort,
+								0, 0, 0);	//Subnet2 is not used
+	lanConfigFrame++;
+								
+	// REG / DIAG
+	//
+
+	var regServerSubnetwork = [11, 12];			//	Take from software!!!
+	var regServerIP = [254, 254];
+	var regServerPort = [13322, 13322];
+	
+	var diagServerSubnetwork = [21, 22];		//	Take from software!!!
+	var diagServerIP = [254, 254];
+	var diagServerPort = [13323, 13323];
+	
+	for (var i = 0; i < 2; i++)
+	{
+		var regIPValue = module.jsPropertyIP("RegIP" + (i + 1));
+		//var regIP = regIPValue & 0xff;
+		
+		//var diagIPValue = module.jsPropertyIP("DiagIP" + (i + 1));
+		//var diagIP = diagIPValue & 0xff;
+
+		generate_LANConfiguration(confFirmware, log, lanConfigFrame, module, regWordsCount, diagWordsCount, 
+				regIPValue, sourcePort, 0,
+				regServerSubnetwork[i], regServerIP[i], regServerPort[i],
+				diagServerSubnetwork[i], diagServerIP[i], diagServerPort[i]); 
+				
+		lanConfigFrame++;
+	}
+	
+	// Create TX/RX configuration
+	//
+	
 	confFirmware.writeLog("Writing TxRx(Opto) configuration.\r\n");
 
-	var txRxConfigFrame = lanConfigFrame + 3;
+	var txRxConfigFrame = lanConfigFrame;
 	var optoCount = 3;
 	
 	/*var txWordsCount = */generate_txRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, connectionStorage, optoCount, false/*modeOCM*/);
@@ -1120,6 +1168,88 @@ function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFr
     ptr += 2;
     
     return true;
+}
+
+function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCount, diagWordsCount, 
+									sourceIP, sourcePort, destPort,
+									regServerSubnetwork, regServerIP, regServerPort, 
+									diagServerSubnetwork, diagServerIP, diagServerPort)
+{
+
+	var ptr = 0;		
+	
+	confFirmware.writeLog("    ----------\r\n");
+	
+	//mac
+	//
+	var mac = 0x3333;
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : MAC address of LM = " + mac + ":" + mac + ":" + mac + "\r\n");
+	setData16(confFirmware, log, frame, ptr, mac); 
+	ptr += 2;
+	setData16(confFirmware, log, frame, ptr, mac); 
+	ptr += 2;
+	setData16(confFirmware, log, frame, ptr, mac); 
+	ptr += 2;
+
+	var netNum = (sourceIP >> 16) & 0xffff;
+	setData16(confFirmware, log, frame, ptr, netNum); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Network number = " + netNum + "\r\n");
+	ptr += 2;
+	
+	ptr += 1;	//reserved
+
+	var hostNum = sourceIP & 0xff;
+	setData8(confFirmware, log, frame, ptr, hostNum); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Host number = " + hostNum + "\r\n");
+	ptr += 1;
+	
+	setData16(confFirmware, log, frame, ptr, sourcePort); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Source port = " + sourcePort + "\r\n");
+	ptr += 2;
+	
+	setData16(confFirmware, log, frame, ptr, destPort); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Destination port [Tuning] = " + destPort + "\r\n");
+	ptr += 2;
+	
+	// subnet 1
+	//
+	
+	setData8(confFirmware, log, frame, ptr, regServerSubnetwork); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Subnetwork1 [REG/TUN] = " + regServerSubnetwork + "\r\n");
+	ptr += 1;
+	
+	setData8(confFirmware, log, frame, ptr, regServerIP); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP1 [REG/TUN] = " + regServerIP + "\r\n");
+	ptr += 1;
+	
+	setData16(confFirmware, log, frame, ptr, regServerPort); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port1 [REG/TUN] = " + regServerPort + "\r\n");
+	ptr += 2;
+	
+	setData16(confFirmware, log, frame, ptr, regWordsCount); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Quantity1 [REG/TUN] = " + regWordsCount + "\r\n");
+	ptr += 2;
+
+	// subnet 2
+	//
+	
+	setData8(confFirmware, log, frame, ptr, diagServerSubnetwork); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Subnetwork2 [DIAG] = " + diagServerSubnetwork + "\r\n");
+	ptr += 1;
+	
+	setData8(confFirmware, log, frame, ptr, diagServerIP); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP2 [DIAG] = " + diagServerIP + "\r\n");
+	ptr += 1;
+	
+	setData16(confFirmware, log, frame, ptr, diagServerPort); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Port2 [DIAG] = " + diagServerPort + "\r\n");
+	ptr += 2;
+	
+	setData16(confFirmware, log, frame, ptr, diagWordsCount); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Quantity2 [DIAG] = " + diagWordsCount + "\r\n");
+	ptr += 2;
+
+	return true;
 }
 
 // function returns the amount of transmitting words
