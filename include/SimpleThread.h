@@ -39,7 +39,8 @@ public:
 
 	void start();
 	void quit();
-	void wait(unsigned long time = ULONG_MAX);
+	bool wait(unsigned long time = ULONG_MAX);
+	bool quitAndWait(unsigned long time = ULONG_MAX);
 
 	virtual void beforeStart();
 	virtual void beforeQuit();

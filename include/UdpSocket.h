@@ -12,6 +12,7 @@
 #include <QDateTime>
 
 #include "../include/SocketIO.h"
+#include "../include/SimpleThread.h"
 
 
 class UdpClientSocket;
@@ -19,8 +20,10 @@ class UdpServerSocket;
 
 
 // -------------------------------------------------------------------
+//
 // UDP Request class
 //
+// -------------------------------------------------------------------
 
 class UdpRequest
 {
@@ -112,10 +115,12 @@ public:
 
 
 // -------------------------------------------------------------------
+//
 // UDP Sockets' Base class
 //
+// -------------------------------------------------------------------
 
-class UdpSocket : public QObject
+class UdpSocket : public SimpleThreadWorker
 {
 private:
 	static bool metaTypesRegistered;
@@ -137,18 +142,20 @@ protected:
 
 
 // -------------------------------------------------------------------
+//
 // UDP Client classes
 //
+// -------------------------------------------------------------------
 
 class UdpClientSocket : public UdpSocket
 {
     Q_OBJECT
 
 private:
-    enum UdpClientSocketState
+	enum State
     {
-        readyToSend,
-        waitingForAck
+		ReadyToSend,
+		WaitingForAck
     };
 
     QMutex m_mutex;
@@ -156,7 +163,7 @@ private:
     QHostAddress m_serverAddress;
 	qint16 m_port = 0;
 
-	UdpClientSocketState m_state = UdpClientSocketState::readyToSend;
+	State m_state = State::ReadyToSend;
 	quint32 m_requestNo = 1;
 	quint32 m_protocolVersion = 1;
 	quint32 m_clientID = 0;
@@ -169,6 +176,9 @@ private:
 private:
     void retryRequest();
 
+	virtual void onThreadStarted() final;
+	virtual void onThreadFinished() final;
+
 public:
     UdpClientSocket(const QHostAddress& serverAddress, quint16 port);
     virtual ~UdpClientSocket();
@@ -179,16 +189,17 @@ public:
     quint16 port() const;
     void setPort(quint16 port);
 
-    bool isWaitingForAck() { return m_state == waitingForAck; }
+	bool isWaitingForAck() { return m_state == WaitingForAck; }
 
     void setProtocolVersion(quint32 version) { m_protocolVersion = version; }
     void setTimeout(int msTimeout) { m_msTimeout = msTimeout; }
     void setRetryCount(int retryCount) { m_retryCount = retryCount; }
 
-    virtual void onSocketThreadStarted();
-    virtual void onSocketThreadFinished();
     virtual void onAckTimeout();
     virtual void onRequestTimeout(const RequestHeader& requestHeader);
+
+	virtual void onSocketThreadStarted() {}
+	virtual void onSocketThreadFinished() {}
 
 signals:
 	void ackTimeout(UdpRequest udpRequest);
@@ -196,20 +207,9 @@ signals:
 	void unknownAckReceived(UdpRequest udpRequest);
 
 public slots:
-    void onSocketThreadStartedSlot();
-    void onSocketThreadFinishedSlot();
-
 	void sendRequest(UdpRequest request);
 
-	void sendShortRequest(quint32 requestID)
-	{
-		UdpRequest request;
-
-		request.setID(requestID);
-
-		sendRequest(request);
-	}
-
+	void sendShortRequest(quint32 requestID);
 
 private slots:
     void onSocketReadyRead();
@@ -218,8 +218,10 @@ private slots:
 
 
 // -------------------------------------------------------------------
+//
 // UDP Server classes
 //
+// -------------------------------------------------------------------
 
 class UdpClientRequestHandler;
 
@@ -278,6 +280,13 @@ signals:
 };
 
 
+
+// -------------------------------------------------------------------
+//
+// UDP Server classes
+//
+// -------------------------------------------------------------------
+
 class UdpServerSocket : public UdpSocket
 {
     Q_OBJECT
@@ -292,6 +301,9 @@ private:
 
 	void bind();
 
+	virtual void onThreadStarted() final;
+	virtual void onThreadFinished() final;
+
 public:
     UdpServerSocket(const QHostAddress& bindToAddress, quint16 port);
     virtual ~UdpServerSocket();
@@ -305,8 +317,6 @@ signals:
 	void receiveRequest(UdpRequest request);
 
 public slots:
-    void onSocketThreadStartedSlot();
-    void onSocketThreadFinishedSlot();
 	void sendAck(UdpRequest m_request);
 
 private slots:
@@ -315,26 +325,20 @@ private slots:
 };
 
 
-
 // -------------------------------------------------------------------
 //
 // UdpSocketThread class declaration
 //
 // -------------------------------------------------------------------
 
-class UdpSocketThread : public QObject
+class UdpSocketThread : public SimpleThread
 {
     Q_OBJECT
 
 public:
     UdpSocketThread();
+	virtual ~UdpSocketThread();
+
     void run(UdpClientSocket* clientSocket);
     void run(UdpServerSocket* serverSocket);
-
-	void quit() { m_socketThread.quit(); }
-
-    virtual ~UdpSocketThread();
-
-private:
-    QThread m_socketThread;
 };

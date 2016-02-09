@@ -74,6 +74,22 @@ public:
 //
 // -------------------------------------------------------------------------------------
 
+
+class ConsoleServiceStarter : private QCoreApplication
+{
+private:
+	QString m_name;
+
+	ServiceWorker* m_serviceWorker = nullptr;
+	Service* m_service = nullptr;
+
+public:
+	ConsoleServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
+
+	int exec();
+};
+
+
 class ConsoleServiceKeyReaderThread : public QThread
 {
 	Q_OBJECT
@@ -89,21 +105,6 @@ public:
 
 		emit keyReaded();
 	}
-};
-
-
-class ConsoleServiceStarter : private QCoreApplication
-{
-private:
-	QString m_name;
-
-	ServiceWorker* m_serviceWorker = nullptr;
-	Service* m_service = nullptr;
-
-public:
-	ConsoleServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
-
-	int exec();
 };
 
 

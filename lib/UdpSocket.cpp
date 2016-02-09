@@ -3,8 +3,10 @@
 
 
 // -----------------------------------------------------------------------------
+//
 // UdpSocket class implementation
 //
+// -----------------------------------------------------------------------------
 
 bool UdpSocket::metaTypesRegistered = false;
 
@@ -35,22 +37,15 @@ void UdpSocket::registerMetaTypes()
 
 
 // -----------------------------------------------------------------------------
+//
 // UdpClientSocket class implementation
 //
-
+// -----------------------------------------------------------------------------
 
 UdpClientSocket::UdpClientSocket(const QHostAddress &serverAddress, quint16 port) :
     m_serverAddress(serverAddress),
 	m_port(port)
 {
-	m_timer.setSingleShot(true);
-
-	// generate unique clientID
-	//
-	m_clientID = qHash(QUuid::createUuid());
-
-	connect(&m_timer, &QTimer::timeout, this, &UdpClientSocket::onAckTimerTimeout);
-    connect(&m_socket, &QUdpSocket::readyRead, this, &UdpClientSocket::onSocketReadyRead);
 }
 
 
@@ -59,27 +54,24 @@ UdpClientSocket::~UdpClientSocket()
 }
 
 
-void UdpClientSocket::onSocketThreadStartedSlot()
+void UdpClientSocket::onThreadStarted()
 {
-    onSocketThreadStarted();
+	m_timer.setSingleShot(true);
+
+	// generate unique clientID
+	//
+	m_clientID = qHash(QUuid::createUuid());
+
+	connect(&m_timer, &QTimer::timeout, this, &UdpClientSocket::onAckTimerTimeout);
+	connect(&m_socket, &QUdpSocket::readyRead, this, &UdpClientSocket::onSocketReadyRead);
+
+	onSocketThreadStarted();
 }
 
 
-void UdpClientSocket::onSocketThreadStarted()
+void UdpClientSocket::onThreadFinished()
 {
-}
-
-
-void UdpClientSocket::onSocketThreadFinishedSlot()
-{
-    onSocketThreadFinished();
-
-    deleteLater();
-}
-
-
-void UdpClientSocket::onSocketThreadFinished()
-{
+	onSocketThreadFinished();
 }
 
 
@@ -87,7 +79,7 @@ void UdpClientSocket::onSocketReadyRead()
 {
 	QMutexLocker locker(&m_mutex);
 
-    assert(m_state == UdpClientSocketState::waitingForAck);
+	assert(m_state == State::WaitingForAck);
 
 	QHostAddress address;
 	quint16 port = 0;
@@ -111,7 +103,7 @@ void UdpClientSocket::onSocketReadyRead()
 
 	m_ack.initRead();
 
-	m_state = UdpClientSocketState::readyToSend;
+	m_state = State::ReadyToSend;
 
 	bool unknownAck = true;
 
@@ -168,9 +160,9 @@ void UdpClientSocket::sendRequest(UdpRequest request)
 {
     QMutexLocker m(&m_mutex);
 
-	if (m_state != UdpClientSocketState::readyToSend)
+	if (m_state != State::ReadyToSend)
 	{
-		assert(m_state == UdpClientSocketState::readyToSend);
+		assert(m_state == State::ReadyToSend);
 		return;
 	}
 
@@ -201,7 +193,7 @@ void UdpClientSocket::sendRequest(UdpRequest request)
 
     m_requestNo++;
 
-    m_state = UdpClientSocketState::waitingForAck;
+	m_state = State::WaitingForAck;
 
     m_retryCtr = 0;
 
@@ -209,9 +201,19 @@ void UdpClientSocket::sendRequest(UdpRequest request)
 }
 
 
+void UdpClientSocket::sendShortRequest(quint32 requestID)
+{
+	UdpRequest request;
+
+	request.setID(requestID);
+
+	sendRequest(request);
+}
+
+
 void UdpClientSocket::retryRequest()
 {
-    assert(m_state == UdpClientSocketState::waitingForAck);
+	assert(m_state == State::WaitingForAck);
 
 	m_socket.writeDatagram(m_request.rawData(), m_request.rawDataSize(), m_serverAddress, m_port);
 
@@ -234,7 +236,7 @@ void UdpClientSocket::onAckTimerTimeout()
     else
     {
        m_retryCtr = 0;
-       m_state = UdpClientSocketState::readyToSend;
+	   m_state = State::ReadyToSend;
 
 	   emit ackTimeout(m_request);
 
@@ -259,8 +261,10 @@ void UdpClientSocket::onRequestTimeout(const RequestHeader& /* requestHeader */)
 
 
 // -----------------------------------------------------------------------------
+//
 // UdpRequest class implementation
 //
+// -----------------------------------------------------------------------------
 
 UdpRequest::UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize) :
     m_address(senderAddress),
@@ -580,7 +584,7 @@ UdpServerSocket::~UdpServerSocket()
 }
 
 
-void UdpServerSocket::onSocketThreadStartedSlot()
+void UdpServerSocket::onThreadStarted()
 {
     m_timer.start(1000);
 
@@ -599,11 +603,15 @@ void UdpServerSocket::onSocketThreadStarted()
 }
 
 
-void UdpServerSocket::onSocketThreadFinishedSlot()
+void UdpServerSocket::onThreadFinished()
 {
     onSocketThreadFinished();
+}
 
-    deleteLater();
+
+void UdpServerSocket::onSocketThreadFinished()
+{
+	qDebug() << "Called UdpServerSocket::onSocketThreadFinished";
 }
 
 
@@ -632,17 +640,11 @@ void UdpServerSocket::sendAck(UdpRequest request)
 }
 
 
-void UdpServerSocket::onSocketThreadFinished()
-{
-    qDebug() << "Called UdpServerSocket::onSocketThreadFinished";
-}
-
-
 void UdpServerSocket::onTimer()
 {
 	bind();
 
-	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+/*	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
 
 	QMutexLocker locker(&m_clientMapMutex);
 
@@ -673,7 +675,7 @@ void UdpServerSocket::onTimer()
                 delete clientHandler;
             }
         }
-    }
+	}*/
 }
 
 
@@ -736,32 +738,24 @@ UdpSocketThread::UdpSocketThread()
 }
 
 
+UdpSocketThread::~UdpSocketThread()
+{
+}
+
+
 void UdpSocketThread::run(UdpClientSocket* clientSocket)
 {
-    clientSocket->moveToThread(&m_socketThread);
-
-    connect(&m_socketThread, &QThread::started, clientSocket, &UdpClientSocket::onSocketThreadStartedSlot);
-    connect(&m_socketThread, &QThread::finished, clientSocket, &UdpClientSocket::onSocketThreadFinishedSlot);
-
-    m_socketThread.start();
+	setWorker(clientSocket);
+	start();
 }
 
 
 void UdpSocketThread::run(UdpServerSocket* serverSocket)
 {
-    serverSocket->moveToThread(&m_socketThread);
-
-    connect(&m_socketThread, &QThread::started, serverSocket, &UdpServerSocket::onSocketThreadStartedSlot);
-    connect(&m_socketThread, &QThread::finished, serverSocket, &UdpServerSocket::onSocketThreadFinishedSlot);
-
-    m_socketThread.start();
+	setWorker(serverSocket);
+	start();
 }
 
 
 
-UdpSocketThread::~UdpSocketThread()
-{
-    m_socketThread.quit();
-    m_socketThread.wait();
-}
 
