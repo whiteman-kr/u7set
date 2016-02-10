@@ -95,9 +95,18 @@ void SimpleThread::quit()
 }
 
 
-void SimpleThread::wait(unsigned long time)
+bool SimpleThread::wait(unsigned long time)
 {
-	m_thread.wait(time);
+	return m_thread.wait(time);
+}
+
+
+bool SimpleThread::quitAndWait(unsigned long time)
+{
+	beforeQuit();
+
+	m_thread.quit();
+	return m_thread.wait(time);
 }
 
 

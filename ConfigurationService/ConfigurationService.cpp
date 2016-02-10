@@ -6,24 +6,6 @@
 
 // ------------------------------------------------------------------------------------
 //
-// ConfigurationService class implementation
-//
-// ------------------------------------------------------------------------------------
-
-/*
-ConfigurationService::ConfigurationService(int argc, char ** argv) :
-	Service(argc, argv, "Configuration Service", SERVICE_CONFIGURATION, new ConfigurationServiceWorker())
-{
-}
-
-
-ConfigurationService::~ConfigurationService()
-{
-}*/
-
-
-// ------------------------------------------------------------------------------------
-//
 // ConfigurationServiceWorker class implementation
 //
 // ------------------------------------------------------------------------------------
@@ -62,6 +44,7 @@ void ConfigurationServiceWorker::startUdpThreads()
 void ConfigurationServiceWorker::stopUdpThreads()
 {
 	m_infoSocketThread->quit();
+	m_infoSocketThread->wait();
 
 	delete m_infoSocketThread;
 }
@@ -78,9 +61,6 @@ void ConfigurationServiceWorker::initialize()
 
 void ConfigurationServiceWorker::shutdown()
 {
-	// Service Main Function deinitialization
-	//
-
 	stopUdpThreads();
 	stopCfgServerThread();
 
