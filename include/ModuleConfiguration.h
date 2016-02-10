@@ -9,8 +9,27 @@
 //
 // ----------------------------------------------------------------------------
 
+class QJsVariantList : public QObject
+{
+    Q_OBJECT
+
+    QVariantList l;
+
+public:
+    QJsVariantList(QObject* parent);
+    ~QJsVariantList();
+
+    void append(QVariant v);
+    Q_INVOKABLE int jsSize();
+    Q_INVOKABLE QVariant jsAt(int i);
+
+
+};
+
 namespace Hardware
 {
+
+
 	class ModuleFirmware : public QObject
 	{
 		Q_OBJECT
@@ -41,6 +60,7 @@ namespace Hardware
 		Q_INVOKABLE quint16 data16(int frameIndex, int offset);
 		Q_INVOKABLE quint32 data32(int frameIndex, int offset);
 
+        Q_INVOKABLE QJsVariantList* calcHash64(QString dataString);
         Q_INVOKABLE QString storeCrc64(int frameIndex, int start, int count, int offset);
         Q_INVOKABLE QString storeHash64(int frameIndex, int offset, QString dataString);
 

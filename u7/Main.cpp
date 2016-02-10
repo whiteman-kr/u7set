@@ -4,8 +4,9 @@
 #include "../VFrame30/VFrame30Library.h"
 #include "../include/DbController.h"
 #include "../include/DeviceObject.h"
-
 #include "../include/PropertyObject.h"
+
+#include <QtQml>
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
@@ -113,7 +114,9 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<std::vector<DbFileInfo>>();
 	qRegisterMetaType<E::SignalType>();
 
-	// Start database communication thread
+    qmlRegisterType<QJsVariantList>();
+
+    // Start database communication thread
 	//
 	DbController dbController;
 
