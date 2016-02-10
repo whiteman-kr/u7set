@@ -7,9 +7,37 @@
 #include <QQmlEngine>
 #include <QtEndian>
 
+QJsVariantList::QJsVariantList(QObject* parent):
+    QObject(parent)
+{
+
+}
+
+QJsVariantList::~QJsVariantList()
+{
+}
+
+void QJsVariantList::append(QVariant v)
+{
+    l.append(v);
+}
+
+int QJsVariantList::jsSize()
+{
+    return l.size();
+}
+
+QVariant QJsVariantList::jsAt(int i)
+{
+    return l.at(i);
+}
+
+//-----------------------------------------------------------------------------
+
 namespace Hardware
 {
-	ModuleFirmware::ModuleFirmware()
+
+    ModuleFirmware::ModuleFirmware()
 	{
 	}
 
@@ -339,6 +367,22 @@ namespace Hardware
 
         quint32 data = *(reinterpret_cast<quint32*>(frameData.data() + offset));
         return qFromBigEndian(data);
+    }
+
+    QJsVariantList* ModuleFirmware::calcHash64(QString dataString)
+    {
+
+        QByteArray bytes = dataString.toUtf8();
+
+        quint64 result = CUtils::calcHash(bytes.data(), bytes.size());
+
+        quint32 h = (result >> 32) & 0xffffffff;
+        quint32 l = result & 0xffffffff;
+
+        QJsVariantList* vl = new QJsVariantList(this);
+        vl->append(QVariant(h));
+        vl->append(QVariant(l));
+        return vl;
     }
 
     QString ModuleFirmware::storeCrc64(int frameIndex, int start, int count, int offset)

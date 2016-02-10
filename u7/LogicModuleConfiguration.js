@@ -225,7 +225,8 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 		|| module.propertyValue("ConfigFrameSize") == undefined || module.propertyValue("ConfigFrameCount") == undefined
 		|| module.propertyValue("RegIP1") == undefined || module.propertyValue("RegIP2") == undefined
 		|| module.propertyValue("DiagIP1") == undefined || module.propertyValue("DiagIP2") == undefined
-		|| module.propertyValue("SourcePort") == undefined || module.propertyValue("TuningPort") == undefined
+		|| module.propertyValue("SourcePort") == undefined 
+		|| module.propertyValue("TuningPort") == undefined || module.propertyValue("TuningServerPort") == undefined
 		|| module.propertyValue("TuningIP") == undefined  || module.propertyValue("TuningServerIP") == undefined
 		)
 	{
@@ -405,29 +406,28 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
     //
 	confFirmware.writeLog("Writing LAN configuration.\r\n");
 
-    var lanCount = 3;
     var lanStartFrame = 19;
 	
 	var regWordsCount = 3580;
 	var diagWordsCount = 3580;
 	
+	var sourcePort = module.propertyValue("SourcePort");
+
 	// Tuning
 	//
 
-	var sourcePort = module.propertyValue("SourcePort");
-
-	var tuningServerIPValue = module.jsPropertyIP("TuningServerIP");
-	var tuningServerIP = tuningServerIPValue & 0xff;
-	var tuningServerSubnetwork = (tuningServerIPValue >> 8) & 0xff;
+	var tuningServerIP = module.jsPropertyIP("TuningServerIP");
+	var tuningServerAddress = tuningServerIP & 0xff;
+	var tuningServerSubnetwork = (tuningServerIP >> 8) & 0xff;
+	var tuningServerPort = module.propertyValue("TuningServerPort");
 	
-	var tuningIPValue = module.jsPropertyIP("TuningIP");
-	var tuningIP = tuningIPValue & 0xff;
-	
-	var tuningServerPort = 50000 + tuningIP;
+	var tuningIP = module.jsPropertyIP("TuningIP");
+	var tuningAddress = tuningIP & 0xff;
+	var tuningPort = module.propertyValue("TuningPort");
 
 	generate_LANConfiguration(confFirmware, log, lanConfigFrame, module, 0, 0, 
-								tuningIPValue, sourcePort, 0,
-								tuningServerSubnetwork, tuningServerIP, tuningServerPort,
+								tuningIP, sourcePort, tuningPort,
+								tuningServerSubnetwork, tuningServerAddress, tuningServerPort,
 								0, 0, 0);	//Subnet2 is not used
 	lanConfigFrame++;
 								
@@ -444,14 +444,19 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 	
 	for (var i = 0; i < 2; i++)
 	{
-		var regIPValue = module.jsPropertyIP("RegIP" + (i + 1));
-		//var regIP = regIPValue & 0xff;
+		var regIP = module.jsPropertyIP("RegIP" + (i + 1));
+		var regAddress = regIP & 0xff;
 		
-		//var diagIPValue = module.jsPropertyIP("DiagIP" + (i + 1));
-		//var diagIP = diagIPValue & 0xff;
+		var diagIP = module.jsPropertyIP("DiagIP" + (i + 1));
+		var diagAddress = diagIP & 0xff;
+		
+		if (regAddress != diagAddress || tuningAddress != regAddress || tuningAddress != diagAddress)
+		{
+			log.writeWarning("WARNING: different module " + module.propertyValue("StrID") + " address! regAddress = " + regAddress + ", diagAddress = " + diagAddress + ", tuningAddress = " + tuningAddress + "! regAddress is used.");
+		}
 
 		generate_LANConfiguration(confFirmware, log, lanConfigFrame, module, regWordsCount, diagWordsCount, 
-				regIPValue, sourcePort, 0,
+				regIP, sourcePort, 0,
 				regServerSubnetwork[i], regServerIP[i], regServerPort[i],
 				diagServerSubnetwork[i], diagServerIP[i], diagServerPort[i]); 
 				
@@ -1169,11 +1174,10 @@ function generate_txRxIoConfig(confFirmware, frame, offset, log, flags, configFr
     
     return true;
 }
-
 function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCount, diagWordsCount, 
 									sourceIP, sourcePort, destPort,
-									regServerSubnetwork, regServerIP, regServerPort, 
-									diagServerSubnetwork, diagServerIP, diagServerPort)
+									regServerSubnetwork, regServerAddress, regServerPort, 
+									diagServerSubnetwork, diagServerAddress, diagServerPort)
 {
 
 	var ptr = 0;		
@@ -1182,13 +1186,33 @@ function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCou
 	
 	//mac
 	//
-	var mac = 0x3333;
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : MAC address of LM = " + mac + ":" + mac + ":" + mac + "\r\n");
-	setData16(confFirmware, log, frame, ptr, mac); 
+	var hashName = "S" + regServerSubnetwork + module.propertyValue("StrID") + sourceIP;
+	//log.writeWarning(hashName);
+	var hashList = confFirmware.calcHash64(hashName);
+	var size = hashList.jsSize();
+	if (size != 2)
+	{
+		log.writeError("Error - hash is not 2 32-bitwords!");
+		return;
+	}
+	//log.writeWarning(size);
+	/*for (var i = 0; i < size; i++)
+	{
+		log.writeWarning(hl.jsAt(i));
+	}*/
+	var h0 = hashList.jsAt(0);
+	var h1 = hashList.jsAt(1);
+	
+	var m1 = h0 & 0x7fff;
+	var m2 = (h0 >> 16) & 0x7fff;
+	var m3 = h1 & 0x7fff;
+
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : MAC address of LM = " + m1 + ":" + m2 + ":" + m3 + "\r\n");
+	setData16(confFirmware, log, frame, ptr, m1); 
 	ptr += 2;
-	setData16(confFirmware, log, frame, ptr, mac); 
+	setData16(confFirmware, log, frame, ptr, m2); 
 	ptr += 2;
-	setData16(confFirmware, log, frame, ptr, mac); 
+	setData16(confFirmware, log, frame, ptr, m3); 
 	ptr += 2;
 
 	var netNum = (sourceIP >> 16) & 0xffff;
@@ -1218,8 +1242,8 @@ function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCou
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Subnetwork1 [REG/TUN] = " + regServerSubnetwork + "\r\n");
 	ptr += 1;
 	
-	setData8(confFirmware, log, frame, ptr, regServerIP); 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP1 [REG/TUN] = " + regServerIP + "\r\n");
+	setData8(confFirmware, log, frame, ptr, regServerAddress); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP1 [REG/TUN] = " + regServerAddress + "\r\n");
 	ptr += 1;
 	
 	setData16(confFirmware, log, frame, ptr, regServerPort); 
@@ -1237,8 +1261,8 @@ function generate_LANConfiguration(confFirmware, log, frame, module, regWordsCou
 	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : Subnetwork2 [DIAG] = " + diagServerSubnetwork + "\r\n");
 	ptr += 1;
 	
-	setData8(confFirmware, log, frame, ptr, diagServerIP); 
-	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP2 [DIAG] = " + diagServerIP + "\r\n");
+	setData8(confFirmware, log, frame, ptr, diagServerAddress); 
+	confFirmware.writeLog("    [" + frame + ":" + ptr +"] : IP2 [DIAG] = " + diagServerAddress + "\r\n");
 	ptr += 1;
 	
 	setData16(confFirmware, log, frame, ptr, diagServerPort); 

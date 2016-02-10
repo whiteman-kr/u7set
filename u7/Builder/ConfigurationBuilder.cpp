@@ -180,9 +180,12 @@ namespace Builder
 
 		QString contents = QString::fromLocal8Bit(scriptFile->data());
 
-		// Attach objects
+        // Attach objects
 		//
 		QJSEngine jsEngine;
+
+        //qmlRegisterType<MySliderItem>("com.mycompany.qmlcomponents", 1, 0, "Slider");
+
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
