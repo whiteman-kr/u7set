@@ -30,21 +30,20 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 
 void ConfigurationServiceWorker::startUdpThreads()
 {
-	m_infoSocketThread = new UdpSocketThread();
-
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_CONFIGURATION_SERVICE_INFO);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &ConfigurationServiceWorker::onInformationRequest);
 	connect(this, &ConfigurationServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
 
-	m_infoSocketThread->run(serverSocket);
+	m_infoSocketThread = new UdpSocketThread(serverSocket);
+
+	m_infoSocketThread->start();
 }
 
 
 void ConfigurationServiceWorker::stopUdpThreads()
 {
-	m_infoSocketThread->quit();
-	m_infoSocketThread->wait();
+	m_infoSocketThread->quitAndWait();
 
 	delete m_infoSocketThread;
 }

@@ -27,16 +27,14 @@ void DataServiceWorker::readConfigurationFiles()
 
 void DataServiceWorker::runUdpThreads()
 {
-	// Information Socket Thread running
-	//
-	m_infoSocketThread = new UdpSocketThread();
-
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_DATA_AQUISITION_SERVICE_INFO);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &DataServiceWorker::onInformationRequest);
 	connect(this, &DataServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
 
-	m_infoSocketThread->run(serverSocket);
+	m_infoSocketThread = new UdpSocketThread(serverSocket);
+
+	m_infoSocketThread->start();
 }
 
 

@@ -36,10 +36,9 @@ SimpleThread::SimpleThread()
 }
 
 
-SimpleThread::SimpleThread(SimpleThreadWorker* worker) :
-	m_worker(worker)
+SimpleThread::SimpleThread(SimpleThreadWorker* worker)
 {
-	assert(m_worker != nullptr);
+	addWorker(worker);
 }
 
 
@@ -50,36 +49,41 @@ SimpleThread::~SimpleThread()
 }
 
 
-void SimpleThread::setWorker(SimpleThreadWorker* worker)
+void SimpleThread::addWorker(SimpleThreadWorker* worker)
 {
+	if (m_thread.isRunning())
+	{
+		// All workers should be added before the thread is started
+		//
+		assert(false);
+		return;
+	}
+
 	if (worker == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	if (m_worker != nullptr)
-	{
-		assert(false);			// worker allready set!
-		return;
-	}
-
-	m_worker = worker;
+	m_workerList.append(worker);
 }
 
 
 void SimpleThread::start()
 {
-	if (m_worker == nullptr)
+	foreach(SimpleThreadWorker* worker, m_workerList)
 	{
-		assert(false);			// set worker before start!
-		return;
+		if (worker == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		worker->moveToThread(&m_thread);
+
+		connect(&m_thread, &QThread::started, worker, &SimpleThreadWorker::slot_onThreadStarted);
+		connect(&m_thread, &QThread::finished, worker, &SimpleThreadWorker::slot_onThreadFinished);
 	}
-
-	m_worker->moveToThread(&m_thread);
-
-	connect(&m_thread, &QThread::started, m_worker, &SimpleThreadWorker::slot_onThreadStarted);
-	connect(&m_thread, &QThread::finished, m_worker, &SimpleThreadWorker::slot_onThreadFinished);
 
 	beforeStart();
 

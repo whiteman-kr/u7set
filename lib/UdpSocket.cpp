@@ -65,6 +65,8 @@ void UdpClientSocket::onThreadStarted()
 	connect(&m_timer, &QTimer::timeout, this, &UdpClientSocket::onAckTimerTimeout);
 	connect(&m_socket, &QUdpSocket::readyRead, this, &UdpClientSocket::onSocketReadyRead);
 
+	connect(this, &UdpClientSocket::sendRequestSignal, this, &UdpClientSocket::onSendRequest);
+
 	onSocketThreadStarted();
 }
 
@@ -156,7 +158,7 @@ void UdpClientSocket::setPort(quint16 port)
 }
 
 
-void UdpClientSocket::sendRequest(UdpRequest request)
+void UdpClientSocket::onSendRequest(UdpRequest request)
 {
     QMutexLocker m(&m_mutex);
 
@@ -201,13 +203,19 @@ void UdpClientSocket::sendRequest(UdpRequest request)
 }
 
 
-void UdpClientSocket::sendShortRequest(quint32 requestID)
+void UdpClientSocket::sendRequest(const UdpRequest& udpRequest)
+{
+	emit sendRequestSignal(udpRequest);
+}
+
+
+void UdpClientSocket::sendRequest(quint32 requestID)
 {
 	UdpRequest request;
 
 	request.setID(requestID);
 
-	sendRequest(request);
+	emit sendRequestSignal(request);
 }
 
 
@@ -729,32 +737,6 @@ void UdpServerSocket::onSocketReadyRead()
 }
 
 
-// -----------------------------------------------------------------------------
-// UdpSocketThread class implementation
-//
-
-UdpSocketThread::UdpSocketThread()
-{
-}
-
-
-UdpSocketThread::~UdpSocketThread()
-{
-}
-
-
-void UdpSocketThread::run(UdpClientSocket* clientSocket)
-{
-	setWorker(clientSocket);
-	start();
-}
-
-
-void UdpSocketThread::run(UdpServerSocket* serverSocket)
-{
-	setWorker(serverSocket);
-	start();
-}
 
 
 

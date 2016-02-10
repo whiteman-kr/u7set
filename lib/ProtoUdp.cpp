@@ -286,14 +286,14 @@ namespace ProtoUdp
 	ClientThread::ClientThread(const HostAddressPort& serverAddress)
 	{
 		m_client = new Client(serverAddress, serverAddress);
-		SimpleThread::setWorker(m_client);
+		SimpleThread::addWorker(m_client);
 	}
 
 
 	ClientThread::ClientThread(const HostAddressPort& firstServerAddress, const HostAddressPort& secondServerAddress)
 	{
 		m_client = new Client(firstServerAddress, secondServerAddress);
-		SimpleThread::setWorker(m_client);
+		SimpleThread::addWorker(m_client);
 	}
 
 

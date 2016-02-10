@@ -144,7 +144,7 @@ void BaseServiceStateWidget::askServiceState()
 {
 	if (!m_baseClientSocket->isWaitingForAck())
 	{
-		m_baseClientSocket->sendShortRequest(RQID_SERVICE_GET_INFO);
+		m_baseClientSocket->sendRequest(RQID_SERVICE_GET_INFO);
 	}
 }
 
@@ -208,5 +208,5 @@ void BaseServiceStateWidget::sendCommand(int command)
 		QMessageBox::critical(this, tr("Command send error"), tr("Socket is waiting for ack, repeat your command later."));
 		return;
 	}
-	m_baseClientSocket->sendShortRequest(command);
+	m_baseClientSocket->sendRequest(command);
 }

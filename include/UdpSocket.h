@@ -201,17 +201,19 @@ public:
 	virtual void onSocketThreadStarted() {}
 	virtual void onSocketThreadFinished() {}
 
+	void sendRequest(const UdpRequest& udpRequest);
+	void sendRequest(quint32 requestID);
+
 signals:
+	void sendRequestSignal(const UdpRequest& udpRequest);
+
 	void ackTimeout(UdpRequest udpRequest);
 	void ackReceived(UdpRequest udpRequest);
+
 	void unknownAckReceived(UdpRequest udpRequest);
 
-public slots:
-	void sendRequest(UdpRequest request);
-
-	void sendShortRequest(quint32 requestID);
-
 private slots:
+	void onSendRequest(UdpRequest request);
     void onSocketReadyRead();
     void onAckTimerTimeout();
 };
@@ -325,20 +327,4 @@ private slots:
 };
 
 
-// -------------------------------------------------------------------
-//
-// UdpSocketThread class declaration
-//
-// -------------------------------------------------------------------
-
-class UdpSocketThread : public SimpleThread
-{
-    Q_OBJECT
-
-public:
-    UdpSocketThread();
-	virtual ~UdpSocketThread();
-
-    void run(UdpClientSocket* clientSocket);
-    void run(UdpServerSocket* serverSocket);
-};
+typedef SimpleThread UdpSocketThread;

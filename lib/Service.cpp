@@ -275,20 +275,20 @@ void Service::stopServiceThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	m_baseRequestSocketThread = new UdpSocketThread;
-
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, serviceInfo[m_type].port);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onBaseRequest);
 	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
 
-	m_baseRequestSocketThread->run(serverSocket);
+	m_baseRequestSocketThread = new UdpSocketThread(serverSocket);
+
+	m_baseRequestSocketThread->start();
 }
 
 
 void Service::stopBaseRequestSocketThread()
 {
-	m_baseRequestSocketThread->quit();
+	m_baseRequestSocketThread->quitAndWait();
 
 	delete m_baseRequestSocketThread;
 }

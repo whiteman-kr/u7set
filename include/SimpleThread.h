@@ -27,7 +27,7 @@ class SimpleThread : public QObject
 
 protected:
 	QThread m_thread;
-	SimpleThreadWorker* m_worker = nullptr;
+	QList<SimpleThreadWorker*> m_workerList;
 
 public:
 	SimpleThread();
@@ -35,7 +35,7 @@ public:
 
 	~SimpleThread();
 
-	void setWorker(SimpleThreadWorker* worker);
+	void addWorker(SimpleThreadWorker* worker);
 
 	void start();
 	void quit();

@@ -29,12 +29,12 @@ public slots:
 	void ackReceived(UdpRequest udpRequest);
 
 signals:
-	void dataClientSendRequest(UdpRequest request);
+	void dataClientSendRequest(const UdpRequest& request);
 	void changedSourceInfo();
 	void changedSourceState();
 
 private:
-	UdpClientSocket* m_clientSocket = nullptr;
+	UdpClientSocket* m_clientSocket;
 	UdpSocketThread m_clientSocketThread;
 	bool m_active = false;
 	int m_currentDataRequestType = RQID_GET_DATA_SOURCES_IDS;

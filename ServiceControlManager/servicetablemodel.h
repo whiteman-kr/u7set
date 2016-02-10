@@ -66,9 +66,19 @@ private:
 	QVector<HostInfo> m_hostsInfo;
 	bool m_freezeUpdate;
 
+	QTimer m_timer;
+
+	UdpSocketThread* m_socketThread = nullptr;
+
+	void startUdpSocketThread();
+	void finishtUdpSocketThread();
+	void restartUdpSocketThread();
+
 	void setServiceState(quint32 ip, quint16 port, ServiceState state);
 	QPair<int,int> getServiceState(quint32 ip, quint16 port);
 	void checkForDeletingSocket(UdpClientSocket* socket);
+
+
 };
 
 #endif // SERVICETABLEMODEL_H

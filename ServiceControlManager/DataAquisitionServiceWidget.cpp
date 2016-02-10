@@ -31,9 +31,12 @@ DataSourcesStateModel::DataSourcesStateModel(QHostAddress ip, QObject* parent) :
 
 	connect(m_clientSocket, &UdpClientSocket::ackTimeout, this, &DataSourcesStateModel::ackTimeout);
 	connect(m_clientSocket, &UdpClientSocket::ackReceived, this, &DataSourcesStateModel::ackReceived);
-	connect(this, &DataSourcesStateModel::dataClientSendRequest, m_clientSocket, &UdpClientSocket::sendRequest);
 
-	m_clientSocketThread.run(m_clientSocket);
+	connect(this, &DataSourcesStateModel::dataClientSendRequest, m_clientSocket, &UdpClientSocket::sendRequestSignal);
+
+	m_clientSocketThread.addWorker(m_clientSocket);
+
+	m_clientSocketThread.start();
 
 	m_periodicTimer = new QTimer(this);
 	connect(m_periodicTimer, &QTimer::timeout, this, &DataSourcesStateModel::onGetStateTimer);
@@ -43,7 +46,7 @@ DataSourcesStateModel::DataSourcesStateModel(QHostAddress ip, QObject* parent) :
 
 DataSourcesStateModel::~DataSourcesStateModel()
 {
-	m_clientSocket->deleteLater();
+	m_clientSocketThread.quitAndWait();
 }
 
 int DataSourcesStateModel::rowCount(const QModelIndex&) const
