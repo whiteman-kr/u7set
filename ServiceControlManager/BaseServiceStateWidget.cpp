@@ -26,20 +26,31 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	statusBar()->addWidget(m_uptimeLabel = new QLabel(this));
 	statusBar()->addWidget(m_runningLabel = new QLabel(this));
 
+	m_socketThread = new UdpSocketThread();
+
 	m_baseClientSocket = new UdpClientSocket(QHostAddress(ip), serviceInfo[portIndex].port);
 	connect(m_baseClientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceStateWidget::serviceNotFound);
 	connect(m_baseClientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceStateWidget::serviceAckReceived);
 
-	QTimer* timer = new QTimer(this);
-	connect(timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
-	timer->start(500);
+	m_socketThread->addWorker(m_baseClientSocket);
+	m_socketThread->start();
+
+	m_timer = new QTimer(this);
+	connect(m_timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
+	m_timer->start(500);
 
 	updateServiceState();
 }
 
 BaseServiceStateWidget::~BaseServiceStateWidget()
 {
-	delete m_baseClientSocket;
+	m_timer->stop();
+
+	if (m_socketThread)
+	{
+		m_socketThread->quitAndWait();
+		delete m_socketThread;
+	}
 }
 
 void BaseServiceStateWidget::updateServiceState()

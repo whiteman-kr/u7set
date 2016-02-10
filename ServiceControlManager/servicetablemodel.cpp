@@ -56,14 +56,6 @@ ServiceTableModel::~ServiceTableModel()
 		settings.setValue("IP", m_hostsInfo[i].ip);
 		for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
 		{
-//			now delete in finishUdpSocketThread()
-//
-//			if (m_hostsInfo[i].servicesData[j].clientSocket != nullptr)
-//			{
-//				delete m_hostsInfo[i].servicesData[j].clientSocket;
-//			}
-
-
 			if (m_hostsInfo[i].servicesData[j].statusWidget != nullptr)
 			{
 				delete m_hostsInfo[i].servicesData[j].statusWidget;
@@ -294,44 +286,6 @@ QPair<int,int> ServiceTableModel::getServiceState(quint32 ip, quint16 port)
 	return QPair<int, int>(-1, portIndex);
 }
 
-void ServiceTableModel::checkForDeletingSocket(UdpClientSocket *socket)
-{
-	/*
-	// Socket should be remembered or deleted, if we are scanning.
-	int portIndex = -1;
-	for (uint i = 0; i < SERVICE_TYPE_COUNT; i++)
-	{
-		if (serviceInfo[i].port == socket->port())
-		{
-			portIndex = i;
-			break;
-		}
-	}
-	if (portIndex == -1)
-	{
-		socket->deleteLater();
-		return;
-	}
-	for (int i = 0; i < m_hostsInfo.count(); i++)
-	{
-		if (m_hostsInfo[i].ip != socket->serverAddress().toIPv4Address())
-		{
-			continue;
-		}
-		UdpClientSocket** clientSocket = &m_hostsInfo[i].servicesData[portIndex].clientSocket;
-		if (*clientSocket == nullptr)
-		{
-			*clientSocket = socket;
-		}
-		if (*clientSocket != socket)
-		{
-			socket->deleteLater();
-		}
-		return;
-	}
-	socket->deleteLater();*/
-}
-
 void ServiceTableModel::addAddress(QString connectionAddress)
 {
 	QHostAddress ha(connectionAddress);
@@ -373,12 +327,6 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 			quint32 ip = socket->serverAddress().toIPv4Address();
 			QPair<int, int> place = getServiceState(ip, socket->port());
 
-			if (place.first >= m_hostsInfo.count() || place.second == -1 || place.second >= (int)SERVICE_TYPE_COUNT)
-			{
-				checkForDeletingSocket(socket);
-				return;
-			}
-
 			if (place.first == -1)
 			{
 				const QHostAddress& sa = socket->serverAddress();
@@ -410,8 +358,6 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 			}
 			QModelIndex changedIndex = index(place.first, place.second);
 			emit dataChanged(changedIndex, changedIndex);
-
-			checkForDeletingSocket(socket);
 		}
 		case RQID_SERVICE_START:
 		case RQID_SERVICE_STOP:
@@ -435,7 +381,6 @@ void ServiceTableModel::serviceNotFound()
 		if (m_hostsInfo[i].ip == ip)
 		{
 			setServiceState(socket->serverAddress().toIPv4Address(), socket->port(), ServiceState::Unavailable);
-			checkForDeletingSocket(socket);
 			return;
 		}
 	}
@@ -457,15 +402,6 @@ void ServiceTableModel::checkServiceStates()
 		{
 			UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
 
-/*				moved to startUdpSocketThread();
- * if (clientSocket == nullptr)
-			{
-				clientSocket = new UdpClientSocket(QHostAddress(m_hostsInfo[i].ip), serviceInfo[j].port);
-				connect(clientSocket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotFound);
-				connect(clientSocket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
-				m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
-			}*/
-
 			if (!clientSocket->isWaitingForAck())
 			{
 				clientSocket->sendRequest(RQID_SERVICE_GET_INFO);
@@ -479,10 +415,6 @@ void ServiceTableModel::removeHost(int row)
 	beginRemoveRows(QModelIndex(), row, row);
 	for (uint j = 0; j < SERVICE_TYPE_COUNT; j++)
 	{
-		/*if (m_hostsInfo[row].servicesData[j].clientSocket != nullptr)
-		{
-			delete m_hostsInfo[row].servicesData[j].clientSocket;
-		}*/
 		if (m_hostsInfo[row].servicesData[j].statusWidget != nullptr)
 		{
 			delete m_hostsInfo[row].servicesData[j].statusWidget;

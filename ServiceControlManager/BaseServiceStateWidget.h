@@ -30,6 +30,9 @@ public slots:
 	void serviceAckReceived(const UdpRequest udpRequest);
 	void serviceNotFound();
 
+protected:
+	UdpSocketThread* m_socketThread = nullptr;
+
 private:
 	void sendCommand(int command);
 
