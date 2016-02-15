@@ -186,7 +186,7 @@ bool ConfigurationServiceSettings::fromJson(const QJsonObject& jsonObject, int)
 
 
 
-void ConfigurationServiceInfo::toJson(QJsonObject& jsonObject)
+void ConfigurationServiceInfo::toJson(QJsonObject& jsonObject) const
 {
 	jsonObject.insert("project", m_buildInfo.project);
 	jsonObject.insert("buildID", m_buildInfo.id);

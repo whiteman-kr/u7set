@@ -278,7 +278,7 @@ class ConfigurationServiceInfo : public JsonSerializable
 private:
 	Builder::BuildInfo m_buildInfo;
 
-	virtual void toJson(QJsonObject& jsonObject) final;
+	virtual void toJson(QJsonObject& jsonObject) const final;
 	virtual bool fromJson(const QJsonObject& jsonObject, int version) final;
 
 public:

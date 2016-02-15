@@ -111,6 +111,7 @@ public:
 
 	quint32 readDword();
 	void readStruct(Serializable* s);
+	bool readStruct(JsonSerializable* s);
 };
 
 

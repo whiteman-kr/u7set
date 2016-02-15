@@ -449,6 +449,14 @@ void UdpRequest::readStruct(Serializable* s)
 }
 
 
+bool UdpRequest::readStruct(JsonSerializable* s)
+{
+	QByteArray json(readDataPtr(), headerDataSize());
+
+	return s->readFromJson(json);
+}
+
+
 // -----------------------------------------------------------------------------
 // UdpRequestProcessor class implementation
 //

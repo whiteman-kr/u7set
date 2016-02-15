@@ -180,6 +180,16 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 	{
 		case RQID_SERVICE_GET_INFO:
 		{
+			ServiceInformation& newServiceState = *(ServiceInformation*)udpRequest.data();
+			if (newServiceState.serviceState != ServiceState::Work && serviceState.serviceState == ServiceState::Work)
+			{
+				emit invalidateData();
+			}
+			if (newServiceState.serviceState == ServiceState::Work &&
+					(serviceState.serviceState != ServiceState::Work || newServiceState.serviceUptime < serviceState.serviceUptime))
+			{
+				emit needToReloadData();
+			}
 			serviceState = *(ServiceInformation*)udpRequest.data();
 			updateServiceState();
 		}

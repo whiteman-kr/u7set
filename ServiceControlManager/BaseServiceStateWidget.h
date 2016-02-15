@@ -18,6 +18,8 @@ public:
 	int addTab(QWidget* page, const QString& label);
 
 signals:
+	void needToReloadData();
+	void invalidateData();
 
 public slots:
 	void updateServiceState();

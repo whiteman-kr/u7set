@@ -29,8 +29,8 @@ DataSourcesStateModel::DataSourcesStateModel(QHostAddress ip, QObject* parent) :
 {
 	m_clientSocket = new UdpClientSocket(ip, PORT_DATA_AQUISITION_SERVICE_INFO);
 
-	connect(m_clientSocket, &UdpClientSocket::ackTimeout, this, &DataSourcesStateModel::ackTimeout);
-	connect(m_clientSocket, &UdpClientSocket::ackReceived, this, &DataSourcesStateModel::ackReceived);
+	connect(m_clientSocket, &UdpClientSocket::ackTimeout, this, &DataSourcesStateModel::invalidateData);
+	connect(m_clientSocket, &UdpClientSocket::ackReceived, this, &DataSourcesStateModel::parseData);
 
 	connect(this, &DataSourcesStateModel::dataClientSendRequest, m_clientSocket, &UdpClientSocket::sendRequestSignal);
 
@@ -124,7 +124,7 @@ void DataSourcesStateModel::onGetStateTimer()
 	sendDataRequest(RQID_GET_DATA_SOURCES_STATISTICS);
 }
 
-void DataSourcesStateModel::ackTimeout()
+void DataSourcesStateModel::invalidateData()
 {
 	beginResetModel();
 	m_dataSource.clear();
@@ -132,7 +132,7 @@ void DataSourcesStateModel::ackTimeout()
 	sendDataRequest(RQID_GET_DATA_SOURCES_IDS);
 }
 
-void DataSourcesStateModel::ackReceived(UdpRequest udpRequest)
+void DataSourcesStateModel::parseData(UdpRequest udpRequest)
 {
 	quint32 sourceCount = 0;
 
@@ -244,6 +244,7 @@ DataAquisitionServiceWidget::DataAquisitionServiceWidget(quint32 ip, int portInd
 
 	connect(m_model, &DataSourcesStateModel::changedSourceInfo, this, &DataAquisitionServiceWidget::updateSourceInfo);
 	connect(m_model, &DataSourcesStateModel::changedSourceState, this, &DataAquisitionServiceWidget::updateSourceState);
+	connect(this, &BaseServiceStateWidget::invalidateData, m_model, &DataSourcesStateModel::invalidateData);	//Data Sources list could be changed, need to update all information
 
 	QTimer* timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &DataAquisitionServiceWidget::checkVisibility);

@@ -25,8 +25,8 @@ public:
 
 public slots:
 	void onGetStateTimer();
-	void ackTimeout();
-	void ackReceived(UdpRequest udpRequest);
+	void invalidateData();
+	void parseData(UdpRequest udpRequest);
 
 signals:
 	void dataClientSendRequest(const UdpRequest& request);
