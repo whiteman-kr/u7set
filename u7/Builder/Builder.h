@@ -80,7 +80,11 @@ namespace Builder
 		//
         bool modulesConfiguration(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter);
 
-		// Build Application Logic
+        // Generate Tuning configuration
+        //
+        bool tuningParameters(DbController* db, Hardware::DeviceRoot *deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter);
+
+        // Build Application Logic
 		//
 		bool parseApplicationLogic(DbController* db, AppLogicData* appLogicData, Afb::AfbElementCollection* afbCollection, Hardware::EquipmentSet* equipment, int changesetId);
 

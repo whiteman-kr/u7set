@@ -408,6 +408,8 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 
     var lanStartFrame = 19;
 	
+	var tuningWordsCount = 1432;
+	
 	var regWordsCount = 3580;
 	var diagWordsCount = 3580;
 	
@@ -425,7 +427,7 @@ function generate_lm_1_rev3(module, confCollection, log, signalSet, subsystemSto
 	var tuningAddress = tuningIP & 0xff;
 	var tuningPort = module.propertyValue("TuningPort");
 
-	generate_LANConfiguration(confFirmware, log, lanConfigFrame, module, 0, 0, 
+	generate_LANConfiguration(confFirmware, log, lanConfigFrame, module, tuningWordsCount, 0, 
 								tuningIP, sourcePort, tuningPort,
 								tuningServerSubnetwork, tuningServerAddress, tuningServerPort,
 								0, 0, 0);	//Subnet2 is not used

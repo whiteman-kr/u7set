@@ -1,5 +1,6 @@
 #include "Builder.h"
 #include "Parser.h"
+#include "TuningBuilder.h"
 #include "ConfigurationBuilder.h"
 
 #include "../../include/DbController.h"
@@ -202,6 +203,7 @@ namespace Builder
 				if (errorCode.isEmpty() == false)
 				{
 					LOG_ERROR(m_log, errorCode);
+                    break;
 				}
 			}
 
@@ -219,6 +221,7 @@ namespace Builder
                 if (errorCode.isEmpty() == false)
                 {
                     LOG_ERROR(m_log, errorCode);
+                    break;
                 }
             }
 
@@ -274,11 +277,30 @@ namespace Builder
                 QThread::currentThread()->requestInterruption();
                 break;
             }
-            else
+
+
+            //
+            // Tuning parameters
+            //
+            LOG_EMPTY_LINE(m_log);
+            LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
+
+            ok = tuningParameters(&db, dynamic_cast<Hardware::DeviceRoot*>(deviceRoot.get()), &signalSet, &subsystems, &connections, lastChangesetId, &buildWriter);
+
+            if (QThread::currentThread()->isInterruptionRequested() == true)
             {
-                LOG_SUCCESS(m_log, tr("Ok"));
+                break;
             }
-		}
+
+            if (ok == false)
+            {
+                LOG_ERROR(m_log, tr("Error"));
+                QThread::currentThread()->requestInterruption();
+                break;
+            }
+
+            LOG_SUCCESS(m_log, tr("Ok"));
+        }
 		while (false);
 
 		buildWriter.finish();
@@ -588,7 +610,27 @@ namespace Builder
 
 	}
 
-	bool BuildWorkerThread::parseApplicationLogic(DbController* db,
+    bool BuildWorkerThread::tuningParameters(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage *subsystems, Hardware::ConnectionStorage *connections, int changesetId, BuildResultWriter* buildWriter)
+    {
+        if (db == nullptr ||
+            deviceRoot == nullptr ||
+            signalSet == nullptr ||
+            subsystems == nullptr ||
+            buildWriter == nullptr)
+        {
+            assert(false);
+            return false;
+        }
+
+        TuningBuilder tunBuilder = {db, deviceRoot, signalSet, subsystems, connections, m_log, changesetId, debug(), projectName(), projectUserName(), buildWriter};
+
+        bool result = tunBuilder.build();
+
+        return result;
+
+    }
+
+    bool BuildWorkerThread::parseApplicationLogic(DbController* db,
 												  AppLogicData* appLogicData,
 												  Afb::AfbElementCollection* afbCollection,
 												  Hardware::EquipmentSet* equipment,

@@ -146,7 +146,8 @@ SOURCES +=\
     ../lib/PropertyEditorDialog.cpp \
     Builder/SoftwareCfgGenerator.cpp \
     ../lib/BuildInfo.cpp \
-    Rs232SignalListEditor.cpp
+    Rs232SignalListEditor.cpp \
+    Builder/TuningBuilder.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -223,7 +224,8 @@ HEADERS  += \
     ../include/DebugInstCounter.h \
     Builder/SoftwareCfgGenerator.h \
     ../include/BuildInfo.h \
-    Rs232SignalListEditor.h
+    Rs232SignalListEditor.h \
+    Builder/TuningBuilder.h
 
 
 FORMS    += \
